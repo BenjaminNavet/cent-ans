@@ -475,6 +475,12 @@ func _evict() -> void:
 ## qui la touche a changé (pas à chaque page du même étage : le LRU des pages tourne sans cesse
 ## pendant un panoramique).
 func _on_surface_rect_changed(rect: Rect2) -> void:
+	var t_probe := Time.get_ticks_usec()
+	_mark_dirty_tiles(rect)
+	PerfProbe.add("qt/l_fine", Time.get_ticks_usec() - t_probe)  # RS-K : écouteur, dans `qt/*`
+
+
+func _mark_dirty_tiles(rect: Rect2) -> void:
 	var now := Time.get_ticks_msec()
 	# ZG7a : étages les plus fins de toutes les tuiles touchées en un parcours des pages (un
 	# instantané par tuile coûtait jusqu'à 9 ms par page arrivée sous charge).

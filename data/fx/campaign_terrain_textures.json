@@ -1,0 +1,33 @@
+{
+  "albedo_size": 2048,
+  "normal_size": 1024,
+  "tile_screen_px": 96.0,
+  "layers": [
+    {"id": "grass", "poly_haven_id": "aerial_grass_rock", "mean_linear": [0.1676, 0.1201, 0.0181]},
+    {"id": "farmland", "poly_haven_id": "aerial_mud_1", "mean_linear": [0.0482, 0.0391, 0.0349]},
+    {"id": "forest", "poly_haven_id": "forrest_ground_01", "mean_linear": [0.2822, 0.2423, 0.11]},
+    {"id": "rock", "poly_haven_id": "aerial_rocks_01", "mean_linear": [0.2095, 0.1855, 0.1013]},
+    {"id": "heath", "poly_haven_id": "sparse_grass", "mean_linear": [0.079, 0.0473, 0.0076]},
+    {"id": "snow", "poly_haven_id": "snow_field_aerial", "mean_linear": [0.2415, 0.2399, 0.2943]},
+    {"id": "sand", "poly_haven_id": "aerial_beach_01", "mean_linear": [0.2824, 0.2368, 0.1955]}
+  ],
+  "macro": {
+    "periods_px": [9.0, 24.0, 60.0, 150.0],
+    "weights": [0.4, 0.3, 0.2, 0.1],
+    "tint_amp": 1.0,
+    "lum_amp": 0.08
+  },
+  "water": {
+    "normal_size": 1024,
+    "scale_a_px": 1.7,
+    "scale_b_px": 4.3,
+    "velocity_a_px": [0.05, 0.02],
+    "velocity_b_px": [-0.03, 0.045],
+    "strength": 0.35,
+    "shallow_color": [0.05, 0.15, 0.14],
+    "mid_color": [0.018, 0.075, 0.095],
+    "deep_color": [0.005, 0.024, 0.046],
+    "mid_depth_m": 25.0,
+    "depth_falloff_m": 90.0
+  }
+}

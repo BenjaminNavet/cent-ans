@@ -1,15 +1,21 @@
-"""Construit les textures de bataille (lot V4) depuis Poly Haven (CC0) et par procédure.
+"""Construit les textures de bataille (lot V4, 2k GA2) depuis Poly Haven (CC0) et par procédure.
 
 Usage : uv run --with pillow --with numpy python build_textures.py <dossier_telechargements>
 
-Le dossier doit contenir les fichiers Poly Haven 1k `<id>_diff_1k.jpg` et `<id>_nor_gl_1k.jpg`
+Le dossier doit contenir, pour les couches du sol listées dans
+`data/fx/battle_ground_layers.json` (lot GA2, schéma `fx_battle_ground_layers.schema.json`),
+les fichiers Poly Haven `<id>_diff_2k.jpg` (albédo, 2k) et `<id>_nor_gl_1k.jpg` (normale, 1k —
+mesure mémoire GA2 : 13 couches en 2k/2k dépasseraient 120 Mo, 2k/1k tient à ~87 Mo) ; pour les
+couches uniques (bâtiments, écorce), `<id>_diff_1k.jpg` et `<id>_nor_gl_1k.jpg`
 (https://api.polyhaven.com/files/<id>). Produit, à côté de ce script :
-- `ground_albedo_array.jpg` / `ground_normal_array.jpg` : couches du sol empilées verticalement
-  (importées en Texture2DArray) ;
+- `ground_albedo_array.jpg` (2048 px/couche) / `ground_normal_array.jpg` (1024 px/couche) :
+  couches du sol empilées verticalement (importées en Texture2DArray), ordre et identifiants
+  Poly Haven tirés de `data/fx/battle_ground_layers.json` (jamais codés en dur ici) ;
 - `<id>_diff.jpg` / `<id>_nor.jpg` : textures des murailles, toits, maisons, écorce ;
 - `foliage_leaves.png`, `grass_clump.png` : cartes alpha procédurales (feuillage, touffes d'herbe).
 """
 
+import json
 import math
 import random
 import sys
@@ -19,17 +25,13 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 HERE = Path(__file__).parent
+DATA_ROOT = HERE.parents[3] / "data"
 
 GROUND_LAYERS = [
-    "sparse_grass",  # 0 herbe
-    "rocky_terrain_02",  # 1 prairie caillouteuse
-    "forest_leaves_04",  # 2 sous-bois
-    "coast_sand_01",  # 3 terre battue (chemins)
-    "muddy_tracks",  # 4 boue
-    "river_small_rocks",  # 5 galets (lit, gués, berges)
-    "aerial_rocks_02",  # 6 roche (pentes)
-    "farm_soil",  # 7 labours
-    "snow_02",  # 8 neige
+    layer["poly_haven_id"]
+    for layer in json.loads(
+        (DATA_ROOT / "fx" / "battle_ground_layers.json").read_text(encoding="utf-8")
+    )["layers"]
 ]
 
 SINGLE = [
@@ -43,23 +45,42 @@ SINGLE = [
     "bark_brown_02",
 ]
 
+# Lot GA5 : matières de bâtiments partagées avec `buildings/build_textures.py`
+# (`BuildingMaterials.SPECS` — Masonry, RoofSlate, Thatch) — albédo 2k, normale 1k (même
+# convention que GA2), contrairement aux autres `SINGLE` (écorce, sol, restées en 1k/512,
+# hors périmètre GA5).
+GA5_BUILDING_SINGLE = {"castle_wall_varriation", "roof_slates_02", "thatch_roof_angled"}
 
-def stack(src: Path, suffix: str, size: int, out: str) -> None:
-    """Empile les couches du sol verticalement en une image."""
+
+def stack(src: Path, suffix: str, source_res: str, size: int, out: str) -> None:
+    """Empile les couches du sol (ordre de `battle_ground_layers.json`) verticalement."""
     sheet = Image.new("RGB", (size, size * len(GROUND_LAYERS)))
     for i, layer in enumerate(GROUND_LAYERS):
-        image = Image.open(src / f"{layer}_{suffix}_1k.jpg").convert("RGB")
-        sheet.paste(image.resize((size, size), Image.LANCZOS), (0, i * size))
+        image = Image.open(src / f"{layer}_{suffix}_{source_res}.jpg").convert("RGB")
+        sheet.paste(image.resize((size, size), Image.Resampling.LANCZOS), (0, i * size))
     sheet.save(HERE / out, quality=88)
 
 
 def singles(src: Path) -> None:
-    """Copie les textures des bâtiments et de l'écorce (normales réduites à 512)."""
+    """Copie les textures des bâtiments et de l'écorce.
+
+    Lot GA5 : `GA5_BUILDING_SINGLE` (matières de bâtiments de bataille, `BuildingMaterials.SPECS`)
+    passe en albédo 2k / normale 1k ; les autres `SINGLE` (écorce, sol) restent en 1k / 512
+    (hors périmètre GA5).
+    """
     for name in SINGLE:
+        if name in GA5_BUILDING_SINGLE:
+            diff = Image.open(src / f"{name}_diff_2k.jpg").convert("RGB")
+            diff.save(HERE / f"{name}_diff.jpg", quality=88)
+            nor = Image.open(src / f"{name}_nor_gl_1k.jpg").convert("RGB")
+            nor.save(HERE / f"{name}_nor.jpg", quality=90)
+            continue
         diff = Image.open(src / f"{name}_diff_1k.jpg").convert("RGB")
         diff.save(HERE / f"{name}_diff.jpg", quality=88)
         nor = Image.open(src / f"{name}_nor_gl_1k.jpg").convert("RGB")
-        nor.resize((512, 512), Image.LANCZOS).save(HERE / f"{name}_nor.jpg", quality=90)
+        nor.resize((512, 512), Image.Resampling.LANCZOS).save(
+            HERE / f"{name}_nor.jpg", quality=90
+        )
 
 
 def _bleed(image: Image.Image) -> Image.Image:
@@ -150,8 +171,9 @@ def grass(width: int = 512, height: int = 256) -> None:
 
 if __name__ == "__main__":
     downloads = Path(sys.argv[1])
-    stack(downloads, "diff", 1024, "ground_albedo_array.jpg")
-    stack(downloads, "nor_gl", 512, "ground_normal_array.jpg")
+    # GA2 : albédo 2k, normale 1k (mesure mémoire, cf. docs/wip/ga.md section GA2).
+    stack(downloads, "diff", "2k", 2048, "ground_albedo_array.jpg")
+    stack(downloads, "nor_gl", "1k", 1024, "ground_normal_array.jpg")
     singles(downloads)
     leaves()
     grass()
