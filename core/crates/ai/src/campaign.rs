@@ -166,7 +166,7 @@ impl<'a> Context<'a> {
         // Net of court and administration (M10 balance) and of the tribute
         // owed to a suzerain.
         let tribute = if me.suzerain.is_some() {
-            (gross_income * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100).max(0)
+            (gross_income * data.feudal_rules.vassal_tribute_percent / 100).max(0)
         } else {
             0
         };

@@ -40,7 +40,6 @@
     "voronoi_weight": 0.8
   },
   "owner": "fac_swiss",
-  "overlord": "fac_empire",
   "culture": "cul_german",
   "religion": "rel_catholic",
   "population": {

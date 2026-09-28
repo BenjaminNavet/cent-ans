@@ -1,0 +1,26 @@
+{
+  "id": "tit_austria",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché d'Autriche",
+    "local": "Herzogtum Österreich",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la fasce d'argent.",
+    "description": "Armes des Babenberg reprises par les Habsbourg.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_austria"
+  ],
+  "holder_1337": {
+    "faction": "fac_austria",
+    "sources": [
+      "Albert II d'Autriche",
+      "Maison de Habsbourg"
+    ]
+  }
+}

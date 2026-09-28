@@ -96,6 +96,11 @@ define_id!(
     "prov_"
 );
 define_id!(
+    /// Identifier of a feudal title (`tit_guyenne`), lot FE.
+    TitleId,
+    "tit_"
+);
+define_id!(
     /// Identifier of a settlement inside a province (`set_rouen`), lot C1.
     SettlementId,
     "set_"

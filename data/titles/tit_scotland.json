@@ -1,0 +1,26 @@
+{
+  "id": "tit_scotland",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume d'Écosse",
+    "local": "Kinrick o Scotland",
+    "local_language": "scots"
+  },
+  "heraldry": {
+    "blazon": "D'or au lion de gueules, armé et lampassé d'azur, au double trescheur fleuré et contre-fleuré du second.",
+    "description": "Lion rouge rampant dans un double trescheur fleurdelisé sur champ d'or.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_provinces": [
+    "prov_fife"
+  ],
+  "holder_1337": {
+    "faction": "fac_scotland",
+    "sources": [
+      "David II",
+      "Seconde guerre d'indépendance écossaise",
+      "Armoiries de l'Écosse"
+    ]
+  }
+}
