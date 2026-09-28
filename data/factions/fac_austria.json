@@ -46,6 +46,16 @@
       "faction": "fac_swiss",
       "status": "peace",
       "note": "Les Habsbourg n'ont pas renoncé aux cantons perdus à Morgarten (1315)."
+    },
+    {
+      "faction": "fac_hungary",
+      "status": "peace",
+      "note": "Paix entre Habsbourg et Anjou de Hongrie après les guerres de 1330."
+    },
+    {
+      "faction": "fac_swidnica",
+      "status": "peace",
+      "note": "Alliance matrimoniale prévue : Bolko II épousera Agnès de Habsbourg (1338)."
     }
   ],
   "ai_personality": {

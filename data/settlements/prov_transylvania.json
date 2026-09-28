@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_alba_iulia",
+    "province": "prov_transylvania",
+    "kind": "city",
+    "name": {
+      "display": "Alba Iulia",
+      "local": "Gyulafehérvár",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      23.573,
+      46.0678
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Siège de l'évêché de Transylvanie et de la voïvodie, cathédrale Saint-Michel.",
+    "sources": [
+      "Alba Iulia"
+    ]
+  },
+  {
+    "id": "set_kolozsvar",
+    "province": "prov_transylvania",
+    "kind": "town",
+    "name": {
+      "display": "Kolozsvár",
+      "local": "Kolozsvár",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      23.5897,
+      46.7712
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande de la Transylvanie du nord, fondée par des Saxons, siège d'un comitat.",
+    "sources": [
+      "Kolozsvár"
+    ]
+  },
+  {
+    "id": "set_nagyszeben",
+    "province": "prov_transylvania",
+    "kind": "town",
+    "name": {
+      "display": "Nagyszeben",
+      "local": "Nagyszeben",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      24.1256,
+      45.7983
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Capitale des Saxons de Transylvanie, riche ville fortifiée.",
+    "sources": [
+      "Nagyszeben"
+    ]
+  }
+]

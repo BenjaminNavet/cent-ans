@@ -1,0 +1,93 @@
+{
+  "id": "prov_muntenia",
+  "name": {
+    "display": "Munténie occidentale",
+    "local": "Muntenia",
+    "local_language": "roumain"
+  },
+  "region": "valachie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Argeș",
+    "Dâmbovița",
+    "Olt"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Curtea de Argeș",
+      "local": "Curtea de Argeș",
+      "local_language": "roumain"
+    },
+    "lat": 45.1381,
+    "lon": 24.6786
+  },
+  "geo": {
+    "capital_lonlat": [
+      24.6786,
+      45.1381
+    ],
+    "seed_lonlat": [
+      25.2,
+      45.0
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_wallachia",
+  "culture": "cul_romanian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Résidence de Basarab Ier, à Câmpulung puis Curtea de Argeș.",
+    "classes": {
+      "peasants": {
+        "count": 95000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1900,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2090,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1600,
+  "description": "Cœur de la Valachie au pied des Carpates : Curtea de Argeș et Câmpulung, résidences de Basarab Ier, prince orthodoxe né des voïvodes locaux ; il tient les cols contre la Hongrie.",
+  "sources": [
+    "Basarab Ier de Valachie",
+    "Curtea de Argeș",
+    "Câmpulung"
+  ]
+}

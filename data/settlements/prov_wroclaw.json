@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_wroclaw",
+    "province": "prov_wroclaw",
+    "kind": "city",
+    "name": {
+      "display": "Wrocław",
+      "local": "Breslau",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      17.0385,
+      51.1079
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Métropole silésienne de l'Oder, ville épiscopale et marchande, incorporée à la couronne de Bohême en 1335.",
+    "sources": [
+      "Wrocław"
+    ]
+  },
+  {
+    "id": "set_sroda_slaska",
+    "province": "prov_wroclaw",
+    "kind": "town",
+    "name": {
+      "display": "Środa Śląska",
+      "local": "Neumarkt",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      16.5939,
+      51.165
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de droit de Neumarkt, modèle du droit allemand exporté en Pologne.",
+    "sources": [
+      "Środa Śląska"
+    ]
+  },
+  {
+    "id": "set_trzebnica",
+    "province": "prov_wroclaw",
+    "kind": "abbey",
+    "name": {
+      "display": "Trzebnica",
+      "local": "Trebnitz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      17.06,
+      51.31
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne de femmes, tombeau de sainte Hedwige de Silésie.",
+    "sources": [
+      "Trzebnica"
+    ]
+  }
+]

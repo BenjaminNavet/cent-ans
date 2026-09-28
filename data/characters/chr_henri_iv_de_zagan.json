@@ -1,0 +1,49 @@
+{
+  "id": "chr_henri_iv_de_zagan",
+  "name": {
+    "display": "Henri IV de Żagań",
+    "local": "Henryk IV Wierny",
+    "local_language": "polonais"
+  },
+  "epithet": "le Fidèle",
+  "sex": "male",
+  "house": "Piast de Głogów",
+  "faction": "fac_glogow",
+  "role": "ruler",
+  "birth": {
+    "value": "1292",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1342",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Żagań",
+      "from": {
+        "value": "1309",
+        "uncertain": true
+      },
+      "note": "Duc de Żagań et de Głogów."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 3
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_cautious",
+    "trait_stubborn"
+  ],
+  "piety": 50,
+  "starting_location": "prov_glogow",
+  "status": "at_court",
+  "description": "Duc de Żagań, père d'Henri V le Fer ; tient une part de Głogów dans l'orbite de la Bohême (dates approximatives).",
+  "sources": [
+    "Henri IV de Żagań"
+  ]
+}

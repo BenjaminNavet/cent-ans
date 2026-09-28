@@ -1446,6 +1446,195 @@
       "vassal_of": [
         "fac_pavia"
       ]
+    },
+    {
+      "id": "piast",
+      "name": "Piast",
+      "arms_of": "fac_poland",
+      "blazon": "De gueules à l'aigle d'argent, couronnée, becquée et membrée d'or.",
+      "description": "Aigle blanc couronné des Piast de Pologne.",
+      "source": "pl.wikipedia : Herb Polski",
+      "certainty": "attesté",
+      "factions": [
+        "fac_poland"
+      ],
+      "vassal_of": [
+        "fac_poland",
+        "fac_hungary"
+      ]
+    },
+    {
+      "id": "piast_mazovie",
+      "name": "Piast de Mazovie",
+      "arms_of": "fac_plock",
+      "blazon": "De gueules à l'aigle d'argent, à la bordure d'azur.",
+      "description": "Aigle des Piast de Mazovie, bordure d'azur en brisure de jeu.",
+      "source": "pl.wikipedia : Herb Mazowsza",
+      "certainty": "incertain",
+      "factions": [
+        "fac_plock",
+        "fac_warsaw",
+        "fac_rawa",
+        "fac_galicia_volhynia"
+      ],
+      "vassal_of": [
+        "fac_plock",
+        "fac_warsaw",
+        "fac_rawa",
+        "fac_galicia_volhynia"
+      ]
+    },
+    {
+      "id": "piast_legnica",
+      "name": "Piast de Legnica",
+      "arms_of": "fac_legnica",
+      "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules.",
+      "description": "Aigle silésienne sur or, croissant d'argent omis.",
+      "source": "pl.wikipedia : Herb Piastów śląskich",
+      "certainty": "incertain",
+      "factions": [
+        "fac_legnica"
+      ],
+      "vassal_of": [
+        "fac_legnica"
+      ]
+    },
+    {
+      "id": "piast_glogow",
+      "name": "Piast de Głogów",
+      "arms_of": "fac_glogow",
+      "blazon": "D'argent à l'aigle de sable, becquée et membrée d'or.",
+      "description": "Armes de substitution pour les Piast de Głogów-Żagań.",
+      "source": "pl.wikipedia : Herb Głogowa",
+      "certainty": "substitution",
+      "factions": [
+        "fac_glogow"
+      ],
+      "vassal_of": [
+        "fac_glogow"
+      ]
+    },
+    {
+      "id": "piast_opole",
+      "name": "Piast d'Opole",
+      "arms_of": "fac_opole",
+      "blazon": "D'azur à l'aigle d'or, becquée et membrée de gueules.",
+      "description": "Aigle d'or sur azur des Piast d'Opole.",
+      "source": "pl.wikipedia : Herb Opola",
+      "certainty": "attesté",
+      "factions": [
+        "fac_opole"
+      ],
+      "vassal_of": [
+        "fac_opole"
+      ]
+    },
+    {
+      "id": "piast_swidnica",
+      "name": "Piast de Świdnica",
+      "arms_of": "fac_swidnica",
+      "blazon": "Parti : au 1 d'argent à la demi-aigle de gueules ; au 2 d'or à la demi-aigle de sable.",
+      "description": "Aigle silésienne partie de gueules et de sable sur argent et or.",
+      "source": "pl.wikipedia : Herb Świdnicy",
+      "certainty": "incertain",
+      "factions": [
+        "fac_swidnica"
+      ],
+      "vassal_of": [
+        "fac_swidnica"
+      ]
+    },
+    {
+      "id": "anjou_hongrie",
+      "name": "Anjou-Hongrie",
+      "arms_of": "fac_hungary",
+      "blazon": "Écartelé : aux 1 et 4 burelé d'argent et de gueules de huit pièces ; aux 2 et 3 d'azur semé de fleurs de lis d'or.",
+      "description": "Armes d'Anjou-Hongrie : bandes des Árpád et fleurs de lis d'Anjou.",
+      "source": "en.wikipedia : Coat of arms of Hungary",
+      "certainty": "attesté",
+      "factions": [
+        "fac_hungary"
+      ],
+      "vassal_of": [
+        "fac_hungary",
+        "fac_transylvania",
+        "fac_slavonia"
+      ]
+    },
+    {
+      "id": "szecsenyi",
+      "name": "Szécsényi",
+      "arms_of": "fac_transylvania",
+      "blazon": "D'azur à l'aigle de sable, becquée et membrée d'or.",
+      "description": "Armes de substitution pour le lignage Szécsényi.",
+      "source": "hu.wikipedia : Szécsényi család",
+      "certainty": "substitution",
+      "factions": [
+        "fac_transylvania"
+      ],
+      "vassal_of": [
+        "fac_transylvania"
+      ]
+    },
+    {
+      "id": "akos",
+      "name": "Ákos",
+      "arms_of": "fac_slavonia",
+      "blazon": "D'azur à la fasce d'argent, accompagnée en chef d'une étoile d'or.",
+      "description": "Armes de substitution pour le lignage des Ákos.",
+      "source": "hu.wikipedia : Ákos nemzetség",
+      "certainty": "substitution",
+      "factions": [
+        "fac_slavonia"
+      ],
+      "vassal_of": [
+        "fac_slavonia"
+      ]
+    },
+    {
+      "id": "gediminides",
+      "name": "Gediminides",
+      "arms_of": "fac_lithuania",
+      "blazon": "De gueules à trois pals d'argent, à la bordure d'or.",
+      "description": "Colonnes de Gediminas, approximées en trois pals.",
+      "source": "en.wikipedia : Vytis",
+      "certainty": "incertain",
+      "factions": [
+        "fac_lithuania"
+      ],
+      "vassal_of": [
+        "fac_lithuania"
+      ]
+    },
+    {
+      "id": "rurikides",
+      "name": "Rurikides",
+      "arms_of": "fac_kiev",
+      "blazon": "D'azur à la croix d'or.",
+      "description": "Substitution pour la principauté de Kiev (trident rurikide non dessinable).",
+      "source": "en.wikipedia : Tryzub",
+      "certainty": "substitution",
+      "factions": [
+        "fac_kiev"
+      ],
+      "vassal_of": [
+        "fac_kiev"
+      ]
+    },
+    {
+      "id": "basarab",
+      "name": "Basarab",
+      "arms_of": "fac_wallachia",
+      "blazon": "D'azur à l'aigle d'or, à la bordure de gueules.",
+      "description": "Aigle d'or sur azur, armes valaques attestées plus tard ; bordure de jeu.",
+      "source": "ro.wikipedia : Stema Țării Românești",
+      "certainty": "incertain",
+      "factions": [
+        "fac_wallachia"
+      ],
+      "vassal_of": [
+        "fac_wallachia"
+      ]
     }
   ]
 }

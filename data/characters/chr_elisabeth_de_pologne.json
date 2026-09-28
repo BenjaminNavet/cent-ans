@@ -1,0 +1,55 @@
+{
+  "id": "chr_elisabeth_de_pologne",
+  "name": {
+    "display": "Élisabeth de Pologne, reine de Hongrie",
+    "local": "Erzsébet",
+    "local_language": "hongrois"
+  },
+  "sex": "female",
+  "house": "Piast",
+  "faction": "fac_hungary",
+  "role": "consort",
+  "birth": {
+    "value": "1305-03-01",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1380-12-29",
+    "place": "Buda"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Reine de Hongrie",
+      "from": {
+        "value": "1320-07-06"
+      },
+      "note": "Mariée à Charles Robert en 1320."
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 5,
+    "court": 8
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_pious",
+    "trait_proud"
+  ],
+  "piety": 65,
+  "family": {
+    "spouses": [
+      "chr_charles_i_robert_de_hongrie"
+    ],
+    "children": [
+      "chr_louis_ier_de_hongrie"
+    ]
+  },
+  "starting_location": "prov_hungary_central",
+  "status": "at_court",
+  "description": "Fille de Ladislas Ier le Bref, sœur de Casimir III, troisième épouse de Charles Robert ; mère de Louis, elle sera régente de Pologne (1370-1375).",
+  "sources": [
+    "Élisabeth de Pologne (1305-1380)"
+  ]
+}

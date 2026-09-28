@@ -1,0 +1,93 @@
+{
+  "id": "prov_transdanubia_mid",
+  "name": {
+    "display": "Transdanubie centrale",
+    "local": "Dunántúl közép",
+    "local_language": "hongrois"
+  },
+  "region": "hongrie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Sárvíz",
+    "Zala"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Székesfehérvár",
+      "local": "Székesfehérvár",
+      "local_language": "hongrois"
+    },
+    "lat": 47.186,
+    "lon": 18.4221
+  },
+  "geo": {
+    "capital_lonlat": [
+      18.4221,
+      47.186
+    ],
+    "seed_lonlat": [
+      18.15,
+      47.0
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_hungary",
+  "culture": "cul_hungarian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Ville du couronnement et de la sépulture des rois de Hongrie.",
+    "classes": {
+      "peasants": {
+        "count": 165000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8250,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3630,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 6600,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2400,
+  "description": "Pays du Balaton et de Székesfehérvár, ville où les rois de Hongrie sont couronnés et enterrés ; Veszprém est la ville des reines.",
+  "sources": [
+    "Székesfehérvár",
+    "Veszprém",
+    "Lac Balaton"
+  ]
+}

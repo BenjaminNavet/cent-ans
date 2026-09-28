@@ -1,0 +1,54 @@
+[
+  {
+    "id": "set_lublin",
+    "province": "prov_lublin",
+    "kind": "city",
+    "name": {
+      "display": "Lublin",
+      "local": "Lublin",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      22.5684,
+      51.2465
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville royale et château de la frontière orientale, étape des marchands vers Kiev.",
+    "sources": [
+      "Lublin"
+    ]
+  },
+  {
+    "id": "set_kazimierz_dolny",
+    "province": "prov_lublin",
+    "kind": "village",
+    "name": {
+      "display": "Kazimierz Dolny",
+      "local": "Kazimierz",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      21.9515,
+      51.3189
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Port de la Vistule où transitent les grains vers Gdańsk, sous château royal.",
+    "sources": [
+      "Kazimierz Dolny"
+    ]
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "id": "tit_warsaw",
+  "rank": "county",
+  "name": {
+    "display": "Duché de Czersk et de Varsovie",
+    "local": "Księstwo Czersko-Warszawskie",
+    "local_language": "polonais"
+  },
+  "heraldry": {
+    "blazon": "De gueules à l'aigle d'argent, à la bordure d'or.",
+    "description": "Aigle blanc de Mazovie, bordure d'or.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Bordure d'or : distinction de jeu, non attestée."
+  },
+  "de_jure_liege": "tit_bohemia",
+  "de_jure_provinces": [
+    "prov_warsaw"
+  ],
+  "holder_1337": {
+    "faction": "fac_warsaw",
+    "sources": [
+      "Trojden Ier de Mazovie",
+      "Varsovie",
+      "Duché de Mazovie"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_warsaw_hold",
+      "title": "Garder Varsovie",
+      "description": "Trojden doit préserver l'héritage de ses ancêtres.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_warsaw"
+      }
+    },
+    {
+      "id": "obj_warsaw_free",
+      "title": "Rester libre",
+      "description": "Ne pas devenir vassal du roi de Pologne.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Duché mazovien de Czersk et de Varsovie.",
+  "sources": [
+    "Trojden Ier de Mazovie",
+    "Varsovie",
+    "Duché de Mazovie"
+  ]
+}

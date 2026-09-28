@@ -1,0 +1,95 @@
+{
+  "id": "prov_moravia",
+  "name": {
+    "display": "Moravie",
+    "local": "Morava",
+    "local_language": "tchèque"
+  },
+  "region": "empire_est",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Morava",
+    "Svratka",
+    "Dyje"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Brno",
+      "local": "Brno",
+      "local_language": "tchèque"
+    },
+    "lat": 49.1951,
+    "lon": 16.6068
+  },
+  "geo": {
+    "capital_lonlat": [
+      16.6068,
+      49.1951
+    ],
+    "seed_lonlat": [
+      16.9,
+      49.4
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_bohemia",
+  "culture": "cul_czech",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Margraviat de Moravie, apanage du fils aîné du roi de Bohême.",
+    "classes": {
+      "peasants": {
+        "count": 300000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 18000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6600,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 3900,
+  "description": "Margraviat de Moravie, gouverné par Charles de Luxembourg (futur Charles IV) au nom de son père ; Brno et Olomouc se partagent l'autorité, le Špilberk garde la ville.",
+  "sources": [
+    "Margraviat de Moravie",
+    "Brno",
+    "Olomouc"
+  ]
+}

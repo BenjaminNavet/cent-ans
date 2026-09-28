@@ -1,0 +1,56 @@
+{
+  "id": "tit_rawa",
+  "rank": "county",
+  "name": {
+    "display": "Duché de Rawa",
+    "local": "Księstwo Rawskie",
+    "local_language": "polonais"
+  },
+  "heraldry": {
+    "blazon": "De gueules à l'aigle d'argent, au lambel d'azur.",
+    "description": "Aigle blanc de Mazovie brisé d'un lambel d'azur.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#1F3F8F",
+    "uncertain": true,
+    "note": "Lambel : brisure de jeu."
+  },
+  "de_jure_liege": "tit_bohemia",
+  "de_jure_provinces": [
+    "prov_rawa"
+  ],
+  "holder_1337": {
+    "faction": "fac_rawa",
+    "sources": [
+      "Siemowit II de Rawa",
+      "Duché de Rawa"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_rawa_hold",
+      "title": "Survivre",
+      "description": "Siemowit II doit garder Rawa.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_rawa"
+      }
+    },
+    {
+      "id": "obj_rawa_plock",
+      "title": "Étendre son influence",
+      "description": "Obtenir la tutelle de Płock.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_rawa",
+          "prov_plock"
+        ]
+      }
+    }
+  ],
+  "description": "Duché mazovien de Rawa et de Sochaczew.",
+  "sources": [
+    "Siemowit II de Rawa",
+    "Duché de Rawa"
+  ]
+}

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_ljubljana",
+    "province": "prov_carniola",
+    "kind": "city",
+    "name": {
+      "display": "Ljubljana",
+      "local": "Laibach",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.5058,
+      46.0569
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville ducale de Carniole sous son château.",
+    "sources": [
+      "Ljubljana"
+    ]
+  },
+  {
+    "id": "set_kranj",
+    "province": "prov_carniola",
+    "kind": "town",
+    "name": {
+      "display": "Kranj",
+      "local": "Krainburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.3556,
+      46.2389
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la haute Save, ancienne capitale de la marche de Carniole.",
+    "sources": [
+      "Kranj"
+    ]
+  },
+  {
+    "id": "set_kamnik",
+    "province": "prov_carniola",
+    "kind": "town",
+    "name": {
+      "display": "Kamnik",
+      "local": "Stein",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.6114,
+      46.2225
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville fortifiée aux portes des Alpes de Kamnik.",
+    "sources": [
+      "Kamnik"
+    ]
+  }
+]

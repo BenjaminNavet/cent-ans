@@ -1,0 +1,63 @@
+{
+  "id": "fac_glogow",
+  "name": {
+    "display": "Duché de Głogów-Żagań",
+    "local": "Herzogtum Glogau-Sagan",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Głogów",
+  "adjective": "de Głogów",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_henri_iv_de_zagan",
+  "capital": "prov_glogow",
+  "capital_city": "Głogów",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_bohemia",
+  "primary_title": "tit_glogow",
+  "heraldry": {
+    "blazon": "D'argent à l'aigle de sable, becquée et membrée d'or.",
+    "description": "Aigle noir de Silésie sur argent.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1A1A1A",
+    "uncertain": true,
+    "note": "Armes de Głogów : distinction de jeu."
+  },
+  "titles": [
+    "Duc de Żagań et de Głogów",
+    "Vassal du roi de Bohême (incertain)"
+  ],
+  "treasury": 3000,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_bohemia",
+      "status": "vassal",
+      "note": "Vassalité de Głogów depuis 1331 (incertain) ; Henri V de Żagań fera hommage en 1344."
+    },
+    {
+      "faction": "fac_poland",
+      "status": "peace",
+      "note": "Parenté piast, voisinage avec la Grande-Pologne."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 55
+  },
+  "description": "Duché de Głogów partagé après 1331 ; Henri IV le Fidèle, duc de Żagań, tient Głogów et sa part avec l'appui de la Bohême, tandis que son fils Henri V le Fer grandit.",
+  "sources": [
+    "Henri IV de Żagań",
+    "Duché de Głogów",
+    "Henri V le Fer"
+  ]
+}

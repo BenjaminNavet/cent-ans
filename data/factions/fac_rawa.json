@@ -1,0 +1,62 @@
+{
+  "id": "fac_rawa",
+  "name": {
+    "display": "Duché de Rawa",
+    "local": "Księstwo Rawskie",
+    "local_language": "polonais"
+  },
+  "short_name": "Rawa",
+  "adjective": "rawois",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_siemowit_ii_de_rawa",
+  "capital": "prov_rawa",
+  "capital_city": "Rawa Mazowiecka",
+  "religion": "rel_catholic",
+  "culture": "cul_polish",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_bohemia",
+  "primary_title": "tit_rawa",
+  "heraldry": {
+    "blazon": "De gueules à l'aigle d'argent, au lambel d'azur.",
+    "description": "Aigle blanc de Mazovie brisé d'un lambel d'azur.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#1F3F8F",
+    "uncertain": true,
+    "note": "Lambel : brisure de jeu."
+  },
+  "titles": [
+    "Duc de Rawa et de Sochaczew",
+    "Vassal du roi de Bohême"
+  ],
+  "treasury": 2000,
+  "prestige": 15,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_bohemia",
+      "status": "vassal",
+      "note": "Hommage de Siemowit II à Jean de Luxembourg en 1329."
+    },
+    {
+      "faction": "fac_poland",
+      "status": "peace",
+      "note": "Enclavé entre les terres de Casimir III."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 60,
+    "trade": 40,
+    "piety": 60
+  },
+  "description": "Petit duché mazovien de Rawa et de Sochaczew, coincé entre la Pologne et la Mazovie ; son duc est aussi tuteur du jeune duc de Płock.",
+  "sources": [
+    "Siemowit II de Rawa",
+    "Duché de Rawa"
+  ]
+}

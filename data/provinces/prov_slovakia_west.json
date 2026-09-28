@@ -1,0 +1,94 @@
+{
+  "id": "prov_slovakia_west",
+  "name": {
+    "display": "Haute-Hongrie occidentale (Presbourg-Nitra)",
+    "local": "Pozsony és Nyitra",
+    "local_language": "hongrois"
+  },
+  "region": "hongrie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Danube",
+    "Váh",
+    "Hron"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Presbourg",
+      "local": "Pozsony",
+      "local_language": "hongrois"
+    },
+    "lat": 48.1486,
+    "lon": 17.1077
+  },
+  "geo": {
+    "capital_lonlat": [
+      17.1077,
+      48.1486
+    ],
+    "seed_lonlat": [
+      18.2,
+      48.55
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_hungary",
+  "culture": "cul_slovak",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Peuplement slovaque et germanique ; l'or de Kremnica alimente le monnayage royal (florin).",
+    "classes": {
+      "peasants": {
+        "count": 200000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 10000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 4400,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2800,
+  "description": "Haute-Hongrie occidentale (futur pays slovaque) : Presbourg sur le Danube, l'évêché de Nitra et les mines d'or de Kremnica dont Charles Robert tire la monnaie d'or (florins, 1325-1328).",
+  "sources": [
+    "Bratislava",
+    "Nitra",
+    "Kremnica"
+  ]
+}

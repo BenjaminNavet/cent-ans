@@ -1,0 +1,58 @@
+{
+  "id": "fac_slavonia",
+  "name": {
+    "display": "Banat de Slavonie et de Croatie",
+    "local": "Slavonska banovina",
+    "local_language": "croate"
+  },
+  "short_name": "Slavonie",
+  "adjective": "slavon",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_mikcs_ban",
+  "capital": "prov_slavonia_west",
+  "capital_city": "Zagreb",
+  "religion": "rel_catholic",
+  "culture": "cul_croatian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_hungary",
+  "primary_title": "tit_slavonia",
+  "heraldry": {
+    "blazon": "D'azur à la fasce d'argent, accompagnée en chef d'une étoile d'or.",
+    "description": "Champ d'azur à la rivière (fasce) d'argent et à l'étoile d'or, armes de la Slavonie.",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Martre passante omise."
+  },
+  "titles": [
+    "Ban de Slavonie",
+    "Ban de Croatie et de Dalmatie (incertain)"
+  ],
+  "treasury": 4500,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_hungary",
+      "status": "vassal",
+      "note": "Le ban est nommé par le roi de Hongrie."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 60
+  },
+  "description": "Grand office de la couronne de Hongrie sur la Slavonie, la Croatie intérieure et, en titre, la Dalmatie ; Mikcs, ban de Slavonie, y tient la frontière méridionale et les Frankopans.",
+  "sources": [
+    "Mikcs Ban",
+    "Ban de Slavonie",
+    "Royaume de Croatie"
+  ]
+}

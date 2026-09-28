@@ -1,0 +1,92 @@
+{
+  "id": "prov_muntenia_east",
+  "name": {
+    "display": "Munténie orientale",
+    "local": "Muntenia de răsărit",
+    "local_language": "roumain"
+  },
+  "region": "valachie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Danube",
+    "Buzău",
+    "Ialomița"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Brăila",
+      "local": "Brăila",
+      "local_language": "roumain"
+    },
+    "lat": 45.2692,
+    "lon": 27.9575
+  },
+  "geo": {
+    "capital_lonlat": [
+      27.9575,
+      45.2692
+    ],
+    "seed_lonlat": [
+      26.9,
+      44.9
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_wallachia",
+  "culture": "cul_romanian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Plaine du Danube ouverte aux raids tatars ; ports du Bas-Danube fréquentés par les Génois (incertain).",
+    "classes": {
+      "peasants": {
+        "count": 75000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2250,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1650,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1125,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1400,
+  "description": "Plaine orientale de Valachie jusqu'au Siret, sous la menace de la Horde d'Or ; ports du Bas-Danube où trafiquent Génois et Vénitiens (Brăila attestée en 1368, Buzău en 1431 : identifications incertaines).",
+  "sources": [
+    "Brăila",
+    "Munténie",
+    "Valachie"
+  ]
+}

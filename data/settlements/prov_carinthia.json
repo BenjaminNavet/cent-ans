@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_sankt_veit_an_der_glan",
+    "province": "prov_carinthia",
+    "kind": "city",
+    "name": {
+      "display": "Sankt Veit an der Glan",
+      "local": "Sankt Veit",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.3611,
+      46.7667
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale ducale de la Carinthie jusqu'en 1518.",
+    "sources": [
+      "Sankt Veit an der Glan"
+    ]
+  },
+  {
+    "id": "set_klagenfurt",
+    "province": "prov_carinthia",
+    "kind": "town",
+    "name": {
+      "display": "Klagenfurt",
+      "local": "Klagenfurt",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.3053,
+      46.6247
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du Wörthersee, refondée au XIIIe siècle sur le lac.",
+    "sources": [
+      "Klagenfurt"
+    ]
+  },
+  {
+    "id": "set_villach",
+    "province": "prov_carinthia",
+    "kind": "town",
+    "name": {
+      "display": "Villach",
+      "local": "Villach",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      13.8558,
+      46.6111
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de la Drave, possession des évêques de Bamberg.",
+    "sources": [
+      "Villach"
+    ]
+  }
+]

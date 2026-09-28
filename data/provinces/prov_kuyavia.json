@@ -1,0 +1,92 @@
+{
+  "id": "prov_kuyavia",
+  "name": {
+    "display": "Kuyavie",
+    "local": "Kujawy",
+    "local_language": "polonais"
+  },
+  "region": "pologne",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Vistule",
+    "Notéć"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_salt",
+    "res_wheat",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Włocławek",
+      "local": "Włocławek",
+      "local_language": "polonais"
+    },
+    "lat": 52.6483,
+    "lon": 19.0678
+  },
+  "geo": {
+    "capital_lonlat": [
+      19.0678,
+      52.6483
+    ],
+    "seed_lonlat": [
+      18.5,
+      52.7
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_poland",
+  "culture": "cul_polish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Kuyavie et terre de Dobrzyń ravagées par l'Ordre teutonique depuis 1331-1332.",
+    "classes": {
+      "peasants": {
+        "count": 120000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2640,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1900,
+  "description": "Terre des saliniers d'Inowrocław, sur la Vistule ; l'Ordre teutonique en a occupé une grande partie après la guerre de 1327-1332 et la garde encore en 1337 (procès de Varsovie en 1339, restitution à Kalisz en 1343). Cas limite : rattachée à la Pologne, revendiquée contre l'Ordre.",
+  "sources": [
+    "Kuyavie",
+    "Włocławek",
+    "Guerre polono-teutonique (1326-1332)"
+  ]
+}
