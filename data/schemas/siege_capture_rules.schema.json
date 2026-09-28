@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/siege_capture_rules.schema.json",
+  "title": "Points de capture des batailles de siège",
+  "description": "Fichier data/rules/siege_capture.json (lot TW2 T4, ADR 0104) : rayon et durée de prise de la place centrale (point de victoire) et de la porte, supériorité numérique exigée, seuil de l'alerte « La place est menacée », dernier carré des défenseurs (moral) et repli de la garnison. Lu par sim-battle (CaptureRules).",
+  "type": "object",
+  "$defs": {
+    "point": {
+      "type": "object",
+      "properties": {
+        "radius_m": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "Rayon du point (m) : les hommes dans ce cercle comptent." },
+        "hold_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 600, "description": "Secondes de supériorité de l'assaillant pour prendre le point." },
+        "decay_per_s": { "type": "number", "minimum": 0, "maximum": 10, "description": "Recul de la progression (s par s) quand personne n'y domine." },
+        "retake_per_s": { "type": "number", "minimum": 0, "maximum": 10, "description": "Recul de la progression (s par s) quand le défenseur y domine." }
+      },
+      "required": ["radius_m", "hold_s", "decay_per_s", "retake_per_s"]
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "square": {
+      "allOf": [{ "$ref": "#/$defs/point" }],
+      "unevaluatedProperties": false,
+      "description": "Place du marché, point de victoire : tenue hold_s secondes, la ville est prise."
+    },
+    "gate": {
+      "allOf": [{ "$ref": "#/$defs/point" }],
+      "properties": {
+        "inside_offset_m": { "type": "number", "minimum": 0, "maximum": 80, "description": "Distance du point au milieu de la porte, vers l'intérieur de la ville (m)." },
+        "silences_towers_m": { "type": "number", "minimum": 0, "maximum": 400, "description": "Porte prise : les tours à moins de cette distance de la porte cessent de tirer." }
+      },
+      "required": ["inside_offset_m", "silences_towers_m"],
+      "unevaluatedProperties": false,
+      "description": "Porte (côté ville) : prise, elle s'ouvre et fait taire les tours voisines."
+    },
+    "superiority": { "type": "number", "minimum": 0.5, "maximum": 5, "description": "L'assaillant progresse quand ses hommes valides sur le point dépassent ceux du défenseur × ce rapport." },
+    "threatened_share": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Part de la progression de la place à partir de laquelle l'alerte « La place est menacée » est émise." },
+    "last_stand": {
+      "type": "object",
+      "properties": {
+        "radius_m": { "type": "number", "minimum": 0, "maximum": 200, "description": "Rayon autour du centre de la place où les défenseurs tiennent le dernier carré (0 : aucun)." },
+        "loss_morale_factor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Multiplicateur du moral perdu par les pertes (1 : aucun effet)." },
+        "morale_per_s": { "type": "number", "minimum": 0, "maximum": 5, "description": "Moral regagné par seconde même au contact, jusqu'au plafond." },
+        "contagion_factor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Multiplicateur de la contagion des déroutes voisines." }
+      },
+      "required": ["radius_m", "loss_morale_factor", "morale_per_s", "contagion_factor"],
+      "additionalProperties": false
+    },
+    "fall_back": {
+      "type": "object",
+      "properties": {
+        "on_breach": { "type": "boolean", "description": "La garnison IA se replie sur la place dès la première brèche (et non plus seulement à la chute de la porte)." }
+      },
+      "required": ["on_breach"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["square", "gate", "superiority", "threatened_share", "last_stand", "fall_back"],
+  "additionalProperties": false
+}

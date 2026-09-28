@@ -1,0 +1,28 @@
+{
+  "description": "Points de capture des batailles de siège (lot TW2 T4, ADR 0104) : place du marché (point de victoire) et porte. Un point progresse tant que l'assaillant y a plus d'hommes valides que le défenseur (× supériorité exigée) ; il recule sinon. La place tenue le temps voulu donne la ville ; la porte prise ouvre la porte et fait taire les tours voisines. Les défenseurs sur la place et à ses abords tiennent un « dernier carré » (moral). Embarqué dans sim-battle à la compilation.",
+  "square": {
+    "radius_m": 35.0,
+    "hold_s": 60.0,
+    "decay_per_s": 0.5,
+    "retake_per_s": 2.0
+  },
+  "gate": {
+    "radius_m": 25.0,
+    "inside_offset_m": 22.0,
+    "hold_s": 30.0,
+    "decay_per_s": 0.5,
+    "retake_per_s": 2.0,
+    "silences_towers_m": 90.0
+  },
+  "superiority": 1.0,
+  "threatened_share": 0.25,
+  "last_stand": {
+    "radius_m": 70.0,
+    "loss_morale_factor": 0.6,
+    "morale_per_s": 0.25,
+    "contagion_factor": 0.5
+  },
+  "fall_back": {
+    "on_breach": true
+  }
+}
