@@ -1,0 +1,34 @@
+{
+  "id": "tit_castile",
+  "rank": "kingdom",
+  "name": {
+    "display": "Couronne de Castille",
+    "local": "Corona de Castilla",
+    "local_language": "castillan"
+  },
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4 de gueules au château d'or ouvert et ajouré d'azur ; aux 2 et 3 d'argent au lion de pourpre, armé, lampassé et couronné d'or.",
+    "description": "Écartelé Castille (château) et León (lion), en usage depuis Ferdinand III (1230).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_provinces": [
+    "prov_biscay",
+    "prov_castilla_vieja",
+    "prov_cordoba",
+    "prov_extremadura",
+    "prov_galicia",
+    "prov_leon",
+    "prov_murcia",
+    "prov_sevilla",
+    "prov_toledo"
+  ],
+  "holder_1337": {
+    "faction": "fac_castile",
+    "sources": [
+      "Alphonse XI de Castille",
+      "Couronne de Castille",
+      "Armoiries de l'Espagne"
+    ]
+  }
+}

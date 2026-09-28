@@ -40,8 +40,6 @@
     "voronoi_weight": 0.7
   },
   "owner": "fac_navarre",
-  "overlord": "fac_france",
-  "holder": "chr_jeanne_ii_de_navarre",
   "culture": "cul_french",
   "religion": "rel_catholic",
   "population": {

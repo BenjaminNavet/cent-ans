@@ -1346,7 +1346,7 @@ impl BattleSim {
                     "max_hp" => piece.max_hp,
                     "intact" => piece.intact(),
                     "docked_tower" => piece.docked_tower.map_or(-1, i64::from),
-                    // SB (ADR 0100): battered, shot at or burning just now.
+                    // SB (ADR 0107): battered, shot at or burning just now.
                     "under_attack" => piece.under_attack(),
                 }
                 .to_variant()
@@ -1391,7 +1391,7 @@ impl BattleSim {
             .iter()
             .map(|p| prop_dict(p).to_variant())
             .collect();
-        // SB (ADR 0100): rams and siege towers with their strength, for the
+        // SB (ADR 0107): rams and siege towers with their strength, for the
         // health bars.
         let engines: VarArray = self
             .sim

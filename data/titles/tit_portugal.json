@@ -1,0 +1,29 @@
+{
+  "id": "tit_portugal",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Portugal",
+    "local": "Reino de Portugal",
+    "local_language": "portugais"
+  },
+  "heraldry": {
+    "blazon": "D'argent à cinq écussons d'azur posés en croix, chacun chargé de cinq besants d'argent en sautoir ; à la bordure de gueules chargée de châteaux d'or.",
+    "description": "Les quinas (cinq écussons) dans une bordure de châteaux ajoutée par Alphonse III ; le nombre de châteaux varie (douze, puis sept).",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Nombre de châteaux de la bordure variable au XIVe siècle."
+  },
+  "de_jure_provinces": [
+    "prov_alentejo",
+    "prov_lisboa",
+    "prov_porto"
+  ],
+  "holder_1337": {
+    "faction": "fac_portugal",
+    "sources": [
+      "Alphonse IV de Portugal",
+      "Armoiries du Portugal"
+    ]
+  }
+}
