@@ -45,7 +45,17 @@
     "pays_bas": "Pays-Bas",
     "portugal": "Portugal",
     "provence_alpes": "Provence et Alpes",
-    "scandinavie": "Scandinavie"
+    "scandinavie": "Scandinavie",
+    "pologne": "Pologne",
+    "mazovie": "Mazovie",
+    "silesie": "Silésie",
+    "hongrie": "Hongrie",
+    "transylvanie": "Transylvanie",
+    "croatie": "Croatie et Slavonie",
+    "rus_ouest": "Galicie-Volhynie",
+    "rus_sud": "Kiévie",
+    "lituanie": "Lituanie et Ruthénie lituanienne",
+    "valachie": "Valachie"
   },
   "bands": [
     {
