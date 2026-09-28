@@ -34,12 +34,15 @@ func _init() -> void:
 	name = "FactionMapPicker"
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
-	custom_minimum_size = Vector2(560, 330)
+	custom_minimum_size = Vector2(280, 240)
 	_card = PanelContainer.new()
 	_card.name = "HoverCard"
 	_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_card.add_theme_stylebox_override("panel", FrontEndStyle.vellum_panel(FrontEndStyle.GOLD_DARK))
 	_card.hide()
+	# Hors du rognage de la carte : la fiche peut déborder sur la liste voisine.
+	_card.top_level = true
+	_card.z_index = 10
 	add_child(_card)
 	_card_text = RichTextLabel.new()
 	_card_text.bbcode_enabled = true
@@ -170,6 +173,18 @@ func visible_factions() -> PackedStringArray:
 	return result
 
 
+## Largeur / hauteur de l'emprise cadrée (pour dimensionner la vue sans bandes de mer).
+func aspect_ratio() -> float:
+	return _bounds.size.x / _bounds.size.y if _bounds.size.y > 0.0 else 1.0
+
+
+## Surbrillance d'une faction depuis l'extérieur (liste), sans fiche de survol.
+func highlight(faction_id: String) -> void:
+	if faction_id != hovered:
+		hovered = faction_id
+		queue_redraw()
+
+
 func select(faction_id: String) -> void:
 	selected = faction_id
 	queue_redraw()
@@ -282,10 +297,11 @@ func _hover(faction_id: String, at: Vector2) -> void:
 	_card_text.text = card_text(faction_id)
 	_card.show()
 	_card.reset_size()
-	var pos := at + Vector2(18, 18)
-	pos.x = minf(pos.x, size.x - _card.size.x - 4)
-	pos.y = minf(pos.y, size.y - _card.size.y - 4)
-	_card.position = pos.max(Vector2(4, 4))
+	var screen := get_viewport_rect().size
+	var pos := get_global_transform() * at + Vector2(18, 18)
+	pos.x = minf(pos.x, screen.x - _card.size.x - 4)
+	pos.y = minf(pos.y, screen.y - _card.size.y - 4)
+	_card.global_position = pos.max(Vector2(4, 4))
 
 
 ## Fiche de survol : souverain, titres, suzerain, royaume, difficulté, objectifs.
