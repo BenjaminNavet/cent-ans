@@ -151,6 +151,12 @@ func _check_keys() -> void:
 func _check_sizes(panel: Control, label: String) -> void:
 	var title := panel.find_child("Title", true, false) as RichTextLabel
 	_check(title != null and title.get_theme_font_size("normal_font_size") == UiType.size(UiType.HEADING), "%s: title should be Heading" % label)
+	# Mise en page réelle : titre sur 1-2 lignes (pas replié lettre à lettre), chiffres vedettes lisibles.
+	if title != null:
+		_check(title.size.x >= 120.0 and title.size.y <= UiType.size(UiType.HEADING) * 3.5, "%s: title laid out %s" % [label, title.size])
+	for badge in panel.find_children("Badge_*", "", true, false):
+		var value := badge.find_child("Value", true, false) as Control
+		_check(value != null and value.size.x >= 10.0 and value.size.y <= UiType.size(UiType.TITLE) * 2.5, "%s: headline value laid out %s" % [label, value.size if value != null else Vector2.ZERO])
 	for name in ["Effects", "Traits", "Conditions"]:
 		var body := panel.find_child(name, true, false) as RichTextLabel
 		if body != null:
