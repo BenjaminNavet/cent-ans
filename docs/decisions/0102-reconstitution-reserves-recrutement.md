@@ -50,10 +50,18 @@ une ville pouvait lever la même unité d'élite à chaque tour.
 `off` = règles d'avant T2 (taux nuls, réserves sans fond). Hommes en armées de campagne
 (moyenne sur les 21 relevés) :
 
-RESULTS_TABLE
+| Graine | France avant → après | Angleterre avant → après | Bourgogne avant → après |
+|---|---|---|---|
+| 7 | 1 831 → 1 910 | 1 606 → 1 524 | 381 → 385 |
+| 11 | 1 689 → 1 827 | 1 536 → 1 535 | 403 → 399 |
+| 23 | 1 831 → 2 068 | 1 441 → 1 585 | 347 → 368 |
 
-L'IA ne s'effondre pas : les effectifs moyens sont du même ordre ou supérieurs (les armées
-entamées se reconstituent en terres propres), les trésors restent comparables.
+Au tour 20, les armées françaises sont plus proches de leur plein effectif (graine 23 :
+2 291/2 760 hommes contre 1 924/2 740) ; les trésors varient de quelques milliers de livres
+(coût de la reconstitution), sans banqueroute nouvelle. Les réserves ne bloquent pas l'IA : elle
+diversifie ses recrues (la doctrine choisit parmi les unités encore disponibles).
+
+L'IA ne s'effondre pas : effectifs moyens égaux ou supérieurs (−5 % à +13 %) sur les trois graines.
 
 ## Conséquences
 
