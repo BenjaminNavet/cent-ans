@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_mytilene",
+    "province": "prov_lesbos",
+    "kind": "city",
+    "name": {
+      "display": "Mytilène",
+      "local": "Μυτιλήνη",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      26.555,
+      39.11
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Capitale de Lesbos, port fortifié.",
+    "sources": [
+      "Mytilène"
+    ]
+  },
+  {
+    "id": "set_molyvos",
+    "province": "prov_lesbos",
+    "kind": "castle",
+    "name": {
+      "display": "Molyvos",
+      "local": "Μήθυμνα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      26.17,
+      39.37
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château de Mithymna, au nord de l'île.",
+    "sources": [
+      "Molyvos"
+    ]
+  },
+  {
+    "id": "set_eresos",
+    "province": "prov_lesbos",
+    "kind": "town",
+    "name": {
+      "display": "Érésos",
+      "local": "Ἐρεσός",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      25.93,
+      39.14
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": true,
+    "description": "Bourg de la côte occidentale.",
+    "sources": [
+      "Eresos"
+    ]
+  }
+]

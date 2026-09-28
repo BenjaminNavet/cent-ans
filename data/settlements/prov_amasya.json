@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_amasya",
+    "province": "prov_amasya",
+    "kind": "city",
+    "name": {
+      "display": "Amasya"
+    },
+    "lonlat": [
+      35.83,
+      40.65
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville des tombes pontiques creusées dans la falaise.",
+    "sources": [
+      "Amasya"
+    ]
+  },
+  {
+    "id": "set_niksar",
+    "province": "prov_amasya",
+    "kind": "town",
+    "name": {
+      "display": "Niksar (Néocésarée)",
+      "local": "Niksar",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      36.97,
+      40.59
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne Néocésarée, danişmendide.",
+    "sources": [
+      "Amasya"
+    ]
+  },
+  {
+    "id": "set_corum",
+    "province": "prov_amasya",
+    "kind": "village",
+    "name": {
+      "display": "Çorum"
+    },
+    "lonlat": [
+      35.0,
+      40.55
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la plaine.",
+    "sources": [
+      "Amasya"
+    ]
+  }
+]

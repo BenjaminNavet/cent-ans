@@ -1,0 +1,31 @@
+{
+  "id": "tit_morea",
+  "rank": "duchy",
+  "name": {
+    "display": "Morée byzantine",
+    "local": "Μορέας",
+    "local_language": "grec"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l'aigle bicéphale reste l'emblème impérial.",
+    "primary_color": "#A81C22",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Emblème tardif et occidental : la forme exacte en 1337 est discutée."
+  },
+  "de_jure_liege": "tit_byzantium",
+  "de_jure_provinces": [
+    "prov_morea"
+  ],
+  "holder_1337": {
+    "faction": "fac_byzantium",
+    "sources": [
+      "Despotat de Morée"
+    ]
+  },
+  "description": "Marches byzantines du Péloponnèse (Mistra, Monemvasie), future despotat de Morée (1349).",
+  "sources": [
+    "Despotat de Morée"
+  ]
+}

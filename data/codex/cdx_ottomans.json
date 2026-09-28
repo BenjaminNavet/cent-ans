@@ -1,0 +1,27 @@
+{
+  "id": "cdx_ottomans",
+  "title": "Les Ottomans d'Orhan",
+  "category": "lieu",
+  "aliases": [
+    "Ottomans",
+    "beylik ottoman",
+    "Orhan",
+    "Osman Ier"
+  ],
+  "era": {
+    "from": "1299",
+    "to": "1453"
+  },
+  "summary": "Petit beylik turc de Bithynie, à la frontière byzantine, celui des Ottomans grandit vite sous Orhan. Il prend Brousse en 1326, Nicée en 1331 et Nicomédie en 1337.",
+  "body": "Fondé vers 1299 par Osman, le beylik ottoman est l'un des nombreux États turcs nés de l'effondrement du sultanat seldjoukide de Rum. Placé à la frontière de l'Empire byzantin, il attire des guerriers de la foi (ghazi) et des colons turcs. Orhan, son fils, s'empare de Brousse en 1326, qui devient sa capitale, puis de Nicée (1331) et de Nicomédie (1337).\n\nIl dispose d'une cavalerie légère et de fantassins levés dans la population ; le beylik n'a pas encore de troupes permanentes de type janissaire, qui viendront plus tard. Les Ottomans sont, dans les années 1330, encore un beylik parmi d'autres, dont la trajectoire n'a rien d'inéluctable.",
+  "entity": "fac_ottoman",
+  "see_also": [
+    "cdx_empire_byzantin",
+    "cdx_nicopolis"
+  ],
+  "sources": [
+    "Orhan",
+    "Empire ottoman",
+    "Beylik"
+  ]
+}

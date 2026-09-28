@@ -8,7 +8,9 @@
     "forest": "plaine",
     "hills": "coteaux",
     "mountains": "montagne",
-    "marsh": "marais"
+    "marsh": "marais",
+    "steppe": "steppe",
+    "desert": "desert"
   },
   "profiles": {
     "plaine": {
@@ -97,8 +99,8 @@
       "hedgerows": false
     },
     "midi": {
-      "label": "Midi (bastides en rue, vignes, maisons de pierre)",
-      "provinces": ["prov_toulousain", "prov_montpellier", "prov_beaucaire", "prov_carcassonne", "prov_rouergue", "prov_quercy", "prov_perigord", "prov_angoumois", "prov_limousin", "prov_gascogne", "prov_bearn", "prov_provence", "prov_comtat_venaissin", "prov_roussillon", "prov_barcelona", "prov_aragon", "prov_valencia", "prov_navarra", "prov_castilla_vieja", "prov_sevilla", "prov_cordoba", "prov_lisboa", "prov_porto", "prov_firenze", "prov_bologna", "prov_lazio", "prov_ancona", "prov_napoli", "prov_sicilia"],
+      "label": "Midi et Méditerranée chrétienne (bastides en rue, vignes, maisons de pierre)",
+      "provinces": ["prov_toulousain", "prov_montpellier", "prov_beaucaire", "prov_carcassonne", "prov_rouergue", "prov_quercy", "prov_perigord", "prov_angoumois", "prov_limousin", "prov_gascogne", "prov_bearn", "prov_provence", "prov_comtat_venaissin", "prov_roussillon", "prov_barcelona", "prov_aragon", "prov_valencia", "prov_navarra", "prov_castilla_vieja", "prov_sevilla", "prov_cordoba", "prov_lisboa", "prov_porto", "prov_firenze", "prov_bologna", "prov_lazio", "prov_ancona", "prov_napoli", "prov_sicilia", "prov_achaea", "prov_archipelago", "prov_attica", "prov_caffa", "prov_chios", "prov_corfu", "prov_cyprus", "prov_lesbos", "prov_modon", "prov_negroponte", "prov_rhodes", "prov_slavonia_east", "prov_slavonia_west", "prov_theodoro", "prov_thessaly"],
       "hamlets": [1, 2],
       "farmsteads": [1, 2],
       "street_share": 0.75,
@@ -111,6 +113,23 @@
       "orchards": [1, 2],
       "ploughland": [3, 5],
       "meadows": [0, 1],
+      "hedgerows": false
+    },
+    "orient": {
+      "label": "Orient méditerranéen musulman (villages de pierre, oliviers, sans vignes)",
+      "provinces": ["prov_aleppo", "prov_alexandria", "prov_alger", "prov_amasya", "prov_ayas", "prov_aydin", "prov_barqa", "prov_beysehir", "prov_bone", "prov_bursa", "prov_cairo", "prov_constantine", "prov_damascus", "prov_delta", "prov_derna", "prov_doukkala", "prov_fes", "prov_hama", "prov_hamid", "prov_izmir", "prov_jerusalem", "prov_karasi", "prov_kocaeli", "prov_kutahya", "prov_malatya", "prov_manisa", "prov_mardin", "prov_marrakech", "prov_meknes", "prov_mentese", "prov_mosul", "prov_oranie", "prov_rabat_sale", "prov_safad", "prov_sahel", "prov_sinope", "prov_sivas", "prov_sogut", "prov_sous", "prov_tadla", "prov_tanger", "prov_tlemcen", "prov_tripoli", "prov_tunis"],
+      "hamlets": [0, 1],
+      "farmsteads": [1, 2],
+      "street_share": 0.5,
+      "stone_share": 0.85,
+      "windmill_chance": 0.05,
+      "watermill_chance": 0.35,
+      "manor_chance": 0.1,
+      "moat_chance": 0.0,
+      "vineyards": [0, 0],
+      "orchards": [1, 3],
+      "ploughland": [1, 3],
+      "meadows": [0, 2],
       "hedgerows": false
     },
     "coteaux": {
@@ -179,6 +198,40 @@
       "orchards": [0, 1],
       "ploughland": [1, 2],
       "meadows": [3, 5],
+      "hedgerows": false
+    },
+    "steppe": {
+      "label": "Steppe (pâtures ouvertes, rares villages)",
+      "provinces": [],
+      "hamlets": [0, 1],
+      "farmsteads": [0, 2],
+      "street_share": 0.2,
+      "stone_share": 0.1,
+      "windmill_chance": 0.05,
+      "watermill_chance": 0.3,
+      "manor_chance": 0.05,
+      "moat_chance": 0.0,
+      "vineyards": [0, 0],
+      "orchards": [0, 0],
+      "ploughland": [0, 2],
+      "meadows": [3, 5],
+      "hedgerows": false
+    },
+    "desert": {
+      "label": "Désert (oasis et hameaux de pierre)",
+      "provinces": [],
+      "hamlets": [0, 1],
+      "farmsteads": [0, 1],
+      "street_share": 0.5,
+      "stone_share": 0.9,
+      "windmill_chance": 0.0,
+      "watermill_chance": 0.1,
+      "manor_chance": 0.05,
+      "moat_chance": 0.0,
+      "vineyards": [0, 0],
+      "orchards": [0, 1],
+      "ploughland": [0, 1],
+      "meadows": [0, 1],
       "hedgerows": false
     }
   },

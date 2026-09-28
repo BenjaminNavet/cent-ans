@@ -1,0 +1,111 @@
+[
+  {
+    "id": "set_tarnovo",
+    "province": "prov_tarnovo",
+    "kind": "city",
+    "name": {
+      "display": "Tarnovo",
+      "local": "Търново",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      25.657,
+      43.086
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Capitale de l'Empire bulgare, siège du patriarche.",
+    "sources": [
+      "Veliko Tarnovo"
+    ]
+  },
+  {
+    "id": "set_lovech",
+    "province": "prov_tarnovo",
+    "kind": "town",
+    "name": {
+      "display": "Lovech",
+      "local": "Ловеч",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      24.72,
+      43.13
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Forteresse de la Ossam, ancienne place royale.",
+    "sources": [
+      "Lovech"
+    ]
+  },
+  {
+    "id": "set_cherven",
+    "province": "prov_tarnovo",
+    "kind": "castle",
+    "name": {
+      "display": "Tcherven",
+      "local": "Червен",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      25.95,
+      43.68
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Grande forteresse de la région de Rousse.",
+    "sources": [
+      "Cherven (forteresse)"
+    ]
+  },
+  {
+    "id": "set_preslav",
+    "province": "prov_tarnovo",
+    "kind": "town",
+    "name": {
+      "display": "Veliki Preslav",
+      "local": "Велики Преслав",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      26.82,
+      43.16
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne capitale du premier empire.",
+    "sources": [
+      "Veliki Preslav"
+    ]
+  }
+]

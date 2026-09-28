@@ -1,0 +1,92 @@
+{
+  "id": "prov_aleppo",
+  "name": {
+    "display": "Alep et Antioche",
+    "local": "حلب",
+    "local_language": "arabe"
+  },
+  "region": "levant",
+  "terrain": "plains",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Quwayq",
+    "Oronte"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Alep (Halab)",
+      "local": "حلب",
+      "local_language": "arabe"
+    },
+    "lat": 36.2,
+    "lon": 37.16
+  },
+  "geo": {
+    "capital_lonlat": [
+      37.16,
+      36.2
+    ],
+    "seed_lonlat": [
+      37.0,
+      36.25
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_mamluks",
+  "culture": "cul_arabic",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 80000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2400,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 960,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1200,
+  "description": "Grand marché de la Syrie du Nord, sur la frontière de Cilicie ; Antioche, détruite en 1268, n'est plus qu'un bourg.",
+  "sources": [
+    "Aleppo",
+    "Antioch",
+    "Ain Tab"
+  ]
+}

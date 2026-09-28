@@ -1,0 +1,28 @@
+{
+  "id": "cdx_hospitaliers_rhodes",
+  "title": "Les Hospitaliers de Rhodes",
+  "category": "institution",
+  "aliases": [
+    "Hospitaliers de Rhodes",
+    "Ordre de Saint-Jean de Jérusalem",
+    "Hospitaliers",
+    "chevaliers de Rhodes",
+    "Rhodes"
+  ],
+  "era": {
+    "from": "1310",
+    "to": "1522"
+  },
+  "summary": "Ayant perdu la Terre sainte, l'ordre de l'Hôpital a conquis Rhodes entre 1306 et 1310 pour en faire un État insulaire. Ses chevaliers font la guerre de course aux Turcs et aux Mamelouks.",
+  "body": "Après la chute de Saint-Jean-d'Acre (1291) et un séjour à Chypre, l'ordre de l'Hôpital de Saint-Jean s'empare de Rhodes entre 1306 et 1310, avec l'aide de galères génoises. Son grand maître Hélion de Villeneuve (1319-1346), originaire de Provence, fait de l'île une place forte.\n\nL'Ordre tient une flotte de galères, contrôle des îles de la mer Égée et lutte contre les corsaires turcs, dont l'émir d'Aydın. Il participe en 1344 à la prise du port de Smyrne. Il est organisé en « langues » (Provence, France, Auvergne, Italie, Aragon, Angleterre, Allemagne).",
+  "entity": "fac_hospitallers",
+  "see_also": [
+    "cdx_mamelouks",
+    "cdx_chypre_lusignan"
+  ],
+  "sources": [
+    "Ordre de Saint-Jean de Jérusalem",
+    "Hélion de Villeneuve",
+    "Siège de Rhodes (1306-1310)"
+  ]
+}

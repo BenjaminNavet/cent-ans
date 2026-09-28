@@ -1,0 +1,47 @@
+{
+  "id": "fac_teke",
+  "name": {
+    "display": "Beylik de Teke",
+    "local": "Tekeoğulları",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Teke",
+  "adjective": "de Teke",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_teke",
+  "capital_city": "Antalya (Attaleia)",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_teke",
+  "heraldry": {
+    "blazon": "D'or à la nef de sinople.",
+    "description": "Nef d'Antalya ; couleurs de convention.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2E7D46",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey de Teke"
+  ],
+  "treasury": 7000,
+  "prestige": 38,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_letters_of_credit"
+  ],
+  "relations": [],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 50,
+    "trade": 70,
+    "piety": 50
+  },
+  "description": "Beylik d'Antalya, fondé vers 1321 ; port marchand et base de corsaires face à Chypre ; le bey en exercice n'est pas identifié.",
+  "sources": [
+    "Teke"
+  ]
+}

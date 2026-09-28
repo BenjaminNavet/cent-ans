@@ -47,6 +47,16 @@
       "faction": "fac_papacy",
       "status": "war",
       "note": "Le pape ne reconnaît pas la couronne aragonaise de Sicile, promise aux Angevins ; excommunication récurrente des rois de Trinacrie."
+    },
+    {
+      "faction": "fac_athens",
+      "status": "overlord",
+      "note": "Apanage du cadet Guillaume, duc d'Athènes et de Néopatras."
+    },
+    {
+      "faction": "fac_hafsids",
+      "status": "war",
+      "note": "Djerba reprise à la Sicile en 1335."
     }
   ],
   "ai_personality": {

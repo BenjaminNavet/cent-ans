@@ -1,0 +1,93 @@
+{
+  "id": "prov_kosovo",
+  "name": {
+    "display": "Kosovo et Prizren",
+    "local": "Косово",
+    "local_language": "serbe"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Sitnica",
+    "Drin Blanc"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_iron",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Prizren",
+      "local": "Призрен",
+      "local_language": "serbe"
+    },
+    "lat": 42.213,
+    "lon": 20.74
+  },
+  "geo": {
+    "capital_lonlat": [
+      20.74,
+      42.213
+    ],
+    "seed_lonlat": [
+      21.0,
+      42.5
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_serbia",
+  "culture": "cul_serbian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 140000,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7200,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 3600,
+        "unrest": 5,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1500,
+        "unrest": 5,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4700,
+  "description": "Plaine du Kosovo, mines d'argent et de plomb (Novo Brdo), Prizren où Dušan tient sa cour, monastère des Saints-Archanges (fondation à venir).",
+  "sources": [
+    "Kosovo médiéval",
+    "Prizren",
+    "Novo Brdo"
+  ]
+}

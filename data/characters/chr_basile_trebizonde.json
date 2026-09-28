@@ -1,0 +1,48 @@
+{
+  "id": "chr_basile_trebizonde",
+  "name": {
+    "display": "Basile Grand Comnène",
+    "local": "Βασίλειος Μέγας Κομνηνός",
+    "local_language": "grec pontique"
+  },
+  "sex": "male",
+  "house": "Grands Comnènes",
+  "faction": "fac_trebizond",
+  "role": "ruler",
+  "birth": {
+    "value": "1315",
+    "uncertain": true,
+    "note": "Date approximative ou discutée.",
+    "place": "Trébizonde"
+  },
+  "death": {
+    "value": "1340-04-06",
+    "place": "Trébizonde"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Empereur de Trébizonde",
+      "from": {
+        "value": "1332"
+      },
+      "note": "Règne jusqu'en 1340."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 65,
+  "starting_location": "prov_trebizond",
+  "status": "at_court",
+  "description": "Empereur de Trébizonde, marié en 1334 à Irène Paléologue, fille naturelle d'Andronic III ; empoisonné par sa première épouse Irène en 1340.",
+  "sources": [
+    "Basil of Trebizond"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "prov_kayseri",
+  "name": {
+    "display": "Kayseri et Aksaray",
+    "local": "Kayseri",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "steppe",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Kızılırmak"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kayseri (Césarée)",
+      "local": "Kayseri",
+      "local_language": "turc ottoman"
+    },
+    "lat": 38.73,
+    "lon": 35.49
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.49,
+      38.73
+    ],
+    "seed_lonlat": [
+      35.1,
+      38.5
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_eretna",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 42000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1300,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 500,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1000,
+  "description": "Plateau de Cappadoce, étape caravanière seldjoukide (hans) ; Kayseri sera plus tard la capitale d'Eretna.",
+  "sources": [
+    "Kayseri",
+    "Aksaray",
+    "Eretna"
+  ]
+}

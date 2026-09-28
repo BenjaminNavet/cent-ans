@@ -17,7 +17,7 @@ extends Node3D
 ## ou la boue ; haies des courtils et du bocage semées avec les buissons (et chênes têtards), fossés,
 ## cour du village, mares et plage cuits dans la splatmap ; maisons, clôtures, mares, roseaux et mer
 ## dans `BattleVillage`. Options après `--` : `--terrain=<plains|hills|mountains|forest|marsh|heath|
-## bocage>`, `--season=<spring|summer|autumn|winter>`, `--village` / `--no-village`, `--coast`,
+## bocage|steppe|desert>`, `--season=<spring|summer|autumn|winter>`, `--village` / `--no-village`, `--coast`,
 ## `--ground=<dry|muddy|snowy>` (rendu seulement, comme `--weather=`)
 ## (réécrivent la mise en place avant la simulation, captures) ; `--no-site` coupe le rendu B5
 ## (comparaisons de performance A/B).
@@ -74,6 +74,9 @@ const MAX_GROUND_LAYERS := 16
 static var _ground_layers: Array = []
 static var _ground_layers_loaded: bool = false
 static var _ground_role_index: Dictionary = {}
+## OM3 (ADR 0116) : teinte de l'herbe par terrain de province (`terrain_tints` du même fichier) ;
+## la steppe et le désert réutilisent le sol de plaine, teinté, tant qu'ils n'ont pas de décor dédié.
+static var _terrain_tints: Dictionary = {}
 
 
 ## GA2 : couches du sol depuis les données (dossier de données du jeu, puis `data/` du dépôt).
@@ -93,6 +96,9 @@ static func ground_layers() -> Array:
 			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 			if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
 				_ground_layers = (parsed as Dictionary)["layers"]
+				var tints: Variant = (parsed as Dictionary).get("terrain_tints", {})
+				if tints is Dictionary:
+					_terrain_tints = tints
 				for i in _ground_layers.size():
 					var role := str((_ground_layers[i] as Dictionary).get("role", ""))
 					if role != "":
@@ -100,6 +106,15 @@ static func ground_layers() -> Array:
 				return _ground_layers
 	push_warning("BattleTerrain: %s introuvable, sol replié sur les couches historiques" % GROUND_LAYERS_FILE)
 	return _ground_layers
+
+
+## OM3 : multiplicateur de teinte de l'herbe pour un terrain de province (blanc si absent des données).
+static func terrain_tint(key: String) -> Color:
+	ground_layers()
+	var rgb: Variant = _terrain_tints.get(key, null)
+	if rgb is Array and (rgb as Array).size() == 3:
+		return Color(float(rgb[0]), float(rgb[1]), float(rgb[2]))
+	return Color(1, 1, 1)
 
 
 ## GA2 : index (dans le `Texture2DArray`) de la couche portant ce rôle, -1 si absente des données.
@@ -305,6 +320,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_plan_roads()
 	_build_textures()
 	_build_material(weather)
+	_apply_terrain_tint()
 	_setup_trample()
 	_add_mesh("Ground", _field_mesh(), true)
 	_add_mesh("NearRing", _ring_mesh(NEAR_RECT, NEAR_STEP, Rect2(0, 0, FIELD_W, FIELD_D), 0.0), true)
@@ -1034,6 +1050,18 @@ func _stamp_disc(image: Image, center: Vector2, radius: float, channel: int, fea
 			if v > c[channel]:
 				c[channel] = v
 				image.set_pixel(ix, iz, c)
+
+
+## OM3 : la teinte du terrain (steppe, désert) s'ajoute à celle de la saison et du temps.
+func _apply_terrain_tint() -> void:
+	if not site_render or ground_material == null:
+		return
+	var tint := terrain_tint(terrain_key)
+	if tint == Color(1, 1, 1):
+		return
+	var current: Variant = ground_material.get_shader_parameter("grass_tint")
+	var base: Color = current if current is Color else Color(0.9, 1.0, 0.8)
+	ground_material.set_shader_parameter("grass_tint", base * tint)
 
 
 func _build_material(weather: String) -> void:

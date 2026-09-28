@@ -1,0 +1,111 @@
+[
+  {
+    "id": "set_athenai",
+    "province": "prov_attica",
+    "kind": "city",
+    "name": {
+      "display": "Athènes",
+      "local": "Ἀθῆναι",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      23.7275,
+      37.9838
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Capitale ducale, Acropole fortifiée par les Catalans.",
+    "sources": [
+      "Athènes"
+    ]
+  },
+  {
+    "id": "set_thebes",
+    "province": "prov_attica",
+    "kind": "town",
+    "name": {
+      "display": "Thèbes",
+      "local": "Θῆβαι",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      23.32,
+      38.32
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Résidence traditionnelle des ducs de la Compagnie.",
+    "sources": [
+      "Thèbes (Grèce)"
+    ]
+  },
+  {
+    "id": "set_livadeia",
+    "province": "prov_attica",
+    "kind": "town",
+    "name": {
+      "display": "Livadie",
+      "local": "Λιβαδειά",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.87,
+      38.44
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château catalan au pied de l'Hélicon.",
+    "sources": [
+      "Livadeia"
+    ]
+  },
+  {
+    "id": "set_salona",
+    "province": "prov_attica",
+    "kind": "castle",
+    "name": {
+      "display": "Salona",
+      "local": "Σάλωνα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.38,
+      38.53
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Comté de Salone, fief des Fadrique.",
+    "sources": [
+      "Lordship of Salona"
+    ]
+  }
+]

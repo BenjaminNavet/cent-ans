@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_kerasous",
+    "province": "prov_kerasous",
+    "kind": "city",
+    "name": {
+      "display": "Kérasonte (Giresun)",
+      "local": "Κερασοῦς",
+      "local_language": "grec pontique"
+    },
+    "lonlat": [
+      38.39,
+      40.91
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port pontique, célèbre pour ses cerises.",
+    "sources": [
+      "Giresun"
+    ]
+  },
+  {
+    "id": "set_tripolis",
+    "province": "prov_kerasous",
+    "kind": "town",
+    "name": {
+      "display": "Tripolis (Tirebolu)",
+      "local": "Τρίπολις",
+      "local_language": "grec pontique"
+    },
+    "lonlat": [
+      38.81,
+      40.98
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de la côte de Chaldie.",
+    "sources": [
+      "Giresun"
+    ]
+  },
+  {
+    "id": "set_kotyora",
+    "province": "prov_kerasous",
+    "kind": "village",
+    "name": {
+      "display": "Kotyora (Ordu)",
+      "local": "Κοτύωρα",
+      "local_language": "grec pontique"
+    },
+    "lonlat": [
+      37.88,
+      40.98
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Rade et village ; autorité de Trébizonde incertaine.",
+    "sources": [
+      "Giresun"
+    ]
+  }
+]

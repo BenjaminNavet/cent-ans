@@ -1,0 +1,49 @@
+{
+  "id": "chr_theodora_basarab",
+  "name": {
+    "display": "Théodora Basarab",
+    "local": "Теодора Басараб",
+    "local_language": "bulgare"
+  },
+  "sex": "female",
+  "house": "Chichman",
+  "faction": "fac_bulgaria",
+  "role": "consort",
+  "birth": {
+    "value": "1310",
+    "uncertain": true,
+    "note": "Date approximative."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Tsarine de Bulgarie",
+      "from": {
+        "value": "1323"
+      }
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 80,
+  "family": {
+    "spouses": [
+      "chr_ivan_alexander"
+    ],
+    "children": [
+      "chr_mihail_asen_iv"
+    ]
+  },
+  "starting_location": "prov_tarnovo",
+  "status": "at_court",
+  "description": "Fille du voïvode Basarab de Valachie, première épouse d'Ivan Alexandre (mariage vers 1323).",
+  "sources": [
+    "Theodora Basarab"
+  ]
+}

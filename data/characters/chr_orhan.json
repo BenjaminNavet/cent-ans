@@ -1,0 +1,55 @@
+{
+  "id": "chr_orhan",
+  "name": {
+    "display": "Orhan Ier",
+    "local": "Orhan Gazi",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Osmanoğulları",
+  "faction": "fac_ottoman",
+  "role": "ruler",
+  "birth": {
+    "value": "1281",
+    "uncertain": true,
+    "note": "Date approximative ou discutée.",
+    "place": "Söğüt"
+  },
+  "death": {
+    "value": "1362",
+    "place": "Bursa"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey des Ottomans",
+      "from": {
+        "value": "1324"
+      },
+      "note": "Successeur d'Osman ; date d'avènement discutée (1323-1326)."
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_brave",
+    "trait_pious"
+  ],
+  "piety": 70,
+  "family": {
+    "children": [
+      "chr_suleyman_pasha"
+    ]
+  },
+  "starting_location": "prov_bursa",
+  "status": "at_court",
+  "description": "Fils d'Osman et d'Malhun Hatun, bey depuis 1324 ; il fait de Bursa sa capitale, prend Nicée (1331) et Nicomédie (1337).",
+  "sources": [
+    "Orhan",
+    "Ottoman Empire"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "chr_stjepan_ii_kotromanic",
+  "name": {
+    "display": "Étienne II Kotromanić",
+    "local": "Stjepan II Kotromanić",
+    "local_language": "serbe"
+  },
+  "sex": "male",
+  "house": "Kotromanić",
+  "faction": "fac_bosnia",
+  "role": "ruler",
+  "birth": {
+    "value": "1292",
+    "uncertain": true,
+    "note": "Naissance vers 1292."
+  },
+  "death": {
+    "value": "1353-09-28"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Ban de Bosnie",
+      "from": {
+        "value": "1322"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_just",
+    "trait_ambitious",
+    "trait_cunning"
+  ],
+  "piety": 55,
+  "starting_location": "prov_bosnia",
+  "status": "at_court",
+  "description": "Ban depuis 1322, il annexe le Hum en 1326 et fait de la Bosnie un pôle indépendant entre Hongrie, Serbie et Venise ; il se marie en 1339 avec Élisabeth de Cujavie.",
+  "sources": [
+    "Stephen II, Ban of Bosnia"
+  ]
+}

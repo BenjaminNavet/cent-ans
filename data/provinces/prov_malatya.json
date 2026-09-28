@@ -1,0 +1,90 @@
+{
+  "id": "prov_malatya",
+  "name": {
+    "display": "Malatya",
+    "local": "ملطية",
+    "local_language": "arabe"
+  },
+  "region": "levant",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Euphrate"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Malatya (Malatiya)",
+      "local": "ملطية",
+      "local_language": "arabe"
+    },
+    "lat": 38.35,
+    "lon": 38.31
+  },
+  "geo": {
+    "capital_lonlat": [
+      38.31,
+      38.35
+    ],
+    "seed_lonlat": [
+      38.3,
+      38.15
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_mamluks",
+  "culture": "cul_arabic",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 30000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 360,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu ; statut de Malatya (Mamelouks ou Dulkadir) incertain."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 900,
+  "description": "Marche nord-est du niyaba d'Alep, sur l'Euphrate ; Malatya, Hisn Mansur et Darende barrent la route de Sivas.",
+  "sources": [
+    "Malatya",
+    "Adıyaman"
+  ]
+}

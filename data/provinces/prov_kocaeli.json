@@ -1,0 +1,98 @@
+{
+  "id": "prov_kocaeli",
+  "name": {
+    "display": "Kocaeli (Nicomédie)",
+    "local": "Kocaeli",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Sakarya"
+  ],
+  "ports": [
+    "Nicomédie"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Nicomédie (İzmit)",
+      "local": "İzmit",
+      "local_language": "turc ottoman"
+    },
+    "lat": 40.77,
+    "lon": 29.92
+  },
+  "geo": {
+    "capital_lonlat": [
+      29.92,
+      40.77
+    ],
+    "seed_lonlat": [
+      30.0,
+      40.8
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_ottoman",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 30000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 360,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu ; date exacte de la prise de Nicomédie incertaine (1333-1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1000,
+  "description": "Presqu'île de Nicomédie, dernière place byzantine de Bithynie, prise par Orhan en 1337 selon les sources ottomanes (date incertaine : siège engagé dès 1333).",
+  "sources": [
+    "Nicomedia",
+    "Ottoman conquest of Bithynia",
+    "Orhan"
+  ]
+}

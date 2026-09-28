@@ -47,6 +47,8 @@
     "mountains": { "charge": 0.5, "ranged": 0.9, "defender": 1.25 },
     "forest": { "charge": 0.5, "ranged": 0.7, "defender": 1.15 },
     "marsh": { "charge": 0.5, "ranged": 1.0, "defender": 1.1 },
-    "bocage": { "charge": 0.7, "ranged": 0.85, "defender": 1.05 }
+    "bocage": { "charge": 0.7, "ranged": 0.85, "defender": 1.05 },
+    "steppe": { "charge": 1.1, "ranged": 1.0, "defender": 0.95 },
+    "desert": { "charge": 0.9, "ranged": 1.0, "defender": 1.0 }
   }
 }

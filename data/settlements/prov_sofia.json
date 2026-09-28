@@ -1,0 +1,109 @@
+[
+  {
+    "id": "set_sredets",
+    "province": "prov_sofia",
+    "kind": "city",
+    "name": {
+      "display": "Sredets",
+      "local": "Средец",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      23.3219,
+      42.6977
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Ville forte sur la route d'Andrinople à Belgrade.",
+    "sources": [
+      "Sofia"
+    ]
+  },
+  {
+    "id": "set_velbazhd",
+    "province": "prov_sofia",
+    "kind": "town",
+    "name": {
+      "display": "Velbaždi",
+      "local": "Велбъжд",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      22.69,
+      42.28
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville forte de Kyustendil.",
+    "sources": [
+      "Kyustendil"
+    ]
+  },
+  {
+    "id": "set_pernik",
+    "province": "prov_sofia",
+    "kind": "castle",
+    "name": {
+      "display": "Pernik",
+      "local": "Перник",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      23.03,
+      42.6
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de Krakra sur la Struma.",
+    "sources": [
+      "Pernik"
+    ]
+  },
+  {
+    "id": "set_rila",
+    "province": "prov_sofia",
+    "kind": "abbey",
+    "name": {
+      "display": "Rila",
+      "local": "Рилски манастир",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      23.34,
+      42.133
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère de saint Jean de Rila.",
+    "sources": [
+      "Monastère de Rila"
+    ]
+  }
+]

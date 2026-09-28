@@ -41,6 +41,7 @@
     "italie_centre": "Italie centrale",
     "italie_nord": "Italie du Nord",
     "italie_sud": "Italie du Sud et îles",
+    "maghreb": "Maghreb et Libye",
     "languedoc": "Languedoc",
     "pays_bas": "Pays-Bas",
     "portugal": "Portugal",
@@ -64,7 +65,16 @@
     "crimee": "Crimée",
     "horde": "Horde d'Or et steppes",
     "rus_centre": "Rus' du Nord-Est",
-    "rus_nord": "Rus' du Nord"
+    "rus_nord": "Rus' du Nord",
+    "anatolie": "Anatolie",
+    "caucase": "Caucase",
+    "levant": "Levant",
+    "egypte": "Égypte",
+    "mesopotamie": "Haute-Mésopotamie",
+    "balkans": "Balkans",
+    "grece": "Grèce",
+    "egee": "Îles de l'Égée",
+    "chypre": "Chypre"
   },
   "bands": [
     {

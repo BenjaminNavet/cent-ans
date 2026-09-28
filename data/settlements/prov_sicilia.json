@@ -192,5 +192,28 @@
     "sources": [
       "Enna"
     ]
+  },
+  {
+    "id": "set_pantelleria",
+    "province": "prov_sicilia",
+    "kind": "village",
+    "name": {
+      "display": "Pantelleria",
+      "local": "Pantelleria",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      11.9481,
+      36.8281
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Île volcanique de Pantelleria, tenue par la couronne de Sicile (arabe de langue jusqu'au XIVe siècle).",
+    "sources": [
+      "Pantelleria"
+    ]
   }
 ]

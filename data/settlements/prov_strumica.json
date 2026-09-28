@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_strumica",
+    "province": "prov_strumica",
+    "kind": "city",
+    "name": {
+      "display": "Strumica",
+      "local": "Струмица",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      22.643,
+      41.437
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Forteresse de la vallée de la Strumica.",
+    "sources": [
+      "Strumica"
+    ]
+  },
+  {
+    "id": "set_stip",
+    "province": "prov_strumica",
+    "kind": "town",
+    "name": {
+      "display": "Štip",
+      "local": "Штип",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      22.194,
+      41.746
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville forte de la Bregalnica.",
+    "sources": [
+      "Štip"
+    ]
+  },
+  {
+    "id": "set_veles",
+    "province": "prov_strumica",
+    "kind": "town",
+    "name": {
+      "display": "Veles",
+      "local": "Велес",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      21.772,
+      41.715
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville du Vardar moyen.",
+    "sources": [
+      "Veles"
+    ]
+  }
+]

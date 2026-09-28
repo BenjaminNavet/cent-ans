@@ -21,7 +21,7 @@
   "additionalProperties": false,
   "$defs": {
     "season": { "type": "string", "enum": ["spring", "summer", "autumn", "winter"] },
-    "terrain": { "type": "string", "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] },
+    "terrain": { "type": "string", "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"] },
     "spawn": {
       "type": "object",
       "properties": {

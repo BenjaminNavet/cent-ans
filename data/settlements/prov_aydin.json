@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_birgi",
+    "province": "prov_aydin",
+    "kind": "city",
+    "name": {
+      "display": "Birgi (Pyrgion)",
+      "local": "Birgi",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      28.08,
+      38.25
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence de Hızır Bey ; Ibn Battuta y est reçu vers 1331-1333.",
+    "sources": [
+      "Aydınids"
+    ]
+  },
+  {
+    "id": "set_aydin",
+    "province": "prov_aydin",
+    "kind": "town",
+    "name": {
+      "display": "Aydın (Tralles)",
+      "local": "Güzelhisar",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.84,
+      37.85
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne Tralles, nom du beylik.",
+    "sources": [
+      "Aydınids"
+    ]
+  },
+  {
+    "id": "set_tire",
+    "province": "prov_aydin",
+    "kind": "village",
+    "name": {
+      "display": "Tire"
+    },
+    "lonlat": [
+      27.74,
+      38.09
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la vallée du Petit Méandre.",
+    "sources": [
+      "Aydınids"
+    ]
+  }
+]

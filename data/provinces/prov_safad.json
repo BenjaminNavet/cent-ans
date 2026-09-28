@@ -1,0 +1,98 @@
+{
+  "id": "prov_safad",
+  "name": {
+    "display": "Safad et Acre",
+    "local": "صفد",
+    "local_language": "arabe"
+  },
+  "region": "levant",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Jourdain"
+  ],
+  "ports": [
+    "Acre"
+  ],
+  "sea_zones": [
+    "sea_levantine"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Safad (Safed)",
+      "local": "صفد",
+      "local_language": "arabe"
+    },
+    "lat": 32.96,
+    "lon": 35.5
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.5,
+      32.96
+    ],
+    "seed_lonlat": [
+      35.4,
+      32.85
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_mamluks",
+  "culture": "cul_arabic",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 34000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4100,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 410,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 900,
+  "description": "Galilée mamelouke, en majeure partie détruite après la chute d'Acre (1291) ; Safad, siège d'un niyaba puissant, garde la marche du nord.",
+  "sources": [
+    "Safed",
+    "Acre, Israel",
+    "Tiberias"
+  ]
+}
