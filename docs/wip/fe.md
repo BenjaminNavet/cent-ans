@@ -19,15 +19,20 @@ ADR : 0098. Worktree orchestrateur : `../game_project-fe` sur `feat/fe`.
 - Tous les worktrees FE d'agents supprimés. `../game_project-fe` (`feat/fe`) = worktree d'intégration.
 
 ## Reprise
-- Vague 3 : F6 interface dans `main` (639b7e49 ; carte de choix de faction encore petite dans son cadre
-  très large, à revoir à la partie pilote). F7 portraits dans `main` (67a9d198) : 62 portraits + 49
-  variantes âgées, 5,13 $ consignés. **F8 équilibre en cours** : `../game_project-fe8` (`feat/fe8-equilibre`).
-- Ensuite : fusion F8, puis partie pilote du joueur.
-- Difficultés des factions ajoutées (F4a-F4e) : choix éditoriaux des agents, à valider par le joueur.
-- Incertitudes sourcées à confirmer : Burchard Grelle (Brême), Nicolas de Brno (Trente), Dietrich IX de
-  Clèves, blasons gaéliques et italiens marqués `uncertain`.
-- `virneburg` (maison) : « trois tours » non dessinées (écu plein, sans doublon).
-- Bretagne, Flandre, Navarre non jouables (pas de présentation front-end ni d'objectifs).
+- **Vagues 1 à 3 dans `main`** (f8c126d5) : F0-F8. F6 interface, F7 portraits (5,13 $), F8 équilibre
+  (ADR 0114 : ost effectif, pas d'alliance suzerain-vassal, commise sur coalitions, félonie de 1337 ;
+  banqueroutes divisées par deux ; rapport `docs/wip/fe8-equilibre.md`).
+- **Reste : partie pilote du joueur.**
+- Points ouverts à arbitrer :
+  - part de guerre France-Angleterre (ADR 0085) dans la bande 55-75 % sur 6/10 graines seulement
+    (moyenne 66 %, trajectoires très sensibles) ;
+  - une ancienne petite faction finit à 11-29 provinces par partie (« aucune faction mineure n'explose »
+    non tenu) ;
+  - royaumes irlandais, Îles, Luna, Urbino : 50-80 livres de revenu, pas une unité de garnison payable
+    (données économiques F4) ;
+  - carte de choix de faction petite dans son cadre (F6) ;
+  - difficultés des factions ajoutées, incertitudes sourcées (Grelle, Nicolas de Brno, Dietrich IX,
+    blasons gaéliques et italiens), `virneburg` sans meuble, Bretagne/Flandre/Navarre non jouables.
 
 ## Entrées F8 (signalées par la session RS, `docs/wip/rs-m-c7a.md`, ADR 0113)
 - **Ost impérial sans distance** : dès la vague 1, vers le tour 8 sur chaque graine, l'Empire s'allie au
