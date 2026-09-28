@@ -34,13 +34,13 @@
   "relations": [
     {
       "faction": "fac_papacy",
-      "status": "peace",
-      "note": "Vicariat pontifical incertain à cette date pour les Montefeltro."
+      "status": "war",
+      "note": "Maîtres d'Urbino depuis 1234, les Montefeltro, gibelins, sont souvent en lutte contre le pouvoir pontifical."
     },
     {
       "faction": "fac_rimini",
       "status": "peace",
-      "note": "Rivalité récurrente entre Montefeltro gibelins et Malatesta guelfes pour la Romagne méridionale."
+      "note": "Rivalité récurrente entre Montefeltro gibelins et Malatesta guelfes pour la Romagne méridionale, sans guerre ouverte en 1337."
     }
   ],
   "ai_personality": {
@@ -49,11 +49,10 @@
     "trade": 35,
     "piety": 40
   },
-  "description": "Petite seigneurie montagnarde des Marches, tenue par la maison gibeline des Montefeltro, en délicatesse récurrente avec la légation pontificale et les guelfes Malatesta de Rimini.",
+  "description": "Seigneurie gibeline des Montefeltro, maîtres d'Urbino depuis 1234, souvent en lutte contre le pouvoir pontifical et rivaux des guelfes Malatesta de Rimini.",
   "sources": [
     "Urbin",
     "Maison de Montefeltro"
   ],
-  "ruler": "chr_nolfo_da_montefeltro",
-  "suzerain": "fac_papacy"
+  "ruler": "chr_nolfo_da_montefeltro"
 }

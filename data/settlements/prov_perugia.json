@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_perugia",
+    "province": "prov_perugia",
+    "kind": "city",
+    "name": {
+      "display": "Pérouse",
+      "local": "Peroscia",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.3888,
+      43.1122
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_collegiate_church",
+      "bld_stone_walls",
+      "bld_guild_hall",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Grande commune ombrienne sous suzeraineté pontificale nominale, riche de son université fondée en 1308.",
+    "sources": [
+      "Pérouse"
+    ]
+  },
+  {
+    "id": "set_assisi",
+    "province": "prov_perugia",
+    "kind": "town",
+    "name": {
+      "display": "Assise",
+      "local": "Ascesi",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.6155,
+      43.0707
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ville ombrienne fortifiée, grand centre de pèlerinage autour de la basilique Saint-François.",
+    "sources": [
+      "Assise",
+      "Basilique Saint-François d'Assise"
+    ]
+  },
+  {
+    "id": "set_gubbio",
+    "province": "prov_perugia",
+    "kind": "town",
+    "name": {
+      "display": "Gubbio",
+      "local": "Agobbio",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.5766,
+      43.3506
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne commune ombrienne, prospère aux XIIe-XIIIe siècles grâce à ses statuts communaux (Tables eugubines).",
+    "sources": [
+      "Gubbio"
+    ]
+  }
+]
