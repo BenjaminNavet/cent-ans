@@ -9,9 +9,9 @@ Session RS parallèle (`docs/wip/restes.md`) : ADR 0098/0099 à elle ; conflits 
 
 | Lot | Branche | État |
 |---|---|---|
-| SB barres de vie + rythme siège | feat/tw2-sb | à lancer |
-| T1 sort de la ville prise | feat/tw2-t1 | à lancer |
-| T2 reconstitution + réserves | feat/tw2-t2 | à lancer |
+| SB barres de vie + rythme siège | feat/tw2-sb | lancé (vague 1) |
+| T1 sort de la ville prise | feat/tw2-t1 | lancé (vague 1) |
+| T2 reconstitution + réserves | feat/tw2-t2 | lancé (vague 1) |
 | T3 mercenaires | feat/tw2-t3 | vague 2 |
 | T4 points de capture | feat/tw2-t4 | vague 2 (après SB) |
 | T5 traditions d'armée | feat/tw2-t5 | vague 2 (après T2) |
