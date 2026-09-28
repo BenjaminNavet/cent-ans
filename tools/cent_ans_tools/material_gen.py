@@ -300,7 +300,8 @@ def contact_sheet(
     material: albedo repeated 2x2 (seams visible if any), derived normal, roughness.
     ``params`` maps an id to its ``materials.yaml`` entry, so the derived maps use
     the material's own ``height_strength``/``roughness_bias`` (defaults otherwise).
-    Falls back to a 256-colour palette PNG if the sheet exceeds ``max_bytes``.
+    Falls back to a 256-colour palette PNG, then shrinks it, while it exceeds
+    ``max_bytes``.
     """
     label_width, header, gap = 150, 30, 8
     columns = ("albédo 2×2", "normale", "rugosité")
@@ -331,9 +332,16 @@ def contact_sheet(
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(out_path, optimize=True)
-    if out_path.stat().st_size > max_bytes:
+    # Too heavy: 256-colour palette, then shrink until it fits.
+    while out_path.stat().st_size > max_bytes:
         sheet.quantize(colors=256, method=Image.Quantize.MEDIANCUT).save(
             out_path, optimize=True
+        )
+        if out_path.stat().st_size <= max_bytes or sheet.width < 400:
+            break
+        sheet = sheet.resize(
+            (int(sheet.width * 0.85), int(sheet.height * 0.85)),
+            Image.Resampling.LANCZOS,
         )
     return out_path
 

@@ -98,3 +98,14 @@ GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
 |---|---|---|---|---|---|
 | 2026-09-28 | OpenRouter | GA1 : matière wool (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,04 $ |
 | 2026-09-28 | OpenRouter | GA1 : matière mail (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,08 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière wool (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,12 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière linen (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,16 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière fustian (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,20 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière gambeson (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,24 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière leather (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,28 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière plate (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,32 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière wood (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,36 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière skin (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,40 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière hair (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,44 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière coat_light (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,48 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière coat_dark (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,52 $ |
