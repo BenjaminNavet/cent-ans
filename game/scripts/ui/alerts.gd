@@ -23,7 +23,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 	var summary: Dictionary = sim.call("get_faction_summary", player)
 	var enemies: PackedStringArray = summary.get("at_war_with", PackedStringArray())
 	var owned: Dictionary = {}  # province id → true (possédée et tenue par le joueur)
-	# PB3d : propriétaires et sièges par l'instantané groupé ; détail du siège seulement si besoin.
+	# PB3d/RS-L : propriétaires, sièges et leur détail par l'instantané groupé (un seul appel).
 	var snapshot := ProvinceSnapshot.of(sim, map_data)
 	for index in range(1, map_data.province_count + 1):
 		var province_id := snapshot.ids[index - 1]
@@ -32,14 +32,13 @@ static func collect(map: Node, last_events: Array) -> Array:
 		owned[province_id] = true
 		if snapshot.besieged[index - 1] == 0:
 			continue
-		var state: Dictionary = sim.call("get_province_state", province_id)
-		var siege: Dictionary = state.get("siege", {})
-		if not siege.is_empty() and str(siege.get("attacker", "")) != player:
+		var attacker := snapshot.siege_attacker[index - 1]
+		if attacker != "" and attacker != player:
 			result.append({
 				"id": "siege:" + province_id, "kind": "siege", "severity": "danger",
 				"province_id": province_id,
-				"text": "%s assiégée (vivres : %d)" % [map.call("province_name_of", province_id), int(siege.get("supplies", 0))],
-				"tooltip": "Siège mené par %s depuis %s." % [_faction_name(str(siege.get("attacker", ""))), FrText.count(int(siege.get("turns_elapsed", 0)), "tour")],
+				"text": "%s assiégée (vivres : %d)" % [map.call("province_name_of", province_id), snapshot.siege_supplies[index - 1]],
+				"tooltip": "Siège mené par %s depuis %s." % [_faction_name(attacker), FrText.count(snapshot.siege_turns_elapsed[index - 1], "tour")],
 			})
 	# Armées ennemies dans une province du joueur ou adjacente.
 	for army_id in sim.call("get_army_ids"):
