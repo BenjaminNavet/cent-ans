@@ -30,6 +30,8 @@ pub struct FeudalRules {
     /// Turns as the realm's first vassal for the generic victory (§ 4.8).
     pub ascension_turns: u32,
     pub loyalty: LoyaltyWeights,
+    /// War escalation and private war (§ 4.3, lot F2).
+    pub escalation: EscalationRules,
 }
 
 impl Default for FeudalRules {
@@ -45,6 +47,7 @@ impl Default for FeudalRules {
             independence_turns: 20,
             ascension_turns: 20,
             loyalty: LoyaltyWeights::default(),
+            escalation: EscalationRules::default(),
         }
     }
 }
@@ -97,6 +100,118 @@ impl Default for LoyaltyWeights {
             peer_forfeiture: -10,
             liege_defeat: -5,
             rival_claimant: -15,
+        }
+    }
+}
+
+/// War escalation (§ 4.3): a suzerain called to protect an attacked vassal
+/// intervenes or shirks; a private war between two vassals of the same
+/// lord is arbitrated by that lord.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct EscalationRules {
+    /// Prestige change of the ruler of a suzerain who shirks protection.
+    pub shirk_prestige: i32,
+    /// Loyalty lost at once by every direct vassal of a shirking suzerain.
+    pub shirk_loyalty_drop: u8,
+    /// Prestige change of the ruler of a suzerain who intervenes.
+    pub intervene_prestige: i32,
+    /// Turns the attacked vassal remembers protection granted or refused
+    /// (opinion modifier worth `loyalty.protection_granted` / `_refused`).
+    pub protection_memory_turns: u32,
+    /// Turns the player has to answer a call for protection or arbitration.
+    pub answer_turns: u32,
+    /// Provisional AI score of a call for protection (replaced in F5).
+    pub score: ProtectionScore,
+    /// Private war arbitration.
+    pub arbitration: ArbitrationRules,
+}
+
+impl Default for EscalationRules {
+    fn default() -> Self {
+        EscalationRules {
+            shirk_prestige: -20,
+            shirk_loyalty_drop: 10,
+            intervene_prestige: 5,
+            protection_memory_turns: 20,
+            answer_turns: 2,
+            score: ProtectionScore::default(),
+            arbitration: ArbitrationRules::default(),
+        }
+    }
+}
+
+/// Terms of the provisional AI score of a call for protection: the
+/// suzerain intervenes when the sum reaches `intervene_at`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct ProtectionScore {
+    /// Feudal duty: starting point.
+    pub base: i32,
+    /// Suzerain at least `power_ratio` times as strong as the aggressor...
+    pub power_favourable: i32,
+    /// ... or not.
+    pub power_unfavourable: i32,
+    /// Power ratio (suzerain / aggressor) counted as favourable.
+    pub power_ratio: f64,
+    /// Attitude of the suzerain towards the vassal is divided by this.
+    pub attitude_divisor: i32,
+    /// Suzerain with a negative treasury.
+    pub empty_treasury: i32,
+    /// Each war the suzerain already wages.
+    pub per_ongoing_war: i32,
+    /// Suzerain allied with the aggressor.
+    pub allied_with_aggressor: i32,
+    /// Score from which the suzerain intervenes.
+    pub intervene_at: i32,
+    /// Distance from `intervene_at` beyond which the preview is certain
+    /// (`likely` above, `unlikely` below, `uncertain` in between).
+    pub certainty_margin: i32,
+}
+
+impl Default for ProtectionScore {
+    fn default() -> Self {
+        ProtectionScore {
+            base: 30,
+            power_favourable: 15,
+            power_unfavourable: -25,
+            power_ratio: 1.0,
+            attitude_divisor: 2,
+            empty_treasury: -20,
+            per_ongoing_war: -15,
+            allied_with_aggressor: -60,
+            intervene_at: 20,
+            certainty_margin: 15,
+        }
+    }
+}
+
+/// Private war between two direct vassals of the same lord (§ 4.3.5).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct ArbitrationRules {
+    /// Truce imposed with the peace.
+    pub truce_turns: u32,
+    /// The AI lord imposes peace when at least this many times as strong
+    /// as the attacker.
+    pub impose_peace_power_ratio: f64,
+    /// The AI lord takes a side when its attitude towards one party exceeds
+    /// its attitude towards the other by at least this much.
+    pub take_side_attitude_gap: i32,
+    /// Loyalty lost at once by the attacker forced into peace.
+    pub imposed_peace_loyalty_drop: u8,
+    /// Loyalty lost at once by the vassal its lord fights.
+    pub opposed_loyalty_drop: u8,
+}
+
+impl Default for ArbitrationRules {
+    fn default() -> Self {
+        ArbitrationRules {
+            truce_turns: 8,
+            impose_peace_power_ratio: 1.5,
+            take_side_attitude_gap: 40,
+            imposed_peace_loyalty_drop: 5,
+            opposed_loyalty_drop: 20,
         }
     }
 }

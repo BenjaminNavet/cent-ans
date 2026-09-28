@@ -22,5 +22,31 @@
     "peer_forfeiture": -10,
     "liege_defeat": -5,
     "rival_claimant": -15
+  },
+  "escalation": {
+    "shirk_prestige": -20,
+    "shirk_loyalty_drop": 10,
+    "intervene_prestige": 5,
+    "protection_memory_turns": 20,
+    "answer_turns": 2,
+    "score": {
+      "base": 30,
+      "power_favourable": 15,
+      "power_unfavourable": -25,
+      "power_ratio": 1.0,
+      "attitude_divisor": 2,
+      "empty_treasury": -20,
+      "per_ongoing_war": -15,
+      "allied_with_aggressor": -60,
+      "intervene_at": 20,
+      "certainty_margin": 15
+    },
+    "arbitration": {
+      "truce_turns": 8,
+      "impose_peace_power_ratio": 1.5,
+      "take_side_attitude_gap": 40,
+      "imposed_peace_loyalty_drop": 5,
+      "opposed_loyalty_drop": 20
+    }
   }
 }
