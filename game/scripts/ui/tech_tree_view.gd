@@ -142,7 +142,7 @@ func _make_button(node: Dictionary) -> Button:
 	else:
 		second_line = "%d pts — %s" % [cost, STATE_LABELS.get(state, state)]
 	button.text = "%s\n%s" % [str(node.get("name", id)), second_line]
-	button.tooltip_text = RichTooltip.technology(node)  # F2 : infobulle riche (tooltip_for : texte brut)
+	RichTooltip.set_tooltip(button, "technology", id, node)  # F2 / IB1 : infobulle en sections (tooltip_for : texte brut)
 	var style := StyleBoxFlat.new()
 	style.bg_color = STATE_COLORS.get(state, Color(0.8, 0.8, 0.8))
 	style.set_border_width_all(2 if state != "researching" else 3)

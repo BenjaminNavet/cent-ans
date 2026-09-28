@@ -361,25 +361,33 @@ func _draw_cross(size: Vector2) -> void:
 
 
 ## Infobulle : fiche du type (F2) + état, effectif, moral, fatigue, munitions et formation.
+## IB1 : l'état de bataille devient les `effects`/`warnings` de la spec (effectif et moral en
+## chiffres vedettes) ; `tooltip_text` porte la clé « ib:unit: » et le BBCode de repli.
 func _refresh_tooltip(unit: Dictionary) -> void:
-	var detail := "État : %s" % state_text(unit)
+	var effects: Array = [{"text": "État : %s" % state_text(unit), "sign": 0}]
+	var warnings: Array = []
 	if BattleUnitMarkers.is_exhausted(unit):
-		detail += " · épuisée"
-	detail += "\nEffectif : %d / %d · moral %d · fatigue %d" % [int(unit["soldiers"]), int(unit["initial_soldiers"]), int(unit["morale"]), int(unit["fatigue"])]
+		warnings.append("Épuisée")
+	effects.append({"text": "Fatigue : %d" % int(unit["fatigue"]), "sign": 0})
 	if bool(unit["can_shoot"]):
-		detail += "\nMunitions : %d / %d%s" % [int(unit["ammo"]), int(unit["max_ammo"]), "" if bool(unit["fire_at_will"]) else " (tir retenu)"]
-	detail += "\nFormation : %s" % formation_label(str(unit["formation"]))
+		effects.append({"text": "Munitions : %d / %d%s" % [int(unit["ammo"]), int(unit["max_ammo"]), "" if bool(unit["fire_at_will"]) else " (tir retenu)"], "sign": 0})
+	effects.append({"text": "Formation : %s" % formation_label(str(unit["formation"])), "sign": 0})
 	var modes := BattleModeIcons.active_modes(unit)
 	if not modes.is_empty():
 		var names: PackedStringArray = []
 		for mode in modes:
 			names.append(BattleModeIcons.label_of(mode).to_lower())
-		detail += "\nModes : %s" % ", ".join(names)
+		effects.append({"text": "Modes : %s" % ", ".join(names), "sign": 0})
 	if _groups != "":
-		detail += "\nGroupe(s) : %s" % _groups
+		effects.append({"text": "Groupe(s) : %s" % _groups, "sign": 0})
 	if locked:
-		detail += "\nGroupe verrouillé : se déplace d'un bloc (Ctrl+G : déverrouiller)"
-	if detail == _tooltip_key:
+		effects.append({"text": "Groupe verrouillé : se déplace d'un bloc (Ctrl+G : déverrouiller)", "sign": 0})
+	var live := {
+		"name": unit_name, "strength": int(unit["soldiers"]), "max_strength": int(unit["initial_soldiers"]),
+		"morale": int(unit["morale"]), "effects": effects, "warnings": warnings,
+	}
+	var key := str(live)
+	if key == _tooltip_key:
 		return
-	_tooltip_key = detail
-	tooltip_text = RichTooltip.unit(unit_type, {"name": unit_name}) + "\n" + detail
+	_tooltip_key = key
+	RichTooltip.set_tooltip(self, "unit", unit_type, live)
