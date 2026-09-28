@@ -9,6 +9,8 @@ Branche `feat/tw2-t5` (worktree `../gp-tw2-t5`, base `integration/tw2`). Spec :
 - [x] `sim-campaign/src/traditions.rs` : xp, rangs, vue, choix, dilution (`add_recruits`), nom/bannière.
 - [x] Champs d'état `Army::traditions`, `Unit::experience_residue` (serde default) ; ordre `ChooseArmyTradition`.
 
+- [x] Accroches : xp (bataille de campagne, 3D, assaut, sortie), mouvement, reconstitution + dilution (et garnisons), siège, moral/tir (auto + 3D) ; tests Rust `tw2_t5_traditions.rs` verts.
+
 ## Prochaine étape
-- Accroches : bataille (xp), mouvement, reconstitution (+ dilution), siège, bataille (moral/tir).
-- Tests Rust `tests/tw2_t5_traditions.rs`, IA (`ai/src/traditions.rs`), pont, UI, test headless, ADR 0109.
+
+- IA (`ai/src/traditions.rs`), pont, UI, test headless, ADR 0109.

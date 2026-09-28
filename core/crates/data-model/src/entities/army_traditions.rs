@@ -158,10 +158,7 @@ impl TraditionEffects {
             parts.push(format!("{:+} de tir", self.ranged));
         }
         if self.siege_speed_percent != 0 {
-            parts.push(format!(
-                "sièges {} % plus courts",
-                self.siege_speed_percent
-            ));
+            parts.push(format!("sièges {} % plus courts", self.siege_speed_percent));
         }
         if self.morale != 0 {
             parts.push(format!("{:+} de moral", self.morale));

@@ -313,7 +313,10 @@ pub struct Army {
     pub fought_turn: Option<u32>,
     /// TW2-T5: army experience, traditions, kept name and banner
     /// (`crate::traditions`).
-    #[serde(default, skip_serializing_if = "crate::traditions::ArmyTraditions::is_empty")]
+    #[serde(
+        default,
+        skip_serializing_if = "crate::traditions::ArmyTraditions::is_empty"
+    )]
     pub traditions: crate::traditions::ArmyTraditions,
 }
 
