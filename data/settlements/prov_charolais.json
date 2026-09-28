@@ -1,0 +1,28 @@
+[
+  {
+    "id": "set_charolles",
+    "province": "prov_charolais",
+    "kind": "city",
+    "name": {
+      "display": "Charolles",
+      "local": "Charolles",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.2733,
+      46.4333
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du comté de Charolais, tenu en propre par les ducs de Bourgogne depuis 1237.",
+    "sources": [
+      "Comté de Charolais"
+    ]
+  }
+]

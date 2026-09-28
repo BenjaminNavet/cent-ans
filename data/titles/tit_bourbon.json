@@ -1,0 +1,51 @@
+{
+  "id": "tit_bourbon",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Bourbon",
+    "local": "Duchié de Bourbon",
+    "local_language": "ancien français"
+  },
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, à la bande de gueules brochant sur le tout.",
+    "description": "Armes de France ancien brisées d'une bande de gueules, adoptées par la maison de Bourbon.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_bourbonnais"
+  ],
+  "holder_1337": {
+    "faction": "fac_bourbon",
+    "sources": [
+      "Louis Ier de Bourbon",
+      "Duché de Bourbon"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_bourbon_hold",
+      "title": "Garder le duché",
+      "description": "La maison de Bourbon doit conserver son duché-pairie.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_bourbon"
+      }
+    },
+    {
+      "id": "obj_bourbon_crown",
+      "title": "La destinée capétienne",
+      "description": "Petits-fils de saint Louis, les Bourbons visent un jour la couronne.",
+      "condition": {
+        "kind": "hold_crown",
+        "faction": "fac_france"
+      }
+    }
+  ],
+  "description": "Comté de Bourbon érigé en duché-pairie par Charles IV en septembre 1327 pour Louis Ier, petit-fils de saint Louis.",
+  "sources": [
+    "Louis Ier de Bourbon",
+    "Duché de Bourbon"
+  ]
+}

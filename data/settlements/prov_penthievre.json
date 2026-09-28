@@ -1,0 +1,28 @@
+[
+  {
+    "id": "set_lamballe",
+    "province": "prov_penthievre",
+    "kind": "city",
+    "name": {
+      "display": "Lamballe",
+      "local": "Lambaol",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -2.5183,
+      48.4703
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du comté de Penthièvre, tenu par Jeanne de Penthièvre depuis 1331.",
+    "sources": [
+      "Comté de Penthièvre"
+    ]
+  }
+]

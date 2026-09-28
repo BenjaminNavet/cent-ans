@@ -1,0 +1,25 @@
+{
+  "id": "tit_evreux",
+  "rank": "county",
+  "name": {
+    "display": "Comté d'Évreux",
+    "local": "Évrues",
+    "local_language": "ancien français"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_evreux"
+  ],
+  "holder_1337": {
+    "faction": "fac_navarre",
+    "sources": [
+      "Philippe III de Navarre",
+      "Comté d'Évreux"
+    ]
+  },
+  "description": "Tenu en 1337 par Philippe III d'Évreux, roi consort de Navarre, cousin germain de Philippe VI (double allégeance : souverain en Navarre, vassal du roi de France pour Évreux).",
+  "sources": [
+    "Comté d'Évreux",
+    "Philippe III de Navarre"
+  ]
+}

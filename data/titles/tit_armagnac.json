@@ -1,0 +1,52 @@
+{
+  "id": "tit_armagnac",
+  "rank": "county",
+  "name": {
+    "display": "Comté d'Armagnac",
+    "local": "Comtat d'Armanhac",
+    "local_language": "occitan"
+  },
+  "heraldry": {
+    "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or.",
+    "description": "Blasonnement traditionnel de la maison d'Armagnac ; attesté surtout à partir du XIVe-XVe siècle.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_armagnac"
+  ],
+  "holder_1337": {
+    "faction": "fac_armagnac",
+    "sources": [
+      "Jean Ier d'Armagnac",
+      "Comté d'Armagnac"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_armagnac_hold",
+      "title": "Garder le comté",
+      "description": "Le comte d'Armagnac doit conserver son comté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_armagnac"
+      }
+    },
+    {
+      "id": "obj_armagnac_rivalry",
+      "title": "Dominer la Gascogne",
+      "description": "Abaisser la maison rivale de Foix-Béarn.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_foix_bearn"
+      }
+    }
+  ],
+  "description": "Comté gascon tenu par Jean Ier d'Armagnac, lieutenant royal en Languedoc, rival acharné de Gaston II de Foix-Béarn.",
+  "sources": [
+    "Jean Ier d'Armagnac",
+    "Comté d'Armagnac"
+  ]
+}
