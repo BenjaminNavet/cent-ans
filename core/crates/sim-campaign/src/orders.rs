@@ -536,6 +536,9 @@ pub struct RecruitOption {
     /// SV2: resource units the faction lacks and must import.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub imported: BTreeMap<data_model::ResourceId, u32>,
+    /// TW2-T2: the settlement's reserve of this unit type.
+    #[serde(default)]
+    pub pool: crate::recruit_pool::PoolView,
 }
 
 /// SV2: full price of one recruit — money cost plus the import of the
@@ -1034,6 +1037,8 @@ impl CampaignState {
             .unwrap_or(1)
             .max(1);
         let ordered_turn = self.turn;
+        // TW2-T2: the recruit leaves the settlement's reserve.
+        self.draw_recruit_pool(data, settlement, unit_type);
         self.settlements
             .get_mut(settlement)
             .expect("checked")
@@ -1125,6 +1130,7 @@ impl CampaignState {
             resources: unit_type.cost.resources.clone(),
             import_cost: price.import_cost,
             imported: price.draw.imported,
+            pool: self.recruit_pool(data, settlement, unit_type_id),
         };
         let reason = self.recruit_blocker(data, faction, settlement, unit_type, price.cost);
         if let Some(reason) = reason {
@@ -1202,6 +1208,15 @@ impl CampaignState {
         let share = crate::settlements::weight_share(data, settlement_id);
         if (class.count as f64 * share) < f64::from(unit_type.soldiers) * 10.0 {
             return Some("classe sociale trop peu nombreuse".to_owned());
+        }
+        // TW2-T2: the settlement's reserve of the unit type.
+        let pool = self.recruit_pool(data, settlement_id, &unit_type.id);
+        if pool.available == 0 {
+            return Some(match pool.seasons_to_next {
+                Some(1) => "réserve épuisée (+1 dans 1 saison)".to_owned(),
+                Some(k) => format!("réserve épuisée (+1 dans {k} saisons)"),
+                None => "réserve épuisée".to_owned(),
+            });
         }
         if faction_state.treasury < i64::from(cost) {
             return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));
