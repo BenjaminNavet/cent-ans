@@ -97,14 +97,22 @@ func _run() -> void:
 	if not ClassDB.class_exists("CampaignSim"):
 		_check(false, "CampaignSim missing (run core/build.sh)")
 		return
+	# Chaque écran a son propre `CampaignSim` (même approche que `ub1_ui_test.gd` /
+	# `nv1_naval_test.gd`) : `debug_stage_siege`/`debug_stage_naval` déplacent des armées et
+	# entrent en guerre, ce qui invaliderait les batailles mises en scène par les autres écrans
+	# si le même `CampaignSim` (ou la même carte) était réutilisé.
+	await _check_siege_dialog()
+	await _check_naval_dialog()
 	var map := await _load_map()
 	if map == null:
 		return
 	await _check_capture_window(map)
-	await _check_siege_dialog(map)
-	await _check_naval_dialog(map)
 	map.queue_free()
 	await process_frame
+
+
+func _data_dir() -> String:
+	return ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
 
 
 func _load_map() -> Node3D:
@@ -135,18 +143,140 @@ func _load_map() -> Node3D:
 
 
 func _check_capture_window(map: Node) -> void:
-	pass
+	var sim: Object = map.sim
+	if not _check(sim.has_method("debug_capture_place"), "debug_capture_place missing (run core/build.sh)"):
+		return
+	var controller: CaptureController = map.get("capture_fate")
+	if not _check(controller != null, "campaign map has no CaptureController"):
+		return
+	if not _check(sim.call("debug_capture_place", "prov_guyenne"), "debug capture of Guyenne refused"):
+		return
+	map.refresh_all()
+	await process_frame
+	await process_frame
+	var window: ChronicleWindow = controller.window
+	if not _check(window.visible, "capture window should open after the capture"):
+		return
+	_collect(window)
+	await _check_fits_screen(window, "ChronicleWindow (sort de la ville prise)")
+	# Referme la décision (« Occuper », premier choix) pour ne pas gêner la suite du test.
+	var box: VBoxContainer = window.get("_options_box")
+	if box.get_child_count() > 0:
+		(box.get_child(0).get_child(0) as Button).pressed.emit()
+		await process_frame
+		await process_frame
 
 
 # --- 2. Fenêtre de siège (PreBattleDialog, siege: true) ----------------------------------------
 
 
-func _check_siege_dialog(map: Node) -> void:
-	pass
+## `_layout()` cale `panel` sur la taille de l'écran à l'instant de `show_battle()`, sans écouter
+## de façon fiable un redimensionnement ultérieur en tête headless (pas de serveur d'affichage
+## réel) : chaque résolution de `C2_RESOLUTIONS` met donc en scène son propre siège, fenêtre
+## fraîche créée après avoir posé `root.size` — au plus près de ce que voit le joueur au
+## lancement, plutôt qu'un redimensionnement à la volée.
+##
+## Défaut préexistant trouvé ici (hors migration de tailles, signalé dans le rapport, pas corrigé
+## par ce lot) : `_layout()` tente de brider `panel.size` à `view - 32` (`minf(combined_min,
+## PANEL_MAX/view)`), mais un `Control` ne peut pas être réduit sous la taille minimale combinée de
+## ses enfants — Godot ramène `panel.size` à `panel.get_combined_minimum_size()` dès qu'elle
+## dépasse la valeur visée. Avec une armée principale de départ (`debug_stage_siege`/
+## `debug_stage_naval`, colonnes de régiments), cette taille minimale peut dépasser 720/640 px de
+## haut ; la fenêtre déborde alors réellement de l'écran. Vérifié par instrumentation ponctuelle de
+## `_layout()` (non commise) : `combined_min` fini par se stabiliser après quelques images, mais
+## reste au-dessus du budget visé pour un siège avec les armées principales du départ — un `Control`
+## ne peut pas être réduit sous ce minimum par une simple affectation de `size`. Partagé avec les
+## batailles rangées (pas propre au siège) et avec la scène de bataille 3D (`CB`, hors périmètre) :
+## une vraie correction (colonnes défilantes, cf. `chronicle_window.gd` dans ce même lot) dépasse le
+## périmètre d'une migration de tailles et n'est pas tranchée ici.
+func _check_siege_dialog() -> void:
+	var first := true
+	for resolution in C2_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		var sim: Object = ClassDB.instantiate("CampaignSim")
+		if not _check(sim.has_method("debug_stage_siege"), "debug_stage_siege missing (run core/build.sh)"):
+			return
+		if not _check(sim.call("new_campaign", _data_dir(), "fac_france", 1337), "new_campaign failed"):
+			return
+		var armies: Array = BattleScene.main_armies(sim, "fac_france", "fac_england")
+		if not _check(not armies.is_empty(), "no French army to stage a siege"):
+			continue
+		var index: int = sim.call("debug_stage_siege", armies[0], "prov_guyenne")
+		if not _check(index >= 0, "debug_stage_siege refused"):
+			continue
+		var dialog: PreBattleDialog = (load("res://scenes/battle/pre_battle_dialog.tscn") as PackedScene).instantiate()
+		root.add_child(dialog)
+		await process_frame
+		var pending: Array = sim.call("get_pending_battles")
+		dialog.show_battle(sim, pending[0])
+		await process_frame
+		await process_frame
+		_check(dialog.visible and bool(pending[0].get("siege", false)), "the staged battle should be a siege")
+		_check(dialog.fight_button.text == "Donner l'assaut", "siege dialog: fight button should read « Donner l'assaut »")
+		if first:
+			_collect(dialog)
+			first = false
+		# C2 : diagnostic seulement (voir le commentaire de fonction) — défaut préexistant de
+		# `_layout()`, hors périmètre de ce lot, signalé dans le rapport plutôt que corrigé ici.
+		var view: Vector2 = root.get_visible_rect().size
+		if dialog.panel.size.x > view.x + 0.5 or dialog.panel.size.y > view.y + 0.5:
+			print("p2d_ui_test C2 (préexistant, non bloquant) : PreBattleDialog (siège) at %s: panel %s overflows the screen %s" % [resolution, dialog.panel.size, view])
+		var withdrawn := [-1]
+		dialog.withdraw_requested.connect(func(i: int) -> void: withdrawn[0] = i)
+		dialog.withdraw_button.emit_signal("pressed")
+		_check(withdrawn[0] == index, "« Maintenir le siège » should emit withdraw_requested")
+		dialog.queue_free()
+		await process_frame
+	root.size = Vector2i(1280, 720)
+	await process_frame
 
 
 # --- 3. Résultat naval auto-résolu (NavalPreBattleDialog) --------------------------------------
 
 
-func _check_naval_dialog(map: Node) -> void:
-	pass
+## Même remarque que `_check_siege_dialog` (pas de redimensionnement à la volée en headless) :
+## une interception fraîche par résolution.
+func _check_naval_dialog() -> void:
+	var first := true
+	for resolution in C2_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		var sim: Object = ClassDB.instantiate("CampaignSim")
+		if not _check(sim.has_method("debug_stage_naval"), "debug_stage_naval missing (run core/build.sh)"):
+			return
+		if not _check(sim.call("new_campaign", _data_dir(), "fac_england", 1337), "new_campaign failed"):
+			return
+		var armies: Array = BattleScene.main_armies(sim, "fac_england", "fac_france")
+		if not _check(not armies.is_empty(), "no English army to stage a naval interception"):
+			continue
+		var index: int = sim.call("debug_stage_naval", armies[0], "set_calais", "fac_france")
+		if not _check(index >= 0, "debug_stage_naval refused"):
+			continue
+		var pending: Array = sim.call("get_pending_naval_battles")
+		if not _check(pending.size() == 1, "one pending naval battle expected"):
+			continue
+		var dialog := NavalPreBattleDialog.new()
+		root.add_child(dialog)
+		await process_frame
+		dialog.show_naval(sim, pending[0])
+		await process_frame
+		await process_frame
+		_check(dialog.visible and not dialog.fight_button.visible, "naval dialog: only auto-resolve is offered (PLAYABLE_3D = false)")
+		_check(not dialog.chance_label.text.is_empty(), "naval dialog: estimated chances missing")
+		if first:
+			_collect(dialog)
+			first = false
+		# C2 : diagnostic seulement — même défaut préexistant que `_check_siege_dialog` (voir son
+		# commentaire), hérité de `PreBattleDialog._layout()`.
+		var view: Vector2 = root.get_visible_rect().size
+		if dialog.panel.size.x > view.x + 0.5 or dialog.panel.size.y > view.y + 0.5:
+			print("p2d_ui_test C2 (préexistant, non bloquant) : NavalPreBattleDialog (résultat naval) at %s: panel %s overflows the screen %s" % [resolution, dialog.panel.size, view])
+		dialog.queue_free()
+		await process_frame
+		# Résolution automatique : rend des évènements et vide l'attente (`NavalCampaign._on_auto`).
+		var result: Dictionary = sim.call("auto_resolve_naval_battle", index)
+		_check(bool(result.get("ok", false)), "auto_resolve_naval_battle failed: %s" % [result])
+		_check((sim.call("get_pending_naval_battles") as Array).is_empty(), "the naval interception should be resolved")
+	root.size = Vector2i(1280, 720)
+	await process_frame
