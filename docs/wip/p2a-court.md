@@ -44,13 +44,41 @@ contrôleur, pas depuis eux-mêmes — mais aucun n'a de compagnon dynamique com
 
 - [x] Lu `docs/wip/po.md`, ADR 0097, bible DA § 12, plan Phase 2, historique PO1/PO2.
 - [x] `.tscn` : tailles de police alignées sur l'échelle à 4 valeurs (`Title`/`Heading`/`Body`/`Caption`).
-- [ ] `.gd` : `add_theme_font_size_override` → `UiType.apply`.
-- [ ] `UiMotion` sur l'ouverture/fermeture de `CourtPanel` et `CharacterSheet`.
-- [ ] C1 (textes d'outil) vérifié sur les deux écrans.
-- [ ] `game/tests/p2a_ui_test.gd`
-- [ ] `game/tests/p2a_shot.gd` + captures `docs/img/po/p2a/`
-- [ ] `smoke.gd` + tests existants de la cour/personnage verts
+- [x] `.gd` : tous les `add_theme_font_size_override` → `UiType.apply` (ou `UiType.size(...)` pour
+      les clés secondaires `italics_font_size`/`bold_font_size`, et les appels `IconChip.create`
+      de `court_panel.gd`/`character_sheet.gd`).
+- [x] `UiMotion.fade_in`/`fade_out` sur l'ouverture/fermeture de `CourtPanel` et `CharacterSheet`.
+- [x] C1 (textes d'outil) et C3 (échelle à 4 tailles, 14 px minimum) vérifiés : `p2a_ui_test.gd`
+      OK (99 textes lus, tailles vues `[14, 17, 20, 26]`).
+- [x] `game/tests/p2a_ui_test.gd` (réutilise les aides de `po_ui_test.gd` par instanciation, sans
+      le modifier — son `_init()` attend `process_frame`, jamais émis sur une instance orpheline,
+      donc ne se déclenche jamais : sûr, voir commentaire en tête de fichier).
+- [x] `game/tests/p2a_shot.gd` + 3 captures `docs/img/po/p2a/` (cour, arbre familial, fiche
+      personnage avec arbre de compétences) — réutilise les mises en scène déjà présentes dans
+      `campaign_map.gd` (`--stage=court|family_tree|skills`, hors lot, non modifiées).
+- [x] `smoke.gd`, `ui1_lettrine_test.gd`, `ui3_test.gd` verts (avant fusion de `main`).
+- [x] `git merge main` fait (ff propre, aucun conflit sur les fichiers du lot).
+
+## Blocage à la fusion de `main` (hors lot, à signaler à l'orchestrateur)
+
+Après `git merge main` (qui a ramené entre autres FE0 — titres féodaux, ADR 0098 — et
+d'autres lots), `smoke.gd` échoue en masse (`CampaignSim.new_campaign(...) failed`,
+`GameDataStore.load(...) : unknown field 'primary_title'` dans `data/factions/fac_aragon.json`
+notamment). La bibliothèque `game/bin/libcent_ans.debug.dylib` de `main` (celle que je copie,
+consigne CLAUDE.md : « ne pas compiler le core ») date de 01:48, **avant** le commit FE0 (titres,
+07:20) qui a changé le schéma des données de faction. Le binaire ne connaît donc pas le nouveau
+champ `primary_title` : ce n'est pas une régression de P2a (aucun fichier du lot ne touche à
+`core/` ni aux données de faction), mais `main` lui-même semble avoir besoin d'un core reconstruit
+après le merge FE0. **Je n'ai pas trouvé de dylib plus récent** dans les emplacements accessibles
+à ce worktree. Avant PO6b, quelqu'un doit reconstruire `core` sur `main` et republier
+`game/bin/libcent_ans.debug.dylib`.
+
+**Preuve que les fichiers du lot sont sains** : `smoke.gd`, `p2a_ui_test.gd`,
+`ui1_lettrine_test.gd`, `ui3_test.gd` étaient tous verts juste avant la fusion (voir journal),
+avec exactement le même code que celui livré (seul un `git merge` sans conflit a suivi).
 
 ## Prochaine étape
 
-Terminer la conversion des tailles de police dans les `.gd`, puis câbler `UiMotion`.
+Dès qu'un `libcent_ans.debug.dylib` à jour (post-FE0) est disponible : recopier, réimporter,
+relancer `smoke.gd` + `p2a_ui_test.gd` une dernière fois pour confirmer, puis rendre la main à
+l'orchestrateur (fusion de la branche : hors périmètre de cet agent).
