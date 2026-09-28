@@ -10,12 +10,12 @@ Branche `feat/tw2-t3` (depuis `integration/tw2`). Spec : `docs/design/2026-09-28
 - [x] `sim-campaign/src/mercenaries.rs` : réserves par bande × région, marché d'une armée, ordre
   `HireMercenary`, surcoût d'entretien, impayés (désertion / pillage), recharge. Branché dans le tour
   après `resolve_economy`. Le recrutement en ville refuse les unités `mercenary`.
-- [ ] Tests Rust `tests/tw2_t3_mercenaries.rs` ; mise à jour de `ur1_units.rs`.
-- [ ] IA : engage quand riche et menacée (`ai/src/campaign.rs`).
+- [x] Tests Rust `sim-campaign/tests/tw2_t3_mercenaries.rs` (7) ; `ur1_units.rs` adapté.
+- [x] IA : `ai/src/mercenaries.rs` (riche + menacée), appelée avant `plan_armies` ; test `ai/tests/tw2_t3_mercenaries_ai.rs`.
 - [ ] Pont `get_mercenaries(army)` ; UI bouton « Mercenaires » (bandeau d'armée) + panneau.
 - [ ] Icônes PNG des deux nouvelles unités (build partiel `entity_icons`).
 - [ ] Test headless `game/tests/tw2_t3_mercenaries_test.gd`, smoke.
 - [ ] Sonde IA (effectifs, trésors) → ADR 0103.
 
 ## Prochaine étape
-Compiler, écrire les tests Rust, puis l'IA.
+Pont `get_mercenaries`, puis UI.
