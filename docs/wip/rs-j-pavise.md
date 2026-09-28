@@ -20,16 +20,17 @@ RS-D (`docs/wip/revue-code.md`, n° 2 : les pavois attendent une cible cachée).
 ## Sondes (release)
 | Sonde | Avant | Après |
 |---|---|---|
-| ep7 Crécy, Anglais 1-20 / 1-30 | 18/20, 27/30 | à relever |
-| ep7 Azincourt | 18/20, 26/30 | à relever |
-| ep7 Poitiers | 16/20, 22/30 | à relever |
-| ep9b_duel `survey` (attaquant) | 4/10 | à relever |
-| `ai_beats_a_passive_ai_at_equal_forces` | ok | à relever |
-| eq7 `probe_mixed_battle` (France) | 58/64 | à relever |
+| ep7 Crécy, Anglais 1-20 / 1-30 | 18/20, 27/30 | 18/20, 27/30 |
+| ep7 Azincourt | 18/20, 26/30 | 18/20, 26/30 |
+| ep7 Poitiers | 16/20, 22/30 | 16/20, 22/30 |
+| ep9b_duel `survey` (attaquant) | 4/10 | 4/10 |
+| `ai_beats_a_passive_ai_at_equal_forces` | ok | ok |
+| eq7 `probe_mixed_battle` (France) | 58/64 | 58/64 |
 
 ## État
 - [x] Squelette, sondes avant, correction, tests.
-- [ ] Sondes après, fmt/clippy/test complets, merge main, suppression de `core/target-rs-j`.
+- [x] Sondes après : identiques (le cas pavois levés + cible cachée ne survient pas dans ces batailles d'IA).
+- [ ] fmt/clippy/test complets, merge main, suppression de `core/target-rs-j`.
 
 ## Prochaine étape
-Relever les sondes après (`/tmp` scratch de la session), puis clippy + `cargo test` complet.
+clippy + `cargo test` complet, `git merge main`, retests.
