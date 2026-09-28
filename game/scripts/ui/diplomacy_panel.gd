@@ -34,6 +34,9 @@ const MAP_COLORS := {
 }
 const FRIENDLY := Color(0.30, 0.62, 0.30)
 const HOSTILE := Color(0.72, 0.36, 0.22)
+## Taille plancher de la carte des relations (elle grandit ensuite jusqu'à remplir sa colonne).
+const MAP_MIN_WIDTH := 200.0
+const MAP_MIN_HEIGHT := 150.0
 const NEUTRAL := Color(0.62, 0.60, 0.55)
 const GIFT_AMOUNT := 1000
 const DONATION_AMOUNT := 1000
@@ -115,14 +118,30 @@ func _ready() -> void:
 	_fit_to_viewport()
 
 
-## Plein écran : la pile de panneaux (`map_ui._keep_on_screen`) le cale sous la barre du haut.
-## P2g : position globale (le parent peut être la zone `MODAL`, décalée de l'écran).
+## Plein écran sous la barre du haut (zone `TOP_BAR` de `UiLayout`). P2g : position globale (le
+## parent peut être la zone `MODAL`, décalée de l'écran) ; la carte repart de sa taille plancher
+## puis se réajuste au cadre (`_fit_minimap` sur `resized`) : sinon sa taille minimale, fixée
+## par un cadre plus grand, empêchait le panneau de tenir dans l'écran (1280×720, 640 px).
 func _fit_to_viewport() -> void:
 	if not is_inside_tree():
 		return
 	var view := get_viewport_rect().size
-	global_position = Vector2(6, 0)
-	size = Vector2(view.x - 12.0, view.y - 4.0)
+	var top: float = UiZones.rect(UiZones.Zone.TOP_BAR).end.y
+	global_position = Vector2(6, top)
+	size = Vector2(view.x - 12.0, view.y - top - 4.0)
+	_refit_minimap_later()
+
+
+## P2g : la carte repart de sa taille plancher, puis se réajuste une image plus tard, une fois les
+## conteneurs recalculés (lue dans la même image, la taille du cadre serait encore l'ancienne).
+func _refit_minimap_later() -> void:
+	if _minimap == null or not is_inside_tree():
+		return
+	var map_view := _minimap.find_child("MapView", true, false) as Control
+	if map_view != null:
+		map_view.custom_minimum_size = Vector2(MAP_MIN_WIDTH, MAP_MIN_HEIGHT)
+	if not get_tree().process_frame.is_connected(_fit_minimap):
+		get_tree().process_frame.connect(_fit_minimap, CONNECT_ONE_SHOT)
 
 
 # ----- construction ------------------------------------------------------------------------
@@ -644,6 +663,7 @@ func _ensure_minimap() -> void:
 	_minimap.clicked.connect(_on_map_clicked)
 	holder.add_child(_minimap)
 	_fit_minimap()
+	_refit_minimap_later()
 
 
 func _fit_minimap() -> void:
@@ -657,10 +677,10 @@ func _fit_minimap() -> void:
 	# Habillage réel de la minicarte (cadre, boutons) autour de la vue, plus un jeu de 4 px :
 	# une marge fixe plus petite que le cadre ferait grandir le conteneur à chaque `resized`.
 	var chrome := _minimap.get_combined_minimum_size() - view.get_combined_minimum_size() + Vector2(4.0, 4.0)
-	var width := maxf(holder.size.x - chrome.x, 200.0)
+	var width := maxf(holder.size.x - chrome.x, MAP_MIN_WIDTH)
 	var height := width * aspect
 	if height > holder.size.y - chrome.y:
-		height = maxf(holder.size.y - chrome.y, 150.0)
+		height = maxf(holder.size.y - chrome.y, MAP_MIN_HEIGHT)
 		width = height / aspect
 	var fitted := Vector2(width, height).floor()
 	if fitted != view.custom_minimum_size:

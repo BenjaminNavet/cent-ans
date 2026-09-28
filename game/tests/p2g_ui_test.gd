@@ -103,6 +103,8 @@ func _check_campaign() -> void:
 		return
 	var layout: Node = root.get_node("/root/UiLayout")
 	var ui: Node = map.ui
+	# La fenêtre Codex (P2c, zone `MODAL` en différé) doit rester inscrite dans la pile.
+	_check_c2(ui.panels.is_registered(ui.codex_hub), "CodexHub should stay registered in the panel stack")
 
 	# Techniques.
 	if _check(map.call("_tech_available"), "technologies unavailable with this simulation"):
@@ -287,3 +289,4 @@ func _collect_tool_texts(node: Node) -> void:
 				break
 	for child in node.get_children():
 		_collect_tool_texts(child)
+

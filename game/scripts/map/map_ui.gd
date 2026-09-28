@@ -1004,9 +1004,11 @@ func claim_modal_panel(panel: Control) -> void:
 	UiZones.put(UiZones.Zone.MODAL, panel)
 	var part: Rect2 = UiZones.ZONE_RECTS[UiZones.Zone.MODAL]
 	var sides := [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]
+	# Gauche/haut d'abord en poussant l'ancre opposée (sinon Godot ramène l'ancre à l'opposée,
+	# encore au centre après `claim`), puis droite/bas.
 	for i in 4:
 		var axis := i % 2
-		panel.set_anchor(sides[i], (float(anchors[i]) - part.position[axis]) / part.size[axis], true, false)
+		panel.set_anchor(sides[i], (float(anchors[i]) - part.position[axis]) / part.size[axis], true, i < 2)
 	for i in 4:
 		panel.set_offset(sides[i], float(offsets[i]))
 	panel.grow_horizontal = grow[0]
@@ -1036,7 +1038,9 @@ func _setup_panel_stack() -> void:
 	# U11 : fenêtre commune « Codex » (Histoire / Règles), panneau central.
 	codex_hub = CodexHub.new()
 	add_child(codex_hub)
-	register_panel(codex_hub, PanelStack.Kind.CENTRAL)
+	# P2g : la fenêtre rejoint la zone `MODAL` en différé (`CodexHub._join_modal_zone`), et ce
+	# reparentage la désinscrivait de la pile (Échap, exclusivité) : inscription après lui.
+	register_panel.call_deferred(codex_hub, PanelStack.Kind.CENTRAL)
 	for child in get_children():
 		_auto_register(child)
 	child_entered_tree.connect(_auto_register)
