@@ -1,0 +1,8 @@
+{
+  "description": "Chantier IB (ADR 0109) — textes des infobulles : libellés d'effets et de stats, textes des jauges et du HUD, infobulles simples (titre, corps, raccourci). Les {rule.…} sont résolus depuis les règles du core, comme dans RichTooltip. Rempli par le lot IB2 à partir des tables de game/scripts/ui/rich_tooltip.gd.",
+  "effects": {},
+  "stats": {},
+  "gauges": {},
+  "hud": {},
+  "plain": {}
+}
