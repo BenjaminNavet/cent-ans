@@ -56,7 +56,9 @@ func _process(delta: float) -> void:
 	if _timer > 0.0:
 		return
 	_timer = FALLBACK_SECONDS
+	var t0 := Time.get_ticks_usec()
 	refresh()
+	PerfProbe.lap("hint.refresh", t0)  # RS-K : banc `--bench-probe`
 
 
 ## Recalcule le conseil et sa visibilité.
