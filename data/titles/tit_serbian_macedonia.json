@@ -1,0 +1,34 @@
+{
+  "id": "tit_serbian_macedonia",
+  "rank": "duchy",
+  "name": {
+    "display": "Macédoine serbe",
+    "local": "Македонија",
+    "local_language": "serbe"
+  },
+  "heraldry": {
+    "blazon": "De gueules à l'aigle bicéphale d'argent.",
+    "description": "Aigle bicéphale blanc sur champ rouge, emblème des Nemanjić emprunté à Byzance (attesté surtout après 1346).",
+    "primary_color": "#9E1B25",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Le blason serbe est surtout attesté au XVe siècle."
+  },
+  "de_jure_liege": "tit_serbia",
+  "de_jure_provinces": [
+    "prov_skopje",
+    "prov_prilep",
+    "prov_ohrid",
+    "prov_strumica"
+  ],
+  "holder_1337": {
+    "faction": "fac_serbia",
+    "sources": [
+      "Étienne Dušan"
+    ]
+  },
+  "description": "Skopje, Prilep, Ohrid, Štip : les conquêtes serbes au sud.",
+  "sources": [
+    "Étienne Dušan"
+  ]
+}

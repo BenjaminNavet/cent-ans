@@ -1,0 +1,103 @@
+[
+  {
+    "id": "set_milas",
+    "province": "prov_mentese",
+    "kind": "city",
+    "name": {
+      "display": "Milas (Mylasa)",
+      "local": "Milas",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.78,
+      37.31
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des Menteşe avec Peçin.",
+    "sources": [
+      "Menteşe"
+    ]
+  },
+  {
+    "id": "set_mugla",
+    "province": "prov_mentese",
+    "kind": "town",
+    "name": {
+      "display": "Muğla"
+    },
+    "lonlat": [
+      28.36,
+      37.21
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg de l'intérieur.",
+    "sources": [
+      "Menteşe"
+    ]
+  },
+  {
+    "id": "set_makri",
+    "province": "prov_mentese",
+    "kind": "town",
+    "name": {
+      "display": "Makri (Telmessos)",
+      "local": "Makri",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      29.12,
+      36.62
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de la côte lycienne (Fethiye).",
+    "sources": [
+      "Menteşe"
+    ]
+  },
+  {
+    "id": "set_bodrum",
+    "province": "prov_mentese",
+    "kind": "town",
+    "name": {
+      "display": "Halicarnasse (Bodrum)",
+      "local": "Bodrum",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.43,
+      37.04
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de Carie ; le château de Saint-Pierre n'est bâti qu'en 1406.",
+    "sources": [
+      "Menteşe"
+    ]
+  }
+]

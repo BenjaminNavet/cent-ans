@@ -1,0 +1,84 @@
+[
+  {
+    "id": "set_neopatras",
+    "province": "prov_neopatras",
+    "kind": "city",
+    "name": {
+      "display": "Néopatras",
+      "local": "Νέαι Πάτραι",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.25,
+      38.92
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du duché de Néopatras (Ypati).",
+    "sources": [
+      "Ypati"
+    ]
+  },
+  {
+    "id": "set_zetouni",
+    "province": "prov_neopatras",
+    "kind": "town",
+    "name": {
+      "display": "Zeitounion",
+      "local": "Ζητούνιον",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.43,
+      38.9
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Forteresse de la plaine du Sperchios (Lamia).",
+    "sources": [
+      "Lamia"
+    ]
+  },
+  {
+    "id": "set_halmyros",
+    "province": "prov_neopatras",
+    "kind": "town",
+    "name": {
+      "display": "Halmyros",
+      "local": "Ἁλμυρός",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.76,
+      39.16
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Bourg de la baie de Volos, lieu de la bataille de 1311.",
+    "sources": [
+      "Almyros"
+    ]
+  }
+]

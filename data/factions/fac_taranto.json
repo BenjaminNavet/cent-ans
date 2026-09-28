@@ -42,6 +42,11 @@
     {
       "faction": "fac_papacy",
       "status": "peace"
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "truce",
+      "note": "Hostilité latente en Morée : Byzance grignote l'Achaïe."
     }
   ],
   "ai_personality": {

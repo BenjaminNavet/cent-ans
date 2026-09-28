@@ -1,0 +1,46 @@
+{
+  "id": "chr_orhan_mentese",
+  "name": {
+    "display": "Orhan Bey de Menteşe",
+    "local": "Orhan Bey",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Menteşeoğulları",
+  "faction": "fac_mentese",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1345"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Menteşe",
+      "from": {
+        "value": "1319"
+      },
+      "note": "Règne jusqu'en 1345 environ."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_admiral"
+  ],
+  "piety": 50,
+  "starting_location": "prov_mentese",
+  "status": "at_court",
+  "description": "Bey de Menteşe ; dates de vie et de règne approximatives.",
+  "sources": [
+    "Menteşe"
+  ]
+}

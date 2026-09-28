@@ -1,0 +1,72 @@
+[
+  {
+    "id": "set_ankara",
+    "province": "prov_ankara",
+    "kind": "city",
+    "name": {
+      "display": "Ankara (Angora)",
+      "local": "Engürü",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      32.86,
+      39.93
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville d'Angora, siège de l'Ahiler.",
+    "sources": [
+      "Ankara"
+    ]
+  },
+  {
+    "id": "set_kirsehir",
+    "province": "prov_ankara",
+    "kind": "town",
+    "name": {
+      "display": "Kırşehir"
+    },
+    "lonlat": [
+      34.16,
+      39.15
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg des ahis.",
+    "sources": [
+      "Ankara"
+    ]
+  },
+  {
+    "id": "set_beypazari",
+    "province": "prov_ankara",
+    "kind": "village",
+    "name": {
+      "display": "Beypazarı"
+    },
+    "lonlat": [
+      31.92,
+      40.17
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Village de l'ouest du plateau.",
+    "sources": [
+      "Ankara"
+    ]
+  }
+]

@@ -1,0 +1,52 @@
+{
+  "id": "chr_helena_of_bulgaria",
+  "name": {
+    "display": "Hélène de Bulgarie",
+    "local": "Јелена Бугарска",
+    "local_language": "serbe"
+  },
+  "sex": "female",
+  "house": "Nemanjić",
+  "faction": "fac_serbia",
+  "role": "consort",
+  "birth": {
+    "value": "1315",
+    "uncertain": true,
+    "note": "Naissance vers 1315."
+  },
+  "death": {
+    "value": "1374"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Reine de Serbie",
+      "from": {
+        "value": "1332"
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 4,
+    "court": 6
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 75,
+  "family": {
+    "spouses": [
+      "chr_stefan_dusan"
+    ],
+    "children": [
+      "chr_stefan_uros_v"
+    ]
+  },
+  "starting_location": "prov_kosovo",
+  "status": "at_court",
+  "description": "Sœur du tsar Ivan Alexandre, épouse de Dušan depuis 1332 ; elle finira dans un monastère (nonne Élisabeth).",
+  "sources": [
+    "Helena of Bulgaria"
+  ]
+}

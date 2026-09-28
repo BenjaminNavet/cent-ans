@@ -1,0 +1,47 @@
+{
+  "id": "chr_mehmed_esref",
+  "name": {
+    "display": "Mübarizeddin Mehmed Bey",
+    "local": "Mübarizeddin Mehmed",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Eşrefoğulları",
+  "faction": "fac_esrefid",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1355",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Beyşehir",
+      "from": {
+        "value": "1326"
+      },
+      "note": "Dates incertaines."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 60,
+  "starting_location": "prov_beysehir",
+  "status": "at_court",
+  "description": "Bey des Eşrefoğulları ; dates de vie incertaines.",
+  "sources": [
+    "Eshrefids"
+  ]
+}

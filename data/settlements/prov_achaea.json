@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_andravida",
+    "province": "prov_achaea",
+    "kind": "city",
+    "name": {
+      "display": "Andravida",
+      "local": "Ἀνδραβίδα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      21.28,
+      37.91
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale de la principauté d'Achaïe.",
+    "sources": [
+      "Andravida"
+    ]
+  },
+  {
+    "id": "set_chlemoutsi",
+    "province": "prov_achaea",
+    "kind": "castle",
+    "name": {
+      "display": "Clermont (Chlemoutsi)",
+      "local": "Χλεμούτσι",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      21.14,
+      37.91
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Grande forteresse franque, port de Clarence à proximité.",
+    "sources": [
+      "Chlemoutsi"
+    ]
+  },
+  {
+    "id": "set_patras",
+    "province": "prov_achaea",
+    "kind": "town",
+    "name": {
+      "display": "Patras",
+      "local": "Πάτραι",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      21.735,
+      38.246
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Archevêché latin et grand port.",
+    "sources": [
+      "Patras"
+    ]
+  }
+]

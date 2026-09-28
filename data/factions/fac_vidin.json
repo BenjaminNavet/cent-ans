@@ -1,0 +1,56 @@
+{
+  "id": "fac_vidin",
+  "name": {
+    "display": "Despotat de Vidin",
+    "local": "Видински деспотат",
+    "local_language": "bulgare"
+  },
+  "short_name": "Vidin",
+  "adjective": "de Vidin",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_belaur",
+  "capital": "prov_vidin",
+  "capital_city": "Vidin",
+  "religion": "rel_orthodox",
+  "culture": "cul_bulgarian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_bulgaria",
+  "primary_title": "tit_vidin",
+  "heraldry": {
+    "blazon": "D'azur au lion d'argent couronné d'or.",
+    "description": "Lion d'argent : armes de convention pour le despotat de Vidin.",
+    "primary_color": "#2A5DA8",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Armes de convention : aucune attestation pour Vidin en 1337."
+  },
+  "titles": [
+    "Despote de Vidin"
+  ],
+  "treasury": 3000,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_bulgaria",
+      "status": "vassal",
+      "note": "Belaur relève nominalement d'Ivan Alexandre."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 40,
+    "trade": 40,
+    "piety": 55
+  },
+  "description": "Apanage du Danube occidental tenu par le despote Belaur, seigneur remuant que le tsar de Tarnovo peine à tenir en bride.",
+  "sources": [
+    "Belaur",
+    "Despotat de Vidin"
+  ]
+}

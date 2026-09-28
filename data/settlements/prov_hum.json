@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_blagaj",
+    "province": "prov_hum",
+    "kind": "city",
+    "name": {
+      "display": "Blagaj",
+      "local": "Благај",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      17.91,
+      43.25
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Forteresse de la source de la Buna, capitale du Hum.",
+    "sources": [
+      "Blagaj"
+    ]
+  },
+  {
+    "id": "set_stolac",
+    "province": "prov_hum",
+    "kind": "castle",
+    "name": {
+      "display": "Vidoški (Stolac)",
+      "local": "Видошки",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      17.96,
+      43.08
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château de l'arrière-pays de Ston.",
+    "sources": [
+      "Stolac"
+    ]
+  },
+  {
+    "id": "set_trebinje",
+    "province": "prov_hum",
+    "kind": "town",
+    "name": {
+      "display": "Trebinje",
+      "local": "Требиње",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      18.345,
+      42.711
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_fair",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourg de la frontière raguséenne.",
+    "sources": [
+      "Trebinje"
+    ]
+  }
+]

@@ -1,0 +1,75 @@
+{
+  "id": "fac_athens",
+  "name": {
+    "display": "Duché d'Athènes et de Néopatras",
+    "local": "Ducat d'Atenes i Neopàtria",
+    "local_language": "catalan"
+  },
+  "short_name": "Athènes",
+  "adjective": "athénien",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_guillaume_ii_d_athenes",
+  "capital": "prov_attica",
+  "capital_city": "Athènes",
+  "religion": "rel_catholic",
+  "culture": "cul_catalan",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_sicily",
+  "primary_title": "tit_athens",
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules, à la bordure d'azur.",
+    "description": "Armes d'Aragon-Sicile brisées d'une bordure : duché catalan d'Athènes.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2A5DA8",
+    "uncertain": true,
+    "note": "Brisure de jeu (la Compagnie catalane portait aussi les armes d'Aragon)."
+  },
+  "titles": [
+    "Duc d'Athènes et de Néopatras",
+    "Comte de Malte et Gozo"
+  ],
+  "treasury": 5000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_sicily",
+      "status": "vassal",
+      "note": "Apanage du roi de Sicile, aux mains de son fils cadet Guillaume."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "truce",
+      "note": "Frontière de Thessalie et de Halmyros : trêve précaire depuis la reprise byzantine de 1333."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "peace",
+      "note": "Négrepont voisine avec les fiefs du duché."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_thessaly",
+      "note": "Thessalie reprise par Byzance en 1333, longtemps convoitée par les Catalans."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 45,
+    "trade": 40,
+    "piety": 55
+  },
+  "description": "Duché conquis par la Compagnie catalane en 1311 après Halmyros, doublé de Néopatras en 1319 : à ce titre, Guillaume II, fils du roi de Sicile, tient sur le papier Athènes et Thèbes, gouvernées par un vicaire.",
+  "sources": [
+    "Duchy of Athens",
+    "William II, Duke of Athens"
+  ]
+}

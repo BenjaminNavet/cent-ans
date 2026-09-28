@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_trebizond",
+    "province": "prov_trebizond",
+    "kind": "city",
+    "name": {
+      "display": "Trébizonde",
+      "local": "Τραπεζοῦς",
+      "local_language": "grec pontique"
+    },
+    "lonlat": [
+      39.72,
+      41.0
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Capitale des Grands Comnènes, sur son promontoire fortifié.",
+    "sources": [
+      "Empire of Trebizond"
+    ]
+  },
+  {
+    "id": "set_rizaion",
+    "province": "prov_trebizond",
+    "kind": "town",
+    "name": {
+      "display": "Rhizaion (Rize)",
+      "local": "Ῥιζαῖον",
+      "local_language": "grec pontique"
+    },
+    "lonlat": [
+      40.52,
+      41.02
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de la côte de Lazique.",
+    "sources": [
+      "Empire of Trebizond"
+    ]
+  },
+  {
+    "id": "set_platana",
+    "province": "prov_trebizond",
+    "kind": "village",
+    "name": {
+      "display": "Platana (Akçaabat)",
+      "local": "Πλατάναι",
+      "local_language": "grec pontique"
+    },
+    "lonlat": [
+      39.57,
+      41.02
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port et village proche de Trébizonde.",
+    "sources": [
+      "Empire of Trebizond"
+    ]
+  }
+]

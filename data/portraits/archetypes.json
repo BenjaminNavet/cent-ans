@@ -167,7 +167,19 @@
         "fac_galicia_volhynia",
         "fac_lithuania",
         "fac_kiev",
-        "fac_wallachia"
+        "fac_wallachia",
+        "fac_byzantium",
+        "fac_epirus",
+        "fac_serbia",
+        "fac_bulgaria",
+        "fac_vidin",
+        "fac_bosnia",
+        "fac_ragusa",
+        "fac_durazzo",
+        "fac_athens",
+        "fac_archipelago",
+        "fac_hospitallers",
+        "fac_cyprus"
       ],
       "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
     },
@@ -214,6 +226,50 @@
         "fac_bashkir"
       ],
       "prompt": "Golden Horde steppe fashion: silk kaftan (del) with wrap closure, felt or fur-trimmed pointed hat, sash belt, composite bow quiver, moustache and thin beard, Turkic-Mongol features, gold jewellery for nobles"
+    },
+    {
+      "id": "anatolie",
+      "label": "Beyliks turcs d'Anatolie",
+      "factions": [
+        "fac_ottoman",
+        "fac_karasi",
+        "fac_saruhan",
+        "fac_aydin",
+        "fac_mentese",
+        "fac_germiyan",
+        "fac_hamid",
+        "fac_teke",
+        "fac_esrefid",
+        "fac_karaman",
+        "fac_eretna",
+        "fac_candar",
+        "fac_dulkadir"
+      ],
+      "prompt": "Anatolian Turkish beylik fashion: long silk kaftan with embroidered collar, wrapped turban or felt cap (kalpak), wide sash belt, soft leather boots, moustache and short beard, no plate armour, decorated composite bow"
+    },
+    {
+      "id": "levant",
+      "label": "Mamelouks, Levant et Mésopotamie",
+      "factions": [
+        "fac_mamluks",
+        "fac_hama",
+        "fac_artuqids",
+        "fac_jalayirids"
+      ],
+      "prompt": "Mamluk and Levantine fashion: long silk robe (qaba) with tiraz armbands, tall conical turban or kalawta cap, sash belt, curved sabre, embroidered gold thread for emirs, sunburnt features, Arabic or Turco-Circassian appearance"
+    },
+    {
+      "id": "caucase",
+      "label": "Trébizonde, Cilicie, Géorgie et Caucase",
+      "factions": [
+        "fac_trebizond",
+        "fac_cilicia",
+        "fac_georgia",
+        "fac_samtskhe",
+        "fac_circassia",
+        "fac_alania"
+      ],
+      "prompt": "Eastern Christian and Caucasian fashion: long brocade tunic with jewelled collar, fur-trimmed cloak, tall hat or crown, tooled belt with dagger, Byzantine-Georgian embroidery, thick beard, Caucasian highlanders in felt cloaks and papakha hats"
     }
   ],
   "default_culture": "france",

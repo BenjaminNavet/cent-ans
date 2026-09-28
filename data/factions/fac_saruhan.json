@@ -1,0 +1,60 @@
+{
+  "id": "fac_saruhan",
+  "name": {
+    "display": "Beylik de Saruhan",
+    "local": "Saruhanoğulları",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Saruhan",
+  "adjective": "de Saruhan",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_saruhan_bey",
+  "capital": "prov_manisa",
+  "capital_city": "Manisa (Magnésie du Sipyle)",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_saruhan",
+  "heraldry": {
+    "blazon": "De sinople au chevron d'argent.",
+    "description": "Couleurs de convention des Saruhan.",
+    "primary_color": "#2E7D46",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey de Saruhan"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_windmills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aydin",
+      "status": "alliance",
+      "note": "Alliance de voisinage contre les Latins de Chios et de Smyrne."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Alliance de circonstance contre les Génois de Phocée (1336)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 55,
+    "trade": 60,
+    "piety": 55
+  },
+  "description": "Beylik fondé vers 1300 par Saruhan Bey, riche plaine du Gediz ; allié des Aydın, tributaire de la piraterie de l'Égée.",
+  "sources": [
+    "Saruhanids",
+    "Saruhan"
+  ]
+}

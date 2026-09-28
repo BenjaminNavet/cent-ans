@@ -1,0 +1,24 @@
+{
+  "id": "tit_venetian_dalmatia",
+  "rank": "duchy",
+  "name": {
+    "display": "Dalmatie vénitienne",
+    "local": "Dalmazia",
+    "local_language": "vénitien"
+  },
+  "de_jure_liege": "tit_venice",
+  "de_jure_provinces": [
+    "prov_zara",
+    "prov_spalato"
+  ],
+  "holder_1337": {
+    "faction": "fac_venice",
+    "sources": [
+      "Dalmatie sous domination vénitienne"
+    ]
+  },
+  "description": "Duché de Dalmatie : Zara, Split, Trogir, Šibenik.",
+  "sources": [
+    "Dalmatie sous domination vénitienne"
+  ]
+}

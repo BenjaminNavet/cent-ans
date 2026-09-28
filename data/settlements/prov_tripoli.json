@@ -1,0 +1,105 @@
+[
+  {
+    "id": "set_tripoli",
+    "province": "prov_tripoli",
+    "kind": "city",
+    "name": {
+      "display": "Tripoli du Levant",
+      "local": "طرابلس",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.85,
+      34.44
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Capitale du niyaba, port ouvert aux Vénitiens et Génois.",
+    "sources": [
+      "Tripoli, Lebanon"
+    ]
+  },
+  {
+    "id": "set_krak",
+    "province": "prov_tripoli",
+    "kind": "castle",
+    "name": {
+      "display": "Krak des Chevaliers",
+      "local": "حصن الأكراد",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      36.29,
+      34.76
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Grande forteresse hospitalière prise en 1271.",
+    "sources": [
+      "Tripoli, Lebanon"
+    ]
+  },
+  {
+    "id": "set_tartus",
+    "province": "prov_tripoli",
+    "kind": "town",
+    "name": {
+      "display": "Tortose (Tartous)",
+      "local": "طرطوس",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.89,
+      34.89
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne place templière.",
+    "sources": [
+      "Tripoli, Lebanon"
+    ]
+  },
+  {
+    "id": "set_homs",
+    "province": "prov_tripoli",
+    "kind": "town",
+    "name": {
+      "display": "Homs",
+      "local": "حمص",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      36.72,
+      34.73
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de l'Oronte moyen.",
+    "sources": [
+      "Tripoli, Lebanon"
+    ]
+  }
+]

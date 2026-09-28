@@ -1,0 +1,49 @@
+{
+  "id": "chr_al_afdal_muhammad",
+  "name": {
+    "display": "al-Afdal Muhammad de Hama",
+    "local": "الأفضل محمد",
+    "local_language": "arabe"
+  },
+  "sex": "male",
+  "house": "Ayyoubides",
+  "faction": "fac_hama",
+  "role": "ruler",
+  "birth": {
+    "value": "1310",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1342",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Émir de Hama",
+      "from": {
+        "value": "1331"
+      },
+      "note": "Fils d'Abu l-Fida ; déposé vers 1341."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_cultured",
+    "trait_cautious"
+  ],
+  "piety": 60,
+  "starting_location": "prov_hama",
+  "status": "at_court",
+  "description": "Émir ayyoubide de Hama, fils d'Abu l-Fida (naissance et mort approximatives).",
+  "sources": [
+    "Hama",
+    "Abu al-Fida"
+  ]
+}

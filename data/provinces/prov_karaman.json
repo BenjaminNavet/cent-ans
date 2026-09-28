@@ -1,0 +1,98 @@
+{
+  "id": "prov_karaman",
+  "name": {
+    "display": "Karaman (Larende)",
+    "local": "Karaman",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "mountains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Göksu"
+  ],
+  "ports": [
+    "Silifke"
+  ],
+  "sea_zones": [
+    "sea_levantine"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Larende (Karaman)",
+      "local": "Larende",
+      "local_language": "turc ottoman"
+    },
+    "lat": 37.18,
+    "lon": 33.22
+  },
+  "geo": {
+    "capital_lonlat": [
+      33.22,
+      37.18
+    ],
+    "seed_lonlat": [
+      33.2,
+      36.95
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_karaman",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 34000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4100,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 410,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1000,
+  "description": "Bastion taurique des Karamanoğulları, qui se posent en héritiers des Seldjoukides de Roum et tiennent Larende, Ermenek, Mut et la côte de Silifke.",
+  "sources": [
+    "Karamanids",
+    "Karaman",
+    "Ermenek"
+  ]
+}

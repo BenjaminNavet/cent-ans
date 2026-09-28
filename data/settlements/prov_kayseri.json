@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_kayseri",
+    "province": "prov_kayseri",
+    "kind": "city",
+    "name": {
+      "display": "Kayseri (Césarée)",
+      "local": "Kayseri",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      35.49,
+      38.73
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Grande ville des Seldjoukides de Roum, ceinte de basalte.",
+    "sources": [
+      "Kayseri"
+    ]
+  },
+  {
+    "id": "set_nigde",
+    "province": "prov_kayseri",
+    "kind": "town",
+    "name": {
+      "display": "Niğde"
+    },
+    "lonlat": [
+      34.68,
+      37.97
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de Cappadoce méridionale.",
+    "sources": [
+      "Kayseri"
+    ]
+  },
+  {
+    "id": "set_aksaray",
+    "province": "prov_kayseri",
+    "kind": "town",
+    "name": {
+      "display": "Aksaray"
+    },
+    "lonlat": [
+      34.03,
+      38.37
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Étape du Sultan Han.",
+    "sources": [
+      "Kayseri"
+    ]
+  }
+]

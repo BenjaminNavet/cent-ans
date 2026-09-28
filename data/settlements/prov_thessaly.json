@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_trikala",
+    "province": "prov_thessaly",
+    "kind": "city",
+    "name": {
+      "display": "Trikala",
+      "local": "Τρίκαλα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      21.7679,
+      39.5555
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale de la Thessalie byzantine.",
+    "sources": [
+      "Trikala"
+    ]
+  },
+  {
+    "id": "set_larissa",
+    "province": "prov_thessaly",
+    "kind": "town",
+    "name": {
+      "display": "Larissa",
+      "local": "Λάρισσα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.4191,
+      39.639
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Ville de la plaine thessalienne.",
+    "sources": [
+      "Larissa"
+    ]
+  },
+  {
+    "id": "set_pharsala",
+    "province": "prov_thessaly",
+    "kind": "castle",
+    "name": {
+      "display": "Pharsale",
+      "local": "Φάρσαλα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.38,
+      39.29
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de la route de Néopatras.",
+    "sources": [
+      "Farsala"
+    ]
+  }
+]

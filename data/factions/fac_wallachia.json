@@ -52,6 +52,11 @@
       "faction": "fac_golden_horde",
       "status": "peace",
       "note": "Voisinage des steppes tatares à l'est."
+    },
+    {
+      "faction": "fac_bulgaria",
+      "status": "alliance",
+      "note": "Basarab marie sa fille à Ivan Alexandre."
     }
   ],
   "claims": [

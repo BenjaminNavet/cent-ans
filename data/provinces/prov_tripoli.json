@@ -1,0 +1,100 @@
+{
+  "id": "prov_tripoli",
+  "name": {
+    "display": "Tripoli du Levant et Homs",
+    "local": "طرابلس",
+    "local_language": "arabe"
+  },
+  "region": "levant",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Oronte",
+    "Nahr Ibrahim"
+  ],
+  "ports": [
+    "Tripoli",
+    "Tortose"
+  ],
+  "sea_zones": [
+    "sea_levantine"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Tripoli du Levant",
+      "local": "طرابلس",
+      "local_language": "arabe"
+    },
+    "lat": 34.44,
+    "lon": 35.85
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.85,
+      34.44
+    ],
+    "seed_lonlat": [
+      36.25,
+      34.65
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_mamluks",
+  "culture": "cul_arabic",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 46000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1400,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 550,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1000,
+  "description": "Ancien comté croisé de Tripoli, reconstruit par les Mamelouks à Tripoli-neuve (1289) ; Krak des Chevaliers et Tortose complètent la côte.",
+  "sources": [
+    "Tripoli, Lebanon",
+    "Krak des Chevaliers",
+    "Homs"
+  ]
+}

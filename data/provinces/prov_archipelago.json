@@ -1,0 +1,98 @@
+{
+  "id": "prov_archipelago",
+  "name": {
+    "display": "Archipel",
+    "local": "Αρχιπέλαγος",
+    "local_language": "grec"
+  },
+  "region": "egee",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Naxos (Chora)",
+    "Paros (Kéfalos)",
+    "Milos"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wine",
+    "res_fish",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Naxos (Chora)",
+      "local": "Νάξος",
+      "local_language": "grec"
+    },
+    "lat": 37.104,
+    "lon": 25.376
+  },
+  "geo": {
+    "capital_lonlat": [
+      25.376,
+      37.104
+    ],
+    "seed_lonlat": [
+      25.2,
+      37.0
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_archipelago",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 32000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4500,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 400,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1100,
+  "description": "Duché de Naxos et des Cyclades, fondé par Marco Sanudo en 1207 : îles de Naxos, Paros, Milos, Santorin, sous la protection de Venise face aux corsaires turcs.",
+  "sources": [
+    "Duché de l'Archipel",
+    "Naxos",
+    "Nicolas Ier Sanudo"
+  ]
+}

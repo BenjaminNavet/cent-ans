@@ -1,0 +1,91 @@
+{
+  "id": "prov_ankara",
+  "name": {
+    "display": "Ankara et Kırşehir",
+    "local": "Ankara",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "steppe",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Sakarya"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Ankara (Angora)",
+      "local": "Engürü",
+      "local_language": "turc ottoman"
+    },
+    "lat": 39.93,
+    "lon": 32.86
+  },
+  "geo": {
+    "capital_lonlat": [
+      32.86,
+      39.93
+    ],
+    "seed_lonlat": [
+      33.1,
+      39.7
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_eretna",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 34000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4100,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 410,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu ; Ankara dominée par les ahis, rattachement à Eretna incertain en 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 900,
+  "description": "Haut plateau à chèvres d'Angora, terre des confréries d'ahis ; Eretna en revendique le contrôle (date incertaine).",
+  "sources": [
+    "Ankara",
+    "Kırşehir",
+    "Ahi order"
+  ]
+}

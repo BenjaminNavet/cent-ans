@@ -1,0 +1,102 @@
+[
+  {
+    "id": "set_ayas",
+    "province": "prov_ayas",
+    "kind": "city",
+    "name": {
+      "display": "Ayas (Lajazzo)",
+      "local": "Այաս",
+      "local_language": "arménien"
+    },
+    "lonlat": [
+      35.79,
+      36.77
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grand port de Cilicie ; pris par al-Nasir Muhammad en 1337.",
+    "sources": [
+      "Ayas"
+    ]
+  },
+  {
+    "id": "set_adana",
+    "province": "prov_ayas",
+    "kind": "town",
+    "name": {
+      "display": "Adana",
+      "local": "Ադանա",
+      "local_language": "arménien"
+    },
+    "lonlat": [
+      35.32,
+      37.0
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du Seyhan, un pont romain.",
+    "sources": [
+      "Ayas"
+    ]
+  },
+  {
+    "id": "set_tarsus",
+    "province": "prov_ayas",
+    "kind": "town",
+    "name": {
+      "display": "Tarse",
+      "local": "Տարսոն",
+      "local_language": "arménien"
+    },
+    "lonlat": [
+      34.89,
+      36.92
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Patrie de saint Paul.",
+    "sources": [
+      "Ayas"
+    ]
+  },
+  {
+    "id": "set_misis",
+    "province": "prov_ayas",
+    "kind": "village",
+    "name": {
+      "display": "Mopsueste (Misis)",
+      "local": "Մսիս",
+      "local_language": "arménien"
+    },
+    "lonlat": [
+      35.63,
+      37.0
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg sur le Ceyhan.",
+    "sources": [
+      "Ayas"
+    ]
+  }
+]

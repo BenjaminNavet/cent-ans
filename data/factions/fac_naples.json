@@ -47,6 +47,11 @@
       "faction": "fac_france",
       "status": "alliance",
       "note": "Les Angevins de Naples sont des cousins des Valois et leurs alliés constants."
+    },
+    {
+      "faction": "fac_durazzo",
+      "status": "overlord",
+      "note": "Fief de la branche de Durazzo-Gravina."
     }
   ],
   "ai_personality": {

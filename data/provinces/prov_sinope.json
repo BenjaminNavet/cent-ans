@@ -1,0 +1,98 @@
+{
+  "id": "prov_sinope",
+  "name": {
+    "display": "Sinope",
+    "local": "Sinop",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Kızılırmak"
+  ],
+  "ports": [
+    "Sinope",
+    "Samsun"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Sinope",
+      "local": "Sinop",
+      "local_language": "turc ottoman"
+    },
+    "lat": 42.03,
+    "lon": 35.15
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.15,
+      42.03
+    ],
+    "seed_lonlat": [
+      35.0,
+      41.75
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_candar",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 28000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 800,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 340,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu ; Samsun disputée entre Candar, Eretna et Gênes."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1000,
+  "description": "Port de la mer Noire pris par les Candaroğulları en 1322, plaque tournante du commerce avec Caffa et la Crimée.",
+  "sources": [
+    "Sinop",
+    "Candar dynasty"
+  ]
+}
