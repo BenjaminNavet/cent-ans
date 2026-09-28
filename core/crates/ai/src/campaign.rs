@@ -552,7 +552,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let levied = me.tax_rate == TaxRate::High;
     let normal_surplus = if levied {
         ctx.surplus()
-            - (ctx.gross_income.max(0) as f64 * (1.0 - 1.0 / TaxRate::High.multiplier())) as i64
+            - (ctx.gross_income.max(0) as f64
+                * (1.0 - 1.0 / TaxRate::High.multiplier(&ctx.data.economy_rules)))
+                as i64
     } else {
         ctx.surplus()
     };

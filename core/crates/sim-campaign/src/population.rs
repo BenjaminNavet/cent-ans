@@ -232,7 +232,9 @@ pub(crate) fn resolve_population(
         let tax_burden = state
             .factions
             .get(&controller)
-            .map_or(0.35, |f| f.tax_rate.burden());
+            .map_or(data.economy_rules.tax_rates.normal.burden, |f| {
+                f.tax_rate.burden(&data.economy_rules)
+            });
         let goods = state
             .factions
             .get(&controller)
