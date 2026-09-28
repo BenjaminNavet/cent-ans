@@ -220,8 +220,8 @@ func _run_campaign_map() -> void:
 	_check(data.province_count == 6, "expected 6 provinces, got %d" % data.province_count)
 	_check(data.index_of_id("prov_synth_3") == 3, "index_of_id(prov_synth_3) should be 3")
 	var terrain: TerrainBuilder = map.terrain
-	_check(terrain.chunk_count() == TerrainBuilder.CHUNKS * TerrainBuilder.CHUNKS,
-		"expected %d terrain chunks, got %d" % [TerrainBuilder.CHUNKS * TerrainBuilder.CHUNKS, terrain.chunk_count()])
+	_check(terrain.chunk_count() == terrain.chunks_x * terrain.chunks_y and terrain.chunks_x * terrain.chunk_px >= terrain.map_data.size.x and terrain.chunks_y * terrain.chunk_px >= terrain.map_data.size.y,
+		"expected %d × %d terrain chunks covering the map, got %d" % [terrain.chunks_x, terrain.chunks_y, terrain.chunk_count()])
 	for chunk in terrain.get_children():
 		if chunk is MeshInstance3D and (chunk.mesh == null or chunk.mesh.get_surface_count() == 0):
 			_fail("terrain chunk %s has no mesh surface" % chunk.name)

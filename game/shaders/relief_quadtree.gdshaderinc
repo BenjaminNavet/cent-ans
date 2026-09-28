@@ -21,7 +21,7 @@ uniform int qt_debug = 0;
 // Nœud : origine x, z (monde) ; espacement des sommets s (unités) ; drapeau (≥ 0 : nœud du quadtree).
 instance uniform vec4 qt_node = vec4(0.0, 0.0, 1.0, -1.0);
 // Pages fine (niveau du nœud) et grossière (niveau du parent) : couche du Texture2DArray
-// (-1 = heightmap 4096), origine x, z et côté (unités) de la tuile.
+// (-1 = heightmap de la carte), origine x, z et côté (unités) de la tuile.
 instance uniform vec4 qt_fine = vec4(-1.0, 0.0, 0.0, 1.0);
 instance uniform vec4 qt_coarse = vec4(-1.0, 0.0, 0.0, 1.0);
 // Début du morphing (distance), 1 / longueur du morphing, poids de la page fine (fondu d'arrivée),
@@ -61,7 +61,7 @@ float qt_texel(ivec2 t, float layer, vec4 nbr, vec4 diag) {
 	return texelFetch(qt_pages, ivec3(t, int(l)), 0).r;
 }
 
-// Altitude (m) au point monde p : bilinéaire dans la page (et ses voisines), ou heightmap 4096.
+// Altitude (m) au point monde p : bilinéaire dans la page (et ses voisines), ou heightmap de la carte.
 float qt_height_m(vec2 p, vec4 page, vec4 nbr, vec4 diag, float hm_lod) {
 	if (page.x < 0.0) {
 		return height_m_lod(p / map_size, hm_lod);  // SZ2b : pixel i centré en i + 0,5 (ADR 0086)
@@ -85,7 +85,7 @@ vec3 qt_vertex(vec3 v) {
 	}
 	float s = qt_node.z;
 	vec2 g = v.xz;
-	// Heightmap 4096 (1 px = 1 unité) : mipmap assorti à l'espacement des sommets.
+	// Heightmap de la carte (1 px = 1 unité) : mipmap assorti à l'espacement des sommets.
 	float lod_fine = max(log2(s) - 1.0, 0.0);
 	float lod_coarse = max(log2(2.0 * s) - 1.0, 0.0);
 	vec2 p = qt_node.xy + g * s;
@@ -141,7 +141,7 @@ bool qt_has_page() {
 }
 
 // Crochet fragment : normale d'ombrage et altitude depuis la page du nœud (vallées et crêtes au
-// pixel de l'étage), au lieu de la heightmap 4096 + détail 8192 ; sans effet hors quadtree ou
+// pixel de l'étage), au lieu de la heightmap de la carte + détail à 2 px par unité ; sans effet hors quadtree ou
 // quand le nœud n'a pas de page (niveaux grossiers).
 void qt_relief(vec2 p, float footprint, inout float hc, inout vec2 grad_m) {
 	if (!qt_has_page()) {

@@ -57,7 +57,9 @@ var yaw: float = 0.0
 var target_focus: Vector3 = Vector3.ZERO
 var target_distance: float = 500.0
 var target_yaw: float = 0.0
-var bounds: Rect2 = Rect2(0, 0, 4096, 4096)
+## Emprise de la carte (unités monde) : `setup` la reçoit de la taille lue dans map.json ; vide
+## tant qu'aucune carte n'est chargée (aucun bornage).
+var bounds: Rect2 = Rect2()
 
 var _dragging := false
 ## PO5 : vitesse de déplacement dans le plan de la carte (unités/s), inertie comprise.
@@ -252,6 +254,8 @@ func _plane_vector(screen_delta: Vector2) -> Vector3:
 
 func _move_target(offset: Vector3) -> void:
 	target_focus += offset
+	if not bounds.has_area():
+		return
 	var clamped_x := clampf(target_focus.x, bounds.position.x, bounds.end.x)
 	var clamped_z := clampf(target_focus.z, bounds.position.y, bounds.end.y)
 	if clamped_x != target_focus.x:

@@ -43,9 +43,10 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// stand on settlements). `6`: lot M2 free movement (`Army::position`,
 /// `movement_left`, `planned_path` replace `location`, `movement_points`,
 /// `path`; field battles carry a point). `7`: lot FE feudal titles
-/// (`feudal`: title holders, primary titles, felony cases).
+/// (`feudal`: title holders, primary titles, felony cases). `8`: lot OM1
+/// Urals–Mediterranean map (ADR 0115: map pixels moved +1280 in y, same layout).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 7;
+pub const STATE_VERSION: u32 = 8;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -257,7 +258,7 @@ impl Unit {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ArmyPosition {
-    /// In the field, at a free point of the map (pixels of the 4096² map).
+    /// In the field, at a free point of the map (map pixels).
     Field { x: f32, y: f32 },
     /// Stationed in a settlement: garrison, siege or friendly stop.
     Settlement(SettlementId),
