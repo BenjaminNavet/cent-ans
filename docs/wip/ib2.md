@@ -26,24 +26,37 @@ Branche `feat/ib2-migrate` depuis `main` (05e711e1). Spec `docs/superpowers/spec
   n'a pas le fichier — bogue latent d'IB4 corrigé au passage, voir Journal).
 - [x] 2. `RichTooltip.plain_spec`/`plain`/`attach_plain` + `plain_tooltip_host.gd` (script
   générique pour les contrôles natifs sans classe dédiée) ; `spec_for` route `"plain"`.
-- [ ] 3. Migration des ~120 littéraux, par lots de fichiers (carte, bataille, menus) — **en
-  cours**, liste exacte des fichiers restants dans `LITERAL_EXCEPTIONS` de `ib_plain_test.gd`.
-  Fait : lot « menus simples », lot « carte » (cf. commits précédents), lot « ui/ restant »
-  (army_strip, budget_table, character_sheet, chivalry_section, chronicle_window, court_panel,
-  diplomacy_panel, encounter_window, encyclopedia, end_turn_cluster, faction_panel, general_seal,
-  mercenary_panel, retinue_row, season_report, tutorial). Reste (`LITERAL_EXCEPTIONS`) :
-  `audio/advisor.gd`, `battle/*` (7 fichiers), `codex/codex_window.gd`, `naval/*` (2 fichiers).
+- [x] 3. Migration des ~131 littéraux `tooltip_text = "…"` faite en 4 lots (menus, carte, ui/
+  restant, bataille+naval+codex+audio) ; `LITERAL_EXCEPTIONS` vide, `ib_plain_test.gd` vert
+  (grep sans littéral restant hors commentaires).
 - [x] 4. Tests : `ib_plain_test.gd` (mécanisme d'attache + grep sans littéraux hors exceptions),
   pytest `test_tooltip_schemas.py` (`plain` référencées existent, `effects`/`stats`/`gauges`
   ont toutes un corps).
 
-## Choix à trancher pendant le travail
+## Choix faits pendant le travail
 
-- Mécanisme d'attache pour les contrôles natifs (`Button`/`Control` hors `RichButton`/`IconChip`/
-  `RichPanel`) : à choisir après lecture de `panel_for` (IB1) — probablement un
-  `RichTooltip.attach_plain(control, key, title, body, hint)` qui pose la clé `ib:plain:<key>`
-  dans `tooltip_text` + éventuel texte dynamique en métadonnée, et une entrée dans `panel_for`/
-  `spec_for` pour `kind == "plain"`.
+- Mécanisme d'attache : `RichTooltip.attach_plain(control, key, live={})`. Pose la clé
+  `ib:plain:<key>` (+ repli BBCode) via `set_tooltip` (déjà générique, IB1) ; si `control` n'a pas
+  de script, lui attache `plain_tooltip_host.gd` (`_make_custom_tooltip` → `panel_for`, même
+  patron que `RichButton`/`IconChip`/`RichPanel`). Un contrôle déjà scripté (`RichButton`…) garde
+  son script, seule la clé change. `live` porte `title`/`body`/`hint` dynamiques, prioritaires sur
+  `tooltips.json`.
+- Titre/corps : heuristique manuelle par occurrence (le plus souvent un clause avant « : »
+  devient le titre, le reste le corps ; sinon un titre court composé pour le contexte). Clés
+  génériques réutilisées quand le texte se répète telles quelles (`close_escape`, `close`,
+  `open_character_sheet`, `seat_unavailable`…).
+- Une bulle `plain` place son texte (`body`/`hint`) en ligne d'effet neutre (`sign: 0`), pas dans
+  `detail` : `TooltipView.blocks_for` ne montre `detail` qu'en version verrouillée (Alt), donc un
+  simple survol resterait vide sinon.
+- `RichLabel` (`set_script(RichLabel)`, ex. `pre_battle_dialog.gd`) route encore vers
+  `RichTooltip.make_panel` (BBCode à plat), pas vers `TooltipView` : `attach_plain` y fonctionne
+  (clé + repli lisibles) mais sans les sections ; mise à niveau de `RichLabel` hors périmètre IB2
+  (même famille que `RichButton`/`IconChip`/`RichPanel`, mais pas listée dans le brief).
+- Bogue latent d'IB4 trouvé et corrigé : `RichTooltip.texts()` n'avait pas le repli vers `data/`
+  racine que `CameraFeel`/`TooltipView.style()` ont déjà (voir Journal).
+- Aucune exception : les ~131 occurrences repérées par le grep du brief sont toutes migrées
+  (`LITERAL_EXCEPTIONS` vide). Cas `tooltip_text = ""` (effacement) exclus du contrôle : ce n'est
+  pas un texte à migrer.
 
 ## Journal
 
@@ -62,9 +75,13 @@ Branche `feat/ib2-migrate` depuis `main` (05e711e1). Spec `docs/superpowers/spec
   de `BRANCH_LABELS.get(branch, branch)` — les deux visibles immédiatement au premier `smoke.gd`.
   Lot 2 (mécanisme `plain`) fait : `RichTooltip.plain_spec/plain/attach_plain`,
   `plain_tooltip_host.gd`, `ib_plain_test.gd` (attache sur `RichButton` et sur un `Button` natif,
-  `live` dynamique, grep sans littéral hors `LITERAL_EXCEPTIONS`). `LITERAL_EXCEPTIONS` contient
-  pour l'instant les 55 fichiers non encore migrés (liste exacte dans le fichier de test) ; à
-  réduire lot par lot. Choix : corps/raccourci d'une bulle `plain` rendus comme des lignes
-  d'effet neutres (`sign: 0`), pas dans `detail`, pour rester visibles en survol court (`detail`
-  n'apparaît qu'en bulle verrouillée dans `TooltipView.blocks_for`).
-  Prochaine étape : lot 3, migration fichier par fichier (commencer par `ui/` menus simples).
+  `live` dynamique, grep sans littéral hors `LITERAL_EXCEPTIONS`). Choix : corps/raccourci d'une
+  bulle `plain` rendus comme des lignes d'effet neutres (`sign: 0`), pas dans `detail`, pour
+  rester visibles en survol court (`detail` n'apparaît qu'en bulle verrouillée dans
+  `TooltipView.blocks_for`).
+- 28/09 : lots 3 (menus, carte, ui/ restant, bataille+naval+codex+audio) faits : ~131 occurrences
+  migrées vers `RichTooltip.attach_plain` + `data/ui/tooltips.json` bloc `plain` (une centaine de
+  clés). `LITERAL_EXCEPTIONS` vide. Tests verts : pytest, `ib_plain_test.gd` (11 vérifications),
+  `ib_layout_test.gd` (253), `ib_chain_test.gd`, `smoke.gd` (voir rapport final pour le dernier
+  passage). Reste à l'orchestrateur : fusionner `main`, jugement joueur sur quelques bulles
+  `plain` représentatives (le titre/corps est un découpage manuel, pas un texte validé par relecture).

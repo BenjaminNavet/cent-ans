@@ -526,6 +526,62 @@
       "title": "Ne plus afficher",
       "body": "Réactivable dans Réglages → Carte."
     },
-    "season_event_action": {"title": "Action"}
+    "season_event_action": {"title": "Action"},
+    "battle_command": {"title": "Ordre"},
+    "battle_mode": {"title": "Mode"},
+    "battle_no_leader": {"title": "Sans chef", "body": "L'ost combat sans général."},
+    "battle_leader": {"title": "Chef"},
+    "battle_log_toggle": {"title": "Journal", "hint": "J"},
+    "battle_withdraw_all": {
+      "title": "Sonner la retraite",
+      "body": "Toute l'armée (confirmation demandée)."
+    },
+    "battle_opening_conditions": {"title": "Conditions d'ouverture"},
+    "click_camera_focus": {"title": "Cliquer pour y porter la caméra"},
+    "formation_picker_toggle": {"title": "Replier ou déplier le sélecteur", "body": "Les raccourcis Alt+Maj+1…6 restent actifs."},
+    "formation_place_proposal": {
+      "title": "Proposer les places",
+      "body": "À chaque régiment de la sélection (sans sélection : toute l'armée) selon la formation choisie ; clic droit : déplacer la proposition ; second appui : valider."
+    },
+    "battle_minimap_click_camera": {"title": "Minicarte : cliquer pour y porter la caméra"},
+    "replay_play_pause": {"title": "Lecture / pause", "hint": "Espace"},
+    "replay_speed": {"title": "Vitesse"},
+    "replay_timeline_scrub": {"title": "Glissez pour aller à un moment de la bataille"},
+    "battle_replay_full": {
+      "title": "Rejouer toute la bataille",
+      "body": "Lecture, pause, vitesse, saut dans le temps, caméra libre."
+    },
+    "roster_card_detail": {"title": "Régiment"},
+    "battle_postpone_assault": {
+      "title": "Remettre l'assaut",
+      "body": "Le siège continue et affame la garnison."
+    },
+    "battle_decline": {
+      "title": "Refuser la bataille",
+      "body": "L'ost se replie et perd du moral."
+    },
+    "leader_command_level": {"title": "Commandement"},
+    "battle_auto_resolve": {
+      "title": "Résolution automatique",
+      "body": "La bataille est tranchée sans être jouée, selon le rapport de forces et la fortune des armes."
+    },
+    "battle_balance_estimate": {
+      "title": "Estimation du cœur",
+      "body": "Mêmes règles que la résolution automatique, sans le hasard : effectifs, qualité, moral, ravitaillement, général, terrain."
+    },
+    "advisor_silence": {
+      "title": "Faire taire le conseiller",
+      "body": "Réglages → Son pour le désactiver."
+    },
+    "naval_balance_estimate": {
+      "title": "Estimation du cœur",
+      "body": "Cinq combats résolus automatiquement avec les mêmes flottes (navires, hauteur de bord, archers aux châteaux, hommes d'armes pour l'abordage)."
+    },
+    "naval_withdraw": {"title": "Se dérober"},
+    "naval_scroll_ships": {"title": "Faire défiler les navires"},
+    "naval_ship_card": {"title": "Navire"},
+    "naval_ship_name": {"title": "Navire"},
+    "naval_hull": {"title": "Coque"},
+    "codex_rules_tab": {"title": "Onglet Règles", "body": "La fiche de jeu.", "hint": "L"}
   }
 }
