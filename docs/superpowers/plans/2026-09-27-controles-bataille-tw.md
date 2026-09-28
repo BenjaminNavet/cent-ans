@@ -190,6 +190,8 @@ L'exploration du code a révélé six écarts. Pour chacun, le plan fait un choi
 
 ### CB2 — Modes d'unité et icônes d'état (en parallèle avec CB3 et CB5)
 
+- Ajout après relecture historique : mode permanent « Battre en brèche » pour les engins (effet sur les murs seulement, mangonneau moins efficace ; voir CB4).
+
 *Cœur* :
 - `Unit` gagne `mode_run: bool`, `guard: bool`, `skirmish: bool`, `melee_mode: bool`.
 - Nouvelle commande `Command::SetMode { units, mode, enabled }`, additive pour le rejeu.
@@ -246,6 +248,15 @@ L'exploration du code a révélé six écarts. Pour chacun, le plan fait un choi
 ### CB4 — Capacités actives (après CB2 ; session principale pour le cœur)
 
 - **Pré-requis** : relecture historique de la liste (agent historien, sources dans `docs/research/cb4-capacites.md`), avant tout code.
+- **Décisions après relecture historique (09-27, `docs/research/cb4-capacites.md`)** :
+  - garder « Tir tendu » (archers seulement, précision et chevaux, portée −⅓ à −½, pas au contact ni sans munitions) ;
+  - « Dresser les pavois » (arbalétriers, couleuvriniers) : facteur 0,35 conservé, plus un délai de pose et une protection de face seulement ;
+  - « Charge en haie » remplacée par « Se rallier à la bannière » (chevaliers, immobiles, cohésion récupérée plus vite après le choc) ;
+  - « Serrer les rangs » (ex-« Rangs serrés », branché sur `ShieldWall`) avec son coût : flancs plus exposés, pertes sous le tir, fatigue ;
+  - « Hérisson » remplacé par « Piques plantées » (face seulement, immobile ; distinct du schiltron T) ;
+  - « Tir de rupture » devient le mode permanent « Battre en brèche » (murs seulement, mangonneau moins efficace), déplacé dans CB2 (modes d'unité) ;
+  - pieux : le passif actuel reste tel quel ; leur datation (attestés à partir de 1415) touche l'équilibrage de Crécy et Poitiers, hors du périmètre CB → suites de l'historien ;
+  - écartés : flèches enflammées en rase campagne, duels, fuite simulée, pied à terre comme capacité d'unité.
 - **Données** :
   - `data/battle_abilities/*.json`, avec un schéma et un test ;
   - champs : `id`, types d'unité, recharge, durée, modificateurs de stats et d'état, conditions (`stationary`, `not_engaged`, `ammo_gt_0`), règle d'IA ;
@@ -298,7 +309,7 @@ donc le rejeu EP13 n'est pas touché.
 
 *Godot* :
 - barre de groupe (à côté du verrou de CB1) : sélecteur de préréglage, séparé en « Attaque » et
-  « Défense », infobulle `description_fr` ; raccourci Alt+1…5 (ajouté au remappage de CB2) ;
+  « Défense », infobulle `description_fr` ; raccourci Alt+Maj+1…6 (Alt+1…4 est pris par les capacités de CB4 ; ajouté au remappage de CB2) ;
 - en déploiement : bouton « Placer en formation » qui applique le préréglage à toute l'armée ou à la
   sélection, avec fantômes (décales CB-M1) avant validation ;
 - en bataille : préréglage actif + clic droit (ou glisser-droit pour l'orientation) = fantômes des
@@ -310,8 +321,16 @@ effectif et ordre gauche-droite stables, zone de déploiement respectée, pas d'
 « Ligne de bataille » = placement actuel, déterminisme) ; Godot `cb6_group_formation_test.gd` ;
 capture `cb6_formation_shot.gd` (déploiement en Herse).
 
+*Décisions après relecture historique (09-27, `docs/research/cb6-formations.md`, qui fournit les écarts par
+rôle et les `description_fr`)* : six préréglages — Ligne de bataille, La herse, Trois batailles, Charge de
+la chevalerie, Bataille à pied (ajout : masse démontée au centre, petite réserve montée sur un flanc,
+Poitiers, Cocherel), Ordre de marche (ex-Colonne : ordre des batailles, vitesse du plus lent,
+`stance: "march"` dans le schéma). « Ligne de bataille » garde les tireurs **derrière** l'infanterie
+comme le placement actuel (non-régression de l'équilibrage) ; les tireurs devant sont l'affaire de la
+herse. Raccourcis Alt+Maj+1…6. Le camp retranché (charrettes, palissade) est reporté à un lot futur.
+
 *Ordonnancement* : après CB1 (largeur, verrou, `group_tag`), en vague 4 avec CB2, CB3 et CB5
-(4 agents). Fusion : CB3, CB5, CB6, puis CB2 (qui intègre les raccourcis Alt+1…5 à l'aide F1).
+(4 agents). Fusion : CB3, CB5, CB6, puis CB2 (qui intègre les raccourcis Alt+Maj+1…6 à l’aide F1).
 
 ## Ordre d'exécution
 

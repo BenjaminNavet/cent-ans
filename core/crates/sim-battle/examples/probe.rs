@@ -89,6 +89,7 @@ fn main() {
                 }),
                 siege_layout: None,
                 orders: Vec::new(),
+                abilities: Vec::new(),
                 standards: None,
                 decor_plan: None,
                 opening: Default::default(),
@@ -195,6 +196,7 @@ fn main() {
                 siege: None,
                 siege_layout: None,
                 orders: Vec::new(),
+                abilities: Vec::new(),
                 standards: None,
                 decor_plan: None,
                 opening: Default::default(),
@@ -248,6 +250,7 @@ fn main() {
         siege: None,
         siege_layout: None,
         orders: Vec::new(),
+        abilities: Vec::new(),
         standards: None,
         decor_plan: None,
         opening: Default::default(),
@@ -287,6 +290,7 @@ fn main() {
             units: vec![0],
             target: 1,
             run: true,
+            queue: false,
         })
         .unwrap();
     }

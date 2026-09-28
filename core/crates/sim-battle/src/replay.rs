@@ -24,6 +24,7 @@ use serde::{Deserialize, Serialize};
 use crate::command::Command;
 use crate::historical::HistoricalMap;
 use crate::outcome::BattleOutcome;
+use crate::queue::QueuedOrder;
 use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId};
 use crate::sim::{BattleSim, DT};
@@ -157,6 +158,9 @@ pub enum ReplayAction {
         z: f64,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         facing: Option<f64>,
+        /// CB1: frontage set by a right-drag in deployment.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<f64>,
     },
     /// `start_battle` (F5a).
     StartBattle,
@@ -181,8 +185,14 @@ impl ReplayAction {
             ReplayAction::BeginDeployment => {
                 sim.begin_deployment();
             }
-            ReplayAction::DeployUnit { unit, x, z, facing } => {
-                let _ = sim.deploy_unit(*unit, *x, *z, *facing);
+            ReplayAction::DeployUnit {
+                unit,
+                x,
+                z,
+                facing,
+                width,
+            } => {
+                let _ = sim.deploy_unit_width(*unit, *x, *z, *facing, *width);
             }
             ReplayAction::StartBattle => {
                 let _ = sim.start_battle();
@@ -373,6 +383,58 @@ pub fn state_digest(sim: &BattleSim) -> u64 {
         hash.u64(u64::from(unit.ammo));
         hash.u64(u64::from(unit.left_field));
         hash.bytes(format!("{:?}", unit.state).as_bytes());
+        // CB1: a dragged width and a grouped pace, only when set (the
+        // digests of replays recorded before CB1 are unchanged).
+        if let Some(files) = unit.line_files {
+            hash.u64(0x4c46);
+            hash.u64(u64::from(files));
+        }
+        if unit.match_speed || unit.group_tag.is_some() {
+            hash.u64(0x4754);
+            hash.u64(u64::from(unit.match_speed));
+            hash.u64(unit.group_tag.map_or(u64::MAX, u64::from));
+        }
+        // CB2: the mode flags are not hashed. They follow from recorded
+        // commands and the deterministic AI, and what they change (pace,
+        // pursuit, step back, shots) shows in the positions, soldiers and
+        // states above; hashing the flags would report replays recorded
+        // before CB2 as diverging (the defensive AI now puts its line on
+        // guard) while the battle they show has not changed.
+        // CB-M3: queued orders, only when there are some (the digests of
+        // replays recorded before CB are unchanged).
+        if !unit.order_queue.is_empty() {
+            hash.u64(unit.order_queue.len() as u64);
+            for order in &unit.order_queue {
+                match order {
+                    QueuedOrder::Move {
+                        x,
+                        z,
+                        facing,
+                        run,
+                        width,
+                        match_speed,
+                        group_tag,
+                    } => {
+                        hash.u64(1);
+                        hash.u64(x.to_bits());
+                        hash.u64(z.to_bits());
+                        hash.u64(facing.map_or(u64::MAX, f64::to_bits));
+                        hash.u64(u64::from(*run));
+                        // CB1: only when set (digests of CB-M3 replays kept).
+                        if width.is_some() || *match_speed || group_tag.is_some() {
+                            hash.u64(width.map_or(u64::MAX, f64::to_bits));
+                            hash.u64(u64::from(*match_speed));
+                            hash.u64(group_tag.map_or(u64::MAX, u64::from));
+                        }
+                    }
+                    QueuedOrder::Attack { target, run } => {
+                        hash.u64(2);
+                        hash.u64(u64::from(*target));
+                        hash.u64(u64::from(*run));
+                    }
+                }
+            }
+        }
     }
     hash.0
 }

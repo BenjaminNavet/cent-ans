@@ -7,12 +7,12 @@
 //! however often the interface asks.
 
 use godot::prelude::*;
-use sim_battle::{Advantage, Compare, CompareSide, PreviewError, SideId};
+use sim_battle::{Advantage, Compare, CompareSide, PreviewError, PreviewLeg, SideId};
 
 use crate::battle_sim::BattleSim;
 
 /// French reason of a refused preview (tooltip of the `forbidden` cursor).
-fn reason_fr(error: PreviewError) -> &'static str {
+pub(crate) fn reason_fr(error: PreviewError) -> &'static str {
     match error {
         PreviewError::UnknownUnit | PreviewError::Unavailable => "Ce régiment ne répond plus",
         PreviewError::OutsideField => "Hors du champ de bataille",
@@ -61,7 +61,7 @@ fn compare_dict(compare: &Compare) -> VarDictionary {
 
 impl BattleSim {
     /// `from` then every waypoint, at the height one walks at.
-    fn path_points(&self, from: (f64, f64), path: &[(f64, f64)]) -> PackedVector3Array {
+    pub(crate) fn path_points(&self, from: (f64, f64), path: &[(f64, f64)]) -> PackedVector3Array {
         let Some(sim) = &self.sim else {
             return PackedVector3Array::new();
         };
@@ -72,8 +72,37 @@ impl BattleSim {
             .collect()
     }
 
+    /// The legs of a group preview as `{unit, ok, reason, path}`, plus CB1
+    /// `width` and `depth` of the regiment on arrival (when known).
+    pub(crate) fn legs_array(&self, legs: &[PreviewLeg]) -> VarArray {
+        legs.iter()
+            .map(|leg| {
+                let (path, reason) = match &leg.path {
+                    Ok(path) => (self.path_points(leg.from, path), ""),
+                    Err(e) => (PackedVector3Array::new(), reason_fr(*e)),
+                };
+                let mut dict = vdict! {
+                    "unit" => leg.unit.map_or(-1, i64::from),
+                    "ok" => leg.path.is_ok(),
+                    "reason" => reason,
+                };
+                dict.set("path", &path);
+                if let Some((width, depth)) = leg.extent {
+                    dict.set("width", width);
+                    dict.set("depth", depth);
+                }
+                dict.to_variant()
+            })
+            .collect()
+    }
+
+    /// CB1: a dragged width (metres) from the interface, `None` when ≤ 0.
+    pub(crate) fn drag_width(width: f64) -> Option<f64> {
+        (width.is_finite() && width > 0.0).then_some(width)
+    }
+
     /// The ids of a `PackedInt32Array` (negative ones skipped).
-    fn ids_of(array: &PackedInt32Array) -> Vec<u32> {
+    pub(crate) fn ids_of(array: &PackedInt32Array) -> Vec<u32> {
         array
             .as_slice()
             .iter()
@@ -108,30 +137,42 @@ impl BattleSim {
     /// `{unit, path, ok, reason}`: `path` as in [`Self::preview_path`];
     /// beyond `max_individual_paths` regiments (`data/rules/battle_hover.json`),
     /// a single entry from the group's centre with `unit` = -1. `reason` is
-    /// the French cause of an empty path.
+    /// the French cause of an empty path. CB1: `width` (metres, optional,
+    /// ≤ 0 for none) previews a dragged `move` that wide; each leg then
+    /// carries the `width` and `depth` of the regiment on arrival.
     #[func]
-    fn preview_paths(&self, unit_ids: PackedInt32Array, x: f64, z: f64, facing: f64) -> VarArray {
+    fn preview_paths(
+        &self,
+        unit_ids: PackedInt32Array,
+        x: f64,
+        z: f64,
+        facing: f64,
+        #[opt(default = 0.0)] width: f64,
+    ) -> VarArray {
         let Some(sim) = &self.sim else {
             return VarArray::new();
         };
         let ids = Self::ids_of(&unit_ids);
         let facing = facing.is_finite().then_some(facing);
-        sim.preview_group(&ids, x, z, facing)
-            .iter()
-            .map(|leg| {
-                let (path, reason) = match &leg.path {
-                    Ok(path) => (self.path_points(leg.from, path), ""),
-                    Err(e) => (PackedVector3Array::new(), reason_fr(*e)),
-                };
-                let mut dict = vdict! {
-                    "unit" => leg.unit.map_or(-1, i64::from),
-                    "ok" => leg.path.is_ok(),
-                    "reason" => reason,
-                };
-                dict.set("path", &path);
-                dict.to_variant()
-            })
-            .collect()
+        let legs = sim.preview_group_width(&ids, x, z, facing, Self::drag_width(width), false);
+        self.legs_array(&legs)
+    }
+
+    /// CB1: frontage and depth (metres) regiment `unit_id` would take if
+    /// ordered (or deployed) `width` metres wide: `Vector2(width, depth)`,
+    /// ranks within `data/rules/formation_width.json`; its present extent
+    /// for a width ≤ 0; `Vector2.ZERO` for an unknown regiment.
+    #[func]
+    fn formation_extent(&self, unit_id: i64, width: f64) -> Vector2 {
+        let unit = self
+            .sim
+            .as_ref()
+            .zip(u32::try_from(unit_id).ok())
+            .and_then(|(sim, id)| sim.unit(id));
+        unit.map_or(Vector2::ZERO, |u| {
+            let (w, d) = u.extent_for_width(Self::drag_width(width));
+            Vector2::new(w as f32, d as f32)
+        })
     }
 
     /// CB-M2: what a right click at (x, z) would do with the player's

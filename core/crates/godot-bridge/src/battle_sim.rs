@@ -641,6 +641,34 @@ impl BattleSim {
             .collect()
     }
 
+    /// CB4: uses (or lifts, when all of them use it) ability `ability` on
+    /// those of `units` that have it: `{ok, error}` like `issue_command`
+    /// (recorded for the replay the same way).
+    #[func]
+    fn use_ability(&mut self, units: PackedInt32Array, ability: GString) -> VarDictionary {
+        let ids: VarArray = units
+            .as_slice()
+            .iter()
+            .map(|&id| i64::from(id).to_variant())
+            .collect();
+        let mut command = VarDictionary::new();
+        command.set("type", "use_ability");
+        command.set("units", &ids);
+        command.set("ability", &ability);
+        self.issue_command(command)
+    }
+
+    /// CB4: `{id: {id, kind, rank, name, description, icon}}` of the
+    /// battle's ability catalogue (texts of the tooltips; the state of each
+    /// regiment's abilities is in `get_units`).
+    #[func]
+    fn get_ability_catalog(&self) -> VarDictionary {
+        self.sim
+            .as_ref()
+            .map(crate::battle_sim_abilities::catalog_dict)
+            .unwrap_or_default()
+    }
+
     /// Did `side` give the "no quarter" order?
     #[func]
     fn get_no_quarter(&self, side: GString) -> bool {
@@ -746,9 +774,18 @@ impl BattleSim {
     }
 
     /// Places regiment `id` at (x, z); `facing` in radians, NaN keeps the
-    /// current facing. → `{ok, error}` (French error).
+    /// current facing; CB1 `width` (metres, optional, ≤ 0 for none): the
+    /// frontage of a right-drag, the regiment forming a Line that wide.
+    /// → `{ok, error}` (French error).
     #[func]
-    fn deploy_unit(&mut self, id: i64, x: f64, z: f64, facing: f64) -> VarDictionary {
+    fn deploy_unit(
+        &mut self,
+        id: i64,
+        x: f64,
+        z: f64,
+        facing: f64,
+        #[opt(default = 0.0)] width: f64,
+    ) -> VarDictionary {
         self.touch_poses();
         if self.player.is_some() {
             return result_dict(Err(REPLAY_REFUSAL.to_owned()));
@@ -757,6 +794,7 @@ impl BattleSim {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
         let facing = facing.is_finite().then_some(facing);
+        let width = (width.is_finite() && width > 0.0).then_some(width);
         let result = u32::try_from(id)
             .map_err(|_| format!("unité inconnue : {id}"))
             .and_then(|id| {
@@ -768,9 +806,10 @@ impl BattleSim {
                         x,
                         z,
                         facing,
+                        width,
                     },
                 );
-                sim.deploy_unit(id, x, z, facing)
+                sim.deploy_unit_width(id, x, z, facing, width)
                     .map_err(|e| sim.error_text(&e))
             });
         result_dict(result)
@@ -853,6 +892,13 @@ impl BattleSim {
                     "width" => width,
                     "depth" => depth,
                     "is_general" => unit.is_general,
+                    // CB3: fog of war for the tactical view (Tab) — purely derived, not part of
+                    // the core state (`state_digest`/replay): own side always spotted; no player
+                    // side set (spectated battle) shows everyone, as the normal view already does.
+                    "spotted" => sim
+                        .setup()
+                        .player_side
+                        .is_none_or(|side| sim.spotted_by(unit, side)),
                     "present" => unit.present(),
                     "reserve" => unit.reserve,
                     "left_field" => unit.left_field,
@@ -881,10 +927,25 @@ impl BattleSim {
                     "loss_cause" => unit.loss_cause.key(),
                     "loss_by" => unit.loss_by.map_or(-1, i64::from),
                     "knocked" => if unit.knocked_timer > 0.0 { unit.knocked } else { 0.0 },
+                    // CB-M4: range drawn on the ground (0 without missiles) and the
+                    // half-angle of the drawn sector (radians, `battle_hover.json`).
+                    "effective_range" => sim.ground_range(unit),
+                    "fire_arc" => sim_battle::HoverRules::bundled().range_arc.fire_half_angle(),
                 };
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
                 }
+                // CB1: files of a dragged Line (-1: default depth), and the
+                // tag of the grouped order it walks under (-1: none).
+                dict.set("line_files", unit.line_files.map_or(-1, i64::from));
+                dict.set("group_tag", unit.group_tag.map_or(-1, i64::from));
+                dict.set("match_speed", unit.match_speed);
+                // CB-M3: orders waiting behind the current one.
+                dict.set("queue", &crate::battle_sim_queue::queue_array(sim, unit));
+                // CB2: modes on, modes available, states for the badges.
+                crate::battle_sim_modes::add_mode_fields(sim, unit, &mut dict);
+                // CB4: the regiment's abilities (buttons of its card).
+                crate::battle_sim_abilities::add_ability_fields(sim, unit, &mut dict);
                 // EP11: push of the lines in melee (m/s, > 0 driving the enemy
                 // back, < 0 giving ground), compression (0-1), ground given (m).
                 dict.set("push_speed", unit.push.speed);
@@ -1587,6 +1648,32 @@ impl BattleSim {
                     "time" => event.time,
                     "text_fr" => event.text_fr.as_str(),
                     "side" => event.side.map_or("", |s| s.key()),
+                }
+                .to_variant()
+            })
+            .collect()
+    }
+
+    /// CB5: typed alerts `[{kind, time, x, z, side, unit}]` added since the
+    /// last call. `kind` is one of `rout`, `general_down`, `flanked`,
+    /// `reinforcements`, `ammo_out`, `wall_breached`, `gate_destroyed`.
+    /// `side` is `""` and `unit` is `-1` for a wall/gate piece. Output only:
+    /// reading it never changes the simulation.
+    #[func]
+    fn get_alerts(&mut self) -> VarArray {
+        let Some(sim) = &mut self.sim else {
+            return VarArray::new();
+        };
+        sim.take_new_alerts()
+            .iter()
+            .map(|alert| {
+                vdict! {
+                    "kind" => alert.kind.key(),
+                    "time" => alert.time,
+                    "x" => alert.x,
+                    "z" => alert.z,
+                    "side" => alert.side.map_or("", |s| s.key()),
+                    "unit" => alert.unit.map_or(-1, |u| u as i64),
                 }
                 .to_variant()
             })

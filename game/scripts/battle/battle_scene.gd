@@ -45,7 +45,8 @@ signal returned(result: Dictionary)
 ## T8 : images mesurées par répétition du banc d'essai (`--benchmark`).
 const BENCH_FRAMES := 600
 const KINDS := ["infantry", "archer", "cavalry", "siege"]
-const SPEEDS := [1.0, 2.0, 4.0]
+## CB3 : ralenti ×0,5 ajouté (le − descend jusque-là) ; index par défaut sur ×1 (`speed = 1.0`).
+const SPEEDS := [0.5, 1.0, 2.0, 4.0]
 ## EP13 : vitesses du rejeu (barre de rejeu, + / −).
 const REPLAY_SPEEDS := [1.0, 2.0, 4.0, 8.0]
 const PICK_RADIUS_PX := 26.0
@@ -126,7 +127,14 @@ var _hovered_ids: Array[int] = []  # régiments survolés (terrain, repère), r�
 ## CB-M2 : aperçu du trajet, curseur contextuel, carte du HUD survolée (-1 : aucune).
 var path_preview: BattlePathPreview = null
 var cursor: BattleCursor = null
+## CB-M4 : portée au sol des tireurs sélectionnés ou survolés, comparaison au survol d'un ennemi.
+var range_arc: BattleRangeArc = null
+var compare_panel: BattleComparePanel = null
+## CB6 : sélecteur de formation de groupe (bas droite, au-dessus du bandeau des cartes).
+var formation_picker: BattleFormationPicker = null
 var card_hover := -1
+## CB-M3 : infobulle « file d'ordres pleine » (Maj tenue).
+var queue_tip: BattleQueueTip = null
 ## Dernier `hover_context` du cœur et nombre d'appels (tests : au plus un par image).
 var last_hover: Dictionary = {}
 var hover_calls := 0
@@ -237,6 +245,8 @@ var log_orders_for_test: bool = false
 @onready var sun: DirectionalLight3D = $Sun
 ## CB0 : entrées (clics, glisser, touches, groupes), nœud enfant créé au premier `_ready`.
 var input: BattleInput = null
+## CB3 : vue tactique (Tab), nœud enfant créé au premier `_ready` comme `input`.
+var tactical_view: BattleTacticalView = null
 
 
 ## À appeler avant `add_child` quand la bataille vient de la campagne.
@@ -261,13 +271,21 @@ func _ready() -> void:
 	input.help_toggled.connect(hud.toggle_help)
 	input.markers_toggled.connect(_on_input_markers_toggled)
 	input.screenshot_requested.connect(_on_input_screenshot_requested)
+	input.tactical_view_toggled.connect(_on_input_tactical_view_toggled)
+	# CB3 : vue tactique (Tab).
+	tactical_view = BattleTacticalView.new()
+	tactical_view.name = "BattleTacticalView"
+	tactical_view.scene = self
+	add_child(tactical_view)
 	hud.card_clicked.connect(_on_card_clicked)
 	hud.card_double_clicked.connect(_on_card_double_clicked)
 	hud.card_hovered.connect(func(id: int) -> void: card_hover = id)  # CB-M2 : contour au survol
 	hud.command_pressed.connect(input._on_command)
+	hud.ability_pressed.connect(input.use_card_ability)  # CB4 : bouton de capacité d'une carte
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
 	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
+	hud.alerts_column.pinged.connect(_on_alert_pinged)  # CB5
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -648,6 +666,14 @@ func _build_scene() -> bool:
 	add_child(path_preview)
 	path_preview.setup(battle, func(x: float, z: float) -> float: return terrain.height_at(x, z), side_colors.get(player_side, Color(0.9, 0.8, 0.3)))
 	cursor = BattleCursor.new()
+	range_arc = BattleRangeArc.new()
+	add_child(range_arc)
+	range_arc.setup(battle, side_colors, player_side)
+	compare_panel = BattleComparePanel.new()
+	hud.root.add_child(compare_panel)
+	formation_picker = BattleFormationPicker.new()
+	hud.root.add_child(formation_picker)
+	formation_picker.setup(self)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	if not historical.is_empty():
@@ -675,6 +701,9 @@ func _build_scene() -> bool:
 		hud.set_opening(battle.call("get_opening"), player_side)  # CV3-2
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
+	# CB4 : textes des capacités pour les infobulles des boutons de carte.
+	if battle.has_method("get_ability_catalog"):
+		hud.ability_catalog = battle.call("get_ability_catalog")
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0)  # EP1
 	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
@@ -686,6 +715,8 @@ func _build_scene() -> bool:
 	hud.add_events(battle.call("get_events"))
 	_leader_bar = LEADER_ORDERS_BAR.new(self)
 	add_child(_leader_bar)
+	if compare_panel != null:
+		compare_panel.above = _leader_bar.panel
 	music = BATTLE_MUSIC.new()
 	music.name = "Music"
 	add_child(music)
@@ -693,6 +724,7 @@ func _build_scene() -> bool:
 	battle_audio = BattleAudio.new()
 	add_child(battle_audio)
 	battle_audio.setup(_weather_key, camera_rig.camera)
+	hud.alerts_column.battle_audio = battle_audio  # CB5 : cris (déroute, général tombé)
 	voices = BattleVoices.new()  # VO1
 	add_child(voices)
 	voices.setup(self)
@@ -1528,6 +1560,9 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		var events: Array = battle.call("get_events")
 		if not events.is_empty():
 			hud.add_events(events)
+		var alerts: Array = battle.call("get_alerts")  # CB5
+		if not alerts.is_empty():
+			hud.alerts_column.push_alerts(alerts)
 
 
 ## Ligne d'état du siège pour le HUD : murailles, brèches, porte, tenue de la place.
@@ -1570,6 +1605,9 @@ func _update_outlines() -> void:
 	if card_hover >= 0:
 		_hovered_ids.append(card_hover)
 	outlines.update(units, selected, _hovered_ids)
+	if range_arc != null:
+		range_arc.update(units, selected, _hovered_ids)
+		compare_panel.refresh(null if replay_mode else battle, units, selected, _hovered_ids, player_side, Time.get_ticks_msec() / 1000.0)
 
 
 ## B2 : repères 2D au-dessus des troupes, sous les panneaux du HUD (premier enfant de sa racine).
@@ -1583,14 +1621,18 @@ func _build_markers() -> void:
 
 
 ## Ancre écran de chaque repère : au-dessus du drapeau 3D du régiment.
+## CB3 : en vue tactique, les ennemis non `spotted` sont retirés et les pastilles sont forcées
+## (regroupées, comme la vue très lointaine B7).
 func _update_markers(banner_scale: float) -> void:
 	if markers == null:
 		return
+	var tactical := tactical_view != null and tactical_view.active
+	var shown: Array = BattleTacticalView.filter_spotted(units, player_side) if tactical else units
 	var anchors := {}
 	if markers.visible:
 		var camera := camera_rig.camera
 		var screen := get_viewport().get_visible_rect().grow(60.0)
-		for unit in units:
+		for unit in shown:
 			if not bool(unit["present"]):
 				continue
 			var top := Vector3(float(unit["x"]), float(unit["y"]) + (BANNER_HEIGHT + 0.6) * banner_scale, float(unit["z"]))
@@ -1599,7 +1641,7 @@ func _update_markers(banner_scale: float) -> void:
 			var point := camera.unproject_position(top)
 			if screen.has_point(point):
 				anchors[int(unit["id"])] = point
-	markers.update(units, anchors, selected, camera_rig.distance)
+	markers.update(shown, anchors, selected, camera_rig.distance, tactical)
 
 
 ## Clic droit sur le repère d'un ennemi : la sélection l'attaque (au pas de course).
@@ -1745,6 +1787,12 @@ func _on_input_markers_toggled() -> void:
 		markers.toggle()
 
 
+## CB3 : touche Tab.
+func _on_input_tactical_view_toggled() -> void:
+	if tactical_view != null:
+		tactical_view.toggle()
+
+
 func _on_input_screenshot_requested() -> void:
 	_take_screenshot(ProjectSettings.globalize_path("res://").path_join("../docs/img/godot-battle-%d.png" % Time.get_unix_time_from_system()).simplify_path(), false)
 
@@ -1761,6 +1809,12 @@ func camera_frame() -> PackedVector2Array:
 
 func _on_minimap_clicked(world: Vector2) -> void:
 	camera_rig.look_at_point(Vector3(world.x, 0, world.y), camera_rig.distance, camera_rig.yaw)
+
+
+## CB5 : clic sur une alerte de la colonne = caméra sur le lieu + repère pulsé sur la minicarte.
+func _on_alert_pinged(x: float, z: float) -> void:
+	camera_rig.look_at_point(Vector3(x, 0, z), camera_rig.distance, camera_rig.yaw)
+	hud.minimap.ping(Vector2(x, z))
 
 
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
@@ -1801,7 +1855,24 @@ func _update_hover_cursor() -> void:
 	var context := str(last_hover.get("context", "none"))
 	if path_preview != null and path_preview.live_active and not path_preview.reachable():
 		context = "forbidden"  # destination sans chemin : l'ordre ne partira pas
+	# CB-M3 : Maj tenue et file pleine : l'ordre en file serait refusé.
+	var full := Input.is_key_pressed(KEY_SHIFT) and not selected.is_empty() and BattlePathPreview.queue_full(units, selected)
+	if full:
+		context = "forbidden"
+	_show_queue_tip(full)
 	cursor.apply(context)
+
+
+func _show_queue_tip(full: bool) -> void:
+	if not full:
+		if queue_tip != null:
+			queue_tip.hide_tip()
+		return
+	if queue_tip == null and hud != null:
+		queue_tip = BattleQueueTip.new()
+		hud.root.add_child(queue_tip)
+	if queue_tip != null:
+		queue_tip.show_at(_hover_mouse, BattleInput.queue_full_text())
 
 
 func issue(command: Dictionary) -> Dictionary:

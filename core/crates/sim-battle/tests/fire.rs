@@ -189,6 +189,10 @@ fn a_burnt_house_can_be_crossed() {
             z: hz + radius + 12.0,
             run: false,
             facing: None,
+            queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         })
         .unwrap();
         let mut closest = f64::INFINITY;
@@ -370,6 +374,7 @@ fn smoke_spoils_the_aim_through_it() {
             units: vec![archer],
             target,
             run: false,
+            queue: false,
         })
         .unwrap();
         run(&mut sim, 30.0);

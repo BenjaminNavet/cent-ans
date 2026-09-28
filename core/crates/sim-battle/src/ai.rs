@@ -76,6 +76,12 @@
 
 use data_model::{Ability, BattleOrder, BattleOrderKind, BattleOrderScope, UnitCategory};
 
+#[path = "ai_modes.rs"]
+mod modes;
+
+#[path = "ai_abilities.rs"]
+mod abilities;
+
 use crate::command::Command;
 use crate::crest::CrestDefenceRules;
 use crate::horse_wait::HorseWaitRules;
@@ -376,6 +382,10 @@ impl<'a> View<'a> {
                 z,
                 run,
                 facing,
+                queue: false,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             });
         }
     }
@@ -390,6 +400,7 @@ impl<'a> View<'a> {
                 units: vec![u.id],
                 target: self.units[j].id,
                 run,
+                queue: false,
             });
         }
     }
@@ -474,6 +485,8 @@ pub fn plan(sim: &BattleSim, side: SideId) -> Vec<Command> {
     }
     if sim.siege().is_some() {
         plan_orders(&mut view, side == SideId::Defender);
+        // CB4: the abilities allowed in sieges (the pavises).
+        abilities::plan_abilities(&mut view, side == SideId::Defender, true);
     }
     view.commands
 }
@@ -1563,6 +1576,10 @@ fn plan_field(view: &mut View) {
 
     react(view, &roles);
     plan_orders(view, defensive);
+    // CB2: guard for a defensive line, skirmish for light shooters.
+    modes::plan_modes(view, &roles, defensive);
+    // CB4: one simple rule per active ability.
+    abilities::plan_abilities(view, defensive, false);
 }
 
 /// R2b: a defender this much higher than the enemy (mean ground under the
@@ -1807,6 +1824,10 @@ fn plan_shooter(
                     z,
                     run: true,
                     facing: Some(facing),
+                    queue: false,
+                    width: None,
+                    match_speed: false,
+                    group_tag: None,
                 });
             }
             return;
@@ -2209,6 +2230,7 @@ fn plan_horse(
                     units: vec![unit.id],
                     target: e.id,
                     run: true,
+                    queue: false,
                 });
             }
             return;
@@ -2314,6 +2336,10 @@ fn react(view: &mut View, roles: &Roles) {
                 z,
                 run: true,
                 facing: None,
+                queue: false,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             });
             continue;
         }
@@ -2330,6 +2356,10 @@ fn react(view: &mut View, roles: &Roles) {
                 z,
                 run: true,
                 facing: None,
+                queue: false,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             });
             continue;
         }
@@ -2345,6 +2375,7 @@ fn react(view: &mut View, roles: &Roles) {
                         units: vec![u.id],
                         target: units[j].id,
                         run: false,
+                        queue: false,
                     });
                 }
             }
