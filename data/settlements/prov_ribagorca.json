@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_benabarre",
+    "province": "prov_ribagorca",
+    "kind": "city",
+    "name": {
+      "display": "Benabarre",
+      "local": "Benavarri",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      0.4772,
+      42.1067
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château-siège du comté de Ribagorce.",
+    "sources": [
+      "Benabarre",
+      "Comté de Ribagorce"
+    ]
+  },
+  {
+    "id": "set_graus",
+    "province": "prov_ribagorca",
+    "kind": "town",
+    "name": {
+      "display": "Graus",
+      "local": "Graus",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      0.3378,
+      42.1878
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg marchand de la Ribagorce, sur l'Ésera.",
+    "sources": [
+      "Graus"
+    ]
+  },
+  {
+    "id": "set_roda_de_isabena",
+    "province": "prov_ribagorca",
+    "kind": "abbey",
+    "name": {
+      "display": "Roda de Isábena",
+      "local": "Roda d'Isàvena",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      0.4478,
+      42.2528
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Ancien siège épiscopal de la Ribagorce, cathédrale romane.",
+    "sources": [
+      "Roda de Isábena"
+    ]
+  }
+]

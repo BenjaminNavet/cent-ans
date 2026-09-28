@@ -13,12 +13,9 @@
     "secondary_color": "#F2C230"
   },
   "de_jure_provinces": [
-    "prov_biscay",
     "prov_castilla_vieja",
     "prov_cordoba",
     "prov_extremadura",
-    "prov_galicia",
-    "prov_leon",
     "prov_murcia",
     "prov_sevilla",
     "prov_toledo"

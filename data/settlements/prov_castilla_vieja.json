@@ -164,30 +164,5 @@
     "sources": [
       "Aranda de Duero"
     ]
-  },
-  {
-    "id": "set_san_pedro_de_arlanza",
-    "province": "prov_castilla_vieja",
-    "kind": "abbey",
-    "name": {
-      "display": "San Pedro de Arlanza",
-      "local": "San Pedro de Arlanza",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -3.4667,
-      42.0333
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Monastère bénédictin fondé au Xe siècle, berceau légendaire du comté de Castille.",
-    "sources": [
-      "Monastère de San Pedro de Arlanza"
-    ]
   }
 ]

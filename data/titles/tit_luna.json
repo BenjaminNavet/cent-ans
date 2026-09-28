@@ -1,0 +1,31 @@
+{
+  "id": "tit_luna",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Luna",
+    "local": "Señorío de Luna",
+    "local_language": "castillan"
+  },
+  "heraldry": {
+    "blazon": "D'azur à la lune décroissante d'argent.",
+    "description": "Armes parlantes (« luna », la lune) de la maison de Luna.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_aragon",
+  "de_jure_provinces": [
+    "prov_luna"
+  ],
+  "holder_1337": {
+    "faction": "fac_luna",
+    "sources": [
+      "Lope de Luna",
+      "Maison de Luna"
+    ]
+  },
+  "description": "Seigneurie tenue en 1337 par Lope de Luna, futur premier comte de Luna (1348) et principal conseiller de Pierre IV d'Aragon ; en 1337 encore simple sire (anachronisme du rang de comté ici approximé faute d'un rang inférieur dans le schéma des titres).",
+  "sources": [
+    "Lope de Luna",
+    "Maison de Luna"
+  ]
+}

@@ -1,0 +1,75 @@
+[
+  {
+    "id": "set_sort",
+    "province": "prov_pallars",
+    "kind": "city",
+    "name": {
+      "display": "Sort",
+      "local": "Sort",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.1292,
+      42.4131
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Capitale du Pallars Sobirà, haute vallée de la Noguera Pallaresa.",
+    "sources": [
+      "Sort (Catalogne)"
+    ]
+  },
+  {
+    "id": "set_tremp",
+    "province": "prov_pallars",
+    "kind": "castle",
+    "name": {
+      "display": "Tremp",
+      "local": "Tremp",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      0.8944,
+      42.1667
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du Pallars Jussà, résidence des comtes de Pallars.",
+    "sources": [
+      "Tremp"
+    ]
+  },
+  {
+    "id": "set_talarn",
+    "province": "prov_pallars",
+    "kind": "village",
+    "name": {
+      "display": "Talarn",
+      "local": "Talarn",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      0.8386,
+      42.1783
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [],
+    "port": false,
+    "description": "Village fortifié du Pallars Jussà, sur la Noguera Pallaresa.",
+    "sources": [
+      "Talarn"
+    ]
+  }
+]

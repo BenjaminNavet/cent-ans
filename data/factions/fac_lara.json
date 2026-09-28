@@ -1,0 +1,55 @@
+{
+  "id": "fac_lara",
+  "name": {
+    "display": "Seigneurie de Lara et Vizcaya",
+    "local": "Señorío de Lara y Vizcaya",
+    "local_language": "castillan"
+  },
+  "short_name": "Lara",
+  "adjective": "lariste",
+  "government": "lordship",
+  "playable": true,
+  "ruler": "chr_juan_nunez_iii_de_lara",
+  "capital": "prov_lara",
+  "capital_city": "Lara de los Infantes",
+  "religion": "rel_catholic",
+  "culture": "cul_castilian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_castile",
+  "primary_title": "tit_lara",
+  "heraldry": {
+    "blazon": "D'argent à deux chaudières échiquetées d'or et de gueules, engoulées de serpents de sinople.",
+    "description": "Chaudières des grands majordomes royaux, emblème de la maison de Lara.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Seigneur de Lara",
+    "Seigneur de Vizcaya",
+    "Alférez mayor de Castille"
+  ],
+  "treasury": 9000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_castile",
+      "status": "vassal",
+      "note": "Réconcilié avec Alphonse XI en 1337 après le siège de Lerma (1336) ; alférez mayor (porte-étendard royal)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 50,
+    "trade": 40,
+    "piety": 50
+  },
+  "description": "Réunion par mariage (1330) de la seigneurie ancestrale de Lara et de la seigneurie basque de Vizcaya, tenue par Juan Núñez III de Lara, l'un des plus puissants magnats de Castille.",
+  "sources": [
+    "Juan Núñez III de Lara"
+  ]
+}

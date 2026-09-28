@@ -76,7 +76,15 @@
         "fac_aragon",
         "fac_portugal",
         "fac_navarre",
-        "fac_granada"
+        "fac_granada",
+        "fac_majorca",
+        "fac_villena",
+        "fac_lara",
+        "fac_urgell",
+        "fac_pallars",
+        "fac_ribagorca",
+        "fac_luna",
+        "fac_calatrava"
       ],
       "prompt": "Iberian (Castilian and Aragonese) fashion: long saya tunic, pellote over-gown with wide armholes, mantle with Mudejar geometric silk borders"
     },

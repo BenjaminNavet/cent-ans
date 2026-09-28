@@ -1,0 +1,56 @@
+{
+  "id": "fac_calatrava",
+  "name": {
+    "display": "Ordre de Calatrava",
+    "local": "Orden de Calatrava",
+    "local_language": "castillan"
+  },
+  "short_name": "Calatrava",
+  "adjective": "calatravan",
+  "government": "theocracy",
+  "playable": true,
+  "capital": "prov_calatrava",
+  "capital_city": "Ciudad Real",
+  "religion": "rel_catholic",
+  "culture": "cul_castilian",
+  "succession_law": "elective",
+  "suzerain": "fac_castile",
+  "primary_title": "tit_calatrava",
+  "heraldry": {
+    "blazon": "D'argent à la croix alésée de gueules.",
+    "description": "Croix de l'ordre militaire du Calatrava (fleurdelisée aux extrémités dans les sources ; rendue ici en croix alésée, forme la plus proche disponible dans le moteur de blasons).",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Grand maître de Calatrava"
+  ],
+  "treasury": 7000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_castile",
+      "status": "vassal",
+      "note": "Ordre militaire cistercien, pilier de la Reconquista sur la frontière de Grenade."
+    },
+    {
+      "faction": "fac_granada",
+      "status": "war"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 70,
+    "diplomacy": 30,
+    "trade": 35,
+    "piety": 80
+  },
+  "description": "Ordre militaire fondé en 1158 à Calatrava pour tenir la frontière de La Manche ; chapitre électif, grand maître en exercice non identifié avec certitude pour 1337 (champ `ruler` omis).",
+  "sources": [
+    "Ordre de Calatrava"
+  ]
+}

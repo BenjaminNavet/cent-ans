@@ -1,0 +1,30 @@
+{
+  "id": "tit_catalonia",
+  "rank": "duchy",
+  "name": {
+    "display": "Principauté de Catalogne (comté de Barcelone)",
+    "local": "Principat de Catalunya",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules.",
+    "description": "Armes de la maison de Barcelone, cœur héraldique de la couronne d'Aragon.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_aragon",
+  "de_jure_provinces": [
+    "prov_barcelona"
+  ],
+  "holder_1337": {
+    "faction": "fac_aragon",
+    "sources": [
+      "Principality of Catalonia",
+      "Comtat de Barcelona"
+    ]
+  },
+  "description": "Le comté de Barcelone, berceau de la dynastie, est tenu directement par le roi d'Aragon en tant que comte de Barcelone ; la Principauté de Catalogne réunit les comtés catalans autour de lui, dotée de ses propres Corts.",
+  "sources": [
+    "Principality of Catalonia"
+  ]
+}

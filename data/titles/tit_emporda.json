@@ -1,0 +1,31 @@
+{
+  "id": "tit_emporda",
+  "rank": "county",
+  "name": {
+    "display": "Comté d'Empúries",
+    "local": "Comtat d'Empúries",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'or à trois pals de gueules.",
+    "description": "Armes traditionnelles des comtes d'Empúries, dérivées de celles de Barcelone.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_aragon",
+  "de_jure_provinces": [
+    "prov_emporda"
+  ],
+  "holder_1337": {
+    "faction": "fac_ribagorca",
+    "sources": [
+      "Peter, Count of Ribagorza",
+      "Comtat d'Empúries"
+    ]
+  },
+  "description": "Ancien comté souverain, racheté par la couronne d'Aragon en 1325 à Hug de Cardona (échange contre la baronnie de Pego) et donné à l'infant Pierre avec Ribagorce ; il l'échangera à son tour contre le comté de Prades en 1341.",
+  "sources": [
+    "Comtat d'Empúries",
+    "Peter, Count of Ribagorza"
+  ]
+}

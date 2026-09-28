@@ -48,6 +48,18 @@
    "relief_max_m": 362.0,
    "sea_share": 0.214
   },
+  "prov_alicante": {
+   "file": "prov_alicante.bin",
+   "lon": -0.5364,
+   "lat": 38.3641,
+   "ref_m": 63.0,
+   "terrain": "plains",
+   "coastal": true,
+   "coast_bearing_deg": 137.1,
+   "skyline_max_deg": 3.48,
+   "relief_max_m": 782.0,
+   "sea_share": 0.2
+  },
   "prov_alsace": {
    "file": "prov_alsace.bin",
    "lon": 7.6554,
@@ -408,6 +420,18 @@
    "relief_max_m": 163.0,
    "sea_share": 0.0
   },
+  "prov_calatrava": {
+   "file": "prov_calatrava.bin",
+   "lon": -3.8611,
+   "lat": 38.9156,
+   "ref_m": 635.5,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.98,
+   "relief_max_m": 906.0,
+   "sea_share": 0.0
+  },
   "prov_carcassonne": {
    "file": "prov_carcassonne.bin",
    "lon": 3.0028,
@@ -430,6 +454,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": 0.9,
    "relief_max_m": 1054.0,
+   "sea_share": 0.0
+  },
+  "prov_cerdagne": {
+   "file": "prov_cerdagne.bin",
+   "lon": 1.948,
+   "lat": 42.4812,
+   "ref_m": 1367.1,
+   "terrain": "mountains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 5.91,
+   "relief_max_m": 2850.0,
    "sea_share": 0.0
   },
   "prov_champagne": {
@@ -599,6 +635,18 @@
    "skyline_max_deg": 2.98,
    "relief_max_m": 744.0,
    "sea_share": 0.181
+  },
+  "prov_emporda": {
+   "file": "prov_emporda.bin",
+   "lon": 3.0589,
+   "lat": 42.1904,
+   "ref_m": 3.7,
+   "terrain": "plains",
+   "coastal": true,
+   "coast_bearing_deg": 100.9,
+   "skyline_max_deg": 2.23,
+   "relief_max_m": 658.0,
+   "sea_share": 0.185
   },
   "prov_evreux": {
    "file": "prov_evreux.bin",
@@ -1008,6 +1056,18 @@
    "relief_max_m": 642.0,
    "sea_share": 0.156
   },
+  "prov_lara": {
+   "file": "prov_lara.bin",
+   "lon": -3.3857,
+   "lat": 42.0405,
+   "ref_m": 1146.0,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 2.31,
+   "relief_max_m": 1750.0,
+   "sea_share": 0.0
+  },
   "prov_lazio": {
    "file": "prov_lazio.bin",
    "lon": 12.1944,
@@ -1115,6 +1175,18 @@
    "skyline_max_deg": 0.01,
    "relief_max_m": 36.0,
    "sea_share": 0.241
+  },
+  "prov_luna": {
+   "file": "prov_luna.bin",
+   "lon": -0.9216,
+   "lat": 42.0218,
+   "ref_m": 613.1,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.05,
+   "relief_max_m": 853.0,
+   "sea_share": 0.0
   },
   "prov_luxembourg": {
    "file": "prov_luxembourg.bin",
@@ -1476,6 +1548,18 @@
    "relief_max_m": 321.0,
    "sea_share": 0.0
   },
+  "prov_pallars": {
+   "file": "prov_pallars.bin",
+   "lon": 0.9994,
+   "lat": 42.4838,
+   "ref_m": 1733.3,
+   "terrain": "mountains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 4.71,
+   "relief_max_m": 2906.0,
+   "sea_share": 0.0
+  },
   "prov_penthievre": {
    "file": "prov_penthievre.bin",
    "lon": -2.6049,
@@ -1595,6 +1679,18 @@
    "skyline_max_deg": 1.79,
    "relief_max_m": 498.0,
    "sea_share": 0.08
+  },
+  "prov_ribagorca": {
+   "file": "prov_ribagorca.bin",
+   "lon": 0.3962,
+   "lat": 42.1726,
+   "ref_m": 893.0,
+   "terrain": "mountains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 2.86,
+   "relief_max_m": 1448.0,
+   "sea_share": 0.0
   },
   "prov_rouergue": {
    "file": "prov_rouergue.bin",
@@ -1836,6 +1932,18 @@
    "relief_max_m": 641.0,
    "sea_share": 0.212
   },
+  "prov_urgell": {
+   "file": "prov_urgell.bin",
+   "lon": 0.8227,
+   "lat": 41.899,
+   "ref_m": 738.1,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 3.19,
+   "relief_max_m": 1715.0,
+   "sea_share": 0.0
+  },
   "prov_utrecht": {
    "file": "prov_utrecht.bin",
    "lon": 5.8758,
@@ -1894,6 +2002,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": 6.42,
    "relief_max_m": 2179.0,
+   "sea_share": 0.0
+  },
+  "prov_villena": {
+   "file": "prov_villena.bin",
+   "lon": -0.9134,
+   "lat": 38.7196,
+   "ref_m": 578.9,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 2.1,
+   "relief_max_m": 1165.0,
    "sea_share": 0.0
   },
   "prov_waldstatten": {

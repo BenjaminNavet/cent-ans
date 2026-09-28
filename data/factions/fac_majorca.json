@@ -1,0 +1,62 @@
+{
+  "id": "fac_majorca",
+  "name": {
+    "display": "Royaume de Majorque",
+    "local": "Regne de Mallorca",
+    "local_language": "catalan"
+  },
+  "short_name": "Majorque",
+  "adjective": "majorquin",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_jacques_iii_de_majorque",
+  "capital": "prov_mallorca",
+  "capital_city": "Palma",
+  "religion": "rel_catholic",
+  "culture": "cul_catalan",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_majorca",
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules, à la bordure de sable.",
+    "description": "Armes de la maison de Barcelone ; bordure de sable ajoutée ici pour la distinction visuelle en jeu (les rois de Majorque portaient parfois les pals non brisés, indistincts de ceux d'Aragon).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Brisure de jeu, non une brisure historiquement attestée."
+  },
+  "titles": [
+    "Roi de Majorque",
+    "Comte de Roussillon et de Cerdagne",
+    "Seigneur de Montpellier"
+  ],
+  "treasury": 9000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aragon",
+      "status": "peace",
+      "note": "Hommage lige nominal depuis le traité de Perpignan (1279), mais indépendance de fait (pas de lien de vassalité mécanique) ; Pierre IV convoite le royaume."
+    },
+    {
+      "faction": "fac_france",
+      "status": "peace",
+      "note": "La seigneurie de Montpellier, vendue à la France en 1349, reste hors du périmètre modélisé ici."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 60,
+    "trade": 65,
+    "piety": 55
+  },
+  "description": "Royaume né du testament de Jacques le Conquérant, à cheval sur les Baléares et les Pyrénées catalanes (Roussillon, Cerdagne) ; sa position fait de lui la cible du roi d'Aragon Pierre IV, qui l'annexera en 1343-1344.",
+  "sources": [
+    "Kingdom of Majorca",
+    "James III of Majorca"
+  ]
+}

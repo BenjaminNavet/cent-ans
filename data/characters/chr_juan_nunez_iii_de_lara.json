@@ -1,0 +1,48 @@
+{
+  "id": "chr_juan_nunez_iii_de_lara",
+  "name": {
+    "display": "Juan Núñez III de Lara",
+    "local": "Juan Núñez de Lara",
+    "local_language": "castillan"
+  },
+  "sex": "male",
+  "house": "Lara",
+  "faction": "fac_lara",
+  "role": "ruler",
+  "birth": {
+    "value": "1313",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1350-11-28",
+    "place": "Burgos"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Seigneur de Lara"
+    },
+    {
+      "title": "Seigneur de Vizcaya"
+    },
+    {
+      "title": "Alférez mayor de Castille"
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_proud"
+  ],
+  "piety": 45,
+  "starting_location": "prov_lara",
+  "status": "at_court",
+  "description": "Fils de Fernando de la Cerda et de Juana Núñez de Lara, héritière du señorío ; acquiert la Vizcaya par son mariage (1330) avec María de Haro. Soumis au siège de Lerma (1336), réconcilié avec Alphonse XI en 1337 et confirmé alférez mayor du royaume.",
+  "sources": [
+    "Juan Núñez III de Lara"
+  ]
+}

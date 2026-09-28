@@ -645,6 +645,20 @@
    "sea": false
   },
   {
+   "from": "set_agramunt",
+   "to": "set_balaguer",
+   "cost": 12.64,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_agramunt",
+   "to": "set_la_seu_durgell",
+   "cost": 41.26,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_agrigento",
    "to": "set_enna",
    "cost": 68.65,
@@ -772,6 +786,13 @@
   },
   {
    "from": "set_ainsa",
+   "to": "set_graus",
+   "cost": 45.68,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ainsa",
    "to": "set_huesca",
    "cost": 54.28,
    "road": false,
@@ -787,7 +808,7 @@
   {
    "from": "set_ainsa",
    "to": "set_lleida",
-   "cost": 48.74,
+   "cost": 48.41,
    "road": true,
    "sea": false
   },
@@ -1220,44 +1241,37 @@
   },
   {
    "from": "set_alicante",
-   "to": "set_gandia",
-   "cost": 49.84,
-   "road": false,
+   "to": "set_elche",
+   "cost": 10.49,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_alicante",
-   "to": "set_murcie",
-   "cost": 46.17,
+   "to": "set_orihuela",
+   "cost": 17.03,
    "road": true,
    "sea": false
   },
   {
    "from": "set_alicante",
    "to": "set_xativa",
-   "cost": 54.47,
+   "cost": 71.33,
    "road": false,
    "sea": false
   },
   {
    "from": "set_almagro",
    "to": "set_calatrava_la_nueva",
-   "cost": 5.76,
+   "cost": 10.19,
    "road": true,
    "sea": false
   },
   {
    "from": "set_almagro",
-   "to": "set_caravaca_de_la_cruz",
-   "cost": 185.2,
+   "to": "set_ciudad_real",
+   "cost": 21.88,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_almagro",
-   "to": "set_cuenca",
-   "cost": 94.88,
-   "road": true,
    "sea": false
   },
   {
@@ -1275,10 +1289,17 @@
    "sea": false
   },
   {
-   "from": "set_almagro",
-   "to": "set_tolede",
-   "cost": 56.77,
-   "road": true,
+   "from": "set_almansa",
+   "to": "set_villena",
+   "cost": 33.07,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_almansa",
+   "to": "set_yecla",
+   "cost": 27.71,
+   "road": false,
    "sea": false
   },
   {
@@ -2214,15 +2235,15 @@
   },
   {
    "from": "set_aranda_de_duero",
-   "to": "set_palencia",
-   "cost": 79.72,
+   "to": "set_burgos",
+   "cost": 74.6,
    "road": false,
    "sea": false
   },
   {
    "from": "set_aranda_de_duero",
-   "to": "set_san_pedro_de_arlanza",
-   "cost": 43.95,
+   "to": "set_palencia",
+   "cost": 79.72,
    "road": false,
    "sea": false
   },
@@ -2921,6 +2942,13 @@
   },
   {
    "from": "set_auterive",
+   "to": "set_tremp",
+   "cost": 185.5,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_auterive",
    "to": "set_vic",
    "cost": 85.27,
    "road": true,
@@ -3363,7 +3391,7 @@
   {
    "from": "set_baeza",
    "to": "set_calatrava_la_nueva",
-   "cost": 95.68,
+   "cost": 84.7,
    "road": false,
    "sea": false
   },
@@ -3379,6 +3407,34 @@
    "to": "set_jaen",
    "cost": 36.23,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_baeza",
+   "to": "set_tolede",
+   "cost": 106.54,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_balaguer",
+   "to": "set_benabarre",
+   "cost": 67.07,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_balaguer",
+   "to": "set_la_seu_durgell",
+   "cost": 44.75,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_balaguer",
+   "to": "set_lleida",
+   "cost": 12.87,
+   "road": true,
    "sea": false
   },
   {
@@ -3428,13 +3484,6 @@
    "to": "set_orduna",
    "cost": 54.84,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_balmaseda",
-   "to": "set_santo_domingo_de_silos",
-   "cost": 102.23,
-   "road": true,
    "sea": false
   },
   {
@@ -4642,6 +4691,27 @@
    "sea": false
   },
   {
+   "from": "set_benabarre",
+   "to": "set_graus",
+   "cost": 14.64,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_benabarre",
+   "to": "set_lleida",
+   "cost": 41.45,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_benabarre",
+   "to": "set_roda_de_isabena",
+   "cost": 16.4,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_benevento",
    "to": "set_capua",
    "cost": 48.4,
@@ -5728,6 +5798,13 @@
   },
   {
    "from": "set_boulbonne",
+   "to": "set_talarn",
+   "cost": 193.33,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_boulbonne",
    "to": "set_villefranche_de_lauragais",
    "cost": 13.71,
    "road": false,
@@ -6491,8 +6568,8 @@
   },
   {
    "from": "set_burgos",
-   "to": "set_san_pedro_de_arlanza",
-   "cost": 19.88,
+   "to": "set_santo_domingo_de_silos",
+   "cost": 24.53,
    "road": true,
    "sea": false
   },
@@ -6862,23 +6939,9 @@
   },
   {
    "from": "set_calatrava_la_nueva",
-   "to": "set_cieza",
-   "cost": 110.92,
+   "to": "set_ciudad_real",
+   "cost": 16.47,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_calatrava_la_nueva",
-   "to": "set_talavera_de_la_reina",
-   "cost": 77.83,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_calatrava_la_nueva",
-   "to": "set_tolede",
-   "cost": 118.53,
-   "road": false,
    "sea": false
   },
   {
@@ -7044,8 +7107,8 @@
   },
   {
    "from": "set_caravaca_de_la_cruz",
-   "to": "set_yecla",
-   "cost": 42.93,
+   "to": "set_ocana",
+   "cost": 125.79,
    "road": true,
    "sea": false
   },
@@ -7100,15 +7163,8 @@
   },
   {
    "from": "set_cardona",
-   "to": "set_limoux",
-   "cost": 66.57,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_cardona",
    "to": "set_lleida",
-   "cost": 94.24,
+   "cost": 95.95,
    "road": false,
    "sea": false
   },
@@ -7131,6 +7187,20 @@
    "to": "set_morlaas",
    "cost": 160.1,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cardona",
+   "to": "set_puigcerda",
+   "cost": 91.27,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cardona",
+   "to": "set_sort",
+   "cost": 108.37,
+   "road": false,
    "sea": false
   },
   {
@@ -7309,13 +7379,6 @@
    "sea": false
   },
   {
-   "from": "set_cartagena",
-   "to": "set_yecla",
-   "cost": 112.2,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_casal",
    "to": "set_lucedio",
    "cost": 8.17,
@@ -7410,6 +7473,27 @@
    "from": "set_casteljaloux",
    "to": "set_sos",
    "cost": 18.11,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_castello_dempuries",
+   "to": "set_collioure",
+   "cost": 14.95,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_castello_dempuries",
+   "to": "set_figueres",
+   "cost": 4.6,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_castello_dempuries",
+   "to": "set_roses",
+   "cost": 8.56,
    "road": false,
    "sea": false
   },
@@ -7611,6 +7695,13 @@
   },
   {
    "from": "set_ceret",
+   "to": "set_figueres",
+   "cost": 15.22,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_ceret",
    "to": "set_girona",
    "cost": 56.88,
    "road": false,
@@ -7632,15 +7723,8 @@
   },
   {
    "from": "set_ceret",
-   "to": "set_prades",
-   "cost": 30.25,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_ceret",
    "to": "set_saint_michel_de_cuxa",
-   "cost": 30.84,
+   "cost": 64.06,
    "road": false,
    "sea": false
   },
@@ -8661,6 +8745,13 @@
   },
   {
    "from": "set_cieza",
+   "to": "set_cuenca",
+   "cost": 106.33,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cieza",
    "to": "set_mula",
    "cost": 22.96,
    "road": false,
@@ -8671,6 +8762,13 @@
    "to": "set_murcie",
    "cost": 18.77,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cieza",
+   "to": "set_xativa",
+   "cost": 113.62,
+   "road": false,
    "sea": false
   },
   {
@@ -8755,6 +8853,13 @@
    "to": "set_nuits_saint_georges",
    "cost": 5.75,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_ciudad_real",
+   "to": "set_tolede",
+   "cost": 97.5,
+   "road": false,
    "sea": false
   },
   {
@@ -9514,6 +9619,13 @@
    "sea": false
   },
   {
+   "from": "set_cordoue",
+   "to": "set_talavera_de_la_reina",
+   "cost": 114.79,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_cork",
    "to": "set_holycross",
    "cost": 143.62,
@@ -9664,6 +9776,20 @@
    "from": "set_cournonterral",
    "to": "set_valmagne",
    "cost": 8.81,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_covarrubias",
+   "to": "set_lara",
+   "cost": 7.41,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_covarrubias",
+   "to": "set_san_pedro_de_arlanza",
+   "cost": 8.46,
    "road": false,
    "sea": false
   },
@@ -9858,9 +9984,9 @@
   },
   {
    "from": "set_cuenca",
-   "to": "set_yecla",
-   "cost": 184.6,
-   "road": false,
+   "to": "set_tolede",
+   "cost": 81.61,
+   "road": true,
    "sea": false
   },
   {
@@ -11600,6 +11726,41 @@
    "sea": false
   },
   {
+   "from": "set_ejea_de_los_caballeros",
+   "to": "set_illueca",
+   "cost": 18.75,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ejea_de_los_caballeros",
+   "to": "set_luna",
+   "cost": 10.88,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_elche",
+   "to": "set_gandia",
+   "cost": 89.31,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_elche",
+   "to": "set_orihuela",
+   "cost": 6.69,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_elche",
+   "to": "set_villena",
+   "cost": 21.87,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_elgin",
    "to": "set_forres",
    "cost": 19.02,
@@ -11617,6 +11778,13 @@
    "from": "set_elne",
    "to": "set_perpignan",
    "cost": 5.82,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_elne",
+   "to": "set_roses",
+   "cost": 20.62,
    "road": true,
    "sea": false
   },
@@ -12321,6 +12489,20 @@
    "sea": false
   },
   {
+   "from": "set_figueres",
+   "to": "set_girona",
+   "cost": 16.84,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_figueres",
+   "to": "set_roses",
+   "cost": 8.83,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_flavigny_sur_ozerain",
    "to": "set_fontenay",
    "cost": 9.42,
@@ -12493,6 +12675,13 @@
    "to": "set_pamiers",
    "cost": 13.22,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_foix",
+   "to": "set_prades",
+   "cost": 128.23,
+   "road": false,
    "sea": false
   },
   {
@@ -13085,6 +13274,13 @@
   },
   {
    "from": "set_gandia",
+   "to": "set_murcie",
+   "cost": 135.03,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gandia",
    "to": "set_sagunto",
    "cost": 79.11,
    "road": false,
@@ -13288,8 +13484,8 @@
   },
   {
    "from": "set_girona",
-   "to": "set_peyrepertuse",
-   "cost": 104.42,
+   "to": "set_prades",
+   "cost": 128.66,
    "road": false,
    "sea": false
   },
@@ -13711,6 +13907,13 @@
    "to": "set_montauban",
    "cost": 30.74,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_graus",
+   "to": "set_roda_de_isabena",
+   "cost": 11.55,
+   "road": true,
    "sea": false
   },
   {
@@ -14576,6 +14779,13 @@
   },
   {
    "from": "set_huesca",
+   "to": "set_luna",
+   "cost": 39.63,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_huesca",
    "to": "set_saragosse",
    "cost": 67.22,
    "road": false,
@@ -14724,8 +14934,22 @@
   {
    "from": "set_ille_sur_tet",
    "to": "set_prades",
-   "cost": 8.29,
+   "cost": 26.03,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_illueca",
+   "to": "set_luna",
+   "cost": 19.62,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_illueca",
+   "to": "set_saragosse",
+   "cost": 35.32,
+   "road": false,
    "sea": false
   },
   {
@@ -14985,6 +15209,13 @@
    "to": "set_lucena",
    "cost": 74.57,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_jaen",
+   "to": "set_ocana",
+   "cost": 120.67,
+   "road": true,
    "sea": false
   },
   {
@@ -15814,6 +16045,13 @@
    "sea": false
   },
   {
+   "from": "set_la_seu_durgell",
+   "to": "set_roda_de_isabena",
+   "cost": 83.02,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_labrit",
    "to": "set_marmande",
    "cost": 70.93,
@@ -15985,6 +16223,13 @@
    "from": "set_langeais",
    "to": "set_tours",
    "cost": 11.25,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_lara",
+   "to": "set_san_pedro_de_arlanza",
+   "cost": 5.16,
    "road": true,
    "sea": false
   },
@@ -16705,28 +16950,35 @@
   {
    "from": "set_lleida",
    "to": "set_montserrat",
-   "cost": 101.7,
+   "cost": 103.5,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lleida",
    "to": "set_morella",
-   "cost": 131.89,
+   "cost": 131.02,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lleida",
+   "to": "set_talarn",
+   "cost": 119.79,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lleida",
    "to": "set_tarbes",
-   "cost": 277.45,
+   "cost": 276.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_lleida",
    "to": "set_tarragona",
-   "cost": 38.64,
+   "cost": 39.25,
    "road": true,
    "sea": false
   },
@@ -17343,6 +17595,13 @@
    "from": "set_manresa",
    "to": "set_rieux_volvestre",
    "cost": 181.13,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_manresa",
+   "to": "set_tremp",
+   "cost": 147.07,
    "road": false,
    "sea": false
   },
@@ -18607,6 +18866,13 @@
    "sea": false
   },
   {
+   "from": "set_mula",
+   "to": "set_tolede",
+   "cost": 149.97,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_munich",
    "to": "set_toelz",
    "cost": 41.64,
@@ -18643,9 +18909,9 @@
   },
   {
    "from": "set_murcie",
-   "to": "set_yecla",
-   "cost": 68.86,
-   "road": false,
+   "to": "set_orihuela",
+   "cost": 17.39,
+   "road": true,
    "sea": false
   },
   {
@@ -19461,6 +19727,13 @@
    "sea": false
   },
   {
+   "from": "set_orihuela",
+   "to": "set_yecla",
+   "cost": 55.17,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_orleans",
    "to": "set_pithiviers",
    "cost": 19.81,
@@ -19723,13 +19996,6 @@
    "from": "set_palencia",
    "to": "set_sahagun",
    "cost": 58.15,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_palencia",
-   "to": "set_san_pedro_de_arlanza",
-   "cost": 88.07,
    "road": false,
    "sea": false
   },
@@ -20386,16 +20652,23 @@
   },
   {
    "from": "set_prades",
+   "to": "set_puigcerda",
+   "cost": 29.02,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_prades",
    "to": "set_puilaurens",
-   "cost": 24.05,
+   "cost": 40.04,
    "road": false,
    "sea": false
   },
   {
    "from": "set_prades",
    "to": "set_saint_michel_de_cuxa",
-   "cost": 2.13,
-   "road": true,
+   "cost": 18.91,
+   "road": false,
    "sea": false
   },
   {
@@ -20490,16 +20763,23 @@
    "sea": false
   },
   {
-   "from": "set_puilaurens",
+   "from": "set_puigcerda",
+   "to": "set_saint_michel_de_cuxa",
+   "cost": 26.59,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_puigcerda",
    "to": "set_tarascon_sur_ariege",
-   "cost": 88.53,
-   "road": false,
+   "cost": 53.11,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_puilaurens",
-   "to": "set_vic",
-   "cost": 98.76,
+   "to": "set_tarascon_sur_ariege",
+   "cost": 88.53,
    "road": false,
    "sea": false
   },
@@ -20661,6 +20941,13 @@
    "from": "set_richmond",
    "to": "set_whitby",
    "cost": 73.44,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_rieux_volvestre",
+   "to": "set_sort",
+   "cost": 141.88,
    "road": false,
    "sea": false
   },
@@ -21059,7 +21346,7 @@
   {
    "from": "set_saint_michel_de_cuxa",
    "to": "set_vic",
-   "cost": 73.31,
+   "cost": 97.07,
    "road": false,
    "sea": false
   },
@@ -21239,20 +21526,6 @@
    "sea": false
   },
   {
-   "from": "set_san_pedro_de_arlanza",
-   "to": "set_soria",
-   "cost": 44.41,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_san_pedro_de_arlanza",
-   "to": "set_vitoria",
-   "cost": 166.25,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_san_sebastian",
    "to": "set_vitoria",
    "cost": 107.08,
@@ -21291,6 +21564,13 @@
    "from": "set_santo_domingo_de_silos",
    "to": "set_soria",
    "cost": 82.05,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_santo_domingo_de_silos",
+   "to": "set_vitoria",
+   "cost": 172.63,
    "road": false,
    "sea": false
   },
@@ -21617,6 +21897,20 @@
    "sea": false
   },
   {
+   "from": "set_sort",
+   "to": "set_talarn",
+   "cost": 53.37,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_sort",
+   "to": "set_tremp",
+   "cost": 19.91,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_southampton",
    "to": "set_winchester",
    "cost": 9.19,
@@ -21837,6 +22131,13 @@
    "from": "set_swaffham",
    "to": "set_wymondham",
    "cost": 60.07,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_talarn",
+   "to": "set_tremp",
+   "cost": 18.19,
    "road": false,
    "sea": false
   },
@@ -22198,6 +22499,20 @@
    "sea": false
   },
   {
+   "from": "set_villena",
+   "to": "set_xativa",
+   "cost": 49.47,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_villena",
+   "to": "set_yecla",
+   "cost": 10.95,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_villers",
    "to": "set_zoutleeuw",
    "cost": 23.3,
@@ -22342,13 +22657,6 @@
    "to": "set_yarmouth",
    "cost": 83.55,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_xativa",
-   "to": "set_yecla",
-   "cost": 33.08,
-   "road": true,
    "sea": false
   }
  ]
