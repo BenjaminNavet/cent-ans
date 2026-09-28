@@ -370,7 +370,10 @@ pub enum Order {
     // ----- TW2-T5: army traditions (`traditions.rs`) -------------------------
     /// `army` takes `tradition` (an id of `data/rules/army_traditions.json`)
     /// for a rank it has reached.
-    ChooseArmyTradition { army: ArmyId, tradition: String },
+    ChooseArmyTradition {
+        army: ArmyId,
+        tradition: String,
+    },
 }
 
 impl Order {
