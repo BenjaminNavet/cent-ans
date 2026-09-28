@@ -33,7 +33,7 @@ func _init() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_label = Label.new()
 	header_label.text = "Ordre de chevalerie"
-	header_label.add_theme_font_size_override("font_size", 16)
+	UiType.apply(header_label, UiType.BODY)  # P2a (ADR 0097) : titre de section (17 px)
 	add_child(header_label)
 	body = VBoxContainer.new()
 	body.add_theme_constant_override("separation", 3)
@@ -41,7 +41,7 @@ func _init() -> void:
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	error_label.custom_minimum_size = Vector2(300, 0)
-	error_label.add_theme_font_size_override("font_size", 12)
+	UiType.apply(error_label, UiType.CAPTION)
 	error_label.add_theme_color_override("font_color", ERROR_COLOR)
 	error_label.hide()
 	add_child(error_label)
@@ -74,21 +74,21 @@ func _show_founded(founded: Dictionary) -> void:
 	var order_id := str(founded.get("order", ""))
 	var option := _option(order_id)
 	var status := " — [color=#8b1a1a]brisé[/color]" if bool(founded.get("collapsed", false)) else ""
-	body.add_child(_rich("[b]%s[/b]%s" % [_codex_name(order_id, str(founded.get("name", order_id))), status], 14))
+	body.add_child(_rich("[b]%s[/b]%s" % [_codex_name(order_id, str(founded.get("name", order_id))), status], UiType.CAPTION))
 	if not option.is_empty():
 		var bonus := "Membres : loyauté +%d, moral +%d · souverain : prestige +%d par an" % [int(option.get("member_loyalty", 0)), int(option.get("member_morale", 0)), int(option.get("yearly_prestige", 0))]
 		if bool(founded.get("collapsed", false)):
 			bonus = "Plus aucun bonus depuis la perte de la moitié de ses membres."
-		body.add_child(_label(bonus, 12, MUTED_COLOR))
+		body.add_child(_label(bonus, UiType.CAPTION, MUTED_COLOR))
 	var members: Array = founded.get("members", [])
-	body.add_child(_label("Membres (%d%s) :" % [members.size(), "/%d" % int(option.get("members", 0)) if not option.is_empty() else ""], 12, MUTED_COLOR))
+	body.add_child(_label("Membres (%d%s) :" % [members.size(), "/%d" % int(option.get("members", 0)) if not option.is_empty() else ""], UiType.CAPTION, MUTED_COLOR))
 	var flow := HFlowContainer.new()
 	flow.add_theme_constant_override("h_separation", 8)
 	for member in members:
 		var character_id := str(member.get("character", ""))
 		var link := LinkButton.new()
 		link.text = str(member.get("name", character_id))
-		link.add_theme_font_size_override("font_size", 13)
+		UiType.apply(link, UiType.CAPTION)
 		RansomPanel.style_link(link)
 		link.tooltip_text = "Ouvrir la fiche du personnage"
 		link.pressed.connect(func() -> void: _request_character(character_id))
@@ -99,11 +99,11 @@ func _show_founded(founded: Dictionary) -> void:
 
 func _show_options(options: Array) -> void:
 	if options.is_empty():
-		body.add_child(_label("Aucun ordre ne peut être fondé.", 12, MUTED_COLOR))
+		body.add_child(_label("Aucun ordre ne peut être fondé.", UiType.CAPTION, MUTED_COLOR))
 		return
 	for option in options:
 		var id := str(option.get("id", ""))
-		body.add_child(_rich("%s — %s %s, prestige requis %d" % [_codex_name(id, str(option.get("name", id))), RichTooltip.thousands(int(option.get("cost", 0))), RichTooltip.POUND, int(option.get("prestige_required", 0))], 13))
+		body.add_child(_rich("%s — %s %s, prestige requis %d" % [_codex_name(id, str(option.get("name", id))), RichTooltip.thousands(int(option.get("cost", 0))), RichTooltip.POUND, int(option.get("prestige_required", 0))], UiType.CAPTION))
 		var button := RichButton.new()
 		button.text = "Fonder l'ordre"
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -114,7 +114,7 @@ func _show_options(options: Array) -> void:
 		found_buttons[id] = button
 		var reason := str(option.get("reason", ""))
 		if not bool(option.get("available", false)) and reason != "":
-			body.add_child(_label("Impossible : %s" % reason, 12, ERROR_COLOR))
+			body.add_child(_label("Impossible : %s" % reason, UiType.CAPTION, ERROR_COLOR))
 
 
 ## Ordre `found_chivalric_order` ; en cas de refus, message de la simulation affiché en rouge.
@@ -149,17 +149,19 @@ func _option(order_id: String) -> Dictionary:
 	return {}
 
 
-func _label(text: String, font_size: int, color: Color) -> Label:
+## P2a (ADR 0097) : `variation`, une taille `UiType` (`UiType.CAPTION` ici, seule taille utilisée
+## par cette section) au lieu d'un nombre de pixels au hasard.
+func _label(text: String, variation: String, color: Color) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(300, 0)
-	label.add_theme_font_size_override("font_size", font_size)
+	UiType.apply(label, variation)
 	label.add_theme_color_override("font_color", color)
 	return label
 
 
-func _rich(bbcode: String, font_size: int) -> RichTextLabel:
+func _rich(bbcode: String, variation: String) -> RichTextLabel:
 	var label := RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
@@ -167,8 +169,8 @@ func _rich(bbcode: String, font_size: int) -> RichTextLabel:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(300, 0)
 	label.add_theme_color_override("default_color", RichTooltip.INK)
-	for key in ["normal_font_size", "bold_font_size"]:
-		label.add_theme_font_size_override(key, font_size)
+	UiType.apply(label, variation)
+	label.add_theme_font_size_override("bold_font_size", UiType.size(variation))
 	label.text = bbcode
 	_texts.append(label)
 	return label
