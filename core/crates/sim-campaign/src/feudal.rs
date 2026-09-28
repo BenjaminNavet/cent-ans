@@ -179,7 +179,11 @@ pub fn province_lieges(
 
 /// Factions whose direct suzerain is `faction` (the maxim: never their
 /// own vassals).
-pub fn direct_vassals(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<FactionId> {
+pub fn direct_vassals(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Vec<FactionId> {
     state
         .feudal
         .primary
@@ -192,7 +196,11 @@ pub fn direct_vassals(state: &CampaignState, data: &GameData, faction: &FactionI
 
 /// Factions holding a title directly below one held by `faction`, primary
 /// or not: England for France through Guyenne (double allegiance).
-pub fn title_vassals(state: &CampaignState, data: &GameData, faction: &FactionId) -> BTreeSet<FactionId> {
+pub fn title_vassals(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> BTreeSet<FactionId> {
     state
         .feudal
         .holders
@@ -211,7 +219,12 @@ pub fn title_vassals(state: &CampaignState, data: &GameData, faction: &FactionId
 
 /// Feudal tree below `faction`.
 pub fn feudal_tree(state: &CampaignState, data: &GameData, faction: &FactionId) -> FeudalNode {
-    fn build(state: &CampaignState, data: &GameData, faction: &FactionId, depth: usize) -> FeudalNode {
+    fn build(
+        state: &CampaignState,
+        data: &GameData,
+        faction: &FactionId,
+        depth: usize,
+    ) -> FeudalNode {
         let vassals = if depth < MAX_DEPTH {
             direct_vassals(state, data, faction)
                 .iter()

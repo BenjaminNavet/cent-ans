@@ -93,9 +93,6 @@ pub use entities::province::{
     CapitalCity, Climate, Population, PopulationClass, PopulationClasses, Province, ProvinceGeo,
     Terrain,
 };
-pub use entities::title::{
-    FeudalTitle, TitleHolder, TitleObjective, TitleObjectiveCondition, TitleRank,
-};
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
 pub use entities::resource::{Resource, ResourceCategory};
@@ -108,6 +105,9 @@ pub use entities::settlement::{
 };
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
+pub use entities::title::{
+    FeudalTitle, TitleHolder, TitleObjective, TitleObjectiveCondition, TitleRank,
+};
 pub use entities::trade::{TradeCatalog, TradeHub, TradeRouteDef};
 pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
