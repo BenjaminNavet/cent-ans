@@ -17,6 +17,7 @@ shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
 #include "res://shaders/battle_common.gdshaderinc"
+#include "res://shaders/ga_macro.gdshaderinc"
 
 const float L_GRASS = 0.0;
 const float L_MEADOW = 1.0;
@@ -376,12 +377,7 @@ void fragment() {
 			+ texture(macro_noise, p / 90.0 + vec2(0.53, 0.02)).r * 0.3
 			+ texture(macro_noise, p / 140.0 + vec2(0.29, 0.71)).r * 0.2
 			+ texture(macro_noise, p / 200.0 + vec2(0.83, 0.19)).r * 0.1;
-		vec3 ga2_tint = vec3(
-			1.0 + (ga2_h - 0.5) * 0.06,
-			1.0 + (ga2_h - 0.5) * 0.04,
-			1.0 - (ga2_h - 0.5) * 0.05
-		);
-		albedo *= ga2_tint;
+		albedo *= ga_macro_variation(ga2_h, 0.5, 1.0, 0.0);  // GA4 : fonction partagée
 	}
 	// DA6 (bible § 3.3) : décor sourd, saturation ramenée vers la luminance.
 	if (da6_on > 0.5) {
