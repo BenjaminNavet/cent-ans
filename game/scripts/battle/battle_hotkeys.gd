@@ -30,6 +30,7 @@ const BINDINGS := [
 	{"group": "orders", "action": "formation", "key": KEY_T, "dispatch": true, "help": "changer de formation (ligne, colonne, schiltron, coin)"},
 	{"group": "orders", "action": "halt", "key": KEY_H, "help": "halte"},
 	{"group": "orders", "action": "leader_orders", "label": "{orders}", "help": "ordres du chef"},
+	{"group": "orders", "action": "burn", "key": KEY_I, "physical": true, "lot": "RS-F", "help": "incendier (siège) : la maison ou la porte la plus proche à portée de torche (bouton de la barre des ordres)"},
 	{"group": "orders", "action": "queue", "label": "Maj + clic droit", "help": "ajouter un point de passage (ordres en file)"},
 	# Modes (CB2).
 	{"group": "modes", "action": "run", "key": KEY_R, "dispatch": true, "help": "course : tous les déplacements au pas de course"},
