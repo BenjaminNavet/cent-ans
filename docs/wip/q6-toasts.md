@@ -1,11 +1,12 @@
 # Q6 — avis (zone TOASTS) au-dessus des fenêtres, repli du texte
 
-Test : `game/tests/q6_toasts_test.gd`.
+Test : `game/tests/q6_toasts_test.gd` (vert).
 
 ## État
 - [x] Test rouge : registre des agents couvert par les avis/journal, « Colonies » aussi, journal et avis plus larges que la zone en vue étroite.
-- [ ] Ordre d'affichage : zone TOASTS sous les fenêtres du joueur.
-- [ ] Largeur : journal et avis repliés à la largeur de la zone.
+- [x] Ordre d'affichage : zone TOASTS à l'étage HUD (`ui_layout.gd`), BANNER seulement pendant le bandeau de fin de tour (`map_ui.gd`) ; fenêtre bloquante hors pile = étage PANEL (`panel_stack.gd`).
+- [x] Largeur : `LogScroll` sans largeur minimale (`map_ui.gd`), encart « Conseil » sans largeur minimale et titre replié (`next_hint_card.gd`).
+- [ ] Non-régression : po_ui, p2c/p2d/p2g, smoke.
 
 ## Prochaine étape
-Corriger l'étage de la zone TOASTS (`ui_layout.gd`, `panel_stack.gd`) et la largeur minimale du journal.
+Lancer les tests de non-régression.

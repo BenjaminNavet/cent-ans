@@ -354,13 +354,15 @@ func _build_host(host: Node) -> Dictionary:
 		node.offset_right = 0.0
 		node.offset_bottom = 0.0
 		zones[zone] = node
-	# Ordre d'affichage : zones de HUD, panneau latéral, avis, voile puis modale. Dans l'interface de
-	# campagne, `PanelStack.restack` respecte ces étages.
+	# Ordre d'affichage : zones de HUD et avis, panneau latéral, voile puis modale. Dans l'interface de
+	# campagne, `PanelStack.restack` respecte ces étages. Q6 : les avis et le journal (`TOASTS`)
+	# sont au niveau du HUD, sous toute fenêtre ouverte par le joueur (elle en recevait les clics) ;
+	# la carte ne les monte à l'étage `BANNER` que le temps du bandeau de fin de tour.
 	PanelStack.set_tier(zones[Zone.TOP_BAR], PanelStack.Tier.HUD)
 	PanelStack.set_tier(zones[Zone.BOTTOM_SELECTION], PanelStack.Tier.HUD)
 	PanelStack.set_tier(zones[Zone.MINIMAP], PanelStack.Tier.HUD)
 	PanelStack.set_tier(zones[Zone.SIDE_PANEL], PanelStack.Tier.PANEL)
-	PanelStack.set_tier(zones[Zone.TOASTS], PanelStack.Tier.BANNER)
+	PanelStack.set_tier(zones[Zone.TOASTS], PanelStack.Tier.HUD)
 	PanelStack.set_tier(dim, PanelStack.Tier.MODAL)
 	PanelStack.set_tier(zones[Zone.MODAL], PanelStack.Tier.MODAL)
 	for zone in [Zone.TOP_BAR, Zone.BOTTOM_SELECTION, Zone.MINIMAP, Zone.SIDE_PANEL, Zone.TOASTS]:

@@ -43,7 +43,11 @@ extends RefCounted
 ##    autres factions »), `MODAL` (pause, réglages, sauvegarde, rapport de saison, chronique,
 ##    avant-bataille terrestre et navale, confirmations, fin de partie), `TUTORIAL`.
 ##    L'étage vient de la méta `TIER_META` si elle est posée (`set_tier`), sinon du genre dans
-##    la pile (`MODAL` → `MODAL`, autres → `PANEL`), sinon `HUD`.
+##    la pile (`MODAL` → `MODAL`, autres → `PANEL`), sinon `PANEL` pour une fenêtre du groupe
+##    `BLOCKING_GROUP`, sinon `HUD`.
+##    Q6 : la zone des avis (`UiZone_TOASTS` : avis, journal, carte « que faire », avis de
+##    résultat) est à l'étage `HUD` — une fenêtre ouverte par le joueur passe toujours devant ;
+##    elle ne monte à `BANNER` que tant que le bandeau « tour des autres factions » est visible.
 ## 3. Fenêtres bloquantes (`BLOCKING_GROUP`) : panneaux centraux, compagnons et modaux de la
 ##    pile, dialogues d'avant-bataille, écrans de fin (bataille, siège, naval), discours.
 
@@ -298,6 +302,9 @@ func tier_of(node: Node) -> int:
 		return int(node.get_meta(TIER_META))
 	if _entries.has(node):
 		return Tier.MODAL if kind_of(node) == Kind.MODAL else Tier.PANEL
+	# Q6 : fenêtre bloquante hors de la pile (« Colonies »…) = fenêtre du joueur, au-dessus du HUD.
+	if node.is_in_group(BLOCKING_GROUP):
+		return Tier.PANEL
 	return Tier.HUD
 
 

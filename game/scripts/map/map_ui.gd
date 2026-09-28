@@ -988,6 +988,15 @@ func _setup_zones() -> void:
 	news_letters.size_flags_horizontal = Control.SIZE_SHRINK_END
 	UiZones.put(UiZones.Zone.TOASTS, event_log)
 	UiZones.put(UiZones.Zone.TOASTS, turn_banner)
+	# Q6 : la zone des avis reste sous les fenêtres du joueur (étage HUD) ; elle ne passe devant les
+	# panneaux (étage BANNER, Q4) que le temps du bandeau de fin de tour.
+	var toasts_zone := UiZones.layout().zone_node(UiZones.Zone.TOASTS)
+	turn_banner.visibility_changed.connect(func() -> void:
+		PanelStack.set_tier(toasts_zone, PanelStack.Tier.BANNER if turn_banner.visible else PanelStack.Tier.HUD)
+		queue_restack())
+	# Q6 : le journal se replie à la largeur de la zone (sa largeur minimale de scène, 380 px,
+	# dépassait la zone en vue étroite et élargissait toute la pile : avis coupés au bord).
+	log_scroll.custom_minimum_size.x = 0.0
 	event_log.visibility_changed.connect(queue_layout)
 	UiZones.layout().side_panel_changed.connect(func(_control: Control) -> void: queue_layout())
 	# P2g : grandes fenêtres et dialogue de sauvegarde dans la zone `MODAL` (voile, entrées
