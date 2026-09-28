@@ -110,6 +110,11 @@ pub mod folders {
     pub const BATTLE_STANDARD_RULES: &str = "battle_standards.json";
     /// Army stances (lot CV3-1), inside `rules/`; optional.
     pub const POSTURE_RULES: &str = "postures.json";
+    /// Fate of captured places (lot TW2-T1), inside `rules/`; optional.
+    pub const CAPTURE_RULES: &str = "capture.json";
+    /// Army replenishment and recruitment pools (lot TW2-T2), inside
+    /// `rules/`; optional.
+    pub const REPLENISHMENT_RULES: &str = "replenishment.json";
     /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
     pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
     /// Trade hubs and routes (lot C5); optional folder.
@@ -327,6 +332,12 @@ pub struct GameData {
     /// `data/rules/postures.json` (lot CV3-1, army stances);
     /// [`crate::PostureRules::default`] when absent.
     pub posture_rules: crate::entities::posture::PostureRules,
+    /// `data/rules/capture.json` (lot TW2-T1, fate of captured places);
+    /// [`crate::CaptureRules::default`] when absent.
+    pub capture_rules: crate::entities::capture::CaptureRules,
+    /// `data/rules/replenishment.json` (lot TW2-T2, army replenishment and
+    /// recruitment pools); the bundled file when absent.
+    pub replenishment_rules: crate::entities::replenishment::ReplenishmentRules,
     /// `data/rules/battle_outcome.json` (lot CV3-1, nuanced outcomes);
     /// [`crate::BattleOutcomeRules::default`] when absent.
     pub battle_outcome_rules: crate::entities::battle_outcome::BattleOutcomeRules,
@@ -339,6 +350,9 @@ pub struct GameData {
     /// `data/economy/trade.json` (lot C5), absent until written: no trade
     /// route exists.
     pub trade: Option<TradeCatalog>,
+    /// Paths of the trade routes, precomputed by
+    /// [`GameData::build_trade_paths`] (review point 18c).
+    pub trade_paths: crate::trade_paths::TradePaths,
     /// `data/movement/rules.json` (lot M2, free movement), absent until
     /// written: [`FreeMovementRules::default`] then applies.
     pub free_movement: Option<crate::entities::movement::FreeMovementRules>,
@@ -403,10 +417,13 @@ impl GameData {
             agent_rules: None,
             battle_standard_rules: Default::default(),
             posture_rules: Default::default(),
+            capture_rules: Default::default(),
+            replenishment_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             cover: Default::default(),
             movement_graph: Default::default(),
             trade: None,
+            trade_paths: Default::default(),
             free_movement: None,
             settlement_px: BTreeMap::new(),
             rasters: Default::default(),
@@ -516,6 +533,14 @@ impl GameData {
         let postures_path = root.join(folders::RULES).join(folders::POSTURE_RULES);
         if postures_path.is_file() {
             data.posture_rules = read_json(&postures_path)?;
+        }
+        let capture_path = root.join(folders::RULES).join(folders::CAPTURE_RULES);
+        if capture_path.is_file() {
+            data.capture_rules = read_json(&capture_path)?;
+        }
+        let replenishment_path = root.join(folders::RULES).join(folders::REPLENISHMENT_RULES);
+        if replenishment_path.is_file() {
+            data.replenishment_rules = read_json(&replenishment_path)?;
         }
         let outcome_path = root
             .join(folders::RULES)

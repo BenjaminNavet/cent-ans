@@ -88,6 +88,7 @@ pub(crate) type BattleData = (
 /// Unit types, leader's orders and standards of `data_dir` (a historical
 /// battle is built without a campaign).
 pub(crate) fn battle_data(data_dir: &Path) -> Result<BattleData, String> {
+    crate::campaign_sim::install_battle_rules(data_dir);
     let units = load_entities(&data_dir.join("unit_types"), |u: &UnitType| &u.id)
         .map_err(|e| e.to_string())?;
     let orders: Vec<BattleOrder> =

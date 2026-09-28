@@ -1,0 +1,239 @@
+//! Fate of a captured place (lot TW2-T1: occupy, ransom, sack, raze),
+//! mirroring `data/schemas/capture_rules.schema.json`
+//! (`data/rules/capture.json`). Spec `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T1.
+
+use std::collections::BTreeMap;
+
+use serde::{Deserialize, Serialize};
+
+use crate::entities::settlement::SettlementKind;
+use crate::ids::{FactionId, SettlementId};
+
+/// Contents of `data/rules/capture.json`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CaptureRules {
+    pub occupy: OccupyRules,
+    pub ransom: OutcomeRules,
+    pub sack: OutcomeRules,
+    pub raze: RazeRules,
+    /// Scale (0-1) of the gold, population, devastation and extra unrest of
+    /// an outcome by kind of place (the city of the province is 1).
+    pub place_share: BTreeMap<SettlementKind, f64>,
+    /// Kinds of place that can never be razed (province cities).
+    pub raze_forbidden_kinds: Vec<SettlementKind>,
+    /// Emblematic places that can never be razed (royal abbeys, shrines).
+    pub raze_forbidden_settlements: Vec<SettlementId>,
+    pub ai: CaptureAiRules,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+/// « Occuper »: the place changes hands, nothing more.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OccupyRules {
+    /// Unrest added to the province when its city is taken.
+    pub unrest_city: u8,
+    /// Unrest added when another place of the province is taken.
+    pub unrest_place: u8,
+}
+
+/// Extra effects of ransom and sack, on top of the occupation.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OutcomeRules {
+    /// Gold taken = seasonal tax base of the province × this share × place share.
+    pub gold_income_share: f64,
+    /// Floor of the gold taken (livres, before the place share).
+    pub min_gold: i64,
+    /// Unrest added on top of the occupation (× place share).
+    pub extra_unrest: u8,
+    /// Population change of the province, percent (× place share).
+    #[serde(default)]
+    pub population_percent: i32,
+    /// Devastation added to the province (× place share).
+    #[serde(default)]
+    pub devastation: u8,
+    /// Buildings of the place destroyed (the most recent first).
+    #[serde(default)]
+    pub buildings_destroyed: u32,
+    /// Experience (0-10 scale) gained by every unit of the capturing armies.
+    #[serde(default)]
+    pub unit_experience: u8,
+    /// Piety of the capturing ruler.
+    #[serde(default)]
+    pub ruler_piety: i32,
+    /// Papal favour of the capturing faction.
+    #[serde(default)]
+    pub papal_favor: i32,
+    /// Opinion of the former holder of the place towards the captor.
+    #[serde(default)]
+    pub victim_opinion: i32,
+    /// Opinion of every other living faction towards the captor.
+    #[serde(default)]
+    pub others_opinion: i32,
+    /// Duration (turns) of the opinion modifiers.
+    #[serde(default)]
+    pub opinion_turns: u32,
+}
+
+/// « Raser / brûler »: the extra effects plus the loss of the place.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RazeRules {
+    /// Effects shared with ransom and sack.
+    pub effects: OutcomeRules,
+    /// Fortification levels lost; a place left at level 0 is a ruin.
+    pub fortification_loss: u8,
+    /// Turns a ruin stays unusable (no recruitment, no construction).
+    pub ruin_turns: u32,
+}
+
+/// Scores of the AI's choice: the highest total wins (ties: occupy, ransom,
+/// sack, raze in that order). No randomness, so that adding the rule leaves
+/// the campaign draws alone.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CaptureAiRules {
+    /// Base scores of every faction.
+    pub default: OutcomeScores,
+    /// Doctrine of a faction (replaces the default base scores).
+    #[serde(default)]
+    pub factions: BTreeMap<FactionId, OutcomeScores>,
+    /// Treasury (livres) under which the faction is poor.
+    pub poor_treasury: i64,
+    /// Added when the faction is poor.
+    pub poor_bonus: OutcomeScores,
+    /// Added when the province's culture differs from the faction's.
+    pub foreign_culture_bonus: OutcomeScores,
+    /// Added when the faction is the de jure owner of the place (reconquest).
+    pub own_land_bonus: OutcomeScores,
+    /// Added for a place (not the city) whose province city stays in enemy
+    /// hands: it cannot be held.
+    pub exposed_bonus: OutcomeScores,
+}
+
+/// One score per outcome.
+#[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OutcomeScores {
+    #[serde(default)]
+    pub occupy: i32,
+    #[serde(default)]
+    pub ransom: i32,
+    #[serde(default)]
+    pub sack: i32,
+    #[serde(default)]
+    pub raze: i32,
+}
+
+impl Default for CaptureRules {
+    /// Fallback when `data/rules/capture.json` is absent; kept equal to that
+    /// file (checked by `tests/real_data.rs`).
+    fn default() -> Self {
+        let scores = |occupy, ransom, sack, raze| OutcomeScores {
+            occupy,
+            ransom,
+            sack,
+            raze,
+        };
+        CaptureRules {
+            occupy: OccupyRules {
+                unrest_city: 20,
+                unrest_place: 10,
+            },
+            ransom: OutcomeRules {
+                gold_income_share: 1.5,
+                min_gold: 60,
+                extra_unrest: 10,
+                population_percent: 0,
+                devastation: 0,
+                buildings_destroyed: 0,
+                unit_experience: 0,
+                ruler_piety: 0,
+                papal_favor: 0,
+                victim_opinion: -10,
+                others_opinion: 0,
+                opinion_turns: 12,
+            },
+            sack: OutcomeRules {
+                gold_income_share: 4.0,
+                min_gold: 150,
+                extra_unrest: 30,
+                population_percent: -15,
+                devastation: 25,
+                buildings_destroyed: 1,
+                unit_experience: 1,
+                ruler_piety: -5,
+                papal_favor: -3,
+                victim_opinion: -25,
+                others_opinion: -5,
+                opinion_turns: 20,
+            },
+            raze: RazeRules {
+                effects: OutcomeRules {
+                    gold_income_share: 0.5,
+                    min_gold: 20,
+                    extra_unrest: 40,
+                    population_percent: -25,
+                    devastation: 40,
+                    buildings_destroyed: 99,
+                    unit_experience: 1,
+                    ruler_piety: -10,
+                    papal_favor: -5,
+                    victim_opinion: -40,
+                    others_opinion: -15,
+                    opinion_turns: 40,
+                },
+                fortification_loss: 1,
+                ruin_turns: 8,
+            },
+            place_share: [
+                (SettlementKind::City, 1.0),
+                (SettlementKind::Town, 0.6),
+                (SettlementKind::Castle, 0.3),
+                (SettlementKind::Abbey, 0.8),
+                (SettlementKind::Village, 0.2),
+            ]
+            .into_iter()
+            .collect(),
+            raze_forbidden_kinds: vec![SettlementKind::City],
+            raze_forbidden_settlements: [
+                "set_saint_denis",
+                "set_vincennes",
+                "set_windsor",
+                "set_mont_saint_michel",
+                "set_cluny",
+                "set_citeaux",
+                "set_clairvaux",
+                "set_fontevraud",
+                "set_grande_chartreuse",
+                "set_vezelay",
+                "set_rocamadour",
+                "set_conques",
+                "set_assisi",
+            ]
+            .into_iter()
+            .map(|id| SettlementId::new(id).expect("well-formed id"))
+            .collect(),
+            ai: CaptureAiRules {
+                default: scores(60, 20, 10, 0),
+                factions: [
+                    ("fac_england", scores(50, 30, 25, 5)),
+                    ("fac_scotland", scores(40, 30, 35, 10)),
+                    ("fac_rebels", scores(100, 0, 0, 0)),
+                ]
+                .into_iter()
+                .map(|(id, s)| (FactionId::new(id).expect("well-formed id"), s))
+                .collect(),
+                poor_treasury: 300,
+                poor_bonus: scores(0, 35, 30, 0),
+                foreign_culture_bonus: scores(0, 10, 15, 5),
+                own_land_bonus: scores(100, 0, 0, 0),
+                exposed_bonus: scores(0, 0, 0, 40),
+            },
+            description: None,
+        }
+    }
+}

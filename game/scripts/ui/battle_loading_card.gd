@@ -12,6 +12,9 @@ extends CanvasLayer
 ##   ... instancier la bataille ...
 ##   card.close()               # attend le reste du temps minimal, fondu, puis libère
 ## Capture : `-- --battle-loading-shot=<chemin.png>` enregistre l'écran puis quitte.
+## Lot P2e (ADR 0097, bible DA § 12.2) : tailles de texte par `UiType`, comme `loading_screen.gd`
+## (transition plein écran par `CanvasLayer` à étage élevé, hors zones `UiLayout` : ni « choix
+## bloquant » ni panneau, la zone `MODAL` ne convient pas à un écran de transition).
 
 signal drawn
 signal closed
@@ -105,10 +108,10 @@ func _build() -> void:
 	margin.add_child(column)
 
 	var kicker := {"battle": "Bataille rangée", "siege": "Siège", "naval": "Bataille sur mer", "campaign": "Campagne"}
-	var head := FrontEndStyle.label(str(kicker.get(context, "")).to_upper(), 16, FrontEndStyle.GOLD, FrontEndStyle.title_font(), 3)
+	var head := FrontEndStyle.label(str(kicker.get(context, "")).to_upper(), UiType.size(UiType.CAPTION), FrontEndStyle.GOLD, FrontEndStyle.title_font(), 3)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(head)
-	var title := FrontEndStyle.label(str(screen.get("title", "")), 40, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 6)
+	var title := FrontEndStyle.label(str(screen.get("title", "")), UiType.size(UiType.TITLE), Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 6)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(title)
 
@@ -131,17 +134,17 @@ func _build() -> void:
 
 	var quote: Dictionary = screen.get("quote", {})
 	if not quote.is_empty():
-		var quote_label := FrontEndStyle.label("« %s »" % quote.get("text", ""), 24, Color(0.95, 0.90, 0.78), FrontEndStyle.title_italic(), 4)
+		var quote_label := FrontEndStyle.label("« %s »" % quote.get("text", ""), UiType.size(UiType.HEADING), Color(0.95, 0.90, 0.78), FrontEndStyle.title_italic(), 4)
 		quote_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		quote_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		quote_label.custom_minimum_size = Vector2(minf(_art_size().x, 1000.0), 0)
 		quote_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		column.add_child(quote_label)
-		var attribution := FrontEndStyle.label("— %s, %s (%s)" % [quote.get("author", ""), quote.get("source", ""), quote.get("date", "")], 17, FrontEndStyle.GOLD, FrontEndStyle.body_font(), 3)
+		var attribution := FrontEndStyle.label("— %s, %s (%s)" % [quote.get("author", ""), quote.get("source", ""), quote.get("date", "")], UiType.size(UiType.BODY), FrontEndStyle.GOLD, FrontEndStyle.body_font(), 3)
 		attribution.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		attribution.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		column.add_child(attribution)
-	var hint := FrontEndStyle.label("Les armées prennent position…", 16, Color(0.80, 0.74, 0.62), FrontEndStyle.body_italic(), 3)
+	var hint := FrontEndStyle.label("Les armées prennent position…", UiType.size(UiType.CAPTION), Color(0.80, 0.74, 0.62), FrontEndStyle.body_italic(), 3)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(hint)
 

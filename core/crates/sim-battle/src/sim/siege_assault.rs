@@ -22,6 +22,34 @@ pub struct Ladder {
     pub top_y: f64,
 }
 
+/// SB: what a siege engine of the attacker is, for its health bar.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SiegeEngineKind {
+    Ram,
+    Tower,
+}
+
+impl SiegeEngineKind {
+    pub fn key(self) -> &'static str {
+        match self {
+            SiegeEngineKind::Ram => "ram",
+            SiegeEngineKind::Tower => "tower",
+        }
+    }
+}
+
+/// SB: a ram or siege tower and its strength (`hp` = crew left).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SiegeEngineView {
+    pub unit: u32,
+    pub kind: SiegeEngineKind,
+    pub side: SideId,
+    pub x: f64,
+    pub z: f64,
+    pub hp: f64,
+    pub max_hp: f64,
+}
+
 /// Per-battle state of the assault events (derived from the works, plus the
 /// ram and oil timers).
 #[derive(Debug, Clone, Default)]
@@ -217,6 +245,28 @@ impl BattleSim {
     /// Every siege event of the battle so far (tests, replays).
     pub fn siege_fx(&self) -> &[SiegeFx] {
         &self.assault.fx
+    }
+
+    /// SB (ADR 0107): the rams and siege towers still on the field, with
+    /// their strength (crew left over full crew) for the health bars.
+    pub fn siege_engines(&self) -> Vec<SiegeEngineView> {
+        self.units
+            .iter()
+            .filter(|u| u.present() && (u.ram || u.siege_tower()))
+            .map(|u| SiegeEngineView {
+                unit: u.id,
+                kind: if u.ram {
+                    SiegeEngineKind::Ram
+                } else {
+                    SiegeEngineKind::Tower
+                },
+                side: u.side,
+                x: u.x,
+                z: u.z,
+                hp: u.hp.max(0.0),
+                max_hp: f64::from(u.initial_soldiers.max(1)),
+            })
+            .collect()
     }
 
     pub(super) fn push_fx(&mut self, kind: SiegeFxKind) {

@@ -159,15 +159,16 @@ static func make_panel(bbcode: String) -> Control:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(WIDTH, 0)
 	label.add_theme_color_override("default_color", INK)
-	label.add_theme_font_size_override("normal_font_size", 14)
-	label.add_theme_font_size_override("bold_font_size", 15)
+	# P2c : infobulle compacte — variation `Caption` (14 px, plancher de la bible § 12.2).
+	UiType.apply(label, UiType.CAPTION)
+	label.add_theme_font_size_override("bold_font_size", UiType.size(UiType.CAPTION))
 	label.text = CodexText.format(bbcode, true)
 	label.name = "Text"
 	box.add_child(label)
 	var footer := Label.new()
 	footer.name = "Footer"
 	footer.text = footer_text(title_entry(label.text) != "")
-	footer.add_theme_font_size_override("font_size", 11)
+	UiType.apply(footer, UiType.CAPTION)
 	footer.add_theme_color_override("font_color", Color(MUTED))
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	box.add_child(footer)

@@ -1,0 +1,1452 @@
+{
+ "format": 2,
+ "id": "calais",
+ "name": "Calais",
+ "settlement": "set_calais",
+ "landmark": "calais",
+ "period": "vers 1340, ville close du comte de Boulogne (avant le siège de 1346-1347, la prise anglaise d'août 1347, le fortin du Rysbank, l'Étape des laines de 1363 et la reconstruction anglaise de Notre-Dame) ; havre et trait de côte restitués",
+ "year": 1340,
+ "seed": 1340062,
+ "crs": "EPSG:3035",
+ "origin_3035": [3749703, 3126203],
+ "extent_m": 1500,
+ "sources": [
+  {
+   "title": "OpenStreetMap (voies de Calais-Nord, tour du Guet, église Notre-Dame, fort Risban, citadelle et tour Carrée, place d'Armes, bassins)",
+   "author": "Contributeurs d'OpenStreetMap",
+   "date": "2026-09-28",
+   "url": "https://www.openstreetmap.org/copyright",
+   "license": "ODbL 1.0 (© contributeurs d'OpenStreetMap)",
+   "extracted": true,
+   "use": "Tracés des rues actuelles de Calais-Nord dans la ville close restituée (extraction par `cent-ans geo landmarks`, boulevards, quais, places et rues identifiées de la reconstruction ou du quartier de l'Europe exclus) ; positions et emprises de la tour du Guet, de Notre-Dame (transept et nef), du fort Risban (site de la tour de Lancastre), de la tour Carrée (front sud médiéval) ; contrôle de la place du Marché. Le trait de côte et les bassins actuels ne servent que de repère : le havre de 1340 est restitué à la main."
+  },
+  {
+   "title": "Calais, archéologie d'un territoire fortifié (Archéologie des Hauts-de-France n° 41)",
+   "author": "I. Speurt, J. Fossaert, J.-J. Tronquoy, L. Quintard-Tardie (Service archéologie Grand Calais Terres & Mers), DRAC Hauts-de-France - SRA",
+   "date": "2025",
+   "url": "https://www.culture.gouv.fr/mc/content/download/384538/pdf_file/41_SRA_Calais_version-en-ligne_def.pdf",
+   "license": "Publication du ministère de la Culture, diffusion gratuite ; faits seulement",
+   "extracted": false,
+   "use": "Charte de 1181, port en 1190 ; enceinte de 1228 (Philippe Hurepel) : mur flanqué de petites tours et fossés ; château carré à donjon, porte vers la ville et porte vers Nieulay, au nord-ouest ; double enceinte et fossé doublé en 1346 ; mur de 2,50 m et tour carrée de 6,50 m (boulevard du 8-Mai, 2017) ; courtine épaissie au XVe s. (esplanade Jacques-Vendroux, 2019) ; fort Risban : première mention 1346, tour de Lancastre (fondations circulaires, 2019) ; citadelle 1564-1574 à l'ouest."
+  },
+  {
+   "title": "Inventaire des sites fortifiés par Vauban en France : Calais",
+   "author": "Réseau des sites majeurs de Vauban",
+   "date": "2015",
+   "url": "https://sites-vauban.org/sites/default/files/sites-vauban/Calais.pdf",
+   "license": "Tous droits réservés ; faits seulement",
+   "extracted": false,
+   "use": "Enceinte rénovée en 1228 : 1 100 m sur 400, 44 tours semi-circulaires, quatre portes précédées d'avant-portes sur une terrée circulaire ; château à tour détachée sur le flanc ouest ; citadelle de 1560 englobant le château médiéval."
+  },
+  {
+   "title": "Calais under Edward III, in Finance and Trade under Edward III (éd. G. Unwin), p. 312-348",
+   "author": "Dorothy Greaves (British History Online)",
+   "date": "1918",
+   "url": "https://www.british-history.ac.uk/manchester-uni/london-lay-subsidy/1332/pp312-348",
+   "license": "Domaine public (texte de 1918) ; faits seulement",
+   "extracted": false,
+   "use": "Ville d'environ 200 acres correspondant à Calais-Nord ; deux murs et deux fossés inondables ; château à l'extrême nord-ouest fondu dans l'enceinte ; place du marché au centre ; havre formé par une langue de terre au nord ; faubourgs à l'est, au sud et à l'ouest ; églises Notre-Dame, Saint-Nicolas et Saint-Jean (Maison-Dieu), Carmes ; Augustins en 1351."
+  },
+  {
+   "title": "Église Notre-Dame (PA00108246) ; Tour du Guet (PA00108248)",
+   "author": "Ministère de la Culture, base Mérimée (POP)",
+   "url": "https://pop.culture.gouv.fr/notice/merimee/PA00108246",
+   "license": "Licence Ouverte 2.0 (notices POP) ; faits seulement",
+   "extracted": false,
+   "use": "Notre-Dame : XIVe s., classée en 1913 ; tour du Guet : XIIIe s., classée en 1931."
+  },
+  {
+   "title": "L'église Notre-Dame de Calais",
+   "author": "Département du Pas-de-Calais (patrimoines.pasdecalais.fr)",
+   "date": "2026",
+   "url": "https://patrimoines.pasdecalais.fr/Decouvrir/Patrimoine-architectural/L-eglise-Notre-Dame-de-Calais",
+   "license": "Tous droits réservés ; faits seulement",
+   "extracted": false,
+   "use": "Première église citée dès 1224 ; agrandissement par les Anglais (1347-1558) au XIVe s. avec des ouvriers flamands ; chapelle axiale au XVIIe s."
+  },
+  {
+   "title": "Église Notre-Dame de Calais ; Tour du Guet ; Citadelle de Calais ; Fort Risban ; Histoire de Calais ; Calais (articles)",
+   "author": "Wikipédia FR et EN (contributeurs), recoupés avec les sources ci-dessus",
+   "date": "2026",
+   "url": "https://fr.wikipedia.org/wiki/%C3%89glise_Notre-Dame_de_Calais",
+   "license": "CC BY-SA 4.0 ; faits seulement",
+   "extracted": false,
+   "use": "Notre-Dame : église du début du XIIIe s. sur le transept actuel, rectangulaire à deux tours de façade ; reconstruction anglaise ; tour-lanterne de 56 m (XVe s.) ; 90 × 45,5 m, voûtes à 18 m ; chapelle de 1631-1635 (18 m). Tour du Guet : 39 m, 1229 ou 1214, première trace en 1302, séisme de 1580, relevée vers 1606. Citadelle : château de 1229 carré à six tours et donjon à l'angle nord-ouest, rasé ; quartier et église Saint-Nicolas détruits ; tour Carrée et tour Pavée médiévales. Rysbank : mention en novembre 1346, fortification sur la pointe du banc en avril 1347, Stone Tower rebaptisée Lancaster Tower après 1400. Étape des laines le 9 février 1363 ; hôtel de ville de 1231 ; havre désenvasé en 1397 ; mariage de Richard II à Saint-Nicolas (1396)."
+  },
+  {
+   "title": "Calais: The Glittering Triumph of Anne Boleyn",
+   "author": "The Tudor Travel Guide (site), d'après History of the King's Works III et la Chronicle of Calais",
+   "url": "https://thetudortravelguide.com/calais/",
+   "license": "Tous droits réservés ; faits seulement",
+   "extracted": false,
+   "use": "État Tudor (postérieur) : Lantern Gate, porte principale, au bout de la rue de la Mer (Lantern Street) ; autres portes (Milk Gate, Water Gate, Boulogne Gate) ; hôtel de ville au sud de la place du Marché, tour du Guet derrière lui ; Staple Inn au carrefour des rues Royale et du Duc-de-Guise ; Saint-Nicolas dans le quartier ouest."
+  },
+  {
+   "title": "Il vero ritratto de Cales preso a Inglesi del Re Cristianissimo l'anno 1558 (BnF, btv1b55004830b)",
+   "author": "Anonyme (gravure italienne)",
+   "date": "1558",
+   "url": "https://commons.wikimedia.org/wiki/File:Il_vero_ritratto_de_Cales_preso_a_Inglesi_del_Re_Cristianissimo_l%27anno_1558_-_btv1b55004830b.jpg",
+   "license": "Domaine public",
+   "extracted": false,
+   "use": "Contrôle humain : ville rectangulaire allongée d'est en ouest, château au nord-ouest, tour du Guet au centre, havre au nord fermé par la tour du Rysbank, portes vers Boulogne et Gravelines, chemins sortant des portes (état de 1558, postérieur)."
+  },
+  {
+   "title": "Plan de Calais et du fort de Nieulet",
+   "author": "Anonyme (Krigsarkivet, Stockholm ; Wikimedia Commons)",
+   "date": "1693",
+   "url": "https://commons.wikimedia.org/wiki/File:Plan_de_Calais_1693.jpg",
+   "license": "Domaine public",
+   "extracted": false,
+   "use": "Contrôle humain : « Vieux Chasteau » dans la partie nord de la citadelle, ville à rues parallèles nord-sud, Courgain hors du rectangle urbain, fort Risban au bout du chenal (état de 1693, postérieur)."
+  },
+  {
+   "title": "La Seconde Reconstruction à Calais (Calais-Nord), dossier IA62005683",
+   "author": "Inventaire général du patrimoine culturel, région Hauts-de-France",
+   "url": "https://inventaire.hautsdefrance.fr/dossier/IA62005683",
+   "license": "Licence Ouverte (Inventaire) ; faits seulement",
+   "extracted": false,
+   "use": "Calais-Nord détruit à 80 % ; le remembrement a redressé et élargi les voies ; nouveaux îlots du quartier de l'Europe : la trame OSM n'est qu'une approximation de la trame médiévale."
+  },
+  {
+   "title": "Isabella of Valois ; Calais ; Siege of Calais (1346-1347) ; Fort Risban",
+   "author": "Wikipédia EN (contributeurs), recoupés",
+   "date": "2026",
+   "url": "https://en.wikipedia.org/wiki/Isabella_of_Valois",
+   "license": "CC BY-SA 4.0 ; faits seulement",
+   "extracted": false,
+   "use": "Mariage de Richard II et d'Isabelle à Saint-Nicolas le 4 novembre 1396 (cérémonie du 31 octobre) ; Étape le 9 février 1363 ; double fossé et château à l'angle nord-ouest avec son propre fossé en 1346 ; fort du Rysbank bâti pendant le siège (novembre 1346), Stone Tower devenue Lancaster Tower après 1400."
+  },
+  {
+   "title": "Tour du Guet (PA00108248)",
+   "author": "Ministère de la Culture, base Mérimée (POP)",
+   "url": "https://pop.culture.gouv.fr/notice/merimee/PA00108248",
+   "license": "Licence Ouverte 2.0 ; faits seulement",
+   "extracted": false,
+   "use": "« Ancien phare de Calais », XIIIe s. ; inscrite le 10 juin 1926, classée le 6 novembre 1931."
+  }
+ ],
+ "plan": {
+  "frontage_m": [5.0, 8.0],
+  "depth_m": [18.0, 35.0],
+  "faubourg_frontage_m": [8.0, 16.0],
+  "faubourg_depth_m": [25.0, 50.0],
+  "street_width_m": {
+   "main": 8.0,
+   "secondary": 5.0,
+   "lane": 3.0,
+   "quay": 10.0
+  },
+  "house_kinds": {
+   "intra": {
+    "townhouse": 0.5,
+    "timber": 0.4,
+    "stonehouse": 0.1
+   },
+   "faubourg": {
+    "cottage": 0.4,
+    "timber": 0.3,
+    "longere": 0.2,
+    "barn": 0.1
+   }
+  },
+  "detail_cell_m": 250.0
+ },
+ "osm_streets": {
+  "bbox_lonlat": [1.8359, 50.9501, 1.8613, 50.962],
+  "highways": [
+   "primary",
+   "secondary",
+   "tertiary",
+   "unclassified",
+   "residential",
+   "living_street",
+   "pedestrian"
+  ],
+  "exclude": [
+   "Boulevard de la Résistance",
+   "Boulevard des Alliés",
+   "Boulevard du 8 Mai",
+   "Boulevard Georges Clemenceau",
+   "Boulevard Jacquard",
+   "Boulevard Léon Gambetta",
+   "Boulevard Lafayette",
+   "Esplanade Jacques Vendroux",
+   "Esplanade des Sauveteurs en Mer",
+   "Avenue Pierre de Coubertin",
+   "Avenue du Président Wilson",
+   "Avenue Winston Churchill",
+   "Avenue Raymond Poincaré",
+   "Quai du Rhin",
+   "Quai du Danube",
+   "Quai de la Tamise",
+   "Quai de l'Escaut",
+   "Quai de la Meuse",
+   "Quai de la Moselle",
+   "Quai Auguste Delpierre",
+   "Pont George V",
+   "Pont Freycinet",
+   "Pont Faidherbe",
+   "Pont Mollien",
+   "Pont Henri Hénon",
+   "Place Georges Maréchal",
+   "Place de Norvège",
+   "Place du Danemark",
+   "Place de Suède",
+   "Place de l'Europe",
+   "Place d'Angleterre",
+   "Place de Lorraine",
+   "Place des Fusillés",
+   "Place de Rheims",
+   "Place d'Armes",
+   "Place Léon Vincent",
+   "Place du Minck",
+   "Rue Edison",
+   "Rue Claude Monet",
+   "Passage Tom Souville",
+   "Rue du Docteur Adolphe Devot",
+   "Rue Edmond Roche",
+   "Rue Ernest Lejeune",
+   "Rue de Madrid",
+   "Rue de Londres",
+   "Rue de Moscou",
+   "Rue de Lisbonne",
+   "Rue de Nottingham",
+   "Rue de Riga",
+   "Rue d'Ostende",
+   "Rue Henri de Baillon",
+   "Rue de Cronstadt",
+   "Rue du Cimetière Nord",
+   "Giratoire de la Base Sous-Marine",
+   "Rue de la Batellerie",
+   "Impasse de la Minoterie",
+   "Rue Philippine de Hainaut",
+   "Rond-Point Thomas Jefferson",
+   "Rue du Commandant Charcot",
+   "Rue Constant Dupont",
+   "Rue du Commandant Bonningue",
+   "Rue de Rome",
+   "Rue d'Edimbourg"
+  ],
+  "main": [
+   "Rue Royale",
+   "Rue de la Mer",
+   "Rue André Gerschel",
+   "Rue de la Paix",
+   "Rue de Croy",
+   "Rue du Duc de Guise"
+  ],
+  "lanes": [],
+  "unnamed": false,
+  "simplify_m": 1.5
+ },
+ "fine_rivers": [],
+ "waters": [
+  {
+   "id": "havre",
+   "name": "Havre de Calais (restitution)",
+   "kind": "river",
+   "origin": "hand",
+   "draw": false,
+   "polygon": [
+    [-620, 65],
+    [-330, 88],
+    [-55, 95],
+    [200, 102],
+    [360, 112],
+    [470, 180],
+    [430, 280],
+    [170, 330],
+    [150, 550],
+    [20, 550],
+    [0, 350],
+    [-150, 300],
+    [-400, 220],
+    [-700, 140]
+   ]
+  }
+ ],
+ "walls": [
+  {
+   "id": "enceinte",
+   "name": "Enceinte de Philippe Hurepel (1228) et château",
+   "points": [
+    [-775, -503],
+    [-500, -485],
+    [-17, -453],
+    [300, -432],
+    [351, -155],
+    [385, 33],
+    [-55, 22],
+    [-330, 10],
+    [-500, -15],
+    [-700, -75],
+    [-775, -105]
+   ],
+   "closed": true,
+   "height_m": 9.0,
+   "thickness_m": 2.5,
+   "tower_spacing_m": 71.0,
+   "tower_radius_m": 3.5,
+   "tower_height_m": 13.0,
+   "ditch_m": 14.0,
+   "gates": [
+    {
+     "name": "Porte de Boulogne",
+     "at": [-500, -485],
+     "kind": "gate",
+     "height_m": 14
+    },
+    {
+     "name": "Porte vers Saint-Pierre",
+     "at": [-17, -453],
+     "kind": "gate",
+     "height_m": 14
+    },
+    {
+     "name": "Porte de Gravelines",
+     "at": [351, -155],
+     "kind": "gate",
+     "height_m": 14
+    },
+    {
+     "name": "Porte du Havre",
+     "at": [-55, 22],
+     "kind": "gate",
+     "height_m": 16
+    }
+   ],
+   "from_year": 1228,
+   "note": "Enceinte de 1228 du comte de Boulogne Philippe Hurepel (SRA Hauts-de-France 2025 ; 1224 selon Wikipédia) : mur flanqué de petites tours et fossés extérieurs ; 1 100 m sur 400, 44 tours semi-circulaires, quatre portes précédées d'avant-portes sur une terrée circulaire (Réseau Vauban, 2015). Mur de 2,50 m d'épaisseur et tour carrée de 6,50 m mis au jour boulevard du 8-Mai (2017). Tracé restitué (hypothétique) : front sud par la tour Carrée (OSM, rempart sud de la citadelle, « déjà construit au Moyen Âge ») parallèle à la rue Jean-de-Vienne ; front nord sur le havre (boulevards de la Résistance et des Alliés) ; front est entre les rues Berthois et de Madrid (le quartier dit de l'Europe est exclu) ; front ouest dans l'emprise de la citadelle (1564-1571), qui a englobé le château de l'angle nord-ouest et un quartier entier. Longueur est-ouest ≈ 1 160 m conforme aux 1 100 m ; profondeur nord-sud ≈ 500 m (les 400 m cités placeraient Notre-Dame et la tour Carrée hors les murs). Tours : rayon et hauteur restitués (une tour carrée est attestée). Noms et positions des portes restitués : les noms connus sont anglais (Lantern Gate, Boulogne Gate, Milk Gate, Water Gate, XVIe s.) ; porte de Boulogne placée au sud-ouest, là où la citadelle a ouvert sa porte de Boulogne sur le rempart sud médiéval. Relecture historique (2026-09-28) : le front nord restitué suit à 10-15 m près le bras est du boulevard du 8-Mai, où le mur de 1228 (55 m de long, 2,50 m) et une tour carrée de 6,50 m ont été fouillés en 2017 (emplacement exact de la fouille non publié) ; le tronçon peut-être médiéval de l'esplanade Jacques-Vendroux (2019) n'est pas situé. Surface discordante : « about 200 acres » (≈ 81 ha, Greaves 1918), 1 100 × 400 m (Réseau Vauban), 52 ha ici. En 1550, l'enceinte anglaise compte quarante tours et six portes (SRA 2025)."
+  },
+  {
+   "id": "avant_mur",
+   "name": "Seconde enceinte et second fossé",
+   "points": [
+    [-801, -531],
+    [-801, -87],
+    [-709, -50],
+    [-506, 10],
+    [-332, 36],
+    [-56, 48],
+    [416, 60],
+    [322, -457]
+   ],
+   "closed": true,
+   "height_m": 5.0,
+   "thickness_m": 1.8,
+   "tower_spacing_m": 0.0,
+   "ditch_m": 18.0,
+   "gates": [
+    {
+     "name": "Porte de Boulogne",
+     "at": [-498, -511],
+     "kind": "gate",
+     "height_m": 8
+    },
+    {
+     "name": "Porte vers Saint-Pierre",
+     "at": [-15, -479],
+     "kind": "gate",
+     "height_m": 8
+    },
+    {
+     "name": "Porte de Gravelines",
+     "at": [376, -160],
+     "kind": "gate",
+     "height_m": 8
+    },
+    {
+     "name": "Porte du Havre",
+     "at": [-56, 48],
+     "kind": "gate",
+     "height_m": 8
+    }
+   ],
+   "note": "« Double enceinte et fossé doublé » que les Anglais trouvent en 1346 (SRA Hauts-de-France 2025) ; « two walls and two ditches, the latter of which could be flooded by sea-water » (D. Greaves, 1918). Date de construction inconnue (entre 1228 et 1346) : supposée en place en 1340. Tracé restitué à 26 m en avant du mur principal, hauteur restituée, sans tours ; portes reportées sur les axes des portes principales."
+  }
+ ],
+ "streets": [
+  {
+   "id": "chemin_de_nieulay",
+   "name": "Chemin de Boulogne par Nieulay",
+   "rank": "main",
+   "width_m": 7.0,
+   "origin": "hand",
+   "points": [
+    [-500, -485],
+    [-540, -570],
+    [-800, -590],
+    [-1050, -550],
+    [-1250, -520]
+   ]
+  },
+  {
+   "id": "chemin_de_saint_pierre",
+   "name": "Chemin de Saint-Pierre",
+   "rank": "main",
+   "width_m": 7.0,
+   "origin": "hand",
+   "points": [
+    [-17, -453],
+    [-22, -570],
+    [-30, -770],
+    [-45, -970]
+   ]
+  },
+  {
+   "id": "chemin_de_gravelines",
+   "name": "Chemin de Gravelines",
+   "rank": "main",
+   "width_m": 7.0,
+   "origin": "hand",
+   "points": [
+    [351, -155],
+    [460, -175],
+    [700, -220],
+    [1000, -290],
+    [1250, -350]
+   ]
+  },
+  {
+   "id": "osm_100114395",
+   "name": "Rue André Gerschel",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-14.6, -161.9],
+    [-55.5, -149.0],
+    [-102.0, -141.2]
+   ]
+  },
+  {
+   "id": "osm_1517010252",
+   "name": "Rue André Gerschel",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-102.0, -141.2],
+    [-148.8, -139.6],
+    [-182.8, -144.1]
+   ]
+  },
+  {
+   "id": "osm_53505663",
+   "name": "Rue André Gerschel",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-333.6, -159.5],
+    [-257.1, -149.7],
+    [-247.7, -153.2],
+    [-182.8, -144.1]
+   ]
+  },
+  {
+   "id": "osm_187717994",
+   "name": "Rue Royale",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-12.2, -447.6],
+    [-22.7, -364.1],
+    [-14.6, -161.9]
+   ]
+  },
+  {
+   "id": "osm_589512744",
+   "name": "Rue de Croy",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [217.6, -174.5],
+    [332.7, -155.7]
+   ]
+  },
+  {
+   "id": "osm_738713582",
+   "name": "Rue de la Mer",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-32.8, -81.8],
+    [-43.7, -42.1],
+    [-68.8, 3.9],
+    [-73.7, 21.4]
+   ]
+  },
+  {
+   "id": "osm_53670020",
+   "name": "Rue de la Paix",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [184.4, -184.4],
+    [67.8, -168.2],
+    [-14.6, -161.9]
+   ]
+  },
+  {
+   "id": "osm_1042014927",
+   "name": "Rue du Duc de Guise",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [175.6, -290.9],
+    [195.7, -280.9]
+   ]
+  },
+  {
+   "id": "osm_53783350",
+   "name": "Rue du Duc de Guise",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-22.5, -345.4],
+    [1.9, -344.5],
+    [83.8, -329.8],
+    [154.9, -303.5]
+   ]
+  },
+  {
+   "id": "osm_53505672",
+   "name": "Rue Berthois",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [356.9, -261.1],
+    [355.6, -247.5]
+   ]
+  },
+  {
+   "id": "osm_607704645",
+   "name": "Rue Berthois",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [355.6, -247.5],
+    [293.0, -6.9]
+   ]
+  },
+  {
+   "id": "osm_290921787",
+   "name": "Rue Charles Ravisse",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [53.3, -41.8],
+    [39.7, 29.7]
+   ]
+  },
+  {
+   "id": "osm_53505679",
+   "name": "Rue Charles Ravisse",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [38.9, 34.1],
+    [36.8, 49.3]
+   ]
+  },
+  {
+   "id": "osm_53505681",
+   "name": "Rue Courtenveau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [164.6, 34.5],
+    [186.2, -32.0]
+   ]
+  },
+  {
+   "id": "osm_53668427",
+   "name": "Rue Eustache de Saint-Pierre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [217.6, -174.5],
+    [219.1, -145.9],
+    [214.8, -111.7],
+    [207.4, -85.6],
+    [186.2, -32.0]
+   ]
+  },
+  {
+   "id": "osm_53668432",
+   "name": "Rue Fernand Lenel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [115.9, -174.1],
+    [138.1, -254.1],
+    [154.9, -303.5]
+   ]
+  },
+  {
+   "id": "osm_53505702",
+   "name": "Rue Française",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-237.5, -230.4],
+    [-92.6, -211.4]
+   ]
+  },
+  {
+   "id": "osm_100114393",
+   "name": "Rue Félix Cadras",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-77.0, -342.0],
+    [-22.5, -345.4]
+   ]
+  },
+  {
+   "id": "osm_194553556",
+   "name": "Rue Félix Cadras",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-158.5, -328.7],
+    [-77.0, -342.0]
+   ]
+  },
+  {
+   "id": "osm_53505660",
+   "name": "Rue Félix Cadras",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-310.7, -325.0],
+    [-219.3, -313.2],
+    [-158.5, -328.7]
+   ]
+  },
+  {
+   "id": "osm_220789828",
+   "name": "Rue Jean Noël Dubout",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [136.7, -44.4],
+    [110.8, 51.2]
+   ]
+  },
+  {
+   "id": "osm_585785520",
+   "name": "Rue Jean Quéhen",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-300.7, -34.9],
+    [-277.8, -52.9],
+    [-259.8, -62.1],
+    [-57.7, -82.8]
+   ]
+  },
+  {
+   "id": "osm_585899363",
+   "name": "Rue Jean Quéhen",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-335.3, -2.3],
+    [-323.4, -18.0],
+    [-316.8, -22.4]
+   ]
+  },
+  {
+   "id": "osm_585899364",
+   "name": "Rue Jean Quéhen",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-316.8, -22.4],
+    [-323.2, -11.3],
+    [-327.4, 4.0]
+   ]
+  },
+  {
+   "id": "osm_761798773",
+   "name": "Rue Jean Quéhen",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-48.7, -82.0],
+    [-33.8, -79.4]
+   ]
+  },
+  {
+   "id": "osm_53505699",
+   "name": "Rue Jean de Vienne",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-273.8, -465.5],
+    [-216.5, -449.9],
+    [-86.1, -453.2]
+   ]
+  },
+  {
+   "id": "osm_915939882",
+   "name": "Rue Jean de Vienne",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-86.1, -453.2],
+    [-43.2, -452.8],
+    [-12.2, -447.6]
+   ]
+  },
+  {
+   "id": "osm_53670021",
+   "name": "Rue Leveux",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-102.0, -141.2],
+    [-77.0, -342.0]
+   ]
+  },
+  {
+   "id": "osm_53505698",
+   "name": "Rue Marie Tudor",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [26.7, -340.6],
+    [45.0, -436.7]
+   ]
+  },
+  {
+   "id": "osm_402927253",
+   "name": "Rue Notre-Dame",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [212.6, -201.1],
+    [297.7, -233.3],
+    [355.6, -247.5]
+   ]
+  },
+  {
+   "id": "osm_53505696",
+   "name": "Rue Philippe Hurepel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-235.2, -314.6],
+    [-216.5, -449.9]
+   ]
+  },
+  {
+   "id": "osm_53668428",
+   "name": "Rue Richelieu",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-12.2, -447.6],
+    [252.5, -396.6]
+   ]
+  },
+  {
+   "id": "osm_53505701",
+   "name": "Rue Saint-Nicolas",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-247.7, -153.2],
+    [-226.4, -313.4]
+   ]
+  },
+  {
+   "id": "osm_53668431",
+   "name": "Rue Tom Souville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [57.3, -167.1],
+    [55.0, -200.1],
+    [56.3, -226.0],
+    [75.9, -331.3]
+   ]
+  },
+  {
+   "id": "osm_155487025",
+   "name": "Rue de Thonis",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-127.8, 8.4],
+    [-112.9, -77.5]
+   ]
+  },
+  {
+   "id": "osm_53505682",
+   "name": "Rue de Thonis",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-130.4, 29.4],
+    [-128.8, 16.5]
+   ]
+  },
+  {
+   "id": "osm_53670025",
+   "name": "Rue de la Harpe",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-193.4, -69.6],
+    [-182.8, -144.1]
+   ]
+  },
+  {
+   "id": "osm_53505683",
+   "name": "Rue de la Victoire",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-182.8, -144.1],
+    [-158.5, -328.7]
+   ]
+  },
+  {
+   "id": "osm_209195873",
+   "name": "Rue des Maréchaux",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [252.5, -396.6],
+    [339.3, -356.5]
+   ]
+  },
+  {
+   "id": "osm_53505678",
+   "name": "Rue des Prêtres",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [240.3, -19.3],
+    [290.3, -164.0]
+   ]
+  },
+  {
+   "id": "osm_290921795",
+   "name": "Rue des Thermes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [170.1, -35.9],
+    [136.7, -44.4]
+   ]
+  },
+  {
+   "id": "osm_402927254",
+   "name": "Rue des Thermes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [293.0, -6.9],
+    [178.9, -33.7]
+   ]
+  },
+  {
+   "id": "osm_290921811",
+   "name": "Rue du Havre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-2.4, 24.9],
+    [11.1, -51.2]
+   ]
+  },
+  {
+   "id": "osm_939388860",
+   "name": "Rue du Havre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-5.3, 42.0],
+    [-3.1, 29.6]
+   ]
+  },
+  {
+   "id": "osm_53670023",
+   "name": "Rue du Lion Rouge",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-112.9, -77.5],
+    [-109.5, -97.2]
+   ]
+  },
+  {
+   "id": "osm_762122608",
+   "name": "Rue du Lion Rouge",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-108.0, -105.7],
+    [-102.0, -141.2]
+   ]
+  },
+  {
+   "id": "osm_53670019",
+   "name": "Rue du Paradis",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-192.5, 1.7],
+    [-193.4, -69.6]
+   ]
+  },
+  {
+   "id": "osm_585785518",
+   "name": "Rue du Paradis",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-194.1, 22.7],
+    [-192.8, 9.8]
+   ]
+  },
+  {
+   "id": "osm_53505661",
+   "name": "Rue du Roule",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-257.1, -149.7],
+    [-268.0, -69.5],
+    [-267.3, -59.7]
+   ]
+  },
+  {
+   "id": "osm_1556051018",
+   "name": "Rue du Seigneur de Gourdan",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [193.5, -271.7],
+    [193.6, -255.4]
+   ]
+  },
+  {
+   "id": "osm_1556051019",
+   "name": "Rue du Seigneur de Gourdan",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [193.6, -255.4],
+    [194.7, -194.1]
+   ]
+  },
+  {
+   "id": "osm_391028693",
+   "name": "Rue du Seigneur de Gourdan",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [252.5, -396.6],
+    [225.2, -324.2],
+    [197.2, -283.7],
+    [193.5, -271.7]
+   ]
+  }
+ ],
+ "quays": [
+  {
+   "id": "quai_du_havre",
+   "name": "Quai du havre",
+   "kind": "timber",
+   "width_m": 10.0,
+   "points": [
+    [-330, 72],
+    [-55, 82],
+    [200, 90],
+    [340, 100]
+   ]
+  }
+ ],
+ "bridges": [],
+ "monuments": [
+  {
+   "id": "tour_du_guet",
+   "name": "Tour du Guet",
+   "model": "belfry",
+   "at": [0, -150],
+   "angle_deg": -4,
+   "clear_m": 3,
+   "certainty": "probable",
+   "params": {
+    "size": 11,
+    "height": 35,
+    "top": "pyramid"
+   },
+   "description": "Tour de guet du XIIIe s., « ancien phare de Calais » (Mérimée PA00108248, inscrite en 1926, classée en 1931) ; datée de 1229 (Hurepel) ou 1214 selon les auteurs, première trace officielle en 1302 ; en 1347 Jean de Vienne y aurait annoncé les conditions de reddition. Fendue par le séisme de 1580, relevée vers 1606 (partie haute actuelle) ; 39 m aujourd'hui (OSM). Emprise OSM (≈ 11 × 13 m, à 1 m) ; hauteur et couverture de 1340 restituées."
+  },
+  {
+   "id": "hotel_de_ville",
+   "name": "Hôtel de ville et halle échevinale",
+   "model": "hall",
+   "at": [62, -137],
+   "angle_deg": 2,
+   "clear_m": 3,
+   "from_year": 1231,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 50,
+    "width_m": 15,
+    "height_m": 12
+   },
+   "description": "Échevinage et marché concédés vers 1181 (SRA) ; hôtel de ville « qui datait de 1231 », rebâti en 1740 (Wikipédia, Histoire de Calais), sur le côté sud de la place du Marché, la tour du Guet étant « derrière » lui (Tudor Travel Guide ; détruit en 1940-1944). Emprise et gabarit restitués."
+  },
+  {
+   "id": "notre_dame_xiiie",
+   "name": "Église Notre-Dame (église du XIIIe s.)",
+   "model": "gothic_cathedral",
+   "at": [250, -261],
+   "angle_deg": -88,
+   "clear_m": 6,
+   "until_year": 1369,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 50,
+    "width_m": 16,
+    "nave_width_m": 9,
+    "vault_m": 13,
+    "ridge_m": 19,
+    "aisle_m": 8,
+    "apse": "flat",
+    "west_towers": [
+     {
+      "side": "north",
+      "size": 6,
+      "height": 22,
+      "top": "pyramid"
+     },
+     {
+      "side": "south",
+      "size": 6,
+      "height": 22,
+      "top": "pyramid"
+     }
+    ]
+   },
+   "description": "Première église citée dès 1224 (Département du Pas-de-Calais) ; « construite à l'emplacement de l'actuel transept… de forme rectangulaire avec deux tours de façade pour l'entrée » (Wikipédia) ; la porte Saint-Pierre, au nord, flanquée de deux tours, ouvre sur le bras nord, partie la plus ancienne. Restituée sur le transept actuel (OSM), façade à deux tours au nord : orientation, dimensions et hauteurs hypothétiques. Très endommagée en 1346-1347 ; remplacement conventionnel en 1370 (chantier anglais de la seconde moitié du XIVe s., date précise inconnue)."
+  },
+  {
+   "id": "notre_dame_anglaise",
+   "name": "Église Notre-Dame (reconstruction anglaise)",
+   "model": "gothic_cathedral",
+   "at": [246, -260],
+   "angle_deg": 2,
+   "clear_m": 6,
+   "from_year": 1370,
+   "until_year": 1409,
+   "certainty": "probable",
+   "params": {
+    "length_m": 75,
+    "width_m": 27,
+    "nave_width_m": 10,
+    "vault_m": 18,
+    "ridge_m": 25,
+    "aisle_m": 9,
+    "transept_m": 46,
+    "transept_width_m": 15,
+    "transept_at": 0.54,
+    "apse": "flat"
+   },
+   "description": "Reconstruite et agrandie sous l'occupation anglaise, de la seconde moitié du XIVe au XVIe s., par des ouvriers flamands (parties hautes de la nef, chœur et clocher en brique), seul édifice de style perpendiculaire anglais en France (Wikipédia ; Département du Pas-de-Calais). Emprise OSM (90 m hors œuvre avec la chapelle d'axe de 1631-1635, 18 m, exclue ici : 75 m) ; voûtes à 18 m ; transept de 46 m (largeur hors œuvre de 45,50 m, Wikipédia ; l'emprise OSM, 52 m nord-sud, compte les tours du portail Saint-Pierre). Phase sans tour de croisée ; dates de début (1370) et de fin (1409) conventionnelles."
+  },
+  {
+   "id": "notre_dame_tour",
+   "name": "Église Notre-Dame et sa tour de croisée",
+   "model": "gothic_cathedral",
+   "at": [246, -260],
+   "angle_deg": 2,
+   "clear_m": 6,
+   "from_year": 1410,
+   "certainty": "probable",
+   "params": {
+    "length_m": 75,
+    "width_m": 27,
+    "nave_width_m": 10,
+    "vault_m": 18,
+    "ridge_m": 25,
+    "aisle_m": 9,
+    "transept_m": 46,
+    "transept_width_m": 15,
+    "transept_at": 0.54,
+    "apse": "flat",
+    "crossing": {
+     "size": 11,
+     "height": 42,
+     "spire_m": 14
+    }
+   },
+   "description": "Tour-lanterne quadrangulaire de 56 m au-dessus de la croisée, du XVe s. (Wikipédia FR) ou de la fin du XIVe - début du XVe s. (Wikipédia EN) : présente à partir de 1410 (date conventionnelle). Base carrée à quatre clochetons, partie haute octogonale et flèche ; effondrée en 1944, reconstruite en 1963-1973."
+  },
+  {
+   "id": "saint_nicolas",
+   "name": "Église Saint-Nicolas",
+   "model": "church",
+   "at": [-560, -300],
+   "angle_deg": 2,
+   "clear_m": 6,
+   "until_year": 1563,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 42,
+    "width_m": 18,
+    "height_m": 13,
+    "tower": {
+     "at": "west",
+     "size": 7,
+     "height": 26
+    }
+   },
+   "description": "Paroisse de Calais avec hôpital (Greaves, 1918) ; Richard II y épouse Isabelle de France le 4 novembre 1396, après la cérémonie du 31 octobre (Wikipédia EN, Isabella of Valois) ; détruite avec tout un quartier pour la citadelle (première pierre 1564) ; une chapelle Saint-Nicolas est rebâtie dans la citadelle en 1605. Emplacement dans le quartier ouest rasé (emprise de la citadelle) et gabarit hypothétiques."
+  },
+  {
+   "id": "chateau",
+   "name": "Château de Philippe Hurepel",
+   "model": "castle",
+   "at": [-722, -140],
+   "angle_deg": 22.0,
+   "clear_m": 10,
+   "from_year": 1228,
+   "until_year": 1559,
+   "certainty": "hypothetical",
+   "params": {
+    "ring": [
+     [-38, -38],
+     [0, -40],
+     [38, -38],
+     [38, 38],
+     [-38, 38],
+     [-40, 0]
+    ],
+    "height_m": 11,
+    "thickness_m": 2.8,
+    "tower_radius_m": 5.5,
+    "tower_height_m": 16,
+    "keep": {
+     "at": [-18, 12],
+     "radius_m": 8.0,
+     "height_m": 28
+    },
+    "halls": [
+     [8, -20, 36, 11, 10, 0]
+    ],
+    "ditch_m": 12
+   },
+   "description": "Bâti en 1228-1229 par Philippe Hurepel à l'angle nord-ouest de la ville, ses défenses fondues dans l'enceinte (Greaves, 1918 ; Wikipédia) : muraille carrée à six tours et donjon, quelques bâtiments, une porte vers la ville et une vers Nieulay (SRA 2025) ; « imposante tour détachée » sur le flanc ouest (Réseau Vauban). Fossé propre en 1346 (Wikipédia EN). Rasé après 1558, englobé dans la citadelle (quatre tours restantes dans les bastions). Emprise (≈ 76 m), position et hauteurs restituées."
+  },
+  {
+   "id": "etape_des_laines",
+   "name": "Hôtel de l'Étape des laines (Staple Inn)",
+   "model": "enclosure",
+   "at": [18, -378],
+   "angle_deg": 2,
+   "clear_m": 3,
+   "from_year": 1363,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 42,
+    "width_m": 30,
+    "height_m": 11,
+    "ranges": true
+   },
+   "description": "Calais devient l'Étape des laines anglaises le 9 février 1363 (Wikipédia) ; la compagnie de l'Étape y siège jusqu'en 1558. Le Staple Inn n'est situé qu'à l'époque Tudor, au carrefour des rues Royale et du Duc-de-Guise (Tudor Travel Guide) : bâtiment, date et gabarit hypothétiques."
+  },
+  {
+   "id": "rysbank_fortin",
+   "name": "Fortin anglais du Rysbank",
+   "model": "earthwork",
+   "at": [-74, 390],
+   "angle_deg": 17,
+   "clear_m": 4,
+   "from_year": 1347,
+   "until_year": 1399,
+   "certainty": "hypothetical",
+   "params": {
+    "ring": [
+     [-24, -24],
+     [24, -24],
+     [24, 24],
+     [-24, 24]
+    ],
+    "bank_m": 3,
+    "base_m": 9,
+    "palisade_m": 3,
+    "closed": true
+   },
+   "description": "Fort élevé par les Anglais sur la pointe du banc de sable au nord de Calais pendant le siège : « première mention… en 1346 dans les archives anglaises » (SRA 2025) ; bâti en novembre 1346 selon Wikipédia EN, installé fin avril 1347 pour fermer l'entrée du havre selon d'autres récits (Wikipédia FR) : `from_year` 1347 gardé (date d'achèvement incertaine). Tour de bois remplacée ensuite par une tour de pierre. Site = fort Risban (OSM, 23 m ; fondations circulaires de la tour de Lancastre, diagnostic 2019). Forme et taille restituées."
+  },
+  {
+   "id": "tour_de_rysbank",
+   "name": "Tour de pierre du Rysbank (tour de Lancastre)",
+   "model": "tower",
+   "at": [-74, 390],
+   "angle_deg": 17,
+   "clear_m": 4,
+   "from_year": 1400,
+   "certainty": "probable",
+   "params": {
+    "radius_m": 9,
+    "height": 20
+   },
+   "description": "« Stone Tower », rebaptisée tour de Lancastre après 1400 (Wikipédia EN) ; sous l'occupation anglaise, le fort « est doté de la tour de Lancastre et d'une muraille polygonale en pierre flanquée de deux tours » (SRA 2025, restitution du fort en 1405) ; fondations circulaires observées en 2019 ; rasée à mi-hauteur en 1586. Construite en pierre à une date inconnue avant 1400 (1350 dans la maquette v1 : non sourcé). Diamètre et hauteur restitués."
+  },
+  {
+   "id": "avant_porte_boulogne",
+   "name": "Avant-porte (Porte de Boulogne)",
+   "model": "earthwork",
+   "at": [-496, -549],
+   "angle_deg": -86,
+   "clear_m": 2,
+   "certainty": "hypothetical",
+   "params": {
+    "ring": [
+     [-14, 16],
+     [6, 18],
+     [18, 6],
+     [18, -6],
+     [6, -18],
+     [-14, -16]
+    ],
+    "bank_m": 2.5,
+    "base_m": 8,
+    "palisade_m": 2,
+    "closed": false
+   },
+   "description": "« Quatre portes, ces dernières précédées d'avant-portes posées sur une terrée circulaire en dos-d'âne » (Réseau des sites majeurs Vauban, 2015). Levée en fer à cheval ouverte vers la porte ; taille et forme restituées."
+  },
+  {
+   "id": "avant_porte_saint_pierre",
+   "name": "Avant-porte (Porte vers Saint-Pierre)",
+   "model": "earthwork",
+   "at": [-13, -517],
+   "angle_deg": -86,
+   "clear_m": 2,
+   "certainty": "hypothetical",
+   "params": {
+    "ring": [
+     [-14, 16],
+     [6, 18],
+     [18, 6],
+     [18, -6],
+     [6, -18],
+     [-14, -16]
+    ],
+    "bank_m": 2.5,
+    "base_m": 8,
+    "palisade_m": 2,
+    "closed": false
+   },
+   "description": "« Quatre portes, ces dernières précédées d'avant-portes posées sur une terrée circulaire en dos-d'âne » (Réseau des sites majeurs Vauban, 2015). Levée en fer à cheval ouverte vers la porte ; taille et forme restituées."
+  },
+  {
+   "id": "avant_porte_gravelines",
+   "name": "Avant-porte (Porte de Gravelines)",
+   "model": "earthwork",
+   "at": [414, -167],
+   "angle_deg": -10,
+   "clear_m": 2,
+   "certainty": "hypothetical",
+   "params": {
+    "ring": [
+     [-14, 16],
+     [6, 18],
+     [18, 6],
+     [18, -6],
+     [6, -18],
+     [-14, -16]
+    ],
+    "bank_m": 2.5,
+    "base_m": 8,
+    "palisade_m": 2,
+    "closed": false
+   },
+   "description": "« Quatre portes, ces dernières précédées d'avant-portes posées sur une terrée circulaire en dos-d'âne » (Réseau des sites majeurs Vauban, 2015). Levée en fer à cheval ouverte vers la porte ; taille et forme restituées."
+  }
+ ],
+ "districts": [
+  {
+   "id": "ville_close",
+   "name": "La ville close",
+   "zone": "intra",
+   "density": 0.85,
+   "polygon": [
+    [-775, -503],
+    [-500, -485],
+    [-17, -453],
+    [300, -432],
+    [351, -155],
+    [385, 33],
+    [-55, 22],
+    [-330, 10],
+    [-500, -15],
+    [-700, -75],
+    [-775, -105]
+   ],
+   "houses": {
+    "townhouse": 0.5,
+    "timber": 0.4,
+    "stonehouse": 0.1
+   },
+   "roofs": {
+    "Tile": 0.45,
+    "TileOld": 0.3,
+    "Thatch": 0.1,
+    "Slate": 0.15
+   }
+  },
+  {
+   "id": "faubourg_sud",
+   "name": "Faubourg vers Saint-Pierre",
+   "zone": "faubourg",
+   "density": 0.25,
+   "polygon": [
+    [-110, -550],
+    [80, -545],
+    [70, -950],
+    [-130, -960]
+   ]
+  },
+  {
+   "id": "faubourg_est",
+   "name": "Faubourg vers Gravelines",
+   "zone": "faubourg",
+   "density": 0.2,
+   "polygon": [
+    [430, -110],
+    [800, -165],
+    [800, -300],
+    [430, -245]
+   ]
+  },
+  {
+   "id": "faubourg_ouest",
+   "name": "Faubourg vers Nieulay",
+   "zone": "faubourg",
+   "density": 0.2,
+   "polygon": [
+    [-600, -560],
+    [-1000, -515],
+    [-1000, -625],
+    [-600, -665]
+   ]
+  }
+ ],
+ "open_spaces": [
+  {
+   "id": "place_du_marche",
+   "name": "Place du Marché (Grand-Place)",
+   "kind": "market",
+   "polygon": [
+    [-30, -124],
+    [172, -120],
+    [172, -45],
+    [-30, -50]
+   ]
+  },
+  {
+   "id": "cimetiere_notre_dame",
+   "name": "Cimetière Notre-Dame",
+   "kind": "cemetery",
+   "polygon": [
+    [212, -292],
+    [300, -284],
+    [300, -330],
+    [212, -336]
+   ]
+  },
+  {
+   "id": "rysbank",
+   "name": "Le Rysbank (banc de sable)",
+   "kind": "strand",
+   "polygon": [
+    [-1000, 110],
+    [-700, 150],
+    [-400, 235],
+    [-150, 310],
+    [-30, 350],
+    [-20, 470],
+    [-150, 500],
+    [-500, 450],
+    [-1000, 320]
+   ]
+  },
+  {
+   "id": "dunes_est",
+   "name": "Dunes et grève à l'est du havre",
+   "kind": "strand",
+   "polygon": [
+    [470, 110],
+    [800, 80],
+    [1100, 150],
+    [1100, 370],
+    [700, 370],
+    [480, 270]
+   ]
+  }
+ ],
+ "render": {
+  "fade_valley": [0.35, 0.65]
+ }
+}

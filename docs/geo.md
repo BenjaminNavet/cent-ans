@@ -486,8 +486,11 @@ par `geo pyramid`, restent identiques octet pour octet).
   n'a aucune donnée fine du tout) ; fondu vers l'ancêtre (tuile existante la plus fine,
   interpolée bilinéairement comme le moteur) sur 20 % du demi-côté au bord de l'emprise et
   sur 2 pixels là où la source n'a pas de donnée (mer : côte de la source). Après chaque étage,
-  les tuiles parentes E5/E6 reprennent la moyenne 2 × 2 de leurs enfants (pondérée par le
-  fondu) : la pyramide reste cohérente d'un étage à l'autre. La terre boostée ne descend jamais
+  les tuiles parentes reprennent la moyenne 2 × 2 de leurs enfants (pondérée par le
+  fondu), en cascade jusqu'à E3 (`MIN_PARENT_LEVEL`, RS-G, `BAKE_VERSION` 6) : la pyramide
+  reste cohérente d'un étage à l'autre, et E3-E4 n'affichent plus le modèle de surface GLO-30
+  au-dessus des zones (immeubles de la Cité de Londres : bosses de 25-50 m en E3-E4 sous un
+  E5-E7 LiDAR plat). La terre boostée ne descend jamais
   sous `MIN_LAND_M` (0,5 m), comme `relief_shade.enforce_coast` pour E0-E4 (correctif ZG3b,
   `docs/wip/zg3-palier3.md`) : sans ce plancher, une base régionale plus haute que la source
   fine (collines à quelques km, ancienne fuite GLO-90 dans les petites emprises E6-E7) pouvait

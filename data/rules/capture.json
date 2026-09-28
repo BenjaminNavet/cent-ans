@@ -1,0 +1,82 @@
+{
+  "description": "Sort de la ville prise (lot TW2-T1, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T1) : occuper, mettre à rançon (appatis), piller, raser. L'or se calcule sur l'assiette fiscale saisonnière de la province × gold_income_share × part de la place (place_share, la cité vaut 1) ; population en pour cent, dévastation et troubles en points (0-100), expérience des unités sur l'échelle 0-10, opinions en points et en tours. Raser est interdit aux cités de province et aux lieux emblématiques ; une place ramenée au niveau 0 devient une ruine pendant ruin_turns tours (ni recrutement ni chantier). L'IA additionne des scores (doctrine de faction, trésor bas, culture étrangère, reconquête de sa terre, place intenable) et prend le plus haut, sans tirage.",
+  "occupy": {
+    "unrest_city": 20,
+    "unrest_place": 10
+  },
+  "ransom": {
+    "gold_income_share": 1.5,
+    "min_gold": 60,
+    "extra_unrest": 10,
+    "victim_opinion": -10,
+    "opinion_turns": 12
+  },
+  "sack": {
+    "gold_income_share": 4.0,
+    "min_gold": 150,
+    "extra_unrest": 30,
+    "population_percent": -15,
+    "devastation": 25,
+    "buildings_destroyed": 1,
+    "unit_experience": 1,
+    "ruler_piety": -5,
+    "papal_favor": -3,
+    "victim_opinion": -25,
+    "others_opinion": -5,
+    "opinion_turns": 20
+  },
+  "raze": {
+    "effects": {
+      "gold_income_share": 0.5,
+      "min_gold": 20,
+      "extra_unrest": 40,
+      "population_percent": -25,
+      "devastation": 40,
+      "buildings_destroyed": 99,
+      "unit_experience": 1,
+      "ruler_piety": -10,
+      "papal_favor": -5,
+      "victim_opinion": -40,
+      "others_opinion": -15,
+      "opinion_turns": 40
+    },
+    "fortification_loss": 1,
+    "ruin_turns": 8
+  },
+  "place_share": {
+    "city": 1.0,
+    "town": 0.6,
+    "castle": 0.3,
+    "abbey": 0.8,
+    "village": 0.2
+  },
+  "raze_forbidden_kinds": ["city"],
+  "raze_forbidden_settlements": [
+    "set_saint_denis",
+    "set_vincennes",
+    "set_windsor",
+    "set_mont_saint_michel",
+    "set_cluny",
+    "set_citeaux",
+    "set_clairvaux",
+    "set_fontevraud",
+    "set_grande_chartreuse",
+    "set_vezelay",
+    "set_rocamadour",
+    "set_conques",
+    "set_assisi"
+  ],
+  "ai": {
+    "default": { "occupy": 60, "ransom": 20, "sack": 10, "raze": 0 },
+    "factions": {
+      "fac_england": { "occupy": 50, "ransom": 30, "sack": 25, "raze": 5 },
+      "fac_scotland": { "occupy": 40, "ransom": 30, "sack": 35, "raze": 10 },
+      "fac_rebels": { "occupy": 100, "ransom": 0, "sack": 0, "raze": 0 }
+    },
+    "poor_treasury": 300,
+    "poor_bonus": { "occupy": 0, "ransom": 35, "sack": 30, "raze": 0 },
+    "foreign_culture_bonus": { "occupy": 0, "ransom": 10, "sack": 15, "raze": 5 },
+    "own_land_bonus": { "occupy": 100, "ransom": 0, "sack": 0, "raze": 0 },
+    "exposed_bonus": { "occupy": 0, "ransom": 0, "sack": 0, "raze": 40 }
+  }
+}

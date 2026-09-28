@@ -23,6 +23,11 @@ const BRANCH_LABELS := {"military": "Militaire", "civil": "Civil", "medicine": "
 
 
 func _ready() -> void:
+	# PO phase 2 (P2b, ADR 0097) : fenêtre centrale plein écran — voir `docs/wip/p2b-tech-diplo.md`
+	# « Point ouvert » : ne rejoint volontairement pas de zone `UiLayout` (`SIDE_PANEL` est trop
+	# étroit ; `MODAL` reparente hors de `map_ui`, ce qui casse `_keep_on_screen`/`PanelStack`
+	# côté `map_ui.gd`, hors lot — régressions constatées sur `smoke.gd`). Migré : tailles
+	# (`UiType`) et animations d'ouverture/fermeture (`UiMotion`).
 	Lettrine.attach(title_label)  # UI1 : titre à lettrine enluminée
 	tabs.set_tab_title(0, BRANCH_LABELS["military"])
 	tabs.set_tab_title(1, BRANCH_LABELS["civil"])
@@ -36,13 +41,17 @@ func _ready() -> void:
 	civil_view.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
 	medicine_view.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
 	close_button.pressed.connect(func() -> void:
-		hide()
+		UiMotion.fade_out(self)  # PO phase 2 (P2b) : fermeture animée (`UiMotion`)
 		closed.emit())
 
 
 ## `tree` : `get_tech_tree(faction)` ; `research` : `get_research(faction)` (vide si aucune) ;
 ## `points_per_turn` : `get_research_points(faction)`.
 func show_tree(tree: Array, research: Dictionary, points_per_turn: int, faction_label: String, faction_color: Color) -> void:
+	# PO phase 2 (P2b) : n'ouvrir en fondu (`UiMotion`) que si le panneau était fermé — les
+	# rafraîchissements (recherche en cours, changement de tour) rappellent `show_tree` sans
+	# rejouer l'animation d'ouverture.
+	var was_visible := visible
 	title_label.text = "Technologies — %s" % faction_label
 	title_label.add_theme_color_override("font_color", faction_color.darkened(0.3))
 	var by_branch := {"military": [], "civil": [], "medicine": []}
@@ -65,6 +74,8 @@ func show_tree(tree: Array, research: Dictionary, points_per_turn: int, faction_
 		research_bar.max_value = maxi(1, int(research.get("cost", 1)))
 		research_bar.value = int(research.get("progress", 0))
 	show()
+	if not was_visible:
+		UiMotion.fade_in(self)
 
 
 ## Onglet de la branche de `technology_id`, si elle est connue du panneau.

@@ -62,7 +62,8 @@ fn clear_the_gate(sim: &mut BattleSim) {
 #[test]
 fn the_ram_strikes_the_gate_in_rhythm() {
     let data = data();
-    let mut sim = siege(&data, &[], 1, 17);
+    // SB (ADR 0107): level 5, so that the gate outlasts 30 s of blows.
+    let mut sim = siege(&data, &[], 5, 17);
     lab(&mut sim);
     hold_fire(&mut sim, SideId::Defender);
     clear_the_gate(&mut sim);
@@ -109,7 +110,8 @@ fn the_ram_strikes_the_gate_in_rhythm() {
 #[test]
 fn an_engine_shot_strikes_a_point_on_its_wall() {
     let data = data();
-    let mut sim = siege(&data, &["unit_trebuchet"], 1, 19);
+    // SB (ADR 0107): level 5, so that the piece outlasts a minute of shots.
+    let mut sim = siege(&data, &["unit_trebuchet"], 5, 19);
     lab(&mut sim);
     let works = sim.siege().unwrap().clone();
     let piece = works.front_walls()[0];

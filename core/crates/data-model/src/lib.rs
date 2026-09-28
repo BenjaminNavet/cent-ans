@@ -18,6 +18,7 @@ pub mod movement_graph;
 pub mod navgrid;
 pub mod settlement_load;
 pub mod title_check;
+pub mod trade_paths;
 
 pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
@@ -56,6 +57,9 @@ pub use entities::battle_standards::BattleStandardRules;
 pub use entities::building::{Building, BuildingCategory};
 pub use entities::campaign_weather::{
     CampaignWeatherChances, CampaignWeatherRules, ClimateWeather, SeasonalWeather,
+};
+pub use entities::capture::{
+    CaptureAiRules, CaptureRules, OccupyRules, OutcomeRules, OutcomeScores, RazeRules,
 };
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
@@ -98,6 +102,10 @@ pub use entities::province::{
 };
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
+pub use entities::replenishment::{
+    ArmyReplenishmentRules, CategoryPercent, KindValues, RecruitPoolRules, ReplenishmentRules,
+    StancePercent, TerritoryPercent,
+};
 pub use entities::resource::{Resource, ResourceCategory};
 pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
@@ -123,3 +131,4 @@ pub use load::{upgrade_regressions, DataError, GameData, ReferenceError, Warning
 pub use map::{MapMeta, ProvinceGeometry};
 pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};
 pub use navgrid::{MapRasters, NavGrid, ProvinceRaster, IMPASSABLE, PLAIN_COST};
+pub use trade_paths::{TradePath, TradePaths};
