@@ -12,8 +12,21 @@ Restes de PB3g / SZ6 : `TownLayer` ~10 ms par image, `qt/collect` ≤ 9 ms (éco
   (toutes images mesurées, 0 si absente) et les sections `town/*` (poll, lod_view, stream, step,
   reground, models) et `hint.refresh`.
 
-## État
-- Squelette : sections de sonde ajoutées. Mesure « avant » à faire.
+## Constats (passe 1, charge 90-180)
+- `town/*` de `TownLayer.update_view` : tous < 3 ms au pire ; le pic « TownLayer » vient de
+  `SettlementLayer._update_model_visibility` (toutes les maquettes à chaque ville construite ou
+  retirée) : 25 ms au pire (`town/models`).
+- `hint.refresh` apparaît encore : 15,6 ms toutes les 5 s (minuterie de secours de RS-E).
+- `map.settlements` p95 25 ms / p99 46 ms et `map.life` p99 57 ms : sous-sections `settle/*`,
+  `life/*` ajoutées pour attribuer.
+
+## Correctifs
+- `TownLayer.take_changes()` : `SettlementLayer` ne revoit que les colonies des villes changées.
+- `NextHintController` : la minuterie de secours ne relit le cœur que si l'empreinte (tour,
+  tutoriel, alertes, croix) a changé ou si le dernier conseil n'a pas été calculé (panneau ouvert).
+
+## Outils A/B
+Copie APFS de `game/` (scratchpad `ab/base`, scripts instrumentés sans correctifs) + lien `data`.
 
 ## Prochaine étape
-Mesure avant (3 passes), diagnostic, correctifs, mesure après.
+Mesure base instrumentée, attribution `settle/*`, `life/*`, `qt/jobs`, puis A/B 3 passes.
