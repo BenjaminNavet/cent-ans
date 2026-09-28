@@ -72,3 +72,9 @@ ici (voir « point ouvert » dans le rapport du lot).
   dans `README.md` ; à revoir si Poly Haven publie une texture plus proche.
 - `--no-ga2` ne restaure pas les anciennes textures 1k (compromis assumé : un seul jeu de
   textures à maintenir) ; il coupe seulement la macro-variation dédiée pour la comparaison A/B.
+- **A/B non concluant à l'écriture de cet ADR** : mesuré sur une machine partagée très chargée
+  (autres sessions compilant en parallèle, `uptime` load average ≈ 120), `frame_ms_median` a varié
+  de 25 à 44 ms sans direction stable, y compris `--no-ga2` parfois plus lent que le défaut — ce
+  qui ne peut pas venir du coût réel de la macro-variation (4 échantillons de bruit en plus par
+  pixel de sol, seule différence entre les deux). À refaire sur machine calme avant de considérer
+  le budget de performance (+5 %) validé.
