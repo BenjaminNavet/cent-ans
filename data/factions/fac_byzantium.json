@@ -67,6 +67,26 @@
       "faction": "fac_taranto",
       "status": "truce",
       "note": "Hostilité latente avec les princes latins de Morée ; Byzance grignote l'Achaïe."
+    },
+    {
+      "faction": "fac_ottoman",
+      "status": "war",
+      "note": "Défaite de Pélékanon (1329), chute de Nicée (1331) et de Nicomédie ; paix de 1333 contre tribut, reprise des hostilités."
+    },
+    {
+      "faction": "fac_aydin",
+      "status": "alliance",
+      "note": "Amitié d'Umur Bey et de Jean Cantacuzène."
+    },
+    {
+      "faction": "fac_saruhan",
+      "status": "peace",
+      "note": "Alliance de circonstance contre les Génois de Phocée (1336)."
+    },
+    {
+      "faction": "fac_trebizond",
+      "status": "peace",
+      "note": "Empire grec rival, liens matrimoniaux."
     }
   ],
   "claims": [

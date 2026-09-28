@@ -46,6 +46,11 @@
       "faction": "fac_germiyan",
       "status": "peace",
       "note": "Voisin méridional, le plus puissant des beyliks."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "war",
+      "note": "Défaite de Pélékanon (1329), chute de Nicée (1331) et de Nicomédie ; paix de 1333 contre tribut, reprise des hostilités."
     }
   ],
   "ai_personality": {

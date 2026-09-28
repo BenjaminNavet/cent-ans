@@ -54,6 +54,11 @@
       "faction": "fac_vidin",
       "status": "overlord",
       "note": "Belaur tient Vidin comme vassal, avec la turbulence habituelle."
+    },
+    {
+      "faction": "fac_wallachia",
+      "status": "alliance",
+      "note": "Basarab marie sa fille à Ivan Alexandre."
     }
   ],
   "claims": [

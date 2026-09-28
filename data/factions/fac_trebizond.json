@@ -50,6 +50,11 @@
       "faction": "fac_georgia",
       "status": "peace",
       "note": "Voisin oriental, orthodoxe."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Empire grec rival, liens matrimoniaux."
     }
   ],
   "ai_personality": {

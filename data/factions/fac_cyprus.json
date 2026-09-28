@@ -60,6 +60,16 @@
       "faction": "fac_papacy",
       "status": "peace",
       "note": "Royaume latin sous obédience de Rome."
+    },
+    {
+      "faction": "fac_mamluks",
+      "status": "peace",
+      "note": "Hugues IV ménage le sultan ; Pierre Ier prendra Alexandrie en 1365."
+    },
+    {
+      "faction": "fac_cilicia",
+      "status": "alliance",
+      "note": "Liens dynastiques des Lusignan avec l'Arménie cilicienne."
     }
   ],
   "ai_personality": {
