@@ -1,0 +1,36 @@
+{
+  "id": "unit_brabancons",
+  "name": {
+    "display": "Soudoyers brabançons",
+    "local": "Brabanchons",
+    "local_language": "moyen néerlandais"
+  },
+  "category": "infantry",
+  "source_class": "burghers",
+  "mercenary": true,
+  "soldiers": 100,
+  "cost": {
+    "money": 700
+  },
+  "upkeep": 65,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 58,
+    "ranged": 0,
+    "range": 0,
+    "armor": 55,
+    "morale": 58,
+    "speed": 42,
+    "ammo": 0
+  },
+  "abilities": [
+    "shield_wall"
+  ],
+  "figure": "infantry_5",
+  "equipment": "Chapel de fer ou bassinet, haubergeon ou jaque, pavois, vouge ou épieu, coutelas ; quelques gens d'armes à pied parmi eux.",
+  "description": "Piétons et gens d'armes de Brabant et de Hainaut loués à la saison : Édouard III les solde lors de ses campagnes des Pays-Bas (1338-1340) aux côtés de Jean de Hainaut, les Valois en engagent autant ; « Brabançons » reste le nom générique des mercenaires des Pays-Bas.",
+  "sources": [
+    "J. Sumption, The Hundred Years War, I: Trial by Battle, Faber, 1990",
+    "Ph. Contamine, Guerre, État et société à la fin du Moyen Âge, Mouton, 1972"
+  ]
+}
