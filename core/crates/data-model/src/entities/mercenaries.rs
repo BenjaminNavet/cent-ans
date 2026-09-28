@@ -70,8 +70,8 @@ pub struct MercenaryArrears {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MercenaryAi {
-    /// « Rich »: treasury of at least this many seasons of gross income...
-    pub rich_income_seasons: i64,
+    /// « Rich »: treasury of at least this percent of a season of gross income...
+    pub rich_income_percent: i64,
     /// ... and at least this many livres.
     pub rich_min_treasury: i64,
     /// « Threatened »: hostile power near the army at least this percent of
@@ -79,8 +79,8 @@ pub struct MercenaryAi {
     pub threat_ratio_percent: u32,
     /// Hires until the army's power reaches this percent of the threat.
     pub target_ratio_percent: u32,
-    /// Treasury kept after hiring, in seasons of gross income.
-    pub keep_income_seasons: i64,
+    /// Treasury kept after hiring, percent of a season of gross income.
+    pub keep_income_percent: i64,
 }
 
 /// A company offered in some regions over a period.

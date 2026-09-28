@@ -2,13 +2,13 @@
 //! is rich and one of its armies is threatened (`data/rules/mercenaries.json`,
 //! `ai`).
 //!
-//! - Rich: a treasury of at least `rich_income_seasons` of gross income and
+//! - Rich: a treasury of at least `rich_income_percent` of a season of gross income and
 //!   `rich_min_treasury` livres, after this turn's other spending.
 //! - Threatened: the hostile power near the army (its anchor settlement or
 //!   one edge away) is at least `threat_ratio_percent` of its own.
 //! - It hires the best companies per livre offered where the army stands
 //!   until its power reaches `target_ratio_percent` of the threat, keeping
-//!   `keep_income_seasons` of income in the treasury, within the limits per
+//!   `keep_income_percent` of income in the treasury, within the limits per
 //!   army and per faction and the regional reserves (the same checks as the
 //!   player's, counted here so that no order is refused).
 
@@ -35,10 +35,13 @@ pub(crate) fn plan_hires(
         return Vec::new();
     }
     let income = gross_income.max(0);
-    if treasury < ai.rich_min_treasury.max(ai.rich_income_seasons * income) {
+    if treasury
+        < ai.rich_min_treasury
+            .max(ai.rich_income_percent * income / 100)
+    {
         return Vec::new();
     }
-    let mut budget = treasury - ai.keep_income_seasons * income;
+    let mut budget = treasury - ai.keep_income_percent * income / 100;
     let mut faction_left = rules
         .hires_per_faction_per_turn
         .saturating_sub(faction_hires(state, faction));

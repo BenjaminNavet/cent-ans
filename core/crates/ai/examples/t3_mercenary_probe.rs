@@ -20,6 +20,14 @@ fn main() {
     if !on {
         data.mercenary_rules.bands.clear();
     }
+    // Tuning: `MERC_RICH_PERCENT`, `MERC_THREAT_PERCENT` override the AI rules.
+    let env = |key: &str| std::env::var(key).ok().and_then(|v| v.parse::<i64>().ok());
+    if let Some(seasons) = env("MERC_RICH_PERCENT") {
+        data.mercenary_rules.ai.rich_income_percent = seasons;
+    }
+    if let Some(percent) = env("MERC_THREAT_PERCENT") {
+        data.mercenary_rules.ai.threat_ratio_percent = percent as u32;
+    }
     let majors =
         ["fac_france", "fac_england", "fac_burgundy"].map(|id| FactionId::new(id).expect("id"));
     // Every major is played by the AI: the Papacy watches.
@@ -71,13 +79,16 @@ fn main() {
                 .filter(|u| is_mercenary(&data, &u.unit_type))
                 .count();
             let treasury = state.factions.get(faction).map_or(0, |f| f.treasury);
+            // Treasury in seasons of gross income (the AI's « rich » test).
+            let income = state.faction_income_effective(&data, faction).max(1);
             totals[index] += u64::from(men);
             line.push_str(&format!(
-                " | {} {:>6}h {:>2}m {:>7}£",
+                " | {} {:>6}h {:>2}m {:>7}£ {:>4.1}s",
                 &faction.as_str()[4..7],
                 men,
                 mercs,
-                treasury
+                treasury,
+                treasury as f64 / income as f64
             ));
         }
         if turn % 4 == 0 || turn == turns {
