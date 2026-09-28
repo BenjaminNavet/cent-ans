@@ -71,6 +71,8 @@ func _line(text: String, color: Color, node_name: String) -> Label:
 	var label := HudStyle.label(text, UiType.size(UiType.CAPTION), color)
 	label.name = node_name
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.custom_minimum_size.x = 1.0
 	_body.add_child(label)
 	return label
 
