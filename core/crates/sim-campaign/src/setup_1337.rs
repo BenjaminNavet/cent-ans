@@ -221,7 +221,7 @@ impl CampaignState {
 
         // Factions and diplomacy.
         for (id, faction) in &data.factions {
-            let mut faction_state = FactionState {
+            let faction_state = FactionState {
                 treasury: faction.treasury.map_or(DEFAULT_TREASURY, |t| t as i64),
                 income_last_turn: 0,
                 upkeep_last_turn: 0,
@@ -283,9 +283,6 @@ impl CampaignState {
                 research_points_last_turn: 0,
                 research_banked: Default::default(),
             };
-            if let Some(suzerain) = faction_state.suzerain.clone() {
-                faction_state.allies.insert(suzerain);
-            }
             state.factions.insert(id.clone(), faction_state);
         }
         for (id, faction) in &data.factions {
@@ -520,6 +517,18 @@ impl CampaignState {
         for (vassal, suzerain) in vassals {
             let loyalty = crate::diplomacy::loyalty_target(&state, data, &vassal, &suzerain);
             state.factions.get_mut(&vassal).expect("exists").loyalty = loyalty;
+        }
+        // ADR 0114: no alliance between a suzerain and its direct vassal.
+        crate::feudal::drop_feudal_alliances(&mut state, data);
+        // F8: the felony cases of 1337 (Robert of Artois harboured by Edward III).
+        for case in &data.feudal_rules.start_felonies {
+            crate::feudal::open_felony_towards(
+                &mut state,
+                data,
+                &case.vassal,
+                &case.liege,
+                case.reason,
+            );
         }
         Ok(state)
     }

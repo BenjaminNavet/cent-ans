@@ -85,12 +85,10 @@ pub fn switch_allegiance(
     }
     let homage_start = data.feudal_rules.loyalty.homage_start;
     if let Some(v) = state.factions.get_mut(vassal) {
-        v.allies.insert(lord.clone());
         v.loyalty = homage_start;
     }
-    if let Some(l) = state.factions.get_mut(lord) {
-        l.allies.insert(vassal.clone());
-    }
+    // ADR 0114: the feudal tie stands for an alliance.
+    super::drop_alliance(state, vassal, lord);
     let text = match &former {
         Some(former) => format!(
             "{} renie {} et prête hommage à {}.",

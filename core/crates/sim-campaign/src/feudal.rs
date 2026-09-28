@@ -160,14 +160,7 @@ pub struct VictoryStreaks {
     pub first_vassal: u32,
 }
 
-/// Why a felony case was opened (§ 4.4).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum FelonyReason {
-    RefusedHost,
-    AlliedWithEnemy,
-    Revolt,
-}
+pub use data_model::FelonyReason;
 
 /// An open felony case: `liege` may declare forfeiture against `vassal`
 /// until `expires_turn`.
@@ -330,6 +323,35 @@ pub fn direct_vassals(
         .filter(|f| liege_of(state, data, f).as_ref() == Some(faction))
         .cloned()
         .collect()
+}
+
+/// `a` and `b` are bound by a direct feudal tie (one is the other's direct
+/// suzerain): they cannot be allies, the tie stands for an alliance (ADR 0114).
+pub fn direct_tie(state: &CampaignState, data: &GameData, a: &FactionId, b: &FactionId) -> bool {
+    liege_of(state, data, a).as_ref() == Some(b) || liege_of(state, data, b).as_ref() == Some(a)
+}
+
+/// Removes the alliance between `a` and `b`, if any.
+pub(crate) fn drop_alliance(state: &mut CampaignState, a: &FactionId, b: &FactionId) {
+    if let Some(f) = state.factions.get_mut(a) {
+        f.allies.remove(b);
+    }
+    if let Some(f) = state.factions.get_mut(b) {
+        f.allies.remove(a);
+    }
+}
+
+/// Removes every alliance between a suzerain and its direct vassal (the
+/// scenario's relations, ADR 0114).
+pub(crate) fn drop_feudal_alliances(state: &mut CampaignState, data: &GameData) {
+    let pairs: Vec<(FactionId, FactionId)> = state
+        .factions
+        .keys()
+        .filter_map(|f| liege_of(state, data, f).map(|l| (f.clone(), l)))
+        .collect();
+    for (vassal, liege) in pairs {
+        drop_alliance(state, &vassal, &liege);
+    }
 }
 
 /// Factions holding a title directly below one held by `faction`, primary
@@ -843,6 +865,9 @@ pub fn summon_host(
         if &vassal == enemy || state.is_at_war(&vassal, enemy) || state.is_allied(&vassal, enemy) {
             continue;
         }
+        if !can_serve(state, data, &vassal, liege, enemy) {
+            continue; // out of reach or independent in fact: not summoned (ADR 0114)
+        }
         if answers_host(state, data, &vassal, liege, enemy) {
             state.start_war(&vassal, enemy);
             let text = format!(
@@ -862,6 +887,53 @@ pub fn summon_host(
             felony::on_host_refused(state, data, &vassal, liege);
         }
     }
+}
+
+/// Can `vassal` be summoned to the host of `liege` against `enemy` (lot F8,
+/// ADR 0114, `feudal_rules.host`)? Not when it is independent in fact (its
+/// power reaches `independent_power_ratio` of its suzerain's), nor when none
+/// of its settlements lies within `max_muster_km` of its suzerain's capital
+/// or of a settlement of the enemy.
+pub fn can_serve(
+    state: &CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+    liege: &FactionId,
+    enemy: &FactionId,
+) -> bool {
+    let rules = &data.feudal_rules.host;
+    if rules.independent_power_ratio > 0.0
+        && state.faction_power(vassal)
+            >= rules.independent_power_ratio * state.faction_power(liege).max(1.0)
+    {
+        return false;
+    }
+    if rules.max_muster_km <= 0.0 {
+        return true;
+    }
+    let points = |faction: &FactionId| -> Vec<[f64; 2]> {
+        state
+            .settlements
+            .iter()
+            .filter(|(_, s)| &s.controller == faction)
+            .filter_map(|(id, _)| data.settlements.get(id).map(|d| d.lonlat))
+            .collect()
+    };
+    let mut targets = points(enemy);
+    if let Some(capital) = state
+        .factions
+        .get(liege)
+        .and_then(|f| state.provinces.get(&f.capital))
+        .and_then(|p| data.settlements.get(&p.city))
+    {
+        targets.push(capital.lonlat);
+    }
+    let max = rules.max_muster_km;
+    points(vassal).iter().any(|own| {
+        targets
+            .iter()
+            .any(|t| data_model::movement_graph::distance_km(*own, *t) <= max)
+    })
 }
 
 /// Does `vassal` answer the host of `liege` against `enemy`? The player's

@@ -118,8 +118,10 @@ fn count_duke_king_chain() {
     let host = feudal::direct_vassals(&state, &data, &france);
     assert!(host.contains(&burgundy) && !host.contains(&flanders));
     for vassal in host {
+        // ADR 0114: only the vassals within reach are summoned.
         if state.factions[&vassal].loyalty >= data.feudal_rules.call_to_arms_loyalty
             && !state.is_allied(&vassal, &brabant)
+            && feudal::can_serve(&state, &data, &vassal, &france, &brabant)
         {
             assert!(
                 state.is_at_war(&vassal, &brabant),

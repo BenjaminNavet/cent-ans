@@ -49,3 +49,12 @@ erreur type de la moyenne sur 8 graines ≈ 3 400).
   suzerain avec son propre vassal) ; si F8 le restreint, remonter le plancher d'après la mesure.
 - Le diagnostic de budget (recettes, armées, bâtiments, administration, Table, autre, ordres) se
   reproduit avec `docs/wip/rs-m-c7a.md` § Méthode.
+
+## Note (2026-09-28, lot FE F8, ADR 0114)
+
+L'ost est restreint aux vassaux à portée (200 km de la capitale du suzerain ou d'une place ennemie) et
+le lien féodal ne vaut plus alliance : l'ost impérial contre la France tombe de 34-67 réponses à 13-15
+sur 50 tours, sans vassaux italiens. Sonde c7a release (graines 1-8) : France 32 603, Angleterre
+13 251, sièges 1,93 / tour, bloquées 0,10, débarquements 4,6, batailles 80,6. **Plancher France
+15 000 → 20 000** (moyenne moins environ trois erreurs types, arrondie au multiple de 5 000
+inférieur) ; autres bornes inchangées.
