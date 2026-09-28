@@ -1,0 +1,25 @@
+{
+ "format": 2,
+ "id": "avignon",
+ "name": "Avignon",
+ "settlement": "set_avignon",
+ "landmark": "avignon",
+ "period": "vers 1340 (squelette VH8, en cours)",
+ "year": 1340,
+ "seed": 1340084,
+ "crs": "EPSG:3035",
+ "origin_3035": [3903599, 2330145],
+ "extent_m": 1800,
+ "sources": [
+  {"title": "OpenStreetMap", "author": "Contributeurs d'OpenStreetMap", "date": "2026-09-28", "url": "https://www.openstreetmap.org/copyright", "license": "ODbL 1.0 (© contributeurs d'OpenStreetMap)", "extracted": true, "use": "Squelette : à compléter."}
+ ],
+ "fine_rivers": ["Rhône"],
+ "waters": [],
+ "walls": [],
+ "streets": [],
+ "monuments": [],
+ "districts": [
+  {"id": "ville", "name": "La ville", "zone": "intra", "density": 0.9, "polygon": [[-100, -100], [100, -100], [100, 100], [-100, 100]]}
+ ],
+ "render": {"fade_valley": [0.35, 0.65]}
+}
