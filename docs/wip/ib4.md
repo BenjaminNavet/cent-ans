@@ -14,11 +14,11 @@ en fin de fichier + `_icon_text`, `cost_text`, `_effects_block`, `population_cla
   (effects 39+, stats 9, gauges 10) ; pytest de couverture
 - [x] 4. Défauts IB1 : icône de vedette « Tir »/« Mêlée » (repli `battle_state_*`), ambiance
   en police italique explicite et encre atténuée
-- [ ] 1b. `CodexBubbles` ouvre les liens `ib:` (entité → `TooltipView.build(link_spec, true)`,
+- [x] 1b. `CodexBubbles` ouvre les liens `ib:` (entité → `TooltipView.build(link_spec, true)`,
   règle → bulle `rule`), clic gauche → fiche `entry_for_entity`
-- [ ] 3. Placement latéral, fil d'Ariane, réduction des ancêtres
+- [x] 3. Placement latéral, fil d'Ariane, réduction des ancêtres
 - [ ] 5. `ib_chain_test` étendu
 
 ## Prochaine étape
 
-`codex_bubbles.gd` : clés de lien génériques (`link_key`), `open` pour `ib:`, placement.
+Étendre `ib_chain_test.gd` (bulles ib:, placement 1280×720 via `area_override`, fil d’Ariane, réduction), puis tests complets.
