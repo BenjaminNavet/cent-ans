@@ -50,3 +50,35 @@ def multi_session_budget_file(budget_file: Path) -> Path:
         encoding="utf-8",
     )
     return target
+
+
+@pytest.fixture
+def da_then_po_budget_file(budget_file: Path) -> Path:
+    """Shape of the real `docs/budget.md`: a funding session (DA) followed by a later one.
+
+    A later, unrelated session (PO) is opened underneath it, the way `PO0` was appended
+    after `DA7c`. Reproduces the RS-H bug: a DA5 tool batch (ink icons) is funded by the DA
+    envelope, but `add_entry()` with no explicit session always lands in the *last* table
+    (PO here), not the one that actually funds it.
+    """
+    header = REPO_BUDGET.read_text(encoding="utf-8").split("| Date |", 1)[0]
+    da_table = (
+        "## Direction artistique (25/09) — plafond propre de 50 $\n"
+        "\n"
+        "| Date | Service | Objet | Coût estimé | Coût réel | Cumul DA |\n"
+        "|---|---|---|---|---|---|\n"
+        "| 2026-09-26 | OpenRouter | DA7c : icônes de trait à l'encre | 2,69 $ | 2,68 $ | 20,56 $ |\n"
+    )
+    po_table = (
+        "## Polish PO (27/09) — 0 $ prévu, enveloppe ≤ 3 $\n"
+        "\n"
+        "| Date | Service | Objet | Coût estimé | Coût réel | Cumul PO |\n"
+        "|---|---|---|---|---|---|\n"
+        "| 2026-09-27 | — | PO0 : planche « avant », gabarit, squelette | 0,00 $ | 0,00 $ | 0,00 $ |\n"
+    )
+    target = budget_file.parent / "da_then_po_budget.md"
+    target.write_text(
+        header.rstrip("\n") + "\n\n" + da_table + "\n" + po_table,
+        encoding="utf-8",
+    )
+    return target

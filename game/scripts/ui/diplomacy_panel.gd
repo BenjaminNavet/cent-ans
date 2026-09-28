@@ -653,6 +653,9 @@ func _render_map() -> void:
 	var ids := PackedStringArray()
 	for index in range(1, map_data.province_count + 1):
 		ids.append(str(map_data.get_province(index).get("id", "")))
+	# RS-E : instantané groupé (mêmes index que `ids`, même construction) au lieu d'un
+	# `get_province_state` par province.
+	var snapshot := ProvinceSnapshot.of(sim, map_data)
 	# DP2 : mêmes couleurs que le mode « Diplomatie » de la carte et de la minicarte.
 	if DiplomaticStances.available(sim):
 		var stances := DiplomaticStances.stances(sim, ids)
@@ -660,7 +663,7 @@ func _render_map() -> void:
 		for index in ids.size():
 			var key := stances[index] if index < stances.size() else ""
 			var stance_color := DiplomaticStances.color_of(key)
-			if key != "" and key != "self" and _selected != "" and _controller_of(ids[index]) == _selected:
+			if key != "" and key != "self" and _selected != "" and _controller_of(snapshot, index) == _selected:
 				stance_color = stance_color.lightened(0.3)
 			stance_colors.append(stance_color)
 		_minimap.set_province_colors(stance_colors)
@@ -673,8 +676,8 @@ func _render_map() -> void:
 	for index in ids.size():
 		var relation := relations[index] if index < relations.size() else ""
 		var color := Color(0, 0, 0, 0)
-		# Contrôleur lu une seule fois par province (et seulement s'il sert).
-		var controller: String = _controller_of(ids[index]) if relation != "" and relation != "self" else ""
+		# Contrôleur lu dans l'instantané groupé (et seulement s'il sert).
+		var controller: String = _controller_of(snapshot, index) if relation != "" and relation != "self" else ""
 		if MAP_COLORS.has(relation):
 			color = MAP_COLORS[relation]
 		elif relation == "peace":
@@ -686,10 +689,12 @@ func _render_map() -> void:
 	_minimap.set_province_colors(colors)
 
 
-## Contrôleur d'une province (une lecture `get_province_state` ; pas d'accès groupé au pont).
-func _controller_of(province_id: String) -> String:
-	var state: Dictionary = sim.call("get_province_state", province_id)
-	return str(state.get("controller", ""))
+## Contrôleur de la province d'index `index` dans l'instantané groupé (RS-E : `ProvinceSnapshot`,
+## au lieu d'une lecture `get_province_state` par province).
+func _controller_of(snapshot: ProvinceSnapshot, index: int) -> String:
+	if index < 0 or index >= snapshot.controller.size():
+		return ""
+	return snapshot.controller[index]
 
 
 func _on_map_clicked(map_pos: Vector2) -> void:

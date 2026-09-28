@@ -1,0 +1,11 @@
+{
+  "id": "cdx_tranchoir",
+  "title": "Le pain tranchoir",
+  "category": "vie_quotidienne",
+  "aliases": ["tranchoir", "tranchoirs", "trencher"],
+  "era": { "from": "1000", "to": "1500" },
+  "summary": "Grosse tranche de pain rassis servant d'assiette, le tranchoir reçoit la viande et absorbe la sauce ; en fin de repas, trempé de jus, il est ramassé et donné en aumône aux pauvres à la porte.",
+  "body": "Avant l'assiette, la table médiévale se sert du pain lui-même. Le tranchoir est une épaisse tranche de pain, coupée dans une miche de plusieurs jours (le pain frais s'effondre, le pain [[cdx_pain_bis|bis]] rassis tient mieux), posée devant chaque convive : on y dépose la viande tranchée, dont il absorbe le jus et la sauce, avant de le manger à son tour ou de le laisser de côté.\n\nLe [[cdx_menagier_de_paris|Ménagier de Paris]] détaille, à l'usage des servantes, la manière de dresser la table : combien de tranchoirs prévoir par convive, comment les tailler dans le pain de quatre jours, comment les renouveler pendant un repas de plusieurs services. Chez les grands, on sert parfois deux tranchoirs par personne, l'un pour la viande, l'autre pour un entremets.\n\nÀ la fin du repas, les tranchoirs imbibés, appelés « bribes », ne sont pas perdus : dans les maisons pieuses, on les recueille pour les distribuer aux pauvres à la porte, un geste de charité ordinaire que rappellent plusieurs textes moraux de l'époque. Ailleurs, ils nourrissent les chiens de la maison.\n\nAu fil du XIVe et surtout du XVe siècle, les tables les plus riches remplacent peu à peu le pain par des plats de bois, d'étain ou d'argent : l'assiette individuelle proprement dite ne se généralise qu'à l'époque moderne. Le tranchoir de pain reste cependant la norme dans la plupart des maisons modestes bien après 1453, et le mot « tranchoir » finira par désigner, plus tard, la planche à découper de nos cuisines.",
+  "see_also": ["cdx_pain_bis", "cdx_menagier_de_paris", "cdx_potage"],
+  "sources": ["Trencher (tableware)", "Pain", "Le Ménagier de Paris"]
+}
