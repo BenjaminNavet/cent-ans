@@ -557,6 +557,11 @@ pub(crate) fn resolve_economy(
         faction.seigniorage_last_turn = seigniorage;
         faction.recoinage_last_turn = recoinage;
         faction.treasury += income - upkeep;
+        faction.deficit_seasons = if income < upkeep {
+            faction.deficit_seasons.saturating_add(1)
+        } else {
+            0
+        };
         faction.income_last_turn = income;
         faction.upkeep_last_turn = upkeep;
         faction.army_upkeep_last_turn = army_upkeep;

@@ -171,6 +171,13 @@ pub enum Order {
         #[serde(alias = "province")]
         settlement: Place,
     },
+    /// RS-C: razes the completed `building` of `settlement`, refunding
+    /// `economy.json` `demolition_refund_percent` of its money cost.
+    Demolish {
+        #[serde(alias = "province")]
+        settlement: Place,
+        building: BuildingId,
+    },
     /// Sets the faction's tax bracket (spec § 1.4).
     SetTaxRate {
         rate: TaxRate,
@@ -491,6 +498,8 @@ pub enum OrderError {
     BuildUnavailable(String),
     #[error("aucune construction en cours dans cette colonie")]
     NoConstruction,
+    #[error("démolition impossible : {0}")]
+    DemolitionRefused(String),
     #[error("la colonie est assiégée")]
     SettlementBesieged,
     #[error("posture impossible : {0}")]
@@ -732,6 +741,13 @@ impl CampaignState {
             Order::CancelBuild { settlement } => {
                 let settlement = self.resolve_place(&settlement)?;
                 self.order_cancel_build(data, faction, &settlement)
+            }
+            Order::Demolish {
+                settlement,
+                building,
+            } => {
+                let settlement = self.resolve_place(&settlement)?;
+                crate::buildings::demolish(self, data, faction, &settlement, &building)
             }
             Order::SetTaxRate { rate } => {
                 self.factions
