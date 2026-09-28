@@ -17,6 +17,8 @@ Branche `feat/tw2-t5` (worktree `../gp-tw2-t5`, base `integration/tw2`). Spec :
 
 - [x] UI : `game/scripts/map/traditions_controller.gd` (bouton du bandeau, panneau latéral, toasts de rang), titre du bandeau = nom gardé.
 
+- [x] Test headless `game/tests/tw2_t5_traditions_test.gd` (OK).
+
 ## Prochaine étape
 
-- Test headless `game/tests/tw2_t5_traditions_test.gd`, ADR 0109, vérifs finales.
+- ADR 0109, vérifs finales (fmt, clippy, workspace, smoke, pytest).
