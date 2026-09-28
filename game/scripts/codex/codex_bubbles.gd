@@ -39,7 +39,6 @@ var _pending_time := 0.0
 var _hover_id := ""
 var _hover_source: Control = null
 var _outside_time := 0.0
-var _window_layer: CanvasLayer
 var _window: Control
 ## Contrôle survolé et durée du survol (T n'épingle une infobulle simple qu'une fois affichée).
 var _hovered_control: Control = null
@@ -49,10 +48,6 @@ var _hovered_time := 0.0
 func _ready() -> void:
 	layer = LAYER
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_window_layer = CanvasLayer.new()
-	_window_layer.layer = LAYER - 1
-	_window_layer.name = "WindowLayer"
-	add_child(_window_layer)
 
 
 ## Branche un `RichTextLabel` (BBCode issu de `CodexText.format`) sur les bulles.
@@ -236,7 +231,10 @@ func window() -> Control:
 		_window = CodexWindow.new()
 		_window.name = "CodexWindow"
 		_window.hide()
-		_window_layer.add_child(_window)
+		# P2c : fenêtre seule (hors `CodexHub`, ex. en bataille) dans `UiZones.Zone.MODAL` — fond
+		# assombri, centrée sur sa taille propre, sous les bulles (étage `UiZones.DEFAULT_LAYER`
+		# < `LAYER`).
+		UiZones.put(UiZones.Zone.MODAL, _window)
 	return _window
 
 
@@ -436,13 +434,15 @@ func _make_bubble(id: String, bbcode: String, pinned: bool, parent: PanelContain
 	label.custom_minimum_size = Vector2(WIDTH, 0)
 	label.mouse_filter = Control.MOUSE_FILTER_PASS
 	label.add_theme_color_override("default_color", INK)
-	label.add_theme_font_size_override("normal_font_size", 14)
-	label.add_theme_font_size_override("bold_font_size", 15)
+	# P2c : bulle compacte — variation `Caption` (14 px, plancher de la bible § 12.2), même taille
+	# pour le gras (les bulles n'ont pas de variation « grasse » dédiée).
+	UiType.apply(label, UiType.CAPTION)
+	label.add_theme_font_size_override("bold_font_size", UiType.size(UiType.CAPTION))
 	label.text = bbcode
 	box.add_child(label)
 	var footer := Label.new()
 	footer.name = "Footer"
-	footer.add_theme_font_size_override("font_size", 11)
+	UiType.apply(footer, UiType.CAPTION)
 	footer.add_theme_color_override("font_color", Color(MUTED))
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	box.add_child(footer)
