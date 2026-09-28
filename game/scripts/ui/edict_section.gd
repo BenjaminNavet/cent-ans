@@ -38,7 +38,7 @@ func _init() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_label = Label.new()
 	header_label.text = "Édit régional"
-	header_label.add_theme_font_size_override("font_size", 16)
+	header_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	add_child(header_label)
 
 	var current_row := HBoxContainer.new()
@@ -49,7 +49,7 @@ func _init() -> void:
 	current_row.add_child(current_chip)
 
 	pending_label = Label.new()
-	pending_label.add_theme_font_size_override("font_size", 12)
+	pending_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	pending_label.add_theme_color_override("font_color", MUTED_COLOR)
 	pending_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	pending_label.hide()
@@ -70,7 +70,7 @@ func _init() -> void:
 
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	error_label.add_theme_font_size_override("font_size", 12)
+	error_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	error_label.add_theme_color_override("font_color", ERROR_COLOR)
 	error_label.hide()
 	add_child(error_label)
@@ -165,7 +165,7 @@ func _fill_options() -> void:
 		if not available and not current:
 			var marker := Label.new()
 			marker.text = str(option.get("reason", "indisponible"))
-			marker.add_theme_font_size_override("font_size", 12)
+			marker.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 			marker.add_theme_color_override("font_color", ERROR_COLOR)
 			line.add_child(marker)
 		options_box.add_child(line)
