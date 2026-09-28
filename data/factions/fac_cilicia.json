@@ -40,6 +40,11 @@
       "faction": "fac_mamluks",
       "status": "war",
       "note": "Al-Nasir Muhammad prend Ayas en 1337 et impose une trêve humiliante à Léon IV."
+    },
+    {
+      "faction": "fac_cyprus",
+      "status": "alliance",
+      "note": "Liens dynastiques des Lusignan avec l'Arménie cilicienne."
     }
   ],
   "ai_personality": {

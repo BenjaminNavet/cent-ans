@@ -45,6 +45,11 @@
       "faction": "fac_venice",
       "status": "peace",
       "note": "Commerce vers Raguse et Cattaro."
+    },
+    {
+      "faction": "fac_hungary",
+      "status": "vassal",
+      "note": "Le ban de Bosnie reconnaît la suzeraineté hongroise."
     }
   ],
   "claims": [

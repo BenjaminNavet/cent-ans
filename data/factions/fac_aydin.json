@@ -50,6 +50,16 @@
       "faction": "fac_venice",
       "status": "war",
       "note": "Umur Bey razzie l'Égée ; ligue chrétienne et prise de Smyrne en 1344."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "alliance",
+      "note": "Amitié d'Umur Bey et de Jean Cantacuzène."
+    },
+    {
+      "faction": "fac_hospitallers",
+      "status": "war",
+      "note": "Les Hospitaliers de Rhodes combattent les razzias d'Umur."
     }
   ],
   "ai_personality": {

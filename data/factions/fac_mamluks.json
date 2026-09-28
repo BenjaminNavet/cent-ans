@@ -69,6 +69,11 @@
       "faction": "fac_golden_horde",
       "status": "alliance",
       "note": "Alliance du Caire et de Saraï contre les Ilkhanides ; épouse mongole d'al-Nasir Muhammad."
+    },
+    {
+      "faction": "fac_cyprus",
+      "status": "peace",
+      "note": "Hugues IV ménage le sultan ; Pierre Ier prendra Alexandrie en 1365."
     }
   ],
   "ai_personality": {

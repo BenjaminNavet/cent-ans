@@ -38,6 +38,11 @@
       "faction": "fac_aydin",
       "status": "peace",
       "note": "Rival naval, voisin du nord."
+    },
+    {
+      "faction": "fac_hospitallers",
+      "status": "war",
+      "note": "Menteşe, voisin continental de Rhodes, harcèle l'île."
     }
   ],
   "ai_personality": {

@@ -54,6 +54,16 @@
       "faction": "fac_papacy",
       "status": "peace",
       "note": "Ordre relevant directement du pape."
+    },
+    {
+      "faction": "fac_aydin",
+      "status": "war",
+      "note": "Les Hospitaliers de Rhodes combattent les razzias d'Umur."
+    },
+    {
+      "faction": "fac_mentese",
+      "status": "war",
+      "note": "Menteşe, voisin continental de Rhodes, harcèle l'île."
     }
   ],
   "ai_personality": {

@@ -60,6 +60,11 @@
       "faction": "fac_venice",
       "status": "peace",
       "note": "Rivalité sur les ports de Zeta."
+    },
+    {
+      "faction": "fac_hungary",
+      "status": "peace",
+      "note": "Frontière de Macsó ; campagne hongroise de 1335."
     }
   ],
   "claims": [

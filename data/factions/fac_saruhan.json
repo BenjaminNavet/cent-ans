@@ -39,6 +39,11 @@
       "faction": "fac_aydin",
       "status": "alliance",
       "note": "Alliance de voisinage contre les Latins de Chios et de Smyrne."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Alliance de circonstance contre les Génois de Phocée (1336)."
     }
   ],
   "ai_personality": {
