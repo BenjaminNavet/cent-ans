@@ -122,7 +122,10 @@ func _test_recruitment(sim: Object, army_id: String) -> void:
 			chosen = row
 	var list := VBoxContainer.new()
 	root.add_child(list)
-	PanelWidgets.fill_recruitable(list, rows, func(_unit: String) -> void: pass)
+	# Chargé à l'exécution : `PanelWidgets` dépend de l'autoload `IconLibrary`, inconnu à la
+	# compilation d'un script `SceneTree`.
+	var widgets: GDScript = load("res://scripts/map/panel_widgets.gd")
+	widgets.call("fill_recruitable", list, rows, func(_unit: String) -> void: pass)
 	var labels := list.find_children("PoolLabel", "Label", true, false)
 	_check(labels.size() == rows.size(), "one reserve label per row (%d for %d)" % [labels.size(), rows.size()])
 	if not labels.is_empty():
