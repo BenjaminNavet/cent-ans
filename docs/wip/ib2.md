@@ -28,6 +28,15 @@ Branche `feat/ib2-migrate` depuis `main` (05e711e1). Spec `docs/superpowers/spec
   générique pour les contrôles natifs sans classe dédiée) ; `spec_for` route `"plain"`.
 - [ ] 3. Migration des ~120 littéraux, par lots de fichiers (carte, bataille, menus) — **en
   cours**, liste exacte des fichiers restants dans `LITERAL_EXCEPTIONS` de `ib_plain_test.gd`.
+  Fait : lot « menus simples » (pause_menu, codex_hub, ransom_panel, ui_layout, replays_menu,
+  battle_demos_menu, historical_battles_menu, next_hint_card, edict_section, table_section,
+  faction_select, news_letters) et lot « carte » (agent/campaign_minimap/chronicle/diplomacy/
+  help/holdings/map_legend/map_mode/map_ui/panel_widgets/province_panel/relief_cache_notice/
+  settlement_panel/traditions/unit_roster/victory_controller). Reste : battle/, naval/,
+  codex_window.gd, advisor.gd, et le lot ui/ restant (army_strip, budget_table, character_sheet,
+  chivalry_section, chronicle_window, court_panel, diplomacy_panel, encounter_window,
+  encyclopedia, end_turn_cluster, faction_panel, general_seal, mercenary_panel, retinue_row,
+  season_report, tutorial).
 - [x] 4. Tests : `ib_plain_test.gd` (mécanisme d'attache + grep sans littéraux hors exceptions),
   pytest `test_tooltip_schemas.py` (`plain` référencées existent, `effects`/`stats`/`gauges`
   ont toutes un corps).

@@ -318,7 +318,7 @@ func _difficulty_row(level: int) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
-	row.tooltip_text = "Défi de la situation historique de cette couronne en 1337 (indicatif).\nLe niveau de difficulté de la campagne se choisit sous la fiche."
+	RichTooltip.attach_plain(row, "faction_challenge_indicative")
 	row.add_child(FrontEndStyle.label("Défi de la faction :", UiType.size(UiType.CAPTION), FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
 	var pips := HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 4)
@@ -399,7 +399,7 @@ func _build_difficulty_selector() -> Control:
 	row.add_theme_constant_override("separation", 12)
 	bar.add_child(row)
 	var heading := FrontEndStyle.label("Difficulté de la campagne", UiType.size(UiType.HEADING), Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 4)
-	heading.tooltip_text = "Figée pour toute la partie : revenus et entretien de l'IA, vos revenus, l'agitation de vos provinces, l'hostilité de l'IA et le moral de ses armées contre vous."
+	RichTooltip.attach_plain(heading, "difficulty_fixed_effects")
 	heading.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_child(heading)
 	var facade := _facade()
@@ -487,7 +487,7 @@ func _build_actions() -> Control:
 	seed_row.visible = false
 	_advanced_box = seed_row
 	var seed_label := FrontEndStyle.label("Graine aléatoire", UiType.size(UiType.BODY), Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
-	seed_label.tooltip_text = "Même graine, même tirage des événements et des batailles : utile pour rejouer une partie."
+	RichTooltip.attach_plain(seed_label, "seed_same_draw")
 	seed_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	seed_row.add_child(seed_label)
 	seed_edit = LineEdit.new()

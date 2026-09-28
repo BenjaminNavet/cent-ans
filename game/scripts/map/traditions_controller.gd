@@ -47,7 +47,7 @@ func setup(campaign_map: Node) -> void:
 	button.name = "TraditionsButton"
 	button.text = "Traditions"
 	UiType.apply(button, UiType.CAPTION)
-	button.tooltip_text = "Traditions de l'armée : expérience, rangs et choix"
+	RichTooltip.attach_plain(button, "army_traditions")
 	button.visible = false
 	button.pressed.connect(func() -> void: open_for(_selected))
 	var strip: Node = map.ui.get("army_strip")
@@ -154,7 +154,7 @@ func _fill(info: Dictionary) -> void:
 	titles.add_child(heading)
 	var close := Button.new()
 	close.text = "×"
-	close.tooltip_text = "Fermer (Échap)"
+	RichTooltip.attach_plain(close, "close_escape")
 	close.pressed.connect(panel.hide)
 	header.add_child(close)
 
@@ -202,14 +202,16 @@ func _option_row(option: Dictionary) -> Control:
 		int(option.get("tier", 1)), str(option.get("effects_text", ""))]
 	choice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var tip := str(option.get("description", ""))
+	var body := tip
 	if bool(option.get("allowed", false)):
-		choice.tooltip_text = tip
 		var id := str(option.get("id", ""))
 		choice.pressed.connect(func() -> void: choose(id))
 	else:
 		choice.disabled = true
 		var reason := str(option.get("reason", ""))
-		choice.tooltip_text = "%s\nImpossible : %s." % [tip, reason] if reason != "" else tip
+		if reason != "":
+			body = "%s\nImpossible : %s." % [tip, reason]
+	RichTooltip.attach_plain(choice, "tradition_choice", {"title": str(option.get("name", "")), "body": body})
 	return choice
 
 

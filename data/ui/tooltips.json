@@ -360,5 +360,101 @@
       "body": "Cour : diplomatie, intrigue, prestige et piété."
     }
   },
-  "plain": {}
+  "plain": {
+    "close": {"title": "Fermer"},
+    "close_escape": {"title": "Fermer", "hint": "Échap"},
+    "click_to_close": {"title": "Cliquer pour fermer"},
+    "open_character_sheet": {"title": "Ouvrir la fiche du personnage"},
+    "historical_sheet_codex": {"title": "Fiche historique (Codex)"},
+    "ransom_pay_full": {"title": "Rançon"},
+    "ransom_cedable_province": {
+      "title": "Province cessible",
+      "body": "Tenue par sa faction, pas sa capitale, voisine d'une des nôtres."
+    },
+    "ransom_parole": {
+      "title": "Libération sans rançon",
+      "body": "Prestige pour notre souverain, gratitude de sa faction."
+    },
+    "pause_difficulty_fixed": {
+      "title": "Difficulté",
+      "body": "Choisie au lancement de la campagne, elle ne peut plus changer."
+    },
+    "replay_wrong_format": {"title": "Rejeu incompatible"},
+    "battle_demo_hour": {
+      "title": "Heure de la bataille",
+      "body": "L'aube et le crépuscule réduisent la portée des tireurs ; la journée avance pendant la bataille."
+    },
+    "historical_battle_ai_both": {
+      "title": "Bataille automatique",
+      "body": "Les deux armées sont menées par l'IA."
+    },
+    "hint_card_hide": {
+      "title": "Masquer ce conseil",
+      "body": "Jusqu'à la saison prochaine.\nRéglages → Carte → « Conseil : que faire maintenant » pour ne plus en voir."
+    },
+    "hint_card_act": {"title": "Cliquez pour agir."},
+    "choose_edict": {
+      "title": "Édit",
+      "body": "Choisir l'édit de la province (délai avant effet selon l'édit)."
+    },
+    "choose_diet": {"title": "Table"},
+    "faction_challenge_indicative": {
+      "title": "Défi indicatif",
+      "body": "Situation historique de cette couronne en 1337.\nLe niveau de difficulté de la campagne se choisit sous la fiche."
+    },
+    "difficulty_fixed_effects": {
+      "title": "Figée pour toute la partie",
+      "body": "Revenus et entretien de l'IA, vos revenus, l'agitation de vos provinces, l'hostilité de l'IA et le moral de ses armées contre vous."
+    },
+    "seed_same_draw": {
+      "title": "Même graine, même tirage des événements et des batailles",
+      "body": "Utile pour rejouer une partie."
+    },
+    "news_card_actions": {"title": "Actions"},
+    "tradition_choice": {"title": "Tradition"},
+    "army_traditions": {
+      "title": "Traditions de l'armée",
+      "body": "Expérience, rangs et choix"
+    },
+    "agent_dismiss": {
+      "title": "Congédier l'agent",
+      "body": "Plus d'entretien."
+    },
+    "agent_identity": {"title": "Agent"},
+    "agent_action": {"title": "Action"},
+    "minimap_click_camera": {"title": "Minicarte : cliquer ou glisser pour y porter la caméra"},
+    "map_legend_open": {
+      "title": "Légende",
+      "body": "Ce que montrent les symboles de la carte."
+    },
+    "chronicle_pending": {"title": "Événements en attente de décision"},
+    "diplomacy_open": {"title": "Diplomatie et religion (P)"},
+    "help_resume_tutorial": {"title": "Reprend le tutoriel à l'étape où vous l'aviez laissé, sinon le relance depuis le début."},
+    "close_list_b": {"title": "Fermer la liste", "hint": "B"},
+    "close_list_u": {"title": "Fermer la liste", "hint": "U"},
+    "holdings_weighted_unrest": {"title": "Agitation pondérée"},
+    "province_focus_open": {"title": "Centrer la caméra sur la province et ouvrir son panneau."},
+    "close_legend": {"title": "Fermer la légende"},
+    "map_mode_filters": {"title": "Filtres de la carte", "body": "Diplomatie, religion, ordre public, richesse…", "hint": "F"},
+    "map_mode_trade_overlay": {"title": "Calque des routes commerciales, combinable avec tout filtre"},
+    "research_none": {"title": "Recherche"},
+    "research_progress": {"title": "Recherche"},
+    "income_gross_last_turn": {"title": "Revenu brut du dernier tour."},
+    "seat_unavailable": {"title": "Impossible"},
+    "codex_open_hint": {
+      "title": "Codex",
+      "body": "L'histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
+    },
+    "recruit_pool": {"title": "Réserve de recrutement"},
+    "colony_focus_open": {"title": "Ouvrir le panneau de la colonie et centrer la carte"},
+    "relief_notice_hide": {"title": "Masquer cet avis jusqu'au prochain lancement du jeu"},
+    "relief_command": {"title": "À lancer à la racine du dépôt"},
+    "relief_copy_command": {"title": "Copier la commande dans le presse-papiers"},
+    "province_panel_open": {"title": "Ouvrir le panneau de la province"},
+    "roster_toggle": {"title": "Liste"},
+    "campaign_score": {
+      "title": "Score de campagne",
+      "body": "Provinces tenues, objectifs remplis, prestige et trésor. Il mesure votre réussite si la campagne s'achève à l'échéance sans que tous les objectifs soient remplis."
+    }
+  }
 }

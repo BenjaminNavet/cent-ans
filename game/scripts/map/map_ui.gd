@@ -306,7 +306,7 @@ func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
 	treasury_label.text = "Trésor : %s" % Money.amount(treasury)
 	if economy.is_empty():
 		income_label.text = "Revenu : %s" % Money.signed(income)
-		income_label.tooltip_text = "Revenu brut du dernier tour."
+		RichTooltip.attach_plain(income_label, "income_gross_last_turn")
 		return
 	var net := int(economy.get("net_income", 0))
 	income_label.text = "Solde : %s / saison" % Money.signed(net)
@@ -721,7 +721,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 	header.add_child(heading)
 	var close := Button.new()
 	close.text = "×"
-	close.tooltip_text = "Fermer (Échap)"
+	RichTooltip.attach_plain(close, "close_escape")
 	close.pressed.connect(general_picker.hide)
 	header.add_child(close)
 	var any_free := false
@@ -733,7 +733,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 		if reason != "":
 			button.text += " (%s)" % reason
 			button.disabled = true
-			button.tooltip_text = "Impossible : %s." % reason
+			RichTooltip.attach_plain(button, "seat_unavailable", {"body": reason})
 		else:
 			any_free = true
 			var character_id := str(candidate.get("id", ""))
@@ -794,17 +794,17 @@ func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 		research_label.text = "Aucune recherche"
 		research_bar.max_value = 1
 		research_bar.value = 0
-		research_box.tooltip_text = "Aucune recherche en cours : %d points par tour perdus (clic : technologies)." % points_per_turn
+		RichTooltip.attach_plain(research_box, "research_none", {"body": "Aucune recherche en cours : %d points par tour perdus (clic : technologies)." % points_per_turn})
 		return
 	var turns := int(research.get("turns_left", -1))
 	research_label.text = str(research.get("name", ""))
 	research_bar.max_value = maxi(1, int(research.get("cost", 1)))
 	research_bar.value = int(research.get("progress", 0))
-	research_box.tooltip_text = "Recherche : [b]%s[/b]\n%d / %d points, +%d par tour%s" % [
+	RichTooltip.attach_plain(research_box, "research_progress", {"body": "[b]%s[/b]\n%d / %d points, +%d par tour%s" % [
 		RichTooltip.entity_name(str(research.get("technology", "")), str(research.get("name", ""))),
 		int(research.get("progress", 0)), int(research.get("cost", 0)),
 		int(research.get("points_per_turn", points_per_turn)),
-		", %s restant%s" % [FrText.count(turns, "tour"), FrText.s(turns)] if turns >= 0 else ""]
+		", %s restant%s" % [FrText.count(turns, "tour"), FrText.s(turns)] if turns >= 0 else ""]})
 
 
 # --- HUD de campagne (F10b) ----------------------------------------------------------
@@ -1294,7 +1294,7 @@ func _add_codex_button() -> void:
 		_decorate_button(button, "hud_codex")
 	button.text = "Codex"
 	UiType.apply(button, UiType.BODY)
-	button.tooltip_text = "[b]Codex[/b]\nL'histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
+	RichTooltip.attach_plain(button, "codex_open_hint")
 	_add_keycap(button, "codex_open")
 	_register_top_label(button, "Codex")
 

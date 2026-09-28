@@ -30,7 +30,7 @@ func setup(campaign_map: Node) -> void:
 	button = Button.new()
 	button.text = "Chronique"
 	UiType.apply(button, UiType.BODY)
-	button.tooltip_text = "Événements en attente de décision"
+	RichTooltip.attach_plain(button, "chronicle_pending")
 	court_button.get_parent().add_child(button)
 	court_button.get_parent().move_child(button, court_button.get_index())
 	button.pressed.connect(toggle_window)
