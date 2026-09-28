@@ -121,11 +121,33 @@ pub struct WallPiece {
     /// Siege tower docked against this piece.
     #[serde(default)]
     pub docked_tower: Option<u32>,
+    /// SB (ADR 0100): seconds this piece still counts as under attack (a ram
+    /// battering it, an engine shooting at it, the gate burning); 0: not.
+    #[serde(default)]
+    pub attacked_for: f64,
 }
+
+/// SB: a ram at the gate, or the gate burning, keeps it "under attack" this
+/// many seconds after the last tick of contact.
+pub const UNDER_ATTACK_CONTACT_S: f64 = 4.0;
+/// SB: an engine's shot keeps its piece "under attack" until a little after
+/// its next shot (`shot::ENGINE_RELOAD` = 12 s), so a steady bombardment
+/// reads as one continuous attack.
+pub const UNDER_ATTACK_SHOT_S: f64 = 15.0;
 
 impl WallPiece {
     pub fn intact(&self) -> bool {
         self.hp > 0.0
+    }
+
+    /// SB: battered, shot at or burning in the last few seconds.
+    pub fn under_attack(&self) -> bool {
+        self.attacked_for > 0.0 && self.intact()
+    }
+
+    /// SB: marks the piece as under attack for at least `seconds`.
+    pub fn mark_attacked(&mut self, seconds: f64) {
+        self.attacked_for = self.attacked_for.max(seconds);
     }
 
     pub fn length(&self) -> f64 {
@@ -703,6 +725,7 @@ impl SiegeWorks {
                 hp: wall_hp,
                 max_hp: wall_hp,
                 docked_tower: None,
+                attacked_for: 0.0,
             };
             if k == RING_SIDES / 2 - 1 {
                 // The side facing the attacker: wall, gate, wall.
@@ -726,6 +749,7 @@ impl SiegeWorks {
                     hp: gate_hp,
                     max_hp: gate_hp,
                     docked_tower: None,
+                    attacked_for: 0.0,
                 });
                 pieces.push(wall(g1, b));
             } else {
@@ -908,6 +932,7 @@ impl SiegeWorks {
             hp: 0.0,
             max_hp: 0.0,
             docked_tower: None,
+            attacked_for: 0.0,
         };
         let start_clear =
             |end: (f64, f64)| ((end.0 - p.0).powi(2) + (end.1 - p.1).powi(2)).sqrt() > margin;
