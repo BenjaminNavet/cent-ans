@@ -119,3 +119,5 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`).
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul FE |
 |---|---|---|---|---|---|
 | 2026-09-28 | — | F0 (titres, migration) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-28 | OpenRouter | Portraits M10 (62 × openai/gpt-5-image-mini) | 2,83 $ | 2,86 $ | 2,86 $ |
+| 2026-09-28 | OpenRouter | DA2 : portraits vivants (archétypes et variantes âgées) (49 × openai/gpt-5-image-mini) | 2,23 $ | 2,27 $ | 5,13 $ |
