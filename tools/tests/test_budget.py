@@ -3,6 +3,8 @@
 from decimal import Decimal
 from pathlib import Path
 
+import pytest
+
 from cent_ans_tools import budget
 from cent_ans_tools.budget import BudgetLedger, format_amount, parse_amount, to_money
 
@@ -165,6 +167,67 @@ def test_trailing_text_after_last_table_is_preserved(tmp_path: Path) -> None:
     ledger.add_entry("2026-09-24", "OpenRouter", "test 2", 1, 1)
     text = path.read_text(encoding="utf-8")
     assert "## Notes de clôture" in text
+
+
+def test_add_entry_without_session_reproduces_the_rs_h_bug(
+    da_then_po_budget_file: Path,
+) -> None:
+    """Reproduces the RS-H bug: a DA-funded batch lands in the wrong, later table.
+
+    With no explicit session, it lands in the later, unrelated PO table (the last one)
+    instead of the DA table that funds it — and the existing PO row is still there (no line
+    lost by this call), just no longer the only one.
+    """
+    ledger = BudgetLedger(da_then_po_budget_file)
+    da_before = len(ledger.sessions[0].entries)
+    ledger.add_entry("2026-09-28", "OpenRouter", "CB : icônes à l'encre", 0.10, 0.09)
+
+    reloaded = BudgetLedger(da_then_po_budget_file)
+    assert len(reloaded.sessions[0].entries) == da_before  # DA untouched
+    assert [entry.subject for entry in reloaded.sessions[1].entries] == [
+        "PO0 : planche « avant », gabarit, squelette",
+        "CB : icônes à l'encre",
+    ]
+
+
+def test_add_entry_with_session_targets_the_named_table(
+    da_then_po_budget_file: Path,
+) -> None:
+    """The fix: naming the funding session targets it even though it is not the last table.
+
+    It leaves the later PO table exactly as it was (no row moved, none dropped).
+    """
+    ledger = BudgetLedger(da_then_po_budget_file)
+    po_text_before = ledger.render().split("## Polish PO", 1)[1]
+    ledger.add_entry(
+        "2026-09-28",
+        "OpenRouter",
+        "CB : icônes à l'encre",
+        0.10,
+        0.09,
+        session="Direction artistique",
+    )
+
+    reloaded = BudgetLedger(da_then_po_budget_file)
+    assert [entry.subject for entry in reloaded.sessions[0].entries] == [
+        "DA7c : icônes de trait à l'encre",
+        "CB : icônes à l'encre",
+    ]
+    assert reloaded.sessions[0].entries[-1].cumulative == Decimal("2.77")
+    assert [entry.subject for entry in reloaded.sessions[1].entries] == [
+        "PO0 : planche « avant », gabarit, squelette",
+    ]
+    po_text_after = reloaded.render().split("## Polish PO", 1)[1]
+    assert po_text_after == po_text_before  # not a single line moved or dropped
+
+
+def test_add_entry_unknown_session_name_raises(da_then_po_budget_file: Path) -> None:
+    """A typo'd or missing heading fails loudly instead of silently falling back to last."""
+    ledger = BudgetLedger(da_then_po_budget_file)
+    with pytest.raises(ValueError, match="Aucune section"):
+        ledger.add_entry(
+            "2026-09-28", "OpenRouter", "x", 1, 1, session="Session inconnue"
+        )
 
 
 def test_real_budget_file_parses_and_round_trips() -> None:

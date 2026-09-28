@@ -69,7 +69,7 @@ func show_tree(nodes: Array) -> void:
 			return ka < kb if not is_equal_approx(ka, kb) else str(a["id"]) < str(b["id"]))
 		var header := Label.new()
 		header.text = "Rang %d" % tier
-		header.add_theme_font_size_override("font_size", 13)
+		UiType.apply(header, UiType.CAPTION)  # PO phase 2 (P2b) : plus de taille ad hoc
 		header.position = Vector2(MARGIN.x + column * COLUMN_STEP, 6)
 		header.size = Vector2(NODE_SIZE.x, 22)
 		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -134,7 +134,7 @@ func _make_button(node: Dictionary) -> Button:
 	button.size = NODE_SIZE
 	button.custom_minimum_size = NODE_SIZE
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	button.add_theme_font_size_override("font_size", 12)
+	UiType.apply(button, UiType.CAPTION)  # PO phase 2 (P2b) : 12 px sous le minimum, Caption (14 px)
 	var cost := int(node.get("effective_cost", node.get("cost", 0)))
 	var second_line: String
 	if state == "researching" or (state == "available" and int(node.get("progress", 0)) > 0):

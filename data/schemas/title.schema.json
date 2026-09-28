@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/title.schema.json",
+  "title": "Titre féodal",
+  "description": "Fichier data/titles/<id>.json (lot FE, ADR 0098). Les titres portent la hiérarchie de jure (royaume, duché, comté) et les provinces ; les factions détiennent des titres. Suzerains et vassaux se déduisent des détentions. Invariants (vérifiés au chargement et par pytest) : suzerain de rang strictement supérieur, chaque province dans exactement un titre.",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/title_id" },
+    "rank": { "type": "string", "enum": ["kingdom", "duchy", "county"], "description": "Rang ; l'Empire est un royaume. Trois niveaux au plus." },
+    "name": { "$ref": "common.schema.json#/$defs/localized_name" },
+    "heraldry": { "$ref": "faction.schema.json#/properties/heraldry" },
+    "de_jure_liege": { "$ref": "common.schema.json#/$defs/title_id", "description": "Titre dont celui-ci relève, de rang strictement supérieur ; absent pour un royaume souverain." },
+    "de_jure_provinces": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/province_id" },
+      "uniqueItems": true,
+      "description": "Provinces du domaine propre du titre (celles des titres vassaux ne sont pas répétées)."
+    },
+    "holder_1337": {
+      "type": "object",
+      "properties": {
+        "faction": { "$ref": "common.schema.json#/$defs/faction_id" },
+        "uncertain": { "type": "boolean" },
+        "sources": { "$ref": "common.schema.json#/$defs/sources" }
+      },
+      "required": ["faction"],
+      "additionalProperties": false,
+      "description": "Faction détentrice au printemps 1337."
+    },
+    "objectives": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "condition": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "enum": ["hold_title", "hold_provinces", "be_independent", "be_liege_of", "hold_crown"] },
+              "title": { "$ref": "common.schema.json#/$defs/title_id" },
+              "provinces": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/province_id" } },
+              "faction": { "$ref": "common.schema.json#/$defs/faction_id" }
+            },
+            "required": ["kind"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["id", "title", "description", "condition"],
+        "additionalProperties": false
+      },
+      "description": "Objectifs historiques (spec § 4.8), portés par le titre principal d'une faction."
+    },
+    "description": { "type": "string" },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "rank", "name", "holder_1337"],
+  "additionalProperties": false
+}

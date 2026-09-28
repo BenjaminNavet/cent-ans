@@ -47,14 +47,17 @@ impl BattleSim {
 
     /// Regiment `index` closes with (or shoots at) `target`: the effect of
     /// an `Attack` order. Pavises stay up while the target is within
-    /// bowshot.
+    /// bowshot and in sight (RS-J: a target hidden in a wood, behind walls
+    /// or a crest is closed in on, like the other shooters do).
     pub(super) fn start_attack(&mut self, index: usize, target: u32, run: bool) {
-        let (tx, tz) = (self.units[target as usize].x, self.units[target as usize].z);
+        let aim = &self.units[target as usize];
+        let (tx, tz) = (aim.x, aim.z);
         let unit = &self.units[index];
+        let dist = ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt();
         let in_range = unit.shoots()
             && unit.ammo > 0
-            && ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt()
-                <= self.effective_range(unit, tx, tz);
+            && dist <= self.effective_range(unit, tx, tz)
+            && self.visible(unit, aim, dist);
         let unit = &mut self.units[index];
         if !in_range {
             unit.pavise = None;

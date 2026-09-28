@@ -104,7 +104,7 @@ pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,
 };
-pub use fire::{Blaze, FireRules, FireState};
+pub use fire::{Blaze, BurnChoice, FireRules, FireState};
 pub use formation_width::{split_widths, FormationWidthRules, RankBounds};
 pub use group_formation::{FormationSlot, GroupFormationRules, Preset, Role, Stance};
 pub use historical::HistoricalMap;

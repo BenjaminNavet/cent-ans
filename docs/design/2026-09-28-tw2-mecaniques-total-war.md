@@ -9,7 +9,7 @@ l'UI Godot se contente d'afficher et d'émettre des ordres. Nouveaux champs d'é
 pas de changement de `STATE_VERSION` sauf nécessité (alors ADR). L'IA doit savoir utiliser chaque
 nouvelle mécanique (sinon le joueur seul en profite).
 
-ADR réservés : **0100** (SB), **0101** (T1), **0102** (T2), **0103** (T3), **0104** (T4), **0105** (T5).
+ADR : **0107** (SB), **0101** (T1), **0102** (T2), **0103** (T3), **0108** (T4), **0109** (T5) — renumérotés le 28/09 (0100 pris par RS B, 0104-0106 par GA).
 (0098/0099 sont réservés par l'orchestration RS, `docs/wip/restes.md`.)
 
 ## SB — Lisibilité et rythme de la destruction en siège (bataille)
@@ -27,7 +27,7 @@ pan de mur 3 100 PV / trébuchet 84 PV par tir toutes les 12 s ≈ 7 min 30.
 - **Rythme** (données seulement, `data/rules/siege_works.json`) : cibles au niveau 3 — porte tombée en
   **40-60 s** par un bélier à plein équipage ; brèche d'un pan en **6-10 tirs** d'un trébuchet (≈ 1 min 30
   à 2 min), une bombarde plus vite qu'un mangonneau. Niveau 5 nettement plus long (×1,5-2), niveau 0-1
-  rapide. Mesurer avant/après par sonde (exemple ou test) et consigner le tableau dans l'ADR 0100.
+  rapide. Mesurer avant/après par sonde (exemple ou test) et consigner le tableau dans l’ADR 0107.
 - Vérifier les tests de siège existants (auto-résolution et batailles de siège) : l'équilibre global
   (taux de prise) ne doit pas basculer ; ajuster si besoin et le dire.
 

@@ -361,6 +361,12 @@ pub enum Order {
         site: u32,
         option: usize,
     },
+    // ----- TW2-T1: fate of a captured place (`capture.rs`) -------------------
+    /// Decides the fate of the place of pending capture `decision`.
+    ChooseCaptureOutcome {
+        decision: u32,
+        outcome: crate::capture::CaptureOutcome,
+    },
 }
 
 impl Order {
@@ -510,6 +516,10 @@ pub enum OrderError {
     Agent(#[from] crate::agents::AgentError),
     #[error(transparent)]
     Encounter(#[from] crate::encounter::EncounterError),
+    #[error(transparent)]
+    Capture(#[from] crate::capture::CaptureError),
+    #[error("la place est en ruine : ni recrutement ni chantier")]
+    SettlementRuined,
 }
 
 /// G1: recruitments every settlement can queue per turn before buildings.
@@ -536,6 +546,9 @@ pub struct RecruitOption {
     /// SV2: resource units the faction lacks and must import.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub imported: BTreeMap<data_model::ResourceId, u32>,
+    /// TW2-T2: the settlement's reserve of this unit type.
+    #[serde(default)]
+    pub pool: crate::recruit_pool::PoolView,
 }
 
 /// SV2: full price of one recruit — money cost plus the import of the
@@ -652,6 +665,9 @@ impl CampaignState {
                 unit_type,
             } => {
                 let settlement = self.resolve_place(&settlement)?;
+                if crate::capture::is_ruined(self, &settlement) {
+                    return Err(OrderError::SettlementRuined);
+                }
                 self.order_recruit(data, faction, &settlement, &unit_type)
             }
             Order::CreateArmy {
@@ -693,6 +709,9 @@ impl CampaignState {
                 building,
             } => {
                 let settlement = self.resolve_place(&settlement)?;
+                if crate::capture::is_ruined(self, &settlement) {
+                    return Err(OrderError::SettlementRuined);
+                }
                 self.order_build(data, faction, &settlement, &building)
             }
             Order::CancelBuild { settlement } => {
@@ -807,6 +826,9 @@ impl CampaignState {
             }
             Order::ChooseEventOption { decision, option } => {
                 Ok(self.choose_event_option(data, faction, decision, option)?)
+            }
+            Order::ChooseCaptureOutcome { decision, outcome } => {
+                Ok(self.choose_capture_outcome(data, faction, decision, outcome)?)
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
@@ -1034,6 +1056,8 @@ impl CampaignState {
             .unwrap_or(1)
             .max(1);
         let ordered_turn = self.turn;
+        // TW2-T2: the recruit leaves the settlement's reserve.
+        self.draw_recruit_pool(data, settlement, unit_type);
         self.settlements
             .get_mut(settlement)
             .expect("checked")
@@ -1125,6 +1149,7 @@ impl CampaignState {
             resources: unit_type.cost.resources.clone(),
             import_cost: price.import_cost,
             imported: price.draw.imported,
+            pool: self.recruit_pool(data, settlement, unit_type_id),
         };
         let reason = self.recruit_blocker(data, faction, settlement, unit_type, price.cost);
         if let Some(reason) = reason {
@@ -1202,6 +1227,15 @@ impl CampaignState {
         let share = crate::settlements::weight_share(data, settlement_id);
         if (class.count as f64 * share) < f64::from(unit_type.soldiers) * 10.0 {
             return Some("classe sociale trop peu nombreuse".to_owned());
+        }
+        // TW2-T2: the settlement's reserve of the unit type.
+        let pool = self.recruit_pool(data, settlement_id, &unit_type.id);
+        if pool.available == 0 {
+            return Some(match pool.seasons_to_next {
+                Some(1) => "réserve épuisée (+1 dans 1 saison)".to_owned(),
+                Some(k) => format!("réserve épuisée (+1 dans {k} saisons)"),
+                None => "réserve épuisée".to_owned(),
+            });
         }
         if faction_state.treasury < i64::from(cost) {
             return Some(format!("trésor insuffisant ({cost} livres nécessaires)"));

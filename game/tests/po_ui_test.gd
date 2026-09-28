@@ -74,6 +74,12 @@ func _collect_font_sizes(node: Node) -> void:
 
 
 func _run() -> void:
+	# Réglages de test dès le départ : le menu titre ne doit pas dépendre de la taille
+	# d'interface choisie par le joueur dans son `settings.cfg`.
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.call("use_test_file")
+		settings.call("_apply_ui_scale")
 	for pattern in ["uv run", "res://", "user://", "(^|\\s)--[a-z]", "[\\w-]+/[\\w./-]+\\.(json|gd|tscn|png|bin|ogg|md)\\b",
 			"\\b[a-z]+(_[a-z0-9]+)+\\b"]:
 		var regex := RegEx.new()

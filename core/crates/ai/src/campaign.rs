@@ -166,7 +166,7 @@ impl<'a> Context<'a> {
         // Net of court and administration (M10 balance) and of the tribute
         // owed to a suzerain.
         let tribute = if me.suzerain.is_some() {
-            (gross_income * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100).max(0)
+            (gross_income * data.feudal_rules.vassal_tribute_percent / 100).max(0)
         } else {
             0
         };
@@ -698,6 +698,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         }
         // G1: no more than the settlement's free recruitment slots.
         let mut free_slots = state.recruit_slots_free(data, site);
+        // TW2-T2: no more of a unit type than the settlement's reserve.
+        let mut drawn: BTreeMap<data_model::UnitTypeId, u32> = BTreeMap::new();
         while recruits < max_recruits && free_slots > 0 {
             let upkeep_cap = |upkeep: i64| {
                 if planned_upkeep == 0 && ctx.surplus() >= upkeep {
@@ -712,6 +714,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
                 .filter(|o| {
                     planned_upkeep + i64::from(o.upkeep) <= upkeep_cap(i64::from(o.upkeep))
                         && budget >= i64::from(o.cost)
+                        && drawn.get(&o.unit_type).copied().unwrap_or(0) < o.pool.available
                 })
                 .collect();
             let Some(option) =
@@ -726,6 +729,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
                 unit_type: option.unit_type.clone(),
             });
             *composition.entry(option.unit_type.clone()).or_default() += 1;
+            *drawn.entry(option.unit_type.clone()).or_default() += 1;
             draw_supply(&mut supply, &option.resources);
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/replenishment_rules.schema.json",
+  "title": "Règles de reconstitution des armées et des réserves de recrutement",
+  "description": "Fichier data/rules/replenishment.json (lot TW2-T2, ADR 0102). Voir docs/design/2026-09-28-tw2-mecaniques-total-war.md § T2.",
+  "type": "object",
+  "$defs": {
+    "percent": { "type": "integer", "minimum": 0, "maximum": 500 },
+    "bonus": { "type": "integer", "minimum": -100, "maximum": 200 },
+    "kinds": {
+      "type": "object",
+      "properties": {
+        "city": { "type": "integer", "minimum": 0 },
+        "town": { "type": "integer", "minimum": 0 },
+        "castle": { "type": "integer", "minimum": 0 },
+        "abbey": { "type": "integer", "minimum": 0 },
+        "village": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["city", "town", "castle", "abbey", "village"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "replenishment": {
+      "type": "object",
+      "description": "Reconstitution saisonnière d'une armée qui n'a pas combattu : pourcentage des hommes manquants.",
+      "properties": {
+        "territory_percent": {
+          "type": "object",
+          "description": "Taux de base selon le territoire où se tient l'armée.",
+          "properties": {
+            "own": { "$ref": "#/$defs/percent" },
+            "ally": { "$ref": "#/$defs/percent" },
+            "neutral": { "$ref": "#/$defs/percent" },
+            "hostile": { "$ref": "#/$defs/percent" }
+          },
+          "required": ["own", "ally", "neutral", "hostile"],
+          "additionalProperties": false
+        },
+        "stance_percent": {
+          "type": "object",
+          "description": "Multiplicateur de la posture de l'armée.",
+          "properties": {
+            "normal": { "$ref": "#/$defs/percent" },
+            "raid": { "$ref": "#/$defs/percent" },
+            "siege": { "$ref": "#/$defs/percent" },
+            "ambush": { "$ref": "#/$defs/percent" },
+            "forced_march": { "$ref": "#/$defs/percent" },
+            "entrenched": { "$ref": "#/$defs/percent" }
+          },
+          "required": ["normal", "raid", "siege", "ambush", "forced_march", "entrenched"],
+          "additionalProperties": false
+        },
+        "in_settlement_percent": { "$ref": "#/$defs/percent", "description": "Multiplicateur dans une place amie (remplace celui de la posture s'il est plus fort)." },
+        "winter_percent": { "$ref": "#/$defs/percent" },
+        "low_supply_threshold": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "low_supply_percent": { "$ref": "#/$defs/percent" },
+        "general_governance_percent_per_level": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "general_skill_percent": {
+          "type": "object",
+          "propertyNames": { "pattern": "^skill_[a-z0-9_]+$" },
+          "additionalProperties": { "$ref": "#/$defs/bonus" }
+        },
+        "general_trait_percent": {
+          "type": "object",
+          "propertyNames": { "pattern": "^trait_[a-z0-9_]+$" },
+          "additionalProperties": { "$ref": "#/$defs/bonus" }
+        },
+        "building_garrison_point_percent": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "building_recruit_slot_percent": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "building_bonus_max_percent": { "type": "integer", "minimum": 0, "maximum": 200 },
+        "max_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Plafond du taux final." },
+        "cost_percent": { "type": "integer", "minimum": 0, "maximum": 200, "description": "Prix d'un homme rendu, en % du prix de recrutement par homme." }
+      },
+      "required": [
+        "territory_percent", "stance_percent", "in_settlement_percent", "winter_percent",
+        "low_supply_threshold", "low_supply_percent", "general_governance_percent_per_level",
+        "building_garrison_point_percent", "building_recruit_slot_percent",
+        "building_bonus_max_percent", "max_percent", "cost_percent"
+      ],
+      "additionalProperties": false
+    },
+    "recruit_pool": {
+      "type": "object",
+      "description": "Réserves de recrutement par établissement et par unité, en millièmes d'unité.",
+      "properties": {
+        "base_cap": { "$ref": "#/$defs/kinds", "description": "Unités en réserve au plus, par type d'établissement." },
+        "base_rate_milli": { "$ref": "#/$defs/kinds", "description": "Millièmes d'unité regagnés par saison." },
+        "capital_cap_bonus": { "type": "integer", "minimum": 0 },
+        "capital_rate_milli": { "type": "integer", "minimum": 0 },
+        "fortification_rate_milli_per_level": { "type": "integer", "minimum": 0 },
+        "recruit_slot_cap_bonus": { "type": "integer", "minimum": 0 },
+        "recruit_slot_rate_milli": { "type": "integer", "minimum": 0 },
+        "category_rate_percent": {
+          "type": "object",
+          "properties": {
+            "infantry": { "$ref": "#/$defs/percent" },
+            "ranged": { "$ref": "#/$defs/percent" },
+            "cavalry": { "$ref": "#/$defs/percent" },
+            "siege": { "$ref": "#/$defs/percent" }
+          },
+          "required": ["infantry", "ranged", "cavalry", "siege"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "base_cap", "base_rate_milli", "capital_cap_bonus", "capital_rate_milli",
+        "fortification_rate_milli_per_level", "recruit_slot_cap_bonus", "recruit_slot_rate_milli",
+        "category_rate_percent"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": ["replenishment", "recruit_pool"],
+  "additionalProperties": false
+}

@@ -247,7 +247,7 @@ impl BattleSim {
         &self.assault.fx
     }
 
-    /// SB (ADR 0100): the rams and siege towers still on the field, with
+    /// SB (ADR 0107): the rams and siege towers still on the field, with
     /// their strength (crew left over full crew) for the health bars.
     pub fn siege_engines(&self) -> Vec<SiegeEngineView> {
         self.units
