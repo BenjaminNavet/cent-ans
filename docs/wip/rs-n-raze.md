@@ -30,10 +30,26 @@ joueur / dépendance (`buildings::demolition_blocker`). Aucune UI n'existait.
 - [x] Cœur : `buildings::demolition_preview`/`DemolitionPreview`, `demolish()`
       réutilise le même calcul de remboursement. 4 tests `rs_n_tests.rs`
       (autorisé, bloqué par dépendance, bloqué par siège, aperçu = réel).
-- [ ] Pont : `settlement_demolition_preview`.
-- [ ] Godot : bouton, dialogue, wiring, tests.
-- [ ] Codex.
-- [ ] fmt/clippy/cargo test, smoke.gd, po_ui_test.gd.
+- [x] Pont : `CampaignSim.settlement_demolition_preview(id)` (lecture pure,
+      `campaign_sim_settlements.rs` + `demolition_preview_array`/`_dict` dans
+      `campaign_sim.rs`).
+- [x] Godot : `PanelWidgets.fill_buildings` prend `demolition`/`is_player_owner`/
+      `on_raze` (rétrocompatible, `province_panel.gd` inchangé) et ajoute un
+      bouton « Raser » par bâtiment (icône `act_cancel_build`, `tooltip_text`
+      simple : remboursement + entretien économisé si possible, raison FR du
+      cœur sinon). `SettlementPanel.raze_requested` → `SettlementController`
+      ouvre `RazeConfirmationDialog` (calqué sur `WarDeclarationDialog`,
+      `UiZones.Zone.MODAL`) avant l'ordre `demolish`.
+- [x] Codex : phrase ajoutée dans `cdx_jeu_construction` (bouton « Raser »).
+- [x] `game/tests/rs_n_raze_test.gd` : OK (Amiens, marché bloqué par la
+      draperie qui en dépend, draperie rasée après confirmation, remboursement
+      versé, renoncer ne change rien).
+- [x] cargo fmt/clippy `--all-targets -D warnings` : verts.
+- [ ] `cargo test --workspace` : en cours (long, tourne en tâche de fond).
+- [ ] `smoke.gd` : en cours (tâche de fond).
+- [ ] `po_ui_test.gd`, `c5_settlements_ui_test.gd` (régression) : à lancer.
+- [ ] Supprimer `core/target-rs-n` en fin de lot.
 
 ## Prochaine étape
-Implémenter `demolition_preview` dans `core/crates/sim-campaign/src/buildings.rs`.
+Attendre `cargo test --workspace` et `smoke.gd`, lancer `po_ui_test.gd` et
+`c5_settlements_ui_test.gd`, puis commit final et rapport.

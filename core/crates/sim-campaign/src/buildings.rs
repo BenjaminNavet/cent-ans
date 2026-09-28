@@ -1027,8 +1027,8 @@ pub fn demolition_preview(
 /// `building` to be razed.
 fn demolition_refund_and_upkeep(data: &GameData, building: &BuildingId) -> (i64, i64) {
     data.buildings.get(building).map_or((0, 0), |b| {
-        let refund = i64::from(b.cost.money) * i64::from(data.economy_rules.demolition_refund_percent)
-            / 100;
+        let refund =
+            i64::from(b.cost.money) * i64::from(data.economy_rules.demolition_refund_percent) / 100;
         (refund, i64::from(b.upkeep.unwrap_or(0)))
     })
 }

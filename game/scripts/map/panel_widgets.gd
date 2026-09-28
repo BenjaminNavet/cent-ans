@@ -89,8 +89,12 @@ static func pool_label(row: Dictionary) -> Label:
 	return label
 
 
-## Bâtiments construits (`{id, name, upkeep, …}`).
-static func fill_buildings(list: Container, buildings: Array) -> void:
+## Bâtiments construits (`{id, name, upkeep, …}`). RS-N : avec `demolition`
+## (`building_id → settlement_demolition_preview` : `{can_demolish, reason,
+## refund, upkeep_saved}`) et `is_player_owner`, ajoute un bouton « Raser » par
+## bâtiment, désactivé et annoté de la raison en français quand le cœur
+## refuserait ; `on_raze(building_id, preview_row)` au clic.
+static func fill_buildings(list: Container, buildings: Array, demolition: Dictionary = {}, is_player_owner: bool = false, on_raze: Callable = Callable()) -> void:
 	clear(list)
 	if buildings.is_empty():
 		placeholder(list, "Aucun bâtiment.")
@@ -98,9 +102,37 @@ static func fill_buildings(list: Container, buildings: Array) -> void:
 	for entry in buildings:
 		var building_id: String = str(entry.get("id", ""))
 		var text := "%s (entretien %s)" % [str(entry.get("name", building_id)), Money.amount(int(entry.get("upkeep", 0)))]
+		var row := HBoxContainer.new()
+		row.name = building_id
+		row.add_theme_constant_override("separation", 6)
 		var chip := IconChip.create(building_id, text, "", ROW_ICON, 14, "building")
 		RichTooltip.set_tooltip(chip, "building", building_id, entry)  # IB1
-		list.add_child(chip)
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(chip)
+		if is_player_owner and demolition.has(building_id):
+			row.add_child(_raze_button(building_id, demolition[building_id], on_raze))
+		list.add_child(row)
+
+
+## RS-N : bouton « Raser » d'un bâtiment ; `preview` vient de
+## `settlement_demolition_preview` (cœur). Infobulle simple (`tooltip_text`),
+## pas l'infobulle riche en cours de refonte.
+static func _raze_button(building_id: String, preview: Dictionary, on_raze: Callable) -> Button:
+	var button := Button.new()
+	button.name = "RazeButton"
+	button.text = "Raser"
+	IconLibrary.decorate_button(button, "act_cancel_build", int(ROW_ICON))
+	var can_demolish: bool = bool(preview.get("can_demolish", false))
+	button.disabled = not can_demolish
+	var refund := int(preview.get("refund", 0))
+	var upkeep_saved := int(preview.get("upkeep_saved", 0))
+	if can_demolish:
+		button.tooltip_text = "Rembourse %s ; économise %s d'entretien par saison." % [Money.amount(refund), Money.amount(upkeep_saved)]
+	else:
+		button.tooltip_text = str(preview.get("reason", "indisponible"))
+	if on_raze.is_valid():
+		button.pressed.connect(func() -> void: on_raze.call(building_id, preview))
+	return button
 
 
 ## Constructions possibles (`buildable`), sans celles déjà construites (`built_ids`) ;
