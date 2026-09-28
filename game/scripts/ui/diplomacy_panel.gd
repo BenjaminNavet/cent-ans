@@ -110,12 +110,11 @@ func _ready() -> void:
 	body.add_child(_build_faction_column())
 	body.add_child(_build_map_column())
 	body.add_child(_build_detail_column())
-	# PO phase 2 (P2b, ADR 0097) : fenêtre centrale plein écran → zone `MODAL` de `UiLayout`
-	# (fond assombri, entrées bloquées derrière). Avant `_fit_to_viewport` : `claim` recentre le
-	# panneau sur sa taille minimale, `_fit_to_viewport` reprend ensuite la main pour la taille
-	# plein écran habituelle (inchangée). L'exclusivité entre panneaux centraux reste celle de
-	# `PanelStack` (inchangée, hors lot).
-	UiZones.put(UiZones.Zone.MODAL, self)
+	# PO phase 2 (P2b, ADR 0097) : fenêtre centrale plein écran — voir `docs/wip/p2b-tech-diplo.md`
+	# « Point ouvert » : ne rejoint volontairement pas de zone `UiLayout` (`SIDE_PANEL` est trop
+	# étroit ; `MODAL` reparente hors de `map_ui`, ce qui casse `_keep_on_screen`/`PanelStack`
+	# côté `map_ui.gd`, hors lot — régressions constatées sur `smoke.gd`). Migré : tailles
+	# (`UiType`) et animations d'ouverture/fermeture (`UiMotion`).
 	_fit_to_viewport()
 
 

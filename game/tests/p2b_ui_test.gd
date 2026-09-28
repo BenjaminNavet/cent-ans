@@ -6,8 +6,8 @@ extends SceneTree
 ## Même méthode que `po_ui_test.gd` (non modifié par ce lot, gardé comme référence pour le reste
 ## de la tranche) :
 ## - C1 : aucun texte d'outil visible hors mode dev.
-## - C2 (ici : zone `MODAL`) : le panneau ouvert est un occupant visible de `UiLayout.MODAL`, le
-##   voile s'affiche, et il disparaît une fois le panneau refermé.
+## - C2 (ici : pas de zone `UiLayout`, voir `docs/wip/p2b-tech-diplo.md` « Point ouvert ») : le
+##   panneau s'ouvre puis se referme correctement (bouton « × », `UiMotion`).
 ## - C3 : aucune taille de police sous `Caption` (14 px de base) et 4 tailles au plus dans les
 ##   contrôles visibles des deux écrans.
 ## Usage : godot --headless --path game --script res://tests/p2b_ui_test.gd
@@ -134,53 +134,44 @@ func _run() -> void:
 		"C3: au plus %d tailles distinctes, %d vues — %s" % [MAX_DISTINCT_SIZES, _sizes.size(), str(_sizes)])
 
 
-## Panneau « Technologies » (`tech_panel.gd`, `tech_tree_view.gd`) : zone `MODAL`, tailles,
-## textes d'outil, fermeture animée (`UiMotion`, instantanée en headless).
+## Panneau « Technologies » (`tech_panel.gd`, `tech_tree_view.gd`) : tailles, textes d'outil,
+## ouverture/fermeture animées (`UiMotion`, instantanée en headless). Ne rejoint pas de zone
+## `UiLayout` (voir `docs/wip/p2b-tech-diplo.md` « Point ouvert ») : C2 se limite ici à
+## l'ouverture/fermeture effective du panneau.
 func _check_tech_panel(map: Node3D) -> void:
-	var layout: Node = root.get_node("/root/UiLayout")
 	if not _check(map.has_method("_tech_available") and map.call("_tech_available"), "technologies indisponibles avec cette simulation"):
 		return
 	map.call("_on_tech_panel_requested")
 	await process_frame
 	var panel: Control = map.ui.tech_panel
-	if not _check(panel.visible, "le panneau des technologies devrait s'ouvrir"):
+	if not _check_c2(panel.visible, "le panneau des technologies devrait s'ouvrir"):
 		return
-	_check_c2(layout.visible_occupants(layout.Zone.MODAL).has(panel), "le panneau des technologies devrait occuper la zone MODAL")
-	var dim: Control = layout.host().get_node("UiModalDim")
-	_check_c2(dim.visible, "le voile modal devrait s'afficher avec le panneau des technologies")
 	_collect_font_sizes(panel)
 	_collect_tool_texts(panel)
 	panel.close_button.pressed.emit()
 	await process_frame
 	_check_c2(not panel.visible, "le panneau des technologies devrait se refermer (bouton ×, UiMotion)")
-	_check_c2(not layout.visible_occupants(layout.Zone.MODAL).has(panel), "le panneau fermé ne devrait plus occuper la zone MODAL")
 
 
-## Écran de diplomatie (`diplomacy_panel.gd`, `diplomatic_stances.gd`) : zone `MODAL`, tailles,
-## textes d'outil, ouverture et fermeture animées (`UiMotion`).
+## Écran de diplomatie (`diplomacy_panel.gd`, `diplomatic_stances.gd`) : tailles, textes d'outil,
+## ouverture et fermeture animées (`UiMotion`). Ne rejoint pas de zone `UiLayout` non plus.
 func _check_diplomacy_panel(map: Node3D) -> void:
-	var layout: Node = root.get_node("/root/UiLayout")
 	var controller: Node = map.diplomacy
 	if not _check(controller != null and controller.call("available"), "diplomatie indisponible avec cette simulation"):
 		return
 	controller.call("open_panel")
 	await process_frame
 	var panel: Control = controller.panel
-	if not _check(panel.visible, "l'écran de diplomatie devrait s'ouvrir"):
+	if not _check_c2(panel.visible, "l'écran de diplomatie devrait s'ouvrir"):
 		return
-	_check_c2(layout.visible_occupants(layout.Zone.MODAL).has(panel), "l'écran de diplomatie devrait occuper la zone MODAL")
-	var dim: Control = layout.host().get_node("UiModalDim")
-	_check_c2(dim.visible, "le voile modal devrait s'afficher avec l'écran de diplomatie")
 	_collect_font_sizes(panel)
 	_collect_tool_texts(panel)
-	# Fermeture par le bouton « × » du panneau (mêmes recherches que `HudStyle` : premier bouton
-	# de 36 px de large dans l'en-tête).
+	# Fermeture par le bouton « × » du panneau (construit en code, sans référence exposée).
 	var close_button := _find_close_button(panel)
 	if _check(close_button != null, "bouton de fermeture de l'écran de diplomatie introuvable"):
 		close_button.pressed.emit()
 		await process_frame
 		_check_c2(not panel.visible, "l'écran de diplomatie devrait se refermer (bouton ×, UiMotion)")
-		_check_c2(not layout.visible_occupants(layout.Zone.MODAL).has(panel), "l'écran fermé ne devrait plus occuper la zone MODAL")
 
 
 func _find_close_button(node: Node) -> Button:
