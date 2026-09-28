@@ -36,6 +36,11 @@
       "faction": "fac_hafsids",
       "status": "peace",
       "note": "Tribus voisines de la Tripolitaine hafside."
+    },
+    {
+      "faction": "fac_mamluks",
+      "status": "peace",
+      "note": "Suzeraineté mamelouke nominale sur les tribus de Cyrénaïque."
     }
   ],
   "ai_personality": {

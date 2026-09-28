@@ -42,6 +42,11 @@
         "value": "1339-03-01"
       },
       "note": "Trêves intermittentes après le siège de Gibraltar (1333) ; la guerre reprend en 1339 et culmine au Salado (1340)."
+    },
+    {
+      "faction": "fac_marinids",
+      "status": "alliance",
+      "note": "Alliance nasride-mérinide contre la Castille."
     }
   ],
   "ai_personality": {

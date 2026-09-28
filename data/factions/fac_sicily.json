@@ -52,6 +52,11 @@
       "faction": "fac_athens",
       "status": "overlord",
       "note": "Apanage du cadet Guillaume, duc d'Athènes et de Néopatras."
+    },
+    {
+      "faction": "fac_hafsids",
+      "status": "war",
+      "note": "Djerba reprise à la Sicile en 1335."
     }
   ],
   "ai_personality": {
