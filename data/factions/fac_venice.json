@@ -55,6 +55,16 @@
       "faction": "fac_golden_horde",
       "status": "peace",
       "note": "Comptoir de Tana obtenu du khan Özbeg (1332-1333)."
+    },
+    {
+      "faction": "fac_mamluks",
+      "status": "peace",
+      "note": "Commerce d'Alexandrie malgré l'interdit pontifical."
+    },
+    {
+      "faction": "fac_aydin",
+      "status": "war",
+      "note": "Umur Bey razzie l'Égée ; ligue chrétienne et prise de Smyrne en 1344."
     }
   ],
   "ai_personality": {

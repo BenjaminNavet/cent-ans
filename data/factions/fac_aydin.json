@@ -45,6 +45,11 @@
       "faction": "fac_mentese",
       "status": "peace",
       "note": "Voisin méridional, rival sur mer."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "war",
+      "note": "Umur Bey razzie l'Égée ; ligue chrétienne et prise de Smyrne en 1344."
     }
   ],
   "ai_personality": {

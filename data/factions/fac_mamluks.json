@@ -64,6 +64,11 @@
       "faction": "fac_genoa",
       "status": "peace",
       "note": "Comptoirs d'Alexandrie et de Tripoli."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "alliance",
+      "note": "Alliance du Caire et de Saraï contre les Ilkhanides ; épouse mongole d'al-Nasir Muhammad."
     }
   ],
   "ai_personality": {
