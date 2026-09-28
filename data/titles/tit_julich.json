@@ -32,6 +32,15 @@
         "kind": "hold_title",
         "title": "tit_julich"
       }
+    },
+    {
+      "id": "obj_julich_berg",
+      "title": "Juliers-Berg",
+      "description": "Acquérir le comté de Berg (union de 1348).",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_berg"
+      }
     }
   ],
   "description": "Comté de Juliers, élevé en duché par l'empereur Louis IV en 1336 pour Guillaume V, comte depuis 1328, pilier de l'alliance anglo-impériale contre la France.",

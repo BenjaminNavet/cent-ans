@@ -33,6 +33,15 @@
         "kind": "hold_title",
         "title": "tit_utrecht"
       }
+    },
+    {
+      "id": "obj_utrecht_guelders",
+      "title": "Contenir la Gueldre",
+      "description": "Soumettre le comté de Gueldre, rival de l'évêché.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_guelders"
+      }
     }
   ],
   "description": "Principauté épiscopale d'Utrecht, État ecclésiastique du Saint-Empire couvrant le Nedersticht (autour d'Utrecht) et l'Oversticht (Deventer, Zwolle, Kampen), villes liées à la Hanse.",

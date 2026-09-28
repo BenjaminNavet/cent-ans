@@ -32,6 +32,15 @@
         "kind": "hold_title",
         "title": "tit_cleve"
       }
+    },
+    {
+      "id": "obj_cleve_mark",
+      "title": "Clèves et La Marck",
+      "description": "Réunir Clèves et le comté de La Marck (union de 1368).",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_mark"
+      }
     }
   ],
   "description": "Comté de Clèves, le long du Bas-Rhin à la frontière de la Gueldre, tenu par la maison de Clèves.",

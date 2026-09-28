@@ -34,6 +34,17 @@
         "kind": "hold_title",
         "title": "tit_villena"
       }
+    },
+    {
+      "id": "obj_villena_murcia",
+      "title": "L'adelantamiento de Murcie",
+      "description": "Tenir Murcie, dont Don Juan Manuel fut adelantado mayor.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_murcia"
+        ]
+      }
     }
   ],
   "description": "Seigneurie bâtie par don Juan Manuel, petit-fils de Ferdinand III, adelantado mayor de Murcie, auteur du Conde Lucanor ; il frappe monnaie et entretient plus de mille chevaliers, autonomie comparable à celle des royaumes voisins.",

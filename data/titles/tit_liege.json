@@ -33,6 +33,15 @@
         "kind": "hold_title",
         "title": "tit_liege"
       }
+    },
+    {
+      "id": "obj_liege_namur",
+      "title": "La guerre de la Vache",
+      "description": "Soumettre le comté de Namur, vieil adversaire de la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_namur"
+      }
     }
   ],
   "description": "Principauté épiscopale de Liège, État ecclésiastique du Saint-Empire régi par le chapitre cathédral qui élit son évêque-prince ; houillères et forges de la vallée mosane, dinanderie de Dinant.",

@@ -32,6 +32,15 @@
         "kind": "hold_title",
         "title": "tit_berg"
       }
+    },
+    {
+      "id": "obj_berg_julich",
+      "title": "Berg et Juliers",
+      "description": "Réunir les comtés de Berg et de Juliers (union de 1348).",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_julich"
+      }
     }
   ],
   "description": "Comté de Berg, rive droite du Rhin face à Cologne, tenu par Adolphe VII (1308-1348).",
