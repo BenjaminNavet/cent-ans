@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_campaign_terrain_textures.schema.json",
+  "title": "Textures du terrain de campagne et de la mer (lot GA4)",
+  "description": "Identité des couches des `Texture2DArray` du terrain de campagne (`terrain.gdshader`, `game/assets/textures/terrain/terrain_albedo_array.jpg` / `terrain_normal_array.jpg`), macro-variation et eau (`water.gdshader`). L'ordre de `layers` est l'ordre d'empilement et suit le contrat d'index fixe du shader (grass, farmland, forest, rock, heath, snow, sand) ; `TerrainBuilder` refuse un ordre différent. `mean_linear` : moyenne linéaire de l'albédo 2k, écrite par `cent-ans geo textures` (le shader teinte le détail autour de cette moyenne). Distances en pixels carte.",
+  "type": "object",
+  "required": ["albedo_size", "normal_size", "tile_screen_px", "layers", "macro", "water"],
+  "additionalProperties": false,
+  "$defs": {
+    "rgb": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+    "vec2": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}}
+  },
+  "properties": {
+    "albedo_size": {"enum": [1024, 2048]},
+    "normal_size": {"enum": [1024, 2048]},
+    "tile_screen_px": {"type": "number", "minimum": 16, "maximum": 512},
+    "layers": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "required": ["id", "poly_haven_id", "mean_linear"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"enum": ["grass", "farmland", "forest", "rock", "heath", "snow", "sand"]},
+          "poly_haven_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "mean_linear": {"$ref": "#/$defs/rgb"}
+        }
+      }
+    },
+    "macro": {
+      "type": "object",
+      "required": ["periods_px", "weights", "tint_amp", "lum_amp"],
+      "additionalProperties": false,
+      "properties": {
+        "periods_px": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "exclusiveMinimum": 0}},
+        "weights": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0}},
+        "tint_amp": {"type": "number", "minimum": 0, "maximum": 4},
+        "lum_amp": {"type": "number", "minimum": 0, "maximum": 0.5}
+      }
+    },
+    "water": {
+      "type": "object",
+      "required": ["normal_size", "scale_a_px", "scale_b_px", "velocity_a_px", "velocity_b_px", "strength", "shallow_color", "mid_color", "deep_color", "mid_depth_m", "depth_falloff_m"],
+      "additionalProperties": false,
+      "properties": {
+        "normal_size": {"enum": [512, 1024, 2048]},
+        "scale_a_px": {"type": "number", "exclusiveMinimum": 0},
+        "scale_b_px": {"type": "number", "exclusiveMinimum": 0},
+        "velocity_a_px": {"$ref": "#/$defs/vec2"},
+        "velocity_b_px": {"$ref": "#/$defs/vec2"},
+        "strength": {"type": "number", "minimum": 0, "maximum": 2},
+        "shallow_color": {"$ref": "#/$defs/rgb"},
+        "mid_color": {"$ref": "#/$defs/rgb"},
+        "deep_color": {"$ref": "#/$defs/rgb"},
+        "mid_depth_m": {"type": "number", "exclusiveMinimum": 0},
+        "depth_falloff_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  }
+}
