@@ -120,6 +120,7 @@ func _check_chivalry_section(sim: Object) -> void:
 	if not sim.has_method("get_chivalric_orders"):
 		return
 	var section: Control = ChivalrySection.new()
+	section.theme = load("res://scenes/ui/parchment_theme.tres")  # thème hérité de `faction_panel.tscn` en jeu
 	root.add_child(section)
 	await process_frame
 	section.show_for(true, sim)

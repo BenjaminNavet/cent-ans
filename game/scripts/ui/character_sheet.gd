@@ -103,7 +103,7 @@ func _decorate() -> void:
 			continue
 		var grid := key.get_parent()
 		var index := key.get_index()
-		var chip := IconChip.create("branch_" + pair[1], key.text, RichTooltip.branch(pair[1]), 20.0, 15)
+		var chip := IconChip.create("branch_" + pair[1], key.text, RichTooltip.branch(pair[1]), 20.0, UiType.size(UiType.CAPTION))
 		grid.add_child(chip)
 		grid.move_child(chip, index)
 		grid.remove_child(key)
@@ -377,7 +377,7 @@ func _fill_stats(character: Dictionary) -> void:
 	if sex_label != "":
 		entries.insert(1, ["gauge_population", sex_label, sex_label])
 	for entry in entries:
-		stats_row.add_child(_pill(IconChip.create(entry[0], entry[1], entry[2], 16.0, 12), HudStyle.PARCHMENT_DARK))
+		stats_row.add_child(_pill(IconChip.create(entry[0], entry[1], entry[2], 16.0, UiType.size(UiType.CAPTION)), HudStyle.PARCHMENT_DARK))
 
 
 func _birth_year(character: Dictionary) -> int:
@@ -488,7 +488,7 @@ func _fill_traits(traits: Array) -> void:
 		var category: String = str(trait_entry.get("category", ""))
 		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
 		var trait_id: String = str(trait_entry.get("id", ""))
-		var chip := IconChip.create(trait_id, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, 13, "trait")
+		var chip := IconChip.create(trait_id, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, UiType.size(UiType.CAPTION), "trait")
 		var color: Color = TRAIT_COLORS.get(category, HudStyle.INK_SOFT)
 		var pill := _pill(chip, color.lerp(HudStyle.PARCHMENT_LIGHT, 0.68), HudStyle.INK)
 		((pill.get_theme_stylebox("panel") as StyleBoxFlat)).border_color = color
