@@ -1,0 +1,39 @@
+{
+  "format": 2,
+  "id": "bordeaux",
+  "name": "Bordeaux",
+  "settlement": "set_bordeaux",
+  "landmark": "bordeaux",
+  "period": "vers 1340 (squelette VH8, en cours)",
+  "year": 1340,
+  "seed": 1340033,
+  "crs": "EPSG:3035",
+  "origin_3035": [3486285, 2473262],
+  "extent_m": 1900,
+  "sources": [
+    {
+      "title": "OpenStreetMap",
+      "author": "Contributeurs d'OpenStreetMap",
+      "date": "2026-09-28",
+      "url": "https://www.openstreetmap.org/copyright",
+      "license": "ODbL 1.0 (© contributeurs d'OpenStreetMap)",
+      "extracted": true,
+      "use": "Tracés des rues actuelles héritées du plan médiéval ; positions des monuments."
+    }
+  ],
+  "osm_streets": {
+    "bbox_lonlat": [-0.588, 44.826, -0.562, 44.848],
+    "highways": ["primary", "secondary", "tertiary", "unclassified", "residential", "living_street", "pedestrian"],
+    "exclude": [],
+    "main": [],
+    "lanes": [],
+    "unnamed": false,
+    "simplify_m": 1.5
+  },
+  "fine_rivers": ["Garonne"],
+  "waters": [],
+  "walls": [],
+  "streets": [],
+  "monuments": [],
+  "districts": []
+}
