@@ -234,12 +234,16 @@ func update_view(camera_distance: float) -> void:
 	_camera_distance = camera_distance
 	if not enabled:
 		return
+	var tp := Time.get_ticks_usec()  # RS-K : sections `life/*` du banc `--bench-probe`
 	if terroir != null and terroir.poll():
 		_terrain.material.set_shader_parameter("terroir_mask", terroir.texture)
+	tp = PerfProbe.lap("life/terroir", tp)
 	seasons.update(get_process_delta_time())
+	tp = PerfProbe.lap("life/seasons", tp)
 	if effects != null:
 		effects.set_season(seasons.weights)
 		effects.update_view(_camera_distance, _tiers)
+	tp = PerfProbe.lap("life/effects", tp)
 		if _off.has("smoke"):
 			effects.get_node("Chimneys").visible = false
 			effects.get_node("Fires").visible = false
@@ -255,3 +259,4 @@ func update_view(camera_distance: float) -> void:
 		# ZG4 : navires, bateaux et oiseaux à l'échelle de la carte masqués au palier « site ».
 		var keep := 1.0 - _tiers.site_weight(_camera_distance)
 		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, _tiers.medium_weight(_camera_distance) * keep)
+	PerfProbe.lap("life/ambient", tp)
