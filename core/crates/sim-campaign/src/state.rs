@@ -915,6 +915,10 @@ pub struct CampaignState {
     /// [`STATE_VERSION`]).
     #[serde(default)]
     pub encounters: crate::encounter::EncounterState,
+    /// TW2-T1: captures waiting for the player's choice and razed places in
+    /// ruins (absent from older saves; no change of [`STATE_VERSION`]).
+    #[serde(default)]
+    pub captures: crate::capture::CaptureState,
     /// Lot M3: the AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -966,6 +970,7 @@ impl CampaignState {
             naval: crate::naval::NavalState::default(),
             difficulty: crate::difficulty::Difficulty::Normal,
             encounters: crate::encounter::EncounterState::default(),
+            captures: crate::capture::CaptureState::default(),
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
             last_battle_outcome: None,
