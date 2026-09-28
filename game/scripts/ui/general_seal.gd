@@ -171,11 +171,11 @@ func _fit_plate() -> void:
 		custom_minimum_size.y = needed
 
 
-## TW2-T2 : « +20 % » (part des hommes manquants regagnée en fin de saison), « 0 % » si bloquée.
+## TW2-T2 : « +20 % » (part des hommes manquants regagnée en fin de saison), « 0 % » en terre ennemie.
+## Le taux reste affiché quand rien ne revient (effectifs au complet, bataille) : grisé.
 static func replenishment_text(replenishment: Dictionary) -> String:
-	if str(replenishment.get("blocked", "")) != "":
-		return "0 %"
-	return "+%d %%" % int(replenishment.get("percent", 0))
+	var percent := int(replenishment.get("percent", 0))
+	return "+%d %%" % percent if percent > 0 else "0 %"
 
 
 static func replenishment_color(replenishment: Dictionary) -> Color:
