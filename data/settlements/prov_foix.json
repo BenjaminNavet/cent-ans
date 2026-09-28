@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_foix",
+    "province": "prov_foix",
+    "kind": "city",
+    "name": {
+      "display": "Foix",
+      "local": "Foish",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.6052,
+      42.9656
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château comtal de Foix, tenu par Gaston II de Foix-Béarn en fief du roi de France.",
+    "sources": [
+      "Comté de Foix"
+    ]
+  },
+  {
+    "id": "set_pamiers",
+    "province": "prov_foix",
+    "kind": "town",
+    "name": {
+      "display": "Pamiers",
+      "local": "Pàmias",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.6108,
+      43.1172
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville épiscopale sur l'Ariège, partagée entre l'évêque et le comte de Foix.",
+    "sources": [
+      "Pamiers"
+    ]
+  },
+  {
+    "id": "set_tarascon_sur_ariege",
+    "province": "prov_foix",
+    "kind": "castle",
+    "name": {
+      "display": "Tarascon-sur-Ariège",
+      "local": "Tarascon",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.6072,
+      42.8461
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Verrou méridional de la vallée de l'Ariège vers l'Andorre et les hautes vallées pyrénéennes.",
+    "sources": [
+      "Tarascon-sur-Ariège"
+    ]
+  }
+]

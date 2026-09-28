@@ -14,7 +14,7 @@
     {
       "id": "france",
       "label": "France, Bourgogne et Pays-Bas",
-      "factions": ["fac_france", "fac_burgundy", "fac_brittany", "fac_flanders", "fac_brabant", "fac_hainaut", "fac_guelders", "fac_savoy", "fac_papacy", "fac_rebels"],
+      "factions": ["fac_france", "fac_burgundy", "fac_brittany", "fac_flanders", "fac_brabant", "fac_hainaut", "fac_guelders", "fac_savoy", "fac_papacy", "fac_rebels", "fac_albret", "fac_alencon", "fac_armagnac", "fac_blois", "fac_bourbon", "fac_foix_bearn", "fac_penthievre"],
       "prompt": "French and Burgundian court fashion: fitted cotehardie, hood (chaperon) with long liripipe, fur-lined mantle, rich wool and silk in muted earth tones"
     },
     {

@@ -1,0 +1,56 @@
+{
+  "id": "tit_albret",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie d'Albret",
+    "local": "Lebret",
+    "local_language": "gascon"
+  },
+  "heraldry": {
+    "blazon": "De gueules à deux léopards d'or, armés et lampassés d'azur, l'un sur l'autre.",
+    "description": "Armes de la maison d'Albret ; blasonnement incertain pour 1337, reconstitué d'après les sceaux ultérieurs.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true
+  },
+  "de_jure_liege": "tit_guyenne",
+  "de_jure_provinces": [
+    "prov_albret"
+  ],
+  "holder_1337": {
+    "faction": "fac_albret",
+    "uncertain": true,
+    "sources": [
+      "Maison d'Albret",
+      "Bernard Ezi II d'Albret"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_albret_hold",
+      "title": "Garder Albret",
+      "description": "Le sire d'Albret doit conserver sa seigneurie.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_albret"
+      }
+    },
+    {
+      "id": "obj_albret_expand",
+      "title": "Étendre en Gascogne",
+      "description": "Élargir l'influence albretaise sur l'Agenais voisin.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_albret",
+          "prov_agenais"
+        ]
+      }
+    }
+  ],
+  "description": "Seigneurie gasconne, rang réduit à comté par convention de schéma (rang réel : simple seigneurie). Sénéchaussée héréditaire de Gascogne pour le duc d'Aquitaine (le roi d'Angleterre).",
+  "sources": [
+    "Maison d'Albret",
+    "Nérac"
+  ]
+}

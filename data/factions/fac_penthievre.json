@@ -1,0 +1,60 @@
+{
+  "id": "fac_penthievre",
+  "name": {
+    "display": "Comté de Penthièvre",
+    "local": "Pennteur",
+    "local_language": "breton"
+  },
+  "short_name": "Penthièvre",
+  "adjective": "penthiévrin",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_jeanne_de_penthievre",
+  "capital": "prov_penthievre",
+  "capital_city": "Lamballe",
+  "religion": "rel_catholic",
+  "culture": "cul_breton",
+  "succession_law": "cognatic_primogeniture",
+  "suzerain": "fac_brittany",
+  "primary_title": "tit_penthievre",
+  "heraldry": {
+    "blazon": "D'hermine, au lambel de gueules.",
+    "description": "Hermine de Bretagne brisée d'un lambel de gueules, marque de la branche cadette de Penthièvre.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true
+  },
+  "titles": [
+    "Comtesse de Penthièvre",
+    "Vicomtesse de Limoges"
+  ],
+  "treasury": 3800,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_brittany",
+      "status": "vassal",
+      "note": "Jeanne est la nièce du duc Jean III et son héritière présomptive contestée."
+    },
+    {
+      "faction": "fac_blois",
+      "status": "marriage_tie",
+      "note": "Épouse Charles de Blois, fils du comte de Blois, le 4 juin 1337."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 55,
+    "trade": 40,
+    "piety": 60
+  },
+  "description": "Jeanne de Penthièvre, comtesse suo jure depuis 1331, épouse Charles de Blois le 4 juin 1337 : leur union prépare la guerre de Succession de Bretagne (1341-1364) contre Jean de Montfort.",
+  "sources": [
+    "Jeanne de Penthièvre",
+    "Comté de Penthièvre"
+  ]
+}

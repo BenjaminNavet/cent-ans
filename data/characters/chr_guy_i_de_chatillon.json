@@ -1,0 +1,56 @@
+{
+  "id": "chr_guy_i_de_chatillon",
+  "name": {
+    "display": "Guy Ier de Châtillon",
+    "local": "Guy Ier de Chastillon",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Châtillon",
+  "faction": "fac_blois",
+  "role": "ruler",
+  "birth": {
+    "value": "1289",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1342-01"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Blois",
+      "from": {
+        "value": "1307"
+      }
+    },
+    {
+      "title": "Comte de Dunois"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_marguerite_de_valois"
+    ],
+    "children": [
+      "chr_charles_de_blois"
+    ]
+  },
+  "starting_location": "prov_blois",
+  "status": "at_court",
+  "description": "Comte de Blois depuis 1307, il marie en juin 1337 son fils [[cdx_charles_de_blois|Charles]] à Jeanne de Penthièvre, héritière présomptive contestée du duché de Bretagne.",
+  "sources": [
+    "Guy Ier de Châtillon",
+    "Comté de Blois"
+  ]
+}

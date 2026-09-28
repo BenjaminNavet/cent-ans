@@ -92,6 +92,11 @@ pub struct FeudalTitle {
     pub holder_1337: TitleHolder,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub objectives: Vec<TitleObjective>,
+    /// Succession law of this title when its holder's line dies out (lot
+    /// F3, spec § 4.5); absent: the holding faction's law. Lets a duchy and
+    /// a county of the same house go to different heirs (Burgundy 1361).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub succession_law: Option<crate::SuccessionLaw>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

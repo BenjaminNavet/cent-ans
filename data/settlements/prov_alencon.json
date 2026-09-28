@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_alencon",
+    "province": "prov_alencon",
+    "kind": "city",
+    "name": {
+      "display": "Alençon",
+      "local": "Alençon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.0925,
+      48.4319
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du comté d'Alençon et du Perche, tenu par Charles II d'Alençon, frère du roi.",
+    "sources": [
+      "Alençon",
+      "Comté d'Alençon"
+    ]
+  },
+  {
+    "id": "set_belleme",
+    "province": "prov_alencon",
+    "kind": "castle",
+    "name": {
+      "display": "Bellême",
+      "local": "Bellême",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.5667,
+      48.3667
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château du Perche, réuni au comté d'Alençon par Charles II en 1291.",
+    "sources": [
+      "Bellême"
+    ]
+  },
+  {
+    "id": "set_sees",
+    "province": "prov_alencon",
+    "kind": "town",
+    "name": {
+      "display": "Sées",
+      "local": "Sées",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.1719,
+      48.6058
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Cité épiscopale et son chapitre cathédral, dans la mouvance du comté d'Alençon.",
+    "sources": [
+      "Sées"
+    ]
+  }
+]

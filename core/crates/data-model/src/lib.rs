@@ -83,7 +83,10 @@ pub use entities::faction::{
     AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
     ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
-pub use entities::feudal_rules::{FeudalRules, LoyaltyWeights};
+pub use entities::feudal_rules::{
+    ArbitrationRules, ArbitrationWeights, EscalationRules, FeudalRules, LoyaltyWeights,
+    ProtectionScore,
+};
 pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
 };

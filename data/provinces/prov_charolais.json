@@ -1,0 +1,89 @@
+{
+  "id": "prov_charolais",
+  "name": {
+    "display": "Charolais",
+    "local": "Charolais",
+    "local_language": "ancien français"
+  },
+  "region": "france_est",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Arroux"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Charolles",
+      "local": "Charolles",
+      "local_language": "ancien français"
+    },
+    "lat": 46.4333,
+    "lon": 4.2733
+  },
+  "geo": {
+    "capital_lonlat": [
+      4.2733,
+      46.4333
+    ],
+    "seed_lonlat": [
+      4.25,
+      46.42
+    ],
+    "voronoi_weight": 0.45
+  },
+  "owner": "fac_burgundy",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 66000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1700,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 650,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Comté acquis par les ducs de Bourgogne en 1237, tenu en propre par la maison ducale."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1300,
+  "description": "Comté de Charolais, tenu directement par les ducs de Bourgogne depuis 1237, distinct du duché proprement dit.",
+  "sources": [
+    "Comté de Charolais",
+    "Eudes IV de Bourgogne"
+  ]
+}

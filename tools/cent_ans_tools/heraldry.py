@@ -699,6 +699,8 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
         _draw_quarterly(image, blazon)
     elif blazon.has("hermine"):
         _draw_ermine(draw, TINCTURES["sable"])
+        if blazon.has("lambel"):
+            _draw_label(draw, blazon.tincture_after("lambel") or TINCTURES["gueules"])
     elif blazon.has("seme"):
         _draw_semé(draw, charge)
         if blazon.has("lambel"):
