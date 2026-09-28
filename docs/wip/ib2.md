@@ -81,7 +81,20 @@ Branche `feat/ib2-migrate` depuis `main` (05e711e1). Spec `docs/superpowers/spec
   `TooltipView.blocks_for`).
 - 28/09 : lots 3 (menus, carte, ui/ restant, bataille+naval+codex+audio) faits : ~131 occurrences
   migrées vers `RichTooltip.attach_plain` + `data/ui/tooltips.json` bloc `plain` (une centaine de
-  clés). `LITERAL_EXCEPTIONS` vide. Tests verts : pytest, `ib_plain_test.gd` (11 vérifications),
-  `ib_layout_test.gd` (253), `ib_chain_test.gd`, `smoke.gd` (voir rapport final pour le dernier
-  passage). Reste à l'orchestrateur : fusionner `main`, jugement joueur sur quelques bulles
-  `plain` représentatives (le titre/corps est un découpage manuel, pas un texte validé par relecture).
+  clés). `LITERAL_EXCEPTIONS` vide. Tests verts (passage complet avant la fusion de `main`) :
+  pytest (7), `ib_plain_test.gd` (11 vérifications), `ib_layout_test.gd` (253), `ib_chain_test.gd`,
+  `smoke.gd`, `hud_components_test.gd`, `p2c_ui_test.gd`.
+- 28/09 : `main` fusionné dans `feat/ib2-migrate` (639b7e49, FE6 dont). Sans conflit ; 4 nouveaux
+  `tooltip_text` littéraux arrivés avec FE (`feudal_section.gd`, `feudal_controller.gd`,
+  `diplomacy_panel.gd`, `province_panel.gd`) migrés à leur tour (mêmes clés génériques
+  réutilisées : `close_escape`…). Dylib rafraîchie depuis `game/bin` de `main` (FE a ajouté du
+  Rust : `campaign_sim_feudal.rs`, `feudal/view.rs`). `python3 -c json.load` sur `tooltips.json` OK,
+  grep `tooltip_text` : plus aucun littéral hors le commentaire de `rich_tooltip.gd`, pytest 7/7 vert.
+  **Point ouvert pour l'orchestrateur** : impossible de relancer les tests Godot après la fusion
+  dans cette session — machine très chargée (charge ≈ 50-59, mémoire quasi pleine, ~15-30 sessions
+  en parallèle), chaque `godot --headless` (seul ou en batterie séquentielle) tué par OOM (code
+  137) sur 6 tentatives successives sur plusieurs minutes, y compris pour `ib_plain_test.gd` seul.
+  Aucun changement de code depuis le dernier passage vert hormis les 4 migrations ci-dessus (motif
+  strictement identique aux >100 déjà vérifiées) et la dylib. À relancer par l'orchestrateur dès
+  que la charge de la machine le permet : `smoke.gd`, `ib_plain_test.gd`, `ib_layout_test.gd`,
+  `ib_chain_test.gd`, `po_ui_test.gd`, `p2c_ui_test.gd`, `hud_components_test.gd`.
