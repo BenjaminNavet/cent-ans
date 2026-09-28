@@ -45,7 +45,9 @@ def _gd_table_keys(name: str) -> set[str]:
 def test_every_linked_rule_key_has_a_text(table: str, block: str) -> None:
     """IB4: each effect, stat and gauge label emitted as an ib:rule: link has a bubble text."""
     entries = _load("ui/tooltips.json")[block]
-    missing = sorted(key for key in _gd_table_keys(table) if not entries.get(key, {}).get("body"))
+    missing = sorted(
+        key for key in _gd_table_keys(table) if not entries.get(key, {}).get("body")
+    )
     assert not missing, f"{block} without text in tooltips.json: {missing}"
 
 
