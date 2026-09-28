@@ -432,6 +432,18 @@
    "relief_max_m": 832.0,
    "sea_share": 0.0
   },
+  "prov_connacht": {
+   "file": "prov_connacht.bin",
+   "lon": -8.9414,
+   "lat": 53.2879,
+   "ref_m": 17.0,
+   "terrain": "heath",
+   "coastal": true,
+   "coast_bearing_deg": 236.4,
+   "skyline_max_deg": 0.86,
+   "relief_max_m": 132.0,
+   "sea_share": 0.123
+  },
   "prov_cordoba": {
    "file": "prov_cordoba.bin",
    "lon": -4.2723,
@@ -491,6 +503,18 @@
    "skyline_max_deg": 1.53,
    "relief_max_m": 367.0,
    "sea_share": 0.1
+  },
+  "prov_desmond": {
+   "file": "prov_desmond.bin",
+   "lon": -9.6117,
+   "lat": 51.885,
+   "ref_m": 53.5,
+   "terrain": "mountains",
+   "coastal": true,
+   "coast_bearing_deg": 245.2,
+   "skyline_max_deg": 3.68,
+   "relief_max_m": 933.0,
+   "sea_share": 0.022
   },
   "prov_devon": {
    "file": "prov_devon.bin",
@@ -828,6 +852,18 @@
    "relief_max_m": 202.0,
    "sea_share": 0.0
   },
+  "prov_isles": {
+   "file": "prov_isles.bin",
+   "lon": -5.9347,
+   "lat": 56.5006,
+   "ref_m": 209.6,
+   "terrain": "heath",
+   "coastal": true,
+   "coast_bearing_deg": 23.3,
+   "skyline_max_deg": 2.04,
+   "relief_max_m": 941.0,
+   "sea_share": 0.126
+  },
   "prov_jutland": {
    "file": "prov_jutland.bin",
    "lon": 9.8167,
@@ -852,6 +888,18 @@
    "relief_max_m": 194.0,
    "sea_share": 0.24
   },
+  "prov_kildare": {
+   "file": "prov_kildare.bin",
+   "lon": -6.9498,
+   "lat": 53.1281,
+   "ref_m": 79.8,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.16,
+   "relief_max_m": 294.0,
+   "sea_share": 0.0
+  },
   "prov_lancashire": {
    "file": "prov_lancashire.bin",
    "lon": -2.8786,
@@ -864,6 +912,18 @@
    "relief_max_m": 81.0,
    "sea_share": 0.125
   },
+  "prov_lancaster": {
+   "file": "prov_lancaster.bin",
+   "lon": -2.812,
+   "lat": 53.9537,
+   "ref_m": 7.2,
+   "terrain": "hills",
+   "coastal": true,
+   "coast_bearing_deg": 305.2,
+   "skyline_max_deg": 2.44,
+   "relief_max_m": 642.0,
+   "sea_share": 0.156
+  },
   "prov_lazio": {
    "file": "prov_lazio.bin",
    "lon": 12.1944,
@@ -875,6 +935,18 @@
    "skyline_max_deg": 1.24,
    "relief_max_m": 440.0,
    "sea_share": 0.222
+  },
+  "prov_leinster": {
+   "file": "prov_leinster.bin",
+   "lon": -6.2862,
+   "lat": 52.6299,
+   "ref_m": 34.7,
+   "terrain": "hills",
+   "coastal": true,
+   "coast_bearing_deg": 108.6,
+   "skyline_max_deg": 1.7,
+   "relief_max_m": 458.0,
+   "sea_share": 0.254
   },
   "prov_leon": {
    "file": "prov_leon.bin",
@@ -1031,6 +1103,30 @@
    "skyline_max_deg": 2.38,
    "relief_max_m": 575.0,
    "sea_share": 0.178
+  },
+  "prov_man": {
+   "file": "prov_man.bin",
+   "lon": -4.5815,
+   "lat": 54.2468,
+   "ref_m": 277.6,
+   "terrain": "heath",
+   "coastal": true,
+   "coast_bearing_deg": 316.3,
+   "skyline_max_deg": 1.26,
+   "relief_max_m": 674.0,
+   "sea_share": 0.319
+  },
+  "prov_meath": {
+   "file": "prov_meath.bin",
+   "lon": -6.8476,
+   "lat": 53.6262,
+   "ref_m": 77.6,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.5,
+   "relief_max_m": 198.0,
+   "sea_share": 0.0
   },
   "prov_meissen": {
    "file": "prov_meissen.bin",
@@ -1234,6 +1330,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": -0.0,
    "relief_max_m": 154.0,
+   "sea_share": 0.0
+  },
+  "prov_ormond": {
+   "file": "prov_ormond.bin",
+   "lon": -8.0949,
+   "lat": 52.8669,
+   "ref_m": 96.2,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 2.0,
+   "relief_max_m": 545.0,
    "sea_share": 0.0
   },
   "prov_oxford": {
@@ -1500,6 +1608,18 @@
    "relief_max_m": 791.0,
    "sea_share": 0.0
   },
+  "prov_thomond": {
+   "file": "prov_thomond.bin",
+   "lon": -9.1184,
+   "lat": 53.0863,
+   "ref_m": 358.5,
+   "terrain": "hills",
+   "coastal": true,
+   "coast_bearing_deg": 357.7,
+   "skyline_max_deg": 0.08,
+   "relief_max_m": 427.0,
+   "sea_share": 0.205
+  },
   "prov_tirol": {
    "file": "prov_tirol.bin",
    "lon": 11.2429,
@@ -1558,6 +1678,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": 1.76,
    "relief_max_m": 676.0,
+   "sea_share": 0.0
+  },
+  "prov_tyrone": {
+   "file": "prov_tyrone.bin",
+   "lon": -6.8159,
+   "lat": 54.5265,
+   "ref_m": 85.2,
+   "terrain": "heath",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.14,
+   "relief_max_m": 371.0,
    "sea_share": 0.0
   },
   "prov_ulster": {

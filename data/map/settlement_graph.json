@@ -534,13 +534,6 @@
   },
   {
    "from": "set_aberdeen",
-   "to": "set_downpatrick",
-   "cost": 291.39,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_aberdeen",
    "to": "set_dumfries",
    "cost": 350.68,
    "road": false,
@@ -2192,37 +2185,37 @@
    "sea": false
   },
   {
-   "from": "set_armagh",
-   "to": "set_carrickfergus",
-   "cost": 68.08,
+   "from": "set_arklow",
+   "to": "set_ferns",
+   "cost": 29.83,
    "road": false,
    "sea": false
   },
   {
-   "from": "set_armagh",
-   "to": "set_coleraine",
-   "cost": 87.58,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_armagh",
-   "to": "set_downpatrick",
-   "cost": 60.57,
+   "from": "set_arklow",
+   "to": "set_st_mullins",
+   "cost": 43.02,
    "road": false,
    "sea": false
   },
   {
    "from": "set_armagh",
    "to": "set_dundalk",
-   "cost": 42.2,
+   "cost": 45.14,
    "road": false,
    "sea": false
   },
   {
    "from": "set_armagh",
-   "to": "set_sligo",
-   "cost": 118.12,
+   "to": "set_dungannon",
+   "cost": 15.61,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_armagh",
+   "to": "set_tullaghoge",
+   "cost": 25.14,
    "road": false,
    "sea": false
   },
@@ -2315,6 +2308,27 @@
    "to": "set_zutphen",
    "cost": 13.43,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_aros",
+   "to": "set_dunyvaig",
+   "cost": 85.97,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aros",
+   "to": "set_finlaggan",
+   "cost": 70.25,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aros",
+   "to": "set_inverness",
+   "cost": 246.44,
+   "road": false,
    "sea": false
   },
   {
@@ -3156,13 +3170,6 @@
    "cost": 9.85,
    "road": true,
    "sea": false
-  },
-  {
-   "from": "set_ayr",
-   "to": "set_carrickfergus",
-   "cost": 211.94,
-   "road": false,
-   "sea": true
   },
   {
    "from": "set_ayr",
@@ -4139,13 +4146,6 @@
   },
   {
    "from": "set_beaumaris",
-   "to": "set_chester",
-   "cost": 80.24,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_beaumaris",
    "to": "set_conwy",
    "cost": 35.23,
    "road": false,
@@ -4303,6 +4303,48 @@
    "to": "set_rouen",
    "cost": 35.68,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beeston",
+   "to": "set_chester",
+   "cost": 32.33,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beeston",
+   "to": "set_dolgellau",
+   "cost": 181.63,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beeston",
+   "to": "set_maxstoke",
+   "cost": 153.13,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beeston",
+   "to": "set_nantwich",
+   "cost": 24.25,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beeston",
+   "to": "set_pontefract",
+   "cost": 168.27,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beeston",
+   "to": "set_wigan",
+   "cost": 40.44,
+   "road": true,
    "sea": false
   },
   {
@@ -6105,6 +6147,34 @@
    "sea": false
   },
   {
+   "from": "set_bunratty",
+   "to": "set_clonroad",
+   "cost": 19.27,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bunratty",
+   "to": "set_ennis",
+   "cost": 19.97,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bunratty",
+   "to": "set_nenagh",
+   "cost": 44.68,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bunratty",
+   "to": "set_shanid",
+   "cost": 46.19,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_burgdorf",
    "to": "set_interlaken",
    "cost": 94.35,
@@ -6772,7 +6842,7 @@
   {
    "from": "set_carlisle",
    "to": "set_furness",
-   "cost": 131.28,
+   "cost": 80.13,
    "road": false,
    "sea": false
   },
@@ -6883,10 +6953,31 @@
   },
   {
    "from": "set_carrickfergus",
-   "to": "set_dunnottar",
-   "cost": 252.54,
+   "to": "set_dundalk",
+   "cost": 44.46,
    "road": true,
    "sea": false
+  },
+  {
+   "from": "set_carrickfergus",
+   "to": "set_dungannon",
+   "cost": 66.45,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_carrickfergus",
+   "to": "set_dunyvaig",
+   "cost": 207.05,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_carrickfergus",
+   "to": "set_inverness",
+   "cost": 424.12,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_carrickfergus",
@@ -6967,6 +7058,20 @@
   },
   {
    "from": "set_cashel",
+   "to": "set_holycross",
+   "cost": 14.61,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cashel",
+   "to": "set_kilkenny",
+   "cost": 52.62,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cashel",
    "to": "set_kilmallock",
    "cost": 48.11,
    "road": false,
@@ -6975,7 +7080,7 @@
   {
    "from": "set_cashel",
    "to": "set_limerick",
-   "cost": 52.18,
+   "cost": 43.6,
    "road": false,
    "sea": false
   },
@@ -7081,6 +7186,20 @@
    "from": "set_castle_acre",
    "to": "set_wymondham",
    "cost": 64.77,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_castletown",
+   "to": "set_douglas",
+   "cost": 14.38,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_castletown",
+   "to": "set_peel",
+   "cost": 15.19,
    "road": false,
    "sea": false
   },
@@ -7947,22 +8066,29 @@
   },
   {
    "from": "set_chester",
+   "to": "set_conwy",
+   "cost": 63.06,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chester",
+   "to": "set_doncaster",
+   "cost": 92.24,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chester",
    "to": "set_liverpool",
-   "cost": 50.21,
+   "cost": 72.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_chester",
-   "to": "set_tamworth",
-   "cost": 152.5,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_chester",
-   "to": "set_wigan",
-   "cost": 86.3,
+   "to": "set_nantwich",
+   "cost": 56.58,
    "road": false,
    "sea": false
   },
@@ -8445,36 +8571,29 @@
   {
    "from": "set_clitheroe",
    "to": "set_fountains",
-   "cost": 89.31,
+   "cost": 59.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clitheroe",
    "to": "set_lancastre",
-   "cost": 66.22,
+   "cost": 33.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_clitheroe",
    "to": "set_preston",
-   "cost": 24.4,
+   "cost": 12.2,
    "road": true,
    "sea": false
   },
   {
    "from": "set_clitheroe",
    "to": "set_whalley",
-   "cost": 5.25,
+   "cost": 2.63,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_clonmel",
-   "to": "set_kilkenny",
-   "cost": 45.11,
-   "road": false,
    "sea": false
   },
   {
@@ -8495,6 +8614,20 @@
    "from": "set_clonmel",
    "to": "set_youghal",
    "cost": 46.08,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_clonroad",
+   "to": "set_dundalk",
+   "cost": 214.13,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_clonroad",
+   "to": "set_ennis",
+   "cost": 0.71,
    "road": false,
    "sea": false
   },
@@ -8563,8 +8696,8 @@
   },
   {
    "from": "set_coleraine",
-   "to": "set_inverness",
-   "cost": 454.01,
+   "to": "set_dundalk",
+   "cost": 127.76,
    "road": false,
    "sea": false
   },
@@ -8572,6 +8705,13 @@
    "from": "set_coleraine",
    "to": "set_sligo",
    "cost": 151.42,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_coleraine",
+   "to": "set_tullaghoge",
+   "cost": 59.92,
    "road": false,
    "sea": false
   },
@@ -8877,13 +9017,6 @@
    "sea": false
   },
   {
-   "from": "set_conwy",
-   "to": "set_liverpool",
-   "cost": 157.43,
-   "road": false,
-   "sea": true
-  },
-  {
    "from": "set_copenhagen",
    "to": "set_koge",
    "cost": 34.02,
@@ -9032,22 +9165,36 @@
   },
   {
    "from": "set_cork",
-   "to": "set_kilmallock",
-   "cost": 56.8,
+   "to": "set_holycross",
+   "cost": 143.62,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cork",
    "to": "set_kinsale",
-   "cost": 20.2,
+   "cost": 41.48,
    "road": false,
    "sea": false
   },
   {
    "from": "set_cork",
+   "to": "set_shanid",
+   "cost": 172.0,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cork",
+   "to": "set_sligo",
+   "cost": 363.49,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_cork",
    "to": "set_youghal",
-   "cost": 20.57,
+   "cost": 35.31,
    "road": true,
    "sea": false
   },
@@ -10445,6 +10592,20 @@
    "sea": false
   },
   {
+   "from": "set_douglas",
+   "to": "set_peel",
+   "cost": 14.49,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_douglas",
+   "to": "set_wigtown",
+   "cost": 180.04,
+   "road": false,
+   "sea": true
+  },
+  {
    "from": "set_doullens",
    "to": "set_peronne",
    "cost": 49.21,
@@ -10522,13 +10683,6 @@
    "sea": false
   },
   {
-   "from": "set_drogheda",
-   "to": "set_trim",
-   "cost": 34.47,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_druyes",
    "to": "set_nogent_sur_seine",
    "cost": 100.99,
@@ -10545,22 +10699,22 @@
   {
    "from": "set_dublin",
    "to": "set_kildare",
-   "cost": 48.19,
+   "cost": 43.78,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dublin",
    "to": "set_kilkenny",
-   "cost": 102.04,
+   "cost": 92.31,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dublin",
-   "to": "set_trim",
-   "cost": 42.01,
-   "road": false,
+   "to": "set_mellifont",
+   "cost": 22.75,
+   "road": true,
    "sea": false
   },
   {
@@ -10691,8 +10845,8 @@
   },
   {
    "from": "set_dundalk",
-   "to": "set_galway",
-   "cost": 175.55,
+   "to": "set_gowran",
+   "cost": 152.9,
    "road": false,
    "sea": false
   },
@@ -10700,6 +10854,13 @@
    "from": "set_dundalk",
    "to": "set_mellifont",
    "cost": 29.5,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dundalk",
+   "to": "set_navan",
+   "cost": 42.79,
    "road": false,
    "sea": false
   },
@@ -10753,11 +10914,32 @@
    "sea": false
   },
   {
+   "from": "set_dungannon",
+   "to": "set_tullaghoge",
+   "cost": 11.38,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_dunnottar",
    "to": "set_glasgow",
    "cost": 131.56,
    "road": true,
    "sea": false
+  },
+  {
+   "from": "set_dunyvaig",
+   "to": "set_finlaggan",
+   "cost": 18.24,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dunyvaig",
+   "to": "set_irvine",
+   "cost": 191.66,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_durango",
@@ -11134,6 +11316,20 @@
    "from": "set_enna",
    "to": "set_siracusa",
    "cost": 104.74,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ennis",
+   "to": "set_galway",
+   "cost": 49.81,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ennis",
+   "to": "set_sligo",
+   "cost": 162.0,
    "road": false,
    "sea": false
   },
@@ -11625,6 +11821,13 @@
    "to": "set_vicenza",
    "cost": 22.28,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_ferns",
+   "to": "set_st_mullins",
+   "cost": 20.86,
+   "road": false,
    "sea": false
   },
   {
@@ -12386,36 +12589,36 @@
   {
    "from": "set_furness",
    "to": "set_kirkham",
-   "cost": 89.2,
+   "cost": 44.65,
    "road": false,
    "sea": false
   },
   {
    "from": "set_furness",
    "to": "set_lancastre",
-   "cost": 56.58,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_furness",
-   "to": "set_ormskirk",
-   "cost": 131.72,
+   "cost": 18.76,
    "road": false,
    "sea": false
   },
   {
    "from": "set_galway",
-   "to": "set_limerick",
-   "cost": 87.35,
+   "to": "set_nenagh",
+   "cost": 74.86,
    "road": false,
    "sea": false
   },
   {
    "from": "set_galway",
-   "to": "set_sligo",
-   "cost": 97.17,
+   "to": "set_rathcroghan",
+   "cost": 75.29,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_galway",
+   "to": "set_roscommon",
+   "cost": 34.76,
+   "road": true,
    "sea": false
   },
   {
@@ -12948,6 +13151,34 @@
    "to": "set_rocamadour",
    "cost": 9.3,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gowran",
+   "to": "set_holycross",
+   "cost": 30.36,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gowran",
+   "to": "set_kilkenny",
+   "cost": 18.65,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gowran",
+   "to": "set_nenagh",
+   "cost": 48.93,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gowran",
+   "to": "set_roscommon",
+   "cost": 105.87,
+   "road": false,
    "sea": false
   },
   {
@@ -13667,7 +13898,7 @@
   {
    "from": "set_hexham",
    "to": "set_lancastre",
-   "cost": 169.06,
+   "cost": 112.71,
    "road": false,
    "sea": false
   },
@@ -13745,6 +13976,13 @@
    "from": "set_hohenzollern",
    "to": "set_weingarten",
    "cost": 76.28,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_holycross",
+   "to": "set_nenagh",
+   "cost": 32.6,
    "road": false,
    "sea": false
   },
@@ -14393,6 +14631,20 @@
    "sea": false
   },
   {
+   "from": "set_kells",
+   "to": "set_navan",
+   "cost": 15.16,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kells",
+   "to": "set_trim",
+   "cost": 20.08,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_kenilworth",
    "to": "set_maxstoke",
    "cost": 13.37,
@@ -14464,36 +14716,50 @@
   },
   {
    "from": "set_kildare",
-   "to": "set_kilkenny",
-   "cost": 60.83,
+   "to": "set_kildare_town",
+   "cost": 5.95,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kildare",
-   "to": "set_trim",
-   "cost": 45.01,
+   "to": "set_kilkenny",
+   "cost": 55.94,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kildare",
+   "to": "set_mellifont",
+   "cost": 65.13,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kildare_town",
+   "to": "set_maynooth",
+   "cost": 5.84,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kildare_town",
+   "to": "set_naas",
+   "cost": 6.94,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kilkenny",
-   "to": "set_trim",
-   "cost": 105.28,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kilmallock",
-   "to": "set_kinsale",
-   "cost": 76.1,
+   "to": "set_st_mullins",
+   "cost": 30.66,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kilmallock",
    "to": "set_limerick",
-   "cost": 14.7,
+   "cost": 9.35,
    "road": true,
    "sea": false
   },
@@ -14527,15 +14793,8 @@
   },
   {
    "from": "set_kinsale",
-   "to": "set_limerick",
-   "cost": 105.43,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kinsale",
-   "to": "set_youghal",
-   "cost": 52.34,
+   "to": "set_shanid",
+   "cost": 201.51,
    "road": false,
    "sea": false
   },
@@ -14570,21 +14829,28 @@
   {
    "from": "set_kirkham",
    "to": "set_lancastre",
-   "cost": 59.48,
+   "cost": 29.74,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kirkham",
+   "to": "set_liverpool",
+   "cost": 17.97,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kirkham",
    "to": "set_ormskirk",
-   "cost": 47.75,
+   "cost": 17.35,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kirkham",
    "to": "set_preston",
-   "cost": 10.08,
+   "cost": 5.04,
    "road": true,
    "sea": false
   },
@@ -15074,14 +15340,14 @@
   {
    "from": "set_lancastre",
    "to": "set_preston",
-   "cost": 32.14,
+   "cost": 16.07,
    "road": true,
    "sea": false
   },
   {
    "from": "set_lancastre",
    "to": "set_richmond",
-   "cost": 119.89,
+   "cost": 79.93,
    "road": false,
    "sea": false
   },
@@ -15751,6 +16017,13 @@
    "sea": false
   },
   {
+   "from": "set_limerick",
+   "to": "set_shanid",
+   "cost": 68.28,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_limoges",
    "to": "set_rochechouart",
    "cost": 16.96,
@@ -15864,22 +16137,15 @@
   },
   {
    "from": "set_liverpool",
-   "to": "set_nuneaton",
-   "cost": 106.64,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_liverpool",
    "to": "set_ormskirk",
-   "cost": 38.6,
+   "cost": 2.88,
    "road": false,
    "sea": false
   },
   {
    "from": "set_liverpool",
    "to": "set_wigan",
-   "cost": 56.61,
+   "cost": 18.19,
    "road": false,
    "sea": false
   },
@@ -16773,10 +17039,10 @@
    "sea": false
   },
   {
-   "from": "set_maxstoke",
-   "to": "set_wigan",
-   "cost": 103.54,
-   "road": true,
+   "from": "set_maynooth",
+   "to": "set_naas",
+   "cost": 2.88,
+   "road": false,
    "sea": false
   },
   {
@@ -16886,8 +17152,8 @@
   },
   {
    "from": "set_mellifont",
-   "to": "set_trim",
-   "cost": 29.58,
+   "to": "set_navan",
+   "cost": 17.07,
    "road": false,
    "sea": false
   },
@@ -17907,11 +18173,53 @@
    "sea": false
   },
   {
+   "from": "set_nantwich",
+   "to": "set_ormskirk",
+   "cost": 99.64,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nantwich",
+   "to": "set_tamworth",
+   "cost": 110.61,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nantwich",
+   "to": "set_wakefield",
+   "cost": 145.49,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_naples",
    "to": "set_trapani",
    "cost": 448.2,
    "road": false,
    "sea": true
+  },
+  {
+   "from": "set_navan",
+   "to": "set_trim",
+   "cost": 13.07,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nenagh",
+   "to": "set_shanid",
+   "cost": 113.09,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nenagh",
+   "to": "set_sligo",
+   "cost": 157.35,
+   "road": false,
+   "sea": false
   },
   {
    "from": "set_nerac",
@@ -18553,14 +18861,14 @@
   {
    "from": "set_ormskirk",
    "to": "set_preston",
-   "cost": 48.61,
+   "cost": 17.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ormskirk",
    "to": "set_wigan",
-   "cost": 34.15,
+   "cost": 15.49,
    "road": false,
    "sea": false
   },
@@ -19505,14 +19813,14 @@
   {
    "from": "set_preston",
    "to": "set_whalley",
-   "cost": 21.52,
+   "cost": 10.76,
    "road": true,
    "sea": false
   },
   {
    "from": "set_preston",
    "to": "set_wigan",
-   "cost": 24.98,
+   "cost": 9.59,
    "road": true,
    "sea": false
   },
@@ -19583,6 +19891,20 @@
    "from": "set_rambures",
    "to": "set_saint_valery_sur_somme",
    "cost": 17.03,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_rathcroghan",
+   "to": "set_roscommon",
+   "cost": 15.41,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_rathcroghan",
+   "to": "set_sligo",
+   "cost": 56.67,
    "road": false,
    "sea": false
   },
@@ -20707,6 +21029,13 @@
    "sea": false
   },
   {
+   "from": "set_st_mullins",
+   "to": "set_waterford",
+   "cost": 46.42,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_stams",
    "to": "set_sterzing",
    "cost": 113.17,
@@ -21199,7 +21528,7 @@
   {
    "from": "set_wakefield",
    "to": "set_whalley",
-   "cost": 92.78,
+   "cost": 61.85,
    "road": false,
    "sea": false
   },
@@ -21227,7 +21556,7 @@
   {
    "from": "set_whalley",
    "to": "set_wigan",
-   "cost": 68.99,
+   "cost": 28.89,
    "road": false,
    "sea": false
   },
