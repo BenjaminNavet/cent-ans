@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "materials.schema.json",
+  "title": "Matières générées tuilables (GA)",
+  "description": "Prompts et paramètres des matières générées par IA (`tools/cent_ans_tools/material_gen.py`) : image source `size`², tuile finale `tile_size`², puis cartes dérivées (hauteur, normale OpenGL, rugosité).",
+  "type": "object",
+  "required": ["model", "size", "tile_size", "materials"],
+  "additionalProperties": false,
+  "properties": {
+    "model": {"type": "string", "minLength": 1},
+    "size": {"type": "integer", "minimum": 256},
+    "tile_size": {"type": "integer", "minimum": 64},
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "prompt"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "prompt": {"type": "string", "minLength": 20},
+          "blend_width": {"type": "integer", "minimum": 1},
+          "height_strength": {"type": "number", "exclusiveMinimum": 0},
+          "roughness_bias": {"type": "number", "minimum": -1, "maximum": 1}
+        }
+      }
+    }
+  }
+}
