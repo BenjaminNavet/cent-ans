@@ -134,6 +134,14 @@ static func icon_bbcode(id: String, size: int = 18, category: String = "") -> St
 ## Dernière infobulle construite (épinglage par `CodexBubbles`, touche T) et son BBCode.
 static var last_panel: WeakRef = null
 static var last_bbcode: String = ""
+## IB1 : spec de la dernière infobulle en sections (`TooltipView.build`), {} après `make_panel`.
+static var last_spec: Dictionary = {}
+
+## IB1 (ADR 0109) : préfixe des clés d'infobulle en sections portées par `tooltip_text`
+## (« ib:<kind>:<id> », puis le BBCode de repli sur les lignes suivantes) ; le `live` de la clé
+## est rangé en métadonnée `LIVE_META` du contrôle.
+const KEY_PREFIX := "ib:"
+const LIVE_META := &"ib_live"
 
 
 ## Style parchemin commun aux infobulles et aux bulles du Codex.
@@ -145,6 +153,8 @@ static func panel_style() -> StyleBox:
 ## Le texte passe par `CodexText.format` (liens `[[…]]` et alias du Codex rubriqués). B1 : pied
 ## « T : maintenir ouverte » (la touche T verrouille l'infobulle en bulle du Codex).
 static func make_panel(bbcode: String) -> Control:
+	bbcode = fallback_of(bbcode)
+	last_spec = {}
 	var panel := PanelContainer.new()
 	if ResourceLoader.exists(THEME_PATH):
 		panel.theme = load(THEME_PATH)
@@ -182,6 +192,84 @@ static func footer_text(has_entry: bool) -> String:
 	return "T : maintenir ouverte" + (" · puis clic : lire la fiche" if has_entry else "")
 
 
+## IB1 : texte de `tooltip_text` d'une infobulle en sections — clé « ib:<kind>:<id> » sur la
+## première ligne, BBCode de repli ensuite (lu par `make_panel` et par les tests de contenu).
+static func tooltip_key(kind: String, id: String, fallback_bbcode: String) -> String:
+	return "%s%s:%s\n%s" % [KEY_PREFIX, kind, id, fallback_bbcode]
+
+
+## Clé « ib:<kind>:<id> » en tête de `text`, "" s'il n'en porte pas.
+static func key_of(text: String) -> String:
+	return text.get_slice("\n", 0) if text.begins_with(KEY_PREFIX) else ""
+
+
+## `text` sans sa clé « ib: » éventuelle (le BBCode de repli).
+static func fallback_of(text: String) -> String:
+	if not text.begins_with(KEY_PREFIX):
+		return text
+	var cut := text.find("\n")
+	return text.substr(cut + 1) if cut >= 0 else ""
+
+
+## IB1 : pose l'infobulle en sections de `kind`/`id` sur `control` (clé + repli dans
+## `tooltip_text`, `live` en métadonnée) ; `_make_custom_tooltip` la reconstruit par `panel_for`.
+static func set_tooltip(control: Control, kind: String, id: String, live: Dictionary = {}) -> void:
+	control.set_meta(LIVE_META, live)
+	control.tooltip_text = tooltip_key(kind, id, to_bbcode(spec_for(KEY_PREFIX + kind + ":" + id, live)))
+
+
+## IB1 : contrôle d'infobulle pour `_make_custom_tooltip(for_text)` de `owner` : rendu en
+## sections (`TooltipView`, version courte) si le texte porte une clé « ib: », sinon `make_panel`.
+static func panel_for(for_text: String, owner: Object = null) -> Control:
+	var key := key_of(for_text)
+	if key == "":
+		return make_panel(for_text)
+	var live: Dictionary = {}
+	if owner != null and owner.has_meta(LIVE_META):
+		live = owner.get_meta(LIVE_META)
+	var spec := spec_for(key, live)
+	if spec.is_empty():
+		return make_panel(for_text)
+	return TooltipView.build(spec, false)
+
+
+## IB1 : spec d'infobulle (§ 2.1 de la spec IB) de la clé « ib:<kind>:<id> » ; {} si le type
+## n'est pas (encore) décrit en sections. `live` : mêmes dictionnaires que les fonctions BBCode.
+static func spec_for(key: String, live: Dictionary = {}) -> Dictionary:
+	var parts := key.split(":", true, 2)
+	if parts.size() < 3 or parts[0] + ":" != KEY_PREFIX:
+		return {}
+	var id: String = parts[2]
+	match parts[1]:
+		"unit":
+			return unit_spec(id, live)
+		"building":
+			return building_spec(id, live)
+		"technology":
+			var node := live.duplicate() if not live.is_empty() else technology_node(id)
+			node["id"] = id
+			return technology_spec(node)
+	return {}
+
+
+## Entrée de type `get_tech_tree` tirée de la seule définition (`data/technologies`), sans état
+## ni coût effectif : bulles ouvertes depuis un lien, hors arbre des techniques.
+static func technology_node(id: String) -> Dictionary:
+	var definition := GameCatalog.technology(id)
+	if definition.is_empty():
+		return {}
+	var node := definition.duplicate(true)
+	node["id"] = id
+	node["name"] = GameCatalog.display_name(id)
+	var year: Variant = definition.get("historical_year", null)
+	if year is Dictionary:
+		node["historical_year"] = int(str(year.get("value", "0")))
+		node["historical_uncertain"] = bool(year.get("uncertain", false))
+		node["historical_note"] = str(year.get("note", ""))
+	node["effective_cost"] = int(definition.get("cost", 0))
+	return node
+
+
 ## Fiche du Codex liée au titre gras (`[b][url=cdx:…]`, première ligne) d'une infobulle, vide sinon.
 static func title_entry(bbcode: String) -> String:
 	var first_line := bbcode.get_slice("\n", 0)
@@ -216,9 +304,9 @@ static func thousands(value: int) -> String:
 	return Money.digits(value)
 
 
-static func _title(id: String, name: String, subtitle: String = "", category: String = "") -> String:
+static func _title(id: String, name: String, subtitle: String = "", category: String = "", entity_id: String = "") -> String:
 	var icon := icon_bbcode(id, 28, category)
-	name = entity_name(id, name)
+	name = entity_name(entity_id if entity_id != "" else id, name)
 	var head := "%s [b]%s[/b]" % [icon, name] if icon != "" else "[b]%s[/b]" % name
 	if subtitle != "":
 		head += "  [color=%s][i]%s[/i][/color]" % [MUTED, subtitle]
@@ -232,10 +320,23 @@ static func _number(value: float) -> String:
 ## « Santé +5 % (paysans) » : effet de `data/` (`effect`) ou de la simulation (`kind`).
 static func effect_text(effect: Dictionary) -> String:
 	var kind: String = str(effect.get("kind", effect.get("effect", "")))
-	var label: String = str(EFFECT_LABELS.get(kind, kind.replace("_", " ")))
+	return "%s %s%s" % [effect_label(kind), effect_value(effect), effect_qualifiers(effect)]
+
+
+static func effect_label(kind: String) -> String:
+	return str(EFFECT_LABELS.get(kind, kind.replace("_", " ")))
+
+
+## « +5 % », « −3 » : valeur signée d'un effet.
+static func effect_value(effect: Dictionary) -> String:
 	var value := float(effect.get("value", 0))
 	var suffix := " %" if str(effect.get("mode", "add")) == "percent" else ""
-	var text := "%s %s%s%s" % [label, "+" if value >= 0 else "", _number(value), suffix]
+	return "%s%s%s" % ["+" if value >= 0 else "", _number(value), suffix]
+
+
+## « (paysans) », « (cavalerie) » : portée d'un effet, "" sinon.
+static func effect_qualifiers(effect: Dictionary) -> String:
+	var text := ""
 	var qualifiers := PackedStringArray()
 	var category: String = str(effect.get("unit_category", ""))
 	if category != "":
@@ -246,6 +347,138 @@ static func effect_text(effect: Dictionary) -> String:
 	if not qualifiers.is_empty():
 		text += " (%s)" % ", ".join(qualifiers)
 	return text
+
+
+# --- Specs en sections (IB1, ADR 0109) -----------------------------------------------------
+# Spec : `id`, `kind`, `headline_kind` (variante de `headline` du style), `title`, `subtitle`,
+# `icon`, `icon_category`, `headline` [{key, icon, label, value}], `stats` [{key, label, value}],
+# `effects` [{key, text, sign, before, after}] (`sign` : 1 favorable, -1 défavorable, 0 neutre),
+# `traits` {strengths, weaknesses, abilities}, `requires` [{text, met}] (`met` : true, false ou
+# null si l'état est inconnu), `warnings`, `flavour`, `footer` {cost, upkeep, time}, `detail`.
+# Textes en BBCode (icônes, liens du Codex). `before`/`after` : fournis par le core dans
+# `live["before_after"]` ({clé d'effet: [avant, après]}) — rien n'est calculé ici.
+
+
+static func _spec(kind: String, id: String, title: String, subtitle: String, icon_category: String) -> Dictionary:
+	return {
+		"id": id, "kind": kind, "headline_kind": kind, "title": title, "subtitle": subtitle,
+		"icon": id, "icon_category": icon_category, "headline": [], "stats": [], "effects": [],
+		"traits": {"strengths": [], "weaknesses": [], "abilities": []}, "requires": [],
+		"warnings": [], "flavour": "", "footer": {}, "detail": [],
+	}
+
+
+## Chiffres vedettes : ceux de `candidates` que `headline[variant]` du style retient, dans l'ordre.
+static func _headline(variant: String, candidates: Dictionary) -> Array:
+	var picked: Array = []
+	for key in (TooltipView.style().get("headline", {}) as Dictionary).get(variant, []):
+		if candidates.has(key):
+			var item: Dictionary = (candidates[key] as Dictionary).duplicate()
+			item["key"] = str(key)
+			picked.append(item)
+	return picked
+
+
+## Ligne d'effet de spec (un effet par ligne) ; sens favorable selon `lower_is_better` du style.
+static func effect_item(effect: Dictionary, live: Dictionary = {}) -> Dictionary:
+	var kind: String = str(effect.get("kind", effect.get("effect", "")))
+	var value := float(effect.get("value", 0))
+	var sign := 0 if is_zero_approx(value) else (1 if value > 0 else -1)
+	if kind in (TooltipView.style().get("lower_is_better", []) as Array):
+		sign = -sign
+	var item := {"key": kind, "text": effect_text(effect), "label": effect_label(kind), "value": effect_value(effect) + effect_qualifiers(effect), "sign": sign}
+	var pair: Variant = (live.get("before_after", {}) as Dictionary).get(kind, null)
+	if pair is Array and (pair as Array).size() == 2:
+		item["before"] = pair[0]
+		item["after"] = pair[1]
+	return item
+
+
+## Texte d'une ligne d'effet : « Moral 60 → 65 (+5) » si avant/après connus, sinon « Moral +5 ».
+static func effect_line(item: Dictionary) -> String:
+	if item.has("before") and item.has("after") and item.has("label"):
+		return "%s %s → %s (%s)" % [item["label"], _number(float(item["before"])), _number(float(item["after"])), item.get("value", "")]
+	return str(item.get("text", ""))
+
+
+## Prérequis remplis : vrai si `live` dit l'action disponible, inconnu (null) sinon.
+static func _met(live: Dictionary) -> Variant:
+	return true if bool(live.get("available", false)) else null
+
+
+static func _icon_text(id: String, name: String) -> String:
+	var icon := icon_bbcode(id, 14)
+	return "%s %s" % [icon, name] if icon != "" else name
+
+
+## Avertissements communs : importation de matériaux, indisponibilité, `live["warnings"]`.
+static func _live_warnings(live: Dictionary) -> Array:
+	var warnings: Array = []
+	if int(live.get("import_cost", 0)) > 0:
+		warnings.append("Dont importation : %s %s (%s manquant)" % [thousands(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
+	if not live.is_empty() and not bool(live.get("available", true)):
+		warnings.append("Indisponible : %s" % str(live.get("reason", "conditions non remplies")))
+	for warning in live.get("warnings", []):
+		warnings.append(str(warning))
+	return warnings
+
+
+## Lignes d'effets passées par `live["effects"]` ([{text, sign}], ex. état en bataille).
+static func _live_effects(live: Dictionary) -> Array:
+	var effects: Array = []
+	for effect in live.get("effects", []):
+		if effect is Dictionary and effect.has("text"):
+			effects.append({"key": str(effect.get("key", "")), "text": str(effect["text"]), "sign": int(effect.get("sign", 0))})
+	return effects
+
+
+## BBCode d'une spec (repli, tests, Codex) : toutes les sections, version complète.
+static func to_bbcode(spec: Dictionary) -> String:
+	if spec.is_empty():
+		return ""
+	var lines: Array = [_title(str(spec.get("icon", "")), str(spec.get("title", "")), str(spec.get("subtitle", "")), str(spec.get("icon_category", "")), str(spec.get("id", "")))]
+	var parts := PackedStringArray()
+	for item in spec.get("headline", []):
+		parts.append("%s : %s" % [item.get("label", ""), item.get("value", "")])
+	lines.append(" · ".join(parts))
+	var footer: Dictionary = spec.get("footer", {})
+	parts = PackedStringArray()
+	for key in ["cost", "upkeep", "time"]:
+		if str(footer.get(key, "")) != "":
+			parts.append("%s : %s" % [FOOTER_LABELS[key], footer[key]])
+	lines.append(" · ".join(parts))
+	for effect in spec.get("effects", []):
+		var text := effect_line(effect)
+		var sign := int(effect.get("sign", 0))
+		lines.append("[color=%s]%s[/color]" % [GREEN if sign > 0 else RED, text] if sign != 0 else text)
+	parts = PackedStringArray()
+	for stat in spec.get("stats", []):
+		parts.append("%s %s" % [stat.get("label", ""), stat.get("value", "")])
+	lines.append(" · ".join(parts))
+	var traits: Dictionary = spec.get("traits", {})
+	if not (traits.get("strengths", []) as Array).is_empty():
+		lines.append("[color=%s]Forces : %s[/color]" % [GREEN, ", ".join(PackedStringArray(traits["strengths"]))])
+	if not (traits.get("weaknesses", []) as Array).is_empty():
+		lines.append("[color=%s]Faiblesses : %s[/color]" % [RED, ", ".join(PackedStringArray(traits["weaknesses"]))])
+	if not (traits.get("abilities", []) as Array).is_empty():
+		lines.append("Capacités : " + ", ".join(PackedStringArray(traits["abilities"])))
+	parts = PackedStringArray()
+	for requirement in spec.get("requires", []):
+		parts.append(str(requirement.get("text", "")))
+	if not parts.is_empty():
+		lines.append("%s : %s" % [str(spec.get("requires_label", "Requiert")), ", ".join(parts)])
+	lines.append_array(spec.get("detail", []))
+	lines.append(_flavour_bbcode(str(spec.get("flavour", ""))))
+	for warning in spec.get("warnings", []):
+		lines.append("[color=%s]%s[/color]" % [RED, warning])
+	return _join(lines)
+
+
+const FOOTER_LABELS := {"cost": "Coût", "upkeep": "Entretien", "time": "Durée"}
+
+
+static func _flavour_bbcode(text: String) -> String:
+	return "[color=%s][i]%s[/i][/color]" % [MUTED, text] if text != "" else ""
 
 
 static func _effects_block(effects: Array, title: String = "Effets") -> String:
@@ -333,6 +566,12 @@ static func strengths_weaknesses(definition: Dictionary) -> Array:
 ## `import_cost`, `imported`) ou unité
 ## d'armée (`strength`, `max_strength`, `morale`) ; vide pour la seule définition.
 static func unit(unit_type: String, live: Dictionary = {}) -> String:
+	return to_bbcode(unit_spec(unit_type, live))
+
+
+## IB1 : spec en sections d'un type d'unité (même `live` que `unit`, plus `effects` [{text,
+## sign}] et `warnings` pour l'état en bataille de `UnitCard`).
+static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	var definition := GameCatalog.unit_type(unit_type)
 	var name: String = str(live.get("name", ""))
 	if name == "":
@@ -341,67 +580,69 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 	var subtitle := str(UNIT_CATEGORY_LABELS.get(category, category))
 	if definition.has("soldiers"):
 		subtitle += ", %d hommes" % int(definition["soldiers"])
-	var lines: Array = [_title(unit_type, name, subtitle, "unit")]
-	if live.has("strength"):
-		lines.append("Effectif : %d / %d · moral %d" % [int(live.get("strength", 0)), int(live.get("max_strength", 0)), int(live.get("morale", 0))])
-	var cost_line := PackedStringArray()
+	var spec := _spec("unit", unit_type, name, subtitle, "unit")
+	var stats: Dictionary = definition.get("stats", {})
+	var candidates := {}
+	var in_army := live.has("strength")
+	if in_army:
+		candidates["strength"] = {"icon": "gauge_strength", "label": "Effectif", "value": "%d / %d" % [int(live.get("strength", 0)), int(live.get("max_strength", 0))]}
+		candidates["morale"] = {"icon": "gauge_morale", "label": "Moral", "value": str(int(live.get("morale", 0)))}
+	var cost := ""
 	if live.has("cost"):
-		cost_line.append("Coût : %s %s" % [thousands(int(live["cost"])), POUND])
+		cost = "%s %s" % [thousands(int(live["cost"])), POUND]
 	elif definition.has("cost"):
-		cost_line.append("Coût : " + cost_text(definition["cost"]))
+		cost = cost_text(definition["cost"])
+	if cost != "":
+		candidates["cost"] = {"icon": "hud_treasury", "label": "Coût", "value": cost}
+	var main_stat := "ranged" if float(stats.get("ranged", 0)) > float(stats.get("melee", 0)) else "melee"
+	if stats.has(main_stat):
+		candidates["melee_or_ranged"] = {"icon": "stat_" + main_stat, "label": STAT_LABELS[main_stat], "value": _number(float(stats[main_stat])), "stat": main_stat}
+	spec["headline_kind"] = "unit" if in_army else "unit_recruit"
+	spec["headline"] = _headline(spec["headline_kind"], candidates)
+	# Unité déjà levée : son prix de recrutement n'a plus d'intérêt au survol.
+	var footer := {} if in_army else {"cost": cost}
 	var upkeep := int(live.get("upkeep", definition.get("upkeep", -1)))
 	if upkeep >= 0:
-		cost_line.append("Entretien : %s %s / saison" % [thousands(upkeep), POUND])
+		footer["upkeep"] = "%s %s / saison" % [thousands(upkeep), POUND]
 	if definition.has("recruit_time_turns"):
-		cost_line.append("Levée : %s" % FrText.count(int(definition["recruit_time_turns"]), "tour"))
-	lines.append(" · ".join(cost_line))
+		footer["time"] = FrText.count(int(definition["recruit_time_turns"]), "tour")
+	spec["footer"] = footer
+	spec["effects"] = _live_effects(live)
+	for stat in ["melee", "ranged", "range", "armor", "morale", "speed", "charge", "siege_attack", "ammo"]:
+		if stats.has(stat) and (float(stats[stat]) > 0.0 or stat in ["melee", "armor", "morale"]):
+			spec["stats"].append({"key": stat, "label": STAT_LABELS[stat], "value": _number(float(stats[stat]))})
+	if not definition.is_empty():
+		var sw := strengths_weaknesses(definition)
+		spec["traits"]["strengths"] = Array(sw[0])
+		spec["traits"]["weaknesses"] = Array(sw[1])
+	for ability in definition.get("abilities", []):
+		if str(ability) != "rain_penalty":
+			spec["traits"]["abilities"].append(str(ABILITY_LABELS.get(ability, ability)))
+	var met: Variant = _met(live)
+	if str(definition.get("required_technology", "")) != "":
+		var tech := str(definition["required_technology"])
+		spec["requires"].append({"text": _icon_text(tech, GameCatalog.display_name(tech)), "met": met})
+	# B7c : le bâtiment requis se lit dans `enables_units` des bâtiments (seule source, lue par le core).
+	var enablers := PackedStringArray()
+	for building_id in enabling_buildings(str(definition.get("id", ""))):
+		enablers.append(_icon_text(building_id, GameCatalog.display_name(building_id)))
+	if not enablers.is_empty():
+		spec["requires"].append({"text": " ou ".join(enablers) + " (ou supérieur)", "met": met})
 	# SV2 : matériaux des engins, tirés des provinces productrices à la commande ; le manque est
 	# importé et compté dans le coût (même règle que les chantiers, ADR 0053).
 	var materials: Dictionary = live.get("resources", (definition.get("cost", {}) as Dictionary).get("resources", {}))
 	if live.has("cost") and not materials.is_empty():
-		lines.append("Matériaux : " + cost_text({"resources": materials}))
-	if int(live.get("import_cost", 0)) > 0:
-		lines.append("[color=%s]Dont importation : %s %s (%s manquant)[/color]" % [RED, thousands(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
-	elif not materials.is_empty():
-		lines.append("Matériaux tirés de vos provinces productrices, sinon importés et payés.")
-	var stats: Dictionary = definition.get("stats", {})
-	var stat_parts := PackedStringArray()
-	for stat in ["melee", "ranged", "range", "armor", "morale", "speed", "charge", "siege_attack", "ammo"]:
-		if stats.has(stat) and (float(stats[stat]) > 0.0 or stat in ["melee", "armor", "morale"]):
-			stat_parts.append("%s %s" % [STAT_LABELS[stat], _number(float(stats[stat]))])
-	if not stat_parts.is_empty():
-		lines.append(" · ".join(stat_parts))
-	if not definition.is_empty():
-		var sw := strengths_weaknesses(definition)
-		if not (sw[0] as PackedStringArray).is_empty():
-			lines.append("[color=%s]Forces : %s[/color]" % [GREEN, ", ".join(sw[0])])
-		if not (sw[1] as PackedStringArray).is_empty():
-			lines.append("[color=%s]Faiblesses : %s[/color]" % [RED, ", ".join(sw[1])])
-	var abilities := PackedStringArray()
-	for ability in definition.get("abilities", []):
-		if str(ability) != "rain_penalty":
-			abilities.append(str(ABILITY_LABELS.get(ability, ability)))
-	if not abilities.is_empty():
-		lines.append("Capacités : " + ", ".join(abilities))
-	var requires := PackedStringArray()
-	if str(definition.get("required_technology", "")) != "":
-		requires.append("%s %s" % [icon_bbcode(str(definition["required_technology"]), 14), GameCatalog.display_name(str(definition["required_technology"]))])
-	# B7c : le bâtiment requis se lit dans `enables_units` des bâtiments (seule source, lue par le core).
-	var enablers := PackedStringArray()
-	for building_id in enabling_buildings(str(definition.get("id", ""))):
-		enablers.append("%s %s" % [icon_bbcode(building_id, 14), GameCatalog.display_name(building_id)])
-	if not enablers.is_empty():
-		requires.append(" ou ".join(enablers) + " (ou supérieur)")
-	if not requires.is_empty():
-		lines.append("Requiert : " + ", ".join(requires))
+		spec["detail"].append("Matériaux : " + cost_text({"resources": materials}))
+	if int(live.get("import_cost", 0)) <= 0 and not materials.is_empty():
+		spec["detail"].append("Matériaux tirés de vos provinces productrices, sinon importés et payés.")
 	var period := unit_period(definition)
 	if period != "":
-		lines.append("Époque : " + period)
+		spec["detail"].append("Époque : " + period)
 	if str(definition.get("source_class", "")) != "":
-		lines.append("Recrutés parmi : %s" % str(CLASS_LABELS.get(definition["source_class"], definition["source_class"])).to_lower())
-	lines.append(_description(definition))
-	lines.append(_unavailable(live))
-	return _join(lines)
+		spec["detail"].append("Recrutés parmi : %s" % str(CLASS_LABELS.get(definition["source_class"], definition["source_class"])).to_lower())
+	spec["flavour"] = str(definition.get("description", ""))
+	spec["warnings"] = _live_warnings(live)
+	return spec
 
 
 # --- Bâtiments ----------------------------------------------------------------------------
@@ -431,6 +672,11 @@ static func has_upgrade(building_id: String) -> bool:
 ## `live` : ligne de `buildable` (`cost`, `turns`, `available`, `reason`) ou bâtiment
 ## construit (`upkeep`).
 static func building(building_id: String, live: Dictionary = {}) -> String:
+	return to_bbcode(building_spec(building_id, live))
+
+
+## IB1 : spec en sections d'un bâtiment (même `live` que `building`).
+static func building_spec(building_id: String, live: Dictionary = {}) -> Dictionary:
 	var definition := GameCatalog.building(building_id)
 	var name: String = str(live.get("name", ""))
 	if name == "":
@@ -439,32 +685,36 @@ static func building(building_id: String, live: Dictionary = {}) -> String:
 	var subtitle := str(BUILDING_CATEGORY_LABELS.get(category, category))
 	if definition.has("tier"):
 		subtitle += ", rang %d" % int(definition["tier"])
-	var lines: Array = [_title(building_id, name, subtitle, "building")]
-	var cost_line := PackedStringArray()
+	var spec := _spec("building", building_id, name, subtitle, "building")
+	spec["requires_label"] = "Prérequis"
+	var effects: Array = []
+	for effect in definition.get("effects", []):
+		if effect is Dictionary:
+			effects.append(effect_item(effect, live))
+	var candidates := {}
+	if not effects.is_empty():
+		var main: Dictionary = effects[0]
+		candidates["main_effect"] = {"icon": "", "label": main.get("label", ""), "value": main.get("value", ""), "sign": main.get("sign", 0)}
+	spec["headline"] = _headline("building", candidates)
+	if not (spec["headline"] as Array).is_empty() and str(spec["headline"][0].get("key", "")) == "main_effect":
+		effects.remove_at(0)
+	var footer := {}
 	if live.has("cost"):
-		cost_line.append("Coût : %s %s" % [thousands(int(live["cost"])), POUND])
+		footer["cost"] = "%s %s" % [thousands(int(live["cost"])), POUND]
 	elif definition.has("cost"):
-		cost_line.append("Coût : " + cost_text(definition["cost"]))
+		footer["cost"] = cost_text(definition["cost"])
 	var turns := int(live.get("turns", definition.get("build_time_turns", 0)))
 	if turns > 0:
-		cost_line.append("Durée : %s" % FrText.count(turns, "tour"))
-	var upkeep := int(live.get("upkeep", definition.get("upkeep", 0)))
-	cost_line.append("Entretien : %s %s / saison" % [thousands(upkeep), POUND])
-	lines.append(" · ".join(cost_line))
-	if live.has("cost") and definition.has("cost") and (definition["cost"] as Dictionary).has("resources"):
-		lines.append("Matériaux : " + cost_text({"resources": definition["cost"]["resources"]}))
-	# B7c : matériaux tirés des provinces productrices ; le manque est importé et compté dans le coût.
-	if int(live.get("import_cost", 0)) > 0:
-		lines.append("[color=%s]Dont importation : %s %s (%s manquant)[/color]" % [RED, thousands(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
-	elif definition.has("cost") and (definition["cost"] as Dictionary).has("resources"):
-		lines.append(RuleValues.format("Matériaux tirés de vos provinces productrices, sinon importés (prix de base × {rule.resource_import_multiplier})."))
-	lines.append(_effects_block(definition.get("effects", [])))
+		footer["time"] = FrText.count(turns, "tour")
+	footer["upkeep"] = "%s %s / saison" % [thousands(int(live.get("upkeep", definition.get("upkeep", 0)))), POUND]
+	spec["footer"] = footer
 	var units := PackedStringArray()
 	for unit_id in definition.get("enables_units", []):
-		units.append("%s %s" % [icon_bbcode(str(unit_id), 14), GameCatalog.display_name(str(unit_id))])
+		units.append(_icon_text(str(unit_id), GameCatalog.display_name(str(unit_id))))
 	if not units.is_empty():
-		lines.append("Permet de lever : " + ", ".join(units))
-	var requires := PackedStringArray()
+		effects.append({"key": "enables_units", "text": "Permet de lever : " + ", ".join(units), "sign": 0})
+	spec["effects"] = effects + _live_effects(live)
+	var met: Variant = _met(live)
 	for key in ["upgrades_from", "required_building", "required_technology", "required_resource"]:
 		var value: String = str(definition.get(key, ""))
 		if value != "":
@@ -473,16 +723,20 @@ static func building(building_id: String, live: Dictionary = {}) -> String:
 				note = " (amélioration : le remplace et garde ses effets)"
 			elif key == "required_building" and has_upgrade(value):
 				note = " ou supérieur"
-			requires.append("%s %s%s" % [icon_bbcode(value, 14), GameCatalog.display_name(value), note])
+			spec["requires"].append({"text": _icon_text(value, GameCatalog.display_name(value)) + note, "met": met})
 	if bool(definition.get("requires_coastal", false)):
-		requires.append("province côtière")
+		spec["requires"].append({"text": "province côtière", "met": met})
 	if bool(definition.get("requires_river", false)):
-		requires.append("rivière")
-	if not requires.is_empty():
-		lines.append("Prérequis : " + ", ".join(requires))
-	lines.append(_description(definition))
-	lines.append(_unavailable(live))
-	return _join(lines)
+		spec["requires"].append({"text": "rivière", "met": met})
+	var has_materials := definition.has("cost") and (definition["cost"] as Dictionary).has("resources")
+	if live.has("cost") and has_materials:
+		spec["detail"].append("Matériaux : " + cost_text({"resources": definition["cost"]["resources"]}))
+	# B7c : matériaux tirés des provinces productrices ; le manque est importé et compté dans le coût.
+	if int(live.get("import_cost", 0)) <= 0 and has_materials:
+		spec["detail"].append(RuleValues.format("Matériaux tirés de vos provinces productrices, sinon importés (prix de base × {rule.resource_import_multiplier})."))
+	spec["flavour"] = str(definition.get("description", ""))
+	spec["warnings"] = _live_warnings(live)
+	return spec
 
 
 # --- Technologies -------------------------------------------------------------------------
@@ -493,42 +747,54 @@ const TECH_STATE_LABELS := {"known": "Acquise", "researching": "En cours", "avai
 
 ## `node` : entrée de `get_tech_tree` (effets, coûts effectif et de base, prérequis, date).
 static func technology(node: Dictionary) -> String:
+	return to_bbcode(technology_spec(node))
+
+
+## IB1 : spec en sections d'une technologie (`node` : entrée de `get_tech_tree`).
+static func technology_spec(node: Dictionary) -> Dictionary:
 	var id: String = str(node.get("id", ""))
 	var state: String = str(node.get("state", ""))
 	var branch: String = str(node.get("branch", ""))
-	var subtitle := "%s, rang %d — %s" % [TECH_BRANCH_LABELS.get(branch, branch), int(node.get("tier", 1)), TECH_STATE_LABELS.get(state, state)]
-	var lines: Array = [_title(id, str(node.get("name", id)), subtitle, "technology")]
+	var subtitle := "%s, rang %d" % [TECH_BRANCH_LABELS.get(branch, branch), int(node.get("tier", 1))]
+	if state != "":
+		subtitle += " — " + str(TECH_STATE_LABELS.get(state, state))
+	var spec := _spec("technology", id, str(node.get("name", GameCatalog.display_name(id))), subtitle, "technology")
+	spec["requires_label"] = "Prérequis"
 	var cost := int(node.get("cost", 0))
 	var effective := int(node.get("effective_cost", cost))
-	var cost_line := "Coût : %d points" % effective
-	if effective > cost:
-		cost_line += " [color=%s](%d + %s %% : en avance sur son temps)[/color]" % [RED, cost, RuleValues.text("anachronism_surcharge_percent")]
+	var value := "%d" % effective
 	if int(node.get("progress", 0)) > 0 and state != "known":
-		cost_line += " · %d / %d" % [int(node.get("progress", 0)), effective]
-	lines.append(cost_line)
-	var year := int(node.get("historical_year", 0))
-	if year > 0:
-		lines.append("Date historique : %s%d" % ["vers " if bool(node.get("historical_uncertain", false)) else "", year])
-	lines.append(_effects_block(node.get("effects", [])))
+		value = "%d / %d" % [int(node.get("progress", 0)), effective]
+	spec["headline"] = _headline("technology", {"research_cost": {"icon": "hud_research", "label": "Recherche", "value": value}})
+	if (spec["headline"] as Array).is_empty():
+		spec["footer"] = {"cost": "%d points" % effective}
+	if effective > cost:
+		spec["warnings"].append("En avance sur son temps : %d + %s %% de points" % [cost, RuleValues.text("anachronism_surcharge_percent")])
+	for effect in node.get("effects", []):
+		if effect is Dictionary:
+			spec["effects"].append(effect_item(effect, node))
 	var unlocks: Dictionary = node.get("unlocks", {})
 	var unlocked := PackedStringArray()
 	for unit_id in unlocks.get("units", []):
-		unlocked.append("%s %s" % [icon_bbcode(str(unit_id), 14), GameCatalog.display_name(str(unit_id))])
+		unlocked.append(_icon_text(str(unit_id), GameCatalog.display_name(str(unit_id))))
 	for building_id in unlocks.get("buildings", []):
-		unlocked.append("%s %s" % [icon_bbcode(str(building_id), 14), GameCatalog.display_name(str(building_id))])
+		unlocked.append(_icon_text(str(building_id), GameCatalog.display_name(str(building_id))))
 	if not unlocked.is_empty():
-		lines.append("Débloque : " + ", ".join(unlocked))
-	var prerequisites := PackedStringArray()
+		spec["effects"].append({"key": "unlocks", "text": "Débloque : " + ", ".join(unlocked), "sign": 0})
+	var met: Variant = null if state == "locked" or state == "" else true
 	for prereq in node.get("prerequisites", []):
-		prerequisites.append("%s %s" % [icon_bbcode(str(prereq), 14), GameCatalog.display_name(str(prereq))])
-	if not prerequisites.is_empty():
-		lines.append("Prérequis : " + ", ".join(prerequisites))
-	lines.append(herbs_line(node.get("herbs", [])))
-	lines.append(_description(node))
+		spec["requires"].append({"text": _icon_text(str(prereq), GameCatalog.display_name(str(prereq))), "met": met})
+	var year := int(node.get("historical_year", 0))
+	if year > 0:
+		spec["detail"].append("Date historique : %s%d" % ["vers " if bool(node.get("historical_uncertain", false)) else "", year])
+	var herbs := herbs_line(node.get("herbs", []))
+	if herbs != "":
+		spec["detail"].append(herbs)
 	var note: String = str(node.get("historical_note", ""))
 	if note != "":
-		lines.append("[color=%s][i]%s[/i][/color]" % [MUTED, note])
-	return _join(lines)
+		spec["detail"].append(_flavour_bbcode(note))
+	spec["flavour"] = str(node.get("description", ""))
+	return spec
 
 
 ## H9 : « Plantes : sauge, rue… » en liens du Codex (nom tiré de l'id si la fiche manque).

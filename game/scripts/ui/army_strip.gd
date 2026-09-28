@@ -459,10 +459,13 @@ class RegimentCard:
 
 	## B1 : infobulle riche (parchemin, auto-liens, T : bulle du Codex) ; le nom mène à la
 	## fiche du Codex du type d'unité s'il y en a une.
-	func _make_custom_tooltip(for_text: String) -> Object:
-		var lines := for_text.split("\n")
-		lines[0] = "[b]%s[/b]" % RichTooltip.entity_name(str(unit.get("unit_type", "")), lines[0])
-		return RichTooltip.make_panel("\n".join(lines))
+	## IB1 : infobulle en sections du type d'unité avec l'état du régiment (effectif, moral,
+	## entretien) ; `tooltip_text` garde le texte brut de `tooltip_for` (repli, tests).
+	func _make_custom_tooltip(_for_text: String) -> Object:
+		var live := unit.duplicate()
+		live["name"] = strip.unit_name(unit)
+		live["upkeep"] = strip.unit_upkeep(unit)
+		return TooltipView.build(RichTooltip.unit_spec(str(unit.get("unit_type", "")), live), false)
 
 	func _draw() -> void:
 		var rect := Rect2(Vector2.ZERO, size)

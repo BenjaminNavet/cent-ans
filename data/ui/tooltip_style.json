@@ -35,5 +35,6 @@
     "class": ["population"],
     "rule": [],
     "plain": []
-  }
+  },
+  "lower_is_better": ["unrest", "recruit_cost", "army_upkeep", "devastation"]
 }
