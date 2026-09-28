@@ -1,15 +1,15 @@
 {
   "albedo_size": 2048,
-  "normal_size": 2048,
+  "normal_size": 1024,
   "tile_screen_px": 96.0,
   "layers": [
-    {"id": "grass", "poly_haven_id": "aerial_grass_rock", "mean_linear": [0.0, 0.0, 0.0]},
-    {"id": "farmland", "poly_haven_id": "aerial_mud_1", "mean_linear": [0.0, 0.0, 0.0]},
-    {"id": "forest", "poly_haven_id": "forrest_ground_01", "mean_linear": [0.0, 0.0, 0.0]},
-    {"id": "rock", "poly_haven_id": "aerial_rocks_01", "mean_linear": [0.0, 0.0, 0.0]},
-    {"id": "heath", "poly_haven_id": "sparse_grass", "mean_linear": [0.0, 0.0, 0.0]},
-    {"id": "snow", "poly_haven_id": "snow_field_aerial", "mean_linear": [0.0, 0.0, 0.0]},
-    {"id": "sand", "poly_haven_id": "aerial_beach_01", "mean_linear": [0.0, 0.0, 0.0]}
+    {"id": "grass", "poly_haven_id": "aerial_grass_rock", "mean_linear": [0.1676, 0.1201, 0.0181]},
+    {"id": "farmland", "poly_haven_id": "aerial_mud_1", "mean_linear": [0.0482, 0.0391, 0.0349]},
+    {"id": "forest", "poly_haven_id": "forrest_ground_01", "mean_linear": [0.2822, 0.2423, 0.11]},
+    {"id": "rock", "poly_haven_id": "aerial_rocks_01", "mean_linear": [0.2095, 0.1855, 0.1013]},
+    {"id": "heath", "poly_haven_id": "sparse_grass", "mean_linear": [0.079, 0.0473, 0.0076]},
+    {"id": "snow", "poly_haven_id": "snow_field_aerial", "mean_linear": [0.2415, 0.2399, 0.2943]},
+    {"id": "sand", "poly_haven_id": "aerial_beach_01", "mean_linear": [0.2824, 0.2368, 0.1955]}
   ],
   "macro": {
     "periods_px": [9.0, 24.0, 60.0, 150.0],

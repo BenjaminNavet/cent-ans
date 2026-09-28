@@ -124,8 +124,8 @@ var _border_texture: ImageTexture
 var _coast_texture: ImageTexture
 var _river_bed_texture: ImageTexture
 var _landuse_texture: ImageTexture
-var _albedo_array: Texture2DArray
-var _normal_array: Texture2DArray
+var _albedo_array: TextureLayered  # GA4 : CompressedTexture2DArray importé ou Texture2DArray (1k)
+var _normal_array: TextureLayered
 var _layer_means: PackedVector3Array = PackedVector3Array()
 ## Mipmap de niveau 2 de la heightmap R16 (blocs 4×4 moyennés) : hauteurs lissées du LOD
 ## lointain (pas de pics en dents de scie échantillonnés tous les `far_step` pixels).
@@ -1122,10 +1122,12 @@ func _build_material_arrays() -> void:
 		var data := albedo.get_data()
 		var mean := Color8(data[offset], data[offset + 1], data[offset + 2]).srgb_to_linear()
 		_layer_means.append(Vector3(mean.r, mean.g, mean.b))
-	_albedo_array = Texture2DArray.new()
-	_albedo_array.create_from_images(albedo_images)
-	_normal_array = Texture2DArray.new()
-	_normal_array.create_from_images(normal_images)
+	var albedo_array := Texture2DArray.new()
+	albedo_array.create_from_images(albedo_images)
+	_albedo_array = albedo_array
+	var normal_array := Texture2DArray.new()
+	normal_array.create_from_images(normal_images)
+	_normal_array = normal_array
 
 
 static func _load_layer_image(path: String) -> Image:

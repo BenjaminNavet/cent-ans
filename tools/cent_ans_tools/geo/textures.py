@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 from pathlib import Path
 
 import httpx
@@ -188,7 +189,14 @@ def format_spec(spec: dict) -> str:
     ]
     lines.append(",\n".join(layer_lines))
     lines.append("  ],")
-    lines.append(json.dumps(head, indent=2, ensure_ascii=False)[1:-1].strip("\n"))
+    rest = json.dumps(head, indent=2, ensure_ascii=False)[1:-1].strip("\n")
+    # Listes de nombres sur une ligne, comme le fichier écrit à la main.
+    rest = re.sub(
+        r"\[\s*([-0-9.e, \n]+?)\s*\]",
+        lambda m: "[" + ", ".join(v.strip() for v in m.group(1).split(",")) + "]",
+        rest,
+    )
+    lines.append(rest)
     lines.append("}")
     return "\n".join(lines) + "\n"
 

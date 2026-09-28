@@ -38,3 +38,27 @@ def test_campaign_terrain_layer_means_filled() -> None:
     """Layer means were written by the texture build (never left at zero)."""
     for layer in _document()["layers"]:
         assert sum(layer["mean_linear"]) > 0.0, layer["id"]
+
+
+def test_water_normal_tiles_seamlessly() -> None:
+    """The procedural sea normal wraps: edge step no larger than interior steps."""
+    import numpy as np
+
+    from cent_ans_tools.geo import textures
+
+    normal = textures.water_normal(128).astype(np.int32)
+    interior = np.abs(np.diff(normal, axis=1)).mean()
+    edge = np.abs(normal[:, 0] - normal[:, -1]).mean()
+    assert edge <= interior * 1.5
+    interior_v = np.abs(np.diff(normal, axis=0)).mean()
+    edge_v = np.abs(normal[0] - normal[-1]).mean()
+    assert edge_v <= interior_v * 1.5
+    assert normal[..., 2].min() > 128  # normals point up (z > 0)
+
+
+def test_format_spec_round_trips() -> None:
+    """``format_spec`` writes the same data it reads."""
+    from cent_ans_tools.geo import textures
+
+    spec = _document()
+    assert json.loads(textures.format_spec(spec)) == spec
