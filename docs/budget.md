@@ -129,4 +129,5 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul OM |
 |---|---|---|---|---|---|
 | 2026-09-28 | — | P1 : écus et bannières (génération locale) | 0,00 $ | 0,00 $ | 0,00 $ |
-| 2026-09-29 | OpenRouter | Portraits M10 (46 × openai/gpt-5-image-mini) | 2,10 $ | 2,16 $ | 2,16 $ |
+| 2026-09-29 | OpenRouter | P1 : portraits des souverains et héritiers D1-D3 (46 × openai/gpt-5-image-mini) | 2,10 $ | 2,16 $ | 2,16 $ |
+| 2026-09-29 | OpenRouter | P1 : variantes âgées D1-D3 (37 × openai/gpt-5-image-mini) | 1,69 $ | 1,69 $ | 3,85 $ |
