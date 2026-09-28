@@ -368,8 +368,11 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
         "France {france:.0}, England {england:.0}, sieges/turn {sieges:.3}, stuck/turn {stuck:.2}, English landings {landings:.1}, battles {:.1}",
         mean(&|g| f64::from(g.battles))
     );
+    // RS-M (ADR 0113): 40 000 until TW2 (royal ransoms after battles) and FE
+    // (the Empire's host at war with France from turn 8); 24 336 on main of
+    // 2026-09-28, standard error of the 8-seed mean about 3 400.
     assert!(
-        (40_000.0..=160_000.0).contains(&france),
+        (15_000.0..=160_000.0).contains(&france),
         "France's treasury {france}"
     );
     assert!(

@@ -33,6 +33,25 @@ Script : `scratchpad/probe.sh <commits>` (git archive → build release, sonde +
 Le 34 286 cité pour main est la valeur de 38954b4f ; main réelle (5aae540f) = 24 336.
 Reconstitution payée par la France : ~5 700 livres / partie seulement.
 
+## Diagnostic
+- **TW2 SB-T3 (41 889 → 34 286)** : Philippe VI pris au combat dans plusieurs graines (12 échéances
+  de rançon de 16 500 livres, ≈ 24 700 par partie ; aucune à ae5d94f1). Reconstitution ≈ 5 700 /
+  partie, mercenaires achetés dans les ordres (total des ordres inchangé, −92 000).
+- **FE (→ 24 336 sur main, 16 601-21 141 aux états intermédiaires, banqueroutes)** : chaque graine,
+  l'Empire s'allie au Hainaut, déclare la guerre à la France vers t8 (« défense d'un allié ») et
+  convoque l'ost : Autriche, Brabant, Gueldre, Hainaut, Confédérés, Milan, Savoie, Gênes, Vérone.
+  Milan/Savoie prennent Lyonnais, Auvergne, Rouergue, Nîmois (cédés à la paix). Recettes −92 000.
+- Contre-épreuve (ost d'Empire coupé, essai jetable) : trésor 25 065, sièges 1,95, batailles 62 ;
+  recettes 1 745 719 mais entretien des armées +72 000 : l'IA dépense ce qu'elle regagne.
+- Décision : pas de bogue ; plancher France 40 000 → 15 000 (ADR 0113). L'ost d'Empire → FE F8.
+
+## Méthode
+Script du scratchpad `probe.sh <commits>` : extraction de `core` et `data` du commit (archive) dans un
+dossier, `touch` de tous les fichiers (sinon cargo réutilise les artefacts d'un autre arbre dans la
+même cible), copie d'un test `rs_m_diag.rs` (budget de la France cumulé : ordres, recettes, armées,
+bâtiments, admin., Table, autre ; `last_budget` après chaque `end_turn_with`), puis
+`cargo test --release --no-fail-fast -p ai --test m3_grid_ai --test rs_m_diag -- --ignored --nocapture`.
+Ne jamais partager une cible cargo entre deux arbres (le worktree a sa cible `target-rs-m-wt`).
+
 ## Prochaine étape
-Diagnostic 2 (`rs_m_diag2.rs`) : provinces de la France au départ / à mi-partie / à la fin et à qui
-elles passent, sur 38954b4f et main.
+Sonde verte sur la branche, century_probe normale 10 graines, tests complets.
