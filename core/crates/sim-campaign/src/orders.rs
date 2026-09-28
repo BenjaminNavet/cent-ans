@@ -367,6 +367,10 @@ pub enum Order {
         decision: u32,
         outcome: crate::capture::CaptureOutcome,
     },
+    // ----- TW2-T5: army traditions (`traditions.rs`) -------------------------
+    /// `army` takes `tradition` (an id of `data/rules/army_traditions.json`)
+    /// for a rank it has reached.
+    ChooseArmyTradition { army: ArmyId, tradition: String },
 }
 
 impl Order {
@@ -518,6 +522,8 @@ pub enum OrderError {
     Encounter(#[from] crate::encounter::EncounterError),
     #[error(transparent)]
     Capture(#[from] crate::capture::CaptureError),
+    #[error(transparent)]
+    Tradition(#[from] crate::traditions::TraditionError),
     #[error("la place est en ruine : ni recrutement ni chantier")]
     SettlementRuined,
 }
@@ -829,6 +835,9 @@ impl CampaignState {
             }
             Order::ChooseCaptureOutcome { decision, outcome } => {
                 Ok(self.choose_capture_outcome(data, faction, decision, outcome)?)
+            }
+            Order::ChooseArmyTradition { army, tradition } => {
+                self.choose_army_tradition(data, faction, &army, &tradition)
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
@@ -1451,6 +1460,8 @@ impl CampaignState {
                 units,
                 planned_path: Vec::new(),
                 destination: None,
+                // TW2-T5: a detachment starts without traditions.
+                traditions: Default::default(),
                 ..template
             },
         );

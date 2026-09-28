@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/army_traditions_rules.schema.json",
+  "title": "Règles des traditions d'armée",
+  "description": "Fichier data/rules/army_traditions.json (lot TW2-T5, ADR 0109). Voir docs/design/2026-09-28-tw2-mecaniques-total-war.md § T5.",
+  "type": "object",
+  "$defs": {
+    "branch": {
+      "type": "string",
+      "enum": ["march", "stewardship", "shooting", "assault", "discipline"]
+    },
+    "weight": { "type": "integer", "minimum": 0, "maximum": 1000 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "experience": {
+      "type": "object",
+      "description": "Expérience d'armée gagnée par bataille et seuils des rangs.",
+      "properties": {
+        "battle_fought": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Expérience de toute bataille livrée (multipliée par l'issue nuancée : héroïque ×2…)."
+        },
+        "battle_won": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Expérience ajoutée en cas de victoire."
+        },
+        "min_enemy_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Aucune expérience contre un ennemi de moins de ce pourcentage de l'armée (pas d'écrasement de bandes)."
+        },
+        "rank_thresholds": {
+          "type": "array",
+          "description": "Expérience cumulée de chaque rang, croissante ; un choix de tradition par rang (3 ou 4 rangs).",
+          "items": { "type": "integer", "minimum": 1 },
+          "minItems": 3,
+          "maxItems": 4
+        }
+      },
+      "required": ["battle_fought", "battle_won", "min_enemy_percent", "rank_thresholds"],
+      "additionalProperties": false
+    },
+    "branches": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "$ref": "#/$defs/branch" },
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "name"],
+        "additionalProperties": false
+      }
+    },
+    "traditions": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^trad_[a-z0-9_]+$" },
+          "branch": { "$ref": "#/$defs/branch" },
+          "tier": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "description": "Palier dans la branche : le palier N exige le palier N-1."
+          },
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "effects": {
+            "type": "object",
+            "description": "Effets de la tradition (au moins un).",
+            "minProperties": 1,
+            "properties": {
+              "movement_percent": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 50,
+                "description": "Points de mouvement de la saison, en pourcentage."
+              },
+              "replenish_percent": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Bonus du taux de reconstitution (TW2-T2), en pourcentage du taux."
+              },
+              "ranged": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 20,
+                "description": "Points de tir ajoutés aux unités de tir (bataille 3D et auto-résolution)."
+              },
+              "siege_speed_percent": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 50,
+                "description": "Durée des sièges raccourcie, en pourcentage (comme la compétence SiegeSpeed du chef)."
+              },
+              "morale": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 20,
+                "description": "Points de moral (0-100) de chaque unité en bataille."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["id", "branch", "tier", "name", "effects"],
+        "additionalProperties": false
+      }
+    },
+    "ai": {
+      "type": "object",
+      "description": "Poids du choix de tradition de l'IA.",
+      "properties": {
+        "description": { "type": "string" },
+        "base_weight": {
+          "type": "object",
+          "properties": {
+            "march": { "$ref": "#/$defs/weight" },
+            "stewardship": { "$ref": "#/$defs/weight" },
+            "shooting": { "$ref": "#/$defs/weight" },
+            "assault": { "$ref": "#/$defs/weight" },
+            "discipline": { "$ref": "#/$defs/weight" }
+          },
+          "required": ["march", "stewardship", "shooting", "assault", "discipline"],
+          "additionalProperties": false
+        },
+        "doctrine_ranged_weight": { "$ref": "#/$defs/weight" },
+        "missing_men_weight": { "$ref": "#/$defs/weight" },
+        "besieging_weight": { "$ref": "#/$defs/weight" },
+        "started_branch_weight": { "$ref": "#/$defs/weight" }
+      },
+      "required": [
+        "base_weight",
+        "doctrine_ranged_weight",
+        "missing_men_weight",
+        "besieging_weight",
+        "started_branch_weight"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": ["experience", "branches", "traditions", "ai"],
+  "additionalProperties": false
+}

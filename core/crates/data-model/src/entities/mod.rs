@@ -32,6 +32,7 @@ pub mod posture;
 pub mod province;
 pub mod religion;
 pub mod replenishment;
+pub mod army_traditions;
 pub mod resource;
 pub mod retinue;
 pub mod settlement;

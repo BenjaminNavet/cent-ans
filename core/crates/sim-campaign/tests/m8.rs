@@ -37,6 +37,7 @@ fn unit(data: &GameData, id: &str) -> Unit {
         morale: 80,
         levy_armor: 0,
         levy_ranged: 0,
+        experience_residue: 0,
     }
 }
 
