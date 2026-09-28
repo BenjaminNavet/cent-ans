@@ -1,0 +1,51 @@
+{
+  "name": {
+    "display": "Jean d'Islay",
+    "local": "Iain Mac Dhòmhnaill",
+    "local_language": "gaélique écossais"
+  },
+  "sex": "male",
+  "house": "MacDonald",
+  "faction": "fac_isles",
+  "role": "ruler",
+  "birth": {
+    "value": "1320",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1386",
+    "place": "Château d'Ardtornish",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Seigneur des Îles",
+      "from": {
+        "value": "1336"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_kind"
+  ],
+  "piety": 65,
+  "family": {
+    "spouses": [
+      "chr_amy_macruari"
+    ]
+  },
+  "starting_location": "prov_isles",
+  "status": "at_court",
+  "description": "Chef du Clan Donald, se proclame « Dominus Insularum » (seigneur des Îles) en 1336. Épouse en 1337 Amy MacRuairi, héritière des îles du Nord et de Garmoran : leur union lui donne le contrôle de tout le littoral occidental d'Argyll aux Hébrides, hors Skye. Réputé pour sa bienveillance envers l'Église.",
+  "sources": [
+    "Jean d'Islay, seigneur des Îles"
+  ],
+  "id": "chr_john_of_islay"
+}

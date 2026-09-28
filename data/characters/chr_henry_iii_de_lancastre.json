@@ -1,0 +1,50 @@
+{
+  "name": {
+    "display": "Henri de Lancastre",
+    "local": "Henry of Lancaster",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Lancastre",
+  "faction": "fac_lancaster",
+  "role": "ruler",
+  "birth": {
+    "value": "1281",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1345-09-22",
+    "place": "Leicester"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "3e comte de Lancastre et de Leicester",
+      "from": {
+        "value": "1324"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_failing_sight",
+    "trait_pious"
+  ],
+  "piety": 70,
+  "family": {
+    "children": [
+      "chr_henry_of_grosmont"
+    ]
+  },
+  "starting_location": "prov_lancaster",
+  "status": "at_court",
+  "description": "Petit-fils de Henri III par Edmond Crouchback ; un des artisans de la déposition d'Édouard II en 1327. Aveugle depuis environ 1330, il se retire au château de Leicester, où il fonde le Newarke, hôpital pour les pauvres et infirmes.",
+  "sources": [
+    "Henri, 3e comte de Lancastre"
+  ],
+  "id": "chr_henry_iii_de_lancastre"
+}
