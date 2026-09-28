@@ -984,6 +984,41 @@ func _setup_zones() -> void:
 	UiZones.put(UiZones.Zone.TOASTS, turn_banner)
 	event_log.visibility_changed.connect(queue_layout)
 	UiZones.layout().side_panel_changed.connect(func(_control: Control) -> void: queue_layout())
+	# P2g : grandes fenêtres et dialogue de sauvegarde dans la zone `MODAL` (voile, entrées
+	# bloquées derrière). Cour, fiche et techniques gardent leur géométrie d'écran ; le dialogue
+	# de sauvegarde se centre sur sa taille, comme celui du menu pause (P2e).
+	for panel: Control in [court_panel, character_sheet, tech_panel]:
+		claim_modal_panel(panel)
+	UiZones.put(UiZones.Zone.MODAL, save_load_dialog)
+
+
+## P2g : `panel` rejoint la zone `MODAL` de `UiLayout` **sans changer de place ni de taille** :
+## ses ancres, pensées pour un parent plein écran, sont converties au repère de la zone
+## (`a' = (a - zone.x) / zone.largeur`, décalages en pixels inchangés), ce qui donne le même
+## rectangle à toute résolution. `layout_hud` le garde ensuite à l'écran (`_keep_on_screen`).
+## À appeler avant `register_panel` : un reparentage désinscrit un panneau de la pile.
+func claim_modal_panel(panel: Control) -> void:
+	var anchors := [panel.anchor_left, panel.anchor_top, panel.anchor_right, panel.anchor_bottom]
+	var offsets := [panel.offset_left, panel.offset_top, panel.offset_right, panel.offset_bottom]
+	var grow := [panel.grow_horizontal, panel.grow_vertical]
+	UiZones.put(UiZones.Zone.MODAL, panel)
+	var part: Rect2 = UiZones.ZONE_RECTS[UiZones.Zone.MODAL]
+	var sides := [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]
+	for i in 4:
+		var axis := i % 2
+		panel.set_anchor(sides[i], (float(anchors[i]) - part.position[axis]) / part.size[axis], true, false)
+	for i in 4:
+		panel.set_offset(sides[i], float(offsets[i]))
+	panel.grow_horizontal = grow[0]
+	panel.grow_vertical = grow[1]
+
+
+## P2g : panneau placé par la carte (enfant direct, ou réclamé dans la zone `MODAL`) ; les
+## occupants des autres zones (chronique, registre dans `SIDE_PANEL`) sont placés par leur zone.
+func _placed_by_map(panel: Control) -> bool:
+	if panel.get_parent() == self:
+		return true
+	return panel.has_meta(UiZones.ZONE_META) and int(panel.get_meta(UiZones.ZONE_META)) == UiZones.Zone.MODAL
 
 
 # --- Pile des panneaux (audit A3, lot U1) ------------------------------------------------
@@ -1046,12 +1081,23 @@ func _auto_register(node: Node) -> void:
 		return
 	if not (node is Control) or panels.is_registered(node):
 		return
-	if node is DiplomacyPanel or node is ChronicleWindow or node.name == &"AgentRegistry":
+	if node is DiplomacyPanel:
+		# P2g : zone `MODAL`, puis la pile (le reparentage désinscrirait le panneau). En différé :
+		# `add_child` est encore en cours (« parent busy setting up children »).
+		_join_modal_then_register.call_deferred(node)
+	elif node is ChronicleWindow or node.name == &"AgentRegistry":
 		register_panel(node, PanelStack.Kind.CENTRAL)
 	elif node is RansomPanel:
 		register_panel(node, PanelStack.Kind.COMPANION, [faction_panel])
 	elif node is PauseMenu or node is SettingsMenu or node is SeasonReport:
 		register_panel(node, PanelStack.Kind.MODAL)
+
+
+func _join_modal_then_register(panel: Control) -> void:
+	if not is_instance_valid(panel) or not panel.is_inside_tree() or panels.is_registered(panel):
+		return
+	claim_modal_panel(panel)
+	register_panel(panel, PanelStack.Kind.CENTRAL)
 
 
 ## Échap ferme le panneau du dessus avant que la carte (désélection) ou le menu pause ne la
@@ -1151,7 +1197,7 @@ func layout_hud() -> void:
 	var wide_panel_open := false
 	for panel in panels.visible_panels():
 		var kind := panels.kind_of(panel)
-		if (kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION) and panel.get_parent() == self:
+		if (kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION) and _placed_by_map(panel):
 			_keep_on_screen(panel, top, view)
 			wide_panel_open = true
 	if minimap != null:
@@ -1179,8 +1225,9 @@ func _covers(rect: Rect2) -> bool:
 
 
 ## U1 : le coin haut droit (bouton ×) d'un panneau reste sous la barre du haut et dans l'écran.
+## P2g : en coordonnées globales (le panneau peut vivre dans la zone `MODAL`, décalée de l'écran).
 func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
-	if panel.get_parent() != self:
+	if not _placed_by_map(panel):
 		return
 	# Trop grand pour l'écran : rétréci (dans la limite de sa taille minimale).
 	var room := Vector2(view.x - 8.0, view.y - top - 4.0)
@@ -1195,7 +1242,7 @@ func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
 	if rect.position.y < top:
 		shift.y = top - rect.position.y
 	if shift != Vector2.ZERO:
-		panel.position += shift
+		panel.global_position += shift
 
 
 ## Lot C7b, PO1 : `panel` (panneau de colonie) rejoint la zone `SIDE_PANEL`, comme le panneau

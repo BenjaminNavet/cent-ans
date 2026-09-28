@@ -18,12 +18,12 @@ locales) et leur géométrie (ancres pensées pour un parent plein écran).
   libéré avec le menu.
 
 ## État
-- [ ] squelette (cette note, `game/tests/p2g_ui_test.gd` désactivé)
-- [ ] `map_ui` : zone `MODAL` + conversion d'ancres + `_keep_on_screen` global
-- [ ] `diplomacy_panel._fit_to_viewport` en coordonnées globales
-- [ ] `start_menu` : `SaveLoadDialog` dans `MODAL`
-- [ ] `p2g_ui_test.gd` (C1, C2 à 1280×720 / 1280×640 / 1920×1080, C3)
+- [x] squelette (cette note, `game/tests/p2g_ui_test.gd` désactivé)
+- [x] `map_ui` : zone `MODAL` + conversion d'ancres + `_keep_on_screen` global
+- [x] `diplomacy_panel._fit_to_viewport` en coordonnées globales
+- [x] `start_menu` : `SaveLoadDialog` dans `MODAL`
+- [x] `p2g_ui_test.gd` (C1, C2 à 1280×720 / 1280×640 / 1920×1080, C3)
 - [ ] tests : smoke, po_ui, p2a, p2b, p2c, p2e, p2g
 
 ## Prochaine étape
-Implémenter `map_ui._claim_modal_panel`.
+Faire passer `p2g_ui_test.gd` puis les tests existants (smoke, po_ui, p2a/b/c/e).

@@ -110,20 +110,18 @@ func _ready() -> void:
 	body.add_child(_build_faction_column())
 	body.add_child(_build_map_column())
 	body.add_child(_build_detail_column())
-	# PO phase 2 (P2b, ADR 0097) : fenêtre centrale plein écran — voir `docs/wip/p2b-tech-diplo.md`
-	# « Point ouvert » : ne rejoint volontairement pas de zone `UiLayout` (`SIDE_PANEL` est trop
-	# étroit ; `MODAL` reparente hors de `map_ui`, ce qui casse `_keep_on_screen`/`PanelStack`
-	# côté `map_ui.gd`, hors lot — régressions constatées sur `smoke.gd`). Migré : tailles
-	# (`UiType`) et animations d'ouverture/fermeture (`UiMotion`).
+	# PO phase 2 (P2b, ADR 0097) : tailles (`UiType`) et ouverture/fermeture (`UiMotion`). P2g :
+	# sur la carte, `map_ui` le réclame dans la zone `MODAL` de `UiLayout` (`claim_modal_panel`).
 	_fit_to_viewport()
 
 
 ## Plein écran : la pile de panneaux (`map_ui._keep_on_screen`) le cale sous la barre du haut.
+## P2g : position globale (le parent peut être la zone `MODAL`, décalée de l'écran).
 func _fit_to_viewport() -> void:
 	if not is_inside_tree():
 		return
 	var view := get_viewport_rect().size
-	position = Vector2(6, 0)
+	global_position = Vector2(6, 0)
 	size = Vector2(view.x - 12.0, view.y - 4.0)
 
 

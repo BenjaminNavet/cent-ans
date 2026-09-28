@@ -70,8 +70,12 @@ func _ready() -> void:
 	if facade != null:
 		var pending := str(facade.get("pending_faction"))
 		faction_select.select(pending if pending != "" else "fac_france")
-	move_child(save_load_dialog, -1)
 	move_child(fade, -1)
+	# P2g : dialogue de chargement dans la zone `MODAL` de `UiLayout` (voile, centré sur sa taille,
+	# comme celui du menu pause). L'hôte par défaut de `UiLayout` vit hors de cette scène : le
+	# dialogue part avec le menu.
+	UiZones.put(UiZones.Zone.MODAL, save_load_dialog)
+	tree_exiting.connect(save_load_dialog.queue_free)
 	save_load_dialog.load_confirmed.connect(_on_load)
 	save_load_dialog.dialog_closed.connect(_refresh_saves)
 	_refresh_saves()
