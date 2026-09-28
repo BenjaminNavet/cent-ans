@@ -273,7 +273,9 @@ func _run_start_menu() -> void:
 	var menu: Control = scene.instantiate()
 	root.add_child(menu)
 	await process_frame
-	_check(menu.card_count() == 3, "start menu should show 3 faction cards, got %d" % menu.card_count())
+	# FE : une carte par faction présentée dans data/ui/front_end.json (plus seulement les trois couronnes).
+	var presented := FrontEndData.factions().size()
+	_check(presented >= 3 and menu.card_count() == presented, "start menu should show %d faction cards, got %d" % [presented, menu.card_count()])
 	_check(menu.selected_faction == "fac_france", "default faction should be fac_france")
 	_check(menu.start_button.text.begins_with("Commencer"), "start button label")
 	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
