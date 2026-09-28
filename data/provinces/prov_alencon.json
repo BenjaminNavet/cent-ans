@@ -1,0 +1,92 @@
+{
+  "id": "prov_alencon",
+  "name": {
+    "display": "Alençon (Perche)",
+    "local": "Alençon",
+    "local_language": "ancien français"
+  },
+  "region": "france_ouest",
+  "terrain": "bocage",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Sarthe",
+    "Huisne"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Alençon",
+      "local": "Alençon",
+      "local_language": "ancien français"
+    },
+    "lat": 48.4322,
+    "lon": 0.0913
+  },
+  "geo": {
+    "capital_lonlat": [
+      0.0913,
+      48.4322
+    ],
+    "seed_lonlat": [
+      0.15,
+      48.4
+    ],
+    "voronoi_weight": 0.55
+  },
+  "owner": "fac_alencon",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 85000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2300,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Comté-apanage détaché du Maine ; population estimée par comparaison avec le Maine voisin."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1700,
+  "description": "Comté d'Alençon et du Perche, érigé en apanage pour Charles II d'Alençon, frère cadet de Philippe VI, en 1325.",
+  "sources": [
+    "Comté d'Alençon",
+    "Charles II d'Alençon"
+  ]
+}

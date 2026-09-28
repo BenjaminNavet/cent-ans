@@ -1,0 +1,50 @@
+{
+  "id": "chr_bernard_ezi_d_albret",
+  "name": {
+    "display": "Bernard Ezi II d'Albret",
+    "local": "Bernat Ezi II de Lebret",
+    "local_language": "gascon"
+  },
+  "sex": "male",
+  "house": "Albret",
+  "faction": "fac_albret",
+  "role": "ruler",
+  "birth": {
+    "value": "1281",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1359",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Sire d'Albret",
+      "from": {
+        "value": "1324",
+        "uncertain": true
+      }
+    },
+    {
+      "title": "Sénéchal héréditaire de Gascogne"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_cunning"
+  ],
+  "piety": 40,
+  "starting_location": "prov_albret",
+  "status": "at_court",
+  "description": "Sire d'Albret, sénéchal héréditaire de Gascogne pour le duc d'Aquitaine ; sa maison changera plusieurs fois de camp au cours de la guerre de Cent Ans.",
+  "sources": [
+    "Maison d'Albret",
+    "Nérac"
+  ]
+}

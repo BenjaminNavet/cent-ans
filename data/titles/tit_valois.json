@@ -1,0 +1,24 @@
+{
+  "id": "tit_valois",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Valois",
+    "local": "Valois",
+    "local_language": "ancien français"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_valois"
+  ],
+  "holder_1337": {
+    "faction": "fac_france",
+    "sources": [
+      "Comté de Valois",
+      "Philippe VI de France"
+    ]
+  },
+  "description": "Berceau de la maison de Valois, réuni au domaine royal à l'avènement de Philippe VI (1328) ; tenu directement par la couronne, sans vassal distinct.",
+  "sources": [
+    "Comté de Valois"
+  ]
+}

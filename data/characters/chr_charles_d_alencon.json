@@ -5,8 +5,8 @@
   },
   "sex": "male",
   "house": "Valois",
-  "faction": "fac_france",
-  "role": "commander",
+  "faction": "fac_alencon",
+  "role": "ruler",
   "birth": {
     "value": "1297"
   },

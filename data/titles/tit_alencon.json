@@ -1,0 +1,54 @@
+{
+  "id": "tit_alencon",
+  "rank": "county",
+  "name": {
+    "display": "Comté d'Alençon",
+    "local": "Alençon",
+    "local_language": "ancien français"
+  },
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+    "description": "Armes de France ancien brisées d'un lambel de gueules, marque des cadets de Valois.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_alencon"
+  ],
+  "holder_1337": {
+    "faction": "fac_alencon",
+    "sources": [
+      "Charles II d'Alençon",
+      "Comté d'Alençon"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_alencon_hold",
+      "title": "Garder le Perche",
+      "description": "Le comte d'Alençon doit conserver son apanage.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_alencon"
+      }
+    },
+    {
+      "id": "obj_alencon_maine",
+      "title": "Arrondir le Perche",
+      "description": "Étendre le comté au Maine voisin.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_alencon",
+          "prov_maine"
+        ]
+      }
+    }
+  ],
+  "description": "Comté-apanage érigé en 1325 pour Charles II d'Alençon, frère cadet de Philippe VI.",
+  "sources": [
+    "Charles II d'Alençon",
+    "Comté d'Alençon"
+  ]
+}
