@@ -143,3 +143,4 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
 - 28/09 : recherche GA3 : fal.ai `fal-ai/trellis`, 0,02 $/génération, usage commercial des sorties
   autorisé, sortie GLB ; modèle TRELLIS (Microsoft) sous licence MIT. Bloquant : aucune clé fal.ai
   dans l'environnement → compte + crédit à créer par le joueur (`FAL_KEY`). Blender présent.
+- 28/09 : `feat/ga` (GA1+GA2) : smoke, ga1_maps, ga2_ground, fg3_maps OK. **GA3 reporté** par le joueur (pas de clé fal.ai) : GA se clôt sans GA3 (GA6 après GA4/GA5), GA3 reste ouvert.
