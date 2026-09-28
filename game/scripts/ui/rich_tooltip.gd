@@ -408,6 +408,7 @@ static func _met(live: Dictionary) -> Variant:
 
 static func _icon_text(id: String, name: String) -> String:
 	var icon := icon_bbcode(id, 14)
+	name = entity_link(id, name)  # IB4 : bulle riche de l'entité
 	return "%s %s" % [icon, name] if icon != "" else name
 
 
@@ -485,7 +486,8 @@ static func _effects_block(effects: Array, title: String = "Effets") -> String:
 	var parts := PackedStringArray()
 	for effect in effects:
 		if effect is Dictionary:
-			parts.append(effect_text(effect))
+			var kind := str(effect.get("kind", effect.get("effect", "")))
+			parts.append(link_rule_label(effect_text(effect), kind, effect_label(kind)))
 	return "%s : %s" % [title, " · ".join(parts)] if not parts.is_empty() else ""
 
 
@@ -500,7 +502,7 @@ static func cost_text(cost: Variant) -> String:
 		parts.append("%s %s" % [thousands(int(cost["money"])), POUND])
 	var resources: Dictionary = cost.get("resources", {})
 	for res_id in resources:
-		parts.append("%s %s %d" % [icon_bbcode(str(res_id), 14), GameCatalog.display_name(str(res_id)), int(resources[res_id])])
+		parts.append("%s %s %d" % [icon_bbcode(str(res_id), 14), entity_link(str(res_id), GameCatalog.display_name(str(res_id))), int(resources[res_id])])
 	return " + ".join(parts)
 
 
@@ -897,7 +899,7 @@ static func population_class(class_id: String, data: Dictionary = {}) -> String:
 	var gauges := PackedStringArray()
 	for key in ["unrest", "health", "wealth", "goods_satisfaction"]:
 		if data.has(key):
-			gauges.append("%s %s %d" % [icon_bbcode("gauge_" + key, 14), GAUGE_TEXTS[key][0], int(data[key])])
+			gauges.append("%s %s %d" % [icon_bbcode("gauge_" + key, 14), rule_link(key, GAUGE_TEXTS[key][0]), int(data[key])])
 	if not gauges.is_empty():
 		lines.append(" · ".join(gauges))
 	return _join(lines)
@@ -1019,3 +1021,162 @@ static func chivalric_order(option: Dictionary) -> String:
 		lines.append("[color=%s]Refus : %s[/color]" % [RED, reason])
 	lines.append(_description(option))
 	return _join(lines)
+
+
+
+# --- Liens et bulles filles (IB4, ADR 0109, spec IB § 3.3) ------------------------------------
+# Les libellés d'effets, de stats et de jauges des infobulles en sections sortent comme liens
+# `ib:rule:<clé>` (texte de la bulle : `data/ui/tooltips.json`, blocs `effects`, `stats`,
+# `gauges`) ; les noms d'entités (prérequis, bâtiments habilitants, ressources, déblocages) comme
+# liens `ib:<kind>:<id>` (bulle : spec riche complète). Libellés encore lus ici (IB2 migrera les
+# tables) ; aucune règle de jeu.
+
+const TEXTS_FILE := "ui/tooltips.json"
+## Ordre de recherche d'une clé de règle dans `tooltips.json`.
+const RULE_BLOCKS := ["effects", "stats", "gauges"]
+const RULE_SUBTITLES := {"effects": "effet", "stats": "caractéristique d'unité", "gauges": "jauge"}
+## Préfixe d'id → `kind` de lien d'entité.
+const ENTITY_KINDS := {
+	"unit_": "unit", "bld_": "building", "tech_": "technology", "res_": "resource",
+	"trait_": "trait", "skill_": "skill",
+}
+
+static var _texts: Dictionary = {}
+
+
+## `data/ui/tooltips.json` (mis en cache).
+static func texts() -> Dictionary:
+	if _texts.is_empty():
+		var path := TooltipView._data_dir().path_join(TEXTS_FILE)
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		if parsed is Dictionary:
+			_texts = parsed
+		else:
+			push_warning("RichTooltip : %s illisible, bulles de règle sans texte." % TEXTS_FILE)
+			_texts = {"effects": {}, "stats": {}, "gauges": {}}
+	return _texts
+
+
+## Relit `tooltips.json` au prochain accès (tests).
+static func reload_texts() -> void:
+	_texts = {}
+
+
+## Entrée de règle `key` : {block, title, body (règles résolues), codex, icon} ; {} si aucune.
+static func rule_entry(key: String) -> Dictionary:
+	var data := texts()
+	for block in RULE_BLOCKS:
+		var entries: Dictionary = data.get(block, {})
+		if entries.has(key) and entries[key] is Dictionary:
+			var entry: Dictionary = entries[key]
+			return {
+				"block": block, "title": str(entry.get("title", entry.get("label", key))),
+				"body": RuleValues.format(str(entry.get("body", ""))), "codex": str(entry.get("codex", "")),
+				"icon": str(entry.get("icon", "")),
+			}
+	return {}
+
+
+## Lien `ib:rule:<key>` sur `label` s'il existe un texte de règle, `label` seul sinon.
+static func rule_link(key: String, label: String) -> String:
+	return CodexText.ib_link("rule", key, label) if key != "" and not rule_entry(key).is_empty() else label
+
+
+## `text` dont la première occurrence de `label` devient le lien de règle `key`.
+static func link_rule_label(text: String, key: String, label: String) -> String:
+	if label == "" or key == "" or text.contains("[url=%srule:%s]" % [CodexText.IB_PREFIX, key]):
+		return text
+	var at := text.find(label)
+	if at < 0:
+		return text
+	var linked := rule_link(key, label)
+	return text.substr(0, at) + linked + text.substr(at + label.length()) if linked != label else text
+
+
+## Clé d'effet ou de stat dont le libellé est `label`, "" sinon.
+static func rule_key_for_label(label: String) -> String:
+	for table: Dictionary in [EFFECT_LABELS, STAT_LABELS]:
+		for key in table:
+			if str(table[key]) == label:
+				return str(key)
+	return ""
+
+
+## `kind` de lien d'une entité d'après le préfixe de son id, "" si inconnu.
+static func entity_kind(id: String) -> String:
+	for prefix in ENTITY_KINDS:
+		if id.begins_with(prefix):
+			return str(ENTITY_KINDS[prefix])
+	return ""
+
+
+## Nom d'entité en lien `ib:<kind>:<id>` (bulle riche), `label` seul si le type est inconnu.
+static func entity_link(id: String, label: String) -> String:
+	var kind := entity_kind(id)
+	return CodexText.ib_link(kind, id, label) if kind != "" else label
+
+
+## Spec d'une bulle ouverte par un lien `ib:<kind>:<id>` : règle (`kind` « rule »), spec riche de
+## l'entité (`spec_for`), sinon spec simple tirée du BBCode de l'entité. {} si inconnue.
+static func link_spec(key: String) -> Dictionary:
+	var parts := key.split(":", true, 2)
+	if parts.size() < 3 or parts[0] + ":" != KEY_PREFIX:
+		return {}
+	var kind: String = parts[1]
+	var id: String = parts[2]
+	if kind == "rule":
+		return rule_spec(id)
+	var spec := spec_for(key)
+	if not spec.is_empty():
+		return spec
+	match kind:
+		"resource":
+			if not GameCatalog.resource(id).is_empty():
+				return _bbcode_spec(kind, id, resource(id))
+		"trait":
+			if not GameCatalog.trait_definition(id).is_empty():
+				return _bbcode_spec(kind, id, trait_tip({"id": id}))
+		"skill":
+			var definition := GameCatalog.skill(id)
+			if not definition.is_empty():
+				var node := definition.duplicate(true)
+				node["name"] = GameCatalog.display_name(id)
+				return _bbcode_spec(kind, id, skill(node))
+	return {}
+
+
+## Bulle de règle : titre, texte de `tooltips.json`, lien vers la fiche du Codex s'il y en a une.
+static func rule_spec(key: String) -> Dictionary:
+	var entry := rule_entry(key)
+	if entry.is_empty():
+		return {}
+	var spec := _spec("rule", "", str(entry["title"]), str(RULE_SUBTITLES.get(entry["block"], "règle")), "gauge")
+	var icon := str(entry.get("icon", ""))
+	var library := icons()
+	if icon == "" and library != null and bool(library.call("has_icon", "gauge_" + key)):
+		icon = "gauge_" + key
+	spec["icon"] = icon
+	spec["rule_key"] = key
+	if str(entry["body"]) != "":
+		spec["detail"].append(str(entry["body"]))
+	var codex := str(entry.get("codex", ""))
+	if codex != "" and _codex_has(codex):
+		spec["detail"].append("Codex : " + CodexText.link(codex))
+		spec["codex"] = codex
+	return spec
+
+
+## Spec simple (en-tête + lignes) tirée du BBCode d'un constructeur pas encore en sections (IB2) :
+## la première ligne (titre, sous-titre en italique) devient l'en-tête.
+static func _bbcode_spec(kind: String, id: String, bbcode: String) -> Dictionary:
+	var lines := bbcode.split("\n")
+	var subtitle := ""
+	var first := lines[0] if not lines.is_empty() else ""
+	var sub_at := first.find("[i]")
+	if sub_at >= 0:
+		subtitle = first.substr(sub_at + 3, first.find("[/i]", sub_at) - sub_at - 3)
+	var spec := _spec(kind, id, GameCatalog.display_name(id), subtitle, kind)
+	for index in range(1, lines.size()):
+		if lines[index] != "":
+			spec["detail"].append(lines[index])
+	return spec

@@ -31,8 +31,14 @@ const HINT := "Alt : explorer"
 const CHECK := "✓"
 const CROSS := "✗"
 const UNKNOWN := "•"
+## IB4 : encre du texte d'ambiance (plus pâle que `RichTooltip.MUTED`).
+const FLAVOUR_COLOR := "#7d6a4e"
 const WARNING := "⚠"
 const HEADLINE_ICON_PX := 28
+## IB4 : icônes des chiffres vedettes sans icône propre (pas d'icône `stat_*` au catalogue).
+const HEADLINE_ICON_FALLBACK := {"stat_ranged": "battle_state_shoot", "stat_melee": "battle_state_melee"}
+## IB4 : clé de règle (`ib:rule:`) des chiffres vedettes qui ne sont ni un effet ni une stat.
+const HEADLINE_RULE_KEYS := {"strength": "strength", "morale": "morale"}
 
 static var _cache: Dictionary = {}
 
@@ -105,7 +111,7 @@ static func blocks_for(spec: Dictionary, detailed: bool) -> Array:
 	var effects := PackedStringArray()
 	for effect in spec.get("effects", []):
 		var sign := int(effect.get("sign", 0))
-		var text := RichTooltip.effect_line(effect)
+		var text := _linked_effect(effect)
 		if sign > 0:
 			effects.append("[color=%s]▲[/color] %s" % [RichTooltip.GREEN, text])
 		elif sign < 0:
@@ -272,7 +278,56 @@ static func _block(name: String, data: Variant, spec: Dictionary, width: float) 
 	var label := _rich(name, UiType.BODY)
 	label.custom_minimum_size = Vector2(width, 0)
 	label.text = CodexText.format("\n".join(lines), true)
+	if name == "Flavour":
+		_style_flavour(label)
 	return label
+
+
+## IB4 (défaut IB1) : ambiance en italique et en encre atténuée, quelle que soit la variation de
+## type (la police italique du thème est posée comme police normale de l'étiquette).
+static func _style_flavour(label: RichTextLabel) -> void:
+	var theme: Theme = load(RichTooltip.THEME_PATH) if ResourceLoader.exists(RichTooltip.THEME_PATH) else null
+	if theme != null and theme.has_font("italics_font", "RichTextLabel"):
+		label.add_theme_font_override("normal_font", theme.get_font("italics_font", "RichTextLabel"))
+	label.add_theme_color_override("default_color", Color(FLAVOUR_COLOR))
+
+
+## IB4 : ligne d'effet dont le libellé est un lien `ib:rule:<clé>` (texte de `tooltips.json`).
+static func _linked_effect(effect: Dictionary) -> String:
+	var text := RichTooltip.effect_line(effect)
+	var key := str(effect.get("key", ""))
+	if not RichTooltip.EFFECT_LABELS.has(key):
+		return text
+	return RichTooltip.link_rule_label(text, key, str(effect.get("label", RichTooltip.effect_label(key))))
+
+
+## IB4 : icône d'un chiffre vedette (repli pour les stats sans icône propre), "" si aucune.
+static func headline_icon(icon_id: String, stat: String = "") -> String:
+	var library := RichTooltip.icons()
+	if library == null:
+		return ""
+	if icon_id == "" and stat != "":
+		icon_id = "stat_" + stat
+	for candidate in [icon_id, str(HEADLINE_ICON_FALLBACK.get(icon_id, ""))]:
+		if candidate != "" and bool(library.call("has_icon", candidate)):
+			return candidate
+	return ""
+
+
+## IB4 : légende d'un chiffre vedette, en lien `ib:rule:` quand une règle l'explique.
+static func _rule_caption(item: Dictionary) -> Control:
+	var text := str(item.get("label", ""))
+	var key := str(item.get("stat", ""))
+	if key == "":
+		key = str(HEADLINE_RULE_KEYS.get(str(item.get("key", "")), RichTooltip.rule_key_for_label(text)))
+	var linked := RichTooltip.rule_link(key, text)
+	if linked == text:
+		return _label("Caption", text, UiType.CAPTION, Color(RichTooltip.MUTED))
+	var caption := _rich("Caption", UiType.CAPTION)
+	caption.autowrap_mode = TextServer.AUTOWRAP_OFF
+	caption.add_theme_color_override("default_color", Color(RichTooltip.MUTED))
+	caption.text = linked
+	return caption
 
 
 ## Écussons des chiffres vedettes : icône, grand chiffre, libellé en légende.
@@ -287,7 +342,8 @@ static func _headline(items: Array, _spec: Dictionary) -> Control:
 		badge.add_theme_constant_override("separation", 6)
 		badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var icon_id := str(item.get("icon", ""))
-		if library != null and icon_id != "" and bool(library.call("has_icon", icon_id)):
+		icon_id = headline_icon(icon_id, str(item.get("stat", "")))
+		if library != null and icon_id != "":
 			badge.add_child(library.call("make_rect", icon_id, HEADLINE_ICON_PX, ""))
 		var column := VBoxContainer.new()
 		column.add_theme_constant_override("separation", -2)
@@ -297,8 +353,7 @@ static func _headline(items: Array, _spec: Dictionary) -> Control:
 		var color: String = RichTooltip.GREEN if sign > 0 else (RichTooltip.RED if sign < 0 else "")
 		value.text = "[b]%s[/b]" % str(item.get("value", "")) if color == "" else "[b][color=%s]%s[/color][/b]" % [color, str(item.get("value", ""))]
 		column.add_child(value)
-		var caption := _label("Caption", str(item.get("label", "")), UiType.CAPTION, Color(RichTooltip.MUTED))
-		column.add_child(caption)
+		column.add_child(_rule_caption(item))
 		badge.add_child(column)
 		row.add_child(badge)
 	return row
@@ -314,8 +369,9 @@ static func _stats(stats: Array, width: float) -> Control:
 	for stat in stats:
 		var cell := HBoxContainer.new()
 		cell.custom_minimum_size = Vector2((width - 16.0) / 2.0, 0)
-		var name_label := _label("Label", str(stat.get("label", "")), UiType.BODY, RichTooltip.INK)
-		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var name_label := _rich("Label", UiType.BODY)
+		name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		name_label.text = RichTooltip.rule_link(str(stat.get("key", "")), str(stat.get("label", "")))
 		cell.add_child(name_label)
 		var value_label := _label("Value", str(stat.get("value", "")), UiType.BODY, RichTooltip.INK)
 		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
