@@ -2709,7 +2709,7 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     let square = works.center;
     let mut ladder_slot = 0usize;
     let mut tower_slot = 0usize;
-    // T4 (ADR 0104): once foot of the side fights inside the walls, the
+    // T4 (ADR 0108): once foot of the side fights inside the walls, the
     // shooters leave the duel with the wall walk and converge on the square
     // too, shooting the garrison that holds it.
     let foot_inside = storm
@@ -2732,11 +2732,10 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         .iter()
         .filter(|&&i| units[i].on_wall || works.inside(units[i].x, units[i].z))
         .count();
-    let committed = melee.iter().any(|&i| {
-        dist_to(&units[i], square.0, square.1) < assault.committed_radius_m
-    });
-    let gathered =
-        committed || melee_in as f64 >= assault.gather_share * melee.len() as f64 - 1e-9;
+    let committed = melee
+        .iter()
+        .any(|&i| dist_to(&units[i], square.0, square.1) < assault.committed_radius_m);
+    let gathered = committed || melee_in as f64 >= assault.gather_share * melee.len() as f64 - 1e-9;
     for &i in &own {
         let unit = &units[i];
         if unit.category == UnitCategory::Siege || !view.free(i) || relief.contains(&i) {
@@ -2866,7 +2865,7 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
         .collect();
     let mut blockers = 0usize;
     let gate_down = !works.pieces[works.gate].intact();
-    // T4 (ADR 0104): the garrison falls back on the square at the first
+    // T4 (ADR 0108): the garrison falls back on the square at the first
     // breach (not only when the gate falls), leaving a few regiments in the
     // openings; fallen back, it only charges attackers near the square.
     let fall_back = &crate::capture::CaptureRules::bundled().fall_back;

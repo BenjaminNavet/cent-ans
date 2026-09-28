@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/siege_capture_rules.schema.json",
   "title": "Points de capture des batailles de siège",
-  "description": "Fichier data/rules/siege_capture.json (lot TW2 T4, ADR 0104) : rayon et durée de prise de la place centrale (point de victoire) et de la porte, supériorité numérique exigée, seuil de l'alerte « La place est menacée », dernier carré des défenseurs (moral) et repli de la garnison. Lu par sim-battle (CaptureRules).",
+  "description": "Fichier data/rules/siege_capture.json (lot TW2 T4, ADR 0108) : rayon et durée de prise de la place centrale (point de victoire) et de la porte, supériorité numérique exigée, seuil de l'alerte « La place est menacée », dernier carré des défenseurs (moral) et repli de la garnison. Lu par sim-battle (CaptureRules).",
   "type": "object",
   "$defs": {
     "point": {

@@ -1,4 +1,4 @@
-//! TW2 T4 (ADR 0104): the step of the capture points of a siege battle
+//! TW2 T4 (ADR 0108): the step of the capture points of a siege battle
 //! (rules and types in [`crate::capture`]) and the last stand of the
 //! garrison on the square.
 
@@ -7,6 +7,18 @@ use crate::capture::{CapturePoint, CapturePointKind, CaptureRules};
 use crate::setup::SideId;
 use crate::siege::SiegeWorks;
 use crate::unit::Unit;
+
+impl SiegeWorks {
+    /// T4: the capture points, built at the first step of the battle; before
+    /// it (deployment) the points as they will be, untouched.
+    pub fn capture_points(&self) -> Vec<CapturePoint> {
+        if self.points.is_empty() {
+            capture_points(self, CaptureRules::bundled())
+        } else {
+            self.points.clone()
+        }
+    }
+}
 
 /// The market square and the gate (inside it) of `works`.
 pub(super) fn capture_points(works: &SiegeWorks, rules: &CaptureRules) -> Vec<CapturePoint> {
@@ -144,7 +156,7 @@ impl BattleSim {
             && (x - gx).powi(2) + (z - gz).powi(2) <= reach * reach
     }
 
-    /// Last stand (ADR 0104): a defender regiment on or around the square
+    /// Last stand (ADR 0108): a defender regiment on or around the square
     /// once the town is open (a breach or the gate down).
     pub(super) fn in_last_stand(&self, unit: &Unit) -> bool {
         let Some(works) = &self.siege else {

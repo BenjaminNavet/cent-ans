@@ -531,7 +531,7 @@ impl BattleSim {
         let gate_fell = new
             .iter()
             .any(|k| matches!(k, SiegeFxKind::GateBroken { .. }));
-        // T4 (ADR 0104): the first breach too, when the rules say so.
+        // T4 (ADR 0108): the first breach too, when the rules say so.
         let wall_fell = crate::capture::CaptureRules::bundled().fall_back.on_breach
             && new
                 .iter()

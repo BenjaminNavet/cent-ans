@@ -22,6 +22,7 @@ const LABELS := {
 	"ammo_out": "Munitions épuisées",
 	"wall_breached": "Muraille rompue",
 	"gate_destroyed": "Porte détruite",
+	"square_threatened": "La place est menacée",
 }
 ## Cris courts (spec CB5) : seuls la déroute et la chute du général en ont un. `_detect_events`
 ## de `BattleAudio` les joue déjà sur la transition d'état ; celui-ci s'appuie sur le
@@ -165,7 +166,7 @@ func visible_entries() -> Array[Dictionary]:
 ## depuis `data/rules/battle_alerts.json` § `importance`) ; repli sur les poids du fichier
 ## d'origine si les données ne sont pas encore chargées (maquette, tests).
 const IMPORTANCE_FALLBACK := {
-	"general_down": 100, "gate_destroyed": 90, "wall_breached": 80,
+	"general_down": 100, "square_threatened": 95, "gate_destroyed": 90, "wall_breached": 80,
 	"rout": 70, "flanked": 60, "reinforcements": 50, "ammo_out": 40,
 }
 
@@ -242,6 +243,11 @@ func _draw_glyph(glyph: Control) -> void:
 		"wall_breached":  # muraille avec une brèche
 			glyph.draw_rect(Rect2(c + Vector2(-9, -2), Vector2(6, 8)), INK)
 			glyph.draw_rect(Rect2(c + Vector2(3, -2), Vector2(6, 8)), INK)
+		"square_threatened":  # drapeau planté sur la place
+			glyph.draw_line(c + Vector2(-5, 9), c + Vector2(-5, -9), INK, 2.0)
+			glyph.draw_colored_polygon(PackedVector2Array([
+				c + Vector2(-4, -9), c + Vector2(8, -6), c + Vector2(-4, -2)]), Color(0.55, 0.1, 0.08))
+			glyph.draw_line(c + Vector2(-9, 9), c + Vector2(9, 9), GOLD, 2.0)
 		"gate_destroyed":  # porte effondrée
 			glyph.draw_rect(Rect2(c + Vector2(-9, -8), Vector2(4, 16)), INK)
 			glyph.draw_rect(Rect2(c + Vector2(5, -8), Vector2(4, 16)), INK)
