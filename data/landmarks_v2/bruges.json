@@ -10429,7 +10429,7 @@
    "name": "Église Saint-Gilles",
    "model": "church",
    "at": [211.4, 713.3],
-   "angle_deg": 0.0,
+   "angle_deg": -14.9,
    "clear_m": 3,
    "certainty": "probable",
    "params": {
