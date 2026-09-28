@@ -49,10 +49,10 @@ Chantier PO phase 2 (`docs/wip/po.md`). Branche `feat/p2d-sieges` depuis `main` 
 
 ## État
 
-- [ ] squelette (cette note, `game/tests/p2d_ui_test.gd`)
-- [ ] `chronicle_window.gd` → `UiType`
-- [ ] `pre_battle_dialog.gd` → `UiType.size`
-- [ ] `naval_pre_battle_dialog.gd` → `UiType.size`
+- [x] squelette (cette note, `game/tests/p2d_ui_test.gd`)
+- [x] `chronicle_window.gd` → `UiType`
+- [x] `pre_battle_dialog.gd` → `UiType.size`
+- [x] `naval_pre_battle_dialog.gd` → `UiType.size`
 - [ ] `p2d_ui_test.gd` (C1-C3 : fenêtre de sort de ville, dialogue de siège, dialogue naval)
 - [ ] tests : smoke, po_ui_test, p2c_ui_test, p2g_ui_test, p2d_ui_test, tw2_t1_capture_test,
       ub1_ui_test, nv1_naval_test
