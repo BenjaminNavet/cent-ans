@@ -360,6 +360,19 @@ func _test_paris() -> void:
 		var verts: PackedVector3Array = (m["arrays"] as Array)[Mesh.ARRAY_VERTEX]
 		_check(verts.size() >= 36 and verts.size() % 3 == 0, "Paris monument %s mesh (%d vertices)" % [m["id"], verts.size()])
 	_check(ids.has("notre_dame") and float(ids["notre_dame"]["length"]) >= 125.0 and float(ids["notre_dame"]["top"]) > 68.0, "Notre-Dame at real size")
+	# RS-G : monuments fusionnés par cellule (un maillage par cellule, base et ancrage par sommet).
+	var cells := TownBuilder._extra_meshes(plan)
+	var merged := 0
+	var verts_total := 0
+	for m in plan["v2_monuments"]:
+		verts_total += ((m["arrays"] as Array)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var cell_verts := 0
+	for cell: Dictionary in cells:
+		merged += (cell["ids"] as Array).size()
+		cell_verts += ((cell["arrays"] as Array)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+		_check(((cell["arrays"] as Array)[Mesh.ARRAY_CUSTOM0] as PackedFloat32Array).size() == ((cell["arrays"] as Array)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() * 4, "merged cell custom data")
+	_check(merged == (plan["v2_monuments"] as Array).size() and cell_verts == verts_total, "all Paris monuments merged (%d in %d cells)" % [merged, cells.size()])
+	_check(cells.size() * 2 < merged, "Paris monuments merged by cell: %d nodes for %d monuments" % [cells.size(), merged])
 	for id in ["tour_horloge", "bastille", "louvre_charles_v", "celestins"]:
 		_check(not ids.has(id), "1340: no %s" % id)
 	var later := LandmarkPlan.generate(city, 1375, _heights())

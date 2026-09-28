@@ -24,6 +24,8 @@ const STREET_GROUP := 40
 ## toutes les maisons de chaque modèle dans le vertex shader (et chaque cascade d'ombre) dès
 ## qu'une seule était proche : plus lent que ZG6 malgré moitié moins d'appels de dessin.
 const DETAIL_CELL_M := 1000.0
+## RS-G : côté des cellules de fusion des monuments v2 (m).
+const MONUMENT_CELL_M := 600.0
 const BLOCK_HEIGHT := {"townhouse": 13.5, "timber": 11.2, "stonehouse": 11.2, "cottage": 7.2, "longere": 7.3, "barn": 11.6}
 
 static var _manifest: Dictionary = {}
@@ -795,28 +797,97 @@ static func _wall_ring_arrays(plan: Dictionary) -> Array:
 
 
 ## VH4 : maillages uniques (monuments à gabarit réel) préparés dans le fil du plan.
+## RS-G : fusionnés par cellule de `MONUMENT_CELL_M` (un maillage, un appel de dessin par cellule
+## au lieu d'un par monument : Paris en a ≈ 110). Sommets déjà tournés et placés dans le repère du
+## plan ; base (m), ancrage xz du monument et teinte dans `CUSTOM0` (`base_source` 2 du shader) :
+## chaque monument garde sa propre hauteur de relief.
 static func _extra_meshes(plan: Dictionary) -> Array:
-	var out: Array = []
+	var cells := {}  # Vector2i → [monuments]
 	for m: Dictionary in plan.get("v2_monuments", []):
-		out.append(m)
+		var arrays: Array = m["arrays"]
+		if arrays.is_empty() or (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():
+			continue
+		var key := Vector2i(floori(float(m["x"]) / MONUMENT_CELL_M), floori(float(m["y"]) / MONUMENT_CELL_M))
+		if not cells.has(key):
+			cells[key] = []
+		(cells[key] as Array).append(m)
+	var out: Array = []
+	var keys := cells.keys()
+	keys.sort()
+	for key: Vector2i in keys:
+		out.append(merge_monuments(cells[key], key))
 	return out
 
 
-func _build_extra(m: Dictionary) -> void:
-	var arrays: Array = m["arrays"]
-	if arrays.is_empty() or (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():
-		return
+## Fusion d'un groupe de monuments préparés (`v2_monuments`) en un seul jeu de tableaux.
+static func merge_monuments(group: Array, key: Vector2i) -> Dictionary:
+	var verts := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var colors := PackedColorArray()
+	var uvs := PackedVector2Array()
+	var custom := PackedFloat32Array()
+	var lo := INF
+	var hi := -INF
+	var top := 0.0
+	var rect := Rect2()
+	var ids: Array = []
+	for i in group.size():
+		var m: Dictionary = group[i]
+		var arrays: Array = m["arrays"]
+		var at := Vector3(float(m["x"]), 0.0, float(m["y"]))
+		var xform := Transform3D(basis_x(Vector2(cos(float(m["yaw"])), sin(float(m["yaw"])))), at)
+		var mv: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var mn: Variant = arrays[Mesh.ARRAY_NORMAL]
+		var mc: Variant = arrays[Mesh.ARRAY_COLOR]
+		var mu: Variant = arrays[Mesh.ARRAY_TEX_UV]
+		var base := float(m["base"])
+		var n0 := verts.size()
+		var n := mv.size()
+		verts.resize(n0 + n)
+		normals.resize(n0 + n)
+		colors.resize(n0 + n)
+		uvs.resize(n0 + n)
+		custom.resize((n0 + n) * 4)
+		for k in n:
+			verts[n0 + k] = xform * mv[k]
+			normals[n0 + k] = xform.basis * (mn as PackedVector3Array)[k] if mn is PackedVector3Array else Vector3.UP
+			colors[n0 + k] = (mc as PackedColorArray)[k] if mc is PackedColorArray else Color(1, 1, 1, 1)
+			uvs[n0 + k] = (mu as PackedVector2Array)[k] if mu is PackedVector2Array else Vector2.ZERO
+			var o := (n0 + k) * 4
+			custom[o] = base
+			custom[o + 1] = at.x
+			custom[o + 2] = at.z
+			custom[o + 3] = 0.5
+		lo = minf(lo, base)
+		hi = maxf(hi, base)
+		top = maxf(top, float(m.get("top", 40.0)))
+		# L'emprise d'un grand monument dépasse le rayon forfaitaire des instances.
+		var r := maxf(float(m.get("length", 40.0)), float(m.get("depth", 40.0)))
+		var own := Rect2(Vector2(at.x, at.z) - Vector2(r, r), Vector2(r, r) * 2.0)
+		rect = own if i == 0 else rect.merge(own)
+		ids.append(str(m.get("id", "")))
+	var merged := []
+	merged.resize(Mesh.ARRAY_MAX)
+	merged[Mesh.ARRAY_VERTEX] = verts
+	merged[Mesh.ARRAY_NORMAL] = normals
+	merged[Mesh.ARRAY_COLOR] = colors
+	merged[Mesh.ARRAY_TEX_UV] = uvs
+	merged[Mesh.ARRAY_CUSTOM0] = custom
+	return {"key": key, "arrays": merged, "lo": lo, "hi": hi, "top": top, "rect": rect, "ids": ids}
+
+
+## Nœud d'une cellule de monuments fusionnés (`merge_monuments`).
+func _build_extra(cell: Dictionary) -> void:
 	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	var d := Vector2(cos(float(m["yaw"])), sin(float(m["yaw"])))
-	var xform := Transform3D(basis_x(d), Vector3(float(m["x"]), 0.0, float(m["y"])))
-	var node := _multimesh(mesh, [xform], [float(m["base"])], [0.5], material(0, true, 0.0, meters_per_unit), "all", float(m.get("top", 40.0)) + 10.0)
-	node.name = "Monument_" + str(m.get("id", ""))
-	# L'emprise d'un grand monument dépasse le rayon forfaitaire des instances.
-	var r := maxf(float(m.get("length", 40.0)), float(m.get("depth", 40.0)))
-	var rect := Rect2(Vector2(float(m["x"]), float(m["y"])) - Vector2(r, r), Vector2(r, r) * 2.0)
-	geometry[geometry.size() - 1][4] = rect
-	refresh_aabbs(MapData.vertical_scale())
+	var fmt := Mesh.ARRAY_FORMAT_CUSTOM0 | (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT)
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, cell["arrays"], [], {}, fmt)
+	var mi := MeshInstance3D.new()
+	var key: Vector2i = cell["key"]
+	mi.name = "Monument_cell_%d_%d" % [key.x, key.y]
+	mi.mesh = mesh
+	mi.material_override = material(2, true, 0.0, meters_per_unit)
+	mi.set_meta("monuments", cell["ids"])
+	_register(mi, "all", float(cell["lo"]), float(cell["hi"]), float(cell["top"]) + 10.0, cell["rect"])
 
 
 func _build_walls() -> void:
