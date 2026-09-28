@@ -5,9 +5,11 @@ extends Node3D
 ## en cache, il dessine tout le terrain de campagne à la place des morceaux E0 de
 ## `TerrainBuilder` (qui restent le repli sans cache, avec le relief fin `FineTerrainJob`).
 ##
-## - Arbre : racine = toute la carte (4096 unités), profondeur n, nœud (n, col, row) de côté
-##   `4096 / 2^n` aligné sur la grille des tuiles de la pyramide (étage L = n − 4 : un nœud de
-##   profondeur 4 est une tuile E0 de 256 unités). Profondeur maximale : étage de données le plus
+## - Arbre : nœud (n, col, row) de côté `DEPTH0_UNITS / 2^n` (4096 / 2^n) aligné sur la grille
+##   des tuiles de la pyramide (étage L = n − 4 : un nœud de profondeur 4 est une tuile E0 de 256
+##   unités). Racines (lot OM1, ADR 0115) : grille de nœuds à la profondeur `_root_depth`, la plus
+##   petite dont le côté divise la largeur et la hauteur du monde (4096² : une racine, profondeur 0 ;
+##   7168 × 6144 : 7 × 6 racines de 1024). Profondeur maximale : étage de données le plus
 ##   fin sous le nœud + `extra_depth` (au-delà, les sommets suréchantillonneraient la page).
 ## - Sélection CDLOD par la distance, équivalente à l'erreur à l'écran : un nœud de profondeur n
 ##   (espacement des sommets s = côté / 64) est accepté quand sa projection s × K / d ≤
@@ -34,7 +36,8 @@ extends Node3D
 signal surface_changed(rect: Rect2)
 
 const PATCH_QUADS := 64
-const ROOT_UNITS := 4096.0
+## Côté d'un nœud de profondeur 0 : échelle des profondeurs, pas la taille du monde (ADR 0115).
+const DEPTH0_UNITS := ReliefPyramid.ROOT_TILE_UNITS * 16.0
 ## Profondeur n d'un nœud de la taille d'une tuile E0 (étage L = n − DEPTH_E0).
 const DEPTH_E0 := 4
 const PAGE_PX := ReliefPyramid.TILE_PX
@@ -109,6 +112,11 @@ var _frame: int = 0
 var _residency_version: int = 0
 var _range_version: int = 0
 var _bounds: PackedVector2Array = PackedVector2Array()
+## Tuiles E0 en x et en y (grille des morceaux, `pyramid.root_cols` × `pyramid.root_rows`).
+var _root_cols: int = 0
+var _root_rows: int = 0
+## Profondeur des racines (`root_depth`).
+var _root_depth: int = 0
 var _cam: Vector3 = Vector3.ZERO
 var _planes: Array[Plane] = []
 var _k_proj: float = 1.0
@@ -146,13 +154,12 @@ var _step_ms_max: Dictionary = {"collect": 0.0, "poll": 0.0, "carve_job": 0.0, "
 
 
 ## `pyramid` doit être disponible ; `terrain_material` est le matériau partagé des morceaux E0
-## (mêmes splat, forêts, frontières, brouillard, surbrillance) ; `chunk_bounds` : 16 × 16 bornes
-## (min, max) des hauteurs en mètres par morceau E0, pour les boîtes englobantes.
+## (mêmes splat, forêts, frontières, brouillard, surbrillance) ; `chunk_bounds` : root_cols × root_rows
+## bornes (min, max) des hauteurs en mètres par morceau E0 (ligne par ligne), pour les boîtes englobantes.
 func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapData, chunk_bounds: PackedVector2Array) -> void:
-	pyramid = relief
 	material = terrain_material
 	map_data = data
-	_bounds = chunk_bounds
+	_set_world(relief, chunk_bounds)
 	_decoder = null
 	_main_store = null
 	_requested.clear()
@@ -162,7 +169,7 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	elif use_rust_decoder and ClassDB.class_exists("GameDataStore"):
 		_main_store = ClassDB.instantiate("GameDataStore")
 	_main_queue.clear()
-	_chunk_top.resize(256)
+	_chunk_top.resize(_root_cols * _root_rows)
 	_chunk_top.fill(-1)
 	wait_jobs(false)
 	_pages.clear()
@@ -190,6 +197,28 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	material.set_shader_parameter("qt_page_h_range", pyramid.height_range_m)
 
 
+## Pyramide, grille des racines (lot OM1, ADR 0115) et bornes des morceaux E0.
+func _set_world(relief: ReliefPyramid, chunk_bounds: PackedVector2Array) -> void:
+	pyramid = relief
+	_bounds = chunk_bounds
+	_root_cols = relief.root_cols
+	_root_rows = relief.root_rows
+	_root_depth = root_depth(_root_cols, _root_rows)
+
+
+## Tests (lot OM1) : sélection seule, sans pages ni matériau ; `ReliefLod` natif si disponible.
+func setup_selection(relief: ReliefPyramid, chunk_bounds: PackedVector2Array) -> void:
+	_set_world(relief, chunk_bounds)
+	_chunk_top.resize(_root_cols * _root_rows)
+	_chunk_top.fill(-1)
+	_setup_native()
+
+
+## Profondeur des racines de la sélection.
+func root_depth_used() -> int:
+	return _root_depth
+
+
 ## PB3g : `ReliefLod` avec les tuiles de la pyramide et les bornes des morceaux.
 func _setup_native() -> void:
 	_native = null
@@ -200,7 +229,7 @@ func _setup_native() -> void:
 	var tiles: Array = []
 	for level in pyramid.max_level + 1:
 		tiles.append(pyramid.tile_indices(level))
-	_native.call("set_pyramid", pyramid.max_level, tiles)
+	_native.call("set_pyramid", pyramid.max_level, tiles, _root_cols, _root_rows)
 	for key: int in pyramid.broken_keys():
 		_native.call("mark_broken", key)
 	_native.call("set_bounds", _bounds)
@@ -244,7 +273,7 @@ func update_view(camera: Camera3D) -> void:
 		_wanted.clear()
 		_page_cache.clear()
 		_missing_wanted = 0
-		_select(0, 0, 0)
+		_select_roots()
 		if _items.size() > max_items:
 			_px_scale = minf(_px_scale * 1.2, 8.0)
 		elif _items.size() < max_items * 0.6 and _px_scale > 1.0:
@@ -282,7 +311,7 @@ func _prepare_camera(camera: Camera3D) -> void:
 		_k_proj = k / threshold
 		_ranges.resize(max_depth + 2)
 		for n in max_depth + 2:
-			var size := ROOT_UNITS / float(1 << n)
+			var size := DEPTH0_UNITS / float(1 << n)
 			# Portée du niveau n = distance d'acceptation du parent : 2 × s_n × K / seuil, au moins
 			# 3 côtés (le morphing doit s'achever avant le voisin plus grossier).
 			_ranges[n] = maxf(2.0 * size / PATCH_QUADS * _k_proj, 3.0 * size)
@@ -379,7 +408,7 @@ func compare_selection(camera: Camera3D) -> Dictionary:
 	_wanted.clear()
 	_page_cache.clear()
 	_missing_wanted = 0
-	_select(0, 0, 0)
+	_select_roots()
 	var keys := PackedInt64Array()
 	var fine := PackedInt64Array()
 	var coarse := PackedInt64Array()
@@ -402,7 +431,25 @@ func compare_selection(camera: Camera3D) -> Dictionary:
 
 
 func node_size(n: int) -> float:
-	return ROOT_UNITS / float(1 << n)
+	return DEPTH0_UNITS / float(1 << n)
+
+
+## Plus petite profondeur dont les nœuds pavent exactement `cols` × `rows` tuiles E0 (miroir de
+## `relief_lod::root_depth`).
+static func root_depth(cols: int, rows: int) -> int:
+	for n in DEPTH_E0:
+		var span := 1 << (DEPTH_E0 - n)
+		if cols % span == 0 and rows % span == 0:
+			return n
+	return DEPTH_E0
+
+
+## Parcourt la grille des racines (ordre ligne par ligne, comme `ReliefLod`).
+func _select_roots() -> void:
+	var span := 1 << (DEPTH_E0 - _root_depth)
+	for r in _root_rows / span:
+		for c in _root_cols / span:
+			_select(_root_depth, c, r)
 
 
 func _select(n: int, c: int, r: int) -> bool:
@@ -412,7 +459,7 @@ func _select(n: int, c: int, r: int) -> bool:
 	var yb := _y_bounds(n, c, r)
 	var bmin := Vector3(ox, yb.x, oz)
 	var bmax := Vector3(ox + size, yb.y, oz + size)
-	if n > 0 and not _box_in_sphere(bmin, bmax, _ranges[n]):
+	if n > _root_depth and not _box_in_sphere(bmin, bmax, _ranges[n]):
 		return false
 	if not _box_in_frustum(bmin, bmax):
 		return true
@@ -440,16 +487,16 @@ func _depth_cap(n: int, c: int, r: int) -> int:
 ## Bornes (min, max) des hauteurs monde du nœud, depuis les morceaux E0 (mètres, marges
 ## comprises) et le facteur vertical courant.
 func _y_bounds(n: int, c: int, r: int) -> Vector2:
-	if _bounds.size() < 256:
+	if _root_cols <= 0 or _root_rows <= 0 or _bounds.size() < _root_cols * _root_rows:
 		return _to_world_bounds(Vector2(-400.0, 5000.0))
 	if n >= DEPTH_E0:
 		var shift := n - DEPTH_E0
-		return _to_world_bounds(_bounds[clampi(r >> shift, 0, 15) * 16 + clampi(c >> shift, 0, 15)])
+		return _to_world_bounds(_bounds[clampi(r >> shift, 0, _root_rows - 1) * _root_cols + clampi(c >> shift, 0, _root_cols - 1)])
 	var span := 1 << (DEPTH_E0 - n)
 	var result := Vector2(INF, -INF)
 	for j in span:
 		for i in span:
-			var b := _bounds[(r * span + j) * 16 + c * span + i]
+			var b := _bounds[(r * span + j) * _root_cols + c * span + i]
 			result = Vector2(minf(result.x, b.x), maxf(result.y, b.y))
 	return _to_world_bounds(result)
 
@@ -480,7 +527,7 @@ func _add_item(n: int, c: int, r: int, quadrant: int, bmin: Vector3, bmax: Vecto
 	var center := (bmin + bmax) * 0.5
 	var dist := _cam.distance_to(_cam.clamp(bmin, bmax))
 	var fine := _page_of(n, c, r, dist)
-	var coarse := fine if n == 0 else _page_of(n - 1, c >> 1, r >> 1, dist)
+	var coarse := fine if n == _root_depth else _page_of(n - 1, c >> 1, r >> 1, dist)
 	_items.append({
 		"key": (n << 40) | (r << 20) | (c << 3) | quadrant,
 		"n": n, "origin": Vector2(bmin.x, bmin.z), "quadrant": quadrant,
@@ -578,7 +625,7 @@ func _set_page_params(slot: MeshInstance3D, item: Dictionary, fine: int, coarse:
 	var n: int = item["n"]
 	var s := node_size(n) / PATCH_QUADS
 	var morph := Vector4(1.0e9, 1.0, fade, minf(s * skirt_factor, skirt_max) + 0.02)
-	if n > 0:
+	if n > _root_depth:
 		var reach: float = _ranges[n]
 		morph.x = morph_ratio * reach
 		morph.y = 1.0 / maxf((1.0 - morph_ratio) * reach, 1e-4)
@@ -621,12 +668,13 @@ func _neighbors(key: int, diagonal: bool) -> Vector4:
 	var r := ReliefPyramid.row_of_key(key)
 	var offsets: Array[Vector2i] = DIAGONALS if diagonal else SIDES
 	var result := Vector4()
-	var side := ReliefPyramid.tiles_per_side(level)
+	var across := pyramid.cols(level)
+	var down := pyramid.rows(level)
 	for i in 4:
 		var nc := c + offsets[i].x
 		var nr := r + offsets[i].y
 		var layer := -1.0
-		if nc >= 0 and nr >= 0 and nc < side and nr < side:
+		if nc >= 0 and nr >= 0 and nc < across and nr < down:
 			var page: Dictionary = _pages.get(ReliefPyramid.key_of(level, nc, nr), {})
 			if not page.is_empty():
 				layer = float(page["layer"])
@@ -854,16 +902,18 @@ func _note_step(step: String, usec: int) -> void:
 	PerfProbe.add("qt/" + step, usec)  # SZ6
 
 
-## Morceaux E0 (index ligne × 16 + colonne) touchés par un rectangle carte.
-static func _chunks_of(rect: Rect2) -> PackedInt32Array:
+## Morceaux E0 (index ligne × `_root_cols` + colonne) touchés par un rectangle carte.
+func _chunks_of(rect: Rect2) -> PackedInt32Array:
 	var result := PackedInt32Array()
-	var c0 := clampi(int(floor(rect.position.x / 256.0)), 0, 15)
-	var r0 := clampi(int(floor(rect.position.y / 256.0)), 0, 15)
-	var c1 := clampi(int(ceil(rect.end.x / 256.0)) - 1, 0, 15)
-	var r1 := clampi(int(ceil(rect.end.y / 256.0)) - 1, 0, 15)
+	if _root_cols <= 0 or _root_rows <= 0:
+		return result
+	var c0 := clampi(int(floor(rect.position.x / ROOT_TILE_UNITS)), 0, _root_cols - 1)
+	var r0 := clampi(int(floor(rect.position.y / ROOT_TILE_UNITS)), 0, _root_rows - 1)
+	var c1 := clampi(int(ceil(rect.end.x / ROOT_TILE_UNITS)) - 1, 0, _root_cols - 1)
+	var r1 := clampi(int(ceil(rect.end.y / ROOT_TILE_UNITS)) - 1, 0, _root_rows - 1)
 	for r in range(r0, r1 + 1):
 		for c in range(c0, c1 + 1):
-			result.append(r * 16 + c)
+			result.append(r * _root_cols + c)
 	return result
 
 
@@ -898,7 +948,7 @@ func _alloc_layer() -> int:
 	for index in _chunks_of(rect):
 		if _chunk_top[index] <= old_level:
 			touched.append(index)
-			touched_rects.append(Rect2((index % 16) * 256.0, (index / 16) * 256.0, 256.0, 256.0))
+			touched_rects.append(Rect2((index % _root_cols) * ROOT_TILE_UNITS, (index / _root_cols) * ROOT_TILE_UNITS, ROOT_TILE_UNITS, ROOT_TILE_UNITS))
 	# RS-K : étage le plus fin restant par morceau touché, sans parcourir toutes les pages.
 	var tops := finest_levels(touched_rects)
 	for k in touched.size():
@@ -991,9 +1041,9 @@ func perf_stats() -> Dictionary:
 ## Hauteur monde de la surface la plus fine chargée en (x, y) carte (bilinéaire dans la page),
 ## NAN si aucune page de la pyramide ne couvre le point.
 func surface_height_at(x: float, y: float) -> float:
-	if pyramid == null or x < 0.0 or y < 0.0 or x >= 4096.0 or y >= 4096.0:
+	if pyramid == null or x < 0.0 or y < 0.0 or x >= _root_cols * ROOT_TILE_UNITS or y >= _root_rows * ROOT_TILE_UNITS:
 		return NAN
-	var top := _chunk_top[int(y / 256.0) * 16 + int(x / 256.0)]
+	var top := _chunk_top[int(y / ROOT_TILE_UNITS) * _root_cols + int(x / ROOT_TILE_UNITS)]
 	if top < 0:
 		return NAN
 	# Dernière page utilisée : valable si elle contient le point et qu'aucune page plus fine ne
@@ -1060,7 +1110,7 @@ static func _bilinear(bytes: PackedByteArray, fx: float, fy: float, h_min: float
 
 ## Instantané des pages chargées qui touchent `rect`, lisible depuis un fil de travail sans
 ## verrou (octets partagés en copie sur écriture) : grille pour `TerrainBuilder.grid_height`
-## (coordonnées locales à `origin`), repli sur la heightmap 4096 hors pages.
+## (coordonnées locales à `origin`), repli sur la heightmap de la carte hors pages.
 ## ZG7a : étage de page le plus fin chargé qui touche chacun des rectangles (-1 : aucun), en
 ## un seul parcours des pages (sans copier leurs octets comme `surface_snapshot`).
 ## RS-K : par rectangle, étages du plus fin au plus grossier avec arrêt à la première page qui le
@@ -1086,11 +1136,12 @@ func _finest_level_in(rect: Rect2) -> int:
 		var c1 := ceili((rect.end.x - ReliefPyramid.GRID_OFFSET) / t)
 		var r0 := floori((rect.position.y - ReliefPyramid.GRID_OFFSET) / t) - 1
 		var r1 := ceili((rect.end.y - ReliefPyramid.GRID_OFFSET) / t)
-		var last := ReliefPyramid.tiles_per_side(level) - 1
-		var candidates := (clampi(c1, 0, last) - clampi(c0, 0, last) + 1) * (clampi(r1, 0, last) - clampi(r0, 0, last) + 1)
+		var last_c := pyramid.cols(level) - 1
+		var last_r := pyramid.rows(level) - 1
+		var candidates := (clampi(c1, 0, last_c) - clampi(c0, 0, last_c) + 1) * (clampi(r1, 0, last_r) - clampi(r0, 0, last_r) + 1)
 		if candidates <= keys.size():
-			for row in range(clampi(r0, 0, last), clampi(r1, 0, last) + 1):
-				for col in range(clampi(c0, 0, last), clampi(c1, 0, last) + 1):
+			for row in range(clampi(r0, 0, last_r), clampi(r1, 0, last_r) + 1):
+				for col in range(clampi(c0, 0, last_c), clampi(c1, 0, last_c) + 1):
 					var key := ReliefPyramid.key_of(level, col, row)
 					if keys.has(key) and _tile_rect(key).intersects(rect):
 						return level

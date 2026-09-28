@@ -9,6 +9,13 @@
     "version": { "type": "integer", "minimum": 1 },
     "tile_px": { "const": 512 },
     "root_tile_units": { "const": 256 },
+    "root_origin_tiles": {
+      "type": "array",
+      "description": "Décalage d'origine du cache (lot OM1, ADR 0115), en tuiles racines [dx, dy] : la tuile (niveau k, col, row) du cache est la tuile monde (col + dx·2^k, row + dy·2^k). Défaut [0, 0].",
+      "prefixItems": [ { "type": "integer" }, { "type": "integer" } ],
+      "minItems": 2,
+      "maxItems": 2
+    },
     "height_min_m": { "type": "number" },
     "height_range_m": { "type": "number", "exclusiveMinimum": 0 },
     "dir": { "type": "string", "description": "Dossier des tuiles E1+, relatif à data/map/." },

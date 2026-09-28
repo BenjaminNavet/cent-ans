@@ -44,7 +44,7 @@ uniform float tone_period = 22.0;
 uniform float scale_jitter = 0.25;
 uniform sampler2D forest_cover : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_forest_cover = false;
-uniform vec2 cover_map_size = vec2(4096.0, 4096.0);
+uniform vec2 cover_map_size = vec2(1.0, 1.0);  // taille du monde (map.json), fournie par le script
 uniform vec4 cover_channel = vec4(0.0, 0.0, 1.0, 0.0);
 uniform float cover_low = 0.35;
 uniform float cover_high = 0.65;

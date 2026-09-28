@@ -186,7 +186,7 @@ pub struct CellSet {
     cells: Vec<u32>,
 }
 
-/// Blocks per side of the coarse bitmap (32 cells each: 4096 cells).
+/// Blocks per side of the coarse bitmap (32 cells each: 4096 cells, enough for a 7168-unit map).
 const COARSE_SIDE: usize = 128;
 
 impl CellSet {

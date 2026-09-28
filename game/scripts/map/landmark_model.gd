@@ -306,8 +306,8 @@ func _on_chunk_surface_changed(index: int) -> void:
 	# ZG4 : un changement d'échelle verticale seul ne touche pas aux hauteurs en mètres.
 	if _terrain == null or _terrain.chunk_px <= 0 or _terrain.rescaling_vertical:
 		return
-	var cx := index % TerrainBuilder.CHUNKS
-	var cy := index / TerrainBuilder.CHUNKS
+	var cx := index % _terrain.chunks_x
+	var cy := index / _terrain.chunks_x
 	var rect := Rect2(cx * _terrain.chunk_px, cy * _terrain.chunk_px, _terrain.chunk_px, _terrain.chunk_px)
 	if rect.intersects(Rect2(_origin, Vector2(_extent, _extent))):
 		# Cuisson en cours : relancée à la fin (la surface a pu changer sous les lignes déjà faites).

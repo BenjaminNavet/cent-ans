@@ -7,7 +7,7 @@ render_mode blend_mix, depth_draw_never, cull_disabled, unshaded, shadows_disabl
 // (la caméra passe dessous) et en vue parchemin.
 
 uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
-uniform vec2 map_size = vec2(4096.0, 4096.0);
+uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 // Opacité selon la distance caméra (CampaignWeatherView) et part max.
 uniform float cloud_alpha = 0.0;
 uniform vec3 rain_color : source_color = vec3(0.50, 0.52, 0.56);

@@ -369,7 +369,7 @@ func on_settlement_model(px: Vector2) -> bool:
 	var margin := ModelLibrary.HAMLET_SCALE * 0.3
 	for dy in [-1, 0, 1]:
 		for dx in [-1, 0, 1]:
-			for j in _settlements_by_chunk.get(index + dy * TerrainBuilder.CHUNKS + dx, PackedInt32Array()):
+			for j in _settlements_by_chunk.get(index + dy * terrain.chunks_x + dx, PackedInt32Array()):
 				if _models[j] != null and not _landmarks.has(j) and px.distance_to(model_px(j)) < _model_radius[j] + margin:
 					return true
 	return false
@@ -430,7 +430,7 @@ func _append_pairs_of(i: int, both: bool) -> void:
 	var index := terrain.chunk_index_at(px.x, px.y)
 	for dy in [-1, 0, 1]:
 		for dx in [-1, 0, 1]:
-			for j in _settlements_by_chunk.get(index + dy * TerrainBuilder.CHUNKS + dx, PackedInt32Array()):
+			for j in _settlements_by_chunk.get(index + dy * terrain.chunks_x + dx, PackedInt32Array()):
 				if j == i or (j > i and not both) or _models[j] == null:
 					continue
 				if px.distance_to(_pair_px[j]) < _model_radius[i] + _model_radius[j]:
@@ -494,7 +494,7 @@ func _fit_model(i: int) -> void:
 	var index := terrain.chunk_index_at(px.x, px.y)
 	for dy in [-1, 0, 1]:
 		for dx in [-1, 0, 1]:
-			var neighbor: int = index + dy * TerrainBuilder.CHUNKS + dx
+			var neighbor: int = index + dy * terrain.chunks_x + dx
 			for j in _settlements_by_chunk.get(neighbor, PackedInt32Array()):
 				if j == i or _models[j] == null:
 					continue
