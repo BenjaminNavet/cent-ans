@@ -1,0 +1,110 @@
+[
+  {
+    "id": "set_sale",
+    "province": "prov_rabat_sale",
+    "kind": "city",
+    "name": {
+      "display": "Salé",
+      "local": "Salā",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -6.8,
+      34.0533
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Cité marchande et port de Salé ; madrasa mérinide (1341).",
+    "sources": [
+      "Salé"
+    ]
+  },
+  {
+    "id": "set_rabat",
+    "province": "prov_rabat_sale",
+    "kind": "town",
+    "name": {
+      "display": "Rabat",
+      "local": "Ribāṭ al-Fatḥ",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -6.8498,
+      34.0209
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Ribat almohade de la Kasbah des Oudayas, face à Salé.",
+    "sources": [
+      "Rabat"
+    ]
+  },
+  {
+    "id": "set_chellah",
+    "province": "prov_rabat_sale",
+    "kind": "village",
+    "name": {
+      "display": "Chellah",
+      "local": "Shāla",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -6.8244,
+      34.0069
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Nécropole royale des Mérinides, enceinte fortifiée sur l'ancienne Sala.",
+    "sources": [
+      "Chellah"
+    ]
+  },
+  {
+    "id": "set_anfa",
+    "province": "prov_rabat_sale",
+    "kind": "town",
+    "name": {
+      "display": "Anfa",
+      "local": "Anfā",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -7.6187,
+      33.5731
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port d'Anfa (futur Casablanca), débarcadère de blé et de laine de la Chaouia.",
+    "sources": [
+      "Casablanca"
+    ]
+  }
+]

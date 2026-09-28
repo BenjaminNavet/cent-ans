@@ -1,0 +1,91 @@
+{
+  "id": "prov_tlemcen",
+  "name": {
+    "display": "Tlemcen",
+    "local": "Tilimsān",
+    "local_language": "arabe maghrébin"
+  },
+  "region": "maghreb",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Tafna"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Tlemcen",
+      "local": "Tilimsān",
+      "local_language": "arabe maghrébin"
+    },
+    "lat": 34.878,
+    "lon": -1.315
+  },
+  "geo": {
+    "capital_lonlat": [
+      -1.315,
+      34.878
+    ],
+    "seed_lonlat": [
+      -1.3,
+      34.75
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_marinids",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 50000,
+        "unrest": 40,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 6000,
+        "unrest": 40,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1250,
+        "unrest": 35,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 35,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Capitale zayyanide conquise le 1er mai 1337 : ville prise, révoltes probables. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1500,
+  "description": "Tlemcen, capitale des Abd al-Wadides (Zayyanides) tombée le 1er mai 1337 après un siège de plus de deux ans ; le pouvoir mérinide s'y installe et Abu l-Hasan y fonde la mosquée de Sidi Boumediene (al-Ubbad).",
+  "sources": [
+    "Tlemcen",
+    "Abd al-Wadides",
+    "Siège de Tlemcen (1335-1337)"
+  ]
+}

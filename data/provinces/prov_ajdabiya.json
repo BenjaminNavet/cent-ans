@@ -1,0 +1,85 @@
+{
+  "id": "prov_ajdabiya",
+  "name": {
+    "display": "Ajdabiya et Aoudjila",
+    "local": "Ajdābiyā",
+    "local_language": "arabe"
+  },
+  "region": "maghreb",
+  "terrain": "desert",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [],
+  "resources": [
+    "res_salt",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Ajdabiya",
+      "local": "Ajdābiyā",
+      "local_language": "arabe"
+    },
+    "lat": 30.7554,
+    "lon": 20.2295
+  },
+  "geo": {
+    "capital_lonlat": [
+      20.2295,
+      30.7554
+    ],
+    "seed_lonlat": [
+      20.6,
+      30.4
+    ],
+    "voronoi_weight": 2.0
+  },
+  "owner": "fac_barqa",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 9000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 30,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 270,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 225,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 50,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 108,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 55,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Steppes et oasis sahariennes de l'intérieur cyrénaïque : Ajdabiya, Aoudjila, Djalo. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market"
+  ],
+  "fortification_level": 1,
+  "base_supply": 400,
+  "description": "L'arrière-pays de la Cyrénaïque : Ajdabiya sur la piste du golfe de Syrte, oasis d'Aoudjila et de Djalo, étapes des caravanes vers l'Égypte et le Fezzan.",
+  "sources": [
+    "Ajdabiya",
+    "Aoudjila"
+  ]
+}

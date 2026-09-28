@@ -1,0 +1,93 @@
+{
+  "id": "prov_barqa",
+  "name": {
+    "display": "Barqa",
+    "local": "Barqa",
+    "local_language": "arabe"
+  },
+  "region": "maghreb",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Barqa (Al-Marj)",
+      "local": "Al-Marj",
+      "local_language": "arabe"
+    },
+    "lat": 32.4914,
+    "lon": 20.8283
+  },
+  "geo": {
+    "capital_lonlat": [
+      20.8283,
+      32.4914
+    ],
+    "seed_lonlat": [
+      21.0,
+      32.35
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_barqa",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 20000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 35,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 600,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 500,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 55,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 240,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Djebel Akhdar et plateau de Cyrénaïque : tribus arabes, éleveurs de chevaux ; suzeraineté mamelouke nominale. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market"
+  ],
+  "fortification_level": 1,
+  "base_supply": 700,
+  "description": "Barqa (Cyrénaïque), massif boisé du Djebel Akhdar, pays des Banu Sulaym et de leurs clients ; les Mamelouks n'y exercent qu'une suzeraineté nominale et achètent des chevaux aux Bédouins.",
+  "sources": [
+    "Cyrénaïque",
+    "Banu Sulaym",
+    "Mamelouks"
+  ],
+  "sea_zones": [
+    "sea_ionian"
+  ],
+  "ports": [
+    "Benghazi (Bernice)"
+  ]
+}

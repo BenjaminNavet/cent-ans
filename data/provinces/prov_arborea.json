@@ -1,0 +1,95 @@
+{
+  "id": "prov_arborea",
+  "name": {
+    "display": "Arborée",
+    "local": "Arborea",
+    "local_language": "sarde"
+  },
+  "region": "italie_sud",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Tirso"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Oristano",
+      "local": "Aristanis",
+      "local_language": "sarde"
+    },
+    "lat": 39.9036,
+    "lon": 8.5911
+  },
+  "geo": {
+    "capital_lonlat": [
+      8.5911,
+      39.9036
+    ],
+    "seed_lonlat": [
+      8.65,
+      40.0
+    ],
+    "voronoi_weight": 1.35
+  },
+  "owner": "fac_arborea",
+  "culture": "cul_sardinian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 24000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 42,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 1200,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 57,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 600,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 62,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 288,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 67,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Judicat d'Arborée : plaine du Campidano d'Oristano et pays de la Tirso. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1000,
+  "description": "Le judicat d'Arborée, dernier des quatre judicats sardes encore autonome, allié de la couronne d'Aragon depuis 1323 ; Oristano en est la capitale.",
+  "sources": [
+    "Judicat d'Arborée",
+    "Pierre III d'Arborée"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "ports": [
+    "Oristano"
+  ]
+}

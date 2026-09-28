@@ -1,0 +1,112 @@
+[
+  {
+    "id": "set_sousse",
+    "province": "prov_sahel",
+    "kind": "city",
+    "name": {
+      "display": "Sousse",
+      "local": "Sūsa",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      10.6411,
+      35.8256
+    ],
+    "weight": 24,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grand port du Sahel, ribat et médina murée.",
+    "sources": [
+      "Sousse"
+    ]
+  },
+  {
+    "id": "set_mahdia",
+    "province": "prov_sahel",
+    "kind": "town",
+    "name": {
+      "display": "Mahdia",
+      "local": "Al-Mahdiyya",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      11.0622,
+      35.5047
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne capitale des Fatimides, presqu'île fortifiée.",
+    "sources": [
+      "Mahdia"
+    ]
+  },
+  {
+    "id": "set_monastir",
+    "province": "prov_sahel",
+    "kind": "castle",
+    "name": {
+      "display": "Monastir",
+      "local": "Al-Munastīr",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      10.8,
+      35.7833
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ribat de Monastir, forteresse côtière.",
+    "sources": [
+      "Monastir (Tunisie)"
+    ]
+  },
+  {
+    "id": "set_sfax",
+    "province": "prov_sahel",
+    "kind": "town",
+    "name": {
+      "display": "Sfax",
+      "local": "Ṣafāqis",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      10.76,
+      34.7406
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port d'huile d'olive et d'éponges, ville marchande de l'Ifriqiya.",
+    "sources": [
+      "Sfax"
+    ]
+  }
+]

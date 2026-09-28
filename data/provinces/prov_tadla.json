@@ -1,0 +1,90 @@
+{
+  "id": "prov_tadla",
+  "name": {
+    "display": "Tadla",
+    "local": "Tādlā",
+    "local_language": "berbère"
+  },
+  "region": "maghreb",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Oum Errabia",
+    "Oued el Abid"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kasba Tadla",
+      "local": "Qaṣbat Tādlā",
+      "local_language": "berbère"
+    },
+    "lat": 32.6,
+    "lon": -6.2833
+  },
+  "geo": {
+    "capital_lonlat": [
+      -6.2833,
+      32.6
+    ],
+    "seed_lonlat": [
+      -6.3,
+      32.4
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_marinids",
+  "culture": "cul_berber",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 38000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 1520,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 950,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 456,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Piémont du Moyen Atlas, tribus berbères sanhaja et zénètes. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1400,
+  "description": "Plaine de Tadla, sur l'Oum Errabia : élevage transhumant, base de tribus berbères, route de Fès à Marrakech.",
+  "sources": [
+    "Tadla",
+    "Kasba Tadla"
+  ]
+}

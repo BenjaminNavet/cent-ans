@@ -1,0 +1,96 @@
+{
+  "id": "prov_malta",
+  "name": {
+    "display": "Malte et Gozo",
+    "local": "Malta",
+    "local_language": "maltais"
+  },
+  "region": "italie_sud",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [],
+  "resources": [
+    "res_salt",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Mdina",
+      "local": "Città Notabile",
+      "local_language": "maltais"
+    },
+    "lat": 35.8867,
+    "lon": 14.4025
+  },
+  "geo": {
+    "capital_lonlat": [
+      14.4025,
+      35.8867
+    ],
+    "seed_lonlat": [
+      14.4,
+      35.9
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_sicily",
+  "culture": "cul_sicilian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 12000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 1200,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 300,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 144,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Petit archipel, longtemps arabe puis normand ; possession de la couronne de Sicile. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 600,
+  "description": "Malte et Gozo, rattachées au royaume de Sicile depuis Roger Ier (1091) ; Mdina, ancienne capitale, et le port de Birgu. Population maltophone, arabe de fond, catholique.",
+  "sources": [
+    "Histoire de Malte",
+    "Mdina",
+    "Gozo"
+  ],
+  "sea_zones": [
+    "sea_mediterranean",
+    "sea_ionian"
+  ],
+  "ports": [
+    "Birgu"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "tit_barqa",
+  "rank": "county",
+  "name": {
+    "display": "Confédération de Barqa",
+    "local": "Qabā'il Barqa",
+    "local_language": "arabe"
+  },
+  "heraldry": {
+    "blazon": "De sable à la lune décroissante d'or.",
+    "description": "Croissant d'or sur champ noir, étendard de tribus bédouines ; emblème de jeu, non attesté.",
+    "primary_color": "#1C1C1C",
+    "secondary_color": "#E0B33A",
+    "uncertain": true,
+    "note": "Aucune source héraldique : emblème conventionnel de jeu."
+  },
+  "de_jure_provinces": [
+    "prov_barqa",
+    "prov_derna",
+    "prov_ajdabiya",
+    "prov_syrte"
+  ],
+  "holder_1337": {
+    "faction": "fac_barqa",
+    "sources": [
+      "Cyrénaïque",
+      "Banu Sulaym"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_barqa_hold",
+      "title": "Garder la Cyrénaïque",
+      "description": "Les tribus doivent conserver la Cyrénaïque.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_barqa"
+      }
+    },
+    {
+      "id": "obj_barqa_derna",
+      "title": "Tenir la côte",
+      "description": "Contrôler Barqa et Derna, ports de la Cyrénaïque.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_barqa",
+          "prov_derna"
+        ]
+      }
+    }
+  ],
+  "description": "Territoire tribal de Barqa, suzerainement rattaché au sultanat mamelouk de façon nominale.",
+  "sources": [
+    "Cyrénaïque",
+    "Banu Sulaym"
+  ]
+}

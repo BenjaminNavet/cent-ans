@@ -1,0 +1,37 @@
+{
+  "id": "chr_muhammad_ibn_thabit",
+  "name": {
+    "display": "Muhammad ibn Thabit, cheikh de Tripoli",
+    "local": "Muḥammad ibn Thābit",
+    "local_language": "arabe maghrébin"
+  },
+  "sex": "male",
+  "house": "Banu Thabit",
+  "faction": "fac_tripoli",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "note": "Année de naissance conventionnelle (incertain)."
+  },
+  "death": {
+    "value": "1348",
+    "note": "Assassiné (vers 1348)."
+  },
+  "historical": true,
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_greedy"
+  ],
+  "piety": 50,
+  "starting_location": "prov_tripolitania",
+  "status": "at_court",
+  "description": "Gouverneur de Tripoli depuis 1326-1327 au nom des Hafsides, en pratique indépendant ; ses successeurs seront chassés par les Génois en 1355.",
+  "sources": [
+    "Banu Thabit"
+  ]
+}

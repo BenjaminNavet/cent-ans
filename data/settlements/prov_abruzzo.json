@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_laquila",
+    "province": "prov_abruzzo",
+    "kind": "city",
+    "name": {
+      "display": "L'Aquila",
+      "local": "L'Aquila",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      13.3995,
+      42.3498
+    ],
+    "weight": 26,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville neuve angevine fondée en 1254, riche de la laine et du safran.",
+    "sources": [
+      "L'Aquila"
+    ]
+  },
+  {
+    "id": "set_sulmona",
+    "province": "prov_abruzzo",
+    "kind": "town",
+    "name": {
+      "display": "Sulmona",
+      "local": "Sulmona",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      13.9274,
+      42.0478
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville d'Ovide, foires, abbaye voisine de Morrone.",
+    "sources": [
+      "Sulmona"
+    ]
+  },
+  {
+    "id": "set_chieti",
+    "province": "prov_abruzzo",
+    "kind": "town",
+    "name": {
+      "display": "Chieti",
+      "local": "Chieti",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      14.1667,
+      42.35
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Siège archiépiscopal sur la colline dominant l'Adriatique.",
+    "sources": [
+      "Chieti"
+    ]
+  }
+]

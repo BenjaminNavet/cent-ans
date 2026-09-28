@@ -2530,6 +2530,102 @@
         "Dépend de la flotte vénitienne"
       ],
       "difficulty": 1
+    },
+    {
+      "id": "fac_marinids",
+      "tagline": "Le sultan de Fès, maître du détroit",
+      "intro": "Abu l-Hasan Ali vient de prendre Tlemcen et rêve de refaire l'empire almohade ; ses armées franchiront bientôt le détroit, mais Castille et Grenade veillent, et l'Ifriqiya hafside attend.",
+      "strengths": [
+        "Sultanat riche, or des caravanes de Sijilmassa",
+        "Cavalerie zénète nombreuse",
+        "Bases dans le détroit (Ceuta, Algésiras, Gibraltar)"
+      ],
+      "weaknesses": [
+        "Conquêtes récentes : Tlemcen et l'Oranie se révoltent",
+        "Fronts multiples : Castille, Hafsides, tribus",
+        "Confédérations tribales indociles"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_hafsids",
+      "tagline": "Les corsaires de Tunis",
+      "intro": "Le sultan Abu Bakr II a réunifié l'Ifriqiya, mais Bougie et Constantine s'agitent, les Banu Makki et Ibn Thabit servent d'autres maîtres, et le Mérinide de Tlemcen attend son heure.",
+      "strengths": [
+        "Port riche et corsaires de Tunis",
+        "Fondouks marchands italiens et catalans",
+        "Terres céréalières de l'Ifriqiya"
+      ],
+      "weaknesses": [
+        "Vassaux quasi indépendants (Gabès, Tripoli)",
+        "Face à un voisin mérinide plus puissant",
+        "Tribus arabes des steppes"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_makki",
+      "tagline": "L'émirat des oasis de Gabès",
+      "intro": "Les Banu Makki tiennent Gabès et Djerba depuis 1282 sous suzeraineté hafside ; leur pouvoir grandit avec l'affaiblissement de Tunis.",
+      "strengths": [
+        "Route des caravanes du Sud",
+        "Île de Djerba, port de course",
+        "Éloignement de Tunis"
+      ],
+      "weaknesses": [
+        "Territoire minuscule",
+        "Voisins puissants : Hafsides et Tripoli",
+        "Armées réduites"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_tripoli",
+      "tagline": "La cité marchande de Tripoli",
+      "intro": "Muhammad ibn Thabit tient Tripoli au nom des Hafsides mais gouverne en maître, entre marchands génois et tribus du Djebel.",
+      "strengths": [
+        "Port de la route de Sicile",
+        "Quasi-indépendance",
+        "Marchés du Fezzan"
+      ],
+      "weaknesses": [
+        "Ressources terrestres faibles",
+        "Djebel Nefousa indocile",
+        "Convoitée par Génois et Hafsides"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_barqa",
+      "tagline": "Les tribus de Cyrénaïque",
+      "intro": "Les Banu Sulaym et leurs clientèles tiennent le Djebel Akhdar et les pistes de Barqa ; le sultan du Caire n'y est qu'un nom.",
+      "strengths": [
+        "Cavalerie bédouine mobile",
+        "Immensités désertiques : refuge et attrition adverse",
+        "Suzeraineté lointaine et nominale"
+      ],
+      "weaknesses": [
+        "Très peu de villes et de revenus",
+        "Aucune tradition de grande armée",
+        "Pas de sultanat à soi"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_arborea",
+      "tagline": "Le judicat de la Sardaigne libre",
+      "intro": "Pierre III d'Arborée est l'allié de l'Aragon ; son frère Mariano IV prépare déjà le réveil sarde. À vous d'unifier l'île.",
+      "strengths": [
+        "Allié de l'Aragon, protégé de la couronne",
+        "Judicat au sol fertile",
+        "Tradition d'indépendance sarde"
+      ],
+      "weaknesses": [
+        "Petit territoire",
+        "Aragonais sur la côte",
+        "Génois Doria au nord"
+      ],
+      "difficulty": 3
     }
   ],
   "difficulty_labels": [
