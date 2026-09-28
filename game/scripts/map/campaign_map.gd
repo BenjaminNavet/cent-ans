@@ -743,6 +743,8 @@ func _on_province_selected(index: int) -> void:
 		ui.hide_province()
 	else:
 		_show_province_panel(index)
+	if map_modes != null:  # DZ : en mode Diplomatie, relations du seigneur de la province
+		map_modes.focus_on_province(str(map_data.get_province(index).get("id", "")) if index > 0 else "")
 	if next_hint != null:  # RS-E : la sélection change la couverture du conseil (panneau de province)
 		next_hint.refresh()
 

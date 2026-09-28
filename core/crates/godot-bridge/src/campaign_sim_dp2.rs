@@ -88,10 +88,31 @@ impl CampaignSim {
     /// province is unknown or held by rebels.
     #[func]
     fn get_province_stances(&self, province_ids: PackedStringArray) -> PackedStringArray {
+        let Some(state) = &self.state else {
+            return PackedStringArray::new();
+        };
+        let player = GString::from(state.player_faction().as_str());
+        self.get_province_stances_for(player, province_ids)
+    }
+
+    /// Same as `get_province_stances`, seen by `viewer` instead of the player
+    /// (lot DZ: the map shows who a selected faction is at war with). Empty
+    /// when `viewer` is unknown.
+    #[func]
+    fn get_province_stances_for(
+        &self,
+        viewer: GString,
+        province_ids: PackedStringArray,
+    ) -> PackedStringArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return PackedStringArray::new();
         };
-        let player = state.player_faction().clone();
+        let Some(viewer) = FactionId::new(viewer.to_string())
+            .ok()
+            .filter(|f| state.factions.contains_key(f))
+        else {
+            return PackedStringArray::new();
+        };
         let mut cache: std::collections::BTreeMap<FactionId, &'static str> = Default::default();
         province_ids
             .as_slice()
@@ -104,11 +125,41 @@ impl CampaignSim {
                 let key = controller.map_or("", |c| {
                     *cache
                         .entry(c.clone())
-                        .or_insert_with(|| diplomatic_stance(state, data, &player, &c).key())
+                        .or_insert_with(|| diplomatic_stance(state, data, &viewer, &c).key())
                 });
                 GString::from(key)
             })
             .collect()
+    }
+
+    /// Stance of `viewer` towards every faction of the campaign (lot DZ:
+    /// colours of the realm borders in the « Diplomatie » map mode):
+    /// `{faction_id: key}`, same keys as `get_province_stances`; rebels are
+    /// always "war". Empty when `viewer` is unknown.
+    #[func]
+    fn get_faction_stances_for(&self, viewer: GString) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        let Some(viewer) = FactionId::new(viewer.to_string())
+            .ok()
+            .filter(|f| state.factions.contains_key(f))
+        else {
+            return VarDictionary::new();
+        };
+        let mut stances = VarDictionary::new();
+        for faction in state.factions.keys() {
+            let key = if faction.as_str() == sim_campaign::diplomacy::REBELS_FACTION {
+                "war"
+            } else {
+                diplomatic_stance(state, data, &viewer, faction).key()
+            };
+            stances.set(faction.as_str(), key);
+        }
+        if !stances.contains_key(sim_campaign::diplomacy::REBELS_FACTION) {
+            stances.set(sim_campaign::diplomacy::REBELS_FACTION, "war");
+        }
+        stances
     }
 
     /// Stance of the player towards `faction` (same keys as
