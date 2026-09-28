@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_fes",
+    "province": "prov_fes",
+    "kind": "city",
+    "name": {
+      "display": "Fès",
+      "local": "Fās",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -4.9998,
+      34.0331
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_weaving_workshop",
+      "bld_university"
+    ],
+    "port": false,
+    "description": "Capitale mérinide ; médina de Fès el-Bali et ville royale de Fès el-Jdid (fondée en 1276).",
+    "sources": [
+      "Fès",
+      "Fès el-Jdid"
+    ]
+  },
+  {
+    "id": "set_sefrou",
+    "province": "prov_fes",
+    "kind": "town",
+    "name": {
+      "display": "Séfrou",
+      "local": "Ṣafrū",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -4.8367,
+      33.8306
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Petite ville de piémont au pied du Moyen Atlas, verger et marché juif et musulman.",
+    "sources": [
+      "Sefrou"
+    ]
+  },
+  {
+    "id": "set_moulay_idriss",
+    "province": "prov_fes",
+    "kind": "village",
+    "name": {
+      "display": "Moulay Idriss Zerhoun",
+      "local": "Mūlāy Idrīs Zarhūn",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -5.5236,
+      34.0553
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Sanctuaire d'Idris Ier, fondateur de la dynastie idrisside, sur le Zerhoun.",
+    "sources": [
+      "Moulay Idriss Zerhoun"
+    ]
+  }
+]

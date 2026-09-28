@@ -1,0 +1,41 @@
+{
+  "id": "chr_mariano_iv_d_arborea",
+  "name": {
+    "display": "Mariano IV d'Arborée",
+    "local": "Mariano IV de Arborea",
+    "local_language": "sarde"
+  },
+  "sex": "male",
+  "house": "Bas-Serra",
+  "faction": "fac_arborea",
+  "role": "prince",
+  "birth": {
+    "value": "1317"
+  },
+  "death": {
+    "value": "1375",
+    "note": "Mort de la peste."
+  },
+  "historical": true,
+  "skills": {
+    "command": 6,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_strong"
+  ],
+  "piety": 55,
+  "family": {
+    "siblings": [
+      "chr_pietro_iii_d_arborea"
+    ]
+  },
+  "starting_location": "prov_arborea",
+  "status": "minor",
+  "description": "Frère cadet de Pierre III, encore adolescent ; il deviendra juge en 1347 et mènera la guerre contre l'Aragon (1353-1375).",
+  "sources": [
+    "Mariano IV d'Arborée"
+  ]
+}

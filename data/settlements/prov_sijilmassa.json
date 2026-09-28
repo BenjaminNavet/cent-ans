@@ -1,0 +1,54 @@
+[
+  {
+    "id": "set_sijilmassa",
+    "province": "prov_sijilmassa",
+    "kind": "city",
+    "name": {
+      "display": "Sijilmassa",
+      "local": "Sijilmāsa",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -4.2803,
+      31.2947
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Grande cité caravanière du Tafilalt, hôtel des monnaies et des marchands d'or.",
+    "sources": [
+      "Sijilmassa"
+    ]
+  },
+  {
+    "id": "set_todgha",
+    "province": "prov_sijilmassa",
+    "kind": "village",
+    "name": {
+      "display": "Ksar du Todgha",
+      "local": "Tūdgha",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -5.5228,
+      31.5147
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Oasis et gorges du Todgha, greniers fortifiés des tribus berbères.",
+    "sources": [
+      "Tinghir"
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_jado",
+    "province": "prov_nafusa",
+    "kind": "city",
+    "name": {
+      "display": "Jado",
+      "local": "Jādū",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      12.0,
+      31.9522
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale du Djebel Nefousa, cité ibadite fortifiée.",
+    "sources": [
+      "Djebel Nefoussa"
+    ]
+  },
+  {
+    "id": "set_yefren",
+    "province": "prov_nafusa",
+    "kind": "town",
+    "name": {
+      "display": "Yefren",
+      "local": "Yafran",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      12.5333,
+      32.0667
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourg du massif, ksar et jardins.",
+    "sources": [
+      "Yefren"
+    ]
+  },
+  {
+    "id": "set_nalut",
+    "province": "prov_nafusa",
+    "kind": "village",
+    "name": {
+      "display": "Nalut",
+      "local": "Nālūt",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      10.9833,
+      31.8667
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ksar et grenier collectif (ghorfa) sur le rebord du Djebel.",
+    "sources": [
+      "Nalut"
+    ]
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "id": "tit_makki",
+  "rank": "county",
+  "name": {
+    "display": "Émirat de Gabès",
+    "local": "Imārat Qābis",
+    "local_language": "arabe maghrébin"
+  },
+  "heraldry": {
+    "blazon": "De sinople à la lune décroissante d'argent.",
+    "description": "Couleurs vertes de l'islam et croissant ; blason de jeu, non attesté pour les Banu Makki.",
+    "primary_color": "#2E7D4F",
+    "secondary_color": "#F2EFE6",
+    "uncertain": true,
+    "note": "Aucune source héraldique : emblème conventionnel de jeu."
+  },
+  "de_jure_liege": "tit_hafsids",
+  "de_jure_provinces": [
+    "prov_gabes"
+  ],
+  "holder_1337": {
+    "faction": "fac_makki",
+    "sources": [
+      "Banu Makki"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_makki_hold",
+      "title": "Garder Gabès",
+      "description": "L'émir doit conserver Gabès et Djerba.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_makki"
+      }
+    },
+    {
+      "id": "obj_makki_tripolitania",
+      "title": "Gagner Tripoli",
+      "description": "Étendre l'influence makkide jusqu'à Tripoli, comme le fera la famille dès 1355.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_gabes",
+          "prov_tripolitania"
+        ]
+      }
+    }
+  ],
+  "description": "Émirat héréditaire des Banu Makki, dynastie locale de Gabès, vassale nominale des Hafsides.",
+  "sources": [
+    "Banu Makki"
+  ]
+}

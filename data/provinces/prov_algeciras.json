@@ -1,0 +1,97 @@
+{
+  "id": "prov_algeciras",
+  "name": {
+    "display": "Algésiras et Gibraltar",
+    "local": "Al-Jazīra al-Khaḍrā'",
+    "local_language": "arabe maghrébin"
+  },
+  "region": "iberie_sud",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Guadarranque"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Algésiras",
+      "local": "Al-Jazīra al-Khaḍrā'",
+      "local_language": "arabe maghrébin"
+    },
+    "lat": 36.1333,
+    "lon": -5.4544
+  },
+  "geo": {
+    "capital_lonlat": [
+      -5.4544,
+      36.1333
+    ],
+    "seed_lonlat": [
+      -5.5,
+      36.25
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_marinids",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 18000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 2700,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 450,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 216,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Enclave mérinide en Andalousie : Algésiras et Gibraltar, têtes de pont contre la Castille. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 900,
+  "description": "Gibraltar (reprise par Abu Malik en 1333) et Algésiras sont les bases mérinides du détroit ; Tarifa, castillane, les tient en respect. Ronda et Marbella restent grenadines dans le jeu (province de Málaga).",
+  "sources": [
+    "Siège de Gibraltar (1333)",
+    "Algésiras",
+    "Guerre du détroit"
+  ],
+  "sea_zones": [
+    "sea_mediterranean",
+    "sea_atlantic"
+  ],
+  "ports": [
+    "Algésiras"
+  ]
+}
