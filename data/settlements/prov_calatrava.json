@@ -42,8 +42,7 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_abbey",
-      "bld_castle"
+      "bld_abbey"
     ],
     "port": false,
     "description": "Forteresse-couvent, siège du grand maître de l'ordre militaire du Calatrava depuis 1217.",
