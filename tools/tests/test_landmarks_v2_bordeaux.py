@@ -7,9 +7,7 @@ import pytest
 
 from cent_ans_tools.geo import landmarks_v2
 
-CITY = (
-    Path(__file__).resolve().parents[2] / "data" / "landmarks_v2" / "bordeaux.json"
-)
+CITY = Path(__file__).resolve().parents[2] / "data" / "landmarks_v2" / "bordeaux.json"
 
 
 @pytest.fixture(scope="module")
