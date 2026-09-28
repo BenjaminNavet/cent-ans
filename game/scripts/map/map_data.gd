@@ -43,7 +43,7 @@ var timings: Dictionary = {}
 var crs: String = ""
 var bounds_projected: Array = []
 var size: Vector2i = Vector2i.ZERO
-var meters_per_px: float = 800.0
+var meters_per_px: float = 718.9765625  # map.json (échelle ADR 0082)
 var height_min_m: float = -200.0
 var height_max_m: float = 4800.0
 
@@ -289,6 +289,27 @@ static func height_from_display_with(y: float, x: float, z: float, scale: float,
 	return (v - k * b + g * f) / (1.0 - k + g)
 
 
+## Taille du monde (`size_px` de `<map_dir>/map.json`, unités carte), sans charger la carte ;
+## Vector2i.ZERO si illisible (lot OM1, ADR 0115 : aucune taille codée en dur).
+static func read_world_size(map_dir: String) -> Vector2i:
+	var path := map_dir.path_join("map.json")
+	if not FileAccess.file_exists(path):
+		return Vector2i.ZERO
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (meta is Dictionary):
+		return Vector2i.ZERO
+	var size_px: Variant = (meta as Dictionary).get("size_px", [])
+	if not (size_px is Array) or (size_px as Array).size() != 2:
+		return Vector2i.ZERO
+	return Vector2i(int(size_px[0]), int(size_px[1]))
+
+
+## Taille du monde de la carte des données par défaut (`MapPaths.default_data_dir()`), pour les tests.
+static func default_world_size() -> Vector2i:
+	var map_paths: GDScript = load("res://scripts/map/map_paths.gd")
+	return read_world_size(str(map_paths.call("default_data_dir")).path_join("map"))
+
+
 static func load_from_dir(dir: String) -> MapData:
 	var data := MapData.new()
 	data.map_dir = dir
@@ -304,7 +325,7 @@ func _load() -> void:
 	if not _load_heightmap():
 		return
 	var t2 := Time.get_ticks_msec()
-	# PB1 : les six masques 4096² sont décodés en parallèle (~100 ms chacun en série).
+	# PB1 : les six masques de la carte sont décodés en parallèle (~100 ms chacun en série).
 	var masks := _load_images_parallel([["land_mask.png", -1], ["splat.png", Image.FORMAT_RGBA8],
 		["province_border_dist.png", Image.FORMAT_RGB8], ["coast_dist.png", Image.FORMAT_L8],
 		["river_bed.png", Image.FORMAT_L8], ["province_ids.png", -1]])
@@ -358,7 +379,7 @@ func _load_map_json() -> bool:
 	bounds_projected = meta.get("bounds_projected", [])
 	var size_px: Array = meta.get("size_px", [0, 0])
 	size = Vector2i(int(size_px[0]), int(size_px[1]))
-	meters_per_px = float(meta.get("meters_per_px", 800.0))
+	meters_per_px = float(meta.get("meters_per_px", meters_per_px))
 	height_min_m = float(meta.get("height_min_m", -200.0))
 	height_max_m = float(meta.get("height_max_m", 4800.0))
 	var render: Variant = meta.get("render_heightmap")

@@ -37,6 +37,12 @@ pub enum CampaignError {
          version attendue : {expected}) : elle ne peut pas être chargée"
     )]
     PreFeudalSave { found: u32, expected: u32 },
+    #[error(
+        "sauvegarde d'une version antérieure à la carte Oural–Méditerranée (version {found}, \
+         version attendue : {expected}) : les positions de cette partie ne correspondent plus à \
+         la carte actuelle, elle ne peut pas être chargée"
+    )]
+    PreWideMapSave { found: u32, expected: u32 },
 }
 
 /// First state version with settlements (lot C4); older saves are refused.
@@ -47,6 +53,9 @@ pub const FREE_MOVEMENT_STATE_VERSION: u32 = 6;
 /// First state version with feudal titles (lot FE); older saves are
 /// refused.
 pub const FEUDAL_STATE_VERSION: u32 = 7;
+/// First state version on the Urals–Mediterranean map (lot OM1, ADR 0115: every map pixel moved
+/// +1280 in y); older saves are refused.
+pub const WIDE_MAP_STATE_VERSION: u32 = 8;
 
 impl CampaignState {
     /// Serialises the whole state (RNG included) as JSON.
@@ -77,6 +86,12 @@ impl CampaignState {
         }
         if header.state_version < FEUDAL_STATE_VERSION {
             return Err(CampaignError::PreFeudalSave {
+                found: header.state_version,
+                expected: STATE_VERSION,
+            });
+        }
+        if header.state_version < WIDE_MAP_STATE_VERSION {
+            return Err(CampaignError::PreWideMapSave {
                 found: header.state_version,
                 expected: STATE_VERSION,
             });
