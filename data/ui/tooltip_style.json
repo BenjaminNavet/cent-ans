@@ -24,17 +24,42 @@
     "plain": "#3a2a1a"
   },
   "headline": {
-    "unit": ["strength", "morale"],
-    "unit_recruit": ["cost", "melee_or_ranged"],
-    "building": ["main_effect"],
-    "technology": ["research_cost"],
-    "gauge": ["value"],
+    "unit": [
+      "strength",
+      "morale"
+    ],
+    "unit_recruit": [
+      "cost",
+      "melee_or_ranged"
+    ],
+    "building": [
+      "main_effect"
+    ],
+    "technology": [
+      "research_cost"
+    ],
+    "gauge": [
+      "value"
+    ],
     "resource": [],
     "trait": [],
     "skill": [],
-    "class": ["population"],
+    "class": [
+      "population"
+    ],
     "rule": [],
     "plain": []
   },
-  "lower_is_better": ["unrest", "recruit_cost", "army_upkeep", "devastation"]
+  "lower_is_better": [
+    "unrest",
+    "recruit_cost",
+    "army_upkeep",
+    "devastation"
+  ],
+  "equilibrium_effects": [
+    "health",
+    "wealth",
+    "goods_satisfaction",
+    "unrest"
+  ]
 }

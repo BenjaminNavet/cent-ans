@@ -394,13 +394,17 @@ static func effect_item(effect: Dictionary, live: Dictionary = {}) -> Dictionary
 	if pair is Array and (pair as Array).size() == 2:
 		item["before"] = pair[0]
 		item["after"] = pair[1]
+		# Jauges à équilibre (santé, richesse…) : le core donne la valeur visée, pas l'immédiate.
+		item["equilibrium"] = kind in (TooltipView.style().get("equilibrium_effects", []) as Array)
 	return item
 
 
-## Texte d'une ligne d'effet : « Moral 60 → 65 (+5) » si avant/après connus, sinon « Moral +5 ».
+## Texte d'une ligne d'effet : « Moral 60 → 65 (+5) » si avant/après connus, sinon « Moral +5 » ;
+## jauge à équilibre : « Santé : équilibre 50 → 55 (+5) ».
 static func effect_line(item: Dictionary) -> String:
 	if item.has("before") and item.has("after") and item.has("label"):
-		return "%s %s → %s (%s)" % [item["label"], _number(float(item["before"])), _number(float(item["after"])), item.get("value", "")]
+		var label := "%s : équilibre" % item["label"] if bool(item.get("equilibrium", false)) else str(item["label"])
+		return "%s %s → %s (%s)" % [label, _number(float(item["before"])), _number(float(item["after"])), item.get("value", "")]
 	return str(item.get("text", ""))
 
 
