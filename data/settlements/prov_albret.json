@@ -24,5 +24,53 @@
       "Nérac",
       "Maison d'Albret"
     ]
+  },
+  {
+    "id": "set_casteljaloux",
+    "province": "prov_albret",
+    "kind": "castle",
+    "name": {
+      "display": "Casteljaloux",
+      "local": "Casteu Jaloux",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      0.0833,
+      44.3167
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Bastide et château fondés par Alphonse de Poitiers en 1259, passés à la maison d'Albret.",
+    "sources": [
+      "Casteljaloux"
+    ]
+  },
+  {
+    "id": "set_sos",
+    "province": "prov_albret",
+    "kind": "village",
+    "name": {
+      "display": "Sos",
+      "local": "Sòs",
+      "local_language": "gascon"
+    },
+    "lonlat": [
+      0.1667,
+      44.05
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [],
+    "port": false,
+    "description": "Ancien berceau castral de la maison d'Albret, avant le transfert du siège à Nérac.",
+    "sources": [
+      "Maison d'Albret"
+    ]
   }
 ]
