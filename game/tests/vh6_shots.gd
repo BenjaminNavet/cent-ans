@@ -9,8 +9,8 @@ extends SceneTree
 ##   [--only=a,b] [--no-fps] [--no-landmarks-1to1]
 ## JPEG ≤ 960 px, `london_<vue>.jpg`.
 
-const LONDON := Vector2(2019.888, 1486.127)
-const ROUEN := Vector2(2096.54, 1819.88)
+const LONDON := Vector2(2019.888, 2766.127)
+const ROUEN := Vector2(2096.54, 3099.88)
 ## Repère : 1 unité ≈ 719 m ; +x à l'est, +y au sud.
 const TOWER := LONDON + Vector2(3.13, 1.13)
 const BRIDGE := LONDON + Vector2(2.13, 1.03)

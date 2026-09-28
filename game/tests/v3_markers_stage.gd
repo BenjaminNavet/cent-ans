@@ -28,7 +28,7 @@ func _init() -> void:
 	await process_frame
 	var args := OS.get_cmdline_user_args()
 	var out_path := args[0] if args.size() > 0 else "user://v3_markers.png"
-	var focus := Vector3(2000, 1900, 230)
+	var focus := Vector3(2000, 3180, 230)
 	if args.size() > 1:
 		var parts := args[1].split(",")
 		focus = Vector3(float(parts[0]), float(parts[1]), float(parts[2]))

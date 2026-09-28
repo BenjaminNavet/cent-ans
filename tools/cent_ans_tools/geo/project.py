@@ -49,7 +49,7 @@ class MapGrid:
     """
 
     bounds: tuple[float, float, float, float]
-    width_px: int = WIDTH_PX
+    width_px: int
     height_px: int | None = None
 
     def __post_init__(self) -> None:

@@ -66,7 +66,7 @@ func _test_map() -> void:
 	var data: MapData = map.map_data
 	var layer: SettlementLayer = map.get("settlement_layer")
 	var life: CampaignLife = map.get("life")
-	var crecy := Vector2(2191.5, 1706.0)
+	var crecy := Vector2(2191.5, 2986.0)
 	var focus := Vector3(crecy.x, data.surface_world_at(crecy.x, crecy.y), crecy.y)
 	var samples := {}
 	for d: float in [60.0, 14.0, 6.0, 2.0]:

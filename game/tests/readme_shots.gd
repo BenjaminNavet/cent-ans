@@ -7,12 +7,12 @@ extends SceneTree
 
 ## [nom, point carte (px 4096), distance caméra (unités, < 0 = minimum + 5 %), lacet (degrés)]
 const SHOTS := [
-	["paris", Vector2(2213.2, 1923.9), 7.0, -15.0],
-	["londres", Vector2(2018.0, 1487.5), 4.5, 0.0],
-	["londres_site", Vector2(2018.0, 1487.5), -1.0, 0.0],
-	["rouen", Vector2(2097.0, 1819.4), -1.0, 0.0],
-	["orleans", Vector2(2152.0, 2066.5), -1.0, 0.0],
-	["orleans_vallee", Vector2(2152.0, 2066.5), 5.0, 0.0],
+	["paris", Vector2(2213.2, 3203.9), 7.0, -15.0],
+	["londres", Vector2(2018.0, 2767.5), 4.5, 0.0],
+	["londres_site", Vector2(2018.0, 2767.5), -1.0, 0.0],
+	["rouen", Vector2(2097.0, 3099.4), -1.0, 0.0],
+	["orleans", Vector2(2152.0, 3346.5), -1.0, 0.0],
+	["orleans_vallee", Vector2(2152.0, 3346.5), 5.0, 0.0],
 ]
 
 
