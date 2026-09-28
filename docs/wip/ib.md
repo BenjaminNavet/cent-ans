@@ -22,9 +22,9 @@ après les fusions FE/TW2 en cours si possible.
   `TooltipView` (repli sur `make_panel`), `ib_layout_test.gd` / `ib_chain_test.gd` désactivés
 - [x] IB1 **fusionné** (ff `main`, df96f3b8)
 - [x] IB3 **fusionné** (6197ed33) : Alt fige/chaîne/remplace, grâce, Échap ; version détaillée en attente de `RichTooltip.spec_for` (IB1) ; cas « souris sur bulle » vérifié à la main seulement (headless)
-- [x] IB4 lancé (28/09) — branche `feat/ib4-bubbles` (+ défauts IB1 : icône de vedette, ambiance en italique)
+- [x] IB4 **fusionné** (f679f72f) : liens `ib:`, bulles riches et de règle, placement latéral, fil d'Ariane, réduction ; défauts IB1 corrigés. Ouverts : alignement sur la ligne du mot-clé à juger à l'œil ; ancêtre rouverte ne re-place pas ses descendantes ; ressources/traits/compétences sans `*_spec` (spec simple)
 - [x] IB5 lancé (28/09) — branche `feat/ib5-live` (core + pont, cible cargo privée `core/target-ib5`)
-- [ ] IB2 autres constructeurs, ~120 infobulles brutes, tables vers `data/` (mech) — après IB1
+- [x] IB2 lancé (28/09, mech) — branche `feat/ib2-migrate`
 - [ ] IB6 intégration, planche avant/après (`docs/img/ib/`), jugement du joueur
 
 ## Tronc commun des briefs
@@ -55,3 +55,4 @@ après les fusions FE/TW2 en cours si possible.
 - 28/09 : IB3 fusionné dans `main` par ff (6197ed33) via `../gp-ib-merge` (`integration/ib`) ; smoke (seul échec FE connu), `ib_chain_test`, `p2c_ui_test` verts. Worktree IB3 supprimé. En cours : IB1.
 - 28/09 : IB1 rendu (89f2425b) et fusionné dans `integration/ib` ; tests verts. Contrôle visuel OK (planche `docs/img/ib/apres/`). Défauts pour IB4 : chiffre vedette sans icône (« Tir »), texte d'ambiance ni italique ni atténué. Écarts IB1 : largeur en unités d'interface (échelle déjà appliquée par `content_scale_factor`), `lower_is_better` ajouté au style, `before`/`after` lus dans `live["before_after"]` = {effet: [avant, après]} (format à fournir par IB5), prérequis ✓ seulement si `available`, sinon • (pas de donnée par prérequis au core → IB5). `main` a bougé (FE5, core) : dylib reconstruite dans `gp-ib-merge` (cible `core/target-ib`, à supprimer à la fin d'IB).
 - 28/09 : IB1 dans `main` (df96f3b8, tous tests verts dont smoke). Dylib de `main` rafraîchie depuis `gp-ib-merge`. IB4 et IB5 lancés. **Prochaine étape : fusionner IB4/IB5, puis IB2 (mech).**
+- 28/09 : IB4 dans `main` (f679f72f), tous verts (smoke, ib_chain, ib_layout, p2c, po_ui, hud_components, pytest). IB2 lancé (mech). En cours : IB5, IB2. **Prochaine étape : fusionner IB5 et IB2, puis IB6 (planche, jugement du joueur, nettoyage `core/target-ib` et `../gp-ib-merge`).**
