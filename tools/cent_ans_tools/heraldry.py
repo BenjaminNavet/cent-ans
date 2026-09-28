@@ -465,6 +465,190 @@ def _draw_buffalo_head(draw: ImageDraw.ImageDraw, color: Color) -> None:
     )
 
 
+def _draw_key_single(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """One key in pale, bow (anneau) toward the chief (FE: Bremen)."""
+    width = int(0.05 * CANVAS)
+    draw.line(_px([(0.5, 0.22), (0.5, 0.82)]), fill=color, width=width)
+    radius = 0.1 * CANVAS
+    cx, cy = 0.5 * CANVAS, 0.18 * CANVAS
+    draw.ellipse(
+        (cx - radius, cy - radius, cx + radius, cy + radius), outline=color, width=width
+    )
+    for y0 in (0.66, 0.76):
+        draw.rectangle(_px([(0.5, y0), (0.66, y0 + 0.06)]), fill=color)
+
+
+def _draw_cauldrons(image: Image.Image, checky: Image.Image, count: int) -> None:
+    """Cauldrons (chaudières) checky, stacked in pale (FE: Lara)."""
+    spots = [0.28, 0.68][:count] if count <= 2 else [0.2, 0.5, 0.8][:count]
+    for cy in spots:
+        body = [
+            (-0.22, -0.16),
+            (0.22, -0.16),
+            (0.28, 0.1),
+            (0.16, 0.24),
+            (-0.16, 0.24),
+            (-0.28, 0.1),
+        ]
+        mask, mask_draw = _new_mask()
+        mask_draw.polygon(_transform(body, 0.5, cy, 0.6), fill=255)
+        width = int(0.03 * CANVAS)
+        for side in (-1, 1):
+            mask_draw.arc(
+                _px(
+                    [
+                        (0.5 + side * 0.36 - 0.12, cy - 0.2),
+                        (0.5 + side * 0.36 + 0.12, cy - 0.02),
+                    ]
+                ),
+                start=200 if side < 0 else -20,
+                end=340 if side < 0 else 120,
+                fill=255,
+                width=width,
+            )
+        _fill_mask_with_paint(image, mask, checky)
+
+
+def _fill_mask_with_paint(
+    image: Image.Image, mask: Image.Image, paint: Color | Image.Image
+) -> None:
+    source = paint if isinstance(paint, Image.Image) else _solid_rgb(paint)
+    image.paste(source, mask=mask)
+
+
+def _draw_hand(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """The "red hand" of Ulster: a dexter hand couped at the wrist (FE: Tyrone)."""
+    hand = [
+        (-0.16, 0.4),
+        (-0.16, -0.06),
+        (-0.24, -0.14),
+        (-0.24, -0.3),
+        (-0.16, -0.3),
+        (-0.16, -0.18),
+        (-0.1, -0.18),
+        (-0.1, -0.4),
+        (-0.02, -0.4),
+        (-0.02, -0.2),
+        (0.04, -0.2),
+        (0.04, -0.42),
+        (0.12, -0.42),
+        (0.12, -0.2),
+        (0.18, -0.2),
+        (0.18, -0.34),
+        (0.26, -0.34),
+        (0.26, -0.1),
+        (0.16, 0.04),
+        (0.16, 0.4),
+    ]
+    draw.polygon(_transform(hand, 0.5, 0.5, 1.0), fill=color)
+
+
+def _draw_ship_shape(
+    draw: ImageDraw.ImageDraw,
+    cx: float,
+    cy: float,
+    scale: float,
+    fill: int | Color = 255,
+) -> None:
+    """A lymphad (galley), sail furled, centred at ``(cx, cy)`` in a ``scale`` box."""
+    hull = [
+        (-0.42, 0.14),
+        (0.42, 0.14),
+        (0.3, 0.32),
+        (-0.3, 0.32),
+    ]
+    draw.polygon(_transform(hull, cx, cy, scale), fill=fill)
+    width = max(1, int(0.03 * scale * CANVAS))
+    draw.line(
+        _transform([(0.0, 0.14), (0.0, -0.34)], cx, cy, scale), fill=fill, width=width
+    )
+    draw.line(
+        _transform([(0.0, -0.28), (0.18, -0.2)], cx, cy, scale), fill=fill, width=width
+    )
+    draw.line(
+        _transform([(0.0, -0.34), (-0.18, -0.24), (0.0, -0.18)], cx, cy, scale),
+        fill=fill,
+        width=width,
+    )
+    for x in (-0.3, 0.0, 0.3):
+        draw.line(
+            _transform([(x * 0.5, 0.14), (x, 0.02)], cx, cy, scale),
+            fill=fill,
+            width=width,
+        )
+
+
+def _draw_ship(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """A lymphad (galley), sail furled (FE: the Isles)."""
+    _draw_ship_shape(draw, 0.5, 0.5, 1.0, fill=color)
+
+
+def _draw_crescent(image: Image.Image, color: Color) -> None:
+    """Crescent decrescent (horns to sinister), FE: Luna."""
+    radius = 0.34 * CANVAS
+    cx, cy = 0.5 * CANVAS, 0.5 * CANVAS
+    mask, mask_draw = _new_mask()
+    mask_draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=255)
+    inner_radius = 0.3 * CANVAS
+    inner_cx = cx + 0.16 * CANVAS
+    mask_draw.ellipse(
+        (
+            inner_cx - inner_radius,
+            cy - inner_radius,
+            inner_cx + inner_radius,
+            cy + inner_radius,
+        ),
+        fill=0,
+    )
+    _fill_mask_with_paint(image, mask, color)
+
+
+def _draw_ox(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """A standing ox, simplified silhouette (FE: Urgell)."""
+    body = [
+        (-0.38, 0.1),
+        (-0.4, -0.06),
+        (-0.3, -0.18),
+        (-0.1, -0.22),
+        (0.16, -0.2),
+        (0.3, -0.06),
+        (0.34, 0.1),
+        (0.26, 0.1),
+        (0.26, 0.3),
+        (0.18, 0.3),
+        (0.18, 0.12),
+        (-0.02, 0.12),
+        (-0.02, 0.3),
+        (-0.1, 0.3),
+        (-0.1, 0.12),
+        (-0.3, 0.1),
+        (-0.3, 0.3),
+        (-0.38, 0.3),
+    ]
+    draw.polygon(_transform(body, 0.5, 0.5, 1.0), fill=color)
+    horns = [(-0.36, -0.2), (-0.48, -0.34), (-0.4, -0.16)]
+    draw.polygon(_transform(horns, 0.5, 0.5, 1.0), fill=color)
+    horns2 = [(-0.16, -0.24), (-0.1, -0.4), (-0.02, -0.26)]
+    draw.polygon(_transform(horns2, 0.5, 0.5, 1.0), fill=color)
+
+
+def _draw_chief(draw: ImageDraw.ImageDraw, color: Color, denched: bool) -> None:
+    """A chief (chef), optionally with a dancetty (denché) lower edge (FE: Ormond)."""
+    if not denched:
+        draw.rectangle(_px([(0.0, 0.0), (1.0, 0.26)]), fill=color)
+        return
+    teeth = 6
+    points = [(0.0, 0.0), (1.0, 0.0)]
+    bottom = []
+    for index in range(teeth + 1):
+        x = index / teeth
+        y = 0.32 if index % 2 == 0 else 0.2
+        bottom.append((x, y))
+    points.append((1.0, bottom[-1][1]))
+    points += list(reversed(bottom))
+    draw.polygon(_px(points), fill=color)
+
+
 def _draw_label(draw: ImageDraw.ImageDraw, color: Color) -> None:
     draw.rectangle(_px([(0.12, 0.1), (0.88, 0.16)]), fill=color)
     for cx in (0.26, 0.5, 0.74):
@@ -814,6 +998,11 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
         _draw_chains(draw, charge)
     elif blazon.has("clefs"):
         _draw_keys(draw, TINCTURES["argent"], TINCTURES["or"])
+    elif blazon.has("chaudiere"):
+        checky = checky_pattern(TINCTURES["or"], TINCTURES["gueules"], 0.12)
+        _draw_cauldrons(image, checky, blazon.count(2))
+    elif blazon.has("clef"):
+        _draw_key_single(draw, charge)
     elif blazon.has("ecussons"):
         _draw_escutcheons(draw, TINCTURES["azur"])
     elif blazon.has("ecusson"):
@@ -828,6 +1017,16 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
         _draw_antlers(draw, charge, blazon.count(3))
     elif blazon.has("tete de buffle"):
         _draw_buffalo_head(draw, charge)
+    elif blazon.has("main"):
+        _draw_hand(draw, charge)
+    elif blazon.has("nef"):
+        _draw_ship(draw, charge)
+    elif blazon.has("lune"):
+        _draw_crescent(image, charge)
+    elif blazon.has("bœuf"):
+        _draw_ox(draw, charge)
+    elif blazon.has("chef"):
+        _draw_chief(draw, charge, denched=blazon.has("denche"))
     elif blazon.has("guivre"):
         paints = charge_paints("guivre", charge, blazon.text, blazon.field)
         paint_charge(image, "guivre", [(0.5, 0.47)], 0.8, paints)
@@ -1017,6 +1216,7 @@ PIECES: dict[str, str] = {
     "fusees": "fusee",
     "dauphin": "dauphin",
     "gonfanon": "gonfanon",
+    "nef": "nef",
     "perron": "perron",
     "chevrons": "chevron",
     "chevron": "chevron",
@@ -1483,6 +1683,9 @@ def _charge_mask(piece: Piece, spots, scale: float) -> Image.Image:
         else:
             if piece.kind == "dauphin":
                 _draw_dolphin(draw, cx, cy, scale)
+                continue
+            if piece.kind == "nef":
+                _draw_ship_shape(draw, cx, cy, scale)
                 continue
             draw.polygon(_transform(SHAPES[piece.kind], cx, cy, scale), fill=255)
             if piece.kind == "coussin":
