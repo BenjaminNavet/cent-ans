@@ -27,7 +27,7 @@ pan de mur 3 100 PV / trébuchet 84 PV par tir toutes les 12 s ≈ 7 min 30.
 - **Rythme** (données seulement, `data/rules/siege_works.json`) : cibles au niveau 3 — porte tombée en
   **40-60 s** par un bélier à plein équipage ; brèche d'un pan en **6-10 tirs** d'un trébuchet (≈ 1 min 30
   à 2 min), une bombarde plus vite qu'un mangonneau. Niveau 5 nettement plus long (×1,5-2), niveau 0-1
-  rapide. Mesurer avant/après par sonde (exemple ou test) et consigner le tableau dans l'ADR 0100.
+  rapide. Mesurer avant/après par sonde (exemple ou test) et consigner le tableau dans l'ADR 0107.
 - Vérifier les tests de siège existants (auto-résolution et batailles de siège) : l'équilibre global
   (taux de prise) ne doit pas basculer ; ajuster si besoin et le dire.
 

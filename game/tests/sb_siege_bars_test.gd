@@ -1,6 +1,6 @@
 extends SceneTree
 
-## SB (TW2, ADR 0100) : barres de vie flottantes des ouvrages de siège.
+## SB (TW2, ADR 0107) : barres de vie flottantes des ouvrages de siège.
 ## 1. `SiegeHealthBars.states` (fonction pure) : visibilité (endommagée ou visée, masquée
 ##    intacte ou tombée), ratio, étiquette « Porte : 324/540 », engins entamés.
 ## 2. Nœud seul avec une caméra : la barre d'une pièce visée est à l'écran, étiquette visible,

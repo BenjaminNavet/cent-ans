@@ -1,7 +1,7 @@
 class_name SiegeHealthBars
 extends CanvasLayer
 
-## SB (TW2, ADR 0100) : barres de vie flottantes des ouvrages et engins de siège, façon Total
+## SB (TW2, ADR 0107) : barres de vie flottantes des ouvrages et engins de siège, façon Total
 ## War. Une petite barre enluminée (fond de vélin, filet d'encre et d'or, remplissage à la
 ## couleur du camp propriétaire) au-dessus de chaque pan de mur ou porte endommagé ou visé
 ## (`under_attack` exposé par le cœur), et au-dessus des béliers et beffrois entamés ; masquée
