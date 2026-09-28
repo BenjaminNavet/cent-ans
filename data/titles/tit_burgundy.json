@@ -1,0 +1,27 @@
+{
+  "id": "tit_burgundy",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Bourgogne",
+    "local": "Duchié de Bourgoigne",
+    "local_language": "ancien français"
+  },
+  "heraldry": {
+    "blazon": "Bandé d'or et d'azur de six pièces, à la bordure de gueules.",
+    "description": "Bourgogne ancien : bandes obliques or et bleu, bordure rouge. Armes des ducs capétiens jusqu'à Philippe de Rouvres (1361).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_bourgogne"
+  ],
+  "holder_1337": {
+    "faction": "fac_burgundy",
+    "sources": [
+      "Eudes IV de Bourgogne",
+      "Jeanne III de Bourgogne",
+      "Armorial des ducs de Bourgogne"
+    ]
+  }
+}

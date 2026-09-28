@@ -1,0 +1,26 @@
+{
+  "id": "tit_milan",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Milan",
+    "local": "Signoria di Milano",
+    "local_language": "italien"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la guivre d'azur couronnée d'or, issante de gueules (biscione).",
+    "description": "La guivre (biscione) des Visconti dévorant un homme, sur champ d'argent.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1F3A93"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_milano"
+  ],
+  "holder_1337": {
+    "faction": "fac_milan",
+    "sources": [
+      "Azzone Visconti",
+      "Maison Visconti"
+    ]
+  }
+}

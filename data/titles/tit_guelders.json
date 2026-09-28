@@ -1,0 +1,26 @@
+{
+  "id": "tit_guelders",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Gueldre",
+    "local": "Graafschap Gelre",
+    "local_language": "moyen néerlandais"
+  },
+  "heraldry": {
+    "blazon": "D'azur au lion d'or couronné, armé et lampassé de gueules.",
+    "description": "Lion couronné de Gueldre.",
+    "primary_color": "#2B4C9B",
+    "secondary_color": "#E8B923"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_gueldre"
+  ],
+  "holder_1337": {
+    "faction": "fac_guelders",
+    "sources": [
+      "Duché de Gueldre",
+      "Renaud II de Gueldre"
+    ]
+  }
+}
