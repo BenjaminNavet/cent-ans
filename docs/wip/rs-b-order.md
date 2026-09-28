@@ -9,11 +9,15 @@ Cible cargo privée : `core/target-rs-b` (à supprimer en fin de lot).
   `production_tax_share`, `upkeep_months_per_season`, `garrison_upkeep_percent`,
   `garrison_relief_*`, `garrison_reinforce_*` (le plafond 50 du renfort était en ligne). Valeurs
   inchangées ; `TaxRate::multiplier/burden` et `province_income` prennent désormais les règles.
-- [ ] 2. Sommes non pondérées par `province_effect_percent` (garnison qui apaise, peste, revenu
-  estimé par l'IA ; recherche des abbayes déjà faite en DC6b via `research_percent`).
+- [x] 2. Sommes pondérées par `province_effect_percent` : garnison qui apaise
+  (`CampaignState::weighted_garrison_strength`, lue par `population`), résistance à la peste
+  (`medicine::plague_resistance` via `province_building_effects`), revenu estimé par l'IA
+  (`ai::campaign` `province_income` via `province_income_with` + effets pondérés) et évaluation des
+  bâtiments par l'IA (apaisement, santé, croissance au poids de province, recherche à
+  `research_percent`). Recherche des abbayes : déjà faite en DC6b. Test `rs_b_weighted_sums.rs` (4).
 - [ ] 3. Révoltes 4-10 / partie (mesure avant/après, réglage dans les données, critères EQ6).
 - [ ] 4. fmt / clippy / test / pytest, `git merge main`, suppression de la cible.
 
 ## Prochaine étape
-Point 2 : pondérer `province_garrison_strength` (population), `plague_resistance` (medicine),
-`province_income` de l'IA.
+Point 3 : mesurer `balance_probe campaign 200` graines 1-16 avant (binaire `bp_base`, commit 5c96ea30)
+et après pondération, puis régler les révoltes dans les données.

@@ -223,7 +223,7 @@ pub(crate) fn resolve_population(
                 city.owner.clone(),
                 p.devastation,
                 p.unrest,
-                state.province_garrison_strength(&id),
+                state.weighted_garrison_strength(data, &id),
             )
         };
         let Some(province_data) = data.provinces.get(&id) else {
