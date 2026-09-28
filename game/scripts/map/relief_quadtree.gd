@@ -769,7 +769,9 @@ func _collect_jobs(block: bool = false) -> void:
 		var entry: Dictionary = _jobs[key]
 		if not block and (uploads >= max_uploads_per_frame or not WorkerThreadPool.is_task_completed(entry["task"])):
 			continue
+		var t_wait := Time.get_ticks_usec()
 		WorkerThreadPool.wait_for_task_completion(entry["task"])
+		PerfProbe.add("qt/wait", Time.get_ticks_usec() - t_wait)  # RS-K
 		_jobs.erase(key)
 		if _finish_job(key, entry["job"]):
 			uploads += 1
@@ -814,7 +816,9 @@ func _finish_job(key: int, job: PageJob) -> bool:
 func _upload(key: int, job: PageJob) -> bool:
 	if _pages.has(key):
 		return false
+	var t_alloc := Time.get_ticks_usec()
 	var layer := _alloc_layer()
+	PerfProbe.add("qt/alloc", Time.get_ticks_usec() - t_alloc)  # RS-K : éviction comprise
 	if layer < 0:
 		return false
 	var t0 := Time.get_ticks_usec()
@@ -824,8 +828,10 @@ func _upload(key: int, job: PageJob) -> bool:
 	var t_upload := Time.get_ticks_msec() / 1000.0
 	_pages[key] = {"layer": layer, "last_used": _frame, "t_upload": t_upload}
 	_page_bytes[key] = job.bytes
+	var t_add := Time.get_ticks_usec()
 	if _native != null:
 		_native.call("add_page", key, layer, t_upload, _frame, job.bytes)
+	PerfProbe.add("qt/add_page", Time.get_ticks_usec() - t_add)  # RS-K
 	_layer_keys[layer] = key
 	_residency_version += 1
 	var rect := _tile_rect(key)
