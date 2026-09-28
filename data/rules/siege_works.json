@@ -1,5 +1,5 @@
 {
-  "description": "Résistance des ouvrages de siège en bataille (lot SG3, ADR 0023 ; rythme retouché par le lot SB, ADR 0100) : points de vie des pans de mur et de la porte selon le niveau de fortification de la campagne (0-5), dégâts du bélier et des engins, relève de l'équipage du bélier par un régiment à pied proche (lot SG4). Cibles SB au niveau 3 : porte enfoncée en 40-60 s par un bélier à plein équipage, brèche d'un pan en 6-10 tirs de trébuchet ; niveau 5 environ ×1,5. Embarqué dans sim-battle à la compilation.",
+  "description": "Résistance des ouvrages de siège en bataille (lot SG3, ADR 0023 ; rythme retouché par le lot SB, ADR 0107) : points de vie des pans de mur et de la porte selon le niveau de fortification de la campagne (0-5), dégâts du bélier et des engins, relève de l'équipage du bélier par un régiment à pied proche (lot SG4). Cibles SB au niveau 3 : porte enfoncée en 40-60 s par un bélier à plein équipage, brèche d'un pan en 6-10 tirs de trébuchet ; niveau 5 environ ×1,5. Embarqué dans sim-battle à la compilation.",
   "wall": {
     "hp_base": 100.0,
     "hp_per_fortification": 200.0

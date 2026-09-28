@@ -1,4 +1,4 @@
-//! SB (TW2, ADR 0100): pace of siege destruction per fortification level.
+//! SB (TW2, ADR 0107): pace of siege destruction per fortification level.
 //! A full ram crew against an unguarded gate, one engine alone against a
 //! front wall piece. The probe (`cargo test -p sim-battle --test
 //! sb_siege_pace -- --ignored --nocapture`) prints the table recorded in the
@@ -136,7 +136,7 @@ fn mmss(seconds: f64) -> String {
 }
 
 #[test]
-#[ignore = "probe: prints the pace table of ADR 0100"]
+#[ignore = "probe: prints the pace table of ADR 0107"]
 fn probe_siege_pace_per_level() {
     let data = data();
     let rules = sim_battle::SiegeWorkRules::bundled();

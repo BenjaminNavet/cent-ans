@@ -42,8 +42,6 @@
     "voronoi_weight": 1.3
   },
   "owner": "fac_savoy",
-  "overlord": "fac_empire",
-  "holder": "chr_aymon_de_savoie",
   "culture": "cul_savoyard",
   "religion": "rel_catholic",
   "population": {

@@ -141,14 +141,6 @@
       "$ref": "common.schema.json#/$defs/faction_id",
       "description": "Faction qui contrôle la province au printemps 1337."
     },
-    "overlord": {
-      "$ref": "common.schema.json#/$defs/faction_id",
-      "description": "Suzerain féodal de la province si le propriétaire la tient en fief (ex. Guyenne : owner England, overlord France)."
-    },
-    "holder": {
-      "$ref": "common.schema.json#/$defs/character_id",
-      "description": "Personnage tenant la province en apanage ou fief (ex. Jean, duc de Normandie)."
-    },
     "culture": {
       "$ref": "common.schema.json#/$defs/culture_id"
     },

@@ -310,7 +310,7 @@ fn a_burning_gate_loses_its_hit_points_and_opens() {
     let max_hp = sim.siege().unwrap().pieces[gate].max_hp;
     assert!(sim.ignite_gate());
     assert!(has_event(&sim, "La porte de la ville prend feu"));
-    // SB (ADR 0100): a gate of a few hundred HP; 20 s of fire wear it, not open it.
+    // SB (ADR 0107): a gate of a few hundred HP; 20 s of fire wear it, not open it.
     run(&mut sim, 20.0);
     let hp = sim.siege().unwrap().pieces[gate].hp;
     assert!(hp < max_hp && hp > 0.0, "gate {hp} / {max_hp}");

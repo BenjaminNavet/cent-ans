@@ -15,6 +15,7 @@
   "culture": "cul_ligurian",
   "succession_law": "elective",
   "suzerain": "fac_empire",
+  "primary_title": "tit_genoa",
   "heraldry": {
     "blazon": "D'argent à la croix de gueules.",
     "description": "Croix de saint Georges rouge sur champ blanc.",
