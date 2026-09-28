@@ -27,6 +27,11 @@
       "additionalProperties": false,
       "description": "Faction détentrice au printemps 1337."
     },
+    "succession_law": {
+      "type": "string",
+      "description": "Loi de succession propre au titre quand la lignée du détenteur s'éteint (§ 4.5) ; absente : celle de la faction détentrice.",
+      "enum": ["salic", "male_preference_primogeniture", "cognatic_primogeniture", "elective"]
+    },
     "objectives": {
       "type": "array",
       "maxItems": 3,

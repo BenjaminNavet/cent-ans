@@ -34,6 +34,18 @@
         "rival_claimant": { "type": "integer" }
       },
       "additionalProperties": false
+    },
+    "forfeiture_win_war_score": { "type": "integer", "minimum": -100, "maximum": 100, "description": "Score de guerre du suzerain contre le félon, à la paix, nécessaire pour saisir les titres commis (§ 4.4)." },
+    "title_loss_penalty": { "type": "integer", "minimum": 0, "description": "Valeur, en points de négociation, d'un titre exigé dans un traité, en plus de ses provinces (§ 4.6)." },
+    "arbitration": {
+      "type": "object",
+      "description": "Points de chaque prétendant quand le suzerain arbitre une succession contestée (§ 4.5).",
+      "properties": {
+        "family_tie": { "type": "integer", "description": "Le prétendant ou son conjoint est parent du souverain arbitre ou appartient à sa cour." },
+        "law_heir": { "type": "integer", "description": "Le prétendant est l'héritier selon la loi de succession." },
+        "designated_heir": { "type": "integer", "description": "Le prétendant est l'héritier désigné par le défunt." }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

@@ -165,7 +165,17 @@ pub(crate) fn succeed(
         .get(faction)
         .and_then(|f| f.heir.clone())
         .filter(|h| state.characters.get(h).is_some_and(|c| c.alive));
-    let successor = designated.or_else(|| {
+    // FE (F3): designated heir and heir by law differ under a suzerain:
+    // the suzerain arbitrates, the loser may start a succession war.
+    let contested = crate::feudal::contested_succession(
+        state,
+        data,
+        faction,
+        dead_ruler.as_ref(),
+        designated.as_ref(),
+        events,
+    );
+    let successor = contested.or(designated).or_else(|| {
         dead_ruler
             .as_ref()
             .and_then(|ruler| dynasty::pick_heir_by_law(state, data, faction, ruler))
@@ -191,6 +201,17 @@ pub(crate) fn succeed(
         }
         None => {
             state.factions.get_mut(faction).expect("exists").ruler = None;
+            // FE (F3): each title passes to kin abroad or escheats; a
+            // faction left without title has vanished into its heir's.
+            if crate::feudal::inherit_titles_on_extinction(
+                state,
+                data,
+                faction,
+                dead_ruler.as_ref(),
+                events,
+            ) {
+                return;
+            }
             if let Some(house) = dead_ruler
                 .as_ref()
                 .and_then(|r| state.characters.get(r))
@@ -249,6 +270,28 @@ pub(crate) fn succeed(
     }
 }
 
+/// Marks `id` dead: its wars, alliances, truces, embargoes and vassal ties
+/// end (also used when a faction without title is absorbed, lot F3).
+pub(crate) fn dissolve_faction(state: &mut CampaignState, id: &FactionId) {
+    let dead = state.factions.get_mut(id).expect("exists");
+    dead.alive = false;
+    dead.at_war_with.clear();
+    dead.allies.clear();
+    dead.truces.clear();
+    dead.embargoes.clear();
+    dead.suzerain = None;
+    // Wars, alliances and vassal ties with a vanished faction end.
+    for other in state.factions.values_mut() {
+        other.at_war_with.remove(id);
+        other.allies.remove(id);
+        other.truces.remove(id);
+        other.embargoes.remove(id);
+        if other.suzerain.as_ref() == Some(id) {
+            other.suzerain = None;
+        }
+    }
+}
+
 /// Marks factions without provinces nor armies as dead.
 pub(crate) fn resolve_faction_deaths(
     state: &mut CampaignState,
@@ -264,23 +307,9 @@ pub(crate) fn resolve_faction_deaths(
         let has_province = state.settlements.values().any(|s| s.controller == id);
         let has_army = state.armies.values().any(|a| a.faction == id);
         if !has_province && !has_army {
-            let dead = state.factions.get_mut(&id).expect("exists");
-            dead.alive = false;
-            dead.at_war_with.clear();
-            dead.allies.clear();
-            dead.truces.clear();
-            dead.embargoes.clear();
-            dead.suzerain = None;
-            // Wars, alliances and vassal ties with a vanished faction end.
-            for other in state.factions.values_mut() {
-                other.at_war_with.remove(&id);
-                other.allies.remove(&id);
-                other.truces.remove(&id);
-                other.embargoes.remove(&id);
-                if other.suzerain.as_ref() == Some(&id) {
-                    other.suzerain = None;
-                }
-            }
+            dissolve_faction(state, &id);
+            // FE (F3): its titles escheat to their liege or fall vacant.
+            crate::feudal::on_faction_destroyed(state, data, &id, events);
             events.push(
                 GameEvent::new(
                     EventKind::FactionDestroyed,
