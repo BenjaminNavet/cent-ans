@@ -152,6 +152,13 @@ func _test_tree_france(map: Node) -> void:
 		_check(france_item.get_text(0).contains("(vous)"), "the player is marked in the tree")
 	var liege := _find(feudal.panel, "Liege") as Label
 	_check(liege != null and liege.text.contains("Souverain"), "France's position: sovereign")
+	# Retour 03-arbre-feodal : aucune ligne n'élargit le panneau au-delà de sa zone.
+	# Zone `SIDE_PANEL` à 1280 px : 30 % de la largeur (la fenêtre headless est plus petite).
+	var zone_width := UiZones.ZONE_RECTS[UiZones.Zone.SIDE_PANEL].size.x * 1280.0
+	_check(feudal.panel.get_combined_minimum_size().x <= zone_width,
+		"feudal panel wider than SIDE_PANEL at 1280 px: %.0f > %.0f" % [feudal.panel.get_combined_minimum_size().x, zone_width])
+	var vassal_line := _find(feudal.panel, "Vassals") as Label
+	_check(vassal_line != null and vassal_line.autowrap_mode != TextServer.AUTOWRAP_OFF, "long vassal line wraps")
 	feudal.select("fac_burgundy")
 	await process_frame
 	var commise := _find(feudal.panel, "CommiseButton") as Button
@@ -345,6 +352,8 @@ func _test_faction_chooser() -> void:
 	await process_frame
 	await process_frame
 	_check(picker.size.x > 100 and picker.provinces.size() > 100, "map picker laid out with provinces")
+	var framed := picker.playable_bounds()
+	_check(framed.size.x < 4096.0 * 0.9, "map picker framed on the playable lands: %s" % framed)
 	_check(not picker.kingdoms().is_empty() and select.kingdom_filter.item_count == picker.kingdoms().size() + 1, "kingdom filter filled")
 	var center := picker.faction_center("fac_foix_bearn")
 	_check(picker.faction_at(center) == "fac_foix_bearn", "Foix-Béarn found under its centre")

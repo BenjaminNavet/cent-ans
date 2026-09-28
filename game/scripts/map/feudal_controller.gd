@@ -14,7 +14,6 @@ extends Node
 ## - Guide de trois étapes au premier lancement (`feudal_tutorial/done`).
 ## Tout vient du cœur (`CampaignSim.get_feudal_*`, `feudal_*`) : aucune règle ici.
 
-const PANEL_WIDTH := 400.0
 const MENU_FEUDAL_ID := 930
 const TREE_HEIGHT := 250.0
 const RECENT_MAX := 12
@@ -107,7 +106,8 @@ func _build_panel() -> void:
 	panel.name = "FeudalTreePanel"
 	panel.theme = load("res://scenes/ui/parchment_theme.tres")
 	panel.add_theme_stylebox_override("panel", HudStyle.panel_box(10))
-	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0)
+	# Largeur donnée par la zone `SIDE_PANEL` : aucun enfant ne doit l'élargir (lignes coupées).
+	panel.custom_minimum_size = Vector2(0, 0)
 	panel.hide()
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -124,6 +124,8 @@ func _build_panel() -> void:
 	titles.add_child(HudStyle.label("Arbre féodal", UiType.size(UiType.HEADING), HudStyle.RUBRIC))
 	_title = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
 	_title.name = "Realm"
+	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.add_child(_title)
 	var close := Button.new()
 	close.text = "×"
@@ -139,6 +141,7 @@ func _build_panel() -> void:
 	tree.custom_minimum_size = Vector2(0, TREE_HEIGHT)
 	tree.set_column_expand(1, false)
 	tree.set_column_custom_minimum_width(1, 110)
+	tree.set_column_clip_content(0, true)
 	tree.item_selected.connect(func() -> void:
 		var item := tree.get_selected()
 		if item != null:
@@ -199,8 +202,17 @@ func _label(box: Container, text: String, color: Color, node_name: String = "", 
 	if node_name != "":
 		label.name = node_name
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.custom_minimum_size.x = 1.0  # retour à la ligne dans la largeur du panneau
 	box.add_child(label)
 	return label
+
+
+## Liste déroulante qui n'impose pas la largeur de son plus long choix.
+static func _compact(choice: OptionButton) -> void:
+	choice.fit_to_longest_item = false
+	choice.clip_text = true
+	choice.custom_minimum_size.x = 150.0
 
 
 func _button(box: Container, text: String, tip: String, node_name: String, action: Callable) -> Button:
@@ -235,6 +247,7 @@ func _fill_position() -> void:
 	if not lords.is_empty():
 		_homage_choice = OptionButton.new()
 		_homage_choice.name = "HomageChoice"
+		_compact(_homage_choice)
 		for lord in lords:
 			_homage_choice.add_item(str(lord.get("name", "")))
 			_homage_choice.set_item_metadata(_homage_choice.item_count - 1, str(lord.get("id", "")))
@@ -368,6 +381,7 @@ func _fill_selection() -> void:
 		return
 	_grant_choice = OptionButton.new()
 	_grant_choice.name = "GrantChoice"
+	_compact(_grant_choice)
 	for title in titles:
 		_grant_choice.add_item(str(title.get("name", "")))
 		_grant_choice.set_item_metadata(_grant_choice.item_count - 1, str(title.get("id", "")))

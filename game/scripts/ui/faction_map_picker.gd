@@ -60,16 +60,6 @@ func _ready() -> void:
 func load_data(geojson_path: String = "") -> bool:
 	var path := geojson_path if geojson_path != "" else FrontEndData._data_dir().path_join("map/provinces.geojson")
 	provinces = read_provinces(path)
-	_bounds = Rect2()
-	var first := true
-	for province in provinces:
-		for polygon in province["polygons"]:
-			for point in polygon:
-				if first:
-					_bounds = Rect2(point, Vector2.ZERO)
-					first = false
-				else:
-					_bounds = _bounds.expand(point)
 	var facade := _facade()
 	var store: Object = facade.get("store") if facade != null else null
 	sheets.clear()
@@ -83,8 +73,36 @@ func load_data(geojson_path: String = "") -> bool:
 				for province in provinces:
 					if province["id"] == province_id:
 						province["owner"] = id
+	_bounds = playable_bounds()
 	queue_redraw()
 	return not provinces.is_empty() and not sheets.is_empty()
+
+
+## Marge autour de l'emprise des terres jouables (part de sa taille).
+const FRAME_MARGIN := 0.04
+
+
+## Emprise (coordonnées carte) des provinces des factions jouables, élargie de `FRAME_MARGIN` : la
+## vue la remplit (les provinces lointaines de l'est et les bords de la carte sont coupés). À
+## défaut de fiches, l'emprise de toutes les provinces.
+func playable_bounds() -> Rect2:
+	var bounds := Rect2()
+	var first := true
+	for pass_index in 2:
+		for province in provinces:
+			if pass_index == 0 and not sheets.has(str(province["owner"])):
+				continue
+			for polygon in province["polygons"]:
+				for point in polygon:
+					if first:
+						bounds = Rect2(point, Vector2.ZERO)
+						first = false
+					else:
+						bounds = bounds.expand(point)
+		if not first:
+			break
+	return bounds.grow_individual(bounds.size.x * FRAME_MARGIN, bounds.size.y * FRAME_MARGIN,
+		bounds.size.x * FRAME_MARGIN, bounds.size.y * FRAME_MARGIN)
 
 
 static func read_provinces(path: String) -> Array:
