@@ -93,6 +93,10 @@ pub use entities::province::{
 };
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
+pub use entities::replenishment::{
+    ArmyReplenishmentRules, CategoryPercent, KindValues, RecruitPoolRules, ReplenishmentRules,
+    StancePercent, TerritoryPercent,
+};
 pub use entities::resource::{Resource, ResourceCategory};
 pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
