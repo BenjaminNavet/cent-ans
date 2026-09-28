@@ -24,6 +24,8 @@ signal army_split_requested(army_id: String, unit_indices: Array)
 ## Bandeau d'ost (lot C7d) : régiments de l'armée `army_id` à laisser en garnison de la
 ## colonie où elle se trouve (ordre `garrison_units`).
 signal army_garrison_requested(army_id: String, unit_indices: Array)
+## TW2-T3 : bouton « Mercenaires » du bandeau de l'armée `army_id`.
+signal army_mercenaries_requested(army_id: String)
 ## Sceau du chef : fiche du chef (`character_id`), ou `""` si l'armée n'a pas de chef.
 signal army_general_clicked(character_id: String)
 ## Cloche : clic sur une pastille d'alerte (ou sur la cloche quand une décision bloque).
@@ -657,6 +659,7 @@ func show_army(army_id: String, army: Dictionary, character: Dictionary, faction
 	army_strip.can_split = can_split
 	army_strip.can_garrison = can_garrison
 	army_strip.garrison_disabled_reason = garrison_disabled_reason
+	army_strip.can_hire_mercenaries = is_player  # TW2-T3
 	army_strip.set_army(army, int(army.get("max_units", DEFAULT_ARMY_CAPACITY)), _unit_catalog, title)
 	if not keep.is_empty():
 		army_strip.select(keep)
@@ -936,6 +939,9 @@ func _setup_hud() -> void:
 	army_strip.garrison_requested.connect(func(indices: PackedInt32Array) -> void:
 		if current_army_id != "":
 			army_garrison_requested.emit(current_army_id, Array(indices)))
+	army_strip.mercenaries_requested.connect(func() -> void:
+		if current_army_id != "":
+			army_mercenaries_requested.emit(current_army_id))
 	news_letters.news_activated.connect(func(item: Dictionary) -> void: news_activated.emit(item))
 	army_actions = PanelContainer.new()
 	army_actions.name = "ArmyActions"

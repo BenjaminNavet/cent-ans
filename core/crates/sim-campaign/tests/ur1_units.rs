@@ -123,23 +123,36 @@ fn ordonnance_companies_wait_for_1445_and_the_technology() {
 
 #[test]
 fn mercenary_bands_come_and_go_with_their_period() {
+    // TW2-T3 (ADR 0103): companies are hired by an army from its region's
+    // reserve, over the band's period; towns never levy them.
     let data = data();
     let mut state = start(&data, "fac_france");
     let paris = city(&state, "prov_ile_de_france");
+    let army = state
+        .armies
+        .iter()
+        .find(|(_, a)| a.faction == fac("fac_france"))
+        .map(|(id, _)| id.clone())
+        .unwrap();
+    state.armies.get_mut(&army).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(paris.clone());
+    let offered = |state: &CampaignState| {
+        state
+            .mercenary_market(&data, &army)
+            .unwrap()
+            .options
+            .iter()
+            .any(|o| o.unit_type.as_str() == "unit_routiers")
+    };
+    assert!(!offered(&state));
+    state.year = 1360;
+    assert!(offered(&state));
     assert_eq!(
         reason(&state, &data, "fac_france", &paris, "unit_routiers").as_deref(),
-        Some("disponible à partir de 1356")
-    );
-    state.year = 1360;
-    assert_eq!(
-        reason(&state, &data, "fac_france", &paris, "unit_routiers"),
-        None
+        Some("compagnie de mercenaires : à engager depuis une armée")
     );
     state.year = 1400;
-    assert_eq!(
-        reason(&state, &data, "fac_france", &paris, "unit_routiers").as_deref(),
-        Some("plus levée après 1395")
-    );
+    assert!(!offered(&state));
 }
 
 #[test]

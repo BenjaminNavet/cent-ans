@@ -33,6 +33,7 @@ mod campaign_sim_family;
 mod campaign_sim_h5h6;
 mod campaign_sim_holdings;
 mod campaign_sim_map_lens;
+mod campaign_sim_mercenaries;
 mod campaign_sim_movement;
 mod campaign_sim_provinces;
 mod campaign_sim_replenish;
