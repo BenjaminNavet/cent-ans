@@ -340,11 +340,17 @@ pub fn protection_score(
     let rules = &data.feudal_rules.escalation.score;
     let mut terms: Vec<(i32, String)> = vec![(
         rules.base,
-        format!("devoir de protection envers {}", faction_label(data, vassal)),
+        format!(
+            "devoir de protection envers {}",
+            faction_label(data, vassal)
+        ),
     )];
     let ratio = state.faction_power(liege) / state.faction_power(aggressor).max(1.0);
     if ratio >= rules.power_ratio {
-        terms.push((rules.power_favourable, "plus fort que l'agresseur".to_owned()));
+        terms.push((
+            rules.power_favourable,
+            "plus fort que l'agresseur".to_owned(),
+        ));
     } else {
         terms.push((
             rules.power_unfavourable,
@@ -374,7 +380,10 @@ pub fn protection_score(
         ));
     }
     if state.is_allied(liege, aggressor) {
-        terms.push((rules.allied_with_aggressor, "allié de l'agresseur".to_owned()));
+        terms.push((
+            rules.allied_with_aggressor,
+            "allié de l'agresseur".to_owned(),
+        ));
     }
     let score: i32 = terms.iter().map(|(v, _)| v).sum();
     let main = if score >= rules.intervene_at {
