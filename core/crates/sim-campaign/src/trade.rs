@@ -24,8 +24,7 @@
 //! full. `resolve_trade` credits the treasuries and reports newly-cut routes
 //! that touch the player.
 
-use std::cmp::Reverse;
-use std::collections::{BTreeMap, BinaryHeap};
+use std::collections::BTreeMap;
 
 use data_model::{FactionId, GameData, ResourceId, SettlementId, TradeRouteDef};
 use serde::{Deserialize, Serialize};
@@ -124,7 +123,9 @@ fn resolve_route(
         .get(&to_hub.settlement)
         .map(|s| s.controller.clone());
 
-    let (path, cost) = shortest_path(data, &from_hub.settlement, &to_hub.settlement)
+    // Precomputed at load (`GameData::build_trade_paths`, review point 18c).
+    let (path, cost) = data
+        .trade_path(&from_hub.settlement, &to_hub.settlement)
         .map(|(cost, path)| (path, cost))
         .unwrap_or_default();
 
@@ -294,51 +295,6 @@ fn route_mode(data: &GameData, path: &[SettlementId]) -> TradeMode {
         (false, true) => TradeMode::Sea,
         _ => TradeMode::Land,
     }
-}
-
-/// Shortest path between two settlements on the static movement graph
-/// (unaware of who controls what: merchants find their way around army
-/// stops that would block a marching army; [`path_security`] separately
-/// penalises a threatened path). Returns `(total cost, path incl. both ends)`.
-fn shortest_path(
-    data: &GameData,
-    from: &SettlementId,
-    to: &SettlementId,
-) -> Option<(u32, Vec<SettlementId>)> {
-    if from == to {
-        return Some((0, vec![from.clone()]));
-    }
-    let mut dist: BTreeMap<SettlementId, u32> = BTreeMap::new();
-    let mut prev: BTreeMap<SettlementId, SettlementId> = BTreeMap::new();
-    let mut heap = BinaryHeap::new();
-    dist.insert(from.clone(), 0);
-    heap.push(Reverse((0u32, from.clone())));
-    while let Some(Reverse((cost, current))) = heap.pop() {
-        if &current == to {
-            break;
-        }
-        if cost > *dist.get(&current).unwrap_or(&u32::MAX) {
-            continue;
-        }
-        for (next, edge_cost) in crate::movement::edges(data, &current) {
-            let next_cost = cost + edge_cost;
-            if next_cost < dist.get(&next).copied().unwrap_or(u32::MAX) {
-                dist.insert(next.clone(), next_cost);
-                prev.insert(next.clone(), current.clone());
-                heap.push(Reverse((next_cost, next)));
-            }
-        }
-    }
-    let cost = *dist.get(to)?;
-    let mut path = vec![to.clone()];
-    let mut current = to.clone();
-    while &current != from {
-        let previous = prev.get(&current)?;
-        path.push(previous.clone());
-        current = previous.clone();
-    }
-    path.reverse();
-    Some((cost, path))
 }
 
 /// Number of catalogue routes linking a hub held by `a` to a hub held by

@@ -88,3 +88,11 @@ d'interface doivent être régénérés dans le registre enluminure.
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul PO |
 |---|---|---|---|---|---|
 | 2026-09-27 | — | PO0 : planche « avant », gabarit, squelette (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+
+## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
+
+Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul FE |
+|---|---|---|---|---|---|
+| 2026-09-28 | — | F0 (titres, migration) | 0,00 $ | 0,00 $ | 0,00 $ |

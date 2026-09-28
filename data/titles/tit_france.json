@@ -1,0 +1,50 @@
+{
+  "id": "tit_france",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de France",
+    "local": "Royaume de France",
+    "local_language": "ancien français"
+  },
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or.",
+    "description": "France ancien : champ bleu semé de fleurs de lis d'or. Les armes « France moderne » à trois fleurs de lis n'apparaissent qu'à partir de Charles V (vers 1376).",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_provinces": [
+    "prov_agenais",
+    "prov_anjou",
+    "prov_auvergne",
+    "prov_bar",
+    "prov_bearn",
+    "prov_beaucaire",
+    "prov_berry",
+    "prov_boulonnais",
+    "prov_bourbonnais",
+    "prov_carcassonne",
+    "prov_champagne",
+    "prov_flandre_wallonne",
+    "prov_ile_de_france",
+    "prov_limousin",
+    "prov_lyonnais",
+    "prov_maine",
+    "prov_orleanais",
+    "prov_perigord",
+    "prov_picardie",
+    "prov_poitou",
+    "prov_quercy",
+    "prov_rouergue",
+    "prov_saintonge",
+    "prov_toulousain",
+    "prov_touraine"
+  ],
+  "holder_1337": {
+    "faction": "fac_france",
+    "sources": [
+      "Philippe VI de France",
+      "Guerre de Cent Ans",
+      "Armoiries de la France"
+    ]
+  }
+}

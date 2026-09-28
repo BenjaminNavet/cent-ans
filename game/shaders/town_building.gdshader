@@ -19,7 +19,8 @@ uniform int first_plain = 11;
 uniform float snow = 0.0;
 uniform int roof_first = 7;
 uniform int roof_last = 10;
-// 0 : base dans INSTANCE_CUSTOM.r ; 1 : base dans UV2.x.
+// 0 : base dans INSTANCE_CUSTOM.r ; 1 : base dans UV2.x ; 2 (RS-G) : monuments fusionnés par
+// cellule, base, ancrage xz (repère du nœud) et teinte dans CUSTOM0.
 uniform int base_source = 0;
 uniform bool box_uv = false;
 uniform float meters_per_unit = 719.0;
@@ -51,10 +52,14 @@ varying float v_built;
 
 void vertex() {
 	layer = clamp(int(COLOR.a * 16.0), 0, 15);
-	float base = base_source == 0 ? INSTANCE_CUSTOM.r : UV2.x;
-	tint_shift = base_source == 0 ? INSTANCE_CUSTOM.g - 0.5 : 0.0;
-	// Ancrage : origine de l'instance (bâtiments rigides) ou le sommet (maillages drapés).
+	float base = base_source == 0 ? INSTANCE_CUSTOM.r : (base_source == 2 ? CUSTOM0.r : UV2.x);
+	tint_shift = base_source == 0 ? INSTANCE_CUSTOM.g - 0.5 : (base_source == 2 ? CUSTOM0.a - 0.5 : 0.0);
+	// Ancrage : origine de l'instance (bâtiments rigides), celle du monument fusionné, ou le
+	// sommet (maillages drapés).
 	vec2 anchor_xz = base_source == 0 ? MODEL_MATRIX[3].xz : VERTEX.xz;
+	if (base_source == 2) {
+		anchor_xz = (MODEL_MATRIX * vec4(CUSTOM0.g, 0.0, CUSTOM0.b, 1.0)).xz;
+	}
 	float keep = 1.0;
 	if (lod_mode > 0) {
 		// Hauteur approchée de l'instance (sans le relief ZG8) : suffit au choix du niveau.

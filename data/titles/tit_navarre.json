@@ -1,0 +1,26 @@
+{
+  "id": "tit_navarre",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Navarre",
+    "local": "Nafarroako Erresuma",
+    "local_language": "basque"
+  },
+  "heraldry": {
+    "blazon": "De gueules aux chaînes d'or posées en orle, en croix et en sautoir, chargées en cœur d'une émeraude au naturel.",
+    "description": "Chaînes d'or sur champ rouge, émeraude au centre ; les chaînes remplacent l'ancien escarboucle au XIVe siècle.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_provinces": [
+    "prov_navarra"
+  ],
+  "holder_1337": {
+    "faction": "fac_navarre",
+    "sources": [
+      "Jeanne II de Navarre",
+      "Philippe III de Navarre",
+      "Armoiries de la Navarre"
+    ]
+  }
+}
