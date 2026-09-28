@@ -283,8 +283,10 @@ func give(id: String) -> Dictionary:
 	if battle == null:
 		return {}
 	var units: Array[int] = []
-	if scene.has_method("_available_selection"):
-		units = scene.call("_available_selection")
+	# La sélection disponible est tenue par `BattleInput` (CB0), pas par la scène.
+	var input: Object = scene.get("input")
+	if input != null and input.has_method("_available_selection"):
+		units = input.call("_available_selection")
 	var command := {"type": "leader_order", "order": id, "units": units}
 	var result: Dictionary = scene.call("issue", command)
 	if not bool(result.get("ok", false)) and not units.is_empty() and str(result.get("error", "")).contains("désignés"):
