@@ -51,7 +51,7 @@ def stack(src: Path, suffix: str, source_res: str, size: int, out: str) -> None:
     sheet = Image.new("RGB", (size, size * len(GROUND_LAYERS)))
     for i, layer in enumerate(GROUND_LAYERS):
         image = Image.open(src / f"{layer}_{suffix}_{source_res}.jpg").convert("RGB")
-        sheet.paste(image.resize((size, size), Image.LANCZOS), (0, i * size))
+        sheet.paste(image.resize((size, size), Image.Resampling.LANCZOS), (0, i * size))
     sheet.save(HERE / out, quality=88)
 
 
@@ -61,7 +61,7 @@ def singles(src: Path) -> None:
         diff = Image.open(src / f"{name}_diff_1k.jpg").convert("RGB")
         diff.save(HERE / f"{name}_diff.jpg", quality=88)
         nor = Image.open(src / f"{name}_nor_gl_1k.jpg").convert("RGB")
-        nor.resize((512, 512), Image.LANCZOS).save(HERE / f"{name}_nor.jpg", quality=90)
+        nor.resize((512, 512), Image.Resampling.LANCZOS).save(HERE / f"{name}_nor.jpg", quality=90)
 
 
 def _bleed(image: Image.Image) -> Image.Image:
