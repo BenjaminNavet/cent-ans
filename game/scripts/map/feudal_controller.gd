@@ -396,9 +396,7 @@ func _after(result: Dictionary, success: String) -> bool:
 		map.ui.show_toast(success)
 	else:
 		map.ui.show_toast(str(result.get("error", "Ordre refusé")), true)
-	map.refresh_all()
-	if panel.visible:
-		fill()
+	map.refresh_all()  # repeint aussi ce panneau (`refresh`)
 	return ok
 
 
