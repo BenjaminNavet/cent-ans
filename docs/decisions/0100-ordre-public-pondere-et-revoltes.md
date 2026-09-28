@@ -27,7 +27,8 @@ Suivi : `docs/wip/rs-b-order.md`. Prolonge l'ADR 0082 (carte densifiée, `provin
 3. **Révolte** (`data/rules/population.json`) : après **2 saisons** (3 avant) au-delà de 75 de
    mécontentement moyen. Les seuils (75, et 90 pour le passage aux rebelles) ne changent pas.
 4. Sondes recalibrées : `m3_grid_ai::fifty_turns_on_eight_seeds_stay_in_the_c7a_band`, plancher des
-   sièges par tour 1,5 → 1,4 (la pondération de l'IA les baisse de 10 %) ;
+   sièges par tour 1,5 → 1,3 (la pondération de l'IA les baisse de 1,65 à 1,49 ; 1,40 après la
+   fusion de main du 28/09 : marge pour le chaos entre versions) ;
    `cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses`, graine 7 → 4 (la graine 7
    ne tendait plus d'embuscade).
 
