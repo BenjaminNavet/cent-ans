@@ -18,10 +18,13 @@ Branche : `worktree-agent-a038490f6abdd9c53`. Agent historien (alimentation, mé
 - [x] lot 4 : plantes du jardin (sauge, rue, menthe, fenouil, ail, oignon, hysope, saule)
 - [x] lot 5 : reine_des_pres, camomille, plantain, consoude, millepertuis, theriaque, aloes, safran
 - [x] lot 6 : pavot, mandragore, jusquiame, genievre, vinaigre, romarin
-- [ ] lots 7-8 : ids de _h10_links.md (puis supprimer ce fichier ou n'y garder que les non écrits)
+- [x] lots 7-8 : 8 ids de _h10_links.md (menagier_de_paris, forme_of_cury, verjus, cervoise,
+  tranchoir, uroscopie, saignee, hildegarde_de_bingen) ; les 12 autres ids du fichier étaient déjà
+  écrits. `_h10_links.md` supprimé (ne restait aucun id).
 
 ## Décisions
 - Alias « Taillevent » et « Guillaume Tirel » déplacés de `cdx_viandier` vers `cdx_taillevent`.
 
 ## Prochaine étape
-Lots 7-8 (_h10_links.md). Entités : une seule fiche par entité (codex_store garde la dernière) ; voir répartition dans le rapport.
+Lot H10 terminé (toutes les fiches prévues sont écrites, validées par `validate_codex` et
+`pytest tools/tests/test_codex.py`). Aucune suite prévue pour ce lot.
