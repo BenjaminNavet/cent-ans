@@ -663,7 +663,7 @@ impl BattleSim {
         match sim.burn_choice(side, &ids) {
             Ok(choice) => {
                 let ids: VarArray = [i64::from(choice.unit).to_variant()].into_iter().collect();
-                let mut command = vdict! { "type" => "burn", "units" => ids };
+                let mut command = vdict! { "type" => "burn", "units" => &ids };
                 let target = match choice.house {
                     Some(house) => {
                         command.set("house", house as i64);
@@ -682,7 +682,7 @@ impl BattleSim {
                     "siege" => true,
                     "available" => true,
                     "reason" => "",
-                    "command" => command,
+                    "command" => &command,
                     "target" => target,
                     "unit" => i64::from(choice.unit),
                     "distance_m" => choice.distance_m,
