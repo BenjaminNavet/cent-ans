@@ -429,6 +429,7 @@ impl SiegeWorks {
                     hp: wall_hp,
                     max_hp: wall_hp,
                     docked_tower: None,
+                    attacked_for: 0.0,
                 });
             }
         }
@@ -463,6 +464,7 @@ impl SiegeWorks {
                 hp: wall_hp,
                 max_hp: wall_hp,
                 docked_tower: None,
+                attacked_for: 0.0,
             };
             pieces.splice(
                 host..=host,
@@ -475,6 +477,7 @@ impl SiegeWorks {
                         hp: gate_hp,
                         max_hp: gate_hp,
                         docked_tower: None,
+                        attacked_for: 0.0,
                     },
                     wall(g1, piece.b),
                 ],
