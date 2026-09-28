@@ -18,10 +18,12 @@
   "suzerain": "fac_aragon",
   "primary_title": "tit_majorca",
   "heraldry": {
-    "blazon": "D'or à quatre pals de gueules.",
-    "description": "Armes de la maison de Barcelone, non brisées.",
+    "blazon": "D'or à quatre pals de gueules, à la bordure de sable.",
+    "description": "Armes de la maison de Barcelone ; bordure de sable ajoutée ici pour la distinction visuelle en jeu (les rois de Majorque portaient parfois les pals non brisés, indistincts de ceux d'Aragon).",
     "primary_color": "#F2C230",
-    "secondary_color": "#B0182B"
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Brisure de jeu, non une brisure historiquement attestée."
   },
   "titles": [
     "Roi de Majorque",
