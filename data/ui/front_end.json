@@ -441,6 +441,150 @@
         "Peu de places fortes face à un rival soutenu par l'Angleterre"
       ],
       "difficulty": 3
+    },
+    {
+      "id": "fac_kildare",
+      "tagline": "Les FitzGerald, maîtres du Pale",
+      "intro": "Maurice FitzGerald, 4e comte de Kildare, gouverne depuis Maynooth un comté anglo-irlandais au cœur du Pale. Rival des Butler d'Ormond pour l'oreille du roi, il doit défendre les marches du Leinster gaélique tout en jouant sa propre partition entre Dublin et Londres.",
+      "strengths": [
+        "Position centrale dans le Pale, proche du gouvernement de Dublin",
+        "Chevalerie anglo-irlandaise expérimentée",
+        "Rivalité avec Ormond qui laisse des marges de manœuvre"
+      ],
+      "weaknesses": [
+        "Frontière permanente avec les clans gaéliques du Leinster",
+        "Comté modeste, ressources limitées",
+        "Dépendant des renforts anglais, rarement envoyés"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_ormond",
+      "tagline": "Les grands bouteillers d'Irlande",
+      "intro": "James Butler, 1er comte d'Ormond, grand bouteiller héréditaire d'Irlande, tient la vallée de la Suir. Sa mort prochaine (janvier 1338) laissera un héritier de six ans en pupille : à vous d'assurer la continuité de la maison Butler.",
+      "strengths": [
+        "Charge héréditaire de grand bouteiller, prestige à la cour",
+        "Terres riches de la Suir et du Nore",
+        "Liens matrimoniaux avec la noblesse anglaise"
+      ],
+      "weaknesses": [
+        "Succession quasi immédiate par un comte mineur",
+        "Frontière disputée avec le Thomond gaélique",
+        "Rivalité avec Kildare pour le gouvernement du Pale"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_desmond",
+      "tagline": "Maurice le Grand, quasi-roi du Munster",
+      "intro": "Maurice FitzGerald, 1er comte de Desmond, rebelle gracié devenu comte palatin de Kerry, gouverne le Munster occidental avec une autorité proche de la souveraineté. Entre fidélité de façade à la couronne et ambitions personnelles, bâtissez votre propre royaume.",
+      "strengths": [
+        "Juridiction palatine quasi souveraine sur le Kerry",
+        "Vaste territoire entre Cork et le Shannon",
+        "Chef naturel des mécontents anglo-irlandais"
+      ],
+      "weaknesses": [
+        "Réputation de rebelle, méfiance de la couronne",
+        "Voisinage contesté avec le Thomond gaélique",
+        "Administration lâche, faible rendement fiscal"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_tyrone",
+      "tagline": "Les Ó Néill, rois jamais soumis",
+      "intro": "Henry Ó Néill règne sur Tír Eoghain depuis 1325 : son royaume n'a jamais rendu hommage à la couronne d'Angleterre. Tenez la frontière du Pale, arbitrez les querelles des petits royaumes d'Ulster, et gardez votre trône face aux prétendants de votre propre parenté.",
+      "strengths": [
+        "Royaume jamais entré dans la vassalité anglo-normande",
+        "Site sacré d'inauguration de Tullyhogue, forte légitimité",
+        "Terrain difficile, défense naturelle"
+      ],
+      "weaknesses": [
+        "Succession contestée au sein même de la dynastie Ó Néill",
+        "Royaume pauvre, peu de villes",
+        "Voisinage de l'Ulster anglo-normand, toujours menaçant"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_thomond",
+      "tagline": "Les héritiers de Brian Boru",
+      "intro": "Muircheartach Ó Briain règne sur le Clare, repris aux colons anglo-normands de Bunratty après la victoire de Dysert O'Dea en 1318. Descendant de Brian Boru, il rêve de reconstituer la puissance de ses ancêtres sur tout le Munster.",
+      "strengths": [
+        "Victoire fondatrice de 1318, prestige et légitimité",
+        "Position centrale sur le Shannon",
+        "Rivalités anglo-irlandaises voisines (Ormond, Desmond) à exploiter"
+      ],
+      "weaknesses": [
+        "Royaume de taille modeste",
+        "Succession par élection, instabilité potentielle",
+        "Encerclé par les comtés anglo-irlandais"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_connacht",
+      "tagline": "Les descendants des derniers grands rois",
+      "intro": "Toirdelbach Ó Conchobair règne sur un Connacht morcelé entre branches rivales de sa propre dynastie. Deux Ó Conchobhair furent les derniers grands rois d'Irlande : reconstituer cet héritage est un rêve, tenir son royaume une tâche de tous les jours.",
+      "strengths": [
+        "Vaste territoire, peu disputé par les Anglo-Normands",
+        "Prestige de l'ancienne haute-royauté d'Irlande",
+        "Éloignement du Pale, relative tranquillité"
+      ],
+      "weaknesses": [
+        "Dynastie divisée en branches rivales (Ó Conchobhair Donn et Ruadh)",
+        "Peu de villes, économie pastorale",
+        "Enclave anglo-normande de Galway sur ses côtes"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_leinster",
+      "tagline": "La guérilla des montagnes de Wicklow",
+      "intro": "Donnchadh Mac Murchada, évadé des prisons de Dublin en 1331, mène depuis les montagnes de Wicklow une guerre incessante contre le Pale anglais. Le plus fragile des royaumes gaéliques, mais aussi le plus proche du cœur du pouvoir anglais en Irlande.",
+      "strengths": [
+        "Terrain montagneux, quasi imprenable",
+        "Guérilla proche du Pale, pression constante sur Dublin",
+        "Rien à perdre : chaque raid affaiblit l'ennemi"
+      ],
+      "weaknesses": [
+        "Le plus petit et le plus pauvre des royaumes gaéliques",
+        "Voisinage immédiat et hostile du Pale anglais",
+        "Aucune ville, aucune administration"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_isles",
+      "tagline": "Le seigneur des mers occidentales",
+      "intro": "Jean d'Islay, chef du Clan Donald, vient de prendre le titre de seigneur des Îles (1336) et s'apprête à épouser Amy MacRuairi, héritière du nord des Hébrides. Sa flotte de galères commande tout le littoral occidental de l'Écosse, une vassalité royale purement nominale.",
+      "strengths": [
+        "Flotte de galères, maîtrise des mers occidentales",
+        "Mariage de 1337 unifiant les Hébrides du sud et du nord",
+        "Vassalité écossaise sans autorité réelle"
+      ],
+      "weaknesses": [
+        "Écosse en pleine guerre civile, alliances à choisir avec soin",
+        "Terres dispersées sur des dizaines d'îles",
+        "Peu de revenus agricoles"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_lancaster",
+      "tagline": "Le sang royal, aveugle et fidèle",
+      "intro": "Henri, 3e comte de Lancastre, petit-fils de Henri III, aveugle depuis 1330, gouverne depuis Lancaster un comté qui deviendra duché en 1351. Son fils Henri de Grosmont, tout juste fait comte de Derby, s'annonce comme l'un des plus grands capitaines du royaume.",
+      "strengths": [
+        "Sang royal, accès privilégié à la cour d'Édouard III",
+        "Riche comté du Nord-Ouest, laine et sel",
+        "Héritier prometteur (Henri de Grosmont, futur grand capitaine)"
+      ],
+      "weaknesses": [
+        "Comte aveugle, peu apte au commandement personnel",
+        "Comté excentré, loin des théâtres français",
+        "Devra un jour céder la place à son fils"
+      ],
+      "difficulty": 1
     }
   ],
   "difficulty_labels": [
