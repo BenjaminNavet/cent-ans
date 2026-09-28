@@ -19,25 +19,6 @@ const GREEN := "#2a6a2a"
 const MUTED := "#6b5a40"
 const POUND := Money.SYMBOL
 
-const EFFECT_LABELS := {
-	"unrest": "Mécontentement", "prestige": "Prestige", "army_morale": "Moral des armées",
-	"piety": "Piété", "health": "Santé", "wealth": "Richesse", "trade_income": "Revenus du commerce",
-	"research_points": "Points de recherche", "research_civil": "Recherche civile",
-	"loyalty": "Loyauté", "army_ranged": "Tir", "army_armor": "Armure", "army_melee": "Mêlée",
-	"tax_income": "Impôts", "production": "Production", "intrigue": "Intrigue",
-	"diplomacy": "Diplomatie", "battle_charge": "Charge en bataille",
-	"battle_ranged": "Tir en bataille", "battle_defense": "Défense en bataille",
-	"siege_resistance": "Résistance aux sièges", "siege_speed": "Vitesse de siège",
-	"army_experience": "Expérience des troupes", "recruit_slots": "Places de recrutement",
-	"recruit_cost": "Coût de recrutement", "fortification_level": "Fortifications",
-	"growth": "Croissance", "movement": "Mouvement", "goods_satisfaction": "Satisfaction en biens",
-	"garrison": "Garnison", "fertility": "Fécondité", "construction_speed": "Vitesse de construction",
-	"attrition_resistance": "Résistance à l'attrition", "supply": "Ravitaillement",
-	"army_upkeep": "Entretien des armées",
-	# H9 : médecine et table.
-	"plague_resistance": "Résistance à la peste", "wound_recovery": "Soin des blessés",
-	"diet_health": "Santé tirée des régimes", "research_military": "Recherche militaire",
-}
 ## Branches de technologies (H9 : médecine) ; forme adjectivale pour les sous-titres.
 const TECH_BRANCH_LABELS := {"military": "militaire", "civil": "civile", "medicine": "médecine"}
 ## H9 : terrains exigés par un régime (`requirements.terrains`).
@@ -52,72 +33,8 @@ const LENT_RULE_TEXTS := {
 	"fish": "Carême : table maigre, +{rule.lent_fish_piety} piété du souverain",
 }
 const WINTER_RULE_TEXTS := {"fresh": "Denrées fraîches : coût ×{rule.winter_fresh_cost_factor} en hiver"}
-const STAT_LABELS := {
-	"melee": "Mêlée", "ranged": "Tir", "range": "Portée", "armor": "Armure", "morale": "Moral",
-	"speed": "Vitesse", "ammo": "Munitions", "charge": "Charge", "siege_attack": "Attaque de siège",
-}
 ## Statistiques comparées à la moyenne des unités pour les forces/faiblesses.
 const COMPARED_STATS := ["melee", "ranged", "armor", "morale", "speed", "charge", "siege_attack"]
-const ABILITY_LABELS := {
-	"stakes": "pieux plantés", "rain_penalty": "gêné par la pluie", "pavise": "pavois",
-	"volley": "tir en volées", "wall_assault": "assaut des murailles", "wall_breach": "ouvre des brèches",
-	"pike_square": "hérisson de piques", "skirmish": "escarmouche", "shield_wall": "mur de boucliers",
-	"charge_lance": "charge à la lance", "dismount": "combat démonté",
-}
-const UNIT_CATEGORY_LABELS := {"infantry": "infanterie", "ranged": "tireurs", "cavalry": "cavalerie", "siege": "engin de siège"}
-const BUILDING_CATEGORY_LABELS := {
-	"production": "production", "commerce": "commerce", "military": "militaire",
-	"religious": "religieux", "sanitary": "sanitaire", "fortification": "fortification",
-}
-const RESOURCE_CATEGORY_LABELS := {
-	"food": "nourriture", "raw_material": "matière première", "manufactured": "produit manufacturé",
-	"luxury": "luxe", "textile": "textile", "metal": "métal",
-}
-const CLASS_LABELS := {"peasants": "Paysans", "burghers": "Bourgeois", "clergy": "Clergé", "nobility": "Noblesse"}
-const TRAIT_CATEGORY_LABELS := {
-	"personality": "personnalité", "physical": "physique", "martial": "martial",
-	"governance": "gouvernance", "acquired": "acquis",
-}
-const BRANCH_LABELS := {"command": "Commandement", "governance": "Gouvernance", "court": "Cour"}
-const BRANCH_TEXTS := {
-	"command": "Commandement : conduite des armées (moral, tir, charge, sièges, logistique).",
-	"governance": "Gouvernance : administration des provinces (impôts, construction, ordre public).",
-	"court": "Cour : diplomatie, intrigue, prestige et piété.",
-}
-const GAUGE_TEXTS := {
-	"unrest": ["Mécontentement", "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère, la religion différente et les troubles récents (prises, pillages, régence) ; la garnison et certains bâtiments l'apaisent. Au-delà de {rule.revolt_unrest_threshold} pendant {rule.revolt_seasons} saisons : révolte (le compte repart ensuite de zéro) ; au-delà de {rule.revolt_control_threshold} : la province passe aux rebelles."],
-	"health": ["Santé", "Tend vers {rule.health_neutral} + bâtiments sanitaires + satisfaction en biens, moins la surpopulation. Sous {rule.health_neutral} la population décline ; sous {rule.plague_health_threshold}, risque de peste."],
-	"wealth": ["Richesse", "Tend vers la base de la classe + bâtiments de commerce, moins le fardeau fiscal et la dévastation."],
-	"goods_satisfaction": ["Biens", "Satisfaction en biens : {rule.goods_target_base} + {rule.goods_target_per_category} par catégorie de biens accessible à la faction (ressources des provinces contrôlées et alliées) + marchés et foires."],
-	"devastation": ["Dévastation", "Pillages et combats : freine la croissance (nulle au-delà de {rule.growth_devastation_cap}), la richesse et nourrit le mécontentement."],
-	"population": ["Population", "Habitants de la province, toutes classes confondues ; croît avec la santé."],
-	"morale": ["Moral", "Au plus bas, l'unité rompt et fuit le combat."],
-	"supply": ["Ravitaillement", "Vivres de l'armée : baisse hors du territoire ami (plus vite l'hiver), remonte en territoire ami ; un pays dévasté aggrave la perte et ralentit la reprise."],
-	"movement": ["Mouvement", "Points de mouvement restants ce tour."],
-	"strength": ["Effectif", "Hommes présents / effectif complet de l'unité."],
-}
-const HUD_TEXTS := {
-	"hud_treasury": ["Trésor", "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent {rule.bankruptcy_morale_penalty} de moral chaque saison."],
-	"hud_income": ["Solde", "Recettes de la saison (impôts, commerce, seigneuriage) moins l'entretien des armées, des bâtiments, de la Table et de l'administration : ce qui sera ajouté au trésor en fin de tour."],
-	"hud_research": ["Recherche", "Technologie en cours ; clic : arbre des technologies."],
-	"hud_court": ["Cour", "Personnages de la faction (touche C)."],
-	"hud_technologies": ["Technologies", "Arbres militaire, civil et médecine (touche T)."],
-	"hud_diplomacy": ["Diplomatie", "Relations, traités et religion (touche P)."],
-	"hud_chronicle": ["Chronique", "Événements historiques et aléatoires en attente de décision."],
-	"hud_end_turn": ["Fin du tour", "Termine la saison (Entrée)."],
-	"hud_season_spring": ["Printemps", ""],
-	"hud_season_summer": ["Été", ""],
-	"hud_season_autumn": ["Automne", ""],
-	"hud_season_winter": ["Hiver", ""],
-	# CV3-4 : postures d'armée (boutons du sceau) et sites de rencontre.
-	"hud_stance_normal": ["Posture normale", "Marche et combat ordinaires, sans bonus ni malus."],
-	"hud_stance_raid": ["Chevauchée", "L'armée pille le pays ennemi qu'elle traverse : butin pour le trésor, dévastation et colère chez l'adversaire."],
-	"hud_stance_siege": ["Siège", "L'armée investit la place ennemie devant laquelle elle se tient."],
-	"hud_stance_ambush": ["Embuscade", "L'armée se cache dans le couvert (forêt, bocage, marais) et surprend l'ennemi qui passe à portée. Il faut garder {rule.ambush_min_movement_percent} % du mouvement du tour ; une armée ennemie à moins de {rule.ambush_detect_radius_km} km, ou un espion à moins de {rule.ambush_detect_spy_km} km, l'évente."],
-	"hud_stance_forced_march": ["Marche forcée", "+{rule.forced_march_bonus_percent} % de mouvement ce tour, {rule.forced_march_supply_cost} points de ravitaillement perdus ; les troupes arrivent fatiguées à la bataille et tombent plus aisément dans une embuscade. Exige le mouvement plein ; dure un tour."],
-	"hud_stance_entrenched": ["Camp retranché", "Fossé et palissade : +{rule.entrenched_defense_percent} % en défense en résolution automatique, {rule.entrenched_supply_saving_percent} % de pertes de ravitaillement en moins. Exige le mouvement plein, hors des colonies."],
-	"hud_encounter": ["Rencontre", "Une occasion ou un péril sur la route. Menez une armée sur le site pour choisir que faire ; il disparaît à son expiration."],
-}
 const SEASON_WORDS := {"printemps": "spring", "été": "summer", "ete": "summer", "automne": "autumn", "hiver": "winter"}
 
 
@@ -131,6 +48,82 @@ static func icon_bbcode(id: String, size: int = 18, category: String = "") -> St
 	return str(library.call("bbcode", id, size, category)) if library != null else ""
 
 
+# --- Libellés d'affichage (IB2, ADR 0109) --------------------------------------------------
+# `EFFECT_LABELS`, `STAT_LABELS`, `GAUGE_TEXTS`, `HUD_TEXTS`, et les tables de catégories,
+# capacités, classes et branches vivaient ici en dur ; elles sont maintenant dans
+# `data/ui/tooltips.json` (blocs `effects`, `stats`, `gauges`, `hud`, `categories`, `abilities`,
+# `classes`, `branches`), lu avec repli par `texts()`. Aucune règle de jeu : uniquement le libellé
+# français affiché pour une clé de `data/` ou du core.
+
+
+## Libellé de `key` dans le bloc `block` de `tooltips.json` (`"label"` ou `"title"`), `fallback`
+## si la clé est absente.
+static func _label(block: String, key: String, fallback: String) -> String:
+	var entry: Variant = (texts().get(block, {}) as Dictionary).get(key, null)
+	if entry is Dictionary:
+		return str(entry.get("label", entry.get("title", fallback)))
+	return fallback
+
+
+static func stat_label(key: String) -> String:
+	return _label("stats", key, key)
+
+
+static func unit_category_label(category: String) -> String:
+	return _label("categories", category, category)
+
+
+static func building_category_label(category: String) -> String:
+	return _label("categories", category, category)
+
+
+static func resource_category_label(category: String) -> String:
+	return _label("categories", category, category)
+
+
+static func trait_category_label(category: String) -> String:
+	return _label("categories", category, category)
+
+
+static func ability_label(id: String) -> String:
+	return _label("abilities", id, id)
+
+
+static func class_label(id: String) -> String:
+	return _label("classes", id, id)
+
+
+static func branch_label(id: String) -> String:
+	return _label("branches", id, id)
+
+
+## Texte descriptif d'une branche de compétence (`branches` de `tooltips.json`), "" si aucun.
+static func branch_text(id: String) -> String:
+	var entry: Variant = (texts().get("branches", {}) as Dictionary).get(id, null)
+	return str(entry.get("body", "")) if entry is Dictionary else ""
+
+
+## Vrai si `key` a un libellé d'effet dans `tooltips.json` (lien `ib:rule:` possible).
+static func has_effect_label(key: String) -> bool:
+	return (texts().get("effects", {}) as Dictionary).has(key)
+
+
+## [titre, corps] d'une jauge (`gauges` de `tooltips.json`), capitalisation de `key` si absente.
+static func gauge_entry(key: String) -> Array:
+	var entry: Variant = (texts().get("gauges", {}) as Dictionary).get(key, null)
+	if entry is Dictionary:
+		return [str(entry.get("title", key.capitalize())), str(entry.get("body", ""))]
+	return [key.capitalize(), ""]
+
+
+## [titre, corps] d'une entrée du HUD (`hud` de `tooltips.json`), repli sur `id` sans préfixe.
+static func hud_entry(id: String) -> Array:
+	var entry: Variant = (texts().get("hud", {}) as Dictionary).get(id, null)
+	if entry is Dictionary:
+		return [str(entry.get("title", id)), str(entry.get("body", ""))]
+	return [id.trim_prefix("hud_").capitalize(), ""]
+
+
 ## Dernière infobulle construite (épinglage par `CodexBubbles`, touche T) et son BBCode.
 static var last_panel: WeakRef = null
 static var last_bbcode: String = ""
@@ -142,6 +135,8 @@ static var last_spec: Dictionary = {}
 ## est rangé en métadonnée `LIVE_META` du contrôle.
 const KEY_PREFIX := "ib:"
 const LIVE_META := &"ib_live"
+## IB2 : script générique attaché par `attach_plain` aux contrôles natifs sans classe dédiée.
+const PLAIN_HOST_SCRIPT := preload("res://scripts/ui/plain_tooltip_host.gd")
 
 
 ## Style parchemin commun aux infobulles et aux bulles du Codex.
@@ -249,6 +244,8 @@ static func spec_for(key: String, live: Dictionary = {}) -> Dictionary:
 			var node := live.duplicate() if not live.is_empty() else technology_node(id)
 			node["id"] = id
 			return technology_spec(node)
+		"plain":
+			return plain_spec(id, live)
 	return {}
 
 
@@ -324,7 +321,7 @@ static func effect_text(effect: Dictionary) -> String:
 
 
 static func effect_label(kind: String) -> String:
-	return str(EFFECT_LABELS.get(kind, kind.replace("_", " ")))
+	return _label("effects", kind, kind.replace("_", " "))
 
 
 ## « +5 % », « −3 » : valeur signée d'un effet.
@@ -340,10 +337,10 @@ static func effect_qualifiers(effect: Dictionary) -> String:
 	var qualifiers := PackedStringArray()
 	var category: String = str(effect.get("unit_category", ""))
 	if category != "":
-		qualifiers.append(str(UNIT_CATEGORY_LABELS.get(category, category)))
+		qualifiers.append(unit_category_label(category))
 	var class_id: String = str(effect.get("class", ""))
 	if class_id != "":
-		qualifiers.append(str(CLASS_LABELS.get(class_id, class_id)).to_lower())
+		qualifiers.append(class_label(class_id).to_lower())
 	if not qualifiers.is_empty():
 		text += " (%s)" % ", ".join(qualifiers)
 	return text
@@ -541,6 +538,56 @@ static func _join(lines: Array) -> String:
 	return "\n".join(kept)
 
 
+# --- Infobulles brutes (IB2, spec § 2.4) ---------------------------------------------------
+# Les ~120 `tooltip_text = "…"` littéraux passent par une clé stable (« battle_log_toggle »…) du
+# bloc `plain` de `data/ui/tooltips.json` (`title`, `body`, `hint`), au lieu du texte français en
+# dur dans le script. `attach_plain` pose la clé sur le contrôle et s'assure qu'il rend la spec en
+# sections (script générique `plain_tooltip_host.gd` si le contrôle n'est pas déjà `RichButton`,
+# `IconChip` ou `RichPanel`). Textes dynamiques (`%`) : partie variable dans `live["body"]` (et
+# éventuellement `live["title"]`/`live["hint"]`), qui l'emporte sur celle de `tooltips.json`.
+
+
+## Entrée brute `key` du bloc `plain` : {title, body, hint}, valeurs vides si `key` est absente.
+static func plain_entry(key: String) -> Dictionary:
+	var entry: Variant = (texts().get("plain", {}) as Dictionary).get(key, null)
+	return entry if entry is Dictionary else {}
+
+
+## Spec `kind: "plain"` (titre + corps + raccourci en pied) de la clé `key` de `tooltips.json`,
+## `live` (`title`/`body`/`hint`) prioritaire pour la part dynamique d'un texte.
+static func plain_spec(key: String, live: Dictionary = {}) -> Dictionary:
+	var entry := plain_entry(key)
+	var title: String = str(live.get("title", entry.get("title", key)))
+	var body: String = str(live.get("body", entry.get("body", "")))
+	var hint: String = str(live.get("hint", entry.get("hint", "")))
+	var spec := _spec("plain", key, title, "", "")
+	spec["icon"] = ""
+	# Ligne neutre (`sign: 0`) plutôt que `detail` : rendue en version courte comme en complète
+	# (`TooltipView.blocks_for` ne montre `detail` qu'en version verrouillée).
+	if body != "":
+		spec["effects"].append({"key": "", "text": body, "sign": 0})
+	if hint != "":
+		spec["effects"].append({"key": "", "text": "[color=%s](%s)[/color]" % [MUTED, hint], "sign": 0})
+	return spec
+
+
+## BBCode d'une infobulle brute (repli, `to_bbcode`) : `title`/`body`/`hint` fournis directement
+## (déjà résolus depuis `tooltips.json` par l'appelant, ex. `plain_spec`).
+static func plain(title: String, body: String = "", hint: String = "") -> String:
+	return to_bbcode(plain_spec("", {"title": title, "body": body, "hint": hint}))
+
+
+## Attache une infobulle brute `ib:plain:<key>` à `control` : pose `tooltip_text` (clé + repli
+## BBCode) et, si `control` n'est pas déjà une classe à infobulle riche (`RichButton`, `IconChip`,
+## `RichPanel`…, reconnue à son script), lui attache le script générique `plain_tooltip_host.gd`
+## qui route `_make_custom_tooltip` vers `panel_for`. `live` : `title`/`body`/`hint` dynamiques
+## (ex. « Vitesse ×%d » selon la donnée du moment), sinon ceux de `tooltips.json`.
+static func attach_plain(control: Control, key: String, live: Dictionary = {}) -> void:
+	if control.get_script() == null:
+		control.set_script(PLAIN_HOST_SCRIPT)
+	set_tooltip(control, "plain", key, live)
+
+
 # --- Unités -------------------------------------------------------------------------------
 
 
@@ -571,12 +618,12 @@ static func strengths_weaknesses(definition: Dictionary) -> Array:
 		if average <= 0.0:
 			continue
 		if value >= average * 1.3:
-			strengths.append(str(STAT_LABELS[stat]).to_lower())
+			strengths.append(stat_label(stat).to_lower())
 		elif value <= average * 0.7 and stat != "siege_attack" and stat != "charge":
-			weaknesses.append("ne tire pas" if stat == "ranged" and value <= 0.0 else str(STAT_LABELS[stat]).to_lower())
+			weaknesses.append("ne tire pas" if stat == "ranged" and value <= 0.0 else stat_label(stat).to_lower())
 	for ability in definition.get("abilities", []):
 		if str(ability) == "rain_penalty":
-			weaknesses.append(str(ABILITY_LABELS[ability]))
+			weaknesses.append(ability_label(ability))
 	return [strengths, weaknesses]
 
 
@@ -595,7 +642,7 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	if name == "":
 		name = GameCatalog.display_name(unit_type)
 	var category: String = str(definition.get("category", ""))
-	var subtitle := str(UNIT_CATEGORY_LABELS.get(category, category))
+	var subtitle := unit_category_label(category)
 	if definition.has("soldiers"):
 		subtitle += ", %d hommes" % int(definition["soldiers"])
 	var spec := _spec("unit", unit_type, name, subtitle, "unit")
@@ -614,7 +661,7 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 		candidates["cost"] = {"icon": "hud_treasury", "label": "Coût", "value": cost}
 	var main_stat := "ranged" if float(stats.get("ranged", 0)) > float(stats.get("melee", 0)) else "melee"
 	if stats.has(main_stat):
-		candidates["melee_or_ranged"] = {"icon": "stat_" + main_stat, "label": STAT_LABELS[main_stat], "value": _number(float(stats[main_stat])), "stat": main_stat}
+		candidates["melee_or_ranged"] = {"icon": "stat_" + main_stat, "label": stat_label(main_stat), "value": _number(float(stats[main_stat])), "stat": main_stat}
 	spec["headline_kind"] = "unit" if in_army else "unit_recruit"
 	spec["headline"] = _headline(spec["headline_kind"], candidates)
 	# Unité déjà levée : son prix de recrutement n'a plus d'intérêt au survol.
@@ -628,14 +675,14 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	spec["effects"] = _live_effects(live)
 	for stat in ["melee", "ranged", "range", "armor", "morale", "speed", "charge", "siege_attack", "ammo"]:
 		if stats.has(stat) and (float(stats[stat]) > 0.0 or stat in ["melee", "armor", "morale"]):
-			spec["stats"].append({"key": stat, "label": STAT_LABELS[stat], "value": _number(float(stats[stat]))})
+			spec["stats"].append({"key": stat, "label": stat_label(stat), "value": _number(float(stats[stat]))})
 	if not definition.is_empty():
 		var sw := strengths_weaknesses(definition)
 		spec["traits"]["strengths"] = Array(sw[0])
 		spec["traits"]["weaknesses"] = Array(sw[1])
 	for ability in definition.get("abilities", []):
 		if str(ability) != "rain_penalty":
-			spec["traits"]["abilities"].append(str(ABILITY_LABELS.get(ability, ability)))
+			spec["traits"]["abilities"].append(ability_label(ability))
 	var met: Variant = _met(live)
 	if str(definition.get("required_technology", "")) != "":
 		var tech := str(definition["required_technology"])
@@ -657,7 +704,7 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	if period != "":
 		spec["detail"].append("Époque : " + period)
 	if str(definition.get("source_class", "")) != "":
-		spec["detail"].append("Recrutés parmi : %s" % str(CLASS_LABELS.get(definition["source_class"], definition["source_class"])).to_lower())
+		spec["detail"].append("Recrutés parmi : %s" % class_label(str(definition["source_class"])).to_lower())
 	spec["flavour"] = str(definition.get("description", ""))
 	spec["warnings"] = _live_warnings(live)
 	return spec
@@ -700,7 +747,7 @@ static func building_spec(building_id: String, live: Dictionary = {}) -> Diction
 	if name == "":
 		name = GameCatalog.display_name(building_id)
 	var category: String = str(definition.get("category", live.get("category", "")))
-	var subtitle := str(BUILDING_CATEGORY_LABELS.get(category, category))
+	var subtitle := building_category_label(category)
 	if definition.has("tier"):
 		subtitle += ", rang %d" % int(definition["tier"])
 	var spec := _spec("building", building_id, name, subtitle, "building")
@@ -893,14 +940,14 @@ static func _diet_requirements(requirements: Variant) -> String:
 static func resource(resource_id: String, stock: int = -1) -> String:
 	var definition := GameCatalog.resource(resource_id)
 	var category: String = str(definition.get("category", ""))
-	var lines: Array = [_title(resource_id, GameCatalog.display_name(resource_id), str(RESOURCE_CATEGORY_LABELS.get(category, category)), "resource")]
+	var lines: Array = [_title(resource_id, GameCatalog.display_name(resource_id), resource_category_label(category), "resource")]
 	if stock >= 0:
 		lines.append("Quantité accessible : %d" % stock)
 	if definition.has("base_price"):
 		lines.append("Prix de base : %s %s" % [_number(float(definition["base_price"])), POUND])
 	var classes := PackedStringArray()
 	for class_id in definition.get("satisfies_classes", []):
-		classes.append("%s %s" % [icon_bbcode("class_" + str(class_id), 14), str(CLASS_LABELS.get(class_id, class_id)).to_lower()])
+		classes.append("%s %s" % [icon_bbcode("class_" + str(class_id), 14), class_label(class_id).to_lower()])
 	if not classes.is_empty():
 		lines.append("Satisfait : " + ", ".join(classes))
 	elif definition.has("satisfies_classes"):
@@ -910,26 +957,26 @@ static func resource(resource_id: String, stock: int = -1) -> String:
 
 
 static func population_class(class_id: String, data: Dictionary = {}) -> String:
-	var lines: Array = [_title("class_" + class_id, str(CLASS_LABELS.get(class_id, class_id)), "", "class")]
+	var lines: Array = [_title("class_" + class_id, class_label(str(class_id)), "", "class")]
 	if data.has("count"):
 		lines.append("Population : %s" % thousands(int(data["count"])))
 	var gauges := PackedStringArray()
 	for key in ["unrest", "health", "wealth", "goods_satisfaction"]:
 		if data.has(key):
-			gauges.append("%s %s %d" % [icon_bbcode("gauge_" + key, 14), rule_link(key, GAUGE_TEXTS[key][0]), int(data[key])])
+			gauges.append("%s %s %d" % [icon_bbcode("gauge_" + key, 14), rule_link(key, gauge_entry(key)[0]), int(data[key])])
 	if not gauges.is_empty():
 		lines.append(" · ".join(gauges))
 	return _join(lines)
 
 
 static func gauge(key: String, value: float = -1.0) -> String:
-	var spec: Array = GAUGE_TEXTS.get(key, [key.capitalize(), ""])
+	var spec: Array = gauge_entry(key)
 	var head := _title("gauge_" + key, str(spec[0]), "%d / 100" % int(round(value)) if value >= 0.0 else "", "gauge")
 	return _join([head, RuleValues.format(str(spec[1]))])
 
 
 static func hud(id: String, extra: String = "") -> String:
-	var spec: Array = HUD_TEXTS.get(id, [id.trim_prefix("hud_").capitalize(), ""])
+	var spec: Array = hud_entry(id)
 	return _join([_title(id, str(spec[0]), "", "hud"), RuleValues.format(str(spec[1])), extra])
 
 
@@ -952,7 +999,7 @@ static func trait_tip(entry: Dictionary) -> String:
 	var name: String = str(entry.get("name", GameCatalog.display_name(id)))
 	# DA7c : icône propre au trait (`data/ui/icons_ink.json`, groupe "trait") ; repli sur
 	# l'icône de catégorie générique si ce trait n'en a pas (`IconLibrary.resolve`).
-	var lines: Array = ["%s [b]%s[/b]  [color=%s][i]%s[/i][/color]" % [icon_bbcode(id, 28, "trait"), name, MUTED, TRAIT_CATEGORY_LABELS.get(category, category)]]
+	var lines: Array = ["%s [b]%s[/b]  [color=%s][i]%s[/i][/color]" % [icon_bbcode(id, 28, "trait"), name, MUTED, trait_category_label(category)]]
 	lines.append(_effects_block(definition.get("effects", [])))
 	var opposites := PackedStringArray()
 	for opposite in definition.get("opposites", entry.get("opposites", [])):
@@ -971,7 +1018,7 @@ static func skill(node: Dictionary, state: String = "") -> String:
 	var name: String = str(node.get("name", node.get("id", "")))
 	var head := "%s [b]%s[/b]  [color=%s][i]%s, rang %d%s[/i][/color]" % [
 		icon_bbcode("branch_" + branch, 28, "branch"), name, MUTED,
-		BRANCH_LABELS.get(branch, branch), int(node.get("tier", 1)), " — " + state if state != "" else ""]
+		branch_label(branch), int(node.get("tier", 1)), " — " + state if state != "" else ""]
 	var lines: Array = [head, "Coût : %s de compétence" % FrText.count(int(node.get("cost", 0)), "point")]
 	lines.append(_effects_block(node.get("effects", [])))
 	var prerequisites := PackedStringArray()
@@ -984,8 +1031,8 @@ static func skill(node: Dictionary, state: String = "") -> String:
 
 
 static func branch(branch_id: String, value: int = -1) -> String:
-	var head := _title("branch_" + branch_id, str(BRANCH_LABELS.get(branch_id, branch_id)), "niveau %d" % value if value >= 0 else "", "branch")
-	return _join([head, str(BRANCH_TEXTS.get(branch_id, ""))])
+	var head := _title("branch_" + branch_id, branch_label(branch_id), "niveau %d" % value if value >= 0 else "", "branch")
+	return _join([head, branch_text(branch_id)])
 
 
 # --- Monnaie, rançons, chevalerie (H11) -------------------------------------------------------
@@ -1058,25 +1105,39 @@ const ENTITY_KINDS := {
 	"trait_": "trait", "skill_": "skill",
 }
 
+const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
+
 static var _texts: Dictionary = {}
+## Vrai si les libellés viennent bien du fichier de données (tests).
+static var texts_loaded_from_data: bool = false
 
 
-## `data/ui/tooltips.json` (mis en cache).
+## `data/ui/tooltips.json` (mis en cache). IB2 : repli comme `CameraFeel`/`TooltipView.style()` —
+## le dossier de `MapPaths` peut ne pas avoir de `ui/tooltips.json` (fixtures de test), auquel cas
+## on retombe sur `data/` à la racine du dépôt.
 static func texts() -> Dictionary:
 	if _texts.is_empty():
 		var path := TooltipView._data_dir().path_join(TEXTS_FILE)
+		if not FileAccess.file_exists(path):
+			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(TEXTS_FILE)
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
 		if parsed is Dictionary:
 			_texts = parsed
+			texts_loaded_from_data = true
 		else:
 			push_warning("RichTooltip : %s illisible, bulles de règle sans texte." % TEXTS_FILE)
-			_texts = {"effects": {}, "stats": {}, "gauges": {}}
+			_texts = {
+				"effects": {}, "stats": {}, "gauges": {}, "hud": {}, "categories": {},
+				"abilities": {}, "classes": {}, "branches": {}, "plain": {},
+			}
+			texts_loaded_from_data = false
 	return _texts
 
 
 ## Relit `tooltips.json` au prochain accès (tests).
 static func reload_texts() -> void:
 	_texts = {}
+	texts_loaded_from_data = false
 
 
 ## Entrée de règle `key` : {block, title, body (règles résolues), codex, icon} ; {} si aucune.
@@ -1112,9 +1173,10 @@ static func link_rule_label(text: String, key: String, label: String) -> String:
 
 ## Clé d'effet ou de stat dont le libellé est `label`, "" sinon.
 static func rule_key_for_label(label: String) -> String:
-	for table: Dictionary in [EFFECT_LABELS, STAT_LABELS]:
-		for key in table:
-			if str(table[key]) == label:
+	for block in ["effects", "stats"]:
+		var entries: Dictionary = texts().get(block, {})
+		for key in entries:
+			if str((entries[key] as Dictionary).get("label", "")) == label:
 				return str(key)
 	return ""
 

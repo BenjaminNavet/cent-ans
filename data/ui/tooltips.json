@@ -238,6 +238,127 @@
       "body": "Hommes présents / effectif complet de l'unité."
     }
   },
-  "hud": {},
+  "hud": {
+    "hud_treasury": {
+      "title": "Trésor",
+      "body": "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent {rule.bankruptcy_morale_penalty} de moral chaque saison."
+    },
+    "hud_income": {
+      "title": "Solde",
+      "body": "Recettes de la saison (impôts, commerce, seigneuriage) moins l'entretien des armées, des bâtiments, de la Table et de l'administration : ce qui sera ajouté au trésor en fin de tour."
+    },
+    "hud_research": {
+      "title": "Recherche",
+      "body": "Technologie en cours ; clic : arbre des technologies."
+    },
+    "hud_court": {
+      "title": "Cour",
+      "body": "Personnages de la faction (touche C)."
+    },
+    "hud_technologies": {
+      "title": "Technologies",
+      "body": "Arbres militaire, civil et médecine (touche T)."
+    },
+    "hud_diplomacy": {
+      "title": "Diplomatie",
+      "body": "Relations, traités et religion (touche P)."
+    },
+    "hud_chronicle": {
+      "title": "Chronique",
+      "body": "Événements historiques et aléatoires en attente de décision."
+    },
+    "hud_end_turn": {
+      "title": "Fin du tour",
+      "body": "Termine la saison (Entrée)."
+    },
+    "hud_season_spring": {"title": "Printemps"},
+    "hud_season_summer": {"title": "Été"},
+    "hud_season_autumn": {"title": "Automne"},
+    "hud_season_winter": {"title": "Hiver"},
+    "hud_stance_normal": {
+      "title": "Posture normale",
+      "body": "Marche et combat ordinaires, sans bonus ni malus."
+    },
+    "hud_stance_raid": {
+      "title": "Chevauchée",
+      "body": "L'armée pille le pays ennemi qu'elle traverse : butin pour le trésor, dévastation et colère chez l'adversaire."
+    },
+    "hud_stance_siege": {
+      "title": "Siège",
+      "body": "L'armée investit la place ennemie devant laquelle elle se tient."
+    },
+    "hud_stance_ambush": {
+      "title": "Embuscade",
+      "body": "L'armée se cache dans le couvert (forêt, bocage, marais) et surprend l'ennemi qui passe à portée. Il faut garder {rule.ambush_min_movement_percent} % du mouvement du tour ; une armée ennemie à moins de {rule.ambush_detect_radius_km} km, ou un espion à moins de {rule.ambush_detect_spy_km} km, l'évente."
+    },
+    "hud_stance_forced_march": {
+      "title": "Marche forcée",
+      "body": "+{rule.forced_march_bonus_percent} % de mouvement ce tour, {rule.forced_march_supply_cost} points de ravitaillement perdus ; les troupes arrivent fatiguées à la bataille et tombent plus aisément dans une embuscade. Exige le mouvement plein ; dure un tour."
+    },
+    "hud_stance_entrenched": {
+      "title": "Camp retranché",
+      "body": "Fossé et palissade : +{rule.entrenched_defense_percent} % en défense en résolution automatique, {rule.entrenched_supply_saving_percent} % de pertes de ravitaillement en moins. Exige le mouvement plein, hors des colonies."
+    },
+    "hud_encounter": {
+      "title": "Rencontre",
+      "body": "Une occasion ou un péril sur la route. Menez une armée sur le site pour choisir que faire ; il disparaît à son expiration."
+    }
+  },
+  "categories": {
+    "infantry": {"title": "infanterie"},
+    "ranged": {"title": "tireurs"},
+    "cavalry": {"title": "cavalerie"},
+    "siege": {"title": "engin de siège"},
+    "production": {"title": "production"},
+    "commerce": {"title": "commerce"},
+    "military": {"title": "militaire"},
+    "religious": {"title": "religieux"},
+    "sanitary": {"title": "sanitaire"},
+    "fortification": {"title": "fortification"},
+    "food": {"title": "nourriture"},
+    "raw_material": {"title": "matière première"},
+    "manufactured": {"title": "produit manufacturé"},
+    "luxury": {"title": "luxe"},
+    "textile": {"title": "textile"},
+    "metal": {"title": "métal"},
+    "personality": {"title": "personnalité"},
+    "physical": {"title": "physique"},
+    "martial": {"title": "martial"},
+    "governance": {"title": "gouvernance"},
+    "acquired": {"title": "acquis"}
+  },
+  "abilities": {
+    "stakes": {"title": "pieux plantés"},
+    "rain_penalty": {"title": "gêné par la pluie"},
+    "pavise": {"title": "pavois"},
+    "volley": {"title": "tir en volées"},
+    "wall_assault": {"title": "assaut des murailles"},
+    "wall_breach": {"title": "ouvre des brèches"},
+    "pike_square": {"title": "hérisson de piques"},
+    "skirmish": {"title": "escarmouche"},
+    "shield_wall": {"title": "mur de boucliers"},
+    "charge_lance": {"title": "charge à la lance"},
+    "dismount": {"title": "combat démonté"}
+  },
+  "classes": {
+    "peasants": {"title": "Paysans"},
+    "burghers": {"title": "Bourgeois"},
+    "clergy": {"title": "Clergé"},
+    "nobility": {"title": "Noblesse"}
+  },
+  "branches": {
+    "command": {
+      "title": "Commandement",
+      "body": "Commandement : conduite des armées (moral, tir, charge, sièges, logistique)."
+    },
+    "governance": {
+      "title": "Gouvernance",
+      "body": "Gouvernance : administration des provinces (impôts, construction, ordre public)."
+    },
+    "court": {
+      "title": "Cour",
+      "body": "Cour : diplomatie, intrigue, prestige et piété."
+    }
+  },
   "plain": {}
 }
