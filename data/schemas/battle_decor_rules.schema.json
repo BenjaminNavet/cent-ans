@@ -107,9 +107,11 @@
         "forest": { "type": "string" },
         "hills": { "type": "string" },
         "mountains": { "type": "string" },
-        "marsh": { "type": "string" }
+        "marsh": { "type": "string" },
+        "steppe": { "type": "string" },
+        "desert": { "type": "string" }
       },
-      "required": ["plains", "heath", "bocage", "forest", "hills", "mountains", "marsh"],
+      "required": ["plains", "heath", "bocage", "forest", "hills", "mountains", "marsh", "steppe", "desert"],
       "additionalProperties": false
     },
     "profiles": {

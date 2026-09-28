@@ -105,7 +105,7 @@
           "panorama": { "type": "string" },
           "provinces": { "type": "array", "items": { "type": "string", "pattern": "^prov_" } },
           "season": { "type": "array", "items": { "enum": ["spring", "summer", "autumn", "winter"] } },
-          "terrain": { "type": "array", "items": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] } },
+          "terrain": { "type": "array", "items": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"] } },
           "coastal": { "type": "boolean" },
           "skyline_max_deg": { "type": "number" },
           "skyline_min_deg": { "type": "number" }

@@ -1,9 +1,11 @@
 //! Economy tuning (lots EQ1, B7a, SV4, RS-B), mirroring
 //! `data/schemas/economy_rules.schema.json` (`data/rules/economy.json`).
 
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
-use crate::SocialClass;
+use crate::{SocialClass, Terrain};
 
 /// RS-B: livres per head and per season, by social class (ex-`tax_per_head`).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -173,8 +175,52 @@ pub struct EconomyRules {
     /// RS-C: when the AI demolishes buildings it can no longer afford.
     #[serde(default)]
     pub ai_demolition: AiDemolition,
+    /// OM3 (ADR 0116): forage by province terrain (steppe, desert); a
+    /// terrain left out feeds an army normally.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub terrain_supply: BTreeMap<Terrain, TerrainSupply>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// OM3: how well a terrain feeds an army.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TerrainSupply {
+    /// Share (percent) of the friendly seasonal recovery kept on this terrain.
+    #[serde(default = "hundred")]
+    pub recovery_percent: f64,
+    /// Seasonal loss outside friendly territory (percent of the base loss).
+    #[serde(default = "hundred")]
+    pub loss_percent: f64,
+    /// Extra supply lost every summer, friendly territory included (heat,
+    /// dry wells): the desert's summer attrition.
+    #[serde(default)]
+    pub summer_loss: u8,
+}
+
+fn hundred() -> f64 {
+    100.0
+}
+
+impl Default for TerrainSupply {
+    fn default() -> Self {
+        TerrainSupply {
+            recovery_percent: 100.0,
+            loss_percent: 100.0,
+            summer_loss: 0,
+        }
+    }
+}
+
+impl EconomyRules {
+    /// Forage of `terrain` (neutral when not listed).
+    pub fn terrain_supply(&self, terrain: Terrain) -> TerrainSupply {
+        self.terrain_supply
+            .get(&terrain)
+            .copied()
+            .unwrap_or_default()
+    }
 }
 
 /// RS-C: the AI demolishes buildings after `deficit_seasons` seasons in a row
@@ -267,6 +313,26 @@ impl Default for EconomyRules {
             garrison_reinforce_max_percent: default_garrison_reinforce_max_percent(),
             demolition_refund_percent: default_demolition_refund_percent(),
             ai_demolition: AiDemolition::default(),
+            terrain_supply: [
+                (
+                    Terrain::Steppe,
+                    TerrainSupply {
+                        recovery_percent: 70.0,
+                        loss_percent: 125.0,
+                        summer_loss: 0,
+                    },
+                ),
+                (
+                    Terrain::Desert,
+                    TerrainSupply {
+                        recovery_percent: 35.0,
+                        loss_percent: 175.0,
+                        summer_loss: 15,
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
             description: None,
         }
     }
