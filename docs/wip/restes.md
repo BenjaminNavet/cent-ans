@@ -9,7 +9,7 @@ FXAA, retrait de `--coarse-figures` (point 17, choix du joueur).
 
 Lire ce fichier, `git worktree list`, `git branch --list 'feat/rs-*'`. Chaque lot a son
 `docs/wip/rs-<lot>.md`. Fusion : worktree `../gp-rs-merge` (branche `integration/rs`), puis ff-only
-vers `main`. ADR réservés : **0098** (lot B), **0099** (lot F).
+vers `main`. ADR réservés : **0100** (lot B ; 0098 pris par FE), **0099** (lot F). GA réserve 0104-0106.
 
 ## Vague 1 (6 agents, fichiers disjoints)
 
