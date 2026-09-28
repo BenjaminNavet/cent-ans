@@ -63,6 +63,14 @@ void vertex() {
 	float fade = (1.0 - smoothstep(radius * 0.6, radius, dist)) * smoothstep(inner_radius * 0.75, inner_radius, dist);
 	// Touffes clairsemées par endroits (bruit) : test bon marché avant les lectures de textures.
 	float density = smoothstep(0.15, 0.45, bt_value_noise(wp * 0.05)) * (1.0 - snow * 0.93);
+	// PO4 : touffes groupées (DA6) : plaques à ~25 m avec des trouées franches, et dans les
+	// plaques des bouquets de ~2 m plus ou moins serrés, au lieu de taches régulières.
+	float clump = 0.5;
+	if (da6_on > 0.5) {
+		float patches = bt_value_noise(wp * 0.04 + 5.3) * 0.7 + bt_value_noise(wp * 0.11 + 1.9) * 0.3;
+		clump = bt_value_noise(wp * 0.55 + 7.1);
+		density = smoothstep(0.22, 0.5, patches) * mix(0.4, 1.0, smoothstep(0.3, 0.72, clump)) * (1.0 - snow * 0.93);
+	}
 	v_tint = vec3(0.0);
 	v_shade = 0.0;
 	v_normal = vec3(0.0, 1.0, 0.0);
@@ -157,6 +165,10 @@ void vertex() {
 		if (soft) {
 			// Hauteur : variation propre à la touffe et par plaques (~6 m).
 			height_mul *= mix(0.7, 1.3, bt_value_noise(wp * 0.17 + 2.3)) * mix(0.85, 1.15, r3);
+			// PO4 : chaque bouquet a sa hauteur et sa teinte (vert frais au cœur des bouquets
+			// serrés, brins plus secs et plus courts aux bords clairsemés).
+			height_mul *= mix(0.8, 1.2, clump);
+			v_tint *= mix(vec3(1.07, 1.03, 0.86), vec3(0.93, 1.0, 0.92), clump) * mix(0.94, 1.06, bt_hash21(floor(wp * 0.55) + 13.7));
 		}
 
 		float angle = rnd.y * 6.2832;

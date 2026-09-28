@@ -148,6 +148,7 @@ impl BattleSim {
                     unit.z = z;
                     unit.destination = None;
                     unit.target = None;
+                    unit.order_queue.clear();
                     scenario.wave_of[i] = block.wave;
                     scenario.origin[i] = (x, z);
                     if block.hold {
@@ -247,6 +248,10 @@ impl BattleSim {
                 z,
                 run,
                 facing,
+                queue,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             } => {
                 let kept: Vec<u32> = units
                     .into_iter()
@@ -258,9 +263,18 @@ impl BattleSim {
                     z,
                     run,
                     facing,
+                    queue,
+                    width: None,
+                    match_speed: false,
+                    group_tag: None,
                 })
             }
-            Command::Attack { units, target, run } => {
+            Command::Attack {
+                units,
+                target,
+                run,
+                queue,
+            } => {
                 let at = index_of(target).map(|j| (self.units[j].x, self.units[j].z));
                 let kept: Vec<u32> = units
                     .into_iter()
@@ -274,6 +288,7 @@ impl BattleSim {
                     units: kept,
                     target,
                     run,
+                    queue,
                 })
             }
             Command::Withdraw { units } => {
@@ -292,6 +307,19 @@ impl BattleSim {
                     side,
                     order,
                     units: kept,
+                })
+            }
+            // CB4: held and assaulting regiments keep to the script, as
+            // under the leader's orders (the Genoese of Crécy never raised
+            // their pavises by the order either).
+            Command::UseAbility { units, ability } => {
+                let kept: Vec<u32> = units
+                    .into_iter()
+                    .filter(|&id| allowed(id, None, 0.0))
+                    .collect();
+                (!kept.is_empty()).then_some(Command::UseAbility {
+                    units: kept,
+                    ability,
                 })
             }
             Command::Halt { units } => {
@@ -412,6 +440,10 @@ impl BattleSim {
                             z,
                             run: false,
                             facing: Some(unit.facing),
+                            queue: false,
+                            width: None,
+                            match_speed: false,
+                            group_tag: None,
                         },
                     ));
                 }
@@ -437,6 +469,7 @@ impl BattleSim {
                         units: vec![unit.id],
                         target,
                         run: d < ASSAULT_RUN,
+                        queue: false,
                     },
                 ));
             }
@@ -462,6 +495,10 @@ impl BattleSim {
                         z: post.z,
                         run: false,
                         facing: Some(post.facing),
+                        queue: false,
+                        width: None,
+                        match_speed: false,
+                        group_tag: None,
                     },
                 ));
             }

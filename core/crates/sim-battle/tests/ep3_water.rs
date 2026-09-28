@@ -232,6 +232,10 @@ fn horsemen_cross_by_the_bridge_not_through_deep_water() {
             z: north,
             run: false,
             facing: None,
+            queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         },
         None,
     )

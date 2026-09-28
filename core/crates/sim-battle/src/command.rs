@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::modes::UnitMode;
 use crate::setup::SideId;
 use crate::unit::Formation;
 
@@ -20,6 +21,26 @@ pub enum Command {
         run: bool,
         #[serde(default)]
         facing: Option<f64>,
+        /// CB-M3: after the regiments' current orders (Shift + right click)
+        /// instead of replacing them. Left out of the JSON when false, so
+        /// replays recorded before CB read and write the same.
+        #[serde(default, skip_serializing_if = "is_false")]
+        queue: bool,
+        /// CB1: frontage in metres set by a right-drag (the whole line for
+        /// a group, shared in proportion to strength): the regiments form a
+        /// Line that wide, ranks within `data/rules/formation_width.json`.
+        /// `None` (a plain click) leaves the formation as it is. Left out
+        /// of the JSON when unset, like `queue`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<f64>,
+        /// CB1: the regiments of the order (or of `group_tag`) walk at the
+        /// pace of the slowest of them.
+        #[serde(default, skip_serializing_if = "is_false")]
+        match_speed: bool,
+        /// CB1: tag shared by the individual moves of a locked group (for
+        /// `match_speed`); without it, the order's own regiments.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        group_tag: Option<u32>,
     },
     /// Close with (or shoot at) an enemy regiment.
     Attack {
@@ -27,6 +48,9 @@ pub enum Command {
         target: u32,
         #[serde(default = "default_true")]
         run: bool,
+        /// CB-M3: after the regiments' current orders (see `Move::queue`).
+        #[serde(default, skip_serializing_if = "is_false")]
+        queue: bool,
     },
     /// Stop where they stand.
     Halt {
@@ -72,10 +96,30 @@ pub enum Command {
         #[serde(default)]
         units: Vec<u32>,
     },
+    /// CB2: turn a persistent mode of the regiments on or off (run, guard,
+    /// skirmish, melee, breach; see [`crate::modes`]). A new variant: replays
+    /// recorded before CB2 read the same.
+    SetMode {
+        units: Vec<u32>,
+        mode: UnitMode,
+        enabled: bool,
+    },
+    /// CB4: an active ability of the regiments (`data/battle_abilities/`),
+    /// used by those of `units` that have it; a second use by regiments
+    /// that all have it on lifts it. Additive: replays recorded before CB4
+    /// read unchanged.
+    UseAbility {
+        units: Vec<u32>,
+        ability: String,
+    },
 }
 
 fn default_true() -> bool {
     true
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 impl Command {
@@ -89,7 +133,9 @@ impl Command {
             | Command::Withdraw { units }
             | Command::TargetWall { units, .. }
             | Command::Burn { units, .. }
-            | Command::LeaderOrder { units, .. } => units,
+            | Command::LeaderOrder { units, .. }
+            | Command::SetMode { units, .. }
+            | Command::UseAbility { units, .. } => units,
         }
     }
 }
@@ -140,6 +186,25 @@ pub enum CommandError {
     NothingToBurn,
     /// `burn`: no regiment of the order stands close enough.
     TooFarToBurn(u32),
+    /// CB-M3: regiment `unit` already has `max` orders waiting.
+    QueueFull {
+        unit: u32,
+        max: u32,
+    },
+    /// CB2: regiment `unit` cannot take `mode` (no missiles, not an engine,
+    /// not a siege...).
+    ModeUnavailable {
+        unit: u32,
+        mode: UnitMode,
+    },
+    /// CB4: no ability of that id in the battle's catalogue.
+    UnknownAbility(String),
+    /// CB4: none of the regiments could use the ability (`ability` is its
+    /// French name).
+    AbilityUnavailable {
+        ability: String,
+        reason: String,
+    },
 }
 
 impl std::fmt::Display for CommandError {
@@ -186,6 +251,23 @@ impl std::fmt::Display for CommandError {
             }
             CommandError::TooFarToBurn(id) => {
                 write!(f, "l'unité {id} est trop loin pour y mettre le feu")
+            }
+            CommandError::QueueFull { unit, max } => {
+                write!(
+                    f,
+                    "file d'ordres pleine : l'unité {unit} a déjà {max} ordres en attente"
+                )
+            }
+            CommandError::ModeUnavailable { unit, mode } => {
+                write!(
+                    f,
+                    "l'unité {unit} ne peut pas passer en mode {}",
+                    mode.label_fr()
+                )
+            }
+            CommandError::UnknownAbility(id) => write!(f, "capacité inconnue : {id}"),
+            CommandError::AbilityUnavailable { ability, reason } => {
+                write!(f, "« {ability} » impossible : {reason}")
             }
             CommandError::OutsideZone(id) => {
                 write!(

@@ -38,11 +38,9 @@ func setup(campaign_map: Node) -> void:
 	map = campaign_map
 	var ui: MapUI = map.get("ui")
 	minimap = CampaignMinimap.new()
-	ui.add_child(minimap)
-	# A3 C1 : la minicarte se dessine sous tous les panneaux (technologies, encyclopédie,
-	# diplomatie…), juste après la barre du haut ; elle ne masque plus leur bouton ×.
-	var top_bar := ui.get_node_or_null("TopBar")
-	ui.move_child(minimap, top_bar.get_index() + 1 if top_bar != null else 0)
+	# PO1 (bible DA § 12.1) : zone `MINIMAP`, en bas à droite (étage HUD : sous tous les panneaux,
+	# elle ne masque jamais leur bouton ×) ; `MapUI.layout_hud` l'ajuste à la zone.
+	UiZones.put(UiZones.Zone.MINIMAP, minimap)
 	ui.set("minimap", minimap)
 	minimap.setup(map.get("map_data"))
 	minimap.clicked.connect(center_camera_on)
@@ -108,13 +106,14 @@ func legend_context() -> Dictionary:
 	return {"player_faction": player, "player_color": player_color, "factions": factions}
 
 
+## PO1 : la légende s'ouvre dans la colonne du panneau latéral, bas calé au-dessus de la
+## minicarte (elle se referme d'elle-même quand un panneau s'y ouvre, voir `setup`).
 func _place_legend() -> void:
-	var view := minimap.get_viewport_rect().size
-	var top := minimap.position.y
-	legend.set_max_height(view.y - top - 150.0)
+	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL)
+	var mini := UiZones.rect(UiZones.Zone.MINIMAP)
+	legend.set_max_height(side.size.y)
 	legend.size = legend.get_combined_minimum_size()
-	var x := minimap.position.x - legend.size.x - 8.0 if minimap.visible else view.x - legend.size.x - 12.0
-	legend.position = Vector2(maxf(x, 8.0), top)
+	legend.position = Vector2(mini.end.x - legend.size.x, maxf(side.position.y, mini.position.y - legend.size.y - 8.0))
 
 
 func _sim() -> Object:

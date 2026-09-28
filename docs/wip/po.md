@@ -53,21 +53,21 @@ Coller ce prompt :
 
 ### Vague 1 (agents en worktree, branches issues de `feat/po-polish`)
 - [x] PO2 lancé (27/09 ~21 h, Sonnet) — branche `feat/po2-typo` — worktree : agent `.claude/worktrees/agent-…` (voir `git worktree list`)
-- [ ] PO1 lancé — branche `feat/po1-layout` — worktree : …
+- [x] PO1 lancé (27/09 ~22 h) — branche `feat/po1-layout` — worktree : agent (voir `git worktree list`)
 - [x] PO3 lancé (27/09 ~21 h) — branche `feat/po3-map` — worktree : agent (voir `git worktree list`)
-- [ ] PO4 lancé — branche `feat/po4-battle` — worktree : …
-- [ ] PO5 lancé — branche `feat/po5-motion` — worktree : …
+- [x] PO4 lancé (27/09 ~22 h, étape 6 autorisée : CB-M1 fusionné) — branche `feat/po4-battle`
+- [x] PO5 lancé (27/09 ~22 h) — branche `feat/po5-motion`
 
 ### PO6 — Intégration (orchestrateur)
-- [ ] Fusion de PO2 dans `feat/po-polish` (tests OK)
-- [ ] Fusion de PO1
-- [ ] Fusion de PO3
-- [ ] Fusion de PO4 (étape 6 faite ou reportée : …)
-- [ ] Fusion de PO5
-- [ ] Tous les tests PO actifs, pytest, `smoke.gd`, bancs PB1 carte et bataille dans ±5 %
-- [ ] Planche `docs/img/po/apres/` + `docs/img/po/planche_avant_apres.jpg`
-- [ ] **Jugement du joueur** (une seule fois) → corrections en PO6b si besoin
-- [ ] ff de `feat/po-polish` vers `main`, worktrees et branches supprimés, `docs/manuel.md` (section « Interface »), mémoire mise à jour
+- [x] Fusion de PO2 dans `feat/po-polish` (tests OK : smoke, C3 = [14, 17, 20, 26])
+- [x] Fusion de PO1 (738f9fee ; bible § 12.1 mise aux mesures)
+- [x] Fusion de PO3 (a8777b7f, avant PO1 : aucun fichier d'UI commun)
+- [x] Fusion de PO4 (019bcf45 ; étape 6 faite en couleur seule, dégradé au sol impossible avec `cb_m1_outline_test`)
+- [x] Fusion de PO5 (925d5ae0 ; `SceneFader` en façade statique, pas d'autoload)
+- [x] Tous les tests PO actifs, pytest, `smoke.gd`, bancs PB1 carte et bataille dans ±5 %
+- [x] Planche `docs/img/po/apres/` + `docs/img/po/planche_avant_apres.jpg` (34cce6df, sur `feat/po-polish`)
+- [x] **Jugement du joueur** (28/09 : « oui fusionne », pas de PO6b)
+- [x] ff de `feat/po-polish` vers `main` (515a82e6), worktrees et branches supprimés, `docs/manuel.md` (§ 4 « Disposition de l'écran »), mémoire mise à jour
 
 ### Phase 2 (après validation) — lots Sonnet
 - [ ] P2a cour, fiche personnage, arbre familial
@@ -144,3 +144,12 @@ Diagnostic de départ (spec § 1), puis vue par vue :
 - 27/09 : PO0 commencé ; planche « avant » (10 vues JPEG, `po_shot.gd` pilote les options de capture des scènes) et inventaire faits. Constat : CB-M1 et CV3-4 sont fusionnés ; 4 agents d'autres chantiers tournent (AN1a, AN1b, PR1, CB-M2), donc 2 lots PO à la fois au plus.
 - 27/09 : PO0 fondations : bible § 12 (zones en parts d'écran, échelle Title 26 / Heading 20 / Body 17 / Caption 14 px à 900 px de référence, soit ×1,2 à 1080p — ancrée sur la taille par défaut du thème, 17), ADR 0097, squelette (`UiLayout`, `Settings.is_dev()` + `--dev`, tests PO désactivés, `time_of_day` au schéma, budget). Smoke vert.
 - 27/09 : PO0 fini (c6cc7cf1), branche `feat/po-polish` créée (eb6a8a23). Vague 1 en deux temps (4 agents d'autres chantiers actifs : AN1a, AN1b, PR1, CB-M2) : PO2 et PO3 lancés ; PO4, PO1 (après la fusion de PO2), puis PO5 à mesure que des places se libèrent. **Prochaine étape : attendre PO2/PO3, fusionner PO2, lancer PO4 et PO1.**
+- 27/09 : PO2 rendu et fusionné dans `feat/po-polish` (a7133864) ; `main` (AN1a/AN1b) fusionné dans `feat/po-polish` (143b3ced), smoke vert. Restes PO2 confiés à PO1 (tailles figées des `.tscn` carte et province). 162 surcharges de taille hors tranche → phase 2. Worktree de fusion de l'orchestrateur : `scratchpad/po-merge` (branche `feat/po-polish`). AN1 clos : PO1, PO4, PO5 lancés. **Prochaine étape : fusionner PO1 → PO3 → PO4 → PO5 à leur retour.**
+- 27/09 : PO3 fusionné dans `feat/po-polish` (a8777b7f). Verts : smoke, po_grade (campagne), C3, da7d, pytest 787. `sz4b_colonies_forests_test` échouait déjà avant PO3. À faire en PO6 : **banc PB1 carte à remesurer sur machine calme** (mesures PO3 bruitées, vue 150 à +5 %) ; saturation ramenée à ≤ 35 % (carte un peu plus terne : à soumettre au joueur en C5).
+- 27/09 : PO5 fusionné dans `feat/po-polish` (925d5ae0). Verts : smoke, po5_motion, zg4_camera, trackpad_zoom, po_grade, po_ui, pytest 789. Restes : pas de voile à l'entrée en bataille (l'écran de chargement fait la transition) ; minicarte de bataille en coupe franche. PO1 prévenu : bandeau U5 sans la date (cartouche de saison PO5). En cours : PO1, PO4.
+- 27/09 : PO1 fusionné dans `feat/po-polish` (738f9fee). Verts : po_ui (UiLayout, C1 128 textes, C2 52 contrôles, C3), smoke et 15 tests UI/caméra/CB. Écarts acceptés et reportés dans la bible § 12.1 : TOP_BAR 0,08 ; cloche hors zone ; fins de bataille/partie en écrans pleins. Restes : bande d'ost dépasse de 10 px à 720p (phase 2 ou PO6b). En cours : PO4.
+- 27/09 : PO4 fusionné (019bcf45) ; heure de bataille = phase EP8 du cœur (tirage sur la graine seulement sans heure du cœur), pas de retouche des arbres lointains (DA6 couvre). `main` (CB-M2) refusionné ; **piège** : recopier `game/bin/libcent_ans.debug.dylib` de main après une fusion qui change le core (sinon `new_campaign failed` partout).
+- 27/09 : PO6. Tous verts sur `feat/po-polish` : 16 tests Godot (smoke, po_ui C1/C2/C3, po_grade C4 48 contextes + 4 saisons, CB, caméras, UI), pytest 793. Banc PB1 carte en A/B alterné **avec le cache de relief relié** (sans lui, le worktree tombe hors quadtree et la comparaison est fausse) : balayage 38,8/38,7 ms (main) contre 38,8/35,8 (PO), chargement 7,05/6,86 s contre 6,97/6,92 s ; vues isolées trop bruitées. Bataille : A/B de PO4, +0,5 % large, −1,8 % rapprochée. Planche avant/après faite. **Prochaine étape : jugement du joueur (C5) sur `docs/img/po/planche_avant_apres.jpg`, puis PO6b éventuel et ff vers main.**
+  Mon avis pour C5 : UI de campagne nettement mieux rangée ; bataille encore chargée (en-tête, bandeau, journal) et changement de lumière peu visible au déploiement → candidats PO6b.
+- 28/09 : joueur : « oui fusionne ». `main` refusionné dans `feat/po-polish` (vagues CB 3-5 + icônes CB) ; un conflit dans `battle_camera.gd` (en-tête et variables CB3 × PO5, les deux gardés ; `glide_to` remet aussi `manual_pitch` à faux). Verts : 27 tests Godot (dont 13 CB), pytest 824. ff vers `main` (515a82e6), smoke et po_ui verts dans main. **Phase 1 close.**
+  Pistes pour la suite (non validées) : bataille encore chargée (en-tête, bandeau de déploiement, journal) et lumière du matin peu visible au déploiement ; bande d'ost qui dépasse de 10 px à 720p ; les nouveaux éléments du HUD de bataille de CB2-CB5 ne sont pas encore contrôlés par C2. **Prochaine étape : phase 2 (P2a-P2f) quand le joueur la demande.**

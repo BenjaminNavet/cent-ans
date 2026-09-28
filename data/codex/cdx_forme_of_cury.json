@@ -1,0 +1,11 @@
+{
+  "id": "cdx_forme_of_cury",
+  "title": "The Forme of Cury (v. 1390)",
+  "category": "cuisine",
+  "aliases": ["Forme of Cury", "The Forme of Cury"],
+  "era": { "from": "1390", "to": "1390" },
+  "summary": "Recueil de recettes réuni vers 1390 par les maîtres queux de Richard II d'Angleterre, avec l'avis des médecins de la cour : le plus ancien grand livre de cuisine anglais, aussi savant et épicé que ses cousins français.",
+  "body": "The Forme of Cury (« la manière de cuisiner », de l'ancien français cuire, sans rapport avec le curry indien) est compilé vers 1390 par les principaux maîtres queux du roi Richard II d'Angleterre, dit le prologue, « avec l'avis et l'assentiment des maîtres en physique et en philosophie » de sa maison : les médecins royaux surveillent donc, comme en France, ce qui se sert à la table du prince. Le texte réunit près de deux cents recettes, de potages, de rôtis, de sauces et d'entremets.\n\nLa cuisine qu'il décrit ressemble beaucoup à celle du [[cdx_viandier|Viandier]] français : gingembre, cannelle, safran, [[cdx_maniguette|graine de paradis]] et galanga y abondent, importés par les mêmes routes méditerranéennes et orientales que sur le continent. On y trouve un [[cdx_blanc_manger|blanc-manger]] au riz et au sucre, des sauces liées au pain ou au verjus, et des plats de fête somptueusement colorés et dorés à la feuille, destinés à impressionner autant qu'à nourrir : la cuisine de cour, en Angleterre comme en France, est un langage de pouvoir.\n\nLe manuscrit reste ignoré du grand public jusqu'à sa première édition imprimée, procurée en 1780 par l'antiquaire Samuel Pegge sous ce titre : c'est lui qui popularise le nom the Forme of Cury, tiré du texte même. L'ouvrage est depuis une source majeure pour l'histoire de la cuisine anglo-normande, et un utile témoin, avec le Viandier, de la parenté des cuisines aristocratiques de part et d'autre de la Manche pendant la guerre de Cent Ans.",
+  "see_also": ["cdx_viandier", "cdx_blanc_manger", "cdx_epices_medievales", "cdx_maniguette"],
+  "sources": ["The Forme of Cury", "Cuisine médiévale"]
+}

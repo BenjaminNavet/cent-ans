@@ -483,6 +483,9 @@ impl HistoricalMap {
             siege: None,
             siege_layout: None,
             orders,
+            // CB4: the caller adds the ability catalogue
+            // (`setup.abilities = data.battle_abilities…`).
+            abilities: Vec::new(),
             standards,
             decor_plan: None,
             opening: Default::default(),

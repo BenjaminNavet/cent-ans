@@ -140,6 +140,7 @@ pub fn plan_sortie(sim: &BattleSim, side: SideId) -> Vec<Command> {
                 units: vec![u.id],
                 target: foe.id,
                 run: true,
+                queue: false,
             })
         })
         .collect()

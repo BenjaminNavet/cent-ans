@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_alerts_rules.schema.json",
+  "title": "Alertes de bataille typées",
+  "description": "Fichier data/rules/battle_alerts.json (lot CB5, ADR 0095) : durée, fusion, rayon et importance des alertes de la colonne de bataille. Lu par sim-battle (AlertRules) ; l'importance décide de l'ordre d'affichage dans game/, la fusion et le rayon décident quand deux alertes du même type deviennent une seule.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "duration_s": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 60,
+      "description": "Secondes avant qu'une alerte ne s'efface de la colonne."
+    },
+    "merge_window_s": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 60,
+      "description": "Deux alertes du même type et de la même zone, à moins de ce nombre de secondes l'une de l'autre, sont regroupées en une seule entrée."
+    },
+    "merge_radius_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 500,
+      "description": "Distance en deçà de laquelle deux alertes du même type comptent comme la même zone (mètres)."
+    },
+    "max_shown": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Nombre maximal d'alertes affichées à la fois dans la colonne."
+    },
+    "importance": {
+      "type": "object",
+      "description": "Poids d'affichage par type d'alerte (clé = AlertKind::key : rout, general_down, flanked, reinforcements, ammo_out, wall_breached, gate_destroyed). Le plus grand nombre s'affiche en premier.",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1000
+      }
+    }
+  },
+  "required": [
+    "duration_s",
+    "merge_window_s",
+    "merge_radius_m",
+    "max_shown",
+    "importance"
+  ],
+  "additionalProperties": false
+}

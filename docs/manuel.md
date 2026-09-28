@@ -64,10 +64,30 @@ Survolez n'importe quelle icône : les infobulles donnent coûts, effets, prére
 - **Modes de carte** : M mécontentement, N diplomatie, R religion ; F12 capture d'écran.
 - **Barre du haut** : trésor, revenu de la saison et prévision, date, recherche en cours, boutons
   Diplomatie (P), Chronique, Cour (C), Technologies (T), Objectifs (O), Menu.
-- **Journal** (en bas à gauche) et **rapport de saison** en fin de tour : batailles, prises, déclarations,
+- **Journal** (en haut à gauche, avec les avis) et **rapport de saison** en fin de tour : batailles, prises, déclarations,
   morts et naissances, constructions et recherches achevées ; un clic centre la caméra.
 - **Alertes** (à droite) : armée ennemie à la frontière, siège, dette, recherche inactive, bâtiment
   terminé, décision de chronique en attente.
+
+### Disposition de l'écran
+
+L'interface a des places fixes (bible DA § 12, ADR 0097) :
+
+- **en haut** : la barre du trésor, de la date et des menus ;
+- **en haut à gauche** : les **avis** (conseiller, conseil du tour, « Tour des autres factions »,
+  résultat d'une bataille, journal). Trois au plus à la fois ; chacun s'efface au bout de 6 secondes
+  ou d'un clic, les plus anciens se replient en une ligne « + N » ;
+- **à droite** : **un seul panneau** à la fois (province, colonie, chronique, registre des unités,
+  lettres) ; en ouvrir un autre ferme le précédent ;
+- **en bas** : l'armée sélectionnée (sceau du chef, bandeau de l'ost, ordres) ;
+- **en bas à droite** : la minicarte et ses filtres, la cloche de fin de tour ;
+- **au centre, sur fond assombri** : les choix qui bloquent le jeu (rencontre, déclaration de guerre).
+
+Les panneaux s'ouvrent et se ferment en fondu, et l'écran passe au noir parchemin entre la carte, la
+bataille et le menu. La caméra glisse vers un point au lieu d'y sauter ; un ordre de marche laisse une
+onde d'encre au sol. « Réduire les animations » (Réglages, accessibilité) coupe ces glissements.
+Lancer le jeu avec `-- --dev` affiche en plus les messages destinés aux développeurs (cache de relief
+incomplet, commandes d'outil).
 
 Un tour est une saison : l'hiver ralentit les marches et affame les armées en pays ennemi. Les armées
 traversent la mer entre deux ports (une cogue marque la traversée) ; embarquer consomme tout le mouvement de

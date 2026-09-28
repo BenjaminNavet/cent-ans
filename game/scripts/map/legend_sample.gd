@@ -194,6 +194,18 @@ func _draw() -> void:
 				var color: Color = others[0][1] if not others.is_empty() else NEUTRAL
 				draw_colored_polygon(PackedVector2Array([center + Vector2(0, -4), center + Vector2(4, 0), center + Vector2(0, 4), center + Vector2(-4, 0)]), HudStyle.INK)
 				draw_colored_polygon(PackedVector2Array([center + Vector2(0, -2.5), center + Vector2(2.5, 0), center + Vector2(0, 2.5), center + Vector2(-2.5, 0)]), color)
+		"occupation":
+			# FR1 : hachures aux couleurs de l'occupant sur le fond du propriétaire (`fr1_hatch_at`).
+			var owner_color := Color.html(str(sample.get("owner_color", "#8a1f1f")))
+			var occupier_color := Color.html(str(sample.get("occupier_color", "#1f4a8a")))
+			var rect := Rect2(center - Vector2(24, 9), Vector2(48, 18))
+			draw_rect(rect, owner_color)
+			for i in range(-2, 9):
+				var x0 := rect.position.x + i * 6.0
+				var top := Vector2(clampf(x0, rect.position.x, rect.end.x), rect.position.y)
+				var bottom := Vector2(clampf(x0 - rect.size.y, rect.position.x, rect.end.x), rect.end.y)
+				draw_line(top, bottom, occupier_color, 2.4)
+			draw_rect(rect, HudStyle.INK, false, 1.0)
 		"minimap_frame":
 			var rect := Rect2(center - Vector2(26, 12), Vector2(52, 24))
 			draw_rect(rect, CampaignMinimap.SEA)

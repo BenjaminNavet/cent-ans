@@ -13,9 +13,13 @@ extends Node
 @export var sun_path: NodePath = ^"../Sun"
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 
-## Hauteur du soleil au-dessus de l'horizon et azimut d'où vient la lumière (0° = nord, 315° = nord-ouest).
-@export_range(5.0, 89.0) var sun_elevation_deg: float = 38.0
-@export_range(0.0, 360.0) var sun_azimuth_deg: float = 315.0
+## Lot PO3 (bible DA § 12.6, ADR 0097) : soleil rasant de fin d'après-midi par saison (hauteur,
+## azimut d'où vient la lumière — 0° = nord, sens horaire —, couleur, énergie), perspective
+## aérienne teintée et étalonnage de carte, lus dans `atmosphere.json` (`campaign.seasons.<saison>`,
+## `resolve_preset`). Aucune valeur de soleil dans le code : sans préréglage, le soleil de la scène
+## reste tel quel.
+var sun_elevation_deg: float = -1.0
+var sun_azimuth_deg: float = -1.0
 
 ## Brouillard de profondeur, en multiples de la distance caméra → point visé.
 @export var fog_begin_factor: float = 1.6
@@ -56,6 +60,10 @@ var _season_check_s: float = 0.0
 var _quality_range: float = 1.0
 var _quality_splits: int = 4
 var _base_ssao_radius: float = -1.0
+## PO3 : soleil de la saison à (ré)appliquer : au chargement (le relief ZG8 impose sa hauteur au
+## soleil pendant la construction du terrain) et au changement de saison, hors soir de fin de tour.
+var _sun_dirty: bool = false
+var _preset: Dictionary = {}
 
 
 func _ready() -> void:
@@ -66,7 +74,6 @@ func _ready() -> void:
 	_world_env = world_env
 	_sun = get_node_or_null(sun_path) as DirectionalLight3D
 	_rig = get_node_or_null(camera_rig_path) as CampaignCamera
-	_orient_sun()
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	if _world_env != null:
@@ -94,23 +101,72 @@ func _update_season() -> void:
 		apply_season(season)
 
 
+## PO3 : préréglage complet de la carte pour `season` : `campaign_look` (ciel, étalonnage de
+## saison) augmenté de l'étalonnage de carte (`grade`, appliqué après), du soleil (`sun_elevation`,
+## `sun_azimuth`, `sun_color`, `sun_energy`) et de la brume (`fog_color`, `fog_sun_scatter`).
+## {} si la saison n'a pas de soleil dans les données.
+static func resolve_preset(season: String) -> Dictionary:
+	var resolved := AtmosphereLibrary.campaign_look(season)
+	if resolved.is_empty():
+		return {}
+	var look: Dictionary = resolved["look"]
+	for key in ["sun_elevation", "sun_azimuth", "sun_color", "fog_color"]:
+		if not look.has(key):
+			return {}
+	var grades: Array = (resolved["grades"] as Array).duplicate()
+	if look.has("grade"):
+		grades.append(look["grade"])
+	resolved["grades"] = grades
+	resolved["sun_elevation"] = float(look["sun_elevation"])
+	resolved["sun_azimuth"] = float(look["sun_azimuth"])
+	resolved["sun_color"] = AtmosphereLibrary._rgb(look["sun_color"])
+	resolved["sun_energy"] = float(look.get("sun_energy", 1.0))
+	resolved["fog_color"] = AtmosphereLibrary._rgb(look["fog_color"])
+	resolved["fog_sun_scatter"] = float(look.get("fog_sun_scatter", 0.0))
+	return resolved
+
+
 func apply_season(season: String) -> void:
 	_season = season
+	_preset = resolve_preset(season)
+	if _preset.is_empty():
+		push_warning("CampaignAtmosphere: no complete preset for season %s" % season)
+		return
+	sun_elevation_deg = float(_preset["sun_elevation"])
+	sun_azimuth_deg = float(_preset["sun_azimuth"])
+	_sun_dirty = true
+	_apply_sun_if_free()
 	if _environment == null:
 		return
-	var look := AtmosphereLibrary.campaign_look(season)
-	if look.is_empty():
-		return
-	var fog := AtmosphereLibrary._rgb((look["look"] as Dictionary).get("fog_color", []), _environment.fog_light_color)
+	var fog: Color = _preset["fog_color"]
 	_environment.fog_light_color = fog
-	AtmosphereLibrary.apply_to_environment(_environment, look, fog, fog.darkened(0.5))
+	_environment.fog_sun_scatter = float(_preset["fog_sun_scatter"])
+	AtmosphereLibrary.apply_to_environment(_environment, _preset, fog, fog.darkened(0.5))
+
+
+## PO3 : pose le soleil de la saison sauf pendant le soir doré de fin de tour (`TurnLight`, qui
+## rend ensuite la lumière mémorisée) ; sinon réessayé à la vérification suivante.
+func _apply_sun_if_free() -> void:
+	if not _sun_dirty or _sun == null or _preset.is_empty():
+		return
+	var turn_light := get_node_or_null(^"../TurnLight")
+	if turn_light != null and (float(turn_light.get("dusk")) > 0.0 or bool(turn_light.get("_active"))):
+		return
+	_orient_sun()
+	_sun.light_color = _preset["sun_color"]
+	_sun.light_energy = float(_preset["sun_energy"])
+	_sun_dirty = false
 
 
 func _process(delta: float) -> void:
+	if not _map_loaded:
+		_check_map_loaded()
 	_season_check_s -= delta
 	if _season_check_s <= 0.0:
 		_season_check_s = 1.0
 		_update_season()
+	if _sun_dirty:
+		_apply_sun_if_free()
 	if _rig == null:
 		return
 	var distance := _rig.distance
@@ -160,7 +216,21 @@ func apply_distance(distance: float) -> void:
 		_attributes.dof_blur_amount = dof_amount_near * closeness
 
 
+## PO3 : une fois la carte chargée (terrain construit, hauteur du soleil ZG8 posée), le soleil de
+## la saison reprend la main.
+var _map_loaded: bool = false
+
+
+func _check_map_loaded() -> void:
+	if _map_loaded:
+		return
+	var map := get_parent()
+	if map != null and bool(map.get("load_ok")):
+		_map_loaded = true
+		_sun_dirty = true
+
+
 func _orient_sun() -> void:
-	if _sun == null:
+	if _sun == null or sun_elevation_deg < 0.0:
 		return
 	_sun.basis = Basis.looking_at(sun_direction(), Vector3.UP)

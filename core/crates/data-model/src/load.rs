@@ -11,6 +11,7 @@ use crate::entities::agent::AgentRules;
 use crate::entities::ai_alignment::AiAlignment;
 use crate::entities::ai_diplomacy::AiDiplomacy;
 use crate::entities::ai_grid::AiGrid;
+use crate::entities::battle_ability::BattleAbility;
 use crate::entities::battle_order::BattleOrder;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
@@ -41,6 +42,8 @@ use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 pub mod folders {
     pub const FACTIONS: &str = "factions";
     pub const PROVINCES: &str = "provinces";
+    /// Feudal titles (lot FE); optional.
+    pub const TITLES: &str = "titles";
     pub const UNIT_TYPES: &str = "unit_types";
     pub const BUILDINGS: &str = "buildings";
     pub const TECHNOLOGIES: &str = "technologies";
@@ -54,6 +57,8 @@ pub mod folders {
     pub const EVENTS: &str = "events";
     /// Leader's battle orders (F10b); optional folder.
     pub const BATTLE_ORDERS: &str = "battle_orders";
+    /// Regiments' active abilities in battle (CB4); optional folder.
+    pub const BATTLE_ABILITIES: &str = "battle_abilities";
     /// Province diets (H3 « La Table »); optional folder.
     pub const DIETS: &str = "diets";
     /// Regional edicts (lot C4); optional folder.
@@ -91,6 +96,8 @@ pub mod folders {
     /// Public order tuning (lot E2), inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
     pub const ECONOMY_RULES: &str = "economy.json";
+    /// Feudal tuning (lot FE), inside `rules/`; optional.
+    pub const FEUDAL_RULES: &str = "feudal.json";
     /// Campaign map weather (lot CM2), inside `rules/`; optional.
     pub const CAMPAIGN_WEATHER_RULES: &str = "campaign_weather.json";
     /// Campaign difficulty levels (lot DF1), inside `rules/`; optional.
@@ -186,6 +193,8 @@ pub enum DataError {
     },
     #[error("invalid event {id}: {message}")]
     InvalidEvent { id: String, message: String },
+    #[error("{} invalid feudal title(s):\n{}", .0.len(), .0.join("\n"))]
+    InvalidTitles(Vec<String>),
     #[error("{} dangling reference(s):\n{}", .0.len(), format_reference_errors(.0))]
     References(Vec<ReferenceError>),
 }
@@ -229,6 +238,11 @@ fn format_reference_errors(errors: &[ReferenceError]) -> String {
 pub struct GameData {
     pub factions: BTreeMap<FactionId, Faction>,
     pub provinces: BTreeMap<ProvinceId, Province>,
+    /// Feudal titles (lot FE), empty when `data/titles/` is absent.
+    pub titles: BTreeMap<crate::ids::TitleId, crate::entities::title::FeudalTitle>,
+    /// `data/rules/feudal.json` (lot FE); [`crate::FeudalRules::default`]
+    /// when absent.
+    pub feudal_rules: crate::entities::feudal_rules::FeudalRules,
     pub unit_types: BTreeMap<UnitTypeId, UnitType>,
     pub buildings: BTreeMap<BuildingId, Building>,
     pub technologies: BTreeMap<TechnologyId, Technology>,
@@ -242,6 +256,9 @@ pub struct GameData {
     pub events: BTreeMap<EventId, Event>,
     /// Leader's battle orders, empty when `data/battle_orders/` is absent.
     pub battle_orders: BTreeMap<String, BattleOrder>,
+    /// Regiments' active abilities (CB4), empty when `data/battle_abilities/`
+    /// is absent.
+    pub battle_abilities: BTreeMap<String, BattleAbility>,
     /// Province diets (H3), empty when `data/diets/` is absent.
     pub diets: BTreeMap<DietId, Diet>,
     /// Regional edicts (lot C4), empty when `data/edicts/` is absent.
@@ -346,6 +363,8 @@ impl GameData {
         let mut data = GameData {
             factions: load_entities(&root.join(folders::FACTIONS), |f: &Faction| &f.id)?,
             provinces: load_entities(&root.join(folders::PROVINCES), |p: &Province| &p.id)?,
+            titles: BTreeMap::new(),
+            feudal_rules: Default::default(),
             unit_types: load_entities(&root.join(folders::UNIT_TYPES), |u: &UnitType| &u.id)?,
             buildings: load_entities(&root.join(folders::BUILDINGS), |b: &Building| &b.id)?,
             technologies: load_entities(&root.join(folders::TECHNOLOGIES), |t: &Technology| &t.id)?,
@@ -357,6 +376,7 @@ impl GameData {
             names: load_entities(&root.join(folders::NAMES), |n: &NameList| &n.id)?,
             events: BTreeMap::new(),
             battle_orders: BTreeMap::new(),
+            battle_abilities: BTreeMap::new(),
             diets: BTreeMap::new(),
             edicts: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
@@ -392,6 +412,15 @@ impl GameData {
             rasters: Default::default(),
             naval: Default::default(),
         };
+        let titles_dir = root.join(folders::TITLES);
+        if titles_dir.is_dir() {
+            data.titles =
+                load_entities(&titles_dir, |t: &crate::entities::title::FeudalTitle| &t.id)?;
+        }
+        let feudal_path = root.join(folders::RULES).join(folders::FEUDAL_RULES);
+        if feudal_path.is_file() {
+            data.feudal_rules = read_json(&feudal_path)?;
+        }
         let events_dir = root.join(folders::EVENTS);
         if events_dir.is_dir() {
             data.events = load_entities(&events_dir, |e: &Event| &e.id)?;
@@ -399,6 +428,10 @@ impl GameData {
         let orders_dir = root.join(folders::BATTLE_ORDERS);
         if orders_dir.is_dir() {
             data.battle_orders = load_entities(&orders_dir, |o: &BattleOrder| &o.id)?;
+        }
+        let abilities_dir = root.join(folders::BATTLE_ABILITIES);
+        if abilities_dir.is_dir() {
+            data.battle_abilities = load_entities(&abilities_dir, |a: &BattleAbility| &a.id)?;
         }
         let diets_dir = root.join(folders::DIETS);
         if diets_dir.is_dir() {
@@ -508,6 +541,7 @@ impl GameData {
         data.prepare_rasters(&root.join(folders::MAP));
         data.prepare_cover(&root.join(folders::MAP));
         data.validate_references(&mut warnings)?;
+        crate::title_check::validate_titles(&data)?;
         crate::event_check::validate_events(&data, &mut warnings)?;
         Ok((data, warnings))
     }
@@ -711,12 +745,6 @@ impl ReferenceChecker<'_> {
             }
             self.require_all(id, "resources", &province.resources, &data.resources);
             self.require(id, "owner", &province.owner, &data.factions);
-            if let Some(overlord) = &province.overlord {
-                self.require(id, "overlord", overlord, &data.factions);
-            }
-            if let Some(holder) = &province.holder {
-                self.require(id, "holder", holder, &data.characters);
-            }
             self.require(id, "religion", &province.religion, &data.religions);
             self.require_all(id, "buildings", &province.buildings, &data.buildings);
         }
@@ -1107,7 +1135,7 @@ mod tests {
     const NAMES_LIST: &str = r#"{"id":"names_fr","language":"français médiéval","cultures":["cul_french"],"male_first_names":["Jehan"],"female_first_names":["Aliénor"]}"#;
     const CHARACTER: &str = r#"{"id":"chr_philippe_vi","name":{"display":"Philippe VI"},"sex":"male","house":"Valois","faction":"fac_france","role":"ruler","birth":{"value":"1293","uncertain":true},"skills":{"command":5,"governance":4,"court":6},"traits":["trait_proud"],"starting_location":"prov_normandie"}"#;
     const FACTION: &str = r##"{"id":"fac_france","name":{"display":"Royaume de France"},"government":"kingdom","playable":true,"ruler":"chr_philippe_vi","capital":"prov_normandie","religion":"rel_catholic","culture":"cul_french","succession_law":"salic","heraldry":{"blazon":"D'azur semé de fleurs de lis d'or.","primary_color":"#1F3A93"},"starting_technologies":["tech_masonry"]}"##;
-    const PROVINCE: &str = r#"{"id":"prov_normandie","name":{"display":"Normandie","local":"Normendie","local_language":"ancien français"},"region":"france_nord","terrain":"bocage","neighbors":["prov_ile_de_france"],"coastal":true,"ports":["Rouen"],"resources":["res_wheat"],"capital_city":{"name":{"display":"Rouen"},"lat":49.44,"lon":1.1},"owner":"fac_france","holder":"chr_philippe_vi","culture":"cul_french","religion":"rel_catholic","population":{"classes":{"peasants":{"count":750000,"unrest":10,"health":55,"wealth":50,"goods_satisfaction":60},"burghers":{"count":130000,"unrest":10,"health":50,"wealth":65,"goods_satisfaction":70},"clergy":{"count":20000,"unrest":5,"health":60,"wealth":70,"goods_satisfaction":75},"nobility":{"count":6000,"unrest":10,"health":60,"wealth":75,"goods_satisfaction":80}},"uncertain":true},"buildings":["bld_market"]}"#;
+    const PROVINCE: &str = r#"{"id":"prov_normandie","name":{"display":"Normandie","local":"Normendie","local_language":"ancien français"},"region":"france_nord","terrain":"bocage","neighbors":["prov_ile_de_france"],"coastal":true,"ports":["Rouen"],"resources":["res_wheat"],"capital_city":{"name":{"display":"Rouen"},"lat":49.44,"lon":1.1},"owner":"fac_france","culture":"cul_french","religion":"rel_catholic","population":{"classes":{"peasants":{"count":750000,"unrest":10,"health":55,"wealth":50,"goods_satisfaction":60},"burghers":{"count":130000,"unrest":10,"health":50,"wealth":65,"goods_satisfaction":70},"clergy":{"count":20000,"unrest":5,"health":60,"wealth":70,"goods_satisfaction":75},"nobility":{"count":6000,"unrest":10,"health":60,"wealth":75,"goods_satisfaction":80}},"uncertain":true},"buildings":["bld_market"]}"#;
 
     fn reference_errors(error: DataError) -> Vec<ReferenceError> {
         match error {

@@ -9,6 +9,8 @@ extends SceneTree
 ##
 ## Ce test verrouille le comportement d'avant l'extraction des entrées vers `battle_input.gd`
 ## (CB0) : il doit rester vert, sans modifier le golden, une fois l'extraction faite.
+## Seule retouche voulue depuis : CB1 ajoute au glisser-droit (commande 1) la clé `width`
+## (longueur du glisser = largeur du front).
 ##
 ## Usage :
 ##   godot --headless --path game --script res://tests/cb0_input_equivalence_test.gd
@@ -41,6 +43,10 @@ func _run() -> void:
 	var record := OS.get_cmdline_user_args().has("--record")
 	root.size = Vector2i(1440, 900)  # headless : la fenêtre par défaut est minuscule (64x64)
 	_scene = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
+	# Script de scène non compilé (classe non importée) : une erreur d'appel interromprait _run()
+	# sans compter d'échec, et le test sortirait « OK ».
+	if not _check(_scene.has_method("issue"), "battle scene script failed to load (run godot --import?)"):
+		return
 	_scene.autoplay = true  # F5c : saute le déploiement (comme la démo autonome, les captures).
 	_scene.log_orders_for_test = true
 	root.add_child(_scene)
@@ -131,8 +137,10 @@ func _play_sequence() -> void:
 	OS.delay_msec(400)
 	_right_click(enemy_screen)  # 7. Clic droit sur un ennemi.
 	OS.delay_msec(400)
-	_key(KEY_F)  # 8-11. F / G / H / C.
-	_key(KEY_G)
+	# 8-11. Formation / tir à volonté / H / C. CB2 : touches remappées (formation F -> T, tir à
+	# volonté G -> F, G = garde) ; mêmes ordres, golden inchangé.
+	_key(KEY_T)
+	_key(KEY_F)
 	_key(KEY_H)
 	_key(KEY_C)
 	_key(KEY_ESCAPE)  # 12-15. Échap / Espace / + / -.

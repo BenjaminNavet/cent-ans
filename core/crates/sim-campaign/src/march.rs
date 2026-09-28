@@ -313,6 +313,21 @@ impl CampaignState {
         result
     }
 
+    /// CV3-6: what a `MoveArmy` of `army` to map point `target` would do
+    /// this turn, without touching the state (same path and stops as the
+    /// real march, hidden ambushes included): the cost walked and the stop.
+    /// `None` when the army is unknown or no path exists.
+    pub fn preview_march_to_point(
+        &self,
+        data: &GameData,
+        army: &ArmyId,
+        target: [f32; 2],
+    ) -> Option<(u32, StopReason)> {
+        let path = self.find_path(data, army, target)?;
+        let walk = simulate(self, data, army, &path.waypoints, None, None, None)?;
+        Some((walk.cost, walk.stop))
+    }
+
     /// Map-pixel point of a move target.
     pub fn target_point(&self, data: &GameData, target: &MoveTarget) -> Option<[f32; 2]> {
         match target {

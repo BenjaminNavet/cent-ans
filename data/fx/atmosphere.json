@@ -60,24 +60,47 @@
     },
     "winter": {"decor_saturation": 0.6}
   },
+  "time_of_day": {
+    "morning": {
+      "phases": ["dawn", "morning"],
+      "sun_elevation": 15.0, "sun_azimuth": 115.0, "sun_color": [1.0, 0.86, 0.66], "sun_energy": 1.55,
+      "sky": {"clear": {"spring": "winter_clear", "summer": "winter_clear", "autumn": "winter_clear", "winter": "winter_clear"}},
+      "grade": {"temperature": 0.22, "tint": 0.02, "contrast": 1.04, "saturation": 0.96, "lift": [0.012, 0.01, 0.006], "highlights": [1.03, 1.0, 0.93], "shadows": [0.97, 0.98, 1.03]}
+    },
+    "midday": {
+      "phases": ["midday", "afternoon"],
+      "sun_elevation": 36.0, "sun_azimuth": 218.0, "sun_color": [1.0, 0.94, 0.84], "sun_energy": 1.75,
+      "grade": {"temperature": 0.05, "contrast": 1.02, "highlights": [1.0, 0.99, 0.96]}
+    },
+    "evening": {
+      "phases": ["dusk", "night"],
+      "sun_elevation": 12.0, "sun_azimuth": 250.0, "sun_color": [1.0, 0.72, 0.46], "sun_energy": 1.45,
+      "sky": {"clear": {"spring": "winter_clear", "summer": "winter_clear", "autumn": "autumn_clear", "winter": "winter_clear"}},
+      "grade": {"temperature": 0.38, "tint": 0.03, "contrast": 1.08, "saturation": 0.98, "gain": [1.03, 0.99, 0.9], "highlights": [1.05, 0.98, 0.86], "shadows": [0.95, 0.96, 1.04]}
+    }
+  },
   "battle": {
     "clear": {
       "sky": {"spring": "clear_midday", "summer": "clear_midday", "autumn": "autumn_clear", "winter": "winter_clear"},
+      "sun_energy_scale": 1.0, "sun_elevation_scale": 1.0, "sun_tint": [1.0, 1.0, 1.0],
       "sky_luminance": 0.62, "sky_saturation": 1.0, "sky_tint": [1.0, 1.0, 1.0], "sun_disc": 1.0, "haze": 0.3,
       "grade": {"contrast": 1.05, "saturation": 0.98, "shadows": [0.98, 0.99, 1.03]}
     },
     "fog": {
       "sky": {"spring": "misty_morning", "summer": "misty_morning", "autumn": "dawn", "winter": "misty_morning"},
+      "sun_energy_scale": 0.286, "sun_elevation_scale": 0.72, "sun_tint": [1.0, 1.032, 1.095],
       "sky_luminance": 0.7, "sky_saturation": 0.6, "sky_tint": [1.0, 0.99, 0.97], "sun_disc": 0.0, "haze": 0.7,
       "grade": {"contrast": 0.95, "saturation": 0.86, "lift": [0.02, 0.02, 0.022]}
     },
     "rain": {
       "sky": {"spring": "overcast", "summer": "storm", "autumn": "storm", "winter": "overcast"},
+      "sun_energy_scale": 0.314, "sun_elevation_scale": 1.0, "sun_tint": [0.9, 0.989, 1.19],
       "sky_luminance": 0.5, "sky_saturation": 0.75, "sky_tint": [0.95, 0.98, 1.03], "sun_disc": 0.0, "haze": 0.5,
       "grade": {"temperature": -0.2, "contrast": 1.05, "saturation": 0.8, "shadows": [0.96, 0.98, 1.04]}
     },
     "snow": {
       "sky": {"spring": "snow", "summer": "snow", "autumn": "snow", "winter": "snow"},
+      "sun_energy_scale": 0.343, "sun_elevation_scale": 0.61, "sun_tint": [0.95, 1.021, 1.19],
       "sky_luminance": 0.78, "sky_saturation": 0.7, "sky_tint": [0.97, 0.99, 1.03], "sun_disc": 0.0, "haze": 0.55,
       "grade": {"temperature": -0.15, "contrast": 1.02, "saturation": 0.9, "gain": [1.01, 1.01, 1.02]}
     }
@@ -85,10 +108,30 @@
   "campaign": {
     "grade_strength": 0.85,
     "seasons": {
-      "spring": {"sky": "clear_midday", "sky_luminance": 0.7, "haze": 0.45, "fog_color": [0.8, 0.8, 0.76]},
-      "summer": {"sky": "autumn_clear", "sky_luminance": 0.72, "haze": 0.45, "fog_color": [0.83, 0.8, 0.72]},
-      "autumn": {"sky": "overcast", "sky_luminance": 0.66, "haze": 0.5, "fog_color": [0.8, 0.76, 0.68]},
-      "winter": {"sky": "overcast_field", "sky_luminance": 0.7, "haze": 0.55, "fog_color": [0.8, 0.82, 0.85]}
+      "spring": {"sky": "clear_midday", "sky_luminance": 0.7, "haze": 0.45, "fog_color": [0.74, 0.79, 0.86], "fog_sun_scatter": 0.22,
+        "sun_elevation": 26, "sun_azimuth": 245, "sun_color": [1.0, 0.9, 0.76], "sun_energy": 1.2,
+        "grade": {"contrast": 1.07, "lift": [0.01, 0.012, 0.02], "highlights": [1.03, 1.0, 0.95], "saturation": 0.8, "shadow_saturation": 0.45}},
+      "summer": {"sky": "autumn_clear", "sky_luminance": 0.72, "haze": 0.45, "fog_color": [0.76, 0.79, 0.84], "fog_sun_scatter": 0.28,
+        "sun_elevation": 28, "sun_azimuth": 250, "sun_color": [1.0, 0.88, 0.72], "sun_energy": 1.25,
+        "grade": {"contrast": 1.07, "lift": [0.01, 0.012, 0.02], "highlights": [1.04, 1.0, 0.94], "saturation": 0.77, "shadow_saturation": 0.45}},
+      "autumn": {"sky": "overcast", "sky_luminance": 0.66, "haze": 0.5, "fog_color": [0.77, 0.77, 0.8], "fog_sun_scatter": 0.32,
+        "sun_elevation": 22, "sun_azimuth": 248, "sun_color": [1.0, 0.86, 0.7], "sun_energy": 1.15,
+        "grade": {"contrast": 1.08, "lift": [0.012, 0.012, 0.02], "highlights": [1.04, 0.99, 0.93], "saturation": 0.72, "shadow_saturation": 0.45}},
+      "winter": {"sky": "overcast_field", "sky_luminance": 0.7, "haze": 0.55, "fog_color": [0.75, 0.8, 0.88], "fog_sun_scatter": 0.2,
+        "sun_elevation": 18, "sun_azimuth": 240, "sun_color": [0.98, 0.87, 0.76], "sun_energy": 1.0,
+        "grade": {"contrast": 1.06, "lift": [0.012, 0.014, 0.024], "highlights": [1.03, 1.0, 0.97], "saturation": 0.88, "shadow_saturation": 0.5}}
     }
+  },
+  "secondary_motion": {
+    "description": "Lot AN1a (ADR 0096) : mouvement secondaire en shader de sommets (bas des surcots et jaques, caparaçons, crinières et queues, étendards). Le vent de base (direction, force, rafales par météo) vient de data/fx/battle_finish.json (wind), partagé avec l'herbe et les drapeaux ; ici, son effet et les amplitudes. Longueurs en mètres (déplacement au bord libre), fréquences en Hz.",
+    "enabled": true,
+    "max_distance_m": 100.0,
+    "speed_ref_m_s": 5.0,
+    "wind_scale": 1.0,
+    "skirt": {"speed_amp_m": 0.07, "wind_amp_m": 0.035, "flutter_amp_m": 0.014, "flutter_hz": 1.3, "lift": 0.35},
+    "caparison": {"speed_amp_m": 0.08, "wind_amp_m": 0.03, "flutter_amp_m": 0.02, "flutter_hz": 1.1, "lift": 0.3, "hem_y_m": 0.48, "top_y_m": 1.45},
+    "mane": {"speed_amp_m": 0.03, "wind_amp_m": 0.02, "flutter_amp_m": 0.012, "flutter_hz": 1.8},
+    "tail": {"speed_amp_m": 0.16, "wind_amp_m": 0.08, "flutter_amp_m": 0.05, "flutter_hz": 1.4, "lift": 0.5},
+    "flag": {"amp_min": 0.08, "amp_max": 0.3, "wave_speed_min": 2.5, "wave_speed_max": 7.5, "ripple": 0.3, "gait_wind": [0.0, 0.25, 0.55, 0.1]}
   }
 }

@@ -24,7 +24,7 @@ const MAX_WAIT_S := 120.0
 const BLOCK_CHECK_S := 0.2
 ## Q4 : largeur de la bulle et place (bord gauche, au-dessus du bas d'écran : hors des boutons
 ## d'action du panneau de province, de la barre d'unités et des ordres du chef).
-const BUBBLE_WIDTH := 420.0
+const BUBBLE_WIDTH := 420.0  # PO1 : plus utilisé pour la place (zone `TOASTS`)
 const BUBBLE_BOTTOM := 0.62
 
 var silent := false
@@ -249,19 +249,19 @@ func _build(data: Dictionary) -> void:
 	style.content_margin_left = 20
 	style.content_margin_right = 20
 	_panel.add_theme_stylebox_override("panel", style)
-	# Q4: left edge, bottom at 62 % of the height. Bottom centre (Q2) covered the
-	# province panel's « Recruter » and the modal dialogs; the left edge between the
-	# « que faire » card and the journal (campaign) or the leader's orders (battle) is free.
-	_panel.anchor_left = 0.0
-	_panel.anchor_right = 0.0
-	_panel.anchor_top = BUBBLE_BOTTOM
-	_panel.anchor_bottom = BUBBLE_BOTTOM
-	_panel.offset_left = 16
-	_panel.offset_right = 16 + BUBBLE_WIDTH
+	# PO1 (bible DA § 12.1) : la bulle suit la zone `TOASTS` de `UiLayout` (haut gauche, sous la
+	# barre) — même largeur, bas calé sur le bas de la zone, elle grandit vers le haut. Elle reste
+	# dans la couche du conseiller (il survit aux changements de scène) : ancres seulement.
+	var zone: Rect2 = UiZones.ZONE_RECTS[UiZones.Zone.TOASTS]
+	_panel.anchor_left = zone.position.x
+	_panel.anchor_right = zone.end.x
+	_panel.anchor_top = zone.end.y
+	_panel.anchor_bottom = zone.end.y
+	_panel.offset_left = 0
+	_panel.offset_right = 0
 	_panel.offset_bottom = 0
 	_panel.offset_top = 0
 	_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_panel.custom_minimum_size = Vector2(BUBBLE_WIDTH, 0)
 	# Q4 : la bulle ne capte plus la souris (le clic passe au jeu) ; seul « × » la ferme.
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_layer.add_child(_panel)
@@ -292,7 +292,7 @@ func _build(data: Dictionary) -> void:
 	head.add_child(_close_button)
 	_text_label = Label.new()
 	_text_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_text_label.custom_minimum_size = Vector2(BUBBLE_WIDTH - 36, 0)
+	_text_label.custom_minimum_size = Vector2(200, 0)  # PO1 : largeur de la zone `TOASTS`
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.add_theme_font_size_override("font_size", 17)
 	_text_label.add_theme_color_override("font_color", HudStyle.INK)

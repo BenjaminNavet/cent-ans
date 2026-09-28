@@ -1,0 +1,30 @@
+{
+  "id": "ability_planted_pikes",
+  "kind": "planted_pikes",
+  "rank": 1,
+  "name": "Piques plantées",
+  "description": "Talon de la pique ou du goedendag calé au sol, pointe à hauteur de poitrail, la troupe reçoit la charge de front sans quitter la ligne : la charge se brise, les chevaux tombent. Les flancs et le dos restent découverts (c'est le schiltron qui fait face partout). Courtrai (1302), Bannockburn (1314), [[cdx_roosebeke|Roosebeke]] (1382).",
+  "icon": "planted_pikes",
+  "eligible": {
+    "unit_types": ["unit_flemish_pikemen", "unit_scottish_spearmen", "unit_goedendag_militia"],
+    "mounted": false
+  },
+  "cooldown": 20.0,
+  "duration": 0.0,
+  "setup_time": 2.0,
+  "conditions": ["stationary"],
+  "start_conditions": ["not_engaged"],
+  "effects": {
+    "frontal_only": true,
+    "stops_charge": true,
+    "horse_taken_front_factor": 0.5,
+    "vs_horse_front_factor": 1.5
+  },
+  "journal": "Les {unit} plantent leurs piques.",
+  "ai": {
+    "enemy_within": 150.0,
+    "mounted_enemy": true,
+    "in_front": true
+  },
+  "sources": ["Verbruggen, The Battle of the Golden Spurs (2002)", "DeVries, Infantry Warfare in the Early Fourteenth Century (1996)"]
+}

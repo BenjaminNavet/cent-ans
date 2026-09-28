@@ -26,7 +26,8 @@ func setup(campaign_map: Node) -> void:
 	band = OutcomeBand.create("", "", 24)
 	band.name = "OutcomeNoticeBand"
 	band.hide()
-	map.ui.add_child(band)
+	# PO1 : avis de résultat dans la zone `TOASTS` (haut gauche) plutôt qu'au centre de l'écran.
+	UiZones.put(UiZones.Zone.TOASTS, band)
 
 
 func available() -> bool:
@@ -69,10 +70,6 @@ func show_band(key: String, text: String) -> void:
 	band.modulate.a = 1.0
 	band.show()
 	band.reset_size()
-	var view: Vector2 = map.ui.get_viewport().get_visible_rect().size
-	var top: Control = map.ui.get_node_or_null("TopBar")
-	var y := (top.size.y if top != null else 40.0) + 110.0
-	band.position = Vector2((view.x - band.size.x) * 0.5, y)
 	if _tween != null:
 		_tween.kill()
 	_tween = band.create_tween()

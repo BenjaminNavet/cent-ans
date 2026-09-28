@@ -1,0 +1,31 @@
+{
+  "id": "ability_close_ranks",
+  "kind": "close_ranks",
+  "rank": 2,
+  "name": "Serrer les rangs",
+  "description": "Les hommes à pied se serrent en masse compacte, lance raccourcie : le front tient mieux et encaisse la charge, mais la troupe avance lentement, se fatigue vite dans la presse, souffre davantage du tir (cible dense) et découvre ses flancs. À [[cdx_azincourt|Azincourt]], la masse française est si serrée que les hommes ne peuvent plus lever leurs armes.",
+  "icon": "close_ranks",
+  "eligible": {
+    "abilities": ["shield_wall"],
+    "dismounted": true,
+    "exclude_abilities": ["pike_square"],
+    "mounted": false
+  },
+  "cooldown": 30.0,
+  "duration": 60.0,
+  "effects": {
+    "speed_factor": 0.6,
+    "melee_taken_front_factor": 0.8,
+    "melee_taken_flank_factor": 1.25,
+    "charge_taken_factor": 0.6,
+    "missile_taken_factor": 1.15,
+    "melee_fatigue_factor": 1.25
+  },
+  "journal": "Les {unit} serrent les rangs.",
+  "ai": {
+    "enemy_within": 40.0,
+    "in_front": true,
+    "when_defensive": true
+  },
+  "sources": ["Froissart, Chroniques (Poitiers)", "Curry, The Battle of Agincourt: Sources and Interpretations (2000)", "Keegan, The Face of Battle (1976)"]
+}

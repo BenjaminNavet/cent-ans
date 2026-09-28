@@ -9,11 +9,13 @@ mod decision;
 mod deployment;
 mod fire;
 mod indirect;
+mod modes;
 mod obstacles;
 mod opening;
 mod pathing;
 mod pipeline;
 mod push;
+mod queue;
 mod reinforcements;
 mod scenario;
 mod separation;
@@ -22,6 +24,7 @@ mod siege_extra;
 mod standards;
 mod time_of_day;
 mod water;
+mod width;
 
 pub use camp::CampState;
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
@@ -29,6 +32,7 @@ pub use opening::AmbushLayout;
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
 pub use siege_assault::Ladder;
+pub use width::{MoveShape, AUTO_GROUP_TAG};
 
 use data_model::{Ability, UnitCategory, UnitStats};
 
@@ -39,12 +43,14 @@ use crate::field::{Battlefield, Weather};
 use crate::impact::{self, ImpactEvent, ImpactKind, LossCause, MAX_PENDING_IMPACTS};
 use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
+use crate::queue::QueuedOrder;
 use crate::rng::BattleRng;
 use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
 use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
 use crate::unit::{Formation, Unit, UnitFate, UnitState};
+use width::move_group_tag;
 
 /// Fixed simulation step, in seconds.
 pub const DT: f64 = 0.1;
@@ -118,6 +124,14 @@ pub struct BattleSim {
     general_captured: [bool; 2],
     events: Vec<BattleEvent>,
     events_read: usize,
+    /// CB5: typed alerts emitted alongside the journal. Output only: not
+    /// part of [`crate::replay::state_digest`], see `alerts.rs`.
+    alerts: Vec<crate::alerts::BattleAlert>,
+    alerts_read: usize,
+    /// CB5: whether a `Flanked` alert already fired for this unit's current
+    /// spell of being flanked (`Unit::flanked` itself is cleared every tick
+    /// by [`BattleSim::step`], so the rising edge needs its own memory).
+    flanked_alerted: Vec<bool>,
     /// Volleys resolved since the renderer last read them (BV1).
     shots: std::collections::VecDeque<ShotEvent>,
     charge_announced: Vec<bool>,
@@ -264,6 +278,34 @@ pub fn of_faction(name: &str) -> String {
 }
 
 /// Relative position of an attacker around a defender: 0 front, 1 flank, 2 rear.
+/// Multiplier of a horseman's blows at foot in a square or with pikes
+/// (1 otherwise).
+pub(crate) fn horse_against_foot(attacker: &Unit, defender: &Unit) -> f64 {
+    if !attacker.is_cavalry() {
+        return 1.0;
+    }
+    if defender.formation == Formation::Square {
+        if defender.has(Ability::PikeSquare) {
+            0.25
+        } else {
+            0.4
+        }
+    } else if defender.has(Ability::PikeSquare) {
+        0.7
+    } else {
+        1.0
+    }
+}
+
+/// Multiplier of pikemen's blows at horsemen (1 otherwise).
+pub(crate) fn pikes_against_horse(attacker: &Unit, defender: &Unit) -> f64 {
+    if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
+        1.8
+    } else {
+        1.0
+    }
+}
+
 pub(crate) fn attack_angle(defender: &Unit, attacker_x: f64, attacker_z: f64) -> u8 {
     if defender.formation == Formation::Square {
         return 0;
@@ -424,6 +466,9 @@ impl BattleSim {
             general_captured: [false; 2],
             events: Vec::new(),
             events_read: 0,
+            alerts: Vec::new(),
+            alerts_read: 0,
+            flanked_alerted: vec![false; count],
             shots: std::collections::VecDeque::new(),
             charge_announced: vec![false; count],
             impacts: std::collections::VecDeque::new(),
@@ -498,7 +543,12 @@ impl BattleSim {
         Ok(sim)
     }
 
+    /// Initial field deployment: each side in « Ligne de bataille » (CB6,
+    /// `data/rules/group_formations.json`), rows centred on the field with
+    /// +x as the lateral axis on both sides (the placement before CB6).
     fn deploy(&mut self) {
+        let rules = crate::group_formation::GroupFormationRules::bundled();
+        let preset = rules.battle_line();
         for side in SideId::BOTH {
             let (line_z, facing, back) = match side {
                 SideId::Attacker => (self.field.attacker_line_z(), 0.0, -1.0),
@@ -507,33 +557,31 @@ impl BattleSim {
             let ids: Vec<usize> = (0..self.units.len())
                 .filter(|&i| self.units[i].side == side && !self.units[i].reserve)
                 .collect();
-            let of = |cat: &dyn Fn(&Unit) -> bool| -> Vec<usize> {
-                ids.iter()
-                    .copied()
-                    .filter(|&i| cat(&self.units[i]))
-                    .collect()
-            };
-            let infantry = of(&|u| u.category == UnitCategory::Infantry);
-            let foot_ranged = of(&|u| u.category == UnitCategory::Ranged && !u.mounted);
-            let cavalry = of(&|u| {
-                u.category == UnitCategory::Cavalry
-                    || (u.mounted && u.category == UnitCategory::Ranged)
-            });
-            let siege = of(&|u| u.category == UnitCategory::Siege);
-            for &i in &ids {
-                self.units[i].facing = facing;
+            let frame = crate::group_formation::Frame::with_axes(
+                self.field.size.center_x(),
+                line_z,
+                (1.0, 0.0),
+                (0.0, -back),
+                facing,
+            );
+            let placed = crate::group_formation::layout(
+                rules,
+                preset,
+                &self.units,
+                &ids,
+                frame,
+                crate::group_formation::LayoutOptions {
+                    field_width: self.field.width,
+                    separate_general: false,
+                    wings: crate::group_formation::WingFill::Alternate,
+                },
+            );
+            for p in placed {
+                let unit = &mut self.units[p.index];
+                unit.x = p.x;
+                unit.z = p.z;
+                unit.facing = p.facing;
             }
-            let front_row = if infantry.is_empty() {
-                &foot_ranged
-            } else {
-                &infantry
-            };
-            let front_width = self.place_row(front_row, line_z, back);
-            if !infantry.is_empty() {
-                self.place_row(&foot_ranged, line_z + back * 45.0, back);
-            }
-            self.place_wings(&cavalry, front_width, line_z + back * 15.0);
-            self.place_row(&siege, line_z + back * 95.0, back);
         }
     }
 
@@ -931,13 +979,44 @@ impl BattleSim {
         new
     }
 
+    /// CB5: typed alerts added since the previous call. Output only: see
+    /// `alerts.rs`.
+    pub fn take_new_alerts(&mut self) -> Vec<crate::alerts::BattleAlert> {
+        let new = self.alerts[self.alerts_read..].to_vec();
+        self.alerts_read = self.alerts.len();
+        new
+    }
+
+    /// Records a CB5 alert at the current simulated time. Called at the
+    /// same points as the matching `log()`; never reads or changes
+    /// simulated state.
+    pub(crate) fn alert(
+        &mut self,
+        kind: crate::alerts::AlertKind,
+        x: f64,
+        z: f64,
+        side: Option<SideId>,
+        unit: Option<u32>,
+    ) {
+        self.alerts.push(crate::alerts::BattleAlert {
+            kind,
+            time: self.elapsed,
+            x,
+            z,
+            side,
+            unit,
+        });
+    }
+
     /// Effective shooting range of `unit` (weather, time of day, height
     /// advantage).
     pub fn effective_range(&self, unit: &Unit, target_x: f64, target_z: f64) -> f64 {
         let height_gain = (self.standing_height(unit, unit.x, unit.z)
             - self.field.height(target_x, target_z))
         .max(0.0);
-        f64::from(unit.stats.range) * self.range_factor() * (1.0 + height_gain / 100.0)
+        // CB4: the aimed shot shortens the range.
+        let ability = self.ability_effects(unit).map_or(1.0, |e| e.range_factor);
+        f64::from(unit.stats.range) * self.range_factor() * (1.0 + height_gain / 100.0) * ability
     }
 
     pub(crate) fn log(&mut self, text_fr: String, side: Option<SideId>) {
@@ -973,7 +1052,7 @@ impl BattleSim {
         }
         let setup_order = matches!(
             command,
-            Command::Formation { .. } | Command::FireAtWill { .. }
+            Command::Formation { .. } | Command::FireAtWill { .. } | Command::SetMode { .. }
         );
         if self.deploying && !setup_order {
             return Err(CommandError::Deploying);
@@ -1021,30 +1100,76 @@ impl BattleSim {
                 z,
                 run,
                 facing,
+                queue,
+                width,
+                match_speed,
+                group_tag,
             } => {
                 if !self.field.inside(x, z) {
                     return Err(CommandError::OutsideField);
                 }
-                let destinations = self.group_destinations(&units, x, z, facing);
-                for (id, (dx, dz)) in units.iter().zip(destinations) {
-                    let unit = &mut self.units[*id as usize];
-                    unit.destination = Some((
+                if queue {
+                    self.check_queue_room(&units)?;
+                }
+                // CB-M3: a queued move spreads the group around where each
+                // regiment will stand once its queue is done.
+                let anchors: Vec<(f64, f64)> = if queue {
+                    units
+                        .iter()
+                        .map(|&id| self.queue_anchor(id as usize))
+                        .collect()
+                } else {
+                    units
+                        .iter()
+                        .map(|&id| (self.units[id as usize].x, self.units[id as usize].z))
+                        .collect()
+                };
+                // CB1: each regiment's share of a dragged width, and the
+                // frontage it will take (ranks within their bounds).
+                let widths = self.move_widths(&units, width);
+                let frontages = self.move_frontages(&units, widths.as_deref());
+                let destinations = self.group_destinations_with(
+                    &units,
+                    &anchors,
+                    x,
+                    z,
+                    facing,
+                    frontages.as_deref(),
+                );
+                let group_tag = move_group_tag(&units, match_speed, group_tag);
+                for (k, (id, (dx, dz))) in units.iter().zip(destinations).enumerate() {
+                    let destination = (
                         dx.clamp(5.0, self.field.width - 5.0),
                         dz.clamp(5.0, self.field.depth - 5.0),
-                    ));
-                    unit.destination_facing = facing;
-                    unit.target = None;
-                    unit.running = run;
-                    unit.withdrawing = false;
-                    unit.pavise = None;
-                    stop_climbing(unit);
-                    unit.disengaging = unit.state == UnitState::Melee;
-                    if unit.state != UnitState::Melee {
-                        unit.state = UnitState::Marching;
+                    );
+                    let shape = MoveShape {
+                        width: widths.as_ref().map(|w| w[k]),
+                        match_speed,
+                        group_tag,
+                    };
+                    let index = *id as usize;
+                    if queue && self.units[index].busy() {
+                        self.units[index].order_queue.push_back(QueuedOrder::Move {
+                            x: destination.0,
+                            z: destination.1,
+                            facing,
+                            run,
+                            width: shape.width,
+                            match_speed,
+                            group_tag,
+                        });
+                        continue;
                     }
+                    self.units[index].order_queue.clear();
+                    self.start_move(index, destination, facing, run, shape);
                 }
             }
-            Command::Attack { units, target, run } => {
+            Command::Attack {
+                units,
+                target,
+                run,
+                queue,
+            } => {
                 let target_unit = self
                     .units
                     .get(target as usize)
@@ -1058,30 +1183,27 @@ impl BattleSim {
                         return Err(CommandError::FriendlyTarget(target));
                     }
                 }
-                let (tx, tz) = (self.units[target as usize].x, self.units[target as usize].z);
+                if queue {
+                    self.check_queue_room(&units)?;
+                }
                 for &id in &units {
-                    // Pavises stay up while the target is within bowshot.
-                    let unit = &self.units[id as usize];
-                    let in_range = unit.can_shoot()
-                        && unit.ammo > 0
-                        && ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt()
-                            <= self.effective_range(unit, tx, tz);
-                    let unit = &mut self.units[id as usize];
-                    if !in_range {
-                        unit.pavise = None;
+                    let index = id as usize;
+                    if queue && self.units[index].busy() {
+                        self.units[index]
+                            .order_queue
+                            .push_back(QueuedOrder::Attack { target, run });
+                        continue;
                     }
-                    unit.target = Some(target);
-                    unit.destination = None;
-                    unit.destination_facing = None;
-                    unit.running = run;
-                    unit.withdrawing = false;
-                    unit.disengaging = false;
-                    stop_climbing(unit);
+                    self.units[index].order_queue.clear();
+                    self.start_attack(index, target, run);
                 }
             }
             Command::Halt { units } => {
                 for &id in &units {
                     let unit = &mut self.units[id as usize];
+                    unit.order_queue.clear();
+                    unit.match_speed = false;
+                    unit.group_tag = None;
                     unit.target = None;
                     unit.destination = None;
                     unit.destination_facing = None;
@@ -1113,7 +1235,9 @@ impl BattleSim {
                     }
                 }
                 for &id in &units {
+                    // CB1: a formation order drops a dragged width.
                     self.units[id as usize].formation = kind;
+                    self.units[id as usize].line_files = None;
                 }
             }
             Command::FireAtWill { units, enabled } => {
@@ -1135,6 +1259,7 @@ impl BattleSim {
                         SideId::Defender => depth + 50.0,
                     };
                     unit.withdrawing = true;
+                    unit.order_queue.clear();
                     unit.pavise = None;
                     stop_climbing(unit);
                     unit.target = None;
@@ -1177,52 +1302,60 @@ impl BattleSim {
                     let unit = &mut self.units[id as usize];
                     unit.wall_target = Some(piece);
                     unit.target = None;
+                    unit.order_queue.clear();
                 }
             }
             Command::Burn { units, house, gate } => self.command_burn(&units, house, gate)?,
+            Command::SetMode {
+                units,
+                mode,
+                enabled,
+            } => self.set_mode(&units, mode, enabled)?,
+            Command::UseAbility { units, ability } => self.use_ability(&units, &ability)?,
             Command::LeaderOrder { .. } => unreachable!("handled above"),
         }
         Ok(())
     }
 
-    /// Destinations of a group move: along a line perpendicular to `facing`
-    /// when given (ordered by current lateral position), else keeping the
-    /// offsets to the group's centroid.
-    fn group_destinations(
+    /// Destinations of a group move for regiments standing at `anchors`
+    /// (where they are, or CB-M3 where their queued orders leave them):
+    /// along a line perpendicular to `facing` when given (ordered by
+    /// lateral position), else keeping the offsets to the group's centroid.
+    /// CB1: `frontages` (metres, one per regiment) replace the present
+    /// frontages of a dragged group.
+    pub(crate) fn group_destinations_with(
         &self,
         ids: &[u32],
+        anchors: &[(f64, f64)],
         x: f64,
         z: f64,
         facing: Option<f64>,
+        frontages: Option<&[f64]>,
     ) -> Vec<(f64, f64)> {
         let n = ids.len() as f64;
-        let (cx, cz) = ids.iter().fold((0.0, 0.0), |(sx, sz), id| {
-            let u = &self.units[*id as usize];
-            (sx + u.x / n, sz + u.z / n)
-        });
+        let (cx, cz) = anchors
+            .iter()
+            .fold((0.0, 0.0), |(sx, sz), &(ax, az)| (sx + ax / n, sz + az / n));
         match facing {
-            None => ids
+            None => anchors
                 .iter()
-                .map(|id| {
-                    let u = &self.units[*id as usize];
-                    (x + u.x - cx, z + u.z - cz)
-                })
+                .map(|&(ax, az)| (x + ax - cx, z + az - cz))
                 .collect(),
             Some(angle) => {
                 let right = (angle.cos(), -angle.sin());
-                let mut order: Vec<(usize, f64)> = ids
+                let mut order: Vec<(usize, f64)> = anchors
                     .iter()
                     .enumerate()
-                    .map(|(k, id)| {
-                        let u = &self.units[*id as usize];
-                        (k, (u.x - cx) * right.0 + (u.z - cz) * right.1)
-                    })
+                    .map(|(k, &(ax, az))| (k, (ax - cx) * right.0 + (az - cz) * right.1))
                     .collect();
                 order.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
-                let widths: Vec<f64> = ids
-                    .iter()
-                    .map(|id| self.units[*id as usize].extent().0 + 10.0)
-                    .collect();
+                let widths: Vec<f64> = match frontages {
+                    Some(frontages) => frontages.iter().map(|w| w + 10.0).collect(),
+                    None => ids
+                        .iter()
+                        .map(|id| self.units[*id as usize].extent().0 + 10.0)
+                        .collect(),
+                };
                 let total: f64 = widths.iter().sum();
                 let mut result = vec![(x, z); ids.len()];
                 let mut offset = -total * 0.5;
@@ -1270,6 +1403,7 @@ impl BattleSim {
             }
         }
         let contacts = self.contacts();
+        self.resolve_skirmish(&contacts);
         self.resolve_movement(&contacts);
         self.separate_friends();
         self.resolve_water();
@@ -1286,6 +1420,7 @@ impl BattleSim {
         self.resolve_camps();
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
+        self.tick_abilities();
         self.elapsed += DT;
         self.ticks += 1;
         self.release_reserves();
@@ -1367,6 +1502,8 @@ impl BattleSim {
             } else {
                 2.0
             };
+            // CB2: a run under the run mode (1 in the bundled data).
+            speed *= unit.run_mode_speed();
         }
         speed *= match unit.formation {
             Formation::Column => 1.15,
@@ -1401,7 +1538,15 @@ impl BattleSim {
         } else {
             1.0 + (-grade).min(0.1)
         };
-        speed * (1.0 - unit.fatigue / 200.0)
+        let speed = speed * (1.0 - unit.fatigue / 200.0);
+        // CB4: close ranks walk slower.
+        let speed = speed * self.ability_effects(unit).map_or(1.0, |e| e.speed_factor);
+        // CB1: a `match_speed` group keeps the pace of its slowest regiment.
+        if unit.match_speed {
+            speed * self.group_pace_factor(unit)
+        } else {
+            speed
+        }
     }
 
     fn turn_rate(unit: &Unit) -> f64 {
@@ -1496,37 +1641,6 @@ impl BattleSim {
             }
         }
         None
-    }
-
-    /// Where `index` should head to reach (tx, tz): straight, or through the
-    /// best opening in the walls when an intact wall is in the way (climbers
-    /// keep going straight unless the detour is short).
-    fn route(&self, index: usize, tx: f64, tz: f64) -> (f64, f64) {
-        let Some(works) = &self.siege else {
-            // EP3: across the river by a bridge or a ford.
-            return self.water_route(index, tx, tz);
-        };
-        let unit = &self.units[index];
-        let sallying = works.sortie && unit.side == SideId::Defender;
-        if (unit.on_wall && !sallying) || unit.state == UnitState::Routing {
-            return (tx, tz);
-        }
-        let from = (unit.x, unit.z);
-        let climber = unit.side == SideId::Attacker && unit.can_climb();
-        if climber && works.path_blocked(from, (tx, tz)) {
-            let Some(opening) = works.best_opening(from, (tx, tz)) else {
-                return (tx, tz);
-            };
-            let dist =
-                |a: (f64, f64), b: (f64, f64)| ((a.0 - b.0).powi(2) + (a.1 - b.1).powi(2)).sqrt();
-            let mid = works.pieces[opening].midpoint();
-            let detour = dist(from, mid) + dist(mid, (tx, tz));
-            if detour > dist(from, (tx, tz)) * 1.6 + 40.0 {
-                return (tx, tz);
-            }
-        }
-        // F5a: A* through breaches, gate and streets (houses are obstacles).
-        self.grid_route(index, tx, tz).unwrap_or((tx, tz))
     }
 
     /// A regiment stopped by an intact wall: foot soldiers of the attacker
@@ -1768,9 +1882,15 @@ impl BattleSim {
             }
             if let Some(target) = self.units[i].target {
                 let t = target as usize;
-                if !self.units[t].present() {
+                // CB-M3: a target gone ends the attack; with orders queued,
+                // so does a target in flight (the next order starts).
+                let fleeing = self.units[t].state == UnitState::Routing
+                    && !self.units[i].order_queue.is_empty();
+                // CB2: a regiment on guard does not pursue.
+                if !self.units[t].present() || fleeing || self.guard_releases(i, t, in_contact) {
                     self.units[i].target = None;
                     self.units[i].state = UnitState::Idle;
+                    self.next_queued(i);
                     continue;
                 }
                 let (tx, tz) = (self.units[t].x, self.units[t].z);
@@ -1778,7 +1898,7 @@ impl BattleSim {
                 let dist = ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt();
                 // A target hidden (forest, walls, crest) is closed in on,
                 // not waited for within range.
-                if unit.can_shoot()
+                if unit.shoots()
                     && unit.ammo > 0
                     && dist <= self.effective_range(unit, tx, tz)
                     && self.visible(unit, &self.units[t], dist)
@@ -1800,7 +1920,7 @@ impl BattleSim {
                     continue;
                 }
                 let charge_distance = if unit.is_cavalry() { 120.0 } else { 40.0 };
-                let charging = unit.running && dist < charge_distance && !unit.can_shoot();
+                let charging = unit.running && dist < charge_distance && !unit.shoots();
                 if charging && self.units[i].state != UnitState::Charging {
                     self.units[i].state = UnitState::Charging;
                     if self.units[i].is_cavalry() && !self.charge_announced[i] {
@@ -1834,11 +1954,17 @@ impl BattleSim {
                     if let Some(facing) = unit.destination_facing.take() {
                         unit.facing = facing;
                     }
+                    self.next_queued(i);
                 } else if !self.units[i].disengaging {
                     // Out of contact after breaking off a melee: marching
                     // again (still `Melee` while pulling out under blows).
                     self.units[i].state = UnitState::Marching;
                 }
+                continue;
+            }
+            // CB-M3: an order cut short (a melee halts the march) leaves
+            // the queue: the next order starts.
+            if !self.units[i].order_queue.is_empty() && self.next_queued(i) {
                 continue;
             }
             // Standing still: idle (shooting is decided later).
@@ -1993,8 +2119,11 @@ impl BattleSim {
             });
             return;
         }
-        // BV2: levelled pikes stop the horses and unhorse the first riders.
-        if impact::pikes_stop(&self.units[i], &self.units[p], angle) {
+        // BV2: levelled pikes stop the horses and unhorse the first riders
+        // (CB4: also pikes planted against a frontal charge).
+        if impact::pikes_stop(&self.units[i], &self.units[p], angle)
+            || self.ability_stops_charge(&self.units[i], &self.units[p], angle)
+        {
             let defender_id = self.units[p].id;
             let unit = &mut self.units[i];
             let loss = unit.hp * impact::PIKE_STOP_LOSS;
@@ -2064,8 +2193,10 @@ impl BattleSim {
         }
         self.units[i].charge_timer = CHARGE_IMPACT;
         // Loss of cohesion: the shock of the horses (B-rules, unchanged).
+        // CB4: close ranks take the shock better.
+        let braced = self.ability_charge_taken(&self.units[p]);
         let cohesion = if cavalry && self.units[p].formation != Formation::Square {
-            impact::shock_morale(angle)
+            impact::shock_morale(angle) * braced
         } else {
             0.0
         };
@@ -2073,7 +2204,12 @@ impl BattleSim {
         // BV2: the horses knock men down; they stop fighting until they are
         // back on their feet.
         let knocked = if cavalry && self.units[i].mounted {
-            impact::knocked_count(&self.units[i], &self.units[p], angle)
+            let count = impact::knocked_count(&self.units[i], &self.units[p], angle);
+            if braced == 1.0 {
+                count
+            } else {
+                (f64::from(count) * braced).round() as u32
+            }
         } else {
             0
         };
@@ -2135,7 +2271,7 @@ impl BattleSim {
         }
     }
 
-    fn defense_points(&self, unit: &Unit) -> f64 {
+    pub(crate) fn defense_points(&self, unit: &Unit) -> f64 {
         f64::from(unit.stats.armor)
             + self
                 .general_bonus(unit.side)
@@ -2146,7 +2282,7 @@ impl BattleSim {
         for i in 0..self.units.len() {
             let unit = &self.units[i];
             if !unit.present()
-                || !unit.can_shoot()
+                || !unit.shoots()
                 || unit.ammo == 0
                 || !contacts[i].is_empty()
                 || matches!(
@@ -2158,7 +2294,7 @@ impl BattleSim {
                 continue;
             }
             let moving = unit.state == UnitState::Marching;
-            if moving && !unit.has(Ability::Skirmish) {
+            if moving && !unit.shoots_on_move() {
                 continue;
             }
             if self.units[i].reload > 0.0 {
@@ -2167,6 +2303,10 @@ impl BattleSim {
             }
             if let Some(piece) = self.pick_wall_target(i) {
                 self.fire_at_wall(i, piece);
+                continue;
+            }
+            // CB2: an engine battering walls never shoots men.
+            if self.units[i].breach {
                 continue;
             }
             let Some(target) = self.pick_shooting_target(i) else {
@@ -2179,7 +2319,27 @@ impl BattleSim {
         }
     }
 
-    fn visible(&self, shooter: &Unit, target: &Unit, dist: f64) -> bool {
+    /// CB3: does any present, standing regiment of `side` see `target`? Reuses the missile-arc
+    /// spotter range (`data/rules/missile_arc.json`, `spotter_range_m`, already the distance at
+    /// which a friend directs an indirect volley) and the forest/wall/line-of-sight checks of
+    /// [`Self::visible`]. Purely derived from the current state (not a field of [`Unit`]): it
+    /// never enters `state_digest` or the replay format. Feeds the tactical view's fog of war
+    /// (`spotted` in `get_units`); the normal view is unaffected.
+    pub fn spotted_by(&self, target: &Unit, side: SideId) -> bool {
+        if target.side == side {
+            return true;
+        }
+        let rules = crate::missile_arc::MissileArcRules::bundled();
+        let reach = rules.spotter_range_m * self.range_factor();
+        self.units.iter().any(|u| {
+            u.side == side && u.present() && !u.synthetic && u.state != UnitState::Routing && {
+                let dist = (u.x - target.x).hypot(u.z - target.z);
+                dist <= reach && self.visible(u, target, dist)
+            }
+        })
+    }
+
+    pub(crate) fn visible(&self, shooter: &Unit, target: &Unit, dist: f64) -> bool {
         if self.field.in_forest(target.x, target.z) && dist > 60.0 {
             return false;
         }
@@ -2251,9 +2411,17 @@ impl BattleSim {
         if shooter.on_wall {
             accuracy *= 1.25;
         }
+        // CB4: the aimed shot aims better, above all at horses.
+        let shooter_ability = self.ability_effects(shooter);
+        if let Some(e) = shooter_ability {
+            accuracy *= e.accuracy_factor;
+        }
         let mut kills = shots * accuracy * f64::from(shooter.stats.ranged) / 100.0
             * armor_factor(self.defense_points(target))
             * RANGED_RATE;
+        if let Some(e) = shooter_ability.filter(|_| target.mounted) {
+            kills *= e.vs_mounted_factor;
+        }
         if self.field.in_forest(target.x, target.z) {
             kills *= 0.5;
         }
@@ -2269,11 +2437,7 @@ impl BattleSim {
                 kills *= crate::site::HEDGE_COVER;
             }
         }
-        if let Some(factor) = target.pavise {
-            kills *= factor;
-        } else if target.has(Ability::Pavise) && target.state != UnitState::Marching {
-            kills *= 0.6;
-        }
+        kills *= self.missile_cover(target, attack_angle(target, shooter.x, shooter.z));
         if target.formation == Formation::Square {
             kills *= 1.2;
         }
@@ -2297,7 +2461,7 @@ impl BattleSim {
         });
         let indirect = mode.is_some_and(|m| m.indirect());
         let aim = (target.x, target.z);
-        let reload = shooter.reload_period();
+        let reload = shooter.reload_period() * shooter_ability.map_or(1.0, |e| e.reload_factor);
         let heading = angle_to(target.x - shooter.x, target.z - shooter.z);
         let kills = kills.min(self.units[t].hp);
         let cover = if target.on_wall {
@@ -2367,6 +2531,14 @@ impl BattleSim {
             let text = format!("Les {} sont à court de {missiles}.", self.unit_label(i));
             let side = self.units[i].side;
             self.log(text, Some(side));
+            let (x, z, id) = (self.units[i].x, self.units[i].z, self.units[i].id);
+            self.alert(
+                crate::alerts::AlertKind::AmmoOut,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
             if self.units[i].state == UnitState::Shooting {
                 self.units[i].state = UnitState::Idle;
             }
@@ -2383,7 +2555,7 @@ impl BattleSim {
     fn pick_wall_target(&self, i: usize) -> Option<usize> {
         let works = self.siege.as_ref()?;
         let unit = &self.units[i];
-        if !unit.wall_breaker() || unit.target.is_some() {
+        if !unit.wall_breaker() || (unit.target.is_some() && !unit.breach) {
             return None;
         }
         let range = f64::from(unit.stats.range) * self.range_factor();
@@ -2395,6 +2567,9 @@ impl BattleSim {
         };
         if let Some(p) = unit.wall_target.filter(|&p| in_range(p)) {
             return Some(p);
+        }
+        if unit.breach {
+            return self.breach_piece(i, range);
         }
         if !unit.fire_at_will {
             return None;
@@ -2417,7 +2592,9 @@ impl BattleSim {
             * siege::SiegeWorkRules::bundled()
                 .engine
                 .wall_damage_per_siege_attack
-            * crew;
+            * crew
+            // CB2: battering in breach (1 otherwise).
+            * unit.breach_wall_damage();
         let heading = {
             let (mx, mz) = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
             angle_to(mx - unit.x, mz - unit.z)
@@ -2438,7 +2615,7 @@ impl BattleSim {
         };
         self.record_shot(shot);
         let shooter = &mut self.units[i];
-        shooter.reload = crate::shot::ENGINE_RELOAD;
+        shooter.reload = crate::shot::ENGINE_RELOAD * shooter.breach_reload();
         shooter.ammo = shooter.ammo.saturating_sub(1);
         shooter.facing = turn_towards(shooter.facing, heading, 0.5);
         if shooter.state != UnitState::Marching {
@@ -2503,7 +2680,7 @@ impl BattleSim {
             // EP6: walls, hedges and houses of the decor shelter the defender.
             / self.field.decor_defense(defender.x, defender.z);
         if attacker.charge_timer > 0.0 {
-            let charge = f64::from(attacker.stats.charge.unwrap_or(20));
+            let charge = attacker.charge_points();
             let lance = if attacker.has(Ability::ChargeLance) {
                 1.5
             } else {
@@ -2519,28 +2696,20 @@ impl BattleSim {
                 .map_or(0.0, |g| g.charge_percent);
             damage *= 1.0 + charge / 100.0 * lance * wedge * (1.0 + general / 100.0);
         }
-        damage *= match attack_angle(defender, attacker.x, attacker.z) {
+        let angle = attack_angle(defender, attacker.x, attacker.z);
+        damage *= match angle {
             0 => 1.0,
             1 => 1.5,
             _ => 2.0,
         };
+        // CB4: close ranks, planted pikes.
+        damage *= self.ability_melee_factor(attacker, defender, angle);
         if defender.state == UnitState::Routing {
             damage *= 1.5;
         }
-        if attacker.is_cavalry() {
-            if defender.formation == Formation::Square {
-                damage *= if defender.has(Ability::PikeSquare) {
-                    0.25
-                } else {
-                    0.4
-                };
-            } else if defender.has(Ability::PikeSquare) {
-                damage *= 0.7;
-            }
-        }
-        if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
-            damage *= 1.8;
-        }
+        // Matchup of the types (CB-M2: also quoted by the hover comparison).
+        damage *= horse_against_foot(attacker, defender);
+        damage *= pikes_against_horse(attacker, defender);
         // Siege: ladders are a poor place to fight from.
         if self.on_ladders(attacker) {
             damage *= 0.3;
@@ -2573,6 +2742,10 @@ impl BattleSim {
         let n = self.units.len();
         let mut damage = vec![0.0; n];
         let mut flanked = vec![0u8; n];
+        // CB5: rising edge of `flanked` (0 -> non-zero), collected here and
+        // turned into alerts once the loop below has released its `&mut`
+        // borrow of `self.units`.
+        let mut newly_flanked: Vec<(f64, f64, SideId, u32)> = Vec::new();
         // BV2: heaviest blow per defender this tick (cause of its deaths).
         let mut heaviest: Vec<Option<(f64, usize)>> = vec![None; n];
         // UB1: (striker, victim, damage) to credit the kills once capped.
@@ -2627,6 +2800,14 @@ impl BattleSim {
                     unit.knocked = 0.0;
                 }
             }
+            if flanked[i] != 0 {
+                if !self.flanked_alerted[i] {
+                    self.flanked_alerted[i] = true;
+                    newly_flanked.push((unit.x, unit.z, unit.side, unit.id));
+                }
+            } else {
+                self.flanked_alerted[i] = false;
+            }
             unit.flanked = flanked[i];
             if damage[i] <= 0.0 || !unit.present() {
                 continue;
@@ -2653,6 +2834,15 @@ impl BattleSim {
         for (striker, victim, blow) in credit {
             self.units[striker].kills += blow * dealt_ratio[victim];
         }
+        for (x, z, side, id) in newly_flanked {
+            self.alert(
+                crate::alerts::AlertKind::Flanked,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
+        }
     }
 
     fn unit_destroyed(&mut self, i: usize) {
@@ -2675,6 +2865,20 @@ impl BattleSim {
             .as_ref()
             .map_or_else(|| "Le général".to_owned(), |g| g.name.clone());
         self.log(format!("{name} est tombé au combat !"), Some(side));
+        let general_pos = self
+            .units
+            .iter()
+            .find(|u| u.side == side && u.is_general)
+            .map(|u| (u.x, u.z, u.id));
+        if let Some((x, z, id)) = general_pos {
+            self.alert(
+                crate::alerts::AlertKind::GeneralDown,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
+        }
         for unit in self.units.iter_mut().filter(|u| u.side == side) {
             unit.morale -= 25.0;
         }
@@ -2799,6 +3003,8 @@ impl BattleSim {
                 UnitState::Routing => 0.3,
             };
             if rate > 0.0 {
+                // CB2: a run under the run mode (1 in the bundled data).
+                rate *= unit.run_mode_fatigue();
                 if self.weather == Weather::Snow {
                     rate *= 1.3;
                 }
@@ -2813,6 +3019,7 @@ impl BattleSim {
                 unit.state = UnitState::Routing;
                 unit.target = None;
                 unit.destination = None;
+                unit.order_queue.clear();
                 unit.stakes_planted = false;
                 unit.pavise = None;
                 unit.charge_timer = 0.0;
@@ -2836,6 +3043,10 @@ impl BattleSim {
             let text = format!("Les {} {what}", self.unit_label(i));
             let side = self.units[i].side;
             self.log(text, Some(side));
+            if what == "sont en déroute !" {
+                let (x, z, id) = (self.units[i].x, self.units[i].z, self.units[i].id);
+                self.alert(crate::alerts::AlertKind::Rout, x, z, Some(side), Some(id));
+            }
         }
     }
 
@@ -2884,6 +3095,7 @@ impl BattleSim {
         let loser = winner.other();
         if self.general_alive[loser.index()] {
             if let Some(unit) = self.units.iter().find(|u| u.side == loser && u.is_general) {
+                let (gx, gz, gid) = (unit.x, unit.z, unit.id);
                 let caught = if unit.left_field {
                     unit.state == UnitState::Routing && !unit.withdrawing
                 } else {
@@ -2903,6 +3115,13 @@ impl BattleSim {
                         .as_ref()
                         .map_or_else(|| "Le général".to_owned(), |g| g.name.clone());
                     self.log(format!("{name} est fait prisonnier."), Some(loser));
+                    self.alert(
+                        crate::alerts::AlertKind::GeneralDown,
+                        gx,
+                        gz,
+                        Some(loser),
+                        Some(gid),
+                    );
                 }
             }
         }

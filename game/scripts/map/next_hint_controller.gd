@@ -8,9 +8,13 @@ extends Node
 ## tutoriel, sous les panneaux et fenêtres, et quand le réglage `interface/next_hint` est
 ## décoché ; la croix masque le conseil courant jusqu'à la saison suivante.
 ## Créé par `campaign_map.gd` (`setup`, `stage_screenshot`). Aucune règle de jeu.
+## RS-E : `refresh()` est appelé par `campaign_map.gd` sur les événements qui changent son état
+## (fin de tour et tout ordre via `refresh_all`, sélection et désélection d'armée ou de province) ;
+## `_process` ne sert plus que de minuterie de secours, lente, pour les cas non couverts.
 
 const SETTING := "interface/next_hint"
-const REFRESH_SECONDS := 1.0
+## Minuterie de secours (les vrais changements passent par `refresh()`, appelé par `campaign_map.gd`).
+const FALLBACK_SECONDS := 5.0
 ## Chantiers recomptés au plus toutes les tant de secondes (parcours des provinces).
 const CONSTRUCTION_SECONDS := 4.0
 
@@ -31,8 +35,8 @@ func setup(campaign_map: Node) -> void:
 	map = campaign_map
 	settings = get_node_or_null("/root/Settings")
 	card = NextHintCard.new()
-	var ui: Node = map.get("ui")
-	ui.add_child(card)
+	# PO1 : la carte « que faire maintenant » est un occupant de la zone `TOASTS`.
+	UiZones.put(UiZones.Zone.TOASTS, card)
 	card.activated.connect(activate)
 	card.dismissed.connect(dismiss)
 	enabled = not TutorialController.capture_mode()
@@ -51,7 +55,7 @@ func _process(delta: float) -> void:
 	_construction_timer -= delta
 	if _timer > 0.0:
 		return
-	_timer = REFRESH_SECONDS
+	_timer = FALLBACK_SECONDS
 	refresh()
 
 
@@ -91,12 +95,9 @@ func covered() -> bool:
 	return ui.turn_banner != null and ui.turn_banner.visible
 
 
-## Haut gauche, sous la barre (la minicarte et les lettres occupent la droite).
+## PO1 : placée par la pile de la zone `TOASTS` (haut gauche, sous la barre).
 func _place() -> void:
-	var ui: MapUI = map.get("ui")
-	var top: float = (ui.get_node("TopBar") as Control).size.y + 8.0
 	card.reset_size()
-	card.position = Vector2(MapUI.HUD_MARGIN, top)
 
 
 # --- État ------------------------------------------------------------------------------

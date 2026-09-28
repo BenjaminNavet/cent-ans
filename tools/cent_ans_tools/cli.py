@@ -857,6 +857,7 @@ def assets_ink_icons(
 
     catalog = ink_icons.load_catalog()
     model = catalog["model"]
+    budget_session = catalog.get("budget_session")
     subject_line = subject or ink_icons.BUDGET_SUBJECT
     prefix = subject_line.split(" :")[0] + " :"
     lot_label = prefix.rstrip(" :")
@@ -892,6 +893,7 @@ def assets_ink_icons(
                 f"image(s) ({current})",
                 subject_line,
                 convert,
+                budget_session=budget_session,
             )
             remaining -= ink_icons.lot_spent(BudgetLedger(), prefix) - before
         if dry_run:
@@ -900,7 +902,8 @@ def assets_ink_icons(
     sheet = ink_icons.contact_sheet(catalog)
     console.print(
         f"[green]OK[/green] : {len(report['icons'])} icône(s), "
-        f"{len(report['medallions'])} médaillon(s) ; planche {sheet}"
+        f"{len(report['medallions'])} médaillon(s), "
+        f"{len(report.get('cursors', []))} curseur(s) ; planche {sheet}"
     )
     if report["missing"]:
         console.print(f"[yellow]Sans source[/yellow] : {', '.join(report['missing'])}")
@@ -1144,8 +1147,14 @@ def assets_map_markers(
         console.print(f"Cellules vides (sans peinture) : {', '.join(missing)}")
 
 
-def _run_art_batch(jobs, model, envelope, dry_run, noun, subject, convert) -> None:
-    """Dry-run listing or paid batch for an image job list (event art, illustrations)."""
+def _run_art_batch(
+    jobs, model, envelope, dry_run, noun, subject, convert, budget_session=None
+) -> None:
+    """Dry-run listing or paid batch for an image job list (event art, illustrations).
+
+    ``budget_session`` names the `docs/budget.md` heading that funds this batch, when it is
+    not necessarily the last table in the file (see `portraits.generate`).
+    """
     from decimal import Decimal
 
     from cent_ans_tools import portraits
@@ -1169,6 +1178,7 @@ def _run_art_batch(jobs, model, envelope, dry_run, noun, subject, convert) -> No
         jobs,
         model,
         envelope=Decimal(str(envelope)),
+        budget_session=budget_session,
         subject=f"{subject} ({len(jobs)} × {model})",
         convert=convert,
         on_progress=lambda job, spent: console.print(

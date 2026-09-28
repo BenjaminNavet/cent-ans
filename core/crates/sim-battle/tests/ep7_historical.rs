@@ -34,7 +34,7 @@ fn game_data() -> &'static data_model::GameData {
 fn start(id: &str, seed: u64) -> (HistoricalMap, BattleSim) {
     let data = game_data();
     let map = map(id);
-    let setup = map
+    let mut setup = map
         .battle_setup(
             &data.unit_types,
             data.battle_orders.values().cloned().collect(),
@@ -42,6 +42,9 @@ fn start(id: &str, seed: u64) -> (HistoricalMap, BattleSim) {
             None,
         )
         .expect("setup");
+    // CB4: the regiments' abilities, as in the game (the pavises of the
+    // crossbowmen among them).
+    setup.abilities = data.battle_abilities.values().cloned().collect();
     let sim = map.start(setup, seed).expect("battle starts");
     (map, sim)
 }

@@ -359,6 +359,10 @@ func _figure_material(side: String, role: String, clip_names: Array) -> ShaderMa
 	mat.set_shader_parameter("size_jitter", 0.0)
 	mat.set_shader_parameter("livery_share", 0.95 if BattleSkinned.is_noble(kind, variant) else 0.75)
 	BattleSkinned.apply_config(mat, _custom_config(kind, variant, clip_names), 0.0)
+	# AN1a : surcot et caparaçon au vent (pas pour le porte-étendard tombé).
+	BattleSecondaryMotion.setup_material(mat, kind, variant)
+	if not clip_names.is_empty() and str(clip_names[0]).ends_with("death"):
+		mat.set_shader_parameter("sm_enabled", false)
 	return mat
 
 
@@ -439,6 +443,7 @@ func _flag_layer(key: String) -> Dictionary:
 	mat.set_shader_parameter("far_from", float(_render.get("far_scale_from_m", 140.0)))
 	mat.set_shader_parameter("far_to", float(_render.get("far_scale_to_m", 600.0)))
 	apply_wind(mat)
+	BattleSecondaryMotion.setup_flag(mat)  # AN1a : onde et vent apparent de l'allure
 	var mesh := BattleMeshes.flag(1.0, 1.0)
 	mesh.custom_aabb = AABB(Vector3(-10, -1, -10), Vector3(20, 20, 20))
 	var mmi := _new_mmi(mesh, mat, true)

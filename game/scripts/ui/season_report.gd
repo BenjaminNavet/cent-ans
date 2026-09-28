@@ -87,7 +87,7 @@ func _ready() -> void:
 	var header := HBoxContainer.new()
 	box.add_child(header)
 	title_label = Label.new()
-	title_label.add_theme_font_size_override("font_size", 22)
+	UiType.apply(title_label, UiType.HEADING)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title_label)
 	var close_button := Button.new()
@@ -106,7 +106,7 @@ func _ready() -> void:
 	vignette.hide()
 	box.add_child(vignette)
 	vignette_caption = Label.new()
-	vignette_caption.add_theme_font_size_override("font_size", 15)
+	UiType.apply(vignette_caption, UiType.CAPTION)
 	vignette_caption.add_theme_color_override("font_color", HudStyle.RUBRIC)
 	vignette_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vignette_caption.hide()
@@ -329,7 +329,7 @@ func _render() -> void:
 	for group in groups:
 		var heading := Label.new()
 		heading.text = "%s  %s" % [group["glyph"], group["title"]]
-		heading.add_theme_font_size_override("font_size", 19)
+		UiType.apply(heading, UiType.HEADING)
 		heading.add_theme_color_override("font_color", HudStyle.RUBRIC)
 		list_box.add_child(heading)
 		var entries: Array = group["entries"]
@@ -339,7 +339,7 @@ func _render() -> void:
 			var more := Label.new()
 			var hidden := entries.size() - MAX_ENTRIES_PER_GROUP
 			more.text = "… et %d autre%s (voir le journal)" % [hidden, "s" if hidden > 1 else ""]
-			more.add_theme_font_size_override("font_size", 14)
+			UiType.apply(more, UiType.CAPTION)
 			list_box.add_child(more)
 
 
@@ -389,7 +389,7 @@ func _entry_row(event: Dictionary) -> Control:
 	row.add_theme_constant_override("separation", 6)
 	var mark := Label.new()
 	mark.text = "▼" if tone == TONE_LOSS else ("▲" if tone == TONE_GAIN else "•")
-	mark.add_theme_font_size_override("font_size", 14)
+	UiType.apply(mark, UiType.CAPTION)
 	mark.custom_minimum_size = Vector2(16, 0)
 	row.add_child(mark)
 	var label := Label.new()
@@ -397,7 +397,7 @@ func _entry_row(event: Dictionary) -> Control:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.custom_minimum_size = Vector2(380, 0)
-	label.add_theme_font_size_override("font_size", 16 if tone == TONE_LOSS else 15)
+	UiType.apply(label, UiType.BODY)
 	var ink := HudStyle.RUBRIC if tone == TONE_LOSS else (Money.GAIN_COLOR if tone == TONE_GAIN else HudStyle.INK)
 	label.add_theme_color_override("font_color", ink)
 	mark.add_theme_color_override("font_color", ink)
@@ -407,7 +407,7 @@ func _entry_row(event: Dictionary) -> Control:
 		var button := Button.new()
 		button.text = action
 		button.tooltip_text = "Aller voir" if action.begins_with("Voir") else "Ouvrir : %s" % action.to_lower()
-		button.add_theme_font_size_override("font_size", 13)
+		UiType.apply(button, UiType.CAPTION)
 		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		button.pressed.connect(func() -> void: entry_selected.emit(event))
 		row.add_child(button)

@@ -190,6 +190,8 @@ L'exploration du code a révélé six écarts. Pour chacun, le plan fait un choi
 
 ### CB2 — Modes d'unité et icônes d'état (en parallèle avec CB3 et CB5)
 
+- Ajout après relecture historique : mode permanent « Battre en brèche » pour les engins (effet sur les murs seulement, mangonneau moins efficace ; voir CB4).
+
 *Cœur* :
 - `Unit` gagne `mode_run: bool`, `guard: bool`, `skirmish: bool`, `melee_mode: bool`.
 - Nouvelle commande `Command::SetMode { units, mode, enabled }`, additive pour le rejeu.
@@ -246,6 +248,15 @@ L'exploration du code a révélé six écarts. Pour chacun, le plan fait un choi
 ### CB4 — Capacités actives (après CB2 ; session principale pour le cœur)
 
 - **Pré-requis** : relecture historique de la liste (agent historien, sources dans `docs/research/cb4-capacites.md`), avant tout code.
+- **Décisions après relecture historique (09-27, `docs/research/cb4-capacites.md`)** :
+  - garder « Tir tendu » (archers seulement, précision et chevaux, portée −⅓ à −½, pas au contact ni sans munitions) ;
+  - « Dresser les pavois » (arbalétriers, couleuvriniers) : facteur 0,35 conservé, plus un délai de pose et une protection de face seulement ;
+  - « Charge en haie » remplacée par « Se rallier à la bannière » (chevaliers, immobiles, cohésion récupérée plus vite après le choc) ;
+  - « Serrer les rangs » (ex-« Rangs serrés », branché sur `ShieldWall`) avec son coût : flancs plus exposés, pertes sous le tir, fatigue ;
+  - « Hérisson » remplacé par « Piques plantées » (face seulement, immobile ; distinct du schiltron T) ;
+  - « Tir de rupture » devient le mode permanent « Battre en brèche » (murs seulement, mangonneau moins efficace), déplacé dans CB2 (modes d'unité) ;
+  - pieux : le passif actuel reste tel quel ; leur datation (attestés à partir de 1415) touche l'équilibrage de Crécy et Poitiers, hors du périmètre CB → suites de l'historien ;
+  - écartés : flèches enflammées en rase campagne, duels, fuite simulée, pied à terre comme capacité d'unité.
 - **Données** :
   - `data/battle_abilities/*.json`, avec un schéma et un test ;
   - champs : `id`, types d'unité, recharge, durée, modificateurs de stats et d'état, conditions (`stationary`, `not_engaged`, `ammo_gt_0`), règle d'IA ;
@@ -264,6 +275,63 @@ L'exploration du code a révélé six écarts. Pour chacun, le plan fait un choi
   - Alt/Option+1-4 agissent sur la sélection, en ne gardant que les unités qui ont la capacité ;
   - aide F1 mise à jour.
 
+### CB6 — Formations de groupe (attaque, défense : placement proposé)
+
+Demande du joueur (09-27) : choisir une formation d'attaque ou de défense pour un groupe et obtenir
+automatiquement une proposition de placement des unités, en déploiement comme en bataille.
+
+*Données* : `data/rules/group_formations.json` + schéma + test pytest. Chaque préréglage :
+`id`, `name_fr`, `description_fr`, `stance` (`attack`/`defense`), et pour chaque rôle
+(`infantry`, `foot_ranged`, `cavalry`, `siege`, `general`) une place : `row` (devant, ligne,
+derrière, réserve), `lateral` (centre, ailes, réparti), écarts en mètres, largeur en files (via
+CB1 `line_files`). Premier jeu, relu par l'historien avant la fusion :
+- **Ligne de bataille** (défense) : fantassins au centre, tireurs devant, cavaliers sur les ailes,
+  engins derrière — le placement par défaut actuel (`sim.rs`, `place_row`/`place_wings`), porté en données ;
+- **Herse** (défense, à l'anglaise, Crécy/Azincourt) : hommes d'armes à pied au centre, archers en
+  ailes avancées obliques, cavaliers en réserve derrière ;
+- **Trois batailles** (attaque ou défense, à la française) : avant-garde, bataille, arrière-garde en
+  trois lignes successives ;
+- **Charge** (attaque) : cavalerie en première ligne, fantassins en soutien, tireurs sur les ailes ;
+- **Colonne** (marche) : une file par ordre de vitesse.
+
+*Cœur* : nouveau `sim-battle/src/group_formation.rs`, fonction pure
+`BattleSim::formation_slots(preset, ids, x, z, facing) -> Vec<Slot{id, x, z, facing, width}>`
+(rôles tirés de `category`/`mounted`, comme la mise en place initiale ; le général suit sa place ;
+places ramenées dans la zone de déploiement en déploiement, hors eau profonde comme `dry_z`).
+La mise en place initiale et `ai_deploy` passent par le préréglage « Ligne de bataille » : résultat
+identique au placement actuel (test de non-régression : positions égales sur les scénarios de
+référence, `b6` et `ep7_historical` inchangés). Aucun nouvel ordre : un préréglage produit des
+`Move` individuels (avec `width`, `match_speed` et `group_tag` de CB1) ou des `deploy_unit`,
+donc le rejeu EP13 n'est pas touché.
+
+*Pont* : `formation_presets() -> Array[Dictionary]` et
+`formation_slots(preset_id, ids, x, z, facing) -> Array[Dictionary]`.
+
+*Godot* :
+- barre de groupe (à côté du verrou de CB1) : sélecteur de préréglage, séparé en « Attaque » et
+  « Défense », infobulle `description_fr` ; raccourci Alt+Maj+1…6 (Alt+1…4 est pris par les capacités de CB4 ; ajouté au remappage de CB2) ;
+- en déploiement : bouton « Placer en formation » qui applique le préréglage à toute l'armée ou à la
+  sélection, avec fantômes (décales CB-M1) avant validation ;
+- en bataille : préréglage actif + clic droit (ou glisser-droit pour l'orientation) = fantômes des
+  places puis ordres ; le groupe est verrouillé dans cette forme (CB1) ;
+- aperçu des trajets par `preview_group` existant.
+
+*Tests* : `sim-battle/tests/cb6_group_formation.rs` (rôles bien placés pour chaque préréglage,
+effectif et ordre gauche-droite stables, zone de déploiement respectée, pas d'eau profonde,
+« Ligne de bataille » = placement actuel, déterminisme) ; Godot `cb6_group_formation_test.gd` ;
+capture `cb6_formation_shot.gd` (déploiement en Herse).
+
+*Décisions après relecture historique (09-27, `docs/research/cb6-formations.md`, qui fournit les écarts par
+rôle et les `description_fr`)* : six préréglages — Ligne de bataille, La herse, Trois batailles, Charge de
+la chevalerie, Bataille à pied (ajout : masse démontée au centre, petite réserve montée sur un flanc,
+Poitiers, Cocherel), Ordre de marche (ex-Colonne : ordre des batailles, vitesse du plus lent,
+`stance: "march"` dans le schéma). « Ligne de bataille » garde les tireurs **derrière** l'infanterie
+comme le placement actuel (non-régression de l'équilibrage) ; les tireurs devant sont l'affaire de la
+herse. Raccourcis Alt+Maj+1…6. Le camp retranché (charrettes, palissade) est reporté à un lot futur.
+
+*Ordonnancement* : après CB1 (largeur, verrou, `group_tag`), en vague 4 avec CB2, CB3 et CB5
+(4 agents). Fusion : CB3, CB5, CB6, puis CB2 (qui intègre les raccourcis Alt+Maj+1…6 à l’aide F1).
+
 ## Ordre d'exécution
 
 | Vague | Lots | Exécutant | Dépend de |
@@ -271,11 +339,11 @@ L'exploration du code a révélé six écarts. Pour chacun, le plan fait un choi
 | 1 | CB0 | agent Sonnet (worktree) | — |
 | 2 | CB-M1 → CB-M2 → CB-M3 → CB-M4 | session principale, ou un agent `cent-ans-dev` par sous-lot | CB0 ; CB-M2 attend la fusion de CV3-2 |
 | 3 | CB1 | agent `cent-ans-dev` | CB-M |
-| 4 | CB2, CB3, CB5 en parallèle (3 agents ≤ 6) | CB3 et CB5 : Sonnet ; CB2 : `cent-ans-dev` | CB1 |
+| 4 | CB2, CB3, CB5, CB6 en parallèle (4 agents ≤ 6) | CB3 et CB5 : Sonnet ; CB2 et CB6 : `cent-ans-dev` (historien pour les préréglages CB6) | CB1 |
 | 5 | CB4 (relecture historique, puis code) | historien, puis session principale | CB2 |
 | fin | ADR 0095 finalisée, note `docs/wip/cb.md`, mémoire | session principale | — |
 
-CB2, CB3 et CB5 modifient tous `battle_input.gd` et `battle_hud.gd`. On les fusionne dans l'ordre CB3, CB5, puis CB2 : CB2 remappe les touches et réécrit l'aide en dernier.
+CB2, CB3 et CB5 modifient tous `battle_input.gd` et `battle_hud.gd`. On les fusionne (avec CB6) dans l'ordre CB3, CB5, CB6, puis CB2 : CB2 remappe les touches et réécrit l'aide en dernier.
 
 ## Vérification de bout en bout
 
