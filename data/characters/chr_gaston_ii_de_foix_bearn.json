@@ -7,8 +7,8 @@
   },
   "sex": "male",
   "house": "Foix",
-  "faction": "fac_france",
-  "role": "noble",
+  "faction": "fac_foix_bearn",
+  "role": "ruler",
   "birth": {
     "value": "1308",
     "uncertain": true

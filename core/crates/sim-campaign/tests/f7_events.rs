@@ -257,7 +257,16 @@ fn montereau_leads_to_the_alliance_then_troyes() {
         "evt_alliance_anglo_bourguignonne",
         "evt_troyes",
     ] {
-        assert!(state.chronicle.fired_events.contains(&evt(id)), "{id}");
+        assert!(
+            state.chronicle.fired_events.contains(&evt(id)),
+            "{id}: {:?} {} {:?} {:?}",
+            state.chronicle.fired_events,
+            state.year,
+            state.season,
+            state
+                .faction_state(&fac("fac_france"))
+                .map(|f| (f.alive, &f.at_war_with))
+        );
     }
 }
 

@@ -56,8 +56,8 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
 fn new_1337_matches_game_data() {
     let data = data();
     let state = france(&data, 1);
-    assert_eq!(state.factions.len(), 29, "including the virtual fac_rebels");
-    assert_eq!(state.provinces.len(), 132);
+    assert_eq!(state.factions.len(), 36, "including the virtual fac_rebels");
+    assert_eq!(state.provinces.len(), 141);
     assert_eq!(state.date_label(), "Printemps 1337");
     assert_eq!(state.turn(), 0);
     assert_eq!(state.year, START_YEAR);
@@ -101,7 +101,7 @@ fn new_1337_matches_game_data() {
         .provinces
         .keys()
         .all(|p| !state.city_state(p).unwrap().garrison.is_empty()));
-    assert_eq!(state.armies().len(), 28, "one main army per faction");
+    assert_eq!(state.armies().len(), 35, "one main army per faction");
 }
 
 #[test]
@@ -242,9 +242,11 @@ fn valid_orders_apply_immediately() {
         .iter()
         .find(|o| o.unit_type == unit("unit_genoese_crossbowmen"))
         .unwrap();
+    // TW2-T3 (ADR 0103): Genoese companies are hired by an army from the
+    // regional reserve, never levied in a town.
     assert!(
-        genoese.available,
-        "France may hire Genoese: {:?}",
+        !genoese.available,
+        "towns no longer levy Genoese: {:?}",
         genoese.reason
     );
 
@@ -781,7 +783,9 @@ fn france_income_is_positive_and_in_target_range() {
         summary.treasury,
         treasury_before + effective_income - effective_upkeep + tribute + trade_income
     );
-    assert_eq!(summary.provinces_count, 27);
+    // FE4a: prov_bourbonnais and prov_bearn moved to fac_bourbon/fac_foix_bearn,
+    // prov_valois (new) stays with the crown: 27 - 2 + 1 = 26.
+    assert_eq!(summary.provinces_count, 26);
 }
 
 #[test]

@@ -82,6 +82,9 @@ ICONS: dict[str, tuple[str, str]] = {
     "unit_breton_knights": ("lorc/crested-helmet", "unit"),
     "unit_gascon_crossbowmen": ("carl-olsen/crossbow", "unit"),
     "unit_culveriners": ("skoll/musket", "unit"),
+    # Lot TW2-T3 : compagnies de mercenaires.
+    "unit_brabancons": ("lorc/halberd", "unit"),
+    "unit_scots_archers": ("lorc/arrows-shield", "unit"),
     # Catégories d'unités (repli en bataille : clé `render`/`category`).
     "unit_category_infantry": ("lorc/crossed-swords", "unit"),
     "unit_category_ranged": ("lorc/bowman", "unit"),

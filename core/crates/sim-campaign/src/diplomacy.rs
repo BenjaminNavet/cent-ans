@@ -99,7 +99,9 @@ pub enum Proposal {
         turns: u32,
     },
     Alliance,
-    /// The recipient becomes the proposer's vassal.
+    /// The recipient pays homage to the proposer: the effective
+    /// `de_jure_liege` of its primary title becomes the proposer's primary
+    /// title (lot FE, [`crate::feudal::pay_homage`]).
     Vassalage,
     /// `character` (proposer's) marries `spouse` (recipient's).
     Marriage {
@@ -114,6 +116,29 @@ pub enum Proposal {
     Treaty {
         articles: Vec<crate::negotiation::Article>,
     },
+    /// FE (§ 4.3): the proposer, a direct vassal of the recipient, is
+    /// attacked by `aggressor` and calls for protection. Accept: intervene;
+    /// refuse or let expire: shirk. Only sent to the player.
+    Protection {
+        aggressor: FactionId,
+    },
+    /// FE (§ 4.3.5): private war of `attacker` against `target`, both
+    /// direct vassals of the recipient. Accept: impose peace; refuse or let
+    /// expire: let be; `arbitrate` also takes a side. Only sent to the player.
+    Arbitration {
+        attacker: FactionId,
+        target: FactionId,
+    },
+}
+
+impl Proposal {
+    /// Feudal calls are created by the core, never proposed by a faction.
+    pub fn is_feudal_call(&self) -> bool {
+        matches!(
+            self,
+            Proposal::Protection { .. } | Proposal::Arbitration { .. }
+        )
+    }
 }
 
 /// A proposal waiting for the player's answer.
@@ -340,6 +365,9 @@ impl CampaignState {
     /// The casus belli `a` holds against `b`, if any (French label).
     pub fn casus_belli(&self, data: &GameData, a: &FactionId, b: &FactionId) -> Option<String> {
         let fa = self.factions.get(a)?;
+        if crate::feudal::has_forfeiture(self, a, b) {
+            return Some("commise".to_owned()); // FE (F3)
+        }
         for claim in &fa.claims {
             match claim.kind {
                 ClaimKind::Throne if claim.faction.as_ref() == Some(b) => {
@@ -785,6 +813,9 @@ pub fn evaluate(
         Proposal::Obedience { .. } => {
             reasons.push(("Choix d'obédience".to_owned(), 0));
         }
+        Proposal::Protection { .. } | Proposal::Arbitration { .. } => {
+            reasons.push(("Devoir féodal".to_owned(), 0));
+        }
         Proposal::Treaty { articles } => {
             let verdict =
                 crate::negotiation::evaluate_treaty(state, data, proposer, recipient, articles);
@@ -943,6 +974,9 @@ impl CampaignState {
             .get_mut(attacker)
             .expect("checked")
             .last_war_declared = Some(self.turn);
+        // FE § 4.3: the target's suzerain is called (or the common lord
+        // arbitrates a private war) before the allies answer.
+        let feudal_liege = crate::feudal::liege_of(self, data, target);
         let text = format!(
             "{} déclare la guerre à {} ({motive}).",
             faction_name(data, attacker),
@@ -952,8 +986,10 @@ impl CampaignState {
         if excommunicate {
             religion::excommunicate(self, data, attacker);
         }
-        self.call_to_arms(data, target, attacker);
-        self.rally_vassals(data, attacker, target);
+        crate::feudal::escalate_war(self, data, attacker, target);
+        self.call_to_arms(data, target, attacker, feudal_liege.as_ref());
+        // The attacker summons its own host too (loyal direct vassals follow).
+        crate::feudal::summon_host(self, data, attacker, target);
         Ok(())
     }
 
@@ -972,8 +1008,8 @@ impl CampaignState {
                 .get(vassal)
                 .is_some_and(|f| f.suzerain.as_ref() == Some(suzerain))
             {
+                crate::feudal::release_from_liege(self, vassal);
                 let v = self.factions.get_mut(vassal).expect("exists");
-                v.suzerain = None;
                 v.allies.remove(suzerain);
                 self.factions
                     .get_mut(suzerain)
@@ -998,10 +1034,18 @@ impl CampaignState {
 
     /// The allies of `defender` decide whether to join its war against
     /// `aggressor` (spec § 2.3).
-    fn call_to_arms(&mut self, data: &GameData, defender: &FactionId, aggressor: &FactionId) {
+    /// `feudal_liege` (FE § 4.3) already answered as suzerain and is skipped.
+    fn call_to_arms(
+        &mut self,
+        data: &GameData,
+        defender: &FactionId,
+        aggressor: &FactionId,
+        feudal_liege: Option<&FactionId>,
+    ) {
         let allies: Vec<FactionId> = self.factions[defender].allies.iter().cloned().collect();
         for ally in allies {
-            if &ally == aggressor
+            if Some(&ally) == feudal_liege
+                || &ally == aggressor
                 || !self.factions.get(&ally).is_some_and(|f| f.alive)
                 || self.is_at_war(&ally, aggressor)
                 || is_rebels(&ally)
@@ -1033,7 +1077,7 @@ impl CampaignState {
                     .allies
                     .remove(&ally);
                 if self.factions[&ally].suzerain.as_ref() == Some(defender) {
-                    self.factions.get_mut(&ally).expect("exists").suzerain = None;
+                    crate::feudal::release_from_liege(self, &ally);
                 }
                 self.add_modifier(defender, &ally, -30, "A refusé l'appel aux armes", 40);
                 let text = format!(
@@ -1045,32 +1089,6 @@ impl CampaignState {
                     GameEvent::new(EventKind::AllianceBroken, text).faction(&ally),
                 );
             }
-        }
-    }
-
-    /// Loyal vassals of `aggressor` follow it to war against `target`.
-    fn rally_vassals(&mut self, data: &GameData, aggressor: &FactionId, target: &FactionId) {
-        let vassals: Vec<FactionId> = self
-            .factions
-            .iter()
-            .filter(|(_, f)| f.alive && f.suzerain.as_ref() == Some(aggressor))
-            .map(|(id, _)| id.clone())
-            .collect();
-        for vassal in vassals {
-            if &vassal == target
-                || self.is_at_war(&vassal, target)
-                || self.is_allied(&vassal, target)
-                || self.factions[&vassal].loyalty < data.feudal_rules.call_to_arms_loyalty
-            {
-                continue;
-            }
-            self.start_war(&vassal, target);
-            let text = format!(
-                "{} suit son suzerain dans la guerre contre {}.",
-                faction_name(data, &vassal),
-                faction_name(data, target)
-            );
-            self.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(&vassal));
         }
     }
 
@@ -1135,7 +1153,7 @@ impl CampaignState {
     }
 
     /// Ends the war between `a` and `b` alone (see [`Self::make_peace`]).
-    fn make_peace_between(
+    pub(crate) fn make_peace_between(
         &mut self,
         data: &GameData,
         a: &FactionId,
@@ -1144,6 +1162,21 @@ impl CampaignState {
         tribute: i64,
         truce_turns: u32,
     ) {
+        self.settle_forfeitures_at_peace(data, a, b); // FE (F3), before war scores clear
+                                                      // FE (F1): the side that cedes land or pays remembers its defeat
+                                                      // through its direct vassals' loyalty.
+        let losses = |x: &FactionId, pays: bool| {
+            provinces
+                .iter()
+                .filter(|p| self.province_owner(p) == Some(x))
+                .count()
+                + usize::from(pays)
+        };
+        let (loss_a, loss_b) = (losses(a, tribute < 0), losses(b, tribute > 0));
+        if loss_a != loss_b {
+            let loser = if loss_a > loss_b { a } else { b };
+            crate::feudal::record_liege_defeat(self, data, loser);
+        }
         let until = self.turn + truce_turns;
         for (x, y) in [(a, b), (b, a)] {
             let f = self.factions.get_mut(x).expect("exists");
@@ -1247,14 +1280,18 @@ impl CampaignState {
         self.push_order_event(GameEvent::new(EventKind::AllianceFormed, text).faction(a));
     }
 
+    /// `vassal` pays homage to `suzerain`: the effective liege of its
+    /// primary title changes (lot FE, ADR 0098).
     fn make_vassal(&mut self, data: &GameData, suzerain: &FactionId, vassal: &FactionId) {
         if self.is_at_war(suzerain, vassal) {
             self.make_peace(data, suzerain, vassal, &[], 0, TRUCE_TURNS);
         }
+        if !crate::feudal::pay_homage(self, data, vassal, suzerain) {
+            return;
+        }
         let v = self.factions.get_mut(vassal).expect("exists");
-        v.suzerain = Some(suzerain.clone());
         v.allies.insert(suzerain.clone());
-        v.loyalty = 60;
+        v.loyalty = data.feudal_rules.loyalty.homage_start;
         self.factions
             .get_mut(suzerain)
             .expect("exists")
@@ -1303,6 +1340,21 @@ impl CampaignState {
             Proposal::Treaty { articles } => {
                 crate::negotiation::apply_treaty(self, data, proposer, recipient, articles)?;
             }
+            Proposal::Protection { aggressor } => {
+                if self.is_at_war(proposer, aggressor) {
+                    crate::feudal::intervene(self, data, recipient, proposer, aggressor);
+                }
+            }
+            Proposal::Arbitration { attacker, target } => {
+                crate::feudal::apply_arbitration(
+                    self,
+                    data,
+                    recipient,
+                    attacker,
+                    target,
+                    &crate::feudal::Arbitration::ImposePeace,
+                );
+            }
         }
         Ok(())
     }
@@ -1347,6 +1399,11 @@ impl CampaignState {
             Proposal::Vassalage | Proposal::Marriage { .. } | Proposal::Obedience { .. } => {}
             Proposal::Treaty { articles } => {
                 crate::negotiation::check_treaty(self, data, proposer, recipient, articles)?;
+            }
+            Proposal::Protection { .. } | Proposal::Arbitration { .. } => {
+                return Err(DiplomacyError::Refused(
+                    "un appel féodal ne se propose pas".to_owned(),
+                ));
             }
         }
         Ok(())
@@ -1434,7 +1491,9 @@ impl CampaignState {
             .ok_or(DiplomacyError::UnknownOffer)?;
         let offer = self.factions[faction].offers[index].clone();
         if accept {
-            if !matches!(offer.proposal, Proposal::Obedience { .. }) {
+            if !matches!(offer.proposal, Proposal::Obedience { .. })
+                && !offer.proposal.is_feudal_call()
+            {
                 self.check_proposal(data, &offer.from, faction, &offer.proposal)?;
             }
             self.factions
@@ -1449,7 +1508,9 @@ impl CampaignState {
                 .expect("exists")
                 .offers
                 .remove(index);
-            if !matches!(offer.proposal, Proposal::Obedience { .. }) {
+            if offer.proposal.is_feudal_call() {
+                crate::feudal::refuse_feudal_call(self, data, faction, &offer);
+            } else if !matches!(offer.proposal, Proposal::Obedience { .. }) {
                 self.add_modifier(&offer.from, faction, -10, "Offre repoussée", 20);
             }
             Ok(())
@@ -1730,6 +1791,15 @@ fn offer_text(
                 .get(religion)
                 .map_or_else(|| religion.to_string(), |r| r.name.display.clone())
         ),
+        Proposal::Protection { aggressor } => format!(
+            "{name} est attaqué par {} et réclame votre protection.",
+            faction_name(data, aggressor)
+        ),
+        Proposal::Arbitration { attacker, target } => format!(
+            "Guerre privée : {} attaque {}, tous deux vos vassaux.",
+            faction_name(data, attacker),
+            faction_name(data, target)
+        ),
     }
 }
 
@@ -1769,6 +1839,10 @@ pub(crate) fn resolve_diplomacy(
         if let Proposal::Obedience { .. } = offer.proposal {
             continue; // keeping the historical obedience is the default
         }
+        if offer.proposal.is_feudal_call() {
+            crate::feudal::refuse_feudal_call(state, data, &player, &offer);
+            continue;
+        }
         events.push(
             GameEvent::new(
                 EventKind::DiplomaticOffer,
@@ -1778,7 +1852,9 @@ pub(crate) fn resolve_diplomacy(
         );
     }
 
-    // Vassals.
+    // Vassals: the suzerains are a view of the titles (lot FE).
+    crate::feudal::forget_expired(state);
+    crate::feudal::sync_suzerains(state, data);
     let vassals: Vec<(FactionId, FactionId)> = state
         .factions
         .iter()
@@ -1787,20 +1863,20 @@ pub(crate) fn resolve_diplomacy(
         .collect();
     for (vassal, suzerain) in vassals {
         if !state.factions.get(&suzerain).is_some_and(|f| f.alive) {
+            crate::feudal::release_from_liege(state, &vassal);
             let v = state.factions.get_mut(&vassal).expect("exists");
-            v.suzerain = None;
             v.allies.remove(&suzerain);
             continue;
         }
-        let tribute = (state.factions[&vassal].income_last_turn
-            * data.feudal_rules.vassal_tribute_percent
-            / 100)
-            .max(0);
+        // Tribute to the direct suzerain only (the maxim, spec § 4.1).
+        let tribute = crate::feudal::tribute_due(state, data, &vassal)
+            .filter(|(liege, _)| liege == &suzerain)
+            .map_or(0, |(_, amount)| amount);
         state.factions.get_mut(&vassal).expect("exists").treasury -= tribute;
         state.factions.get_mut(&suzerain).expect("exists").treasury += tribute;
         let target = loyalty_target(state, data, &vassal, &suzerain);
         let v = state.factions.get_mut(&vassal).expect("exists");
-        v.loyalty = move_towards(v.loyalty, target, 5);
+        v.loyalty = move_towards(v.loyalty, target, data.feudal_rules.loyalty.drift_per_turn);
         let loyalty = v.loyalty;
         if loyalty < data.feudal_rules.rebellion_loyalty
             && !state.is_at_war(&vassal, &suzerain)
@@ -1810,6 +1886,7 @@ pub(crate) fn resolve_diplomacy(
         {
             state.cut_vassal_tie(&vassal, &suzerain);
             state.start_war(&vassal, &suzerain);
+            crate::feudal::on_revolt(state, data, &vassal, &suzerain); // FE (F3)
             events.push(
                 GameEvent::new(
                     EventKind::VassalRebellion,
@@ -1836,7 +1913,8 @@ fn move_towards(current: u8, target: u8, step: u8) -> u8 {
     }
 }
 
-/// Loyalty a vassal drifts towards (0-100).
+/// Loyalty a vassal drifts towards (0-100), towards its direct suzerain,
+/// with the terms of `feudal.json:loyalty` (spec § 4.2).
 pub fn loyalty_target(
     state: &CampaignState,
     data: &GameData,
@@ -1849,15 +1927,30 @@ pub fn loyalty_target(
         .filter(|(t, _)| t == "Loyauté envers le suzerain")
         .map(|(_, v)| v)
         .sum();
-    let mut target = 55 + (attitude - loyalty_term) / 2;
-    if state.faction_power(suzerain) > 2.0 * state.faction_power(vassal) {
-        target += 10;
+    let weights = &data.feudal_rules.loyalty;
+    let mut target = weights.base + (attitude - loyalty_term) / 2;
+    if state.faction_power(suzerain) > weights.power_ratio * state.faction_power(vassal) {
+        target += weights.power_favourable;
     } else {
-        target -= 10;
+        target += weights.power_unfavourable;
     }
     if religion::is_excommunicated(state, suzerain) {
-        target -= 20;
+        target += weights.excommunicated_liege;
     }
+    // Kin: a marriage between the ruling houses, or the same house.
+    let kin = state.marriage_tie(vassal, suzerain)
+        || state.marriage_tie(suzerain, vassal)
+        || state
+            .ruler_house(vassal)
+            .is_some_and(|h| state.ruler_house(suzerain) == Some(h));
+    if kin {
+        target += weights.family_tie;
+    }
+    let culture = |f: &FactionId| data.factions.get(f).map(|f| &f.culture);
+    if culture(vassal).is_some() && culture(vassal) == culture(suzerain) {
+        target += weights.shared_culture;
+    }
+    target += crate::feudal::remembered_loyalty(state, data, vassal, suzerain);
     // F1 `Loyalty`: a loyal vassal ruler, a generous or kind overlord.
     let loyalty = |e: &crate::buildings::EffectTotals| e.loyalty.apply(0.0);
     target += state.ruler_effect_points(data, vassal, loyalty)
@@ -1869,7 +1962,7 @@ pub fn loyalty_target(
         .iter()
         .any(|(id, f)| f.alive && f.embargoes.contains(vassal) && state.is_at_war(id, suzerain));
     if squeezed {
-        target -= 25;
+        target += weights.embargo_squeeze;
     }
     target.clamp(0, 100) as u8
 }

@@ -188,6 +188,9 @@ pub(crate) fn resolve_victory(
         }
         state.victory_streak = 0;
     }
+    // FE (F3, spec § 4.8): objectives of the primary title, independence,
+    // first vassal of the realm, crown of the suzerain.
+    let feudal = crate::feudal::generic_victory(state, data, &player);
     let (kind, text) = if !alive {
         (
             OutcomeKind::Defeat,
@@ -197,6 +200,11 @@ pub(crate) fn resolve_victory(
         (
             OutcomeKind::Victory,
             format!("Victoire ! {name} a accompli tous ses objectifs historiques."),
+        )
+    } else if let Some(path) = feudal {
+        (
+            OutcomeKind::Victory,
+            format!("Victoire ! {name} {}.", path.text_fr()),
         )
     } else if end_year.is_some_and(|y| state.year > y) {
         let done = objectives.iter().filter(|o| o.done).count();

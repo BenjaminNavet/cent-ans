@@ -32,33 +32,6 @@
     ]
   },
   {
-    "id": "set_evreux",
-    "province": "prov_normandie",
-    "kind": "town",
-    "name": {
-      "display": "Évreux",
-      "local": "Évrues",
-      "local_language": "ancien français"
-    },
-    "lonlat": [
-      1.15,
-      49.0267
-    ],
-    "weight": 16,
-    "owner": "fac_navarre",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Capitale du comté d'Évreux, enclave normande de Philippe d'Évreux, roi consort de Navarre.",
-    "sources": [
-      "Évreux",
-      "Comté d'Évreux"
-    ]
-  },
-  {
     "id": "set_chateau_gaillard",
     "province": "prov_normandie",
     "kind": "castle",

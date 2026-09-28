@@ -12,6 +12,30 @@
    "relief_max_m": 250.0,
    "sea_share": 0.0
   },
+  "prov_albret": {
+   "file": "prov_albret.bin",
+   "lon": 0.2558,
+   "lat": 44.1137,
+   "ref_m": 101.2,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.59,
+   "relief_max_m": 251.0,
+   "sea_share": 0.0
+  },
+  "prov_alencon": {
+   "file": "prov_alencon.bin",
+   "lon": 0.0255,
+   "lat": 48.4951,
+   "ref_m": 219.6,
+   "terrain": "bocage",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.13,
+   "relief_max_m": 525.0,
+   "sea_share": 0.0
+  },
   "prov_alentejo": {
    "file": "prov_alentejo.bin",
    "lon": -8.7469,
@@ -82,6 +106,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": 0.9,
    "relief_max_m": 796.0,
+   "sea_share": 0.0
+  },
+  "prov_armagnac": {
+   "file": "prov_armagnac.bin",
+   "lon": 0.5218,
+   "lat": 43.8201,
+   "ref_m": 256.7,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.85,
+   "relief_max_m": 308.0,
    "sea_share": 0.0
   },
   "prov_artois": {
@@ -203,6 +239,18 @@
    "skyline_max_deg": 3.0,
    "relief_max_m": 714.0,
    "sea_share": 0.286
+  },
+  "prov_blois": {
+   "file": "prov_blois.bin",
+   "lon": 1.2914,
+   "lat": 47.5652,
+   "ref_m": 127.8,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.14,
+   "relief_max_m": 219.0,
+   "sea_share": 0.0
   },
   "prov_bohemia": {
    "file": "prov_bohemia.bin",
@@ -348,6 +396,18 @@
    "relief_max_m": 211.0,
    "sea_share": 0.0
   },
+  "prov_charolais": {
+   "file": "prov_charolais.bin",
+   "lon": 4.3209,
+   "lat": 46.4142,
+   "ref_m": 311.0,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 2.16,
+   "relief_max_m": 848.0,
+   "sea_share": 0.0
+  },
   "prov_cologne": {
    "file": "prov_cologne.bin",
    "lon": 6.8909,
@@ -456,6 +516,18 @@
    "relief_max_m": 744.0,
    "sea_share": 0.181
   },
+  "prov_evreux": {
+   "file": "prov_evreux.bin",
+   "lon": 1.1984,
+   "lat": 48.9168,
+   "ref_m": 153.1,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.05,
+   "relief_max_m": 196.0,
+   "sea_share": 0.0
+  },
   "prov_extremadura": {
    "file": "prov_extremadura.bin",
    "lon": -6.375,
@@ -526,6 +598,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": 0.26,
    "relief_max_m": 91.0,
+   "sea_share": 0.0
+  },
+  "prov_foix": {
+   "file": "prov_foix.bin",
+   "lon": 1.6156,
+   "lat": 42.8356,
+   "ref_m": 566.6,
+   "terrain": "mountains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 7.27,
+   "relief_max_m": 2383.0,
    "sea_share": 0.0
   },
   "prov_franche_comte": {
@@ -1176,6 +1260,18 @@
    "relief_max_m": 321.0,
    "sea_share": 0.0
   },
+  "prov_penthievre": {
+   "file": "prov_penthievre.bin",
+   "lon": -2.6049,
+   "lat": 48.4972,
+   "ref_m": 48.9,
+   "terrain": "bocage",
+   "coastal": true,
+   "coast_bearing_deg": 346.0,
+   "skyline_max_deg": 0.96,
+   "relief_max_m": 310.0,
+   "sea_share": 0.146
+  },
   "prov_perigord": {
    "file": "prov_perigord.bin",
    "lon": 0.7408,
@@ -1499,6 +1595,18 @@
    "skyline_max_deg": 2.23,
    "relief_max_m": 448.0,
    "sea_share": 0.259
+  },
+  "prov_valois": {
+   "file": "prov_valois.bin",
+   "lon": 2.9215,
+   "lat": 49.196,
+   "ref_m": 134.0,
+   "terrain": "forest",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.76,
+   "relief_max_m": 350.0,
+   "sea_share": 0.0
   },
   "prov_venezia": {
    "file": "prov_venezia.bin",

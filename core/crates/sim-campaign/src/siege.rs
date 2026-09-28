@@ -26,6 +26,8 @@ pub const RAID_UNREST: u8 = 10;
 pub const RAID_LOOT_SHARE: f64 = 0.5;
 /// Unrest added to a province when its city changes hands (half for
 /// another settlement).
+/// TW2-T1: the value now read is `occupy.unrest_city` of
+/// `data/rules/capture.json`; kept for reference.
 pub const CAPTURE_UNREST: u8 = 20;
 
 fn province_name(data: &GameData, id: &ProvinceId) -> String {
@@ -859,11 +861,8 @@ pub(crate) fn capture(
             army.stance = Stance::Normal;
         }
     }
-    let unrest = if is_city {
-        CAPTURE_UNREST
-    } else {
-        CAPTURE_UNREST / 2
-    };
+    // TW2-T1: the occupation's unrest comes from `data/rules/capture.json`.
+    let unrest = crate::capture::occupation_unrest(state, data, settlement_id);
     if let Some(province) = state.provinces.get_mut(&province_id) {
         province.unrest = province.unrest.saturating_add(unrest).min(100);
     }
@@ -888,6 +887,15 @@ pub(crate) fn capture(
         .province(&province_id)
         .faction(new_controller),
     );
+    // TW2-T1: the fate of the place (player's choice, or the AI's at once).
+    crate::capture::on_captured(
+        state,
+        data,
+        settlement_id,
+        new_controller,
+        &previous,
+        events,
+    );
 }
 
 /// Phase 4: armies in `Raid` stance devastate hostile provinces for loot.
@@ -911,7 +919,8 @@ pub(crate) fn resolve_raids(
         }
         let general = state.armies[&army_id].general.clone();
         let province = state.provinces.get_mut(&province_id).expect("exists");
-        let loot = (province_income(province) * RAID_LOOT_SHARE).round() as i64;
+        let loot =
+            (province_income(&data.economy_rules, province) * RAID_LOOT_SHARE).round() as i64;
         province.devastation = province
             .devastation
             .saturating_add(RAID_DEVASTATION)

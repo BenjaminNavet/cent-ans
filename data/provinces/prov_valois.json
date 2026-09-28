@@ -1,0 +1,89 @@
+{
+  "id": "prov_valois",
+  "name": {
+    "display": "Valois",
+    "local": "Valois",
+    "local_language": "ancien français"
+  },
+  "region": "france_nord",
+  "terrain": "forest",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Automne"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Crépy-en-Valois",
+      "local": "Crépy-en-Valois",
+      "local_language": "ancien français"
+    },
+    "lat": 49.2333,
+    "lon": 2.8874
+  },
+  "geo": {
+    "capital_lonlat": [
+      2.8874,
+      49.2333
+    ],
+    "seed_lonlat": [
+      2.85,
+      49.2
+    ],
+    "voronoi_weight": 0.45
+  },
+  "owner": "fac_france",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 70000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 750,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Comté-berceau des Valois, réuni à la couronne à l'avènement de Philippe VI en 1328."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1450,
+  "description": "Comté de Valois, terre d'origine de la maison de Valois, réuni au domaine royal depuis l'avènement de Philippe VI (1328).",
+  "sources": [
+    "Comté de Valois",
+    "Philippe VI de France"
+  ]
+}

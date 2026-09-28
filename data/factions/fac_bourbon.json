@@ -1,0 +1,57 @@
+{
+  "id": "fac_bourbon",
+  "name": {
+    "display": "Duché de Bourbon",
+    "local": "Duchié de Bourbon",
+    "local_language": "ancien français"
+  },
+  "short_name": "Bourbon",
+  "adjective": "bourbonnais",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_louis_i_de_bourbon",
+  "heir": "chr_pierre_i_de_bourbon",
+  "capital": "prov_bourbonnais",
+  "capital_city": "Moulins",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_france",
+  "primary_title": "tit_bourbon",
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, à la bande de gueules brochant sur le tout.",
+    "description": "Armes de France ancien brisées d'une bande de gueules, adoptées par la maison de Bourbon.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Duc de Bourbon",
+    "Comte de Clermont-en-Beauvaisis",
+    "Comte de la Marche"
+  ],
+  "treasury": 7000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "vassal",
+      "note": "Louis Ier est petit-fils de saint Louis et proche conseiller de Philippe VI."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 60,
+    "trade": 45,
+    "piety": 65
+  },
+  "description": "Comté de Bourbon érigé en duché-pairie par Charles IV en 1327 pour Louis Ier, petit-fils de saint Louis ; sa maison donnera plus tard des rois de France (1589).",
+  "sources": [
+    "Louis Ier de Bourbon",
+    "Duché de Bourbon"
+  ]
+}

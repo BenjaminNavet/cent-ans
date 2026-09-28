@@ -1,0 +1,52 @@
+{
+  "id": "tit_blois",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Blois",
+    "local": "Comté de Bloys",
+    "local_language": "ancien français"
+  },
+  "heraldry": {
+    "blazon": "De gueules à trois pals de vair, au chef d'or.",
+    "description": "Armes de la maison de Châtillon, comtes de Blois.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_blois"
+  ],
+  "holder_1337": {
+    "faction": "fac_blois",
+    "sources": [
+      "Guy Ier de Châtillon",
+      "Comté de Blois"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_blois_hold",
+      "title": "Garder le comté",
+      "description": "Le comte de Blois doit conserver Blois.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_blois"
+      }
+    },
+    {
+      "id": "obj_blois_brittany",
+      "title": "Le mariage breton",
+      "description": "Faire valoir, par le mariage de Charles avec Jeanne de Penthièvre, les droits sur le duché de Bretagne.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_brittany"
+      }
+    }
+  ],
+  "description": "Comté tenu par Guy Ier de Châtillon ; son fils Charles de Blois épouse le 4 juin 1337 Jeanne de Penthièvre, ouvrant la voie à la guerre de Succession de Bretagne.",
+  "sources": [
+    "Guy Ier de Châtillon",
+    "Comté de Blois",
+    "Charles de Blois"
+  ]
+}

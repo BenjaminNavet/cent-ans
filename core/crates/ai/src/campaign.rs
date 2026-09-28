@@ -240,13 +240,17 @@ impl<'a> Context<'a> {
             .is_some_and(|s| &s.owner == self.faction)
     }
 
+    /// Estimated seasonal tax of `province` at the normal rate, its places'
+    /// buildings weighing their kind's `province_effect_percent` (lot RS-B:
+    /// a market in a village no longer counts as one in the city).
     fn province_income(&self, province: &ProvinceId) -> f64 {
         self.state.provinces.get(province).map_or(0.0, |p| {
-            sim_campaign::economy::province_income_effective(
+            sim_campaign::economy::province_income_with(
                 self.data,
                 p,
-                &self.state.province_buildings(province),
+                &[],
                 TaxRate::Normal,
+                &self.state.province_building_effects(self.data, province),
             )
         })
     }
@@ -494,8 +498,42 @@ fn plan_turn_in(
     orders.extend(plans.agents);
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
+    // TW2-T3: companies for the threatened armies of a rich realm, hired
+    // where they stand before they march.
+    let treasury = ctx.treasury - planned_spending(data, &orders);
+    orders.extend(crate::mercenaries::plan_hires(
+        state,
+        data,
+        faction,
+        treasury,
+        ctx.gross_income,
+        |army| {
+            ctx.anchors
+                .get(army)
+                .map_or(0.0, |anchor| ctx.threat_at(anchor))
+        },
+    ));
     plan_armies(&ctx, &mut orders);
     orders
+}
+
+/// TW2-T3: livres this turn's recruitments and constructions will spend
+/// (base prices: an estimate for the mercenary budget).
+fn planned_spending(data: &GameData, orders: &[Order]) -> i64 {
+    orders
+        .iter()
+        .map(|order| match order {
+            Order::Recruit { unit_type, .. } => data
+                .unit_types
+                .get(unit_type)
+                .map_or(0, |t| i64::from(t.cost.money)),
+            Order::Build { building, .. } => data
+                .buildings
+                .get(building)
+                .map_or(0, |b| i64::from(b.cost.money)),
+            _ => 0,
+        })
+        .sum()
 }
 
 // =========================================================================
@@ -552,7 +590,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let levied = me.tax_rate == TaxRate::High;
     let normal_surplus = if levied {
         ctx.surplus()
-            - (ctx.gross_income.max(0) as f64 * (1.0 - 1.0 / TaxRate::High.multiplier())) as i64
+            - (ctx.gross_income.max(0) as f64
+                * (1.0 - 1.0 / TaxRate::High.multiplier(&ctx.data.economy_rules)))
+                as i64
     } else {
         ctx.surplus()
     };
@@ -698,6 +738,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         }
         // G1: no more than the settlement's free recruitment slots.
         let mut free_slots = state.recruit_slots_free(data, site);
+        // TW2-T2: no more of a unit type than the settlement's reserve.
+        let mut drawn: BTreeMap<data_model::UnitTypeId, u32> = BTreeMap::new();
         while recruits < max_recruits && free_slots > 0 {
             let upkeep_cap = |upkeep: i64| {
                 if planned_upkeep == 0 && ctx.surplus() >= upkeep {
@@ -712,6 +754,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
                 .filter(|o| {
                     planned_upkeep + i64::from(o.upkeep) <= upkeep_cap(i64::from(o.upkeep))
                         && budget >= i64::from(o.cost)
+                        && drawn.get(&o.unit_type).copied().unwrap_or(0) < o.pool.available
                 })
                 .collect();
             let Some(option) =
@@ -726,6 +769,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
                 unit_type: option.unit_type.clone(),
             });
             *composition.entry(option.unit_type.clone()).or_default() += 1;
+            *drawn.entry(option.unit_type.clone()).or_default() += 1;
             draw_supply(&mut supply, &option.resources);
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);
@@ -909,6 +953,14 @@ fn building_value(
         return 0.0;
     };
     let income = ctx.province_income(province);
+    // RS-B: a secondary place's buildings weigh on the whole province and on
+    // research as the rules count them (`province_effect_percent`, `research_percent`).
+    let kind = ctx.state.settlement_kind(settlement);
+    let province_weight = f64::from(sim_campaign::buildings::province_effect_percent(
+        ctx.data, kind,
+    )) / 100.0;
+    let research_weight =
+        f64::from(sim_campaign::buildings::research_percent(ctx.data, kind)) / 100.0;
     let mut value = 0.0;
     for effect in &def.effects {
         let v = effect.value;
@@ -920,10 +972,10 @@ fn building_value(
                     v
                 }
             }
-            EffectKind::Unrest if unrest > 30.0 => -v * income / 50.0,
-            EffectKind::Health if health < 50.0 => v * income / 80.0,
-            EffectKind::Growth | EffectKind::Wealth => v * income / 150.0,
-            EffectKind::ResearchPoints => v * 60.0,
+            EffectKind::Unrest if unrest > 30.0 => -v * province_weight * income / 50.0,
+            EffectKind::Health if health < 50.0 => v * province_weight * income / 80.0,
+            EffectKind::Growth | EffectKind::Wealth => v * province_weight * income / 150.0,
+            EffectKind::ResearchPoints => v * research_weight * 60.0,
             EffectKind::Garrison | EffectKind::FortificationLevel if ctx.is_border(province) => {
                 v * 20.0
             }
