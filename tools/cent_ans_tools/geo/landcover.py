@@ -319,6 +319,8 @@ def desert_mask(grid: MapGrid) -> np.ndarray | None:
     except download.DownloadError:
         return None
     regions = gpd.read_file(path)
+    regions.columns = [str(column).lower() for column in regions.columns]
+    regions = regions.set_geometry("geometry")
     deserts = regions[regions["featurecla"].str.lower() == "desert"].to_crs(CRS_MAP)
     shapes = [(geom, 1) for geom in deserts.geometry if not geom.is_empty]
     if not shapes:
