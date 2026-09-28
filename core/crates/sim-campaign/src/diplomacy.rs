@@ -1796,10 +1796,10 @@ pub(crate) fn resolve_diplomacy(
             v.allies.remove(&suzerain);
             continue;
         }
-        let tribute = (state.factions[&vassal].income_last_turn
-            * data.feudal_rules.vassal_tribute_percent
-            / 100)
-            .max(0);
+        // Tribute to the direct suzerain only (the maxim, spec § 4.1).
+        let tribute = crate::feudal::tribute_due(state, data, &vassal)
+            .filter(|(liege, _)| liege == &suzerain)
+            .map_or(0, |(_, amount)| amount);
         state.factions.get_mut(&vassal).expect("exists").treasury -= tribute;
         state.factions.get_mut(&suzerain).expect("exists").treasury += tribute;
         let target = loyalty_target(state, data, &vassal, &suzerain);

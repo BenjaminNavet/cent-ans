@@ -579,3 +579,16 @@ pub fn remembered_loyalty(
         })
         .sum()
 }
+
+/// Tribute `vassal` owes this turn, and to whom: its direct suzerain only,
+/// never the suzerain's own lieges (spec § 4.1, `feudal.json:vassal_tribute_percent`).
+pub fn tribute_due(
+    state: &CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+) -> Option<(FactionId, i64)> {
+    let liege = liege_of(state, data, vassal)?;
+    let income = state.factions.get(vassal)?.income_last_turn;
+    let amount = (income * data.feudal_rules.vassal_tribute_percent / 100).max(0);
+    Some((liege, amount))
+}
