@@ -33,10 +33,10 @@
       39.9036
     ],
     "seed_lonlat": [
-      8.75,
+      8.65,
       40.0
     ],
-    "voronoi_weight": 1.4
+    "voronoi_weight": 1.35
   },
   "owner": "fac_arborea",
   "culture": "cul_sardinian",

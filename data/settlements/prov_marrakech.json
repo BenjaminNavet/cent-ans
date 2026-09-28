@@ -52,26 +52,26 @@
     ]
   },
   {
-    "id": "set_tinmel",
+    "id": "set_amizmiz",
     "province": "prov_marrakech",
     "kind": "village",
     "name": {
-      "display": "Tinmel",
-      "local": "Tīnmal",
+      "display": "Amizmiz",
+      "local": "Amizmīz",
       "local_language": "berbère"
     },
     "lonlat": [
-      -8.3667,
-      30.9833
+      -8.25,
+      31.2247
     ],
     "weight": 5,
     "owner": null,
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Village du Haut Atlas où Ibn Tumart fonda la puissance almohade ; mosquée en ruine.",
+    "description": "Bourg du piémont du Haut Atlas, sur la route des cols du sud.",
     "sources": [
-      "Tinmel"
+      "Amizmiz"
     ]
   }
 ]

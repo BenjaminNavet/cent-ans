@@ -1,5 +1,28 @@
 [
   {
+    "id": "set_moulay_idriss",
+    "province": "prov_meknes",
+    "kind": "village",
+    "name": {
+      "display": "Moulay Idriss Zerhoun",
+      "local": "Mūlāy Idrīs Zarhūn",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -5.5236,
+      34.0553
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Sanctuaire d'Idris Ier, fondateur de la dynastie idrisside, sur le Zerhoun.",
+    "sources": [
+      "Moulay Idriss Zerhoun"
+    ]
+  },
+  {
     "id": "set_meknes",
     "province": "prov_meknes",
     "kind": "city",

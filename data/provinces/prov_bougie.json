@@ -33,10 +33,10 @@
       36.7509
     ],
     "seed_lonlat": [
-      4.8,
-      36.5
+      5.1,
+      36.4
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 1.1
   },
   "owner": "fac_hafsids",
   "culture": "cul_berber",

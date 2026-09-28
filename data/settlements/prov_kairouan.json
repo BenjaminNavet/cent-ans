@@ -55,29 +55,26 @@
     ]
   },
   {
-    "id": "set_tebessa",
+    "id": "set_sbeitla",
     "province": "prov_kairouan",
-    "kind": "town",
+    "kind": "village",
     "name": {
-      "display": "Tébessa",
-      "local": "Tibissa",
+      "display": "Sbeïtla",
+      "local": "Sbīṭla",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      8.1242,
-      35.4042
+      9.1167,
+      35.2333
     ],
-    "weight": 8,
+    "weight": 5,
     "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
+    "fortification_level": 0,
+    "buildings": [],
     "port": false,
-    "description": "Ancienne Theveste, place frontière des steppes de l'ouest.",
+    "description": "Ruines de Sufetula au milieu des steppes.",
     "sources": [
-      "Tébessa"
+      "Sbeïtla"
     ]
   }
 ]
