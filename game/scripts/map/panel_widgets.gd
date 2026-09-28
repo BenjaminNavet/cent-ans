@@ -84,7 +84,7 @@ static func pool_label(row: Dictionary) -> Label:
 	label.name = "PoolLabel"
 	if int(row.get("pool_available", 0)) > 0:
 		label.add_theme_color_override("font_color", HudStyle.INK_SOFT)
-	label.tooltip_text = "Réserve de recrutement : %d au plus, se remplit à chaque saison" % int(row.get("pool_cap", 0))
+	RichTooltip.attach_plain(label, "recruit_pool", {"body": "%d au plus, se remplit à chaque saison" % int(row.get("pool_cap", 0))})
 	label.mouse_filter = Control.MOUSE_FILTER_PASS
 	return label
 

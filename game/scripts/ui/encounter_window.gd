@@ -22,9 +22,9 @@ func _ready() -> void:
 	for node in find_children("*", "Button", true, false):
 		var button := node as Button
 		if button.text == "Plus tard":
-			button.tooltip_text = "Sans réponse, l'option par défaut s'appliquera à la fin du tour."
+			RichTooltip.attach_plain(button, "decision_default_choice_turn")
 		elif button.text == "×":
-			button.tooltip_text = "Fermer (la rencontre reste en attente jusqu'à la fin du tour)"
+			RichTooltip.attach_plain(button, "close_encounter_pending")
 
 
 ## Affiche `encounter` (un élément de `get_pending_encounters`) ; `queue_size` en attente.

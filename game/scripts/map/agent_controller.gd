@@ -161,7 +161,7 @@ func refresh() -> void:
 		token.selected = id == selected_agent
 		token.world = world
 		token.slot = int(per_place.get(location, 0))
-		token.tooltip_text = "%s — %s" % [agent.get("kind_name", ""), agent.get("name", "")]
+		RichTooltip.attach_plain(token, "agent_identity", {"title": "%s — %s" % [agent.get("kind_name", ""), agent.get("name", "")]})
 		per_place[location] = token.slot + 1
 		_layer.add_child(token)
 		_tokens[id] = token
@@ -319,7 +319,7 @@ func _build_bar() -> void:
 	head.add_child(_bar_title)
 	var dismiss := Button.new()
 	dismiss.text = "Renvoyer"
-	dismiss.tooltip_text = "Congédier cet agent (plus d'entretien)."
+	RichTooltip.attach_plain(dismiss, "agent_dismiss")
 	dismiss.pressed.connect(func() -> void: dismiss_selected())
 	head.add_child(dismiss)
 	var close := Button.new()
@@ -385,7 +385,7 @@ func _action_button(option: Dictionary) -> Button:
 			tip.append("Risque de perdre l'agent en cas d'échec : %d %%" % int(option.get("death_risk", 0)))
 	else:
 		tip.append("Indisponible : %s" % option.get("reason", ""))
-	button.tooltip_text = "\n".join(tip)
+	RichTooltip.attach_plain(button, "agent_action", {"title": str(option.get("name", "")), "body": "\n".join(tip)})
 	button.pressed.connect(func() -> void: perform_action(str(option.get("action", ""))))
 	return button
 

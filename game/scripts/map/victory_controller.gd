@@ -174,7 +174,7 @@ func open_panel() -> void:
 	score_label.custom_minimum_size.x = WRAP_WIDTH
 	# Audit A3 D2 : le score n'était pas expliqué.
 	score_label.mouse_filter = Control.MOUSE_FILTER_PASS
-	score_label.tooltip_text = "Score de campagne : provinces tenues, objectifs remplis, prestige et trésor. Il mesure votre réussite si la campagne s'achève à l'échéance sans que tous les objectifs soient remplis."
+	RichTooltip.attach_plain(score_label, "campaign_score")
 	if objectives.is_empty():
 		var none := Label.new()
 		none.text = "Cette faction n'a pas d'objectifs historiques : survivre et prospérer."

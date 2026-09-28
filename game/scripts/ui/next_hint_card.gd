@@ -53,7 +53,7 @@ func _ready() -> void:
 	close_button.focus_mode = Control.FOCUS_NONE
 	close_button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	close_button.add_theme_color_override("font_color", HudStyle.INK_SOFT)
-	close_button.tooltip_text = "Masquer ce conseil jusqu'à la saison prochaine.\nRéglages → Carte → « Conseil : que faire maintenant » pour ne plus en voir."
+	RichTooltip.attach_plain(close_button, "hint_card_hide")
 	close_button.pressed.connect(func() -> void: dismissed.emit(hint))
 	header.add_child(close_button)
 	text_label = Label.new()
@@ -80,7 +80,7 @@ func set_hint(new_hint: Dictionary) -> void:
 		return
 	title_label.text = str(hint.get("title", ""))
 	text_label.text = str(hint.get("text", ""))
-	tooltip_text = "Cliquez pour agir."
+	RichTooltip.attach_plain(self, "hint_card_act")
 	size = Vector2.ZERO
 	reset_size()
 

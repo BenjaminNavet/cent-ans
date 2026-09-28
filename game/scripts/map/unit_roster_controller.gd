@@ -57,7 +57,7 @@ func _build_panel() -> void:
 	head.add_child(title)
 	var close := Button.new()
 	close.text = "✕"
-	close.tooltip_text = "Fermer la liste (U)"
+	RichTooltip.attach_plain(close, "close_list_u")
 	close.pressed.connect(func() -> void: panel.hide())
 	head.add_child(close)
 	_scroll = ScrollContainer.new()
@@ -120,7 +120,7 @@ func _add_section(key: String, text: String, count: int) -> void:
 	header.flat = true
 	header.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	header.text = "%s %s (%d)" % ["▾" if _expanded[key] else "▸", text, count]
-	header.tooltip_text = "Replier la liste" if _expanded[key] else "Dérouler la liste"
+	RichTooltip.attach_plain(header, "roster_toggle", {"title": "Replier la liste" if _expanded[key] else "Dérouler la liste"})
 	header.add_theme_font_size_override("font_size", HudStyle.FONT_BODY + 1)
 	header.pressed.connect(func() -> void:
 		_expanded[key] = not _expanded[key]

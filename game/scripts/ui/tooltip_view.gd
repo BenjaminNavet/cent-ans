@@ -296,7 +296,7 @@ static func _style_flavour(label: RichTextLabel) -> void:
 static func _linked_effect(effect: Dictionary) -> String:
 	var text := RichTooltip.effect_line(effect)
 	var key := str(effect.get("key", ""))
-	if not RichTooltip.EFFECT_LABELS.has(key):
+	if not RichTooltip.has_effect_label(key):
 		return text
 	return RichTooltip.link_rule_label(text, key, str(effect.get("label", RichTooltip.effect_label(key))))
 

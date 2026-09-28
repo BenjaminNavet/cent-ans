@@ -95,7 +95,7 @@ func _ready() -> void:
 	toc_button.focus_mode = Control.FOCUS_NONE
 	toc_button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	toc_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	toc_button.tooltip_text = "Sommaire du tutoriel : cliquez sur une étape pour y aller."
+	RichTooltip.attach_plain(toc_button, "tutorial_toc")
 	toc_button.toggled.connect(func(on: bool) -> void: set_toc_open(on))
 	header.add_child(toc_button)
 	toc_box = VBoxContainer.new()
@@ -118,13 +118,13 @@ func _ready() -> void:
 	skip_all_button = Button.new()
 	skip_all_button.name = "SkipAllButton"
 	skip_all_button.text = "Passer le tutoriel"
-	skip_all_button.tooltip_text = "Ferme le tutoriel pour de bon (Menu → Tutoriel ou Aide pour le relancer)."
+	RichTooltip.attach_plain(skip_all_button, "tutorial_skip_all")
 	skip_all_button.pressed.connect(func() -> void: skip_all_pressed.emit())
 	buttons.add_child(skip_all_button)
 	later_button = Button.new()
 	later_button.name = "LaterButton"
 	later_button.text = "Plus tard"
-	later_button.tooltip_text = "Range le guide. Pour le reprendre à cette étape : le conseil en haut à gauche, l'aide (F1) ou Menu → Tutoriel."
+	RichTooltip.attach_plain(later_button, "tutorial_later")
 	later_button.pressed.connect(func() -> void: later_pressed.emit())
 	buttons.add_child(later_button)
 	var spacer := Control.new()
@@ -246,7 +246,7 @@ func _rebuild_toc() -> void:
 			row.add_theme_color_override("font_color", Color(0.55, 0.12, 0.08))
 		elif index < current_index:
 			row.add_theme_color_override("font_color", Color(0.42, 0.35, 0.25))
-		row.tooltip_text = "Aller à cette étape."
+		RichTooltip.attach_plain(row, "tutorial_go_to_step")
 		row.pressed.connect(func() -> void: step_chosen.emit(index))
 		toc_box.add_child(row)
 

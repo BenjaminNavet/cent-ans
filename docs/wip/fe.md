@@ -19,12 +19,15 @@ ADR : 0098. Worktree orchestrateur : `../game_project-fe` sur `feat/fe`.
 - Tous les worktrees FE d'agents supprimés. `../game_project-fe` (`feat/fe`) = worktree d'intégration.
 
 ## Reprise
-1. Vague 3 : F6 interface (`cent-ans-dev`), F7 portraits (`cent-ans-mech`, plafond 15 $, `--dry-run`
-   d'abord), puis F8 équilibre (commise de Guyenne à régler : `commise.min_power_ratio`, `max_wars`).
+- Vague 3 : F6 interface dans `main` (639b7e49 ; carte de choix de faction encore petite dans son cadre
+  très large, à revoir à la partie pilote). F7 portraits dans `main` (67a9d198) : 62 portraits + 49
+  variantes âgées, 5,13 $ consignés. **F8 équilibre en cours** : `../game_project-fe8` (`feat/fe8-equilibre`).
+- Ensuite : fusion F8, puis partie pilote du joueur.
 - Difficultés des factions ajoutées (F4a-F4e) : choix éditoriaux des agents, à valider par le joueur.
 - Incertitudes sourcées à confirmer : Burchard Grelle (Brême), Nicolas de Brno (Trente), Dietrich IX de
   Clèves, blasons gaéliques et italiens marqués `uncertain`.
 - `virneburg` (maison) : « trois tours » non dessinées (écu plein, sans doublon).
+- Bretagne, Flandre, Navarre non jouables (pas de présentation front-end ni d'objectifs).
 
 ## Entrées F8 (signalées par la session RS, `docs/wip/rs-m-c7a.md`, ADR 0113)
 - **Ost impérial sans distance** : dès la vague 1, vers le tour 8 sur chaque graine, l'Empire s'allie au

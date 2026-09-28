@@ -377,7 +377,7 @@ func _make_settlement_row(row: Dictionary) -> Control:
 	if not siege.is_empty():
 		text += " — assiégée par %s (%s)" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
 	button.text = text
-	button.tooltip_text = "Ouvrir le panneau de la colonie et centrer la carte"
+	RichTooltip.attach_plain(button, "colony_focus_open")
 	button.pressed.connect(func() -> void: settlement_requested.emit(settlement_id))
 	return button
 
@@ -430,6 +430,6 @@ func _fill_breadcrumb() -> void:
 		crumb.add_theme_color_override("font_color", HudStyle.RUBRIC)
 		var holder := str(link.get("holder", ""))
 		var holder_name := str(link.get("holder_name", ""))
-		crumb.tooltip_text = "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"
+		RichTooltip.attach_plain(crumb, "feudal_title_crumb", {"title": "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"})
 		crumb.pressed.connect(func() -> void: breadcrumb_clicked.emit(holder))
 		breadcrumb.add_child(crumb)

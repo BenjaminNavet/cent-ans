@@ -75,7 +75,7 @@ func setup(checked: ReliefCacheStatus) -> void:
 	head.add_child(title)
 	close_button = Button.new()
 	close_button.text = "Fermer"
-	close_button.tooltip_text = "Masquer cet avis jusqu'au prochain lancement du jeu"
+	RichTooltip.attach_plain(close_button, "relief_notice_hide")
 	close_button.pressed.connect(dismiss)
 	head.add_child(close_button)
 	var body := Label.new()
@@ -94,7 +94,7 @@ func setup(checked: ReliefCacheStatus) -> void:
 	command_field.editable = false
 	command_field.selecting_enabled = true
 	command_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	command_field.tooltip_text = "À lancer à la racine du dépôt. État détaillé : %s" % ReliefCacheStatus.CHECK_COMMAND
+	RichTooltip.attach_plain(command_field, "relief_command", {"body": "État détaillé : %s" % ReliefCacheStatus.CHECK_COMMAND})
 	# ZG7c : un champ non modifiable prend la couleur « désactivée » du thème (gris sur parchemin,
 	# illisible) ; la commande est à lire et à copier : encre normale du champ.
 	command_field.ready.connect(func() -> void:
@@ -102,7 +102,7 @@ func setup(checked: ReliefCacheStatus) -> void:
 	row.add_child(command_field)
 	var copy := Button.new()
 	copy.text = "Copier"
-	copy.tooltip_text = "Copier la commande dans le presse-papiers"
+	RichTooltip.attach_plain(copy, "relief_copy_command")
 	copy.pressed.connect(func() -> void: DisplayServer.clipboard_set(ReliefCacheStatus.FETCH_COMMAND))
 	row.add_child(copy)
 	var fallback := Label.new()

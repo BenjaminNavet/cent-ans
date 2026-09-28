@@ -67,7 +67,7 @@ func _build_panel() -> void:
 	head.add_child(title)
 	var close := Button.new()
 	close.text = "✕"
-	close.tooltip_text = "Fermer la liste (B)"
+	RichTooltip.attach_plain(close, "close_list_b")
 	close.pressed.connect(func() -> void: panel.hide())
 	head.add_child(close)
 
@@ -228,7 +228,7 @@ func _add_province_row(province: Dictionary, expanded: bool, visible_settlements
 		"▾" if expanded else "▸", province.get("name", province_id),
 		Money.amount(int(province.get("income", 0))), int(province.get("slots_busy", 0)),
 		int(province.get("slots_total", 0)), revolt_text]
-	header.tooltip_text = "Agitation pondérée : %d %%" % int(province.get("unrest", 0))
+	RichTooltip.attach_plain(header, "holdings_weighted_unrest", {"body": "%d %%" % int(province.get("unrest", 0))})
 	header.pressed.connect(func() -> void:
 		_expanded[province_id] = not expanded
 		_rebuild())
@@ -237,7 +237,7 @@ func _add_province_row(province: Dictionary, expanded: bool, visible_settlements
 	var focus_button := Button.new()
 	focus_button.text = "⌖"
 	focus_button.focus_mode = Control.FOCUS_NONE
-	focus_button.tooltip_text = "Centrer la caméra sur la province et ouvrir son panneau."
+	RichTooltip.attach_plain(focus_button, "province_focus_open")
 	focus_button.pressed.connect(func() -> void: focus_province(province_id))
 	row.add_child(focus_button)
 

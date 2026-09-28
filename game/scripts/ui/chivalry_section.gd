@@ -90,7 +90,7 @@ func _show_founded(founded: Dictionary) -> void:
 		link.text = str(member.get("name", character_id))
 		UiType.apply(link, UiType.CAPTION)
 		RansomPanel.style_link(link)
-		link.tooltip_text = "Ouvrir la fiche du personnage"
+		RichTooltip.attach_plain(link, "open_character_sheet")
 		link.pressed.connect(func() -> void: _request_character(character_id))
 		flow.add_child(link)
 		member_links.append(link)

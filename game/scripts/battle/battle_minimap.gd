@@ -25,7 +25,7 @@ func _init() -> void:
 	custom_minimum_size = SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true  # bois et boues débordant du champ
-	tooltip_text = "Minicarte : cliquer pour y porter la caméra"
+	RichTooltip.attach_plain(self, "battle_minimap_click_camera")
 	set_process(false)  # CB5 : seulement pendant un repère pulsé
 
 

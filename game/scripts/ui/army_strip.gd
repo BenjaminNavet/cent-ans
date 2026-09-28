@@ -92,7 +92,7 @@ func _ready() -> void:
 	header.add_child(_title_label)
 	_count_label = HudStyle.label("", UiType.size(UiType.HEADING), HudStyle.INK)
 	_count_label.set_script(RichLabel)  # B1 : infobulle riche auto-liée (T : bulle du Codex)
-	_count_label.tooltip_text = "Régiments sous contrat d'endenture / capacité du chef"
+	RichTooltip.attach_plain(_count_label, "army_contracted_regiments")
 	_count_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header.add_child(_count_label)
 	_men_label = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
@@ -107,7 +107,7 @@ func _ready() -> void:
 	_split_button = RichButton.new()
 	_split_button.text = "Séparer"
 	UiType.apply(_split_button, UiType.CAPTION)
-	_split_button.tooltip_text = "Maj ou Ctrl + clic pour choisir les régiments à détacher"
+	RichTooltip.attach_plain(_split_button, "army_split_regiments")
 	_split_button.pressed.connect(_on_split_pressed)
 	header.add_child(_split_button)
 	_garrison_button = RichButton.new()
@@ -119,7 +119,7 @@ func _ready() -> void:
 	_mercenary_button.name = "MercenaryButton"
 	_mercenary_button.text = "Mercenaires"
 	UiType.apply(_mercenary_button, UiType.CAPTION)
-	_mercenary_button.tooltip_text = "Compagnies à engager dans la région où se trouve l'armée"
+	RichTooltip.attach_plain(_mercenary_button, "army_mercenaries_available")
 	_mercenary_button.pressed.connect(func() -> void: mercenaries_requested.emit())
 	header.add_child(_mercenary_button)
 
@@ -268,7 +268,7 @@ func _refresh() -> void:
 	_men_label.text = "%s hommes" % HudStyle.thousands(men)
 	var upkeep := total_upkeep()
 	_upkeep_label.text = "Entretien %s ₶" % HudStyle.thousands(upkeep)
-	_upkeep_label.tooltip_text = "Entretien de l'armée par saison : %s (livres tournois)" % Money.amount(upkeep)
+	RichTooltip.attach_plain(_upkeep_label, "army_upkeep_per_season", {"body": "%s (livres tournois)" % Money.amount(upkeep)})
 
 	var layout := card_layout(units.size())
 	_grid.columns = int(layout["columns"])

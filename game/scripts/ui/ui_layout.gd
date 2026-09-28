@@ -226,7 +226,7 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	entry.set_meta(_TOAST_META, true)
 	entry.mouse_filter = Control.MOUSE_FILTER_STOP
 	entry.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	entry.tooltip_text = "Cliquer pour fermer"
+	RichTooltip.attach_plain(entry, "click_to_close")
 	entry.add_theme_stylebox_override("panel", HudStyle.note_box(8))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)

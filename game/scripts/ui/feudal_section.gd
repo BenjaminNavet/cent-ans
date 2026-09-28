@@ -29,7 +29,7 @@ func _init() -> void:
 	tree_button = RichButton.new()
 	tree_button.name = "FeudalTreeButton"
 	tree_button.text = "Arbre féodal…"
-	tree_button.tooltip_text = "Suzerains, vassaux, loyautés et actions féodales"
+	RichTooltip.attach_plain(tree_button, "feudal_tree_open")
 	tree_button.pressed.connect(func() -> void: tree_requested.emit(faction_id))
 	header.add_child(tree_button)
 	_body = VBoxContainer.new()
