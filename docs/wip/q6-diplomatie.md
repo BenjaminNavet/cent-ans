@@ -12,5 +12,5 @@
       et la zone MODAL. Placé juste au-dessus de la zone MODAL (`flow_controller.gd`) ; pause /
       réglages / sauvegarde ouverts après lui le ferment.
 
-## Prochaine étape
-Tests d'UI voisins + smoke, puis rapport.
+## Résultat
+Terminé : q6_diplomacy, po/p2b/p2c/p2d/p2g/fe/ui1 verts ; smoke vert (worktree propre à 57b180d9 ; dans gp-q6 il échoue sur le travail en cours d’un autre agent dans province_panel).
