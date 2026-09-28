@@ -20,8 +20,8 @@ après les fusions FE/TW2 en cours si possible.
 - [x] IB0 squelette (orchestrateur, dans `main`) : ADR 0109, `data/ui/tooltip_style.json` +
   `tooltips.json` + schémas + `tools/tests/test_tooltip_schemas.py`, action `tooltip_explore` (Alt),
   `TooltipView` (repli sur `make_panel`), `ib_layout_test.gd` / `ib_chain_test.gd` désactivés
-- [ ] IB1 rendu en sections (dev) — branche `feat/ib1-layout`
-- [ ] IB3 chaîne à Alt (dev) — branche `feat/ib3-chain`
+- [x] IB1 lancé (28/09, agent dev en worktree) — branche `feat/ib1-layout`
+- [x] IB3 lancé (28/09, agent dev en worktree) — branche `feat/ib3-chain`
 - [ ] IB4 liens `ib:`, bulles riches, placement latéral, fil d'Ariane (dev) — après IB1 + IB3
 - [ ] IB5 avant → après (`before`/`after` au pont) (dev) — après IB1
 - [ ] IB2 autres constructeurs, ~120 infobulles brutes, tables vers `data/` (mech) — après IB1
@@ -51,3 +51,4 @@ après les fusions FE/TW2 en cours si possible.
 - 28/09 : spec (f65e12c6), décisions du joueur (Alt, détail verrouillé), IB0 écrit. P2c déjà
   fusionné par RS. `main` : dylib périmée après la fusion FE (`feudal.json` : `power_ratio` inconnu)
   → `core/build.sh` relancé par IB0 avant le smoke.
+- 28/09 : dylib de `main` à jour (déjà reconstruite par une autre session). Smoke : seul échec « 3 faction cards, got 10 » (FE, étranger à IB). IB1 et IB3 lancés. **Prochaine étape : fusionner IB1 et IB3 dans `integration/ib`, puis lancer IB4 et IB5.**
