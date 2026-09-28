@@ -111,5 +111,32 @@
     "sources": [
       "La Goulette"
     ]
+  },
+  {
+    "id": "set_tabarka",
+    "province": "prov_tunis",
+    "kind": "town",
+    "name": {
+      "display": "Tabarka",
+      "local": "Ṭabarqa",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      8.7583,
+      36.9544
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port du corail ; les Génois y ont leur comptoir.",
+    "sources": [
+      "Tabarka"
+    ]
   }
 ]

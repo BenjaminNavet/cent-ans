@@ -58,26 +58,26 @@
     ]
   },
   {
-    "id": "set_moulay_idriss",
+    "id": "set_sidi_harazem",
     "province": "prov_fes",
     "kind": "village",
     "name": {
-      "display": "Moulay Idriss Zerhoun",
-      "local": "Mūlāy Idrīs Zarhūn",
+      "display": "Sidi Harazem",
+      "local": "Sīdī Ḥarāzim",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      -5.5236,
-      34.0553
+      -4.9,
+      34.0
     ],
-    "weight": 5,
+    "weight": 4,
     "owner": null,
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Sanctuaire d'Idris Ier, fondateur de la dynastie idrisside, sur le Zerhoun.",
+    "description": "Source thermale à l'est de Fès, lieu de villégiature.",
     "sources": [
-      "Moulay Idriss Zerhoun"
+      "Sidi Harazem"
     ]
   }
 ]

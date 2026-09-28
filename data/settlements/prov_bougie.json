@@ -81,5 +81,31 @@
     "sources": [
       "Kalâa des Béni Hammad"
     ]
+  },
+  {
+    "id": "set_setif",
+    "province": "prov_bougie",
+    "kind": "town",
+    "name": {
+      "display": "Sétif",
+      "local": "Sṭīf",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      5.4108,
+      36.19
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Place forte des hauts plateaux sur la route de Constantine à Alger.",
+    "sources": [
+      "Sétif"
+    ]
   }
 ]

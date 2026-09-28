@@ -30,57 +30,55 @@
     ]
   },
   {
-    "id": "set_collo",
+    "id": "set_guelma",
     "province": "prov_bone",
     "kind": "town",
     "name": {
-      "display": "Collo",
-      "local": "Kūlū",
+      "display": "Guelma",
+      "local": "Qālama",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      6.5667,
-      37.0
+      7.4333,
+      36.4667
     ],
-    "weight": 6,
+    "weight": 8,
     "owner": null,
     "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_stone_walls",
-      "bld_port"
+      "bld_stone_walls"
     ],
-    "port": true,
-    "description": "Petit port kabyle du Collo.",
+    "port": false,
+    "description": "Ancienne Calama, ville de la Seybouse.",
     "sources": [
-      "Collo"
+      "Guelma"
     ]
   },
   {
-    "id": "set_tabarka",
+    "id": "set_souk_ahras",
     "province": "prov_bone",
     "kind": "town",
     "name": {
-      "display": "Tabarka",
-      "local": "Ṭabarqa",
+      "display": "Souk Ahras",
+      "local": "Sūq Ahrās",
       "local_language": "arabe maghrébin"
     },
     "lonlat": [
-      8.7583,
-      36.9544
+      7.95,
+      36.2833
     ],
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_stone_walls",
-      "bld_port"
+      "bld_stone_walls"
     ],
-    "port": true,
-    "description": "Port du corail ; les Génois y ont leur comptoir.",
+    "port": false,
+    "description": "Ancienne Thagaste, ville natale de saint Augustin.",
     "sources": [
-      "Tabarka"
+      "Souk Ahras"
     ]
   }
 ]

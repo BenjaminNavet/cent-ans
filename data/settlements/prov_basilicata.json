@@ -55,29 +55,28 @@
     ]
   },
   {
-    "id": "set_matera",
+    "id": "set_venosa",
     "province": "prov_basilicata",
-    "kind": "town",
+    "kind": "abbey",
     "name": {
-      "display": "Matera",
-      "local": "Matera",
+      "display": "Venosa",
+      "local": "Venosa",
       "local_language": "italien"
     },
     "lonlat": [
-      16.6,
-      40.6667
+      15.8167,
+      40.9667
     ],
-    "weight": 10,
+    "weight": 6,
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_stone_walls"
+      "bld_abbey"
     ],
     "port": false,
-    "description": "Ville troglodytique des sassi, siège d'un archevêché.",
+    "description": "Abbaye de la Trinité, nécropole des Hauteville.",
     "sources": [
-      "Matera"
+      "Venosa"
     ]
   }
 ]

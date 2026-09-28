@@ -31,10 +31,10 @@
       41.1171
     ],
     "seed_lonlat": [
-      16.6,
-      41.0
+      16.5,
+      41.1
     ],
-    "voronoi_weight": 0.7
+    "voronoi_weight": 0.75
   },
   "owner": "fac_naples",
   "culture": "cul_neapolitan",
