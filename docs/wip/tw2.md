@@ -12,7 +12,7 @@ Chaque lot a sa note `docs/wip/tw2-<lot>.md` dans sa branche `feat/tw2-<lot>`.
 | SB barres de vie + rythme siège | feat/tw2-sb (6fcd5080) | **dans main** (befaf258) ; br3 bascule 3/10→10/10 (rééquilibré par T4) |
 | T1 sort de la ville prise | feat/tw2-t1 (9851cd5d) | **dans main** (befaf258) |
 | T2 reconstitution + réserves | feat/tw2-t2 (fd7e7275) | **dans main** (befaf258) |
-| T3 mercenaires | feat/tw2-t3 (e4cdde5e) | agent stoppé ; ADR 0103 avec sonde, icônes faites, integration/tw2 déjà fusionnée ; voir `docs/wip/tw2-t3.md` de la branche |
+| T3 mercenaires | feat/tw2-t3 (e4cdde5e) | **dans main** (c60a6e73) ; suites : surprime absente du panneau budget, illustrations provisoires |
 | T4 points de capture + rééquilibrage br3 (cible 4-7/10) | feat/tw2-t4 (597020f1) | agent stoppé pendant sa vérif finale ; capture, dernier carré, repli, UI, tests, ADR 0108 ; voir `docs/wip/tw2-t4.md` |
 | T5 traditions d'armée | feat/tw2-t5 (worktree `../gp-tw2-t5`) | agent lancé (inclut dilution d'xp des renforts) |
 
