@@ -16,6 +16,12 @@ const FADED_INK := Color(0.40, 0.30, 0.18)
 const RUBRIC := Color(0.55, 0.12, 0.10)
 const EVENT_ART_DIR := "res://assets/events/"
 const ART_SIZE := Vector2(580, 240)
+## P2d : part de la hauteur de l'écran (ou de la zone `UiLayout`) laissée au corps défilant
+## (image, texte, choix) — une décision à plusieurs choix chiffrés (sort d'une place prise) peut
+## dépasser 720 px de haut ; le titre et le pied restent visibles, le reste défile plutôt que de
+## pousser la fenêtre hors de l'écran.
+const BODY_MAX_RATIO := 0.5
+const BODY_MIN_HEIGHT := 160.0
 
 var _kind_label: Label
 var _art: TextureRect
@@ -24,6 +30,7 @@ var _meta_label: Label
 var _text_label: RichTextLabel
 var _options_box: VBoxContainer
 var _queue_label: Label
+var _scroll: ScrollContainer
 var _decision_id: int = -1
 
 
@@ -52,13 +59,22 @@ func _ready() -> void:
 	header.add_child(close)
 	root.add_child(header)
 
+	_scroll = ScrollContainer.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.follow_focus = true
+	root.add_child(_scroll)
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 8)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.add_child(body)
+
 	_art = TextureRect.new()
 	_art.custom_minimum_size = ART_SIZE
 	_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_art.clip_contents = true
 	_art.hide()
-	root.add_child(_art)
+	body.add_child(_art)
 
 	_title_label = Label.new()
 	UiType.apply(_title_label, UiType.TITLE)
@@ -68,14 +84,14 @@ func _ready() -> void:
 	# Wrap width fixed: at width 0 the title wraps one letter per line on the first layout and
 	# the window grew taller than the screen (Q3).
 	_title_label.custom_minimum_size = Vector2(580, 0)
-	root.add_child(_title_label)
+	body.add_child(_title_label)
 
 	_meta_label = Label.new()
 	UiType.apply(_meta_label, UiType.CAPTION)
 	_meta_label.add_theme_color_override("font_color", FADED_INK)
 	_meta_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(_meta_label)
-	root.add_child(HSeparator.new())
+	body.add_child(_meta_label)
+	body.add_child(HSeparator.new())
 
 	_text_label = RichTextLabel.new()
 	_text_label.bbcode_enabled = true
@@ -85,16 +101,16 @@ func _ready() -> void:
 	UiType.apply(_text_label, UiType.BODY)
 	_text_label.add_theme_font_size_override("italics_font_size", UiType.size(UiType.BODY))
 	_text_label.add_theme_color_override("default_color", INK)
-	root.add_child(_text_label)
+	body.add_child(_text_label)
 	# H2 : mots du Codex cliquables (bulles imbriquées).
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", _text_label)
-	root.add_child(HSeparator.new())
+	body.add_child(HSeparator.new())
 
 	_options_box = VBoxContainer.new()
 	_options_box.add_theme_constant_override("separation", 6)
-	root.add_child(_options_box)
+	body.add_child(_options_box)
 
 	var footer := HBoxContainer.new()
 	_queue_label = Label.new()
@@ -178,7 +194,24 @@ func _option_row(option: Dictionary) -> Control:
 ## Ramène la fenêtre à la taille de son contenu une fois le texte mis en page.
 func _fit() -> void:
 	reset_size()
+	_clamp_body_height()
+	reset_size()
 	_center_on_screen()
+
+
+## P2d : borne la hauteur du corps défilant (image, texte, choix) à `BODY_MAX_RATIO` de l'écran
+## (ou de la zone `UiLayout`, hôte de la fenêtre) : une décision chargée (plusieurs choix chiffrés,
+## texte long) défile au lieu de pousser la fenêtre hors de l'écran (titre et pied toujours
+## visibles). Rien à borner sous `BODY_MIN_HEIGHT` : le contenu tient déjà.
+func _clamp_body_height() -> void:
+	if not is_inside_tree() or _scroll == null:
+		return
+	var parent := get_parent()
+	var area := (parent as Control).size if parent is Control else get_viewport_rect().size
+	if area.y <= 0.0:
+		return
+	var budget := maxf(BODY_MIN_HEIGHT, area.y * BODY_MAX_RATIO)
+	_scroll.custom_minimum_size.y = minf(_scroll.get_combined_minimum_size().y, budget)
 
 
 func _center_on_screen() -> void:
