@@ -1,0 +1,94 @@
+{
+  "name": {
+    "display": "Lancastre",
+    "local": "Lancaster",
+    "local_language": "moyen anglais"
+  },
+  "region": "angleterre_nord",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Lune",
+    "Ribble"
+  ],
+  "coastal": true,
+  "resources": [
+    "res_wool",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Lancaster",
+      "local": "Lancaster",
+      "local_language": "moyen anglais"
+    },
+    "lat": 54.047,
+    "lon": -2.801
+  },
+  "geo": {
+    "capital_lonlat": [
+      -2.801,
+      54.047
+    ],
+    "seed_lonlat": [
+      -2.75,
+      53.9
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_lancaster",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 70000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2000,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 700,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Comté de Lancastre, fief des Plantagenêt de Lancastre ; population estimée par comparaison avec le Lancashire voisin."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 3100,
+  "description": "Comté de Lancastre, tenu en 1337 par Henri, 3e comte de Lancastre, petit-fils de Henri III, aveugle depuis 1330 ; château de Lancaster, chef-lieu du comté.",
+  "sources": [
+    "Henri, 3e comte de Lancastre",
+    "Comté de Lancastre",
+    "Château de Lancaster"
+  ],
+  "id": "prov_lancaster"
+}

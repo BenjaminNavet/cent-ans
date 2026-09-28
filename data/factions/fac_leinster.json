@@ -1,0 +1,63 @@
+{
+  "name": {
+    "display": "Royaume de Leinster",
+    "local": "Ríoghacht Laighean",
+    "local_language": "gaélique irlandais"
+  },
+  "short_name": "Leinster",
+  "adjective": "leinsterois",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_donnchadh_mac_murchada",
+  "capital": "prov_leinster",
+  "capital_city": "Ferns",
+  "religion": "rel_catholic",
+  "culture": "cul_irish",
+  "succession_law": "elective",
+  "primary_title": "tit_leinster",
+  "heraldry": {
+    "blazon": "De gueules au lion rampant d'argent.",
+    "description": "Blason attesté tardivement (branche Kavanagh), utilisé par convention.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2F2F2"
+  },
+  "titles": [
+    "Roi de Leinster"
+  ],
+  "treasury": 1200,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_kildare",
+      "status": "war",
+      "since": {
+        "value": "1330",
+        "uncertain": true
+      },
+      "note": "Guerre quasi permanente avec le Pale voisin depuis l'évasion de Donnchadh Mac Murchada en janvier 1331."
+    },
+    {
+      "faction": "fac_england",
+      "status": "war",
+      "since": {
+        "value": "1331",
+        "uncertain": true
+      }
+    }
+  ],
+  "ai_personality": {
+    "aggression": 65,
+    "diplomacy": 25,
+    "trade": 15,
+    "piety": 45
+  },
+  "description": "Donnchadh Mac Murchada, élu roi de Leinster en 1328, emprisonné à Dublin puis évadé en janvier 1331 : depuis, il mène une guérilla incessante dans les montagnes de Wicklow contre le Pale anglais. Le plus fragile des royaumes gaéliques, descendant de Diarmait Mac Murchada qui appela les Anglo-Normands en 1169.",
+  "sources": [
+    "Donnchadh Mac Murchada",
+    "Royaume de Leinster"
+  ],
+  "id": "fac_leinster"
+}
