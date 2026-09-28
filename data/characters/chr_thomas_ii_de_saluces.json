@@ -1,0 +1,40 @@
+{
+  "id": "chr_thomas_ii_de_saluces",
+  "name": {
+    "display": "Thomas II de Saluces",
+    "local": "Tommaso II di Saluzzo",
+    "local_language": "français"
+  },
+  "sex": "male",
+  "house": "Saluces",
+  "faction": "fac_saluzzo",
+  "role": "ruler",
+  "birth": {
+    "value": "1287"
+  },
+  "historical": true,
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_cultured"
+  ],
+  "piety": 50,
+  "starting_location": "prov_saluzzo",
+  "status": "at_court",
+  "description": "Marquis de Saluces depuis 1296, l'un des plus longs règnes de la maison ; auteur vers ces années du Chevalier errant, long poème allégorique mêlant récit chevaleresque et traité moral.",
+  "sources": [
+    "Thomas II de Saluces",
+    "Marquisat de Saluces"
+  ],
+  "titles": [
+    {
+      "title": "Marquis de Saluces",
+      "from": {
+        "value": "1296"
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "chr_nolfo_da_montefeltro",
+  "name": {
+    "display": "Nolfo da Montefeltro",
+    "local": "Nolfo da Montefeltro",
+    "local_language": "italien"
+  },
+  "sex": "male",
+  "house": "Montefeltro",
+  "faction": "fac_urbino",
+  "role": "ruler",
+  "birth": {
+    "value": "1293"
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_ambitious"
+  ],
+  "piety": 35,
+  "starting_location": "prov_urbino",
+  "status": "at_court",
+  "description": "Fils de Federico Ier da Montefeltro, co-seigneur d'Urbin avec ses frères ; la chronologie exacte de la possession d'Urbin par les Montefeltro dans les années 1330 reste incertaine, la ville ayant changé plusieurs fois de maître au XIVe siècle.",
+  "sources": [
+    "Maison de Montefeltro",
+    "Urbin"
+  ]
+}

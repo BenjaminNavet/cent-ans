@@ -1,0 +1,39 @@
+{
+  "id": "chr_pietro_ii_di_sicilia",
+  "name": {
+    "display": "Pierre II de Sicile",
+    "local": "Pietro II di Sicilia",
+    "local_language": "sicilien"
+  },
+  "sex": "male",
+  "house": "Barcelone-Sicile",
+  "faction": "fac_sicily",
+  "role": "heir",
+  "birth": {
+    "value": "1304"
+  },
+  "historical": true,
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_sicilia",
+  "status": "at_court",
+  "description": "Fils aîné de Frédéric III, il succède à son père à la mort de ce dernier le 25 juin 1337.",
+  "sources": [
+    "Pierre II de Sicile"
+  ],
+  "titles": [
+    {
+      "title": "Roi de Trinacrie (futur)"
+    }
+  ],
+  "family": {
+    "father": "chr_federico_iii_de_sicile"
+  }
+}

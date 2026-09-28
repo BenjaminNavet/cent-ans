@@ -1,0 +1,42 @@
+{
+  "id": "chr_federico_iii_de_sicile",
+  "name": {
+    "display": "Frédéric III de Sicile",
+    "local": "Federico III di Sicilia",
+    "local_language": "sicilien"
+  },
+  "sex": "male",
+  "house": "Barcelone-Sicile",
+  "faction": "fac_sicily",
+  "role": "ruler",
+  "birth": {
+    "value": "1272"
+  },
+  "historical": true,
+  "skills": {
+    "command": 3,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 60,
+  "starting_location": "prov_sicilia",
+  "status": "at_court",
+  "description": "Second fils de Pierre III d'Aragon, roi de Trinacrie (Sicile) depuis 1296, confirmé par la paix de Caltabellotta (1302) ; vieux et goutteux, il meurt le 25 juin 1337, quelques semaines après le début de la partie, laissant la couronne à son fils Pierre II.",
+  "sources": [
+    "Frédéric III de Sicile"
+  ],
+  "death": {
+    "value": "1337-06-25"
+  },
+  "titles": [
+    {
+      "title": "Roi de Trinacrie",
+      "from": {
+        "value": "1296-12-25"
+      }
+    }
+  ]
+}
