@@ -86,9 +86,14 @@ fn a_prolonged_deficit_razes_the_least_useful_building() {
         .into_iter()
         .filter(|o| matches!(o, Order::Demolish { .. }))
     {
-        state.apply_order(&data, &swiss, order).expect("demolition applies");
+        state
+            .apply_order(&data, &swiss, order)
+            .expect("demolition applies");
     }
-    assert!(state.factions[&swiss].treasury > treasury, "refund received");
+    assert!(
+        state.factions[&swiss].treasury > treasury,
+        "refund received"
+    );
 }
 
 #[test]
