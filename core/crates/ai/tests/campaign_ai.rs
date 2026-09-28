@@ -7,6 +7,8 @@ use sim_campaign::{CampaignState, Order, Place};
 
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    // FE5: the feudal AI decides, whatever the order of the tests.
+    ai::feudal::install();
     GameData::load(&root).expect("game data loads").0
 }
 

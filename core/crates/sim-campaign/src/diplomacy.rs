@@ -1072,7 +1072,7 @@ impl CampaignState {
         }
     }
 
-    fn cut_vassal_tie(&mut self, a: &FactionId, b: &FactionId) {
+    pub(crate) fn cut_vassal_tie(&mut self, a: &FactionId, b: &FactionId) {
         for (vassal, suzerain) in [(a, b), (b, a)] {
             if self
                 .factions
@@ -1949,15 +1949,20 @@ pub(crate) fn resolve_diplomacy(
         let v = state.factions.get_mut(&vassal).expect("exists");
         v.loyalty = move_towards(v.loyalty, target, data.feudal_rules.loyalty.drift_per_turn);
         let loyalty = v.loyalty;
-        if loyalty < data.feudal_rules.rebellion_loyalty
+        // FE5: AI vassals revolt by their own order when the policy plans it.
+        let planned = crate::feudal::policy().planned_revolts && vassal != state.player_faction;
+        if !planned
+            && loyalty < data.feudal_rules.rebellion_loyalty
             && !state.is_at_war(&vassal, &suzerain)
             && state
                 .rng
                 .chance_permille(data.feudal_rules.rebellion_permille)
         {
+            // FE (F3): the felony case first (FE5: once the tie is cut the
+            // rebel no longer holds of its suzerain and no case opened).
+            crate::feudal::on_revolt(state, data, &vassal, &suzerain);
             state.cut_vassal_tie(&vassal, &suzerain);
             state.start_war(&vassal, &suzerain);
-            crate::feudal::on_revolt(state, data, &vassal, &suzerain); // FE (F3)
             events.push(
                 GameEvent::new(
                     EventKind::VassalRebellion,
@@ -2283,7 +2288,7 @@ pub fn answers_call_to_arms(
         return false;
     };
     if ally_state.suzerain.as_ref() == Some(defender) {
-        return ally_state.loyalty >= data.feudal_rules.call_to_arms_loyalty;
+        return crate::feudal::answers_host(state, data, ally, defender, aggressor);
     }
     if state
         .factions
