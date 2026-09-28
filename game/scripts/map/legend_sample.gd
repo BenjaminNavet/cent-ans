@@ -52,7 +52,7 @@ static func build(sample_data: Dictionary, legend_context: Dictionary) -> Contro
 		"construction":
 			var label := Label.new()
 			label.text = "⚒"
-			label.add_theme_font_size_override("font_size", 22)
+			label.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 			label.add_theme_color_override("font_color", HAMMER)
 			label.add_theme_color_override("font_outline_color", Color(0.97, 0.92, 0.80))
 			label.add_theme_constant_override("outline_size", 6)

@@ -40,7 +40,7 @@ func _ready() -> void:
 	header.add_child(kicker)
 	title_label = Label.new()
 	title_label.name = "Title"
-	title_label.add_theme_font_size_override("font_size", 15)
+	title_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	title_label.add_theme_color_override("font_color", HudStyle.INK)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -51,7 +51,7 @@ func _ready() -> void:
 	close_button.text = "×"
 	close_button.flat = true
 	close_button.focus_mode = Control.FOCUS_NONE
-	close_button.add_theme_font_size_override("font_size", 15)
+	close_button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	close_button.add_theme_color_override("font_color", HudStyle.INK_SOFT)
 	close_button.tooltip_text = "Masquer ce conseil jusqu'à la saison prochaine.\nRéglages → Carte → « Conseil : que faire maintenant » pour ne plus en voir."
 	close_button.pressed.connect(func() -> void: dismissed.emit(hint))
@@ -60,7 +60,7 @@ func _ready() -> void:
 	text_label.name = "Text"
 	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text_label.custom_minimum_size = Vector2(WIDTH - 24.0, 0)
-	text_label.add_theme_font_size_override("font_size", 13)
+	text_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	text_label.add_theme_color_override("font_color", HudStyle.INK_SOFT)
 	text_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(text_label)

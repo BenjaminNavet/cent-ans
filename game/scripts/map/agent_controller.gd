@@ -314,7 +314,7 @@ func _build_bar() -> void:
 	var head := HBoxContainer.new()
 	box.add_child(head)
 	_bar_title = Label.new()
-	_bar_title.add_theme_font_size_override("font_size", 18)
+	_bar_title.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	_bar_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(_bar_title)
 	var dismiss := Button.new()
@@ -335,7 +335,7 @@ func _build_bar() -> void:
 	_bar_report = Label.new()
 	_bar_report.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_bar_report.custom_minimum_size = Vector2(560, 0)
-	_bar_report.add_theme_font_size_override("font_size", 13)
+	_bar_report.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	box.add_child(_bar_report)
 	bar.hide()
 	map.ui.add_child(bar)
@@ -453,7 +453,7 @@ func _build_registry() -> void:
 	box.add_child(head)
 	var title := Label.new()
 	title.text = "Agents (G)"
-	title.add_theme_font_size_override("font_size", 20)
+	title.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
 	var close := Button.new()

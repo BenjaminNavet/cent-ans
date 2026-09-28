@@ -62,7 +62,7 @@ func _ready() -> void:
 	panel.add_child(box)
 	var title := Label.new()
 	title.text = "Ordres du chef"
-	title.add_theme_font_size_override("font_size", 13)
+	title.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	title.add_theme_color_override("font_color", INK_MUTED)
 	box.add_child(title)
 	row = HBoxContainer.new()
@@ -166,7 +166,7 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 		var glyph := Label.new()
 		glyph.text = GLYPHS.get(str(order.get("kind", "")), "✦")
 		glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		glyph.add_theme_font_size_override("font_size", 24)
+		glyph.add_theme_font_size_override("font_size", UiType.size(UiType.TITLE))
 		glyph.add_theme_color_override("font_color", INK)
 		icon_node = glyph
 	icon_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -175,7 +175,7 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	name_label.custom_minimum_size = Vector2(BUTTON_SIZE.x - 8, 0)
-	name_label.add_theme_font_size_override("font_size", 12)
+	name_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	name_label.add_theme_color_override("font_color", INK)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	inner.add_child(name_label)
@@ -183,7 +183,7 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 	var key := Label.new()
 	key.text = physical_label(BURN_HOTKEY) if index < 0 else (physical_label(HOTKEYS[index]) if index < HOTKEYS.size() else "")
 	key.position = Vector2(5, 1)
-	key.add_theme_font_size_override("font_size", 11)
+	key.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	key.add_theme_color_override("font_color", INK_MUTED)
 	key.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	button.add_child(key)
@@ -199,7 +199,7 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 	timer.offset_right = -5
 	timer.offset_top = 0
 	timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	timer.add_theme_font_size_override("font_size", 14)
+	timer.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	timer.add_theme_color_override("font_color", Color(1, 0.95, 0.85))
 	timer.add_theme_color_override("font_outline_color", Color(0.1, 0.06, 0.03))
 	timer.add_theme_constant_override("outline_size", 5)

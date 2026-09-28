@@ -42,7 +42,7 @@ func _init() -> void:
 	box.add_child(header)
 	title_label = Label.new()
 	title_label.text = "Captifs et rançons"
-	title_label.add_theme_font_size_override("font_size", 22)
+	title_label.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title_label)
 	var close_button := Button.new()
@@ -54,7 +54,7 @@ func _init() -> void:
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	error_label.custom_minimum_size = Vector2(520, 0)
-	error_label.add_theme_font_size_override("font_size", 13)
+	error_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	error_label.add_theme_color_override("font_color", ERROR_COLOR)
 	error_label.hide()
 	box.add_child(error_label)
@@ -126,7 +126,7 @@ func _heading(text: String, hint: String) -> Control:
 	box.add_theme_constant_override("separation", 0)
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	label.add_theme_color_override("font_color", RUBRIC_COLOR)
 	box.add_child(label)
 	var rich := RichTextLabel.new()
@@ -135,7 +135,7 @@ func _heading(text: String, hint: String) -> Control:
 	rich.scroll_active = false
 	rich.custom_minimum_size = Vector2(520, 0)
 	rich.add_theme_color_override("default_color", MUTED_COLOR)
-	rich.add_theme_font_size_override("normal_font_size", 12)
+	rich.add_theme_font_size_override("normal_font_size", UiType.size(UiType.CAPTION))
 	rich.text = CodexText.format(hint)
 	box.add_child(rich)
 	var bubbles := _root_node("/root/CodexBubbles")
@@ -147,7 +147,7 @@ func _heading(text: String, hint: String) -> Control:
 func _muted(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	label.add_theme_color_override("font_color", MUTED_COLOR)
 	return label
 
@@ -173,7 +173,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	var link := LinkButton.new()
 	link.text = name_text
 	link.tooltip_text = "Ouvrir la fiche du personnage"
-	link.add_theme_font_size_override("font_size", 15)
+	link.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	style_link(link)
 	link.pressed.connect(func() -> void: request_character(character_id))
 	name_row.add_child(link)
@@ -192,7 +192,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	sub.text = subtitle
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sub.custom_minimum_size = Vector2(440, 0)
-	sub.add_theme_font_size_override("font_size", 12)
+	sub.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	sub.add_theme_color_override("font_color", MUTED_COLOR)
 	text_box.add_child(sub)
 	return line
