@@ -28,12 +28,12 @@ Note E : `alerts.gd` garde une lecture par province (détail du siège absent de
 
 | Lot | Contenu | Branche | État |
 |---|---|---|---|
-| P2a | cour, fiche perso, arbre familial | `feat/p2a-court` | en cours |
+| P2a | cour, fiche perso, arbre familial | `feat/p2a-court` | **fusionné** (9b1ee0bb) ; cour et fiche restent hors `UiLayout` (même cause que P2b) |
 | P2b | techniques, diplomatie | `feat/p2b-tech-diplo` | **fusionné** (9b1ee0bb) — fini (9ceabff1) ; Tech/Diplo restent hors `UiLayout` (reparentage casse `map_ui._keep_on_screen`) |
 | P2c | codex, encyclopédie, infobulles | `feat/p2c-codex` | en cours (codex en `MODAL`) |
 | P2e | menus secondaires | `feat/p2e-menus` | **fusionné** (9b1ee0bb) — fini (816c775b) ; `SaveLoadDialog` de `start_menu`/`map_ui` pas en zone |
-| G | Bordeaux, Avignon, Calais, Bruges ; rives | `feat/rs-g-cities` | en cours |
-| J | pavois face à une cible cachée (test ignoré de D) | `feat/rs-j-pavise` | en cours |
+| G | Bordeaux, Avignon, Calais, Bruges ; rives | `feat/rs-g-cities` | **fusionné** (9b1ee0bb) ; recuisson par le joueur |
+| J | pavois face à une cible cachée (test ignoré de D) | `feat/rs-j-pavise` | **fusionné** (9b1ee0bb), sondes ep7/ep9b/eq7 identiques |
 
 Suites notées : sonde c7a (trésor France 38 297 < 40 000) confiée à B ; `alerts.gd` (champ de siège au pont) ;
 P2g éventuel : Tech/Diplo et `SaveLoadDialog` dans `UiLayout` via `map_ui`/`PanelStack` ; P2d sièges après TW2 SB ; P2f après tous les P2.
