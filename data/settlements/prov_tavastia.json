@@ -1,0 +1,106 @@
+[
+  {
+    "id": "set_tavastehus",
+    "province": "prov_tavastia",
+    "kind": "city",
+    "name": {
+      "display": "Tavastehus",
+      "local": "Tavastehus",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      24.459,
+      60.9959
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château royal suédois de Häme, sur le lac Vanajavesi.",
+    "sources": [
+      "Château de Häme"
+    ]
+  },
+  {
+    "id": "set_hattula",
+    "province": "prov_tavastia",
+    "kind": "abbey",
+    "name": {
+      "display": "Hattula",
+      "local": "Hattula",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      24.3719,
+      61.0517
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Église de la Sainte-Croix, sanctuaire de la Tavastie.",
+    "sources": [
+      "Hattula"
+    ]
+  },
+  {
+    "id": "set_vanaja",
+    "province": "prov_tavastia",
+    "kind": "village",
+    "name": {
+      "display": "Vanaja",
+      "local": "Vanaja",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      24.3,
+      61.05
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Domaine seigneurial et paroisse en bord de lac.",
+    "sources": [
+      "Vanaja"
+    ]
+  },
+  {
+    "id": "set_palkane",
+    "province": "prov_tavastia",
+    "kind": "village",
+    "name": {
+      "display": "Pälkäne",
+      "local": "Pälkäne",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      24.2894,
+      61.3367
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Paroisse tavastienne aux grandes fermes libres.",
+    "sources": [
+      "Pälkäne"
+    ]
+  }
+]

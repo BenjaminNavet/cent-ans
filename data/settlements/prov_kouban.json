@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_matrega",
+    "province": "prov_kouban",
+    "kind": "city",
+    "name": {
+      "display": "Matrega (Taman)",
+      "local": "Matarcha",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      36.72,
+      45.22
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne Tmoutarakan, port du détroit de Kertch (rôle génois postérieur).",
+    "sources": [
+      "Taman"
+    ]
+  },
+  {
+    "id": "set_kopa",
+    "province": "prov_kouban",
+    "kind": "village",
+    "name": {
+      "display": "Kopa",
+      "local": "Копа",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      38.13,
+      45.25
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Comptoir du bas Kouban (emplacement approximatif ; Copa des Génois).",
+    "sources": [
+      "Kopa"
+    ]
+  },
+  {
+    "id": "set_kouban_camps",
+    "province": "prov_kouban",
+    "kind": "village",
+    "name": {
+      "display": "Camps du Kouban",
+      "local": "Кубань",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      40.2,
+      45.3
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Campements des nomades du Kouban (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Kouban"
+    ]
+  }
+]

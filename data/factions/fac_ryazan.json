@@ -1,0 +1,60 @@
+{
+  "id": "fac_ryazan",
+  "name": {
+    "display": "Grande-principauté de Riazan",
+    "local": "Великое княжество Рязанское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Riazan",
+  "adjective": "riazanais",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_ivan_korotopol",
+  "capital": "prov_ryazan",
+  "capital_city": "Pereslavl-Riazanski",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_ryazan",
+  "heraldry": {
+    "blazon": "D'azur au pal d'or.",
+    "description": "Blason de convention pour Riazan (armes historiques : un prince sur son trône).",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Grand-prince de Riazan"
+  ],
+  "treasury": 6000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_moscow",
+      "status": "peace",
+      "note": "Contentieux de Kolomna (prise en 1301) ; Ivan Korotopol, réputé hostile à Moscou, y sera attiré et supprimé (1342-1343)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 45,
+    "trade": 40,
+    "piety": 55
+  },
+  "description": "Grande-principauté frontalière de la steppe, ravagée par les Mongols en 1237 ; ses princes, tributaires de la Horde, disputent Kolomna à Moscou ; Ivan II Korotopol y règne depuis 1327.",
+  "sources": [
+    "Principauté de Riazan",
+    "Ivan II de Riazan"
+  ]
+}

@@ -47,6 +47,16 @@
       "faction": "fac_empire",
       "status": "peace",
       "note": "Rivalité Luxembourg-Wittelsbach : Charles sera élu roi des Romains contre Louis IV en 1346."
+    },
+    {
+      "faction": "fac_hungary",
+      "status": "alliance",
+      "note": "Congrès de Visegrád (1335) : alliance de Jean de Bohême avec Charles Robert et Casimir de Pologne."
+    },
+    {
+      "faction": "fac_poland",
+      "status": "peace",
+      "note": "Traité de Trentschin (1335) : Jean renonce à la couronne de Pologne, Casimir à la Silésie."
     }
   ],
   "ai_personality": {

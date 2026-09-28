@@ -774,29 +774,45 @@ fn supply_modifiers(
 /// `location`: positive recovery in friendly territory, negative loss
 /// outside it (heavier in winter). Shared by [`resolve_attrition`] and the
 /// supply map filter (`crate::map_lens`), which passes no general.
+///
+/// OM3 (ADR 0116): the province terrain scales the forage (`terrain_supply`
+/// of `economy.json`: thin on the steppe, very thin in the desert) and the
+/// desert costs `summer_loss` more every summer, friendly territory included.
 pub fn seasonal_supply_change(
     state: &CampaignState,
     data: &GameData,
     location: &ProvinceId,
     friendly: bool,
     general: Option<&data_model::CharacterId>,
-    winter: bool,
+    season: Season,
 ) -> i8 {
     let (recovery_bonus, loss_relief) = supply_modifiers(state, data, location, friendly, general);
     let rules = &data.economy_rules;
+    let forage = data
+        .provinces
+        .get(location)
+        .map(|p| rules.terrain_supply(p.terrain))
+        .unwrap_or_default();
+    let summer = if season == Season::Summer {
+        f64::from(forage.summer_loss)
+    } else {
+        0.0
+    };
     if friendly {
-        return (f64::from(rules.supply_recovery) + recovery_bonus)
-            .round()
-            .clamp(0.0, 100.0) as i8;
+        let recovery = (f64::from(rules.supply_recovery) + recovery_bonus).max(0.0)
+            * forage.recovery_percent.max(0.0)
+            / 100.0;
+        return (recovery - summer).round().clamp(-100.0, 100.0) as i8;
     }
-    let base_loss = if winter {
+    let base_loss = if season == Season::Winter {
         rules.supply_loss_winter
     } else {
         rules.supply_loss
     };
-    -((f64::from(base_loss) * (1.0 - loss_relief / 100.0))
-        .round()
-        .clamp(0.0, 100.0) as i8)
+    let loss = f64::from(base_loss) * forage.loss_percent.max(0.0) / 100.0
+        * (1.0 - loss_relief / 100.0)
+        + summer;
+    -(loss.round().clamp(0.0, 100.0) as i8)
 }
 
 /// Phase 6: supply and attrition for field armies.
@@ -806,7 +822,7 @@ pub(crate) fn resolve_attrition(
     events: &mut Vec<GameEvent>,
 ) {
     let ids: Vec<ArmyId> = state.armies.keys().cloned().collect();
-    let winter = state.season == Season::Winter;
+    let season = state.season;
     for army_id in ids {
         let (faction, settlement, general, province) = {
             let army = &state.armies[&army_id];
@@ -826,10 +842,10 @@ pub(crate) fn resolve_attrition(
                 .as_ref()
                 .is_some_and(|s| state.is_friendly_settlement(&faction, s));
         let change =
-            seasonal_supply_change(state, data, &location, friendly, general.as_ref(), winter);
+            seasonal_supply_change(state, data, &location, friendly, general.as_ref(), season);
         let army_label = crate::events::capitalize(&state.army_name(data, &army_id));
         let army = state.armies.get_mut(&army_id).expect("exists");
-        if friendly {
+        if friendly && change >= 0 {
             army.supply = army.supply.saturating_add(change.unsigned_abs()).min(100);
             continue;
         }

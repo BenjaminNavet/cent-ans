@@ -1,0 +1,69 @@
+{
+  "id": "tit_vladimir",
+  "rank": "duchy",
+  "name": {
+    "display": "Grande-principauté de Vladimir",
+    "local": "Великое княжество Владимирское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la bande d'or.",
+    "description": "Armes de convention de Moscou (le cavalier terrassant le dragon n'est fixé que plus tard).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_vladimir",
+    "prov_pereslavl",
+    "prov_kostroma",
+    "prov_uglich"
+  ],
+  "holder_1337": {
+    "faction": "fac_moscow",
+    "sources": [
+      "Ivan Ier de Moscou",
+      "Grande-principauté de Moscou",
+      "Grande-principauté de Vladimir"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_moscow_hold",
+      "title": "Le grand-prince",
+      "description": "Tenir le titre de grand-prince de Vladimir.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_vladimir"
+      }
+    },
+    {
+      "id": "obj_moscow_gather",
+      "title": "Rassembler les terres",
+      "description": "Tenir Tver et Novgorod.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tver",
+          "prov_novgorod"
+        ]
+      }
+    },
+    {
+      "id": "obj_moscow_free",
+      "title": "Secouer le joug",
+      "description": "Devenir indépendant de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Principauté cadette des Riourikides qui, grâce à l'habileté d'Ivan Kalita (« la Bourse »), a reçu du khan le yarlyk de grand-prince de Vladimir (1331) ; il collecte le tribut de toute la Rus', gagne en richesse et attire le métropolite (1325).",
+  "sources": [
+    "Ivan Ier de Moscou",
+    "Grande-principauté de Moscou",
+    "Grande-principauté de Vladimir"
+  ]
+}

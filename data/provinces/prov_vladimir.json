@@ -1,0 +1,90 @@
+{
+  "id": "prov_vladimir",
+  "name": {
+    "display": "Vladimir",
+    "local": "Владимир",
+    "local_language": "russe"
+  },
+  "region": "rus_centre",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Kliazma"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Vladimir",
+      "local": "Владимир",
+      "local_language": "russe"
+    },
+    "lat": 56.129,
+    "lon": 40.407
+  },
+  "geo": {
+    "capital_lonlat": [
+      40.407,
+      56.129
+    ],
+    "seed_lonlat": [
+      40.4,
+      56.3
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_moscow",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 97900,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 6600,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3300,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2200,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2100,
+  "description": "Ancienne capitale du grand-duché de Vladimir-Souzdal, dont le siège du grand-prince est transféré de fait à Moscou ; cathédrale de la Dormition, porte d'or, Bogolioubovo.",
+  "sources": [
+    "Vladimir",
+    "Grande-principauté de Vladimir"
+  ]
+}

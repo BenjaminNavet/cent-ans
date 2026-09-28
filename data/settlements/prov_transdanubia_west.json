@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_gyor",
+    "province": "prov_transdanubia_west",
+    "kind": "city",
+    "name": {
+      "display": "Győr",
+      "local": "Győr",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      17.6504,
+      47.6875
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville épiscopale et forteresse de la Rába, verrou de la route de Vienne.",
+    "sources": [
+      "Győr"
+    ]
+  },
+  {
+    "id": "set_sopron",
+    "province": "prov_transdanubia_west",
+    "kind": "town",
+    "name": {
+      "display": "Sopron",
+      "local": "Sopron",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      16.5845,
+      47.6817
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville royale libre des marches autrichiennes, riche de son vin.",
+    "sources": [
+      "Sopron"
+    ]
+  },
+  {
+    "id": "set_pannonhalma",
+    "province": "prov_transdanubia_west",
+    "kind": "abbey",
+    "name": {
+      "display": "Pannonhalma",
+      "local": "Pannonhalma",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      17.7574,
+      47.5511
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Archiabbaye bénédictine fondée en 996 sur le Mont Saint-Martin.",
+    "sources": [
+      "Pannonhalma"
+    ]
+  }
+]

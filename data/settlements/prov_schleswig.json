@@ -1,0 +1,107 @@
+[
+  {
+    "id": "set_slesvig",
+    "province": "prov_schleswig",
+    "kind": "city",
+    "name": {
+      "display": "Slesvig",
+      "local": "Slesvig",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      9.5686,
+      54.5153
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale du duché, au fond de la Slien ; château de Gottorp et cathédrale Saint-Pierre.",
+    "sources": [
+      "Schleswig"
+    ]
+  },
+  {
+    "id": "set_flensburg",
+    "province": "prov_schleswig",
+    "kind": "town",
+    "name": {
+      "display": "Flensbourg",
+      "local": "Flensborg",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      9.4321,
+      54.7823
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port du fond du fjord, ville danoise chartrée en 1284.",
+    "sources": [
+      "Flensbourg"
+    ]
+  },
+  {
+    "id": "set_haderslev",
+    "province": "prov_schleswig",
+    "kind": "castle",
+    "name": {
+      "display": "Haderslev",
+      "local": "Haderslev",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      9.4894,
+      55.2494
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château ducal et ville du nord du duché.",
+    "sources": [
+      "Haderslev"
+    ]
+  },
+  {
+    "id": "set_logumkloster",
+    "province": "prov_schleswig",
+    "kind": "abbey",
+    "name": {
+      "display": "Løgumkloster",
+      "local": "Løgum Kloster",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      8.9736,
+      54.9911
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne de Sønderjylland.",
+    "sources": [
+      "Løgumkloster"
+    ]
+  }
+]

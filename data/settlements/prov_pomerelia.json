@@ -1,0 +1,108 @@
+[
+  {
+    "id": "set_danzig",
+    "province": "prov_pomerelia",
+    "kind": "city",
+    "name": {
+      "display": "Dantzig",
+      "local": "Danzig",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      18.6466,
+      54.352
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_guild_hall",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Grande ville de l'Ordre et de la Hanse, à l'embouchure de la Vistule, avec le château des chevaliers.",
+    "sources": [
+      "Gdańsk"
+    ]
+  },
+  {
+    "id": "set_mewe",
+    "province": "prov_pomerelia",
+    "kind": "castle",
+    "name": {
+      "display": "Mewe",
+      "local": "Mewe",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      18.8,
+      53.8333
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de l'Ordre sur la Vistule, siège d'une commanderie.",
+    "sources": [
+      "Gniew"
+    ]
+  },
+  {
+    "id": "set_dirschau",
+    "province": "prov_pomerelia",
+    "kind": "town",
+    "name": {
+      "display": "Dirschau",
+      "local": "Dirschau",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      18.7833,
+      54.0833
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Bourg de la Vistule, péage de l'Ordre.",
+    "sources": [
+      "Tczew"
+    ]
+  },
+  {
+    "id": "set_oliva",
+    "province": "prov_pomerelia",
+    "kind": "abbey",
+    "name": {
+      "display": "Oliva",
+      "local": "Oliva",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      18.5667,
+      54.4167
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne aux portes de Dantzig, sépulture des ducs de Pomérélie.",
+    "sources": [
+      "Abbaye d'Oliwa"
+    ]
+  }
+]

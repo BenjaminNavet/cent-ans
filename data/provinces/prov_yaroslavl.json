@@ -1,0 +1,90 @@
+{
+  "id": "prov_yaroslavl",
+  "name": {
+    "display": "Iaroslavl",
+    "local": "Ярославль",
+    "local_language": "russe"
+  },
+  "region": "rus_centre",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Volga",
+    "Kotorosl"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Iaroslavl",
+      "local": "Ярославль",
+      "local_language": "russe"
+    },
+    "lat": 57.63,
+    "lon": 39.87
+  },
+  "geo": {
+    "capital_lonlat": [
+      39.87,
+      57.63
+    ],
+    "seed_lonlat": [
+      40.0,
+      57.85
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_yaroslavl",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 53400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1200,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1200,
+  "description": "Petite principauté de la Volga, tenue par la lignée de Vassili Davidovitch (1321-1345), dans le sillage de Moscou.",
+  "sources": [
+    "Principauté de Iaroslavl",
+    "Iaroslavl"
+  ]
+}

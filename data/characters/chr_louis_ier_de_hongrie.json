@@ -1,0 +1,42 @@
+{
+  "id": "chr_louis_ier_de_hongrie",
+  "name": {
+    "display": "Louis Ier de Hongrie",
+    "local": "Nagy Lajos",
+    "local_language": "hongrois"
+  },
+  "epithet": "le Grand",
+  "sex": "male",
+  "house": "Anjou-Hongrie",
+  "faction": "fac_hungary",
+  "role": "heir",
+  "birth": {
+    "value": "1326-03-05"
+  },
+  "death": {
+    "value": "1382-09-10",
+    "place": "Nagyszombat"
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_chivalrous",
+    "trait_pious",
+    "trait_brave"
+  ],
+  "piety": 70,
+  "family": {
+    "father": "chr_charles_i_robert_de_hongrie",
+    "mother": "chr_elisabeth_de_pologne"
+  },
+  "starting_location": "prov_hungary_central",
+  "status": "minor",
+  "description": "Fils aîné de Charles Robert, âgé de onze ans ; futur roi de Hongrie (1342) et de Pologne (1370).",
+  "sources": [
+    "Louis Ier de Hongrie"
+  ]
+}

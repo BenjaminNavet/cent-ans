@@ -1,0 +1,38 @@
+{
+  "id": "chr_eberhard_von_monheim",
+  "name": {
+    "display": "Eberhard von Monheim",
+    "local": "Eberhard von Monheim",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Ordre Livonien",
+  "faction": "fac_livonian_order",
+  "role": "ruler",
+  "birth": {
+    "value": "1285",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1340",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 3
+  },
+  "traits": [
+    "trait_crusader",
+    "trait_veteran"
+  ],
+  "piety": 80,
+  "starting_location": "prov_livonia",
+  "status": "at_court",
+  "description": "Maître de Livonie de 1328 à sa mort en 1340 ; il a réduit Riga à l'obéissance en 1330 et mène la guerre contre les Lituaniens.",
+  "sources": [
+    "Eberhard von Monheim",
+    "Ordre Livonien"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "id": "chr_valdemar_v_de_slesvig",
+  "name": {
+    "display": "Valdemar V de Slesvig",
+    "local": "Valdemar V af Slesvig",
+    "local_language": "danois médiéval"
+  },
+  "sex": "male",
+  "house": "Abel",
+  "faction": "fac_schleswig",
+  "role": "ruler",
+  "birth": {
+    "value": "1314",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1364"
+  },
+  "historical": true,
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_proud",
+    "trait_ambitious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_schleswig",
+  "status": "at_court",
+  "description": "Duc de Slesvig, brièvement élu roi de Danemark comme Valdemar III (1326-1329) ; il gouverne son duché depuis 1330 en s'appuyant sur les Holstein.",
+  "sources": [
+    "Valdemar III de Danemark"
+  ]
+}

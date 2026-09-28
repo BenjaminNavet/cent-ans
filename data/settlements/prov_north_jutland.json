@@ -1,0 +1,105 @@
+[
+  {
+    "id": "set_aalborg",
+    "province": "prov_north_jutland",
+    "kind": "city",
+    "name": {
+      "display": "Aalborg",
+      "local": "Aalborg",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      9.9217,
+      57.0488
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Ville marchande du Limfjord, port du hareng et du sel.",
+    "sources": [
+      "Aalborg"
+    ]
+  },
+  {
+    "id": "set_viborg_north",
+    "province": "prov_north_jutland",
+    "kind": "castle",
+    "name": {
+      "display": "Hald",
+      "local": "Hald",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      9.3,
+      56.95
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse épiscopale près de Viborg gardant le Limfjord ; simple position frontière.",
+    "sources": [
+      "Hald Hovedgaard"
+    ]
+  },
+  {
+    "id": "set_vestervig",
+    "province": "prov_north_jutland",
+    "kind": "abbey",
+    "name": {
+      "display": "Vestervig",
+      "local": "Vestervig",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      8.3,
+      56.77
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Grande église abbatiale du Thy, l'un des plus anciens sanctuaires du Jutland.",
+    "sources": [
+      "Église de Vestervig"
+    ]
+  },
+  {
+    "id": "set_skagen",
+    "province": "prov_north_jutland",
+    "kind": "village",
+    "name": {
+      "display": "Skagen",
+      "local": "Skagen",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      10.5924,
+      57.7209
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Village de pêcheurs à la pointe du Jutland, marché saisonnier du hareng.",
+    "sources": [
+      "Skagen"
+    ]
+  }
+]

@@ -1,0 +1,99 @@
+{
+  "id": "prov_riga",
+  "name": {
+    "display": "Ville de Riga",
+    "local": "Rīga",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "livonie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Dvina"
+  ],
+  "coastal": true,
+  "ports": [
+    "Riga"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Riga",
+      "local": "Riga",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 56.9496,
+    "lon": 24.1052
+  },
+  "geo": {
+    "capital_lonlat": [
+      24.1052,
+      56.9496
+    ],
+    "seed_lonlat": [
+      24.3,
+      56.95
+    ],
+    "voronoi_weight": 0.55
+  },
+  "owner": "fac_riga",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 15000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7500,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 450,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 180,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Riga : environ 7 000 habitants en ville, chiffre incertain."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_guild_hall",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 800,
+  "description": "La grande ville hanséatique de la Dvina : entrepôt du bois, du blé, de la cire et des fourrures de la Russie. Soumise en 1330 par l'Ordre, qui a bâti le château Saint-Georges, elle garde son conseil et ses privilèges.",
+  "sources": [
+    "Riga",
+    "Siège de Riga (1329-1330)",
+    "Hanse"
+  ]
+}

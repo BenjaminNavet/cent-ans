@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_wloclawek",
+    "province": "prov_kuyavia",
+    "kind": "city",
+    "name": {
+      "display": "Włocławek",
+      "local": "Włocławek",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      19.0678,
+      52.6483
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Siège de l'évêché de Kuyavie sur la Vistule, à la frontière de l'Ordre.",
+    "sources": [
+      "Włocławek"
+    ]
+  },
+  {
+    "id": "set_inowroclaw",
+    "province": "prov_kuyavia",
+    "kind": "town",
+    "name": {
+      "display": "Inowrocław",
+      "local": "Inowrocław",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      18.2611,
+      52.7936
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville des salines de Kuyavie, capitale d'un duché piast.",
+    "sources": [
+      "Inowrocław"
+    ]
+  },
+  {
+    "id": "set_kruszwica",
+    "province": "prov_kuyavia",
+    "kind": "castle",
+    "name": {
+      "display": "Kruszwica",
+      "local": "Kruszwica",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      18.3227,
+      52.6614
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Vieux château piast sur le lac Gopło, berceau légendaire de la dynastie (tour de la Souris).",
+    "sources": [
+      "Kruszwica"
+    ]
+  }
+]

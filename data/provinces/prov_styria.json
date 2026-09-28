@@ -1,0 +1,94 @@
+{
+  "id": "prov_styria",
+  "name": {
+    "display": "Styrie",
+    "local": "Steiermark",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_est",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Mur",
+    "Enns",
+    "Drave"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wood",
+    "res_wine",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Graz",
+      "local": "Graz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 47.0707,
+    "lon": 15.4395
+  },
+  "geo": {
+    "capital_lonlat": [
+      15.4395,
+      47.0707
+    ],
+    "seed_lonlat": [
+      15.2,
+      47.2
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_austria",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Duché de Styrie, aux mains des Habsbourg depuis 1282.",
+    "classes": {
+      "peasants": {
+        "count": 150000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3300,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2250,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls",
+    "bld_forge"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2200,
+  "description": "Duché de Styrie, aux Habsbourg depuis 1282 ; mines de fer de l'Erzberg, château de Graz et abbaye d'Admont sur l'Enns.",
+  "sources": [
+    "Duché de Styrie",
+    "Graz"
+  ]
+}

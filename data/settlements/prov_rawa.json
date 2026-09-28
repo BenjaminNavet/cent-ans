@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_rawa_mazowiecka",
+    "province": "prov_rawa",
+    "kind": "city",
+    "name": {
+      "display": "Rawa Mazowiecka",
+      "local": "Rawa",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      20.2503,
+      51.7669
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château ducal d'un duché piast réduit, aux marches de la Mazovie et de Łęczyca.",
+    "sources": [
+      "Rawa Mazowiecka"
+    ]
+  },
+  {
+    "id": "set_sochaczew",
+    "province": "prov_rawa",
+    "kind": "town",
+    "name": {
+      "display": "Sochaczew",
+      "local": "Sochaczew",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      20.2384,
+      52.2295
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Petite ville de la Bzura, sur la route de Varsovie à Łęczyca.",
+    "sources": [
+      "Sochaczew"
+    ]
+  },
+  {
+    "id": "set_lowicz",
+    "province": "prov_rawa",
+    "kind": "village",
+    "name": {
+      "display": "Łowicz",
+      "local": "Łowicz",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      19.945,
+      52.1067
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg des archevêques de Gniezno, résidence de plaisance du primat.",
+    "sources": [
+      "Łowicz"
+    ]
+  }
+]

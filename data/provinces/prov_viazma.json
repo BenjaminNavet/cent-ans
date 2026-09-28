@@ -1,0 +1,90 @@
+{
+  "id": "prov_viazma",
+  "name": {
+    "display": "Viazma",
+    "local": "Вязьма",
+    "local_language": "russe"
+  },
+  "region": "rus_ouest",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Viazma",
+    "Dniepr"
+  ],
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Viazma",
+      "local": "Вязьма",
+      "local_language": "russe"
+    },
+    "lat": 55.21,
+    "lon": 34.29
+  },
+  "geo": {
+    "capital_lonlat": [
+      34.29,
+      55.21
+    ],
+    "seed_lonlat": [
+      34.5,
+      55.15
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_smolensk",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 53400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1200,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1200,
+  "description": "Principauté de Viazma, cadette de Smolensk et vassale de son prince, à mi-chemin de Moscou.",
+  "sources": [
+    "Principauté de Viazma",
+    "Viazma"
+  ]
+}

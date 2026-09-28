@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_nagyvarad",
+    "province": "prov_great_plain_east",
+    "kind": "city",
+    "name": {
+      "display": "Nagyvárad",
+      "local": "Nagyvárad",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      21.9189,
+      47.0458
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Évêché et forteresse de Bihar, tombeau de saint Ladislas.",
+    "sources": [
+      "Nagyvárad"
+    ]
+  },
+  {
+    "id": "set_debrecen",
+    "province": "prov_great_plain_east",
+    "kind": "town",
+    "name": {
+      "display": "Debrecen",
+      "local": "Debrecen",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      21.6273,
+      47.5316
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg marchand de la plaine orientale.",
+    "sources": [
+      "Debrecen"
+    ]
+  },
+  {
+    "id": "set_szatmar",
+    "province": "prov_great_plain_east",
+    "kind": "town",
+    "name": {
+      "display": "Szatmár",
+      "local": "Szatmár",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      22.885,
+      47.79
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse et ville du nord-est, sur le Szamos.",
+    "sources": [
+      "Szatmár"
+    ]
+  }
+]

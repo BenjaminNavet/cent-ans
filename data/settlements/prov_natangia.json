@@ -1,0 +1,106 @@
+[
+  {
+    "id": "set_bartenstein",
+    "province": "prov_natangia",
+    "kind": "city",
+    "name": {
+      "display": "Bartenstein",
+      "local": "Bartenstein",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      20.8083,
+      54.2517
+    ],
+    "weight": 28,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château et ville de Barthie sur l'Alle.",
+    "sources": [
+      "Bartoszyce"
+    ]
+  },
+  {
+    "id": "set_braunsberg",
+    "province": "prov_natangia",
+    "kind": "town",
+    "name": {
+      "display": "Braunsberg",
+      "local": "Braunsberg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      19.8206,
+      54.3811
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville de l'évêque de Warmie sur la Passarge, de droit de Lübeck.",
+    "sources": [
+      "Braniewo"
+    ]
+  },
+  {
+    "id": "set_heilsberg",
+    "province": "prov_natangia",
+    "kind": "castle",
+    "name": {
+      "display": "Heilsberg",
+      "local": "Heilsberg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      20.5833,
+      54.1333
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de l'évêque de Warmie, alors en bois et terre.",
+    "sources": [
+      "Lidzbark Warmiński"
+    ]
+  },
+  {
+    "id": "set_frauenburg",
+    "province": "prov_natangia",
+    "kind": "abbey",
+    "name": {
+      "display": "Frauenburg",
+      "local": "Frauenburg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      19.6833,
+      54.3667
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_collegiate_church",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Chapitre cathédral de Warmie, sur le Frisches Haff.",
+    "sources": [
+      "Frombork"
+    ]
+  }
+]

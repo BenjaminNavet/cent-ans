@@ -211,7 +211,7 @@ pub struct TileRequest {
 /// depend on `keep`, so a cell scattered with a smaller `keep` is an exact subset of the same
 /// cell scattered with a larger one. Parts: `parts_side²` slots per kind over the rectangle.
 /// `corridors`: segments `[x0, y0, x1, y1, half_width]` (world units) kept free of trees (fine
-/// rivers and draped roads of lot ZG5b, which the 4096 river raster does not know).
+/// rivers and draped roads of lot ZG5b, which the map-wide river raster does not know).
 #[derive(Clone, Debug, Default)]
 pub struct DetailArea {
     pub rect: (f64, f64, f64, f64),
@@ -437,7 +437,7 @@ impl TileRequest {
                 + self.relief_gain * (1.0 - squash) * (h_m - floor).max(0.0))
     }
 
-    /// `MapData.height_world_at` (displayed height of the 4096 heightmap).
+    /// `MapData.height_world_at` (displayed height of the map heightmap).
     fn height_world_at(&self, map: &MapRasters, x: f64, y: f64) -> f64 {
         self.display_height(map.height_m_at(x, y), x, y)
     }

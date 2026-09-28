@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_pskov",
+    "province": "prov_pskov",
+    "kind": "city",
+    "name": {
+      "display": "Pskov",
+      "local": "Псков",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      28.333,
+      57.817
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville forteresse du kremlin (Krom) au confluent de la Velikaïa et de la Pskova.",
+    "sources": [
+      "Pskov"
+    ]
+  },
+  {
+    "id": "set_izborsk",
+    "province": "prov_pskov",
+    "kind": "castle",
+    "name": {
+      "display": "Izborsk",
+      "local": "Изборск",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      27.86,
+      57.71
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de pierre sur la route de la Livonie.",
+    "sources": [
+      "Izborsk"
+    ]
+  },
+  {
+    "id": "set_gdov",
+    "province": "prov_pskov",
+    "kind": "castle",
+    "name": {
+      "display": "Gdov",
+      "local": "Гдов",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      27.83,
+      58.745
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse pskovienne du lac Peipous, fondée en 1323.",
+    "sources": [
+      "Gdov"
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "id": "fac_danish_estonia",
+  "name": {
+    "display": "Estonie danoise",
+    "local": "Hertugdømmet Estland",
+    "local_language": "danois médiéval"
+  },
+  "short_name": "Estonie danoise",
+  "adjective": "estonien danois",
+  "government": "duchy",
+  "playable": true,
+  "capital": "prov_harrien_wierland",
+  "capital_city": "Reval",
+  "religion": "rel_catholic",
+  "culture": "cul_danish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_estonia",
+  "heraldry": {
+    "blazon": "D'or à trois léopards d'azur passant.",
+    "description": "Armes de l'Estonie danoise : trois lions bleus sur or, dérivés des armes danoises.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "titles": [
+    "Duché d'Estonie (capitaine royal)"
+  ],
+  "treasury": 4000,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hanseatic_trade"
+  ],
+  "relations": [
+    {
+      "faction": "fac_livonian_order",
+      "status": "peace",
+      "note": "L'ordre Livonien convoite l'Estonie ; il l'achètera en 1346 à la couronne danoise."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 55,
+    "trade": 60,
+    "piety": 50
+  },
+  "description": "Le duché d'Estonie, possession danoise depuis 1219, a perdu son roi avec le Danemark en 1332 : le parti danois de l'évêque de Reval s'oppose au parti allemand du capitaine Marquard Breide.",
+  "sources": [
+    "Estonie danoise",
+    "Olaf de Roskilde"
+  ]
+}

@@ -1,0 +1,73 @@
+[
+  {
+    "id": "set_saraitchik",
+    "province": "prov_saraichik",
+    "kind": "city",
+    "name": {
+      "display": "Saraïtchik",
+      "local": "Sarāychiq",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      51.72,
+      47.48
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Grande ville de l'Iaïk inférieur, résidence des princes de l'ulus oriental.",
+    "sources": [
+      "Saraïtchik"
+    ]
+  },
+  {
+    "id": "set_iaik_camps",
+    "province": "prov_saraichik",
+    "kind": "village",
+    "name": {
+      "display": "Camps de l'Iaïk",
+      "local": "Яик",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      51.9,
+      49.6
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Campements des tribus sur l'Iaïk moyen (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Iaïk"
+    ]
+  },
+  {
+    "id": "set_emba",
+    "province": "prov_saraichik",
+    "kind": "village",
+    "name": {
+      "display": "Camps de l'Emba",
+      "local": "Ембі",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      53.5,
+      48.0
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Campements des steppes de l'Emba (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Steppe pontique"
+    ]
+  }
+]

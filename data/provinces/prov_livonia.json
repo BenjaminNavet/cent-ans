@@ -1,0 +1,91 @@
+{
+  "id": "prov_livonia",
+  "name": {
+    "display": "Livonie de l'Ordre",
+    "local": "Lyvlant",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "livonie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Aa de Livonie (Gauja)"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Wenden",
+      "local": "Wenden",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 57.3117,
+    "lon": 25.2733
+  },
+  "geo": {
+    "capital_lonlat": [
+      25.2733,
+      57.3117
+    ],
+    "seed_lonlat": [
+      25.4,
+      57.75
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_livonian_order",
+  "culture": "cul_latvian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 70000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2100,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 840,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1500,
+  "description": "Le domaine central de l'ordre Livonien autour de Wenden (Cēsis), résidence du maître, et de Fellin (Viljandi) : forteresses de pierre en ligne sur la frontière de Pskov.",
+  "sources": [
+    "Ordre Livonien",
+    "Cēsis",
+    "Viljandi"
+  ]
+}

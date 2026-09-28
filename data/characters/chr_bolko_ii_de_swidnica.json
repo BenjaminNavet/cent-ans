@@ -1,0 +1,47 @@
+{
+  "id": "chr_bolko_ii_de_swidnica",
+  "name": {
+    "display": "Bolko II de Świdnica",
+    "local": "Bolko II świdnicki",
+    "local_language": "polonais"
+  },
+  "epithet": "le Petit",
+  "sex": "male",
+  "house": "Piast de Świdnica",
+  "faction": "fac_swidnica",
+  "role": "ruler",
+  "birth": {
+    "value": "1312",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1368-07-28"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Świdnica",
+      "from": {
+        "value": "1326"
+      },
+      "note": "Sous la tutelle de sa mère et de son oncle Henri Ier de Jawor."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_ambitious",
+    "trait_resolute"
+  ],
+  "piety": 50,
+  "starting_location": "prov_swidnica",
+  "status": "at_court",
+  "description": "Duc de Świdnica depuis 1326, dernier duc piast indépendant de Silésie ; épousera Agnès de Habsbourg en 1338.",
+  "sources": [
+    "Bolko II de Świdnica"
+  ]
+}

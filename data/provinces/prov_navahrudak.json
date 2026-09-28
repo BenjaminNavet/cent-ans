@@ -1,0 +1,94 @@
+{
+  "id": "prov_navahrudak",
+  "name": {
+    "display": "Ruthénie noire",
+    "local": "Navahrudak",
+    "local_language": "ruthène"
+  },
+  "region": "lituanie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Niémen",
+    "Servetch",
+    "Schara"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Navahrudak",
+      "local": "Novogorodok",
+      "local_language": "ruthène"
+    },
+    "lat": 53.6,
+    "lon": 25.8333
+  },
+  "geo": {
+    "capital_lonlat": [
+      25.8333,
+      53.6
+    ],
+    "seed_lonlat": [
+      25.8,
+      53.55
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_lithuania",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Première capitale de Mindaugas ; population ruthène orthodoxe et noblesse lituanienne.",
+    "classes": {
+      "peasants": {
+        "count": 110000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3300,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2420,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3300,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_market",
+    "bld_muster_field",
+    "bld_cathedral"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1800,
+  "description": "La Ruthénie noire, première conquête lituanienne : Navahrudak, où Mindaugas fut couronné en 1253, Lida (fortifiée par Gediminas vers 1323) et Slonim.",
+  "sources": [
+    "Navahrudak",
+    "Lida",
+    "Ruthénie noire"
+  ]
+}

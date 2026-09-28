@@ -38,7 +38,7 @@ func _run() -> void:
 		var job := VegetationTileJob.new()
 		job.mask = vegetation.mask
 		job.tile_index = index
-		job.origin_px = Vector2i((index % TerrainBuilder.CHUNKS) * terrain.chunk_px, (index / TerrainBuilder.CHUNKS) * terrain.chunk_px)
+		job.origin_px = Vector2i((index % terrain.chunks_x) * terrain.chunk_px, (index / terrain.chunks_x) * terrain.chunk_px)
 		job.size_px = terrain.chunk_px
 		job.spacing = vegetation.spacing
 		job.tree_scale = vegetation.tree_scale

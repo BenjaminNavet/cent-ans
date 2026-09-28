@@ -1,0 +1,107 @@
+{
+  "id": "fac_lithuania",
+  "name": {
+    "display": "Grand-duché de Lituanie",
+    "local": "Lietuvos Didžioji Kunigaikštystė",
+    "local_language": "lituanien"
+  },
+  "short_name": "Lituanie",
+  "adjective": "lituanien",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_gediminas",
+  "heir": "chr_jaunutis",
+  "capital": "prov_vilnius",
+  "capital_city": "Vilnius",
+  "religion": "rel_pagan",
+  "culture": "cul_lithuanian",
+  "succession_law": "elective",
+  "primary_title": "tit_lithuania",
+  "heraldry": {
+    "blazon": "De gueules à trois pals d'argent, à la bordure d'or.",
+    "description": "Colonnes de Gediminas, approximées en trois pals d'argent, bordure d'or de jeu (emblème du sceau de la dynastie) ; le cavalier Vytis n'est attesté que plus tard.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Substitution : les colonnes de Gediminas ne sont pas dessinables comme telles."
+  },
+  "titles": [
+    "Grand-duc de Lituanie et de Ruthénie",
+    "Roi des Lituaniens et de nombreux Ruthènes"
+  ],
+  "treasury": 9000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_poland",
+      "status": "alliance",
+      "note": "Aldona, fille de Gediminas, est reine de Pologne ; alliance contre l'Ordre teutonique (1325)."
+    },
+    {
+      "faction": "fac_galicia_volhynia",
+      "status": "peace",
+      "note": "Concurrence pour la Volhynie ; liens dynastiques."
+    },
+    {
+      "faction": "fac_kiev",
+      "status": "peace",
+      "note": "Gediminas exerce son influence sur Kiev (tribut à la Horde d'Or)."
+    },
+    {
+      "faction": "fac_teutonic",
+      "status": "war",
+      "note": "Croisades de Prusse contre la Lituanie païenne ; Bayerburg fondée sur le Niémen en 1337."
+    },
+    {
+      "faction": "fac_livonian_order",
+      "status": "war",
+      "note": "Guerre de frontière permanente entre la Livonie et la Lituanie."
+    },
+    {
+      "faction": "fac_pskov",
+      "status": "alliance",
+      "note": "Pskov sous protection lituanienne (Alexandre de Tver, prince de Pskov)."
+    },
+    {
+      "faction": "fac_smolensk",
+      "status": "alliance",
+      "note": "Ivan Alexandrovitch se rapproche de Gediminas ; campagne moscovite et tatare contre Smolensk en 1339."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Rivalité pour les terres ruthènes, sans guerre ouverte en 1337."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_lutsk",
+      "note": "Volhynie orientale."
+    },
+    {
+      "kind": "province",
+      "province": "prov_volodymyr",
+      "note": "Marches lituanien-galiciennes."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 65,
+    "diplomacy": 45,
+    "trade": 45,
+    "piety": 20
+  },
+  "description": "Dernier État païen d'Europe, réuni par Gediminas (v. 1316-1341) : Lituanie proprement dite, Samogitie et grands territoires ruthènes orthodoxes conquis ou soumis ; sans cesse harcelé par les chevaliers teutoniques et livoniens.",
+  "sources": [
+    "Gediminas",
+    "Grand-duché de Lituanie",
+    "Paganisme lituanien"
+  ]
+}

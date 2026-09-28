@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_moscou",
+    "province": "prov_moscow",
+    "kind": "city",
+    "name": {
+      "display": "Moscou",
+      "local": "Москва",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      37.617,
+      55.752
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale d'Ivan Kalita ; enceinte de chêne du Kremlin, églises de pierre neuves.",
+    "sources": [
+      "Moscou"
+    ]
+  },
+  {
+    "id": "set_zvenigorod",
+    "province": "prov_moscow",
+    "kind": "town",
+    "name": {
+      "display": "Zvenigorod",
+      "local": "Звенигород",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      36.85,
+      55.73
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Apanage moscovite sur la Moskova.",
+    "sources": [
+      "Zvenigorod"
+    ]
+  },
+  {
+    "id": "set_trinite_serge",
+    "province": "prov_moscow",
+    "kind": "abbey",
+    "name": {
+      "display": "Laure de la Trinité-Saint-Serge",
+      "local": "Троице-Сергиева обитель",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      38.13,
+      56.31
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère fondé vers 1337 par Serge de Radonège dans la forêt de Makovets (date traditionnelle, 1337 ou 1342).",
+    "sources": [
+      "Serge de Radonège"
+    ]
+  }
+]

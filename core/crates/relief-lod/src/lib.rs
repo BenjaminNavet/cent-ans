@@ -13,10 +13,14 @@ use std::collections::{HashMap, HashSet};
 
 /// Quads per side of a full patch.
 pub const PATCH_QUADS: f64 = 64.0;
-/// Side of the quadtree root, in map units.
-pub const ROOT_UNITS: f64 = 4096.0;
 /// Depth of a node the size of an E0 tile (pyramid level = depth − `DEPTH_E0`).
 pub const DEPTH_E0: i32 = 4;
+/// Side of a depth-0 node, in map units: the scale of depths only, not the size of the world
+/// (ADR 0115). The world (W × H map units, multiples of `ROOT_TILE_UNITS`) is covered by a grid of
+/// nodes at depth [`root_depth`].
+pub const DEPTH0_UNITS: f64 = ROOT_TILE_UNITS * (1i64 << DEPTH_E0) as f64;
+/// Largest E0 grid side the 12-bit tile keys support at `MAX_LEVEL` (4096 >> 7).
+pub const MAX_ROOT_TILES: i64 = 0x1000 >> MAX_LEVEL;
 /// Finest pyramid level the key layout supports (`ReliefPyramid.MAX_LEVEL`).
 pub const MAX_LEVEL: i32 = 7;
 /// Side of an E0 tile in map units.
@@ -75,9 +79,31 @@ pub fn row_of_key(key: i64) -> i64 {
     (key >> 12) & 0xfff
 }
 
-/// Tiles per side at a pyramid level (16 at E0).
-pub fn tiles_per_side(level: i64) -> i64 {
-    16 << level
+/// Tiles along an axis at a pyramid level, for `root_tiles` E0 tiles along that axis.
+pub fn tiles_across(root_tiles: i64, level: i64) -> i64 {
+    root_tiles << level
+}
+
+/// Shallowest depth whose nodes tile a world of `cols` × `rows` E0 tiles exactly (0 for the
+/// 16 × 16 map: one root, as before ADR 0115; 2 for 28 × 24: 7 × 6 roots of 1024 units).
+pub fn root_depth(cols: i64, rows: i64) -> i32 {
+    (0..DEPTH_E0)
+        .find(|&n| {
+            let span = 1i64 << (DEPTH_E0 - n);
+            cols % span == 0 && rows % span == 0
+        })
+        .unwrap_or(DEPTH_E0)
+}
+
+/// World tile of a tile of the cache (`relief_pyramid.json` `root_origin_tiles`, ADR 0115): cache
+/// tile (level, col, row) is world tile (col + dx·2^level, row + dy·2^level).
+pub fn cache_to_world(level: i64, col: i64, row: i64, origin: (i64, i64)) -> (i64, i64) {
+    (col + (origin.0 << level), row + (origin.1 << level))
+}
+
+/// Inverse of [`cache_to_world`] (file names of the cache).
+pub fn world_to_cache(level: i64, col: i64, row: i64, origin: (i64, i64)) -> (i64, i64) {
+    (col - (origin.0 << level), row - (origin.1 << level))
 }
 
 pub fn tile_units(level: i64) -> f64 {
@@ -85,7 +111,7 @@ pub fn tile_units(level: i64) -> f64 {
 }
 
 pub fn node_size(n: i32) -> f64 {
-    ROOT_UNITS / (1i64 << n) as f64
+    DEPTH0_UNITS / (1i64 << n) as f64
 }
 
 /// Node key of an item (`ReliefQuadtree._add_item`): quadrant 4 = whole node.
@@ -131,18 +157,24 @@ impl V3 {
     }
 }
 
-/// Tiles present in the pyramid (`ReliefPyramid`: manifest, E0 files, broken tiles).
+/// Tiles present in the pyramid (`ReliefPyramid`: manifest, E0 files, broken tiles), in world
+/// tile coordinates (the `root_origin_tiles` offset of the cache already applied).
 #[derive(Default)]
 pub struct Pyramid {
     max_level: i32,
+    /// E0 tiles along x and y (W / 256, H / 256).
+    cols: i64,
+    rows: i64,
     tiles: Vec<HashSet<i64>>,
     broken: HashSet<i64>,
     max_under: HashMap<i64, i32>,
 }
 
 impl Pyramid {
-    /// `tiles[level]`: indices `row × tiles_per_side + col` of the tiles of each level.
-    pub fn new(max_level: i32, tiles: Vec<Vec<i64>>) -> Self {
+    /// `tiles[level]`: indices `row × tiles_across(cols, level) + col` of the tiles of each level,
+    /// over a world of `cols` × `rows` E0 tiles.
+    pub fn new(max_level: i32, tiles: Vec<Vec<i64>>, cols: i64, rows: i64) -> Self {
+        debug_assert!(cols <= MAX_ROOT_TILES && rows <= MAX_ROOT_TILES);
         let tiles: Vec<HashSet<i64>> = tiles
             .into_iter()
             .map(|list| list.into_iter().collect())
@@ -152,9 +184,9 @@ impl Pyramid {
             let Some(set) = tiles.get(level as usize) else {
                 break;
             };
-            let cols = tiles_per_side(level as i64);
+            let across = tiles_across(cols, level as i64);
             for &index in set {
-                let (col, row) = (index % cols, index / cols);
+                let (col, row) = (index % across, index / across);
                 for up in (0..level).rev() {
                     let shift = level - up;
                     let akey = key_of(up as i64, col >> shift, row >> shift);
@@ -168,6 +200,8 @@ impl Pyramid {
         }
         Pyramid {
             max_level,
+            cols,
+            rows,
             tiles,
             broken: HashSet::new(),
             max_under,
@@ -178,6 +212,11 @@ impl Pyramid {
         self.max_level
     }
 
+    /// E0 tiles along x and y.
+    pub fn root_tiles(&self) -> (i64, i64) {
+        (self.cols, self.rows)
+    }
+
     pub fn mark_broken(&mut self, key: i64) {
         self.broken.insert(key);
     }
@@ -186,14 +225,14 @@ impl Pyramid {
         if level < 0 || level > MAX_LEVEL as i64 || level as usize >= self.tiles.len() {
             return false;
         }
-        let cols = tiles_per_side(level);
-        if col < 0 || row < 0 || col >= cols || row >= cols {
+        let across = tiles_across(self.cols, level);
+        if col < 0 || row < 0 || col >= across || row >= tiles_across(self.rows, level) {
             return false;
         }
         if self.broken.contains(&key_of(level, col, row)) {
             return false;
         }
-        self.tiles[level as usize].contains(&(row * cols + col))
+        self.tiles[level as usize].contains(&(row * across + col))
     }
 
     /// Finest level present in the subtree of the tile (itself included), −1 if none.
@@ -343,7 +382,9 @@ type PageParams = [[f32; 4]; 3];
 /// Selection state of one quadtree.
 pub struct Selector {
     pyramid: Pyramid,
-    /// 16 × 16 (min, max) heights in metres per E0 chunk.
+    /// Depth of the root nodes ([`root_depth`] of the pyramid grid).
+    root_depth: i32,
+    /// cols × rows (min, max) heights in metres per E0 chunk (row-major).
     bounds: Vec<(f32, f32)>,
     pages: HashMap<i64, Page>,
     seq: u64,
@@ -377,6 +418,7 @@ impl Default for Selector {
 impl Selector {
     pub fn new(pyramid: Pyramid, bounds: Vec<(f32, f32)>) -> Self {
         Selector {
+            root_depth: Self::depth_of(&pyramid),
             pyramid,
             bounds,
             pages: HashMap::new(),
@@ -402,8 +444,24 @@ impl Selector {
         }
     }
 
+    fn depth_of(pyramid: &Pyramid) -> i32 {
+        let (cols, rows) = pyramid.root_tiles();
+        root_depth(cols.max(1), rows.max(1))
+    }
+
     pub fn set_pyramid(&mut self, pyramid: Pyramid) {
+        self.root_depth = Self::depth_of(&pyramid);
         self.pyramid = pyramid;
+    }
+
+    /// Depth of the root nodes.
+    pub fn root_depth(&self) -> i32 {
+        self.root_depth
+    }
+
+    /// E0 tiles along x and y of the world.
+    pub fn root_tiles(&self) -> (i64, i64) {
+        self.pyramid.root_tiles()
     }
 
     pub fn set_bounds(&mut self, bounds: Vec<(f32, f32)>) {
@@ -508,7 +566,13 @@ impl Selector {
         self.wanted.clear();
         self.page_cache.clear();
         self.missing = 0;
-        self.select(0, 0, 0);
+        let (cols, rows) = self.pyramid.root_tiles();
+        let span = 1i64 << (DEPTH_E0 - self.root_depth);
+        for r in 0..rows / span {
+            for c in 0..cols / span {
+                self.select(self.root_depth, c, r);
+            }
+        }
         let count = self.items.len() as f64;
         let max_items = self.config.max_items as f64;
         if count > max_items {
@@ -550,7 +614,7 @@ impl Selector {
         let yb = self.y_bounds(n, c, r);
         let bmin = V3::new(ox as f32, yb.0, oz as f32);
         let bmax = V3::new((ox + size) as f32, yb.1, (oz + size) as f32);
-        if n > 0 && !self.box_in_sphere(bmin, bmax, self.range(n)) {
+        if n > self.root_depth && !self.box_in_sphere(bmin, bmax, self.range(n)) {
             return false;
         }
         if !self.box_in_frustum(bmin, bmax) {
@@ -593,19 +657,20 @@ impl Selector {
     }
 
     fn y_bounds(&self, n: i32, c: i64, r: i64) -> (f32, f32) {
-        if self.bounds.len() < 256 {
+        let (cols, rows) = self.pyramid.root_tiles();
+        if cols <= 0 || rows <= 0 || (self.bounds.len() as i64) < cols * rows {
             return self.to_world((-400.0, 5000.0));
         }
         if n >= DEPTH_E0 {
             let shift = n - DEPTH_E0;
-            let index = (r >> shift).clamp(0, 15) * 16 + (c >> shift).clamp(0, 15);
+            let index = (r >> shift).clamp(0, rows - 1) * cols + (c >> shift).clamp(0, cols - 1);
             return self.to_world(self.bounds[index as usize]);
         }
         let span = 1i64 << (DEPTH_E0 - n);
         let mut result = (f32::INFINITY, f32::NEG_INFINITY);
         for j in 0..span {
             for i in 0..span {
-                let b = self.bounds[((r * span + j) * 16 + c * span + i) as usize];
+                let b = self.bounds[((r * span + j) * cols + c * span + i) as usize];
                 result = (result.0.min(b.0), result.1.max(b.1));
             }
         }
@@ -647,7 +712,7 @@ impl Selector {
             .length_squared_to(self.cam.clamp(bmin, bmax))
             .sqrt() as f64;
         let fine = self.page_of(n, c, r, dist);
-        let coarse = if n == 0 {
+        let coarse = if n == self.root_depth {
             fine
         } else {
             self.page_of(n - 1, c >> 1, r >> 1, dist)
@@ -827,7 +892,7 @@ impl Selector {
             fade as f32,
             ((s * self.config.skirt_factor).min(self.config.skirt_max) + 0.02) as f32,
         ];
-        if item.n > 0 {
+        if item.n > self.root_depth {
             let reach = self.range(item.n) as f64;
             morph[0] = (self.config.morph_ratio * reach) as f32;
             morph[1] = (1.0 / ((1.0 - self.config.morph_ratio) * reach).max(1e-4)) as f32;
@@ -879,11 +944,12 @@ impl Selector {
         let level = level_of_key(key);
         let (c, r) = (col_of_key(key), row_of_key(key));
         let offsets = if diagonal { &DIAGONALS } else { &SIDES };
-        let side = tiles_per_side(level);
+        let (cols, rows) = self.pyramid.root_tiles();
+        let (across, down) = (tiles_across(cols, level), tiles_across(rows, level));
         let mut result = [-1.0f32; 4];
         for (i, (dx, dy)) in offsets.iter().enumerate() {
             let (nc, nr) = (c + dx, r + dy);
-            if nc >= 0 && nr >= 0 && nc < side && nr < side {
+            if nc >= 0 && nr >= 0 && nc < across && nr < down {
                 if let Some(page) = self.pages.get_mut(&key_of(level, nc, nr)) {
                     result[i] = page.layer as f32;
                     page.last_used = frame;
@@ -903,7 +969,7 @@ mod tests {
         let e0: Vec<i64> = (0..256).collect();
         let e1 = vec![14 * 32 + 16, 14 * 32 + 17, 15 * 32 + 16, 15 * 32 + 17];
         let e2 = vec![28 * 64 + 32, 28 * 64 + 33, 29 * 64 + 32, 29 * 64 + 33];
-        Pyramid::new(2, vec![e0, e1, e2])
+        Pyramid::new(2, vec![e0, e1, e2], 16, 16)
     }
 
     /// Frustum of a camera at `eye` looking straight down with a 90° field of view.
@@ -998,6 +1064,82 @@ mod tests {
             Config::default(),
         );
         assert!(!far.removed.is_empty());
+    }
+
+    /// World of 28 × 24 E0 tiles (7168 × 6144 units, ADR 0115): E0 everywhere, E1 over (20, 3).
+    fn wide_pyramid() -> Pyramid {
+        let e0: Vec<i64> = (0..28 * 24).collect();
+        let e1 = vec![6 * 56 + 40, 6 * 56 + 41, 7 * 56 + 40, 7 * 56 + 41];
+        Pyramid::new(1, vec![e0, e1], 28, 24)
+    }
+
+    #[test]
+    fn root_depth_tiles_the_world() {
+        assert_eq!(root_depth(16, 16), 0);
+        assert_eq!(root_depth(28, 24), 2);
+        assert_eq!(root_depth(20, 12), 2);
+        assert_eq!(root_depth(24, 24), 1);
+        assert_eq!(root_depth(18, 18), 3);
+        assert_eq!(root_depth(7, 5), DEPTH_E0);
+        assert_eq!(node_size(0), 4096.0);
+        assert_eq!(node_size(DEPTH_E0), ROOT_TILE_UNITS);
+    }
+
+    #[test]
+    fn cache_offset_round_trips() {
+        assert_eq!(cache_to_world(0, 3, 4, (0, 5)), (3, 9));
+        assert_eq!(cache_to_world(3, 10, 20, (0, 5)), (10, 60));
+        assert_eq!(world_to_cache(3, 10, 60, (0, 5)), (10, 20));
+        assert_eq!(cache_to_world(7, 1, 1, (0, 0)), (1, 1));
+    }
+
+    #[test]
+    fn wide_pyramid_bounds_are_rectangular() {
+        let p = wide_pyramid();
+        assert_eq!(p.root_tiles(), (28, 24));
+        assert!(p.has_tile(0, 27, 23));
+        assert!(!p.has_tile(0, 28, 0) && !p.has_tile(0, 0, 24));
+        assert!(p.has_tile(1, 41, 7) && !p.has_tile(1, 42, 7));
+        assert_eq!(p.max_level_under(0, 20, 3), 1);
+        assert_eq!(p.finest_ancestor(4, 20 * 16 + 3, 3 * 16 + 15), 1);
+        assert_eq!(p.finest_ancestor(4, 0, 0), 0);
+    }
+
+    #[test]
+    fn wide_world_far_view_selects_the_root_grid() {
+        let mut sel = Selector::new(wide_pyramid(), vec![(0.0, 100.0); 28 * 24]);
+        assert_eq!(sel.root_depth(), 2);
+        // Far above the middle of the world: every root visible, none refined.
+        let eye = V3::new(3584.0, 1.0e6, 3072.0);
+        let mut view = view_down(eye, 1);
+        view.planes[1].1 = -(eye.y - 2.0e6);
+        view.k = 1.0;
+        let update = sel.update(&view, Config::default());
+        assert_eq!(update.items, 42);
+        let mut covered = 0.0;
+        for item in sel.items() {
+            assert_eq!(item.n, 2);
+            assert!(item.origin.0 < 7168.0 && item.origin.1 < 6144.0);
+            covered += node_size(item.n) * node_size(item.n);
+        }
+        assert_eq!(covered, 7168.0 * 6144.0);
+    }
+
+    #[test]
+    fn wide_world_refines_in_the_south_east() {
+        let mut sel = Selector::new(wide_pyramid(), vec![(0.0, 100.0); 28 * 24]);
+        // Near the ground over E1 tile (41, 7), beyond x = 4096.
+        let eye = V3::new(5300.0, 3.0, 950.0);
+        let update = sel.update(&view_down(eye, 1), Config::default());
+        assert!(update.items > 0);
+        let deepest = sel.items().iter().map(|i| i.n).max().unwrap();
+        assert_eq!(deepest, DEPTH_E0 + 1 + 3);
+        assert!(update.wanted.contains(&key_of(1, 41, 7)));
+        // No node outside the world.
+        for item in sel.items() {
+            let size = node_size(item.n) as f32;
+            assert!(item.origin.0 + size <= 7168.0 + 1e-3 && item.origin.1 + size <= 6144.0 + 1e-3);
+        }
     }
 
     #[test]

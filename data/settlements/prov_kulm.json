@@ -1,0 +1,106 @@
+[
+  {
+    "id": "set_thorn",
+    "province": "prov_kulm",
+    "kind": "city",
+    "name": {
+      "display": "Thorn",
+      "local": "Thorn",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      18.6089,
+      53.0138
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Première ville de l'Ordre (1231), place hanséatique de la Vistule.",
+    "sources": [
+      "Toruń"
+    ]
+  },
+  {
+    "id": "set_kulm",
+    "province": "prov_kulm",
+    "kind": "town",
+    "name": {
+      "display": "Kulm",
+      "local": "Culm",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      18.4,
+      53.35
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ville dont le droit a essaimé dans toute la Prusse ; siège épiscopal de Culm.",
+    "sources": [
+      "Chełmno"
+    ]
+  },
+  {
+    "id": "set_graudenz",
+    "province": "prov_kulm",
+    "kind": "castle",
+    "name": {
+      "display": "Graudenz",
+      "local": "Graudenz",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      18.7536,
+      53.4837
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de l'Ordre sur la Vistule, siège d'une commanderie.",
+    "sources": [
+      "Grudziądz"
+    ]
+  },
+  {
+    "id": "set_strasburg",
+    "province": "prov_kulm",
+    "kind": "castle",
+    "name": {
+      "display": "Strasburg",
+      "local": "Strasburg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      19.4,
+      53.2667
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château frontière face à la Mazovie sur la Drewenz.",
+    "sources": [
+      "Brodnica"
+    ]
+  }
+]

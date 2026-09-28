@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_novossil",
+    "province": "prov_novossil",
+    "kind": "city",
+    "name": {
+      "display": "Novossil",
+      "local": "Новосиль",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      37.03,
+      52.98
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Chef-lieu d'une principauté des confins.",
+    "sources": [
+      "Novossil"
+    ]
+  },
+  {
+    "id": "set_odoiev",
+    "province": "prov_novossil",
+    "kind": "town",
+    "name": {
+      "display": "Odoïev",
+      "local": "Одоев",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      36.68,
+      53.93
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de l'Oupa, principauté d'Odoïev.",
+    "sources": [
+      "Odoïev"
+    ]
+  },
+  {
+    "id": "set_mtsensk",
+    "province": "prov_novossil",
+    "kind": "town",
+    "name": {
+      "display": "Mtsensk",
+      "local": "Мценск",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      36.57,
+      53.28
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Zoucha (mention en 1146).",
+    "sources": [
+      "Mtsensk"
+    ]
+  }
+]

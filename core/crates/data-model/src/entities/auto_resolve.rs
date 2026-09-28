@@ -208,6 +208,8 @@ impl Default for AutoResolveRules {
                 (Terrain::Forest, effects(0.5, 0.7, 1.15)),
                 (Terrain::Marsh, effects(0.5, 1.0, 1.1)),
                 (Terrain::Bocage, effects(0.7, 0.85, 1.05)),
+                (Terrain::Steppe, effects(1.1, 1.0, 0.95)),
+                (Terrain::Desert, effects(0.9, 1.0, 1.0)),
             ]
             .into_iter()
             .collect(),

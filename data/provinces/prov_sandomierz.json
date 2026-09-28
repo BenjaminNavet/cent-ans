@@ -1,0 +1,92 @@
+{
+  "id": "prov_sandomierz",
+  "name": {
+    "display": "Sandomierz",
+    "local": "Sandomierz",
+    "local_language": "polonais"
+  },
+  "region": "pologne",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Vistule",
+    "San"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_iron",
+    "res_wood",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Sandomierz",
+      "local": "Sandomierz",
+      "local_language": "polonais"
+    },
+    "lat": 50.6826,
+    "lon": 21.7488
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.7488,
+      50.6826
+    ],
+    "seed_lonlat": [
+      21.2,
+      50.75
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_poland",
+  "culture": "cul_polish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Terre de Sandomierz et monts de Sainte-Croix (Kielce, Radom).",
+    "classes": {
+      "peasants": {
+        "count": 230000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5060,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 9200,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3100,
+  "description": "Terre de Sandomierz, ancienne principauté piast sur la haute Vistule, riche en blé et en fer des monts de Sainte-Croix ; base des expéditions polonaises vers la Ruthénie.",
+  "sources": [
+    "Terre de Sandomierz",
+    "Sandomierz"
+  ]
+}

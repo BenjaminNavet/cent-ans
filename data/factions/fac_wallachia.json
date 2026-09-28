@@ -1,0 +1,76 @@
+{
+  "id": "fac_wallachia",
+  "name": {
+    "display": "Principauté de Valachie",
+    "local": "Țara Românească",
+    "local_language": "roumain"
+  },
+  "short_name": "Valachie",
+  "adjective": "valaque",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_basarab_ier",
+  "heir": "chr_nicolae_alexandru",
+  "capital": "prov_muntenia",
+  "capital_city": "Curtea de Argeș",
+  "religion": "rel_orthodox",
+  "culture": "cul_romanian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_wallachia",
+  "heraldry": {
+    "blazon": "D'azur à l'aigle d'or, à la bordure de gueules.",
+    "description": "Aigle d'or sur azur, symbole des princes de Valachie, attesté plus tard ; bordure de gueules ajoutée pour la distinction en jeu.",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Armes attestées à partir du XVe siècle ; bordure : brisure de jeu."
+  },
+  "titles": [
+    "Voïvode de la Valachie",
+    "Prince de toute la Valachie"
+  ],
+  "treasury": 4500,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_hungary",
+      "status": "truce",
+      "note": "Basarab a vaincu Charles Robert à Posada en 1330 et s'est affranchi de sa suzeraineté."
+    },
+    {
+      "faction": "fac_transylvania",
+      "status": "war",
+      "note": "Escarmouches aux cols des Carpates."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Voisinage des steppes tatares à l'est."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_banat",
+      "note": "Banat de Severin, contesté à la Hongrie."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 45,
+    "trade": 55,
+    "piety": 55
+  },
+  "description": "Principauté valaque de Basarab Ier, vainqueur de Charles Robert à Posada (1330) : Olténie et Munténie, tenues par un prince orthodoxe qui compose avec la Horde d'Or au nord du Bas-Danube.",
+  "sources": [
+    "Basarab Ier de Valachie",
+    "Principauté de Valachie",
+    "Bataille de Posada"
+  ]
+}

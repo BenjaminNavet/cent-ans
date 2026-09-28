@@ -1,0 +1,92 @@
+{
+  "id": "prov_pinsk",
+  "name": {
+    "display": "Pinsk et Tourov",
+    "local": "Pinsk",
+    "local_language": "ruthène"
+  },
+  "region": "lituanie",
+  "terrain": "marsh",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Pripiat",
+    "Pina",
+    "Horyn"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Pinsk",
+      "local": "Pinsk",
+      "local_language": "ruthène"
+    },
+    "lat": 52.1229,
+    "lon": 26.0951
+  },
+  "geo": {
+    "capital_lonlat": [
+      26.0951,
+      52.1229
+    ],
+    "seed_lonlat": [
+      26.9,
+      52.1
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_lithuania",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Marais du Pripiat, faible densité.",
+    "classes": {
+      "peasants": {
+        "count": 70000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1540,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1750,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_market"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1400,
+  "description": "Polésie du Pripiat : principautés ruthènes de Pinsk et de Tourov, liées à Gediminas ; terrain marécageux difficile pour les armées, riche en poisson et bois.",
+  "sources": [
+    "Pinsk",
+    "Tourov",
+    "Polésie"
+  ]
+}

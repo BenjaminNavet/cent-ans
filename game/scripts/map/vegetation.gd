@@ -80,6 +80,9 @@ var terrain: TerrainBuilder
 ## Lot C6 : cercles d'exclusion supplémentaires (colonies, hameaux) : Vector3(x, y, rayon) px carte.
 var extra_exclusions: PackedVector3Array = PackedVector3Array()
 var chunk_px: int = 0
+## Grille des tuiles de terrain (`TerrainBuilder.chunk_grid_for`, ADR 0115).
+var chunks_x: int = TerrainBuilder.LEGACY_CHUNKS
+var chunks_y: int = TerrainBuilder.LEGACY_CHUNKS
 var enabled: bool = true
 ## Statistiques : tuiles construites, instances, temps de semis (ms, somme et max).
 var stats: Dictionary = {"tiles": 0, "instances": 0, "build_ms_total": 0.0, "build_ms_max": 0.0, "source": "", "regrounds": 0, "reground_ms_max": 0.0}
@@ -138,7 +141,10 @@ func build(data: MapData) -> void:
 	map_data = data
 	_native = _make_native(data) if use_native_scatter else null
 	_native_floor_version = -1
-	chunk_px = TerrainBuilder.chunk_px_for(data.size)
+	var grid := TerrainBuilder.chunk_grid_for(data.size)
+	chunk_px = grid.x
+	chunks_x = grid.y
+	chunks_y = grid.z
 	mask = VegetationMask.new()
 	mask.setup(data)
 	stats["source"] = mask.source
@@ -382,9 +388,9 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	var camera_xz := Vector2(camera_position.x, camera_position.z)
 	# Même métrique que le shader : distance horizontale + moitié de la hauteur de la caméra.
 	var lift := absf(camera_position.y) * 0.5
-	for cy in TerrainBuilder.CHUNKS:
-		for cx in TerrainBuilder.CHUNKS:
-			var index := cy * TerrainBuilder.CHUNKS + cx
+	for cy in chunks_y:
+		for cx in chunks_x:
+			var index := cy * chunks_x + cx
 			var d := _rect_distance(Rect2(cx * chunk_px, cy * chunk_px, chunk_px, chunk_px), camera_xz) + lift
 			var in_range := d < fade_end
 			if _tiles.has(index):
@@ -494,7 +500,7 @@ func _start_job(index: int) -> void:
 	var job := VegetationTileJob.new()
 	job.mask = mask
 	job.tile_index = index
-	job.origin_px = Vector2i((index % TerrainBuilder.CHUNKS) * chunk_px, (index / TerrainBuilder.CHUNKS) * chunk_px)
+	job.origin_px = Vector2i((index % chunks_x) * chunk_px, (index / chunks_x) * chunk_px)
 	job.size_px = chunk_px
 	job.spacing = spacing * float(chunk_px) / 256.0 if chunk_px < 256 else spacing
 	job.tree_scale = tree_scale
@@ -634,7 +640,7 @@ func _start_ground_jobs() -> void:
 		job.generation = entry["generation"]
 		job.level = terrain.chunk_level(index)
 		job.grid = terrain.surface_grid(index)
-		job.origin = Vector2((index % TerrainBuilder.CHUNKS) * chunk_px, (index / TerrainBuilder.CHUNKS) * chunk_px)
+		job.origin = Vector2((index % chunks_x) * chunk_px, (index / chunks_x) * chunk_px)
 		job.buffers = entry["buffers"]
 		if _native != null:
 			_sync_native_floor()

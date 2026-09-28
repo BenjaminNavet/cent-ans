@@ -75,7 +75,7 @@ impl CampaignState {
 
 /// Destination of a `move_army` order (lot M2): a settlement (or a
 /// province, standing for its city), a map point `{x, y}` in pixels of the
-/// 4096² map, or a v1/C4 path whose last place is the destination.
+/// map, or a v1/C4 path whose last place is the destination.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum MoveOrderTarget {

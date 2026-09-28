@@ -1,0 +1,92 @@
+{
+  "id": "prov_pecs",
+  "name": {
+    "display": "Transdanubie méridionale",
+    "local": "Baranya és Tolna",
+    "local_language": "hongrois"
+  },
+  "region": "hongrie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Danube",
+    "Drave",
+    "Kapos"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Pécs",
+      "local": "Pécs",
+      "local_language": "hongrois"
+    },
+    "lat": 46.0727,
+    "lon": 18.2323
+  },
+  "geo": {
+    "capital_lonlat": [
+      18.2323,
+      46.0727
+    ],
+    "seed_lonlat": [
+      18.2,
+      46.1
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_hungary",
+  "culture": "cul_hungarian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Diocèse de Pécs ; l'université de Pécs (1367) n'existe pas encore.",
+    "classes": {
+      "peasants": {
+        "count": 145000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7250,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3190,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 5800,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2200,
+  "description": "Baranya, Tolna et Somogy entre le Danube et la Drave : Pécs, ville épiscopale et minière, et l'abbaye de Pécsvárad.",
+  "sources": [
+    "Pécs",
+    "Comitat de Baranya"
+  ]
+}

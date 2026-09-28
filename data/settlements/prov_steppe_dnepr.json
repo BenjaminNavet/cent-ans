@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_tavan",
+    "province": "prov_steppe_dnepr",
+    "kind": "city",
+    "name": {
+      "display": "Tavan",
+      "local": "Tavan",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      33.35,
+      46.95
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Gué du bas Dniepr et point de passage majeur (localisation approximative).",
+    "sources": [
+      "Dniepr"
+    ]
+  },
+  {
+    "id": "set_or_kapi",
+    "province": "prov_steppe_dnepr",
+    "kind": "village",
+    "name": {
+      "display": "Or Qapi (Perekop)",
+      "local": "Ор Капы",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      33.69,
+      46.16
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Isthme de Perekop : la « Porte de l'Or » entre steppe et Crimée.",
+    "sources": [
+      "Perekop"
+    ]
+  },
+  {
+    "id": "set_ordabazar",
+    "province": "prov_steppe_dnepr",
+    "kind": "village",
+    "name": {
+      "display": "Orda-Bazar",
+      "local": "Орда-Базар",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      35.1,
+      47.3
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Camp marchand du nord de la mer d'Azov (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Steppe pontique"
+    ]
+  }
+]

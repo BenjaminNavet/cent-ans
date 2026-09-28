@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_azaq",
+    "province": "prov_azaq",
+    "kind": "city",
+    "name": {
+      "display": "Azaq",
+      "local": "Āzāq",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      39.42,
+      47.22
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville de la Horde sur le delta du Don.",
+    "sources": [
+      "Azov"
+    ]
+  },
+  {
+    "id": "set_tana",
+    "province": "prov_azaq",
+    "kind": "town",
+    "name": {
+      "display": "Tana (comptoir vénitien)",
+      "local": "Tana",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      39.41,
+      47.2
+    ],
+    "weight": 6,
+    "owner": "fac_venice",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Comptoir des marchands vénitiens, obtenu du khan Özbeg (1333).",
+    "sources": [
+      "Tana (Azov)"
+    ]
+  },
+  {
+    "id": "set_don_delta",
+    "province": "prov_azaq",
+    "kind": "village",
+    "name": {
+      "display": "Pêcheries du delta du Don",
+      "local": "Дон",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      39.2,
+      47.1
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Pêcheries du delta (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Don (fleuve)"
+    ]
+  }
+]

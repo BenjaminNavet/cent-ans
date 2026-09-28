@@ -1,0 +1,62 @@
+{
+  "id": "fac_pomerania_stettin",
+  "name": {
+    "display": "Duché de Poméranie-Stettin",
+    "local": "Herzogtum Pommern-Stettin",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Poméranie-Stettin",
+  "adjective": "poméranien de Stettin",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_otto_i_de_pomeranie",
+  "heir": "chr_barnim_iii_de_pomeranie",
+  "capital": "prov_pomerania_stettin",
+  "capital_city": "Stettin",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_pomerania_stettin",
+  "heraldry": {
+    "blazon": "D'argent au griffon de gueules, à la bordure de sable.",
+    "description": "Le griffon rouge des ducs de Poméranie, sur argent ; bordure de sable ajoutée en jeu pour distinguer la ligne de Stettin.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Brisure de jeu, non attestée (le griffon nu est l'écu du duché)."
+  },
+  "titles": [
+    "Duc de Poméranie-Stettin"
+  ],
+  "treasury": 7000,
+  "prestige": 36,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hanseatic_trade"
+  ],
+  "relations": [
+    {
+      "faction": "fac_brandenburg",
+      "status": "peace",
+      "note": "La Marche revendique la suzeraineté sur la Poméranie ; l'empereur Louis la levera en 1338."
+    },
+    {
+      "faction": "fac_pomerania_wolgast",
+      "status": "peace",
+      "note": "Cousins de la même maison des Griffons, rivaux pour l'héritage."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 50,
+    "trade": 60,
+    "piety": 50
+  },
+  "description": "Duché des Griffons sur l'Oder, entre la Marche de Brandebourg, les Teutoniques et la Baltique ; Otto I et son fils Barnim III tiennent Stettin, Stargard et Gartz.",
+  "sources": [
+    "Duché de Poméranie-Stettin",
+    "Othon Ier de Poméranie"
+  ]
+}

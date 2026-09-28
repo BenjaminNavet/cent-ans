@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_vilnius",
+    "province": "prov_vilnius",
+    "kind": "city",
+    "name": {
+      "display": "Vilnius",
+      "local": "Vilnia",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      25.2797,
+      54.6872
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale de Gediminas sur la Neris ; château sur la colline et temple païen à ses pieds.",
+    "sources": [
+      "Vilnius"
+    ]
+  },
+  {
+    "id": "set_trakai",
+    "province": "prov_vilnius",
+    "kind": "castle",
+    "name": {
+      "display": "Trakai",
+      "local": "Trakai",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      24.9339,
+      54.6528
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château lacustre du vieux Trakai, résidence de Kęstutis.",
+    "sources": [
+      "Trakai"
+    ]
+  },
+  {
+    "id": "set_kernave",
+    "province": "prov_vilnius",
+    "kind": "town",
+    "name": {
+      "display": "Kernavė",
+      "local": "Kernavė",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      24.8586,
+      54.8894
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de Mindaugas sur la Neris, cinq collines fortifiées.",
+    "sources": [
+      "Kernavė"
+    ]
+  }
+]

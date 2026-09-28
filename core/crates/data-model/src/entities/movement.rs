@@ -15,6 +15,34 @@ pub struct TerrainCosts {
     pub forest: u8,
     pub marsh: u8,
     pub mountains: u8,
+    /// OM3 (ADR 0116): dry grassland, plains pace by default.
+    #[serde(default = "default_steppe_cost")]
+    pub steppe: u8,
+    /// OM3 (ADR 0116): sand and stone, slower than plains.
+    #[serde(default = "default_desert_cost")]
+    pub desert: u8,
+}
+
+fn default_steppe_cost() -> u8 {
+    10
+}
+
+fn default_desert_cost() -> u8 {
+    16
+}
+
+impl TerrainCosts {
+    /// Cost of a province terrain relative to plains (1.0), for the
+    /// terrains the grid pipeline marks per province (steppe, desert);
+    /// `None` for the others, whose province-level factor stays the v1 one.
+    pub fn province_factor(&self, terrain: crate::Terrain) -> Option<f64> {
+        let plains = f64::from(self.plains.max(1));
+        match terrain {
+            crate::Terrain::Steppe => Some(f64::from(self.steppe) / plains),
+            crate::Terrain::Desert => Some(f64::from(self.desert) / plains),
+            _ => None,
+        }
+    }
 }
 
 impl Default for TerrainCosts {
@@ -25,6 +53,8 @@ impl Default for TerrainCosts {
             forest: 18,
             marsh: 25,
             mountains: 30,
+            steppe: default_steppe_cost(),
+            desert: default_desert_cost(),
         }
     }
 }

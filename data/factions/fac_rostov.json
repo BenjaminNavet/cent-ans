@@ -1,0 +1,54 @@
+{
+  "id": "fac_rostov",
+  "name": {
+    "display": "Principauté de Rostov",
+    "local": "Княжество Ростовское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Rostov",
+  "adjective": "rostovien",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_rostov",
+  "capital_city": "Rostov",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_moscow",
+  "primary_title": "tit_rostov",
+  "heraldry": {
+    "blazon": "D'azur au bois de cerf d'argent.",
+    "description": "Bois de cerf d'argent sur champ d'azur, allusion au cerf attribué à Rostov, attesté plus tard.",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Prince de Rostov"
+  ],
+  "treasury": 3500,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_moscow",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 65,
+    "trade": 40,
+    "piety": 70
+  },
+  "description": "Le plus ancien centre de la Rus' du Nord-Est, siège d'un évêché, découpé en deux moitiés entre les branches de la maison ; le nom du prince de 1337 n'est pas retenu ici faute de source sûre.",
+  "sources": [
+    "Principauté de Rostov",
+    "Rostov"
+  ]
+}

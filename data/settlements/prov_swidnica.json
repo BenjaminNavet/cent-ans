@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_swidnica",
+    "province": "prov_swidnica",
+    "kind": "city",
+    "name": {
+      "display": "Świdnica",
+      "local": "Schweidnitz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      16.4881,
+      50.8436
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Résidence des ducs de Świdnica, riche ville de foire aux portes des monts des Sudètes.",
+    "sources": [
+      "Świdnica"
+    ]
+  },
+  {
+    "id": "set_jawor",
+    "province": "prov_swidnica",
+    "kind": "town",
+    "name": {
+      "display": "Jawor",
+      "local": "Jauer",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      16.1927,
+      51.05
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du duché de Jawor, tenu par Henri Ier, oncle de Bolko II.",
+    "sources": [
+      "Jawor"
+    ]
+  },
+  {
+    "id": "set_bolkow",
+    "province": "prov_swidnica",
+    "kind": "castle",
+    "name": {
+      "display": "Bolków",
+      "local": "Bolkenhain",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      16.0972,
+      50.9161
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château fondé par Bolko Ier, l'une des grandes forteresses de la Silésie.",
+    "sources": [
+      "Bolków"
+    ]
+  }
+]

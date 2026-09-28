@@ -1,0 +1,134 @@
+[
+  {
+    "id": "set_uppsala",
+    "province": "prov_svealand",
+    "kind": "city",
+    "name": {
+      "display": "Uppsala",
+      "local": "Uppsala",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      17.6389,
+      59.8586
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Siège de l'archevêque, cathédrale gothique en achèvement et vieille Uppsala.",
+    "sources": [
+      "Uppsala"
+    ]
+  },
+  {
+    "id": "set_stockholm",
+    "province": "prov_svealand",
+    "kind": "town",
+    "name": {
+      "display": "Stockholm",
+      "local": "Stockholm",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      18.0686,
+      59.3293
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Ville insulaire à l'entrée du Mälar, forteresse Tre Kronor (château) et port du fer.",
+    "sources": [
+      "Stockholm"
+    ]
+  },
+  {
+    "id": "set_vasteras",
+    "province": "prov_svealand",
+    "kind": "town",
+    "name": {
+      "display": "Västerås",
+      "local": "Västerås",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      16.5448,
+      59.6099
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Siège épiscopal, marché du fer de Bergslagen.",
+    "sources": [
+      "Västerås"
+    ]
+  },
+  {
+    "id": "set_sigtuna",
+    "province": "prov_svealand",
+    "kind": "town",
+    "name": {
+      "display": "Sigtuna",
+      "local": "Sigtuna",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      17.7233,
+      59.6178
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne capitale marchande sur le Mälar, bourg déclinant.",
+    "sources": [
+      "Sigtuna"
+    ]
+  },
+  {
+    "id": "set_nykoping",
+    "province": "prov_svealand",
+    "kind": "castle",
+    "name": {
+      "display": "Nyköping",
+      "local": "Nyköping",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      17.0086,
+      58.7528
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse royale où furent enfermés les frères du roi Birger.",
+    "sources": [
+      "Nyköpingshus"
+    ]
+  }
+]

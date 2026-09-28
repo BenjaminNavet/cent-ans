@@ -190,10 +190,13 @@ impl GameData {
     fn fallback_edges(&self) -> Vec<SettlementEdge> {
         let rules = self.movement_rules();
         let mut edges = Vec::new();
+        let costs = &self.free_movement_rules().terrain_costs;
         let terrain = |p: &ProvinceId| {
-            self.provinces
-                .get(p)
-                .map_or(1.0, |province| terrain_cost(province.terrain))
+            self.provinces.get(p).map_or(1.0, |province| {
+                costs
+                    .province_factor(province.terrain)
+                    .unwrap_or_else(|| terrain_cost(province.terrain))
+            })
         };
         let lonlat = |id: &SettlementId| self.settlements.get(id).map(|s| s.lonlat);
         let edge = |from: &SettlementId, to: &SettlementId, cost: f64, sea: bool| SettlementEdge {

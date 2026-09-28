@@ -15,7 +15,7 @@ extends RefCounted
 ##   la surface affichée, pour poser les objets), sans accès à l'arbre de scène.
 
 var tile_index: int = 0
-var origin_px: Vector2i = Vector2i.ZERO  # coin nord-ouest (coordonnées carte 4096)
+var origin_px: Vector2i = Vector2i.ZERO  # coin nord-ouest (coordonnées carte)
 var chunk_px: int = 256
 var step: int = 1
 ## Tuile 8192 : 2 octets par pixel, `tile_side` × `tile_side`.
@@ -34,7 +34,7 @@ var relief_squash: float = 0.0
 var map_bytes: PackedByteArray = PackedByteArray()
 var map_bpp: int = 2
 var map_little_endian: bool = true
-var map_size: Vector2i = Vector2i(4096, 4096)
+var map_size: Vector2i = Vector2i.ZERO  # map.json size_px, fourni par TerrainBuilder
 var edge_step: int = 4
 var skirt_depth: float = 1.5
 
@@ -61,7 +61,7 @@ func run() -> void:
 			var v := (_sample(sx, sy) + _sample(sx1, sy) + _sample(sx, sy1) + _sample(sx1, sy1)) * 0.25
 			heights[k] = MapData.display_height_with(h_min + v * h_range, origin_px.x + i * unit, origin_px.y + j * unit, height_scale, relief_gain, relief_squash)
 			k += 1
-	# Pourtour : profil du LOD proche 4096.
+	# Pourtour : profil du LOD proche (heightmap de la carte).
 	for i in side:
 		var t := i * unit
 		heights[i] = _edge_height(float(origin_px.x) + t, float(origin_px.y))

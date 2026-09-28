@@ -20,6 +20,7 @@ signal breadcrumb_clicked(faction_id: String)
 const TERRAIN_LABELS := {
 	"plains": "Plaines", "hills": "Collines", "mountains": "Montagnes",
 	"forest": "Forêt", "marsh": "Marais", "coast": "Littoral", "highlands": "Hautes terres",
+	"heath": "Lande", "bocage": "Bocage", "steppe": "Steppe", "desert": "Désert",
 }
 const STANCE_LABELS := {"normal": "Normale", "raid": "Chevauchée", "siege": "Siège"}
 const CLASS_LABELS := {"peasants": "Paysans", "burghers": "Bourgeois", "clergy": "Clergé", "nobility": "Noblesse"}

@@ -140,7 +140,7 @@ func _run() -> void:
 
 func _levels(terrain: TerrainBuilder) -> PackedInt32Array:
 	var levels := PackedInt32Array()
-	for i in TerrainBuilder.CHUNKS * TerrainBuilder.CHUNKS:
+	for i in terrain.chunks_x * terrain.chunks_y:
 		levels.append(terrain.chunk_level(i))
 	return levels
 

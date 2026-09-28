@@ -12,9 +12,7 @@
   "rivers": [],
   "coastal": true,
   "ports": [
-    "Lödöse",
-    "Oslo",
-    "Tønsberg"
+    "Lödöse"
   ],
   "sea_zones": [
     "sea_north_sea"

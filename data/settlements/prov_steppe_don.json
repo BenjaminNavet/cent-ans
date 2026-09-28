@@ -1,0 +1,73 @@
+[
+  {
+    "id": "set_sarkel",
+    "province": "prov_steppe_don",
+    "kind": "city",
+    "name": {
+      "display": "Belaïa Vèja (Sarkel)",
+      "local": "Sarkel",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      42.05,
+      47.7
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne forteresse khazare du bas Don, réoccupée par les nomades (statut incertain).",
+    "sources": [
+      "Sarkel"
+    ]
+  },
+  {
+    "id": "set_don_khoper",
+    "province": "prov_steppe_don",
+    "kind": "village",
+    "name": {
+      "display": "Camps du haut Don",
+      "local": "Дон",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      40.1,
+      50.9
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Campements d'été des tribus kiptchak sur le Don (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Steppe pontique"
+    ]
+  },
+  {
+    "id": "set_medveditsa",
+    "province": "prov_steppe_don",
+    "kind": "village",
+    "name": {
+      "display": "Camps de la Medveditsa",
+      "local": "Медведица",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      43.9,
+      50.2
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Campements de la Medveditsa, entre Don et Volga (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Steppe pontique"
+    ]
+  }
+]

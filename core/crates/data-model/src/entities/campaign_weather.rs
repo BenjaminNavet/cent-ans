@@ -41,6 +41,10 @@ pub struct ClimateWeather {
     pub continental: SeasonalWeather,
     pub mediterranean: SeasonalWeather,
     pub mountain: SeasonalWeather,
+    /// OM3 (ADR 0116): hot and dry, almost no rain.
+    pub arid: SeasonalWeather,
+    /// OM3 (ADR 0116): dry continental grassland.
+    pub steppe: SeasonalWeather,
 }
 
 /// Contents of `data/rules/campaign_weather.json`: the weather drawn on the
@@ -87,6 +91,8 @@ impl Default for CampaignWeatherRules {
                 continental: temperate,
                 mediterranean: temperate,
                 mountain: temperate,
+                arid: temperate,
+                steppe: temperate,
             },
             description: None,
         }

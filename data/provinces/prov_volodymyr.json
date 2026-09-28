@@ -1,0 +1,93 @@
+{
+  "id": "prov_volodymyr",
+  "name": {
+    "display": "Volodymyr",
+    "local": "Volodymyr",
+    "local_language": "ruthène"
+  },
+  "region": "rus_ouest",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Bug",
+    "Louga",
+    "Styr"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Volodymyr",
+      "local": "Volodymyr-Volynskyï",
+      "local_language": "ruthène"
+    },
+    "lat": 50.8483,
+    "lon": 24.3222
+  },
+  "geo": {
+    "capital_lonlat": [
+      24.3222,
+      50.8483
+    ],
+    "seed_lonlat": [
+      24.0,
+      50.85
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_galicia_volhynia",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Volhynie occidentale, terre de Chełm.",
+    "classes": {
+      "peasants": {
+        "count": 120000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2640,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1900,
+  "description": "Volhynie occidentale et terre de Chełm : Volodymyr, siège de Bolesław-Iouri II, Chełm, ville de Daniel, et Belz, ancienne principauté.",
+  "sources": [
+    "Volodymyr",
+    "Chełm",
+    "Belz"
+  ]
+}

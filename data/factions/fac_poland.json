@@ -1,0 +1,89 @@
+{
+  "id": "fac_poland",
+  "name": {
+    "display": "Royaume de Pologne",
+    "local": "Królestwo Polskie",
+    "local_language": "polonais"
+  },
+  "short_name": "Pologne",
+  "adjective": "polonais",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_casimir_iii_de_pologne",
+  "capital": "prov_lesser_poland",
+  "capital_city": "Cracovie",
+  "religion": "rel_catholic",
+  "culture": "cul_polish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_poland",
+  "heraldry": {
+    "blazon": "De gueules à l'aigle d'argent, couronnée, becquée et membrée d'or.",
+    "description": "Aigle blanc couronné des Piast, armes du royaume restauré.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Roi de Pologne",
+    "Duc de Cracovie, de Sandomierz, de Sieradz et de Łęczyca",
+    "Seigneur de Kuyavie"
+  ],
+  "treasury": 14000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_hungary",
+      "status": "alliance",
+      "note": "Charles Robert est l'époux de la sœur de Casimir ; alliance de Visegrád (1335)."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "alliance",
+      "note": "Casimir a épousé Aldona, fille de Gediminas (1325) : alliance contre l'Ordre teutonique."
+    },
+    {
+      "faction": "fac_bohemia",
+      "status": "peace",
+      "note": "Casimir a renoncé à la Silésie à Trentschin et Visegrád (1335) contre la renonciation de Jean de Bohême à la couronne polonaise ; paix froide."
+    },
+    {
+      "faction": "fac_galicia_volhynia",
+      "status": "peace",
+      "note": "Bolesław-Iouri II est le cousin de Casimir ; la Ruthénie rouge attire Cracovie."
+    },
+    {
+      "faction": "fac_teutonic",
+      "status": "truce",
+      "note": "Trêve depuis 1332 ; l'Ordre occupe la Kuyavie et Dobrzyń ; arbitrage de Visegrád (1335), paix de Kalisz en 1343."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_wroclaw",
+      "note": "Silésie piast, abandonnée à la Bohême en 1335 mais jamais oubliée."
+    },
+    {
+      "kind": "province",
+      "province": "prov_lviv",
+      "note": "Ruthénie rouge (Léopol, Przemyśl) : prétention sur l'héritage galicien."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 65
+  },
+  "description": "Royaume reconstitué par Ladislas Ier le Bref (couronné en 1320) et hérité par Casimir III (couronné en 1333) : plaines de Grande-Pologne, Cracovie et salines de Wieliczka, mais un royaume encore fragile entre l'Ordre teutonique, la Bohême et la Ruthénie.",
+  "sources": [
+    "Casimir III de Pologne",
+    "Royaume de Pologne (1320-1385)",
+    "Traité de Trentschin"
+  ]
+}

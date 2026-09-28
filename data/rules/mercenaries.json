@@ -45,14 +45,41 @@
     "pays_bas": "Pays-Bas",
     "portugal": "Portugal",
     "provence_alpes": "Provence et Alpes",
-    "scandinavie": "Scandinavie"
+    "scandinavie": "Scandinavie",
+    "norvege": "Norvège",
+    "finlande": "Finlande",
+    "prusse": "Prusse teutonique",
+    "livonie": "Livonie et Estonie",
+    "pomeranie": "Poméranie",
+    "pologne": "Pologne",
+    "mazovie": "Mazovie",
+    "silesie": "Silésie",
+    "hongrie": "Hongrie",
+    "transylvanie": "Transylvanie",
+    "croatie": "Croatie et Slavonie",
+    "rus_ouest": "Rus' occidentale",
+    "rus_sud": "Rus' du Sud",
+    "lituanie": "Lituanie et Ruthénie lituanienne",
+    "valachie": "Valachie",
+    "crimee": "Crimée",
+    "horde": "Horde d'Or et steppes",
+    "rus_centre": "Rus' du Nord-Est",
+    "rus_nord": "Rus' du Nord"
   },
   "bands": [
     {
       "id": "grandes_compagnies",
       "name": "Grandes Compagnies",
       "unit": "unit_routiers",
-      "regions": ["france_nord", "france_centre", "france_est", "france_ouest", "aquitaine", "languedoc", "provence_alpes"],
+      "regions": [
+        "france_nord",
+        "france_centre",
+        "france_est",
+        "france_ouest",
+        "aquitaine",
+        "languedoc",
+        "provence_alpes"
+      ],
       "from": 1360,
       "until": 1395,
       "cap": 3,
@@ -64,7 +91,10 @@
       "id": "compagnie_blanche",
       "name": "Compagnie Blanche",
       "unit": "unit_routiers",
-      "regions": ["italie_nord", "italie_centre"],
+      "regions": [
+        "italie_nord",
+        "italie_centre"
+      ],
       "from": 1361,
       "until": 1394,
       "cap": 2,
@@ -76,7 +106,11 @@
       "id": "compagnies_de_castille",
       "name": "Compagnies de Castille",
       "unit": "unit_routiers",
-      "regions": ["iberie_nord", "iberie_centre", "aragon"],
+      "regions": [
+        "iberie_nord",
+        "iberie_centre",
+        "aragon"
+      ],
       "from": 1365,
       "until": 1369,
       "cap": 2,
@@ -88,7 +122,12 @@
       "id": "arbaletriers_genois",
       "name": "Arbalétriers génois",
       "unit": "unit_genoese_crossbowmen",
-      "regions": ["italie_nord", "italie_sud", "provence_alpes", "languedoc"],
+      "regions": [
+        "italie_nord",
+        "italie_sud",
+        "provence_alpes",
+        "languedoc"
+      ],
       "from": 1337,
       "until": 1453,
       "cap": 3,
@@ -100,7 +139,9 @@
       "id": "genois_des_galees",
       "name": "Génois des galées du roi",
       "unit": "unit_genoese_crossbowmen",
-      "regions": ["france_nord"],
+      "regions": [
+        "france_nord"
+      ],
       "from": 1337,
       "until": 1347,
       "cap": 2,
@@ -112,7 +153,11 @@
       "id": "brabancons",
       "name": "Soudoyers brabançons et hennuyers",
       "unit": "unit_brabancons",
-      "regions": ["pays_bas", "empire_rhin", "france_nord"],
+      "regions": [
+        "pays_bas",
+        "empire_rhin",
+        "france_nord"
+      ],
       "from": 1337,
       "until": 1453,
       "cap": 3,
@@ -124,7 +169,9 @@
       "id": "ecossais_d_ecosse",
       "name": "Archers des Marches écossaises",
       "unit": "unit_scots_archers",
-      "regions": ["ecosse"],
+      "regions": [
+        "ecosse"
+      ],
       "from": 1337,
       "until": 1453,
       "cap": 2,
@@ -136,7 +183,11 @@
       "id": "armee_d_ecosse",
       "name": "Armée d'Écosse",
       "unit": "unit_scots_archers",
-      "regions": ["france_centre", "france_ouest", "france_nord"],
+      "regions": [
+        "france_centre",
+        "france_ouest",
+        "france_nord"
+      ],
       "from": 1419,
       "until": 1453,
       "cap": 3,
@@ -148,7 +199,13 @@
       "id": "ecorcheurs",
       "name": "Écorcheurs",
       "unit": "unit_ecorcheurs",
-      "regions": ["france_nord", "france_centre", "france_est", "languedoc", "empire_rhin"],
+      "regions": [
+        "france_nord",
+        "france_centre",
+        "france_est",
+        "languedoc",
+        "empire_rhin"
+      ],
       "from": 1435,
       "until": 1445,
       "cap": 3,

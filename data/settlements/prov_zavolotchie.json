@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_kholmogory",
+    "province": "prov_zavolotchie",
+    "kind": "city",
+    "name": {
+      "display": "Kholmogory",
+      "local": "Холмогоры",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      41.15,
+      64.22
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Principale bourgade de la Dvina (première mention écrite en 1353, existence antérieure incertaine).",
+    "sources": [
+      "Kholmogory"
+    ]
+  },
+  {
+    "id": "set_chenkoursk",
+    "province": "prov_zavolotchie",
+    "kind": "town",
+    "name": {
+      "display": "Vaga (Chenkoursk)",
+      "local": "Важская земля",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      42.9,
+      62.1
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Terre de la Vaga, colonisée par Novgorod (fondation traditionnelle vers 1315, incertaine).",
+    "sources": [
+      "Chenkoursk"
+    ]
+  },
+  {
+    "id": "set_solvytchegodsk",
+    "province": "prov_zavolotchie",
+    "kind": "village",
+    "name": {
+      "display": "Sol Vytchegodskaïa",
+      "local": "Соль Вычегодская",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      46.92,
+      61.33
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Salines de la Vytchegda, exploitées par les colons de Novgorod (date exacte incertaine).",
+    "sources": [
+      "Solvytchegodsk"
+    ]
+  }
+]

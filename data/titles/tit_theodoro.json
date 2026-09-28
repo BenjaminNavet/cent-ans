@@ -1,0 +1,64 @@
+{
+  "id": "tit_theodoro",
+  "rank": "county",
+  "name": {
+    "display": "Principauté de Théodoro",
+    "local": "Θεοδωρώ",
+    "local_language": "grec"
+  },
+  "heraldry": {
+    "blazon": "Écartelé de gueules et d'or.",
+    "description": "Couleurs des Paléologues (gueules et or) pour la principauté hellénisée de Gothie ; blason de convention.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Armes réelles de Théodoro non établies pour 1337."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_theodoro"
+  ],
+  "holder_1337": {
+    "faction": "fac_theodoro",
+    "sources": [
+      "Principauté de Théodoro",
+      "Mangoup"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_theodoro_hold",
+      "title": "Garder Théodoro",
+      "description": "Conserver la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_theodoro"
+      }
+    },
+    {
+      "id": "obj_theodoro_crimea",
+      "title": "La Gothie étendue",
+      "description": "Tenir Théodoro et la Crimée de Solkhat.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_theodoro",
+          "prov_crimee"
+        ]
+      }
+    },
+    {
+      "id": "obj_theodoro_free",
+      "title": "Sans khan",
+      "description": "Se libérer de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Petite principauté orthodoxe de la Crimée montagneuse (Gothie), capitale Mangoup ; sous la suzeraineté de la Horde. Son histoire au XIVe siècle est mal connue ; aucun prince de 1337 n'est nommé ici faute de source sûre.",
+  "sources": [
+    "Principauté de Théodoro",
+    "Mangoup"
+  ]
+}

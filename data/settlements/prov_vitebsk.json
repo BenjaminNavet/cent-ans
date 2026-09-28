@@ -1,0 +1,55 @@
+[
+  {
+    "id": "set_vitebsk",
+    "province": "prov_vitebsk",
+    "kind": "city",
+    "name": {
+      "display": "Vitebsk",
+      "local": "Viciebsk",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      30.2049,
+      55.1904
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château de Vitebsk sur la Dvina, verrou entre Lituanie et Smolensk.",
+    "sources": [
+      "Vitebsk"
+    ]
+  },
+  {
+    "id": "set_orcha",
+    "province": "prov_vitebsk",
+    "kind": "castle",
+    "name": {
+      "display": "Orcha",
+      "local": "Orša",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      30.4172,
+      54.5081
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Place-forte du Dniepr, sur la route de Smolensk.",
+    "sources": [
+      "Orcha"
+    ]
+  }
+]
