@@ -167,19 +167,25 @@ func update_view(rig_distance: float) -> void:
 		version += 1
 		towns_changed.emit()
 	_last_distance = rig_distance
+	var tp := Time.get_ticks_usec()  # RS-K : sections `town/*` du banc `--bench-probe`
 	_poll_jobs()
+	tp = PerfProbe.lap("town/poll", tp)
 	if not active:
 		return
 	# ZG7a : HLOD maison par maison dans le shader (caméra principale, passe d'ombre comprise).
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if camera != null:
 		TownBuilder.set_lod_view(camera.global_position, _detail_range())
+	tp = PerfProbe.lap("town/lod_view", tp)
 	_stream_timer -= 1
 	if _stream_timer <= 0:
 		_stream_timer = 10
 		_stream(rig_distance)
+	tp = PerfProbe.lap("town/stream", tp)
 	_step_builders(int(profile.build_budget_ms * 1000.0))
+	tp = PerfProbe.lap("town/step", tp)
 	_check_reground()
+	PerfProbe.lap("town/reground", tp)
 
 
 func _camera_ground() -> Vector2:

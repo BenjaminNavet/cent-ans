@@ -1719,9 +1719,11 @@ func _update_towns(camera_distance: float) -> void:
 	if towns.version == _towns_version:
 		return
 	_towns_version = towns.version
+	var tp := Time.get_ticks_usec()
 	_update_model_visibility()
 	if was_active != towns.active:
 		_update_label_heights()
+	PerfProbe.lap("town/models", tp)  # RS-K
 
 
 ## SZ4b : maquette masquée seulement quand la ville 1:1 de sa colonie est affichée (ZG6) ; ailleurs
