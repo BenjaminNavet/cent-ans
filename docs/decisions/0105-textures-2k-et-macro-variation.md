@@ -10,11 +10,21 @@ Le sol de bataille (lot V4) mélangeait 9 couches Poly Haven (CC0) en 1k dans un
 herbe piétinée, chaume/éteules, labour), une macro-variation procédurale (50–200 m, teinte et
 luminance, faible amplitude) et un `--no-ga2` pour comparer.
 
-Mesure mémoire (avant tout téléchargement, arithmétique BC7/mipmaps, 1 octet/texel, facteur
-mipmaps 4/3) :
+Mesure mémoire préalable (avant tout téléchargement, arithmétique BC7/mipmaps supposé par la
+spec, 1 octet/texel, facteur mipmaps 4/3) :
 - 13 couches, albédo **et** normale en 2k (2048²) : 13 × 2048² × 4/3 ≈ 69,3 Mo chacun,
   soit **≈ 138,6 Mo** — au-dessus du plafond de 120 Mo fixé par la spec.
 - 13 couches, albédo 2k / normale **1k** (1024²) : 69,3 + 17,3 ≈ **86,6 Mo** — sous le plafond.
+
+Mesure réelle en jeu (`game/tests/ga2_ground_test.gd`, `TextureLayered.get_format()`) : le format
+VRAM effectif de ces couches (sans alpha) est **DXT1/BC1** (format Godot 17), pas BC7/BPTC comme
+la spec le supposait — réglage `compress/channel_pack=0` des fichiers `.import`, déjà en place
+avant GA2 (`ground_albedo_array.jpg.import` du lot V4, inchangé ici). DXT1 tient 0,5 octet/texel
+(la moitié de BC7) : mémoire mesurée **≈ 43,3 Mo** (albédo 2k ≈ 34,7 Mo, normale 1k ≈ 8,7 Mo),
+très en dessous des 86,6 Mo anticipés. Décision inchangée (albédo 2k / normale 1k) : la marge
+sous le plafond permettrait même normale 2k (≈ 138,6 Mo réel ÷ 2 ≈ 69,3 Mo hypothétique en DXT1),
+mais la spec fixe explicitement le repli 1k dès 120 Mo dépassés en BC7 ; ne pas rouvrir ce choix
+ici (voir « point ouvert » dans le rapport du lot).
 
 ## Décision
 
@@ -53,7 +63,9 @@ mipmaps 4/3) :
 
 ## Conséquences
 
-- Mémoire du sol : ≈ 86,6 Mo mesurés (`game/tests/ga2_ground_test.gd`), sous le plafond de 120 Mo.
+- Mémoire du sol : **≈ 43,3 Mo mesurés** (`game/tests/ga2_ground_test.gd`), largement sous le
+  plafond de 120 Mo — la spec anticipait 86,6 Mo en supposant BC7 ; le format réel (DXT1,
+  préexistant) est deux fois plus compact.
 - `data/fx/battle_ground_layers.json` devient la source de vérité pour toute couche de sol future
   (GA4 réutilisera la macro-variation ; GA5 suit le même schéma pour les bâtiments si besoin).
 - La substitution « prairie fleurie » → `leafy_grass` est un choix éditorial documenté ici et
