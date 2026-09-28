@@ -48,6 +48,7 @@
     "version": {"type": "integer", "const": 1},
     "model": {"type": "string", "minLength": 3},
     "budget_cap_usd": {"type": "number", "exclusiveMinimum": 0, "maximum": 50},
+    "budget_session": {"type": "string", "minLength": 3, "description": "En-tête (préfixe suffisant) de la section de `docs/budget.md` qui finance ce lot ; l'outil y écrit sa ligne de grand livre même si une section plus récente a été ajoutée après (`BudgetLedger.find_session`)."},
     "icon_style": {"$ref": "#/$defs/style"},
     "medallion_style": {"$ref": "#/$defs/style"},
     "icons": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}},
