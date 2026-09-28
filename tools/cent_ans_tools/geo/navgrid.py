@@ -161,6 +161,8 @@ class NavgridLayers:
     settlement_cells: dict[str, tuple[int, int]]
     ports: set[str]
     road_crossings_dropped: int = 0
+    #: Land outside every province (impassable, ADR 0115); ``None`` = none.
+    outside: np.ndarray | None = None
 
 
 @dataclass
@@ -670,7 +672,8 @@ def compute(
 
     cost[water] = IMPASSABLE
     # Land outside every province (ADR 0115): impassable.
-    cost[labels == 0] = IMPASSABLE
+    outside = (labels == 0) & ~water
+    cost[outside] = IMPASSABLE
     plains = float(rules["terrain_costs"]["plains"])
     for cell in settlement_cells.values():
         cost[cell] = plains
@@ -686,6 +689,7 @@ def compute(
         settlement_cells=settlement_cells,
         ports=_ports(),
         road_crossings_dropped=road_dropped,
+        outside=outside,
     )
 
 
@@ -705,8 +709,14 @@ def _lonlat_to_pixel(grid: MapGrid, lon: float, lat: float) -> tuple[float, floa
 
 
 def land_masses(layers: NavgridLayers) -> np.ndarray:
-    """8-connected land components (settlement cells count as land)."""
+    """8-connected land components (settlement cells count as land).
+
+    Land outside every province does not count: Scandinavia and the continent
+    are one landmass on the map, but not through the provinces (ADR 0115).
+    """
     land = ~layers.water
+    if layers.outside is not None:
+        land &= ~layers.outside
     for cell in layers.settlement_cells.values():
         land[cell] = True
     labels, _ = ndimage.label(land, structure=EIGHT)
