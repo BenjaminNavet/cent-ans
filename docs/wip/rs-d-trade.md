@@ -19,7 +19,8 @@ Hors périmètre (RS-B en parallèle) : `economy.rs`, `settlements.rs`, `populat
 3. Pavois / cible cachée : toujours ouvert après CB4. Test ignoré
    `sim-battle/tests/review_fixes.rs::pavised_crossbowmen_close_in_on_a_hidden_target` (échoue : z reste 380).
    Correction de règle (`start_attack` : tester aussi la visibilité) laissée à un lot bataille.
-4. Sonde release `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` : en cours.
+4. Sonde release `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` : échoue sur le trésor moyen français
+   38 297 < 40 000 ; identique sans le cache (dérive préexistante). Toutes les assertions par graine passent.
 5. `revue-code.md` coché.
 
 ## Prochaine étape
