@@ -11,7 +11,9 @@ DATA = Path(__file__).resolve().parents[2] / "data"
 def test_battle_ground_layers_match_schema() -> None:
     """``data/fx/battle_ground_layers.json`` matches ``fx_battle_ground_layers.schema.json``."""
     schema = json.loads(
-        (DATA / "schemas" / "fx_battle_ground_layers.schema.json").read_text(encoding="utf-8")
+        (DATA / "schemas" / "fx_battle_ground_layers.schema.json").read_text(
+            encoding="utf-8"
+        )
     )
     document = json.loads(
         (DATA / "fx" / "battle_ground_layers.json").read_text(encoding="utf-8")
