@@ -103,7 +103,37 @@ test_shields_are_distinct_and_masked`, qui échoue sur une collision **préexist
 `fac_navarre`/`fac_papacy` (dernière modification de ces deux fichiers : commit `bdd997c1`
 « FE0 », hors de ma zone Ibérie/Papauté, non touché).
 
+## Pipeline géographique régénéré (dans l'ordre)
+
+1. `cent-ans geo provinces` → 152 provinces (141 + 11).
+2. `cent-ans geo settlements` → 1242 colonies, 1 composante connexe, 0 cité de repli.
+3. `cent-ans geo hamlets` → 2997 hameaux, 152 provinces.
+4. `cent-ans geo horizon --province prov_kildare,prov_meath,prov_leinster,prov_ormond,prov_thomond,prov_desmond,prov_connacht,prov_tyrone,prov_man,prov_lancaster,prov_isles` → 11 tuiles.
+5. `cent-ans geo navgrid` → 97,8 % des cases de terre franchissables.
+
+## Tests finaux
+
+- `uv run --project tools pytest -q` : 906 passed, 2 skipped, **1 failed** —
+  `test_heraldry.py::test_shields_are_distinct_and_masked`, collision `fac_navarre`/
+  `fac_papacy` **préexistante** (dernière modif de ces fichiers : commit `bdd997c1`, lot FE0,
+  hors de ma zone Ibérie/Papauté).
+- `cd core && cargo fmt --all -- --check` : propre. `cargo clippy --all-targets -- -D
+  warnings` : propre.
+- `cargo test` : 690 tests passés, **1 échec** — `sim-campaign::c7_retinue::
+  companions_move_between_generals_standing_together`. Cause : ce test place Édouard III et
+  Henri de Grosmont comme généraux de deux armées anglaises séparées et vérifie qu'un transfert
+  de compagnon entre eux est refusé (`NotTogether`) tant qu'ils ne sont pas réunis. Depuis que
+  Henri de Grosmont appartient à `fac_lancaster` (correction du bogue de titulaire signalée plus
+  haut), l'ordre est refusé pour une autre raison (vraisemblablement un contrôle de faction en
+  amont de `NotTogether`) et l'assertion sur la variante d'erreur précise échoue. Comme pour le
+  test de succession Valois signalé par F4a, je n'ai pas touché au code de règles
+  (`crates/sim-campaign/src/retinue.rs`, hors mandat données) ni affaibli le test : c'est un
+  effet de bord attendu de la correction du titulaire 1337 du comté de Lancastre, à traiter par
+  F1/F3 si le contrôle de faction doit être assoupli pour des compagnons de maisons vassales
+  distinctes, ou en choisissant un autre couple de personnages dans ce test.
+- Fixtures figées mises à jour (mandat explicite) : `campaign.rs::new_1337_matches_game_data` —
+  `factions.len()` 36 → 45, `provinces.len()` 141 → 152, `armies().len()` 35 → 44.
+
 ## Prochaine étape
 
-Régénérer le pipeline géographique (`cent-ans geo provinces`, `settlements`, `hamlets`,
-`horizon`, `navgrid`), relancer `cargo test`, écrire le rapport final.
+Lot terminé. Points ouverts pour l'intégrateur : voir le rapport final de fin de lot.
