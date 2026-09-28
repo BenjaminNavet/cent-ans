@@ -209,7 +209,7 @@ func _build_header() -> Control:
 	header.add_child(donate)
 	var close := Button.new()
 	close.text = "×"
-	close.tooltip_text = "Fermer (Échap)"
+	RichTooltip.attach_plain(close, "close_escape")
 	close.custom_minimum_size = Vector2(36, 36)
 	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void:
@@ -377,7 +377,7 @@ func _build_negotiation() -> Control:
 	var adopt := Button.new()
 	adopt.name = "AdoptCounter"
 	adopt.text = "Reprendre leur contre-offre"
-	adopt.tooltip_text = "Remplacer le brouillon par la contre-offre (il reste à la proposer)."
+	RichTooltip.attach_plain(adopt, "treaty_adopt_counter")
 	adopt.focus_mode = Control.FOCUS_NONE
 	adopt.pressed.connect(_adopt_counter)
 	_counter_box.add_child(adopt)
@@ -392,7 +392,7 @@ func _build_negotiation() -> Control:
 	buttons.add_theme_constant_override("separation", 6)
 	var counter := Button.new()
 	counter.text = "Que faudrait-il ?"
-	counter.tooltip_text = "Demander ce qui les ferait accepter (captifs, terres occupées, or, tribut, exigences retirées)."
+	RichTooltip.attach_plain(counter, "treaty_ask_counter")
 	counter.pressed.connect(_ask_counter)
 	buttons.add_child(counter)
 	var clear := Button.new()
@@ -548,7 +548,7 @@ func _render_offers() -> void:
 				var side_id := str(call.get(side[0], ""))
 				var take := Button.new()
 				take.text = "Soutenir %s" % str(call.get(side[1], side_id))
-				take.tooltip_text = "Prendre le parti de %s : guerre contre l'autre vassal." % str(call.get(side[1], side_id))
+				RichTooltip.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l'autre vassal."})
 				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
 				row.add_child(take)
 		var no := Button.new()
@@ -593,7 +593,7 @@ func _faction_row(entry: Dictionary) -> Control:
 	var reasons := PackedStringArray(["Attitude envers nous : %+d" % attitude])
 	for reason in entry.get("attitude_reasons", []):
 		reasons.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
-	row.tooltip_text = "\n".join(reasons)
+	RichTooltip.attach_plain(row, "faction_attitude", {"body": "\n".join(reasons)})
 	var line := HBoxContainer.new()
 	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	line.offset_left = 6
@@ -867,18 +867,18 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 		tips.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
 	if str(value.get("blocked", "")) != "":
 		tips.append("Impossible : %s" % value["blocked"])
-	label.tooltip_text = "\n".join(tips)
+	RichTooltip.attach_plain(label, "treaty_clause_detail", {"body": "\n".join(tips)})
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
 	row.add_child(label)
 	if not value.is_empty():
 		var points := int(value.get("value", 0))
 		var points_label := _label("%+d" % points, UiType.BODY, HudStyle.GOOD if points >= 0 else HudStyle.POOR)
-		points_label.tooltip_text = "Valeur pour eux"
+		RichTooltip.attach_plain(points_label, "treaty_clause_value_for_them")
 		points_label.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(points_label)
 	var remove := Button.new()
 	remove.text = "×"
-	remove.tooltip_text = "Retirer cette clause"
+	RichTooltip.attach_plain(remove, "treaty_clause_remove")
 	remove.focus_mode = Control.FOCUS_NONE
 	remove.pressed.connect(func() -> void:
 		_articles.remove_at(index)

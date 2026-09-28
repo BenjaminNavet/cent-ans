@@ -195,7 +195,7 @@ func _row(entry: Dictionary) -> Control:
 	if int(entry["count"]) > 1:
 		text += " (×%d)" % int(entry["count"])
 	row.text = "   " + text
-	row.tooltip_text = "Cliquer pour y porter la caméra"
+	RichTooltip.attach_plain(row, "click_camera_focus")
 	var glyph := Control.new()
 	glyph.custom_minimum_size = Vector2(22, 22)
 	glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -68,7 +68,7 @@ func _ready() -> void:
 	header.add_child(search)
 	var close := Button.new()
 	close.text = "×"
-	close.tooltip_text = "Fermer (Échap)"
+	RichTooltip.attach_plain(close, "close_escape")
 	close.pressed.connect(hide)
 	header.add_child(close)
 	body = VBoxContainer.new()

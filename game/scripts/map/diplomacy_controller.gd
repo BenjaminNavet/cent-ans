@@ -28,7 +28,7 @@ func setup(campaign_map: Node) -> void:
 	button = Button.new()
 	button.text = "Diplomatie"
 	button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
-	button.tooltip_text = "Diplomatie et religion (P)"
+	RichTooltip.attach_plain(button, "diplomacy_open")
 	court_button.get_parent().add_child(button)
 	court_button.get_parent().move_child(button, court_button.get_index())
 	button.pressed.connect(toggle_panel)

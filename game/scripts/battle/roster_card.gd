@@ -66,7 +66,6 @@ func _refresh_tooltip() -> void:
 	var name_text := str(unit.get("name", "?"))
 	var soldiers := int(unit.get("soldiers", 0))
 	var lines := PackedStringArray()
-	lines.append(name_text + (" (général)" if general else ""))
 	lines.append("Effectif : %d / %d" % [soldiers, int(unit.get("max_soldiers", soldiers))])
 	if unit.has("morale"):
 		lines.append("Moral : %d · expérience : %d" % [int(unit.get("morale", 0)), int(unit.get("experience", 0))])
@@ -76,7 +75,7 @@ func _refresh_tooltip() -> void:
 			lines.append("Sort : %s" % fate)
 		if hero:
 			lines.append("Héros de la bataille")
-	tooltip_text = "\n".join(lines)
+	RichTooltip.attach_plain(self, "roster_card_detail", {"title": name_text + (" (général)" if general else ""), "body": "\n".join(lines)})
 
 
 func _draw() -> void:

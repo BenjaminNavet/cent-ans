@@ -181,7 +181,7 @@ func _build_buttons() -> Control:
 	row.add_child(spacer)
 	auto_button = _button("Résolution automatique", UiType.size(UiType.BODY))
 	auto_button.name = "AutoResolve"
-	auto_button.tooltip_text = "La bataille est tranchée sans être jouée, selon le rapport de forces et la fortune des armes."
+	RichTooltip.attach_plain(auto_button, "battle_auto_resolve")
 	auto_button.pressed.connect(func() -> void:
 		visible = false
 		auto_requested.emit(int(battle.get("index", 0))))
@@ -277,11 +277,11 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	var can_withdraw := bool(forecast.get("can_withdraw", false))
 	withdraw_button.disabled = not can_withdraw
 	if siege:
-		withdraw_button.tooltip_text = "Remettre l'assaut : le siège continue et affame la garnison."
+		RichTooltip.attach_plain(withdraw_button, "battle_postpone_assault")
 	elif can_withdraw:
-		withdraw_button.tooltip_text = "Refuser la bataille : l'ost se replie et perd du moral."
+		RichTooltip.attach_plain(withdraw_button, "battle_decline")
 	else:
-		withdraw_button.tooltip_text = "Impossible : vous êtes attaqué, il faut tenir ou laisser trancher la fortune."
+		RichTooltip.attach_plain(withdraw_button, "seat_unavailable", {"body": "Vous êtes attaqué, il faut tenir ou laisser trancher la fortune."})
 	_layout()
 	if not visible:
 		UiSounds.play("alert")  # UB1 / U13 : bataille en vue
@@ -316,7 +316,7 @@ func _fill_balance(siege: bool) -> void:
 			BattleUiKit.thousands(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
 			" (assaut)" if siege else "",
 		]
-	balance_bar.tooltip_text = "Estimation du cœur de la simulation (mêmes règles que la résolution automatique, sans le hasard) : effectifs, qualité, moral, ravitaillement, général, terrain."
+	RichTooltip.attach_plain(balance_bar, "battle_balance_estimate")
 	balance_bar.queue_redraw()
 
 
@@ -444,7 +444,7 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
 	var stars_label := BattleUiKit.label(stars, UiType.size(UiType.CAPTION), BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
 	stars_label.set_script(RichLabel)
-	stars_label.tooltip_text = "Commandement %d / %s" % [command, RuleValues.text("max_skill_level")]
+	RichTooltip.attach_plain(stars_label, "leader_command_level", {"body": "%d / %s" % [command, RuleValues.text("max_skill_level")]})
 	stars_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	texts.add_child(stars_label)
 	if slot == 0:

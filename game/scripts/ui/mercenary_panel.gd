@@ -33,7 +33,7 @@ func _init() -> void:
 	var close := Button.new()
 	close.name = "Close"
 	close.text = "×"
-	close.tooltip_text = "Fermer (Échap)"
+	RichTooltip.attach_plain(close, "close_escape")
 	close.pressed.connect(hide)
 	header.add_child(close)
 	_status = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)

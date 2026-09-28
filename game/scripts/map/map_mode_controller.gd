@@ -86,7 +86,7 @@ func setup(campaign_map: Node) -> void:
 	button = Button.new()
 	button.name = "MapFiltersButton"
 	button.text = "Filtres ▾"
-	button.tooltip_text = "Filtres de la carte : diplomatie, religion, ordre public, richesse… (F)"
+	RichTooltip.attach_plain(button, "map_mode_filters")
 	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(toggle_menu)
 	_decorate_ink(button, "map_filters", 14)  # DA5
@@ -147,7 +147,7 @@ func _build_menu() -> void:
 	_trade_check.name = "TradeLayer"
 	var trade_key := ShortcutSheet.first_key("map_toggle_trade")
 	_trade_check.text = "Routes commerciales   (%s)" % trade_key if trade_key != "" else "Routes commerciales"
-	_trade_check.tooltip_text = "Calque des routes commerciales, combinable avec tout filtre"
+	RichTooltip.attach_plain(_trade_check, "map_mode_trade_overlay")
 	_trade_check.focus_mode = Control.FOCUS_NONE
 	_trade_check.toggled.connect(func(_on: bool) -> void: map.call("_toggle_trade_layer"))
 	box.add_child(_trade_check)

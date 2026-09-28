@@ -107,7 +107,7 @@ func _ready() -> void:
 	box.add_child(hour_row)
 	var hour_label := Label.new()
 	hour_label.text = "Heure de la bataille"
-	hour_label.tooltip_text = "L'aube et le crépuscule réduisent la portée des tireurs ; la journée avance pendant la bataille."
+	RichTooltip.attach_plain(hour_label, "battle_demo_hour")
 	hour_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	hour_row.add_child(hour_label)
 	hour_option = OptionButton.new()
