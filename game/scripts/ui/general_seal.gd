@@ -150,6 +150,11 @@ func _refresh() -> void:
 			_add_status("stance_" + stance, StanceBar.stance_name(stance), "Posture")
 		var supply := int(army.get("supply", 0))
 		_add_status("supply", "%d %%" % supply, "Ravitaillement", HudStyle.gauge_color(supply / 100.0))
+		# TW2-T2 : reconstitution saisonnière (taux et facteurs calculés par le cœur).
+		var replenishment: Dictionary = army.get("replenishment", {})
+		if not replenishment.is_empty():
+			_add_status("infantry", replenishment_text(replenishment),
+				str(replenishment.get("tooltip", "Reconstitution")), replenishment_color(replenishment))
 		var moves := int(army.get("movement_points", 0))
 		_add_status("movement", str(moves), "Mouvement restant : %s" % FrText.count(moves, "point"))
 	tooltip_text = _tooltip_text()
@@ -164,6 +169,19 @@ func _fit_plate() -> void:
 	var needed := maxf(SEAL_RADIUS * 2.0 + 24.0, _plate.position.y + _plate.get_combined_minimum_size().y + 2.0)
 	if not is_equal_approx(custom_minimum_size.y, needed):
 		custom_minimum_size.y = needed
+
+
+## TW2-T2 : « +20 % » (part des hommes manquants regagnée en fin de saison), « 0 % » si bloquée.
+static func replenishment_text(replenishment: Dictionary) -> String:
+	if str(replenishment.get("blocked", "")) != "":
+		return "0 %"
+	return "+%d %%" % int(replenishment.get("percent", 0))
+
+
+static func replenishment_color(replenishment: Dictionary) -> Color:
+	if str(replenishment.get("blocked", "")) != "":
+		return HudStyle.INK_FADED
+	return HudStyle.GOOD
 
 
 func _add_status(glyph: String, text: String, tip: String, color: Color = HudStyle.INK) -> HBoxContainer:
