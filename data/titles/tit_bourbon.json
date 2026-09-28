@@ -39,7 +39,7 @@
       "description": "Petits-fils de saint Louis, les Bourbons visent un jour la couronne.",
       "condition": {
         "kind": "hold_crown",
-        "faction": "fac_france"
+        "title": "tit_france"
       }
     }
   ],
