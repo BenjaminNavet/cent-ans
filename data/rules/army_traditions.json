@@ -1,5 +1,5 @@
 {
-  "description": "Traditions d'armée (lot TW2-T5, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T5, ADR 0109). L'armée, et non son chef, gagne de l'expérience à chaque bataille livrée (davantage si elle la gagne) ; chaque rang atteint ouvre un choix de tradition. Une tradition de palier N exige celle de palier N-1 de la même branche. Les traditions suivent l'armée quand le chef change et disparaissent avec elle.",
+  "description": "Traditions d'armée (lot TW2-T5, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T5, ADR 0112). L'armée, et non son chef, gagne de l'expérience à chaque bataille livrée (davantage si elle la gagne) ; chaque rang atteint ouvre un choix de tradition. Une tradition de palier N exige celle de palier N-1 de la même branche. Les traditions suivent l'armée quand le chef change et disparaissent avec elle.",
   "experience": {
     "battle_fought": 10,
     "battle_won": 10,

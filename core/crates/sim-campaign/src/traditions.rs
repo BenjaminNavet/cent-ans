@@ -1,4 +1,4 @@
-//! Lot TW2-T5 (ADR 0109): army traditions.
+//! Lot TW2-T5 (ADR 0112): army traditions.
 //!
 //! The *army*, not only its general, gains experience from every battle it
 //! fights, more when it wins (`data/rules/army_traditions.json`,

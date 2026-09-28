@@ -1,4 +1,4 @@
-//! Lot TW2-T5 (ADR 0109): the AI spends the ranks of its armies on
+//! Lot TW2-T5 (ADR 0112): the AI spends the ranks of its armies on
 //! traditions according to its doctrine (England's longbows: shooting) and
 //! its situation (a depleted army: stewardship), through the campaign
 //! planner.

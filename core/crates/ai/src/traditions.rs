@@ -1,4 +1,4 @@
-//! Army traditions of the AI (lot TW2-T5, ADR 0109).
+//! Army traditions of the AI (lot TW2-T5, ADR 0112).
 //!
 //! Each rank an AI army reaches is spent at once on the tradition whose
 //! branch scores best (`data/rules/army_traditions.json`, `ai`): a base

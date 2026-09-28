@@ -2,7 +2,7 @@
 
 Plan : `docs/design/2026-09-28-tw2-mecaniques-total-war.md`. Mandat : enchaîner les lots sans validation.
 Mis en pause par le joueur le 28/09 (« on reprendra dans une future session ») ; rien de TW2 n'est dans main.
-ADR : SB 0107, T1 0101, T2 0102, T3 0103, T4 0108, T5 0109 (0100 pris par RS B, 0104-0106 par GA).
+ADR : SB 0107, T1 0101, T2 0102, T3 0103, T4 0108, T5 0112 (0100 pris par RS B, 0104-0106 par GA).
 Chaque lot a sa note `docs/wip/tw2-<lot>.md` dans sa branche `feat/tw2-<lot>`.
 
 ## État
