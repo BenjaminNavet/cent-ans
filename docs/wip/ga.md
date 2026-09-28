@@ -72,7 +72,15 @@ Fichiers : `game/assets/textures/battle/build_textures.py`, `README.md`, tableau
 4. [x] Macro-variation dédiée (4 octaves 50/90/140/200 m, teinte + luminance, faible amplitude),
        appliquée à l'albédo final, sous `ga2_on`. `--no-ga2` la coupe (compromis : ne restaure pas
        d'anciennes textures 1k, cf. ADR 0105 « conséquences »).
-5. [ ] Tests mémoire + smoke ; A/B ≤ +5 %. ADR 0105 écrit (à confirmer avec les mesures). Commit.
+5. [x] Tests : `ga2_ground_test.gd` OK (13 couches, ~43,3 Mo, rôles câblés), `smoke.gd` OK,
+       pytest ciblé + suite complète (`uv run --project tools pytest`, 824 passed/5 skipped),
+       `ruff check --fix`/`format` sur le Python modifié. A/B (`--benchmark --units=20` avec/sans
+       `--no-ga2`) **non concluant** : machine partagée très chargée pendant la mesure (`uptime`
+       load average ≈ 120, nombreuses compilations Rust d'autres sessions en parallèle) ;
+       `frame_ms_median` a varié de 25 à 44 ms selon l'ordre des passes, sans direction stable
+       (parfois `--no-ga2` plus lent que le défaut, ce qui est incohérent avec le coût réel du
+       drapeau — 4 échantillons de bruit en plus seulement). À refaire sur machine calme avant de
+       clore le lot ; ADR 0105 le signale. Commit.
 
 ### GA5 — Bâtiments (CC0, ≤ 1 $, agent `cent-ans-mech`, après GA2)
 - [ ] Textures bâtiments de bataille et `textures/buildings` en 2k Poly Haven ; variantes
@@ -123,3 +131,8 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
   A/B dans le bruit (≤ +5 %) ; ADR 0104. Planche des 12 : `docs/research/ga1_sheet.png` à juger
   (jugement en jeu : session principale). `main` a bougé (`tools/cent_ans_tools/cli.py`) : conflit
   possible, simple, à la fusion ; le shader n'a pas bougé sur `main`.
+- 28/09 : GA2 fait (worktree `../game_project-ga2`, branche `feat/ga2`) : 13 couches 2k/1k
+  (Poly Haven), données `battle_ground_layers.json`, câblage des 4 rôles ajoutés, macro-variation
+  dédiée, ADR 0105, tests mémoire/smoke/pytest verts. A/B non concluant (machine chargée) : à
+  refaire avant fusion dans `feat/ga`. Point ouvert : substitut « prairie fleurie » (`leafy_grass`,
+  pas de texture CC0 dédiée chez Poly Haven).
