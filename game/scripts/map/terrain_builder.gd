@@ -445,6 +445,23 @@ func set_province_colors(colors: PackedColorArray) -> void:
 		material.set_shader_parameter("faction_colors", _faction_texture)
 
 
+## FE6 : hachures du filtre « Féodalité » (`colors[index - 1]`, alpha 0 = aucune) ; un tableau
+## vide les efface.
+func set_province_hatch(colors: PackedColorArray) -> void:
+	if map_data == null or material == null:
+		return
+	if colors.is_empty():
+		material.set_shader_parameter("hatch_enabled", false)
+		return
+	var width := maxi(map_data.province_count + 1, 1)
+	var image := Image.create(width, 1, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0, 0, 0, 0))
+	for index in range(1, mini(width, colors.size() + 1)):
+		image.set_pixel(index, 0, colors[index - 1])
+	material.set_shader_parameter("hatch_colors", ImageTexture.create_from_image(image))
+	material.set_shader_parameter("hatch_enabled", true)
+
+
 ## Masque 1D indexé par province : 1 = atteignable ce tour, 2 = sur le chemin prévisualisé.
 ## `reachable` et `path` sont des index raster. Un appel avec deux tableaux vides efface tout.
 func set_reachable(reachable: PackedInt32Array, path: PackedInt32Array = PackedInt32Array()) -> void:

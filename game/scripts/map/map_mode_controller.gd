@@ -22,6 +22,8 @@ const MODES := [
 	["loyalty", "Loyauté des vassaux", "", "Loyauté de chaque vassal envers son suzerain"],
 	["supply", "Ravitaillement", "", "Ravitaillement gagné ou perdu par saison par une armée sans général"],
 	["claims", "Revendications", "", "Provinces que vous revendiquez, ou que d'autres vous disputent"],
+	# FE6 : fond du royaume, hachures du tenant direct, écu parti des doubles allégeances.
+	["feudal", "Féodalité", "", "Royaumes, grands vassaux (hachures) et doubles allégeances (écu parti)"],
 ]
 
 const RELATION_COLORS := {
@@ -75,6 +77,8 @@ var _tint_saved: Dictionary = {}
 var _lens: Dictionary = {}
 var _relations: Dictionary = {}
 var _religions: Dictionary = {}
+## FE6 : filtre « Féodalité » (couleurs, hachures, écus partis).
+var feudal_lens := FeudalMapLens.new()
 
 
 func setup(campaign_map: Node) -> void:
@@ -206,6 +210,7 @@ func set_mode(target: String) -> void:
 	mode = target
 	_sync_menu()
 	_clear_relation_markers()
+	_clear_feudal()
 	_set_tint_boost(mode != POLITICAL)
 	_show_legend()
 	if mode == POLITICAL:
@@ -233,6 +238,8 @@ func _available(target: String) -> bool:
 			return map.sim.has_method("get_province_relations")
 		"religion":
 			return map.sim.has_method("get_province_religion")
+		"feudal":
+			return FeudalMapLens.available(map.sim)
 		_:
 			return map.sim.has_method("get_map_lens")
 
@@ -248,6 +255,8 @@ func refresh() -> void:
 			colors = _relation_colors(ids)
 		"religion":
 			colors = _religion_colors(ids)
+		"feudal":
+			colors = _feudal_colors(ids)
 		_:
 			colors = _lens_colors(ids)
 	map.terrain.set_province_colors(colors)
@@ -260,6 +269,25 @@ func _province_ids() -> PackedStringArray:
 	for index in range(1, map.map_data.province_count + 1):
 		ids.append(str(map.map_data.get_province(index).get("id", "")))
 	return ids
+
+
+# ----- Féodalité (FE6) --------------------------------------------------------------------------
+
+func _feudal_colors(ids: PackedStringArray) -> PackedColorArray:
+	var result := feudal_lens.read(map.sim, ids)
+	var terrain: Node = map.get("terrain")
+	if terrain != null and terrain.has_method("set_province_hatch"):
+		terrain.call("set_province_hatch", result["hatch"])
+	feudal_lens.place_shields(map, result["doubles"])
+	return result["colors"]
+
+
+func _clear_feudal() -> void:
+	feudal_lens.clear_shields()
+	feudal_lens.cells.clear()
+	var terrain: Node = map.get("terrain") if map != null else null
+	if terrain != null and terrain.has_method("set_province_hatch"):
+		terrain.call("set_province_hatch", PackedColorArray())
 
 
 # ----- Diplomatie et religion (M5, DP1) ---------------------------------------------------------
@@ -429,6 +457,8 @@ func hover_text(province_id: String) -> String:
 			if int(info.get("heresy", 0)) > 0:
 				text += ", hérésie %d %%" % int(info.get("heresy", 0))
 			return text
+		"feudal":
+			return feudal_lens.hover_text(province_id)
 	var row: Dictionary = _lens.get(province_id, {})
 	if row.is_empty():
 		return ""
@@ -498,6 +528,8 @@ func _legend_entries() -> Variant:
 			return [[SUPPLY_GAIN, "Ravitaillée (terres amies)"], [SUPPLY_LOSS, "Attrition"], [SUPPLY_STARVE, "Attrition d'hiver"]]
 		"claims":
 			return [[CLAIM_COLORS["ours"], "Nos revendications"], [CLAIM_COLORS["against_us"], "Revendiquées contre nous"], [CLAIM_COLORS["contested"], "Disputées"], [NEUTRAL, "Aucune"]]
+		"feudal":
+			return FeudalMapLens.legend_entries()
 	return []
 
 

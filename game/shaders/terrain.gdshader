@@ -31,6 +31,11 @@ uniform int selected_id = 0;
 // Masque 1D par province (R8) : ~0,5 = atteignable par l'armée sélectionnée, 1 = sur le chemin.
 uniform sampler2D province_mask : filter_nearest, repeat_disable, hint_default_black;
 uniform bool mask_enabled = false;
+// FE6 : filtre « Féodalité » — couleur du tenant direct par province (alpha 0 = pas de hachure),
+// peinte en hachures obliques par-dessus le fond du royaume.
+uniform sampler2D hatch_colors : filter_nearest, repeat_disable, hint_default_transparent;
+uniform bool hatch_enabled = false;
+uniform float hatch_period_px = 9.0;
 uniform vec3 reachable_color : source_color = vec3(0.98, 0.93, 0.55);
 uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
 // Brouillard de guerre (lot C1, A1-03) : 1 = province vue, 0 = voilée. Le voile ne noircit
@@ -619,6 +624,21 @@ void fragment() {
 		vec3 colorized = mix(vec3(1.0), fc_lin / lf, faction_saturation) * lc;
 		vec3 target = mix(colorized, fc_lin * political_flat_gain, political * 0.55);
 		col = mix(col, target, fc.a * faction_amount * land_f);
+		if (hatch_enabled) {
+			vec4 hatch_c = texelFetch(hatch_colors, ivec2(clamp(id, 0, textureSize(hatch_colors, 0).x - 1), 0), 0);
+			if (hatch_c.a > 0.0) {
+				// Hachures obliques antialiasées (largeur d'un demi-pas), à la teinte du tenant.
+				// Pas élargi au dézoom (au moins six pixels d'écran) : pas de moiré.
+				float hatch_period = max(hatch_period_px, footprint * 6.0);
+				float hatch_s = fract((p.x + p.y) / hatch_period);
+				float hatch_aa = clamp(footprint / hatch_period, 0.02, 0.25);
+				float hatch_stripe = smoothstep(0.5 - hatch_aa, 0.5 + hatch_aa, hatch_s) * (1.0 - smoothstep(1.0 - hatch_aa, 1.0, hatch_s));
+				vec3 hatch_lin = pow(hatch_c.rgb, vec3(2.2));
+				float hatch_l = max(dot(hatch_lin, vec3(0.2126, 0.7152, 0.0722)), 0.02);
+				vec3 hatch_target = mix(mix(vec3(1.0), hatch_lin / hatch_l, faction_saturation) * lc, hatch_lin * political_flat_gain, political * 0.55);
+				col = mix(col, hatch_target, hatch_stripe * hatch_c.a * faction_amount * land_f);
+			}
+		}
 		if (mask_enabled) {
 			float m = texelFetch(province_mask, ivec2(clamp(id, 0, textureSize(province_mask, 0).x - 1), 0), 0).r;
 			float lcol = dot(col, vec3(0.2126, 0.7152, 0.0722));
