@@ -10,7 +10,7 @@ Suites possibles (non faites) :
 - Pont : lectures groupées get_province_controllers / get_devastation (diplomacy_panel, alerts, settlement_layer).
 - Pont get_siege_state / get_soldier_buffers groupés : repris par PB3c.
 - [x] trade.rs : précalculer les chemins des routes au chargement de data.trade — fait (RS-D, `feat/rs-d-trade`, voir 18c).
-- sim-battle : `disengaging` retombe au 1er pas hors contact (décrochage en bord de mêlée) ; pavois attend une cible cachée — revérifié après CB4 (RS-D) : toujours ouvert (`start_attack` ne teste que la portée, les pavois restent levés et le régiment attend) ; test ignoré `review_fixes::pavised_crossbowmen_close_in_on_a_hidden_target` (comportement attendu, échoue aujourd'hui), correction de règle laissée à un lot bataille.
+- sim-battle : `disengaging` retombe au 1er pas hors contact (décrochage en bord de mêlée) ; pavois face à une cible cachée — **corrigé par RS-J** (28/09) : pavois baissés, le régiment avance jusqu'à voir la cible ; tests `review_fixes::pavised_crossbowmen_close_in_on_a_hidden_target` et `..._hold_and_shoot_a_visible_target`.
 - Mock : événements "appointment", "skill_learned" absents d'EventKind (mais traités par `map_ui.gd`,
   laissés). RS-H (28/09) : "movement" (armée qui campe, pas de rôle de jeu, aucun script n'en
   dépendait) retiré du mock ; ce sont désormais les deux seuls types restants à écarter du core.
@@ -106,8 +106,7 @@ Points ouverts :
   régiment peut retoucher l'ennemi et `enter_melee` annule alors la destination (vu en test :
   le décrochage en arrière d'une mêlée à la limite du contact échoue). Défaut préexistant, non
   corrigé (règle de mêlée, équilibre).
-- n° 2 : les pavois attendent encore, à portée, une cible cachée (branche `pavise`), sans
-  s'approcher.
+- ~~n° 2~~ : pavois face à une cible cachée — corrigé par RS-J (28/09).
 
 ## Corrections tools
 
