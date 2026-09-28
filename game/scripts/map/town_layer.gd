@@ -30,6 +30,10 @@ var active := false
 var force_active := false
 ## Incrémenté à chaque ville affichée ou retirée (`SettlementLayer` recalcule alors les maquettes).
 var version := 0
+## RS-K : villes affichées ou retirées depuis le dernier `take_changes` (id → vrai) ; `_all_changed`
+## quand l'activité bascule (toutes les maquettes sont concernées).
+var _changed_ids: Dictionary = {}
+var _all_changed := true
 var stats: Dictionary = {}
 
 var _ids: Array[String] = []
@@ -129,6 +133,15 @@ func is_shown(id: String) -> bool:
 	return entry.get("builder") != null
 
 
+## RS-K : changements depuis l'appel précédent : `{"all": bool, "ids": Array}` (`all` : toutes
+## les colonies sont à revoir, `ids` sinon). Remet à zéro.
+func take_changes() -> Dictionary:
+	var changes := {"all": _all_changed, "ids": _changed_ids.keys()}
+	_all_changed = false
+	_changed_ids = {}
+	return changes
+
+
 func plan_of(id: String) -> Dictionary:
 	return (_entries.get(id, {}) as Dictionary).get("plan", {})
 
@@ -165,6 +178,7 @@ func update_view(rig_distance: float) -> void:
 		active = now_active
 		visible = active
 		version += 1
+		_all_changed = true
 		towns_changed.emit()
 	_last_distance = rig_distance
 	var tp := Time.get_ticks_usec()  # RS-K : sections `town/*` du banc `--bench-probe`
@@ -383,6 +397,7 @@ func _step_builders(budget_usec: int) -> void:
 			entry["builder"] = b
 			entry["pending"] = null
 			version += 1
+			_changed_ids[id] = true
 			towns_changed.emit()
 		if not FrameBudget.has_time():
 			break
@@ -399,6 +414,7 @@ func _unload(id: String) -> void:
 	_entries.erase(id)
 	_cache_plan(id, entry["plan"])
 	version += 1
+	_changed_ids[id] = true
 	towns_changed.emit()
 
 

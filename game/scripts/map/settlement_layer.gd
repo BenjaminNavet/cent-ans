@@ -1727,7 +1727,16 @@ func _update_towns(camera_distance: float) -> void:
 		return
 	_towns_version = towns.version
 	var tp := Time.get_ticks_usec()
-	_update_model_visibility()
+	# RS-K : seules les colonies dont la ville 1:1 vient d'apparaître ou de disparaître (toutes
+	# les ~570 maquettes coûtaient jusqu'à 25 ms à chaque ville construite).
+	var changes := towns.take_changes()
+	if bool(changes["all"]) or was_active != towns.active:
+		_update_model_visibility()
+	else:
+		for id: String in changes["ids"]:
+			var i := int(data.index_by_id.get(id, -1))
+			if i >= 0 and i < _models.size():
+				_apply_model_visibility(i)
 	if was_active != towns.active:
 		_update_label_heights()
 	PerfProbe.lap("town/models", tp)  # RS-K

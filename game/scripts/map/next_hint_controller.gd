@@ -11,6 +11,9 @@ extends Node
 ## RS-E : `refresh()` est appelé par `campaign_map.gd` sur les événements qui changent son état
 ## (fin de tour et tout ordre via `refresh_all`, sélection et désélection d'armée ou de province) ;
 ## `_process` ne sert plus que de minuterie de secours, lente, pour les cas non couverts.
+## RS-K : la minuterie de secours ne relit l'état du cœur (`gather_state`, ~15 ms : armées,
+## chantiers) que si une empreinte bon marché a changé (tour, tutoriel, alertes, croix) ou si le
+## dernier conseil n'a pas été calculé ; sinon elle ne refait que la visibilité (panneaux ouverts).
 
 const SETTING := "interface/next_hint"
 ## Minuterie de secours (les vrais changements passent par `refresh()`, appelé par `campaign_map.gd`).
@@ -27,6 +30,9 @@ var _dismissed_turn := -1
 var _timer := 0.0
 var _construction_timer := 0.0
 var _constructions := 0
+## RS-K : dernier conseil calculé et empreinte de l'état au moment du calcul (vide : à recalculer).
+var _hint: Dictionary = {}
+var _signature: Array = []
 ## Faux en capture d'écran (sauf `--stage=next_hint`) : les captures des autres lots ne changent pas.
 var enabled := true
 
@@ -57,7 +63,10 @@ func _process(delta: float) -> void:
 		return
 	_timer = FALLBACK_SECONDS
 	var t0 := Time.get_ticks_usec()
-	refresh()
+	if _signature.is_empty() or _signature != _state_signature():
+		refresh()
+	else:
+		_refresh_visibility()
 	PerfProbe.lap("hint.refresh", t0)  # RS-K : banc `--bench-probe`
 
 
@@ -65,16 +74,43 @@ func _process(delta: float) -> void:
 func refresh() -> void:
 	if card == null or map == null:
 		return
-	if not enabled or not _setting_on() or map.get("sim") == null or covered():
+	if not _can_show():
+		_signature = []
 		card.hide()
 		return
 	var hint := NextHint.choose(gather_state())
+	_hint = hint
+	_signature = _state_signature()
 	card.set_hint(hint)
-	if hint.is_empty():
+	_refresh_visibility()
+
+
+## RS-K : visibilité du dernier conseil calculé, sans relire l'état du cœur.
+func _refresh_visibility() -> void:
+	if card == null or map == null:
+		return
+	if _hint.is_empty() or not _can_show():
 		card.hide()
 		return
 	_place()
 	card.show()
+
+
+func _can_show() -> bool:
+	return enabled and _setting_on() and map.get("sim") != null and not covered()
+
+
+## RS-K : empreinte bon marché de ce qui change le conseil hors des événements de `campaign_map`.
+func _state_signature() -> Array:
+	var sim := _sim()
+	var ui: MapUI = map.get("ui")
+	var tutorial: TutorialController = map.get("tutorial")
+	return [
+		int(sim.call("get_turn")) if sim != null else -1,
+		tutorial.postponed_step() if tutorial != null else -1,
+		ui.end_turn_cluster.alerts.size() if ui != null and ui.end_turn_cluster != null else -1,
+		dismissed.size(),
+	]
 
 
 ## Vrai quand le conseil doit s'effacer : tutoriel actif, panneau ou fenêtre ouverts.
