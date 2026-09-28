@@ -1,0 +1,26 @@
+{
+  "id": "cdx_georgie",
+  "title": "Le royaume de Géorgie de Georges V",
+  "category": "lieu",
+  "aliases": [
+    "Géorgie",
+    "royaume de Géorgie",
+    "Georges V le Brillant",
+    "Tbilissi"
+  ],
+  "era": {
+    "from": "1008",
+    "to": "1490"
+  },
+  "summary": "Royaume orthodoxe du Caucase, la Géorgie, réunifiée par Georges V le Brillant, se libère de la tutelle des Ilkhans mongols et connaît un dernier âge d'or.",
+  "body": "Le royaume de Géorgie a atteint son apogée sous la reine Tamar (1184-1213), puis a été dominé par les Mongols au XIIIe siècle. Georges V le Brillant, roi de 1314 à 1346, réunifie le royaume, se libère de la tutelle de l'Ilkhan alors que ce dernier s'effondre après 1335, et rétablit l'ordre à Tbilissi.\n\nIl obtient du sultan mamelouk des faveurs pour les monastères géorgiens de Jérusalem et entretient des relations avec l'Europe. Le royaume reste entouré de voisins musulmans, dont les principautés turkmènes d'Anatolie orientale.",
+  "entity": "fac_georgia",
+  "see_also": [
+    "cdx_mamelouks",
+    "cdx_empire_byzantin"
+  ],
+  "sources": [
+    "Royaume de Géorgie",
+    "Georges V le Brillant"
+  ]
+}
