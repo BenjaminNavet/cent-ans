@@ -42,6 +42,7 @@ mod campaign_sim_siege;
 mod campaign_sim_table;
 mod campaign_sim_tech;
 mod campaign_sim_trade;
+mod campaign_sim_traditions;
 mod campaign_sim_treaty;
 mod campaign_sim_turn;
 mod campaign_sim_victory;

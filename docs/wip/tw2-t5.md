@@ -13,6 +13,8 @@ Branche `feat/tw2-t5` (worktree `../gp-tw2-t5`, base `integration/tw2`). Spec :
 
 - [x] IA : `ai/src/traditions.rs` (doctrine de tir, hommes manquants, siège, branche entamée), branché dans `plan_turn` ; test `ai/tests/tw2_t5_traditions_ai.rs`.
 
+- [x] Pont `campaign_sim_traditions.rs` : `get_army_traditions`, `get_armies_with_pending_traditions`, `choose_army_tradition`, `debug_grant_army_xp`.
+
 ## Prochaine étape
 
-- Pont, UI, test headless, ADR 0109.
+- UI, test headless, ADR 0109.
