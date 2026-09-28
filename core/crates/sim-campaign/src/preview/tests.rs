@@ -225,13 +225,14 @@ fn requirements_state() {
     let without = state
         .settlements
         .iter()
-        .find(|(_, s)| {
-            s.controller == france() && !data.has_building(&s.buildings, &parish)
-        })
+        .find(|(_, s)| s.controller == france() && !data.has_building(&s.buildings, &parish))
         .map(|(id, _)| id.clone())
         .expect("a French place without a parish church");
     let met = |place: &SettlementId| state.building_requirements(&data, place, &collegiate);
-    assert_eq!(met(&with), vec![Requirement::new("bld_parish_church", true)]);
+    assert_eq!(
+        met(&with),
+        vec![Requirement::new("bld_parish_church", true)]
+    );
     assert_eq!(
         met(&without),
         vec![Requirement::new("bld_parish_church", false)]
@@ -253,7 +254,11 @@ fn requirements_state() {
     let (unit, _) = data
         .unit_types
         .iter()
-        .find(|(id, _)| crate::buildings::enabling_buildings(&data, id).next().is_some())
+        .find(|(id, _)| {
+            crate::buildings::enabling_buildings(&data, id)
+                .next()
+                .is_some()
+        })
         .expect("a unit needing a building");
     let unit: &UnitTypeId = unit;
     let rows = state.recruit_requirements(&data, &with, unit);
