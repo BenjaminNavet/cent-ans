@@ -498,8 +498,42 @@ fn plan_turn_in(
     orders.extend(plans.agents);
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
+    // TW2-T3: companies for the threatened armies of a rich realm, hired
+    // where they stand before they march.
+    let treasury = ctx.treasury - planned_spending(data, &orders);
+    orders.extend(crate::mercenaries::plan_hires(
+        state,
+        data,
+        faction,
+        treasury,
+        ctx.gross_income,
+        |army| {
+            ctx.anchors
+                .get(army)
+                .map_or(0.0, |anchor| ctx.threat_at(anchor))
+        },
+    ));
     plan_armies(&ctx, &mut orders);
     orders
+}
+
+/// TW2-T3: livres this turn's recruitments and constructions will spend
+/// (base prices: an estimate for the mercenary budget).
+fn planned_spending(data: &GameData, orders: &[Order]) -> i64 {
+    orders
+        .iter()
+        .map(|order| match order {
+            Order::Recruit { unit_type, .. } => data
+                .unit_types
+                .get(unit_type)
+                .map_or(0, |t| i64::from(t.cost.money)),
+            Order::Build { building, .. } => data
+                .buildings
+                .get(building)
+                .map_or(0, |b| i64::from(b.cost.money)),
+            _ => 0,
+        })
+        .sum()
 }
 
 // =========================================================================
@@ -704,6 +738,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         }
         // G1: no more than the settlement's free recruitment slots.
         let mut free_slots = state.recruit_slots_free(data, site);
+        // TW2-T2: no more of a unit type than the settlement's reserve.
+        let mut drawn: BTreeMap<data_model::UnitTypeId, u32> = BTreeMap::new();
         while recruits < max_recruits && free_slots > 0 {
             let upkeep_cap = |upkeep: i64| {
                 if planned_upkeep == 0 && ctx.surplus() >= upkeep {
@@ -718,6 +754,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
                 .filter(|o| {
                     planned_upkeep + i64::from(o.upkeep) <= upkeep_cap(i64::from(o.upkeep))
                         && budget >= i64::from(o.cost)
+                        && drawn.get(&o.unit_type).copied().unwrap_or(0) < o.pool.available
                 })
                 .collect();
             let Some(option) =
@@ -732,6 +769,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
                 unit_type: option.unit_type.clone(),
             });
             *composition.entry(option.unit_type.clone()).or_default() += 1;
+            *drawn.entry(option.unit_type.clone()).or_default() += 1;
             draw_supply(&mut supply, &option.resources);
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);

@@ -11,6 +11,7 @@ pub mod campaign;
 pub mod diplomacy_eval;
 pub mod doctrine;
 pub mod grid;
+mod mercenaries;
 pub mod parallel;
 pub mod stances;
 pub mod support;

@@ -183,6 +183,7 @@ impl BattleSim {
                 let gate = works.gate;
                 let piece = &mut works.pieces[gate];
                 if piece.intact() {
+                    piece.mark_attacked(crate::siege::UNDER_ATTACK_CONTACT_S);
                     piece.hp -= rules.gate.damage_per_s * works.gate_fire.intensity * DT;
                     if piece.hp <= 0.0 {
                         piece.hp = 0.0;

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/capture_rules.schema.json",
+  "title": "Règles du sort des places prises",
+  "description": "Fichier data/rules/capture.json (lot TW2-T1) : occuper, mettre à rançon, piller, raser une place prise. Voir docs/design/2026-09-28-tw2-mecaniques-total-war.md § T1 et l'ADR 0101.",
+  "type": "object",
+  "$defs": {
+    "kind": { "enum": ["city", "town", "castle", "abbey", "village"] },
+    "points": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "delta": { "type": "integer", "minimum": -100, "maximum": 100 },
+    "outcome": {
+      "type": "object",
+      "properties": {
+        "gold_income_share": { "type": "number", "minimum": 0, "maximum": 20, "description": "Or = assiette fiscale saisonnière de la province × cette part × part de la place." },
+        "min_gold": { "type": "integer", "minimum": 0, "description": "Plancher de l'or pris (livres, avant la part de la place)." },
+        "extra_unrest": { "$ref": "#/$defs/points", "description": "Troubles ajoutés à ceux de l'occupation (× part de la place)." },
+        "population_percent": { "type": "integer", "minimum": -90, "maximum": 0, "description": "Variation de population de la province, en pour cent (× part de la place)." },
+        "devastation": { "$ref": "#/$defs/points", "description": "Dévastation ajoutée à la province (× part de la place)." },
+        "buildings_destroyed": { "type": "integer", "minimum": 0, "description": "Bâtiments de la place détruits, les plus récents d'abord." },
+        "unit_experience": { "type": "integer", "minimum": 0, "maximum": 10, "description": "Expérience gagnée par chaque unité des armées preneuses (échelle 0-10)." },
+        "ruler_piety": { "$ref": "#/$defs/delta" },
+        "papal_favor": { "$ref": "#/$defs/delta" },
+        "victim_opinion": { "$ref": "#/$defs/delta", "description": "Opinion de l'ancien tenant envers le preneur." },
+        "others_opinion": { "$ref": "#/$defs/delta", "description": "Opinion de toutes les autres factions envers le preneur." },
+        "opinion_turns": { "type": "integer", "minimum": 0, "maximum": 200 }
+      },
+      "required": ["gold_income_share", "min_gold", "extra_unrest"],
+      "additionalProperties": false
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "occupy": { "type": "integer" },
+        "ransom": { "type": "integer" },
+        "sack": { "type": "integer" },
+        "raze": { "type": "integer" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "occupy": {
+      "type": "object",
+      "properties": {
+        "unrest_city": { "$ref": "#/$defs/points" },
+        "unrest_place": { "$ref": "#/$defs/points" }
+      },
+      "required": ["unrest_city", "unrest_place"],
+      "additionalProperties": false
+    },
+    "ransom": { "$ref": "#/$defs/outcome" },
+    "sack": { "$ref": "#/$defs/outcome" },
+    "raze": {
+      "type": "object",
+      "properties": {
+        "effects": { "$ref": "#/$defs/outcome" },
+        "fortification_loss": { "type": "integer", "minimum": 1, "maximum": 5, "description": "Niveaux de fortification perdus ; une place ramenée à 0 devient une ruine." },
+        "ruin_turns": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Tours pendant lesquels une ruine ne recrute ni ne bâtit." }
+      },
+      "required": ["effects", "fortification_loss", "ruin_turns"],
+      "additionalProperties": false
+    },
+    "place_share": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/kind" },
+      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+    },
+    "raze_forbidden_kinds": { "type": "array", "items": { "$ref": "#/$defs/kind" }, "uniqueItems": true },
+    "raze_forbidden_settlements": { "type": "array", "items": { "type": "string", "pattern": "^set_[a-z0-9_]+$" }, "uniqueItems": true },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "default": { "$ref": "#/$defs/scores" },
+        "factions": {
+          "type": "object",
+          "propertyNames": { "pattern": "^fac_[a-z0-9_]+$" },
+          "additionalProperties": { "$ref": "#/$defs/scores" }
+        },
+        "poor_treasury": { "type": "integer", "description": "Trésor (livres) sous lequel la faction est pauvre." },
+        "poor_bonus": { "$ref": "#/$defs/scores" },
+        "foreign_culture_bonus": { "$ref": "#/$defs/scores" },
+        "own_land_bonus": { "$ref": "#/$defs/scores" },
+        "exposed_bonus": { "$ref": "#/$defs/scores" }
+      },
+      "required": ["default", "poor_treasury", "poor_bonus", "foreign_culture_bonus", "own_land_bonus", "exposed_bonus"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["occupy", "ransom", "sack", "raze", "place_share", "raze_forbidden_kinds", "raze_forbidden_settlements", "ai"],
+  "additionalProperties": false
+}

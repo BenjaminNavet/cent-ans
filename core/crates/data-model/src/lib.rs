@@ -58,6 +58,9 @@ pub use entities::building::{Building, BuildingCategory};
 pub use entities::campaign_weather::{
     CampaignWeatherChances, CampaignWeatherRules, ClimateWeather, SeasonalWeather,
 };
+pub use entities::capture::{
+    CaptureAiRules, CaptureRules, OccupyRules, OutcomeRules, OutcomeScores, RazeRules,
+};
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
@@ -80,6 +83,7 @@ pub use entities::feudal_rules::{FeudalRules, LoyaltyWeights};
 pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
 };
+pub use entities::mercenaries::{MercenaryAi, MercenaryArrears, MercenaryBand, MercenaryRules};
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
 pub use entities::naval::{
@@ -96,6 +100,10 @@ pub use entities::province::{
 };
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
+pub use entities::replenishment::{
+    ArmyReplenishmentRules, CategoryPercent, KindValues, RecruitPoolRules, ReplenishmentRules,
+    StancePercent, TerritoryPercent,
+};
 pub use entities::resource::{Resource, ResourceCategory};
 pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,

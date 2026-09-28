@@ -24,6 +24,7 @@ fn option(data: &GameData, id: &str) -> RecruitOption {
         resources: t.cost.resources.clone(),
         import_cost: 0,
         imported: BTreeMap::new(),
+        pool: Default::default(),
     }
 }
 

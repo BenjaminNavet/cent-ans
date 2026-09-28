@@ -1370,10 +1370,11 @@ impl BattleSim {
     /// Siege battle walls (empty dictionary in a field battle):
     /// `{fortification, center: Vector2, square_radius, thickness, wall_height,
     /// gate, hold_time, hold_to_win, integrity, pieces[{index, kind: "wall"|"gate",
-    /// a: Vector2, b: Vector2, hp, max_hp, intact, docked_tower}],
+    /// a: Vector2, b: Vector2, hp, max_hp, intact, docked_tower, under_attack (SB)}],
     /// towers[{x, z, radius, height}], houses[{x, z, radius, suburb, fire: {state:
     /// "intact"|"burning"|"burnt", intensity}, length, depth, yaw, rows, church}],
-    /// props[{kind, x, z, yaw, length, depth, house}] (BR3), gate_fire: {state, intensity},
+    /// props[{kind, x, z, yaw, length, depth, house}] (BR3), engines[{unit, kind:
+    /// "ram"|"tower", side, x, z, hp, max_hp}] (SB), gate_fire: {state, intensity},
     /// wind: Vector2 (direction × strength 0-1), houses_burning, houses_burnt,
     /// sortie, ram_period, oil_period}`. Pieces lose HP and houses burn during the battle (S2): call it
     /// again to show the damage.
@@ -1400,6 +1401,8 @@ impl BattleSim {
                     "max_hp" => piece.max_hp,
                     "intact" => piece.intact(),
                     "docked_tower" => piece.docked_tower.map_or(-1, i64::from),
+                    // SB (ADR 0107): battered, shot at or burning just now.
+                    "under_attack" => piece.under_attack(),
                 }
                 .to_variant()
             })
@@ -1443,6 +1446,27 @@ impl BattleSim {
             .iter()
             .map(|p| prop_dict(p).to_variant())
             .collect();
+        // SB (ADR 0107): rams and siege towers with their strength, for the
+        // health bars.
+        let engines: VarArray = self
+            .sim
+            .as_ref()
+            .map(|s| s.siege_engines())
+            .unwrap_or_default()
+            .iter()
+            .map(|e| {
+                vdict! {
+                    "unit" => i64::from(e.unit),
+                    "kind" => e.kind.key(),
+                    "side" => e.side.key(),
+                    "x" => e.x,
+                    "z" => e.z,
+                    "hp" => e.hp,
+                    "max_hp" => e.max_hp,
+                }
+                .to_variant()
+            })
+            .collect();
         vdict! {
             "fortification" => i64::from(works.fortification),
             "center" => v2(works.center),
@@ -1457,6 +1481,7 @@ impl BattleSim {
             "towers" => &towers,
             "houses" => &houses,
             "props" => &props,
+            "engines" => &engines,
             "sortie" => works.sortie,
             "gate_fire" => &blaze(&works.gate_fire),
             "wind" => v2(works.wind),
