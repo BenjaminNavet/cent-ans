@@ -694,6 +694,12 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 
 
 func _on_quadtree_surface_changed(rect: Rect2) -> void:
+	var t_probe := Time.get_ticks_usec()
+	_note_quadtree_surface(rect)
+	PerfProbe.add("qt/l_terrain", Time.get_ticks_usec() - t_probe)  # RS-K : écouteurs compris
+
+
+func _note_quadtree_surface(rect: Rect2) -> void:
 	if chunk_px <= 0:
 		return
 	var c0 := clampi(int(floor(rect.position.x / chunk_px)), 0, CHUNKS - 1)
