@@ -32,23 +32,23 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Cork",
-      "local": "Corcaigh",
-      "local_language": "gaélique irlandais"
+      "display": "Waterford",
+      "local": "Waterford",
+      "local_language": "moyen anglais"
     },
-    "lat": 51.8985,
-    "lon": -8.4756
+    "lat": 52.2593,
+    "lon": -7.1101
   },
   "geo": {
     "capital_lonlat": [
-      -8.4756,
-      51.8985
+      -7.1101,
+      52.2593
     ],
     "seed_lonlat": [
-      -8.6,
-      52.4
+      -7.6,
+      52.3
     ],
-    "voronoi_weight": 1.5
+    "voronoi_weight": 1.0
   },
   "owner": "fac_england",
   "culture": "cul_irish",
@@ -97,10 +97,10 @@
   ],
   "fortification_level": 2,
   "base_supply": 4000,
-  "description": "Munster : comtes de Desmond (Maurice FitzGerald) et d'Ormond (James Butler, 1328), villes royales de Cork et Limerick ; rois gaéliques Mac Carthaigh et Ó Briain dans le Kerry et le Thomond.",
+  "description": "Munster royal : domaine direct de la couronne autour des villes chartées de Waterford et Limerick, entre les comtés de Desmond, d'Ormond et le royaume gaélique de Thomond (devenus provinces propres, lot FE4c).",
   "sources": [
     "Munster",
-    "Comte de Desmond",
-    "Cork"
+    "Waterford",
+    "Limerick"
   ]
 }

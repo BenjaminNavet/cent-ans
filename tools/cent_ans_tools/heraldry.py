@@ -350,6 +350,13 @@ def _draw_cross(draw: ImageDraw.ImageDraw, color: Color, arm: float = 0.16) -> N
     draw.rectangle(_px([(0.0, 0.42 - arm / 2), (1.0, 0.42 + arm / 2)]), fill=color)
 
 
+def _draw_saltire(draw: ImageDraw.ImageDraw, color: Color, arm: float = 0.16) -> None:
+    """Diagonal cross (X), the saltire of the FitzGerald arms (FE4c)."""
+    width = int(arm * CANVAS)
+    draw.line(_px([(0.0, 0.0), (1.0, 1.0)]), fill=color, width=width)
+    draw.line(_px([(1.0, 0.0), (0.0, 1.0)]), fill=color, width=width)
+
+
 def _draw_fess(draw: ImageDraw.ImageDraw, color: Color) -> None:
     draw.rectangle(_px([(0.0, 0.34), (1.0, 0.56)]), fill=color)
 
@@ -701,6 +708,10 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
         _draw_ermine(draw, TINCTURES["sable"])
         if blazon.has("lambel"):
             _draw_label(draw, blazon.tincture_after("lambel") or TINCTURES["gueules"])
+        if blazon.has("sautoir"):
+            _draw_saltire(draw, charge)
+    elif blazon.has("sautoir"):
+        _draw_saltire(draw, charge)
     elif blazon.has("seme"):
         _draw_semé(draw, charge)
         if blazon.has("lambel"):

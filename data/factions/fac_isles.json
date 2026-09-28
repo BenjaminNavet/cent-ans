@@ -1,0 +1,57 @@
+{
+  "name": {
+    "display": "Seigneurie des Îles",
+    "local": "Tighearnas nan Eilean",
+    "local_language": "gaélique écossais"
+  },
+  "short_name": "Îles",
+  "adjective": "insulaire",
+  "government": "lordship",
+  "playable": true,
+  "ruler": "chr_john_of_islay",
+  "capital": "prov_isles",
+  "capital_city": "Finlaggan",
+  "religion": "rel_catholic",
+  "culture": "cul_scottish",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_scotland",
+  "primary_title": "tit_isles",
+  "heraldry": {
+    "blazon": "D'azur à la nef (lymphad) d'argent, voiles ferlées.",
+    "description": "La nef des Hébrides, emblème de Clan Donald.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2F2F2"
+  },
+  "titles": [
+    "Seigneur des Îles",
+    "Chef du Clan Donald"
+  ],
+  "treasury": 2200,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_scotland",
+      "status": "vassal",
+      "note": "Jean d'Islay se proclame « Dominus Insularum » en 1336 ; vassalité purement nominale envers la couronne écossaise, en guerre civile."
+    },
+    {
+      "faction": "fac_england",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 50,
+    "trade": 40,
+    "piety": 45
+  },
+  "description": "Jean d'Islay, chef du Clan Donald, prend le titre de seigneur des Îles en 1336 et épouse en 1337 Amy MacRuairi, héritière des îles du Nord : par ce mariage il contrôle bientôt tout le littoral occidental d'Argyll aux Hébrides, hors Skye. Conseil coutumier au Loch Finlaggan, sur l'île du Comptage.",
+  "sources": [
+    "Jean d'Islay, seigneur des Îles",
+    "Seigneurie des Îles"
+  ],
+  "id": "fac_isles"
+}

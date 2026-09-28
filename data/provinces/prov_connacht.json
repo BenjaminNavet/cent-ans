@@ -1,0 +1,93 @@
+{
+  "name": {
+    "display": "Connacht",
+    "local": "Connachta",
+    "local_language": "gaélique irlandais"
+  },
+  "region": "irlande",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Shannon",
+    "Suck"
+  ],
+  "coastal": true,
+  "resources": [
+    "res_wool",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Roscommon",
+      "local": "Ros Comáin",
+      "local_language": "gaélique irlandais"
+    },
+    "lat": 53.6358,
+    "lon": -8.1928
+  },
+  "geo": {
+    "capital_lonlat": [
+      -8.1928,
+      53.6358
+    ],
+    "seed_lonlat": [
+      -8.6,
+      53.6
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_connacht",
+  "culture": "cul_irish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 68000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 700,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Royaume gaélique de Connacht ; population estimée, aucune ville anglo-normande de premier rang hors Galway (enclave)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 2100,
+  "description": "Royaume gaélique de Connacht, tenu par les Ó Conchobhair ; site royal traditionnel de Rathcroghan, où les rois sont inaugurés.",
+  "sources": [
+    "Toirdelbach Ó Conchobair",
+    "Royaume de Connacht",
+    "Rathcroghan"
+  ],
+  "id": "prov_connacht"
+}

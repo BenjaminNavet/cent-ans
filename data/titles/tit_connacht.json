@@ -1,0 +1,56 @@
+{
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Connacht",
+    "local": "Ríoghacht Chonnacht",
+    "local_language": "gaélique irlandais"
+  },
+  "heraldry": {
+    "blazon": "De sinople au lion rampant à la queue fourchée, couronné d'or.",
+    "description": "Armes attestées tardivement (armorial moderne) ; utilisées ici par convention pour 1337.",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F2C230",
+    "uncertain": true
+  },
+  "de_jure_provinces": [
+    "prov_connacht"
+  ],
+  "holder_1337": {
+    "faction": "fac_connacht",
+    "sources": [
+      "Toirdelbach Ó Conchobair, roi de Connacht"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_connacht_hold",
+      "title": "Garder le Connacht",
+      "description": "Conserver le royaume face aux prétentions de Mac Diarmata et des de Burgh.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_connacht"
+      }
+    },
+    {
+      "id": "obj_connacht_high_king",
+      "title": "Ard rí Éireann",
+      "description": "Deux des derniers grands rois d'Irlande furent des Ó Conchobhair : reconstituer un royaume d'Irlande gaélique.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_connacht",
+          "prov_tyrone",
+          "prov_thomond",
+          "prov_leinster"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume gaélique de Connacht, tenu par les Ó Conchobhair, dont deux membres furent les derniers grands rois d'Irlande (Toirdelbach Mór et Ruaidrí) ; site royal de Rathcroghan.",
+  "sources": [
+    "Toirdelbach Ó Conchobair",
+    "Royaume de Connacht",
+    "Rathcroghan"
+  ],
+  "id": "tit_connacht"
+}

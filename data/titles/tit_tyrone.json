@@ -1,0 +1,54 @@
+{
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Tír Eoghain",
+    "local": "Ríoghacht Thír Eoghain",
+    "local_language": "gaélique irlandais"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la main dextre coupée de gueules.",
+    "description": "La « main rouge » (Lámh Dhearg), emblème des Ó Néill et de l'Ulster gaélique ; attestation héraldique tardive (XVe-XVIe s.), utilisée ici par convention pour 1337.",
+    "primary_color": "#F2F2F2",
+    "secondary_color": "#B0182B",
+    "uncertain": true
+  },
+  "de_jure_provinces": [
+    "prov_tyrone"
+  ],
+  "holder_1337": {
+    "faction": "fac_tyrone",
+    "sources": [
+      "Henry Ó Néill, roi de Tír Eoghain"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_tyrone_hold",
+      "title": "Garder Tír Eoghain",
+      "description": "Les Ó Néill n'ont jamais plié devant les Anglo-Normands : conserver le royaume libre.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_tyrone"
+      }
+    },
+    {
+      "id": "obj_tyrone_ulster",
+      "title": "Le grand roi d'Ulster",
+      "description": "Réunir les terres de l'ancien royaume d'Ulster.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tyrone",
+          "prov_ulster"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume gaélique de Tír Eoghain, jamais entré dans la vassalité anglo-normande ; les rois Ó Néill sont inaugurés sur le Leac na Rí de Tullyhogue.",
+  "sources": [
+    "Henry Ó Néill",
+    "Royaume de Tír Eoghain",
+    "Tullyhogue"
+  ],
+  "id": "tit_tyrone"
+}

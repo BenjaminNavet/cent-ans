@@ -1,0 +1,49 @@
+{
+  "rank": "county",
+  "name": {
+    "display": "Comté de Desmond",
+    "local": "Earldom of Desmond",
+    "local_language": "moyen anglais"
+  },
+  "heraldry": {
+    "blazon": "D'hermine au sautoir de gueules.",
+    "description": "Armes des FitzGerald de Desmond, brisées d'hermine pour se distinguer de la branche de Kildare.",
+    "primary_color": "#F2F2F2",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_ireland",
+  "de_jure_provinces": [
+    "prov_desmond"
+  ],
+  "holder_1337": {
+    "faction": "fac_desmond",
+    "sources": [
+      "Maurice FitzGerald, 1er comte de Desmond"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_desmond_hold",
+      "title": "Garder le comté palatin",
+      "description": "Maurice FitzGerald doit conserver son comté palatin de Kerry face à la couronne et aux Gaéliques.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_desmond"
+      }
+    },
+    {
+      "id": "obj_desmond_independence",
+      "title": "Le roi de Munster",
+      "description": "« Maurice le Grand » a rêvé de se faire couronner : accomplir son ambition.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Comté palatin érigé le 27 août 1329 pour Maurice FitzGerald, dit « Maurice le Grand » ; juridiction quasi souveraine sur le Kerry, chef de file des révoltes anglo-irlandaises contre l'autorité de Dublin.",
+  "sources": [
+    "Comté de Desmond",
+    "Maurice FitzGerald, 1er comte de Desmond"
+  ],
+  "id": "tit_desmond"
+}
