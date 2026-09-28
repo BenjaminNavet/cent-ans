@@ -135,7 +135,11 @@ impl GaugeSums {
                 .iter()
                 .find(|((n, c), _)| *n == name && *c == class)
                 .map(|(_, v)| *v)?,
-            None => self.all.iter().find(|(n, _)| **n == name).map(|(_, v)| *v)?,
+            None => self
+                .all
+                .iter()
+                .find(|(n, _)| **n == name)
+                .map(|(_, v)| *v)?,
         };
         (count > 0.0).then(|| (sum / count * 10.0).round() / 10.0)
     }
@@ -238,9 +242,10 @@ impl CampaignState {
         settlement: &SettlementId,
         building: &BuildingId,
     ) -> BeforeAfter {
-        let (Some(place), Some(definition)) =
-            (self.settlements.get(settlement), data.buildings.get(building))
-        else {
+        let (Some(place), Some(definition)) = (
+            self.settlements.get(settlement),
+            data.buildings.get(building),
+        ) else {
             return BeforeAfter::new();
         };
         if data.has_building(&place.buildings, building) {
@@ -298,16 +303,23 @@ impl CampaignState {
         settlement: &SettlementId,
         building: &BuildingId,
     ) -> Vec<Requirement> {
-        let (Some(place), Some(definition)) =
-            (self.settlements.get(settlement), data.buildings.get(building))
-        else {
+        let (Some(place), Some(definition)) = (
+            self.settlements.get(settlement),
+            data.buildings.get(building),
+        ) else {
             return Vec::new();
         };
         let province = data.provinces.get(&place.province);
-        let technologies = self.factions.get(&place.controller).map(|f| &f.technologies);
+        let technologies = self
+            .factions
+            .get(&place.controller)
+            .map(|f| &f.technologies);
         let mut out = Vec::new();
         if let Some(from) = &definition.upgrades_from {
-            out.push(Requirement::new(from.as_str(), place.buildings.contains(from)));
+            out.push(Requirement::new(
+                from.as_str(),
+                place.buildings.contains(from),
+            ));
         }
         if let Some(required) = &definition.required_building {
             let met = data.has_building(&place.buildings, required);
@@ -343,9 +355,10 @@ impl CampaignState {
         settlement: &SettlementId,
         unit_type: &UnitTypeId,
     ) -> Vec<Requirement> {
-        let (Some(place), Some(definition)) =
-            (self.settlements.get(settlement), data.unit_types.get(unit_type))
-        else {
+        let (Some(place), Some(definition)) = (
+            self.settlements.get(settlement),
+            data.unit_types.get(unit_type),
+        ) else {
             return Vec::new();
         };
         let mut out = Vec::new();

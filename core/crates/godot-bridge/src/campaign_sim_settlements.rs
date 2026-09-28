@@ -148,7 +148,7 @@ impl CampaignSim {
         let Ok(id) = SettlementId::new(id.to_string()) else {
             return VarArray::new();
         };
-        buildable_array(data, &state.buildable(data, &id))
+        buildable_array(data, &state.buildable(data, &id), Some((state, &id)))
     }
 
     /// Settlement ids of a province, the city first then by id (lot C4).

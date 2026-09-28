@@ -7,19 +7,33 @@ Branche `feat/ib5-live` (worktree agent). Spec : `docs/superpowers/specs/2026-09
 ## Plan
 
 - [x] 0. Squelette : `sim-campaign/src/preview.rs` (API vide)
-- [ ] 1. Core : `effect_key`, prérequis (bâtiments, recrutement, techniques)
-- [ ] 2. Core : avant → après (bâtiment : province ; technique : faction) sur copie de l'état
-- [ ] 3. Pont : `before_after` et `requirements` dans `get_buildable`/`buildable`, `get_recruitable`, `get_tech_tree`
-- [ ] 4. `rich_tooltip.gd` : lecture de `requirements` et de la clé d'effet ciblée
-- [ ] 5. `ib_layout_test.gd` étendu ; tests de fin
+- [x] 1. Core : `effect_key`, prérequis (bâtiments, recrutement, techniques)
+- [x] 2. Core : avant → après (bâtiment : province ; technique : faction) sur copie de l'état
+- [x] 3. Pont : `before_after` et `requirements` dans `get_province_city().buildable`,
+  `settlement_buildable`, `get_recruitable` (prérequis seuls), `get_tech_tree`
+  (`campaign_sim_preview.rs`)
+- [x] 4. `rich_tooltip.gd` : `_requirement_met(live, id, repli)`, clé d'effet ciblée dans `effect_item`,
+  l'effet vedette d'un bâtiment garde sa ligne quand il a un avant → après
+- [ ] 5. `ib_layout_test.gd` étendu (`_check_live`) ; tests de fin
 
 ## Choix
 
-- Clé d'effet : `kind`, ou `kind:classe` / `kind:famille` pour un effet ciblé (évite de montrer la
-  valeur d'une classe sur la ligne d'une autre).
+- Valeurs lues sur l'état réel et sur une **copie** où la chose est appliquée comme au tour
+  (`buildings::complete_building`, extrait de `resolve_construction` ; insertion de la technique),
+  avec les fonctions du tour. Coût mesuré (release) : 18 ms pour tous les bâtiments d'une cité,
+  31 ms pour tout l'arbre des techniques.
+- Statistiques : impôts/commerce/production → revenu de la province
+  (`province_gross_income`, extrait de `faction_income_effective`) ou de la faction (technique) ;
+  santé/richesse/biens/mécontentement → **valeur d'équilibre** de la jauge (`population::equilibrium`,
+  point fixe de la mise à jour saisonnière ; `update_class` découpé en fonctions de cible partagées,
+  arithmétique inchangée), moyenne pondérée par la population, ou une classe pour un effet ciblé ;
+  points de recherche ; bâtiment seulement : fortifications, places de recrutement, résistance à la
+  peste (%). Autres effets (piété, garnison, bataille, croissance…) : pas d'entrée.
+- Clé d'effet : `kind`, ou `kind:classe` / `kind:famille` pour un effet ciblé ; une clé présente deux
+  fois dans une même entité n'a pas d'entrée.
 - Prérequis : `live["requirements"]` = [{id, met}], `id` = entité requise ou `coastal`, `river`,
   `enabling_building`.
 
 ## Prochaine étape
 
-Implémenter l'étape 1.
+Dylib (`CARGO_TARGET_DIR=core/target-ib5 core/build.sh`), import Godot, `ib_layout_test.gd`.

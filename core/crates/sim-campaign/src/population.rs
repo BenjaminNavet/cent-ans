@@ -150,8 +150,7 @@ fn update_class(
         garrison_strength,
         overpopulation: overpopulation(population_total, cap),
     };
-    let health_target =
-        health_target(effects, class, f64::from(entry.goods_satisfaction), &shared);
+    let health_target = health_target(effects, class, f64::from(entry.goods_satisfaction), &shared);
     entry.health = move_towards(entry.health, health_target, HEALTH_SPEED);
 
     // ----- wealth --------------------------------------------------------
@@ -257,8 +256,8 @@ fn unrest_target(
     }
     // EQ1: recent captures, raids and regencies (the province's own
     // disorder gauge, which fades by itself).
-    unrest_target += (f64::from(shared.disorder) * rules.disorder_unrest_weight)
-        .min(rules.disorder_unrest_max);
+    unrest_target +=
+        (f64::from(shared.disorder) * rules.disorder_unrest_weight).min(rules.disorder_unrest_max);
     // Building `Unrest` effects: negative values are appeasement.
     unrest_target += effects.unrest.flat
         + effects.unrest.percent

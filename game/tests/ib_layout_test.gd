@@ -46,6 +46,7 @@ func _run() -> void:
 	await _check_kinds()
 	await _check_short_units(int(style.get("short_max_body_lines", 8)))
 	await _check_keys()
+	_check_live()
 	print("ib_layout_test: %d checks, %s" % [_checks, "OK" if _failures == 0 else "%d failure(s)" % _failures])
 	quit(0 if _failures == 0 else 1)
 
@@ -146,6 +147,62 @@ func _check_keys() -> void:
 	_check(RichTooltip.spec_for("ib:nothing:x").is_empty() and RichTooltip.spec_for("cdx:x").is_empty(), "unknown keys give {}")
 	var bbcode := RichTooltip.unit("unit_longbowmen", {"cost": 420, "upkeep": 40, "available": false, "reason": "test"})
 	_check(bbcode.contains("Coût") and bbcode.contains("Indisponible : test") and bbcode.contains("Forces"), "BBCode fallback keeps its content: %s" % bbcode)
+
+
+## IB5 : « avant → après » et état de chaque prérequis calculés par le core (`CampaignSim`) :
+## une infobulle de bâtiment constructible montre une ligne « a → b », un prérequis manquant est ✗
+## et un prérequis rempli ✓ ; mêmes données pour les techniques et le recrutement.
+func _check_live() -> void:
+	if not _check(ClassDB.class_exists("CampaignSim"), "CampaignSim missing (run core/build.sh)"):
+		return
+	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(bool(sim.call("new_campaign", data_dir, "fac_france", YEAR)), "new_campaign failed"):
+		return
+	var capital := "prov_ile_de_france"
+	var rows: Array = (sim.call("get_province_city", capital) as Dictionary).get("buildable", [])
+	var arrow := false
+	var unmet := false
+	var met := false
+	for row in rows:
+		_check((row as Dictionary).has("requirements") and row.has("before_after"), "buildable row should carry requirements and before_after: %s" % row.keys())
+		var spec := RichTooltip.building_spec(str(row.get("building", "")), row)
+		var effects := "\n".join(_block(TooltipView.blocks_for(spec, false), "Effects"))
+		if str(row.get("reason", "")) != "déjà construit" and not (row.get("before_after", {}) as Dictionary).is_empty() and effects.contains(" → "):
+			arrow = true
+		var conditions := "\n".join(_block(TooltipView.blocks_for(spec, true), "Conditions"))
+		for requirement in row.get("requirements", []):
+			if bool(requirement.get("met", true)) == false and conditions.contains("✗"):
+				unmet = true
+			if bool(requirement.get("met", false)) and conditions.contains("✓"):
+				met = true
+	_check(arrow, "a buildable building tooltip should show a « before → after » line (%s: %d rows)" % [capital, rows.size()])
+	_check(unmet, "a missing building requirement should be ✗")
+	_check(met, "a met building requirement should be ✓")
+	# Techniques : prérequis et avant → après de faction.
+	var tech_arrow := false
+	var tech_state := false
+	for node in sim.call("get_tech_tree", "fac_france"):
+		var spec := RichTooltip.technology_spec(node)
+		if " → " in "\n".join(_block(TooltipView.blocks_for(spec, false), "Effects")):
+			tech_arrow = true
+		for requirement in node.get("requirements", []):
+			for item in spec.get("requires", []):
+				if str(item.get("text", "")).contains(GameCatalog.display_name(str(requirement.get("id", "")))) and item.get("met") == bool(requirement.get("met")):
+					tech_state = true
+	_check(tech_arrow, "a technology tooltip should show a « before → after » line")
+	_check(tech_state, "technology prerequisites should follow the core's state")
+	# Recrutement : chaque ligne porte l'état de ses prérequis.
+	var recruit: Array = sim.call("get_recruitable", capital)
+	_check(not recruit.is_empty() and (recruit[0] as Dictionary).has("requirements"), "recruitable rows should carry requirements")
+	for row in recruit:
+		for requirement in row.get("requirements", []):
+			if str(requirement.get("id", "")) == "enabling_building":
+				var spec := RichTooltip.unit_spec(str(row.get("unit_type", "")), row)
+				var states: Array = []
+				for item in spec.get("requires", []):
+					states.append(item.get("met"))
+				_check(states.has(bool(requirement.get("met"))), "%s: enabling building state %s expected in %s" % [row.get("unit_type"), requirement.get("met"), states])
 
 
 func _check_sizes(panel: Control, label: String) -> void:
