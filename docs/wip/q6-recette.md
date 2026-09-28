@@ -17,10 +17,19 @@ main 24824cee (France, 1280×720, 12 tours). Branche `fix/q6-recette`, worktree 
 - Note : le pilote hérite des réglages du joueur (taille d'interface 1,25) ; en 1920×1080 la
   vue logique est 1280×720 (configuration réelle du joueur), en 1280×720 elle tombe à 1137×640.
 
-## À trier (partie 720p)
-- « Recruter » (panneau d'armée) sous le bouton de fin de tour ; « Changer d'édit » hors écran
-  à droite ; journal et bulles à gauche tronqués à ~345 px ; dialogue « Continuer » sous le
-  panneau de diplomatie ; espion recruté absent (la sim recrute bien : clic du pilote ?).
+## Partie 1920×1080 (vue 1280×720, config du joueur) — en cours de correction (3 agents)
+- A1 panneaux de droite : « Changer d'édit » sous la minicarte, « Recruter » sous la fin de tour
+  (`game/tests/q6_side_panel_test.gd`).
+- A2 diplomatie : « Proposer le traité » hors écran ; dialogue « Continuer » de fin de tour sous
+  le panneau de diplomatie (`game/tests/q6_diplomacy_test.gd`).
+- A3 avis/journal (zone TOASTS) au-dessus du registre des agents (clic sur un agent perdu) ;
+  texte des avis tronqué en vue étroite (`game/tests/q6_toasts_test.gd`).
+
+## Écartés (artefacts du pilote, jeu vérifié en headless)
+- sélection d'agent depuis le registre : fonctionne au vrai clic quand rien ne le couvre (→ A3) ;
+- menu pause / réglages : ESC ouvre bien le menu (enchaînement de touches du pilote) ;
+- bouton « Commerce » masqué exprès (menu des filtres, touche V) ;
+- clic sur la capitale : sélectionne l'armée qui s'y trouve (comportement voulu).
 
 ## Prochaine étape
-Partie 1920×1080 (vue 1280×720) en cours ; trier ce qui reste à cette taille.
+Intégrer les 3 lots, smoke + tests, fusion ff dans main.
