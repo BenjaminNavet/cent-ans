@@ -829,7 +829,7 @@ fn article_value(
                 let income = state.factions[proposer].income_last_turn.max(0);
                 reasons.push((
                     "Tribut du vassal".to_owned(),
-                    gold_points(income * diplomacy::VASSAL_TRIBUTE_PERCENT / 100 * 20),
+                    gold_points(income * data.feudal_rules.vassal_tribute_percent / 100 * 20),
                 ));
             }
         }

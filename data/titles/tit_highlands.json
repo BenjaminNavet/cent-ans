@@ -1,0 +1,22 @@
+{
+  "id": "tit_highlands",
+  "rank": "duchy",
+  "name": {
+    "display": "Highlands et Moray",
+    "local": "Gàidhealtachd",
+    "local_language": "gaélique écossais"
+  },
+  "de_jure_liege": "tit_scotland",
+  "de_jure_provinces": [
+    "prov_highlands"
+  ],
+  "holder_1337": {
+    "faction": "fac_scotland",
+    "sources": [
+      "Highlands",
+      "Andrew Murray (1298-1338)",
+      "Seigneurie des Îles"
+    ]
+  },
+  "description": "Tenu en 1337 par chr_andrew_murray (apanage ou fief)."
+}

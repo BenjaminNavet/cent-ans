@@ -842,6 +842,9 @@ func _apply_unrest_events() -> void:
 			_events.append({"kind": "famine", "text_fr": "Famine en %s." % province["name"], "province": province_id})
 
 
+## RS-H : l'ancien événement "movement" (armée qui campe) n'existe pas dans `EventKind`
+## (`core/crates/sim-campaign/src/events.rs`) ; retiré pour que le mock n'émette que des
+## genres réels du core (aucun script ne dépendait de "movement", vérifié).
 func _fake_events() -> void:
 	var player_summary := get_faction_summary(_player)
 	_events.append({
@@ -849,17 +852,6 @@ func _fake_events() -> void:
 		"text_fr": "%s : revenus du trésor %+d livres (trésor : %d)." % [get_date_label(), player_summary.get("income", 0), player_summary.get("treasury", 0)],
 		"faction": _player,
 	})
-	var ids := get_army_ids()
-	if not ids.is_empty():
-		var army: Dictionary = _armies[ids[_turn % ids.size()]]
-		var province_name: String = _provinces.get(army["location"], {}).get("name", army["location"])
-		_events.append({
-			"kind": "movement",
-			"text_fr": "L'armée de %s campe en %s." % [_faction_label(army["faction"]), province_name],
-			"province": army["location"],
-			"army": ids[_turn % ids.size()],
-			"faction": army["faction"],
-		})
 
 
 # --- Construction de l'état initial ---------------------------------------------
