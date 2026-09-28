@@ -51,6 +51,22 @@ static func faction(faction_id: String) -> Dictionary:
 	return {}
 
 
+## FE6 : départs recommandés (cartes du menu), dans l'ordre des données, réduits aux factions
+## présentées (jouables) ; à défaut, les trois premières présentations.
+static func recommended() -> PackedStringArray:
+	var presented := {}
+	for entry in factions():
+		presented[str((entry as Dictionary).get("id", ""))] = true
+	var result := PackedStringArray()
+	for id in data().get("recommended_factions", []):
+		if presented.has(str(id)):
+			result.append(str(id))
+	if result.is_empty():
+		for entry in factions().slice(0, 3):
+			result.append(str((entry as Dictionary).get("id", "")))
+	return result
+
+
 static func difficulty_label(level: int) -> String:
 	var labels: Array = data().get("difficulty_labels", [])
 	return str(labels[clampi(level, 0, labels.size() - 1)]) if not labels.is_empty() else ""

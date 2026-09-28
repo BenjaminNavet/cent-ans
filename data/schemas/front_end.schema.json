@@ -353,6 +353,15 @@
         }
       }
     },
+    "recommended_factions": {
+      "type": "array",
+      "description": "FE6 : six départs recommandés (cartes du menu, spec FE § 6) ; seules les factions présentées (jouables) s'affichent.",
+      "items": {
+        "type": "string",
+        "pattern": "^fac_"
+      },
+      "maxItems": 6
+    },
     "factions": {
       "type": "array",
       "minItems": 1,

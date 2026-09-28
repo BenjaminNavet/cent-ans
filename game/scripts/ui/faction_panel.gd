@@ -42,6 +42,7 @@ var seigniorage_value: Label
 var recoinage_value: Label
 var coinage_section: CoinageSection
 var chivalry_section: ChivalrySection
+var feudal_section: FeudalSection  # FE6 : obligations et objectifs féodaux
 var ransom_button: Button
 var ransom_panel: RansomPanel
 ## Audit A3 E1 : « Solde prévu » (le chiffre de la barre du haut, calculé par `core/`).
@@ -104,6 +105,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 		tax_note.text = "Non disponible avec cette simulation."
 		_set_tax_buttons_disabled(true)
 		_fill_goods({}, [])
+		feudal_section.refresh(_sim(), id)
 		show()
 		return
 	treasury_value.text = Money.amount(int(economy.get("treasury", 0)))
@@ -137,6 +139,7 @@ func show_faction(id: String, label: String, color: Color, economy: Dictionary) 
 		"high": "×{rule.tax_multiplier_high:1} sur le revenu fiscal ; augmente le mécontentement.",
 	}.get(rate, ""))
 	_fill_goods(economy.get("goods", {}), economy.get("goods_categories", []))
+	feudal_section.refresh(_sim(), id)
 	show()
 
 
@@ -218,7 +221,8 @@ func _add_h11_sections() -> void:
 	ransom_button.text = "Captifs et rançons"
 	RichTooltip.attach_plain(ransom_button, "captives_and_ransoms")
 	ransom_button.pressed.connect(toggle_ransoms)
-	for node in [HSeparator.new(), coinage_section, HSeparator.new(), chivalry_section, ransom_button]:
+	feudal_section = FeudalSection.new()
+	for node in [HSeparator.new(), coinage_section, HSeparator.new(), chivalry_section, ransom_button, HSeparator.new(), feudal_section]:
 		goods_list.get_parent().add_child(node)
 
 

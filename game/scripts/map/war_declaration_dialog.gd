@@ -4,6 +4,7 @@ extends PanelContainer
 ## Confirmation « Déclarer la guerre ? » quand le joueur attaque, sur la carte de campagne, une
 ## armée ou une place d'une faction avec laquelle il n'est pas en guerre. Les conséquences
 ## (motif, réputation, prestige) viennent de `CampaignSim.evaluate_proposal` ; aucune règle ici.
+## FE6 : la chaîne « Qui peut entrer en guerre » (`EscalationPreview`) suit les conséquences.
 
 signal confirmed
 signal cancelled
@@ -11,6 +12,7 @@ signal cancelled
 var _title: Label
 var _consequences: RichTextLabel
 var _confirm_button: Button
+var escalation: EscalationPreview
 
 
 func _init() -> void:
@@ -35,6 +37,9 @@ func _init() -> void:
 	_consequences.scroll_active = false
 	_consequences.custom_minimum_size = Vector2(480, 0)
 	box.add_child(_consequences)
+	escalation = EscalationPreview.new()
+	escalation.hide()
+	box.add_child(escalation)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 12)
@@ -64,6 +69,8 @@ func ask(sim: Object, faction_id: String, faction_name: String, target_label: St
 		if not parts.is_empty():
 			lines.append("[b]Conséquences :[/b] " + " · ".join(parts))
 	_consequences.text = "\n".join(lines)
+	var attacker := str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
+	escalation.show_for(sim, attacker, faction_id)
 	show()
 	_confirm_button.grab_focus()
 
