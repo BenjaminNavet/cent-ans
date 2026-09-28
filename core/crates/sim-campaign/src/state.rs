@@ -223,6 +223,14 @@ pub struct Unit {
     /// G1: flat ranged bonus of the buildings of the levying province.
     #[serde(default, skip_serializing_if = "is_zero_u8")]
     pub levy_ranged: u8,
+    /// TW2-T5: thousandths of an experience level below `experience`, left by
+    /// the pro rata dilution of reinforcements (`traditions::add_recruits`).
+    #[serde(default, skip_serializing_if = "is_zero_u16")]
+    pub experience_residue: u16,
+}
+
+fn is_zero_u16(value: &u16) -> bool {
+    *value == 0
 }
 
 fn is_zero_u8(value: &u8) -> bool {
@@ -240,6 +248,7 @@ impl Unit {
             morale: unit_type.stats.morale,
             levy_armor: 0,
             levy_ranged: 0,
+            experience_residue: 0,
         }
     }
 }
@@ -302,6 +311,13 @@ pub struct Army {
     /// season, `crate::replenish`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fought_turn: Option<u32>,
+    /// TW2-T5: army experience, traditions, kept name and banner
+    /// (`crate::traditions`).
+    #[serde(
+        default,
+        skip_serializing_if = "crate::traditions::ArmyTraditions::is_empty"
+    )]
+    pub traditions: crate::traditions::ArmyTraditions,
 }
 
 impl Army {
@@ -319,6 +335,7 @@ impl Army {
             destination: None,
             morale_modifiers: Vec::new(),
             fought_turn: None,
+            traditions: Default::default(),
         }
     }
 
@@ -580,6 +597,10 @@ pub struct FactionState {
     pub army_upkeep_last_turn: i64,
     #[serde(default)]
     pub building_upkeep_last_turn: i64,
+    /// RS-C: seasons in a row closed in deficit (income below upkeep); the
+    /// AI demolishes buildings after `economy.json` `ai_demolition`.
+    #[serde(default)]
+    pub deficit_seasons: u32,
     #[serde(default)]
     pub projected_income: i64,
     /// A regency governs for a minor ruler (M4 spec § 2); tracked so the
@@ -791,6 +812,10 @@ impl CampaignState {
         let Some(army) = self.armies.get(id) else {
             return "une armée".to_owned();
         };
+        // TW2-T5: a veteran army keeps its name when its general changes.
+        if let Some(name) = &army.traditions.name {
+            return name.clone();
+        }
         let owner = match &army.general {
             Some(general) => self.character_name(data, general),
             None => data.factions.get(&army.faction).map_or_else(

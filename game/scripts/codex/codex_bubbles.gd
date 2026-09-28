@@ -30,6 +30,16 @@ extends CanvasLayer
 ## Délais, grâce et taille de la pile : bloc `chain` de `data/ui/tooltip_style.json` (constantes
 ## ci-dessous en repli). Bulle verrouillée : version détaillée `TooltipView.build(spec, true)` quand
 ## `RichTooltip.spec_for` existe (IB1), BBCode sinon.
+##
+## IB4 (spec IB § 3.3-3.4) : liens `ib:<kind>:<id>` (`CodexText.ib_link`) à côté de `cdx:` — une
+## entité ouvre sa spec riche complète (`TooltipView.build(RichTooltip.link_spec(clé), true)`), une
+## règle (`ib:rule:<clé>`) une bulle `rule` (texte de `data/ui/tooltips.json`) ; clic gauche sur la
+## bulle : fiche du Codex liée (`entry_for_entity`, ou `codex` de la règle). Placement : chaque
+## fille à côté de sa parente (droite, sinon gauche, sinon dessous), alignée sur la ligne du
+## mot-clé si possible, jamais par-dessus une ancêtre ; faute de place, les ancêtres les plus
+## anciennes se réduisent à leur en-tête (clic : rouvrir). Fil d'Ariane cliquable en haut de la
+## bulle la plus récente dès `chain.breadcrumb_from_depth` (un segment ferme les descendantes de
+## son niveau). `chain.max_bubbles` reste la borne dure.
 
 signal bubble_opened(id: String)
 signal entry_requested(id: String)
@@ -48,8 +58,12 @@ const STYLE_FILE := "ui/tooltip_style.json"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const CHAIN_FALLBACK := {
 	"hover_delay_s": 0.12, "idle_hover_delay_s": HOVER_DELAY, "close_grace_s": CLOSE_GRACE,
-	"max_bubbles": MAX_BUBBLES,
+	"max_bubbles": MAX_BUBBLES, "breadcrumb_from_depth": 3,
 }
+## IB4 : écart entre une fille et sa parente ; préfixe des segments du fil d'Ariane.
+const GAP := 6.0
+const CRUMB_PREFIX := "crumb:"
+const CRUMB_SEPARATOR := " › "
 ## Fond du mot-lien source d'une fille ouverte par la chaîne.
 const SOURCE_HIGHLIGHT := "#e8cf8a"
 
@@ -71,6 +85,10 @@ var _hovered_time := 0.0
 var _explore_held := false
 ## Étiquettes de bulles dont le surlignage de mot source est à recalculer (hors survol d'un lien).
 var _highlight_dirty: Array[RichTextLabel] = []
+## IB4 : zone de placement imposée (tests à 1280 × 720) ; vide : zone visible de la fenêtre.
+var area_override := Rect2()
+## IB4 : un segment du fil d'Ariane est survolé (le clic gauche lui revient, pas au Codex).
+var _crumb_hover := false
 
 
 func _ready() -> void:
@@ -94,9 +112,15 @@ func attach(label: RichTextLabel) -> void:
 ## ferment). `chain` (IB3) : bulle verrouillée par la chaîne à Alt ; les bulles verrouillées par
 ## la chaîne au-dessus de la parente sont aussi remplacées. Renvoie la bulle, ou null si la fiche
 ## n'existe pas.
-func open(id: String, at: Vector2 = Vector2(-1, -1), parent_index: int = -1, pinned: bool = false, chain: bool = false) -> PanelContainer:
+## IB4 : `id` peut être une clé `ib:<kind>:<id>` (bulle riche ou de règle) ; `source` : étiquette
+## du mot-lien (alignement de la fille sur sa ligne).
+func open(id: String, at: Vector2 = Vector2(-1, -1), parent_index: int = -1, pinned: bool = false, chain: bool = false, source: Control = null) -> PanelContainer:
 	var codex := CodexText.store()
-	if codex == null or not bool(codex.call("has_entry", id)):
+	var is_ib := id.begins_with(CodexText.IB_PREFIX)
+	var spec := RichTooltip.link_spec(id) if is_ib else {}
+	if is_ib and spec.is_empty():
+		return null
+	if not is_ib and (codex == null or not bool(codex.call("has_entry", id))):
 		return null
 	var parent: PanelContainer = bubbles[parent_index] if parent_index >= 0 and parent_index < bubbles.size() else null
 	var existing := _child_of(parent, id)
@@ -108,15 +132,47 @@ func open(id: String, at: Vector2 = Vector2(-1, -1), parent_index: int = -1, pin
 		elif chain:
 			chain_lock(existing)
 		return existing
-	var bubble := _make_bubble(id, _entry_bbcode(id), false, parent)
+	var bubble: PanelContainer
+	if is_ib:
+		bubble = _make_bubble(entry_for_spec(spec), "", false, parent, TooltipView.build(spec, true))
+		bubble.set_meta("title", str(spec.get("title", "")))
+	else:
+		bubble = _make_bubble(id, _entry_bbcode(id), false, parent)
+		bubble.set_meta("title", str(codex.call("title", id)))
+	bubble.set_meta("link_key", id)
+	if parent != null:
+		bubble.set_meta("anchor_dy", _keyword_offset(source, link_meta(id), parent))
 	_push(bubble, at)
 	if pinned:
 		set_pinned(bubble, true)
 	elif chain:
 		chain_lock(bubble)
-	codex.call("discover", id)
+	if is_ib:
+		CodexText.mark_ib_read(id)
+	else:
+		codex.call("discover", id)
 	bubble_opened.emit(id)
 	return bubble
+
+
+## IB4 : fiche du Codex d'une bulle `ib:` (entité : `entry_for_entity` ; règle : son `codex`).
+static func entry_for_spec(spec: Dictionary) -> String:
+	if str(spec.get("kind", "")) == "rule":
+		return str(spec.get("codex", ""))
+	var codex := CodexText.store()
+	var id := str(spec.get("id", ""))
+	return str(codex.call("entry_for_entity", id)) if codex != null and id != "" else ""
+
+
+## IB4 : clé de bulle désignée par une méta de lien (`cdx:<id>` → id, `ib:…` → la clé), "" sinon.
+static func link_key(meta: Variant) -> String:
+	var key := CodexText.ib_key(meta)
+	return key if key != "" else CodexText.meta_id(meta)
+
+
+## IB4 : méta `[url=…]` d'une clé de bulle (inverse de `link_key`).
+static func link_meta(key: String) -> String:
+	return key if key.begins_with(CodexText.IB_PREFIX) else CodexText.META_PREFIX + key
 
 
 ## Bulle au texte libre (infobulle épinglée), toujours épinglée ; `entry_id` : fiche ouverte par
@@ -147,7 +203,7 @@ func explore_lock() -> bool:
 		var source := _pending_source
 		_pending_id = ""
 		_pending_source = null
-		var child := open(id, -Vector2.ONE, _index_of_source(source), false, true)
+		var child := open(id, -Vector2.ONE, _index_of_source(source), false, true, source)
 		if child != null:
 			_mark_source(child, source, id)
 			return true
@@ -227,7 +283,7 @@ func pin_top_bubble() -> bool:
 		var source := _pending_source
 		_pending_id = ""
 		_pending_source = null
-		if open(id, -Vector2.ONE, _index_of_source(source), true) != null:
+		if open(id, -Vector2.ONE, _index_of_source(source), true, false, source) != null:
 			return true
 	for index in range(bubbles.size() - 1, -1, -1):
 		if not bubbles[index].get_meta("pinned", false) or bubbles[index].get_meta("chain_locked", false):
@@ -475,13 +531,16 @@ func _on_mouse_pressed(event: InputEventMouseButton) -> void:
 	var under := _bubble_under_mouse()
 	if event.button_index == MOUSE_BUTTON_RIGHT:
 		if _hover_id != "":
-			open(_hover_id, -Vector2.ONE, _index_of_source(_hover_source), true)
+			open(_hover_id, -Vector2.ONE, _index_of_source(_hover_source), true, false, _hover_source)
 			get_viewport().set_input_as_handled()
 		elif under != null:
 			# IB3 : une bulle verrouillée par la chaîne devient épinglée durablement.
 			set_pinned(under, not under.get_meta("pinned", false) or under.get_meta("chain_locked", false))
 			get_viewport().set_input_as_handled()
-	elif event.button_index == MOUSE_BUTTON_LEFT and under != null and _hover_id == "":
+	elif event.button_index == MOUSE_BUTTON_LEFT and under != null and bool(under.get_meta("collapsed", false)):
+		set_collapsed(under, false)  # IB4 : une ancêtre réduite se rouvre au clic
+		get_viewport().set_input_as_handled()
+	elif event.button_index == MOUSE_BUTTON_LEFT and under != null and _hover_id == "" and not _crumb_hover:
 		var id := str(under.get_meta("codex_id", ""))
 		if id != "":
 			open_entry(id)
@@ -489,7 +548,7 @@ func _on_mouse_pressed(event: InputEventMouseButton) -> void:
 
 
 func _on_meta_hover_started(meta: Variant, label: RichTextLabel) -> void:
-	var id := CodexText.meta_id(meta)
+	var id := link_key(meta)
 	if id == "":
 		return
 	_hover_id = id
@@ -513,6 +572,13 @@ func _on_meta_hover_ended(_meta: Variant, label: RichTextLabel) -> void:
 
 
 func _on_meta_clicked(meta: Variant) -> void:
+	var key := CodexText.ib_key(meta)
+	if key != "":
+		# IB4 : un lien `ib:` mène à la fiche du Codex liée, s'il y en a une.
+		var entry := entry_for_spec(RichTooltip.link_spec(key))
+		if entry != "":
+			open_entry(entry)
+		return
 	var id := CodexText.meta_id(meta)
 	if id != "":
 		open_entry(id)
@@ -544,7 +610,7 @@ func _process(delta: float) -> void:
 			var id := _pending_id
 			var source := _pending_source
 			_pending_id = ""
-			var child := open(id, -Vector2.ONE, _index_of_source(source), false, chain)
+			var child := open(id, -Vector2.ONE, _index_of_source(source), false, chain, source)
 			if chain and child != null:
 				_mark_source(child, source, id)
 	_refresh_highlights()
@@ -584,7 +650,7 @@ func _mark_source(child: PanelContainer, source: Control, id: String) -> void:
 	if label == null or not is_instance_valid(label) or _index_of_source(label) < 0:
 		return
 	child.set_meta("source_label", label)
-	child.set_meta("source_meta", CodexText.META_PREFIX + id)
+	child.set_meta("source_meta", link_meta(id))
 	_queue_highlight(label)
 
 
@@ -701,6 +767,7 @@ func _make_bubble(id: String, bbcode: String, pinned: bool, parent: PanelContain
 	if parent != null:
 		bubble.set_meta("parent", parent)
 	var box := VBoxContainer.new()
+	box.name = "Box"
 	box.add_theme_constant_override("separation", 4)
 	box.mouse_filter = Control.MOUSE_FILTER_PASS
 	bubble.add_child(box)
@@ -723,7 +790,19 @@ func _make_bubble(id: String, bbcode: String, pinned: bool, parent: PanelContain
 func _adopt_view(box: VBoxContainer, view: Control) -> void:
 	if view is PanelContainer:
 		view.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	# IB4 : seule l'aide de touche part (la bulle a son pied) ; coût, entretien, durée restent.
 	for node in view.find_children("Footer", "", true, false):
+		var costs := node.find_child("Costs", false, false) as Control
+		if costs != null and costs.visible:
+			node.name = "ViewFooter"
+			for hint in node.find_children("Hint", "", false, false):
+				hint.get_parent().remove_child(hint)
+				hint.queue_free()
+			continue
+		var rule := node.get_parent().get_node_or_null("RuleFooter")
+		if rule != null:
+			rule.get_parent().remove_child(rule)
+			rule.queue_free()
 		node.get_parent().remove_child(node)
 		node.queue_free()
 	view.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -762,21 +841,28 @@ func _push(bubble: PanelContainer, at: Vector2) -> void:
 	while bubbles.size() > maxi(1, int(chain_setting("max_bubbles"))):
 		_remove(bubbles[0])
 	_outside_time = 0.0
-	bubble.resized.connect(_clamp.bind(bubble))
-	_clamp(bubble)
+	bubble.reset_size()
+	bubble.resized.connect(_place.bind(bubble))
+	# IB4 : la bulle suit sa taille minimale (texte replié une fois sa largeur connue, fil
+	# d'Ariane, réduction) au lieu de garder la plus grande hauteur atteinte.
+	bubble.minimum_size_changed.connect(bubble.reset_size)
+	_place(bubble)
+	_refresh_breadcrumbs()
 
 
 ## Garde la bulle à l'écran : à gauche de l'ancre si elle déborde à droite, remontée sinon.
 func _clamp(bubble: PanelContainer) -> void:
 	if not is_instance_valid(bubble):
 		return
-	var area := get_viewport().get_visible_rect().size
+	var rect := layout_area()
+	var low := rect.position + Vector2(MARGIN, MARGIN)
+	var high := rect.end - Vector2(MARGIN, MARGIN)
 	var at: Vector2 = bubble.get_meta("anchor", bubble.position)
 	var pos := at
-	if pos.x + bubble.size.x > area.x - MARGIN:
+	if pos.x + bubble.size.x > high.x:
 		pos.x = at.x - bubble.size.x - MOUSE_OFFSET.x * 2.0
-	pos.x = clampf(pos.x, MARGIN, maxf(MARGIN, area.x - bubble.size.x - MARGIN))
-	pos.y = clampf(pos.y, MARGIN, maxf(MARGIN, area.y - bubble.size.y - MARGIN))
+	pos.x = clampf(pos.x, low.x, maxf(low.x, high.x - bubble.size.x))
+	pos.y = clampf(pos.y, low.y, maxf(low.y, high.y - bubble.size.y))
 	bubble.position = pos.floor()
 
 
@@ -812,12 +898,13 @@ func _remove(bubble: PanelContainer) -> void:
 		_pending_id = ""
 		_pending_source = null
 	bubble.queue_free()
+	_refresh_breadcrumbs()
 
 
 ## Bulle fille de `parent` (null : racine) sur la fiche `id`, null si aucune.
 func _child_of(parent: PanelContainer, id: String) -> PanelContainer:
 	for bubble in bubbles:
-		if parent_of(bubble) == parent and not bubble.get_meta("free_text", false) and str(bubble.get_meta("codex_id", "")) == id:
+		if parent_of(bubble) == parent and not bubble.get_meta("free_text", false) and str(bubble.get_meta("link_key", bubble.get_meta("codex_id", ""))) == id:
 			return bubble
 	return null
 
@@ -853,3 +940,272 @@ func _bubble_under_mouse() -> PanelContainer:
 		if bubbles[index].get_global_rect().has_point(mouse):
 			return bubbles[index]
 	return null
+
+
+# --- Placement, fil d'Ariane, réduction (IB4, spec IB § 3.4) ---------------------------------
+
+
+## Zone de placement des bulles (`area_override` en test, sinon la zone visible).
+func layout_area() -> Rect2:
+	return area_override if area_override.has_area() else get_viewport().get_visible_rect()
+
+
+## Place `bubble` : racine près de son ancre (`_clamp`) ; fille à côté de sa parente, sans
+## chevaucher ses ancêtres — faute de place, les ancêtres les plus anciennes se réduisent.
+func _place(bubble: PanelContainer) -> void:
+	if not is_instance_valid(bubble) or not bubbles.has(bubble) or bool(bubble.get_meta("collapsed", false)):
+		return  # une ancêtre réduite reste à sa place
+	var parent := parent_of(bubble)
+	if parent == null:
+		_clamp(bubble)
+		return
+	var area := layout_area().grow(-MARGIN)
+	var anchor_y := parent.position.y + float(bubble.get_meta("anchor_dy", 0.0))
+	var pos := place_beside(bubble.size, parent.get_rect(), anchor_y, area, _ancestor_rects(bubble))
+	while is_nan(pos.x):
+		var victim := _oldest_open_ancestor(bubble)
+		if victim == null:
+			break
+		set_collapsed(victim, true)
+		if not is_instance_valid(bubble) or not bubbles.has(bubble):
+			return
+		pos = place_beside(bubble.size, parent.get_rect(), anchor_y, area, _ancestor_rects(bubble))
+	if is_nan(pos.x):
+		# Aucune place libre même réduites : à droite de la parente, gardée à l'écran.
+		pos = Vector2(parent.get_rect().end.x + GAP, anchor_y)
+		pos.x = clampf(pos.x, area.position.x, maxf(area.position.x, area.end.x - bubble.size.x))
+		pos.y = clampf(pos.y, area.position.y, maxf(area.position.y, area.end.y - bubble.size.y))
+	bubble.position = pos.floor()
+
+
+## Position d'une bulle de taille `size` à côté de `parent` : à droite, sinon à gauche (haut
+## aligné sur `anchor_y`, glissée vers le bas sous une ancêtre gênante), sinon dessous ; dans
+## `area` et hors des rectangles `avoid` (ancêtres). (NAN, NAN) si aucune place.
+static func place_beside(size: Vector2, parent: Rect2, anchor_y: float, area: Rect2, avoid: Array, gap: float = GAP) -> Vector2:
+	var top := clampf(anchor_y, area.position.y, maxf(area.position.y, area.end.y - size.y))
+	for x: float in [parent.end.x + gap, parent.position.x - gap - size.x]:
+		if x < area.position.x or x + size.x > area.end.x:
+			continue
+		var y := _free_y(x, top, size, area, avoid, gap)
+		if not is_nan(y):
+			return Vector2(x, y)
+	var below_x := clampf(parent.position.x, area.position.x, maxf(area.position.x, area.end.x - size.x))
+	var below_y := _free_y(below_x, parent.end.y + gap, size, area, avoid, gap)
+	if not is_nan(below_y):
+		return Vector2(below_x, below_y)
+	return Vector2(NAN, NAN)
+
+
+## Première ordonnée ≥ `y` où le rectangle (`x`, `size`) tient dans `area` sans toucher `avoid`.
+static func _free_y(x: float, y: float, size: Vector2, area: Rect2, avoid: Array, gap: float) -> float:
+	for _attempt in avoid.size() + 1:
+		if y + size.y > area.end.y:
+			return NAN
+		var rect := Rect2(Vector2(x, y), size)
+		var blocker: Variant = null
+		for other: Rect2 in avoid:
+			if rect.intersects(other):
+				blocker = other
+				break
+		if blocker == null:
+			return y
+		y = (blocker as Rect2).end.y + gap
+	return NAN
+
+
+## Ancêtres de `bubble`, de la racine à sa parente.
+func ancestors_of(bubble: PanelContainer) -> Array[PanelContainer]:
+	var chain: Array[PanelContainer] = []
+	var current := parent_of(bubble)
+	while current != null and not chain.has(current):
+		chain.push_front(current)
+		current = parent_of(current)
+	return chain
+
+
+func _ancestor_rects(bubble: PanelContainer) -> Array:
+	var rects: Array = []
+	for ancestor in ancestors_of(bubble):
+		rects.append(ancestor.get_rect())
+	return rects
+
+
+## Ancêtre non réduite la plus ancienne de `bubble`, hors sa parente directe (null si aucune).
+func _oldest_open_ancestor(bubble: PanelContainer) -> PanelContainer:
+	var parent := parent_of(bubble)
+	for ancestor in ancestors_of(bubble):
+		if ancestor != parent and not bool(ancestor.get_meta("collapsed", false)):
+			return ancestor
+	return null
+
+
+## Décalage vertical (depuis le haut de `parent`) de la ligne du mot-lien `meta` dans `source` ;
+## repli : la souris si elle est sur la parente, sinon 0 (haut de la parente).
+func _keyword_offset(source: Control, meta: String, parent: PanelContainer) -> float:
+	var label := source as RichTextLabel
+	if label == null or not is_instance_valid(label) or not parent.is_ancestor_of(label):
+		return 0.0
+	var y := keyword_y(label, meta)
+	if is_nan(y):
+		var mouse := get_viewport().get_mouse_position()
+		if not parent.get_global_rect().has_point(mouse):
+			return 0.0
+		y = mouse.y - float(UiType.size(UiType.BODY))
+	return maxf(0.0, y - parent.global_position.y)
+
+
+## Ordonnée globale du haut de la ligne du mot-lien `meta` dans `label`, NAN si introuvable.
+static func keyword_y(label: RichTextLabel, meta: String) -> float:
+	var bbcode := str(label.get_meta("base_text", label.text))
+	var open_tag := "[url=%s]" % meta
+	var start := bbcode.find(open_tag)
+	if start < 0:
+		return NAN
+	var inner := start + open_tag.length()
+	var end := bbcode.find("[/url]", inner)
+	if end < 0:
+		return NAN
+	var word := RegEx.create_from_string("\\[[^\\]]*\\]").sub(bbcode.substr(inner, end - inner), "", true)
+	var index := label.get_parsed_text().find(word) if word != "" else -1
+	if index < 0:
+		return NAN
+	var line := label.get_character_line(index)
+	if line < 0:
+		return NAN
+	return label.get_global_rect().position.y + label.get_line_offset(line)
+
+
+## Réduit `bubble` à son en-tête (titre, clic pour rouvrir) ou la rouvre.
+func set_collapsed(bubble: PanelContainer, collapsed: bool) -> void:
+	if not is_instance_valid(bubble) or bool(bubble.get_meta("collapsed", false)) == collapsed:
+		return
+	var box := bubble.get_node_or_null("Box") as VBoxContainer
+	if box == null:
+		return
+	bubble.set_meta("collapsed", true)  # réduite ou en cours de réouverture : ne bouge pas
+	if collapsed:
+		var hidden: Array = []
+		for child in box.get_children():
+			if (child as Control).visible:
+				(child as Control).visible = false
+				hidden.append(child)
+		bubble.set_meta("collapsed_nodes", hidden)
+		var head := Label.new()
+		head.name = "CollapsedHeader"
+		head.text = "▸ " + bubble_title(bubble)
+		head.mouse_filter = Control.MOUSE_FILTER_PASS
+		UiType.apply(head, UiType.BODY)
+		head.add_theme_color_override("font_color", INK)
+		box.add_child(head)
+	else:
+		var head := box.get_node_or_null("CollapsedHeader")
+		if head != null:
+			box.remove_child(head)
+			head.queue_free()
+		for child in bubble.get_meta("collapsed_nodes", []):
+			if is_instance_valid(child):
+				(child as Control).visible = true
+		bubble.remove_meta("collapsed_nodes")
+	bubble.reset_size()
+	bubble.set_meta("collapsed", collapsed)
+
+
+## Fil d'Ariane de `bubble` (null si elle n'en porte pas).
+func breadcrumb_of(bubble: PanelContainer) -> RichTextLabel:
+	return bubble.get_node_or_null("Box/Breadcrumb") as RichTextLabel if is_instance_valid(bubble) else null
+
+
+## Titre court d'une bulle (fil d'Ariane, en-tête réduit).
+func bubble_title(bubble: PanelContainer) -> String:
+	var title := str(bubble.get_meta("title", ""))
+	if title != "":
+		return title
+	var label := bubble.find_child("Title", true, false) as RichTextLabel
+	if label == null:
+		label = bubble.find_child("Text", true, false) as RichTextLabel
+	if label != null:
+		title = label.get_parsed_text().strip_edges().get_slice("\n", 0).strip_edges()
+	if title.length() > 32:
+		title = title.substr(0, 31) + "…"
+	return title if title != "" else "Bulle"
+
+
+## Fil d'Ariane en haut de la bulle la plus récente (dès `chain.breadcrumb_from_depth` niveaux) ;
+## retiré des autres bulles.
+func _refresh_breadcrumbs() -> void:
+	var top: PanelContainer = bubbles[-1] if not bubbles.is_empty() else null
+	for bubble in bubbles:
+		var crumb := bubble.get_node_or_null("Box/Breadcrumb")
+		if crumb != null and bubble != top:
+			crumb.get_parent().remove_child(crumb)
+			crumb.queue_free()
+			bubble.reset_size()
+	if top == null or not is_instance_valid(top):
+		return
+	var chain: Array = ancestors_of(top)
+	chain.append(top)
+	var box := top.get_node_or_null("Box") as VBoxContainer
+	var existing := top.get_node_or_null("Box/Breadcrumb") as RichTextLabel
+	if box == null or chain.size() < int(chain_setting("breadcrumb_from_depth")):
+		if existing != null:
+			existing.get_parent().remove_child(existing)
+			existing.queue_free()
+			top.reset_size()
+		return
+	var segments := PackedStringArray()
+	for index in chain.size():
+		var title := bubble_title(chain[index]).replace("[", "(").replace("]", ")")
+		segments.append("[b]%s[/b]" % title if index == chain.size() - 1 else "[url=%s%d]%s[/url]" % [CRUMB_PREFIX, index, title])
+	var crumb := existing
+	if crumb == null:
+		crumb = RichTextLabel.new()
+		crumb.name = "Breadcrumb"
+		crumb.bbcode_enabled = true
+		crumb.fit_content = true
+		crumb.scroll_active = false
+		crumb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		crumb.mouse_filter = Control.MOUSE_FILTER_PASS
+		crumb.add_theme_color_override("default_color", Color(MUTED))
+		UiType.apply(crumb, UiType.CAPTION)
+		crumb.add_theme_font_size_override("bold_font_size", UiType.size(UiType.CAPTION))
+		crumb.meta_clicked.connect(_on_crumb_clicked.bind(crumb))
+		crumb.meta_hover_started.connect(func(_meta: Variant) -> void: _crumb_hover = true)
+		crumb.meta_hover_ended.connect(func(_meta: Variant) -> void: _crumb_hover = false)
+		box.add_child(crumb)
+		box.move_child(crumb, 0)
+	# Largeur fixée sur celle du contenu : sans elle, le texte replié lettre à lettre gonflerait
+	# la hauteur de la bulle.
+	var width := 0.0
+	for child in box.get_children():
+		if child != crumb and (child as Control).visible:
+			width = maxf(width, (child as Control).get_combined_minimum_size().x)
+	crumb.custom_minimum_size = Vector2(maxf(WIDTH * 0.5, width), 0)
+	crumb.set_meta("chain", chain)
+	crumb.text = CRUMB_SEPARATOR.join(segments)
+	top.reset_size()
+
+
+func _on_crumb_clicked(meta: Variant, crumb: RichTextLabel) -> void:
+	var value := str(meta)
+	if not value.begins_with(CRUMB_PREFIX):
+		return
+	var chain: Array = crumb.get_meta("chain", [])
+	var index := int(value.trim_prefix(CRUMB_PREFIX))
+	_crumb_hover = false
+	if index >= 0 and index < chain.size() and is_instance_valid(chain[index]):
+		back_to(chain[index])
+
+
+## Ramène la chaîne au niveau de `bubble` : ses descendantes se ferment, elle se rouvre si réduite.
+func back_to(bubble: PanelContainer) -> void:
+	if not bubbles.has(bubble):
+		return
+	var descendants: Array[PanelContainer] = []
+	for other in bubbles:
+		if ancestors_of(other).has(bubble):
+			descendants.append(other)
+	for other in descendants:
+		if bubbles.has(other):
+			_remove(other)
+	set_collapsed(bubble, false)
+	_refresh_breadcrumbs()

@@ -1,0 +1,172 @@
+{
+  "description": "Traditions d'armée (lot TW2-T5, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T5, ADR 0112). L'armée, et non son chef, gagne de l'expérience à chaque bataille livrée (davantage si elle la gagne) ; chaque rang atteint ouvre un choix de tradition. Une tradition de palier N exige celle de palier N-1 de la même branche. Les traditions suivent l'armée quand le chef change et disparaissent avec elle.",
+  "experience": {
+    "battle_fought": 10,
+    "battle_won": 10,
+    "min_enemy_percent": 25,
+    "rank_thresholds": [20, 60, 120, 200]
+  },
+  "branches": [
+    {
+      "id": "march",
+      "name": "Marche",
+      "description": "L'ost couvre plus de chemin chaque saison."
+    },
+    {
+      "id": "stewardship",
+      "name": "Intendance",
+      "description": "L'ost se reconstitue plus vite entre deux batailles."
+    },
+    {
+      "id": "shooting",
+      "name": "Tir",
+      "description": "Archers et arbalétriers tirent plus juste."
+    },
+    {
+      "id": "assault",
+      "name": "Assaut",
+      "description": "Les sièges de l'ost sont plus courts."
+    },
+    {
+      "id": "discipline",
+      "name": "Tenue",
+      "description": "Les hommes de l'ost tiennent mieux sous le choc."
+    }
+  ],
+  "traditions": [
+    {
+      "id": "trad_march_1",
+      "branch": "march",
+      "tier": 1,
+      "name": "Longues étapes",
+      "description": "Levés avant l'aube, les hommes allongent l'étape.",
+      "effects": { "movement_percent": 8 }
+    },
+    {
+      "id": "trad_march_2",
+      "branch": "march",
+      "tier": 2,
+      "name": "Charrois allégés",
+      "description": "Moins de chariots, des bêtes de somme : le train suit mieux.",
+      "effects": { "movement_percent": 8 }
+    },
+    {
+      "id": "trad_march_3",
+      "branch": "march",
+      "tier": 3,
+      "name": "Chevauchée",
+      "description": "L'ost court le pays comme une compagnie montée.",
+      "effects": { "movement_percent": 10 }
+    },
+    {
+      "id": "trad_stewardship_1",
+      "branch": "stewardship",
+      "tier": 1,
+      "name": "Maréchal des logis",
+      "description": "Un officier veille aux quartiers et aux vivres des recrues.",
+      "effects": { "replenish_percent": 20 }
+    },
+    {
+      "id": "trad_stewardship_2",
+      "branch": "stewardship",
+      "tier": 2,
+      "name": "Montres régulières",
+      "description": "Les revues des compagnies comblent les vides sans tarder.",
+      "effects": { "replenish_percent": 25 }
+    },
+    {
+      "id": "trad_stewardship_3",
+      "branch": "stewardship",
+      "tier": 3,
+      "name": "Recrues du pays",
+      "description": "Le renom de l'ost attire les hommes du plat pays.",
+      "effects": { "replenish_percent": 30 }
+    },
+    {
+      "id": "trad_shooting_1",
+      "branch": "shooting",
+      "tier": 1,
+      "name": "Exercice à la butte",
+      "description": "Le tir s'entretient chaque dimanche à la butte.",
+      "effects": { "ranged": 2 }
+    },
+    {
+      "id": "trad_shooting_2",
+      "branch": "shooting",
+      "tier": 2,
+      "name": "Traits ajustés",
+      "description": "Flèches et carreaux choisis, empennés avec soin.",
+      "effects": { "ranged": 3 }
+    },
+    {
+      "id": "trad_shooting_3",
+      "branch": "shooting",
+      "tier": 3,
+      "name": "Maîtres archers",
+      "description": "Les vétérans règlent les volées de toute la ligne.",
+      "effects": { "ranged": 4 }
+    },
+    {
+      "id": "trad_assault_1",
+      "branch": "assault",
+      "tier": 1,
+      "name": "Mineurs et sapeurs",
+      "description": "Des mineurs suivent l'ost pour saper les murs.",
+      "effects": { "siege_speed_percent": 10 }
+    },
+    {
+      "id": "trad_assault_2",
+      "branch": "assault",
+      "tier": 2,
+      "name": "Échelles et mantelets",
+      "description": "L'ost sait dresser ses engins d'approche en quelques jours.",
+      "effects": { "siege_speed_percent": 15 }
+    },
+    {
+      "id": "trad_assault_3",
+      "branch": "assault",
+      "tier": 3,
+      "name": "Blocus serré",
+      "description": "Nul convoi ne passe : la place affamée cède plus tôt.",
+      "effects": { "siege_speed_percent": 15 }
+    },
+    {
+      "id": "trad_discipline_1",
+      "branch": "discipline",
+      "tier": 1,
+      "name": "Serrer les rangs",
+      "description": "Chacun connaît sa place dans la bataille.",
+      "effects": { "morale": 3 }
+    },
+    {
+      "id": "trad_discipline_2",
+      "branch": "discipline",
+      "tier": 2,
+      "name": "Ordonnance du camp",
+      "description": "Un camp tenu, des hommes qui obéissent.",
+      "effects": { "morale": 4 }
+    },
+    {
+      "id": "trad_discipline_3",
+      "branch": "discipline",
+      "tier": 3,
+      "name": "Compagnons d'armes",
+      "description": "Des hommes qui ont tant vu ne lâchent plus pied.",
+      "effects": { "morale": 5 }
+    }
+  ],
+  "ai": {
+    "description": "Choix de l'IA : poids de base de chaque branche, plus la part de tireurs de sa doctrine de recrutement (tir), la part d'hommes manquants de l'armée (intendance), un siège en cours (assaut) et une branche déjà entamée (approfondir).",
+    "base_weight": {
+      "march": 20,
+      "stewardship": 20,
+      "shooting": 15,
+      "assault": 15,
+      "discipline": 25
+    },
+    "doctrine_ranged_weight": 80,
+    "missing_men_weight": 60,
+    "besieging_weight": 30,
+    "started_branch_weight": 10
+  }
+}
