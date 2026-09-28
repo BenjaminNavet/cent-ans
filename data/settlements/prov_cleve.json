@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_kleve",
+    "province": "prov_cleve",
+    "kind": "city",
+    "name": {
+      "display": "Clèves",
+      "local": "Kleve",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.1381,
+      51.7876
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_stone_walls",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du comté de Clèves, dominée par le château des comtes (Schwanenburg).",
+    "sources": [
+      "Clèves"
+    ]
+  },
+  {
+    "id": "set_wesel",
+    "province": "prov_cleve",
+    "kind": "town",
+    "name": {
+      "display": "Wesel",
+      "local": "Wesele",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.6167,
+      51.6583
+    ],
+    "weight": 17,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port fluvial sur le Rhin, ville hanséatique la plus active du comté de Clèves.",
+    "sources": [
+      "Wesel"
+    ]
+  },
+  {
+    "id": "set_calcar",
+    "province": "prov_cleve",
+    "kind": "village",
+    "name": {
+      "display": "Calcar",
+      "local": "Kalker",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.3,
+      51.7458
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg du Bas-Rhin, futur siège de foire drapière sous les comtes de Clèves.",
+    "sources": [
+      "Kalkar"
+    ]
+  }
+]

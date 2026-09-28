@@ -1,0 +1,55 @@
+{
+  "id": "fac_meissen",
+  "name": {
+    "display": "Marche de Misnie",
+    "local": "Markgrafschaft Meißen",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Misnie",
+  "adjective": "misnien",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_frederic_ii_de_misnie",
+  "capital": "prov_meissen",
+  "capital_city": "Meissen",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_meissen",
+  "heraldry": {
+    "blazon": "D'or et de sable burelé, au crancelin de sinople brochant en bande.",
+    "description": "Armes de la maison de Wettin, le « crancelin » (couronne de rue) brochant sur les burelles d'or et de sable.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Margrave de Misnie",
+    "Landgrave de Thuringe"
+  ],
+  "treasury": 11000,
+  "prestige": 48,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Frédéric II tient la Misnie et la Thuringe réunies depuis 1323/1324."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 55
+  },
+  "description": "Maison de Wettin, margraves de Misnie et landgraves de Thuringe ; Frédéric II le Sérieux tient les deux provinces (Meissen, Erfurt), mines d'argent de Freiberg, foires de Leipzig.",
+  "sources": [
+    "Frédéric II de Misnie",
+    "Marche de Misnie"
+  ]
+}

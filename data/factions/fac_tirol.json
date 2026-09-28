@@ -1,0 +1,59 @@
+{
+  "id": "fac_tirol",
+  "name": {
+    "display": "Comté de Tyrol",
+    "local": "Grafschaft Tirol",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Tyrol",
+  "adjective": "tyrolien",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_jean_henri_de_luxembourg",
+  "capital": "prov_tirol",
+  "capital_city": "Innsbruck",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "cognatic_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_tirol",
+  "heraldry": {
+    "blazon": "D'argent à l'aigle de gueules, becquée et membrée d'or, couronnée d'or.",
+    "description": "Aigle du Tyrol, armes historiques du comté attestées depuis le XIIIe siècle.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#C8102E"
+  },
+  "titles": [
+    "Comte de Tyrol"
+  ],
+  "treasury": 7000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_bohemia",
+      "status": "marriage_tie",
+      "note": "Jean-Henri est le frère cadet du futur empereur Charles IV et fils de Jean l'Aveugle de Bohême ; comté acquis par son mariage avec Marguerite Maultasch en 1330."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 50,
+    "trade": 45,
+    "piety": 55
+  },
+  "description": "Comté alpin de Tyrol, échu à Jean-Henri de Luxembourg par son mariage (1330) avec Marguerite Maultasch, héritière comtale ; le mariage sera répudié en 1341, hors de la portée de ce lot. Col du Brenver, mines d'argent de Schwaz.",
+  "sources": [
+    "Jean-Henri de Luxembourg",
+    "Marguerite de Tyrol",
+    "Comté de Tyrol"
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "prov_westphalia",
   "name": {
-    "display": "Westphalie",
-    "local": "Westfalen",
-    "local_language": "moyen haut-allemand"
+    "display": "Comté de la Marck (Westphalie)",
+    "local": "Grafschaft Mark",
+    "local_language": "moyen bas-allemand"
   },
   "region": "empire_nord",
   "terrain": "plains",
@@ -40,7 +40,7 @@
     ],
     "voronoi_weight": 1.3
   },
-  "owner": "fac_empire",
+  "owner": "fac_mark",
   "culture": "cul_german",
   "religion": "rel_catholic",
   "population": {
@@ -88,7 +88,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 5000,
-  "description": "Duché de Westphalie (archevêque de Cologne), évêchés de Münster, Paderborn et Osnabrück, comté de La Marck (Adolphe II). Villes hanséatiques de Dortmund et Soest.",
+  "description": "Comté de la Marck, tenu par Adolphe II (1328-1347), englobant ici par simplification les évêchés voisins de Münster, Paderborn et Osnabrück et les villes hanséatiques de Dortmund et Soest.",
   "sources": [
     "Westphalie",
     "Principauté épiscopale de Münster",

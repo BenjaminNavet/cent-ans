@@ -1,0 +1,43 @@
+{
+  "id": "chr_wilhelm_v_von_julich",
+  "name": {
+    "display": "Guillaume V de Juliers",
+    "local": "Wilhelm V. von Jülich",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Juliers",
+  "faction": "fac_julich",
+  "role": "ruler",
+  "birth": {
+    "value": "1299",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1361-02-26"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Juliers"
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_diplomat"
+  ],
+  "piety": 45,
+  "starting_location": "prov_julich",
+  "status": "at_court",
+  "description": "Comte de Juliers depuis 1328, élevé au rang de duc par Louis IV en 1336. Époux de Jeanne de Hainaut, sœur de la reine d'Angleterre Philippa ; l'un des principaux alliés rhénans d'Édouard III dans sa coalition impériale contre la France en 1337-1338.",
+  "sources": [
+    "Guillaume Ier de Juliers",
+    "Duché de Juliers",
+    "Philippa de Hainaut"
+  ]
+}

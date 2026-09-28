@@ -1,0 +1,50 @@
+{
+  "id": "chr_leopold_d_egloffstein",
+  "name": {
+    "display": "Léopold d'Egloffstein",
+    "local": "Leopold von Egloffstein",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "male",
+  "house": "Egloffstein",
+  "faction": "fac_bamberg",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1343",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince-évêque de Bamberg",
+      "from": {
+        "value": "1335",
+        "uncertain": true
+      },
+      "to": {
+        "value": "1343",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 70,
+  "starting_location": "prov_bamberg",
+  "status": "at_court",
+  "description": "Évêque de Bamberg vers 1335-1343, issu de la famille noble franconienne d'Egloffstein. Identité et dates exactes incertaines à ce budget de recherche : signalé comme approximation à vérifier.",
+  "sources": [
+    "Léopold d'Egloffstein"
+  ]
+}

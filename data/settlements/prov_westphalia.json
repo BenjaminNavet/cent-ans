@@ -188,5 +188,32 @@
     "sources": [
       "Werl"
     ]
+  },
+  {
+    "id": "set_hamm",
+    "province": "prov_westphalia",
+    "kind": "castle",
+    "name": {
+      "display": "Hamm",
+      "local": "Hamme",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      7.8228,
+      51.6805
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville neuve fondée en 1226 par le comte Adolphe Ier comme capitale du comté de la Marck ; siège de la maison régnante en 1337.",
+    "sources": [
+      "Hamm",
+      "Comté de la Marck"
+    ]
   }
 ]

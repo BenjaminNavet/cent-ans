@@ -1,0 +1,93 @@
+{
+  "id": "prov_hesse",
+  "name": {
+    "display": "Hesse",
+    "local": "Hessen",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_rhin",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Lahn",
+    "Fulda",
+    "Eder"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Cassel",
+      "local": "Kassel",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 51.3127,
+    "lon": 9.4797
+  },
+  "geo": {
+    "capital_lonlat": [
+      9.4797,
+      51.3127
+    ],
+    "seed_lonlat": [
+      9.2,
+      51.0
+    ],
+    "voronoi_weight": 0.75
+  },
+  "owner": "fac_hesse",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Province nouvellement détachée de l'ancienne 'Mayence et Hesse' (prov_mainz) ; population estimée par comparaison avec les provinces rhénanes voisines.",
+    "classes": {
+      "peasants": {
+        "count": 140000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 14000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1200,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2500,
+  "description": "Landgraviat de Hesse, tenu par Henri II « le Fer », fils d'Otton Ier ; terres forestières et minières entre Lahn, Eder et Fulda, autrefois rattachées à l'électorat de Mayence dont elles se sont détachées politiquement.",
+  "sources": [
+    "Landgraviat de Hesse",
+    "Henri II de Hesse"
+  ]
+}

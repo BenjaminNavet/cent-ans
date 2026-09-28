@@ -1,0 +1,34 @@
+{
+  "id": "tit_trier",
+  "rank": "duchy",
+  "name": {
+    "display": "Électorat de Trèves",
+    "local": "Erzstift Trier",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix pattée de gueules.",
+    "description": "Croix pattée de gueules sur champ d'argent, variante distinctive de la croix pleine traditionnellement attribuée à l'électorat de Trèves.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#C8102E",
+    "uncertain": true,
+    "note": "Les armes historiques de Trèves sont une simple croix de gueules sur champ d'argent, identique dans ce jeu au blason déjà utilisé par Gênes ; une croix pattée est substituée ici pour éviter le doublon."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_trier"
+  ],
+  "holder_1337": {
+    "faction": "fac_trier",
+    "sources": [
+      "Électorat de Trèves",
+      "Baudouin de Luxembourg"
+    ]
+  },
+  "succession_law": "elective",
+  "description": "Principauté ecclésiastique de l'archevêque-électeur de Trèves, classée ici au rang de duché par convention de rang politique, comme les autres électorats rhénans. Baudouin de Luxembourg, frère de l'empereur Henri VII et oncle du roi Jean de Bohême, archevêque depuis 1307.",
+  "sources": [
+    "Électorat de Trèves",
+    "Baudouin de Luxembourg"
+  ]
+}

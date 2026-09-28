@@ -1,0 +1,31 @@
+{
+  "id": "tit_wurzburg",
+  "rank": "county",
+  "name": {
+    "display": "Évêché de Wurtzbourg",
+    "local": "Bistum Würzburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la fasce de gueules (rastel de Franconie).",
+    "description": "« Rastel de Franconie » : armes ducales portées par les princes-évêques de Wurtzbourg en tant que ducs de Franconie.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_franconia"
+  ],
+  "holder_1337": {
+    "faction": "fac_wurzburg",
+    "sources": [
+      "Otto von Wolfskeel",
+      "Évêché de Wurtzbourg"
+    ]
+  },
+  "description": "Principauté épiscopale de Wurtzbourg, les évêques portant depuis Frédéric Barberousse (1168) le titre de duc de Franconie.",
+  "sources": [
+    "Otto von Wolfskeel",
+    "Évêché de Wurtzbourg"
+  ]
+}

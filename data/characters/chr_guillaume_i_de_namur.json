@@ -1,0 +1,46 @@
+{
+  "id": "chr_guillaume_i_de_namur",
+  "name": {
+    "display": "Guillaume Ier de Namur",
+    "local": "Guillaume de Namur",
+    "local_language": "ancien français"
+  },
+  "epithet": "le Riche",
+  "sex": "male",
+  "house": "Dampierre",
+  "faction": "fac_namur",
+  "role": "heir",
+  "birth": {
+    "value": "1324",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1391-10-01"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Marquis de Namur (futur)"
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 3,
+    "court": 2
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 55,
+  "family": {
+    "siblings": [
+      "chr_philippe_iii_de_namur"
+    ]
+  },
+  "starting_location": "prov_namur",
+  "status": "minor",
+  "description": "Frère cadet de Philippe III, âgé de treize ans en 1337 ; il lui succède la même année à la mort de celui-ci à Famagouste et règne jusqu'en 1391 sous le nom de Guillaume Ier le Riche.",
+  "sources": [
+    "Guillaume Ier de Namur"
+  ]
+}
