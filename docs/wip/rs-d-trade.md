@@ -25,4 +25,6 @@ Hors périmètre (RS-B en parallèle) : `economy.rs`, `settlements.rs`, `populat
 
 ## Prochaine étape
 
-Résultat de la sonde, fmt/clippy/test complets, `git merge main`, retests, suppression de `core/target-rs-d`.
+TERMINÉ (28/09). `main` fusionné (fbfca366) ; fmt, clippy `-D warnings`, `cargo test` workspace verts
+(1079 réussis, 0 échec, 54 ignorés). Cible `core/target-rs-d` supprimée. À fusionner par l'orchestrateur.
+Restes : borne de trésor France de la sonde C7a (avec RS-B) ; règle des pavois face à une cible cachée (lot bataille).
