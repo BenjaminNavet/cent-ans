@@ -43,6 +43,14 @@ python -c "from cent_ans_tools.geo import kk10; kk10.extract()"`, 16 s).
 ## Prochaine étape
 Aucune dans ce lot : régénération finale par l'orchestrateur après D6.
 
+## Rust (profil om2, cargo test --no-fail-fast)
+Décalés pour la nouvelle carte : `real_data.rs` (navgrid 3584 × 3072, mer à l'ouest de la
+Bretagne), `c1_vision.rs` (masque 896 × 768), `cv3_ai_stances.rs`, `m2_free_movement.rs`,
+`cv3_postures.rs`, `m4_path_plan.rs`, `cv3_reach.rs`, `cv3_outcomes.rs` (points de France
++1280 y, grilles factices 3584 × 3072). Restent en échec, liés aux données D1-D5 et non à la
+géo : `dp2_explain` (« one point blocks »), `eq2_balance` (bâtiments de colonies D),
+`f7_events::montereau_leads_to_the_alliance_then_troyes`.
+
 ## Échecs pytest restants (données des lots D, pas OM2)
 - `test_settlements_schema` : 9 provinces à 2 colonies (3 attendues : beysehir, elbistan, lublin,
   muntenia, muntenia_east, oltenia, polotsk, teke, vitebsk) ; `set_emba` (53,5° E, 48° N) hors
