@@ -447,7 +447,10 @@ pub enum TitleDemandOutcome {
 
 /// The winner of a war takes `title` (§ 4.6): it usurps a title of rank
 /// equal to or above its primary title, and grants a lesser one to its
-/// strongest direct vassal (or keeps it, without vassal).
+/// strongest direct vassal (or keeps it, without vassal). Only a vassal
+/// whose primary title ranks at least as high is eligible: a lesser vassal
+/// would take the conquered title as its primary one and pass under that
+/// title's liege (Albret given Normandy would become a vassal of France).
 pub fn conquer_title(
     state: &mut CampaignState,
     data: &GameData,
@@ -466,6 +469,14 @@ pub fn conquer_title(
         direct_vassals(state, data, winner)
             .into_iter()
             .filter(|v| holder_of(state, title) != Some(v))
+            .filter(|v| {
+                state
+                    .feudal
+                    .primary
+                    .get(v)
+                    .and_then(|t| rank_of(data, t))
+                    .is_some_and(|own| own >= rank)
+            })
             .max_by(|a, b| {
                 state
                     .faction_power(a)

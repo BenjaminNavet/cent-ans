@@ -39,6 +39,9 @@
   ],
   "piety": 55,
   "family": {
+    "spouses": [
+      "chr_marguerite_de_valois"
+    ],
     "children": [
       "chr_charles_de_blois"
     ]

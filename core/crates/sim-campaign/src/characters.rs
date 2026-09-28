@@ -180,6 +180,13 @@ pub(crate) fn succeed(
             .as_ref()
             .and_then(|ruler| dynasty::pick_heir_by_law(state, data, faction, ruler))
     });
+    // FE: an heir living in another faction comes home (or takes the realm
+    // into his own, greater one).
+    if let Some(heir) = &successor {
+        if crate::feudal::heir_comes_home(state, data, faction, heir, events) {
+            return;
+        }
+    }
     match successor {
         Some(new_ruler) => {
             let faction_state = state.factions.get_mut(faction).expect("exists");

@@ -23,7 +23,7 @@ mod transfer;
 pub use felony::{
     has_forfeiture, on_host_refused, on_revolt, open_felony_towards, settle_forfeitures,
 };
-pub(crate) use inherit::{contested_succession, inherit_titles_on_extinction};
+pub(crate) use inherit::{contested_succession, heir_comes_home, inherit_titles_on_extinction};
 pub(crate) use objectives::resolve_feudal;
 pub use objectives::{generic_victory, objective_status, GenericVictory};
 pub use transfer::{
@@ -210,6 +210,20 @@ pub struct ObjectiveProgress {
 /// Current holder of `title`.
 pub fn holder_of<'s>(state: &'s CampaignState, title: &TitleId) -> Option<&'s FactionId> {
     state.feudal.holders.get(title)
+}
+
+/// Rank of the primary title of `faction`, if it holds any.
+pub fn primary_rank(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Option<data_model::TitleRank> {
+    state
+        .feudal
+        .primary
+        .get(faction)
+        .and_then(|t| data.titles.get(t))
+        .map(|t| t.rank)
 }
 
 /// Titles held by `faction`, primary first.

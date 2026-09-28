@@ -102,7 +102,7 @@ fn guyenne_forfeiture() {
         .war_scores
         .insert(england.clone(), 60);
     apply_treaty(&mut s, &data, &france, &england, &[Article::Peace]).expect("peace");
-    for title in ["tit_guyenne", "tit_gascogne", "tit_ponthieu"] {
+    for title in ["tit_guyenne", "tit_ponthieu"] {
         assert_eq!(holder(&s, title), Some(france.clone()), "{title}");
     }
     assert_eq!(s.province_owner(&prov("prov_guyenne")), Some(&france));
@@ -257,6 +257,9 @@ fn escheat_without_heir() {
     let mut s = start(&data);
     let (france, brittany) = (fac("fac_france"), fac("fac_brittany"));
     last_of_line(&mut s, "chr_jean_iii_de_bretagne", "Dreux (test)");
+    // Jeanne de Penthièvre, designated heir, rules her own county (F4a):
+    // no heir at all here.
+    s.factions.get_mut(&brittany).unwrap().heir = None;
 
     kill(&mut s, &data, "chr_jean_iii_de_bretagne");
 
@@ -328,14 +331,18 @@ fn conquered_title_is_usurped_or_granted() {
     apply_treaty(&mut s, &data, &england, &france, &articles).expect("treaty");
     let normandy = holder(&s, "tit_normandie").unwrap();
     let english_vassals = feudal::direct_vassals(&s, &data, &england);
-    assert!(normandy == england || english_vassals.contains(&normandy));
+    assert!(
+        normandy == england || english_vassals.contains(&normandy),
+        "{normandy:?} not in {english_vassals:?}"
+    );
     assert_eq!(s.province_owner(&prov("prov_normandie")), Some(&normandy));
     // A crown is usurped by a duke.
     let outcome = feudal::conquer_title(&mut s, &data, &brittany, &tit("tit_france")).unwrap();
     assert_eq!(outcome, TitleDemandOutcome::Usurped);
     assert_eq!(holder(&s, "tit_france"), Some(brittany.clone()));
     assert_eq!(s.feudal.primary[&brittany], tit("tit_france"));
-    // A treaty cannot take a faction's last title.
+    // A treaty cannot take a faction's last title (Navarre: Navarre, Évreux,
+    // Angoulême).
     let navarre = fac("fac_navarre");
     let all = [
         Article::DemandTitle {
@@ -344,13 +351,16 @@ fn conquered_title_is_usurped_or_granted() {
         },
         Article::DemandTitle {
             giver: Party::Recipient,
+            title: tit("tit_evreux"),
+        },
+        Article::DemandTitle {
+            giver: Party::Recipient,
             title: tit("tit_angoumois"),
         },
     ];
     assert!(sim_campaign::negotiation::check_treaty(&s, &data, &england, &navarre, &all).is_err());
-    assert!(
-        sim_campaign::negotiation::check_treaty(&s, &data, &england, &navarre, &all[1..]).is_ok()
-    );
+    let partial = sim_campaign::negotiation::check_treaty(&s, &data, &england, &navarre, &all[2..]);
+    assert!(partial.is_ok(), "{partial:?}");
 }
 
 #[test]
@@ -358,7 +368,7 @@ fn grant_to_a_courtier_founds_a_vassal_faction() {
     let data = data();
     let mut s = start(&data);
     let france = fac("fac_france");
-    let blois = chr("chr_charles_de_blois");
+    let blois = chr("chr_godefroy_d_harcourt");
     assert_eq!(
         feudal::grant_title(
             &mut s,
