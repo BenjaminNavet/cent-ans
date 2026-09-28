@@ -88,3 +88,12 @@ d'interface doivent être régénérés dans le registre enluminure.
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul PO |
 |---|---|---|---|---|---|
 | 2026-09-27 | — | PO0 : planche « avant », gabarit, squelette (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+
+## Assets générés GA (28/09) — plafond propre de 15 $ (clé OpenRouter personnelle du joueur)
+
+Spec `docs/superpowers/specs/2026-09-28-ga-assets-generes-design.md`. GA1 ≤ 4 $, GA3 ≤ 8 $,
+GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul GA |
+|---|---|---|---|---|---|
+| 2026-09-28 | — | GA0 : squelette (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |

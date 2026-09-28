@@ -21,11 +21,11 @@ Budget : plafond 15 $, section « GA » de `docs/budget.md`.
 ## Lots
 
 ### GA0 — Squelette (session principale, ~15 min)
-- [ ] Branche `feat/ga` + worktree.
-- [ ] `tools/cent_ans_tools/material_gen.py` : API vide (`generate`, `make_tileable`,
+- [x] Branche `feat/ga` + worktree.
+- [x] `tools/cent_ans_tools/material_gen.py` : API vide (`generate`, `make_tileable`,
       `derive_maps`, `contact_sheet`) + tests pytest désactivés (`skip`).
-- [ ] `data/art/materials.yaml` (vide typé) + `data/schemas/materials.schema.json`.
-- [ ] Section « GA » dans `docs/budget.md`. Commit `wip: GA0 skeleton`.
+- [x] `data/art/materials.yaml` (vide typé) + `data/schemas/materials.schema.json`.
+- [x] Section « GA » dans `docs/budget.md`. Commit `wip: GA0 skeleton`.
 
 ### GA1 — Matières des figurines (IA, ≤ 4 $, agent `cent-ans-dev`)
 Fichiers : `material_gen.py`, `data/art/materials.yaml`,
@@ -85,3 +85,4 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
 
 ## Journal
 - 28/09 : spec approuvée (726a31bf), plan écrit.
+- 28/09 : GA0 fait (squelette, section budget GA). Suite : vague 1 (GA1 ∥ GA2).

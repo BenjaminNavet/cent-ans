@@ -1,0 +1,5 @@
+# GA: AI-generated tileable materials (ADR 0104). Filled in GA1.
+model: openai/gpt-5-image-mini
+size: 1024
+tile_size: 512
+materials: []
