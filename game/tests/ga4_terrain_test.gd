@@ -35,7 +35,7 @@ func _init() -> void:
 		return
 	var total := 0
 	for key in ["albedo", "normal"]:
-		var arr := arrays[key] as Texture2DArray
+		var arr := arrays[key] as TextureLayered
 		var bytes := int(arr.get_width() * arr.get_height() * arr.get_layers() * _bytes_per_texel(arr.get_format()) * 4.0 / 3.0)
 		total += bytes
 		print("GA4 %s : %dx%d x%d, format %d, %.2f Mo (mipmaps compris)" % [key, arr.get_width(), arr.get_height(), arr.get_layers(), arr.get_format(), bytes / 1048576.0])
@@ -49,23 +49,29 @@ func _init() -> void:
 		print("GA4: mémoire au-dessus du plafond ou de l'ancien chemin")
 		ok = false
 
-	# Moyennes des données contre le dernier mipmap décompressé de chaque couche.
-	var albedo_arr := arrays["albedo"] as Texture2DArray
+	# Moyennes des données contre la source empilée (dernier mipmap de chaque tranche, comme
+	# l'ancien chemin de `TerrainBuilder`) : le tableau importé ne garde pas ses pixels côté CPU.
+	var albedo_arr := arrays["albedo"] as TextureLayered
 	var means: PackedVector3Array = arrays["means"]
-	for i in albedo_arr.get_layers():
-		var image := albedo_arr.get_layer_data(i)
-		if image.is_compressed():
-			image.decompress()
-		image.convert(Image.FORMAT_RGBA8)
-		var last := image.get_mipmap_count()
-		var offset := image.get_mipmap_offset(last)
-		var data := image.get_data()
-		var c := Color8(data[offset], data[offset + 1], data[offset + 2]).srgb_to_linear()
-		var diff := Vector3(c.r, c.g, c.b) - means[i]
-		print("GA4 moyenne %s : données %s, texture %s" % [CampaignTextures.layer_ids()[i], means[i], Vector3(c.r, c.g, c.b)])
-		if diff.length() > 0.03 or means[i].length() <= 0.0:
-			print("GA4: moyenne de %s incohérente (relancer `cent-ans geo textures`)" % CampaignTextures.layer_ids()[i])
-			ok = false
+	var sheet := Image.load_from_file(ProjectSettings.globalize_path(CampaignTextures.ALBEDO_ARRAY_PATH))
+	if sheet == null or sheet.is_empty():
+		print("GA4: source de l'albédo illisible")
+		ok = false
+	else:
+		sheet.convert(Image.FORMAT_RGBA8)
+		var side := albedo_arr.get_width()
+		for i in albedo_arr.get_layers():
+			var image := sheet.get_region(Rect2i(0, i * side, side, side))
+			image.generate_mipmaps()
+			var last := image.get_mipmap_count()
+			var offset := image.get_mipmap_offset(last)
+			var data := image.get_data()
+			var c := Color8(data[offset], data[offset + 1], data[offset + 2]).srgb_to_linear()
+			var measured := Vector3(c.r, c.g, c.b)
+			print("GA4 moyenne %s : données %s, texture %s" % [CampaignTextures.layer_ids()[i], means[i], measured])
+			if (measured - means[i]).length() > 0.03 or means[i].length() <= 0.0:
+				print("GA4: moyenne de %s incohérente (relancer `cent-ans geo textures`)" % CampaignTextures.layer_ids()[i])
+				ok = false
 
 	var water_tex := load(CampaignTextures.WATER_NORMAL_PATH) as Texture2D
 	if water_tex == null:
@@ -91,9 +97,8 @@ func _init() -> void:
 	var world := Node3D.new()
 	root.add_child(world)
 	var cam := Camera3D.new()
-	cam.position = Vector3(0, 5, 5)
 	world.add_child(cam)
-	cam.look_at(Vector3.ZERO)
+	cam.look_at_from_position(Vector3(0, 5, 5), Vector3.ZERO)
 	for mat in [terrain_mat, water_mat]:
 		var plane := MeshInstance3D.new()
 		plane.mesh = PlaneMesh.new()

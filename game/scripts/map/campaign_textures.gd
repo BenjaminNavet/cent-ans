@@ -66,8 +66,8 @@ static func load_arrays() -> Dictionary:
 	if not ResourceLoader.exists(ALBEDO_ARRAY_PATH) or not ResourceLoader.exists(NORMAL_ARRAY_PATH):
 		push_warning("CampaignTextures: tableaux GA4 absents, repli sur les couches 1k")
 		return {}
-	var albedo := load(ALBEDO_ARRAY_PATH) as Texture2DArray
-	var normal := load(NORMAL_ARRAY_PATH) as Texture2DArray
+	var albedo := load(ALBEDO_ARRAY_PATH) as TextureLayered
+	var normal := load(NORMAL_ARRAY_PATH) as TextureLayered
 	if albedo == null or normal == null or albedo.get_layers() != SHADER_LAYER_ORDER.size() or normal.get_layers() != SHADER_LAYER_ORDER.size():
 		push_warning("CampaignTextures: tableaux GA4 invalides, repli sur les couches 1k")
 		return {}
