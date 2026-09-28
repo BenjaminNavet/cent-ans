@@ -78,6 +78,7 @@ var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
 var capture_fate: CaptureController = null  # TW2-T1 : sort de la place prise
 var traditions: TraditionsController = null  # TW2-T5 : traditions d'armée
+var feudal: FeudalController = null  # FE6 : arbre féodal, actions et guide de la féodalité
 var encounters: EncounterController = null  # CV3-4 : sites et fenêtre des rencontres
 var outcome_notice: OutcomeNotice = null  # CV3-4 : classe du résultat d'une bataille automatique
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
@@ -227,6 +228,10 @@ func _ready() -> void:
 	traditions = TraditionsController.new()  # TW2-T5
 	add_child(traditions)
 	traditions.setup(self)
+	feudal = FeudalController.new()  # FE6
+	feudal.name = "FeudalController"
+	add_child(feudal)
+	feudal.setup(self)
 	encounters = EncounterController.new()  # CV3-4
 	add_child(encounters)
 	encounters.setup(self)
@@ -252,6 +257,8 @@ func _ready() -> void:
 	tutorial = TutorialController.new()  # F8
 	add_child(tutorial)
 	tutorial.setup(self)
+	if feudal != null:  # FE6 : guide de la féodalité après le tutoriel général
+		feudal.maybe_start_tutorial()
 	next_hint = NextHintController.new()  # UX2
 	next_hint.name = "NextHintController"
 	add_child(next_hint)
@@ -452,6 +459,8 @@ func refresh_all() -> void:
 		capture_fate.refresh()
 	if traditions != null:  # TW2-T5
 		traditions.refresh()
+	if feudal != null:  # FE6
+		feudal.refresh()
 	_refresh_research()  # M6
 	_tech_open = _tech_open and ui.tech_panel_visible()
 	if _tech_open:
@@ -1114,6 +1123,8 @@ func _on_end_turn(threaded: bool = false) -> void:
 		capture_fate.after_end_turn()
 	if traditions != null:  # TW2-T5
 		traditions.after_end_turn()
+	if feudal != null:  # FE6 : événements et appels féodaux
+		feudal.after_end_turn(events)
 	for event in events:
 		if str(event.get("kind", "")) == "battle" and ui.keeps_news(event):  # U5 : filtre d'intérêt
 			ui.show_toast(str(event.get("text_fr", "Bataille")))
@@ -1527,6 +1538,8 @@ func _parse_cmdline() -> void:
 					movement_ctl.stage_trespass_screenshot()
 				"agents", "agents_registry":  # C6 agents
 					agents_ctl.stage_screenshot(_screenshot_stage == "agents_registry")
+				"feudal_tree", "feudal_map", "feudal_war":  # FE6 : arbre, filtre, escalade
+					feudal.stage_screenshot(_screenshot_stage)
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
