@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_kerak",
+    "province": "prov_kerak",
+    "kind": "city",
+    "name": {
+      "display": "Kérak (Crac de Moab)",
+      "local": "الكرك",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.7,
+      31.18
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse croisée devenue refuge et lieu d'exil des sultans.",
+    "sources": [
+      "Kerak Castle"
+    ]
+  },
+  {
+    "id": "set_shawbak",
+    "province": "prov_kerak",
+    "kind": "castle",
+    "name": {
+      "display": "Chaubak (Montréal)",
+      "local": "الشوبك",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.53,
+      30.53
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château croisé sur la route des caravanes.",
+    "sources": [
+      "Kerak Castle"
+    ]
+  },
+  {
+    "id": "set_ayla",
+    "province": "prov_kerak",
+    "kind": "village",
+    "name": {
+      "display": "Ayla (Aqaba)",
+      "local": "أيلة",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.0,
+      29.53
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port de la mer Rouge, sur la route du hajj.",
+    "sources": [
+      "Kerak Castle"
+    ]
+  }
+]

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_jerusalem",
+    "province": "prov_jerusalem",
+    "kind": "city",
+    "name": {
+      "display": "Jérusalem (al-Quds)",
+      "local": "القدس",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.23,
+      31.78
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Al-Aqsa et Saint-Sépulcre ; une garnison mamelouke à la Citadelle.",
+    "sources": [
+      "Jerusalem"
+    ]
+  },
+  {
+    "id": "set_hebron",
+    "province": "prov_jerusalem",
+    "kind": "town",
+    "name": {
+      "display": "Hébron (al-Khalil)",
+      "local": "الخليل",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.1,
+      31.53
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Tombeau des patriarches.",
+    "sources": [
+      "Jerusalem"
+    ]
+  },
+  {
+    "id": "set_nablus",
+    "province": "prov_jerusalem",
+    "kind": "town",
+    "name": {
+      "display": "Naplouse",
+      "local": "نابلس",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.26,
+      32.22
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de l'huile et du savon.",
+    "sources": [
+      "Jerusalem"
+    ]
+  }
+]

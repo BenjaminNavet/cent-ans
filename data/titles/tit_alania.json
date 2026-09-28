@@ -1,0 +1,43 @@
+{
+  "id": "tit_alania",
+  "rank": "county",
+  "name": {
+    "display": "Alanie (Ossètes)",
+    "local": "Ир",
+    "local_language": "alan (ossète)"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la fasce d'argent.",
+    "description": "Couleurs de convention des Alains.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_alania"
+  ],
+  "holder_1337": {
+    "faction": "fac_alania",
+    "sources": [
+      "Alania",
+      "Ossetians"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_alania_free",
+      "title": "Le royaume alain",
+      "description": "Se libérer de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Descendants des Alains, réfugiés dans les montagnes du Caucase central après la conquête mongole ; aucun souverain n'est nommé en 1337.",
+  "sources": [
+    "Alania",
+    "Ossetians"
+  ]
+}

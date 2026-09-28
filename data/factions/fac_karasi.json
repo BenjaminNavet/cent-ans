@@ -1,0 +1,52 @@
+{
+  "id": "fac_karasi",
+  "name": {
+    "display": "Beylik de Karasi",
+    "local": "Karesi Beyliği",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Karasi",
+  "adjective": "karasi",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_karasi",
+  "capital_city": "Balıkesir",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_karasi",
+  "heraldry": {
+    "blazon": "D'azur à l'étoile d'or.",
+    "description": "Couleurs de convention des Karasi.",
+    "primary_color": "#2B4A9E",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey de Karasi"
+  ],
+  "treasury": 7000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_ottoman",
+      "status": "peace",
+      "note": "Rival direct de la Bithynie ottomane ; l'annexion vient en 1345."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 45,
+    "trade": 60,
+    "piety": 55
+  },
+  "description": "Beylik de Mysie, fondé vers 1296 par Karasi Bey, dont les gazis ont déjà traversé l'Hellespont ; le bey en exercice en 1337 n'est pas identifié avec certitude, faute de source sûre.",
+  "sources": [
+    "Karasids"
+  ]
+}

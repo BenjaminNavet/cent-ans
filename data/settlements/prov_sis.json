@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_sis",
+    "province": "prov_sis",
+    "kind": "city",
+    "name": {
+      "display": "Sis (Kozan)",
+      "local": "Սիս",
+      "local_language": "arménien"
+    },
+    "lonlat": [
+      35.8,
+      37.45
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du royaume arménien de Cilicie et siège du catholicossat.",
+    "sources": [
+      "Kingdom of Armenia (Cilicia)"
+    ]
+  },
+  {
+    "id": "set_anavarza",
+    "province": "prov_sis",
+    "kind": "castle",
+    "name": {
+      "display": "Anavarza (Anazarbe)",
+      "local": "Անարզաբա",
+      "local_language": "arménien"
+    },
+    "lonlat": [
+      35.9,
+      37.25
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse sur son rocher, ancienne capitale des Roupénides.",
+    "sources": [
+      "Kingdom of Armenia (Cilicia)"
+    ]
+  },
+  {
+    "id": "set_vahka",
+    "province": "prov_sis",
+    "kind": "castle",
+    "name": {
+      "display": "Vahka (Feke)",
+      "local": "Վահկա",
+      "local_language": "arménien"
+    },
+    "lonlat": [
+      35.92,
+      37.82
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse des monts.",
+    "sources": [
+      "Kingdom of Armenia (Cilicia)"
+    ]
+  }
+]

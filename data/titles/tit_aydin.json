@@ -1,0 +1,46 @@
+{
+  "id": "tit_aydin",
+  "rank": "duchy",
+  "name": {
+    "display": "Beylik d'Aydın",
+    "local": "Aydınoğulları",
+    "local_language": "turc ottoman"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la nef de sinople.",
+    "description": "Nef en hommage à la flotte des Aydın ; couleurs de convention.",
+    "primary_color": "#2E7D46",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_provinces": [
+    "prov_aydin",
+    "prov_izmir"
+  ],
+  "holder_1337": {
+    "faction": "fac_aydin",
+    "sources": [
+      "Aydınids",
+      "Umur Bey"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_aydin_smyrna",
+      "title": "Les rades de l'Égée",
+      "description": "Tenir Smyrne et Ayasuluk.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_izmir"
+        ]
+      }
+    }
+  ],
+  "description": "Beylik de l'Égée d'Umur Bey (1309-1348), dont les flottes de corsaires font trembler les îles ; son frère aîné Hızır Bey siège à Birgi.",
+  "sources": [
+    "Aydınids",
+    "Umur Bey"
+  ]
+}

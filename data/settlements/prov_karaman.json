@@ -1,0 +1,102 @@
+[
+  {
+    "id": "set_larende",
+    "province": "prov_karaman",
+    "kind": "city",
+    "name": {
+      "display": "Larende (Karaman)",
+      "local": "Larende",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      33.22,
+      37.18
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des Karamanoğulları.",
+    "sources": [
+      "Karamanids"
+    ]
+  },
+  {
+    "id": "set_ermenek",
+    "province": "prov_karaman",
+    "kind": "castle",
+    "name": {
+      "display": "Ermenek"
+    },
+    "lonlat": [
+      32.9,
+      36.64
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse des monts de Cilicie Trachée, berceau du clan.",
+    "sources": [
+      "Karamanids"
+    ]
+  },
+  {
+    "id": "set_mut",
+    "province": "prov_karaman",
+    "kind": "town",
+    "name": {
+      "display": "Mut (Claudiopolis)",
+      "local": "Mut",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      33.43,
+      36.64
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg du Taurus.",
+    "sources": [
+      "Karamanids"
+    ]
+  },
+  {
+    "id": "set_silifke",
+    "province": "prov_karaman",
+    "kind": "town",
+    "name": {
+      "display": "Silifke (Séleucie)",
+      "local": "Silifke",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      33.93,
+      36.38
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port du Calycadnus ; possession karamanide incertaine en 1337.",
+    "sources": [
+      "Karamanids"
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_alexandria",
+    "province": "prov_alexandria",
+    "kind": "city",
+    "name": {
+      "display": "Alexandrie",
+      "local": "الإسكندرية",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      29.92,
+      31.2
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grand port d'Égypte et entrepôt des marchands francs.",
+    "sources": [
+      "Alexandria"
+    ]
+  },
+  {
+    "id": "set_rosetta",
+    "province": "prov_alexandria",
+    "kind": "town",
+    "name": {
+      "display": "Rosette (Rashid)",
+      "local": "رشيد",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      30.42,
+      31.4
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de la bouche occidentale du Nil.",
+    "sources": [
+      "Alexandria"
+    ]
+  },
+  {
+    "id": "set_damanhur",
+    "province": "prov_alexandria",
+    "kind": "town",
+    "name": {
+      "display": "Damanhour",
+      "local": "دمنهور",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      30.47,
+      31.04
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du Béhéra.",
+    "sources": [
+      "Alexandria"
+    ]
+  }
+]

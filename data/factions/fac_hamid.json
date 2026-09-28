@@ -1,0 +1,52 @@
+{
+  "id": "fac_hamid",
+  "name": {
+    "display": "Beylik de Hamid",
+    "local": "Hamidoğulları",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Hamid",
+  "adjective": "de Hamid",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_hamid",
+  "capital_city": "Eğirdir",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_hamid",
+  "heraldry": {
+    "blazon": "D'azur à la bande d'argent.",
+    "description": "Couleurs de convention des Hamid.",
+    "primary_color": "#2B4A9E",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey de Hamid"
+  ],
+  "treasury": 6000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_germiyan",
+      "status": "peace",
+      "note": "Voisin du nord, plus puissant."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 55,
+    "trade": 50,
+    "piety": 60
+  },
+  "description": "Beylik des lacs de Pisidie, fondé vers 1300, en déclin ; le bey en exercice en 1337 n'est pas identifié.",
+  "sources": [
+    "Hamidids"
+  ]
+}

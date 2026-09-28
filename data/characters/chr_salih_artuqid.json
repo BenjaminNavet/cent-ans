@@ -1,0 +1,46 @@
+{
+  "id": "chr_salih_artuqid",
+  "name": {
+    "display": "al-Salih Chams al-Din Salih",
+    "local": "الصالح شمس الدين صالح",
+    "local_language": "arabe"
+  },
+  "sex": "male",
+  "house": "Artuqides",
+  "faction": "fac_artuqids",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1364"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Émir de Mardin",
+      "from": {
+        "value": "1312"
+      },
+      "note": "Règne jusqu'en 1364."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_just"
+  ],
+  "piety": 55,
+  "starting_location": "prov_mardin",
+  "status": "at_court",
+  "description": "Émir de Mardin, vassal du Caire (naissance approximative).",
+  "sources": [
+    "Artuqids"
+  ]
+}
