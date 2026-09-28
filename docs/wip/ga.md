@@ -21,49 +21,127 @@ Budget : plafond 15 $, section « GA » de `docs/budget.md`.
 ## Lots
 
 ### GA0 — Squelette (session principale, ~15 min)
-- [ ] Branche `feat/ga` + worktree.
-- [ ] `tools/cent_ans_tools/material_gen.py` : API vide (`generate`, `make_tileable`,
+- [x] Branche `feat/ga` + worktree.
+- [x] `tools/cent_ans_tools/material_gen.py` : API vide (`generate`, `make_tileable`,
       `derive_maps`, `contact_sheet`) + tests pytest désactivés (`skip`).
-- [ ] `data/art/materials.yaml` (vide typé) + `data/schemas/materials.schema.json`.
-- [ ] Section « GA » dans `docs/budget.md`. Commit `wip: GA0 skeleton`.
+- [x] `data/art/materials.yaml` (vide typé) + `data/schemas/materials.schema.json`.
+- [x] Section « GA » dans `docs/budget.md`. Commit `wip: GA0 skeleton`.
 
 ### GA1 — Matières des figurines (IA, ≤ 4 $, agent `cent-ans-dev`)
 Fichiers : `material_gen.py`, `data/art/materials.yaml`,
 `tools/blender_scripts/battle_fine_tiles.py` (assemblage), `game/assets/models/battle_fine/textures/`,
 `game/shaders/battle_soldier_skinned.gdshader` (sous `#ifdef FG3_BAKED` seulement),
 `game/scripts/battle/battle_skinned.gd` (chargement), ADR `0104-albedo-de-detail-des-figurines.md`.
-1. [ ] Chaîne : `make_tileable` (décalage ½ + fondu des coutures), `derive_maps` (hauteur =
+1. [x] Chaîne : `make_tileable` (décalage ½ + fondu des coutures), `derive_maps` (hauteur =
        luminance passe-haut → normale OpenGL → rugosité), `contact_sheet`. Tests : écart des
-       bords ≤ 4/255, dimensions, canaux. Commit.
-2. [ ] Sonde : 2 matières (laine, mailles) → planche ; jugement en session principale (1 capture).
-3. [ ] Lot : 12 matières (laine, lin, futaine, gambison, mailles, cuir, plates, bois, peau,
+       bords ≤ 4/255, dimensions, canaux. Commit. CLI : `uv run --project tools cent-ans assets
+       materials --out <scratch> [--only id]… [--sheet planche.png]` (brute réutilisée si présente).
+2. [x] Sonde : 2 matières (laine, mailles) → planche ; jugement en session principale (1 capture).
+       Sonde faite (0,08 $) : `docs/research/ga1_probe_sheet.png` ; validée (raccords invisibles) ; corrections : mailles moins rugueuses,
+       laine feutrée irrégulière (height_strength −30 %), police accentuée de la planche.
+3. [x] Lot : 12 matières (laine, lin, futaine, gambison, mailles, cuir, plates, bois, peau,
        cheveux, robe claire, robe foncée), 512², budget consigné.
-4. [ ] Nouveau `fine_detail_albedo` (Texture2DArray, centré en luminance moyenne 0,5) multiplié
+4. [x] Nouveau `fine_detail_albedo` (Texture2DArray, centré en luminance moyenne 0,5) multiplié
        à la couleur de sommet ; tuiles RG/B/A remplacées ; même `FG3_TILE_SIZE`. Drapeau `--no-ga1`.
-5. [ ] Tests : mémoire (modèle `fg3_maps_test.gd`, ajout ≤ 4 Mo), smoke ; A/B `--closeup`
+5. [x] Tests : mémoire (modèle `fg3_maps_test.gd`, ajout ≤ 4 Mo), smoke ; A/B `--closeup`
        et standard (≤ +5 %). ADR 0104. Commit.
 
 ### GA2 — Sol de bataille (CC0, 0 $, agent `cent-ans-mech`)
 Fichiers : `game/assets/textures/battle/build_textures.py`, `README.md`, tableaux du sol,
 `game/scripts/battle/battle_terrain.gd`, shader du sol de bataille, données des couches
 (`data/fx/` ou `battle_layers`), ADR `0105-textures-2k-et-macro-variation.md`.
-1. [ ] Mesure mémoire : 13 couches 2k BC7 (si > 120 Mo : normales en 1k). Noter ici.
-2. [ ] Poly Haven 2k pour les 9 couches + 3–4 nouvelles (prairie fleurie, herbe piétinée,
-       chaume/éteules, labour) ; identifiants choisis consignés dans `README.md`.
-3. [ ] Câbler les nouvelles couches dans l'occupation du sol de bataille (données).
-4. [ ] Macro-variation procédurale (octaves 50–200 m, teinte + luminance). `--no-ga2`.
-5. [ ] Tests mémoire + smoke ; A/B ≤ +5 %. ADR 0105. Commit.
+1. [x] Mesure mémoire : 13 couches 2k, arithmétique BC7 (hypothèse de la spec) : albédo 2k
+       ≈ 69,3 Mo, normales 2k ≈ 69,3 Mo → 2k/2k ≈ 138,6 Mo > 120 Mo ; normales 1k ≈ 17,3 Mo →
+       albédo 2k + normale 1k ≈ 86,6 Mo (sous le plafond). Décision : albédo 2k, normale 1k.
+       **Mesure réelle en jeu** (`ga2_ground_test.gd`) : format VRAM effectif = DXT1/BC1 (pas
+       BC7 ; réglage `channel_pack=0` déjà présent avant GA2), 0,5 o/texel → **≈ 43,3 Mo mesurés**
+       (albédo 2k 34,7 Mo + normale 1k 8,7 Mo), bien sous le plafond. Détail dans l'ADR 0105.
+2. [x] Poly Haven 2k (9 couches existantes + 4 nouvelles) : identifiants dans `data/fx/
+       battle_ground_layers.json` (schéma `fx_battle_ground_layers.schema.json`) et `README.md`.
+       Nouvelles : `leafy_grass` (prairie fleurie — pas de texture « prairie fleurie » dédiée en
+       CC0 chez Poly Haven ; substitut le plus proche, à revoir si une meilleure source apparaît),
+       `grassy_cobblestone` (herbe piétinée), `withered_grass` (chaume/éteules), `farm_furrows`
+       (labour frais, distinct de `farm_soil` déjà utilisé pour le labour ambiant/procédural).
+3. [x] Câblage (données) : `BattleTerrain.ground_layers()`/`ground_role_index()` lisent
+       `data/fx/battle_ground_layers.json` ; uniformes `layer_count`, `layer_tile_size[]`,
+       `idx_flowering_meadow/trodden_grass/stubble/fresh_plough` posés dans `_build_material`.
+       Occupation : labour frais = parcelles décor EP6 `decor_kind==1` (le labour ambiant garde
+       `farm_soil`) ; chaume = `decor_kind==6` ; herbe piétinée = halo `splat_b.g` des chemins/
+       routes déjà cuit ; prairie fleurie = part des taches de prairie grasse (`patch`/`patch2`
+       du lot V4b). `layer_size()` du shader lit `layer_tile_size[]` (plus de constantes en dur).
+4. [x] Macro-variation dédiée (4 octaves 50/90/140/200 m, teinte + luminance, faible amplitude),
+       appliquée à l'albédo final, sous `ga2_on`. `--no-ga2` la coupe (compromis : ne restaure pas
+       d'anciennes textures 1k, cf. ADR 0105 « conséquences »).
+5. [x] Tests : `ga2_ground_test.gd` OK (13 couches, ~43,3 Mo, rôles câblés), `smoke.gd` OK,
+       pytest ciblé + suite complète (`uv run --project tools pytest`, 824 passed/5 skipped),
+       `ruff check --fix`/`format` sur le Python modifié. A/B (`--benchmark --units=20` avec/sans
+       `--no-ga2`) **non concluant** : machine partagée très chargée pendant la mesure (`uptime`
+       load average ≈ 120, nombreuses compilations Rust d'autres sessions en parallèle) ;
+       `frame_ms_median` a varié de 25 à 44 ms selon l'ordre des passes, sans direction stable
+       (parfois `--no-ga2` plus lent que le défaut, ce qui est incohérent avec le coût réel du
+       drapeau — 4 échantillons de bruit en plus seulement). À refaire sur machine calme avant de
+       clore le lot ; ADR 0105 le signale. Commit.
 
 ### GA5 — Bâtiments (CC0, ≤ 1 $, agent `cent-ans-mech`, après GA2)
-- [ ] Textures bâtiments de bataille et `textures/buildings` en 2k Poly Haven ; variantes
-      torchis et colombages ; `SOURCE.md`/`README.md` ; tests mémoire ; ajout à l'ADR 0105.
+- [x] Textures bâtiments de bataille et `textures/buildings` en 2k Poly Haven (10 identifiants
+      existants bumpés : `medieval_wall_01`, `stone_wall`, `rustic_stone_wall`, `rough_wood`,
+      `weathered_brown_planks`, `clay_roof_tiles_03`, `roof_tiles_14`, `castle_wall_varriation`,
+      `roof_slates_02`, `thatch_roof_angled` — albédo 2k, normale/rugosité 1k, même convention
+      que GA2). Import corrigé au passage : ces textures étaient en `compress/mode=0` (« Lossless »,
+      sans mipmaps, oubli du lot BR1) — repassées en VRAM compressé + mipmaps, ce qui fait
+      **baisser** la mémoire malgré le doublement de résolution (cf. ADR 0105 §GA5).
+- [x] `BuildingMaterials.SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` déplacés dans les données
+      (`data/art/building_materials.json`, schéma `art_building_materials.schema.json`), lus au
+      premier appel comme `BattleTerrain.ground_layers()`. `kit_export.py` (Blender) garde sa
+      propre copie Python, inchangée (hors périmètre, synchronisation manuelle déjà assumée
+      avant GA5).
+- [x] Torchis/colombage (`TimberFrame`) : composite procédural (lattis de poteaux/sablières/
+      entretoises sur `lime_plaster` + `rough_wood` assombri, seed déterministe,
+      `build_textures.py::timber_frame()`), 0 $, pas d'IA (Poly Haven n'a pas de texture CC0
+      dédiée à ce motif). Ajoutée au catalogue avec `"wired": false`, absente de `atlas_layers` :
+      utilisable via `BuildingMaterials.material("TimberFrame")`, mais **non câblée** à une
+      surface du kit Blender — **point ouvert, décision à prendre par le joueur/lead**, pas
+      tranchée ici : (a) câbler demande un changement + réexport de `tools/blender_scripts/
+      building_kit.py`/`kit_export.py` (Blender dispo sur la machine, mais l'indice de couche de
+      l'atlas `Building` est baké dans la couleur de sommet des `.glb` déjà exportés — ajout en
+      milieu de tableau = modèles existants désalignés ; ajout en fin de tableau = tombe après
+      `first_plain`, traité comme matière unie par le shader sans changement supplémentaire) ;
+      (b) quelle proportion de bâtiments/quelles régions (la charpenterie apparente est plus
+      caractéristique de Normandie/Île-de-France/Angleterre que du Midi) recevraient cette
+      matière à la place de `Plaster`. Voir ADR 0105 §GA5 et `SOURCE.md`.
+- [x] `SOURCE.md` (nouveau, `game/assets/textures/buildings/`) et `README.md` (`battle/`,
+      tableau bâtiments mis à jour) : provenance Poly Haven (identifiants, CC0) + torchis.
+- [x] Tests mémoire : `game/tests/ga5_building_test.gd` — 12 matières texturées (11 + TimberFrame),
+      **≈ 47,3 Mo** au total (mesure conservatrice : compte double les matières qui partagent un
+      fichier source, ex. `Planks`/`Door`), format réel DXT1/BC1, sous le seuil (60 Mo, choisi
+      dans le test faute de plafond donné par la spec pour les bâtiments). `smoke.gd`, pytest
+      ciblé (`tools/tests/test_art_building_materials_schema.py`) et suite complète, `ruff` :
+      lancés, résultat noté au journal.
+- [x] Ajout à l'ADR 0105 (section « GA5 (bâtiments) »).
+
+**Point ouvert (non tranché par ce lot)** : câblage de `TimberFrame` dans le kit de bâtiments
+(quelles surfaces/bâtiments/régions, réexport Blender) — décision de conception pour le joueur/
+lead, cf. ci-dessus et ADR 0105 §GA5.
 
 ### GA4 — Campagne (CC0 + IA ponctuelle, ≤ 2 $, agent `cent-ans-dev`, après GA2)
 Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd`,
-`game/shaders/terrain.gdshader`, `game/shaders/water.gdshader`.
-- [ ] Plaines et couches terrain en 2k ; macro-variation (réutiliser GA2).
-- [ ] Eau : normales CC0 animées + couleur de profondeur.
-- [ ] A/B banc carte PB1 (cache de relief relié, cf. PO6). Vignettes IA seulement sur décision.
+`game/shaders/terrain.gdshader`, `game/shaders/water.gdshader` ; ajoutés :
+`game/scripts/map/campaign_textures.gd`, `game/shaders/ga_macro.gdshaderinc`,
+`data/fx/campaign_terrain_textures.json` (+ schéma, pytest), `game/tests/ga4_terrain_test.gd`.
+- [x] Plaines et couches terrain : albédo 2k / normale 1k (mêmes 7 assets Poly Haven), tableaux
+      importés compressés (DXT1) : **23,3 Mo mesurés** contre 74,7 Mo (ancien RGBA8 1k) ;
+      identité des couches et moyennes en données ; `tile_screen_px` 72 → 96 ; macro-variation
+      factorisée (`ga_macro.gdshaderinc`, GA2 inchangé), 4 octaves 9–150 px carte, teinte +
+      luminance ±8 %.
+- [x] Eau : normale tuilable **procédurale** (aucune normale d'eau CC0 chez Poly Haven ni
+      ambientCG), deux couches défilantes ; couleur de profondeur à trois paliers (mer et mer
+      peinte du terrain). `--no-ga4` = ancien chemin complet (fichiers 1k gardés jusqu'à GA6).
+- [ ] A/B banc carte PB1 (session principale, machine calme) : cache de relief relié via
+      `CENT_ANS_RELIEF_DIR=/Users/jean_hubert/dev/game_project/data/map` (ou lien symbolique
+      `data/map/pyramid` → dépôt principal), passes alternées :
+      `godot --path game --script res://tests/pb1_bench.gd` puis
+      `godot --path game --script res://tests/pb1_bench.gd -- --no-ga4` (×2, ordre inversé).
+      Vignettes IA non faites (sur décision seulement). 0 $ dépensé.
 
 ### GA3 — Décor 3D statique (image-vers-3D, ≤ 8 $)
 1. [ ] Recherche (session principale) : service hébergé TRELLIS payant à l'appel, conditions
@@ -76,7 +154,7 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
        de bataille (données `battle_decor`). ADR `0106-pipeline-image-vers-3d.md`.
 
 ### GA6 — Clôture
-- [ ] Planche avant/après globale (réutiliser `po_shot.gd`, vues 04, 08, 09 + gros plan).
+- [x] Planche avant/après globale (réutiliser `po_shot.gd`, vues 04, 08, 09 + gros plan).
 - [ ] Jugement du joueur, puis `feat/ga` → `main` (`--ff-only`), suppression des worktrees.
 
 ## Vagues
@@ -85,3 +163,64 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
 
 ## Journal
 - 28/09 : spec approuvée (726a31bf), plan écrit.
+- 28/09 : GA0 fait (squelette, section budget GA). Suite : vague 1 (GA1 ∥ GA2).
+- 28/09 : GA1 étape 1 faite (worktree `../game_project-ga1`, branche `feat/ga1`) : chaîne
+  tuilable + cartes dérivées + planche + CLI `assets materials`. Suite : sonde laine/mailles.
+- 28/09 : GA1 sonde laine + mailles (gpt-5-image-mini, 2 × 0,04 $ = 0,08 $, estimation 0,02 $/image :
+  prévoir ≈ 0,50 $ pour les 12). Brutes 1024² hors dépôt (scratch de l'agent). Tuiles 512² :
+  écart moyen des bords ≤ pas moyen intérieur (sans couture). Mailles sombres (lum. moy. 63/255),
+  laine claire (174) : le centrage à 0,5 de l'étape 4 est nécessaire. Planche
+  `docs/research/ga1_probe_sheet.png` (945 Ko) à juger en session principale.
+- 28/09 : GA1 étapes 3-5 en cours : 12 matières dans `materials.yaml` (`tile_m` = `GA1_TILE_SIZE`
+  du shader, testé), génération en cours vers le scratch ; shader (`ga1_detail`, `fine_detail_albedo`),
+  chargement (`--no-ga1`), test `ga1_maps_test.gd`. Suite : assembler les tableaux
+  (`material_gen.build_fine_arrays`), import Godot, tests, A/B, ADR 0104.
+- 28/09 : GA1 fait (branche `feat/ga1`, non fusionnée) : 12 matières (0,59 $ au total, dont un
+  appel coupé facturé), `fine_detail_ga1.png` + `fine_detail_albedo.png` (ajout 2,33 Mo), shader
+  `ga1_detail`, `--no-ga1`, `ga1_maps_test.gd` OK (et `-- --no-ga1`), fg3_maps OK, smoke OK ;
+  A/B dans le bruit (≤ +5 %) ; ADR 0104. Planche des 12 : `docs/research/ga1_sheet.png` à juger
+  (jugement en jeu : session principale). `main` a bougé (`tools/cent_ans_tools/cli.py`) : conflit
+  possible, simple, à la fusion ; le shader n'a pas bougé sur `main`.
+- 28/09 : GA2 fait (worktree `../game_project-ga2`, branche `feat/ga2`) : 13 couches 2k/1k
+  (Poly Haven), données `battle_ground_layers.json`, câblage des 4 rôles ajoutés, macro-variation
+  dédiée, ADR 0105, tests mémoire/smoke/pytest verts. A/B non concluant (machine chargée) : à
+  refaire avant fusion dans `feat/ga`. Point ouvert : substitut « prairie fleurie » (`leafy_grass`,
+  pas de texture CC0 dédiée chez Poly Haven).
+- 28/09 : GA1 + GA2 fusionnés dans `feat/ga` (1e5f26c6). Planche GA1 des 12 jugée bonne (défauts
+  mineurs : clous du bois et bandes horizontales des plates, à revoir si visibles en jeu). Brutes GA1
+  copiées hors dépôt dans `~/dev/game_raw_assets/ga1/`. A/B GA2 non concluant (charge ≈ 120) : à
+  refaire machine calme. Vague 2 lancée : GA5 (`../game_project-ga5`) ∥ GA4 (`../game_project-ga4`).
+- 28/09 : recherche GA3 : fal.ai `fal-ai/trellis`, 0,02 $/génération, usage commercial des sorties
+  autorisé, sortie GLB ; modèle TRELLIS (Microsoft) sous licence MIT. Bloquant : aucune clé fal.ai
+  dans l'environnement → compte + crédit à créer par le joueur (`FAL_KEY`). Blender présent.
+- 28/09 : `feat/ga` (GA1+GA2) : smoke, ga1_maps, ga2_ground, fg3_maps OK. **GA3 reporté** par le joueur (pas de clé fal.ai) : GA se clôt sans GA3 (GA6 après GA4/GA5), GA3 reste ouvert.
+- 28/09 : GA5 fait (worktree `../game_project-ga5`, branche `feat/ga5`, 0 $) : 10 matières de
+  bâtiments (dont 3 partagées avec `battle/`) bumpées en 2k Poly Haven (albédo 2k, normale/rugosité
+  1k). Import `compress/mode=0` (sans mipmaps, oubli BR1) corrigé en VRAM compressé — mémoire
+  mesurée en baisse malgré le bump (`ga5_building_test.gd` : ≈ 47,3 Mo pour les 12 matières
+  texturées, mesure conservatrice). `BuildingMaterials.SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS`
+  déplacés dans `data/art/building_materials.json` (schéma dédié, chargé comme
+  `BattleTerrain.ground_layers()`). Torchis/colombage (`TimberFrame`) : composite procédural
+  (lattis de poutres sur `lime_plaster`/`rough_wood`, 0 $, pas d'IA), ajouté au catalogue mais
+  **non câblé** au kit Blender (`wired: false`, absent de `atlas_layers`) — point ouvert non
+  tranché (câblage = changement + réexport Blender, indice de couche baké dans les `.glb` déjà
+  exportés ; proportion/région de bâtiments à choisir), signalé au joueur/lead. ADR 0105 §GA5.
+  `SOURCE.md` (nouveau) + `README.md` mis à jour. Tests : `ga5_building_test.gd` OK, `smoke.gd`
+  OK, 841 pytest passed/2 skipped, `ruff check --fix`/`format` sur le Python modifié. Pas de
+  capture d'écran (asset procédural vérifié par statistiques de pixels). Suite : fusion dans
+  `feat/ga` après GA4, puis planche GA6 et jugement du joueur.
+
+- 28/09 : GA4 fait (worktree `../game_project-ga4`, branche `feat/ga4`) : terrain 2k/1k importé
+  (23,3 Mo contre 74,7), données `campaign_terrain_textures.json`, macro-variation partagée
+  `ga_macro.gdshaderinc`, mer à normale procédurale animée + 3 paliers de profondeur, `--no-ga4`,
+  ADR 0105 § GA4 ; `ga4_terrain_test.gd`, smoke (avec et sans `--no-ga4`), pytest ciblé verts.
+  A/B PB1 carte à faire (commande ci-dessus). 0 $.
+- 28/09 : GA4 + GA5 fusionnés dans `feat/ga` ; tests Godot (smoke, ga1, ga2, ga4, ga5, fg3) et
+  pytest (846 passés) verts. GA6 : `po_shot.gd` gagne `--extra=` et la vue 11 `gros-plan` ;
+  planche `docs/img/ga/avant/` (drapeaux `--no-ga1,--no-ga2,--no-ga4` ; GA5 sans drapeau) vs
+  `apres/`, montage `docs/img/ga/avant-apres.jpg`. Écart moyen mesuré 0,6 à 4/255 : gain subtil à
+  ces cadrages (sol plus varié, teinte carte) ; le détail GA1 des figurines ne se lit pas à la
+  distance de la vue « gros-plan ». Reste : A/B perf machine calme, jugement du joueur, fusion.
+  Points ouverts : câblage `TimberFrame` (réexport Blender + choix régions), GA3 reporté.
+- 28/09 : **Fusion vers main demandée par le joueur, en cours (arrêt de session).** `main` fusionné dans `feat/ga` (d4cb31d7, conflit `budget.md` résolu : section GA puis FE). Reste : `CARGO_TARGET_DIR=$PWD/core/target core/build.sh` (core a bougé sur main), import, tests Godot (smoke, ga1/2/4/5, fg3) + pytest, puis dans le checkout principal `git merge --ff-only feat/ga` (refusionner main si elle a encore bougé), supprimer `../game_project-ga` et `feat/ga`. A/B perf machine calme toujours à faire.
+- 28/09 : **GA fusionné dans main (53dbe19a).** Dylib recompilée, import, tests ga1/2/4/5 + fg3 verts, pytest 920 passés. `smoke.gd` échoue sur main indépendamment de GA (« 3 faction cards, got 10 », vague FE 1). Worktree `../game_project-ga` et branche `feat/ga` supprimés. Restent ouverts : A/B perf sur machine calme (`--no-ga1 --no-ga2`, `--closeup`, bench PB1 `--no-ga4`), câblage `TimberFrame`, GA3 (clé fal.ai), retrait des fichiers 1k campagne si GA4 gardé.

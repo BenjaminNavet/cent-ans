@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tooltip_style.schema.json",
+  "title": "Style des infobulles (IB)",
+  "description": "Présentation des infobulles en sections et de la chaîne de bulles (ADR 0109). Aucune règle de jeu.",
+  "type": "object",
+  "required": ["width_px", "max_height_screen_share", "header_icon_px", "short_max_body_lines", "chain", "kind_colors", "headline"],
+  "additionalProperties": false,
+  "$defs": {
+    "kind": {"enum": ["unit", "unit_recruit", "building", "technology", "resource", "gauge", "trait", "skill", "class", "rule", "plain"]},
+    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "width_px": {"description": "Largeur à la hauteur de référence (900 px), avant échelle d'interface.", "type": "number", "minimum": 240, "maximum": 600},
+    "max_height_screen_share": {"description": "Hauteur maximale en part de l'écran.", "type": "number", "exclusiveMinimum": 0, "maximum": 1},
+    "header_icon_px": {"type": "integer", "minimum": 16, "maximum": 96},
+    "short_max_body_lines": {"description": "Lignes de corps au plus dans la version courte (survol).", "type": "integer", "minimum": 3, "maximum": 20},
+    "chain": {
+      "type": "object",
+      "required": ["hover_delay_s", "idle_hover_delay_s", "close_grace_s", "max_bubbles", "breadcrumb_from_depth"],
+      "additionalProperties": false,
+      "properties": {
+        "hover_delay_s": {"description": "Délai d'ouverture d'une bulle fille, Alt maintenu.", "type": "number", "minimum": 0, "maximum": 1},
+        "idle_hover_delay_s": {"description": "Délai d'ouverture sans Alt (comportement H2).", "type": "number", "minimum": 0, "maximum": 2},
+        "close_grace_s": {"description": "Grâce avant fermeture des bulles non épinglées, souris hors des bulles.", "type": "number", "minimum": 0, "maximum": 3},
+        "max_bubbles": {"type": "integer", "minimum": 2, "maximum": 20},
+        "breadcrumb_from_depth": {"description": "Profondeur à partir de laquelle le fil d'Ariane s'affiche.", "type": "integer", "minimum": 2, "maximum": 10}
+      }
+    },
+    "kind_colors": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/kind"},
+      "additionalProperties": {"$ref": "#/$defs/color"}
+    },
+    "headline": {
+      "description": "Chiffres vedettes (0 à 2) par type d'infobulle, clés interprétées par TooltipView.",
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/kind"},
+      "additionalProperties": {"type": "array", "maxItems": 2, "items": {"type": "string"}}
+    }
+  }
+}
