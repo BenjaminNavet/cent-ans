@@ -106,6 +106,23 @@
    "license": "Licence Ouverte (Inventaire) ; faits seulement",
    "extracted": false,
    "use": "Calais-Nord détruit à 80 % ; le remembrement a redressé et élargi les voies ; nouveaux îlots du quartier de l'Europe : la trame OSM n'est qu'une approximation de la trame médiévale."
+  },
+  {
+   "title": "Isabella of Valois ; Calais ; Siege of Calais (1346-1347) ; Fort Risban",
+   "author": "Wikipédia EN (contributeurs), recoupés",
+   "date": "2026",
+   "url": "https://en.wikipedia.org/wiki/Isabella_of_Valois",
+   "license": "CC BY-SA 4.0 ; faits seulement",
+   "extracted": false,
+   "use": "Mariage de Richard II et d'Isabelle à Saint-Nicolas le 4 novembre 1396 (cérémonie du 31 octobre) ; Étape le 9 février 1363 ; double fossé et château à l'angle nord-ouest avec son propre fossé en 1346 ; fort du Rysbank bâti pendant le siège (novembre 1346), Stone Tower devenue Lancaster Tower après 1400."
+  },
+  {
+   "title": "Tour du Guet (PA00108248)",
+   "author": "Ministère de la Culture, base Mérimée (POP)",
+   "url": "https://pop.culture.gouv.fr/notice/merimee/PA00108248",
+   "license": "Licence Ouverte 2.0 ; faits seulement",
+   "extracted": false,
+   "use": "« Ancien phare de Calais », XIIIe s. ; inscrite le 10 juin 1926, classée le 6 novembre 1931."
   }
  ],
  "plan": {
@@ -299,7 +316,7 @@
     }
    ],
    "from_year": 1228,
-   "note": "Enceinte de 1228 du comte de Boulogne Philippe Hurepel (SRA Hauts-de-France 2025 ; 1224 selon Wikipédia) : mur flanqué de petites tours et fossés extérieurs ; 1 100 m sur 400, 44 tours semi-circulaires, quatre portes précédées d'avant-portes sur une terrée circulaire (Réseau Vauban, 2015). Mur de 2,50 m d'épaisseur et tour carrée de 6,50 m mis au jour boulevard du 8-Mai (2017). Tracé restitué (hypothétique) : front sud par la tour Carrée (OSM, rempart sud de la citadelle, « déjà construit au Moyen Âge ») parallèle à la rue Jean-de-Vienne ; front nord sur le havre (boulevards de la Résistance et des Alliés) ; front est entre les rues Berthois et de Madrid (le quartier dit de l'Europe est exclu) ; front ouest dans l'emprise de la citadelle (1564-1571), qui a englobé le château de l'angle nord-ouest et un quartier entier. Longueur est-ouest ≈ 1 160 m conforme aux 1 100 m ; profondeur nord-sud ≈ 500 m (les 400 m cités placeraient Notre-Dame et la tour Carrée hors les murs). Tours : rayon et hauteur restitués (une tour carrée est attestée). Noms et positions des portes restitués : les noms connus sont anglais (Lantern Gate, Boulogne Gate, Milk Gate, Water Gate, XVIe s.) ; porte de Boulogne placée au sud-ouest, là où la citadelle a ouvert sa porte de Boulogne sur le rempart sud médiéval."
+   "note": "Enceinte de 1228 du comte de Boulogne Philippe Hurepel (SRA Hauts-de-France 2025 ; 1224 selon Wikipédia) : mur flanqué de petites tours et fossés extérieurs ; 1 100 m sur 400, 44 tours semi-circulaires, quatre portes précédées d'avant-portes sur une terrée circulaire (Réseau Vauban, 2015). Mur de 2,50 m d'épaisseur et tour carrée de 6,50 m mis au jour boulevard du 8-Mai (2017). Tracé restitué (hypothétique) : front sud par la tour Carrée (OSM, rempart sud de la citadelle, « déjà construit au Moyen Âge ») parallèle à la rue Jean-de-Vienne ; front nord sur le havre (boulevards de la Résistance et des Alliés) ; front est entre les rues Berthois et de Madrid (le quartier dit de l'Europe est exclu) ; front ouest dans l'emprise de la citadelle (1564-1571), qui a englobé le château de l'angle nord-ouest et un quartier entier. Longueur est-ouest ≈ 1 160 m conforme aux 1 100 m ; profondeur nord-sud ≈ 500 m (les 400 m cités placeraient Notre-Dame et la tour Carrée hors les murs). Tours : rayon et hauteur restitués (une tour carrée est attestée). Noms et positions des portes restitués : les noms connus sont anglais (Lantern Gate, Boulogne Gate, Milk Gate, Water Gate, XVIe s.) ; porte de Boulogne placée au sud-ouest, là où la citadelle a ouvert sa porte de Boulogne sur le rempart sud médiéval. Relecture historique (2026-09-28) : le front nord restitué suit à 10-15 m près le bras est du boulevard du 8-Mai, où le mur de 1228 (55 m de long, 2,50 m) et une tour carrée de 6,50 m ont été fouillés en 2017 (emplacement exact de la fouille non publié) ; le tronçon peut-être médiéval de l'esplanade Jacques-Vendroux (2019) n'est pas situé. Surface discordante : « about 200 acres » (≈ 81 ha, Greaves 1918), 1 100 × 400 m (Réseau Vauban), 52 ha ici. En 1550, l'enceinte anglaise compte quarante tours et six portes (SRA 2025)."
   },
   {
    "id": "avant_mur",
@@ -1019,7 +1036,7 @@
     "height": 35,
     "top": "pyramid"
    },
-   "description": "Tour de guet du XIIIe s. (Mérimée PA00108248, classée en 1931) ; datée de 1229 (Hurepel) ou 1214 selon les auteurs, première trace officielle en 1302 ; en 1347 Jean de Vienne y aurait annoncé les conditions de reddition. Fendue par le séisme de 1580, relevée vers 1606 (partie haute actuelle) ; 39 m aujourd'hui. Emprise OSM (≈ 11 × 13 m) ; hauteur et couverture de 1340 restituées."
+   "description": "Tour de guet du XIIIe s., « ancien phare de Calais » (Mérimée PA00108248, inscrite en 1926, classée en 1931) ; datée de 1229 (Hurepel) ou 1214 selon les auteurs, première trace officielle en 1302 ; en 1347 Jean de Vienne y aurait annoncé les conditions de reddition. Fendue par le séisme de 1580, relevée vers 1606 (partie haute actuelle) ; 39 m aujourd'hui (OSM). Emprise OSM (≈ 11 × 13 m, à 1 m) ; hauteur et couverture de 1340 restituées."
   },
   {
    "id": "hotel_de_ville",
@@ -1088,12 +1105,12 @@
     "vault_m": 18,
     "ridge_m": 25,
     "aisle_m": 9,
-    "transept_m": 52,
+    "transept_m": 46,
     "transept_width_m": 15,
     "transept_at": 0.54,
     "apse": "flat"
    },
-   "description": "Reconstruite et agrandie sous l'occupation anglaise, de la seconde moitié du XIVe au XVIe s., par des ouvriers flamands (parties hautes de la nef, chœur et clocher en brique), seul édifice de style perpendiculaire anglais en France (Wikipédia ; Département du Pas-de-Calais). Emprise OSM (90 m hors œuvre avec la chapelle d'axe de 1631-1635, 18 m, exclue ici : 75 m) ; voûtes à 18 m ; transept de 52 m. Phase sans tour de croisée ; dates de début (1370) et de fin (1409) conventionnelles."
+   "description": "Reconstruite et agrandie sous l'occupation anglaise, de la seconde moitié du XIVe au XVIe s., par des ouvriers flamands (parties hautes de la nef, chœur et clocher en brique), seul édifice de style perpendiculaire anglais en France (Wikipédia ; Département du Pas-de-Calais). Emprise OSM (90 m hors œuvre avec la chapelle d'axe de 1631-1635, 18 m, exclue ici : 75 m) ; voûtes à 18 m ; transept de 46 m (largeur hors œuvre de 45,50 m, Wikipédia ; l'emprise OSM, 52 m nord-sud, compte les tours du portail Saint-Pierre). Phase sans tour de croisée ; dates de début (1370) et de fin (1409) conventionnelles."
   },
   {
    "id": "notre_dame_tour",
@@ -1111,7 +1128,7 @@
     "vault_m": 18,
     "ridge_m": 25,
     "aisle_m": 9,
-    "transept_m": 52,
+    "transept_m": 46,
     "transept_width_m": 15,
     "transept_at": 0.54,
     "apse": "flat",
@@ -1142,7 +1159,7 @@
      "height": 26
     }
    },
-   "description": "Paroisse de Calais avec hôpital (Greaves, 1918) ; Richard II y épouse Isabelle de France le 1er novembre 1396 ; détruite avec tout un quartier pour la citadelle (première pierre 1564) ; une chapelle Saint-Nicolas est rebâtie dans la citadelle en 1605. Emplacement dans le quartier ouest rasé (emprise de la citadelle) et gabarit hypothétiques."
+   "description": "Paroisse de Calais avec hôpital (Greaves, 1918) ; Richard II y épouse Isabelle de France le 4 novembre 1396, après la cérémonie du 31 octobre (Wikipédia EN, Isabella of Valois) ; détruite avec tout un quartier pour la citadelle (première pierre 1564) ; une chapelle Saint-Nicolas est rebâtie dans la citadelle en 1605. Emplacement dans le quartier ouest rasé (emprise de la citadelle) et gabarit hypothétiques."
   },
   {
    "id": "chateau",
@@ -1218,7 +1235,7 @@
     "palisade_m": 3,
     "closed": true
    },
-   "description": "Fort élevé par les Anglais sur la pointe du banc de sable au nord de Calais pendant le siège (mention en novembre 1346 ; installé fin avril 1347 pour fermer l'entrée du havre : Wikipédia EN et FR) ; tour de bois remplacée ensuite par une tour de pierre. Site = fort Risban (OSM, fondations circulaires de la tour de Lancastre, diagnostic 2019). Forme et taille restituées."
+   "description": "Fort élevé par les Anglais sur la pointe du banc de sable au nord de Calais pendant le siège : « première mention… en 1346 dans les archives anglaises » (SRA 2025) ; bâti en novembre 1346 selon Wikipédia EN, installé fin avril 1347 pour fermer l'entrée du havre selon d'autres récits (Wikipédia FR) : `from_year` 1347 gardé (date d'achèvement incertaine). Tour de bois remplacée ensuite par une tour de pierre. Site = fort Risban (OSM, 23 m ; fondations circulaires de la tour de Lancastre, diagnostic 2019). Forme et taille restituées."
   },
   {
    "id": "tour_de_rysbank",
@@ -1233,7 +1250,7 @@
     "radius_m": 9,
     "height": 20
    },
-   "description": "« Stone Tower », rebaptisée tour de Lancastre après 1400 (Wikipédia) : fondations circulaires observées en 2019 (SRA 2025). Construite en pierre à une date inconnue avant 1400 (1350 dans la maquette v1 : non sourcé) ; muraille polygonale à deux tours au XVIe s. Diamètre et hauteur restitués."
+   "description": "« Stone Tower », rebaptisée tour de Lancastre après 1400 (Wikipédia EN) ; sous l'occupation anglaise, le fort « est doté de la tour de Lancastre et d'une muraille polygonale en pierre flanquée de deux tours » (SRA 2025, restitution du fort en 1405) ; fondations circulaires observées en 2019 ; rasée à mi-hauteur en 1586. Construite en pierre à une date inconnue avant 1400 (1350 dans la maquette v1 : non sourcé). Diamètre et hauteur restitués."
   },
   {
    "id": "avant_porte_boulogne",
