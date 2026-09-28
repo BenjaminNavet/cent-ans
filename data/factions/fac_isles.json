@@ -17,10 +17,10 @@
   "suzerain": "fac_scotland",
   "primary_title": "tit_isles",
   "heraldry": {
-    "blazon": "D'or à la nef (lymphad) de sable, voiles ferlées.",
+    "blazon": "D'azur à la nef (lymphad) d'argent, voiles ferlées.",
     "description": "La nef des Hébrides, emblème de Clan Donald.",
-    "primary_color": "#F2C230",
-    "secondary_color": "#1a1a1a"
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2F2F2"
   },
   "titles": [
     "Seigneur des Îles",

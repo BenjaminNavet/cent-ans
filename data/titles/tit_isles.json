@@ -6,10 +6,10 @@
     "local_language": "gaélique écossais"
   },
   "heraldry": {
-    "blazon": "D'or à la nef (lymphad) de sable, voiles ferlées.",
+    "blazon": "D'azur à la nef (lymphad) d'argent, voiles ferlées.",
     "description": "La nef (galère des Hébrides), emblème de la dynastie de Somerled repris par les MacDonald ; seule la nef, sans l'aigle (ajouté par les descendants après 1363), est attestée sur les sceaux de Jean d'Islay.",
-    "primary_color": "#F2C230",
-    "secondary_color": "#1a1a1a",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2F2F2",
     "uncertain": true
   },
   "de_jure_liege": "tit_scotland",
