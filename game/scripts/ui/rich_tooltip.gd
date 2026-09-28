@@ -387,7 +387,10 @@ static func effect_item(effect: Dictionary, live: Dictionary = {}) -> Dictionary
 	if kind in (TooltipView.style().get("lower_is_better", []) as Array):
 		sign = -sign
 	var item := {"key": kind, "text": effect_text(effect), "label": effect_label(kind), "value": effect_value(effect) + effect_qualifiers(effect), "sign": sign}
-	var pair: Variant = (live.get("before_after", {}) as Dictionary).get(kind, null)
+	# IB5 : un effet ciblé (classe sociale, famille d'unités) a sa propre clé « kind:cible ».
+	var target: String = str(effect.get("class", "")) if str(effect.get("class", "")) != "" else str(effect.get("unit_category", ""))
+	var lookup := kind if target == "" or target == "<null>" else "%s:%s" % [kind, target]
+	var pair: Variant = (live.get("before_after", {}) as Dictionary).get(lookup, null)
 	if pair is Array and (pair as Array).size() == 2:
 		item["before"] = pair[0]
 		item["after"] = pair[1]
@@ -404,6 +407,15 @@ static func effect_line(item: Dictionary) -> String:
 ## Prérequis remplis : vrai si `live` dit l'action disponible, inconnu (null) sinon.
 static func _met(live: Dictionary) -> Variant:
 	return true if bool(live.get("available", false)) else null
+
+
+## IB5 : état du prérequis `id` lu dans `live["requirements"]` ([{id, met}], calculé par le core),
+## sinon `fallback`.
+static func _requirement_met(live: Dictionary, id: String, fallback: Variant) -> Variant:
+	for row in live.get("requirements", []):
+		if row is Dictionary and str(row.get("id", "")) == id:
+			return bool(row.get("met", false))
+	return fallback
 
 
 static func _icon_text(id: String, name: String) -> String:
@@ -623,13 +635,13 @@ static func unit_spec(unit_type: String, live: Dictionary = {}) -> Dictionary:
 	var met: Variant = _met(live)
 	if str(definition.get("required_technology", "")) != "":
 		var tech := str(definition["required_technology"])
-		spec["requires"].append({"text": _icon_text(tech, GameCatalog.display_name(tech)), "met": met})
+		spec["requires"].append({"text": _icon_text(tech, GameCatalog.display_name(tech)), "met": _requirement_met(live, tech, met)})
 	# B7c : le bâtiment requis se lit dans `enables_units` des bâtiments (seule source, lue par le core).
 	var enablers := PackedStringArray()
 	for building_id in enabling_buildings(str(definition.get("id", ""))):
 		enablers.append(_icon_text(building_id, GameCatalog.display_name(building_id)))
 	if not enablers.is_empty():
-		spec["requires"].append({"text": " ou ".join(enablers) + " (ou supérieur)", "met": met})
+		spec["requires"].append({"text": " ou ".join(enablers) + " (ou supérieur)", "met": _requirement_met(live, "enabling_building", met)})
 	# SV2 : matériaux des engins, tirés des provinces productrices à la commande ; le manque est
 	# importé et compté dans le coût (même règle que les chantiers, ADR 0053).
 	var materials: Dictionary = live.get("resources", (definition.get("cost", {}) as Dictionary).get("resources", {}))
@@ -698,7 +710,8 @@ static func building_spec(building_id: String, live: Dictionary = {}) -> Diction
 		var main: Dictionary = effects[0]
 		candidates["main_effect"] = {"icon": "", "label": main.get("label", ""), "value": main.get("value", ""), "sign": main.get("sign", 0)}
 	spec["headline"] = _headline("building", candidates)
-	if not (spec["headline"] as Array).is_empty() and str(spec["headline"][0].get("key", "")) == "main_effect":
+	# IB5 : l'effet principal garde sa ligne « avant → après » quand le core la fournit.
+	if not (spec["headline"] as Array).is_empty() and str(spec["headline"][0].get("key", "")) == "main_effect" and not (effects[0] as Dictionary).has("before"):
 		effects.remove_at(0)
 	var footer := {}
 	if live.has("cost"):
@@ -725,11 +738,11 @@ static func building_spec(building_id: String, live: Dictionary = {}) -> Diction
 				note = " (amélioration : le remplace et garde ses effets)"
 			elif key == "required_building" and has_upgrade(value):
 				note = " ou supérieur"
-			spec["requires"].append({"text": _icon_text(value, GameCatalog.display_name(value)) + note, "met": met})
+			spec["requires"].append({"text": _icon_text(value, GameCatalog.display_name(value)) + note, "met": _requirement_met(live, value, met)})
 	if bool(definition.get("requires_coastal", false)):
-		spec["requires"].append({"text": "province côtière", "met": met})
+		spec["requires"].append({"text": "province côtière", "met": _requirement_met(live, "coastal", met)})
 	if bool(definition.get("requires_river", false)):
-		spec["requires"].append({"text": "rivière", "met": met})
+		spec["requires"].append({"text": "rivière", "met": _requirement_met(live, "river", met)})
 	var has_materials := definition.has("cost") and (definition["cost"] as Dictionary).has("resources")
 	if live.has("cost") and has_materials:
 		spec["detail"].append("Matériaux : " + cost_text({"resources": definition["cost"]["resources"]}))
@@ -785,7 +798,7 @@ static func technology_spec(node: Dictionary) -> Dictionary:
 		spec["effects"].append({"key": "unlocks", "text": "Débloque : " + ", ".join(unlocked), "sign": 0})
 	var met: Variant = null if state == "locked" or state == "" else true
 	for prereq in node.get("prerequisites", []):
-		spec["requires"].append({"text": _icon_text(str(prereq), GameCatalog.display_name(str(prereq))), "met": met})
+		spec["requires"].append({"text": _icon_text(str(prereq), GameCatalog.display_name(str(prereq))), "met": _requirement_met(node, str(prereq), met)})
 	var year := int(node.get("historical_year", 0))
 	if year > 0:
 		spec["detail"].append("Date historique : %s%d" % ["vers " if bool(node.get("historical_uncertain", false)) else "", year])

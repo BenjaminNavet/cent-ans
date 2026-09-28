@@ -17,6 +17,7 @@ use sim_campaign::{
     EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
 };
 
+use crate::campaign_sim_preview::{before_after_dict, requirements_array};
 use crate::campaign_sim_turn::TURN_PENDING_FR;
 use crate::convert::variant_to_json;
 
@@ -252,13 +253,14 @@ impl CampaignSim {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return VarDictionary::new();
         };
-        let Some(city) = ProvinceId::new(id.to_string())
-            .ok()
-            .and_then(|id| state.province_city(data, &id))
-        else {
+        let Ok(id) = ProvinceId::new(id.to_string()) else {
             return VarDictionary::new();
         };
-        province_city_dict(data, &city)
+        let Some(city) = state.province_city(data, &id) else {
+            return VarDictionary::new();
+        };
+        let place = state.province_city_id(&id).map(|city| (state, city));
+        province_city_dict(data, &city, place)
     }
 
     /// Full economic panel of a faction (spec M3 § 2), or an empty
@@ -500,6 +502,10 @@ impl CampaignSim {
                     "pool_cap" => i64::from(option.pool.cap),
                     "pool_seasons_to_next" => option.pool.seasons_to_next.map_or(-1, i64::from),
                     "pool_label" => option.pool.label_fr().as_str(),
+                    // IB5: each requirement's state, for the tooltip.
+                    "requirements" => &requirements_array(
+                        &state.recruit_requirements(data, &settlement, &option.unit_type),
+                    ),
                 }
                 .to_variant()
             })
@@ -882,7 +888,11 @@ pub(crate) fn construction_dict(data: &GameData, construction: &Construction) ->
     }
 }
 
-fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
+fn build_option_dict(
+    data: &GameData,
+    option: &BuildOption,
+    place: Option<(&CampaignState, &SettlementId)>,
+) -> VarDictionary {
     let category = data
         .buildings
         .get(&option.building)
@@ -891,7 +901,7 @@ fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
     for (resource, amount) in &option.imported {
         imported.set(resource.as_str(), i64::from(*amount));
     }
-    vdict! {
+    let mut dict = vdict! {
         "building" => option.building.as_str(),
         "name" => option.name.as_str(),
         "category" => category,
@@ -903,13 +913,28 @@ fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
         // units imported.
         "import_cost" => i64::from(option.import_cost),
         "imported" => &imported,
+    };
+    // IB5: each requirement's state and the "before → after" of the
+    // province statistics the building moves, for its tooltip.
+    if let Some((state, settlement)) = place {
+        let requirements = state.building_requirements(data, settlement, &option.building);
+        dict.set("requirements", &requirements_array(&requirements));
+        let preview = state.building_before_after(data, settlement, &option.building);
+        dict.set("before_after", &before_after_dict(&preview));
     }
+    dict
 }
 
-pub(crate) fn buildable_array(data: &GameData, options: &[BuildOption]) -> VarArray {
+/// Build option rows; with `place` (the state and the settlement), each row
+/// also carries `requirements` `[{id, met}]` and `before_after` (IB5).
+pub(crate) fn buildable_array(
+    data: &GameData,
+    options: &[BuildOption],
+    place: Option<(&CampaignState, &SettlementId)>,
+) -> VarArray {
     options
         .iter()
-        .map(|option| build_option_dict(data, option).to_variant())
+        .map(|option| build_option_dict(data, option, place).to_variant())
         .collect()
 }
 
@@ -956,13 +981,17 @@ fn class_effects_dict(effects: &sim_campaign::buildings::ClassEffects) -> VarDic
     }
 }
 
-fn province_city_dict(data: &GameData, city: &ProvinceCity) -> VarDictionary {
+fn province_city_dict(
+    data: &GameData,
+    city: &ProvinceCity,
+    place: Option<(&CampaignState, &SettlementId)>,
+) -> VarDictionary {
     let mut dict = vdict! {
         "classes" => &population_classes_dict(&city.classes),
         "buildings" => &buildings_array(data, &city.buildings),
         "fortification_level" => i64::from(city.fortification_level),
         "capacity" => city.capacity as i64,
-        "buildable" => &buildable_array(data, &city.buildable),
+        "buildable" => &buildable_array(data, &city.buildable, place),
         "resources" => &ids(city.resources.iter()),
         "effects" => &effect_totals_dict(&city.effects),
     };
