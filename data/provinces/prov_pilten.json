@@ -1,0 +1,97 @@
+{
+  "id": "prov_pilten",
+  "name": {
+    "display": "Évêché de Courlande (Pilten)",
+    "local": "Piltene",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "livonie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Venta"
+  ],
+  "coastal": true,
+  "ports": [
+    "Windau"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Pilten",
+      "local": "Pilten",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 57.2231,
+    "lon": 21.6836
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.6836,
+      57.2231
+    ],
+    "seed_lonlat": [
+      21.7,
+      57.1
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_courland",
+  "culture": "cul_latvian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 18000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 540,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 540,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 216,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 500,
+  "description": "Petit territoire de l'évêque de Courlande : le tiers de la région, dont le chapitre et le château de Pilten, enclavé entre les terres de l'Ordre.",
+  "sources": [
+    "Évêché de Courlande",
+    "Piltene"
+  ]
+}

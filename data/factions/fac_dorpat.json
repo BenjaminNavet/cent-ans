@@ -1,0 +1,56 @@
+{
+  "id": "fac_dorpat",
+  "name": {
+    "display": "Évêché de Dorpat",
+    "local": "Bistum Dorpat",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Dorpat",
+  "adjective": "dorpatois",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_engelbert_von_dolen",
+  "capital": "prov_dorpat",
+  "capital_city": "Dorpat",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "primary_title": "tit_dorpat",
+  "heraldry": {
+    "blazon": "De sable à deux clefs d'argent en sautoir.",
+    "description": "Clefs croisées de l'évêché de Dorpat (armes simplifiées).",
+    "primary_color": "#1A1A1A",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason non retrouvé pour 1337."
+  },
+  "titles": [
+    "Évêque de Dorpat",
+    "Prince d'Empire"
+  ],
+  "treasury": 4500,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_livonian_order",
+      "status": "peace",
+      "note": "Voisin puissant qui convoite l'évêché."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 80
+  },
+  "description": "La principauté épiscopale de Tartu, entre la Livonie et le lac Peïpous, place marchande sur la route de Novgorod et bastion contre la Russie.",
+  "sources": [
+    "Évêché de Dorpat",
+    "Engelbert von Dolen"
+  ]
+}

@@ -1,0 +1,109 @@
+[
+  {
+    "id": "set_abo",
+    "province": "prov_finland",
+    "kind": "city",
+    "name": {
+      "display": "Turku (Åbo)",
+      "local": "Åbo",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      22.2666,
+      60.4518
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Capitale de la Finlande suédoise : cathédrale (consacrée en 1300) et château d'Åbo.",
+    "sources": [
+      "Turku"
+    ]
+  },
+  {
+    "id": "set_raseborg",
+    "province": "prov_finland",
+    "kind": "castle",
+    "name": {
+      "display": "Raseborg",
+      "local": "Raseborg",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      23.4333,
+      59.9833
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château de pierre de la côte de Nyland, en cours de construction.",
+    "sources": [
+      "Château de Raseborg"
+    ]
+  },
+  {
+    "id": "set_kastelholm",
+    "province": "prov_finland",
+    "kind": "castle",
+    "name": {
+      "display": "Kastelholm",
+      "local": "Kastelholm",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      20.0503,
+      60.2153
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse d'Åland, gardant le passage de la mer d'Åland.",
+    "sources": [
+      "Château de Kastelholm"
+    ]
+  },
+  {
+    "id": "set_borga",
+    "province": "prov_finland",
+    "kind": "town",
+    "name": {
+      "display": "Porvoo (Borgå)",
+      "local": "Borgå",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      25.6643,
+      60.3927
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Bourg marchand du Nyland oriental.",
+    "sources": [
+      "Porvoo"
+    ]
+  }
+]

@@ -1,0 +1,62 @@
+{
+  "id": "fac_holstein_kiel",
+  "name": {
+    "display": "Comté de Holstein-Kiel et gage de Sjælland",
+    "local": "Grafschaft Holstein-Kiel",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Holstein-Kiel",
+  "adjective": "holsteinois de Kiel",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_johan_iii_de_holstein_kiel",
+  "capital": "prov_sjaelland",
+  "capital_city": "Roskilde",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_sjaelland",
+  "heraldry": {
+    "blazon": "De gueules à la feuille d'ortie d'argent, à la bordure d'azur.",
+    "description": "Feuille d'ortie des Schauenbourg ; bordure d'azur ajoutée en jeu pour distinguer la branche de Kiel de celle de Rendsbourg.",
+    "primary_color": "#B22222",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Brisure de jeu, non attestée pour Jean III."
+  },
+  "titles": [
+    "Comte de Holstein-Kiel et de Plön",
+    "Gagiste de Sjælland, Lolland et Falster"
+  ],
+  "treasury": 8000,
+  "prestige": 38,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hanseatic_trade"
+  ],
+  "relations": [
+    {
+      "faction": "fac_holstein",
+      "status": "peace",
+      "note": "Cousin de Gérard III, son partenaire et rival dans le partage du royaume vacant."
+    },
+    {
+      "faction": "fac_sweden",
+      "status": "peace",
+      "note": "A cédé la Scanie à Magnus Eriksson en 1332."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 65,
+    "trade": 55,
+    "piety": 50
+  },
+  "description": "Jean le Doux, médiateur de la paix de Kiel (1332), tient Sjælland, Lolland et Falster en gage ; contrepoids à son cousin Gérard, il finira par vendre ses droits à Valdemar Atterdag.",
+  "sources": [
+    "Jean III de Holstein-Kiel",
+    "Interrègne danois (1332-1340)"
+  ]
+}

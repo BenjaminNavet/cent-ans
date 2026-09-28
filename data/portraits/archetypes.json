@@ -140,7 +140,19 @@
         "fac_rimini",
         "fac_sicily",
         "fac_taranto",
-        "fac_pavia"
+        "fac_pavia",
+        "fac_holstein_kiel",
+        "fac_schleswig",
+        "fac_danish_estonia",
+        "fac_teutonic",
+        "fac_livonian_order",
+        "fac_riga_archbishopric",
+        "fac_riga",
+        "fac_dorpat",
+        "fac_osel_wiek",
+        "fac_courland",
+        "fac_pomerania_stettin",
+        "fac_pomerania_wolgast"
       ],
       "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
     },

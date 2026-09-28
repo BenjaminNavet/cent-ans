@@ -1,0 +1,102 @@
+{
+  "id": "prov_pomerania_wolgast",
+  "name": {
+    "display": "Poméranie-Wolgast et Rügen",
+    "local": "Pommern-Wolgast",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "pomeranie",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Peene",
+    "Ryck"
+  ],
+  "coastal": true,
+  "ports": [
+    "Stralsund",
+    "Greifswald",
+    "Wolgast"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wheat",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Wolgast",
+      "local": "Wolgast",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 54.0489,
+    "lon": 13.7681
+  },
+  "geo": {
+    "capital_lonlat": [
+      13.7681,
+      54.0489
+    ],
+    "seed_lonlat": [
+      13.5,
+      54.1
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_pomerania_wolgast",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 95000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8550,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2850,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1140,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2100,
+  "description": "Poméranie occidentale (Vorpommern) et île de Rügen, échue aux ducs de Poméranie en 1325 ; Wolgast, Greifswald et Stralsund, hanséatiques.",
+  "sources": [
+    "Duché de Poméranie-Wolgast",
+    "Wolgast",
+    "Stralsund",
+    "Principauté de Rügen"
+  ]
+}

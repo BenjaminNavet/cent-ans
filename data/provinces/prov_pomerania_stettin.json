@@ -1,0 +1,98 @@
+{
+  "id": "prov_pomerania_stettin",
+  "name": {
+    "display": "Poméranie-Stettin",
+    "local": "Pommern-Stettin",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "pomeranie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Oder"
+  ],
+  "coastal": true,
+  "ports": [
+    "Stettin"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Stettin",
+      "local": "Stettin",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 53.4285,
+    "lon": 14.5528
+  },
+  "geo": {
+    "capital_lonlat": [
+      14.5528,
+      53.4285
+    ],
+    "seed_lonlat": [
+      14.75,
+      53.4
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_pomerania_stettin",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9450,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3150,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1260,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2300,
+  "description": "Le duché des Griffons de Stettin, au pays de l'Oder, entre la Marche de Brandebourg (qui le revendique en suzeraineté) et la mer : Stettin, Stargard, Gartz.",
+  "sources": [
+    "Duché de Poméranie-Stettin",
+    "Szczecin",
+    "Stargard"
+  ]
+}

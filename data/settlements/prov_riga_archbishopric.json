@@ -1,0 +1,104 @@
+[
+  {
+    "id": "set_kokenhusen",
+    "province": "prov_riga_archbishopric",
+    "kind": "city",
+    "name": {
+      "display": "Kokenhusen",
+      "local": "Kokenhusen",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      25.4353,
+      56.6408
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château de l'archevêque sur la Dvina, résidence en Livonie orientale.",
+    "sources": [
+      "Koknese"
+    ]
+  },
+  {
+    "id": "set_treiden",
+    "province": "prov_riga_archbishopric",
+    "kind": "castle",
+    "name": {
+      "display": "Treiden",
+      "local": "Treiden",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      24.8419,
+      57.1847
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'évêque Albert (1214), sur la Gauja.",
+    "sources": [
+      "Turaida"
+    ]
+  },
+  {
+    "id": "set_lemsal",
+    "province": "prov_riga_archbishopric",
+    "kind": "castle",
+    "name": {
+      "display": "Lemsal",
+      "local": "Lemsal",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      24.7,
+      57.5167
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'archevêque et petite ville du nord de la Livonie.",
+    "sources": [
+      "Limbaži"
+    ]
+  },
+  {
+    "id": "set_ronneburg",
+    "province": "prov_riga_archbishopric",
+    "kind": "castle",
+    "name": {
+      "display": "Ronneburg",
+      "local": "Ronneburg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      25.6,
+      57.3333
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château archiépiscopal dont la construction est attestée au XIVe siècle.",
+    "sources": [
+      "Rauna"
+    ]
+  }
+]

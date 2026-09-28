@@ -1,0 +1,37 @@
+{
+  "id": "chr_jakob_ii_d_osel_wiek",
+  "name": {
+    "display": "Jakob II d'Ösel-Wiek",
+    "local": "Jakob von Ösel-Wiek",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Évêché d'Ösel-Wiek",
+  "faction": "fac_osel_wiek",
+  "role": "ruler",
+  "birth": {
+    "value": "1280",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1337",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 2,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 70,
+  "starting_location": "prov_osel_wiek",
+  "status": "at_court",
+  "description": "Évêque d'Ösel-Wiek depuis 1322 ; son épiscopat prend fin en 1337 (Hermann II Osenbrügge lui succède en 1338).",
+  "sources": [
+    "Évêché d'Ösel-Wiek"
+  ]
+}

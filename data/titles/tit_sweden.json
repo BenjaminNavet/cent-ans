@@ -13,7 +13,12 @@
     "secondary_color": "#E8B923"
   },
   "de_jure_provinces": [
-    "prov_gotaland"
+    "prov_gotaland",
+    "prov_ostergotland",
+    "prov_svealand",
+    "prov_bergslagen",
+    "prov_norrland",
+    "prov_gotland"
   ],
   "holder_1337": {
     "faction": "fac_sweden",

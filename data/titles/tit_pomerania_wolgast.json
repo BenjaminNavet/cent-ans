@@ -1,0 +1,53 @@
+{
+  "id": "tit_pomerania_wolgast",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Poméranie-Wolgast",
+    "local": "Herzogtum Pommern-Wolgast",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'or au griffon de gueules, à la bordure de gueules.",
+    "description": "Griffon de Poméranie sur or pour la ligne de Wolgast.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Brisure de jeu (champ d'or, bordure), non attestée pour Wolgast."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_pomerania_wolgast",
+    "prov_pomerania_stolp"
+  ],
+  "holder_1337": {
+    "faction": "fac_pomerania_wolgast",
+    "sources": [
+      "Duché de Poméranie-Wolgast",
+      "Principauté de Rügen"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_wolgast_hold",
+      "title": "Garder Wolgast",
+      "description": "Conserver le duché.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_pomerania_wolgast"
+      }
+    },
+    {
+      "id": "obj_wolgast_indep",
+      "title": "Libre du Brandebourg",
+      "description": "Rester indépendant du margrave.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Duché de Wolgast, Rügen (acquise en 1325) et pays de Stolp.",
+  "sources": [
+    "Duché de Poméranie-Wolgast",
+    "Principauté de Rügen"
+  ]
+}

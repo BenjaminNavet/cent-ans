@@ -1,0 +1,99 @@
+{
+  "id": "prov_pomesania",
+  "name": {
+    "display": "Prusse-Marienbourg",
+    "local": "Pomesanien",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "prusse",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Nogat",
+    "Vistule"
+  ],
+  "coastal": true,
+  "ports": [
+    "Elbing"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Marienbourg",
+      "local": "Marienburg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 54.0383,
+    "lon": 19.0402
+  },
+  "geo": {
+    "capital_lonlat": [
+      19.0402,
+      54.0383
+    ],
+    "seed_lonlat": [
+      19.4,
+      53.95
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_teutonic",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 80000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6400,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2400,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 960,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1900,
+  "description": "Le noyau de l'État de l'Ordre : Marienbourg (Malbork), résidence du grand maître depuis 1309 et forteresse en briques la plus vaste d'Europe, Elbing (Elbląg) hanséatique, Marienwerder (Kwidzyn) et la Vistule.",
+  "sources": [
+    "Château de Malbork",
+    "Elbląg",
+    "Ordre Teutonique"
+  ]
+}

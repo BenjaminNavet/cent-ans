@@ -39,6 +39,10 @@
       "faction": "fac_holstein",
       "status": "peace",
       "note": "Magnus a racheté la Scanie aux comtes de Holstein (1332)."
+    },
+    {
+      "faction": "fac_holstein_kiel",
+      "status": "peace"
     }
   ],
   "ai_personality": {

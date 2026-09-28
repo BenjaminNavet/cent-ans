@@ -1,0 +1,37 @@
+{
+  "id": "chr_johann_ii_de_courlande",
+  "name": {
+    "display": "Jean II de Courlande",
+    "local": "Johann II. von Kurland",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Évêché de Courlande",
+  "faction": "fac_courland",
+  "role": "ruler",
+  "birth": {
+    "value": "1295",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1353",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 2,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_loyal"
+  ],
+  "piety": 70,
+  "starting_location": "prov_pilten",
+  "status": "at_court",
+  "description": "Évêque de Courlande de 1332 à 1353 ; chanoine régulier de l'Ordre, enclavé entre les terres de l'ordre Livonien.",
+  "sources": [
+    "Évêché de Courlande"
+  ]
+}
