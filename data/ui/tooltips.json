@@ -362,6 +362,7 @@
   },
   "plain": {
     "close": {"title": "Fermer"},
+    "raze_building": {"title": "Raser le bâtiment"},
     "close_escape": {"title": "Fermer", "hint": "Échap"},
     "click_to_close": {"title": "Cliquer pour fermer"},
     "open_character_sheet": {"title": "Ouvrir la fiche du personnage"},

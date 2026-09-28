@@ -115,8 +115,7 @@ static func fill_buildings(list: Container, buildings: Array, demolition: Dictio
 
 
 ## RS-N : bouton « Raser » d'un bâtiment ; `preview` vient de
-## `settlement_demolition_preview` (cœur). Infobulle simple (`tooltip_text`),
-## pas l'infobulle riche en cours de refonte.
+## `settlement_demolition_preview` (cœur). Infobulle en sections (IB2, clé `raze_building`).
 static func _raze_button(building_id: String, preview: Dictionary, on_raze: Callable) -> Button:
 	var button := Button.new()
 	button.name = "RazeButton"
@@ -127,9 +126,9 @@ static func _raze_button(building_id: String, preview: Dictionary, on_raze: Call
 	var refund := int(preview.get("refund", 0))
 	var upkeep_saved := int(preview.get("upkeep_saved", 0))
 	if can_demolish:
-		button.tooltip_text = "Rembourse %s ; économise %s d'entretien par saison." % [Money.amount(refund), Money.amount(upkeep_saved)]
+		RichTooltip.attach_plain(button, "raze_building", {"body": "Rembourse %s ; économise %s d'entretien par saison." % [Money.amount(refund), Money.amount(upkeep_saved)]})
 	else:
-		button.tooltip_text = str(preview.get("reason", "indisponible"))
+		RichTooltip.attach_plain(button, "raze_building", {"body": str(preview.get("reason", "indisponible"))})
 	if on_raze.is_valid():
 		button.pressed.connect(func() -> void: on_raze.call(building_id, preview))
 	return button
