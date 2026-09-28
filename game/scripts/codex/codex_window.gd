@@ -164,7 +164,7 @@ func _build_page() -> Control:
 	page.add_child(_art)
 	encyclopedia_button = Button.new()
 	encyclopedia_button.text = "Voir la fiche de règles"
-	encyclopedia_button.tooltip_text = "Onglet Règles : la fiche de jeu (touche L)"
+	RichTooltip.attach_plain(encyclopedia_button, "codex_rules_tab")
 	encyclopedia_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	encyclopedia_button.hide()
 	encyclopedia_button.pressed.connect(open_in_encyclopedia)

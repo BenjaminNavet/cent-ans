@@ -213,7 +213,7 @@ func _build_log() -> void:
 	log_toggle.name = "LogToggle"
 	log_toggle.focus_mode = Control.FOCUS_NONE
 	log_toggle.flat = true
-	log_toggle.tooltip_text = "Replier ou déplier le journal (J)"
+	RichTooltip.attach_plain(log_toggle, "battle_log_toggle")
 	log_toggle.pressed.connect(toggle_log)
 	header.add_child(log_toggle)
 	_update_log_toggle()
@@ -294,8 +294,7 @@ func _build_bottom() -> void:
 		button.custom_minimum_size = Vector2(46, 38)
 		button.focus_mode = Control.FOCUS_NONE
 		var key := BattleHotkeys.key_label(str(entry[0]))
-		var key_hint := " (%s)" % key if key != "" else ""
-		button.tooltip_text = "[b]%s[/b]%s\n%s" % [entry[1], key_hint, entry[2]]
+		RichTooltip.attach_plain(button, "battle_command", {"title": str(entry[1]), "hint": key, "body": str(entry[2])})
 		button.draw.connect(_draw_command_icon.bind(button, str(entry[0]), key))
 		button.pressed.connect(func() -> void: command_pressed.emit(str(entry[0])))
 		buttons.add_child(button)
@@ -304,7 +303,7 @@ func _build_bottom() -> void:
 	withdraw_all_button.name = "WithdrawAll"
 	withdraw_all_button.text = "Retraite générale"
 	withdraw_all_button.focus_mode = Control.FOCUS_NONE
-	withdraw_all_button.tooltip_text = "Sonner la retraite de toute l'armée (confirmation demandée)"
+	RichTooltip.attach_plain(withdraw_all_button, "battle_withdraw_all")
 	withdraw_all_button.add_theme_font_size_override("font_size", 12)
 	withdraw_all_button.add_theme_color_override("font_color", Color(0.98, 0.92, 0.8))
 	withdraw_all_button.add_theme_color_override("font_hover_color", Color(1, 1, 0.92))
@@ -387,7 +386,7 @@ func _build_leader_seal() -> Control:
 	leader_seal.name = "LeaderSeal"
 	leader_seal.custom_minimum_size = Vector2(SEAL_SIZE, SEAL_SIZE)
 	leader_seal.mouse_filter = Control.MOUSE_FILTER_STOP
-	leader_seal.tooltip_text = "Sans chef"
+	RichTooltip.attach_plain(leader_seal, "battle_no_leader")
 	leader_seal.draw.connect(_draw_leader_seal)
 	leader_seal.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
@@ -413,15 +412,14 @@ func leader_unit_id() -> int:
 
 func _refresh_leader_tooltip() -> void:
 	if _leader.is_empty():
-		leader_seal.tooltip_text = "L'ost combat sans général."
+		RichTooltip.attach_plain(leader_seal, "battle_no_leader")
 		return
-	var text := "%s\nCommandement %d / %s" % [str(_leader.get("name", "")), int(_leader.get("command", 0)), RuleValues.text("max_skill_level")]
+	var body := "Commandement %d / %s" % [int(_leader.get("command", 0)), RuleValues.text("max_skill_level")]
 	if not _leader_unit.is_empty():
-		text += "\nGarde du chef : %d hommes · moral %d" % [int(_leader_unit["soldiers"]), int(_leader_unit["morale"])]
+		body += "\nGarde du chef : %d hommes · moral %d" % [int(_leader_unit["soldiers"]), int(_leader_unit["morale"])]
 		if not bool(_leader_unit["present"]):
-			text += "\nLe chef est tombé ou a quitté le champ."
-	text += "\nClic : sélectionner sa garde · double clic : y aller"
-	leader_seal.tooltip_text = text
+			body += "\nLe chef est tombé ou a quitté le champ."
+	RichTooltip.attach_plain(leader_seal, "battle_leader", {"title": str(_leader.get("name", "")), "body": body, "hint": "clic : sélectionner sa garde · double clic : y aller"})
 
 
 func _draw_leader_seal() -> void:
@@ -594,7 +592,7 @@ func set_opening(opening: Dictionary, player_side: String) -> void:
 			parts.append("Camp retranché")
 			tips.append(("Votre ost" if own else "L'ennemi") + " tient un camp retranché : pieux et palissade.")
 	opening_badge.text = " · ".join(parts)
-	opening_badge.tooltip_text = "\n".join(tips)
+	RichTooltip.attach_plain(opening_badge, "battle_opening_conditions", {"body": "\n".join(tips)})
 	opening_badge.visible = not parts.is_empty()
 
 
@@ -749,8 +747,7 @@ func _build_mode_buttons(grid: GridContainer) -> void:
 		var key := BattleHotkeys.key_label(mode)
 		if key.length() > 3:  # « bouton » : pas de touche
 			key = ""
-		var key_hint := " (%s)" % key if key != "" else ""
-		button.tooltip_text = "[b]%s[/b]%s\n%s" % [str(entry["label"]), key_hint, BattleModeIcons.tip_of(mode)]
+		RichTooltip.attach_plain(button, "battle_mode", {"title": str(entry["label"]), "hint": key, "body": BattleModeIcons.tip_of(mode)})
 		button.draw.connect(_draw_mode_button.bind(button, mode, key))
 		button.pressed.connect(func() -> void: command_pressed.emit(mode))
 		grid.add_child(button)

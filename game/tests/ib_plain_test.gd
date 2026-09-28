@@ -15,20 +15,7 @@ const ENABLED := true
 ## Fichiers où un `tooltip_text = "…"` littéral peut légitimement rester (§ 2.4 : textes purement
 ## dynamiques sans titre possible, ou migration IB2 restante — voir docs/wip/ib2.md « reste »).
 ## Chemins relatifs à `res://`. Se réduit lot par lot au fil de la migration.
-const LITERAL_EXCEPTIONS: Array[String] = [
-	"res://scripts/audio/advisor.gd",
-	"res://scripts/battle/battle_alerts_column.gd",
-	"res://scripts/battle/battle_formation_picker.gd",
-	"res://scripts/battle/battle_hud.gd",
-	"res://scripts/battle/battle_minimap.gd",
-	"res://scripts/battle/battle_replay_bar.gd",
-	"res://scripts/battle/battle_result_screen.gd",
-	"res://scripts/battle/pre_battle_dialog.gd",
-	"res://scripts/battle/roster_card.gd",
-	"res://scripts/codex/codex_window.gd",
-	"res://scripts/naval/naval_hud.gd",
-	"res://scripts/naval/naval_pre_battle_dialog.gd",
-]
+const LITERAL_EXCEPTIONS: Array[String] = []
 
 var _failures := 0
 var _checks := 0
