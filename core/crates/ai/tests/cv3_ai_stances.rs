@@ -50,7 +50,7 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
         .filter_map(|id| data.settlement_point(id))
         .collect();
     let radius = radius_km * px_per_km(data);
-    for y in (2000..2600).step_by(8) {
+    for y in (3280..3880).step_by(8) {
         for x in (1900..2500).step_by(8) {
             let p = [x as f32, y as f32];
             if settlements.iter().all(|s| distance_px(*s, p) > radius) {
@@ -66,10 +66,10 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
 fn data_with_forest(forests: &[[f32; 2]]) -> GameData {
     let mut data = real_data();
     data.set_map_rasters(MapRasters {
-        navgrid: NavGrid::uniform(2048, 2048, 2, 1.438, PLAIN_COST),
+        navgrid: NavGrid::uniform(3584, 3072, 2, 1.438, PLAIN_COST),
         provinces: None,
     });
-    let mut cover = CoverMap::open(2048, 2048, 2);
+    let mut cover = CoverMap::open(3584, 3072, 2);
     for point in forests {
         for dy in -1..=1 {
             for dx in -1..=1 {
