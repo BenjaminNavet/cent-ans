@@ -12,6 +12,7 @@ pub mod battle_outcome;
 pub mod battle_standards;
 pub mod building;
 pub mod campaign_weather;
+pub mod capture;
 pub mod character;
 pub mod chivalric_order;
 pub mod diet;
