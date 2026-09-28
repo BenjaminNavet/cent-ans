@@ -51,5 +51,30 @@
     "sources": [
       "Orcha"
     ]
+  },
+  {
+    "id": "set_drutsk",
+    "province": "prov_vitebsk",
+    "kind": "castle",
+    "name": {
+      "display": "Droutsk",
+      "local": "Druck",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      29.73,
+      54.4
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'ancienne principauté de Droutsk sur la Drout, cité dès 1092, dans l'orbite de Vitebsk.",
+    "sources": [
+      "Drutsk"
+    ]
   }
 ]
