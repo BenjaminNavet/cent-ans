@@ -600,4 +600,3 @@ fn view_lists_ruler_first_and_family() {
         .any(|c| c.id == chr("chr_jean_de_normandie")));
     assert!(!view.traits.is_empty());
 }
-
