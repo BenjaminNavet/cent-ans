@@ -93,10 +93,10 @@ func _ready() -> void:
 			var divider := VSeparator.new()
 			sides.add_child(divider)
 	content.add_child(BattleUiKit.rule())
-	body_label = BattleUiKit.label("", 16)
+	body_label = BattleUiKit.label("", UiType.size(UiType.BODY))
 	body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(body_label)
-	modifiers_label = BattleUiKit.label("", 14, BattleUiKit.INK_SOFT)
+	modifiers_label = BattleUiKit.label("", UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 	modifiers_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	modifiers_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	modifiers_label.clip_text = true
@@ -122,11 +122,11 @@ func _build_banner() -> Control:
 	texts.alignment = BoxContainer.ALIGNMENT_END
 	texts.add_theme_constant_override("separation", 0)
 	margin.add_child(texts)
-	title_label = BattleUiKit.label("", 38, Color(0.99, 0.95, 0.84), true)
+	title_label = BattleUiKit.label("", UiType.size(UiType.TITLE), Color(0.99, 0.95, 0.84), true)
 	title_label.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.02))
 	title_label.add_theme_constant_override("outline_size", 6)
 	texts.add_child(title_label)
-	subtitle_label = BattleUiKit.label("", 17, Color(0.96, 0.88, 0.68))
+	subtitle_label = BattleUiKit.label("", UiType.size(UiType.BODY), Color(0.96, 0.88, 0.68))
 	subtitle_label.add_theme_font_override("font", BattleUiKit.title_italic_font())
 	subtitle_label.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.02))
 	subtitle_label.add_theme_constant_override("outline_size", 4)
@@ -149,7 +149,7 @@ func _draw_banner() -> void:
 func _build_balance() -> Control:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
-	verdict_label = BattleUiKit.label("", 24, INK, true)
+	verdict_label = BattleUiKit.label("", UiType.size(UiType.HEADING), INK, true)
 	verdict_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(verdict_label)
 	var row := HBoxContainer.new()
@@ -160,7 +160,7 @@ func _build_balance() -> Control:
 	balance_bar.custom_minimum_size = Vector2(620, 18)
 	balance_bar.draw.connect(func() -> void: BattleUiKit.draw_balance(balance_bar, _share, _colors[0], _colors[1]))
 	row.add_child(balance_bar)
-	chance_label = BattleUiKit.label("", 14, BattleUiKit.INK_SOFT)
+	chance_label = BattleUiKit.label("", UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 	chance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	chance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q5 : libellé plus long
 	box.add_child(chance_label)
@@ -170,7 +170,7 @@ func _build_balance() -> Control:
 func _build_buttons() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 18)
-	withdraw_button = _button("Retraite", 18)
+	withdraw_button = _button("Retraite", UiType.size(UiType.BODY))
 	withdraw_button.name = "Withdraw"
 	withdraw_button.pressed.connect(func() -> void:
 		visible = false
@@ -179,14 +179,14 @@ func _build_buttons() -> Control:
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(spacer)
-	auto_button = _button("Résolution automatique", 18)
+	auto_button = _button("Résolution automatique", UiType.size(UiType.BODY))
 	auto_button.name = "AutoResolve"
 	auto_button.tooltip_text = "La bataille est tranchée sans être jouée, selon le rapport de forces et la fortune des armes."
 	auto_button.pressed.connect(func() -> void:
 		visible = false
 		auto_requested.emit(int(battle.get("index", 0))))
 	row.add_child(auto_button)
-	fight_button = _button("Combattre", 22)
+	fight_button = _button("Combattre", UiType.size(UiType.HEADING))
 	fight_button.name = "Fight"
 	fight_button.custom_minimum_size = Vector2(230, 48)
 	var style := BattleUiKit.parchment_box(8, Color(0.55, 0.11, 0.08), Color(0.36, 0.06, 0.04), 2)
@@ -341,7 +341,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	var name_box := VBoxContainer.new()
 	name_box.add_theme_constant_override("separation", -2)
 	var name_text := str(battle.get("%s_name" % side, side_setup.get("faction_name", "")))
-	var name_label := BattleUiKit.label(name_text + ("  (vous)" if slot == 0 and str(battle.get("player_side", "")) != "" else ""), 24, INK, true)
+	var name_label := BattleUiKit.label(name_text + ("  (vous)" if slot == 0 and str(battle.get("player_side", "")) != "" else ""), UiType.size(UiType.HEADING), INK, true)
 	name_box.add_child(name_label)
 	var role := "assaillant" if side == "attacker" else "défenseur"
 	if siege:
@@ -350,7 +350,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	for unit in units:
 		soldiers += int(unit.get("soldiers", 0))
 	var strength_text := "%s · %s hommes en %d régiments" % [role.capitalize(), BattleUiKit.thousands(soldiers), units.size()]
-	name_box.add_child(BattleUiKit.label(strength_text, 15, BattleUiKit.INK_SOFT))
+	name_box.add_child(BattleUiKit.label(strength_text, UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT))
 	if slot == 0:
 		header.add_child(arms)
 		header.add_child(name_box)
@@ -370,7 +370,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 			if str(entry.get("general", "")) != "":
 				text += " sous %s" % str(entry.get("general", ""))
 			parts.append(text)
-		var reinf := BattleUiKit.label("Renforts : " + ", ".join(parts), 14, BattleUiKit.GOOD, false, true)
+		var reinf := BattleUiKit.label("Renforts : " + ", ".join(parts), UiType.size(UiType.CAPTION), BattleUiKit.GOOD, false, true)
 		reinf.clip_text = true
 		reinf.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		reinf.set_script(RichLabel)
@@ -378,7 +378,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 		reinf.mouse_filter = Control.MOUSE_FILTER_PASS
 		column.add_child(reinf)
 	else:
-		column.add_child(BattleUiKit.label("Aucun renfort à portée.", 14, BattleUiKit.INK_FADED))
+		column.add_child(BattleUiKit.label("Aucun renfort à portée.", UiType.size(UiType.CAPTION), BattleUiKit.INK_FADED))
 	# Régiments en cartes.
 	var grid := GridContainer.new()
 	grid.columns = CARD_COLUMNS
@@ -399,7 +399,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	scroll.custom_minimum_size = Vector2(0, rows * (CARD_SIZE.y + 4) + 2)
 	scroll.add_child(grid)
 	column.add_child(scroll)
-	var composition := BattleUiKit.label(_composition(units), 14, BattleUiKit.INK_SOFT)
+	var composition := BattleUiKit.label(_composition(units), UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 	composition.clip_text = true
 	composition.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	composition.set_script(RichLabel)
@@ -439,10 +439,10 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 		medallion.draw_arc(c, r, 0, TAU, 48, BattleUiKit.INK, 1.5))
 	var texts := VBoxContainer.new()
 	texts.alignment = BoxContainer.ALIGNMENT_CENTER
-	var name_label := BattleUiKit.label(name_text, 19, INK, false, true)
+	var name_label := BattleUiKit.label(name_text, UiType.size(UiType.HEADING), INK, false, true)
 	texts.add_child(name_label)
 	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
-	var stars_label := BattleUiKit.label(stars, 14, BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
+	var stars_label := BattleUiKit.label(stars, UiType.size(UiType.CAPTION), BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
 	stars_label.set_script(RichLabel)
 	stars_label.tooltip_text = "Commandement %d / %s" % [command, RuleValues.text("max_skill_level")]
 	stars_label.mouse_filter = Control.MOUSE_FILTER_PASS
