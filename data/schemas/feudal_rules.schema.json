@@ -20,6 +20,10 @@
       "description": "Termes de la loyauté cible d'un vassal envers son suzerain direct (§ 4.2).",
       "properties": {
         "base": { "type": "integer" },
+        "power_ratio": { "type": "number", "minimum": 1, "description": "Rapport de forces (suzerain / vassal) au-delà duquel il joue en faveur du suzerain." },
+        "drift_per_turn": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Points par saison dont la loyauté se rapproche de sa cible." },
+        "homage_start": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté d'un vassal qui vient de prêter hommage." },
+        "memory_turns": { "type": "integer", "minimum": 1, "description": "Saisons pendant lesquelles un événement (protection, commise d'un pair, défaite, prétendant, octroi de titre) pèse sur la loyauté." },
         "power_favourable": { "type": "integer" },
         "power_unfavourable": { "type": "integer" },
         "excommunicated_liege": { "type": "integer" },

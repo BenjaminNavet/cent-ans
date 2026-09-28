@@ -271,15 +271,22 @@ pub(crate) fn resolve_faction_deaths(
             dead.truces.clear();
             dead.embargoes.clear();
             dead.suzerain = None;
+            let vassals: Vec<FactionId> = state
+                .factions
+                .iter()
+                .filter(|(_, f)| f.suzerain.as_ref() == Some(&id))
+                .map(|(v, _)| v.clone())
+                .collect();
+            // The vassals of a vanished faction become sovereign (lot FE).
+            for vassal in &vassals {
+                crate::feudal::release_from_liege(state, vassal);
+            }
             // Wars, alliances and vassal ties with a vanished faction end.
             for other in state.factions.values_mut() {
                 other.at_war_with.remove(&id);
                 other.allies.remove(&id);
                 other.truces.remove(&id);
                 other.embargoes.remove(&id);
-                if other.suzerain.as_ref() == Some(&id) {
-                    other.suzerain = None;
-                }
             }
             events.push(
                 GameEvent::new(

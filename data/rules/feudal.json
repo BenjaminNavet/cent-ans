@@ -10,6 +10,10 @@
   "ascension_turns": 20,
   "loyalty": {
     "base": 55,
+    "power_ratio": 2.0,
+    "drift_per_turn": 5,
+    "homage_start": 60,
+    "memory_turns": 12,
     "power_favourable": 10,
     "power_unfavourable": -10,
     "excommunicated_liege": -20,
