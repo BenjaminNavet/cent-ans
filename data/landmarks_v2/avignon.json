@@ -6645,6 +6645,22 @@
    "description": "Franciscains installés en 1226 hors de l'enceinte, couvent commencé en 1233, grande église achevée en 1350 ; Laure de Noves y est dite inhumée en 1348. Seuls restent un clocher et une chapelle absidiale (OSM, rue des Teinturiers) : emprise, axe et hauteur restitués autour de ce vestige."
   },
   {
+   "id": "augustins",
+   "name": "Église des Augustins",
+   "model": "church",
+   "at": [430, -128],
+   "angle_deg": 10,
+   "clear_m": 6,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 50,
+    "width_m": 16,
+    "height_m": 16,
+    "apse": "flat"
+   },
+   "description": "Grands Augustins installés en 1261 rue de la Carreterie, église reconstruite à partir de 1345 ; démolie à la Révolution, seul reste le clocher (tour des Augustins, OSM). Emprise, axe et hauteur restitués à l'ouest du clocher."
+  },
+  {
    "id": "sainte_claire",
    "name": "Église des Clarisses (Sainte-Claire)",
    "model": "church",
