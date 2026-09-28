@@ -4,6 +4,7 @@ pub mod agent;
 pub mod ai_alignment;
 pub mod ai_diplomacy;
 pub mod ai_doctrine;
+pub mod ai_feudal;
 pub mod ai_grid;
 pub mod auto_resolve;
 pub mod battle_ability;
