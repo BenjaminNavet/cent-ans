@@ -1,0 +1,27 @@
+{
+  "id": "tit_naples",
+  "rank": "duchy",
+  "name": {
+    "display": "Royaume de Naples",
+    "local": "Regno di Sicilia",
+    "local_language": "napolitain"
+  },
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+    "description": "Armes d'Anjou-Sicile : les lis de France brisés du lambel rouge des Angevins de Naples.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_liege": "tit_papacy",
+  "de_jure_provinces": [
+    "prov_napoli"
+  ],
+  "holder_1337": {
+    "faction": "fac_naples",
+    "sources": [
+      "Royaume de Naples",
+      "Robert Ier de Naples",
+      "Comté de Provence"
+    ]
+  }
+}

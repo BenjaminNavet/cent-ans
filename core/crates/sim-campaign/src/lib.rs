@@ -52,6 +52,7 @@ pub mod economy_balance;
 pub mod edicts;
 pub mod encounter;
 pub mod events;
+pub mod feudal;
 pub mod frontier;
 pub mod holdings;
 pub mod map_lens;

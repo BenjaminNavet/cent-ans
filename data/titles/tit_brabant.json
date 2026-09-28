@@ -1,0 +1,26 @@
+{
+  "id": "tit_brabant",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Brabant",
+    "local": "Hertogdom Brabant",
+    "local_language": "moyen néerlandais"
+  },
+  "heraldry": {
+    "blazon": "De sable au lion d'or, armé et lampassé de gueules.",
+    "description": "Lion d'or des ducs de Brabant et de Lothier.",
+    "primary_color": "#1A1A1A",
+    "secondary_color": "#E8B923"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_brabant"
+  ],
+  "holder_1337": {
+    "faction": "fac_brabant",
+    "sources": [
+      "Duché de Brabant",
+      "Jean III de Brabant"
+    ]
+  }
+}

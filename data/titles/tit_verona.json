@@ -1,0 +1,26 @@
+{
+  "id": "tit_verona",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Vérone",
+    "local": "Signoria scaligera",
+    "local_language": "vénitien"
+  },
+  "heraldry": {
+    "blazon": "De gueules à l'échelle d'argent posée en pal.",
+    "description": "L'échelle (scala) des della Scala.",
+    "primary_color": "#A31F24",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_verona"
+  ],
+  "holder_1337": {
+    "faction": "fac_verona",
+    "sources": [
+      "Mastino II della Scala",
+      "Scaligeri"
+    ]
+  }
+}
