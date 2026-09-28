@@ -15,6 +15,8 @@ Branche `feat/tw2-t5` (worktree `../gp-tw2-t5`, base `integration/tw2`). Spec :
 
 - [x] Pont `campaign_sim_traditions.rs` : `get_army_traditions`, `get_armies_with_pending_traditions`, `choose_army_tradition`, `debug_grant_army_xp`.
 
+- [x] UI : `game/scripts/map/traditions_controller.gd` (bouton du bandeau, panneau latéral, toasts de rang), titre du bandeau = nom gardé.
+
 ## Prochaine étape
 
-- UI, test headless, ADR 0109.
+- Test headless `game/tests/tw2_t5_traditions_test.gd`, ADR 0109, vérifs finales.

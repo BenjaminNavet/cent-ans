@@ -489,3 +489,8 @@ class RegimentCard:
 			draw_rect(rect.grow(-4), HudStyle.GOLD, false, 1.0)
 		else:
 			draw_rect(rect, HudStyle.INK_SOFT, false, 1.0)
+
+
+## TW2-T5 : bouton d'un contrôleur (« Traditions ») ajouté sous « Séparer » et « Garnison ».
+func add_header_button(button: Control) -> void:
+	_garrison_button.get_parent().add_child(button)
