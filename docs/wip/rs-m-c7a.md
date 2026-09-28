@@ -53,5 +53,14 @@ bâtiments, admin., Table, autre ; `last_budget` après chaque `end_turn_with`),
 `cargo test --release --no-fail-fast -p ai --test m3_grid_ai --test rs_m_diag -- --ignored --nocapture`.
 Ne jamais partager une cible cargo entre deux arbres (le worktree a sa cible `target-rs-m-wt`).
 
+## Century_probe 464 tours, normale, graines 1-10 (release, main 427b4978 = cœur de 5aae540f)
+| Niveau | Guerre FR-EN moy. [min-max] | Graines 55-75 | Trêves | Révoltes / 200 t. | Banqueroutes / fac. / déc. | 1re faction fin |
+|---|---|---|---|---|---|---|
+| Normale (10) | 64 % [40-74] | 8/10 | 12,2 | 6,5 [1,3-13,8] | 1,09 [0,48-2,38] | 21 % |
+
+Guerre et révoltes dans leurs bandes en moyenne (graines hors bande : 1 à 52 %, 6 à 40 %). Écart à
+signaler : banqueroutes / faction / décennie 1,09 contre 0,05 à RS-B (ae5d94f1) — les petites
+factions FE ; à juger en F8, hors lot.
+
 ## Prochaine étape
-Sonde verte sur la branche, century_probe normale 10 graines, tests complets.
+Sonde verte sur la branche, tests complets.
