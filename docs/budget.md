@@ -96,4 +96,5 @@ GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
 
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul GA |
 |---|---|---|---|---|---|
-| 2026-09-28 | — | GA0 : squelette (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière wool (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,04 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière mail (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,08 $ |

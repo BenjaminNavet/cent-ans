@@ -1,5 +1,29 @@
 # GA: AI-generated tileable materials (ADR 0104). Filled in GA1.
+# Prompts: flat texture seen straight on, even diffuse light, no cast shadow or
+# perspective, filling the frame (the pipeline makes it tileable afterwards).
 model: openai/gpt-5-image-mini
 size: 1024
 tile_size: 512
-materials: []
+materials:
+  - id: wool
+    prompt: >-
+      Seamless flat texture swatch of coarse medieval hand-woven wool cloth, undyed
+      natural oatmeal colour, visible irregular plain weave with thick uneven yarns,
+      slight fuzz and small slubs. Photographed straight on, orthographic top-down
+      view, perfectly even diffuse lighting, no cast shadows, no highlights, no
+      perspective, no folds, no vignette, the weave fills the entire frame edge to
+      edge. No text, no border, no objects.
+    blend_width: 128
+    height_strength: 0.8
+    roughness_bias: 0.1
+  - id: mail
+    prompt: >-
+      Seamless flat texture swatch of medieval riveted chain mail, European
+      four-in-one pattern of small interlocking round iron rings with visible rivets,
+      dull grey forged iron with slight patina. Photographed straight on,
+      orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
+      no perspective, no folds, no vignette, uniform ring size, the rings fill the
+      entire frame edge to edge. No text, no border, no background showing.
+    blend_width: 96
+    height_strength: 1.2
+    roughness_bias: -0.3
