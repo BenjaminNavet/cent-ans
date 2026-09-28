@@ -25,7 +25,13 @@ fn title_name(data: &GameData, title: &TitleId) -> String {
 /// Highest-ranked title held by `faction`; the current primary wins ties.
 fn best_primary(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<TitleId> {
     let current = state.feudal.primary.get(faction).cloned();
-    let held = titles_of(state, faction);
+    let held: Vec<&TitleId> = state
+        .feudal
+        .holders
+        .iter()
+        .filter(|(_, h)| *h == faction)
+        .map(|(t, _)| t)
+        .collect();
     let current_rank = current
         .as_ref()
         .filter(|t| holder_of(state, t) == Some(faction))
@@ -34,7 +40,7 @@ fn best_primary(state: &CampaignState, data: &GameData, faction: &FactionId) -> 
         .iter()
         .filter_map(|t| rank_of(data, t).map(|r| (r, t)))
         .max_by(|(ra, ta), (rb, tb)| ra.cmp(rb).then_with(|| tb.cmp(ta)))
-        .map(|(r, t)| (r, t.clone()));
+        .map(|(r, t)| (r, (*t).clone()));
     match (current_rank, best) {
         (Some(rank), Some((best_rank, _))) if rank >= best_rank => current,
         (_, Some((_, best))) => Some(best),
