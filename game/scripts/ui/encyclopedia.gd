@@ -112,7 +112,7 @@ func _ready() -> void:
 	box.add_child(header)
 	title_label = Label.new()
 	title_label.text = "Encyclopédie"
-	title_label.add_theme_font_size_override("font_size", 24)
+	UiType.apply(title_label, UiType.TITLE)
 	header.add_child(title_label)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -165,14 +165,14 @@ func _ready() -> void:
 	left.custom_minimum_size = Vector2(300, 0)
 	split.add_child(left)
 	count_label = Label.new()
-	count_label.add_theme_font_size_override("font_size", 13)
+	UiType.apply(count_label, UiType.CAPTION)
 	count_label.add_theme_color_override("font_color", Color(0.42, 0.35, 0.25))
 	left.add_child(count_label)
 	entry_list = ItemList.new()
 	entry_list.name = "Entries"
 	entry_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	entry_list.fixed_icon_size = Vector2i(22, 22)
-	entry_list.add_theme_font_size_override("font_size", 15)
+	UiType.apply(entry_list, UiType.BODY)
 	entry_list.add_theme_color_override("font_selected_color", Color(0.98, 0.94, 0.84))
 	var selected := StyleBoxFlat.new()
 	selected.bg_color = Color(0.45, 0.28, 0.12)
@@ -189,8 +189,8 @@ func _ready() -> void:
 	fiche.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	fiche.custom_minimum_size = Vector2(700, 0)
 	fiche.add_theme_color_override("default_color", Color(0.22, 0.14, 0.07))
-	fiche.add_theme_font_size_override("normal_font_size", 15)
-	fiche.add_theme_font_size_override("bold_font_size", 16)
+	UiType.apply(fiche, UiType.BODY)
+	fiche.add_theme_font_size_override("bold_font_size", UiType.size(UiType.BODY))
 	fiche.meta_clicked.connect(func(meta: Variant) -> void: open_entry(str(meta)))
 	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le corps des fiches.
 	var bubbles := get_node_or_null("/root/CodexBubbles")
@@ -401,7 +401,7 @@ func set_embedded(on: bool) -> void:
 	search_field.visible = not on
 	_close_button.visible = not on
 	if on:
-		CodexHub.style_tabs(tab_bar, 14, 7)
+		CodexHub.style_tabs(tab_bar, UiType.CAPTION, 7)
 
 
 ## Nombre d'entrées de tous les onglets qui répondent à la recherche courante.
@@ -570,7 +570,7 @@ static func _links(ids: Array) -> String:
 
 static func _heading(entry_id: String, name: String, subtitle: String, category: String = "") -> String:
 	var icon := icon_bbcode(entry_id, 40, category) if entry_id != "" else ""
-	var head := "[font_size=24][b]%s[/b][/font_size]" % name
+	var head := "[font_size=%d][b]%s[/b][/font_size]" % [UiType.size(UiType.TITLE), name]
 	if icon != "":
 		head = icon + " " + head
 	if subtitle != "":
@@ -596,7 +596,7 @@ static func _sources(definition: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for source in sources:
 		parts.append(str(source))
-	return "[font_size=12][color=%s]Sources : %s[/color][/font_size]" % [MUTED, " ; ".join(parts)]
+	return "[font_size=%d][color=%s]Sources : %s[/color][/font_size]" % [UiType.size(UiType.CAPTION), MUTED, " ; ".join(parts)]
 
 
 static func _join(parts: Array) -> String:
