@@ -597,20 +597,6 @@
   },
   {
    "from": "set_abo",
-   "to": "set_borga",
-   "cost": 65.88,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_abo",
-   "to": "set_hattula",
-   "cost": 132.27,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_abo",
    "to": "set_kastelholm",
    "cost": 105.33,
    "road": false,
@@ -620,6 +606,13 @@
    "from": "set_abo",
    "to": "set_raseborg",
    "cost": 80.78,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_abo",
+   "to": "set_vanaja",
+   "cost": 128.8,
    "road": false,
    "sea": false
   },
@@ -848,6 +841,34 @@
    "sea": false
   },
   {
+   "from": "set_agadir_irir",
+   "to": "set_massa",
+   "cost": 41.4,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_agadir_irir",
+   "to": "set_taroudant",
+   "cost": 70.53,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_agadir_irir",
+   "to": "set_tit",
+   "cost": 293.34,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_agadir_irir",
+   "to": "set_todgha",
+   "cost": 408.23,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_agen",
    "to": "set_aiguillon",
    "cost": 12.34,
@@ -872,6 +893,41 @@
    "from": "set_agen",
    "to": "set_serignac_sur_garonne",
    "cost": 16.19,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aghmat",
+   "to": "set_amizmiz",
+   "cost": 42.35,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aghmat",
+   "to": "set_marrakech",
+   "cost": 32.52,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aghmat",
+   "to": "set_ouaouizeght",
+   "cost": 167.98,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aghmat",
+   "to": "set_tit",
+   "cost": 201.6,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aghmat",
+   "to": "set_todgha",
+   "cost": 222.87,
    "road": false,
    "sea": false
   },
@@ -1212,6 +1268,34 @@
    "sea": false
   },
   {
+   "from": "set_ajdabiya",
+   "to": "set_brega",
+   "cost": 74.32,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ajdabiya",
+   "to": "set_fayyum",
+   "cost": 522.84,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_ajdabiya",
+   "to": "set_tobruk",
+   "cost": 392.81,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ajdabiya",
+   "to": "set_zuwaytina",
+   "cost": 11.78,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_akhaltsikhe",
    "to": "set_artaani",
    "cost": 130.57,
@@ -1451,13 +1535,6 @@
   },
   {
    "from": "set_alba_iulia",
-   "to": "set_craiova",
-   "cost": 193.91,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_alba_iulia",
    "to": "set_kolozsvar",
    "cost": 78.28,
    "road": false,
@@ -1474,6 +1551,13 @@
    "from": "set_alba_iulia",
    "to": "set_nagyvarad",
    "cost": 166.44,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_alba_iulia",
+   "to": "set_slatina",
+   "cost": 192.04,
    "road": false,
    "sea": false
   },
@@ -1849,10 +1933,73 @@
    "sea": false
   },
   {
+   "from": "set_algeciras",
+   "to": "set_ceuta",
+   "cost": 129.94,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_algeciras",
+   "to": "set_gibraltar",
+   "cost": 9.11,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_algeciras",
+   "to": "set_jerez_de_la_frontera",
+   "cost": 87.7,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_algeciras",
+   "to": "set_ronda",
+   "cost": 107.68,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_algeciras",
+   "to": "set_tarifa",
+   "cost": 18.51,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_alger",
+   "to": "set_bejaia",
+   "cost": 136.8,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_alger",
+   "to": "set_medea",
+   "cost": 60.42,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_alger",
+   "to": "set_miliana",
+   "cost": 89.28,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_alghero",
    "to": "set_bosa",
-   "cost": 62.78,
+   "cost": 47.09,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_alghero",
+   "to": "set_cagliari",
+   "cost": 161.7,
+   "road": true,
    "sea": false
   },
   {
@@ -1866,13 +2013,6 @@
    "from": "set_alghero",
    "to": "set_iglesias",
    "cost": 277.59,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_alghero",
-   "to": "set_oristano",
-   "cost": 150.38,
    "road": false,
    "sea": false
   },
@@ -2178,6 +2318,27 @@
    "sea": false
   },
   {
+   "from": "set_altefahr",
+   "to": "set_bergen_rugen",
+   "cost": 19.95,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_altefahr",
+   "to": "set_greifswald",
+   "cost": 31.72,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_altefahr",
+   "to": "set_stralsund",
+   "cost": 3.03,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_altenburg_bamberg",
    "to": "set_altzella",
    "cost": 109.37,
@@ -2253,13 +2414,6 @@
    "cost": 17.2,
    "road": true,
    "sea": false
-  },
-  {
-   "from": "set_amalfi",
-   "to": "set_palerme",
-   "cost": 399.76,
-   "road": false,
-   "sea": true
   },
   {
    "from": "set_amalfi",
@@ -2472,6 +2626,27 @@
    "sea": false
   },
   {
+   "from": "set_amizmiz",
+   "to": "set_kasba_tadla",
+   "cost": 237.1,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_amizmiz",
+   "to": "set_marrakech",
+   "cost": 50.5,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_amizmiz",
+   "to": "set_taroudant",
+   "cost": 100.49,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_amsterdam",
    "to": "set_dordrecht",
    "cost": 126.79,
@@ -2539,6 +2714,13 @@
    "to": "set_subiaco",
    "cost": 10.07,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_anagni",
+   "to": "set_sulmona",
+   "cost": 109.1,
+   "road": false,
    "sea": false
   },
   {
@@ -2773,6 +2955,27 @@
    "sea": false
   },
   {
+   "from": "set_anfa",
+   "to": "set_azemmour",
+   "cost": 95.21,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_anfa",
+   "to": "set_beni_mellal",
+   "cost": 180.93,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_anfa",
+   "to": "set_rabat",
+   "cost": 62.53,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_angelokastro",
    "to": "set_kassiopi",
    "cost": 21.19,
@@ -2949,6 +3152,13 @@
   },
   {
    "from": "set_antalya",
+   "to": "set_elmali",
+   "cost": 146.44,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_antalya",
    "to": "set_konya",
    "cost": 146.05,
    "road": true,
@@ -2974,13 +3184,6 @@
    "cost": 392.57,
    "road": false,
    "sea": true
-  },
-  {
-   "from": "set_antalya",
-   "to": "set_usak",
-   "cost": 169.85,
-   "road": true,
-   "sea": false
   },
   {
    "from": "set_antequera",
@@ -3547,6 +3750,41 @@
    "to": "set_steyning",
    "cost": 8.05,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_arzew",
+   "to": "set_mansoura",
+   "cost": 70.9,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_arzew",
+   "to": "set_medea",
+   "cost": 140.87,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_arzew",
+   "to": "set_mostaganem",
+   "cost": 29.44,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_arzew",
+   "to": "set_oran",
+   "cost": 17.11,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_arzew",
+   "to": "set_tolga",
+   "cost": 539.56,
+   "road": false,
    "sea": false
   },
   {
@@ -4509,6 +4747,27 @@
    "sea": false
   },
   {
+   "from": "set_azemmour",
+   "to": "set_kasba_tadla",
+   "cost": 105.43,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_azemmour",
+   "to": "set_safi",
+   "cost": 67.54,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_azemmour",
+   "to": "set_tit",
+   "cost": 44.13,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_azincourt",
    "to": "set_blangy_sur_ternoise",
    "cost": 8.51,
@@ -4519,6 +4778,34 @@
    "from": "set_azincourt",
    "to": "set_hesdin",
    "cost": 12.46,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_azrou",
+   "to": "set_kasba_tadla",
+   "cost": 133.69,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_azrou",
+   "to": "set_meknes",
+   "cost": 59.92,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_azrou",
+   "to": "set_sefrou",
+   "cost": 55.83,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_azrou",
+   "to": "set_todgha",
+   "cost": 211.53,
    "road": false,
    "sea": false
   },
@@ -4552,7 +4839,7 @@
   },
   {
    "from": "set_baalbek",
-   "to": "set_tripoli",
+   "to": "set_tripoli_levant",
    "cost": 57.03,
    "road": false,
    "sea": false
@@ -4743,6 +5030,20 @@
    "from": "set_bahnasa",
    "to": "set_ramla",
    "cost": 282.04,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bahnasa",
+   "to": "set_tobruk",
+   "cost": 372.89,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bahnasa",
+   "to": "set_zuwaytina",
+   "cost": 529.84,
    "road": true,
    "sea": false
   },
@@ -5202,6 +5503,27 @@
    "sea": false
   },
   {
+   "from": "set_bardia",
+   "to": "set_derna",
+   "cost": 256.07,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bardia",
+   "to": "set_fayyum",
+   "cost": 610.83,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bardia",
+   "to": "set_tobruk",
+   "cost": 111.62,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_barfleur",
    "to": "set_bayeux",
    "cost": 59.63,
@@ -5237,6 +5559,27 @@
    "sea": false
   },
   {
+   "from": "set_bari",
+   "to": "set_barletta",
+   "cost": 27.08,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bari",
+   "to": "set_massafra",
+   "cost": 62.43,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bari",
+   "to": "set_trani",
+   "cost": 20.69,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_barking",
    "to": "set_enfield",
    "cost": 8.59,
@@ -5269,6 +5612,27 @@
    "to": "set_rochester",
    "cost": 16.82,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_barletta",
+   "to": "set_manfredonia",
+   "cost": 148.51,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_barletta",
+   "to": "set_trani",
+   "cost": 6.42,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_barletta",
+   "to": "set_venosa",
+   "cost": 83.02,
+   "road": false,
    "sea": false
   },
   {
@@ -5378,6 +5742,20 @@
   },
   {
    "from": "set_barysau",
+   "to": "set_drutsk",
+   "cost": 81.65,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_barysau",
+   "to": "set_lukoml",
+   "cost": 72.43,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_barysau",
    "to": "set_minsk",
    "cost": 35.77,
    "road": true,
@@ -5385,22 +5763,8 @@
   },
   {
    "from": "set_barysau",
-   "to": "set_orcha",
-   "cost": 127.57,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_barysau",
    "to": "set_pinsk",
    "cost": 426.93,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_barysau",
-   "to": "set_polotsk",
-   "cost": 142.17,
    "road": false,
    "sea": false
   },
@@ -6140,6 +6504,62 @@
    "sea": false
   },
   {
+   "from": "set_beja_tn",
+   "to": "set_bizerte",
+   "cost": 42.66,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_beja_tn",
+   "to": "set_kef",
+   "cost": 74.4,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beja_tn",
+   "to": "set_souk_ahras",
+   "cost": 60.71,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_beja_tn",
+   "to": "set_tabarka",
+   "cost": 45.75,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beja_tn",
+   "to": "set_tunis",
+   "cost": 44.53,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bejaia",
+   "to": "set_jijel",
+   "cost": 123.59,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bejaia",
+   "to": "set_qalaa_hammad",
+   "cost": 106.45,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bejaia",
+   "to": "set_setif",
+   "cost": 137.09,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_bejetsk",
    "to": "set_mologa",
    "cost": 43.07,
@@ -6554,6 +6974,20 @@
   },
   {
    "from": "set_benevento",
+   "to": "set_lucera",
+   "cost": 61.97,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_benevento",
+   "to": "set_melfi",
+   "cost": 112.2,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_benevento",
    "to": "set_montecassino",
    "cost": 45.25,
    "road": true,
@@ -6570,6 +7004,69 @@
    "from": "set_benevento",
    "to": "set_salerno",
    "cost": 24.78,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_benghazi",
+   "to": "set_cyrene",
+   "cost": 89.9,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_benghazi",
+   "to": "set_marj",
+   "cost": 84.12,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_benghazi",
+   "to": "set_zuwaytina",
+   "cost": 63.72,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_beni_mellal",
+   "to": "set_kasba_tadla",
+   "cost": 14.52,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_beni_mellal",
+   "to": "set_marrakech",
+   "cost": 86.0,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_beni_mellal",
+   "to": "set_meknes",
+   "cost": 184.26,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beni_mellal",
+   "to": "set_ouaouizeght",
+   "cost": 21.45,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beni_mellal",
+   "to": "set_tit",
+   "cost": 237.32,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beni_suef",
+   "to": "set_derna",
+   "cost": 450.41,
    "road": true,
    "sea": false
   },
@@ -6652,13 +7149,6 @@
   },
   {
    "from": "set_bereket",
-   "to": "set_emba",
-   "cost": 454.84,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_bereket",
    "to": "set_hadji_tarkhan",
    "cost": 51.52,
    "road": false,
@@ -6731,13 +7221,6 @@
    "from": "set_bergen_rugen",
    "to": "set_greifswald",
    "cost": 37.07,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_bergen_rugen",
-   "to": "set_stralsund",
-   "cost": 25.97,
    "road": false,
    "sea": false
   },
@@ -7303,13 +7786,6 @@
   },
   {
    "from": "set_beysehir",
-   "to": "set_egirdir",
-   "cost": 79.96,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_beysehir",
    "to": "set_konya",
    "cost": 71.01,
    "road": false,
@@ -7317,8 +7793,8 @@
   },
   {
    "from": "set_beysehir",
-   "to": "set_korkuteli",
-   "cost": 115.29,
+   "to": "set_kubadabad",
+   "cost": 10.18,
    "road": true,
    "sea": false
   },
@@ -7631,6 +8107,69 @@
    "sea": false
   },
   {
+   "from": "set_birgu",
+   "to": "set_gozo",
+   "cost": 30.91,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_birgu",
+   "to": "set_mdina",
+   "cost": 5.48,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_biskra",
+   "to": "set_constantine",
+   "cost": 92.27,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_biskra",
+   "to": "set_draa",
+   "cost": 1196.23,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_biskra",
+   "to": "set_msila",
+   "cost": 144.86,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_biskra",
+   "to": "set_nedroma",
+   "cost": 345.49,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_biskra",
+   "to": "set_nefta",
+   "cost": 227.0,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_biskra",
+   "to": "set_oran",
+   "cost": 296.94,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_biskra",
+   "to": "set_tolga",
+   "cost": 35.4,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_bitola",
    "to": "set_kastoria",
    "cost": 57.03,
@@ -7655,6 +8194,34 @@
    "from": "set_bitola",
    "to": "set_prilep",
    "cost": 19.76,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bizerte",
+   "to": "set_goulette",
+   "cost": 62.7,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bizerte",
+   "to": "set_pantelleria",
+   "cost": 195.6,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bizerte",
+   "to": "set_tabarka",
+   "cost": 51.75,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bizerte",
+   "to": "set_tunis",
+   "cost": 30.14,
    "road": true,
    "sea": false
   },
@@ -8032,8 +8599,8 @@
   {
    "from": "set_bolkow",
    "to": "set_hradec_kralove",
-   "cost": 80.89,
-   "road": false,
+   "cost": 40.44,
+   "road": true,
    "sea": false
   },
   {
@@ -8163,6 +8730,34 @@
    "sea": false
   },
   {
+   "from": "set_bone",
+   "to": "set_collo",
+   "cost": 208.39,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_bone",
+   "to": "set_guelma",
+   "cost": 28.13,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bone",
+   "to": "set_souk_ahras",
+   "cost": 69.82,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bone",
+   "to": "set_tabarka",
+   "cost": 189.24,
+   "road": false,
+   "sea": true
+  },
+  {
    "from": "set_bonifacio",
    "to": "set_castelsardo",
    "cost": 165.9,
@@ -8269,16 +8864,23 @@
   },
   {
    "from": "set_borga",
-   "to": "set_raseborg",
-   "cost": 61.43,
-   "road": false,
+   "to": "set_tavastehus",
+   "cost": 47.29,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_borga",
-   "to": "set_tavastehus",
-   "cost": 52.96,
-   "road": true,
+   "to": "set_umea",
+   "cost": 577.47,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_borga",
+   "to": "set_vehkalahti",
+   "cost": 59.32,
+   "road": false,
    "sea": false
   },
   {
@@ -8318,22 +8920,15 @@
   },
   {
    "from": "set_bosa",
-   "to": "set_castelsardo",
-   "cost": 141.36,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_bosa",
    "to": "set_oristano",
-   "cost": 88.74,
+   "cost": 44.37,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bosa",
-   "to": "set_sassari",
-   "cost": 94.94,
+   "to": "set_santa_giusta",
+   "cost": 46.69,
    "road": false,
    "sea": false
   },
@@ -8507,8 +9102,8 @@
   },
   {
    "from": "set_bourdjan",
-   "to": "set_emba",
-   "cost": 683.16,
+   "to": "set_iaik_camps",
+   "cost": 602.9,
    "road": false,
    "sea": false
   },
@@ -8675,22 +9270,15 @@
   },
   {
    "from": "set_braila",
-   "to": "set_isaccea",
-   "cost": 83.01,
+   "to": "set_floci",
+   "cost": 72.03,
    "road": false,
    "sea": false
   },
   {
    "from": "set_braila",
-   "to": "set_mangalia",
-   "cost": 84.02,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_braila",
-   "to": "set_preslav",
-   "cost": 265.02,
+   "to": "set_isaccea",
+   "cost": 83.01,
    "road": false,
    "sea": false
   },
@@ -8822,6 +9410,13 @@
   },
   {
    "from": "set_braslaw",
+   "to": "set_lukoml",
+   "cost": 149.07,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_braslaw",
    "to": "set_polotsk",
    "cost": 109.46,
    "road": false,
@@ -8838,13 +9433,6 @@
    "from": "set_braslaw",
    "to": "set_wenden",
    "cost": 216.36,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_braslaw",
-   "to": "set_zaslauje",
-   "cost": 185.07,
    "road": false,
    "sea": false
   },
@@ -8933,6 +9521,27 @@
    "sea": false
   },
   {
+   "from": "set_brega",
+   "to": "set_madinat_sultan",
+   "cost": 264.27,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_brega",
+   "to": "set_minya",
+   "cost": 561.2,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_brega",
+   "to": "set_zuwaytina",
+   "cost": 79.81,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_bremen",
    "to": "set_emden",
    "cost": 166.87,
@@ -8944,6 +9553,13 @@
    "to": "set_loccum",
    "cost": 72.51,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bremen",
+   "to": "set_osnabruck",
+   "cost": 51.25,
+   "road": true,
    "sea": false
   },
   {
@@ -9249,22 +9865,22 @@
   },
   {
    "from": "set_brunswick",
-   "to": "set_corvey",
-   "cost": 94.33,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_brunswick",
-   "to": "set_kassel",
-   "cost": 64.29,
+   "to": "set_erfurt",
+   "cost": 73.88,
    "road": true,
    "sea": false
   },
   {
    "from": "set_brunswick",
-   "to": "set_leipzig",
-   "cost": 82.04,
+   "to": "set_goslar",
+   "cost": 20.51,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_brunswick",
+   "to": "set_hildesheim",
+   "cost": 20.77,
    "road": true,
    "sea": false
   },
@@ -9273,13 +9889,6 @@
    "to": "set_luneburg",
    "cost": 45.14,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_brunswick",
-   "to": "set_wartburg",
-   "cost": 145.89,
-   "road": false,
    "sea": false
   },
   {
@@ -9312,29 +9921,36 @@
   },
   {
    "from": "set_brzeg",
-   "to": "set_kutna_hora",
-   "cost": 165.88,
+   "to": "set_opole",
+   "cost": 18.95,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_brzeg",
+   "to": "set_piotrkow",
+   "cost": 83.82,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_brzeg",
+   "to": "set_raciborz",
+   "cost": 50.36,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_brzeg",
+   "to": "set_swidnica",
+   "cost": 69.1,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brzeg",
-   "to": "set_legnica",
-   "cost": 17.17,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_brzeg",
-   "to": "set_lubin",
-   "cost": 20.5,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_brzeg",
-   "to": "set_sroda_slaska",
-   "cost": 1.83,
+   "to": "set_wroclaw",
+   "cost": 20.48,
    "road": true,
    "sea": false
   },
@@ -9627,13 +10243,6 @@
   },
   {
    "from": "set_buzau",
-   "to": "set_campulung",
-   "cost": 140.31,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_buzau",
    "to": "set_cherven",
    "cost": 178.85,
    "road": false,
@@ -9641,8 +10250,15 @@
   },
   {
    "from": "set_buzau",
-   "to": "set_silistra",
-   "cost": 119.16,
+   "to": "set_floci",
+   "cost": 97.04,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_buzau",
+   "to": "set_targoviste",
+   "cost": 111.4,
    "road": false,
    "sea": false
   },
@@ -9735,6 +10351,13 @@
    "to": "set_san_isidoro_del_campo",
    "cost": 101.74,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cadiz",
+   "to": "set_tarifa",
+   "cost": 42.71,
+   "road": true,
    "sea": false
   },
   {
@@ -9865,6 +10488,13 @@
   },
   {
    "from": "set_cagliari",
+   "to": "set_castelsardo",
+   "cost": 190.23,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cagliari",
    "to": "set_iglesias",
    "cost": 51.83,
    "road": true,
@@ -9872,8 +10502,8 @@
   },
   {
    "from": "set_cagliari",
-   "to": "set_oristano",
-   "cost": 87.97,
+   "to": "set_sassari",
+   "cost": 172.83,
    "road": true,
    "sea": false
   },
@@ -10089,15 +10719,15 @@
   },
   {
    "from": "set_camerino",
-   "to": "set_orvieto",
-   "cost": 90.91,
+   "to": "set_laquila",
+   "cost": 136.76,
    "road": false,
    "sea": false
   },
   {
-   "from": "set_campulung",
-   "to": "set_cherven",
-   "cost": 189.68,
+   "from": "set_camerino",
+   "to": "set_orvieto",
+   "cost": 90.91,
    "road": false,
    "sea": false
   },
@@ -10110,8 +10740,8 @@
   },
   {
    "from": "set_campulung",
-   "to": "set_strehaia",
-   "cost": 162.6,
+   "to": "set_targoviste",
+   "cost": 49.43,
    "road": false,
    "sea": false
   },
@@ -10698,13 +11328,6 @@
   },
   {
    "from": "set_castelsardo",
-   "to": "set_oristano",
-   "cost": 224.81,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_castelsardo",
    "to": "set_sassari",
    "cost": 24.85,
    "road": true,
@@ -10790,8 +11413,8 @@
   {
    "from": "set_catania",
    "to": "set_messina",
-   "cost": 43.2,
-   "road": true,
+   "cost": 76.73,
+   "road": false,
    "sea": false
   },
   {
@@ -10802,23 +11425,30 @@
    "sea": false
   },
   {
-   "from": "set_celle",
-   "to": "set_erfurt",
-   "cost": 194.29,
+   "from": "set_catanzaro",
+   "to": "set_crotone",
+   "cost": 100.46,
    "road": false,
    "sea": false
   },
   {
-   "from": "set_celle",
-   "to": "set_goslar",
-   "cost": 52.09,
+   "from": "set_catanzaro",
+   "to": "set_gerace",
+   "cost": 156.11,
    "road": false,
    "sea": false
   },
   {
+   "from": "set_catanzaro",
+   "to": "set_reggio",
+   "cost": 121.1,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_celle",
-   "to": "set_gudensberg",
-   "cost": 169.36,
+   "to": "set_hildesheim",
+   "cost": 53.39,
    "road": false,
    "sea": false
   },
@@ -10831,8 +11461,8 @@
   },
   {
    "from": "set_celle",
-   "to": "set_paderborn",
-   "cost": 135.56,
+   "to": "set_verden",
+   "cost": 66.36,
    "road": false,
    "sea": false
   },
@@ -11066,6 +11696,41 @@
    "cost": 259.89,
    "road": false,
    "sea": true
+  },
+  {
+   "from": "set_ceuta",
+   "to": "set_guercif",
+   "cost": 389.83,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ceuta",
+   "to": "set_ksar_seghir",
+   "cost": 22.6,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ceuta",
+   "to": "set_sefrou",
+   "cost": 231.85,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ceuta",
+   "to": "set_tanger",
+   "cost": 47.14,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ceuta",
+   "to": "set_tetouan",
+   "cost": 17.23,
+   "road": true,
+   "sea": false
   },
   {
    "from": "set_chalonnes_sur_loire",
@@ -11754,6 +12419,41 @@
    "sea": false
   },
   {
+   "from": "set_chellah",
+   "to": "set_meknes",
+   "cost": 119.5,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_chellah",
+   "to": "set_ouaouizeght",
+   "cost": 211.18,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_chellah",
+   "to": "set_rabat",
+   "cost": 1.68,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chellah",
+   "to": "set_sale",
+   "cost": 2.76,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chellah",
+   "to": "set_tetouan",
+   "cost": 108.02,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_chelm",
    "to": "set_davyd_haradok",
    "cost": 416.21,
@@ -11839,6 +12539,13 @@
   },
   {
    "from": "set_cherven",
+   "to": "set_craiova",
+   "cost": 186.49,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cherven",
    "to": "set_lovech",
    "cost": 58.8,
    "road": true,
@@ -11855,6 +12562,13 @@
    "from": "set_cherven",
    "to": "set_silistra",
    "cost": 116.58,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cherven",
+   "to": "set_targoviste",
+   "cost": 143.51,
    "road": false,
    "sea": false
   },
@@ -12027,6 +12741,20 @@
    "sea": false
   },
   {
+   "from": "set_chieti",
+   "to": "set_laquila",
+   "cost": 126.85,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_chieti",
+   "to": "set_sulmona",
+   "cost": 78.02,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_chimay",
    "to": "set_reims",
    "cost": 90.45,
@@ -12156,6 +12884,34 @@
    "from": "set_chlemoutsi",
    "to": "set_patras",
    "cost": 32.37,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chojnow",
+   "to": "set_kutna_hora",
+   "cost": 154.64,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_chojnow",
+   "to": "set_legnica",
+   "cost": 8.28,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chojnow",
+   "to": "set_lubin",
+   "cost": 11.65,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chojnow",
+   "to": "set_szprotawa",
+   "cost": 21.63,
    "road": true,
    "sea": false
   },
@@ -12692,6 +13448,27 @@
    "sea": false
   },
   {
+   "from": "set_collo",
+   "to": "set_constantine",
+   "cost": 35.02,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_collo",
+   "to": "set_mila",
+   "cost": 66.2,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_collo",
+   "to": "set_tiddis",
+   "cost": 59.33,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_colmar",
    "to": "set_haut_koenigsbourg",
    "cost": 18.98,
@@ -13007,6 +13784,34 @@
    "sea": false
   },
   {
+   "from": "set_constantine",
+   "to": "set_gafsa",
+   "cost": 146.06,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_constantine",
+   "to": "set_guelma",
+   "cost": 37.4,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_constantine",
+   "to": "set_mila",
+   "cost": 16.55,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_constantine",
+   "to": "set_tiddis",
+   "cost": 8.75,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_constantinople",
    "to": "set_gebze",
    "cost": 22.06,
@@ -13275,7 +14080,7 @@
   {
    "from": "set_corvey",
    "to": "set_hildesheim",
-   "cost": 78.22,
+   "cost": 55.84,
    "road": false,
    "sea": false
   },
@@ -13283,6 +14088,13 @@
    "from": "set_corvey",
    "to": "set_kassel",
    "cost": 51.83,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_corvey",
+   "to": "set_loccum",
+   "cost": 78.53,
    "road": false,
    "sea": false
   },
@@ -13305,6 +14117,27 @@
    "to": "set_soest",
    "cost": 92.92,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cosenza",
+   "to": "set_crotone",
+   "cost": 158.78,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cosenza",
+   "to": "set_rossano",
+   "cost": 90.06,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cosenza",
+   "to": "set_venosa",
+   "cost": 187.91,
+   "road": true,
    "sea": false
   },
   {
@@ -13470,13 +14303,6 @@
   },
   {
    "from": "set_craiova",
-   "to": "set_curtea_de_arges",
-   "cost": 114.48,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_craiova",
    "to": "set_lom",
    "cost": 72.37,
    "road": false,
@@ -13484,9 +14310,9 @@
   },
   {
    "from": "set_craiova",
-   "to": "set_lovech",
-   "cost": 75.98,
-   "road": true,
+   "to": "set_slatina",
+   "cost": 47.23,
+   "road": false,
    "sea": false
   },
   {
@@ -13628,6 +14454,20 @@
    "cost": 88.49,
    "road": false,
    "sea": false
+  },
+  {
+   "from": "set_crotone",
+   "to": "set_rossano",
+   "cost": 137.75,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_crotone",
+   "to": "set_salerno",
+   "cost": 368.08,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_csanad",
@@ -13778,15 +14618,22 @@
   },
   {
    "from": "set_curtea_de_arges",
-   "to": "set_lovech",
-   "cost": 111.63,
-   "road": true,
+   "to": "set_nagyszeben",
+   "cost": 84.84,
+   "road": false,
    "sea": false
   },
   {
    "from": "set_curtea_de_arges",
-   "to": "set_nagyszeben",
-   "cost": 84.84,
+   "to": "set_slatina",
+   "cost": 82.73,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_curtea_de_arges",
+   "to": "set_targoviste",
+   "cost": 65.48,
    "road": false,
    "sea": false
   },
@@ -13808,6 +14655,20 @@
    "from": "set_cymer",
    "to": "set_tewkesbury",
    "cost": 112.06,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cyrene",
+   "to": "set_derna",
+   "cost": 40.92,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cyrene",
+   "to": "set_marj",
+   "cost": 48.13,
    "road": true,
    "sea": false
   },
@@ -14260,6 +15121,34 @@
    "sea": false
   },
   {
+   "from": "set_debdou",
+   "to": "set_guercif",
+   "cost": 79.72,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_debdou",
+   "to": "set_oujda",
+   "cost": 193.22,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_debdou",
+   "to": "set_sijilmassa",
+   "cost": 471.95,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_debdou",
+   "to": "set_taza",
+   "cost": 188.09,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_debrecen",
    "to": "set_kassa",
    "cost": 201.84,
@@ -14425,6 +15314,20 @@
    "to": "set_vilvoorde",
    "cost": 12.64,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_derna",
+   "to": "set_tobruk",
+   "cost": 146.11,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_derna",
+   "to": "set_zuwaytina",
+   "cost": 316.31,
+   "road": false,
    "sea": false
   },
   {
@@ -14811,6 +15714,41 @@
    "cost": 166.96,
    "road": false,
    "sea": false
+  },
+  {
+   "from": "set_djerba",
+   "to": "set_gabes",
+   "cost": 71.41,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_djerba",
+   "to": "set_jado",
+   "cost": 352.81,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_djerba",
+   "to": "set_kairouan",
+   "cost": 211.05,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_djerba",
+   "to": "set_matmata",
+   "cost": 91.03,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_djerba",
+   "to": "set_sfax",
+   "cost": 196.45,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_dmitrov",
@@ -15464,6 +16402,34 @@
    "sea": false
   },
   {
+   "from": "set_draa",
+   "to": "set_marrakech",
+   "cost": 127.89,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_draa",
+   "to": "set_sijilmassa",
+   "cost": 181.47,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_draa",
+   "to": "set_taroudant",
+   "cost": 148.7,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_draa",
+   "to": "set_todgha",
+   "cost": 131.96,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_drama",
    "to": "set_serres",
    "cost": 51.27,
@@ -15580,6 +16546,41 @@
    "to": "set_przemysl",
    "cost": 35.75,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_drutsk",
+   "to": "set_lukoml",
+   "cost": 71.0,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_drutsk",
+   "to": "set_novgorod",
+   "cost": 235.3,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_drutsk",
+   "to": "set_orcha",
+   "cost": 45.94,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_drutsk",
+   "to": "set_tchernigov",
+   "cost": 340.86,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_drutsk",
+   "to": "set_vitebsk",
+   "cost": 93.44,
+   "road": false,
    "sea": false
   },
   {
@@ -16123,6 +17124,13 @@
   },
   {
    "from": "set_egirdir",
+   "to": "set_kubadabad",
+   "cost": 66.69,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_egirdir",
    "to": "set_uluborlu",
    "cost": 41.65,
    "road": false,
@@ -16215,14 +17223,21 @@
   {
    "from": "set_ejea_de_los_caballeros",
    "to": "set_illueca",
-   "cost": 18.75,
-   "road": false,
+   "cost": 10.77,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_ejea_de_los_caballeros",
    "to": "set_luna",
-   "cost": 10.88,
+   "cost": 24.85,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ejea_de_los_caballeros",
+   "to": "set_veruela",
+   "cost": 58.98,
    "road": false,
    "sea": false
   },
@@ -16263,9 +17278,9 @@
   },
   {
    "from": "set_elbistan",
-   "to": "set_kayseri",
-   "cost": 118.05,
-   "road": true,
+   "to": "set_goksun",
+   "cost": 132.35,
+   "road": false,
    "sea": false
   },
   {
@@ -16311,6 +17326,27 @@
    "sea": false
   },
   {
+   "from": "set_elmali",
+   "to": "set_korkuteli",
+   "cost": 44.94,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_elmali",
+   "to": "set_makri",
+   "cost": 55.12,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_elmali",
+   "to": "set_usak",
+   "cost": 163.66,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_elne",
    "to": "set_perpignan",
    "cost": 5.82,
@@ -16350,20 +17386,6 @@
    "to": "set_seville",
    "cost": 99.62,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_emba",
-   "to": "set_iaik_camps",
-   "cost": 182.44,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_emba",
-   "to": "set_saraitchik",
-   "cost": 132.09,
-   "road": false,
    "sea": false
   },
   {
@@ -16411,7 +17433,7 @@
   {
    "from": "set_enna",
    "to": "set_messina",
-   "cost": 133.0,
+   "cost": 113.26,
    "road": false,
    "sea": false
   },
@@ -17305,6 +18327,34 @@
    "sea": false
   },
   {
+   "from": "set_fes",
+   "to": "set_moulay_idriss",
+   "cost": 48.93,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fes",
+   "to": "set_sefrou",
+   "cost": 13.66,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_fes",
+   "to": "set_sidi_harazem",
+   "cost": 5.06,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_fes",
+   "to": "set_tetouan",
+   "cost": 87.1,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_feurs",
    "to": "set_largentiere",
    "cost": 131.79,
@@ -17522,6 +18572,20 @@
    "sea": false
   },
   {
+   "from": "set_floci",
+   "to": "set_preslav",
+   "cost": 98.48,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_floci",
+   "to": "set_silistra",
+   "cost": 73.16,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_floreffe",
    "to": "set_mettet",
    "cost": 15.4,
@@ -17646,6 +18710,34 @@
    "cost": 148.72,
    "road": false,
    "sea": true
+  },
+  {
+   "from": "set_foggia",
+   "to": "set_lucera",
+   "cost": 9.49,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_foggia",
+   "to": "set_manfredonia",
+   "cost": 17.55,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_foggia",
+   "to": "set_melfi",
+   "cost": 38.97,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_foggia",
+   "to": "set_montevergine",
+   "cost": 45.48,
+   "road": true,
+   "sea": false
   },
   {
    "from": "set_foix",
@@ -18292,6 +19384,69 @@
    "sea": false
   },
   {
+   "from": "set_gabes",
+   "to": "set_gafsa",
+   "cost": 68.18,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gabes",
+   "to": "set_matmata",
+   "cost": 39.15,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gabes",
+   "to": "set_sbeitla",
+   "cost": 87.05,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gabes",
+   "to": "set_yefren",
+   "cost": 455.99,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gafsa",
+   "to": "set_nalut",
+   "cost": 261.53,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gafsa",
+   "to": "set_nefta",
+   "cost": 51.91,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gafsa",
+   "to": "set_sbeitla",
+   "cost": 93.84,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gafsa",
+   "to": "set_souk_ahras",
+   "cost": 109.11,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gafsa",
+   "to": "set_tozeur",
+   "cost": 41.01,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_galitch",
    "to": "set_ipatiev",
    "cost": 105.26,
@@ -18614,6 +19769,34 @@
    "sea": false
   },
   {
+   "from": "set_gerace",
+   "to": "set_reggio",
+   "cost": 106.41,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gibraltar",
+   "to": "set_marbella",
+   "cost": 87.16,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gibraltar",
+   "to": "set_tarifa",
+   "cost": 26.15,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gibraltar",
+   "to": "set_utrera",
+   "cost": 122.31,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_gien",
    "to": "set_montargis",
    "cost": 34.88,
@@ -18929,6 +20112,34 @@
    "sea": false
   },
   {
+   "from": "set_goksun",
+   "to": "set_kayseri",
+   "cost": 172.13,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_goksun",
+   "to": "set_maras",
+   "cost": 62.18,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_goksun",
+   "to": "set_sivas",
+   "cost": 149.75,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_goksun",
+   "to": "set_vahka",
+   "cost": 109.74,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_goldingen",
    "to": "set_mitau",
    "cost": 112.0,
@@ -19218,35 +20429,28 @@
   {
    "from": "set_goslar",
    "to": "set_hildesheim",
-   "cost": 3.56,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_goslar",
-   "to": "set_loccum",
-   "cost": 6.37,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_goslar",
-   "to": "set_paderborn",
-   "cost": 97.47,
+   "cost": 42.48,
    "road": false,
    "sea": false
   },
   {
    "from": "set_goslar",
-   "to": "set_stade",
-   "cost": 53.59,
+   "to": "set_kassel",
+   "cost": 46.49,
    "road": true,
    "sea": false
   },
   {
    "from": "set_goslar",
-   "to": "set_verden",
-   "cost": 45.52,
+   "to": "set_leipzig",
+   "cost": 148.83,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_goslar",
+   "to": "set_wartburg",
+   "cost": 105.0,
    "road": false,
    "sea": false
   },
@@ -19276,6 +20480,20 @@
    "to": "set_teylingen",
    "cost": 59.93,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_goulette",
+   "to": "set_pantelleria",
+   "cost": 148.61,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_goulette",
+   "to": "set_tunis",
+   "cost": 6.42,
+   "road": true,
    "sea": false
   },
   {
@@ -19324,6 +20542,20 @@
    "from": "set_gowran",
    "to": "set_roscommon",
    "cost": 105.87,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gozo",
+   "to": "set_mahdia",
+   "cost": 396.28,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_gozo",
+   "to": "set_mdina",
+   "cost": 22.73,
    "road": false,
    "sea": false
   },
@@ -19673,8 +20905,8 @@
   {
    "from": "set_groningue",
    "to": "set_klaarkamp",
-   "cost": 79.95,
-   "road": false,
+   "cost": 39.98,
+   "road": true,
    "sea": false
   },
   {
@@ -19714,6 +20946,13 @@
   },
   {
    "from": "set_grottaglie",
+   "to": "set_melfi",
+   "cost": 119.12,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_grottaglie",
    "to": "set_taranto",
    "cost": 18.47,
    "road": false,
@@ -19749,6 +20988,13 @@
   },
   {
    "from": "set_gudensberg",
+   "to": "set_hildesheim",
+   "cost": 116.62,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gudensberg",
    "to": "set_kassel",
    "cost": 9.04,
    "road": true,
@@ -19776,6 +21022,20 @@
    "sea": false
   },
   {
+   "from": "set_guelma",
+   "to": "set_souk_ahras",
+   "cost": 25.51,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_guelma",
+   "to": "set_tozeur",
+   "cost": 143.61,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_guerande",
    "to": "set_nantes",
    "cost": 33.61,
@@ -19793,6 +21053,20 @@
    "from": "set_guerande",
    "to": "set_suscinio",
    "cost": 32.23,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_guercif",
+   "to": "set_nedroma",
+   "cost": 254.84,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_guercif",
+   "to": "set_taza",
+   "cost": 121.91,
    "road": false,
    "sea": false
   },
@@ -20639,8 +21913,8 @@
   {
    "from": "set_hildesheim",
    "to": "set_loccum",
-   "cost": 3.18,
-   "road": true,
+   "cost": 63.97,
+   "road": false,
    "sea": false
   },
   {
@@ -20743,7 +22017,7 @@
   },
   {
    "from": "set_homs",
-   "to": "set_tripoli",
+   "to": "set_tripoli_levant",
    "cost": 87.8,
    "road": false,
    "sea": false
@@ -20793,15 +22067,15 @@
   {
    "from": "set_hradec_kralove",
    "to": "set_kutna_hora",
-   "cost": 24.9,
-   "road": true,
+   "cost": 49.8,
+   "road": false,
    "sea": false
   },
   {
    "from": "set_hradec_kralove",
    "to": "set_legnica",
-   "cost": 113.35,
-   "road": false,
+   "cost": 56.67,
+   "road": true,
    "sea": false
   },
   {
@@ -20904,13 +22178,6 @@
   },
   {
    "from": "set_iaik_camps",
-   "to": "set_iourmaty",
-   "cost": 598.14,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_iaik_camps",
    "to": "set_sarai_al_jadid",
    "cost": 431.36,
    "road": false,
@@ -20920,6 +22187,13 @@
    "from": "set_iaik_camps",
    "to": "set_saraitchik",
    "cost": 241.19,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_iaik_camps",
+   "to": "set_zhaiyk",
+   "cost": 176.92,
    "road": false,
    "sea": false
   },
@@ -20990,13 +22264,6 @@
    "from": "set_iaroslavl",
    "to": "set_spasski",
    "cost": 0.81,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_iglesias",
-   "to": "set_oristano",
-   "cost": 65.85,
    "road": true,
    "sea": false
   },
@@ -21108,14 +22375,14 @@
   {
    "from": "set_illueca",
    "to": "set_luna",
-   "cost": 19.62,
+   "cost": 28.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_illueca",
    "to": "set_saragosse",
-   "cost": 35.32,
+   "cost": 41.31,
    "road": false,
    "sea": false
   },
@@ -21368,6 +22635,13 @@
    "from": "set_iourmaty",
    "to": "set_sarai",
    "cost": 886.94,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_iourmaty",
+   "to": "set_zhaiyk",
+   "cost": 504.13,
    "road": false,
    "sea": false
   },
@@ -21750,6 +23024,27 @@
    "sea": false
   },
   {
+   "from": "set_jado",
+   "to": "set_nalut",
+   "cost": 196.13,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_jado",
+   "to": "set_tozeur",
+   "cost": 637.33,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_jado",
+   "to": "set_yefren",
+   "cost": 105.42,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_jaen",
    "to": "set_lorca",
    "cost": 92.7,
@@ -21830,6 +23125,20 @@
    "from": "set_jerusalem",
    "to": "set_ramla",
    "cost": 19.78,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_jijel",
+   "to": "set_mila",
+   "cost": 45.37,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_jijel",
+   "to": "set_setif",
+   "cost": 75.91,
    "road": true,
    "sea": false
   },
@@ -21956,6 +23265,27 @@
    "from": "set_kachira",
    "to": "set_zvenigorod",
    "cost": 128.38,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kairouan",
+   "to": "set_kef",
+   "cost": 68.52,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_kairouan",
+   "to": "set_sbeitla",
+   "cost": 51.27,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_kairouan",
+   "to": "set_sousse",
+   "cost": 52.04,
    "road": false,
    "sea": false
   },
@@ -22366,6 +23696,20 @@
    "sea": false
   },
   {
+   "from": "set_kasba_tadla",
+   "to": "set_ouaouizeght",
+   "cost": 49.26,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kasba_tadla",
+   "to": "set_rabat",
+   "cost": 162.04,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_kassa",
    "to": "set_kecskemet",
    "cost": 175.18,
@@ -22534,10 +23878,31 @@
    "sea": false
   },
   {
+   "from": "set_kazimierz_dolny",
+   "to": "set_urzedow",
+   "cost": 38.95,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_kecskemet",
    "to": "set_szeged",
    "cost": 80.25,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kef",
+   "to": "set_sbeitla",
+   "cost": 54.49,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_kef",
+   "to": "set_souk_ahras",
+   "cost": 35.39,
+   "road": true,
    "sea": false
   },
   {
@@ -23424,9 +24789,9 @@
   },
   {
    "from": "set_korkuteli",
-   "to": "set_makri",
-   "cost": 82.66,
-   "road": true,
+   "to": "set_kubadabad",
+   "cost": 229.69,
+   "road": false,
    "sea": false
   },
   {
@@ -23634,7 +24999,7 @@
   },
   {
    "from": "set_krak",
-   "to": "set_tripoli",
+   "to": "set_tripoli_levant",
    "cost": 27.54,
    "road": true,
    "sea": false
@@ -23875,6 +25240,48 @@
    "to": "set_wloclawek",
    "cost": 50.4,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ksar_seghir",
+   "to": "set_meknes",
+   "cost": 212.43,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ksar_seghir",
+   "to": "set_rabat",
+   "cost": 116.16,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_ksar_seghir",
+   "to": "set_sidi_harazem",
+   "cost": 105.52,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_ksar_seghir",
+   "to": "set_tanger",
+   "cost": 24.55,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ksar_seghir",
+   "to": "set_tetouan",
+   "cost": 32.28,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kubadabad",
+   "to": "set_seydisehir",
+   "cost": 25.19,
+   "road": true,
    "sea": false
   },
   {
@@ -24417,6 +25824,20 @@
    "sea": false
   },
   {
+   "from": "set_laquila",
+   "to": "set_subiaco",
+   "cost": 80.31,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_laquila",
+   "to": "set_sulmona",
+   "cost": 54.93,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_lara",
    "to": "set_san_pedro_de_arlanza",
    "cost": 5.16,
@@ -24784,6 +26205,13 @@
    "from": "set_legnica",
    "to": "set_lubin",
    "cost": 10.91,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_legnica",
+   "to": "set_sroda_slaska",
+   "cost": 18.99,
    "road": true,
    "sea": false
   },
@@ -25440,8 +26868,8 @@
   },
   {
    "from": "set_loccum",
-   "to": "set_osnabruck",
-   "cost": 79.03,
+   "to": "set_stade",
+   "cost": 113.87,
    "road": false,
    "sea": false
   },
@@ -25713,6 +27141,13 @@
   },
   {
    "from": "set_lovech",
+   "to": "set_slatina",
+   "cost": 73.43,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_lovech",
    "to": "set_sredets",
    "cost": 124.45,
    "road": false,
@@ -25775,6 +27210,13 @@
    "sea": false
   },
   {
+   "from": "set_lublin",
+   "to": "set_urzedow",
+   "cost": 41.41,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_lucca",
    "to": "set_montecarlo",
    "cost": 6.1,
@@ -25799,6 +27241,27 @@
    "from": "set_lucena",
    "to": "set_montilla",
    "cost": 11.81,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_lucera",
+   "to": "set_manfredonia",
+   "cost": 24.92,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_lucera",
+   "to": "set_monte_sant_angelo",
+   "cost": 57.67,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lucera",
+   "to": "set_venosa",
+   "cost": 53.6,
    "road": true,
    "sea": false
   },
@@ -25859,6 +27322,20 @@
    "sea": false
   },
   {
+   "from": "set_lukoml",
+   "to": "set_novgorod",
+   "cost": 436.75,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lukoml",
+   "to": "set_polotsk",
+   "cost": 74.18,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_lund",
    "to": "set_malmo",
    "cost": 8.08,
@@ -25883,6 +27360,13 @@
    "from": "set_luneburg",
    "to": "set_spandau",
    "cost": 199.21,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_luneburg",
+   "to": "set_stade",
+   "cost": 81.36,
    "road": false,
    "sea": false
   },
@@ -25985,6 +27469,20 @@
    "sea": false
   },
   {
+   "from": "set_madinat_sultan",
+   "to": "set_syrte",
+   "cost": 19.01,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_madinat_sultan",
+   "to": "set_tawargha",
+   "cost": 207.5,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_madrid",
    "to": "set_ocana",
    "cost": 53.85,
@@ -26024,6 +27522,27 @@
    "to": "set_montpellier",
    "cost": 8.34,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_mahdia",
+   "to": "set_monastir",
+   "cost": 19.41,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_mahdia",
+   "to": "set_sfax",
+   "cost": 88.47,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_mahdia",
+   "to": "set_sousse",
+   "cost": 26.07,
+   "road": true,
    "sea": false
   },
   {
@@ -26153,6 +27672,13 @@
    "sea": false
   },
   {
+   "from": "set_manfredonia",
+   "to": "set_monte_sant_angelo",
+   "cost": 4.53,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_mangalia",
    "to": "set_silistra",
    "cost": 55.19,
@@ -26223,6 +27749,34 @@
    "sea": false
   },
   {
+   "from": "set_mansoura",
+   "to": "set_nedroma",
+   "cost": 40.4,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_mansoura",
+   "to": "set_oujda",
+   "cost": 55.64,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_mansoura",
+   "to": "set_tlemcen",
+   "cost": 1.51,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_mansoura",
+   "to": "set_tolga",
+   "cost": 311.32,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_mansura",
    "to": "set_tanta",
    "cost": 46.86,
@@ -26254,20 +27808,6 @@
    "from": "set_mao",
    "to": "set_soller",
    "cost": 131.6,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_maras",
-   "to": "set_nigde",
-   "cost": 151.72,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_maras",
-   "to": "set_vahka",
-   "cost": 185.68,
    "road": false,
    "sea": false
   },
@@ -26510,6 +28050,13 @@
    "sea": false
   },
   {
+   "from": "set_marrakech",
+   "to": "set_safi",
+   "cost": 71.56,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_marseille",
    "to": "set_tarascon",
    "cost": 29.17,
@@ -26521,6 +28068,20 @@
    "to": "set_toulon",
    "cost": 48.49,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_massa",
+   "to": "set_taroudant",
+   "cost": 88.24,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_massafra",
+   "to": "set_potenza",
+   "cost": 83.51,
+   "road": true,
    "sea": false
   },
   {
@@ -26563,6 +28124,20 @@
    "to": "set_tetovo",
    "cost": 9.9,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_matmata",
+   "to": "set_nalut",
+   "cost": 310.57,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_matmata",
+   "to": "set_tozeur",
+   "cost": 176.98,
+   "road": false,
    "sea": false
   },
   {
@@ -26713,6 +28288,27 @@
    "sea": false
   },
   {
+   "from": "set_medea",
+   "to": "set_miliana",
+   "cost": 47.0,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_medea",
+   "to": "set_msila",
+   "cost": 87.38,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_medea",
+   "to": "set_qalaa_hammad",
+   "cost": 144.19,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_medellin",
    "to": "set_merida",
    "cost": 16.32,
@@ -26780,6 +28376,48 @@
    "to": "set_stolpen",
    "cost": 44.35,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_meknes",
+   "to": "set_moulay_idriss",
+   "cost": 17.9,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_meknes",
+   "to": "set_sijilmassa",
+   "cost": 312.64,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_meknes",
+   "to": "set_volubilis",
+   "cost": 19.56,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_melfi",
+   "to": "set_potenza",
+   "cost": 83.24,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_melfi",
+   "to": "set_trani",
+   "cost": 53.14,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_melfi",
+   "to": "set_venosa",
+   "cost": 14.3,
+   "road": true,
    "sea": false
   },
   {
@@ -26904,21 +28542,21 @@
   {
    "from": "set_messina",
    "to": "set_palerme",
-   "cost": 193.7,
+   "cost": 170.75,
    "road": false,
    "sea": false
   },
   {
    "from": "set_messina",
-   "to": "set_salerno",
-   "cost": 382.63,
+   "to": "set_reggio",
+   "cost": 48.42,
    "road": false,
-   "sea": true
+   "sea": false
   },
   {
    "from": "set_messina",
    "to": "set_siracusa",
-   "cost": 125.68,
+   "cost": 122.06,
    "road": false,
    "sea": false
   },
@@ -27070,6 +28708,27 @@
    "sea": false
   },
   {
+   "from": "set_mila",
+   "to": "set_msila",
+   "cost": 88.12,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_mila",
+   "to": "set_tiddis",
+   "cost": 9.18,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_mila",
+   "to": "set_tozeur",
+   "cost": 163.71,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_milan",
    "to": "set_monza",
    "cost": 7.44,
@@ -27095,6 +28754,13 @@
    "to": "set_paros",
    "cost": 237.26,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_miliana",
+   "to": "set_mostaganem",
+   "cost": 104.46,
+   "road": true,
    "sea": false
   },
   {
@@ -27192,6 +28858,27 @@
    "from": "set_mirebeau_sur_beze",
    "to": "set_vaudemont",
    "cost": 65.78,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_misrata",
+   "to": "set_tawargha",
+   "cost": 22.12,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_misrata",
+   "to": "set_tripoli",
+   "cost": 89.8,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_misrata",
+   "to": "set_zawiya",
+   "cost": 109.72,
    "road": true,
    "sea": false
   },
@@ -27305,6 +28992,13 @@
    "to": "set_mytilene",
    "cost": 43.6,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_monastir",
+   "to": "set_sousse",
+   "cost": 7.61,
+   "road": true,
    "sea": false
   },
   {
@@ -27525,6 +29219,13 @@
    "sea": false
   },
   {
+   "from": "set_monte_sant_angelo",
+   "to": "set_trani",
+   "cost": 62.26,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_montecarlo",
    "to": "set_prato",
    "cost": 17.9,
@@ -27546,6 +29247,13 @@
    "sea": false
   },
   {
+   "from": "set_montecassino",
+   "to": "set_sulmona",
+   "cost": 93.69,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_montevergine",
    "to": "set_naples",
    "cost": 40.34,
@@ -27563,6 +29271,13 @@
    "from": "set_montevergine",
    "to": "set_taranto",
    "cost": 109.34,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_montevergine",
+   "to": "set_venosa",
+   "cost": 68.8,
    "road": true,
    "sea": false
   },
@@ -27882,6 +29597,20 @@
    "sea": false
   },
   {
+   "from": "set_mostaganem",
+   "to": "set_msila",
+   "cost": 207.24,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_mostaganem",
+   "to": "set_oran",
+   "cost": 30.08,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_mosul",
    "to": "set_mtskheta",
    "cost": 318.65,
@@ -27921,6 +29650,27 @@
    "to": "set_salobrena",
    "cost": 12.34,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_moulay_idriss",
+   "to": "set_rabat",
+   "cost": 123.12,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_moulay_idriss",
+   "to": "set_tanger",
+   "cost": 190.15,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_moulay_idriss",
+   "to": "set_volubilis",
+   "cost": 1.73,
+   "road": true,
    "sea": false
   },
   {
@@ -27990,6 +29740,34 @@
    "from": "set_moutiers",
    "to": "set_vigevano",
    "cost": 275.17,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_msila",
+   "to": "set_qalaa_hammad",
+   "cost": 37.81,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_msila",
+   "to": "set_sijilmassa",
+   "cost": 475.88,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_msila",
+   "to": "set_tlemcen",
+   "cost": 272.07,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_msila",
+   "to": "set_tolga",
+   "cost": 133.96,
    "road": false,
    "sea": false
   },
@@ -28253,6 +30031,13 @@
    "sea": false
   },
   {
+   "from": "set_nalut",
+   "to": "set_yefren",
+   "cost": 300.75,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_namur",
    "to": "set_poilvache",
    "cost": 8.83,
@@ -28321,13 +30106,6 @@
    "cost": 145.49,
    "road": false,
    "sea": false
-  },
-  {
-   "from": "set_naples",
-   "to": "set_trapani",
-   "cost": 448.2,
-   "road": false,
-   "sea": true
   },
   {
    "from": "set_narva",
@@ -28404,6 +30182,48 @@
    "to": "set_volissos",
    "cost": 20.11,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nedroma",
+   "to": "set_oujda",
+   "cost": 38.52,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nedroma",
+   "to": "set_tlemcen",
+   "cost": 43.0,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nedroma",
+   "to": "set_todgha",
+   "cost": 515.94,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nefta",
+   "to": "set_tiddis",
+   "cost": 156.73,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_nefta",
+   "to": "set_tozeur",
+   "cost": 12.25,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_nefta",
+   "to": "set_yefren",
+   "cost": 362.41,
+   "road": true,
    "sea": false
   },
   {
@@ -29522,8 +31342,8 @@
   {
    "from": "set_opole",
    "to": "set_raciborz",
-   "cost": 68.32,
-   "road": false,
+   "cost": 34.16,
+   "road": true,
    "sea": false
   },
   {
@@ -29531,20 +31351,6 @@
    "to": "set_sieradz",
    "cost": 58.55,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_opole",
-   "to": "set_swidnica",
-   "cost": 51.38,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_opole",
-   "to": "set_wroclaw",
-   "cost": 78.58,
-   "road": false,
    "sea": false
   },
   {
@@ -29587,6 +31393,13 @@
    "to": "set_vychhorod",
    "cost": 545.69,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_oran",
+   "to": "set_tlemcen",
+   "cost": 53.86,
+   "road": true,
    "sea": false
   },
   {
@@ -29692,6 +31505,13 @@
    "to": "set_yecla",
    "cost": 55.17,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_oristano",
+   "to": "set_santa_giusta",
+   "cost": 1.17,
+   "road": true,
    "sea": false
   },
   {
@@ -29884,9 +31704,16 @@
    "sea": false
   },
   {
-   "from": "set_oufa_camp",
-   "to": "set_saraitchik",
-   "cost": 884.67,
+   "from": "set_ouaouizeght",
+   "to": "set_safi",
+   "cost": 281.19,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ouaouizeght",
+   "to": "set_todgha",
+   "cost": 103.58,
    "road": false,
    "sea": false
   },
@@ -29929,6 +31756,20 @@
    "from": "set_ouglitch",
    "to": "set_spaso_kamenny",
    "cost": 228.37,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_oujda",
+   "to": "set_sijilmassa",
+   "cost": 214.49,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_oujda",
+   "to": "set_tlemcen",
+   "cost": 58.6,
    "road": false,
    "sea": false
   },
@@ -30168,6 +32009,13 @@
    "to": "set_veszprem",
    "cost": 26.09,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_pantelleria",
+   "to": "set_tunis",
+   "cost": 160.4,
+   "road": false,
    "sea": false
   },
   {
@@ -30449,13 +32297,6 @@
    "cost": 85.99,
    "road": false,
    "sea": false
-  },
-  {
-   "from": "set_pernau",
-   "to": "set_windau",
-   "cost": 276.92,
-   "road": false,
-   "sea": true
   },
   {
    "from": "set_pernes_les_fontaines",
@@ -30801,6 +32642,13 @@
    "sea": false
   },
   {
+   "from": "set_poide",
+   "to": "set_windau",
+   "cost": 217.45,
+   "road": false,
+   "sea": true
+  },
+  {
    "from": "set_poissy",
    "to": "set_pontoise",
    "cost": 14.13,
@@ -31049,6 +32897,27 @@
    "from": "set_portsmouth",
    "to": "set_winchester",
    "cost": 16.31,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_potenza",
+   "to": "set_rossano",
+   "cost": 137.07,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_potenza",
+   "to": "set_salerno",
+   "cost": 66.28,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_potenza",
+   "to": "set_venosa",
+   "cost": 36.07,
    "road": true,
    "sea": false
   },
@@ -31333,6 +33202,13 @@
    "sea": false
   },
   {
+   "from": "set_qalaa_hammad",
+   "to": "set_setif",
+   "cost": 70.04,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_quesnoy",
    "to": "set_saint_ghislain",
    "cost": 12.76,
@@ -31350,6 +33226,13 @@
    "from": "set_quesnoy",
    "to": "set_valenciennes",
    "cost": 7.31,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_rabat",
+   "to": "set_sale",
+   "cost": 4.43,
    "road": true,
    "sea": false
   },
@@ -31418,8 +33301,8 @@
   },
   {
    "from": "set_raseborg",
-   "to": "set_vanaja",
-   "cost": 126.87,
+   "to": "set_tavastehus",
+   "cost": 125.1,
    "road": false,
    "sea": false
   },
@@ -31659,6 +33542,13 @@
    "to": "set_serres",
    "cost": 117.23,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_rila",
+   "to": "set_slatina",
+   "cost": 134.69,
+   "road": true,
    "sea": false
   },
   {
@@ -32082,6 +33972,20 @@
    "sea": false
   },
   {
+   "from": "set_safi",
+   "to": "set_taroudant",
+   "cost": 102.34,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_safi",
+   "to": "set_tit",
+   "cost": 92.17,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_safranbolu",
    "to": "set_tosya",
    "cost": 230.7,
@@ -32292,6 +34196,20 @@
    "sea": false
   },
   {
+   "from": "set_sale",
+   "to": "set_tanger",
+   "cost": 306.35,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_sale",
+   "to": "set_volubilis",
+   "cost": 116.02,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_salies_de_bearn",
    "to": "set_sauveterre_de_bearn",
    "cost": 17.89,
@@ -32433,6 +34351,13 @@
   },
   {
    "from": "set_sandomierz",
+   "to": "set_urzedow",
+   "cost": 43.97,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_sandomierz",
    "to": "set_wislica",
    "cost": 79.69,
    "road": false,
@@ -32539,8 +34464,8 @@
   {
    "from": "set_sarai",
    "to": "set_saraitchik",
-   "cost": 309.0,
-   "road": false,
+   "cost": 154.5,
+   "road": true,
    "sea": false
   },
   {
@@ -32554,6 +34479,13 @@
    "from": "set_sarai_al_jadid",
    "to": "set_ukek",
    "cost": 293.71,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_saraitchik",
+   "to": "set_zhaiyk",
+   "cost": 413.88,
    "road": false,
    "sea": false
   },
@@ -32702,6 +34634,20 @@
    "to": "set_vrhbosna",
    "cost": 150.69,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_sefrou",
+   "to": "set_sidi_harazem",
+   "cost": 9.84,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_sefrou",
+   "to": "set_todgha",
+   "cost": 260.29,
+   "road": false,
    "sea": false
   },
   {
@@ -32873,6 +34819,13 @@
    "sea": false
   },
   {
+   "from": "set_sfax",
+   "to": "set_sousse",
+   "cost": 59.83,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_shertogenbosch",
    "to": "set_tiel",
    "cost": 55.99,
@@ -32897,6 +34850,27 @@
    "from": "set_siauliai",
    "to": "set_trakai",
    "cost": 176.37,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_sidi_harazem",
+   "to": "set_sijilmassa",
+   "cost": 151.94,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_sidi_harazem",
+   "to": "set_taza",
+   "cost": 128.27,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_sidi_harazem",
+   "to": "set_volubilis",
+   "cost": 61.75,
    "road": false,
    "sea": false
   },
@@ -32940,6 +34914,13 @@
    "to": "set_vasteras",
    "cost": 32.7,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_sijilmassa",
+   "to": "set_todgha",
+   "cost": 122.86,
+   "road": false,
    "sea": false
   },
   {
@@ -33030,6 +35011,13 @@
    "from": "set_slagelse",
    "to": "set_vordingborg",
    "cost": 55.01,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_slatina",
+   "to": "set_strehaia",
+   "cost": 94.64,
    "road": false,
    "sea": false
   },
@@ -33186,6 +35174,13 @@
    "cost": 19.91,
    "road": true,
    "sea": false
+  },
+  {
+   "from": "set_sousse",
+   "to": "set_tunis",
+   "cost": 216.12,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_southampton",
@@ -33734,6 +35729,20 @@
    "sea": false
   },
   {
+   "from": "set_syrte",
+   "to": "set_tawargha",
+   "cost": 170.74,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_syrte",
+   "to": "set_zuwaytina",
+   "cost": 342.98,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_szekesfehervar",
    "to": "set_tihany",
    "cost": 50.82,
@@ -33797,6 +35806,13 @@
    "sea": false
   },
   {
+   "from": "set_tanger",
+   "to": "set_tetouan",
+   "cost": 45.69,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_tannay",
    "to": "set_vezelay",
    "cost": 17.44,
@@ -33804,8 +35820,15 @@
    "sea": false
   },
   {
+   "from": "set_taranto",
+   "to": "set_venosa",
+   "cost": 99.44,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_tartus",
-   "to": "set_tripoli",
+   "to": "set_tripoli_levant",
    "cost": 50.0,
    "road": false,
    "sea": false
@@ -33825,9 +35848,23 @@
    "sea": false
   },
   {
-   "from": "set_tavastehus",
-   "to": "set_vehkalahti",
-   "cost": 132.26,
+   "from": "set_tawargha",
+   "to": "set_yefren",
+   "cost": 361.99,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_taza",
+   "to": "set_tetouan",
+   "cost": 297.3,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_taza",
+   "to": "set_todgha",
+   "cost": 487.18,
    "road": false,
    "sea": false
   },
@@ -33849,6 +35886,13 @@
    "from": "set_ter_duinen",
    "to": "set_wijnendale",
    "cost": 28.98,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_tetouan",
+   "to": "set_volubilis",
+   "cost": 166.2,
    "road": false,
    "sea": false
   },
@@ -33891,6 +35935,13 @@
    "from": "set_thun",
    "to": "set_wimmis",
    "cost": 15.54,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_tiddis",
+   "to": "set_tolga",
+   "cost": 107.89,
    "road": true,
    "sea": false
   },
@@ -33944,6 +35995,13 @@
    "sea": false
   },
   {
+   "from": "set_todgha",
+   "to": "set_tolga",
+   "cost": 1081.19,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_toelz",
    "to": "set_treviso",
    "cost": 357.56,
@@ -33954,6 +36012,13 @@
    "from": "set_toelz",
    "to": "set_wasserburg",
    "cost": 59.35,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_tolga",
+   "to": "set_tozeur",
+   "cost": 270.99,
    "road": false,
    "sea": false
   },
@@ -34098,6 +36163,13 @@
    "sea": false
   },
   {
+   "from": "set_tripoli",
+   "to": "set_zawiya",
+   "cost": 23.15,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_tromso",
    "to": "set_trondenes",
    "cost": 272.98,
@@ -34206,6 +36278,13 @@
    "from": "set_tyniec",
    "to": "set_wieliczka",
    "cost": 18.15,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ukek",
+   "to": "set_zhaiyk",
+   "cost": 365.81,
    "road": false,
    "sea": false
   },
@@ -34647,6 +36726,13 @@
    "from": "set_wymondham",
    "to": "set_yarmouth",
    "cost": 83.55,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_yefren",
+   "to": "set_zawiya",
+   "cost": 116.72,
    "road": false,
    "sea": false
   }
