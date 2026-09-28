@@ -1,0 +1,46 @@
+{
+  "id": "chr_suleyman_candar",
+  "name": {
+    "display": "Süleyman Paşa de Candar",
+    "local": "Süleyman Paşa",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Candaroğulları",
+  "faction": "fac_candar",
+  "role": "ruler",
+  "birth": {
+    "value": "1280",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1339"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Candar",
+      "from": {
+        "value": "1309"
+      },
+      "note": "Règne jusqu'en 1339."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_builder"
+  ],
+  "piety": 50,
+  "starting_location": "prov_kastamonu",
+  "status": "at_court",
+  "description": "Bey de Candar qui prend Sinope (1322) ; naissance approximative.",
+  "sources": [
+    "Candar dynasty"
+  ]
+}

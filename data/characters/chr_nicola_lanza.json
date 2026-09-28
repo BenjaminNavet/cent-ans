@@ -1,0 +1,42 @@
+{
+  "id": "chr_nicola_lanza",
+  "name": {
+    "display": "Nicolas Lanza",
+    "local": "Nicolau Llança",
+    "local_language": "catalan"
+  },
+  "sex": "male",
+  "house": "Lanza",
+  "faction": "fac_athens",
+  "role": "regent",
+  "birth": {
+    "value": "1290",
+    "uncertain": true,
+    "note": "Naissance et dates inconnues ; approximation."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Vicaire général du duché",
+      "from": {
+        "value": "1330"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_veteran"
+  ],
+  "piety": 45,
+  "starting_location": "prov_attica",
+  "status": "at_court",
+  "description": "Vicaire général du duché depuis le retour d'Alphonse Fadrique en Sicile (1330), il gouverne en fait Athènes et Néopatras.",
+  "sources": [
+    "Alfonso Fadrique",
+    "Duchy of Athens"
+  ]
+}

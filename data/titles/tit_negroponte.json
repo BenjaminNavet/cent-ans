@@ -1,0 +1,26 @@
+{
+  "id": "tit_negroponte",
+  "rank": "county",
+  "name": {
+    "display": "Bailliage de Négrepont et Modon",
+    "local": "Negroponte",
+    "local_language": "vénitien"
+  },
+  "de_jure_liege": "tit_venice",
+  "de_jure_provinces": [
+    "prov_negroponte",
+    "prov_modon"
+  ],
+  "holder_1337": {
+    "faction": "fac_venice",
+    "sources": [
+      "Négrepont",
+      "Modon"
+    ]
+  },
+  "description": "Négrepont et les deux yeux de Morée.",
+  "sources": [
+    "Négrepont",
+    "Modon"
+  ]
+}

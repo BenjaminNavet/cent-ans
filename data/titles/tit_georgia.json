@@ -1,0 +1,60 @@
+{
+  "id": "tit_georgia",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Géorgie",
+    "local": "საქართველოს სამეფო",
+    "local_language": "géorgien"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix de gueules, au chef d'or.",
+    "description": "Croix de Géorgie ; chef d'or de convention.",
+    "primary_color": "#F3F0E4",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_provinces": [
+    "prov_imereti",
+    "prov_kakheti",
+    "prov_kartli",
+    "prov_odishi"
+  ],
+  "holder_1337": {
+    "faction": "fac_georgia",
+    "sources": [
+      "Kingdom of Georgia",
+      "George V of Georgia"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_georgia_hold",
+      "title": "L'âge d'or",
+      "description": "Conserver le trône de Géorgie.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_georgia"
+      }
+    },
+    {
+      "id": "obj_georgia_core",
+      "title": "Un royaume uni",
+      "description": "Tenir Karthlie, Kakhétie, Iméréthie et Odishi.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_kartli",
+          "prov_kakheti",
+          "prov_imereti",
+          "prov_odishi"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume de Géorgie sous Georges V le Brillant (1314-1346), qui a réuni le pays et secoué la tutelle ilkhanide après 1335 ; le Caucase, la mer Noire et Tbilissi sont à lui.",
+  "sources": [
+    "Kingdom of Georgia",
+    "George V of Georgia"
+  ]
+}

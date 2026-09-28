@@ -1,0 +1,29 @@
+{
+  "id": "tit_corfu",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Corfou",
+    "local": "Κέρκυρα",
+    "local_language": "italien"
+  },
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, au lambel d'argent.",
+    "description": "Armes d'Anjou-Sicile brisées d'un lambel d'argent, à la manière des branches cadettes angevines.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_naples",
+  "de_jure_provinces": [
+    "prov_corfu"
+  ],
+  "holder_1337": {
+    "faction": "fac_taranto",
+    "sources": [
+      "Corfou"
+    ]
+  },
+  "description": "Corfou, fief angevin.",
+  "sources": [
+    "Corfou"
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "id": "prov_bosnia",
+  "name": {
+    "display": "Bosnie",
+    "local": "Босна",
+    "local_language": "serbe"
+  },
+  "region": "balkans",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Bosna",
+    "Vrbas"
+  ],
+  "resources": [
+    "res_iron",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Visoko",
+      "local": "Високо",
+      "local_language": "serbe"
+    },
+    "lat": 43.988,
+    "lon": 18.178
+  },
+  "geo": {
+    "capital_lonlat": [
+      18.178,
+      43.988
+    ],
+    "seed_lonlat": [
+      18.2,
+      44.05
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_bosnia",
+  "culture": "cul_bosnian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 133000,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 30,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4500,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 7,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1350,
+        "unrest": 7,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4400,
+  "description": "Banat de Bosnie, au cœur des montagnes ; l'Église bosniaque (hérétique aux yeux de Rome) y côtoie franciscains et orthodoxes. Étienne II Kotromanić y règne depuis 1322 et rêve d'unir les Slaves du Sud-Ouest.",
+  "sources": [
+    "Bosnie médiévale",
+    "Étienne II Kotromanić",
+    "Bobovac"
+  ]
+}

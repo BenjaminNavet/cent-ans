@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_hama",
+    "province": "prov_hama",
+    "kind": "city",
+    "name": {
+      "display": "Hama (Hamat)",
+      "local": "حماة",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      36.75,
+      35.13
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville des norias sur l'Oronte.",
+    "sources": [
+      "Hama"
+    ]
+  },
+  {
+    "id": "set_shayzar",
+    "province": "prov_hama",
+    "kind": "castle",
+    "name": {
+      "display": "Shaïzar",
+      "local": "شيزر",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      36.57,
+      35.25
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de l'Oronte.",
+    "sources": [
+      "Hama"
+    ]
+  },
+  {
+    "id": "set_salamiyya",
+    "province": "prov_hama",
+    "kind": "village",
+    "name": {
+      "display": "Salamiyya",
+      "local": "سلمية",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      37.05,
+      35.01
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg du désert de Syrie.",
+    "sources": [
+      "Hama"
+    ]
+  }
+]

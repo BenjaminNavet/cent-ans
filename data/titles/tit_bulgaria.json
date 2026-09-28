@@ -1,0 +1,69 @@
+{
+  "id": "tit_bulgaria",
+  "rank": "kingdom",
+  "name": {
+    "display": "Empire bulgare",
+    "local": "Царство Българско",
+    "local_language": "bulgare"
+  },
+  "heraldry": {
+    "blazon": "De gueules au lion d'or couronné.",
+    "description": "Lion d'or sur champ rouge, attribué à l'empire de Tarnovo dans les armoriaux occidentaux.",
+    "primary_color": "#A31621",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Attribution d'armoriaux tardifs ; les sceaux d'Ivan Alexandre montrent surtout le tsar en majesté."
+  },
+  "de_jure_provinces": [
+    "prov_tarnovo",
+    "prov_sofia",
+    "prov_dobrudja",
+    "prov_varna",
+    "prov_philippopolis",
+    "prov_zagora"
+  ],
+  "holder_1337": {
+    "faction": "fac_bulgaria",
+    "sources": [
+      "Second Empire bulgare",
+      "Ivan Alexandre de Bulgarie"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_bulgaria_hold",
+      "title": "Garder Tarnovo",
+      "description": "Ivan Alexandre doit tenir le trône de Tarnovo.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_bulgaria"
+      }
+    },
+    {
+      "id": "obj_bulgaria_vidin",
+      "title": "Réunir Vidin",
+      "description": "Faire de Belaur un vassal soumis.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_vidin"
+      }
+    },
+    {
+      "id": "obj_bulgaria_thrace",
+      "title": "Retour aux Balkans",
+      "description": "Reprendre Anchialos et la côte pontique.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_anchialos"
+        ]
+      }
+    }
+  ],
+  "description": "Second empire bulgare, tsar Ivan Alexandre à Tarnovo. Rang « royaume » du schéma.",
+  "sources": [
+    "Second Empire bulgare",
+    "Ivan Alexandre de Bulgarie"
+  ]
+}

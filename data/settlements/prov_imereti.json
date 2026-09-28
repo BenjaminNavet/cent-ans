@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_kutaisi",
+    "province": "prov_imereti",
+    "kind": "city",
+    "name": {
+      "display": "Koutaïssi",
+      "local": "ქუთაისი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      42.7,
+      42.27
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Seconde capitale du royaume.",
+    "sources": [
+      "Imereti"
+    ]
+  },
+  {
+    "id": "set_gelati",
+    "province": "prov_imereti",
+    "kind": "abbey",
+    "name": {
+      "display": "Ghélati",
+      "local": "გელათი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      42.77,
+      42.29
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère royal, académie de David le Bâtisseur.",
+    "sources": [
+      "Imereti"
+    ]
+  },
+  {
+    "id": "set_tskhaltubo",
+    "province": "prov_imereti",
+    "kind": "village",
+    "name": {
+      "display": "Tskhaltoubo",
+      "local": "წყალტუბო",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      42.6,
+      42.33
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Village des sources.",
+    "sources": [
+      "Imereti"
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "id": "tit_achaea",
+  "rank": "county",
+  "name": {
+    "display": "Principauté d'Achaïe",
+    "local": "Πριγκιπάτο τῆς Ἀχαΐας",
+    "local_language": "français"
+  },
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, au lambel d'argent.",
+    "description": "Armes d'Anjou-Sicile brisées d'un lambel d'argent, à la manière des branches cadettes angevines.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_naples",
+  "de_jure_provinces": [
+    "prov_achaea"
+  ],
+  "holder_1337": {
+    "faction": "fac_taranto",
+    "sources": [
+      "Principauté d'Achaïe",
+      "Catherine II de Courtenay"
+    ]
+  },
+  "description": "Principauté franque de Morée, fief angevin détenu par Catherine de Valois-Courtenay.",
+  "sources": [
+    "Principauté d'Achaïe",
+    "Catherine II de Courtenay"
+  ]
+}

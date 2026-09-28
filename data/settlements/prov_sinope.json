@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_sinop",
+    "province": "prov_sinope",
+    "kind": "city",
+    "name": {
+      "display": "Sinope",
+      "local": "Sinop",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      35.15,
+      42.03
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grande presqu'île fortifiée, arsenal des Candar.",
+    "sources": [
+      "Sinop"
+    ]
+  },
+  {
+    "id": "set_boyabat",
+    "province": "prov_sinope",
+    "kind": "village",
+    "name": {
+      "display": "Boyabat"
+    },
+    "lonlat": [
+      34.77,
+      41.47
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la vallée.",
+    "sources": [
+      "Sinop"
+    ]
+  },
+  {
+    "id": "set_samsun",
+    "province": "prov_sinope",
+    "kind": "town",
+    "name": {
+      "display": "Samsun (Amisos)",
+      "local": "Samsun",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      36.33,
+      41.29
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de la mer Noire, sous influence génoise.",
+    "sources": [
+      "Sinop"
+    ]
+  }
+]

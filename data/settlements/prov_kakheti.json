@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_telavi",
+    "province": "prov_kakheti",
+    "kind": "city",
+    "name": {
+      "display": "Télavi",
+      "local": "თელავი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      45.47,
+      41.92
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale de la Kakhétie.",
+    "sources": [
+      "Kakheti"
+    ]
+  },
+  {
+    "id": "set_gremi",
+    "province": "prov_kakheti",
+    "kind": "town",
+    "name": {
+      "display": "Grémi",
+      "local": "გრემი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      45.72,
+      42.03
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville-marché de la route caravanière.",
+    "sources": [
+      "Kakheti"
+    ]
+  },
+  {
+    "id": "set_alaverdi",
+    "province": "prov_kakheti",
+    "kind": "abbey",
+    "name": {
+      "display": "Alaverdi",
+      "local": "ალავერდი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      45.38,
+      41.95
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Grande cathédrale monastique.",
+    "sources": [
+      "Kakheti"
+    ]
+  }
+]

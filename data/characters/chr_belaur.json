@@ -1,0 +1,39 @@
+{
+  "id": "chr_belaur",
+  "name": {
+    "display": "Belaur",
+    "local": "Белаур",
+    "local_language": "bulgare"
+  },
+  "sex": "male",
+  "house": "Belaur",
+  "faction": "fac_vidin",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Naissance et dates inconnues ; approximation."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Despote de Vidin"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_stubborn"
+  ],
+  "piety": 55,
+  "starting_location": "prov_vidin",
+  "status": "at_court",
+  "description": "Seigneur du Danube occidental, vassal récalcitrant du tsar ; dates de règne mal connues.",
+  "sources": [
+    "Belaur"
+  ]
+}

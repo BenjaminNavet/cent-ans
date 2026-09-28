@@ -61,6 +61,16 @@
       "faction": "fac_naples",
       "status": "marriage_tie",
       "note": "Les Angevins de Naples sont la branche aînée de la maison d'Anjou."
+    },
+    {
+      "faction": "fac_serbia",
+      "status": "peace",
+      "note": "Frontière de Macsó ; campagne hongroise de 1335."
+    },
+    {
+      "faction": "fac_bosnia",
+      "status": "peace",
+      "note": "Le ban de Bosnie reconnaît la suzeraineté hongroise."
     }
   ],
   "claims": [

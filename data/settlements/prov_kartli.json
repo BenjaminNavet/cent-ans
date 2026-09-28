@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_tbilisi",
+    "province": "prov_kartli",
+    "kind": "city",
+    "name": {
+      "display": "Tbilissi",
+      "local": "თბილისი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      44.8,
+      41.72
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du royaume, ville de commerce entre Perse et mer Noire.",
+    "sources": [
+      "Kingdom of Georgia"
+    ]
+  },
+  {
+    "id": "set_mtskheta",
+    "province": "prov_kartli",
+    "kind": "town",
+    "name": {
+      "display": "Mtskheta",
+      "local": "მცხეთა",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      44.72,
+      41.85
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne capitale, siège du catholicos.",
+    "sources": [
+      "Kingdom of Georgia"
+    ]
+  },
+  {
+    "id": "set_gori",
+    "province": "prov_kartli",
+    "kind": "castle",
+    "name": {
+      "display": "Gori",
+      "local": "გორი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      44.11,
+      41.98
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de la haute Koura.",
+    "sources": [
+      "Kingdom of Georgia"
+    ]
+  }
+]

@@ -1,0 +1,93 @@
+{
+  "id": "prov_strumica",
+  "name": {
+    "display": "Strumica et Štip",
+    "local": "Струмица",
+    "local_language": "bulgare"
+  },
+  "region": "balkans",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Strumica",
+    "Bregalnica",
+    "Vardar"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Strumica",
+      "local": "Струмица",
+      "local_language": "bulgare"
+    },
+    "lat": 41.437,
+    "lon": 22.643
+  },
+  "geo": {
+    "capital_lonlat": [
+      22.643,
+      41.437
+    ],
+    "seed_lonlat": [
+      22.4,
+      41.55
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_serbia",
+  "culture": "cul_bulgarian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5400,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2000,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 750,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3500,
+  "description": "Vallées de la Strumica et de la Bregalnica jusqu'à Veles, gagnées sur Byzance en 1330-1334.",
+  "sources": [
+    "Strumica",
+    "Štip",
+    "Veles"
+  ]
+}

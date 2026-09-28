@@ -1,0 +1,84 @@
+[
+  {
+    "id": "set_durazzo",
+    "province": "prov_durazzo",
+    "kind": "city",
+    "name": {
+      "display": "Durazzo",
+      "local": "Dyrrachium",
+      "local_language": "latin"
+    },
+    "lonlat": [
+      19.444,
+      41.323
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Port et forteresse de la via Egnatia.",
+    "sources": [
+      "Durrës"
+    ]
+  },
+  {
+    "id": "set_kruja",
+    "province": "prov_durazzo",
+    "kind": "castle",
+    "name": {
+      "display": "Krujë",
+      "local": "Kruja",
+      "local_language": "latin"
+    },
+    "lonlat": [
+      19.793,
+      41.509
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de l'Arbanon.",
+    "sources": [
+      "Krujë"
+    ]
+  },
+  {
+    "id": "set_alessio",
+    "province": "prov_durazzo",
+    "kind": "town",
+    "name": {
+      "display": "Alessio (Lezhë)",
+      "local": "Lissus",
+      "local_language": "latin"
+    },
+    "lonlat": [
+      19.645,
+      41.782
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "description": "Ville portuaire et tombeau des seigneurs albanais.",
+    "sources": [
+      "Lezhë"
+    ]
+  }
+]

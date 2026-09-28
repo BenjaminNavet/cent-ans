@@ -1,0 +1,96 @@
+{
+  "id": "prov_kerasous",
+  "name": {
+    "display": "Kérasonte et Tripolis",
+    "local": "Κερασοῦς",
+    "local_language": "grec pontique"
+  },
+  "region": "anatolie",
+  "terrain": "mountains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Kérasonte",
+    "Tripolis"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wood",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kérasonte (Giresun)",
+      "local": "Κερασοῦς",
+      "local_language": "grec pontique"
+    },
+    "lat": 40.91,
+    "lon": 38.39
+  },
+  "geo": {
+    "capital_lonlat": [
+      38.39,
+      40.91
+    ],
+    "seed_lonlat": [
+      38.3,
+      40.8
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_trebizond",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 30000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 360,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu ; extension occidentale de l'empire en 1337 incertaine."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 900,
+  "description": "Côte occidentale de l'empire de Trébizonde : Kérasonte (Giresun) et Tripolis, ports des noisettes et du bois.",
+  "sources": [
+    "Giresun",
+    "Empire of Trebizond",
+    "Tirebolu"
+  ]
+}

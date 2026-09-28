@@ -1,0 +1,90 @@
+{
+  "id": "fac_mamluks",
+  "name": {
+    "display": "Sultanat mamelouk",
+    "local": "سلطنة المماليك",
+    "local_language": "arabe"
+  },
+  "short_name": "Mamelouks",
+  "adjective": "mamelouk",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_al_nasir_muhammad",
+  "heir": "chr_anuk",
+  "capital": "prov_cairo",
+  "capital_city": "Le Caire (al-Qahira)",
+  "religion": "rel_islam",
+  "culture": "cul_arabic",
+  "succession_law": "elective",
+  "primary_title": "tit_mamluks",
+  "heraldry": {
+    "blazon": "D'or à la fasce de sable.",
+    "description": "Couleurs jaune et noir de l'étendard mamelouk ; blason de jeu.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2A2A2A",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Sultan d'Égypte et de Syrie",
+    "Serviteur des deux Villes saintes"
+  ],
+  "treasury": 40000,
+  "prestige": 80,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_royal_taxation",
+    "tech_letters_of_credit",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_cilicia",
+      "status": "war",
+      "note": "Al-Nasir Muhammad prend Ayas en 1337 et impose une trêve humiliante à Léon IV."
+    },
+    {
+      "faction": "fac_dulkadir",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_hama",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_artuqids",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_venice",
+      "status": "peace",
+      "note": "Comptoirs d'Alexandrie et de Damiette."
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Comptoirs d'Alexandrie et de Tripoli."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "alliance",
+      "note": "Alliance du Caire et de Saraï contre les Ilkhanides ; épouse mongole d'al-Nasir Muhammad."
+    },
+    {
+      "faction": "fac_cyprus",
+      "status": "peace",
+      "note": "Hugues IV ménage le sultan ; Pierre Ier prendra Alexandrie en 1365."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 65,
+    "trade": 75,
+    "piety": 75
+  },
+  "description": "Sultanat de la caste militaire de mamelouks turcs et circassiens, maître de l'Égypte, de la Syrie et du Hedjaz ; al-Nasir Muhammad, son troisième règne (1310-1341) au sommet, tient Le Caire, Damas et Alep.",
+  "sources": [
+    "Mamluk Sultanate",
+    "Al-Nasir Muhammad"
+  ]
+}

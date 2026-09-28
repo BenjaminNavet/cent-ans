@@ -1,0 +1,55 @@
+{
+  "id": "fac_dulkadir",
+  "name": {
+    "display": "Principauté de Dulkadir",
+    "local": "Dulkadirli Beyliği",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Dulkadir",
+  "adjective": "de Dulkadir",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_karaca_bey",
+  "capital": "prov_elbistan",
+  "capital_city": "Elbistan (Albistan)",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_mamluks",
+  "primary_title": "tit_dulkadir",
+  "heraldry": {
+    "blazon": "De sinople à la bande d'argent.",
+    "description": "Couleurs de convention des Dulkadir.",
+    "primary_color": "#2E7D46",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey de Dulkadir"
+  ],
+  "treasury": 6000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_mamluks",
+      "status": "vassal",
+      "note": "Zeyneddin Karaca Bey reçoit son investiture du sultan mamelouk."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 45,
+    "trade": 45,
+    "piety": 60
+  },
+  "description": "Principauté turkmène du Taurus oriental, fondée par Zeyneddin Karaca Bey (date discutée : 1337 ou 1348) et tenue sous suzeraineté mamelouke.",
+  "sources": [
+    "Dulkadir",
+    "Karaca Bey"
+  ]
+}

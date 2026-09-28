@@ -1,0 +1,56 @@
+{
+  "id": "fac_artuqids",
+  "name": {
+    "display": "Émirat artuqide de Mardin",
+    "local": "ماردين",
+    "local_language": "arabe"
+  },
+  "short_name": "Artuqides",
+  "adjective": "artuqide",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_salih_artuqid",
+  "capital": "prov_mardin",
+  "capital_city": "Mardin",
+  "religion": "rel_islam",
+  "culture": "cul_arabic",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_mamluks",
+  "primary_title": "tit_artuqids",
+  "heraldry": {
+    "blazon": "D'or à la bande de sable.",
+    "description": "Couleurs de convention des Artuqides.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2A2A2A",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Émir de Mardin"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_mamluks",
+      "status": "vassal",
+      "note": "Vassal nominal du sultan mamelouk depuis 1260."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 60,
+    "trade": 50,
+    "piety": 65
+  },
+  "description": "Dynastie turque de Mardin, tenue par al-Salih Chams al-Din Salih (1312-1364) ; forteresse imprenable et vassalité au sultan.",
+  "sources": [
+    "Artuqids",
+    "Mardin"
+  ]
+}

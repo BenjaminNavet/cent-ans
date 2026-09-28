@@ -1,0 +1,46 @@
+{
+  "id": "tit_artuqids",
+  "rank": "county",
+  "name": {
+    "display": "Émirat artuqide de Mardin",
+    "local": "ماردين",
+    "local_language": "arabe"
+  },
+  "heraldry": {
+    "blazon": "D'or à la bande de sable.",
+    "description": "Couleurs de convention des Artuqides.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2A2A2A",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_mamluks",
+  "de_jure_provinces": [
+    "prov_mardin"
+  ],
+  "holder_1337": {
+    "faction": "fac_artuqids",
+    "sources": [
+      "Artuqids",
+      "Mardin"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_artuqids_hold",
+      "title": "La forteresse de Mardin",
+      "description": "Conserver Mardin.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_mardin"
+        ]
+      }
+    }
+  ],
+  "description": "Dynastie turque de Mardin, tenue par al-Salih Chams al-Din Salih (1312-1364) ; forteresse imprenable et vassalité au sultan.",
+  "sources": [
+    "Artuqids",
+    "Mardin"
+  ]
+}

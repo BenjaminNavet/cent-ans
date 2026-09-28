@@ -1,0 +1,107 @@
+[
+  {
+    "id": "set_nis",
+    "province": "prov_nis",
+    "kind": "city",
+    "name": {
+      "display": "Niš",
+      "local": "Ниш",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.903,
+      43.32
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Nœud stratégique de la route des Balkans.",
+    "sources": [
+      "Niš"
+    ]
+  },
+  {
+    "id": "set_branicevo",
+    "province": "prov_nis",
+    "kind": "castle",
+    "name": {
+      "display": "Braničevo",
+      "local": "Браничево",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.22,
+      44.73
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse du Danube, frontière avec la Hongrie.",
+    "sources": [
+      "Braničevo"
+    ]
+  },
+  {
+    "id": "set_prokuplje",
+    "province": "prov_nis",
+    "kind": "town",
+    "name": {
+      "display": "Prokuplje",
+      "local": "Прокупље",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.59,
+      43.24
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourg de la Toplica.",
+    "sources": [
+      "Prokuplje"
+    ]
+  },
+  {
+    "id": "set_kursumlija",
+    "province": "prov_nis",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Nicolas de Kuršumlija",
+      "local": "Св. Никола",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.27,
+      43.14
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère de Nemanja, fondé vers 1168, dans la haute Toplica.",
+    "sources": [
+      "Monastère de Saint-Nicolas (Kuršumlija)"
+    ]
+  }
+]

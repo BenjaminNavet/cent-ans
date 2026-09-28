@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_balikesir",
+    "province": "prov_karasi",
+    "kind": "city",
+    "name": {
+      "display": "Balıkesir"
+    },
+    "lonlat": [
+      27.89,
+      39.65
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des Karasi.",
+    "sources": [
+      "Karasids"
+    ]
+  },
+  {
+    "id": "set_bergama",
+    "province": "prov_karasi",
+    "kind": "town",
+    "name": {
+      "display": "Bergame (Pergame)",
+      "local": "Bergama",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.18,
+      39.12
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne Pergame, acropole des Karasi.",
+    "sources": [
+      "Karasids"
+    ]
+  },
+  {
+    "id": "set_edremit",
+    "province": "prov_karasi",
+    "kind": "town",
+    "name": {
+      "display": "Edremit (Adramyttion)",
+      "local": "Edremit",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.03,
+      39.6
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port du golfe d'Edremit.",
+    "sources": [
+      "Karasids"
+    ]
+  }
+]
