@@ -24,7 +24,9 @@ def test_mercenary_rules_match_schema() -> None:
     """The mercenary rules file exists and matches its schema."""
     schema = _load(DATA / "schemas" / "mercenary_rules.schema.json")
     Draft202012Validator.check_schema(schema)
-    errors = sorted(Draft202012Validator(schema).iter_errors(_rules()), key=lambda e: e.path)
+    errors = sorted(
+        Draft202012Validator(schema).iter_errors(_rules()), key=lambda e: e.path
+    )
     assert not errors, [error.message for error in errors]
 
 
