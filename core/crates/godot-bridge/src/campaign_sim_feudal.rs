@@ -181,6 +181,7 @@ fn felony_reason_label(reason: feudal::FelonyReason) -> &'static str {
         feudal::FelonyReason::RefusedHost => "refus d'ost",
         feudal::FelonyReason::AlliedWithEnemy => "alliance avec l'ennemi du suzerain",
         feudal::FelonyReason::Revolt => "révolte",
+        feudal::FelonyReason::HarbouredFelon => "asile donné à un banni",
     }
 }
 

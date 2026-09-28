@@ -61,6 +61,7 @@
   "passive_counter_base": 10,
   "passive_counter_per_level": 5,
   "passive_counter_cap": 60,
+  "ai_network_min_income": 500,
   "effects": {
     "intel_turns": 4,
     "sabotage_breach": 25,

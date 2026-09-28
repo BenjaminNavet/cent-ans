@@ -490,7 +490,11 @@ fn plan_turn_in(
     // inflation of their upkeep outweighs the seigniorage (Scots spiral).
     // EQ5: a third is enough: the prices stay up after the money is sound
     // again (Swiss buildings 158 → 201 after two years of debasement).
-    let upkeep_heavy = 3 * ctx.building_upkeep > ctx.gross_income;
+    // F8: the garrisons are a fixed cost inflated alike (a county whose
+    // single garrison eats its income sank into a spiral of debasement and
+    // debt: Connacht, prices 100 -> 360 in 50 turns).
+    let fixed_upkeep = ctx.building_upkeep + garrison_upkeep(&ctx).min(ctx.army_upkeep);
+    let upkeep_heavy = 3 * fixed_upkeep > ctx.gross_income;
     orders.extend(plans.coinage.into_iter().filter(|o| {
         !upkeep_heavy
             || !matches!(

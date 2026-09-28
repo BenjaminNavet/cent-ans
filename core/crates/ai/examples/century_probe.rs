@@ -1323,7 +1323,10 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             report.dominance_turns += 1;
         }
         for (index, (_, a, b)) in PAIRS.iter().enumerate() {
-            if state.is_allied(&id(a), &id(b)) {
+            // FE8 (ADR 0114): a direct feudal tie stands for an alliance.
+            if state.is_allied(&id(a), &id(b))
+                || sim_campaign::feudal::direct_tie(&state, data, &id(a), &id(b))
+            {
                 report.alliance_turns[index] += 1;
                 report.alliance_first[index].get_or_insert(state.turn);
                 if at_war {
@@ -1615,9 +1618,10 @@ fn track_fe8(
             }
         }
     }
+    let empire_allies = &state.factions[&empire].allies;
     if sim_campaign::feudal::direct_vassals(state, data, &empire)
         .iter()
-        .any(|v| state.is_allied(&empire, v))
+        .any(|v| empire_allies.contains(v))
     {
         fe8.empire_allied_vassal_turns += 1;
     }

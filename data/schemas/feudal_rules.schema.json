@@ -91,6 +91,29 @@
         }
       },
       "additionalProperties": false
+    },
+    "host": {
+      "type": "object",
+      "description": "Vassaux directs que l'ost peut convoquer (lot F8, ADR 0114) : un vassal trop loin à la fois de la capitale de son suzerain et des terres de l'ennemi, ou assez puissant pour être indépendant de fait, n'est pas convoqué (et ne commet pas de félonie).",
+      "properties": {
+        "max_muster_km": { "type": "number", "minimum": 0, "description": "Distance maximale (km) entre une place du vassal et la capitale de son suzerain ou une place de l'ennemi. 0 : sans limite." },
+        "independent_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance du vassal, en part de celle de son suzerain, à partir de laquelle il est indépendant de fait et n'est pas convoqué. 0 : sans limite." }
+      },
+      "additionalProperties": false
+    },
+    "start_felonies": {
+      "type": "array",
+      "description": "Cas de félonie ouverts au début de la campagne de 1337 (lot F8 : Édouard III donne asile à Robert d'Artois, banni par Philippe VI).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vassal": { "type": "string", "pattern": "^fac_[a-z0-9_]+$", "description": "Faction félonne (tient un titre du suzerain)." },
+          "liege": { "type": "string", "pattern": "^fac_[a-z0-9_]+$", "description": "Suzerain qui peut prononcer la commise." },
+          "reason": { "enum": ["refused_host", "allied_with_enemy", "revolt", "harboured_felon"], "description": "Motif du cas." }
+        },
+        "required": ["vassal", "liege", "reason"],
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false

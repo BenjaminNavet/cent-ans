@@ -74,7 +74,9 @@ fn new_1337_matches_game_data() {
     assert_eq!(france_state.treasury, 60_000);
     assert!(france_state.at_war_with.contains(&fac("fac_england")));
     assert!(france_state.allies.contains(&fac("fac_scotland")));
-    assert!(france_state.allies.contains(&fac("fac_burgundy")));
+    // ADR 0114: the feudal tie of Burgundy stands for an alliance.
+    assert!(!france_state.allies.contains(&fac("fac_burgundy")));
+    assert!(state.is_allied(&fac("fac_france"), &fac("fac_burgundy")));
     assert!(!france_state.at_war_with.contains(&fac("fac_scotland")));
 
     let army_id = main_army(&state, "fac_france");

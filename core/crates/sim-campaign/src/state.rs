@@ -1159,8 +1159,19 @@ impl CampaignState {
                 .is_some_and(|f| f.at_war_with.contains(b))
     }
 
+    /// `a` and `b` fight on the same side: the same faction, allies, or a
+    /// suzerain and its direct vassal (the feudal tie stands for an
+    /// alliance, ADR 0114; read from the `suzerain` cache).
     pub fn is_allied(&self, a: &FactionId, b: &FactionId) -> bool {
-        a == b || self.factions.get(a).is_some_and(|f| f.allies.contains(b))
+        a == b
+            || self
+                .factions
+                .get(a)
+                .is_some_and(|f| f.allies.contains(b) || f.suzerain.as_ref() == Some(b))
+            || self
+                .factions
+                .get(b)
+                .is_some_and(|f| f.suzerain.as_ref() == Some(a))
     }
 
     /// Lot C5: a formal trade agreement is in force between `a` and `b` (also
