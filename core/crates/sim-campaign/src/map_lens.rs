@@ -74,7 +74,7 @@ pub fn map_lens(
             };
             let friendly = state.is_friendly_territory(viewer, id);
             let lens = ProvinceLens {
-                income: province_income(province),
+                income: province_income(&data.economy_rules, province),
                 population: province.population.total(),
                 unrest: weighted_unrest(&province.population),
                 vassal_loyalty: vassal.map(|f| f.loyalty),

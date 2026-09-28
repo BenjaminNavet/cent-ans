@@ -166,17 +166,23 @@ pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
     values.insert("decision_turns", f64::from(chronicle::DECISION_TURNS));
 
     // Tax brackets (spec § 1.4).
-    values.insert("tax_multiplier_low", economy::TaxRate::Low.multiplier());
+    values.insert(
+        "tax_multiplier_low",
+        economy::TaxRate::Low.multiplier(&data.economy_rules),
+    );
     values.insert(
         "tax_multiplier_normal",
-        economy::TaxRate::Normal.multiplier(),
+        economy::TaxRate::Normal.multiplier(&data.economy_rules),
     );
-    values.insert("tax_multiplier_high", economy::TaxRate::High.multiplier());
+    values.insert(
+        "tax_multiplier_high",
+        economy::TaxRate::High.multiplier(&data.economy_rules),
+    );
 
-    // Economy constants still in code.
+    // Upkeep months (`economy.json`, RS-B).
     values.insert(
         "upkeep_months_per_season",
-        economy::UPKEEP_MONTHS_PER_SEASON as f64,
+        economy_rules.upkeep_months_per_season as f64,
     );
 
     // Army stances (`data/rules/postures.json`, lot CV3-4 tooltips).
