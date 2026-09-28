@@ -74,6 +74,11 @@
       "faction": "fac_cyprus",
       "status": "peace",
       "note": "Hugues IV ménage le sultan ; Pierre Ier prendra Alexandrie en 1365."
+    },
+    {
+      "faction": "fac_barqa",
+      "status": "peace",
+      "note": "Suzeraineté mamelouke nominale sur les tribus de Cyrénaïque."
     }
   ],
   "ai_personality": {

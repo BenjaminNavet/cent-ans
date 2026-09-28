@@ -56,6 +56,11 @@
       "faction": "fac_genoa",
       "status": "peace",
       "note": "Fondouks génois à Tunis, comptoirs à Tabarka."
+    },
+    {
+      "faction": "fac_tripoli",
+      "status": "peace",
+      "note": "Tripoli des Banu Thabit, autonome de fait."
     }
   ],
   "ai_personality": {
