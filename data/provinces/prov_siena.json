@@ -1,0 +1,92 @@
+{
+  "id": "prov_siena",
+  "name": {
+    "display": "Sienne",
+    "local": "Siena",
+    "local_language": "toscan"
+  },
+  "region": "italie_centre",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Arbia"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wool",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Sienne",
+      "local": "Siena",
+      "local_language": "toscan"
+    },
+    "lat": 43.3188,
+    "lon": 11.3306
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.3306,
+      43.3188
+    ],
+    "seed_lonlat": [
+      11.3,
+      43.25
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_siena",
+  "culture": "cul_tuscan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 52000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8500,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1700,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 700,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Commune guelfe prospère ; population estimée par comparaison avec Florence à échelle réduite."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_fair",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4200,
+  "description": "République guelfe gouvernée par le Governo dei Nove depuis 1287 ; banquiers et lainiers, rivale commerciale de Florence, achève la Torre del Mangia à la fin de la décennie.",
+  "sources": [
+    "République de Sienne",
+    "Governo dei Nove"
+  ]
+}

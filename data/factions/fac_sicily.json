@@ -1,0 +1,65 @@
+{
+  "id": "fac_sicily",
+  "name": {
+    "display": "Royaume de Trinacrie",
+    "local": "Regnum Trinacriae",
+    "local_language": "sicilien"
+  },
+  "short_name": "Sicile",
+  "adjective": "sicilien",
+  "government": "kingdom",
+  "playable": true,
+  "capital": "prov_sicilia",
+  "capital_city": "Palerme",
+  "religion": "rel_catholic",
+  "culture": "cul_sicilian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_sicily",
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4, d'or à quatre pals de gueules ; aux 2 et 3, d'argent à l'aigle de sable.",
+    "description": "Armes aragono-souabes des rois de Sicile depuis la paix de Caltabellotta (1302).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Roi de Trinacrie"
+  ],
+  "treasury": 22000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aragon",
+      "status": "alliance",
+      "note": "Branche cadette de la maison de Barcelone ; alliance dynastique constante avec l'Aragon continental, sans union des couronnes."
+    },
+    {
+      "faction": "fac_naples",
+      "status": "truce",
+      "note": "Guerre des Vêpres siciliennes (1282-1302) : rivalité persistante avec les Angevins de Naples pour la Sicile."
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "war",
+      "note": "Le pape ne reconnaît pas la couronne aragonaise de Sicile, promise aux Angevins ; excommunication récurrente des rois de Trinacrie."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 50,
+    "trade": 60,
+    "piety": 30
+  },
+  "description": "Royaume issu des Vêpres siciliennes, tenu par la branche cadette aragonaise de la maison de Barcelone depuis la paix de Caltabellotta (1302). Frédéric III, vieux et goutteux, meurt en juin 1337 ; son fils Pierre II lui succède aussitôt.",
+  "sources": [
+    "Royaume de Sicile (1282-1442)",
+    "Frédéric III de Sicile",
+    "Pierre II de Sicile"
+  ],
+  "ruler": "chr_federico_iii_de_sicile"
+}

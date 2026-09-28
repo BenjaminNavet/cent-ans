@@ -1,0 +1,68 @@
+{
+  "id": "fac_ferrara",
+  "name": {
+    "display": "Marquisat de Ferrare",
+    "local": "Marchesato di Ferrara",
+    "local_language": "italien"
+  },
+  "short_name": "Ferrare",
+  "adjective": "ferrarais",
+  "government": "lordship",
+  "playable": true,
+  "capital": "prov_ferrara",
+  "capital_city": "Ferrare",
+  "religion": "rel_catholic",
+  "culture": "cul_lombard",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_ferrara",
+  "heraldry": {
+    "blazon": "D'azur à l'aigle d'argent, becquée et membrée d'or.",
+    "description": "Aigle blanche des Este, armes anciennes de la maison.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Marquis de Ferrare",
+    "Vicaire pontifical"
+  ],
+  "treasury": 15000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_papacy",
+      "status": "vassal",
+      "note": "Vicariat pontifical accordé en 1329 après la guerre de Ferrare (1321-1329)."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_verona",
+      "status": "war",
+      "since": {
+        "value": "1336"
+      },
+      "note": "Membre de la ligue de Venise, Florence, Milan, Mantoue et Ferrare contre l'expansion de Mastino II della Scala."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 65,
+    "trade": 60,
+    "piety": 55
+  },
+  "description": "Marquisat du delta du Pô, gouverné en 1337 par trois frères co-seigneurs : Obizzo III, Nicolò Ier et Aldobrandino II d'Este.",
+  "sources": [
+    "Ferrare",
+    "Maison d'Este"
+  ],
+  "ruler": "chr_obizzo_iii_d_este",
+  "suzerain": "fac_papacy"
+}

@@ -1,0 +1,55 @@
+{
+  "id": "fac_perugia",
+  "name": {
+    "display": "Commune de Pérouse",
+    "local": "Comune di Perugia",
+    "local_language": "ombrien"
+  },
+  "short_name": "Pérouse",
+  "adjective": "pérugin",
+  "government": "republic",
+  "playable": true,
+  "capital": "prov_perugia",
+  "capital_city": "Pérouse",
+  "religion": "rel_catholic",
+  "culture": "cul_tuscan",
+  "succession_law": "elective",
+  "primary_title": "tit_perugia",
+  "heraldry": {
+    "blazon": "D'or au griffon de sable.",
+    "description": "Griffon noir de Pérouse.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "République de Pérouse"
+  ],
+  "treasury": 9000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "Suzeraineté pontificale théorique sur l'État de l'Église ; Pérouse gouverne de fait sans ingérence."
+    },
+    {
+      "faction": "fac_siena",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 55
+  },
+  "description": "Commune ombrienne fortement fortifiée, guelfe intransigeante, alliée constante de Florence contre les seigneuries gibelines voisines.",
+  "sources": [
+    "Pérouse"
+  ]
+}

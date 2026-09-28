@@ -1,0 +1,60 @@
+{
+  "id": "fac_rimini",
+  "name": {
+    "display": "Seigneurie de Rimini",
+    "local": "Signoria di Rimini",
+    "local_language": "romagnol"
+  },
+  "short_name": "Rimini",
+  "adjective": "riminois",
+  "government": "lordship",
+  "playable": true,
+  "capital": "prov_rimini",
+  "capital_city": "Rimini",
+  "religion": "rel_catholic",
+  "culture": "cul_tuscan",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_rimini",
+  "heraldry": {
+    "blazon": "Fuselé d'argent et de gueules.",
+    "description": "Blason attribué aux Malatesta, incertain avant le XVe siècle.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Seigneur de Rimini",
+    "Vicaire pontifical"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_papacy",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_urbino",
+      "status": "peace",
+      "note": "Rivalité récurrente entre Malatesta guelfes et Montefeltro gibelins pour la Romagne méridionale."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 50,
+    "trade": 45,
+    "piety": 45
+  },
+  "description": "Seigneurie guelfe adriatique des Malatesta, gouvernée en 1337 par les frères Ferrantino et Malatesta « Guastafamiglia », vicaires pontificaux de Romagne.",
+  "sources": [
+    "Rimini",
+    "Maison Malatesta"
+  ],
+  "ruler": "chr_ferrantino_malatesta",
+  "suzerain": "fac_papacy"
+}

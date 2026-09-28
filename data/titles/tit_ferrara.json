@@ -1,0 +1,46 @@
+{
+  "id": "tit_ferrara",
+  "rank": "county",
+  "name": {
+    "display": "Marquisat de Ferrare",
+    "local": "Marchesato di Ferrara",
+    "local_language": "italien"
+  },
+  "heraldry": {
+    "blazon": "D'azur à l'aigle d'argent, becquée et membrée d'or.",
+    "description": "Aigle blanche des Este, armes anciennes de la maison avant l'adjonction ultérieure du lambel de France (1352).",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_papacy",
+  "de_jure_provinces": [
+    "prov_ferrara"
+  ],
+  "holder_1337": {
+    "faction": "fac_ferrara",
+    "sources": [
+      "Ferrare",
+      "Maison d'Este"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_ferrara_hold",
+      "title": "Garder le marquisat",
+      "description": "La maison d'Este doit conserver Ferrare.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_ferrara"
+      }
+    },
+    {
+      "id": "obj_ferrara_modena",
+      "title": "Réunir Modène et Reggio",
+      "description": "Réunir les possessions estenses de Modène et Reggio, déjà tenues par la maison hors de cette carte.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "id": "fac_mantua",
+  "name": {
+    "display": "Seigneurie de Mantoue",
+    "local": "Signoria di Mantova",
+    "local_language": "italien"
+  },
+  "short_name": "Mantoue",
+  "adjective": "mantouan",
+  "government": "lordship",
+  "playable": true,
+  "capital": "prov_mantova",
+  "capital_city": "Mantoue",
+  "religion": "rel_catholic",
+  "culture": "cul_lombard",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_mantova",
+  "heraldry": {
+    "blazon": "D'argent à la croix pattée de gueules.",
+    "description": "Armes primitives de la maison Gonzague.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Seigneur de Mantoue",
+    "Vicaire impérial"
+  ],
+  "treasury": 12000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_milan",
+      "status": "peace",
+      "note": "Voisin puissant, rival potentiel pour l'hégémonie lombarde."
+    },
+    {
+      "faction": "fac_verona",
+      "status": "war",
+      "since": {
+        "value": "1336"
+      },
+      "note": "Membre de la ligue de Venise, Florence, Milan, Ferrare et Mantoue contre l'expansion de Mastino II della Scala."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 60,
+    "trade": 55,
+    "piety": 45
+  },
+  "description": "Ville-lacs sur le Mincio tenue par Louis Ier Gonzague, qui a renversé les Bonacolsi en 1328 et acheté le vicariat impérial l'année suivante.",
+  "sources": [
+    "Mantoue",
+    "Louis Ier Gonzague"
+  ],
+  "ruler": "chr_luigi_i_gonzaga",
+  "suzerain": "fac_empire"
+}

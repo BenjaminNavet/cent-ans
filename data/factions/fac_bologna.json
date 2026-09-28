@@ -1,0 +1,58 @@
+{
+  "id": "fac_bologna",
+  "name": {
+    "display": "Commune de Bologne",
+    "local": "Comune di Bologna",
+    "local_language": "émilien"
+  },
+  "short_name": "Bologne",
+  "adjective": "bolonais",
+  "government": "republic",
+  "playable": true,
+  "capital": "prov_bologna",
+  "capital_city": "Bologne",
+  "religion": "rel_catholic",
+  "culture": "cul_lombard",
+  "succession_law": "elective",
+  "primary_title": "tit_bologna",
+  "heraldry": {
+    "blazon": "De gueules à la croix pattée d'argent.",
+    "description": "Armes communales de Bologne reprises par la seigneurie Pepoli.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Commune de Bologne"
+  ],
+  "treasury": 13000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_universities"
+  ],
+  "relations": [
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "A chassé le légat pontifical Bertrand du Pouget le 17 mars 1334 ; gouverne depuis en commune, sans suzerain effectif."
+    },
+    {
+      "faction": "fac_ferrara",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 60,
+    "trade": 55,
+    "piety": 45
+  },
+  "description": "Commune universitaire qui a chassé le légat pontifical en 1334 et se gouverne depuis en proie aux « querelles de factions » ; le juriste Taddeo Pepoli, fils du banquier Romeo Pepoli, s'y impose peu à peu comme arbitre avant de s'emparer formellement du pouvoir le 28 août 1337.",
+  "sources": [
+    "Bologne",
+    "Taddeo Pepoli"
+  ]
+}
