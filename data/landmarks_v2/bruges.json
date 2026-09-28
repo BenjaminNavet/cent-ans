@@ -29,6 +29,14 @@
    "use": "Enceinte de 1297-1300 : double fossé, levée de terre et palissade ; neuf portes dont cinq avancées ; démantèlement vers 1328 ; Gentpoort 1361-1363, Smedenpoort 1367-1368 ; 25 à 30 moulins."
   },
   {
+   "title": "Brugge - middeleeuwse stadsuitbreiding zuid (thème 14697) ; Poertoren (objet de protection 11630)",
+   "author": "Inventaris Onroerend Erfgoed (agentschap Onroerend Erfgoed, Vlaanderen)",
+   "url": "https://inventaris.onroerenderfgoed.be/themas/14697",
+   "license": "CC BY 4.0 (textes de l'Inventaire) ; faits seulement",
+   "extracted": false,
+   "use": "Relecture 2026-09-28 : neuf portes de 1297 dont cinq avancées ; Smedenpoort 1368 du même type que la Boeveriepoort bâtie quatre ans plus tôt ; Ezelpoort 1369 dans le fossé intérieur ; Gentpoort 1401 et 1407, Katelijnepoort 1401-1402, Kruispoort 1401-1406 (devis du 16 août 1400) ; Poertoren 1398-1401 ; Koepoort (prise d'eau derrière le béguinage)."
+  },
+  {
    "title": "Beheerplan Vesten Brugge — Bijlage 1 : Inventarisatie (fiches bouwkundig erfgoed)",
    "author": "Stad Brugge",
    "date": "2024",
@@ -134,7 +142,7 @@
    "use": "Auberge des van der Beurse de 1285 à 1302, loge vénitienne dès 1397, bâtiment actuel daté de 1453 (hors période : non rendu)."
   },
   {
-   "title": "Waterhalle ; Kraanrei ; Het Steen (Brugge) ; Brugse reien ; Brugse stadspoorten ; Sint-Jakobskerk (Brugge) ; Freren Fonteinstraat ; Augustijnenklooster (Brugge) ; Poertoren ; Markt (Brugge)",
+   "title": "Waterhalle ; Kraanrei ; Het Steen (Brugge) ; Brugse reien ; Brugse stadspoorten ; Sint-Jakobskerk (Brugge) ; Freren Fonteinstraat ; Augustijnenklooster (Brugge) ; Poertoren ; Markt (Brugge) ; Belfort van Brugge ; Boeveriepoort ; Dampoort (Brugge) (relecture 2026-09-28)",
    "author": "Wikipédia (néerlandais), contributeurs",
    "url": "https://nl.wikipedia.org/wiki/Waterhalle",
    "license": "CC BY-SA 4.0 ; faits seulement, rien d'extrait",
@@ -315,7 +323,7 @@
     [-729.3, 483.5, 24.0],
     [-640.0, 700.0, 24.0],
     [-574.0, 764.0, 24.0],
-    [-518.0, 855.0, 24.0],
+    [-561.0, 865.0, 24.0],
     [-481.0, 885.0, 24.0],
     [-427.1, 913.5, 24.0],
     [-402.5, 960.1, 24.0],
@@ -612,7 +620,7 @@
     [-710, 477],
     [-623, 689],
     [-558, 751],
-    [-503, 842],
+    [-550, 848],
     [-470, 868],
     [-412, 899],
     [-388, 945],
@@ -753,14 +761,14 @@
     },
     {
      "name": "Ezelpoort (passage de la porte démantelée vers 1328)",
-     "at": [-509, 832],
+     "at": [-550, 848],
      "kind": "gate",
      "height_m": 7,
      "until_year": 1368
     },
     {
      "name": "Ezelpoort (1369-1370)",
-     "at": [-509, 832],
+     "at": [-550, 848],
      "kind": "gate",
      "height_m": 16,
      "from_year": 1369
@@ -794,7 +802,7 @@
      "from_year": 1366
     }
    ],
-   "note": "Enceinte de 1297-1302 (≈ 6,8 km, 430 ha) : double fossé, levée de terre et palissade de bois (Inventaire, objet 302193). Tracé : axe du fossé intérieur d'après OSM (vesten actuelles : Katelijne-, Begijnen-, Boeverie-, Smedenvest, canal Gand-Bruges à l'est ; au nord-ouest, fossé comblé sous la Koningin Elisabethlaan et le Komvest), levée restituée 20 m à l'intérieur. Hauteur 6 m : moyenne des coupes de 1702 (Beheerplan Vesten, Stad Brugge 2024), état antérieur inconnu. Fortifications démantelées vers 1328 (lettres de Philippe VI du 20 décembre 1328 après Cassel ; l'Inventaire parle de l'exécution du traité d'Athis-sur-Orge de 1305) : en 1340, levée et fossés sans portes maçonnées (passages bas restitués). Portes rebâties de 1361 à 1407, dates de l'Inventaire. Format : la levée est rendue comme un mur maçonné bas (pas de gabarit de levée de terre linéaire) ; le fossé est dessiné à part (`waters`, `vesten_fosse`), d'où `ditch_m: 0`. Second fossé extérieur non tracé (tracé de 1340 inconnu ; les fossés extérieurs actuels de l'ouest datent de la bastionnement du XVIIe s.). Dampoort : trois portes (Sint-Nikolaas, Sint-Leonardus, Speiepoort), positions et dates non trouvées."
+   "note": "Enceinte de 1297-1302 (≈ 6,8 km, 430 ha) : double fossé, levée de terre et palissade de bois (Inventaire, objet 302193). Tracé : axe du fossé intérieur d'après OSM (vesten actuelles : Katelijne-, Begijnen-, Boeverie-, Smedenvest, canal Gand-Bruges à l'est ; au nord-ouest, fossé comblé sous la Koningin Elisabethlaan et le Komvest), levée restituée 20 m à l'intérieur. Hauteur 6 m : moyenne des coupes de 1702 (Beheerplan Vesten, Stad Brugge 2024), état antérieur inconnu. Fortifications démantelées vers 1328 (lettres de Philippe VI du 20 décembre 1328 après Cassel ; l'Inventaire parle de l'exécution du traité d'Athis-sur-Orge de 1305) : en 1340, levée et fossés sans portes maçonnées (passages bas restitués). Portes rebâties de 1361 à 1407, dates de l'Inventaire (objet 302193, thème 14697) et du Beheerplan Vesten : Gentpoort 1361-1363, détruite en 1382, 1401-1407 ; Kruispoort (première porte 1302-1304) 1366-1367, 1401-1406 ; Boeveriepoort 1366-1367 (Wikipédia NL, Jan Slabbaert ; le thème 14697 la dit bâtie « quatre ans » avant la Smedenpoort de 1368, soit vers 1364 ; première porte en service en 1312 selon Wikipédia NL) ; Smedenpoort 1367-1368 ; Ezelpoort 1369 ; Katelijnepoort 1401-1402. Ezelpoort : bâtiment actuel (OSM, dans le fossé intérieur) à 62 m de l'ancien point, levée et fossé recalés sur lui (relecture 2026-09-28) ; les autres portes sont à 1-35 m de leur bâtiment ou de leur rue (Gentpoort, Kruispoort, Smedenpoort, Katelijnestraat, Boeveriestraat). Format : la levée est rendue comme un mur maçonné bas (pas de gabarit de levée de terre linéaire) ; le fossé est dessiné à part (`waters`, `vesten_fosse`), d'où `ditch_m: 0`. Second fossé extérieur non tracé (tracé de 1340 inconnu ; les fossés extérieurs actuels de l'ouest datent de la bastionnement du XVIIe s.). Dampoort : trois portes (Sint-Nikolaas, Sint-Leonardus, Speiepoort), positions et dates non trouvées."
   },
   {
    "id": "mur_begijnenvest",
@@ -10149,7 +10157,7 @@
     "height": 32,
     "top": "pyramid"
    },
-   "description": "Tour de brique bâtie d'un seul tenant avec les halles après l'incendie de 1280 (dendrochronologie 1270-1300, Inventaire 29457). En 1340, avant l'ajout (ou la restauration) d'une seconde assise carrée vers 1345-1346 : hauteur non trouvée, restituée (32 m et flèche de bois). Emprise : tour actuelle (OSM)."
+   "description": "Tour de brique bâtie d'un seul tenant avec les halles après l'incendie de 1280 (dendrochronologie 1270-1300, Inventaire 29457). En 1340, avant l'ajout (ou la restauration) d'une seconde assise carrée vers 1345-1346 : hauteur non trouvée, restituée (32 m et flèche de bois). Emprise : tour actuelle (OSM). Wikipédia NL date au contraire les deux assises carrées de la réparation de 1291-1296 ; l'Inventaire parle d'« ajout ou restauration » vers 1345-1346 : état de 1340 incertain."
   },
   {
    "id": "beffroi_1346",
@@ -10212,9 +10220,9 @@
    "params": {
     "length_m": 95,
     "width_m": 24,
-    "height_m": 18
+    "height_m": 30
    },
-   "description": "Halle couverte bâtie de 1284 à 1294 au-dessus de la Kraanrei, côté est du Markt entre la Philipstockstraat et la Breidelstraat : les bateaux y déchargeaient à couvert ; 95 × 24 m (Wikipédia NL, Waterhalle), démolie en 1787-1789 (site du Provinciaal Hof). Hauteur restituée."
+   "description": "Halle couverte achevée en 1294 au-dessus de la Kraanrei, côté est du Markt entre la Philipstockstraat et la Breidelstraat : les bateaux y déchargeaient à couvert ; 95 × 24 m, quinze travées, hauteur estimée à 30 m, murs de 1,30 à 1,50 m, appentis de 4 m côté Markt (Wikipédia NL, Waterhalle) ; démolie en 1787 (site du Provinciaal Hof, OSM à 5 m)."
   },
   {
    "id": "ghyselhuus",
@@ -10386,7 +10394,7 @@
    "at": [-268.5, -290.0],
    "angle_deg": 35.4,
    "clear_m": 3,
-   "from_year": 1359,
+   "from_year": 1425,
    "certainty": "hypothetical",
    "params": {
     "length_m": 50,
@@ -10400,7 +10408,7 @@
      "spire_m": 10
     }
    },
-   "description": "Nef et tour rebâties après l'incendie de 1358 (chapelle Saint-Jacques 1360, chapelle des cordonniers 1372 : Inventaire 29716). Date d'achèvement et gabarit non trouvés (restitués, à partir de 1359) ; le couronnement néo-roman de la tour date de 1844-1846."
+   "description": "Tour et nef romane détruites par l'incendie de 1358 ; nef gothique actuelle bâtie dans le premier quart du XVe s. (Inventaire 29716 ; chapelle Saint-Jacques 1360, chapelle des cordonniers 1372). Entre 1359 et 1424 seul le chœur gothique est rendu (nef en ruine ou en chantier, état inconnu). Gabarit restitué ; le couronnement néo-roman de la tour date de 1844-1846."
   },
   {
    "id": "saint_jacques",
@@ -10579,7 +10587,7 @@
     "radius_m": 4,
     "height": 18
    },
-   "description": "Tour ronde de pierre bâtie en 1398-1401 par Jan van Oudenaerde à l'ouest du Minnewater (Beheerplan Vesten ; 1397-1398 selon Wikipédia NL) ; 18 m, 8 m de diamètre ; poudrière jusqu'au XVIIe s."
+   "description": "Tour ronde de pierre bâtie en 1398-1401 par Jan van Oudenaerde à l'ouest du Minnewater (Beheerplan Vesten ; Inventaire, objet de protection 11630 et thème 14697 ; 1397-1398 selon Wikipédia NL ; le texte de l'objet 302193 donne 1367-1368, erreur probable) ; 18 m, 8 m de diamètre ; poudrière jusqu'au XVIIe s."
   },
   {
    "id": "minnewater_tour_est",
