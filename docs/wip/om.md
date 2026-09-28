@@ -18,3 +18,4 @@ Lire ce fichier, `git log feat/om`, les notes `docs/wip/om-*.md` des lots.
 - D6 fusionné (37 prov, 6 fac ; 93cc38fb). Total 443 provinces, 177 factions. C1 (données annexes) lancé. Reste : OM2 géo, P1, puis P2 portraits D4-D6, intégration complète.
 - P1 fusionné (écus/bannières toutes factions, 46 portraits + 37 âgés D1-D3, 3,85 $). P2 (portraits D4-D6, ≤ 4,50 $) lancé. Attente OM2.
 - OM2 fusionné (artefacts géo 7168×6144, 406 prov). I1 (intégration : régénération 443 prov, corrections, tous tests, mesures) lancé dans ../gp-om-om2. Ensuite : fusion P2, puis main.
+- P2 fusionné (49 portraits + 42 âgés D4-D6, 4,20 $ ; cumul OM 8,05 $/10). Contrôle visuel planche : correct ; Andronic III en couronne occidentale, Abu l-Hasan auréolé (à retoucher éventuellement).
