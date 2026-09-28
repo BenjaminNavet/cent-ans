@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_visegrad",
+    "province": "prov_hungary_central",
+    "kind": "city",
+    "name": {
+      "display": "Visegrád",
+      "local": "Visegrád",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.97,
+      47.7892
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Résidence royale de Charles Robert sur le coude du Danube, la cour fixe du roi angevin depuis 1323.",
+    "sources": [
+      "Visegrád"
+    ]
+  },
+  {
+    "id": "set_buda",
+    "province": "prov_hungary_central",
+    "kind": "town",
+    "name": {
+      "display": "Buda",
+      "local": "Buda",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      19.0402,
+      47.4979
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Ville royale sur la rive droite du Danube, plus grande cité du royaume avec Pest voisine.",
+    "sources": [
+      "Buda"
+    ]
+  },
+  {
+    "id": "set_esztergom",
+    "province": "prov_hungary_central",
+    "kind": "town",
+    "name": {
+      "display": "Esztergom",
+      "local": "Esztergom",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.7398,
+      47.7928
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Siège de l'archevêque primat de Hongrie, ancienne capitale royale.",
+    "sources": [
+      "Esztergom"
+    ]
+  }
+]

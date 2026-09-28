@@ -49,5 +49,9 @@
     "deficit_seasons": 4,
     "max_upkeep_percent": 40,
     "max_per_turn": 1
+  },
+  "terrain_supply": {
+    "steppe": { "recovery_percent": 70, "loss_percent": 125, "summer_loss": 0 },
+    "desert": { "recovery_percent": 35, "loss_percent": 175, "summer_loss": 15 }
   }
 }

@@ -108,9 +108,9 @@ func _register_chunks(sid: String) -> void:
 	var size := float(terrain.chunk_px)
 	for cy in range(int(floor((a.y - e) / size)), int(floor((a.y + e) / size)) + 1):
 		for cx in range(int(floor((a.x - e) / size)), int(floor((a.x + e) / size)) + 1):
-			if cx < 0 or cy < 0 or cx >= TerrainBuilder.CHUNKS or cy >= TerrainBuilder.CHUNKS:
+			if cx < 0 or cy < 0 or cx >= terrain.chunks_x or cy >= terrain.chunks_y:
 				continue
-			var index := cy * TerrainBuilder.CHUNKS + cx
+			var index := cy * terrain.chunks_x + cx
 			if not _ids_by_chunk.has(index):
 				_ids_by_chunk[index] = []
 			(_ids_by_chunk[index] as Array).append(sid)

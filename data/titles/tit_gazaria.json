@@ -1,0 +1,32 @@
+{
+  "id": "tit_gazaria",
+  "rank": "county",
+  "name": {
+    "display": "Gazarie génoise (Caffa)",
+    "local": "Gazaria",
+    "local_language": "ligure"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix de gueules.",
+    "description": "Croix de saint Georges des Génois.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_caffa"
+  ],
+  "holder_1337": {
+    "faction": "fac_genoa",
+    "uncertain": true,
+    "sources": [
+      "Caffa",
+      "Gazarie"
+    ]
+  },
+  "description": "Colonies génoises de Gazarie (Caffa, Cerco), tenues par concession de la Horde d'Or depuis 1266.",
+  "sources": [
+    "Caffa",
+    "Gazarie"
+  ]
+}

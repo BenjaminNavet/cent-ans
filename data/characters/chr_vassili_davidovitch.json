@@ -1,0 +1,45 @@
+{
+  "id": "chr_vassili_davidovitch",
+  "name": {
+    "display": "Vassili Davidovitch de Iaroslavl",
+    "local": "Василий Давидович",
+    "local_language": "vieux russe"
+  },
+  "sex": "male",
+  "house": "Iaroslavl",
+  "faction": "fac_yaroslavl",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Naissance inconnue."
+  },
+  "death": {
+    "value": "1345"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Iaroslavl",
+      "from": {
+        "value": "1321"
+      },
+      "note": "Règne 1321-1345."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_loyal"
+  ],
+  "piety": 55,
+  "starting_location": "prov_yaroslavl",
+  "status": "at_court",
+  "description": "Prince de Iaroslavl de 1321 à sa mort à l'hiver 1345.",
+  "sources": [
+    "Vassili de Iaroslavl"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "id": "chr_jaunutis",
+  "name": {
+    "display": "Jaunutis",
+    "local": "Jaunutis",
+    "local_language": "lituanien"
+  },
+  "sex": "male",
+  "house": "Gediminides",
+  "faction": "fac_lithuania",
+  "role": "heir",
+  "birth": {
+    "value": "1300",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1366",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 3,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_peaceful",
+    "trait_cautious"
+  ],
+  "piety": 40,
+  "family": {
+    "father": "chr_gediminas"
+  },
+  "starting_location": "prov_vilnius",
+  "status": "at_court",
+  "description": "Fils cadet de Gediminas, qui héritera de Vilnius en 1341 avant d'être chassé par ses frères en 1345 ; naissance approximative.",
+  "sources": [
+    "Jaunutis"
+  ]
+}

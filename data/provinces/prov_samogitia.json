@@ -1,0 +1,93 @@
+{
+  "id": "prov_samogitia",
+  "name": {
+    "display": "Samogitie",
+    "local": "Žemaitija",
+    "local_language": "lituanien"
+  },
+  "region": "lituanie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Dubysa",
+    "Venta",
+    "Jūra"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Raseiniai",
+      "local": "Raseiniai",
+      "local_language": "lituanien"
+    },
+    "lat": 55.3711,
+    "lon": 23.1179
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.1179,
+      55.3711
+    ],
+    "seed_lonlat": [
+      22.8,
+      55.55
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_lithuania",
+  "culture": "cul_lithuanian",
+  "religion": "rel_pagan",
+  "population": {
+    "uncertain": true,
+    "note": "Basses terres païennes entre la Livonie et la Prusse ; hommage de Gediminas contesté par l'Ordre.",
+    "classes": {
+      "peasants": {
+        "count": 95000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1425,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2090,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3325,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_market",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1600,
+  "description": "La Samogitie païenne, pont de terre entre l'Ordre de Livonie et l'Ordre teutonique, que les deux ordres veulent couper de la Lituanie ; forêts, marais et forteresses de bois sur les collines.",
+  "sources": [
+    "Samogitie",
+    "Raseiniai",
+    "Medvėgalis"
+  ]
+}

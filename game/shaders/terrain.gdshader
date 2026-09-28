@@ -21,7 +21,7 @@ uniform float height_max_m = 4800.0;
 // `campaign_display_height` (source unique, double GDScript MapData.display_height).
 #include "res://shaders/campaign_relief.gdshaderinc"
 #define height_scale campaign_vertical_scale
-uniform vec2 map_size = vec2(4096.0, 4096.0);
+uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 uniform float meters_per_px = 719.0;
 
 uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
@@ -54,7 +54,7 @@ uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
 // M5a : brouillard par case (texture de vue R8 de la simulation, filtrage linéaire).
 uniform sampler2D fog_cells : filter_linear, repeat_disable, hint_default_white;
 uniform bool fog_by_cell = false;
-uniform vec2 fog_cells_size = vec2(4096.0, 4096.0);   // pixels carte couverts par la texture
+uniform vec2 fog_cells_size = vec2(1.0, 1.0);   // pixels carte couverts par la texture (fournis par le script)
 uniform float fog_edge_jitter_px = 7.0;
 uniform vec3 fog_rim_color = vec3(0.10, 0.065, 0.03);
 uniform float fog_rim_amount = 0.22;

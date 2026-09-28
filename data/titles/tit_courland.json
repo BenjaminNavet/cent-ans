@@ -1,0 +1,50 @@
+{
+  "id": "tit_courland",
+  "rank": "county",
+  "name": {
+    "display": "Évêché de Courlande",
+    "local": "Bistum Kurland",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "De sinople à la croix d'argent.",
+    "description": "Croix blanche de l'évêché de Courlande (armes simplifiées).",
+    "primary_color": "#1E783C",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason non retrouvé pour 1337."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_pilten"
+  ],
+  "holder_1337": {
+    "faction": "fac_courland",
+    "sources": [
+      "Évêché de Courlande"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_courland_hold",
+      "title": "Garder Pilten",
+      "description": "Conserver l'évêché.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_courland"
+      }
+    },
+    {
+      "id": "obj_courland_indep",
+      "title": "Un évêque libre",
+      "description": "Ne jamais dépendre de l'Ordre.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Principauté épiscopale de Courlande (Pilten).",
+  "sources": [
+    "Évêché de Courlande"
+  ]
+}

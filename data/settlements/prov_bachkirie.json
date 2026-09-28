@@ -1,0 +1,73 @@
+[
+  {
+    "id": "set_oufa_camp",
+    "province": "prov_bachkirie",
+    "kind": "city",
+    "name": {
+      "display": "Oufa (site)",
+      "local": "Өфө",
+      "local_language": "bachkir"
+    },
+    "lonlat": [
+      56.03,
+      54.73
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Site de campement d'été au confluent de la Belaïa et de l'Oufa ; ville fondée en 1574 seulement.",
+    "sources": [
+      "Oufa"
+    ]
+  },
+  {
+    "id": "set_iourmaty",
+    "province": "prov_bachkirie",
+    "kind": "village",
+    "name": {
+      "display": "Yourt des Ioumran",
+      "local": "Юрматы",
+      "local_language": "bachkir"
+    },
+    "lonlat": [
+      57.6,
+      53.5
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Campement tribal des Ioumran, sur la Belaïa (emplacement approximatif).",
+    "sources": [
+      "Bachkirs"
+    ]
+  },
+  {
+    "id": "set_bourdjan",
+    "province": "prov_bachkirie",
+    "kind": "village",
+    "name": {
+      "display": "Yourt des Bourdjan",
+      "local": "Бурзян",
+      "local_language": "bachkir"
+    },
+    "lonlat": [
+      58.2,
+      53.2
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Campement des Bourdjan dans l'Oural méridional (emplacement approximatif).",
+    "sources": [
+      "Bachkirs"
+    ]
+  }
+]

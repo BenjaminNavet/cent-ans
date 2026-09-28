@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_glogow",
+    "province": "prov_glogow",
+    "kind": "city",
+    "name": {
+      "display": "Głogów",
+      "local": "Glogau",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      16.0842,
+      51.6635
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse et ville de l'Oder, capitale de l'ancien duché de Głogów.",
+    "sources": [
+      "Głogów"
+    ]
+  },
+  {
+    "id": "set_zagan",
+    "province": "prov_glogow",
+    "kind": "town",
+    "name": {
+      "display": "Żagań",
+      "local": "Sagan",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      15.3167,
+      51.6167
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence d'Henri IV, ville de Basse-Silésie sur le Bóbr.",
+    "sources": [
+      "Żagań"
+    ]
+  },
+  {
+    "id": "set_szprotawa",
+    "province": "prov_glogow",
+    "kind": "town",
+    "name": {
+      "display": "Szprotawa",
+      "local": "Sprottau",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      15.5344,
+      51.5644
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Petite ville fortifiée entre Żagań et Głogów.",
+    "sources": [
+      "Szprotawa"
+    ]
+  }
+]

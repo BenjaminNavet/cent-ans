@@ -111,7 +111,7 @@
     "summary": { "type": "string" },
     "province": { "type": "string", "pattern": "^prov_[a-z_]+$" },
     "province_name": { "type": "string" },
-    "terrain": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] },
+    "terrain": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"] },
     "season": { "enum": ["spring", "summer", "autumn", "winter"] },
     "site": {
       "type": "object",

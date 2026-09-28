@@ -1,0 +1,93 @@
+{
+  "id": "prov_banat",
+  "name": {
+    "display": "Banat de Temes",
+    "local": "Temesi bánság",
+    "local_language": "hongrois"
+  },
+  "region": "hongrie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Timiș",
+    "Danube",
+    "Maros"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Temesvár",
+      "local": "Temesvár",
+      "local_language": "hongrois"
+    },
+    "lat": 45.7489,
+    "lon": 21.2087
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.2087,
+      45.7489
+    ],
+    "seed_lonlat": [
+      21.9,
+      45.3
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_hungary",
+  "culture": "cul_hungarian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Résidence royale de 1315 à 1323 ; paysannerie roumaine et serbe orthodoxe importante.",
+    "classes": {
+      "peasants": {
+        "count": 110000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2420,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3300,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1800,
+  "description": "Banat de Temes, résidence de Charles Robert avant Visegrád, et marche du Banat de Severin face à la Valachie de Basarab, qui a battu le roi à Posada en 1330.",
+  "sources": [
+    "Temesvár",
+    "Banat",
+    "Bataille de Posada"
+  ]
+}

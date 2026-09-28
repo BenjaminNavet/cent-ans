@@ -1,0 +1,77 @@
+{
+  "id": "fac_teutonic",
+  "name": {
+    "display": "Ordre Teutonique (État de Prusse)",
+    "local": "Deutscher Orden",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Ordre Teutonique",
+  "adjective": "teutonique",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_dietrich_von_altenburg",
+  "capital": "prov_pomesania",
+  "capital_city": "Marienbourg",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "primary_title": "tit_teutonic",
+  "heraldry": {
+    "blazon": "D'argent à la croix de sable.",
+    "description": "La croix noire sur fond blanc de l'ordre Teutonique.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1A1A1A"
+  },
+  "titles": [
+    "Grand maître de l'ordre Teutonique",
+    "Maître de Prusse"
+  ],
+  "treasury": 14000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hanseatic_trade",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_bohemia",
+      "status": "peace",
+      "note": "Jean de Luxembourg, roi de Bohême, a mené deux croisades en Prusse."
+    },
+    {
+      "faction": "fac_brandenburg",
+      "status": "peace",
+      "note": "Voisin par la Neumark ; alliance ancienne contre Pologne et Lituanie."
+    },
+    {
+      "faction": "fac_poland",
+      "status": "truce",
+      "note": "Trêve depuis 1332 ; l'Ordre occupe la Kuyavie et Dobrzyń ; arbitrage de Visegrád (1335), paix de Kalisz en 1343."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "war",
+      "note": "Croisades de Prusse contre la Lituanie païenne ; Bayerburg fondée sur le Niémen en 1337."
+    },
+    {
+      "faction": "fac_livonian_order",
+      "status": "overlord",
+      "note": "Branche livonienne de l'Ordre."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 45,
+    "trade": 65,
+    "piety": 75
+  },
+  "description": "État monastique en armes qui tient la Prusse, la Pomérélie et Culm ; ses briques rouges, ses forteresses et son commerce hanséatique en font la grande puissance de la Baltique orientale, en croisade permanente contre la Lituanie et en procès avec la Pologne.",
+  "sources": [
+    "Ordre Teutonique",
+    "État monastique des chevaliers Teutoniques",
+    "Dietrich von Altenburg"
+  ]
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_szeged",
+    "province": "prov_great_plain_west",
+    "kind": "city",
+    "name": {
+      "display": "Szeged",
+      "local": "Szeged",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      20.1414,
+      46.253
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Port de la Tisza, étape du sel de Transylvanie.",
+    "sources": [
+      "Szeged"
+    ]
+  },
+  {
+    "id": "set_kalocsa",
+    "province": "prov_great_plain_west",
+    "kind": "town",
+    "name": {
+      "display": "Kalocsa",
+      "local": "Kalocsa",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.9791,
+      46.5287
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_cathedral",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Siège d'un archevêché, bourg sur le Danube.",
+    "sources": [
+      "Kalocsa"
+    ]
+  },
+  {
+    "id": "set_kecskemet",
+    "province": "prov_great_plain_west",
+    "kind": "village",
+    "name": {
+      "display": "Kecskemét",
+      "local": "Kecskemét",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      19.6913,
+      46.9062
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg d'élevage de la plaine, marché de chevaux et de bétail.",
+    "sources": [
+      "Kecskemét"
+    ]
+  }
+]

@@ -117,6 +117,7 @@ FOREST_MIN_WEIGHT = 0.5
 MARSH_MAX_M = 15.0
 MARSH_MAX_SLOPE = 0.01
 MARSH_TERRAIN = "marsh"
+DESERT_TERRAIN = "desert"
 WETLANDS_FILE = "wetlands.png"
 WETLAND_MARSH_MIN = 0.5  # share of reed beds and open water (R) for a marsh cell
 WETLAND_PONDS_MIN = 0.5  # pond-country density (G) for a marsh cell
@@ -269,6 +270,7 @@ def terrain_cost(
     marsh_province: np.ndarray,
     rules: dict,
     wetland: np.ndarray | None = None,
+    desert_province: np.ndarray | None = None,
 ) -> np.ndarray:
     """Base cost per cell (float), :data:`IMPASSABLE` above the slope limit.
 
@@ -280,6 +282,9 @@ def terrain_cost(
         rules: ``data/movement/rules.json``.
         wetland: Cells of a curated wetland (``wetlands.png``): marsh whatever
             their height and slope.
+        desert_province: Cells of a province whose dominant terrain is
+            ``desert`` (lot OM3, ADR 0116): at least the ``desert`` cost when
+            the rules give one.
     """
     costs = rules["terrain_costs"]
     cost = np.full(height.shape, float(costs["plains"]))
@@ -303,6 +308,8 @@ def terrain_cost(
         (mountains, "mountains"),
     ):
         cost = np.where(mask, np.maximum(cost, float(costs[name])), cost)
+    if desert_province is not None and "desert" in costs:
+        cost = np.where(desert_province, np.maximum(cost, float(costs["desert"])), cost)
     cost[slope > rules["slope_impassable_threshold"]] = IMPASSABLE
     return cost
 
@@ -453,12 +460,16 @@ def _major_key(name: str | None) -> str | None:
 
 
 def _marsh_provinces(map_dir: Path, ids: np.ndarray) -> np.ndarray:
+    return _terrain_provinces(map_dir, ids, MARSH_TERRAIN)
+
+
+def _terrain_provinces(map_dir: Path, ids: np.ndarray, terrain: str) -> np.ndarray:
     terrains = splat.province_terrains(map_dir / "provinces.geojson")
-    marsh = np.zeros(int(ids.max()) + 1, dtype=bool)
+    mask = np.zeros(int(ids.max()) + 1, dtype=bool)
     for index, name in terrains.items():
-        if name == MARSH_TERRAIN and 0 <= index < len(marsh):
-            marsh[index] = True
-    return marsh[ids]
+        if name == terrain and 0 <= index < len(mask):
+            mask[index] = True
+    return mask[ids]
 
 
 def _block_mean(array: np.ndarray, size: int | tuple[int, int]) -> np.ndarray:
@@ -548,6 +559,7 @@ def compute(
         _marsh_provinces(map_dir, labels),
         rules,
         _wetland_marsh(map_dir, size),
+        desert_province=_terrain_provinces(map_dir, labels, DESERT_TERRAIN),
     )
     steep = slope > rules["slope_impassable_threshold"]
 

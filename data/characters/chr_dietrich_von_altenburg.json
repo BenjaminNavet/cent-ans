@@ -1,0 +1,37 @@
+{
+  "id": "chr_dietrich_von_altenburg",
+  "name": {
+    "display": "Dietrich von Altenburg",
+    "local": "Dietrich von Altenburg",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Ordre Teutonique",
+  "faction": "fac_teutonic",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1341"
+  },
+  "historical": true,
+  "skills": {
+    "command": 6,
+    "governance": 7,
+    "court": 4
+  },
+  "traits": [
+    "trait_crusader",
+    "trait_stern"
+  ],
+  "piety": 85,
+  "starting_location": "prov_pomesania",
+  "status": "at_court",
+  "description": "Grand maître de l'ordre Teutonique de 1335 à sa mort ; il gouverne depuis Marienbourg, mène les « voyages » annuels contre la Lituanie et défend l'ordre face à la Pologne devant la curie.",
+  "sources": [
+    "Dietrich von Altenburg",
+    "Ordre Teutonique"
+  ]
+}

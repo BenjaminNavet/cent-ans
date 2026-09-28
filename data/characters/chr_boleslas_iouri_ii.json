@@ -1,0 +1,51 @@
+{
+  "id": "chr_boleslas_iouri_ii",
+  "name": {
+    "display": "Boleslas-Iouri II de Galicie-Volhynie",
+    "local": "Bolesław-Jerzy II",
+    "local_language": "polonais"
+  },
+  "sex": "male",
+  "house": "Piast de Mazovie",
+  "faction": "fac_galicia_volhynia",
+  "role": "ruler",
+  "birth": {
+    "value": "1310",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1340-04-07",
+    "uncertain": true,
+    "place": "Volodymyr",
+    "note": "Empoisonné par des boyards."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Ruthénie",
+      "from": {
+        "value": "1323"
+      },
+      "note": "Prince de Galicie-Volhynie depuis 1323."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_impulsive"
+  ],
+  "piety": 45,
+  "family": {
+    "father": "chr_trojden_i_de_mazovie"
+  },
+  "starting_location": "prov_lviv",
+  "status": "at_court",
+  "description": "Prince piast de Mazovie devenu roi de Galicie-Volhynie et converti à l'orthodoxie ; ses réformes, ses colons catholiques et ses privilèges aux étrangers dressent contre lui les boyards, qui l'empoisonneront.",
+  "sources": [
+    "Boleslas-Iouri II de Galicie-Volhynie"
+  ]
+}

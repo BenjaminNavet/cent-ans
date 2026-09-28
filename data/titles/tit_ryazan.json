@@ -1,0 +1,64 @@
+{
+  "id": "tit_ryazan",
+  "rank": "duchy",
+  "name": {
+    "display": "Grande-principauté de Riazan",
+    "local": "Великое княжество Рязанское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "D'azur au pal d'or.",
+    "description": "Blason de convention pour Riazan (armes historiques : un prince sur son trône).",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_ryazan",
+    "prov_pronsk"
+  ],
+  "holder_1337": {
+    "faction": "fac_ryazan",
+    "sources": [
+      "Principauté de Riazan",
+      "Ivan II de Riazan"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_ryazan_hold",
+      "title": "Tenir Riazan",
+      "description": "Conserver le domaine de Riazan.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_ryazan"
+      }
+    },
+    {
+      "id": "obj_ryazan_kolomna",
+      "title": "Reprendre Kolomna",
+      "description": "Recouvrer Kolomna, prise par Moscou en 1301.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_kolomna"
+        ]
+      }
+    },
+    {
+      "id": "obj_ryazan_free",
+      "title": "Libres des maîtres",
+      "description": "Ne plus dépendre de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Grande-principauté frontalière de la steppe, ravagée par les Mongols en 1237 ; ses princes, tributaires de la Horde, disputent Kolomna à Moscou ; Ivan II Korotopol y règne depuis 1327.",
+  "sources": [
+    "Principauté de Riazan",
+    "Ivan II de Riazan"
+  ]
+}

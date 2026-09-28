@@ -1,0 +1,74 @@
+{
+  "id": "fac_warsaw",
+  "name": {
+    "display": "Duché de Czersk et de Varsovie",
+    "local": "Księstwo Czersko-Warszawskie",
+    "local_language": "polonais"
+  },
+  "short_name": "Varsovie",
+  "adjective": "varsovien",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_trojden_i_de_mazovie",
+  "capital": "prov_warsaw",
+  "capital_city": "Varsovie",
+  "religion": "rel_catholic",
+  "culture": "cul_polish",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_bohemia",
+  "primary_title": "tit_warsaw",
+  "heraldry": {
+    "blazon": "De gueules à l'aigle d'argent, à la bordure d'or.",
+    "description": "Aigle blanc de Mazovie, bordure d'or.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Bordure d'or : distinction de jeu, non attestée."
+  },
+  "titles": [
+    "Duc de Czersk",
+    "Seigneur de Varsovie et de Liw",
+    "Vassal du roi de Bohême (incertain)"
+  ],
+  "treasury": 3000,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_bohemia",
+      "status": "vassal",
+      "note": "Hommage aux Luxembourg en 1329 (incertain pour Trojden)."
+    },
+    {
+      "faction": "fac_galicia_volhynia",
+      "status": "alliance",
+      "note": "Son fils Bolesław est prince de Galicie-Volhynie (1323)."
+    },
+    {
+      "faction": "fac_poland",
+      "status": "peace",
+      "note": "Rivalité de voisinage avec le roi Casimir III."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "peace",
+      "note": "Trojden fait face aux raids lituaniens sur la Podlachie."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 60,
+    "trade": 45,
+    "piety": 60
+  },
+  "description": "Duché de Trojden Ier, à cheval sur Czersk, Varsovie et Liw ; son fils Bolesław est devenu prince de Galicie-Volhynie en 1323 et lui vaut d'être tuteur du jeune duc de Płock.",
+  "sources": [
+    "Trojden Ier de Mazovie",
+    "Varsovie",
+    "Duché de Mazovie"
+  ]
+}

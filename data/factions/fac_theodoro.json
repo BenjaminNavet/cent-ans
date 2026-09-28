@@ -1,0 +1,58 @@
+{
+  "id": "fac_theodoro",
+  "name": {
+    "display": "Principauté de Théodoro",
+    "local": "Θεοδωρώ",
+    "local_language": "grec"
+  },
+  "short_name": "Théodoro",
+  "adjective": "théodorite",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_theodoro",
+  "capital_city": "Mangoup",
+  "religion": "rel_orthodox",
+  "culture": "cul_greek",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_theodoro",
+  "heraldry": {
+    "blazon": "Écartelé de gueules et d'or.",
+    "description": "Couleurs des Paléologues (gueules et or) pour la principauté hellénisée de Gothie ; blason de convention.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Armes réelles de Théodoro non établies pour 1337."
+  },
+  "titles": [
+    "Prince de Gothie (Théodoro)"
+  ],
+  "treasury": 3000,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Voisine de Caffa ; les Génois convoitent la côte (Cembalo, 1357)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 60,
+    "trade": 55,
+    "piety": 70
+  },
+  "description": "Petite principauté orthodoxe de la Crimée montagneuse (Gothie), capitale Mangoup ; sous la suzeraineté de la Horde. Son histoire au XIVe siècle est mal connue ; aucun prince de 1337 n'est nommé ici faute de source sûre.",
+  "sources": [
+    "Principauté de Théodoro",
+    "Mangoup"
+  ]
+}

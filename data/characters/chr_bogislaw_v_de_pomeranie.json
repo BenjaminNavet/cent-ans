@@ -1,0 +1,37 @@
+{
+  "id": "chr_bogislaw_v_de_pomeranie",
+  "name": {
+    "display": "Bogislas V de Poméranie",
+    "local": "Bogislaw V. von Pommern-Wolgast",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Greifen",
+  "faction": "fac_pomerania_wolgast",
+  "role": "ruler",
+  "birth": {
+    "value": "1318",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1374",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_prolific",
+    "trait_cautious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_pomerania_wolgast",
+  "status": "at_court",
+  "description": "Fils aîné de Wartislaw IV (mort en 1326), il gouverne Wolgast, Rügen et le pays de Stolp avec ses frères ; sa minorité est achevée vers 1338.",
+  "sources": [
+    "Bogislaw V. (Pommern)"
+  ]
+}

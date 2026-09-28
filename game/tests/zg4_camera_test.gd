@@ -137,7 +137,9 @@ func _test_camera() -> void:
 	rig.add_child(camera)
 	root.add_child(rig)
 	rig.edge_pan_enabled = false
-	rig.setup(Rect2(0, 0, 4096, 4096), 500.0)
+	var world := MapData.default_world_size()
+	_check(world.x > 0 and world.y > 0, "map.json size_px unreadable")
+	rig.setup(Rect2(Vector2.ZERO, Vector2(world)), 500.0)
 	# Sans pyramide : comportement historique.
 	_check(is_equal_approx(rig.min_distance_at(Vector3(100.0, 0.0, 100.0)), 22.0), "legacy min distance")
 	rig.relief = FakeRelief.new(Vector2(1000.0, 1000.0))

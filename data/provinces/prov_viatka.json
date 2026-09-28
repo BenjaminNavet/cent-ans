@@ -1,0 +1,89 @@
+{
+  "id": "prov_viatka",
+  "name": {
+    "display": "Viatka",
+    "local": "Вятка",
+    "local_language": "russe"
+  },
+  "region": "rus_nord",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Viatka"
+  ],
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Khlynov",
+      "local": "Хлынов",
+      "local_language": "russe"
+    },
+    "lat": 58.6,
+    "lon": 49.66
+  },
+  "geo": {
+    "capital_lonlat": [
+      49.66,
+      58.6
+    ],
+    "seed_lonlat": [
+      49.6,
+      58.6
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_viatka",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 35600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 2400,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1200,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 800,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_palisade"
+  ],
+  "fortification_level": 1,
+  "base_supply": 800,
+  "description": "Terre libre des colons de Novgorod sur la Viatka, gouvernée par un vétché de type novgorodien ; les ouchkouïniks pillent la Volga jusqu'à Bolgar.",
+  "sources": [
+    "Terre de Viatka",
+    "Kirov"
+  ]
+}

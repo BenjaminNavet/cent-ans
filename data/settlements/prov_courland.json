@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_goldingen",
+    "province": "prov_courland",
+    "kind": "city",
+    "name": {
+      "display": "Goldingen",
+      "local": "Goldingen",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      21.9736,
+      56.9686
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château de l'Ordre sur la Venta, chef-lieu de commanderie.",
+    "sources": [
+      "Kuldīga"
+    ]
+  },
+  {
+    "id": "set_mitau",
+    "province": "prov_courland",
+    "kind": "castle",
+    "name": {
+      "display": "Mitau",
+      "local": "Mitau",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      23.7128,
+      56.6511
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de brique sur la Lielupe, rempart de l'Ordre contre la Lituanie.",
+    "sources": [
+      "Jelgava"
+    ]
+  },
+  {
+    "id": "set_windau",
+    "province": "prov_courland",
+    "kind": "town",
+    "name": {
+      "display": "Windau",
+      "local": "Windau",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      21.5528,
+      57.3894
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Port et château de l'Ordre à l'embouchure de la Venta, lié à la Hanse.",
+    "sources": [
+      "Ventspils"
+    ]
+  }
+]

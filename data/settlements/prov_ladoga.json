@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_ladoga",
+    "province": "prov_ladoga",
+    "kind": "city",
+    "name": {
+      "display": "Staraïa Ladoga",
+      "local": "Ладога",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      32.298,
+      60.002
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Plus ancienne ville de Russie, forteresse de pierre sur le Volkhov.",
+    "sources": [
+      "Staraïa Ladoga"
+    ]
+  },
+  {
+    "id": "set_korela",
+    "province": "prov_ladoga",
+    "kind": "castle",
+    "name": {
+      "display": "Korela (Kexholm)",
+      "local": "Корела",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      30.133,
+      61.033
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse novgorodienne de la Carélie, sur la Vuoksi.",
+    "sources": [
+      "Priozersk"
+    ]
+  },
+  {
+    "id": "set_valaam",
+    "province": "prov_ladoga",
+    "kind": "abbey",
+    "name": {
+      "display": "Monastère de Valaam",
+      "local": "Валаам",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      30.95,
+      61.385
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère de l'île de Valaam, sur le lac Ladoga (fondation antérieure au XIVe siècle, incertaine).",
+    "sources": [
+      "Monastère de Valaam"
+    ]
+  }
+]

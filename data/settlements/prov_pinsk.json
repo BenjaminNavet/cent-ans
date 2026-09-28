@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_pinsk",
+    "province": "prov_pinsk",
+    "kind": "city",
+    "name": {
+      "display": "Pinsk",
+      "local": "Pinsk",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      26.0951,
+      52.1229
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville marchande de la Pina, principauté ruthène liée à la Lituanie.",
+    "sources": [
+      "Pinsk"
+    ]
+  },
+  {
+    "id": "set_tourov",
+    "province": "prov_pinsk",
+    "kind": "village",
+    "name": {
+      "display": "Tourov",
+      "local": "Turov",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      27.7333,
+      52.0667
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancien siège d'un évêché orthodoxe de la Ruthénie.",
+    "sources": [
+      "Tourov"
+    ]
+  },
+  {
+    "id": "set_davyd_haradok",
+    "province": "prov_pinsk",
+    "kind": "castle",
+    "name": {
+      "display": "Davyd-Haradok",
+      "local": "Davyd-Haradok",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      27.2064,
+      52.0553
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château du Pripiat, apanage des princes de Pinsk.",
+    "sources": [
+      "Davyd-Haradok"
+    ]
+  }
+]

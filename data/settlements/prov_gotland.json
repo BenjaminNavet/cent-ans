@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_visby",
+    "province": "prov_gotland",
+    "kind": "city",
+    "name": {
+      "display": "Visby",
+      "local": "Visby",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      18.2948,
+      57.6348
+    ],
+    "weight": 60,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port",
+      "bld_guild_hall",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Ville hanséatique enserrée d'une muraille de pierre, entrepôt de la Baltique.",
+    "sources": [
+      "Visby"
+    ]
+  },
+  {
+    "id": "set_roma_kloster",
+    "province": "prov_gotland",
+    "kind": "abbey",
+    "name": {
+      "display": "Roma",
+      "local": "Roma kloster",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      18.4653,
+      57.5153
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne au centre de l'île.",
+    "sources": [
+      "Abbaye de Roma"
+    ]
+  },
+  {
+    "id": "set_vastergarn",
+    "province": "prov_gotland",
+    "kind": "castle",
+    "name": {
+      "display": "Västergarn",
+      "local": "Västergarn",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      18.2,
+      57.4
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancien port gotlandais et château sur la côte ouest.",
+    "sources": [
+      "Västergarn"
+    ]
+  }
+]

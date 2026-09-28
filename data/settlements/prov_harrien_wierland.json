@@ -1,0 +1,106 @@
+[
+  {
+    "id": "set_reval",
+    "province": "prov_harrien_wierland",
+    "kind": "city",
+    "name": {
+      "display": "Reval",
+      "local": "Reval",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      24.7454,
+      59.437
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Tallinn, ville hanséatique de droit de Lübeck ; le château de Toompea, siège du capitaine royal danois.",
+    "sources": [
+      "Tallinn"
+    ]
+  },
+  {
+    "id": "set_wesenberg",
+    "province": "prov_harrien_wierland",
+    "kind": "castle",
+    "name": {
+      "display": "Wesenberg",
+      "local": "Rakvere",
+      "local_language": "estonien"
+    },
+    "lonlat": [
+      26.3564,
+      59.3475
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château danois du Wierland.",
+    "sources": [
+      "Rakvere"
+    ]
+  },
+  {
+    "id": "set_narva",
+    "province": "prov_harrien_wierland",
+    "kind": "castle",
+    "name": {
+      "display": "Narva",
+      "local": "Narva",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      28.1937,
+      59.3773
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château danois de la frontière face à Ivangorod et à Novgorod.",
+    "sources": [
+      "Narva"
+    ]
+  },
+  {
+    "id": "set_weissenstein",
+    "province": "prov_harrien_wierland",
+    "kind": "castle",
+    "name": {
+      "display": "Weissenstein",
+      "local": "Paide",
+      "local_language": "estonien"
+    },
+    "lonlat": [
+      25.5586,
+      58.8856
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse du Jerwen, au centre de l'Estonie danoise.",
+    "sources": [
+      "Paide"
+    ]
+  }
+]

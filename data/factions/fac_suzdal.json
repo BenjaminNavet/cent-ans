@@ -1,0 +1,61 @@
+{
+  "id": "fac_suzdal",
+  "name": {
+    "display": "Principauté de Souzdal-Nijni Novgorod",
+    "local": "Княжество Суздальское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Souzdal",
+  "adjective": "souzdalien",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_konstantin_vassilievitch",
+  "capital": "prov_suzdal",
+  "capital_city": "Souzdal",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_suzdal",
+  "heraldry": {
+    "blazon": "D'azur à l'aigle d'argent.",
+    "description": "Blason de convention pour Souzdal (armes historiques : un faucon).",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Prince de Souzdal",
+    "Prince de Nijni Novgorod"
+  ],
+  "treasury": 6500,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_moscow",
+      "status": "peace",
+      "note": "Les Souzdaliens tiennent, plus anciens en lignée (Andreï Iaroslavitch), que le grand-principat leur revient."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 55,
+    "trade": 50,
+    "piety": 65
+  },
+  "description": "Lignée aînée des Riourikides du Nord-Est, prétendante au grand-principat ; Konstantin Vassilievitch tient Souzdal depuis 1331-1332, puis Nijni Novgorod (v. 1341). Il sera l'un des principaux concurrents de Moscou.",
+  "sources": [
+    "Principauté de Souzdal",
+    "Konstantin Vassilievitch de Souzdal"
+  ]
+}

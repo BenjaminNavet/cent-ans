@@ -1,0 +1,48 @@
+{
+  "id": "chr_ivan_korotopol",
+  "name": {
+    "display": "Ivan II Korotopol",
+    "local": "Иван Коротопол",
+    "local_language": "vieux russe"
+  },
+  "epithet": "Korotopol",
+  "sex": "male",
+  "house": "Riazan",
+  "faction": "fac_ryazan",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Dates de naissance et de mort approximatives."
+  },
+  "death": {
+    "value": "1343",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Grand-prince de Riazan",
+      "from": {
+        "value": "1327"
+      },
+      "note": "Règne jusqu'en 1342 ; destitué et exilé."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_stubborn",
+    "trait_brave"
+  ],
+  "piety": 55,
+  "starting_location": "prov_ryazan",
+  "status": "at_court",
+  "description": "Prince de Pronsk devenu grand-prince de Riazan en 1327 ; opposant à Moscou, il fut exilé en 1342 à la suite d'un procès à la Horde, et mourut en exil (date incertaine).",
+  "sources": [
+    "Ivan II de Riazan"
+  ]
+}

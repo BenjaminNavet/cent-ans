@@ -1,0 +1,100 @@
+{
+  "id": "prov_pomerania_stolp",
+  "name": {
+    "display": "Poméranie orientale (Stolp)",
+    "local": "Land Stolp",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "pomeranie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Stolpe",
+    "Persante"
+  ],
+  "coastal": true,
+  "ports": [
+    "Rügenwalde",
+    "Stolpmünde"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Stolp",
+      "local": "Stolp",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 54.4641,
+    "lon": 17.0266
+  },
+  "geo": {
+    "capital_lonlat": [
+      17.0266,
+      54.4641
+    ],
+    "seed_lonlat": [
+      16.4,
+      54.15
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_pomerania_wolgast",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 65000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3900,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1950,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 780,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1400,
+  "description": "Hinterpommern, pays de Stolp, de Schlawe et de Belgard, tenu par la ligne de Wolgast ; sur la côte, Kolberg reste à l'évêque de Cammin.",
+  "sources": [
+    "Słupsk",
+    "Duché de Poméranie",
+    "Évêché de Cammin"
+  ]
+}

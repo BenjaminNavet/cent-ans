@@ -1,0 +1,110 @@
+[
+  {
+    "id": "set_bergen",
+    "province": "prov_vestlandet",
+    "kind": "city",
+    "name": {
+      "display": "Bergen",
+      "local": "Bjørgvin",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      5.3221,
+      60.3913
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_castle",
+      "bld_cathedral",
+      "bld_guild_hall",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Grand port du royaume, forteresse de Bergenhus, comptoir du stockfisch.",
+    "sources": [
+      "Bergen"
+    ]
+  },
+  {
+    "id": "set_stavanger",
+    "province": "prov_vestlandet",
+    "kind": "town",
+    "name": {
+      "display": "Stavanger",
+      "local": "Stavanger",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      5.7331,
+      58.97
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville épiscopale de Rogaland.",
+    "sources": [
+      "Stavanger"
+    ]
+  },
+  {
+    "id": "set_utstein",
+    "province": "prov_vestlandet",
+    "kind": "abbey",
+    "name": {
+      "display": "Utstein",
+      "local": "Utstein kloster",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      5.9,
+      59.0783
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": true,
+    "description": "Abbaye augustinienne de Rogaland.",
+    "sources": [
+      "Abbaye d'Utstein"
+    ]
+  },
+  {
+    "id": "set_alesund_borgund",
+    "province": "prov_vestlandet",
+    "kind": "village",
+    "name": {
+      "display": "Borgund",
+      "local": "Borgund",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      6.1,
+      62.4667
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Ancien marché de pêche du Sunnmøre.",
+    "sources": [
+      "Borgund (Sunnmøre)"
+    ]
+  }
+]

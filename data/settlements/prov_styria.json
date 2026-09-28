@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_graz",
+    "province": "prov_styria",
+    "kind": "city",
+    "name": {
+      "display": "Graz",
+      "local": "Graz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      15.4395,
+      47.0707
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville ducale de la Mur sous le Schlossberg.",
+    "sources": [
+      "Graz"
+    ]
+  },
+  {
+    "id": "set_leoben",
+    "province": "prov_styria",
+    "kind": "town",
+    "name": {
+      "display": "Leoben",
+      "local": "Leoben",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      15.0947,
+      47.3814
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Ville du fer styrien, au pied de l'Erzberg.",
+    "sources": [
+      "Leoben"
+    ]
+  },
+  {
+    "id": "set_admont",
+    "province": "prov_styria",
+    "kind": "abbey",
+    "name": {
+      "display": "Admont",
+      "local": "Admont",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.4611,
+      47.5726
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine de l'Enns, célèbre pour son scriptorium.",
+    "sources": [
+      "Admont"
+    ]
+  }
+]

@@ -1,0 +1,93 @@
+{
+  "id": "prov_croatia",
+  "name": {
+    "display": "Croatie intérieure",
+    "local": "Hrvatska",
+    "local_language": "croate"
+  },
+  "region": "croatie",
+  "terrain": "mountains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Una",
+    "Krka",
+    "Kupa"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wool",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Knin",
+      "local": "Knin",
+      "local_language": "croate"
+    },
+    "lat": 44.04,
+    "lon": 16.1975
+  },
+  "geo": {
+    "capital_lonlat": [
+      16.1975,
+      44.04
+    ],
+    "seed_lonlat": [
+      15.9,
+      44.6
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_slavonia",
+  "culture": "cul_croatian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Croatie intérieure, sous tutelle du ban après la chute des Šubić (1322) ; Frankopans quasi indépendants.",
+    "classes": {
+      "peasants": {
+        "count": 85000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2550,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1870,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3400,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1500,
+  "description": "Croatie intérieure (Knin, Lika, Krbava, Una) tenue par le ban de Croatie et de Dalmatie depuis la chute des Šubić de Bribir (1322) ; les Frankopans y gardent leurs châteaux. Le littoral dalmate est traité par le lot D4.",
+  "sources": [
+    "Royaume de Croatie",
+    "Knin",
+    "Šubić"
+  ]
+}

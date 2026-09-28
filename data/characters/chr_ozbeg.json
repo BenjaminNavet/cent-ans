@@ -1,0 +1,53 @@
+{
+  "id": "chr_ozbeg",
+  "name": {
+    "display": "Özbeg Khan",
+    "local": "Ўзбак хон",
+    "local_language": "kiptchak"
+  },
+  "epithet": "Ghiyath al-Din Muhammad",
+  "sex": "male",
+  "house": "Djötchides",
+  "faction": "fac_golden_horde",
+  "role": "ruler",
+  "birth": {
+    "value": "1282",
+    "place": "Steppe kiptchak"
+  },
+  "death": {
+    "value": "1341",
+    "place": "Saraï"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Khan de la Horde d'Or",
+      "from": {
+        "value": "1313"
+      },
+      "note": "Fils de Toghrul, khan depuis 1313 ; convertit la Horde à l'islam sunnite."
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 8,
+    "court": 6
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cunning",
+    "trait_ambitious"
+  ],
+  "piety": 75,
+  "family": {
+    "children": [
+      "chr_tini_beg"
+    ]
+  },
+  "starting_location": "prov_saray",
+  "status": "at_court",
+  "description": "Khan de la Horde d'Or depuis 1313, converti à l'islam sunnite ; sous son règne, l'empire atteint son apogée. Il reçoit les princes russes à Saraï, confirme les yarlyks, fait exécuter Mikhaïl de Tver (1318) et le fils de celui-ci Alexandre (1339). Sept épouses connues, dont Taïdoula et la byzantine Bayalun.",
+  "sources": [
+    "Özbeg Khan"
+  ]
+}

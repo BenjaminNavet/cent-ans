@@ -3,7 +3,8 @@
   "language": "vieux norrois (suédois, danois)",
   "cultures": [
     "cul_swedish",
-    "cul_danish"
+    "cul_danish",
+    "cul_norwegian"
   ],
   "male_first_names": [
     "Magnus",

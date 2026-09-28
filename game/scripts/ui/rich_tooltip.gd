@@ -25,6 +25,7 @@ const TECH_BRANCH_LABELS := {"military": "militaire", "civil": "civile", "medici
 const TERRAIN_LABELS := {
 	"plains": "plaines", "hills": "collines", "mountains": "montagnes", "forest": "forêt",
 	"marsh": "marais", "coast": "littoral", "highlands": "hautes terres", "bocage": "bocage",
+	"heath": "lande", "steppe": "steppe", "desert": "désert",
 }
 ## H9 : règles de Carême et d'hiver d'un régime (`lent_rule`, `winter_rule`), texte d'affichage.
 const LENT_RULE_TEXTS := {

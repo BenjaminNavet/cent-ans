@@ -1,0 +1,61 @@
+{
+  "id": "tit_denmark",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Danemark",
+    "local": "Kongeriget Danmark",
+    "local_language": "danois médiéval"
+  },
+  "heraldry": {
+    "blazon": "D'or semé de cœurs de gueules, à trois léopards d'azur.",
+    "description": "Armes du royaume de Danemark : trois lions bleus passant sur un champ d'or semé de cœurs rouges.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F4E9B"
+  },
+  "de_jure_provinces": [
+    "prov_jutland",
+    "prov_north_jutland",
+    "prov_fyn",
+    "prov_skane"
+  ],
+  "holder_1337": {
+    "faction": "fac_holstein",
+    "uncertain": true,
+    "sources": [
+      "Interrègne danois (1332-1340)",
+      "Gérard III de Holstein-Rendsbourg"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_denmark_hold",
+      "title": "Garder la régence",
+      "description": "Gérard III doit tenir la couronne vacante face aux prétendants.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_denmark"
+      }
+    },
+    {
+      "id": "obj_denmark_reunite",
+      "title": "Reconstituer le royaume",
+      "description": "Réunir Jutland, Fionie, Sjælland, Scanie et Slesvig sous une seule main.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_jutland",
+          "prov_north_jutland",
+          "prov_fyn",
+          "prov_sjaelland",
+          "prov_skane",
+          "prov_schleswig"
+        ]
+      }
+    }
+  ],
+  "description": "Couronne vacante depuis la mort de Christophe II (1332) ; ses terres sont engagées aux comtes de Holstein. Gérard III, régent de fait et gagiste du Jutland et de la Fionie, est traité ici comme détenteur de la couronne en attendant un roi (Valdemar Atterdag sera élu en 1340). La Scanie, achetée par la Suède en 1332, reste de jure danoise.",
+  "sources": [
+    "Interrègne danois (1332-1340)",
+    "Gérard III de Holstein-Rendsbourg"
+  ]
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "id": "set_wolgast",
+    "province": "prov_pomerania_wolgast",
+    "kind": "city",
+    "name": {
+      "display": "Wolgast",
+      "local": "Wolgast",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      13.7681,
+      54.0489
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Château ducal sur la Peene, capitale de la ligne de Wolgast.",
+    "sources": [
+      "Wolgast"
+    ]
+  },
+  {
+    "id": "set_stralsund",
+    "province": "prov_pomerania_wolgast",
+    "kind": "town",
+    "name": {
+      "display": "Stralsund",
+      "local": "Stralsund",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      13.0817,
+      54.3096
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_guild_hall"
+    ],
+    "port": true,
+    "description": "Grande ville hanséatique face à Rügen ; ville libre en conflit avec ses ducs.",
+    "sources": [
+      "Stralsund"
+    ]
+  },
+  {
+    "id": "set_greifswald",
+    "province": "prov_pomerania_wolgast",
+    "kind": "town",
+    "name": {
+      "display": "Greifswald",
+      "local": "Greifswald",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      13.3812,
+      54.0865
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ville hanséatique sur le Ryck, abbaye d'Eldena voisine.",
+    "sources": [
+      "Greifswald"
+    ]
+  },
+  {
+    "id": "set_bergen_rugen",
+    "province": "prov_pomerania_wolgast",
+    "kind": "abbey",
+    "name": {
+      "display": "Bergen (Rügen)",
+      "local": "Bergen auf Rügen",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      13.4361,
+      54.4183
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de Rügen, abbaye cistercienne.",
+    "sources": [
+      "Bergen auf Rügen"
+    ]
+  }
+]

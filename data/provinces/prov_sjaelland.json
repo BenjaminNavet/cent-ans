@@ -12,9 +12,7 @@
   "rivers": [],
   "coastal": true,
   "ports": [
-    "Copenhague",
-    "Lund",
-    "Skanör"
+    "Copenhague"
   ],
   "sea_zones": [
     "sea_baltic"
@@ -44,7 +42,7 @@
     ],
     "voronoi_weight": 1.3
   },
-  "owner": "fac_holstein",
+  "owner": "fac_holstein_kiel",
   "culture": "cul_danish",
   "religion": "rel_catholic",
   "population": {

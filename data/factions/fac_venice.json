@@ -50,6 +50,11 @@
       "faction": "fac_florence",
       "status": "alliance",
       "note": "Ligue contre les Scaliger (1336)."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Comptoir de Tana obtenu du khan Özbeg (1332-1333)."
     }
   ],
   "ai_personality": {

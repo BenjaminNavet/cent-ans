@@ -327,9 +327,10 @@ func _on_settlement_selected(settlement_id: String) -> void:
 		ui.show_toast("%s (%s)" % [entry.get("name", settlement_id), province_name_of(str(entry.get("province", "")))])
 
 
-## Pas de sommets proportionnels à la taille de carte (4096 → 4/8, 512 → 1/2).
+## Pas de sommets proportionnels au côté des tuiles de terrain (tuile racine de 256 → 4/8 ;
+## carte d'essai 512² → 1/2).
 func _configure_lod() -> void:
-	var scale := float(maxi(map_data.size.x, map_data.size.y)) / 4096.0
+	var scale := float(TerrainBuilder.chunk_px_for(map_data.size)) / TerrainBuilder.ROOT_TILE_UNITS
 	terrain.near_step = clampi(int(round(4.0 * scale)), 1, 4)
 	terrain.far_step = clampi(int(round(8.0 * scale)), 2, 8)
 	terrain.near_distance = maxf(terrain.chunk_px_for(map_data.size) * 2.0, 150.0)

@@ -1,0 +1,50 @@
+{
+  "id": "tit_viatka",
+  "rank": "county",
+  "name": {
+    "display": "Terre de Viatka",
+    "local": "Вятская земля",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix de sinople.",
+    "description": "Blason de convention pour la terre libre de Viatka.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#2E7D32",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_novgorod",
+  "de_jure_provinces": [
+    "prov_viatka"
+  ],
+  "holder_1337": {
+    "faction": "fac_viatka",
+    "sources": [
+      "Terre de Viatka"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_viatka_hold",
+      "title": "Garder la Viatka",
+      "description": "Conserver la terre de Viatka.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_viatka"
+      }
+    },
+    {
+      "id": "obj_viatka_free",
+      "title": "Aucun maître",
+      "description": "Rester indépendante de Novgorod.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Communauté de colons et d'ouchkouïniks issus de Novgorod, sur la Viatka, avec un vétché de type novgorodien ; les chefs de l'époque sont mal connus.",
+  "sources": [
+    "Terre de Viatka"
+  ]
+}

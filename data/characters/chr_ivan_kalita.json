@@ -1,0 +1,67 @@
+{
+  "id": "chr_ivan_kalita",
+  "name": {
+    "display": "Ivan Ier Kalita",
+    "local": "Иван Калита",
+    "local_language": "vieux russe"
+  },
+  "epithet": "Kalita (la Bourse)",
+  "sex": "male",
+  "house": "Moscou",
+  "faction": "fac_moscow",
+  "role": "ruler",
+  "birth": {
+    "value": "1288",
+    "uncertain": true,
+    "place": "Moscou"
+  },
+  "death": {
+    "value": "1340-03-31",
+    "place": "Moscou"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Moscou",
+      "from": {
+        "value": "1325"
+      }
+    },
+    {
+      "title": "Grand-prince de Vladimir",
+      "from": {
+        "value": "1331"
+      },
+      "note": "Yarlyk d'Özbeg."
+    },
+    {
+      "title": "Prince de Novgorod",
+      "from": {
+        "value": "1328"
+      },
+      "note": "Jusqu'en 1337 (incertain)."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 9,
+    "court": 8
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_greedy",
+    "trait_pious"
+  ],
+  "piety": 70,
+  "family": {
+    "children": [
+      "chr_simeon_ivanovitch"
+    ]
+  },
+  "starting_location": "prov_moscow",
+  "status": "at_court",
+  "description": "Fils de Daniel de Moscou ; par son habileté, il obtient le grand-principat et fait de Moscou le centre religieux et financier de la Rus'. Il meurt le 31 mars 1340.",
+  "sources": [
+    "Ivan Ier de Moscou"
+  ]
+}
