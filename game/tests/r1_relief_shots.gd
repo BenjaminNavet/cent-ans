@@ -7,17 +7,17 @@ extends SceneTree
 
 const VIEWS := [
 	["france", Vector2(2000, 1900), 1400.0],
-	["idf_orleans", Vector2(2195, 1990), 330.0],
-	["orleans_near", Vector2(2175, 2050), 130.0],
-	["normandie", Vector2(2040, 1850), 300.0],
-	["dombes_alpes", Vector2(2530, 2400), 380.0],
-	["fens", Vector2(2056, 1337), 260.0],
+	["idf_orleans", Vector2(2195, 3270), 330.0],
+	["orleans_near", Vector2(2175, 3330), 130.0],
+	["normandie", Vector2(2040, 3130), 300.0],
+	["dombes_alpes", Vector2(2530, 3680), 380.0],
+	["fens", Vector2(2056, 2617), 260.0],
 ]
 ## Vues rapprochées (après seulement, `--near`) : étangs de la Dombes, marais des Fens, Seine normande.
 const NEAR_VIEWS := [
-	["dombes_near", Vector2(2459, 2390), 70.0],
-	["fens_near", Vector2(2050, 1345), 70.0],
-	["seine_near", Vector2(2120, 1880), 90.0],
+	["dombes_near", Vector2(2459, 3670), 70.0],
+	["fens_near", Vector2(2050, 2625), 70.0],
+	["seine_near", Vector2(2120, 3160), 90.0],
 ]
 
 

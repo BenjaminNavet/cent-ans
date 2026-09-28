@@ -7,11 +7,11 @@ extends SceneTree
 
 const VIEWS := [
 	["France entière", Vector2(2000, 1900), 1400.0],
-	["zoom moyen", Vector2(2000, 2000), 400.0],
-	["proche", Vector2(1950, 1850), 150.0],
-	["forêt d'Orléans", Vector2(2144, 2054), 150.0],
-	["très proche", Vector2(1950, 1850), 40.0],
-	["bocage", Vector2(1900, 2098), 60.0],
+	["zoom moyen", Vector2(2000, 3280), 400.0],
+	["proche", Vector2(1950, 3130), 150.0],
+	["forêt d'Orléans", Vector2(2144, 3334), 150.0],
+	["très proche", Vector2(1950, 3130), 40.0],
+	["bocage", Vector2(1900, 3378), 60.0],
 ]
 const WARMUP_FRAMES := 20
 const MEASURE_FRAMES := 180

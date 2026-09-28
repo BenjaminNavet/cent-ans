@@ -8,19 +8,19 @@ extends SceneTree
 ##   [--only=a,b] [--no-fps] [--year=1429]
 ## JPEG ≤ 960 px, `orleans_<vue>.jpg`.
 
-const ORLEANS := Vector2(2152.671, 2066.053)  # Sainte-Croix (origine du fichier v2)
-const ROUEN := Vector2(2096.54, 1819.88)
+const ORLEANS := Vector2(2152.671, 3346.053)  # Sainte-Croix (origine du fichier v2)
+const ROUEN := Vector2(2096.54, 3099.88)
 ## [nom, point, distance (unités), cap (degrés)]
 const SHOTS := [
 	["strategique", ORLEANS, 60.0, 0.0],
 	["transition", ORLEANS, 8.0, 0.0],
 	["vallee", ORLEANS, 4.0, 0.0],
 	["site", ORLEANS + Vector2(-0.2, 0.2), 1.6, 0.0],
-	["pont", Vector2(2152.15, 2066.78), 0.6, 90.0],
-	["tourelles", Vector2(2152.13, 2067.03), 0.32, 120.0],
-	["sainte_croix", Vector2(2152.76, 2066.06), 0.3, 300.0],
-	["enceinte", Vector2(2152.03, 2065.93), 0.45, 200.0],
-	["loire", Vector2(2152.4, 2066.6), 0.9, 0.0],
+	["pont", Vector2(2152.15, 3346.78), 0.6, 90.0],
+	["tourelles", Vector2(2152.13, 3347.03), 0.32, 120.0],
+	["sainte_croix", Vector2(2152.76, 3346.06), 0.3, 300.0],
+	["enceinte", Vector2(2152.03, 3345.93), 0.45, 200.0],
+	["loire", Vector2(2152.4, 3346.6), 0.9, 0.0],
 ]
 
 

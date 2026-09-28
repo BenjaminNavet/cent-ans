@@ -7,8 +7,8 @@ extends SceneTree
 ## Options : `--out=`, `--prefix=`, `--map-weather=rain|snow|clear` (forcé partout, cf. CM2/ZG7c).
 
 const PLACES := [
-	["paris", Vector2(2213.2, 1923.9)],
-	["val_de_loire", Vector2(2052.0, 2127.3)],
+	["paris", Vector2(2213.2, 3203.9)],
+	["val_de_loire", Vector2(2052.0, 3407.3)],
 ]
 ## Distances des paliers (unités) ; « site » = distance minimale au point (+ 5 %).
 const TIERS := {"site": -1.0, "vallee": 6.0, "lointain": 60.0}

@@ -253,7 +253,7 @@ func _test_rescale() -> void:
 	var camera := Camera3D.new()
 	world.add_child(camera)
 	camera.current = true
-	var paris := Vector2(2213.2, 1923.9)
+	var paris := Vector2(2213.2, 3203.9)
 	var focus := Vector3(paris.x, map_data.surface_world_at(paris.x, paris.y), paris.y)
 	camera.look_at_from_position(focus + Vector3(0.0, 8.0, 8.0), focus, Vector3.UP)
 	for _i in 30:

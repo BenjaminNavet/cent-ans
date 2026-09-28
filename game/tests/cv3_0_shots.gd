@@ -6,9 +6,9 @@ extends SceneTree
 ## Options : `--out=` (défaut `user://cv3_0`), `--prefix=`.
 ## Résolution 640 px de large (contrainte "vérification visuelle" CLAUDE.md).
 
-const PARIS := Vector2(2213.2, 1923.9)
+const PARIS := Vector2(2213.2, 3203.9)
 ## Entre Paris et Orléans (vue régionale, lot #5).
-const ORLEANS_AXIS := Vector2(2185.0, 2010.0)
+const ORLEANS_AXIS := Vector2(2185.0, 3290.0)
 const WIDTH := 640
 
 
