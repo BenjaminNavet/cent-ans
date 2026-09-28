@@ -85,6 +85,8 @@ pub mod folders {
     pub const AI_DIPLOMACY: &str = "diplomacy.json";
     /// Inside `AI`: recruitment doctrines (lot E1); optional.
     pub const AI_DOCTRINES: &str = "doctrines.json";
+    /// Inside `AI`: weights of the feudal AI (lot FE5); optional.
+    pub const AI_FEUDAL: &str = "feudal.json";
     /// Inside `AI`: the AI armies on the navigation grid (lot M3).
     pub const AI_GRID: &str = "grid.json";
     /// Global rule tuning (lot C1: `vision.json`); optional folder.
@@ -305,6 +307,8 @@ pub struct GameData {
     /// `data/ai/doctrines.json` (lot E1), absent until written: the AI then
     /// ranks units by value alone.
     pub ai_doctrines: Option<crate::entities::ai_doctrine::AiDoctrines>,
+    /// `data/ai/feudal.json` (lot FE5); [`AiFeudal::default`] when absent.
+    pub ai_feudal: crate::entities::ai_feudal::AiFeudal,
     /// `data/ai/grid.json` (lot M3); [`AiGrid::default`] when absent.
     pub ai_grid: AiGrid,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
@@ -416,6 +420,7 @@ impl GameData {
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
             ai_doctrines: None,
+            ai_feudal: Default::default(),
             ai_grid: AiGrid::default(),
             vision_rules: None,
             auto_resolve: Default::default(),
@@ -497,6 +502,10 @@ impl GameData {
         let doctrines_path = root.join(folders::AI).join(folders::AI_DOCTRINES);
         if doctrines_path.is_file() {
             data.ai_doctrines = Some(read_json(&doctrines_path)?);
+        }
+        let feudal_ai_path = root.join(folders::AI).join(folders::AI_FEUDAL);
+        if feudal_ai_path.is_file() {
+            data.ai_feudal = read_json(&feudal_ai_path)?;
         }
         let grid_path = root.join(folders::AI).join(folders::AI_GRID);
         if grid_path.is_file() {

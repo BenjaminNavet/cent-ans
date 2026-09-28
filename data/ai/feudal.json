@@ -1,0 +1,68 @@
+{
+  "description": "Poids de l'IA féodale (lot FE5, spec FE § 5) : chaque décision d'un seigneur ou d'un vassal est un score de ces poids, infléchi par le tempérament (ai_personality) de la faction.",
+  "protection": {
+    "base": 30,
+    "power_weight": 20,
+    "max_power_doublings": 3.0,
+    "attitude_divisor": 2,
+    "loyalty_pivot": 50,
+    "loyalty_divisor": 3,
+    "empty_treasury": -20,
+    "per_ongoing_war": -15,
+    "allied_with_aggressor": -60,
+    "aggression_weight": 10,
+    "diplomacy_weight": 10,
+    "threshold": 20,
+    "certainty_margin": 15
+  },
+  "arbitration": {
+    "take_side_attitude_gap": 40,
+    "aggression_weight": 10,
+    "impose_peace_power_ratio": 1.5,
+    "max_wars_to_impose": 1
+  },
+  "host": {
+    "loyalty_pivot": 30,
+    "loyalty_weight": 1,
+    "fear_power_ratio": 4.0,
+    "fear_bonus": 10,
+    "lost_cause_power_ratio": 3.0,
+    "lost_cause": -15,
+    "enemy_attitude_divisor": 4,
+    "allied_with_enemy": -60,
+    "aggression_weight": 5,
+    "threshold": 0
+  },
+  "commise": {
+    "min_power_ratio": 2.0,
+    "aggression_shift": 0.3,
+    "max_wars": 1,
+    "min_treasury": 0
+  },
+  "revolt": {
+    "min_power_ratio": 0.6,
+    "chance_permille": 250,
+    "aggression_permille": 3
+  },
+  "allegiance": {
+    "min_attitude": 10,
+    "min_power_ratio": 1.0,
+    "chance_permille": 150
+  },
+  "grant": {
+    "max_kept_titles": 3,
+    "min_vassal_loyalty": 50,
+    "period_turns": 8
+  },
+  "demand_title": {
+    "enabled": true,
+    "min_controlled_percent": 50
+  },
+  "foreign_alliance": {
+    "allowed": true
+  },
+  "light_evaluation": {
+    "enabled": false,
+    "period": 2
+  }
+}
