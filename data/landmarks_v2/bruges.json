@@ -1,0 +1,32 @@
+{
+ "format": 2,
+ "id": "bruges",
+ "name": "Bruges",
+ "settlement": "set_bruges",
+ "landmark": "bruges",
+ "period": "vers 1340 (squelette en cours d'écriture, lot VH8)",
+ "year": 1340,
+ "seed": 1340088,
+ "crs": "EPSG:3035",
+ "origin_3035": [3848306, 3143840],
+ "extent_m": 1900,
+ "sources": [
+  {
+   "title": "OpenStreetMap",
+   "author": "Contributeurs d'OpenStreetMap",
+   "date": "2026-09-28",
+   "url": "https://www.openstreetmap.org/copyright",
+   "license": "ODbL 1.0 (© contributeurs d'OpenStreetMap)",
+   "extracted": true,
+   "use": "Positions (squelette)."
+  }
+ ],
+ "fine_rivers": [],
+ "walls": [],
+ "streets": [],
+ "monuments": [],
+ "districts": [],
+ "render": {
+  "fade_valley": [0.35, 0.65]
+ }
+}
