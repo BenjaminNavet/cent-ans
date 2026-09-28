@@ -56,6 +56,19 @@ pub const FOREVER: u32 = u32::MAX;
 pub const REBELS_FACTION: &str = "fac_rebels";
 pub const PAPACY_FACTION: &str = "fac_papacy";
 
+/// RS-C: the capped motive (`data/rules/diplomacy.json`) of an opinion
+/// modifier's reason, if any.
+pub fn opinion_motive(reason: &str) -> Option<data_model::OpinionMotive> {
+    use data_model::OpinionMotive;
+    match reason {
+        MARRIAGE_REASON => Some(OpinionMotive::Marriage),
+        crate::agents::PARLEY_REASON => Some(OpinionMotive::HeraldEmbassy),
+        GIFT_REASON => Some(OpinionMotive::Gift),
+        crate::negotiation::TREATY_REASON => Some(OpinionMotive::Treaty),
+        _ => None,
+    }
+}
+
 // =========================================================================
 // Types
 // =========================================================================
@@ -527,6 +540,64 @@ impl CampaignState {
                 expires_turn,
             });
         }
+    }
+
+    /// RS-C: adds an opinion modifier of a capped motive
+    /// (`data/rules/diplomacy.json` `opinion_caps`, looked up from `reason`
+    /// by [`opinion_motive`]). The running modifiers of the same motive held
+    /// by `holder` about `with` never total more than the cap (in absolute
+    /// value): the new one is cut to what is left, and when nothing is left
+    /// it only renews the running ones up to its own expiry.
+    pub(crate) fn add_capped_modifier(
+        &mut self,
+        data: &GameData,
+        holder: &FactionId,
+        with: &FactionId,
+        value: i32,
+        reason: &str,
+        duration: u32,
+    ) {
+        let Some(cap) = opinion_motive(reason).and_then(|m| data.diplomacy_rules.opinion_cap(m))
+        else {
+            self.add_modifier(holder, with, value, reason, duration);
+            return;
+        };
+        let turn = self.turn;
+        let expires_turn = if duration == FOREVER {
+            FOREVER
+        } else {
+            turn.saturating_add(duration)
+        };
+        let Some(f) = self.factions.get_mut(holder) else {
+            return;
+        };
+        let running: i32 = f
+            .modifiers
+            .iter()
+            .filter(|m| &m.with == with && m.reason_fr == reason && m.expires_turn > turn)
+            .map(|m| m.value)
+            .sum();
+        let room = if value >= 0 {
+            (cap - running).clamp(0, value)
+        } else {
+            (-cap - running).clamp(value, 0)
+        };
+        if room == 0 {
+            for m in f
+                .modifiers
+                .iter_mut()
+                .filter(|m| &m.with == with && m.reason_fr == reason && m.expires_turn > turn)
+            {
+                m.expires_turn = m.expires_turn.max(expires_turn);
+            }
+            return;
+        }
+        f.modifiers.push(OpinionModifier {
+            with: with.clone(),
+            value: room,
+            reason_fr: reason.to_owned(),
+            expires_turn,
+        });
     }
 
     /// Records a battle between two factions in their war scores.
@@ -1288,8 +1359,8 @@ impl CampaignState {
             Proposal::Marriage { character, spouse } => {
                 crate::dynasty::propose_marriage(self, data, character, spouse)
                     .map_err(|e| DiplomacyError::Refused(e.to_string()))?;
-                self.add_modifier(proposer, recipient, 15, MARRIAGE_REASON, 80);
-                self.add_modifier(recipient, proposer, 15, MARRIAGE_REASON, 80);
+                self.add_capped_modifier(data, proposer, recipient, 15, MARRIAGE_REASON, 80);
+                self.add_capped_modifier(data, recipient, proposer, 15, MARRIAGE_REASON, 80);
                 let text = format!(
                     "Mariage de {} et de {}.",
                     self.character_name(data, character),
@@ -1591,7 +1662,7 @@ impl CampaignState {
         self.factions.get_mut(faction).expect("checked").treasury -= amount;
         self.factions.get_mut(target).expect("checked").treasury += amount;
         let value = ((amount / 100) as i32).clamp(1, 30);
-        self.add_modifier(target, faction, value, GIFT_REASON, 20);
+        self.add_capped_modifier(data, target, faction, value, GIFT_REASON, 20);
         let text = format!(
             "{} envoie {amount} livres de présents à {}.",
             faction_name(data, faction),
