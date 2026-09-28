@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_building_materials.schema.json",
+  "title": "Matières des bâtiments du kit (lot GA5)",
+  "description": "Identité et paramètres des matières partagées du kit de bâtiments (`BuildingMaterials` — `game/scripts/visual/building_materials.gd`, `tools/blender_scripts/kit_export.py`). Remplace les tables codées en dur `SPECS`/`PLAIN`/`ATLAS_LAYERS` de ce script (lot BR1) : ce fichier est la source de vérité, `building_materials.gd` le lit au premier appel. `textured` liste les matières avec albédo (+ normale, + rugosité optionnelle) ; `plain` les matières sans texture (couleur unie) ; `atlas_layers` l'ordre des couches de l'atlas `Building` partagé (campagne lointaine et hameaux) — un sous-ensemble de `textured`/`plain`, dans l'ordre d'empilement de `building_albedo_array.jpg`/`building_normal_array.jpg` ; l'indice d'une couche y est baké dans la couleur de sommet des maillages exportés par `kit_export.py`, donc cet ordre ne doit être modifié qu'en re-exportant le kit (voir docs/wip/ga.md, section GA5).",
+  "type": "object",
+  "required": ["textured", "plain", "atlas_layers"],
+  "additionalProperties": false,
+  "properties": {
+    "textured": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "diffuse", "normal", "tile_size_m", "tint", "roughness"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$"},
+          "diffuse": {"type": "string", "description": "Chemin relatif à `assets/textures/`, sans extension."},
+          "normal": {"type": "string", "description": "Chemin relatif à `assets/textures/`, sans extension."},
+          "roughness_map": {"type": "string", "description": "Chemin relatif à `assets/textures/`, sans extension ; absent = rugosité scalaire (`roughness`)."},
+          "tile_size_m": {"type": "number", "exclusiveMinimum": 0},
+          "tint": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+          "roughness": {"type": "number", "minimum": 0, "maximum": 1},
+          "roof": {"type": "boolean", "default": false},
+          "poly_haven_id": {"type": "string", "description": "Identifiant Poly Haven (source directe) ou vide si dérivé/procédural (cf. README.md)."},
+          "wired": {"type": "boolean", "default": true, "description": "false = matière disponible mais non affectée à une surface du kit Blender (cf. docs/wip/ga.md GA5)."}
+        }
+      }
+    },
+    "plain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "color", "roughness"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$"},
+          "color": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+          "roughness": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "atlas_layers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "maxItems": 16
+    }
+  }
+}

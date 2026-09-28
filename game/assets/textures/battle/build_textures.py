@@ -45,6 +45,12 @@ SINGLE = [
     "bark_brown_02",
 ]
 
+# Lot GA5 : matières de bâtiments partagées avec `buildings/build_textures.py`
+# (`BuildingMaterials.SPECS` — Masonry, RoofSlate, Thatch) — albédo 2k, normale 1k (même
+# convention que GA2), contrairement aux autres `SINGLE` (écorce, sol, restées en 1k/512,
+# hors périmètre GA5).
+GA5_BUILDING_SINGLE = {"castle_wall_varriation", "roof_slates_02", "thatch_roof_angled"}
+
 
 def stack(src: Path, suffix: str, source_res: str, size: int, out: str) -> None:
     """Empile les couches du sol (ordre de `battle_ground_layers.json`) verticalement."""
@@ -56,8 +62,19 @@ def stack(src: Path, suffix: str, source_res: str, size: int, out: str) -> None:
 
 
 def singles(src: Path) -> None:
-    """Copie les textures des bâtiments et de l'écorce (normales réduites à 512)."""
+    """Copie les textures des bâtiments et de l'écorce.
+
+    Lot GA5 : `GA5_BUILDING_SINGLE` (matières de bâtiments de bataille, `BuildingMaterials.SPECS`)
+    passe en albédo 2k / normale 1k ; les autres `SINGLE` (écorce, sol) restent en 1k / 512
+    (hors périmètre GA5).
+    """
     for name in SINGLE:
+        if name in GA5_BUILDING_SINGLE:
+            diff = Image.open(src / f"{name}_diff_2k.jpg").convert("RGB")
+            diff.save(HERE / f"{name}_diff.jpg", quality=88)
+            nor = Image.open(src / f"{name}_nor_gl_1k.jpg").convert("RGB")
+            nor.save(HERE / f"{name}_nor.jpg", quality=90)
+            continue
         diff = Image.open(src / f"{name}_diff_1k.jpg").convert("RGB")
         diff.save(HERE / f"{name}_diff.jpg", quality=88)
         nor = Image.open(src / f"{name}_nor_gl_1k.jpg").convert("RGB")
