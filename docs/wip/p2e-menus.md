@@ -89,7 +89,22 @@ Branche `feat/p2e-menus` (depuis `main`), worktree
    (par ex. extraire ces aides dans une classe `RefCounted` séparée, touchant `po_ui_test.gd`) est
    préférée — je ne l'ai pas fait puisque la consigne était de ne pas modifier ce fichier.
 
+## État final
+
+- `smoke.gd`, `po_ui_test.gd`, `p2e_ui_test.gd`, `p2e_shot.gd` (7 vues), `ep7_historical_test.gd`,
+  `ep13_replay_test.gd` : tous verts avant la fusion de `main`.
+- Fusion de `main` dans `feat/p2e-menus` : propre, aucun conflit sur les fichiers du lot.
+- Après fusion : `p2e_ui_test.gd` reste vert (0 échec). `smoke.gd` échoue
+  (« research: not met before choosing », `get_tech_tree` absent du mock) — **cause : `main` a
+  reçu le lot FE0 (`docs/decisions/0098-titres-au-dessus-des-factions.md`, champ `primary_title`
+  dans `data/factions/*.json`) après le début de ma session ; ma dylib copiée (celle de `main`
+  au moment où j'ai démarré) ne connaît pas ce champ, `GameDataStore` refuse les données et
+  `SimFacade` retombe sur le mock, qui n'implémente pas `get_tech_tree`.** Rien de mon lot n'est
+  en cause (menus secondaires, aucune dépendance à `primary_title` ni au mock) ; je n'ai pas
+  reconstruit le core (interdit par la consigne). L'orchestrateur devra reconstruire/copier une
+  dylib à jour avec `main` avant de rejouer `smoke.gd` en confirmation finale.
+
 ## Prochaine étape
 
-Une fois la machine moins chargée : relancer `smoke.gd`, puis `p2e_ui_test.gd` et `p2e_shot.gd`,
-fusionner `main`, réimporter, relancer tous les tests, puis répondre à l'orchestrateur.
+Fusion PO6/orchestrateur : reconstruire une dylib à jour avec `main`, relancer `smoke.gd` pour
+confirmer que l'échec ci-dessus disparaît (attendu, sans rapport avec P2e), puis fusion normale.
