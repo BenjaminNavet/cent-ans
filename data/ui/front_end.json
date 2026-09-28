@@ -278,6 +278,14 @@
       "text": "Printemps 1337. Philippe VI s'apprête à confisquer la Guyenne ; Édouard III rassemble ses alliés aux Pays-Bas et prépare son défi. La grande campagne s'étend jusqu'en 1453."
     }
   ],
+  "recommended_factions": [
+    "fac_france",
+    "fac_england",
+    "fac_burgundy",
+    "fac_brittany",
+    "fac_flanders",
+    "fac_navarre"
+  ],
   "factions": [
     {
       "id": "fac_france",

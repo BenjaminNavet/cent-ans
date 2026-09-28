@@ -193,7 +193,7 @@ func _clear(box: Container) -> void:
 		child.queue_free()
 
 
-func _label(box: Container, text: String, color: Color, node_name: String = "", size: int = UiType.CAPTION) -> Label:
+func _label(box: Container, text: String, color: Color, node_name: String = "", size: String = UiType.CAPTION) -> Label:
 	var label := HudStyle.label(text, UiType.size(size), color)
 	if node_name != "":
 		label.name = node_name

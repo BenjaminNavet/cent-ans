@@ -23,7 +23,7 @@ static func available(sim: Object) -> bool:
 static func faction_color(faction_id: String) -> Color:
 	if faction_id == "":
 		return Color(0, 0, 0, 0)
-	var facade := Engine.get_main_loop().root.get_node_or_null("SimFacade") if Engine.get_main_loop() is SceneTree else null
+	var facade: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("SimFacade") if Engine.get_main_loop() is SceneTree else null
 	var color: Color = facade.call("faction_color", faction_id) if facade != null else NEUTRAL
 	color.a = 1.0
 	return color
@@ -59,7 +59,7 @@ func hover_text(province_id: String) -> String:
 	var row: Dictionary = cells.get(province_id, {})
 	if row.is_empty():
 		return ""
-	var facade := Engine.get_main_loop().root.get_node_or_null("SimFacade") if Engine.get_main_loop() is SceneTree else null
+	var facade: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("SimFacade") if Engine.get_main_loop() is SceneTree else null
 	var name_of := func(id: String) -> String:
 		return str(facade.call("faction_short_name", id)) if facade != null else id
 	var sovereign := str(row.get("sovereign", ""))
