@@ -30,7 +30,9 @@ RS-D (`docs/wip/revue-code.md`, n° 2 : les pavois attendent une cible cachée).
 ## État
 - [x] Squelette, sondes avant, correction, tests.
 - [x] Sondes après : identiques (le cas pavois levés + cible cachée ne survient pas dans ces batailles d'IA).
-- [ ] fmt/clippy/test complets, merge main, suppression de `core/target-rs-j`.
+- [x] `git merge main`, fmt + clippy -D warnings + `cargo test` complet verts ; `core/target-rs-j` supprimée.
+
+Lot terminé, prêt à fusionner.
 
 ## Prochaine étape
-clippy + `cargo test` complet, `git merge main`, retests.
+Fusion par l'orchestrateur RS ; retirer le point n° 2 de `docs/wip/revue-code.md` à la fusion.
