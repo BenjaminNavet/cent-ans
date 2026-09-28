@@ -10,7 +10,7 @@ Branche `feat/ib1-layout` (worktree agent). Spec : `docs/superpowers/specs/2026-
 - [x] 3. `TooltipView.build(spec, detailed)` en sections
 - [x] 4. Branchement recrutement / armée / `unit_card` / bâtiments / techniques
 - [x] 5. `ib_layout_test.gd` activé
-- [ ] 6. Planche `docs/img/ib/apres/`
+- [x] 6. Planche `docs/img/ib/apres/`
 
 ## Choix
 
@@ -24,4 +24,6 @@ Branche `feat/ib1-layout` (worktree agent). Spec : `docs/superpowers/specs/2026-
 
 ## Prochaine étape
 
-Lancer smoke / po_ui / p2c_ui / hud_components ; planche après ; fusion de main.
+Lot terminé (main fusionné, tests verts sauf l'échec FE connu du smoke). Reste à l'orchestrateur :
+fusion dans `integration/ib`, jugement visuel de `docs/img/ib/apres/` (non regardée par l'agent).
+Pour IB3/IB4 : `RichTooltip.spec_for(key, live)`, `RichTooltip.last_spec`, `TooltipView.build(spec, true)`.
