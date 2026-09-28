@@ -25,7 +25,9 @@
         "forest",
         "marsh",
         "heath",
-        "bocage"
+        "bocage",
+        "steppe",
+        "desert"
       ]
     },
     "climate": {
@@ -34,7 +36,9 @@
         "oceanic",
         "continental",
         "mediterranean",
-        "mountain"
+        "mountain",
+        "arid",
+        "steppe"
       ]
     },
     "neighbors": {
