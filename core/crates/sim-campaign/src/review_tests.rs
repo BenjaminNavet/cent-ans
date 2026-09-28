@@ -509,3 +509,403 @@ fn research_follows_the_controller() {
     assert!(state.research_points_per_turn(&data, &fr) > base_fr);
     assert!(state.research_points_per_turn(&data, &en) <= base_en);
 }
+
+/// Reference for fix 18c: the per-resolution search `trade.rs` ran before
+/// the paths were precomputed (Dijkstra over `movement::edges`), verbatim.
+fn reference_shortest_path(
+    data: &GameData,
+    from: &SettlementId,
+    to: &SettlementId,
+) -> Option<(u32, Vec<SettlementId>)> {
+    use std::cmp::Reverse;
+    use std::collections::{BTreeMap, BinaryHeap};
+    if from == to {
+        return Some((0, vec![from.clone()]));
+    }
+    let mut dist: BTreeMap<SettlementId, u32> = BTreeMap::new();
+    let mut prev: BTreeMap<SettlementId, SettlementId> = BTreeMap::new();
+    let mut heap = BinaryHeap::new();
+    dist.insert(from.clone(), 0);
+    heap.push(Reverse((0u32, from.clone())));
+    while let Some(Reverse((cost, current))) = heap.pop() {
+        if &current == to {
+            break;
+        }
+        if cost > *dist.get(&current).unwrap_or(&u32::MAX) {
+            continue;
+        }
+        for (next, edge_cost) in crate::movement::edges(data, &current) {
+            let next_cost = cost + edge_cost;
+            if next_cost < dist.get(&next).copied().unwrap_or(u32::MAX) {
+                dist.insert(next.clone(), next_cost);
+                prev.insert(next.clone(), current.clone());
+                heap.push(Reverse((next_cost, next)));
+            }
+        }
+    }
+    let cost = *dist.get(to)?;
+    let mut path = vec![to.clone()];
+    let mut current = to.clone();
+    while &current != from {
+        let previous = prev.get(&current)?;
+        path.push(previous.clone());
+        current = previous.clone();
+    }
+    path.reverse();
+    Some((cost, path))
+}
+
+/// Fix 18c: the trade paths precomputed at load are exactly those the old
+/// per-season search found, for every route of the catalogue.
+#[test]
+fn precomputed_trade_paths_match_the_old_search() {
+    let data = data();
+    let catalog = data.trade.as_ref().expect("trade catalogue");
+    assert!(!catalog.routes.is_empty());
+    let mut found = 0;
+    for route in &catalog.routes {
+        let from = &catalog.hub(&route.from_hub).unwrap().settlement;
+        let to = &catalog.hub(&route.to_hub).unwrap().settlement;
+        let key = (from.clone(), to.clone());
+        let cached = data
+            .trade_paths
+            .paths
+            .get(&key)
+            .unwrap_or_else(|| panic!("{} is precomputed", route.id));
+        let reference = reference_shortest_path(&data, from, to);
+        assert_eq!(cached, &reference, "{}", route.id);
+        assert_eq!(data.trade_path(from, to), reference, "{}", route.id);
+        found += usize::from(reference.is_some());
+    }
+    assert!(found > 0, "some route has a path");
+
+    // The whole view is unchanged, cache or not.
+    let state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut uncached = data.clone();
+    uncached.trade_paths = Default::default();
+    assert_eq!(
+        crate::trade::trade_routes(&state, &data),
+        crate::trade::trade_routes(&state, &uncached)
+    );
+}
+
+/// Fix 18c, timing: `cargo test -p sim-campaign --release --lib --
+/// --ignored trade_paths_timing --nocapture`.
+#[test]
+#[ignore = "timing probe"]
+fn trade_paths_timing() {
+    const RUNS: u32 = 200;
+    let data = data();
+    let state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let mut uncached = data.clone();
+    uncached.trade_paths = Default::default();
+    let time = |d: &GameData| {
+        let start = std::time::Instant::now();
+        for _ in 0..RUNS {
+            std::hint::black_box(crate::trade::trade_routes(&state, d));
+        }
+        start.elapsed() / RUNS
+    };
+    let before = time(&uncached);
+    let after = time(&data);
+    let mut rebuilt = data.clone();
+    let start = std::time::Instant::now();
+    rebuilt.build_trade_paths();
+    let build = start.elapsed();
+    println!(
+        "trade_routes: {before:?} per call before, {after:?} after; \
+         build_trade_paths once: {build:?}"
+    );
+}
+
+/// Fix 4: an army emptied by the stragglers of an orderly fallback is
+/// dispersed (as in a rout), not left on the map without a regiment.
+#[test]
+fn an_army_emptied_by_its_fallback_is_dispersed() {
+    let mut data = data();
+    // As in c7a_retreat: no English place in reach of Saint-Denis, but a
+    // refuge (a place no enemy holds) within the neutral radius.
+    let retreat = &mut data.settlement_rules.as_mut().unwrap().retreat;
+    retreat.friendly_radius_steps = 0.5;
+    retreat.neutral_radius_steps = 2.0;
+    assert!(data.retreat_rules().neutral_loss_percent > 0);
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    state.interactive_battles = false;
+    let english = led_army(&state, "fac_england");
+    let french = led_army(&state, "fac_france");
+    let saint_denis = SettlementId::new("set_saint_denis").unwrap();
+    let paris = SettlementId::new("set_paris").unwrap();
+    for (army, place) in [(&english, &saint_denis), (&french, &paris)] {
+        let a = state.armies.get_mut(army).unwrap();
+        a.position = ArmyPosition::Settlement(place.clone());
+        a.clear_plan();
+    }
+    let paris_point = data.settlement_point(&paris).unwrap();
+    assert!(matches!(
+        crate::movement::retreat_target_after(&state, &data, &english, paris_point, 0),
+        Some(crate::movement::Retreat::Fallback(_))
+    ));
+    // A single regiment at exactly 5 % of its men: it survives the battle
+    // (no loss), but the fallback's stragglers disband it.
+    let general = state.armies[&english].general.clone();
+    {
+        let a = state.armies.get_mut(&english).unwrap();
+        a.units.truncate(1);
+        a.units[0].max_strength = 100;
+        a.units[0].strength = 5;
+    }
+    let units = state.armies[&french].units.len();
+    let result = BattleResult {
+        winner: Winner::Defender,
+        attacker: outcome(1, false),
+        defender: outcome(units, false),
+    };
+    let mut events = Vec::new();
+    crate::movement::apply_battle_result(
+        &mut state,
+        &data,
+        std::slice::from_ref(&english),
+        std::slice::from_ref(&french),
+        &result,
+        &mut events,
+    );
+    assert!(!state.armies.contains_key(&english), "dispersed");
+    assert!(events
+        .iter()
+        .any(|e| e.kind == crate::events::EventKind::ArmyDestroyed));
+    if let Some(general) = general {
+        let c = &state.characters[&general];
+        assert!(c.alive && !c.captive, "the general escapes");
+    }
+}
+
+/// England and France at war only with each other, `score` for France.
+fn anglo_french_war(data: &GameData, player: &str, score: i32) -> CampaignState {
+    let mut state = CampaignState::new_1337(data, fac(player), 5).unwrap();
+    state.chronicle.disabled = true;
+    let (fr, en) = (fac("fac_france"), fac("fac_england"));
+    state.turn = 40;
+    let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
+    for id in &ids {
+        state.factions.get_mut(id).unwrap().at_war_with.clear();
+    }
+    for (a, b) in [(&fr, &en), (&en, &fr)] {
+        let f = state.factions.get_mut(a).unwrap();
+        f.at_war_with.insert(b.clone());
+        f.truces.remove(b);
+        f.war_started.insert(b.clone(), 20);
+        f.war_scores.insert(b.clone(), 0);
+    }
+    set_war_score(&mut state, data, score);
+    state
+}
+
+/// Sets France's war score against England to `score`.
+fn set_war_score(state: &mut CampaignState, data: &GameData, score: i32) {
+    let (fr, en) = (fac("fac_france"), fac("fac_england"));
+    state
+        .factions
+        .get_mut(&fr)
+        .unwrap()
+        .war_scores
+        .insert(en.clone(), 0);
+    let base = state.war_score(data, &fr, &en);
+    state
+        .factions
+        .get_mut(&fr)
+        .unwrap()
+        .war_scores
+        .insert(en, score - base);
+}
+
+fn ceded(order: Option<crate::Order>) -> Vec<ProvinceId> {
+    let Some(crate::Order::ProposeTreaty { articles, .. }) = order else {
+        panic!("a treaty, got {order:?}");
+    };
+    articles
+        .into_iter()
+        .filter_map(|a| match a {
+            crate::negotiation::Article::CedeProvince { province, .. } => Some(province),
+            _ => None,
+        })
+        .collect()
+}
+
+/// Fix 13: a winner demands its war goals, even unheld, before the other
+/// provinces it holds (ADR 0025 § 5).
+#[test]
+fn the_winner_demands_its_unheld_war_goals_first() {
+    let data = data();
+    let (fr, en) = (fac("fac_france"), fac("fac_england"));
+    // England is the player: its acceptance is not weighed, only the order.
+    let mut state = anglo_french_war(&data, "fac_england", 0);
+    let capital = state.factions[&en].capital.clone();
+    let english: Vec<ProvinceId> = state
+        .provinces
+        .keys()
+        .filter(|p| state.province_owner(p) == Some(&en) && *p != &capital)
+        .cloned()
+        .collect();
+    assert!(english.len() >= 2, "{english:?}");
+    // France holds the first English province (by id); its war goal is the
+    // last one, which it does not hold.
+    let (held, goal) = (english[0].clone(), english[english.len() - 1].clone());
+    for s in state.settlements.values_mut() {
+        if s.province == held {
+            s.controller = fr.clone();
+        }
+    }
+    assert!(state.controls_province(&fr, &held));
+    assert!(!state.controls_province(&fr, &goal));
+    state
+        .factions
+        .get_mut(&fr)
+        .unwrap()
+        .ledger
+        .war_goals
+        .insert(en.clone(), vec![goal.clone()]);
+    set_war_score(&mut state, &data, 100);
+    let provinces = ceded(crate::negotiation::plan_peace(&state, &data, &fr));
+    assert_eq!(provinces.first(), Some(&goal), "{provinces:?}");
+    assert!(provinces.contains(&held), "{provinces:?}");
+}
+
+/// Fix 13: a crown sues for peace from a war score of -50 included
+/// (`score <= 2 * SURRENDER_WAR_SCORE`, ADR 0025 § 5 « score ≤ -50 »).
+#[test]
+fn a_crown_beaten_at_minus_fifty_sues_for_peace() {
+    let mut data = data();
+    data.ai_diplomacy.peace.cornered_provinces = 0;
+    let fr = fac("fac_france");
+    let threshold = 2 * crate::diplomacy::SURRENDER_WAR_SCORE;
+    assert_eq!(threshold, -50);
+    let at = |score: i32| {
+        let state = anglo_french_war(&data, "fac_england", score);
+        assert_eq!(state.war_score(&data, &fr, &fac("fac_england")), score);
+        assert!(!crate::diplomacy::is_cornered(&state, &data, &fr));
+        crate::negotiation::plan_peace(&state, &data, &fr)
+    };
+    assert_eq!(at(threshold + 1), None);
+    assert!(at(threshold).is_some());
+}
+
+/// Fix 14: an AI herald does not wait at the captor's for a ransom his
+/// treasury cannot pay; he moves on to his other errands (here a truce).
+#[test]
+fn a_poor_herald_does_not_wait_for_a_ransom() {
+    use data_model::{AgentActionKind, AgentKind};
+    let data = data();
+    let mut state = anglo_french_war(&data, "fac_scotland", -60);
+    let (fr, en) = (fac("fac_france"), fac("fac_england"));
+    let captive = state
+        .characters
+        .iter()
+        .find(|(id, c)| {
+            c.faction == fr && c.alive && state.factions[&fr].ruler.as_ref() != Some(*id)
+        })
+        .map(|(id, _)| id.clone())
+        .unwrap();
+    crate::chronicle::capture_character(&mut state, &data, &captive, &en, &mut Vec::new());
+    assert!(state.characters[&captive].captive);
+    // A herald recruited at home, then standing in an English city.
+    state.factions.get_mut(&fr).unwrap().treasury = 100_000;
+    let herald = state
+        .settlements
+        .iter()
+        .filter(|(_, s)| s.controller == fr)
+        .map(|(id, _)| id.clone())
+        .collect::<Vec<_>>()
+        .into_iter()
+        .find_map(|id| {
+            state
+                .recruit_agent(&data, &fr, &id, AgentKind::Emissary)
+                .ok()
+        })
+        .expect("a place to recruit a herald");
+    let english_city = state
+        .settlements
+        .iter()
+        .find(|(_, s)| s.controller == en && s.kind == data_model::SettlementKind::City)
+        .map(|(id, _)| id.clone())
+        .unwrap();
+    {
+        let agent = state.agents.agents.get_mut(&herald).unwrap();
+        agent.location = english_city;
+        agent.movement_points = 500;
+    }
+    let action_of = |state: &CampaignState| {
+        crate::agents::plan_agents(state, &data, &fr)
+            .into_iter()
+            .find_map(|o| match o {
+                crate::Order::AgentAction { agent, action, .. } if agent == herald => Some(action),
+                _ => None,
+            })
+    };
+    // Rich: he buys the captive back.
+    assert_eq!(action_of(&state), Some(AgentActionKind::Ransom));
+    // Penniless: no ransom, a truce with the winning enemy instead.
+    state.factions.get_mut(&fr).unwrap().treasury = 0;
+    assert_eq!(action_of(&state), Some(AgentActionKind::Truce));
+}
+
+/// Fix 15: hired cogs lost in a crossing battle are not taken from the
+/// faction's fleet; only its own ships are.
+#[test]
+fn hired_cogs_lost_at_sea_are_not_the_fleets() {
+    use data_model::ShipClassId;
+    use sim_battle::naval::{NavalSideResult, NavalSideSetup, ShipFate, ShipResult, ShipSetup};
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 1).unwrap();
+    let en = fac("fac_england");
+    let cog_id = ShipClassId::new("ship_cog").unwrap();
+    let cog = data.naval.ship("ship_cog").expect("cog class").clone();
+    // England owns two cogs; the crossing hires two more.
+    state
+        .naval
+        .fleets
+        .insert(en.clone(), [(cog_id.clone(), 2)].into_iter().collect());
+    let ship = |n: usize| ShipSetup {
+        name: format!("cogue {n}"),
+        class: cog.clone(),
+        crew: Vec::new(),
+        fireship: false,
+        chain: None,
+        fire_arrows: false,
+        position: None,
+        heading_deg: None,
+        flagship: n == 0,
+    };
+    let side = NavalSideSetup {
+        faction: en.to_string(),
+        faction_name: String::new(),
+        army: String::new(),
+        admiral: String::new(),
+        units: Vec::new(),
+        ships: (0..4).map(ship).collect(),
+        hold: false,
+    };
+    let fates = [
+        ShipFate::Kept,
+        ShipFate::Sunk,
+        ShipFate::Captured,
+        ShipFate::Sunk,
+    ];
+    let result = NavalSideResult {
+        ships: fates
+            .iter()
+            .enumerate()
+            .map(|(index, fate)| ShipResult {
+                index,
+                name: format!("cogue {index}"),
+                class: "ship_cog".to_owned(),
+                fate: *fate,
+            })
+            .collect(),
+        ..Default::default()
+    };
+    // Ships 0-1 are England's own, 2-3 hired: one own cog lost (ship 1).
+    assert_eq!(
+        crate::naval::own_ships_lost(&state, &en, &side, &result),
+        vec![cog_id]
+    );
+}
