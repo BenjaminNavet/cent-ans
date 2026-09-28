@@ -30,16 +30,61 @@ Branche `feat/fe4a-france`, issue de `main` (dfe88244, qui contient FE0 1dcd6821
 - Pipeline géographique (`cent-ans geo provinces`) : **pas encore relancé** à ce stade du wip
   (voir prochaine étape).
 
-## Prochaine étape
+## État final
 
-1. Lancer `uv run --project tools cent-ans geo provinces`, vérifier l'aperçu
-   (`docs/img/provinces-preview.png`), commiter `data/map/provinces.geojson`,
-   `data/map/province_ids.png` et l'aperçu ensemble.
-2. `uv run --project tools pytest tools/tests/test_feudal_titles.py`.
-3. `cd core && CARGO_TARGET_DIR=$PWD/target cargo test -p data-model` puis
-   `cargo test -p sim-campaign --test feudal_deductions --test campaign`.
-4. Relecture historienne (dates, détenteurs, rangs, suzerainetés) — voir section ci-dessous.
-5. Commit final `FE4a: …`.
+1. `cent-ans geo provinces` et `cent-ans geo settlements` relancés : 141 provinces, aperçus et
+   graphe de colonies régénérés et commités.
+2. `pytest tools/tests/test_feudal_titles.py` : 6/6 verts.
+3. `cargo test -p data-model` : 34 + 11 verts (le second lot avait échoué deux fois — voir
+   « Bogues trouvés et corrigés » — corrigé puis vert).
+4. `cargo test -p sim-campaign --test feudal_deductions --test campaign` : `feudal_deductions`
+   3 verts + 4 `#[ignore]` (F1, sans rapport avec ce lot) ; `campaign` 19/20 verts, un échec
+   restant signalé ci-dessous (non corrigé, hors mandat).
+5. Commit final `FE4a: registre féodal de la France (9 provinces, 11 titres, 7 factions)`.
+
+## Bogues trouvés et corrigés en cours de route
+
+- `tit_bourbon` : objectif `hold_crown` écrit avec un champ `faction` au lieu de `title`
+  (l'énumération Rust `TitleObjectiveCondition::HoldCrown` attend `{ title }`, alors que le
+  schéma JSON accepte les deux champs sans distinction par `kind` — schéma trop permissif,
+  signalé plus bas). Corrigé : `"title": "tit_france"`.
+- `chr_bernard_ezi_d_albret` : trait `trait_pragmatic` inexistant dans `data/traits/`. Remplacé
+  par `trait_cunning`.
+- Trois fixations de test Rust qui figeaient un décompte (province/faction/armée), toutes mises
+  à jour comme autorisé par le mandat :
+  - `campaign.rs::new_1337_matches_game_data` : `factions.len()` 29 → 36 (+7 nouvelles
+    factions), `provinces.len()` 132 → 141 (+9 nouvelles provinces), `armies().len()` 28 → 35
+    (une armée principale par faction).
+  - `campaign.rs::france_income_is_positive_and_in_target_range` : `summary.provinces_count`
+    27 → 26 (`prov_bourbonnais` et `prov_bearn` quittent `fac_france` pour `fac_bourbon` et
+    `fac_foix_bearn` ; `prov_valois`, nouvelle, reste à la couronne : 27 − 2 + 1 = 26).
+
+## Échec de test non corrigé (signalé, pas de code de règles touché)
+
+`campaign.rs::succession_follows_heir_then_house_then_none` échoue désormais : après la mort de
+Philippe VI puis de Jean de Normandie, le test attend que « l'aîné des Valois vivants » hérite de
+la couronne, et vérifie `house == "Valois"`. Il obtient `"Quiéret"`. Cause : avant ce lot,
+Charles II d'Alençon (maison Valois, `faction: fac_france`) faisait partie du vivier de
+candidats de la faction France ; ce lot le transfère à sa propre faction (`fac_alencon`), comme
+demandé par la spec (chaque grand vassal doit avoir sa propre faction jouable). L'algorithme de
+succession actuel (`characters.rs::succeed`, recherche « maison » **au sein de la faction**) n'a
+donc plus de candidat Valois dans `fac_france` et retombe sur un personnage de la maison
+Quiéret. C'est un effet de bord attendu de la restructuration féodale : la vraie correction
+revient à F1/F3 (succession par titres, pas par recherche de maison intra-faction) — voir
+`docs/superpowers/plans/2026-09-28-feodalite.md` § F3 (« Héritage »). Je n'ai pas touché à
+`characters.rs` (code de règles, hors mandat F4a) ; je n'ai pas non plus modifié le test, car ce
+n'est pas un simple décompte figé mais une assertion de comportement.
+
+## Point de schéma à examiner (hors mandat, signalé pour F0/F3)
+
+`data/schemas/title.schema.json` (`objectives[].condition`) accepte `title`, `provinces` et
+`faction` sans distinction par `kind`, alors que l'énumération Rust
+(`TitleObjectiveCondition`) impose des champs précis par variante (`hold_title`/`hold_crown` →
+`title` ; `hold_provinces` → `provinces` ; `be_liege_of` → `faction` ; `be_independent` → aucun).
+Le schéma JSON n'aurait pas détecté mon erreur initiale sur `tit_bourbon` (voir plus haut) ; seul
+`cargo test` l'a trouvée. Une validation JSON Schema par `if`/`then` sur `kind` rendrait ce genre
+d'erreur détectable avant la compilation Rust — je ne l'ai pas fait ici (fichier partagé F0, hors
+périmètre de ce lot de données).
 
 ## Relecture historienne (voir aussi le rapport final dans le message de fin de lot)
 
