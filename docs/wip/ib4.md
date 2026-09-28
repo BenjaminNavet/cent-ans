@@ -17,8 +17,8 @@ en fin de fichier + `_icon_text`, `cost_text`, `_effects_block`, `population_cla
 - [x] 1b. `CodexBubbles` ouvre les liens `ib:` (entité → `TooltipView.build(link_spec, true)`,
   règle → bulle `rule`), clic gauche → fiche `entry_for_entity`
 - [x] 3. Placement latéral, fil d'Ariane, réduction des ancêtres
-- [ ] 5. `ib_chain_test` étendu
+- [x] 5. `ib_chain_test` étendu (liens, bulles ib:, placement 1280×720, fil d’Ariane, réduction)
 
 ## Prochaine étape
 
-Étendre `ib_chain_test.gd` (bulles ib:, placement 1280×720 via `area_override`, fil d’Ariane, réduction), puis tests complets.
+Tests complets (smoke, ib_layout, p2c_ui, po_ui, pytest), fusion de `main`.

@@ -843,6 +843,9 @@ func _push(bubble: PanelContainer, at: Vector2) -> void:
 	_outside_time = 0.0
 	bubble.reset_size()
 	bubble.resized.connect(_place.bind(bubble))
+	# IB4 : la bulle suit sa taille minimale (texte replié une fois sa largeur connue, fil
+	# d'Ariane, réduction) au lieu de garder la plus grande hauteur atteinte.
+	bubble.minimum_size_changed.connect(bubble.reset_size)
 	_place(bubble)
 	_refresh_breadcrumbs()
 
@@ -851,13 +854,15 @@ func _push(bubble: PanelContainer, at: Vector2) -> void:
 func _clamp(bubble: PanelContainer) -> void:
 	if not is_instance_valid(bubble):
 		return
-	var area := get_viewport().get_visible_rect().size
+	var rect := layout_area()
+	var low := rect.position + Vector2(MARGIN, MARGIN)
+	var high := rect.end - Vector2(MARGIN, MARGIN)
 	var at: Vector2 = bubble.get_meta("anchor", bubble.position)
 	var pos := at
-	if pos.x + bubble.size.x > area.x - MARGIN:
+	if pos.x + bubble.size.x > high.x:
 		pos.x = at.x - bubble.size.x - MOUSE_OFFSET.x * 2.0
-	pos.x = clampf(pos.x, MARGIN, maxf(MARGIN, area.x - bubble.size.x - MARGIN))
-	pos.y = clampf(pos.y, MARGIN, maxf(MARGIN, area.y - bubble.size.y - MARGIN))
+	pos.x = clampf(pos.x, low.x, maxf(low.x, high.x - bubble.size.x))
+	pos.y = clampf(pos.y, low.y, maxf(low.y, high.y - bubble.size.y))
 	bubble.position = pos.floor()
 
 
@@ -948,8 +953,8 @@ func layout_area() -> Rect2:
 ## Place `bubble` : racine près de son ancre (`_clamp`) ; fille à côté de sa parente, sans
 ## chevaucher ses ancêtres — faute de place, les ancêtres les plus anciennes se réduisent.
 func _place(bubble: PanelContainer) -> void:
-	if not is_instance_valid(bubble) or not bubbles.has(bubble):
-		return
+	if not is_instance_valid(bubble) or not bubbles.has(bubble) or bool(bubble.get_meta("collapsed", false)):
+		return  # une ancêtre réduite reste à sa place
 	var parent := parent_of(bubble)
 	if parent == null:
 		_clamp(bubble)
@@ -1077,7 +1082,7 @@ func set_collapsed(bubble: PanelContainer, collapsed: bool) -> void:
 	var box := bubble.get_node_or_null("Box") as VBoxContainer
 	if box == null:
 		return
-	bubble.set_meta("collapsed", collapsed)
+	bubble.set_meta("collapsed", true)  # réduite ou en cours de réouverture : ne bouge pas
 	if collapsed:
 		var hidden: Array = []
 		for child in box.get_children():
@@ -1102,6 +1107,12 @@ func set_collapsed(bubble: PanelContainer, collapsed: bool) -> void:
 				(child as Control).visible = true
 		bubble.remove_meta("collapsed_nodes")
 	bubble.reset_size()
+	bubble.set_meta("collapsed", collapsed)
+
+
+## Fil d'Ariane de `bubble` (null si elle n'en porte pas).
+func breadcrumb_of(bubble: PanelContainer) -> RichTextLabel:
+	return bubble.get_node_or_null("Box/Breadcrumb") as RichTextLabel if is_instance_valid(bubble) else null
 
 
 ## Titre court d'une bulle (fil d'Ariane, en-tête réduit).
@@ -1128,6 +1139,7 @@ func _refresh_breadcrumbs() -> void:
 		if crumb != null and bubble != top:
 			crumb.get_parent().remove_child(crumb)
 			crumb.queue_free()
+			bubble.reset_size()
 	if top == null or not is_instance_valid(top):
 		return
 	var chain: Array = ancestors_of(top)
@@ -1138,6 +1150,7 @@ func _refresh_breadcrumbs() -> void:
 		if existing != null:
 			existing.get_parent().remove_child(existing)
 			existing.queue_free()
+			top.reset_size()
 		return
 	var segments := PackedStringArray()
 	for index in chain.size():
@@ -1160,8 +1173,16 @@ func _refresh_breadcrumbs() -> void:
 		crumb.meta_hover_ended.connect(func(_meta: Variant) -> void: _crumb_hover = false)
 		box.add_child(crumb)
 		box.move_child(crumb, 0)
+	# Largeur fixée sur celle du contenu : sans elle, le texte replié lettre à lettre gonflerait
+	# la hauteur de la bulle.
+	var width := 0.0
+	for child in box.get_children():
+		if child != crumb and (child as Control).visible:
+			width = maxf(width, (child as Control).get_combined_minimum_size().x)
+	crumb.custom_minimum_size = Vector2(maxf(WIDTH * 0.5, width), 0)
 	crumb.set_meta("chain", chain)
 	crumb.text = CRUMB_SEPARATOR.join(segments)
+	top.reset_size()
 
 
 func _on_crumb_clicked(meta: Variant, crumb: RichTextLabel) -> void:
