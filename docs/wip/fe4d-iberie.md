@@ -47,7 +47,17 @@ Albuquerque (seigneurie concédée après 1337), maison de La Cerda (prétention
 assise territoriale 1337 floue), ordre de Santiago (domaine trop dispersé pour une province).
 
 ## État
-- [ ] Provinces/titres/factions/colonies écrits
-- [ ] Héraldique, front_end, portraits
-- [ ] Pipeline géo régénéré
-- [ ] Tests Python/Rust verts
+- [x] Provinces/titres/factions/colonies écrits (10 provinces, 19 titres dont 14 nouveaux,
+  8 factions, 7 personnages ; `tit_aragon`/`tit_castile` élagués des provinces devenues
+  autonomes)
+- [x] Héraldique (6 maisons + 2 blasons corrigés pour distinction visuelle), front_end (8
+  fiches), portraits (bucket « iberia » complété)
+- [x] Pipeline géo régénéré (voir commandes dans le rapport final)
+- [x] `uv run --project tools pytest -q` : 906 passed, 2 skipped
+- [ ] `cargo test` (en cours, `core/target-fe4d`)
+
+## Écarts notables
+- `chr_jacques_iii_de_majorque` existait déjà, rattaché à `fac_aragon` avec un commentaire
+  explicite « faute de faction Majorque distincte, liberté du jeu ». Ce lot renverse ce choix
+  documenté et lui donne sa propre faction (conforme au mandat qui cite Majorque comme
+  candidat) — codex mis à jour en conséquence.
