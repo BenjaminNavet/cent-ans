@@ -1,4 +1,4 @@
-//! Capture points of a siege battle (TW2 T4, ADR 0104), Total War style.
+//! Capture points of a siege battle (TW2 T4, ADR 0108), Total War style.
 //!
 //! Two points: the **market square** (victory point: held long enough, the
 //! town falls) and the **gate** (just inside it: taken, the gate opens and

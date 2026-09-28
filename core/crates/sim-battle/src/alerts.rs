@@ -39,7 +39,7 @@ pub enum AlertKind {
     AmmoOut,
     WallBreached,
     GateDestroyed,
-    /// T4 (ADR 0104): the attacker is taking the market square.
+    /// T4 (ADR 0108): the attacker is taking the market square.
     SquareThreatened,
 }
 

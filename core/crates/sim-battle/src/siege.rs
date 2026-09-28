@@ -657,7 +657,7 @@ pub struct SiegeWorks {
     /// Seconds the attacker has held the central square (T4: mirror of the
     /// square capture point's progress, see [`crate::capture`]).
     pub hold_time: f64,
-    /// T4 (ADR 0104): capture points (market square, gate), built at the
+    /// T4 (ADR 0108): capture points (market square, gate), built at the
     /// first step of the battle.
     #[serde(default)]
     pub points: Vec<crate::capture::CapturePoint>,

@@ -2902,7 +2902,7 @@ impl BattleSim {
         // formatted for the few regiments concerned).
         let mut new_events: Vec<(usize, &'static str)> = Vec::new();
         let siege = self.siege.is_some();
-        // T4 (ADR 0104): the garrison's last stand on the square.
+        // T4 (ADR 0108): the garrison's last stand on the square.
         let stand = &crate::capture::CaptureRules::bundled().last_stand;
         let last_stand: Vec<bool> = self
             .units
@@ -3073,7 +3073,7 @@ impl BattleSim {
                 .count()
         });
         let timeout = self.elapsed >= MAX_DURATION - 1e-9;
-        // T4 (ADR 0104): the market square held long enough.
+        // T4 (ADR 0108): the market square held long enough.
         let square_held = self.square_taken();
         let (winner, end) = if able[0] > 0 && able[1] > 0 && !timeout && !square_held {
             // EP9: a broken army, a refused battle or a lull.

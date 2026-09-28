@@ -37,6 +37,7 @@ var _kit_ruins: Dictionary = {}  # indice de maison → true (ruine déjà posé
 var external_ladders := false  # SG1 : échelles posées contre le mur par `SiegeAssaultFx`
 var side_colors: Dictionary = {}  # SB : couleurs des camps (« attacker »/« defender ») des barres de vie
 var health_bars: SiegeHealthBars = null  # SB : barres de vie flottantes des ouvrages et engins
+var capture_points: SiegeCapturePoints = null  # T4 : drapeaux et barres de capture (place, porte)
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -77,6 +78,12 @@ func build(p_siege: Dictionary, p_height_at: Callable) -> void:
 		health_bars.side_colors[side] = side_colors[side]
 	add_child(health_bars)
 	health_bars.sync(siege)
+	capture_points = SiegeCapturePoints.new()
+	capture_points.height_at = height_at
+	for side in side_colors:
+		capture_points.side_colors[side] = side_colors[side]
+	add_child(capture_points)
+	capture_points.sync(siege)
 
 
 static func _material(color: Color, roughness: float = 0.95) -> StandardMaterial3D:
@@ -664,6 +671,8 @@ func update(p_siege: Dictionary, units: Array) -> void:
 		fire_fx.update(p_siege)
 	if health_bars != null:
 		health_bars.sync(p_siege)
+	if capture_points != null:
+		capture_points.sync(p_siege)
 	_update_machines(units)
 
 

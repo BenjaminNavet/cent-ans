@@ -1321,7 +1321,7 @@ impl BattleSim {
     /// props[{kind, x, z, yaw, length, depth, house}] (BR3), engines[{unit, kind:
     /// "ram"|"tower", side, x, z, hp, max_hp}] (SB), points[{kind: "square"|"gate",
     /// x, z, radius, progress, hold_s, share, status: "held"|"contested"|"capturing"|
-    /// "taken", attackers, defenders}] (T4, ADR 0104), gate_fire: {state, intensity},
+    /// "taken", attackers, defenders}] (T4, ADR 0108), gate_fire: {state, intensity},
     /// wind: Vector2 (direction × strength 0-1), houses_burning, houses_burnt,
     /// sortie, ram_period, oil_period}`. Pieces lose HP and houses burn during the battle (S2): call it
     /// again to show the damage.
@@ -1414,10 +1414,10 @@ impl BattleSim {
                 .to_variant()
             })
             .collect();
-        // T4 (ADR 0104): capture points (market square, gate) with their
+        // T4 (ADR 0108): capture points (market square, gate) with their
         // progress, for the flags and the capture bars.
         let points: VarArray = works
-            .points
+            .capture_points()
             .iter()
             .map(|p| {
                 vdict! {
@@ -1705,7 +1705,7 @@ impl BattleSim {
 
     /// CB5: typed alerts `[{kind, time, x, z, side, unit}]` added since the
     /// last call. `kind` is one of `rout`, `general_down`, `flanked`,
-    /// `reinforcements`, `ammo_out`, `wall_breached`, `gate_destroyed`.
+    /// `reinforcements`, `ammo_out`, `wall_breached`, `gate_destroyed`, `square_threatened` (T4).
     /// `side` is `""` and `unit` is `-1` for a wall/gate piece. Output only:
     /// reading it never changes the simulation.
     #[func]

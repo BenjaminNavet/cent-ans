@@ -166,7 +166,9 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
             let line: Vec<String> = sim
                 .units()
                 .iter()
-                .filter(|u| u.present() && !u.synthetic && u.category != data_model::UnitCategory::Siege)
+                .filter(|u| {
+                    u.present() && !u.synthetic && u.category != data_model::UnitCategory::Siege
+                })
                 .map(|u| {
                     format!(
                         "{}{}[{:.0}m {:?} w{} hp{:.0} m{:.0} f{:.0}]",
