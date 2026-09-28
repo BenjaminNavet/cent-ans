@@ -32,9 +32,10 @@ Fichiers : `material_gen.py`, `data/art/materials.yaml`,
 `tools/blender_scripts/battle_fine_tiles.py` (assemblage), `game/assets/models/battle_fine/textures/`,
 `game/shaders/battle_soldier_skinned.gdshader` (sous `#ifdef FG3_BAKED` seulement),
 `game/scripts/battle/battle_skinned.gd` (chargement), ADR `0104-albedo-de-detail-des-figurines.md`.
-1. [ ] Chaîne : `make_tileable` (décalage ½ + fondu des coutures), `derive_maps` (hauteur =
+1. [x] Chaîne : `make_tileable` (décalage ½ + fondu des coutures), `derive_maps` (hauteur =
        luminance passe-haut → normale OpenGL → rugosité), `contact_sheet`. Tests : écart des
-       bords ≤ 4/255, dimensions, canaux. Commit.
+       bords ≤ 4/255, dimensions, canaux. Commit. CLI : `uv run --project tools cent-ans assets
+       materials --out <scratch> [--only id]… [--sheet planche.png]` (brute réutilisée si présente).
 2. [ ] Sonde : 2 matières (laine, mailles) → planche ; jugement en session principale (1 capture).
 3. [ ] Lot : 12 matières (laine, lin, futaine, gambison, mailles, cuir, plates, bois, peau,
        cheveux, robe claire, robe foncée), 512², budget consigné.
@@ -86,3 +87,5 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
 ## Journal
 - 28/09 : spec approuvée (726a31bf), plan écrit.
 - 28/09 : GA0 fait (squelette, section budget GA). Suite : vague 1 (GA1 ∥ GA2).
+- 28/09 : GA1 étape 1 faite (worktree `../game_project-ga1`, branche `feat/ga1`) : chaîne
+  tuilable + cartes dérivées + planche + CLI `assets materials`. Suite : sonde laine/mailles.

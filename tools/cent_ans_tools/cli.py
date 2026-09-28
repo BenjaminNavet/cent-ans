@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -1349,6 +1351,42 @@ def assets_codex_art(
         "Illustrations du Codex",
         codex_art.convert,
     )
+
+
+@assets_app.command("materials")
+def assets_materials(
+    out_dir: Path = typer.Option(  # noqa: B008
+        ...,
+        "--out",
+        help="Dossier des images brutes et tuiles (hors dépôt, ex. scratch)",
+    ),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiants à générer seuls (sonde), répétable"
+    ),
+    sheet: Path | None = typer.Option(  # noqa: B008
+        None, "--sheet", help="Planche de contrôle PNG à écrire"
+    ),
+    lot: str = typer.Option("GA1", "--lot", help="Préfixe de ligne et plafond du lot"),
+) -> None:
+    """GA : matières tuilables générées (data/art/materials.yaml) + cartes dérivées.
+
+    Une image brute déjà présente dans --out est réutilisée sans appel payant.
+    """
+    import numpy as np
+    from PIL import Image
+
+    from cent_ans_tools import material_gen
+
+    ids = only or [entry["id"] for entry in material_gen.load_materials()["materials"]]
+    tiles = {}
+    for material_id in ids:
+        albedo = material_gen.generate(material_id, out_dir, lot=lot)
+        tiles[material_id] = np.asarray(Image.open(albedo).convert("RGB"))
+        console.print(f"[green]OK[/green] : {material_id} -> {albedo}")
+    if sheet is not None:
+        path = material_gen.contact_sheet(tiles, sheet)
+        console.print(f"Planche : {path} ({path.stat().st_size // 1024} Ko)")
+    console.print(f"Cumul GA : {budget.total()} $")
 
 
 if __name__ == "__main__":
