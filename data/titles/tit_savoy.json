@@ -1,0 +1,27 @@
+{
+  "id": "tit_savoy",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Savoie",
+    "local": "Comté de Savoye",
+    "local_language": "ancien français"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix d'argent.",
+    "description": "Croix blanche sur champ rouge, en usage depuis Amédée V.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_piemont",
+    "prov_savoie"
+  ],
+  "holder_1337": {
+    "faction": "fac_savoy",
+    "sources": [
+      "Aymon de Savoie",
+      "Comté de Savoie"
+    ]
+  }
+}

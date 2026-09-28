@@ -355,7 +355,7 @@ fn research_state_survives_a_save_round_trip() {
     state.end_turn_with(&data, idle);
     let json = state.save_json();
     assert!(json.contains(&format!("\"state_version\":{STATE_VERSION}")));
-    assert_eq!(STATE_VERSION, 6);
+    assert_eq!(STATE_VERSION, 7);
     let loaded = CampaignState::load_json(&json).expect("loads");
     assert_eq!(loaded, state);
     let faction = &loaded.factions[&fac("fac_france")];
