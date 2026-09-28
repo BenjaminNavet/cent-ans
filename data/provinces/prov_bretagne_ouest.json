@@ -53,8 +53,6 @@
     "voronoi_weight": 1.2
   },
   "owner": "fac_brittany",
-  "overlord": "fac_france",
-  "holder": "chr_jean_iii_de_bretagne",
   "culture": "cul_breton",
   "religion": "rel_catholic",
   "population": {

@@ -51,8 +51,6 @@
     "voronoi_weight": 1.0
   },
   "owner": "fac_flanders",
-  "overlord": "fac_france",
-  "holder": "chr_louis_de_nevers",
   "culture": "cul_flemish",
   "religion": "rel_catholic",
   "population": {
