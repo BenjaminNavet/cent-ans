@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_zara",
+    "province": "prov_zara",
+    "kind": "city",
+    "name": {
+      "display": "Zara",
+      "local": "Iadera",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      15.227,
+      44.117
+    ],
+    "weight": 55,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Cité fortifiée sur presqu'île, clé de la Dalmatie vénitienne.",
+    "sources": [
+      "Zadar"
+    ]
+  },
+  {
+    "id": "set_nin",
+    "province": "prov_zara",
+    "kind": "town",
+    "name": {
+      "display": "Nin",
+      "local": "Nona",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      15.18,
+      44.24
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_port",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Ancien siège royal croate, ville épiscopale.",
+    "sources": [
+      "Nin"
+    ]
+  },
+  {
+    "id": "set_biograd",
+    "province": "prov_zara",
+    "kind": "town",
+    "name": {
+      "display": "Biograd",
+      "local": "Zaravecchia",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      15.44,
+      43.94
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne capitale des rois croates (Zara Vecchia).",
+    "sources": [
+      "Biograd na Moru"
+    ]
+  }
+]

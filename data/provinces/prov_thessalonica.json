@@ -1,0 +1,103 @@
+{
+  "id": "prov_thessalonica",
+  "name": {
+    "display": "Thessalonique",
+    "local": "Θεσσαλονίκη",
+    "local_language": "grec"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Axios",
+    "Galikos"
+  ],
+  "ports": [
+    "Thessalonique",
+    "Cassandrie"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Thessalonique",
+      "local": "Θεσσαλονίκη",
+      "local_language": "grec"
+    },
+    "lat": 40.6401,
+    "lon": 22.9444
+  },
+  "geo": {
+    "capital_lonlat": [
+      22.9444,
+      40.6401
+    ],
+    "seed_lonlat": [
+      23.2,
+      40.55
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 110000,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 45000,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1300,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 75,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_scriptorium",
+    "bld_guild_hall",
+    "bld_counting_house"
+  ],
+  "fortification_level": 4,
+  "base_supply": 3700,
+  "description": "Seconde ville de l'Empire, cité de saint Démétrios, avec la Chalcidique et le Mont Athos. Foyer d'humanisme et de la révolte zélote (1342-1349).",
+  "sources": [
+    "Thessalonique",
+    "Mont Athos",
+    "Cassandra"
+  ]
+}

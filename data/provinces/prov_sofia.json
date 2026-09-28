@@ -1,0 +1,92 @@
+{
+  "id": "prov_sofia",
+  "name": {
+    "display": "Sofia",
+    "local": "Средец",
+    "local_language": "bulgare"
+  },
+  "region": "balkans",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Iskar",
+    "Struma"
+  ],
+  "resources": [
+    "res_iron",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Sredets",
+      "local": "Средец",
+      "local_language": "bulgare"
+    },
+    "lat": 42.6977,
+    "lon": 23.3219
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.3219,
+      42.6977
+    ],
+    "seed_lonlat": [
+      23.3,
+      42.65
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_bulgaria",
+  "culture": "cul_bulgarian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 126000,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8100,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2600,
+        "unrest": 5,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1050,
+        "unrest": 5,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4200,
+  "description": "Sredets (Sofia) et le pays des sources de l'Iskar et de la Struma ; monastère de Rila.",
+  "sources": [
+    "Sofia",
+    "Monastère de Rila"
+  ]
+}

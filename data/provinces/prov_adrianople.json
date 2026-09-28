@@ -1,0 +1,94 @@
+{
+  "id": "prov_adrianople",
+  "name": {
+    "display": "Andrinople",
+    "local": "Ἀδριανούπολις",
+    "local_language": "grec"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Maritza",
+    "Tundja",
+    "Arda"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Andrinople",
+      "local": "Ἀδριανούπολις",
+      "local_language": "grec"
+    },
+    "lat": 41.6771,
+    "lon": 26.5557
+  },
+  "geo": {
+    "capital_lonlat": [
+      26.5557,
+      41.6771
+    ],
+    "seed_lonlat": [
+      26.6,
+      41.62
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 168000,
+        "unrest": 14,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16200,
+        "unrest": 14,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 3200,
+        "unrest": 9,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1050,
+        "unrest": 9,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 5600,
+  "description": "Vallée de la Maritza : Andrinople et Didymotique, résidence d'Andronic III et de Jean Cantacuzène. Place forte face à la Bulgarie.",
+  "sources": [
+    "Edirne",
+    "Didymoteicho"
+  ]
+}

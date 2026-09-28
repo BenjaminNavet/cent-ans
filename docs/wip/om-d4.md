@@ -8,8 +8,9 @@ Branche `feat/om-d4` (issue de `feat/om`). Brief : scratchpad `brief-common.md` 
 - Générateur Python jetable hors dépôt ; seuls les JSON sont commités.
 
 ## État
-- [ ] noms, provinces, colonies, titres, factions, personnages, maisons, front-end, portraits (bucket)
+- [x] noms (el, sr, sq, dl), 45 provinces, colonies
+- [ ] titres, factions, personnages, maisons, front-end, portraits (bucket)
 - [ ] validation
 
 ## Prochaine étape
-Écrire les données.
+Titres, factions, personnages, maisons, front-end, bucket portraits.

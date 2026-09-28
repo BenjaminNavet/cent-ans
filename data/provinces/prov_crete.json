@@ -1,0 +1,103 @@
+{
+  "id": "prov_crete",
+  "name": {
+    "display": "Crète",
+    "local": "Κρήτη",
+    "local_language": "vénitien"
+  },
+  "region": "egee",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Candie",
+    "La Canée",
+    "Rethymno",
+    "Sitia"
+  ],
+  "sea_zones": [
+    "sea_aegean",
+    "sea_levantine"
+  ],
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Candie",
+      "local": "Candia",
+      "local_language": "vénitien"
+    },
+    "lat": 35.339,
+    "lon": 25.144
+  },
+  "geo": {
+    "capital_lonlat": [
+      25.144,
+      35.339
+    ],
+    "seed_lonlat": [
+      24.9,
+      35.25
+    ],
+    "voronoi_weight": 1.8
+  },
+  "owner": "fac_venice",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 200000,
+        "unrest": 25,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 20000,
+        "unrest": 25,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 5000,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1200,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 75,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_fair",
+    "bld_guild_hall",
+    "bld_counting_house"
+  ],
+  "fortification_level": 3,
+  "base_supply": 6700,
+  "description": "Royaume de Candie, colonie vénitienne peuplée de Grecs orthodoxes remuants (révoltes de la noblesse grecque, dont les Kallergis, en 1333).",
+  "sources": [
+    "Royaume de Candie",
+    "Candie",
+    "La Canée"
+  ]
+}

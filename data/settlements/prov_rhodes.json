@@ -1,0 +1,87 @@
+[
+  {
+    "id": "set_rhodes",
+    "province": "prov_rhodes",
+    "kind": "city",
+    "name": {
+      "display": "Rhodes",
+      "local": "Ῥόδος",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      28.227,
+      36.443
+    ],
+    "weight": 55,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_port",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_counting_house",
+      "bld_guild_hall"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Couvent des Hospitaliers et grande forteresse maritime.",
+    "sources": [
+      "Rhodes"
+    ]
+  },
+  {
+    "id": "set_lindos",
+    "province": "prov_rhodes",
+    "kind": "castle",
+    "name": {
+      "display": "Lindos",
+      "local": "Λίνδος",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      28.088,
+      36.09
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Château de l'acropole de Lindos.",
+    "sources": [
+      "Lindos"
+    ]
+  },
+  {
+    "id": "set_filerimos",
+    "province": "prov_rhodes",
+    "kind": "abbey",
+    "name": {
+      "display": "Philerimos",
+      "local": "Φιλέρημος",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      28.16,
+      36.4
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère de Notre-Dame de Philerme.",
+    "sources": [
+      "Philerimos"
+    ]
+  }
+]

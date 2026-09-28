@@ -1,0 +1,98 @@
+{
+  "id": "prov_negroponte",
+  "name": {
+    "display": "Négrepont",
+    "local": "Εὔβοια",
+    "local_language": "vénitien"
+  },
+  "region": "egee",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Négrepont",
+    "Castel Rosso (Karystos)",
+    "Oréos"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Négrepont",
+      "local": "Chalcis",
+      "local_language": "vénitien"
+    },
+    "lat": 38.46,
+    "lon": 23.6
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.6,
+      38.46
+    ],
+    "seed_lonlat": [
+      23.7,
+      38.4
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_venice",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 60000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 700,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_counting_house"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2000,
+  "description": "Île d'Eubée, le bailliage de Négrepont : la colonie vénitienne la plus riche de la mer Égée, sous le Bailli et les triarques lombards.",
+  "sources": [
+    "Négrepont",
+    "Chalcis"
+  ]
+}

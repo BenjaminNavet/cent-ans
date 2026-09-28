@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_prilep",
+    "province": "prov_prilep",
+    "kind": "city",
+    "name": {
+      "display": "Prilep",
+      "local": "Прилеп",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      21.5546,
+      41.345
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville et forteresse de la Pélagonie.",
+    "sources": [
+      "Prilep"
+    ]
+  },
+  {
+    "id": "set_bitola",
+    "province": "prov_prilep",
+    "kind": "town",
+    "name": {
+      "display": "Monastir (Bitola)",
+      "local": "Битола",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      21.34,
+      41.03
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_fair",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Grand marché de Pélagonie.",
+    "sources": [
+      "Bitola"
+    ]
+  },
+  {
+    "id": "set_markovi_kuli",
+    "province": "prov_prilep",
+    "kind": "castle",
+    "name": {
+      "display": "Tours de Marko",
+      "local": "Маркови Кули",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      21.57,
+      41.34
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Citadelle dominant Prilep.",
+    "sources": [
+      "Markovi Kuli"
+    ]
+  }
+]
