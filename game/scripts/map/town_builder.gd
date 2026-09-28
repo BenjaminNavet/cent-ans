@@ -178,7 +178,7 @@ static func clear_cache() -> void:
 
 ## Couleur de sommet d'une couche de l'atlas (alpha = (indice + 0,5) / 16).
 static func layer_color(layer_name: String, tint: Color = Color(1, 1, 1)) -> Color:
-	var index := BuildingMaterials.ATLAS_LAYERS.find(layer_name)
+	var index := BuildingMaterials.atlas_layers().find(layer_name)
 	return Color(tint.r, tint.g, tint.b, (maxi(index, 0) + 0.5) / 16.0)
 
 
