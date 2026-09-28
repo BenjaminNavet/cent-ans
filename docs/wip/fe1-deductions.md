@@ -3,6 +3,7 @@
 Plan : `docs/superpowers/plans/2026-09-28-feodalite.md` § F1. ADR 0098.
 
 ## État
+- **F1 terminé** (branche `feat/fe1-deductions`), suites Rust et Python vertes hors points ci-dessous.
 - `FactionState::suzerain` = vue en cache de `feudal::liege_of`, recalculée par
   `feudal::sync_suzerains` (nouvelle partie, résolution diplomatique de chaque tour, chargement
   d'une sauvegarde dans le pont). Source unique : détentions + `FeudalState::liege_overrides`
@@ -28,6 +29,12 @@ Plan : `docs/superpowers/plans/2026-09-28-feodalite.md` § F1. ADR 0098.
   l'Empire, et l'IA G4 (`alignment.rs`, pensions et alliances dynastiques) n'approche aucun vassal
   (`suzerain.is_none()`). Historiquement ces princes d'Empire s'allient à Édouard III (1337-1340) :
   à trancher en F5 (IA féodale : un vassal peut-il s'allier hors de son suzerain ?) et F8.
+- Bande d'équilibre `ai/tests/m3_grid_ai.rs::fifty_turns_on_eight_seeds_stay_in_the_c7a_band`
+  (`--ignored`, release) : **déjà rouge sur `main`** (dfe88244 : trésor moyen de la France 38 297,
+  hors bande, ligne 361). Avec F1 elle échoue plus tôt : graine 2, France en banqueroute deux fois
+  (ligne 350). Essai avec `family_tie` et `shared_culture` à 0 : même échec, donc la cause est la
+  vassalité déduite des princes d'Empire (alliances et appels aux armes de l'Empire, ost), pas les
+  nouveaux termes de loyauté. Non corrigé (pas de retouche de seuils) : à juger en F8.
 - `tools/tests/test_budget.py::test_real_budget_file_parses_and_round_trips` échoue déjà sur
   `main` (ligne de budget F0 à quatre colonnes), hors F1.
 
