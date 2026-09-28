@@ -1,0 +1,21 @@
+{
+  "id": "tit_guyenne",
+  "rank": "duchy",
+  "name": {
+    "display": "Guyenne",
+    "local": "Guiana",
+    "local_language": "gascon"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_guyenne"
+  ],
+  "holder_1337": {
+    "faction": "fac_england",
+    "sources": [
+      "Duché d'Aquitaine",
+      "Guyenne",
+      "Guerre de Cent Ans"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "tit_angoumois",
+  "rank": "duchy",
+  "name": {
+    "display": "Angoumois",
+    "local": "Engolesme",
+    "local_language": "ancien français"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_angoumois"
+  ],
+  "holder_1337": {
+    "faction": "fac_navarre",
+    "sources": [
+      "Comté d'Angoulême",
+      "Jeanne II de Navarre"
+    ]
+  }
+}

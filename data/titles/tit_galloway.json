@@ -1,0 +1,22 @@
+{
+  "id": "tit_galloway",
+  "rank": "duchy",
+  "name": {
+    "display": "Galloway et Annandale",
+    "local": "Gallowa",
+    "local_language": "scots"
+  },
+  "de_jure_liege": "tit_england",
+  "de_jure_provinces": [
+    "prov_galloway"
+  ],
+  "holder_1337": {
+    "faction": "fac_england",
+    "sources": [
+      "Galloway",
+      "Édouard Balliol",
+      "Annandale"
+    ]
+  },
+  "description": "Tenu en 1337 par chr_edward_balliol (apanage ou fief)."
+}

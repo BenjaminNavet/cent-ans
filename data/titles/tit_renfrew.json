@@ -1,0 +1,22 @@
+{
+  "id": "tit_renfrew",
+  "rank": "duchy",
+  "name": {
+    "display": "Clydesdale et Renfrew",
+    "local": "Renfrew",
+    "local_language": "scots"
+  },
+  "de_jure_liege": "tit_scotland",
+  "de_jure_provinces": [
+    "prov_renfrew"
+  ],
+  "holder_1337": {
+    "faction": "fac_scotland",
+    "sources": [
+      "Robert II d'Écosse",
+      "Renfrewshire",
+      "Dumbarton"
+    ]
+  },
+  "description": "Tenu en 1337 par chr_robert_stewart (apanage ou fief)."
+}
