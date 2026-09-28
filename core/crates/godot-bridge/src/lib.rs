@@ -35,6 +35,7 @@ mod campaign_sim_holdings;
 mod campaign_sim_map_lens;
 mod campaign_sim_mercenaries;
 mod campaign_sim_movement;
+mod campaign_sim_preview;
 mod campaign_sim_provinces;
 mod campaign_sim_replenish;
 mod campaign_sim_retinue;

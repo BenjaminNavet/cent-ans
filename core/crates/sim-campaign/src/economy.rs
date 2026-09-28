@@ -430,28 +430,41 @@ impl CampaignState {
         let gross: i64 = self
             .provinces
             .keys()
-            .map(|id| {
-                // DC3: provinces where the faction collects nothing are skipped, and the
-                // governor's effects are merged once per province.
-                let mut held = self
-                    .settlements_of(id)
-                    .filter(|(_, s)| &s.controller == faction && s.siege.is_none())
-                    .peekable();
-                if held.peek().is_none() {
-                    return 0;
-                }
-                let mut extra = self.governor_effects(data, id);
-                extra.merge(&tech);
-                let tax: f64 = held
-                    .map(|(sid, _)| self.settlement_tax_with(data, sid, tax_rate, &extra))
-                    .sum();
-                (tax * self.full_province_income_factor(data, id, faction)).round() as i64
-            })
+            .map(|id| self.province_gross_income(data, id, faction, tax_rate, &tech))
             .sum();
         // Embargoes (M5) cut trade.
         let net = (gross as f64 * self.embargo_income_factor(faction)).round() as i64;
         // DF1: difficulty (AI or player income).
         crate::difficulty::scale_i64(net, self.difficulty_income_percent(data, faction))
+    }
+
+    /// Seasonal tax `faction` collects in `province` before embargoes and
+    /// difficulty (the per-province part of
+    /// [`CampaignState::faction_income_effective`]; `tech` is the faction's
+    /// `faction_province_tech_effects`). IB5: read by the tooltip previews.
+    pub fn province_gross_income(
+        &self,
+        data: &GameData,
+        province: &ProvinceId,
+        faction: &FactionId,
+        tax_rate: TaxRate,
+        tech: &EffectTotals,
+    ) -> i64 {
+        // DC3: provinces where the faction collects nothing are skipped, and the
+        // governor's effects are merged once per province.
+        let mut held = self
+            .settlements_of(province)
+            .filter(|(_, s)| &s.controller == faction && s.siege.is_none())
+            .peekable();
+        if held.peek().is_none() {
+            return 0;
+        }
+        let mut extra = self.governor_effects(data, province);
+        extra.merge(tech);
+        let tax: f64 = held
+            .map(|(sid, _)| self.settlement_tax_with(data, sid, tax_rate, &extra))
+            .sum();
+        (tax * self.full_province_income_factor(data, province, faction)).round() as i64
     }
 
     /// Court and administration costs of the season: a share of income that
