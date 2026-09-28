@@ -30,11 +30,10 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 - Icônes (≈ 40, ≈ 2 $) via le pipeline DA5 ; consigner dans `docs/budget.md`.
 
 ## Prochaine étape
-Tous les lots de code CB sont dans main. Reste : (1) icônes DA5 en une fois — 6 curseurs, cadenas, modes
-(`battle_mode_<mode>`), pastilles d'état, 7 alertes, 5 capacités ; retirer `order_pavise` de
-`icons_ink.json` ; plafond 3 $, `docs/budget.md` ; remplacer les glyphes dessinés en code ;
-(2) ADR 0095 finalisée (addenda CB-M2…CB6, CB4 : filtre de scénario, IA du tir tendu) ;
-(3) partie pilote du joueur.
-Suites notées : sélecteur de formations repliable ; cris d'alerte doublés possibles ; bornes de rangs CB1
+**Chantier CB terminé côté code (09-28, main 135a7b36)** : tous les lots, icônes DA5 (25 clés + 6 curseurs,
+0,73 $, cumul DA 21,29 $, `docs/wip/cb-icones.md`), ADR 0095 acceptée. Reste : partie pilote du joueur.
+Suites notées : sélecteur de formations repliable ; cris d'alerte parfois doublés ; bornes de rangs CB1
 sans relecture historique ; bulle d'aide CB6 qui masque les archers avancés sur un cadrage haut ; Crécy à
-18/20 (bande 14-19) après CB4 : peu de marge haute.
+18/20 (bande 14-19) après CB4 ; trait de `cb_planted_pikes` plus épais que la famille ; l'outil
+`ink-icons` écrit sa ligne de grand livre dans la DERNIÈRE section de `docs/budget.md` (ici « Polish PO »)
+et y avait supprimé une ligne : à corriger dans `tools/cent_ans_tools/` avant le prochain lot payant.
