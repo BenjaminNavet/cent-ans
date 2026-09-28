@@ -1,0 +1,134 @@
+{
+  "textured": [
+    {
+      "name": "Plaster",
+      "diffuse": "buildings/lime_plaster_diff",
+      "normal": "buildings/medieval_wall_01_nor",
+      "roughness_map": "buildings/medieval_wall_01_rough",
+      "tile_size_m": 2.2,
+      "tint": [1.05, 1.02, 0.97],
+      "roughness": 0.95,
+      "poly_haven_id": "medieval_wall_01"
+    },
+    {
+      "name": "Rubble",
+      "diffuse": "buildings/stone_wall_diff",
+      "normal": "buildings/stone_wall_nor",
+      "roughness_map": "buildings/stone_wall_rough",
+      "tile_size_m": 2.4,
+      "tint": [1.0, 1.0, 1.0],
+      "roughness": 0.95,
+      "poly_haven_id": "stone_wall"
+    },
+    {
+      "name": "Ashlar",
+      "diffuse": "buildings/rustic_stone_wall_diff",
+      "normal": "buildings/rustic_stone_wall_nor",
+      "roughness_map": "buildings/rustic_stone_wall_rough",
+      "tile_size_m": 2.1,
+      "tint": [1.15, 1.12, 1.06],
+      "roughness": 0.9,
+      "poly_haven_id": "rustic_stone_wall"
+    },
+    {
+      "name": "Masonry",
+      "diffuse": "battle/castle_wall_varriation_diff",
+      "normal": "battle/castle_wall_varriation_nor",
+      "tile_size_m": 3.0,
+      "tint": [1.05, 1.03, 0.98],
+      "roughness": 0.9,
+      "poly_haven_id": "castle_wall_varriation"
+    },
+    {
+      "name": "Timber",
+      "diffuse": "buildings/rough_wood_diff",
+      "normal": "buildings/rough_wood_nor",
+      "roughness_map": "buildings/rough_wood_rough",
+      "tile_size_m": 1.6,
+      "tint": [1.0, 1.0, 1.0],
+      "roughness": 0.9,
+      "poly_haven_id": "rough_wood"
+    },
+    {
+      "name": "Planks",
+      "diffuse": "buildings/weathered_brown_planks_diff",
+      "normal": "buildings/weathered_brown_planks_nor",
+      "roughness_map": "buildings/weathered_brown_planks_rough",
+      "tile_size_m": 2.2,
+      "tint": [1.0, 1.0, 1.0],
+      "roughness": 0.92,
+      "poly_haven_id": "weathered_brown_planks"
+    },
+    {
+      "name": "Door",
+      "diffuse": "buildings/weathered_brown_planks_diff",
+      "normal": "buildings/weathered_brown_planks_nor",
+      "tile_size_m": 1.6,
+      "tint": [0.7, 0.62, 0.55],
+      "roughness": 0.9,
+      "poly_haven_id": "weathered_brown_planks"
+    },
+    {
+      "name": "RoofTile",
+      "diffuse": "buildings/clay_roof_tiles_03_diff",
+      "normal": "buildings/clay_roof_tiles_03_nor",
+      "roughness_map": "buildings/clay_roof_tiles_03_rough",
+      "tile_size_m": 2.4,
+      "tint": [0.85, 0.78, 0.76],
+      "roughness": 0.85,
+      "roof": true,
+      "poly_haven_id": "clay_roof_tiles_03"
+    },
+    {
+      "name": "RoofFlat",
+      "diffuse": "buildings/roof_tiles_14_diff",
+      "normal": "buildings/roof_tiles_14_nor",
+      "roughness_map": "buildings/roof_tiles_14_rough",
+      "tile_size_m": 2.2,
+      "tint": [1.0, 1.0, 1.0],
+      "roughness": 0.88,
+      "roof": true,
+      "poly_haven_id": "roof_tiles_14"
+    },
+    {
+      "name": "RoofSlate",
+      "diffuse": "battle/roof_slates_02_diff",
+      "normal": "battle/roof_slates_02_nor",
+      "tile_size_m": 2.4,
+      "tint": [0.5, 0.53, 0.61],
+      "roughness": 0.6,
+      "roof": true,
+      "poly_haven_id": "roof_slates_02"
+    },
+    {
+      "name": "Thatch",
+      "diffuse": "battle/thatch_roof_angled_diff",
+      "normal": "battle/thatch_roof_angled_nor",
+      "tile_size_m": 2.2,
+      "tint": [1.45, 1.2, 0.85],
+      "roughness": 1.0,
+      "roof": true,
+      "poly_haven_id": "thatch_roof_angled"
+    },
+    {
+      "name": "TimberFrame",
+      "diffuse": "buildings/timber_frame_diff",
+      "normal": "buildings/timber_frame_nor",
+      "roughness_map": "buildings/timber_frame_rough",
+      "tile_size_m": 2.2,
+      "tint": [1.0, 1.0, 1.0],
+      "roughness": 0.85,
+      "poly_haven_id": "",
+      "wired": false
+    }
+  ],
+  "plain": [
+    {"name": "Window", "color": [0.035, 0.032, 0.03], "roughness": 0.35},
+    {"name": "Iron", "color": [0.09, 0.09, 0.1], "roughness": 0.5},
+    {"name": "Canvas", "color": [0.78, 0.74, 0.66], "roughness": 0.95}
+  ],
+  "atlas_layers": [
+    "Plaster", "Rubble", "Ashlar", "Masonry", "Timber", "Planks", "Door",
+    "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas"
+  ]
+}
