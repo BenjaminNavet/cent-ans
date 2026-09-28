@@ -27,7 +27,7 @@
    "url": "https://archive.org/details/bordeauxvers145000drou",
    "license": "Domaine public",
    "extracted": false,
-   "use": "Faits seulement (texte) : tracés du castrum, de la deuxième et de la troisième enceinte décrits par les rues de 1874 (p. 4-10, 38-43), tours, portes, fossés en eau, chemin de ronde. Le plan de l'ouvrage n'est pas utilisé."
+   "use": "Faits seulement (texte intégral d'archive.org) : tracés du castrum, de la deuxième et de la troisième enceinte décrits par les rues de 1874 (p. 4-5, 9-12, 36-43), liste des 21 portes de la troisième enceinte avec leur position (p. 11-12), tours (p. 39-42), portes Basse, Saint-André, Dijeaux, Saint-Symphorien (p. 80-85), fossés en eau, chemin de ronde. Le plan de l'ouvrage n'est pas utilisé."
   },
   {
    "title": "Enceintes, tours, palais et castrum à Bordeaux du XIe siècle au milieu du XIIIe siècle, d'après les textes",
@@ -39,7 +39,7 @@
    "use": "Chronologie de la deuxième enceinte (1205-1255), portes (Sous-le-Mur, Eyres, Cayffernan, Saint-Éloi, Bouqueyre, Rousselle), fouille de Mensignac (mur de 1,75 m, tours de 5,5 m, fossé de 20 m) ; castrum royal de l'Ombrière, tour de l'Arbalesteyre (17 × 14 m), grande salle (37 × 22 m) ; portes Bégueyre et des Paux."
   },
   {
-   "title": "Wikipédia (FR) : Remparts et portes de ville de Bordeaux ; Cathédrale Saint-André ; Tour Pey-Berland ; Palais de l'Ombrière ; Basilique Saint-Michel ; Abbaye Sainte-Croix ; Basilique Saint-Seurin ; Église Sainte-Eulalie ; Église Saint-Pierre ; Église Notre-Dame ; Esplanade des Quinconces",
+   "title": "Wikipédia (FR) : Remparts et portes de ville de Bordeaux ; Cathédrale Saint-André ; Tour Pey-Berland ; Palais de l'Ombrière ; Basilique Saint-Michel ; Abbaye Sainte-Croix ; Basilique Saint-Seurin ; Église Sainte-Eulalie ; Église Saint-Pierre ; Église Notre-Dame ; Esplanade des Quinconces ; Porte Cailhau ; Porte d'Aquitaine (relecture 2026-09-28)",
    "author": "Contributeurs de Wikipédia",
    "date": "2026-09-28",
    "url": "https://fr.wikipedia.org/wiki/Remparts_et_portes_de_ville_de_Bordeaux",
@@ -350,10 +350,12 @@
     [-95, -300],
     [-90, -450],
     [-88, -553],
-    [-30, -586],
-    [76, -642],
-    [126, -666],
-    [200, -705],
+    [-46, -557],
+    [2, -552],
+    [108, -612],
+    [125, -622],
+    [155, -652],
+    [200, -692],
     [245, -728],
     [302, -770],
     [362, -745],
@@ -391,6 +393,12 @@
      "height_m": 17
     },
     {
+     "name": "Porte Saint-Symphorien",
+     "at": [-108, 230],
+     "kind": "gate",
+     "height_m": 13
+    },
+    {
      "name": "Porte du Far",
      "at": [-96, -172],
      "kind": "gate",
@@ -398,7 +406,7 @@
     },
     {
      "name": "Porte Sainte-Eulalie",
-     "at": [-60, -570],
+     "at": [-46, -557],
      "kind": "gate",
      "height_m": 15
     },
@@ -410,7 +418,7 @@
     },
     {
      "name": "Porte du Mirail",
-     "at": [522, -745],
+     "at": [462, -745],
      "kind": "gate",
      "height_m": 15
     },
@@ -421,7 +429,7 @@
      "height_m": 16
     }
    ],
-   "note": "Ordonnance de 1302 (Chronique bordelaise de Lurbe, citée par Drouyn 1874) : clore les faubourgs du nord et du sud et leurs couvents ; convention avec l'abbaye Sainte-Croix en 1302-1304, travaux jusqu'aux années 1320 (Bordeaux Métropole). Tracé de Drouyn (1874, p. 9-10 et 38-43) reporté sur les rues actuelles (OSM) : colonnes des Quinconces, cours de Tournon et rue Boudet, entre la rue Condillac et le cours Clemenceau, entre la place Gambetta et la rue de la Vieille-Tour, entre les rues Bouffard et des Remparts, milieu de la place Rohan, ouest de la rue Jean-Burguet, bord extérieur de la rue Henri-IV, saillant de la porte Saint-Julien, rue de Candale, rue Bigot, place des Capucins, rue des Douves, site du fort Louis (place André-Meunier), sud de l'abbaye Sainte-Croix. Front nord entre les allées d'Orléans et le milieu des Quinconces connu par les seuls textes (château Trompette) : tracé hypothétique ; de même la pointe sud-est (fort Louis - Garonne). Tours semi-circulaires de 9 à 12 m au nord-ouest (Drouyn) ; au sud, lignes droites et petits bastions (plans du XVIIIe s.). Fossés pleins d'eau courante (Vinet, cité par Drouyn), largeur restituée. Portes : Saint-Germain (place Tourny), Dijeaux (10-12 m à l'ouest de la porta Jovia, Wikipédia) et Saint-Julien (place de la Victoire) attestées ; porte du Far au débouché de la rue du Hâ (probable) ; porte Sainte-Eulalie (déplacée en 1603), porte du Mirail (au sud de la rue du Mirail) et grand portail Sainte-Croix (site des abattoirs) placées d'après une seule mention (hypothétique). Portes Saint-Symphorien, d'Audeyole, du Casse, du Redge, de Beyssac omises (position inconnue)."
+   "note": "Ordonnance de 1302 (Chronique bordelaise de Lurbe, citée par Drouyn 1874) : clore les faubourgs du nord et du sud et leurs couvents ; convention avec l'abbaye Sainte-Croix en 1302-1304, travaux jusqu'aux années 1320 (Bordeaux Métropole) ; porte Saint-Julien « datant de 1302 » (Wikipédia, qui date par ailleurs le troisième rempart de 1327). Tracé de Drouyn (1874, p. 9-10 et 38-43) reporté sur les rues actuelles (OSM) : colonnes des Quinconces, cours de Tournon et rue Boudet, entre la rue Condillac et le cours Clemenceau, entre la place Gambetta et la rue de la Vieille-Tour, entre les rues Bouffard et des Remparts, milieu de la place Rohan, ouest de la rue Jean-Burguet, grosse tour carrée au coin des rues Henri-IV et Jean-Burguet (base retrouvée), puis maisons du sud de la rue de la Miséricorde, place Henri-IV en diagonale, côté sud de la rue Saincric (ancienne rue du Chemin-de-Ronde), rue Henri-IV coupée en biais avant la place intérieure d'Aquitaine (relecture 2026-09-28 : le tracé suivait auparavant la rue Henri-IV, bord extérieur du grand bastion postérieur, 25 à 55 m trop au sud), saillant de la porte Saint-Julien, rue de Candale, rue Bigot, place des Capucins, rue des Douves, site du fort Louis (place André-Meunier), sud de l'abbaye Sainte-Croix. À l'ouest, entre la porte Dijeaux et l'archevêché, le mur du XIVe s. double le mur antique à 20-35 m (rue des Remparts entre les deux ; « terrains compris entre les deux murs de la ville, près la porte Basse », 1495, cité par Drouyn) : c'est historique. Front nord entre les allées d'Orléans et le milieu des Quinconces connu par les seuls textes (château Trompette) : tracé hypothétique ; de même la pointe sud-est (fort Louis - Garonne). Tours semi-circulaires de 4,5 à 12 m au nord-ouest (Drouyn) ; au sud, lignes droites et petits bastions (plans du XVIIIe s.). Fossés pleins d'eau courante (Vinet, cité par Drouyn), largeur restituée. Portes (liste de Drouyn, p. 11-12) : Saint-Germain (bout nord-ouest des allées de Tourny), Dijeaux (10-12 m à l'ouest de la porta Jovia), Saint-Symphorien (milieu de la rue des Remparts, près du pont de La Mothe sur la Devèze ; « portail de Sainct-Seurian » en 1321), du Far (bout ouest de la rue du Hâ), Saint-Julien (bout sud de la rue Sainte-Catherine) : positions données par Drouyn ; Sainte-Eulalie (au sud de l'église, déplacée en 1603), du Mirail (au sud de la rue du Mirail) et grand portail Sainte-Croix (site de l'ancien abattoir, non localisé) : hypothétiques. Portes d'Audeyole (près des colonnes rostrales) et du Redge (bains des Quinconces) omises : front nord hypothétique."
   },
   {
    "id": "enceinte_front_garonne",
@@ -464,13 +472,19 @@
    "gates": [
     {
      "name": "Porte Sainte-Croix de la Rivière",
-     "at": [1268, -795],
+     "at": [1253, -778],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte de Beyssac",
+     "at": [1139, -626],
      "kind": "water_gate",
      "height_m": 12
     },
     {
      "name": "Porte de la Grave",
-     "at": [1029, -472],
+     "at": [1001, -442],
      "kind": "water_gate",
      "height_m": 12
     },
@@ -482,13 +496,19 @@
     },
     {
      "name": "Porte des Salinières",
-     "at": [895, -298],
+     "at": [882, -280],
      "kind": "gate",
      "height_m": 14
     },
     {
      "name": "Porte Saint-Jean",
      "at": [760, -87],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte du Peugue (Brisson)",
+     "at": [749, -70],
      "kind": "water_gate",
      "height_m": 12
     },
@@ -509,9 +529,15 @@
      "at": [625, 343],
      "kind": "gate",
      "height_m": 13
+    },
+    {
+     "name": "Porte de l'Orme-de-Casse",
+     "at": [611, 470],
+     "kind": "gate",
+     "height_m": 13
     }
    ],
-   "note": "Pas de fossé du côté de la rivière (Drouyn). Mur de 8 à 10 m sur 2 m environ (trace au revers de la porte Cailhau, Wikipédia). La porte Cailhau actuelle (1493-1496) est bâtie plus près de la Garonne que la porte du Caillau du XIVe s. Portes des Salinières, du Caillau, Saint-Pey (embouchure de la Devèze) et des Paux (bout de la rue Saint-Rémi, Drouyn) placées d'après les textes ; Sainte-Croix de la Rivière, la Grave et Pey-Miqueu : ordre de la liste des portes (Wikipédia), positions hypothétiques ; porte Saint-Jean au bout de la rue de la Porte-Saint-Jean. Au nord du castrum, mur rectiligne sur 200 m jusqu'au bas des allées d'Orléans, puis tracé bouleversé par le château Trompette (1453 et XVIIe s.) : hypothétique jusqu'aux colonnes des Quinconces."
+   "note": "Pas de fossé du côté de la rivière (Drouyn). Mur de 8 à 10 m sur 2 m environ (trace au revers de la porte Cailhau, Wikipédia). Tracé de Drouyn (p. 10) : entre les quais et les rues du Moulin, Carpenteyre et de la Fusterie, entre le quai et la rue de la Rousselle, côté ouest des rues des Portanets, Ausone et du Chai-des-Farines (OSM : écart de 5 à 15 m, conforme) ; la porte Cailhau actuelle (1493-1496) est bâtie plus près de la Garonne que la porte du Caillau du XIVe s. (« un peu à l'ouest de la porte actuelle », 21 m ici). Portes de la liste de Drouyn (p. 11-12), placées où la rue qu'il nomme coupe le mur : Sainte-Croix de la Rivière (bout inférieur de la rue du Port), Beyssac (bout de la rue de Beyssac), la Grave (bout de la rue des Faures), Pey-Miqueu (entre la rue des Faures et la porte Bourgogne), Salinières (site de la porte de Bourgogne, Wikipédia ; « à l'ouest de la porte Bourgogne », Drouyn), Saint-Jean (bout du cours d'Alsace-et-Lorraine), du Peugue ou du Brisson (embouchure du Peugue, rue Ausone), du Caillau (bas de la place du Palais), Saint-Pey (derrière Saint-Pierre), des Paux (bout de la rue Saint-Rémi), de l'Orme-de-Casse (bas du cours du Chapeau-Rouge). Les rues ont été prolongées jusqu'aux quais du XVIIIe s. : positions probables à ± 20 m. Au nord du castrum, mur rectiligne sur 200 m jusqu'au bas des allées d'Orléans, puis tracé bouleversé par le château Trompette (1453 et XVIIe s.) : hypothétique jusqu'aux colonnes des Quinconces."
   },
   {
    "id": "castrum",
@@ -553,6 +579,12 @@
      "height_m": 11
     },
     {
+     "name": "Porte Saint-André (porte Basse du XVe s.)",
+     "at": [-66, 105],
+     "kind": "gate",
+     "height_m": 11
+    },
+    {
      "name": "Porte Basse",
      "at": [177, -42],
      "kind": "gate",
@@ -571,7 +603,7 @@
      "height_m": 11
     }
    ],
-   "note": "Castrum bâti entre 278 et 290 (725 × 450 m d'après Drouyn, 740 × 480 m d'après Wikipédia), murs de 2,8 à 4 m, quarante-six tours au moins (Drouyn) ; resté debout jusqu'au XVIIIe s. (porte de la Cadène 1728, porte Médoque vers 1775, porte Basse 1803). Tracé de Drouyn (1874, p. 4-5) : côté nord du cours d'Alsace-et-Lorraine, place du Palais, entre les rues des Bahutiers et des Argentiers, travers de Saint-Pierre, angle sud-ouest de la Bourse, côté sud des rues du Pont-de-la-Mousque et de la Maison-Daurade et du cours de l'Intendance, rue de la Vieille-Tour, côté est de la rue des Remparts, quelques mètres à l'ouest de Saint-André. Côté est arrêté au nord de l'Ombrière : plus au nord, le tracé antique coupe l'église Saint-Pierre en deux (Drouyn), il n'était donc plus debout ; au nord de la Devèze il se confond avec le mur de Garonne du XIVe s. Portes de 1340 d'après Drouyn et Boutoulle (Bégueyre : débouché de la rue du Pas-Saint-Georges) ; la porte des Paux et la porte Saint-Pey sont sur le mur de Garonne. Fossés en grande partie bâtis ou comblés (non restitués). Gabarit des tours restitué."
+   "note": "Castrum bâti entre 278 et 290 (725 × 450 m d'après Drouyn, 740 × 480 m d'après Wikipédia), murs de 2,8 à 4 m, quarante-six tours au moins (Drouyn) ; resté debout jusqu'au XVIIIe s. (porte de la Cadène 1728, porte Médoque vers 1775, porte Basse 1803). Tracé de Drouyn (1874, p. 4-5) : côté nord du cours d'Alsace-et-Lorraine, place du Palais, entre les rues des Bahutiers et des Argentiers, travers de Saint-Pierre, angle sud-ouest de la Bourse, côté sud des rues du Pont-de-la-Mousque et de la Maison-Daurade et du cours de l'Intendance, rue de la Vieille-Tour, côté est de la rue des Remparts, quelques mètres à l'ouest de Saint-André. Côté est arrêté au nord de l'Ombrière : plus au nord, le tracé antique coupe l'église Saint-Pierre en deux (Drouyn), il n'était donc plus debout ; au nord de la Devèze il se confond avec le mur de Garonne du XIVe s. Portes de 1340 d'après Drouyn et Boutoulle (Bégueyre : débouché de la rue du Pas-Saint-Georges ; porte Saint-André, appelée porte Basse en 1404, au bout ouest de la rue des Trois-Conils, pieds-droits retrouvés, Drouyn, notice des portes) ; la porte des Paux et la porte Saint-Pey sont sur le mur de Garonne. Fossés en grande partie bâtis ou comblés (non restitués). Gabarit des tours restitué."
   },
   {
    "id": "deuxieme_enceinte",
@@ -5373,7 +5405,7 @@
     "height": 47,
     "top": "pyramid"
    },
-   "description": "Clocher isolé à l'est du chevet, commencé en 1440 par l'archevêque Pey Berland, chantier jusqu'en 1500 (Wikipédia) : en 1440-1453 la tour est en construction ; hauteur et toit restitués."
+   "description": "Clocher isolé à l'est du chevet, première pierre posée par l'archevêque Pey Berland la veille des nones d'octobre 1440 (inscription), chantier jusqu'en 1500 ; terrasse à ≈ 50 m aujourd'hui (Wikipédia). En 1440-1453 la tour est en construction : hauteur atteinte inconnue, gabarit de la tour achevée (sans flèche) restitué."
   },
   {
    "id": "ombriere",
@@ -5478,7 +5510,7 @@
      "size": 40
     }
    },
-   "description": "Abbaye bénédictine ; église de la fin du XIe - début du XIIe s., façade romane saintongeaise à un seul clocher (le second est d'Abadie, 1861-1865), voûtes gothiques des XIIe-XIIIe s. Englobée dans l'enceinte par la convention de 1302-1304. Église : emprise OSM ; cloître et hauteurs restitués."
+   "description": "Abbaye bénédictine ; église de la fin du XIe - début du XIIe s., façade romane saintongeaise à un seul clocher (le second est d'Abadie, 1861-1865), voûtes gothiques des XIIe-XIIIe s. ; nef de cinq travées à collatéraux de 39 m, transept à absidioles, abside polygonale de 15,30 m (Wikipédia ; abside ronde dans le gabarit). Englobée dans l'enceinte par la convention de 1302-1304. Église : emprise OSM ; cloître et hauteurs restitués."
   },
   {
    "id": "sainte_eulalie",
@@ -5529,7 +5561,7 @@
     "width_m": 18,
     "height_m": 13
    },
-   "description": "Église du port de la Devèze, mentionnée par Grégoire de Tours ; place et port Saint-Pierre cités en 1262 ; reconstruite à partir de 1358 jusqu'à la fin du XVe s. Le rempart antique la coupait en deux (Drouyn). Gabarit restitué."
+   "description": "Église du port de la Devèze, mentionnée par Grégoire de Tours ; place et port Saint-Pierre cités en 1262 ; reconstruite à partir de 1358 jusqu'à la fin du XVe s. (Wikipédia) ; le gabarit de 1340 (église avant la reconstruction) est restitué. Le rempart antique la coupait en deux (Drouyn). Gabarit restitué."
   },
   {
    "id": "saint_remi",
@@ -5707,7 +5739,12 @@
     [362, -745],
     [302, -770],
     [245, -728],
-    [76, -642],
+    [200, -692],
+    [155, -652],
+    [125, -622],
+    [108, -612],
+    [2, -552],
+    [-46, -557],
     [-88, -553],
     [-96, -172],
     [-95, -100],
