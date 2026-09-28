@@ -156,6 +156,30 @@
    "relief_max_m": 1316.0,
    "sea_share": 0.0
   },
+  "prov_baden": {
+   "file": "prov_baden.bin",
+   "lon": 8.3737,
+   "lat": 48.7838,
+   "ref_m": 323.5,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 3.29,
+   "relief_max_m": 1082.0,
+   "sea_share": 0.0
+  },
+  "prov_bamberg": {
+   "file": "prov_bamberg.bin",
+   "lon": 10.9234,
+   "lat": 50.0269,
+   "ref_m": 242.1,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.63,
+   "relief_max_m": 666.0,
+   "sea_share": 0.0
+  },
   "prov_bar": {
    "file": "prov_bar.bin",
    "lon": 5.3029,
@@ -203,6 +227,18 @@
    "skyline_max_deg": 0.96,
    "relief_max_m": 129.0,
    "sea_share": 0.183
+  },
+  "prov_berg": {
+   "file": "prov_berg.bin",
+   "lon": 6.8147,
+   "lat": 51.2714,
+   "ref_m": 39.6,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.84,
+   "relief_max_m": 234.0,
+   "sea_share": 0.0
   },
   "prov_bern": {
    "file": "prov_bern.bin",
@@ -360,6 +396,18 @@
    "relief_max_m": 266.0,
    "sea_share": 0.14
   },
+  "prov_brunswick": {
+   "file": "prov_brunswick.bin",
+   "lon": 10.4355,
+   "lat": 52.2854,
+   "ref_m": 94.6,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.86,
+   "relief_max_m": 163.0,
+   "sea_share": 0.0
+  },
   "prov_carcassonne": {
    "file": "prov_carcassonne.bin",
    "lon": 3.0028,
@@ -406,6 +454,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": 2.16,
    "relief_max_m": 848.0,
+   "sea_share": 0.0
+  },
+  "prov_cleve": {
+   "file": "prov_cleve.bin",
+   "lon": 6.1816,
+   "lat": 51.6768,
+   "ref_m": 15.8,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.44,
+   "relief_max_m": 149.0,
    "sea_share": 0.0
   },
   "prov_cologne": {
@@ -804,6 +864,18 @@
    "relief_max_m": 258.0,
    "sea_share": 0.0
   },
+  "prov_hesse": {
+   "file": "prov_hesse.bin",
+   "lon": 9.395,
+   "lat": 51.0807,
+   "ref_m": 308.8,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.14,
+   "relief_max_m": 624.0,
+   "sea_share": 0.0
+  },
   "prov_highlands": {
    "file": "prov_highlands.bin",
    "lon": -4.1601,
@@ -863,6 +935,18 @@
    "skyline_max_deg": 2.04,
    "relief_max_m": 941.0,
    "sea_share": 0.126
+  },
+  "prov_julich": {
+   "file": "prov_julich.bin",
+   "lon": 6.2996,
+   "lat": 50.9301,
+   "ref_m": 90.6,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.01,
+   "relief_max_m": 379.0,
+   "sea_share": 0.0
   },
   "prov_jutland": {
    "file": "prov_jutland.bin",
@@ -1128,6 +1212,18 @@
    "relief_max_m": 198.0,
    "sea_share": 0.0
   },
+  "prov_mecklenburg": {
+   "file": "prov_mecklenburg.bin",
+   "lon": 11.5206,
+   "lat": 53.9011,
+   "ref_m": 34.0,
+   "terrain": "plains",
+   "coastal": true,
+   "coast_bearing_deg": 310.6,
+   "skyline_max_deg": 0.36,
+   "relief_max_m": 145.0,
+   "sea_share": 0.09
+  },
   "prov_meissen": {
    "file": "prov_meissen.bin",
    "lon": 12.7885,
@@ -1307,6 +1403,18 @@
    "skyline_max_deg": 1.38,
    "relief_max_m": 214.0,
    "sea_share": 0.044
+  },
+  "prov_nuremberg": {
+   "file": "prov_nuremberg.bin",
+   "lon": 11.2035,
+   "lat": 49.434,
+   "ref_m": 391.4,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.2,
+   "relief_max_m": 699.0,
+   "sea_share": 0.0
   },
   "prov_oberbayern": {
    "file": "prov_oberbayern.bin",
@@ -1620,6 +1728,18 @@
    "relief_max_m": 427.0,
    "sea_share": 0.205
   },
+  "prov_thuringia": {
+   "file": "prov_thuringia.bin",
+   "lon": 10.7487,
+   "lat": 50.9177,
+   "ref_m": 333.9,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.6,
+   "relief_max_m": 765.0,
+   "sea_share": 0.0
+  },
   "prov_tirol": {
    "file": "prov_tirol.bin",
    "lon": 11.2429,
@@ -1666,6 +1786,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": 0.14,
    "relief_max_m": 138.0,
+   "sea_share": 0.0
+  },
+  "prov_trent": {
+   "file": "prov_trent.bin",
+   "lon": 11.0705,
+   "lat": 46.2096,
+   "ref_m": 1204.6,
+   "terrain": "mountains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 7.04,
+   "relief_max_m": 2850.0,
    "sea_share": 0.0
   },
   "prov_trier": {
@@ -1810,6 +1942,18 @@
    "coast_bearing_deg": null,
    "skyline_max_deg": 0.53,
    "relief_max_m": 122.0,
+   "sea_share": 0.0
+  },
+  "prov_wurttemberg": {
+   "file": "prov_wurttemberg.bin",
+   "lon": 9.0909,
+   "lat": 48.8282,
+   "ref_m": 308.6,
+   "terrain": "hills",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 1.13,
+   "relief_max_m": 610.0,
    "sea_share": 0.0
   },
   "prov_yorkshire": {

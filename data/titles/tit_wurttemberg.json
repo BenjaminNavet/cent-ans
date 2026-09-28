@@ -1,0 +1,31 @@
+{
+  "id": "tit_wurttemberg",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Wurtemberg",
+    "local": "Grafschaft Württemberg",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'or à trois bois de cerf de sable, rangés en pal.",
+    "description": "Armes historiques des comtes de Wurtemberg (bois de cerf), attestées dès le début du XIVe siècle.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1A1A1A"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_wurttemberg"
+  ],
+  "holder_1337": {
+    "faction": "fac_wurttemberg",
+    "sources": [
+      "Ulrich IV de Wurtemberg",
+      "Comté de Wurtemberg"
+    ]
+  },
+  "description": "Comté de Wurtemberg autour de Stuttgart, subdivisé de la Souabe impériale (voir prov_swabia) ; tenu par Ulrich IV depuis 1325.",
+  "sources": [
+    "Ulrich IV de Wurtemberg",
+    "Comté de Wurtemberg"
+  ]
+}

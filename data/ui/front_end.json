@@ -585,6 +585,373 @@
         "Devra un jour céder la place à son fils"
       ],
       "difficulty": 1
+    },
+    {
+      "id": "fac_mainz",
+      "tagline": "Le chancelier électeur du Saint-Empire",
+      "intro": "Henri III de Virnebourg, archevêque-électeur de Mayence depuis 1328, est chancelier d'Allemagne : sa voix pèse dans l'élection impériale et sa cathédrale rhénane domine l'un des plus riches électorats ecclésiastiques.",
+      "strengths": [
+        "Électorat impérial, voix décisive au sacre du roi des Romains",
+        "Richesse d'un grand siège archiépiscopal rhénan",
+        "Position centrale sur le Rhin moyen"
+      ],
+      "weaknesses": [
+        "Pas d'héritier dynastique : le chapitre choisit le successeur",
+        "Rivalités constantes avec Trèves et Cologne",
+        "Terres dispersées, difficiles à défendre d'un bloc"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_hesse",
+      "tagline": "Le jeune landgraviat de Hesse",
+      "intro": "Henri II « le Fer » tient depuis 1328 le landgraviat détaché de Thuringe par son grand-père Henri Ier l'Enfant, petit-fils de sainte Élisabeth de Hongrie et de Sophie de Brabant.",
+      "strengths": [
+        "Position centrale entre Rhin et Saxe",
+        "Dynastie stable, lignage brabançon prestigieux",
+        "Terres agricoles fertiles"
+      ],
+      "weaknesses": [
+        "Petit territoire récemment détaché de la Thuringe",
+        "Encerclé par Mayence et les Wettin",
+        "Peu de ressources militaires propres"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_palatinate",
+      "tagline": "Le Palatinat électoral du Rhin",
+      "intro": "Rodolphe II « l'Aveugle », comte palatin du Rhin, gouverne depuis Heidelberg un électorat vinicole prospère, en coseigneurie avec son frère Robert Ier.",
+      "strengths": [
+        "Électorat impérial",
+        "Vignobles rhénans réputés, fiscalité prospère",
+        "Position clé sur le Rhin supérieur"
+      ],
+      "weaknesses": [
+        "Coseigneurie fragile avec le frère cadet",
+        "Terres dispersées entre Rhin et Neckar",
+        "Voisins électeurs ambitieux (Trèves, Mayence)"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_trier",
+      "tagline": "Trèves, l'électorat de l'oncle de Bohême",
+      "intro": "Baudouin de Luxembourg, archevêque-électeur de Trèves depuis 1307, oncle de Jean l'Aveugle et grand artisan de l'ascension de sa maison, tient l'un des plus anciens sièges épiscopaux d'Allemagne.",
+      "strengths": [
+        "Électorat impérial, doyen des sept",
+        "Réseau diplomatique luxembourgeois (Bohême)",
+        "Ville antique fortifiée, cathédrale romane"
+      ],
+      "weaknesses": [
+        "Petit territoire montagneux (Eifel, Hunsrück)",
+        "Succession dépend du chapitre, pas de dynastie",
+        "Dépend beaucoup du crédit personnel de Baudouin"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_cologne",
+      "tagline": "Cologne, l'électorat face à sa propre ville libre",
+      "intro": "Walram de Juliers, archevêque-électeur de Cologne depuis 1332, dirige le plus riche électorat rhénan, mais doit composer avec l'autonomie croissante de la commune de Cologne elle-même.",
+      "strengths": [
+        "Électorat impérial, le plus riche des trois rhénans",
+        "Grand commerce sur le Rhin",
+        "Appui de la puissante maison de Juliers"
+      ],
+      "weaknesses": [
+        "Ville libre de Cologne de plus en plus autonome",
+        "Succession épiscopale non dynastique",
+        "Rivalité avec Mayence et Trèves pour la préséance"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_julich",
+      "tagline": "Juliers, jeune duché et allié de l'Angleterre",
+      "intro": "Guillaume V de Juliers, élevé duc par l'empereur Louis IV en 1336, époux d'une sœur de la reine d'Angleterre Philippa de Hainaut, est un pilier de la coalition anglo-impériale contre la France.",
+      "strengths": [
+        "Duché tout neuf, faveur impériale",
+        "Alliance anglaise active dès 1337",
+        "Position clé face à la Gueldre et Cologne"
+      ],
+      "weaknesses": [
+        "Petit territoire",
+        "Exposé à la France en cas de retournement d'alliance",
+        "Ambitions dynastiques coûteuses"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_berg",
+      "tagline": "Le comté de Berg, verrou du Rhin moyen",
+      "intro": "Adolphe VII de Berg, comte depuis 1308, tient la rive droite du Rhin face à Cologne, entre Juliers et la Marck.",
+      "strengths": [
+        "Position stratégique sur le Rhin",
+        "Terres boisées et minières (Bergisches Land)",
+        "Relations équilibrées avec ses puissants voisins"
+      ],
+      "weaknesses": [
+        "Petit comté sans grande ambition dynastique",
+        "Coincé entre Cologne, Juliers et la Marck",
+        "Peu de ville fortifiée majeure"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_cleve",
+      "tagline": "Clèves, sentinelle du Bas-Rhin",
+      "intro": "Le comte de Clèves garde le cours inférieur du Rhin à la frontière de la Gueldre, sur la route commerciale vers les Pays-Bas.",
+      "strengths": [
+        "Contrôle du Bas-Rhin, péages fluviaux",
+        "Position frontalière avec la Gueldre, opportunités de mariage"
+      ],
+      "weaknesses": [
+        "Petit comté sans profondeur stratégique",
+        "Numérotation et succession de la maison incertaines pour cette période",
+        "Pris entre Gueldre, Berg et l'Empire"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_mark",
+      "tagline": "La Marck, pépinière d'archevêques",
+      "intro": "Adolphe II, comte de la Marck depuis 1328, dirige une maison westphalienne qui a déjà donné plusieurs archevêques à Cologne, dont son propre cousin Adolphe de la Marck, prince-évêque de Liège.",
+      "strengths": [
+        "Réseau ecclésiastique étendu (Cologne, Liège)",
+        "Terres westphaliennes fertiles"
+      ],
+      "weaknesses": [
+        "Comté fragmenté, peu de grandes villes",
+        "Dépend beaucoup de ses alliances familiales dans l'Église"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_brandenburg",
+      "tagline": "Brandebourg, l'électorat du fils de l'empereur",
+      "intro": "Louis V de Bavière, dit « le Brandebourgeois », fils aîné de l'empereur Louis IV, tient depuis 1323 la marche orientale de l'Empire face aux terres slaves.",
+      "strengths": [
+        "Électorat impérial",
+        "Soutien direct de l'empereur, son père",
+        "Grand territoire en expansion"
+      ],
+      "weaknesses": [
+        "Terres pauvres et frontalières, économie encore rudimentaire",
+        "Rivalité avec le Mecklembourg et la Poméranie voisine",
+        "Éloigné du cœur rhénan de l'Empire"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_mecklenburg",
+      "tagline": "Mecklembourg, façade hanséatique de la Baltique",
+      "intro": "Albert II de Mecklembourg, seigneur depuis 1329, tient les ports hanséatiques de Rostock et Wismar sur la Baltique, à la lisière du monde germanique et slave.",
+      "strengths": [
+        "Villes hanséatiques prospères (Rostock, Wismar)",
+        "Commerce baltique florissant"
+      ],
+      "weaknesses": [
+        "Petit territoire, pas encore érigé en duché",
+        "Voisin du puissant Brandebourg",
+        "Exposé aux ambitions danoises"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_meissen",
+      "tagline": "Misnie et Thuringe, l'ascension des Wettin",
+      "intro": "Frédéric II « le Sérieux » réunit depuis 1324 le margraviat de Misnie et le landgraviat de Thuringe : la maison de Wettin bâtit ici les bases de sa future électorale saxonne.",
+      "strengths": [
+        "Grand territoire, deux principautés réunies",
+        "Dynastie ambitieuse aux ressources solides",
+        "Terres minières (argent de l'Erzgebirge)"
+      ],
+      "weaknesses": [
+        "Frontière orientale exposée aux terres slaves",
+        "Rivalité avec le Brandebourg voisin",
+        "Pas encore d'électorat propre"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_brunswick",
+      "tagline": "Brunswick-Lunebourg, le prestige welf divisé",
+      "intro": "Otton « le Doux », de la maison Welf, tient la branche de Lunebourg d'un duché de Brunswick-Lunebourg alors fragmenté entre plusieurs cousins.",
+      "strengths": [
+        "Prestige ancien de la maison Welf",
+        "Terres saxonnes riches"
+      ],
+      "weaknesses": [
+        "Duché divisé entre branches cadettes, faible cohésion",
+        "Coordination difficile avec les autres Welf",
+        "Voisins hanséatiques puissants"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_bremen",
+      "tagline": "Brême, l'archevêché face à sa cité marchande",
+      "intro": "Burchard Grelle, archevêque de Brême, dirige une principauté ecclésiastique tournée vers le grand commerce hanséatique de la mer du Nord.",
+      "strengths": [
+        "Façade maritime, commerce hanséatique",
+        "Autorité religieuse sur la Saxe du Nord"
+      ],
+      "weaknesses": [
+        "Autonomie croissante de la ville de Brême elle-même",
+        "Terres dispersées le long du Weser",
+        "Succession non dynastique"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_wurttemberg",
+      "tagline": "Wurtemberg, comté montant de Souabe",
+      "intro": "Ulrich IV, comte de Wurtemberg depuis 1325, affirme son autorité au cœur de la Souabe fragmentée, face aux villes libres impériales voisines.",
+      "strengths": [
+        "Position centrale en Souabe",
+        "Terres agricoles et viticoles du Neckar"
+      ],
+      "weaknesses": [
+        "Rivalité constante avec les villes libres souabes",
+        "Pas de titre électoral ni ducal",
+        "Souabe très morcelée, alliances instables"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_baden",
+      "tagline": "Bade, le margraviat rhénan partagé",
+      "intro": "Le margraviat de Bade, sur le Rhin supérieur, est alors partagé entre plusieurs branches cousines de la maison : ce lot en retient une seule pour simplifier.",
+      "strengths": [
+        "Terres rhénanes riches",
+        "Position frontalière avec l'Alsace impériale"
+      ],
+      "weaknesses": [
+        "Margraviat effectivement divisé entre cousins, faible unité",
+        "Petit territoire face au Wurtemberg voisin"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_wurzburg",
+      "tagline": "Wurtzbourg, le duché-évêché de Franconie",
+      "intro": "Otton de Wolfskeel, prince-évêque de Wurtzbourg depuis 1333, porte le titre de duc de Franconie : son siège domine les vignobles du Main.",
+      "strengths": [
+        "Duché de Franconie nominal, prestige ancien",
+        "Vignobles réputés du Main",
+        "Forteresse de Marienberg dominant la ville"
+      ],
+      "weaknesses": [
+        "Autorité disputée par le burgraviat de Nuremberg voisin",
+        "Terres dispersées en Franconie",
+        "Succession non dynastique"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_nuremberg",
+      "tagline": "Nuremberg, le burgraviat des futurs Hohenzollern",
+      "intro": "Jean II de Hohenzollern, burgrave de Nuremberg depuis 1332, partage l'autorité sur la ville avec le conseil de la puissante cité libre : sa maison régnera un jour sur le Brandebourg et la Prusse.",
+      "strengths": [
+        "Position commerciale majeure sur les routes d'Allemagne du Sud",
+        "Maison promise à un grand avenir (Hohenzollern)"
+      ],
+      "weaknesses": [
+        "Cohabitation difficile avec la ville libre autonome",
+        "Château seul face à une cité riche et indépendante"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_bamberg",
+      "tagline": "Bamberg, riche évêché de Franconie",
+      "intro": "L'évêque de Bamberg gouverne une principauté ecclésiastique prospère fondée par l'empereur Henri II trois siècles plus tôt, entre Wurtzbourg et Nuremberg.",
+      "strengths": [
+        "Évêché ancien et riche",
+        "Cathédrale impériale prestigieuse"
+      ],
+      "weaknesses": [
+        "Petit territoire, dépend du chapitre cathédral",
+        "Encadré par des voisins francs plus puissants"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_tirol",
+      "tagline": "Le Tyrol, verrou alpin des Luxembourg",
+      "intro": "Jean-Henri de Luxembourg, frère cadet du futur empereur Charles IV, tient le comté de Tyrol par son mariage contesté avec Marguerite Maultasch (1330), maîtresse des cols alpins vers l'Italie.",
+      "strengths": [
+        "Verrou stratégique des routes transalpines",
+        "Appui de la puissante maison de Luxembourg-Bohême"
+      ],
+      "weaknesses": [
+        "Légitimité du mariage de Marguerite disputée",
+        "Terrain montagneux, ressources agricoles limitées",
+        "Rivalité avec les Habsbourg voisins"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_trent",
+      "tagline": "Trente, principauté épiscopale des Alpes",
+      "intro": "Le prince-évêque de Trente gouverne une petite principauté enclavée dans le comté de Tyrol, sur la grande route commerciale reliant l'Allemagne à l'Italie.",
+      "strengths": [
+        "Verrou commercial vers l'Italie",
+        "Autorité religieuse et temporelle réunie"
+      ],
+      "weaknesses": [
+        "Petit territoire, enclavé dans le Tyrol voisin",
+        "Dépend de la bienveillance du comte de Tyrol",
+        "Succession non dynastique"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_liege",
+      "tagline": "Liège, la grande principauté mosane",
+      "intro": "Adolphe de la Marck, prince-évêque de Liège depuis 1313, dirige l'une des plus riches principautés ecclésiastiques d'Europe, fondatrice d'une université naissante sur la Meuse.",
+      "strengths": [
+        "Riche évêché, industrie et commerce mosans",
+        "Défenses solides de la cité épiscopale",
+        "Rayonnement intellectuel croissant"
+      ],
+      "weaknesses": [
+        "Chapitre cathédral et cité limitent l'autorité du prince",
+        "Voisins ambitieux (Brabant, Gueldre)",
+        "Succession non dynastique"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_utrecht",
+      "tagline": "Utrecht, l'évêché des Pays-Bas du Nord",
+      "intro": "Jean (III) de Diest, prince-évêque d'Utrecht depuis 1322, exerce une autorité religieuse étendue sur les terres frisonnes et néerlandaises du Nord.",
+      "strengths": [
+        "Position commerciale sur les voies fluviales néerlandaises",
+        "Autorité religieuse étendue (Frise, Overyssel)"
+      ],
+      "weaknesses": [
+        "Noblesse locale turbulente, Frise difficile à soumettre",
+        "Succession non dynastique",
+        "Voisins puissants (Hainaut-Hollande, Gueldre)"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_lorraine",
+      "tagline": "Lorraine, le duché entre Empire et France",
+      "intro": "Raoul de Lorraine, duc depuis 1329, gouverne un duché francophone rattaché de jure à l'Empire mais tourné diplomatiquement vers la France, à laquelle il restera fidèle jusqu'à la mort.",
+      "strengths": [
+        "Duché organisé et cohérent",
+        "Alliance solide avec la France"
+      ],
+      "weaknesses": [
+        "Pris en étau entre Empire et France",
+        "Exposé aux deux puissances en cas de conflit",
+        "Peu de ressources propres face à ses voisins"
+      ],
+      "difficulty": 1
     }
   ],
   "difficulty_labels": [

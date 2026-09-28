@@ -1,0 +1,45 @@
+{
+  "id": "chr_rodolphe_hesso_de_bade",
+  "name": {
+    "display": "Rodolphe Hesso de Bade",
+    "local": "Rudolf Hesso von Baden",
+    "local_language": "moyen haut-allemand"
+  },
+  "epithet": "Hesso",
+  "sex": "male",
+  "house": "Bade",
+  "faction": "fac_baden",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1348",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Margrave de Bade",
+      "note": "Branche de Baden-Baden ; le margraviat est en réalité partagé entre plusieurs cousins en 1337."
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 60,
+  "starting_location": "prov_baden",
+  "status": "at_court",
+  "description": "Margrave de la branche aînée de Baden-Baden, dit « Hesso ». Choix simplificateur parmi plusieurs margraves de Bade cousins contemporains (Baden-Baden, Baden-Pforzheim/Durlach, Baden-Eberstein) ; dates de règne incertaines.",
+  "sources": [
+    "Rodolphe Hesso de Bade",
+    "Margraviat de Bade"
+  ]
+}

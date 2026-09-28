@@ -1,0 +1,42 @@
+{
+  "id": "tit_cleve",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Clèves",
+    "local": "Grafschaft Kleve",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "De gueules à l'écusson d'argent.",
+    "description": "Armes historiques des comtes de Clèves : écu d'argent en abîme sur champ de gueules.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#E5E5E5"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_cleve"
+  ],
+  "holder_1337": {
+    "faction": "fac_cleve",
+    "sources": [
+      "Dietrich IX de Clèves",
+      "Comté de Clèves"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_cleve_hold",
+      "title": "Garder le comté",
+      "description": "La maison de Clèves doit conserver son comté du Bas-Rhin.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_cleve"
+      }
+    }
+  ],
+  "description": "Comté de Clèves, le long du Bas-Rhin à la frontière de la Gueldre, tenu par la maison de Clèves.",
+  "sources": [
+    "Dietrich IX de Clèves",
+    "Comté de Clèves"
+  ]
+}

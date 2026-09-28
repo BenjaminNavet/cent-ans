@@ -1,0 +1,63 @@
+{
+  "id": "fac_utrecht",
+  "name": {
+    "display": "Principauté épiscopale d'Utrecht",
+    "local": "Sticht Utrecht",
+    "local_language": "moyen néerlandais"
+  },
+  "short_name": "Utrecht",
+  "adjective": "utrechtois",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_jean_iii_de_diest",
+  "capital": "prov_utrecht",
+  "capital_city": "Utrecht",
+  "religion": "rel_catholic",
+  "culture": "cul_dutch",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_utrecht",
+  "heraldry": {
+    "blazon": "De gueules à la croix d'argent, chargée en abîme d'un écusson de gueules à trois pals de vair.",
+    "description": "Croix d'argent du Sticht (attestée dès 1291 sur le sceau de l'évêque Jean de Sierck), brisée depuis Jean de Diest (1328) d'un écusson aux armes patrimoniales de la maison de Diest.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Prince-évêque d'Utrecht"
+  ],
+  "treasury": 7500,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Élection épiscopale de 1322 validée par le pape Jean XXII depuis Avignon, contre le choix initial du chapitre."
+    },
+    {
+      "faction": "fac_hainaut",
+      "status": "peace",
+      "note": "Jean de Diest est choisi en 1322 sur suggestion du comte de Hollande (union personnelle avec Hainaut) et du duc de Gueldre."
+    },
+    {
+      "faction": "fac_guelders",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 55,
+    "trade": 65,
+    "piety": 70
+  },
+  "description": "Principauté épiscopale du Bas-Rhin, tenue depuis 1322 par Jean de Diest ; ses villes de l'IJssel (Deventer, Zwolle, Kampen) sont tournées vers le commerce hanséatique.",
+  "sources": [
+    "Jean de Diest",
+    "Principauté épiscopale d'Utrecht"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "tit_palatinate",
+  "rank": "duchy",
+  "name": {
+    "display": "Palatinat électoral du Rhin",
+    "local": "Kurpfalz",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'or au lion d'azur, armé et lampassé de gueules.",
+    "description": "Le lion palatin, couramment blasonné d'un lion noir (ou bleu-noir selon les sources) sur champ d'or ; ici rendu d'azur pour le distinguer des autres lions d'or déjà en usage.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93",
+    "uncertain": true,
+    "note": "Tincture du lion adaptée pour éviter un doublon avec d'autres blasons ; les armes historiques du Palatinat portent un lion décrit tantôt noir, tantôt bleu-noir."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_palatinate"
+  ],
+  "holder_1337": {
+    "faction": "fac_palatinate",
+    "uncertain": true,
+    "sources": [
+      "Palatinat du Rhin",
+      "Rodolphe II du Palatinat",
+      "Traité de Pavie (1329)"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "description": "Comté palatin du Rhin, principauté électorale des Wittelsbach palatins ; classé ici au rang de duché par convention de rang politique, comme les autres électorats. Rodolphe II « l'Aveugle » (ou « le Borgne ») partage la seigneurie du Palatinat avec son frère Robert Ier depuis le traité de Pavie (1329), qui leur restitue le comté palatin face à leur cousin l'empereur Louis IV de Wittelsbach ; la répartition exacte du pouvoir entre les deux frères en 1337 est incertaine, l'ancienneté de Rodolphe II en fait ici le titulaire retenu.",
+  "sources": [
+    "Palatinat du Rhin",
+    "Rodolphe II du Palatinat",
+    "Traité de Pavie (1329)"
+  ]
+}

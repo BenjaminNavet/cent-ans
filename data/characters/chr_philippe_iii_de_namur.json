@@ -1,0 +1,57 @@
+{
+  "id": "chr_philippe_iii_de_namur",
+  "name": {
+    "display": "Philippe III de Namur",
+    "local": "Philippe de Namur",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Dampierre",
+  "faction": "fac_namur",
+  "role": "ruler",
+  "birth": {
+    "value": "1319",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1337-09",
+    "place": "Famagouste, Chypre",
+    "uncertain": true,
+    "note": "Tué avec sa suite lors d'un séjour à Famagouste ; il meurt sans alliance, son jeune frère Guillaume Ier lui succède."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Marquis de Namur",
+      "from": {
+        "value": "1336"
+      }
+    },
+    {
+      "title": "Comte de Namur",
+      "from": {
+        "value": "1335"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 2,
+    "court": 3
+  },
+  "traits": [
+    "trait_ambitious"
+  ],
+  "piety": 35,
+  "family": {
+    "siblings": [
+      "chr_guillaume_i_de_namur"
+    ]
+  },
+  "starting_location": "prov_namur",
+  "status": "at_court",
+  "description": "Marquis et comte de Namur, de la maison de Dampierre, cadette de Flandre ; il meurt à Famagouste au cours de l'année 1337, laissant le comté à son frère cadet Guillaume Ier le Riche, alors âgé de treize ans.",
+  "sources": [
+    "Philippe III de Namur"
+  ]
+}

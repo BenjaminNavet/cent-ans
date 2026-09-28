@@ -1,0 +1,53 @@
+{
+  "id": "fac_mecklenburg",
+  "name": {
+    "display": "Seigneurie de Mecklembourg",
+    "local": "Herrschaft Mekelenborch",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Mecklembourg",
+  "adjective": "mecklembourgeois",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_albert_ii_de_mecklembourg",
+  "capital": "prov_mecklenburg",
+  "capital_city": "Schwerin",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_mecklenburg",
+  "heraldry": {
+    "blazon": "D'or à la tête de buffle de sable, accornée et allumée d'argent, languée de gueules, couronnée d'or.",
+    "description": "Tête de buffle (bœuf) noire, meuble historique des seigneurs puis ducs de Mecklembourg.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Seigneur de Mecklembourg"
+  ],
+  "treasury": 5500,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Vassal du Saint-Empire ; Albert II deviendra premier duc de Mecklembourg en 1348."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 55,
+    "trade": 60,
+    "piety": 45
+  },
+  "description": "Seigneurie balte tenue par Albert II de Mecklembourg, dont les villes de Rostock et Wismar (« villes vendes ») s'affirment dans la Hanse naissante.",
+  "sources": [
+    "Albert II de Mecklembourg",
+    "Mecklembourg"
+  ]
+}

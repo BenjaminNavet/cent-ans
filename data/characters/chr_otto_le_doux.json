@@ -1,0 +1,47 @@
+{
+  "id": "chr_otto_le_doux",
+  "name": {
+    "display": "Otton le Doux",
+    "local": "Otto der Milde",
+    "local_language": "moyen bas-allemand"
+  },
+  "epithet": "le Doux",
+  "sex": "male",
+  "house": "Welf",
+  "faction": "fac_brunswick",
+  "role": "ruler",
+  "birth": {
+    "value": "1292",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1344-12-13"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Brunswick-Lunebourg",
+      "from": {
+        "value": "1330",
+        "uncertain": true,
+        "note": "Coseigneurie welfe ; date de prise de pouvoir effective disputée selon les branches."
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_kind",
+    "trait_generous"
+  ],
+  "piety": 55,
+  "starting_location": "prov_brunswick",
+  "status": "at_court",
+  "description": "Prince welf de la lignée de Lunebourg, retenu ici comme titulaire unique d'un duché en réalité fragmenté entre plusieurs cadets welfes en 1337.",
+  "sources": [
+    "Otto der Milde"
+  ]
+}

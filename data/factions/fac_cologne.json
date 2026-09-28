@@ -1,0 +1,56 @@
+{
+  "id": "fac_cologne",
+  "name": {
+    "display": "Électorat de Cologne",
+    "local": "Erzstift Köln",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Cologne",
+  "adjective": "colonais",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_walram_de_juliers",
+  "capital": "prov_cologne",
+  "capital_city": "Cologne",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_cologne",
+  "heraldry": {
+    "blazon": "D'argent à la croix de sable.",
+    "description": "Croix noire sur champ d'argent, armes traditionnelles de l'archevêché-électorat de Cologne.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Archevêque-électeur de Cologne",
+    "Archichancelier du royaume d'Italie"
+  ],
+  "treasury": 10000,
+  "prestige": 58,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Prince-électeur, archichancelier du royaume d'Italie ; Cologne, ville libre d'empire, échappe cependant à son autorité directe depuis 1288."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 60,
+    "trade": 65,
+    "piety": 65
+  },
+  "description": "Électorat ecclésiastique de Cologne, tenu par Walram de Juliers, archevêque de 1332 à 1349 ; la ville libre de Cologne, la plus grande cité d'Allemagne, échappe à son autorité temporelle directe depuis sa victoire communale de Worringen (1288).",
+  "sources": [
+    "Électorat de Cologne",
+    "Walram de Juliers"
+  ]
+}

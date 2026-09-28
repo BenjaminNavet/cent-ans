@@ -1,0 +1,45 @@
+{
+  "id": "tit_lorraine",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Lorraine",
+    "local": "Duché de Loherraine",
+    "local_language": "ancien français"
+  },
+  "heraldry": {
+    "blazon": "D'or à la bande de gueules chargée de trois alérions d'argent.",
+    "description": "Armes historiques des ducs de Lorraine, alérions (petits aiglons sans bec ni pattes) associés par la légende à la bataille de Bouvines.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#8B1A2B",
+    "uncertain": true,
+    "note": "Icône simplifiée : les trois alérions d'argent brochant sur la bande ne sont pas rendus par le générateur (charge non supportée) ; nuance de gueules de la bande légèrement distinguée de celle du Bade pour éviter un icône identique. Le blason textuel ci-dessus reste la description héraldique de référence."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_lorraine"
+  ],
+  "holder_1337": {
+    "faction": "fac_lorraine",
+    "sources": [
+      "Raoul de Lorraine",
+      "Duché de Lorraine"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_lorraine_hold",
+      "title": "Garder le duché",
+      "description": "La maison de Lorraine doit conserver son duché, fief d'Empire d'expression française tourné vers la France.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_lorraine"
+      }
+    }
+  ],
+  "description": "Duché de Lorraine, fief du Saint-Empire mais de langue et de culture françaises ; Metz, Toul et Verdun, cités épiscopales impériales enclavées dans le duché, restent indépendantes du duc.",
+  "sources": [
+    "Raoul de Lorraine",
+    "Duché de Lorraine"
+  ]
+}

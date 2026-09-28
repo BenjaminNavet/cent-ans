@@ -1,0 +1,45 @@
+{
+  "id": "chr_jean_iii_de_diest",
+  "name": {
+    "display": "Jean III de Diest",
+    "local": "Jan van Diest",
+    "local_language": "moyen néerlandais"
+  },
+  "sex": "male",
+  "house": "de Diest",
+  "faction": "fac_utrecht",
+  "role": "ruler",
+  "birth": {
+    "value": "1280",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1340-06-01"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince-évêque d'Utrecht",
+      "from": {
+        "value": "1322"
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 70,
+  "family": {},
+  "starting_location": "prov_utrecht",
+  "status": "at_court",
+  "description": "Second fils d'Arnoul V de Diest, prévôt de Cambrai avant d'être nommé évêque d'Utrecht en 1322 à la suggestion du comte de Hollande et du duc de Gueldre ; son élection, invalidée par le chapitre, est confirmée et il est sacré en personne par le pape Jean XXII à Avignon.",
+  "sources": [
+    "Jean de Diest"
+  ]
+}

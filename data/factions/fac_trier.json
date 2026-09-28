@@ -1,0 +1,57 @@
+{
+  "id": "fac_trier",
+  "name": {
+    "display": "Électorat de Trèves",
+    "local": "Erzstift Trier",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Trèves",
+  "adjective": "trévire",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_baudouin_de_luxembourg",
+  "capital": "prov_trier",
+  "capital_city": "Trèves",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_trier",
+  "heraldry": {
+    "blazon": "D'argent à la croix pattée de gueules.",
+    "description": "Croix pattée de gueules sur champ d'argent, variante distinctive de la croix pleine traditionnellement attribuée à l'électorat de Trèves.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#C8102E",
+    "uncertain": true,
+    "note": "Les armes historiques de Trèves sont une simple croix de gueules sur champ d'argent, identique dans ce jeu au blason déjà utilisé par Gênes ; une croix pattée est substituée ici pour éviter le doublon."
+  },
+  "titles": [
+    "Archevêque-électeur de Trèves",
+    "Archichancelier du royaume de Bourgogne"
+  ],
+  "treasury": 7500,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Prince-électeur, archichancelier du royaume de Bourgogne ; oncle du roi Jean de Bohême, figure centrale de la diplomatie impériale."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 75,
+    "trade": 55,
+    "piety": 70
+  },
+  "description": "Électorat ecclésiastique de Trèves, tenu par Baudouin de Luxembourg depuis 1307 ; frère de l'empereur Henri VII, oncle du roi Jean de Bohême, l'un des princes les plus influents de l'Empire. Coblence, confluent du Rhin et de la Moselle.",
+  "sources": [
+    "Électorat de Trèves",
+    "Baudouin de Luxembourg"
+  ]
+}

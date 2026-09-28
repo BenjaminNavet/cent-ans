@@ -1,0 +1,106 @@
+[
+  {
+    "id": "set_baden_baden",
+    "province": "prov_baden",
+    "kind": "city",
+    "name": {
+      "display": "Baden-Baden",
+      "local": "Baden",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.2472,
+      48.7606
+    ],
+    "weight": 26,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Résidence des margraves de Bade, station thermale connue depuis l'Antiquité romaine (Aquae Aureliae).",
+    "sources": [
+      "Baden-Baden"
+    ]
+  },
+  {
+    "id": "set_pforzheim",
+    "province": "prov_baden",
+    "kind": "town",
+    "name": {
+      "display": "Pforzheim",
+      "local": "Pforzheim",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.6975,
+      48.8922
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Seconde résidence des margraves de Bade, au confluent de la Nagold et de l'Enz.",
+    "sources": [
+      "Pforzheim"
+    ]
+  },
+  {
+    "id": "set_hohenbaden",
+    "province": "prov_baden",
+    "kind": "castle",
+    "name": {
+      "display": "Hohenbaden",
+      "local": "Hohenbaden",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.2178,
+      48.7639
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château ancestral des margraves de Bade, dominant Baden-Baden depuis les hauteurs de la Forêt-Noire.",
+    "sources": [
+      "Château de Hohenbaden"
+    ]
+  },
+  {
+    "id": "set_ettlingen",
+    "province": "prov_baden",
+    "kind": "village",
+    "name": {
+      "display": "Ettlingen",
+      "local": "Ettelingen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.4083,
+      48.9394
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg sur l'Alb, ancienne résidence carolingienne devenue ville margraviale.",
+    "sources": [
+      "Ettlingen"
+    ]
+  }
+]

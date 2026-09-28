@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_julich",
+    "province": "prov_julich",
+    "kind": "city",
+    "name": {
+      "display": "Jülich",
+      "local": "Gulik",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.3639,
+      50.9231
+    ],
+    "weight": 28,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale du comté puis duché de Juliers sur la Roer, résidence de Guillaume V.",
+    "sources": [
+      "Jülich"
+    ]
+  },
+  {
+    "id": "set_duren",
+    "province": "prov_julich",
+    "kind": "town",
+    "name": {
+      "display": "Düren",
+      "local": "Duren",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.4831,
+      50.8036
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville close du duché de Juliers sur la Roer, entre Cologne et Aix-la-Chapelle.",
+    "sources": [
+      "Düren"
+    ]
+  },
+  {
+    "id": "set_nideggen",
+    "province": "prov_julich",
+    "kind": "castle",
+    "name": {
+      "display": "Nideggen",
+      "local": "Nideggen",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.4794,
+      50.6975
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse des comtes de Juliers dominant l'Eifel, l'une de leurs principales places fortes.",
+    "sources": [
+      "Château de Nideggen"
+    ]
+  }
+]

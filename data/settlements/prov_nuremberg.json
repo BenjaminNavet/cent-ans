@@ -1,0 +1,108 @@
+[
+  {
+    "id": "set_nuremberg",
+    "province": "prov_nuremberg",
+    "kind": "city",
+    "name": {
+      "display": "Nuremberg",
+      "local": "Nürnberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.0767,
+      49.4521
+    ],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire fidèle à Louis IV de Bavière, coexistant avec la forteresse voisine du burgrave (Kaiserburg) sans lui être soumise. Métallurgie et commerce vers l'Italie.",
+    "sources": [
+      "Nuremberg"
+    ]
+  },
+  {
+    "id": "set_cadolzburg",
+    "province": "prov_nuremberg",
+    "kind": "castle",
+    "name": {
+      "display": "Cadolzburg",
+      "local": "Kadelburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.9308,
+      49.4425
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château des burgraves de Hohenzollern, résidence principale de Jean II hors de la cité de Nuremberg.",
+    "sources": [
+      "Château de Cadolzburg"
+    ]
+  },
+  {
+    "id": "set_kronach",
+    "province": "prov_nuremberg",
+    "kind": "castle",
+    "name": {
+      "display": "Kronach",
+      "local": "Cronach",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.3269,
+      50.2417
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse épiscopale de Bamberg gardant la frontière nord de la Franconie, enclave près de Nuremberg.",
+    "sources": [
+      "Kronach"
+    ]
+  },
+  {
+    "id": "set_furth",
+    "province": "prov_nuremberg",
+    "kind": "village",
+    "name": {
+      "display": "Fürth",
+      "local": "Furt",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.9886,
+      49.4778
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg au confluent de la Rednitz et de la Pegnitz, en aval de Nuremberg.",
+    "sources": [
+      "Fürth"
+    ]
+  }
+]

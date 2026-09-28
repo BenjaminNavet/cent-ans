@@ -1,0 +1,54 @@
+{
+  "id": "chr_baudouin_de_luxembourg",
+  "name": {
+    "display": "Baudouin de Luxembourg",
+    "local": "Balduin von Luxemburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "male",
+  "house": "Luxembourg",
+  "faction": "fac_trier",
+  "role": "ruler",
+  "birth": {
+    "value": "1285",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1354-01-21",
+    "place": "Trèves"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Archevêque-électeur de Trèves",
+      "from": {
+        "value": "1307"
+      }
+    },
+    {
+      "title": "Archichancelier du royaume de Bourgogne",
+      "from": {
+        "value": "1308",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 8,
+    "court": 8
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_diplomat",
+    "trait_cunning"
+  ],
+  "piety": 60,
+  "starting_location": "prov_trier",
+  "status": "at_court",
+  "description": "Fils du comte Henri VI de Luxembourg, frère cadet de l'empereur Henri VII et oncle du roi Jean de Bohême ; archevêque-électeur de Trèves depuis 1307, il façonne la politique impériale de la maison de Luxembourg pendant près d'un demi-siècle.",
+  "sources": [
+    "Baudouin de Luxembourg",
+    "Électorat de Trèves"
+  ]
+}

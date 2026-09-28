@@ -1,0 +1,62 @@
+{
+  "id": "fac_lorraine",
+  "name": {
+    "display": "Duché de Lorraine",
+    "local": "Duché de Loherraine",
+    "local_language": "ancien français"
+  },
+  "short_name": "Lorraine",
+  "adjective": "lorrain",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_raoul_de_lorraine",
+  "capital": "prov_lorraine",
+  "capital_city": "Nancy",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_lorraine",
+  "heraldry": {
+    "blazon": "D'or à la bande de gueules chargée de trois alérions d'argent.",
+    "description": "Armes historiques des ducs de Lorraine, alérions (petits aiglons sans bec ni pattes) associés par la légende à la bataille de Bouvines.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#8B1A2B",
+    "uncertain": true,
+    "note": "Icône simplifiée : les trois alérions d'argent brochant sur la bande ne sont pas rendus par le générateur (charge non supportée) ; nuance de gueules de la bande légèrement distinguée de celle du Bade pour éviter un icône identique. Le blason textuel ci-dessus reste la description héraldique de référence."
+  },
+  "titles": [
+    "Duc de Lorraine"
+  ],
+  "treasury": 8000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Duché de jure d'Empire, mais Raoul mène une politique résolument francophile."
+    },
+    {
+      "faction": "fac_france",
+      "status": "alliance",
+      "note": "Double jeu diplomatique : Raoul de Lorraine se rapproche de la couronne de France malgré son hommage à l'empereur ; il mourra aux côtés de Philippe VI à Crécy en 1346."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 50,
+    "trade": 50,
+    "piety": 55
+  },
+  "description": "Duché francophone du Saint-Empire, tenu par Raoul de Lorraine ; malgré l'hommage impérial, sa maison penche vers la France et Raoul mourra à Crécy en 1346 aux côtés du roi Philippe VI.",
+  "sources": [
+    "Raoul de Lorraine",
+    "Duché de Lorraine"
+  ]
+}

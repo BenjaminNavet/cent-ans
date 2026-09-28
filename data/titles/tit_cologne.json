@@ -1,0 +1,32 @@
+{
+  "id": "tit_cologne",
+  "rank": "duchy",
+  "name": {
+    "display": "Électorat de Cologne",
+    "local": "Erzstift Köln",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix de sable.",
+    "description": "Croix noire sur champ d'argent, armes traditionnelles de l'archevêché-électorat de Cologne.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#111111"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_cologne"
+  ],
+  "holder_1337": {
+    "faction": "fac_cologne",
+    "sources": [
+      "Électorat de Cologne",
+      "Walram de Juliers"
+    ]
+  },
+  "succession_law": "elective",
+  "description": "Principauté ecclésiastique de l'archevêque-électeur de Cologne, classée ici au rang de duché par convention de rang politique, comme les autres électorats rhénans. Walram de Juliers, archevêque de 1332 à 1349, issu de la maison comtale de Juliers.",
+  "sources": [
+    "Électorat de Cologne",
+    "Walram de Juliers"
+  ]
+}

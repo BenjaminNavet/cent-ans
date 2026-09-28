@@ -56,8 +56,11 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
 fn new_1337_matches_game_data() {
     let data = data();
     let state = france(&data, 1);
-    assert_eq!(state.factions.len(), 45, "including the virtual fac_rebels");
-    assert_eq!(state.provinces.len(), 152);
+    // FE registry lots keep adding factions and provinces: every one in the
+    // data enters the campaign (fac_rebels included), and the map is not shrunk.
+    assert_eq!(state.factions.len(), data.factions.len(), "including the virtual fac_rebels");
+    assert_eq!(state.provinces.len(), data.provinces.len());
+    assert!(state.factions.len() >= 61 && state.provinces.len() >= 153);
     assert_eq!(state.date_label(), "Printemps 1337");
     assert_eq!(state.turn(), 0);
     assert_eq!(state.year, START_YEAR);
@@ -101,7 +104,11 @@ fn new_1337_matches_game_data() {
         .provinces
         .keys()
         .all(|p| !state.city_state(p).unwrap().garrison.is_empty()));
-    assert_eq!(state.armies().len(), 44, "one main army per faction");
+    assert_eq!(
+        state.armies().len(),
+        data.factions.len() - 1,
+        "one main army per faction but the rebels"
+    );
 }
 
 #[test]
