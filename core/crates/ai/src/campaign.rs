@@ -494,8 +494,42 @@ fn plan_turn_in(
     orders.extend(plans.agents);
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
+    // TW2-T3: companies for the threatened armies of a rich realm, hired
+    // where they stand before they march.
+    let treasury = ctx.treasury - planned_spending(data, &orders);
+    orders.extend(crate::mercenaries::plan_hires(
+        state,
+        data,
+        faction,
+        treasury,
+        ctx.gross_income,
+        |army| {
+            ctx.anchors
+                .get(army)
+                .map_or(0.0, |anchor| ctx.threat_at(anchor))
+        },
+    ));
     plan_armies(&ctx, &mut orders);
     orders
+}
+
+/// TW2-T3: livres this turn's recruitments and constructions will spend
+/// (base prices: an estimate for the mercenary budget).
+fn planned_spending(data: &GameData, orders: &[Order]) -> i64 {
+    orders
+        .iter()
+        .map(|order| match order {
+            Order::Recruit { unit_type, .. } => data
+                .unit_types
+                .get(unit_type)
+                .map_or(0, |t| i64::from(t.cost.money)),
+            Order::Build { building, .. } => data
+                .buildings
+                .get(building)
+                .map_or(0, |b| i64::from(b.cost.money)),
+            _ => 0,
+        })
+        .sum()
 }
 
 // =========================================================================
