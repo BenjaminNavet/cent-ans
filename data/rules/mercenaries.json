@@ -45,7 +45,13 @@
     "pays_bas": "Pays-Bas",
     "portugal": "Portugal",
     "provence_alpes": "Provence et Alpes",
-    "scandinavie": "Scandinavie"
+    "scandinavie": "Scandinavie",
+    "crimee": "Crimée",
+    "horde": "Horde d'Or et steppes",
+    "rus_centre": "Rus' du Nord-Est",
+    "rus_nord": "Rus' du Nord",
+    "rus_ouest": "Rus' occidentale",
+    "rus_sud": "Rus' du Sud"
   },
   "bands": [
     {

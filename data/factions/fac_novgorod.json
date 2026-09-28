@@ -18,10 +18,10 @@
   "suzerain": "fac_golden_horde",
   "primary_title": "tit_novgorod",
   "heraldry": {
-    "blazon": "D'argent au sautoir de gueules.",
-    "description": "Armes de convention de Novgorod (les sceaux de la république montrent surtout saint Georges et un trône).",
-    "primary_color": "#B0182B",
-    "secondary_color": "#F5F1E6",
+    "blazon": "D'argent à la nef de gueules.",
+    "description": "Armes de convention de Novgorod : la nef des marchands (les sceaux de la république montrent surtout saint Georges et un trône).",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
     "uncertain": true,
     "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
   },
