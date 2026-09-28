@@ -11,7 +11,9 @@ Suites possibles (non faites) :
 - Pont get_siege_state / get_soldier_buffers groupés : repris par PB3c.
 - trade.rs : précalculer les chemins des routes au chargement de data.trade.
 - sim-battle : `disengaging` retombe au 1er pas hors contact (décrochage en bord de mêlée) ; pavois attend une cible cachée.
-- Mock : événements "movement", "appointment", "skill_learned" absents d'EventKind.
+- Mock : événements "appointment", "skill_learned" absents d'EventKind (mais traités par `map_ui.gd`,
+  laissés). RS-H (28/09) : "movement" (armée qui campe, pas de rôle de jeu, aucun script n'en
+  dépendait) retiré du mock ; ce sont désormais les deux seuls types restants à écarter du core.
 - Tests manquants : campagne n° 4, 13, 14, 15.
 - Relancer la sonde release ai `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` (une instabilité vue pendant la correction).
 - Leçon outillage : un CARGO_TARGET_DIR partagé entre worktrees mélange les artefacts des crates du workspace ;
