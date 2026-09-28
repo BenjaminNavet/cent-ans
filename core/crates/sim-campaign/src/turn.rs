@@ -173,6 +173,8 @@ impl CampaignState {
         dynasty::resolve_births(self, data, events);
         dynasty::resolve_regencies(self, data, events);
         characters::resolve_faction_deaths(self, data, events);
+        // FE (F3): felony cases, generic victory streaks, objectives.
+        crate::feudal::resolve_feudal(self, data, events);
 
         // 11. New season (step 4 of § 3.4): movement points are refilled,
         // then the player plays.

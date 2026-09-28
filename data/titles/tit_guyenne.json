@@ -2,13 +2,14 @@
   "id": "tit_guyenne",
   "rank": "duchy",
   "name": {
-    "display": "Guyenne",
+    "display": "Duché de Guyenne (Aquitaine)",
     "local": "Guiana",
     "local_language": "gascon"
   },
   "de_jure_liege": "tit_france",
   "de_jure_provinces": [
-    "prov_guyenne"
+    "prov_guyenne",
+    "prov_gascogne"
   ],
   "holder_1337": {
     "faction": "fac_england",
@@ -17,5 +18,11 @@
       "Guyenne",
       "Guerre de Cent Ans"
     ]
-  }
+  },
+  "sources": [
+    "Duché d'Aquitaine",
+    "Bayonne",
+    "Landes de Gascogne"
+  ],
+  "description": "Duché d'Aquitaine (Guyenne), confisqué par Philippe VI le 24 mai 1337 pour félonie d'Édouard III. Fusionne les anciens titres distincts tit_guyenne et tit_gascogne (auto-migration F0), qui recouvraient le même duché."
 }

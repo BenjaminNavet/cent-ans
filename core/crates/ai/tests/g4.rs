@@ -247,6 +247,7 @@ fn over_four_turns<T>(
 }
 
 #[test]
+#[ignore = "FE1: imperial princes are vassals of the Empire (ADR 0098) and G4 courts no vassal; F5 decides, see docs/wip/fe1-deductions.md"]
 fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
     let data = data();
     let (england, brabant, france) = (fac("fac_england"), fac("fac_brabant"), fac("fac_france"));

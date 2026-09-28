@@ -329,6 +329,118 @@
       ],
       "difficulty": 3,
       "illustration": "res://assets/illustrations/fac_burgundy.jpg"
+    },
+    {
+      "id": "fac_albret",
+      "tagline": "Sénéchaux de Gascogne, maîtres du double jeu",
+      "intro": "Bernard Ezi II tient Nérac et la Baïse, sénéchal héréditaire de Gascogne pour le duc d'Aquitaine, qui n'est autre qu'Édouard III. Petite seigneurie entre deux couronnes rivales, Albret sait vendre son épée au plus offrant : sa maison changera plusieurs fois de camp au fil de la guerre.",
+      "strengths": [
+        "Sénéchaussée héréditaire : autorité sur la noblesse gasconne",
+        "Position centrale en Guyenne, entre Bordeaux et Toulouse",
+        "Liberté de manœuvre diplomatique entre France et Angleterre"
+      ],
+      "weaknesses": [
+        "Seigneurie minuscule, trésor et armée limités",
+        "Vassal du roi d'Angleterre, exposé aux représailles françaises",
+        "Aucune place forte de premier rang"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_alencon",
+      "tagline": "L'apanage du frère du roi",
+      "intro": "Charles II d'Alençon, frère cadet de Philippe VI, tient depuis 1325 ce comté-apanage aux confins de la Normandie et du Perche. Proche du trône, il devra prouver sa vaillance aux côtés du roi tout en gouvernant ses propres terres.",
+      "strengths": [
+        "Lien direct avec la couronne : faveurs et renforts royaux",
+        "Chevalerie normande et perchronne réputée",
+        "Terres riches du Perche, entre bocage et forêts"
+      ],
+      "weaknesses": [
+        "Comté modeste, vite mobilisé dans les guerres du roi",
+        "Exposé aux chevauchées anglaises venues de Normandie",
+        "Peu de places fortes de premier rang"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_armagnac",
+      "tagline": "Le lion du Midi",
+      "intro": "Jean Ier d'Armagnac, lieutenant royal en Languedoc, dispute à Gaston II de Foix-Béarn la domination de la Gascogne et du Midi. Entre fidélité à Philippe VI et ambitions propres, tenez tête aux Anglais de Guyenne et à votre rival héréditaire.",
+      "strengths": [
+        "Lieutenance royale en Languedoc : autorité et subsides du roi",
+        "Grande maison féodale, alliances dans tout le Midi",
+        "Position clé face à la Guyenne anglaise"
+      ],
+      "weaknesses": [
+        "Rivalité ouverte avec Foix-Béarn, aux marges du royaume",
+        "Ressources moindres que les grands pairs du royaume",
+        "Terres écartelées entre Gascogne et Rouergue"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_blois",
+      "tagline": "Un mariage qui prépare une guerre",
+      "intro": "Guy Ier de Châtillon tient le comté de Blois sur la Loire. Le 4 juin 1337, son fils Charles épouse Jeanne de Penthièvre : une union qui ouvrira, quatre ans plus tard, la guerre de Succession de Bretagne. Gouvernez la Loire tout en préparant l'avenir breton de votre maison.",
+      "strengths": [
+        "Comté riche sur la Loire : vignes, blé, pierre de taille",
+        "Alliance matrimoniale ouvrant des prétentions sur la Bretagne",
+        "Vassal fidèle, proche des grands officiers du royaume"
+      ],
+      "weaknesses": [
+        "Petit comté sans grande armée propre",
+        "Engagement breton à venir, coûteux en hommes et en deniers",
+        "Peu fortifié face aux routes de la grande guerre"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_bourbon",
+      "tagline": "Le duché-pairie du sang de saint Louis",
+      "intro": "Louis Ier de Bourbon, petit-fils de saint Louis, tient depuis 1327 le premier duché-pairie érigé par la couronne. Proche conseiller de Philippe VI, il a la confiance du roi et les moyens d'une grande maison : sa lignée régnera un jour sur la France.",
+      "strengths": [
+        "Duché-pairie riche, au cœur du royaume",
+        "Confiance du roi, accès privilégié à la cour",
+        "Chevalerie nombreuse et bien équipée"
+      ],
+      "weaknesses": [
+        "Entraîné dans toutes les guerres du roi de France",
+        "Peu de frontière propre à défendre, peu d'occasions de conquête",
+        "Dépendant des faveurs royales pour grandir"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_foix_bearn",
+      "tagline": "Comte et vicomte, vassal de personne au Béarn",
+      "intro": "Gaston II tient le comté de Foix en fief du roi de France, mais le Béarn en alleu souverain, sans hommage à quiconque. Rival de la maison d'Armagnac, il joue de cette double allégeance pour bâtir, entre Pyrénées et Adour, une principauté que son fils Gaston Fébus portera à son apogée.",
+      "strengths": [
+        "Le Béarn tenu en alleu : aucun hommage, aucune contrainte féodale",
+        "Position pyrénéenne difficile à envahir",
+        "Rivalité avec Armagnac ouvrant des occasions d'expansion"
+      ],
+      "weaknesses": [
+        "Terres étirées entre Foix et Orthez, difficiles à défendre ensemble",
+        "Faible population face aux grandes couronnes",
+        "Succession fragile : Gaston II meurt en croisade en 1343"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_penthievre",
+      "tagline": "L'héritière contestée de Bretagne",
+      "intro": "Jeanne de Penthièvre, comtesse depuis 1331 et nièce du duc Jean III, épouse Charles de Blois le 4 juin 1337. Leur union prépare sa prétention au duché de Bretagne contre Jean de Montfort : la guerre de Succession n'éclatera qu'en 1341, mais les partis se forment déjà.",
+      "strengths": [
+        "Prétention à l'héritage du duché de Bretagne",
+        "Alliance avec la maison de Blois, proche du roi de France",
+        "Port de Saint-Brieuc, ouverture sur la Manche"
+      ],
+      "weaknesses": [
+        "Petit comté, vassal du duché de Bretagne",
+        "Succession contestée : la guerre bretonne menace à tout moment",
+        "Peu de places fortes face à un rival soutenu par l'Angleterre"
+      ],
+      "difficulty": 3
     }
   ],
   "difficulty_labels": [
