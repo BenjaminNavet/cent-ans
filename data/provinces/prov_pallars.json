@@ -1,0 +1,91 @@
+{
+  "id": "prov_pallars",
+  "name": {
+    "display": "Pallars",
+    "local": "Pallars",
+    "local_language": "catalan"
+  },
+  "region": "aragon",
+  "terrain": "mountains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Noguera Pallaresa"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Sort",
+      "local": "Sort",
+      "local_language": "catalan"
+    },
+    "lat": 42.4131,
+    "lon": 1.1292
+  },
+  "geo": {
+    "capital_lonlat": [
+      1.1292,
+      42.4131
+    ],
+    "seed_lonlat": [
+      0.95,
+      42.45
+    ],
+    "voronoi_weight": 0.35
+  },
+  "owner": "fac_pallars",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 18000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 700,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 300,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Haute vallée pyrénéenne peu peuplée, élevage transhumant."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 700,
+  "description": "Comté de Pallars, dans les hautes Pyrénées catalanes, tenu en 1337 par Arnau Roger II, qui dut défendre ses terres face aux prétentions de Comminges et de Foix avec l'appui du roi d'Aragon.",
+  "sources": [
+    "Comté de Pallars",
+    "Arnau Roger II de Pallars",
+    "Sort"
+  ]
+}

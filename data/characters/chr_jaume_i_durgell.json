@@ -1,0 +1,47 @@
+{
+  "id": "chr_jaume_i_durgell",
+  "name": {
+    "display": "Jacques Ier d'Urgell",
+    "local": "Jaume I d'Urgell",
+    "local_language": "catalan"
+  },
+  "sex": "male",
+  "house": "Aragon-Urgell",
+  "faction": "fac_urgell",
+  "role": "ruler",
+  "birth": {
+    "value": "1321",
+    "place": "Saragosse"
+  },
+  "death": {
+    "value": "1347-11-15",
+    "place": "Barcelone"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte d'Urgell"
+    },
+    {
+      "title": "Vicomte d'Àger"
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 60,
+  "family": {
+    "spouse": "Cécile de Comminges"
+  },
+  "starting_location": "prov_urgell",
+  "status": "at_court",
+  "description": "Fils cadet d'Alphonse IV d'Aragon et de Thérèse d'Entença, comte d'Urgell depuis 1328 (il n'a alors que huit ans) ; marié en 1336 à Cécile de Comminges. Cousin germain de Pierre IV d'Aragon.",
+  "sources": [
+    "James I, Count of Urgell"
+  ]
+}

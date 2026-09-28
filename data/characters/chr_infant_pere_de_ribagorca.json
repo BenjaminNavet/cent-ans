@@ -1,0 +1,49 @@
+{
+  "id": "chr_infant_pere_de_ribagorca",
+  "name": {
+    "display": "Pierre d'Aragon, comte de Ribagorce",
+    "local": "Pere d'Aragó",
+    "local_language": "catalan"
+  },
+  "sex": "male",
+  "house": "Aragon",
+  "faction": "fac_ribagorca",
+  "role": "ruler",
+  "birth": {
+    "value": "1305",
+    "place": "Barcelone"
+  },
+  "death": {
+    "value": "1381-11-04",
+    "place": "Pise"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Ribagorce"
+    },
+    {
+      "title": "Comte d'Empúries"
+    },
+    {
+      "title": "Seigneur de Gandie"
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_cultured",
+    "trait_diplomat",
+    "trait_scholar"
+  ],
+  "piety": 55,
+  "starting_location": "prov_ribagorca",
+  "status": "at_court",
+  "description": "Huitième fils de Jacques II d'Aragon et de Blanche de Naples, oncle de Pierre IV ; diplomate, homme de lettres et mécène, comte de Ribagorce depuis 1322 et d'Empúries depuis 1325 (qu'il échangera contre Prades en 1341).",
+  "sources": [
+    "Peter, Count of Ribagorza"
+  ]
+}

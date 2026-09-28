@@ -1,0 +1,53 @@
+{
+  "id": "fac_luna",
+  "name": {
+    "display": "Seigneurie de Luna",
+    "local": "Señorío de Luna",
+    "local_language": "castillan"
+  },
+  "short_name": "Luna",
+  "adjective": "lunois",
+  "government": "lordship",
+  "playable": true,
+  "ruler": "chr_lope_de_luna",
+  "capital": "prov_luna",
+  "capital_city": "Luna",
+  "religion": "rel_catholic",
+  "culture": "cul_catalan",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_aragon",
+  "primary_title": "tit_luna",
+  "heraldry": {
+    "blazon": "D'azur à la lune décroissante d'argent.",
+    "description": "Armes parlantes de la maison de Luna.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Sire de Luna",
+    "Seigneur d'Illueca"
+  ],
+  "treasury": 5000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aragon",
+      "status": "vassal",
+      "note": "Conseiller très écouté de Pierre IV d'Aragon ; obtiendra le titre de comte de Luna en 1348."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 60,
+    "trade": 45,
+    "piety": 45
+  },
+  "description": "Seigneurie de l'Aragon septentrional tenue par Lope de Luna, futur premier comte de Luna (1348), l'un des plus influents conseillers de Pierre IV.",
+  "sources": [
+    "Lope de Luna"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "tit_urgell",
+  "rank": "county",
+  "name": {
+    "display": "Comté d'Urgell",
+    "local": "Comtat d'Urgell",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'or au bœuf de gueules.",
+    "description": "Armes traditionnelles des comtes d'Urgell.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_aragon",
+  "de_jure_provinces": [
+    "prov_urgell"
+  ],
+  "holder_1337": {
+    "faction": "fac_urgell",
+    "sources": [
+      "James I, Count of Urgell",
+      "County of Urgell"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_urgell_hold",
+      "title": "Garder le comté",
+      "description": "Le jeune comte doit affermir son autorité sur ses terres pyrénéennes.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_urgell"
+      }
+    }
+  ],
+  "description": "L'un des plus anciens comtés catalans ; Jacques Ier l'a hérité à huit ans en 1328, à la mort de sa mère Thérèse d'Entença et à l'avènement de son père comme roi Alphonse IV.",
+  "sources": [
+    "James I, Count of Urgell",
+    "County of Urgell"
+  ]
+}

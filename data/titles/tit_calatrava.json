@@ -1,0 +1,30 @@
+{
+  "id": "tit_calatrava",
+  "rank": "county",
+  "name": {
+    "display": "Ordre de Calatrava",
+    "local": "Orden de Calatrava",
+    "local_language": "castillan"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix pattée et fleurdelisée de gueules.",
+    "description": "Croix de l'ordre militaire du Calatrava.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_castile",
+  "de_jure_provinces": [
+    "prov_calatrava"
+  ],
+  "holder_1337": {
+    "faction": "fac_calatrava",
+    "sources": [
+      "Ordre de Calatrava"
+    ]
+  },
+  "description": "Ordre militaire cistercien fondé en 1158 pour défendre la frontière de La Manche face à Grenade ; grand maître en exercice non identifié avec certitude pour l'année 1337 (liste des maîtres discutée par les sources).",
+  "sources": [
+    "Ordre de Calatrava",
+    "Calatrava la Nueva"
+  ]
+}

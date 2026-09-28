@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_puigcerda",
+    "province": "prov_cerdagne",
+    "kind": "town",
+    "name": {
+      "display": "Puigcerdà",
+      "local": "Puigcerdà",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.9287,
+      42.4326
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale de la Cerdagne, fondée en 1177 par Alphonse II d'Aragon pour contrôler la vallée.",
+    "sources": [
+      "Puigcerdà"
+    ]
+  },
+  {
+    "id": "set_saint_michel_de_cuxa",
+    "province": "prov_cerdagne",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Michel-de-Cuxa",
+      "local": "Sant Miquel de Cuixà",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.3986,
+      42.5844
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine du Conflent, au pied du Canigou.",
+    "sources": [
+      "Abbaye de Saint-Michel-de-Cuxa"
+    ]
+  },
+  {
+    "id": "set_prades",
+    "province": "prov_cerdagne",
+    "kind": "village",
+    "name": {
+      "display": "Prades",
+      "local": "Prada",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.4258,
+      42.6172
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg du Conflent, chef-lieu de vigueries entre Cerdagne et Roussillon.",
+    "sources": [
+      "Prades (Pyrénées-Orientales)"
+    ]
+  }
+]

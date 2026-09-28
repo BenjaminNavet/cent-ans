@@ -1,0 +1,91 @@
+{
+  "id": "prov_lara",
+  "name": {
+    "display": "Lara",
+    "local": "Lara",
+    "local_language": "castillan"
+  },
+  "region": "iberie_nord",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Arlanza"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Lara de los Infantes",
+      "local": "Lara de los Infantes",
+      "local_language": "castillan"
+    },
+    "lat": 42.0667,
+    "lon": -3.35
+  },
+  "geo": {
+    "capital_lonlat": [
+      -3.35,
+      42.0667
+    ],
+    "seed_lonlat": [
+      -3.5,
+      42.05
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_lara",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 24000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1400,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 500,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Berceau de la maison de Lara ; abbaye de San Pedro de Arlanza, panthéon des comtes de Castille et des Infants de Lara."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 800,
+  "description": "Seigneurie de Lara, berceau de l'une des plus anciennes maisons de la haute noblesse castillane ; tenue en 1337 par Juan Núñez III de Lara, réconcilié avec Alphonse XI après le siège de Lerma (1336).",
+  "sources": [
+    "Maison de Lara",
+    "Juan Núñez III de Lara",
+    "San Pedro de Arlanza"
+  ]
+}
