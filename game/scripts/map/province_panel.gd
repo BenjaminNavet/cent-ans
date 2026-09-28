@@ -120,6 +120,7 @@ func _ready() -> void:
 	city_box.move_child(edict_rule, 1)
 	edict_section.visibility_changed.connect(func() -> void: edict_rule.visible = edict_section.visible)
 	_build_settlements_tab()  # C5
+	get_viewport().size_changed.connect(queue_fit_height)  # Q6
 	breadcrumb = HFlowContainer.new()  # FE6
 	breadcrumb.name = "FeudalBreadcrumb"
 	breadcrumb.add_theme_constant_override("h_separation", 2)
@@ -177,6 +178,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	_fill_settlements()  # C5
 	_fill_breadcrumb()  # FE6
 	show()
+	queue_fit_height()
 
 
 ## Onglet « Ville » : classes de population, bâtiments, construction, constructible,
@@ -329,6 +331,29 @@ func _on_create_army() -> void:
 	if indices.is_empty():
 		return
 	create_army_requested.emit(province_id, indices)
+
+
+## Q6 : hauteur de conception des onglets (scène) ; ils rétrécissent si la zone manque.
+const TABS_HEIGHT := 343.0
+var _fit_queued := false
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
+		queue_fit_height()
+
+
+## Q6 : le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
+func queue_fit_height() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	_fit_height.call_deferred()
+
+
+func _fit_height() -> void:
+	_fit_queued = false
+	PanelWidgets.fit_tabs_to_side_zone(self, tabs, TABS_HEIGHT)
 
 
 func show_ville_tab() -> void:

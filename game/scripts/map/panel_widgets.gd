@@ -202,6 +202,26 @@ static func import_cost_label(import_cost: int) -> Label:
 	return label
 
 
+## Q6 : hauteur plancher des onglets d'un panneau de la zone `SIDE_PANEL` (liste défilante).
+const SIDE_TABS_MIN_HEIGHT := 200.0
+
+
+## Q6 : ajuste la hauteur des onglets (`tabs`) de `panel` pour que le panneau tienne dans la zone
+## `SIDE_PANEL` : l'en-tête garde sa taille, les onglets (pages défilantes, bornes minimales
+## remises à zéro) prennent le reste, entre `SIDE_TABS_MIN_HEIGHT` et `max_height` (hauteur de
+## conception). En vue 1280×720, les onglets fixes (300-360 px) poussaient « Recruter » et
+## « Changer d'édit » sous le bord de la zone, au niveau de la minicarte et de la fin de tour.
+static func fit_tabs_to_side_zone(panel: Control, tabs: TabContainer, max_height: float) -> void:
+	if not is_instance_valid(panel) or not panel.is_inside_tree():
+		return
+	for page in tabs.get_children():
+		if page is ScrollContainer:
+			(page as Control).custom_minimum_size.y = 0.0
+	var zone_height := UiZones.rect(UiZones.Zone.SIDE_PANEL).size.y
+	var others := panel.get_combined_minimum_size().y - tabs.get_combined_minimum_size().y
+	tabs.custom_minimum_size.y = clampf(zone_height - others, minf(SIDE_TABS_MIN_HEIGHT, max_height), max_height)
+
+
 ## Q6 : bouton de ligne d'une liste du panneau latéral ; son libellé se coupe (points de
 ## suspension, texte entier dans la bulle) au lieu d'élargir le panneau au-delà de sa zone
 ## (`SIDE_PANEL`, 384 px en vue 1280×720), où le reste du panneau passait hors de l'écran.
