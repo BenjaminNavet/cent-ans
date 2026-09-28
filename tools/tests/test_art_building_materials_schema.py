@@ -9,31 +9,41 @@ DATA = Path(__file__).resolve().parents[2] / "data"
 
 
 def _document() -> dict:
-    return json.loads((DATA / "art" / "building_materials.json").read_text(encoding="utf-8"))
+    return json.loads(
+        (DATA / "art" / "building_materials.json").read_text(encoding="utf-8")
+    )
 
 
 def test_building_materials_match_schema() -> None:
     """``data/art/building_materials.json`` matches ``art_building_materials.schema.json``."""
     schema = json.loads(
-        (DATA / "schemas" / "art_building_materials.schema.json").read_text(encoding="utf-8")
+        (DATA / "schemas" / "art_building_materials.schema.json").read_text(
+            encoding="utf-8"
+        )
     )
     document = _document()
     Draft202012Validator.check_schema(schema)
-    errors = sorted(Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path)
+    errors = sorted(
+        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
+    )
     assert not errors, [error.message for error in errors]
 
 
 def test_building_materials_names_unique() -> None:
     """``textured``/``plain`` names are unique across both lists (shared ``material()`` lookup)."""
     document = _document()
-    names = [m["name"] for m in document["textured"]] + [m["name"] for m in document["plain"]]
+    names = [m["name"] for m in document["textured"]] + [
+        m["name"] for m in document["plain"]
+    ]
     assert len(names) == len(set(names))
 
 
 def test_atlas_layers_are_known_materials() -> None:
     """Every ``atlas_layers`` entry names a ``textured``/``plain`` material."""
     document = _document()
-    names = {m["name"] for m in document["textured"]} | {m["name"] for m in document["plain"]}
+    names = {m["name"] for m in document["textured"]} | {
+        m["name"] for m in document["plain"]
+    }
     for layer in document["atlas_layers"]:
         assert layer in names, layer
 

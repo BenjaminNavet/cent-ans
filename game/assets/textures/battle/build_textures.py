@@ -78,7 +78,9 @@ def singles(src: Path) -> None:
         diff = Image.open(src / f"{name}_diff_1k.jpg").convert("RGB")
         diff.save(HERE / f"{name}_diff.jpg", quality=88)
         nor = Image.open(src / f"{name}_nor_gl_1k.jpg").convert("RGB")
-        nor.resize((512, 512), Image.Resampling.LANCZOS).save(HERE / f"{name}_nor.jpg", quality=90)
+        nor.resize((512, 512), Image.Resampling.LANCZOS).save(
+            HERE / f"{name}_nor.jpg", quality=90
+        )
 
 
 def _bleed(image: Image.Image) -> Image.Image:
