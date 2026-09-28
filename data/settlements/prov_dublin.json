@@ -109,30 +109,5 @@
     "sources": [
       "Kilkenny"
     ]
-  },
-  {
-    "id": "set_kildare",
-    "province": "prov_dublin",
-    "kind": "abbey",
-    "name": {
-      "display": "Kildare",
-      "local": "Cill Dara",
-      "local_language": "gaélique irlandais"
-    },
-    "lonlat": [
-      -6.9111,
-      53.1589
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey"
-    ],
-    "port": false,
-    "description": "Abbaye et ville épiscopale du Kildare, associée au culte de sainte Brigide.",
-    "sources": [
-      "Kildare"
-    ]
   }
 ]
