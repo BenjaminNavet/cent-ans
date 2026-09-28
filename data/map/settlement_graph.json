@@ -6413,34 +6413,6 @@
    "sea": false
   },
   {
-   "from": "set_buonconsiglio",
-   "to": "set_como",
-   "cost": 241.41,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_buonconsiglio",
-   "to": "set_pergine",
-   "cost": 8.86,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_buonconsiglio",
-   "to": "set_schloss_tirol",
-   "cost": 138.62,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_buonconsiglio",
-   "to": "set_trento",
-   "cost": 0.39,
-   "road": true,
-   "sea": false
-  },
-  {
    "from": "set_burg_an_der_wupper",
    "to": "set_cologne",
    "cost": 32.31,
@@ -9382,6 +9354,13 @@
   },
   {
    "from": "set_como",
+   "to": "set_pergine",
+   "cost": 254.34,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_como",
    "to": "set_schloss_tirol",
    "cost": 280.44,
    "road": false,
@@ -11237,16 +11216,16 @@
   },
   {
    "from": "set_dublin",
-   "to": "set_kildare",
-   "cost": 43.78,
+   "to": "set_kilkenny",
+   "cost": 92.31,
    "road": false,
    "sea": false
   },
   {
    "from": "set_dublin",
-   "to": "set_kilkenny",
-   "cost": 92.31,
-   "road": false,
+   "to": "set_maynooth",
+   "cost": 21.44,
+   "road": true,
    "sea": false
   },
   {
@@ -15745,34 +15724,20 @@
   },
   {
    "from": "set_kildare",
-   "to": "set_kildare_town",
-   "cost": 5.95,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kildare",
    "to": "set_kilkenny",
-   "cost": 55.94,
+   "cost": 49.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kildare",
-   "to": "set_mellifont",
-   "cost": 65.13,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kildare_town",
    "to": "set_maynooth",
    "cost": 5.84,
    "road": false,
    "sea": false
   },
   {
-   "from": "set_kildare_town",
+   "from": "set_kildare",
    "to": "set_naas",
    "cost": 6.94,
    "road": false,
@@ -20456,6 +20421,13 @@
   },
   {
    "from": "set_pergine",
+   "to": "set_rovereto",
+   "cost": 24.61,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_pergine",
    "to": "set_trento",
    "cost": 8.99,
    "road": true,
@@ -21956,6 +21928,13 @@
    "from": "set_schloss_tirol",
    "to": "set_sterzing",
    "cost": 63.16,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_schloss_tirol",
+   "to": "set_trento",
+   "cost": 139.35,
    "road": false,
    "sea": false
   },

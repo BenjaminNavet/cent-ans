@@ -21,34 +21,9 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Siège de la principauté épiscopale de Trente, cité romaine antique (Tridentum) sur l'Adige, verrou de la route entre Empire et Italie.",
+    "description": "Siège de la principauté épiscopale de Trente, cité romaine antique (Tridentum) sur l'Adige, verrou de la route entre Empire et Italie. Le château du Buonconsiglio, résidence des princes-évêques, s'élève dans ses murs.",
     "sources": [
       "Trente"
-    ]
-  },
-  {
-    "id": "set_buonconsiglio",
-    "province": "prov_trent",
-    "kind": "castle",
-    "name": {
-      "display": "Château du Buonconsiglio",
-      "local": "Castello del Buonconsiglio",
-      "local_language": "italien"
-    },
-    "lonlat": [
-      11.1236,
-      46.0703
-    ],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Résidence fortifiée des princes-évêques de Trente, dominant la cité depuis le XIIIe siècle.",
-    "sources": [
-      "Château du Buonconsiglio"
     ]
   },
   {
