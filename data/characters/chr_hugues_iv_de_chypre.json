@@ -1,0 +1,53 @@
+{
+  "id": "chr_hugues_iv_de_chypre",
+  "name": {
+    "display": "Hugues IV de Chypre",
+    "local": "Hugues IV de Lusignan",
+    "local_language": "français"
+  },
+  "sex": "male",
+  "house": "Lusignan-Chypre",
+  "faction": "fac_cyprus",
+  "role": "ruler",
+  "birth": {
+    "value": "1295",
+    "uncertain": true,
+    "note": "Naissance vers 1295 (1293-1296)."
+  },
+  "death": {
+    "value": "1359-10-10"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Chypre",
+      "from": {
+        "value": "1324-03-31"
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_peaceful",
+    "trait_cultured"
+  ],
+  "piety": 65,
+  "family": {
+    "spouses": [
+      "chr_alix_d_ibelin"
+    ],
+    "children": [
+      "chr_pierre_i_de_chypre"
+    ]
+  },
+  "starting_location": "prov_cyprus",
+  "status": "at_court",
+  "description": "Roi depuis 1324, mécène et pacifique, il fait de Famagouste un des grands ports d'Orient ; il abdiquera en 1358.",
+  "sources": [
+    "Hugh IV of Cyprus"
+  ]
+}

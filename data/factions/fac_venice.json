@@ -50,6 +50,32 @@
       "faction": "fac_florence",
       "status": "alliance",
       "note": "Ligue contre les Scaliger (1336)."
+    },
+    {
+      "faction": "fac_ragusa",
+      "status": "overlord",
+      "note": "Suzeraineté sur Raguse depuis 1205."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Traité de commerce avec Andronic III ; Venise convoite les îles de l'Égée."
+    },
+    {
+      "faction": "fac_hospitallers",
+      "status": "alliance",
+      "note": "Ligue anti-turque de 1334 avec Rhodes et Chypre.",
+      "since": {
+        "value": "1334"
+      }
+    },
+    {
+      "faction": "fac_cyprus",
+      "status": "alliance",
+      "note": "Ligue anti-turque de 1334.",
+      "since": {
+        "value": "1334"
+      }
     }
   ],
   "ai_personality": {

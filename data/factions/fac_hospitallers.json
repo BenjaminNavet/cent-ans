@@ -1,0 +1,68 @@
+{
+  "id": "fac_hospitallers",
+  "name": {
+    "display": "Ordre de Saint-Jean de Jérusalem (Rhodes)",
+    "local": "Ordo Hospitalis Sancti Ioannis",
+    "local_language": "latin"
+  },
+  "short_name": "Hospitaliers",
+  "adjective": "hospitalier",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_helion_de_villeneuve",
+  "capital": "prov_rhodes",
+  "capital_city": "Rhodes",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "elective",
+  "primary_title": "tit_rhodes",
+  "heraldry": {
+    "blazon": "De gueules à la croix d'argent.",
+    "description": "Croix blanche sur fond rouge, armes de l'Ordre de Saint-Jean (bannière de guerre).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Grand Maître de l'Hôpital"
+  ],
+  "treasury": 15000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hospital_reform",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_cyprus",
+      "status": "peace",
+      "note": "Les Hospitaliers, chassés de Chypre en 1306, gardent des liens avec les Lusignan."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "alliance",
+      "note": "Ligue anti-turque de 1334 avec Venise et Chypre.",
+      "since": {
+        "value": "1334"
+      }
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "Ordre relevant directement du pape."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 90
+  },
+  "description": "Ordre militaire installé à Rhodes depuis 1306-1310 : couvent-forteresse, flotte de galères, corsaires contre les Turcs d'Aydın. Hélion de Villeneuve, Grand Maître depuis 1319, a rendu à l'Ordre sa puissance.",
+  "sources": [
+    "Knights Hospitaller",
+    "Hélion de Villeneuve"
+  ]
+}

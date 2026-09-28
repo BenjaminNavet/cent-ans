@@ -52,6 +52,11 @@
     {
       "faction": "fac_empire",
       "status": "vassal"
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Galata, colonie génoise ; Chios reprise par Byzance en 1329."
     }
   ],
   "ai_personality": {

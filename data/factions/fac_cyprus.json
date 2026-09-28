@@ -1,0 +1,76 @@
+{
+  "id": "fac_cyprus",
+  "name": {
+    "display": "Royaume de Chypre",
+    "local": "Βασίλειο τῆς Κύπρου",
+    "local_language": "français"
+  },
+  "short_name": "Chypre",
+  "adjective": "chypriote",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_hugues_iv_de_chypre",
+  "heir": "chr_pierre_i_de_chypre",
+  "capital": "prov_cyprus",
+  "capital_city": "Nicosie",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_cyprus",
+  "heraldry": {
+    "blazon": "Burelé d'argent et d'azur au lion de gueules couronné d'or.",
+    "description": "Armes des Lusignan, rois de Chypre.",
+    "primary_color": "#2A5DA8",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Roi de Chypre",
+    "Roi (nominal) de Jérusalem"
+  ],
+  "treasury": 20000,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_double_entry",
+    "tech_letters_of_credit"
+  ],
+  "relations": [
+    {
+      "faction": "fac_hospitallers",
+      "status": "peace",
+      "note": "Les Hospitaliers, hôtes puis rivaux à Rhodes."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "alliance",
+      "note": "Ligue anti-turque de 1334.",
+      "since": {
+        "value": "1334"
+      }
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Génois installés à Famagouste, tenue tendue."
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "Royaume latin sous obédience de Rome."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 70,
+    "trade": 80,
+    "piety": 60
+  },
+  "description": "Hugues IV de Lusignan, roi de Chypre depuis 1324 : un royaume riche de Famagouste, bastion des croisés du Levant, sous la menace conjuguée des Turcs, des Mamelouks et des Génois.",
+  "sources": [
+    "Hugh IV of Cyprus",
+    "Kingdom of Cyprus"
+  ]
+}

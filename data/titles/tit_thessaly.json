@@ -1,0 +1,31 @@
+{
+  "id": "tit_thessaly",
+  "rank": "duchy",
+  "name": {
+    "display": "Thessalie byzantine",
+    "local": "Θεσσαλία",
+    "local_language": "grec"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l'aigle bicéphale reste l'emblème impérial.",
+    "primary_color": "#A81C22",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Emblème tardif et occidental : la forme exacte en 1337 est discutée."
+  },
+  "de_jure_liege": "tit_byzantium",
+  "de_jure_provinces": [
+    "prov_thessaly"
+  ],
+  "holder_1337": {
+    "faction": "fac_byzantium",
+    "sources": [
+      "Thessalie médiévale"
+    ]
+  },
+  "description": "Thessalie, reprise en 1333.",
+  "sources": [
+    "Thessalie médiévale"
+  ]
+}
