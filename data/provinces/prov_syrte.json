@@ -1,0 +1,89 @@
+{
+  "id": "prov_syrte",
+  "name": {
+    "display": "Syrte",
+    "local": "Surt",
+    "local_language": "arabe"
+  },
+  "region": "maghreb",
+  "terrain": "desert",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [],
+  "resources": [
+    "res_salt",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Syrte",
+      "local": "Surt",
+      "local_language": "arabe"
+    },
+    "lat": 31.2089,
+    "lon": 16.5887
+  },
+  "geo": {
+    "capital_lonlat": [
+      16.5887,
+      31.2089
+    ],
+    "seed_lonlat": [
+      16.9,
+      30.9
+    ],
+    "voronoi_weight": 2.2
+  },
+  "owner": "fac_barqa",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 8000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 30,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 240,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 200,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 50,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 96,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 55,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Golfe de Syrte : côte désertique et tribus nomades entre Tripolitaine et Cyrénaïque. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market"
+  ],
+  "fortification_level": 1,
+  "base_supply": 300,
+  "description": "La côte du golfe de Syrte, désertique, sans autorité étatique stable : tribus arabes (Awlad, Hawwara) entre Tripolitaine hafside et Barqa.",
+  "sources": [
+    "Syrte",
+    "Golfe de Syrte"
+  ],
+  "sea_zones": [
+    "sea_ionian"
+  ],
+  "ports": []
+}

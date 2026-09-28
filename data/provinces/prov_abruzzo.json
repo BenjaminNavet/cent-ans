@@ -1,0 +1,95 @@
+{
+  "id": "prov_abruzzo",
+  "name": {
+    "display": "Abruzzes",
+    "local": "Abruzzo",
+    "local_language": "italien"
+  },
+  "region": "italie_sud",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Pescara",
+    "Aterno"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "L'Aquila",
+      "local": "L'Aquila",
+      "local_language": "italien"
+    },
+    "lat": 42.3498,
+    "lon": 13.3995
+  },
+  "geo": {
+    "capital_lonlat": [
+      13.3995,
+      42.3498
+    ],
+    "seed_lonlat": [
+      13.85,
+      42.2
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_naples",
+  "culture": "cul_neapolitan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 12,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1125,
+        "unrest": 7,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 540,
+        "unrest": 7,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Apennin des Abruzzes : transhumance, safran, cité neuve de L'Aquila. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Les Abruzzes, marches septentrionales du royaume de Naples ; L'Aquila, fondée en 1254, et ses privilèges ; transhumance ovine vers les Pouilles.",
+  "sources": [
+    "Abruzzes",
+    "L'Aquila",
+    "Justiciarat d'Abruzzes"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "ports": []
+}

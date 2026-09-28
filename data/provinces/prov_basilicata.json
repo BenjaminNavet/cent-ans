@@ -1,0 +1,90 @@
+{
+  "id": "prov_basilicata",
+  "name": {
+    "display": "Basilicate",
+    "local": "Basilicata",
+    "local_language": "italien"
+  },
+  "region": "italie_sud",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Bradano",
+    "Basento"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Potenza",
+      "local": "Potenza",
+      "local_language": "italien"
+    },
+    "lat": 40.6404,
+    "lon": 15.8082
+  },
+  "geo": {
+    "capital_lonlat": [
+      15.8082,
+      40.6404
+    ],
+    "seed_lonlat": [
+      15.95,
+      40.6
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_naples",
+  "culture": "cul_neapolitan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 30000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 1200,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 750,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 360,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Apennin lucanien : Potenza, Melfi (constitutions de 1231), Matera et ses sassi. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1100,
+  "description": "La Basilicate, pays de collines et de montagnes, pauvre et éloignée ; Melfi, château normand où Frédéric II promulgua les constitutions de 1231 ; Matera, ville de grottes.",
+  "sources": [
+    "Basilicate",
+    "Melfi",
+    "Matera"
+  ]
+}

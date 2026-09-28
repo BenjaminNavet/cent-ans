@@ -1,0 +1,40 @@
+{
+  "id": "chr_abu_inan_faris",
+  "name": {
+    "display": "Abu Inan Faris",
+    "local": "Abū ʿInān Fāris",
+    "local_language": "arabe maghrébin"
+  },
+  "sex": "male",
+  "house": "Mérinides",
+  "faction": "fac_marinids",
+  "role": "prince",
+  "birth": {
+    "value": "1329",
+    "note": "Date de naissance approximative (1329)."
+  },
+  "death": {
+    "value": "1358-05-10",
+    "note": "Étranglé à Fès sur ordre de son vizir."
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_scholar",
+    "trait_ambitious"
+  ],
+  "piety": 55,
+  "family": {
+    "father": "chr_abu_l_hasan_ali"
+  },
+  "starting_location": "prov_fes",
+  "status": "minor",
+  "description": "Fils d'Abu l-Hasan, enfant en 1337 ; il s'emparera du trône en 1348 pendant l'absence de son père en Ifriqiya.",
+  "sources": [
+    "Abu Inan Faris"
+  ]
+}

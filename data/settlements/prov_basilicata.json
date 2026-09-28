@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_potenza",
+    "province": "prov_basilicata",
+    "kind": "city",
+    "name": {
+      "display": "Potenza",
+      "local": "Potenza",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      15.8082,
+      40.6404
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale de la Basilicate, sur sa colline.",
+    "sources": [
+      "Potenza"
+    ]
+  },
+  {
+    "id": "set_melfi",
+    "province": "prov_basilicata",
+    "kind": "castle",
+    "name": {
+      "display": "Melfi",
+      "local": "Melfi",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      15.6522,
+      40.9986
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château des Normands et de Frédéric II ; constitutions de Melfi (1231).",
+    "sources": [
+      "Melfi"
+    ]
+  },
+  {
+    "id": "set_matera",
+    "province": "prov_basilicata",
+    "kind": "town",
+    "name": {
+      "display": "Matera",
+      "local": "Matera",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      16.6,
+      40.6667
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville troglodytique des sassi, siège d'un archevêché.",
+    "sources": [
+      "Matera"
+    ]
+  }
+]

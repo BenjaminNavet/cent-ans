@@ -1,0 +1,97 @@
+{
+  "id": "prov_capitanata",
+  "name": {
+    "display": "Capitanate",
+    "local": "Capitanata",
+    "local_language": "italien"
+  },
+  "region": "italie_sud",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Ofanto",
+    "Candelaro"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Foggia",
+      "local": "Foggia",
+      "local_language": "italien"
+    },
+    "lat": 41.4622,
+    "lon": 15.5544
+  },
+  "geo": {
+    "capital_lonlat": [
+      15.5544,
+      41.4622
+    ],
+    "seed_lonlat": [
+      15.7,
+      41.5
+    ],
+    "voronoi_weight": 0.7
+  },
+  "owner": "fac_naples",
+  "culture": "cul_neapolitan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 40000,
+        "unrest": 12,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 2400,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 7,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 480,
+        "unrest": 7,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Tavoliere de Foggia : grenier à blé du royaume, ancienne résidence de Frédéric II. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "La Capitanate, vaste plaine du Tavoliere, grenier de la couronne de Naples ; Foggia (palais de Frédéric II), Lucera, dont la colonie sarrasine a été détruite en 1300, et le sanctuaire du Mont-Gargan.",
+  "sources": [
+    "Capitanate",
+    "Foggia",
+    "Lucera"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "ports": [
+    "Manfredonia"
+  ]
+}

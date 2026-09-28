@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_tozeur",
+    "province": "prov_djerid",
+    "kind": "city",
+    "name": {
+      "display": "Tozeur",
+      "local": "Tūzar",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      8.1339,
+      33.9197
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Oasis-capitale du Djérid, briques décorées des maisons de dattiers.",
+    "sources": [
+      "Tozeur"
+    ]
+  },
+  {
+    "id": "set_gafsa",
+    "province": "prov_djerid",
+    "kind": "town",
+    "name": {
+      "display": "Gafsa",
+      "local": "Qafṣa",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      8.7842,
+      34.425
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne Capsa, oasis-forteresse aux portes du Sahara ; siège d'assauts hafsides contre les Riyah.",
+    "sources": [
+      "Gafsa"
+    ]
+  },
+  {
+    "id": "set_nefta",
+    "province": "prov_djerid",
+    "kind": "village",
+    "name": {
+      "display": "Nefta",
+      "local": "Nafṭa",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      7.8778,
+      33.8736
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Oasis sainte du Djérid, palmeraie en cuvette.",
+    "sources": [
+      "Nefta"
+    ]
+  }
+]

@@ -1,0 +1,84 @@
+[
+  {
+    "id": "set_alger",
+    "province": "prov_alger",
+    "kind": "city",
+    "name": {
+      "display": "Alger",
+      "local": "Al-Jazā'ir",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      3.0586,
+      36.7539
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port des Beni Mezghenna, base de corsaires ; simple bourg avant le XVIe siècle.",
+    "sources": [
+      "Alger"
+    ]
+  },
+  {
+    "id": "set_miliana",
+    "province": "prov_alger",
+    "kind": "town",
+    "name": {
+      "display": "Miliana",
+      "local": "Milyāna",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      2.2333,
+      36.3
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourg fortifié du Zaccar, verrou de la vallée du Chélif.",
+    "sources": [
+      "Miliana"
+    ]
+  },
+  {
+    "id": "set_medea",
+    "province": "prov_alger",
+    "kind": "town",
+    "name": {
+      "display": "Médéa",
+      "local": "Al-Midiyya",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      2.75,
+      36.2642
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de montagne du Titteri, ancienne capitale hammadide.",
+    "sources": [
+      "Médéa"
+    ]
+  }
+]

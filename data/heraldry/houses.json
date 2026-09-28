@@ -1446,6 +1446,62 @@
       "vassal_of": [
         "fac_pavia"
       ]
+    },
+    {
+      "id": "marinides",
+      "name": "Mérinides",
+      "blazon": "D'argent plain.",
+      "description": "Champ blanc, étendard des Banu Marin ; sans charge héraldique.",
+      "source": "fr.wikipedia : Mérinides, drapeau",
+      "certainty": "incertain",
+      "factions": [
+        "fac_marinids"
+      ],
+      "vassal_of": [
+        "fac_marinids"
+      ]
+    },
+    {
+      "id": "hafsides",
+      "name": "Hafsides",
+      "blazon": "Coupé d'argent et de gueules.",
+      "description": "Bicolore blanc et rouge d'après les portulans.",
+      "source": "fr.wikipedia : Hafsides ; Atlas catalan (1375)",
+      "certainty": "incertain",
+      "factions": [
+        "fac_hafsids"
+      ],
+      "vassal_of": [
+        "fac_hafsids"
+      ]
+    },
+    {
+      "id": "banu_thabit",
+      "name": "Banu Thabit",
+      "blazon": "D'or à la bande de sinople.",
+      "description": "Emblème de jeu, aucune source héraldique connue.",
+      "source": "convention de jeu",
+      "certainty": "substitution",
+      "factions": [
+        "fac_tripoli"
+      ],
+      "vassal_of": [
+        "fac_tripoli"
+      ]
+    },
+    {
+      "id": "bas_serra",
+      "name": "Bas-Serra",
+      "blazon": "D'argent à la bordure de sinople.",
+      "description": "Arbre arraché d'Arborée ; non rendu, bordure de substitution.",
+      "source": "it.wikipedia : Giudicato d'Arborea, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_arborea"
+      ],
+      "vassal_of": [
+        "fac_arborea"
+      ]
     }
   ]
 }

@@ -1,0 +1,115 @@
+[
+  {
+    "id": "set_tunis",
+    "province": "prov_tunis",
+    "kind": "city",
+    "name": {
+      "display": "Tunis",
+      "local": "Tūnis",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      10.1658,
+      36.8065
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_university"
+    ],
+    "port": true,
+    "description": "Capitale hafside, grande mosquée al-Zaytuna et fondouks des marchands italiens et catalans.",
+    "sources": [
+      "Tunis",
+      "Mosquée Zitouna"
+    ]
+  },
+  {
+    "id": "set_bizerte",
+    "province": "prov_tunis",
+    "kind": "town",
+    "name": {
+      "display": "Bizerte",
+      "local": "Banzart",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      9.8739,
+      37.2744
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port du nord tunisien, arsenal.",
+    "sources": [
+      "Bizerte"
+    ]
+  },
+  {
+    "id": "set_beja",
+    "province": "prov_tunis",
+    "kind": "town",
+    "name": {
+      "display": "Béja",
+      "local": "Bāja",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      9.1817,
+      36.7256
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Grenier à blé de la Medjerda.",
+    "sources": [
+      "Béja"
+    ]
+  },
+  {
+    "id": "set_goulette",
+    "province": "prov_tunis",
+    "kind": "town",
+    "name": {
+      "display": "La Goulette",
+      "local": "Ḥalq al-Wādī",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      10.3056,
+      36.8181
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Avant-port de Tunis et chenal de Carthage.",
+    "sources": [
+      "La Goulette"
+    ]
+  }
+]

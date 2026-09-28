@@ -1,0 +1,93 @@
+{
+  "id": "prov_derna",
+  "name": {
+    "display": "Derna",
+    "local": "Darna",
+    "local_language": "arabe"
+  },
+  "region": "maghreb",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Wadi Derna"
+  ],
+  "resources": [
+    "res_wool",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Derna",
+      "local": "Darna",
+      "local_language": "arabe"
+    },
+    "lat": 32.7671,
+    "lon": 22.6394
+  },
+  "geo": {
+    "capital_lonlat": [
+      22.6394,
+      32.7671
+    ],
+    "seed_lonlat": [
+      23.3,
+      32.3
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_barqa",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 12000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 35,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 480,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 300,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 55,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 144,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Côte orientale de la Cyrénaïque : Derna, Tobrouk, pays des Bédouins. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market"
+  ],
+  "fortification_level": 1,
+  "base_supply": 500,
+  "description": "Derna, port de la côte cyrénaïque orientale, adossé au Djebel Akhdar, et Tobrouk, dans un pays d'éleveurs bédouins.",
+  "sources": [
+    "Derna",
+    "Tobrouk"
+  ],
+  "sea_zones": [
+    "sea_levantine"
+  ],
+  "ports": [
+    "Derna"
+  ]
+}

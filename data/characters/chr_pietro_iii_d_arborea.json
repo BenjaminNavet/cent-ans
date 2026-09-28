@@ -1,0 +1,42 @@
+{
+  "id": "chr_pietro_iii_d_arborea",
+  "name": {
+    "display": "Pierre III, juge d'Arborée",
+    "local": "Pedru III de Arborea",
+    "local_language": "sarde"
+  },
+  "sex": "male",
+  "house": "Bas-Serra",
+  "faction": "fac_arborea",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "note": "Date de naissance approximative (vers 1300)."
+  },
+  "death": {
+    "value": "1347",
+    "note": "Meurt à Oristano ; son frère Mariano IV lui succède."
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_cautious"
+  ],
+  "piety": 60,
+  "family": {
+    "siblings": [
+      "chr_mariano_iv_d_arborea"
+    ]
+  },
+  "starting_location": "prov_arborea",
+  "status": "at_court",
+  "description": "Juge d'Arborée de 1335 à 1347, fidèle allié de la couronne d'Aragon ; il laisse le pouvoir à son frère Mariano IV.",
+  "sources": [
+    "Pierre III d'Arborée"
+  ]
+}

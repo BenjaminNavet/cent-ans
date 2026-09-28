@@ -1,0 +1,60 @@
+{
+  "id": "fac_tripoli",
+  "name": {
+    "display": "Cité de Tripoli",
+    "local": "Ṭarābulus al-Gharb",
+    "local_language": "arabe maghrébin"
+  },
+  "short_name": "Tripoli",
+  "adjective": "tripolitain",
+  "government": "lordship",
+  "playable": true,
+  "ruler": "chr_muhammad_ibn_thabit",
+  "capital": "prov_tripolitania",
+  "capital_city": "Tripoli",
+  "religion": "rel_islam",
+  "culture": "cul_maghrebi",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_tripoli",
+  "heraldry": {
+    "blazon": "D'or à la bande de sinople.",
+    "description": "Bande verte sur or ; blason de jeu aux couleurs de la cité, sans source héraldique.",
+    "primary_color": "#E0B33A",
+    "secondary_color": "#2E7D4F",
+    "uncertain": true,
+    "note": "Aucune source héraldique : emblème conventionnel de jeu."
+  },
+  "titles": [
+    "Cheikh de Tripoli"
+  ],
+  "treasury": 6000,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_hafsids",
+      "status": "peace",
+      "note": "Gouverne la cité au nom des Hafsides, mais en pratique indépendant (Muhammad ibn Thabit)."
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Marchands génois établis à Tripoli."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 60,
+    "trade": 75,
+    "piety": 55
+  },
+  "description": "Cité marchande de Tripoli, gouvernée depuis 1326-1327 par Muhammad ibn Thabit, quasi indépendante de Tunis ; port de la route de Sicile et des caravanes du Fezzan.",
+  "sources": [
+    "Banu Thabit",
+    "Histoire de Tripoli"
+  ]
+}

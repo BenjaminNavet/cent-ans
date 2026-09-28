@@ -13,7 +13,8 @@
     "secondary_color": "#111111"
   },
   "de_jure_provinces": [
-    "prov_sicilia"
+    "prov_sicilia",
+    "prov_malta"
   ],
   "holder_1337": {
     "faction": "fac_sicily",

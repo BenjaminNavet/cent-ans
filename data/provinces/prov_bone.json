@@ -1,0 +1,98 @@
+{
+  "id": "prov_bone",
+  "name": {
+    "display": "Bône",
+    "local": "'Annāba",
+    "local_language": "arabe maghrébin"
+  },
+  "region": "maghreb",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Seybouse"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bône",
+      "local": "'Annāba",
+      "local_language": "arabe maghrébin"
+    },
+    "lat": 36.9,
+    "lon": 7.7667
+  },
+  "geo": {
+    "capital_lonlat": [
+      7.7667,
+      36.9
+    ],
+    "seed_lonlat": [
+      7.6,
+      36.7
+    ],
+    "voronoi_weight": 0.7
+  },
+  "owner": "fac_hafsids",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 38000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 50,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 3800,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 950,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 456,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Côte du nord-est algérien : Bône, Collo, Tabarka et les forêts de chêne-liège. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1300,
+  "description": "Bône (Annaba), port de la Seybouse, et Tabarka, où les Génois pêchent le corail ; forêts de la Kroumirie.",
+  "sources": [
+    "Annaba",
+    "Tabarka",
+    "Collo"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "ports": [
+    "Bône",
+    "Collo",
+    "Tabarka"
+  ]
+}

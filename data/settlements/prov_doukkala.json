@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_azemmour",
+    "province": "prov_doukkala",
+    "kind": "city",
+    "name": {
+      "display": "Azemmour",
+      "local": "Azammūr",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -8.3406,
+      33.2851
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de l'Oum Errabia, exportateur de blé et de poisson (alose).",
+    "sources": [
+      "Azemmour"
+    ]
+  },
+  {
+    "id": "set_safi",
+    "province": "prov_doukkala",
+    "kind": "town",
+    "name": {
+      "display": "Safi",
+      "local": "Āsfī",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -9.2372,
+      32.2994
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ribat et port marchand de la côte atlantique, en relations avec les marchands génois et catalans.",
+    "sources": [
+      "Safi"
+    ]
+  },
+  {
+    "id": "set_tit",
+    "province": "prov_doukkala",
+    "kind": "village",
+    "name": {
+      "display": "Tit",
+      "local": "Tīṭ",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -8.7,
+      33.0167
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ancien ribat de la côte des Doukkala, siège de saints.",
+    "sources": [
+      "Tit (Maroc)"
+    ]
+  }
+]

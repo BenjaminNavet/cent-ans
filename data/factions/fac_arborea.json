@@ -1,0 +1,61 @@
+{
+  "id": "fac_arborea",
+  "name": {
+    "display": "Judicat d'Arborée",
+    "local": "Judicatu de Arborea",
+    "local_language": "sarde"
+  },
+  "short_name": "Arborée",
+  "adjective": "arboréen",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_pietro_iii_d_arborea",
+  "capital": "prov_arborea",
+  "capital_city": "Oristano",
+  "religion": "rel_catholic",
+  "culture": "cul_sardinian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_aragon",
+  "primary_title": "tit_arborea",
+  "heraldry": {
+    "blazon": "D'argent à la bordure de sinople.",
+    "description": "Les armes du judicat d'Arborée sont un arbre arraché de sinople sur champ d'argent (attesté) ; le générateur ne dessine pas encore l'arbre, remplacé par la bordure de sinople.",
+    "primary_color": "#F2EFE6",
+    "secondary_color": "#2E7D4F",
+    "uncertain": true,
+    "note": "Arbre arraché non rendu par le générateur de blasons ; bordure de sinople de substitution."
+  },
+  "titles": [
+    "Juge d'Arborée"
+  ],
+  "treasury": 5500,
+  "prestige": 28,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aragon",
+      "status": "vassal",
+      "note": "Juge allié et vassal de la couronne d'Aragon (traité de 1323) ; la rupture n'interviendra qu'avec Mariano IV (1353)."
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Rivalité avec les Doria de Logudoro."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 55,
+    "trade": 40,
+    "piety": 55
+  },
+  "description": "Judicat d'Arborée, dernier judicat sarde autonome, allié de l'Aragon depuis la conquête de 1323-1326 ; Pierre III (1335-1347) tient Oristano et prépare, sans le savoir, la grande révolte de son fils Mariano IV.",
+  "sources": [
+    "Judicat d'Arborée",
+    "Pierre III d'Arborée"
+  ]
+}

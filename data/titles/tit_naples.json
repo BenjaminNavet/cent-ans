@@ -14,7 +14,13 @@
   },
   "de_jure_liege": "tit_papacy",
   "de_jure_provinces": [
-    "prov_napoli"
+    "prov_napoli",
+    "prov_abruzzo",
+    "prov_capitanata",
+    "prov_bari",
+    "prov_basilicata",
+    "prov_calabria_citra",
+    "prov_calabria_ultra"
   ],
   "holder_1337": {
     "faction": "fac_naples",

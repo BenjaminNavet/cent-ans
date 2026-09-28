@@ -1,0 +1,54 @@
+[
+  {
+    "id": "set_syrte",
+    "province": "prov_syrte",
+    "kind": "city",
+    "name": {
+      "display": "Syrte",
+      "local": "Surt",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      16.5887,
+      31.2089
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Modeste bourg côtier (ancien port de Macomades) ; importance très réduite avant le XXe siècle (à préciser).",
+    "sources": [
+      "Syrte"
+    ]
+  },
+  {
+    "id": "set_tawargha",
+    "province": "prov_syrte",
+    "kind": "village",
+    "name": {
+      "display": "Tawargha",
+      "local": "Tāwarghā",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      15.05,
+      32.0
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Oasis de dattiers au sud de Misrata.",
+    "sources": [
+      "Tawergha"
+    ]
+  }
+]

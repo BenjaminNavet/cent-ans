@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_bejaia",
+    "province": "prov_bougie",
+    "kind": "city",
+    "name": {
+      "display": "Béjaïa",
+      "local": "Bijāya",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      5.0844,
+      36.7509
+    ],
+    "weight": 28,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grand port du Maghreb central, ancienne capitale hammadide ; marché de cire, de cuir et de blé.",
+    "sources": [
+      "Béjaïa"
+    ]
+  },
+  {
+    "id": "set_jijel",
+    "province": "prov_bougie",
+    "kind": "town",
+    "name": {
+      "display": "Jijel",
+      "local": "Jījal",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      5.7667,
+      36.8167
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de Djidjelli, comptoir génois.",
+    "sources": [
+      "Jijel"
+    ]
+  },
+  {
+    "id": "set_qalaa_hammad",
+    "province": "prov_bougie",
+    "kind": "castle",
+    "name": {
+      "display": "Kalâa des Béni Hammad",
+      "local": "Qal'at Banī Ḥammād",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      4.7867,
+      35.8125
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ruines de l'ancienne capitale hammadide (XIe siècle), désertée depuis 1090.",
+    "sources": [
+      "Kalâa des Béni Hammad"
+    ]
+  }
+]
