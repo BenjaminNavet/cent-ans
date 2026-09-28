@@ -5,10 +5,10 @@ Spec : `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § SB. Branche `feat
 ## État
 - [x] Sonde `core/crates/sim-battle/tests/sb_siege_pace.rs` (tableau par niveau, tests de cibles niveau 3 / niveau 5).
 - [x] Données `data/rules/siege_works.json` retouchées (mur 100+200/niv., porte 40+70/niv.).
-- [ ] Cœur : `under_attack` par pièce + PV bélier/tours exposés dans `get_siege`.
-- [ ] Vérifier tests de siège existants (sg3 invariant mur ≥ 3× porte à relâcher, sg4_balance, br3, b6).
-- [~] Godot (écrit, non testé) : barres de vie flottantes + étiquette « Porte : 320/540 » ; test `game/tests/sb_siege_bars_test.gd`.
-- [ ] ADR 0100 avec tableau avant/après.
+- [x] Cœur : `WallPiece::under_attack()` (+ `attacked_for`), `BattleSim::siege_engines()` ; `get_siege` expose `pieces[i].under_attack` et `engines`.
+- [x] Tests de siège : invariant sg3 relâché (mur ≥ 1,5× porte), test du feu de porte raccourci (20 s), sg1 bélier/engin passés au niveau 5. Taux de prise sg3 inchangé ; banc br3 bascule 3/10 → 10/10 (documenté ADR 0100, levier T4).
+- [x] Godot : `game/scripts/battle/siege_health_bars.gd` + `game/tests/sb_siege_bars_test.gd` (OK) ; smoke OK.
+- [x] ADR 0100 avec tableaux avant/après.
 
 ## Prochaine étape
-Cœur écrit (under_attack, siege_engines, bridge `engines`) : compiler, clippy, tests ; puis build.sh + test Godot.
+Lot terminé ; reste la vérification visuelle (session principale, pas de capture en sous-agent).
