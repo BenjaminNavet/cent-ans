@@ -56,8 +56,17 @@
       },
       "required": ["on_breach", "blockers_per_opening", "max_blockers", "engage_radius_m"],
       "additionalProperties": false
+    },
+    "assault": {
+      "type": "object",
+      "properties": {
+        "gather_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "L'assaillant IA ne marche sur la place qu'une fois cette part de ses régiments de mêlée entrée dans la ville (0 : aussitôt)." },
+        "committed_radius_m": { "type": "number", "minimum": 0, "maximum": 300, "description": "Dès qu'un régiment de mêlée de l'assaillant est à moins de cette distance du centre de la place, l'assaut est engagé : plus d'attente." }
+      },
+      "required": ["gather_share", "committed_radius_m"],
+      "additionalProperties": false
     }
   },
-  "required": ["square", "gate", "superiority", "threatened_share", "last_stand", "fall_back"],
+  "required": ["square", "gate", "superiority", "threatened_share", "last_stand", "fall_back", "assault"],
   "additionalProperties": false
 }

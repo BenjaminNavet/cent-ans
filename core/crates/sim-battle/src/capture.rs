@@ -81,6 +81,18 @@ pub struct CaptureRules {
     pub threatened_share: f64,
     pub last_stand: LastStandRules,
     pub fall_back: FallBackRules,
+    pub assault: AssaultRules,
+}
+
+/// How the AI attacker storms the square.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AssaultRules {
+    /// March on the square once this share of the melee regiments is inside.
+    pub gather_share: f64,
+    /// A melee regiment this close to the centre of the square: the assault
+    /// is under way, nobody waits any more.
+    pub committed_radius_m: f64,
 }
 
 const BUNDLED: &str = include_str!("../../../../data/rules/siege_capture.json");
