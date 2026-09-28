@@ -710,8 +710,6 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
             _draw_label(draw, blazon.tincture_after("lambel") or TINCTURES["gueules"])
         if blazon.has("sautoir"):
             _draw_saltire(draw, charge)
-    elif blazon.has("sautoir"):
-        _draw_saltire(draw, charge)
     elif blazon.has("seme"):
         _draw_semé(draw, charge)
         if blazon.has("lambel"):
@@ -760,6 +758,9 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
         draw.rectangle(_px([(0.24, 0.36), (0.76, 0.52)]), fill=charge)
     elif blazon.has("croix"):
         _draw_cross(draw, charge)
+    elif blazon.has("sautoir"):
+        # Last: "en sautoir" also describes other charges (Navarre's chains, the keys).
+        _draw_saltire(draw, charge)
 
     if blazon.has("trescheur"):
         width = int(0.018 * CANVAS)

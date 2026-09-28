@@ -258,12 +258,13 @@ fn companions_move_between_generals_standing_together() {
     state.armies.insert(second.clone(), copy);
     let armies = [first, second];
     let edward = chr("chr_edward_iii");
-    let henry = chr("chr_henry_of_grosmont");
+    // FE: Henry of Grosmont serves Lancaster now; Bohun is an English captain.
+    let bohun = chr("chr_william_de_bohun");
     for army in &armies {
         state.armies.get_mut(army).unwrap().general = None;
     }
     place_general(&mut state, &armies[0], &edward);
-    place_general(&mut state, &armies[1], &henry);
+    place_general(&mut state, &armies[1], &bohun);
     state
         .characters
         .get_mut(&edward)
@@ -272,7 +273,7 @@ fn companions_move_between_generals_standing_together() {
         .push(ret("ret_ecuyer"));
     let order = || Order::TransferCompanion {
         from: edward.clone(),
-        to: henry.clone(),
+        to: bohun.clone(),
         companion: ret("ret_ecuyer"),
     };
     // Apart: refused.
@@ -286,7 +287,7 @@ fn companions_move_between_generals_standing_together() {
         sim_campaign::ArmyPosition::Settlement(far);
     state.submit_order(&data, order()).expect("transfer");
     assert!(state.characters[&edward].retinue.is_empty());
-    assert_eq!(state.characters[&henry].retinue, vec![ret("ret_ecuyer")]);
+    assert_eq!(state.characters[&bohun].retinue, vec![ret("ret_ecuyer")]);
     // Not his any more.
     assert!(state.submit_order(&data, order()).is_err());
 }
