@@ -24,13 +24,13 @@
       "local": "Aristanis",
       "local_language": "sarde"
     },
-    "lat": 39.9037,
-    "lon": 8.5881
+    "lat": 39.9036,
+    "lon": 8.5911
   },
   "geo": {
     "capital_lonlat": [
-      8.5881,
-      39.9037
+      8.5911,
+      39.9036
     ],
     "seed_lonlat": [
       8.75,
@@ -90,7 +90,6 @@
     "sea_mediterranean"
   ],
   "ports": [
-    "Oristano",
-    "Bosa"
+    "Oristano"
   ]
 }
