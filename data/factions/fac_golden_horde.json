@@ -111,6 +111,26 @@
       "faction": "fac_galicia_volhynia",
       "status": "peace",
       "note": "Boleslas-Iouri II ménage la Horde."
+    },
+    {
+      "faction": "fac_circassia",
+      "status": "overlord",
+      "note": "Tribus tcherkesses tributaires de la Horde."
+    },
+    {
+      "faction": "fac_alania",
+      "status": "overlord",
+      "note": "Alains du Caucase soumis à la Horde depuis les conquêtes mongoles."
+    },
+    {
+      "faction": "fac_mamluks",
+      "status": "alliance",
+      "note": "Alliance du Caire et de Saraï contre les Ilkhanides ; épouse mongole d'al-Nasir Muhammad."
+    },
+    {
+      "faction": "fac_georgia",
+      "status": "peace",
+      "note": "Georges V le Brillant s'affranchit des Ilkhanides."
     }
   ],
   "ai_personality": {

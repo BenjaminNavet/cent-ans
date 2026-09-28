@@ -57,6 +57,11 @@
       "faction": "fac_golden_horde",
       "status": "peace",
       "note": "Caffa et Cerco sont tenus par concession du khan Özbeg ; paix commerciale."
+    },
+    {
+      "faction": "fac_mamluks",
+      "status": "peace",
+      "note": "Commerce d'Alexandrie ; traite des mamelouks par Caffa."
     }
   ],
   "ai_personality": {
