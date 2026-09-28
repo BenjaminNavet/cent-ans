@@ -41,9 +41,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de la plaine valaque, gué du Buzău.",
     "sources": [
@@ -66,9 +64,7 @@
     "weight": 5,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de gué au confluent de la Ialomița et du Danube (attesté au XVe siècle, habitat antérieur probable, incertain).",
     "sources": [

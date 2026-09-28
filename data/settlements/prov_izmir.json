@@ -66,9 +66,7 @@
     "weight": 3,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_port"
-    ],
+    "buildings": [],
     "port": true,
     "description": "Pointe occidentale, repaire de corsaires.",
     "sources": [

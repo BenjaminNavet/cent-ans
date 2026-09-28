@@ -68,9 +68,7 @@
     "weight": 3,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_port"
-    ],
+    "buildings": [],
     "port": true,
     "description": "Port et village proche de Trébizonde.",
     "sources": [

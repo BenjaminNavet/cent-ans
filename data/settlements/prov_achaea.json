@@ -73,8 +73,8 @@
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_cathedral",
-      "bld_stone_walls"
+      "bld_stone_walls",
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Archevêché latin et grand port.",

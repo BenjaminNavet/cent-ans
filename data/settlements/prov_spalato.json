@@ -16,7 +16,7 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_market",
+      "bld_fair",
       "bld_port",
       "bld_cathedral",
       "bld_stone_walls",
@@ -48,7 +48,7 @@
       "bld_market",
       "bld_port",
       "bld_stone_walls",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Ville-île de Dalmatie, dotée d'un statut communal.",
@@ -76,7 +76,7 @@
       "bld_market",
       "bld_port",
       "bld_stone_walls",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Ville fondée par les Croates, cathédrale en construction.",

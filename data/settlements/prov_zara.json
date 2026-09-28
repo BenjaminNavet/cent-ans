@@ -16,7 +16,7 @@
     "owner": null,
     "fortification_level": 4,
     "buildings": [
-      "bld_market",
+      "bld_fair",
       "bld_port",
       "bld_cathedral",
       "bld_stone_walls",
