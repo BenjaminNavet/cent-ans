@@ -99,6 +99,10 @@ pub use entities::province::{
 };
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
+pub use entities::army_traditions::{
+    ArmyExperienceRules, ArmyTradition, ArmyTraditionRules, BranchWeights, TraditionAiWeights,
+    TraditionBranch, TraditionBranchDef, TraditionEffects,
+};
 pub use entities::replenishment::{
     ArmyReplenishmentRules, CategoryPercent, KindValues, RecruitPoolRules, ReplenishmentRules,
     StancePercent, TerritoryPercent,

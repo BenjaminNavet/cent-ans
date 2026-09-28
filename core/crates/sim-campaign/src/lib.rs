@@ -85,6 +85,7 @@ pub mod stance;
 pub mod state;
 pub mod table;
 pub mod trade;
+pub mod traditions;
 pub mod treaty_explain;
 pub mod turn;
 pub mod victory;
@@ -135,6 +136,7 @@ pub use orders::{
 pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use recruit_pool::PoolView;
+pub use traditions::{ArmyTraditions, TraditionError, TraditionOption, TraditionView};
 pub use replenish::{FactorKind, ReplenishFactor, ReplenishPreview, Territory};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
