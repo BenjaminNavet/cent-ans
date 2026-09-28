@@ -196,6 +196,15 @@ func _run_ib4() -> void:
 		"%s: effect labels should link to ib:rule:" % building_id)
 	building_view.queue_free()
 	_check(CodexText.ib_link("rule", "army_morale", "Moral").contains("[url=ib:rule:army_morale]"), "CodexText.ib_link")
+	# Défauts IB1 : chiffre vedette « Tir » avec icône ; ambiance en italique atténué.
+	var recruit_view := TooltipView.build(RichTooltip.unit_spec("unit_longbowmen", {"cost": 420, "upkeep": 40}), true)
+	root.add_child(recruit_view)
+	var badge := recruit_view.find_child("Badge_melee_or_ranged", true, false)
+	_check(badge != null and not badge.find_children("Icon_*", "", true, false).is_empty(), "recruit headline stat badge should carry an icon")
+	var flavour := recruit_view.find_child("Flavour", true, false) as RichTextLabel
+	_check(flavour != null and flavour.has_theme_font_override("normal_font") and flavour.get_theme_color("default_color") == Color(TooltipView.FLAVOUR_COLOR),
+		"flavour text should be italic and muted")
+	recruit_view.queue_free()
 
 	# Lien d'entité → bulle riche (en-tête), clé retenue ; règle → bulle `rule`.
 	_bubbles.set("area_override", Rect2(0, 0, 1280, 720))
