@@ -70,7 +70,7 @@ func load_data(geojson_path: String = "") -> bool:
 					first = false
 				else:
 					_bounds = _bounds.expand(point)
-	var facade := get_node_or_null("/root/SimFacade")
+	var facade := _facade()
 	var store: Object = facade.get("store") if facade != null else null
 	sheets.clear()
 	sheet_order = PackedStringArray()
@@ -179,25 +179,36 @@ func faction_at(local: Vector2) -> String:
 	return ""
 
 
-## Centre (coordonnées locales) des provinces de `faction_id` (tests, captures).
+## Point (coordonnées locales) à l'intérieur d'une terre de `faction_id` : centre du plus grand
+## triangle de sa plus grande province (tests, captures) ; (-1, -1) si elle n'en a aucune.
 func faction_center(faction_id: String) -> Vector2:
-	var xform := _transform()
-	var total := Vector2.ZERO
-	var count := 0
+	var best := Vector2(-1, -1)
+	var best_area := 0.0
 	for province in provinces:
 		if province["owner"] != faction_id:
 			continue
 		for polygon in province["polygons"]:
-			var sum := Vector2.ZERO
-			for point in polygon:
-				sum += point
-			total += xform * (sum / polygon.size())
-			count += 1
-	return total / count if count > 0 else Vector2(-1, -1)
+			var points: PackedVector2Array = polygon
+			var triangles := Geometry2D.triangulate_polygon(points)
+			for i in range(0, triangles.size(), 3):
+				var a := points[triangles[i]]
+				var b := points[triangles[i + 1]]
+				var c := points[triangles[i + 2]]
+				var area := absf((b - a).cross(c - a)) * 0.5
+				if area > best_area:
+					best_area = area
+					best = (a + b + c) / 3.0
+	return _transform() * best if best_area > 0.0 else Vector2(-1, -1)
+
+
+## L'autoload `SimFacade` (lu par l'arbre même avant l'entrée de ce contrôle dans la scène).
+static func _facade() -> Node:
+	var tree := Engine.get_main_loop() as SceneTree
+	return tree.root.get_node_or_null("SimFacade") if tree != null else null
 
 
 func _faction_color(faction_id: String) -> Color:
-	var facade := get_node_or_null("/root/SimFacade")
+	var facade := _facade()
 	return facade.call("faction_color", faction_id) if facade != null else Color(0.5, 0.5, 0.5)
 
 

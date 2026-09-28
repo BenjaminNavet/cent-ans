@@ -2,7 +2,8 @@ class_name FeudalController
 extends Node
 
 ## Lot FE6 (spec FE § 6) : interface de la féodalité sur la carte de campagne.
-## - Bouton « Féodalité » de la barre : panneau « Arbre féodal » (zone `SIDE_PANEL`), ouvert sur la
+## - Menu → « Arbre féodal » (la barre du haut est pleine en 1280 px) et bouton « Arbre féodal… » de
+##   la section « Féodalité » du panneau de faction : panneau « Arbre féodal » (zone `SIDE_PANEL`), ouvert sur la
 ##   position du joueur — chaîne de ses suzerains, ses vassaux, pastilles d'état (loyal,
 ##   mécontent, félon, en révolte), loyauté au survol ; actions : se révolter, prêter hommage,
 ##   prononcer la commise, concéder un titre ; appels féodaux (protection, arbitrage).
@@ -14,6 +15,7 @@ extends Node
 ## Tout vient du cœur (`CampaignSim.get_feudal_*`, `feudal_*`) : aucune règle ici.
 
 const PANEL_WIDTH := 400.0
+const MENU_FEUDAL_ID := 930
 const TREE_HEIGHT := 250.0
 const RECENT_MAX := 12
 ## Kinds des événements du cœur portant la féodalité (hommage, commise, félonie, révolte d'un
@@ -28,7 +30,7 @@ const STATUS_GLYPHS := {"loyal": "●", "discontent": "◐", "felon": "✖", "in
 const TUTORIAL_SCENE := "res://scenes/ui/tutorial.tscn"
 const TUTORIAL_STEPS := [
 	{"id": "feudal_tree", "title": "Votre place dans la féodalité",
-		"text": "Au-dessus des factions, des titres : royaumes, duchés, comtés. Ouvrez l'[b]arbre féodal[/b] (bouton « Féodalité » de la barre du haut) : il montre votre suzerain, vos vassaux et leur loyauté. Un vassal mécontent peut refuser l'ost, se révolter ou prêter hommage ailleurs.",
+		"text": "Au-dessus des factions, des titres : royaumes, duchés, comtés. Cliquez sur votre écu, en haut à gauche : la section « Féodalité » du panneau de faction donne vos obligations et vos objectifs, et son bouton [b]« Arbre féodal… »[/b] (ou Menu → Arbre féodal) montre votre suzerain, vos vassaux et leur loyauté. Un vassal mécontent peut refuser l'ost, se révolter ou prêter hommage ailleurs.",
 		"objective": "Ouvrir l'arbre féodal.", "target": "feudal_button"},
 	{"id": "feudal_filter", "title": "La carte des fiefs",
 		"text": "Le filtre de carte [b]« Féodalité »[/b] (bouton « Filtres ») peint chaque royaume ; les hachures montrent les terres des grands vassaux, l'écu parti les doubles allégeances, comme la Guyenne anglaise tenue du roi de France. Dans la fiche d'une province, le fil d'Ariane donne ses titres, du royaume au comté.",
@@ -40,6 +42,7 @@ const TUTORIAL_STEPS := [
 
 var map: Node = null  # CampaignMap
 var panel: PanelContainer
+## Bouton « Arbre féodal… » de la section « Féodalité » du panneau de faction (cible du guide).
 var button: Button
 ## Faction mise en avant dans l'arbre (le joueur par défaut).
 var focus: String = ""
@@ -70,22 +73,20 @@ func setup(campaign_map: Node) -> void:
 	_build_panel()
 	UiZones.put(UiZones.Zone.SIDE_PANEL, panel)
 	map.ui.register_panel(panel, PanelStack.Kind.CENTRAL)
-	var court_button: Button = map.ui.court_button
-	button = Button.new()
-	button.name = "FeudalButton"
-	button.text = "Féodalité"
-	UiType.apply(button, UiType.BODY)
-	button.tooltip_text = "Arbre féodal : suzerains, vassaux, obligations"
-	court_button.get_parent().add_child(button)
-	court_button.get_parent().move_child(button, court_button.get_index())
-	button.pressed.connect(toggle)
-	button.visible = available()
+	var menu_button: MenuButton = map.ui.get("menu_button")
+	if menu_button != null:
+		var popup := menu_button.get_popup()
+		popup.add_item("Arbre féodal", MENU_FEUDAL_ID)
+		popup.id_pressed.connect(func(id: int) -> void:
+			if id == MENU_FEUDAL_ID:
+				toggle())
 	var province_panel: Node = map.ui.get("province_panel")
 	if province_panel != null and province_panel.has_signal("breadcrumb_clicked"):
 		province_panel.connect("breadcrumb_clicked", func(faction: String) -> void: open_for(faction))
 	var faction_panel: Node = map.ui.get("faction_panel")
 	var section: Variant = faction_panel.get("feudal_section") if faction_panel != null else null
 	if section is FeudalSection:
+		button = (section as FeudalSection).tree_button
 		(section as FeudalSection).tree_requested.connect(func(faction: String) -> void: open_for(faction))
 	_setup_tutorial()
 
@@ -444,7 +445,8 @@ func after_end_turn(events: Array) -> void:
 		return
 	var date := str(map.sim.call("get_date_label")) if map.sim.has_method("get_date_label") else ""
 	var me := player()
-	var my_name := SimFacade.faction_short_name(me)
+	var facade := get_node_or_null("/root/SimFacade")
+	var my_name := str(facade.call("faction_short_name", me)) if facade != null else me
 	var mine := 0
 	var fresh: Array = []
 	for event in events:
@@ -466,8 +468,6 @@ func after_end_turn(events: Array) -> void:
 
 
 func refresh() -> void:
-	if button != null:
-		button.visible = available()
 	if panel != null and panel.visible and available():
 		fill()
 
@@ -476,7 +476,7 @@ func refresh() -> void:
 
 
 func _setup_tutorial() -> void:
-	persist_tutorial = not TutorialController.capture_mode()
+	persist_tutorial = not capture_mode()
 	tutorial = (load(TUTORIAL_SCENE) as PackedScene).instantiate()
 	tutorial.name = "FeudalTutorial"
 	tutorial.hide()
@@ -490,6 +490,15 @@ func _setup_tutorial() -> void:
 		tutorial_index = -1
 		tutorial.hide())
 	tutorial.step_chosen.connect(func(index: int) -> void: _enter_tutorial(index))
+
+
+## Captures et vues de flux (mêmes arguments que `TutorialController.capture_mode`) : le guide ne
+## démarre pas et ne note rien.
+static func capture_mode() -> bool:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--screenshot=") or arg.begins_with("--flow-stage=") or arg.begins_with("--loading-shot="):
+			return true
+	return false
 
 
 func _setting(key: String, fallback: Variant) -> Variant:
@@ -560,7 +569,10 @@ func _process(delta: float) -> void:
 	if tutorial_index < 0 or tutorial == null:
 		return
 	var target := str(TUTORIAL_STEPS[tutorial_index].get("target", ""))
-	var control: Control = button if target == "feudal_button" else null
+	var control: Control = null
+	if target == "feudal_button":
+		# Le bouton du panneau de faction s'il est ouvert, sinon l'écu qui ouvre ce panneau.
+		control = button if button != null and button.is_visible_in_tree() else map.ui.get("faction_swatch")
 	if target == "filters_button":
 		var modes: Node = map.get("map_modes")
 		control = modes.get("button") if modes != null else null
