@@ -231,10 +231,8 @@ func _rich_text(variation: String) -> RichTextLabel:
 ## Affiche la fenêtre (centrée) sur la fiche `id`, ou sur la dernière consultée si vide.
 func open(id: String = "") -> void:
 	show()
-	if not embedded:
-		var area := get_viewport_rect().size
-		size = SIZE
-		position = ((area - SIZE) / 2.0).floor()
+	# P2c : plus de centrage manuel ici — la fenêtre seule (non `embedded`) est enregistrée dans
+	# `UiZones.Zone.MODAL` par l'appelant (`CodexBubbles.window`), qui la centre par ancrage.
 	if id != "":
 		navigate(id)
 	elif current_id == "":
