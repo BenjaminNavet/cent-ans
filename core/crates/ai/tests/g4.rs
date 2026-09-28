@@ -10,6 +10,8 @@ use sim_campaign::{CampaignState, Order};
 
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    // FE5: the feudal AI decides, whatever the order of the tests.
+    ai::feudal::install();
     GameData::load(&root).expect("game data loads").0
 }
 
@@ -247,7 +249,6 @@ fn over_four_turns<T>(
 }
 
 #[test]
-#[ignore = "FE1: imperial princes are vassals of the Empire (ADR 0098) and G4 courts no vassal; F5 decides, see docs/wip/fe1-deductions.md"]
 fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
     let data = data();
     let (england, brabant, france) = (fac("fac_england"), fac("fac_brabant"), fac("fac_france"));
@@ -258,9 +259,8 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
     let anchor = state
         .factions
         .iter()
-        .filter(|(id, f)| {
-            **id != brabant && f.alive && f.suzerain.is_none() && id.as_str() != "fac_rebels"
-        })
+        // FE5 (ADR 0110): the Low Countries princes are vassals of the Empire.
+        .filter(|(id, f)| **id != brabant && f.alive && id.as_str() != "fac_rebels")
         .map(|(id, _)| id.clone())
         .find(|id| {
             state.are_neighbors(&data, &brabant, id)

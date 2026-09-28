@@ -382,6 +382,11 @@ fn state_plans(
                     || {
                         let mut orders =
                             sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+                        // FE5: « survival first » for the counties, titles
+                        // demanded at the peace, feudal acts.
+                        crate::feudal::filter_suicidal_wars(state, data, faction, &mut orders);
+                        crate::feudal::demand_titles(state, data, faction, &mut orders);
+                        orders.extend(crate::feudal::plan_feudal(state, data, faction));
                         // DP1: trade agreements and military access (ADR 0025).
                         orders.extend(crate::diplomacy_eval::plan_treaties(state, data, faction));
                         // G2: historical side changes (Artevelde, Troyes).
@@ -452,6 +457,8 @@ fn plan_turn_in(
     data: &GameData,
     faction: &FactionId,
 ) -> Vec<Order> {
+    // FE5: the core asks the feudal decisions of this crate from now on.
+    crate::feudal::install();
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
