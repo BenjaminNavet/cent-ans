@@ -11,6 +11,23 @@ Lire ce fichier, `git worktree list`, `git branch --list 'feat/rs-*'`. Chaque lo
 `docs/wip/rs-<lot>.md`. Fusion : worktree `../gp-rs-merge` (branche `integration/rs`), puis ff-only
 vers `main`. ADR réservés : **0100** (lot B ; 0098 pris par FE), **0099** (lot F). GA réserve 0104-0106.
 
+## PAUSE (28/09 ~09 h 15, demande du joueur) — comment reprendre
+
+`main` = fec99a04 + ce commit : lots A, D, E, F, G, H, J, P2a, P2b, P2e fusionnés. Deux lots arrêtés, tout commité :
+
+- **B Ordre public** — `feat/rs-b-order` (worktree `.claude/worktrees/agent-a90b4dd66bed1d599`, cible privée
+  `core/target-rs-b` à supprimer après fusion), dernier commit ae5d94f1. ADR **0100** écrit (seuil de révolte 75,
+  2 saisons). Wip : `docs/wip/rs-b-order.md` (chiffres avant/après). À vérifier avant fusion : sonde release
+  `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` (trésor France 38 297 < 40 000 avant B), critères eq6 (guerre
+  55-75 % à chaque difficulté), test cv3 passé de la graine 7 à 4 (la 7 n'embusque plus). Puis intégration complète.
+- **P2c Codex** — `feat/p2c-codex` (worktree `.claude/worktrees/agent-a90707317064d725a`), dernier commit 6f9a2e32
+  (main fusionnée, planche faite). Reste : `smoke.gd` + `p2c_ui_test.gd` avec la dylib de `main`, puis fusion.
+  Cause du C2 trouvée : centrage manuel résiduel de `codex_window.gd::open()` retiré.
+
+Fusion : worktree `../gp-rs-merge` (branche `integration/rs`), `git merge main` puis les lots ; conflits déjà vus
+(FE0 × data-model). Tests d'écran : appeler `Settings.use_test_file()` + `_apply_ui_scale()` avant le premier écran
+(le `settings.cfg` du joueur a `ui_size=1.25`).
+
 ## Vague 1 (6 agents, fichiers disjoints)
 
 | Lot | Points | Agent | Branche | État |
