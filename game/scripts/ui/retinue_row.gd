@@ -75,7 +75,7 @@ static func make_vignette(companion: Dictionary) -> PanelContainer:
 	var glyph := Label.new()
 	glyph.text = str(companion.get("glyph", "?"))
 	glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	glyph.add_theme_font_size_override("font_size", 26)
+	UiType.apply(glyph, UiType.TITLE)  # P2a (ADR 0097) : glyphe de vignette, taille d'origine
 	glyph.add_theme_color_override("font_color", color.darkened(0.2))
 	glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(glyph)
@@ -84,7 +84,7 @@ static func make_vignette(companion: Dictionary) -> PanelContainer:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.clip_text = true
 	label.custom_minimum_size = Vector2(VIGNETTE_SIZE.x - 6, 0)
-	label.add_theme_font_size_override("font_size", 10)
+	UiType.apply(label, UiType.CAPTION)  # P2a (ADR 0097) : plus petite taille du gabarit (14 px)
 	label.add_theme_color_override("font_color", HudStyle.INK)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(label)
