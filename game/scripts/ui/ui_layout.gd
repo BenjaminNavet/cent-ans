@@ -455,14 +455,17 @@ func _forget(control: Control) -> void:
 	if is_instance_valid(control):
 		var parent := control.get_parent()
 		if parent != null and parent.has_meta(_WRAPPER_META) and not parent.is_queued_for_deletion():
-			_free_wrapper.call_deferred(parent)
+			# Par identifiant : l'enveloppe peut être libérée avant l'appel différé (un argument
+			# typé Object refuse alors l'instance morte).
+			_free_wrapper.call_deferred(parent.get_instance_id())
 	_update_dim.call_deferred()
 
 
 ## Enveloppe défilante devenue vide (occupant sorti) ; rien si elle est partie avec son hôte.
-func _free_wrapper(wrapper: Object) -> void:
-	if is_instance_valid(wrapper) and not (wrapper as Node).is_queued_for_deletion() and (wrapper as Node).get_child_count() == 0:
-		(wrapper as Node).queue_free()
+func _free_wrapper(wrapper_id: int) -> void:
+	var wrapper := instance_from_id(wrapper_id) as Node
+	if wrapper != null and not wrapper.is_queued_for_deletion() and wrapper.get_child_count() == 0:
+		wrapper.queue_free()
 
 
 func _on_occupant_visibility(control: Control) -> void:

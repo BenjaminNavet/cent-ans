@@ -56,6 +56,8 @@ func _ready() -> void:
 	_build()
 	# Q2 : en 1280×720 le bas de l'écran (bouton « Commencer ») sortait de la fenêtre.
 	resized.connect(_fit)
+	# Onglets, fiche plus longue : la taille minimale du contenu peut dépasser FIT_SIZE.
+	_content.minimum_size_changed.connect(_fit, CONNECT_DEFERRED)
 	_fit.call_deferred()
 	var entries := FrontEndData.start_dates()
 	if not entries.is_empty():
@@ -69,7 +71,9 @@ func _fit() -> void:
 	if _content == null:
 		return
 	var view := size
-	var factor := clampf(minf(view.x / FIT_SIZE.x, view.y / FIT_SIZE.y), 0.5, 1.0)
+	var needed := _content.get_combined_minimum_size()
+	var fit_size := Vector2(maxf(FIT_SIZE.x, needed.x), maxf(FIT_SIZE.y, needed.y))
+	var factor := clampf(minf(view.x / fit_size.x, view.y / fit_size.y), 0.5, 1.0)
 	# Ancres au-delà de 1 : la mise en page donne la taille (vue / facteur), l'échelle la réduit.
 	_content.scale = Vector2.ONE * factor
 	_content.anchor_left = 0.0
