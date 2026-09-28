@@ -36,8 +36,49 @@ func _init() -> void:
 	_test_london()
 	await _test_orleans()
 	_test_paris()
+	for sid in ["set_bordeaux", "set_avignon", "set_calais", "set_bruges"]:
+		_test_vh8(sid)
 	print("vh4_landmarks_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
+
+
+## VH8 (RS-G) : Bordeaux, Avignon, Calais, Bruges — chargement, plan déterministe, portes,
+## monuments construits, aucune maison dans l'eau, monuments fusionnés par cellule.
+func _test_vh8(settlement_id: String) -> void:
+	var city := LandmarkV2Library.for_settlement(settlement_id)
+	if not _check(not city.is_empty(), "%s v2 loaded" % settlement_id):
+		return
+	var v1 := LandmarkLibrary.for_settlement(settlement_id)
+	var px: Array = v1.get("anchor", {}).get("px", [0, 0])
+	var mpu := LandmarkV2Library.meters_per_unit()
+	var offset := LandmarkV2Library.anchor_units(city).distance_to(Vector2(float(px[0]), float(px[1]))) * mpu
+	_check(offset < 300.0, "%s origin near the L1 anchor (%.0f m)" % [settlement_id, offset])
+	var h := TownPlan.Heights.new()
+	h.func_m = _flat
+	var plan := LandmarkPlan.generate(city, 1340, h)
+	var again := LandmarkPlan.generate(city, 1340, h)
+	print("vh8: %s plan %s" % [settlement_id, JSON.stringify(plan["stats"])])
+	var houses: Dictionary = plan["houses"]
+	var n: int = (houses["x"] as PackedFloat32Array).size()
+	_check(n > 1000, "%s houses %d" % [settlement_id, n])
+	_check(houses["x"] == again["houses"]["x"], "%s deterministic plan" % settlement_id)
+	_check((plan["wall_rings"] as Array).size() >= 1 and (plan["gates"] as Array).size() >= 4, "%s walls and gates (%d)" % [settlement_id, (plan["gates"] as Array).size()])
+	var fixed: Dictionary = plan["fixed_bases"]
+	var wet := 0
+	for i in n:
+		if not fixed.has(i) and LandmarkPlan._in_water(Vector2(houses["x"][i], houses["y"][i]), plan["waters"], plan.get("water_index", {})):
+			wet += 1
+	_check(wet == 0, "%s houses in the water: %d" % [settlement_id, wet])
+	var monuments: Array = plan["v2_monuments"]
+	_check(monuments.size() >= 8, "%s monuments %d" % [settlement_id, monuments.size()])
+	for m in monuments:
+		var verts: PackedVector3Array = (m["arrays"] as Array)[Mesh.ARRAY_VERTEX]
+		_check(verts.size() >= 36 and verts.size() % 3 == 0, "%s monument %s mesh (%d vertices)" % [settlement_id, m["id"], verts.size()])
+	var cells := TownBuilder._extra_meshes(plan)
+	var merged := 0
+	for cell: Dictionary in cells:
+		merged += (cell["ids"] as Array).size()
+	_check(merged == monuments.size() and cells.size() < monuments.size(), "%s monuments merged (%d in %d cells)" % [settlement_id, merged, cells.size()])
 
 
 func _check(condition: bool, message: String) -> bool:
@@ -360,6 +401,19 @@ func _test_paris() -> void:
 		var verts: PackedVector3Array = (m["arrays"] as Array)[Mesh.ARRAY_VERTEX]
 		_check(verts.size() >= 36 and verts.size() % 3 == 0, "Paris monument %s mesh (%d vertices)" % [m["id"], verts.size()])
 	_check(ids.has("notre_dame") and float(ids["notre_dame"]["length"]) >= 125.0 and float(ids["notre_dame"]["top"]) > 68.0, "Notre-Dame at real size")
+	# RS-G : monuments fusionnés par cellule (un maillage par cellule, base et ancrage par sommet).
+	var cells := TownBuilder._extra_meshes(plan)
+	var merged := 0
+	var verts_total := 0
+	for m in plan["v2_monuments"]:
+		verts_total += ((m["arrays"] as Array)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var cell_verts := 0
+	for cell: Dictionary in cells:
+		merged += (cell["ids"] as Array).size()
+		cell_verts += ((cell["arrays"] as Array)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+		_check(((cell["arrays"] as Array)[Mesh.ARRAY_CUSTOM0] as PackedFloat32Array).size() == ((cell["arrays"] as Array)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() * 4, "merged cell custom data")
+	_check(merged == (plan["v2_monuments"] as Array).size() and cell_verts == verts_total, "all Paris monuments merged (%d in %d cells)" % [merged, cells.size()])
+	_check(cells.size() * 2 < merged, "Paris monuments merged by cell: %d nodes for %d monuments" % [cells.size(), merged])
 	for id in ["tour_horloge", "bastille", "louvre_charles_v", "celestins"]:
 		_check(not ids.has(id), "1340: no %s" % id)
 	var later := LandmarkPlan.generate(city, 1375, _heights())

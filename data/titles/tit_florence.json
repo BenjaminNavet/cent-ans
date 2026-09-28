@@ -1,0 +1,25 @@
+{
+  "id": "tit_florence",
+  "rank": "kingdom",
+  "name": {
+    "display": "République de Florence",
+    "local": "Repubblica fiorentina",
+    "local_language": "toscan"
+  },
+  "heraldry": {
+    "blazon": "D'argent au lis florencé de gueules.",
+    "description": "Le giglio rouge des guelfes sur champ d'argent.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B22222"
+  },
+  "de_jure_provinces": [
+    "prov_firenze"
+  ],
+  "holder_1337": {
+    "faction": "fac_florence",
+    "sources": [
+      "République de Florence",
+      "Compagnie des Bardi"
+    ]
+  }
+}

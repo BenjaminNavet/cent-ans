@@ -158,7 +158,8 @@ impl GameData {
     }
 
     /// (Re)builds [`GameData::movement_graph`] from `settlement_graph`, or
-    /// the fallback graph when it is empty. Called by [`GameData::load`].
+    /// the fallback graph when it is empty, then the trade route paths
+    /// ([`GameData::build_trade_paths`]). Called by [`GameData::load`].
     pub fn build_movement_graph(&mut self) {
         let mut graph = MovementGraph::default();
         if self.settlement_graph.is_empty() {
@@ -183,6 +184,7 @@ impl GameData {
         }
         graph.sort();
         self.movement_graph = graph;
+        self.build_trade_paths();
     }
 
     fn fallback_edges(&self) -> Vec<SettlementEdge> {

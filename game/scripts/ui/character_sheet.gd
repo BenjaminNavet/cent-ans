@@ -78,7 +78,7 @@ const SCREEN_MARGIN := 16.0
 func _ready() -> void:
 	Lettrine.attach(name_label)  # UI1 : titre à lettrine enluminée
 	close_button.pressed.connect(func() -> void:
-		hide()
+		UiMotion.fade_out(self)  # P2a (ADR 0097, bible DA § 12.4)
 		closed.emit())
 	governor_button.pressed.connect(func() -> void: _open_picker("governor", "Nommer gouverneur de…", governable_provinces))
 	general_button.pressed.connect(func() -> void: _open_picker("general", "Donner le commandement de…", commandable_armies))
@@ -103,7 +103,7 @@ func _decorate() -> void:
 			continue
 		var grid := key.get_parent()
 		var index := key.get_index()
-		var chip := IconChip.create("branch_" + pair[1], key.text, RichTooltip.branch(pair[1]), 20.0, 15)
+		var chip := IconChip.create("branch_" + pair[1], key.text, RichTooltip.branch(pair[1]), 20.0, UiType.size(UiType.CAPTION))
 		grid.add_child(chip)
 		grid.move_child(chip, index)
 		grid.remove_child(key)
@@ -123,8 +123,8 @@ func _add_description() -> void:
 	_description.fit_content = true
 	_description.scroll_active = false
 	_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_description.add_theme_font_size_override("normal_font_size", 14)
-	_description.add_theme_font_size_override("italics_font_size", 14)
+	UiType.apply(_description, UiType.CAPTION)
+	_description.add_theme_font_size_override("italics_font_size", UiType.size(UiType.CAPTION))
 	_description.add_theme_color_override("default_color", Color(0.22, 0.14, 0.07))
 	var content := get_node_or_null("VBox/Body/Scroll/Content")
 	if content == null:
@@ -161,7 +161,7 @@ var marriage_candidates: Array = []
 ## province, sans général). `marriage_candidates` : `get_marriage_candidates(id)`.
 func show_character(character: Dictionary, skill_tree: Array, learnable: Array, governable: Array, commandable: Array, candidates: Array) -> void:
 	if character.is_empty():
-		hide()
+		UiMotion.fade_out(self)  # P2a (ADR 0097, bible DA § 12.4)
 		return
 	character_id = str(character["id"])
 	_skill_tree = skill_tree
@@ -221,7 +221,10 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 
 	_fill_ransom(character)  # G1
 	_fill_skill_tree()
+	var was_visible := visible
 	show()
+	if not was_visible:
+		UiMotion.fade_in(self)  # P2a (ADR 0097, bible DA § 12.4)
 
 
 # --- U10 : motifs des actions grisées ------------------------------------------------------
@@ -264,7 +267,7 @@ func _show_blockers(character: Dictionary, governable: Array, commandable: Array
 		_blocker_label = Label.new()
 		_blocker_label.name = "Blockers"
 		_blocker_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		_blocker_label.add_theme_font_size_override("font_size", 13)
+		UiType.apply(_blocker_label, UiType.CAPTION)
 		_blocker_label.add_theme_color_override("font_color", HudStyle.INK_SOFT)
 		var actions := governor_button.get_parent()
 		actions.get_parent().add_child(_blocker_label)
@@ -374,7 +377,7 @@ func _fill_stats(character: Dictionary) -> void:
 	if sex_label != "":
 		entries.insert(1, ["gauge_population", sex_label, sex_label])
 	for entry in entries:
-		stats_row.add_child(_pill(IconChip.create(entry[0], entry[1], entry[2], 16.0, 12), HudStyle.PARCHMENT_DARK))
+		stats_row.add_child(_pill(IconChip.create(entry[0], entry[1], entry[2], 16.0, UiType.size(UiType.CAPTION)), HudStyle.PARCHMENT_DARK))
 
 
 func _birth_year(character: Dictionary) -> int:
@@ -485,7 +488,7 @@ func _fill_traits(traits: Array) -> void:
 		var category: String = str(trait_entry.get("category", ""))
 		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
 		var trait_id: String = str(trait_entry.get("id", ""))
-		var chip := IconChip.create(trait_id, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, 13, "trait")
+		var chip := IconChip.create(trait_id, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, UiType.size(UiType.CAPTION), "trait")
 		var color: Color = TRAIT_COLORS.get(category, HudStyle.INK_SOFT)
 		var pill := _pill(chip, color.lerp(HudStyle.PARCHMENT_LIGHT, 0.68), HudStyle.INK)
 		((pill.get_theme_stylebox("panel") as StyleBoxFlat)).border_color = color
@@ -577,10 +580,10 @@ func _build_retinue_section() -> void:
 	_retinue_header = Label.new()
 	_retinue_header.text = "Suite"
 	_retinue_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_retinue_header.add_theme_font_size_override("font_size", 16)
+	UiType.apply(_retinue_header, UiType.BODY)
 	header.add_child(_retinue_header)
 	_retinue_hint = Label.new()
-	_retinue_hint.add_theme_font_size_override("font_size", 12)
+	UiType.apply(_retinue_hint, UiType.CAPTION)
 	_retinue_hint.add_theme_color_override("font_color", HudStyle.INK_SOFT)
 	header.add_child(_retinue_hint)
 	retinue_row = RetinueRow.new()

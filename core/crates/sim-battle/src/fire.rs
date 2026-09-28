@@ -6,7 +6,8 @@
 //! burning law of one blaze, so that the bridge and the tests share it.
 
 use std::collections::BTreeMap;
-use std::sync::OnceLock;
+use std::path::Path;
+use std::sync::{Arc, OnceLock, RwLock};
 
 use serde::{Deserialize, Serialize};
 
@@ -204,8 +205,30 @@ pub struct FireRules {
     pub suburbs: SuburbRules,
 }
 
-/// The rules file, embedded at compile time.
+/// RS-F: what the « Incendier » order of the battle bar would set on fire
+/// (`BattleSim::burn_choice`): the regiment carrying the torch and its
+/// target, `house` (index in `siege.houses`) or the gate.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
+pub struct BurnChoice {
+    pub unit: u32,
+    pub house: Option<usize>,
+    pub gate: bool,
+    /// The house is one of the suburbs.
+    pub suburb: bool,
+    /// From the regiment to the edge of its target, in metres.
+    pub distance_m: f64,
+}
+
+/// The rules file, embedded at compile time: the default of the tests and
+/// the fallback until the game data is loaded (RS-F, ADR 0099).
 const BUNDLED: &str = include_str!("../../../../data/rules/siege_fire.json");
+
+/// Path of the rules file under the data folder.
+pub const FIRE_RULES_PATH: &str = "rules/siege_fire.json";
+
+/// Rules read from the data folder at load time ([`FireRules::install`]);
+/// `None`: the bundled ones.
+static INSTALLED: RwLock<Option<Arc<FireRules>>> = RwLock::new(None);
 
 impl FireRules {
     /// `data/rules/siege_fire.json` as compiled into the crate.
@@ -214,6 +237,35 @@ impl FireRules {
         RULES.get_or_init(|| {
             serde_json::from_str(BUNDLED).expect("data/rules/siege_fire.json is valid")
         })
+    }
+
+    /// Parses the contents of a rules file.
+    pub fn from_json(text: &str) -> Result<FireRules, String> {
+        serde_json::from_str(text).map_err(|e| format!("{FIRE_RULES_PATH}: {e}"))
+    }
+
+    /// Reads `rules/siege_fire.json` under `data_dir`.
+    pub fn load(data_dir: &Path) -> Result<FireRules, String> {
+        let path = data_dir.join(FIRE_RULES_PATH);
+        let text =
+            std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+        Self::from_json(&text)
+    }
+
+    /// Rules of the battles built from now on (`None`: back to the bundled
+    /// ones). The bridge installs the file of the data folder when it loads
+    /// the game data, so the fire can be tuned without recompiling.
+    pub fn install(rules: Option<FireRules>) {
+        let mut guard = INSTALLED.write().unwrap_or_else(|e| e.into_inner());
+        *guard = rules.map(Arc::new);
+    }
+
+    /// The installed rules, else the bundled ones.
+    pub fn current() -> Arc<FireRules> {
+        let guard = INSTALLED.read().unwrap_or_else(|e| e.into_inner());
+        guard
+            .clone()
+            .unwrap_or_else(|| Arc::new(Self::bundled().clone()))
     }
 
     /// Weather factors (neutral when the weather is not listed).

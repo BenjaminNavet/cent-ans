@@ -16,6 +16,7 @@
   "culture": "cul_lombard",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_empire",
+  "primary_title": "tit_milan",
   "heraldry": {
     "blazon": "D'argent à la guivre d'azur couronnée d'or, issante de gueules (biscione).",
     "description": "La guivre (biscione) des Visconti dévorant un homme, sur champ d'argent.",

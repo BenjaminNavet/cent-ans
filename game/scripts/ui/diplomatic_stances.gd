@@ -65,7 +65,9 @@ static func symbol(key: String) -> String:
 
 
 ## Légende en pastilles (une par position) ; `wrap` : sur plusieurs lignes si la place manque.
-static func legend(font_size: int, swatch: float = 14.0, wrap: bool = true) -> Container:
+## `variation` : PO phase 2 (P2b, ADR 0097) — une des quatre tailles `UiType` (plus de taille ad
+## hoc), `UiType.CAPTION` par défaut (légende).
+static func legend(variation: String = UiType.CAPTION, swatch: float = 14.0, wrap: bool = true) -> Container:
 	var flow: Container = HFlowContainer.new() if wrap else HBoxContainer.new()
 	flow.name = "StanceLegend"
 	flow.add_theme_constant_override("h_separation", 12)
@@ -82,7 +84,8 @@ static func legend(font_size: int, swatch: float = 14.0, wrap: bool = true) -> C
 		rect.color = COLORS[key]
 		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		chip.add_child(rect)
-		var label := HudStyle.label(("%s %s" % [symbol(key), LABELS[key]]).strip_edges(), font_size, HudStyle.INK)
+		var label := HudStyle.label(("%s %s" % [symbol(key), LABELS[key]]).strip_edges(), UiType.size(variation), HudStyle.INK)
+		UiType.apply(label, variation)
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		chip.add_child(label)
 		flow.add_child(chip)
