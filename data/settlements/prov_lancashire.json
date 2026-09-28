@@ -109,56 +109,6 @@
     ]
   },
   {
-    "id": "set_preston",
-    "province": "prov_lancashire",
-    "kind": "town",
-    "name": {
-      "display": "Preston",
-      "local": "Prestone",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -2.7169,
-      53.7632
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
-    "port": false,
-    "description": "Bourg royal et marché du centre du Lancashire, sur la Ribble.",
-    "sources": [
-      "Preston, Lancashire"
-    ]
-  },
-  {
-    "id": "set_clitheroe",
-    "province": "prov_lancashire",
-    "kind": "castle",
-    "name": {
-      "display": "Clitheroe",
-      "local": "Cliderhow",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -2.3939,
-      53.8703
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Château des barons de Clitheroe, gardien de la vallée de la Ribble.",
-    "sources": [
-      "Château de Clitheroe"
-    ]
-  },
-  {
     "id": "set_whalley",
     "province": "prov_lancashire",
     "kind": "abbey",

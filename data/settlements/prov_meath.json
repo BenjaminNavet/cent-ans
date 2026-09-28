@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_trim",
+    "province": "prov_meath",
+    "kind": "city",
+    "name": {
+      "display": "Trim",
+      "local": "Baile Átha Troim",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -6.7906,
+      53.5553
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Château de Trim, plus vaste forteresse anglo-normande d'Irlande, tenu par la couronne après la confiscation des Mortimer (1330).",
+    "sources": [
+      "Château de Trim"
+    ]
+  },
+  {
+    "id": "set_kells",
+    "province": "prov_meath",
+    "kind": "town",
+    "name": {
+      "display": "Kells",
+      "local": "Ceanannas",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -6.8742,
+      53.7277
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancien grand monastère colombien, siège d'un synode de réforme de l'Église irlandaise en 1152.",
+    "sources": [
+      "Kells"
+    ]
+  },
+  {
+    "id": "set_navan",
+    "province": "prov_meath",
+    "kind": "castle",
+    "name": {
+      "display": "Navan",
+      "local": "An Uaimh",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -6.6819,
+      53.6528
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Bourg fortifié au confluent de la Boyne et de la Blackwater.",
+    "sources": [
+      "Navan"
+    ]
+  }
+]
