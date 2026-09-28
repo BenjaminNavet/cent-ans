@@ -33,7 +33,13 @@ fn siege(data: &GameData, extra: &[&str], fortification: u32) -> BattleSim {
     let (cx, cz) = sim.siege().unwrap().center;
     for i in 0..sim.units().len() {
         if sim.units()[i].side == SideId::Defender {
-            place(&mut sim, i as u32, cx + (i as f64 - 6.0) * 12.0, cz + 100.0, 0.0);
+            place(
+                &mut sim,
+                i as u32,
+                cx + (i as f64 - 6.0) * 12.0,
+                cz + 100.0,
+                0.0,
+            );
         }
     }
     sim
@@ -182,4 +188,91 @@ fn stronger_towns_hold_longer() {
     assert!(ram_seconds(&data, 1) < 30.0);
     let (_, shots1) = engine_pace(&data, 1, "unit_trebuchet");
     assert!(shots1 <= 5, "{shots1} shots at level 1");
+}
+
+/// SB: the gate counts as under attack while a ram batters it, and a few
+/// seconds after; a wall piece while an engine keeps shooting at it; an
+/// untouched piece never.
+#[test]
+fn pieces_under_attack_are_flagged() {
+    let data = data();
+    let mut sim = siege(&data, &["unit_trebuchet"], 3);
+    let works = sim.siege().unwrap().clone();
+    assert!(works.pieces.iter().all(|p| !p.under_attack()));
+    // Ram against the gate.
+    let ram = sim.units().iter().position(|u| u.ram).unwrap() as u32;
+    let gate = &works.pieces[works.gate];
+    let (mx, mz) = gate.midpoint();
+    let (nx, nz) = gate.outward();
+    let band = works.band();
+    place(
+        &mut sim,
+        ram,
+        mx + nx * (band + 1.0),
+        mz + nz * (band + 1.0),
+        (-nx).atan2(-nz),
+    );
+    // Trebuchet against a front wall piece.
+    let engine = sim.units().iter().position(|u| u.wall_breaker()).unwrap() as u32;
+    let piece = works.front_walls()[0];
+    sim.issue_command(Command::TargetWall {
+        units: vec![engine],
+        piece,
+    })
+    .unwrap();
+    let (px, pz) = works.pieces[piece].midpoint();
+    let (qx, qz) = works.pieces[piece].outward();
+    place(
+        &mut sim,
+        engine,
+        px + qx * 150.0,
+        pz + qz * 150.0,
+        (-qx).atan2(-qz),
+    );
+    for _ in 0..(20.0 / sim_battle::DT) as usize {
+        steady_step(&mut sim);
+    }
+    let now = sim.siege().unwrap();
+    assert!(now.pieces[now.gate].under_attack(), "ram at the gate");
+    assert!(now.pieces[piece].under_attack(), "engine shooting");
+    assert!(now.pieces[piece].hp < now.pieces[piece].max_hp);
+    let untouched = (0..now.pieces.len())
+        .find(|&p| p != piece && p != now.gate && now.pieces[p].hp == now.pieces[p].max_hp)
+        .unwrap();
+    assert!(!now.pieces[untouched].under_attack());
+    // The ram leaves: the gate is no longer under attack a few seconds on.
+    place(&mut sim, ram, mx + nx * 80.0, mz + nz * 80.0, 0.0);
+    let settle = sim_battle::siege::UNDER_ATTACK_CONTACT_S + 1.0;
+    for _ in 0..(settle / sim_battle::DT) as usize {
+        steady_step(&mut sim);
+    }
+    let now = sim.siege().unwrap();
+    assert!(!now.pieces[now.gate].under_attack(), "ram gone");
+}
+
+/// SB: rams and siege towers are listed with their crew as strength.
+#[test]
+fn siege_engines_report_their_strength() {
+    use sim_battle::SiegeEngineKind;
+    let data = data();
+    let mut sim = siege(&data, &["unit_siege_tower"], 2);
+    let engines = sim.siege_engines();
+    assert!(engines.iter().any(|e| e.kind == SiegeEngineKind::Ram));
+    assert!(engines.iter().any(|e| e.kind == SiegeEngineKind::Tower));
+    for e in &engines {
+        assert_eq!(e.side, SideId::Attacker);
+        assert!((e.hp - e.max_hp).abs() < 1e-9);
+    }
+    let ram = engines
+        .iter()
+        .find(|e| e.kind == SiegeEngineKind::Ram)
+        .unwrap()
+        .unit;
+    sim.units_mut()[ram as usize].hp *= 0.5;
+    let hurt = sim
+        .siege_engines()
+        .into_iter()
+        .find(|e| e.unit == ram)
+        .unwrap();
+    assert!((hurt.hp / hurt.max_hp - 0.5).abs() < 1e-9);
 }
