@@ -4,23 +4,27 @@ Spec : `docs/superpowers/specs/2026-09-28-feodalite-design.md`. Plan : `docs/sup
 ADR : 0098. Worktree orchestrateur : `../game_project-fe` sur `feat/fe`.
 
 ## État (2026-09-28)
-- **Vague 1 dans `main`** (a2672d2e) : F0-F4a + réconciliation F1/F2/F3 (cdad6965) + données dérivées F4a
-  (colonies, horizon, navgrid, héraldique, front-end). Vérif complète verte (155 binaires cargo, 896 pytest, smoke).
-  Retouches d'intégration : `cv3_ai_stances` déterminisme sur la graine 1 (la 7 a perdu son embuscade avec
-  les fiefs français) ; Sées : collégiale (une ville ne porte pas de cathédrale).
-- Worktrees vague 1 supprimés. `../game_project-fe` (`feat/fe`) reste le worktree d'intégration.
-- **Vague 2 en cours** (depuis `main` a2672d2e ou `feat/fe` a9f7b409 pour F5) :
-  - F5 IA féodale : `../game_project-fe5` (`feat/fe5-ia`) ;
-  - F4b Empire et Pays-Bas : `../game_project-fe4b` (`feat/fe4b-empire`) ;
-  - F4c îles Britanniques : `../game_project-fe4c` (`feat/fe4c-iles`) ;
-  - F4d Ibérie et F4e Italie : à lancer quand des places d'agents se libèrent (plafond 10 sur le dépôt).
+- **Vagues 1 et 2 dans `main`** (26bea252) : F0-F5 + registres F4a-F4e. 91 factions (dont `fac_rebels`),
+  186 provinces. Vérif complète verte (159 binaires cargo, 980 pytest, smoke).
+- F5 : IA féodale (`FeudalPolicy` installée par `ai::feudal::install`, ADR 0110), ordres `DeclareCommise`,
+  `GrantTitle`, `Revolt`, `SwitchAllegiance` ; doctrine « survie d'abord » des comtés.
+- Intégration vague 2 : artefacts géo régénérés une fois sur les données fusionnées ; JSON partagés
+  (maisons, portraits, front-end, index horizon, titres) fusionnés à trois voies ; `campaign.rs`
+  compare désormais l'état aux données (plus de compteurs figés). Écus et bannières générés pour toutes
+  les factions et maisons (62 factions n'en avaient pas) ; moteur héraldique : sautoir, clef, chaudière,
+  main, nef, croissant, chef, bœuf. Pavie : bordure de jeu (doublon Palatinat).
+- Tests recalés sur une graine (trajectoire changée par les nouvelles factions, pas de règle en cause) :
+  `cv3_ai_stances` (graine 1), `m4` régence (graine 11), `c7_retinue` (Bohun au lieu de Lancastre),
+  `g4` (allié ancre pris aux Pays-Bas).
+- Tous les worktrees FE d'agents supprimés. `../game_project-fe` (`feat/fe`) = worktree d'intégration.
 
 ## Reprise
-1. Fusionner chaque lot dans `feat/fe`. Artefacts géo GLOBAUX (`provinces.geojson`, rasters, `data/map/*`,
-   `navgrid.png`, aperçus) : prendre un côté puis relancer le pipeline sur les données fusionnées
-   (`cent-ans geo provinces`, `geo settlements`, `geo hamlets`, `geo horizon --province …`, `geo navgrid`).
-2. Vérif complète, ff `main`, puis vague 3 (F6 UI, F7 portraits, F8 équilibre).
-- Difficultés (2-3) des 7 factions F4a : choix éditorial de l'agent, à valider par le joueur.
+1. Vague 3 : F6 interface (`cent-ans-dev`), F7 portraits (`cent-ans-mech`, plafond 15 $, `--dry-run`
+   d'abord), puis F8 équilibre (commise de Guyenne à régler : `commise.min_power_ratio`, `max_wars`).
+- Difficultés des factions ajoutées (F4a-F4e) : choix éditoriaux des agents, à valider par le joueur.
+- Incertitudes sourcées à confirmer : Burchard Grelle (Brême), Nicolas de Brno (Trente), Dietrich IX de
+  Clèves, blasons gaéliques et italiens marqués `uncertain`.
+- `virneburg` (maison) : « trois tours » non dessinées (écu plein, sans doublon).
 
 ## Points ouverts (à trancher en F5/F8)
 - `ai/tests/g4.rs` (Brabant allié de l'Angleterre) en `#[ignore]` : un vassal peut-il s'allier hors de son suzerain ? (F5)
