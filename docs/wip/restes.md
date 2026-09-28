@@ -21,9 +21,9 @@ infobulle IB + taille `UiType`), N × règle IB2 (plus de `tooltip_text` littér
 Worktree `../gp-rs-merge` et branche `integration/rs` supprimés.
 
 Suites possibles (non lancées) :
-- `PreBattleDialog._layout()` : déborde à 1280×640 avec les grosses armées de début (défaut préexistant, domaine CB ;
-  colonnes de régiments à rendre défilantes) — voir `docs/wip/p2d-sieges.md`.
-- Icône dédiée « Raser » (reprend `act_cancel_build`).
+- ~~`PreBattleDialog._layout()` déborde à 1280×640~~ — FAIT 28/09 (65dd4452) : colonnes et conditions défilantes,
+  bannière réduite sous 760 px, re-layout au changement de minimum ; C2 de `p2d_ui_test` bloquant.
+- ~~Icône dédiée « Raser »~~ — FAIT 28/09 : `act_raze` (`raze.png`, 0,04 $).
 - Écrans de siège en bataille (`battle_siege.gd`, points de capture) après TW2 T4.
 - Pics carte restants ~8 ms (`settle/labels`, `settle/declutter`), `docs/wip/rs-k2-perf.md`.
 - FE F8 : ost d'Empire sans distance, banqueroutes ×20 ; remonter le plancher c7a (ADR 0113) si l'ost est restreint.
