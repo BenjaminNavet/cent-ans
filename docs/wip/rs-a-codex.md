@@ -14,11 +14,10 @@ Branche : `feat/rs-a-codex`, worktree agent. Lot de données : pas de build carg
   mis à jour (lots 7-8 cochés, chantier clos).
 - [x] `pytest tools/tests/test_codex.py tools/tests/test_codex_homonyms.py` : verts après l'écriture
   des 8 fiches.
-- [ ] Fiche de mécanique « Difficulté » (`cdx_jeu_difficulte`), à partir de `data/rules/difficulty.json`
-  et ADR 0037.
+- [x] Fiche de mécanique « Difficulté » (`cdx_jeu_difficulte`), chiffres tirés de
+  `data/rules/difficulty.json` (ADR 0037), validée par `validate_codex` et pytest.
 - [ ] Re-vérification finale (pytest complet) + merge de `main` + rapport.
 
 ## Prochaine étape
-Écrire `data/codex/cdx_jeu_difficulte.json` (catégorie mecanique, chiffres tirés de
-`data/rules/difficulty.json`, sans rien inventer), puis relancer les tests, merger `main` et
-rendre la main.
+Relancer `pytest tools` en entier, merger `main` dans la branche, relancer les tests, puis rendre
+la main.
