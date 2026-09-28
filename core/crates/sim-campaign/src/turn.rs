@@ -46,6 +46,8 @@ impl CampaignState {
         // auto-resolved first (M7).
         // CV3-3: encounters left unanswered take their default option.
         crate::encounter::resolve_unanswered(self, data, &mut events);
+        // TW2-T1: captures left unanswered stay simply occupied.
+        crate::capture::resolve_unanswered(self);
         battle_request::auto_resolve_all_pending(self, data, &mut events);
         crate::naval::auto_resolve_all_pending(self, data, &mut events);
 
@@ -129,6 +131,10 @@ impl CampaignState {
         crate::chivalry::resolve_chivalry(self, data, events);
         research::resolve_research(self, data, events);
         economy::resolve_attrition(self, data, events);
+        // TW2-T2: armies that did not fight regain men, recruitment pools
+        // refill (before forced marches end: they replenish nothing).
+        crate::replenish::resolve_replenishment(self, data, events);
+        crate::recruit_pool::resolve_recruit_pools(self, data);
         // CV3: forced marches pay their supply, morale modifiers wear off.
         crate::posture::end_of_turn(self, data);
         economy::resolve_decay(self, data);

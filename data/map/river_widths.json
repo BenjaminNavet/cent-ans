@@ -12,14 +12,14 @@
         { "place": "Melun", "lonlat": [2.66, 48.54], "width_m": 90 },
         { "place": "Paris (Cité)", "lonlat": [2.348, 48.855], "width_m": 130 },
         { "place": "Vernon", "lonlat": [1.485, 49.09], "width_m": 160 },
-        { "place": "Rouen", "lonlat": [1.09, 49.437], "width_m": 200 },
+        { "place": "Rouen", "lonlat": [1.09, 49.437], "width_m": 260 },
         { "place": "La Bouille", "lonlat": [0.935, 49.352], "width_m": 250 },
         { "place": "Duclair", "lonlat": [0.876, 49.482], "width_m": 300 },
         { "place": "Caudebec", "lonlat": [0.726, 49.526], "width_m": 450 },
         { "place": "Quillebeuf", "lonlat": [0.53, 49.475], "width_m": 1200 },
         { "place": "Honfleur (embouchure)", "lonlat": [0.24, 49.44], "width_m": 3000 }
       ],
-      "source": "Largeurs actuelles d'après les cartes IGN (Seine à Paris 110-150 m selon les bras, à Rouen ~200 m) ; estuaire non endigué en 1340 ; ZG7a : La Bouille, Duclair et Caudebec ajoutés (la Seine maritime ne s'évase qu'après Villequier), largeur interpolée le long de la chaîne des ancrages quel que soit le tronçon."
+      "source": "Largeurs actuelles d'après les cartes IGN (Seine à Paris 110-150 m selon les bras, à Rouen ~200 m) ; estuaire non endigué en 1340 ; ZG7a : La Bouille, Duclair et Caudebec ajoutés (la Seine maritime ne s'évase qu'après Villequier), largeur interpolée le long de la chaîne des ancrages quel que soit le tronçon. RS-G : Rouen porté de 200 à 260 m (Seine non endiguée de 1340 : pont Mathilde ≈ 270 m d'une rive à l'autre, data/landmarks_v2/rouen.json ; chenal du relief E7 mesuré jusqu'à ≈ 280 m au droit de l'île Lacroix, où le ruban de 200 m laissait une bande sèche le long d'une rive)."
     },
     {
       "id": "loire", "names": ["la Loire", "Loire", "Fleuve la Loire"],
@@ -27,14 +27,18 @@
         { "place": "Roanne", "lonlat": [4.08, 46.04], "width_m": 150 },
         { "place": "Nevers", "lonlat": [3.16, 46.985], "width_m": 300 },
         { "place": "Gien", "lonlat": [2.63, 47.685], "width_m": 300 },
-        { "place": "Orléans", "lonlat": [1.905, 47.897], "width_m": 350 },
+        { "place": "Saint-Jean-de-Braye (amont d'Orléans)", "lonlat": [1.954, 47.9002], "width_m": 350 },
+        { "place": "Orléans", "lonlat": [1.905, 47.897], "width_m": 440 },
+        { "place": "La Chapelle-Saint-Mesmin (aval d'Orléans)", "lonlat": [1.8349, 47.88], "width_m": 350 },
         { "place": "Blois", "lonlat": [1.335, 47.585], "width_m": 350 },
-        { "place": "Tours", "lonlat": [0.69, 47.40], "width_m": 400 },
+        { "place": "Vouvray (amont de Tours)", "lonlat": [0.799, 47.4045], "width_m": 390 },
+        { "place": "Tours", "lonlat": [0.69, 47.40], "width_m": 460 },
+        { "place": "Luynes (aval de Tours)", "lonlat": [0.5597, 47.3737], "width_m": 410 },
         { "place": "Saumur", "lonlat": [-0.075, 47.26], "width_m": 450 },
         { "place": "Nantes", "lonlat": [-1.555, 47.21], "width_m": 500 },
         { "place": "Paimbœuf", "lonlat": [-2.03, 47.29], "width_m": 2500 }
       ],
-      "source": "Lit de la Loire moyenne à Orléans ~350 m entre levées, bras multiples ; estuaire à partir de Nantes."
+      "source": "Lit de la Loire moyenne à Orléans ~350 m entre levées, bras multiples ; estuaire à partir de Nantes. RS-G : élargi au droit d'Orléans (440 m) et de Tours (460 m), ancrages voisins à la largeur d'avant pour borner l'effet : l'axe fin longe une rive du chenal du relief (E7 à Orléans : chenal jusqu'à 260-320 m d'un côté de l'axe, 30-180 m de l'autre ; E4 à Tours : jusqu'à 220-330 m), le ruban laissait une bande basse sèche le long de l'autre rive ; la part du ruban qui déborde sur la berge haute reste sous le relief."
     },
     {
       "id": "garonne", "names": ["la Garonne", "Garonne"],

@@ -21,6 +21,6 @@ Demande du joueur (24/09) : physique de destruction des murailles et incendies.
 - S1 : porte de Guyenne masquée par ses tours (géométrie antérieure) ; pas de son d'effondrement.
 - S2 : les ruines restent frustes (toit aplati sur un socle noir) ; le HUD de la capture affiche encore
   « Déploiement » (artefact du script, bataille démarrée par l'API).
-- S2 : règles embarquées par `include_str!` (recompiler pour changer un réglage) ; l'IA n'évite pas les rues en feu
-  et n'utilise `burn` que pour les faubourgs ; pas de bouton « incendier » dans l'UI ; l'église ne s'effondre pas
+- S2 : ~~règles embarquées par `include_str!`~~ (RS-F : lues depuis `data/` au chargement, ADR 0099) ; l'IA n'évite pas les rues en feu
+  et n'utilise `burn` que pour les faubourgs ; ~~pas de bouton « incendier »~~ (RS-F : bouton de la barre des ordres, touche I) ; l'église ne s'effondre pas
   visuellement ; pas de lutte contre le feu.

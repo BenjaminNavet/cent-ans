@@ -278,7 +278,9 @@ fn avignon_gate_falls_to_the_ram_within_minutes() {
 
 /// Wooden gate against stone wall (`data/rules/siege_works.json`): at every
 /// fortification level a full ram crew breaks the gate in a few minutes, a
-/// trebuchet alone needs at least three times as long for a wall piece.
+/// trebuchet alone needs clearly longer for a wall piece (SB, ADR 0107: at
+/// least 1.5 times as long; the gate falls in 40-60 s at level 3, a wall in
+/// 6-10 trebuchet shots).
 #[test]
 fn stone_walls_hold_far_longer_than_the_gate() {
     let data = data();
@@ -296,7 +298,7 @@ fn stone_walls_hold_far_longer_than_the_gate() {
         let wall_s = (wall / per_shot).ceil() * sim_battle::shot::ENGINE_RELOAD;
         assert!(ram_s <= 180.0, "fort {fort}: gate {ram_s:.0} s");
         assert!(
-            wall_s >= 3.0 * ram_s,
+            wall_s >= 1.5 * ram_s,
             "fort {fort}: wall {wall_s:.0} s, gate {ram_s:.0} s"
         );
     }

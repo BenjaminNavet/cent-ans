@@ -298,6 +298,10 @@ pub struct Army {
     /// the end of each turn.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub morale_modifiers: Vec<MoraleModifier>,
+    /// TW2-T2: last turn the army fought a battle (no replenishment that
+    /// season, `crate::replenish`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fought_turn: Option<u32>,
 }
 
 impl Army {
@@ -314,6 +318,7 @@ impl Army {
             planned_path: Vec::new(),
             destination: None,
             morale_modifiers: Vec::new(),
+            fought_turn: None,
         }
     }
 
@@ -456,6 +461,10 @@ pub struct SettlementState {
     /// Base fortification level from the data (0 village, 1-4 otherwise).
     #[serde(default)]
     pub fortification_level: u8,
+    /// TW2-T2: recruitment pools not full, in thousandths of a unit
+    /// (`crate::recruit_pool`); a unit type absent is at its cap.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub recruit_pool: BTreeMap<UnitTypeId, u32>,
 }
 
 /// Turn marker of a queue entry loaded from a save written before B7b (a
@@ -916,6 +925,10 @@ pub struct CampaignState {
     /// [`STATE_VERSION`]).
     #[serde(default)]
     pub encounters: crate::encounter::EncounterState,
+    /// TW2-T1: captures waiting for the player's choice and razed places in
+    /// ruins (absent from older saves; no change of [`STATE_VERSION`]).
+    #[serde(default)]
+    pub captures: crate::capture::CaptureState,
     /// Lot FE: title holdings (feudal hierarchy, ADR 0098).
     #[serde(default)]
     pub feudal: crate::feudal::FeudalState,
@@ -970,6 +983,7 @@ impl CampaignState {
             naval: crate::naval::NavalState::default(),
             difficulty: crate::difficulty::Difficulty::Normal,
             encounters: crate::encounter::EncounterState::default(),
+            captures: crate::capture::CaptureState::default(),
             feudal: crate::feudal::FeudalState::default(),
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),

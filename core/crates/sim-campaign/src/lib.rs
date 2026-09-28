@@ -39,6 +39,7 @@ pub mod battle_forecast;
 pub mod battle_outcome;
 pub mod battle_request;
 pub mod buildings;
+pub mod capture;
 pub mod characters;
 pub mod chivalry;
 pub mod chronicle;
@@ -68,7 +69,9 @@ pub mod population;
 pub mod posture;
 pub mod ransom;
 pub mod reach;
+pub mod recruit_pool;
 pub mod religion;
+pub mod replenish;
 pub mod research;
 pub mod retinue;
 pub mod rng;
@@ -98,6 +101,10 @@ pub use battle_auto::{
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
+pub use capture::{
+    CaptureDecisionView, CaptureEffects, CaptureError, CaptureOptionView, CaptureOutcome,
+    CaptureState, PendingCapture,
+};
 pub use chivalry::{ChivalryError, OrderState};
 pub use chronicle::{
     ChronicleError, ChronicleState, Decision, DecisionOptionView, DecisionView, EventContext,
@@ -127,6 +134,8 @@ pub use orders::{
 };
 pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
+pub use recruit_pool::PoolView;
+pub use replenish::{FactorKind, ReplenishFactor, ReplenishPreview, Territory};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
 pub use save::{CampaignError, FREE_MOVEMENT_STATE_VERSION, SETTLEMENTS_STATE_VERSION};
@@ -141,5 +150,7 @@ pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};
 pub use weather::{MapWeather, ProvinceWeather};
 
+#[cfg(test)]
+mod capture_tests;
 #[cfg(test)]
 mod review_tests;
