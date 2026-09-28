@@ -1,0 +1,95 @@
+{
+  "id": "prov_transylvania",
+  "name": {
+    "display": "Transylvanie",
+    "local": "Erdély",
+    "local_language": "hongrois"
+  },
+  "region": "transylvanie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Mureș",
+    "Someș",
+    "Olt"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_salt",
+    "res_iron",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Alba Iulia",
+      "local": "Gyulafehérvár",
+      "local_language": "hongrois"
+    },
+    "lat": 46.0678,
+    "lon": 23.573
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.573,
+      46.0678
+    ],
+    "seed_lonlat": [
+      23.6,
+      46.4
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_transylvania",
+  "culture": "cul_hungarian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Nobles hongrois, colons saxons et paysannerie roumaine orthodoxe (majoritaire, incertain).",
+    "classes": {
+      "peasants": {
+        "count": 150000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3300,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4500,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2200,
+  "description": "Voïvodie de Transylvanie, gouvernée par le voïvode Thomas Szécsényi au nom du roi ; colons saxons de Nagyszeben, sel de la Mureș, paysannerie roumaine dont les kenezes reçoivent des privilèges.",
+  "sources": [
+    "Voïvodie de Transylvanie",
+    "Alba Iulia",
+    "Cluj-Napoca"
+  ]
+}

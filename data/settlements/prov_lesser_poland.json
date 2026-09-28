@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_cracovie",
+    "province": "prov_lesser_poland",
+    "kind": "city",
+    "name": {
+      "display": "Cracovie",
+      "local": "Kraków",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      19.945,
+      50.0647
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du royaume depuis 1320, couronnement de Ladislas Ier puis de Casimir III ; le Wawel domine la Vistule.",
+    "sources": [
+      "Cracovie"
+    ]
+  },
+  {
+    "id": "set_wieliczka",
+    "province": "prov_lesser_poland",
+    "kind": "town",
+    "name": {
+      "display": "Wieliczka",
+      "local": "Wieliczka",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      20.0645,
+      49.9871
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville des mines de sel gemme exploitées par le monopole royal (żupy).",
+    "sources": [
+      "Wieliczka"
+    ]
+  },
+  {
+    "id": "set_tyniec",
+    "province": "prov_lesser_poland",
+    "kind": "abbey",
+    "name": {
+      "display": "Tyniec",
+      "local": "Tyniec",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      19.8156,
+      50.0197
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fortifiée sur un rocher de la Vistule, en amont de Cracovie.",
+    "sources": [
+      "Tyniec"
+    ]
+  }
+]

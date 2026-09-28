@@ -1,0 +1,63 @@
+{
+  "id": "fac_transylvania",
+  "name": {
+    "display": "Voïvodie de Transylvanie",
+    "local": "Erdélyi vajdaság",
+    "local_language": "hongrois"
+  },
+  "short_name": "Transylvanie",
+  "adjective": "transylvain",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_thomas_szecsenyi",
+  "capital": "prov_transylvania",
+  "capital_city": "Alba Iulia",
+  "religion": "rel_catholic",
+  "culture": "cul_hungarian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_hungary",
+  "primary_title": "tit_transylvania",
+  "heraldry": {
+    "blazon": "D'azur à l'aigle de sable, becquée et membrée d'or.",
+    "description": "Aigle sombre sur azur, armes de substitution pour la voïvodie.",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Armes de la voïvodie attestées seulement plus tard."
+  },
+  "titles": [
+    "Voïvode de Transylvanie",
+    "Comte des Sicules"
+  ],
+  "treasury": 6000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_hungary",
+      "status": "vassal",
+      "note": "Le voïvode est nommé et révoqué par le roi."
+    },
+    {
+      "faction": "fac_wallachia",
+      "status": "war",
+      "note": "Frontière des Carpates, tensions depuis Posada (1330)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 50,
+    "trade": 50,
+    "piety": 55
+  },
+  "description": "Grande voïvodie du roi sur la frontière orientale : Thomas Szécsényi, voïvode depuis 1321, gouverne nobles hongrois, Sicules et Saxons contre la Valachie et les Tatars.",
+  "sources": [
+    "Thomas Szécsényi",
+    "Voïvodie de Transylvanie"
+  ]
+}

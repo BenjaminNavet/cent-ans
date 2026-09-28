@@ -1,0 +1,92 @@
+{
+  "id": "prov_vitebsk",
+  "name": {
+    "display": "Vitebsk",
+    "local": "Viciebsk",
+    "local_language": "ruthène"
+  },
+  "region": "lituanie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Dvina",
+    "Kasplia"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Vitebsk",
+      "local": "Viciebsk",
+      "local_language": "ruthène"
+    },
+    "lat": 55.1904,
+    "lon": 30.2049
+  },
+  "geo": {
+    "capital_lonlat": [
+      30.2049,
+      55.1904
+    ],
+    "seed_lonlat": [
+      30.4,
+      55.0
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_lithuania",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Principauté ruthène sous influence de Gediminas (mariage d'Algirdas avec Maria de Vitebsk en 1318 ; succession en 1345).",
+    "classes": {
+      "peasants": {
+        "count": 75000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2250,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1650,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1875,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_market",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1400,
+  "description": "Principauté de Vitebsk, sur la Dvina, dont la princesse Maria a épousé Algirdas en 1318 ; le prince Iaroslav en est le souverain nominal, sous la protection de Gediminas.",
+  "sources": [
+    "Vitebsk",
+    "Algirdas",
+    "Principauté de Vitebsk"
+  ]
+}

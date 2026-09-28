@@ -1,0 +1,57 @@
+{
+  "id": "tit_glogow",
+  "rank": "county",
+  "name": {
+    "display": "Duché de Głogów-Żagań",
+    "local": "Herzogtum Glogau-Sagan",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à l'aigle de sable, becquée et membrée d'or.",
+    "description": "Aigle noir de Silésie sur argent.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1A1A1A",
+    "uncertain": true,
+    "note": "Armes de Głogów : distinction de jeu."
+  },
+  "de_jure_liege": "tit_bohemia",
+  "de_jure_provinces": [
+    "prov_glogow"
+  ],
+  "holder_1337": {
+    "faction": "fac_glogow",
+    "sources": [
+      "Henri IV de Żagań",
+      "Duché de Głogów",
+      "Henri V le Fer"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_glogow_hold",
+      "title": "Garder Głogów",
+      "description": "Conserver l'héritage de Przemko II.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_glogow"
+      }
+    },
+    {
+      "id": "obj_glogow_wroclaw",
+      "title": "Étendre l'influence",
+      "description": "Obtenir Legnica.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_legnica"
+        ]
+      }
+    }
+  ],
+  "description": "Duché piast de Głogów-Żagań.",
+  "sources": [
+    "Henri IV de Żagań",
+    "Duché de Głogów",
+    "Henri V le Fer"
+  ]
+}

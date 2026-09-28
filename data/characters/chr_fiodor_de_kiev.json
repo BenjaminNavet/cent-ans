@@ -1,0 +1,43 @@
+{
+  "id": "chr_fiodor_de_kiev",
+  "name": {
+    "display": "Fiodor de Kiev",
+    "local": "Fedir Kyivskyi",
+    "local_language": "ruthène"
+  },
+  "sex": "male",
+  "house": "Rurikides",
+  "faction": "fac_kiev",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Kiev",
+      "from": {
+        "value": "1331",
+        "uncertain": true
+      },
+      "note": "Date d'accession incertaine."
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_loyal"
+  ],
+  "piety": 55,
+  "starting_location": "prov_kyiv",
+  "status": "at_court",
+  "description": "Prince de Kiev, tributaire de la Horde d'Or et lié à Gediminas ; il sera vaincu par Algirdas en 1362 (dates de naissance et de règne incertaines).",
+  "sources": [
+    "Fiodor de Kiev"
+  ]
+}

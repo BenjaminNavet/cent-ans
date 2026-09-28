@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_sremska_mitrovica",
+    "province": "prov_syrmia",
+    "kind": "city",
+    "name": {
+      "display": "Sremska Mitrovica",
+      "local": "Szávaszentdemeter",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      19.6108,
+      44.9764
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Chef-lieu du comitat de Szerém, sur la Save, à la frontière de la Serbie.",
+    "sources": [
+      "Sremska Mitrovica"
+    ]
+  },
+  {
+    "id": "set_vukovar",
+    "province": "prov_syrmia",
+    "kind": "town",
+    "name": {
+      "display": "Vukovar",
+      "local": "Valkó",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      19.0022,
+      45.3519
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg fortifié du Danube, à l'embouchure de la Vuka.",
+    "sources": [
+      "Vukovar"
+    ]
+  },
+  {
+    "id": "set_ilok",
+    "province": "prov_syrmia",
+    "kind": "castle",
+    "name": {
+      "display": "Ilok",
+      "local": "Újlak",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      19.3833,
+      45.2233
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de la famille d'Újlak, sur une colline du Danube.",
+    "sources": [
+      "Ilok"
+    ]
+  }
+]

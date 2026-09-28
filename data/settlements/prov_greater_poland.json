@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_poznan",
+    "province": "prov_greater_poland",
+    "kind": "city",
+    "name": {
+      "display": "Poznań",
+      "local": "Poznań",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      16.9252,
+      52.4064
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale de la Grande-Pologne, ville épiscopale sur la Warta ; l'assemblée de la noblesse s'y réunit.",
+    "sources": [
+      "Poznań"
+    ]
+  },
+  {
+    "id": "set_gniezno",
+    "province": "prov_greater_poland",
+    "kind": "town",
+    "name": {
+      "display": "Gniezno",
+      "local": "Gniezno",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      17.5826,
+      52.5348
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_cathedral",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Première capitale des Piast et siège de l'archevêque, où se couronnent les rois avant Cracovie.",
+    "sources": [
+      "Gniezno"
+    ]
+  },
+  {
+    "id": "set_kalisz",
+    "province": "prov_greater_poland",
+    "kind": "town",
+    "name": {
+      "display": "Kalisz",
+      "local": "Kalisz",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      18.0911,
+      51.7611
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville murée aux confins de la Silésie, chef-lieu d'une ancienne principauté piast.",
+    "sources": [
+      "Kalisz"
+    ]
+  }
+]

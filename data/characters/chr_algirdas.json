@@ -1,0 +1,40 @@
+{
+  "id": "chr_algirdas",
+  "name": {
+    "display": "Algirdas",
+    "local": "Algirdas",
+    "local_language": "lituanien"
+  },
+  "sex": "male",
+  "house": "Gediminides",
+  "faction": "fac_lithuania",
+  "role": "prince",
+  "birth": {
+    "value": "1296",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1377-05"
+  },
+  "historical": true,
+  "skills": {
+    "command": 9,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_ambitious",
+    "trait_brave"
+  ],
+  "piety": 40,
+  "family": {
+    "father": "chr_gediminas"
+  },
+  "starting_location": "prov_vitebsk",
+  "status": "on_campaign",
+  "description": "Fils de Gediminas, marié en 1318 à Maria, fille du prince de Vitebsk ; habile chef de guerre, il deviendra grand-duc à l'est.",
+  "sources": [
+    "Algirdas"
+  ]
+}

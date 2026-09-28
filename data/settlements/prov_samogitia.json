@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_raseiniai",
+    "province": "prov_samogitia",
+    "kind": "city",
+    "name": {
+      "display": "Raseiniai",
+      "local": "Raseiniai",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      23.1179,
+      55.3711
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château et marché de la Samogitie centrale, sur la Dubysa.",
+    "sources": [
+      "Raseiniai"
+    ]
+  },
+  {
+    "id": "set_medvegalis",
+    "province": "prov_samogitia",
+    "kind": "castle",
+    "name": {
+      "display": "Medvėgalis",
+      "local": "Medvėgalis",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      22.1281,
+      55.6019
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Grande colline fortifiée de Samogitie, refuge des Žemaitiai.",
+    "sources": [
+      "Medvėgalis"
+    ]
+  },
+  {
+    "id": "set_siauliai",
+    "province": "prov_samogitia",
+    "kind": "village",
+    "name": {
+      "display": "Šiauliai",
+      "local": "Šiauliai",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      23.3137,
+      55.9349
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg proche de la plaine de Saulė, où l'Ordre livonien fut vaincu en 1236.",
+    "sources": [
+      "Šiauliai"
+    ]
+  }
+]

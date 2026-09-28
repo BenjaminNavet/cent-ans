@@ -1,0 +1,90 @@
+{
+  "id": "prov_glogow",
+  "name": {
+    "display": "Duché de Głogów-Żagań",
+    "local": "Glogau",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "silesie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Oder",
+    "Bóbr"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Głogów",
+      "local": "Glogau",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 51.6635,
+    "lon": 16.0842
+  },
+  "geo": {
+    "capital_lonlat": [
+      16.0842,
+      51.6635
+    ],
+    "seed_lonlat": [
+      15.6,
+      51.75
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_glogow",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Duché de Głogów morcelé en 1331 ; Żagań passe par héritage à la branche cadette.",
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5250,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2310,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2100,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "Duché de Głogów partagé après la mort de Przemko II (1331) ; Henri IV le Fidèle tient Żagań et sa part de Głogów, aux marches du Brandebourg, dans l'orbite de la Bohême (incertain avant l'hommage de 1344).",
+  "sources": [
+    "Duché de Głogów",
+    "Henri IV de Żagań"
+  ]
+}

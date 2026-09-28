@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_halych",
+    "province": "prov_halych",
+    "kind": "city",
+    "name": {
+      "display": "Halych",
+      "local": "Halych",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      24.7203,
+      49.1194
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de la principauté, siège d'un métropolite orthodoxe.",
+    "sources": [
+      "Halych"
+    ]
+  },
+  {
+    "id": "set_kolomyia",
+    "province": "prov_halych",
+    "kind": "town",
+    "name": {
+      "display": "Kolomyia",
+      "local": "Kolomyia",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      25.04,
+      48.53
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville des salines du Pokoutié, sur le Prout.",
+    "sources": [
+      "Kolomyia"
+    ]
+  },
+  {
+    "id": "set_terebovlia",
+    "province": "prov_halych",
+    "kind": "castle",
+    "name": {
+      "display": "Terebovlia",
+      "local": "Terebovlia",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      25.7022,
+      49.2783
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de la Podolie occidentale sur le Seret.",
+    "sources": [
+      "Terebovlia"
+    ]
+  }
+]

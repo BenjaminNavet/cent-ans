@@ -1,0 +1,92 @@
+{
+  "id": "prov_hrodna",
+  "name": {
+    "display": "Hrodna",
+    "local": "Hrodna",
+    "local_language": "ruthène"
+  },
+  "region": "lituanie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Niémen",
+    "Svislač",
+    "Narew"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Hrodna",
+      "local": "Horodnia",
+      "local_language": "ruthène"
+    },
+    "lat": 53.6688,
+    "lon": 23.8131
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.8131,
+      53.6688
+    ],
+    "seed_lonlat": [
+      24.3,
+      53.6
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_lithuania",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Marche ruthène de Lituanie face à la Mazovie et à l'Ordre.",
+    "classes": {
+      "peasants": {
+        "count": 90000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2700,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1980,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2250,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_market",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1600,
+  "description": "Marche de Hrodna sur le Niémen, ancien territoire ruthène passé à la Lituanie ; château de Gediminas et forêts giboyeuses de Vaŭkavysk.",
+  "sources": [
+    "Hrodna",
+    "Vaŭkavysk"
+  ]
+}

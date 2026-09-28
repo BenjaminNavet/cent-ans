@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_plock",
+    "province": "prov_plock",
+    "kind": "city",
+    "name": {
+      "display": "Płock",
+      "local": "Płock",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      19.7065,
+      52.5463
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de la Pologne (1079-1138), siège de l'évêché de Płock sur la haute rive de la Vistule.",
+    "sources": [
+      "Płock"
+    ]
+  },
+  {
+    "id": "set_ciechanow",
+    "province": "prov_plock",
+    "kind": "castle",
+    "name": {
+      "display": "Ciechanów",
+      "local": "Ciechanów",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      20.6206,
+      52.8816
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château ducal du nord de la Mazovie, sur la Łydynia.",
+    "sources": [
+      "Ciechanów"
+    ]
+  },
+  {
+    "id": "set_wyszogrod",
+    "province": "prov_plock",
+    "kind": "town",
+    "name": {
+      "display": "Wyszogród",
+      "local": "Wyszogród",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      20.193,
+      52.3878
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de la Vistule, ancienne résidence de la cour ducale.",
+    "sources": [
+      "Wyszogród"
+    ]
+  }
+]

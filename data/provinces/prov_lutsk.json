@@ -1,0 +1,92 @@
+{
+  "id": "prov_lutsk",
+  "name": {
+    "display": "Loutsk",
+    "local": "Lutsk",
+    "local_language": "ruthène"
+  },
+  "region": "rus_ouest",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Styr",
+    "Horyn",
+    "Ikva"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Loutsk",
+      "local": "Lutsk",
+      "local_language": "ruthène"
+    },
+    "lat": 50.7472,
+    "lon": 25.3254
+  },
+  "geo": {
+    "capital_lonlat": [
+      25.3254,
+      50.7472
+    ],
+    "seed_lonlat": [
+      25.6,
+      50.6
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_galicia_volhynia",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Volhynie orientale, à la marche de la Lituanie.",
+    "classes": {
+      "peasants": {
+        "count": 115000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3450,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2530,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3450,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1900,
+  "description": "Volhynie orientale autour de Loutsk, place-forte de la marche lituanienne ; forêts et noblesse turbulente.",
+  "sources": [
+    "Lutsk",
+    "Kremenets",
+    "Volhynie"
+  ]
+}

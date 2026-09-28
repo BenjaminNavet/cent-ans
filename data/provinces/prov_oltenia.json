@@ -1,0 +1,93 @@
+{
+  "id": "prov_oltenia",
+  "name": {
+    "display": "Olténie",
+    "local": "Oltenia",
+    "local_language": "roumain"
+  },
+  "region": "valachie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Olt",
+    "Jiu",
+    "Danube"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Craiova",
+      "local": "Craiova",
+      "local_language": "roumain"
+    },
+    "lat": 44.3302,
+    "lon": 23.7949
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.7949,
+      44.3302
+    ],
+    "seed_lonlat": [
+      24.0,
+      44.6
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_wallachia",
+  "culture": "cul_romanian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Craiova n'est attestée qu'en 1475 ; choisie ici comme centre régional (incertain).",
+    "classes": {
+      "peasants": {
+        "count": 75000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1650,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1500,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1400,
+  "description": "Olténie, moitié occidentale de la Valachie de Basarab Ier, entre les Carpates, l'Olt et le Danube ; principauté née de la victoire de Posada (1330) sur le roi de Hongrie.",
+  "sources": [
+    "Olténie",
+    "Basarab Ier de Valachie",
+    "Bataille de Posada"
+  ]
+}

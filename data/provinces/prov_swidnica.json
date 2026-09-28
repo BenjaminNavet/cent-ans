@@ -1,0 +1,92 @@
+{
+  "id": "prov_swidnica",
+  "name": {
+    "display": "Duché de Świdnica-Jawor",
+    "local": "Schweidnitz",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "silesie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Bystrzyca",
+    "Nysa Łużycka"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wheat",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Świdnica",
+      "local": "Schweidnitz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 50.8436,
+    "lon": 16.4881
+  },
+  "geo": {
+    "capital_lonlat": [
+      16.4881,
+      50.8436
+    ],
+    "seed_lonlat": [
+      16.4,
+      50.85
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_swidnica",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Le plus riche des duchés silésiens indépendants.",
+    "classes": {
+      "peasants": {
+        "count": 110000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2420,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2200,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls",
+    "bld_fair"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1800,
+  "description": "Dernier duché silésien indépendant de la Bohême : Bolko II tient Świdnica et Jawor (partagé avec son oncle Henri Ier de Jawor) ; il se rapproche de la Hongrie et des Habsbourg pour éviter l'hommage à Jean de Luxembourg.",
+  "sources": [
+    "Duché de Świdnica",
+    "Bolko II de Świdnica"
+  ]
+}

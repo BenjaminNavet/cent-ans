@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_pecs",
+    "province": "prov_pecs",
+    "kind": "city",
+    "name": {
+      "display": "Pécs",
+      "local": "Pécs",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.2323,
+      46.0727
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville épiscopale entre les monts Mecsek et la Drave.",
+    "sources": [
+      "Pécs"
+    ]
+  },
+  {
+    "id": "set_pecsvarad",
+    "province": "prov_pecs",
+    "kind": "abbey",
+    "name": {
+      "display": "Pécsvárad",
+      "local": "Pécsvárad",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.4194,
+      46.1547
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fondée par saint Étienne, au pied du Mecsek.",
+    "sources": [
+      "Pécsvárad"
+    ]
+  },
+  {
+    "id": "set_szekszard",
+    "province": "prov_pecs",
+    "kind": "town",
+    "name": {
+      "display": "Szekszárd",
+      "local": "Szekszárd",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.7064,
+      46.3474
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Bourg vinicole de la Tolna, abbaye bénédictine de 1061.",
+    "sources": [
+      "Szekszárd"
+    ]
+  }
+]

@@ -1,0 +1,66 @@
+{
+  "id": "fac_galicia_volhynia",
+  "name": {
+    "display": "Royaume de Galicie-Volhynie",
+    "local": "Королівство Русі",
+    "local_language": "ruthène"
+  },
+  "short_name": "Galicie-Volhynie",
+  "adjective": "galicien",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_boleslas_iouri_ii",
+  "capital": "prov_lviv",
+  "capital_city": "Léopol",
+  "religion": "rel_orthodox",
+  "culture": "cul_ruthenian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_galicia_volhynia",
+  "heraldry": {
+    "blazon": "D'azur au lion d'or, armé et lampassé de gueules, couronné d'or.",
+    "description": "Lion d'or des rois de Ruthénie sur azur.",
+    "primary_color": "#1F4FA8",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Lion passant réduit à un lion rampant pour le dessin."
+  },
+  "titles": [
+    "Roi de Ruthénie",
+    "Duc de toute la Petite Russie"
+  ],
+  "treasury": 7000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_poland",
+      "status": "peace",
+      "note": "Bolesław-Iouri est parent des ducs de Mazovie, cousin de Casimir III."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "peace",
+      "note": "Rivalité pour la Volhynie orientale et la Podlachie ; Gediminas est son beau-père (Eufemia, 1331, incertain)."
+    },
+    {
+      "faction": "fac_hungary",
+      "status": "peace",
+      "note": "Charles Robert observe la Ruthénie rouge."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 50,
+    "piety": 70
+  },
+  "description": "Dernier royaume de la Rus' occidentale, gouverné depuis 1323 par Bolesław-Iouri II (Iouri II), prince piast de Mazovie converti à l'orthodoxie ; ses boyards, mécontents de son catholicisme, l'empoisonneront en 1340.",
+  "sources": [
+    "Boleslas-Iouri II de Galicie-Volhynie",
+    "Royaume de Galicie-Volhynie"
+  ]
+}

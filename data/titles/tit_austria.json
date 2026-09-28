@@ -14,7 +14,10 @@
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [
-    "prov_austria"
+    "prov_austria",
+    "prov_styria",
+    "prov_carinthia",
+    "prov_carniola"
   ],
   "holder_1337": {
     "faction": "fac_austria",

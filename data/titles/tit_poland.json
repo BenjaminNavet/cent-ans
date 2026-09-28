@@ -1,0 +1,73 @@
+{
+  "id": "tit_poland",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Pologne",
+    "local": "Królestwo Polskie",
+    "local_language": "polonais"
+  },
+  "heraldry": {
+    "blazon": "De gueules à l'aigle d'argent, couronnée, becquée et membrée d'or.",
+    "description": "Aigle blanc couronné des Piast, armes du royaume restauré.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_provinces": [
+    "prov_lesser_poland",
+    "prov_greater_poland",
+    "prov_kuyavia",
+    "prov_sieradz_leczyca",
+    "prov_sandomierz",
+    "prov_lublin"
+  ],
+  "holder_1337": {
+    "faction": "fac_poland",
+    "sources": [
+      "Casimir III de Pologne",
+      "Royaume de Pologne (1320-1385)",
+      "Traité de Trentschin"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_poland_hold",
+      "title": "Garder la couronne",
+      "description": "Casimir III doit conserver le royaume restauré de Ladislas Ier.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_poland"
+      }
+    },
+    {
+      "id": "obj_poland_core",
+      "title": "Rassembler les terres piast",
+      "description": "Tenir la Petite-Pologne, la Grande-Pologne, la Kuyavie et le pays de Sieradz-Łęczyca.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_lesser_poland",
+          "prov_greater_poland",
+          "prov_kuyavia",
+          "prov_sieradz_leczyca"
+        ]
+      }
+    },
+    {
+      "id": "obj_poland_ruthenia",
+      "title": "La Ruthénie rouge",
+      "description": "Prendre Léopol pour la couronne de Pologne.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_lviv"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume de Pologne restauré : couronnement de Ladislas Ier à Cracovie en 1320, puis de Casimir III en 1333 ; les duchés de Mazovie et de Silésie, vassaux de la Bohême, en restent séparés.",
+  "sources": [
+    "Casimir III de Pologne",
+    "Royaume de Pologne (1320-1385)",
+    "Traité de Trentschin"
+  ]
+}
