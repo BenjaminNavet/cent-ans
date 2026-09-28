@@ -29,7 +29,11 @@ mask as ``heightmap_render.png`` (σ 5 km, gain 0.8, ±120 m, faded out above
 
 After a level is baked, every parent tile (level ``k - 1``) of a baked tile is
 set to the 2 x 2 mean of its children where they carry fine data (weighted by
-``w``): a child averaged 2 x 2 gives back its parent to quantisation.
+``w``): a child averaged 2 x 2 gives back its parent to quantisation. RS-G: the
+update cascades down to :data:`MIN_PARENT_LEVEL` (E3), E5 included, so that the
+coarser levels shown from farther away inherit the bare-earth DTM instead of the
+GLO-30 surface model (tower blocks of the City of London were 25-50 m bumps in
+E3-E4 above an EA LiDAR E5-E7).
 """
 
 from __future__ import annotations
@@ -92,7 +96,10 @@ MIN_LAND_M = 0.5
 WORKERS = max(1, min(8, (os.cpu_count() or 4) - 2))
 #: Bump when the bake changes, so that ``done`` markers are invalidated.
 #: 5 (SZ2): valley floors not dug (:func:`relief_shade.valley_floor`), E1-E4 re-baked.
-BAKE_VERSION = 5
+#: 6 (RS-G): 2 x 2 means cascaded into E4 and E3 (no GLO-30 buildings above the zones).
+BAKE_VERSION = 6
+#: Coarsest level receiving the 2 x 2 means of the detail levels (RS-G).
+MIN_PARENT_LEVEL = 3
 #: Grey-opening width (GLO-30 pixels) turning the surface model into rough ground.
 GLO30_OPENING_PX = 5
 PREVIEW_ZONES = ("calais", "poitiers", "chateau_gaillard")
@@ -735,7 +742,7 @@ def _parent_updates(
     cluster: Cluster, baked: np.ndarray, weight: np.ndarray
 ) -> Path | None:
     """Save the 2 x 2 means (and mean weights) of the baked raster for the parents."""
-    if cluster.level - 1 < LEVELS[0]:
+    if cluster.level - 1 < MIN_PARENT_LEVEL:
         return None
     means = baked.reshape(baked.shape[0] // 2, 2, baked.shape[1] // 2, 2).mean(
         axis=(1, 3)
@@ -756,35 +763,61 @@ def _parent_updates(
 
 
 def apply_parent_updates(paths: list[str], map_dir: Path = MAP_DIR) -> int:
-    """Blend the 2 x 2 child means into the parent tiles (serial, after a level)."""
-    touched = 0
-    pending: dict[tuple[int, int, int], np.ndarray] = {}
+    """Blend the 2 x 2 child means into the parent tiles (serial, after a level).
+
+    RS-G: the blended parents are then averaged 2 x 2 into their own parents, down
+    to :data:`MIN_PARENT_LEVEL`, with the blend weights averaged the same way.
+    """
+    half = TILE_PX // 2
+    # (level, col, row) -> [heights, weights] of the parent tiles being updated.
+    pending: dict[tuple[int, int, int], list[np.ndarray]] = {}
+
+    def blend_block(key, quadrant, means, weights) -> None:  # noqa: ANN001
+        if key not in pending:
+            tile = read_tile_m(tile_path(map_dir, *key))
+            if tile is None:
+                return
+            pending[key] = [tile, np.zeros_like(tile)]
+        pr, pc = quadrant
+        block = pending[key][0][pr : pr + half, pc : pc + half]
+        block[...] = weights * means + (1.0 - weights) * block
+        seen = pending[key][1][pr : pr + half, pc : pc + half]
+        np.maximum(seen, weights, out=seen)
+
     for name in paths:
         data = np.load(name)
         means, weights = data["means"], data["weights"]
         col0, row0, level = (int(v) for v in data["origin"])
-        parent_level = level - 1
-        half = TILE_PX // 2
+        if level - 1 < MIN_PARENT_LEVEL:
+            continue
         for col, row in (tuple(int(v) for v in t) for t in data["tiles"]):
-            key = (parent_level, col // 2, row // 2)
-            if key not in pending:
-                tile = read_tile_m(tile_path(map_dir, *key))
-                if tile is None:
-                    continue
-                pending[key] = tile
             r = (row - row0) * half
             c = (col - col0) * half
-            pr = (row % 2) * half
-            pc = (col % 2) * half
-            block = pending[key][pr : pr + half, pc : pc + half]
-            w = weights[r : r + half, c : c + half]
-            block[...] = w * means[r : r + half, c : c + half] + (1.0 - w) * block
-    for (level, col, row), tile in pending.items():
-        path = tile_path(map_dir, level, col, row)
-        partial = path.with_suffix(".part.png")
-        terrain.write_png16(terrain.height_to_uint16(tile), partial)
-        partial.replace(path)
-        touched += 1
+            blend_block(
+                (level - 1, col // 2, row // 2),
+                ((row % 2) * half, (col % 2) * half),
+                means[r : r + half, c : c + half],
+                weights[r : r + half, c : c + half],
+            )
+    touched = 0
+    while pending:
+        for (level, col, row), (tile, _) in pending.items():
+            path = tile_path(map_dir, level, col, row)
+            partial = path.with_suffix(".part.png")
+            terrain.write_png16(terrain.height_to_uint16(tile), partial)
+            partial.replace(path)
+            touched += 1
+        children = pending
+        pending = {}
+        for (level, col, row), (tile, weight) in children.items():
+            if level - 1 < MIN_PARENT_LEVEL:
+                continue
+            blend_block(
+                (level - 1, col // 2, row // 2),
+                ((row % 2) * half, (col % 2) * half),
+                tile.reshape(half, 2, half, 2).mean(axis=(1, 3)),
+                weight.reshape(half, 2, half, 2).mean(axis=(1, 3)),
+            )
     return touched
 
 
