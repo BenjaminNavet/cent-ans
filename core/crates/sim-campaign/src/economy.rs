@@ -570,6 +570,11 @@ pub(crate) fn resolve_economy(
         faction.seigniorage_last_turn = seigniorage;
         faction.recoinage_last_turn = recoinage;
         faction.treasury += income - upkeep;
+        faction.deficit_seasons = if income < upkeep {
+            faction.deficit_seasons.saturating_add(1)
+        } else {
+            0
+        };
         faction.income_last_turn = income;
         faction.upkeep_last_turn = upkeep;
         faction.army_upkeep_last_turn = army_upkeep;
@@ -715,8 +720,11 @@ fn reinforce_garrison(
     let percent = (points * rules.garrison_reinforce_percent_per_point)
         .min(rules.garrison_reinforce_max_percent);
     for unit in &mut settlement.garrison {
-        let gain = (unit.max_strength * percent).div_ceil(100);
-        unit.strength = (unit.strength + gain).min(unit.max_strength.max(unit.strength));
+        let gain = (unit.max_strength * percent)
+            .div_ceil(100)
+            .min(unit.max_strength.saturating_sub(unit.strength));
+        // TW2-T5: local levies dilute the garrison's experience pro rata.
+        crate::traditions::add_recruits(unit, gain, 0);
     }
 }
 

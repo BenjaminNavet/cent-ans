@@ -46,6 +46,8 @@ pub const COUNTER_TRIBUTE_SEASONS: u32 = 8;
 pub const MAX_TRIBUTE_SEASONS: u32 = 40;
 /// Reason of the modifier left by a war declared on a hostage holder.
 pub const HOSTAGE_BETRAYAL_REASON: &str = "Otages abandonnés : parole trahie";
+/// Opinion reason of a signed treaty (capped motive `treaty`, RS-C).
+pub const TREATY_REASON: &str = "Traité signé";
 
 // =========================================================================
 // Types
@@ -1527,8 +1529,8 @@ pub fn apply_treaty(
             }
         }
     }
-    state.add_modifier(recipient, proposer, 5, "Traité signé", 20);
-    state.add_modifier(proposer, recipient, 5, "Traité signé", 20);
+    state.add_capped_modifier(data, recipient, proposer, 5, TREATY_REASON, 20);
+    state.add_capped_modifier(data, proposer, recipient, 5, TREATY_REASON, 20);
     state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(proposer));
     Ok(())
 }
