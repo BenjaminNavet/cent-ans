@@ -243,13 +243,13 @@ func update_view(camera_distance: float) -> void:
 	if effects != null:
 		effects.set_season(seasons.weights)
 		effects.update_view(_camera_distance, _tiers)
-	tp = PerfProbe.lap("life/effects", tp)
 		if _off.has("smoke"):
 			effects.get_node("Chimneys").visible = false
 			effects.get_node("Fires").visible = false
 		if _off.has("mills"):
 			effects.get_node("WindmillBodies").visible = false
 			effects.get_node("WindmillSails").visible = false
+	tp = PerfProbe.lap("life/effects", tp)
 	if _off.has("ambient"):
 		if ambient != null:
 			ambient.visible = false
