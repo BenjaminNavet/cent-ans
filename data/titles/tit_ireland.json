@@ -1,0 +1,51 @@
+{
+  "rank": "duchy",
+  "name": {
+    "display": "Seigneurie d'Irlande",
+    "local": "Lordship of Ireland",
+    "local_language": "moyen anglais"
+  },
+  "heraldry": {
+    "blazon": "D'azur à trois couronnes d'or.",
+    "description": "Armes historiques de la seigneurie d'Irlande sous la couronne anglaise (attestées à partir du XVe siècle, utilisées ici par convention).",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_liege": "tit_england",
+  "de_jure_provinces": [
+    "prov_dublin",
+    "prov_meath",
+    "prov_munster",
+    "prov_ulster",
+    "prov_man"
+  ],
+  "holder_1337": {
+    "faction": "fac_england",
+    "sources": [
+      "Édouard III, seigneur d'Irlande",
+      "Seigneurie d'Irlande"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_ireland_submit",
+      "title": "Pacifier l'Irlande gaélique",
+      "description": "Soumettre les royaumes gaéliques (Tyrone, Thomond, Connacht, Leinster) à la couronne.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tyrone",
+          "prov_thomond",
+          "prov_connacht",
+          "prov_leinster"
+        ]
+      }
+    }
+  ],
+  "description": "Titre de jure créé par Henri II en 1177 et tenu depuis par la couronne d'Angleterre ; en pratique, l'autorité royale ne dépasse guère le Pale et les grandes seigneuries anglo-irlandaises.",
+  "sources": [
+    "Seigneurie d'Irlande",
+    "Édouard III"
+  ],
+  "id": "tit_ireland"
+}

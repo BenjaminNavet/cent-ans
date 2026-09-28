@@ -1,0 +1,33 @@
+{
+  "rank": "duchy",
+  "name": {
+    "display": "Principauté de Galles",
+    "local": "Tywysogaeth Cymru",
+    "local_language": "gallois"
+  },
+  "heraldry": {
+    "blazon": "De gueules à quatre lions passants gardants d'or, cantonnés.",
+    "description": "Armes du royaume de Gwynedd, reprises pour la principauté après la conquête édouardienne (1282-1284).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_liege": "tit_england",
+  "de_jure_provinces": [
+    "prov_deheubarth",
+    "prov_gwynedd"
+  ],
+  "holder_1337": {
+    "faction": "fac_england",
+    "sources": [
+      "Statut de Rhuddlan (1284)",
+      "Principauté de Galles"
+    ]
+  },
+  "description": "Titre vacant en 1337 : le dernier prince de Galles fut le futur Édouard III lui-même (1301-1307) ; son fils Édouard de Woodstock n'est créé prince de Galles qu'en 1343. La principauté est tenue directement par la couronne depuis la conquête édouardienne (1282-1284) et le statut de Rhuddlan (1284).",
+  "sources": [
+    "Statut de Rhuddlan",
+    "Édouard de Woodstock",
+    "Principauté de Galles"
+  ],
+  "id": "tit_wales"
+}

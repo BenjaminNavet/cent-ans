@@ -13,19 +13,14 @@
     "secondary_color": "#F2C230"
   },
   "de_jure_provinces": [
-    "prov_deheubarth",
     "prov_devon",
-    "prov_dublin",
     "prov_gloucester",
-    "prov_gwynedd",
     "prov_kent",
     "prov_middlesex",
-    "prov_munster",
     "prov_norfolk",
     "prov_northumberland",
     "prov_oxford",
     "prov_sussex",
-    "prov_ulster",
     "prov_warwick",
     "prov_wessex",
     "prov_yorkshire"

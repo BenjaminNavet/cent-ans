@@ -1,0 +1,51 @@
+{
+  "rank": "duchy",
+  "name": {
+    "display": "Seigneurie des Îles",
+    "local": "Tighearnas nan Eilean",
+    "local_language": "gaélique écossais"
+  },
+  "heraldry": {
+    "blazon": "D'or à la nef (lymphad) de sable, voiles ferlées.",
+    "description": "La nef (galère des Hébrides), emblème de la dynastie de Somerled repris par les MacDonald ; seule la nef, sans l'aigle (ajouté par les descendants après 1363), est attestée sur les sceaux de Jean d'Islay.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1a1a1a",
+    "uncertain": true
+  },
+  "de_jure_liege": "tit_scotland",
+  "de_jure_provinces": [
+    "prov_isles"
+  ],
+  "holder_1337": {
+    "faction": "fac_isles",
+    "sources": [
+      "Jean d'Islay, seigneur des Îles"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_isles_hold",
+      "title": "Garder les Îles",
+      "description": "Conserver l'autonomie de fait de la seigneurie face à la couronne écossaise.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_isles"
+      }
+    },
+    {
+      "id": "obj_isles_independence",
+      "title": "Roi des Îles",
+      "description": "Les ancêtres de Jean d'Islay se disaient rois des Îles : rompre tout lien avec Édimbourg.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Seigneurie des Îles, titre pris par Jean d'Islay en 1336 (« Dominus Insularum ») ; vassalité écossaise purement nominale sur les Hébrides et la côte occidentale d'Argyll.",
+  "sources": [
+    "Jean d'Islay, seigneur des Îles",
+    "Seigneurie des Îles",
+    "Finlaggan"
+  ],
+  "id": "tit_isles"
+}

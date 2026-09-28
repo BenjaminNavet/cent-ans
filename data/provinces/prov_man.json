@@ -1,0 +1,89 @@
+{
+  "name": {
+    "display": "Île de Man",
+    "local": "Mannin",
+    "local_language": "mannois"
+  },
+  "region": "irlande",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [],
+  "coastal": true,
+  "resources": [
+    "res_fish",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Castletown",
+      "local": "Castletown",
+      "local_language": "moyen anglais"
+    },
+    "lat": 54.073,
+    "lon": -4.658
+  },
+  "geo": {
+    "capital_lonlat": [
+      -4.658,
+      54.073
+    ],
+    "seed_lonlat": [
+      -4.55,
+      54.23
+    ],
+    "voronoi_weight": 0.35
+  },
+  "owner": "fac_england",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 8000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1200,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 300,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 100,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Petite île tenue en 1337 par Guillaume de Montaigu, comte de Salisbury ; population estimée."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 900,
+  "description": "Île de Man, ancien royaume nordo-gaélique tenu depuis 1333 par Guillaume de Montaigu, comte de Salisbury, sous la couronne d'Angleterre ; Château Rushen à Castletown.",
+  "sources": [
+    "Guillaume de Montaigu, 1er comte de Salisbury",
+    "Île de Man",
+    "Château Rushen"
+  ],
+  "id": "prov_man"
+}

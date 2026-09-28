@@ -1,0 +1,56 @@
+{
+  "name": {
+    "display": "Comté de Lancastre",
+    "local": "Earldom of Lancaster",
+    "local_language": "moyen anglais"
+  },
+  "short_name": "Lancastre",
+  "adjective": "lancastrien",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_henry_iii_de_lancastre",
+  "heir": "chr_henry_of_grosmont",
+  "capital": "prov_lancaster",
+  "capital_city": "Lancaster",
+  "religion": "rel_catholic",
+  "culture": "cul_english",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_england",
+  "primary_title": "tit_lancaster",
+  "heraldry": {
+    "blazon": "De gueules à trois léopards d'or, à la bande d'azur brochant sur le tout.",
+    "description": "Armes d'Angleterre brisées d'une bande d'azur.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#1F3A93"
+  },
+  "titles": [
+    "Comte de Lancastre et de Leicester",
+    "Sénéchal d'Angleterre"
+  ],
+  "treasury": 6000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_masonry",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "vassal",
+      "note": "Henri, petit-fils de Henri III par Edmond Crouchback, un des artisans de la déposition d'Édouard II en 1327."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 55,
+    "trade": 40,
+    "piety": 70
+  },
+  "description": "Henri, 3e comte de Lancastre et de Leicester, petit-fils de Henri III, aveugle depuis environ 1330 ; il passera ses dernières années à Leicester, où il fonde un hôpital pour les pauvres (le Newarke). Son fils Henri de Grosmont, fait comte de Derby le 16 mars 1337, deviendra le plus grand capitaine anglais du début de la guerre.",
+  "sources": [
+    "Henri, 3e comte de Lancastre",
+    "Henri de Grosmont"
+  ],
+  "id": "fac_lancaster"
+}
