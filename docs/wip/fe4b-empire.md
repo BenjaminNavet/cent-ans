@@ -74,5 +74,24 @@ intégration, blasons, cartes front-end, portraits, régénération géo, tests 
 l'agent orchestrateur (moi) après collecte des 5 grappes, pour éviter les conflits d'écriture
 concurrente sur les fichiers partagés et les courses git.
 
+## État (mise à jour)
+
+Les 5 grappes ont livré. Validation faite (0 erreur de schéma, 0 collision d'id, 0 référence
+pendante, 0 doublon de blazon hors paires titre/faction attendues) via un script jsonschema
+jetable. `tit_empire.json` nettoyé (provinces désormais couvertes par leur propre titre
+retirées de `de_jure_provinces`). `data/heraldry/houses.json` intégré : 19 nouvelles maisons +
+mise à jour `vassal_of` de Wittelsbach (Brandebourg, Palatinat) et Luxembourg (Tyrol, Trèves) ;
+`tools/tests/test_heraldry_houses.py` 6/6 verts après correction d'une collision de rendu
+(Wolfskeel/Grelle, charges non reconnues par la grammaire → remplacées par roses/tourteaux).
+
+**Incident (corrigé)** : `git stash -u` exécuté par erreur, arbre de travail vidé un temps ;
+restauré par l'orchestrateur (`git stash apply`) avec l'accord du joueur, filet de sécurité
+`backup/fe4b-stash`. Tout le travail des 5 grappes est intact, commité en `11602157`.
+
+Incertitudes non vérifiables signalées par les agents, gardées `uncertain: true` comme demandé :
+Burchard Grelle (archevêque de Brême, dates 1327-1344) et Nicolas de Brno (évêque de Trente,
+attesté surtout à partir de 1338).
+
 ## Prochaine étape
-Lancer les 5 agents de grappe, puis intégrer.
+`data/ui/front_end.json` (24 cartes, `fac_namur` non jouable), `data/portraits/archetypes.json`
+(bucket `italy_empire`), régénération géo, `cargo test`, `pytest`, commits wip réguliers.
