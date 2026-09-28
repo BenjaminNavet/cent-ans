@@ -19,6 +19,17 @@
         "prompt": {"type": "string", "minLength": 40}
       }
     },
+    "cursor": {
+      "type": "object",
+      "required": ["id", "fill", "barred"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "enum": ["move", "melee", "ranged", "ranged_blocked", "siege", "forbidden"], "description": "Contexte de survol du cœur (`BattleSim.hover_context`), nom du fichier `game/assets/ui/cursors/<id>.png`."},
+        "icon": {"$ref": "#/$defs/id", "description": "Icône à l'encre du catalogue dont le curseur est dérivé (absent : cercle barré seul)."},
+        "fill": {"type": "string", "pattern": "^#[0-9a-f]{6}$", "description": "Teinte du dessin, cerné d'encre."},
+        "barred": {"type": "boolean", "description": "Barre rouge en diagonale (cercle barré si pas d'icône)."}
+      }
+    },
     "entry": {
       "type": "object",
       "required": ["id", "label", "subject", "targets"],
@@ -26,7 +37,7 @@
       "properties": {
         "id": {"$ref": "#/$defs/id"},
         "label": {"type": "string", "minLength": 1, "description": "Nom français (planche de contrôle)."},
-        "group": {"type": "string", "enum": ["hud", "alert", "gauge", "class", "category", "building", "stance", "battle", "map", "action", "trait"]},
+        "group": {"type": "string", "enum": ["hud", "alert", "gauge", "class", "category", "building", "stance", "battle", "map", "action", "trait", "cb"]},
         "subject": {"type": "string", "minLength": 3, "description": "Sujet en anglais, ajouté à la fin du prompt de style."},
         "source": {"type": "string", "description": "Image déjà validée réutilisée telle quelle (aucune génération)."},
         "targets": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/target"}}
@@ -40,6 +51,7 @@
     "icon_style": {"$ref": "#/$defs/style"},
     "medallion_style": {"$ref": "#/$defs/style"},
     "icons": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}},
+    "cursors": {"type": "array", "description": "Lot CB : curseurs de bataille 32 px, point chaud au centre, dérivés gratuitement des icônes à l'encre.", "items": {"$ref": "#/$defs/cursor"}},
     "medallions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}}
   }
 }

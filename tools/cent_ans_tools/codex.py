@@ -37,6 +37,7 @@ ENTITY_DIRECTORIES = {
     "res": "resources",
     "edict": "edicts",
     "order": "battle_orders",
+    "ability": "battle_abilities",
     "ship": "naval/ships",
 }
 

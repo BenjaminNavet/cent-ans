@@ -33,6 +33,58 @@ impl GameDataStore {
             "hover_preview_max_paths",
             f64::from(preview.max_individual_paths),
         );
+        // CB-M3: queued orders per regiment (`data/rules/battle_queue.json`).
+        dict.set(
+            "battle_queue_max",
+            f64::from(sim_battle::QueueRules::bundled().max_queued_orders),
+        );
+        // CB5: the alert column's on-screen duration and merge window, so
+        // `battle_alerts_column.gd` quotes `data/rules/battle_alerts.json`
+        // instead of copying its numbers.
+        let alerts = sim_battle::alerts::AlertRules::bundled();
+        dict.set("cb5_alert_duration_s", alerts.duration_s);
+        dict.set("cb5_alert_merge_window_s", alerts.merge_window_s);
+        dict.set("cb5_alert_merge_radius_m", alerts.merge_radius_m);
+        dict.set("cb5_alert_max_shown", f64::from(alerts.max_shown));
+        for kind in [
+            sim_battle::alerts::AlertKind::Rout,
+            sim_battle::alerts::AlertKind::GeneralDown,
+            sim_battle::alerts::AlertKind::Flanked,
+            sim_battle::alerts::AlertKind::Reinforcements,
+            sim_battle::alerts::AlertKind::AmmoOut,
+            sim_battle::alerts::AlertKind::WallBreached,
+            sim_battle::alerts::AlertKind::GateDestroyed,
+        ] {
+            dict.set(
+                format!("cb5_alert_importance_{}", kind.key()),
+                f64::from(alerts.importance(kind)),
+            );
+        }
+        // CB2: unit modes (`data/rules/unit_modes.json`), quoted by the
+        // tooltips of the mode buttons and the help.
+        let modes = sim_battle::UnitModeRules::bundled();
+        dict.set("unit_modes_skirmish_trigger_m", modes.skirmish.trigger_m);
+        dict.set("unit_modes_skirmish_retreat_m", modes.skirmish.retreat_m);
+        dict.set(
+            "unit_modes_breach_damage_percent",
+            (modes.breach.wall_damage("default") - 1.0) * 100.0,
+        );
+        dict.set(
+            "unit_modes_breach_mangonel_percent",
+            (modes.breach.wall_damage("unit_mangonel") - 1.0) * 100.0,
+        );
+        dict.set(
+            "unit_modes_breach_reload_percent",
+            (modes.breach.reload_multiplier - 1.0) * 100.0,
+        );
+        dict.set("unit_modes_wavering_morale", modes.status.wavering_morale);
+        dict.set(
+            "unit_modes_under_fire_seconds",
+            modes.status.under_fire_seconds,
+        );
+        // CB4: regiments' abilities (`data/battle_abilities/`), quoted by the
+        // tooltips of the ability buttons.
+        crate::battle_sim_abilities::rule_constants(data, &mut dict);
         dict
     }
 }

@@ -29,6 +29,7 @@ fn disengaged_regiment_marches_again() {
         units: vec![0],
         target: 1,
         run: false,
+        queue: false,
     })
     .unwrap();
     for _ in 0..600 {
@@ -44,6 +45,10 @@ fn disengaged_regiment_marches_again() {
         z: 100.0,
         run: true,
         facing: None,
+        queue: false,
+        width: None,
+        match_speed: false,
+        group_tag: None,
     })
     .unwrap();
     // The enemy falls back out of reach: the regiment is free.
@@ -77,6 +82,7 @@ fn archers_close_in_on_a_hidden_target() {
         units: vec![0],
         target: 1,
         run: false,
+        queue: false,
     })
     .unwrap();
     run(&mut sim, 60.0);
@@ -109,6 +115,7 @@ fn archers_fall_back_on_a_free_enemy() {
         units: vec![1],
         target: 2,
         run: false,
+        queue: false,
     })
     .unwrap();
     for _ in 0..600 {
@@ -123,6 +130,7 @@ fn archers_fall_back_on_a_free_enemy() {
         units: vec![0],
         target: 2,
         run: false,
+        queue: false,
     })
     .unwrap();
     run(&mut sim, 20.0);
@@ -186,6 +194,7 @@ fn ai_pull_out_stays_on_the_field() {
             units: vec![5],
             target: 0,
             run: false,
+            queue: false,
         },
         None,
     )

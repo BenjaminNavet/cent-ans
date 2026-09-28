@@ -900,7 +900,8 @@ def assets_ink_icons(
     sheet = ink_icons.contact_sheet(catalog)
     console.print(
         f"[green]OK[/green] : {len(report['icons'])} icône(s), "
-        f"{len(report['medallions'])} médaillon(s) ; planche {sheet}"
+        f"{len(report['medallions'])} médaillon(s), "
+        f"{len(report.get('cursors', []))} curseur(s) ; planche {sheet}"
     )
     if report["missing"]:
         console.print(f"[yellow]Sans source[/yellow] : {', '.join(report['missing'])}")

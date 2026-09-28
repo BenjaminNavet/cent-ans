@@ -35,6 +35,7 @@ fn duel(rules: BattleStandardRules, seed: u64) -> BattleSim {
                 units: vec![unit],
                 target,
                 run: false,
+                queue: false,
             },
             None,
         )

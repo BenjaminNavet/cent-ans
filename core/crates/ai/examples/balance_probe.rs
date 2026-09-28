@@ -1001,6 +1001,7 @@ fn run_3d(data: &GameData, scenario: &Scenario, runs: u32) -> Reference3d {
             siege: None,
             siege_layout: None,
             orders: Vec::new(),
+            abilities: Vec::new(),
             standards: None,
             decor_plan: None,
             opening: Default::default(),

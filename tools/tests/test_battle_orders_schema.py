@@ -25,7 +25,7 @@ def _validator() -> Draft202012Validator:
 
 
 def test_every_battle_order_matches_the_schema() -> None:
-    """The five leader's orders, each valid, file name equal to id."""
+    """The four leader's orders (the pavise became an ability, CB4), each valid."""
     validator = _validator()
     files = sorted((DATA / "battle_orders").glob("*.json"))
     kinds = set()
@@ -35,7 +35,7 @@ def test_every_battle_order_matches_the_schema() -> None:
         assert not errors, f"{path.name}: {errors}"
         assert path.stem == order["id"]
         kinds.add(order["kind"])
-    assert kinds == {"war_cry", "no_quarter", "dismount", "pavise", "rally"}
+    assert kinds == {"war_cry", "no_quarter", "dismount", "rally"}
 
 
 def test_faction_labels_name_existing_factions() -> None:

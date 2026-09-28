@@ -77,6 +77,20 @@ impl BattleSim {
         z: f64,
         facing: Option<f64>,
     ) -> Result<(), CommandError> {
+        self.deploy_unit_width(id, x, z, facing, None)
+    }
+
+    /// CB1: [`Self::deploy_unit`] with the frontage of a right-drag: the
+    /// regiment forms a Line `width` metres wide (ranks within
+    /// `data/rules/formation_width.json`; unchanged without width).
+    pub fn deploy_unit_width(
+        &mut self,
+        id: u32,
+        x: f64,
+        z: f64,
+        facing: Option<f64>,
+        width: Option<f64>,
+    ) -> Result<(), CommandError> {
         if !self.deploying {
             return Err(CommandError::NotDeploying);
         }
@@ -102,6 +116,7 @@ impl BattleSim {
         unit.destination = None;
         unit.target = None;
         unit.on_wall = false;
+        unit.set_width(width);
         Ok(())
     }
 
@@ -160,8 +175,9 @@ impl BattleSim {
         }
     }
 
-    /// AI deployment by roles: the default layout (foot line in the centre,
-    /// shooters ahead, horse on the wings, engines behind) then the general's
+    /// AI deployment by roles: the default layout (« Ligne de bataille »,
+    /// CB6: foot line in the centre, shooters behind it, horse on the
+    /// wings, engines behind) then the general's
     /// regiment behind the centre and, for a clearly weaker side of a field
     /// battle, the whole army shifted onto the best height of its zone.
     fn ai_deploy(&mut self, side: SideId) {
@@ -199,8 +215,15 @@ impl BattleSim {
             .copied()
             .find(|&i| self.units[i].is_general && !self.units[i].on_wall);
         if let (Some(g), true, None) = (general, own.len() > 2, &self.siege) {
+            // CB6: the general's place of « Ligne de bataille » (60 m
+            // behind the centre of the army).
+            let behind = -crate::group_formation::GroupFormationRules::bundled()
+                .battle_line()
+                .roles
+                .as_ref()
+                .map_or(-60.0, |r| r.general.depth_m);
             let (cx, cz) = self.centroid(&own);
-            let (x, z) = zone.clamp(cx, cz + back * 60.0);
+            let (x, z) = zone.clamp(cx, cz + back * behind);
             self.units[g].x = x;
             self.units[g].z = z;
         }

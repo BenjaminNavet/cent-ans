@@ -40,6 +40,10 @@ pub use entities::ai_grid::{
 pub use entities::auto_resolve::{
     AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
 };
+pub use entities::battle_ability::{
+    AbilityCondition, AbilityKind, BattleAbility, BattleAbilityAi, BattleAbilityEffects,
+    BattleAbilityFilter,
+};
 pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
     BattleOrderScope,

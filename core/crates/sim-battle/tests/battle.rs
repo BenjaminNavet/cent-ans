@@ -47,6 +47,7 @@ fn setup(attacker: Vec<UnitSetup>, defender: Vec<UnitSetup>) -> BattleSetup {
         siege: None,
         siege_layout: None,
         orders: Vec::new(),
+        abilities: Vec::new(),
         standards: None,
         decor_plan: None,
         opening: Default::default(),
@@ -107,6 +108,10 @@ fn same_setup_and_commands_give_the_same_battle() {
                     z: 400.0,
                     run: false,
                     facing: Some(0.0),
+                    queue: false,
+                    width: None,
+                    match_speed: false,
+                    group_tag: None,
                 })
                 .unwrap();
             }
@@ -115,6 +120,7 @@ fn same_setup_and_commands_give_the_same_battle() {
                     units: vec![4],
                     target: 5,
                     run: true,
+                    queue: false,
                 })
                 .unwrap();
             }
@@ -209,6 +215,7 @@ fn charge_losses(data: &GameData, from_flank: bool) -> f64 {
         units: vec![0],
         target: 1,
         run: true,
+        queue: false,
     })
     .unwrap();
     for _ in 0..600 {
@@ -253,6 +260,7 @@ fn schiltron_stops_cavalry() {
             units: vec![0],
             target: 1,
             run: true,
+            queue: false,
         })
         .unwrap();
         run(&mut sim, 40.0);
@@ -301,6 +309,10 @@ fn running_tires_and_rest_recovers() {
             z: 700.0,
             run: run_flag,
             facing: None,
+            queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         })
         .unwrap();
         run(&mut sim, 60.0);
@@ -503,7 +515,8 @@ fn commands_are_validated() {
         sim.issue_command(Command::Attack {
             units: vec![0],
             target: 1,
-            run: true
+            run: true,
+            queue: false
         }),
         Err(CommandError::FriendlyTarget(1))
     );
@@ -520,7 +533,11 @@ fn commands_are_validated() {
             x: -10.0,
             z: 5.0,
             run: false,
-            facing: None
+            facing: None,
+            queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         }),
         Err(CommandError::OutsideField)
     );
@@ -562,6 +579,7 @@ fn stakes_break_a_frontal_cavalry_charge() {
             units: vec![0],
             target: 1,
             run: true,
+            queue: false,
         })
         .unwrap();
         run(&mut sim, 30.0);

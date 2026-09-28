@@ -1,0 +1,103 @@
+{
+  "description": "Formations de groupe (lot CB6, ADR 0095) : préréglages d'attaque, de défense et de marche qui proposent une place à chaque régiment d'un groupe ou de l'armée entière. Relus par l'historien (docs/research/cb6-formations.md). Rôles tirés de la catégorie : infantry (gens de pied), foot_ranged (tireurs à pied), cavalry (montés, tireurs montés compris), siege (engins), general (le régiment du chef, à part dès trois régiments). Profondeurs en mètres par rapport à la ligne du rôle de front, positives vers l'ennemi. « Ligne de bataille » reproduit exactement la mise en place initiale de la bataille (tireurs derrière l'infanterie). Lu par sim-battle (GroupFormationRules).",
+  "unit_gap_m": 12.0,
+  "wrap_depth_m": 30.0,
+  "row_margin_m": 50.0,
+  "wing_clamp_m": 30.0,
+  "general_min_group": 3,
+  "presets": [
+    {
+      "id": "battle_line",
+      "name_fr": "Ligne de bataille",
+      "description_fr": "L'ordre ordinaire : les gens de pied au centre, les tireurs en arrière de la ligne, les hommes d'armes montés sur les ailes, les engins derrière.",
+      "stance": "defense",
+      "layout": "blocks",
+      "front_roles": ["infantry", "foot_ranged"],
+      "roles": {
+        "infantry": { "row": "line", "lateral": "center", "depth_m": 0 },
+        "foot_ranged": { "row": "behind", "lateral": "center", "depth_m": -45 },
+        "cavalry": { "row": "line", "lateral": "wings", "depth_m": -15, "wing_offset_m": 20 },
+        "siege": { "row": "behind", "lateral": "center", "depth_m": -95 },
+        "general": { "row": "behind", "lateral": "center", "depth_m": -60 }
+      }
+    },
+    {
+      "id": "harrow",
+      "name_fr": "La herse",
+      "description_fr": "Défense à l'anglaise, comme à Crécy et à Azincourt : les hommes d'armes à pied au centre, les archers en avant sur les deux ailes, tournés vers l'intérieur, et une réserve montée en arrière.",
+      "stance": "defense",
+      "layout": "blocks",
+      "front_roles": ["infantry", "foot_ranged"],
+      "roles": {
+        "infantry": { "row": "line", "lateral": "center", "depth_m": 0, "gap_m": 6 },
+        "foot_ranged": { "row": "front", "lateral": "wings", "depth_m": 35, "gap_m": 8, "wing_offset_m": 10, "turn_in_deg": 20 },
+        "cavalry": { "row": "reserve", "lateral": "center", "depth_m": -110 },
+        "siege": { "row": "behind", "lateral": "center", "depth_m": -150 },
+        "general": { "row": "behind", "lateral": "center", "depth_m": -30 }
+      }
+    },
+    {
+      "id": "three_battles",
+      "name_fr": "Trois batailles",
+      "description_fr": "L'ost en trois batailles l'une derrière l'autre : avant-garde, bataille du chef, arrière-garde. Chaque ligne peut relever ou appuyer la précédente.",
+      "stance": "attack",
+      "layout": "blocks",
+      "front_roles": ["infantry", "foot_ranged", "cavalry"],
+      "roles": {
+        "infantry": { "row": "line", "lateral": "center", "depth_m": 0, "echelons": 3, "echelon_step_m": -100 },
+        "foot_ranged": { "row": "front", "lateral": "spread", "depth_m": 40 },
+        "cavalry": { "row": "reserve", "lateral": "center", "depth_m": -250 },
+        "siege": { "row": "behind", "lateral": "center", "depth_m": -160 },
+        "general": { "row": "behind", "lateral": "center", "depth_m": -125 }
+      }
+    },
+    {
+      "id": "knight_charge",
+      "name_fr": "Charge de la chevalerie",
+      "description_fr": "Les hommes d'armes montés en première ligne, par conrois, les tireurs sur les ailes et les gens de pied qui suivent pour exploiter. À réserver à un ennemi surpris, fixé ou pris de flanc : contre des archers retranchés, la charge se brise.",
+      "stance": "attack",
+      "layout": "blocks",
+      "front_roles": ["cavalry", "infantry", "foot_ranged"],
+      "roles": {
+        "cavalry": { "row": "line", "lateral": "center", "depth_m": 0, "gap_m": 20, "echelons": 2, "echelon_step_m": -50 },
+        "foot_ranged": { "row": "front", "lateral": "wings", "depth_m": 20, "gap_m": 10, "wing_offset_m": 15 },
+        "infantry": { "row": "behind", "lateral": "center", "depth_m": -110 },
+        "siege": { "row": "behind", "lateral": "center", "depth_m": -170 },
+        "general": { "row": "behind", "lateral": "center", "depth_m": -75 }
+      }
+    },
+    {
+      "id": "foot_battle",
+      "name_fr": "Bataille à pied",
+      "description_fr": "Tous les hommes d'armes à pied en une masse compacte, les tireurs sur les ailes, et une petite réserve montée à l'écart pour prendre l'ennemi de flanc, comme à Poitiers et à Cocherel. À combiner avec l'ordre « Pied à terre ».",
+      "stance": "defense",
+      "layout": "blocks",
+      "front_roles": ["infantry", "foot_ranged"],
+      "roles": {
+        "infantry": { "row": "line", "lateral": "center", "depth_m": 0, "gap_m": 6 },
+        "foot_ranged": { "row": "front", "lateral": "wings", "depth_m": 20, "gap_m": 8, "wing_offset_m": 10 },
+        "cavalry": { "row": "reserve", "lateral": "flank", "depth_m": -150, "wing_offset_m": 60 },
+        "siege": { "row": "behind", "lateral": "center", "depth_m": -120 },
+        "general": { "row": "behind", "lateral": "center", "depth_m": -25 }
+      }
+    },
+    {
+      "id": "march",
+      "name_fr": "Ordre de marche",
+      "description_fr": "L'armée en marche, batailles dans l'ordre : éclaireurs montés en tête, avant-garde, bataille du chef, engins, arrière-garde. Tous vont au pas du plus lent : une colonne étirée se fait surprendre.",
+      "stance": "march",
+      "layout": "column",
+      "column_gap_m": 15,
+      "column_files": { "infantry": 6, "foot_ranged": 6, "cavalry": 4, "general": 4 },
+      "column": [
+        { "role": "cavalry", "filter": "light" },
+        { "role": "infantry", "part": "first_half" },
+        { "role": "foot_ranged" },
+        { "role": "general" },
+        { "role": "siege" },
+        { "role": "infantry", "part": "second_half" },
+        { "role": "cavalry", "filter": "heavy" }
+      ]
+    }
+  ]
+}

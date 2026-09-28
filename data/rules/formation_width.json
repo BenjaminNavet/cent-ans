@@ -1,0 +1,11 @@
+{
+  "description": "Largeur de formation au glisser (lot CB1, ADR 0095) : un glisser-droit fixe la largeur du front d'un régiment en Ligne ; le nombre de rangs qui en découle reste borné par classe de troupe. Lu par sim-battle (FormationWidthRules). Classes : piquiers (capacité pike_square), fantassins, tireurs, cavaliers (montés), engins. Les rangs par défaut de la Ligne (4 fantassins, 3 tireurs, 2 cavaliers, 1 engin) sont dans les bornes.",
+  "group_gap_m": 10.0,
+  "classes": {
+    "pikemen": { "min_ranks": 4, "max_ranks": 16 },
+    "infantry": { "min_ranks": 2, "max_ranks": 16 },
+    "ranged": { "min_ranks": 2, "max_ranks": 8 },
+    "cavalry": { "min_ranks": 1, "max_ranks": 6 },
+    "siege": { "min_ranks": 1, "max_ranks": 1 }
+  }
+}
