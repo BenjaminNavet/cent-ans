@@ -31,7 +31,7 @@ pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use opening::AmbushLayout;
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
-pub use siege_assault::Ladder;
+pub use siege_assault::{Ladder, SiegeEngineKind, SiegeEngineView};
 pub use width::{MoveShape, AUTO_GROUP_TAG};
 
 use data_model::{Ability, UnitCategory, UnitStats};
@@ -1757,9 +1757,11 @@ impl BattleSim {
                 SideId::Attacker => unit.on_wall && near.is_some_and(|(_, d)| d < band + 3.0),
             };
         }
-        // Siege towers dock against the wall they touch.
+        // Siege towers dock against the wall they touch; SB: the "under
+        // attack" marks wear off.
         for piece in works.pieces.iter_mut() {
             piece.docked_tower = None;
+            piece.attacked_for = (piece.attacked_for - DT).max(0.0);
         }
         for unit in self.units.iter() {
             if !unit.siege_tower() || !unit.able() {
@@ -1781,6 +1783,9 @@ impl BattleSim {
             let at_gate = unit.able()
                 && works.pieces[gate].intact()
                 && works.pieces[gate].distance(unit.x, unit.z) < band + 4.0;
+            if at_gate {
+                works.pieces[gate].mark_attacked(siege::UNDER_ATTACK_CONTACT_S);
+            }
             let Some(seconds) = Self::ram_blow(&mut self.assault.ram_timers, index, at_gate) else {
                 continue;
             };
@@ -2636,6 +2641,7 @@ impl BattleSim {
         let band = works.band();
         let p = &mut works.pieces[piece];
         p.hp = (p.hp - damage).max(0.0);
+        p.mark_attacked(siege::UNDER_ATTACK_SHOT_S);
         let breached = p.hp <= 0.0;
         let kind = p.kind;
         let p = works.pieces[piece].clone();

@@ -61,6 +61,13 @@ fn recruit_slots_cap_the_province_queue() {
     let base = state.recruit_slots(&data, &province);
     assert_eq!(base, sim_campaign::BASE_RECRUIT_SLOTS);
     let recruit = |state: &mut CampaignState| {
+        // TW2-T2: the reserve of the unit type must not be what refuses.
+        state
+            .settlements
+            .get_mut(&province)
+            .unwrap()
+            .recruit_pool
+            .clear();
         state.submit_order(
             &data,
             Order::Recruit {

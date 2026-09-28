@@ -35,6 +35,8 @@
     {"id": "unit_trebuchet", "label": "Trébuchet", "group": "unit", "source": "game/assets/illustrations/unit_trebuchet.jpg"},
     {"id": "unit_urban_militia", "label": "Milice urbaine", "group": "unit", "source": "game/assets/illustrations/unit_urban_militia.jpg"},
     {"id": "unit_welsh_spearmen", "label": "Lanciers gallois", "group": "unit", "source": "game/assets/illustrations/unit_welsh_spearmen.jpg"},
+    {"id": "unit_brabancons", "label": "Soudoyers brabançons", "group": "unit", "source": "game/assets/illustrations/unit_flemish_pikemen.jpg", "crop": {"x": 0.35, "y": 0.5, "scale": 0.85}},
+    {"id": "unit_scots_archers", "label": "Archers écossais", "group": "unit", "source": "game/assets/illustrations/unit_longbowmen.jpg", "crop": {"x": 0.65, "y": 0.5, "scale": 0.85}},
     {"id": "bld_abbey", "label": "Abbaye", "group": "building", "source": "game/assets/illustrations/bld_abbey.jpg"},
     {"id": "bld_apothecary", "label": "Apothicairerie", "group": "building", "source": "game/assets/illustrations/bld_apothecary.jpg"},
     {"id": "bld_archery_butts", "label": "Butte de tir", "group": "building", "source": "game/assets/illustrations/bld_archery_butts.jpg"},
