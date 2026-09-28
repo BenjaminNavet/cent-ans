@@ -60,6 +60,10 @@ var _smoke_scales := Vector2(-1.0, -1.0)
 ## SZ4b : échelle de référence des maquettes appliquée aux positions (pas de `rewrite_step`).
 var _settlement_ref := 1.0
 var _camera_distance := 1000.0
+## RS-K : copies processeur des tampons MultiMesh (panaches : 12 + 4 flottants par instance ; corps
+## de moulin : 12 ; ailes : 12 + 4). Lire `MultiMesh.buffer` relit le tampon du GPU de façon
+## synchrone (jusqu'à 80 ms par réécriture pendant un zoom) : on écrit depuis ces copies.
+var _cpu_buffers: Dictionary = {}  # MultiMeshInstance3D → PackedFloat32Array
 
 
 func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
@@ -211,14 +215,65 @@ func _build_windmills(province_states: Dictionary) -> void:
 	sails.use_custom_data = true
 	sails.mesh = sails_mesh
 	sails.instance_count = _windmill_points.size()
+	var body_buffer := PackedFloat32Array()
+	body_buffer.resize(_windmill_points.size() * 12)
+	var sail_buffer := PackedFloat32Array()
+	sail_buffer.resize(_windmill_points.size() * 16)
 	for n in _windmill_points.size():
 		var point: Array = _windmill_points[n]
 		var xforms := _windmill_transforms(point)
-		bodies.set_instance_transform(n, xforms[0])
-		sails.set_instance_transform(n, xforms[1])
-		sails.set_instance_custom_data(n, Color(float(point[2]), 0.9 if bool(point[3]) else 0.0, 0.0, 0.0))
+		_write_transform(body_buffer, n * 12, xforms[0])
+		_write_transform(sail_buffer, n * 16, xforms[1])
+		_write_custom(sail_buffer, n * 16 + 12, Color(float(point[2]), 0.9 if bool(point[3]) else 0.0, 0.0, 0.0))
+	bodies.buffer = body_buffer
+	sails.buffer = sail_buffer
 	_windmill_bodies.multimesh = bodies
 	_windmill_sails.multimesh = sails
+	_cpu_buffers[_windmill_bodies] = body_buffer
+	_cpu_buffers[_windmill_sails] = sail_buffer
+
+
+## RS-K : transformation au format du tampon MultiMesh (3 lignes de base + origine).
+static func _write_transform(buffer: PackedFloat32Array, o: int, t: Transform3D) -> void:
+	buffer[o] = t.basis.x.x
+	buffer[o + 1] = t.basis.y.x
+	buffer[o + 2] = t.basis.z.x
+	buffer[o + 3] = t.origin.x
+	buffer[o + 4] = t.basis.x.y
+	buffer[o + 5] = t.basis.y.y
+	buffer[o + 6] = t.basis.z.y
+	buffer[o + 7] = t.origin.y
+	buffer[o + 8] = t.basis.x.z
+	buffer[o + 9] = t.basis.y.z
+	buffer[o + 10] = t.basis.z.z
+	buffer[o + 11] = t.origin.z
+
+
+static func _write_custom(buffer: PackedFloat32Array, o: int, c: Color) -> void:
+	buffer[o] = c.r
+	buffer[o + 1] = c.g
+	buffer[o + 2] = c.b
+	buffer[o + 3] = c.a
+
+
+## RS-K : moulins `indices` réécrits dans les copies processeur, puis envoyés en un bloc.
+func _write_windmills(indices: Array) -> void:
+	var body_buffer: PackedFloat32Array = _cpu_buffers.get(_windmill_bodies, PackedFloat32Array())
+	var sail_buffer: PackedFloat32Array = _cpu_buffers.get(_windmill_sails, PackedFloat32Array())
+	if body_buffer.size() != _windmill_points.size() * 12 or sail_buffer.size() != _windmill_points.size() * 16:
+		for n: int in indices:
+			var xforms := _windmill_transforms(_windmill_points[n])
+			_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
+			_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
+		return
+	for n: int in indices:
+		var xforms := _windmill_transforms(_windmill_points[n])
+		_write_transform(body_buffer, n * 12, xforms[0])
+		_write_transform(sail_buffer, n * 16, xforms[1])
+	_windmill_bodies.multimesh.buffer = body_buffer
+	_windmill_sails.multimesh.buffer = sail_buffer
+	_cpu_buffers[_windmill_bodies] = body_buffer
+	_cpu_buffers[_windmill_sails] = sail_buffer
 
 
 func _surface_y(px: Vector2) -> float:
@@ -355,15 +410,19 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 	multimesh.use_custom_data = true
 	multimesh.mesh = quad
 	multimesh.instance_count = points.size()
+	var buffer := PackedFloat32Array()
+	buffer.resize(points.size() * 16)
 	for n in points.size():
 		var point: Array = points[n]
 		var seed_value: float = point[2]
 		var s := 0.8 + 0.4 * seed_value
 		# SZ4 : origine au sol, levée dans la colonne z (lue et mise à l'échelle par le shader).
 		var basis := Basis(Vector3(size.x * s, 0.0, 0.0), Vector3(0.0, size.y * s, 0.0), Vector3(0.0, float(point[1]), 1.0))
-		multimesh.set_instance_transform(n, Transform3D(basis, _origin(point)))
-		multimesh.set_instance_custom_data(n, Color(seed_value, darkness, 0.75 + 0.25 * fposmod(seed_value * 7.0, 1.0), fposmod(seed_value * 13.0, 1.0)))
+		_write_transform(buffer, n * 16, Transform3D(basis, _origin(point)))
+		_write_custom(buffer, n * 16 + 12, Color(seed_value, darkness, 0.75 + 0.25 * fposmod(seed_value * 7.0, 1.0), fposmod(seed_value * 13.0, 1.0)))
+	multimesh.buffer = buffer
 	mmi.multimesh = multimesh
+	_cpu_buffers[mmi] = buffer
 
 
 ## Pied d'un panache (au sol ; la levée `point[1]` est portée par la base d'instance, SZ4) ;
@@ -393,11 +452,11 @@ func _reground() -> void:
 	var changed := _reground_chunks
 	_reground_chunks = {}
 	if _windmill_bodies.multimesh != null and _windmill_sails.multimesh != null:
-		for n: int in _changed_points("windmills", _windmill_points, changed):
+		var mills := _changed_points("windmills", _windmill_points, changed)
+		for n: int in mills:
 			_reground_windmill(_windmill_points[n])
-			var xforms := _windmill_transforms(_windmill_points[n])
-			_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
-			_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
+		if not mills.is_empty():
+			_write_windmills(mills)
 	for triple in [[_chimneys, _chimney_points, "chimneys"], [_fires, _fire_points, "fires"]]:
 		var mmi: MultiMeshInstance3D = triple[0]
 		var points: Array = triple[1]
@@ -406,13 +465,13 @@ func _reground() -> void:
 		var todo := _changed_points(triple[2], points, changed)
 		if todo.is_empty():
 			continue
-		# Tampon complet lu et écrit une fois (12 flottants de transformation + 4 de données
+		# Tampon complet écrit une fois (12 flottants de transformation + 4 de données
 		# personnalisées par instance ; hauteur de l'origine au rang 7) plutôt que deux appels au
-		# serveur de rendu par point.
-		var buffer := mmi.multimesh.buffer
+		# serveur de rendu par point. RS-K : depuis la copie processeur (pas de relecture du GPU).
+		var buffer: PackedFloat32Array = _cpu_buffers.get(mmi, PackedFloat32Array())
 		var stride := 16
 		if buffer.size() != points.size() * stride:
-			# Rendu factice (headless) : pas de tampon lisible, repli point par point.
+			# Tampon absent (maillage reconstruit ailleurs) : repli point par point.
 			for n: int in todo:
 				_reground_point(points[n])
 				var xform := mmi.multimesh.get_instance_transform(n)
@@ -423,6 +482,7 @@ func _reground() -> void:
 			_reground_point(points[n])
 			buffer[n * stride + 7] = _pose_y(points[n])
 		mmi.multimesh.buffer = buffer
+		_cpu_buffers[mmi] = buffer
 
 
 ## SZ6 : index par tuile des points (`_windmill_points`, `_chimney_points`, `_fire_points`),
@@ -527,20 +587,18 @@ func _rewrite_windmills() -> void:
 		_settlement_pose(pose)
 		point[0] = pose[0]
 		point[4] = _pose_y(pose)
-		var xforms := _windmill_transforms(point)
-		_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
-		_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
+	_write_windmills(range(_windmill_points.size()))
 
 
 ## SZ4b : origines des panaches des colonies à l'échelle courante de leur maquette (tampon complet
-## lu et écrit une fois ; repli point par point sans tampon lisible, rendu factice).
+## écrit une fois depuis sa copie processeur, RS-K ; repli point par point sans copie).
 func _rewrite_smoke_positions() -> void:
 	for pair in [[_chimneys, _chimney_points], [_fires, _fire_points]]:
 		var mmi: MultiMeshInstance3D = pair[0]
 		var points: Array = pair[1]
 		if mmi.multimesh == null or mmi.multimesh.instance_count != points.size():
 			continue
-		var buffer := mmi.multimesh.buffer
+		var buffer: PackedFloat32Array = _cpu_buffers.get(mmi, PackedFloat32Array())
 		var stride := 16
 		var readable := buffer.size() == points.size() * stride
 		var touched := false
@@ -561,6 +619,7 @@ func _rewrite_smoke_positions() -> void:
 				mmi.multimesh.set_instance_transform(n, xform)
 		if touched:
 			mmi.multimesh.buffer = buffer
+			_cpu_buffers[mmi] = buffer
 
 
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
