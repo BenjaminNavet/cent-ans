@@ -6,10 +6,18 @@
 // couleurs selon la carte de relief cuite par `battle_terrain.gd` (pente, creux, crêtes) :
 // roche affleurante sur les pentes et les crêtes des collines, terre et cailloux des crêtes,
 // herbe grasse, humidité et ombre des creux.
+// Lot GA2 : jusqu'à 4 couches supplémentaires (prairie fleurie, herbe piétinée, chaume, labour
+// frais), identité et taille de répétition lues depuis les données (`layer_count`,
+// `layer_tile_size[]`, `idx_*`, cf. `battle_terrain.gd::ground_layers()` et
+// `data/fx/battle_ground_layers.json`) : les 9 rôles historiques ci-dessous restent des index
+// fixes (occupation du sol déjà spécifique à chaque rôle), les rôles ajoutés sont des index de
+// données (-1 si absents). Macro-variation supplémentaire (50–200 m, teinte et luminance, faible
+// amplitude) sous `ga2_on` (`--no-ga2`).
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
 #include "res://shaders/battle_common.gdshaderinc"
+#include "res://shaders/ga_macro.gdshaderinc"
 
 const float L_GRASS = 0.0;
 const float L_MEADOW = 1.0;
@@ -20,9 +28,20 @@ const float L_PEBBLES = 5.0;
 const float L_ROCK = 6.0;
 const float L_PLOUGH = 7.0;
 const float L_SNOW = 8.0;
+// GA2 : taille max du tableau de couches (miroir de `BattleTerrain.MAX_GROUND_LAYERS`).
+const int MAX_GROUND_LAYERS = 16;
 
 uniform sampler2DArray albedo_array : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_array : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+// GA2 : nombre réel de couches et taille de répétition (m) de chacune, depuis les données.
+uniform int layer_count = 9;
+uniform float layer_tile_size[MAX_GROUND_LAYERS];
+// GA2 : index de couche des rôles ajoutés (-1 si absents des données).
+uniform int idx_flowering_meadow = -1;
+uniform int idx_trodden_grass = -1;
+uniform int idx_stubble = -1;
+uniform int idx_fresh_plough = -1;
+uniform float ga2_on = 1.0;
 uniform sampler2D macro_noise : filter_linear_mipmap, repeat_enable;
 // r = sous-bois, g = chemin, b = boue, a = galets (lit de rivière, gués).
 uniform sampler2D splat_a : filter_linear, repeat_disable;
@@ -79,16 +98,10 @@ void vertex() {
 }
 
 // Taille (m) d'une répétition de chaque couche.
+// GA2 : taille de répétition (m) depuis les données (`data/fx/battle_ground_layers.json`,
+// `layer_tile_size[]`), plus codée en dur ici.
 float layer_size(float layer) {
-	if (layer == L_GRASS) return 5.0;
-	if (layer == L_MEADOW) return 7.0;
-	if (layer == L_FOREST) return 4.0;
-	if (layer == L_DIRT) return 5.0;
-	if (layer == L_MUD) return 4.5;
-	if (layer == L_PEBBLES) return 3.5;
-	if (layer == L_ROCK) return 9.0;
-	if (layer == L_PLOUGH) return 4.0;
-	return 6.0;
+	return layer_tile_size[clamp(int(layer), 0, MAX_GROUND_LAYERS - 1)];
 }
 
 // Échantillon anti-tuilage : deux échelles tournées, mélangées selon le bruit macro.
@@ -120,6 +133,10 @@ void fragment() {
 	float macro2 = texture(macro_noise, p * 0.00043 + vec2(0.3, 0.7)).r;
 	float fine = texture(macro_noise, p * 0.017).r;
 	float blend = smoothstep(0.35, 0.65, texture(macro_noise, p * 0.006 + 0.5).r);
+	// Lot V4b : taches de prairie (herbe sèche, prairie grasse), calculées ici pour servir aussi
+	// au partage prairie fleurie de GA2, ci-dessous.
+	float patch = texture(macro_noise, p * 0.0013 + vec2(0.61, 0.13)).r;
+	float patch2 = texture(macro_noise, p * 0.0047 + vec2(0.27, 0.83)).r;
 
 	vec2 suv = (p - splat_rect.xy) / splat_rect.zw;
 	// Bords des zones brisés par le bruit (la splatmap est à 4 m le texel).
@@ -183,10 +200,30 @@ void fragment() {
 	w_dirt = max(w_dirt, thin_soil * 0.5);
 	w_pebbles = max(w_pebbles, thin_soil * outcrops * 0.5);
 	w_rock *= 1.0 - dip * 0.8;
-	float w_plough = field.x == 1.0 ? field_w : 0.0;
+	// GA2 : labour frais (parcelle « labour » du décor, EP6 `decor_kind == 1`) tient une texture
+	// dédiée (`farm_furrows`) distincte du labour ambiant/procédural (loin des parcelles).
+	bool decor_labour = decor_kind == 1.0 && idx_fresh_plough >= 0;
+	float w_plough = (field.x == 1.0 && !decor_labour) ? field_w : 0.0;
+	float w_fresh_plough = decor_labour ? field_w : 0.0;
+	// GA2 : chaume/éteules (EP6 `decor_kind == 6`, `field.x` mis à 2.0 ci-dessus).
+	float w_stubble = (decor_kind == 6.0 && idx_stubble >= 0) ? field_w : 0.0;
 	float w_meadow = smoothstep(0.25, 0.55, macro2 + (fine - 0.5) * 0.2);
 	if (field.x == 3.0) {
 		w_meadow = max(w_meadow, field_w);
+	}
+	// GA2 : prairie fleurie — part des taches de prairie grasse (`lush`, cf. plus bas) rendue avec
+	// une texture dédiée plutôt que la prairie caillouteuse ordinaire.
+	float w_flower_meadow = 0.0;
+	if (idx_flowering_meadow >= 0) {
+		float flower_share = smoothstep(0.45, 0.7, (1.0 - patch) * 0.75 + patch2 * 0.35);
+		w_flower_meadow = w_meadow * flower_share;
+		w_meadow -= w_flower_meadow;
+	}
+	// GA2 : herbe piétinée — halo élargi des chemins et routes (`splat_b.g`, déjà cuit), hors
+	// terre battue elle-même et sous-bois.
+	float w_trodden_grass = 0.0;
+	if (idx_trodden_grass >= 0) {
+		w_trodden_grass = clamp(sb.g - w_dirt, 0.0, 1.0) * (1.0 - w_forest) * 0.6;
 	}
 	float w_snow = snow * smoothstep(0.35, 0.75, world_normal.y * 0.6 + macro * 0.5 + fine * 0.2);
 	w_snow = max(w_snow, smoothstep(snow_line, snow_line + 60.0, world_pos.y + (macro - 0.5) * 50.0) * smoothstep(0.25, 0.6, world_normal.y));
@@ -200,37 +237,51 @@ void fragment() {
 		w_mud = max(w_mud, smoothstep(0.3, 0.9, trampled) * (1.0 - snow) * mix(0.45, 0.8, fine));
 	}
 
-	// Empilement par priorité : chaque couche recouvre les précédentes.
-	float w[9];
+	// Empilement par priorité : chaque couche recouvre les précédentes. GA2 : 4 rôles ajoutés
+	// (index de données, -1 si absents) intercalés parmi les 9 rôles historiques.
+	float w[MAX_GROUND_LAYERS];
 	float rest = 1.0;
-	float order[8] = float[](L_SNOW, L_PEBBLES, L_MUD, L_DIRT, L_ROCK, L_FOREST, L_PLOUGH, L_MEADOW);
-	float ws[8] = float[](w_snow, w_pebbles, w_mud * (1.0 - w_snow * 0.5), w_dirt * (1.0 - w_snow * 0.6), w_rock, w_forest, w_plough, w_meadow);
-	for (int i = 0; i < 9; i++) {
+	const int ORDER_COUNT = 12;
+	float order[ORDER_COUNT] = float[](
+		L_SNOW, L_PEBBLES, L_MUD, L_DIRT, float(idx_trodden_grass), L_ROCK, L_FOREST,
+		float(idx_fresh_plough), L_PLOUGH, float(idx_stubble), float(idx_flowering_meadow), L_MEADOW
+	);
+	float ws[ORDER_COUNT] = float[](
+		w_snow, w_pebbles, w_mud * (1.0 - w_snow * 0.5), w_dirt * (1.0 - w_snow * 0.6),
+		w_trodden_grass, w_rock, w_forest, w_fresh_plough, w_plough, w_stubble, w_flower_meadow, w_meadow
+	);
+	for (int i = 0; i < MAX_GROUND_LAYERS; i++) {
 		w[i] = 0.0;
 	}
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < ORDER_COUNT; i++) {
+		int oi = int(order[i]);
+		if (oi < 0) {
+			continue; // rôle de données absent (-1) : pas de couche à empiler.
+		}
 		float wi = clamp(ws[i], 0.0, 1.0) * rest;
-		w[int(order[i])] = wi;
+		w[oi] = wi;
 		rest -= wi;
 	}
 	w[int(L_GRASS)] = rest;
 
 	vec3 albedo = vec3(0.0);
 	vec3 nrm = vec3(0.0);
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < layer_count; i++) {
 		sample_layer(float(i), p, blend, albedo, nrm, w[i]);
 	}
 
-	// Herbe : teinte de saison, blé doré, macro-variation de luminosité et de teinte.
-	float grassy = w[int(L_GRASS)] + w[int(L_MEADOW)];
+	// Herbe : teinte de saison, blé doré, macro-variation de luminosité et de teinte. GA2 :
+	// prairie fleurie et herbe piétinée sont des variantes d'herbe, teintées pareillement.
+	float grassy = w[int(L_GRASS)] + w[int(L_MEADOW)]
+		+ (idx_flowering_meadow >= 0 ? w[idx_flowering_meadow] : 0.0)
+		+ (idx_trodden_grass >= 0 ? w[idx_trodden_grass] : 0.0);
 	vec3 tint = grass_tint * mix(vec3(0.92, 1.0, 0.86), vec3(1.08, 1.02, 0.86), macro2);
 	if (field.x == 2.0) {
 		tint = mix(tint, decor_kind == 6.0 ? vec3(1.3, 1.1, 0.7) : vec3(1.45, 1.18, 0.62), field_w);
 	}
 	// Lot V4b : taches de prairie visibles de haut (herbe sèche blonde, prairie grasse sombre,
-	// friches roussâtres) à deux échelles, pour casser l'uniformité du champ vu d'ensemble.
-	float patch = texture(macro_noise, p * 0.0013 + vec2(0.61, 0.13)).r;
-	float patch2 = texture(macro_noise, p * 0.0047 + vec2(0.27, 0.83)).r;
+	// friches roussâtres) à deux échelles, pour casser l'uniformité du champ vu d'ensemble
+	// (`patch`/`patch2` calculés plus haut, réutilisés par la prairie fleurie GA2).
 	float dry = smoothstep(0.42, 0.66, patch * 0.7 + patch2 * 0.45);
 	float lush = smoothstep(0.45, 0.7, (1.0 - patch) * 0.75 + patch2 * 0.35);
 	float rust = smoothstep(0.68, 0.8, patch2) * (1.0 - dry);
@@ -249,7 +300,7 @@ void fragment() {
 	if (near_k > 0.01) {
 		float dom = 0.0;
 		float wmax = -1.0;
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < layer_count; i++) {
 			if (w[i] > wmax) {
 				wmax = w[i];
 				dom = float(i);
@@ -318,6 +369,16 @@ void fragment() {
 	albedo *= mix(1.0, 0.62, wet);
 	albedo *= 1.0 - dip * 0.08;
 
+	// GA2 : macro-variation supplémentaire (4 octaves, 50 à 200 m) de teinte et de luminance,
+	// faible amplitude, pour casser la répétition à moyenne échelle (indépendante des taches de
+	// prairie ci-dessus, à plus grande échelle). `--no-ga2` la coupe (comparaison A/B).
+	if (ga2_on > 0.5) {
+		float ga2_h = texture(macro_noise, p / 50.0 + vec2(0.11, 0.37)).r * 0.4
+			+ texture(macro_noise, p / 90.0 + vec2(0.53, 0.02)).r * 0.3
+			+ texture(macro_noise, p / 140.0 + vec2(0.29, 0.71)).r * 0.2
+			+ texture(macro_noise, p / 200.0 + vec2(0.83, 0.19)).r * 0.1;
+		albedo *= ga_macro_variation(ga2_h, 0.5, 1.0, 0.0);  // GA4 : fonction partagée
+	}
 	// DA6 (bible § 3.3) : décor sourd, saturation ramenée vers la luminance.
 	if (da6_on > 0.5) {
 		albedo = mix(vec3(dot(albedo, vec3(0.3, 0.59, 0.11))), albedo, decor_saturation);

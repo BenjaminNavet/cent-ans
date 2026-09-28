@@ -168,6 +168,26 @@ const int FG3_TILE_WOOD = 5;
 const int FG3_TILE_SKIN = 6;
 const int FG3_TILE_HAIR = 7;
 const float FG3_TILE_SIZE[8] = float[](0.1, 0.024, 0.08, 0.12, 0.16, 0.3, 0.06, 0.05);
+// Lot GA1 (ADR 0104) : matières générées (`data/art/materials.yaml`, même ordre, `tile_m` =
+// GA1_TILE_SIZE). `fine_detail` reçoit alors `fine_detail_ga1.png` (RG normale, B relief,
+// A rugosité absolue) et `fine_detail_albedo` un albédo de détail centré en luminance 0,5 qui
+// multiplie (x2) la couleur de sommet : livrée et armoiries restent pilotées par les données.
+// `--no-ga1` : tuiles FG3 d'origine (ga1_detail = false).
+uniform sampler2DArray fine_detail_albedo : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform bool ga1_detail = false;
+const int GA1_TILE_WOOL = 0;
+const int GA1_TILE_LINEN = 1;
+const int GA1_TILE_FUSTIAN = 2;
+const int GA1_TILE_GAMBESON = 3;
+const int GA1_TILE_MAIL = 4;
+const int GA1_TILE_LEATHER = 5;
+const int GA1_TILE_PLATE = 6;
+const int GA1_TILE_WOOD = 7;
+const int GA1_TILE_SKIN = 8;
+const int GA1_TILE_HAIR = 9;
+const int GA1_TILE_COAT_LIGHT = 10;
+const int GA1_TILE_COAT_DARK = 11;
+const float GA1_TILE_SIZE[12] = float[](0.1, 0.05, 0.06, 0.16, 0.1, 0.12, 0.16, 0.3, 0.06, 0.05, 0.1, 0.1);
 // Teints (multipliés par la couleur du sommet) : pâle, clair rosé, hâlé, olivâtre, buriné,
 // brun (bible : variation par soldat).
 const vec3 FG3_SKIN[6] = vec3[](
@@ -756,12 +776,67 @@ void fragment() {
 				amt = code == C_HAIR ? 0.9 : 0.45;
 				relief = code == C_HAIR ? 0.0 : 0.3;
 			}
-			if (tl >= 0) {
-				float size = FG3_TILE_SIZE[tl];
-				vec4 d = textureGrad(fine_detail, vec3(vec2(q.x, -q.y) / size, float(tl)), vec2(fg_dq1.x, -fg_dq1.y) / size, vec2(fg_dq2.x, -fg_dq2.y) / size);
-				n = fg3_perturb(n, fg_dp1, fg_dp2, fg_dq1, fg_dq2, (d.rg * 2.0 - 1.0) * amt);
-				albedo *= 1.0 + relief * (d.b * 2.0 - 1.0);
+			// GA1 : couche générée de la matière et part de l'albédo de détail (uniforme : flux
+			// uniforme, aucune divergence entre figurines).
+			int gl = -1;
+			float ga_mix = 0.0;
+			if (ga1_detail && tl >= 0) {
 				if (code == C_MAIL) {
+					gl = GA1_TILE_MAIL;
+					ga_mix = 1.0;
+				} else if (code == C_PLATE || code == C_TRIM) {
+					gl = GA1_TILE_PLATE;
+					ga_mix = code == C_PLATE ? 0.45 : 0.3;
+				} else if (code == C_LIVERY || code == C_ARMS) {
+					gl = GA1_TILE_FUSTIAN;
+					ga_mix = 0.6;
+				} else if (code == C_CLOTH) {
+					gl = h5 < 0.5 ? GA1_TILE_WOOL : GA1_TILE_LINEN;
+					ga_mix = 0.8;
+				} else if (code == C_QUILT) {
+					gl = GA1_TILE_GAMBESON;
+					ga_mix = 0.8;
+				} else if (code == C_LEATHER) {
+					gl = GA1_TILE_LEATHER;
+					ga_mix = 0.85;
+				} else if (code == C_WOOD) {
+					gl = GA1_TILE_WOOD;
+					ga_mix = 0.8;
+				} else if (code == C_SKIN) {
+					gl = GA1_TILE_SKIN;
+					ga_mix = 0.45;
+				} else if (code == C_HAIR) {
+					gl = GA1_TILE_HAIR;
+					ga_mix = 0.6;
+				} else {
+					// Robes : claires (gris, isabelle) ou foncées (alezan, bai, noir), cf. COATS.
+					gl = int(v_var.w * 4.99) >= 3 ? GA1_TILE_COAT_LIGHT : GA1_TILE_COAT_DARK;
+					ga_mix = 0.5;
+				}
+			}
+			if (tl >= 0) {
+				int layer = gl >= 0 ? gl : tl;
+				float size = gl >= 0 ? GA1_TILE_SIZE[gl] : FG3_TILE_SIZE[tl];
+				vec3 tq = vec3(vec2(q.x, -q.y) / size, float(layer));
+				vec2 tg1 = vec2(fg_dq1.x, -fg_dq1.y) / size;
+				vec2 tg2 = vec2(fg_dq2.x, -fg_dq2.y) / size;
+				vec4 d = textureGrad(fine_detail, tq, tg1, tg2);
+				n = fg3_perturb(n, fg_dp1, fg_dp2, fg_dq1, fg_dq2, (d.rg * 2.0 - 1.0) * amt);
+				vec3 ga_albedo = vec3(1.0);
+				if (gl >= 0) {
+					ga_albedo = mix(vec3(1.0), textureGrad(fine_detail_albedo, tq, tg1, tg2).rgb * 2.0, ga_mix);
+					albedo *= ga_albedo;
+				} else {
+					albedo *= 1.0 + relief * (d.b * 2.0 - 1.0);
+				}
+				if (gl >= 0 && code == C_MAIL) {
+					// GA1 : anneaux et creux portés par l'albédo généré ; rugosité de la tuile
+					// (anneaux lisses ~0,35, creux plus rugueux).
+					albedo = v_color * mix(0.85, 1.1, v_var.z) * ga_albedo;
+					metallic = 0.6;
+					roughness = d.a;
+					fg_ao = mix(0.55, 1.0, fg_ao);
+				} else if (code == C_MAIL) {
 					// Mailles lisibles sans être noires : anneaux clairs, creux sombres, moins
 					// métalliques que l'acier plein (pas de reflet du ciel dans la maille serrée).
 					albedo = v_color * mix(0.85, 1.1, v_var.z) * mix(0.18, 1.2, d.b * d.b);
@@ -773,8 +848,11 @@ void fragment() {
 					// les bords et la bouche dans la peau, les mèches cassent la lisière.
 					vec3 hair = FG3_HAIR[int(h6 * 6.99)] * (v_color.r > 0.2 ? 1.2 : 1.0);
 					float cover = smoothstep(0.25, 0.75, mask * (0.55 + 0.9 * d.b));
-					albedo = mix(skin_tone, hair * mix(0.75, 1.2, d.b), cover);
+					albedo = mix(skin_tone, hair * mix(0.75, 1.2, d.b) * ga_albedo, cover);
 					roughness = mix(0.6, 0.75, cover);
+				} else if (gl >= 0) {
+					// Rugosité absolue de la tuile générée.
+					roughness = mix(roughness, d.a, min(amt, 1.0));
 				} else {
 					roughness = mix(roughness, roughness * (0.6 + 0.8 * d.a), min(amt, 1.0));
 				}
