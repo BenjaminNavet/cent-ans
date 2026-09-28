@@ -1,0 +1,62 @@
+{
+  "id": "tit_ragusa",
+  "rank": "county",
+  "name": {
+    "display": "République de Raguse",
+    "local": "Respublica Ragusina",
+    "local_language": "italien"
+  },
+  "heraldry": {
+    "blazon": "Bandé d'or et de gueules.",
+    "description": "Armes de la commune de Raguse : bandes d'or et de gueules (usage ancien, la bande d'azur est postérieure).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Armoiries anciennes de Raguse, reconstitution."
+  },
+  "de_jure_liege": "tit_venice",
+  "de_jure_provinces": [
+    "prov_ragusa"
+  ],
+  "holder_1337": {
+    "faction": "fac_ragusa",
+    "sources": [
+      "République de Raguse"
+    ]
+  },
+  "succession_law": "elective",
+  "objectives": [
+    {
+      "id": "obj_ragusa_hold",
+      "title": "Garder Raguse",
+      "description": "Le patriciat doit conserver la cité.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_ragusa"
+      }
+    },
+    {
+      "id": "obj_ragusa_indep",
+      "title": "Libre de Venise",
+      "description": "Racheter la liberté vis-à-vis de Venise.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_ragusa_hum",
+      "title": "Le Pelješac et le Hum",
+      "description": "Étendre les terres de la République jusqu'à l'arrière-pays.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_hum"
+        ]
+      }
+    }
+  ],
+  "description": "Commune patricienne de Raguse, sous protection vénitienne depuis 1205.",
+  "sources": [
+    "République de Raguse"
+  ]
+}

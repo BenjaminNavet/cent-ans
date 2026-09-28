@@ -1383,10 +1383,12 @@
       "source": "it.wikipedia : Regno di Sicilia (1282-1442), stemma",
       "certainty": "attesté",
       "factions": [
-        "fac_sicily"
+        "fac_sicily",
+        "fac_athens"
       ],
       "vassal_of": [
-        "fac_sicily"
+        "fac_sicily",
+        "fac_athens"
       ]
     },
     {
@@ -1445,6 +1447,186 @@
       ],
       "vassal_of": [
         "fac_pavia"
+      ]
+    },
+    {
+      "id": "paleologue",
+      "name": "Paléologue",
+      "arms_of": "fac_byzantium",
+      "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+      "description": "Maison régnante de l'Empire depuis 1261 (Michel VIII).",
+      "source": "Palaiologos",
+      "certainty": "attesté",
+      "factions": [
+        "fac_byzantium"
+      ],
+      "vassal_of": [
+        "fac_byzantium"
+      ]
+    },
+    {
+      "id": "cantacuzene",
+      "name": "Cantacuzène",
+      "arms_of": "fac_byzantium",
+      "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+      "description": "Grande famille de l'aristocratie byzantine ; armes non attestées, armes impériales par substitution.",
+      "source": "Kantakouzenos",
+      "certainty": "substitution",
+      "factions": [
+        "fac_byzantium"
+      ],
+      "vassal_of": [
+        "fac_byzantium"
+      ]
+    },
+    {
+      "id": "nemanjic",
+      "name": "Némanjić",
+      "arms_of": "fac_serbia",
+      "blazon": "De gueules à l'aigle bicéphale d'argent.",
+      "description": "Dynastie de Serbie depuis Étienne Nemanja (vers 1166).",
+      "source": "Nemanjić dynasty",
+      "certainty": "incertain",
+      "factions": [
+        "fac_serbia"
+      ],
+      "vassal_of": [
+        "fac_serbia"
+      ]
+    },
+    {
+      "id": "chichman",
+      "name": "Chichman",
+      "arms_of": "fac_bulgaria",
+      "blazon": "De gueules au lion d'or couronné.",
+      "description": "Dynastie régnante en Bulgarie depuis 1323 (Michel Chichman) ; armes attribuées à l'empire.",
+      "source": "Shishman dynasty",
+      "certainty": "incertain",
+      "factions": [
+        "fac_bulgaria"
+      ],
+      "vassal_of": [
+        "fac_bulgaria"
+      ]
+    },
+    {
+      "id": "belaur",
+      "name": "Belaur",
+      "arms_of": "fac_vidin",
+      "blazon": "D'azur au lion d'argent couronné d'or.",
+      "description": "Armes de convention pour le despote de Vidin.",
+      "source": "Belaur",
+      "certainty": "substitution",
+      "factions": [
+        "fac_vidin"
+      ],
+      "vassal_of": [
+        "fac_vidin"
+      ]
+    },
+    {
+      "id": "kotromanic",
+      "name": "Kotromanić",
+      "arms_of": "fac_bosnia",
+      "blazon": "D'azur à six fleurs de lis d'or posées trois, deux et une.",
+      "description": "Maison des bans de Bosnie.",
+      "source": "Kotromanić dynasty",
+      "certainty": "incertain",
+      "factions": [
+        "fac_bosnia"
+      ],
+      "vassal_of": [
+        "fac_bosnia"
+      ]
+    },
+    {
+      "id": "orsini_epire",
+      "name": "Orsini d'Épire",
+      "arms_of": "fac_epirus",
+      "blazon": "Bandé d'argent et de gueules, au chef d'argent chargé d'une rose de gueules.",
+      "description": "Branche des Orsini de Céphalonie, despotes d'Épire.",
+      "source": "Orsini family",
+      "certainty": "incertain",
+      "factions": [
+        "fac_epirus"
+      ],
+      "vassal_of": [
+        "fac_epirus"
+      ]
+    },
+    {
+      "id": "anjou_durazzo",
+      "name": "Anjou-Durazzo",
+      "arms_of": "fac_durazzo",
+      "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+      "description": "Branche d'Anjou-Sicile issue de Jean de Gravina, ducs de Durazzo.",
+      "source": "House of Anjou-Durazzo",
+      "certainty": "incertain",
+      "factions": [
+        "fac_durazzo"
+      ],
+      "vassal_of": [
+        "fac_durazzo"
+      ]
+    },
+    {
+      "id": "lanza",
+      "name": "Lanza",
+      "arms_of": "fac_athens",
+      "blazon": "D'or à quatre pals de gueules, à la bordure d'azur.",
+      "description": "Maison sicilienne du vicaire Nicolas Lanza ; armes du duché par substitution.",
+      "source": "Lanza family",
+      "certainty": "substitution",
+      "factions": [
+        "fac_athens"
+      ],
+      "vassal_of": [
+        "fac_athens"
+      ]
+    },
+    {
+      "id": "sanudo",
+      "name": "Sanudo",
+      "arms_of": "fac_archipelago",
+      "blazon": "Écartelé d'argent et de gueules.",
+      "description": "Maison vénitienne des ducs de Naxos depuis Marco Sanudo (1207).",
+      "source": "Sanudo",
+      "certainty": "incertain",
+      "factions": [
+        "fac_archipelago"
+      ],
+      "vassal_of": [
+        "fac_archipelago"
+      ]
+    },
+    {
+      "id": "villeneuve_hospitaliers",
+      "name": "Villeneuve",
+      "arms_of": "fac_hospitallers",
+      "blazon": "De gueules à la croix d'argent.",
+      "description": "Grand maître Hélion de Villeneuve : armes de l'Ordre par substitution.",
+      "source": "Hélion de Villeneuve",
+      "certainty": "substitution",
+      "factions": [
+        "fac_hospitallers"
+      ],
+      "vassal_of": [
+        "fac_hospitallers"
+      ]
+    },
+    {
+      "id": "lusignan_chypre",
+      "name": "Lusignan-Chypre",
+      "arms_of": "fac_cyprus",
+      "blazon": "Burelé d'argent et d'azur au lion de gueules couronné d'or.",
+      "description": "Maison royale de Chypre et de Jérusalem.",
+      "source": "House of Lusignan",
+      "certainty": "attesté",
+      "factions": [
+        "fac_cyprus"
+      ],
+      "vassal_of": [
+        "fac_cyprus"
       ]
     }
   ]

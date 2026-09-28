@@ -1,0 +1,50 @@
+{
+  "id": "chr_agnes_de_perigord",
+  "name": {
+    "display": "Agnès de Périgord",
+    "local": "Agnese di Périgord",
+    "local_language": "latin"
+  },
+  "sex": "female",
+  "house": "Anjou-Durazzo",
+  "faction": "fac_durazzo",
+  "role": "regent",
+  "birth": {
+    "value": "1299",
+    "uncertain": true,
+    "note": "Naissance vers 1299."
+  },
+  "death": {
+    "value": "1345"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Régente de Durazzo",
+      "from": {
+        "value": "1336"
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_ambitious"
+  ],
+  "piety": 55,
+  "family": {
+    "children": [
+      "chr_charles_de_durazzo"
+    ]
+  },
+  "starting_location": "prov_durazzo",
+  "status": "at_court",
+  "description": "Veuve de Jean de Gravina, sœur du cardinal Talleyrand de Périgord ; tutrice de ses fils et intrigante à la cour de Naples.",
+  "sources": [
+    "Agnes of Périgord"
+  ]
+}

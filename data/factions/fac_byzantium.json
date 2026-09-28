@@ -1,0 +1,100 @@
+{
+  "id": "fac_byzantium",
+  "name": {
+    "display": "Empire byzantin",
+    "local": "Βασιλεία Ῥωμαίων",
+    "local_language": "grec"
+  },
+  "short_name": "Byzance",
+  "adjective": "byzantin",
+  "government": "empire",
+  "playable": true,
+  "ruler": "chr_andronikos_iii",
+  "heir": "chr_ioannes_v",
+  "capital": "prov_constantinople",
+  "capital_city": "Constantinople",
+  "religion": "rel_orthodox",
+  "culture": "cul_greek",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_byzantium",
+  "heraldry": {
+    "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l'aigle bicéphale reste l'emblème impérial.",
+    "primary_color": "#A81C22",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Emblème tardif et occidental : la forme exacte en 1337 est discutée."
+  },
+  "titles": [
+    "Basileus et autocrator des Romains"
+  ],
+  "treasury": 14000,
+  "prestige": 65,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_siege_engineering",
+    "tech_letters_of_credit"
+  ],
+  "relations": [
+    {
+      "faction": "fac_serbia",
+      "status": "peace",
+      "note": "Traité de 1334 : Ohrid, Prilep et Strumica cédées à Dušan contre la paix ; la Serbie est le voisin le plus dangereux."
+    },
+    {
+      "faction": "fac_bulgaria",
+      "status": "peace",
+      "note": "Paix après Rusokastro (1332) ; Ivan Alexandre reste un rival dans les Balkans orientaux."
+    },
+    {
+      "faction": "fac_epirus",
+      "status": "peace",
+      "note": "Andronic III attend son heure : la mort de Jean Orsini ouvre l'Épire (annexion en 1338)."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "peace",
+      "note": "Traité commercial ; Venise convoite les îles."
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Galata est génoise ; Chios, reprise sur Zaccaria en 1329, est un point de friction."
+    },
+    {
+      "faction": "fac_taranto",
+      "status": "truce",
+      "note": "Hostilité latente avec les princes latins de Morée ; Byzance grignote l'Achaïe."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_epirus",
+      "note": "Droit impérial sur l'ancien despotat."
+    },
+    {
+      "kind": "province",
+      "province": "prov_achaea",
+      "note": "Reconquête de la Morée latine."
+    },
+    {
+      "kind": "province",
+      "province": "prov_durazzo",
+      "note": "Ancienne place byzantine, tenue par les Angevins."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 65,
+    "trade": 50,
+    "piety": 75
+  },
+  "description": "Restes majestueux de l'Empire romain : Constantinople, la Thrace, la Macédoine, la Thessalie reprise en 1333 et la Morée byzantine. Andronic III Paléologue, empereur depuis 1328, avec son ami Jean Cantacuzène, tente d'arrêter le déclin face à la Serbie, à la Bulgarie et aux émirats turcs.",
+  "sources": [
+    "Andronikos III Palaiologos",
+    "Empire byzantin"
+  ]
+}
