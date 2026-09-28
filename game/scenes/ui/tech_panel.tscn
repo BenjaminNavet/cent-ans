@@ -32,7 +32,8 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 20
 text = "Technologies"
 
 [node name="TechCloseButton" type="Button" parent="VBox/Header"]
@@ -43,7 +44,8 @@ text = "×"
 [node name="ResearchStatus" type="Label" parent="VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Aucune recherche en cours."
 
 [node name="ResearchStatusBar" type="ProgressBar" parent="VBox"]
@@ -54,7 +56,8 @@ show_percentage = false
 
 [node name="Legend" type="Label" parent="VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 14
 text = "Vert : acquise · Or : en cours · Clair : disponible (clic pour rechercher) · Gris : verrouillée. Survolez une technologie pour ses effets et son année historique."
 
 [node name="TechTabs" type="TabContainer" parent="VBox"]

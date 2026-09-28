@@ -517,3 +517,33 @@ def test_zones_are_consistent() -> None:
             assert z["settlement_id"] in settlements, z["id"]
         for key in [z["source"], *z.get("extra_sources", [])]:
             assert key in detail_sources.SOURCES, (z["id"], key)
+
+
+def test_parent_updates_cascade_to_e3(tmp_path: Path) -> None:
+    """RS-G: E5 means reach E4 and E3 (no GLO-30 tower blocks left above a detail zone)."""
+    half = detail_dem.TILE_PX // 2
+    for level, col, row in ((4, 8, 6), (3, 4, 3)):
+        path = detail_dem.tile_path(tmp_path, level, col, row)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        spikes = np.full((detail_dem.TILE_PX, detail_dem.TILE_PX), 20.0, np.float32)
+        spikes[::7, ::7] = 70.0  # buildings of the surface model
+        terrain.write_png16(terrain.height_to_uint16(spikes), path)
+    # One E5 tile (17, 12) under E4 (8, 6), quadrant (row 0, col 1): flat 10 m, weight 1.
+    update = tmp_path / "E5_parents.npz"
+    np.savez_compressed(
+        update,
+        means=np.full((half, half), 10.0, np.float32),
+        weights=np.ones((half, half), np.float32),
+        origin=np.array([17, 12, 5]),
+        tiles=np.array([[17, 12]]),
+    )
+    touched = detail_dem.apply_parent_updates([str(update)], tmp_path)
+    assert touched == 2
+    e4 = detail_dem.read_tile_m(detail_dem.tile_path(tmp_path, 4, 8, 6))
+    assert np.allclose(e4[:half, half:], 10.0, atol=0.05)
+    assert e4[:half, :half].max() > 60.0  # outside the child: untouched
+    e3 = detail_dem.read_tile_m(detail_dem.tile_path(tmp_path, 3, 4, 3))
+    # E4 (8, 6) is quadrant (row 0, col 0) of E3 (4, 3); its top-right quarter is flat.
+    q = half // 2
+    assert np.allclose(e3[:q, q:half], 10.0, atol=0.05)
+    assert e3[half:, half:].max() > 60.0

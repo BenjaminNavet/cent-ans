@@ -8,6 +8,9 @@ extends CenterContainer
 ## demande une seconde confirmation). Mode chargement : liste seule (les sauvegardes d'un
 ## autre moteur sont grisées). « Supprimer » efface l'emplacement choisi.
 ## Signaux `save_confirmed(name)` et `load_confirmed(path)`.
+## Lot P2e (ADR 0097, bible DA § 12.2) : tailles de texte par `UiType`, ouverture et fermeture
+## par `UiMotion`. Rattachement inchangé (instancié par `pause_menu.gd`, `start_menu.gd` et
+## `map_ui.gd`, ces deux derniers hors lot) : voir `docs/wip/p2e-menus.md`.
 
 signal save_confirmed(save_name: String)
 signal load_confirmed(path: String)
@@ -35,6 +38,8 @@ var _row_selected_style: StyleBoxFlat
 
 
 func _ready() -> void:
+	UiType.apply(title_label, UiType.TITLE)
+	UiType.apply(status_label, UiType.CAPTION)
 	cancel_button.pressed.connect(close)
 	confirm_button.pressed.connect(_on_confirm)
 	delete_button.pressed.connect(_on_delete)
@@ -58,6 +63,7 @@ func open_save(default_name: String) -> void:
 	name_edit.text = default_name
 	_refresh_list()
 	show()
+	UiMotion.fade_in(self)
 	name_edit.grab_focus()
 
 
@@ -70,10 +76,11 @@ func open_load() -> void:
 	status_label.text = "Aucune sauvegarde." if _saves.is_empty() else ""
 	confirm_button.disabled = _saves.is_empty()
 	show()
+	UiMotion.fade_in(self)
 
 
 func close() -> void:
-	hide()
+	UiMotion.fade_out(self)
 	dialog_closed.emit()
 
 
@@ -125,17 +132,17 @@ func _make_row(save: Dictionary, index: int) -> PanelContainer:
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.add_child(text)
 	var lines := [
-		[str(save["label"]), 18, Color(0.22, 0.14, 0.07)],
-		["%s — %s, tour %d — %s" % [faction, save.get("date", "?"), int(save.get("turn", 0)) + 1, _difficulty_label(str(save.get("difficulty", "normal")))], 15, Color(0.35, 0.22, 0.10)],
-		["Sauvegardée le %s" % french_timestamp(str(save.get("timestamp", ""))), 13, Color(0.45, 0.36, 0.26)],
+		[str(save["label"]), UiType.HEADING, Color(0.22, 0.14, 0.07)],
+		["%s — %s, tour %d — %s" % [faction, save.get("date", "?"), int(save.get("turn", 0)) + 1, _difficulty_label(str(save.get("difficulty", "normal")))], UiType.CAPTION, Color(0.35, 0.22, 0.10)],
+		["Sauvegardée le %s" % french_timestamp(str(save.get("timestamp", ""))), UiType.CAPTION, Color(0.45, 0.36, 0.26)],
 	]
 	var usable := mode != Mode.LOAD or SaveSlots.loadable(save)
 	if not usable:
-		lines.append(["Simulation réelle requise", 13, Color(0.55, 0.12, 0.10)])
+		lines.append(["Simulation réelle requise", UiType.CAPTION, Color(0.55, 0.12, 0.10)])
 	for spec in lines:
 		var label := Label.new()
 		label.text = spec[0]
-		label.add_theme_font_size_override("font_size", spec[1])
+		UiType.apply(label, spec[1])
 		label.add_theme_color_override("font_color", spec[2])
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		text.add_child(label)

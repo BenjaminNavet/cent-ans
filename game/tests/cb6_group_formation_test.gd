@@ -18,12 +18,23 @@ var _scene: Node = null
 
 func _init() -> void:
 	await process_frame
+	_hermetic_settings()
 	_check_pure()
 	await _check_integration()
 	if _scene != null and is_instance_valid(_scene):
 		_scene.queue_free()
 	print("cb6_group_formation_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
+
+
+## Réglages par défaut (fichier de test) : la « Taille de l'interface » du joueur
+## (`user://settings.cfg`, partagé par toutes les copies du dépôt) change l'échelle de la fenêtre,
+## donc le point visé par le clic droit simulé.
+func _hermetic_settings() -> void:
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.call("use_test_file")
+		settings.call("_apply_ui_scale")
 
 
 func _check(condition: bool, message: String) -> bool:
