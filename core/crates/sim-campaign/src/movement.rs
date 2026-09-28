@@ -266,8 +266,16 @@ impl CampaignState {
         let steps = (base * (1.0 + pace / 100.0) + 1e-9).floor()
             + tech.movement.flat
             + general.movement.flat;
+        // TW2-T5: march traditions of the army, on the points themselves (a
+        // few percent of three or four steps would be floored away).
+        let traditions =
+            f64::from(crate::traditions::army_tradition_effects(data, army).movement_percent);
         // Lot C7a: the season covers `season_scale` of the v1 steps.
-        (steps.max(1.0) * points_per_step(data) * data.movement_rules().season_scale).round() as u32
+        (steps.max(1.0)
+            * points_per_step(data)
+            * data.movement_rules().season_scale
+            * (1.0 + traditions / 100.0))
+            .round() as u32
     }
 
     /// Movement points of a fresh army at full pace this season (no
@@ -292,6 +300,8 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
         .as_ref()
         .map(|id| skills::character_effects(state, data, id))
         .unwrap_or_default();
+    // TW2-T5: discipline (morale) and shooting traditions of the army.
+    let traditions = crate::traditions::army_tradition_effects(data, army);
     Side {
         units: army
             .units
@@ -306,11 +316,21 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
                     strength: unit.strength,
                     max_strength: unit.max_strength,
                     experience: unit.experience,
-                    morale: research::boosted(unit.morale, tech.morale, 100),
+                    morale: research::boosted(
+                        unit.morale,
+                        tech.morale + f64::from(traditions.morale),
+                        100,
+                    ),
                     melee: research::boosted(stats.map_or(30, |t| t.stats.melee), tech.melee, 255),
                     ranged: research::boosted(
                         stats.map_or(0, |t| t.stats.ranged),
-                        tech.ranged + f64::from(unit.levy_ranged),
+                        tech.ranged
+                            + f64::from(unit.levy_ranged)
+                            + if stats.is_some_and(|t| t.stats.ranged > 0) {
+                                f64::from(traditions.ranged)
+                            } else {
+                                0.0
+                            },
                         255,
                     ),
                     // G1: plus the levying province's buildings (armoury, butts).
@@ -794,6 +814,31 @@ pub(crate) fn apply_battle_result(
                 events,
             );
         }
+    }
+
+    // TW2-T5: army experience of both sides (traditions).
+    let side_strength = |ids: &[ArmyId]| {
+        ids.iter()
+            .filter_map(|id| strength_before.get(id))
+            .sum::<u32>()
+    };
+    let sides = [
+        (attackers, defenders, Winner::Attacker, attacker_xp),
+        (defenders, attackers, Winner::Defender, defender_xp),
+    ];
+    for (ids, enemies, side, multiplier) in sides {
+        crate::traditions::on_battle(
+            state,
+            data,
+            &crate::traditions::BattleSide {
+                armies: ids,
+                strength_before: &strength_before,
+                won: result.winner == side,
+                enemy_strength: side_strength(enemies),
+                multiplier,
+            },
+            events,
+        );
     }
 
     let losers = match result.winner {
