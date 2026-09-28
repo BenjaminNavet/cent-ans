@@ -645,12 +645,14 @@ fn an_army_emptied_by_its_fallback_is_dispersed() {
         crate::movement::retreat_target_after(&state, &data, &english, paris_point, 0),
         Some(crate::movement::Retreat::Fallback(_))
     ));
-    // A single straggling regiment: the fallback's losses take it all.
+    // A single regiment at exactly 5 % of its men: it survives the battle
+    // (no loss), but the fallback's stragglers disband it.
     let general = state.armies[&english].general.clone();
     {
         let a = state.armies.get_mut(&english).unwrap();
         a.units.truncate(1);
-        a.units[0].strength = 1;
+        a.units[0].max_strength = 100;
+        a.units[0].strength = 5;
     }
     let units = state.armies[&french].units.len();
     let result = BattleResult {
