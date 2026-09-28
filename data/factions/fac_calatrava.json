@@ -17,8 +17,8 @@
   "suzerain": "fac_castile",
   "primary_title": "tit_calatrava",
   "heraldry": {
-    "blazon": "D'argent à la croix pattée et fleurdelisée de gueules.",
-    "description": "Croix de l'ordre militaire du Calatrava.",
+    "blazon": "D'argent à la croix alésée de gueules.",
+    "description": "Croix de l'ordre militaire du Calatrava (fleurdelisée aux extrémités dans les sources ; rendue ici en croix alésée, forme la plus proche disponible dans le moteur de blasons).",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B0182B"
   },
