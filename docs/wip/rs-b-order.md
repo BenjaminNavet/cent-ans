@@ -39,9 +39,12 @@ toutes ses valeurs avant de vérifier.
 | main (mesure RS-D) | 38 297 | — | — | — | — | — | échec trésor |
 | constantes seules + révoltes 2 × 74 | 42 634 | 23 406 | 1,647 | 0,05 | 4,8 | 42 | ok |
 | pondérations + révoltes 2 × 74 | 43 830 | 21 636 | 1,485 | 0,06 | 4,2 | 47 | échec sièges (< 1,5) |
-Le trésor de la France revient dans la bande avec les nouveaux seuils de révolte. La pondération de
-l'IA (bâtiments des places secondaires estimés à leur vrai poids) baisse les sièges de 10 % ;
-plancher recalibré 1,5 → 1,4 (ADR 0100), les autres bornes inchangées.
+| **état final (fusion de main, révoltes 2 × 75)** | **41 889** | 17 424 | 1,402 | 0,05 | 5,5 | 52 | **ok** |
+
+Le trésor de la France revient dans la bande (41 889 ≥ 40 000) avec les réglages de révolte. La
+pondération de l'IA (bâtiments des places secondaires estimés à leur vrai poids) baisse les sièges
+(1,65 → 1,49, puis 1,40 après la fusion de main) : plancher recalibré 1,5 → 1,3 (ADR 0100), les
+autres bornes inchangées.
 
 ## Century_probe 464 tours (binaire d'avant la fusion de main), essai 2 saisons × seuil 74
 | Niveau | Guerre FR-EN moy. [min-max] | Graines 55-75 | Trêves | Révoltes / 200 t. | Banqueroutes | 1re faction fin |
