@@ -19,7 +19,7 @@
           "enum": [
             "faction_colors", "gradient", "relation", "color", "fog", "settlement",
             "settlement_owners", "army_banner", "army_plate", "agent", "path", "ring",
-            "construction", "trade_route", "minimap_army", "minimap_frame"
+            "construction", "trade_route", "minimap_army", "minimap_frame", "occupation"
           ]
         },
         "pictogram": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Lot DA3 : pictogramme de data/map/settlement_markers.json (sinon celui du type et du rang)."},
@@ -28,6 +28,8 @@
         "from": {"$ref": "#/$defs/hex_color"},
         "to": {"$ref": "#/$defs/hex_color"},
         "color": {"$ref": "#/$defs/hex_color"},
+        "owner_color": {"$ref": "#/$defs/hex_color"},
+        "occupier_color": {"$ref": "#/$defs/hex_color"},
         "relation": {"type": "string", "enum": ["self", "war", "truce", "peace", "alliance", "vassal", "suzerain", "ally", "agreement", "neutral", "tension"]},
         "kind": {"type": "string", "enum": ["city", "town", "castle", "abbey", "village", "spy", "emissary", "preacher"]},
         "owner": {"$ref": "#/$defs/owner"},
@@ -41,7 +43,8 @@
         {"if": {"properties": {"type": {"const": "relation"}}}, "then": {"required": ["relation"]}},
         {"if": {"properties": {"type": {"const": "settlement"}}}, "then": {"required": ["kind"], "properties": {"kind": {"enum": ["city", "town", "castle", "abbey", "village"]}}}},
         {"if": {"properties": {"type": {"const": "agent"}}}, "then": {"required": ["kind"], "properties": {"kind": {"enum": ["spy", "emissary", "preacher"]}}}},
-        {"if": {"properties": {"type": {"const": "army_plate"}}}, "then": {"required": ["men", "status"]}}
+        {"if": {"properties": {"type": {"const": "army_plate"}}}, "then": {"required": ["men", "status"]}},
+        {"if": {"properties": {"type": {"const": "occupation"}}}, "then": {"required": ["owner_color", "occupier_color"]}}
       ]
     },
     "entry": {
