@@ -15,6 +15,7 @@
   "religion": "rel_islam",
   "culture": "cul_andalusi",
   "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_granada",
   "heraldry": {
     "blazon": "De gueules à la bande d'or engoulée de deux têtes de dragon, chargée de la devise nasride.",
     "description": "Bande d'or des Nasrides portant « Wa-lā ghālib illā Allāh » (Nul vainqueur sinon Dieu).",

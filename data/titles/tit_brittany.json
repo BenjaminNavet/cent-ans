@@ -1,0 +1,28 @@
+{
+  "id": "tit_brittany",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Bretagne",
+    "local": "Dugelezh Breizh",
+    "local_language": "breton"
+  },
+  "heraldry": {
+    "blazon": "D'hermine plain.",
+    "description": "Champ d'hermine plain, adopté par Jean III en 1316 en remplacement de l'échiqueté de Dreux au franc-quartier d'hermine.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#111111"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_bretagne",
+    "prov_bretagne_ouest"
+  ],
+  "holder_1337": {
+    "faction": "fac_brittany",
+    "sources": [
+      "Jean III de Bretagne",
+      "Guerre de Succession de Bretagne",
+      "Armoiries de la Bretagne"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "tit_normandie_ouest",
+  "rank": "duchy",
+  "name": {
+    "display": "Normandie (Caen)",
+    "local": "Normendie",
+    "local_language": "ancien français"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_normandie_ouest"
+  ],
+  "holder_1337": {
+    "faction": "fac_france",
+    "sources": [
+      "Duché de Normandie",
+      "Caen",
+      "Cotentin"
+    ]
+  },
+  "description": "Tenu en 1337 par chr_jean_de_normandie (apanage ou fief)."
+}
