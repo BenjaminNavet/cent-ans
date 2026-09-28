@@ -597,6 +597,10 @@ pub struct FactionState {
     pub army_upkeep_last_turn: i64,
     #[serde(default)]
     pub building_upkeep_last_turn: i64,
+    /// RS-C: seasons in a row closed in deficit (income below upkeep); the
+    /// AI demolishes buildings after `economy.json` `ai_demolition`.
+    #[serde(default)]
+    pub deficit_seasons: u32,
     #[serde(default)]
     pub projected_income: i64,
     /// A regency governs for a minor ruler (M4 spec § 2); tracked so the

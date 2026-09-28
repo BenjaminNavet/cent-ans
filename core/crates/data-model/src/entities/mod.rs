@@ -19,6 +19,7 @@ pub mod character;
 pub mod chivalric_order;
 pub mod diet;
 pub mod difficulty;
+pub mod diplomacy_rules;
 pub mod economy_rules;
 pub mod edict;
 pub mod encounter;

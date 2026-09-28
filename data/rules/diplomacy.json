@@ -1,0 +1,7 @@
+{
+  "description": "Diplomatie (lot RS-C). Plafond, par motif, du total des modificateurs d'opinion en cours qu'une faction garde envers une autre : au-delà, un nouveau mariage ou une nouvelle ambassade ne fait que prolonger les bons sentiments déjà acquis. Sans plafond, dix mariages entre deux maisons donnaient +150 et six ambassades de héraut s'empilaient. Les motifs absents ne sont pas plafonnés.",
+  "opinion_caps": {
+    "marriage": 30,
+    "herald_embassy": 20
+  }
+}
