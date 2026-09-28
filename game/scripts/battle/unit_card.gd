@@ -320,9 +320,14 @@ func _draw_star(center: Vector2, radius: float) -> void:
 	art.draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
 
 
-## CB1 : cadenas (anse et corps) centré en `center`, à l'échelle `k` ; glyphe provisoire en
-## attendant une icône DA5, comme les curseurs de CB-M2.
+## CB1 : cadenas centré en `center`, à l'échelle `k` : icône à l'encre DA5 `battle_lock` (lot CB)
+## sur une pastille de parchemin, sinon glyphe doré dessiné en code (repli sans PNG).
 static func draw_padlock(canvas: CanvasItem, center: Vector2, k: float) -> void:
+	if HudStyle.icon("battle_lock") != null:
+		canvas.draw_circle(center, 7.5 * k, Color(0.95, 0.9, 0.78, 0.95))
+		canvas.draw_arc(center, 7.5 * k, 0, TAU, 16, Color(0.1, 0.06, 0.03), 1.0)
+		BattleModeIcons.draw_ink_icon(canvas, "battle_lock", center, 11.0 * k)
+		return
 	var dark := Color(0.1, 0.06, 0.03)
 	var gold := Color(1, 0.82, 0.3)
 	var body := Rect2(center + Vector2(-5.5, -1.5) * k, Vector2(11, 8.5) * k)
@@ -338,8 +343,8 @@ static func bar_y_top(size: Vector2, bars: int) -> float:
 	return size.y - 2.0 - bars * (BAR_H + 1.0)
 
 
-## CB2 : modes actifs en petits glyphes sur pastille claire, de droite à gauche depuis `right`
-## (centre du premier) ; glyphes provisoires en attendant les icônes DA5.
+## CB2 : modes actifs en petites icônes sur pastille claire, de droite à gauche depuis `right`
+## (centre du premier) ; icônes DA5 du lot CB, glyphes en repli (`BattleModeIcons.draw_mode`).
 static func draw_modes(canvas: CanvasItem, modes: Array[String], right: Vector2) -> void:
 	for i in modes.size():
 		var c := right - Vector2(i * 13.0, 0)

@@ -427,6 +427,16 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 		BattleModeIcons.draw_mode(canvas, kind.trim_prefix("mode_"), c, 0.62, ink)
 	elif kind == "wavering" or kind == "under_fire":
 		BattleModeIcons.draw_state(canvas, kind, c, ink)
+	else:
+		# Lot CB : icône à l'encre DA5 (`battle_state_<kind>`), glyphe dessiné en repli sans PNG.
+		var tint := ink if kind != "tired" else Color(0.2, 0.4, 0.75)
+		if not BattleModeIcons.draw_ink_icon(canvas, "battle_state_" + kind, c, BattleModeIcons.BADGE_ICON_SIDE, tint):
+			_draw_badge_glyph(canvas, kind, c, ink)
+	canvas.draw_set_transform(Vector2.ZERO)
+
+
+## Glyphe de repli d'une pastille (sans icône DA5).
+static func _draw_badge_glyph(canvas: CanvasItem, kind: String, c: Vector2, ink: Color) -> void:
 	match kind:
 		"shoot":  # flèche en diagonale
 			canvas.draw_line(c + Vector2(-3.5, 3.5), c + Vector2(3.5, -3.5), ink, 1.5)
@@ -443,7 +453,6 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 		"rout":  # drapeau blanc
 			canvas.draw_line(c + Vector2(-2.5, 4), c + Vector2(-2.5, -4), ink, 1.2)
 			canvas.draw_rect(Rect2(c + Vector2(-2.5, -4), Vector2(6, 4)), ink)
-	canvas.draw_set_transform(Vector2.ZERO)
 
 
 ## B7 : nom d'une troupe seule ; B8 : infobulle détaillée d'un groupe (une ligne par régiment :
