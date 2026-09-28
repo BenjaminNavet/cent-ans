@@ -69,11 +69,7 @@ fn resistance_with_apothecary(data: &GameData, kind: SettlementKind) -> (f64, f6
         .settlements
         .iter()
         .filter(|(_, s)| s.controller == france && s.kind == kind)
-        .filter(|(_, s)| {
-            !state
-                .province_buildings(&s.province)
-                .contains(&apothecary)
-        })
+        .filter(|(_, s)| !state.province_buildings(&s.province).contains(&apothecary))
         .map(|(id, s)| (id.clone(), s.province.clone()))
         .next()
         .expect("a French place without apothecary in its province");
