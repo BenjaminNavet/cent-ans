@@ -23,6 +23,13 @@ vers `main`. ADR réservés : **0100** (lot B ; 0098 pris par FE), **0099** (lot
   `settings.cfg` du joueur (`advisor_seen` vidé).
 - En cours : **C** (`feat/rs-c-diplo`, plafond par motif, démolition IA), **L** (`feat/rs-l-alerts`,
   champ de siège au pont pour `alerts.gd`). P2d attend TW2 T4 (UI de capture).
+- **K fusionné** (perf carte : `town/models` 25 → 0 ms, images > 50 ms 106 → 87), **L fusionné**
+  (champs `siege_*` dans `get_provinces_snapshot`, `alerts.gd` en lecture groupée), **C fusionné**
+  (5aae540f, ADR **0111** renumérotée : plafond d'opinion par motif, ordre `Demolish` + IA en déficit).
+  Conflit sémantique C × FE (`feudal/transfer.rs`, champ `deficit_seasons`) corrigé à l'intégration.
+  `sz4*_test` exigent `data/map/pyramid` (ignoré par git) : liens symboliques dans les worktrees.
+- En cours : **M** (`feat/rs-m-c7a`, sonde c7a rouge sur main : France 34 286 < 40 000 depuis TW2/FE),
+  **K2** (`feat/rs-k2-perf`, `settle/*` et `life/*` au zoom). En attente : P2d (TW2 T4), P2f (après IB).
 - Vague 3 lancée : **P2g** (`feat/p2g-layout`, Tech/Diplo/Cour/Fiche/SaveLoadDialog dans `UiLayout`),
   **K perf** (`feat/rs-k-perf`, `TownLayer` ~10 ms, `qt/collect`). `alerts.gd` (champ de siège au pont)
   attend TW2 SB (même zone) ; C après B ; P2d après TW2 SB ; P2f en dernier.
