@@ -45,11 +45,11 @@ joueur / dépendance (`buildings::demolition_blocker`). Aucune UI n'existait.
       draperie qui en dépend, draperie rasée après confirmation, remboursement
       versé, renoncer ne change rien).
 - [x] cargo fmt/clippy `--all-targets -D warnings` : verts.
-- [ ] `cargo test --workspace` : en cours (long, tourne en tâche de fond).
-- [ ] `smoke.gd` : en cours (tâche de fond).
-- [ ] `po_ui_test.gd`, `c5_settlements_ui_test.gd` (régression) : à lancer.
-- [ ] Supprimer `core/target-rs-n` en fin de lot.
+- [x] `cargo test --workspace` : vert (0 échec).
+- [x] `smoke.gd` : OK.
+- [x] `po_ui_test.gd` : OK (tailles UiType 14/17/20/26 confirmées).
+- [x] `c5_settlements_ui_test.gd` (régression) : OK.
+- [x] `core/target-rs-n` supprimé.
 
-## Prochaine étape
-Attendre `cargo test --workspace` et `smoke.gd`, lancer `po_ui_test.gd` et
-`c5_settlements_ui_test.gd`, puis commit final et rapport.
+## Terminé
+Lot terminé. Fusion par l'orchestrateur.
