@@ -244,7 +244,8 @@ def weighted_cost_voronoi(
             c1 = min(cols, int(sources[:, 1].max()) + reach + 1)
         mcp = MCP_Geometric(costs[r0:r1, c0:c1], fully_connected=True)
         cost, _ = mcp.find_costs(
-            [(int(row) - r0, int(col) - c0) for row, col in sources])
+            [(int(row) - r0, int(col) - c0) for row, col in sources]
+        )
         if max_cost is not None:
             cost[cost > max_cost] = np.inf
         scaled = cost / weight
@@ -405,7 +406,11 @@ def sea_neighbours(
     radius_px: float = SEA_NEIGHBOUR_RADIUS_PX,
     step: int = COAST_SAMPLE_STEP,
 ) -> dict[int, set[int]]:
-    """Coastal provinces whose coasts lie within ``radius_px`` and are not land neighbours."""
+    """Coastal provinces whose coasts lie within ``radius_px`` and are not land neighbours.
+
+    A province with neither land nor sea neighbour (remote island) is linked to
+    the province whose coast is nearest.
+    """
     coast = coastal_pixels(labels)[::step]
     tree = cKDTree(coast[:, :2].astype(np.float64))
     pairs = tree.query_pairs(radius_px, output_type="ndarray")
@@ -420,6 +425,21 @@ def sea_neighbours(
             continue
         graph.setdefault(low, set()).add(high)
         graph.setdefault(high, set()).add(low)
+    # An island province beyond the radius (Gotland, 90 km off the coast) is
+    # linked to the nearest other province, so that the graph stays connected.
+    labels_on_coast = coast[:, 2]
+    for label in np.unique(labels_on_coast):
+        label = int(label)
+        if land_graph.get(label) or graph.get(label):
+            continue
+        own = coast[labels_on_coast == label, :2].astype(np.float64)
+        others = coast[labels_on_coast != label]
+        if len(others) == 0:
+            continue
+        distance, index = cKDTree(others[:, :2].astype(np.float64)).query(own)
+        nearest = int(others[index[int(np.argmin(distance))], 2])
+        graph.setdefault(label, set()).add(nearest)
+        graph.setdefault(nearest, set()).add(label)
     return graph
 
 
