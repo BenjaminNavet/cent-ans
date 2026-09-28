@@ -25,5 +25,55 @@
       "Comté d'Armagnac",
       "Lectoure"
     ]
+  },
+  {
+    "id": "set_fleurance",
+    "province": "prov_armagnac",
+    "kind": "town",
+    "name": {
+      "display": "Fleurance",
+      "local": "Flourença",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.6607,
+      43.8422
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bastide fondée en 1274 par les comtes d'Armagnac sur les rives du Gers.",
+    "sources": [
+      "Fleurance"
+    ]
+  },
+  {
+    "id": "set_mauvezin",
+    "province": "prov_armagnac",
+    "kind": "castle",
+    "name": {
+      "display": "Mauvezin",
+      "local": "Maubesin",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.8964,
+      43.7286
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château comtal d'Armagnac, verrou oriental du comté vers la Lomagne.",
+    "sources": [
+      "Mauvezin (Gers)"
+    ]
   }
 ]
