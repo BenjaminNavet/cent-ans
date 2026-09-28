@@ -45,6 +45,21 @@
       "faction": "fac_brandenburg",
       "status": "peace",
       "note": "Voisin par la Neumark ; alliance ancienne contre Pologne et Lituanie."
+    },
+    {
+      "faction": "fac_poland",
+      "status": "truce",
+      "note": "Trêve depuis 1332 ; l'Ordre occupe la Kuyavie et Dobrzyń ; arbitrage de Visegrád (1335), paix de Kalisz en 1343."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "war",
+      "note": "Croisades de Prusse contre la Lituanie païenne ; Bayerburg fondée sur le Niémen en 1337."
+    },
+    {
+      "faction": "fac_livonian_order",
+      "status": "overlord",
+      "note": "Branche livonienne de l'Ordre."
     }
   ],
   "ai_personality": {

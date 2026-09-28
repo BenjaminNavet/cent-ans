@@ -53,6 +53,31 @@
       "faction": "fac_kiev",
       "status": "peace",
       "note": "Gediminas exerce son influence sur Kiev (tribut à la Horde d'Or)."
+    },
+    {
+      "faction": "fac_teutonic",
+      "status": "war",
+      "note": "Croisades de Prusse contre la Lituanie païenne ; Bayerburg fondée sur le Niémen en 1337."
+    },
+    {
+      "faction": "fac_livonian_order",
+      "status": "war",
+      "note": "Guerre de frontière permanente entre la Livonie et la Lituanie."
+    },
+    {
+      "faction": "fac_pskov",
+      "status": "alliance",
+      "note": "Pskov sous protection lituanienne (Alexandre de Tver, prince de Pskov)."
+    },
+    {
+      "faction": "fac_smolensk",
+      "status": "alliance",
+      "note": "Ivan Alexandrovitch se rapproche de Gediminas ; campagne moscovite et tatare contre Smolensk en 1339."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Rivalité pour les terres ruthènes, sans guerre ouverte en 1337."
     }
   ],
   "claims": [

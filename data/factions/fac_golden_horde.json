@@ -91,6 +91,26 @@
     {
       "faction": "fac_theodoro",
       "status": "overlord"
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "peace",
+      "note": "Rivalité pour les terres ruthènes, sans guerre ouverte en 1337."
+    },
+    {
+      "faction": "fac_kiev",
+      "status": "overlord",
+      "note": "Kiev paie tribut à la Horde, sous influence lituanienne."
+    },
+    {
+      "faction": "fac_wallachia",
+      "status": "peace",
+      "note": "Voisinage des steppes tatares à l'est."
+    },
+    {
+      "faction": "fac_galicia_volhynia",
+      "status": "peace",
+      "note": "Boleslas-Iouri II ménage la Horde."
     }
   ],
   "ai_personality": {

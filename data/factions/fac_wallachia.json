@@ -47,6 +47,11 @@
       "faction": "fac_transylvania",
       "status": "war",
       "note": "Escarmouches aux cols des Carpates."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Voisinage des steppes tatares à l'est."
     }
   ],
   "claims": [

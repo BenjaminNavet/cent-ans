@@ -39,6 +39,11 @@
       "faction": "fac_lithuania",
       "status": "peace",
       "note": "Gediminas exerce une influence sur Kiev depuis sa victoire sur la Irpen (v. 1320-1324, incertain) ; le prince paie encore le tribut à la Horde."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal",
+      "note": "Kiev paie tribut à la Horde, sous influence lituanienne."
     }
   ],
   "ai_personality": {

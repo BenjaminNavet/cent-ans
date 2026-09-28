@@ -43,6 +43,11 @@
     {
       "faction": "fac_holstein_kiel",
       "status": "peace"
+    },
+    {
+      "faction": "fac_novgorod",
+      "status": "peace",
+      "note": "Traité de Nöteborg (1323) ; guerre de Magnus Eriksson en 1348."
     }
   ],
   "ai_personality": {

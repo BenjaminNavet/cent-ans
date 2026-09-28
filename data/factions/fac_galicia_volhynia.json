@@ -50,6 +50,11 @@
       "faction": "fac_hungary",
       "status": "peace",
       "note": "Charles Robert observe la Ruthénie rouge."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Boleslas-Iouri II ménage la Horde."
     }
   ],
   "ai_personality": {

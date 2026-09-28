@@ -45,6 +45,11 @@
       "faction": "fac_briansk",
       "status": "peace",
       "note": "Son frère Dmitri de Briansk l'a assiégé en 1334 avec des Tatars ; paix depuis."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "alliance",
+      "note": "Ivan Alexandrovitch se rapproche de Gediminas ; campagne moscovite et tatare contre Smolensk en 1339."
     }
   ],
   "ai_personality": {
