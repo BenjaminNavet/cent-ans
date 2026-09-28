@@ -28,22 +28,6 @@ const LITERAL_EXCEPTIONS: Array[String] = [
 	"res://scripts/codex/codex_window.gd",
 	"res://scripts/naval/naval_hud.gd",
 	"res://scripts/naval/naval_pre_battle_dialog.gd",
-	"res://scripts/ui/army_strip.gd",
-	"res://scripts/ui/budget_table.gd",
-	"res://scripts/ui/character_sheet.gd",
-	"res://scripts/ui/chivalry_section.gd",
-	"res://scripts/ui/chronicle_window.gd",
-	"res://scripts/ui/court_panel.gd",
-	"res://scripts/ui/diplomacy_panel.gd",
-	"res://scripts/ui/encounter_window.gd",
-	"res://scripts/ui/encyclopedia.gd",
-	"res://scripts/ui/end_turn_cluster.gd",
-	"res://scripts/ui/faction_panel.gd",
-	"res://scripts/ui/general_seal.gd",
-	"res://scripts/ui/mercenary_panel.gd",
-	"res://scripts/ui/retinue_row.gd",
-	"res://scripts/ui/season_report.gd",
-	"res://scripts/ui/tutorial.gd",
 ]
 
 var _failures := 0
@@ -122,7 +106,8 @@ func _check_dynamic_override() -> void:
 func _check_no_stray_literals() -> void:
 	var offenders := PackedStringArray()
 	var regex := RegEx.new()
-	regex.compile("tooltip_text\\s*\\+?=\\s*\"")
+	# Une chaîne vide (`tooltip_text = ""`) n'est pas un texte à migrer : elle efface l'infobulle.
+	regex.compile("tooltip_text\\s*\\+?=\\s*\"[^\"]")
 	_scan_dir("res://scripts", regex, offenders)
 	var kept := PackedStringArray()
 	for path in offenders:

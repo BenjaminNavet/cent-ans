@@ -296,9 +296,9 @@ func _update_tooltip() -> void:
 		return
 	var blocking := blocking_alert()
 	if not blocking.is_empty():
-		_button.tooltip_text = "Une décision attend avant la fin de la saison :\n%s" % str(blocking.get("text", ""))
+		RichTooltip.attach_plain(_button, "end_turn_blocked", {"body": str(blocking.get("text", ""))})
 	else:
-		_button.tooltip_text = "Finir la saison (Entrée)"
+		RichTooltip.attach_plain(_button, "end_turn_finish")
 
 
 func _on_button_pressed() -> void:
