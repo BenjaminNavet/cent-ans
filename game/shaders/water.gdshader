@@ -38,8 +38,22 @@ uniform float specular_amount = 0.06;
 uniform float sun_spec_power = 180.0;
 uniform float sun_spec_intensity = 0.1;
 uniform float sun_spec_max = 0.1;
+// GA4 (ADR 0105) : normale d'eau tuilable (CC0, `water_normal.png`) en deux couches défilantes
+// (échelles en pixels carte, vitesses en pixels carte par seconde) et couleur de profondeur à
+// trois paliers, réglées depuis `data/fx/campaign_terrain_textures.json`
+// (`CampaignTextures.apply_water`) ; `ga4_on` = 0 (`--no-ga4`) : houle procédurale d'origine.
+uniform float ga4_on = 0.0;
+uniform sampler2D water_normal : filter_linear_mipmap_anisotropic, repeat_enable, hint_default_black;
+uniform float ga4_scale_a = 1.7;
+uniform float ga4_scale_b = 4.3;
+uniform vec2 ga4_velocity_a = vec2(0.05, 0.02);
+uniform vec2 ga4_velocity_b = vec2(-0.03, 0.045);
+uniform float ga4_normal_strength = 0.35;
+uniform vec3 mid_color = vec3(0.018, 0.075, 0.095);
+uniform float mid_depth_m = 25.0;
 // Lot CM2 : mer des portulans (vue stratégique parchemin).
 #include "res://shaders/parchment_sea.gdshaderinc"
+#include "res://shaders/ga_macro.gdshaderinc"  // GA4 : couleur de profondeur
 
 varying float v_far;
 
@@ -92,19 +106,31 @@ void fragment() {
 	bool inside = all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
 	float h_here = (has_heightmap && inside) ? height_m(uv) : -200.0;
 	float depth = max(-h_here, 0.0);
-	float depth_t = 1.0 - exp(-depth / depth_falloff_m);
-	vec3 col = mix(shallow_color, deep_color, depth_t);
+	vec3 col = ga_depth_color(depth, shallow_color, mid_color, deep_color, mid_depth_m, depth_falloff_m, ga4_on);  // GA4
 	float alpha = mix(alpha_shallow, alpha_deep, smoothstep(0.0, 45.0, depth));
 
 	// Vagues : normale par différences finies de la houle, estompée au dézoom.
 	float t = TIME * wave_speed;
 	vec2 q = p * wave_scale;
-	float e = 0.15;
 	float h0 = swell(q, t);
-	float hx = swell(q + vec2(e, 0.0), t) - h0;
-	float hz = swell(q + vec2(0.0, e), t) - h0;
-	float ws = wave_strength * (1.0 - smoothstep(0.15, 0.8, footprint));
-	vec3 n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
+	vec3 n;
+	if (ga4_on > 0.5) {
+		// GA4 : deux couches de normale défilant en sens différents (la seconde tournée), mêlées
+		// en « whiteout » ; les mipmaps lissent le lointain, estompe plus tardive que la houle.
+		vec2 ua = (p + TIME * ga4_velocity_a) / ga4_scale_a;
+		vec2 ub = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * (p + TIME * ga4_velocity_b) / ga4_scale_b;
+		vec2 na = texture(water_normal, ua).rg * 2.0 - 1.0;
+		vec2 nb = texture(water_normal, ub).rg * 2.0 - 1.0;
+		float gs = ga4_normal_strength * (1.0 - smoothstep(0.6, 2.5, footprint) * 0.7);
+		vec2 nxy = (na + nb) * gs;
+		n = normalize(vec3(nxy.x, 1.0, nxy.y));
+	} else {
+		float e = 0.15;
+		float hx = swell(q + vec2(e, 0.0), t) - h0;
+		float hz = swell(q + vec2(0.0, e), t) - h0;
+		float ws = wave_strength * (1.0 - smoothstep(0.15, 0.8, footprint));
+		n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
+	}
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
 	col *= 1.0 + h0 * 0.06 * (1.0 - smoothstep(0.25, 1.2, footprint));
 
