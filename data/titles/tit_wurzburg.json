@@ -9,8 +9,8 @@
   "heraldry": {
     "blazon": "D'argent à la fasce de gueules (rastel de Franconie).",
     "description": "« Rastel de Franconie » : armes ducales portées par les princes-évêques de Wurtzbourg en tant que ducs de Franconie.",
-    "primary_color": "#C8102E",
-    "secondary_color": "#F5F1E6"
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#C8102E"
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [

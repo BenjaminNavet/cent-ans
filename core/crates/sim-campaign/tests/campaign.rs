@@ -56,8 +56,8 @@ fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
 fn new_1337_matches_game_data() {
     let data = data();
     let state = france(&data, 1);
-    assert_eq!(state.factions.len(), 36, "including the virtual fac_rebels");
-    assert_eq!(state.provinces.len(), 141);
+    assert_eq!(state.factions.len(), 61, "including the virtual fac_rebels");
+    assert_eq!(state.provinces.len(), 153);
     assert_eq!(state.date_label(), "Printemps 1337");
     assert_eq!(state.turn(), 0);
     assert_eq!(state.year, START_YEAR);
