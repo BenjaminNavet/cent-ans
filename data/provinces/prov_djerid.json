@@ -1,0 +1,87 @@
+{
+  "id": "prov_djerid",
+  "name": {
+    "display": "Djérid",
+    "local": "Al-Jarīd",
+    "local_language": "arabe maghrébin"
+  },
+  "region": "maghreb",
+  "terrain": "desert",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [],
+  "resources": [
+    "res_salt",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Tozeur",
+      "local": "Tūzar",
+      "local_language": "arabe maghrébin"
+    },
+    "lat": 33.9197,
+    "lon": 8.1339
+  },
+  "geo": {
+    "capital_lonlat": [
+      8.1339,
+      33.9197
+    ],
+    "seed_lonlat": [
+      8.3,
+      33.95
+    ],
+    "voronoi_weight": 1.9
+  },
+  "owner": "fac_hafsids",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 30000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 1500,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 750,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 360,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Chotts et oasis présahariennes : Tozeur, Nefta, Gafsa, palmeraies et caravanes. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 1,
+  "base_supply": 800,
+  "description": "Le Djérid, chapelet d'oasis autour du chott el-Djérid, source de dattes et d'étape caravanière vers le Sahara et le Soudan ; les tribus arabes y font la loi.",
+  "sources": [
+    "Chott el Djérid",
+    "Tozeur",
+    "Gafsa"
+  ]
+}

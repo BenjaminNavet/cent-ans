@@ -1,0 +1,95 @@
+{
+  "id": "prov_sous",
+  "name": {
+    "display": "Sous",
+    "local": "Sūs",
+    "local_language": "berbère"
+  },
+  "region": "maghreb",
+  "terrain": "hills",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Sous"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Taroudant",
+      "local": "Tarūdānt",
+      "local_language": "berbère"
+    },
+    "lat": 30.4703,
+    "lon": -8.8761
+  },
+  "geo": {
+    "capital_lonlat": [
+      -8.8761,
+      30.4703
+    ],
+    "seed_lonlat": [
+      -9.0,
+      30.4
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_marinids",
+  "culture": "cul_berber",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 35,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 1350,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1125,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 55,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 540,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Vallée du Sous et Anti-Atlas : canne à sucre, cuivre, tribus chleuhs. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1500,
+  "description": "Vallée du Sous, ceinturée par le Haut et l'Anti-Atlas : canne à sucre, tribus chleuhs autonomes, ports sur l'Atlantique.",
+  "sources": [
+    "Sous",
+    "Taroudant"
+  ],
+  "sea_zones": [
+    "sea_atlantic"
+  ],
+  "ports": [
+    "Agadir Igourramen"
+  ]
+}

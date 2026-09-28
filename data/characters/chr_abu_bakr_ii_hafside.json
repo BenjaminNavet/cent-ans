@@ -1,0 +1,42 @@
+{
+  "id": "chr_abu_bakr_ii_hafside",
+  "name": {
+    "display": "Abu Yahya Abu Bakr II, sultan hafside",
+    "local": "Abū Yaḥyā Abū Bakr al-Mutawakkil",
+    "local_language": "arabe maghrébin"
+  },
+  "sex": "male",
+  "house": "Hafsides",
+  "faction": "fac_hafsids",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "note": "Naissance non connue avec précision (vers 1290, incertain)."
+  },
+  "death": {
+    "value": "1346-10-19",
+    "note": "Meurt à Tunis ; son fils Abu Hafs Umar lui succède."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Sultan de Tunis"
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_pious"
+  ],
+  "piety": 65,
+  "starting_location": "prov_tunis",
+  "status": "at_court",
+  "description": "Sultan depuis 1318 ; il restaure l'unité de l'Ifriqiya, reprend Djerba aux Siciliens (1335) et fait de la course une ressource d'État.",
+  "sources": [
+    "Abu Yahya Abu Bakr II"
+  ]
+}
