@@ -3,25 +3,24 @@
 Spec : `docs/superpowers/specs/2026-09-28-feodalite-design.md`. Plan : `docs/superpowers/plans/2026-09-28-feodalite.md`.
 ADR : 0098. Worktree orchestrateur : `../game_project-fe` sur `feat/fe`.
 
-## État (2026-09-28, reprise)
-- F0 dans `main` (1dcd6821). Vague 1 entièrement fusionnée dans `feat/fe` (`../game_project-fe`) :
-  F3, F2, F4a, puis F1 (cdad6965) avec réconciliation :
-  - une seule convocation d'ost : `feudal::summon_host` (l'attaquant et le suzerain protecteur convoquent
-    leurs vassaux directs) ; refus → `on_host_refused` envers le suzerain qui convoque ;
-  - `sync_suzerains` appelé à chaque changement de détention (`transfer::refresh_primary`) ; la déshérence
-    suit le suzerain effectif (`effective_liege`, donc les hommages) ; titre supérieur vacant → indépendant ;
-  - mémoire de loyauté F1 alimentée par concession (F3), commise (pairs du félon), succession contestée
-    (prétendant rival) et paix perdue (côté qui cède terres ou tribut). La protection reste un modificateur
-    d'opinion F2 (visible dans l'UI) : les variantes `Protection*` de F1 ont été retirées (double compte) ;
-  - tests F2 : `suzerain` dérivé par `sync_suzerains`, plus d'alignement manuel.
-- `main` (TW2, RS) fusionné dans `feat/fe` (3d634500) : fmt, clippy, 152 binaires de test verts, smoke OK.
-- En cours : agent `feat/fe4a-assets` (`../game_project-fe4a-assets`) pour les 16 échecs pytest dus aux
-  données F4a (colonies, horizon, navgrid, héraldique, front-end, portraits).
+## État (2026-09-28)
+- **Vague 1 dans `main`** (a2672d2e) : F0-F4a + réconciliation F1/F2/F3 (cdad6965) + données dérivées F4a
+  (colonies, horizon, navgrid, héraldique, front-end). Vérif complète verte (155 binaires cargo, 896 pytest, smoke).
+  Retouches d'intégration : `cv3_ai_stances` déterminisme sur la graine 1 (la 7 a perdu son embuscade avec
+  les fiefs français) ; Sées : collégiale (une ville ne porte pas de cathédrale).
+- Worktrees vague 1 supprimés. `../game_project-fe` (`feat/fe`) reste le worktree d'intégration.
+- **Vague 2 en cours** (depuis `main` a2672d2e ou `feat/fe` a9f7b409 pour F5) :
+  - F5 IA féodale : `../game_project-fe5` (`feat/fe5-ia`) ;
+  - F4b Empire et Pays-Bas : `../game_project-fe4b` (`feat/fe4b-empire`) ;
+  - F4c îles Britanniques : `../game_project-fe4c` (`feat/fe4c-iles`) ;
+  - F4d Ibérie et F4e Italie : à lancer quand des places d'agents se libèrent (plafond 10 sur le dépôt).
 
 ## Reprise
-1. Fusionner `feat/fe4a-assets` dans `feat/fe`, pytest vert, ff `main`.
-2. Vague 2 (F4b-F4e, F5) depuis `main`. Les artefacts globaux régénérés (navgrid, horizon) se régénèrent
-   à l'intégration, pas dans chaque lot.
+1. Fusionner chaque lot dans `feat/fe`. Artefacts géo GLOBAUX (`provinces.geojson`, rasters, `data/map/*`,
+   `navgrid.png`, aperçus) : prendre un côté puis relancer le pipeline sur les données fusionnées
+   (`cent-ans geo provinces`, `geo settlements`, `geo hamlets`, `geo horizon --province …`, `geo navgrid`).
+2. Vérif complète, ff `main`, puis vague 3 (F6 UI, F7 portraits, F8 équilibre).
+- Difficultés (2-3) des 7 factions F4a : choix éditorial de l'agent, à valider par le joueur.
 
 ## Points ouverts (à trancher en F5/F8)
 - `ai/tests/g4.rs` (Brabant allié de l'Angleterre) en `#[ignore]` : un vassal peut-il s'allier hors de son suzerain ? (F5)
@@ -29,4 +28,3 @@ ADR : 0098. Worktree orchestrateur : `../game_project-fe` sur `feat/fe`.
 - Interprétations F3 à valider : conquête (§ 4.6), « plusieurs prétendants », lois de succession par titre (données à écrire).
 - F6 : offres Protection/Arbitrage, ordre `ArbitratePrivateWar`, article `demand_title`, factions créées sans données d'affichage.
 - F4a : Normandie en deux titres, héritiers manquants, couleurs héraldiques en doublon.
-- Worktrees d'agents FE (F1-F4a) à supprimer après fusion dans `main`.
