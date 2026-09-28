@@ -25,13 +25,13 @@ Cible cargo privée : `core/target-rs-b` (à supprimer en fin de lot).
 | pondération (108709cc) | 2,8 | 1 0 3 1 11 0 3 0 9 1 2 0 5 5 1 3 | 69 % | 0,10 | 32 % | 20,5 |
 | + `revolt_seasons` 3 → 2 | 4,8 | 1 2 9 7 6 0 5 2 10 4 3 7 7 8 1 4 | 69 % | 0,10 | 33 % | 20,6 |
 | + seuil 75 → 72 | 11,1 | 12 3 10 11 12 12 17 7 12 20 6 1 9 19 16 10 | 69 % | 0,08 | 30 % | 19,8 |
+| **+ seuil 75 → 74 (retenu)** | **7,8** | 8 10 1 4 13 6 7 7 2 9 4 4 15 8 13 13 | 69 % | 0,13 | 31 % | 19,6 |
 
 Bruit énorme entre graines (0 à 15). La pondération relève le mécontentement moyen (+1,3) mais pas
 le compte de révoltes de façon mesurable.
 
 ## Prochaine étape
-Essai en cours : `revolt_seasons` 2 + seuil 74 (données de la copie de travail). `century_probe` des 4
-niveaux sur `revolt_seasons` 2 / seuil 75 en cours (copie `data_rs2`). Puis sonde release
-`m3_grid_ai::fifty_turns_on_eight_seeds_stay_in_the_c7a_band` (demande de l'orchestrateur : trésor
-France 38 297 < 40 000 sur main). Ancien : mesurer `balance_probe campaign 200` graines 1-16 avant (binaire `bp_base`, commit 5c96ea30)
-et après pondération, puis régler les révoltes dans les données.
+Retenu : `revolt_seasons` 2, `revolt_unrest_threshold` 74 (population.json + défauts Rust + codex
+`cdx_jeu_ordre_public`). En cours : `century_probe` 4 niveaux sur ces données (`out/final`) et sonde
+m3 release (1er essai : trésor France dans la bande, échec sur « sieges per turn », valeur à relire).
+Puis ADR 0098, fusion de main, tests complets, suppression de `core/target-rs-b`.
