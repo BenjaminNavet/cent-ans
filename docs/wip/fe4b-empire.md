@@ -92,6 +92,46 @@ Incertitudes non vérifiables signalées par les agents, gardées `uncertain: tr
 Burchard Grelle (archevêque de Brême, dates 1327-1344) et Nicolas de Brno (évêque de Trente,
 attesté surtout à partir de 1338).
 
+## État (suite)
+
+- `data/ui/front_end.json` : 24 cartes ajoutées (`fac_namur` non jouable, pas de carte).
+- `data/portraits/archetypes.json` : 24 factions dans le bucket `italy_empire`, `fac_lorraine`
+  dans `france` (culture francophone).
+- Pipeline géo relancé dans l'ordre : `cent-ans geo provinces` (153 provinces),
+  `cent-ans geo settlements`, `cent-ans geo hamlets`, `cent-ans geo navgrid`,
+  `cent-ans geo horizon --province prov_hesse,prov_julich,prov_berg,prov_cleve,prov_mecklenburg,prov_thuringia,prov_brunswick,prov_wurttemberg,prov_baden,prov_nuremberg,prov_bamberg,prov_trent`
+  (12 tuiles). Tout commité.
+- `pytest` : 908 passed, 2 skipped, vert. Deux bogues trouvés et corrigés en cours de route
+  (hors périmètre géographique mais dans mes fichiers) :
+  - `tools/cent_ans_tools/heraldry.py` : le rendu de blason « legacy » (`_draw_charges`,
+    utilisé pour les icônes de faction) ne reconnaissait pas roue/colonne/chevron/bois de
+    cerf/tête de buffle → plusieurs de mes 24 nouvelles factions rendaient un écu identique
+    (champ plein, aucune charge dessinée). Ajout de 5 nouvelles fonctions de dessin
+    (`_draw_wheel`, `_draw_column`, `_draw_chevrons`, `_draw_antlers`, `_draw_buffalo_head`)
+    + branches `elif` correspondantes ; correction de deux couleurs mal renseignées
+    (`fac_wurzburg`/`tit_wurzburg` : primary/secondary inversés, la fasce de gueules était
+    dessinée en blanc sur fond blanc) et nuance de gueules de `fac_lorraine`/`tit_lorraine`
+    légèrement distinguée de celle du Bade (alérions non rendus par le générateur, signalé en
+    `note`). `tools/tests/test_heraldry.py::test_shields_are_distinct_and_masked` vert (61/61
+    écus distincts).
+  - `chr_louis_v_de_baviere.json` : lien codex cassé `[[cdx_ludwig_iv]]` (entrée inexistante) →
+    retiré, texte simple. `tools/tests/test_codex.py` vert.
+- `cargo test --no-fail-fast` (arrière-plan, `CARGO_TARGET_DIR` dédié) : 4 échecs identifiés.
+  - `sim-campaign::campaign::new_1337_matches_game_data` : fixture de comptage figée
+    (`factions.len()` 36→61, `provinces.len()` 141→153) — corrigée, comme autorisé par le
+    mandat (mécanique, pas de comportement).
+  - `sim-campaign::eq2_balance::starting_settlements_hold_reachable_building_tiers` : vrai bogue
+    de données, `set_hamm` (Marck) avait `bld_market` dans un settlement `kind: castle` (non
+    autorisé). Corrigé : `kind` → `town` (cohérent avec sa description de « ville neuve » à
+    droit de marché dès 1226), `buildings` → `[bld_market, bld_stone_walls]`.
+  - `ai::cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses` et
+    `sim-campaign::m4::a_minor_ruler_opens_a_regency` : **non corrigés, signalés seulement**
+    (mandat : un test sensible à la graine qui casse par changement de trajectoire se signale,
+    ne s'affaiblit pas). Cause probable : l'ajout de provinces/factions déplace en aval le flux
+    RNG déterministe (positions d'armées IA, génération de personnages), sans rapport avec une
+    règle de jeu que j'aurais modifiée. À trancher par F5 (IA féodale) / l'intégration finale.
+- Re-run de `cargo test --no-fail-fast` après corrections : en cours (voir rapport final).
+
 ## Prochaine étape
-`data/ui/front_end.json` (24 cartes, `fac_namur` non jouable), `data/portraits/archetypes.json`
-(bucket `italy_empire`), régénération géo, `cargo test`, `pytest`, commits wip réguliers.
+Rapport final une fois le deuxième `cargo test` confirmé (seuls les deux échecs de trajectoire
+attendus doivent rester).
