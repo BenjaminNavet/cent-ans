@@ -45,7 +45,7 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 			list.add_child(check)
 			checks.append(check)
 		else:
-			var chip := IconChip.create(unit_type, text, "", ROW_ICON, 14, "unit")
+			var chip := wrap_chip(IconChip.create(unit_type, text, "", ROW_ICON, 14, "unit"))
 			RichTooltip.set_tooltip(chip, "unit", unit_type, unit)  # IB1
 			list.add_child(chip)
 	return checks
@@ -107,7 +107,7 @@ static func fill_buildings(list: Container, buildings: Array, demolition: Dictio
 		var row := HBoxContainer.new()
 		row.name = building_id
 		row.add_theme_constant_override("separation", 6)
-		var chip := IconChip.create(building_id, text, "", ROW_ICON, 14, "building")
+		var chip := wrap_chip(IconChip.create(building_id, text, "", ROW_ICON, 14, "building"))
 		RichTooltip.set_tooltip(chip, "building", building_id, entry)  # IB1
 		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(chip)
@@ -229,6 +229,13 @@ static func narrow_button(button: Button) -> Button:
 	button.clip_text = true
 	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	return button
+
+
+## Q6 : libellé d'une puce de liste qui passe à la ligne au lieu d'élargir la liste.
+static func wrap_chip(chip: IconChip) -> IconChip:
+	chip.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	chip.label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return chip
 
 
 ## Q6 : note à droite d'un bouton de ligne (raison, import, réserve) : elle passe à la ligne
