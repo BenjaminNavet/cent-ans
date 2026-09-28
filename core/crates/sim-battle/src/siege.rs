@@ -119,7 +119,7 @@ pub struct WallPiece {
     /// Siege tower docked against this piece.
     #[serde(default)]
     pub docked_tower: Option<u32>,
-    /// SB (ADR 0100): seconds this piece still counts as under attack (a ram
+    /// SB (ADR 0107): seconds this piece still counts as under attack (a ram
     /// battering it, an engine shooting at it, the gate burning); 0: not.
     #[serde(default)]
     pub attacked_for: f64,

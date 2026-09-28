@@ -29,7 +29,8 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 20
 text = "Cour"
 
 [node name="CloseButton" type="Button" parent="VBox/Header"]

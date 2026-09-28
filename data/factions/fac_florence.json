@@ -14,6 +14,7 @@
   "religion": "rel_catholic",
   "culture": "cul_tuscan",
   "succession_law": "elective",
+  "primary_title": "tit_florence",
   "heraldry": {
     "blazon": "D'argent au lis florencé de gueules.",
     "description": "Le giglio rouge des guelfes sur champ d'argent.",

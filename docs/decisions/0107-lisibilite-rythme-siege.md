@@ -1,4 +1,4 @@
-# 0100 — Lisibilité et rythme de la destruction en siège (lot SB)
+# 0107 — Lisibilité et rythme de la destruction en siège (lot SB)
 
 Date : 2026-09-28. Statut : accepté. Spec : `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § SB.
 

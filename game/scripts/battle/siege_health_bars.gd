@@ -1,7 +1,7 @@
 class_name SiegeHealthBars
 extends CanvasLayer
 
-## SB (TW2, ADR 0100) : barres de vie flottantes des ouvrages et engins de siège, façon Total
+## SB (TW2, ADR 0107) : barres de vie flottantes des ouvrages et engins de siège, façon Total
 ## War. Une petite barre enluminée (fond de vélin, filet d'encre et d'or, remplissage à la
 ## couleur du camp propriétaire) au-dessus de chaque pan de mur ou porte endommagé ou visé
 ## (`under_attack` exposé par le cœur), et au-dessus des béliers et beffrois entamés ; masquée
@@ -26,6 +26,8 @@ var side_colors: Dictionary = DEFAULT_COLORS.duplicate()
 ## Hauteur du chemin de ronde (m), pour placer les barres des murs.
 var wall_height: float = 8.0
 var height_at: Callable
+## Tests : position de souris imposée (celle du headless est arbitraire).
+var mouse_override: Variant = null
 
 var _root: Control
 var _bars: Dictionary = {}  # clé -> Bar
@@ -168,6 +170,8 @@ func _place() -> void:
 	var camera: Camera3D = viewport.get_camera_3d() if viewport != null else null
 	var screen := viewport.get_visible_rect() if viewport != null else Rect2()
 	var mouse := viewport.get_mouse_position() if viewport != null else Vector2(-1e6, -1e6)
+	if mouse_override != null:
+		mouse = mouse_override
 	for key in _bars:
 		var bar_node: Bar = _bars[key]
 		var s: Dictionary = _state.get(key, {})

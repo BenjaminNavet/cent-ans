@@ -76,6 +76,7 @@ var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
+var capture_fate: CaptureController = null  # TW2-T1 : sort de la place prise
 var encounters: EncounterController = null  # CV3-4 : sites et fenêtre des rencontres
 var outcome_notice: OutcomeNotice = null  # CV3-4 : classe du résultat d'une bataille automatique
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
@@ -219,6 +220,9 @@ func _ready() -> void:
 	chronicle = ChronicleController.new()
 	add_child(chronicle)
 	chronicle.setup(self)
+	capture_fate = CaptureController.new()  # TW2-T1
+	add_child(capture_fate)
+	capture_fate.setup(self)
 	encounters = EncounterController.new()  # CV3-4
 	add_child(encounters)
 	encounters.setup(self)
@@ -422,6 +426,8 @@ func refresh_all() -> void:
 			select_army(selected_army)
 		else:
 			deselect_army()
+	if next_hint != null:  # RS-E : recalculé sur l'événement plutôt que sur une minuterie seule
+		next_hint.refresh()
 	if selected_index > 0:
 		_show_province_panel(selected_index)
 	if ui.faction_panel_visible() and _faction_panel_id != "":
@@ -438,6 +444,8 @@ func refresh_all() -> void:
 		diplomacy.refresh()
 	if chronicle != null:  # M10
 		chronicle.refresh()
+	if capture_fate != null:  # TW2-T1
+		capture_fate.refresh()
 	_refresh_research()  # M6
 	_tech_open = _tech_open and ui.tech_panel_visible()
 	if _tech_open:
@@ -592,6 +600,8 @@ func select_army(army_id: String) -> void:
 	ui.hide_province()
 	selected_index = 0
 	terrain.set_highlight(hovered_index, 0)
+	if next_hint != null:  # RS-E : la sélection change la couverture du conseil (panneaux ouverts)
+		next_hint.refresh()
 	# Le chemin en cours (ordre déjà donné) est prévisualisé.
 	if free_movement:
 		path_preview.hide_path()
@@ -619,6 +629,8 @@ func deselect_army() -> void:
 		movement_ctl.on_army_deselected()
 	path_preview.hide_path()
 	ui.hide_army()
+	if next_hint != null:  # RS-E : la désélection change la couverture du conseil
+		next_hint.refresh()
 
 
 func _apply_reachable_mask(path_indices: PackedInt32Array) -> void:
@@ -714,8 +726,10 @@ func _on_province_selected(index: int) -> void:
 	terrain.set_highlight(hovered_index, selected_index)
 	if index == 0:
 		ui.hide_province()
-		return
-	_show_province_panel(index)
+	else:
+		_show_province_panel(index)
+	if next_hint != null:  # RS-E : la sélection change la couverture du conseil (panneau de province)
+		next_hint.refresh()
 
 
 func _show_province_panel(index: int) -> void:
@@ -1090,6 +1104,8 @@ func _on_end_turn(threaded: bool = false) -> void:
 		victory.after_end_turn()
 	if chronicle != null:  # M10
 		chronicle.after_end_turn()
+	if capture_fate != null:  # TW2-T1
+		capture_fate.after_end_turn()
 	for event in events:
 		if str(event.get("kind", "")) == "battle" and ui.keeps_news(event):  # U5 : filtre d'intérêt
 			ui.show_toast(str(event.get("text_fr", "Bataille")))

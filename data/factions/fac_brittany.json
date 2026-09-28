@@ -17,6 +17,7 @@
   "culture": "cul_breton",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_france",
+  "primary_title": "tit_brittany",
   "heraldry": {
     "blazon": "D'hermine plain.",
     "description": "Champ d'hermine plain, adopté par Jean III en 1316 en remplacement de l'échiqueté de Dreux au franc-quartier d'hermine.",

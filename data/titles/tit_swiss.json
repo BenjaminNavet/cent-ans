@@ -1,0 +1,27 @@
+{
+  "id": "tit_swiss",
+  "rank": "county",
+  "name": {
+    "display": "Confédération des Waldstätten",
+    "local": "Eidgenossenschaft",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix alésée d'argent.",
+    "description": "Croix blanche des Confédérés (bannière de Schwytz, plus tard de toute la Confédération).",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_bern",
+    "prov_waldstatten"
+  ],
+  "holder_1337": {
+    "faction": "fac_swiss",
+    "sources": [
+      "Ancienne Confédération suisse",
+      "Bataille de Laupen"
+    ]
+  }
+}

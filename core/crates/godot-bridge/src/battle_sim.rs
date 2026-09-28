@@ -641,6 +641,61 @@ impl BattleSim {
             .collect()
     }
 
+    /// RS-F: the « Incendier » order of the battle bar for `units` of `side`
+    /// (every regiment of the side when empty): `{siege: false}` outside a
+    /// siege; else `{siege: true, available, reason, command}` where
+    /// `command` is the `burn` order to give (`{type: "burn", units: [id],
+    /// house: i}` or `gate: true`) and `target` names it (« la porte », « une
+    /// maison du faubourg », « une maison »). The core decides; nothing drawn.
+    #[func]
+    fn get_burn_order(&self, side: GString, units: PackedInt32Array) -> VarDictionary {
+        let (Some(sim), Some(side)) = (&self.sim, parse_side(&side)) else {
+            return vdict! { "siege" => false };
+        };
+        if sim.fire_rules().is_none() || sim.siege().is_none() {
+            return vdict! { "siege" => false };
+        }
+        let ids: Vec<u32> = units
+            .as_slice()
+            .iter()
+            .filter_map(|&id| u32::try_from(id).ok())
+            .collect();
+        match sim.burn_choice(side, &ids) {
+            Ok(choice) => {
+                let ids: VarArray = [i64::from(choice.unit).to_variant()].into_iter().collect();
+                let mut command = vdict! { "type" => "burn", "units" => &ids };
+                let target = match choice.house {
+                    Some(house) => {
+                        command.set("house", house as i64);
+                        if choice.suburb {
+                            "une maison du faubourg"
+                        } else {
+                            "une maison"
+                        }
+                    }
+                    None => {
+                        command.set("gate", true);
+                        "la porte"
+                    }
+                };
+                vdict! {
+                    "siege" => true,
+                    "available" => true,
+                    "reason" => "",
+                    "command" => &command,
+                    "target" => target,
+                    "unit" => i64::from(choice.unit),
+                    "distance_m" => choice.distance_m,
+                }
+            }
+            Err(error) => vdict! {
+                "siege" => true,
+                "available" => false,
+                "reason" => error.to_string(),
+            },
+        }
+    }
+
     /// CB4: uses (or lifts, when all of them use it) ability `ability` on
     /// those of `units` that have it: `{ok, error}` like `issue_command`
     /// (recorded for the replay the same way).
@@ -1348,7 +1403,7 @@ impl BattleSim {
                     "max_hp" => piece.max_hp,
                     "intact" => piece.intact(),
                     "docked_tower" => piece.docked_tower.map_or(-1, i64::from),
-                    // SB (ADR 0100): battered, shot at or burning just now.
+                    // SB (ADR 0107): battered, shot at or burning just now.
                     "under_attack" => piece.under_attack(),
                 }
                 .to_variant()
@@ -1393,7 +1448,7 @@ impl BattleSim {
             .iter()
             .map(|p| prop_dict(p).to_variant())
             .collect();
-        // SB (ADR 0100): rams and siege towers with their strength, for the
+        // SB (ADR 0107): rams and siege towers with their strength, for the
         // health bars.
         let engines: VarArray = self
             .sim

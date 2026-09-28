@@ -22,6 +22,7 @@ mod battle_step_job;
 mod campaign_sim;
 mod campaign_sim_agents;
 mod campaign_sim_ai_replay;
+mod campaign_sim_capture;
 mod campaign_sim_difficulty;
 mod campaign_sim_diplomacy;
 mod campaign_sim_dp2;
@@ -34,6 +35,7 @@ mod campaign_sim_holdings;
 mod campaign_sim_map_lens;
 mod campaign_sim_movement;
 mod campaign_sim_provinces;
+mod campaign_sim_replenish;
 mod campaign_sim_retinue;
 mod campaign_sim_settlements;
 mod campaign_sim_siege;
@@ -162,8 +164,6 @@ impl GameDataStore {
             "capital" => province.capital_city.name.display.as_str(),
             "owner" => province.owner.as_str(),
             "owner_display_name" => owner.map_or("", |faction| faction.short_or_display_name()),
-            "overlord" => province.overlord.as_ref().map_or("", |id| id.as_str()),
-            "holder" => province.holder.as_ref().map_or("", |id| id.as_str()),
             "population" => &population,
             "population_total" => province.population.classes.total() as i64,
             "neighbors" =>&ids_of(sim_campaign::movement::land_neighbors(data, &province.id).iter()),

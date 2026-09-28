@@ -151,6 +151,7 @@ fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), Ca
                 construction: None,
                 recruit_queue: Vec::new(),
                 fortification_level: settlement.fortification_level,
+                recruit_pool: Default::default(),
             },
         );
     }
@@ -168,6 +169,7 @@ impl CampaignState {
             return Err(CampaignError::UnknownFaction(player));
         }
         let mut state = CampaignState::empty(player, seed);
+        state.feudal = crate::feudal::FeudalState::from_data(data);
 
         // Provinces, then their settlements, then the city garrisons (P1:
         // frontiers classified by `CampaignState::is_frontier`, like the AI

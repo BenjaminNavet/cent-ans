@@ -1903,13 +1903,24 @@ impl BattleSim {
                     );
                     continue;
                 }
-                if unit.pavise.is_some() {
+                if unit.pavise.is_some()
+                    && unit.shoots()
+                    && unit.ammo > 0
+                    && dist <= self.effective_range(unit, tx, tz)
+                {
+                    // RS-J: within bowshot but out of sight (the shooting
+                    // case returned above): the pavises come down and the
+                    // crossbowmen close in until they see it, like the
+                    // other shooters.
+                    self.units[i].pavise = None;
+                } else if self.units[i].pavise.is_some() {
                     // Behind the pavises: wait for the target to come in range.
                     if self.units[i].state != UnitState::Shooting {
                         self.units[i].state = UnitState::Idle;
                     }
                     continue;
                 }
+                let unit = &self.units[i];
                 let charge_distance = if unit.is_cavalry() { 120.0 } else { 40.0 };
                 let charging = unit.running && dist < charge_distance && !unit.shoots();
                 if charging && self.units[i].state != UnitState::Charging {

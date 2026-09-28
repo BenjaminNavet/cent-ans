@@ -1,5 +1,5 @@
 class_name HistoricalBattlesMenu
-extends Control
+extends PanelContainer
 
 ## EP7 — « Batailles historiques » du menu principal : Crécy (1346), Poitiers (1356), Azincourt
 ## (1415), lues dans `data/battle_maps/` par le cœur (`BattleSim.list_historical`). Pour chaque
@@ -7,6 +7,9 @@ extends Control
 ## l'IA contre l'IA. La scène de bataille reçoit `--historical=<id>` et `--historical-side=` ;
 ## la fin de la bataille ramène au menu (hors campagne, rien n'est conservé). Échap ou
 ## « Fermer » : signal `closed`.
+## Lot P2e (ADR 0097, bible DA § 12.1) : zone `MODAL` de `UiLayout` (plus de veil ni de
+## `CenterContainer` propres) ; tailles de texte par `UiType`, ouverture et fermeture par
+## `UiMotion`.
 
 signal closed
 signal battle_started(id: String, side: String)
@@ -44,37 +47,27 @@ static func args_for(id: String, side: String) -> PackedStringArray:
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	custom_minimum_size = Vector2(780, 0)
 	battles = load_battles()
-	var veil := ColorRect.new()
-	veil.color = Color(0.05, 0.03, 0.01, 0.5)
-	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(veil)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(780, 0)
-	center.add_child(panel)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(760, 560)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panel.add_child(scroll)
+	add_child(scroll)
 	var box := VBoxContainer.new()
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation", 8)
 	scroll.add_child(box)
 	var title := Label.new()
 	title.text = "Batailles historiques"
-	title.add_theme_font_size_override("font_size", 26)
+	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
 	var hint := Label.new()
 	hint.text = "Le champ réel, les armées de ce jour-là, la météo et l'heure : menez l'un des camps, ou regardez. Hors campagne : le résultat n'est pas conservé."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(720, 0)
-	hint.add_theme_font_size_override("font_size", 15)
+	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.75)
 	box.add_child(hint)
 	if battles.is_empty():
@@ -93,6 +86,8 @@ func _ready() -> void:
 	row.add_child(close_button)
 	if not buttons.is_empty():
 		(buttons.values()[0] as Button).grab_focus.call_deferred()
+	UiZones.put(UiZones.Zone.MODAL, self)
+	UiMotion.fade_in(self)
 
 
 func _add_battle(box: VBoxContainer, entry: Dictionary) -> void:
@@ -101,26 +96,26 @@ func _add_battle(box: VBoxContainer, entry: Dictionary) -> void:
 	box.add_child(sep)
 	var name := Label.new()
 	name.text = "%s — %s" % [str(entry.get("name", id)), str(entry.get("date_fr", entry.get("date", "")))]
-	name.add_theme_font_size_override("font_size", 21)
+	UiType.apply(name, UiType.HEADING)
 	box.add_child(name)
 	var place := Label.new()
 	place.text = "%s (%s) · %s" % [str(entry.get("place", "")), str(entry.get("province_name", "")), str(entry.get("weather_label", ""))]
 	place.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	place.custom_minimum_size = Vector2(720, 0)
-	place.add_theme_font_size_override("font_size", 14)
+	UiType.apply(place, UiType.CAPTION)
 	place.modulate = Color(1, 1, 1, 0.8)
 	box.add_child(place)
 	var summary := Label.new()
 	summary.text = str(entry.get("summary", ""))
 	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary.custom_minimum_size = Vector2(720, 0)
-	summary.add_theme_font_size_override("font_size", 15)
+	UiType.apply(summary, UiType.BODY)
 	box.add_child(summary)
 	var armies := Label.new()
 	armies.text = "%s\n%s" % [_army_line(entry, "attacker"), _army_line(entry, "defender")]
 	armies.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	armies.custom_minimum_size = Vector2(720, 0)
-	armies.add_theme_font_size_override("font_size", 14)
+	UiType.apply(armies, UiType.CAPTION)
 	armies.modulate = Color(1, 1, 1, 0.8)
 	box.add_child(armies)
 	var row := HBoxContainer.new()
@@ -171,7 +166,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func close() -> void:
 	closed.emit()
-	queue_free()
+	UiMotion.fade_out(self, UiMotion.DURATION, true)
 
 
 ## Lance la bataille `id`, `side` menée par le joueur ("" : IA contre IA).

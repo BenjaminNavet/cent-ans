@@ -1,0 +1,71 @@
+{
+  "description": "Reconstitution saisonnière des armées de campagne et réserves de recrutement des établissements (lot TW2-T2, spec docs/design/2026-09-28-tw2-mecaniques-total-war.md § T2, ADR 0102). Pourcentages en points ; réserves en millièmes d'unité (1000 = une unité recrutable).",
+  "replenishment": {
+    "territory_percent": {
+      "own": 20,
+      "ally": 10,
+      "neutral": 5,
+      "hostile": 0
+    },
+    "stance_percent": {
+      "normal": 100,
+      "raid": 25,
+      "siege": 50,
+      "ambush": 75,
+      "forced_march": 0,
+      "entrenched": 150
+    },
+    "in_settlement_percent": 150,
+    "winter_percent": 50,
+    "low_supply_threshold": 30,
+    "low_supply_percent": 50,
+    "general_governance_percent_per_level": 3,
+    "general_skill_percent": {
+      "skill_discipline": 10,
+      "skill_logistique_militaire": 25,
+      "skill_intendant": 10,
+      "skill_grand_intendant": 15
+    },
+    "general_trait_percent": {
+      "trait_energetic": 10,
+      "trait_charismatic": 10,
+      "trait_veteran": 10,
+      "trait_cautious": 5,
+      "trait_spendthrift": -10,
+      "trait_unpopular": -15,
+      "trait_cruel": -10
+    },
+    "building_garrison_point_percent": 5,
+    "building_recruit_slot_percent": 10,
+    "building_bonus_max_percent": 50,
+    "max_percent": 40,
+    "cost_percent": 40
+  },
+  "recruit_pool": {
+    "base_cap": {
+      "city": 2,
+      "town": 1,
+      "castle": 2,
+      "abbey": 1,
+      "village": 1
+    },
+    "base_rate_milli": {
+      "city": 350,
+      "town": 250,
+      "castle": 300,
+      "abbey": 150,
+      "village": 200
+    },
+    "capital_cap_bonus": 1,
+    "capital_rate_milli": 150,
+    "fortification_rate_milli_per_level": 25,
+    "recruit_slot_cap_bonus": 1,
+    "recruit_slot_rate_milli": 100,
+    "category_rate_percent": {
+      "infantry": 100,
+      "ranged": 100,
+      "cavalry": 60,
+      "siege": 50
+    }
+  }
+}

@@ -25,6 +25,20 @@ use crate::convert::variant_to_json;
 type CachedData = Option<(PathBuf, Arc<GameData>, Arc<[String]>)>;
 static SHARED_DATA: OnceLock<Mutex<CachedData>> = OnceLock::new();
 
+/// RS-F (ADR 0099): battle rules read from `data_dir` at load time rather
+/// than compiled in, for the battles built from now on. Siege fire
+/// (`rules/siege_fire.json`): an unreadable file is reported and the bundled
+/// rules stay in force.
+pub(crate) fn install_battle_rules(data_dir: &Path) {
+    match sim_battle::FireRules::load(data_dir) {
+        Ok(rules) => sim_battle::FireRules::install(Some(rules)),
+        Err(error) => {
+            godot_error!("règles d'incendie : {error} (règles intégrées gardées)");
+            sim_battle::FireRules::install(None);
+        }
+    }
+}
+
 /// Game data of `data_dir` with the warnings of its load: the cached copy
 /// when it comes from the same folder, else loaded from disk (the cache is
 /// then replaced; a failed load leaves it untouched). The warnings are
@@ -40,6 +54,7 @@ pub(crate) fn load_shared_data(data_dir: &Path) -> Result<(Arc<GameData>, Arc<[S
         }
     }
     let (data, warnings) = GameData::load(data_dir).map_err(|error| error.to_string())?;
+    install_battle_rules(data_dir);
     let warnings: Arc<[String]> = warnings.iter().map(ToString::to_string).collect();
     for warning in warnings.iter() {
         godot_warn!("game data: {warning}");
@@ -441,7 +456,10 @@ impl CampaignSim {
 
     /// Recruitment options of a settlement (or of a province's city):
     /// `[{unit_type, name, cost, upkeep, available, reason, resources,
-    /// import_cost, imported}]` (SV2: `cost` includes `import_cost`).
+    /// import_cost, imported, pool_available, pool_cap,
+    /// pool_seasons_to_next, pool_label}]` (SV2: `cost` includes
+    /// `import_cost`; TW2-T2: the settlement's reserve of the unit type,
+    /// `pool_seasons_to_next` -1 when full or never refilled).
     #[func]
     fn get_recruitable(&self, place_id: GString) -> VarArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -474,6 +492,10 @@ impl CampaignSim {
                     "resources" => &amounts(&option.resources),
                     "import_cost" => i64::from(option.import_cost),
                     "imported" => &amounts(&option.imported),
+                    "pool_available" => i64::from(option.pool.available),
+                    "pool_cap" => i64::from(option.pool.cap),
+                    "pool_seasons_to_next" => option.pool.seasons_to_next.map_or(-1, i64::from),
+                    "pool_label" => option.pool.label_fr().as_str(),
                 }
                 .to_variant()
             })

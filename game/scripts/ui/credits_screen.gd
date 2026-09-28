@@ -6,6 +6,11 @@ extends Control
 ## fichier, un texte intégré. Markdown simple converti en BBCode (titres, listes, gras,
 ## italique, liens réduits à leur texte). Molette ou glisser : défilement manuel.
 ## Échap ou « Retour » : signal `closed`.
+## Lot P2e (ADR 0097, bible DA § 12.1/12.2) : `self` reste un `Control` plein écran, seul hôte du
+## fond illustré voilé (`MenuBackground`, propre à cet écran — la zone `MODAL` ne fournit qu'un
+## voile uni) ; le cadre du parchemin (`_panel`, ex-`CenterContainer` + `PanelContainer`) rejoint
+## lui la zone `MODAL` de `UiLayout`. Tailles par `UiType` (titre, bouton) et par la même échelle
+## dans le BBCode généré (`markdown_to_bbcode`) ; ouverture et fermeture du cadre par `UiMotion`.
 
 signal closed
 
@@ -45,27 +50,26 @@ var scroll: ScrollContainer
 var source_path: String = ""
 var _auto_scroll := true
 var _scroll_position := 0.0
+var _panel: PanelContainer
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	theme = load("res://scenes/ui/parchment_theme.tres")
-	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var background := MenuBackground.new()
 	background.dim = 0.45
 	add_child(background)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(760, 620)
-	center.add_child(panel)
+	_panel = PanelContainer.new()
+	_panel.theme = load("res://scenes/ui/parchment_theme.tres")
+	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.custom_minimum_size = Vector2(760, 620)
+	add_child(_panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
+	_panel.add_child(box)
 	var title := Label.new()
 	title.text = "Crédits"
-	title.add_theme_font_size_override("font_size", 30)
+	UiType.apply(title, UiType.TITLE)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	scroll = ScrollContainer.new()
@@ -76,8 +80,8 @@ func _ready() -> void:
 	text_label.bbcode_enabled = true
 	text_label.fit_content = true
 	text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text_label.add_theme_font_size_override("normal_font_size", 17)
-	text_label.add_theme_font_size_override("bold_font_size", 17)
+	UiType.apply(text_label, UiType.BODY)
+	text_label.add_theme_font_size_override("bold_font_size", UiType.size(UiType.BODY))
 	text_label.add_theme_color_override("default_color", Color(0.22, 0.14, 0.07))
 	scroll.add_child(text_label)
 	scroll.gui_input.connect(func(event: InputEvent) -> void:
@@ -85,13 +89,15 @@ func _ready() -> void:
 			_auto_scroll = false)
 	var back := Button.new()
 	back.text = "Retour"
-	back.add_theme_font_size_override("font_size", 20)
+	UiType.apply(back, UiType.HEADING)
 	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back.pressed.connect(close)
 	box.add_child(back)
 	var parts := split_title(load_credits())
 	title.text = parts[0]
 	text_label.text = markdown_to_bbcode(parts[1])
+	UiZones.put(UiZones.Zone.MODAL, _panel)
+	UiMotion.fade_in(_panel)
 
 
 func _process(delta: float) -> void:
@@ -109,6 +115,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func close() -> void:
 	closed.emit()
+	UiMotion.fade_out(_panel, UiMotion.DURATION, true)
 	queue_free()
 
 
@@ -153,7 +160,7 @@ static func markdown_to_bbcode(markdown: String) -> String:
 			for index in range(1, table_rows.size()):
 				var row: PackedStringArray = table_rows[index]
 				var rest := row.slice(1)
-				blocks.append("[b]%s[/b] — [font_size=14]%s[/font_size]" % [row[0], " — ".join(rest)])
+				blocks.append("[b]%s[/b] — [font_size=%d]%s[/font_size]" % [row[0], UiType.size(UiType.CAPTION), " — ".join(rest)])
 			table_rows.clear()
 		var is_item := stripped.begins_with("- ") or stripped.begins_with("* ")
 		if stripped == "" or stripped.begins_with("#") or is_item:
@@ -176,11 +183,11 @@ static func markdown_to_bbcode(markdown: String) -> String:
 		line = italic.sub(line, "[i]$1[/i]", true)
 		line = code.sub(line, "[i]$1[/i]", true)
 		if line.begins_with("# "):
-			line = "[font_size=30][b]%s[/b][/font_size]" % line.trim_prefix("# ")
+			line = "[font_size=%d][b]%s[/b][/font_size]" % [UiType.size(UiType.TITLE), line.trim_prefix("# ")]
 		elif line.begins_with("## "):
-			line = "\n[font_size=22][b]%s[/b][/font_size]" % line.trim_prefix("## ")
+			line = "\n[font_size=%d][b]%s[/b][/font_size]" % [UiType.size(UiType.HEADING), line.trim_prefix("## ")]
 		elif line.begins_with("### "):
-			line = "[font_size=19][b]%s[/b][/font_size]" % line.trim_prefix("### ")
+			line = "[font_size=%d][b]%s[/b][/font_size]" % [UiType.size(UiType.HEADING), line.trim_prefix("### ")]
 		lines.append(line)
 	return "[center]%s[/center]" % "\n".join(lines)
 
