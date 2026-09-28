@@ -37,6 +37,17 @@
           "prov_karaman"
         ]
       }
+    },
+    {
+      "id": "obj_karaman_beysehir",
+      "title": "Beyşehir",
+      "description": "Annexer la terre des Eşrefoğulları.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_beysehir"
+        ]
+      }
     }
   ],
   "description": "Héritiers autoproclamés des Seldjoukides de Roum, les Karamanoğulları dominent le Taurus et Konya ; Badreddin Ibrahim règne depuis 1333.",

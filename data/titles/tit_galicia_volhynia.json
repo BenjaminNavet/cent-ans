@@ -56,6 +56,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_galicia_volhynia_berestia",
+      "title": "Berestia",
+      "description": "Recouvrer la terre de Brest, passée aux Lituaniens.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_brest"
+        ]
+      }
     }
   ],
   "description": "Royaume de Galicie-Volhynie (Rus') fondé par Daniel de Galicie ; dernier roi : Iouri II (1323-1340).",

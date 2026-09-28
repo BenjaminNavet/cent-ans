@@ -32,6 +32,15 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_jalayirids_mardin",
+      "title": "Suzerains de Mardin",
+      "description": "Ranger les Artuqides sous l'autorité de Bagdad.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_artuqids"
+      }
     }
   ],
   "description": "Prince mongol-turc, gouverneur de l'Ilkhanat déchu ; Hasan Buzurg s'installe à Bagdad (hors carte) et tient Mossoul par ses lieutenants. Capitale replacée à Mossoul pour la carte.",

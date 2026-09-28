@@ -31,6 +31,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_mentese_rhodes",
+      "title": "Rhodes",
+      "description": "Reprendre Rhodes aux Hospitaliers.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_rhodes"
+        ]
+      }
     }
   ],
   "description": "Beylik côtier de la Carie et de la Lycie occidentale, fondé vers 1261 ; ses marins guerroient contre Rhodes.",

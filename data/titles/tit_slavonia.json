@@ -50,6 +50,17 @@
           "prov_slavonia_east"
         ]
       }
+    },
+    {
+      "id": "obj_slavonia_zara",
+      "title": "La Dalmatie",
+      "description": "Rendre Zara à la couronne (reprise en 1358).",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_zara"
+        ]
+      }
     }
   ],
   "description": "Banat de Slavonie et de Croatie, grand office du royaume de Hongrie.",

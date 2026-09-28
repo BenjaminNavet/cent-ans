@@ -36,6 +36,17 @@
           "prov_mardin"
         ]
       }
+    },
+    {
+      "id": "obj_artuqids_jazira",
+      "title": "La Djézireh",
+      "description": "Profiter de la chute des Ilkhans pour tenir Mossoul.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_mosul"
+        ]
+      }
     }
   ],
   "description": "Dynastie turque de Mardin, tenue par al-Salih Chams al-Din Salih (1312-1364) ; forteresse imprenable et vassalité au sultan.",

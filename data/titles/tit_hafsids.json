@@ -53,6 +53,17 @@
           "prov_constantine"
         ]
       }
+    },
+    {
+      "id": "obj_hafsids_tripoli",
+      "title": "Tripoli",
+      "description": "Rétablir l'autorité de Tunis sur Tripoli.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tripolitania"
+        ]
+      }
     }
   ],
   "description": "Sultanat hafside de Tunis, héritier des Almohades d'Ifriqiya depuis 1229 ; Abu Bakr II en a restauré l'unité après 1318.",
