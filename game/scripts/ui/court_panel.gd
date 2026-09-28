@@ -235,7 +235,7 @@ func _make_row(row: Dictionary) -> Control:
 	var character_id: String = str(row.get("id", ""))
 	var frame := CourtRow.new()
 	frame.name = "CourtRow_%s" % character_id.validate_node_name()
-	frame.tooltip_text = "Ouvrir la fiche de %s" % str(row.get("name", "?"))
+	RichTooltip.attach_plain(frame, "open_named_sheet", {"title": "Ouvrir la fiche de %s" % str(row.get("name", "?"))})
 	frame.activated.connect(func() -> void: character_selected.emit(character_id))
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override("separation", 10)

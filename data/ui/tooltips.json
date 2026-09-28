@@ -455,6 +455,77 @@
     "campaign_score": {
       "title": "Score de campagne",
       "body": "Provinces tenues, objectifs remplis, prestige et trésor. Il mesure votre réussite si la campagne s'achève à l'échéance sans que tous les objectifs soient remplis."
-    }
+    },
+    "army_contracted_regiments": {"title": "Régiments sous contrat d'endenture / capacité du chef"},
+    "army_split_regiments": {"title": "Maj ou Ctrl + clic pour choisir les régiments à détacher"},
+    "army_mercenaries_available": {"title": "Compagnies à engager dans la région où se trouve l'armée"},
+    "army_upkeep_per_season": {"title": "Entretien de l'armée par saison"},
+    "budget_line_hint": {"title": "Ligne budgétaire"},
+    "budget_projected_hint": {"title": "Prévision pour la prochaine fin de tour."},
+    "budget_last_hint": {"title": "Dernier tour"},
+    "budget_delta_hint": {"title": "Par rapport à la saison passée."},
+    "ransom_refused": {"title": "Refusé"},
+    "close_decision_pending": {"title": "Fermer", "body": "La décision reste en attente."},
+    "decision_default_choice": {"title": "Sans réponse, le premier choix s'appliquera d'office à l'expiration."},
+    "open_named_sheet": {"title": "Ouvrir la fiche"},
+    "faction_attitude": {"title": "Attitude"},
+    "treaty_clause_detail": {"title": "Clause"},
+    "treaty_clause_value_for_them": {"title": "Valeur pour eux"},
+    "treaty_clause_remove": {"title": "Retirer cette clause"},
+    "treaty_adopt_counter": {
+      "title": "Adopter la contre-offre",
+      "body": "Remplacer le brouillon par la contre-offre (il reste à la proposer)."
+    },
+    "treaty_ask_counter": {
+      "title": "Demander une contre-offre",
+      "body": "Ce qui les ferait accepter (captifs, terres occupées, or, tribut, exigences retirées)."
+    },
+    "decision_default_choice_turn": {"title": "Sans réponse, l'option par défaut s'appliquera à la fin du tour."},
+    "close_encounter_pending": {"title": "Fermer", "body": "La rencontre reste en attente jusqu'à la fin du tour."},
+    "encyclopedia_open_codex": {"title": "Ouvrir la fiche du Codex", "hint": "K"},
+    "encyclopedia_previous_entry": {"title": "Fiche précédente"},
+    "close_escape_k": {"title": "Fermer", "hint": "Échap ou K"},
+    "end_turn_blocked": {"title": "Décision en attente"},
+    "end_turn_finish": {"title": "Finir la saison", "hint": "Entrée"},
+    "trade_income_detail": {"title": "Revenus du commerce"},
+    "table_upkeep_detail": {"title": "La Table"},
+    "captives_and_ransoms": {
+      "title": "Captifs et rançons",
+      "body": "Nos captifs, nos prisonniers et les dettes de rançon."
+    },
+    "budget_total_hint": {"title": "Solde"},
+    "budget_projected_income_hint": {
+      "title": "Recettes prévues",
+      "body": "Impôts, commerce et seigneuriage attendus à la prochaine fin de tour, avant les charges."
+    },
+    "budget_last_income_hint": {
+      "title": "Solde de la saison passée",
+      "body": "Ce qui a réellement été ajouté au trésor (ou retiré) à la dernière fin de tour."
+    },
+    "seigniorage_detail": {"title": "Seigneuriage"},
+    "recoinage_detail": {"title": "Refonte des espèces"},
+    "general_skills_overview": {"title": "Commandement, gouvernement, cour"},
+    "retinue_slot_free": {
+      "title": "Emplacement libre",
+      "body": "Un compagnon peut rejoindre la suite (victoire, siège, chevauchée, saison dans une ville bien dotée, rançon)."
+    },
+    "tutorial_toc": {
+      "title": "Sommaire du tutoriel",
+      "body": "Cliquez sur une étape pour y aller."
+    },
+    "tutorial_skip_all": {
+      "title": "Fermer le tutoriel pour de bon",
+      "body": "Menu → Tutoriel ou Aide pour le relancer."
+    },
+    "tutorial_later": {
+      "title": "Range le guide",
+      "body": "Pour le reprendre à cette étape : le conseil en haut à gauche, l'aide (F1) ou Menu → Tutoriel."
+    },
+    "tutorial_go_to_step": {"title": "Aller à cette étape."},
+    "season_report_disable": {
+      "title": "Ne plus afficher",
+      "body": "Réactivable dans Réglages → Carte."
+    },
+    "season_event_action": {"title": "Action"}
   }
 }

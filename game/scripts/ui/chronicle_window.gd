@@ -47,7 +47,7 @@ func _ready() -> void:
 	header.add_child(_kind_label)
 	var close := Button.new()
 	close.text = "×"
-	close.tooltip_text = "Fermer (la décision reste en attente)"
+	RichTooltip.attach_plain(close, "close_decision_pending")
 	close.pressed.connect(_close)
 	header.add_child(close)
 	root.add_child(header)
@@ -104,7 +104,7 @@ func _ready() -> void:
 	footer.add_child(_queue_label)
 	var later := Button.new()
 	later.text = "Plus tard"
-	later.tooltip_text = "Sans réponse, le premier choix s'appliquera d'office à l'expiration."
+	RichTooltip.attach_plain(later, "decision_default_choice")
 	later.pressed.connect(_close)
 	footer.add_child(later)
 	root.add_child(footer)
@@ -161,7 +161,7 @@ func _option_row(option: Dictionary) -> Control:
 	var reason := str(option.get("reason", ""))
 	if not option.get("allowed", true):
 		button.disabled = true
-		button.tooltip_text = "Impossible : %s." % reason if reason != "" else "Impossible."
+		RichTooltip.attach_plain(button, "seat_unavailable", {"body": reason if reason != "" else "Impossible."})
 		effects = "Impossible : %s" % reason if reason != "" else effects
 	row.add_child(button)
 	if effects != "":

@@ -107,7 +107,7 @@ func _empty_slot() -> Control:
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(4)
 	slot.add_theme_stylebox_override("panel", style)
-	slot.tooltip_text = "Emplacement libre : un compagnon peut rejoindre la suite (victoire, siège, chevauchée, saison dans une ville bien dotée, rançon)."
+	RichTooltip.attach_plain(slot, "retinue_slot_free")
 	return slot
 
 

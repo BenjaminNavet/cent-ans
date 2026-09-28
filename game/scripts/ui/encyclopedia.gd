@@ -120,14 +120,14 @@ func _ready() -> void:
 	codex_button = Button.new()
 	codex_button.name = "CodexButton"
 	codex_button.text = "✠ Fiche historique"
-	codex_button.tooltip_text = "Ouvrir la fiche du Codex (K)"
+	RichTooltip.attach_plain(codex_button, "encyclopedia_open_codex")
 	codex_button.hide()
 	codex_button.pressed.connect(open_codex_entry)
 	header.add_child(codex_button)
 	var back := Button.new()
 	back.name = "BackButton"
 	back.text = "← Retour"
-	back.tooltip_text = "Fiche précédente"
+	RichTooltip.attach_plain(back, "encyclopedia_previous_entry")
 	back.pressed.connect(go_back)
 	header.add_child(back)
 	search_field = LineEdit.new()
@@ -142,7 +142,7 @@ func _ready() -> void:
 	var close := Button.new()
 	close.name = "CloseButton"
 	close.text = "×"
-	close.tooltip_text = "Fermer (Échap ou K)"
+	RichTooltip.attach_plain(close, "close_escape_k")
 	close.pressed.connect(close_window)
 	header.add_child(close)
 	_close_button = close
