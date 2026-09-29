@@ -11,7 +11,7 @@ Branche `feat/fk2-assets`. Spec : `docs/design/2026-09-29-carte-vivante-folk.md`
 - [x] Figurines civiles `villager_0..3` fines (atlas 28-31) et grossières (`--no-rigs` : rig
   grossier inchangé, sans les clips de travail → repli marche/attente).
 - [x] `battle_fine_bake.store_layer` : la bande d'atlas s'allonge sans perdre les couches.
-- [ ] Import Godot, smoke, `fk2_assets_test.gd`, tests figurines (an1b, fg3, ga1).
+- [x] Import Godot, smoke, `fk2_assets_test.gd` (fin et `--coarse-figures`), an1b, an1a, fg3, ga1 : OK.
 
 ## Prochaine étape
-Import + tests, puis rapport.
+Lot terminé ; intégration dans `integration/fk` par l’orchestrateur, vérification visuelle (poses, accessoires) par la session principale.
