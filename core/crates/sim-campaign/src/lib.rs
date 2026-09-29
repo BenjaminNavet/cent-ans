@@ -56,6 +56,7 @@ pub mod feudal;
 pub mod frontier;
 pub mod holdings;
 pub mod map_lens;
+pub mod map_scenes;
 pub mod march;
 pub mod medicine;
 pub mod mercenaries;
