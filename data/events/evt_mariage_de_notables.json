@@ -1,0 +1,61 @@
+{
+  "id": "evt_mariage_de_notables",
+  "title": "Un mariage de notables",
+  "text": "Le fils d'un riche bourgeois épouse la fille d'un chevalier du voisinage, et les deux familles veulent des noces qui fassent parler du pays. On attend du seigneur qu'il y paraisse.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 65
+  },
+  "scope": {
+    "type": "province"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Offrir un banquet et y paraître",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -500
+        },
+        {
+          "type": "unrest",
+          "amount": -6
+        },
+        {
+          "type": "wealth",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Envoyer un présent et s'excuser",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -120
+        },
+        {
+          "type": "unrest",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Ne rien donner",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Georges Duby, Le Chevalier, la femme et le prêtre, Hachette, 1981",
+    "Christiane Klapisch-Zuber, La Maison et le nom, EHESS, 1990"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "id": "evt_faux_monnayeur",
+  "title": "Un faux-monnayeur",
+  "text": "Un orfèvre du bourg a rogné et coulé de la fausse monnaie avec de l'étain. Des pièces de mauvais aloi courent déjà sur les marchés et les changeurs s'alarment.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 75
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Le livrer à la justice du prince",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 300
+        },
+        {
+          "type": "unrest",
+          "amount": -2
+        },
+        {
+          "type": "wealth",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Faire saisir les faux deniers et la fonte",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 150
+        },
+        {
+          "type": "wealth",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Fermer les yeux contre une part du gain",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 500
+        },
+        {
+          "type": "wealth",
+          "amount": -6
+        },
+        {
+          "type": "unrest",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Marc Bompaire et Françoise Dumas, Numismatique médiévale, Brepols, 2000",
+    "Nicole Oresme, Traité des monnaies (vers 1360)"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "id": "evt_marchand_detrousse",
+  "title": "Un marchand détroussé",
+  "text": "Un marchand drapier a été dévalisé sur le grand chemin, à une lieue du bourg. Sa plainte est portée devant le seigneur, qui doit la sauvegarde des routes.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 55
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Indemniser le marchand et poursuivre les voleurs",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -500
+        },
+        {
+          "type": "unrest",
+          "amount": -3
+        },
+        {
+          "type": "wealth",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Faire garder la route par des sergents",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -300
+        },
+        {
+          "type": "devastation",
+          "amount": -2
+        },
+        {
+          "type": "wealth",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rejeter la plainte",
+      "effects": [
+        {
+          "type": "wealth",
+          "amount": -4
+        },
+        {
+          "type": "unrest",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "sources": [
+    "Philippe Contamine, La Guerre au Moyen Âge, PUF, 1980",
+    "Jean Favier, De l'or et des épices, Fayard, 1987"
+  ]
+}
