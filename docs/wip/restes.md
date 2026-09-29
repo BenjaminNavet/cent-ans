@@ -20,7 +20,12 @@ infobulle IB `raze_building`). Conflits : P2d × P2f (`chronicle_window.gd`), P2
 infobulle IB + taille `UiType`), N × règle IB2 (plus de `tooltip_text` littéral).
 Worktree `../gp-rs-merge` et branche `integration/rs` supprimés.
 
-Suites possibles (non lancées) :
+Suites du 29/09 (toutes dans `main`) : O (test C2 de l'avant-bataille durci ; correctif déjà fait par 65dd4452),
+P (icône « Raser » déjà faite, 982dec2b, 0,05 $), K3 (`settle/labels` p99 8,9 → 1,8 ms, `declutter` 16,7 → 5,8,
+`map.settlements` 19,4 → 8,0), correctif IB2 de `diplomacy_panel.gd`. Reste hors RS : écrans de siège en
+bataille (après TW2 T4), FE F8. `da7d_overlap_test` (seuil 4 ms) échoue sous charge, base comprise.
+
+Suites possibles (état au 28/09 soir) :
 - ~~`PreBattleDialog._layout()` déborde à 1280×640~~ — FAIT 28/09 (65dd4452) : colonnes et conditions défilantes,
   bannière réduite sous 760 px, re-layout au changement de minimum ; C2 de `p2d_ui_test` bloquant.
 - ~~Icône dédiée « Raser »~~ — FAIT 28/09 : `act_raze` (`raze.png`, 0,04 $).
