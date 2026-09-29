@@ -1,6 +1,6 @@
 # NT5 — N6 plafond d'unités + N7 engins de siège construits
 
-Branche `feat/nt5-cap-engines` (worktree agent). Spec : `docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md` (ligne NT5).
+Branche `feat/nt5-cap-engines` (worktree agent). État : **terminé**, à fusionner. Spec : `docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md` (ligne NT5).
 ADR : `docs/decisions/0128-plafond-et-engins-de-siege.md`.
 
 ## Conception
@@ -26,6 +26,7 @@ ADR : `docs/decisions/0128-plafond-et-engins-de-siege.md`.
 - [x] UI : siege_controller (engins, bouton grisé + infobulle), settlement/province panel (Former une armée > 20)
 - [x] `core/build.sh`, test Godot `nt5_cap_engines_test.gd` OK, `tw2_t3_mercenaries_test` OK
 - [x] Garde-fous bataille avant/après : `ep7_historical` 6/6, `ep9b_duel` 8/8, `ai` (dont `ai_beats_a_passive_ai_at_equal_forces`) 2/2, identiques
+- [x] `cargo test --workspace` (no-fail-fast), clippy, pytest 1274, smoke OK
 - [x] Sonde `century_probe` après (part de guerre FR–EN) : dans la cible, aucun ajustement de données
 
 ## Chiffres d'équilibre
@@ -37,6 +38,8 @@ Effet de bord : batailles FR/EN par décennie 77,5 → 144,6 (armées plafonnée
 distincts, donc plus de rencontres). Garde-fous bataille inchangés (voir État).
 
 ## Points ouverts
+- `cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses` : plus d'embuscade en 60 tours
+  pour les graines 1-4 après NT5 ; graine 5 (aucun ordre refusé dans tous les cas).
 - Batailles FR/EN ×1,9 par décennie (N6) : à surveiller en partie pilote.
 - Le bélier n'a pas d'effet propre en résolution automatique (seul le beffroi ôte les murailles).
 
