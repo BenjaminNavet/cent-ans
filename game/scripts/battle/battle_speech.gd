@@ -24,6 +24,8 @@ const CAMERA_DISTANCE := 34.0
 const CRY_DISTANCE := 95.0
 
 var active: bool = false
+## Vrai si le joueur a passé le discours (le discours adverse n'est alors pas joué).
+var skipped: bool = false
 var lines: Array = []
 var cry: String = ""
 var speaker: String = ""
@@ -278,6 +280,7 @@ func _input(event: InputEvent) -> void:
 		skip = (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT
 	if skip:
 		get_viewport().set_input_as_handled()
+		skipped = true
 		stop()
 
 
