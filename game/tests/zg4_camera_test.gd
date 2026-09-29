@@ -279,13 +279,14 @@ func _test_rescale() -> void:
 		_check(is_equal_approx(float(global_value), target), "global shader parameter updated")
 	# ZG8 : la surface suit la hauteur affichée (échelle et gain local), pas seulement l'échelle.
 	_check(absf(terrain.surface_height_at(paris.x, paris.y) - MapData.display_height(before_m, paris.x, paris.y)) < 1e-4, "surface follows the scale")
-	_check(terrain.pending_rescales() == 256, "all chunks queued, got %d" % terrain.pending_rescales())
+	var chunks := terrain.chunk_count()  # OM1 : 28 × 24 morceaux sur 7168 × 6144 (plus 16 × 16)
+	_check(terrain.pending_rescales() == chunks, "all chunks queued, got %d of %d" % [terrain.pending_rescales(), chunks])
 	terrain.update_lod(camera.global_position, 11.0, focus, 170.0)
-	_check(terrain.pending_rescales() == 256, "rescale waits for the scale to settle")
+	_check(terrain.pending_rescales() == chunks, "rescale waits for the scale to settle")
 	terrain.rescale_settle_ms = 0
 	terrain.rescale_budget_ms = 0.0  # un morceau par image au plus
 	terrain.update_lod(camera.global_position, 11.0, focus, 170.0)
-	_check(terrain.pending_rescales() == 255, "rescale spread over frames (%d left)" % terrain.pending_rescales())
+	_check(terrain.pending_rescales() == chunks - 1, "rescale spread over frames (%d left)" % terrain.pending_rescales())
 	terrain.wait_fine_jobs()
 	_check(terrain.pending_rescales() == 0, "flush completes the rescale")
 	_check(rescaling[0] >= 256, "rescale emits flagged (%d)" % rescaling[0])
