@@ -195,6 +195,35 @@ pub fn garrison_upkeep_percent(data: &GameData, kind: data_model::SettlementKind
         .unwrap_or(data.economy_rules.garrison_upkeep_percent)
 }
 
+/// Livres of a garrison's upkeep paid by its controller, before reliefs:
+/// each unit pays its settlement kind's share ([`garrison_upkeep_percent`]),
+/// except in the capital city (`capital`), where the cheapest
+/// `capital_guard.units` form the lord's household guard and pay
+/// `capital_guard.upkeep_percent` (lot OMR R3, ADR 0117: a one-province lordship
+/// could not pay the one unit the AI never dismisses).
+pub fn garrison_share(
+    data: &GameData,
+    kind: data_model::SettlementKind,
+    capital: bool,
+    unit_costs: impl IntoIterator<Item = i64>,
+) -> i64 {
+    let percent = garrison_upkeep_percent(data, kind);
+    let guard = data
+        .settlement_rules
+        .as_ref()
+        .and_then(|rules| rules.capital_guard.as_ref())
+        .filter(|_| capital);
+    let Some(guard) = guard else {
+        return unit_costs.into_iter().sum::<i64>() * percent / 100;
+    };
+    let mut costs: Vec<i64> = unit_costs.into_iter().collect();
+    costs.sort_unstable();
+    let split = guard.units.min(costs.len());
+    let (household, others) = costs.split_at(split);
+    household.iter().sum::<i64>() * guard.upkeep_percent / 100
+        + others.iter().sum::<i64>() * percent / 100
+}
+
 /// Share (per cent) of the upkeep of a settlement's buildings paid by its
 /// controller, by settlement kind (lot C7a, `rules.json`
 /// `building_upkeep_percent`; 100 when absent).
@@ -366,6 +395,7 @@ impl CampaignState {
                 }
             })
             .sum();
+        let capital = self.faction_capital_city(faction);
         let garrisons: i64 = self
             .settlements
             .iter()
@@ -375,8 +405,13 @@ impl CampaignState {
                     &data.economy_rules,
                     &self.settlement_effects(data, id),
                 );
-                let raw: i64 = s.garrison.iter().map(unit_cost).sum();
-                raw * garrison_upkeep_percent(data, s.kind) / 100 * (100 - relief) / 100
+                let share = garrison_share(
+                    data,
+                    s.kind,
+                    capital == Some(id),
+                    s.garrison.iter().map(unit_cost),
+                );
+                share * (100 - relief) / 100
             })
             .sum();
         // DF1: the AI's armies cost less at higher difficulty.
@@ -386,6 +421,17 @@ impl CampaignState {
         );
         // H5: prices follow the coinage.
         crate::coinage::priced(self, faction, upkeep)
+    }
+
+    /// The city of the faction's capital province, when the faction holds it
+    /// (lot OMR R3: home of the household guard, [`garrison_share`]).
+    pub fn faction_capital_city(&self, faction: &FactionId) -> Option<&SettlementId> {
+        let capital = &self.factions.get(faction)?.capital;
+        self.province_city_id(capital).filter(|city| {
+            self.settlements
+                .get(*city)
+                .is_some_and(|s| &s.controller == faction)
+        })
     }
 
     /// Upkeep of the army (field armies + garrisons), without buildings.

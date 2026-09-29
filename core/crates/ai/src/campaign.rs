@@ -915,18 +915,19 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
 /// Seasonal upkeep of the faction's garrisons (share paid by the crown by
 /// settlement kind; reliefs, technologies and coinage left out).
 fn garrison_upkeep(ctx: &Context) -> i64 {
-    use sim_campaign::economy::{garrison_upkeep_percent, unit_upkeep};
+    use sim_campaign::economy::{garrison_share, unit_upkeep};
+    let capital = ctx.state.faction_capital_city(ctx.faction);
     ctx.state
         .settlements
-        .values()
-        .filter(|s| &s.controller == ctx.faction)
-        .map(|s| {
-            s.garrison
-                .iter()
-                .map(|u| unit_upkeep(ctx.data, u))
-                .sum::<i64>()
-                * garrison_upkeep_percent(ctx.data, s.kind)
-                / 100
+        .iter()
+        .filter(|(_, s)| &s.controller == ctx.faction)
+        .map(|(id, s)| {
+            garrison_share(
+                ctx.data,
+                s.kind,
+                capital == Some(id),
+                s.garrison.iter().map(|u| unit_upkeep(ctx.data, u)),
+            )
         })
         .sum()
 }
@@ -1021,7 +1022,12 @@ fn plan_demolitions(ctx: &Context) -> Vec<Order> {
     let state = ctx.state;
     let data = ctx.data;
     let rules = &data.economy_rules.ai_demolition;
-    if state.factions[ctx.faction].deficit_seasons < rules.deficit_seasons {
+    // OMR R3 (ADR 0117): also in a debt the net surplus cannot repay within
+    // `DEBT_REPAYMENT_TURNS` — the simulation's deficit count leaves out the
+    // tribute to the suzerain and the agents, which kept small vassals in
+    // the red for decades without ever razing a building.
+    let stuck = ctx.treasury < 0 && ctx.surplus() < -ctx.treasury / DEBT_REPAYMENT_TURNS;
+    if state.factions[ctx.faction].deficit_seasons < rules.deficit_seasons && !stuck {
         return Vec::new();
     }
     // (value per livre of upkeep, upkeep, settlement, building)
