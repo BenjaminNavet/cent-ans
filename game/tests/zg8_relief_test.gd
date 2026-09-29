@@ -164,7 +164,7 @@ func _test_real_map() -> void:
 	var best_h := -INF
 	for j in 41:
 		for i in 41:
-			var p := Vector2(1835.5 + i, 2814.5 + j)  # centres des pixels (SZ2b, ADR 0086)
+			var p := Vector2(1835.5 + i, 4094.5 + j)  # centres des pixels (SZ2b, ADR 0086) ; +1280 en y (OM)
 			var h := map_data.height_m_at(p.x, p.y)
 			if h > best_h:
 				best_h = h
@@ -194,7 +194,7 @@ func _test_grounding() -> void:
 	var heights: PackedFloat32Array = grid["heights"]
 	var side: int = grid["side"]
 	var unit: float = grid["unit"]
-	var origin := Vector2((index % 16) * terrain.chunk_px, (index / 16) * terrain.chunk_px)
+	var origin := Vector2((index % terrain.chunks_x) * terrain.chunk_px, (index / terrain.chunks_x) * terrain.chunk_px)
 	var worst := 0.0
 	for k in [0, side + 1, side * 5 + 7, side * side / 2 + 3]:
 		var p := origin + Vector2((k % side) * unit, (k / side) * unit)
