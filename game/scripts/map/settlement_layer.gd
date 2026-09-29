@@ -971,7 +971,9 @@ func update_view(camera_distance: float) -> void:
 		_declutter_force = true
 	if MapData.vertical_scale() != _label_scale:
 		_labels_dirty = false
+		var tv := Time.get_ticks_usec()
 		_update_label_heights()  # ZG4 : toutes les étiquettes du palier moyen suivent l'échelle
+		PerfProbe.lap("settle/labels/vscale", tv)  # RS-K3
 	elif _labels_dirty:
 		_labels_dirty = false
 		# SZ6 : seules les colonies des morceaux recalés (hauteur de leur maquette ou de leur ville
@@ -1082,6 +1084,7 @@ func declutter() -> void:
 	if camera == null or data == null or _priority_order.is_empty():
 		return
 	var t0 := Time.get_ticks_usec()
+	var tp := t0  # RS-K3 : sous-sections du banc `--bench-probe`
 	_declutter_force = false
 	_declutter_camera = _camera_state(camera)
 	var screen := get_viewport().get_visible_rect()
@@ -1112,6 +1115,7 @@ func declutter() -> void:
 	for i in _priority_order:
 		if not pins.has(i):
 			sequence.append(i)
+	tp = PerfProbe.lap("settle/declutter/prep", tp)
 	for i in sequence:
 		var has_marker := icons_on and marker_in_tier(i)
 		var shown := true
@@ -1134,6 +1138,7 @@ func declutter() -> void:
 			continue
 		var rect := _label_screen_rect(i, camera, scale, label_margin)
 		_show_label(i, label_screen.intersects(rect) and _placer.try_place(rect, i), alpha)
+	PerfProbe.lap("settle/declutter/run", tp)
 	last_declutter_ms = float(Time.get_ticks_usec() - t0) / 1000.0
 
 
@@ -1468,6 +1473,7 @@ func _hamlet_memo_ready() -> bool:
 
 
 func _build_hamlets(index: int) -> void:
+	var tp := Time.get_ticks_usec()  # RS-K3 : sous-sections du banc `--bench-probe`
 	_hamlet_dirty.erase(index)
 	var previous: Node3D = _hamlet_nodes.get(index)
 	if previous != null:
@@ -1519,7 +1525,9 @@ func _build_hamlets(index: int) -> void:
 			var angle := k * TAU / 4.0 + yaw
 			points.append(Vector2(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
 		pending.append([key, px, yaw, scale])
+	tp = PerfProbe.lap("settle/hamlets/prep", tp)
 	var heights := terrain.surface_heights_at(points)
+	tp = PerfProbe.lap("settle/hamlets/heights", tp)
 	for p in pending.size():
 		var key: int = pending[p][0]
 		var px: Vector2 = pending[p][1]
@@ -1545,6 +1553,7 @@ func _build_hamlets(index: int) -> void:
 			mmi.material_override = _burned_material
 		mmi.visibility_range_end = tiers.hamlet_range + terrain.chunk_px
 		node.add_child(mmi)
+	PerfProbe.lap("settle/hamlets/mesh", tp)
 
 
 # --- Picking et sélection ------------------------------------------------------------
