@@ -19,7 +19,9 @@ Branche `feat/om-om2`, worktree `../gp-om-om2`. Profil cargo `i1`.
   en coordonnées monde (+20 tuiles E2, +1280 unités en y), chemin de fichier en coordonnées de
   cache (`CafvTile.parse(bytes, offset_tiles)`). Test : `zg5b_fine_geo_test.gd` § 2b ; test réel
   de Rouen décalé. Aucun code Rust ne lit les tuiles CAFV (rendu seul).
-- [ ] 4  - [ ] 5
+- [x] 4 : cargo test --workspace 1 223 ok, 0 échec, 55 ignorés ; clippy -D warnings et fmt OK ;
+  pytest 1 246 ok, 2 sautés ; import, smoke.gd (toutes étapes OK) et 22 tests Godot carte OK.
+- [x] 5 : voir « Mesures ».
 
 ## Corrections de données
 - 3 colonies minimum : Kubadabad (palais seldjoukide, Beyşehir), Göksun (Elbistan), Urzędów
@@ -89,5 +91,7 @@ les basses terres reliées à la mer (Pays-Bas) gardent le comportement d'avant.
   `agent_dijkstra`, `attitude`, `faction_power` (O(armées + colonies) par appel).
 
 ## Prochaine étape
-Fin de `geo build`, contrôles (colonies hors province, provinces sans pixel, îles sans port),
-puis splat, relief-shade, navgrid, rivers-render, horizon.
+Lot terminé. Points ouverts : Volok Lamski, Gorokhovets, Kamianiets ramenées de loin ;
+268 colonies ramenées dans leur province (la plupart côtières, < 20 km) ; objectifs ajoutés aux
+31 titres D à relire par un historien ; coût restant du tour d'IA (×4,6 par tour de jeu contre
+main) ; chargement (relief_landcover 7,8 s).
