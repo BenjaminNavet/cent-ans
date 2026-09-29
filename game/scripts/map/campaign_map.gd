@@ -1368,6 +1368,7 @@ func _update_fps_probe() -> void:
 			"hamlets": settlement_layer.hamlet_instance_count() if settlement_layer != null else 0,
 			"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 			"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			"folk": life.folk.stats if life != null and life.folk != null else {},
 		}))
 		_fps_probe_frames = -1
 		if _screenshot_path == "":
