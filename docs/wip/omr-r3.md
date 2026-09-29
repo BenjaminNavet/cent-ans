@@ -50,11 +50,28 @@ après F8 donnait déjà 10/10 au tour 1 (`docs/wip/fe8-equilibre.md`). Rien à 
 | incite 8 | 1,09 | 0,93-1,40 | 0,00-0,11 | 0,8 [0-4] |
 | **incite 10 (retenu)** | 1,26 | 1,20-1,62 (1,41) | 0,00-0,29 | 8,8 [0-16] |
 
+## Sonde 464 t. × 10 (graines 1-10, profil release r3)
+| mesure | base 5d64d2bd | après (incite 10) |
+|---|---|---|
+| banqueroutes / fac. / déc. (toutes) | 3,98 [3,81-4,26] | 0,66 [0,61-0,75] |
+| petites factions (≤ 2 prov.) | 4,47 [4,32-4,72] | 0,71 [0,64-0,81] |
+| 28 factions d'avant FE | 0,07 [0,03-0,10] | 0,10 [0,05-0,21] |
+| révoltes / 200 t. | 16,0 [9,1-25,9] | 4,7 [0,0-9,5] (4/10 graines dans 4-10, 6 en dessous) |
+| guerre FR-EN (55-75 %) | 68,4 % [61-75], 10/10 | 67,6 % [60-73], 10/10 |
+| commise de Guyenne | 10/10 au tour 1 | 10/10 au tour 1 |
+| factions éliminées | 100,1 [98-103] | 100,1 [94-105] |
+| 1re faction fin (% prov.) | 9,95 | 9,98 |
+| 4 majeures en vie en 1400 | 10/10 | 10/10 |
+| recettes France t ≤ 50 | 1 699 978 | 1 752 864 |
+
+Essai en cours : incite 12 sur 464 × 10 pour centrer les révoltes dans la bande.
+
 ## État
 - [x] Commise de Guyenne : diagnostic (voulu).
 - [x] Banqueroutes des petites factions.
 - [x] Révoltes (incite 10).
-- [ ] Sonde 464 t. × 10 (base et final, en cours) ; tests workspace + pytest.
+- [x] Sonde 464 t. × 10 (base et final) ; cargo test --workspace 1 227 ok / 0 échec / 55 ignorés ; clippy, fmt ; pytest 1 246 ok, 2 sautés.
+- [ ] Essai incite 12 (464 × 10).
 
 ## Prochaine étape
 Relever les sondes 464 × 10 (`/private/tmp/claude-501/r3/{base,final}_464.txt`), rapport, commit final.
