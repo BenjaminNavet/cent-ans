@@ -10,7 +10,7 @@ ADR : `docs/decisions/0127-missions-de-campagne.md`.
 - [x] Implémentation (génération, progression, réussite, échec, récompense) + tests Rust (`tests/nt3_missions.rs`)
 - [x] Pont `campaign_sim_missions.rs`, UI (`victory_controller.gd` section Missions + toasts, `season_report.gd`), test `game/tests/nt3_missions_test.gd` écrits — à vérifier (build.sh, Godot)
 - [x] pytest schéma (`tools/tests/test_missions_schema.py`)
-- [ ] ADR 0127
+- [x] ADR 0127 (`docs/decisions/0127-missions-de-campagne.md`)
 
 ## Prochaine étape
 core/build.sh, test Godot, smoke, clippy workspace, ADR.
