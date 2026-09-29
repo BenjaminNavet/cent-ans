@@ -216,7 +216,7 @@ func _rebuild_key(province_states: Dictionary) -> String:
 	for h in data.hamlets.size():
 		var devastation := float(province_states.get(str(data.hamlets[h]["province"]), {}).get("devastation", 0.0))
 		burned[h] = (2 if _layer.hamlet_burned(h) else 0) + (1 if devastation >= FIRE_MIN_DEVASTATION else 0)
-	return "%s|%s|%s|%s" % [",".join(parts), Marshalls.raw_to_base64(burned), ",".join(PackedStringArray(quiet_settlements.keys())), scene_fires]
+	return "%s|%s|%s|%s" % [",".join(parts), burned.hex_encode(), ",".join(PackedStringArray(quiet_settlements.keys())), scene_fires]
 
 
 ## Moulins à vent sur la couronne de champs des colonies ; ailes arrêtées en pays dévasté.
