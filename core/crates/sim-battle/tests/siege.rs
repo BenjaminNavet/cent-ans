@@ -378,7 +378,9 @@ fn a_wide_breach_eases_the_assault_and_ladders_are_costly() {
         breach_wins >= ladder_wins,
         "breach {breach_wins} vs ladders {ladder_wins}"
     );
-    assert_eq!(breach_wins, 4, "a wide breach carries the town");
+    // T4 (ADR 0108): the garrison falls back on the square and makes a last
+    // stand there, so a wide breach no longer carries the town every time.
+    assert!(breach_wins >= 2, "a wide breach carries the town often: {breach_wins}/4");
     assert!(
         ladder_ratio > breach_ratio,
         "ladders cost more: {ladder_ratio:.2} vs {breach_ratio:.2} attackers lost per defender"
