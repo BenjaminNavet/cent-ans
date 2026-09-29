@@ -1,7 +1,8 @@
 //! Chronicle: historical and random events (M10, `docs/design/m10-events.md`).
 //!
 //! Each end of turn (after religion, before population), [`resolve_chronicle`]:
-//! 1. resolves player decisions that expired (first option applies);
+//! 1. resolves player decisions that expired: the option the AI would pick
+//!    for that realm applies (ADR 0122, [`ai_affordable_choice_among`]);
 //! 2. fires the historical events whose date is reached and whose conditions
 //!    hold (at most once each; history may diverge);
 //! 3. rolls the random events, at most one per faction and per turn;
@@ -17,7 +18,8 @@ use std::collections::BTreeSet;
 
 use data_model::{
     CharacterId, CharacterRef, ClaimKind, Condition, Event, EventCategory, EventEffect, EventId,
-    EventScope, EventSeason, FactionId, GameData, ProvinceId, ProvinceRef, SocialClass,
+    EventPresentation, EventScope, EventSeason, FactionId, GameData, ProvinceId, ProvinceRef,
+    SceneKind, SocialClass,
 };
 use serde::{Deserialize, Serialize};
 
@@ -27,7 +29,8 @@ use crate::population::weighted_unrest;
 use crate::state::{Army, CampaignState, Season, Unit, TURNS_PER_YEAR};
 use crate::{characters, religion, skills};
 
-/// Turns a player decision stays open before its first option applies.
+/// Turns a player decision stays open before the AI's option applies
+/// (ADR 0122).
 pub const DECISION_TURNS: u32 = 2;
 /// Default duration (turns) of an `opinion` effect.
 pub const OPINION_TURNS: u32 = 20;
@@ -50,8 +53,32 @@ pub struct Decision {
     pub province: Option<ProvinceId>,
     /// Indices of the event's options offered.
     pub options: Vec<usize>,
-    /// At the end of this turn, the first option applies automatically.
+    /// At the end of this turn, the option the AI would pick applies
+    /// automatically (ADR 0122).
     pub expires_turn: u32,
+}
+
+impl Decision {
+    /// FK1: map incident or dialog window (the event's effective
+    /// presentation, [`Event::presentation`]); `dialog` for an unknown event.
+    pub fn presentation(&self, data: &GameData) -> EventPresentation {
+        data.events
+            .get(&self.event)
+            .map_or(EventPresentation::Dialog, Event::presentation)
+    }
+}
+
+/// FK1: a province scene born of a recent chronicle event (or of the Black
+/// Death wave), kept while [`data_model::MapSceneRules::duration`] runs.
+/// Purely visual (`crate::map_scenes`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RecentScene {
+    pub kind: SceneKind,
+    pub province: ProvinceId,
+    /// Turn whose end fired the event (the scene shows from the next one).
+    pub turn: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event: Option<EventId>,
 }
 
 /// Black Death in progress: every province is struck once, south first,
@@ -82,6 +109,9 @@ pub struct ChronicleState {
     /// F1: events scheduled by `schedule_event` effects (chains).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub scheduled: Vec<ScheduledEvent>,
+    /// FK1: recent events carrying a `map_scene`, by province (visual only).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub recent_scenes: Vec<RecentScene>,
 }
 
 /// An event programmed by another one (F1), fired at the end of `turn` for
@@ -130,10 +160,12 @@ pub struct DecisionView {
     pub text: String,
     pub historical: bool,
     pub options: Vec<DecisionOptionView>,
-    /// End-of-turns left before the first option applies (1 = this turn).
+    /// End-of-turns left before the AI's option applies (1 = this turn).
     pub expires_in: u32,
     pub province: Option<ProvinceId>,
     pub province_name: String,
+    /// FK1: map incident or dialog window.
+    pub presentation: EventPresentation,
 }
 
 fn season_of(season: Season) -> EventSeason {
@@ -326,6 +358,7 @@ impl CampaignState {
                         .as_ref()
                         .map(|p| province_name(data, p))
                         .unwrap_or_default(),
+                    presentation: event.presentation(),
                 })
             })
             .collect()
@@ -1240,19 +1273,8 @@ fn mitigate_effect(effect: &EventEffect, resistance: f64) -> EventEffect {
 
 /// Option of highest `ai_weight`, ties broken by the campaign RNG.
 pub fn ai_choice(state: &mut CampaignState, event: &Event) -> usize {
-    let best = event.options.iter().map(|o| o.ai_weight).max().unwrap_or(0);
-    let candidates: Vec<usize> = event
-        .options
-        .iter()
-        .enumerate()
-        .filter(|(_, o)| o.ai_weight == best)
-        .map(|(i, _)| i)
-        .collect();
-    match candidates.len() {
-        0 => 0,
-        1 => candidates[0],
-        n => candidates[state.rng.below(n as u32) as usize],
-    }
+    let every: Vec<usize> = (0..event.options.len()).collect();
+    weighted_pick(state, event, &every)
 }
 
 /// F4: like [`ai_choice`], but an AI realm first sets aside the options it
@@ -1264,11 +1286,31 @@ pub fn ai_affordable_choice(
     event: &Event,
     decider: Option<&FactionId>,
 ) -> usize {
+    let every: Vec<usize> = (0..event.options.len()).collect();
+    ai_affordable_choice_among(state, data, event, decider, &every)
+}
+
+/// FK1 (ADR 0122): [`ai_affordable_choice`] restricted to the options
+/// `offered` (indices into `event.options`; unknown ones are ignored).
+/// Same random stream as [`ai_affordable_choice`] when every option is
+/// offered: one draw only when several options tie.
+pub fn ai_affordable_choice_among(
+    state: &mut CampaignState,
+    data: &GameData,
+    event: &Event,
+    decider: Option<&FactionId>,
+    offered: &[usize],
+) -> usize {
+    let offered: Vec<usize> = offered
+        .iter()
+        .copied()
+        .filter(|i| *i < event.options.len())
+        .collect();
     let Some(means) = decider
         .and_then(|f| state.factions.get(f))
         .map(|f| f.treasury.max(0) + 2 * f.income_last_turn.max(0))
     else {
-        return ai_choice(state, event);
+        return weighted_pick(state, event, &offered);
     };
     let cost = |option: &data_model::EventOption| -> i64 {
         option
@@ -1283,26 +1325,32 @@ pub fn ai_affordable_choice(
             })
             .sum()
     };
-    let affordable: Vec<usize> = event
-        .options
+    let affordable: Vec<usize> = offered
         .iter()
-        .enumerate()
-        .filter(|(_, o)| cost(o) <= means)
-        .map(|(i, _)| i)
+        .copied()
+        .filter(|i| cost(&event.options[*i]) <= means)
         .collect();
-    if affordable.is_empty() || affordable.len() == event.options.len() {
-        return ai_choice(state, event);
+    if affordable.is_empty() || affordable.len() == offered.len() {
+        return weighted_pick(state, event, &offered);
     }
-    let best = affordable
+    weighted_pick(state, event, &affordable)
+}
+
+/// Option of highest `ai_weight` among `among` (indices into
+/// `event.options`), ties broken by the campaign RNG; 0 when empty.
+fn weighted_pick(state: &mut CampaignState, event: &Event, among: &[usize]) -> usize {
+    let best = among
         .iter()
         .map(|i| event.options[*i].ai_weight)
         .max()
         .unwrap_or(0);
-    let candidates: Vec<usize> = affordable
-        .into_iter()
+    let candidates: Vec<usize> = among
+        .iter()
+        .copied()
         .filter(|i| event.options[*i].ai_weight == best)
         .collect();
     match candidates.len() {
+        0 => 0,
         1 => candidates[0],
         n => candidates[state.rng.below(n as u32) as usize],
     }
@@ -1340,6 +1388,7 @@ fn fire(
             return;
         }
     }
+    record_scene(state, event, decider.as_ref(), province.as_ref());
     let historical = event.kind != EventCategory::Random;
     let player_decides = decider
         .as_ref()
@@ -1392,6 +1441,35 @@ fn fire(
         }
         events.push(entry);
     }
+}
+
+/// FK1: remembers the scene of an event carrying a `map_scene`, at its
+/// province or else at the deciding realm's capital (sacres, peaces,
+/// weddings); an event with neither has no scene. No RNG read.
+fn record_scene(
+    state: &mut CampaignState,
+    event: &Event,
+    decider: Option<&FactionId>,
+    province: Option<&ProvinceId>,
+) {
+    let Some(kind) = event.map_scene else {
+        return;
+    };
+    let place = province.cloned().or_else(|| {
+        decider
+            .and_then(|f| state.factions.get(f))
+            .map(|f| f.capital.clone())
+    });
+    let Some(place) = place.filter(|p| state.provinces.contains_key(p)) else {
+        return;
+    };
+    let turn = state.turn;
+    state.chronicle.recent_scenes.push(RecentScene {
+        kind,
+        province: place,
+        turn,
+        event: Some(event.id.clone()),
+    });
 }
 
 /// Factions that can receive events (alive, not the virtual rebels).
@@ -1537,7 +1615,8 @@ pub(crate) fn resolve_chronicle(
     data: &GameData,
     events: &mut Vec<GameEvent>,
 ) {
-    // 1. Expired player decisions: the first option applies.
+    // 1. Expired player decisions: the option the AI would pick for that
+    //    realm among those offered applies (ADR 0122).
     let turn = state.turn;
     let (expired, kept): (Vec<Decision>, Vec<Decision>) =
         std::mem::take(&mut state.chronicle.pending_decisions)
@@ -1545,9 +1624,25 @@ pub(crate) fn resolve_chronicle(
             .partition(|d| d.expires_turn <= turn);
     state.chronicle.pending_decisions = kept;
     for decision in expired {
-        let first = decision.options.first().copied().unwrap_or(0);
-        resolve_decision(state, data, &decision, first, true, events);
+        let option = match data.events.get(&decision.event) {
+            Some(event) => ai_affordable_choice_among(
+                state,
+                data,
+                event,
+                Some(&decision.faction),
+                &decision.options,
+            ),
+            None => decision.options.first().copied().unwrap_or(0),
+        };
+        resolve_decision(state, data, &decision, option, true, events);
     }
+
+    // 1a. FK1: scenes of recent events fade out (visual only, no RNG).
+    let rules = &data.map_scene_rules;
+    state
+        .chronicle
+        .recent_scenes
+        .retain(|scene| scene.turn + rules.duration(scene.kind) > turn);
 
     if state.chronicle.disabled {
         resolve_plague_wave(state, data, events);
@@ -1710,6 +1805,17 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
         });
         struck.push(id);
     }
+    // FK1: every province struck shows its plague scene (visual only).
+    let turn = state.turn;
+    state
+        .chronicle
+        .recent_scenes
+        .extend(struck.iter().map(|id| RecentScene {
+            kind: SceneKind::Plague,
+            province: id.clone(),
+            turn,
+            event: None,
+        }));
     let player = state.player_faction.clone();
     for id in &spared {
         if state.controls_province(&player, id) {

@@ -25,6 +25,7 @@
     "type": "faction",
     "faction": "fac_burgundy"
   },
+  "map_scene": "celebration",
   "options": [
     {
       "text": "Se réconcilier avec le roi de France",

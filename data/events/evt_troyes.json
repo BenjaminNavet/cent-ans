@@ -48,6 +48,7 @@
     "type": "faction",
     "faction": "fac_france"
   },
+  "map_scene": "celebration",
   "options": [
     {
       "text": "Signer le traité « de la honte »",
