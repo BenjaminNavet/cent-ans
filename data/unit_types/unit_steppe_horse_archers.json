@@ -8,18 +8,18 @@
   "category": "ranged",
   "source_class": "peasants",
   "mounted": true,
-  "soldiers": 80,
+  "soldiers": 100,
   "cost": {
-    "money": 520
+    "money": 560
   },
-  "upkeep": 46,
+  "upkeep": 50,
   "recruit_time_turns": 1,
   "stats": {
-    "melee": 30,
-    "ranged": 55,
-    "range": 170,
-    "armor": 16,
-    "morale": 48,
+    "melee": 34,
+    "ranged": 60,
+    "range": 180,
+    "armor": 22,
+    "morale": 52,
     "speed": 88,
     "ammo": 30
   },

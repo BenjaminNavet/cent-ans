@@ -1,0 +1,26 @@
+{
+  "id": "cdx_almogavres",
+  "title": "Les almogavres",
+  "category": "unite",
+  "aliases": [
+    "almogavres",
+    "almogàvers",
+    "Compagnie catalane"
+  ],
+  "era": {
+    "from": "1250",
+    "to": "1400"
+  },
+  "summary": "Fantassins légers des montagnes de la couronne d'Aragon, sans armure, armés de javelots et d'un coutelas. Ils ont conquis la Sicile et fondé la Compagnie catalane d'Orient, qui tient le duché d'Athènes depuis 1311.",
+  "body": "Le mot vient de l'arabe al-mughāwir, le coureur. Nés des guerres de frontière contre les musulmans, les almogavres vivent en bandes, se nourrissent de peu et marchent vite. Ils lancent leurs deux javelots (azconas) puis chargent à la lance courte et au coutelas (colltell).\n\nAprès la conquête de la Sicile (1282), une partie d'entre eux, sous Roger de Flor, passe au service de Byzance contre les Turcs (1303), puis se retourne contre l'Empire. Victorieux des chevaliers français à Halmyros (1311), ils prennent le duché d'Athènes. Le chroniqueur Ramon Muntaner, qui les a commandés, raconte leurs exploits. Ils disparaissent dans la seconde moitié du XIVe siècle.",
+  "gameplay": "Compagnie de 100 hommes (fantassins). Recrutement : 520 livres payées à l'enrôlement, 1 saison(s) d'instruction ; entretien 46 livres par saison. Caractéristiques : mêlée 58, armure 22, moral 60, vitesse 58. Exige une province de culture catalane ; levés jusqu'en 1400. La place doit compter assez de paysans (dix fois l'effectif). Infanterie légère rapide, au moral élevé et redoutable en mêlée, mais sans armure : elle souffre sous les flèches et devant une charge de front.",
+  "entity": "unit_almogavars",
+  "see_also": [
+    "cdx_empire_byzantin"
+  ],
+  "sources": [
+    "Almogavres",
+    "Compagnie catalane",
+    "R. Muntaner, Crònica, v. 1325-1328"
+  ]
+}

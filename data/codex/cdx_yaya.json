@@ -1,0 +1,26 @@
+{
+  "id": "cdx_yaya",
+  "title": "Les yaya ottomans",
+  "category": "unite",
+  "aliases": [
+    "yaya",
+    "müsellem",
+    "piyade"
+  ],
+  "era": {
+    "from": "1330",
+    "to": "1450"
+  },
+  "summary": "Premiers fantassins soldés des [[cdx_ottomans|Ottomans]], créés par Orhan vers 1330 : archers turcs levés parmi les paysans et payés pendant la campagne. Les janissaires ne viendront que plus tard.",
+  "body": "Selon les chroniques ottomanes, Orhan institue les yaya (« piétons ») en même temps que les müsellem, cavaliers exemptés d'impôt, pour disposer d'une troupe qui ne dépende pas des seuls volontaires de la frontière. Ils servent en échange de terres exemptées de taxes, par groupes qui partent en campagne à tour de rôle.\n\nLeur arme principale est l'arc ; ils tiennent aussi les sièges, comme ceux de Nicée et de Nicomédie. Leur prestige décline avec la création des janissaires, sous Murad Ier, et au XVe siècle ils ne sont plus que des auxiliaires employés aux routes et aux travaux de siège.",
+  "gameplay": "Compagnie de 100 hommes (tireurs). Recrutement : 380 livres payées à l'enrôlement, 1 saison(s) d'instruction ; entretien 32 livres par saison. Caractéristiques : mêlée 38, tir 50 à 170 m (32 volées), armure 22, moral 46, vitesse 48. Réservés aux Ottomans, dans une province de culture turque ; levés de 1330 à 1450. La place doit compter assez de paysans (dix fois l'effectif). Archers à pied bon marché : moins adroits que les archers longs, mais peu coûteux à entretenir. Protégez-les derrière des fantassins.",
+  "entity": "unit_yaya",
+  "see_also": [
+    "cdx_ottomans"
+  ],
+  "sources": [
+    "Yaya (Ottoman)",
+    "H. İnalcık, The Ottoman Empire: the Classical Age 1300-1600, 1973",
+    "C. Imber, The Ottoman Empire 1300-1650, 2002"
+  ]
+}

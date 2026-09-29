@@ -1,0 +1,28 @@
+{
+  "id": "cdx_freres_chevaliers",
+  "title": "Les frères chevaliers teutoniques",
+  "category": "unite",
+  "aliases": [
+    "frères chevaliers",
+    "Ritterbrüder",
+    "Reisen",
+    "manteau blanc"
+  ],
+  "era": {
+    "from": "1198",
+    "to": "1525"
+  },
+  "summary": "Moines-soldats de l'[[cdx_ordre_teutonique|Ordre teutonique]], liés par les vœux de pauvreté, de chasteté et d'obéissance. Quelques centaines seulement, ils encadrent les hôtes croisés venus de tout l'Occident contre la [[cdx_lituanie|Lituanie]].",
+  "body": "Chaque commanderie compte une douzaine de frères chevaliers, nobles pour la plupart, entourés de frères sergents, de mercenaires et des vassaux prussiens. Le manteau blanc à croix noire les distingue. Leur vie de couvent, rythmée par les heures canoniales, et leur discipline en font la meilleure cavalerie de la Baltique.\n\nChaque hiver et chaque été, les « voyages » (Reisen) contre la Lituanie attirent des chevaliers anglais, français et allemands : Henri de Derby, futur Henri IV d'Angleterre, et Boucicaut y viendront. La branche livonienne de l'Ordre, héritière des Porte-Glaive, tient la Livonie et l'Estonie.",
+  "gameplay": "Compagnie de 60 hommes (cavaliers). Recrutement : 1600 livres payées à l'enrôlement, 3 saison(s) d'instruction ; entretien 150 livres par saison. Caractéristiques : mêlée 76, armure 80, moral 86, vitesse 68, charge 90. Réservés à l'Ordre teutonique et à l'Ordre livonien. La place doit compter assez de nobles (dix fois l'effectif). Chevaliers lourds au moral le plus haut du jeu : ils ne fuient presque jamais. Très chers, en petit nombre : gardez-les pour la charge décisive.",
+  "entity": "unit_teutonic_knights",
+  "see_also": [
+    "cdx_ordre_teutonique",
+    "cdx_lituanie"
+  ],
+  "sources": [
+    "Ordre Teutonique",
+    "Croisade lituanienne",
+    "W. Urban, The Teutonic Knights: a Military History, 2003"
+  ]
+}

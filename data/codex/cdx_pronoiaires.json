@@ -1,0 +1,28 @@
+{
+  "id": "cdx_pronoiaires",
+  "title": "Les pronoïaires byzantins",
+  "category": "unite",
+  "aliases": [
+    "pronoïaires",
+    "pronoiaires",
+    "pronoïa",
+    "pronoia"
+  ],
+  "era": {
+    "from": "1150",
+    "to": "1453"
+  },
+  "summary": "Cavaliers de l'[[cdx_empire_byzantin|Empire byzantin]] tardif, payés par la pronoïa, concession viagère des revenus d'un domaine et de ses paysans. Peu nombreux, ils forment le noyau des armées paléologues.",
+  "body": "Introduite sous les Comnènes, la pronoïa confie à un soldat les impôts et redevances d'un domaine en échange du service ; au XIVe siècle, elle devient souvent héréditaire, et les pronoïaires se confondent avec l'aristocratie provinciale. Leur armement mêle l'Occident (lance couchée, cotte de mailles, écu en amande) et l'Orient (arc, cuirasse à lamelles).\n\nAndronic III (1328-1341) et son grand domestique Jean Cantacuzène reprennent avec eux la Thessalie et l'Épire, mais ne peuvent arrêter les Ottomans : défaits à Pélékanon (1329), ils perdent Nicée (1331) puis Nicomédie (1337). La guerre civile de 1341-1347 ruinera ce qui reste de l'armée.",
+  "gameplay": "Compagnie de 60 hommes (cavaliers). Recrutement : 900 livres payées à l'enrôlement, 2 saison(s) d'instruction ; entretien 82 livres par saison. Caractéristiques : mêlée 64, armure 62, moral 70, vitesse 70, charge 70. Exige une province de culture grecque, pour l'Empire byzantin, Trébizonde ou l'Épire. La place doit compter assez de nobles (dix fois l'effectif). Cavalerie de ligne moyenne : moins solide que des chevaliers, mais moins chère et assez rapide. Bonne pour achever les tireurs et poursuivre.",
+  "entity": "unit_pronoiars",
+  "see_also": [
+    "cdx_empire_byzantin",
+    "cdx_ottomans"
+  ],
+  "sources": [
+    "Pronoia",
+    "M. C. Bartusis, The Late Byzantine Army: Arms and Society 1204-1453, 1992",
+    "D. M. Nicol, The Last Centuries of Byzantium, 1993"
+  ]
+}

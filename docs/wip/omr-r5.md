@@ -30,11 +30,11 @@ Branche `feat/omr-r5`, worktree `../gp-omr-r5`. Plan d'ensemble : `docs/wip/omr.
 - [x] Données des 10 types (schéma valide)
 - [x] Doctrines IA (9 factions + poids régionaux dans `default`), éclaireurs, gore, étendards
 - [x] Icônes game-icons
-- [ ] Codex
+- [x] Codex (10 entrées `cdx_*`, catégorie unite)
 - [ ] Looks de rendu (données + shader)
 - [x] Tests core `ai/tests/omr_r5_eastern_units.rs`
-- [ ] Sonde matrice (20-80 %)
+- [x] Sonde matrice budget égal : 10 types entre 30 et 80 % (brabançons 16→12 %, archers écossais 88→84 % : hors bande déjà sur main)
 - [ ] Vérifs finales (fmt, clippy, tests, pytest, import, smoke), 1 capture
 
 ## Prochaine étape
-Codex, looks de rendu, sonde matrice.
+Looks de rendu (data/fx/unit_looks.json + shader), puis vérifs finales.
