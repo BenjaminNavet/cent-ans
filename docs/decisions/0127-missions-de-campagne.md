@@ -44,6 +44,7 @@ aléatoire de la campagne (tests d'équilibre graine-dépendants : `ep7_historic
 - Les récompenses ajoutent un peu d'or et de prestige au joueur seul : à surveiller par la partie
   pilote (ordre de grandeur : quelques centaines de livres toutes les 4 à 10 saisons).
 - Les batailles gagnées en défense pendant le tour de l'IA comptent (auto-résolues contre le
-  joueur) ; les assauts de siège ne passent pas par `battle_outcome::apply` et ne comptent pas.
+  joueur) ; un assaut de siège gagné (place emportée ou assaut repoussé) compte aussi
+  (`siege::apply_assault_result`) ; les sorties de garnison ne comptent pas.
 - Ajouter un genre de mission = une variante de `MissionKind`, ses candidats et son verdict dans
   `missions.rs`, et l'énumération du schéma.

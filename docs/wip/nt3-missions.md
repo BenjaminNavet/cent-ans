@@ -12,7 +12,10 @@ ADR : `docs/decisions/0127-missions-de-campagne.md`.
 - [x] Test Godot `game/tests/nt3_missions_test.gd` OK, smoke OK, pytest (1274) OK
 - [x] ADR 0127
 
+## Suite (demande orchestrateur, après fusion df36171e4)
+- [x] Panneau d'objectifs défilant (`ObjectivesScroll`, hauteur ≤ 420 px, réduite si fenêtre basse), test 1280×720 dans `nt3_missions_test.gd`
+- [x] Assaut de siège gagné (prise ou assaut repoussé) = bataille gagnée (`siege::apply_assault_result`), test `a_won_assault_counts_as_a_won_battle`
+
 ## Points ouverts
-- Panneau d'objectifs sans défilement : 3+ objectifs + 2 missions peuvent dépasser 720 px de haut (à juger en partie pilote).
 - Équilibre des récompenses (or/prestige) à juger en partie pilote.
-- Les assauts de siège ne comptent pas comme batailles gagnées.
+- Les sorties de garnison ne comptent pas comme batailles gagnées.
