@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_izmir",
+    "province": "prov_izmir",
+    "kind": "city",
+    "name": {
+      "display": "Smyrne (İzmir)",
+      "local": "İzmir",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.14,
+      38.43
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de la flotte d'Umur ; forteresse haute (Kadifekale).",
+    "sources": [
+      "Umur Bey"
+    ]
+  },
+  {
+    "id": "set_ayasuluk",
+    "province": "prov_izmir",
+    "kind": "town",
+    "name": {
+      "display": "Ayasuluk (Éphèse)",
+      "local": "Ayasuluk",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.37,
+      37.95
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Colline de Saint-Jean, port d'Aydın sur l'Égée.",
+    "sources": [
+      "Umur Bey"
+    ]
+  },
+  {
+    "id": "set_cesme",
+    "province": "prov_izmir",
+    "kind": "village",
+    "name": {
+      "display": "Çeşme"
+    },
+    "lonlat": [
+      26.3,
+      38.32
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": true,
+    "description": "Pointe occidentale, repaire de corsaires.",
+    "sources": [
+      "Umur Bey"
+    ]
+  }
+]

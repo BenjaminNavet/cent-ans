@@ -1,0 +1,58 @@
+{
+  "id": "tit_bearn",
+  "rank": "county",
+  "name": {
+    "display": "Vicomté souveraine de Béarn",
+    "local": "Bearn",
+    "local_language": "gascon"
+  },
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4, d'or à trois pals de gueules (Foix) ; aux 2 et 3, d'or à deux vaches de gueules, accornées, colletées et clarinées d'azur (Béarn).",
+    "description": "Écu écartelé Foix-Béarn adopté par Gaston Ier puis ses successeurs.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_provinces": [
+    "prov_bearn"
+  ],
+  "holder_1337": {
+    "faction": "fac_foix_bearn",
+    "sources": [
+      "Vicomté de Béarn",
+      "Gaston II de Foix-Béarn"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_bearn_foix",
+      "title": "Réunir Foix et Béarn",
+      "description": "Tenir ensemble le comté de Foix et la vicomté de Béarn.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_foix"
+      }
+    },
+    {
+      "id": "obj_bearn_independence",
+      "title": "Le Béarn souverain",
+      "description": "Maintenir le Béarn hors de toute suzeraineté, tenu en alleu.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_bearn_armagnac",
+      "title": "Vaincre l'Armagnac",
+      "description": "Soumettre le comté d'Armagnac, rival de la maison de Foix (Launac, 1362).",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_armagnac"
+      }
+    }
+  ],
+  "description": "Vicomté tenue en alleu, sans hommage, selon la prétention de la maison de Foix-Béarn (rang de comté par convention de schéma ; titre souverain, sans suzerain de jure).",
+  "sources": [
+    "Vicomté de Béarn",
+    "Gaston II de Foix-Béarn"
+  ]
+}

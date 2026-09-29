@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_charolles",
+    "province": "prov_charolais",
+    "kind": "city",
+    "name": {
+      "display": "Charolles",
+      "local": "Charolles",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.2733,
+      46.4333
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du comté de Charolais, tenu en propre par les ducs de Bourgogne depuis 1237.",
+    "sources": [
+      "Comté de Charolais"
+    ]
+  },
+  {
+    "id": "set_paray_le_monial",
+    "province": "prov_charolais",
+    "kind": "abbey",
+    "name": {
+      "display": "Paray-le-Monial",
+      "local": "Paray-le-Monial",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.1211,
+      46.4494
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré clunisien fondé au Xe siècle, dépendance majeure de l'ordre de Cluny en Charolais.",
+    "sources": [
+      "Paray-le-Monial"
+    ]
+  },
+  {
+    "id": "set_la_clayette",
+    "province": "prov_charolais",
+    "kind": "castle",
+    "name": {
+      "display": "La Clayette",
+      "local": "La Clayette",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.3167,
+      46.35
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de moyenne noblesse gardant l'accès méridional du comté vers le Brionnais.",
+    "sources": [
+      "La Clayette"
+    ]
+  }
+]

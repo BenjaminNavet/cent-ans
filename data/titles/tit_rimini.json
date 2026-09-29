@@ -1,0 +1,47 @@
+{
+  "id": "tit_rimini",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Rimini",
+    "local": "Signoria di Rimini",
+    "local_language": "romagnol"
+  },
+  "heraldry": {
+    "blazon": "Fuselé d'argent et de gueules.",
+    "description": "Losanges enchaînés blanc et rouge attribués aux Malatesta ; blason incertain, les sources héraldiques divergent avant le XVe siècle.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_papacy",
+  "de_jure_provinces": [
+    "prov_rimini"
+  ],
+  "holder_1337": {
+    "faction": "fac_rimini",
+    "sources": [
+      "Rimini",
+      "Maison Malatesta"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_rimini_hold",
+      "title": "Garder la seigneurie",
+      "description": "Les Malatesta doivent conserver Rimini.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_rimini"
+      }
+    },
+    {
+      "id": "obj_rimini_urbino",
+      "title": "Abaisser Urbin",
+      "description": "Soumettre les rivaux gibelins Montefeltro d'Urbin.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_urbino"
+      }
+    }
+  ]
+}

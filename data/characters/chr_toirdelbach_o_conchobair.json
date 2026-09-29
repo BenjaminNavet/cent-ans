@@ -1,0 +1,47 @@
+{
+  "name": {
+    "display": "Toirdelbach Ó Conchobair",
+    "local": "Toirdealbhach Ó Conchobhair",
+    "local_language": "gaélique irlandais"
+  },
+  "sex": "male",
+  "house": "Ó Conchobhair",
+  "faction": "fac_connacht",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1345",
+    "uncertain": true,
+    "note": "Déposé en 1342 par Mac Diarmata et les de Burgh ; date de mort incertaine."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Connacht",
+      "from": {
+        "value": "1324"
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_pious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_connacht",
+  "status": "at_court",
+  "description": "Reprend la royauté de Connacht en 1324 ; règne sur un royaume morcelé entre branches rivales de sa dynastie, jusqu'à sa déposition en 1342 par Mac Diarmata et les de Burgh.",
+  "sources": [
+    "Toirdelbach Ó Conchobair",
+    "Royaume de Connacht"
+  ],
+  "id": "chr_toirdelbach_o_conchobair"
+}

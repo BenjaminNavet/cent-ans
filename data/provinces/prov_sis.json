@@ -1,0 +1,91 @@
+{
+  "id": "prov_sis",
+  "name": {
+    "display": "Sis et l'Anti-Taurus",
+    "local": "Սիս",
+    "local_language": "arménien"
+  },
+  "region": "anatolie",
+  "terrain": "mountains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Ceyhan"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Sis (Kozan)",
+      "local": "Սիս",
+      "local_language": "arménien"
+    },
+    "lat": 37.45,
+    "lon": 35.8
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.8,
+      37.45
+    ],
+    "seed_lonlat": [
+      35.8,
+      37.55
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_cilicia",
+  "culture": "cul_armenian",
+  "religion": "rel_armenian",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 30000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 360,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 4,
+  "base_supply": 1000,
+  "description": "Massif de Cilicie Montagneuse où le roi Léon IV se retranche à Sis, la capitale, avec la forteresse d'Anavarza et la résidence des catholicos.",
+  "sources": [
+    "Kingdom of Armenia (Cilicia)",
+    "Sis",
+    "Anazarbus"
+  ]
+}

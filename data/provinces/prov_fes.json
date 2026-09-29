@@ -1,0 +1,92 @@
+{
+  "id": "prov_fes",
+  "name": {
+    "display": "Fès",
+    "local": "Fās",
+    "local_language": "arabe maghrébin"
+  },
+  "region": "maghreb",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Sebou",
+    "Fès"
+  ],
+  "resources": [
+    "res_cloth",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Fès",
+      "local": "Fās",
+      "local_language": "arabe maghrébin"
+    },
+    "lat": 34.0331,
+    "lon": -4.9998
+  },
+  "geo": {
+    "capital_lonlat": [
+      -4.9998,
+      34.0331
+    ],
+    "seed_lonlat": [
+      -4.9,
+      34.05
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_marinids",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 70000,
+        "unrest": 12,
+        "health": 55,
+        "wealth": 55,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 15400,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1750,
+        "unrest": 7,
+        "health": 60,
+        "wealth": 75,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 840,
+        "unrest": 7,
+        "health": 60,
+        "wealth": 80,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Capitale du sultanat ; grande ville de métiers et de savoir (Qarawiyyin). Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2200,
+  "description": "Fès, capitale des Mérinides depuis 1276 : Fès el-Jdid, ville royale, jouxte la vieille médina ; l'université al-Qarawiyyin en fait le premier foyer savant du Maghreb.",
+  "sources": [
+    "Fès",
+    "Mérinides",
+    "Université al-Qarawiyyin"
+  ]
+}

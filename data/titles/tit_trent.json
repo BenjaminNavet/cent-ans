@@ -1,0 +1,34 @@
+{
+  "id": "tit_trent",
+  "rank": "county",
+  "name": {
+    "display": "Évêché de Trente",
+    "local": "Tridentum",
+    "local_language": "latin"
+  },
+  "heraldry": {
+    "blazon": "D'argent à l'aigle bicéphale de sable, couronnée d'or, tenant en son cœur un écu d'azur à la crosse d'or.",
+    "description": "Armes traditionnelles de la principauté épiscopale de Trente, combinant l'aigle impériale et la crosse épiscopale.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1A1A1A",
+    "uncertain": true,
+    "note": "Composition héraldique plausible pour une principauté épiscopale impériale ; blason exact du XIVe siècle non vérifié à ce budget."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_trent"
+  ],
+  "holder_1337": {
+    "faction": "fac_trent",
+    "uncertain": true,
+    "sources": [
+      "Nicolas de Brno",
+      "Principauté épiscopale de Trente"
+    ]
+  },
+  "description": "Principauté épiscopale de Trente, enclavée dans le comté de Tyrol mais autonome, verrou de la route de l'Adige.",
+  "sources": [
+    "Nicolas de Brno",
+    "Principauté épiscopale de Trente"
+  ]
+}

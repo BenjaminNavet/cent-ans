@@ -1,0 +1,52 @@
+{
+  "id": "chr_andronikos_iii",
+  "name": {
+    "display": "Andronic III Paléologue",
+    "local": "Ἀνδρόνικος Γ΄ Παλαιολόγος",
+    "local_language": "grec"
+  },
+  "epithet": "le Jeune",
+  "sex": "male",
+  "house": "Paléologue de Byzance",
+  "faction": "fac_byzantium",
+  "role": "ruler",
+  "birth": {
+    "value": "1297-03-25"
+  },
+  "death": {
+    "value": "1341-06-15"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Empereur des Romains",
+      "from": {
+        "value": "1328-05-24"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_energetic"
+  ],
+  "piety": 65,
+  "family": {
+    "spouses": [
+      "chr_anna_of_savoy"
+    ],
+    "children": [
+      "chr_ioannes_v"
+    ]
+  },
+  "starting_location": "prov_constantinople",
+  "status": "at_court",
+  "description": "Empereur depuis 1328 après avoir chassé son grand-père Andronic II ; chasseur passionné, il reprend la Thessalie (1333) et prépare l'annexion de l'Épire ; sa maladie l'emportera en 1341, ouvrant la guerre civile.",
+  "sources": [
+    "Andronikos III Palaiologos"
+  ]
+}

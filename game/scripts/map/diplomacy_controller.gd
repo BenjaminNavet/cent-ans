@@ -7,6 +7,9 @@ extends Node
 ## `campaign_map.gd` pour garder chaque jalon dans son fichier ; `campaign_map` n'appelle que
 ## `setup`, `refresh`, `after_end_turn` et `handle_input`.
 
+## Offres courantes (accords commerciaux, `Proposal::Treaty`) : avis et pastille seulement.
+const ROUTINE_OFFER_KINDS := ["treaty"]
+
 var map: Node = null  # CampaignMap
 var panel: DiplomacyPanel
 var button: Button
@@ -23,11 +26,12 @@ func setup(campaign_map: Node) -> void:
 	map.ui.add_child(panel)
 	panel.order_requested.connect(_on_order_requested)
 	panel.offer_answered.connect(_on_offer_answered)
+	panel.arbitration_requested.connect(_on_arbitration_requested)
 	var court_button: Button = map.ui.court_button
 	button = Button.new()
 	button.text = "Diplomatie"
-	button.add_theme_font_size_override("font_size", 15)
-	button.tooltip_text = "Diplomatie et religion (P)"
+	button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
+	RichTooltip.attach_plain(button, "diplomacy_open")
 	court_button.get_parent().add_child(button)
 	court_button.get_parent().move_child(button, court_button.get_index())
 	button.pressed.connect(toggle_panel)
@@ -74,14 +78,31 @@ func after_end_turn() -> void:
 		return
 	var offers: Array = map.sim.call("get_offers")
 	var fresh := 0
+	var weighty := 0
 	for offer in offers:
 		var offer_id := int(offer.get("id", -1))
 		if not _seen_offers.has(offer_id):
 			_seen_offers[offer_id] = true
 			fresh += 1
-	if fresh > 0:
+			if str(offer.get("kind", "")) not in ROUTINE_OFFER_KINDS:
+				weighty += 1
+	if fresh == 0:
+		return
+	# Q6 : avec des dizaines de factions (FE), l'IA propose un accord presque à chaque tour ; le
+	# panneau ne s'ouvre seul que pour une offre de poids (paix, alliance, hommage…), et pas
+	# par-dessus une décision de chronique qui attend le joueur. La pastille « Proposition » reste.
+	if weighty > 0 and not _decision_waiting():
 		open_panel()
-		map.ui.show_toast("%s en attente." % FrText.count(offers.size(), "proposition diplomatique", "propositions diplomatiques"))
+	map.ui.show_toast("%s en attente." % FrText.count(offers.size(), "proposition diplomatique", "propositions diplomatiques"))
+
+
+func _decision_waiting() -> bool:
+	# Appelé avant la chronique en fin de tour : les décisions à venir sont lues dans la sim.
+	if map.sim.has_method("get_pending_decisions") and not (map.sim.call("get_pending_decisions") as Array).is_empty():
+		return true
+	var chronicle: Node = map.get("chronicle")
+	var window: Control = chronicle.get("window") if chronicle != null else null
+	return window != null and window.is_visible_in_tree()
 
 
 func handle_input(event: InputEvent) -> bool:
@@ -109,4 +130,14 @@ func _on_offer_answered(offer_id: int, accept: bool) -> void:
 		map.ui.show_toast("Proposition acceptée." if accept else "Proposition repoussée.")
 	else:
 		map.ui.show_toast(str(result.get("error", "Réponse impossible")), true)
+	map.refresh_all()
+
+
+## FE6 : verdict du joueur sur une guerre privée entre deux de ses vassaux.
+func _on_arbitration_requested(offer_id: int, verdict: String, side: String) -> void:
+	var result: Dictionary = map.sim.call("feudal_arbitrate", offer_id, verdict, side)
+	if result.get("ok", false):
+		map.ui.show_toast("Arbitrage rendu.")
+	else:
+		map.ui.show_toast(str(result.get("error", "Arbitrage impossible")), true)
 	map.refresh_all()

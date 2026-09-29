@@ -1,0 +1,56 @@
+{
+  "id": "fac_brunswick",
+  "name": {
+    "display": "Duché de Brunswick-Lunebourg",
+    "local": "Herzogtum Brunswik-Lüneborch",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Brunswick",
+  "adjective": "brunswicois",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_otto_le_doux",
+  "capital": "prov_brunswick",
+  "capital_city": "Brunswick",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_brunswick",
+  "heraldry": {
+    "blazon": "De gueules à deux léopards d'or l'un sur l'autre, à la bordure componée d'argent et d'azur.",
+    "description": "Armes welfes (deux léopards d'or sur gueules), différenciées ici d'une bordure componée pour les distinguer des armes normandes/anglaises historiquement très proches.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Le blasonnement exact varie selon la branche welfe et l'époque."
+  },
+  "titles": [
+    "Duc de Brunswick-Lunebourg"
+  ],
+  "treasury": 8000,
+  "prestige": 42,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Maison de Welf, vassale du Saint-Empire depuis la déchéance d'Henri le Lion (1180)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 45
+  },
+  "description": "Duché welf de Brunswick-Lunebourg, en 1337 fragmenté entre plusieurs princes cadets ; ce lot le modélise sous un seul titulaire, Otton le Doux, de la lignée de Lunebourg, par simplification.",
+  "sources": [
+    "Otto der Milde",
+    "Duché de Brunswick-Lunebourg"
+  ]
+}

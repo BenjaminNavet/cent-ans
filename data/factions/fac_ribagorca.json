@@ -1,0 +1,56 @@
+{
+  "id": "fac_ribagorca",
+  "name": {
+    "display": "Comté de Ribagorce et d'Empúries",
+    "local": "Comtat de Ribagorça i Empúries",
+    "local_language": "catalan"
+  },
+  "short_name": "Ribagorce",
+  "adjective": "ribagorçan",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_infant_pere_de_ribagorca",
+  "capital": "prov_ribagorca",
+  "capital_city": "Benabarre",
+  "religion": "rel_catholic",
+  "culture": "cul_catalan",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_aragon",
+  "primary_title": "tit_ribagorca",
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules, à la bordure d'azur.",
+    "description": "Armes d'Aragon brisées d'une bordure d'azur.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "titles": [
+    "Comte de Ribagorce",
+    "Comte d'Empúries",
+    "Seigneur de Gandie"
+  ],
+  "treasury": 7000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aragon",
+      "status": "vassal",
+      "note": "L'infant Pierre, oncle de Pierre IV, huitième fils de Jacques II ; diplomate et homme de lettres influent à la cour."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 70,
+    "trade": 50,
+    "piety": 55
+  },
+  "description": "Deux comtés pyrénéens et côtiers réunis en 1325 dans la main de l'infant Pierre d'Aragon ; il échangera Empúries contre le comté de Prades en 1341.",
+  "sources": [
+    "Peter, Count of Ribagorza",
+    "Comtat d'Empúries"
+  ]
+}

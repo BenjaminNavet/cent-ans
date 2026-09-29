@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_potenza",
+    "province": "prov_basilicata",
+    "kind": "city",
+    "name": {
+      "display": "Potenza",
+      "local": "Potenza",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      15.8082,
+      40.6404
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale de la Basilicate, sur sa colline.",
+    "sources": [
+      "Potenza"
+    ]
+  },
+  {
+    "id": "set_melfi",
+    "province": "prov_basilicata",
+    "kind": "castle",
+    "name": {
+      "display": "Melfi",
+      "local": "Melfi",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      15.6522,
+      40.9986
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château des Normands et de Frédéric II ; constitutions de Melfi (1231).",
+    "sources": [
+      "Melfi"
+    ]
+  },
+  {
+    "id": "set_venosa",
+    "province": "prov_basilicata",
+    "kind": "abbey",
+    "name": {
+      "display": "Venosa",
+      "local": "Venosa",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      15.8167,
+      40.9667
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye de la Trinité, nécropole des Hauteville.",
+    "sources": [
+      "Venosa"
+    ]
+  }
+]

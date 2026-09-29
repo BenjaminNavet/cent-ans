@@ -85,6 +85,8 @@ pub mod folders {
     pub const AI_DIPLOMACY: &str = "diplomacy.json";
     /// Inside `AI`: recruitment doctrines (lot E1); optional.
     pub const AI_DOCTRINES: &str = "doctrines.json";
+    /// Inside `AI`: weights of the feudal AI (lot FE5); optional.
+    pub const AI_FEUDAL: &str = "feudal.json";
     /// Inside `AI`: the AI armies on the navigation grid (lot M3).
     pub const AI_GRID: &str = "grid.json";
     /// Global rule tuning (lot C1: `vision.json`); optional folder.
@@ -96,6 +98,8 @@ pub mod folders {
     /// Public order tuning (lot E2), inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
     pub const ECONOMY_RULES: &str = "economy.json";
+    /// Diplomacy tuning (lot RS-C: opinion caps), inside `rules/`; optional.
+    pub const DIPLOMACY_RULES: &str = "diplomacy.json";
     /// Feudal tuning (lot FE), inside `rules/`; optional.
     pub const FEUDAL_RULES: &str = "feudal.json";
     /// Campaign map weather (lot CM2), inside `rules/`; optional.
@@ -115,6 +119,10 @@ pub mod folders {
     /// Army replenishment and recruitment pools (lot TW2-T2), inside
     /// `rules/`; optional.
     pub const REPLENISHMENT_RULES: &str = "replenishment.json";
+    /// Mercenary companies (lot TW2-T3), inside `rules/`; optional.
+    pub const MERCENARY_RULES: &str = "mercenaries.json";
+    /// Army traditions (lot TW2-T5), inside `rules/`; optional.
+    pub const ARMY_TRADITION_RULES: &str = "army_traditions.json";
     /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
     pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
     /// Trade hubs and routes (lot C5); optional folder.
@@ -301,6 +309,8 @@ pub struct GameData {
     /// `data/ai/doctrines.json` (lot E1), absent until written: the AI then
     /// ranks units by value alone.
     pub ai_doctrines: Option<crate::entities::ai_doctrine::AiDoctrines>,
+    /// `data/ai/feudal.json` (lot FE5); [`AiFeudal::default`] when absent.
+    pub ai_feudal: crate::entities::ai_feudal::AiFeudal,
     /// `data/ai/grid.json` (lot M3); [`AiGrid::default`] when absent.
     pub ai_grid: AiGrid,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
@@ -314,6 +324,9 @@ pub struct GameData {
     /// `data/rules/economy.json` (lot EQ1); [`crate::EconomyRules::default`]
     /// when absent.
     pub economy_rules: crate::entities::economy_rules::EconomyRules,
+    /// `data/rules/diplomacy.json` (lot RS-C); [`crate::DiplomacyRules::default`]
+    /// when absent.
+    pub diplomacy_rules: crate::entities::diplomacy_rules::DiplomacyRules,
     /// `data/rules/campaign_weather.json` (lot CM2);
     /// [`crate::CampaignWeatherRules::default`] when absent.
     pub campaign_weather: crate::entities::campaign_weather::CampaignWeatherRules,
@@ -338,6 +351,12 @@ pub struct GameData {
     /// `data/rules/replenishment.json` (lot TW2-T2, army replenishment and
     /// recruitment pools); the bundled file when absent.
     pub replenishment_rules: crate::entities::replenishment::ReplenishmentRules,
+    /// `data/rules/mercenaries.json` (lot TW2-T3, mercenary companies); the
+    /// bundled file when absent.
+    pub mercenary_rules: crate::entities::mercenaries::MercenaryRules,
+    /// `data/rules/army_traditions.json` (lot TW2-T5, army traditions); the
+    /// bundled file when absent.
+    pub army_tradition_rules: crate::entities::army_traditions::ArmyTraditionRules,
     /// `data/rules/battle_outcome.json` (lot CV3-1, nuanced outcomes);
     /// [`crate::BattleOutcomeRules::default`] when absent.
     pub battle_outcome_rules: crate::entities::battle_outcome::BattleOutcomeRules,
@@ -406,11 +425,13 @@ impl GameData {
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
             ai_doctrines: None,
+            ai_feudal: Default::default(),
             ai_grid: AiGrid::default(),
             vision_rules: None,
             auto_resolve: Default::default(),
             population_rules: Default::default(),
             economy_rules: Default::default(),
+            diplomacy_rules: Default::default(),
             campaign_weather: Default::default(),
             difficulty: Default::default(),
             retinue: None,
@@ -419,6 +440,8 @@ impl GameData {
             posture_rules: Default::default(),
             capture_rules: Default::default(),
             replenishment_rules: Default::default(),
+            mercenary_rules: Default::default(),
+            army_tradition_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             cover: Default::default(),
             movement_graph: Default::default(),
@@ -486,6 +509,10 @@ impl GameData {
         if doctrines_path.is_file() {
             data.ai_doctrines = Some(read_json(&doctrines_path)?);
         }
+        let feudal_ai_path = root.join(folders::AI).join(folders::AI_FEUDAL);
+        if feudal_ai_path.is_file() {
+            data.ai_feudal = read_json(&feudal_ai_path)?;
+        }
         let grid_path = root.join(folders::AI).join(folders::AI_GRID);
         if grid_path.is_file() {
             data.ai_grid = read_json(&grid_path)?;
@@ -505,6 +532,10 @@ impl GameData {
         let economy_path = root.join(folders::RULES).join(folders::ECONOMY_RULES);
         if economy_path.is_file() {
             data.economy_rules = read_json(&economy_path)?;
+        }
+        let diplomacy_rules_path = root.join(folders::RULES).join(folders::DIPLOMACY_RULES);
+        if diplomacy_rules_path.is_file() {
+            data.diplomacy_rules = read_json(&diplomacy_rules_path)?;
         }
         let weather_path = root
             .join(folders::RULES)
@@ -541,6 +572,16 @@ impl GameData {
         let replenishment_path = root.join(folders::RULES).join(folders::REPLENISHMENT_RULES);
         if replenishment_path.is_file() {
             data.replenishment_rules = read_json(&replenishment_path)?;
+        }
+        let mercenary_path = root.join(folders::RULES).join(folders::MERCENARY_RULES);
+        if mercenary_path.is_file() {
+            data.mercenary_rules = read_json(&mercenary_path)?;
+        }
+        let traditions_path = root
+            .join(folders::RULES)
+            .join(folders::ARMY_TRADITION_RULES);
+        if traditions_path.is_file() {
+            data.army_tradition_rules = read_json(&traditions_path)?;
         }
         let outcome_path = root
             .join(folders::RULES)

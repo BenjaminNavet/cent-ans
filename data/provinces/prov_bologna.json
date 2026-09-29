@@ -1,7 +1,7 @@
 {
   "id": "prov_bologna",
   "name": {
-    "display": "Bologne et Romagne",
+    "display": "Bologne",
     "local": "Bulåggna",
     "local_language": "lombard"
   },
@@ -11,17 +11,9 @@
   "neighbors": [],
   "rivers": [
     "Reno",
-    "Savio",
-    "Ronco"
+    "Savena"
   ],
-  "coastal": true,
-  "ports": [
-    "Ravenne",
-    "Rimini"
-  ],
-  "sea_zones": [
-    "sea_adriatic"
-  ],
+  "coastal": false,
   "resources": [
     "res_wheat",
     "res_cloth",
@@ -45,38 +37,38 @@
       11.8,
       44.3
     ],
-    "voronoi_weight": 1.0
+    "voronoi_weight": 0.65
   },
-  "owner": "fac_papacy",
+  "owner": "fac_bologna",
   "culture": "cul_lombard",
   "religion": "rel_catholic",
   "population": {
     "uncertain": true,
-    "note": "Bologne compte environ 40 000 habitants.",
+    "note": "Bologne compte environ 40 000 habitants ; population provinciale réduite par rapport à l'ancienne entrée « Bologne et Romagne », désormais partagée avec Rimini et Urbin.",
     "classes": {
       "peasants": {
-        "count": 223800,
+        "count": 123090,
         "unrest": 20,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 66000,
+        "count": 36300,
         "unrest": 20,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 7500,
+        "count": 4125,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2700,
+        "count": 1485,
         "unrest": 20,
         "health": 60,
         "wealth": 70,
@@ -87,20 +79,17 @@
   "buildings": [
     "bld_market",
     "bld_windmill",
-    "bld_port",
-    "bld_vineyard_press",
-    "bld_weaving_workshop",
     "bld_cathedral",
     "bld_stone_walls",
     "bld_muster_field",
     "bld_university"
   ],
   "fortification_level": 2,
-  "base_supply": 4500,
-  "description": "Bologne, terre d'Église sous la seigneurie de [[cdx_taddeo_pepoli|Taddeo Pepoli]] (1337) après la révolte contre le légat Bertrand du Pouget (1334) ; Romagne pontificale morcelée entre seigneurs (Polenta à Ravenne, Malatesta à Rimini). Université de droit.",
+  "base_supply": 4200,
+  "description": "Commune universitaire, terre d'Église en principe, qui a chassé le légat pontifical Bertrand du Pouget le 17 mars 1334 et se gouverne depuis en proie aux « querelles de factions » ; le juriste [[cdx_taddeo_pepoli|Taddeo Pepoli]], fils du banquier Romeo Pepoli, s'y impose peu à peu comme arbitre avant de s'emparer formellement du pouvoir le 28 août 1337.",
   "sources": [
     "Taddeo Pepoli",
     "Bologne",
-    "Romagne"
+    "Bertrand du Pouget"
   ]
 }

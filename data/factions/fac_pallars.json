@@ -1,0 +1,54 @@
+{
+  "id": "fac_pallars",
+  "name": {
+    "display": "Comté de Pallars Sobirà",
+    "local": "Comtat de Pallars Sobirà",
+    "local_language": "catalan"
+  },
+  "short_name": "Pallars",
+  "adjective": "pallarais",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_arnau_roger_ii_de_pallars",
+  "capital": "prov_pallars",
+  "capital_city": "Sort",
+  "religion": "rel_catholic",
+  "culture": "cul_catalan",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_aragon",
+  "primary_title": "tit_pallars",
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules, au lambel d'azur.",
+    "description": "Approximation faute de blason personnel retrouvé avec certitude.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93",
+    "uncertain": true
+  },
+  "titles": [
+    "Comte de Pallars Sobirà",
+    "Seigneur d'Urtx"
+  ],
+  "treasury": 4000,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aragon",
+      "status": "vassal",
+      "note": "Conflits frontaliers avec Comminges et Foix, arbitrés par le roi d'Aragon."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 45,
+    "trade": 30,
+    "piety": 50
+  },
+  "description": "Petit comté des hautes Pyrénées catalanes ; Arnau Roger II, trois fois marié sans descendance, mourra en 1343, laissant le comté à son frère Ramon Roger II.",
+  "sources": [
+    "Arnau Roger II de Pallars Sobirà"
+  ]
+}

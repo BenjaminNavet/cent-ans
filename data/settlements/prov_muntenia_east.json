@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_braila",
+    "province": "prov_muntenia_east",
+    "kind": "city",
+    "name": {
+      "display": "Brăila",
+      "local": "Brăila",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      27.9575,
+      45.2692
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Port danubien du Bas-Danube, comptoir de céréales (site incertain pour 1337).",
+    "sources": [
+      "Brăila"
+    ]
+  },
+  {
+    "id": "set_buzau",
+    "province": "prov_muntenia_east",
+    "kind": "village",
+    "name": {
+      "display": "Buzău",
+      "local": "Buzău",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      26.8333,
+      45.15
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la plaine valaque, gué du Buzău.",
+    "sources": [
+      "Buzău"
+    ]
+  },
+  {
+    "id": "set_floci",
+    "province": "prov_muntenia_east",
+    "kind": "village",
+    "name": {
+      "display": "Floci",
+      "local": "Oraşul de Floci",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      27.83,
+      44.63
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de gué au confluent de la Ialomița et du Danube (attesté au XVe siècle, habitat antérieur probable, incertain).",
+    "sources": [
+      "Oraşul de Floci"
+    ]
+  }
+]

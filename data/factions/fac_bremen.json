@@ -1,0 +1,55 @@
+{
+  "id": "fac_bremen",
+  "name": {
+    "display": "Archevêché de Brême",
+    "local": "Erzbistum Bremen",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Brême",
+  "adjective": "brêmois",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_burchard_grelle",
+  "capital": "prov_lower_saxony",
+  "capital_city": "Brême",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_bremen",
+  "heraldry": {
+    "blazon": "D'argent à la clef de gueules posée en pal, le panneton vers le chef.",
+    "description": "Clef, symbole traditionnel des principautés ecclésiastiques allemandes ; couleurs de Brême simplifiées et signalées incertaines.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Armes plausibles, non attestées avec certitude pour 1337."
+  },
+  "titles": [
+    "Archevêque de Brême"
+  ],
+  "treasury": 6000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Prince-archevêque, élu par le chapitre cathédral, vassal du Saint-Empire."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 20,
+    "diplomacy": 60,
+    "trade": 55,
+    "piety": 80
+  },
+  "description": "Principauté ecclésiastique tenue par l'archevêque Burchard Grelle (1327-1344, dates à vérifier) ; sa ville capitale de Brême est déjà largement autonome vis-à-vis de son suzerain spirituel et temporel.",
+  "sources": [
+    "Burchard Grelle",
+    "Archevêché de Brême"
+  ]
+}

@@ -180,7 +180,15 @@
     "sea_irish_sea": "la mer d'Irlande",
     "sea_mediterranean": "la Méditerranée",
     "sea_baltic": "la Baltique",
-    "sea_adriatic": "l'Adriatique"
+    "sea_adriatic": "l'Adriatique",
+    "sea_ionian": "la mer Ionienne",
+    "sea_aegean": "la mer Égée",
+    "sea_levantine": "la mer du Levant",
+    "sea_black_sea": "la mer Noire",
+    "sea_caspian": "la Caspienne",
+    "sea_gulf_of_bothnia": "le golfe de Botnie",
+    "sea_norwegian": "la mer de Norvège",
+    "sea_white_sea": "la mer Blanche"
   },
   "default_marines": {
     "archers": "unit_crossbowmen",

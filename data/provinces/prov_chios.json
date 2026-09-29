@@ -1,0 +1,94 @@
+{
+  "id": "prov_chios",
+  "name": {
+    "display": "Chios",
+    "local": "Χίος",
+    "local_language": "grec"
+  },
+  "region": "egee",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Chios"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wine",
+    "res_salt",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Chios",
+      "local": "Χίος",
+      "local_language": "grec"
+    },
+    "lat": 38.37,
+    "lon": 26.137
+  },
+  "geo": {
+    "capital_lonlat": [
+      26.137,
+      38.37
+    ],
+    "seed_lonlat": [
+      26.05,
+      38.4
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 34000,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7000,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1100,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 75,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 350,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 80,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1100,
+  "description": "Île du mastic, reprise en 1329 par Andronic III sur le Génois Martino Zaccaria ; les Génois de la Maona s'en empareront en 1346.",
+  "sources": [
+    "Chios",
+    "Martino Zaccaria"
+  ]
+}

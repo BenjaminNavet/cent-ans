@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_shanid",
+    "province": "prov_desmond",
+    "kind": "city",
+    "name": {
+      "display": "Shanid",
+      "local": "Sean Aid",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -9.207,
+      52.567
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château berceau de la maison FitzGerald de Desmond, d'où le cri de guerre « Shanid Abú ».",
+    "sources": [
+      "Château de Shanid"
+    ]
+  },
+  {
+    "id": "set_cork",
+    "province": "prov_desmond",
+    "kind": "town",
+    "name": {
+      "display": "Cork",
+      "local": "Corcaigh",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -8.4756,
+      51.8985
+    ],
+    "weight": 35,
+    "owner": "fac_england",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Cité chartée royale et port, enclave sous administration directe de la couronne dans le comté de Desmond.",
+    "sources": [
+      "Munster",
+      "Comte de Desmond",
+      "Cork"
+    ]
+  },
+  {
+    "id": "set_kinsale",
+    "province": "prov_desmond",
+    "kind": "village",
+    "name": {
+      "display": "Kinsale",
+      "local": "Cionn tSáile",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -8.5306,
+      51.7069
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": true,
+    "description": "Petit port de pêche du sud de Munster.",
+    "sources": [
+      "Kinsale"
+    ]
+  }
+]

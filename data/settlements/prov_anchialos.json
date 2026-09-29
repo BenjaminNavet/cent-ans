@@ -1,0 +1,110 @@
+[
+  {
+    "id": "set_anchialos",
+    "province": "prov_anchialos",
+    "kind": "city",
+    "name": {
+      "display": "Anchialos",
+      "local": "Ἀγχίαλος",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      27.63,
+      42.56
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_fair",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Port et salines, ville disputée entre Byzance et la Bulgarie.",
+    "sources": [
+      "Pomorie"
+    ]
+  },
+  {
+    "id": "set_mesembria",
+    "province": "prov_anchialos",
+    "kind": "town",
+    "name": {
+      "display": "Mésembrie",
+      "local": "Μεσημβρία",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      27.73,
+      42.66
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_collegiate_church"
+    ],
+    "port": true,
+    "description": "Cité-péninsule aux nombreuses églises byzantines.",
+    "sources": [
+      "Nessebar"
+    ]
+  },
+  {
+    "id": "set_sozopolis",
+    "province": "prov_anchialos",
+    "kind": "town",
+    "name": {
+      "display": "Sozopolis",
+      "local": "Σωζόπολις",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      27.69,
+      42.42
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port fortifié sur la péninsule d'Apollonie.",
+    "sources": [
+      "Sozopol"
+    ]
+  },
+  {
+    "id": "set_aetos",
+    "province": "prov_anchialos",
+    "kind": "castle",
+    "name": {
+      "display": "Aétos",
+      "local": "Ἀετός",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      27.29,
+      42.7
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de la passe de l'Aïtos, sur la frontière bulgare.",
+    "sources": [
+      "Aytos"
+    ]
+  }
+]

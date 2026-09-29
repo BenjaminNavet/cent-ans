@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_viazma",
+    "province": "prov_viazma",
+    "kind": "city",
+    "name": {
+      "display": "Viazma",
+      "local": "Вязьма",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      34.29,
+      55.21
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de la haute Viazma.",
+    "sources": [
+      "Viazma"
+    ]
+  },
+  {
+    "id": "set_dorogobouj",
+    "province": "prov_viazma",
+    "kind": "town",
+    "name": {
+      "display": "Dorogobouj",
+      "local": "Дорогобуж",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      33.3,
+      54.91
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du haut Dniepr, à la frontière de Smolensk.",
+    "sources": [
+      "Dorogobouj"
+    ]
+  },
+  {
+    "id": "set_kholm_jirkovski",
+    "province": "prov_viazma",
+    "kind": "village",
+    "name": {
+      "display": "Kholm-Jirkovski",
+      "local": "Холм-Жирковский",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      33.75,
+      55.05
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourgade forestière de la haute Viazma (emplacement approximatif).",
+    "sources": [
+      "Viazma"
+    ]
+  }
+]

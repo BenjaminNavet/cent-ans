@@ -6,16 +6,17 @@
     "local_language": "catalan"
   },
   "sex": "male",
-  "house": "Barcelone",
-  "faction": "fac_aragon",
-  "role": "noble",
+  "house": "Majorque",
+  "faction": "fac_majorca",
+  "role": "ruler",
   "birth": {
-    "value": "1315-01-05"
+    "value": "1315-04-05",
+    "place": "Catane"
   },
   "death": {
     "value": "1349-10-25",
     "place": "Llucmajor",
-    "note": "Tué en tentant de reprendre son royaume."
+    "note": "Tué en tentant de reconquérir son royaume sur Pierre IV d'Aragon."
   },
   "historical": true,
   "titles": [
@@ -23,24 +24,23 @@
       "title": "Roi de Majorque"
     },
     {
-      "title": "Seigneur de Montpellier"
+      "title": "Comte de Roussillon et de Cerdagne"
     }
   ],
   "skills": {
-    "command": 3,
-    "governance": 3,
-    "court": 4
+    "command": 4,
+    "governance": 4,
+    "court": 5
   },
   "traits": [
-    "trait_stubborn",
-    "trait_unpopular"
+    "trait_cultured",
+    "trait_stubborn"
   ],
-  "piety": 45,
+  "piety": 55,
   "starting_location": "prov_mallorca",
   "status": "at_court",
-  "description": "Roi de Majorque, de Minorque et d'Ibiza, seigneur de Montpellier, vassal contesté de son cousin Pierre IV d'Aragon : liberté du jeu, la branche cadette de Majorque est rattachée à la faction aragonaise plutôt que traitée comme royaume indépendant hors carte. Accusé de forfaiture, il perd son royaume en 1343 et vend Montpellier à la France en 1349 pour financer sa reconquête, où il meurt à Llucmajor.",
+  "description": "Roi de Majorque depuis 1324, orphelin de mère (Isabelle de Sabran, morte peu après sa naissance) ; son cousin Pierre IV d'Aragon conteste sa souveraineté et l'annexera par la force en 1343-1344.",
   "sources": [
-    "Jacques III de Majorque",
-    "Royaume de Majorque"
+    "James III of Majorca"
   ]
 }

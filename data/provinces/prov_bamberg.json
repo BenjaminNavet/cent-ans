@@ -1,0 +1,90 @@
+{
+  "id": "prov_bamberg",
+  "name": {
+    "display": "Évêché de Bamberg",
+    "local": "Bistum Bamberg",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_sud",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Regnitz"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bamberg",
+      "local": "Bamberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 49.8988,
+    "lon": 10.888
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.888,
+      49.8988
+    ],
+    "seed_lonlat": [
+      10.9,
+      49.95
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_bamberg",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Subdivisée de la Franconie (data FE4a), lot FE4b.",
+    "classes": {
+      "peasants": {
+        "count": 70000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 12000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_collegiate_church",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2000,
+  "description": "Principauté épiscopale de Bamberg, fondée par l'empereur Henri II en 1007 sur les sept collines de la Regnitz ; important centre religieux du Saint-Empire.",
+  "sources": [
+    "Évêché de Bamberg",
+    "Bamberg"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "id": "tit_liege",
+  "rank": "county",
+  "name": {
+    "display": "Principauté épiscopale de Liège",
+    "local": "Principauté de Liège",
+    "local_language": "ancien français"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la colonne d'argent, couronnée d'or.",
+    "description": "Armes traditionnelles de la principauté épiscopale de Liège, colonne perronnelle rappelant le perron liégeois.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_liege"
+  ],
+  "holder_1337": {
+    "faction": "fac_liege",
+    "sources": [
+      "Adolphe de la Marck",
+      "Principauté de Liège"
+    ]
+  },
+  "succession_law": "elective",
+  "objectives": [
+    {
+      "id": "obj_liege_hold",
+      "title": "Garder la principauté",
+      "description": "L'évêque de Liège doit conserver son autorité temporelle sur la principauté épiscopale.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_liege"
+      }
+    },
+    {
+      "id": "obj_liege_namur",
+      "title": "La guerre de la Vache",
+      "description": "Soumettre le comté de Namur, vieil adversaire de la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_namur"
+      }
+    }
+  ],
+  "description": "Principauté épiscopale de Liège, État ecclésiastique du Saint-Empire régi par le chapitre cathédral qui élit son évêque-prince ; houillères et forges de la vallée mosane, dinanderie de Dinant.",
+  "sources": [
+    "Adolphe de la Marck",
+    "Principauté de Liège"
+  ]
+}

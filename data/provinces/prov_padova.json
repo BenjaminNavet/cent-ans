@@ -1,0 +1,93 @@
+{
+  "id": "prov_padova",
+  "name": {
+    "display": "Padoue",
+    "local": "Padova",
+    "local_language": "vénitien"
+  },
+  "region": "italie_nord",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Brenta"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Padoue",
+      "local": "Padova",
+      "local_language": "vénitien"
+    },
+    "lat": 45.4064,
+    "lon": 11.8768
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.8768,
+      45.4064
+    ],
+    "seed_lonlat": [
+      11.85,
+      45.35
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_verona",
+  "culture": "cul_venetian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 65000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9500,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2200,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Cité universitaire de la Marche trévisane ; population estimée par comparaison avec Vérone."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_university",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4600,
+  "description": "Cité universitaire, ancienne commune des [[cdx_carrare|Carrare]] chassés par Cangrande della Scala en 1328 ; occupée par Vérone au printemps 1337, elle sera reprise par Marsilio da Carrare avec l'appui de la ligue de Venise et Florence le 3 août 1337.",
+  "sources": [
+    "Padoue",
+    "Carrare",
+    "Mastino II della Scala"
+  ]
+}

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_pereslavl_zalesski",
+    "province": "prov_pereslavl",
+    "kind": "city",
+    "name": {
+      "display": "Pereslavl-Zalesski",
+      "local": "Переславль-Залесский",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      38.85,
+      56.74
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville du lac Plechtcheïevo, patrimoine d'Alexandre Nevski et de Daniel de Moscou.",
+    "sources": [
+      "Pereslavl-Zalesski"
+    ]
+  },
+  {
+    "id": "set_dmitrov",
+    "province": "prov_pereslavl",
+    "kind": "town",
+    "name": {
+      "display": "Dmitrov",
+      "local": "Дмитров",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      37.53,
+      56.35
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du haut Iakhroma, rattachée à Moscou depuis le début du XIVe siècle.",
+    "sources": [
+      "Dmitrov"
+    ]
+  },
+  {
+    "id": "set_nikitski",
+    "province": "prov_pereslavl",
+    "kind": "abbey",
+    "name": {
+      "display": "Monastère Nikitski",
+      "local": "Никитский монастырь",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      38.86,
+      56.75
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère de Pereslavl.",
+    "sources": [
+      "Pereslavl-Zalesski"
+    ]
+  }
+]

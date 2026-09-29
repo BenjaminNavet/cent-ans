@@ -1,0 +1,42 @@
+{
+  "id": "chr_guillaume_ii_d_athenes",
+  "name": {
+    "display": "Guillaume II d'Athènes",
+    "local": "Guillem II d'Atenes",
+    "local_language": "catalan"
+  },
+  "sex": "male",
+  "house": "Barcelone-Sicile",
+  "faction": "fac_athens",
+  "role": "ruler",
+  "birth": {
+    "value": "1312"
+  },
+  "death": {
+    "value": "1338-08-22"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc d'Athènes et de Néopatras",
+      "from": {
+        "value": "1317"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 2,
+    "court": 3
+  },
+  "traits": [
+    "trait_puppet"
+  ],
+  "piety": 55,
+  "starting_location": "prov_attica",
+  "status": "at_court",
+  "description": "Troisième fils de Frédéric III de Sicile, duc depuis 1317 ; gouverné par des vicaires, il mourra dès 1338 sans postérité.",
+  "sources": [
+    "William II, Duke of Athens"
+  ]
+}

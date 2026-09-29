@@ -1,0 +1,50 @@
+{
+  "id": "tit_montferrat",
+  "rank": "county",
+  "name": {
+    "display": "Marquisat de Montferrat",
+    "local": "Marchesato del Monferrato",
+    "local_language": "piémontais"
+  },
+  "heraldry": {
+    "blazon": "D'argent au chef de gueules.",
+    "description": "Armes traditionnelles des marquis de Montferrat, portées par la maison Alérame puis reprises par les Paléologue à leur avènement en 1306.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_montferrat"
+  ],
+  "holder_1337": {
+    "faction": "fac_montferrat",
+    "sources": [
+      "Marquisat de Montferrat",
+      "Jean II de Montferrat"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_montferrat_hold",
+      "title": "Garder le marquisat",
+      "description": "Les Paléologue doivent conserver le Montferrat.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_montferrat"
+      }
+    },
+    {
+      "id": "obj_montferrat_saluzzo",
+      "title": "Dominer le Piémont",
+      "description": "Étendre le marquisat aux dépens de Saluces et de la Savoie.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_saluzzo",
+          "prov_piemont"
+        ]
+      }
+    }
+  ]
+}

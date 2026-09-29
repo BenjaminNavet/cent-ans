@@ -1,0 +1,51 @@
+{
+  "id": "tit_hamid",
+  "rank": "county",
+  "name": {
+    "display": "Beylik de Hamid",
+    "local": "Hamidoğulları",
+    "local_language": "turc ottoman"
+  },
+  "heraldry": {
+    "blazon": "D'azur à la bande d'argent.",
+    "description": "Couleurs de convention des Hamid.",
+    "primary_color": "#2B4A9E",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_provinces": [
+    "prov_hamid"
+  ],
+  "holder_1337": {
+    "faction": "fac_hamid",
+    "sources": [
+      "Hamidids"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_hamid_independent",
+      "title": "Rester libre",
+      "description": "Garder l'indépendance de Hamid.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_hamid_teke",
+      "title": "Réunir les Hamidides",
+      "description": "Réunir la branche de Teke et celle d'Eğirdir.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_teke"
+        ]
+      }
+    }
+  ],
+  "description": "Beylik des lacs de Pisidie, fondé vers 1300, en déclin ; le bey en exercice en 1337 n'est pas identifié.",
+  "sources": [
+    "Hamidids"
+  ]
+}

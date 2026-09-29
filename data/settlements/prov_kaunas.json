@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_kaunas",
+    "province": "prov_kaunas",
+    "kind": "city",
+    "name": {
+      "display": "Kaunas",
+      "local": "Kaunas",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      23.9036,
+      54.8985
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château de Kaunas au confluent du Niémen et de la Neris, verrou de la route de Vilnius.",
+    "sources": [
+      "Kaunas"
+    ]
+  },
+  {
+    "id": "set_veliuona",
+    "province": "prov_kaunas",
+    "kind": "castle",
+    "name": {
+      "display": "Veliuona",
+      "local": "Veliuona",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      23.3517,
+      55.0778
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château du Niémen, futur lieu de mort de Gediminas (1341).",
+    "sources": [
+      "Veliuona"
+    ]
+  },
+  {
+    "id": "set_merkine",
+    "province": "prov_kaunas",
+    "kind": "castle",
+    "name": {
+      "display": "Merkinė",
+      "local": "Merkinė",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      24.1833,
+      54.1667
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de la Dainava sur le Niémen, au confluent de la Merkys.",
+    "sources": [
+      "Merkinė"
+    ]
+  }
+]

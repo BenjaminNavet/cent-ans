@@ -1,0 +1,44 @@
+{
+  "id": "chr_marguerite_de_valois",
+  "name": {
+    "display": "Marguerite de Valois",
+    "local": "Marguerite de Valois",
+    "local_language": "ancien français"
+  },
+  "sex": "female",
+  "house": "Valois",
+  "faction": "fac_blois",
+  "role": "consort",
+  "birth": {
+    "value": "1295",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1342-07"
+  },
+  "historical": true,
+  "skills": {
+    "command": 1,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 60,
+  "family": {
+    "spouses": [
+      "chr_guy_i_de_chatillon"
+    ],
+    "children": [
+      "chr_charles_de_blois"
+    ]
+  },
+  "starting_location": "prov_blois",
+  "status": "at_court",
+  "description": "Fille de Charles de Valois et sœur de Philippe VI, épouse de Guy Ier de Châtillon, comte de Blois : par elle, Charles de Blois est le neveu du roi, ce qui pèse dans l'arrêt de Conflans (1341).",
+  "sources": [
+    "Marguerite de Valois (1295-1342)",
+    "Guy Ier de Châtillon"
+  ]
+}

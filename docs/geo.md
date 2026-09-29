@@ -11,7 +11,7 @@ de ces sorties (grille, masque terre, rivières) et des seeds de `data/provinces
 
 | Donnée | Source | Licence | Fichiers |
 |---|---|---|---|
-| Relief (terre + bathymétrie) | [ETOPO 2022 v1](https://www.ncei.noaa.gov/products/etopo-global-relief-model), NOAA NCEI, grille « ice surface », 15 secondes d'arc, tuiles GeoTIFF 15° × 15° nommées par leur coin nord-ouest | Domaine public (données du gouvernement des États-Unis) ; citation : *NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model. doi:10.25921/fd45-gt74* | `https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/15s/15s_surface_elev_gtif/ETOPO_2022_v1_15s_<NlatWlon>_surface.tif` (12 tuiles, ~300 Mo) |
+| Relief (terre + bathymétrie) | [ETOPO 2022 v1](https://www.ncei.noaa.gov/products/etopo-global-relief-model), NOAA NCEI, grille « ice surface », 15 secondes d'arc, tuiles GeoTIFF 15° × 15° nommées par leur coin nord-ouest | Domaine public (données du gouvernement des États-Unis) ; citation : *NOAA National Centers for Environmental Information. 2022: ETOPO 2022 15 Arc-Second Global Relief Model. doi:10.25921/fd45-gt74* | `https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/15s/15s_surface_elev_gtif/ETOPO_2022_v1_15s_<NlatWlon>_surface.tif` (26 tuiles depuis OM2, ~800 Mo ; seules les tuiles touchant le rectangle projeté, `download.etopo_tiles_for_grid`) |
 | Voies romaines (routes) | [Itiner-e](https://itiner-e.org), *A High-Resolution Dataset of Roads of the Roman Empire*, version statique 2024 v1.3 (de Soto, Pažout, Brughmans et al.), Zenodo [doi:10.5281/zenodo.17122148](https://doi.org/10.5281/zenodo.17122148) | CC BY 4.0 ; citation : *de Soto P., Pažout A., Brughmans T. et al. (2025). Itiner-e: A high-resolution dataset of roads of the Roman Empire. Scientific Data. doi:10.1038/s41597-025-06140-z* | `https://zenodo.org/api/records/17122148/files/itinere_roads.gpkg/content` (GeoPackage, 34 Mo, sans compte) |
 | Hameaux | [GeoNames](https://www.geonames.org/) `cities500.zip` (lieux habités de 500 habitants et plus) | CC BY 4.0, © GeoNames (https://www.geonames.org) | `https://download.geonames.org/export/dump/cities500.zip` (14 Mo) |
 | Terre, côte, rivières, lacs | [Natural Earth](https://www.naturalearthdata.com/) 10 m physical, servi par `https://naciscdn.org/naturalearth/10m/physical/<couche>.zip` | Domaine public | `ne_10m_land`, `ne_10m_coastline`, `ne_10m_rivers_lake_centerlines`, `ne_10m_rivers_europe`, `ne_10m_lakes`, `ne_10m_lakes_europe` |
@@ -26,10 +26,10 @@ présent n'est jamais retéléchargé sauf avec `--force`.
 ## Commandes
 
 ```sh
-uv run --project tools cent-ans geo build            # télécharge (cache) puis génère data/map/ (terrain, provinces, relief 8192², routes, colonies, hameaux) et docs/img/*-preview.png
+uv run --project tools cent-ans geo build            # télécharge (cache) puis génère data/map/ (terrain, provinces, relief fin 14336 × 12288, routes, colonies, hameaux, grille de navigation) et docs/img/*-preview.png
 uv run --project tools cent-ans geo build --force    # retélécharge les données brutes
 uv run --project tools cent-ans geo provinces        # provinces seules (≈ 10 s), après modification de seeds ou de poids
-uv run --project tools cent-ans geo relief           # relief 8192² en 16 × 16 tuiles (≈ 10 s)
+uv run --project tools cent-ans geo relief           # relief fin ETOPO seul en 28 × 24 tuiles (repli, écrasé par geo relief-shade)
 uv run --project tools cent-ans geo roads            # routes (Itiner-e + complément calculé) puis graphe des colonies
 uv run --project tools cent-ans geo roads --computed # routes entièrement calculées (repli)
 uv run --project tools cent-ans geo settlements      # graphe des colonies seul et tracé routier des arêtes (≈ 7 s), après modification de data/settlements
@@ -44,13 +44,13 @@ La construction complète prend quelques minutes (téléchargement inclus la pre
 ## Projection et convention de pixels
 
 - CRS : **EPSG:3035** (Lambert azimutale équivalente Europe, centre 10° E / 52° N).
-- Emprise géographique demandée : longitude −11° → 16°, latitude 35° → 60°. Projetée, cette
-  emprise fait ≈ 2 464 km de large pour 2 945 km de haut : elle n'est pas carrée. Comme la
-  heightmap est carrée (4096²) avec un seul `meters_per_px`, l'emprise **est élargie
-  symétriquement en X** jusqu'à obtenir un carré (`project.squared_bounds`). L'emprise finale
-  est stockée dans `map.json` (`bounds_projected`, mètres entiers) et couvre un peu plus
-  d'Atlantique et de Germanie que demandé. **C'est l'unique écart au contrat.**
-- Grille : 4096 × 4096 pixels, `meters_per_px` ≈ 719 m (isotrope).
+- Emprise (ADR 0115, lot OM2) : rectangle projeté **fixé explicitement** dans
+  `cent_ans_tools/geo/project.py` (`BOUNDS_PROJECTED`) : x 2 169 486 → 7 323 110 m,
+  y 775 684 → 5 193 076 m, soit 28 × 24 tuiles racines de 256 unités. `extent_lonlat` de
+  `map.json` n'est qu'indicatif (Maroc atlantique → Oural, mer Blanche → delta du Nil). Bord ouest
+  et échelle de l'ancienne carte 4096² (lon −11 → 16°, lat 35 → 60°, élargie en carré) : un ancien
+  pixel `(x, y)` vaut `(x, y + 1280)` (`LEGACY_Y_OFFSET_PX`).
+- Grille : 7168 × 6144 pixels, `meters_per_px` = 718,9765625 m (isotrope).
 - Coordonnées carte : origine au coin **nord-ouest** de `bounds_projected`, X vers l'est,
   Y vers le sud, unité = pixel. Conversion : `px = (x − minx) / mpp`, `py = (maxy − y) / mpp`.
   Le pixel entier `(i, j)` couvre `[i, i+1[ × [j, j+1[`, son centre est `(i + 0,5 ; j + 0,5)`.
@@ -83,8 +83,61 @@ rivières en bleu) pour vérification visuelle.
 3. Commiter `data/map/*` et `docs/img/map-preview.png` ensemble : les provinces en dépendent.
 
 Pour changer l'emprise ou la résolution, modifier les constantes de
-`cent_ans_tools/geo/project.py` (`LON_MIN`… `SIZE_PX`) et la plage d'altitudes dans
-`terrain.py`, puis reconstruire et mettre à jour le contrat de design.
+`cent_ans_tools/geo/project.py` (`BOUNDS_PROJECTED`, `WIDTH_PX`, `HEIGHT_PX`) et la plage
+d'altitudes dans `terrain.py`, puis reconstruire et mettre à jour le contrat de design. Toute
+donnée écrite à la main en pixels carte doit alors être migrée (voir « Emprise
+Oural–Méditerranée »).
+
+## Emprise Oural–Méditerranée (lot OM2, ADR 0115)
+
+Régénération complète, dans cet ordre (mesuré le 29/09/2026, M4 Pro, 406 provinces, bruts en
+cache) :
+
+```sh
+uv run --project tools cent-ans geo build          # 5 min 08 : terrain, provinces (34 s), relief ETOPO, routes, colonies, hameaux, grille de navigation
+uv run --project tools cent-ans geo splat          # 2 min 20 : coast_dist, province_border_dist, puis landcover (splat, wetlands, forest_kind)
+uv run --project tools cent-ans geo relief-shade   # 1 min 04 : tuiles fines Copernicus + ETOPO, heightmap_render, relief_shade_<i>
+uv run --project tools cent-ans geo navgrid        # 6 s : recalcul avec splat et wetlands
+uv run --project tools cent-ans geo rivers-render  # 14 s : rivers_render.json, river_bed.png, crossings_px.json
+uv run --project tools cent-ans geo horizon        # 26 s : game/assets/horizon/relief/
+```
+
+Total ≈ 9 min 20. Après une modification des seules graines ou colonies :
+`geo provinces`, `geo roads` (routes, colonies, tracés), `geo hamlets`, `geo splat`,
+`geo navgrid`, `geo rivers-render`, `geo horizon` (le relief ne dépend pas des provinces).
+
+- **Bruts** : 26 tuiles ETOPO (14 ajoutées, ≈ 480 Mo), KK10 1330-1349 sur lon −37 → 69,
+  lat 24 → 71 (`kk10_1330_1349_om.npz`, 1,1 Mo, 16 s), Natural Earth
+  `ne_10m_geography_regions_polys` (déserts nommés). Pas de GLO-90/GLO-30/WorldCover à l'Est :
+  l'Ouest garde Copernicus (bbox lon −11 → 12, lat 41 → 60), l'Est et le Sud n'ont qu'ETOPO.
+  Le cache `copernicus_cache/cop_<w>x<h>_<minx>_<maxy>.npy` dépend de la grille (705 Mo).
+- **Occupation du sol de repli** (`landcover.dryness`) : sans source fine à l'Est, la forêt
+  potentielle est retirée dans les steppes pontique, caspienne et kazakhe (au sud d'une ligne
+  delta du Danube – Kiev – Voronej – Samara – Oufa, montagnes au-dessus de ~700 m exceptées),
+  sur le plateau anatolien, dans la ceinture aride au sud de ~34° N (Atlas et Liban exceptés)
+  et dans les déserts Natural Earth ; KK10 donne le défrichement partout.
+- **Altitudes** : plage inchangée (−200 → 4800 m) : le quadtree décode E0 (`height/`) avec
+  l'encodage de la pyramide, qui n'est pas recuite. La Caspienne (−28 m) est couverte ; les
+  sommets du Caucase au-dessus de 4800 m sont écrêtés (30 px de `heightmap.png`, 147 px fins,
+  ≈ 20 km²).
+- **Terres hors provinces** : à plus de 400 km par la terre d'une graine (voir « Provinces »),
+  province 0 dans `province_ids.png`, **infranchissables** dans `navgrid.png` ; la vérification
+  des masses terrestres de la grille ne les compte pas (Scandinavie et continent ne sont reliés
+  que par elles). Une province insulaire trop loin de toute côte (Gotland) reçoit une liaison
+  maritime vers la province la plus proche.
+- **Pyramide** : rien n'est recuit. `relief_pyramid.json` porte `root_origin_tiles: [0, 5]` :
+  la tuile (k, col, row) du cache est la tuile monde (col, row + 5·2^k). Le code de cuisson
+  travaille dans ce cadre (`pyramid.map_bounds` = ancien carré 4096², `FineRelief` relit E0 avec
+  le décalage) ; les points des tuiles CAFV (fleuves et routes fins) sont en unités de ce cadre.
+  `geo anchors-fine` et `geo towns` refusent de tourner tant que le décalage n'est pas nul
+  (`pyramid.require_world_frame`) : leurs sorties ont été migrées.
+- **Migration +1280 y** (`python -m cent_ans_tools.geo.migrate_om2`, une seule fois, refuse une
+  seconde passe) : `data/landmarks/*.json` (`anchor.px`), `fine_anchors.json`,
+  `towns_1340.json`. Les points visés à la main par les tests et scripts Godot ont été décalés
+  dans le même lot. Rien à migrer en lon/lat ou `origin_3035`.
+- **Fichiers** : aucun fichier versionné au-delà de 50 Mo ; `relief_shade` en 4 bandes (31, 31,
+  41, 31 Mo), `heightmap_render.png` 44,5 Mo, `heightmap.png` 43,5 Mo, `splat.png` 25 Mo, 672
+  tuiles `height/` (159 Mo au total).
 
 ## Provinces (`cent_ans_tools/geo/provinces.py`)
 
@@ -97,7 +150,7 @@ Entrées : `data/map/` (grille, `land_mask.png`, `rivers.geojson`) et, pour chaq
 
 ### Méthode : Voronoï pondéré par distance de coût
 
-1. **Grille de travail 1024²** (blocs de 4 px, terre si ≥ 8 des 16 pixels sont terre). Chaque
+1. **Grille de travail 1792 × 1536** (blocs de 4 px, terre si ≥ 8 des 16 pixels sont terre). Chaque
    province a deux sources : son seed et sa capitale (la capitale appartient par définition à
    sa province ; un seed en mer est ramené sur la terre la plus proche, cas de Gênes).
 2. **Coût par cellule** : terre = 1, cellule traversée par un fleuve majeur (`scalerank ≤ 4`,
@@ -105,19 +158,28 @@ Entrées : `data/map/` (grille, `land_mask.png`, `rivers.geojson`) et, pour chaq
    (Dijkstra géodésique, 8-connexité) donne la distance de coût depuis ses sources ; la cellule
    va à la province minimisant `coût / voronoi_weight`. Les provinces ne sautent donc jamais
    un détroit (Manche, Pyrénées contournées par les cols…) et les fleuves font frontière douce.
-   132 propagations sur 1024² ≈ 8 s.
-3. **Retour à 4096²** : suréchantillonnage au plus proche, masquage par `land_mask.png`,
-   puis remplissage des pixels terre sans étiquette (îles sans seed — Man, Wight, Anglesey,
-   Baléares mineures — et pixels perdus par le sous-échantillonnage) par l'étiquette la plus
-   proche (distance euclidienne), **sauf** les masses continentales sans seed de plus de
-   64 000 px (≈ 33 000 km²) qui restent à 0 : c'est l'Afrique du Nord (≈ 600 000 px), qui n'est
-   pas jouable. Lissage des frontières par filtre majoritaire 5 × 5 (la mer est d'abord
-   remplie par le plus proche voisin pour ne pas éroder les côtes, puis remasquée).
-4. **Vectorisation** : `rasterio.features.shapes` (coins de pixels, 4-connexité) → union →
+   Relevé OM2 : 313 provinces en 28 s tout compris (vectorisation, voisins, aperçu), 420
+   (graines factices ajoutées hors dépôt) en 34 s.
+3. **Terres hors provinces (ADR 0115, lot OM2)** : une cellule de terre dont la distance *par la
+   terre* (Dijkstra 8-connexe) à la graine ou capitale la plus proche dépasse
+   `MAX_SEED_DISTANCE_KM` = 400 km reste à 0 (Sahara, Arabie, steppe kazakhe, Sibérie, et pour
+   l'instant tout l'Est tant que les lots de données n'y ont pas mis de graines). Une petite masse
+   sans graine (île, ≤ `MAX_SEEDLESS_ISLAND_PX` = 64 000 px ≈ 33 000 km²) à moins de 400 km à vol
+   d'oiseau d'une source rejoint la province la plus proche (Man, Wight, Baléares mineures) ; une
+   grande masse sans graine (Islande, Afrique sans graine) reste à 0. Chaque propagation du
+   Voronoï est coupée à 2 × 400 km de coût et calculée sur une fenêtre autour de ses sources :
+   le temps croît avec le nombre de provinces, pas avec leur produit par la surface de la carte.
+4. **Retour à la grille carte** : suréchantillonnage au plus proche, masquage par `land_mask.png`
+   et par les terres atteignables (dilatées d'une cellule pour garder les pixels côtiers),
+   puis remplissage des pixels terre sans étiquette (îlots, pixels perdus par le
+   sous-échantillonnage) par l'étiquette la plus proche (distance euclidienne). Lissage des
+   frontières par filtre majoritaire 5 × 5 (la mer est d'abord remplie par le plus proche voisin
+   pour ne pas éroder les côtes, puis remasquée).
+5. **Vectorisation** : `rasterio.features.shapes` (coins de pixels, 4-connexité) → union →
    `simplify(1,5 px, topologie préservée)` → parties < 30 px² supprimées (au moins une partie
    conservée). Les polygones sont simplifiés indépendamment : de minuscules écarts entre
    voisins sont possibles ; `province_ids.png` reste la référence pour le picking.
-5. **Propriétés** : `centroid` = centroïde de la plus grande partie si elle le contient, sinon
+6. **Propriétés** : `centroid` = centroïde de la plus grande partie si elle le contient, sinon
    `representative_point` ; `capital_px` = projection de `capital_lonlat`, ramenée au pixel le
    plus proche de sa province si elle tombe en mer ou ailleurs (le rapport de construction le
    signale) ; `neighbors` = provinces partageant ≥ 3 paires de pixels adjacents (4-connexité)
@@ -128,7 +190,7 @@ Entrées : `data/map/` (grille, `land_mask.png`, `rivers.geojson`) et, pour chaq
 
 | Fichier | Contenu |
 |---|---|
-| `data/map/province_ids.png` | PNG RGB 4096² : `R = index & 255`, `G = index >> 8`, `B = 0`, 0 = mer ou aucune. |
+| `data/map/province_ids.png` | PNG RGB 7168 × 6144 : `R = index & 255`, `G = index >> 8`, `B = 0`, 0 = mer ou aucune. |
 | `data/map/provinces.geojson` | `FeatureCollection` en coordonnées carte (1 décimale), propriétés `id`, `index`, `name`, `owner`, `centroid`, `capital_px`, `neighbors`, `sea_neighbors`, `area_px`. |
 | `docs/img/provinces-preview.png` | 1024² : remplissage par `heraldry.primary_color` du propriétaire sur ombrage du relief, frontières noires, capitales en points blancs. |
 
@@ -175,7 +237,7 @@ fichiers de colonies arrivent.
    provinces pour une arête frontalière), ÷ 2 si `road`. Arête `sea` : 100 (embarquement et
    débarquement, ≈ une traversée de province) + km.
 4. **Route** : une arête terrestre porte `road: true` si la distance moyenne de son segment au
-   réseau de `roads.geojson` (transformée de distance sur 4096²) est < max(3 km, 4 % de sa
+   réseau de `roads.geojson` (transformée de distance sur la grille carte) est < max(3 km, 4 % de sa
    longueur) — la tolérance relative évite de rater une voie qui serpente le long d'une arête
    de 200 km entre deux cités de repli.
 
@@ -184,7 +246,7 @@ fichiers de colonies arrivent.
 | `data/map/settlement_graph.json` | `{"edges": [{"from", "to", "cost", "road", "sea"}]}`, format du lot C1 (chargé par `settlement_load.rs`, aucun autre champ). |
 | `data/map/settlements_px.json` | `{"set_…": [x, y]}` : position de jeu en pixels carte 4096 (1 décimale), pour Godot. |
 | `data/map/settlement_edge_paths.json` | Lot C7b, affichage seulement : `{"edges": [{"from", "to", "points"}]}`, tracé routier (pixels carte, 1 décimale, de `from` à `to`, extrémités sur les colonies) de chaque arête `road` qu'une route suit ; lu par `SettlementData.edge_path` pour l'aperçu de chemin d'armée. Voir ci-dessous. |
-| `docs/img/settlements-preview.png` | 2048² : provinces, colonies par type (cité rouge, ville orange, château gris, abbaye violette, village vert ; contour blanc = position ramenée), arêtes grises, routes brunes, liaisons maritimes en tirets bleus. |
+| `docs/img/settlements-preview.png` | 2048 px de large : provinces, colonies par type (cité rouge, ville orange, château gris, abbaye violette, village vert ; contour blanc = position ramenée), arêtes grises, routes brunes, liaisons maritimes en tirets bleus. |
 
 Relevé du 2026-09-24 (132 fichiers de colonies, aucune cité de repli) : 568 colonies,
 1 345 arêtes terrestres dont 634 sur route, 28 maritimes, graphe connexe ; 71 colonies ramenées
@@ -222,7 +284,7 @@ gardés s'ils passent pour moitié au moins dans une province jouable.
 Itiner-e s'arrête au limes (Irlande, Écosse, Germanie à l'est du Rhin, Danemark, Suède,
 Bohême…). Les provinces qu'il ne couvre pas (densité < 4 px de route pour 1 000 px de province)
 reçoivent des **routes calculées** : plus court chemin de coût (`skimage.graph.MCP_Geometric`,
-grille 2048², coût = 1 + 25 × pente de `heightmap.png` + 6 sur un fleuve de `scalerank` ≤ 6, mer
+grille de travail (carte / 4), coût = 1 + 25 × pente de `heightmap.png` + 6 sur un fleuve de `scalerank` ≤ 6, mer
 infranchissable) le long des arêtes terrestres du graphe entre colonies `city`/`town`. Le même
 calcul sert de repli complet si Itiner-e est indisponible (3 tentatives) ou avec `--computed`.
 
@@ -251,19 +313,18 @@ provinces (71 306 candidats), 0,2 Mo.
 
 ## Relief en tuiles (`cent_ans_tools/geo/relief.py`)
 
-Relief **8192²** (≈ 360 m/px) sur la même emprise (`bounds_projected` inchangé : 1 px 8192 = ½ px
-4096), ETOPO 2022 15″ rééchantillonné **bilinéairement** (la cible est aussi fine que la
+Relief fin **14336 × 12288** (≈ 360 m/px) sur la même emprise (1 px fin = ½ px carte), ETOPO 2022 15″ rééchantillonné **bilinéairement** (la cible est aussi fine que la
 source ; une moyenne laisserait des marches), même encodage 16 bits que `heightmap.png`.
-Découpé en 16 × 16 tuiles PNG de 512² : `data/map/height/h_<col>_<row>.png` couvre les pixels
+Découpé en 28 × 24 tuiles PNG de 512² : `data/map/height/h_<col>_<row>.png` couvre les pixels
 `[col × 512, (col + 1) × 512[` en X et `[row × 512, (row + 1) × 512[` en Y, sans recouvrement
 (pour coudre deux maillages, lire la première ligne ou colonne de la tuile voisine).
 `map.json` déclare :
 
 ```json
-"height_tiles": {"size_px": 8192, "tile_px": 512, "dir": "height", "pattern": "h_{col}_{row}.png"}
+"height_tiles": {"size_px": [14336, 12288], "tile_px": 512, "dir": "height", "pattern": "h_{col}_{row}.png"}
 ```
 
-`heightmap.png` (4096²) est conservé pour la compatibilité. Relevé du 2026-09-24 : 256 tuiles,
+`heightmap.png` (grille carte) est conservé pour la compatibilité. Relevé du 2026-09-24 : 256 tuiles,
 50,5 Mo au total (pas de LFS dans le dépôt ; sous le seuil de 150 Mo, PNG 16 bits conservé),
 ≈ 10 s. Écart moyen avec `heightmap.png` après moyenne 2 × 2 : 0,5 m.
 
@@ -276,10 +337,10 @@ Ordre de régénération : `geo relief-shade` (après `geo build`) puis `geo lan
 
 - `cent-ans geo relief-shade` (`relief_shade.py`, `copernicus.py`) : télécharge les 312 tuiles
   Copernicus DEM GLO-90 de l'emprise jouable (lon −11 → 12, lat 41 → 60 ; ≈ 1 Go dans
-  `tools/geo/raw/copernicus/`, HTTPS anonyme, gratuit), les **moyenne** sur la grille 8192²
+  `tools/geo/raw/copernicus/`, HTTPS anonyme, gratuit), les **moyenne** sur la grille fine
   (la source à 90 m est 4 × plus fine : moyenne de zone, pas d'interpolation), ETOPO en mer et
   hors emprise. Écrit les tuiles `height/`, `heightmap_render.png` (moyenne 2 × 2, relief de
-  rendu lu par `MapData`) et `relief_shade.png` (LA8 8192² : détail + occlusion). Rehaussement
+  rendu lu par `MapData`) et `relief_shade_<i>.png` (LA8, grille fine en 4 bandes horizontales de 3072 lignes, `map.json.relief_shade.bands`, pour rester sous 50 Mo par fichier : détail + occlusion). Rehaussement
   de rendu (masque flou, σ 5 km, gain 0,8, ±120 m, effacé au-dessus de 600-1 600 m), trait de
   côte identique à `heightmap.png`. `heightmap.png` et `navgrid.png` ne changent pas. ≈ 40 s
   avec le cache `tools/geo/raw/copernicus_cache/cop_8192.npy`.
@@ -287,10 +348,10 @@ Ordre de régénération : `geo relief-shade` (après `geo build`) puis `geo lan
   complet fait 18,5 Go) ; dépendances ponctuelles :
   `uv run --project tools --with h5py --with fsspec --with aiohttp --with requests cent-ans geo kk10`
   (≈ 8 min, cache `tools/geo/raw/kk10/*.npz` de 190 ko).
-- `cent-ans geo landcover` (`landcover.py`) : `splat.png` 4096² (forêts : défrichement KK10 ×
+- `cent-ans geo landcover` (`landcover.py`) : `splat.png` grille carte (forêts : défrichement KK10 ×
   potentiel forestier, massifs nommés de `historical_forests.json`, allocation binaire par score
   bruit + terrain, essarts autour des villes et hameaux), `wetlands.png` (RGB : marais, étangs,
-  prés humides, depuis `wetlands.json` et les fonds de vallée), `forest_kind.png` (L8 2048², part
+  prés humides, depuis `wetlands.json` et les fonds de vallée), `forest_kind.png` (L8 demi-grille, part
   de résineux, pour le rendu des forêts). ≈ 70 s.
 
 ## Cache du relief fin : pipeline complet des paliers 1-3 (lot ZG7b, ADR 0036)

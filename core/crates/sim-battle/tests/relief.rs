@@ -75,6 +75,7 @@ fn relief_does_not_shift_the_later_draws() {
             Terrain::Forest => (9, 1),
             Terrain::Hills | Terrain::Mountains => (3, 0),
             Terrain::Marsh => (1, 8),
+            Terrain::Steppe | Terrain::Desert => (0, 0),
         };
         assert_eq!(f.forests.len(), base.0);
         assert_eq!(f.mud.len(), base.1 + if river { 2 } else { 0 });

@@ -10,6 +10,7 @@ use godot::prelude::*;
 use sim_campaign::research::{effective_cost, tech_progress, tech_status};
 
 use crate::campaign_sim::{effects_array, ids, CampaignSim};
+use crate::campaign_sim_preview::{before_after_dict, requirements_array};
 
 fn tech_branch_key(branch: TechBranch) -> &'static str {
     branch.key()
@@ -92,6 +93,10 @@ impl CampaignSim {
                     "progress" => i64::from(tech_progress(state, &faction, &tech.id)),
                     "herbs" => &herbs,
                     "historical_note" => tech.historical_year.as_ref().and_then(|d| d.note.as_deref()).unwrap_or(""),
+                    // IB5: each prerequisite's state and the "before → after"
+                    // of the faction statistics the technology moves.
+                    "requirements" => &requirements_array(&state.technology_requirements(data, &faction, &tech.id)),
+                    "before_after" => &before_after_dict(&state.technology_before_after(data, &faction, &tech.id)),
                 }
                 .to_variant()
             })

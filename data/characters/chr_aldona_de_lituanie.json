@@ -1,0 +1,52 @@
+{
+  "id": "chr_aldona_de_lituanie",
+  "name": {
+    "display": "Aldona de Lituanie, reine de Pologne",
+    "local": "Aldona Ona",
+    "local_language": "lituanien"
+  },
+  "sex": "female",
+  "house": "Gediminides",
+  "faction": "fac_poland",
+  "role": "consort",
+  "birth": {
+    "value": "1309",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1339-05-26",
+    "place": "Cracovie"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Reine de Pologne",
+      "from": {
+        "value": "1333-04-25"
+      },
+      "note": "Mariée en 1325, couronnée en 1333."
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 3,
+    "court": 6
+  },
+  "traits": [
+    "trait_pious",
+    "trait_kind"
+  ],
+  "piety": 60,
+  "family": {
+    "father": "chr_gediminas",
+    "spouses": [
+      "chr_casimir_iii_de_pologne"
+    ]
+  },
+  "starting_location": "prov_lesser_poland",
+  "status": "at_court",
+  "description": "Fille de Gediminas, baptisée Anna, épouse de Casimir III depuis 1325 ; elle scelle l'alliance polono-lituanienne contre l'Ordre teutonique. Elle meurt en 1339 sans héritier mâle.",
+  "sources": [
+    "Aldona de Lituanie"
+  ]
+}

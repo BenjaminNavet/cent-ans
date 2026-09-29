@@ -164,7 +164,7 @@ fn a_battle_is_classified_with_its_consequences() {
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
     state.armies.retain(|id, _| *id == french || *id == english);
-    let point = [2200.0, 2300.0];
+    let point = [2200.0, 3580.0];
     state.armies.get_mut(&french).unwrap().position = ArmyPosition::field(point);
     state.armies.get_mut(&english).unwrap().position =
         ArmyPosition::field([point[0] + 4.0, point[1]]);
@@ -249,7 +249,7 @@ fn the_3d_battle_setup_carries_the_morale_modifiers() {
     let french = main_army(&state, "fac_france");
     let english = main_army(&state, "fac_england");
     state.armies.retain(|id, _| *id == french || *id == english);
-    let point = [2200.0, 2300.0];
+    let point = [2200.0, 3580.0];
     state.armies.get_mut(&french).unwrap().position = ArmyPosition::field(point);
     state.armies.get_mut(&english).unwrap().position =
         ArmyPosition::field([point[0] + 4.0, point[1]]);

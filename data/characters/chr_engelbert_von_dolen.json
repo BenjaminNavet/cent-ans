@@ -1,0 +1,38 @@
+{
+  "id": "chr_engelbert_von_dolen",
+  "name": {
+    "display": "Engelbert von Dolen",
+    "local": "Engelbert von Dolen",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Évêché de Dorpat",
+  "faction": "fac_dorpat",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1341",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 3,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_stern"
+  ],
+  "piety": 75,
+  "starting_location": "prov_dorpat",
+  "status": "at_court",
+  "description": "Évêque de Dorpat de 1331 à 1341 ; il tient Tartu contre l'ordre Livonien et les Russes.",
+  "sources": [
+    "Évêché de Dorpat",
+    "Engelbert von Dolen"
+  ]
+}

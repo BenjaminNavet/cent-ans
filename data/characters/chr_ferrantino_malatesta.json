@@ -1,0 +1,32 @@
+{
+  "id": "chr_ferrantino_malatesta",
+  "name": {
+    "display": "Ferrantino Malatesta",
+    "local": "Ferrantino Malatesta",
+    "local_language": "italien"
+  },
+  "sex": "male",
+  "house": "Malatesta",
+  "faction": "fac_rimini",
+  "role": "ruler",
+  "birth": {
+    "value": "1294"
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious"
+  ],
+  "piety": 40,
+  "starting_location": "prov_rimini",
+  "status": "at_court",
+  "description": "Coseigneur de Rimini avec son frère Malatesta « Guastafamiglia » depuis 1330 ; vicaires pontificaux de Romagne, les Malatesta étendent leur influence sur les cités voisines de la côte adriatique.",
+  "sources": [
+    "Maison Malatesta",
+    "Rimini"
+  ]
+}

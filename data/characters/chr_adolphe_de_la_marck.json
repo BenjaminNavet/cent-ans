@@ -1,0 +1,45 @@
+{
+  "id": "chr_adolphe_de_la_marck",
+  "name": {
+    "display": "Adolphe de la Marck",
+    "local": "Adolf von der Mark",
+    "local_language": "moyen bas allemand"
+  },
+  "sex": "male",
+  "house": "de la Marck",
+  "faction": "fac_liege",
+  "role": "ruler",
+  "birth": {
+    "value": "1288",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1344-02-08"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince-évêque de Liège",
+      "from": {
+        "value": "1313"
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_builder",
+    "trait_cultured"
+  ],
+  "piety": 75,
+  "family": {},
+  "starting_location": "prov_liege",
+  "status": "at_court",
+  "description": "Prince-évêque de Liège depuis 1313, issu de la maison de la Marck ; grand bâtisseur (palais épiscopal, fortifications) et fondateur du studium liégeois, il domine la vie politique de la principauté jusqu'à sa mort en 1344.",
+  "sources": [
+    "Adolphe de la Marck"
+  ]
+}

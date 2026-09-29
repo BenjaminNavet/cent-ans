@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_loutsk",
+    "province": "prov_lutsk",
+    "kind": "city",
+    "name": {
+      "display": "Loutsk",
+      "local": "Lutsk",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      25.3254,
+      50.7472
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de la Volhynie orientale sur le Styr.",
+    "sources": [
+      "Loutsk"
+    ]
+  },
+  {
+    "id": "set_kremenets",
+    "province": "prov_lutsk",
+    "kind": "castle",
+    "name": {
+      "display": "Kremenets",
+      "local": "Kremenets",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      25.7256,
+      50.1069
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse imprenable qui résista aux Mongols en 1241.",
+    "sources": [
+      "Kremenets"
+    ]
+  },
+  {
+    "id": "set_doubno",
+    "province": "prov_lutsk",
+    "kind": "castle",
+    "name": {
+      "display": "Doubno",
+      "local": "Dubno",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      25.75,
+      50.4167
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de la Volhynie du sud, sur la Ikva.",
+    "sources": [
+      "Doubno"
+    ]
+  }
+]

@@ -8,38 +8,81 @@ extends RefCounted
 ## matériau texturé commun (textures Poly Haven CC0), albédo × couleur de sommet. Variantes :
 ## `snow` (toits enneigés) et `far` (campagne : sans carte normale, moins de lectures de texture).
 ## Purement visuel. Les teintes par matériau reprennent `MATERIAL_TINT` de `kit_export.py`.
+##
+## Lot GA5 : `SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` viennent de `data/art/building_materials.json`
+## (schéma `art_building_materials.schema.json`), jamais codés en dur ici — même repli que
+## `BattleTerrain.ground_layers()`. `TimberFrame` (torchis/colombage, lot GA5) y figure avec
+## `wired = false` : la matière est prête (texture, entrée `SPECS`) mais aucune surface du kit
+## Blender ne porte ce nom pour l'instant (voir docs/wip/ga.md, section GA5, pour la raison :
+## l'indice de couche de l'atlas `Building` est baké dans les `.glb` exportés, donc l'y ajouter
+## demande un changement + réexport côté `tools/blender_scripts/kit_export.py`, hors périmètre
+## de ce lot). `TimberFrame` reste donc utilisable uniquement via `material("TimberFrame")`
+## (matériau individuel, pas l'atlas).
 
 const TEX := "res://assets/textures/"
+const DATA_FILE := "art/building_materials.json"
+
 ## nom → [albédo, normale, rugosité ("" = scalaire), tuile (m), teinte, rugosité]
-const SPECS := {
-	"Plaster": ["buildings/lime_plaster_diff", "buildings/medieval_wall_01_nor", "buildings/medieval_wall_01_rough", 2.2, Color(1.05, 1.02, 0.97), 0.95],
-	"Rubble": ["buildings/stone_wall_diff", "buildings/stone_wall_nor", "buildings/stone_wall_rough", 2.4, Color(1.0, 1.0, 1.0), 0.95],
-	"Ashlar": ["buildings/rustic_stone_wall_diff", "buildings/rustic_stone_wall_nor", "buildings/rustic_stone_wall_rough", 2.1, Color(1.15, 1.12, 1.06), 0.9],
-	"Masonry": ["battle/castle_wall_varriation_diff", "battle/castle_wall_varriation_nor", "", 3.0, Color(1.05, 1.03, 0.98), 0.9],
-	"Timber": ["buildings/rough_wood_diff", "buildings/rough_wood_nor", "buildings/rough_wood_rough", 1.6, Color(1.0, 1.0, 1.0), 0.9],
-	"Planks": ["buildings/weathered_brown_planks_diff", "buildings/weathered_brown_planks_nor", "buildings/weathered_brown_planks_rough", 2.2, Color(1.0, 1.0, 1.0), 0.92],
-	"Door": ["buildings/weathered_brown_planks_diff", "buildings/weathered_brown_planks_nor", "", 1.6, Color(0.7, 0.62, 0.55), 0.9],
-	"RoofTile": ["buildings/clay_roof_tiles_03_diff", "buildings/clay_roof_tiles_03_nor", "buildings/clay_roof_tiles_03_rough", 2.4, Color(0.85, 0.78, 0.76), 0.85],
-	"RoofFlat": ["buildings/roof_tiles_14_diff", "buildings/roof_tiles_14_nor", "buildings/roof_tiles_14_rough", 2.2, Color(1.0, 1.0, 1.0), 0.88],
-	"RoofSlate": ["battle/roof_slates_02_diff", "battle/roof_slates_02_nor", "", 2.4, Color(0.5, 0.53, 0.61), 0.6],
-	"Thatch": ["battle/thatch_roof_angled_diff", "battle/thatch_roof_angled_nor", "", 2.2, Color(1.45, 1.2, 0.85), 1.0],
-}
+static var SPECS: Dictionary = {}
 ## Matériaux unis (sans texture) : couleur sRGB, rugosité.
-const PLAIN := {
-	"Window": [Color(0.035, 0.032, 0.03), 0.35],
-	"Iron": [Color(0.09, 0.09, 0.1), 0.5],
-	"Canvas": [Color(0.78, 0.74, 0.66), 0.95],
-}
-const ROOFS := ["RoofTile", "RoofFlat", "RoofSlate", "Thatch"]
+static var PLAIN: Dictionary = {}
+static var ROOFS: Array = []
 ## Toutes les matières du kit fusionnées en un matériau `Building` (`building_atlas.gdshader`),
 ## couche = alpha de la couleur de sommet : maquettes de campagne (variante `far`, sans normales)
 ## et bâtiments de bataille. Même ordre que `kit_export.ATLAS_LAYERS` et que les tranches de
 ## `building_albedo_array.jpg` / `building_normal_array.jpg`.
-const ATLAS_LAYERS := ["Plaster", "Rubble", "Ashlar", "Masonry", "Timber", "Planks", "Door", "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas"]
+static var ATLAS_LAYERS: Array = []
 const ATLAS_SHADER := preload("res://shaders/building_atlas.gdshader")
 
 static var _materials: Dictionary = {}  # "variante|nom" → Material
 static var _meshes: Dictionary = {}  # "variante|id du maillage" → Mesh
+static var _data_loaded: bool = false
+
+
+## Lot GA5 : charge `SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` depuis les données (dossier de données
+## du jeu, puis `data/` du dépôt). Sans repli chiffré : si le fichier est introuvable ou invalide,
+## les tables restent vides et `material()`/`_atlas()` ne trouvent aucune matière (avertissement).
+static func _ensure_data() -> void:
+	if _data_loaded:
+		return
+	_data_loaded = true
+	var candidates: Array[String] = []
+	var tree := Engine.get_main_loop() as SceneTree
+	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
+	if paths != null:
+		candidates.append(str(paths.get("data_dir")))
+	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
+	for dir in candidates:
+		var path := dir.path_join(DATA_FILE)
+		if not FileAccess.file_exists(path):
+			continue
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not (parsed is Dictionary):
+			continue
+		var doc := parsed as Dictionary
+		for entry_v in doc.get("textured", []):
+			var entry := entry_v as Dictionary
+			var name := str(entry["name"])
+			var rough_map := str(entry.get("roughness_map", ""))
+			var tint: Array = entry["tint"]
+			SPECS[name] = [
+				str(entry["diffuse"]),
+				str(entry["normal"]),
+				rough_map,
+				float(entry["tile_size_m"]),
+				Color(tint[0], tint[1], tint[2]),
+				float(entry["roughness"]),
+			]
+			if bool(entry.get("roof", false)):
+				ROOFS.append(name)
+		for entry_v in doc.get("plain", []):
+			var entry := entry_v as Dictionary
+			var color: Array = entry["color"]
+			PLAIN[str(entry["name"])] = [Color(color[0], color[1], color[2]), float(entry["roughness"])]
+		var layers: Array = doc.get("atlas_layers", [])
+		ATLAS_LAYERS = layers.duplicate()
+		return
+	push_warning("BuildingMaterials: %s introuvable, aucune matière chargée" % DATA_FILE)
 
 
 static func clear_cache() -> void:
@@ -47,8 +90,15 @@ static func clear_cache() -> void:
 	_meshes.clear()
 
 
+## Lot GA5 : ordre des couches de l'atlas `Building` (`ATLAS_LAYERS`, chargé depuis les données).
+static func atlas_layers() -> Array:
+	_ensure_data()
+	return ATLAS_LAYERS
+
+
 ## Matériau partagé `name` (variante "", "snow" ou "far") ; null si le nom est inconnu.
 static func material(name: String, variant: String = "") -> Material:
+	_ensure_data()
 	var key := variant + "|" + name
 	if _materials.has(key):
 		return _materials[key]

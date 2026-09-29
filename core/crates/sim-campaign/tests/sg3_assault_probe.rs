@@ -83,6 +83,7 @@ fn assault(data: &GameData, landmark: &str, attacker: &str, seed: u64, limit_s: 
                     experience: 0,
                     levy_armor: 0,
                     levy_ranged: 0,
+                    experience_residue: 0,
                 });
         }
     }

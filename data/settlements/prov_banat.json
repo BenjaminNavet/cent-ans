@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_temesvar",
+    "province": "prov_banat",
+    "kind": "city",
+    "name": {
+      "display": "Temesvár",
+      "local": "Temesvár",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      21.2087,
+      45.7489
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château royal et ville du Banat, ancienne résidence de Charles Robert.",
+    "sources": [
+      "Temesvár"
+    ]
+  },
+  {
+    "id": "set_csanad",
+    "province": "prov_banat",
+    "kind": "town",
+    "name": {
+      "display": "Csanád",
+      "local": "Csanád",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      20.4667,
+      46.1667
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Siège d'un évêché de la marche du Maros.",
+    "sources": [
+      "Csanád"
+    ]
+  },
+  {
+    "id": "set_szoreny",
+    "province": "prov_banat",
+    "kind": "castle",
+    "name": {
+      "display": "Szörény",
+      "local": "Szörény",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      22.656,
+      44.6318
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse du banat de Severin sur le Danube, face à la Valachie.",
+    "sources": [
+      "Szörény"
+    ]
+  }
+]

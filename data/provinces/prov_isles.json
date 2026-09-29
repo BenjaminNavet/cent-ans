@@ -1,0 +1,90 @@
+{
+  "name": {
+    "display": "Seigneurie des Îles",
+    "local": "Tighearnas nan Eilean",
+    "local_language": "gaélique écossais"
+  },
+  "region": "ecosse",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [],
+  "coastal": true,
+  "resources": [
+    "res_fish",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Finlaggan",
+      "local": "Eilean Fhionnlagain",
+      "local_language": "gaélique écossais"
+    },
+    "lat": 55.803,
+    "lon": -6.256
+  },
+  "geo": {
+    "capital_lonlat": [
+      -6.256,
+      55.803
+    ],
+    "seed_lonlat": [
+      -6.3,
+      56.6
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_isles",
+  "culture": "cul_scottish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 25000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 700,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 350,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Hébrides et côte occidentale d'Argyll ; population estimée par comparaison avec les Highlands voisines."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1300,
+  "description": "Seigneurie des Îles, tenue par Jean d'Islay (Clan Donald) depuis 1336 ; conseil de l'Île du Comptage (Finlaggan) sur le Loch Finlaggan, à Islay.",
+  "sources": [
+    "Jean d'Islay, seigneur des Îles",
+    "Seigneurie des Îles",
+    "Finlaggan"
+  ],
+  "id": "prov_isles"
+}

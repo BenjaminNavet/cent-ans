@@ -87,33 +87,6 @@
     ]
   },
   {
-    "id": "set_calatrava_la_nueva",
-    "province": "prov_toledo",
-    "kind": "abbey",
-    "name": {
-      "display": "Calatrava la Nueva",
-      "local": "Calatrava la Nueva",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -3.8306,
-      38.6994
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Commanderie-siège de l'ordre militaire de Calatrava depuis 1217, après la perte de l'ancienne forteresse.",
-    "sources": [
-      "Calatrava la Nueva",
-      "Ordre de Calatrava"
-    ]
-  },
-  {
     "id": "set_talavera_de_la_reina",
     "province": "prov_toledo",
     "kind": "town",
@@ -191,32 +164,6 @@
     "sources": [
       "Ocaña (Espagne)",
       "Ordre de Santiago"
-    ]
-  },
-  {
-    "id": "set_almagro",
-    "province": "prov_toledo",
-    "kind": "village",
-    "name": {
-      "display": "Almagro",
-      "local": "Almagro",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -3.7288,
-      38.8672
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg du Campo de Calatrava, lieu de résidence des maîtres de l'ordre de Calatrava.",
-    "sources": [
-      "Almagro (Espagne)",
-      "Ordre de Calatrava"
     ]
   }
 ]

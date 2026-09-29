@@ -240,13 +240,17 @@ impl<'a> Context<'a> {
             .is_some_and(|s| &s.owner == self.faction)
     }
 
+    /// Estimated seasonal tax of `province` at the normal rate, its places'
+    /// buildings weighing their kind's `province_effect_percent` (lot RS-B:
+    /// a market in a village no longer counts as one in the city).
     fn province_income(&self, province: &ProvinceId) -> f64 {
         self.state.provinces.get(province).map_or(0.0, |p| {
-            sim_campaign::economy::province_income_effective(
+            sim_campaign::economy::province_income_with(
                 self.data,
                 p,
-                &self.state.province_buildings(province),
+                &[],
                 TaxRate::Normal,
+                &self.state.province_building_effects(self.data, province),
             )
         })
     }
@@ -378,6 +382,11 @@ fn state_plans(
                     || {
                         let mut orders =
                             sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+                        // FE5: « survival first » for the counties, titles
+                        // demanded at the peace, feudal acts.
+                        crate::feudal::filter_suicidal_wars(state, data, faction, &mut orders);
+                        crate::feudal::demand_titles(state, data, faction, &mut orders);
+                        orders.extend(crate::feudal::plan_feudal(state, data, faction));
                         // DP1: trade agreements and military access (ADR 0025).
                         orders.extend(crate::diplomacy_eval::plan_treaties(state, data, faction));
                         // G2: historical side changes (Artevelde, Troyes).
@@ -448,6 +457,8 @@ fn plan_turn_in(
     data: &GameData,
     faction: &FactionId,
 ) -> Vec<Order> {
+    // FE5: the core asks the feudal decisions of this crate from now on.
+    crate::feudal::install();
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
@@ -479,7 +490,11 @@ fn plan_turn_in(
     // inflation of their upkeep outweighs the seigniorage (Scots spiral).
     // EQ5: a third is enough: the prices stay up after the money is sound
     // again (Swiss buildings 158 → 201 after two years of debasement).
-    let upkeep_heavy = 3 * ctx.building_upkeep > ctx.gross_income;
+    // F8: the garrisons are a fixed cost inflated alike (a county whose
+    // single garrison eats its income sank into a spiral of debasement and
+    // debt: Connacht, prices 100 -> 360 in 50 turns).
+    let fixed_upkeep = ctx.building_upkeep + garrison_upkeep(&ctx).min(ctx.army_upkeep);
+    let upkeep_heavy = 3 * fixed_upkeep > ctx.gross_income;
     orders.extend(plans.coinage.into_iter().filter(|o| {
         !upkeep_heavy
             || !matches!(
@@ -494,8 +509,48 @@ fn plan_turn_in(
     orders.extend(plans.agents);
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
+    // TW2-T3: companies for the threatened armies of a rich realm, hired
+    // where they stand before they march.
+    let treasury = ctx.treasury - planned_spending(data, &orders);
+    orders.extend(crate::mercenaries::plan_hires(
+        state,
+        data,
+        faction,
+        treasury,
+        ctx.gross_income,
+        |army| {
+            ctx.anchors
+                .get(army)
+                .map_or(0.0, |anchor| ctx.threat_at(anchor))
+        },
+    ));
+    // TW2-T5: ranks of the armies spent on traditions.
+    orders.extend(crate::traditions::plan_traditions(
+        ctx.state,
+        ctx.data,
+        ctx.faction,
+    ));
     plan_armies(&ctx, &mut orders);
     orders
+}
+
+/// TW2-T3: livres this turn's recruitments and constructions will spend
+/// (base prices: an estimate for the mercenary budget).
+fn planned_spending(data: &GameData, orders: &[Order]) -> i64 {
+    orders
+        .iter()
+        .map(|order| match order {
+            Order::Recruit { unit_type, .. } => data
+                .unit_types
+                .get(unit_type)
+                .map_or(0, |t| i64::from(t.cost.money)),
+            Order::Build { building, .. } => data
+                .buildings
+                .get(building)
+                .map_or(0, |b| i64::from(b.cost.money)),
+            _ => 0,
+        })
+        .sum()
 }
 
 // =========================================================================
@@ -552,7 +607,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let levied = me.tax_rate == TaxRate::High;
     let normal_surplus = if levied {
         ctx.surplus()
-            - (ctx.gross_income.max(0) as f64 * (1.0 - 1.0 / TaxRate::High.multiplier())) as i64
+            - (ctx.gross_income.max(0) as f64
+                * (1.0 - 1.0 / TaxRate::High.multiplier(&ctx.data.economy_rules)))
+                as i64
     } else {
         ctx.surplus()
     };
@@ -573,6 +630,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     if rate != me.tax_rate {
         orders.push(Order::SetTaxRate { rate });
     }
+    // RS-C: a realm whose buildings outgrew its income raze the least useful.
+    orders.extend(plan_demolitions(ctx));
 
     // Debt: dismiss the costliest unit until the surplus repays the debt
     // within `DEBT_REPAYMENT_TURNS`. F4: dismiss ahead of bankruptcy when the
@@ -913,6 +972,14 @@ fn building_value(
         return 0.0;
     };
     let income = ctx.province_income(province);
+    // RS-B: a secondary place's buildings weigh on the whole province and on
+    // research as the rules count them (`province_effect_percent`, `research_percent`).
+    let kind = ctx.state.settlement_kind(settlement);
+    let province_weight = f64::from(sim_campaign::buildings::province_effect_percent(
+        ctx.data, kind,
+    )) / 100.0;
+    let research_weight =
+        f64::from(sim_campaign::buildings::research_percent(ctx.data, kind)) / 100.0;
     let mut value = 0.0;
     for effect in &def.effects {
         let v = effect.value;
@@ -924,10 +991,10 @@ fn building_value(
                     v
                 }
             }
-            EffectKind::Unrest if unrest > 30.0 => -v * income / 50.0,
-            EffectKind::Health if health < 50.0 => v * income / 80.0,
-            EffectKind::Growth | EffectKind::Wealth => v * income / 150.0,
-            EffectKind::ResearchPoints => v * 60.0,
+            EffectKind::Unrest if unrest > 30.0 => -v * province_weight * income / 50.0,
+            EffectKind::Health if health < 50.0 => v * province_weight * income / 80.0,
+            EffectKind::Growth | EffectKind::Wealth => v * province_weight * income / 150.0,
+            EffectKind::ResearchPoints => v * research_weight * 60.0,
             EffectKind::Garrison | EffectKind::FortificationLevel if ctx.is_border(province) => {
                 v * 20.0
             }
@@ -935,6 +1002,73 @@ fn building_value(
         };
     }
     value - f64::from(def.upkeep.unwrap_or(0)) * 1.5
+}
+
+/// RS-C: after `ai_demolition.deficit_seasons` seasons of deficit in a row,
+/// razes the buildings that do not pay for themselves, least value per livre
+/// of upkeep first, while their upkeep exceeds `max_upkeep_percent` of the
+/// gross income (at most `max_per_turn`). Buildings built before the
+/// construction cap (EQ5) otherwise sank the Swiss into bankruptcy.
+fn plan_demolitions(ctx: &Context) -> Vec<Order> {
+    let state = ctx.state;
+    let data = ctx.data;
+    let rules = &data.economy_rules.ai_demolition;
+    if state.factions[ctx.faction].deficit_seasons < rules.deficit_seasons {
+        return Vec::new();
+    }
+    // (value per livre of upkeep, upkeep, settlement, building)
+    let mut candidates: Vec<(f64, i64, SettlementId, data_model::BuildingId)> = Vec::new();
+    let mut burden = 0;
+    for (id, settlement) in state
+        .settlements
+        .iter()
+        .filter(|(id, s)| ctx.owns_settlement(id) && s.siege.is_none())
+    {
+        let Some(province) = state.provinces.get(&settlement.province) else {
+            continue;
+        };
+        let unrest = weighted_unrest(&province.population);
+        let health = f64::from(province.population.peasants.health);
+        let percent = sim_campaign::economy::building_upkeep_percent(data, settlement.kind);
+        for building in &settlement.buildings {
+            let upkeep = data
+                .buildings
+                .get(building)
+                .map_or(0, |b| i64::from(b.upkeep.unwrap_or(0)))
+                * percent
+                / 100;
+            if upkeep <= 0 || building_income(ctx, id, building) >= upkeep as f64 {
+                continue;
+            }
+            burden += upkeep;
+            if sim_campaign::buildings::demolition_blocker(state, data, id, building).is_some() {
+                continue;
+            }
+            let value = building_value(ctx, id, building, unrest, health);
+            candidates.push((value / upkeep as f64, upkeep, id.clone(), building.clone()));
+        }
+    }
+    let limit = ctx.gross_income.max(0) * rules.max_upkeep_percent / 100;
+    if burden <= limit {
+        return Vec::new();
+    }
+    candidates.sort_by(|a, b| {
+        a.0.total_cmp(&b.0)
+            .then_with(|| a.2.cmp(&b.2))
+            .then_with(|| a.3.cmp(&b.3))
+    });
+    let mut orders = Vec::new();
+    for (_, upkeep, settlement, building) in candidates {
+        if burden <= limit || orders.len() >= rules.max_per_turn {
+            break;
+        }
+        burden -= upkeep;
+        orders.push(Order::Demolish {
+            settlement: settlement.into(),
+            building,
+        });
+    }
+    orders
 }
 
 /// In debt, dismisses the costliest units until `savings` livres of upkeep
@@ -1444,6 +1578,20 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             _ => None,
         })
         .collect();
+    // Armies losing every unit this turn: gone before any later order.
+    let emptied: BTreeSet<&ArmyId> = disbanding
+        .iter()
+        .filter(|army| {
+            let dismissed = orders
+                .iter()
+                .filter(|o| matches!(o, Order::DisbandUnit { army: Some(a), .. } if a == *army))
+                .count();
+            state
+                .armies
+                .get(*army)
+                .is_some_and(|a| dismissed >= a.units.len())
+        })
+        .collect();
 
     // PB3f: the route tables the loop below asks for, computed ahead on
     // the planner's pool (a memo of the grid planner: same tables).
@@ -1458,7 +1606,10 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         .collect();
     ctx.grid.prefetch_tables(ctx.mode, &table_keys);
 
-    for (army_id, _) in armies.iter().filter(|(id, _)| !merged.contains(id)) {
+    for (army_id, _) in armies
+        .iter()
+        .filter(|(id, _)| !merged.contains(id) && !emptied.contains(id))
+    {
         let army = &state.armies[army_id];
         // EQ5: standing without right of passage in the lands of a realm at
         // peace (after a peace, or in a place of its own inside a foreign

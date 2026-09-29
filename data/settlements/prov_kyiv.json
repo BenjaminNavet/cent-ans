@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_kiev",
+    "province": "prov_kyiv",
+    "kind": "city",
+    "name": {
+      "display": "Kiev",
+      "local": "Kyiv",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      30.5234,
+      50.4501
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Ville sacrée aux mille églises, très dépeuplée depuis 1240, avec la cathédrale Sainte-Sophie.",
+    "sources": [
+      "Kiev"
+    ]
+  },
+  {
+    "id": "set_vychhorod",
+    "province": "prov_kyiv",
+    "kind": "town",
+    "name": {
+      "display": "Vychhorod",
+      "local": "Vyshhorod",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      30.4833,
+      50.5833
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne résidence des princes de Kiev, au nord de la ville.",
+    "sources": [
+      "Vychhorod"
+    ]
+  },
+  {
+    "id": "set_bila_tserkva",
+    "province": "prov_kyiv",
+    "kind": "castle",
+    "name": {
+      "display": "Bila Tserkva",
+      "local": "Bila Tserkva",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      30.12,
+      49.795
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de la Ros, marche sud de la Kiévie face à la steppe.",
+    "sources": [
+      "Bila Tserkva"
+    ]
+  }
+]

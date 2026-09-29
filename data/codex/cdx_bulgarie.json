@@ -1,0 +1,28 @@
+{
+  "id": "cdx_bulgarie",
+  "title": "Le second Empire bulgare",
+  "category": "lieu",
+  "aliases": [
+    "Bulgarie",
+    "empire bulgare",
+    "Ivan Alexandre",
+    "Tarnovo",
+    "Veliko Tarnovo"
+  ],
+  "era": {
+    "from": "1185",
+    "to": "1396"
+  },
+  "summary": "Le second Empire bulgare, gouverné depuis Tarnovo, sort meurtri de sa défaite de Velbažd en 1330. Ivan Alexandre, tsar depuis 1331, cherche à en conserver les restes.",
+  "body": "Renaissant en 1185, l'Empire bulgare a dominé les Balkans au XIIIe siècle. Il est ensuite affaibli par les invasions mongoles et les querelles de boyards. La défaite de Velbažd en 1330 face à la Serbie fait perdre au tsar Michel Chichman la vie et l'hégémonie.\n\nIvan Alexandre (1331-1371) reprend une partie des terres perdues, entre autres contre Byzance. Il protège l'Église orthodoxe et les moines hésychastes ; la capitale, Tarnovo, est un grand foyer de copie de manuscrits.",
+  "entity": "fac_bulgaria",
+  "see_also": [
+    "cdx_serbie",
+    "cdx_empire_byzantin"
+  ],
+  "sources": [
+    "Ivan Alexandre de Bulgarie",
+    "Second Empire bulgare",
+    "Bataille de Velbažd"
+  ]
+}

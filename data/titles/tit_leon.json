@@ -1,0 +1,28 @@
+{
+  "id": "tit_leon",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de León",
+    "local": "Reino de León",
+    "local_language": "castillan"
+  },
+  "heraldry": {
+    "blazon": "D'argent au lion de pourpre, armé, lampassé et couronné d'or.",
+    "description": "Armes traditionnelles du royaume de León.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#6A2C91"
+  },
+  "de_jure_provinces": [
+    "prov_leon"
+  ],
+  "holder_1337": {
+    "faction": "fac_castile",
+    "sources": [
+      "Kingdom of León"
+    ]
+  },
+  "description": "Royaume uni à la Castille depuis Ferdinand III (1230) ; conserve son intitulation royale propre dans le titre des rois de Castille.",
+  "sources": [
+    "Kingdom of León"
+  ]
+}

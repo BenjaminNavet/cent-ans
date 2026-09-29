@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_odense",
+    "province": "prov_fyn",
+    "kind": "city",
+    "name": {
+      "display": "Odense",
+      "local": "Odense",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      10.3883,
+      55.3959
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Siège épiscopal de Fionie, cœur du culte de saint Knud.",
+    "sources": [
+      "Odense"
+    ]
+  },
+  {
+    "id": "set_nyborg",
+    "province": "prov_fyn",
+    "kind": "castle",
+    "name": {
+      "display": "Nyborg",
+      "local": "Nyborg",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      10.7864,
+      55.3122
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château royal sur le Grand Belt où se tenait le Danehof.",
+    "sources": [
+      "Château de Nyborg"
+    ]
+  },
+  {
+    "id": "set_svendborg",
+    "province": "prov_fyn",
+    "kind": "town",
+    "name": {
+      "display": "Svendborg",
+      "local": "Svendborg",
+      "local_language": "danois médiéval"
+    },
+    "lonlat": [
+      10.6068,
+      55.0598
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port du sud de la Fionie sur le Sund.",
+    "sources": [
+      "Svendborg"
+    ]
+  }
+]

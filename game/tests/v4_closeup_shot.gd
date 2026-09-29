@@ -6,7 +6,7 @@ extends SceneTree
 
 
 func _init() -> void:
-	var at := Vector4(2122.07, 2082.48, 6.0, 30.0)
+	var at := Vector4(2122.07, 3362.48, 6.0, 30.0)
 	var out := "user://v4_closeup.png"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--at="):

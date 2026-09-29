@@ -1,0 +1,31 @@
+{
+  "id": "tit_brandenburg",
+  "rank": "duchy",
+  "name": {
+    "display": "Marche de Brandebourg",
+    "local": "Mark Brandenburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à l'aigle de gueules, becquée et membrée d'or.",
+    "description": "Aigle rouge margraviale de Brandebourg, distincte de l'aigle noire impériale.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_brandenburg"
+  ],
+  "holder_1337": {
+    "faction": "fac_brandenburg",
+    "sources": [
+      "Louis V de Bavière",
+      "Marche de Brandebourg"
+    ]
+  },
+  "description": "Marche électorale de Brandebourg, rang de duché retenu par convention politique comme les autres grands électorats de l'Empire (rang réel : margraviat).",
+  "sources": [
+    "Louis V de Bavière",
+    "Marche de Brandebourg"
+  ]
+}

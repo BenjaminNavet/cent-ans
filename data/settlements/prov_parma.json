@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_parma",
+    "province": "prov_parma",
+    "kind": "city",
+    "name": {
+      "display": "Parme",
+      "local": "Parma",
+      "local_language": "émilien"
+    },
+    "lonlat": [
+      10.3279,
+      44.8015
+    ],
+    "weight": 26,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité d'Émilie occupée par Mastino II della Scala de Vérone depuis 1335.",
+    "sources": [
+      "Parme",
+      "Mastino II della Scala"
+    ]
+  },
+  {
+    "id": "set_fontanellato",
+    "province": "prov_parma",
+    "kind": "castle",
+    "name": {
+      "display": "Fontanellato",
+      "local": "Fontanellato",
+      "local_language": "émilien"
+    },
+    "lonlat": [
+      10.1667,
+      44.8783
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Place forte de la campagne parmesane (rocca Sanvitale).",
+    "sources": [
+      "Fontanellato"
+    ]
+  },
+  {
+    "id": "set_fontevivo",
+    "province": "prov_parma",
+    "kind": "abbey",
+    "name": {
+      "display": "Fontevivo",
+      "local": "Fontevivo",
+      "local_language": "émilien"
+    },
+    "lonlat": [
+      10.1417,
+      44.8931
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne du contado parmesan, fondée en 1142.",
+    "sources": [
+      "Abbaye de Fontevivo"
+    ]
+  }
+]

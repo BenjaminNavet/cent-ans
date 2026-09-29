@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_leczyca",
+    "province": "prov_sieradz_leczyca",
+    "kind": "city",
+    "name": {
+      "display": "Łęczyca",
+      "local": "Łęczyca",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      19.2036,
+      52.0606
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château royal et collégiale de Tum, cœur de l'ancien duché de Łęczyca.",
+    "sources": [
+      "Łęczyca"
+    ]
+  },
+  {
+    "id": "set_sieradz",
+    "province": "prov_sieradz_leczyca",
+    "kind": "town",
+    "name": {
+      "display": "Sieradz",
+      "local": "Sieradz",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      18.7297,
+      51.5953
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale de l'ancien duché de Sieradz, ville de la Warta.",
+    "sources": [
+      "Sieradz"
+    ]
+  },
+  {
+    "id": "set_piotrkow",
+    "province": "prov_sieradz_leczyca",
+    "kind": "town",
+    "name": {
+      "display": "Piotrków",
+      "local": "Piotrków",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      19.7035,
+      51.4054
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg royal où se réunissent les assemblées de la noblesse (diètes du XIVe siècle).",
+    "sources": [
+      "Piotrków"
+    ]
+  }
+]

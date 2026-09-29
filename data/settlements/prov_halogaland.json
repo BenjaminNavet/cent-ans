@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_vagan",
+    "province": "prov_halogaland",
+    "kind": "city",
+    "name": {
+      "display": "Vågan",
+      "local": "Vágar",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      14.7,
+      68.2
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Principal bourg des Lofoten, marché de la morue séchée.",
+    "sources": [
+      "Vågan"
+    ]
+  },
+  {
+    "id": "set_trondenes",
+    "province": "prov_halogaland",
+    "kind": "castle",
+    "name": {
+      "display": "Trondenes",
+      "local": "Trondenes",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      16.55,
+      68.8
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Église-forteresse de pierre, la plus septentrionale de la chrétienté.",
+    "sources": [
+      "Église de Trondenes"
+    ]
+  },
+  {
+    "id": "set_tromso",
+    "province": "prov_halogaland",
+    "kind": "village",
+    "name": {
+      "display": "Tromsø",
+      "local": "Tromsø",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      18.9553,
+      69.6492
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Église et poste de pêche de l'extrême nord, chapelle royale depuis 1252.",
+    "sources": [
+      "Tromsø"
+    ]
+  }
+]

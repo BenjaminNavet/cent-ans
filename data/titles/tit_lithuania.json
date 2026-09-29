@@ -1,0 +1,76 @@
+{
+  "id": "tit_lithuania",
+  "rank": "kingdom",
+  "name": {
+    "display": "Grand-duché de Lituanie",
+    "local": "Lietuvos Didžioji Kunigaikštystė",
+    "local_language": "lituanien"
+  },
+  "heraldry": {
+    "blazon": "De gueules à trois pals d'argent, à la bordure d'or.",
+    "description": "Colonnes de Gediminas, approximées en trois pals d'argent, bordure d'or de jeu (emblème du sceau de la dynastie) ; le cavalier Vytis n'est attesté que plus tard.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Substitution : les colonnes de Gediminas ne sont pas dessinables comme telles."
+  },
+  "de_jure_provinces": [
+    "prov_vilnius",
+    "prov_kaunas",
+    "prov_samogitia",
+    "prov_hrodna",
+    "prov_brest",
+    "prov_navahrudak",
+    "prov_minsk",
+    "prov_pinsk",
+    "prov_polotsk",
+    "prov_vitebsk"
+  ],
+  "holder_1337": {
+    "faction": "fac_lithuania",
+    "sources": [
+      "Gediminas",
+      "Grand-duché de Lituanie",
+      "Paganisme lituanien"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_lithuania_hold",
+      "title": "Bâtir un empire",
+      "description": "Gediminas doit conserver la couronne de Lituanie.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_lithuania"
+      }
+    },
+    {
+      "id": "obj_lithuania_core",
+      "title": "Tenir la Lituanie et la Ruthénie noire",
+      "description": "Vilnius, Samogitie et Navahrudak.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_vilnius",
+          "prov_samogitia",
+          "prov_navahrudak"
+        ]
+      }
+    },
+    {
+      "id": "obj_lithuania_kiev",
+      "title": "Étendre l'influence sur Kiev",
+      "description": "Devenir suzerain de Kiev.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_kiev"
+      }
+    }
+  ],
+  "description": "Grand-duché de Lituanie et de Ruthénie ; rang « royaume » approximé pour un souverain qui a refusé la couronne papale.",
+  "sources": [
+    "Gediminas",
+    "Grand-duché de Lituanie",
+    "Paganisme lituanien"
+  ]
+}

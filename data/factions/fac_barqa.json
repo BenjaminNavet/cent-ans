@@ -1,0 +1,57 @@
+{
+  "id": "fac_barqa",
+  "name": {
+    "display": "Confédération de Barqa",
+    "local": "Qabā'il Barqa",
+    "local_language": "arabe"
+  },
+  "short_name": "Barqa",
+  "adjective": "cyrénaïque",
+  "government": "lordship",
+  "playable": true,
+  "capital": "prov_barqa",
+  "capital_city": "Barqa (Al-Marj)",
+  "religion": "rel_islam",
+  "culture": "cul_maghrebi",
+  "succession_law": "elective",
+  "primary_title": "tit_barqa",
+  "heraldry": {
+    "blazon": "De sable à la lune décroissante d'or.",
+    "description": "Croissant d'or sur champ noir, étendard de tribus bédouines ; emblème de jeu, non attesté.",
+    "primary_color": "#1C1C1C",
+    "secondary_color": "#E0B33A",
+    "uncertain": true,
+    "note": "Aucune source héraldique : emblème conventionnel de jeu."
+  },
+  "titles": [
+    "Cheikh des tribus de Barqa"
+  ],
+  "treasury": 2500,
+  "prestige": 15,
+  "starting_technologies": [
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_hafsids",
+      "status": "peace",
+      "note": "Tribus voisines de la Tripolitaine hafside."
+    },
+    {
+      "faction": "fac_mamluks",
+      "status": "peace",
+      "note": "Suzeraineté mamelouke nominale sur les tribus de Cyrénaïque."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 35,
+    "trade": 30,
+    "piety": 55
+  },
+  "description": "Confédération de tribus arabes (Banu Sulaym et clientèles) de la Cyrénaïque, sous une suzeraineté mamelouke seulement nominale : les sultans du Caire n'y exercent aucun contrôle réel et achètent des chevaux aux Bédouins. Choix de modélisation : faction tribale autonome ; le lien nominal avec fac_mamluks n'est pas codé (faction créée par le lot D5), à ajouter à l'intégration.",
+  "sources": [
+    "Cyrénaïque",
+    "Banu Sulaym"
+  ]
+}

@@ -10,9 +10,9 @@ extends SceneTree
 ##   [--no-landmarks-1to1] (rendu d'avant VH4 : maquette et plancher ZG4b)
 ## JPEG ≤ 960 px, `<ville>_<vue>.jpg`.
 
-const ROUEN := Vector2(2096.54, 1819.88)
-const AMIENS := Vector2(2224.0, 1763.6)
-const PARIS := Vector2(2212.975, 1924.511)
+const ROUEN := Vector2(2096.54, 3099.88)
+const AMIENS := Vector2(2224.0, 3043.6)
+const PARIS := Vector2(2212.975, 3204.511)
 ## [nom, point, distance (unités), décalage de cap (degrés)]
 const SHOTS := [
 	["strategique", ROUEN, 60.0, 0.0],

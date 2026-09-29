@@ -1,0 +1,52 @@
+{
+  "id": "chr_jean_henri_de_luxembourg",
+  "name": {
+    "display": "Jean-Henri de Luxembourg",
+    "local": "Jan Jindřich Lucemburský",
+    "local_language": "tchèque"
+  },
+  "sex": "male",
+  "house": "Luxembourg",
+  "faction": "fac_tirol",
+  "role": "ruler",
+  "birth": {
+    "value": "1322-10-12"
+  },
+  "death": {
+    "value": "1375-11-12"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Tyrol",
+      "from": {
+        "value": "1330"
+      },
+      "to": {
+        "value": "1341",
+        "note": "Répudié par Marguerite Maultasch en 1341, perte du comté."
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_impulsive"
+  ],
+  "piety": 45,
+  "family": {
+    "father": "chr_jean_de_luxembourg",
+    "spouses": [
+      "chr_marguerite_de_tyrol"
+    ]
+  },
+  "starting_location": "prov_tirol",
+  "status": "minor",
+  "description": "Fils cadet de Jean l'Aveugle de Bohême, frère du futur empereur Charles IV ; marié en 1330, encore enfant, à Marguerite Maultasch, comtesse de Tyrol de dix ans son aînée. Le mariage restera malheureux et sera répudié en 1341 (hors de la portée de ce lot).",
+  "sources": [
+    "Jean-Henri de Luxembourg"
+  ]
+}

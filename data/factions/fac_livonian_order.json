@@ -1,0 +1,71 @@
+{
+  "id": "fac_livonian_order",
+  "name": {
+    "display": "Ordre Livonien",
+    "local": "Livländischer Orden",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Ordre Livonien",
+  "adjective": "livonien",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_eberhard_von_monheim",
+  "capital": "prov_livonia",
+  "capital_city": "Wenden",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "suzerain": "fac_teutonic",
+  "primary_title": "tit_livonian_order",
+  "heraldry": {
+    "blazon": "D'argent à la croix de sable, à la bordure de gueules.",
+    "description": "Croix noire de l'Ordre, bordure rouge ajoutée en jeu pour distinguer la branche livonienne.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1A1A1A",
+    "uncertain": true,
+    "note": "Brisure de jeu, non attestée."
+  },
+  "titles": [
+    "Maître de Livonie"
+  ],
+  "treasury": 8000,
+  "prestige": 42,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_teutonic",
+      "status": "vassal",
+      "note": "Branche livonienne de l'ordre Teutonique depuis 1237, autonome de fait."
+    },
+    {
+      "faction": "fac_riga_archbishopric",
+      "status": "peace",
+      "note": "Rivalité ancienne avec l'archevêque pour la suprématie."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "war",
+      "note": "Guerre de frontière permanente entre la Livonie et la Lituanie."
+    },
+    {
+      "faction": "fac_novgorod",
+      "status": "peace",
+      "note": "Paix commerciale fragile, conflits de frontière en Ingrie et à Pskov."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 40,
+    "trade": 50,
+    "piety": 70
+  },
+  "description": "Branche livonienne de l'Ordre, maître de Wenden, de la Courlande et de la Sémigalle ; il domine ses voisins les évêques, a soumis Riga en 1330 et guette l'Estonie danoise.",
+  "sources": [
+    "Ordre Livonien",
+    "Eberhard von Monheim"
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "id": "prov_durazzo",
+  "name": {
+    "display": "Durazzo et Arbanon",
+    "local": "Dürrës",
+    "local_language": "latin"
+  },
+  "region": "balkans",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Shkumbin",
+    "Mat"
+  ],
+  "ports": [
+    "Durazzo",
+    "Alessio (Lezhë)"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "resources": [
+    "res_salt",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Durazzo",
+      "local": "Dyrrachium",
+      "local_language": "latin"
+    },
+    "lat": 41.323,
+    "lon": 19.444
+  },
+  "geo": {
+    "capital_lonlat": [
+      19.444,
+      41.323
+    ],
+    "seed_lonlat": [
+      19.7,
+      41.4
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_durazzo",
+  "culture": "cul_albanian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 30,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2400,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1050,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 3500,
+  "description": "Royaume d'Albanie angevin (Durazzo, Kruja, Alessio) : réduit à la côte, entouré de clans albanais (Thopia, Muzaka) et disputé par Byzance et la Serbie. Andronic III convoite la place depuis 1336.",
+  "sources": [
+    "Royaume d'Albanie (médiéval)",
+    "Durrës",
+    "Krujë"
+  ]
+}

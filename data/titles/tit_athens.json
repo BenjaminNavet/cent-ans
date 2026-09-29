@@ -1,0 +1,70 @@
+{
+  "id": "tit_athens",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché d'Athènes et de Néopatras",
+    "local": "Ducat d'Atenes i Neopàtria",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules, à la bordure d'azur.",
+    "description": "Armes d'Aragon-Sicile brisées d'une bordure : duché catalan d'Athènes.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2A5DA8",
+    "uncertain": true,
+    "note": "Brisure de jeu (la Compagnie catalane portait aussi les armes d'Aragon)."
+  },
+  "de_jure_liege": "tit_sicily",
+  "de_jure_provinces": [
+    "prov_attica",
+    "prov_neopatras"
+  ],
+  "holder_1337": {
+    "faction": "fac_athens",
+    "sources": [
+      "Duché d'Athènes",
+      "Duché de Néopatras",
+      "Guillaume II d'Athènes"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_athens_hold",
+      "title": "Garder le duché",
+      "description": "Le duc doit conserver Athènes.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_athens"
+      }
+    },
+    {
+      "id": "obj_athens_thessaly",
+      "title": "Toute la Grèce centrale",
+      "description": "Prendre la Thessalie à Byzance.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_thessaly"
+        ]
+      }
+    },
+    {
+      "id": "obj_athens_euboea",
+      "title": "L'Eubée",
+      "description": "Chasser Venise de Négrepont.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_negroponte"
+        ]
+      }
+    }
+  ],
+  "description": "Duchés d'Athènes et de Néopatras, apanage du cadet de Sicile.",
+  "sources": [
+    "Duché d'Athènes",
+    "Duché de Néopatras",
+    "Guillaume II d'Athènes"
+  ]
+}

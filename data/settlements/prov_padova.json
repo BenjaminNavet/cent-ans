@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_padova",
+    "province": "prov_padova",
+    "kind": "city",
+    "name": {
+      "display": "Padoue",
+      "local": "Padoa",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.8768,
+      45.4064
+    ],
+    "weight": 32,
+    "owner": "fac_verona",
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_university",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité universitaire occupée par Vérone au printemps 1337 ; Marsilio da Carrare y restaure sa seigneurie le 3 août 1337 avec l'appui de Venise et Florence, après la domination scaligère.",
+    "sources": [
+      "Padoue",
+      "Marsilio da Carrara",
+      "Carrare"
+    ]
+  },
+  {
+    "id": "set_praglia",
+    "province": "prov_padova",
+    "kind": "abbey",
+    "name": {
+      "display": "Praglia",
+      "local": "Praja",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.7315,
+      45.3287
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fondée vers 1080 près de Padoue.",
+    "sources": [
+      "Abbaye de Praglia"
+    ]
+  },
+  {
+    "id": "set_monselice",
+    "province": "prov_padova",
+    "kind": "castle",
+    "name": {
+      "display": "Monselice",
+      "local": "Monsełexe",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.7561,
+      45.2354
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Bourg fortifié au pied de sa rocca, sur la route entre Padoue et Este.",
+    "sources": [
+      "Monselice"
+    ]
+  }
+]

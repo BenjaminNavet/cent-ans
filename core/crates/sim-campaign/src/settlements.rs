@@ -139,6 +139,25 @@ impl CampaignState {
             .sum()
     }
 
+    /// Men of [`CampaignState::province_garrison_strength`], each place weighing
+    /// its kind's `province_effect_percent` (lot RS-B, ADR 0100: the garrison
+    /// that keeps a province in order is the city's; the dense map's castles and
+    /// towns count like their buildings, for half).
+    pub fn weighted_garrison_strength(&self, data: &GameData, province: &ProvinceId) -> u32 {
+        let Some(controller) = self.province_controller(province) else {
+            return 0;
+        };
+        let weighted: u64 = self
+            .settlements_of(province)
+            .filter(|(_, s)| &s.controller == controller)
+            .map(|(_, s)| {
+                u64::from(s.garrison_strength())
+                    * u64::from(crate::buildings::province_effect_percent(data, s.kind))
+            })
+            .sum();
+        u32::try_from(weighted / 100).unwrap_or(u32::MAX)
+    }
+
     /// `true` while the city of `province` is besieged.
     pub fn province_besieged(&self, province: &ProvinceId) -> bool {
         self.city_state(province).is_some_and(|s| s.siege.is_some())

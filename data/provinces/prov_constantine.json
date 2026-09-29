@@ -1,0 +1,90 @@
+{
+  "id": "prov_constantine",
+  "name": {
+    "display": "Constantine",
+    "local": "Qusanṭīna",
+    "local_language": "arabe maghrébin"
+  },
+  "region": "maghreb",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Rhumel"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Constantine",
+      "local": "Qusanṭīna",
+      "local_language": "arabe maghrébin"
+    },
+    "lat": 36.365,
+    "lon": 6.6147
+  },
+  "geo": {
+    "capital_lonlat": [
+      6.6147,
+      36.365
+    ],
+    "seed_lonlat": [
+      6.4,
+      36.15
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_hafsids",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 55000,
+        "unrest": 18,
+        "health": 55,
+        "wealth": 50,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 5500,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1375,
+        "unrest": 13,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 660,
+        "unrest": 13,
+        "health": 60,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Hauts plateaux constantinois : forteresse du Rhumel, grenier des Hafsides. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1700,
+  "description": "Constantine, place forte sur son rocher, seconde capitale de l'Est hafside ; gouvernée par des princes de la famille, qui se rebellent fréquemment contre Tunis.",
+  "sources": [
+    "Constantine",
+    "Hafsides"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "fac_mark",
+  "name": {
+    "display": "Comté de la Marck",
+    "local": "Grafschaft Mark",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Marck",
+  "adjective": "marckois",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_adolf_ii_von_der_mark",
+  "capital": "prov_westphalia",
+  "capital_city": "Münster",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_mark",
+  "heraldry": {
+    "blazon": "D'or à trois chevrons de gueules.",
+    "description": "Armes historiques des comtes de la Marck : trois chevrons de gueules sur champ d'or.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#C8102E"
+  },
+  "titles": [
+    "Comte de la Marck"
+  ],
+  "treasury": 6000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Adolphe II rend hommage à l'empereur pour son comté westphalien."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 55,
+    "trade": 50,
+    "piety": 65
+  },
+  "description": "Comté de la Marck, en Westphalie, tenu par Adolphe II (1328-1347) ; sa maison a déjà donné plusieurs archevêques de Cologne et continuera d'être très liée à l'Église.",
+  "sources": [
+    "Adolphe II de la Marck",
+    "Comté de la Marck"
+  ]
+}

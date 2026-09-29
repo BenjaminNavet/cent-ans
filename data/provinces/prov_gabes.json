@@ -1,0 +1,96 @@
+{
+  "id": "prov_gabes",
+  "name": {
+    "display": "Gabès et Djerba",
+    "local": "Qābis",
+    "local_language": "arabe maghrébin"
+  },
+  "region": "maghreb",
+  "terrain": "desert",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Oued Gabès"
+  ],
+  "resources": [
+    "res_fish",
+    "res_salt",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Gabès",
+      "local": "Qābis",
+      "local_language": "arabe maghrébin"
+    },
+    "lat": 33.8815,
+    "lon": 10.0982
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.0982,
+      33.8815
+    ],
+    "seed_lonlat": [
+      10.1,
+      33.5
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_makki",
+  "culture": "cul_maghrebi",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 32000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 2560,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 800,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 384,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Oasis maritime de Gabès, sud tunisien, île de Djerba (reprise aux Siciliens en 1335). Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 900,
+  "description": "Gabès, oasis sur la mer et étape des caravanes de Ghadamès et du Djérid ; les Banu Makki y forment depuis 1282 une dynastie locale sous suzeraineté hafside. Djerba, enlevée aux Siciliens en 1335 par le sultan Abu Bakr II avec l'aide de la population, y est rattachée (Djerba : possession hafside, non makkide).",
+  "sources": [
+    "Banu Makki",
+    "Conquête hafside de Djerba",
+    "Djerba"
+  ],
+  "sea_zones": [
+    "sea_ionian"
+  ],
+  "ports": [
+    "Gabès"
+  ]
+}

@@ -54,3 +54,37 @@ def test_shields_are_distinct_and_masked(tmp_path: Path) -> None:
     image = Image.open(paths[0])
     assert image.getpixel((127, 127))[3] == 0
     assert image.getpixel((64, 40))[3] == 255
+
+
+def _digest_image(image: Image.Image):
+    return hashlib.sha256(image.tobytes()).hexdigest()
+
+
+def test_new_charges_render_distinct_from_plain_field() -> None:
+    """FE new charges (key, cauldron, hand, ship, crescent, ox, chief) are drawn.
+
+    Each faction blazon must give a shield distinct from a plain field of the same
+    tinctures (regression for FEH: these blazons used to fall through to a bare
+    field and collide with each other).
+    """
+    factions = {faction["id"]: faction for faction in heraldry.load_factions()}
+    new_charge_factions = [
+        "fac_bremen",
+        "fac_lara",
+        "fac_tyrone",
+        "fac_isles",
+        "fac_luna",
+        "fac_ormond",
+        "fac_urgell",
+    ]
+    for faction_id in new_charge_factions:
+        heraldry_data = factions[faction_id]["heraldry"]
+        blazon = heraldry.parse_blazon(
+            heraldry_data["blazon"],
+            heraldry_data["primary_color"],
+            heraldry_data["secondary_color"],
+        )
+        charged = heraldry.render_shield(blazon)
+        plain = heraldry.Blazon(field=blazon.field, charge=blazon.charge, text="")
+        bare = heraldry.render_shield(plain)
+        assert _digest_image(charged) != _digest_image(bare), faction_id

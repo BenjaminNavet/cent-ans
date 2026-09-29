@@ -19,7 +19,9 @@
         "hills": { "$ref": "#/$defs/cost" },
         "forest": { "$ref": "#/$defs/cost" },
         "marsh": { "$ref": "#/$defs/cost" },
-        "mountains": { "$ref": "#/$defs/cost" }
+        "mountains": { "$ref": "#/$defs/cost" },
+        "steppe": { "$ref": "#/$defs/cost", "description": "Steppe (OM3, ADR 0116) : allure de plaine." },
+        "desert": { "$ref": "#/$defs/cost", "description": "Désert (OM3, ADR 0116) : cases des provinces de désert dans la grille, plus lentes que la plaine." }
       },
       "required": ["plains", "hills", "forest", "marsh", "mountains"],
       "additionalProperties": false

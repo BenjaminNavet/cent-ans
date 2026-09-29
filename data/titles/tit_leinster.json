@@ -1,0 +1,54 @@
+{
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Leinster",
+    "local": "Ríoghacht Laighean",
+    "local_language": "gaélique irlandais"
+  },
+  "heraldry": {
+    "blazon": "De gueules au lion rampant d'argent.",
+    "description": "Armes attestées tardivement (branche Kavanagh) ; utilisées ici par convention pour 1337.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2F2F2",
+    "uncertain": true
+  },
+  "de_jure_provinces": [
+    "prov_leinster"
+  ],
+  "holder_1337": {
+    "faction": "fac_leinster",
+    "sources": [
+      "Donnchadh Mac Murchada, roi de Leinster"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_leinster_hold",
+      "title": "Survivre",
+      "description": "Le royaume, réduit aux montagnes de Wicklow, doit simplement durer.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_leinster"
+      }
+    },
+    {
+      "id": "obj_leinster_dublin",
+      "title": "Reprendre Dublin",
+      "description": "Dublin fut jadis la capitale des rois de Leinster : la reprendre au Pale anglais.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_leinster",
+          "prov_dublin"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume de Leinster, réduit depuis la conquête anglo-normande (1169) à un réduit montagneux du Wicklow et du Carlow, tenu par les Mac Murchada, descendants du roi Diarmait qui appela les Anglo-Normands en 1169.",
+  "sources": [
+    "Donnchadh Mac Murchada",
+    "Royaume de Leinster",
+    "Diarmait Mac Murchada"
+  ],
+  "id": "tit_leinster"
+}

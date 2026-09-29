@@ -27,11 +27,12 @@ from cent_ans_tools.geo import download
 
 KK10_URL = "https://hs.pangaea.de/model/ALCC/KK10.nc"
 RAW_DIR = download.RAW_DIR / "kk10"
-CACHE_FILE = RAW_DIR / "kk10_1330_1349_europe.npz"
+CACHE_FILE = RAW_DIR / "kk10_1330_1349_om.npz"
 #: Years (AD) averaged: the generation before the Black Death, around 1337.
 YEARS = (1330, 1349)
-#: ``(lon_min, lat_min, lon_max, lat_max)`` extracted (map extent plus a margin).
-BBOX = (-12.0, 34.0, 17.0, 61.0)
+#: ``(lon_min, lat_min, lon_max, lat_max)`` extracted: lon/lat box of the map
+#: rectangle (ADR 0115, ``MapGrid.geographic_extent``) plus a margin.
+BBOX = (-37.0, 24.0, 69.0, 71.0)
 
 
 @dataclass(frozen=True)

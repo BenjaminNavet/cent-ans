@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_sandomierz",
+    "province": "prov_sandomierz",
+    "kind": "city",
+    "name": {
+      "display": "Sandomierz",
+      "local": "Sandomierz",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      21.7488,
+      50.6826
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville haute sur la Vistule, siège d'un palatinat et de l'un des grands châteaux royaux.",
+    "sources": [
+      "Sandomierz"
+    ]
+  },
+  {
+    "id": "set_radom",
+    "province": "prov_sandomierz",
+    "kind": "castle",
+    "name": {
+      "display": "Radom",
+      "local": "Radom",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      21.1471,
+      51.4027
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château et bourg de la terre de Sandomierz, sur la route de Mazovie.",
+    "sources": [
+      "Radom"
+    ]
+  },
+  {
+    "id": "set_wislica",
+    "province": "prov_sandomierz",
+    "kind": "village",
+    "name": {
+      "display": "Wiślica",
+      "local": "Wiślica",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      20.6836,
+      50.3417
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne capitale des Vislanes, collégiale royale sur la Nida.",
+    "sources": [
+      "Wiślica"
+    ]
+  }
+]

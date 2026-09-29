@@ -1,0 +1,56 @@
+{
+  "id": "tit_durazzo",
+  "rank": "county",
+  "name": {
+    "display": "Duché de Durazzo",
+    "local": "Ducato di Durazzo",
+    "local_language": "latin"
+  },
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules et au lambel d'argent.",
+    "description": "Armes d'Anjou-Sicile brisées d'une bordure et d'un lambel, comme les branches angevines de Durazzo et de Gravina.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Brisure de jeu : la distinction exacte entre les branches cadettes angevines est incertaine."
+  },
+  "de_jure_liege": "tit_naples",
+  "de_jure_provinces": [
+    "prov_durazzo"
+  ],
+  "holder_1337": {
+    "faction": "fac_durazzo",
+    "sources": [
+      "Royaume d'Albanie (médiéval)",
+      "Charles de Durazzo"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_durazzo_hold",
+      "title": "Garder Durazzo",
+      "description": "Le jeune Charles doit conserver le duché.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_durazzo"
+      }
+    },
+    {
+      "id": "obj_durazzo_berat",
+      "title": "Vers l'intérieur",
+      "description": "Prendre Bérat et Avlona à Byzance.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_berat"
+        ]
+      }
+    }
+  ],
+  "description": "Duché de Durazzo et royaume angevin d'Albanie ; fief de la maison d'Anjou-Durazzo.",
+  "sources": [
+    "Royaume d'Albanie (médiéval)",
+    "Charles de Durazzo"
+  ]
+}

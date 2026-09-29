@@ -1,0 +1,95 @@
+{
+  "id": "prov_crimee",
+  "name": {
+    "display": "Crimée (Solkhat)",
+    "local": "Қырым",
+    "local_language": "tatar kiptchak"
+  },
+  "region": "crimee",
+  "terrain": "steppe",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Salgir"
+  ],
+  "ports": [
+    "Soldaïa (Soudak)"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_salt",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Solkhat (Qirim)",
+      "local": "Solḫāt (Qırım)",
+      "local_language": "tatar kiptchak"
+    },
+    "lat": 45.03,
+    "lon": 35.09
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.09,
+      45.03
+    ],
+    "seed_lonlat": [
+      34.5,
+      45.35
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_golden_horde",
+  "culture": "cul_kipchak",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 56000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 17600,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 4000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2400,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1600,
+  "description": "Solkhat (Qirim, futur Stary Krym), chef-lieu de l'ulus de Crimée de la Horde : marché de la soie, du sel et des esclaves ; les Génois de Caffa y traitent, les Grecs et Arméniens y prospèrent.",
+  "sources": [
+    "Solkhat",
+    "Crimée"
+  ]
+}

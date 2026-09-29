@@ -26,6 +26,12 @@
       "items": { "$ref": "common.schema.json#/$defs/province_id" },
       "uniqueItems": true
     },
+    "kindred": {
+      "type": "array",
+      "description": "Lot OM3 (ADR 0116) : Églises séparées de la même foi au sens large (orthodoxie envers le catholicisme : schismatiques, pas infidèles). Relation symétrique ; une obédience compte comme son Église mère.",
+      "items": { "$ref": "common.schema.json#/$defs/religion_id" },
+      "uniqueItems": true
+    },
     "description": { "type": "string" },
     "sources": { "$ref": "common.schema.json#/$defs/sources" }
   },

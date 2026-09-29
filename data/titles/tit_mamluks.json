@@ -1,0 +1,76 @@
+{
+  "id": "tit_mamluks",
+  "rank": "kingdom",
+  "name": {
+    "display": "Sultanat mamelouk",
+    "local": "سلطنة المماليك",
+    "local_language": "arabe"
+  },
+  "heraldry": {
+    "blazon": "D'or à la fasce de sable.",
+    "description": "Couleurs jaune et noir de l'étendard mamelouk ; blason de jeu.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2A2A2A",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_provinces": [
+    "prov_aleppo",
+    "prov_alexandria",
+    "prov_cairo",
+    "prov_damascus",
+    "prov_delta",
+    "prov_gaza",
+    "prov_jerusalem",
+    "prov_kerak",
+    "prov_malatya",
+    "prov_safad",
+    "prov_tripoli",
+    "prov_upper_egypt"
+  ],
+  "holder_1337": {
+    "faction": "fac_mamluks",
+    "sources": [
+      "Mamluk Sultanate",
+      "Al-Nasir Muhammad"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_mamluks_hold",
+      "title": "Le trône du Caire",
+      "description": "Conserver le sultanat.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_mamluks"
+      }
+    },
+    {
+      "id": "obj_mamluks_syria",
+      "title": "Égypte et Syrie",
+      "description": "Tenir Le Caire, Damas et Alep.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_cairo",
+          "prov_damascus",
+          "prov_aleppo"
+        ]
+      }
+    },
+    {
+      "id": "obj_mamluks_cilicia",
+      "title": "La porte de Cilicie",
+      "description": "Réduire l'Arménie de Cilicie.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_cilicia"
+      }
+    }
+  ],
+  "description": "Sultanat de la caste militaire de mamelouks turcs et circassiens, maître de l'Égypte, de la Syrie et du Hedjaz ; al-Nasir Muhammad, son troisième règne (1310-1341) au sommet, tient Le Caire, Damas et Alep.",
+  "sources": [
+    "Mamluk Sultanate",
+    "Al-Nasir Muhammad"
+  ]
+}

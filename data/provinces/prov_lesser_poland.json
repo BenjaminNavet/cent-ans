@@ -1,0 +1,96 @@
+{
+  "id": "prov_lesser_poland",
+  "name": {
+    "display": "Petite-Pologne",
+    "local": "Małopolska",
+    "local_language": "polonais"
+  },
+  "region": "pologne",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Vistule",
+    "Raba"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_salt",
+    "res_wheat",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Cracovie",
+      "local": "Kraków",
+      "local_language": "polonais"
+    },
+    "lat": 50.0647,
+    "lon": 19.945
+  },
+  "geo": {
+    "capital_lonlat": [
+      19.945,
+      50.0647
+    ],
+    "seed_lonlat": [
+      20.1,
+      50.05
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_poland",
+  "culture": "cul_polish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Cracovie compte quelques milliers d'habitants ; les salines de Wieliczka et Bochnia font la richesse royale.",
+    "classes": {
+      "peasants": {
+        "count": 330000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 26400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7260,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 11550,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_stone_walls",
+    "bld_fair",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4200,
+  "description": "Cœur du royaume restauré : Cracovie, ville du couronnement, le Wawel et les mines de sel de Wieliczka et de Bochnia, qui financent la couronne de Casimir III.",
+  "sources": [
+    "Petite-Pologne",
+    "Cracovie",
+    "Mine de sel de Wieliczka"
+  ]
+}

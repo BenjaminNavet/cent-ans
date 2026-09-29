@@ -1,0 +1,95 @@
+{
+  "id": "prov_calabria_ultra",
+  "name": {
+    "display": "Calabre ultérieure",
+    "local": "Calabria Ultra",
+    "local_language": "italien"
+  },
+  "region": "italie_sud",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [],
+  "resources": [
+    "res_wood",
+    "res_wine",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Reggio de Calabre",
+      "local": "Reggio",
+      "local_language": "italien"
+    },
+    "lat": 38.1147,
+    "lon": 15.65
+  },
+  "geo": {
+    "capital_lonlat": [
+      15.65,
+      38.1147
+    ],
+    "seed_lonlat": [
+      16.4,
+      38.75
+    ],
+    "voronoi_weight": 0.7
+  },
+  "owner": "fac_naples",
+  "culture": "cul_neapolitan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 34000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 42,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 2040,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 57,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 850,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 62,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 408,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 67,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Pointe de la botte : Aspromonte, Catanzaro, détroit de Messine. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1100,
+  "description": "La Calabre ultérieure, jusqu'au détroit de Messine ; Reggio, Catanzaro (soie), Gerace ; face à la Sicile insurgée depuis les Vêpres, sous la garde d'un capitaine.",
+  "sources": [
+    "Calabre",
+    "Reggio de Calabre",
+    "Catanzaro"
+  ],
+  "sea_zones": [
+    "sea_mediterranean",
+    "sea_ionian"
+  ],
+  "ports": [
+    "Reggio de Calabre"
+  ]
+}

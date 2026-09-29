@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_hrodna",
+    "province": "prov_hrodna",
+    "kind": "city",
+    "name": {
+      "display": "Hrodna",
+      "local": "Horodnia",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      23.8131,
+      53.6688
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château de Hrodna sur le Niémen, verrou de la Lituanie occidentale.",
+    "sources": [
+      "Hrodna"
+    ]
+  },
+  {
+    "id": "set_vaukavysk",
+    "province": "prov_hrodna",
+    "kind": "town",
+    "name": {
+      "display": "Vaŭkavysk",
+      "local": "Vaŭkavysk",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      24.4531,
+      53.1567
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de l'ancienne principauté de Vaŭkavysk.",
+    "sources": [
+      "Vaŭkavysk"
+    ]
+  },
+  {
+    "id": "set_kamianiets",
+    "province": "prov_hrodna",
+    "kind": "castle",
+    "name": {
+      "display": "Kamianiets",
+      "local": "Kamianiets",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      23.8225,
+      52.4056
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Tour de brique du XIIIe siècle, sentinelle sur la Lieusna, entre Brest et Hrodna.",
+    "sources": [
+      "Kamianiets"
+    ]
+  }
+]

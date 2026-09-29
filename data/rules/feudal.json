@@ -10,6 +10,10 @@
   "ascension_turns": 20,
   "loyalty": {
     "base": 55,
+    "power_ratio": 2.0,
+    "drift_per_turn": 5,
+    "homage_start": 60,
+    "memory_turns": 12,
     "power_favourable": 10,
     "power_unfavourable": -10,
     "excommunicated_liege": -20,
@@ -22,5 +26,49 @@
     "peer_forfeiture": -10,
     "liege_defeat": -5,
     "rival_claimant": -15
-  }
+  },
+  "forfeiture_win_war_score": 10,
+  "title_loss_penalty": 30,
+  "arbitration": {
+    "family_tie": 20,
+    "law_heir": 10,
+    "designated_heir": 5
+  },
+  "escalation": {
+    "shirk_prestige": -20,
+    "shirk_loyalty_drop": 10,
+    "intervene_prestige": 5,
+    "protection_memory_turns": 20,
+    "answer_turns": 2,
+    "score": {
+      "base": 30,
+      "power_favourable": 15,
+      "power_unfavourable": -25,
+      "power_ratio": 1.0,
+      "attitude_divisor": 2,
+      "empty_treasury": -20,
+      "per_ongoing_war": -15,
+      "allied_with_aggressor": -60,
+      "intervene_at": 20,
+      "certainty_margin": 15
+    },
+    "arbitration": {
+      "truce_turns": 8,
+      "impose_peace_power_ratio": 1.5,
+      "take_side_attitude_gap": 40,
+      "imposed_peace_loyalty_drop": 5,
+      "opposed_loyalty_drop": 20
+    }
+  },
+  "host": {
+    "max_muster_km": 200,
+    "independent_power_ratio": 0.5
+  },
+  "start_felonies": [
+    {
+      "vassal": "fac_england",
+      "liege": "fac_france",
+      "reason": "harboured_felon"
+    }
+  ]
 }

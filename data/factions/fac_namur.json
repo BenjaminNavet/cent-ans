@@ -1,0 +1,66 @@
+{
+  "id": "fac_namur",
+  "name": {
+    "display": "Comté de Namur",
+    "local": "Conté de Namur",
+    "local_language": "ancien français"
+  },
+  "short_name": "Namur",
+  "adjective": "namurois",
+  "government": "county",
+  "playable": false,
+  "ruler": "chr_philippe_iii_de_namur",
+  "heir": "chr_guillaume_i_de_namur",
+  "capital": "prov_namur",
+  "capital_city": "Namur",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_namur",
+  "heraldry": {
+    "blazon": "D'or au lion de sable, armé et lampassé de gueules, au bâton de gueules brochant sur le tout.",
+    "description": "Lion de Flandre brisé d'un bâton de gueules, adopté par la branche de Dampierre-Namur, cadette de la maison de Flandre.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1A1A1A"
+  },
+  "titles": [
+    "Marquis de Namur",
+    "Comte de Namur"
+  ],
+  "treasury": 4500,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Comté érigé en marquisat d'Empire par Louis IV en 1336, honneur sans changement de rang réel."
+    },
+    {
+      "faction": "fac_flanders",
+      "status": "peace",
+      "note": "Maison cousine : les Dampierre-Namur descendent de Gui de Dampierre, comte de Flandre."
+    },
+    {
+      "faction": "fac_liege",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 50
+  },
+  "description": "Petit comté mosan tenu par une branche cadette de la maison de Flandre, aux carrières de pierre bleue réputées ; Philippe III meurt à Famagouste en 1337 et son jeune frère Guillaume Ier le Riche lui succède.",
+  "sources": [
+    "Philippe III de Namur",
+    "Guillaume Ier de Namur",
+    "Comté de Namur"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "id": "prov_syrmia",
+  "name": {
+    "display": "Syrmie",
+    "local": "Szerémség",
+    "local_language": "hongrois"
+  },
+  "region": "hongrie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Danube",
+    "Save"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Sremska Mitrovica",
+      "local": "Szávaszentdemeter",
+      "local_language": "hongrois"
+    },
+    "lat": 44.9764,
+    "lon": 19.6108
+  },
+  "geo": {
+    "capital_lonlat": [
+      19.6108,
+      44.9764
+    ],
+    "seed_lonlat": [
+      19.5,
+      45.1
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_hungary",
+  "culture": "cul_croatian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Marche entre Danube et Save face à la Serbie ; peuplement slave mixte.",
+    "classes": {
+      "peasants": {
+        "count": 80000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1760,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2000,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Syrmie (Szerém) entre Danube et Save, marche méridionale du royaume face à la Serbie de Stefan Dušan ; bourgs viticoles et abbaye de Bánmonostor.",
+  "sources": [
+    "Syrmie",
+    "Sremska Mitrovica"
+  ]
+}

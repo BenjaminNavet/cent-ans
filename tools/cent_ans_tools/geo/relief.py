@@ -24,20 +24,25 @@ from rasterio.enums import Resampling
 from rasterio.warp import reproject
 
 from cent_ans_tools.geo import download, terrain
-from cent_ans_tools.geo.project import CRS_GEO, CRS_MAP, MapGrid
+from cent_ans_tools.geo.project import CRS_GEO, CRS_MAP, MapGrid, grid_from_metadata
 
 REPO_DIR = Path(__file__).resolve().parents[3]
 MAP_DIR = REPO_DIR / "data" / "map"
-TILE_SIZE_PX = 8192
+#: Fine relief is twice as fine as the map grid (one fine pixel = half a map pixel).
+FINE_SCALE = 2
 TILE_PX = 512
 TILE_DIR = "height"
 TILE_PATTERN = "h_{col}_{row}.png"
-HEIGHT_TILES = {
-    "size_px": TILE_SIZE_PX,
-    "tile_px": TILE_PX,
-    "dir": TILE_DIR,
-    "pattern": TILE_PATTERN,
-}
+
+
+def height_tiles_meta(grid: MapGrid) -> dict:
+    """``map.json.height_tiles`` for the fine grid ``grid`` ([w, h] in pixels)."""
+    return {
+        "size_px": [grid.width_px, grid.height_px],
+        "tile_px": TILE_PX,
+        "dir": TILE_DIR,
+        "pattern": TILE_PATTERN,
+    }
 
 
 @dataclass
@@ -51,15 +56,15 @@ class ReliefResult:
 
 
 def fine_grid(map_dir: Path = MAP_DIR) -> MapGrid:
-    """The 8192² grid over the ``map.json`` bounds."""
+    """The fine relief grid (twice the map grid) over the ``map.json`` bounds."""
     metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
-    return MapGrid(tuple(metadata["bounds_projected"]), TILE_SIZE_PX)
+    return grid_from_metadata(metadata, FINE_SCALE)
 
 
 def resample_heights(grid: MapGrid, tile_paths: list[Path]) -> np.ndarray:
     """ETOPO mosaic reprojected bilinearly onto ``grid`` (metres, NaN -> 0)."""
     mosaic, src_transform = terrain.mosaic_dem(tile_paths, grid.geographic_extent())
-    destination = np.full((grid.size_px, grid.size_px), np.nan, dtype=np.float32)
+    destination = np.full(grid.shape, np.nan, dtype=np.float32)
     reproject(
         source=mosaic,
         destination=destination,
@@ -75,12 +80,12 @@ def resample_heights(grid: MapGrid, tile_paths: list[Path]) -> np.ndarray:
 
 
 def write_tiles(encoded: np.ndarray, directory: Path) -> list[Path]:
-    """Split a ``uint16`` square array into ``TILE_PX`` tiles named by :data:`TILE_PATTERN`."""
+    """Split a ``uint16`` array into ``TILE_PX`` tiles named by :data:`TILE_PATTERN`."""
     directory.mkdir(parents=True, exist_ok=True)
-    count = encoded.shape[0] // TILE_PX
+    rows, cols = encoded.shape[0] // TILE_PX, encoded.shape[1] // TILE_PX
     paths = []
-    for row in range(count):
-        for col in range(count):
+    for row in range(rows):
+        for col in range(cols):
             block = encoded[
                 row * TILE_PX : (row + 1) * TILE_PX, col * TILE_PX : (col + 1) * TILE_PX
             ]
@@ -90,8 +95,19 @@ def write_tiles(encoded: np.ndarray, directory: Path) -> list[Path]:
     return paths
 
 
-def read_tiles(directory: Path, count: int) -> np.ndarray:
-    """Reassemble ``count`` x ``count`` tiles into one ``uint16`` array."""
+def read_tiles(
+    directory: Path, count: int | tuple[int, int], rows: int | None = None
+) -> np.ndarray:
+    """Reassemble tiles into one ``uint16`` array.
+
+    Args:
+        directory: Tile directory.
+        count: Tiles per row (columns), or ``(cols, rows)``.
+        rows: Tile rows (defaults to ``count``: square layout).
+    """
+    if isinstance(count, tuple):
+        count, rows = count
+    rows = count if rows is None else rows
     rows = [
         np.hstack(
             [
@@ -99,16 +115,22 @@ def read_tiles(directory: Path, count: int) -> np.ndarray:
                 for col in range(count)
             ]
         )
-        for row in range(count)
+        for row in range(rows)
     ]
     return np.vstack(rows)
+
+
+def tile_counts(map_dir: Path = MAP_DIR) -> tuple[int, int]:
+    """``(cols, rows)`` of the fine relief tiles."""
+    grid = fine_grid(map_dir)
+    return grid.width_px // TILE_PX, grid.height_px // TILE_PX
 
 
 def update_map_json(map_dir: Path) -> None:
     """Add (or refresh) ``height_tiles`` in ``map.json``, keeping every other key."""
     path = map_dir / "map.json"
     metadata = json.loads(path.read_text(encoding="utf-8"))
-    metadata["height_tiles"] = dict(HEIGHT_TILES)
+    metadata["height_tiles"] = height_tiles_meta(fine_grid(map_dir))
     path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
 
 
@@ -116,7 +138,7 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefResult:
     """Write ``data/map/height/h_<col>_<row>.png`` and ``map.json.height_tiles``."""
     started = time.perf_counter()
     grid = fine_grid(map_dir)
-    names = download.etopo_tiles_covering(*grid.geographic_extent())
+    names = download.etopo_tiles_for_grid(grid)
     heights = resample_heights(grid, download.etopo_tiles(names, force))
     paths = write_tiles(terrain.height_to_uint16(heights), map_dir / TILE_DIR)
     update_map_json(map_dir)

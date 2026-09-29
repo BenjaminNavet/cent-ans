@@ -106,8 +106,110 @@ struct Report {
     declared_by_france: u32,
     /// UR2: whether each of `CENTURY_15` was ever seen in an army or a garrison (any faction).
     recruited_15th: Vec<bool>,
+    /// FE8: feudal balance measures.
+    fe8: Fe8,
     seconds: f64,
 }
+
+/// FE8 (`docs/wip/fe8-equilibre.md`): forfeitures, felonies, the imperial
+/// host and the French revenue.
+#[derive(Default)]
+struct Fe8 {
+    /// Turn France first declares the forfeiture of England (Guyenne).
+    guyenne_commise: Option<u32>,
+    /// Turn of the first France-England war.
+    first_war: Option<u32>,
+    /// Forfeitures declared / executed at the peace (every faction).
+    commises: u32,
+    commises_executed: u32,
+    felonies: u32,
+    /// Vassals answering the host of the Emperor, and against France.
+    imperial_host: u32,
+    imperial_host_vs_france: u32,
+    /// Turns x Italian imperial vassals at war with France (first 50 turns).
+    italian_war_turns: u32,
+    /// Turns the Emperor is allied with one of its direct vassals.
+    empire_allied_vassal_turns: u32,
+    /// France's revenue over the first 50 turns.
+    france_income_50: i64,
+    /// France's treasury at turn 50.
+    france_treasury_50: i64,
+    /// Bankruptcies of the factions holding at most 2 provinces at start.
+    small_bankruptcies: u32,
+    small_factions: usize,
+    /// Bankruptcies of the 28 factions of before FE (`LEGACY`), the population
+    /// the column measured up to RS-B.
+    legacy_bankruptcies: u32,
+    /// Spec FE § 5 bands: France's direct vassals at the start, after 20
+    /// years and at the end; France first realm by population (itself and
+    /// its direct vassals) after 20 years and at the end; succession wars
+    /// (disputes taken up by a sponsor); most provinces held at the end by a
+    /// faction of at most 2 provinces in 1337, and which.
+    france_vassals: [usize; 3],
+    france_first: [bool; 2],
+    succession_wars: usize,
+    minor_max: (usize, String),
+}
+
+/// FE8: population of `faction`'s realm (its provinces and its direct vassals').
+fn realm_population(state: &CampaignState, data: &GameData, faction: &FactionId) -> u64 {
+    let mut members = sim_campaign::feudal::direct_vassals(state, data, faction);
+    members.push(faction.clone());
+    members
+        .iter()
+        .flat_map(|f| state.owned_provinces(f))
+        .filter_map(|p| state.provinces.get(&p))
+        .map(|p| p.population.total())
+        .sum()
+}
+
+/// FE8: whether France is the most populous sovereign realm.
+fn france_first(state: &CampaignState, data: &GameData) -> bool {
+    let france = id("fac_france");
+    let ours = realm_population(state, data, &france);
+    state
+        .factions
+        .iter()
+        .filter(|(f, s)| {
+            s.alive && s.suzerain.is_none() && **f != france && f.as_str() != "fac_rebels"
+        })
+        .all(|(f, _)| realm_population(state, data, f) <= ours)
+}
+
+/// FE8: the factions of before FE (ae5d94f1), rebels left out.
+const LEGACY: &[&str] = &[
+    "fac_aragon",
+    "fac_austria",
+    "fac_bohemia",
+    "fac_brabant",
+    "fac_brittany",
+    "fac_burgundy",
+    "fac_castile",
+    "fac_empire",
+    "fac_england",
+    "fac_flanders",
+    "fac_florence",
+    "fac_france",
+    "fac_genoa",
+    "fac_granada",
+    "fac_guelders",
+    "fac_hainaut",
+    "fac_holstein",
+    "fac_milan",
+    "fac_naples",
+    "fac_navarre",
+    "fac_papacy",
+    "fac_portugal",
+    "fac_savoy",
+    "fac_scotland",
+    "fac_sweden",
+    "fac_swiss",
+    "fac_venice",
+    "fac_verona",
+];
+
+/// FE8: the imperial vassals of Italy, whose host against France RS measured.
+const ITALIANS: &[&str] = &["fac_milan", "fac_savoy", "fac_genoa", "fac_verona"];
 
 /// EQ6: why England, at peace with France, does not declare war (one count
 /// per peace turn and blocker; `free` when nothing in the claim-war gate
@@ -793,6 +895,16 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         blockers: vec![0; BLOCKERS.len()],
         ..Report::default()
     };
+    // FE8: the small factions (at most 2 provinces in 1337).
+    let small: BTreeSet<FactionId> = state
+        .factions
+        .keys()
+        .filter(|f| f.as_str() != "fac_rebels" && state.owned_provinces(f).len() <= 2)
+        .cloned()
+        .collect();
+    report.fe8.small_factions = small.len();
+    report.fe8.france_vassals[0] =
+        sim_campaign::feudal::direct_vassals(&state, data, &france).len();
     let names: Vec<String> = [&france, &england]
         .iter()
         .map(|f| data.factions[*f].short_or_display_name().to_owned())
@@ -923,6 +1035,12 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 EventKind::Bankruptcy => {
                     if let Some(f) = &event.faction {
                         *report.bankruptcies.entry(f.clone()).or_default() += 1;
+                        if small.contains(f) {
+                            report.fe8.small_bankruptcies += 1;
+                        }
+                        if LEGACY.contains(&f.as_str()) {
+                            report.fe8.legacy_bankruptcies += 1;
+                        }
                     }
                 }
                 EventKind::Battle
@@ -1217,6 +1335,15 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 println!("    t{} {}", state.turn, e.text_fr);
             }
         }
+        track_fe8(&state, data, &events, &names, &mut report.fe8);
+        if state.turn == 80 {
+            report.fe8.france_vassals[1] =
+                sim_campaign::feudal::direct_vassals(&state, data, &france).len();
+            report.fe8.france_first[0] = france_first(&state, data);
+        }
+        if at_war {
+            report.fe8.first_war.get_or_insert(state.turn);
+        }
         if at_war && !was_at_war {
             let by_france = events.iter().any(|e| {
                 matches!(e.kind, EventKind::WarDeclared)
@@ -1237,7 +1364,10 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             report.dominance_turns += 1;
         }
         for (index, (_, a, b)) in PAIRS.iter().enumerate() {
-            if state.is_allied(&id(a), &id(b)) {
+            // FE8 (ADR 0114): a direct feudal tie stands for an alliance.
+            if state.is_allied(&id(a), &id(b))
+                || sim_campaign::feudal::direct_tie(&state, data, &id(a), &id(b))
+            {
                 report.alliance_turns[index] += 1;
                 report.alliance_first[index].get_or_insert(state.turn);
                 if at_war {
@@ -1319,6 +1449,25 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         .map(|(id, _)| id.as_str().trim_start_matches("fac_").to_owned())
         .collect();
     report.idle_count = over_limit.values().filter(|n| **n > 4).count();
+    report.fe8.france_vassals[2] =
+        sim_campaign::feudal::direct_vassals(&state, data, &france).len();
+    report.fe8.france_first[1] = france_first(&state, data);
+    report.fe8.succession_wars = state
+        .feudal
+        .disputes
+        .iter()
+        .filter(|d| d.sponsor.is_some())
+        .count();
+    report.fe8.minor_max = small
+        .iter()
+        .map(|f| {
+            (
+                state.owned_provinces(f).len(),
+                f.as_str().trim_start_matches("fac_").to_owned(),
+            )
+        })
+        .max()
+        .unwrap_or_default();
     report.factions = state
         .factions
         .keys()
@@ -1478,12 +1627,134 @@ fn main() {
     print_summary(&reports, decades);
     print_eq4(&reports);
     print_eq6(&reports);
+    print_fe8(&reports);
     if std::env::var("CV3_STATS").is_ok() {
         print_cv3(&reports);
     }
 }
 
 /// EQ6: who opens the France-England wars and what keeps England at peace.
+/// FE8: one turn of feudal measures (after `end_turn`).
+fn track_fe8(
+    state: &CampaignState,
+    data: &GameData,
+    events: &[sim_campaign::GameEvent],
+    names: &[String],
+    fe8: &mut Fe8,
+) {
+    let france = id("fac_france");
+    let empire = id("fac_empire");
+    let empire_name = data.factions[&empire].short_or_display_name().to_owned();
+    for e in events {
+        let text = e.text_fr.as_str();
+        if text.contains("prononce la commise") {
+            fe8.commises += 1;
+            if e.faction.as_ref() == Some(&france) && text.contains(names[1].as_str()) {
+                fe8.guyenne_commise.get_or_insert(state.turn);
+            }
+        } else if text.starts_with("La commise est exécutée") {
+            fe8.commises_executed += 1;
+        } else if text.starts_with("Félonie de") {
+            fe8.felonies += 1;
+        } else if text.contains("répond à l'ost de son suzerain")
+            && text.contains(&format!("suzerain {empire_name} "))
+        {
+            fe8.imperial_host += 1;
+            if text.ends_with(&format!("contre {}.", names[0])) {
+                fe8.imperial_host_vs_france += 1;
+            }
+        }
+    }
+    let turn = state.turn;
+    if turn <= 50 {
+        fe8.italian_war_turns += ITALIANS
+            .iter()
+            .filter(|f| state.is_at_war(&id(f), &france))
+            .count() as u32;
+        if let Some(f) = state.factions.get(&france) {
+            fe8.france_income_50 += f.income_last_turn;
+            if turn == 50 {
+                fe8.france_treasury_50 = f.treasury;
+            }
+        }
+    }
+    let empire_allies = &state.factions[&empire].allies;
+    if sim_campaign::feudal::direct_vassals(state, data, &empire)
+        .iter()
+        .any(|v| empire_allies.contains(v))
+    {
+        fe8.empire_allied_vassal_turns += 1;
+    }
+}
+
+fn print_fe8(reports: &[Report]) {
+    println!("\nFE8 — féodalité :");
+    println!(
+        "| graine | commise Guyenne (tour) | 1re guerre FR-EN | commises / exécutées | félonies | ost impérial (dont c. France) | Italiens en guerre c. France (tours×fac., t≤50) | Empire allié à son vassal (tours) | recettes France t≤50 | trésor France t50 | banqueroutes petites fac. / fac. / déc. | banqueroutes 28 fac. d'avant FE / fac. / déc. |"
+    );
+    println!("|---|---|---|---|---|---|---|---|---|---|---|---|");
+    for r in reports {
+        let f = &r.fe8;
+        let small_rate = f64::from(f.small_bankruptcies)
+            / f.small_factions.max(1) as f64
+            / (f64::from(r.turns) / 40.0);
+        let legacy_rate =
+            f64::from(f.legacy_bankruptcies) / LEGACY.len() as f64 / (f64::from(r.turns) / 40.0);
+        println!(
+            "| {} | {} | {} | {} / {} | {} | {} ({}) | {} | {} | {} | {} | {:.2} | {:.2} |",
+            r.seed,
+            f.guyenne_commise.map_or("-".to_owned(), |t| t.to_string()),
+            f.first_war.map_or("-".to_owned(), |t| t.to_string()),
+            f.commises,
+            f.commises_executed,
+            f.felonies,
+            f.imperial_host,
+            f.imperial_host_vs_france,
+            f.italian_war_turns,
+            f.empire_allied_vassal_turns,
+            f.france_income_50,
+            f.france_treasury_50,
+            small_rate,
+            legacy_rate,
+        );
+    }
+    println!(
+        "| graine | vassaux directs de la France (1337 / t80 / fin) | France 1er royaume par population (t80 / fin) | guerres de succession | mineure la plus grande à la fin (provinces) |"
+    );
+    println!("|---|---|---|---|---|");
+    for r in reports {
+        let f = &r.fe8;
+        println!(
+            "| {} | {} / {} / {} | {} / {} | {} | {} ({}) |",
+            r.seed,
+            f.france_vassals[0],
+            f.france_vassals[1],
+            f.france_vassals[2],
+            if f.france_first[0] { "oui" } else { "non" },
+            if f.france_first[1] { "oui" } else { "non" },
+            f.succession_wars,
+            f.minor_max.1,
+            f.minor_max.0,
+        );
+    }
+    let n = reports.len();
+    let guyenne = reports
+        .iter()
+        .filter(|r| r.fe8.guyenne_commise.is_some())
+        .count();
+    let trigger = reports
+        .iter()
+        .filter(|r| r.fe8.guyenne_commise.is_some() && r.fe8.guyenne_commise == r.fe8.first_war)
+        .count();
+    println!("  Commise de Guyenne : {guyenne}/{n} graines, dont {trigger}/{n} ouvrant la 1re guerre FR-EN.");
+    let income: Vec<f64> = reports
+        .iter()
+        .map(|r| r.fe8.france_income_50 as f64)
+        .collect();
+    let (mean, min, max) = spread(&income);
+    println!("  Recettes France t≤50 : moy. {mean:.0} [{min:.0}-{max:.0}]");
+}
+
 fn print_eq6(reports: &[Report]) {
     println!("\nEQ6 — tours de paix FR-EN, obstacles à la déclaration anglaise :");
     println!(

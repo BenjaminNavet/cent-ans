@@ -1,0 +1,40 @@
+{
+  "id": "chr_barnim_iii_de_pomeranie",
+  "name": {
+    "display": "Barnim III de Poméranie",
+    "local": "Barnim III. von Pommern-Stettin",
+    "local_language": "moyen bas-allemand"
+  },
+  "epithet": "le Grand",
+  "sex": "male",
+  "house": "Greifen",
+  "faction": "fac_pomerania_stettin",
+  "role": "heir",
+  "birth": {
+    "value": "1300",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1368-08-24"
+  },
+  "historical": true,
+  "skills": {
+    "command": 7,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_ambitious"
+  ],
+  "piety": 60,
+  "family": {
+    "father": "chr_otto_i_de_pomeranie"
+  },
+  "starting_location": "prov_pomerania_stettin",
+  "status": "at_court",
+  "description": "Fils d'Othon Ier, co-régent de Poméranie-Stettin ; futur « le Grand » qui unifiera le duché.",
+  "sources": [
+    "Barnim III de Poméranie"
+  ]
+}

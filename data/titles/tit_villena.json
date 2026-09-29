@@ -1,0 +1,55 @@
+{
+  "id": "tit_villena",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Villena",
+    "local": "Señorío de Villena",
+    "local_language": "castillan"
+  },
+  "heraldry": {
+    "blazon": "Écartelé de Castille et de León, à la bordure d'argent.",
+    "description": "Armes royales de Castille-León brisées d'une bordure, portées par les cadets de la maison de Castille issus de l'infant Manuel.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason personnel de Juan Manuel non localisé avec certitude ; approximation d'après sa filiation royale."
+  },
+  "de_jure_liege": "tit_castile",
+  "de_jure_provinces": [
+    "prov_villena"
+  ],
+  "holder_1337": {
+    "faction": "fac_villena",
+    "sources": [
+      "Juan Manuel, Prince of Villena",
+      "Lordship of Villena"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_villena_hold",
+      "title": "Garder l'autonomie",
+      "description": "Don Juan Manuel doit conserver ses terres, pratiquement un royaume dans le royaume.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_villena"
+      }
+    },
+    {
+      "id": "obj_villena_murcia",
+      "title": "L'adelantamiento de Murcie",
+      "description": "Tenir Murcie, dont Don Juan Manuel fut adelantado mayor.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_murcia"
+        ]
+      }
+    }
+  ],
+  "description": "Seigneurie bâtie par don Juan Manuel, petit-fils de Ferdinand III, adelantado mayor de Murcie, auteur du Conde Lucanor ; il frappe monnaie et entretient plus de mille chevaliers, autonomie comparable à celle des royaumes voisins.",
+  "sources": [
+    "Juan Manuel, Prince of Villena",
+    "Lordship of Villena"
+  ]
+}

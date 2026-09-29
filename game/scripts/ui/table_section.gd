@@ -41,7 +41,7 @@ func _init() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_label = Label.new()
 	header_label.text = "La Table"
-	header_label.add_theme_font_size_override("font_size", 16)
+	header_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	add_child(header_label)
 
 	lent_banner = PanelContainer.new()
@@ -63,13 +63,14 @@ func _init() -> void:
 	current_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	current_row.add_child(current_chip)
 	cost_label = Label.new()
-	cost_label.add_theme_font_size_override("font_size", 13)
+	cost_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	current_row.add_child(cost_label)
 
 	changed_label = Label.new()
 	changed_label.text = "Régime déjà changé ce tour-ci (effet à la fin du tour)."
-	changed_label.add_theme_font_size_override("font_size", 12)
+	changed_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	changed_label.add_theme_color_override("font_color", MUTED_COLOR)
+	changed_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6
 	changed_label.hide()
 	add_child(changed_label)
 
@@ -88,7 +89,7 @@ func _init() -> void:
 
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	error_label.add_theme_font_size_override("font_size", 12)
+	error_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	error_label.add_theme_color_override("font_color", ERROR_COLOR)
 	error_label.hide()
 	add_child(error_label)
@@ -108,7 +109,7 @@ func _rich_text(font_size: int) -> RichTextLabel:
 	label.scroll_active = false
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.custom_minimum_size = Vector2(300, 0)
+	label.custom_minimum_size = Vector2(160, 0)  # Q6 : zone `SIDE_PANEL` étroite (264 px utiles à 1280×720)
 	label.add_theme_color_override("default_color", RichTooltip.INK)
 	for key in ["normal_font_size", "bold_font_size", "italics_font_size"]:
 		label.add_theme_font_size_override(key, font_size)
@@ -150,7 +151,7 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 		lent_text.text = CodexText.format(RuleValues.format(LENT_TEXT))
 	choose_button.visible = player_owned
 	choose_button.disabled = changed
-	choose_button.tooltip_text = "Un seul changement par province et par tour." if changed else "Choisir la table de la province (effet à la fin du tour)."
+	RichTooltip.attach_plain(choose_button, "choose_diet", {"body": "Un seul changement par province et par tour." if changed else "Choisir la table de la province (effet à la fin du tour)."})
 	if not player_owned:
 		options_box.hide()
 	_fill_options(changed)
@@ -190,7 +191,7 @@ func _fill_options(changed: bool) -> void:
 		if not available and not current:
 			var marker := Label.new()
 			marker.text = "indisponible"
-			marker.add_theme_font_size_override("font_size", 12)
+			marker.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 			marker.add_theme_color_override("font_color", ERROR_COLOR)
 			line.add_child(marker)
 		options_box.add_child(line)

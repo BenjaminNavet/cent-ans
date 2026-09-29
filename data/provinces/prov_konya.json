@@ -1,0 +1,86 @@
+{
+  "id": "prov_konya",
+  "name": {
+    "display": "Konya"
+  },
+  "region": "anatolie",
+  "terrain": "steppe",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Konya (Iconium)",
+      "local": "Konya",
+      "local_language": "turc ottoman"
+    },
+    "lat": 37.87,
+    "lon": 32.49
+  },
+  "geo": {
+    "capital_lonlat": [
+      32.49,
+      37.87
+    ],
+    "seed_lonlat": [
+      32.6,
+      37.95
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_karaman",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 50000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1500,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu ; date de la prise de Konya par les Karamanoğulları incertaine (1320-1350)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1300,
+  "description": "Ancienne capitale des Seldjoukides de Roum, sur le plateau central ; les Karamanoğulları s'en sont emparés (date incertaine), face aux Eretna au nord.",
+  "sources": [
+    "Konya",
+    "Sultanate of Rum",
+    "Karamanids"
+  ]
+}

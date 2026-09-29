@@ -1,0 +1,61 @@
+{
+  "id": "tit_epirus",
+  "rank": "county",
+  "name": {
+    "display": "Despotat d'Épire",
+    "local": "Δεσποτᾶτον τῆς Ἠπείρου",
+    "local_language": "grec"
+  },
+  "heraldry": {
+    "blazon": "Bandé d'argent et de gueules, au chef d'argent chargé d'une rose de gueules.",
+    "description": "Armes des Orsini (bandé, chef à la rose), maison des despotes d'Épire depuis 1323.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_provinces": [
+    "prov_epirus"
+  ],
+  "holder_1337": {
+    "faction": "fac_epirus",
+    "sources": [
+      "Despotat d'Épire",
+      "Nikephoros II Orsini"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_epirus_hold",
+      "title": "Sauver le despotat",
+      "description": "Nicéphore II doit garder son despotat.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_epirus"
+      }
+    },
+    {
+      "id": "obj_epirus_indep",
+      "title": "Refuser Byzance",
+      "description": "Ne jamais se soumettre à l'empereur.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_epirus_thessaly",
+      "title": "La Thessalie",
+      "description": "Rendre à Arta la Thessalie des anciens despotes.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_thessaly"
+        ]
+      }
+    }
+  ],
+  "description": "Despotat d'Arta et de Janina, tenu par la maison Orsini, réduit à l'Épire propre.",
+  "sources": [
+    "Despotat d'Épire",
+    "Nikephoros II Orsini"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "tit_brunswick",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Brunswick-Lunebourg",
+    "local": "Herzogtum Brunswik-Lüneborch",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "De gueules à deux léopards d'or l'un sur l'autre, à la bordure componée d'argent et d'azur.",
+    "description": "Armes welfes (deux léopards d'or sur gueules), différenciées ici d'une bordure componée pour les distinguer des armes normandes/anglaises historiquement très proches.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Le blasonnement exact varie selon la branche welfe (Brunswick, Lunebourg, Grubenhagen) et l'époque ; simplifié à une seule forme différenciée pour ce lot."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_brunswick"
+  ],
+  "holder_1337": {
+    "faction": "fac_brunswick",
+    "uncertain": true,
+    "sources": [
+      "Otto der Milde",
+      "Duché de Brunswick-Lunebourg"
+    ]
+  },
+  "description": "Duché welf de Brunswick-Lunebourg ; fragmenté en 1337 entre plusieurs princes cadets (Brunswick, Lunebourg, Grubenhagen), simplifié ici à un seul titulaire, Otton le Doux, de la lignée de Lunebourg.",
+  "sources": [
+    "Otto der Milde",
+    "Duché de Brunswick-Lunebourg"
+  ]
+}

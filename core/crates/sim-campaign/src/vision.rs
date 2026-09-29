@@ -12,7 +12,7 @@
 //! faction or a lending ally is seen.
 //!
 //! The seen area is rasterised as discs on a reduced grid ([`VisionMask`],
-//! 512² texels over the 4096² map, one texel = 4×4 navigation cells, soft
+//! one texel = 4×4 navigation cells (512² texels over a 4096² map), soft
 //! edge `edge_feather_km` wide, `data/rules/vision.json`); the
 //! point tests (armies, settlements) use the exact distance to the sources.
 //! A province is visible when `province_seen_percent` of its land texels
@@ -33,8 +33,10 @@ use data_model::{FactionId, GameData, ProvinceId, VisionRules};
 use crate::movement::land_neighbors;
 use crate::state::{Army, ArmyId, CampaignState};
 
-/// Side of the exported vision mask, in texels (the map is square).
+/// Minimum width of the exported vision mask, in texels (small grids: one texel per cell).
 pub const VISION_MASK_SIZE: u32 = 512;
+/// Navigation cells per texel side on a large map (ADR 0115: the mask follows the map size).
+pub const VISION_TEXEL_CELLS: u32 = 4;
 /// Texel value from which a texel counts as seen.
 pub const SEEN_THRESHOLD: u8 = 128;
 
@@ -185,7 +187,9 @@ impl CampaignState {
 
         let map_w = (grid.width * grid.scale) as f32;
         let map_h = (grid.height * grid.scale) as f32;
-        let width = VISION_MASK_SIZE.min(grid.width).max(1);
+        let width = (grid.width / VISION_TEXEL_CELLS)
+            .max(VISION_MASK_SIZE.min(grid.width))
+            .max(1);
         let texel_px = map_w / width as f32;
         let height = ((map_h / texel_px).ceil() as u32).max(1);
         let mut mask = VisionMask {

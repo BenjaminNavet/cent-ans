@@ -18,18 +18,16 @@
     "buildings": [
       "bld_market",
       "bld_windmill",
-      "bld_port",
       "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field",
       "bld_stables"
     ],
     "port": false,
-    "description": "Marche de Brandebourg donnée en 1323 par Louis IV à son fils Louis le Brandebourgeois ; seigneuries de Mecklembourg et Poméranie occidentale (villes hanséatiques de Rostock, Wismar, Stralsund).",
+    "description": "Double bourgade jumelle de Berlin-Cölln sur la Sprée, environ 7 000 habitants en 1337, en essor comme capitale du margraviat sous les Wittelsbach.",
     "sources": [
-      "Marche de Brandebourg",
-      "Louis V de Bavière",
-      "Mecklembourg"
+      "Berlin",
+      "Marche de Brandebourg"
     ]
   },
   {
@@ -82,85 +80,6 @@
     "description": "Forteresse margraviale au confluent de la Havel et de la Sprée, gardant l'approche de Berlin.",
     "sources": [
       "Spandau"
-    ]
-  },
-  {
-    "id": "set_stralsund",
-    "province": "prov_brandenburg",
-    "kind": "town",
-    "name": {
-      "display": "Stralsund",
-      "local": "Stralessund",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      13.091,
-      54.3093
-    ],
-    "weight": 18,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Grand port hanséatique de la Baltique, rival de Lübeck pour le commerce du hareng et des céréales.",
-    "sources": [
-      "Stralsund"
-    ]
-  },
-  {
-    "id": "set_rostock",
-    "province": "prov_brandenburg",
-    "kind": "town",
-    "name": {
-      "display": "Rostock",
-      "local": "Rozstok",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      12.1449,
-      54.0887
-    ],
-    "weight": 16,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Grand port hanséatique du Mecklembourg, l'une des « villes vendes » avec Lübeck, Wismar et Stralsund.",
-    "sources": [
-      "Rostock"
-    ]
-  },
-  {
-    "id": "set_wismar",
-    "province": "prov_brandenburg",
-    "kind": "town",
-    "name": {
-      "display": "Wismar",
-      "local": "Wismer",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      11.461,
-      53.8912
-    ],
-    "weight": 14,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Port hanséatique du Mecklembourg sur la Baltique, membre des « villes vendes ».",
-    "sources": [
-      "Wismar"
     ]
   },
   {

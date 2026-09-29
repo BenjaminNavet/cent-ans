@@ -1,0 +1,52 @@
+{
+  "id": "fac_circassia",
+  "name": {
+    "display": "Principautés de Zikhia",
+    "local": "Adyghé",
+    "local_language": "adyguéen"
+  },
+  "short_name": "Circassie",
+  "adjective": "circassien",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_zikhia",
+  "capital_city": "Nikopsis (Zikhia)",
+  "religion": "rel_pagan",
+  "culture": "cul_circassian",
+  "succession_law": "elective",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_circassia",
+  "heraldry": {
+    "blazon": "De sinople à trois étoiles d'or.",
+    "description": "Étoiles du drapeau circassien ; couleurs de convention.",
+    "primary_color": "#2E7D46",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Prince des Adyghés"
+  ],
+  "treasury": 5000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal",
+      "note": "Tributaires lâches de la Horde."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 65,
+    "diplomacy": 40,
+    "trade": 45,
+    "piety": 40
+  },
+  "description": "Confédération de princes adyghés (Tcherkesses) sous suzeraineté lâche de la Horde d'Or ; aucun chef n'est identifié en 1337.",
+  "sources": [
+    "Circassia"
+  ]
+}

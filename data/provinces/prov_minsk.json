@@ -1,0 +1,92 @@
+{
+  "id": "prov_minsk",
+  "name": {
+    "display": "Minsk",
+    "local": "Mensk",
+    "local_language": "ruthène"
+  },
+  "region": "lituanie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Svislač",
+    "Bérézina",
+    "Nemonien"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Minsk",
+      "local": "Mensk",
+      "local_language": "ruthène"
+    },
+    "lat": 53.9006,
+    "lon": 27.559
+  },
+  "geo": {
+    "capital_lonlat": [
+      27.559,
+      53.9006
+    ],
+    "seed_lonlat": [
+      27.5,
+      54.0
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_lithuania",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Principauté ruthène passée sous la domination lituanienne.",
+    "classes": {
+      "peasants": {
+        "count": 85000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2125,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1870,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2125,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_market",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Ancienne principauté ruthène de Minsk, rattachée à la Lituanie au début du XIVe siècle ; forêts, marais du Polésie, ville sur la Svislač.",
+  "sources": [
+    "Minsk",
+    "Principauté de Minsk"
+  ]
+}

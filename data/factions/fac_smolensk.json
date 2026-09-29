@@ -1,0 +1,66 @@
+{
+  "id": "fac_smolensk",
+  "name": {
+    "display": "Principauté de Smolensk",
+    "local": "Княжество Смоленское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Smolensk",
+  "adjective": "smolenskien",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_ivan_alexandrovitch",
+  "capital": "prov_smolensk",
+  "capital_city": "Smolensk",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_smolensk",
+  "heraldry": {
+    "blazon": "De gueules à la guivre d'or.",
+    "description": "Blason de convention pour Smolensk (armes historiques : un oiseau Gamayoun sur un canon, d'époque moderne).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Prince de Smolensk"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_briansk",
+      "status": "peace",
+      "note": "Son frère Dmitri de Briansk l'a assiégé en 1334 avec des Tatars ; paix depuis."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "alliance",
+      "note": "Ivan Alexandrovitch se rapproche de Gediminas ; campagne moscovite et tatare contre Smolensk en 1339."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 65,
+    "trade": 60,
+    "piety": 70
+  },
+  "description": "Grande principauté du haut Dniepr, tenue depuis 1313 par Ivan Alexandrovitch, prise entre Lituanie, Moscou et Horde ; en 1339, il envoie des troupes à Ivan Kalita mais préfère les liens avec Gediminas.",
+  "sources": [
+    "Principauté de Smolensk",
+    "Ivan Alexandrovitch de Smolensk"
+  ]
+}

@@ -38,7 +38,7 @@ func _init() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_label = Label.new()
 	header_label.text = "Édit régional"
-	header_label.add_theme_font_size_override("font_size", 16)
+	header_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	add_child(header_label)
 
 	var current_row := HBoxContainer.new()
@@ -49,7 +49,7 @@ func _init() -> void:
 	current_row.add_child(current_chip)
 
 	pending_label = Label.new()
-	pending_label.add_theme_font_size_override("font_size", 12)
+	pending_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	pending_label.add_theme_color_override("font_color", MUTED_COLOR)
 	pending_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	pending_label.hide()
@@ -70,7 +70,7 @@ func _init() -> void:
 
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	error_label.add_theme_font_size_override("font_size", 12)
+	error_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	error_label.add_theme_color_override("font_color", ERROR_COLOR)
 	error_label.hide()
 	add_child(error_label)
@@ -89,7 +89,7 @@ func _rich_text(font_size: int) -> RichTextLabel:
 	label.scroll_active = false
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.custom_minimum_size = Vector2(300, 0)
+	label.custom_minimum_size = Vector2(160, 0)  # Q6 : zone `SIDE_PANEL` étroite (264 px utiles à 1280×720)
 	label.add_theme_color_override("default_color", RichTooltip.INK)
 	for key in ["normal_font_size", "bold_font_size", "italics_font_size"]:
 		label.add_theme_font_size_override(key, font_size)
@@ -126,7 +126,7 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 	description_label.text = CodexText.format("[i]%s[/i]" % str(current.get("description", ""))) if not current.is_empty() else ""
 	description_label.visible = description_label.text != ""
 	choose_button.visible = player_owned
-	choose_button.tooltip_text = "Choisir l'édit de la province (délai avant effet selon l'édit)."
+	RichTooltip.attach_plain(choose_button, "choose_edict")
 	if not player_owned:
 		options_box.hide()
 	_fill_options()
@@ -165,7 +165,7 @@ func _fill_options() -> void:
 		if not available and not current:
 			var marker := Label.new()
 			marker.text = str(option.get("reason", "indisponible"))
-			marker.add_theme_font_size_override("font_size", 12)
+			marker.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 			marker.add_theme_color_override("font_color", ERROR_COLOR)
 			line.add_child(marker)
 		options_box.add_child(line)

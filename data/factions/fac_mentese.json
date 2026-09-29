@@ -1,0 +1,58 @@
+{
+  "id": "fac_mentese",
+  "name": {
+    "display": "Beylik de Menteşe",
+    "local": "Menteşeoğulları",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Menteşe",
+  "adjective": "de Menteşe",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_orhan_mentese",
+  "capital": "prov_mentese",
+  "capital_city": "Milas (Mylasa)",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_mentese",
+  "heraldry": {
+    "blazon": "De sable à la bande d'argent.",
+    "description": "Couleurs de convention de Menteşe.",
+    "primary_color": "#2A2A2A",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey de Menteşe"
+  ],
+  "treasury": 8000,
+  "prestige": 42,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aydin",
+      "status": "peace",
+      "note": "Rival naval, voisin du nord."
+    },
+    {
+      "faction": "fac_hospitallers",
+      "status": "war",
+      "note": "Menteşe, voisin continental de Rhodes, harcèle l'île."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 45,
+    "trade": 65,
+    "piety": 55
+  },
+  "description": "Beylik côtier de la Carie et de la Lycie occidentale, fondé vers 1261 ; ses marins guerroient contre Rhodes.",
+  "sources": [
+    "Menteşe"
+  ]
+}

@@ -143,7 +143,9 @@ func _run(map_dir: String, relief_root: String) -> void:
 		var level := int(entry.get("level", 0))
 		if level < 1 or level > MAX_LEVEL:
 			continue
-		var keys := _expand_rle(entry.get("tiles_rle", []), 16 << level)
+		# Coordonnées du cache (noms de fichiers, sans le décalage `root_origin_tiles`, ADR 0115) :
+		# bornées par la capacité des clés (12 bits par axe), pas par la taille du monde.
+		var keys := _expand_rle(entry.get("tiles_rle", []), 0x1000)
 		if keys.is_empty():
 			continue
 		expected[level] = keys.size()

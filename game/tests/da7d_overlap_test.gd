@@ -13,7 +13,7 @@ extends SceneTree
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## Régions denses (coordonnées carte 4096) et zooms types (distance caméra) : palier Europe,
 ## province, province rapprochée, moyen près du palier comté.
-const REGIONS := {"flandre": Vector2(2330, 1630), "ile_de_france": Vector2(2213, 1923), "normandie": Vector2(2030, 1840)}
+const REGIONS := {"flandre": Vector2(2330, 2910), "ile_de_france": Vector2(2213, 3203), "normandie": Vector2(2030, 3120)}
 const DISTANCES := [1100.0, 600.0, 330.0, 200.0]
 ## Borne du temps moyen d'un recalcul complet (ms), machine de dev partagée.
 const MAX_DECLUTTER_MS := 4.0

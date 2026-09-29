@@ -1,0 +1,45 @@
+{
+  "id": "chr_nicolo_i_sanudo",
+  "name": {
+    "display": "Nicolas Ier Sanudo",
+    "local": "Nicolò I Sanudo",
+    "local_language": "vénitien"
+  },
+  "sex": "male",
+  "house": "Sanudo",
+  "faction": "fac_archipelago",
+  "role": "ruler",
+  "birth": {
+    "value": "1285",
+    "uncertain": true,
+    "note": "Naissance vers 1285."
+  },
+  "death": {
+    "value": "1341"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de l'Archipel",
+      "from": {
+        "value": "1323"
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_diplomat"
+  ],
+  "piety": 55,
+  "starting_location": "prov_archipelago",
+  "status": "at_court",
+  "description": "Cinquième duc de Naxos, vétéran d'Halmyros ; il traite avec les Turcs pour préserver les Cyclades.",
+  "sources": [
+    "Nicholas I Sanudo"
+  ]
+}

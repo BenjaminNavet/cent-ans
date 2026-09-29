@@ -14,10 +14,13 @@ signal court_requested
 ## Lot C5 : clic sur une colonie de l'onglet « Colonies ».
 signal settlement_requested(settlement_id: String)
 signal closed
+## FE6 : clic sur un maillon du fil d'Ariane féodal (détenteur du titre).
+signal breadcrumb_clicked(faction_id: String)
 
 const TERRAIN_LABELS := {
 	"plains": "Plaines", "hills": "Collines", "mountains": "Montagnes",
 	"forest": "Forêt", "marsh": "Marais", "coast": "Littoral", "highlands": "Hautes terres",
+	"heath": "Lande", "bocage": "Bocage", "steppe": "Steppe", "desert": "Désert",
 }
 const STANCE_LABELS := {"normal": "Normale", "raid": "Chevauchée", "siege": "Siège"}
 const CLASS_LABELS := {"peasants": "Paysans", "burghers": "Bourgeois", "clergy": "Clergé", "nobility": "Noblesse"}
@@ -47,7 +50,7 @@ const ROW_ICON := 20.0
 @onready var id_value: Label = %IdValue
 @onready var garrison_header: Label = %GarrisonHeader
 @onready var garrison_list: VBoxContainer = %GarrisonList
-@onready var actions: HBoxContainer = %Actions
+@onready var actions: HFlowContainer = %Actions  # Q6 : boutons à la ligne si la zone est étroite
 @onready var recruit_button: Button = %RecruitButton
 @onready var create_army_button: Button = %CreateArmyButton
 @onready var recruit_panel: VBoxContainer = %RecruitPanel
@@ -75,10 +78,12 @@ var edict_section: EdictSection  # lot C4
 var settlements_list: VBoxContainer
 var settlement_rows_provider: Callable = Callable()
 var _label_of: Callable = Callable()
+## FE6 : fil d'Ariane des titres (« Royaume de France › Duché de Bourgogne › Comté de Charolais »).
+var breadcrumb: HFlowContainer
 
 
 func _ready() -> void:
-	Lettrine.attach(name_label)  # UI1 : titre à lettrine enluminée
+	Lettrine.attach(name_label, 0.0, true)  # UI1 : titre à lettrine enluminée (Q6 : ajusté à la zone)
 	recruit_button.pressed.connect(func() -> void: recruit_panel.visible = not recruit_panel.visible)
 	create_army_button.pressed.connect(_on_create_army)
 	cancel_build_button.pressed.connect(func() -> void: cancel_build_requested.emit(province_id))
@@ -116,6 +121,13 @@ func _ready() -> void:
 	city_box.move_child(edict_rule, 1)
 	edict_section.visibility_changed.connect(func() -> void: edict_rule.visible = edict_section.visible)
 	_build_settlements_tab()  # C5
+	get_viewport().size_changed.connect(queue_fit_height)  # Q6
+	breadcrumb = HFlowContainer.new()  # FE6
+	breadcrumb.name = "FeudalBreadcrumb"
+	breadcrumb.add_theme_constant_override("h_separation", 2)
+	# Q6 : sur sa propre ligne sous le titre (dans l'en-tête, titre + fil + × dépassaient la
+	# zone `SIDE_PANEL` de 384 px en vue 1280×720).
+	name_label.get_parent().add_sibling(breadcrumb)
 
 
 ## `province` : entrée MapData fusionnée avec `GameDataStore.get_province` (display_name,
@@ -167,7 +179,9 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	edict_section.show_for(province_id, is_player_owner and not state.is_empty())  # lot C4
 	_label_of = label_of
 	_fill_settlements()  # C5
+	_fill_breadcrumb()  # FE6
 	show()
+	queue_fit_height()
 
 
 ## Onglet « Ville » : classes de population, bâtiments, construction, constructible,
@@ -212,8 +226,10 @@ func _fill_classes(classes: Dictionary) -> void:
 
 
 func _make_class_row(class_id: String, data: Dictionary) -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
+	# Q6 : ligne à retour (jauges sous le nom quand la zone `SIDE_PANEL` est étroite) ; une
+	# ligne fixe de 420 px élargissait le panneau hors de l'écran en vue 1280×720.
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 8)
 	var name_chip := IconChip.create("class_" + class_id, str(CLASS_LABELS.get(class_id, class_id)), RichTooltip.population_class(class_id, data), ROW_ICON, 14)
 	name_chip.custom_minimum_size = Vector2(104, 0)
 	row.add_child(name_chip)
@@ -320,6 +336,29 @@ func _on_create_army() -> void:
 	create_army_requested.emit(province_id, indices)
 
 
+## Q6 : hauteur de conception des onglets (scène) ; ils rétrécissent si la zone manque.
+const TABS_HEIGHT := 343.0
+var _fit_queued := false
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
+		queue_fit_height()
+
+
+## Q6 : le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
+func queue_fit_height() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	_fit_height.call_deferred()
+
+
+func _fit_height() -> void:
+	_fit_queued = false
+	PanelWidgets.fit_tabs_to_side_zone(self, tabs, TABS_HEIGHT)
+
+
 func show_ville_tab() -> void:
 	tabs.current_tab = 1
 
@@ -359,6 +398,7 @@ func _make_settlement_row(row: Dictionary) -> Control:
 	var button := RichButton.new()
 	button.name = settlement_id
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6 : zone `SIDE_PANEL` étroite
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kind := str(row.get("kind", ""))
 	var controller := _faction_label(str(row.get("controller", "")), "", _label_of)
@@ -368,7 +408,7 @@ func _make_settlement_row(row: Dictionary) -> Control:
 	if not siege.is_empty():
 		text += " — assiégée par %s (%s)" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
 	button.text = text
-	button.tooltip_text = "Ouvrir le panneau de la colonie et centrer la carte"
+	RichTooltip.attach_plain(button, "colony_focus_open")
 	button.pressed.connect(func() -> void: settlement_requested.emit(settlement_id))
 	return button
 
@@ -395,3 +435,32 @@ static func _thousands(value: int) -> String:
 		out = " " + text.substr(text.length() - 3) + out
 		text = text.substr(0, text.length() - 3)
 	return ("-" if value < 0 else "") + text + out
+
+
+## FE6 : titres de la province, du royaume au comté, chacun cliquable (ouvre l'arbre féodal sur
+## son détenteur). Lu dans `CampaignSim.get_province_breadcrumb`.
+func _fill_breadcrumb() -> void:
+	for child in breadcrumb.get_children():
+		breadcrumb.remove_child(child)
+		child.queue_free()
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	var links: Array = sim.call("get_province_breadcrumb", province_id) if sim != null and sim.has_method("get_province_breadcrumb") else []
+	breadcrumb.visible = not links.is_empty()
+	for index in links.size():
+		var link: Dictionary = links[index]
+		if index > 0:
+			var sep := Label.new()
+			sep.text = "›"
+			sep.add_theme_color_override("font_color", HudStyle.INK_FADED)
+			breadcrumb.add_child(sep)
+		var crumb := LinkButton.new()
+		crumb.name = "Crumb%d" % index
+		crumb.text = str(link.get("title_name", ""))
+		crumb.underline = LinkButton.UNDERLINE_MODE_ON_HOVER
+		crumb.add_theme_color_override("font_color", HudStyle.RUBRIC)
+		var holder := str(link.get("holder", ""))
+		var holder_name := str(link.get("holder_name", ""))
+		RichTooltip.attach_plain(crumb, "feudal_title_crumb", {"title": "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"})
+		crumb.pressed.connect(func() -> void: breadcrumb_clicked.emit(holder))
+		breadcrumb.add_child(crumb)

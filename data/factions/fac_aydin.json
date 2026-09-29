@@ -1,0 +1,76 @@
+{
+  "id": "fac_aydin",
+  "name": {
+    "display": "Beylik d'Aydın",
+    "local": "Aydınoğulları",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Aydın",
+  "adjective": "d'Aydın",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_umur_bey",
+  "capital": "prov_izmir",
+  "capital_city": "Smyrne (İzmir)",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_aydin",
+  "heraldry": {
+    "blazon": "D'argent à la nef de sinople.",
+    "description": "Nef en hommage à la flotte des Aydın ; couleurs de convention.",
+    "primary_color": "#2E7D46",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey d'Aydın",
+    "Gouverneur de Smyrne"
+  ],
+  "treasury": 9500,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_saruhan",
+      "status": "alliance",
+      "note": "Voisin du nord, allié de Smyrne."
+    },
+    {
+      "faction": "fac_mentese",
+      "status": "peace",
+      "note": "Voisin méridional, rival sur mer."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "war",
+      "note": "Umur Bey razzie l'Égée ; ligue chrétienne et prise de Smyrne en 1344."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "alliance",
+      "note": "Amitié d'Umur Bey et de Jean Cantacuzène."
+    },
+    {
+      "faction": "fac_hospitallers",
+      "status": "war",
+      "note": "Les Hospitaliers de Rhodes combattent les razzias d'Umur."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 70,
+    "diplomacy": 40,
+    "trade": 65,
+    "piety": 55
+  },
+  "description": "Beylik de l'Égée d'Umur Bey (1309-1348), dont les flottes de corsaires font trembler les îles ; son frère aîné Hızır Bey siège à Birgi.",
+  "sources": [
+    "Aydınids",
+    "Umur Bey"
+  ]
+}

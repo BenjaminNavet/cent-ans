@@ -1,0 +1,52 @@
+{
+  "id": "tit_penthievre",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Penthièvre",
+    "local": "Pennteur",
+    "local_language": "breton"
+  },
+  "heraldry": {
+    "blazon": "D'hermine, au lambel de gueules.",
+    "description": "Hermine de Bretagne brisée d'un lambel de gueules, marque de la branche cadette de Penthièvre.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true
+  },
+  "de_jure_liege": "tit_brittany",
+  "de_jure_provinces": [
+    "prov_penthievre"
+  ],
+  "holder_1337": {
+    "faction": "fac_penthievre",
+    "sources": [
+      "Jeanne de Penthièvre",
+      "Comté de Penthièvre"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_penthievre_hold",
+      "title": "Garder Penthièvre",
+      "description": "Jeanne de Penthièvre doit conserver son comté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_penthievre"
+      }
+    },
+    {
+      "id": "obj_penthievre_brittany",
+      "title": "Devenir duchesse de Bretagne",
+      "description": "Faire reconnaître les droits de Jeanne sur le duché contre Jean de Montfort.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_brittany"
+      }
+    }
+  ],
+  "description": "Comté et vicomté de Limoges tenus en propre par Jeanne de Penthièvre depuis 1331, nièce et héritière présomptive contestée du duc Jean III.",
+  "sources": [
+    "Jeanne de Penthièvre",
+    "Comté de Penthièvre"
+  ]
+}

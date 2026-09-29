@@ -41,6 +41,11 @@ pub struct Religion {
     /// Heresy: provinces where it appears at `available_from`.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub origin_provinces: Vec<ProvinceId>,
+    /// OM3 (ADR 0116): separated churches of the same wider faith
+    /// (Orthodoxy towards Catholicism: schismatics, not infidels). The
+    /// relation is symmetric; an obedience counts as its parent church.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub kindred: Vec<ReligionId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

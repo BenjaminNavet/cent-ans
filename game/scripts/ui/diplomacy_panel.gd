@@ -17,6 +17,8 @@ extends PanelContainer
 
 signal order_requested(order: Dictionary, success_text: String)
 signal offer_answered(offer_id: int, accept: bool)
+## FE6 : verdict sur une guerre privée entre deux vassaux (« impose_peace », « take_side », « let_be »).
+signal arbitration_requested(offer_id: int, verdict: String, side: String)
 signal closed
 
 const STATUS_LABELS := {
@@ -34,6 +36,9 @@ const MAP_COLORS := {
 }
 const FRIENDLY := Color(0.30, 0.62, 0.30)
 const HOSTILE := Color(0.72, 0.36, 0.22)
+## Taille plancher de la carte des relations (elle grandit ensuite jusqu'à remplir sa colonne).
+const MAP_MIN_WIDTH := 200.0
+const MAP_MIN_HEIGHT := 150.0
 const NEUTRAL := Color(0.62, 0.60, 0.55)
 const GIFT_AMOUNT := 1000
 const DONATION_AMOUNT := 1000
@@ -67,9 +72,20 @@ var _offers_box: VBoxContainer
 var _list: VBoxContainer
 var _minimap: CampaignMinimap
 var _map_hint: Label
+## Lot DZ : la carte montre les relations de la faction choisie (vrai) ou les nôtres.
+var _map_their_view := true
+var _map_view_toggle: CheckButton
+var _map_caption: Label
 var _head: VBoxContainer
 var _tab_buttons: Array[Button] = []
 var _pages: Array[Control] = []
+## Q6 : boutons du traité (« Que faudrait-il ? », « Effacer », « Proposer le traité »), posés
+## sous les pages et non dans la page défilante : toujours visibles sur l'onglet Négociation.
+var _treaty_buttons: HBoxContainer
+## Q6 : taille visée par `_fit_to_viewport` (le panneau ne doit pas la dépasser).
+var _target_size := Vector2.ZERO
+var _fit_queued := false
+var _fitting := false
 var _clauses: HFlowContainer
 var _offer_list: VBoxContainer
 var _demand_list: VBoxContainer
@@ -107,24 +123,42 @@ func _ready() -> void:
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 14)
 	root.add_child(body)
+	# Q6 : un contenu qui grandit après l'ajustement (avis reçus, fiche) faisait déborder le
+	# panneau sous l'écran, la carte gardant sa taille : on la réduit de l'excédent.
+	resized.connect(_queue_fit_minimap)
 	body.add_child(_build_faction_column())
 	body.add_child(_build_map_column())
 	body.add_child(_build_detail_column())
-	# PO phase 2 (P2b, ADR 0097) : fenêtre centrale plein écran — voir `docs/wip/p2b-tech-diplo.md`
-	# « Point ouvert » : ne rejoint volontairement pas de zone `UiLayout` (`SIDE_PANEL` est trop
-	# étroit ; `MODAL` reparente hors de `map_ui`, ce qui casse `_keep_on_screen`/`PanelStack`
-	# côté `map_ui.gd`, hors lot — régressions constatées sur `smoke.gd`). Migré : tailles
-	# (`UiType`) et animations d'ouverture/fermeture (`UiMotion`).
+	# PO phase 2 (P2b, ADR 0097) : tailles (`UiType`) et ouverture/fermeture (`UiMotion`). P2g :
+	# sur la carte, `map_ui` le réclame dans la zone `MODAL` de `UiLayout` (`claim_modal_panel`).
 	_fit_to_viewport()
 
 
-## Plein écran : la pile de panneaux (`map_ui._keep_on_screen`) le cale sous la barre du haut.
+## Plein écran sous la barre du haut (zone `TOP_BAR` de `UiLayout`). P2g : position globale (le
+## parent peut être la zone `MODAL`, décalée de l'écran) ; la carte repart de sa taille plancher
+## puis se réajuste au cadre (`_fit_minimap` sur `resized`) : sinon sa taille minimale, fixée
+## par un cadre plus grand, empêchait le panneau de tenir dans l'écran (1280×720, 640 px).
 func _fit_to_viewport() -> void:
 	if not is_inside_tree():
 		return
 	var view := get_viewport_rect().size
-	position = Vector2(6, 0)
-	size = Vector2(view.x - 12.0, view.y - 4.0)
+	var top: float = UiZones.rect(UiZones.Zone.TOP_BAR).end.y
+	global_position = Vector2(6, top)
+	_target_size = Vector2(view.x - 12.0, view.y - top - 4.0)
+	size = _target_size
+	_refit_minimap_later()
+
+
+## P2g : la carte repart de sa taille plancher, puis se réajuste une image plus tard, une fois les
+## conteneurs recalculés (lue dans la même image, la taille du cadre serait encore l'ancienne).
+func _refit_minimap_later() -> void:
+	if _minimap == null or not is_inside_tree():
+		return
+	var map_view := _minimap.find_child("MapView", true, false) as Control
+	if map_view != null:
+		map_view.custom_minimum_size = Vector2(MAP_MIN_WIDTH, MAP_MIN_HEIGHT)
+	if not get_tree().process_frame.is_connected(_fit_minimap):
+		get_tree().process_frame.connect(_fit_minimap, CONNECT_ONE_SHOT)
 
 
 # ----- construction ------------------------------------------------------------------------
@@ -190,7 +224,7 @@ func _build_header() -> Control:
 	header.add_child(donate)
 	var close := Button.new()
 	close.text = "×"
-	close.tooltip_text = "Fermer (Échap)"
+	RichTooltip.attach_plain(close, "close_escape")
 	close.custom_minimum_size = Vector2(36, 36)
 	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void:
@@ -229,6 +263,23 @@ func _build_map_column() -> Control:
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.add_theme_constant_override("separation", 6)
 	column.add_child(_section("Carte des relations"))
+	var view_row := HBoxContainer.new()  # DZ
+	view_row.add_theme_constant_override("separation", 8)
+	_map_caption = _label("", UiType.BODY, HudStyle.INK)
+	_map_caption.name = "MapViewCaption"
+	_map_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	view_row.add_child(_map_caption)
+	_map_view_toggle = CheckButton.new()
+	_map_view_toggle.name = "MapViewToggle"
+	_map_view_toggle.text = "Vue de la faction choisie"
+	_map_view_toggle.button_pressed = _map_their_view
+	_map_view_toggle.focus_mode = Control.FOCUS_NONE
+	_map_view_toggle.tooltip_text = "Coché : la carte montre les ennemis (rouge), neutres et alliés de la faction choisie. Décoché : vos propres relations."
+	_map_view_toggle.toggled.connect(func(on: bool) -> void:
+		_map_their_view = on
+		_render_map())
+	view_row.add_child(_map_view_toggle)
+	column.add_child(view_row)
 	var holder := CenterContainer.new()
 	holder.name = "MapHolder"
 	holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -282,6 +333,7 @@ func _build_detail_column() -> Control:
 	stack.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(stack)
 	var negotiation := _scroll_page(_build_negotiation())
+	column.add_child(_treaty_buttons)
 	var war := VBoxContainer.new()
 	war.add_theme_constant_override("separation", 6)
 	_war_page = war
@@ -358,7 +410,7 @@ func _build_negotiation() -> Control:
 	var adopt := Button.new()
 	adopt.name = "AdoptCounter"
 	adopt.text = "Reprendre leur contre-offre"
-	adopt.tooltip_text = "Remplacer le brouillon par la contre-offre (il reste à la proposer)."
+	RichTooltip.attach_plain(adopt, "treaty_adopt_counter")
 	adopt.focus_mode = Control.FOCUS_NONE
 	adopt.pressed.connect(_adopt_counter)
 	_counter_box.add_child(adopt)
@@ -373,7 +425,7 @@ func _build_negotiation() -> Control:
 	buttons.add_theme_constant_override("separation", 6)
 	var counter := Button.new()
 	counter.text = "Que faudrait-il ?"
-	counter.tooltip_text = "Demander ce qui les ferait accepter (captifs, terres occupées, or, tribut, exigences retirées)."
+	RichTooltip.attach_plain(counter, "treaty_ask_counter")
 	counter.pressed.connect(_ask_counter)
 	buttons.add_child(counter)
 	var clear := Button.new()
@@ -388,7 +440,7 @@ func _build_negotiation() -> Control:
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	send.pressed.connect(_send_treaty)
 	buttons.add_child(send)
-	page.add_child(buttons)
+	_treaty_buttons = buttons  # Q6 : hors de la page défilante (voir `_build_detail_column`)
 	page.add_child(_rule())
 	page.add_child(_label("Actions unilatérales", UiType.HEADING, HudStyle.INK))
 	_actions = HFlowContainer.new()
@@ -500,6 +552,10 @@ func _render_offers() -> void:
 	if offers.is_empty():
 		return
 	_offers_box.add_child(_section("Propositions reçues"))
+	var feudal := {}  # FE6 : appels féodaux (protection, arbitrage) par id d'offre
+	if sim.has_method("get_feudal_offers"):
+		for call in sim.call("get_feudal_offers"):
+			feudal[int(call.get("id", -1))] = call
 	for offer in offers:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 6)
@@ -514,12 +570,22 @@ func _render_offers() -> void:
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(text)
 		var offer_id := int(offer["id"])
+		var kind := str(offer.get("kind", ""))
 		var yes := Button.new()
-		yes.text = "Accepter"
+		yes.text = {"protection": "Intervenir", "arbitration": "Imposer la paix"}.get(kind, "Accepter")
 		yes.pressed.connect(func() -> void: offer_answered.emit(offer_id, true))
 		row.add_child(yes)
+		if kind == "arbitration" and feudal.has(offer_id):
+			var call: Dictionary = feudal[offer_id]
+			for side in [["attacker", "attacker_name"], ["target", "target_name"]]:
+				var side_id := str(call.get(side[0], ""))
+				var take := Button.new()
+				take.text = "Soutenir %s" % str(call.get(side[1], side_id))
+				RichTooltip.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l'autre vassal."})
+				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
+				row.add_child(take)
 		var no := Button.new()
-		no.text = "Refuser"
+		no.text = {"protection": "Se dérober", "arbitration": "Laisser faire"}.get(kind, "Refuser")
 		no.pressed.connect(func() -> void: offer_answered.emit(offer_id, false))
 		row.add_child(no)
 		_offers_box.add_child(row)
@@ -560,7 +626,7 @@ func _faction_row(entry: Dictionary) -> Control:
 	var reasons := PackedStringArray(["Attitude envers nous : %+d" % attitude])
 	for reason in entry.get("attitude_reasons", []):
 		reasons.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
-	row.tooltip_text = "\n".join(reasons)
+	RichTooltip.attach_plain(row, "faction_attitude", {"body": "\n".join(reasons)})
 	var line := HBoxContainer.new()
 	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	line.offset_left = 6
@@ -646,10 +712,23 @@ func _ensure_minimap() -> void:
 	_minimap.clicked.connect(_on_map_clicked)
 	holder.add_child(_minimap)
 	_fit_minimap()
+	_refit_minimap_later()
+
+
+## Q6 : ajustement différé (une fois par image) quand le panneau change de taille ; appelé
+## directement depuis `resized`, il se relançait lui-même en rendant sa taille au panneau.
+func _queue_fit_minimap() -> void:
+	if _fit_queued or _fitting:
+		return
+	_fit_queued = true
+	(func() -> void:
+		_fit_queued = false
+		if is_inside_tree():
+			_fit_minimap()).call_deferred()
 
 
 func _fit_minimap() -> void:
-	if _minimap == null:
+	if _minimap == null or _fitting:
 		return
 	var holder := _minimap.get_parent() as Control
 	var view := _minimap.find_child("MapView", true, false) as Control
@@ -659,14 +738,23 @@ func _fit_minimap() -> void:
 	# Habillage réel de la minicarte (cadre, boutons) autour de la vue, plus un jeu de 4 px :
 	# une marge fixe plus petite que le cadre ferait grandir le conteneur à chaque `resized`.
 	var chrome := _minimap.get_combined_minimum_size() - view.get_combined_minimum_size() + Vector2(4.0, 4.0)
-	var width := maxf(holder.size.x - chrome.x, 200.0)
+	# Q6 : place prise au-delà de la taille visée (le panneau a grandi avec son contenu).
+	var excess := Vector2.ZERO
+	if _target_size != Vector2.ZERO:
+		excess = (size - _target_size).max(Vector2.ZERO)
+	var room := holder.size - chrome - excess
+	var width := maxf(room.x, MAP_MIN_WIDTH)
 	var height := width * aspect
-	if height > holder.size.y - chrome.y:
-		height = maxf(holder.size.y - chrome.y, 150.0)
+	if height > room.y:
+		height = maxf(room.y, MAP_MIN_HEIGHT)
 		width = height / aspect
 	var fitted := Vector2(width, height).floor()
 	if fitted != view.custom_minimum_size:
 		view.custom_minimum_size = fitted
+	if excess != Vector2.ZERO:
+		_fitting = true
+		size = _target_size  # rendu à la taille visée (bornée par la nouvelle taille minimale)
+		_fitting = false
 	_minimap.tooltip_text = ""
 
 
@@ -682,12 +770,15 @@ func _render_map() -> void:
 	var snapshot := ProvinceSnapshot.of(sim, map_data)
 	# DP2 : mêmes couleurs que le mode « Diplomatie » de la carte et de la minicarte.
 	if DiplomaticStances.available(sim):
-		var stances := DiplomaticStances.stances(sim, ids)
+		# DZ : vue de la faction choisie (ses ennemis en rouge, ses terres en blanc).
+		var viewer := map_viewer()
+		_update_map_caption(viewer)
+		var stances := DiplomaticStances.stances(sim, ids, viewer)
 		var stance_colors := PackedColorArray()
 		for index in ids.size():
 			var key := stances[index] if index < stances.size() else ""
 			var stance_color := DiplomaticStances.color_of(key)
-			if key != "" and key != "self" and _selected != "" and _controller_of(snapshot, index) == _selected:
+			if viewer == "" and key != "" and key != "self" and _selected != "" and _controller_of(snapshot, index) == _selected:
 				stance_color = stance_color.lightened(0.3)
 			stance_colors.append(stance_color)
 		_minimap.set_province_colors(stance_colors)
@@ -711,6 +802,23 @@ func _render_map() -> void:
 			color = color.lightened(0.22)
 		colors.append(color)
 	_minimap.set_province_colors(colors)
+
+
+## DZ : faction dont la carte montre les relations ("" : le joueur).
+func map_viewer() -> String:
+	if not _map_their_view or _selected == "" or _selected == player_faction:
+		return ""
+	if sim == null or not sim.has_method("get_province_stances_for"):
+		return ""
+	return _selected
+
+
+func _update_map_caption(viewer: String) -> void:
+	if _map_caption == null:
+		return
+	_map_caption.text = "Relations de %s" % SimFacade.faction_short_name(viewer) if viewer != "" else "Vos relations"
+	if _map_view_toggle != null:
+		_map_view_toggle.visible = sim != null and sim.has_method("get_province_stances_for")
 
 
 ## Contrôleur de la province d'index `index` dans l'instantané groupé (RS-E : `ProvinceSnapshot`,
@@ -740,6 +848,8 @@ func _show_tab(index: int) -> void:
 	_tab = index
 	for i in _pages.size():
 		_pages[i].visible = i == index
+	if _treaty_buttons != null:
+		_treaty_buttons.visible = index == TAB_NEGOTIATION
 	for i in _tab_buttons.size():
 		_tab_buttons[i].set_pressed_no_signal(i == index)
 
@@ -833,18 +943,18 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 		tips.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
 	if str(value.get("blocked", "")) != "":
 		tips.append("Impossible : %s" % value["blocked"])
-	label.tooltip_text = "\n".join(tips)
+	RichTooltip.attach_plain(label, "treaty_clause_detail", {"body": "\n".join(tips)})
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
 	row.add_child(label)
 	if not value.is_empty():
 		var points := int(value.get("value", 0))
 		var points_label := _label("%+d" % points, UiType.BODY, HudStyle.GOOD if points >= 0 else HudStyle.POOR)
-		points_label.tooltip_text = "Valeur pour eux"
+		RichTooltip.attach_plain(points_label, "treaty_clause_value_for_them")
 		points_label.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(points_label)
 	var remove := Button.new()
 	remove.text = "×"
-	remove.tooltip_text = "Retirer cette clause"
+	RichTooltip.attach_plain(remove, "treaty_clause_remove")
 	remove.focus_mode = Control.FOCUS_NONE
 	remove.pressed.connect(func() -> void:
 		_articles.remove_at(index)
@@ -1165,6 +1275,11 @@ func _show_consequences(order: Dictionary, unilateral: bool) -> void:
 		var reason_text := CodexText.format(str(reason["text"]), true)
 		parts.append(("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, reason_text]) if v != 0 else reason_text)
 	_unilateral_hint.text = text + " · ".join(parts)
+	if type == "declare_war":  # FE6 : chaîne d'escalade avant la déclaration
+		var player := str(sim.call("get_player_faction")) if sim.has_method("get_player_faction") else ""
+		var chain := EscalationPreview.bbcode(sim, player, str(order.get("target", "")))
+		if chain != "":
+			_unilateral_hint.text += "\n" + chain
 
 
 # ----- guerre et traités --------------------------------------------------------------------------

@@ -1,0 +1,100 @@
+{
+  "id": "fac_hungary",
+  "name": {
+    "display": "Royaume de Hongrie",
+    "local": "Magyar Királyság",
+    "local_language": "hongrois"
+  },
+  "short_name": "Hongrie",
+  "adjective": "hongrois",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_charles_i_robert_de_hongrie",
+  "heir": "chr_louis_ier_de_hongrie",
+  "capital": "prov_hungary_central",
+  "capital_city": "Visegrád",
+  "religion": "rel_catholic",
+  "culture": "cul_hungarian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_hungary",
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4 burelé d'argent et de gueules de huit pièces ; aux 2 et 3 d'azur semé de fleurs de lis d'or.",
+    "description": "Armes d'Anjou-Hongrie : bandes des Árpád et fleurs de lis d'Anjou.",
+    "primary_color": "#B01E2E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Roi de Hongrie",
+    "Roi de Croatie et de Dalmatie"
+  ],
+  "treasury": 32000,
+  "prestige": 70,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_royal_taxation",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_poland",
+      "status": "alliance",
+      "note": "Charles Robert, beau-frère de Casimir III ; alliance de Visegrád (1335)."
+    },
+    {
+      "faction": "fac_bohemia",
+      "status": "alliance",
+      "note": "Congrès de Visegrád (1335) : paix et alliance entre Charles Robert, Jean de Bohême et Casimir."
+    },
+    {
+      "faction": "fac_austria",
+      "status": "peace",
+      "note": "Paix avec les Habsbourg après les guerres de 1330."
+    },
+    {
+      "faction": "fac_wallachia",
+      "status": "truce",
+      "note": "Basarab Ier a vaincu le roi à Posada (1330) ; la Valachie reste en dehors de son autorité."
+    },
+    {
+      "faction": "fac_naples",
+      "status": "marriage_tie",
+      "note": "Les Angevins de Naples sont la branche aînée de la maison d'Anjou."
+    },
+    {
+      "faction": "fac_serbia",
+      "status": "peace",
+      "note": "Frontière de Macsó ; campagne hongroise de 1335."
+    },
+    {
+      "faction": "fac_bosnia",
+      "status": "peace",
+      "note": "Le ban de Bosnie reconnaît la suzeraineté hongroise."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_oltenia",
+      "note": "Banat de Severin et suzeraineté sur la Valachie."
+    },
+    {
+      "kind": "province",
+      "province": "prov_lviv",
+      "note": "Prétention à la Ruthénie rouge (Galicie-Volhynie)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 65,
+    "trade": 65,
+    "piety": 60
+  },
+  "description": "Royaume de Charles Ier Robert d'Anjou, restaurateur de l'autorité royale : florins d'or de Kremnica, réforme de l'armée banderiale, cour de Visegrád ; la défaite de Posada (1330) contre Basarab a toutefois montré ses limites.",
+  "sources": [
+    "Charles Ier de Hongrie",
+    "Royaume de Hongrie",
+    "Bataille de Posada"
+  ]
+}

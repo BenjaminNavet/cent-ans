@@ -1,0 +1,91 @@
+{
+  "id": "prov_halych",
+  "name": {
+    "display": "Halych",
+    "local": "Halych",
+    "local_language": "ruthène"
+  },
+  "region": "rus_ouest",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Dniestr",
+    "Strypa"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_salt",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Halych",
+      "local": "Halych",
+      "local_language": "ruthène"
+    },
+    "lat": 49.1194,
+    "lon": 24.7203
+  },
+  "geo": {
+    "capital_lonlat": [
+      24.7203,
+      49.1194
+    ],
+    "seed_lonlat": [
+      25.1,
+      49.15
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_galicia_volhynia",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Ancienne capitale de la principauté, éclipsée par Lviv.",
+    "classes": {
+      "peasants": {
+        "count": 130000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3900,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2860,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4550,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2000,
+  "description": "Haute vallée du Dniestr, ancienne capitale de la principauté de Halych qui donne son nom au royaume ; le métropolite orthodoxe y siège encore.",
+  "sources": [
+    "Halych",
+    "Principauté de Halych"
+  ]
+}

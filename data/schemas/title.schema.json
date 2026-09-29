@@ -27,6 +27,11 @@
       "additionalProperties": false,
       "description": "Faction détentrice au printemps 1337."
     },
+    "succession_law": {
+      "type": "string",
+      "description": "Loi de succession propre au titre quand la lignée du détenteur s'éteint (§ 4.5) ; absente : celle de la faction détentrice.",
+      "enum": ["salic", "male_preference_primogeniture", "cognatic_primogeniture", "elective"]
+    },
     "objectives": {
       "type": "array",
       "maxItems": 3,
@@ -45,7 +50,14 @@
               "faction": { "$ref": "common.schema.json#/$defs/faction_id" }
             },
             "required": ["kind"],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "oneOf": [
+              { "properties": { "kind": { "const": "hold_title" } }, "required": ["title"], "not": { "anyOf": [{ "required": ["provinces"] }, { "required": ["faction"] }] } },
+              { "properties": { "kind": { "const": "hold_provinces" } }, "required": ["provinces"], "not": { "anyOf": [{ "required": ["title"] }, { "required": ["faction"] }] } },
+              { "properties": { "kind": { "const": "be_independent" } }, "not": { "anyOf": [{ "required": ["title"] }, { "required": ["provinces"] }, { "required": ["faction"] }] } },
+              { "properties": { "kind": { "const": "be_liege_of" } }, "required": ["faction"], "not": { "anyOf": [{ "required": ["title"] }, { "required": ["provinces"] }] } },
+              { "properties": { "kind": { "const": "hold_crown" } }, "required": ["title"], "not": { "anyOf": [{ "required": ["provinces"] }, { "required": ["faction"] }] } }
+            ]
           }
         },
         "required": ["id", "title", "description", "condition"],

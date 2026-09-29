@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_xanthi",
+    "province": "prov_rhodope",
+    "kind": "city",
+    "name": {
+      "display": "Xanthi",
+      "local": "Ξάνθεια",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      24.888,
+      41.1349
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville forte de Thrace occidentale.",
+    "sources": [
+      "Xanthi"
+    ]
+  },
+  {
+    "id": "set_koumoutzina",
+    "province": "prov_rhodope",
+    "kind": "town",
+    "name": {
+      "display": "Koumoutzina",
+      "local": "Κουμουτζηνά",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      25.4,
+      41.12
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de Rhodope (Komotini).",
+    "sources": [
+      "Komotini"
+    ]
+  },
+  {
+    "id": "set_maroneia",
+    "province": "prov_rhodope",
+    "kind": "castle",
+    "name": {
+      "display": "Maronée",
+      "local": "Μαρώνεια",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      25.53,
+      40.87
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Vieux port fortifié de la côte thrace.",
+    "sources": [
+      "Maroneia"
+    ]
+  }
+]

@@ -1,0 +1,106 @@
+[
+  {
+    "id": "set_stolp",
+    "province": "prov_pomerania_stolp",
+    "kind": "city",
+    "name": {
+      "display": "Stolp",
+      "local": "Stolp",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      17.0266,
+      54.4641
+    ],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château ducal et ville de Poméranie orientale, sur la Stolpe.",
+    "sources": [
+      "Słupsk"
+    ]
+  },
+  {
+    "id": "set_rugenwalde",
+    "province": "prov_pomerania_stolp",
+    "kind": "town",
+    "name": {
+      "display": "Rügenwalde",
+      "local": "Rügenwalde",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      16.3792,
+      54.4244
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Port et château ducal sur la Wipper.",
+    "sources": [
+      "Darłowo"
+    ]
+  },
+  {
+    "id": "set_belgard",
+    "province": "prov_pomerania_stolp",
+    "kind": "town",
+    "name": {
+      "display": "Belgard",
+      "local": "Belgard",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      15.9917,
+      54.0042
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville murée de la Persante.",
+    "sources": [
+      "Białogard"
+    ]
+  },
+  {
+    "id": "set_schlawe",
+    "province": "prov_pomerania_stolp",
+    "kind": "town",
+    "name": {
+      "display": "Schlawe",
+      "local": "Schlawe",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      16.68,
+      54.3617
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de Poméranie orientale, seigneurie des Swenzones.",
+    "sources": [
+      "Sławno"
+    ]
+  }
+]

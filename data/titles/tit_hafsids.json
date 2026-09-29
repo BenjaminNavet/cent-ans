@@ -1,0 +1,74 @@
+{
+  "id": "tit_hafsids",
+  "rank": "kingdom",
+  "name": {
+    "display": "Sultanat hafside",
+    "local": "Sulṭānat al-Ḥafṣiyyīn",
+    "local_language": "arabe maghrébin"
+  },
+  "heraldry": {
+    "blazon": "Coupé de gueules et d'argent.",
+    "description": "Étendard hafside : bandes blanche et rouge d'après l'Atlas catalan (1375) et les portulans ; simplifié en écu coupé pour le jeu.",
+    "primary_color": "#F2EFE6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Bicolore attribué d'après les représentations des portulans du XIVe siècle ; teintes et disposition incertaines."
+  },
+  "de_jure_provinces": [
+    "prov_tunis",
+    "prov_bougie",
+    "prov_constantine",
+    "prov_bone",
+    "prov_kairouan",
+    "prov_sahel",
+    "prov_djerid",
+    "prov_zab"
+  ],
+  "holder_1337": {
+    "faction": "fac_hafsids",
+    "sources": [
+      "Hafsides",
+      "Abu Yahya Abu Bakr II"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_hafsids_hold",
+      "title": "Garder l'Ifriqiya",
+      "description": "Le sultan doit conserver le sultanat de Tunis.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_hafsids"
+      }
+    },
+    {
+      "id": "obj_hafsids_ifriqiya",
+      "title": "Réunir l'Ifriqiya",
+      "description": "Tenir ensemble Tunis, Bougie et Constantine.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tunis",
+          "prov_bougie",
+          "prov_constantine"
+        ]
+      }
+    },
+    {
+      "id": "obj_hafsids_tripoli",
+      "title": "Tripoli",
+      "description": "Rétablir l'autorité de Tunis sur Tripoli.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tripolitania"
+        ]
+      }
+    }
+  ],
+  "description": "Sultanat hafside de Tunis, héritier des Almohades d'Ifriqiya depuis 1229 ; Abu Bakr II en a restauré l'unité après 1318.",
+  "sources": [
+    "Hafsides",
+    "Abu Yahya Abu Bakr II"
+  ]
+}

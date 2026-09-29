@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_pozega",
+    "province": "prov_slavonia_east",
+    "kind": "city",
+    "name": {
+      "display": "Požega",
+      "local": "Pozsega",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      17.6853,
+      45.3403
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Chef-lieu du comitat de Požega, château et bourg de la plaine slavonne.",
+    "sources": [
+      "Požega"
+    ]
+  },
+  {
+    "id": "set_osijek",
+    "province": "prov_slavonia_east",
+    "kind": "town",
+    "name": {
+      "display": "Osijek",
+      "local": "Eszék",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.6955,
+      45.555
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg de la Drave, gué et péage.",
+    "sources": [
+      "Osijek"
+    ]
+  },
+  {
+    "id": "set_dakovo",
+    "province": "prov_slavonia_east",
+    "kind": "town",
+    "name": {
+      "display": "Đakovo",
+      "local": "Diakovár",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.4094,
+      45.3086
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Résidence de l'évêque de Bosnie, hors de Bosnie, sur la marche de Slavonie.",
+    "sources": [
+      "Đakovo"
+    ]
+  }
+]

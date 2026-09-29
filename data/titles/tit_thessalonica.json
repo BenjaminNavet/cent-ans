@@ -1,0 +1,33 @@
+{
+  "id": "tit_thessalonica",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Thessalonique",
+    "local": "Θεσσαλονίκη",
+    "local_language": "grec"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l'aigle bicéphale reste l'emblème impérial.",
+    "primary_color": "#A81C22",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Emblème tardif et occidental : la forme exacte en 1337 est discutée."
+  },
+  "de_jure_liege": "tit_byzantium",
+  "de_jure_provinces": [
+    "prov_thessalonica",
+    "prov_serres",
+    "prov_veroia"
+  ],
+  "holder_1337": {
+    "faction": "fac_byzantium",
+    "sources": [
+      "Thessalonique"
+    ]
+  },
+  "description": "Macédoine byzantine autour de la seconde ville de l'Empire.",
+  "sources": [
+    "Thessalonique"
+  ]
+}

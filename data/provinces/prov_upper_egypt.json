@@ -1,0 +1,91 @@
+{
+  "id": "prov_upper_egypt",
+  "name": {
+    "display": "Moyenne-Égypte",
+    "local": "صعيد مصر",
+    "local_language": "arabe"
+  },
+  "region": "egypte",
+  "terrain": "desert",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Nil"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_stone",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Beni Souef",
+      "local": "بني سويف",
+      "local_language": "arabe"
+    },
+    "lat": 29.07,
+    "lon": 31.1
+  },
+  "geo": {
+    "capital_lonlat": [
+      31.1,
+      29.07
+    ],
+    "seed_lonlat": [
+      30.85,
+      28.5
+    ],
+    "voronoi_weight": 1.9
+  },
+  "owner": "fac_mamluks",
+  "culture": "cul_arabic",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 90000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2700,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 1080,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu ; la carte s'arrête vers Minya (27-28° N)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1100,
+  "description": "Vallée du Nil du Fayoum à Minya, encadrée de déserts ; les émirs mamelouks y lèvent l'impôt des terres.",
+  "sources": [
+    "Upper Egypt",
+    "Beni Suef",
+    "Minya"
+  ]
+}

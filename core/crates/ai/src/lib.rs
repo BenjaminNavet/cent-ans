@@ -10,10 +10,13 @@ pub mod alignment;
 pub mod campaign;
 pub mod diplomacy_eval;
 pub mod doctrine;
+pub mod feudal;
 pub mod grid;
+mod mercenaries;
 pub mod parallel;
 pub mod stances;
 pub mod support;
+pub mod traditions;
 
 pub use campaign::{plan_turn, plan_turn_sequential};
 pub use sim_campaign::ai_minimal::plan_turn as plan_turn_minimal;

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_villena",
+    "province": "prov_villena",
+    "kind": "city",
+    "name": {
+      "display": "Villena",
+      "local": "Villena",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -0.8667,
+      38.6333
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Château-siège de la seigneurie de Villena, résidence de Juan Manuel.",
+    "sources": [
+      "Château de Villena",
+      "Juan Manuel, prince de Villena"
+    ]
+  },
+  {
+    "id": "set_yecla",
+    "province": "prov_villena",
+    "kind": "village",
+    "name": {
+      "display": "Yecla",
+      "local": "Yecla",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.1156,
+      38.6158
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg des terres de Juan Manuel, aux confins de Murcie.",
+    "sources": [
+      "Yecla"
+    ]
+  },
+  {
+    "id": "set_almansa",
+    "province": "prov_villena",
+    "kind": "castle",
+    "name": {
+      "display": "Almansa",
+      "local": "Almansa",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.1,
+      38.8667
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Bourg fortifié des terres de Juan Manuel, sur la route de Valence.",
+    "sources": [
+      "Almansa"
+    ]
+  }
+]

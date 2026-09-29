@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_cosenza",
+    "province": "prov_calabria_citra",
+    "kind": "city",
+    "name": {
+      "display": "Cosenza",
+      "local": "Cosenza",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      16.2529,
+      39.2981
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale de la Calabre citérieure, aux sept collines.",
+    "sources": [
+      "Cosenza"
+    ]
+  },
+  {
+    "id": "set_rossano",
+    "province": "prov_calabria_citra",
+    "kind": "town",
+    "name": {
+      "display": "Rossano",
+      "local": "Rossano",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      16.6333,
+      39.5733
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville byzantine sur son piton, siège du Codex purpureus.",
+    "sources": [
+      "Rossano"
+    ]
+  },
+  {
+    "id": "set_crotone",
+    "province": "prov_calabria_citra",
+    "kind": "town",
+    "name": {
+      "display": "Crotone",
+      "local": "Crotone",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      17.1265,
+      39.0813
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "sea_zone": "sea_ionian",
+    "description": "Ancienne Crotone, port de l'Ionienne.",
+    "sources": [
+      "Crotone"
+    ]
+  }
+]

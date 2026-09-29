@@ -1,41 +1,8 @@
 [
   {
-    "id": "set_brunswick",
-    "province": "prov_lower_saxony",
-    "kind": "city",
-    "name": {
-      "display": "Brunswick",
-      "local": "Brunswik",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      10.5268,
-      52.2689
-    ],
-    "weight": 35,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_windmill",
-      "bld_port",
-      "bld_cathedral",
-      "bld_stone_walls",
-      "bld_muster_field",
-      "bld_stables"
-    ],
-    "port": false,
-    "description": "Duchés de Brunswick-Lunebourg (Welfs), archevêché de Brême, évêché de Hildesheim ; Brunswick et Lunebourg (salines) sont villes hanséatiques.",
-    "sources": [
-      "Duché de Brunswick-Lunebourg",
-      "Brême",
-      "Lunebourg"
-    ]
-  },
-  {
     "id": "set_bremen",
     "province": "prov_lower_saxony",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Brême",
       "local": "Bremen",
@@ -45,45 +12,20 @@
       8.8017,
       53.0793
     ],
-    "weight": 25,
+    "weight": 30,
     "owner": null,
     "fortification_level": 2,
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_collegiate_church"
-    ],
-    "port": true,
-    "description": "Ville hanséatique largement autonome face à son archevêque, grand port de la Weser (elle ne sera reconnue ville libre d'Empire qu'en 1646).",
-    "sources": [
-      "Brême"
-    ]
-  },
-  {
-    "id": "set_hildesheim",
-    "province": "prov_lower_saxony",
-    "kind": "town",
-    "name": {
-      "display": "Hildesheim",
-      "local": "Hildensem",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      9.95,
-      52.15
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
       "bld_collegiate_church",
       "bld_stone_walls"
     ],
-    "port": false,
-    "description": "Ancienne cité épiscopale saxonne réputée pour son orfèvrerie et sa cathédrale.",
+    "port": true,
+    "description": "Cité de l'archevêque Burchard Grelle, ville hanséatique largement autonome face à son suzerain, grand port de la Weser (elle ne sera reconnue ville libre d'Empire qu'en 1646).",
     "sources": [
-      "Hildesheim"
+      "Brême",
+      "Burchard Grelle"
     ]
   },
   {
@@ -113,56 +55,29 @@
     ]
   },
   {
-    "id": "set_luneburg",
+    "id": "set_stade",
     "province": "prov_lower_saxony",
     "kind": "town",
     "name": {
-      "display": "Lunebourg",
-      "local": "Lüneborch",
+      "display": "Stade",
+      "local": "Stade",
       "local_language": "moyen bas-allemand"
     },
     "lonlat": [
-      10.4137,
-      53.2504
+      9.4767,
+      53.5964
     ],
-    "weight": 22,
+    "weight": 12,
     "owner": null,
-    "fortification_level": 2,
+    "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_stone_walls"
+      "bld_port"
     ],
-    "port": false,
-    "description": "Ville hanséatique fameuse pour ses salines (Saline de Lunebourg), qui alimentent le commerce du hareng de Scanie.",
+    "port": true,
+    "description": "Ville de l'Elbe inférieure, bailliage et péage de l'archevêché de Brême face au duché de Brunswick-Lunebourg.",
     "sources": [
-      "Lunebourg"
-    ]
-  },
-  {
-    "id": "set_goslar",
-    "province": "prov_lower_saxony",
-    "kind": "town",
-    "name": {
-      "display": "Goslar",
-      "local": "Goslere",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      10.4257,
-      51.9058
-    ],
-    "weight": 18,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville libre d'Empire au pied du Rammelsberg, dont les mines d'argent et de cuivre font la richesse depuis le Xe siècle.",
-    "sources": [
-      "Goslar",
-      "Rammelsberg"
+      "Stade"
     ]
   },
   {

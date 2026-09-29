@@ -1,0 +1,47 @@
+{
+  "id": "chr_jean_ii_de_hohenzollern",
+  "name": {
+    "display": "Jean II de Hohenzollern",
+    "local": "Johann II. von Hohenzollern",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "male",
+  "house": "Hohenzollern",
+  "faction": "fac_nuremberg",
+  "role": "ruler",
+  "birth": {
+    "value": "1279",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1357-12-13"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Burgrave de Nuremberg",
+      "from": {
+        "value": "1332"
+      },
+      "to": {
+        "value": "1357"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_cunning"
+  ],
+  "piety": 50,
+  "starting_location": "prov_nuremberg",
+  "status": "at_court",
+  "description": "Burgrave de Nuremberg de 1332 à 1357, château de Cadolzburg ; sa maison de Hohenzollern deviendra plus tard celle des margraves de Brandebourg puis des rois de Prusse.",
+  "sources": [
+    "Jean II de Hohenzollern"
+  ]
+}

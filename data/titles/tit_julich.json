@@ -1,0 +1,51 @@
+{
+  "id": "tit_julich",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Juliers",
+    "local": "Herzogtum Jülich",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'or au lion de sable, armé et lampassé de gueules, à la bordure de gueules.",
+    "description": "Armes de Juliers (lion de sable sur or) brisées d'une bordure de gueules pour les distinguer des armes historiques du Palatinat de Bavière, également au lion de sable sur or.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_julich"
+  ],
+  "holder_1337": {
+    "faction": "fac_julich",
+    "sources": [
+      "Guillaume Ier de Juliers",
+      "Duché de Juliers"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_julich_hold",
+      "title": "Garder le duché",
+      "description": "La maison de Juliers doit conserver son duché nouvellement érigé.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_julich"
+      }
+    },
+    {
+      "id": "obj_julich_berg",
+      "title": "Juliers-Berg",
+      "description": "Acquérir le comté de Berg (union de 1348).",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_berg"
+      }
+    }
+  ],
+  "description": "Comté de Juliers, élevé en duché par l'empereur Louis IV en 1336 pour Guillaume V, comte depuis 1328, pilier de l'alliance anglo-impériale contre la France.",
+  "sources": [
+    "Guillaume Ier de Juliers",
+    "Duché de Juliers"
+  ]
+}

@@ -59,7 +59,7 @@ const MECHANICS := [
 	{"id": "mech_morale", "name": "Moral", "icon": "gauge_morale", "text": "Le moral d'une unité baisse sous le tir, en mêlée, quand elle est prise de flanc ou de dos, quand ses voisines fuient ou que le général tombe. Au plus bas, elle rompt et fuit ; elle peut se rallier loin de l'ennemi. En campagne, la dette, la famine et les défaites entament le moral des armées ; le repos en territoire ami le rétablit. Certains traits (chevaleresque…) et compétences du général le relèvent."},
 	{"id": "mech_supply", "name": "Ravitaillement", "icon": "gauge_supply", "text": "Chaque armée a des vivres (sur 100). Ils baissent hors du territoire ami ({rule.supply_loss} par saison, {rule.supply_loss_winter} l'hiver) et remontent en territoire ami ({rule.supply_recovery} par saison). Un pays dévasté nourrit mal : la perte y est plus forte (jusqu'à {rule.supply_devastation_loss_percent} % de plus) et la reprise plus lente (jusqu'à {rule.supply_devastation_recovery_cut_percent} % de moins), selon la dévastation. Sans vivres, l'armée perd {rule.starvation_loss_percent} % de ses hommes chaque saison (attrition). Les bâtiments et les compétences de logistique améliorent le ravitaillement ; la posture « Chevauchée » rapporte du butin mais ne nourrit pas l'armée, et le pays qu'elle dévaste affame ensuite ceux qui y passent.\n\nTraverser la mer se fait entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte des hommes."},
 	{"id": "mech_sieges", "name": "Sièges", "icon": "bld_stone_walls", "text": "Chaque province contient plusieurs colonies prenables séparément (cité, villes, châteaux, abbayes, villages) : une armée en posture « Siège » sur une colonie ennemie fortifiée l'assiège. La place a des vivres : quand ils s'épuisent, elle capitule. Les engins de siège ouvrent une brèche. Quand l'armée assiégeante est sélectionnée, un encart au-dessus du bandeau d'ost affiche vivres, brèche et chances d'assaut ; « Donner l'assaut » lance une bataille de siège (3D ou automatique). Les fortifications (palissade, murailles de pierre, château fort, bastion) allongent le siège et renforcent la garnison ; un village sans garnison est pris dès qu'une armée ennemie y entre, sans siège.\n\nEn bataille de siège : échelles, tours de siège et bélier contre la porte ; la victoire revient à qui met la garnison en déroute ou tient la place centrale.\n\nUne armée battue se replie vers la colonie amie la plus proche ; sinon elle recule de quelques lieues en perdant des traînards, si un refuge reste à portée et qu'elle n'a pas été écrasée ; sinon c'est la débandade (lourdes pertes, dispersion possible)."},
-	{"id": "mech_movement", "name": "Mouvement des armées", "icon": "hud_army", "text": "Les armées se déplacent librement sur la terre. Armée sélectionnée, la bulle dorée au sol montre sa portée pour la saison (environ {rule.march_km_season} km de plaine, {rule.march_km_winter} l'hiver ; les routes accélèrent, collines, forêts, marais et montagnes ralentissent). En survolant le sol, le chemin s'affiche en vert pour ce tour et en rouge pour les suivants. Clic droit sur le sol : l'armée marche aussitôt ; une cible hors de portée est gardée, et la marche reprend d'elle-même au début des tours suivants. Clic droit sur une colonie ennemie : siège (un village sans garnison est pris aussitôt) ; sur une colonie amie : stationnement ; sur une armée ennemie : attaque.\n\nChaque armée tient une zone de contrôle de {rule.zoc_radius_km} km : une armée ennemie qui y entre s'arrête. Les grands fleuves ne se passent qu'aux ponts et gués, et les montagnes qu'aux cols connus. Pour traverser la mer, marchez jusqu'à un port puis visez le port d'arrivée : la traversée prend la saison.\n\nLe tour est séquentiel : vous jouez d'abord, chaque ordre s'exécute tout de suite ; puis chaque puissance IA joue à son tour. Ses batailles contre vous sont résolues automatiquement et figurent au rapport de saison."},
+	{"id": "mech_movement", "name": "Mouvement des armées", "icon": "hud_army", "text": "Les armées se déplacent librement sur la terre. Armée sélectionnée, la bulle dorée au sol montre sa portée pour la saison (environ {rule.march_km_season} km de plaine, {rule.march_km_winter} l'hiver ; les routes accélèrent, collines, forêts, marais, déserts et montagnes ralentissent). En survolant le sol, le chemin s'affiche en vert pour ce tour et en rouge pour les suivants. Clic droit sur le sol : l'armée marche aussitôt ; une cible hors de portée est gardée, et la marche reprend d'elle-même au début des tours suivants. Clic droit sur une colonie ennemie : siège (un village sans garnison est pris aussitôt) ; sur une colonie amie : stationnement ; sur une armée ennemie : attaque.\n\nChaque armée tient une zone de contrôle de {rule.zoc_radius_km} km : une armée ennemie qui y entre s'arrête. Les grands fleuves ne se passent qu'aux ponts et gués, et les montagnes qu'aux cols connus. Pour traverser la mer, marchez jusqu'à un port puis visez le port d'arrivée : la traversée prend la saison.\n\nLe tour est séquentiel : vous jouez d'abord, chaque ordre s'exécute tout de suite ; puis chaque puissance IA joue à son tour. Ses batailles contre vous sont résolues automatiquement et figurent au rapport de saison."},
 	{"id": "mech_battles", "name": "Batailles", "icon": "hud_army", "text": "Quand deux armées ennemies se rencontrent, choisissez « Livrer bataille » (bataille 3D en temps réel) ou la résolution automatique. En 3D : régiments en ligne, colonne, schiltron ou coin ; flancs et arrières vulnérables ; piques contre cavalerie ; pieux des archers ; la pluie gêne arcs et arbalètes, le brouillard réduit la portée. La mort du général fait chuter le moral. Les armées alliées présentes à proximité se joignent à la bataille."},
 	{"id": "mech_diplomacy", "name": "Diplomatie", "icon": "hud_diplomacy", "text": "L'attitude de chaque puissance envers vous est calculée (liens, guerres, religion, prétentions, réputation) et le panneau en donne les raisons. Déclarer une guerre sans casus belli ou rompre une trêve coûte en réputation. La paix se négocie selon le score de guerre (cessions, tribut, trêve). Alliances, appels aux armes, embargos, vassalité, mariages entre dynasties et unions personnelles complètent le jeu.\n\nReligion : la faveur pontificale se gagne par la piété et les dons ; l'excommunication isole. Le Grand Schisme (1378-1417) oblige à choisir une obédience.", "extra": "relations"},
 	{"id": "mech_succession", "name": "Succession", "icon": "hud_court", "text": "Les personnages vieillissent, se marient, ont des enfants et meurent. À la mort du souverain, l'héritier est désigné par la loi de succession du royaume ; un héritier mineur règne sous régence. Une faction sans héritier voit une nouvelle maison (ou un élu) prendre le pouvoir. Les prétentions dynastiques issues des mariages peuvent donner un casus belli, voire une union personnelle.", "extra": "succession"},
@@ -112,7 +112,7 @@ func _ready() -> void:
 	box.add_child(header)
 	title_label = Label.new()
 	title_label.text = "Encyclopédie"
-	title_label.add_theme_font_size_override("font_size", 24)
+	UiType.apply(title_label, UiType.TITLE)
 	header.add_child(title_label)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -120,14 +120,14 @@ func _ready() -> void:
 	codex_button = Button.new()
 	codex_button.name = "CodexButton"
 	codex_button.text = "✠ Fiche historique"
-	codex_button.tooltip_text = "Ouvrir la fiche du Codex (K)"
+	RichTooltip.attach_plain(codex_button, "encyclopedia_open_codex")
 	codex_button.hide()
 	codex_button.pressed.connect(open_codex_entry)
 	header.add_child(codex_button)
 	var back := Button.new()
 	back.name = "BackButton"
 	back.text = "← Retour"
-	back.tooltip_text = "Fiche précédente"
+	RichTooltip.attach_plain(back, "encyclopedia_previous_entry")
 	back.pressed.connect(go_back)
 	header.add_child(back)
 	search_field = LineEdit.new()
@@ -142,7 +142,7 @@ func _ready() -> void:
 	var close := Button.new()
 	close.name = "CloseButton"
 	close.text = "×"
-	close.tooltip_text = "Fermer (Échap ou K)"
+	RichTooltip.attach_plain(close, "close_escape_k")
 	close.pressed.connect(close_window)
 	header.add_child(close)
 	_close_button = close
@@ -165,14 +165,14 @@ func _ready() -> void:
 	left.custom_minimum_size = Vector2(300, 0)
 	split.add_child(left)
 	count_label = Label.new()
-	count_label.add_theme_font_size_override("font_size", 13)
+	UiType.apply(count_label, UiType.CAPTION)
 	count_label.add_theme_color_override("font_color", Color(0.42, 0.35, 0.25))
 	left.add_child(count_label)
 	entry_list = ItemList.new()
 	entry_list.name = "Entries"
 	entry_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	entry_list.fixed_icon_size = Vector2i(22, 22)
-	entry_list.add_theme_font_size_override("font_size", 15)
+	UiType.apply(entry_list, UiType.BODY)
 	entry_list.add_theme_color_override("font_selected_color", Color(0.98, 0.94, 0.84))
 	var selected := StyleBoxFlat.new()
 	selected.bg_color = Color(0.45, 0.28, 0.12)
@@ -189,8 +189,8 @@ func _ready() -> void:
 	fiche.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	fiche.custom_minimum_size = Vector2(700, 0)
 	fiche.add_theme_color_override("default_color", Color(0.22, 0.14, 0.07))
-	fiche.add_theme_font_size_override("normal_font_size", 15)
-	fiche.add_theme_font_size_override("bold_font_size", 16)
+	UiType.apply(fiche, UiType.BODY)
+	fiche.add_theme_font_size_override("bold_font_size", UiType.size(UiType.BODY))
 	fiche.meta_clicked.connect(func(meta: Variant) -> void: open_entry(str(meta)))
 	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le corps des fiches.
 	var bubbles := get_node_or_null("/root/CodexBubbles")
@@ -401,7 +401,7 @@ func set_embedded(on: bool) -> void:
 	search_field.visible = not on
 	_close_button.visible = not on
 	if on:
-		CodexHub.style_tabs(tab_bar, 14, 7)
+		CodexHub.style_tabs(tab_bar, UiType.CAPTION, 7)
 
 
 ## Nombre d'entrées de tous les onglets qui répondent à la recherche courante.
@@ -570,7 +570,7 @@ static func _links(ids: Array) -> String:
 
 static func _heading(entry_id: String, name: String, subtitle: String, category: String = "") -> String:
 	var icon := icon_bbcode(entry_id, 40, category) if entry_id != "" else ""
-	var head := "[font_size=24][b]%s[/b][/font_size]" % name
+	var head := "[font_size=%d][b]%s[/b][/font_size]" % [UiType.size(UiType.TITLE), name]
 	if icon != "":
 		head = icon + " " + head
 	if subtitle != "":
@@ -596,7 +596,7 @@ static func _sources(definition: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for source in sources:
 		parts.append(str(source))
-	return "[font_size=12][color=%s]Sources : %s[/color][/font_size]" % [MUTED, " ; ".join(parts)]
+	return "[font_size=%d][color=%s]Sources : %s[/color][/font_size]" % [UiType.size(UiType.CAPTION), MUTED, " ; ".join(parts)]
 
 
 static func _join(parts: Array) -> String:
@@ -713,7 +713,7 @@ static func _tech_unlocking(kind: String, entry_id: String) -> Array:
 
 static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	var category := str(definition.get("category", ""))
-	var subtitle := str(RichTooltip.UNIT_CATEGORY_LABELS.get(category, category))
+	var subtitle := RichTooltip.unit_category_label(category)
 	if definition.has("soldiers"):
 		subtitle += ", %d hommes" % int(definition["soldiers"])
 	var name_block: Variant = definition.get("name", {})
@@ -730,7 +730,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	var stat_lines := PackedStringArray()
 	for stat in ["melee", "ranged", "range", "armor", "morale", "speed", "charge", "siege_attack", "ammo"]:
 		if stats.has(stat):
-			stat_lines.append("%s %s" % [RichTooltip.STAT_LABELS[stat], RichTooltip._number(float(stats[stat]))])
+			stat_lines.append("%s %s" % [RichTooltip.stat_label(stat), RichTooltip._number(float(stats[stat]))])
 	var sw := RichTooltip.strengths_weaknesses(definition)
 	var traits := PackedStringArray()
 	if not (sw[0] as PackedStringArray).is_empty():
@@ -739,7 +739,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 		traits.append("[color=%s]Faiblesses : %s[/color]" % [RichTooltip.RED, ", ".join(sw[1])])
 	var abilities := PackedStringArray()
 	for ability in definition.get("abilities", []):
-		abilities.append(str(RichTooltip.ABILITY_LABELS.get(ability, ability)))
+		abilities.append(RichTooltip.ability_label(ability))
 	if not abilities.is_empty():
 		traits.append("Capacités : " + ", ".join(abilities))
 	var requires := PackedStringArray()
@@ -756,7 +756,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	if not unlocking.is_empty() and str(definition.get("required_technology", "")) == "":
 		requires.append("Débloquée par : " + _links(unlocking))
 	if str(definition.get("source_class", "")) != "":
-		requires.append("Recrutés parmi : %s" % str(RichTooltip.CLASS_LABELS.get(definition["source_class"], definition["source_class"])).to_lower())
+		requires.append("Recrutés parmi : %s" % RichTooltip.class_label(str(definition["source_class"])).to_lower())
 	var cultures: Array = definition.get("required_culture", [])
 	if not cultures.is_empty():
 		var names := PackedStringArray()
@@ -784,7 +784,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 
 static func _building_fiche(entry_id: String, definition: Dictionary) -> String:
 	var category := str(definition.get("category", ""))
-	var subtitle := str(RichTooltip.BUILDING_CATEGORY_LABELS.get(category, category))
+	var subtitle := RichTooltip.building_category_label(category)
 	if definition.has("tier"):
 		subtitle += ", rang %d" % int(definition["tier"])
 	var costs := PackedStringArray()
@@ -857,7 +857,7 @@ static func _resource_fiche(entry_id: String, definition: Dictionary) -> String:
 		lines.append("Prix de base : %s %s" % [RichTooltip._number(float(definition["base_price"])), RichTooltip.POUND])
 	var classes := PackedStringArray()
 	for class_id in definition.get("satisfies_classes", []):
-		classes.append("%s %s" % [icon_bbcode("class_" + str(class_id), 16), str(RichTooltip.CLASS_LABELS.get(class_id, class_id))])
+		classes.append("%s %s" % [icon_bbcode("class_" + str(class_id), 16), RichTooltip.class_label(str(class_id))])
 	if not classes.is_empty():
 		lines.append("Satisfait : " + ", ".join(classes))
 	elif definition.has("satisfies_classes"):
@@ -869,7 +869,7 @@ static func _resource_fiche(entry_id: String, definition: Dictionary) -> String:
 			used_by.append(str(id))
 	used_by.sort()
 	return _join([
-		_heading(entry_id, name_of(entry_id), str(RichTooltip.RESOURCE_CATEGORY_LABELS.get(category, category)), "resource"),
+		_heading(entry_id, name_of(entry_id), RichTooltip.resource_category_label(category), "resource"),
 		_description(definition), "\n".join(lines),
 		_section("Utilisée par les bâtiments", _links(used_by)), _sources(definition),
 	])
@@ -880,7 +880,7 @@ static func _trait_fiche(entry_id: String, definition: Dictionary) -> String:
 	var opposites: Array = definition.get("opposites", [])
 	return _join([
 		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
-		_heading(entry_id, name_of(entry_id), "Trait " + str(RichTooltip.TRAIT_CATEGORY_LABELS.get(category, category)), "trait"),
+		_heading(entry_id, name_of(entry_id), "Trait " + RichTooltip.trait_category_label(category), "trait"),
 		_description(definition), _section("Effets", _effects(definition.get("effects", []))),
 		_section("Incompatible avec", _links(opposites)),
 	])
@@ -888,14 +888,14 @@ static func _trait_fiche(entry_id: String, definition: Dictionary) -> String:
 
 static func _skill_fiche(entry_id: String, definition: Dictionary) -> String:
 	var branch := str(definition.get("branch", ""))
-	var subtitle := "%s, rang %d — %s de compétence" % [RichTooltip.BRANCH_LABELS.get(branch, branch), int(definition.get("tier", 1)), FrText.count(int(definition.get("cost", 1)), "point")]
+	var subtitle := "%s, rang %d — %s de compétence" % [RichTooltip.branch_label(branch), int(definition.get("tier", 1)), FrText.count(int(definition.get("cost", 1)), "point")]
 	var prerequisites: Array = definition.get("prerequisites", [])
 	return _join([
 		_heading("branch_" + branch, name_of(entry_id), subtitle, "branch"), _description(definition),
 		_section("Effets", _effects(definition.get("effects", []))),
 		_section("Prérequis", _links(prerequisites) if not prerequisites.is_empty() else "Aucun"),
 		_section("Ouvre", _links(_referencing("skills", "prerequisites", entry_id))),
-		str(RichTooltip.BRANCH_TEXTS.get(branch, "")),
+		RichTooltip.branch_text(branch),
 	])
 
 
@@ -984,6 +984,13 @@ static func _religion_fiche(entry_id: String, definition: Dictionary) -> String:
 		lines.append("Chef : " + link(str(definition["head_faction"])))
 	if str(definition.get("seat", "")) != "":
 		lines.append("Siège : " + str(definition["seat"]))
+	# OM3 : Églises séparées de la même foi (orthodoxes et catholiques : schismatiques, pas infidèles).
+	var kindred: Array = (definition.get("kindred", []) as Array).duplicate()
+	for other in _referencing("religions", "kindred", entry_id):
+		if not kindred.has(other):
+			kindred.append(other)
+	if not kindred.is_empty():
+		lines.append("Églises séparées (schismatiques) : " + _links(kindred))
 	var adherents: Array = definition.get("historical_adherents", [])
 	var followers := _referencing("factions", "religion", entry_id)
 	for faction_id in followers:
@@ -1035,7 +1042,7 @@ static func _mechanic_extra(kind: String) -> String:
 				for res_id in resources:
 					if class_id in resources[res_id].get("satisfies_classes", []):
 						goods.append(link(str(res_id)))
-				parts.append("• %s %s : %s" % [icon_bbcode("class_" + class_id, 16), RichTooltip.CLASS_LABELS[class_id], ", ".join(goods)])
+				parts.append("• %s %s : %s" % [icon_bbcode("class_" + class_id, 16), RichTooltip.class_label(class_id), ", ".join(goods)])
 			return _section("Biens recherchés par classe", "\n".join(parts))
 		"relations":
 			var parts := PackedStringArray()

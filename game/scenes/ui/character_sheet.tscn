@@ -216,7 +216,7 @@ theme_override_constants/separation = 2
 
 [node name="Scroll" type="ScrollContainer" parent="VBox/Body"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 640)
+custom_minimum_size = Vector2(0, 320)
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0

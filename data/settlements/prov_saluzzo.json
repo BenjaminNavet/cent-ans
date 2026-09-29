@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_saluzzo",
+    "province": "prov_saluzzo",
+    "kind": "city",
+    "name": {
+      "display": "Saluces",
+      "local": "Saluzzo",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.4906,
+      44.6553
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du marquisat alleutier de Saluces, aux sources du Pô.",
+    "sources": [
+      "Saluces"
+    ]
+  },
+  {
+    "id": "set_revello",
+    "province": "prov_saluzzo",
+    "kind": "castle",
+    "name": {
+      "display": "Revello",
+      "local": "Revel",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.4224,
+      44.6497
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence favorite des marquis de Saluces, à l'entrée du val Pô.",
+    "sources": [
+      "Revello"
+    ]
+  },
+  {
+    "id": "set_verzuolo",
+    "province": "prov_saluzzo",
+    "kind": "village",
+    "name": {
+      "display": "Verzuolo",
+      "local": "Verzuel",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.4569,
+      44.6931
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg agricole du marquisat de Saluces.",
+    "sources": [
+      "Verzuolo"
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "id": "cdx_marinides",
+  "title": "Le sultanat mérinide de Fès",
+  "category": "lieu",
+  "aliases": [
+    "Mérinides",
+    "sultanat mérinide",
+    "Fès mérinide",
+    "Tlemcen"
+  ],
+  "era": {
+    "from": "1244",
+    "to": "1465"
+  },
+  "summary": "Dynastie de Fès, les Mérinides règnent sur le Maroc. Sous Abu l-Hasan, ils prennent Tlemcen en 1337 et rêvent de réunir tout le Maghreb.",
+  "body": "Issus de tribus zénètes du Maroc oriental, les Mérinides se sont installés à Fès en 1248 et ont renversé les Almohades. Ils ont plusieurs fois traversé le détroit pour secourir les royaumes musulmans d'Espagne, et tiennent le trafic de l'or du Soudan.\n\nAbu l-Hasan Ali (1331-1348) reprend Gibraltar en 1333, s'empare de Tlemcen, capitale des Zayyanides, en mai 1337, puis passe en Espagne, où il sera battu au Salado en 1340. Son entreprise, qui vise à unifier le Maghreb, échouera en 1348.",
+  "entity": "fac_marinids",
+  "see_also": [
+    "cdx_abu_al_hasan_ali",
+    "cdx_hafsides"
+  ],
+  "sources": [
+    "Mérinides",
+    "Abu al-Hasan Ali",
+    "Siège de Tlemcen"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "id": "chr_walram_de_juliers",
+  "name": {
+    "display": "Walram de Juliers",
+    "local": "Walram von Jülich",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "male",
+  "house": "Juliers",
+  "faction": "fac_cologne",
+  "role": "ruler",
+  "birth": {
+    "value": "1304",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1349-08-14",
+    "place": "Bonn",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Archevêque-électeur de Cologne",
+      "from": {
+        "value": "1332"
+      },
+      "to": {
+        "value": "1349"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_energetic"
+  ],
+  "piety": 50,
+  "starting_location": "prov_cologne",
+  "status": "at_court",
+  "description": "Fils du comte Gérard V de Juliers, archevêque-électeur de Cologne de 1332 à sa mort en 1349 ; il renforce l'alliance de sa maison avec l'Angleterre d'Édouard III, dans la lignée de son frère Guillaume, comte puis marquis de Juliers.",
+  "sources": [
+    "Walram de Juliers",
+    "Électorat de Cologne",
+    "Duché de Juliers"
+  ]
+}

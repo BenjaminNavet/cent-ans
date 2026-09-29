@@ -3,154 +3,266 @@
     "id": "set_agen",
     "province": "prov_agenais",
     "kind": "city",
-    "name": { "display": "Agen", "local": "Agen", "local_language": "occitan" },
-    "lonlat": [0.6163, 44.2049],
+    "name": {
+      "display": "Agen",
+      "local": "Agen",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.6163,
+      44.2049
+    ],
     "weight": 40,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_vineyard_press", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale de l'Agenais sur la Garonne, siège d'un évêché et d'une sénéchaussée ; occupée par la France depuis la guerre de Saint-Sardos (1324).",
-    "sources": ["Agen", "Agenais", "Guerre de Saint-Sardos"]
+    "sources": [
+      "Agen",
+      "Agenais",
+      "Guerre de Saint-Sardos"
+    ]
   },
   {
     "id": "set_aiguillon",
     "province": "prov_agenais",
     "kind": "castle",
-    "name": { "display": "Aiguillon", "local": "Aguilhon", "local_language": "occitan" },
-    "lonlat": [0.3406, 44.3036],
+    "name": {
+      "display": "Aiguillon",
+      "local": "Aguilhon",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.3406,
+      44.3036
+    ],
     "weight": 13,
     "owner": "fac_england",
     "fortification_level": 3,
-    "buildings": ["bld_castle", "bld_armoury"],
+    "buildings": [
+      "bld_castle",
+      "bld_armoury"
+    ],
     "port": false,
     "description": "Place forte au confluent du Lot et de la Garonne, qui commande la route de La Réole et de Bordeaux ; garnison française en 1337, elle est livrée aux Anglais en 1345 et résiste au siège de Jean de Normandie en 1346.",
-    "sources": ["Aiguillon (Lot-et-Garonne)", "Siège d'Aiguillon"]
+    "sources": [
+      "Aiguillon (Lot-et-Garonne)",
+      "Siège d'Aiguillon"
+    ]
   },
   {
     "id": "set_villeneuve_sur_lot",
     "province": "prov_agenais",
     "kind": "town",
-    "name": { "display": "Villeneuve-sur-Lot", "local": "Vilanova d'Agenés", "local_language": "occitan" },
-    "lonlat": [0.7075, 44.4075],
+    "name": {
+      "display": "Villeneuve-sur-Lot",
+      "local": "Vilanova d'Agenés",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.7075,
+      44.4075
+    ],
     "weight": 16,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Bastide fondée en 1264 par Alphonse de Poitiers, comte de Toulouse, au bord du Lot : plan en damier, marché et halles.",
-    "sources": ["Villeneuve-sur-Lot", "Bastide"]
+    "sources": [
+      "Villeneuve-sur-Lot",
+      "Bastide"
+    ]
   },
   {
     "id": "set_clairac",
     "province": "prov_agenais",
     "kind": "abbey",
-    "name": { "display": "Clairac", "local": "Clairac", "local_language": "occitan" },
-    "lonlat": [0.6903, 44.3667],
+    "name": {
+      "display": "Clairac",
+      "local": "Clairac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.6903,
+      44.3667
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Abbaye bénédictine sur le Lot, fondée au haut Moyen Âge, dotée d'un scriptorium actif.",
-    "sources": ["Clairac (Lot-et-Garonne)"]
+    "sources": [
+      "Clairac (Lot-et-Garonne)"
+    ]
   },
   {
     "id": "set_layrac",
     "province": "prov_agenais",
     "kind": "village",
-    "name": { "display": "Layrac", "local": "Lairac", "local_language": "occitan" },
-    "lonlat": [0.6889, 44.1594],
+    "name": {
+      "display": "Layrac",
+      "local": "Lairac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.6889,
+      44.1594
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_water_mill"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
     "port": false,
     "description": "Bourg de prieuré clunisien sur la Garonne, marché agricole non fortifié.",
-    "sources": ["Layrac"]
+    "sources": [
+      "Layrac"
+    ]
   },
   {
     "id": "set_marmande",
     "province": "prov_agenais",
     "kind": "town",
-    "name": { "display": "Marmande", "local": "Marmanda", "local_language": "occitan" },
-    "lonlat": [0.1667, 44.4989],
+    "name": {
+      "display": "Marmande",
+      "local": "Marmanda",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.1667,
+      44.4989
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Bastide fondée en 1182 par Richard Cœur de Lion sur la rive droite de la Garonne, port fluvial et place forte disputée entre les couronnes de France et d'Angleterre.",
-    "sources": ["Marmande (Lot-et-Garonne)"]
-  },
-  {
-    "id": "set_nerac",
-    "province": "prov_agenais",
-    "kind": "castle",
-    "name": { "display": "Nérac", "local": "Nerac", "local_language": "occitan" },
-    "lonlat": [0.3333, 44.1333],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": ["bld_castle"],
-    "port": false,
-    "description": "Château sur la Baïse, berceau de la maison d'Albret, sénéchaux héréditaires de Gascogne.",
-    "sources": ["Nérac", "Maison d'Albret"]
+    "sources": [
+      "Marmande (Lot-et-Garonne)"
+    ]
   },
   {
     "id": "set_penne_dagenais",
     "province": "prov_agenais",
     "kind": "town",
-    "name": { "display": "Penne-d'Agenais", "local": "Pena d'Agenés", "local_language": "occitan" },
-    "lonlat": [0.8189, 44.3981],
+    "name": {
+      "display": "Penne-d'Agenais",
+      "local": "Pena d'Agenés",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.8189,
+      44.3981
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Ville fortifiée perchée au-dessus du Lot, dont le château fut plusieurs fois pris et détruit lors des guerres entre Capétiens et Plantagenêts.",
-    "sources": ["Penne-d'Agenais"]
+    "sources": [
+      "Penne-d'Agenais"
+    ]
   },
   {
     "id": "set_abbaye_de_moirax",
     "province": "prov_agenais",
     "kind": "abbey",
-    "name": { "display": "Moirax", "local": "Morais", "local_language": "occitan" },
-    "lonlat": [0.5686, 44.1461],
+    "name": {
+      "display": "Moirax",
+      "local": "Morais",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.5686,
+      44.1461
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey"],
+    "buildings": [
+      "bld_abbey"
+    ],
     "port": false,
     "description": "Prieuré clunisien fondé vers 1049 près d'Agen, connu pour son église romane.",
-    "sources": ["Prieuré de Moirax"]
+    "sources": [
+      "Prieuré de Moirax"
+    ]
   },
   {
     "id": "set_astaffort",
     "province": "prov_agenais",
     "kind": "village",
-    "name": { "display": "Astaffort", "local": "Estafòrt", "local_language": "occitan" },
-    "lonlat": [0.6500, 44.0683],
+    "name": {
+      "display": "Astaffort",
+      "local": "Estafòrt",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.65,
+      44.0683
+    ],
     "weight": 5,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Bourg sur l'Arrats, étape du chemin de Saint-Jacques-de-Compostelle en direction d'Agen.",
-    "sources": ["Astaffort"]
+    "sources": [
+      "Astaffort"
+    ]
   },
   {
     "id": "set_serignac_sur_garonne",
     "province": "prov_agenais",
     "kind": "village",
-    "name": { "display": "Sérignac-sur-Garonne", "local": "Serinhac", "local_language": "occitan" },
-    "lonlat": [0.4167, 44.1167],
+    "name": {
+      "display": "Sérignac-sur-Garonne",
+      "local": "Serinhac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.4167,
+      44.1167
+    ],
     "weight": 4,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_water_mill"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
     "port": false,
     "description": "Village agricole sur la Garonne en aval d'Agen, doté d'un prieuré.",
-    "sources": ["Sérignac-sur-Garonne"]
+    "sources": [
+      "Sérignac-sur-Garonne"
+    ]
   }
 ]

@@ -1,0 +1,99 @@
+{
+  "id": "prov_mecklenburg",
+  "name": {
+    "display": "Mecklembourg",
+    "local": "Mekelenborch",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "empire_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Warnow",
+    "Elde"
+  ],
+  "coastal": true,
+  "ports": [
+    "Rostock",
+    "Wismar"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Schwerin",
+      "local": "Swerin",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 53.6355,
+    "lon": 11.4132
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.4132,
+      53.6355
+    ],
+    "seed_lonlat": [
+      12.0,
+      53.7
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_mecklenburg",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Seigneurie de Mecklembourg (comprend ici, par simplification, la côte poméranienne occidentale de Stralsund) ; population estimée indépendamment de l'ancienne province combinée Brandebourg-Mecklembourg.",
+    "classes": {
+      "peasants": {
+        "count": 95000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 12000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2800,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 2400,
+  "description": "Seigneurie de Mecklembourg, tenue par Albert II, futur premier duc (1348) ; villes hanséatiques vendes de Rostock et Wismar, et la côte poméranienne occidentale de Stralsund.",
+  "sources": [
+    "Mecklembourg",
+    "Albert II de Mecklembourg"
+  ]
+}

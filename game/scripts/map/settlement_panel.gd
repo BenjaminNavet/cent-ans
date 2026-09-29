@@ -11,6 +11,9 @@ signal recruit_requested(settlement_id: String, unit_type: String)
 signal create_army_requested(settlement_id: String, unit_indices: Array)
 signal build_requested(settlement_id: String, building_id: String)
 signal cancel_build_requested(settlement_id: String)
+## RS-N : `preview` vient de `settlement_demolition_preview` (cœur) : `{building, name,
+## can_demolish, reason, refund, upkeep_saved}`.
+signal raze_requested(settlement_id: String, building_id: String, preview: Dictionary)
 signal province_requested(province_id: String)
 signal closed
 
@@ -36,7 +39,7 @@ var income_value: Label
 var tabs: TabContainer
 var garrison_header: Label
 var garrison_list: VBoxContainer
-var actions: HBoxContainer
+var actions: HFlowContainer
 var recruit_button: Button
 var create_army_button: Button
 var recruit_panel: VBoxContainer
@@ -54,8 +57,7 @@ var _garrison_checks: Array[CheckBox] = []
 
 func _init() -> void:
 	name = "SettlementPanel"
-	custom_minimum_size = Vector2(380, 0)
-	clip_contents = true
+	clip_contents = true  # Q6 : largeur donnée par la zone `SIDE_PANEL` (pas de minimum fixe)
 	if ResourceLoader.exists(THEME_PATH):
 		theme = load(THEME_PATH)
 	_build()
@@ -106,7 +108,7 @@ func _build() -> void:
 	province_button.name = "ProvinceButton"
 	province_button.flat = true
 	province_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	province_button.tooltip_text = "Ouvrir le panneau de la province"
+	RichTooltip.attach_plain(province_button, "province_panel_open")
 	province_button.pressed.connect(func() -> void: province_requested.emit(province_id))
 	grid.add_child(province_button)
 	owner_value = _grid_row(grid, "Propriétaire")
@@ -154,6 +156,7 @@ func _tab_box(title: String) -> VBoxContainer:
 func _header(parent: Container, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6
 	UiType.apply(label, UiType.HEADING)
 	parent.add_child(label)
 	return label
@@ -164,7 +167,8 @@ func _build_garrison_tab() -> void:
 	garrison_header = _header(inner, "Garnison")
 	garrison_list = VBoxContainer.new()
 	inner.add_child(garrison_list)
-	actions = HBoxContainer.new()
+	actions = HFlowContainer.new()  # Q6 : boutons à la ligne si la zone est étroite
+	actions.add_theme_constant_override("v_separation", 4)
 	inner.add_child(actions)
 	recruit_button = Button.new()
 	recruit_button.name = "RecruitButton"
@@ -219,9 +223,10 @@ func _build_buildings_tab() -> void:
 
 
 ## `detail` : `CampaignSim.settlement_detail(id)`. `recruitable` : `get_recruitable(id)`,
-## `buildable` : `settlement_buildable(id)` (vides si la colonie n'est pas au joueur).
-## `label_of(faction_id) -> String` traduit un id de faction en nom court.
-func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Array = [], player_owner: bool = false, label_of: Callable = Callable()) -> void:
+## `buildable` : `settlement_buildable(id)`, `demolition` : `settlement_demolition_preview(id)`
+## (vides si la colonie n'est pas au joueur). `label_of(faction_id) -> String` traduit un id
+## de faction en nom court.
+func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Array = [], player_owner: bool = false, label_of: Callable = Callable(), demolition: Array = []) -> void:
 	if detail.is_empty():
 		hide()
 		return
@@ -273,7 +278,11 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 		func(unit_type: String) -> void: recruit_requested.emit(settlement_id, unit_type))
 	# Bâtiments et construction.
 	var buildings: Array = detail.get("buildings_info", [])
-	PanelWidgets.fill_buildings(buildings_list, buildings)
+	var demolition_by_id: Dictionary = {}
+	for row in demolition:
+		demolition_by_id[str(row.get("building", ""))] = row
+	PanelWidgets.fill_buildings(buildings_list, buildings, demolition_by_id, player_owner,
+		func(building_id: String, preview: Dictionary) -> void: raze_requested.emit(settlement_id, building_id, preview))
 	var construction: Dictionary = detail.get("construction", {}) if detail.get("construction") is Dictionary else {}
 	construction_box.visible = not construction.is_empty()
 	if not construction.is_empty():
@@ -285,6 +294,35 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	if not player_owner:
 		PanelWidgets.placeholder(buildable_list, "Colonie hors de votre contrôle.")
 	show()
+	queue_fit_height()
+
+
+## Q6 : hauteur de conception des onglets ; ils rétrécissent si la zone `SIDE_PANEL` manque.
+const TABS_HEIGHT := 360.0
+var _fit_queued := false
+
+
+func _enter_tree() -> void:
+	if not get_viewport().size_changed.is_connected(queue_fit_height):
+		get_viewport().size_changed.connect(queue_fit_height)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
+		queue_fit_height()
+
+
+## Q6 : le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
+func queue_fit_height() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	_fit_height.call_deferred()
+
+
+func _fit_height() -> void:
+	_fit_queued = false
+	PanelWidgets.fit_tabs_to_side_zone(self, tabs, TABS_HEIGHT)
 
 
 func show_recruit() -> void:

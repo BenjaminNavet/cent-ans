@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_iaroslavl",
+    "province": "prov_yaroslavl",
+    "kind": "city",
+    "name": {
+      "display": "Iaroslavl",
+      "local": "Ярославль",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      39.87,
+      57.63
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de la Volga, fondée v. 1010, capitale des princes de Iaroslavl.",
+    "sources": [
+      "Iaroslavl"
+    ]
+  },
+  {
+    "id": "set_spasski",
+    "province": "prov_yaroslavl",
+    "kind": "abbey",
+    "name": {
+      "display": "Monastère du Sauveur (Spasski)",
+      "local": "Спасо-Преображенский монастырь",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      39.89,
+      57.62
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère princier, l'un des plus anciens de la ville.",
+    "sources": [
+      "Monastère de la Transfiguration-du-Sauveur"
+    ]
+  },
+  {
+    "id": "set_romanov",
+    "province": "prov_yaroslavl",
+    "kind": "village",
+    "name": {
+      "display": "Romanov",
+      "local": "Романов",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      39.6,
+      57.98
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la Volga au nord de Iaroslavl (mention ancienne, statut incertain).",
+    "sources": [
+      "Tutaïev"
+    ]
+  }
+]

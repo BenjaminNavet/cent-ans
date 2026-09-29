@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_nikopsis",
+    "province": "prov_zikhia",
+    "kind": "city",
+    "name": {
+      "display": "Nikopsis (Zikhia)",
+      "local": "Nikopsis",
+      "local_language": "adyguéen"
+    },
+    "lonlat": [
+      39.07,
+      44.1
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Site de la côte de Zikhia ; emplacement approximatif.",
+    "sources": [
+      "Circassia"
+    ]
+  },
+  {
+    "id": "set_vati",
+    "province": "prov_zikhia",
+    "kind": "town",
+    "name": {
+      "display": "Vati (Novorossiisk)",
+      "local": "Vati",
+      "local_language": "adyguéen"
+    },
+    "lonlat": [
+      37.77,
+      44.72
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Comptoir de la côte, actif dès le XIIIe siècle.",
+    "sources": [
+      "Circassia"
+    ]
+  },
+  {
+    "id": "set_maykop",
+    "province": "prov_zikhia",
+    "kind": "village",
+    "name": {
+      "display": "Site de Maïkop",
+      "local": "Maykop",
+      "local_language": "adyguéen"
+    },
+    "lonlat": [
+      40.1,
+      44.6
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Site de la haute Belaïa ; emplacement approximatif.",
+    "sources": [
+      "Circassia"
+    ]
+  }
+]

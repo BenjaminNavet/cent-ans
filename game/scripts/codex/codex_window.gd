@@ -57,6 +57,8 @@ func _ready() -> void:
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = SIZE if not embedded else Vector2(SIZE.x, 560)
+	# P2c : fenêtre seule (`CodexBubbles`, hors `CodexHub`) enregistrée dans `UiZones.Zone.MODAL`
+	# par l'appelant (`CodexBubbles.window`), qui centre et assombrit le fond ; rien à faire ici.
 	if embedded:
 		add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -84,7 +86,7 @@ func _ready() -> void:
 		_tabs.add_tab(short_label)
 		_tabs.set_tab_tooltip(_tabs.tab_count - 1, str(family[0]))
 	_tabs.tab_changed.connect(func(_tab: int) -> void: _refresh_list())
-	CodexHub.style_tabs(_tabs, 14, 9)  # D5 : onglets parchemin
+	CodexHub.style_tabs(_tabs, UiType.CAPTION, 9)  # D5 : onglets parchemin
 	root.add_child(_tabs)
 
 	var split := HBoxContainer.new()
@@ -93,7 +95,7 @@ func _ready() -> void:
 	root.add_child(split)
 	_list = ItemList.new()
 	_list.custom_minimum_size = Vector2(270, 0)
-	_list.add_theme_font_size_override("font_size", 15)
+	UiType.apply(_list, UiType.BODY)
 	_list.item_selected.connect(func(index: int) -> void:
 		if str(_list.get_item_metadata(index)) != "":
 			navigate.call_deferred(str(_list.get_item_metadata(index))))
@@ -112,13 +114,13 @@ func _build_header() -> Control:
 	header.add_theme_constant_override("separation", 8)
 	var title := Label.new()
 	title.text = "✠ Codex"
-	title.add_theme_font_size_override("font_size", 26)
+	UiType.apply(title, UiType.TITLE)
 	title.add_theme_color_override("font_color", RUBRIC)
 	title.visible = not embedded
 	_header_title = title
 	header.add_child(title)
 	_counter_label = Label.new()
-	_counter_label.add_theme_font_size_override("font_size", 14)
+	UiType.apply(_counter_label, UiType.CAPTION)
 	_counter_label.add_theme_color_override("font_color", FADED_INK)
 	_counter_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_counter_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -146,12 +148,12 @@ func _build_page() -> Control:
 	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	page.add_theme_constant_override("separation", 8)
 	_title_label = Label.new()
-	_title_label.add_theme_font_size_override("font_size", 26)
+	UiType.apply(_title_label, UiType.TITLE)
 	_title_label.add_theme_color_override("font_color", INK)
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	page.add_child(_title_label)
 	_meta_label = Label.new()
-	_meta_label.add_theme_font_size_override("font_size", 14)
+	UiType.apply(_meta_label, UiType.CAPTION)
 	_meta_label.add_theme_color_override("font_color", FADED_INK)
 	page.add_child(_meta_label)
 	_art = TextureRect.new()
@@ -162,13 +164,13 @@ func _build_page() -> Control:
 	page.add_child(_art)
 	encyclopedia_button = Button.new()
 	encyclopedia_button.text = "Voir la fiche de règles"
-	encyclopedia_button.tooltip_text = "Onglet Règles : la fiche de jeu (touche L)"
+	RichTooltip.attach_plain(encyclopedia_button, "codex_rules_tab")
 	encyclopedia_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	encyclopedia_button.hide()
 	encyclopedia_button.pressed.connect(open_in_encyclopedia)
 	page.add_child(encyclopedia_button)
 	page.add_child(HSeparator.new())
-	_body = _rich_text(16)
+	_body = _rich_text(UiType.BODY)
 	page.add_child(_body)
 
 	gameplay_box = PanelContainer.new()
@@ -181,7 +183,7 @@ func _build_page() -> Control:
 	gameplay_style.set_corner_radius_all(3)
 	gameplay_style.set_content_margin_all(10)
 	gameplay_box.add_theme_stylebox_override("panel", gameplay_style)
-	gameplay_label = _rich_text(14)
+	gameplay_label = _rich_text(UiType.CAPTION)
 	gameplay_box.add_child(gameplay_label)
 	page.add_child(gameplay_box)
 
@@ -192,21 +194,21 @@ func _build_page() -> Control:
 	style.border_width_left = 4
 	style.set_content_margin_all(10)
 	_anachronism_box.add_theme_stylebox_override("panel", style)
-	_anachronism = _rich_text(14)
+	_anachronism = _rich_text(UiType.CAPTION)
 	_anachronism_box.add_child(_anachronism)
 	page.add_child(_anachronism_box)
 
-	_see_also = _rich_text(15)
+	_see_also = _rich_text(UiType.BODY)
 	page.add_child(_see_also)
 	_sources = Label.new()
-	_sources.add_theme_font_size_override("font_size", 12)
+	UiType.apply(_sources, UiType.CAPTION)
 	_sources.add_theme_color_override("font_color", FADED_INK)
 	_sources.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	page.add_child(_sources)
 	return page
 
 
-func _rich_text(font_size: int) -> RichTextLabel:
+func _rich_text(variation: String) -> RichTextLabel:
 	var label := RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
@@ -214,8 +216,9 @@ func _rich_text(font_size: int) -> RichTextLabel:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_color_override("default_color", INK)
-	for key in ["normal_font_size", "bold_font_size", "italics_font_size"]:
-		label.add_theme_font_size_override(key, font_size)
+	UiType.apply(label, variation)
+	for key in ["bold_font_size", "italics_font_size", "bold_italics_font_size"]:
+		label.add_theme_font_size_override(key, UiType.size(variation))
 	var bubbles := _bubbles()
 	if bubbles != null:
 		bubbles.call("attach", label)
@@ -228,10 +231,8 @@ func _rich_text(font_size: int) -> RichTextLabel:
 ## Affiche la fenêtre (centrée) sur la fiche `id`, ou sur la dernière consultée si vide.
 func open(id: String = "") -> void:
 	show()
-	if not embedded:
-		var area := get_viewport_rect().size
-		size = SIZE
-		position = ((area - SIZE) / 2.0).floor()
+	# P2c : plus de centrage manuel ici — la fenêtre seule (non `embedded`) est enregistrée dans
+	# `UiZones.Zone.MODAL` par l'appelant (`CodexBubbles.window`), qui la centre par ancrage.
 	if id != "":
 		navigate(id)
 	elif current_id == "":

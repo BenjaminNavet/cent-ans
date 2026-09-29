@@ -1,0 +1,108 @@
+[
+  {
+    "id": "set_prizren",
+    "province": "prov_kosovo",
+    "kind": "city",
+    "name": {
+      "display": "Prizren",
+      "local": "Призрен",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      20.74,
+      42.213
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Résidence favorite du roi Dušan.",
+    "sources": [
+      "Prizren"
+    ]
+  },
+  {
+    "id": "set_pristina",
+    "province": "prov_kosovo",
+    "kind": "town",
+    "name": {
+      "display": "Priština",
+      "local": "Приштина",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.166,
+      42.663
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_fair",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourg de la plaine du Kosovo.",
+    "sources": [
+      "Pristina"
+    ]
+  },
+  {
+    "id": "set_novo_brdo",
+    "province": "prov_kosovo",
+    "kind": "castle",
+    "name": {
+      "display": "Novo Brdo",
+      "local": "Ново Брдо",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.43,
+      42.62
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse minière de l'argent serbe.",
+    "sources": [
+      "Novo Brdo"
+    ]
+  },
+  {
+    "id": "set_gracanica",
+    "province": "prov_kosovo",
+    "kind": "abbey",
+    "name": {
+      "display": "Gračanica",
+      "local": "Грачаница",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.19,
+      42.594
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère du roi Milutin (vers 1321).",
+    "sources": [
+      "Monastère de Gračanica"
+    ]
+  }
+]

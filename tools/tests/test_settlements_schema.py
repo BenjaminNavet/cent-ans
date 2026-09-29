@@ -98,7 +98,7 @@ def test_settlement_file_is_valid(path: Path) -> None:
         assert owner is None or owner in factions, f"{label}: unknown owner {owner}"
         lon, lat = settlement["lonlat"]
         column, row = GRID.lonlat_to_pixel(lon, lat)
-        assert 0 <= column < GRID.size_px and 0 <= row < GRID.size_px, (
+        assert 0 <= column < GRID.width_px and 0 <= row < GRID.height_px, (
             f"{label}: {lon}, {lat} off the map"
         )
 

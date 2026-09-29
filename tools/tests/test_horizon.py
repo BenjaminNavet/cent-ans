@@ -54,7 +54,7 @@ def test_every_province_has_a_tile() -> None:
     provinces = {p.stem for p in (DATA / "provinces").glob("prov_*.json")}
     assert provinces == set(index["provinces"])
     total = sum(p.stat().st_size for p in RELIEF.glob("*.bin"))
-    assert total < 30e6
+    assert total < 90e3 * len(provinces)  # ≈ 82 ko par province (OM2 : ~420 provinces)
     tile = horizon.decode_tile((RELIEF / "prov_bearn.bin").read_bytes())
     assert tile["n"] == horizon.TILE_N
     # Béarn: the Pyrenees stand to the south, far above the plain to the north.

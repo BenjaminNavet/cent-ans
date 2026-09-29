@@ -194,8 +194,10 @@ class PyramidGrid:
     @classmethod
     def from_map(cls, map_dir: Path = MAP_DIR) -> PyramidGrid:
         """Grid of ``map_dir/map.json``."""
+        from cent_ans_tools.geo import pyramid  # noqa: PLC0415 - import cycle
+
         metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
-        minx, _, _, maxy = metadata["bounds_projected"]
+        minx, _, _, maxy = pyramid.map_bounds(map_dir)  # frame of the cache (OM2)
         return cls(float(minx), float(maxy), float(metadata["meters_per_px"]))
 
     def pixel_m(self, level: int) -> float:

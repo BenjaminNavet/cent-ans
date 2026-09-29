@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_bardia",
+    "province": "prov_derna",
+    "kind": "village",
+    "name": {
+      "display": "Bardia",
+      "local": "Bardiyya",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      25.0917,
+      31.7594
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Port de pêcheurs et de caravanes sur la côte, dernière étape avant l'Égypte.",
+    "sources": [
+      "Bardia"
+    ]
+  },
+  {
+    "id": "set_derna",
+    "province": "prov_derna",
+    "kind": "city",
+    "name": {
+      "display": "Derna",
+      "local": "Darna",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      22.6394,
+      32.7671
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port dans une oasis de la côte, marché de bétail.",
+    "sources": [
+      "Derna"
+    ]
+  },
+  {
+    "id": "set_tobruk",
+    "province": "prov_derna",
+    "kind": "village",
+    "name": {
+      "display": "Tobrouk",
+      "local": "Ṭubruq",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      23.9764,
+      32.0836
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Baie naturelle et puits, étape côtière vers l'Égypte.",
+    "sources": [
+      "Tobrouk"
+    ]
+  }
+]

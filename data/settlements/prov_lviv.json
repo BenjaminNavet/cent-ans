@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_leopol",
+    "province": "prov_lviv",
+    "kind": "city",
+    "name": {
+      "display": "Léopol",
+      "local": "Lviv",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      24.0297,
+      49.8397
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Capitale du roi de Ruthénie, fondée par Daniel de Halych ; colonies allemande et arménienne.",
+    "sources": [
+      "Léopol"
+    ]
+  },
+  {
+    "id": "set_przemysl",
+    "province": "prov_lviv",
+    "kind": "town",
+    "name": {
+      "display": "Przemyśl",
+      "local": "Peremyshl",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      22.7677,
+      49.7836
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne capitale d'une principauté ruthène, siège d'un évêché orthodoxe et d'un évêché latin.",
+    "sources": [
+      "Przemyśl"
+    ]
+  },
+  {
+    "id": "set_drohobytch",
+    "province": "prov_lviv",
+    "kind": "town",
+    "name": {
+      "display": "Drohobytch",
+      "local": "Drohobych",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      23.5,
+      49.35
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville des salines carpatiques, source de revenus des princes.",
+    "sources": [
+      "Drohobytch"
+    ]
+  }
+]

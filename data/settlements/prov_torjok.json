@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_torjok",
+    "province": "prov_torjok",
+    "kind": "city",
+    "name": {
+      "display": "Torjok",
+      "local": "Торжок",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      34.958,
+      57.043
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Novyi Torg, ville-frontière et grenier de Novgorod.",
+    "sources": [
+      "Torjok"
+    ]
+  },
+  {
+    "id": "set_vychni_volotchek",
+    "province": "prov_torjok",
+    "kind": "town",
+    "name": {
+      "display": "Vychni Volotchek",
+      "local": "Вышний Волочёк",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      34.564,
+      57.588
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Portage entre la Tvertsa et la Msta, clé de la route de la Volga à Novgorod.",
+    "sources": [
+      "Vychni Volotchek"
+    ]
+  },
+  {
+    "id": "set_volok_lamski",
+    "province": "prov_torjok",
+    "kind": "town",
+    "name": {
+      "display": "Volok Lamski",
+      "local": "Волок Ламский",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      35.96,
+      56.03
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Portage de la Lama, possession de Novgorod à la frontière moscovite (statut incertain en 1337).",
+    "sources": [
+      "Volokolamsk"
+    ]
+  }
+]

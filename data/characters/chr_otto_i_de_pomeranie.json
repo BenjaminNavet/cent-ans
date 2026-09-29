@@ -1,0 +1,42 @@
+{
+  "id": "chr_otto_i_de_pomeranie",
+  "name": {
+    "display": "Othon Ier de Poméranie",
+    "local": "Otto I. von Pommern-Stettin",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Greifen",
+  "faction": "fac_pomerania_stettin",
+  "role": "ruler",
+  "birth": {
+    "value": "1279",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1344",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_just"
+  ],
+  "piety": 60,
+  "family": {
+    "children": [
+      "chr_barnim_iii_de_pomeranie"
+    ]
+  },
+  "starting_location": "prov_pomerania_stettin",
+  "status": "at_court",
+  "description": "Duc de Poméranie-Stettin depuis 1309, âgé, il associe son fils Barnim à la régence.",
+  "sources": [
+    "Othon Ier de Poméranie"
+  ]
+}

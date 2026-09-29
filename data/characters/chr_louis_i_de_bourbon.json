@@ -7,8 +7,8 @@
   },
   "sex": "male",
   "house": "Bourbon",
-  "faction": "fac_france",
-  "role": "noble",
+  "faction": "fac_bourbon",
+  "role": "ruler",
   "birth": {
     "value": "1279",
     "uncertain": true

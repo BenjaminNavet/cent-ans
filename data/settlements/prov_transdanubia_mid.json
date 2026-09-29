@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_szekesfehervar",
+    "province": "prov_transdanubia_mid",
+    "kind": "city",
+    "name": {
+      "display": "Székesfehérvár",
+      "local": "Székesfehérvár",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      18.4221,
+      47.186
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Ville du couronnement et de la sépulture royale, avec sa basilique.",
+    "sources": [
+      "Székesfehérvár"
+    ]
+  },
+  {
+    "id": "set_veszprem",
+    "province": "prov_transdanubia_mid",
+    "kind": "town",
+    "name": {
+      "display": "Veszprém",
+      "local": "Veszprém",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      17.9093,
+      47.093
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ville épiscopale, dite ville des reines.",
+    "sources": [
+      "Veszprém"
+    ]
+  },
+  {
+    "id": "set_tihany",
+    "province": "prov_transdanubia_mid",
+    "kind": "abbey",
+    "name": {
+      "display": "Tihany",
+      "local": "Tihany",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      17.888,
+      46.913
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine sur la presqu'île du lac Balaton, fondée en 1055.",
+    "sources": [
+      "Tihany"
+    ]
+  }
+]

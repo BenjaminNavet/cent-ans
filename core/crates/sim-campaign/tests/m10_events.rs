@@ -314,12 +314,14 @@ fn black_death_strikes_south_first_once_per_province() {
     struck.dedup();
     assert_eq!(total, struck.len());
     assert_eq!(total, state.provinces.len());
+    // OM: the map now reaches Egypt and the Maghreb; Cairo (struck in the
+    // autumn of 1347) is among the southernmost provinces.
     let first = plague_slice(&state, &data, 0, wave.duration);
-    assert!(first.contains(&prov("prov_malaga")), "{first:?}");
+    assert!(first.contains(&prov("prov_cairo")), "{first:?}");
     let last = plague_slice(&state, &data, wave.duration - 1, wave.duration);
     assert!(last.contains(&prov("prov_highlands")), "{last:?}");
 
-    let south = prov("prov_malaga");
+    let south = prov("prov_cairo");
     let north = prov("prov_highlands");
     let before_south = state.provinces[&south].population.total();
     let before_north = state.provinces[&north].population.total();
@@ -349,7 +351,7 @@ fn chronicle_state_survives_save_and_old_saves_load() {
     let loaded = CampaignState::load_json(&json).expect("loads");
     assert_eq!(loaded.chronicle, state.chronicle);
     assert_eq!(loaded.state_version, STATE_VERSION);
-    assert_eq!(STATE_VERSION, 7);
+    assert_eq!(STATE_VERSION, 8);
 
     // A save without the `chronicle` key (written before M10) still loads.
     let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();

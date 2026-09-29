@@ -6,7 +6,8 @@ extends SceneTree
 ## des scènes (`--screenshot`, `--stage=…`, `--deploy-shot`, `--result-shot`). La rencontre n'a
 ## pas d'option de scène : ce script la met en scène lui-même (`--view=encounter`).
 ## Usage :
-##   godot --path game --script res://tests/po_shot.gd -- [--out=<dossier>] [--only=<n,n>]
+##   godot --path game --script res://tests/po_shot.gd -- [--out=<dossier>] [--only=<n,n>] [--extra=<a,b>]
+## `--extra` : options ajoutées à chaque vue de scène (GA6 : `--extra=--no-ga1,--no-ga2,--no-ga4`).
 ## `--out` relatif : relatif à la racine du dépôt. PO6 : `--out=docs/img/po/apres`.
 ## Chaque PNG est converti en JPEG (qualité 85) puis supprimé : la planche pèse ≈ 4 Mo.
 
@@ -28,6 +29,7 @@ const VIEWS := [
 	[8, "bataille-deploiement", BATTLE, ["--deploy-shot"]],
 	[9, "melee", BATTLE, []],
 	[10, "resultat", BATTLE, ["--result-shot"]],
+	[11, "gros-plan", BATTLE, ["--closeup"]],
 ]
 
 
@@ -35,9 +37,12 @@ func _init() -> void:
 	var out := "docs/img/po/avant"
 	var only := PackedInt32Array()
 	var view := ""
+	var extra := PackedStringArray()
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out = arg.trim_prefix("--out=")
+		elif arg.begins_with("--extra="):
+			extra = arg.trim_prefix("--extra=").split(",", false)
 		elif arg.begins_with("--only="):
 			for part in arg.trim_prefix("--only=").split(",", false):
 				only.append(int(part))
@@ -63,6 +68,7 @@ func _init() -> void:
 				args.append(str(entry[2]))
 			args.append("--")
 			args.append_array(PackedStringArray(entry[3]))
+			args.append_array(extra)
 			args.append("--screenshot=" + png)
 		DirAccess.remove_absolute(png)
 		var started := Time.get_ticks_msec()

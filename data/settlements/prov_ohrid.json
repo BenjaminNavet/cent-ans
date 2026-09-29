@@ -1,0 +1,108 @@
+[
+  {
+    "id": "set_ohrid",
+    "province": "prov_ohrid",
+    "kind": "city",
+    "name": {
+      "display": "Ohrid",
+      "local": "Охрид",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      20.801,
+      41.117
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Cité lacustre, siège de l'archevêque d'Ohrid.",
+    "sources": [
+      "Ohrid"
+    ]
+  },
+  {
+    "id": "set_struga",
+    "province": "prov_ohrid",
+    "kind": "town",
+    "name": {
+      "display": "Struga",
+      "local": "Струга",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      20.68,
+      41.177
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": false,
+    "description": "Bourg pêcheur sur le lac.",
+    "sources": [
+      "Struga"
+    ]
+  },
+  {
+    "id": "set_sveti_naum",
+    "province": "prov_ohrid",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Naum",
+      "local": "Свети Наум",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      20.79,
+      40.91
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère au bord du lac, fondé en 905.",
+    "sources": [
+      "Monastère de Saint-Naum"
+    ]
+  },
+  {
+    "id": "set_debar",
+    "province": "prov_ohrid",
+    "kind": "town",
+    "name": {
+      "display": "Debar",
+      "local": "Дебар",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      20.53,
+      41.52
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Marché de montagne à la frontière albanaise.",
+    "sources": [
+      "Debar"
+    ]
+  }
+]

@@ -12,7 +12,7 @@ fn real_rasters_load() {
     let start = std::time::Instant::now();
     let grid = data.navgrid();
     println!("rasters decoded in {:?} ({grid:?})", start.elapsed());
-    assert_eq!((grid.width, grid.height), (2048, 2048));
+    assert_eq!((grid.width, grid.height), (3584, 3072));
     let paris = data_model::SettlementId::new("set_paris").unwrap();
     let point = data.settlement_point(&paris).expect("Paris has a position");
     let (x, y) = grid.cell_of(point[0], point[1]);
@@ -22,8 +22,8 @@ fn real_rasters_load() {
             .map(|p| p.as_str()),
         Some(data.settlements[&paris].province.as_str())
     );
-    // Open sea west of Brittany.
-    assert!(!grid.passable(300, 1000));
+    // Open sea west of Brittany (OM2: +640 cells in y).
+    assert!(!grid.passable(300, 1640));
     let mismatched = data
         .settlements
         .iter()
@@ -93,6 +93,15 @@ fn economy_rules_match_their_default() {
     assert!(from_file.description.is_some(), "economy.json not read");
     from_file.description = None;
     assert_eq!(from_file, data_model::EconomyRules::default());
+}
+
+#[test]
+fn diplomacy_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.diplomacy_rules.clone();
+    assert!(from_file.description.is_some(), "diplomacy.json not read");
+    from_file.description = None;
+    assert_eq!(from_file, data_model::DiplomacyRules::default());
 }
 
 #[test]

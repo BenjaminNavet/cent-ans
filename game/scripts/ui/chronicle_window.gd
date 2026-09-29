@@ -16,6 +16,12 @@ const FADED_INK := Color(0.40, 0.30, 0.18)
 const RUBRIC := Color(0.55, 0.12, 0.10)
 const EVENT_ART_DIR := "res://assets/events/"
 const ART_SIZE := Vector2(580, 240)
+## P2d : part de la hauteur de l'écran (ou de la zone `UiLayout`) laissée au corps défilant
+## (image, texte, choix) — une décision à plusieurs choix chiffrés (sort d'une place prise) peut
+## dépasser 720 px de haut ; le titre et le pied restent visibles, le reste défile plutôt que de
+## pousser la fenêtre hors de l'écran.
+const BODY_MAX_RATIO := 0.5
+const BODY_MIN_HEIGHT := 160.0
 
 var _kind_label: Label
 var _art: TextureRect
@@ -24,6 +30,7 @@ var _meta_label: Label
 var _text_label: RichTextLabel
 var _options_box: VBoxContainer
 var _queue_label: Label
+var _scroll: ScrollContainer
 var _decision_id: int = -1
 
 
@@ -41,16 +48,25 @@ func _ready() -> void:
 
 	var header := HBoxContainer.new()
 	_kind_label = Label.new()
-	_kind_label.add_theme_font_size_override("font_size", 14)
+	UiType.apply(_kind_label, UiType.CAPTION)
 	_kind_label.add_theme_color_override("font_color", RUBRIC)
 	_kind_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_kind_label)
 	var close := Button.new()
 	close.text = "×"
-	close.tooltip_text = "Fermer (la décision reste en attente)"
+	RichTooltip.attach_plain(close, "close_decision_pending")
 	close.pressed.connect(_close)
 	header.add_child(close)
 	root.add_child(header)
+
+	_scroll = ScrollContainer.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.follow_focus = true
+	root.add_child(_scroll)
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 8)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.add_child(body)
 
 	_art = TextureRect.new()
 	_art.custom_minimum_size = ART_SIZE
@@ -58,53 +74,53 @@ func _ready() -> void:
 	_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_art.clip_contents = true
 	_art.hide()
-	root.add_child(_art)
+	body.add_child(_art)
 
 	_title_label = Label.new()
-	_title_label.add_theme_font_size_override("font_size", 26)
+	UiType.apply(_title_label, UiType.TITLE)
 	_title_label.add_theme_color_override("font_color", INK)
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	# Wrap width fixed: at width 0 the title wraps one letter per line on the first layout and
 	# the window grew taller than the screen (Q3).
 	_title_label.custom_minimum_size = Vector2(580, 0)
-	root.add_child(_title_label)
+	body.add_child(_title_label)
 
 	_meta_label = Label.new()
-	_meta_label.add_theme_font_size_override("font_size", 14)
+	UiType.apply(_meta_label, UiType.CAPTION)
 	_meta_label.add_theme_color_override("font_color", FADED_INK)
 	_meta_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(_meta_label)
-	root.add_child(HSeparator.new())
+	body.add_child(_meta_label)
+	body.add_child(HSeparator.new())
 
 	_text_label = RichTextLabel.new()
 	_text_label.bbcode_enabled = true
 	_text_label.fit_content = true
 	_text_label.scroll_active = false
 	_text_label.custom_minimum_size = Vector2(580, 0)
-	_text_label.add_theme_font_size_override("normal_font_size", 17)
-	_text_label.add_theme_font_size_override("italics_font_size", 17)
+	UiType.apply(_text_label, UiType.BODY)
+	_text_label.add_theme_font_size_override("italics_font_size", UiType.size(UiType.BODY))
 	_text_label.add_theme_color_override("default_color", INK)
-	root.add_child(_text_label)
+	body.add_child(_text_label)
 	# H2 : mots du Codex cliquables (bulles imbriquées).
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", _text_label)
-	root.add_child(HSeparator.new())
+	body.add_child(HSeparator.new())
 
 	_options_box = VBoxContainer.new()
 	_options_box.add_theme_constant_override("separation", 6)
-	root.add_child(_options_box)
+	body.add_child(_options_box)
 
 	var footer := HBoxContainer.new()
 	_queue_label = Label.new()
-	_queue_label.add_theme_font_size_override("font_size", 13)
+	UiType.apply(_queue_label, UiType.CAPTION)
 	_queue_label.add_theme_color_override("font_color", FADED_INK)
 	_queue_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(_queue_label)
 	var later := Button.new()
 	later.text = "Plus tard"
-	later.tooltip_text = "Sans réponse, le premier choix s'appliquera d'office à l'expiration."
+	RichTooltip.attach_plain(later, "decision_default_choice")
 	later.pressed.connect(_close)
 	footer.add_child(later)
 	root.add_child(footer)
@@ -151,7 +167,7 @@ func _option_row(option: Dictionary) -> Control:
 	row.add_theme_constant_override("separation", 1)
 	var button := Button.new()
 	button.text = str(option.get("text", ""))
-	button.add_theme_font_size_override("font_size", 17)
+	button.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	var effects := str(option.get("effects_text", ""))
 	button.tooltip_text = effects if effects != "" else "Sans effet notable."
@@ -161,13 +177,13 @@ func _option_row(option: Dictionary) -> Control:
 	var reason := str(option.get("reason", ""))
 	if not option.get("allowed", true):
 		button.disabled = true
-		button.tooltip_text = "Impossible : %s." % reason if reason != "" else "Impossible."
+		RichTooltip.attach_plain(button, "seat_unavailable", {"body": reason if reason != "" else "Impossible."})
 		effects = "Impossible : %s" % reason if reason != "" else effects
 	row.add_child(button)
 	if effects != "":
 		var summary := Label.new()
 		summary.text = "   " + effects.replace("\n", " · ")
-		summary.add_theme_font_size_override("font_size", 13)
+		UiType.apply(summary, UiType.CAPTION)
 		summary.add_theme_color_override("font_color", FADED_INK)
 		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		summary.custom_minimum_size = Vector2(580, 0)
@@ -178,7 +194,27 @@ func _option_row(option: Dictionary) -> Control:
 ## Ramène la fenêtre à la taille de son contenu une fois le texte mis en page.
 func _fit() -> void:
 	reset_size()
+	_clamp_body_height()
+	reset_size()
 	_center_on_screen()
+
+
+## P2d : borne la hauteur du corps défilant (image, texte, choix) à `BODY_MAX_RATIO` de l'écran
+## (ou de la zone `UiLayout`, hôte de la fenêtre) : une décision chargée (plusieurs choix chiffrés,
+## texte long) défile au lieu de pousser la fenêtre hors de l'écran (titre et pied toujours
+## visibles). Rien à borner sous `BODY_MIN_HEIGHT` : le contenu tient déjà.
+func _clamp_body_height() -> void:
+	if not is_inside_tree() or _scroll == null:
+		return
+	var parent := get_parent()
+	var area := (parent as Control).size if parent is Control else get_viewport_rect().size
+	if area.y <= 0.0:
+		return
+	var budget := maxf(BODY_MIN_HEIGHT, area.y * BODY_MAX_RATIO)
+	# Hauteur du contenu, pas du ScrollContainer : sa taille minimale propre est nulle en défilement
+	# vertical (Q6 : la fenêtre s'ouvrait avec un corps vide, choix inaccessibles).
+	var content := _scroll.get_child(0) as Control
+	_scroll.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, budget)
 
 
 func _center_on_screen() -> void:

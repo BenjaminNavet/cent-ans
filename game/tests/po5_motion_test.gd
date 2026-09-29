@@ -48,7 +48,7 @@ func _test_camera_feel() -> void:
 
 func _test_campaign_glide() -> void:
 	var rig := CampaignCamera.new()
-	rig.bounds = Rect2(0, 0, 4096, 4096)
+	rig.bounds = Rect2(Vector2.ZERO, Vector2(MapData.default_world_size()))
 	rig.target_focus = Vector3(100.0, 0.0, 100.0)
 	rig.target_distance = 500.0
 	rig.snap()

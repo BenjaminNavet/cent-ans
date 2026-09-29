@@ -1,0 +1,20 @@
+{
+  "id": "tit_parma",
+  "rank": "county",
+  "name": {
+    "display": "Commune de Parme",
+    "local": "Comune di Parma",
+    "local_language": "émilien"
+  },
+  "de_jure_provinces": [
+    "prov_parma"
+  ],
+  "holder_1337": {
+    "faction": "fac_verona",
+    "uncertain": true,
+    "sources": [
+      "Parme",
+      "Mastino II della Scala"
+    ]
+  }
+}

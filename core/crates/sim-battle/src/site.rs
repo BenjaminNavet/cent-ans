@@ -329,6 +329,8 @@ pub fn woodland(terrain: Terrain) -> f64 {
         Terrain::Mountains => 0.5,
         Terrain::Heath => 0.35,
         Terrain::Marsh => 0.3,
+        Terrain::Steppe => 0.1,
+        Terrain::Desert => 0.02,
     }
 }
 
@@ -342,6 +344,8 @@ fn village_chance(terrain: Terrain) -> f64 {
         Terrain::Forest => 0.35,
         Terrain::Marsh => 0.35,
         Terrain::Mountains => 0.3,
+        Terrain::Steppe => 0.25,
+        Terrain::Desert => 0.15,
     }
 }
 

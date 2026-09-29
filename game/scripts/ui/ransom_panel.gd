@@ -42,19 +42,19 @@ func _init() -> void:
 	box.add_child(header)
 	title_label = Label.new()
 	title_label.text = "Captifs et rançons"
-	title_label.add_theme_font_size_override("font_size", 22)
+	title_label.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title_label)
 	var close_button := Button.new()
 	close_button.text = "×"
-	close_button.tooltip_text = "Fermer"
+	RichTooltip.attach_plain(close_button, "close")
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
 	box.add_child(HSeparator.new())
 	error_label = Label.new()
 	error_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	error_label.custom_minimum_size = Vector2(520, 0)
-	error_label.add_theme_font_size_override("font_size", 13)
+	error_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	error_label.add_theme_color_override("font_color", ERROR_COLOR)
 	error_label.hide()
 	box.add_child(error_label)
@@ -126,7 +126,7 @@ func _heading(text: String, hint: String) -> Control:
 	box.add_theme_constant_override("separation", 0)
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	label.add_theme_color_override("font_color", RUBRIC_COLOR)
 	box.add_child(label)
 	var rich := RichTextLabel.new()
@@ -135,7 +135,7 @@ func _heading(text: String, hint: String) -> Control:
 	rich.scroll_active = false
 	rich.custom_minimum_size = Vector2(520, 0)
 	rich.add_theme_color_override("default_color", MUTED_COLOR)
-	rich.add_theme_font_size_override("normal_font_size", 12)
+	rich.add_theme_font_size_override("normal_font_size", UiType.size(UiType.CAPTION))
 	rich.text = CodexText.format(hint)
 	box.add_child(rich)
 	var bubbles := _root_node("/root/CodexBubbles")
@@ -147,7 +147,7 @@ func _heading(text: String, hint: String) -> Control:
 func _muted(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	label.add_theme_color_override("font_color", MUTED_COLOR)
 	return label
 
@@ -172,8 +172,8 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	text_box.add_child(name_row)
 	var link := LinkButton.new()
 	link.text = name_text
-	link.tooltip_text = "Ouvrir la fiche du personnage"
-	link.add_theme_font_size_override("font_size", 15)
+	RichTooltip.attach_plain(link, "open_character_sheet")
+	link.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	style_link(link)
 	link.pressed.connect(func() -> void: request_character(character_id))
 	name_row.add_child(link)
@@ -182,7 +182,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 		var codex_button := Button.new()
 		codex_button.flat = true
 		codex_button.text = "✠"
-		codex_button.tooltip_text = "Fiche historique (Codex)"
+		RichTooltip.attach_plain(codex_button, "historical_sheet_codex")
 		codex_button.pressed.connect(func() -> void:
 			var bubbles := _root_node("/root/CodexBubbles")
 			if bubbles != null:
@@ -192,7 +192,7 @@ func _identity(character_id: String, name_text: String, faction_id: String, subt
 	sub.text = subtitle
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sub.custom_minimum_size = Vector2(440, 0)
-	sub.add_theme_font_size_override("font_size", 12)
+	sub.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	sub.add_theme_color_override("font_color", MUTED_COLOR)
 	text_box.add_child(sub)
 	return line
@@ -221,7 +221,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 	if ours:
 		var pay := RichButton.new()
 		pay.text = "Céder %s" % _province_name(str(terms.get("province", ""))) if kind == "province" else "Payer comptant (%s)" % _pounds(ransom)
-		pay.tooltip_text = "Paiement intégral : le captif rentre aussitôt." if kind != "province" else "La province exigée passe au geôlier ; le captif est libéré."
+		RichTooltip.attach_plain(pay, "ransom_pay_full", {"body": "Paiement intégral : le captif rentre aussitôt." if kind != "province" else "La province exigée passe au geôlier ; le captif est libéré."})
 		pay.pressed.connect(func() -> void: pay_ransom(character_id, 1))
 		actions.add_child(pay)
 		controls["pay"] = pay
@@ -255,7 +255,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 			if str(meta.get("kind", "")) == kind and str(meta.get("province", "")) == str(terms.get("province", "")):
 				choice.select(index)
 		choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		choice.tooltip_text = "Province cessible : tenue par sa faction, pas sa capitale, voisine d'une des nôtres."
+		RichTooltip.attach_plain(choice, "ransom_cedable_province")
 		actions.add_child(choice)
 		var set_terms := RichButton.new()
 		set_terms.text = "Fixer les termes"
@@ -263,7 +263,7 @@ func _captive_row(captive: Dictionary, ours: bool) -> Control:
 		actions.add_child(set_terms)
 		var parole := RichButton.new()
 		parole.text = "Libérer sur parole"
-		parole.tooltip_text = "Libération sans rançon : prestige pour notre souverain, gratitude de sa faction."
+		RichTooltip.attach_plain(parole, "ransom_parole")
 		parole.pressed.connect(func() -> void: release_on_parole(character_id))
 		actions.add_child(parole)
 		controls["terms"] = choice

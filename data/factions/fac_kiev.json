@@ -1,0 +1,60 @@
+{
+  "id": "fac_kiev",
+  "name": {
+    "display": "Principauté de Kiev",
+    "local": "Київське князівство",
+    "local_language": "ruthène"
+  },
+  "short_name": "Kiev",
+  "adjective": "kiévien",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_fiodor_de_kiev",
+  "capital": "prov_kyiv",
+  "capital_city": "Kiev",
+  "religion": "rel_orthodox",
+  "culture": "cul_ruthenian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_kiev",
+  "heraldry": {
+    "blazon": "D'azur à la croix d'or.",
+    "description": "Croix d'or sur azur, substitution pour la principauté (le trident rurikide n'est pas dessinable ici).",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Trident des Rurikides omis."
+  },
+  "titles": [
+    "Prince de Kiev"
+  ],
+  "treasury": 2000,
+  "prestige": 15,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_lithuania",
+      "status": "peace",
+      "note": "Gediminas exerce une influence sur Kiev depuis sa victoire sur la Irpen (v. 1320-1324, incertain) ; le prince paie encore le tribut à la Horde."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Kiev paie tribut à la Horde, sous influence lituanienne."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 60,
+    "trade": 50,
+    "piety": 80
+  },
+  "description": "L'ancienne capitale de la Rus', ruinée par les Mongols en 1240 ; le prince Fiodor, tributaire de la Horde d'Or, y règne sous l'influence lituanienne (incertain).",
+  "sources": [
+    "Fiodor de Kiev",
+    "Principauté de Kiev"
+  ]
+}

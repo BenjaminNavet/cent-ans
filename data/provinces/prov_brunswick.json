@@ -1,0 +1,94 @@
+{
+  "id": "prov_brunswick",
+  "name": {
+    "display": "Brunswick-Lunebourg",
+    "local": "Brunswik",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "empire_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Oker",
+    "Ilmenau"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Brunswick",
+      "local": "Brunswik",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 52.2689,
+    "lon": 10.5268
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.5268,
+      52.2689
+    ],
+    "seed_lonlat": [
+      10.4,
+      52.4
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_brunswick",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Brunswick compte environ 12 000 habitants en 1337. Population indépendante de l'ancienne province combinée Brunswick-Brême (léger surcomptage assumé, cf. note FE4a).",
+    "classes": {
+      "peasants": {
+        "count": 210000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 34000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2400,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_windmill",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4400,
+  "description": "Duché de Brunswick-Lunebourg (maison Welf) ; en 1337, le duché est en fait fragmenté entre plusieurs branches cadettes welfes, simplifié ici à un seul titulaire, Otton le Doux, de la lignée de Lunebourg.",
+  "sources": [
+    "Duché de Brunswick-Lunebourg",
+    "Otto der Milde"
+  ]
+}

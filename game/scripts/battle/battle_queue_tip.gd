@@ -15,7 +15,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
 	_label = Label.new()
-	_label.add_theme_font_size_override("font_size", 14)
+	_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10))
 	add_child(_label)
 

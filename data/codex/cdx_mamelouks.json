@@ -1,0 +1,28 @@
+{
+  "id": "cdx_mamelouks",
+  "title": "Le sultanat mamelouk",
+  "category": "lieu",
+  "aliases": [
+    "sultanat mamelouk",
+    "Mamelouks",
+    "mamelouk",
+    "sultan du Caire"
+  ],
+  "era": {
+    "from": "1250",
+    "to": "1517"
+  },
+  "summary": "Maîtres de l'Égypte et de la Syrie depuis 1250, les Mamelouks sont d'anciens esclaves-soldats devenus dynastie. Sous al-Nasir Muhammad, leur sultanat est au sommet de sa richesse et de sa puissance.",
+  "body": "Les sultans mamelouks sont d'anciens esclaves militaires, achetés enfants dans la steppe kiptchak et le Caucase, formés et affranchis. Ils ont arrêté les Mongols à Aïn Djalout (1260) et chassé les derniers croisés de Saint-Jean-d'Acre en 1291. Le sultan règne depuis Le Caire ; la Syrie est gouvernée par des émirs nommés par lui, de Damas et d'Alep à Hama.\n\nAl-Nasir Muhammad, monté une troisième fois sur le trône en 1310, règne jusqu'en 1341. Il conclut la paix avec l'Ilkhan en 1323, bâtit des mosquées et des canaux, et tire de grandes recettes du commerce des épices entre l'océan Indien et la Méditerranée. La cavalerie lourde des mamelouks, à l'entraînement réputé sévère, reste l'une des meilleures armées du monde.",
+  "entity": "fac_mamluks",
+  "see_also": [
+    "cdx_horde_d_or",
+    "cdx_hospitaliers_rhodes",
+    "cdx_chypre_lusignan"
+  ],
+  "sources": [
+    "Sultanat mamelouk",
+    "Al-Nasir Muhammad",
+    "Bataille d'Aïn Djalout"
+  ]
+}

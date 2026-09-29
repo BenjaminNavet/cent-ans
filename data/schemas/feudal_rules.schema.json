@@ -20,6 +20,10 @@
       "description": "Termes de la loyauté cible d'un vassal envers son suzerain direct (§ 4.2).",
       "properties": {
         "base": { "type": "integer" },
+        "power_ratio": { "type": "number", "minimum": 1, "description": "Rapport de forces (suzerain / vassal) au-delà duquel il joue en faveur du suzerain." },
+        "drift_per_turn": { "type": "integer", "minimum": 1, "maximum": 100, "description": "Points par saison dont la loyauté se rapproche de sa cible." },
+        "homage_start": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté d'un vassal qui vient de prêter hommage." },
+        "memory_turns": { "type": "integer", "minimum": 1, "description": "Saisons pendant lesquelles un événement (protection, commise d'un pair, défaite, prétendant, octroi de titre) pèse sur la loyauté." },
         "power_favourable": { "type": "integer" },
         "power_unfavourable": { "type": "integer" },
         "excommunicated_liege": { "type": "integer" },
@@ -34,6 +38,82 @@
         "rival_claimant": { "type": "integer" }
       },
       "additionalProperties": false
+    },
+    "forfeiture_win_war_score": { "type": "integer", "minimum": -100, "maximum": 100, "description": "Score de guerre du suzerain contre le félon, à la paix, nécessaire pour saisir les titres commis (§ 4.4)." },
+    "title_loss_penalty": { "type": "integer", "minimum": 0, "description": "Valeur, en points de négociation, d'un titre exigé dans un traité, en plus de ses provinces (§ 4.6)." },
+    "arbitration": {
+      "type": "object",
+      "description": "Points de chaque prétendant quand le suzerain arbitre une succession contestée (§ 4.5).",
+      "properties": {
+        "family_tie": { "type": "integer", "description": "Le prétendant ou son conjoint est parent du souverain arbitre ou appartient à sa cour." },
+        "law_heir": { "type": "integer", "description": "Le prétendant est l'héritier selon la loi de succession." },
+        "designated_heir": { "type": "integer", "description": "Le prétendant est l'héritier désigné par le défunt." }
+      },
+      "additionalProperties": false
+    },
+    "escalation": {
+      "type": "object",
+      "description": "Escalade de guerre et guerre privée (spec § 4.3, lot F2).",
+      "properties": {
+        "shirk_prestige": { "type": "integer", "description": "Prestige du souverain d'un suzerain qui se dérobe." },
+        "shirk_loyalty_drop": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté perdue d'un coup par chaque vassal direct d'un suzerain qui se dérobe." },
+        "intervene_prestige": { "type": "integer", "description": "Prestige du souverain d'un suzerain qui intervient." },
+        "protection_memory_turns": { "type": "integer", "minimum": 1, "description": "Saisons pendant lesquelles le vassal attaqué se souvient de la protection accordée ou refusée (modificateur d'opinion valant loyalty.protection_granted / protection_refused)." },
+        "answer_turns": { "type": "integer", "minimum": 1, "description": "Saisons laissées au joueur pour répondre à un appel de protection ou d'arbitrage." },
+        "score": {
+          "type": "object",
+          "description": "Score provisoire de l'IA appelée à protéger un vassal (remplacé en F5) : elle intervient si la somme atteint intervene_at.",
+          "properties": {
+            "base": { "type": "integer", "description": "Devoir féodal : point de départ." },
+            "power_favourable": { "type": "integer", "description": "Suzerain au moins power_ratio fois plus fort que l'agresseur." },
+            "power_unfavourable": { "type": "integer", "description": "Sinon." },
+            "power_ratio": { "type": "number", "exclusiveMinimum": 0, "description": "Rapport de forces (suzerain / agresseur) jugé favorable." },
+            "attitude_divisor": { "type": "integer", "minimum": 1, "description": "Diviseur de l'attitude du suzerain envers le vassal." },
+            "empty_treasury": { "type": "integer", "description": "Trésor négatif." },
+            "per_ongoing_war": { "type": "integer", "description": "Par guerre déjà en cours." },
+            "allied_with_aggressor": { "type": "integer", "description": "Suzerain allié de l'agresseur." },
+            "intervene_at": { "type": "integer", "description": "Score à partir duquel le suzerain intervient." },
+            "certainty_margin": { "type": "integer", "minimum": 0, "description": "Écart au seuil au-delà duquel l'aperçu est certain (likely au-dessus, unlikely au-dessous)." }
+          },
+          "additionalProperties": false
+        },
+        "arbitration": {
+          "type": "object",
+          "description": "Guerre privée entre deux vassaux directs d'un même seigneur.",
+          "properties": {
+            "truce_turns": { "type": "integer", "minimum": 1, "description": "Trêve imposée avec la paix." },
+            "impose_peace_power_ratio": { "type": "number", "minimum": 0, "description": "L'IA impose la paix si elle est au moins ce multiple de la force de l'attaquant." },
+            "take_side_attitude_gap": { "type": "integer", "minimum": 0, "description": "L'IA prend parti si son attitude envers une partie dépasse l'autre d'au moins cet écart." },
+            "imposed_peace_loyalty_drop": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté perdue par l'attaquant contraint à la paix." },
+            "opposed_loyalty_drop": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté perdue par le vassal que son seigneur combat." }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "host": {
+      "type": "object",
+      "description": "Vassaux directs que l'ost peut convoquer (lot F8, ADR 0114) : un vassal trop loin à la fois de la capitale de son suzerain et des terres de l'ennemi, ou assez puissant pour être indépendant de fait, n'est pas convoqué (et ne commet pas de félonie).",
+      "properties": {
+        "max_muster_km": { "type": "number", "minimum": 0, "description": "Distance maximale (km) entre une place du vassal et la capitale de son suzerain ou une place de l'ennemi. 0 : sans limite." },
+        "independent_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance du vassal, en part de celle de son suzerain, à partir de laquelle il est indépendant de fait et n'est pas convoqué. 0 : sans limite." }
+      },
+      "additionalProperties": false
+    },
+    "start_felonies": {
+      "type": "array",
+      "description": "Cas de félonie ouverts au début de la campagne de 1337 (lot F8 : Édouard III donne asile à Robert d'Artois, banni par Philippe VI).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vassal": { "type": "string", "pattern": "^fac_[a-z0-9_]+$", "description": "Faction félonne (tient un titre du suzerain)." },
+          "liege": { "type": "string", "pattern": "^fac_[a-z0-9_]+$", "description": "Suzerain qui peut prononcer la commise." },
+          "reason": { "enum": ["refused_host", "allied_with_enemy", "revolt", "harboured_felon"], "description": "Motif du cas." }
+        },
+        "required": ["vassal", "liege", "reason"],
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false

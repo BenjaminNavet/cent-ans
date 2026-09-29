@@ -1,0 +1,91 @@
+{
+  "id": "prov_saray",
+  "name": {
+    "display": "Saraï",
+    "local": "Сарай",
+    "local_language": "tatar kiptchak"
+  },
+  "region": "horde",
+  "terrain": "steppe",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Volga",
+    "Akhtouba"
+  ],
+  "resources": [
+    "res_wool",
+    "res_cloth",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Saraï",
+      "local": "Sarāy",
+      "local_language": "tatar kiptchak"
+    },
+    "lat": 48.58,
+    "lon": 47.8
+  },
+  "geo": {
+    "capital_lonlat": [
+      47.8,
+      48.58
+    ],
+    "seed_lonlat": [
+      46.3,
+      49.6
+    ],
+    "voronoi_weight": 2.0
+  },
+  "owner": "fac_golden_horde",
+  "culture": "cul_kipchak",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 33000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 7500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4500,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_counting_house"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2600,
+  "description": "Saraï sur l'Akhtouba, capitale de la Horde d'Or : l'une des plus grandes villes du monde d'alors (Ibn Battûta en 1334), cosmopolite, avec un second Saraï (Saraï al-Djadid) en cours d'édification ; Özbeg y reçoit les princes russes.",
+  "sources": [
+    "Saraï (Horde d'Or)",
+    "Özbeg"
+  ]
+}

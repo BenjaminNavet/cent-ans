@@ -1,0 +1,47 @@
+{
+  "id": "chr_louis_v_de_baviere",
+  "name": {
+    "display": "Louis V de Bavière",
+    "local": "Ludwig V. der Brandenburger",
+    "local_language": "moyen haut-allemand"
+  },
+  "epithet": "le Brandebourgeois",
+  "sex": "male",
+  "house": "Wittelsbach",
+  "faction": "fac_brandenburg",
+  "role": "ruler",
+  "birth": {
+    "value": "1315-05-04"
+  },
+  "death": {
+    "value": "1361-09-18"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Margrave de Brandebourg",
+      "from": {
+        "value": "1323"
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_greedy"
+  ],
+  "piety": 45,
+  "family": {
+    "father": "chr_ludwig_iv"
+  },
+  "starting_location": "prov_brandenburg",
+  "status": "at_court",
+  "description": "Fils aîné de l'empereur Louis IV, margrave de Brandebourg depuis 1323 ; épousera en 1345 Marguerite Maultasch, comtesse du Tyrol, déclenchant un scandale (répudiation de son premier mari, hors période de ce lot).",
+  "sources": [
+    "Louis V de Bavière"
+  ]
+}

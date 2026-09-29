@@ -1,0 +1,59 @@
+{
+  "id": "fac_villena",
+  "name": {
+    "display": "Seigneurie de Villena",
+    "local": "Señorío de Villena",
+    "local_language": "castillan"
+  },
+  "short_name": "Villena",
+  "adjective": "villenois",
+  "government": "lordship",
+  "playable": true,
+  "ruler": "chr_juan_manuel_de_villena",
+  "capital": "prov_villena",
+  "capital_city": "Villena",
+  "religion": "rel_catholic",
+  "culture": "cul_castilian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_castile",
+  "primary_title": "tit_villena",
+  "heraldry": {
+    "blazon": "Écartelé de Castille et de León, à la bordure d'argent.",
+    "description": "Armes royales brisées, cadet de la maison de Castille.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Prince de Villena",
+    "Adelantado mayor de Murcie"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_castile",
+      "status": "vassal",
+      "note": "Don Juan Manuel, petit-fils de Ferdinand III, a mené plusieurs révoltes avant sa réconciliation avec Alphonse XI."
+    },
+    {
+      "faction": "fac_aragon",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 65,
+    "trade": 45,
+    "piety": 50
+  },
+  "description": "Seigneurie bâtie par don Juan Manuel, écrivain et homme d'État, sur les marches de Murcie et de Valence ; autonomie quasi souveraine, monnaie et chevalerie propres.",
+  "sources": [
+    "Juan Manuel, Prince of Villena",
+    "Lordship of Villena"
+  ]
+}

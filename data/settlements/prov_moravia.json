@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_brno",
+    "province": "prov_moravia",
+    "kind": "city",
+    "name": {
+      "display": "Brno",
+      "local": "Brno",
+      "local_language": "tchèque"
+    },
+    "lonlat": [
+      16.6068,
+      49.1951
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Résidence des margraves, dominée par la forteresse du Špilberk.",
+    "sources": [
+      "Brno"
+    ]
+  },
+  {
+    "id": "set_olomouc",
+    "province": "prov_moravia",
+    "kind": "town",
+    "name": {
+      "display": "Olomouc",
+      "local": "Olomouc",
+      "local_language": "tchèque"
+    },
+    "lonlat": [
+      17.2509,
+      49.5938
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ville épiscopale et ancienne capitale de la Moravie septentrionale.",
+    "sources": [
+      "Olomouc"
+    ]
+  },
+  {
+    "id": "set_znojmo",
+    "province": "prov_moravia",
+    "kind": "town",
+    "name": {
+      "display": "Znojmo",
+      "local": "Znojmo",
+      "local_language": "tchèque"
+    },
+    "lonlat": [
+      16.0488,
+      48.8556
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville royale de la Moravie méridionale, sur la Dyje, aux portes de l'Autriche.",
+    "sources": [
+      "Znojmo"
+    ]
+  }
+]

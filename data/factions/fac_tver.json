@@ -1,0 +1,61 @@
+{
+  "id": "fac_tver",
+  "name": {
+    "display": "Grande-principauté de Tver",
+    "local": "Великое княжество Тверское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Tver",
+  "adjective": "tverois",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_konstantin_mikhailovitch",
+  "capital": "prov_tver",
+  "capital_city": "Tver",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_tver",
+  "heraldry": {
+    "blazon": "De gueules au chevron d'or.",
+    "description": "Armes de convention pour Tver (le trône couronné apparaît plus tard).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Prince de Tver"
+  ],
+  "treasury": 7000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_moscow",
+      "status": "peace",
+      "note": "Haine héréditaire depuis le supplice de Mikhaïl (1318) et l'insurrection de 1327."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 65,
+    "trade": 50,
+    "piety": 70
+  },
+  "description": "Grande-principauté de la haute Volga, longtemps la plus forte de Rus' ; le prince Alexandre a fait massacrer l'armée de Chevkal (1327) et fui à Pskov puis en Lituanie ; son frère Konstantin, régnant en 1337, ménage la Horde ; Alexandre sera gracié en 1338, exécuté à Saraï en 1339.",
+  "sources": [
+    "Principauté de Tver",
+    "Konstantin de Tver",
+    "Alexandre de Tver"
+  ]
+}

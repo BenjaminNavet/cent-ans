@@ -54,6 +54,21 @@
     {
       "faction": "fac_navarre",
       "status": "peace"
+    },
+    {
+      "faction": "fac_sicily",
+      "status": "alliance",
+      "note": "Branche cadette de la maison de Barcelone, tenant la Sicile depuis la paix de Caltabellotta (1302) ; alliance dynastique constante, sans union des couronnes."
+    },
+    {
+      "faction": "fac_marinids",
+      "status": "peace",
+      "note": "Trêves et commerce catalan au Maghreb."
+    },
+    {
+      "faction": "fac_hafsids",
+      "status": "peace",
+      "note": "Tribut hafside à l'Aragon, commerce de Tunis."
     }
   ],
   "ai_personality": {

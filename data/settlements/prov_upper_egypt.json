@@ -1,0 +1,103 @@
+[
+  {
+    "id": "set_beni_suef",
+    "province": "prov_upper_egypt",
+    "kind": "city",
+    "name": {
+      "display": "Beni Souef",
+      "local": "بني سويف",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      31.1,
+      29.07
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Chef-lieu de la haute vallée.",
+    "sources": [
+      "Upper Egypt"
+    ]
+  },
+  {
+    "id": "set_bahnasa",
+    "province": "prov_upper_egypt",
+    "kind": "town",
+    "name": {
+      "display": "Bahnasa (Oxyrhynque)",
+      "local": "البهنسا",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      30.66,
+      28.54
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg copte et musulman.",
+    "sources": [
+      "Upper Egypt"
+    ]
+  },
+  {
+    "id": "set_minya",
+    "province": "prov_upper_egypt",
+    "kind": "town",
+    "name": {
+      "display": "Minya",
+      "local": "المنيا",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      30.74,
+      28.11
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville-frontière de la Haute-Égypte.",
+    "sources": [
+      "Upper Egypt"
+    ]
+  },
+  {
+    "id": "set_fayyum",
+    "province": "prov_upper_egypt",
+    "kind": "town",
+    "name": {
+      "display": "Fayoum (Madinat al-Fayyum)",
+      "local": "الفيوم",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      30.84,
+      29.31
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Oasis irriguée du lac Qarun.",
+    "sources": [
+      "Upper Egypt"
+    ]
+  }
+]

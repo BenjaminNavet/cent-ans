@@ -1,0 +1,31 @@
+{
+  "id": "chr_ramon_berenguer_de_prades",
+  "name": {
+    "display": "Ramon Berenguer, infant d'Aragon",
+    "local": "Ramon Berenguer d'Aragó",
+    "local_language": "catalan"
+  },
+  "sex": "male",
+  "house": "Barcelone",
+  "faction": "fac_aragon",
+  "role": "noble",
+  "birth": {
+    "value": "1308"
+  },
+  "death": {
+    "value": "1364"
+  },
+  "historical": true,
+  "titles": [],
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": ["trait_loyal"],
+  "piety": 50,
+  "starting_location": "prov_barcelona",
+  "status": "at_court",
+  "description": "Fils cadet de Jacques II d'Aragon, frère de l'infant Pierre de Ribagorce et oncle de Pierre IV ; encore sans domaine propre en 1337, il ne recevra le comté de Prades qu'en 1341 (échange avec son frère Pierre contre le comté d'Empúries).",
+  "sources": ["Ramon Berenguer, comte de Prades"]
+}

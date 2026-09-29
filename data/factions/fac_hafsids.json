@@ -1,0 +1,78 @@
+{
+  "id": "fac_hafsids",
+  "name": {
+    "display": "Sultanat hafside",
+    "local": "Sulṭānat al-Ḥafṣiyyīn",
+    "local_language": "arabe maghrébin"
+  },
+  "short_name": "Hafsides",
+  "adjective": "hafside",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_abu_bakr_ii_hafside",
+  "capital": "prov_tunis",
+  "capital_city": "Tunis",
+  "religion": "rel_islam",
+  "culture": "cul_maghrebi",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_hafsids",
+  "heraldry": {
+    "blazon": "Coupé de gueules et d'argent.",
+    "description": "Étendard hafside : bandes blanche et rouge d'après l'Atlas catalan (1375) et les portulans ; simplifié en écu coupé pour le jeu.",
+    "primary_color": "#F2EFE6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Bicolore attribué d'après les représentations des portulans du XIVe siècle ; teintes et disposition incertaines."
+  },
+  "titles": [
+    "Sultan de Tunis",
+    "Commandeur des croyants (prétention)"
+  ],
+  "treasury": 24000,
+  "prestige": 52,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_marinids",
+      "status": "marriage_tie",
+      "note": "Alliance matrimoniale avec Abu l-Hasan (à préciser) ; le Mérinide, maître de Tlemcen, menace désormais Bougie et Constantine."
+    },
+    {
+      "faction": "fac_sicily",
+      "status": "war",
+      "note": "Djerba reprise aux Siciliens en 1335 ; guerre de course et de razzias en Méditerranée centrale."
+    },
+    {
+      "faction": "fac_aragon",
+      "status": "peace",
+      "note": "Traités de commerce et tribut depuis Pierre le Grand (à préciser)."
+    },
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Fondouks génois à Tunis, comptoirs à Tabarka."
+    },
+    {
+      "faction": "fac_tripoli",
+      "status": "peace",
+      "note": "Tripoli des Banu Thabit, autonome de fait."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 55,
+    "trade": 70,
+    "piety": 65
+  },
+  "description": "Sultanat de Tunis, dernier grand État de l'Ifriqiya, réunifié par Abu Yahya Abu Bakr II après 1318 ; corsaires, marchands et vassaux turbulents (Banu Makki de Gabès, Banu Thabit de Tripoli) le rendent riche mais fragile face aux Mérinides.",
+  "sources": [
+    "Hafsides",
+    "Abu Yahya Abu Bakr II",
+    "Conquête hafside de Djerba"
+  ]
+}

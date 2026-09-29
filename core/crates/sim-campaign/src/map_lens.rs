@@ -10,7 +10,7 @@ use data_model::{FactionId, GameData, ProvinceId};
 use crate::diplomacy::claimed_provinces;
 use crate::economy::{province_income, seasonal_supply_change};
 use crate::population::weighted_unrest;
-use crate::state::{CampaignState, Season};
+use crate::state::CampaignState;
 
 /// Who claims a province, from the viewer's side.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -56,7 +56,7 @@ pub fn map_lens(
         .filter(|f| *f != viewer)
         .flat_map(|f| claimed_provinces(state, f))
         .collect();
-    let winter = state.season == Season::Winter;
+    let season = state.season;
     state
         .provinces
         .iter()
@@ -74,12 +74,12 @@ pub fn map_lens(
             };
             let friendly = state.is_friendly_territory(viewer, id);
             let lens = ProvinceLens {
-                income: province_income(province),
+                income: province_income(&data.economy_rules, province),
                 population: province.population.total(),
                 unrest: weighted_unrest(&province.population),
                 vassal_loyalty: vassal.map(|f| f.loyalty),
                 suzerain: vassal.and_then(|f| f.suzerain.clone()),
-                supply_change: seasonal_supply_change(state, data, id, friendly, None, winter),
+                supply_change: seasonal_supply_change(state, data, id, friendly, None, season),
                 claim,
             };
             (id.clone(), lens)

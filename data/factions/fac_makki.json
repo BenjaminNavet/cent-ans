@@ -1,0 +1,58 @@
+{
+  "id": "fac_makki",
+  "name": {
+    "display": "Émirat de Gabès",
+    "local": "Imārat Qābis",
+    "local_language": "arabe maghrébin"
+  },
+  "short_name": "Gabès",
+  "adjective": "gabésien",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_gabes",
+  "capital_city": "Gabès",
+  "religion": "rel_islam",
+  "culture": "cul_maghrebi",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_hafsids",
+  "primary_title": "tit_makki",
+  "heraldry": {
+    "blazon": "De sinople au chef d'argent.",
+    "description": "Couleurs vertes de l'islam et croissant ; blason de jeu, non attesté pour les Banu Makki.",
+    "primary_color": "#2E7D4F",
+    "secondary_color": "#F2EFE6",
+    "uncertain": true,
+    "note": "Aucune source héraldique : emblème conventionnel de jeu."
+  },
+  "titles": [
+    "Émir de Gabès"
+  ],
+  "treasury": 5000,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_hafsids",
+      "status": "vassal",
+      "note": "Vassal nominal de Tunis, en pratique maître du sud tunisien (Banu Makki, depuis 1282)."
+    },
+    {
+      "faction": "fac_tripoli",
+      "status": "peace",
+      "note": "Voisin oriental, rivalité de caravanes."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 55
+  },
+  "description": "Famille des Banu Makki, émirs de Gabès depuis 1282, sous suzeraineté hafside ; nom de l'émir de 1337 non établi (aucun ruler renseigné).",
+  "sources": [
+    "Banu Makki"
+  ]
+}

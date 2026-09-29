@@ -1,0 +1,66 @@
+{
+  "id": "fac_georgia",
+  "name": {
+    "display": "Royaume de Géorgie",
+    "local": "საქართველოს სამეფო",
+    "local_language": "géorgien"
+  },
+  "short_name": "Géorgie",
+  "adjective": "géorgien",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_georges_v",
+  "capital": "prov_kartli",
+  "capital_city": "Tbilissi",
+  "religion": "rel_orthodox",
+  "culture": "cul_georgian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_georgia",
+  "heraldry": {
+    "blazon": "D'argent à la croix de gueules, au chef d'or.",
+    "description": "Croix de Géorgie ; chef d'or de convention.",
+    "primary_color": "#F3F0E4",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Roi des Abkhazes, des Cartvèles, des Ranes et des Kakhs",
+    "Roi des Rois"
+  ],
+  "treasury": 22000,
+  "prestige": 65,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_royal_taxation",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_samtskhe",
+      "status": "overlord",
+      "note": "Les atabegs Djakéli de Samtskhé sont vassaux de la couronne."
+    },
+    {
+      "faction": "fac_trebizond",
+      "status": "peace",
+      "note": "Voisin occidental orthodoxe."
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Menace au nord du Caucase."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 60,
+    "trade": 60,
+    "piety": 80
+  },
+  "description": "Royaume de Géorgie sous Georges V le Brillant (1314-1346), qui a réuni le pays et secoué la tutelle ilkhanide après 1335 ; le Caucase, la mer Noire et Tbilissi sont à lui.",
+  "sources": [
+    "Kingdom of Georgia",
+    "George V of Georgia"
+  ]
+}

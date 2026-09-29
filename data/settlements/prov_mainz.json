@@ -25,11 +25,10 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Électorat de Mayence (archevêque Henri de Virnebourg), Francfort (cité impériale, foires) et landgraviat de Hesse (Henri II). Chancellerie de l'Empire.",
+    "description": "Cité capitale de l'électorat de Mayence, siège de l'archevêque-électeur Henri III de Virnebourg, archichancelier du royaume de Germanie.",
     "sources": [
       "Électorat de Mayence",
-      "Landgraviat de Hesse",
-      "Francfort-sur-le-Main"
+      "Henri III de Virnebourg"
     ]
   },
   {
@@ -185,60 +184,6 @@
     "description": "Ville libre d'empire du Rheinhessen, cité viticole fortifiée sur le Rhin.",
     "sources": [
       "Oppenheim"
-    ]
-  },
-  {
-    "id": "set_giessen",
-    "province": "prov_mainz",
-    "kind": "town",
-    "name": {
-      "display": "Gießen",
-      "local": "Giezen",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      8.6725,
-      50.5842
-    ],
-    "weight": 10,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville forte du landgraviat de Hesse, fondée autour d'un château fort par les landgraves à la fin du XIIe siècle.",
-    "sources": [
-      "Gießen",
-      "Landgraviat de Hesse"
-    ]
-  },
-  {
-    "id": "set_marburg",
-    "province": "prov_mainz",
-    "kind": "abbey",
-    "name": {
-      "display": "Marbourg",
-      "local": "Marburg",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      8.7667,
-      50.806
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Commanderie de l'ordre Teutonique fondée en 1234 autour de l'église Sainte-Élisabeth, haut lieu de pèlerinage de Hesse.",
-    "sources": [
-      "Marbourg",
-      "Ordre Teutonique"
     ]
   }
 ]

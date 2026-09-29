@@ -42,7 +42,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
 from scipy import ndimage
 
 from cent_ans_tools.geo import copernicus, download, relief, terrain
@@ -53,6 +52,11 @@ MAP_DIR = REPO_DIR / "data" / "map"
 CACHE_DIR = download.RAW_DIR / "copernicus_cache"
 RENDER_HEIGHTMAP = "heightmap_render.png"
 RELIEF_SHADE = "relief_shade.png"
+#: The shade raster is written as horizontal bands ``relief_shade_<i>.png``
+#: (``map.json.relief_shade.bands``): the whole 14336 x 12288 LA8 PNG would
+#: exceed GitHub's 50 MB warning (ADR 0115).
+RELIEF_SHADE_STEM = "relief_shade"
+RELIEF_SHADE_BAND_ROWS = 3072
 
 BOOST_SIGMA_M = 5000.0
 BOOST_GAIN = 0.8
@@ -87,11 +91,10 @@ def copernicus_on_grid(
     """Copernicus heights averaged on the whole ``grid`` (NaN where no tile), cached."""
     if cache is not None and cache.exists():
         return np.load(cache)
-    size = grid.size_px
-    result = np.full((size, size), np.nan, dtype=np.float32)
+    result = np.full(grid.shape, np.nan, dtype=np.float32)
     lon_min, lat_min, lon_max, lat_max = copernicus.FINE_BBOX
-    for row0 in range(0, size, block):
-        for col0 in range(0, size, block):
+    for row0 in range(0, grid.height_px, block):
+        for col0 in range(0, grid.width_px, block):
             window = (col0, row0, block, block)
             w_lon0, w_lon1, w_lat0, w_lat1 = copernicus._window_lonlat(grid, window)
             if (
@@ -108,6 +111,14 @@ def copernicus_on_grid(
         cache.parent.mkdir(parents=True, exist_ok=True)
         np.save(cache, result)
     return result
+
+
+def cache_path(grid: MapGrid) -> Path:
+    """Copernicus-on-grid cache of ``grid`` (keyed by its size and origin)."""
+    minx, _, _, maxy = grid.bounds
+    return CACHE_DIR / (
+        f"cop_{grid.width_px}x{grid.height_px}_{int(minx)}_{int(maxy)}.npy"
+    )
 
 
 def upsample_sign(original_4096: np.ndarray, factor: int) -> np.ndarray:
@@ -176,9 +187,13 @@ def block_mean(array: np.ndarray, factor: int) -> np.ndarray:
 
 def bilinear_upsample(array: np.ndarray, factor: int) -> np.ndarray:
     """What a GPU bilinear fetch of ``array`` returns at the centres of a ``factor``x finer grid."""
-    size = array.shape[0] * factor
-    coords = (np.arange(size, dtype=np.float32) + 0.5) / factor - 0.5
-    rows, cols = np.meshgrid(coords, coords, indexing="ij")
+    row_coords = (
+        np.arange(array.shape[0] * factor, dtype=np.float32) + 0.5
+    ) / factor - 0.5
+    col_coords = (
+        np.arange(array.shape[1] * factor, dtype=np.float32) + 0.5
+    ) / factor - 0.5
+    rows, cols = np.meshgrid(row_coords, col_coords, indexing="ij")
     return ndimage.map_coordinates(array, [rows, cols], order=1, mode="nearest").astype(
         np.float32
     )
@@ -215,7 +230,14 @@ def update_map_json(map_dir: Path, names: list[str]) -> None:
             "valley_dig_max_m": VALLEY_DIG_MAX_M,
         },
     }
-    metadata["relief_shade"] = {"file": RELIEF_SHADE, "detail_scale_m": DETAIL_SCALE_M}
+    metadata["relief_shade"] = {
+        "bands": {
+            "pattern": RELIEF_SHADE_STEM + "_{band}.png",
+            "count": len(list(map_dir.glob(RELIEF_SHADE_STEM + "_*.png"))),
+            "rows": RELIEF_SHADE_BAND_ROWS,
+        },
+        "detail_scale_m": DETAIL_SCALE_M,
+    }
     metadata.setdefault("sources", {})["fine_dem"] = {
         "name": "Copernicus DEM GLO-90 (area average), ETOPO 2022 at sea and outside the bbox",
         "bbox_lonlat": list(copernicus.FINE_BBOX),
@@ -228,16 +250,14 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefShadeResult:
     """Download Copernicus if needed, then write the fine tiles, render heightmap and shade."""
     started = time.perf_counter()
     grid = relief.fine_grid(map_dir)
-    factor = grid.size_px // 4096
+    factor = relief.FINE_SCALE
     names = copernicus.tiles_in_bbox(copernicus.tile_list())
     copernicus.fetch_tiles(names)
     etopo = relief.resample_heights(
         grid,
-        download.etopo_tiles(download.etopo_tiles_covering(*grid.geographic_extent())),
+        download.etopo_tiles(download.etopo_tiles_for_grid(grid)),
     )
-    cop = copernicus_on_grid(
-        grid, names, cache=None if force else CACHE_DIR / f"cop_{grid.size_px}.npy"
-    )
+    cop = copernicus_on_grid(grid, names, cache=None if force else cache_path(grid))
     merged = copernicus.merge_with_etopo(cop, etopo)
     del cop, etopo
     original = terrain.uint16_to_height(
@@ -259,17 +279,21 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefShadeResult:
     # Neutre en mer (le shader ne l'utilise que sur terre ; compression).
     detail[~land] = 0.0
     occ[~land] = 0.0
-    shade_path = map_dir / RELIEF_SHADE
-    Image.fromarray(encode_shade(detail, occ), mode="LA").save(
-        shade_path, compress_level=9
+    shade_paths = terrain.write_png_bands(
+        encode_shade(detail, occ),
+        map_dir,
+        RELIEF_SHADE_STEM,
+        "LA",
+        RELIEF_SHADE_BAND_ROWS,
     )
+    (map_dir / RELIEF_SHADE).unlink(missing_ok=True)
     relief.update_map_json(map_dir)
     update_map_json(map_dir, names)
     return ReliefShadeResult(
         tiles=len(paths),
         tiles_bytes=sum(p.stat().st_size for p in paths),
         render_heightmap=render_path,
-        relief_shade=shade_path,
-        shade_bytes=shade_path.stat().st_size,
+        relief_shade=shade_paths[0],
+        shade_bytes=sum(path.stat().st_size for path in shade_paths),
         seconds=time.perf_counter() - started,
     )

@@ -1,0 +1,89 @@
+{
+  "id": "prov_pereslavl",
+  "name": {
+    "display": "Pereslavl-Zalesski",
+    "local": "Переславль-Залесский",
+    "local_language": "russe"
+  },
+  "region": "rus_centre",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Trubej"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Pereslavl-Zalesski",
+      "local": "Переславль-Залесский",
+      "local_language": "russe"
+    },
+    "lat": 56.74,
+    "lon": 38.85
+  },
+  "geo": {
+    "capital_lonlat": [
+      38.85,
+      56.74
+    ],
+    "seed_lonlat": [
+      38.6,
+      56.8
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_moscow",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 66750,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 4500,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2250,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1500,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Pereslavl du lac Plechtcheïevo et Dmitrov : anciens patrimoines de la lignée d'Alexandre Nevski, tenus par les Daniilovitch de Moscou.",
+  "sources": [
+    "Pereslavl-Zalesski",
+    "Dmitrov"
+  ]
+}

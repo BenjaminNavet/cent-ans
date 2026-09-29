@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_marrakech",
+    "province": "prov_marrakech",
+    "kind": "city",
+    "name": {
+      "display": "Marrakech",
+      "local": "Murrākush",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -7.9811,
+      31.6295
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ancienne capitale des Almoravides et des Almohades, remparts de pisé, mosquée de la Koutoubia.",
+    "sources": [
+      "Marrakech"
+    ]
+  },
+  {
+    "id": "set_aghmat",
+    "province": "prov_marrakech",
+    "kind": "village",
+    "name": {
+      "display": "Aghmat",
+      "local": "Aghmāt",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -7.8353,
+      31.3661
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ancienne capitale de la région, en déclin depuis la fondation de Marrakech.",
+    "sources": [
+      "Aghmat"
+    ]
+  },
+  {
+    "id": "set_amizmiz",
+    "province": "prov_marrakech",
+    "kind": "village",
+    "name": {
+      "display": "Amizmiz",
+      "local": "Amizmīz",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -8.25,
+      31.2247
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg du piémont du Haut Atlas, sur la route des cols du sud.",
+    "sources": [
+      "Amizmiz"
+    ]
+  }
+]

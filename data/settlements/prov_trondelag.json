@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_nidaros",
+    "province": "prov_trondelag",
+    "kind": "city",
+    "name": {
+      "display": "Nidaros",
+      "local": "Niðaróss",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      10.3951,
+      63.4305
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Trondheim médiévale : cathédrale du saint roi Olaf et siège de l'archevêque.",
+    "sources": [
+      "Nidaros"
+    ]
+  },
+  {
+    "id": "set_munkholmen",
+    "province": "prov_trondelag",
+    "kind": "abbey",
+    "name": {
+      "display": "Munkholmen",
+      "local": "Nidarholm",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      10.3803,
+      63.4522
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": true,
+    "description": "Abbaye bénédictine sur un îlot du fjord.",
+    "sources": [
+      "Munkholmen"
+    ]
+  },
+  {
+    "id": "set_stiklestad",
+    "province": "prov_trondelag",
+    "kind": "village",
+    "name": {
+      "display": "Stiklestad",
+      "local": "Stiklastaðir",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      11.4,
+      63.8
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Lieu de la mort d'Olaf II (1030), pèlerinage de Norvège.",
+    "sources": [
+      "Stiklestad"
+    ]
+  }
+]

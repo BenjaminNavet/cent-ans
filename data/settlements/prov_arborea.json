@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_oristano",
+    "province": "prov_arborea",
+    "kind": "city",
+    "name": {
+      "display": "Oristano",
+      "local": "Aristanis",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      8.5911,
+      39.9036
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Capitale du judicat d'Arborée, résidence des juges de la maison de Bas-Serra ; port sur le golfe d'Oristano.",
+    "sources": [
+      "Judicat d'Arborea",
+      "Oristano"
+    ]
+  },
+  {
+    "id": "set_bosa",
+    "province": "prov_arborea",
+    "kind": "village",
+    "name": {
+      "display": "Bosa",
+      "local": "Bosa",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      8.4989,
+      40.2986
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Bourg côtier au pied du château Malaspina, sur la côte occidentale de l'île.",
+    "sources": [
+      "Bosa (Italie)"
+    ]
+  },
+  {
+    "id": "set_santa_giusta",
+    "province": "prov_arborea",
+    "kind": "abbey",
+    "name": {
+      "display": "Santa Giusta",
+      "local": "Santa Giusta",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      8.6,
+      39.8833
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Cathédrale romane et évêché sur l'étang.",
+    "sources": [
+      "Santa Giusta"
+    ]
+  }
+]

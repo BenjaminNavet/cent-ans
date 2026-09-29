@@ -1,0 +1,75 @@
+[
+  {
+    "id": "set_khlynov",
+    "province": "prov_viatka",
+    "kind": "city",
+    "name": {
+      "display": "Khlynov",
+      "local": "Хлынов",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      49.66,
+      58.6
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Chef-lieu de la terre de Viatka (fondation traditionnelle en 1181, première mention en 1374).",
+    "sources": [
+      "Kirov"
+    ]
+  },
+  {
+    "id": "set_kotelnitch",
+    "province": "prov_viatka",
+    "kind": "town",
+    "name": {
+      "display": "Kotelnitch",
+      "local": "Котельнич",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      48.35,
+      58.31
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Viatka moyenne (mention écrite postérieure à 1337).",
+    "sources": [
+      "Kotelnitch"
+    ]
+  },
+  {
+    "id": "set_orlov",
+    "province": "prov_viatka",
+    "kind": "village",
+    "name": {
+      "display": "Orlov",
+      "local": "Орлов",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      48.9,
+      58.55
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourgade de la Viatka fondée par les colons novgorodiens (date incertaine).",
+    "sources": [
+      "Orlov"
+    ]
+  }
+]

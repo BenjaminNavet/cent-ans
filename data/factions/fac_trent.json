@@ -1,0 +1,60 @@
+{
+  "id": "fac_trent",
+  "name": {
+    "display": "Évêché de Trente",
+    "local": "Tridentum",
+    "local_language": "latin"
+  },
+  "short_name": "Trente",
+  "adjective": "trentin",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_nicolas_de_brno",
+  "capital": "prov_trent",
+  "capital_city": "Trente",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_trent",
+  "heraldry": {
+    "blazon": "D'argent à l'aigle bicéphale de sable, couronnée d'or, tenant en son cœur un écu d'azur à la crosse d'or.",
+    "description": "Armes traditionnelles de la principauté épiscopale de Trente, combinant l'aigle impériale et la crosse épiscopale.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1A1A1A",
+    "uncertain": true,
+    "note": "Composition héraldique plausible pour une principauté épiscopale impériale ; blason exact du XIVe siècle non vérifié à ce budget."
+  },
+  "titles": [
+    "Prince-évêque de Trente"
+  ],
+  "treasury": 3500,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_tirol",
+      "status": "peace",
+      "note": "Principauté enclavée dans le comté de Tyrol, mais de jure distincte et directement vassale de l'Empire."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 15,
+    "diplomacy": 60,
+    "trade": 50,
+    "piety": 75
+  },
+  "description": "Principauté épiscopale de Trente sur l'Adige, enclavée dans le comté de Tyrol mais politiquement distincte ; évêque en 1337 incertain, Nicolas de Brno (attesté à partir de 1338) retenu ici comme approximation faute de titulaire confirmé exactement pour 1337.",
+  "sources": [
+    "Nicolas de Brno",
+    "Principauté épiscopale de Trente"
+  ]
+}

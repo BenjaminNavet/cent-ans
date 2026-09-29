@@ -1,0 +1,92 @@
+{
+  "id": "prov_kulm",
+  "name": {
+    "display": "Terre de Culm",
+    "local": "Kulmerland",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "prusse",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Vistule",
+    "Drewenz"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Thorn",
+      "local": "Thorn",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 53.0138,
+    "lon": 18.6089
+  },
+  "geo": {
+    "capital_lonlat": [
+      18.6089,
+      53.0138
+    ],
+    "seed_lonlat": [
+      18.9,
+      53.2
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_teutonic",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 85000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2550,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1020,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1700,
+  "description": "Terre de Culm, premier domaine de l'Ordre en Prusse (cession de Conrad de Mazovie, 1230) : Thorn, Culm et Graudenz, colonisés par des paysans allemands sous le droit de Culm.",
+  "sources": [
+    "Terre de Culm",
+    "Toruń",
+    "Droit de Culm"
+  ]
+}

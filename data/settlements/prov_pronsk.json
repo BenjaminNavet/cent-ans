@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_pronsk",
+    "province": "prov_pronsk",
+    "kind": "city",
+    "name": {
+      "display": "Pronsk",
+      "local": "Пронск",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      40.61,
+      53.87
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de la Pronia, principauté cadette de Riazan.",
+    "sources": [
+      "Pronsk"
+    ]
+  },
+  {
+    "id": "set_izheslavets",
+    "province": "prov_pronsk",
+    "kind": "village",
+    "name": {
+      "display": "Ijeslavets",
+      "local": "Ижеславец",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      40.15,
+      54.15
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la haute Pronia (emplacement approximatif).",
+    "sources": [
+      "Pronsk"
+    ]
+  },
+  {
+    "id": "set_belgorod_riazanski",
+    "province": "prov_pronsk",
+    "kind": "village",
+    "name": {
+      "display": "Belgorod-Riazanski",
+      "local": "Белгород-Рязанский",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      40.55,
+      53.6
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Forteresse ancienne de la frontière méridionale de Riazan (emplacement approximatif).",
+    "sources": [
+      "Riazan"
+    ]
+  }
+]

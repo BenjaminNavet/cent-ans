@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_erzincan",
+    "province": "prov_erzincan",
+    "kind": "city",
+    "name": {
+      "display": "Erzincan (Erznka)",
+      "local": "Erzincan",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      39.5,
+      39.75
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville arménienne et turque du haut Euphrate.",
+    "sources": [
+      "Erzincan"
+    ]
+  },
+  {
+    "id": "set_erzurum",
+    "province": "prov_erzincan",
+    "kind": "town",
+    "name": {
+      "display": "Erzurum (Théodosiopolis)",
+      "local": "Erzurum",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      41.27,
+      39.9
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Grande forteresse de la frontière orientale.",
+    "sources": [
+      "Erzincan"
+    ]
+  },
+  {
+    "id": "set_bayburt",
+    "province": "prov_erzincan",
+    "kind": "castle",
+    "name": {
+      "display": "Bayburt"
+    },
+    "lonlat": [
+      40.23,
+      40.26
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château sur la route de Trébizonde.",
+    "sources": [
+      "Erzincan"
+    ]
+  }
+]

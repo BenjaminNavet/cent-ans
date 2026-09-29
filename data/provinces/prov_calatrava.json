@@ -1,0 +1,91 @@
+{
+  "id": "prov_calatrava",
+  "name": {
+    "display": "Calatrava",
+    "local": "Calatrava",
+    "local_language": "castillan"
+  },
+  "region": "iberie_centre",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Guadiana"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Ciudad Real",
+      "local": "Ciudad Real",
+      "local_language": "castillan"
+    },
+    "lat": 38.9861,
+    "lon": -3.9272
+  },
+  "geo": {
+    "capital_lonlat": [
+      -3.9272,
+      38.9861
+    ],
+    "seed_lonlat": [
+      -3.85,
+      38.9
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_calatrava",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 26000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 300,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Campo de Calatrava, domaine de l'ordre militaire du Calatrava ; Ciudad Real fondée en 1255 par Alphonse X pour contrebalancer le pouvoir de l'ordre sur la région."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1000,
+  "description": "Campo de Calatrava, La Manche septentrionale tenue par l'ordre militaire du Calatrava depuis 1158 (défense de la frontière face à Grenade et au califat almohade).",
+  "sources": [
+    "Ordre de Calatrava",
+    "Ciudad Real",
+    "Calatrava la Nueva"
+  ]
+}

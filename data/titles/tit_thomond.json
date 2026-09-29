@@ -1,0 +1,56 @@
+{
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Thomond",
+    "local": "Ríoghacht Thuadhmhumhan",
+    "local_language": "gaélique irlandais"
+  },
+  "heraldry": {
+    "blazon": "De gueules à trois léopards d'or.",
+    "description": "Armes attestées seulement à partir de la reddition de 1543 (comté de Thomond des Tudor) ; utilisées ici par convention, anachronisme assumé pour 1337.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#D9A441",
+    "uncertain": true
+  },
+  "de_jure_provinces": [
+    "prov_thomond"
+  ],
+  "holder_1337": {
+    "faction": "fac_thomond",
+    "sources": [
+      "Muircheartach Ó Briain, roi de Thomond"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_thomond_hold",
+      "title": "Garder le Clare",
+      "description": "Conserver le royaume repris aux Anglo-Normands à Dysert O'Dea (1318).",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_thomond"
+      }
+    },
+    {
+      "id": "obj_thomond_munster",
+      "title": "Les héritiers de Brian Boru",
+      "description": "Les Ó Briain descendent du grand roi Brian Boru : étendre le royaume sur le Munster.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_thomond",
+          "prov_desmond",
+          "prov_ormond",
+          "prov_munster"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume gaélique de Thomond, tenu par les Ó Briain, descendants de Brian Boru ; repris aux colons anglo-normands de Bunratty après la victoire de Dysert O'Dea en 1318.",
+  "sources": [
+    "Muircheartach Ó Briain",
+    "Bataille de Dysert O'Dea",
+    "Brian Boru"
+  ],
+  "id": "tit_thomond"
+}

@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_marj",
+    "province": "prov_barqa",
+    "kind": "city",
+    "name": {
+      "display": "Barqa (Al-Marj)",
+      "local": "Al-Marj",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      20.8283,
+      32.4914
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ancienne Barca, capitale historique de la Cyrénaïque, marché des tribus.",
+    "sources": [
+      "Al-Marj"
+    ]
+  },
+  {
+    "id": "set_benghazi",
+    "province": "prov_barqa",
+    "kind": "town",
+    "name": {
+      "display": "Benghazi (Bernice)",
+      "local": "Banghāzī",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      20.0678,
+      32.1167
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port sur l'antique Bérénice, de peu d'importance (à préciser).",
+    "sources": [
+      "Benghazi"
+    ]
+  },
+  {
+    "id": "set_cyrene",
+    "province": "prov_barqa",
+    "kind": "village",
+    "name": {
+      "display": "Cyrène (Shahhat)",
+      "local": "Shaḥḥāt",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      21.8583,
+      32.8236
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ruines de Cyrène, bourg de bergers.",
+    "sources": [
+      "Cyrène (Libye)"
+    ]
+  }
+]

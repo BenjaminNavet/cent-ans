@@ -1,0 +1,38 @@
+{
+  "id": "chr_barnim_iv_de_pomeranie",
+  "name": {
+    "display": "Barnim IV de Poméranie",
+    "local": "Barnim IV. von Pommern-Wolgast",
+    "local_language": "moyen bas-allemand"
+  },
+  "epithet": "le Bon",
+  "sex": "male",
+  "house": "Greifen",
+  "faction": "fac_pomerania_wolgast",
+  "role": "heir",
+  "birth": {
+    "value": "1319",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1365",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_impulsive"
+  ],
+  "piety": 55,
+  "starting_location": "prov_pomerania_wolgast",
+  "status": "at_court",
+  "description": "Frère cadet de Bogislaw V, co-souverain de Wolgast (« le Bon »).",
+  "sources": [
+    "Barnim IV. (Pommern)"
+  ]
+}

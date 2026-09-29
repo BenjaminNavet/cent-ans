@@ -1,0 +1,70 @@
+[
+  {
+    "id": "set_kastamonu",
+    "province": "prov_kastamonu",
+    "kind": "city",
+    "name": {
+      "display": "Kastamonu"
+    },
+    "lonlat": [
+      33.78,
+      41.39
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des Candaroğulları.",
+    "sources": [
+      "Candar dynasty"
+    ]
+  },
+  {
+    "id": "set_tosya",
+    "province": "prov_kastamonu",
+    "kind": "village",
+    "name": {
+      "display": "Tosya"
+    },
+    "lonlat": [
+      34.04,
+      41.02
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la vallée.",
+    "sources": [
+      "Candar dynasty"
+    ]
+  },
+  {
+    "id": "set_safranbolu",
+    "province": "prov_kastamonu",
+    "kind": "town",
+    "name": {
+      "display": "Safranbolu"
+    },
+    "lonlat": [
+      32.69,
+      41.25
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg minier.",
+    "sources": [
+      "Candar dynasty"
+    ]
+  }
+]

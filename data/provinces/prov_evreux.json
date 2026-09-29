@@ -1,0 +1,91 @@
+{
+  "id": "prov_evreux",
+  "name": {
+    "display": "Évreux",
+    "local": "Évrues",
+    "local_language": "ancien français"
+  },
+  "region": "france_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Iton",
+    "Eure"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Évreux",
+      "local": "Évrues",
+      "local_language": "ancien français"
+    },
+    "lat": 49.0269,
+    "lon": 1.1499
+  },
+  "geo": {
+    "capital_lonlat": [
+      1.1499,
+      49.0269
+    ],
+    "seed_lonlat": [
+      1.1,
+      49.05
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_navarre",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 90000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2600,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Comté détaché de Normandie ; enclave normande de Philippe d'Évreux."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "Comté d'Évreux, tenu par Philippe III d'Évreux, roi consort de Navarre, en fief du roi de France.",
+  "sources": [
+    "Comté d'Évreux",
+    "Philippe III de Navarre"
+  ]
+}

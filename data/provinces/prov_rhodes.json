@@ -1,0 +1,100 @@
+{
+  "id": "prov_rhodes",
+  "name": {
+    "display": "Rhodes",
+    "local": "Ῥόδος",
+    "local_language": "grec"
+  },
+  "region": "egee",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Rhodes",
+    "Lindos"
+  ],
+  "sea_zones": [
+    "sea_aegean",
+    "sea_levantine"
+  ],
+  "resources": [
+    "res_wine",
+    "res_fish",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Rhodes",
+      "local": "Ῥόδος",
+      "local_language": "grec"
+    },
+    "lat": 36.443,
+    "lon": 28.227
+  },
+  "geo": {
+    "capital_lonlat": [
+      28.227,
+      36.443
+    ],
+    "seed_lonlat": [
+      28.0,
+      36.25
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_hospitallers",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 14000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1500,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 75,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_counting_house",
+    "bld_guild_hall"
+  ],
+  "fortification_level": 4,
+  "base_supply": 500,
+  "description": "Île prise par les Hospitaliers en 1306-1310 : couvent-forteresse de l'Ordre, base navale contre les Turcs (Aydın), État autonome du Grand Maître.",
+  "sources": [
+    "Rhodes",
+    "Ordre de Saint-Jean de Jérusalem",
+    "Hélion de Villeneuve"
+  ]
+}

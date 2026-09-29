@@ -1,0 +1,84 @@
+[
+  {
+    "id": "set_kerkyra",
+    "province": "prov_corfu",
+    "kind": "city",
+    "name": {
+      "display": "Corfou",
+      "local": "Κέρκυρα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      19.92,
+      39.62
+    ],
+    "weight": 50,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "sea_zone": "sea_ionian",
+    "description": "Château et ville sur la presqu'île de la Vieille Forteresse.",
+    "sources": [
+      "Corfou"
+    ]
+  },
+  {
+    "id": "set_angelokastro",
+    "province": "prov_corfu",
+    "kind": "castle",
+    "name": {
+      "display": "Angelokastro",
+      "local": "Ἀγγελόκαστρο",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      19.67,
+      39.75
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de l'ouest de l'île.",
+    "sources": [
+      "Angelokastro"
+    ]
+  },
+  {
+    "id": "set_kassiopi",
+    "province": "prov_corfu",
+    "kind": "castle",
+    "name": {
+      "display": "Cassiopé",
+      "local": "Κασσιόπη",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      19.91,
+      39.79
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": true,
+    "sea_zone": "sea_ionian",
+    "description": "Château du nord.",
+    "sources": [
+      "Kassiopi"
+    ]
+  }
+]

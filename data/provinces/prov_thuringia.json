@@ -1,0 +1,93 @@
+{
+  "id": "prov_thuringia",
+  "name": {
+    "display": "Thuringe",
+    "local": "Thüringen",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_est",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Saale",
+    "Unstrut"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Erfurt",
+      "local": "Erpesfurt",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 50.9787,
+    "lon": 11.0299
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.0299,
+      50.9787
+    ],
+    "seed_lonlat": [
+      10.9,
+      50.9
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_meissen",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Erfurt compte environ 18 000 habitants en 1337. Population indépendante de l'ancienne province combinée Misnie-Thuringe (léger surcomptage assumé, cf. note FE4a).",
+    "classes": {
+      "peasants": {
+        "count": 130000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 4000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1300,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_collegiate_church",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3200,
+  "description": "Landgraviat de Thuringe tenu par Frédéric II de Wettin, même faction que la Misnie ; Erfurt, grande ville de commerce du pastel, sous la suzeraineté nominale de l'archevêque de Mayence mais largement autonome.",
+  "sources": [
+    "Landgraviat de Thuringe",
+    "Frédéric II de Misnie",
+    "Erfurt"
+  ]
+}

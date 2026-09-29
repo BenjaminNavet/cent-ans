@@ -1,0 +1,33 @@
+{
+  "id": "tit_mainz",
+  "rank": "duchy",
+  "name": {
+    "display": "Électorat de Mayence",
+    "local": "Erzstift Mainz",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la roue d'argent à six rais.",
+    "description": "La roue de Mayence, attribut héraldique de l'archevêché-électorat depuis le XIIIe siècle.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_mainz"
+  ],
+  "holder_1337": {
+    "faction": "fac_mainz",
+    "uncertain": true,
+    "sources": [
+      "Électorat de Mayence",
+      "Henri III de Virnebourg"
+    ]
+  },
+  "succession_law": "elective",
+  "description": "Principauté ecclésiastique de l'archevêque-électeur de Mayence, archichancelier du royaume de Germanie ; classée ici au rang de duché par convention de rang politique, comme les autres électorats rhénans, bien qu'il s'agisse formellement d'un prince-évêché électif.",
+  "sources": [
+    "Électorat de Mayence",
+    "Henri III de Virnebourg"
+  ]
+}

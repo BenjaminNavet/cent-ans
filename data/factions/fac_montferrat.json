@@ -1,0 +1,59 @@
+{
+  "id": "fac_montferrat",
+  "name": {
+    "display": "Marquisat de Montferrat",
+    "local": "Marchesato del Monferrato",
+    "local_language": "italien"
+  },
+  "short_name": "Montferrat",
+  "adjective": "montferratais",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_montferrat",
+  "capital_city": "Casal",
+  "religion": "rel_catholic",
+  "culture": "cul_lombard",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_montferrat",
+  "heraldry": {
+    "blazon": "D'argent à la fasce de gueules.",
+    "description": "Approximation du chef historique (D'argent au chef de gueules) : le moteur de rendu simplifié des factions ne trace pas de chef, remplacé par une fasce. Armes exactes dans data/heraldry/houses.json et le titre.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Marquis de Montferrat",
+    "Vicaire impérial"
+  ],
+  "treasury": 9000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_savoy",
+      "status": "peace",
+      "note": "Rivalité ancienne pour le contrôle du Piémont."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 50
+  },
+  "description": "Marquisat alpin tenu par la maison byzantine des Paléologue, appelée au marquisat en 1306 par la volonté testamentaire du dernier marquis aléramique.",
+  "sources": [
+    "Marquisat de Montferrat",
+    "Théodore Ier de Montferrat"
+  ],
+  "ruler": "chr_theodore_i_paleologue",
+  "suzerain": "fac_empire"
+}

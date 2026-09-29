@@ -1,7 +1,7 @@
 class_name TerrainBuilder
 extends Node3D
 
-## Terrain de campagne : grille de CHUNKS × CHUNKS tuiles (MeshInstance3D) construites
+## Terrain de campagne : grille de `chunks_x` × `chunks_y` tuiles (MeshInstance3D) construites
 ## depuis la heightmap. Deux niveaux de détail : le LOD lointain (`far_step`) est
 ## construit au chargement ; le LOD proche (`near_step`) est construit à la demande
 ## quand la caméra s'approche, puis mis en cache.
@@ -32,10 +32,13 @@ signal surface_rect_changed(rect: Rect2)
 ## plus `chunk_surface_changed` (étalé, `rescaling_vertical` vrai).
 signal vertical_scale_changed(old_scale: float, new_scale: float)
 
-const CHUNKS := 16
+## Tuiles par côté d'une petite carte carrée (essais) ; une carte en tuiles racines de 256 unités
+## (4096², 7168 × 6144, ADR 0115) a une tuile de terrain par tuile racine (`chunk_grid_for`).
+const LEGACY_CHUNKS := 16
+const ROOT_TILE_UNITS := 256
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
-## Couches de matériaux, dans l'ordre des Texture2DArray (voir game/assets/textures/terrain/README.md).
-const MATERIAL_LAYERS: Array[String] = ["grass", "farmland", "forest", "rock", "heath", "snow", "sand"]
+## Couches de matériaux, dans l'ordre des Texture2DArray : GA4, lues dans les données
+## (`CampaignTextures.layer_ids()`, `data/fx/campaign_terrain_textures.json`).
 const TEXTURE_DIR := "res://assets/textures/terrain/"
 
 ## Pas (en pixels) entre deux sommets pour le LOD proche / lointain.
@@ -92,6 +95,9 @@ var _base_near_distance: float = -1.0
 var relief_shadow_override: int = 0
 var material: ShaderMaterial
 var chunk_px: int = 0
+## Tuiles de terrain en x et en y (index `cy * chunks_x + cx`).
+var chunks_x: int = LEGACY_CHUNKS
+var chunks_y: int = LEGACY_CHUNKS
 var build_stats: Dictionary = {}
 
 var _chunks: Array[MeshInstance3D] = []
@@ -124,8 +130,8 @@ var _border_texture: ImageTexture
 var _coast_texture: ImageTexture
 var _river_bed_texture: ImageTexture
 var _landuse_texture: ImageTexture
-var _albedo_array: Texture2DArray
-var _normal_array: Texture2DArray
+var _albedo_array: TextureLayered  # GA4 : CompressedTexture2DArray importé ou Texture2DArray (1k)
+var _normal_array: TextureLayered
 var _layer_means: PackedVector3Array = PackedVector3Array()
 ## Mipmap de niveau 2 de la heightmap R16 (blocs 4×4 moyennés) : hauteurs lissées du LOD
 ## lointain (pas de pics en dents de scie échantillonnés tous les `far_step` pixels).
@@ -202,28 +208,31 @@ func build(data: MapData) -> void:
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
 	RenderingServer.global_shader_parameter_set("campaign_vertical_scale", MapData.HEIGHT_SCALE)
 	map_data = data
-	chunk_px = ceili(float(maxi(data.size.x, data.size.y)) / CHUNKS)
+	var grid := chunk_grid_for(data.size)
+	chunk_px = grid.x
+	chunks_x = grid.y
+	chunks_y = grid.z
 	_build_relief_floor()
 	_build_textures()
 	_build_material()
 	_apply_sun_elevation()
-	_is_near.resize(CHUNKS * CHUNKS)
+	_is_near.resize(chunks_x * chunks_y)
 	_is_near.fill(0)
 	var vertex_count := 0
 	# PB1 : sommets des 256 tuiles lointaines calculés en parallèle (fonction pure des hauteurs) ;
 	# maillages et nœuds créés ensuite sur le fil principal, dans le même ordre.
 	var far_vertices: Array = []
 	var far_heights: Array = []
-	far_vertices.resize(CHUNKS * CHUNKS)
-	far_heights.resize(CHUNKS * CHUNKS)
+	far_vertices.resize(chunks_x * chunks_y)
+	far_heights.resize(chunks_x * chunks_y)
 	var task := WorkerThreadPool.add_group_task(func(i: int) -> void:
 		var heights := PackedFloat32Array()
-		far_vertices[i] = _chunk_vertices(i % CHUNKS, i / CHUNKS, far_step, heights)
-		far_heights[i] = heights, CHUNKS * CHUNKS, -1, true, "terrain far chunks")
+		far_vertices[i] = _chunk_vertices(i % chunks_x, i / chunks_x, far_step, heights)
+		far_heights[i] = heights, chunks_x * chunks_y, -1, true, "terrain far chunks")
 	WorkerThreadPool.wait_for_group_task_completion(task)
-	for cy in CHUNKS:
-		for cx in CHUNKS:
-			var i := cy * CHUNKS + cx
+	for cy in chunks_y:
+		for cx in chunks_x:
+			var i := cy * chunks_x + cx
 			var built := _chunk_from(far_vertices[i], far_heights[i], far_step)
 			var mesh: ArrayMesh = built["mesh"]
 			_far_grids.append(built["grid"])
@@ -297,9 +306,9 @@ func chunk_index_at(x: float, y: float) -> int:
 		return -1
 	var cx := int(floor(x / chunk_px))
 	var cy := int(floor(y / chunk_px))
-	if cx < 0 or cy < 0 or cx >= CHUNKS or cy >= CHUNKS:
+	if cx < 0 or cy < 0 or cx >= chunks_x or cy >= chunks_y:
 		return -1
-	return cy * CHUNKS + cx
+	return cy * chunks_x + cx
 
 
 ## Hauteur monde exacte de la surface affichée en (x, y) carte (interpolation dans le triangle
@@ -316,7 +325,7 @@ func surface_height_at(x: float, y: float) -> float:
 	var grid: Dictionary = _grid_for(index)
 	if grid.is_empty():
 		return map_data.surface_world_at(x, y)
-	return maxf(grid_height(grid, x - (index % CHUNKS) * chunk_px, y - (index / CHUNKS) * chunk_px), 0.0)
+	return maxf(grid_height(grid, x - (index % chunks_x) * chunk_px, y - (index / chunks_x) * chunk_px), 0.0)
 
 
 ## `surface_height_at` pour une série de points (PB1 : rubans de route, recalages) : même
@@ -355,8 +364,8 @@ func surface_heights_at(points: PackedVector2Array) -> PackedFloat32Array:
 					heights = grid["heights"]
 					side = grid["side"]
 					unit = grid["unit"]
-					ox = (index % CHUNKS) * chunk_px
-					oy = (index / CHUNKS) * chunk_px
+					ox = (index % chunks_x) * chunk_px
+					oy = (index / chunks_x) * chunk_px
 		if not has_grid:
 			result[n] = map_data.surface_world_at(p.x, p.y) if map_data != null else 0.0
 			continue
@@ -387,7 +396,7 @@ func surface_grid(index: int) -> Dictionary:
 	if index < 0 or index >= _is_near.size():
 		return {}
 	if quadtree != null:
-		var origin := Vector2((index % CHUNKS) * chunk_px, (index / CHUNKS) * chunk_px)
+		var origin := Vector2((index % chunks_x) * chunk_px, (index / chunks_x) * chunk_px)
 		return quadtree.surface_snapshot(Rect2(origin, Vector2(chunk_px, chunk_px)), origin)
 	return _grid_for(index)
 
@@ -443,6 +452,23 @@ func set_province_colors(colors: PackedColorArray) -> void:
 	if map_data != null:
 		_build_faction_texture()
 		material.set_shader_parameter("faction_colors", _faction_texture)
+
+
+## FE6 : hachures du filtre « Féodalité » (`colors[index - 1]`, alpha 0 = aucune) ; un tableau
+## vide les efface.
+func set_province_hatch(colors: PackedColorArray) -> void:
+	if map_data == null or material == null:
+		return
+	if colors.is_empty():
+		material.set_shader_parameter("hatch_enabled", false)
+		return
+	var width := maxi(map_data.province_count + 1, 1)
+	var image := Image.create(width, 1, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0, 0, 0, 0))
+	for index in range(1, mini(width, colors.size() + 1)):
+		image.set_pixel(index, 0, colors[index - 1])
+	material.set_shader_parameter("hatch_colors", ImageTexture.create_from_image(image))
+	material.set_shader_parameter("hatch_enabled", true)
 
 
 ## Masque 1D indexé par province : 1 = atteignable ce tour, 2 = sur le chemin prévisualisé.
@@ -533,7 +559,7 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 			if not _near_meshes.has(i):
 				if builds >= max_near_builds_per_frame or (builds > 0 and not FrameBudget.has_time()):
 					continue
-				var built := _build_chunk(i % CHUNKS, i / CHUNKS, near_step)
+				var built := _build_chunk(i % chunks_x, i / chunks_x, near_step)
 				_near_meshes[i] = built["mesh"]
 				_near_grids[i] = built["grid"]
 				builds += 1
@@ -577,7 +603,7 @@ func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: f
 	var radius := maxf(fine_radius, camera_distance * 1.2)
 	var candidates: Array = []
 	for i in _chunks.size():
-		var rect := Rect2((i % CHUNKS) * chunk_px, (i / CHUNKS) * chunk_px, chunk_px, chunk_px)
+		var rect := Rect2((i % chunks_x) * chunk_px, (i / chunks_x) * chunk_px, chunk_px, chunk_px)
 		var nearest := Vector2(clampf(center.x, rect.position.x, rect.end.x), clampf(center.y, rect.position.y, rect.end.y))
 		var d := nearest.distance_to(center)
 		if d < radius:
@@ -625,7 +651,7 @@ func _setup_quadtree() -> void:
 ## Bornes (min, max) en mètres des morceaux E0, depuis les maillages lointains (lissés : marges).
 func _chunk_bounds_m() -> PackedVector2Array:
 	var bounds := PackedVector2Array()
-	bounds.resize(CHUNKS * CHUNKS)
+	bounds.resize(chunks_x * chunks_y)
 	for i in bounds.size():
 		var lo := 0.0
 		var hi := 0.0
@@ -681,7 +707,7 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 		var i: int = changes[k][1]
 		_is_near[i] = changes[k][2]
 		_surface_dirty.erase(i)
-		if _emitted_top.size() == CHUNKS * CHUNKS:
+		if _emitted_top.size() == chunks_x * chunks_y:
 			_emitted_top[i] = quadtree.chunk_top(i)
 		var t_emit := Time.get_ticks_usec()
 		chunk_surface_changed.emit(i)
@@ -694,22 +720,28 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 
 
 func _on_quadtree_surface_changed(rect: Rect2) -> void:
+	var t_probe := Time.get_ticks_usec()
+	_note_quadtree_surface(rect)
+	PerfProbe.add("qt/l_terrain", Time.get_ticks_usec() - t_probe)  # RS-K : écouteurs compris
+
+
+func _note_quadtree_surface(rect: Rect2) -> void:
 	if chunk_px <= 0:
 		return
-	var c0 := clampi(int(floor(rect.position.x / chunk_px)), 0, CHUNKS - 1)
-	var r0 := clampi(int(floor(rect.position.y / chunk_px)), 0, CHUNKS - 1)
-	var c1 := clampi(int(floor(rect.end.x / chunk_px)), 0, CHUNKS - 1)
-	var r1 := clampi(int(floor(rect.end.y / chunk_px)), 0, CHUNKS - 1)
+	var c0 := clampi(int(floor(rect.position.x / chunk_px)), 0, chunks_x - 1)
+	var r0 := clampi(int(floor(rect.position.y / chunk_px)), 0, chunks_y - 1)
+	var c1 := clampi(int(floor(rect.end.x / chunk_px)), 0, chunks_x - 1)
+	var r1 := clampi(int(floor(rect.end.y / chunk_px)), 0, chunks_y - 1)
 	# Morceaux lointains ignorés : leurs objets sont recalés quand ils passent au niveau proche
 	# (signal de changement de niveau). Ailleurs, un recalage seulement quand l'étage le plus fin
 	# chargé du morceau change (E1 → E2 → …), pas à chaque tuile du même étage.
 	surface_rect_changed.emit(rect)
-	if _emitted_top.size() != CHUNKS * CHUNKS:
-		_emitted_top.resize(CHUNKS * CHUNKS)
+	if _emitted_top.size() != chunks_x * chunks_y:
+		_emitted_top.resize(chunks_x * chunks_y)
 		_emitted_top.fill(-1)
 	for r in range(r0, r1 + 1):
 		for c in range(c0, c1 + 1):
-			var index := r * CHUNKS + c
+			var index := r * chunks_x + c
 			if _is_near[index] >= 1 and (quadtree.chunk_top(index) != _emitted_top[index] or _surface_dirty.has(index)):
 				_surface_dirty[index] = Time.get_ticks_msec()
 
@@ -781,7 +813,7 @@ func set_vertical_scale(value: float) -> bool:
 		return false
 	quadtree.on_vertical_scale_changed(old, value)
 	_rescale_queue.clear()
-	for index in CHUNKS * CHUNKS:
+	for index in chunks_x * chunks_y:
 		_rescale_queue[index] = true
 	_rescale_changed_ms = Time.get_ticks_msec()
 	build_stats["vertical_rescales"] = int(build_stats.get("vertical_rescales", 0)) + 1
@@ -815,10 +847,10 @@ func _flush_rescale(view_center: Vector3, force: bool = false) -> void:
 	if not force and Time.get_ticks_msec() - _rescale_changed_ms < rescale_settle_ms:
 		return
 	var order: Array = []
-	var center := Vector2(view_center.x, view_center.z) if view_center != Vector3.INF else Vector2(2048.0, 2048.0)
+	var center := Vector2(view_center.x, view_center.z) if view_center != Vector3.INF else Vector2(map_data.size) * 0.5
 	var half := chunk_px * 0.5
 	for index: int in _rescale_queue:
-		var c := Vector2((index % CHUNKS) * chunk_px + half, (index / CHUNKS) * chunk_px + half)
+		var c := Vector2((index % chunks_x) * chunk_px + half, (index / chunks_x) * chunk_px + half)
 		var far_penalty := 0.0 if _is_near[index] >= 1 else 1.0e6
 		order.append([far_penalty + c.distance_to(center), index])
 	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
@@ -856,10 +888,13 @@ func _setup_fine_tiles() -> void:
 	if not (meta is Dictionary) or not (meta as Dictionary).has("height_tiles"):
 		return
 	var tiles: Dictionary = meta["height_tiles"]
-	var size_px := int(tiles.get("size_px", 0))
+	# `size_px` : un côté (carte carrée) ou [largeur, hauteur] (ADR 0115), 2 pixels par unité.
+	var size_value: Variant = tiles.get("size_px", 0)
+	var size_w := int(size_value[0]) if size_value is Array else int(size_value)
+	var size_h := int(size_value[1]) if size_value is Array else int(size_value)
 	var tile_px := int(tiles.get("tile_px", 0))
-	# Contrat : tuiles alignées sur les CHUNKS × CHUNKS tuiles de terrain.
-	if tile_px <= 0 or size_px != tile_px * CHUNKS or size_px != 2 * maxi(map_data.size.x, map_data.size.y):
+	# Contrat : tuiles alignées sur les chunks_x × chunks_y tuiles de terrain.
+	if tile_px <= 0 or size_w != tile_px * chunks_x or size_h != tile_px * chunks_y or size_w != 2 * map_data.size.x or size_h != 2 * map_data.size.y:
 		push_warning("TerrainBuilder: height_tiles %s not aligned with the terrain chunks, fine relief disabled" % tiles)
 		return
 	var dir := map_data.map_dir.path_join(str(tiles.get("dir", "height")))
@@ -875,8 +910,8 @@ func _setup_fine_tiles() -> void:
 
 ## Décodage de la tuile (fil principal : décodeur Rust, sinon `Png16`) puis tâche de maillage.
 func _start_fine_job(index: int) -> void:
-	var col := index % CHUNKS
-	var row := index / CHUNKS
+	var col := index % chunks_x
+	var row := index / chunks_x
 	var path := _fine_tiles_dir.path_join(_fine_pattern.replace("{col}", str(col)).replace("{row}", str(row)))
 	var job := FineTerrainJob.new()
 	job.tile_index = index
@@ -1079,8 +1114,8 @@ func fine_chunk_rects() -> PackedVector4Array:
 	var rects := PackedVector4Array()
 	for index in _is_near.size():
 		if _is_near[index] == 2:
-			var cx := index % CHUNKS
-			var cy := index / CHUNKS
+			var cx := index % chunks_x
+			var cy := index / chunks_x
 			rects.append(Vector4(cx * chunk_px, cy * chunk_px, (cx + 1) * chunk_px, (cy + 1) * chunk_px))
 	return rects
 
@@ -1095,10 +1130,19 @@ static func _optional_texture(image: Image) -> ImageTexture:
 ## Moyenne linéaire de chaque albédo (dernier niveau de mipmap) : le shader s'en sert pour
 ## teinter les textures vers des couleurs réalistes réglables sans perdre leur détail.
 func _build_material_arrays() -> void:
+	# GA4 : tableaux 2k importés (compressés en VRAM), moyennes dans les données. `--no-ga4` ou
+	# tableaux absents : ancien chemin ci-dessous (JPEG 1k par couche, RGBA8 non compressé).
+	if CampaignTextures.enabled():
+		var ga4 := CampaignTextures.load_arrays()
+		if not ga4.is_empty():
+			_albedo_array = ga4["albedo"]
+			_normal_array = ga4["normal"]
+			_layer_means = ga4["means"]
+			return
 	var albedo_images: Array[Image] = []
 	var normal_images: Array[Image] = []
 	_layer_means = PackedVector3Array()
-	for layer in MATERIAL_LAYERS:
+	for layer in CampaignTextures.layer_ids():
 		var albedo := _load_layer_image(TEXTURE_DIR + layer + "_albedo.jpg")
 		var normal := _load_layer_image(TEXTURE_DIR + layer + "_normal_rough.jpg")
 		if albedo == null or normal == null:
@@ -1113,10 +1157,12 @@ func _build_material_arrays() -> void:
 		var data := albedo.get_data()
 		var mean := Color8(data[offset], data[offset + 1], data[offset + 2]).srgb_to_linear()
 		_layer_means.append(Vector3(mean.r, mean.g, mean.b))
-	_albedo_array = Texture2DArray.new()
-	_albedo_array.create_from_images(albedo_images)
-	_normal_array = Texture2DArray.new()
-	_normal_array.create_from_images(normal_images)
+	var albedo_array := Texture2DArray.new()
+	albedo_array.create_from_images(albedo_images)
+	_albedo_array = albedo_array
+	var normal_array := Texture2DArray.new()
+	normal_array.create_from_images(normal_images)
+	_normal_array = normal_array
 
 
 static func _load_layer_image(path: String) -> Image:
@@ -1198,6 +1244,7 @@ func _build_material() -> void:
 		material.set_shader_parameter("albedo_array", _albedo_array)
 		material.set_shader_parameter("normal_rough_array", _normal_array)
 		material.set_shader_parameter("layer_mean", _layer_means)
+	CampaignTextures.apply_terrain(material)  # GA4 : macro-variation, tuilage, mer peinte
 
 
 ## Maillage d'une tuile et grille de ses hauteurs : {"mesh": ArrayMesh, "grid": Dictionary}.
@@ -1305,4 +1352,14 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 
 
 static func chunk_px_for(map_size: Vector2i) -> int:
-	return ceili(float(maxi(map_size.x, map_size.y)) / CHUNKS)
+	return chunk_grid_for(map_size).x
+
+
+## (côté des tuiles, tuiles en x, tuiles en y) : une tuile par tuile racine de 256 unités quand la
+## carte en est pavée (au moins 16 × 16 : 4096² comme avant, 7168 × 6144 → 28 × 24) ; sinon 16 × 16
+## tuiles couvrant le plus grand côté (petites cartes d'essai).
+static func chunk_grid_for(map_size: Vector2i) -> Vector3i:
+	var root := ROOT_TILE_UNITS
+	if map_size.x % root == 0 and map_size.y % root == 0 and map_size.x >= root * LEGACY_CHUNKS and map_size.y >= root * LEGACY_CHUNKS:
+		return Vector3i(root, map_size.x / root, map_size.y / root)
+	return Vector3i(ceili(float(maxi(map_size.x, map_size.y)) / LEGACY_CHUNKS), LEGACY_CHUNKS, LEGACY_CHUNKS)

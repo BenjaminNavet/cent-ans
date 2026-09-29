@@ -1,0 +1,93 @@
+{
+  "id": "prov_skopje",
+  "name": {
+    "display": "Skopje",
+    "local": "Скопље",
+    "local_language": "serbe"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Vardar",
+    "Treska"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Skopje",
+      "local": "Скопље",
+      "local_language": "serbe"
+    },
+    "lat": 41.9981,
+    "lon": 21.432
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.432,
+      41.9981
+    ],
+    "seed_lonlat": [
+      21.4,
+      42.05
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_serbia",
+  "culture": "cul_serbian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 119000,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9900,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2600,
+        "unrest": 5,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1200,
+        "unrest": 5,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4000,
+  "description": "Capitale de fait de Dušan : Skopje, sur le Vardar, prise aux Byzantins en 1282, avec le Polog et Kratovo.",
+  "sources": [
+    "Skopje",
+    "Tetovo",
+    "Kratovo"
+  ]
+}

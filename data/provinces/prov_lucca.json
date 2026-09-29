@@ -1,0 +1,91 @@
+{
+  "id": "prov_lucca",
+  "name": {
+    "display": "Lucques",
+    "local": "Lucca",
+    "local_language": "toscan"
+  },
+  "region": "italie_centre",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Serchio"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_cloth",
+    "res_wine",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Lucques",
+      "local": "Lucca",
+      "local_language": "toscan"
+    },
+    "lat": 43.843,
+    "lon": 10.5027
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.5027,
+      43.843
+    ],
+    "seed_lonlat": [
+      10.55,
+      43.9
+    ],
+    "voronoi_weight": 0.35
+  },
+  "owner": "fac_verona",
+  "culture": "cul_tuscan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 35000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5500,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1200,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 500,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Cité soyeuse occupée ; population réduite par les guerres de Castruccio Castracani et l'occupation véronaise."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2600,
+  "description": "République soyeuse, dominée par Castruccio Castracani jusqu'à sa mort en 1328, puis vendue et rachetée par divers maîtres ; occupée depuis 1335 par Mastino II della Scala de Vérone, qui la perdra en 1341.",
+  "sources": [
+    "Lucques",
+    "Castruccio Castracani",
+    "Mastino II della Scala"
+  ]
+}

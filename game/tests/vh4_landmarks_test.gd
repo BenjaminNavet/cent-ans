@@ -167,7 +167,7 @@ func _test_builder(plan: Dictionary) -> void:
 	var root := Node3D.new()
 	get_root().add_child(root)
 	TownBuilder.prepare(plan)
-	var b := TownBuilder.new(plan, Vector2(2096.5, 1819.9), LandmarkV2Library.meters_per_unit(), root)
+	var b := TownBuilder.new(plan, Vector2(2096.5, 3099.9), LandmarkV2Library.meters_per_unit(), root)
 	FrameBudget.unlimited = true
 	var guard := 0
 	while not b.step(1 << 30) and guard < 10000:

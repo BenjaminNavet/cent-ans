@@ -24,6 +24,8 @@ signal split_requested(indices: PackedInt32Array)
 ## Bouton « Garnison » (lot C7d) : les régiments choisis rejoindraient la garnison de la
 ## colonie où l'armée se trouve (ordre `garrison_units`).
 signal garrison_requested(indices: PackedInt32Array)
+## TW2-T3 : bouton « Mercenaires » (compagnies engageables dans la région de l'armée).
+signal mercenaries_requested
 
 const CARD_WIDTH := 84.0
 const CARD_MIN_WIDTH := 52.0
@@ -53,6 +55,9 @@ const CLASS_LABELS := {
 ## Raison en français si le bouton « Garnison » doit rester désactivé (colonie assiégée ou
 ## pleine) ; vide = bouton actif dès qu'au moins un régiment est choisi.
 @export var garrison_disabled_reason: String = ""
+## TW2-T3 : vrai pour une armée du joueur (bouton « Mercenaires » affiché ; le panneau dit
+## pourquoi rien n'est engageable, le cas échéant).
+@export var can_hire_mercenaries: bool = false
 
 var army: Dictionary = {}
 var capacity: int = 20
@@ -66,6 +71,7 @@ var _upkeep_label: Label
 var _title_label: Label
 var _split_button: Button
 var _garrison_button: Button
+var _mercenary_button: Button
 var _grid: GridContainer
 
 
@@ -86,7 +92,7 @@ func _ready() -> void:
 	header.add_child(_title_label)
 	_count_label = HudStyle.label("", UiType.size(UiType.HEADING), HudStyle.INK)
 	_count_label.set_script(RichLabel)  # B1 : infobulle riche auto-liée (T : bulle du Codex)
-	_count_label.tooltip_text = "Régiments sous contrat d'endenture / capacité du chef"
+	RichTooltip.attach_plain(_count_label, "army_contracted_regiments")
 	_count_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header.add_child(_count_label)
 	_men_label = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
@@ -101,7 +107,7 @@ func _ready() -> void:
 	_split_button = RichButton.new()
 	_split_button.text = "Séparer"
 	UiType.apply(_split_button, UiType.CAPTION)
-	_split_button.tooltip_text = "Maj ou Ctrl + clic pour choisir les régiments à détacher"
+	RichTooltip.attach_plain(_split_button, "army_split_regiments")
 	_split_button.pressed.connect(_on_split_pressed)
 	header.add_child(_split_button)
 	_garrison_button = RichButton.new()
@@ -109,6 +115,13 @@ func _ready() -> void:
 	UiType.apply(_garrison_button, UiType.CAPTION)
 	_garrison_button.pressed.connect(_on_garrison_pressed)
 	header.add_child(_garrison_button)
+	_mercenary_button = RichButton.new()
+	_mercenary_button.name = "MercenaryButton"
+	_mercenary_button.text = "Mercenaires"
+	UiType.apply(_mercenary_button, UiType.CAPTION)
+	RichTooltip.attach_plain(_mercenary_button, "army_mercenaries_available")
+	_mercenary_button.pressed.connect(func() -> void: mercenaries_requested.emit())
+	header.add_child(_mercenary_button)
 
 	var rule := ColorRect.new()
 	rule.color = HudStyle.GOLD
@@ -255,7 +268,7 @@ func _refresh() -> void:
 	_men_label.text = "%s hommes" % HudStyle.thousands(men)
 	var upkeep := total_upkeep()
 	_upkeep_label.text = "Entretien %s ₶" % HudStyle.thousands(upkeep)
-	_upkeep_label.tooltip_text = "Entretien de l'armée par saison : %s (livres tournois)" % Money.amount(upkeep)
+	RichTooltip.attach_plain(_upkeep_label, "army_upkeep_per_season", {"body": "%s (livres tournois)" % Money.amount(upkeep)})
 
 	var layout := card_layout(units.size())
 	_grid.columns = int(layout["columns"])
@@ -322,6 +335,7 @@ func _update_selection(emit := true) -> void:
 	else:
 		_split_button.text = "Séparer"
 	_garrison_button.visible = can_garrison
+	_mercenary_button.visible = can_hire_mercenaries
 	_garrison_button.disabled = count == 0 or garrison_disabled_reason != ""
 	_garrison_button.text = "Garnison (%d)" % count if count > 0 else "Garnison"
 	_garrison_button.tooltip_text = garrison_disabled_reason if garrison_disabled_reason != "" \
@@ -445,10 +459,13 @@ class RegimentCard:
 
 	## B1 : infobulle riche (parchemin, auto-liens, T : bulle du Codex) ; le nom mène à la
 	## fiche du Codex du type d'unité s'il y en a une.
-	func _make_custom_tooltip(for_text: String) -> Object:
-		var lines := for_text.split("\n")
-		lines[0] = "[b]%s[/b]" % RichTooltip.entity_name(str(unit.get("unit_type", "")), lines[0])
-		return RichTooltip.make_panel("\n".join(lines))
+	## IB1 : infobulle en sections du type d'unité avec l'état du régiment (effectif, moral,
+	## entretien) ; `tooltip_text` garde le texte brut de `tooltip_for` (repli, tests).
+	func _make_custom_tooltip(_for_text: String) -> Object:
+		var live := unit.duplicate()
+		live["name"] = strip.unit_name(unit)
+		live["upkeep"] = strip.unit_upkeep(unit)
+		return TooltipView.build(RichTooltip.unit_spec(str(unit.get("unit_type", "")), live), false)
 
 	func _draw() -> void:
 		var rect := Rect2(Vector2.ZERO, size)
@@ -489,3 +506,8 @@ class RegimentCard:
 			draw_rect(rect.grow(-4), HudStyle.GOLD, false, 1.0)
 		else:
 			draw_rect(rect, HudStyle.INK_SOFT, false, 1.0)
+
+
+## TW2-T5 : bouton d'un contrôleur (« Traditions ») ajouté sous « Séparer » et « Garnison ».
+func add_header_button(button: Control) -> void:
+	_garrison_button.get_parent().add_child(button)

@@ -1,0 +1,44 @@
+{
+  "name": {
+    "display": "Maurice FitzGerald",
+    "local": "Muiris Mac Gearailt",
+    "local_language": "irlandais moyen"
+  },
+  "sex": "male",
+  "house": "FitzGerald de Kildare",
+  "faction": "fac_kildare",
+  "role": "ruler",
+  "birth": {
+    "value": "1318",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1390-08-25"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "4e comte de Kildare",
+      "from": {
+        "value": "1329"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_pious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_kildare",
+  "status": "at_court",
+  "description": "Succède à son frère Richard, mort à douze ans en 1329 ; matera l'insurrection des O'Dempsey du Leinster en 1339. Un des deux grands rivaux anglo-irlandais avec les Butler d'Ormond pour le gouvernement du Pale.",
+  "sources": [
+    "Maurice FitzGerald, 4e comte de Kildare"
+  ],
+  "id": "chr_maurice_fitzgerald_iv_de_kildare"
+}

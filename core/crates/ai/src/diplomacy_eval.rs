@@ -68,6 +68,7 @@ fn plan_trade(state: &CampaignState, data: &GameData, faction: &FactionId) -> Op
     let me = state.factions.get(faction)?;
     let my_rivals = rivals(state, faction);
     let treaty = [Article::TradeAgreement];
+    let neighbours = state.neighbour_factions(data, faction);
     state
         .factions
         .keys()
@@ -75,7 +76,7 @@ fn plan_trade(state: &CampaignState, data: &GameData, faction: &FactionId) -> Op
         .filter(|id| !my_rivals.contains(*id) && friendly(state, faction, id))
         .filter(|id| !me.ledger.trade_agreements.contains(*id))
         .filter(|id| !me.embargoes.contains(*id))
-        .filter(|id| state.are_neighbors(data, faction, id) || state.is_allied(faction, id))
+        .filter(|id| neighbours.contains(*id) || state.is_allied(faction, id))
         .map(|id| (id.clone(), state.attitude(data, faction, id).0))
         .filter(|(id, attitude)| {
             let needed = if id == &state.player_faction {

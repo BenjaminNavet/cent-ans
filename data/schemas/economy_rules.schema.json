@@ -2,26 +2,308 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/economy_rules.schema.json",
   "title": "Règles d'économie",
-  "description": "Fichier data/rules/economy.json (lots EQ1, B7a, SV4) : échelle des effets de trésor des événements selon le revenu de la faction, coût de la cour et de l'administration, pénalité de banqueroute, ravitaillement (perte, reprise, famine, pays dévasté) et résorption de la dévastation.",
+  "description": "Fichier data/rules/economy.json (lots EQ1, B7a, SV4, RS-B) : barème et rendement de l'impôt, entretien des unités et des garnisons, échelle des effets de trésor des événements selon le revenu de la faction, coût de la cour et de l'administration, pénalité de banqueroute, ravitaillement (perte, reprise, famine, pays dévasté) et résorption de la dévastation.",
   "type": "object",
   "properties": {
-    "description": { "type": "string" },
-    "event_treasury_reference_income": { "type": "integer", "minimum": 1, "description": "Revenu de saison (livres) à partir duquel l'effet de trésor d'un événement s'applique en entier ; en dessous, il est proportionnel au revenu." },
-    "event_treasury_min_scale": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part minimale du montant écrit qui s'applique toujours (0-1)." },
-    "administration_base": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du revenu dépensée chaque saison par la cour et l'administration, quelle que soit la taille du royaume (0-1)." },
-    "administration_per_province": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part supplémentaire par province contrôlée (0-1)." },
-    "administration_max": { "type": "number", "minimum": 0, "maximum": 1, "description": "Plafond de la part d'administration (0-1)." },
-    "opulence_seasons": { "type": "integer", "minimum": 0, "description": "Nombre de saisons de revenu au-delà duquel le trésor nourrit une cour opulente." },
-    "opulence_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Pourcentage de cet excédent dépensé par la cour chaque saison." },
-    "bankruptcy_morale_penalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Moral perdu chaque saison par toutes les unités (armées et garnisons) tant que le trésor est négatif." },
-    "supply_devastation_loss_percent": { "type": "number", "minimum": 0, "description": "Hors territoire ami : perte de ravitaillement supplémentaire (en % de la perte de saison) dans une province dévastée à 100 ; proportionnelle en dessous." },
-    "supply_devastation_recovery_cut_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "En territoire ami : part de la reprise de ravitaillement (en %) perdue dans une province dévastée à 100 ; proportionnelle en dessous." },
-    "resource_import_multiplier": { "type": "integer", "minimum": 0, "description": "Lot B7c (et SV2 pour les unités) : prix (livres) d'une unité de ressource de construction ou de recrutement manquante = prix de base de la ressource × ce multiplicateur. Les unités disponibles viennent des provinces productrices accessibles à la faction (une par province), réservées pendant le chantier ou la levée." },
-    "supply_loss": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : points de ravitaillement perdus par saison hors du territoire ami (hors hiver)." },
-    "supply_loss_winter": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : points de ravitaillement perdus par saison d'hiver hors du territoire ami." },
-    "supply_recovery": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : points de ravitaillement regagnés par saison en territoire ami (avant bâtiments, compétences et dévastation)." },
-    "starvation_loss_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : pourcentage des hommes de chaque unité perdus chaque saison où l'armée est à zéro de ravitaillement." },
-    "devastation_decay": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Lot SV4 : points de dévastation résorbés par saison dans chaque province." }
+    "description": {
+      "type": "string"
+    },
+    "event_treasury_reference_income": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Revenu de saison (livres) à partir duquel l'effet de trésor d'un événement s'applique en entier ; en dessous, il est proportionnel au revenu."
+    },
+    "event_treasury_min_scale": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Part minimale du montant écrit qui s'applique toujours (0-1)."
+    },
+    "administration_base": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Part du revenu dépensée chaque saison par la cour et l'administration, quelle que soit la taille du royaume (0-1)."
+    },
+    "administration_per_province": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Part supplémentaire par province contrôlée (0-1)."
+    },
+    "administration_max": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Plafond de la part d'administration (0-1)."
+    },
+    "opulence_seasons": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Nombre de saisons de revenu au-delà duquel le trésor nourrit une cour opulente."
+    },
+    "opulence_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Pourcentage de cet excédent dépensé par la cour chaque saison."
+    },
+    "bankruptcy_morale_penalty": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Moral perdu chaque saison par toutes les unités (armées et garnisons) tant que le trésor est négatif."
+    },
+    "supply_devastation_loss_percent": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Hors territoire ami : perte de ravitaillement supplémentaire (en % de la perte de saison) dans une province dévastée à 100 ; proportionnelle en dessous."
+    },
+    "supply_devastation_recovery_cut_percent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "En territoire ami : part de la reprise de ravitaillement (en %) perdue dans une province dévastée à 100 ; proportionnelle en dessous."
+    },
+    "resource_import_multiplier": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lot B7c (et SV2 pour les unités) : prix (livres) d'une unité de ressource de construction ou de recrutement manquante = prix de base de la ressource × ce multiplicateur. Les unités disponibles viennent des provinces productrices accessibles à la faction (une par province), réservées pendant le chantier ou la levée."
+    },
+    "supply_loss": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Lot SV4 : points de ravitaillement perdus par saison hors du territoire ami (hors hiver)."
+    },
+    "supply_loss_winter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Lot SV4 : points de ravitaillement perdus par saison d'hiver hors du territoire ami."
+    },
+    "supply_recovery": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Lot SV4 : points de ravitaillement regagnés par saison en territoire ami (avant bâtiments, compétences et dévastation)."
+    },
+    "starvation_loss_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Lot SV4 : pourcentage des hommes de chaque unité perdus chaque saison où l'armée est à zéro de ravitaillement."
+    },
+    "devastation_decay": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Lot SV4 : points de dévastation résorbés par saison dans chaque province."
+    },
+    "tax_efficiency": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Lot RS-B : part de l'assiette théorique de l'impôt réellement perçue (0-1).",
+      "maximum": 1
+    },
+    "tax_per_head": {
+      "type": "object",
+      "description": "Lot RS-B : livres par tête et par saison, par classe sociale.",
+      "properties": {
+        "peasants": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Livres par tête et par saison."
+        },
+        "burghers": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Livres par tête et par saison."
+        },
+        "clergy": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Livres par tête et par saison."
+        },
+        "nobility": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Livres par tête et par saison."
+        }
+      },
+      "required": [
+        "peasants",
+        "burghers",
+        "clergy",
+        "nobility"
+      ],
+      "additionalProperties": false
+    },
+    "tax_rates": {
+      "type": "object",
+      "description": "Lot RS-B : barèmes d'impôt (bas, normal, haut).",
+      "properties": {
+        "low": {
+          "type": "object",
+          "properties": {
+            "multiplier": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Multiplicateur de l'assiette de l'impôt, aussi multiplicateur du mécontentement."
+            },
+            "burden": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Part de la richesse de la population prélevée par la couronne (0-1).",
+              "maximum": 1
+            }
+          },
+          "required": [
+            "multiplier",
+            "burden"
+          ],
+          "additionalProperties": false
+        },
+        "normal": {
+          "type": "object",
+          "properties": {
+            "multiplier": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Multiplicateur de l'assiette de l'impôt, aussi multiplicateur du mécontentement."
+            },
+            "burden": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Part de la richesse de la population prélevée par la couronne (0-1).",
+              "maximum": 1
+            }
+          },
+          "required": [
+            "multiplier",
+            "burden"
+          ],
+          "additionalProperties": false
+        },
+        "high": {
+          "type": "object",
+          "properties": {
+            "multiplier": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Multiplicateur de l'assiette de l'impôt, aussi multiplicateur du mécontentement."
+            },
+            "burden": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Part de la richesse de la population prélevée par la couronne (0-1).",
+              "maximum": 1
+            }
+          },
+          "required": [
+            "multiplier",
+            "burden"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "low",
+        "normal",
+        "high"
+      ],
+      "additionalProperties": false
+    },
+    "production_tax_share": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Lot RS-B : part d'un bonus de production (moulins, forges) qui atteint l'assiette de l'impôt (0-1).",
+      "maximum": 1
+    },
+    "upkeep_months_per_season": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lot RS-B : mois d'entretien (mensuel dans les types d'unités) facturés par saison.",
+      "maximum": 12
+    },
+    "garrison_upkeep_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lot RS-B : part (en %) de l'entretien de campagne que coûte une garnison, à défaut de réglage par type de place (settlements/rules.json).",
+      "maximum": 100
+    },
+    "garrison_relief_percent_per_point": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lot RS-B : allègement (en %) de l'entretien de la garnison par point d'effet Garnison des bâtiments.",
+      "maximum": 100
+    },
+    "garrison_relief_max_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lot RS-B : plafond de cet allègement (en %).",
+      "maximum": 100
+    },
+    "garrison_reinforce_percent_per_point": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lot RS-B : effectifs (en % du maximum) regagnés par saison par une garnison, par point d'effet Garnison.",
+      "maximum": 100
+    },
+    "garrison_reinforce_max_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lot RS-B : plafond de ce renfort (en %).",
+      "maximum": 100
+    },
+    "demolition_refund_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Part (en %) du coût en argent d'un bâtiment rendue quand on le rase (lot RS-C)."
+    },
+    "terrain_supply": {
+      "type": "object",
+      "description": "Lot OM3 (ADR 0116) : fourrage selon le terrain de la province. En territoire ami, la reprise de saison est multipliée par recovery_percent % ; hors du territoire ami, la perte par loss_percent % ; chaque été, summer_loss points de plus sont perdus partout (chaleur, puits à sec). Un terrain absent nourrit normalement.",
+      "propertyNames": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"] },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "recovery_percent": { "type": "number", "minimum": 0 },
+          "loss_percent": { "type": "number", "minimum": 0 },
+          "summer_loss": { "type": "integer", "minimum": 0, "maximum": 100 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "ai_demolition": {
+      "type": "object",
+      "description": "Quand l'IA rase ses bâtiments (lot RS-C).",
+      "properties": {
+        "deficit_seasons": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Saisons de déficit d'affilée avant la première démolition."
+        },
+        "max_upkeep_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "L'IA rase tant que l'entretien de ses bâtiments qui ne se paient pas eux-mêmes dépasse cette part (en %) du revenu brut."
+        },
+        "max_per_turn": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Démolitions au plus par saison."
+        }
+      },
+      "required": [
+        "deficit_seasons",
+        "max_upkeep_percent",
+        "max_per_turn"
+      ],
+      "additionalProperties": false
+    }
   },
   "required": [
     "event_treasury_reference_income",
@@ -39,7 +321,17 @@
     "supply_loss_winter",
     "supply_recovery",
     "starvation_loss_percent",
-    "devastation_decay"
+    "devastation_decay",
+    "tax_efficiency",
+    "tax_per_head",
+    "tax_rates",
+    "production_tax_share",
+    "upkeep_months_per_season",
+    "garrison_upkeep_percent",
+    "garrison_relief_percent_per_point",
+    "garrison_relief_max_percent",
+    "garrison_reinforce_percent_per_point",
+    "garrison_reinforce_max_percent"
   ],
   "additionalProperties": false
 }

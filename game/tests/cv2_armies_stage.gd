@@ -47,11 +47,11 @@ func _init() -> void:
 	var zooms := PackedFloat32Array()
 	for part in _arg(args, "--zooms", "60,160,320,800").split(","):
 		zooms.append(float(part))
-	var focus_parts := _arg(args, "--focus", "1985,1905").split(",")
+	var focus_parts := _arg(args, "--focus", "1985,3185").split(",")
 	var focus := Vector2(float(focus_parts[0]), float(focus_parts[1]))
 	var fps_mode := args.has("--fps")
 	# Position des armées mises en scène (indépendante du point visé).
-	var base := Vector2(1985, 1905)
+	var base := Vector2(1985, 3185)
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
 	root.add_child(map)
 	for i in 5:

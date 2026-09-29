@@ -18,6 +18,8 @@ extends Node
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const TUNING_PATH := "map/faction_borders.json"
 const PALETTE_SIZE := 256
+## DZ : trait d'une faction sans couleur imposée (encre brun-gris).
+const NEUTRAL_OVERRIDE := Color(0.35, 0.30, 0.25)
 
 var map: Node = null  # CampaignMap (non typé : tests et maquettes)
 var terrain: TerrainBuilder = null
@@ -41,6 +43,10 @@ var _band_saved: Variant = null
 var _last_distance: float = -1.0
 var _last_mode: String = ""
 var _cli_disabled: bool = false
+## Lot DZ : couleurs imposées par faction (mode Diplomatie : position envers la faction observée)
+## et faction mise en valeur (halo du joueur) ; vides : couleurs héraldiques, joueur.
+var _color_override: Dictionary = {}
+var _highlight: String = ""
 
 
 func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
@@ -192,6 +198,30 @@ func set_ownership(owners: PackedStringArray, controllers: PackedStringArray, pl
 				palette_dirty = true
 	if palette_dirty:
 		_build_palette()
+	_build_info()
+	return true
+
+
+## Lot DZ : couleur de trait par faction ({id: Color}, les absentes en encre neutre) et faction
+## dont le halo respire comme celui du joueur ; `{}` et "" : retour aux couleurs héraldiques.
+func set_color_override(colors: Dictionary, highlight: String = "") -> void:
+	if colors == _color_override and highlight == _highlight:
+		return
+	_color_override = colors.duplicate()
+	_highlight = highlight
+	_build_palette()
+	if not _owners.is_empty():
+		_build_info()
+
+
+func color_override_active() -> bool:
+	return not _color_override.is_empty()
+
+
+func _build_info() -> void:
+	var owners := _owners
+	var controllers := _controllers
+	var focus := _highlight if _highlight != "" else _player
 	var width := maxi(owners.size() + 1, 1)
 	if _info_image == null or _info_image.get_width() != width:
 		_info_image = Image.create(width, 1, false, Image.FORMAT_RGBA8)
@@ -199,14 +229,13 @@ func set_ownership(owners: PackedStringArray, controllers: PackedStringArray, pl
 	for i in owners.size():
 		var o := int(_faction_index.get(owners[i], 0))
 		var c := int(_faction_index.get(controllers[i], o)) if i < controllers.size() else o
-		var mine := player != "" and (owners[i] == player or (i < controllers.size() and controllers[i] == player))
+		var mine := focus != "" and (owners[i] == focus or (i < controllers.size() and controllers[i] == focus))
 		_info_image.set_pixel(i + 1, 0, Color8(o, c, 255 if mine else 0, 255))
 	if _info_texture == null or _info_texture.get_width() != width:
 		_info_texture = ImageTexture.create_from_image(_info_image)
 	else:
 		_info_texture.update(_info_image)
 	_set_param("fr1_info", _info_texture)
-	return true
 
 
 func _build_palette() -> void:
@@ -220,6 +249,8 @@ func _build_palette() -> void:
 
 ## Couleur héraldique (SimFacade), palette de repli du terrain sans store.
 func faction_color(faction: String) -> Color:
+	if not _color_override.is_empty():  # DZ
+		return _color_override.get(faction, NEUTRAL_OVERRIDE)
 	var facade: Node = get_node_or_null("/root/SimFacade") if is_inside_tree() else null
 	if facade != null and bool(facade.call("store_loaded")):
 		var color: Color = facade.call("faction_color", faction)

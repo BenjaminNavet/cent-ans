@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_ajdabiya",
+    "province": "prov_ajdabiya",
+    "kind": "city",
+    "name": {
+      "display": "Ajdabiya",
+      "local": "Ajdābiyā",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      20.2295,
+      30.7554
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Étape caravanière de l'arrière-pays du golfe de Syrte.",
+    "sources": [
+      "Ajdabiya"
+    ]
+  },
+  {
+    "id": "set_brega",
+    "province": "prov_ajdabiya",
+    "kind": "village",
+    "name": {
+      "display": "Marsa el-Brega",
+      "local": "Marsā al-Burayqa",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      19.58,
+      30.41
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": true,
+    "description": "Mouillage du fond du golfe de Syrte, débouché côtier des pistes caravanières (emplacement et activité en 1337 incertains).",
+    "sources": [
+      "Marsa el-Brega"
+    ]
+  },
+  {
+    "id": "set_zuwaytina",
+    "province": "prov_ajdabiya",
+    "kind": "village",
+    "name": {
+      "display": "Zouétina",
+      "local": "Zuwaytīna",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      20.12,
+      30.95
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": true,
+    "description": "Mouillage d'Ajdabiya sur le golfe de Syrte (incertain).",
+    "sources": [
+      "Zuwaytina"
+    ]
+  }
+]

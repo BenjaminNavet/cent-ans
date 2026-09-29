@@ -36,7 +36,7 @@ from cent_ans_tools.geo.project import (
 REPO_DIR = download.TOOLS_DIR.parent
 MAP_DIR = REPO_DIR / "data" / "map"
 PREVIEW_PATH = REPO_DIR / "docs" / "img" / "map-preview.png"
-PREVIEW_SIZE = 1024
+PREVIEW_SIZE = 1792  # preview width (1792 x 1536, 4 map pixels each)
 
 
 @dataclass(frozen=True)
@@ -57,17 +57,22 @@ class BuildResult:
     navgrid: navgrid.NavgridResult | None = None
 
 
+#: A pixel of the open Atlantic (Bay of Biscay): seed of the ocean for
+#: :func:`terrain.lift_inland_depressions`.
+OCEAN_SEED_LONLAT = (-8.0, 45.0)
+
+
 def map_metadata(grid: MapGrid, etopo_tiles: list[str]) -> dict:
     """The ``map.json`` contract plus provenance fields."""
     return {
         "crs": CRS_MAP,
         "bounds_projected": list(grid.bounds),
-        "size_px": [grid.size_px, grid.size_px],
+        "size_px": [grid.width_px, grid.height_px],
         "meters_per_px": grid.meters_per_px,
         "height_min_m": terrain.HEIGHT_MIN_M,
         "height_max_m": terrain.HEIGHT_MAX_M,
         "extent_lonlat": [LON_MIN, LAT_MIN, LON_MAX, LAT_MAX],
-        "height_tiles": dict(relief.HEIGHT_TILES),
+        "height_tiles": relief.height_tiles_meta(grid.scaled(relief.FINE_SCALE)),
         "sources": {
             "dem": {"name": "ETOPO 2022 v1 15s surface", "tiles": etopo_tiles},
             "vectors": {
@@ -107,9 +112,19 @@ def render_preview(
     size: int = PREVIEW_SIZE,
 ) -> None:
     """Render a downscaled hypsometric + hillshade preview with vectors."""
-    factor = grid.size_px // size
-    small_height = height_m.reshape(size, factor, size, factor).mean(axis=(1, 3))
-    small_land = land_mask.reshape(size, factor, size, factor).max(axis=(1, 3)) > 0
+    factor = max(1, grid.width_px // size)
+    rows, cols = grid.height_px // factor, grid.width_px // factor
+    small_height = (
+        height_m[: rows * factor, : cols * factor]
+        .reshape(rows, factor, cols, factor)
+        .mean(axis=(1, 3))
+    )
+    small_land = (
+        land_mask[: rows * factor, : cols * factor]
+        .reshape(rows, factor, cols, factor)
+        .max(axis=(1, 3))
+        > 0
+    )
     shade = hillshade(small_height, grid.meters_per_px * factor)
     relief = np.clip(small_height, 0.0, 2500.0) / 2500.0
     land_rgb = np.stack(
@@ -154,7 +169,7 @@ def build(
     grid = default_grid()
     map_dir.mkdir(parents=True, exist_ok=True)
 
-    tile_names = download.etopo_tiles_covering(*grid.geographic_extent())
+    tile_names = download.etopo_tiles_for_grid(grid)
     tile_paths = download.etopo_tiles(tile_names, force)
     shapefiles = {
         layer: download.natural_earth_shapefile(layer, force)
@@ -165,8 +180,6 @@ def build(
         return gpd.read_file(shapefiles[layer])
 
     height_m = terrain.build_heightmap(grid, tile_paths)
-    heightmap_path = map_dir / "heightmap.png"
-    terrain.write_png16(terrain.height_to_uint16(height_m), heightmap_path)
 
     lakes = gpd.GeoDataFrame(
         pd.concat([read("lakes"), read("lakes_europe")], ignore_index=True),
@@ -175,6 +188,14 @@ def build(
     land_mask = terrain.build_land_mask(grid, read("land"), lakes)
     land_mask_path = map_dir / "land_mask.png"
     terrain.write_png8(land_mask, land_mask_path)
+
+    # Caspian depression and Jordan rift: land below 0 m cut off from the ocean.
+    ocean_col, ocean_row = grid.lonlat_to_pixel(*OCEAN_SEED_LONLAT)
+    height_m, _ = terrain.lift_inland_depressions(
+        height_m, land_mask > 0, (int(ocean_row), int(ocean_col))
+    )
+    heightmap_path = map_dir / "heightmap.png"
+    terrain.write_png16(terrain.height_to_uint16(height_m), heightmap_path)
 
     rivers = vectors.prepare_rivers(read("rivers"), read("rivers_europe"), grid)
     rivers_path = map_dir / "rivers.geojson"

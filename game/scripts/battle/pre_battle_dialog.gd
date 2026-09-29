@@ -17,7 +17,7 @@ signal withdraw_requested(index: int)
 const INK := BattleUiKit.INK
 const TERRAIN_FR := {
 	"plains": "plaines", "hills": "collines", "mountains": "montagnes", "forest": "forêt",
-	"marsh": "marais", "heath": "lande", "bocage": "bocage",
+	"marsh": "marais", "heath": "lande", "bocage": "bocage", "steppe": "steppe", "desert": "désert",
 }
 const SEASON_FR := {"spring": "printemps", "summer": "été", "autumn": "automne", "winter": "hiver"}
 const BANNER_FIELD := "res://assets/events/evt_crecy.jpg"
@@ -25,6 +25,8 @@ const BANNER_SIEGE := "res://assets/events/evt_sluys.jpg"
 const PANEL_MAX := Vector2(1180, 820)
 const CARD_COLUMNS := 8
 const CARD_SIZE := Vector2(64, 94)
+const BANNER_HEIGHT := 132.0
+const BANNER_HEIGHT_SHORT := 84.0  # écrans bas (1280×640) : place rendue aux régiments
 
 var battle: Dictionary = {}
 var setup: Dictionary = {}
@@ -46,6 +48,9 @@ var panel: PanelContainer
 var banner: Control
 var _banner_texture: Texture2D
 var _columns: Array[VBoxContainer] = []
+var _scroll_body: VBoxContainer
+var _sides_scroll: ScrollContainer
+var _layout_queued := false
 var _share := 0.5
 var _colors: Array[Color] = [Color(0.2, 0.3, 0.75), Color(0.75, 0.15, 0.12)]
 
@@ -79,10 +84,21 @@ func _ready() -> void:
 	inner.add_child(content)
 	content.add_child(_build_balance())
 	content.add_child(BattleUiKit.rule())
+	# Colonnes d'armées et conditions défilantes : les grosses armées du départ dépassent 640 px
+	# de haut ; bannière, équilibre et boutons restent fixes.
+	_sides_scroll = ScrollContainer.new()
+	_sides_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_sides_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_child(_sides_scroll)
+	_scroll_body = VBoxContainer.new()
+	_scroll_body.add_theme_constant_override("separation", 8)
+	_scroll_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_sides_scroll.add_child(_scroll_body)
 	var sides := HBoxContainer.new()
 	sides.add_theme_constant_override("separation", 24)
 	sides.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	content.add_child(sides)
+	_scroll_body.add_child(sides)
 	for i in 2:
 		var column := VBoxContainer.new()
 		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -92,17 +108,19 @@ func _ready() -> void:
 		if i == 0:
 			var divider := VSeparator.new()
 			sides.add_child(divider)
-	content.add_child(BattleUiKit.rule())
-	body_label = BattleUiKit.label("", 16)
+	_scroll_body.add_child(BattleUiKit.rule())
+	body_label = BattleUiKit.label("", UiType.size(UiType.BODY))
 	body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content.add_child(body_label)
-	modifiers_label = BattleUiKit.label("", 14, BattleUiKit.INK_SOFT)
+	_scroll_body.add_child(body_label)
+	modifiers_label = BattleUiKit.label("", UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 	modifiers_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	modifiers_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	modifiers_label.clip_text = true
-	content.add_child(modifiers_label)
+	_scroll_body.add_child(modifiers_label)
 	content.add_child(_build_buttons())
 	get_viewport().size_changed.connect(_layout)
+	panel.minimum_size_changed.connect(_queue_layout)
+	_scroll_body.minimum_size_changed.connect(_queue_layout)
 	_layout()
 	visible = false
 
@@ -110,7 +128,7 @@ func _ready() -> void:
 func _build_banner() -> Control:
 	banner = Control.new()
 	banner.name = "Banner"
-	banner.custom_minimum_size = Vector2(0, 132)
+	banner.custom_minimum_size = Vector2(0, BANNER_HEIGHT)
 	banner.clip_contents = true
 	banner.draw.connect(_draw_banner)
 	var margin := MarginContainer.new()
@@ -122,11 +140,11 @@ func _build_banner() -> Control:
 	texts.alignment = BoxContainer.ALIGNMENT_END
 	texts.add_theme_constant_override("separation", 0)
 	margin.add_child(texts)
-	title_label = BattleUiKit.label("", 38, Color(0.99, 0.95, 0.84), true)
+	title_label = BattleUiKit.label("", UiType.size(UiType.TITLE), Color(0.99, 0.95, 0.84), true)
 	title_label.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.02))
 	title_label.add_theme_constant_override("outline_size", 6)
 	texts.add_child(title_label)
-	subtitle_label = BattleUiKit.label("", 17, Color(0.96, 0.88, 0.68))
+	subtitle_label = BattleUiKit.label("", UiType.size(UiType.BODY), Color(0.96, 0.88, 0.68))
 	subtitle_label.add_theme_font_override("font", BattleUiKit.title_italic_font())
 	subtitle_label.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.02))
 	subtitle_label.add_theme_constant_override("outline_size", 4)
@@ -149,7 +167,7 @@ func _draw_banner() -> void:
 func _build_balance() -> Control:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
-	verdict_label = BattleUiKit.label("", 24, INK, true)
+	verdict_label = BattleUiKit.label("", UiType.size(UiType.HEADING), INK, true)
 	verdict_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(verdict_label)
 	var row := HBoxContainer.new()
@@ -160,7 +178,7 @@ func _build_balance() -> Control:
 	balance_bar.custom_minimum_size = Vector2(620, 18)
 	balance_bar.draw.connect(func() -> void: BattleUiKit.draw_balance(balance_bar, _share, _colors[0], _colors[1]))
 	row.add_child(balance_bar)
-	chance_label = BattleUiKit.label("", 14, BattleUiKit.INK_SOFT)
+	chance_label = BattleUiKit.label("", UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 	chance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	chance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q5 : libellé plus long
 	box.add_child(chance_label)
@@ -170,7 +188,7 @@ func _build_balance() -> Control:
 func _build_buttons() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 18)
-	withdraw_button = _button("Retraite", 18)
+	withdraw_button = _button("Retraite", UiType.size(UiType.BODY))
 	withdraw_button.name = "Withdraw"
 	withdraw_button.pressed.connect(func() -> void:
 		visible = false
@@ -179,14 +197,14 @@ func _build_buttons() -> Control:
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(spacer)
-	auto_button = _button("Résolution automatique", 18)
+	auto_button = _button("Résolution automatique", UiType.size(UiType.BODY))
 	auto_button.name = "AutoResolve"
-	auto_button.tooltip_text = "La bataille est tranchée sans être jouée, selon le rapport de forces et la fortune des armes."
+	RichTooltip.attach_plain(auto_button, "battle_auto_resolve")
 	auto_button.pressed.connect(func() -> void:
 		visible = false
 		auto_requested.emit(int(battle.get("index", 0))))
 	row.add_child(auto_button)
-	fight_button = _button("Combattre", 22)
+	fight_button = _button("Combattre", UiType.size(UiType.HEADING))
 	fight_button.name = "Fight"
 	fight_button.custom_minimum_size = Vector2(230, 48)
 	var style := BattleUiKit.parchment_box(8, Color(0.55, 0.11, 0.08), Color(0.36, 0.06, 0.04), 2)
@@ -219,9 +237,26 @@ func _layout() -> void:
 	var view := get_viewport_rect().size
 	var width := minf(PANEL_MAX.x, view.x - 32.0)
 	panel.custom_minimum_size = Vector2(width, 0)
-	var height := minf(panel.get_combined_minimum_size().y, minf(PANEL_MAX.y, view.y - 32.0))
+	banner.custom_minimum_size.y = BANNER_HEIGHT if view.y >= 760.0 else BANNER_HEIGHT_SHORT
+	# Hauteur naturelle (colonnes entières) bornée à l'écran ; au-delà, les colonnes défilent.
+	# `size` est réaffectée à chaque passe : un premier calcul (libellés repliés sans largeur)
+	# peut l'avoir gonflée, et un Control ne rétrécit jamais seul.
+	var natural := panel.get_combined_minimum_size().y + _scroll_body.get_combined_minimum_size().y
+	var height := minf(natural, minf(PANEL_MAX.y, view.y - 32.0))
 	panel.size = Vector2(width, height)
 	panel.position = (view - panel.size) * 0.5
+
+
+func _queue_layout() -> void:
+	if _layout_queued:
+		return
+	_layout_queued = true
+	_run_queued_layout.call_deferred()
+
+
+func _run_queued_layout() -> void:
+	_layout_queued = false
+	_layout()
 
 
 ## Remplit l'écran pour `p_battle` (entrée de `get_pending_battles`).
@@ -277,11 +312,11 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	var can_withdraw := bool(forecast.get("can_withdraw", false))
 	withdraw_button.disabled = not can_withdraw
 	if siege:
-		withdraw_button.tooltip_text = "Remettre l'assaut : le siège continue et affame la garnison."
+		RichTooltip.attach_plain(withdraw_button, "battle_postpone_assault")
 	elif can_withdraw:
-		withdraw_button.tooltip_text = "Refuser la bataille : l'ost se replie et perd du moral."
+		RichTooltip.attach_plain(withdraw_button, "battle_decline")
 	else:
-		withdraw_button.tooltip_text = "Impossible : vous êtes attaqué, il faut tenir ou laisser trancher la fortune."
+		RichTooltip.attach_plain(withdraw_button, "seat_unavailable", {"body": "Vous êtes attaqué, il faut tenir ou laisser trancher la fortune."})
 	_layout()
 	if not visible:
 		UiSounds.play("alert")  # UB1 / U13 : bataille en vue
@@ -316,7 +351,7 @@ func _fill_balance(siege: bool) -> void:
 			BattleUiKit.thousands(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
 			" (assaut)" if siege else "",
 		]
-	balance_bar.tooltip_text = "Estimation du cœur de la simulation (mêmes règles que la résolution automatique, sans le hasard) : effectifs, qualité, moral, ravitaillement, général, terrain."
+	RichTooltip.attach_plain(balance_bar, "battle_balance_estimate")
 	balance_bar.queue_redraw()
 
 
@@ -341,7 +376,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	var name_box := VBoxContainer.new()
 	name_box.add_theme_constant_override("separation", -2)
 	var name_text := str(battle.get("%s_name" % side, side_setup.get("faction_name", "")))
-	var name_label := BattleUiKit.label(name_text + ("  (vous)" if slot == 0 and str(battle.get("player_side", "")) != "" else ""), 24, INK, true)
+	var name_label := BattleUiKit.label(name_text + ("  (vous)" if slot == 0 and str(battle.get("player_side", "")) != "" else ""), UiType.size(UiType.HEADING), INK, true)
 	name_box.add_child(name_label)
 	var role := "assaillant" if side == "attacker" else "défenseur"
 	if siege:
@@ -350,7 +385,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	for unit in units:
 		soldiers += int(unit.get("soldiers", 0))
 	var strength_text := "%s · %s hommes en %d régiments" % [role.capitalize(), BattleUiKit.thousands(soldiers), units.size()]
-	name_box.add_child(BattleUiKit.label(strength_text, 15, BattleUiKit.INK_SOFT))
+	name_box.add_child(BattleUiKit.label(strength_text, UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT))
 	if slot == 0:
 		header.add_child(arms)
 		header.add_child(name_box)
@@ -370,7 +405,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 			if str(entry.get("general", "")) != "":
 				text += " sous %s" % str(entry.get("general", ""))
 			parts.append(text)
-		var reinf := BattleUiKit.label("Renforts : " + ", ".join(parts), 14, BattleUiKit.GOOD, false, true)
+		var reinf := BattleUiKit.label("Renforts : " + ", ".join(parts), UiType.size(UiType.CAPTION), BattleUiKit.GOOD, false, true)
 		reinf.clip_text = true
 		reinf.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		reinf.set_script(RichLabel)
@@ -378,7 +413,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 		reinf.mouse_filter = Control.MOUSE_FILTER_PASS
 		column.add_child(reinf)
 	else:
-		column.add_child(BattleUiKit.label("Aucun renfort à portée.", 14, BattleUiKit.INK_FADED))
+		column.add_child(BattleUiKit.label("Aucun renfort à portée.", UiType.size(UiType.CAPTION), BattleUiKit.INK_FADED))
 	# Régiments en cartes.
 	var grid := GridContainer.new()
 	grid.columns = CARD_COLUMNS
@@ -399,7 +434,7 @@ func _fill_column(column: VBoxContainer, side: String, slot: int) -> void:
 	scroll.custom_minimum_size = Vector2(0, rows * (CARD_SIZE.y + 4) + 2)
 	scroll.add_child(grid)
 	column.add_child(scroll)
-	var composition := BattleUiKit.label(_composition(units), 14, BattleUiKit.INK_SOFT)
+	var composition := BattleUiKit.label(_composition(units), UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 	composition.clip_text = true
 	composition.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	composition.set_script(RichLabel)
@@ -439,12 +474,12 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 		medallion.draw_arc(c, r, 0, TAU, 48, BattleUiKit.INK, 1.5))
 	var texts := VBoxContainer.new()
 	texts.alignment = BoxContainer.ALIGNMENT_CENTER
-	var name_label := BattleUiKit.label(name_text, 19, INK, false, true)
+	var name_label := BattleUiKit.label(name_text, UiType.size(UiType.HEADING), INK, false, true)
 	texts.add_child(name_label)
 	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
-	var stars_label := BattleUiKit.label(stars, 14, BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
+	var stars_label := BattleUiKit.label(stars, UiType.size(UiType.CAPTION), BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
 	stars_label.set_script(RichLabel)
-	stars_label.tooltip_text = "Commandement %d / %s" % [command, RuleValues.text("max_skill_level")]
+	RichTooltip.attach_plain(stars_label, "leader_command_level", {"body": "%d / %s" % [command, RuleValues.text("max_skill_level")]})
 	stars_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	texts.add_child(stars_label)
 	if slot == 0:

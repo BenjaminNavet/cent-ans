@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_ciudad_real",
+    "province": "prov_calatrava",
+    "kind": "city",
+    "name": {
+      "display": "Ciudad Real",
+      "local": "Ciudad Real",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.9272,
+      38.9861
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité royale fondée en 1255 par Alphonse X pour contrebalancer le pouvoir de l'ordre de Calatrava sur la région.",
+    "sources": [
+      "Ciudad Real"
+    ]
+  },
+  {
+    "id": "set_calatrava_la_nueva",
+    "province": "prov_calatrava",
+    "kind": "abbey",
+    "name": {
+      "display": "Calatrava la Nueva",
+      "local": "Calatrava la Nueva",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.8306,
+      38.6994
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Forteresse-couvent, siège du grand maître de l'ordre militaire du Calatrava depuis 1217.",
+    "sources": [
+      "Ordre de Calatrava",
+      "Calatrava la Nueva"
+    ]
+  },
+  {
+    "id": "set_almagro",
+    "province": "prov_calatrava",
+    "kind": "village",
+    "name": {
+      "display": "Almagro",
+      "local": "Almagro",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.7288,
+      38.8672
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg du Campo de Calatrava.",
+    "sources": [
+      "Almagro"
+    ]
+  }
+]

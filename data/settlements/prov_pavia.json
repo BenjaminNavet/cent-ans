@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_pavia",
+    "province": "prov_pavia",
+    "kind": "city",
+    "name": {
+      "display": "Pavie",
+      "local": "Pavia",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.1582,
+      45.1847
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne capitale du royaume lombard, commune gibeline dominée par les Beccaria ; elle ne tombera aux mains des Visconti qu'en 1359.",
+    "sources": [
+      "Pavie"
+    ]
+  },
+  {
+    "id": "set_certosa_di_pavia",
+    "province": "prov_pavia",
+    "kind": "abbey",
+    "name": {
+      "display": "Certosa di Pavia",
+      "local": "Certosa di Pavia",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.1364,
+      45.2606
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Site monastique visconti, la grande chartreuse n'est fondée qu'en 1396 : simple prieuré en 1337.",
+    "sources": [
+      "Certosa di Pavia"
+    ]
+  },
+  {
+    "id": "set_voghera",
+    "province": "prov_pavia",
+    "kind": "town",
+    "name": {
+      "display": "Voghera",
+      "local": "Voghera",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      9.0117,
+      44.9917
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de l'Oltrepò pavese, sur la route de Gênes.",
+    "sources": [
+      "Voghera"
+    ]
+  }
+]

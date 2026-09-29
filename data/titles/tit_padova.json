@@ -1,0 +1,20 @@
+{
+  "id": "tit_padova",
+  "rank": "county",
+  "name": {
+    "display": "Commune de Padoue",
+    "local": "Comune di Padova",
+    "local_language": "vénitien"
+  },
+  "de_jure_provinces": [
+    "prov_padova"
+  ],
+  "holder_1337": {
+    "faction": "fac_verona",
+    "uncertain": true,
+    "sources": [
+      "Padoue",
+      "Mastino II della Scala"
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "id": "prov_galindia",
+  "name": {
+    "display": "Galindie et Oberland",
+    "local": "Galinden",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "prusse",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Drwęca",
+    "Alle"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Osterode",
+      "local": "Osterode",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 53.6997,
+    "lon": 19.9667
+  },
+  "geo": {
+    "capital_lonlat": [
+      19.9667,
+      53.6997
+    ],
+    "seed_lonlat": [
+      20.3,
+      53.55
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_teutonic",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1350,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 540,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 900,
+  "description": "Sud de la Prusse : Galindie, Oberland et pays d'Allenstein, colonisés par des paysans mazoviens et allemands sur la frontière de la Mazovie (Neidenburg, Soldau).",
+  "sources": [
+    "Galindie",
+    "Ostróda",
+    "Olsztyn"
+  ]
+}

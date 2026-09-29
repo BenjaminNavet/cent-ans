@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_zugdidi",
+    "province": "prov_odishi",
+    "kind": "city",
+    "name": {
+      "display": "Zougdidi",
+      "local": "ზუგდიდი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      41.87,
+      42.51
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence des Dadiani, princes de Mingrélie.",
+    "sources": [
+      "Odishi"
+    ]
+  },
+  {
+    "id": "set_poti",
+    "province": "prov_odishi",
+    "kind": "town",
+    "name": {
+      "display": "Poti (Phasis)",
+      "local": "ფოთი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      41.67,
+      42.15
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de la Colchide.",
+    "sources": [
+      "Odishi"
+    ]
+  },
+  {
+    "id": "set_sukhumi",
+    "province": "prov_odishi",
+    "kind": "town",
+    "name": {
+      "display": "Soukhoumi (Tskhumi)",
+      "local": "სოხუმი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      41.02,
+      43.0
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de l'Abkhazie.",
+    "sources": [
+      "Odishi"
+    ]
+  }
+]

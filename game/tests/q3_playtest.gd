@@ -127,8 +127,8 @@ func _run() -> void:
 
 
 func _treasury() -> String:
-	var info: Dictionary = root.get_node("SimFacade").faction_info(map.player_faction)
-	return str(info.get("treasury", "?"))
+	var summary: Dictionary = map.sim.call("get_faction_summary", map.player_faction)
+	return str(summary.get("treasury", "?"))
 
 
 func _advisor_said() -> String:
@@ -617,13 +617,20 @@ func fight(button: Button, label: String) -> void:
 	var t_fight := Time.get_ticks_msec()
 	var next_shot := 15000
 	var fight_limit_ms := 110000
-	while not battle.get("finished_shown") and Time.get_ticks_msec() - t_fight < fight_limit_ms:
+	while is_instance_valid(battle) and not battle.get("finished_shown") and Time.get_ticks_msec() - t_fight < fight_limit_ms:
 		await wait(10)
+		if not is_instance_valid(battle):
+			break
 		if Time.get_ticks_msec() - t_fight > next_shot:
 			await shot("%s-%ds" % [label, next_shot / 1000])
 			await fps_probe("%s-%ds" % [label, next_shot / 1000], 60)
 			next_shot += 30000
 			await attack_order(battle, label)
+	if not is_instance_valid(battle):
+		# Victoire d'assaut : la scène rend la main d'elle-même (sort de la ville prise).
+		log_q("%s scene closed by itself" % label)
+		await dismiss_dialogs()
+		return
 	if not battle.get("finished_shown"):
 		var sim_battle: Object = battle.get("battle")
 		log_q("%s still running after %d s (clock %.0f s); sounding the general retreat" % [label, (Time.get_ticks_msec() - t_fight) / 1000, float(sim_battle.call("get_elapsed"))])
@@ -654,7 +661,11 @@ func attack_order(battle: Node, label: String) -> void:
 		log_q("%s: no unit cards" % label)
 		return
 	for index in cards.size():
+		if not is_instance_valid(cards[index]):
+			return  # bataille finie pendant les ordres
 		await click_at(window_point(cards[index]), MOUSE_BUTTON_LEFT, index > 0)
+	if not is_instance_valid(battle):
+		return
 	var player_side := str(battle.get("player_side"))
 	var mine := Vector3.ZERO
 	var count := 0
@@ -755,6 +766,13 @@ func phase_naval() -> void:
 		log_q("naval: no pre-battle dialog")
 		return
 	await wait(60)
+	if not dialog.fight_button.visible:
+		# Bataille navale 3D retirée (PLAYABLE_3D = false) : résolution automatique, comme un joueur.
+		await click(dialog.auto_button)
+		await wait(30)
+		log_q("naval: auto-resolved, dialog visible %s" % dialog.visible)
+		await dismiss_dialogs()
+		return
 	var t := Time.get_ticks_msec()
 	await click(dialog.fight_button)
 	if dialog.visible:

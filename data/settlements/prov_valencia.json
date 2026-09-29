@@ -59,33 +59,6 @@
     ]
   },
   {
-    "id": "set_alicante",
-    "province": "prov_valencia",
-    "kind": "town",
-    "name": {
-      "display": "Alicante",
-      "local": "Alacant",
-      "local_language": "catalan"
-    },
-    "lonlat": [
-      -0.481,
-      38.3452
-    ],
-    "weight": 25,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_castle"
-    ],
-    "port": true,
-    "description": "Port méditerranéen dominé par le château de Santa Bárbara.",
-    "sources": [
-      "Alicante"
-    ]
-  },
-  {
     "id": "set_peniscola",
     "province": "prov_valencia",
     "kind": "abbey",

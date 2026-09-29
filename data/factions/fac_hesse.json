@@ -1,0 +1,54 @@
+{
+  "id": "fac_hesse",
+  "name": {
+    "display": "Landgraviat de Hesse",
+    "local": "Landgrafschaft Hessen",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Hesse",
+  "adjective": "hessois",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_heinrich_ii_de_hesse",
+  "capital": "prov_hesse",
+  "capital_city": "Cassel",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_hesse",
+  "heraldry": {
+    "blazon": "Burelé d'azur et d'or, au lion de gueules, armé et couronné d'or, brochant sur le tout.",
+    "description": "Le lion de Hesse, burelé d'azur et d'or, hérité des landgraves de Thuringe par Sophie de Brabant.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Landgrave de Hesse"
+  ],
+  "treasury": 5500,
+  "prestige": 32,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Henri II est un allié fidèle de l'empereur Louis IV de Wittelsbach."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 50,
+    "trade": 40,
+    "piety": 50
+  },
+  "description": "Landgraviat de Hesse, tenu par Henri II « le Fer », fils d'Otton Ier, depuis 1328 ; terres forestières et minières entre Lahn, Eder et Fulda.",
+  "sources": [
+    "Landgraviat de Hesse",
+    "Henri II de Hesse"
+  ]
+}

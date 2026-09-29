@@ -79,6 +79,7 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 | 2026-09-26 | OpenRouter | DA7c : icônes de trait à l'encre (59 × openai/gpt-5-image-mini) | 2,69 $ | 2,68 $ | 20,56 $ |
 | 2026-09-28 | OpenRouter | CB : icônes des contrôles de bataille à l'encre, sonde (2 × openai/gpt-5-image-mini) | 0,10 $ | 0,09 $ | 20,65 $ |
 | 2026-09-28 | OpenRouter | CB : icônes des contrôles de bataille à l'encre (14 × openai/gpt-5-image-mini) | 0,64 $ | 0,64 $ | 21,29 $ |
+| 2026-09-28 | OpenRouter | RS : icône « Raser » à l'encre (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 21,34 $ |
 
 ## Polish PO (27/09) — 0 $ prévu, enveloppe ≤ 3 $ (ADR 0097)
 
@@ -89,6 +90,29 @@ d'interface doivent être régénérés dans le registre enluminure.
 |---|---|---|---|---|---|
 | 2026-09-27 | — | PO0 : planche « avant », gabarit, squelette (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
 
+## Assets générés GA (28/09) — plafond propre de 15 $ (clé OpenRouter personnelle du joueur)
+
+Spec `docs/superpowers/specs/2026-09-28-ga-assets-generes-design.md`. GA1 ≤ 4 $, GA3 ≤ 8 $,
+GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul GA |
+|---|---|---|---|---|---|
+| 2026-09-28 | OpenRouter | GA1 : matière wool (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,04 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière mail (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,08 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière wool (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,12 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière linen (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,16 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière fustian (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,20 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière gambeson (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,24 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière leather (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,28 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière plate (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,32 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière wood (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,36 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière skin (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,40 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière hair (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,44 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière coat_light (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,48 $ |
+| 2026-09-28 | OpenRouter | GA1 : matière coat_dark (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,52 $ |
+| 2026-09-28 | OpenRouter | GA1 : rapprochement du solde (appel coat_light coupé en cours de réponse, arrondis) | 0,00 $ | 0,07 $ | 0,59 $ |
+| 2026-09-28 | Poly Haven | GA5 : bâtiments en 2k (10 identifiants existants, téléchargement direct, CC0) + torchis/colombage procédural (composite local, pas d'appel IA) | 0,00 $ | 0,00 $ | 0,59 $ |
+
 ## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
 
 Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`).
@@ -96,3 +120,17 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`).
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul FE |
 |---|---|---|---|---|---|
 | 2026-09-28 | — | F0 (titres, migration) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-28 | OpenRouter | F7 : portraits des souverains et héritiers FE (62 × openai/gpt-5-image-mini) | 2,83 $ | 2,86 $ | 2,86 $ |
+| 2026-09-28 | OpenRouter | F7 : variantes âgées des personnages FE (49 × openai/gpt-5-image-mini) | 2,23 $ | 2,27 $ | 5,13 $ |
+
+## Carte Oural–Méditerranée OM (28/09) — plafond propre de 10 $ (portraits)
+
+Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot P1 : plafond 5 $ (portraits des nouvelles factions D1-D3 et variantes âgées).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul OM |
+|---|---|---|---|---|---|
+| 2026-09-28 | — | P1 : écus et bannières (génération locale) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-29 | OpenRouter | P1 : portraits des souverains et héritiers D1-D3 (46 × openai/gpt-5-image-mini) | 2,10 $ | 2,16 $ | 2,16 $ |
+| 2026-09-29 | OpenRouter | P1 : variantes âgées D1-D3 (37 × openai/gpt-5-image-mini) | 1,69 $ | 1,69 $ | 3,85 $ |
+| 2026-09-29 | OpenRouter | P2 : portraits des personnages D4-D6 (49 × openai/gpt-5-image-mini) | 2,23 $ | 2,26 $ | 6,11 $ |
+| 2026-09-29 | OpenRouter | P2 : variantes âgées D4-D6 (42 × openai/gpt-5-image-mini) | 1,92 $ | 1,94 $ | 8,05 $ |

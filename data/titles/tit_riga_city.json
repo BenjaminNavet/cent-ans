@@ -1,0 +1,50 @@
+{
+  "id": "tit_riga_city",
+  "rank": "county",
+  "name": {
+    "display": "Ville de Riga",
+    "local": "Stadt Riga",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à deux clefs de gueules en sautoir.",
+    "description": "Clefs croisées de la ville de Riga (armes simplifiées).",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Blason simplifié du sceau de la ville, inversé pour la distinction visuelle."
+  },
+  "de_jure_liege": "tit_livonian_order",
+  "de_jure_provinces": [
+    "prov_riga"
+  ],
+  "holder_1337": {
+    "faction": "fac_riga",
+    "sources": [
+      "Riga"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_riga_hold",
+      "title": "Défendre la ville",
+      "description": "Garder Riga.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_riga_city"
+      }
+    },
+    {
+      "id": "obj_riga_indep",
+      "title": "Une ville libre",
+      "description": "Secouer la tutelle de l'Ordre.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Ville hanséatique de Riga, sous l'autorité de l'Ordre depuis 1330 ; conseil et guildes.",
+  "sources": [
+    "Riga"
+  ]
+}

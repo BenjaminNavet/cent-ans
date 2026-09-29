@@ -1,0 +1,85 @@
+{
+  "id": "prov_nafusa",
+  "name": {
+    "display": "Djebel Nefousa",
+    "local": "Jabal Nafūsa",
+    "local_language": "berbère"
+  },
+  "region": "maghreb",
+  "terrain": "mountains",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [],
+  "resources": [
+    "res_wool",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Jado",
+      "local": "Jādū",
+      "local_language": "berbère"
+    },
+    "lat": 31.9522,
+    "lon": 12.0
+  },
+  "geo": {
+    "capital_lonlat": [
+      12.0,
+      31.9522
+    ],
+    "seed_lonlat": [
+      12.0,
+      31.6
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_tripoli",
+  "culture": "cul_berber",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 22000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 35,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 660,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 550,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 55,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 264,
+        "unrest": 15,
+        "health": 60,
+        "wealth": 60,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Massif berbère ibadite du Djebel Nefousa, sur la route caravanière du Fezzan. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_castle"
+  ],
+  "fortification_level": 1,
+  "base_supply": 700,
+  "description": "Le Djebel Nefousa, massif berbérophone et majoritairement ibadite, greniers fortifiés (ksour) ; autorité de Tripoli lâche et mal établie (à préciser).",
+  "sources": [
+    "Djebel Nefoussa",
+    "Ibadisme"
+  ]
+}
