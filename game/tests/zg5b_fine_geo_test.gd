@@ -321,8 +321,8 @@ func _test_real_cache() -> void:
 	if not store.load_from(map_dir) or not store.available(1):
 		print("zg5b_fine_geo_test: no ZG5a cache, real-data checks skipped")
 		return
-	# Rouen ≈ (2097, 3099) en unités monde (1819 + 1280 dans le cadre du cache) : tuile E2 (32, 48).
-	var tile := store.load_sync(1, 32, 28 + store.origin_tiles.y)
+	# Rouen ≈ (2097, 3099) en unités monde : tuile E2 (32, 48) (cache dans le cadre monde, ADR 0119).
+	var tile := store.load_sync(1, 32, 48)
 	if not _check(tile != null and tile.lines() > 0, "Rouen tile missing"):
 		return
 	var seine := 0
