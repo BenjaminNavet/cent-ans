@@ -43,5 +43,26 @@ Diagnostic chiffré (sonde `FK_DEBUG=1` : `FolkPool._debug_dump`, Paris d=12, pe
   (cercles `landmark_zones` + `landmark_cities.zone_of`) : aucune instance dedans ;
   `FolkScenes._footprint` = emprise de ville emblématique couvrant la colonie.
 
-État : code fait, `fk_folk_test` vert (placement ≤ 8 ms par scène, aucune instance dans Paris,
-lisibilité). Prochaine étape : dylib reconstruite, `fk5_incidents_test`, `smoke`, mesures.
+- **Routine** (> 8 ms à d=30-45 : 12-15 ms) : tri `sort_custom` de milliers de tronçons près
+  de Paris et échantillonnage des masques à chaque placement. → tri natif de clés entières
+  (`PackedInt64Array`, distance² quantifiée << 20 | indice) pour tronçons et grilles, choix des
+  grilles en cache par tour (signature saison / disette / réglages), tronçons proches partagés
+  routes / pèlerins ; préchauffage des couples rôle:activité courants (`WARM_FIGURES`).
+
+Mesures `--fps-probe` après correctifs (Paris, `place_ms` = premier placement, création 0) :
+- d=12 peste : 90 figurines, 28 accessoires, place 3,3 ms (FolkScenes 0,6, routine 2,5) ;
+  préchauffage 620 ms étalé sur ≈ 20 images au lancement.
+- d=30 peste : 250 figurines, 89 accessoires, place 6,6 ms (routine 5,6, scènes 0,9).
+- d=45 : 423-436 figurines, place 9,3-10,5 ms (routine 9-10 ; ≈ 1 ms de plus que la cible,
+  placement rare : déplacement de 20 % du rayon ou zoom de 12 %).
+- FPS : A/B non concluant ce soir (machine chargée par un autre processus ; d=12 `--no-folk`
+  à 17,9 fps contre 130,8 avec folk dans le même lot : écart dû aux à-coups de la ville 1:1, pas
+  aux figurines). À refaire sur machine calme.
+
+Débogage : `FK_DEBUG=1` imprime au placement chaque groupe (première position, hauteur du sol,
+hauteur monde, taille écran en px, AABB) et les stats des fournisseurs.
+
+État : fait. `fk_folk_test` (placement ≤ 8 ms, aucune instance dans l'emprise de Paris,
+lisibilité), `fk5_incidents_test`, `smoke`, `cargo test` + clippy verts.
+Prochaine étape : capture de contrôle par l'orchestrateur à d=12 (taille 0,018 à juger ;
+réglage `figure_min_view_fraction`).
