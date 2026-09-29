@@ -34,6 +34,9 @@ extends Node3D
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
+## FK6 : images d'attente au plus pour la vie de la carte avant une capture.
+const SCREENSHOT_LIFE_WAIT := 240
+var _screenshot_life_wait := 0
 const START_MENU_SCENE := "res://scenes/start_menu.tscn"
 ## Q2 : un second clic à moins de tant de pixels du précédent alterne armée / ville.
 const REPEAT_CLICK_PX := 12.0
@@ -1290,6 +1293,11 @@ func _process(_delta: float) -> void:
 			settlement_layer.flush()
 			roads.flush(zoom_tiers.near_weight(distance) * (1.0 - zoom_tiers.site_weight(distance)))
 			rivers.flush_fine(distance)  # ZG5b
+		# FK6 : la capture attend aussi la vie de la carte (préchauffage des figurines et premier
+		# placement, différé tant que la caméra bouge), au plus `SCREENSHOT_LIFE_WAIT` images.
+		if _screenshot_countdown == 1 and life != null and life.folk != null and not life.folk.settled() and _screenshot_life_wait < SCREENSHOT_LIFE_WAIT:
+			_screenshot_life_wait += 1
+			return
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:
 			_take_screenshot(_screenshot_path, true)
@@ -1734,6 +1742,8 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var err := image.save_png(path)
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
+	if life != null and life.folk != null:  # FK6 : contenu du réservoir au moment de la capture
+		print("CampaignMap: screenshot folk %s (waited %d frames)" % [JSON.stringify(life.folk.view_report(camera)), _screenshot_life_wait])
 	if OS.get_cmdline_user_args().has("--dump-near"):  # ZG4 : diagnostic, géométries autour de la caméra
 		var eye := camera.global_position
 		for node in get_tree().root.find_children("*", "GeometryInstance3D", true, false):

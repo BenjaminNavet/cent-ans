@@ -66,3 +66,13 @@ hauteur monde, taille écran en px, AABB) et les stats des fournisseurs.
 lisibilité), `fk5_incidents_test`, `smoke`, `cargo test` + clippy verts.
 Prochaine étape : capture de contrôle par l'orchestrateur à d=12 (taille 0,018 à juger ;
 réglage `figure_min_view_fraction`).
+
+### Captures (`--screenshot`, 960×600)
+La capture attend `FolkPool.settled()` (préchauffage fini + placement à jour), au plus
+`SCREENSHOT_LIFE_WAIT` (240) images, et imprime `screenshot folk {…}` (`view_report` :
+instances dans le champ, taille écran px). Mesuré au moment de la capture (attente 0 image :
+le réservoir était déjà prêt) :
+- d=12 peste : 94 figurines + 30 accessoires, 74 dans le champ, hauteur 3,7-14,6 px (méd. 6,1) ;
+- `--focus=2235,3204,18` : 54 + 3, 44 dans le champ, 4,4-8,1 px (méd. 6,0).
+Avec `figure_min_view_fraction` = 0,035 (essai, non retenu) : méd. 10,1 px (d=12), 10,8 px
+(d=18). À 6 px sur 600, les figurines sont probablement noyées : réglage à trancher sur capture.

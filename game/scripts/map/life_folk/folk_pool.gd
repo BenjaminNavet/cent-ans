@@ -84,6 +84,9 @@ var _height_usec := 0
 var _create_usec := 0
 ## Groupes dont le modèle manque (clé → vrai).
 var _missing: Dictionary = {}
+## FK6 : vrai quand le réservoir est à jour pour la vue courante (préchauffage fini, placement
+## fait ou rien à placer) ; les captures `--screenshot` l'attendent.
+var _settled := false
 ## FK6 : préchauffage (accessoires, première matière de figurine) étalé sur les premières images,
 ## avant tout placement : la première lecture des sommets d'un glb (`surface_get_arrays`) attend
 ## le fil de rendu (50-170 ms mesurés pour la première, quelques ms ensuite) ; faite pendant un
@@ -172,6 +175,7 @@ func invalidate() -> void:
 func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> void:
 	var delta := get_process_delta_time()
 	_track_budget(delta)
+	_settled = false
 	if not _warm_queue.is_empty():
 		_warm_step(WARM_BUDGET_USEC)
 		if not _warm_queue.is_empty():
@@ -179,6 +183,7 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 	if near_weight < NEAR_MIN or not _refreshed:
 		if _active:
 			clear()
+		_settled = _refreshed or near_weight < NEAR_MIN
 		return
 	_anim_time += delta
 	var scale_now := world_scale(camera_distance)
@@ -191,8 +196,11 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 	_prev_focus = focus
 	_prev_distance = camera_distance
 	_since_place += delta
-	if not _active or ((_dirty or moved or rescaled) and (steady or _since_place > MAX_DEFER_SECONDS)):
+	var pending := not _active or _dirty or moved or rescaled
+	if not _active or (pending and (steady or _since_place > MAX_DEFER_SECONDS)):
 		place(focus, radius, scale_now)
+		pending = false
+	_settled = not pending
 	_apply_level(camera_distance)
 	for key in _groups:
 		var group: Dictionary = _groups[key]
@@ -587,3 +595,43 @@ func warm_all() -> void:
 
 func is_warm() -> bool:
 	return _warm_queue.is_empty()
+
+
+## Vrai si le réservoir est à jour pour la vue courante (captures `--screenshot`).
+func settled() -> bool:
+	return _settled
+
+
+## Contrôle chiffré d'une capture : instances dans le champ de `camera` et taille écran (px)
+## de leur hauteur (médiane, min, max), par nature (figurines / accessoires).
+func view_report(camera: Camera3D) -> Dictionary:
+	var report := {"figures": _figures, "props": _props, "in_view": 0, "px_median": 0.0, "px_min": 0.0, "px_max": 0.0, "settled": _settled, "scale": _scale}
+	if camera == null:
+		return report
+	var sizes: Array = []
+	var frustum := camera.get_frustum()
+	for key in _groups:
+		var group: Dictionary = _groups[key]
+		var n := int(group["count"])
+		if n == 0 or not (group["mmi"] as MultiMeshInstance3D).is_visible_in_tree():
+			continue
+		var mesh := (group["mmi"] as MultiMeshInstance3D).multimesh.mesh
+		var height := (mesh.get_aabb().end.y if mesh != null else HUMAN_HEIGHT_M) * _scale
+		var buffer: PackedFloat32Array = group["buffer"]
+		for i in n:
+			var o := Vector3(buffer[i * 16 + 3], buffer[i * 16 + 7], buffer[i * 16 + 11])
+			var inside := true
+			for plane in frustum:
+				if plane.is_point_over(o):
+					inside = false
+					break
+			if not inside:
+				continue
+			sizes.append((camera.unproject_position(o) - camera.unproject_position(o + Vector3(0.0, height, 0.0))).length())
+	sizes.sort()
+	report["in_view"] = sizes.size()
+	if not sizes.is_empty():
+		report["px_median"] = snappedf(sizes[sizes.size() / 2], 0.1)
+		report["px_min"] = snappedf(sizes[0], 0.1)
+		report["px_max"] = snappedf(sizes[sizes.size() - 1], 0.1)
+	return report
