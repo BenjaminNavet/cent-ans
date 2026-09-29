@@ -1,6 +1,7 @@
 //! `CampaignSim` chronicle API (spec M10 § 3), in a secondary `#[godot_api]`
 //! block so that each milestone keeps its own file.
 
+use data_model::{EventId, ProvinceId};
 use godot::prelude::*;
 use sim_campaign::Order;
 
@@ -76,5 +77,31 @@ impl CampaignSim {
             option: option.max(0) as usize,
         };
         order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+    }
+
+    /// Staging (UI tests, screenshots, FK5): offers `event` to the player as
+    /// a pending decision in `province` (`""`: none); returns its id, -1 if
+    /// refused (unknown event or province, turn being resolved).
+    #[func]
+    fn debug_offer_decision(&mut self, event: GString, province: GString) -> i64 {
+        if self.refuse_while_turn_pending("debug_offer_decision") {
+            return -1;
+        }
+        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+            return -1;
+        };
+        let Ok(event) = EventId::new(event.to_string()) else {
+            return -1;
+        };
+        let province = match province.to_string().as_str() {
+            "" => None,
+            id => match ProvinceId::new(id) {
+                Ok(p) => Some(p),
+                Err(_) => return -1,
+            },
+        };
+        state
+            .debug_offer_decision(data, &event, province.as_ref())
+            .map_or(-1, i64::from)
     }
 }

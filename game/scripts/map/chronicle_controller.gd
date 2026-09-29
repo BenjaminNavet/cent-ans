@@ -7,6 +7,9 @@ extends Node
 ## jalon dans son fichier ; `campaign_map` n'appelle que `setup`, `refresh` et `after_end_turn`.
 
 const WINDOW_SCENE := "res://scenes/ui/chronicle_window.tscn"
+## Marque d'une décision expirée dans l'entrée de chronique du cœur (`chronicle.rs`,
+## `resolve_decision`).
+const EXPIRED_MARK := "(délai écoulé)"
 
 var map: Node = null  # CampaignMap
 var window: ChronicleWindow
@@ -53,15 +56,42 @@ func toggle_window() -> void:
 
 
 ## Ouvre la fenêtre sur la première décision en attente ; `false` s'il n'y en a aucune.
-func open_window() -> bool:
-	var decisions := pending()
+## `modal_only` (début de tour) : seulement parmi celles qui s'ouvrent d'elles-mêmes.
+func open_window(modal_only: bool = false) -> bool:
+	var decisions := modal_pending() if modal_only else pending()
 	if decisions.is_empty():
 		window.hide()
-		if available():
+		if available() and not modal_only:
 			map.ui.show_toast("Aucun événement n'attend votre décision.")
 		return false
-	window.show_decision(decisions[0], decisions.size())
+	window.show_decision(decisions[0], pending().size())
 	return true
+
+
+## FK5 : ouvre la fenêtre sur la décision `decision_id` (clic sur le sceau d'un incident) ;
+## `false` si elle n'attend plus.
+func open_decision(decision_id: int) -> bool:
+	var decisions := pending()
+	for decision: Dictionary in decisions:
+		if int(decision.get("id", -1)) == decision_id:
+			window.show_decision(decision, decisions.size())
+			return true
+	return false
+
+
+## FK5 : vrai quand les incidents (présentation `map`) ont leur sceau sur la carte.
+func incidents_on_map() -> bool:
+	var life: Node = map.get("life") if map != null else null
+	return life != null and life.get("incidents") != null
+
+
+## Décisions qui ouvrent la fenêtre en début de tour : toutes, sauf les incidents posés sur la
+## carte (FK5, spec carte vivante § 3.4) quand leurs sceaux sont affichés.
+func modal_pending() -> Array:
+	var decisions := pending()
+	if not incidents_on_map():
+		return decisions
+	return decisions.filter(func(d: Dictionary) -> bool: return not IncidentMarkers.is_map_decision(d))
 
 
 ## Après tout changement d'état : compteur du bouton.
@@ -89,10 +119,31 @@ func refresh() -> void:
 
 ## Après `end_turn` : ouvre la fenêtre si une décision attend ; Q2 : après la fermeture du
 ## rapport de saison s'il s'affiche (plus deux fenêtres modales empilées à chaque tour).
-func after_end_turn() -> void:
+## FK5 : les incidents posés sur la carte n'ouvrent rien ; une décision expirée est notifiée.
+func after_end_turn(events: Array = []) -> void:
 	refresh()
-	if not pending().is_empty():
+	notify_expired(events)
+	if not modal_pending().is_empty():
 		_open_after_report.call_deferred()
+
+
+## FK5 (ADR 0122) : pour chaque décision du joueur expirée ce tour (entrée de chronique du cœur
+## marquée « (délai écoulé) », titre et option retenue), un avis dit ce que le conseil a tranché.
+## Renvoie les textes notifiés.
+func notify_expired(events: Array) -> PackedStringArray:
+	var notified := PackedStringArray()
+	var player := str(map.get("player_faction")) if map != null else ""
+	for event in events:
+		if not (event is Dictionary) or str(event.get("kind", "")) != "chronicle":
+			continue
+		var text := str(event.get("text_fr", ""))
+		if not text.contains(EXPIRED_MARK) or str(event.get("faction", "")) != player:
+			continue
+		var decided := text.replace(" " + EXPIRED_MARK, "").trim_suffix(".")
+		var toast := "Délai écoulé, le conseil a tranché — %s." % decided
+		map.ui.show_toast(toast)
+		notified.append(toast)
+	return notified
 
 
 func _open_after_report() -> void:
@@ -103,8 +154,8 @@ func _open_after_report() -> void:
 			_watched_report = report
 			report.visibility_changed.connect(_on_report_visibility)
 		return
-	if not pending().is_empty() and not window.visible:
-		open_window()
+	if not modal_pending().is_empty() and not window.visible:
+		open_window(true)
 
 
 func _on_report_visibility() -> void:
@@ -112,8 +163,8 @@ func _on_report_visibility() -> void:
 		return
 	_watched_report.visibility_changed.disconnect(_on_report_visibility)
 	_watched_report = null
-	if not pending().is_empty() and not window.visible:
-		open_window()
+	if not modal_pending().is_empty() and not window.visible:
+		open_window(true)
 
 
 func _on_option_chosen(decision_id: int, option_index: int) -> void:
@@ -123,10 +174,11 @@ func _on_option_chosen(decision_id: int, option_index: int) -> void:
 	else:
 		map.ui.show_toast(str(result.get("error", "Choix impossible")), true)
 	map.refresh_all()
-	if pending().is_empty():
+	# FK5 : la file enchaîne les décisions en fenêtre ; les incidents restent sur leur sceau.
+	if modal_pending().is_empty():
 		window.hide()
 	else:
-		open_window()
+		open_window(true)
 	refresh()
 
 

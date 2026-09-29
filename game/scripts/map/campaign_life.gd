@@ -32,6 +32,8 @@ var folk: FolkPool = null
 var folk_routine: FolkRoutine = null
 var folk_caravans: FolkCaravans = null
 var folk_scenes: FolkScenes = null
+## FK5 : sceaux des incidents (nul : `--no-life`, `--no-folk`, `--folk-off=incidents`).
+var incidents: IncidentMarkers = null
 var folk_enabled: bool = true
 var folk_off: Dictionary = {}
 ## FK4 : scènes forcées par `--scene=` ({province, kind, settlement, intensity}).
@@ -80,6 +82,7 @@ func setup(map: Node) -> void:
 	ambient.setup(_map_data, _terrain, _settlements.data if _settlements != null else null)
 	stats.merge(ambient.stats, true)
 	_setup_folk()
+	_setup_incidents()
 
 
 ## FK3 : réservoir et fournisseurs, servis dans l'ordre d'enregistrement quand le plafond est
@@ -105,6 +108,15 @@ func _setup_folk() -> void:
 		folk_routine = FolkRoutine.new()
 		folk_routine.setup(_map_data, settlement_data)
 		folk.register(folk_routine)
+
+
+## FK5 : sceaux des incidents, à tous les zooms (hors réservoir : aucune figurine).
+func _setup_incidents() -> void:
+	if not folk_enabled or folk_off.has("incidents"):
+		return
+	incidents = IncidentMarkers.new()
+	add_child(incidents)
+	incidents.setup(_map)
 
 
 func _parse_cmdline() -> void:
@@ -134,6 +146,8 @@ func _parse_cmdline() -> void:
 func refresh(sim: Object) -> void:
 	if not enabled or sim == null:
 		return
+	if incidents != null:  # FK5 : une décision prise dans le tour retire son sceau
+		incidents.refresh(sim)
 	if forced_season == "" and sim.has_method("get_date_label"):
 		var season := SeasonVisuals.season_from_label(str(sim.call("get_date_label")))
 		# Premier affichage (nouvelle partie, chargement) : sans transition.
