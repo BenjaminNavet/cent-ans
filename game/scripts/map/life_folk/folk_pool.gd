@@ -42,6 +42,8 @@ const BUDGET_WINDOW := 90
 const BUDGET_OVER_SHARE := 0.6
 const BUDGET_RESTORE_SECONDS := 20.0
 const OVER_FRAME_SECONDS := 1.0 / 40.0
+## Délai maximal d'un placement différé pendant un mouvement continu de la caméra.
+const MAX_DEFER_SECONDS := 0.5
 
 var cap: int = DEFAULT_CAP
 ## Plafond appliqué (moitié de `cap` en cas de dépassement du budget d'image).
@@ -72,6 +74,12 @@ var _props := 0
 var _over_history := PackedByteArray()
 var _quiet_seconds := 0.0
 var _warned: Dictionary = {}
+## Vrai après le premier `refresh` : pas de placement avant (état du tour encore inconnu).
+var _refreshed := false
+var _height_usec := 0
+var _prev_focus := Vector2(INF, INF)
+var _prev_distance := 0.0
+var _since_place := 0.0
 
 
 func setup(map_data: MapData, terrain: TerrainBuilder, cap_override: int = -1) -> void:
@@ -122,6 +130,7 @@ func refresh(sim: Object) -> void:
 	for provider in _providers:
 		if provider.has_method("refresh"):
 			provider.call("refresh", sim)
+	_refreshed = true
 	_dirty = true
 
 
@@ -134,7 +143,7 @@ func invalidate() -> void:
 func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> void:
 	var delta := get_process_delta_time()
 	_track_budget(delta)
-	if near_weight < NEAR_MIN:
+	if near_weight < NEAR_MIN or not _refreshed:
 		if _active:
 			clear()
 		return
@@ -143,7 +152,13 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 	var radius := active_radius(camera_distance)
 	var moved := focus.distance_to(_last_focus) > radius * MOVE_FRACTION
 	var rescaled := _last_scale <= 0.0 or absf(scale_now / _last_scale - 1.0) > RESCALE_STEP
-	if _dirty or moved or rescaled or not _active:
+	# Pendant un déplacement ou un zoom continu, placement différé jusqu'à ce que la caméra se
+	# pose (ou au plus tard après `MAX_DEFER_SECONDS`) : pas un placement par image.
+	var steady := focus.distance_to(_prev_focus) < radius * 0.004 and absf(camera_distance / maxf(_prev_distance, 1e-3) - 1.0) < 0.004
+	_prev_focus = focus
+	_prev_distance = camera_distance
+	_since_place += delta
+	if not _active or ((_dirty or moved or rescaled) and (steady or _since_place > MAX_DEFER_SECONDS)):
 		place(focus, radius, scale_now)
 	_apply_level(camera_distance)
 	for key in _groups:
@@ -193,9 +208,15 @@ func place(focus: Vector2, radius: float, world_scale_value: float) -> void:
 	for key in _groups:
 		_groups[key]["buffer"] = PackedFloat32Array()
 		_groups[key]["count"] = 0
+	_height_usec = 0
+	var provider_ms := {}
 	for provider in _providers:
 		if provider.has_method("populate"):
+			var tp := Time.get_ticks_usec()
 			provider.call("populate", self, focus, radius)
+			provider_ms[str(provider.get_script().get_global_name())] = float(Time.get_ticks_usec() - tp) / 1000.0
+	stats["provider_ms"] = provider_ms
+	stats["height_ms"] = float(_height_usec) / 1000.0
 	var margin := radius + 10.0
 	var aabb := AABB(Vector3(focus.x - margin, -200.0, focus.y - margin), Vector3(margin * 2.0, 4000.0, margin * 2.0))
 	for key in _groups:
@@ -207,6 +228,7 @@ func place(focus: Vector2, radius: float, world_scale_value: float) -> void:
 		mm.custom_aabb = aabb
 	_last_focus = focus
 	_last_scale = world_scale_value
+	_since_place = 0.0
 	_dirty = false
 	_active = true
 	visible = true
@@ -292,7 +314,10 @@ func add_static(role: String, activity: String, at: Vector2, yaw: float) -> bool
 
 func _height(p: Vector2) -> float:
 	if _terrain != null:
-		return _terrain.surface_height_at(p.x, p.y)
+		var t := Time.get_ticks_usec()
+		var h := _terrain.surface_height_at(p.x, p.y)
+		_height_usec += Time.get_ticks_usec() - t
+		return h
 	if _map_data != null:
 		return _map_data.surface_world_at(p.x, p.y)
 	return 0.0

@@ -50,6 +50,12 @@ func _edge_near(data: SettlementData, near: Vector2, avoid: Vector2) -> Array:
 	return best
 
 
+## Caméra posée sur `focus` : deux images (le placement attend une caméra immobile).
+func _view(pool: FolkPool, focus: Vector2, distance: float, near_weight: float) -> void:
+	pool.update_view(focus, distance, near_weight)
+	pool.update_view(focus, distance, near_weight)
+
+
 func _run() -> void:
 	# 1. Modèles.
 	_check(not FolkModels.figure_of("peasant").is_empty(), "peasant figure fallback")
@@ -97,6 +103,7 @@ func _run() -> void:
 	routine.season = "summer"
 	routine.cities = PackedVector2Array([paris])
 	pool.register(routine)
+	pool.refresh(null)  # premier tour (sans simulation : routes posées par `set_routes`)
 	print("fk_folk_test: routine %s, caravans %s" % [routine.stats, caravans.stats])
 
 	# 4. Route coupée : aucun trajet ; route active : des trajets.
@@ -106,7 +113,7 @@ func _run() -> void:
 
 	# 3. Palier proche sur la route active : charrettes, marchands et routine.
 	var focus: Vector2 = active_edge[2]
-	pool.update_view(focus, 45.0, 1.0)
+	_view(pool, focus, 45.0, 1.0)
 	print("fk_folk_test: near %s, caravans %s, routine %s" % [pool.stats, caravans.stats, routine.stats])
 	_check(pool.figure_count() > 0 and pool.figure_count() <= 600, "figures near: %d" % pool.figure_count())
 	_check(int(caravans.stats.get("carts", 0)) > 0, "merchant carts on the active route: %s" % caravans.stats)
@@ -120,23 +127,23 @@ func _run() -> void:
 		_check(pool.instance_custom("merchant_cart", 0).r > 0.0, "cart travels (custom data)")
 
 	# Route coupée seule dans le rayon : aucune charrette.
-	pool.update_view(cut_edge[2], 45.0, 1.0)
+	_view(pool, cut_edge[2], 45.0, 1.0)
 	_check(int(caravans.stats.get("carts", -1)) == 0, "no cart on the cut route: %s" % caravans.stats)
 	print("fk_folk_test: second placement %s" % pool.stats)
 
 	# 2. Plafond : petit plafond atteint exactement, moitié en dépassement.
 	pool.cap = 20
 	pool.set_budget_exceeded(false)
-	pool.update_view(focus, 45.0, 1.0)
+	_view(pool, focus, 45.0, 1.0)
 	_check(pool.figure_count() <= 20, "cap 20: %d" % pool.figure_count())
 	pool.set_budget_exceeded(true)
-	pool.update_view(focus, 45.0, 1.0)
+	_view(pool, focus, 45.0, 1.0)
 	_check(pool.effective_cap == 10 and pool.figure_count() <= 10, "halved cap: %d/%d" % [pool.figure_count(), pool.effective_cap])
 	pool.cap = 600
 	pool.set_budget_exceeded(false)
 
 	# Au loin : réservoir vide.
-	pool.update_view(focus, 400.0, 0.0)
+	_view(pool, focus, 400.0, 0.0)
 	_check(pool.figure_count() == 0 and not pool.visible, "empty far away")
 	var total := 0
 	for child in pool.get_children():
@@ -146,7 +153,7 @@ func _run() -> void:
 	# Saisons : hiver, bûcherons possibles, champs clairsemés ; pas d'erreur.
 	routine.season = "winter"
 	pool.invalidate()
-	pool.update_view(focus, 45.0, 1.0)
+	_view(pool, focus, 45.0, 1.0)
 	print("fk_folk_test: winter %s" % routine.stats)
 	_check(pool.figure_count() <= 600, "winter capped")
 

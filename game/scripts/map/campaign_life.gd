@@ -159,11 +159,12 @@ func _refresh_folk(sim: Object) -> void:
 		folk_routine.terroir = terroir
 		var cities := PackedVector2Array()
 		if _settlements != null and _settlements.data != null:
-			for id in levels:
-				if int(levels[id]) / 2 == 3:
-					var px: Variant = _settlements.data.get_settlement(str(id)).get("px")
-					if px is Vector2:
-						cities.append(px)
+			# Cités : colonies de type « city » (Paris et les villes 1:1 ne passent pas par la
+			# croissance) et colonies promues cité (`SettlementGrowth`, niveau 3).
+			for entry in _settlements.data.settlements:
+				var level := int(levels.get(str(entry["id"]), -2)) / 2
+				if str(entry["kind"]) == "city" or level == 3:
+					cities.append(entry["px"])
 		folk_routine.cities = cities
 	folk.refresh(sim)
 	stats["folk"] = folk.stats

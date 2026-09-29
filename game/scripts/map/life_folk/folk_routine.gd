@@ -22,7 +22,7 @@ const CELL := 32.0
 ## Longueur maximale d'un trajet rectiligne (les tronçons plus longs sont coupés).
 const PIECE := 4.0
 ## Pas des grilles de semis (champs, pâtures, forêts).
-const FIELD_STEP := 2.5
+const FIELD_STEP := 3.5
 const PASTURE_STEP := 5.0
 const FOREST_STEP := 5.0
 ## Densités par défaut (surchargées par `map_scenes.json`, voir `FolkPool.settings`).
@@ -54,6 +54,8 @@ var _seg_main := PackedByteArray()
 ## Case → PackedInt32Array des tronçons (milieu dans la case).
 var _cells: Dictionary = {}
 var _pool: FolkPool = null
+## Facteur de densité par province (index raster), vidé à chaque placement.
+var _factor_cache: Dictionary = {}
 
 
 func setup(map_data: MapData, settlement_data: SettlementData) -> void:
@@ -89,16 +91,29 @@ func refresh(_sim: Object) -> void:
 
 func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 	_pool = pool
+	_factor_cache.clear()
 	var budget := pool.remaining()
 	if budget <= 0:
 		return
 	var counts := {}
+	var ms := {}
+	var t := Time.get_ticks_usec()
 	counts["roads"] = 0 if off.has("roads") else _roads(focus, radius, int(budget * SHARES["roads"]))
+	ms["roads"] = Time.get_ticks_usec() - t
+	t = Time.get_ticks_usec()
 	counts["fields"] = _fields(focus, radius, int(budget * SHARES["fields"]))
+	ms["fields"] = Time.get_ticks_usec() - t
+	t = Time.get_ticks_usec()
 	counts["pastures"] = _pastures(focus, radius, int(budget * SHARES["pastures"]))
+	ms["pastures"] = Time.get_ticks_usec() - t
+	t = Time.get_ticks_usec()
 	var other := int(budget * SHARES["other"])
 	counts["pilgrims"] = _pilgrims(focus, radius, other / 2)
 	counts["woodcutters"] = _woodcutters(focus, radius, other - int(counts["pilgrims"]))
+	ms["other"] = Time.get_ticks_usec() - t
+	for key in ms:
+		ms[key] = snappedf(float(ms[key]) / 1000.0, 0.01)
+	counts["ms"] = ms
 	stats.merge(counts, true)
 
 
@@ -140,10 +155,15 @@ func _province_state(p: Vector2) -> Dictionary:
 ## Facteur de densité d'une province : population (relative à la référence du masque des
 ## terroirs), réduit par la dévastation.
 func _people_factor(p: Vector2) -> float:
+	var index := _map_data.province_index_at(p.x, p.y) if _map_data != null else 0
+	if _factor_cache.has(index):
+		return _factor_cache[index]
 	var state := _province_state(p)
 	var population := float(state.get("population", TerroirMask.REFERENCE_POPULATION))
 	var devastation := float(state.get("devastation", 0.0))
-	return clampf(population / TerroirMask.REFERENCE_POPULATION, 0.2, 2.5) * clampf(1.0 - devastation / 100.0, 0.0, 1.0)
+	var factor := clampf(population / TerroirMask.REFERENCE_POPULATION, 0.2, 2.5) * clampf(1.0 - devastation / 100.0, 0.0, 1.0)
+	_factor_cache[index] = factor
+	return factor
 
 
 # --- Routes -------------------------------------------------------------------------
@@ -201,9 +221,10 @@ func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2) -> int:
 # --- Champs, pâtures, forêts ----------------------------------------------------------
 
 
-## Points d'une grille ancrée sur la carte (stables d'un placement à l'autre), plus proches
-## d'abord : [distance², position jittée, i, j].
-static func _grid(focus: Vector2, radius: float, step: float, salt: int) -> Array:
+## Points d'une grille ancrée sur la carte (stables d'un placement à l'autre) retenus par
+## `pick(p, i, j)` (résultat non nul), plus proches d'abord : [distance², position jittée, i, j,
+## résultat]. Le tri ne porte que sur les points retenus.
+static func _grid(focus: Vector2, radius: float, step: float, salt: int, pick: Callable) -> Array:
 	var points: Array = []
 	var i0 := int(floorf((focus.x - radius) / step))
 	var i1 := int(ceilf((focus.x + radius) / step))
@@ -214,8 +235,11 @@ static func _grid(focus: Vector2, radius: float, step: float, salt: int) -> Arra
 		for i in range(i0, i1 + 1):
 			var p := Vector2((i + _h(i, j, salt)) * step, (j + _h(i, j, salt + 1)) * step)
 			var d2 := p.distance_squared_to(focus)
-			if d2 <= r2:
-				points.append([d2, p, i, j])
+			if d2 > r2:
+				continue
+			var picked: Variant = pick.call(p, i, j)
+			if picked != null:
+				points.append([d2, p, i, j, picked])
 	points.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
 	return points
 
@@ -229,41 +253,15 @@ func _fields(focus: Vector2, radius: float, budget: int) -> int:
 		return 0
 	var probability := _setting("field_work_probability", FIELD_WORK_PROBABILITY)
 	var placed := 0
-	for entry in _grid(focus, radius, FIELD_STEP, 11):
+	for entry in _grid(focus, radius, FIELD_STEP, 11, _field_plan.bind(probability)):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
 		var i: int = entry[2]
 		var j: int = entry[3]
-		var mask := terroir.sample(p)
-		var fields := mask.r * (1.0 - mask.b)
-		if fields < 0.25:
-			continue
-		var activity := ""
-		var chance := 0.0
-		var group := 1
-		match season:
-			"spring":
-				activity = "plough"
-				chance = fields * probability
-			"summer":
-				activity = "scythe"
-				chance = fields * probability
-				group = 2 + int(_h(i, j, 21) * 2.0)
-			"autumn":
-				if mask.g > 0.25:
-					activity = "harvest"
-					chance = mask.g * probability * 1.4
-					group = 2 + int(_h(i, j, 21) * 3.0)
-				else:
-					activity = "harvest"
-					chance = fields * probability * 0.4
-			_:
-				activity = "idle"
-				chance = fields * probability * 0.12
-		chance *= clampf(_people_factor(p), 0.3, 1.5)
-		if _h(i, j, 20) >= chance:
-			continue
+		var plan: Array = entry[4]
+		var activity: String = plan[0]
+		var group: int = plan[1]
 		var yaw := _h(i, j, 22) * TAU
 		for k in group:
 			if placed >= budget:
@@ -276,21 +274,53 @@ func _fields(focus: Vector2, radius: float, budget: int) -> int:
 	return placed
 
 
+## Travail d'un point de champ selon la saison : [activité, taille du groupe], ou null.
+func _field_plan(p: Vector2, i: int, j: int, probability: float) -> Variant:
+	var mask := terroir.sample(p)
+	var fields := mask.r * (1.0 - mask.b)
+	if fields < 0.25:
+		return null
+	var activity := "idle"
+	var chance := fields * probability * 0.12
+	var group := 1
+	match season:
+		"spring":
+			activity = "plough"
+			chance = fields * probability
+		"summer":
+			activity = "scythe"
+			chance = fields * probability
+			group = 2 + int(_h(i, j, 21) * 2.0)
+		"autumn":
+			activity = "harvest"
+			if mask.g > 0.25:
+				chance = mask.g * probability * 1.4
+				group = 2 + int(_h(i, j, 21) * 3.0)
+			else:
+				chance = fields * probability * 0.4
+	var roll := _h(i, j, 20)
+	if roll >= chance * 1.5:
+		return null  # rejet avant la lecture (coûteuse) de la province
+	if roll >= chance * clampf(_people_factor(p), 0.3, 1.5):
+		return null
+	return [activity, group]
+
+
 func _pastures(focus: Vector2, radius: float, budget: int) -> int:
 	if off.has("pastures") or terroir == null or terroir.image == null:
 		return 0
 	var probability := _setting("herd_probability", HERD_PROBABILITY) * (0.4 if season == "winter" else 1.0)
 	var placed := 0
-	for entry in _grid(focus, radius, PASTURE_STEP, 41):
+	var pick := func(p: Vector2, i: int, j: int) -> Variant:
+		var mask := terroir.sample(p)
+		var pasture := mask.a * (1.0 - mask.b)
+		return null if pasture < 0.3 or _h(i, j, 42) >= pasture * probability else true
+	for entry in _grid(focus, radius, PASTURE_STEP, 41, pick):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
 		var i: int = entry[2]
 		var j: int = entry[3]
-		var mask := terroir.sample(p)
-		var pasture := mask.a * (1.0 - mask.b)
-		if pasture < 0.3 or _h(i, j, 42) >= pasture * probability:
-			continue
 		var cows := _h(i, j, 43) < 0.35
 		var beasts := (2 + int(_h(i, j, 44) * 3.0)) if cows else (4 + int(_h(i, j, 44) * 4.0))
 		var spread := (4.0 if cows else 3.0) * _pool.current_scale()
@@ -315,16 +345,20 @@ func _woodcutters(focus: Vector2, radius: float, budget: int) -> int:
 	var sy := float(splat.get_height()) / maxf(float(_map_data.size.y), 1.0)
 	var probability := _setting("woodcutter_probability", WOODCUTTER_PROBABILITY)
 	var placed := 0
-	for entry in _grid(focus, radius, FOREST_STEP, 81):
+	var pick := func(p: Vector2, i: int, j: int) -> Variant:
+		if _h(i, j, 82) >= probability * 2.5:
+			return null
+		var x := clampi(int(p.x * sx), 0, splat.get_width() - 1)
+		var y := clampi(int(p.y * sy), 0, splat.get_height() - 1)
+		if splat.get_pixel(x, y).b < FOREST_COVER or _h(i, j, 82) >= probability * _people_factor(p):
+			return null
+		return true
+	for entry in _grid(focus, radius, FOREST_STEP, 81, pick):
 		if placed >= budget:
 			break
 		var p: Vector2 = entry[1]
 		var i: int = entry[2]
 		var j: int = entry[3]
-		var x := clampi(int(p.x * sx), 0, splat.get_width() - 1)
-		var y := clampi(int(p.y * sy), 0, splat.get_height() - 1)
-		if splat.get_pixel(x, y).b < FOREST_COVER or _h(i, j, 82) >= probability * _people_factor(p):
-			continue
 		for k in 2:
 			if placed < budget and _pool.add_static("peasant", "chop", p + Vector2(k * 1.2, k * 0.6) * _pool.current_scale(), _h(i, j, 83 + k) * TAU):
 				placed += 1

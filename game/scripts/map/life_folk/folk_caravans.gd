@@ -50,7 +50,9 @@ func setup(map_data: MapData, settlement_data: SettlementData) -> void:
 
 
 func refresh(sim: Object) -> void:
-	if sim == null or not sim.has_method("get_trade_routes"):
+	if sim == null:
+		return
+	if not sim.has_method("get_trade_routes"):
 		set_routes([])
 		return
 	set_routes(sim.call("get_trade_routes"))
