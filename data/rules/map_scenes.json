@@ -1,0 +1,20 @@
+{
+  "description": "Carte vivante (lot FK1, spec docs/design/2026-09-29-carte-vivante-folk.md §§ 2.1.1 et 2.1.4) : purement visuel. durations = tours pendant lesquels une scène née d'un événement de la chronique reste sur la carte, par type ; devastation_threshold = dévastation (0-100) à partir de laquelle une province montre des fuyards ; pool_cap = figurines vivantes au plus sur la vue rapprochée (divisé par deux si le budget d'image est dépassé) ; carts_per_trade_value = charrettes par unité de valeur d'une route commerciale ; peasants_per_thousand = paysans aux champs par millier d'habitants ; activity_radius = rayon (unités du monde) autour du centre de la caméra où vivent les figurines.",
+  "durations": {
+    "plague": 4,
+    "famine": 3,
+    "revolt": 2,
+    "devastation": 3,
+    "siege": 1,
+    "construction": 2,
+    "fair": 1,
+    "celebration": 2,
+    "flood": 2,
+    "muster": 1
+  },
+  "devastation_threshold": 25,
+  "pool_cap": 600,
+  "carts_per_trade_value": 0.05,
+  "peasants_per_thousand": 0.5,
+  "activity_radius": 60.0
+}

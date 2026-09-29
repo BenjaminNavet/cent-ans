@@ -494,4 +494,91 @@ pub struct Event {
     pub historical_date: Option<HistoricalDate>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Sources,
+    /// FK1: scene staged on the close campaign view while the event is
+    /// recent (`data/rules/map_scenes.json` sets how long).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub map_scene: Option<SceneKind>,
+    /// FK1: how the player meets the event; see [`Event::presentation`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub presentation: Option<EventPresentation>,
+}
+
+/// FK1: kind of scene staged on the close campaign view (closed list,
+/// mirrored by the `map_scene` enum of `event.schema.json`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SceneKind {
+    Plague,
+    Famine,
+    Revolt,
+    Devastation,
+    Siege,
+    Construction,
+    Fair,
+    Celebration,
+    Flood,
+    Muster,
+}
+
+impl SceneKind {
+    /// Every kind, in declaration order.
+    pub const ALL: [SceneKind; 10] = [
+        SceneKind::Plague,
+        SceneKind::Famine,
+        SceneKind::Revolt,
+        SceneKind::Devastation,
+        SceneKind::Siege,
+        SceneKind::Construction,
+        SceneKind::Fair,
+        SceneKind::Celebration,
+        SceneKind::Flood,
+        SceneKind::Muster,
+    ];
+
+    /// Snake-case name, as in the data files.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            SceneKind::Plague => "plague",
+            SceneKind::Famine => "famine",
+            SceneKind::Revolt => "revolt",
+            SceneKind::Devastation => "devastation",
+            SceneKind::Siege => "siege",
+            SceneKind::Construction => "construction",
+            SceneKind::Fair => "fair",
+            SceneKind::Celebration => "celebration",
+            SceneKind::Flood => "flood",
+            SceneKind::Muster => "muster",
+        }
+    }
+}
+
+/// FK1: an incident posed on the map (a marker over its province) or a
+/// dialog window at the start of the turn.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EventPresentation {
+    Map,
+    Dialog,
+}
+
+impl EventPresentation {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            EventPresentation::Map => "map",
+            EventPresentation::Dialog => "dialog",
+        }
+    }
+}
+
+impl Event {
+    /// Effective presentation: the explicit `presentation` key, else `map`
+    /// for a `random` event scoped to a province and `dialog` otherwise
+    /// (historical, chained and faction events keep their window).
+    pub fn presentation(&self) -> EventPresentation {
+        self.presentation
+            .unwrap_or(match (&self.kind, &self.scope) {
+                (EventCategory::Random, EventScope::Province { .. }) => EventPresentation::Map,
+                _ => EventPresentation::Dialog,
+            })
+    }
 }

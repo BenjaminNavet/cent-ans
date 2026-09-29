@@ -15,6 +15,7 @@
     "type": "faction",
     "faction": "fac_france"
   },
+  "map_scene": "celebration",
   "options": [
     {
       "text": "Marcher sur Reims et sacrer le roi",

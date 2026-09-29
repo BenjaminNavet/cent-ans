@@ -9,6 +9,7 @@
   "scope": {
     "type": "province"
   },
+  "map_scene": "plague",
   "options": [
     {
       "text": "Fermer les portes et isoler les malades",

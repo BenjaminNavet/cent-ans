@@ -18,6 +18,14 @@
       "items": { "$ref": "#/$defs/option" }
     },
     "historical_date": { "$ref": "common.schema.json#/$defs/historical_date", "description": "Date réelle de l'événement historique." },
+    "map_scene": {
+      "enum": ["plague", "famine", "revolt", "devastation", "siege", "construction", "fair", "celebration", "flood", "muster"],
+      "description": "Lot FK1 : scène de province montrée sur la vue rapprochée tant que l'événement est récent (durée par type dans data/rules/map_scenes.json). Liste fermée, identique à map_scenes_rules.schema.json."
+    },
+    "presentation": {
+      "enum": ["map", "dialog"],
+      "description": "Lot FK1 : map = incident posé sur la carte (marqueur au-dessus de la province), dialog = fenêtre en début de tour. Par défaut : map pour un événement random à portée de province, dialog sinon."
+    },
     "sources": { "$ref": "common.schema.json#/$defs/sources" }
   },
   "required": ["id", "title", "text", "kind", "trigger", "scope", "options"],

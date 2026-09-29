@@ -264,7 +264,9 @@ fn player_decision_is_answered_by_order() {
 }
 
 #[test]
-fn unanswered_decision_expires_with_its_first_option() {
+fn unanswered_decision_expires_with_the_ai_option() {
+    // ADR 0122: the option the AI would pick (« Renoncer à la mer »,
+    // highest `ai_weight`), no longer the first one.
     let data = data();
     let mut state = start(&data, "fac_france", 7);
     set_war(&mut state, "fac_england", "fac_france", true);
@@ -278,7 +280,7 @@ fn unanswered_decision_expires_with_its_first_option() {
     let events = state.end_turn_with(&data, idle);
     assert!(decision_for(&state, "evt_sluys").is_none());
     assert!(events.iter().any(|e| e.kind == EventKind::Chronicle
-        && e.text_fr.contains("Reconstruire la flotte")
+        && e.text_fr.contains("Renoncer à la mer")
         && e.text_fr.contains("délai écoulé")));
 }
 

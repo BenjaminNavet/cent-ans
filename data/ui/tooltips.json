@@ -468,7 +468,7 @@
     "budget_delta_hint": {"title": "Par rapport à la saison passée."},
     "ransom_refused": {"title": "Refusé"},
     "close_decision_pending": {"title": "Fermer", "body": "La décision reste en attente."},
-    "decision_default_choice": {"title": "Sans réponse, le premier choix s'appliquera d'office à l'expiration."},
+    "decision_default_choice": {"title": "Sans réponse, le choix que ferait votre conseil (celui de l'IA) s'appliquera d'office à l'expiration."},
     "open_named_sheet": {"title": "Ouvrir la fiche"},
     "faction_attitude": {"title": "Attitude"},
     "treaty_clause_detail": {"title": "Clause"},

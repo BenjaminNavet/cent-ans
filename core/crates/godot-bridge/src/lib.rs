@@ -34,6 +34,7 @@ mod campaign_sim_feudal;
 mod campaign_sim_h5h6;
 mod campaign_sim_holdings;
 mod campaign_sim_map_lens;
+mod campaign_sim_map_scenes;
 mod campaign_sim_mercenaries;
 mod campaign_sim_movement;
 mod campaign_sim_preview;

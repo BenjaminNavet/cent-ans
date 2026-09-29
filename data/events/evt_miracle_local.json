@@ -9,6 +9,7 @@
   "scope": {
     "type": "province"
   },
+  "map_scene": "celebration",
   "options": [
     {
       "text": "Faire bâtir une chapelle",

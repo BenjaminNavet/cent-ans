@@ -24,6 +24,7 @@
     "type": "faction",
     "faction": "fac_france"
   },
+  "map_scene": "celebration",
   "options": [
     {
       "text": "Célébrer les noces",

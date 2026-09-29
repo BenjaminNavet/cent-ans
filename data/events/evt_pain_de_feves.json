@@ -10,6 +10,7 @@
     ]
   },
   "scope": { "type": "province" },
+  "map_scene": "famine",
   "options": [
     {
       "text": "Acheter des fèves et fixer le prix du pain",

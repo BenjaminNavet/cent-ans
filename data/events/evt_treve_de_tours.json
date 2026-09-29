@@ -26,6 +26,7 @@
     "type": "faction",
     "faction": "fac_france"
   },
+  "map_scene": "celebration",
   "options": [
     {
       "text": "Signer la trêve et réformer l'armée",

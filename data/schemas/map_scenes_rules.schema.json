@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_scenes_rules.schema.json",
+  "title": "Règles de la carte vivante",
+  "description": "Fichier data/rules/map_scenes.json (lot FK1) : durées des scènes de province, plafond du réservoir de figurines, densités et rayon d'activité. Voir docs/design/2026-09-29-carte-vivante-folk.md §§ 2.1.1 et 2.1.4. Purement visuel.",
+  "type": "object",
+  "$defs": {
+    "map_scene": {
+      "enum": ["plague", "famine", "revolt", "devastation", "siege", "construction", "fair", "celebration", "flood", "muster"],
+      "description": "Type de scène de province (liste fermée, identique à event.schema.json)."
+    },
+    "turns": { "type": "integer", "minimum": 1, "maximum": 40 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "durations": {
+      "type": "object",
+      "description": "Tours pendant lesquels une scène née d'un événement reste sur la carte, par type.",
+      "propertyNames": { "$ref": "#/$defs/map_scene" },
+      "additionalProperties": { "$ref": "#/$defs/turns" }
+    },
+    "devastation_threshold": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Dévastation à partir de laquelle la province montre une scène devastation." },
+    "pool_cap": { "type": "integer", "minimum": 0, "maximum": 5000, "description": "Figurines vivantes au plus sur la vue rapprochée." },
+    "carts_per_trade_value": { "type": "number", "minimum": 0, "description": "Charrettes par unité de valeur d'une route commerciale." },
+    "peasants_per_thousand": { "type": "number", "minimum": 0, "description": "Paysans aux champs par millier d'habitants de la province." },
+    "activity_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon (unités du monde) autour du centre de la caméra où vivent les figurines." }
+  },
+  "required": ["durations", "devastation_threshold", "pool_cap", "carts_per_trade_value", "peasants_per_thousand", "activity_radius"],
+  "additionalProperties": false
+}

@@ -21,6 +21,7 @@
     "type": "province",
     "province": "prov_kent"
   },
+  "map_scene": "revolt",
   "options": [
     {
       "text": "Que le roi rencontre les rebelles puis les châtie",

@@ -25,6 +25,7 @@
     "type": "province",
     "province": "prov_ile_de_france"
   },
+  "map_scene": "revolt",
   "options": [
     {
       "text": "Promulguer l'ordonnance cabochienne",

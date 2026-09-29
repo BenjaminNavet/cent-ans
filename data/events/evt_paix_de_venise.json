@@ -21,6 +21,7 @@
     "type": "faction",
     "faction": "fac_verona"
   },
+  "map_scene": "celebration",
   "options": [
     {
       "text": "Signer la paix et céder Trévise",
