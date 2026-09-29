@@ -4,7 +4,7 @@ extends SceneTree
 ## 1. Manifeste réel : `root_origin_tiles` [0, 0], étages E1-E2 listés au Bosphore, à Moscou,
 ##    au Caire et à Tunis ; Rouen garde ses étages fins (E4) dans le cadre monde.
 ## 2. Si le cache est là : page E2 du Bosphore décodée, eau du détroit sous 0 m et collines
-##    d'Üsküdar / Çamlıca au-dessus de 40 m (Copernicus, pas l'ETOPO lissé d'E0).
+##    de Beykoz au-dessus de 150 m (Copernicus à 90 m, pas l'ETOPO lissé d'E0).
 ##
 ## godot --headless --path game --script res://tests/omr_r7_east_relief_test.gd
 
@@ -26,19 +26,29 @@ func _check(condition: bool, message: String) -> bool:
 	return condition
 
 
-## Hauteur (m) d'un point monde sur une page PNG 16 bits de l'étage `level`.
-func _height_at(pyramid: ReliefPyramid, level: int, x: float, y: float) -> float:
+## Hauteurs (m) extrêmes des 3 × 3 pixels autour d'un point monde, page PNG 16 bits de `level`
+## (x = min, y = max).
+func _range_at(pyramid: ReliefPyramid, level: int, x: float, y: float) -> Vector2:
 	var t := ReliefPyramid.tile_at(level, x, y)
 	var decoded := Png16.load_gray16(pyramid.tile_path(level, t.x, t.y))
 	if decoded.is_empty():
-		return NAN
+		return Vector2(NAN, NAN)
 	var origin := ReliefPyramid.tile_origin(level, t.x, t.y)
 	var px := int((x - origin.x) / ReliefPyramid.pixel_units(level))
 	var py := int((y - origin.y) / ReliefPyramid.pixel_units(level))
 	var data: PackedByteArray = decoded["data"]
-	var o := (py * int(decoded["width"]) + px) * 2
-	var v := (int(data[o]) << 8) | int(data[o + 1])
-	return pyramid.height_min_m + float(v) / 65535.0 * pyramid.height_range_m
+	var width := int(decoded["width"])
+	var lo := INF
+	var hi := -INF
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var cx := clampi(px + dx, 0, width - 1)
+			var cy := clampi(py + dy, 0, int(decoded["height"]) - 1)
+			var o := (cy * width + cx) * 2
+			var h := pyramid.height_min_m + float((int(data[o]) << 8) | int(data[o + 1])) / 65535.0 * pyramid.height_range_m
+			lo = minf(lo, h)
+			hi = maxf(hi, h)
+	return Vector2(lo, hi)
 
 
 func _run() -> void:
@@ -65,13 +75,14 @@ func _run() -> void:
 		_check(level >= 2, "%s : étage le plus fin %d (E2 attendu)" % [name, level])
 	var rouen := pyramid.finest_level_at(2097.0, 3099.0)
 	_check(rouen >= 4, "Rouen : étage le plus fin %d (E4+ attendu)" % rouen)
-	# Page E2 réelle du Bosphore.
-	var strait := _height_at(pyramid, 2, 5199.0, 4166.1)
-	var hills := _height_at(pyramid, 2, 5207.2, 4170.4)
-	if is_nan(strait) or is_nan(hills):
+	# Page E2 réelle du Bosphore, profil à 41,10° N : détroit (Rumeli Hisarı, ≈ 29,057° E)
+	# et collines de Beykoz (≈ 29,12° E, ≈ 320 m).
+	var strait := _range_at(pyramid, 2, 5201.9, 4160.6)
+	var hills := _range_at(pyramid, 2, 5209.2, 4158.7)
+	if is_nan(strait.x) or is_nan(hills.y):
 		_failures += 1
 		push_error("omr_r7_east_relief_test: page E2 du Bosphore illisible")
 		return
-	print("omr_r7_east_relief_test: Bosphore %.1f m, collines d'Üsküdar %.1f m" % [strait, hills])
-	_check(strait <= 0.0, "détroit à %.1f m" % strait)
-	_check(hills > 40.0, "collines d'Üsküdar à %.1f m" % hills)
+	print("omr_r7_east_relief_test: Bosphore %.1f m, collines de Beykoz %.1f m" % [strait.x, hills.y])
+	_check(strait.x <= 0.0, "détroit à %.1f m" % strait.x)
+	_check(hills.y > 150.0, "collines de Beykoz à %.1f m" % hills.y)
