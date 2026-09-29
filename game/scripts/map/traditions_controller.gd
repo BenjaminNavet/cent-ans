@@ -173,11 +173,13 @@ func _fill(info: Dictionary) -> void:
 		else "Traditions : %s." % ", ".join(chosen)
 	var chosen_label := HudStyle.label(chosen_text, UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
 	chosen_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	chosen_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_box.add_child(chosen_label)
 	var effects := str(info.get("effects_text", ""))
 	if effects != "":
 		var effects_label := HudStyle.label("Effets : %s." % effects, UiType.size(UiType.CAPTION), HudStyle.GOOD)
 		effects_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		effects_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_box.add_child(effects_label)
 
 	var pending := int(info.get("pending", 0))
@@ -201,6 +203,9 @@ func _option_row(option: Dictionary) -> Control:
 	choice.text = "%s — %s (palier %d) : %s" % [str(option.get("branch_name", "")), str(option.get("name", "")),
 		int(option.get("tier", 1)), str(option.get("effects_text", ""))]
 	choice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	choice.clip_text = false
+	choice.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+	choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var tip := str(option.get("description", ""))
 	var body := tip
 	if bool(option.get("allowed", false)):

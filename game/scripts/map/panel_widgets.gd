@@ -51,11 +51,16 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 	return checks
 
 
-## Options de recrutement (`get_recruitable`) ; `on_recruit(unit_type)` au clic.
-static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Callable) -> void:
+## Options de recrutement (`get_recruitable`) ; `on_recruit(unit_type)` au clic. `wrap` (TW2-T3,
+## mercenaires) : libellés longs (« Arbalétriers génois (Génois des galées) ») retournés à la
+## ligne plutôt que tronqués par des points de suspension — chaque ligne prend alors toute la
+## largeur du panneau (colonne unique) au lieu de la partager avec la note de droite.
+static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Callable, wrap: bool = false) -> void:
 	clear(list)
 	for row in recruitable:
-		var line := HBoxContainer.new()
+		var line: Container = VBoxContainer.new() if wrap else HBoxContainer.new()
+		if wrap:
+			line.add_theme_constant_override("separation", 1)
 		var button := RichButton.new()
 		button.text = "%s — %s / %s" % [str(row.get("name", row.get("unit_type", "?"))), Money.amount(int(row.get("cost", 0))), Money.amount(int(row.get("upkeep", 0)))]
 		# SV2 : le coût comprend l'importation des matériaux manquants (détail dans la bulle).
@@ -63,7 +68,12 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 			button.text += " (dont import %s)" % Money.amount(int(row["import_cost"]))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		narrow_button(button)
+		if wrap:
+			button.clip_text = false
+			button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+			button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		else:
+			narrow_button(button)
 		var available: bool = bool(row.get("available", false))
 		button.disabled = not available
 		var unit_type: String = str(row.get("unit_type", ""))
@@ -73,11 +83,20 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		line.add_child(button)
 		var reason := str(row.get("reason", "Indisponible"))
 		if not available and not reason.begins_with("réserve"):
-			line.add_child(side_note(reason_label(reason)))
+			line.add_child(_note(reason_label(reason), wrap))
 		# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
 		if row.has("pool_label"):
-			line.add_child(side_note(pool_label(row)))
+			line.add_child(_note(pool_label(row), wrap))
 		list.add_child(line)
+
+
+## Note à droite d'un bouton de ligne (`side_note`), ou pleine largeur sous le bouton si `wrap`.
+static func _note(label: Label, wrap: bool) -> Label:
+	if wrap:
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		return label
+	return side_note(label)
 
 
 ## TW2-T2 : réserve de l'unité dans la colonie (`pool_label` du cœur), en rubrique si épuisée.

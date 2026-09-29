@@ -68,7 +68,7 @@ func show_market(army: String, info: Dictionary) -> void:
 		PanelWidgets.placeholder(_list, "Aucune compagnie ne se loue dans cette région en ce moment.")
 	else:
 		PanelWidgets.fill_recruitable(_list, rows, func(unit_type: String) -> void:
-			hire_requested.emit(army_id, unit_type))
+			hire_requested.emit(army_id, unit_type), true)
 
 
 ## Ligne d'état : refus de la région, sinon engagements restants et solde de la saison passée.
