@@ -31,6 +31,15 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_germiyan_aydin",
+      "title": "Les anciens sous-bachis",
+      "description": "Ramener Aydın, jadis vassal de Kütahya, sous la suzeraineté de Germiyan.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_aydin"
+      }
     }
   ],
   "description": "Grand beylik de l'ouest de l'Anatolie, avec Kütahya et Afyon ; Yakub Ier (1300-1340) est le plus puissant bey d'Anatolie occidentale.",

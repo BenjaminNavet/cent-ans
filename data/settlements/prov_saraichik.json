@@ -48,26 +48,26 @@
     ]
   },
   {
-    "id": "set_emba",
+    "id": "set_zhaiyk",
     "province": "prov_saraichik",
     "kind": "village",
     "name": {
-      "display": "Camps de l'Emba",
-      "local": "Ембі",
-      "local_language": "tatar kiptchak"
+      "display": "Jaïk (site de la Horde)",
+      "local": "Žayyq",
+      "local_language": "kiptchak"
     },
     "lonlat": [
-      53.5,
-      48.0
+      51.33,
+      51.13
     ],
     "weight": 4,
     "owner": null,
     "fortification_level": 0,
     "buildings": [],
     "port": false,
-    "description": "Campements des steppes de l'Emba (nom et emplacement génériques, incertain).",
+    "description": "Petite ville de la Horde d'Or sur l'Iaïk moyen (site archéologique de Jaïk près d'Ouralsk, XIIIe-XIVe siècles).",
     "sources": [
-      "Steppe pontique"
+      "Zhaiyk"
     ]
   }
 ]

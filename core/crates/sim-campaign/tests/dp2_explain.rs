@@ -7,6 +7,7 @@ use std::path::PathBuf;
 use data_model::{FactionId, GameData};
 use sim_campaign::diplomacy::RelationKind;
 use sim_campaign::negotiation::{evaluate_treaty, Article, Party};
+use sim_campaign::religion::faction_religion;
 use sim_campaign::treaty_explain::{explain_treaty, ACCEPT_CHANCE};
 use sim_campaign::CampaignState;
 
@@ -24,13 +25,21 @@ fn start(data: &GameData) -> CampaignState {
     CampaignState::new_1337(data, fac("fac_france"), 1).expect("1337 start")
 }
 
-/// A faction at plain peace with France, first by id.
-fn neutral(state: &CampaignState) -> FactionId {
+/// A faction at plain peace with France and of its faith, first by id (OM:
+/// the first peaceful faction by id is now a distant power of another faith,
+/// whose extra objections hide the single blocking point under test).
+fn neutral(state: &CampaignState, data: &GameData) -> FactionId {
     let fr = fac("fac_france");
+    let faith = faction_religion(state, data, &fr);
     state
         .factions
         .iter()
-        .find(|(id, f)| f.alive && **id != fr && state.relation(&fr, id) == RelationKind::Peace)
+        .find(|(id, f)| {
+            f.alive
+                && **id != fr
+                && state.relation(&fr, id) == RelationKind::Peace
+                && faction_religion(state, data, id) == faith
+        })
         .map(|(id, _)| id.clone())
         .expect("a neutral")
 }
@@ -39,7 +48,7 @@ fn neutral(state: &CampaignState) -> FactionId {
 fn every_weighted_reason_is_a_line_objections_first() {
     let data = data();
     let state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state));
+    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
     let treaty = vec![
         Article::TradeAgreement,
         Article::Gold {
@@ -87,7 +96,7 @@ fn every_weighted_reason_is_a_line_objections_first() {
 fn a_single_excessive_demand_is_named_and_lowered_in_a_counter_offer() {
     let data = data();
     let mut state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state));
+    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
     state.factions.get_mut(&other).unwrap().treasury = 50_000;
     // A generous offer spoiled by one greedy demand.
     let treaty = vec![
@@ -134,7 +143,7 @@ fn a_single_excessive_demand_is_named_and_lowered_in_a_counter_offer() {
 fn a_general_consideration_can_be_the_single_blocking_point() {
     let data = data();
     let mut state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state));
+    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
     // They loathe us: a gift alone does not suffice.
     let turn = state.turn;
     state.factions.get_mut(&other).unwrap().modifiers.push(
@@ -161,7 +170,7 @@ fn a_general_consideration_can_be_the_single_blocking_point() {
 fn several_objections_give_no_single_point() {
     let data = data();
     let mut state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state));
+    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
     state.factions.get_mut(&other).unwrap().treasury = 100_000;
     let turn = state.turn;
     state.factions.get_mut(&other).unwrap().modifiers.push(
@@ -196,7 +205,7 @@ fn several_objections_give_no_single_point() {
 fn an_acceptable_treaty_says_why() {
     let data = data();
     let mut state = start(&data);
-    let (fr, other) = (fac("fac_france"), neutral(&state));
+    let (fr, other) = (fac("fac_france"), neutral(&state, &data));
     state.factions.get_mut(&fr).unwrap().treasury = 50_000;
     let treaty = vec![Article::Gold {
         giver: Party::Proposer,
@@ -226,7 +235,7 @@ fn a_trade_agreement_with_a_rival_is_worth_little_on_purpose() {
     assert_eq!(rival.value, -12);
     // Between two factions that are not rivals, the same article is worth
     // at least the rival malus more.
-    let other = neutral(&state);
+    let other = neutral(&state, &data);
     let with_rival = evaluate_treaty(&state, &data, &fr, &en, &[Article::TradeAgreement]);
     let plain = evaluate_treaty(&state, &data, &fr, &other, &[Article::TradeAgreement]);
     let rival_article = with_rival.articles[0].value;

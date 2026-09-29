@@ -1,28 +1,5 @@
 [
   {
-    "id": "set_marada",
-    "province": "prov_ajdabiya",
-    "kind": "village",
-    "name": {
-      "display": "Maradah",
-      "local": "Mārāda",
-      "local_language": "arabe"
-    },
-    "lonlat": [
-      19.1167,
-      29.2
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Oasis de la piste du Fezzan à Ajdabiya.",
-    "sources": [
-      "Marada"
-    ]
-  },
-  {
     "id": "set_ajdabiya",
     "province": "prov_ajdabiya",
     "kind": "city",
@@ -52,49 +29,49 @@
     ]
   },
   {
-    "id": "set_awjila",
+    "id": "set_brega",
     "province": "prov_ajdabiya",
     "kind": "village",
     "name": {
-      "display": "Aoudjila",
-      "local": "Awjila",
+      "display": "Marsa el-Brega",
+      "local": "Marsā al-Burayqa",
       "local_language": "arabe"
     },
     "lonlat": [
-      21.2833,
-      29.1333
+      19.58,
+      30.41
     ],
-    "weight": 5,
+    "weight": 3,
     "owner": null,
     "fortification_level": 0,
     "buildings": [],
-    "port": false,
-    "description": "Oasis de palmiers, étape des caravanes vers l'Égypte.",
+    "port": true,
+    "description": "Mouillage du fond du golfe de Syrte, débouché côtier des pistes caravanières (emplacement et activité en 1337 incertains).",
     "sources": [
-      "Awjila"
+      "Marsa el-Brega"
     ]
   },
   {
-    "id": "set_jalu",
+    "id": "set_zuwaytina",
     "province": "prov_ajdabiya",
     "kind": "village",
     "name": {
-      "display": "Djalo",
-      "local": "Jālū",
+      "display": "Zouétina",
+      "local": "Zuwaytīna",
       "local_language": "arabe"
     },
     "lonlat": [
-      21.55,
-      29.0333
+      20.12,
+      30.95
     ],
-    "weight": 4,
+    "weight": 3,
     "owner": null,
     "fortification_level": 0,
     "buildings": [],
-    "port": false,
-    "description": "Oasis de la même cuvette, palmeraies.",
+    "port": true,
+    "description": "Mouillage d'Ajdabiya sur le golfe de Syrte (incertain).",
     "sources": [
-      "Jalu"
+      "Zuwaytina"
     ]
   }
 ]

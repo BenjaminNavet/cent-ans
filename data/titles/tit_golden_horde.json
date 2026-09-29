@@ -47,14 +47,15 @@
     {
       "id": "obj_golden_horde_volga",
       "title": "Cœur de l'empire",
-      "description": "Tenir Saraï, Bolgar, Hadji-Tarkhan et la Crimée.",
+      "description": "Tenir Saraï, Bolgar, Hadji-Tarkhan et la Crimée ; chasser les Génois de Caffa (sièges de 1343-1346).",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
           "prov_saray",
           "prov_bolgar",
           "prov_hadji_tarkhan",
-          "prov_crimee"
+          "prov_crimee",
+          "prov_caffa"
         ]
       }
     },

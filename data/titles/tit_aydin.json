@@ -36,6 +36,17 @@
           "prov_izmir"
         ]
       }
+    },
+    {
+      "id": "obj_aydin_chios",
+      "title": "Maîtres de l'Égée",
+      "description": "Umur Bey veut Chios, clef des routes de l'Égée.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_chios"
+        ]
+      }
     }
   ],
   "description": "Beylik de l'Égée d'Umur Bey (1309-1348), dont les flottes de corsaires font trembler les îles ; son frère aîné Hızır Bey siège à Birgi.",

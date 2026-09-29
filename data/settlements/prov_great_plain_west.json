@@ -43,8 +43,8 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_cathedral",
-      "bld_market"
+      "bld_market",
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Siège d'un archevêché, bourg sur le Danube.",
@@ -68,9 +68,7 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg d'élevage de la plaine, marché de chevaux et de bétail.",
     "sources": [

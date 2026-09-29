@@ -41,13 +41,34 @@
     "weight": 12,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg de la plaine valaque, gué du Buzău.",
     "sources": [
       "Buzău"
+    ]
+  },
+  {
+    "id": "set_floci",
+    "province": "prov_muntenia_east",
+    "kind": "village",
+    "name": {
+      "display": "Floci",
+      "local": "Oraşul de Floci",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      27.83,
+      44.63
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de gué au confluent de la Ialomița et du Danube (attesté au XVe siècle, habitat antérieur probable, incertain).",
+    "sources": [
+      "Oraşul de Floci"
     ]
   }
 ]

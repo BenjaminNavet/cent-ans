@@ -31,6 +31,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_teke_hamid",
+      "title": "Réunir les Hamidides",
+      "description": "Réunir la branche d'Eğirdir à celle d'Antalya.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_hamid"
+        ]
+      }
     }
   ],
   "description": "Beylik d'Antalya, fondé vers 1321 ; port marchand et base de corsaires face à Chypre ; le bey en exercice n'est pas identifié.",

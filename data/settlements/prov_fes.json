@@ -22,7 +22,8 @@
       "bld_water_mill",
       "bld_muster_field",
       "bld_weaving_workshop",
-      "bld_university"
+      "bld_university",
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Capitale mérinide ; médina de Fès el-Bali et ville royale de Fès el-Jdid (fondée en 1276).",

@@ -98,8 +98,8 @@
     "buildings": [
       "bld_castle"
     ],
-    "port": false,
-    "description": "Commanderie de l'Ordre à Ösel (ordre Livonien), face à l'évêché.",
+    "port": true,
+    "description": "Commanderie de l'Ordre à Ösel (ordre Livonien), face à l'évêché ; l'île n'est accessible que par mer (mouillage de la côte est, emplacement approximatif).",
     "sources": [
       "Pöide"
     ]

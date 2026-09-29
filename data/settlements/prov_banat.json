@@ -43,7 +43,7 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Siège d'un évêché de la marche du Maros.",

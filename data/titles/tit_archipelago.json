@@ -42,6 +42,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_archipelago_chios",
+      "title": "Chios latine",
+      "description": "Reprendre Chios, perdue par les Zaccaria alliés de Naxos en 1329.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_chios"
+        ]
+      }
     }
   ],
   "description": "Duché de Naxos, Paros, Milos : État latin des Cyclades sous protection vénitienne. Rang « comté » du schéma.",

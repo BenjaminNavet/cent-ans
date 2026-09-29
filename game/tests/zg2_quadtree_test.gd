@@ -154,7 +154,7 @@ func _run() -> void:
 		_check(absf(qt.surface_height_at(x, y) - expected) < 1e-4, "E1 surface %f vs %f" % [qt.surface_height_at(x, y), expected])
 		var index := terrain.chunk_index_at(x, y)
 		var grid := terrain.surface_grid(index)
-		var local := Vector2(x, y) - Vector2((index % 16) * terrain.chunk_px, (index / 16) * terrain.chunk_px)
+		var local := Vector2(x, y) - Vector2((index % terrain.chunks_x) * terrain.chunk_px, (index / terrain.chunks_x) * terrain.chunk_px)
 		_check(absf(TerrainBuilder.grid_height(grid, local.x, local.y) - qt.surface_height_at(x, y)) < 1e-4, "snapshot grid matches surface")
 	else:
 		_check(false, "E1 page (17, 15) should be resident")

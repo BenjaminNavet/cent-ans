@@ -16,7 +16,7 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_market",
+      "bld_fair",
       "bld_port",
       "bld_stone_walls",
       "bld_counting_house"
@@ -47,7 +47,7 @@
       "bld_market",
       "bld_port",
       "bld_stone_walls",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Cité-péninsule aux nombreuses églises byzantines.",

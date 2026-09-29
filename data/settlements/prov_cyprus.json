@@ -46,12 +46,12 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_market",
+      "bld_fair",
       "bld_port",
       "bld_stone_walls",
-      "bld_cathedral",
       "bld_counting_house",
-      "bld_guild_hall"
+      "bld_guild_hall",
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Principal port du royaume et entrepôt du Levant, riche entre toutes.",
@@ -78,7 +78,7 @@
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Port du sud, siège des Hospitaliers avant 1310.",

@@ -50,5 +50,30 @@
     "sources": [
       "Braslaw"
     ]
+  },
+  {
+    "id": "set_lukoml",
+    "province": "prov_polotsk",
+    "kind": "castle",
+    "name": {
+      "display": "Loukoml",
+      "local": "Lukoml",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      29.08,
+      54.72
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville fortifiée de la terre de Polotsk sur le lac de Loukoml, citée dès 1078 dans les chroniques.",
+    "sources": [
+      "Lukoml"
+    ]
   }
 ]
