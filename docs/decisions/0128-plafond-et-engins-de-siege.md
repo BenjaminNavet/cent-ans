@@ -26,10 +26,10 @@ Date : 2026-09-29. Statut : accepté. Spec : `docs/superpowers/specs/2026-09-29-
 2. **Engins construits, pas recrutés** : `data/rules/siege_engines.json`. `SiegeState.engine_work`
    cumule à chaque tour de progression du siège `hommes des assiégeants / men_per_work_point`
    (au moins `min_work_per_turn`), majoré de la vitesse de siège (général, traditions). Les engins
-   s'achèvent l'un après l'autre dans l'ordre du fichier : échelles (8), bélier (16), beffroi (40).
-   Échelles 4, bélier 16, beffroi 40 : une armée de 2 000 hommes (20 points par tour) a échelles
-   et bélier en 1 tour, son beffroi en 3 ; 400 hommes (plancher de 4) : 1, 5 et 15 tours. Pas d'ordre de construction : l'armée qui assiège construit
-   (tout siège de campagne en a besoin, l'IA comprise, sans arbitrage).
+   s'achèvent l'un après l'autre dans l'ordre du fichier : échelles (4), bélier (16), beffroi (40).
+   Une armée de 2 000 hommes (20 points par tour) a échelles et bélier en 1 tour, son beffroi en
+   3 ; 400 hommes (plancher de 4) : 1, 5 et 15 tours. Pas d'ordre de construction : l'armée qui
+   assiège construit (tout siège de campagne en a besoin, l'IA comprise, sans arbitrage).
 3. **Assaut** : derrière des murailles debout (fortifiée, brèche < 50, sans tour de siège recrutée
    ni beffroi construit), l'assaut exige au moins un engin prêt (`assault_blocker`,
    `AssaultError::NoEngine`) ; il devient donc possible au 2e tour de siège, bien avant la famine.
