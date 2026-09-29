@@ -20,4 +20,11 @@ Lire ce fichier, `git log feat/om`, les notes `docs/wip/om-*.md` des lots.
 - OM2 fusionné (artefacts géo 7168×6144, 406 prov). I1 (intégration : régénération 443 prov, corrections, tous tests, mesures) lancé dans ../gp-om-om2. Ensuite : fusion P2, puis main.
 - P2 fusionné (49 portraits + 42 âgés D4-D6, 4,20 $ ; cumul OM 8,05 $/10). Contrôle visuel planche : correct ; Andronic III en couronne occidentale, Abu l-Hasan auréolé (à retoucher éventuellement).
 - I1 fini sur feat/om-om2 (tests Rust 1223 ok, pytest 1246 ok, 22 tests Godot carte ok) ; fusionné dans feat/om, puis main (FE8, Q6, DZ) fusionné dans feat/om sans conflit textuel. Vérification complète post-main relancée par I1 (reprise). Mesures : chargement 6,7 → 11,4 s, RSS 1,61 → 2,89 Go, planification IA ≈ 0,23 → 1,07 s par tour (après correctif are_neighbors).
-- Ensuite : ff main, suppression des worktrees, note finale.
+- Vérification post-main verte (Rust 1223, pytest 1246, smoke 30/30, 22 tests carte + tests Q6/DZ). century_probe 50 tours × 5 graines : banqueroutes 5,25/fac./déc. (petites factions surtout ; anciennes 0,03-0,23), révoltes 15,2/200 tours, commise de Guyenne au tour 1 sur 5/5 graines.
+- **Incident** : `q3_playtest.gd` lancé en headless par I1 a réécrit `settings.cfg` du joueur (fenêtré 1920×1080, conseiller et voix réactivés, `advisor_seen` vidé) ; anciennes valeurs perdues.
+
+## Reste (après fusion dans main)
+- Sonde 464 tours × 10 graines et équilibre des petites factions de l'Est (banqueroutes, révoltes).
+- Relecture historienne : 31 objectifs ajoutés par I1, incertitudes listées dans om-d1..d6.
+- Coût IA ×4,6 par tour (recherche de chemins, faction_power) ; chargement 11,4 s ; RSS 2,9 Go (relief_shade à tuiler/compresser).
+- Relief fin (tiers 1-3) absent à l'Est ; unités orientales ; musique orthodoxe/orientale ; portraits : Andronic III en couronne occidentale.
