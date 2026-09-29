@@ -2760,18 +2760,20 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         // SG4 (BR3b too): over the wall or inside the town: take the square
         // (never wait at the ladders); enemies on the way are fought as they
         // come close.
+        // T4: staging point just inside the opening nearest to the unit,
+        // towards the square, while the assault has not gathered.
+        let stage = (!gathered && !unit.on_wall)
+            .then(|| works.best_opening((unit.x, unit.z), square))
+            .flatten()
+            .map(|p| {
+                // Clear of the gap, towards the square.
+                let (mx, mz) = works.pieces[p].midpoint();
+                let (dx, dz) = (square.0 - mx, square.1 - mz);
+                let d = dx.hypot(dz).max(1.0);
+                let k = (35.0 / d).min(0.5);
+                (mx + dx * k, mz + dz * k)
+            });
         if unit.on_wall || works.inside(unit.x, unit.z) {
-            let stage = (!gathered && !unit.on_wall)
-                .then(|| works.best_opening((unit.x, unit.z), square))
-                .flatten()
-                .map(|p| {
-                    // Clear of the gap, towards the square.
-                    let (mx, mz) = works.pieces[p].midpoint();
-                    let (dx, dz) = (square.0 - mx, square.1 - mz);
-                    let d = dx.hypot(dz).max(1.0);
-                    let k = (35.0 / d).min(0.5);
-                    (mx + dx * k, mz + dz * k)
-                });
             match stage {
                 Some((x, z)) => view.move_to(i, x, z, false, None),
                 None => view.move_to(i, square.0, square.1, true, None),
@@ -2779,8 +2781,13 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
             continue;
         }
         if storm {
-            // SG4: through the breach or the gate as soon as it opens.
-            view.move_to(i, square.0, square.1, true, None);
+            // SG4: through the breach or the gate as soon as it opens; T4:
+            // to the staging point first, so no regiment storms the town
+            // alone ahead of the others.
+            match stage {
+                Some((x, z)) => view.move_to(i, x, z, true, None),
+                None => view.move_to(i, square.0, square.1, true, None),
+            }
         } else if (escalade || storm) && unit.can_climb() {
             // Climb at a docked tower if any (one regiment per tower at a
             // time), else ladders on the least-held stretches of the front.
