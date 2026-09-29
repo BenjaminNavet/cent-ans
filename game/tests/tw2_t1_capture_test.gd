@@ -95,7 +95,9 @@ func _test_capture_window(map: Node, sim: Object) -> void:
 	_check(ransom_summary != null and ransom_summary.text.contains("Trésor"), "ransom effects should show the gold")
 	# 2. Raser une cité : grisé, raison en clair.
 	_check(buttons[3].disabled, "raze should be disabled on a city")
-	_check(buttons[3].tooltip_text.begins_with("Impossible"), "raze tooltip should give the reason: %s" % buttons[3].tooltip_text)
+	# IB2 : infobulle brute `ib:plain:<clé>` (titre « Impossible » dans tooltips.json) ou texte direct.
+	var raze_tip := buttons[3].tooltip_text
+	_check(raze_tip.begins_with("Impossible") or raze_tip.begins_with("ib:plain:seat_unavailable"), "raze tooltip should give the reason: %s" % raze_tip)
 	_check(not buttons[1].disabled, "ransom should be allowed")
 	# 3. Rançon.
 	var gold := int(options[1].get("gold", 0))
