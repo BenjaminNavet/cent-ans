@@ -1150,7 +1150,7 @@ func _label_alpha(kind: String) -> float:
 		"city":
 			return clampf(_weights.x + _weights.y, 0.0, 1.0)
 		"town":
-			var t := 1.0 - smoothstep(tiers.town_label_distance * 0.85, tiers.town_label_distance * 1.15, _camera_distance)
+			var t := 1.0 - smoothstep(380.0 * 0.85, 380.0 * 1.15, _camera_distance)
 			return clampf(maxf(_weights.x, _weights.y * t), 0.0, 1.0)
 		_:
 			return _weights.x
