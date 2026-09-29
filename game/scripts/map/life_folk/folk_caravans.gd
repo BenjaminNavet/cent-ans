@@ -218,11 +218,16 @@ func _caravan(index: int, k: int, a: Vector2, b: Vector2, value: float) -> int:
 	var side := 0.9
 	if not _pool.add("merchant_cart", "roll", from, to, phase, side):
 		return 0
+	# Places de la suite : `slots` du manifeste FK2 (charretier près du cheval, marchand au flanc,
+	# garde en queue) ; (latéral, avance) en mètres, repli pour la maquette.
+	var carter := FolkModels.slot("merchant_cart", "carter", Vector2(1.1, 1.0))
+	var merchant := FolkModels.slot("merchant_cart", "merchant", Vector2(0.0, -3.2))
+	var guard := FolkModels.slot("merchant_cart", "guard", Vector2(-0.2, -5.0))
 	var placed := 0
-	placed += 1 if _pool.add("peasant", "walk", from, to, phase, side + 1.1, -1.0) else 0
-	placed += 1 if _pool.add("merchant", "walk", from, to, phase, side, 3.2) else 0
+	placed += 1 if _pool.add("peasant", "walk", from, to, phase, side + carter.x, -carter.y) else 0
+	placed += 1 if _pool.add("merchant", "walk", from, to, phase, side + merchant.x, -merchant.y) else 0
 	var guard_value := float(_pool.settings.get("guard_value", GUARD_VALUE))
 	var guards := 0 if value < guard_value else (1 if value < guard_value * 2.0 else 2)
 	for g in guards:
-		placed += 1 if _pool.add("guard", "guard_walk", from, to, phase, side + (0.9 if g == 1 else -0.2), 5.0 + 1.2 * g) else 0
+		placed += 1 if _pool.add("guard", "guard_walk", from, to, phase, side + guard.x + 0.9 * g, -guard.y + 1.2 * g) else 0
 	return placed

@@ -25,6 +25,8 @@ const PIECE := 4.0
 const FIELD_STEP := 3.5
 const PASTURE_STEP := 5.0
 const FOREST_STEP := 5.0
+## Longueur (unités monde) d'un sillon ou d'un trajet de porteur aux champs.
+const FURROW := 2.0
 ## Densités par défaut (surchargées par `map_scenes.json`, voir `FolkPool.settings`).
 const ROAD_FOLK_PER_UNIT := 0.12
 const FIELD_WORK_PROBABILITY := 0.35
@@ -209,12 +211,16 @@ func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2) -> int:
 	var kind := _h(seed_id, k, 5)
 	if kind < 0.15:
 		return 1 if _pool.add("rider", "ride", from, to, phase, side) else 0
-	if kind < 0.3:
+	if kind < 0.27:
 		var count := 0
 		if _pool.add("peasant_cart", "roll", from, to, phase, side):
-			count += 1 if _pool.add("peasant", "walk", from, to, phase, side + 1.1, -0.8) else 0
+			# Charretier à sa place (manifeste FK2 : `carter`).
+			var carter := FolkModels.slot("peasant_cart", "carter", Vector2(1.1, 0.8))
+			count += 1 if _pool.add("peasant", "walk", from, to, phase, side + carter.x, -carter.y) else 0
 		return count
-	var role := "peasant" if _h(seed_id, k, 6) < 0.6 else "peasant_b"
+	var pick := _h(seed_id, k, 6)
+	# Porteurs (sac à l'épaule : leur marche est `carry`) parmi les piétons.
+	var role := "porter" if pick < 0.25 else ("peasant" if pick < 0.7 else "peasant_b")
 	return 1 if _pool.add(role, "walk", from, to, phase, side) else 0
 
 
@@ -263,14 +269,37 @@ func _fields(focus: Vector2, radius: float, budget: int) -> int:
 		var activity: String = plan[0]
 		var group: int = plan[1]
 		var yaw := _h(i, j, 22) * TAU
+		var dir := Vector2(sin(yaw), cos(yaw))
+		if activity == "plough":
+			placed += _plough_team(p, dir, _h(i, j, 23))
+			continue
 		for k in group:
 			if placed >= budget:
 				break
 			# Les membres d'un groupe à 2-3 m les uns des autres (mètres → monde).
 			var offset := Vector2(cos(yaw + k * 2.1), sin(yaw + k * 2.1)) * (2.5 * k) * _pool.current_scale()
-			var role := "peasant" if (i + j + k) % 3 != 0 else "peasant_b"
+			if activity == "harvest":
+				# Porteurs (vendange, gerbes) : allers et venues courtes.
+				if _pool.add("porter", "harvest", p + offset, p + offset + dir.rotated(k * 0.7) * FURROW, _h(i, j, 30 + k)):
+					placed += 1
+				continue
+			var role := "reaper" if activity == "scythe" else ("peasant" if (i + j + k) % 3 != 0 else "peasant_b")
 			if _pool.add_static(role, activity, p + offset, yaw + (_h(i, j, 30 + k) - 0.5) * 0.8):
 				placed += 1
+	return placed
+
+
+## Attelage de labour (FK2 `plough` : charrue et bœufs, origine aux pieds du laboureur) qui
+## remonte un sillon ; laboureur à `ploughman`, bouvier à `drover`. Renvoie les figurines posées.
+func _plough_team(p: Vector2, dir: Vector2, phase: float) -> int:
+	var to := p + dir * FURROW
+	if not _pool.add("plough", "", p, to, phase):
+		return 0
+	var placed := 0
+	var ploughman := FolkModels.slot("plough", "ploughman", Vector2.ZERO)
+	var drover := FolkModels.slot("plough", "drover", Vector2(1.0, 5.4))
+	placed += 1 if _pool.add("peasant", "plough", p, to, phase, ploughman.x, -ploughman.y) else 0
+	placed += 1 if _pool.add("peasant_b", "plough", p, to, phase, drover.x, -drover.y) else 0
 	return placed
 
 

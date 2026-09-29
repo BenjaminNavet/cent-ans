@@ -6,49 +6,67 @@ extends RefCounted
 ##
 ## - **Figurines** (`ROLES`) : figurines skinnées des batailles (`BattleSkinned`, texture d'os).
 ##   Chaque rôle liste des candidats [famille, variante] ; le premier présent dans le manifeste
-##   `battle_skinned` l'emporte. Les figurines civiles du lot FK2 se branchent en tête de liste
-##   (`civilian_*`) ; en attendant, maquettes provisoires : servants d'engins (`crew`, sans
-##   armure) et miliciens.
-## - **Activités** (`ACTIVITIES`) : jeu de clips (les clips absents du rig sont écartés : les
-##   clips `plough`, `scythe`, `carry` du lot FK2 prennent le relais dès qu'ils existent) et
-##   vitesse de marche (m/s, unités du modèle).
-## - **Accessoires** (`PROPS`) : modèles `res://assets/models/folk/*.glb` du lot FK2 (premier
-##   chemin présent), sinon maquette en boîtes (`_fallback_mesh`). Unités : mètres.
+##   `battle_skinned` l'emporte : villageois du lot FK2 (`villager_0` mains vides, `villager_1`
+##   faucheurs, `villager_3` porteurs ; `villager_2` émeutiers réservés aux scènes FK4), sinon
+##   servants d'engins (`crew`, sans armure) et miliciens.
+## - **Activités** (`ACTIVITIES`) : villageois animés par `BattleSkinned.state_config` (états
+##   `marching`, `plough`, `scythe`, `carry`, `idle` du style `folk`) ; autres figurines, jeu de
+##   clips (absents du rig écartés). Vitesse de déplacement en m/s (0 : sur place).
+## - **Accessoires** (`PROPS`) : modèles FK2 (`res://assets/models/folk/manifest.json`,
+##   `models.<nom>.file` ; mètres, origine au sol, regard +X, tournés d'un quart de tour vers +Z,
+##   sens du déplacement en shader), sinon maquette en boîtes (`_fallback_mesh`, regard +Z).
+##   Emplacements des figurines autour d'un accessoire : `slots` du manifeste (`slot`).
 
 const PROP_SHADER := preload("res://shaders/folk_prop.gdshader")
 
 ## Rôle → candidats [famille, variante] (ordre de préférence), livrée et couleurs des habits.
 const ROLES := {
-	"peasant": {"figures": [["civilian", 0], ["crew", 0], ["infantry", 2]], "livery": Color(0.42, 0.33, 0.22)},
-	"peasant_b": {"figures": [["civilian", 1], ["crew", 1], ["infantry", 3]], "livery": Color(0.36, 0.38, 0.3)},
-	"merchant": {"figures": [["civilian", 2], ["crew", 1], ["infantry", 5]], "livery": Color(0.35, 0.18, 0.12)},
-	"pilgrim": {"figures": [["civilian", 3], ["crew", 0], ["infantry", 2]], "livery": Color(0.3, 0.27, 0.24)},
+	"peasant": {"figures": [["villager", 0], ["crew", 0], ["infantry", 2]], "livery": Color(0.42, 0.33, 0.22)},
+	"peasant_b": {"figures": [["villager", 0], ["crew", 1], ["infantry", 3]], "livery": Color(0.36, 0.38, 0.3)},
+	"reaper": {"figures": [["villager", 1], ["crew", 0], ["infantry", 2]], "livery": Color(0.45, 0.36, 0.24)},
+	"porter": {"figures": [["villager", 3], ["crew", 1], ["infantry", 3]], "livery": Color(0.4, 0.3, 0.22)},
+	"rioter": {"figures": [["villager", 2], ["infantry", 2], ["infantry", 5]], "livery": Color(0.38, 0.3, 0.2)},
+	"merchant": {"figures": [["villager", 0], ["crew", 1], ["infantry", 5]], "livery": Color(0.35, 0.18, 0.12)},
+	"pilgrim": {"figures": [["villager", 0], ["crew", 0], ["infantry", 2]], "livery": Color(0.3, 0.27, 0.24)},
 	"guard": {"figures": [["infantry", 2], ["infantry", 5]], "livery": Color(0.5, 0.12, 0.1)},
 	"rider": {"figures": [["cavalry", 1], ["cavalry", 0]], "livery": Color(0.33, 0.28, 0.2)},
 }
 ## Habits ternes (laine écrue, brun, roux, gris) tirés par figurine (`plain_colors`).
 const DRAB := [Color(0.55, 0.5, 0.4), Color(0.4, 0.3, 0.2), Color(0.5, 0.32, 0.2), Color(0.42, 0.42, 0.4)]
 
-## Activité → clips (les absents du rig sont écartés, repli sur `fallback`) et vitesse (m/s).
+## Activité → état des villageois (`BattleSkinned.state_config`), clips des autres figurines
+## (absents du rig écartés, repli sur `fallback`) et vitesse (m/s ; 0 = sur place).
 const ACTIVITIES := {
-	"walk": {"clips": ["walk"], "fallback": ["idle"], "speed": 1.2},
-	"guard_walk": {"clips": ["pike_walk", "walk"], "fallback": ["walk"], "speed": 1.2},
-	"ride": {"clips": ["c_walk"], "fallback": ["c_idle"], "speed": 1.2},
-	"plough": {"clips": ["plough", "push"], "fallback": ["walk"], "speed": 0.0},
-	"scythe": {"clips": ["scythe", "slash"], "fallback": ["idle"], "speed": 0.0},
-	"harvest": {"clips": ["carry", "haul", "push"], "fallback": ["idle"], "speed": 0.0},
-	"chop": {"clips": ["overhead", "slash", "crank"], "fallback": ["idle"], "speed": 0.0},
-	"herd": {"clips": ["idle", "idle_look", "idle_lean"], "fallback": ["idle"], "speed": 0.0},
-	"idle": {"clips": ["idle", "idle_look", "idle_lean", "guard"], "fallback": ["idle"], "speed": 0.0},
+	"walk": {"state": "marching", "clips": ["walk"], "fallback": ["idle"], "speed": 1.2},
+	"guard_walk": {"state": "marching", "clips": ["pike_walk", "walk"], "fallback": ["walk"], "speed": 1.2},
+	"ride": {"state": "marching", "clips": ["c_walk"], "fallback": ["c_idle"], "speed": 1.2},
+	"plough": {"state": "plough", "clips": ["plough", "push"], "fallback": ["walk"], "speed": 0.8},
+	"scythe": {"state": "scythe", "clips": ["scythe", "slash"], "fallback": ["idle"], "speed": 0.0},
+	"harvest": {"state": "carry", "clips": ["carry", "haul", "push"], "fallback": ["walk"], "speed": 1.0},
+	"chop": {"state": "scythe", "clips": ["overhead", "slash", "crank"], "fallback": ["idle"], "speed": 0.0},
+	"herd": {"state": "idle", "clips": ["idle", "idle_look", "idle_lean"], "fallback": ["idle"], "speed": 0.0},
+	"idle": {"state": "idle", "clips": ["idle", "idle_look", "idle_lean", "guard"], "fallback": ["idle"], "speed": 0.0},
+}
+## Familles animées par état (`BattleSkinned.state_config`, styles `folk` / `folk_carry` de FK2).
+const STATE_KINDS := ["villager"]
+const PROP_DIR := "res://assets/models/folk/"
+const PROP_MANIFEST := PROP_DIR + "manifest.json"
+
+## Accessoire → modèle FK2 (nom du manifeste), maquette de repli, vitesse de déplacement (m/s,
+## celle des figurines qui l'accompagnent). Charrette de paysan : `stone_cart` (bœuf inclus ;
+## FK2 n'a pas de charrette de paysan propre). FK4 ajoute ici les accessoires de ses scènes
+## (`dead_cart`, `market_stall`, `pyre`, `scaffold`, `pitchfork`, `torch`, `procession_*`…).
+const PROPS := {
+	"merchant_cart": {"model": "merchant_cart", "fallback": "covered_cart", "speed": 1.2},
+	"peasant_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2},
+	"plough": {"model": "plough", "fallback": "plough", "speed": 0.8},
+	"sheep": {"model": "sheep", "fallback": "sheep", "speed": 0.0},
+	"cow": {"model": "cow", "fallback": "cow", "speed": 0.0},
+	"ox": {"model": "ox", "fallback": "cow", "speed": 0.0},
+	"horse": {"model": "horse", "fallback": "cow", "speed": 0.0},
 }
 
-## Accessoire → chemins candidats (lot FK2), maquette de repli, vitesse de roulage (m/s).
-const PROPS := {
-	"merchant_cart": {"paths": ["res://assets/models/folk/merchant_cart.glb"], "fallback": "covered_cart", "speed": 1.2},
-	"peasant_cart": {"paths": ["res://assets/models/folk/peasant_cart.glb", "res://assets/models/folk/stone_cart.glb"], "fallback": "open_cart", "speed": 1.2},
-	"sheep": {"paths": ["res://assets/models/folk/sheep.glb", "res://assets/models/folk/herd_sheep.glb"], "fallback": "sheep", "speed": 0.0},
-	"cow": {"paths": ["res://assets/models/folk/cow.glb", "res://assets/models/folk/herd_cows.glb"], "fallback": "cow", "speed": 0.0},
-}
+static var _manifest: Dictionary = {}
 
 static var _prop_meshes: Dictionary = {}
 static var _prop_sources: Dictionary = {}
@@ -81,6 +99,8 @@ static func speed_of(role: String, activity: String) -> float:
 ## Configuration d'animation (format `BattleSkinned.apply_config`) d'une activité.
 static func activity_config(kind: String, variant: int, activity: String) -> Dictionary:
 	var entry: Dictionary = ACTIVITIES.get(activity, ACTIVITIES["idle"])
+	if STATE_KINDS.has(kind):
+		return BattleSkinned.state_config(kind, variant, str(entry["state"]), false)
 	var rig_entry := BattleSkinned.rig(kind, variant)
 	var names := BattleSkinned._present(rig_entry, entry["clips"])
 	if names.is_empty():
@@ -105,12 +125,11 @@ static func prop_mesh(role: String) -> ArrayMesh:
 		return _prop_meshes[role]
 	var entry: Dictionary = PROPS.get(role, {})
 	var mesh: ArrayMesh = null
-	for path in entry.get("paths", []):
-		if ResourceLoader.exists(str(path)):
-			mesh = _mesh_from_scene(str(path))
-			if mesh != null:
-				_prop_sources[role] = str(path)
-				break
+	var path := model_path(str(entry.get("model", role)))
+	if path != "" and ResourceLoader.exists(path):
+		mesh = _mesh_from_scene(path)
+		if mesh != null:
+			_prop_sources[role] = path
 	if mesh == null:
 		mesh = _fallback_mesh(str(entry.get("fallback", "open_cart")))
 		_prop_sources[role] = "fallback:%s" % entry.get("fallback", "open_cart")
@@ -118,9 +137,37 @@ static func prop_mesh(role: String) -> ArrayMesh:
 	return mesh
 
 
+## Entrée `models.<nom>` du manifeste FK2 ({} si absent).
+static func model_entry(model: String) -> Dictionary:
+	if _manifest.is_empty():
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROP_MANIFEST)) if FileAccess.file_exists(PROP_MANIFEST) else null
+		_manifest = parsed if parsed is Dictionary else {"models": {}}
+	var entry: Variant = (_manifest.get("models", {}) as Dictionary).get(model)
+	return entry if entry is Dictionary else {}
+
+
+## Chemin du glb d'un modèle FK2 (`file` du manifeste), vide si absent.
+static func model_path(model: String) -> String:
+	var file := str(model_entry(model).get("file", ""))
+	return PROP_DIR + file if file != "" else ""
+
+
+## Emplacement `slot` autour de l'accessoire `role` (manifeste FK2, repère du glb : +X devant,
+## +Z à droite du sens de marche) en (latéral, avance) mètres pour `FolkPool.add`
+## (`lateral_m` = latéral, `behind_m` = -avance) ; `fallback` (même convention) si absent.
+static func slot(role: String, slot_name: String, fallback: Vector2) -> Vector2:
+	var model := str((PROPS.get(role, {}) as Dictionary).get("model", role))
+	var slots: Variant = model_entry(model).get("slots", {})
+	if prop_source(role).begins_with("fallback:") or not (slots is Dictionary) or not (slots as Dictionary).has(slot_name):
+		return fallback
+	var p: Array = slots[slot_name]
+	return Vector2(float(p[2]), float(p[0]))
+
+
 static func clear_cache() -> void:
 	_prop_meshes.clear()
 	_prop_sources.clear()
+	_manifest.clear()
 
 
 ## Fusionne les maillages d'une scène glTF (transformations appliquées) en un seul maillage ;
@@ -133,6 +180,8 @@ static func _mesh_from_scene(path: String) -> ArrayMesh:
 	if root == null:
 		return null
 	var out := ArrayMesh.new()
+	# Glb FK2 : regard +X ; le shader déplace le long de +Z (quart de tour : +X → +Z, +Z → -X).
+	var facing := Transform3D(Basis(Vector3.UP, -PI * 0.5), Vector3.ZERO)
 	for node in root.find_children("*", "MeshInstance3D", true, false):
 		var instance := node as MeshInstance3D
 		if instance.mesh == null:
@@ -143,6 +192,7 @@ static func _mesh_from_scene(path: String) -> ArrayMesh:
 			if walk is Node3D:
 				xform = (walk as Node3D).transform * xform
 			walk = walk.get_parent()
+		xform = facing * xform
 		for s in instance.mesh.get_surface_count():
 			var arrays := instance.mesh.surface_get_arrays(s)
 			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -200,6 +250,9 @@ static func _fallback_mesh(kind: String) -> ArrayMesh:
 			_box(st, Vector3(0, 0.55, 0), Vector3(0.55, 0.5, 1.0), Color(0.88, 0.86, 0.8))
 			_box(st, Vector3(0, 0.7, 0.6), Vector3(0.25, 0.25, 0.3), Color(0.2, 0.18, 0.16))
 			_box(st, Vector3(0, 0.15, 0), Vector3(0.4, 0.3, 0.7), Color(0.2, 0.18, 0.16))
+		"plough":
+			_box(st, Vector3(0, 0.35, 0.9), Vector3(0.25, 0.25, 1.8), Color(0.42, 0.28, 0.16))
+			_box(st, Vector3(0, 1.0, 4.0), Vector3(0.9, 0.9, 2.2), Color(0.5, 0.33, 0.2))
 		"cow":
 			_box(st, Vector3(0, 1.0, 0), Vector3(0.8, 0.8, 1.9), Color(0.5, 0.33, 0.2))
 			_box(st, Vector3(0, 1.2, 1.15), Vector3(0.4, 0.4, 0.5), Color(0.45, 0.3, 0.18))

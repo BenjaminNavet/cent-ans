@@ -65,6 +65,21 @@ func _run() -> void:
 	print("fk_folk_test: merchant_cart from %s, peasant %s" % [FolkModels.prop_source("merchant_cart"), FolkModels.figure_of("peasant")])
 	var config := FolkModels.activity_config("crew", 0, "walk")
 	_check((config["set"] as Array).size() > 0, "walk config")
+	# Modèles FK2 : villageois par rôle, accessoires du manifeste, emplacements (+X devant).
+	if BattleSkinned.has_figure("villager", 1):
+		_check(FolkModels.figure_of("reaper") == ["villager", 1], "reapers are villager_1: %s" % [FolkModels.figure_of("reaper")])
+		_check(FolkModels.figure_of("porter") == ["villager", 3], "porters are villager_3")
+		_check(FolkModels.figure_of("peasant") == ["villager", 0], "peasants are villager_0")
+		var scythe := FolkModels.activity_config("villager", 1, "scythe")
+		_check((scythe["names"] as Array).has("scythe"), "reapers scythe: %s" % [scythe["names"]])
+	if FolkModels.model_path("merchant_cart") != "" and ResourceLoader.exists(FolkModels.model_path("merchant_cart")):
+		_check(FolkModels.prop_source("merchant_cart").ends_with("merchant_cart.glb"), "FK2 merchant cart: %s" % FolkModels.prop_source("merchant_cart"))
+		_check(FolkModels.prop_source("peasant_cart").ends_with("stone_cart.glb"), "FK2 stone cart for peasants")
+		var carter := FolkModels.slot("merchant_cart", "carter", Vector2(-9, -9))
+		_check(carter.is_equal_approx(Vector2(0.7, 2.2)), "carter slot (lateral, ahead): %s" % carter)
+		# Regard +X du glb tourné vers +Z (sens du déplacement) : le cheval est devant.
+		var cart_aabb := FolkModels.prop_mesh("merchant_cart").get_aabb()
+		_check(cart_aabb.end.z > 4.0 and cart_aabb.position.z > -1.5 and absf(cart_aabb.position.x) < 1.0, "cart faces +Z: %s" % cart_aabb)
 
 	var data_dir := MAP_PATHS.default_data_dir()
 	var map_dir := data_dir.path_join("map")
@@ -149,6 +164,13 @@ func _run() -> void:
 	for child in pool.get_children():
 		total += (child as MultiMeshInstance3D).multimesh.instance_count
 	_check(total == 0, "no instance far away: %d" % total)
+
+	# Printemps : attelages de labour (charrue FK2 ou maquette) qui remontent leur sillon.
+	routine.season = "spring"
+	pool.invalidate()
+	_view(pool, focus, 45.0, 1.0)
+	var ploughs := pool.get_node_or_null("Folk_plough") as MultiMeshInstance3D
+	_check(ploughs != null and ploughs.multimesh.instance_count > 0 and pool.instance_custom("plough", 0).r > 0.0, "plough teams in spring: %s" % routine.stats)
 
 	# Saisons : hiver, bûcherons possibles, champs clairsemés ; pas d'erreur.
 	routine.season = "winter"

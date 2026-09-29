@@ -15,6 +15,16 @@ Spec : `docs/design/2026-09-29-carte-vivante-folk.md` §§ 2.2, 3.1, 3.2, 5-7. S
   (`--no-folk`, `--folk-off=routine,caravans,...`).
 - `game/tests/fk_folk_test.gd` vert, `smoke.gd` vert, shaders compilés sans erreur (lancement GPU).
 
+## Rebranchement FK2 (sur `integration/fk`)
+- Rôles : `peasant`/`peasant_b`/`merchant`/`pilgrim` → `villager_0`, `reaper` → `villager_1`
+  (fauche), `porter` → `villager_3` (porteurs, routes et vendanges), `rioter` → `villager_2`
+  (réservé aux scènes FK4). Villageois animés par `BattleSkinned.state_config` (aucun indice de
+  clip en dur) ; sans villageois, repli servants/miliciens.
+- Accessoires : manifeste `folk/manifest.json` (`file`, `slots`) ; glb tournés de +X vers +Z ;
+  charrette de paysan = `stone_cart`, labour = `plough` (charrue + bœufs, laboureur et bouvier
+  aux `slots`) qui remonte un sillon ; suite des marchands aux `slots` de `merchant_cart`.
+  `FolkModels.slot(role, name, repli)` → (latéral, avance) pour `FolkPool.add`.
+
 ## Mesures (Paris, distance 45)
 250-430 figurines, placement 4-12 ms après le premier (création des groupes ≈ 50 ms, une fois).
 
