@@ -70,6 +70,9 @@ var _icon_material: ShaderMaterial
 ## Lot DA3 : catalogue des marqueurs ; par colonie : rang, taille écran de l'écu (px), distance de
 ## retrait.
 var markers: SettlementMarkers
+## Lot DV : pièces de maquettes qui portent ombre, et état courant de la coupure des ombres.
+var _shadow_geometries: Array[GeometryInstance3D] = []
+var _model_shadows := true
 ## Lot DV2 : atlas des écus des détenteurs.
 var heraldry := HeraldryAtlas.new()
 var _marker_rank: PackedInt32Array = PackedInt32Array()
@@ -318,16 +321,42 @@ func _build_model(i: int, entry: Dictionary) -> void:
 	_model_top[i] = aabb.end.y
 	_base_radius[i] = _model_radius[i]
 	_base_top[i] = _model_top[i]
-	for geometry in model.find_children("*", "GeometryInstance3D", true, false):
-		var g := geometry as GeometryInstance3D
-		g.visibility_range_end = tiers.model_range
-		g.visibility_range_end_margin = tiers.model_range * 0.15
+	_limit_model(model)
 	_models_root.add_child(holder)
 	_models.append(holder)
 	_ground_model(i)
 
 
 ## Ville emblématique (lot L1) : maquette dédiée à la place de la maquette générique.
+## Portée d'affichage d'une maquette (`ZoomTiers.model_range`) ; ses pièces qui portent ombre
+## sont retenues pour la coupure des ombres au-delà de `model_shadow_distance` (lot DV).
+func _limit_model(model: Node) -> void:
+	for geometry in model.find_children("*", "GeometryInstance3D", true, false):
+		var g := geometry as GeometryInstance3D
+		g.visibility_range_end = tiers.model_range
+		g.visibility_range_end_margin = tiers.model_range * 0.15
+		if g.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+			_shadow_geometries.append(g)
+			if not _model_shadows:
+				g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+
+## Lot DV (ADR 0124) : les maquettes restent jusqu'à ~1250 ; au-delà de `model_shadow_distance`,
+## leurs ombres coûtent des appels de dessin sans se voir. Bascule seulement au franchissement.
+func _update_model_shadows(camera_distance: float) -> void:
+	var shadows := camera_distance < tiers.model_shadow_distance
+	if shadows == _model_shadows:
+		return
+	_model_shadows = shadows
+	var setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var alive: Array[GeometryInstance3D] = []
+	for g in _shadow_geometries:
+		if is_instance_valid(g):
+			g.cast_shadow = setting
+			alive.append(g)
+	_shadow_geometries = alive
+
+
 func _build_landmark(i: int, entry: Dictionary) -> bool:
 	var plan := LandmarkLibrary.for_settlement(str(entry["id"]))
 	if plan.is_empty():
@@ -998,6 +1027,7 @@ func update_view(camera_distance: float) -> void:
 	if data == null:
 		return
 	_camera_distance = camera_distance
+	_update_model_shadows(camera_distance)
 	var tp := Time.get_ticks_usec()  # RS-K : sections `settle/*` du banc `--bench-probe`
 	# DV2 (ADR 0124) : détail proche, vue normale, vue stratégique.
 	var strategic := tiers.strategic_weight(camera_distance)
@@ -2049,10 +2079,7 @@ func replace_models(replacements: Array) -> void:
 		_fit_scale[i] = 1.0
 		_model_scale[i] = 1.0
 		_forget_scale(i)
-		for geometry in model.find_children("*", "GeometryInstance3D", true, false):
-			var g := geometry as GeometryInstance3D
-			g.visibility_range_end = tiers.model_range
-			g.visibility_range_end_margin = tiers.model_range * 0.15
+		_limit_model(model)
 		if i < _colors.size():
 			ModelLibrary.tint_banner(holder, _colors[i])
 		_ground_model(i)
