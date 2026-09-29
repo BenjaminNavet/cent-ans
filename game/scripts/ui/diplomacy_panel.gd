@@ -274,7 +274,7 @@ func _build_map_column() -> Control:
 	_map_view_toggle.text = "Vue de la faction choisie"
 	_map_view_toggle.button_pressed = _map_their_view
 	_map_view_toggle.focus_mode = Control.FOCUS_NONE
-	_map_view_toggle.tooltip_text = "Coché : la carte montre les ennemis (rouge), neutres et alliés de la faction choisie. Décoché : vos propres relations."
+	RichTooltip.attach_plain(_map_view_toggle, "diplomacy_map_view")
 	_map_view_toggle.toggled.connect(func(on: bool) -> void:
 		_map_their_view = on
 		_render_map())

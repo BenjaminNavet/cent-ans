@@ -430,6 +430,7 @@
     },
     "chronicle_pending": {"title": "Événements en attente de décision"},
     "diplomacy_open": {"title": "Diplomatie et religion (P)"},
+    "diplomacy_map_view": {"title": "Vue de la faction choisie", "body": "Coché : la carte montre les ennemis (rouge), neutres et alliés de la faction choisie. Décoché : vos propres relations."},
     "help_resume_tutorial": {"title": "Reprend le tutoriel à l'étape où vous l'aviez laissé, sinon le relance depuis le début."},
     "close_list_b": {"title": "Fermer la liste", "hint": "B"},
     "close_list_u": {"title": "Fermer la liste", "hint": "U"},
