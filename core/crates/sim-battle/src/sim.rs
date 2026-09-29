@@ -5,6 +5,7 @@
 #![allow(clippy::needless_range_loop)]
 
 mod camp;
+mod capture;
 mod decision;
 mod deployment;
 mod fire;
@@ -140,6 +141,9 @@ pub struct BattleSim {
     /// Siege battles: the town walls (M8 § 2).
     siege: Option<SiegeWorks>,
     square_announced: bool,
+    /// T4: the "square threatened" alert fired (re-armed when the
+    /// square's progress falls back to 0). Output only.
+    square_threatened: bool,
     /// Leader's orders: uses and cooldowns per side (F10b).
     pub(crate) order_uses: OrderUses,
     /// The side gave the "no quarter" order.
@@ -474,6 +478,7 @@ impl BattleSim {
             impacts: std::collections::VecDeque::new(),
             siege,
             square_announced: false,
+            square_threatened: false,
             order_uses: Default::default(),
             no_quarter: [false; 2],
             deploying: false,
@@ -1408,6 +1413,7 @@ impl BattleSim {
         self.separate_friends();
         self.resolve_water();
         self.resolve_siege_works();
+        self.resolve_capture_points();
         self.relieve_rams();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
@@ -1802,26 +1808,6 @@ impl BattleSim {
                     ));
                 }
             }
-        }
-        // The central square.
-        let held_by = |side: SideId| {
-            self.units
-                .iter()
-                .any(|u| u.side == side && u.able() && !u.synthetic && works.in_square(u.x, u.z))
-        };
-        let attackers_in = held_by(SideId::Attacker);
-        let defenders_in = held_by(SideId::Defender);
-        if attackers_in && !defenders_in {
-            works.hold_time += DT;
-            if !self.square_announced {
-                self.square_announced = true;
-                logs.push((
-                    "Les assaillants s'emparent de la place centrale !".to_owned(),
-                    Some(SideId::Attacker),
-                ));
-            }
-        } else {
-            works.hold_time = (works.hold_time - DT * 0.5).max(0.0);
         }
         for (text, side) in logs {
             self.log(text, side);
@@ -2927,12 +2913,24 @@ impl BattleSim {
         // formatted for the few regiments concerned).
         let mut new_events: Vec<(usize, &'static str)> = Vec::new();
         let siege = self.siege.is_some();
+        // T4 (ADR 0108): the garrison's last stand on the square.
+        let stand = &crate::capture::CaptureRules::bundled().last_stand;
+        let last_stand: Vec<bool> = self
+            .units
+            .iter()
+            .map(|u| siege && u.present() && self.in_last_stand(u))
+            .collect();
         for i in 0..n {
             if !self.units[i].present() {
                 continue;
             }
             let unit = &mut self.units[i];
             let mut morale = unit.morale;
+            let (stand_loss, stand_contagion) = if last_stand[i] {
+                (stand.loss_morale_factor, stand.contagion_factor)
+            } else {
+                (1.0, 1.0)
+            };
             // Behind battlements the garrison takes its losses more calmly.
             let cover = if unit.ram || unit.siege_tower() {
                 0.3
@@ -2941,7 +2939,10 @@ impl BattleSim {
             } else {
                 1.0
             };
-            morale -= unit.tick_losses / f64::from(unit.max_soldiers) * LOSS_MORALE_FACTOR * cover;
+            morale -= unit.tick_losses / f64::from(unit.max_soldiers)
+                * LOSS_MORALE_FACTOR
+                * cover
+                * stand_loss;
             if unit.flanked & 1 != 0 {
                 morale -= 1.5 * DT;
             }
@@ -2983,7 +2984,7 @@ impl BattleSim {
                     nearest_enemy = nearest_enemy.min((dx * dx + dz * dz).sqrt());
                 }
             }
-            morale -= contagion.morale_rate(routing_weight) * DT;
+            morale -= contagion.morale_rate(routing_weight) * DT * stand_contagion;
             let mut aura = 0.0;
             if let Some((gx, gz, command)) = general_pos[unit.side.index()] {
                 if (gx - unit.x).powi(2) + (gz - unit.z).powi(2) < GENERAL_AURA * GENERAL_AURA {
@@ -3003,6 +3004,11 @@ impl BattleSim {
                 // Behind their walls the burghers stand firm.
                 if morale < unit.morale_cap {
                     morale = (morale + 0.2 * DT + aura).min(unit.morale_cap);
+                }
+            } else if last_stand[i] {
+                // T4: the last stand, even in the melee.
+                if morale < unit.morale_cap {
+                    morale = (morale + stand.morale_per_s * DT + aura).min(unit.morale_cap);
                 }
             } else if morale < unit.morale_cap + 10.0 {
                 morale += aura;
@@ -3078,10 +3084,8 @@ impl BattleSim {
                 .count()
         });
         let timeout = self.elapsed >= MAX_DURATION - 1e-9;
-        let square_held = self
-            .siege
-            .as_ref()
-            .is_some_and(|w| w.hold_time >= siege::HOLD_TO_WIN);
+        // T4 (ADR 0108): the market square held long enough.
+        let square_held = self.square_taken();
         let (winner, end) = if able[0] > 0 && able[1] > 0 && !timeout && !square_held {
             // EP9: a broken army, a refused battle or a lull.
             match self.field_decision() {

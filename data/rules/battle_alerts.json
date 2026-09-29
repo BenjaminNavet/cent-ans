@@ -1,11 +1,12 @@
 {
-  "description": "Alertes de bataille typées (lot CB5, ADR 0095) : durée d'affichage, fenêtre et rayon de fusion des alertes de même type dans la colonne, importance (ordre d'affichage, la plus importante en premier) et nombre maximal affiché en même temps.",
+  "description": "Alertes de bataille typées (lot CB5, ADR 0095) : durée d'affichage, fenêtre et rayon de fusion des alertes de même type dans la colonne, importance (ordre d'affichage, la plus importante en premier) et nombre maximal affiché en même temps. « square_threatened » : la place centrale est en train d'être prise (lot TW2 T4, ADR 0108).",
   "duration_s": 8,
   "merge_window_s": 5,
   "merge_radius_m": 60,
   "max_shown": 5,
   "importance": {
     "general_down": 100,
+    "square_threatened": 95,
     "gate_destroyed": 90,
     "wall_breached": 80,
     "rout": 70,

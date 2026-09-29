@@ -42,6 +42,8 @@ struct Outcome {
     defender_lost: f64,
     burnt: usize,
     houses: usize,
+    /// T4: how the battle ended (`square_held`, `rout`, `nightfall`...).
+    end: &'static str,
     /// BR3b diagnostics (`BR3_TRACE`): seconds from the start.
     trace: Trace,
 }
@@ -156,6 +158,33 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
                 shooters_log.push(format!("{:.0}: {}", sim.elapsed(), line.join(" ")));
             }
         }
+        // T4: the garrison's morale every 5 s (`BR3_WATCH`).
+        if std::env::var("BR3_WATCH").is_ok()
+            && ((sim.elapsed() / DT).round() as u64).is_multiple_of((5.0 / DT).round() as u64)
+        {
+            let c = sim.siege().unwrap().center;
+            let line: Vec<String> = sim
+                .units()
+                .iter()
+                .filter(|u| {
+                    u.present() && !u.synthetic && u.category != data_model::UnitCategory::Siege
+                })
+                .map(|u| {
+                    format!(
+                        "{}{}[{:.0}m {:?} w{} hp{:.0} m{:.0} f{:.0}]",
+                        if u.side == SideId::Defender { "D" } else { "A" },
+                        &u.unit_type[5..9],
+                        (u.x - c.0).hypot(u.z - c.1),
+                        u.state,
+                        u8::from(u.on_wall),
+                        u.hp,
+                        u.morale,
+                        u.fatigue
+                    )
+                })
+                .collect();
+            println!("W {:.0}: {}", sim.elapsed(), line.join(" "));
+        }
         if !tracing {
             continue;
         }
@@ -185,6 +214,22 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
                 }
             }
             if u.side != SideId::Attacker {
+                // T4: when and where the garrison breaks (`BR3_DEF_ROUTS`).
+                if u.state == UnitState::Routing
+                    && pstate != UnitState::Routing
+                    && std::env::var("BR3_DEF_ROUTS").is_ok()
+                {
+                    let c = works.center;
+                    println!(
+                        "D   {town:?} seed {seed} rout {} at {now:.0} s, {:.0} m from the square, wall {}, hp {:.0}/{}, openings {}",
+                        u.unit_type,
+                        (u.x - c.0).hypot(u.z - c.1),
+                        u.on_wall,
+                        u.hp,
+                        u.initial_soldiers,
+                        works.openings().len(),
+                    );
+                }
                 continue;
             }
             let inside = works.inside(u.x, u.z);
@@ -291,6 +336,7 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
         defender_lost: lost(SideId::Defender),
         burnt: works.houses.iter().filter(|h| h.fire.burnt()).count(),
         houses: works.houses.iter().filter(|h| !h.suburb).count(),
+        end: sim.outcome().map_or("—", |o| o.end.key()),
         trace: t,
     }
 }
@@ -322,8 +368,8 @@ fn probe_town_assaults() {
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(1800.0);
-    println!("| Ville | Maisons | Victoires assaillant | Durée médiane (s) | Pertes assaillant | Pertes garnison | Maisons brûlées (moy.) |");
-    println!("|---|---|---|---|---|---|---|");
+    println!("| Ville | Maisons | Victoires assaillant | Durée médiane (s) | Pertes assaillant | Pertes garnison | Maisons brûlées (moy.) | Fins |");
+    println!("|---|---|---|---|---|---|---|---|");
     let mut traces: Vec<(String, Vec<Trace>, Vec<bool>)> = Vec::new();
     for town in towns() {
         let town = town.as_deref();
@@ -332,8 +378,13 @@ fn probe_town_assaults() {
             .collect();
         let n = runs.len() as f64;
         let wins = runs.iter().filter(|r| r.attacker_won).count();
+        let mut ends: std::collections::BTreeMap<&str, usize> = Default::default();
+        for r in &runs {
+            *ends.entry(r.end).or_default() += 1;
+        }
+        let ends: Vec<String> = ends.iter().map(|(k, n)| format!("{k} {n}")).collect();
         println!(
-            "| {} | {} | {}/{} | {:.0} | {:.0} | {:.0} | {:.1} |",
+            "| {} | {} | {}/{} | {:.0} | {:.0} | {:.0} | {:.1} | {} |",
             town.unwrap_or("générique"),
             runs[0].houses,
             wins,
@@ -342,6 +393,7 @@ fn probe_town_assaults() {
             runs.iter().map(|r| r.attacker_lost).sum::<f64>() / n,
             runs.iter().map(|r| r.defender_lost).sum::<f64>() / n,
             runs.iter().map(|r| r.burnt as f64).sum::<f64>() / n,
+            ends.join(", "),
         );
         traces.push((
             town.unwrap_or("générique").to_owned(),

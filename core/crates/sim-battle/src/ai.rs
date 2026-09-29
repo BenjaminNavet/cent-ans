@@ -2709,6 +2709,25 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     let square = works.center;
     let mut ladder_slot = 0usize;
     let mut tower_slot = 0usize;
+    // T4: the melee regiments gather inside before they march on the square
+    // together (no regiment thrown alone at the garrison's last stand).
+    let assault = &crate::capture::CaptureRules::bundled().assault;
+    let melee: Vec<usize> = own
+        .iter()
+        .copied()
+        .filter(|&i| {
+            let u = &units[i];
+            u.able() && !is_shooter(u) && u.category != UnitCategory::Siege
+        })
+        .collect();
+    let melee_in = melee
+        .iter()
+        .filter(|&&i| units[i].on_wall || works.inside(units[i].x, units[i].z))
+        .count();
+    let committed = melee
+        .iter()
+        .any(|&i| dist_to(&units[i], square.0, square.1) < assault.committed_radius_m);
+    let gathered = committed || melee_in as f64 >= assault.gather_share * melee.len() as f64 - 1e-9;
     for &i in &own {
         let unit = &units[i];
         if unit.category == UnitCategory::Siege || !view.free(i) || relief.contains(&i) {
@@ -2742,7 +2761,21 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         // (never wait at the ladders); enemies on the way are fought as they
         // come close.
         if unit.on_wall || works.inside(unit.x, unit.z) {
-            view.move_to(i, square.0, square.1, true, None);
+            let stage = (!gathered && !unit.on_wall)
+                .then(|| works.best_opening((unit.x, unit.z), square))
+                .flatten()
+                .map(|p| {
+                    // Clear of the gap, towards the square.
+                    let (mx, mz) = works.pieces[p].midpoint();
+                    let (dx, dz) = (square.0 - mx, square.1 - mz);
+                    let d = dx.hypot(dz).max(1.0);
+                    let k = (35.0 / d).min(0.5);
+                    (mx + dx * k, mz + dz * k)
+                });
+            match stage {
+                Some((x, z)) => view.move_to(i, x, z, false, None),
+                None => view.move_to(i, square.0, square.1, true, None),
+            }
             continue;
         }
         if storm {
@@ -2813,6 +2846,33 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
         .collect();
     let mut blockers = 0usize;
     let gate_down = !works.pieces[works.gate].intact();
+    // T4 (ADR 0108): the garrison falls back on the square at the first
+    // breach (not only when the gate falls), leaving a few regiments in the
+    // openings; fallen back, it only charges attackers near the square.
+    let fall_back = &crate::capture::CaptureRules::bundled().fall_back;
+    let fallen_back = gate_down || (fall_back.on_breach && !openings.is_empty());
+    // The broken gate (a gatehouse to hold) keeps `gate_blockers`
+    // regiments while it is the only way in; a breach (rubble) keeps
+    // `breach_blockers` and, once the walls are breached, the gate too:
+    // `max_blockers` in all.
+    let breached = openings.iter().any(|&p| p != works.gate);
+    let blocked: Vec<usize> = openings
+        .iter()
+        .flat_map(|&p| {
+            let n = if p == works.gate && !breached {
+                fall_back.gate_blockers
+            } else {
+                fall_back.breach_blockers
+            };
+            std::iter::repeat_n(p, n)
+        })
+        .take(fall_back.max_blockers)
+        .collect();
+    let max_blockers = blocked.len();
+    let near_square = |j: usize| {
+        fall_back.on_breach
+            && dist_to(&units[j], works.center.0, works.center.1) < fall_back.engage_radius_m
+    };
     let mut square_slot = 0usize;
     for &i in &own {
         let unit = &units[i];
@@ -2842,9 +2902,9 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
                 .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
             if let Some((j, _)) = near_climber {
                 view.attack(i, j, false);
-            } else if gate_down {
-                // SG1: the gate is down, nobody climbs here: come down and
-                // regroup on the square.
+            } else if fallen_back {
+                // SG1: the gate is down (T4: or a breach open), nobody
+                // climbs here: come down and regroup on the square.
                 let k = square_slot;
                 square_slot += 1;
                 let (x, z) = square_point(works, k);
@@ -2855,18 +2915,21 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
             continue;
         }
         if let Some((j, d)) = near_inside {
-            if d < 250.0 || is_horse(unit) {
+            let engage = if fallen_back && fall_back.on_breach {
+                d < 40.0 || near_square(j)
+            } else {
+                d < 250.0
+            };
+            if engage || is_horse(unit) {
                 view.attack(i, j, true);
                 continue;
             }
         }
         // Block the openings from inside, one regiment per opening first;
-        // SG1: beyond `BLOCKERS_PER_OPENING` per opening, the foot regroups
-        // on the central square (and holds it) instead of crowding the gap.
-        if !openings.is_empty()
-            && blockers >= openings.len() * crate::siege_fx::BLOCKERS_PER_OPENING
-            && !is_horse(unit)
-        {
+        // SG1: beyond the blockers of each opening (T4: `gate_blockers`,
+        // `breach_blockers`, `max_blockers`), the foot regroups on the central square
+        // (and holds it) instead of crowding the gap.
+        if !openings.is_empty() && blockers >= max_blockers && !is_horse(unit) {
             if !works.in_square(unit.x, unit.z) {
                 let k = square_slot;
                 square_slot += 1;
@@ -2875,8 +2938,8 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
             }
             continue;
         }
-        if !openings.is_empty() {
-            let p = openings[blockers % openings.len()];
+        if !blocked.is_empty() {
+            let p = blocked[blockers % blocked.len()];
             blockers += 1;
             let (x, z) = outer_point(works, p, -(band + 22.0));
             let (nx, nz) = works.pieces[p].outward();

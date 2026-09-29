@@ -34,7 +34,7 @@
     },
     "importance": {
       "type": "object",
-      "description": "Poids d'affichage par type d'alerte (clé = AlertKind::key : rout, general_down, flanked, reinforcements, ammo_out, wall_breached, gate_destroyed). Le plus grand nombre s'affiche en premier.",
+      "description": "Poids d'affichage par type d'alerte (clé = AlertKind::key : rout, general_down, flanked, reinforcements, ammo_out, wall_breached, gate_destroyed, square_threatened). Le plus grand nombre s'affiche en premier.",
       "additionalProperties": {
         "type": "integer",
         "minimum": 0,
