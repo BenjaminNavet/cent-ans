@@ -259,26 +259,6 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "Public domain",
         150.0,
     ),
-    WikimediaTrack(
-        "File:2 Rubba laylin.flac",
-        "nuba_ramal_maya_rubba_laylin",
-        "« Rubba laylin », Nūbat Ramal al-Māya (nuba andalouse de Fès)",
-        "Orchestre Jawq Brihi de Fès, dir. ʿAbd al-Krīm ar-Rāyis (v. 1980), Carl Davila",
-        "islamic",
-        "campaign_islamic",
-        "CC BY 4.0",
-        180.0,
-    ),
-    WikimediaTrack(
-        "File:Oud music by Andy R. Jordan 1V2 long.mp3",
-        "oud_andy_jordan",
-        "Improvisation à l'oud",
-        "Andy R. Jordan",
-        "islamic",
-        "campaign_islamic",
-        "CC BY-SA 3.0",
-        150.0,
-    ),
 ]
 
 
