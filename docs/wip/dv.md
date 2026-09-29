@@ -14,7 +14,7 @@ Worktree `../game_project-dv`, branche `feat/dv`. Coût cloud : 0 $.
 - [ ] DV3 : retrait des enveloppes, test activé, banc FPS à 1100, 2 captures, fusion.
 
 ## Prochaine étape
-Lancer DV1 et DV2 (agents cent-ans-dev, worktrees depuis feat/dv).
+DV1 et DV2 lancés 09-29 (agents cent-ans-dev en worktree, branches feat/dv1, feat/dv2). Ensuite : fusion dans feat/dv, DV3. Banc A/B (main vs feat/dv) à d = 1100 lancé dos à dos, agents arrêtés.
 
 ## Points ouverts
 - `integration/fk` touche campaign_map.gd, life_effects.gd, campaign_life.gd : petits conflits à la fusion.
