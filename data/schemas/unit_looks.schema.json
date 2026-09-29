@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/unit_looks.schema.json",
+  "title": "Variantes de rendu des figurines par type d'unité",
+  "description": "Fichier data/fx/unit_looks.json (lot OMR R5) : rendu seulement, lu par game/scripts/battle/battle_unit_looks.gd.",
+  "type": "object",
+  "$defs": {
+    "colour": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "look": {
+      "type": "object",
+      "properties": {
+        "livery_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part des soldats vêtus de la livrée du camp." },
+        "cloth": {
+          "type": "array",
+          "description": "Étoffes (sRGB) des vêtements non teints à la livrée, à la place de la palette commune.",
+          "items": { "$ref": "#/$defs/colour" },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "coats": {
+          "type": "array",
+          "description": "Robes des chevaux tirées au hasard par figurine.",
+          "items": { "enum": ["bay", "chestnut", "black", "grey", "dun"] },
+          "minItems": 1,
+          "maxItems": 4
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "looks": {
+      "type": "object",
+      "propertyNames": { "pattern": "^unit_[a-z0-9_]+$" },
+      "additionalProperties": { "$ref": "#/$defs/look" }
+    }
+  },
+  "required": ["looks"],
+  "additionalProperties": false
+}

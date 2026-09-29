@@ -1201,10 +1201,10 @@
       "author": "Skoll"
     },
     "unit_druzhina": {
-      "file": "delapouite-viking-helmet.svg",
+      "file": "lorc-lamellar.svg",
       "category": "unit",
-      "source": "delapouite/viking-helmet",
-      "author": "Delapouite"
+      "source": "lorc/lamellar",
+      "author": "Lorc"
     },
     "unit_ecorcheurs": {
       "file": "delapouite-torch.svg",
@@ -1339,10 +1339,10 @@
       "author": "Lorc"
     },
     "unit_serbian_heavy_cavalry": {
-      "file": "lorc-heavy-helm.svg",
+      "file": "delapouite-cavalry.svg",
       "category": "unit",
-      "source": "lorc/heavy-helm",
-      "author": "Lorc"
+      "source": "delapouite/cavalry",
+      "author": "Delapouite"
     },
     "unit_siege_tower": {
       "file": "delapouite-siege-tower.svg",
