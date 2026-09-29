@@ -1,0 +1,67 @@
+{
+  "id": "evt_rixe_de_foire",
+  "title": "Rixe de foire",
+  "text": "Deux troupes de marchands en viennent aux mains sur la place de la foire, pour une querelle d'aunage. Les étals sont renversés, le guet accourt et chacun crie à l'injustice.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 45,
+    "conditions": [
+      {
+        "type": "season",
+        "season": "summer"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "map_scene": "fair",
+  "options": [
+    {
+      "text": "Faire juger l'affaire par le prévôt",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 300
+        },
+        {
+          "type": "unrest",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Faire emprisonner les meneurs",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 4
+        },
+        {
+          "type": "wealth",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser les marchands s'arranger",
+      "effects": [
+        {
+          "type": "wealth",
+          "amount": -5
+        },
+        {
+          "type": "unrest",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "sources": [
+    "Robert-Henri Bautier, Les Foires de Champagne, 1953",
+    "Jean Favier, De l'or et des épices, Fayard, 1987"
+  ]
+}

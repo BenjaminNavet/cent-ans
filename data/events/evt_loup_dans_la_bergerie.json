@@ -1,0 +1,60 @@
+{
+  "id": "evt_loup_dans_la_bergerie",
+  "title": "Un loup dans la bergerie",
+  "text": "Un loup a égorgé une vingtaine de brebis dans la nuit. Le berger jure qu'il n'a pas dormi, et les paysans réclament que le seigneur fasse lever les louvetiers.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Dépêcher les louvetiers",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -300
+        },
+        {
+          "type": "unrest",
+          "amount": -3
+        },
+        {
+          "type": "wealth",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Promettre une prime par bête abattue",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -150
+        },
+        {
+          "type": "unrest",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Dédommager le berger seul",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -100
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "sources": [
+    "Jean-Marc Moriceau, Histoire du méchant loup, Fayard, 2007",
+    "Journal d'un bourgeois de Paris (1405-1449)"
+  ]
+}

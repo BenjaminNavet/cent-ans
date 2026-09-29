@@ -1,0 +1,60 @@
+{
+  "id": "evt_moines_quetes",
+  "title": "Les moines quêteurs",
+  "text": "Des frères mendiants parcourent la province, besace au flanc, et prêchent au pied des croix de carrefour. Ils demandent des aumônes pour leur couvent et promettent des prières aux généreux.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 70
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Ouvrir la bourse du seigneur",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -400
+        },
+        {
+          "type": "piety",
+          "amount": 3
+        },
+        {
+          "type": "unrest",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Les laisser quêter chez les seuls habitants",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -2
+        },
+        {
+          "type": "wealth",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Les renvoyer poliment",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Jacques Le Goff, « Apostolat mendiant et fait urbain dans la France médiévale », Annales E.S.C., 1968",
+    "Ordres mendiants"
+  ]
+}

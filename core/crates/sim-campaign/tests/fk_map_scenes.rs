@@ -300,12 +300,13 @@ fn random_province_event_defaults_to_map() {
 ///
 /// Measured by FK1 (France, `end_turn` with the built-in minimal AI, the
 /// player's decisions left to expire): 37 map incidents and 57 dialogs over
-/// 252 turns, 0.147 incident per turn (one every 6.8 turns). Below the
-/// target until FK5 adds its ~15 random province events; the bounds are
-/// then enforced. Slow (about 3 min in release): run with
+/// 252 turns, 0.147 incident per turn (one every 6.8 turns). FK5b (15 random
+/// province events) brings it to 80 map incidents and 41 dialogs, 0.317 per
+/// turn (one every 3.2 turns), inside the bounds. Slow (165 s in release, so
+/// kept `#[ignore]`): run with
 /// `cargo test --release -p sim-campaign --test fk_map_scenes -- --ignored`.
 #[test]
-#[ignore = "FK5: below 1 incident / 4 turns until the 15 new events land"]
+#[ignore = "slow: about 165 s in release"]
 fn player_incident_rate_1337_1400() {
     let (turns, map, dialog) = measure_incidents();
     let rate = map as f64 / turns as f64;

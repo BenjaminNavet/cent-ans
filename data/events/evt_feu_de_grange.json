@@ -1,0 +1,70 @@
+{
+  "id": "evt_feu_de_grange",
+  "title": "Le feu de la grange",
+  "text": "La grange où l'on entassait la dîme a pris feu par une nuit d'été. Le grain est perdu et l'on murmure qu'un fermier lésé y a mis la main.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 50,
+    "conditions": [
+      {
+        "type": "season",
+        "season": "summer"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Secourir les sinistrés sur les greniers du seigneur",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -500
+        },
+        {
+          "type": "unrest",
+          "amount": -4
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Rechercher l'incendiaire",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -150
+        },
+        {
+          "type": "unrest",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Faire payer la reconstruction aux paroissiens",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 200
+        },
+        {
+          "type": "unrest",
+          "amount": 6
+        },
+        {
+          "type": "wealth",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "sources": [
+    "Guy Fourquin, Les Campagnes de la région parisienne à la fin du Moyen Âge, PUF, 1964",
+    "Journal d'un bourgeois de Paris (1405-1449)"
+  ]
+}
