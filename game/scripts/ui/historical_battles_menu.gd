@@ -166,7 +166,7 @@ func _add_battle(box: VBoxContainer, entry: Dictionary) -> void:
 			var army: Dictionary = entry.get(side, {})
 			button.text = "Mener %s" % _the_army(str(army.get("faction_name", side)))
 			button.tooltip_text = str(army.get("army", ""))
-		button.pressed.connect(start.bind(id, side))
+		button.pressed.connect(func() -> void: BattlePrologueInvite.gate(self, start.bind(id, side)))  # NT4
 		row.add_child(button)
 		buttons["%s:%s" % [id, side]] = button
 

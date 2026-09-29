@@ -177,7 +177,7 @@ func _build() -> void:
 	launch_button = Button.new()
 	launch_button.name = "LaunchButton"
 	launch_button.text = "Lancer la bataille"
-	launch_button.pressed.connect(launch)
+	launch_button.pressed.connect(func() -> void: BattlePrologueInvite.gate(self, launch))  # NT4 : invite au didacticiel
 	row.add_child(launch_button)
 	launch_button.grab_focus.call_deferred()
 

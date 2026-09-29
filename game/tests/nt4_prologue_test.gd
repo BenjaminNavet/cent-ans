@@ -22,6 +22,8 @@ func _init() -> void:
 		print("nt4: extension absente, partie bataille ignorée")
 	else:
 		await _check_menu_entry()
+		await _check_invite()
+		await _check_defeat()
 		await _check_battle()
 	if _failures == 0:
 		print("nt4 battle prologue OK")
@@ -185,7 +187,68 @@ func _check_battle() -> void:
 	_check(prologue.current_step_id() == "outro", "victory -> outro")
 	prologue.overlay.continue_pressed.emit()
 	_check(prologue.done and not prologue.overlay.visible, "guide closed after the last step")
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	_check(settings == null or bool(settings.call("get_value", BattlePrologueInvite.DONE_KEY)), "prologue marked done")
+	_check(not BattlePrologueInvite.should_ask(), "no invite once the prologue is done")
 	scene.queue_free()
+	await process_frame
+
+
+## Défaite : texte d'adieu, « Recommencer » visible, « Fermer » clôt sans marquer le didacticiel fait.
+func _check_defeat() -> void:
+	var data := BattlePrologue.load_data()
+	BattleScene.custom_config = BattlePrologue.battle_config(data)
+	BattleScene.prologue_data = data
+	var scene: Node = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
+	root.add_child(scene)
+	await process_frame
+	await process_frame
+	var prologue: BattlePrologue = scene.get("prologue")
+	if not _check(prologue != null, "second prologue battle built"):
+		scene.queue_free()
+		return
+	prologue.overlay.continue_pressed.emit()  # intro -> camera
+	prologue.show_defeat()
+	_check(prologue.defeated and prologue.overlay.visible, "defeat text shown")
+	_check(prologue.overlay.title_label.text == str(data["defeat"]["title"]), "defeat title: %s" % prologue.overlay.title_label.text)
+	_check(prologue.restart_button != null and prologue.restart_button.visible and prologue.restart_button.text == "Recommencer", "restart button")
+	_check(prologue.overlay.continue_button.text == "Fermer", "close button")
+	_check(not prologue.check_now(), "no step check after the defeat")
+	prologue.overlay.continue_pressed.emit()
+	_check(prologue.done and not prologue.overlay.visible, "defeat panel closed")
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	_check(settings == null or not bool(settings.call("get_value", BattlePrologueInvite.DONE_KEY)), "defeat does not mark the prologue done")
+	scene.queue_free()
+	await process_frame
+
+
+## Invite du premier lancement : Non poursuit, Ne plus demander poursuit et mémorise.
+func _check_invite() -> void:
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings == null:
+		return
+	settings.call("set_value", BattlePrologueInvite.DONE_KEY, false, false)
+	settings.call("set_value", BattlePrologueInvite.NEVER_KEY, false, false)
+	_check(BattlePrologueInvite.should_ask(), "invite asked at first launch")
+	var host := Control.new()
+	root.add_child(host)
+	var proceeded := [0]
+	var invite := BattlePrologueInvite.gate(host, func() -> void: proceeded[0] += 1)
+	await process_frame
+	_check(invite != null and proceeded[0] == 0, "launch held by the invite")
+	if invite != null:
+		_check(invite.yes_button.text == "Oui" and invite.no_button.text == "Non" and invite.never_button.text == "Ne plus demander", "invite buttons")
+		invite.no_button.pressed.emit()
+	_check(proceeded[0] == 1 and BattlePrologueInvite.should_ask(), "« Non » proceeds and asks again later")
+	invite = BattlePrologueInvite.gate(host, func() -> void: proceeded[0] += 1)
+	await process_frame
+	if invite != null:
+		invite.never_button.pressed.emit()
+	_check(proceeded[0] == 2 and not BattlePrologueInvite.should_ask(), "« Ne plus demander » proceeds and remembers")
+	invite = BattlePrologueInvite.gate(host, func() -> void: proceeded[0] += 1)
+	_check(invite == null and proceeded[0] == 3, "no invite after « Ne plus demander »")
+	settings.call("set_value", BattlePrologueInvite.NEVER_KEY, false, false)
+	host.queue_free()
 	await process_frame
 
 

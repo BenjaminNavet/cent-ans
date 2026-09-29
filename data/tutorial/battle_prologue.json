@@ -26,6 +26,10 @@
     "seed": 1337
   },
   "enemy_passive": true,
+  "defeat": {
+    "title": "Le champ est perdu",
+    "text": "Vos hommes lâchent pied : les fourrageurs l'emportent cette fois. Rien n'est perdu pour autant. Gardez les archers derrière les hommes d'armes, laissez-les tirer avant le choc et ne lancez les chevaliers que sur un flanc ou sur un ennemi déjà ébranlé. « Recommencer » relance l'escarmouche depuis le début."
+  },
   "steps": [
     {
       "id": "intro",

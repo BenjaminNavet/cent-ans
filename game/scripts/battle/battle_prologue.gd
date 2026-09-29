@@ -30,6 +30,11 @@ var overlay: TutorialOverlay = null
 var baseline: Dictionary = {}
 var done := false
 var enemy_ai_enabled := false
+## Défaite affichée (texte d'adieu, « Recommencer »).
+var defeated := false
+var restart_button: Button = null
+## Faux en test : `battle_prologue/done` n'est pas enregistré.
+var persist_progress := true
 ## Étape dont l'objectif vient d'être rempli (bref retour avant la suivante).
 var _done_timer := -1.0
 var _check_timer := 0.0
@@ -235,7 +240,7 @@ func index_of(id: String) -> int:
 
 
 func go_to(index: int) -> void:
-	if index < 0 or index >= steps.size():
+	if defeated or index < 0 or index >= steps.size():
 		return
 	step_index = index
 	_done_timer = -1.0
@@ -253,13 +258,14 @@ func go_to(index: int) -> void:
 func advance() -> void:
 	if done:
 		return
-	if step_index >= steps.size() - 1:
+	if defeated or step_index >= steps.size() - 1:
 		finish()
 	else:
 		go_to(step_index + 1)
 
 
-## Fin du guide (dernière étape ou « Passer le tutoriel ») : l'ennemi reprend la main.
+## Fin du guide (dernière étape ou « Passer le tutoriel ») : l'ennemi reprend la main. Hors
+## défaite, le didacticiel compte comme fait (plus d'invite au premier lancement).
 func finish() -> void:
 	if done:
 		return
@@ -268,7 +274,49 @@ func finish() -> void:
 	if overlay != null:
 		overlay.hide()
 		overlay.set_target({})
+		if restart_button != null:
+			restart_button.visible = false
+	if not defeated and persist_progress:
+		var settings := get_node_or_null("/root/Settings")
+		if settings != null:
+			settings.call("set_value", BattlePrologueInvite.DONE_KEY, true)
 	finished.emit()
+
+
+## Défaite : texte d'adieu du conseiller, « Recommencer » (relance l'escarmouche) ou « Fermer ».
+func show_defeat() -> void:
+	if done or defeated:
+		return
+	defeated = true
+	_done_timer = -1.0
+	var defeat: Dictionary = data.get("defeat", {})
+	if overlay == null:
+		return
+	overlay.show_step(_overlay_step({
+		"id": "defeat",
+		"title": str(defeat.get("title", "Défaite")),
+		"text": str(defeat.get("text", "")),
+		"objective": "",
+		"condition": {"type": "manual"},
+	}), step_index, steps.size())
+	overlay.set_target({})
+	overlay.continue_button.text = "Fermer"
+	overlay.skip_step_button.visible = false
+	if restart_button == null:
+		restart_button = Button.new()
+		restart_button.name = "RestartButton"
+		restart_button.text = "Recommencer"
+		restart_button.pressed.connect(restart)
+		overlay.continue_button.add_sibling(restart_button)
+		overlay.continue_button.get_parent().move_child(restart_button, overlay.continue_button.get_index())
+	restart_button.visible = true
+
+
+## Relance la bataille-prologue depuis le début.
+func restart() -> void:
+	done = true
+	if not Engine.is_editor_hint() and is_inside_tree():
+		BattlePrologue.launch(get_tree())
 
 
 func _overlay_step(step: Dictionary) -> Dictionary:
@@ -335,7 +383,7 @@ func _unit_point(unit: Dictionary) -> Dictionary:
 
 
 func _process(delta: float) -> void:
-	if done or scene == null or step_index < 0:
+	if done or defeated or scene == null or step_index < 0:
 		return
 	overlay.set_target(resolve_target(str(current_step().get("target", ""))))
 	if _done_timer >= 0.0:
@@ -352,14 +400,14 @@ func _process(delta: float) -> void:
 
 ## Vérifie l'étape courante sur l'état de la bataille (appelé toutes les `CHECK_INTERVAL` s).
 func check_now() -> bool:
-	if done or scene == null:
+	if done or defeated or scene == null:
 		return false
 	var state := snapshot(scene)
 	# La bataille est finie avant l'étape de victoire (l'ennemi s'est débandé plus tôt) : on y va.
 	if bool(state["finished"]):
 		var victory := index_of("victory")
 		if str(state["winner"]) != str(state["player_side"]):
-			finish()
+			show_defeat()
 			return false
 		if victory > step_index:
 			go_to(victory)
