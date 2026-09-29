@@ -8,8 +8,9 @@ ADR : `docs/decisions/0127-missions-de-campagne.md`.
 - [x] Squelette `core/crates/sim-campaign/src/missions.rs`, champ `CampaignState::missions` (serde default)
 - [x] Crochets : bataille gagnée (`battle_outcome::apply`), recrutement/engagement (`submit_order_outcome`), fin de tour (`turn.rs`)
 - [x] Implémentation (génération, progression, réussite, échec, récompense) + tests Rust (`tests/nt3_missions.rs`)
-- [ ] Pont GDExtension (`campaign_sim_missions.rs`), UI panneau d'objectifs + avis, test Godot
-- [ ] ADR 0127, pytest schéma
+- [x] Pont `campaign_sim_missions.rs`, UI (`victory_controller.gd` section Missions + toasts, `season_report.gd`), test `game/tests/nt3_missions_test.gd` écrits — à vérifier (build.sh, Godot)
+- [x] pytest schéma (`tools/tests/test_missions_schema.py`)
+- [ ] ADR 0127
 
 ## Prochaine étape
-Pont GDExtension puis UI.
+core/build.sh, test Godot, smoke, clippy workspace, ADR.
