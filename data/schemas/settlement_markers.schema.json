@@ -2,68 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/settlement_markers.schema.json",
   "title": "Marqueurs de lieux de la carte de campagne",
-  "description": "Fichier data/map/settlement_markers.json (lot DA3, ADR 0066) : catalogue des pictogrammes peints (atlas unique), choix du pictogramme par type et rang, règles de rang, tailles écran et dé-encombrement par distance caméra.",
+  "description": "Fichier data/map/settlement_markers.json (lot DA3, ADR 0066 ; lot DV, ADR 0124) : règles de rang des lieux, taille écran de l'écu par rang, densité des noms par distance caméra et dé-encombrement écran. Plus de marqueur peint ni de son atlas.",
   "type": "object",
   "$defs": {
     "kind": {"enum": ["city", "town", "village", "castle", "abbey"]},
-    "rank_key": {"type": "string", "pattern": "^[1-4]$"},
-    "unit_point": {
-      "type": "array",
-      "items": {"type": "number", "minimum": 0, "maximum": 1},
-      "minItems": 2,
-      "maxItems": 2
-    },
-    "placement": {
-      "type": "object",
-      "description": "Position (fraction du quad, origine en bas à gauche) et demi-taille d'un élément composé dans le shader.",
-      "properties": {
-        "center": {"$ref": "#/$defs/unit_point"},
-        "half_size": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.5}
-      },
-      "required": ["center", "half_size"],
-      "additionalProperties": false
-    }
+    "rank_key": {"type": "string", "pattern": "^[1-4]$"}
   },
   "properties": {
     "description": {"type": "string"},
-    "atlas": {
-      "type": "object",
-      "properties": {
-        "path": {"type": "string", "pattern": "^res://.+\\.png$"},
-        "cell_px": {"type": "integer", "minimum": 32, "maximum": 512},
-        "columns": {"type": "integer", "minimum": 1, "maximum": 16}
-      },
-      "required": ["path", "cell_px", "columns"],
-      "additionalProperties": false
-    },
-    "pictograms": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-          "cell": {"type": "integer", "minimum": 0},
-          "label": {"type": "string", "description": "Nom affiché (légende)."},
-          "badge": {"type": "boolean", "description": "Vrai pour un insigne composé (port), pas un type."},
-          "subject": {"type": "string", "description": "Sujet du prompt de génération (anglais)."}
-        },
-        "required": ["id", "cell", "label", "subject"],
-        "additionalProperties": false
-      }
-    },
-    "kinds": {
-      "type": "object",
-      "description": "Pictogramme par type de colonie et par rang (1 à 4). Rang absent : celui du rang inférieur le plus proche.",
-      "propertyNames": {"$ref": "#/$defs/kind"},
-      "additionalProperties": {
-        "type": "object",
-        "propertyNames": {"$ref": "#/$defs/rank_key"},
-        "additionalProperties": {"type": "string"},
-        "minProperties": 1
-      }
-    },
-    "port_badge": {"type": "string", "description": "Pictogramme insigne des colonies portuaires."},
     "rank_rules": {
       "type": "array",
       "description": "Règles de rang, la première qui s'applique l'emporte ; sinon `default_rank`.",
@@ -83,7 +29,7 @@
     "default_rank": {"type": "integer", "minimum": 1, "maximum": 4},
     "size_px": {
       "type": "object",
-      "description": "Taille écran (px, à 900 px de haut) du marqueur par rang.",
+      "description": "Taille écran de référence (px, à 900 px de haut) par rang ; l'écu en prend `shield.size_factor`.",
       "propertyNames": {"$ref": "#/$defs/rank_key"},
       "additionalProperties": {"type": "number", "minimum": 8, "maximum": 96}
     },
@@ -117,10 +63,9 @@
       "description": "Lot DA7d : dé-encombrement écran par priorité (placement glouton, grille spatiale).",
       "properties": {
         "description": {"type": "string"},
-        "marker_box": {"$ref": "#/$defs/unit_point", "description": "Emprise opaque du pictogramme (fraction du quad : largeur, hauteur), centrée."},
-        "marker_margin_px": {"type": "number", "minimum": 0, "maximum": 32, "description": "Marge (px) autour d'un marqueur."},
+        "marker_margin_px": {"type": "number", "minimum": 0, "maximum": 32, "description": "Marge (px) autour d'un écu."},
         "label_margin_px": {"type": "number", "minimum": 0, "maximum": 32, "description": "Marge (px) autour d'un nom."},
-        "hidden_alpha": {"type": "number", "minimum": 0, "maximum": 1, "description": "Opacité d'un marqueur qui cède la place (0 = masqué, > 0 = estompé)."},
+        "hidden_alpha": {"type": "number", "minimum": 0, "maximum": 1, "description": "Opacité d'un écu qui cède la place (0 = masqué, > 0 = estompé)."},
         "fade_seconds": {"type": "number", "minimum": 0, "maximum": 2, "description": "Durée du fondu d'apparition / disparition."},
         "interval_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 2, "description": "Période minimale entre deux recalculs."},
         "recompute_move_fraction": {"type": "number", "minimum": 0, "maximum": 1, "description": "Déplacement de la caméra (fraction de sa distance) qui déclenche un recalcul."},
@@ -133,9 +78,18 @@
       },
       "additionalProperties": false
     },
-    "shield": {"$ref": "#/$defs/placement"},
-    "badge": {"$ref": "#/$defs/placement"}
+    "shield": {
+      "type": "object",
+      "description": "Lot DV2 : écu du détenteur au-dessus du nom.",
+      "properties": {
+        "description": {"type": "string"},
+        "size_factor": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Côté de l'écu en fraction de `size_px`."},
+        "gap_px": {"type": "number", "minimum": 0, "maximum": 16, "description": "Écart (px) entre le haut du nom et le bas de l'écu."}
+      },
+      "required": ["size_factor", "gap_px"],
+      "additionalProperties": false
+    }
   },
-  "required": ["atlas", "pictograms", "kinds", "rank_rules", "default_rank", "size_px", "visibility", "fade_distance", "shield"],
+  "required": ["rank_rules", "default_rank", "size_px", "visibility", "fade_distance", "shield"],
   "additionalProperties": false
 }

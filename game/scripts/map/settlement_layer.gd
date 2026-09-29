@@ -1,16 +1,17 @@
 class_name SettlementLayer
 extends Node3D
 
-## Colonies et hameaux sur la carte de campagne (lot C6), rendu seulement :
-## - paliers Europe et moyen : marqueurs (`settlement_icon.gdshader`, un `MultiMesh`), langage
-##   unique du lot DA3 (ADR 0066, `SettlementMarkers`) : pictogramme peint selon le type, écu du
-##   détenteur, taille selon le rang, dé-encombrement par distance caméra (données) ; noms des
-##   cités (et des villes en se rapprochant) ;
-## - palier près : maquettes 3D par type (`ModelLibrary.settlement_model`), posées sur la surface
-##   exacte du terrain affiché et recalées quand une tuile change de niveau ; hameaux en
-##   `MultiMesh` par tuile (orientation et variante déterministes, brûlés selon la dévastation de
-##   la province) ; noms de toutes les colonies.
-## Dé-encombrement écran (lot DA7d, ADR 0066) : marqueurs et noms posés par priorité (rang puis
+## Colonies et hameaux sur la carte de campagne (lot C6), rendu seulement. Lot DV2 (ADR 0124) :
+## tout vit dans la vue normale (`normal = 1 − ZoomTiers.strategic_weight`), le parchemin prend le
+## relais au-delà ; plus de marqueur peint.
+## - maquettes 3D par type (`ModelLibrary.settlement_model`) jusqu'à `ZoomTiers.model_range`,
+##   posées sur la surface exacte du terrain affiché et recalées quand une tuile change de niveau ;
+## - nom de chaque lieu au-dessus de sa maquette, surmonté d'un petit écu du détenteur
+##   (`settlement_icon.gdshader`, un `MultiMesh`, atlas `HeraldryAtlas`) ; taille selon le rang et
+##   densité par rang et distance caméra (`SettlementMarkers`, données) ; estompés par `normal` ;
+## - détail proche (`ZoomTiers.near_weight`) : hameaux en `MultiMesh` par tuile (orientation et
+##   variante déterministes, brûlés selon la dévastation de la province).
+## Dé-encombrement écran (lot DA7d, ADR 0066) : couples nom + écu posés par priorité (rang puis
 ## poids, `MarkerDeclutter`) ; ceux qui recouvrent un rectangle déjà posé cèdent la place (fondu
 ## du shader), sauf la capitale du joueur, la colonie sélectionnée et celle survolée. Recalcul
 ## seulement quand la caméra bouge nettement (paramètres dans `settlement_markers.json`).
@@ -18,7 +19,6 @@ extends Node3D
 
 signal settlement_selected(id: String)
 
-const KIND_INDEX := {"city": 0, "town": 1, "castle": 2, "abbey": 3, "village": 4}
 ## Lot PO3 (bible DA § 4, § 12.2) : noms dans le registre manuscrit — EB Garamond, graisse et taille
 ## selon le rang (cité `Heading`, ville `Body`, bourg `Caption`), encre sombre sur un halo de
 ## parchemin léger (plus de pastille claire).
@@ -29,12 +29,9 @@ const LABEL_FONT_PATH := "res://assets/third_party/fonts/eb_garamond/EBGaramond-
 ## Halo : contour fin (px de police) et part d'opacité du halo.
 const LABEL_OUTLINE_PX := 4
 const LABEL_HALO_ALPHA := 0.6
-## Rayon de picking d'un marqueur, en fraction de sa taille écran.
-const PICK_ICON_FRACTION := 0.45
-## Hauteur du centre du marqueur au-dessus du lieu, en fraction de sa taille (cf. shader).
-const ICON_CENTER_LIFT := 0.42
-## Nom au-dessus du marqueur (DA7d) : écart (px écran) entre le haut de l'emprise du
-## pictogramme et le bas du texte mesuré (DC4), pour que le nom ne touche plus ses flèches.
+## Rayon de picking d'un écu, en fraction de sa taille écran.
+const PICK_ICON_FRACTION := 0.6
+## Nom d'un lieu sans maquette : écart (px écran) entre le lieu et le bas du texte mesuré (DC4).
 const LABEL_GAP_PX := 2.0
 ## Proportion de hameaux brûlés = dévastation (%) × ce facteur (au-delà d'un seuil).
 const BURN_THRESHOLD := 10.0
@@ -51,7 +48,7 @@ const ABSORB_FACTOR := 0.5
 const ABSORB_OVERLAP := 0.2
 
 @export var tiers: ZoomTiers
-## Échelle globale des marqueurs (tailles par rang dans `data/map/settlement_markers.json`).
+## Échelle globale des écus (tailles par rang dans `data/map/settlement_markers.json`).
 @export var icon_size_scale: float = 1.0
 @export var label_color: Color = Color(0.13, 0.085, 0.045)
 @export var label_outline: Color = Color(0.93, 0.87, 0.72)
@@ -70,16 +67,20 @@ var label_obstacles: Callable = Callable()
 
 var _icons: MultiMeshInstance3D
 var _icon_material: ShaderMaterial
-## Lot DA3 : catalogue des marqueurs ; par colonie : rang, taille écran (px), distance de retrait.
+## Lot DA3 : catalogue des marqueurs ; par colonie : rang, taille écran de l'écu (px), distance de
+## retrait.
 var markers: SettlementMarkers
+## Lot DV2 : atlas des écus des détenteurs.
+var heraldry := HeraldryAtlas.new()
 var _marker_rank: PackedInt32Array = PackedInt32Array()
 var _marker_size: PackedFloat32Array = PackedFloat32Array()
 var _marker_until: PackedFloat32Array = PackedFloat32Array()
-## DC4 : position monde de chaque marqueur, ancre du `MultiMesh` (picking et dé-encombrement DA7d
-## sans relire le relief).
+## DC4, DV2 : ancre monde de chaque couple nom + écu (= position du `Label3D`), ancre du
+## `MultiMesh` (picking et dé-encombrement DA7d sans relire le relief).
 var _marker_world: PackedVector3Array = PackedVector3Array()
-## Écu affiché par colonie (faction), pour ne réécrire que ce qui change.
+## Écu affiché par colonie (faction), pour ne réécrire que ce qui change ; 1 si armorié (DV2).
 var _marker_holder: PackedStringArray = PackedStringArray()
+var _shielded: PackedByteArray = PackedByteArray()
 ## Lot DA7d : état de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
 ## ordre de priorité fixe (rang puis poids), épinglés et dernier état de caméra calculé.
 var _marker_shown: PackedByteArray = PackedByteArray()
@@ -136,7 +137,12 @@ var _burned_material: StandardMaterial3D
 var _devastation: Dictionary = {}
 var _colors: PackedColorArray = PackedColorArray()
 var _declutter_timer := 0.0
-var _weights := Vector3(-1, -1, -1)  # près, moyen, loin
+var _weights := Vector3(-1, -1, -1)  # DV2 : détail proche, vue normale, vue stratégique
+## DV2 : échelle écran des `Label3D` transmise au shader des écus (px écran par px d'étiquette).
+var _shield_label_scale := -1.0
+## DV2 : fondu de retrait par rang et écart nom → écu (données, lus une fois).
+var _fade_distance := 60.0
+var _shield_gap := 1.0
 var _camera_distance := 1000.0  # SZ4b : maquettes à la taille de carte avant la première vue
 var _regrounded: Dictionary = {}
 ## ZG6 : villes ordinaires à l'échelle réelle (paliers vallée et site), voir `TownLayer`.
@@ -188,10 +194,9 @@ var _hamlet_tiles: Dictionary = {}
 ## RS-K3 : emprises des maquettes ordinaires autour d'un morceau (3 × 3 morceaux) : morceau →
 ## [centres, rayons + marge] ; même validité que les exclusions des hameaux.
 var _model_disks: Dictionary = {}
-## RS-K2 : échelle écran et boîte des marqueurs pour les décalages d'étiquettes, par image.
+## RS-K2 : échelle écran pour les décalages d'étiquettes, par image.
 var _lift_frame := -1
 var _lift_scale := 1.0
-var _lift_box := 0.94
 
 
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
@@ -691,7 +696,7 @@ func _place_slice(sliced: bool) -> void:
 		_place_left = 0
 		return
 	var tp := Time.get_ticks_usec()  # RS-K2 : sous-sections du banc `--bench-probe`
-	var near := _weights.x > 0.35
+	var near := _models_on()
 	var placed := 0
 	var i := _place_cursor % count
 	while _place_left > 0 and (not sliced or placed < PLACE_SLICE):
@@ -749,6 +754,8 @@ func _build_icons() -> void:
 	_marker_until.resize(count)
 	_marker_world.resize(count)
 	_marker_holder.resize(count)
+	_shielded.resize(count)
+	_shielded.fill(0)
 	_marker_shown.resize(count)
 	_marker_shown.fill(1)
 	_marker_screen.resize(count)
@@ -767,23 +774,23 @@ func _build_icons() -> void:
 		var kind := str(entry["kind"])
 		var rank := markers.rank_of(entry)
 		_marker_rank[i] = rank
-		_marker_size[i] = markers.size_px(kind, rank)
+		_marker_size[i] = markers.size_px(kind, rank) * markers.shield_size_factor()
 		_marker_until[i] = markers.visible_until(kind, rank)
 		_marker_holder[i] = ""
-		var cell := markers.cell_of(markers.pictogram_for(kind, rank))
 		var k := _icon_instance(i)
-		_marker_world[i] = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+		# DV2 : ancre = position du nom (recalée par `_sync_shield` quand le nom bouge).
+		_marker_world[i] = _labels[i].position if i < _labels.size() else Vector3(px.x, map_data.surface_world_at(px.x, px.y), px.y)
 		multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, _marker_world[i]))
-		# DA7d : b = affiché (1) / cède la place (0), a = instant du dernier changement (fondu).
-		multimesh.set_instance_color(k, Color(-1.0, 1.0 if bool(entry.get("port", false)) else 0.0, 1.0, -1.0e4))
-		multimesh.set_instance_custom_data(k, Color(cell, 0.0, _marker_size[i], _marker_until[i] / 100.0))
+		# r = case d'écu (-1 : aucun) ; DA7d : b = affiché (1) / cède la place (0), a = instant
+		# du dernier changement (fondu).
+		multimesh.set_instance_color(k, Color(-1.0, 0.0, 1.0, -1.0e4))
+		# r = haut du nom au-dessus de l'ancre (px d'étiquette), b = côté de l'écu (px écran).
+		multimesh.set_instance_custom_data(k, Color(_shield_lift(i), 0.0, _marker_size[i], _marker_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
 	_icon_material.shader = preload("res://shaders/settlement_icon.gdshader")
-	_icon_material.set_shader_parameter("atlas", markers.atlas)
-	_icon_material.set_shader_parameter("atlas_grid", Vector2(markers.atlas_columns, markers.atlas_rows))
-	_icon_material.set_shader_parameter("port_cell", float(markers.port_cell()))
-	_icon_material.set_shader_parameter("shield_place", markers.placement("shield"))
-	_icon_material.set_shader_parameter("badge_place", markers.placement("badge"))
+	_fade_distance = markers.fade_distance()
+	_shield_gap = markers.shield_gap_px()
+	_icon_material.set_shader_parameter("gap_px", _shield_gap)
 	_icon_material.set_shader_parameter("fade_distance", markers.fade_distance())
 	_icon_material.set_shader_parameter("size_scale", icon_size_scale)
 	_icon_material.set_shader_parameter("declutter_fade", float(markers.declutter_value("fade_seconds", 0.25)))
@@ -806,18 +813,18 @@ func _refresh_shields() -> void:
 	if _icons == null or markers == null:
 		return
 	var factions: Array = []
-	var missing := markers.shield_atlas == null
+	var missing := heraldry.texture == null
 	for entry in data.settlements:
 		var controller := str(entry["controller"])
 		if controller != "" and not factions.has(controller):
 			factions.append(controller)
-			if not markers.shield_index.has(controller):
+			if not heraldry.has(controller):
 				missing = true
 	if missing:
 		factions.sort()
-		markers.build_shield_atlas(factions)
-		_icon_material.set_shader_parameter("shields", markers.shield_atlas)
-		_icon_material.set_shader_parameter("shield_grid", Vector2(markers.shield_columns, markers.shield_rows))
+		heraldry.build(factions)
+		_icon_material.set_shader_parameter("shields", heraldry.texture)
+		_icon_material.set_shader_parameter("shield_grid", heraldry.grid())
 		_marker_holder.fill("?")
 	var multimesh := _icons.multimesh
 	for i in data.settlements.size():
@@ -827,25 +834,37 @@ func _refresh_shields() -> void:
 		_marker_holder[i] = controller
 		var k := _icon_instance(i)
 		var color := multimesh.get_instance_color(k)
-		color.r = float(markers.shield_of(controller))
+		var cell := heraldry.shield_of(controller)
+		_shielded[i] = 1 if cell >= 0 else 0
+		color.r = float(cell)
 		multimesh.set_instance_color(k, color)
 
 
-## Taille écran (px) du marqueur d'une colonie (légende, étiquettes, picking).
+## Côté écran (px) de l'écu d'une colonie (dé-encombrement, picking).
 func marker_size(i: int) -> float:
 	return _marker_size[i] * icon_size_scale if i >= 0 and i < _marker_size.size() else 24.0
 
 
-## Vrai si le marqueur de la colonie `i` est affiché à la distance caméra courante (palier de
-## rang et dé-encombrement écran DA7d).
+## Vrai si le couple nom + écu de la colonie `i` est affiché à la distance caméra courante (rang
+## et dé-encombrement écran DA7d).
 func marker_visible(i: int) -> bool:
 	return marker_in_tier(i) and _marker_shown[i] == 1
 
 
-## Vrai si le rang du marqueur `i` l'affiche à la distance caméra courante (avant dé-encombrement).
-## La colonie sélectionnée reste affichée à toute distance.
+## Vrai si le rang de la colonie `i` affiche son nom et son écu à la distance caméra courante, en
+## vue normale (avant dé-encombrement). La colonie sélectionnée reste affichée à toute distance.
 func marker_in_tier(i: int) -> bool:
-	return i >= 0 and i < _marker_until.size() and _camera_distance < _marker_until_of(i) and _weights.x < 0.65
+	return i >= 0 and i < _marker_until.size() and _camera_distance < _marker_until_of(i) and _weights.y > 0.01
+
+
+## Vrai si la colonie `i` a un écu (détenteur armorié).
+func has_shield(i: int) -> bool:
+	return i >= 0 and i < _shielded.size() and _shielded[i] == 1
+
+
+## DV2 : maquettes affichées (vue normale).
+func _models_on() -> bool:
+	return _weights.y > 0.35
 
 
 func _marker_until_of(i: int) -> float:
@@ -980,7 +999,9 @@ func update_view(camera_distance: float) -> void:
 		return
 	_camera_distance = camera_distance
 	var tp := Time.get_ticks_usec()  # RS-K : sections `settle/*` du banc `--bench-probe`
-	var weights := Vector3(tiers.near_weight(camera_distance), tiers.medium_weight(camera_distance), tiers.far_weight(camera_distance))
+	# DV2 (ADR 0124) : détail proche, vue normale, vue stratégique.
+	var strategic := tiers.strategic_weight(camera_distance)
+	var weights := Vector3(tiers.near_weight(camera_distance), 1.0 - strategic, strategic)
 	# ZG4 : au palier « site » (~1 km, jusqu'à 200 m), les maquettes à la loupe (colonies ×3-7,
 	# villes emblématiques ×3,5) dépasseraient les collines : masquées en attendant les villes à
 	# l'échelle réelle (ZG6, VH4).
@@ -988,20 +1009,21 @@ func update_view(camera_distance: float) -> void:
 	if weights != _weights or site != _site_hidden:
 		_weights = weights
 		_site_hidden = site
-		# DA3 : marqueurs aux paliers Europe et moyen (dé-encombrés par le shader), retirés au
-		# profit des maquettes au palier près.
-		var icon_alpha := 1.0 - weights.x
+		# DV2 : écus (dé-encombrés par le shader) dans toute la vue normale, estompés au fondu
+		# vers le parchemin.
+		var icon_alpha := weights.y
 		_icon_material.set_shader_parameter("alpha", icon_alpha)
 		_icons.visible = icon_alpha > 0.01
-		# SZ4b : maquettes à leur taille réelle sous le palier vallée, masquées une par une quand
-		# leur ville 1:1 est affichée (`_update_model_visibility`).
-		_models_root.visible = weights.x > 0.35
+		# DV2 : maquettes dans toute la vue normale (portée `model_range`). SZ4b : à leur taille
+		# réelle sous le palier vallée, masquées une par une quand leur ville 1:1 est affichée
+		# (`_update_model_visibility`).
+		_models_root.visible = _models_on()
 		# SZ4 : hameaux à leur taille réelle sous le palier comté, gardés au palier site.
 		_hamlets_root.visible = weights.x > 0.35
 		_landmarks_root.visible = not site
 		# SZ6 : les hauteurs d'étiquettes ne dépendent des poids que par le palier près et les
 		# villes 1:1 : pas de recalcul des 570 étiquettes à chaque image d'un zoom.
-		var label_state := Vector2i(int(weights.x > 0.35), 0)  # RS-K : indépendant des villes 1:1
+		var label_state := Vector2i(int(_models_on()), 0)  # RS-K : indépendant des villes 1:1
 		if label_state != _label_state:
 			_update_label_heights()
 		_declutter_timer = 0.0
@@ -1016,7 +1038,7 @@ func update_view(camera_distance: float) -> void:
 		_labels_dirty = false
 		# SZ6 : seules les colonies des morceaux recalés (hauteur de leur maquette ou de leur ville
 		# emblématique) changent.
-		var near := _weights.x > 0.35
+		var near := _models_on()
 		for index: int in _label_chunks:
 			for i in _settlements_by_chunk.get(index, PackedInt32Array()):
 				_update_label_height(i, near)
@@ -1025,6 +1047,7 @@ func update_view(camera_distance: float) -> void:
 		var tv := Time.get_ticks_usec()
 		_label_slice(FrameBudget.in_frame())
 		PerfProbe.lap("settle/labels/vscale", tv)  # RS-K3
+	_update_shield_label_scale()
 	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
@@ -1077,9 +1100,9 @@ var _label_left := 0
 var _label_ground_m: PackedFloat64Array = PackedFloat64Array()
 
 
-## Hauteur des étiquettes : au-dessus de la maquette (près) ou de l'icône (moyen).
+## Hauteur des étiquettes : au-dessus de la maquette (vue normale), sinon au-dessus du lieu.
 func _update_label_heights() -> void:
-	var near := _weights.x > 0.35
+	var near := _models_on()
 	_label_state = Vector2i(int(near), 0)
 	_label_scale = MapData.vertical_scale()
 	_label_chunks.clear()
@@ -1094,7 +1117,7 @@ func _label_slice(sliced: bool) -> void:
 	if count == 0:
 		_label_left = 0
 		return
-	var near := _weights.x > 0.35
+	var near := _models_on()
 	var done := 0
 	var i := _label_cursor % count
 	while _label_left > 0 and (not sliced or done < LABEL_SLICE):
@@ -1126,8 +1149,9 @@ func _update_label_height(i: int, near: bool) -> void:
 			label.position = label_at
 		label.offset = Vector2.ZERO
 	else:
-		# Palier moyen : au-dessus de l'icône (décalage en pixels écran). RS-K3 : altitude du sol
-		# lue une fois (même valeur que `surface_world_at`), écritures seulement si elles changent.
+		# Sans maquette : juste au-dessus du lieu (décalage en pixels écran). RS-K3 : altitude du
+		# sol lue une fois (même valeur que `surface_world_at`), écritures seulement si elles
+		# changent.
 		if _label_ground_m.size() != _labels.size():
 			_label_ground_m.resize(_labels.size())
 			_label_ground_m.fill(NAN)
@@ -1141,19 +1165,58 @@ func _update_label_height(i: int, near: bool) -> void:
 		var offset := Vector2(0.0, _label_lift_px(i))
 		if label.offset != offset:
 			label.offset = offset
+	_sync_shield(i)
 
 
-## Opacité d'une étiquette selon le type et le palier (cité : moyen et près ; ville : moyen
-## rapproché ; autres : près seulement).
-func _label_alpha(kind: String) -> float:
-	match kind:
-		"city":
-			return clampf(_weights.x + _weights.y, 0.0, 1.0)
-		"town":
-			var t := 1.0 - smoothstep(380.0 * 0.85, 380.0 * 1.15, _camera_distance)
-			return clampf(maxf(_weights.x, _weights.y * t), 0.0, 1.0)
-		_:
-			return _weights.x
+## DV2 : écu recalé sur son nom (ancre du `MultiMesh` et haut du texte), écritures seulement si
+## elles changent.
+func _sync_shield(i: int) -> void:
+	if _icons == null or i >= _marker_world.size():
+		return
+	var at := _labels[i].position
+	var k := _icon_instance(i)
+	if _marker_world[i] != at:
+		_marker_world[i] = at
+		_icons.multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, at))
+	var custom := _icons.multimesh.get_instance_custom_data(k)
+	var lift := _shield_lift(i)
+	if not is_equal_approx(custom.r, lift):
+		custom.r = lift
+		_icons.multimesh.set_instance_custom_data(k, custom)
+
+
+## DV2 : haut du nom `i` au-dessus de son ancre, en px d'étiquette (décalage + demi-texte).
+func _shield_lift(i: int) -> float:
+	return _labels[i].offset.y + _label_text_size(i).y * 0.5
+
+
+## DV2 : échelle écran des étiquettes transmise au shader des écus quand elle change.
+func _update_shield_label_scale() -> void:
+	if _icon_material == null or not is_inside_tree():
+		return
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	var scale := _label_screen_scale(camera)
+	if not is_equal_approx(scale, _shield_label_scale):
+		_shield_label_scale = scale
+		_icon_material.set_shader_parameter("label_scale", scale)
+
+
+## DV2 : rectangle écran de l'écu `i`, l'ancre projetée en `anchor` (échelle des étiquettes
+## `scale`), élargi de `margin` px.
+func _shield_rect(i: int, anchor: Vector2, scale: float, margin: float) -> Rect2:
+	var size := marker_size(i)
+	var bottom := anchor.y - _shield_lift(i) * scale - _shield_gap
+	return Rect2(Vector2(anchor.x - size * 0.5, bottom - size), Vector2(size, size)).grow(margin)
+
+
+## DV2 : opacité du nom `i` : vue normale, fondu de retrait par rang (comme l'écu, cf. shader).
+## La densité des noms suit la seule règle par rang (`SettlementMarkers.visible_until`).
+func _label_alpha(i: int) -> float:
+	var until := _marker_until_of(i)
+	var fade := _fade_distance
+	return clampf(_weights.y * (1.0 - smoothstep(until - fade, until, _camera_distance)), 0.0, 1.0)
 
 
 ## Lot DA7d (ADR 0066) : dé-encombrement écran unique des marqueurs et des noms. Colonie par
@@ -1186,10 +1249,8 @@ var _dc_label_screen := Rect2()
 var _dc_marker_margin := 2.0
 var _dc_label_margin := 4.0
 var _dc_icons_on := false
-var _dc_box := Vector2(0.8, 0.8)
 var _dc_close_w := 0.0
 var _dc_label_range := INF
-var _dc_alpha_by_kind := {}
 var _dc_scale := 1.0
 
 
@@ -1214,7 +1275,7 @@ func _declutter_begin() -> bool:
 	_dc_label_screen = screen.grow_individual(screen.size.x * spill, screen.size.y * spill, screen.size.x * spill, screen.size.y * spill)
 	_dc_marker_margin = float(markers.declutter_value("marker_margin_px", 2.0))
 	_dc_label_margin = float(markers.declutter_value("label_margin_px", declutter_margin))
-	_dc_icons_on = _icons != null and _icons.visible and _weights.x < 0.65
+	_dc_icons_on = _icons != null and _icons.visible
 	_placer.reset(_max_marker_px * icon_size_scale + _dc_marker_margin * 2.0)
 	# CV3-0 (#7) : les plaques/étendards d'armée sont réservés avant les colonies (déjà placés,
 	# stables d'une frame à l'autre) ; un marqueur ou un nom de colonie qui les recouvre cède
@@ -1223,14 +1284,10 @@ func _declutter_begin() -> bool:
 		for rect: Rect2 in label_obstacles.call(camera):
 			_placer.try_place(rect, -2, true)
 	_dc_pins = _pinned_indices()
-	_dc_box = markers.marker_box()
 	# ZG4 : paliers vallée / site (vue rasante) : seulement les colonies proches, l'horizon ne se
 	# couvre pas de noms.
 	_dc_close_w = tiers.valley_weight(_camera_distance) if tiers != null else 0.0
 	_dc_label_range = tiers.close_label_range_factor * _camera_distance if tiers != null else INF
-	_dc_alpha_by_kind = {}
-	for kind in KIND_INDEX:
-		_dc_alpha_by_kind[kind] = _label_alpha(kind)
 	_dc_scale = _label_screen_scale(camera)
 	_dc_sequence = PackedInt32Array(_dc_pins)
 	for i in _priority_order:
@@ -1261,35 +1318,37 @@ func _declutter_step(sliced: bool) -> void:
 	for n in range(_dc_pos, end):
 		var i := _dc_sequence[n]
 		var pinned := n < _dc_pins.size()
-		var has_marker := _dc_icons_on and marker_in_tier(i)
-		var shown := true
 		_marker_screen[i] = Vector2(-1.0e6, -1.0e6)
-		if has_marker and not _dc_behind(_marker_world[i]):
-			# Emprise opaque du marqueur (cf. `_marker_rect`).
-			var size := marker_size(i)
-			var center := _dc_project(_marker_world[i]) - Vector2(0.0, size * ICON_CENTER_LIFT)
-			var box := _dc_box * size + Vector2(_dc_marker_margin, _dc_marker_margin) * 2.0
-			var marker_rect := Rect2(center - box * 0.5, box)
-			# Hors de l'écran élargi : rien à départager (recalcul dès que la caméra bouge).
-			if _dc_label_screen.intersects(marker_rect):
-				shown = _placer.try_place(marker_rect, i, pinned)
-				if shown:
-					_marker_screen[i] = marker_rect.get_center()
-		_set_marker_shown(i, shown)
-		var alpha: float = _dc_alpha_by_kind.get(_label_kind[i], _weights.x)
-		if not shown or alpha < 0.02:
+		# DV2 : nom et écu forment un seul couple, affiché ou cédé ensemble. Tests du moins cher
+		# au plus cher (hors palier : le shader replie l'écu lui-même).
+		var alpha := _label_alpha(i) if _dc_icons_on and marker_in_tier(i) else 0.0
+		if alpha < 0.02:
+			_set_marker_shown(i, true)
 			_show_label(i, false, alpha)
 			continue
 		var label := _labels[i]
 		var at := label.global_position
-		if (_dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range) or _dc_behind(at):
+		if _dc_behind(at) or (_dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range):
+			_set_marker_shown(i, true)
 			_show_label(i, false, alpha)
 			continue
-		# Rectangle du nom (cf. `_label_screen_rect`).
+		var anchor := _dc_project(at)
+		# Rectangle du nom (cf. `_label_screen_rect`) et de l'écu (cf. `_shield_rect`).
 		var text := _label_text_size(i) * _dc_scale
-		var label_center := _dc_project(at) - label.offset * Vector2(-1.0, 1.0) * _dc_scale
+		var label_center := anchor - label.offset * Vector2(-1.0, 1.0) * _dc_scale
 		var rect := Rect2(label_center - text * 0.5, text).grow(_dc_label_margin)
-		_show_label(i, _dc_label_screen.intersects(rect) and _placer.try_place(rect, i), alpha)
+		var shielded := _shielded[i] == 1
+		var shield_rect := _shield_rect(i, anchor, _dc_scale, _dc_marker_margin) if shielded else Rect2()
+		var shown := false
+		if _dc_label_screen.intersects(rect) or (shielded and _dc_label_screen.intersects(shield_rect)):
+			shown = pinned or not (_placer.overlaps(rect, i) or (shielded and _placer.overlaps(shield_rect, i)))
+			if shown:
+				_placer.try_place(rect, i, true)
+				if shielded:
+					_placer.try_place(shield_rect, i, true)
+					_marker_screen[i] = shield_rect.get_center()
+		_set_marker_shown(i, shown)
+		_show_label(i, shown, alpha)
 	_dc_pos = end
 	_dc_usec += Time.get_ticks_usec() - t0
 	if _dc_pos >= _dc_sequence.size():
@@ -1335,18 +1394,17 @@ static func _label_font(weight: int) -> Font:
 	return font
 
 
-## DA7d : décalage du nom `i` au-dessus de son marqueur (px du `Label3D`) : haut de l'emprise du
-## pictogramme + demi-hauteur du texte mesuré + `LABEL_GAP_PX`, ramené à l'échelle écran.
+## DV2 : décalage du nom `i` d'un lieu sans maquette au-dessus du lieu (px du `Label3D`) :
+## `LABEL_GAP_PX` ramené à l'échelle écran + demi-hauteur du texte mesuré (DC4). L'écu est posé
+## au-dessus du nom (`_shield_lift`).
 func _label_lift_px(i: int) -> float:
-	# RS-K2 : caméra et boîte lues une fois par image (570 étiquettes par recalcul).
+	# RS-K2 : caméra lue une fois par image (570 étiquettes par recalcul).
 	var frame := Engine.get_process_frames()
 	if frame != _lift_frame:
 		_lift_frame = frame
 		var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 		_lift_scale = _label_screen_scale(camera) if camera != null else 1.0
-		_lift_box = markers.marker_box().y if markers != null else 0.94
-	var marker_top := marker_size(i) * (ICON_CENTER_LIFT + _lift_box * 0.5)
-	return (marker_top + LABEL_GAP_PX) / maxf(_lift_scale, 0.1) + _label_text_size(i).y * 0.5
+	return LABEL_GAP_PX / maxf(_lift_scale, 0.1) + _label_text_size(i).y * 0.5
 
 
 ## DC4 : taille du texte du nom `i` (police, contour compris), mesurée une fois.
@@ -1382,7 +1440,7 @@ func _pinned_indices() -> PackedInt32Array:
 	if bool(markers.declutter_value("pin_selected", true)) and selected_id != "":
 		pins.append(int(data.index_by_id.get(selected_id, -1)))
 	_hovered_index = -1
-	if bool(markers.declutter_value("pin_hovered", true)) and _weights.x < 0.65 and is_inside_tree():
+	if bool(markers.declutter_value("pin_hovered", true)) and _weights.y > 0.01 and is_inside_tree():
 		# Survol : le marqueur affiché sous la souris (centres écran du recalcul précédent) reste
 		# affiché pendant le zoom à la molette.
 		var mouse := get_viewport().get_mouse_position()
@@ -1474,12 +1532,9 @@ func screen_label_rects(camera: Camera3D) -> Array[Rect2]:
 	return rects
 
 
-## Lot DA7d : rectangle écran de l'emprise opaque du marqueur `i` (marge `margin` en px).
-func _marker_rect(i: int, camera: Camera3D, margin: float, box_fraction: Vector2 = Vector2(0.8, 0.8)) -> Rect2:
-	var size := marker_size(i)
-	var center := camera.unproject_position(_marker_world[i]) - Vector2(0.0, size * ICON_CENTER_LIFT)
-	var box := box_fraction * size + Vector2(margin, margin) * 2.0
-	return Rect2(center - box * 0.5, box)
+## Lot DA7d, DV2 : rectangle écran de l'écu `i` (marge `margin` en px).
+func _marker_rect(i: int, camera: Camera3D, margin: float) -> Rect2:
+	return _shield_rect(i, camera.unproject_position(_marker_world[i]), _label_screen_scale(camera), margin)
 
 
 ## Lot DA7d (mesures, tests) : rectangles écran (sans marge) des marqueurs et des noms affichés
@@ -1497,9 +1552,9 @@ func screen_occupancy(camera: Camera3D) -> Dictionary:
 	var screen := camera.get_viewport().get_visible_rect()
 	var icons_on := _icons != null and _icons.visible
 	for i in data.settlements.size():
-		if icons_on and marker_visible(i):
+		if icons_on and marker_visible(i) and has_shield(i):
 			if not camera.is_position_behind(_marker_world[i]):
-				var rect := _marker_rect(i, camera, 0.0, markers.marker_box())
+				var rect := _marker_rect(i, camera, 0.0)
 				if screen.intersects(rect):
 					rects.append(rect)
 					owners.append(i)
@@ -1751,45 +1806,67 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if camera == null or data == null:
 		return {}
-	var near := _weights.x > 0.35
-	var icons := _weights.x < 0.65
+	var near := _models_on()
+	var icons := _weights.y > 0.01
+	var scale := _label_screen_scale(camera)
 	var best := ""
 	var best_score := INF
 	var right := camera.global_transform.basis.x
 	var eye := camera.global_position
 	var model_range_sq := tiers.model_range * tiers.model_range
 	for i in data.settlements.size():
+		var score := INF
 		if near and _models[i] != null and (_models[i] as Node3D).visible:  # DC4 : pas les absorbées
-			var holder: Node3D = _models[i]
-			if eye.distance_squared_to(holder.position) > model_range_sq:
-				continue  # maquette hors de sa portée de visibilité
-			# Rayon effectif = rayon d'origine × réduction DC4 (`_model_radius`) × échelle SZ4b.
-			var zoom_scale := model_scale(i)
-			var center := Vector3(holder.position.x, _model_base_y(i) + _model_top[i] * zoom_scale * 0.4, holder.position.z)
-			if camera.is_position_behind(center):
-				continue
-			var screen_center := camera.unproject_position(center)
-			var edge := camera.unproject_position(center + right * _model_radius[i] * zoom_scale)
-			var radius_px := maxf(screen_center.distance_to(edge), 8.0)
-			var d := screen_center.distance_to(screen_position)
-			if d < radius_px and d / radius_px < best_score:
-				best_score = d / radius_px
-				best = str(data.settlements[i]["id"])
-		elif icons and marker_visible(i):  # DA7d : pas les marqueurs cédés
-			var world := _marker_world[i]
-			if camera.is_position_behind(world):
-				continue
-			var size := marker_size(i)
-			var radius := size * PICK_ICON_FRACTION
-			var center_px := camera.unproject_position(world) - Vector2(0.0, size * ICON_CENTER_LIFT)
-			var d_icon := center_px.distance_to(screen_position)
-			if d_icon < radius and d_icon / radius < best_score:
-				best_score = d_icon / radius
-				best = str(data.settlements[i]["id"])
+			score = _model_pick_score(i, camera, right, eye, model_range_sq, screen_position)
+		if icons and marker_visible(i):  # DA7d : pas les couples cédés
+			# DV2 : l'écu et le nom se cliquent comme la maquette (vue normale entière).
+			score = minf(score, _pair_pick_score(i, camera, scale, screen_position))
+		if score < best_score:
+			best_score = score
+			best = str(data.settlements[i]["id"])
 	return {"id": best, "score": best_score} if best != "" else {}
 
 
-## Sélectionne une colonie ("" = aucune) : surbrillance de l'icône, anneau au sol, signal.
+## Score de picking (distance au centre / rayon de prise, INF hors prise) de la maquette `i`.
+func _model_pick_score(i: int, camera: Camera3D, right: Vector3, eye: Vector3, model_range_sq: float, screen_position: Vector2) -> float:
+	var holder: Node3D = _models[i]
+	if eye.distance_squared_to(holder.position) > model_range_sq:
+		return INF  # maquette hors de sa portée de visibilité
+	# Rayon effectif = rayon d'origine × réduction DC4 (`_model_radius`) × échelle SZ4b.
+	var zoom_scale := model_scale(i)
+	var center := Vector3(holder.position.x, _model_base_y(i) + _model_top[i] * zoom_scale * 0.4, holder.position.z)
+	if camera.is_position_behind(center):
+		return INF
+	var screen_center := camera.unproject_position(center)
+	var edge := camera.unproject_position(center + right * _model_radius[i] * zoom_scale)
+	var radius_px := maxf(screen_center.distance_to(edge), 8.0)
+	var d := screen_center.distance_to(screen_position)
+	return d / radius_px if d < radius_px else INF
+
+
+## DV2 : score de picking du couple nom + écu `i` (écu : disque de `PICK_ICON_FRACTION` × sa
+## taille ; nom : son rectangle, score ≥ 0,5 pour laisser la priorité à un écu ou une maquette
+## visés en plein).
+func _pair_pick_score(i: int, camera: Camera3D, scale: float, screen_position: Vector2) -> float:
+	var world := _marker_world[i]
+	if camera.is_position_behind(world):
+		return INF
+	var anchor := camera.unproject_position(world)
+	var score := INF
+	if has_shield(i):
+		var radius := marker_size(i) * PICK_ICON_FRACTION
+		var d_icon := _shield_rect(i, anchor, scale, 0.0).get_center().distance_to(screen_position)
+		if d_icon < radius:
+			score = d_icon / radius
+	if _labels[i].visible:
+		var rect := _label_screen_rect(i, camera, scale, 2.0)
+		if rect.has_point(screen_position):
+			var half := maxf(rect.size.length() * 0.5, 1.0)
+			score = minf(score, 0.5 + 0.5 * rect.get_center().distance_to(screen_position) / half)
+	return score
+
+
+## Sélectionne une colonie ("" = aucune) : surbrillance de l'écu, anneau au sol, signal.
 func select(id: String) -> void:
 	if _icons != null and selected_id != "" and data.index_by_id.has(selected_id):
 		var old := _icon_instance(data.index_by_id[selected_id])
@@ -1817,7 +1894,7 @@ func _update_selection_ring() -> void:
 		return
 	var index: int = data.index_by_id.get(selected_id, -1) if data != null else -1
 	var holder: Node3D = _models[index] if index >= 0 else null
-	var show := index >= 0 and holder != null and _weights.x > 0.35
+	var show := index >= 0 and holder != null and _models_on()
 	_selection_ring.visible = show
 	if show:
 		var radius := _model_radius[index] * model_scale(index) * 1.1

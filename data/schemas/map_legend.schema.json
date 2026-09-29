@@ -18,13 +18,12 @@
           "type": "string",
           "enum": [
             "faction_colors", "gradient", "relation", "color", "fog", "settlement",
-            "settlement_owners", "army_banner", "army_plate", "agent", "path", "ring",
+            "settlement_owners", "parchment_town", "army_banner", "army_plate", "agent", "path", "ring",
             "construction", "trade_route", "minimap_army", "minimap_frame", "occupation"
           ]
         },
-        "pictogram": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Lot DA3 : pictogramme de data/map/settlement_markers.json (sinon celui du type et du rang)."},
-        "rank": {"type": "integer", "minimum": 1, "maximum": 4},
-        "port": {"type": "boolean"},
+        "rank": {"type": "integer", "minimum": 1, "maximum": 4, "description": "Lot DV2 : rang du lieu (taille de l'écu, data/map/settlement_markers.json)."},
+        "name": {"type": "string", "minLength": 1, "description": "Lot DV2 : nom d'exemple écrit sous l'écu."},
         "from": {"$ref": "#/$defs/hex_color"},
         "to": {"$ref": "#/$defs/hex_color"},
         "color": {"$ref": "#/$defs/hex_color"},
