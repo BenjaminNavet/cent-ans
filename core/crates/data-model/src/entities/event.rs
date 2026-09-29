@@ -575,11 +575,10 @@ impl Event {
     /// for a `random` event scoped to a province and `dialog` otherwise
     /// (historical, chained and faction events keep their window).
     pub fn presentation(&self) -> EventPresentation {
-        self.presentation.unwrap_or(
-            match (&self.kind, &self.scope) {
+        self.presentation
+            .unwrap_or(match (&self.kind, &self.scope) {
                 (EventCategory::Random, EventScope::Province { .. }) => EventPresentation::Map,
                 _ => EventPresentation::Dialog,
-            },
-        )
+            })
     }
 }

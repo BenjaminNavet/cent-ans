@@ -25,9 +25,7 @@ pub use data_model::SceneKind;
 use data_model::{GameData, ProvinceId, SettlementId};
 use serde::{Deserialize, Serialize};
 
-use crate::population::{
-    weighted_unrest, FAMINE_DEVASTATION_THRESHOLD, PLAGUE_HEALTH_THRESHOLD,
-};
+use crate::population::{weighted_unrest, FAMINE_DEVASTATION_THRESHOLD, PLAGUE_HEALTH_THRESHOLD};
 use crate::state::{Season, LEGACY_RECRUIT_TURN};
 use crate::CampaignState;
 
@@ -86,12 +84,22 @@ fn province_scenes(state: &CampaignState, data: &GameData, turn: u32, out: &mut 
             .is_some_and(crate::diplomacy::is_rebels);
         let unrest = weighted_unrest(&province.population);
         if rebels_hold {
-            out.push(scene(SceneKind::Revolt, Some(province.city.clone()), turn, 1.0));
+            out.push(scene(
+                SceneKind::Revolt,
+                Some(province.city.clone()),
+                turn,
+                1.0,
+            ));
         } else if unrest > threshold {
             let span = (100.0 - threshold).max(1.0);
             let intensity = 0.5 + 0.5 * ((unrest - threshold) / span) as f32;
             let since = turn.saturating_sub(province.revolt_seasons);
-            out.push(scene(SceneKind::Revolt, Some(province.city.clone()), since, intensity));
+            out.push(scene(
+                SceneKind::Revolt,
+                Some(province.city.clone()),
+                since,
+                intensity,
+            ));
         }
         if province.devastation >= rules.devastation_threshold.max(1) {
             let intensity = f32::from(province.devastation) / 100.0;
@@ -110,7 +118,12 @@ fn province_scenes(state: &CampaignState, data: &GameData, turn: u32, out: &mut 
         let sick_below = f32::from(PLAGUE_HEALTH_THRESHOLD);
         if province.population.total() > 0 && health < sick_below {
             let intensity = 0.4 + 0.6 * (1.0 - health / sick_below);
-            out.push(scene(SceneKind::Plague, Some(province.city.clone()), turn, intensity));
+            out.push(scene(
+                SceneKind::Plague,
+                Some(province.city.clone()),
+                turn,
+                intensity,
+            ));
         }
     }
 }
@@ -127,7 +140,11 @@ fn settlement_scenes(state: &CampaignState, data: &GameData, turn: u32, out: &mu
         };
         if let Some(siege) = &settlement.siege {
             let hardship = settlement_hardship(siege.breach, siege.supplies);
-            out.push(scene(SceneKind::Siege, siege.started_turn, 0.4 + 0.6 * hardship));
+            out.push(scene(
+                SceneKind::Siege,
+                siege.started_turn,
+                0.4 + 0.6 * hardship,
+            ));
         }
         if let Some(work) = &settlement.construction {
             let total = data
@@ -175,7 +192,11 @@ fn event_scenes(state: &CampaignState, data: &GameData, turn: u32, out: &mut Vec
             continue;
         }
         let age = turn - since;
-        let Some(city) = state.provinces.get(&recent.province).map(|p| p.city.clone()) else {
+        let Some(city) = state
+            .provinces
+            .get(&recent.province)
+            .map(|p| p.city.clone())
+        else {
             continue;
         };
         out.push(MapScene {

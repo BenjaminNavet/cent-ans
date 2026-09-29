@@ -268,7 +268,10 @@ fn random_province_event_defaults_to_map() {
         event("evt_jacquerie").presentation(),
         EventPresentation::Dialog
     );
-    assert_eq!(event("evt_tournoi").presentation(), EventPresentation::Dialog);
+    assert_eq!(
+        event("evt_tournoi").presentation(),
+        EventPresentation::Dialog
+    );
     assert_eq!(event("evt_crue").map_scene, Some(SceneKind::Flood));
 
     // The pending decision exposes its province and presentation.
