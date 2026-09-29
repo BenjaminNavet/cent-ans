@@ -145,6 +145,13 @@ uniform float cliff_slope_full = 0.0;
 // Politique : empreinte (pixels carte par pixel écran) où la couleur de faction prend le dessus.
 uniform float political_start = 0.9;
 uniform float political_full = 2.8;
+// Lot DV (ADR 0124) : la couche « politique » (provinces aplaties en couleur de faction,
+// désaturation, frontières renforcées) est neutralisée en vue normale : jusqu'au fondu vers le
+// parchemin (d ≈ 1100-1300), le terrain garde le rendu « near » (teinte de faction légère,
+// frontières DZ) ; seul le parchemin assure la lecture politique au-delà. Un multiplicateur plutôt
+// que des seuils d'empreinte repoussés : l'empreinte à une distance donnée dépend de la résolution
+// (HiDPI, ADR 0123). Remettre 1.0 pour retrouver l'ancien palier « loin » (A/B).
+uniform float political_amount = 0.0;
 uniform float faction_alpha_near = 0.10;
 uniform float faction_alpha_far = 0.50;
 uniform float faction_saturation = 0.55;
@@ -592,7 +599,7 @@ void fragment() {
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
 
 	// --- Couche politique ---
-	float political = smoothstep(political_start, political_full, footprint);
+	float political = smoothstep(political_start, political_full, footprint) * political_amount;
 	// Au dézoom maximal : terrain un peu désaturé, façon carte.
 	float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
 	col = mix(col, vec3(lum) * vec3(1.02, 1.0, 0.95), 0.3 * political);

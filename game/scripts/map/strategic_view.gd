@@ -9,11 +9,8 @@ extends Node
 ## provinces, étendards et plaques d'armées). Purement visuel.
 ## Options (après `--`) : `--no-parchment` (A/B), `--parchment=<0..1>` (poids imposé).
 
-## Bande de fondu (distance caméra) : carte 3D en deçà de `start`, parchemin au-delà de `end`.
-## CV3-0 (#1) : mis à l'échelle après le passage de max_distance à 2600 (était 1180 / 1440
-## pour un max de 1500, ratio ~0,79 / 0,96 conservé).
-@export var start_distance: float = 2050.0
-@export var end_distance: float = 2500.0
+## Lot DV (ADR 0124) : la bande de fondu vue normale → parchemin est celle de
+## `ZoomTiers.strategic_weight` (seuil 1200, largeur 200), seule source des deux vues.
 ## Au-delà de ce poids, les marqueurs 3D d'armée cèdent la place aux jetons.
 @export var marker_cutoff: float = 0.6
 
@@ -29,6 +26,7 @@ const PARCHMENT_SHADER := preload("res://shaders/terrain_parchment.gdshader")
 const FULL_WEIGHT := 0.999
 
 var _map: Node
+var _tiers: ZoomTiers
 var _parchment_only: bool = false
 var _layer: CanvasLayer
 var _markers_hidden: bool = false
@@ -76,14 +74,18 @@ func weight_at(distance: float) -> float:
 		return 0.0
 	if forced >= 0.0:
 		return forced
-	return smoothstep(start_distance, end_distance, distance)
+	if _tiers == null:
+		_tiers = _map.get("zoom_tiers") as ZoomTiers if _map != null else null
+		if _tiers == null:
+			_tiers = ZoomTiers.load_default()
+	return _tiers.strategic_weight(distance)
 
 
 func refresh(sim: Object) -> void:
 	if overlay != null:
-		# DA3 (ADR 0066) : les lieux gardent leurs marqueurs peints au palier Europe, le parchemin
-		# ne redessine plus ses propres vignettes de villes (un seul langage).
-		overlay.draw_towns = _map.get("settlement_layer") == null
+		# DV (ADR 0124, remplace DA3) : plus de marqueurs peints ; sur le parchemin, les villes
+		# sont les vignettes à l'encre de la couche 2D.
+		overlay.draw_towns = true
 		overlay.refresh(sim, _map.get("settlement_data"))
 
 

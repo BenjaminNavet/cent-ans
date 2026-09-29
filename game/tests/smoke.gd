@@ -228,7 +228,7 @@ func _run_campaign_map() -> void:
 			break
 	_check(data.rivers.size() == 2, "expected 2 rivers, got %d" % data.rivers.size())
 	_check(not data.coastlines.is_empty(), "coastline missing")
-	_check(map.cities.get_child_count() == 6, "expected 6 city markers, got %d" % map.cities.get_child_count())
+	_check(map.get_node_or_null("Cities") == null, "DV: province name markers (CityMarkers) should be gone")
 
 	# Picking : centroïde de la province 3, en coordonnées monde puis via l'écran.
 	var province: Dictionary = data.get_province(PICK_PROVINCE_INDEX)

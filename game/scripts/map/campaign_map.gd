@@ -42,7 +42,6 @@ const REPEAT_CLICK_PX := 12.0
 @onready var sea: Sea = $Sea
 @onready var rivers: RiversRenderer = $Rivers
 @onready var coast: CoastRenderer = $Coast
-@onready var cities: CityMarkers = $Cities
 @onready var armies: ArmyMarkers = $Armies
 @onready var path_preview: PathPreview = $PathPreview
 @onready var trade_layer: TradeRouteLayer = $TradeRouteLayer
@@ -141,10 +140,6 @@ func _ready() -> void:
 	var map_extent := maxf(map_data.size.x, map_data.size.y)
 	rivers.minor_max_distance = map_extent * 0.35
 	coast.build(map_data)
-	# Étiquettes visibles quand peu de provinces sont à l'écran : seuil ∝ 1/√(nombre de provinces).
-	cities.label_max_distance = map_extent * 0.35 * sqrt(20.0 / maxf(map_data.province_count, 1.0))
-	cities.labels_only = true  # C6 : noms de provinces (palier loin), colonies à part
-	cities.build(map_data)
 	_setup_settlements()
 	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
 	rivers.build(map_data, terrain, settlement_layer)
@@ -310,7 +305,7 @@ func _setup_settlements() -> void:
 	camera_rig.floor_zones_set = true
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
-		return settlement_layer.screen_label_rects(view_camera) + cities.screen_label_rects(view_camera)
+		return settlement_layer.screen_label_rects(view_camera)
 	# CV3-0 (#7) : réciproque — les colonies évitent à leur tour les plaques/étendards d'armée.
 	settlement_layer.label_obstacles = func(view_camera: Camera3D) -> Array:
 		return armies.screen_label_rects(view_camera)
@@ -1245,17 +1240,18 @@ func _process(_delta: float) -> void:
 	tp = PerfProbe.lap("map.vertical_scale", tp)
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
 	tp = PerfProbe.lap("map.update_lod", tp)
-	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
-	tp = PerfProbe.lap("map.cities", tp)
-	if zoom_tiers != null:  # C6 : paliers de zoom
-		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
+	if zoom_tiers != null:  # C6 / DV (ADR 0124) : deux vues, détail proche sous `near_threshold`
 		settlement_layer.update_view(distance)
 		tp = PerfProbe.lap("map.settlements", tp)
 		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
 		# palier « site » (routes drapées à leur vraie largeur : lot ZG5b).
+		# DV : traits (principales ; secondaires effacées d'elles-mêmes au-delà de
+		# `minor_fade_distance`) sur toute la vue normale hors détail proche, où les rubans de toutes
+		# les routes prennent le relais ; rien sur le parchemin.
 		var site_hide := 1.0 - zoom_tiers.site_weight(distance)
-		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
+		var near := zoom_tiers.near_weight(distance)
+		roads.update_view(clampf(1.0 - zoom_tiers.strategic_weight(distance) - near, 0.0, 1.0), near * site_hide)
 		tp = PerfProbe.lap("map.roads", tp)
 		if rivers.crossings != null:
 			# ZG5b : avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.

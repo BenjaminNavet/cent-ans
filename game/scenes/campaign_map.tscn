@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://cent_ans_campaign_map"]
+[gd_scene load_steps=30 format=3 uid="uid://cent_ans_campaign_map"]
 
 [ext_resource type="Script" path="res://scripts/map/campaign_map.gd" id="1_map"]
 [ext_resource type="Script" path="res://scripts/visual/campaign_atmosphere.gd" id="v1_atmosphere"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://scripts/map/sea.gd" id="3_sea"]
 [ext_resource type="Script" path="res://scripts/map/rivers_renderer.gd" id="4_rivers"]
 [ext_resource type="Script" path="res://scripts/map/coast_renderer.gd" id="5_coast"]
-[ext_resource type="Script" path="res://scripts/map/city_markers.gd" id="6_cities"]
 [ext_resource type="Script" path="res://scripts/map/campaign_camera.gd" id="7_camera"]
 [ext_resource type="Script" path="res://scripts/map/province_picker.gd" id="8_picker"]
 [ext_resource type="Script" path="res://scripts/map/map_ui.gd" id="9_ui"]
@@ -124,9 +123,6 @@ script = ExtResource("5_coast")
 
 [node name="Vegetation" type="Node3D" parent="."]
 script = ExtResource("v3_vegetation")
-
-[node name="Cities" type="Node3D" parent="."]
-script = ExtResource("6_cities")
 
 [node name="PathPreview" type="MeshInstance3D" parent="."]
 script = ExtResource("12_path")
