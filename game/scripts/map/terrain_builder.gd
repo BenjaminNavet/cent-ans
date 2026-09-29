@@ -1295,6 +1295,10 @@ func _grid_indices(quads: int) -> PackedInt32Array:
 
 ## Sommets d'une tuile en coordonnées locales (origine = coin nord-ouest de la tuile) ; remplit
 ## `heights` avec leurs hauteurs (grille de `surface_height_at`).
+## OMR-R2 : mêmes calculs que `MapData.display_height_with` / `relief_fields_at`, mais colonnes
+## (indices de texels, cellule du fond de relief) et lignes précalculées une fois par tuile et
+## grilles en variables locales : ≈ 2 × plus rapide sur les 672 tuiles lointaines, résultat
+## identique au bit près (test `r2_chunk_vertices_test.gd`).
 func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -> PackedVector3Array:
 	var x0 := cx * chunk_px
 	var y0 := cy * chunk_px
@@ -1316,6 +1320,116 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 	heights.resize(side * side)
 	# LOD lointain : bilinéaire dans le mipmap 4×4 (filtre ≈ 8 px), si le pas est multiple de 4.
 	var smooth := step >= far_step and step % 4 == 0 and not _smooth_bytes.is_empty()
+	var sb := _smooth_bytes
+	var sw := _smooth_size.x
+	var sh := _smooth_size.y
+	# Champs du relief exagéré (`MapData.relief_fields_at`) : sans gain ni écrasement, h × échelle.
+	var plain := gain == 0.0 and squash == 0.0
+	var floor_grid := MapData._floor
+	var has_floor := not plain and not floor_grid.is_empty()
+	var floor_base := MapData._floor_base
+	var floor_squash := MapData._floor_squash
+	var cell := MapData._floor_cell
+	var fw := MapData._floor_side.x
+	var fh := MapData._floor_side.y
+	# Colonnes : x du texel, texels du mipmap lissé (octets), cellule du fond et poids.
+	var col_px := PackedInt32Array()
+	col_px.resize(side)
+	var col_k0 := PackedInt32Array()
+	col_k0.resize(side)
+	var col_k1 := PackedInt32Array()
+	col_k1.resize(side)
+	var col_fi := PackedInt32Array()
+	col_fi.resize(side)
+	var col_tx := PackedFloat64Array()
+	col_tx.resize(side)
+	for i in side:
+		var px := mini(x0 + i * step, width - 1)
+		col_px[i] = px
+		if smooth:
+			col_k0[i] = clampi(px / 4 - 1, 0, sw - 1) * 2
+			col_k1[i] = clampi(px / 4, 0, sw - 1) * 2
+		if has_floor:
+			var fx := clampf((px - 0.5 * (cell - 1.0)) / cell, 0.0, fw - 1.0)
+			var fi := mini(int(fx), fw - 2)
+			col_fi[i] = fi
+			col_tx[i] = fx - fi
+	var k := 0
+	for j in side:
+		var py := mini(y0 + j * step, height - 1)
+		var row := py * width
+		var r0 := 0
+		var r1 := 0
+		if smooth:
+			r0 = clampi(py / 4 - 1, 0, sh - 1) * sw * 2
+			r1 = clampi(py / 4, 0, sh - 1) * sw * 2
+		var frow := 0
+		var tz := 0.0
+		if has_floor:
+			var fz := clampf((py - 0.5 * (cell - 1.0)) / cell, 0.0, fh - 1.0)
+			var fj := mini(int(fz), fh - 2)
+			frow = fj * fw
+			tz = fz - fj
+		for i in side:
+			var px := col_px[i]
+			var v01: float
+			if smooth:
+				# Centre du texel mip k = 4k + 1,5 : pour px ≡ 0 (mod 4), poids 0,375 / 0,625.
+				var a := sb.decode_u16(r0 + col_k0[i])
+				var b := sb.decode_u16(r0 + col_k1[i])
+				var c := sb.decode_u16(r1 + col_k0[i])
+				var d := sb.decode_u16(r1 + col_k1[i])
+				v01 = ((a * 0.375 + b * 0.625) * 0.375 + (c * 0.375 + d * 0.625) * 0.625) / 65535.0
+			elif bpp == 2:
+				var o := (row + px) * 2
+				if little_endian:
+					v01 = float(bytes[o] | (bytes[o + 1] << 8)) / 65535.0
+				else:
+					v01 = float((bytes[o] << 8) | bytes[o + 1]) / 65535.0
+			else:
+				v01 = float(bytes[row + px]) / 255.0
+			var h_m := h_min + v01 * h_range
+			var y: float
+			if plain:
+				y = h_m * scale
+			elif has_floor:
+				var o := frow + col_fi[i]
+				var tx := col_tx[i]
+				var f_floor := lerpf(lerpf(floor_grid[o], floor_grid[o + 1], tx), lerpf(floor_grid[o + fw], floor_grid[o + fw + 1], tx), tz)
+				var f_base := lerpf(lerpf(floor_base[o], floor_base[o + 1], tx), lerpf(floor_base[o + fw], floor_base[o + fw + 1], tx), tz)
+				var f_squash := lerpf(lerpf(floor_squash[o], floor_squash[o + 1], tx), lerpf(floor_squash[o + fw], floor_squash[o + fw + 1], tx), tz)
+				# Vector3 (flottants 32 bits) comme `relief_fields_at` : arrondis identiques.
+				var fields := Vector3(f_floor, f_base, f_squash)
+				var kk := squash * fields.z
+				y = scale * (h_m - kk * maxf(h_m - fields.y, 0.0) + gain * (1.0 - kk) * maxf(h_m - fields.x, 0.0))
+			else:
+				y = MapData.display_height_fields(h_m, Vector3.ZERO, scale, gain, squash)
+			vertices[k] = Vector3(px - x0, y, py - y0)
+			heights[k] = y
+			k += 1
+	return vertices
+
+
+## Version de référence de `_chunk_vertices` (avant OMR-R2), pour le test d'égalité.
+func _chunk_vertices_reference(cx: int, cy: int, step: int, heights: PackedFloat32Array) -> PackedVector3Array:
+	var x0 := cx * chunk_px
+	var y0 := cy * chunk_px
+	var quads := ceili(float(chunk_px) / step)
+	var side := quads + 1
+	var width := map_data.size.x
+	var height := map_data.size.y
+	var bytes := map_data.height_bytes
+	var bpp := map_data.height_bpp
+	var little_endian := map_data.height_little_endian
+	var h_min := map_data.height_min_m
+	var h_range := map_data.height_max_m - map_data.height_min_m
+	var scale := MapData.HEIGHT_SCALE
+	var gain := _baked_gain
+	var squash := _baked_squash
+	var vertices := PackedVector3Array()
+	vertices.resize(side * side)
+	heights.resize(side * side)
+	var smooth := step >= far_step and step % 4 == 0 and not _smooth_bytes.is_empty()
 	var sw := _smooth_size.x
 	var sh := _smooth_size.y
 	var k := 0
@@ -1326,7 +1440,6 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 			var px := mini(x0 + i * step, width - 1)
 			var v01: float
 			if smooth:
-				# Centre du texel mip k = 4k + 1,5 : pour px ≡ 0 (mod 4), poids 0,375 / 0,625.
 				var kx0 := clampi(px / 4 - 1, 0, sw - 1)
 				var kx1 := clampi(px / 4, 0, sw - 1)
 				var ky0 := clampi(py / 4 - 1, 0, sh - 1)
