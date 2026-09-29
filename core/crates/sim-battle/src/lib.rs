@@ -48,6 +48,7 @@ pub mod alerts;
 pub mod capture;
 pub mod command;
 pub mod crest;
+pub mod custom;
 pub mod decision;
 pub mod decor;
 mod decor_gen;
@@ -94,6 +95,7 @@ pub mod unit;
 pub use abilities::{AbilityView, ActiveAbility, EndedAbility, UnitAbilities};
 pub use capture::{CapturePoint, CapturePointKind, CaptureRules, PointStatus};
 pub use command::{Command, CommandError};
+pub use custom::{CustomBattle, CustomBattleRules, CustomData, CustomReport, CustomSide};
 pub use decision::{BattleEnd, DecisionRules};
 pub use decor::{
     Area, AreaKind, Camp, Decor, DecorItem, DecorPlan, DecorProp, DecorPropKind, DecorRules,

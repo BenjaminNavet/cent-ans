@@ -340,7 +340,19 @@ impl BattleSim {
     pub fn new_scaled(
         setup: BattleSetup,
         seed: u64,
+        scale: BattleScale,
+    ) -> Result<Self, SetupError> {
+        Self::new_scaled_weather(setup, seed, scale, None)
+    }
+
+    /// [`Self::new_scaled`] with the weather forced (NT2: custom battle).
+    /// The draw still consumes its roll so the field of a given seed stays
+    /// the same whatever the weather.
+    pub fn new_scaled_weather(
+        setup: BattleSetup,
+        seed: u64,
         mut scale: BattleScale,
+        forced_weather: Option<Weather>,
     ) -> Result<Self, SetupError> {
         if setup.siege.is_some() {
             scale.field = crate::scale::FieldSize::STANDARD;
@@ -351,7 +363,8 @@ impl BattleSim {
             }
         }
         let mut rng = BattleRng::from_seed(seed);
-        let weather = Weather::draw(setup.season, &mut rng);
+        let drawn = Weather::draw(setup.season, &mut rng);
+        let weather = forced_weather.unwrap_or(drawn);
         let is_siege = setup.siege.is_some();
         let mut field =
             Battlefield::generate_site_sized(&setup.field_site(), scale.field, weather, &mut rng);
