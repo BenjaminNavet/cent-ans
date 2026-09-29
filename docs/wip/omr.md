@@ -27,3 +27,6 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
 
 ## État
 - Vague 1 (R1-R6) lancée.
+- R6 fini (feat/omr-r6, 25504e100) : campaign_orthodox et campaign_islamic (5 pistes chacun, 24 Mo),
+  portraits Andronic III / Abu l-Hasan refaits (0,18 $, cumul OM 8,25 $). Pas de steppe/nordique
+  (aucune source libre). Écoute humaine à faire.
