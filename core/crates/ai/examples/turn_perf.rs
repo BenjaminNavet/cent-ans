@@ -7,8 +7,11 @@
 //! the fastest run is kept (the others measure the machine's load, not the
 //! AI), then once for real.
 //!
-//! Usage: `turn_perf [turns] [repeats] [seed...]` (default 50 turns, 3
-//! repeats, seed 1). France is the "player", driven by the same AI.
+//! Usage: `turn_perf [--sequential] [turns] [repeats] [seed...]` (default
+//! 50 turns, 3 repeats, seed 1). France is the "player", driven by the same
+//! AI. OMR R1: `--sequential` plans on the calling thread only and times
+//! the thread's CPU (on Unix): a measure of the work that a loaded machine
+//! barely disturbs, for before/after comparisons.
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::time::{Duration, Instant};
@@ -16,8 +19,48 @@ use std::time::{Duration, Instant};
 use data_model::{FactionId, GameData};
 use sim_campaign::CampaignState;
 
+/// CPU time of the calling thread (Unix), else the wall clock.
+#[cfg(unix)]
+fn clock() -> Duration {
+    #[repr(C)]
+    struct Timespec {
+        tv_sec: i64,
+        tv_nsec: i64,
+    }
+    extern "C" {
+        fn clock_gettime(clock: i32, time: *mut Timespec) -> i32;
+    }
+    #[cfg(target_os = "macos")]
+    const THREAD_CPU: i32 = 16;
+    #[cfg(not(target_os = "macos"))]
+    const THREAD_CPU: i32 = 3;
+    let mut time = Timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    // SAFETY: `time` is a valid, writable timespec.
+    unsafe { clock_gettime(THREAD_CPU, &mut time) };
+    Duration::new(time.tv_sec as u64, time.tv_nsec as u32)
+}
+
+#[cfg(not(unix))]
+fn clock() -> Duration {
+    static START: std::sync::OnceLock<Instant> = std::sync::OnceLock::new();
+    START.get_or_init(Instant::now).elapsed()
+}
+
 fn main() {
-    let args: Vec<String> = std::env::args().skip(1).collect();
+    let mut args: Vec<String> = std::env::args().skip(1).collect();
+    let sequential = args.first().is_some_and(|a| a == "--sequential");
+    if sequential {
+        args.remove(0);
+    }
+    let planner: fn(&CampaignState, &GameData, &FactionId) -> Vec<sim_campaign::Order> =
+        if sequential {
+            ai::plan_turn_sequential
+        } else {
+            ai::plan_turn
+        };
     let turns: u32 = args.first().and_then(|a| a.parse().ok()).unwrap_or(50);
     let repeats: u32 = args.get(1).and_then(|a| a.parse().ok()).unwrap_or(3).max(1);
     let mut seeds: Vec<u64> = args.iter().skip(2).filter_map(|a| a.parse().ok()).collect();
@@ -51,11 +94,17 @@ fn main() {
                 for _ in 0..repeats {
                     let mut copy = state.clone();
                     let mut scratch = Vec::new();
-                    let started = Instant::now();
-                    copy.play_ai_turn(&data, &faction, &ai::plan_turn, &mut scratch);
-                    best = best.min(started.elapsed());
+                    if sequential {
+                        let started = clock();
+                        copy.play_ai_turn(&data, &faction, &planner, &mut scratch);
+                        best = best.min(clock().saturating_sub(started));
+                    } else {
+                        let started = Instant::now();
+                        copy.play_ai_turn(&data, &faction, &planner, &mut scratch);
+                        best = best.min(started.elapsed());
+                    }
                 }
-                state.play_ai_turn(&data, &faction, &ai::plan_turn, &mut events);
+                state.play_ai_turn(&data, &faction, &planner, &mut events);
                 all.push(best);
                 if worst.as_ref().is_none_or(|w| best > w.0) {
                     worst = Some((best, *seed, turn, faction.clone()));
@@ -72,7 +121,8 @@ fn main() {
     let ms = |d: Duration| d.as_secs_f64() * 1000.0;
     let pick = |q: f64| all[((all.len() as f64 - 1.0) * q).round() as usize];
     println!(
-        "{} faction turns ({} turns x {} seed(s), best of {}): mean {:.2} ms, median {:.2} ms, p95 {:.2} ms, p99 {:.2} ms, max {:.2} ms",
+        "{}{} faction turns ({} turns x {} seed(s), best of {}): mean {:.2} ms, median {:.2} ms, p95 {:.2} ms, p99 {:.2} ms, max {:.2} ms",
+        if sequential { "[sequential, thread CPU] " } else { "" },
         all.len(),
         turns,
         seeds.len(),

@@ -255,6 +255,15 @@ pub(crate) fn is_rebels(id: &FactionId) -> bool {
 impl CampaignState {
     /// Military weight of a faction: field armies count fully, garrisons half.
     pub fn faction_power(&self, faction: &FactionId) -> f64 {
+        // OMR R1: the planning scope's index (same sums).
+        if let Some(derived) = self.derived() {
+            return derived.faction_power(faction);
+        }
+        self.faction_power_walk(faction)
+    }
+
+    /// [`Self::faction_power`] walking the armies and settlements.
+    pub fn faction_power_walk(&self, faction: &FactionId) -> f64 {
         let armies: u32 = self
             .armies
             .values()
@@ -318,6 +327,12 @@ impl CampaignState {
         // OM I1: called for most pairs of factions each turn (O(F² × P)); read
         // each province's city directly instead of looking the province up
         // again, and compare the controller before walking the neighbours.
+        // OMR R1: the planning scope's neighbour index when one is open.
+        if let Some(derived) = self.derived() {
+            if let Some(index) = derived.neighbours(self, data) {
+                return index.get(a).is_some_and(|set| set.contains(b));
+            }
+        }
         self.provinces.iter().any(|(id, province)| {
             self.settlements
                 .get(&province.city)
@@ -332,6 +347,11 @@ impl CampaignState {
     /// pass over the provinces (OM I1: loops over all factions call this
     /// once instead of `are_neighbors` for each pair). May contain `a`.
     pub fn neighbour_factions(&self, data: &GameData, a: &FactionId) -> BTreeSet<FactionId> {
+        if let Some(derived) = self.derived() {
+            if let Some(index) = derived.neighbours(self, data) {
+                return index.get(a).cloned().unwrap_or_default();
+            }
+        }
         let mut out = BTreeSet::new();
         for (id, province) in &self.provinces {
             if !self

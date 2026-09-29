@@ -128,18 +128,20 @@ impl<'a> GridPlanner<'a> {
         };
         let mut forbidden: BTreeMap<SettlementId, FactionId> = BTreeMap::new();
         let mut crossable: BTreeSet<SettlementId> = BTreeSet::new();
-        let foreign: Vec<&SettlementId> = state
-            .settlements
-            .iter()
-            .filter(|(_, s)| &s.controller != faction)
-            .map(|(id, _)| id)
-            .collect();
-        let owners = mode.map(&foreign, |id| {
-            state
-                .settlement_province(id)
-                .and_then(|p| passage::trespassed_owner(state, faction, p))
-        });
-        for (id, owner) in foreign.into_iter().zip(owners) {
+        // OMR R1: `trespassed_owner` depends on the province's controller
+        // alone: asked once per controller instead of once per settlement.
+        let mut by_controller: BTreeMap<&FactionId, Option<FactionId>> = BTreeMap::new();
+        for (id, settlement) in &state.settlements {
+            if &settlement.controller == faction {
+                continue;
+            }
+            let Some(controller) = state.province_controller(&settlement.province) else {
+                continue;
+            };
+            let owner = by_controller
+                .entry(controller)
+                .or_insert_with(|| passage::trespassed_owner(state, faction, &settlement.province))
+                .clone();
             let Some(owner) = owner else {
                 continue;
             };

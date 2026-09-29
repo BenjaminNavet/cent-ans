@@ -12,12 +12,33 @@ cible ≤ 0,45 s, décisions de l'IA inchangées (empreinte `turn_digest` identi
 - Profil : `sample` sur `turn_perf`.
 
 ## État
-- [ ] Mesure de référence + empreinte de référence
-- [ ] Profil
-- [ ] Caches (tests d'égalité ancien = nouveau)
-- [ ] Mesure après
+- [x] Mesure de référence + empreinte de référence (`turn_digest 12 1 7`, 24 lignes)
+- [x] Profil (`sample`) : attitude (faction_power + are_neighbors), GridPlanner::with_mode
+  (trespassed_owner par colonie), agent_dijkstra, city_state, nearest_settlement, revenus.
+- [x] C1 : `sim_campaign::planning_scope` — `CampaignState::planning_scope()` (garde qui emprunte
+  l'état ; index enregistré sous l'adresse de l'état) : puissance par faction, voisins de chaque
+  faction. `faction_power`, `are_neighbors`, `neighbour_factions` les lisent pendant la portée.
+  Ouverte par `ai::plan_turn_in`. Test `sim-campaign/tests/omr_r1_planning_scope.rs`.
+- [x] C2 : `GridPlanner::with_mode` : `trespassed_owner` une fois par contrôleur (mémo local).
+- [ ] agent_dijkstra (index entiers), autres points chauds
+- [ ] Mesure finale
 
 ## Mesures
+Machine partagée très chargée (charge ≈ 12 sur 14 cœurs) : le temps mur de `turn_perf` varie
+du simple au double d'un passage à l'autre. Ajout de `turn_perf --sequential` : planification
+sur le fil appelant, temps CPU du fil (clock_gettime THREAD_CPUTIME) — mesure du travail peu
+sensible à la charge. A/B toujours base et branche l'un après l'autre.
+
+| Version | turn_perf 10 1 1 (mur, moy./méd.) | --sequential CPU (moy./méd./p99) |
+|---|---|---|
+| base (a8a9c5bf9) | 5,49 / 2,70 ms (≈ 0,96 s par tour de jeu) | 10,02 / 6,32 / 51,6 ms |
+| C1+C2 | bruit | 6,50 / 4,80 / 25,1 ms |
+
+Empreinte `turn_digest 12 1 7` : identique à la base après C1+C2.
+
+Attention (cible partagée) : un worktree de base construit avec le même profil `r1rel` fait
+passer ses crates pour à jour (dep-info vers l'autre chemin) ; base construite en `r1base`,
+puis `cargo clean -p … --profile r1rel`.
 
 ## Prochaine étape
-Construire `turn_perf`/`turn_digest` en `r1rel`, mesurer, profiler.
+agent_dijkstra sur index entiers (même départage : ordre des SettlementId), puis re-profil.

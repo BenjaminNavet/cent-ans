@@ -459,6 +459,9 @@ fn plan_turn_in(
 ) -> Vec<Order> {
     // FE5: the core asks the feudal decisions of this crate from now on.
     crate::feudal::install();
+    // OMR R1: the state is read-only for the whole plan; repeated questions
+    // (faction power, neighbours) are answered from indexes built once.
+    let _scope = state.planning_scope();
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
