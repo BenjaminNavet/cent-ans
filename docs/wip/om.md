@@ -19,3 +19,5 @@ Lire ce fichier, `git log feat/om`, les notes `docs/wip/om-*.md` des lots.
 - P1 fusionné (écus/bannières toutes factions, 46 portraits + 37 âgés D1-D3, 3,85 $). P2 (portraits D4-D6, ≤ 4,50 $) lancé. Attente OM2.
 - OM2 fusionné (artefacts géo 7168×6144, 406 prov). I1 (intégration : régénération 443 prov, corrections, tous tests, mesures) lancé dans ../gp-om-om2. Ensuite : fusion P2, puis main.
 - P2 fusionné (49 portraits + 42 âgés D4-D6, 4,20 $ ; cumul OM 8,05 $/10). Contrôle visuel planche : correct ; Andronic III en couronne occidentale, Abu l-Hasan auréolé (à retoucher éventuellement).
+- I1 fini sur feat/om-om2 (tests Rust 1223 ok, pytest 1246 ok, 22 tests Godot carte ok) ; fusionné dans feat/om, puis main (FE8, Q6, DZ) fusionné dans feat/om sans conflit textuel. Vérification complète post-main relancée par I1 (reprise). Mesures : chargement 6,7 → 11,4 s, RSS 1,61 → 2,89 Go, planification IA ≈ 0,23 → 1,07 s par tour (après correctif are_neighbors).
+- Ensuite : ff main, suppression des worktrees, note finale.
