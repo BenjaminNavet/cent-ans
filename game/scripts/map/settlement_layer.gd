@@ -185,6 +185,9 @@ var _hamlet_seed: PackedInt64Array = PackedInt64Array()
 ## hameau : centre puis emprise), lacets, échelles]) : une reconstruction (recalage du relief,
 ## dévastation) ne relit plus que les hauteurs. Vidée avec les exclusions.
 var _hamlet_tiles: Dictionary = {}
+## RS-K3 : emprises des maquettes ordinaires autour d'un morceau (3 × 3 morceaux) : morceau →
+## [centres, rayons + marge] ; même validité que les exclusions des hameaux.
+var _model_disks: Dictionary = {}
 ## RS-K2 : échelle écran et boîte des marqueurs pour les décalages d'étiquettes, par image.
 var _lift_frame := -1
 var _lift_scale := 1.0
@@ -383,6 +386,30 @@ func on_settlement_model(px: Vector2) -> bool:
 	return false
 
 
+## RS-K3 : `on_settlement_model` avec les emprises voisines lues une fois par morceau (même test).
+func _on_model_disk(px: Vector2) -> bool:
+	var index := terrain.chunk_index_at(px.x, px.y)
+	var disks: Array = _model_disks.get(index, [])
+	if disks.is_empty():
+		var centers := PackedVector2Array()
+		var radii := PackedFloat64Array()
+		var margin := ModelLibrary.HAMLET_SCALE * 0.3
+		for dy in [-1, 0, 1]:
+			for dx in [-1, 0, 1]:
+				for j in _settlements_by_chunk.get(index + dy * terrain.chunks_x + dx, PackedInt32Array()):
+					if _models[j] != null and not _landmarks.has(j):
+						centers.append(model_px(j))
+						radii.append(_model_radius[j] + margin)
+		disks = [centers, radii]
+		_model_disks[index] = disks
+	var centers: PackedVector2Array = disks[0]
+	var radii: PackedFloat64Array = disks[1]
+	for k in centers.size():
+		if px.distance_to(centers[k]) < radii[k]:
+			return true
+	return false
+
+
 ## Vrai si un point carte est couvert par une ville emblématique (hameaux, végétation).
 func covered_by_landmark(px: Vector2) -> bool:
 	for landmark in _landmarks.values():
@@ -417,6 +444,7 @@ func _forget_hamlet_exclusions() -> void:
 	_hamlet_keep.resize(data.hamlets.size())
 	_hamlet_keep.fill(0)
 	_hamlet_tiles.clear()
+	_model_disks.clear()
 
 
 ## DC6c : paires de maquettes voisines qui peuvent se masquer (rayons à la taille de carte, les
@@ -1625,7 +1653,7 @@ func _hamlet_tile(index: int) -> Array:
 				_hamlet_seed[h] = seed_value
 		px = hamlet_px(h)  # ZG5b : ancrage fin (tirages inchangés)
 		if keep == 0:
-			if on_settlement_model(px):
+			if _on_model_disk(px):
 				if memo:
 					_hamlet_keep[h] = 2
 				continue
