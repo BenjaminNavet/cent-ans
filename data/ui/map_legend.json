@@ -82,19 +82,15 @@
     },
     {
       "id": "settlements",
-      "title": "Places (vue moyenne)",
+      "title": "Places",
       "entries": [
-        {"sample": {"type": "settlement", "kind": "city", "pictogram": "city_capital", "owner": "player"}, "label": "Capitale, grande cité", "text": "Plus la place compte, plus son dessin est grand : capitale d'un royaume, grande cité, puis cité à cathédrale. Seules les capitales, grandes cités et forteresses restent à la vue d'Europe."},
-        {"sample": {"type": "settlement", "kind": "city", "owner": "player"}, "label": "Cité", "text": "Ville close à cathédrale, dont le nom est écrit en plus grand."},
-        {"sample": {"type": "settlement", "kind": "town", "pictogram": "town_walled", "owner": "player"}, "label": "Ville", "text": "Ville close si elle est fortifiée, bourg de maisons sinon. Les petites places n'apparaissent qu'en rapprochant la caméra."},
-        {"sample": {"type": "settlement", "kind": "castle", "rank": 3, "owner": "player"}, "label": "Château", "text": "Forteresse, château ou simple tour, selon sa force."},
-        {"sample": {"type": "settlement", "kind": "abbey", "owner": "player"}, "label": "Abbaye", "text": "Abbaye ou prieuré."},
-        {"sample": {"type": "settlement", "kind": "village", "owner": "player"}, "label": "Village", "text": "Chaumières et chapelle."},
-        {"sample": {"type": "settlement", "kind": "town", "rank": 1, "port": true, "owner": "player"}, "label": "Port", "text": "Une nef en bas à gauche : la place a un port."},
+        {"sample": {"type": "settlement", "kind": "city", "rank": 4, "owner": "player", "name": "Paris"}, "label": "Vue normale : maquette et écu", "text": "Chaque place est une maquette en relief ; son nom est écrit au-dessus, surmonté du petit écu du royaume qui la tient. Plus la place compte, plus son nom et son écu sont grands et plus longtemps ils restent au dézoom : capitales, grandes cités et forteresses d'abord."},
+        {"sample": {"type": "settlement", "kind": "town", "rank": 1, "owner": "player", "name": "Mantes"}, "label": "Petites places", "text": "Villes, châteaux, abbayes et villages n'écrivent leur nom qu'en rapprochant la caméra."},
+        {"sample": {"type": "parchment_town"}, "label": "Vue stratégique : vignette à l'encre", "text": "Au dézoom maximal, la carte devient un parchemin : les villes y sont des vignettes dessinées à l'encre, les capitales marquées d'un fanion aux couleurs du royaume."},
         {
           "sample": {"type": "settlement_owners"},
           "label": "Écu d'une place",
-          "text": "Les armes du royaume qui la tient : les vôtres à gauche, puis d'autres royaumes ; sans écu, place sans seigneur. En rapprochant la caméra, les marqueurs cèdent la place aux maquettes."
+          "text": "Les armes du royaume qui la tient : les vôtres à gauche, puis d'autres royaumes ; sans écu, place sans seigneur."
         }
       ]
     },

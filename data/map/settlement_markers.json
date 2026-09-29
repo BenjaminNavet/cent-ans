@@ -1,32 +1,5 @@
 {
-  "description": "Lot DA3 (ADR 0066) : langage unique des marqueurs de lieux sur la carte de campagne. Forme = type (pictogramme peint de l'atlas), écu = détenteur (armoiries de la faction), taille = rang. Règles de rang et de dé-encombrement par distance caméra.",
-  "atlas": {
-    "path": "res://assets/map/markers/settlement_markers.png",
-    "cell_px": 128,
-    "columns": 4
-  },
-  "pictograms": [
-    {"id": "city_capital", "cell": 0, "label": "Capitale", "subject": "a royal capital city seen from the front: a tall double ring of crenellated stone walls with many round towers topped by slate-blue conical roofs, a great Gothic cathedral with two towers and a royal palace keep rising above the roofs, a small gilded crown finial on the highest tower"},
-    {"id": "city_major", "cell": 1, "label": "Grande cité", "subject": "a great walled medieval city seen from the front: crenellated stone walls with several round towers and a gatehouse, crowded red and grey tiled roofs, a large Gothic cathedral with a tall spire rising in the middle"},
-    {"id": "city", "cell": 2, "label": "Cité", "subject": "a walled medieval cathedral city seen from the front: a ring of crenellated stone walls with four round towers and a gate, tiled roofs inside, one Gothic church with a spire rising above"},
-    {"id": "town_walled", "cell": 3, "label": "Ville close", "subject": "a small walled market town seen from the front: a low crenellated stone wall with two small towers and a gate, a few timber-framed houses with red-brown tiled roofs and a parish church bell tower"},
-    {"id": "town", "cell": 4, "label": "Ville", "subject": "a small open market town seen from the front: a cluster of half-timbered houses with steep brown tiled roofs around a stone parish church with a square bell tower, a wooden palisade on one side"},
-    {"id": "village", "cell": 5, "label": "Bourg", "subject": "a tiny village seen from the front: three thatched cottages and a small stone chapel with a bell-cote, one tree"},
-    {"id": "fortress", "cell": 6, "label": "Forteresse", "subject": "a mighty medieval fortress on a rocky mound seen from the front: a massive square keep, a curtain wall with four big round towers with conical slate roofs, a twin-towered gatehouse"},
-    {"id": "castle", "cell": 7, "label": "Château", "subject": "a stone medieval castle on a low mound seen from the front: a square crenellated keep with a small turret, a short curtain wall with two round towers"},
-    {"id": "tower", "cell": 8, "label": "Tour", "subject": "a single fortified stone tower house (donjon) on a small grassy motte seen from the front, crenellated top, one small wooden hoarding"},
-    {"id": "abbey_major", "cell": 9, "label": "Grande abbaye", "subject": "a great Benedictine abbey seen from the front: a large Romanesque-Gothic abbey church with a tall crossing tower and a western bell tower, cloister buildings and an enclosure wall"},
-    {"id": "abbey", "cell": 10, "label": "Abbaye", "subject": "a small monastery priory seen from the front: a stone church with a small bell tower topped by a cross, a low cloister range with a red tiled roof"},
-    {"id": "port", "cell": 11, "label": "Port", "badge": true, "subject": "a single small 14th-century cog seen from the side: a high round-bellied clinker-built hull with a straight stem and sternpost, a small crenellated aftercastle, one mast with a single square sail, riding on stylised curling waves"}
-  ],
-  "kinds": {
-    "city": {"1": "city", "2": "city", "3": "city_major", "4": "city_capital"},
-    "town": {"1": "town", "2": "town_walled"},
-    "village": {"1": "village"},
-    "castle": {"1": "tower", "2": "castle", "3": "fortress"},
-    "abbey": {"1": "abbey", "2": "abbey_major"}
-  },
-  "port_badge": "port",
+  "description": "Lot DA3 (ADR 0066), refondu au lot DV (ADR 0124) : rangs des lieux de la carte de campagne, taille écran de l'écu par rang, densité des noms par distance caméra (`visibility`) et dé-encombrement écran. Vue normale : maquette 3D, nom et petit écu du détenteur au-dessus ; vue stratégique : vignettes à l'encre du parchemin. Plus de pictogramme peint.",
   "rank_rules": [
     {"ids": ["set_paris", "set_londres", "set_barcelone", "set_prague", "set_louvain", "set_nantes", "set_dijon", "set_tolede", "set_munich", "set_gand", "set_florence", "set_genes", "set_grenade", "set_arnhem", "set_milan", "set_naples", "set_pampelune", "set_avignon", "set_lisbonne", "set_chambery", "set_edimbourg", "set_lodose", "set_lucerne", "set_venise", "set_verone"], "rank": 4},
     {"ids": ["set_bordeaux", "set_rouen", "set_lyon", "set_toulouse", "set_montpellier", "set_orleans", "set_tours", "set_poitiers", "set_lille", "set_arras", "set_caen", "set_york", "set_bristol", "set_norwich", "set_dublin", "set_cologne", "set_saragosse", "set_seville", "set_burgos", "set_cordoue", "set_valence", "set_rome", "set_palerme", "set_nuremberg", "set_lubeck", "set_mayence", "set_liege", "set_utrecht", "set_bayonne", "set_limoges", "set_amiens", "set_bourges", "set_strasbourg"], "rank": 3},
@@ -49,8 +22,7 @@
   ],
   "fade_distance": 60,
   "declutter": {
-    "description": "Lot DA7d : dé-encombrement écran par priorité (ADR 0066). Les lieux sont posés par ordre de rang puis de poids ; un marqueur (ou un nom) qui recouvre un rectangle déjà posé est masqué. La capitale du joueur, le lieu sélectionné et le lieu survolé passent toujours. Recalcul seulement quand la caméra bouge nettement.",
-    "marker_box": [0.8, 0.94],
+    "description": "Lot DA7d : dé-encombrement écran par priorité (ADR 0066, DV2). Les lieux sont posés par ordre de rang puis de poids ; un couple nom + écu qui recouvre un rectangle déjà posé est masqué. La capitale du joueur, le lieu sélectionné et le lieu survolé passent toujours. Recalcul seulement quand la caméra bouge nettement.",
     "marker_margin_px": 2,
     "label_margin_px": 3,
     "hidden_alpha": 0.0,
@@ -64,6 +36,5 @@
     "pin_selected": true,
     "pin_hovered": true
   },
-  "shield": {"center": [0.79, 0.24], "half_size": 0.22},
-  "badge": {"center": [0.18, 0.2], "half_size": 0.18}
+  "shield": {"description": "Lot DV2 : écu du détenteur posé au-dessus du nom ; côté = size_px × size_factor, écart au texte en px.", "size_factor": 0.45, "gap_px": 1}
 }
