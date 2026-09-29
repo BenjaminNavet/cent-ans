@@ -2,6 +2,7 @@
 
 import copy
 import json
+import re
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -85,3 +86,24 @@ def test_tagged_events() -> None:
     }
     for event_id, scene in expected.items():
         assert _load(DATA / "events" / f"{event_id}.json")["map_scene"] == scene
+
+
+def test_renderer_keys_are_in_the_schema() -> None:
+    """Every tuning key the renderer reads (life_folk) is declared by the schema (FK4).
+
+    `data/rules/map_scenes.json` is the single source of the living map tuning: a key
+    read by `game/scripts/map/life_folk/*.gd` but absent from the schema would be a
+    silent fallback to a value hard-coded in the renderer.
+    """
+    folk_dir = DATA.parent / "game" / "scripts" / "map" / "life_folk"
+    pattern = re.compile(r'(?:settings\.get|_setting)\("([a-z_]+)"')
+    read = set()
+    for path in folk_dir.glob("*.gd"):
+        read |= set(pattern.findall(path.read_text(encoding="utf-8")))
+    assert read, "no tuning key found in the renderer"
+    declared = set(
+        _load(DATA / "schemas" / "map_scenes_rules.schema.json")["properties"]
+    )
+    assert read <= declared, sorted(read - declared)
+    rules = _load(DATA / "rules" / "map_scenes.json")
+    assert read <= set(rules), sorted(read - set(rules))

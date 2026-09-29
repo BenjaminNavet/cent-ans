@@ -9,7 +9,7 @@ extends RefCounted
 ## - Tracé de chaque étape (deux colonies successives du chemin) : le tracé routier de l'arête
 ##   (`SettlementData.edge_path`, celui des rubans de `RoadRenderer`) s'il existe, sinon le
 ##   segment droit ; une étape surtout en mer est laissée aux navires de `LifeAmbient`.
-## - Charrettes bâchées par 10 unités de route selon la valeur (`carts_per_value`), dans les deux
+## - Charrettes bâchées par 10 unités de route selon la valeur (`carts_per_trade_value`), dans les deux
 ##   sens, phases décalées ; chacune avec son charretier, un marchand à pied et, au-delà de
 ##   `guard_value`, un ou deux gardes.
 ## - Indépendant de la couche des routes commerciales (touche V) : c'est de la vie.
@@ -96,7 +96,7 @@ func set_routes(routes: Array) -> void:
 
 
 func _carts_per_value() -> float:
-	return float(_pool.settings.get("carts_per_value", CARTS_PER_VALUE)) if _pool != null else CARTS_PER_VALUE
+	return float(_pool.settings.get("carts_per_trade_value", CARTS_PER_VALUE)) if _pool != null else CARTS_PER_VALUE
 
 
 ## Tracé d'une étape (carte) : tracé routier, sinon segment droit ; vide si maritime ou inconnu.

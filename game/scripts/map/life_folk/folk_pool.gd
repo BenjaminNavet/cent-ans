@@ -94,8 +94,9 @@ func setup(map_data: MapData, terrain: TerrainBuilder, cap_override: int = -1) -
 	figure_height = float(settings.get("figure_height", DEFAULT_FIGURE_HEIGHT))
 
 
-## Réglages de `data/rules/map_scenes.json` (lot FK1) ; dictionnaire vide si absent. Les clés
-## du réservoir peuvent être au premier niveau ou sous `folk`.
+## Réglages de `data/rules/map_scenes.json` (source unique, schéma `map_scenes_rules`, miroir
+## `MapSceneRules` du cœur) ; lus dans le fichier car le réservoir existe avant la campagne.
+## Dictionnaire vide si absent (les fournisseurs gardent alors leurs valeurs de repli).
 static func load_settings() -> Dictionary:
 	var path := ArmyFigures._data_dir().path_join(DATA_FILE)
 	if not FileAccess.file_exists(path):
@@ -104,12 +105,7 @@ static func load_settings() -> Dictionary:
 	if not (parsed is Dictionary):
 		push_warning("FolkPool: %s invalid" % path)
 		return {}
-	var out: Dictionary = (parsed as Dictionary).duplicate()
-	if parsed.get("folk") is Dictionary:
-		out.merge(parsed["folk"], true)
-	if parsed.get("densities") is Dictionary:
-		out.merge(parsed["densities"], false)
-	return out
+	return (parsed as Dictionary).duplicate()
 
 
 ## Avertissement unique (spec § 6 : donnée absente → routine sautée, un seul message).

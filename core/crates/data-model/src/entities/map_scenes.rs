@@ -25,12 +25,29 @@ pub struct MapSceneRules {
     /// Most figurines alive at once on the close view (halved when the
     /// frame budget is exceeded).
     pub pool_cap: u32,
-    /// Merchant carts per unit of trade route value.
-    pub carts_per_trade_value: f64,
-    /// Peasants in the fields per thousand inhabitants of the province.
-    pub peasants_per_thousand: f64,
     /// Radius (world units) around the camera centre where figurines live.
     pub activity_radius: f64,
+    /// Height of a figurine (world units) at map scale.
+    pub figure_height: f64,
+    /// Road travellers per world unit at the reference population.
+    pub road_folk_per_unit: f64,
+    /// Chance a field point is worked.
+    pub field_work_probability: f64,
+    /// Chance a pasture point holds a herd.
+    pub herd_probability: f64,
+    /// Chance a forest point holds woodcutters in winter.
+    pub woodcutter_probability: f64,
+    /// Chance a road piece near a city holds pilgrims.
+    pub pilgrim_probability: f64,
+    /// Merchant carts per 10 world units of road and per unit of trade
+    /// route value.
+    pub carts_per_trade_value: f64,
+    /// Trade route value from which a cart has a guard (two at double).
+    pub guard_value: f64,
+    /// Extras of a province scene at intensity 0.
+    pub scene_figures_min: u32,
+    /// Extras of a province scene at intensity 1.
+    pub scene_figures_max: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -77,9 +94,17 @@ impl Default for MapSceneRules {
             durations,
             devastation_threshold: 25,
             pool_cap: 600,
-            carts_per_trade_value: 0.05,
-            peasants_per_thousand: 0.5,
             activity_radius: 60.0,
+            figure_height: 0.5,
+            road_folk_per_unit: 0.12,
+            field_work_probability: 0.35,
+            herd_probability: 0.12,
+            woodcutter_probability: 0.06,
+            pilgrim_probability: 0.1,
+            carts_per_trade_value: 0.02,
+            guard_value: 40.0,
+            scene_figures_min: 6,
+            scene_figures_max: 24,
             description: None,
         }
     }
