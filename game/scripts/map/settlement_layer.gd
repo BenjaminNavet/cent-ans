@@ -181,6 +181,10 @@ var _exaggeration_value := 1.0
 ## 0 : à calculer, 1 : posé, 2 : écarté ; graine de tirage par hameau (0 : à calculer).
 var _hamlet_keep: PackedByteArray = PackedByteArray()
 var _hamlet_seed: PackedInt64Array = PackedInt64Array()
+## RS-K3 : partie fixe d'une tuile de hameaux (morceau → [hameaux posés, points des hauteurs (5 par
+## hameau : centre puis emprise), lacets, échelles]) : une reconstruction (recalage du relief,
+## dévastation) ne relit plus que les hauteurs. Vidée avec les exclusions.
+var _hamlet_tiles: Dictionary = {}
 ## RS-K2 : échelle écran et boîte des marqueurs pour les décalages d'étiquettes, par image.
 var _lift_frame := -1
 var _lift_scale := 1.0
@@ -257,6 +261,10 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	_hamlet_seed.resize(data.hamlets.size())
 	_hamlet_seed.fill(-1)
 	_forget_hamlet_exclusions()
+	# RS-K3 : maillages des hameaux chargés au chargement de la carte (~15 ms la première fois),
+	# pas à la construction de la première tuile en jeu.
+	if not data.hamlets.is_empty():
+		ModelLibrary.hamlet_meshes()
 	_build_icons()
 	_build_selection_ring()
 	_setup_towns()
@@ -408,6 +416,7 @@ func _forget_hamlet_exclusions() -> void:
 		return
 	_hamlet_keep.resize(data.hamlets.size())
 	_hamlet_keep.fill(0)
+	_hamlet_tiles.clear()
 
 
 ## DC6c : paires de maquettes voisines qui peuvent se masquer (rayons à la taille de carte, les
@@ -1516,6 +1525,55 @@ func _hamlet_memo_ready() -> bool:
 	return _hamlet_keep.size() == data.hamlets.size() and _hamlet_seed.size() == data.hamlets.size()
 
 
+## RS-K3 : hameaux posés du morceau `index` (exclusions et graines mémorisées au passage) et
+## points de leurs hauteurs : [hameaux, points (5 par hameau), lacets, échelles].
+func _hamlet_tile(index: int) -> Array:
+	var kept := PackedInt32Array()
+	var points := PackedVector2Array()
+	var yaws := PackedFloat32Array()
+	var scales := PackedFloat32Array()
+	var memo := _hamlet_memo_ready()
+	for h in _hamlets_by_chunk[index]:
+		var hamlet: Dictionary = data.hamlets[h]
+		var px: Vector2 = hamlet["px"]
+		var keep := _hamlet_keep[h] if memo else 0
+		if keep == 2:
+			continue
+		if keep == 0 and not _landmarks.is_empty() and covered_by_landmark(px):
+			if memo:
+				_hamlet_keep[h] = 2
+			continue
+		var seed_value: int = _hamlet_seed[h] if memo else -1
+		if seed_value < 0:
+			seed_value = _hamlet_seed_of(h)
+			if memo:
+				_hamlet_seed[h] = seed_value
+		px = hamlet_px(h)  # ZG5b : ancrage fin (tirages inchangés)
+		if keep == 0:
+			if on_settlement_model(px):
+				if memo:
+					_hamlet_keep[h] = 2
+				continue
+			if memo:
+				_hamlet_keep[h] = 1
+		var yaw := float((seed_value / 13) % 628) / 100.0
+		var scale := ModelLibrary.HAMLET_SCALE * (0.85 + float((seed_value / 17) % 30) / 100.0)
+		kept.append(h)
+		yaws.append(yaw)
+		scales.append(scale)
+		points.append(px)
+		for k in 4:
+			var angle := k * TAU / 4.0 + yaw
+			points.append(Vector2(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
+	return [kept, points, yaws, scales]
+
+
+## Graine de tirage du hameau `h` (variante, lacet, taille, incendie).
+func _hamlet_seed_of(h: int) -> int:
+	var hamlet: Dictionary = data.hamlets[h]
+	return _hash(str(hamlet["name"]) + str(hamlet["px"]))
+
+
 func _build_hamlets(index: int) -> void:
 	var tp := Time.get_ticks_usec()  # RS-K3 : sous-sections du banc `--bench-probe`
 	_hamlet_dirty.erase(index)
@@ -1531,50 +1589,26 @@ func _build_hamlets(index: int) -> void:
 		return
 	# Groupes : (variante, brûlé) → transformations.
 	var groups := {}
-	# PB3g : hauteurs (centre + 4 points de l'emprise) en un seul appel groupé.
-	var pending: Array = []
-	var points := PackedVector2Array()
+	var tile: Array = _hamlet_tiles.get(index, [])
+	if tile.is_empty():
+		tile = _hamlet_tile(index)
+		if _hamlet_memo_ready():
+			_hamlet_tiles[index] = tile
+	var kept: PackedInt32Array = tile[0]
+	var points: PackedVector2Array = tile[1]
+	var yaws: PackedFloat32Array = tile[2]
+	var scales: PackedFloat32Array = tile[3]
 	var memo := _hamlet_memo_ready()
-	for h in _hamlets_by_chunk[index]:
-		var hamlet: Dictionary = data.hamlets[h]
-		var px: Vector2 = hamlet["px"]
-		var keep := _hamlet_keep[h] if memo else 0
-		if keep == 2:
-			continue
-		if keep == 0 and not _landmarks.is_empty() and covered_by_landmark(px):
-			if memo:
-				_hamlet_keep[h] = 2
-			continue
-		var seed_value: int = _hamlet_seed[h] if memo else -1
-		if seed_value < 0:
-			seed_value = _hash(str(hamlet["name"]) + str(px))
-			if memo:
-				_hamlet_seed[h] = seed_value
-		px = hamlet_px(h)  # ZG5b : ancrage fin (tirages inchangés)
-		if keep == 0:
-			if on_settlement_model(px):
-				if memo:
-					_hamlet_keep[h] = 2
-				continue
-			if memo:
-				_hamlet_keep[h] = 1
-		var variant := seed_value % meshes.size()
-		var devastation: float = _devastation.get(hamlet["province"], 0.0)
-		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
-		var key := variant * 2 + (1 if burned else 0)
-		var yaw := float((seed_value / 13) % 628) / 100.0
-		var scale := ModelLibrary.HAMLET_SCALE * (0.85 + float((seed_value / 17) % 30) / 100.0)
-		points.append(px)
-		for k in 4:
-			var angle := k * TAU / 4.0 + yaw
-			points.append(Vector2(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
-		pending.append([key, px, yaw, scale])
 	tp = PerfProbe.lap("settle/hamlets/prep", tp)
 	var heights := terrain.surface_heights_at(points)
 	tp = PerfProbe.lap("settle/hamlets/heights", tp)
-	for p in pending.size():
-		var key: int = pending[p][0]
-		var px: Vector2 = pending[p][1]
+	for p in kept.size():
+		var h := kept[p]
+		var seed_value := _hamlet_seed[h] if memo else _hamlet_seed_of(h)
+		var devastation: float = _devastation.get(data.hamlets[h]["province"], 0.0)
+		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
+		var key := (seed_value % meshes.size()) * 2 + (1 if burned else 0)
+		var px := points[p * 5]
 		var center := heights[p * 5]
 		var low := center
 		for k in range(1, 5):
@@ -1582,7 +1616,7 @@ func _build_hamlets(index: int) -> void:
 		if not groups.has(key):
 			groups[key] = []
 		# SZ4 : (x, z, lacet, échelle de carte, sol au centre, sol le plus bas de l'emprise de carte).
-		groups[key].append(PackedFloat32Array([px.x, px.y, pending[p][2], pending[p][3], center, low]))
+		groups[key].append(PackedFloat32Array([px.x, px.y, yaws[p], scales[p], center, low]))
 	for key in groups:
 		var entries: Array = groups[key]
 		var multimesh := MultiMesh.new()
