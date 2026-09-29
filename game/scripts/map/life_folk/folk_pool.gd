@@ -219,6 +219,16 @@ func place(focus: Vector2, radius: float, world_scale_value: float) -> void:
 # --- API des fournisseurs ----------------------------------------------------------
 
 
+## Données d'instance (longueur, vitesse, phase, dénivelé) posées au dernier placement (tests).
+func instance_custom(key: String, index: int) -> Color:
+	var group: Dictionary = _groups.get(key, {})
+	var buffer: PackedFloat32Array = group.get("buffer", PackedFloat32Array())
+	var o := index * 16 + 12
+	if o + 3 >= buffer.size():
+		return Color(0, 0, 0, 0)
+	return Color(buffer[o], buffer[o + 1], buffer[o + 2], buffer[o + 3])
+
+
 ## Places de figurines restantes sous le plafond.
 func remaining() -> int:
 	return maxi(effective_cap - _figures, 0)
