@@ -34,7 +34,7 @@
     "threshold": 0
   },
   "commise": {
-    "min_power_ratio": 2.0,
+    "min_power_ratio": 1.2,
     "aggression_shift": 0.3,
     "max_wars": 1,
     "min_treasury": 0

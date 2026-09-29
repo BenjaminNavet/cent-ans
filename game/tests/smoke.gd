@@ -1098,6 +1098,12 @@ func _run_diplomacy() -> void:
 		_check(stances.size() == 2 and stances[0] == "self", "get_province_stances: %s" % stances)
 		_check(DiplomaticStances.COLORS.has(stances[1]), "unknown stance %s" % stances[1])
 		_check(str((sim.call("get_faction_stance", "fac_flanders") as Dictionary).get("key", "")) != "", "get_faction_stance expected")
+		if sim.has_method("get_province_stances_for"):  # DZ : relations vues d'une autre faction
+			var seen: PackedStringArray = sim.call("get_province_stances_for", "fac_england", PackedStringArray(["prov_ile_de_france", "prov_guyenne"]))
+			var of_england: Dictionary = sim.call("get_faction_stances_for", "fac_england")
+			_check(seen.size() == 2 and seen[1] == "self" and seen[0] == str(of_england.get(FACTION_ID, "")), "get_province_stances_for: %s / %s" % [seen, of_england.get(FACTION_ID)])
+			_check(str(of_england.get("fac_rebels", "")) == "war", "rebels should be enemies of everyone")
+			_check((sim.call("get_province_stances_for", "fac_nobody", PackedStringArray(["prov_guyenne"])) as PackedStringArray).is_empty(), "unknown viewer should give nothing")
 		_check((sim.call("get_trespass", "fac_flanders") as Dictionary).has("theirs"), "get_trespass expected")
 		var army_ids: PackedStringArray = sim.call("get_army_ids")
 		for army_id in army_ids:

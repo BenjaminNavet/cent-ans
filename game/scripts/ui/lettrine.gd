@@ -23,17 +23,23 @@ var _box := 0.0
 var _text := ""
 var _color := Color.BLACK
 var _font_size := 22
+## Q6 : titre d'un panneau à largeur imposée (zone `SIDE_PANEL`) : le label ne réclame que
+## `FIT_MIN_WIDTH` et la suite du titre est rapetissée (jusqu'à `FIT_MIN_FONT`) pour tenir.
+var _fit := false
+const FIT_MIN_WIDTH := 120.0
+const FIT_MIN_FONT := 12
 
 
 ## Habille `label` d'une lettrine. `box` : côté du champ d'azur (défaut : 1,5 × la taille de
 ## police du label). Idempotent : un second appel renvoie la lettrine déjà posée.
-static func attach(label: Label, box: float = 0.0) -> Lettrine:
+static func attach(label: Label, box: float = 0.0, fit: bool = false) -> Lettrine:
 	for child in label.get_children():
 		if child is Lettrine:
 			return child
 	var lettrine := Lettrine.new()
 	lettrine.name = "Lettrine"
 	lettrine._label = label
+	lettrine._fit = fit
 	lettrine._font_size = label.get_theme_font_size("font_size")
 	lettrine._box = box if box > 0.0 else roundf(float(lettrine._font_size) * 1.5)
 	label.add_child(lettrine)
@@ -65,6 +71,8 @@ func _sync() -> void:
 	_color = color
 	var rest := _text.substr(1) if _has_initial() else _text
 	var width := FrontEndStyle.title_font().get_string_size(rest, HORIZONTAL_ALIGNMENT_LEFT, -1, _font_size).x
+	if _fit:
+		width = minf(width, FIT_MIN_WIDTH)
 	_label.custom_minimum_size = Vector2(_box + GAP + width + 2.0, _box + 2.0)
 	queue_redraw()
 
@@ -86,8 +94,14 @@ func _draw() -> void:
 		_draw_initial(font, box, str(UNACCENTED.get(initial, initial)))
 	# Suite du titre : même couleur que le label (couleur de faction éventuelle), centrée
 	# verticalement sur le champ.
-	var baseline := box.get_center().y + font.get_ascent(_font_size) - font.get_height(_font_size) * 0.5
-	draw_string(font, Vector2(_box + GAP, baseline), rest, HORIZONTAL_ALIGNMENT_LEFT, -1, _font_size, _color)
+	var font_size := _font_size
+	if _fit:
+		var room := size.x - _box - GAP - 2.0
+		var width := font.get_string_size(rest, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+		if width > room and width > 0.0:
+			font_size = maxi(FIT_MIN_FONT, int(floorf(float(font_size) * room / width)))
+	var baseline := box.get_center().y + font.get_ascent(font_size) - font.get_height(font_size) * 0.5
+	draw_string(font, Vector2(_box + GAP, baseline), rest, HORIZONTAL_ALIGNMENT_LEFT, maxf(size.x - _box - GAP, 1.0), font_size, _color)
 
 
 func _draw_initial(font: Font, box: Rect2, letter: String) -> void:

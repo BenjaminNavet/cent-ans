@@ -370,9 +370,11 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
     );
     // RS-M (ADR 0113): 40 000 until TW2 (royal ransoms after battles) and FE
     // (the Empire's host at war with France from turn 8); 24 336 on main of
-    // 2026-09-28, standard error of the 8-seed mean about 3 400.
+    // 2026-09-28, standard error of the 8-seed mean about 3 400. FE8 (ADR
+    // 0114, effective host): 32 603, floor raised to 20 000 (the mean less
+    // about three standard errors, rounded down to 5 000).
     assert!(
-        (15_000.0..=160_000.0).contains(&france),
+        (20_000.0..=160_000.0).contains(&france),
         "France's treasury {france}"
     );
     assert!(

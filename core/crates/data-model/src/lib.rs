@@ -88,8 +88,8 @@ pub use entities::faction::{
     ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
 pub use entities::feudal_rules::{
-    ArbitrationRules, ArbitrationWeights, EscalationRules, FeudalRules, LoyaltyWeights,
-    ProtectionScore,
+    ArbitrationRules, ArbitrationWeights, EscalationRules, FelonyReason, FeudalRules, HostRules,
+    LoyaltyWeights, ProtectionScore, StartFelony,
 };
 pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,

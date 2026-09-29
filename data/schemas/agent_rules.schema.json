@@ -80,6 +80,7 @@
     "passive_counter_base": { "$ref": "#/$defs/percent" },
     "passive_counter_per_level": { "type": "integer", "minimum": 0, "maximum": 30 },
     "passive_counter_cap": { "$ref": "#/$defs/percent" },
+    "ai_network_min_income": { "type": "integer", "minimum": 0, "description": "Lot F8 : revenu de saison sous lequel une faction IA ne garde qu'un espion en temps de guerre, comme une puissance mineure (0 : toute faction jouable entretient un agent de chaque sorte)." },
     "effects": {
       "type": "object",
       "properties": {

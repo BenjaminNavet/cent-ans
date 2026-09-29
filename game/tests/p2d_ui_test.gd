@@ -176,19 +176,9 @@ func _check_capture_window(map: Node) -> void:
 ## fraîche créée après avoir posé `root.size` — au plus près de ce que voit le joueur au
 ## lancement, plutôt qu'un redimensionnement à la volée.
 ##
-## Défaut préexistant trouvé ici (hors migration de tailles, signalé dans le rapport, pas corrigé
-## par ce lot) : `_layout()` tente de brider `panel.size` à `view - 32` (`minf(combined_min,
-## PANEL_MAX/view)`), mais un `Control` ne peut pas être réduit sous la taille minimale combinée de
-## ses enfants — Godot ramène `panel.size` à `panel.get_combined_minimum_size()` dès qu'elle
-## dépasse la valeur visée. Avec une armée principale de départ (`debug_stage_siege`/
-## `debug_stage_naval`, colonnes de régiments), cette taille minimale peut dépasser 720/640 px de
-## haut ; la fenêtre déborde alors réellement de l'écran. Vérifié par instrumentation ponctuelle de
-## `_layout()` (non commise) : `combined_min` fini par se stabiliser après quelques images, mais
-## reste au-dessus du budget visé pour un siège avec les armées principales du départ — un `Control`
-## ne peut pas être réduit sous ce minimum par une simple affectation de `size`. Partagé avec les
-## batailles rangées (pas propre au siège) et avec la scène de bataille 3D (`CB`, hors périmètre) :
-## une vraie correction (colonnes défilantes, cf. `chronicle_window.gd` dans ce même lot) dépasse le
-## périmètre d'une migration de tailles et n'est pas tranchée ici.
+## C2 : la fenêtre tient à l'écran. Les colonnes d'armées défilent (grosses armées du départ) et
+## `_layout()` réaffecte la taille à chaque changement de minimum (un premier calcul, libellés
+## repliés sans largeur, gonflait le panneau à plus de 3000 px sans jamais le rétrécir).
 func _check_siege_dialog() -> void:
 	var first := true
 	for resolution in C2_RESOLUTIONS:
@@ -217,11 +207,10 @@ func _check_siege_dialog() -> void:
 		if first:
 			_collect(dialog)
 			first = false
-		# C2 : diagnostic seulement (voir le commentaire de fonction) — défaut préexistant de
-		# `_layout()`, hors périmètre de ce lot, signalé dans le rapport plutôt que corrigé ici.
+		# C2 : bloquant depuis que les colonnes d'armées défilent (voir le commentaire de fonction).
 		var view: Vector2 = root.get_visible_rect().size
-		if dialog.panel.size.x > view.x + 0.5 or dialog.panel.size.y > view.y + 0.5:
-			print("p2d_ui_test C2 (préexistant, non bloquant) : PreBattleDialog (siège) at %s: panel %s overflows the screen %s" % [resolution, dialog.panel.size, view])
+		_check(dialog.panel.size.x <= view.x + 0.5 and dialog.panel.size.y <= view.y + 0.5,
+			"C2: PreBattleDialog (siège) at %s: panel %s overflows the screen %s" % [resolution, dialog.panel.size, view])
 		var withdrawn := [-1]
 		dialog.withdraw_requested.connect(func(i: int) -> void: withdrawn[0] = i)
 		dialog.withdraw_button.emit_signal("pressed")
@@ -267,11 +256,10 @@ func _check_naval_dialog() -> void:
 		if first:
 			_collect(dialog)
 			first = false
-		# C2 : diagnostic seulement — même défaut préexistant que `_check_siege_dialog` (voir son
-		# commentaire), hérité de `PreBattleDialog._layout()`.
+		# C2 : bloquant, même mise en page que `_check_siege_dialog`.
 		var view: Vector2 = root.get_visible_rect().size
-		if dialog.panel.size.x > view.x + 0.5 or dialog.panel.size.y > view.y + 0.5:
-			print("p2d_ui_test C2 (préexistant, non bloquant) : NavalPreBattleDialog (résultat naval) at %s: panel %s overflows the screen %s" % [resolution, dialog.panel.size, view])
+		_check(dialog.panel.size.x <= view.x + 0.5 and dialog.panel.size.y <= view.y + 0.5,
+			"C2: NavalPreBattleDialog (résultat naval) at %s: panel %s overflows the screen %s" % [resolution, dialog.panel.size, view])
 		dialog.queue_free()
 		await process_frame
 		# Résolution automatique : rend des évènements et vide l'attente (`NavalCampaign._on_auto`).

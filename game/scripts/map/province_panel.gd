@@ -50,7 +50,7 @@ const ROW_ICON := 20.0
 @onready var id_value: Label = %IdValue
 @onready var garrison_header: Label = %GarrisonHeader
 @onready var garrison_list: VBoxContainer = %GarrisonList
-@onready var actions: HBoxContainer = %Actions
+@onready var actions: HFlowContainer = %Actions  # Q6 : boutons à la ligne si la zone est étroite
 @onready var recruit_button: Button = %RecruitButton
 @onready var create_army_button: Button = %CreateArmyButton
 @onready var recruit_panel: VBoxContainer = %RecruitPanel
@@ -83,7 +83,7 @@ var breadcrumb: HFlowContainer
 
 
 func _ready() -> void:
-	Lettrine.attach(name_label)  # UI1 : titre à lettrine enluminée
+	Lettrine.attach(name_label, 0.0, true)  # UI1 : titre à lettrine enluminée (Q6 : ajusté à la zone)
 	recruit_button.pressed.connect(func() -> void: recruit_panel.visible = not recruit_panel.visible)
 	create_army_button.pressed.connect(_on_create_army)
 	cancel_build_button.pressed.connect(func() -> void: cancel_build_requested.emit(province_id))
@@ -121,10 +121,13 @@ func _ready() -> void:
 	city_box.move_child(edict_rule, 1)
 	edict_section.visibility_changed.connect(func() -> void: edict_rule.visible = edict_section.visible)
 	_build_settlements_tab()  # C5
+	get_viewport().size_changed.connect(queue_fit_height)  # Q6
 	breadcrumb = HFlowContainer.new()  # FE6
 	breadcrumb.name = "FeudalBreadcrumb"
 	breadcrumb.add_theme_constant_override("h_separation", 2)
-	name_label.add_sibling(breadcrumb)
+	# Q6 : sur sa propre ligne sous le titre (dans l'en-tête, titre + fil + × dépassaient la
+	# zone `SIDE_PANEL` de 384 px en vue 1280×720).
+	name_label.get_parent().add_sibling(breadcrumb)
 
 
 ## `province` : entrée MapData fusionnée avec `GameDataStore.get_province` (display_name,
@@ -178,6 +181,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	_fill_settlements()  # C5
 	_fill_breadcrumb()  # FE6
 	show()
+	queue_fit_height()
 
 
 ## Onglet « Ville » : classes de population, bâtiments, construction, constructible,
@@ -222,8 +226,10 @@ func _fill_classes(classes: Dictionary) -> void:
 
 
 func _make_class_row(class_id: String, data: Dictionary) -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
+	# Q6 : ligne à retour (jauges sous le nom quand la zone `SIDE_PANEL` est étroite) ; une
+	# ligne fixe de 420 px élargissait le panneau hors de l'écran en vue 1280×720.
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 8)
 	var name_chip := IconChip.create("class_" + class_id, str(CLASS_LABELS.get(class_id, class_id)), RichTooltip.population_class(class_id, data), ROW_ICON, 14)
 	name_chip.custom_minimum_size = Vector2(104, 0)
 	row.add_child(name_chip)
@@ -330,6 +336,29 @@ func _on_create_army() -> void:
 	create_army_requested.emit(province_id, indices)
 
 
+## Q6 : hauteur de conception des onglets (scène) ; ils rétrécissent si la zone manque.
+const TABS_HEIGHT := 343.0
+var _fit_queued := false
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
+		queue_fit_height()
+
+
+## Q6 : le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
+func queue_fit_height() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	_fit_height.call_deferred()
+
+
+func _fit_height() -> void:
+	_fit_queued = false
+	PanelWidgets.fit_tabs_to_side_zone(self, tabs, TABS_HEIGHT)
+
+
 func show_ville_tab() -> void:
 	tabs.current_tab = 1
 
@@ -369,6 +398,7 @@ func _make_settlement_row(row: Dictionary) -> Control:
 	var button := RichButton.new()
 	button.name = settlement_id
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6 : zone `SIDE_PANEL` étroite
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kind := str(row.get("kind", ""))
 	var controller := _faction_label(str(row.get("controller", "")), "", _label_of)

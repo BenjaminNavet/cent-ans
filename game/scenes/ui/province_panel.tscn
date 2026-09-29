@@ -6,7 +6,6 @@
 [node name="ProvincePanel" type="PanelContainer"]
 theme_type_variation = &"IlluminatedPanel"
 unique_name_in_owner = true
-custom_minimum_size = Vector2(380, 0)
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -185,10 +184,11 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="Actions" type="HBoxContainer" parent="VBox/Tabs/Garnison/GarrisonBox"]
+[node name="Actions" type="HFlowContainer" parent="VBox/Tabs/Garnison/GarrisonBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 4
 
 [node name="RecruitButton" type="Button" parent="VBox/Tabs/Garnison/GarrisonBox/Actions"]
 unique_name_in_owner = true
@@ -216,6 +216,7 @@ layout_mode = 2
 theme_type_variation = &"Heading"
 theme_override_font_sizes/font_size = 20
 text = "Recrutement — coût / entretien par saison"
+autowrap_mode = 3
 
 [node name="RecruitList" type="VBoxContainer" parent="VBox/Tabs/Garnison/GarrisonBox/RecruitPanel"]
 unique_name_in_owner = true

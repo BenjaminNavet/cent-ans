@@ -25,6 +25,8 @@ const BANNER_SIEGE := "res://assets/events/evt_sluys.jpg"
 const PANEL_MAX := Vector2(1180, 820)
 const CARD_COLUMNS := 8
 const CARD_SIZE := Vector2(64, 94)
+const BANNER_HEIGHT := 132.0
+const BANNER_HEIGHT_SHORT := 84.0  # écrans bas (1280×640) : place rendue aux régiments
 
 var battle: Dictionary = {}
 var setup: Dictionary = {}
@@ -46,6 +48,9 @@ var panel: PanelContainer
 var banner: Control
 var _banner_texture: Texture2D
 var _columns: Array[VBoxContainer] = []
+var _scroll_body: VBoxContainer
+var _sides_scroll: ScrollContainer
+var _layout_queued := false
 var _share := 0.5
 var _colors: Array[Color] = [Color(0.2, 0.3, 0.75), Color(0.75, 0.15, 0.12)]
 
@@ -79,10 +84,21 @@ func _ready() -> void:
 	inner.add_child(content)
 	content.add_child(_build_balance())
 	content.add_child(BattleUiKit.rule())
+	# Colonnes d'armées et conditions défilantes : les grosses armées du départ dépassent 640 px
+	# de haut ; bannière, équilibre et boutons restent fixes.
+	_sides_scroll = ScrollContainer.new()
+	_sides_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_sides_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_child(_sides_scroll)
+	_scroll_body = VBoxContainer.new()
+	_scroll_body.add_theme_constant_override("separation", 8)
+	_scroll_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_sides_scroll.add_child(_scroll_body)
 	var sides := HBoxContainer.new()
 	sides.add_theme_constant_override("separation", 24)
 	sides.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	content.add_child(sides)
+	_scroll_body.add_child(sides)
 	for i in 2:
 		var column := VBoxContainer.new()
 		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -92,17 +108,19 @@ func _ready() -> void:
 		if i == 0:
 			var divider := VSeparator.new()
 			sides.add_child(divider)
-	content.add_child(BattleUiKit.rule())
+	_scroll_body.add_child(BattleUiKit.rule())
 	body_label = BattleUiKit.label("", UiType.size(UiType.BODY))
 	body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content.add_child(body_label)
+	_scroll_body.add_child(body_label)
 	modifiers_label = BattleUiKit.label("", UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 	modifiers_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	modifiers_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	modifiers_label.clip_text = true
-	content.add_child(modifiers_label)
+	_scroll_body.add_child(modifiers_label)
 	content.add_child(_build_buttons())
 	get_viewport().size_changed.connect(_layout)
+	panel.minimum_size_changed.connect(_queue_layout)
+	_scroll_body.minimum_size_changed.connect(_queue_layout)
 	_layout()
 	visible = false
 
@@ -110,7 +128,7 @@ func _ready() -> void:
 func _build_banner() -> Control:
 	banner = Control.new()
 	banner.name = "Banner"
-	banner.custom_minimum_size = Vector2(0, 132)
+	banner.custom_minimum_size = Vector2(0, BANNER_HEIGHT)
 	banner.clip_contents = true
 	banner.draw.connect(_draw_banner)
 	var margin := MarginContainer.new()
@@ -219,9 +237,26 @@ func _layout() -> void:
 	var view := get_viewport_rect().size
 	var width := minf(PANEL_MAX.x, view.x - 32.0)
 	panel.custom_minimum_size = Vector2(width, 0)
-	var height := minf(panel.get_combined_minimum_size().y, minf(PANEL_MAX.y, view.y - 32.0))
+	banner.custom_minimum_size.y = BANNER_HEIGHT if view.y >= 760.0 else BANNER_HEIGHT_SHORT
+	# Hauteur naturelle (colonnes entières) bornée à l'écran ; au-delà, les colonnes défilent.
+	# `size` est réaffectée à chaque passe : un premier calcul (libellés repliés sans largeur)
+	# peut l'avoir gonflée, et un Control ne rétrécit jamais seul.
+	var natural := panel.get_combined_minimum_size().y + _scroll_body.get_combined_minimum_size().y
+	var height := minf(natural, minf(PANEL_MAX.y, view.y - 32.0))
 	panel.size = Vector2(width, height)
 	panel.position = (view - panel.size) * 0.5
+
+
+func _queue_layout() -> void:
+	if _layout_queued:
+		return
+	_layout_queued = true
+	_run_queued_layout.call_deferred()
+
+
+func _run_queued_layout() -> void:
+	_layout_queued = false
+	_layout()
 
 
 ## Remplit l'écran pour `p_battle` (entrée de `get_pending_battles`).

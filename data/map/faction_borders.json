@@ -46,7 +46,7 @@
       "neutral": false
     },
     "diplomacy": {
-      "alpha": 0.75,
+      "alpha": 1.0,
       "neutral": false
     },
     "claims": {
