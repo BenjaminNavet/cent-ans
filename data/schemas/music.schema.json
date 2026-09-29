@@ -39,7 +39,7 @@
       "type": "object",
       "additionalProperties": {
         "type": "string",
-        "enum": ["france", "england", "burgundy", "iberia", "italy"]
+        "enum": ["france", "england", "burgundy", "iberia", "italy", "orthodox", "islamic"]
       }
     }
   },

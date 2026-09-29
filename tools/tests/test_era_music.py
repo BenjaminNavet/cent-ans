@@ -14,7 +14,15 @@ DATA = REPO / "data"
 GAME = REPO / "game"
 ASSETS = GAME / "assets"
 
-CULTURE_REGIONS = {"france", "england", "burgundy", "iberia", "italy"}
+CULTURE_REGIONS = {
+    "france",
+    "england",
+    "burgundy",
+    "iberia",
+    "italy",
+    "orthodox",
+    "islamic",
+}
 
 
 def _music() -> dict:
@@ -196,8 +204,8 @@ def test_run_ffmpeg_atomic_writes_dst_only_on_success(
     era_music._run_ffmpeg_atomic(["ffmpeg", "-y", "-i", "src.mp3", str(dst)], dst)
 
     assert dst.read_bytes() == b"fake-audio"
-    assert calls[0][-1] == str(dst.with_suffix(dst.suffix + ".part"))
-    assert not dst.with_suffix(dst.suffix + ".part").exists()
+    assert calls[0][-1] == str(dst.with_name("out.part.mp3"))
+    assert not dst.with_name("out.part.mp3").exists()
 
 
 def test_run_ffmpeg_atomic_leaves_no_dst_and_no_part_on_failure(
@@ -215,4 +223,37 @@ def test_run_ffmpeg_atomic_leaves_no_dst_and_no_part_on_failure(
         era_music._run_ffmpeg_atomic(["ffmpeg", "-y", "-i", "src.mp3", str(dst)], dst)
 
     assert not dst.exists()
-    assert not dst.with_suffix(dst.suffix + ".part").exists()
+    assert not dst.with_name("out.part.mp3").exists()
+
+
+def test_every_faction_culture_has_a_music_region() -> None:
+    """OMR-R6: chaque culture de faction (``data/factions/*.json``) a une région musicale."""
+    regions = _music()["culture_regions"]
+    cultures = {
+        json.loads(path.read_text(encoding="utf-8"))["culture"]
+        for path in (DATA / "factions").glob("*.json")
+    }
+    assert not cultures - set(regions), (
+        f"cultures sans région : {cultures - set(regions)}"
+    )
+
+
+def test_every_campaign_context_has_two_primary_tracks() -> None:
+    """OMR-R6: chaque contexte ``campaign_*`` a au moins 2 pistes primary, dont orthodoxe/islamique."""
+    playlists = _music()["playlists"]
+    for context in ("campaign_orthodox", "campaign_islamic"):
+        assert context in playlists
+    for context, playlist in playlists.items():
+        if context.startswith("campaign_"):
+            assert len(playlist["primary"]) >= 2, context
+
+
+def test_orthodox_and_islamic_tracks_have_allowed_licences() -> None:
+    """OMR-R6: pistes orthodoxes/islamiques créditées avec une licence libre (ni NC ni ND)."""
+    tracks = [
+        t for t in era_music.WIKIMEDIA_TRACKS if t.culture in {"orthodox", "islamic"}
+    ]
+    assert len(tracks) >= 4
+    for track in tracks:
+        assert track.licence in era_music.ACCEPTED_LICENSES, track.file_title
+        assert track.context == f"campaign_{track.culture}"

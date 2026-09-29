@@ -132,6 +132,32 @@
         "assets/third_party/music/wikimedia/machaut_douce_dame_jolie.mp3",
         "assets/third_party/music/kevin_macleod/village_consort.mp3"
       ]
+    },
+    "campaign_orthodox": {
+      "primary": [
+        "assets/third_party/music/wikimedia/znamenny_carju_nebesnyj.mp3",
+        "assets/third_party/music/wikimedia/byzantine_hymns_part1.mp3",
+        "assets/third_party/music/wikimedia/znamenny_se_zhenih_grjadet.mp3",
+        "assets/third_party/music/wikimedia/byzantine_hymns_part2.mp3",
+        "assets/third_party/music/wikimedia/znamenny_da_molchit_vsjaka_plot.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/kevin_macleod/lord_of_the_land.mp3",
+        "assets/third_party/music/kevin_macleod/village_consort.mp3"
+      ]
+    },
+    "campaign_islamic": {
+      "primary": [
+        "assets/third_party/music/wikimedia/maqam_sika_1931.mp3",
+        "assets/third_party/music/wikimedia/huseyni_saz_semai.mp3",
+        "assets/third_party/music/wikimedia/istikhbar_mezmoum.mp3",
+        "assets/third_party/music/wikimedia/maqam_mezmum_1931.mp3",
+        "assets/third_party/music/wikimedia/baschrav_maqam_hijaz_1931.mp3"
+      ],
+      "fallback": [
+        "assets/third_party/music/kevin_macleod/lord_of_the_land.mp3",
+        "assets/third_party/music/kevin_macleod/teller_of_the_tales.mp3"
+      ]
     }
   },
   "culture_regions": {
@@ -144,35 +170,51 @@
     "cul_czech": "burgundy",
     "cul_catalan": "iberia",
     "cul_castilian": "iberia",
-    "cul_andalusi": "iberia",
+    "cul_andalusi": "islamic",
     "cul_navarrese": "iberia",
     "cul_tuscan": "italy",
     "cul_ligurian": "italy",
     "cul_lombard": "italy",
     "cul_neapolitan": "italy",
-    "cul_arabic": "iberia",
-    "cul_maghrebi": "iberia",
-    "cul_berber": "iberia",
-    "cul_greek": "italy",
-    "cul_turkish": "italy",
-    "cul_armenian": "italy",
-    "cul_georgian": "italy",
-    "cul_circassian": "italy",
-    "cul_alan": "italy",
+    "cul_arabic": "islamic",
+    "cul_maghrebi": "islamic",
+    "cul_berber": "islamic",
+    "cul_greek": "orthodox",
+    "cul_turkish": "islamic",
+    "cul_armenian": "orthodox",
+    "cul_georgian": "orthodox",
+    "cul_circassian": "orthodox",
+    "cul_alan": "orthodox",
     "cul_albanian": "italy",
     "cul_dalmatian": "italy",
     "cul_sardinian": "italy",
     "cul_croatian": "italy",
-    "cul_serbian": "italy",
-    "cul_bulgarian": "italy",
-    "cul_bosnian": "italy",
-    "cul_romanian": "italy",
+    "cul_serbian": "orthodox",
+    "cul_bulgarian": "orthodox",
+    "cul_bosnian": "orthodox",
+    "cul_romanian": "orthodox",
     "cul_polish": "burgundy",
     "cul_hungarian": "burgundy",
     "cul_slovak": "burgundy",
     "cul_slovene": "burgundy",
     "cul_lithuanian": "burgundy",
     "cul_latvian": "burgundy",
-    "cul_estonian": "burgundy"
+    "cul_estonian": "burgundy",
+    "cul_russian": "orthodox",
+    "cul_novgorodian": "orthodox",
+    "cul_ruthenian": "orthodox",
+    "cul_mordvin": "orthodox",
+    "cul_permian": "orthodox",
+    "cul_kipchak": "islamic",
+    "cul_bashkir": "islamic",
+    "cul_scottish": "england",
+    "cul_irish": "england",
+    "cul_occitan": "france",
+    "cul_savoyard": "france",
+    "cul_portuguese": "iberia",
+    "cul_sicilian": "italy",
+    "cul_venetian": "italy",
+    "cul_danish": "burgundy",
+    "cul_swedish": "burgundy"
   }
 }
