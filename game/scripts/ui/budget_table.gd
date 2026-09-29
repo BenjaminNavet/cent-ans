@@ -25,6 +25,8 @@ const RUBRIC_HINTS := {
 	"administration": "Part du revenu prise par la cour et l'administration (plus de provinces, plus de frais), refonte des monnaies comprise.",
 	"other": "Ce que le budget n'explique pas : rançons, tributs, agents, choix de la chronique, butin des chevauchées. Connu seulement après coup.",
 }
+const PREMIUM_NAME := "Surprime des mercenaires"
+const PREMIUM_HINT := "Ce que les compagnies coûtent au-delà de la solde ordinaire ; prélevé sur le trésor en fin de tour, en plus du solde. Impayée, une compagnie déserte ou pille."
 const HEADER_COLOR := Color(0.40, 0.28, 0.14)
 const FONT_SIZE := 15
 const COLUMN_WIDTHS := [0, 96, 108, 96]
@@ -63,6 +65,10 @@ func show_budget(economy: Dictionary) -> void:
 	for line in lines:
 		if str(line.get("key", "")) == "other" and has_past:
 			_line_row(line, has_past)
+	var premium := int(economy.get("mercenary_premium", 0))
+	var premium_last := int(economy.get("mercenary_premium_last_turn", 0))
+	if premium != 0 or premium_last != 0:
+		_premium_row(premium, premium_last)
 	_rule_row()
 	var net := int(economy.get("net_income", 0))
 	var last_net := int(economy.get("net_income_last_turn", 0))
@@ -87,6 +93,23 @@ func _section_row(title: String) -> void:
 	_grid.add_child(label)
 	for _i in 3:
 		_grid.add_child(Control.new())
+
+
+## NT6b : surprime des compagnies de mercenaires (valeur du core), prélevée sur le trésor en
+## plus du solde ci-dessus ; ligne à part, hors du total.
+func _premium_row(premium: int, last: int) -> void:
+	var name_label := _cell("   " + PREMIUM_NAME, false, FONT_SIZE)
+	RichTooltip.attach_plain(name_label, "budget_line_hint", {"title": PREMIUM_NAME, "body": PREMIUM_HINT})
+	_grid.add_child(name_label)
+	var projected_label := _cell(Money.signed(-premium), true, FONT_SIZE)
+	projected_label.add_theme_color_override("font_color", Money.LOSS_COLOR if premium > 0 else Money.INK_COLOR)
+	RichTooltip.attach_plain(projected_label, "budget_projected_hint")
+	_grid.add_child(projected_label)
+	var last_label := _cell(Money.signed(-last), true, FONT_SIZE - 1)
+	RichTooltip.attach_plain(last_label, "budget_last_hint", {"body": "Surprime réellement prélevée à la dernière fin de tour."})
+	_grid.add_child(last_label)
+	_grid.add_child(Control.new())
+	cells["mercenary_premium"] = {"projected": projected_label.text, "last": last_label.text, "delta": "—"}
 
 
 func _rule_row() -> void:

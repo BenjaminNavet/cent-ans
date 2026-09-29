@@ -118,6 +118,7 @@ var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée 
 var standards: BattleStandards = null  # BV3 : vent, porte-étendards
 var duels: BattleDuels = null  # BV3 : duels appariés cosmétiques
 var speech: BattleSpeech = null  # BV3 : discours du général avant la bataille
+var enemy_speech: BattleSpeech = null  # NT6a : discours du général adverse, après celui du joueur
 var _no_speech: bool = false  # `--no-speech`
 var _speech_shot: String = ""  # `--speech-shot=<png>` (avec `--speech-at=<s>`)
 var _speech_at: float = 6.0
@@ -891,13 +892,21 @@ func _update_time_label() -> void:
 	hud.set_title(_title_text, "%s · %s" % [_weather_text, label] if _weather_text != "" else label, [side_colors[player_side], side_colors[enemy_side]])
 
 
+## NT6a : le conseiller parle après le discours adverse s'il est en cours.
+func _advise_after_speeches(trigger: String) -> void:
+	if enemy_speech != null and is_instance_valid(enemy_speech) and enemy_speech.active:
+		enemy_speech.finished.connect(func() -> void: Advisor.say_trigger(trigger), CONNECT_ONE_SHOT)
+	else:
+		Advisor.say_trigger(trigger)
+
+
 ## VO1 : le conseiller commente la première bataille (ou le premier assaut), après le discours.
 func _advise_first_battle() -> void:
 	if autoplay or _benchmark or not _prologue_data.is_empty():  # NT4 : le guide parle déjà
 		return
 	var trigger := "first_assault" if siege_view != null else "first_battle"
 	if speech != null:
-		speech.finished.connect(func() -> void: Advisor.say_trigger(trigger), CONNECT_ONE_SHOT)
+		speech.finished.connect(_advise_after_speeches.bind(trigger), CONNECT_ONE_SHOT)
 	else:
 		Advisor.say_trigger(trigger)
 
@@ -1033,6 +1042,25 @@ func _start_speech() -> void:
 	if not speech.start(self, text, units, player_side):
 		speech.queue_free()
 		speech = null
+		return
+	if _speech_shot == "":
+		speech.finished.connect(_start_enemy_speech, CONNECT_ONE_SHOT)
+
+
+## NT6a : discours du général adverse, joué juste après celui du joueur (même réglage
+## `--no-speech`) ; un « passer » du joueur écarte aussi celui de l'adversaire.
+func _start_enemy_speech() -> void:
+	if speech == null or speech.skipped or _no_speech:
+		return
+	var ours := float(battle.call("get_strength", player_side))
+	var theirs := maxf(float(battle.call("get_strength", enemy_side)), 1.0)
+	var text := BattleSpeech.compose(setup, enemy_side, theirs / maxf(ours, 1.0), terrain.terrain_key, _weather_key, battle_seed)
+	enemy_speech = BattleSpeech.new()
+	enemy_speech.name = "EnemySpeech"
+	add_child(enemy_speech)
+	if not enemy_speech.start(self, text, units, enemy_side):
+		enemy_speech.queue_free()
+		enemy_speech = null
 
 
 ## BV3 : herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
