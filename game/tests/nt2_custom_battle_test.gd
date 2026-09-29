@@ -30,6 +30,10 @@ func _check_screen() -> void:
 	var screen: CustomBattleScreen = (load("res://scenes/ui/custom_battle_screen.tscn") as PackedScene).instantiate()
 	root.add_child(screen)
 	await process_frame
+	# L'écran tient dans la plus petite fenêtre prise en charge (1280×720, hauteur logique 800).
+	var needed := screen.get_combined_minimum_size()
+	print("nt2: screen minimum size %s" % str(needed))
+	_check(needed.x <= 1280.0 and needed.y <= 720.0, "screen fits 1280×720: %s" % str(needed))
 	_check(screen.factions.size() > 20, "playable factions listed (%d)" % screen.factions.size())
 	_check(int(screen.rules.get("default_budget", 0)) == 6000, "default budget 6000")
 	var french: Array = screen.roster("fac_france")

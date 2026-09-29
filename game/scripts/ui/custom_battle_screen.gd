@@ -243,7 +243,7 @@ func _list_column(parent: Control, heading_text: String) -> VBoxContainer:
 	heading.modulate = Color(1, 1, 1, 0.75)
 	column.add_child(heading)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(0, 260)
+	scroll.custom_minimum_size = Vector2(0, 220)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(scroll)
 	var items := VBoxContainer.new()
