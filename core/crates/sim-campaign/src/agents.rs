@@ -1807,6 +1807,7 @@ fn ai_emissary(
             None,
         );
     }
+    let neighbours = state.neighbour_factions(data, faction);
     let neighbour = state
         .factions
         .iter()
@@ -1816,7 +1817,7 @@ fn ai_emissary(
                 && other.as_str() != REBELS_FACTION
                 && !state.is_at_war(faction, other)
                 && !state.is_allied(faction, other)
-                && state.are_neighbors(data, faction, other)
+                && neighbours.contains(*other)
                 && !f.modifiers.iter().any(|m| {
                     &m.with == faction
                         && m.reason_fr == PARLEY_REASON
