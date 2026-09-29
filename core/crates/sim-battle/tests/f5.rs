@@ -171,7 +171,7 @@ fn siege_besiegers_deploy_outside_the_walls() {
     let siege = SiegeSetup {
         fortification: 1,
         breach: 0,
-        engines: None,
+        ..Default::default()
     };
     let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 4).unwrap();
     assert!(sim.begin_deployment());
@@ -200,7 +200,7 @@ fn siege_pathing_uses_breach() {
     let siege = SiegeSetup {
         fortification: 2,
         breach: 0,
-        engines: None,
+        ..Default::default()
     };
     let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 11).unwrap();
     lab(&mut sim);
@@ -261,7 +261,7 @@ fn towers_shoot_and_the_garrison_sallies() {
     let siege = SiegeSetup {
         fortification: 1,
         breach: 0,
-        engines: None,
+        ..Default::default()
     };
     let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 3).unwrap();
     lab(&mut sim);
@@ -330,7 +330,7 @@ fn f5_is_deterministic() {
         Some(SiegeSetup {
             fortification: 1,
             breach: 60,
-            engines: None,
+            ..Default::default()
         }),
     ] {
         let run_once = || {

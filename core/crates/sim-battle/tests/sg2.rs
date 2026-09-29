@@ -19,7 +19,7 @@ fn siege_with_trebuchet(seed: u64) -> (BattleSim, u32, usize) {
         Some(SiegeSetup {
             fortification: 1,
             breach: 0,
-            engines: None,
+            ..Default::default()
         }),
     );
     let mut sim = BattleSim::new(setup, seed).unwrap();

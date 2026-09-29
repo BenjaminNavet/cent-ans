@@ -214,7 +214,7 @@ fn gate_destroyed_alert_fires_once_when_the_gate_breaks() {
         Some(SiegeSetup {
             fortification: 1,
             breach: 0,
-            engines: None,
+            ..Default::default()
         }),
     );
     let mut sim = BattleSim::new(battle_setup, 43).unwrap();

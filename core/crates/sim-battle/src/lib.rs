@@ -48,6 +48,7 @@ pub mod alerts;
 pub mod capture;
 pub mod command;
 pub mod crest;
+pub mod custom;
 pub mod decision;
 pub mod decor;
 mod decor_gen;
@@ -85,6 +86,7 @@ pub mod shot;
 pub mod siege;
 pub mod siege_fx;
 pub mod siege_layout;
+pub mod siege_layouts;
 pub mod sim;
 pub mod site;
 pub mod time_of_day;
@@ -94,6 +96,7 @@ pub mod unit;
 pub use abilities::{AbilityView, ActiveAbility, EndedAbility, UnitAbilities};
 pub use capture::{CapturePoint, CapturePointKind, CaptureRules, PointStatus};
 pub use command::{Command, CommandError};
+pub use custom::{CustomBattle, CustomBattleRules, CustomData, CustomReport, CustomSide};
 pub use decision::{BattleEnd, DecisionRules};
 pub use decor::{
     Area, AreaKind, Camp, Decor, DecorItem, DecorPlan, DecorProp, DecorPropKind, DecorRules,
@@ -138,6 +141,7 @@ pub use shot::{MissileKind, ShotCover, ShotEvent};
 pub use siege::{PieceKind, SiegeWorkRules, SiegeWorks, Tower, WallPiece};
 pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
+pub use siege_layouts::{place_seed, BoroughRules, CastleRules, PlaceKind, PlaceRules};
 pub use sim::{
     AmbushLayout, BattleSim, CampState, DeploymentZone, Ladder, SetupError, SiegeEngineKind,
     SiegeEngineView, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD, SIEGE_STANDOFF,

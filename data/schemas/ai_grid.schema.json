@@ -44,6 +44,18 @@
           "required": ["enabled", "reach_margin", "danger_radius_km", "danger_ratio"],
           "additionalProperties": false
         },
+        "rest": {
+          "type": "object",
+          "description": "NT6c : repos d'une armée affaiblie pour se reconstituer, en terres amies (en place ou camp retranché) sans armée ennemie à portée.",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "below_percent": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "L'armée se met au repos sous cette part (%) de son effectif complet." },
+            "until_percent": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "Elle reprend la campagne à partir de cette part (%)." },
+            "watch_radius_km": { "type": "number", "minimum": 0, "description": "Aucune armée ennemie à moins de cette distance (km)." }
+          },
+          "required": ["enabled", "below_percent", "until_percent", "watch_radius_km"],
+          "additionalProperties": false
+        },
         "entrenched": {
           "type": "object",
           "description": "Camp retranché d'une armée immobile, en infériorité sur une frontière menacée, hors place forte.",

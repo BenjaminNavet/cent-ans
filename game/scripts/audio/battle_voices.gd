@@ -70,6 +70,9 @@ func _muted() -> bool:
 	var speech: Variant = scene.get("speech")
 	if speech != null and is_instance_valid(speech) and bool(speech.get("active")):
 		return true
+	var enemy_speech: Variant = scene.get("enemy_speech")
+	if enemy_speech != null and is_instance_valid(enemy_speech) and bool(enemy_speech.get("active")):
+		return true
 	var advisor := Advisor.current()
 	return advisor != null and advisor.speaking()
 

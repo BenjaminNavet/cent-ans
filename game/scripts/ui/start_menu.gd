@@ -4,7 +4,8 @@ extends Control
 ## Écran titre et menu principal (F3, refait par MM1) : décor 3D vivant (`MenuBackdrop3D` : Paris
 ## au crépuscule, l'ost et ses bannières, plans de caméra lents enchaînés en fondu), titre enluminé
 ## (`IlluminatedTitle`), colonne de boutons à gauche (Nouvelle partie, Continuer, Charger une
-## partie, Prologue, Codex, Batailles de démonstration, Réglages, Crédits, Quitter), légende du plan en bas à droite.
+## partie, Prologue, Codex, Batailles historiques, Bataille personnalisée, Batailles de démonstration,
+## Rejeux, Réglages, Crédits, Quitter), légende du plan en bas à droite.
 ## « Nouvelle partie » ouvre le choix de faction (`FactionSelect`) en fondu ; « Commencer »
 ## passe par l'écran de chargement (`LoadingScreen`). Le prologue (`IntroCards`) est joué une fois
 ## au premier lancement, puis depuis le menu. Sans rendu (headless) ou avec `--no-menu-3d` : fond
@@ -31,6 +32,7 @@ var intro_button: Button
 var codex_button: Button
 var demos_button: Button
 var historical_button: Button  # EP7
+var custom_battle_button: Button  # NT2
 var replays_button: Button  # EP13
 var settings_button: Button
 var credits_button: Button
@@ -65,7 +67,7 @@ func _ready() -> void:
 	faction_select.visible = false
 	add_child(faction_select)
 	faction_select.back_requested.connect(show_main)
-	faction_select.start_requested.connect(_on_start_requested)
+	faction_select.start_requested.connect(_on_start_gated)  # NT4 : invite au didacticiel
 	var facade := get_node_or_null("/root/SimFacade")
 	if facade != null:
 		var pending := str(facade.get("pending_faction"))
@@ -213,7 +215,8 @@ func _build_main_column() -> void:
 	main_column.add_theme_constant_override("margin_left", 84)
 	# PO1 : la colonne tient à 1280×720 (hauteur logique 800 px) — « Crédits » et « Quitter »
 	# sortaient de l'écran ; marges et espacements de la grille 4/8/16/24 (bible DA § 12.3).
-	main_column.add_theme_constant_override("margin_top", 24)
+	# NT2 : « Bataille personnalisée » ajoutée, marge haute et écart sous le titre réduits à 16 et 8.
+	main_column.add_theme_constant_override("margin_top", 16)
 	main_column.add_theme_constant_override("margin_bottom", 24)
 	add_child(main_column)
 	var column := VBoxContainer.new()
@@ -221,7 +224,7 @@ func _build_main_column() -> void:
 	main_column.add_child(column)
 	column.add_child(IlluminatedTitle.new())
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 16)
+	gap.custom_minimum_size = Vector2(0, 8)
 	column.add_child(gap)
 
 	new_game_button = _menu_button(column, "Nouvelle partie", func() -> void: show_faction_select())
@@ -236,6 +239,7 @@ func _build_main_column() -> void:
 	intro_button = _menu_button(column, "Prologue : 1328-1337", open_intro)
 	codex_button = _menu_button(column, "Codex", open_codex)
 	historical_button = _menu_button(column, "Batailles historiques", open_historical)  # EP7
+	custom_battle_button = _menu_button(column, "Bataille personnalisée", open_custom_battle)  # NT2
 	demos_button = _menu_button(column, "Batailles de démonstration", open_demos)  # SG2
 	replays_button = _menu_button(column, "Rejeux", open_replays)  # EP13
 	settings_button = _menu_button(column, "Réglages", open_settings)
@@ -378,6 +382,11 @@ func open_historical() -> void:
 	_open_overlay(HistoricalBattlesMenu.new())
 
 
+## NT2 : bataille personnalisée (deux armées achetées sur un budget de points, champ au choix).
+func open_custom_battle() -> void:
+	_open_overlay((load("res://scenes/ui/custom_battle_screen.tscn") as PackedScene).instantiate())
+
+
 ## SG2 : batailles de démonstration (sièges d'Avignon, de Bruges, de Paris...).
 func open_demos() -> void:
 	_open_overlay(BattleDemosMenu.new())
@@ -409,6 +418,11 @@ func overlay_open() -> bool:
 
 
 # --- Départ ------------------------------------------------------------------------------------
+
+
+## NT4 : au premier lancement, invite à jouer d'abord le didacticiel de bataille.
+func _on_start_gated(faction_id: String, seed_value: int, start_date: String) -> void:
+	BattlePrologueInvite.gate(self, _on_start_requested.bind(faction_id, seed_value, start_date))
 
 
 func _on_start_requested(faction_id: String, seed_value: int, _start_date: String) -> void:

@@ -29,6 +29,7 @@ pub mod faction;
 pub mod feudal_rules;
 pub mod landmark;
 pub mod mercenaries;
+pub mod missions;
 pub mod movement;
 pub mod names;
 pub mod naval;

@@ -81,6 +81,10 @@ pub struct ReplayStart {
     /// battle fought on the site only ([`HistoricalMap::apply_site`]).
     #[serde(default)]
     pub scripted: bool,
+    /// NT2: weather forced by a custom battle (`None`: drawn from the
+    /// season). Ignored on a historical site.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weather: Option<crate::field::Weather>,
 }
 
 impl ReplayStart {
@@ -98,6 +102,7 @@ impl ReplayStart {
             scale,
             site: None,
             scripted: false,
+            weather: None,
         }
     }
 
@@ -109,6 +114,7 @@ impl ReplayStart {
             scale: map.scale(),
             site: Some(map),
             scripted: false,
+            weather: None,
         }
     }
 
@@ -120,7 +126,14 @@ impl ReplayStart {
             scale: map.scale(),
             site: Some(map),
             scripted: true,
+            weather: None,
         }
+    }
+
+    /// NT2: the same start with the weather forced (custom battle).
+    pub fn with_weather(mut self, weather: Option<crate::field::Weather>) -> Self {
+        self.weather = weather;
+        self
     }
 
     /// Builds the simulation (the single construction path of the bridge,
@@ -135,8 +148,13 @@ impl ReplayStart {
                 map.apply_site(sim.field_mut());
                 Ok(sim)
             }
-            (None, _) => BattleSim::new_scaled(self.setup.clone(), self.seed, self.scale.clone())
-                .map_err(|e| e.to_string()),
+            (None, _) => BattleSim::new_scaled_weather(
+                self.setup.clone(),
+                self.seed,
+                self.scale.clone(),
+                self.weather,
+            )
+            .map_err(|e| e.to_string()),
         }
     }
 }

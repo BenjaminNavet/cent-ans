@@ -33,7 +33,7 @@ fn siege(data: &GameData, extra: &[&str], fortification: u32, breach: u8, seed: 
         Some(SiegeSetup {
             fortification,
             breach,
-            engines: None,
+            ..Default::default()
         }),
     );
     BattleSim::new(setup, seed).unwrap()

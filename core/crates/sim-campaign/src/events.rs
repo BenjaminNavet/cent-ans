@@ -73,6 +73,8 @@ pub enum EventKind {
     Agent,
     /// C5: trade agreements, routes cut by war/siege/blockade.
     Trade,
+    /// NT3: campaign missions offered, fulfilled, failed.
+    Mission,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

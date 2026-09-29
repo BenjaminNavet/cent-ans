@@ -10,6 +10,7 @@ extends PanelContainer
 ## Lot P2e (ADR 0097, bible DA § 12.1) : zone `MODAL` de `UiLayout` (plus de veil ni de
 ## `CenterContainer` propres) ; tailles de texte par `UiType`, ouverture et fermeture par
 ## `UiMotion`.
+## NT4 : le « Didacticiel de bataille » (bataille-prologue guidée, `BattlePrologue`) ouvre la liste.
 
 signal closed
 signal battle_started(id: String, side: String)
@@ -18,6 +19,7 @@ const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 
 var battles: Array = []
 var buttons: Dictionary = {}  # "<id>:<side>" -> Button (tests)
+var prologue_button: Button = null  # NT4 : « Commencer le didacticiel »
 
 
 ## Batailles historiques déclarées (`[]` sans l'extension ou sans données).
@@ -70,6 +72,7 @@ func _ready() -> void:
 	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.75)
 	box.add_child(hint)
+	_add_prologue(box)
 	if battles.is_empty():
 		var none := Label.new()
 		none.text = "Aucune bataille historique n'a été trouvée."
@@ -88,6 +91,38 @@ func _ready() -> void:
 		(buttons.values()[0] as Button).grab_focus.call_deferred()
 	UiZones.put(UiZones.Zone.MODAL, self)
 	UiMotion.fade_in(self)
+
+
+## NT4 : « Didacticiel de bataille » en tête de liste (bataille-prologue guidée), pour ne pas
+## ajouter de ligne à la colonne du menu principal (tenue à 1280×720 par NT2).
+func _add_prologue(box: VBoxContainer) -> void:
+	var prologue := BattlePrologue.load_data()
+	if prologue.is_empty():
+		return
+	var sep := HSeparator.new()
+	box.add_child(sep)
+	var name := Label.new()
+	name.text = str(prologue.get("menu_label", "Didacticiel de bataille"))
+	UiType.apply(name, UiType.HEADING)
+	box.add_child(name)
+	var detail := Label.new()
+	detail.text = str(prologue.get("menu_detail", ""))
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail.custom_minimum_size = Vector2(720, 0)
+	UiType.apply(detail, UiType.BODY)
+	box.add_child(detail)
+	prologue_button = Button.new()
+	prologue_button.name = "BattlePrologue"
+	prologue_button.text = "Commencer le didacticiel"
+	prologue_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	prologue_button.pressed.connect(start_prologue)
+	box.add_child(prologue_button)
+
+
+## NT4 : lance la bataille-prologue guidée.
+func start_prologue() -> void:
+	if BattlePrologue.launch(get_tree()):
+		battle_started.emit("battle_prologue", str((BattlePrologue.load_data().get("battle", {}) as Dictionary).get("player_side", "")))
 
 
 func _add_battle(box: VBoxContainer, entry: Dictionary) -> void:
@@ -131,7 +166,7 @@ func _add_battle(box: VBoxContainer, entry: Dictionary) -> void:
 			var army: Dictionary = entry.get(side, {})
 			button.text = "Mener %s" % _the_army(str(army.get("faction_name", side)))
 			button.tooltip_text = str(army.get("army", ""))
-		button.pressed.connect(start.bind(id, side))
+		button.pressed.connect(func() -> void: BattlePrologueInvite.gate(self, start.bind(id, side)))  # NT4
 		row.add_child(button)
 		buttons["%s:%s" % [id, side]] = button
 

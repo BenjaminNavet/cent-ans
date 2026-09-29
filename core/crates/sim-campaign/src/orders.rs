@@ -629,8 +629,7 @@ pub struct RecruitPrice {
 impl CampaignState {
     /// Validates and applies an order of the player faction.
     pub fn submit_order(&mut self, data: &GameData, order: Order) -> Result<(), OrderError> {
-        let player = self.player_faction.clone();
-        self.apply_order(data, &player, order)
+        self.submit_order_outcome(data, order).map(|_| ())
     }
 
     /// Validates and applies an order of the player faction, and says what
@@ -641,7 +640,16 @@ impl CampaignState {
         order: Order,
     ) -> Result<OrderOutcome, OrderError> {
         let player = self.player_faction.clone();
-        self.apply_order_outcome(data, &player, order)
+        // NT3: recruitments and hires count towards the player's missions.
+        let recruits = u32::from(matches!(
+            order,
+            Order::Recruit { .. } | Order::HireMercenary { .. }
+        ));
+        let outcome = self.apply_order_outcome(data, &player, order)?;
+        if recruits > 0 {
+            crate::missions::note_units_recruited(self, &player, recruits);
+        }
+        Ok(outcome)
     }
 
     /// Validates and applies an order on behalf of `faction`.

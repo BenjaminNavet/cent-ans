@@ -9,6 +9,7 @@ Coût cloud : 0 $.
 - [ ] Intégration `integration/nt` (worktree ../game_project-nt), vérifs, ff dans main
 
 ## Prochaine étape
-Lancer la vague 1.
+Vague 1 : NT2 fusionné (2c1464985) ; attendre NT1, NT3, NT5. Vague 2 lancée (NT4, NT6ab, NT6cd). Vérifier `c5_trade` (échec signalé par NT2, hors lot).
 
 ## Points ouverts
+- NT2 : siège générique en attendant NT1 (brancher le type de place après fusion) ; roster sans époque/techno.

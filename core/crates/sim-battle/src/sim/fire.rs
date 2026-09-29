@@ -350,9 +350,10 @@ impl BattleSim {
             return false;
         };
         let lit = match fuel {
+            // NT1: a castle keep is stone, it never burns.
             Fuel::House(i) => match works.houses.get_mut(i) {
-                Some(house) => house.fire.ignite(intensity),
-                None => false,
+                Some(house) if !house.keep => house.fire.ignite(intensity),
+                _ => false,
             },
             Fuel::Gate => works.pieces[works.gate].intact() && works.gate_fire.ignite(intensity),
         };

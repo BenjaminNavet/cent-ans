@@ -19,7 +19,7 @@ fn siege(data: &GameData, attackers: &[&str], defenders: &[&str], seed: u64) -> 
         Some(SiegeSetup {
             fortification: 1,
             breach: 0,
-            engines: None,
+            ..Default::default()
         }),
     );
     let mut sim = BattleSim::new(setup, seed).unwrap();

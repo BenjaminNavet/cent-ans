@@ -97,6 +97,16 @@ var siege_attacker: String = "fac_france"
 ## SG2 : options d'une démo lancée depuis le menu (`BattleDemosMenu`), lues comme la ligne de
 ## commande puis oubliées.
 static var demo_args: PackedStringArray = []
+## NT2 : bataille personnalisée composée dans `CustomBattleScreen` (configuration de
+## `BattleSim.setup_custom`), lue au `_ready` puis oubliée. `--custom-battle` rejoue la dernière
+## composition gardée dans les réglages (captures, bancs).
+static var custom_config: Dictionary = {}
+var _custom: Dictionary = {}
+## NT4 : bataille-prologue guidée (`BattlePrologue.launch`), lue au `_ready` avec
+## `custom_config` puis oubliée ; pas de déploiement, de discours ni de conseiller spontané.
+static var prologue_data: Dictionary = {}
+var _prologue_data: Dictionary = {}
+var prologue: BattlePrologue = null
 var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -108,6 +118,7 @@ var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée 
 var standards: BattleStandards = null  # BV3 : vent, porte-étendards
 var duels: BattleDuels = null  # BV3 : duels appariés cosmétiques
 var speech: BattleSpeech = null  # BV3 : discours du général avant la bataille
+var enemy_speech: BattleSpeech = null  # NT6a : discours du général adverse, après celui du joueur
 var _no_speech: bool = false  # `--no-speech`
 var _speech_shot: String = ""  # `--speech-shot=<png>` (avec `--speech-at=<s>`)
 var _speech_at: float = 6.0
@@ -298,6 +309,22 @@ func _ready() -> void:
 			push_error("BattleScene: replay %s failed: %s" % [_replay_path, replay_error])
 			_replay_failed()
 		return
+	if campaign_sim == null and not custom_config.is_empty():
+		_custom = custom_config
+	custom_config = {}
+	if campaign_sim == null and not prologue_data.is_empty() and not _custom.is_empty():
+		_prologue_data = prologue_data
+	prologue_data = {}
+	if campaign_sim == null and not _custom.is_empty():
+		# NT2 : bataille personnalisée (menu « Bataille personnalisée »), hors campagne.
+		standalone = true
+		if not begin_custom(_custom):
+			push_error("BattleScene: custom battle setup failed")
+			if _benchmark:
+				_bench_fail("custom battle setup failed")
+		elif not _prologue_data.is_empty():
+			_start_prologue()
+		return
 	if campaign_sim == null and _historical != "":
 		# EP7 : carte historique jouée hors campagne (menu « Batailles historiques »).
 		standalone = true
@@ -421,6 +448,48 @@ func begin_historical() -> bool:
 		else:
 			battle.call("set_start_phase", _hour_override)
 	return _build_scene()
+
+
+## NT2 : bataille personnalisée `config` (armées achetées, champ, siège) ; le résultat n'est pas
+## conservé (hors campagne).
+func begin_custom(config: Dictionary) -> bool:
+	if not ClassDB.class_exists("BattleSim"):
+		return false
+	_audio_director = get_node_or_null("/root/AudioDirector")
+	if _audio_director != null:
+		_audio_director.call("stop_all")
+	battle = ClassDB.instantiate("BattleSim")
+	if not battle.has_method("setup_custom"):
+		return false
+	# Un champ différent à chaque bataille, sauf graine imposée (`seed` : tests, captures).
+	battle_seed = int(config.get("seed", randi() % 1000000))
+	if not battle.call("setup_custom", CustomBattleScreen.data_dir(), config, battle_seed):
+		return false
+	setup = battle.call("get_setup")
+	padded = true  # hors campagne : pas de résultat à rapporter
+	if _hour_override != "":
+		if _hour_override.is_valid_float():
+			battle.call("set_start_hour", float(_hour_override))
+		else:
+			battle.call("set_start_phase", _hour_override)
+	if not _build_scene():
+		return false
+	var attacker := str((setup.get("attacker", {}) as Dictionary).get("faction_name", ""))
+	var defender := str((setup.get("defender", {}) as Dictionary).get("faction_name", ""))
+	_title_text = "Bataille personnalisée : %s contre %s" % [attacker, defender]
+	if not _prologue_data.is_empty():
+		_title_text = str(_prologue_data.get("title", _title_text))  # NT4
+	hud.set_title(_title_text, _weather_text, [side_colors[player_side], side_colors[enemy_side]])
+	return true
+
+
+## NT4 : branche le guide de la bataille-prologue (étapes, ennemi passif au début).
+func _start_prologue() -> void:
+	prologue = BattlePrologue.new()
+	prologue.name = "BattlePrologue"
+	prologue.setup(_prologue_data)
+	add_child(prologue)
+	prologue.attach(self)
 
 
 ## EP13 : rejeu du fichier `path` ; `replay_error` dit pourquoi en cas d'échec (autre format,
@@ -823,13 +892,21 @@ func _update_time_label() -> void:
 	hud.set_title(_title_text, "%s · %s" % [_weather_text, label] if _weather_text != "" else label, [side_colors[player_side], side_colors[enemy_side]])
 
 
+## NT6a : le conseiller parle après le discours adverse s'il est en cours.
+func _advise_after_speeches(trigger: String) -> void:
+	if enemy_speech != null and is_instance_valid(enemy_speech) and enemy_speech.active:
+		enemy_speech.finished.connect(func() -> void: Advisor.say_trigger(trigger), CONNECT_ONE_SHOT)
+	else:
+		Advisor.say_trigger(trigger)
+
+
 ## VO1 : le conseiller commente la première bataille (ou le premier assaut), après le discours.
 func _advise_first_battle() -> void:
-	if autoplay or _benchmark:
+	if autoplay or _benchmark or not _prologue_data.is_empty():  # NT4 : le guide parle déjà
 		return
 	var trigger := "first_assault" if siege_view != null else "first_battle"
 	if speech != null:
-		speech.finished.connect(func() -> void: Advisor.say_trigger(trigger), CONNECT_ONE_SHOT)
+		speech.finished.connect(_advise_after_speeches.bind(trigger), CONNECT_ONE_SHOT)
 	else:
 		Advisor.say_trigger(trigger)
 
@@ -952,7 +1029,7 @@ func _setup_standards() -> void:
 ## BV3 : discours du général du joueur, au début du déploiement (ou de la bataille), en jeu
 ## seulement (pas en `--autoplay`, captures ni bancs), sauf `--speech-shot`.
 func _start_speech() -> void:
-	if _no_bv3 or _no_speech or (autoplay and _speech_shot == ""):
+	if _no_bv3 or _no_speech or (autoplay and _speech_shot == "") or not _prologue_data.is_empty():
 		return
 	var ours := float(battle.call("get_strength", player_side))
 	var theirs := maxf(float(battle.call("get_strength", enemy_side)), 1.0)
@@ -965,6 +1042,25 @@ func _start_speech() -> void:
 	if not speech.start(self, text, units, player_side):
 		speech.queue_free()
 		speech = null
+		return
+	if _speech_shot == "":
+		speech.finished.connect(_start_enemy_speech, CONNECT_ONE_SHOT)
+
+
+## NT6a : discours du général adverse, joué juste après celui du joueur (même réglage
+## `--no-speech`) ; un « passer » du joueur écarte aussi celui de l'adversaire.
+func _start_enemy_speech() -> void:
+	if speech == null or speech.skipped or _no_speech:
+		return
+	var ours := float(battle.call("get_strength", player_side))
+	var theirs := maxf(float(battle.call("get_strength", enemy_side)), 1.0)
+	var text := BattleSpeech.compose(setup, enemy_side, theirs / maxf(ours, 1.0), terrain.terrain_key, _weather_key, battle_seed)
+	enemy_speech = BattleSpeech.new()
+	enemy_speech.name = "EnemySpeech"
+	add_child(enemy_speech)
+	if not enemy_speech.start(self, text, units, enemy_side):
+		enemy_speech.queue_free()
+		enemy_speech = null
 
 
 ## BV3 : herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
@@ -1670,7 +1766,7 @@ func _victory_hold() -> float:
 func _show_end() -> void:
 	finished_shown = true
 	var outcome: Dictionary = battle.call("get_outcome")
-	if not autoplay and not _benchmark:  # VO1 : conseiller
+	if not autoplay and not _benchmark and _prologue_data.is_empty():  # VO1 : conseiller
 		Advisor.say_trigger("first_victory" if str(outcome.get("winner", "")) == player_side else "first_defeat")
 	var sides := {}
 	for side in ["attacker", "defender"]:
@@ -2095,6 +2191,8 @@ func _parse_cmdline() -> void:
 			_historical = arg.trim_prefix("--historical=")
 		elif arg.begins_with("--historical-side="):
 			_historical_side = arg.trim_prefix("--historical-side=")
+		elif arg == "--custom-battle":
+			_custom = CustomBattleScreen.saved_config()  # NT2
 		elif arg == "--cinematic":
 			_force_cinematic = true
 		elif arg == "--birds-shot":
@@ -2523,6 +2621,8 @@ func _open_deployment() -> void:
 		return  # EP13 : le déploiement enregistré est rejoué par le cœur
 	if autoplay and not _deploy_shot:
 		return
+	if not _prologue_data.is_empty():
+		return  # NT4 : le prologue commence en bataille, armées déjà rangées
 	if not historical.is_empty() and not bool(historical.get("site_only", false)):
 		return  # EP7 : déploiement historique imposé
 

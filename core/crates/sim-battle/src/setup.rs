@@ -212,6 +212,13 @@ pub struct SiegeSetup {
     /// Campaign wall damage (0-100): from 50 a breach is already open.
     #[serde(default)]
     pub breach: u8,
+    /// NT1 (ADR 0126): kind of place (ring city, fortified borough,
+    /// castle); a landmark plan (`siege_layout`) takes precedence.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::siege_layouts::PlaceKind::is_city"
+    )]
+    pub place: crate::siege_layouts::PlaceKind,
     /// NT5 (N7): the engines the besiegers built during the campaign siege.
     /// `None` (older replays, hand-made setups): the ram every besieging
     /// army brings and ladders for every foot regiment.

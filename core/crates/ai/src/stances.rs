@@ -443,6 +443,100 @@ pub fn should_entrench(
         || posture::validate_stance_change(state, data, army_id, Stance::Entrenched).is_ok()
 }
 
+/// NT6c: what a weakened army does about resting this turn.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RestPlan {
+    /// Not resting (and not in a rest camp): the usual plan applies.
+    None,
+    /// Stay put; `entrench` when it stands in the open (camp retranché).
+    Rest { entrench: bool },
+    /// Rested enough: leave the rest camp.
+    Leave,
+}
+
+/// NT6c: a field army below `below_percent` of its full strength, on
+/// friendly ground and with no hostile army within `watch_radius_km`, stays
+/// put to be replenished (`replenish`): in a friendly place, or in an
+/// entrenched camp in the open. It resumes once at `until_percent`
+/// (hysteresis for the camp; a place has no marker, so it uses the
+/// lower threshold there).
+pub fn rest_plan(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    army_id: &ArmyId,
+) -> RestPlan {
+    let rules = &data.ai_grid.postures.rest;
+    let Some(army) = state.armies.get(army_id) else {
+        return RestPlan::None;
+    };
+    if !rules.enabled
+        || army.units.is_empty()
+        || !matches!(army.stance, Stance::Normal | Stance::Entrenched)
+    {
+        return RestPlan::None;
+    }
+    let camped = army.stance == Stance::Entrenched;
+    let strength: u32 = army.units.iter().map(|u| u.strength).sum();
+    let full: u32 = army.units.iter().map(|u| u.max_strength).sum();
+    if full == 0 {
+        return RestPlan::None;
+    }
+    let share = 100.0 * f64::from(strength) / f64::from(full);
+    let limit = if camped {
+        rules.until_percent
+    } else {
+        rules.below_percent
+    };
+    if share >= limit {
+        return if camped {
+            RestPlan::Leave
+        } else {
+            RestPlan::None
+        };
+    }
+    use sim_campaign::Territory;
+    if !matches!(
+        state.army_territory(data, army_id),
+        Territory::Own | Territory::Ally
+    ) {
+        return RestPlan::None;
+    }
+    let place = army.settlement();
+    if place.is_some_and(|s| {
+        state.settlements.get(s).is_some_and(|p| p.siege.is_some())
+            || !state.is_friendly_settlement(faction, s)
+    }) {
+        return RestPlan::None;
+    }
+    let here = state.army_point(data, army);
+    let radius = rules.watch_radius_km as f32 * sim_campaign::march::px_per_km(data);
+    let menaced = state.armies.values().any(|other| {
+        !other.units.is_empty()
+            && state.is_at_war(faction, &other.faction)
+            && distance(here, state.army_point(data, other)) <= radius
+    });
+    if menaced {
+        return RestPlan::None;
+    }
+    // Nothing would come back (empty treasury, season already fought...).
+    if !state
+        .army_replenishment(data, army_id)
+        .is_some_and(|p| p.men > 0)
+    {
+        return RestPlan::None;
+    }
+    if place.is_none()
+        && !camped
+        && posture::validate_stance_change(state, data, army_id, Stance::Entrenched).is_err()
+    {
+        return RestPlan::None;
+    }
+    RestPlan::Rest {
+        entrench: place.is_none(),
+    }
+}
+
 /// CV3-6: a `MoveArmy` to an encounter site `army_id` reaches this turn
 /// (low chance per turn), for an army without urgent business: the caller
 /// checks that; here the site must be seen, in lands the army may enter.

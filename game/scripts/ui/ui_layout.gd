@@ -45,6 +45,8 @@ const ZONE_RECTS := {
 	Zone.MODAL: Rect2(0.2, 0.12, 0.6, 0.76),
 }
 const TOAST_SECONDS := 6.0
+## NT6b : lignes visibles au plus d'un avis (le reste : points de suspension).
+const TOAST_MAX_LINES := 3
 const MAX_TOASTS := 3
 ## Voile des fenêtres modales (bible § 12.1 : noir 45 %).
 const MODAL_DIM := Color(0.0, 0.0, 0.0, 0.45)
@@ -249,11 +251,14 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	label.name = "Text"
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.max_lines_visible = TOAST_MAX_LINES  # NT6b : un avis très long reste dans sa zone
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_theme_color_override("font_color", HudStyle.INK)
 	UiType.apply(label, UiType.BODY)
 	row.add_child(label)
+	entry.clip_contents = true
 	entry.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			_dismiss_toast(entry))

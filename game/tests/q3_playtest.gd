@@ -59,6 +59,7 @@ func _run() -> void:
 	settings.call("set_value", "voice/advisor", true)
 	settings.call("set_value", "voice/barks", true)
 	settings.call("set_value", "voice/advisor_seen", "")
+	settings.call("set_value", "battle_prologue/never_ask", true)  # NT4 : pas d'invite au didacticiel
 	await wait(10)
 	log_q("window %s, viewport %s" % [DisplayServer.window_get_size(), root.get_visible_rect().size])
 	_voice_bus = AudioServer.get_bus_index("Voix")

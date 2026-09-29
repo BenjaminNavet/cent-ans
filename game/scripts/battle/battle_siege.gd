@@ -23,6 +23,8 @@ var siege: Dictionary = {}
 var height_at: Callable
 var _pieces: Array = []  # [{node, wall, rubble, material, hp_ratio}]
 var _machines: Dictionary = {}  # unit id -> Node3D (tower / ram)
+var _target_marks: Dictionary = {}  # NT6a : unit id -> marqueur « visé » (anneau rouge + ◎)
+var targeted_ids: Array = []  # NT6a : engins (bélier/beffroi) pris pour cible par un ennemi
 var _ladders: Dictionary = {}  # unit id -> Node3D (group of ladders)
 var _ladder_mesh: ArrayMesh
 var wall_height: float = 8.0
@@ -47,6 +49,7 @@ func build(p_siege: Dictionary, p_height_at: Callable) -> void:
 		child.queue_free()
 	_pieces.clear()
 	_machines.clear()
+	_target_marks.clear()
 	_ladders.clear()
 	wall_height = float(siege.get("wall_height", 8.0))
 	thickness = float(siege.get("thickness", 3.0))
@@ -350,12 +353,13 @@ func _build_houses() -> void:
 	var houses_root := Node3D.new()
 	houses_root.name = "Houses"
 	add_child(houses_root)
+	_build_keeps()
 	if BuildingKit.available():
 		_build_kit_town(houses_root, center)
 		return
 	for i in house_sites.size():
 		var site: Dictionary = house_sites[i]
-		if i != church_index:
+		if i != church_index and not bool(site["keep"]):
 			var h := 4.0 + 3.0 * BuildingKit.hash01(i, 11)
 			_house(houses_root, site["p"], float(site["length"]) * 0.95, float(site["depth"]) * 0.95, h, -float(site["yaw"]))
 	BattleSiegeBatcher.batch_and_replace(houses_root)
@@ -398,7 +402,9 @@ func _build_kit_town(houses_root: Node3D, center: Vector2) -> void:
 		var depth := float(site["depth"])
 		var yaw := float(site["yaw"])
 		var handles: Array = []
-		if bool(site["church"]):
+		if bool(site["keep"]):
+			pass  # NT1 : le donjon est dessiné par `_build_keeps`.
+		elif bool(site["church"]):
 			handles.append(_kit_place("church", p, length, depth, yaw, rng))
 		elif bool(site["suburb"]):
 			var kind: String = ["cottage", "timber", "longere", "barn", "cottage"][rng.randi_range(0, 4)]
@@ -678,6 +684,7 @@ func update(p_siege: Dictionary, units: Array) -> void:
 
 func _update_machines(units: Array) -> void:
 	var seen := {}
+	_update_target_marks(units)
 	for unit in units:
 		var id := int(unit["id"])
 		var render := str(unit.get("render", ""))
@@ -713,6 +720,59 @@ func _update_machines(units: Array) -> void:
 
 ## SG2 : bélier ou beffroi modélisé (`game/assets/models/siege/`) ; null si absent. La caisse du
 ## beffroi est mise à la hauteur du mur, son pont-levis juste au-dessus du chemin de ronde.
+## NT6a : béliers et beffrois « visés » : un ennemi présent les a pour cible (champ `target` de
+## l'état exposé par le pont ; rien n'est décidé ici). Anneau rouge au sol et ◎ au-dessus.
+func _update_target_marks(units: Array) -> void:
+	var by_id := {}
+	for unit in units:
+		by_id[int(unit["id"])] = unit
+	targeted_ids = []
+	for unit in units:
+		if not bool(unit["present"]):
+			continue
+		var foe: Variant = by_id.get(int(unit.get("target", -1)), null)
+		if foe == null or not bool((foe as Dictionary)["present"]) or str(foe["side"]) == str(unit["side"]):
+			continue
+		if ["ram", "tower"].has(str(foe.get("render", ""))) and not targeted_ids.has(int(foe["id"])):
+			targeted_ids.append(int(foe["id"]))
+	for id in _machines:
+		var machine: Node3D = _machines[id]
+		var on: bool = targeted_ids.has(id) and machine.visible
+		if on and not _target_marks.has(id):
+			_target_marks[id] = _make_target_mark()
+			machine.add_child(_target_marks[id])
+		if _target_marks.has(id):
+			(_target_marks[id] as Node3D).visible = on
+
+
+func _make_target_mark() -> Node3D:
+	var mark := Node3D.new()
+	mark.name = "TargetMark"
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 2.6
+	torus.outer_radius = 3.0
+	ring.mesh = torus
+	ring.position.y = 0.15
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = Color(0.9, 0.12, 0.1)
+	ring.material_override = material
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mark.add_child(ring)
+	var icon := Label3D.new()
+	icon.text = "◎"
+	icon.font_size = 96
+	icon.pixel_size = 0.03
+	icon.modulate = Color(1.0, 0.25, 0.2)
+	icon.outline_modulate = Color(0, 0, 0, 0.9)
+	icon.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	icon.no_depth_test = true
+	icon.position.y = 7.5
+	mark.add_child(icon)
+	return mark
+
+
 func _model_machine(render: String) -> Node3D:
 	var node := SiegeEnginesFx.instantiate("siege_tower" if render == "tower" else "ram")
 	if node == null or render != "tower":
@@ -844,5 +904,26 @@ func _house_sites() -> Array:
 			"yaw": float(house.get("yaw", 0.0)),
 			"rows": int(house.get("rows", 2)),
 			"church": bool(house.get("church", false)),
+			"keep": bool(house.get("keep", false)),
 		})
 	return sites
+
+
+## NT1 (ADR 0126) : donjon d'un château = tour agrandie (même maquette que les tours de
+## l'enceinte), posée sur l'emprise carrée de la simulation (`houses[].keep`), plus haute que les
+## courtines. Aucune règle ici : emprise et position viennent du cœur.
+func _build_keeps() -> void:
+	for site in house_sites:
+		if not bool(site["keep"]):
+			continue
+		var keep_root := Node3D.new()
+		keep_root.name = "Keep"
+		add_child(keep_root)
+		var p: Vector2 = site["p"]
+		var side := maxf(float(site["length"]), float(site["depth"]))
+		_build_tower(keep_root, {
+			"x": p.x,
+			"z": p.y,
+			"radius": side * 0.6,
+			"height": wall_height + 14.0,
+		})

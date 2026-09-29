@@ -26,6 +26,12 @@
     "entrenched": {
       "enabled": true,
       "inferiority_ratio": 1.0
+    },
+    "rest": {
+      "enabled": true,
+      "below_percent": 60,
+      "until_percent": 85,
+      "watch_radius_km": 60
     }
   },
   "encounters": {

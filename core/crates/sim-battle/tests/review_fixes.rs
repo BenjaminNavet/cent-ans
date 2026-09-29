@@ -147,7 +147,7 @@ fn withdrawal_from_the_town_goes_through_the_breach() {
     let siege = sim_battle::SiegeSetup {
         fortification: 2,
         breach: 0,
-        engines: None,
+        ..Default::default()
     };
     let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 11).unwrap();
     lab(&mut sim);
@@ -274,7 +274,7 @@ fn siege_pathing_cache_follows_the_walls() {
     let siege = sim_battle::SiegeSetup {
         fortification: 2,
         breach: 0,
-        engines: None,
+        ..Default::default()
     };
     let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 11).unwrap();
     lab(&mut sim);

@@ -27,7 +27,7 @@ const SECTION_KINDS := {
 	"lands": ["province_captured", "siege_started", "siege_lifted", "raid", "revolt", "plague", "famine",
 		"death", "succession", "no_heir", "birth", "marriage", "regency", "table", "medicine", "chivalry",
 		"agent", "excommunication", "heresy", "vassal_rebellion", "victory", "defeat", "campaign_ended",
-		"edict"],  # C4 : édits régionaux
+		"edict", "mission"],  # C4 : édits régionaux ; NT3 : missions
 	# « income » (revenus bruts) : redondant avec la ligne de synthèse du trésor, laissé au journal.
 	"treasury": ["bankruptcy", "coinage", "ransom", "trade"],  # C5 : accords et routes coupées
 	"armies": ["battle", "army_destroyed", "general_captured", "recruited", "attrition"],
@@ -52,6 +52,8 @@ const KIND_STYLES := {
 	"agent": {"glyph": "✦", "label": "Agents", "color": "#4a2a6a"},
 	# C5 : accords commerciaux, routes coupées par la guerre, un siège ou un blocus.
 	"trade": {"glyph": "⚓", "label": "Commerce", "color": "#1a5a6a"},
+	# NT3 : missions obtenues, réussies, échouées.
+	"mission": {"glyph": "✠", "label": "Mission", "color": "#5a3a10"},
 }
 ## Ton d'une ligne (`_tone`) : perte (rouge, en tête), prise (vert, juste après), neutre.
 const TONE_LOSS := "loss"

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/missions.schema.json",
+  "title": "Missions de campagne",
+  "description": "Fichier data/missions.json (lot NT3, ADR 0127) : gabarits de missions à court terme de la faction du joueur. Textes : {cible} = province, place ou bâtiment visé, {lieu} = place du bâtiment, {n} = nombre demandé.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "max_active": {
+      "type": "integer", "minimum": 1, "maximum": 2,
+      "description": "Missions actives au plus en même temps."
+    },
+    "first_turn": {
+      "type": "integer", "minimum": 0,
+      "description": "Premier tour où une mission peut être proposée."
+    },
+    "offer_cooldown_turns": {
+      "type": "integer", "minimum": 0, "maximum": 12,
+      "description": "Tours d'attente après une réussite ou un échec avant une nouvelle proposition."
+    },
+    "failure_prestige": {
+      "type": "integer", "minimum": -20, "maximum": 0,
+      "description": "Prestige du souverain à l'échec (échéance passée, place perdue) : nul ou faible."
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/template" }
+    }
+  },
+  "required": ["max_active", "first_turn", "offer_cooldown_turns", "failure_prestige", "templates"],
+  "additionalProperties": false,
+  "$defs": {
+    "template": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "kind": {
+          "enum": ["take_province", "win_battle", "construct_building", "recruit_units", "conclude_treaty", "hold_place"],
+          "description": "take_province : prendre une province voisine tenue par un ennemi en guerre ; win_battle : gagner n batailles ; construct_building : achever un bâtiment disponible ; recruit_units : recruter ou engager n unités ; conclude_treaty : paix, alliance ou vassalité nouvelle ; hold_place : garder une place frontalière menacée jusqu'à l'échéance."
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "objective": { "type": "string", "minLength": 1 },
+        "duration": {
+          "type": "integer", "minimum": 3, "maximum": 12,
+          "description": "Tours (saisons) avant l'échéance ; pour hold_place, durée à tenir."
+        },
+        "count": { "type": "integer", "minimum": 1, "maximum": 20, "default": 1 },
+        "weight": { "type": "integer", "minimum": 1, "maximum": 10, "default": 1 },
+        "reward": { "$ref": "#/$defs/reward" }
+      },
+      "required": ["id", "kind", "title", "objective", "duration", "reward"],
+      "additionalProperties": false
+    },
+    "reward": {
+      "type": "object",
+      "properties": {
+        "gold": { "type": "integer", "minimum": 0, "maximum": 5000, "description": "Livres versées au trésor." },
+        "prestige": { "type": "integer", "minimum": 0, "maximum": 50, "description": "Prestige du souverain." },
+        "public_order": { "type": "integer", "minimum": 0, "maximum": 30, "description": "Agitation retirée à la province visée (sinon à la capitale)." },
+        "free_unit": { "type": "boolean", "description": "Une compagnie gratuite rejoint la garnison de la capitale (la plus chère qu'on y lève)." }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    }
+  }
+}

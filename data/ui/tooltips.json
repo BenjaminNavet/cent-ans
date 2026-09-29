@@ -397,6 +397,38 @@
       "title": "Heure de la bataille",
       "body": "L'aube et le crépuscule réduisent la portée des tireurs ; la journée avance pendant la bataille."
     },
+    "custom_battle_budget": {
+      "title": "Budget de points",
+      "body": "Chaque unité coûte son prix de recrutement en livres. L'armée ne peut dépasser ni le budget ni le plafond d'unités."
+    },
+    "custom_battle_terrain": {
+      "title": "Terrain",
+      "body": "Relief, bois, marais et haies du champ de bataille, tirés comme en campagne pour ce type de pays."
+    },
+    "custom_battle_season": {
+      "title": "Saison",
+      "body": "Sol de la saison (boue, neige) et, si la météo est laissée au hasard, temps probable."
+    },
+    "custom_battle_weather": {
+      "title": "Météo",
+      "body": "La pluie gêne arcs et arbalètes, le brouillard raccourcit la portée, la neige alourdit la marche."
+    },
+    "custom_battle_player": {
+      "title": "Camp du joueur",
+      "body": "Le camp que vous commandez ; l'autre est mené par l'IA. « Aucun » : les deux camps sont menés par l'IA."
+    },
+    "custom_battle_siege": {
+      "title": "Siège",
+      "body": "Le camp 2 tient une place fortifiée ; le camp 1 donne l'assaut aux murs."
+    },
+    "custom_battle_place": {
+      "title": "Type de place",
+      "body": "Plan de la place assiégée : cité en anneaux de maisons, bourg fortifié le long d'une grand-rue, ou château avec donjon et basse-cour."
+    },
+    "custom_battle_fortification": {
+      "title": "Fortification",
+      "body": "Niveau des murs de la place (0 à 3) : épaisseur, hauteur et solidité."
+    },
     "historical_battle_ai_both": {
       "title": "Bataille automatique",
       "body": "Les deux armées sont menées par l'IA."

@@ -123,6 +123,8 @@ pub mod folders {
     pub const MERCENARY_RULES: &str = "mercenaries.json";
     pub const ARMY_RULES: &str = "armies.json";
     pub const SIEGE_ENGINE_RULES: &str = "siege_engines.json";
+    /// Short-term campaign missions (lot NT3), at the data root; optional.
+    pub const MISSIONS: &str = "missions.json";
     /// Army traditions (lot TW2-T5), inside `rules/`; optional.
     pub const ARMY_TRADITION_RULES: &str = "army_traditions.json";
     /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
@@ -362,6 +364,9 @@ pub struct GameData {
     /// `data/rules/siege_engines.json` (lot NT5, N7: engines built during
     /// a siege); the bundled file when absent.
     pub siege_engine_rules: crate::entities::army_rules::SiegeEngineRules,
+    /// `data/missions.json` (lot NT3, short-term missions); the bundled file
+    /// when absent.
+    pub mission_rules: crate::entities::missions::MissionRules,
     /// `data/rules/army_traditions.json` (lot TW2-T5, army traditions); the
     /// bundled file when absent.
     pub army_tradition_rules: crate::entities::army_traditions::ArmyTraditionRules,
@@ -454,6 +459,7 @@ impl GameData {
             mercenary_rules: Default::default(),
             army_rules: Default::default(),
             siege_engine_rules: Default::default(),
+            mission_rules: Default::default(),
             army_tradition_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             cover: Default::default(),
@@ -598,6 +604,10 @@ impl GameData {
         let engines_path = root.join(folders::RULES).join(folders::SIEGE_ENGINE_RULES);
         if engines_path.is_file() {
             data.siege_engine_rules = read_json(&engines_path)?;
+        }
+        let missions_path = root.join(folders::MISSIONS);
+        if missions_path.is_file() {
+            data.mission_rules = read_json(&missions_path)?;
         }
         let traditions_path = root
             .join(folders::RULES)

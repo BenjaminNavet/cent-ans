@@ -66,6 +66,35 @@ pub struct AiPostures {
     pub forced_march: AiForcedMarch,
     #[serde(default)]
     pub entrenched: AiEntrenched,
+    #[serde(default)]
+    pub rest: AiRest,
+}
+
+/// NT6c: a weakened AI army rests to rebuild its ranks (in a friendly
+/// place, or entrenched on friendly lands) while no enemy is near.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AiRest {
+    /// `false`: the AI never rests to recover.
+    pub enabled: bool,
+    /// The army starts resting when its men are below this share (percent)
+    /// of its full strength.
+    pub below_percent: f64,
+    /// It stops resting once at or above this share (percent).
+    pub until_percent: f64,
+    /// No hostile army within this distance (km) of the army.
+    pub watch_radius_km: f64,
+}
+
+impl Default for AiRest {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            below_percent: 60.0,
+            until_percent: 85.0,
+            watch_radius_km: 60.0,
+        }
+    }
 }
 
 /// CV3-6: an AI army weaker than an enemy army marching on its lands lies

@@ -60,6 +60,7 @@ pub mod map_scenes;
 pub mod march;
 pub mod medicine;
 pub mod mercenaries;
+pub mod missions;
 pub mod movement;
 pub mod naval;
 pub mod navigation;

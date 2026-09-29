@@ -128,6 +128,53 @@ func _ready() -> void:
 	# Q6 : sur sa propre ligne sous le titre (dans l'en-tête, titre + fil + × dépassaient la
 	# zone `SIDE_PANEL` de 384 px en vue 1280×720).
 	name_label.get_parent().add_sibling(breadcrumb)
+	_compact_header()  # NT6b
+
+
+## NT6b : en-tête compacté à 5 lignes en 1280×720 (titre, fil d'Ariane, propriétaire, capitale,
+## jauges en une ligne) pour ne plus écraser les onglets. « Aux mains de » et le terrain sont
+## fondus dans le propriétaire et la capitale ; le siège n'a sa ligne que s'il y en a un ;
+## le gouverneur passe en tête de l'onglet Ville. Les séparateurs disparaissent.
+var gauges_row: HFlowContainer
+var siege_key: Label
+var _siege_key_visible := false
+
+
+func _compact_header() -> void:
+	var box: VBoxContainer = get_node("VBox")
+	var grid: GridContainer = box.get_node("Grid")
+	for hidden in ["ControllerKey", "ControllerValue", "TerrainKey", "TerrainValue", "IdKey", "IdValue"]:
+		(grid.get_node(hidden) as Control).hide()
+	for separator in ["Separator", "Separator2"]:
+		(box.get_node(separator) as Control).hide()
+	box.add_theme_constant_override("separation", 3)
+	grid.add_theme_constant_override("v_separation", 1)
+	gauges_row = HFlowContainer.new()
+	gauges_row.name = "GaugesRow"
+	gauges_row.add_theme_constant_override("h_separation", 12)
+	gauges_row.add_theme_constant_override("v_separation", 0)
+	grid.add_sibling(gauges_row)
+	var chips := [["PopulationKey", population_value, "Pop."], ["UnrestKey", unrest_value, "Mécont."], ["DevastationKey", devastation_value, "Dévast."]]
+	for chip in chips:
+		var key: Label = grid.get_node(chip[0])
+		var value: Label = chip[1]
+		var full_name := key.text
+		grid.remove_child(key)
+		grid.remove_child(value)
+		var holder := HBoxContainer.new()
+		holder.add_theme_constant_override("separation", 4)
+		key.text = chip[2]
+		key.tooltip_text = full_name
+		holder.add_child(key)
+		holder.add_child(value)
+		gauges_row.add_child(holder)
+	siege_key = grid.get_node("SiegeKey")
+	# Gouverneur : en tête de l'onglet Ville.
+	var governor_row: Control = box.get_node("GovernorRow")
+	box.remove_child(governor_row)
+	var city_box := classes_list.get_parent()
+	city_box.add_child(governor_row)
+	city_box.move_child(governor_row, 0)
 
 
 ## `province` : entrée MapData fusionnée avec `GameDataStore.get_province` (display_name,
@@ -145,10 +192,14 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	owner_value.text = _faction_label(owner, province.get("owner_display_name", ""), label_of)
 	var controller: String = str(state.get("controller", owner))
 	controller_value.text = _faction_label(controller, "", label_of) if controller != owner else "—"
+	if controller != owner:
+		owner_value.text += " (aux mains de %s)" % controller_value.text
 	var capital: String = str(province.get("capital", province.get("capital_name", "")))
 	capital_value.text = capital if capital != "" else "—"
 	var terrain: String = str(province.get("terrain", ""))
 	terrain_value.text = TERRAIN_LABELS.get(terrain, terrain if terrain != "" else "—")
+	if terrain != "":
+		capital_value.text += " · %s" % str(terrain_value.text).to_lower()
 	var population := int(state.get("population_total", province.get("population_total", 0)))
 	population_value.text = _thousands(population) if population > 0 else "—"
 	unrest_value.text = ("%d %%" % int(state["unrest"])) if state.has("unrest") else "—"
@@ -165,9 +216,12 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 		siege_value.text = "Aucun"
 	else:
 		siege_value.text = "%s, %s" % [_faction_label(str(siege.get("attacker", "")), "", label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
+	if siege_key != null:
+		siege_key.visible = not siege.is_empty()
+		siege_value.visible = not siege.is_empty()
 	id_value.text = "%s (index %d)" % [province_id, int(province.get("index", 0))]
 	var governor_name: String = str(state.get("governor_name", ""))
-	governor_label.text = "Gouverneur : %s" % (governor_name if governor_name != "" else "—")
+	governor_label.text = "Gouverneur : %s" % (governor_name if governor_name != "" else "—")  # NT6b : ligne de l'onglet Ville
 	governor_court_button.visible = state.has("governor")
 	_fill_garrison(state.get("garrison", []), is_player_owner)
 	_fill_recruitable(recruitable)

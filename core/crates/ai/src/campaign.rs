@@ -1722,6 +1722,31 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 stance: Stance::Normal,
             });
         }
+        // NT6c: a weakened army on friendly ground with no enemy near rests
+        // to be replenished; it leaves the rest camp once rebuilt.
+        if choice.is_none() && !broken && !besieging {
+            match crate::stances::rest_plan(state, data, ctx.faction, army_id) {
+                crate::stances::RestPlan::Rest { entrench } => {
+                    if entrench && army.stance != Stance::Entrenched {
+                        orders.push(Order::SetStance {
+                            army: army_id.clone(),
+                            stance: Stance::Entrenched,
+                        });
+                    }
+                    continue;
+                }
+                crate::stances::RestPlan::Leave => {
+                    let threat = here.as_ref().map_or(0.0, |p| ctx.threat(p));
+                    if !crate::stances::should_entrench(state, data, ctx.faction, army_id, threat) {
+                        orders.push(Order::SetStance {
+                            army: army_id.clone(),
+                            stance: Stance::Normal,
+                        });
+                    }
+                }
+                crate::stances::RestPlan::None => {}
+            }
+        }
         let mut attacked = false;
         if !broken && !besieging {
             if let Some(order) = ctx.grid.attack_order(army_id) {
