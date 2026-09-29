@@ -229,7 +229,13 @@ impl<'a> Context<'a> {
         self.state
             .settlements
             .get(settlement)
-            .is_some_and(|s| &s.owner == self.faction && &s.controller == self.faction)
+            .is_some_and(|s| self.holds(s))
+    }
+
+    /// [`Context::owns_settlement`] on a settlement already read (OMR R1:
+    /// the walks over the settlements do not look each one up again).
+    fn holds(&self, settlement: &sim_campaign::SettlementState) -> bool {
+        &settlement.owner == self.faction && &settlement.controller == self.faction
     }
 
     /// `settlement` is owned de jure by the faction (held or lost).
@@ -459,6 +465,9 @@ fn plan_turn_in(
 ) -> Vec<Order> {
     // FE5: the core asks the feudal decisions of this crate from now on.
     crate::feudal::install();
+    // OMR R1: the state is read-only for the whole plan; repeated questions
+    // (faction power, neighbours) are answered from indexes built once.
+    let _scope = state.planning_scope();
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
@@ -688,7 +697,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let training_upkeep: i64 = state
         .settlements
         .iter()
-        .filter(|(id, _)| ctx.owns_settlement(id))
+        .filter(|(_, s)| ctx.holds(s))
         .flat_map(|(_, s)| s.recruit_queue.iter())
         .filter_map(|r| data.unit_types.get(&r.unit_type))
         .map(|t| i64::from(t.upkeep))
@@ -710,9 +719,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             let threat = -(ctx.threat(id) as i64);
             state
                 .settlements_of(id)
-                .filter(|(sid, s)| {
-                    ctx.owns_settlement(sid)
-                        && matches!(s.kind, SettlementKind::City | SettlementKind::Castle)
+                .filter(|(_, s)| {
+                    ctx.holds(s) && matches!(s.kind, SettlementKind::City | SettlementKind::Castle)
                 })
                 .map(move |(sid, _)| (sid.clone(), threat))
                 .collect::<Vec<_>>()
@@ -804,7 +812,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // turn); the need grows with the threat around the city (lot C4). The
     // small garrisons of the other settlements stay where they are.
     for (id, settlement) in &state.settlements {
-        if !ctx.owns_settlement(id) || settlement.siege.is_some() || !ctx.is_city(id) {
+        if !ctx.holds(settlement) || settlement.siege.is_some() || !ctx.is_city(id) {
             continue;
         }
         // P1: one unit less than the garrison of the same role at the 1337
@@ -843,7 +851,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let idle: Vec<(&SettlementId, &sim_campaign::SettlementState)> = state
         .settlements
         .iter()
-        .filter(|(id, s)| ctx.owns_settlement(id) && s.construction.is_none())
+        .filter(|(_, s)| ctx.holds(s) && s.construction.is_none())
         .collect();
     let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = ctx
         .mode
@@ -1022,7 +1030,7 @@ fn plan_demolitions(ctx: &Context) -> Vec<Order> {
     for (id, settlement) in state
         .settlements
         .iter()
-        .filter(|(id, s)| ctx.owns_settlement(id) && s.siege.is_none())
+        .filter(|(_, s)| ctx.holds(s) && s.siege.is_none())
     {
         let Some(province) = state.provinces.get(&settlement.province) else {
             continue;

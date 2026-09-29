@@ -90,6 +90,16 @@ impl CampaignState {
 
     /// Ids of the provinces whose city `faction` controls, in id order.
     pub fn controlled_provinces(&self, faction: &FactionId) -> Vec<ProvinceId> {
+        // OMR R1: a memo while a planning scope is open.
+        if let Some(derived) = self.derived() {
+            return derived
+                .controlled_provinces(faction, || self.controlled_provinces_walk(faction));
+        }
+        self.controlled_provinces_walk(faction)
+    }
+
+    /// [`Self::controlled_provinces`] computed afresh.
+    pub fn controlled_provinces_walk(&self, faction: &FactionId) -> Vec<ProvinceId> {
         self.provinces
             .keys()
             .filter(|id| self.controls_province(faction, id))

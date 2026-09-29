@@ -82,7 +82,8 @@ fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
 
 /// The settlement nearest to map pixel `point` (ties by id).
 pub fn nearest_settlement(data: &GameData, point: [f32; 2]) -> Option<SettlementId> {
-    nearest_settlement_where(data, point, |_| true)
+    // OMR R1: read on the settlement grid (same answer as the walk).
+    data.nearest_settlement(point)
 }
 
 /// The settlement nearest to `point` among those accepted by `accept`.

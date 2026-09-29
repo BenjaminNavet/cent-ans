@@ -382,6 +382,9 @@ pub struct GameData {
     pub rasters: crate::navgrid::RasterHandle,
     /// `data/naval/` (lot NV1): ship classes, naval rules, fleets of 1337.
     pub naval: crate::entities::naval::NavalData,
+    /// OMR R1: settlements on a coarse grid, built on first use
+    /// ([`GameData::nearest_settlement`]).
+    pub settlement_grid: crate::settlement_grid::SettlementGridCell,
 }
 
 impl GameData {
@@ -445,6 +448,7 @@ impl GameData {
             battle_outcome_rules: Default::default(),
             cover: Default::default(),
             movement_graph: Default::default(),
+            settlement_grid: Default::default(),
             trade: None,
             trade_paths: Default::default(),
             free_movement: None,

@@ -66,6 +66,7 @@ pub mod negotiation;
 pub mod orders;
 pub mod passage;
 pub mod path_plan;
+pub mod planning_scope;
 pub mod population;
 pub mod posture;
 pub mod preview;

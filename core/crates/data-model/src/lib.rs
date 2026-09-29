@@ -16,6 +16,7 @@ pub mod load;
 pub mod map;
 pub mod movement_graph;
 pub mod navgrid;
+pub mod settlement_grid;
 pub mod settlement_load;
 pub mod title_check;
 pub mod trade_paths;
