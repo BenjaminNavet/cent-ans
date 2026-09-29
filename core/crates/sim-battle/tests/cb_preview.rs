@@ -256,6 +256,7 @@ fn siege_lab(seed: u64) -> BattleSim {
     let siege = SiegeSetup {
         fortification: 2,
         breach: 0,
+        ..Default::default()
     };
     let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), seed).unwrap();
     lab(&mut sim);
@@ -381,6 +382,7 @@ fn hover_siege() -> BattleSim {
     let siege = SiegeSetup {
         fortification: 2,
         breach: 0,
+        ..Default::default()
     };
     let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 5).unwrap();
     lab(&mut sim);

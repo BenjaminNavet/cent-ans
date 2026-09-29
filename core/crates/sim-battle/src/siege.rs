@@ -243,6 +243,10 @@ pub struct House {
     /// wall walk).
     #[serde(default = "two_rows")]
     pub rows: u8,
+    /// NT1 (ADR 0126): the keep of a castle (a stone tower: it blocks like
+    /// a block but never burns).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub keep: bool,
 }
 
 fn two_rows() -> u8 {
@@ -264,6 +268,7 @@ impl House {
             yaw,
             church: false,
             rows: 2,
+            keep: false,
         }
     }
 
@@ -679,6 +684,12 @@ pub struct SiegeWorks {
     /// BR3: street furniture (façades, suburbs, market square).
     #[serde(default)]
     pub props: Vec<Prop>,
+    /// NT1 (ADR 0126): kind of place (a landmark city is a `City`).
+    #[serde(
+        default,
+        skip_serializing_if = "crate::siege_layouts::PlaceKind::is_city"
+    )]
+    pub place: crate::siege_layouts::PlaceKind,
 }
 
 fn cross(o: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
@@ -795,6 +806,7 @@ impl SiegeWorks {
             hold_time: 0.0,
             points: Vec::new(),
             landmark: None,
+            place: crate::siege_layouts::PlaceKind::City,
         };
         works.lay_generic_town(TownRules::bundled());
         works.apply_campaign_breach(breach, rng);

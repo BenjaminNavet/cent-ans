@@ -107,6 +107,7 @@ fn forced_tier_and_sieges() {
     siege.siege = Some(sim_battle::SiegeSetup {
         fortification: 1,
         breach: 0,
+        ..Default::default()
     });
     let sim = BattleSim::new(siege, 3).unwrap();
     assert_eq!(sim.field().width, 1200.0, "sieges keep the standard field");

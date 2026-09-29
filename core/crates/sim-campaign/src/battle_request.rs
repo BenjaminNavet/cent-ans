@@ -809,6 +809,7 @@ impl CampaignState {
             .get(&request.location)
             .and_then(|s| s.siege.as_ref())
             .map_or(0, |s| s.breach);
+        let fortification = self.fortification_level(data, &request.location);
         let mut defender = side_setup(self, data, &request.attacker, &garrison);
         defender.army = String::new();
         let mut setup = BattleSetup {
@@ -823,8 +824,12 @@ impl CampaignState {
             defender,
             player_side,
             siege: Some(SiegeSetup {
-                fortification: self.fortification_level(data, &request.location),
+                fortification,
                 breach,
+                // NT1 (ADR 0126): ring city, fortified borough or castle.
+                place: sim_battle::town::TownRules::bundled()
+                    .places
+                    .place_kind(self.settlement_kind(&request.location), fortification),
             }),
             siege_layout: siege_layout(data, &request.location),
             orders: data.battle_orders.values().cloned().collect(),

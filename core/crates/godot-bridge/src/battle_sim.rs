@@ -1439,6 +1439,8 @@ impl BattleSim {
                     "yaw" => h.yaw,
                     "rows" => i64::from(h.rows),
                     "church" => h.church,
+                    // NT1: a castle keep (drawn as a great tower).
+                    "keep" => h.keep,
                 }
                 .to_variant()
             })
@@ -1503,6 +1505,8 @@ impl BattleSim {
             "integrity" => works.integrity(),
             "pieces" => &pieces,
             "towers" => &towers,
+            // NT1 (ADR 0126): "city" | "borough" | "castle".
+            "place" => works.place.key(),
             "houses" => &houses,
             "props" => &props,
             "engines" => &engines,

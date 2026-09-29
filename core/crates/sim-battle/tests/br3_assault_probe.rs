@@ -101,6 +101,7 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
         Some(SiegeSetup {
             fortification: env("FORT", 2),
             breach: env("BREACH", 40) as u8,
+            ..Default::default()
         }),
     );
     setup.siege_layout =
@@ -502,6 +503,7 @@ fn fire_spread(data: &GameData, town: Option<&str>, seed: u64) -> (usize, usize)
         Some(SiegeSetup {
             fortification: 2,
             breach: 0,
+            ..Default::default()
         }),
     );
     setup.siege_layout =
@@ -582,6 +584,7 @@ fn probe_figure_cost() {
         Some(SiegeSetup {
             fortification: 2,
             breach: 60,
+            ..Default::default()
         }),
     );
     let mut sim = BattleSim::new(s, 3).unwrap();
@@ -643,6 +646,7 @@ fn probe_assault_map() {
         Some(SiegeSetup {
             fortification: 2,
             breach: 40,
+            ..Default::default()
         }),
     );
     setup.siege_layout = town
