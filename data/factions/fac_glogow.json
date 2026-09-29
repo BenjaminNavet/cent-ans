@@ -26,8 +26,8 @@
     "note": "Armes de Głogów : distinction de jeu."
   },
   "titles": [
-    "Duc de Żagań et de Głogów",
-    "Vassal du roi de Bohême (incertain)"
+    "Duc de Żagań",
+    "Vassal du roi de Bohême (hommage de 1329)"
   ],
   "treasury": 3000,
   "prestige": 20,
@@ -40,7 +40,7 @@
     {
       "faction": "fac_bohemia",
       "status": "vassal",
-      "note": "Vassalité de Głogów depuis 1331 (incertain) ; Henri V de Żagań fera hommage en 1344."
+      "note": "Henri IV et ses frères ont fait hommage à Jean de Luxembourg en 1329 ; Głogów même est au roi depuis octobre 1331."
     },
     {
       "faction": "fac_poland",
@@ -54,7 +54,7 @@
     "trade": 45,
     "piety": 55
   },
-  "description": "Duché de Głogów partagé après 1331 ; Henri IV le Fidèle, duc de Żagań, tient Głogów et sa part avec l'appui de la Bohême, tandis que son fils Henri V le Fer grandit.",
+  "description": "Duché de Żagań : Henri IV le Fidèle, vassal de la Bohême depuis 1329 ; la ville de Głogów, prise par Jean de Luxembourg en 1331 à la mort de Przemko II, est au roi (moitié rendue à Henri V le Fer en 1349).",
   "sources": [
     "Henri IV de Żagań",
     "Duché de Głogów",

@@ -41,7 +41,7 @@
     {
       "id": "obj_karaman_beysehir",
       "title": "Beyşehir",
-      "description": "Annexer la terre des Eşrefoğulları.",
+      "description": "Annexer Beyşehir, l'ancienne terre des Eşrefoğulları (éteints en 1326), tenue par les Hamidides.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

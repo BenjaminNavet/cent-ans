@@ -64,8 +64,8 @@
   "claims": [
     {
       "kind": "province",
-      "province": "prov_anchialos",
-      "note": "Côte pontique aux mains des Byzantins."
+      "province": "prov_philippopolis",
+      "note": "Philippopolis, prise en 1322 puis reperdue en 1323 ; la régence byzantine la cédera en 1344."
     }
   ],
   "ai_personality": {

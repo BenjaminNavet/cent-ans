@@ -43,7 +43,7 @@
     ],
     "voronoi_weight": 0.8
   },
-  "owner": "fac_byzantium",
+  "owner": "fac_bulgaria",
   "culture": "cul_greek",
   "religion": "rel_orthodox",
   "population": {
@@ -88,7 +88,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 3000,
-  "description": "Ports byzantins de la mer Noire occidentale : Anchialos, Mésembrie, Sozopolis ; saunes et pêche. Bastion contre la Bulgarie, qu'Amédée de Savoie prendra en 1366.",
+  "description": "Ports de la mer Noire occidentale : Anchialos, Mésembrie, Sozopolis ; saunes et pêche. Pris par Andronic III en 1328, repris par Ivan Alexandre en 1331 (Roussokastro, 1332) ; Amédée de Savoie les enlèvera aux Bulgares en 1366.",
   "sources": [
     "Pomorie",
     "Nessebar",

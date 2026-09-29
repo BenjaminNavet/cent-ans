@@ -2124,19 +2124,6 @@
       "difficulty": 3
     },
     {
-      "id": "fac_esrefid",
-      "tagline": "La principauté du lac",
-      "intro": "Ta terre est petite mais belle ; Karaman et Hamid convoitent tes rives.",
-      "strengths": [
-        "Rives fertiles"
-      ],
-      "weaknesses": [
-        "Trop petit",
-        "Voisins voraces"
-      ],
-      "difficulty": 3
-    },
-    {
       "id": "fac_karaman",
       "tagline": "L'héritier des Seldjoukides",
       "intro": "Tes ancêtres ont sauvé Konya de l'Ilkhan ; tu veux relever le sultanat de Roum, mais Eretna et les Mamelouks guettent.",

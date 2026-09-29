@@ -2003,21 +2003,6 @@
       ]
     },
     {
-      "id": "esrefogullar",
-      "name": "Eşrefoğulları",
-      "arms_of": "fac_esrefid",
-      "blazon": "De sinople au chevron d'or.",
-      "description": "Maison régnante (Eşrefoğulları) ; Couleurs de convention des Eşrefoğulları.",
-      "source": "Eshrefids (Wikipédia)",
-      "certainty": "substitution",
-      "factions": [
-        "fac_esrefid"
-      ],
-      "vassal_of": [
-        "fac_esrefid"
-      ]
-    },
-    {
       "id": "karamanogullar",
       "name": "Karamanoğulları",
       "arms_of": "fac_karaman",

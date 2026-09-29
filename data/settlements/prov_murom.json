@@ -72,5 +72,30 @@
     "sources": [
       "Mechtchéra"
     ]
+  },
+  {
+    "id": "set_gorokhovets",
+    "province": "prov_murom",
+    "kind": "town",
+    "name": {
+      "display": "Gorokhovets",
+      "local": "Гороховец",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      42.65,
+      56.2
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Kliazma inférieure, rattachée avec Nijni et Gorodets à la maison de Souzdal.",
+    "sources": [
+      "Gorokhovets"
+    ]
   }
 ]

@@ -597,22 +597,29 @@
   },
   {
    "from": "set_abo",
-   "to": "set_kastelholm",
-   "cost": 105.33,
+   "to": "set_hattula",
+   "cost": 132.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_abo",
-   "to": "set_raseborg",
-   "cost": 80.78,
+   "to": "set_junkarsborg",
+   "cost": 88.42,
    "road": false,
    "sea": false
   },
   {
    "from": "set_abo",
-   "to": "set_vanaja",
-   "cost": 128.8,
+   "to": "set_kuusisto",
+   "cost": 15.01,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_abo",
+   "to": "set_uppsala",
+   "cost": 265.08,
    "road": false,
    "sea": false
   },
@@ -2083,6 +2090,13 @@
    "from": "set_allenstein",
    "to": "set_hrodna",
    "cost": 218.95,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_allenstein",
+   "to": "set_kamianiets",
+   "cost": 405.16,
    "road": false,
    "sea": false
   },
@@ -6561,37 +6575,23 @@
   },
   {
    "from": "set_bejetsk",
-   "to": "set_mologa",
-   "cost": 43.07,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_bejetsk",
    "to": "set_spaso_kamenny",
-   "cost": 243.49,
+   "cost": 258.96,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bejetsk",
-   "to": "set_staritsa",
-   "cost": 86.9,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_bejetsk",
-   "to": "set_trinite_serge",
-   "cost": 186.93,
+   "to": "set_torjok",
+   "cost": 113.62,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bejetsk",
-   "to": "set_tver",
-   "cost": 56.81,
-   "road": true,
+   "to": "set_vychni_volotchek",
+   "cost": 100.21,
+   "road": false,
    "sea": false
   },
   {
@@ -6638,20 +6638,6 @@
   },
   {
    "from": "set_belev",
-   "to": "set_dorogobouj",
-   "cost": 106.72,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_belev",
-   "to": "set_kalouga",
-   "cost": 79.2,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_belev",
    "to": "set_karatchev",
    "cost": 53.8,
    "road": true,
@@ -6669,6 +6655,13 @@
    "to": "set_odoiev",
    "cost": 19.48,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_belev",
+   "to": "set_vorotynsk",
+   "cost": 76.78,
+   "road": false,
    "sea": false
   },
   {
@@ -8521,37 +8514,9 @@
   },
   {
    "from": "set_bogolioubovo",
-   "to": "set_gorokhovets",
-   "cost": 25.83,
+   "to": "set_mourom",
+   "cost": 58.23,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_bogolioubovo",
-   "to": "set_kachira",
-   "cost": 106.28,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_bogolioubovo",
-   "to": "set_kideksha",
-   "cost": 23.7,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_bogolioubovo",
-   "to": "set_moscou",
-   "cost": 186.63,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_bogolioubovo",
-   "to": "set_nikitski",
-   "cost": 119.2,
-   "road": false,
    "sea": false
   },
   {
@@ -8559,6 +8524,13 @@
    "to": "set_vladimir",
    "cost": 5.5,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bogolioubovo",
+   "to": "set_yuriev_polski",
+   "cost": 62.02,
+   "road": false,
    "sea": false
   },
   {
@@ -8886,7 +8858,7 @@
   {
    "from": "set_borisoglebsk",
    "to": "set_iouriev_polski",
-   "cost": 34.25,
+   "cost": 34.01,
    "road": true,
    "sea": false
   },
@@ -9622,6 +9594,13 @@
    "from": "set_brest_berestia",
    "to": "set_drohiczyn",
    "cost": 160.4,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_brest_berestia",
+   "to": "set_kamianiets",
+   "cost": 69.75,
    "road": false,
    "sea": false
   },
@@ -15024,13 +15003,6 @@
   },
   {
    "from": "set_davyd_haradok",
-   "to": "set_kamianiets",
-   "cost": 352.46,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_davyd_haradok",
    "to": "set_kiev",
    "cost": 437.25,
    "road": false,
@@ -15752,6 +15724,13 @@
   },
   {
    "from": "set_dmitrov",
+   "to": "set_kashin",
+   "cost": 93.19,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dmitrov",
    "to": "set_nikitski",
    "cost": 80.63,
    "road": false,
@@ -15769,13 +15748,6 @@
    "to": "set_trinite_serge",
    "cost": 33.68,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_dmitrov",
-   "to": "set_tver",
-   "cost": 56.91,
-   "road": true,
    "sea": false
   },
   {
@@ -16501,15 +16473,15 @@
   },
   {
    "from": "set_drohiczyn",
-   "to": "set_kazimierz_dolny",
-   "cost": 193.63,
+   "to": "set_kamianiets",
+   "cost": 157.98,
    "road": false,
    "sea": false
   },
   {
    "from": "set_drohiczyn",
-   "to": "set_kobryn",
-   "cost": 234.28,
+   "to": "set_kazimierz_dolny",
+   "cost": 193.63,
    "road": false,
    "sea": false
   },
@@ -20309,6 +20281,13 @@
   },
   {
    "from": "set_gorodets",
+   "to": "set_gorokhovets",
+   "cost": 71.27,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gorodets",
    "to": "set_ipatiev",
    "cost": 97.63,
    "road": true,
@@ -20344,6 +20323,13 @@
   },
   {
    "from": "set_gorodets_mechtcherski",
+   "to": "set_gorokhovets",
+   "cost": 81.27,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gorodets_mechtcherski",
    "to": "set_izheslavets",
    "cost": 121.29,
    "road": false,
@@ -20372,23 +20358,30 @@
   },
   {
    "from": "set_gorokhovets",
-   "to": "set_mourom",
-   "cost": 33.67,
-   "road": true,
+   "to": "set_kideksha",
+   "cost": 132.18,
+   "road": false,
    "sea": false
   },
   {
    "from": "set_gorokhovets",
-   "to": "set_staraia_riazan",
-   "cost": 197.12,
+   "to": "set_mechtchera",
+   "cost": 122.22,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gorokhovets",
+   "to": "set_mourom",
+   "cost": 79.49,
    "road": false,
    "sea": false
   },
   {
    "from": "set_gorokhovets",
    "to": "set_vladimir",
-   "cost": 28.26,
-   "road": true,
+   "cost": 137.68,
+   "road": false,
    "sea": false
   },
   {
@@ -21730,13 +21723,6 @@
   },
   {
    "from": "set_heilsberg",
-   "to": "set_kamianiets",
-   "cost": 266.0,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_heilsberg",
    "to": "set_kaunas",
    "cost": 230.73,
    "road": false,
@@ -21746,6 +21732,13 @@
    "from": "set_heilsberg",
    "to": "set_raseiniai",
    "cost": 213.2,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_heilsberg",
+   "to": "set_vaukavysk",
+   "cost": 277.69,
    "road": false,
    "sea": false
   },
@@ -22094,13 +22087,6 @@
   },
   {
    "from": "set_hrodna",
-   "to": "set_kamianiets",
-   "cost": 85.18,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_hrodna",
    "to": "set_merkine",
    "cost": 60.59,
    "road": false,
@@ -22118,6 +22104,13 @@
    "to": "set_vaukavysk",
    "cost": 35.61,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_hrodna",
+   "to": "set_zelva",
+   "cost": 88.45,
+   "road": false,
    "sea": false
   },
   {
@@ -22585,28 +22578,35 @@
   {
    "from": "set_iouriev_polski",
    "to": "set_kideksha",
-   "cost": 25.76,
+   "cost": 26.11,
    "road": true,
    "sea": false
   },
   {
    "from": "set_iouriev_polski",
    "to": "set_nikitski",
-   "cost": 57.08,
+   "cost": 56.37,
    "road": false,
    "sea": false
   },
   {
    "from": "set_iouriev_polski",
    "to": "set_petchersky",
-   "cost": 133.07,
+   "cost": 133.4,
    "road": true,
    "sea": false
   },
   {
    "from": "set_iouriev_polski",
    "to": "set_souzdal",
-   "cost": 23.26,
+   "cost": 23.62,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_iouriev_polski",
+   "to": "set_yuriev_polski",
+   "cost": 1.44,
    "road": true,
    "sea": false
   },
@@ -23248,6 +23248,27 @@
    "sea": false
   },
   {
+   "from": "set_junkarsborg",
+   "to": "set_kuusisto",
+   "cost": 73.41,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_junkarsborg",
+   "to": "set_sigtuna",
+   "cost": 338.22,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_junkarsborg",
+   "to": "set_tavastehus",
+   "cost": 111.73,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_kachira",
    "to": "set_kolomna",
    "cost": 51.38,
@@ -23258,6 +23279,13 @@
    "from": "set_kachira",
    "to": "set_serpoukhov",
    "cost": 47.67,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kachira",
+   "to": "set_yuriev_polski",
+   "cost": 208.7,
    "road": false,
    "sea": false
   },
@@ -23375,6 +23403,13 @@
   },
   {
    "from": "set_kaliazine",
+   "to": "set_kashin",
+   "cost": 35.18,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kaliazine",
    "to": "set_mologa",
    "cost": 98.42,
    "road": false,
@@ -23399,13 +23434,6 @@
    "to": "set_spasski",
    "cost": 127.72,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kaliazine",
-   "to": "set_tver",
-   "cost": 62.53,
-   "road": true,
    "sea": false
   },
   {
@@ -23507,51 +23535,16 @@
    "sea": false
   },
   {
-   "from": "set_kalouga",
-   "to": "set_kozelsk",
-   "cost": 31.27,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_kalouga",
-   "to": "set_serpoukhov",
-   "cost": 43.04,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_kalouga",
-   "to": "set_viazma",
-   "cost": 74.31,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_kalouga",
-   "to": "set_zvenigorod",
-   "cost": 70.96,
-   "road": true,
-   "sea": false
-  },
-  {
    "from": "set_kamianiets",
    "to": "set_kobryn",
-   "cost": 122.07,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kamianiets",
-   "to": "set_neidenburg",
-   "cost": 246.24,
+   "cost": 84.27,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kamianiets",
    "to": "set_vaukavysk",
-   "cost": 38.39,
+   "cost": 140.88,
    "road": false,
    "sea": false
   },
@@ -23710,6 +23703,34 @@
    "sea": false
   },
   {
+   "from": "set_kashin",
+   "to": "set_staritsa",
+   "cost": 81.03,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_kashin",
+   "to": "set_trinite_serge",
+   "cost": 121.52,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kashin",
+   "to": "set_tver",
+   "cost": 95.07,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kashin",
+   "to": "set_vologda",
+   "cost": 132.44,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_kassa",
    "to": "set_kecskemet",
    "cost": 175.18,
@@ -23778,20 +23799,6 @@
    "cost": 92.02,
    "road": false,
    "sea": false
-  },
-  {
-   "from": "set_kastelholm",
-   "to": "set_raseborg",
-   "cost": 158.42,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kastelholm",
-   "to": "set_stockholm",
-   "cost": 261.63,
-   "road": false,
-   "sea": true
   },
   {
    "from": "set_kastoria",
@@ -24005,6 +24012,13 @@
   },
   {
    "from": "set_kernave",
+   "to": "set_vaukavysk",
+   "cost": 195.23,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kernave",
    "to": "set_vilnius",
    "cost": 17.61,
    "road": true,
@@ -24054,13 +24068,6 @@
   },
   {
    "from": "set_kholm_jirkovski",
-   "to": "set_moscou",
-   "cost": 127.53,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_kholm_jirkovski",
    "to": "set_roslavl",
    "cost": 136.02,
    "road": false,
@@ -24070,6 +24077,20 @@
    "from": "set_kholm_jirkovski",
    "to": "set_viazma",
    "cost": 19.28,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_kholm_jirkovski",
+   "to": "set_vychni_volotchek",
+   "cost": 288.97,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kholm_jirkovski",
+   "to": "set_zvenigorod",
+   "cost": 104.48,
    "road": true,
    "sea": false
   },
@@ -24092,13 +24113,6 @@
    "to": "set_kostroma",
    "cost": 157.96,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kideksha",
-   "to": "set_mourom",
-   "cost": 66.17,
-   "road": true,
    "sea": false
   },
   {
@@ -24532,6 +24546,13 @@
    "from": "set_kobryn",
    "to": "set_volodymyr",
    "cost": 228.67,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kobryn",
+   "to": "set_zelva",
+   "cost": 163.5,
    "road": false,
    "sea": false
   },
@@ -24991,6 +25012,20 @@
    "sea": false
   },
   {
+   "from": "set_kozelsk",
+   "to": "set_volok_lamski",
+   "cost": 221.74,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kozelsk",
+   "to": "set_vorotynsk",
+   "cost": 53.75,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_krak",
    "to": "set_tartus",
    "cost": 19.39,
@@ -25055,8 +25090,8 @@
   },
   {
    "from": "set_krasny",
-   "to": "set_torjok",
-   "cost": 354.19,
+   "to": "set_vychni_volotchek",
+   "cost": 390.1,
    "road": false,
    "sea": false
   },
@@ -25393,6 +25428,20 @@
    "from": "set_kutna_hora",
    "to": "set_zbraslav",
    "cost": 62.49,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kuusisto",
+   "to": "set_stockholm",
+   "cost": 375.99,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_kuusisto",
+   "to": "set_vanaja",
+   "cost": 121.88,
    "road": false,
    "sea": false
   },
@@ -28268,22 +28317,8 @@
   },
   {
    "from": "set_mechtchera",
-   "to": "set_petchersky",
-   "cost": 185.01,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_mechtchera",
    "to": "set_pronsk",
    "cost": 171.46,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_mechtchera",
-   "to": "set_souzdal",
-   "cost": 164.63,
    "road": false,
    "sea": false
   },
@@ -29577,13 +29612,6 @@
   },
   {
    "from": "set_moscou",
-   "to": "set_staritsa",
-   "cost": 92.5,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_moscou",
    "to": "set_trinite_serge",
    "cost": 66.32,
    "road": false,
@@ -29703,16 +29731,16 @@
   },
   {
    "from": "set_mourom",
-   "to": "set_nijni_novgorod",
-   "cost": 147.5,
+   "to": "set_pourgaz",
+   "cost": 129.53,
    "road": false,
    "sea": false
   },
   {
    "from": "set_mourom",
-   "to": "set_pourgaz",
-   "cost": 129.53,
-   "road": false,
+   "to": "set_souzdal",
+   "cost": 68.32,
+   "road": true,
    "sea": false
   },
   {
@@ -30255,6 +30283,13 @@
    "sea": false
   },
   {
+   "from": "set_neidenburg",
+   "to": "set_vaukavysk",
+   "cost": 268.99,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_nenagh",
    "to": "set_shanid",
    "cost": 56.55,
@@ -30532,6 +30567,13 @@
    "to": "set_pereslavl_zalesski",
    "cost": 0.65,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_nikitski",
+   "to": "set_yuriev_polski",
+   "cost": 57.22,
+   "road": false,
    "sea": false
   },
   {
@@ -32257,13 +32299,6 @@
    "sea": false
   },
   {
-   "from": "set_pereslavl_zalesski",
-   "to": "set_vladimir",
-   "cost": 58.68,
-   "road": true,
-   "sea": false
-  },
-  {
    "from": "set_pergine",
    "to": "set_rovereto",
    "cost": 24.61,
@@ -32475,15 +32510,15 @@
   },
   {
    "from": "set_pinsk",
-   "to": "set_vaukavysk",
-   "cost": 119.99,
+   "to": "set_volodymyr",
+   "cost": 141.04,
    "road": true,
    "sea": false
   },
   {
    "from": "set_pinsk",
-   "to": "set_volodymyr",
-   "cost": 141.04,
+   "to": "set_zelva",
+   "cost": 107.5,
    "road": true,
    "sea": false
   },
@@ -33297,13 +33332,6 @@
    "to": "set_visoko",
    "cost": 204.98,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_raseborg",
-   "to": "set_tavastehus",
-   "cost": 125.1,
-   "road": false,
    "sea": false
   },
   {
@@ -34784,6 +34812,13 @@
    "sea": false
   },
   {
+   "from": "set_serpoukhov",
+   "to": "set_vorotynsk",
+   "cost": 50.8,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_serres",
    "to": "set_strumica",
    "cost": 84.98,
@@ -35037,8 +35072,8 @@
   },
   {
    "from": "set_slonim",
-   "to": "set_vaukavysk",
-   "cost": 29.14,
+   "to": "set_zelva",
+   "cost": 17.0,
    "road": true,
    "sea": false
   },
@@ -35058,9 +35093,9 @@
   },
   {
    "from": "set_smolensk",
-   "to": "set_volok_lamski",
-   "cost": 121.16,
-   "road": true,
+   "to": "set_torjok",
+   "cost": 311.23,
+   "road": false,
    "sea": false
   },
   {
@@ -35121,8 +35156,8 @@
   },
   {
    "from": "set_soldau",
-   "to": "set_vaukavysk",
-   "cost": 290.56,
+   "to": "set_zelva",
+   "cost": 314.79,
    "road": false,
    "sea": false
   },
@@ -35190,13 +35225,6 @@
    "sea": false
   },
   {
-   "from": "set_souzdal",
-   "to": "set_vladimir",
-   "cost": 16.44,
-   "road": true,
-   "sea": false
-  },
-  {
    "from": "set_sozopolis",
    "to": "set_tzouroulon",
    "cost": 140.04,
@@ -35219,8 +35247,8 @@
   },
   {
    "from": "set_spaso_kamenny",
-   "to": "set_torjok",
-   "cost": 372.58,
+   "to": "set_tver",
+   "cost": 355.61,
    "road": false,
    "sea": false
   },
@@ -35366,6 +35394,13 @@
   },
   {
    "from": "set_staraia_riazan",
+   "to": "set_yuriev_polski",
+   "cost": 235.59,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_staraia_riazan",
    "to": "set_zaraisk",
    "cost": 75.5,
    "road": false,
@@ -35401,6 +35436,13 @@
   },
   {
    "from": "set_staritsa",
+   "to": "set_torjok",
+   "cost": 28.74,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_staritsa",
    "to": "set_tver",
    "cost": 67.03,
    "road": false,
@@ -35416,8 +35458,8 @@
   {
    "from": "set_staritsa",
    "to": "set_volok_lamski",
-   "cost": 14.38,
-   "road": true,
+   "cost": 92.57,
+   "road": false,
    "sea": false
   },
   {
@@ -36052,9 +36094,16 @@
   },
   {
    "from": "set_torjok",
-   "to": "set_volok_lamski",
-   "cost": 42.44,
+   "to": "set_viazma",
+   "cost": 104.84,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_torjok",
+   "to": "set_vologda",
+   "cost": 376.21,
+   "road": false,
    "sea": false
   },
   {
@@ -36143,8 +36192,15 @@
   },
   {
    "from": "set_trinite_serge",
-   "to": "set_vladimir",
-   "cost": 145.06,
+   "to": "set_volok_lamski",
+   "cost": 124.1,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_trinite_serge",
+   "to": "set_yuriev_polski",
+   "cost": 101.65,
    "road": false,
    "sea": false
   },
@@ -36243,20 +36299,6 @@
    "from": "set_tulle",
    "to": "set_uzerche",
    "cost": 11.63,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_tver",
-   "to": "set_vologda",
-   "cost": 352.05,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_tver",
-   "to": "set_zvenigorod",
-   "cost": 70.0,
    "road": true,
    "sea": false
   },
@@ -36409,9 +36451,9 @@
   },
   {
    "from": "set_vaukavysk",
-   "to": "set_vilnius",
-   "cost": 89.59,
-   "road": true,
+   "to": "set_zelva",
+   "cost": 24.51,
+   "road": false,
    "sea": false
   },
   {
@@ -36466,14 +36508,14 @@
   {
    "from": "set_viazma",
    "to": "set_volok_lamski",
-   "cost": 62.75,
-   "road": true,
+   "cost": 143.9,
+   "road": false,
    "sea": false
   },
   {
    "from": "set_viazma",
-   "to": "set_zvenigorod",
-   "cost": 85.3,
+   "to": "set_vorotynsk",
+   "cost": 68.09,
    "road": true,
    "sea": false
   },
@@ -36534,6 +36576,13 @@
    "sea": false
   },
   {
+   "from": "set_vilnius",
+   "to": "set_zelva",
+   "cost": 174.26,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_visoko",
    "to": "set_vrhbosna",
    "cost": 23.89,
@@ -36545,6 +36594,13 @@
    "to": "set_vukovar",
    "cost": 247.97,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_vladimir",
+   "to": "set_yuriev_polski",
+   "cost": 30.52,
+   "road": true,
    "sea": false
   },
   {
@@ -36562,16 +36618,9 @@
    "sea": false
   },
   {
-   "from": "set_vologda",
-   "to": "set_volok_lamski",
-   "cost": 221.69,
-   "road": true,
-   "sea": false
-  },
-  {
    "from": "set_volok_lamski",
-   "to": "set_vychni_volotchek",
-   "cost": 146.49,
+   "to": "set_zvenigorod",
+   "cost": 54.47,
    "road": false,
    "sea": false
   },
@@ -36580,6 +36629,13 @@
    "to": "set_zetouni",
    "cost": 269.73,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_vorotynsk",
+   "to": "set_zvenigorod",
+   "cost": 74.56,
+   "road": true,
    "sea": false
   },
   {

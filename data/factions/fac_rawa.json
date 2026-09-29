@@ -15,7 +15,6 @@
   "religion": "rel_catholic",
   "culture": "cul_polish",
   "succession_law": "male_preference_primogeniture",
-  "suzerain": "fac_bohemia",
   "primary_title": "tit_rawa",
   "heraldry": {
     "blazon": "De gueules à l'aigle d'argent, au lambel d'azur.",
@@ -39,8 +38,8 @@
   "relations": [
     {
       "faction": "fac_bohemia",
-      "status": "vassal",
-      "note": "Hommage de Siemowit II à Jean de Luxembourg en 1329."
+      "status": "peace",
+      "note": "Pas d'hommage : après la soumission de Wenceslas de Płock (1329), Trojden et Siemowit II restent neutres."
     },
     {
       "faction": "fac_poland",

@@ -52,7 +52,7 @@
     {
       "id": "obj_barqa_tripoli",
       "title": "La route de Tripoli",
-      "description": "Imposer les tribus de Barqa jusqu'à la Tripolitaine (ambition incertaine).",
+      "description": "Les Arabes Sulaym de Barqa sont cousins des Dabbab qui tiennent les plaines de Tripolitaine : imposer leur loi jusqu'à Tripoli.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

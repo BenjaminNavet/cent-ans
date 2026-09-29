@@ -31,7 +31,7 @@
     ],
     "voronoi_weight": 0.9
   },
-  "owner": "fac_esrefid",
+  "owner": "fac_hamid",
   "culture": "cul_turkish",
   "religion": "rel_islam",
   "population": {
@@ -75,7 +75,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 900,
-  "description": "Rive du lac de Beyşehir, seigneurie des Eşrefoğulları, qui tiennent aussi Seydişehir.",
+  "description": "Rive du lac de Beyşehir et Seydişehir : ancienne seigneurie des Eşrefoğulları, éteints en 1326 (exécution de leur bey par Timurtaş), passée aux Hamidides.",
   "sources": [
     "Eshrefids",
     "Beyşehir"

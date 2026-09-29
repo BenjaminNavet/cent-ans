@@ -38,7 +38,7 @@
     ],
     "voronoi_weight": 0.9
   },
-  "owner": "fac_bulgaria",
+  "owner": "fac_byzantium",
   "culture": "cul_bulgarian",
   "religion": "rel_orthodox",
   "population": {
@@ -83,7 +83,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 4400,
-  "description": "Plaine de la haute Maritza : Philippopolis (Plovdiv) et les Rhodopes bulgares avec Stenimachos et le monastère de Batchkovo.",
+  "description": "Plaine de la haute Maritza : Philippopolis (Plovdiv) et les Rhodopes, avec Stenimachos et le monastère de Batchkovo. Byzantine depuis 1323 (brève prise bulgare de 1322), cédée à Ivan Alexandre en 1344.",
   "sources": [
     "Plovdiv",
     "Asenovgrad",

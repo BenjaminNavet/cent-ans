@@ -73,5 +73,30 @@
     "sources": [
       "Kobryn"
     ]
+  },
+  {
+    "id": "set_kamianiets",
+    "province": "prov_brest",
+    "kind": "castle",
+    "name": {
+      "display": "Kamianiets",
+      "local": "Kamianiets",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      23.8225,
+      52.4056
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Tour de brique élevée en 1276-1288 par Vladimir Vassilkovitch, sentinelle de la terre de Brest sur la Lieusna.",
+    "sources": [
+      "Kamianiets"
+    ]
   }
 ]

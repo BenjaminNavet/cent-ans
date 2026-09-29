@@ -29,17 +29,17 @@
     ]
   },
   {
-    "id": "set_raseborg",
+    "id": "set_junkarsborg",
     "province": "prov_finland",
     "kind": "castle",
     "name": {
-      "display": "Raseborg",
-      "local": "Raseborg",
-      "local_language": "vieux suédois"
+      "display": "Junkarsborg",
+      "local": "Junkarsborg",
+      "local_language": "suédois"
     },
     "lonlat": [
-      23.4333,
-      59.9833
+      23.66,
+      60.07
     ],
     "weight": 20,
     "owner": null,
@@ -49,23 +49,23 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Château de pierre de la côte de Nyland, en cours de construction.",
+    "description": "Fort de terre et de bois de Karis (début du XIVe siècle), prédécesseur du château de Raseborg (vers 1370) sur la côte de Nyland.",
     "sources": [
-      "Château de Raseborg"
+      "Junkarsborg"
     ]
   },
   {
-    "id": "set_kastelholm",
+    "id": "set_kuusisto",
     "province": "prov_finland",
     "kind": "castle",
     "name": {
-      "display": "Kastelholm",
-      "local": "Kastelholm",
-      "local_language": "vieux suédois"
+      "display": "Kuusisto",
+      "local": "Kuusisto",
+      "local_language": "finnois"
     },
     "lonlat": [
-      20.0503,
-      60.2153
+      22.47,
+      60.39
     ],
     "weight": 12,
     "owner": null,
@@ -75,9 +75,9 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Forteresse d'Åland, gardant le passage de la mer d'Åland.",
+    "description": "Château des évêques d'Åbo, en construction depuis 1317 sur l'île de Kuusisto (Kastelholm, sur Åland, n'est cité qu'en 1388).",
     "sources": [
-      "Château de Kastelholm"
+      "Kuusisto Castle"
     ]
   }
 ]
