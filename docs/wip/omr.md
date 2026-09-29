@@ -51,3 +51,27 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
 - R7 fini (feat/omr-r7, 5027c6563) : relief fin E1-E2 GLO-90 sur tout le monde OM, pyramide passée au cadre monde (ADR 0121), paquet relief v2 (non publié), hydro/anchors/towns régénérés. Cache 4,98 Go dans ../gp-omr-r7/data/map/pyramid : à échanger avec celui du principal à l'atterrissage ; supprimer tools/geo/raw/pyramid_work/{e0,base,coast}.npy et raw/hydro/cache/links_naturalearth.npz du principal (périmés).
 - R3 fini (feat/omr-r3, 901dc0a99) : commise T1 voulue (ADR 0114), garde du seigneur (ADR 0117, seul détenteur du numéro), IA rase/congédie en dette, incite_unrest 12. 464 t. × 10 : banqueroutes 3,98 → 0,69, révoltes 16,0 → 8,1 ; Bourgogne éliminée avant 1400 sur 1/10. Fusionné (conflit cv3_ai_stances : graine 1, à vérifier). Intégration : pytest 1266 ok ; cargo en cours.
 - Intégration : portrait Hızır Bey (0,13 $, cumul OM 8,40 $), .import musique commités. fmt/clippy OK, cargo test 1237 ok / 0 échec. Godot (dylib profil omr, pyramide R7 en lien symbolique) : batterie en cours (scratchpad godot_tests.sh). Ensuite : turn_perf + r2_load_probe au calme, échange du cache, ff-only main.
+
+## Mesures d'intégration (machine calme, charge 2-5)
+- IA (`turn_perf 10 1 1`, release) : 2,64 ms par tour de faction (médiane 1,92, p99 12,5, max 32) ;
+  ≈ 0,46 s par tour de jeu (OM avant : 1,07 s ; carte d'avant OM : 0,23 s). Décisions inchangées (R1).
+- Chargement (`r2_load_probe.gd`) : total_ms 6,0 s (I1 : 9,3 s), temps mur 9,2 s avec démarrage de Godot
+  (I1 : 11,4 s) ; RSS max 2,45 Go (I1 : 2,89 Go). Cibles RSS 2,2 Go et 7,5 s mur non atteintes.
+- Godot : 39 tests (carte, Q6, DZ, R2, R5, R7, smoke) OK ; da7d (seuil 4 ms) OK 3/3 au calme
+  (3,5-3,7 ms, marge faible), échoue sous charge.
+- `settings.cfg` du joueur inchangé (sauvegarde comparée).
+
+## Restes
+- RSS : province_ids en RG8, libérer les images CPU de MapData (docs/wip/omr-r2.md).
+- IA : recruitable_with_supply, goods_map/free_supply (docs/wip/omr-r1.md).
+- Bourgogne éliminée avant 1400 sur 1/10 graines (incite 12) ; ≈ 100 factions disparues en 1453 ;
+  fac_brandenburg sans province au tour 0 (prov_brandenburg à fac_empire depuis FE0).
+- Brabançons 12 %, archers écossais 84 % (hors bande 20-80, préexistant).
+- Incertitudes historiques : docs/wip/omr-r4.md ; colonies > 40 km : Illueca, Vestervig, Isaccea,
+  Lemsal, Kronach, Nyköping.
+- Pas de musique steppe/nordique ; 2 pistes islamiques bloquées par la limite de débit Commons ;
+  écoute humaine des nouvelles pistes à faire.
+- Relief Est en GLO-90 seulement ; paquet relief v2 à publier (accord du joueur, ADR 0077) ;
+  export embarque encore 134 Mo de PNG de relief inutiles.
+- Emblèmes d'unités de l'Est (pas d'enluminures) ; écusson sur le portrait de Hızır Bey.
+- Après fusion de main (TW2-T4) : fmt, clippy OK ; cargo test 1246 ok / 0 échec ; smoke OK. Fusionné dans main.

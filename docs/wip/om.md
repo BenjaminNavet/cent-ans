@@ -24,7 +24,4 @@ Lire ce fichier, `git log feat/om`, les notes `docs/wip/om-*.md` des lots.
 - **Incident** : `q3_playtest.gd` lancé en headless par I1 a réécrit `settings.cfg` du joueur (fenêtré 1920×1080, conseiller et voix réactivés, `advisor_seen` vidé) ; anciennes valeurs perdues.
 
 ## Reste (après fusion dans main)
-- Sonde 464 tours × 10 graines et équilibre des petites factions de l'Est (banqueroutes, révoltes).
-- Relecture historienne : 31 objectifs ajoutés par I1, incertitudes listées dans om-d1..d6.
-- Coût IA ×4,6 par tour (recherche de chemins, faction_power) ; chargement 11,4 s ; RSS 2,9 Go (relief_shade à tuiler/compresser).
-- Relief fin (tiers 1-3) absent à l'Est ; unités orientales ; musique orthodoxe/orientale ; portraits : Andronic III en couronne occidentale.
+- Traité par OMR (docs/wip/omr.md) : sonde, relecture, perf, relief fin Est, unités, musique, portraits. Restes dans omr.md.
