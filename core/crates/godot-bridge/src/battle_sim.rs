@@ -1439,6 +1439,8 @@ impl BattleSim {
                     "yaw" => h.yaw,
                     "rows" => i64::from(h.rows),
                     "church" => h.church,
+                    // NT1: a castle keep (drawn as a great tower).
+                    "keep" => h.keep,
                 }
                 .to_variant()
             })
@@ -1503,6 +1505,8 @@ impl BattleSim {
             "integrity" => works.integrity(),
             "pieces" => &pieces,
             "towers" => &towers,
+            // NT1 (ADR 0126): "city" | "borough" | "castle".
+            "place" => works.place.key(),
             "houses" => &houses,
             "props" => &props,
             "engines" => &engines,
@@ -2049,6 +2053,29 @@ impl CampaignSim {
             Ok(index) => index as i64,
             Err(error) => {
                 godot_warn!("CampaignSim.debug_stage_siege: {error}");
+                -1
+            }
+        }
+    }
+
+    /// NT1 demo (captures): `army` besieges the first settlement laid out as
+    /// a place of `kind` (`city`, `borough`, `castle`). Returns the battle
+    /// index or -1.
+    #[func]
+    fn debug_stage_place_siege(&mut self, army: GString, kind: GString) -> i64 {
+        if self.refuse_while_turn_pending("debug_stage_place_siege") {
+            return -1;
+        }
+        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+            return -1;
+        };
+        let Some(army) = sim_campaign::ArmyId::parse(&army.to_string()) else {
+            return -1;
+        };
+        match state.debug_stage_place_siege(data, &army, &kind.to_string()) {
+            Ok(index) => index as i64,
+            Err(error) => {
+                godot_warn!("CampaignSim.debug_stage_place_siege: {error}");
                 -1
             }
         }

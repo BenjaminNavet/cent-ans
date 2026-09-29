@@ -387,6 +387,8 @@ impl BattleSim {
                 s.fortification,
                 s.breach,
                 setup.siege_layout.as_ref(),
+                s.place,
+                crate::siege_layouts::place_seed(&setup.province),
                 &mut rng,
             )
         });

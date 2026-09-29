@@ -23,6 +23,7 @@ fn quiet_siege(data: &GameData, seed: u64) -> BattleSim {
         Some(SiegeSetup {
             fortification: 2,
             breach: 0,
+            ..Default::default()
         }),
     );
     let mut sim = BattleSim::new(setup, seed).unwrap();

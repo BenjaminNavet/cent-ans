@@ -86,6 +86,7 @@ fn main() {
                 siege: Some(SiegeSetup {
                     fortification: 2,
                     breach,
+                    ..Default::default()
                 }),
                 siege_layout: None,
                 orders: Vec::new(),

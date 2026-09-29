@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/siege_town_rules.schema.json",
   "title": "Règles de la ville assiégée et du mobilier de rue",
-  "description": "Fichier data/rules/siege_town.json (lot BR3, ADR 0047) : disposition des îlots de maisons de la ville de siège générique et des villes emblématiques, emprises du mobilier de rue, marché de la place et marge des figurines. Lu par sim-battle (TownRules).",
+  "description": "Fichier data/rules/siege_town.json (lot BR3, ADR 0047) : disposition des îlots de maisons de la ville de siège générique et des villes emblématiques, emprises du mobilier de rue, marché de la place et marge des figurines ; NT1 (ADR 0126) : type de place assiégée (cité, bourg fortifié, château) et plans du bourg et du château. Lu par sim-battle (TownRules).",
   "type": "object",
   "$defs": {
     "distance": { "type": "number", "minimum": 0, "maximum": 400 },
@@ -10,6 +10,12 @@
     "factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 4 },
     "chance": { "type": "number", "minimum": 0, "maximum": 1 },
     "kind": { "enum": ["stall", "cart", "barrels", "woodpile", "well"] },
+    "place": { "enum": ["city", "borough", "castle"] },
+    "range": { "type": "array", "items": { "$ref": "#/$defs/distance" }, "minItems": 2, "maxItems": 2, "description": "Intervalle [min, max] tiré par graine de province." },
+    "chances": { "type": "array", "items": { "$ref": "#/$defs/chance" }, "minItems": 2, "maxItems": 2 },
+    "counts": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 40 }, "minItems": 2, "maxItems": 2 },
+    "sides": { "type": "array", "items": { "type": "integer", "minimum": 4, "maximum": 12 }, "minItems": 2, "maxItems": 2, "description": "Nombre de côtés [min, max] de l'enceinte polygonale." },
+    "rotation": { "type": "number", "minimum": 0, "maximum": 40, "description": "Rotation maximale de l'enceinte (degrés) ; le côté de la porte fait toujours face à l'assaillant." },
     "kinds": { "type": "array", "items": { "$ref": "#/$defs/kind" }, "minItems": 1 },
     "footprint": {
       "type": "object",
@@ -132,8 +138,70 @@
       },
       "required": ["margin_m"],
       "additionalProperties": false
+    },
+    "places": {
+      "type": "object",
+      "description": "NT1 (ADR 0126) : types de places assiégées hors villes emblématiques (cité en anneaux, bourg fortifié, château).",
+      "properties": {
+        "by_settlement_kind": {
+          "type": "object",
+          "description": "Type de place selon le type de la localité assiégée.",
+          "properties": {
+            "city": { "$ref": "#/$defs/place" },
+            "town": { "$ref": "#/$defs/place" },
+            "castle": { "$ref": "#/$defs/place" },
+            "abbey": { "$ref": "#/$defs/place" },
+            "village": { "$ref": "#/$defs/place" }
+          },
+          "required": ["city", "town", "castle", "abbey", "village"],
+          "additionalProperties": false
+        },
+        "borough_to_city_from_fortification": { "type": "integer", "minimum": 0, "maximum": 10, "description": "Un bourg dont la fortification atteint ce niveau est tracé en cité." },
+        "city_to_borough_up_to_fortification": { "type": "integer", "minimum": 0, "maximum": 10, "description": "Une cité dont la fortification ne dépasse pas ce niveau est tracée en bourg." },
+        "castle": {
+          "type": "object",
+          "description": "Château : enceinte polygonale serrée, donjon, basse-cour, peu de bâtiments.",
+          "properties": {
+            "sides": { "$ref": "#/$defs/sides" },
+            "radius_m": { "$ref": "#/$defs/range", "description": "Rayon moyen de l'enceinte autour du centre (m)." },
+            "radius_jitter": { "$ref": "#/$defs/chance", "description": "Écart relatif du rayon de chaque sommet." },
+            "rotation_deg": { "$ref": "#/$defs/rotation" },
+            "gate_offset": { "$ref": "#/$defs/chance", "description": "Décalage maximal de la porte le long de son côté (fraction de la demi-longueur utile)." },
+            "wall_height_bonus_m": { "$ref": "#/$defs/distance", "description": "Hauteur ajoutée aux courtines du château." },
+            "courtyard_m": { "$ref": "#/$defs/positive", "description": "Rayon de la basse-cour (place centrale, point de capture)." },
+            "keep_side_m": { "$ref": "#/$defs/range", "description": "Côté du donjon carré (m)." },
+            "keep_distance": { "$ref": "#/$defs/chances", "description": "Distance du donjon au centre, en fraction du rayon." },
+            "keep_arc_deg": { "type": "number", "minimum": 0, "maximum": 180, "description": "Ouverture de l'arc, au fond (+z), où se tient le donjon." },
+            "buildings": { "$ref": "#/$defs/counts", "description": "Nombre [min, max] de bâtiments adossés à la courtine." },
+            "wall_walk_m": { "$ref": "#/$defs/distance", "description": "Largeur libre derrière la courtine." },
+            "lane_m": { "$ref": "#/$defs/positive", "description": "Largeur du passage porte - basse-cour - donjon." }
+          },
+          "required": ["sides", "radius_m", "radius_jitter", "rotation_deg", "gate_offset", "wall_height_bonus_m", "courtyard_m", "keep_side_m", "keep_distance", "keep_arc_deg", "buildings", "wall_walk_m", "lane_m"],
+          "additionalProperties": false
+        },
+        "borough": {
+          "type": "object",
+          "description": "Bourg fortifié : grand-rue traversante, place du marché, maisons en bandes le long des rues.",
+          "properties": {
+            "sides": { "$ref": "#/$defs/sides" },
+            "radius_m": { "$ref": "#/$defs/range", "description": "Rayon moyen de l'enceinte autour du centre (m)." },
+            "radius_jitter": { "$ref": "#/$defs/chance", "description": "Écart relatif du rayon de chaque sommet." },
+            "rotation_deg": { "$ref": "#/$defs/rotation" },
+            "gate_offset": { "$ref": "#/$defs/chance", "description": "Décalage maximal de la porte le long de son côté (fraction de la demi-longueur utile)." },
+            "market_m": { "$ref": "#/$defs/positive", "description": "Rayon de la place du marché (centre)." },
+            "main_street_m": { "$ref": "#/$defs/positive", "description": "Largeur des rues du bourg : grand-rue (de la porte à la porte opposée par le marché), ruelles parallèles et rue transversale." },
+            "street_bend_m": { "$ref": "#/$defs/distance", "description": "Déport latéral maximal de la grand-rue à mi-chemin." },
+            "back_lane_offset_m": { "$ref": "#/$defs/range", "description": "Distance des ruelles parallèles à l'axe de la grand-rue." },
+            "cross_lane_chance": { "$ref": "#/$defs/chance", "description": "Probabilité d'une rue transversale par le marché." }
+          },
+          "required": ["sides", "radius_m", "radius_jitter", "rotation_deg", "gate_offset", "market_m", "main_street_m", "street_bend_m", "back_lane_offset_m", "cross_lane_chance"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["by_settlement_kind", "borough_to_city_from_fortification", "city_to_borough_up_to_fortification", "castle", "borough"],
+      "additionalProperties": false
     }
   },
-  "required": ["block", "generic", "landmark", "church", "suburb", "props", "figures"],
+  "required": ["block", "generic", "landmark", "church", "suburb", "props", "figures", "places"],
   "additionalProperties": false
 }

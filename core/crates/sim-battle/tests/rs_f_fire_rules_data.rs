@@ -18,6 +18,7 @@ fn suburbs(data: &data_model::GameData) -> usize {
         Some(SiegeSetup {
             fortification: 2,
             breach: 0,
+            ..Default::default()
         }),
     );
     let sim = BattleSim::new(setup, 11).unwrap();

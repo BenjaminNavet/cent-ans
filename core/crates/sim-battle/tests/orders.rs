@@ -308,6 +308,7 @@ fn siege_assault_dismount_uses_the_order_wording() {
     s.siege = Some(sim_battle::SiegeSetup {
         fortification: 1,
         breach: 0,
+        ..Default::default()
     });
     let sim = BattleSim::new(s, 2).unwrap();
     assert!(has_event(

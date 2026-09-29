@@ -36,6 +36,7 @@ fn landmark_siege(data: &GameData, id: &str, breach: u8, seed: u64) -> BattleSim
         Some(SiegeSetup {
             fortification: 2,
             breach,
+            ..Default::default()
         }),
     );
     setup.siege_layout = Some(layout(data, id));
@@ -134,6 +135,7 @@ fn a_campaign_siege_of_a_landmark_city_carries_its_layout() {
         Some(SiegeSetup {
             fortification: 1,
             breach: 0,
+            ..Default::default()
         }),
     );
     s.siege_layout = Some(layout(&data, "rouen"));
