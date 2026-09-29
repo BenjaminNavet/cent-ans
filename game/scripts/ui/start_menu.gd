@@ -215,7 +215,8 @@ func _build_main_column() -> void:
 	main_column.add_theme_constant_override("margin_left", 84)
 	# PO1 : la colonne tient à 1280×720 (hauteur logique 800 px) — « Crédits » et « Quitter »
 	# sortaient de l'écran ; marges et espacements de la grille 4/8/16/24 (bible DA § 12.3).
-	main_column.add_theme_constant_override("margin_top", 24)
+	# NT2 : « Bataille personnalisée » ajoutée, marge haute et écart sous le titre réduits à 16 et 8.
+	main_column.add_theme_constant_override("margin_top", 16)
 	main_column.add_theme_constant_override("margin_bottom", 24)
 	add_child(main_column)
 	var column := VBoxContainer.new()
@@ -223,7 +224,7 @@ func _build_main_column() -> void:
 	main_column.add_child(column)
 	column.add_child(IlluminatedTitle.new())
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 16)
+	gap.custom_minimum_size = Vector2(0, 8)
 	column.add_child(gap)
 
 	new_game_button = _menu_button(column, "Nouvelle partie", func() -> void: show_faction_select())
