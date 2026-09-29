@@ -40,6 +40,55 @@ pub struct FeudalRules {
     pub arbitration: ArbitrationWeights,
     /// War escalation and private war (§ 4.3, lot F2).
     pub escalation: EscalationRules,
+    /// Which direct vassals the host reaches (lot F8, ADR 0114).
+    pub host: HostRules,
+    /// Felony cases open at the start of the 1337 campaign (lot F8: Edward
+    /// III harbours Robert of Artois, banished by Philip VI).
+    pub start_felonies: Vec<StartFelony>,
+}
+
+/// Why a felony case was opened (§ 4.4).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FelonyReason {
+    RefusedHost,
+    AlliedWithEnemy,
+    Revolt,
+    /// The vassal harbours a man banished by its suzerain (lot F8).
+    HarbouredFelon,
+}
+
+/// A felony case open at the start of the campaign (lot F8).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct StartFelony {
+    pub vassal: crate::FactionId,
+    pub liege: crate::FactionId,
+    pub reason: FelonyReason,
+}
+
+/// Which direct vassals a suzerain's host can summon (lot F8, ADR 0114):
+/// a vassal too far from both the muster and the theatre, or strong enough
+/// to be independent in fact, is not summoned (and commits no felony).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct HostRules {
+    /// A vassal is summoned only if one of its settlements lies within this
+    /// distance (km) of its suzerain's capital or of a settlement of the
+    /// enemy. `0` removes the limit.
+    pub max_muster_km: f64,
+    /// A vassal whose power reaches this share of its suzerain's is
+    /// independent in fact and not summoned. `0` removes the limit.
+    pub independent_power_ratio: f64,
+}
+
+impl Default for HostRules {
+    fn default() -> Self {
+        HostRules {
+            max_muster_km: 0.0,
+            independent_power_ratio: 0.0,
+        }
+    }
 }
 
 impl Default for FeudalRules {
@@ -59,6 +108,8 @@ impl Default for FeudalRules {
             title_loss_penalty: 30,
             arbitration: ArbitrationWeights::default(),
             escalation: EscalationRules::default(),
+            host: HostRules::default(),
+            start_felonies: Vec::new(),
         }
     }
 }

@@ -39,7 +39,7 @@ var income_value: Label
 var tabs: TabContainer
 var garrison_header: Label
 var garrison_list: VBoxContainer
-var actions: HBoxContainer
+var actions: HFlowContainer
 var recruit_button: Button
 var create_army_button: Button
 var recruit_panel: VBoxContainer
@@ -57,8 +57,7 @@ var _garrison_checks: Array[CheckBox] = []
 
 func _init() -> void:
 	name = "SettlementPanel"
-	custom_minimum_size = Vector2(380, 0)
-	clip_contents = true
+	clip_contents = true  # Q6 : largeur donnée par la zone `SIDE_PANEL` (pas de minimum fixe)
 	if ResourceLoader.exists(THEME_PATH):
 		theme = load(THEME_PATH)
 	_build()
@@ -157,6 +156,7 @@ func _tab_box(title: String) -> VBoxContainer:
 func _header(parent: Container, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6
 	UiType.apply(label, UiType.HEADING)
 	parent.add_child(label)
 	return label
@@ -167,7 +167,8 @@ func _build_garrison_tab() -> void:
 	garrison_header = _header(inner, "Garnison")
 	garrison_list = VBoxContainer.new()
 	inner.add_child(garrison_list)
-	actions = HBoxContainer.new()
+	actions = HFlowContainer.new()  # Q6 : boutons à la ligne si la zone est étroite
+	actions.add_theme_constant_override("v_separation", 4)
 	inner.add_child(actions)
 	recruit_button = Button.new()
 	recruit_button.name = "RecruitButton"
@@ -293,6 +294,35 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	if not player_owner:
 		PanelWidgets.placeholder(buildable_list, "Colonie hors de votre contrôle.")
 	show()
+	queue_fit_height()
+
+
+## Q6 : hauteur de conception des onglets ; ils rétrécissent si la zone `SIDE_PANEL` manque.
+const TABS_HEIGHT := 360.0
+var _fit_queued := false
+
+
+func _enter_tree() -> void:
+	if not get_viewport().size_changed.is_connected(queue_fit_height):
+		get_viewport().size_changed.connect(queue_fit_height)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
+		queue_fit_height()
+
+
+## Q6 : le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
+func queue_fit_height() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	_fit_height.call_deferred()
+
+
+func _fit_height() -> void:
+	_fit_queued = false
+	PanelWidgets.fit_tabs_to_side_zone(self, tabs, TABS_HEIGHT)
 
 
 func show_recruit() -> void:

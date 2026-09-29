@@ -272,6 +272,12 @@ pub struct AgentRules {
     pub passive_counter_per_level: i32,
     #[serde(default = "default_passive_counter_cap")]
     pub passive_counter_cap: i32,
+    /// Lot F8: seasonal income (livres) under which an AI faction keeps no
+    /// more than a spy in wartime, like a minor power (FE made about ninety
+    /// factions playable, counties of 80 livres included). 0: every playable
+    /// faction keeps one agent of each kind.
+    #[serde(default)]
+    pub ai_network_min_income: i64,
     #[serde(default)]
     pub effects: AgentEffects,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -397,6 +403,7 @@ impl Default for AgentRules {
             passive_counter_base: default_passive_counter_base(),
             passive_counter_per_level: default_passive_counter_per_level(),
             passive_counter_cap: default_passive_counter_cap(),
+            ai_network_min_income: 0,
             effects: AgentEffects::default(),
             description: None,
         }

@@ -70,6 +70,7 @@ func _init() -> void:
 	changed_label.text = "Régime déjà changé ce tour-ci (effet à la fin du tour)."
 	changed_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	changed_label.add_theme_color_override("font_color", MUTED_COLOR)
+	changed_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q6
 	changed_label.hide()
 	add_child(changed_label)
 
@@ -108,7 +109,7 @@ func _rich_text(font_size: int) -> RichTextLabel:
 	label.scroll_active = false
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.custom_minimum_size = Vector2(300, 0)
+	label.custom_minimum_size = Vector2(160, 0)  # Q6 : zone `SIDE_PANEL` étroite (264 px utiles à 1280×720)
 	label.add_theme_color_override("default_color", RichTooltip.INK)
 	for key in ["normal_font_size", "bold_font_size", "italics_font_size"]:
 		label.add_theme_font_size_override(key, font_size)

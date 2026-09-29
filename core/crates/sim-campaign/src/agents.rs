@@ -1547,7 +1547,10 @@ pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) 
     if !f.alive || faction.as_str() == REBELS_FACTION || faction.as_str() == PAPACY_FACTION {
         return Vec::new();
     }
-    let playable = data.factions.get(faction).is_some_and(|d| d.playable);
+    // F8: a playable faction too poor for a network of agents (their
+    // upkeep) behaves like a minor power.
+    let playable = data.factions.get(faction).is_some_and(|d| d.playable)
+        && state.faction_income_effective(data, faction) >= rules(data).ai_network_min_income;
     let mut orders = Vec::new();
     // Recruitment: one agent of each missing kind, one per season.
     if playable || f.treasury > 2 * AI_RECRUIT_RESERVE {

@@ -86,6 +86,9 @@ var _tint_saved: Dictionary = {}
 var _lens: Dictionary = {}
 var _relations: Dictionary = {}
 var _religions: Dictionary = {}
+## Lot DZ : faction dont le mode Diplomatie montre les relations ("" : le joueur). Un clic sur une
+## province la choisit (son contrôleur) ; un clic sur nos terres ou hors carte revient au joueur.
+var focus_faction: String = ""
 ## FE6 : filtre « Féodalité » (couleurs, hachures, écus partis).
 var feudal_lens := FeudalMapLens.new()
 
@@ -219,6 +222,9 @@ func set_mode(target: String) -> void:
 	mode = target
 	_sync_menu()
 	_clear_relation_markers()
+	if mode != "diplomacy":
+		focus_faction = ""
+		_set_border_override({}, "")
 	_clear_feudal()
 	_set_tint_boost(mode != POLITICAL)
 	_show_legend()
@@ -304,7 +310,7 @@ func _clear_feudal() -> void:
 func _relation_colors(ids: PackedStringArray) -> PackedColorArray:
 	# Lot DP2 : positions diplomatiques (allié, accord, neutre, tension, guerre, vassal).
 	if DiplomaticStances.available(map.sim):
-		var stances := DiplomaticStances.stances(map.sim, ids)
+		var stances := DiplomaticStances.stances(map.sim, ids, focus_faction)
 		var stance_colors := PackedColorArray()
 		var symbols := PackedStringArray()
 		_relations.clear()
@@ -314,6 +320,7 @@ func _relation_colors(ids: PackedStringArray) -> PackedColorArray:
 			stance_colors.append(DiplomaticStances.color_of(key))
 			symbols.append(str(DiplomaticStances.SYMBOL_KEYS.get(key, "")))
 		_place_relation_markers(ids, symbols)
+		_apply_stance_borders()
 		return stance_colors
 	var relations: PackedStringArray = map.sim.call("get_province_relations", ids)
 	var colors := PackedColorArray()
@@ -326,6 +333,60 @@ func _relation_colors(ids: PackedStringArray) -> PackedColorArray:
 		colors.append(color)
 	_place_relation_markers(ids, relations)
 	return colors
+
+
+## Lot DZ : faction observée par le mode Diplomatie (le joueur par défaut).
+func viewer() -> String:
+	if focus_faction != "":
+		return focus_faction
+	return str(map.get("player_faction")) if map != null else ""
+
+
+## Lot DZ : frontières de royaume aux couleurs de position envers la faction observée (rouge :
+## ses ennemis), halo respirant autour d'elle.
+func _apply_stance_borders() -> void:
+	var stances := DiplomaticStances.faction_stances(map.sim, viewer())
+	var colors := {}
+	for faction in stances:
+		var key := str(stances[faction])
+		if DiplomaticStances.COLORS.has(key):
+			colors[str(faction)] = DiplomaticStances.COLORS[key]
+	_set_border_override(colors, viewer())
+
+
+func _set_border_override(colors: Dictionary, highlight: String) -> void:
+	var borders: Object = map.get("faction_borders") if map != null else null
+	if borders != null and borders.has_method("set_color_override"):
+		borders.call("set_color_override", colors, highlight if not colors.is_empty() else "")
+
+
+## Lot DZ : clic sur une province en mode Diplomatie — son contrôleur devient la faction
+## observée (nos terres, rebelles ou hors carte : retour au joueur). Vrai si la vue a changé.
+func focus_on_province(province_id: String) -> bool:
+	if mode != "diplomacy" or map == null or map.sim == null:
+		return false
+	var controller := ""
+	if province_id != "":
+		var state: Dictionary = map.sim.call("get_province_state", province_id)
+		controller = str(state.get("controller", state.get("owner", "")))
+	return set_focus_faction(controller)
+
+
+func set_focus_faction(faction: String) -> bool:
+	var player := str(map.get("player_faction")) if map != null else ""
+	if faction == player or faction == "fac_rebels":
+		faction = ""
+	if faction == focus_faction:
+		return false
+	focus_faction = faction
+	refresh()
+	_show_legend()
+	if map.ui != null:
+		if faction == "":
+			map.ui.show_toast("Carte diplomatique : vos relations.")
+		else:
+			map.ui.show_toast("Relations de %s : rouge ses ennemis, vert ses alliés. Cliquez vos terres pour revenir." % SimFacade.faction_short_name(faction))
+	return true
 
 
 func _religion_colors(ids: PackedStringArray) -> PackedColorArray:
@@ -453,6 +514,8 @@ func _lens_color(row: Dictionary, rank: float) -> Color:
 func hover_text(province_id: String) -> String:
 	match mode:
 		"diplomacy":
+			if focus_faction != "":  # DZ
+				return _focus_hover_text(str(_relations.get(province_id, "")))
 			return {"self": "vos terres", "war": "en guerre", "truce": "trêve", "peace": "neutre",
 				"alliance": "allié", "vassal": "vassal", "suzerain": "suzerain",
 				# DP2 : positions diplomatiques
@@ -492,6 +555,15 @@ func hover_text(province_id: String) -> String:
 	return ""
 
 
+## DZ : valeur de survol vue de la faction observée.
+func _focus_hover_text(key: String) -> String:
+	var faction_name := SimFacade.faction_short_name(focus_faction)
+	var text: String = {"self": "terres de %s", "war": "en guerre contre %s", "ally": "allié de %s",
+		"agreement": "en paix avec %s, avec un accord", "neutral": "neutre envers %s",
+		"tension": "tensions avec %s", "vassal": "vassal ou suzerain de %s"}.get(key, "")
+	return text.replace("%s", faction_name)
+
+
 # ----- Teinte renforcée et légende (DP1, audit A3 C11/U14) --------------------------------------
 
 func _set_tint_boost(on: bool) -> void:
@@ -520,7 +592,10 @@ func _legend_entries() -> Variant:
 			if map != null and DiplomaticStances.available(map.sim):  # DP2
 				var stance_entries: Array = []
 				for key in DiplomaticStances.ORDER:
-					stance_entries.append([key, DiplomaticStances.LABELS[key]])
+					var label: String = DiplomaticStances.LABELS[key]
+					if key == "self" and focus_faction != "":  # DZ
+						label = SimFacade.faction_short_name(focus_faction)
+					stance_entries.append([key, label])
 				return stance_entries
 			return [["self", "Nous"], ["war", "Guerre"], ["truce", "Trêve"], ["alliance", "Alliés"], ["vassal", "Vassaux"], ["peace", "Neutres"]]
 		"religion":
@@ -546,7 +621,8 @@ func _mode_title() -> String:
 	for entry in MODES:
 		if entry[0] == mode:
 			var key := ShortcutSheet.first_key(str(entry[2])) if str(entry[2]) != "" else ""
-			return "Carte : %s%s" % [str(entry[1]).to_lower(), " (%s)" % key if key != "" else ""]
+			var seen := " — relations de %s" % SimFacade.faction_short_name(focus_faction) if mode == "diplomacy" and focus_faction != "" else ""  # DZ
+			return "Carte : %s%s%s" % [str(entry[1]).to_lower(), seen, " (%s)" % key if key != "" else ""]
 	return ""
 
 
@@ -599,6 +675,8 @@ func _show_legend() -> void:
 			row.add_child(chip)
 	box.add_child(row)
 	box.add_child(HudStyle.label("Survolez une province pour sa valeur. Les terres voilées sont hors de vue de vos armées, places et agents.", HudStyle.FONT_SMALL, HudStyle.INK_FADED))
+	if mode == "diplomacy" and DiplomaticStances.available(map.sim):  # DZ
+		box.add_child(HudStyle.label("Cliquez une province pour voir les relations de son seigneur ; vos terres pour revenir aux vôtres.", HudStyle.FONT_SMALL, HudStyle.INK_FADED))
 	map.ui.add_child(_legend)
 	_legend.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 18)
 	_legend.grow_horizontal = Control.GROW_DIRECTION_BOTH

@@ -112,6 +112,7 @@
     {"id": "recruit", "label": "Recruter", "group": "action", "subject": "a kettle hat helmet in front of a halberd standing upright", "targets": ["act_recruit"]},
     {"id": "form_army", "label": "Former une armée", "group": "action", "subject": "three spears and a banner grouped together", "targets": ["act_form_army", "battle_alert_reinforcements"]},
     {"id": "marry", "label": "Mariage", "group": "action", "subject": "two interlinked rings", "targets": ["act_marry"]},
+    {"id": "raze", "label": "Raser", "group": "action", "subject": "a stone wall crumbling apart, its top blocks tumbling down, with a mason's pick-hammer swung against it", "targets": ["act_raze"]},
     {"id": "trait_admiral", "label": "Amiral", "group": "trait", "subject": "a ship's helm wheel crossed with a captain's baton, wound with a rope", "targets": ["trait_admiral"]},
     {"id": "trait_ambitious", "label": "Ambitieux", "group": "trait", "subject": "a hand reaching up to grasp a floating crown just out of reach", "targets": ["trait_ambitious"]},
     {"id": "trait_anglophile", "label": "Anglophile", "group": "trait", "subject": "a small leopard passant, in profile, as on a shield", "targets": ["trait_anglophile"]},

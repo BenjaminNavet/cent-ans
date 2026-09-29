@@ -39,12 +39,13 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 			check.button_pressed = true
 			check.set_script(RichButton)
 			check.theme_type_variation = &"CheckBox"
+			narrow_button(check)
 			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
 			RichTooltip.set_tooltip(check, "unit", unit_type, unit)  # IB1 : infobulle en sections
 			list.add_child(check)
 			checks.append(check)
 		else:
-			var chip := IconChip.create(unit_type, text, "", ROW_ICON, 14, "unit")
+			var chip := wrap_chip(IconChip.create(unit_type, text, "", ROW_ICON, 14, "unit"))
 			RichTooltip.set_tooltip(chip, "unit", unit_type, unit)  # IB1
 			list.add_child(chip)
 	return checks
@@ -62,6 +63,7 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 			button.text += " (dont import %s)" % Money.amount(int(row["import_cost"]))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		narrow_button(button)
 		var available: bool = bool(row.get("available", false))
 		button.disabled = not available
 		var unit_type: String = str(row.get("unit_type", ""))
@@ -71,10 +73,10 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		line.add_child(button)
 		var reason := str(row.get("reason", "Indisponible"))
 		if not available and not reason.begins_with("réserve"):
-			line.add_child(reason_label(reason))
+			line.add_child(side_note(reason_label(reason)))
 		# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
 		if row.has("pool_label"):
-			line.add_child(pool_label(row))
+			line.add_child(side_note(pool_label(row)))
 		list.add_child(line)
 
 
@@ -105,7 +107,7 @@ static func fill_buildings(list: Container, buildings: Array, demolition: Dictio
 		var row := HBoxContainer.new()
 		row.name = building_id
 		row.add_theme_constant_override("separation", 6)
-		var chip := IconChip.create(building_id, text, "", ROW_ICON, 14, "building")
+		var chip := wrap_chip(IconChip.create(building_id, text, "", ROW_ICON, 14, "building"))
 		RichTooltip.set_tooltip(chip, "building", building_id, entry)  # IB1
 		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(chip)
@@ -120,7 +122,7 @@ static func _raze_button(building_id: String, preview: Dictionary, on_raze: Call
 	var button := Button.new()
 	button.name = "RazeButton"
 	button.text = "Raser"
-	IconLibrary.decorate_button(button, "act_cancel_build", int(ROW_ICON))
+	IconLibrary.decorate_button(button, "act_raze", int(ROW_ICON))
 	var can_demolish: bool = bool(preview.get("can_demolish", false))
 	button.disabled = not can_demolish
 	var refund := int(preview.get("refund", 0))
@@ -173,6 +175,7 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		button.text = "%s — %s / %s" % [str(row.get("name", row.get("building", "?"))), Money.amount(int(row.get("cost", 0))), FrText.count(int(row.get("turns", 1)), "tour")]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		narrow_button(button)
 		var available: bool = bool(row.get("available", false))
 		button.disabled = not available
 		var building_id: String = str(row.get("building", ""))
@@ -180,12 +183,12 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		button.pressed.connect(func() -> void: on_build.call(building_id))
 		line.add_child(button)
 		if not available:
-			line.add_child(reason_label(str(row.get("reason", "Indisponible"))))
+			line.add_child(side_note(reason_label(str(row.get("reason", "Indisponible")))))
 		# SV3 : surcoût d'import (B7c) déjà visible dans la bulle ; rappel court sur la ligne
 		# pour ne pas avoir à ouvrir la bulle pour le repérer.
 		var import_cost := int(row.get("import_cost", 0))
 		if import_cost > 0:
-			line.add_child(import_cost_label(import_cost))
+			line.add_child(side_note(import_cost_label(import_cost)))
 		RichTooltip.set_tooltip(button, "building", building_id, row)  # IB1 : infobulle en sections
 		list.add_child(line)
 
@@ -196,6 +199,51 @@ static func import_cost_label(import_cost: int) -> Label:
 	label.text = "Dont import : %s" % Money.amount(import_cost)
 	label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	label.add_theme_color_override("font_color", Color(RichTooltip.RED))
+	return label
+
+
+## Q6 : hauteur plancher des onglets d'un panneau de la zone `SIDE_PANEL` (liste défilante).
+const SIDE_TABS_MIN_HEIGHT := 200.0
+
+
+## Q6 : ajuste la hauteur des onglets (`tabs`) de `panel` pour que le panneau tienne dans la zone
+## `SIDE_PANEL` : l'en-tête garde sa taille, les onglets (pages défilantes, bornes minimales
+## remises à zéro) prennent le reste, entre `SIDE_TABS_MIN_HEIGHT` et `max_height` (hauteur de
+## conception). En vue 1280×720, les onglets fixes (300-360 px) poussaient « Recruter » et
+## « Changer d'édit » sous le bord de la zone, au niveau de la minicarte et de la fin de tour.
+static func fit_tabs_to_side_zone(panel: Control, tabs: TabContainer, max_height: float) -> void:
+	if not is_instance_valid(panel) or not panel.is_inside_tree():
+		return
+	for page in tabs.get_children():
+		if page is ScrollContainer:
+			(page as Control).custom_minimum_size.y = 0.0
+	var zone_height := UiZones.rect(UiZones.Zone.SIDE_PANEL).size.y
+	var others := panel.get_combined_minimum_size().y - tabs.get_combined_minimum_size().y
+	tabs.custom_minimum_size.y = clampf(zone_height - others, minf(SIDE_TABS_MIN_HEIGHT, max_height), max_height)
+
+
+## Q6 : bouton de ligne d'une liste du panneau latéral ; son libellé se coupe (points de
+## suspension, texte entier dans la bulle) au lieu d'élargir le panneau au-delà de sa zone
+## (`SIDE_PANEL`, 384 px en vue 1280×720), où le reste du panneau passait hors de l'écran.
+static func narrow_button(button: Button) -> Button:
+	button.clip_text = true
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	return button
+
+
+## Q6 : libellé d'une puce de liste qui passe à la ligne au lieu d'élargir la liste.
+static func wrap_chip(chip: IconChip) -> IconChip:
+	chip.label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	chip.label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return chip
+
+
+## Q6 : note à droite d'un bouton de ligne (raison, import, réserve) : elle passe à la ligne
+## dans le tiers de la largeur au lieu d'élargir la ligne.
+static func side_note(label: Label) -> Label:
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.size_flags_stretch_ratio = 0.5
 	return label
 
 

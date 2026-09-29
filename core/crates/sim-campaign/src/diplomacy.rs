@@ -233,6 +233,9 @@ pub enum DiplomacyError {
 // Helpers
 // =========================================================================
 
+/// Refusal of an alliance between a suzerain and its direct vassal (ADR 0114).
+pub const FEUDAL_TIE_ALLIANCE: &str = "le lien féodal tient déjà lieu d'alliance";
+
 pub(crate) fn faction_name(data: &GameData, id: &FactionId) -> String {
     data.factions
         .get(id)
@@ -268,19 +271,36 @@ impl CampaignState {
         f64::from(armies) + f64::from(garrisons) / 2.0
     }
 
-    /// Power of `faction` plus that of its allies.
+    /// Power of `faction` plus that of its coalition
+    /// ([`Self::coalition_members`]: the feudal tie stands for an alliance,
+    /// ADR 0114).
     pub fn coalition_power(&self, faction: &FactionId) -> f64 {
-        let allies = self
-            .factions
-            .get(faction)
-            .map(|f| f.allies.clone())
-            .unwrap_or_default();
         self.faction_power(faction)
-            + allies
+            + self
+                .coalition_members(faction)
                 .iter()
-                .filter(|a| self.factions.get(*a).is_some_and(|f| f.alive))
                 .map(|a| self.faction_power(a))
                 .sum::<f64>()
+    }
+
+    /// Living allies, direct suzerain and direct vassals of `faction` (its
+    /// coalition, itself left out; ADR 0114). The feudal ties are read from
+    /// the `suzerain` cache refreshed every turn by the feudal pass.
+    pub fn coalition_members(&self, faction: &FactionId) -> BTreeSet<FactionId> {
+        let mut members: BTreeSet<FactionId> = self
+            .factions
+            .get(faction)
+            .map(|f| f.allies.iter().chain(f.suzerain.iter()).cloned().collect())
+            .unwrap_or_default();
+        members.extend(
+            self.factions
+                .iter()
+                .filter(|(_, f)| f.suzerain.as_ref() == Some(faction))
+                .map(|(id, _)| id.clone()),
+        );
+        members.remove(faction);
+        members.retain(|a| self.factions.get(a).is_some_and(|f| f.alive));
+        members
     }
 
     /// `true` while a truce between `a` and `b` is running.
@@ -813,6 +833,10 @@ pub fn evaluate(
                 reasons.push(("Déjà alliés".to_owned(), -100));
                 hard_no = true;
             }
+            if crate::feudal::direct_tie(state, data, proposer, recipient) {
+                reasons.push(("Lien féodal".to_owned(), -100));
+                hard_no = true;
+            }
             if state.is_at_war(proposer, recipient) {
                 reasons.push(("En guerre".to_owned(), -100));
                 hard_no = true;
@@ -1089,8 +1113,11 @@ impl CampaignState {
         }
         crate::feudal::escalate_war(self, data, attacker, target);
         self.call_to_arms(data, target, attacker, feudal_liege.as_ref());
-        // The attacker summons its own host too (loyal direct vassals follow).
+        // The attacker summons its own host too (loyal direct vassals follow),
+        // and so does the target: its vassals owe it the host, the feudal tie
+        // standing for an alliance (ADR 0114).
         crate::feudal::summon_host(self, data, attacker, target);
+        crate::feudal::summon_host(self, data, target, attacker);
         Ok(())
     }
 
@@ -1391,13 +1418,9 @@ impl CampaignState {
             return;
         }
         let v = self.factions.get_mut(vassal).expect("exists");
-        v.allies.insert(suzerain.clone());
         v.loyalty = data.feudal_rules.loyalty.homage_start;
-        self.factions
-            .get_mut(suzerain)
-            .expect("exists")
-            .allies
-            .insert(vassal.clone());
+        // ADR 0114: the feudal tie stands for an alliance.
+        crate::feudal::drop_alliance(self, vassal, suzerain);
         let text = format!(
             "{} devient vassal de {}.",
             faction_name(data, vassal),
@@ -1495,6 +1518,9 @@ impl CampaignState {
                 }
                 if self.is_at_war(proposer, recipient) {
                     return Err(DiplomacyError::AlreadyAtWar);
+                }
+                if crate::feudal::direct_tie(self, data, proposer, recipient) {
+                    return Err(DiplomacyError::Refused(FEUDAL_TIE_ALLIANCE.to_owned()));
                 }
             }
             Proposal::Vassalage | Proposal::Marriage { .. } | Proposal::Obedience { .. } => {}

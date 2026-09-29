@@ -345,8 +345,8 @@ fn create_faction(
         .get(title)
         .and_then(|t| t.de_jure_provinces.first().cloned())
         .unwrap_or_else(|| template.capital.clone());
-    let mut allies = BTreeSet::new();
-    allies.insert(grantor.clone());
+    // ADR 0114: the feudal tie stands for an alliance.
+    let allies = BTreeSet::new();
     let faction = FactionState {
         treasury: 0,
         income_last_turn: 0,
@@ -397,12 +397,6 @@ fn create_faction(
         ledger: Default::default(),
     };
     state.factions.insert(id.clone(), faction);
-    state
-        .factions
-        .get_mut(grantor)
-        .expect("alive")
-        .allies
-        .insert(id.clone());
     state.detach_general(character);
     let spouse = state
         .characters

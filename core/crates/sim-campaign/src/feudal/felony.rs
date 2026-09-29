@@ -21,6 +21,7 @@ fn reason_text(reason: FelonyReason) -> &'static str {
         FelonyReason::RefusedHost => "refus de l'ost",
         FelonyReason::AlliedWithEnemy => "alliance avec l'ennemi de son suzerain",
         FelonyReason::Revolt => "révolte",
+        FelonyReason::HarbouredFelon => "asile donné à un banni du royaume",
     }
 }
 

@@ -459,6 +459,11 @@ pub fn check_treaty(
                 if state.is_allied(proposer, recipient) {
                     return Err(DiplomacyError::AlreadyAllied);
                 }
+                if crate::feudal::direct_tie(state, data, proposer, recipient) {
+                    return Err(DiplomacyError::Refused(
+                        crate::diplomacy::FEUDAL_TIE_ALLIANCE.to_owned(),
+                    ));
+                }
                 if at_war && !ends_war {
                     return Err(DiplomacyError::AlreadyAtWar);
                 }
