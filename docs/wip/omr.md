@@ -71,7 +71,7 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
   Lemsal, Kronach, Nyköping.
 - Pas de musique steppe/nordique ; 2 pistes islamiques bloquées par la limite de débit Commons ;
   écoute humaine des nouvelles pistes à faire.
-- Relief Est en GLO-90 seulement ; paquet relief v2 à publier (accord du joueur, ADR 0077) ;
+- Relief Est en GLO-90 seulement ; paquet relief v2 publié le 2026-09-29 (accord du joueur) : dépôt public BenjaminNavet/cent-ans-relief, release v2 (3 parts, 5,04 Go) ;
   export embarque encore 134 Mo de PNG de relief inutiles.
 - Emblèmes d'unités de l'Est (pas d'enluminures) ; écusson sur le portrait de Hızır Bey.
 - Après fusion de main (TW2-T4) : fmt, clippy OK ; cargo test 1246 ok / 0 échec ; smoke OK. Fusionné dans main.
