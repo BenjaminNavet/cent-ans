@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from jsonschema import Draft202012Validator
 
-from cent_ans_tools.geo import pyramid, relief_shade, surface, terrain
+from cent_ans_tools.geo import copernicus, pyramid, relief_shade, surface, terrain
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 MAP_DIR = DATA / "map"
@@ -307,7 +307,17 @@ def test_e1_mean_matches_e0() -> None:
     median gap stays under a metre and the mean is unbiased.
     """
     diffs = []
+    # E0 is GLO-90 only inside the West box (ETOPO elsewhere, ADR 0121): compare there.
+    grid1 = pyramid.level_grid(pyramid.map_bounds(MAP_DIR), 1)
+    lon_min, lat_min, lon_max, lat_max = copernicus.FINE_BBOX
     for col, row in _cached(1)[::7]:
+        lon, lat = grid1.pixel_to_lonlat(
+            np.array([(col + 0.5) * 512]), np.array([(row + 0.5) * 512])
+        )
+        if not (
+            lon_min + 1 < lon[0] < lon_max - 1 and lat_min + 1 < lat[0] < lat_max - 1
+        ):
+            continue
         key = pyramid.TileKey(1, col, row)
         child = terrain.uint16_to_height(
             terrain.read_png16(pyramid.tile_path(MAP_DIR, key))
@@ -341,6 +351,8 @@ def test_e2_mean_is_e1() -> None:
         parent = parent[dy * 256 : (dy + 1) * 256, dx * 256 : (dx + 1) * 256]
         mean = relief_shade.block_mean(child.astype(np.float32), 2)
         land = parent > 1.0
+        if not land.any():  # Caspian depression, salt flats
+            continue
         assert np.percentile(np.abs(mean - parent)[land], 99) < 0.2
         checked += 1
     assert checked > 0
