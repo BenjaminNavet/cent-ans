@@ -1,0 +1,41 @@
+{
+  "id": "unit_lithuanian_light_cavalry",
+  "name": {
+    "display": "Cavalerie légère lituanienne",
+    "local": "raiteliai",
+    "local_language": "lituanien"
+  },
+  "category": "ranged",
+  "source_class": "peasants",
+  "mounted": true,
+  "soldiers": 80,
+  "cost": {
+    "money": 460
+  },
+  "upkeep": 40,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 44,
+    "ranged": 50,
+    "range": 70,
+    "armor": 22,
+    "morale": 56,
+    "speed": 86,
+    "ammo": 10
+  },
+  "abilities": [
+    "skirmish"
+  ],
+  "required_culture": [
+    "cul_lithuanian"
+  ],
+  "figure": "cavalry_5",
+  "missile": "javelin",
+  "equipment": "Petit cheval des forêts (žemaitukas), deux ou trois sulicas (javelots), épée ou hache, petit écu ; bonnet de feutre ou calotte de fer.",
+  "description": "Cavaliers de [[cdx_lituanie|Lituanie]] païenne sous Gediminas : rapides dans les forêts et les marais, ils mènent des raids contre l'[[cdx_ordre_teutonique|Ordre teutonique]] et harcèlent au javelot avant de se dérober.",
+  "sources": [
+    "Grand-duché de Lituanie",
+    "Croisade lituanienne",
+    "S. C. Rowell, Lithuania Ascending, 1994"
+  ]
+}

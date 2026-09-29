@@ -1,0 +1,39 @@
+{
+  "id": "unit_almogavars",
+  "name": {
+    "display": "Almogavres",
+    "local": "almogàvers",
+    "local_language": "catalan"
+  },
+  "category": "infantry",
+  "source_class": "peasants",
+  "soldiers": 100,
+  "cost": {
+    "money": 520
+  },
+  "upkeep": 46,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 58,
+    "ranged": 0,
+    "range": 0,
+    "armor": 22,
+    "morale": 64,
+    "speed": 58,
+    "ammo": 0
+  },
+  "abilities": [],
+  "required_culture": [
+    "cul_catalan"
+  ],
+  "available_until": 1400,
+  "figure": "infantry_3",
+  "equipment": "Deux javelots (azconas), lance courte, coutelas (colltell) ; sans armure, sandales (abarcas), bonnet de cuir, sac de vivres.",
+  "description": "Fantassins légers des montagnes de la couronne d'Aragon, redoutés pour leurs javelots et leurs charges : ils ont conquis la Sicile (1282) et fondé la Compagnie catalane d'Orient, qui tient encore le duché d'Athènes en 1337 ; ils disparaissent dans la seconde moitié du XIVe siècle.",
+  "sources": [
+    "Almogavres",
+    "Compagnie catalane",
+    "R. Muntaner, Crònica, v. 1325-1328",
+    "L. Sáez, Almogàvers: la història, 2006"
+  ]
+}

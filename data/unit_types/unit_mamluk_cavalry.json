@@ -1,0 +1,44 @@
+{
+  "id": "unit_mamluk_cavalry",
+  "name": {
+    "display": "Mamelouks",
+    "local": "mamālīk",
+    "local_language": "arabe"
+  },
+  "category": "ranged",
+  "source_class": "nobility",
+  "mounted": true,
+  "soldiers": 60,
+  "cost": {
+    "money": 1300
+  },
+  "upkeep": 120,
+  "recruit_time_turns": 3,
+  "stats": {
+    "melee": 66,
+    "ranged": 62,
+    "range": 180,
+    "armor": 58,
+    "morale": 78,
+    "speed": 72,
+    "ammo": 24
+  },
+  "abilities": [
+    "volley",
+    "skirmish",
+    "rain_penalty"
+  ],
+  "required_faction": [
+    "fac_mamluks"
+  ],
+  "figure": "cavalry_2",
+  "missile": "arrow",
+  "equipment": "Arc composite turc, lance, épée ou sabre, masse d'armes ; cotte de mailles ou jawshan à lamelles sous le qabā', casque à nasal ; cheval arabe.",
+  "description": "Esclaves-soldats affranchis, d'origine kiptchak puis circassienne, formés à la furūsiyya (tir à l'arc monté, lance, manège) ; élite du sultanat des [[cdx_mamelouks|Mamelouks]] d'an-Nasir Muhammad, vainqueurs des Mongols à Ayn Jalut (1260) et à Marj as-Suffar (1303).",
+  "sources": [
+    "Mamelouk",
+    "Furusiyya",
+    "D. Ayalon, Le phénomène mamelouk dans l'Orient islamique, PUF, 1996",
+    "R. Irwin, The Middle East in the Middle Ages: the Early Mamluk Sultanate 1250-1382, 1986"
+  ]
+}

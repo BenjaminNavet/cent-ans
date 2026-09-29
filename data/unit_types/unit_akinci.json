@@ -1,0 +1,39 @@
+{
+  "id": "unit_akinci",
+  "name": {
+    "display": "Akıncı",
+    "local": "akıncı",
+    "local_language": "turc ottoman"
+  },
+  "category": "cavalry",
+  "source_class": "peasants",
+  "mounted": true,
+  "soldiers": 80,
+  "cost": {
+    "money": 420
+  },
+  "upkeep": 34,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 46,
+    "ranged": 0,
+    "range": 0,
+    "armor": 24,
+    "morale": 50,
+    "speed": 88,
+    "ammo": 0,
+    "charge": 48
+  },
+  "abilities": [],
+  "required_faction": [
+    "fac_ottoman"
+  ],
+  "figure": "cavalry_6",
+  "equipment": "Cheval turkmène, lance légère, sabre, arc court, écu rond ; bonnet de feutre ou calotte de fer, rarement de maille.",
+  "description": "Coureurs de frontière des [[cdx_ottomans|Ottomans]] d'Orhan, payés sur le butin : ils ravagent la Bithynie byzantine puis la Thrace sous des chefs comme les Mihaloğlu et Evrenos.",
+  "sources": [
+    "Akıncı",
+    "H. İnalcık, The Ottoman Empire: the Classical Age 1300-1600, 1973",
+    "C. Imber, The Ottoman Empire 1300-1650, 2002"
+  ]
+}

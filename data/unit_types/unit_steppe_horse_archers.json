@@ -1,0 +1,46 @@
+{
+  "id": "unit_steppe_horse_archers",
+  "name": {
+    "display": "Archers montés des steppes",
+    "local": "atlı okçular",
+    "local_language": "kiptchak"
+  },
+  "category": "ranged",
+  "source_class": "peasants",
+  "mounted": true,
+  "soldiers": 80,
+  "cost": {
+    "money": 520
+  },
+  "upkeep": 46,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 30,
+    "ranged": 55,
+    "range": 170,
+    "armor": 16,
+    "morale": 48,
+    "speed": 88,
+    "ammo": 30
+  },
+  "abilities": [
+    "volley",
+    "skirmish",
+    "rain_penalty"
+  ],
+  "required_culture": [
+    "cul_kipchak",
+    "cul_bashkir",
+    "cul_turkish"
+  ],
+  "figure": "cavalry_2",
+  "missile": "arrow",
+  "equipment": "Arc composite, carquois de trente flèches, sabre léger, lasso ; kaftan et bonnet de feutre, parfois cuirasse de cuir ; deux ou trois chevaux de steppe par homme.",
+  "description": "Nomades kiptchaks, bachkirs et turkmènes, qui tirent au galop et feignent la fuite ; ils font la force de la [[cdx_horde_d_or|Horde d'Or]] d'Özbeg et des beylicats d'Anatolie. Distincts des archers montés anglais, qui combattent à pied.",
+  "sources": [
+    "Archer monté",
+    "Horde d'Or",
+    "T. May, The Mongol Art of War, 2007",
+    "J. Masson Smith, « Ayn Jalut: Mamluk success or Mongol failure? », HJAS, 44, 1984"
+  ]
+}
