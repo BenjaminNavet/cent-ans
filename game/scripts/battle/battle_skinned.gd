@@ -683,6 +683,30 @@ const STYLES := {
 		"routing": {"set": ["c_gallop"]},
 		"victory": {"set": ["c_victory"]},
 	},
+	## Lot FK2 : civils de la carte vivante (figurines `villager_*`). Les états de travail
+	## (`scythe` fauche, `carry` porte un fardeau à l'épaule, `plough` laboure) sont demandés par
+	## le rendu de la carte (`state_config(kind, variant, "scythe", false)`) ; sans ces clips (kit
+	## grossier antérieur), repli sur la marche ou l'attente.
+	"folk": {
+		"idle": {"set": ["idle", "idle", "idle_look"]},
+		"marching": {"set": ["walk"]},
+		"running": {"set": ["run"]},
+		"charging": {"set": ["run"]},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
+		"victory": {"set": ["victory", "victory_b"]},
+		"scythe": {"set": ["scythe"], "fallback": ["idle"]},
+		"carry": {"set": ["carry"], "fallback": ["walk"]},
+		"plough": {"set": ["plough"], "speed": 0.7, "fallback": ["walk"]},
+	},
+	## FK2 : porteurs (sac sur l'épaule) : la marche est `carry`.
+	"folk_carry": {
+		"idle": {"set": ["idle", "idle_look"]},
+		"marching": {"set": ["carry"], "fallback": ["walk"]},
+		"running": {"set": ["run"]},
+		"charging": {"set": ["run"]},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
+		"carry": {"set": ["carry"], "fallback": ["walk"]},
+	},
 	## UR2 : jinetes (javelot au lieu de l'arc, cavalerie légère skirmish).
 	"horse_javelin": {
 		"idle": {"set": ["c_javelin_idle"]},

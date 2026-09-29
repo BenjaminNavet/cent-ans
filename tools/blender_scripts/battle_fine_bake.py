@@ -932,11 +932,17 @@ def store_layer(fine_dir, level, index, count, rgba):
         strip = None
         if os.path.exists(path):
             strip = tiles.read_png(path)
-            if strip.shape != (size * count, size, 4):
+            if strip.shape[1:] != (size, 4) or strip.shape[0] % size:
                 strip = None
+        fresh = np.zeros((size * count, size, 4), np.uint8)
+        fresh[..., :] = (128, 128, 255, 255)
+        if strip is not None and strip.shape[0] != size * count:
+            # FK2: figures appended to the recipes grow the strip; earlier layers are kept.
+            keep = min(strip.shape[0], size * count)
+            fresh[:keep] = strip[:keep]
+            strip = fresh
         if strip is None:
-            strip = np.zeros((size * count, size, 4), np.uint8)
-            strip[..., :] = (128, 128, 255, 255)
+            strip = fresh
         strip[index * size : (index + 1) * size] = rgba
         tiles.write_png(path, strip)
         fcntl.flock(lock, fcntl.LOCK_UN)
