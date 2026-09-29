@@ -12,10 +12,10 @@ Branche : `feat/nt1-siege-layouts`. Cargo : `CARGO_TARGET_DIR=core/target-nt1`.
   pont (`houses[].keep`, `place`).
 - [x] Génération château et bourg + tests (portes accessibles, rien hors enceinte ni sur le chemin
   de ronde, déterminisme, provinces différentes).
-- [ ] Rendu Godot : donjon = tour agrandie (`battle_siege.gd`), script `game/tests/nt1_siege_shot.gd`.
-- [ ] ADR 0126.
+- [x] Rendu Godot : donjon = tour agrandie (`battle_siege.gd`), script `game/tests/nt1_siege_shot.gd` (+ `debug_stage_place_siege`).
+- [x] ADR 0126.
 
 ## Prochaine étape
-Rendu Godot du donjon, script de capture, ADR 0126 ; vérifier `cargo test` du workspace.
+Vérifier `cargo test` du workspace, `core/build.sh`, smoke et tests Godot de siège.
 
 ## Points ouverts

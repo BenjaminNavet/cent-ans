@@ -921,6 +921,49 @@ impl CampaignState {
         Ok(self.stage_siege_at(data, army, &city, &province))
     }
 
+    /// NT1 demo (captures): puts `army` in siege of the first settlement
+    /// (in id order, not a landmark, held by another faction) laid out as a
+    /// place of `kind` (`city`, `borough`, `castle`), declaring war on its
+    /// holder first if needed. Returns the battle index.
+    pub fn debug_stage_place_siege(
+        &mut self,
+        data: &GameData,
+        army: &ArmyId,
+        kind: &str,
+    ) -> Result<usize, BattleRequestError> {
+        let index = self.pending_battles.len();
+        let Some(faction) = self.armies.get(army).map(|a| a.faction.clone()) else {
+            return Err(BattleRequestError::Stale(index));
+        };
+        let places = &sim_battle::town::TownRules::bundled().places;
+        let city = self
+            .settlements
+            .iter()
+            .filter(|(id, s)| {
+                s.controller != faction
+                    && self.factions.contains_key(&s.controller)
+                    && !data.landmarks.values().any(|l| l.settlement == id.as_str())
+            })
+            .map(|(id, _)| id.clone())
+            .find(|id| {
+                let fortification = self.fortification_level(data, id);
+                fortification > 0
+                    && places
+                        .place_kind(self.settlement_kind(id), fortification)
+                        .key()
+                        == kind
+            });
+        let Some(city) = city else {
+            return Err(BattleRequestError::Stale(index));
+        };
+        let province = self.settlements[&city].province.clone();
+        let controller = self.settlements[&city].controller.clone();
+        if !self.is_at_war(&faction, &controller) {
+            self.start_war(&faction, &controller);
+        }
+        Ok(self.stage_siege_at(data, army, &city, &province))
+    }
+
     /// Moves `army` before settlement `city` of `province`, gives the town a
     /// garrison if it has none, opens the siege and records the battle.
     fn stage_siege_at(
