@@ -52,6 +52,7 @@ mod campaign_sim_victory;
 mod campaign_sim_vision;
 mod campaign_sim_weather;
 mod convert;
+mod custom_battle;
 mod data_store_rules;
 mod historical_battles;
 mod naval_sim;

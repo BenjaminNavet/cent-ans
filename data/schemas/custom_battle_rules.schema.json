@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/custom_battle_rules.schema.json",
+  "title": "Bataille personnalisée",
+  "description": "Fichier data/rules/custom_battle.json (lot NT2) : budget de points, plafond d'unités, capitaine et place de la bataille personnalisée du menu principal. Lu par sim-battle (CustomBattleRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "default_budget": {
+      "type": "integer",
+      "minimum": 100,
+      "description": "Budget de points proposé à chaque camp (le coût d'une unité est son coût de recrutement en livres)."
+    },
+    "min_budget": {
+      "type": "integer",
+      "minimum": 100,
+      "description": "Budget le plus bas réglable."
+    },
+    "max_budget": {
+      "type": "integer",
+      "minimum": 100,
+      "description": "Budget le plus haut réglable."
+    },
+    "budget_step": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Pas du réglage du budget dans l'écran."
+    },
+    "max_units_per_side": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60,
+      "description": "Unités au plus dans l'armée d'un camp."
+    },
+    "general_command": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Commandement (0-10) du capitaine générique de chaque camp."
+    },
+    "default_fortification": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Niveau de fortification (0-3) de la place défendue par le camp 2, proposé par défaut."
+    },
+    "max_fortification": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Niveau de fortification le plus haut réglable."
+    }
+  },
+  "required": [
+    "default_budget",
+    "min_budget",
+    "max_budget",
+    "budget_step",
+    "max_units_per_side",
+    "general_command",
+    "default_fortification",
+    "max_fortification"
+  ],
+  "additionalProperties": false
+}

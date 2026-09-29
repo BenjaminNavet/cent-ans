@@ -70,6 +70,8 @@ const DEFAULTS := {
 	# EP8 : plan cinématique facultatif au premier choc, et son ralenti.
 	"battle/cinematic": true,
 	"battle/cinematic_slowmo": true,
+	# NT2 : dernière composition de la bataille personnalisée (JSON, "" : aucune).
+	"custom_battle/last": "",
 	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
 	"interface/intro_seen": false,
 	# VO1 : conseiller parlé (chroniqueur), répliques des unités, interventions déjà faites
