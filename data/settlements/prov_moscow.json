@@ -74,5 +74,30 @@
     "sources": [
       "Serge de Radonège"
     ]
+  },
+  {
+    "id": "set_volok_lamski",
+    "province": "prov_moscow",
+    "kind": "town",
+    "name": {
+      "display": "Volok Lamski",
+      "local": "Волок Ламский",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      35.96,
+      56.03
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Portage de la Lama, ancien condominium de Novgorod et du grand-prince : le lieutenant d'Ivan Kalita en a chassé le représentant novgorodien.",
+    "sources": [
+      "Volokolamsk"
+    ]
   }
 ]

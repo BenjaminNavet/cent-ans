@@ -49,17 +49,17 @@
     ]
   },
   {
-    "id": "set_gorokhovets",
+    "id": "set_yuriev_polski",
     "province": "prov_vladimir",
     "kind": "town",
     "name": {
-      "display": "Gorokhovets",
-      "local": "Гороховец",
+      "display": "Iouriev-Polski",
+      "local": "Юрьев-Польский",
       "local_language": "russe"
     },
     "lonlat": [
-      42.65,
-      56.2
+      39.68,
+      56.5
     ],
     "weight": 5,
     "owner": null,
@@ -68,9 +68,9 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville de la Kliazma inférieure, aux marges de la terre de Nijni.",
+    "description": "Fondée en 1152 par Iouri Dolgorouki (cathédrale Saint-Georges, 1230-1234) ; petit apanage dans l'orbite du grand-prince, uni à Moscou vers 1340.",
     "sources": [
-      "Gorokhovets"
+      "Yuryev-Polsky"
     ]
   }
 ]

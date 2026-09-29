@@ -51,17 +51,17 @@
     ]
   },
   {
-    "id": "set_volok_lamski",
+    "id": "set_bejetsk",
     "province": "prov_torjok",
     "kind": "town",
     "name": {
-      "display": "Volok Lamski",
-      "local": "Волок Ламский",
+      "display": "Bejitchi (Bejetski Verkh)",
+      "local": "Бежичи",
       "local_language": "russe"
     },
     "lonlat": [
-      35.96,
-      56.03
+      36.7,
+      57.78
     ],
     "weight": 5,
     "owner": null,
@@ -70,9 +70,10 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Portage de la Lama, possession de Novgorod à la frontière moscovite (statut incertain en 1337).",
+    "description": "Bejitchi, chef-lieu du Bejetski Verkh novgorodien (mentionné en 1137), disputé par Tver et Moscou tout le XIVe siècle.",
     "sources": [
-      "Volokolamsk"
+      "Bezhetsk",
+      "Bezhetsky Verkh"
     ]
   }
 ]

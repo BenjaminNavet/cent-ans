@@ -53,28 +53,26 @@
     ]
   },
   {
-    "id": "set_kamianiets",
+    "id": "set_zelva",
     "province": "prov_hrodna",
-    "kind": "castle",
+    "kind": "village",
     "name": {
-      "display": "Kamianiets",
-      "local": "Kamianiets",
+      "display": "Zelva",
+      "local": "Зэльва",
       "local_language": "ruthène"
     },
     "lonlat": [
-      23.8225,
-      52.4056
+      24.82,
+      53.15
     ],
-    "weight": 12,
+    "weight": 3,
     "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_castle"
-    ],
+    "fortification_level": 0,
+    "buildings": [],
     "port": false,
-    "description": "Tour de brique du XIIIe siècle, sentinelle sur la Lieusna, entre Brest et Hrodna.",
+    "description": "Bourg de la Zelvianka, cité par la chronique hypatienne sous l'année 1258.",
     "sources": [
-      "Kamianiets"
+      "Zelva"
     ]
   }
 ]

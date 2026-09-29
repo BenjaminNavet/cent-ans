@@ -26,31 +26,6 @@
     ]
   },
   {
-    "id": "set_bejetsk",
-    "province": "prov_tver",
-    "kind": "town",
-    "name": {
-      "display": "Bejetsk",
-      "local": "Бежецк",
-      "local_language": "russe"
-    },
-    "lonlat": [
-      36.7,
-      57.78
-    ],
-    "weight": 5,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
-    "port": false,
-    "description": "Bejetski Verkh, ville de l'apanage tverien.",
-    "sources": [
-      "Bejetsk"
-    ]
-  },
-  {
     "id": "set_staritsa",
     "province": "prov_tver",
     "kind": "town",
@@ -73,6 +48,31 @@
     "description": "Ville de la Volga supérieure, apanage de Tver.",
     "sources": [
       "Staritsa (Tver)"
+    ]
+  },
+  {
+    "id": "set_kashin",
+    "province": "prov_tver",
+    "kind": "town",
+    "name": {
+      "display": "Kachine",
+      "local": "Кашин",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      37.61,
+      57.36
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Kachinka (mentionnée en 1238), apanage tverien de Vassili Mikhaïlovitch.",
+    "sources": [
+      "Kashin"
     ]
   }
 ]
