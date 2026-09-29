@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/settlement_markers.schema.json",
   "title": "Marqueurs de lieux de la carte de campagne",
-  "description": "Fichier data/map/settlement_markers.json (lot DA3, ADR 0066 ; lot DV, ADR 0124) : règles de rang des lieux, taille écran de l'écu par rang, densité des noms par distance caméra et dé-encombrement écran. Plus de pictogramme ni d'atlas peint.",
+  "description": "Fichier data/map/settlement_markers.json (lot DA3, ADR 0066 ; lot DV, ADR 0124) : règles de rang des lieux, taille écran de l'écu par rang, densité des noms par distance caméra et dé-encombrement écran. Plus de marqueur peint ni de son atlas.",
   "type": "object",
   "$defs": {
     "kind": {"enum": ["city", "town", "village", "castle", "abbey"]},

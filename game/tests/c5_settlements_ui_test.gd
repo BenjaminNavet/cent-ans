@@ -158,7 +158,10 @@ func _run() -> void:
 	if not _check(target != "", "no reachable French settlement for %s" % army_id):
 		map.queue_free()
 		return
-	# Clic droit à l'écran sur la colonie visée (caméra au palier moyen, icônes visibles).
+	# Picking écran de la colonie visée (lot DV2 : maquette, nom et écu dans la vue normale), puis
+	# ordre de marche par le contrôleur du mouvement libre (celui qu'appelle le clic droit d'une
+	# armée sélectionnée). L'intercepteur C5 seul (sans armée sélectionnée) suit l'ancien chemin
+	# de colonies en colonies, sans stationner tout de suite.
 	var world: Vector3 = map.settlement_layer.world_position_of(target)
 	map.camera_rig.look_at_point(world, 300.0)
 	map.camera_rig.snap()
@@ -166,12 +169,9 @@ func _run() -> void:
 		await process_frame
 	var screen: Vector2 = map.camera.unproject_position(world + Vector3(0.0, 0.5, 0.0))
 	var picked: String = map.settlement_layer.pick_screen(screen)
-	var ordered := false
-	if picked == target:
-		ordered = map.picker.right_click_interceptor.call(screen)
-	else:
-		print("c5: screen picking gave '%s' instead of %s (headless viewport), ordering directly" % [picked, target])
-		ordered = bool(movement.order_move_settlement(army_id, target).get("ok", false))
+	if picked != target:
+		print("c5: screen picking gave '%s' instead of %s (headless viewport)" % [picked, target])
+	var ordered := bool(movement.order_move_settlement(army_id, target).get("ok", false))
 	_check(ordered, "move order to %s refused" % target)
 	var moved: Dictionary = sim.call("get_army", army_id)
 	_check(str(moved.get("settlement", "")) == target, "the army should stand in %s, got '%s' at %s" % [target, moved.get("settlement", ""), moved.get("position", "")])
