@@ -29,21 +29,32 @@ func _run() -> void:
 	var t_load := Time.get_ticks_msec()
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
 	root.add_child(map)
+	var ready_ms := Time.get_ticks_msec() - t_load
+	var frames: Array = []
+	var t_frame := Time.get_ticks_msec()
 	while not map.get("load_ok") or ReliefLandcover.pending():
 		if Time.get_ticks_msec() - t_load > TIMEOUT_MS:
 			print("R2_LOAD ", JSON.stringify({"ok": false, "error": "timeout"}))
 			quit(1)
 			return
 		await process_frame
+		frames.append(Time.get_ticks_msec() - t_frame)
+		t_frame = Time.get_ticks_msec()
 	var wall_ms := Time.get_ticks_msec() - t_load
 	var stats: Dictionary = map.get("startup_stats")
 	var result := {
 		"ok": true,
 		"wall_ms": wall_ms,
+		"ready_ms": ready_ms,
+		"frames_ms": frames.slice(0, 12),
+		"frame_count": frames.size(),
 		"total_ms": stats.get("total_ms"),
 		"load_ms": stats.get("load_ms"),
 		"terrain_ms": stats.get("terrain_ms"),
 		"decor_ms": stats.get("decor_ms"),
+		"controllers_ms": stats.get("controllers_ms"),
+		"campaign_ms": stats.get("campaign_ms"),
+		"after_campaign_ms": stats.get("after_campaign_ms"),
 		"data": stats.get("data"),
 		"static_mem_mb": snappedf(OS.get_static_memory_usage() / 1048576.0, 0.1),
 		"static_peak_mb": snappedf(OS.get_static_memory_peak_usage() / 1048576.0, 0.1),

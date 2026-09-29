@@ -238,7 +238,9 @@ func _ready() -> void:
 	outcome_notice = OutcomeNotice.new()
 	add_child(outcome_notice)
 	outcome_notice.setup(self)
+	var t4 := Time.get_ticks_msec()
 	_setup_campaign()
+	var t5 := Time.get_ticks_msec()
 	victory.setup(self)
 	help = HelpController.new()
 	add_child(help)
@@ -277,6 +279,9 @@ func _ready() -> void:
 		"load_ms": t1 - t0,
 		"terrain_ms": t2 - t1,
 		"decor_ms": t3 - t2,
+		"controllers_ms": t4 - t3,
+		"campaign_ms": t5 - t4,
+		"after_campaign_ms": Time.get_ticks_msec() - t5,
 		"total_ms": Time.get_ticks_msec() - t0,
 		"data": map_data.timings,
 		"terrain": terrain.build_stats,
