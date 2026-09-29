@@ -21,8 +21,18 @@ Branche `feat/nt4-battle-prologue` (partie de `integration/nt`). Spec : ligne NT
 - [x] Test Godot `game/tests/nt4_prologue_test.gd` (vert : étapes, évaluation pure, menu,
   bataille réelle jusqu'à la victoire anglaise en 146 s), smoke, ep7, nt2, pytest verts
 
+## Suite (après fusion 4160d0696)
+- [x] Invite au premier lancement (campagne, bataille historique, bataille personnalisée) :
+  `BattlePrologueInvite` Oui / Non / Ne plus demander (réglages `battle_prologue/never_ask`,
+  `battle_prologue/done`, ce dernier posé à la fin du guide hors défaite).
+- [x] Défaite : texte d'adieu (`defeat` du JSON), boutons « Recommencer » et « Fermer ».
+- [ ] Ennemi tenu en place : pas d'option au cœur. `issue_command` refuse les régiments du
+  camp non joué, et il n'existe ni ordre « tenir » ni mode « sans fuite ». La déroute par le
+  moral est une règle de combat, à laquelle je n'ai pas touché. Il faudrait une commande côté
+  (`ReplayAction`) pour passer l'ennemi en mode garde : c'est à décider.
+
 ## Prochaine étape
-Terminé ; à fusionner dans `integration/nt`. Partie pilote à faire par le joueur.
+Fusion dans `integration/nt`.
 
 ## Points ouverts
 - Aucune capture faite (consigne) : placement du parchemin sur le HUD de bataille et
