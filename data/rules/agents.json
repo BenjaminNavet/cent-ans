@@ -1,5 +1,5 @@
 {
-  "description": "Agents de campagne (lot C6, docs/design/2026-09-24-agents.md) : espions, hérauts et prédicateurs, recrutés dans les colonies, marchant sur le graphe des colonies (pas × points_per_step), une action par saison. Chance de réussite = base + par_sceau × (sceau − 1) − malus de fortification (actions hostiles) − contre-espions − garnison, bornée min_chance-max_chance. Coûts et entretien suivent le niveau des prix de la faction (monnaie H5). Soulever (lot OMR R3, docs/wip/omr-r3.md) : incite_unrest 10 (15 avant) ; sur la carte à 177 factions, un espion posté dans une cité ennemie la soulevait saison après saison (la cible tend vers son équilibre de 20 % par saison) : 24 révoltes / 200 tours en début de partie, 1 sans l'incitation, 9 à 10, 1 à 8.",
+  "description": "Agents de campagne (lot C6, docs/design/2026-09-24-agents.md) : espions, hérauts et prédicateurs, recrutés dans les colonies, marchant sur le graphe des colonies (pas × points_per_step), une action par saison. Chance de réussite = base + par_sceau × (sceau − 1) − malus de fortification (actions hostiles) − contre-espions − garnison, bornée min_chance-max_chance. Coûts et entretien suivent le niveau des prix de la faction (monnaie H5). Soulever (lot OMR R3, docs/wip/omr-r3.md) : incite_unrest 12 (15 avant) ; sur la carte à 177 factions, un espion posté dans une cité ennemie la soulevait saison après saison (la jauge ne revient vers son équilibre que de 20 % par saison) : 16 révoltes / 200 tours sur 1337-1453 à 15, 8,1 à 12, 4,7 à 10 (464 tours × 10 graines), 1 sans l'incitation en début de partie.",
   "types": {
     "spy": {
       "name": "Espion",
@@ -68,7 +68,7 @@
     "sabotage_supplies": 15,
     "sabotage_delay_turns": 2,
     "sabotage_morale": 15,
-    "incite_unrest": 10,
+    "incite_unrest": 12,
     "parley_opinion": 10,
     "parley_opinion_per_level": 2,
     "parley_turns": 12,
