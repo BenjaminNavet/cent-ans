@@ -15,3 +15,4 @@ Lancer la vague 1 (branches `feat/fk1-core`, `feat/fk2-assets`, `feat/fk3-folk`)
 dans `integration/fk`.
 
 ## Points ouverts
+- FK2 fini (feat/fk2-assets, a31bbf3a9) : 15 .glb + manifest.json, clips scythe/carry/plough (rig fin, 61 clips), figurines `villager_0..3` ; note docs/wip/fk2-assets.md. À vérifier en capture : faux vs jambe gauche, sac vs tête, torche non émissive, lisibilité à l'échelle de la carte ; rig grossier sans les 3 clips (repli marche/attente).
