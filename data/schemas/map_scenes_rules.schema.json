@@ -24,6 +24,7 @@
     "pool_cap": { "type": "integer", "minimum": 0, "maximum": 5000, "description": "Figurines vivantes au plus sur la vue rapprochée (FolkPool)." },
     "activity_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon (unités du monde) autour du centre de la caméra où vivent les figurines (FolkPool)." },
     "figure_height": { "type": "number", "exclusiveMinimum": 0, "description": "Hauteur d'une figurine (unités du monde) à l'échelle de la carte (FolkPool)." },
+    "figure_min_view_fraction": { "type": "number", "minimum": 0, "maximum": 0.2, "description": "Hauteur minimale d'une figurine en fraction de la distance caméra, taille à l'écran à peu près constante au palier proche (FolkPool, FK6)." },
     "road_folk_per_unit": { "type": "number", "minimum": 0, "description": "Voyageurs par unité de route à la population de référence (FolkRoutine)." },
     "field_work_probability": { "$ref": "#/$defs/chance", "description": "Chance qu'un point de champ soit travaillé (FolkRoutine)." },
     "herd_probability": { "$ref": "#/$defs/chance", "description": "Chance qu'un point de pâture porte un troupeau (FolkRoutine)." },
@@ -34,6 +35,6 @@
     "scene_figures_min": { "type": "integer", "minimum": 0, "maximum": 200, "description": "Figurants d'une scène de province à l'intensité 0 (FolkScenes)." },
     "scene_figures_max": { "type": "integer", "minimum": 0, "maximum": 200, "description": "Figurants d'une scène de province à l'intensité 1 (FolkScenes)." }
   },
-  "required": ["durations", "devastation_threshold", "pool_cap", "activity_radius", "figure_height", "road_folk_per_unit", "field_work_probability", "herd_probability", "woodcutter_probability", "pilgrim_probability", "carts_per_trade_value", "guard_value", "scene_figures_min", "scene_figures_max"],
+  "required": ["durations", "devastation_threshold", "pool_cap", "activity_radius", "figure_height", "figure_min_view_fraction", "road_folk_per_unit", "field_work_probability", "herd_probability", "woodcutter_probability", "pilgrim_probability", "carts_per_trade_value", "guard_value", "scene_figures_min", "scene_figures_max"],
   "additionalProperties": false
 }

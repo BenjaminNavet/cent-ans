@@ -9,6 +9,9 @@ extends SceneTree
 ##  6. FK4 : chaque type de scène forcé produit des figurines au palier proche, moins à
 ##     l'intensité 0, rien au loin ; colonie inconnue → chef-lieu, province sans colonie → ignorée ;
 ##  7. FK4 : disette → champs de la province sans travailleurs.
+##  8. FK6 : placement borné (≤ 8 ms hors création des groupes, préchauffés), aucune instance
+##     dans l'emprise d'une ville emblématique (Paris : maquette L1 et ville 1:1), figurines
+##     lisibles au palier proche (hauteur ≥ `figure_min_view_fraction` × distance).
 ## FK5 (incidents) ajoutera ses cas.
 ## Usage : godot --headless --path game --script res://tests/fk_folk_test.gd
 
@@ -112,6 +115,9 @@ func _run() -> void:
 	var pool := FolkPool.new()
 	world.add_child(pool)
 	pool.setup(map_data, terrain, 600)
+	_check(not pool.is_warm(), "warm-up queued")
+	pool.warm_all()
+	_check(pool.is_warm(), "warm-up done")
 	var caravans := FolkCaravans.new()
 	caravans.setup(map_data, data)
 	caravans.set_routes(routes)
@@ -207,9 +213,17 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	var pool := FolkPool.new()
 	world.add_child(pool)
 	pool.setup(map_data, terrain, 600)
+	_check(not pool.is_warm(), "warm-up queued")
+	pool.warm_all()
+	_check(pool.is_warm(), "warm-up done")
 	var scenes := FolkScenes.new()
 	scenes.setup(map_data, data)
 	pool.register(scenes)
+	# 8. Emprises des villes emblématiques (sans `SettlementLayer` : mêmes sources qu'en jeu).
+	var disks := _paris_disks(data)
+	pool.exclusions = disks
+	scenes.disks = disks
+	_check(disks.size() > 0, "Paris landmark footprint known")
 
 	var paris_entry: Dictionary = data.get_settlement("set_paris")
 	var province := str(paris_entry["province"])
@@ -244,6 +258,18 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		_check(pool.figure_count() == int(shown.get("figures", 0)), "%s: only the scene provider: %d" % [kind, pool.figure_count()])
 		var full := pool.figure_count()
 		var props := pool.prop_count()
+		var place_ms := float(pool.stats.get("place_ms", 0.0)) - float(pool.stats.get("create_ms", 0.0))
+		_check(place_ms <= 8.0, "%s: placement %.2f ms (> 8 ms)" % [kind, place_ms])
+		var inside := 0
+		for p in pool.instance_origins():
+			if pool.excluded(p):
+				inside += 1
+		_check(inside == 0, "%s: %d instance(s) inside a landmark footprint" % [kind, inside])
+		# Hors emprise de Paris, mais ancrée près de son bord.
+		var nearest := INF
+		for p in pool.instance_origins():
+			nearest = minf(nearest, p.distance_to(paris))
+		_check(nearest < disks[disks.size() - 1].z + 12.0, "%s: scene next to Paris (%.1f)" % [kind, nearest])
 		print("fk_folk_test: scene %s → %d figures, %d props" % [kind, full, props])
 		if kind in ["plague", "construction", "fair", "celebration", "flood"]:
 			_check(props > 0, "%s scene has props: %d" % [kind, props])
@@ -257,6 +283,10 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		# Palier proche mais loin de la scène : rien.
 		_view(pool, paris + Vector2(600.0, 600.0), 45.0, 1.0)
 		_check(pool.figure_count() == 0, "%s: nothing near another place: %d" % [kind, pool.figure_count()])
+
+	# 8. Lisibilité : au palier proche (d = 12), une figurine mesure ≥ 0,018 × 12 unités.
+	_view(pool, paris, 12.0, 1.0)
+	_check(pool.current_scale() * FolkPool.HUMAN_HEIGHT_M >= pool.figure_min_view_fraction * 12.0 - 1e-4, "readable figures near: %.3f" % (pool.current_scale() * FolkPool.HUMAN_HEIGHT_M))
 
 	# 7. Disette : champs de la province sans travailleurs (routine en été).
 	var routine := FolkRoutine.new()
@@ -279,3 +309,17 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 
 	world.queue_free()
 	await process_frame
+
+
+## Cercles (x, z, rayon) de Paris : maquette L1 (`zone_radius_px`) et ville 1:1 (VH).
+func _paris_disks(data: SettlementData) -> PackedVector3Array:
+	var disks := PackedVector3Array()
+	var paris: Vector2 = data.get_settlement("set_paris")["px"]
+	var plan := LandmarkLibrary.for_settlement("set_paris")
+	if not plan.is_empty():
+		disks.append(Vector3(paris.x, paris.y, float((plan.get("scale", {}) as Dictionary).get("zone_radius_px", 6.0))))
+	var city := LandmarkV2Library.for_settlement("set_paris")
+	if not city.is_empty():
+		var anchor := LandmarkV2Library.anchor_units(city)
+		disks.append(Vector3(anchor.x, anchor.y, LandmarkV2Library.extent_units(city)))
+	return disks

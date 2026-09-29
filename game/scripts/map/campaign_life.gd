@@ -94,6 +94,7 @@ func _setup_folk() -> void:
 	folk.name = "Folk"
 	add_child(folk)
 	folk.setup(_map_data, _terrain)
+	folk.landmark_layer = _settlements
 	var settlement_data: SettlementData = _settlements.data if _settlements != null else null
 	if not folk_off.has("scenes"):
 		folk_scenes = FolkScenes.new()

@@ -51,6 +51,13 @@ var _layer: SettlementLayer = null
 var _seat: Dictionary = {}
 var _pool: FolkPool = null
 var _warned: Dictionary = {}
+## FK6 : cercles (x, z, rayon) des villes emblématiques (maquette L1, ville 1:1), relus au
+## premier `refresh` ; une scène se tient hors de ces emprises.
+var disks: PackedVector3Array = PackedVector3Array()
+## Emprise (rayon) par indice de colonie, calculée une fois par tour (`resolve`).
+var _footprints: Dictionary = {}
+## Points de fleuve proches par indice de colonie (crue), calculés une fois par tour.
+var _river_cache: Dictionary = {}
 
 
 func setup(map_data: MapData, settlement_data: SettlementData, layer: SettlementLayer = null) -> void:
@@ -78,6 +85,8 @@ static func parse_forced(spec: String) -> Array:
 
 ## Une fois par tour : scènes du pont (conservées si `sim` est nul) et forcées, lieux résolus.
 func refresh(sim: Object) -> void:
+	if disks.is_empty() and _layer != null:
+		disks = FolkPool.landmark_disks(_layer)
 	if sim != null and sim.has_method("get_map_scenes"):
 		live = Array(sim.call("get_map_scenes"))
 	resolve(live + forced)
@@ -114,6 +123,8 @@ func resolve(scenes: Array) -> void:
 			"intensity": intensity, "since_turn": int(scene.get("since_turn", 0)),
 		}
 	staged = by_key.values()
+	_footprints.clear()
+	_river_cache.clear()
 	quiet_settlements.clear()
 	idle_provinces.clear()
 	fire_points = PackedVector2Array()
@@ -126,6 +137,11 @@ func resolve(scenes: Array) -> void:
 				fire_points.append(_side_point(scene, 1.3))
 			"famine":
 				idle_provinces[scene["province"]] = true
+			"flood":
+				# Parcours des fleuves une fois par tour, pas au placement (≈ 25 ms).
+				var index := int(scene["index"])
+				if not _river_cache.has(index):
+					_river_cache[index] = _near_river_points(scene["center"], FLOOD_RANGE + _footprint(index))
 	stats = {"staged": staged.size(), "skipped": skipped}
 
 
@@ -157,6 +173,23 @@ func _model_radius(index: int) -> float:
 	return _layer.model_radius(index) * _layer.model_scale(index)
 
 
+## FK6 : rayon (unités monde) de l'emprise de la colonie `index` autour de son centre : maquette
+## à l'échelle courante, élargie à toute ville emblématique (L1 ou 1:1) qui couvre le centre (le
+## rayon de la maquette générique d'une ville 1:1 ne dit rien de son enceinte). Mis en cache par
+## tour (les emprises des villes emblématiques ne dépendent pas de l'échelle).
+func _footprint(index: int) -> float:
+	var landmark: float = _footprints.get(index, -1.0)
+	if landmark < 0.0:
+		landmark = 0.0
+		var center: Vector2 = _data.settlements[index]["px"] if _data != null and index >= 0 and index < _data.settlements.size() else Vector2.INF
+		for disk in disks:
+			var d := center.distance_to(Vector2(disk.x, disk.y))
+			if d < disk.z:
+				landmark = maxf(landmark, d + disk.z)
+		_footprints[index] = landmark
+	return maxf(_model_radius(index), landmark)
+
+
 ## Direction (carte) du côté de la colonie où se tient la scène (stable par colonie et type).
 static func _side(scene: Dictionary) -> Vector2:
 	var angle := _h(int(scene["seed"]), 1) * TAU
@@ -165,7 +198,7 @@ static func _side(scene: Dictionary) -> Vector2:
 
 ## Point au bord de la maquette (`factor` × rayon), du côté de la scène (fumées).
 func _side_point(scene: Dictionary, factor: float) -> Vector2:
-	return (scene["center"] as Vector2) + _side(scene) * (_model_radius(int(scene["index"])) * factor + 0.5)
+	return (scene["center"] as Vector2) + _side(scene) * (_footprint(int(scene["index"])) * factor + 0.5)
 
 
 func _figures_for(intensity: float) -> int:
@@ -181,7 +214,7 @@ func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 	var order: Array = []
 	for scene in staged:
 		var d := (scene["center"] as Vector2).distance_to(focus)
-		if d <= radius + _model_radius(int(scene["index"])):
+		if d <= radius + _footprint(int(scene["index"])):
 			order.append([d, scene])
 	order.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
 	for pair in order:
@@ -200,6 +233,7 @@ func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 		shown += 1
 	stats["shown"] = shown
 	stats["by_kind"] = by_kind
+
 
 
 # --- Mise en scène -------------------------------------------------------------------
@@ -235,7 +269,7 @@ func _slot_at(at: Vector2, dir: Vector2, slot: Vector2) -> Vector2:
 func _stage(scene: Dictionary, figures: int) -> void:
 	var out := _side(scene)
 	var frame := {
-		"anchor": (scene["center"] as Vector2) + out * (_model_radius(int(scene["index"])) + _m(EDGE_M)),
+		"anchor": (scene["center"] as Vector2) + out * (_footprint(int(scene["index"])) + _m(EDGE_M)),
 		"out": out,
 		"along": _right(out),
 		"seed": int(scene["seed"]),
@@ -340,7 +374,7 @@ func _devastation(f: Dictionary, n: int) -> void:
 	var center: Vector2 = f["center"]
 	var groups := maxi(n / 3, 1)
 	var placed := 0
-	var inner := (f["anchor"] as Vector2).distance_to(center) - _m(EDGE_M) + _m(2.0)
+	var inner := (f["anchor"] as Vector2).distance_to(center) - _m(EDGE_M) * 0.5
 	for g in groups:
 		var angle := _h(seed_value, 5) * TAU + (float(g) + _h(seed_value, 10 + g) * 0.5) * TAU / float(groups)
 		var dir := Vector2(cos(angle), sin(angle))
@@ -449,7 +483,7 @@ func _flood(f: Dictionary, n: int) -> void:
 	var seed_value: int = f["seed"]
 	var center: Vector2 = f["center"]
 	var sheets := 3 + int(float(n) / 6.0)
-	var points := _river_points(center, FLOOD_RANGE + _model_radius(int(f["index"])),sheets, _m(18.0))
+	var points := _river_points(int(f["index"]), center, FLOOD_RANGE + _footprint(int(f["index"])), sheets, _m(18.0))
 	if points.is_empty():
 		_pool.warn_once("scenes:flood_river", "FolkScenes: no river near a flooded settlement, water laid in front of it")
 		for k in 2:
@@ -465,11 +499,35 @@ func _flood(f: Dictionary, n: int) -> void:
 
 
 ## Points des fleuves à moins de `range_world` de `center`, espacés d'au moins `spacing`, les
-## plus proches d'abord, au plus `count`.
-func _river_points(center: Vector2, range_world: float, count: int, spacing: float) -> PackedVector2Array:
-	var found: Array = []
+## plus proches d'abord, au plus `count`, hors des villes emblématiques. Les points proches de la
+## colonie `index` sont mis en cache par tour (parcours des fleuves une fois, pas à chaque
+## placement).
+func _river_points(index: int, center: Vector2, range_world: float, count: int, spacing: float) -> PackedVector2Array:
 	if _map_data == null:
 		return PackedVector2Array()
+	if not _river_cache.has(index):
+		_river_cache[index] = _near_river_points(center, range_world)
+	var out := PackedVector2Array()
+	for entry in _river_cache[index]:
+		var p: Vector2 = entry[1]
+		if _pool != null and _pool.excluded(p):
+			continue
+		var ok := true
+		for q in out:
+			if q.distance_to(p) < spacing:
+				ok = false
+				break
+		if ok:
+			out.append(p)
+			if out.size() >= count:
+				break
+	return out
+
+
+## Points (et milieux de tronçons) des fleuves à moins de `range_world` de `center`, triés par
+## distance : [[d², point], …].
+func _near_river_points(center: Vector2, range_world: float) -> Array:
+	var found: Array = []
 	var r2 := range_world * range_world
 	for river in _map_data.rivers:
 		var line: Variant = river.get("points")
@@ -487,19 +545,7 @@ func _river_points(center: Vector2, range_world: float, count: int, spacing: flo
 				if dm <= r2:
 					found.append([dm, mid])
 	found.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
-	var out := PackedVector2Array()
-	for entry in found:
-		var p: Vector2 = entry[1]
-		var ok := true
-		for q in out:
-			if q.distance_to(p) < spacing:
-				ok = false
-				break
-		if ok:
-			out.append(p)
-			if out.size() >= count:
-				break
-	return out
+	return found
 
 
 ## Recrutement : carré de recrues à l'exercice près de la ville, un sergent qui longe le front.

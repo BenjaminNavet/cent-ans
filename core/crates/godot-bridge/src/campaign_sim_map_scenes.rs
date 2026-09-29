@@ -56,6 +56,7 @@ impl CampaignSim {
             "pool_cap" => i64::from(rules.pool_cap),
             "activity_radius" => rules.activity_radius,
             "figure_height" => rules.figure_height,
+            "figure_min_view_fraction" => rules.figure_min_view_fraction,
             "road_folk_per_unit" => rules.road_folk_per_unit,
             "field_work_probability" => rules.field_work_probability,
             "herd_probability" => rules.herd_probability,
