@@ -78,8 +78,9 @@ var _marker_until: PackedFloat32Array = PackedFloat32Array()
 ## DC4, DV2 : ancre monde de chaque couple nom + écu (= position du `Label3D`), ancre du
 ## `MultiMesh` (picking et dé-encombrement DA7d sans relire le relief).
 var _marker_world: PackedVector3Array = PackedVector3Array()
-## Écu affiché par colonie (faction), pour ne réécrire que ce qui change.
+## Écu affiché par colonie (faction), pour ne réécrire que ce qui change ; 1 si armorié (DV2).
 var _marker_holder: PackedStringArray = PackedStringArray()
+var _shielded: PackedByteArray = PackedByteArray()
 ## Lot DA7d : état de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
 ## ordre de priorité fixe (rang puis poids), épinglés et dernier état de caméra calculé.
 var _marker_shown: PackedByteArray = PackedByteArray()
@@ -139,6 +140,9 @@ var _declutter_timer := 0.0
 var _weights := Vector3(-1, -1, -1)  # DV2 : détail proche, vue normale, vue stratégique
 ## DV2 : échelle écran des `Label3D` transmise au shader des écus (px écran par px d'étiquette).
 var _shield_label_scale := -1.0
+## DV2 : fondu de retrait par rang et écart nom → écu (données, lus une fois).
+var _fade_distance := 60.0
+var _shield_gap := 1.0
 var _camera_distance := 1000.0  # SZ4b : maquettes à la taille de carte avant la première vue
 var _regrounded: Dictionary = {}
 ## ZG6 : villes ordinaires à l'échelle réelle (paliers vallée et site), voir `TownLayer`.
@@ -750,6 +754,8 @@ func _build_icons() -> void:
 	_marker_until.resize(count)
 	_marker_world.resize(count)
 	_marker_holder.resize(count)
+	_shielded.resize(count)
+	_shielded.fill(0)
 	_marker_shown.resize(count)
 	_marker_shown.fill(1)
 	_marker_screen.resize(count)
@@ -782,7 +788,9 @@ func _build_icons() -> void:
 		multimesh.set_instance_custom_data(k, Color(_shield_lift(i), 0.0, _marker_size[i], _marker_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
 	_icon_material.shader = preload("res://shaders/settlement_icon.gdshader")
-	_icon_material.set_shader_parameter("gap_px", markers.shield_gap_px())
+	_fade_distance = markers.fade_distance()
+	_shield_gap = markers.shield_gap_px()
+	_icon_material.set_shader_parameter("gap_px", _shield_gap)
 	_icon_material.set_shader_parameter("fade_distance", markers.fade_distance())
 	_icon_material.set_shader_parameter("size_scale", icon_size_scale)
 	_icon_material.set_shader_parameter("declutter_fade", float(markers.declutter_value("fade_seconds", 0.25)))
@@ -826,7 +834,9 @@ func _refresh_shields() -> void:
 		_marker_holder[i] = controller
 		var k := _icon_instance(i)
 		var color := multimesh.get_instance_color(k)
-		color.r = float(heraldry.shield_of(controller))
+		var cell := heraldry.shield_of(controller)
+		_shielded[i] = 1 if cell >= 0 else 0
+		color.r = float(cell)
 		multimesh.set_instance_color(k, color)
 
 
@@ -849,7 +859,7 @@ func marker_in_tier(i: int) -> bool:
 
 ## Vrai si la colonie `i` a un écu (détenteur armorié).
 func has_shield(i: int) -> bool:
-	return _icons != null and i >= 0 and i < data.settlements.size() and _icons.multimesh.get_instance_color(_icon_instance(i)).r >= 0.0
+	return i >= 0 and i < _shielded.size() and _shielded[i] == 1
 
 
 ## DV2 : maquettes affichées (vue normale).
@@ -1197,7 +1207,7 @@ func _update_shield_label_scale() -> void:
 ## `scale`), élargi de `margin` px.
 func _shield_rect(i: int, anchor: Vector2, scale: float, margin: float) -> Rect2:
 	var size := marker_size(i)
-	var bottom := anchor.y - _shield_lift(i) * scale - markers.shield_gap_px()
+	var bottom := anchor.y - _shield_lift(i) * scale - _shield_gap
 	return Rect2(Vector2(anchor.x - size * 0.5, bottom - size), Vector2(size, size)).grow(margin)
 
 
@@ -1205,7 +1215,7 @@ func _shield_rect(i: int, anchor: Vector2, scale: float, margin: float) -> Rect2
 ## La densité des noms suit la seule règle par rang (`SettlementMarkers.visible_until`).
 func _label_alpha(i: int) -> float:
 	var until := _marker_until_of(i)
-	var fade := markers.fade_distance() if markers != null else 60.0
+	var fade := _fade_distance
 	return clampf(_weights.y * (1.0 - smoothstep(until - fade, until, _camera_distance)), 0.0, 1.0)
 
 
@@ -1309,12 +1319,17 @@ func _declutter_step(sliced: bool) -> void:
 		var i := _dc_sequence[n]
 		var pinned := n < _dc_pins.size()
 		_marker_screen[i] = Vector2(-1.0e6, -1.0e6)
+		# DV2 : nom et écu forment un seul couple, affiché ou cédé ensemble. Tests du moins cher
+		# au plus cher (hors palier : le shader replie l'écu lui-même).
+		var alpha := _label_alpha(i) if _dc_icons_on and marker_in_tier(i) else 0.0
+		if alpha < 0.02:
+			_set_marker_shown(i, true)
+			_show_label(i, false, alpha)
+			continue
 		var label := _labels[i]
 		var at := label.global_position
-		var alpha := _label_alpha(i)
-		# DV2 : nom et écu forment un seul couple, affiché ou cédé ensemble.
-		if not _dc_icons_on or not marker_in_tier(i) or alpha < 0.02 or _dc_behind(at) or (_dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range):
-			_set_marker_shown(i, true)  # hors palier : le shader replie l'écu lui-même
+		if _dc_behind(at) or (_dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range):
+			_set_marker_shown(i, true)
 			_show_label(i, false, alpha)
 			continue
 		var anchor := _dc_project(at)
@@ -1322,7 +1337,7 @@ func _declutter_step(sliced: bool) -> void:
 		var text := _label_text_size(i) * _dc_scale
 		var label_center := anchor - label.offset * Vector2(-1.0, 1.0) * _dc_scale
 		var rect := Rect2(label_center - text * 0.5, text).grow(_dc_label_margin)
-		var shielded := has_shield(i)
+		var shielded := _shielded[i] == 1
 		var shield_rect := _shield_rect(i, anchor, _dc_scale, _dc_marker_margin) if shielded else Rect2()
 		var shown := false
 		if _dc_label_screen.intersects(rect) or (shielded and _dc_label_screen.intersects(shield_rect)):

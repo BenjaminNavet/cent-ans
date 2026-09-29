@@ -8,7 +8,8 @@ extends SceneTree
 ##     flotte), hameaux en `MultiMesh`, étiquettes, picking écran de Paris → `set_paris` et
 ##     signal `settlement_selected` ;
 ##  4. `RoadRenderer` : routes principales et rubans drapés construits autour de Paris ;
-##  5. paliers : poids cohérents (somme 1) aux trois distances de référence.
+##  5. paliers (lot DV) : fondu vers la vue stratégique, `tier_at` ;
+##  6. lot DV2 : maquettes et couples nom + écu sur toute la vue normale, rien au-delà.
 ## Usage : godot --headless --path game --script res://tests/settlements_render_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -157,6 +158,23 @@ func _run() -> void:
 	# 5. Paliers (lot DV : vue normale / vue stratégique).
 	_check(tiers.strategic_weight(1000.0) < 0.001 and tiers.strategic_weight(1400.0) > 0.999, "strategic fade 1100-1300")
 	_check(tiers.tier_at(40.0) == ZoomTiers.Tier.NEAR and tiers.tier_at(1100.0) == ZoomTiers.Tier.NEAR and tiers.tier_at(1400.0) == ZoomTiers.Tier.STRATEGIC, "tier_at thresholds")
+	# 6. Lot DV2 : maquettes et couples nom + écu dans toute la vue normale, rien sur le parchemin.
+	layer.refresh(null, Callable())  # écus des détenteurs des données statiques
+	layer.update_view(1100.0)
+	_check(layer._models_root.visible, "models shown at 1100 (normal view)")
+	_check(layer._icons.visible, "shields shown at 1100 (normal view)")
+	var paris_index: int = data.index_by_id["set_paris"]
+	_check(layer.marker_in_tier(paris_index), "Paris name + shield in tier at 1100 (rank 4)")
+	_check(layer.has_shield(paris_index), "Paris has its holder's shield")
+	var village_index := -1
+	for i in data.settlements.size():
+		if str(data.settlements[i]["kind"]) == "village":
+			village_index = i
+			break
+	_check(village_index < 0 or not layer.marker_in_tier(village_index), "village name hidden at 1100 (rank rule)")
+	layer.update_view(1400.0)
+	_check(not layer._models_root.visible and not layer._icons.visible, "no model nor shield on the parchment (1400)")
+	layer.update_view(55.0)
 	print("settlements_render_test: %s" % JSON.stringify({
 		"settlements": data.settlements.size(), "hamlets": data.hamlets.size(), "roads": data.roads.size(),
 		"fine_chunks": terrain.fine_chunk_count(), "fine_worst_delta": snappedf(worst, 0.01),
