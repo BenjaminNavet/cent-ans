@@ -60,11 +60,27 @@ fn besiege_guyenne(data: &GameData, seed: u64) -> (CampaignState, ArmyId) {
     (state, army)
 }
 
+/// NT5 (N7): the besiegers' ladders are built (an assault behind standing
+/// walls needs one ready engine).
+fn ladders_ready(state: &mut CampaignState, data: &GameData, place: &SettlementId) {
+    if let Some(siege) = state
+        .settlements
+        .get_mut(place)
+        .and_then(|s| s.siege.as_mut())
+    {
+        siege.engine_work = siege
+            .engine_work
+            .max(data.siege_engine_rules.engines[0].work);
+    }
+}
+
 #[test]
 fn army_bar_odds_match_the_assault_screen() {
     let data = data();
     let (mut state, army) = besiege_guyenne(&data, 5);
     state.end_turn_with(&data, idle);
+    let place = state.armies[&army].settlement().unwrap().clone();
+    ladders_ready(&mut state, &data, &place);
     let bar = state
         .assault_win_chance(&data, &army)
         .expect("the army besieges Guyenne");

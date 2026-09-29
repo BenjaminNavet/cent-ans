@@ -92,8 +92,7 @@ fn a_21st_unit_cannot_form_an_army() {
         .province_city_id(&prov("prov_ile_de_france"))
         .unwrap()
         .clone();
-    state.settlements.get_mut(&paris).unwrap().garrison =
-        units(&data, "unit_crossbowmen", 25);
+    state.settlements.get_mut(&paris).unwrap().garrison = units(&data, "unit_crossbowmen", 25);
     let refused = state.submit_order(
         &data,
         Order::CreateArmy {
@@ -192,7 +191,8 @@ fn engines_take_turns_by_army_size() {
     assert!(tower_turns(big) >= 2, "a tower takes several turns");
     assert!(tower_turns(small) > tower_turns(big));
     // In list order: ladders first.
-    let first = siege_engines::statuses(&data, 8, big);
+    let ladders = data.siege_engine_rules.engines[0].work;
+    let first = siege_engines::statuses(&data, ladders, 1);
     assert!(first[0].ready && !first[1].ready && !first[2].ready);
     assert_eq!(
         siege_engines::ready_kinds(&data, 1_000),
@@ -215,7 +215,12 @@ fn engines_are_built_during_the_siege() {
     let rate = state.engine_rate(&data, &city);
     assert!(rate >= data.siege_engine_rules.min_work_per_turn);
     state.end_turn_with(&data, idle);
-    let siege = state.settlement_state(&city).unwrap().siege.clone().unwrap();
+    let siege = state
+        .settlement_state(&city)
+        .unwrap()
+        .siege
+        .clone()
+        .unwrap();
     assert_eq!(siege.engine_work, rate);
     let engines = state.siege_engines(&data, &city);
     assert!(engines[0].ready, "ladders after one turn: {engines:?}");
@@ -308,5 +313,8 @@ fn built_engines_reach_the_siege_battle() {
         .collect();
     assert!(attackers.iter().any(|u| u.ram));
     assert!(attackers.iter().any(|u| u.siege_tower() && u.synthetic));
-    assert_eq!(state.assault_odds(&data, &army).map(|(_, walls)| walls), Some(false));
+    assert_eq!(
+        state.assault_odds(&data, &army).map(|(_, walls)| walls),
+        Some(false)
+    );
 }

@@ -3,7 +3,7 @@
   "men_per_work_point": 100,
   "min_work_per_turn": 4,
   "engines": [
-    { "id": "ladders", "kind": "ladders", "name": "Échelles", "work": 8 },
+    { "id": "ladders", "kind": "ladders", "name": "Échelles", "work": 4 },
     { "id": "ram", "kind": "ram", "name": "Bélier", "work": 16 },
     { "id": "siege_tower", "kind": "tower", "name": "Beffroi", "work": 40, "tower_unit_type": "unit_siege_tower" }
   ]

@@ -76,6 +76,20 @@ fn besiege_guyenne(data: &GameData, seed: u64, extra: &[&str]) -> (CampaignState
     (state, army)
 }
 
+/// NT5 (N7): the besiegers' ladders are built (an assault behind standing
+/// walls needs one ready engine).
+fn ladders_ready(state: &mut CampaignState, data: &GameData, place: &SettlementId) {
+    if let Some(siege) = state
+        .settlements
+        .get_mut(place)
+        .and_then(|s| s.siege.as_mut())
+    {
+        siege.engine_work = siege
+            .engine_work
+            .max(data.siege_engine_rules.engines[0].work);
+    }
+}
+
 #[test]
 fn a_starved_town_capitulates() {
     let data = data();
@@ -148,6 +162,8 @@ fn assault_takes_the_town_or_bloodies_the_attacker() {
     let (mut state, army) = besiege_guyenne(&data, 4, &[]);
     state.interactive_battles = false; // auto-resolved assault (M8 § 1)
     state.end_turn_with(&data, idle);
+    let guyenne = city(&state, "prov_guyenne");
+    ladders_ready(&mut state, &data, &guyenne);
     let before: u32 = state.armies[&army].units.iter().map(|u| u.strength).sum();
     state
         .submit_order(&data, Order::Assault { army: army.clone() })

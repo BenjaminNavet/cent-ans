@@ -971,6 +971,18 @@ impl CampaignState {
                 engine_work: 0,
             });
         }
+        // NT5 (N7): a staged siege brings its ladders and ram (the demos'
+        // assault as before the engines were built on the spot), no tower.
+        let staged_work: u32 = data
+            .siege_engine_rules
+            .engines
+            .iter()
+            .take_while(|e| e.kind != data_model::BuiltEngineKind::Tower)
+            .map(|e| e.work)
+            .sum();
+        if let Some(siege) = p.siege.as_mut() {
+            siege.engine_work = siege.engine_work.max(staged_work);
+        }
         self.pending_battles.push(BattleRequest {
             attacker: army.clone(),
             defender: army.clone(),

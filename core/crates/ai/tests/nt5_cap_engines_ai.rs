@@ -62,7 +62,10 @@ fn the_ai_forms_armies_within_the_cap() {
     assert!(forming.len() >= 2, "several armies: {forming:?}");
     assert!(forming.iter().all(|n| *n <= 20), "{forming:?}");
     // Applied in order, every order is accepted.
-    for order in orders.iter().filter(|o| matches!(o, Order::CreateArmy { .. })) {
+    for order in orders
+        .iter()
+        .filter(|o| matches!(o, Order::CreateArmy { .. }))
+    {
         state
             .apply_order(&data, &fac("fac_france"), order.clone())
             .unwrap();
