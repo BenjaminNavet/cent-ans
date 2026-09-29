@@ -97,6 +97,11 @@ var siege_attacker: String = "fac_france"
 ## SG2 : options d'une démo lancée depuis le menu (`BattleDemosMenu`), lues comme la ligne de
 ## commande puis oubliées.
 static var demo_args: PackedStringArray = []
+## NT2 : bataille personnalisée composée dans `CustomBattleScreen` (configuration de
+## `BattleSim.setup_custom`), lue au `_ready` puis oubliée. `--custom-battle` rejoue la dernière
+## composition gardée dans les réglages (captures, bancs).
+static var custom_config: Dictionary = {}
+var _custom: Dictionary = {}
 var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -298,6 +303,17 @@ func _ready() -> void:
 			push_error("BattleScene: replay %s failed: %s" % [_replay_path, replay_error])
 			_replay_failed()
 		return
+	if campaign_sim == null and not custom_config.is_empty():
+		_custom = custom_config
+	custom_config = {}
+	if campaign_sim == null and not _custom.is_empty():
+		# NT2 : bataille personnalisée (menu « Bataille personnalisée »), hors campagne.
+		standalone = true
+		if not begin_custom(_custom):
+			push_error("BattleScene: custom battle setup failed")
+			if _benchmark:
+				_bench_fail("custom battle setup failed")
+		return
 	if campaign_sim == null and _historical != "":
 		# EP7 : carte historique jouée hors campagne (menu « Batailles historiques »).
 		standalone = true
@@ -421,6 +437,37 @@ func begin_historical() -> bool:
 		else:
 			battle.call("set_start_phase", _hour_override)
 	return _build_scene()
+
+
+## NT2 : bataille personnalisée `config` (armées achetées, champ, siège) ; le résultat n'est pas
+## conservé (hors campagne).
+func begin_custom(config: Dictionary) -> bool:
+	if not ClassDB.class_exists("BattleSim"):
+		return false
+	_audio_director = get_node_or_null("/root/AudioDirector")
+	if _audio_director != null:
+		_audio_director.call("stop_all")
+	battle = ClassDB.instantiate("BattleSim")
+	if not battle.has_method("setup_custom"):
+		return false
+	# Un champ différent à chaque bataille, sauf graine imposée (`seed` : tests, captures).
+	battle_seed = int(config.get("seed", randi() % 1000000))
+	if not battle.call("setup_custom", CustomBattleScreen.data_dir(), config, battle_seed):
+		return false
+	setup = battle.call("get_setup")
+	padded = true  # hors campagne : pas de résultat à rapporter
+	if _hour_override != "":
+		if _hour_override.is_valid_float():
+			battle.call("set_start_hour", float(_hour_override))
+		else:
+			battle.call("set_start_phase", _hour_override)
+	if not _build_scene():
+		return false
+	var attacker := str((setup.get("attacker", {}) as Dictionary).get("faction_name", ""))
+	var defender := str((setup.get("defender", {}) as Dictionary).get("faction_name", ""))
+	_title_text = "Bataille personnalisée : %s contre %s" % [attacker, defender]
+	hud.set_title(_title_text, _weather_text, [side_colors[player_side], side_colors[enemy_side]])
+	return true
 
 
 ## EP13 : rejeu du fichier `path` ; `replay_error` dit pourquoi en cas d'échec (autre format,
@@ -2095,6 +2142,8 @@ func _parse_cmdline() -> void:
 			_historical = arg.trim_prefix("--historical=")
 		elif arg.begins_with("--historical-side="):
 			_historical_side = arg.trim_prefix("--historical-side=")
+		elif arg == "--custom-battle":
+			_custom = CustomBattleScreen.saved_config()  # NT2
 		elif arg == "--cinematic":
 			_force_cinematic = true
 		elif arg == "--birds-shot":

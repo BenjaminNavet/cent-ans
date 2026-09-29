@@ -12,6 +12,12 @@ Branche `feat/nt2-custom-battle`. Spec : `docs/superpowers/specs/2026-09-29-nt-n
 
 ## État
 - [x] Squelette (écran vide, entrée du menu, test SKIPPED)
+- [x] Cœur `sim-battle/src/custom.rs` + tests `nt2_custom.rs` ; météo forcée (`ReplayStart.weather`,
+  `BattleSim::new_scaled_weather`) ; règles `data/rules/custom_battle.json` + schéma + pytest
+- [x] Pont `godot-bridge/src/custom_battle.rs`
+- [x] Écran complet, `BattleScene.custom_config` / `begin_custom` / `--custom-battle`, réglage
+  `custom_battle/last`, infobulles `custom_battle_*` dans `data/ui/tooltips.json`
+- [x] `nt2_custom_battle_test.gd` vert
 
 ## Prochaine étape
-Cœur Rust.
+`nt2_shot.gd`, smoke, po_ui_test (menu tient à 1280×720), clippy/test complets.

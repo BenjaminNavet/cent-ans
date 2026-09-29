@@ -18,7 +18,9 @@ const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const SETTINGS_KEY := "custom_battle/last"
 const SIDES: Array[String] = ["attacker", "defender"]
 const SIDE_TITLES := {"attacker": "Camp 1 — assaillant", "defender": "Camp 2 — défenseur"}
-const TERRAINS: Array[String] = ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"]
+## Terrains des champs de bataille (clés de `Terrain` au cœur) et leurs libellés (mêmes que le
+## panneau de province).
+const TERRAINS := [["plains", "Plaines"], ["hills", "Collines"], ["mountains", "Montagnes"], ["forest", "Forêt"], ["marsh", "Marais"], ["heath", "Lande"], ["bocage", "Bocage"], ["steppe", "Steppe"], ["desert", "Désert"]]
 const SEASONS := [["spring", "Printemps"], ["summer", "Été"], ["autumn", "Automne"], ["winter", "Hiver"]]
 const WEATHERS := [["", "Selon la saison"], ["clear", "Temps clair"], ["rain", "Pluie"], ["fog", "Brouillard"], ["snow", "Neige"]]
 const PLAYER_SIDES := [["attacker", "Camp 1"], ["defender", "Camp 2"], ["", "Aucun (IA contre IA)"]]
@@ -82,7 +84,10 @@ static func saved_config() -> Dictionary:
 	var settings: Node = tree.root.get_node_or_null("/root/Settings") if tree != null else null
 	if settings == null:
 		return {}
-	var parsed: Variant = JSON.parse_string(str(settings.call("get_value", SETTINGS_KEY)))
+	var text := str(settings.call("get_value", SETTINGS_KEY))
+	if text.strip_edges() == "":
+		return {}
+	var parsed: Variant = JSON.parse_string(text)
 	return parsed if parsed is Dictionary else {}
 
 
@@ -254,11 +259,10 @@ func _build_field() -> Control:
 	grid.columns = 6
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 6)
-	var terrain_labels: Dictionary = ProvincePanel.TERRAIN_LABELS
 	terrain_option = _field_option(grid, "Terrain", "custom_battle_terrain")
-	for key in TERRAINS:
-		terrain_option.add_item(str(terrain_labels.get(key, key)))
-	terrain_option.item_selected.connect(func(i: int) -> void: _set_key("terrain", TERRAINS[i]))
+	for entry in TERRAINS:
+		terrain_option.add_item(entry[1])
+	terrain_option.item_selected.connect(func(i: int) -> void: _set_key("terrain", TERRAINS[i][0]))
 	season_option = _field_option(grid, "Saison", "custom_battle_season")
 	for entry in SEASONS:
 		season_option.add_item(entry[1])
@@ -323,7 +327,7 @@ func _sync_controls() -> void:
 			if str(factions[i]["id"]) == faction_id:
 				(faction_options[side] as OptionButton).selected = i
 		(budget_spins[side] as SpinBox).set_value_no_signal(float(config[side]["budget"]))
-	terrain_option.selected = maxi(TERRAINS.find(str(config["terrain"])), 0)
+	terrain_option.selected = maxi(_index_of(TERRAINS, str(config["terrain"])), 0)
 	season_option.selected = maxi(_index_of(SEASONS, str(config["season"])), 0)
 	weather_option.selected = maxi(_index_of(WEATHERS, str(config["weather"])), 0)
 	hour_option.selected = maxi(_hour_keys.find(str(config["hour"])), 0)
