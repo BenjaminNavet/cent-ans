@@ -353,6 +353,11 @@ Ordre de régénération : `geo relief-shade` (après `geo build`) puis `geo lan
   bruit + terrain, essarts autour des villes et hameaux), `wetlands.png` (RGB : marais, étangs,
   prés humides, depuis `wetlands.json` et les fonds de vallée), `forest_kind.png` (L8 demi-grille, part
   de résineux, pour le rendu des forêts). ≈ 70 s.
+- `cent-ans geo gpu-textures` (`block_compress.py`, lot OMR-R2, ADR 0118) : copies GPU lues par le
+  jeu à la place des PNG : `relief_shade_bc5_<i>.bin` (BC5 + mipmaps, `map.json.relief_shade.bc5`)
+  et `wetlands_bc1_<i>.bin` (BC1, `map.json.wetlands_gpu`), parts zlib de ≤ 32 Mo bruts. Refaites
+  aussi en fin de `geo relief-shade` et `geo landcover` ; à relancer seule après une retouche des
+  PNG. ≈ 3 min.
 
 ## Cache du relief fin : pipeline complet des paliers 1-3 (lot ZG7b, ADR 0036)
 
