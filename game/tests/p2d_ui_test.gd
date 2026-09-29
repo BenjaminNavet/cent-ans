@@ -167,6 +167,27 @@ func _check_capture_window(map: Node) -> void:
 		await process_frame
 
 
+## C2 des dialogues d'avant-bataille : le panneau (pas le voile plein écran) tient entièrement
+## dans l'écran — rectangle global, position comprise, et sa taille n'est pas remontée au-dessus
+## du budget par le minimum combiné de ses enfants (colonnes de régiments défilantes).
+func _check_panel_fits(dialog: PreBattleDialog, label: String, resolution: Vector2i) -> void:
+	var view: Vector2 = root.get_visible_rect().size
+	var rect := dialog.panel.get_global_rect()
+	var minimum := dialog.panel.get_combined_minimum_size()
+	_check(rect.position.x >= -0.5 and rect.position.y >= -0.5 and rect.end.x <= view.x + 0.5 and rect.end.y <= view.y + 0.5,
+		"C2: %s at %s: panel %s overflows the screen %s" % [label, resolution, rect, view])
+	_check(minimum.x <= view.x + 0.5 and minimum.y <= view.y + 0.5,
+		"C2: %s at %s: panel minimum size %s exceeds the screen %s" % [label, resolution, minimum, view])
+	# Rangée d'actions (bas du panneau) : jamais rognée, les régiments défilent à sa place.
+	for button: Button in [dialog.withdraw_button, dialog.auto_button, dialog.fight_button]:
+		if not button.is_visible_in_tree():
+			continue
+		var button_rect := button.get_global_rect()
+		_check(rect.encloses(button_rect.grow(-0.5)) and button_rect.end.y <= view.y + 0.5,
+			"C2: %s at %s: button « %s » %s outside the panel %s" % [label, resolution, button.text, button_rect, rect])
+	print("p2d_ui_test C2: %s at %s: panel %s, minimum %s" % [label, resolution, rect, minimum])
+
+
 # --- 2. Fenêtre de siège (PreBattleDialog, siege: true) ----------------------------------------
 
 
@@ -208,9 +229,7 @@ func _check_siege_dialog() -> void:
 			_collect(dialog)
 			first = false
 		# C2 : bloquant depuis que les colonnes d'armées défilent (voir le commentaire de fonction).
-		var view: Vector2 = root.get_visible_rect().size
-		_check(dialog.panel.size.x <= view.x + 0.5 and dialog.panel.size.y <= view.y + 0.5,
-			"C2: PreBattleDialog (siège) at %s: panel %s overflows the screen %s" % [resolution, dialog.panel.size, view])
+		_check_panel_fits(dialog, "PreBattleDialog (siège)", resolution)
 		var withdrawn := [-1]
 		dialog.withdraw_requested.connect(func(i: int) -> void: withdrawn[0] = i)
 		dialog.withdraw_button.emit_signal("pressed")
@@ -257,9 +276,7 @@ func _check_naval_dialog() -> void:
 			_collect(dialog)
 			first = false
 		# C2 : bloquant, même mise en page que `_check_siege_dialog`.
-		var view: Vector2 = root.get_visible_rect().size
-		_check(dialog.panel.size.x <= view.x + 0.5 and dialog.panel.size.y <= view.y + 0.5,
-			"C2: NavalPreBattleDialog (résultat naval) at %s: panel %s overflows the screen %s" % [resolution, dialog.panel.size, view])
+		_check_panel_fits(dialog, "NavalPreBattleDialog (résultat naval)", resolution)
 		dialog.queue_free()
 		await process_frame
 		# Résolution automatique : rend des évènements et vide l'attente (`NavalCampaign._on_auto`).
