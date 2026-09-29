@@ -28,11 +28,13 @@ Branche `feat/omr-r5`, worktree `../gp-omr-r5`. Plan d'ensemble : `docs/wip/omr.
 
 ## État
 - [x] Données des 10 types (schéma valide)
-- [ ] Doctrines IA, éclaireurs (postures), gore, étendards
-- [ ] Icônes game-icons, codex
+- [x] Doctrines IA (9 factions + poids régionaux dans `default`), éclaireurs, gore, étendards
+- [x] Icônes game-icons
+- [ ] Codex
 - [ ] Looks de rendu (données + shader)
-- [ ] Tests core (recrutement), sonde matrice (20-80 %)
+- [x] Tests core `ai/tests/omr_r5_eastern_units.rs`
+- [ ] Sonde matrice (20-80 %)
 - [ ] Vérifs finales (fmt, clippy, tests, pytest, import, smoke), 1 capture
 
 ## Prochaine étape
-Doctrines IA + fichiers fx, puis tests core.
+Codex, looks de rendu, sonde matrice.

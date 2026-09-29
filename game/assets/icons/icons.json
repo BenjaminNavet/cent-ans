@@ -1110,6 +1110,18 @@
       "source": "lorc/muscle-up",
       "author": "Lorc"
     },
+    "unit_akinci": {
+      "file": "lorc-wolf-head.svg",
+      "category": "unit",
+      "source": "lorc/wolf-head",
+      "author": "Lorc"
+    },
+    "unit_almogavars": {
+      "file": "lorc-curvy-knife.svg",
+      "category": "unit",
+      "source": "lorc/curvy-knife",
+      "author": "Lorc"
+    },
     "unit_bombard": {
       "file": "lorc-cannon.svg",
       "category": "unit",
@@ -1188,6 +1200,12 @@
       "source": "skoll/musket",
       "author": "Skoll"
     },
+    "unit_druzhina": {
+      "file": "delapouite-viking-helmet.svg",
+      "category": "unit",
+      "source": "delapouite/viking-helmet",
+      "author": "Delapouite"
+    },
     "unit_ecorcheurs": {
       "file": "delapouite-torch.svg",
       "category": "unit",
@@ -1248,10 +1266,22 @@
       "source": "skoll/mounted-knight",
       "author": "Skoll"
     },
+    "unit_lithuanian_light_cavalry": {
+      "file": "lorc-spears.svg",
+      "category": "unit",
+      "source": "lorc/spears",
+      "author": "Lorc"
+    },
     "unit_longbowmen": {
       "file": "lorc-bowman.svg",
       "category": "unit",
       "source": "lorc/bowman",
+      "author": "Lorc"
+    },
+    "unit_mamluk_cavalry": {
+      "file": "lorc-crossed-sabres.svg",
+      "category": "unit",
+      "source": "lorc/crossed-sabres",
       "author": "Lorc"
     },
     "unit_mangonel": {
@@ -1284,6 +1314,12 @@
       "source": "lorc/visored-helm",
       "author": "Lorc"
     },
+    "unit_pronoiars": {
+      "file": "lorc-checked-shield.svg",
+      "category": "unit",
+      "source": "lorc/checked-shield",
+      "author": "Lorc"
+    },
     "unit_routiers": {
       "file": "lorc-broadsword.svg",
       "category": "unit",
@@ -1302,10 +1338,28 @@
       "source": "lorc/spiked-fence",
       "author": "Lorc"
     },
+    "unit_serbian_heavy_cavalry": {
+      "file": "lorc-heavy-helm.svg",
+      "category": "unit",
+      "source": "lorc/heavy-helm",
+      "author": "Lorc"
+    },
     "unit_siege_tower": {
       "file": "delapouite-siege-tower.svg",
       "category": "unit",
       "source": "delapouite/siege-tower",
+      "author": "Delapouite"
+    },
+    "unit_steppe_horse_archers": {
+      "file": "delapouite-bow-arrow.svg",
+      "category": "unit",
+      "source": "delapouite/bow-arrow",
+      "author": "Delapouite"
+    },
+    "unit_teutonic_knights": {
+      "file": "delapouite-templar-shield.svg",
+      "category": "unit",
+      "source": "delapouite/templar-shield",
       "author": "Delapouite"
     },
     "unit_trebuchet": {
@@ -1325,6 +1379,12 @@
       "category": "unit",
       "source": "lorc/stone-spear",
       "author": "Lorc"
+    },
+    "unit_yaya": {
+      "file": "delapouite-archer.svg",
+      "category": "unit",
+      "source": "delapouite/archer",
+      "author": "Delapouite"
     }
   }
 }
