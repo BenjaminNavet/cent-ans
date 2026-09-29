@@ -43,8 +43,8 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_cathedral",
-      "bld_market"
+      "bld_market",
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Ville épiscopale et ancienne capitale de la Moravie septentrionale.",

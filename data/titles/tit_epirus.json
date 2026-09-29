@@ -40,6 +40,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_epirus_thessaly",
+      "title": "La Thessalie",
+      "description": "Rendre à Arta la Thessalie des anciens despotes.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_thessaly"
+        ]
+      }
     }
   ],
   "description": "Despotat d'Arta et de Janina, tenu par la maison Orsini, réduit à l'Épire propre.",

@@ -102,5 +102,31 @@
     "sources": [
       "Pälkäne"
     ]
+  },
+  {
+    "id": "set_borga",
+    "province": "prov_tavastia",
+    "kind": "town",
+    "name": {
+      "display": "Porvoo (Borgå)",
+      "local": "Borgå",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      25.6643,
+      60.3927
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Bourg marchand du Nyland oriental.",
+    "sources": [
+      "Porvoo"
+    ]
   }
 ]

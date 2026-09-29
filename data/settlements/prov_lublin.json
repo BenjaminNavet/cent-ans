@@ -42,13 +42,34 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Port de la Vistule où transitent les grains vers Gdańsk, sous château royal.",
     "sources": [
       "Kazimierz Dolny"
+    ]
+  },
+  {
+    "id": "set_urzedow",
+    "province": "prov_lublin",
+    "kind": "village",
+    "name": {
+      "display": "Urzędów",
+      "local": "Urzędów",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      22.14,
+      50.99
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [],
+    "port": false,
+    "description": "Ancien chef-lieu de châtellenie de la terre de Lublin, bourg de marché au sud de la ville.",
+    "sources": [
+      "Urzędów"
     ]
   }
 ]

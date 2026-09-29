@@ -46,6 +46,17 @@
           "prov_kerasous"
         ]
       }
+    },
+    {
+      "id": "obj_trebizond_limnia",
+      "title": "Limnia et Oinaion",
+      "description": "Recouvrer les bandons de l'ouest face aux Turcomans.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_amasya"
+        ]
+      }
     }
   ],
   "description": "État byzantin d'Anatolie pontique, dernier héritier de l'Empire des Comnènes ; Basile (1332-1340) règne sur une côte riche, mais son épouse Irène Paléologue va l'empoisonner en 1340.",

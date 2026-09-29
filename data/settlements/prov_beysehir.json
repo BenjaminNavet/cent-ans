@@ -43,5 +43,30 @@
     "sources": [
       "Eshrefids"
     ]
+  },
+  {
+    "id": "set_kubadabad",
+    "province": "prov_beysehir",
+    "kind": "castle",
+    "name": {
+      "display": "Kubadabad",
+      "local": "Kubadabad",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      31.53,
+      37.83
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Palais d'été seldjoukide d'Alaeddin Keykubad (vers 1236) sur la rive ouest du lac de Beyşehir, passé aux Eşrefoğulları.",
+    "sources": [
+      "Kubadabad"
+    ]
   }
 ]

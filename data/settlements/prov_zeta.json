@@ -47,7 +47,7 @@
       "bld_market",
       "bld_port",
       "bld_stone_walls",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Cité maritime latine, sous protection serbe.",
@@ -74,7 +74,7 @@
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Siège de l'archevêché catholique de Dioclée.",

@@ -17,7 +17,8 @@
     "fortification_level": 4,
     "buildings": [
       "bld_market",
-      "bld_castle"
+      "bld_castle",
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Cité des sultans, sous la Citadelle.",

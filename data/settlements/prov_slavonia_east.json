@@ -67,7 +67,7 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Résidence de l'évêque de Bosnie, hors de Bosnie, sur la marche de Slavonie.",

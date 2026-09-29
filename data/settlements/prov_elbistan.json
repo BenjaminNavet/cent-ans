@@ -49,5 +49,28 @@
     "sources": [
       "Dulkadir"
     ]
+  },
+  {
+    "id": "set_goksun",
+    "province": "prov_elbistan",
+    "kind": "village",
+    "name": {
+      "display": "Göksun (Coxon)",
+      "local": "Göksun",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      36.48,
+      38.02
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la route de Kayseri à Maraş (Coxon des croisés), dans l'orbite des Dulkadir (contrôle en 1337 incertain).",
+    "sources": [
+      "Göksun"
+    ]
   }
 ]

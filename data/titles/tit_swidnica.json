@@ -41,6 +41,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_swidnica_legnica",
+      "title": "L'héritage piast",
+      "description": "Réunir Legnica au duché de Świdnica.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_legnica"
+        ]
+      }
     }
   ],
   "description": "Duché piast de Świdnica-Jawor, indépendant de la Bohême jusqu'en 1368 ; rang « royaume » approximé pour marquer la souveraineté.",

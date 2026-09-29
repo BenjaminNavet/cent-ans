@@ -76,5 +76,31 @@
     "sources": [
       "Cieszyn"
     ]
+  },
+  {
+    "id": "set_brzeg",
+    "province": "prov_upper_silesia",
+    "kind": "town",
+    "name": {
+      "display": "Brzeg",
+      "local": "Brieg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      17.47,
+      50.86
+    ],
+    "weight": 30,
+    "owner": "fac_legnica",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence des ducs de Brzeg sur l'Oder.",
+    "sources": [
+      "Brzeg"
+    ]
   }
 ]

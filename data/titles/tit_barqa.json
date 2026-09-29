@@ -48,6 +48,17 @@
           "prov_derna"
         ]
       }
+    },
+    {
+      "id": "obj_barqa_tripoli",
+      "title": "La route de Tripoli",
+      "description": "Imposer les tribus de Barqa jusqu'à la Tripolitaine (ambition incertaine).",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tripolitania"
+        ]
+      }
     }
   ],
   "description": "Territoire tribal de Barqa, suzerainement rattaché au sultanat mamelouk de façon nominale.",

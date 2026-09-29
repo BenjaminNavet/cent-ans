@@ -16,7 +16,7 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_market",
+      "bld_fair",
       "bld_cathedral",
       "bld_port",
       "bld_stone_walls",
@@ -73,7 +73,7 @@
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Ville portuaire et tombeau des seigneurs albanais.",

@@ -43,8 +43,8 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_cathedral",
-      "bld_castle"
+      "bld_castle",
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Siège d'un évêché, plus ancienne citadelle de la région.",

@@ -50,5 +50,30 @@
     "sources": [
       "Câmpulung"
     ]
+  },
+  {
+    "id": "set_targoviste",
+    "province": "prov_muntenia",
+    "kind": "town",
+    "name": {
+      "display": "Târgoviște",
+      "local": "Târgoviște",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      25.4567,
+      44.9254
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg de marché sur la Ialomița, future résidence princière (mention écrite tardive, 1396 ; existence en 1337 probable, à préciser).",
+    "sources": [
+      "Târgoviște"
+    ]
   }
 ]

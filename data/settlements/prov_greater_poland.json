@@ -43,8 +43,8 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_cathedral",
-      "bld_market"
+      "bld_market",
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Première capitale des Piast et siège de l'archevêque, où se couronnent les rois avant Cracovie.",

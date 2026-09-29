@@ -29,60 +29,6 @@
     ]
   },
   {
-    "id": "set_hildesheim",
-    "province": "prov_lower_saxony",
-    "kind": "town",
-    "name": {
-      "display": "Hildesheim",
-      "local": "Hildensem",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      9.95,
-      52.15
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ancienne cité épiscopale saxonne réputée pour son orfèvrerie et sa cathédrale.",
-    "sources": [
-      "Hildesheim"
-    ]
-  },
-  {
-    "id": "set_goslar",
-    "province": "prov_lower_saxony",
-    "kind": "town",
-    "name": {
-      "display": "Goslar",
-      "local": "Goslere",
-      "local_language": "moyen bas-allemand"
-    },
-    "lonlat": [
-      10.4257,
-      51.9058
-    ],
-    "weight": 18,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ville libre d'Empire au pied du Rammelsberg, dont les mines d'argent et de cuivre font la richesse depuis le Xe siècle.",
-    "sources": [
-      "Goslar",
-      "Rammelsberg"
-    ]
-  },
-  {
     "id": "set_loccum",
     "province": "prov_lower_saxony",
     "kind": "abbey",

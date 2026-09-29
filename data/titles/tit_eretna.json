@@ -41,6 +41,17 @@
           "prov_amasya"
         ]
       }
+    },
+    {
+      "id": "obj_eretna_konya",
+      "title": "Le trône seldjoukide",
+      "description": "Eretna se veut héritier des Ilkhans en Roum : tenir Konya.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_konya"
+        ]
+      }
     }
   ],
   "description": "Ancien gouverneur ilkhanide de Roum, Eretna devient autonome après la mort d'Abu Saïd (1335) ; il ne prend le titre de sultan qu'en 1341-1343.",

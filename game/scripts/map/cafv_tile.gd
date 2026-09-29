@@ -14,6 +14,8 @@ const MAGIC := "CAFV"
 const HEADER_BYTES := 28
 const LAYER_RIVERS := 1
 const LAYER_ROADS := 2
+## Côté d'une tuile E2 en unités monde.
+const TILE_UNITS := 64.0
 
 ## Drapeaux (`rivers_fine.json` → `flags`).
 const FLAG_DIVAGATING := 1
@@ -82,14 +84,17 @@ static func source_of(flags: int) -> int:
 
 
 ## Lit une tuile (null si absente ou illisible). Sûr dans un fil de travail.
-static func load_file(path: String) -> CafvTile:
+## `offset_tiles` : décalage d'origine du cache en tuiles E2 (`root_origin_tiles` × 4, ADR 0115) ;
+## les points et l'en-tête passent du cadre du cache au cadre monde.
+static func load_file(path: String, offset_tiles: Vector2i = Vector2i.ZERO) -> CafvTile:
 	if not FileAccess.file_exists(path):
 		return null
-	return parse(FileAccess.get_file_as_bytes(path))
+	return parse(FileAccess.get_file_as_bytes(path), offset_tiles)
 
 
-## Décode les octets d'une tuile (null si le format est inattendu).
-static func parse(bytes: PackedByteArray) -> CafvTile:
+## Décode les octets d'une tuile (null si le format est inattendu). `offset_tiles` : voir
+## `load_file` (unités monde ajoutées = `offset_tiles` × 64).
+static func parse(bytes: PackedByteArray, offset_tiles: Vector2i = Vector2i.ZERO) -> CafvTile:
 	if bytes.size() < HEADER_BYTES or bytes.slice(0, 4).get_string_from_ascii() != MAGIC:
 		return null
 	if bytes.decode_u16(4) != 1:
@@ -121,6 +126,14 @@ static func parse(bytes: PackedByteArray) -> CafvTile:
 	tile.y = bytes.slice(offset + span, offset + span * 2).to_float32_array()
 	tile.z = bytes.slice(offset + span * 2, offset + span * 3).to_float32_array()
 	tile.w = bytes.slice(offset + span * 3, offset + span * 4).to_float32_array()
+	if offset_tiles != Vector2i.ZERO:
+		tile.col += offset_tiles.x
+		tile.row += offset_tiles.y
+		var dx := float(offset_tiles.x) * TILE_UNITS
+		var dy := float(offset_tiles.y) * TILE_UNITS
+		for k in n_points:
+			tile.x[k] += dx
+			tile.y[k] += dy
 	tile.line_bounds.resize(n_lines)
 	tile.line_rank.resize(n_lines)
 	for i in n_lines:

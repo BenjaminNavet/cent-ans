@@ -45,8 +45,8 @@
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
-      "bld_stone_walls"
+      "bld_stone_walls",
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Cité lacustre et forteresse.",
