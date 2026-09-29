@@ -295,12 +295,41 @@ impl CampaignState {
     /// borders as armies walk them, [`crate::movement::land_neighbors`]: the
     /// geometry graph, not the province files' partial `neighbors`).
     pub fn are_neighbors(&self, data: &GameData, a: &FactionId, b: &FactionId) -> bool {
-        self.provinces.keys().any(|id| {
-            self.controls_province(a, id)
+        // OM I1: called for most pairs of factions each turn (O(F² × P)); read
+        // each province's city directly instead of looking the province up
+        // again, and compare the controller before walking the neighbours.
+        self.provinces.iter().any(|(id, province)| {
+            self.settlements
+                .get(&province.city)
+                .is_some_and(|city| &city.controller == a)
                 && crate::movement::land_neighbors(data, id)
                     .iter()
                     .any(|n| self.controls_province(b, n))
         })
+    }
+
+    /// Every `b` for which [`Self::are_neighbors`]`(data, a, b)` holds, in one
+    /// pass over the provinces (OM I1: loops over all factions call this
+    /// once instead of `are_neighbors` for each pair). May contain `a`.
+    pub fn neighbour_factions(&self, data: &GameData, a: &FactionId) -> BTreeSet<FactionId> {
+        let mut out = BTreeSet::new();
+        for (id, province) in &self.provinces {
+            if !self
+                .settlements
+                .get(&province.city)
+                .is_some_and(|city| &city.controller == a)
+            {
+                continue;
+            }
+            for n in crate::movement::land_neighbors(data, id) {
+                if let Some(controller) = self.province_controller(n) {
+                    if !out.contains(controller) {
+                        out.insert(controller.clone());
+                    }
+                }
+            }
+        }
+        out
     }
 
     /// Relation of `a` with `b`.

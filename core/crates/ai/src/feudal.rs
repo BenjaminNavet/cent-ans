@@ -424,6 +424,7 @@ pub fn plan_homage(state: &CampaignState, data: &GameData, faction: &FactionId) 
     let floor = liege
         .as_ref()
         .map_or(0.0, |l| w.min_power_ratio * state.faction_power(l));
+    let neighbours = state.neighbour_factions(data, faction);
     state
         .factions
         .iter()
@@ -443,7 +444,7 @@ pub fn plan_homage(state: &CampaignState, data: &GameData, faction: &FactionId) 
         })
         .filter(|(id, _)| !fe::liege_chain(state, data, id).contains(faction))
         .filter(|(id, _)| state.attitude(data, faction, id).0 >= w.min_attitude)
-        .filter(|(id, _)| state.are_neighbors(data, faction, id))
+        .filter(|(id, _)| neighbours.contains(*id))
         .map(|(id, _)| (id, state.faction_power(id)))
         .filter(|(_, power)| *power >= floor)
         .max_by(|a, b| a.1.total_cmp(&b.1).then_with(|| b.0.cmp(a.0)))
