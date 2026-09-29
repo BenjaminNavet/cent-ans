@@ -17,7 +17,8 @@ extends Node3D
 ## Chantier FK (carte vivante, `docs/design/2026-09-29-carte-vivante-folk.md`) : figurines de la
 ## vue rapprochée (`life_folk/`), mêmes crochets `refresh` / `update_view` :
 ##   --no-folk                                        désactive les figurines (mesures A/B) ;
-##   --folk-off=routine,caravans,scenes,incidents     désactive une partie.
+##   --folk-off=routine,caravans,scenes,incidents     désactive une partie ;
+##   --scene=<province>:<kind>[,...]                  force une scène de province (FK4, captures).
 
 var enabled: bool = true
 var seasons: SeasonVisuals = SeasonVisuals.new()
@@ -30,8 +31,11 @@ var ambient: LifeAmbient = null
 var folk: FolkPool = null
 var folk_routine: FolkRoutine = null
 var folk_caravans: FolkCaravans = null
+var folk_scenes: FolkScenes = null
 var folk_enabled: bool = true
 var folk_off: Dictionary = {}
+## FK4 : scènes forcées par `--scene=` ({province, kind, settlement, intensity}).
+var forced_scenes: Array = []
 var forced_season: String = ""
 ## province_id → dévastation forcée (captures).
 var forced_devastation: Dictionary = {}
@@ -88,6 +92,11 @@ func _setup_folk() -> void:
 	add_child(folk)
 	folk.setup(_map_data, _terrain)
 	var settlement_data: SettlementData = _settlements.data if _settlements != null else null
+	if not folk_off.has("scenes"):
+		folk_scenes = FolkScenes.new()
+		folk_scenes.setup(_map_data, settlement_data, _settlements)
+		folk_scenes.forced = forced_scenes
+		folk.register(folk_scenes)
 	if not folk_off.has("caravans"):
 		folk_caravans = FolkCaravans.new()
 		folk_caravans.setup(_map_data, settlement_data)
@@ -110,6 +119,8 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--folk-off="):
 			for part in arg.trim_prefix("--folk-off=").split(",", false):
 				folk_off[part] = true
+		elif arg.begins_with("--scene="):
+			forced_scenes.append_array(FolkScenes.parse_forced(arg.trim_prefix("--scene=")))
 		elif arg.begins_with("--season="):
 			forced_season = arg.trim_prefix("--season=")
 		elif arg.begins_with("--devastate="):
@@ -168,6 +179,15 @@ func _refresh_folk(sim: Object) -> void:
 		folk_routine.cities = cities
 	folk.refresh(sim)
 	stats["folk"] = folk.stats
+	if folk_scenes != null:
+		# FK4 : disette → champs vides ; peste → cheminées éteintes ; bûchers et émeutes fument.
+		if folk_routine != null:
+			folk_routine.idle_provinces = folk_scenes.idle_provinces
+		if effects != null:
+			effects.quiet_settlements = folk_scenes.quiet_settlements
+			effects.scene_fires = folk_scenes.fire_points
+			effects.rebuild(province_states)
+		stats["folk_scenes"] = folk_scenes.stats
 
 
 ## Dévastation et population des provinces qui ont des colonies ou des hameaux.

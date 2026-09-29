@@ -30,6 +30,9 @@ const ROLES := {
 	"pilgrim": {"figures": [["villager", 0], ["crew", 0], ["infantry", 2]], "livery": Color(0.3, 0.27, 0.24)},
 	"guard": {"figures": [["infantry", 2], ["infantry", 5]], "livery": Color(0.5, 0.12, 0.1)},
 	"rider": {"figures": [["cavalry", 1], ["cavalry", 0]], "livery": Color(0.33, 0.28, 0.2)},
+	## FK4 : recrues à l'exercice (miliciens, livrée terne) et moines des processions.
+	"recruit": {"figures": [["infantry", 2], ["infantry", 5], ["crew", 0]], "livery": Color(0.4, 0.36, 0.28)},
+	"monk": {"figures": [["villager", 0], ["crew", 0], ["infantry", 2]], "livery": Color(0.2, 0.18, 0.17)},
 }
 ## Habits ternes (laine écrue, brun, roux, gris) tirés par figurine (`plain_colors`).
 const DRAB := [Color(0.55, 0.5, 0.4), Color(0.4, 0.3, 0.2), Color(0.5, 0.32, 0.2), Color(0.42, 0.42, 0.4)]
@@ -46,6 +49,10 @@ const ACTIVITIES := {
 	"chop": {"state": "scythe", "clips": ["overhead", "slash", "crank"], "fallback": ["idle"], "speed": 0.0},
 	"herd": {"state": "idle", "clips": ["idle", "idle_look", "idle_lean"], "fallback": ["idle"], "speed": 0.0},
 	"idle": {"state": "idle", "clips": ["idle", "idle_look", "idle_lean", "guard"], "fallback": ["idle"], "speed": 0.0},
+	## FK4 : marche lente des processions, du convoi des morts et des fuyards (accessoires portés
+	## à la même vitesse : `PROPS`), exercice des recrues.
+	"procession": {"state": "marching", "clips": ["walk"], "fallback": ["idle"], "speed": 0.6},
+	"drill": {"state": "idle", "clips": ["guard", "idle"], "fallback": ["idle"], "speed": 0.0},
 }
 ## Familles animées par état (`BattleSkinned.state_config`, styles `folk` / `folk_carry` de FK2).
 const STATE_KINDS := ["villager"]
@@ -54,8 +61,10 @@ const PROP_MANIFEST := PROP_DIR + "manifest.json"
 
 ## Accessoire → modèle FK2 (nom du manifeste), maquette de repli, vitesse de déplacement (m/s,
 ## celle des figurines qui l'accompagnent). Charrette de paysan : `stone_cart` (bœuf inclus ;
-## FK2 n'a pas de charrette de paysan propre). FK4 ajoute ici les accessoires de ses scènes
-## (`dead_cart`, `market_stall`, `pyre`, `scaffold`, `pitchfork`, `torch`, `procession_*`…).
+## FK2 n'a pas de charrette de paysan propre). Accessoires des scènes de province (FK4) : croix
+## et bannière « portées » roulent à côté de leur porteur, à la vitesse `procession` ; fourche et
+## torche (tenues en main) ne sont pas posées : le réservoir n'accroche rien à un os et les
+## émeutiers `villager_2` les portent déjà. `flood_water` : nappe de crue (maquette seule).
 const PROPS := {
 	"merchant_cart": {"model": "merchant_cart", "fallback": "covered_cart", "speed": 1.2},
 	"peasant_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2},
@@ -64,6 +73,14 @@ const PROPS := {
 	"cow": {"model": "cow", "fallback": "cow", "speed": 0.0},
 	"ox": {"model": "ox", "fallback": "cow", "speed": 0.0},
 	"horse": {"model": "horse", "fallback": "cow", "speed": 0.0},
+	"stone_cart": {"model": "stone_cart", "fallback": "open_cart", "speed": 1.2},
+	"dead_cart": {"model": "dead_cart", "fallback": "open_cart", "speed": 0.6},
+	"market_stall": {"model": "market_stall", "fallback": "stall", "speed": 0.0},
+	"pyre": {"model": "pyre", "fallback": "pyre", "speed": 0.0},
+	"scaffold": {"model": "scaffold", "fallback": "scaffold", "speed": 0.0},
+	"procession_cross": {"model": "procession_cross", "fallback": "pole", "speed": 0.6},
+	"procession_banner": {"model": "procession_banner", "fallback": "pole", "speed": 0.6},
+	"flood_water": {"model": "", "fallback": "water", "speed": 0.0},
 }
 
 static var _manifest: Dictionary = {}
@@ -253,6 +270,26 @@ static func _fallback_mesh(kind: String) -> ArrayMesh:
 		"plough":
 			_box(st, Vector3(0, 0.35, 0.9), Vector3(0.25, 0.25, 1.8), Color(0.42, 0.28, 0.16))
 			_box(st, Vector3(0, 1.0, 4.0), Vector3(0.9, 0.9, 2.2), Color(0.5, 0.33, 0.2))
+		"stall":
+			_box(st, Vector3(0, 0.45, 0), Vector3(3.2, 0.9, 1.4), wood)
+			_box(st, Vector3(0, 2.1, 0), Vector3(3.4, 0.08, 1.8), Color(0.7, 0.25, 0.18))
+			for x in [-1.5, 1.5]:
+				_box(st, Vector3(x, 1.1, -0.8), Vector3(0.1, 2.2, 0.1), dark)
+		"pyre":
+			_box(st, Vector3(0, 0.35, 0), Vector3(2.4, 0.7, 2.4), Color(0.3, 0.2, 0.12))
+			_box(st, Vector3(0, 0.9, 0), Vector3(1.2, 0.5, 1.2), Color(0.15, 0.12, 0.1))
+		"scaffold":
+			for x in [-0.9, 2.9]:
+				for z in [-2.2, 2.2]:
+					_box(st, Vector3(x, 3.5, z), Vector3(0.15, 7.0, 0.15), wood)
+			for y in [2.0, 3.9]:
+				_box(st, Vector3(1.0, y, 0), Vector3(4.0, 0.1, 4.6), wood)
+		"pole":
+			_box(st, Vector3(0, 1.6, 0), Vector3(0.08, 3.2, 0.08), wood)
+			_box(st, Vector3(0, 2.8, 0), Vector3(0.06, 0.8, 0.8), Color(0.75, 0.62, 0.3))
+		"water":
+			# Nappe de crue (30 m, eau boueuse), à peine au-dessus du sol.
+			_box(st, Vector3(0, 0.06, 0), Vector3(30.0, 0.12, 30.0), Color(0.3, 0.38, 0.4))
 		"cow":
 			_box(st, Vector3(0, 1.0, 0), Vector3(0.8, 0.8, 1.9), Color(0.5, 0.33, 0.2))
 			_box(st, Vector3(0, 1.2, 1.15), Vector3(0.4, 0.4, 0.5), Color(0.45, 0.3, 0.18))

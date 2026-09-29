@@ -27,6 +27,10 @@ const FIRE_MIN_DEVASTATION := 25.0
 
 var stats: Dictionary = {}
 var near_weight: float = 0.0
+## FK4 (scènes de province, `FolkScenes`) : colonies aux cheminées éteintes (id → vrai, peste)
+## et fumées de scène (bûcher, émeute), unités monde ; lues par `rebuild`.
+var quiet_settlements: Dictionary = {}
+var scene_fires: PackedVector2Array = PackedVector2Array()
 
 var _layer: SettlementLayer = null
 var _terrain: TerrainBuilder = null
@@ -149,7 +153,9 @@ func rebuild(province_states: Dictionary) -> void:
 		var state: Dictionary = province_states.get(str(entry["province"]), {})
 		var radius := _layer.model_radius(i) * 0.55
 		var top := _layer.model_top(i) * 0.45
-		for k in int(CHIMNEYS.get(kind, 1)):
+		# FK4 : colonie pestiférée, cheminées éteintes.
+		var chimneys := 0 if quiet_settlements.has(str(entry["id"])) else int(CHIMNEYS.get(kind, 1))
+		for k in chimneys:
 			var angle := float((seed_value / (k + 3)) % 628) / 100.0
 			var r := radius * float((seed_value / (k + 7)) % 100) / 100.0
 			_chimney_points.append(_settlement_point(i, Vector2(cos(angle), sin(angle)) * r, top, float((seed_value / (k + 11)) % 1000) / 1000.0))
@@ -169,6 +175,9 @@ func rebuild(province_states: Dictionary) -> void:
 				_fire_points.append(_fixed_point(hpx, 0.1, float(hseed % 1000) / 1000.0))
 		elif hseed % 2 == 0:
 			_chimney_points.append(_fixed_point(hpx, 0.35, float(hseed % 1000) / 1000.0))
+	# FK4 : fumées de bûcher (peste) et d'émeute (révolte) des scènes de province.
+	for k in scene_fires.size():
+		_fire_points.append(_fixed_point(scene_fires[k], 0.1, float(k % 7) / 7.0))
 	_settlement_ref = _reference_scale()
 	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE, 0.0)
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
@@ -207,7 +216,7 @@ func _rebuild_key(province_states: Dictionary) -> String:
 	for h in data.hamlets.size():
 		var devastation := float(province_states.get(str(data.hamlets[h]["province"]), {}).get("devastation", 0.0))
 		burned[h] = (2 if _layer.hamlet_burned(h) else 0) + (1 if devastation >= FIRE_MIN_DEVASTATION else 0)
-	return "%s|%s" % [",".join(parts), Marshalls.raw_to_base64(burned)]
+	return "%s|%s|%s|%s" % [",".join(parts), Marshalls.raw_to_base64(burned), ",".join(PackedStringArray(quiet_settlements.keys())), scene_fires]
 
 
 ## Moulins à vent sur la couronne de champs des colonies ; ailes arrêtées en pays dévasté.

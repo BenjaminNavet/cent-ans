@@ -47,6 +47,8 @@ var cities: PackedVector2Array = PackedVector2Array()
 ## Masque des terroirs (`CampaignLife.terroir`) ; sans masque, champs et pâtures sont sautés.
 var terroir: TerroirMask = null
 var off: Dictionary = {}
+## FK4 : provinces en disette (id → vrai, `FolkScenes.idle_provinces`) : champs sans travailleurs.
+var idle_provinces: Dictionary = {}
 var stats: Dictionary = {}
 
 var _map_data: MapData = null
@@ -332,6 +334,8 @@ func _field_plan(p: Vector2, i: int, j: int, probability: float) -> Variant:
 		return null  # rejet avant la lecture (coûteuse) de la province
 	if roll >= chance * clampf(_people_factor(p), 0.3, 1.5):
 		return null
+	if not idle_provinces.is_empty() and _map_data != null and idle_provinces.has(str(_map_data.get_province(_map_data.province_index_at(p.x, p.y)).get("id", ""))):
+		return null  # disette (scène FK4) : champs abandonnés
 	return [activity, group]
 
 
