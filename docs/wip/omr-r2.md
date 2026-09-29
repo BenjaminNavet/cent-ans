@@ -44,10 +44,25 @@ toutes les colonies : paires, masquage, hauteurs d'étiquettes) ; 1re image 0,7.
   `r2_relief_bc5_test.gd`) ; module renommé `block_compress.py`, commande `geo gpu-textures`.
 - [x] Fond de relief : min/max sur valeurs brutes 16 bits (identique, `r2_relief_floor_test.gd`).
 - [x] ADR 0118 (numéro à vérifier à l'intégration), docs/geo.md.
-- [ ] smoke.gd + tests carte (29 verts sauf da7d : seuil de temps de `declutter` 11 ms sous charge
-  50, à relancer au calme), A/B alterné (`scratchpad/ab.sh` : A = scripts de 8e31dbf, B = HEAD).
+- [x] Tests : smoke.gd EXIT 0 (10 min 22 sous charge) ; 29 tests carte verts (liste om-i1 +
+  cv1, dc6c, sz4b, sz4_prop_scale, settlements_render, r2_*) sauf da7d : seuil `declutter` < 4 ms
+  dépassé aussi par l'état d'avant R2 (4,2-6,8 ms à charge 30-50 ; 4,2-12 ms après), bruit ;
+  pytest 1 253 ok, 2 sautés.
+
+## Mesures A/B alternées (charge 54-60 sur 14 cœurs, `scratchpad/ab.sh`)
+A = scripts de carte de 8e31dbf (avant R2), B = HEAD, mêmes données et dylib i1.
+| | wall (ms) | total_ms | statique | RSS max | CPU user |
+|---|---|---|---|---|---|
+| A (×3) | 17 368-25 829 (méd. 23 387) | 14 641-20 623 | 2 098 Mo | 2,04-3,05 Go | 24,1-26,0 s |
+| B (×3) | 10 972-13 307 (méd. 12 140) | 7 982-9 190 | 1 774 Mo | 1,68-2,32 Go | 16,5-17,2 s |
+B à charge ≈ 35 : wall 8,6-8,9 s, total 6,2-6,3 s, RSS 2,43-2,67 Go.
+Wall ÷ 1,9, CPU −33 %, mémoire statique −324 Mo. Rapporté aux 11,4 s d'I1 : ≈ 6 s (cible 7,5 ✓).
+RSS : très bruité (pression mémoire de la machine) ; médiane B ≈ 2,3 Go, cible 2,2 Go non
+démontrée. Textures restantes : splat 168, province_ids 126, border_dist 126, heightmap 111
+(+ 88 d'octets CPU), relief 224 ; RSS − statique ≈ 0,5-0,7 Go (Rust ≈ 220 Mo au `new_campaign`).
 
 ## Prochaine étape
-Mesure A/B au calme, puis rapport. Pistes restantes si la cible n'est pas atteinte : colonies
-(1,0 s, 1 200 maquettes instanciées puis 517 remplacées par la croissance CV1), `FineGeoLayer.setup`
-(0,5-0,7 s), première image (0,7 s), chargement de la scène (1,5 s de compilation GDScript).
+Lot terminé (non fusionné). Pistes si la RSS doit baisser encore : province_ids en RG8 (−42 Mo,
+plusieurs shaders), images CPU de `MapData` libérées après envoi (gain réel en jeu, nul en
+headless), mémoire du `CampaignSim` Rust, maquettes des colonies construites puis remplacées
+(517), export sans les PNG du relief (134 Mo inutiles dans l'app).
