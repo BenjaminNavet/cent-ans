@@ -28,4 +28,13 @@ toutes les colonies : paires, masquage, hauteurs d'étiquettes) ; 1re image 0,7.
 ## État
 - [x] mesure de référence
 - [x] `SettlementLayer.replace_models` (lot) : croissance 3 375 → 109 ms
-- [ ] suite : avant `_ready`, terrain, colonies, rivières, mémoire (relief_shade)
+- [x] relief_shade en BC5 (RGTC RG) + mipmaps précalculés : `tools/cent_ans_tools/geo/bc5.py`,
+  `cent-ans geo relief-shade-bc5` (depuis les bandes PNG), 8 parts zlib `relief_shade_bc5_<i>.bin`
+  (≈ 16 Mo chacune, 131 Mo au total), `map.json.relief_shade.bc5` ; `ReliefLandcover.load_bc5`
+  (repli PNG) ; shader `relief_shade_rg` (occlusion en .g). Texture 447 → 224 Mo. Test
+  `r2_relief_bc5_test.gd` (erreur moyenne 0,8 niveau, max 18 ; borne BC4 = étendue / 14).
+- [x] `ModelLibrary.tint_banner` : matériau surchargé par instance au lieu d'un maillage dupliqué
+  par couleur (312 maillages copiés, ≈ 350 Mo de sommets en rendu réel ; sans effet en headless,
+  le rendu factice ne garde pas les sommets).
+- [ ] suite : sommets lointains (1,4 s GDScript), rivières 1,1 s, colonies 1,0 s, 1re image,
+  mesures au calme (machine à 80 de charge)

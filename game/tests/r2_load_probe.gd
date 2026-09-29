@@ -27,7 +27,10 @@ func _run() -> void:
 	facade.pending_load_path = ""
 	await process_frame
 	var t_load := Time.get_ticks_msec()
-	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
+	var scene := load("res://scenes/campaign_map.tscn") as PackedScene
+	var scene_load_ms := Time.get_ticks_msec() - t_load
+	var map: Node3D = scene.instantiate()
+	var instantiate_ms := Time.get_ticks_msec() - t_load - scene_load_ms
 	root.add_child(map)
 	var ready_ms := Time.get_ticks_msec() - t_load
 	var frames: Array = []
@@ -46,6 +49,8 @@ func _run() -> void:
 		"ok": true,
 		"wall_ms": wall_ms,
 		"ready_ms": ready_ms,
+		"scene_load_ms": scene_load_ms,
+		"instantiate_ms": instantiate_ms,
 		"frames_ms": frames.slice(0, 12),
 		"frame_count": frames.size(),
 		"total_ms": stats.get("total_ms"),

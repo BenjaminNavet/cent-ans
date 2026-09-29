@@ -263,6 +263,16 @@ def geo_relief_shade(
     _print_sizes("Relief de rendu", [result.render_heightmap, result.relief_shade])
 
 
+@geo_app.command("relief-shade-bc5")
+def geo_relief_shade_bc5() -> None:
+    """relief_shade_bc5_<i>.bin (BC5 + mipmaps, OMR-R2) depuis les bandes PNG de data/map."""
+    from cent_ans_tools.geo import bc5 as geo_bc5_step
+    from cent_ans_tools.geo import relief_shade as geo_relief_shade_step
+
+    result = geo_bc5_step.build_from_bands(geo_relief_shade_step.MAP_DIR)
+    _print_sizes("Relief BC5", result.paths)
+
+
 @geo_app.command("horizon")
 def geo_horizon(
     province: str = typer.Option(

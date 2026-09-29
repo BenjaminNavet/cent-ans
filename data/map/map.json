@@ -112,6 +112,27 @@
       "count": 4,
       "rows": 3072
     },
-    "detail_scale_m": 1.5
+    "detail_scale_m": 1.5,
+    "bc5": {
+      "format": "rgtc_rg",
+      "size_px": [
+        14336,
+        12288
+      ],
+      "mipmaps": true,
+      "bytes": 234881088,
+      "compression": "deflate",
+      "pattern": "relief_shade_bc5_{part}.bin",
+      "part_bytes": [
+        29360136,
+        29360136,
+        29360136,
+        29360136,
+        29360136,
+        29360136,
+        29360136,
+        29360136
+      ]
+    }
   }
 }

@@ -9,6 +9,10 @@ extends RefCounted
 ## - `relief_shade.png` (LA8, 2 × la carte) : L détail d'altitude, A occlusion/courbure (mipmaps).
 ##   Depuis OM2 (ADR 0115), écrit en bandes horizontales `relief_shade_<i>.png`
 ##   (`map.json.relief_shade.bands`) empilées ici en une seule image.
+##   OMR-R2 : copie GPU `map.json.relief_shade.bc5` (BC5 = RGTC RG, mipmaps précalculés, parts
+##   zlib `relief_shade_bc5_<i>.bin`, écrite par `cent-ans geo relief-shade-bc5`) lue en priorité :
+##   235 Mo au lieu de 470, ni décodage PNG ni calcul de mipmaps. Canaux R = L, G = A
+##   (`relief_shade_rg` dans le shader).
 ## - `wetlands.png` (RGB8, 4096²) : R marais, G étangs, B prés humides.
 ## - `forest_kind.png` (L8, 2048², part de résineux) n'est pas lu ici : il est destiné au rendu
 ##   des forêts (lot V4), comme `splat.png`.
@@ -54,11 +58,13 @@ static func pending() -> bool:
 
 
 func _load() -> void:
-	_shade = _load_bands(_map_dir, Image.FORMAT_LA8)
+	_shade = load_bc5(_map_dir)
 	if _shade == null:
-		_shade = _load_image(_map_dir, SHADE_FILE, Image.FORMAT_LA8)
-	if _shade != null:
-		_shade.generate_mipmaps()
+		_shade = _load_bands(_map_dir, Image.FORMAT_LA8)
+		if _shade == null:
+			_shade = _load_image(_map_dir, SHADE_FILE, Image.FORMAT_LA8)
+		if _shade != null:
+			_shade.generate_mipmaps()
 	_wet = _load_image(_map_dir, WETLANDS_FILE, Image.FORMAT_RGB8)
 	_finish.call_deferred()
 
@@ -69,6 +75,7 @@ func _finish() -> void:
 	if _shade != null:
 		_material.set_shader_parameter("relief_shade", ImageTexture.create_from_image(_shade))
 		_material.set_shader_parameter("rl_detail_scale_m", _detail_scale)
+		_material.set_shader_parameter("relief_shade_rg", _shade.get_format() != Image.FORMAT_LA8)
 	_material.set_shader_parameter("has_relief_shade", _shade != null)
 	if _wet != null:
 		_material.set_shader_parameter("wetlands", ImageTexture.create_from_image(_wet))
@@ -89,6 +96,38 @@ static func _load_image(map_dir: String, file_name: String, format: int) -> Imag
 		return null
 	if image.get_format() != format:
 		image.convert(format)
+	return image
+
+
+## OMR-R2 : image BC5 (RGTC RG) avec mipmaps de `map.json.relief_shade.bc5` ; null sans copie GPU
+## ou si une part manque ou ne correspond pas (repli sur les bandes PNG). Parts lues et
+## décompressées une à une (pic mémoire ≈ image + une part).
+static func load_bc5(map_dir: String) -> Image:
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("map.json")))
+	if not (meta is Dictionary and (meta as Dictionary).get("relief_shade") is Dictionary):
+		return null
+	var bc5: Variant = meta["relief_shade"].get("bc5")
+	if not bc5 is Dictionary or str(bc5.get("format", "")) != "rgtc_rg" or str(bc5.get("compression", "")) != "deflate":
+		return null
+	var size: Array = bc5.get("size_px", [])
+	var part_bytes: Array = bc5.get("part_bytes", [])
+	var pattern := str(bc5.get("pattern", ""))
+	if size.size() != 2 or part_bytes.is_empty() or pattern == "":
+		return null
+	var data := PackedByteArray()
+	for i in part_bytes.size():
+		var path := map_dir.path_join(pattern.replace("{part}", str(i)))
+		if not FileAccess.file_exists(path):
+			return null
+		var raw := FileAccess.get_file_as_bytes(path).decompress(int(part_bytes[i]), FileAccess.COMPRESSION_DEFLATE)
+		if raw.size() != int(part_bytes[i]):
+			push_warning("ReliefLandcover: %s unreadable" % path)
+			return null
+		data.append_array(raw)
+	var image := Image.create_from_data(int(size[0]), int(size[1]), true, Image.FORMAT_RGTC_RG, data)
+	if image.is_empty():
+		push_warning("ReliefLandcover: BC5 relief %s does not match %d bytes" % [size, data.size()])
+		return null
 	return image
 
 
