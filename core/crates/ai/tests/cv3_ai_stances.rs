@@ -645,8 +645,9 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     enable_ai_stances(&mut data);
     // RS-B (ADR 0100): seed 4 since the AI weighs its secondary places'
     // buildings (seed 7 then gave 2 watched orders, no ambush; seed 4 gives 12,
-    // 5 ambushes).
-    let log = campaign_stance_orders(&data, 4, 60);
+    // 5 ambushes). OMR R3 (ADR 0117, spies incite +12): seed 1 (12 watched
+    // orders, 3 ambushes; seed 4 now gives a single point move).
+    let log = campaign_stance_orders(&data, 1, 60);
     // 15 years of war: the AI lies in wait at least once.
     assert!(
         log.iter().any(|(_, order, _)| order.contains("Ambush")),

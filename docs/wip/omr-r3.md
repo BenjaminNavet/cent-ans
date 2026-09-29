@@ -36,9 +36,12 @@ après F8 donnait déjà 10/10 au tour 1 (`docs/wip/fe8-equilibre.md`). Rien à 
    `economy::garrison_share`, `CampaignState::faction_capital_city`.
 2. IA : démolition aussi quand la dette ne se rembourse pas en 8 tours au surplus net (tribut et
    agents compris) ; agents congédiés (le plus cher, un par saison) tant que le trésor est négatif.
-3. `rules/agents.json` `incite_unrest` 15 → 10 (défaut du code aligné ; spec agents mise à jour).
+3. `rules/agents.json` `incite_unrest` 15 → 12 (défaut du code aligné ; spec agents mise à jour).
 4. Exemples `r3_small_scan` (marge structurelle au tour 0) et `r3_unrest_scan`.
-5. Tests `sim-campaign/tests/omr_r3_small_realms.rs` ; `c6_agents` lit la valeur de la donnée.
+5. Tests `sim-campaign/tests/omr_r3_small_realms.rs` ; `c6_agents` lit la valeur de la donnée ;
+   `cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses` recalé graine 4 → 1
+   (trajectoire : graine 4 ne donne plus qu'un déplacement vers un point ; graine 1 : 12 ordres, 3 embuscades).
+   Attention à l'intégration : R4 sonde aussi les graines de ce fichier.
 
 ## Mesures 50 t. × 5 (graines 1-5)
 | version | banq. toutes | petites | 28 anciennes | révoltes / 200 t. |
@@ -48,31 +51,40 @@ après F8 donnait déjà 10/10 au tour 1 (`docs/wip/fe8-equilibre.md`). Rien à 
 | v2 + démolition/agents | 1,18 | 1,08-1,54 (1,30) | 0,03-0,11 | 24,0 [8-36] |
 | incite 0 (expérience) | 1,20 | 1,14-1,68 | 0,00-0,57 | 0,8 |
 | incite 8 | 1,09 | 0,93-1,40 | 0,00-0,11 | 0,8 [0-4] |
-| **incite 10 (retenu)** | 1,26 | 1,20-1,62 (1,41) | 0,00-0,29 | 8,8 [0-16] |
+| incite 10 | 1,26 | 1,20-1,62 (1,41) | 0,00-0,29 | 8,8 [0-16] |
+| **incite 12 (retenu)** | 1,24 [1,04-1,50] | 1,20-1,69 (1,41) | 0,03-0,69 (0,27) | 12,8 [0-36] |
+
+Sur 50 tours, les révoltes (0 à 9 par graine) et les 28 anciennes (graine 1 : 0,69) sont très bruitées ;
+la sonde de référence est celle de 464 tours.
 
 ## Sonde 464 t. × 10 (graines 1-10, profil release r3)
-| mesure | base 5d64d2bd | après (incite 10) |
-|---|---|---|
-| banqueroutes / fac. / déc. (toutes) | 3,98 [3,81-4,26] | 0,66 [0,61-0,75] |
-| petites factions (≤ 2 prov.) | 4,47 [4,32-4,72] | 0,71 [0,64-0,81] |
-| 28 factions d'avant FE | 0,07 [0,03-0,10] | 0,10 [0,05-0,21] |
-| révoltes / 200 t. | 16,0 [9,1-25,9] | 4,7 [0,0-9,5] (4/10 graines dans 4-10, 6 en dessous) |
-| guerre FR-EN (55-75 %) | 68,4 % [61-75], 10/10 | 67,6 % [60-73], 10/10 |
-| commise de Guyenne | 10/10 au tour 1 | 10/10 au tour 1 |
-| factions éliminées | 100,1 [98-103] | 100,1 [94-105] |
-| 1re faction fin (% prov.) | 9,95 | 9,98 |
-| 4 majeures en vie en 1400 | 10/10 | 10/10 |
-| recettes France t ≤ 50 | 1 699 978 | 1 752 864 |
-
-Essai en cours : incite 12 sur 464 × 10 pour centrer les révoltes dans la bande.
+| mesure | base 5d64d2bd | incite 10 | **incite 12 (retenu)** |
+|---|---|---|---|
+| banqueroutes / fac. / déc. (toutes) | 3,98 [3,81-4,26] | 0,66 [0,61-0,75] | 0,69 [0,64-0,78] |
+| petites factions (≤ 2 prov.) | 4,47 [4,32-4,72] | 0,71 [0,64-0,81] | 0,74 [0,69-0,77] |
+| 28 factions d'avant FE | 0,07 [0,03-0,10] | 0,10 [0,05-0,21] | 0,09 [0,02-0,17] |
+| révoltes / 200 t. (bande 4-10) | 16,0 [9,1-25,9], 2/10 | 4,7 [0,0-9,5], 4/10 | 8,1 [3,4-12,1], 7/10 |
+| guerre FR-EN (55-75 %) | 68,4 % [61-75] | 67,6 % [60-73] | 68,3 % [59-75] |
+| commise de Guyenne | 10/10 au tour 1 | 10/10 au tour 1 | 10/10 au tour 1 |
+| factions éliminées | 100,1 [98-103] | 100,1 [94-105] | 100,0 [96-102] |
+| 1re faction fin (% prov.) | 9,95 | 9,98 | 10,18 |
+| 4 majeures en vie en 1400 | 10/10 | 10/10 | 9/10 (Bourgogne, graine 4) |
+| recettes France t ≤ 50 | 1 699 978 | 1 752 864 | 1 800 536 |
 
 ## État
 - [x] Commise de Guyenne : diagnostic (voulu).
 - [x] Banqueroutes des petites factions.
 - [x] Révoltes (incite 10).
-- [x] Sonde 464 t. × 10 (base et final) ; cargo test --workspace 1 227 ok / 0 échec / 55 ignorés ; clippy, fmt ; pytest 1 246 ok, 2 sautés.
-- [ ] Essai incite 12 (464 × 10).
+- [x] Sonde 464 t. × 10 (base et final) ; cargo test --workspace (incite 12) 1 227 ok / 0 échec / 55 ignorés après recalage cv3 ; clippy, fmt ; pytest 1 246 ok, 2 sautés.
+- [x] Essai incite 12 (464 × 10) : retenu.
+
+## Points ouverts
+- Une centaine de factions sur 177 disparaissent en 1453 (base comme après) : hors R3.
+- Bourgogne éliminée avant 1400 sur 1/10 graine avec incite 12 (0/10 à 10 et en base ; en base
+  elle disparaît après 1400 sur 2 graines) : fragilité de trajectoire à surveiller.
+- ADR 0117 : numéro pris sans coordination avec les autres lots OMR (renuméroter à l'intégration
+  si un autre lot l'a pris).
+- `fac_brandenburg` ne tient aucune province au tour 0 (`prov_brandenburg` à `fac_empire` depuis FE0) : faction morte-née, préexistant, hors R3.
 
 ## Prochaine étape
-Relever les sondes 464 × 10 (`/private/tmp/claude-501/r3/{base,final}_464.txt`), rapport, commit final.
-Disque : 13 Go libres pendant le lot (autres lots) ; empreinte R3 ≈ 1,5 Go (profils r3/r3dev).
+Lot terminé ; intégration par l'orchestrateur (`../gp-omr`).

@@ -34,9 +34,23 @@ Le calcul vit dans `sim_campaign::economy::garrison_share` (entretien de la simu
 l'estimation de l'IA (`ai::campaign::garrison_upkeep`) l'appelle aussi. La prime des
 mercenaires en garnison n'est pas concernée.
 
+Même lot, sans changer de règle :
+
+- **IA en dette** (`ai::campaign::plan_demolitions`, `sim_campaign::agents::plan_agents`) : la
+  démolition se déclenche aussi quand la dette ne se rembourse pas en `DEBT_REPAYMENT_TURNS` (8)
+  au surplus net, tribut au suzerain et agents compris (le compteur de déficit de la simulation
+  les ignore : Tarente, Kildare restaient en dette des décennies sans raser) ; un royaume en dette
+  congédie son agent le plus cher, un par saison.
+- **Révoltes** : `rules/agents.json` `incite_unrest` 15 → 12. Avec 177 factions, les espions
+  postés dans une cité ennemie la soulevaient chaque saison (395 ordres « Soulever » en 50 tours) ;
+  sans incitation, 0,8 révolte / 200 tours en début de partie contre 24.
+
 ## Conséquences
 
 - L'unité que l'IA garde toujours ne peut plus, seule, ruiner un comté ; les grands royaumes
   économisent 45-50 livres par saison (moins de 0,2 % du revenu de la France).
 - Un joueur ne peut pas en abuser : une seule unité, la moins chère, dans une seule place.
-- Chiffres avant/après : `docs/wip/omr-r3.md`.
+- Sonde `century_probe` 464 tours × 10 graines (avant → après) : banqueroutes 3,98 → 0,69 par
+  faction et par décennie, petites factions 4,47 → 0,74, 28 factions d'avant FE 0,07 → 0,09 ;
+  révoltes 16,0 → 8,1 / 200 tours (bande 4-10 : 2/10 → 7/10 graines) ; guerre FR-EN 68 % → 68 %.
+  Détail : `docs/wip/omr-r3.md`.
