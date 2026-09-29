@@ -46,6 +46,16 @@
     "description": {
       "type": "string"
     },
+    "capital_guard": {
+      "type": "object",
+      "description": "Garde du seigneur (lot OMR R3, ADR 0117) : les unités les moins chères de la garnison de la cité capitale d'une faction, entretenues par son domaine ; le trésor n'en paie que upkeep_percent %.",
+      "additionalProperties": false,
+      "required": ["units", "upkeep_percent"],
+      "properties": {
+        "units": { "type": "integer", "minimum": 0, "description": "Nombre d'unités de la garde." },
+        "upkeep_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Part de leur entretien payée par le trésor, en pour cent." }
+      }
+    },
     "garrison_upkeep_percent": {
       "type": "object",
       "description": "Part de l'entretien des unités de garnison payée par le contrôleur, en pour cent, selon le type de colonie (lot C4). Un type absent paie le taux par défaut de la simulation (50 %).",

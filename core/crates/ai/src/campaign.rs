@@ -907,18 +907,19 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
 /// Seasonal upkeep of the faction's garrisons (share paid by the crown by
 /// settlement kind; reliefs, technologies and coinage left out).
 fn garrison_upkeep(ctx: &Context) -> i64 {
-    use sim_campaign::economy::{garrison_upkeep_percent, unit_upkeep};
+    use sim_campaign::economy::{garrison_share, unit_upkeep};
+    let capital = ctx.state.faction_capital_city(ctx.faction);
     ctx.state
         .settlements
-        .values()
-        .filter(|s| &s.controller == ctx.faction)
-        .map(|s| {
-            s.garrison
-                .iter()
-                .map(|u| unit_upkeep(ctx.data, u))
-                .sum::<i64>()
-                * garrison_upkeep_percent(ctx.data, s.kind)
-                / 100
+        .iter()
+        .filter(|(_, s)| &s.controller == ctx.faction)
+        .map(|(id, s)| {
+            garrison_share(
+                ctx.data,
+                s.kind,
+                capital == Some(id),
+                s.garrison.iter().map(|u| unit_upkeep(ctx.data, u)),
+            )
         })
         .sum()
 }

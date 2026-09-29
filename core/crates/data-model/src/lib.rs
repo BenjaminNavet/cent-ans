@@ -120,8 +120,8 @@ pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
 };
 pub use entities::settlement::{
-    FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge, SettlementGraph,
-    SettlementKind, SettlementRules,
+    CapitalGuard, FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge,
+    SettlementGraph, SettlementKind, SettlementRules,
 };
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};

@@ -181,6 +181,11 @@ pub struct SettlementRules {
     /// default (`GARRISON_UPKEEP_PERCENT` of the simulation).
     #[serde(default)]
     pub garrison_upkeep_percent: BTreeMap<SettlementKind, i64>,
+    /// Lot OMR R3 (ADR 0117): the lord's household guard, the cheapest units
+    /// of the capital city's garrison, paid by the domain rather than by the
+    /// treasury. Absent: every garrison unit pays its kind's share.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capital_guard: Option<CapitalGuard>,
     /// Share of the upkeep of a settlement's buildings paid by its
     /// controller, in per cent, by settlement kind (lot C7a); kinds left out
     /// pay in full.
@@ -204,6 +209,17 @@ pub struct SettlementRules {
     pub retreat: RetreatRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// Household guard of a faction's capital city (lot OMR R3, ADR 0117,
+/// `rules.json` § `capital_guard`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CapitalGuard {
+    /// How many units (the cheapest of the capital city's garrison) form the guard.
+    pub units: usize,
+    /// Share of their upkeep paid by the treasury, in per cent.
+    pub upkeep_percent: i64,
 }
 
 /// Retreat of a beaten army (lot C7a, `rules.json` § `retreat`). Radii are
