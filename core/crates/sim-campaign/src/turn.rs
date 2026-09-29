@@ -205,6 +205,8 @@ impl CampaignState {
         }
         // M10: victory, defeat or end of the campaign for the player.
         crate::victory::resolve_victory(self, data, events);
+        // NT3: the player's missions (success, deadline, new offers).
+        crate::missions::resolve_missions(self, data, events);
         self.events = events.clone();
     }
 }

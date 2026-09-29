@@ -194,6 +194,7 @@ func open_panel() -> void:
 		text.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 		row.add_child(text)
 		list.add_child(row)
+	_add_missions_section()
 	panel.show()
 	_fit_centered.call_deferred(panel)
 
@@ -207,7 +208,82 @@ static func _fit_centered(p: Control) -> void:
 	p.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 
 
+## NT3 : section « Missions » (missions à court terme de la faction du joueur, `get_missions`) :
+## objectif, progression, échéance, récompense.
+func _add_missions_section() -> void:
+	if not map.sim.has_method("get_missions"):
+		return
+	list.add_child(HSeparator.new())
+	var heading := Label.new()
+	heading.name = "MissionsHeading"
+	heading.text = "Missions"
+	heading.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
+	list.add_child(heading)
+	var missions: Array = map.sim.call("get_missions")
+	if missions.is_empty():
+		var none := Label.new()
+		none.text = "Aucune mission en cours : de nouvelles viendront selon la situation du royaume."
+		none.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		none.custom_minimum_size.x = WRAP_WIDTH
+		none.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
+		list.add_child(none)
+		return
+	for mission in missions:
+		list.add_child(mission_row(mission))
+
+
+## Ligne d'une mission (`get_missions`), séparée pour le test NT3.
+static func mission_row(mission: Dictionary) -> VBoxContainer:
+	var row := VBoxContainer.new()
+	row.name = "Mission%d" % int(mission.get("id", 0))
+	var head := Label.new()
+	head.name = "Head"
+	var left := int(mission.get("turns_left", 0))
+	head.text = "☐ %s — %s" % [str(mission.get("title", "")), str(mission.get("progress", ""))]
+	head.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
+	head.add_theme_color_override("font_color", Color(0.35, 0.22, 0.10))
+	row.add_child(head)
+	var text := Label.new()
+	text.name = "Objective"
+	text.text = str(mission.get("objective", ""))
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.custom_minimum_size.x = WRAP_WIDTH
+	text.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
+	row.add_child(text)
+	var bar := ProgressBar.new()
+	bar.name = "Progress"
+	bar.min_value = 0.0
+	bar.max_value = 1.0
+	bar.value = float(mission.get("progress_ratio", 0.0))
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(WRAP_WIDTH, 6)
+	row.add_child(bar)
+	var terms := Label.new()
+	terms.name = "Terms"
+	terms.text = "Échéance : %s (%s) — Récompense : %s" % [
+		str(mission.get("deadline", "")),
+		"dernière saison" if left <= 1 else "%d saisons" % left,
+		str(mission.get("reward", ""))]
+	terms.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	terms.custom_minimum_size.x = WRAP_WIDTH
+	terms.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
+	terms.add_theme_color_override("font_color", Color(0.40, 0.30, 0.18))
+	row.add_child(terms)
+	return row
+
+
+## NT3 : avis (toast) des missions obtenues, réussies ou échouées à la fin du tour.
+func show_mission_notices() -> void:
+	if map == null or map.sim == null or not map.sim.has_method("get_mission_notices"):
+		return
+	for notice in map.sim.call("get_mission_notices"):
+		map.ui.show_toast(str(notice.get("text", "")), str(notice.get("kind", "")) == "failed")
+	if panel != null and panel.visible:
+		open_panel()
+
+
 func after_end_turn() -> void:
+	show_mission_notices()
 	if not available():
 		return
 	var outcome: Dictionary = map.sim.call("get_outcome")

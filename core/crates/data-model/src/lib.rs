@@ -96,6 +96,7 @@ pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
 };
 pub use entities::mercenaries::{MercenaryAi, MercenaryArrears, MercenaryBand, MercenaryRules};
+pub use entities::missions::{MissionKind, MissionReward, MissionRules, MissionTemplate};
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
 pub use entities::naval::{
