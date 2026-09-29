@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import time
 from collections.abc import Iterable
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -49,6 +50,7 @@ from cent_ans_tools.geo import (
     relief,
     relief_shade,
     terrain,
+    world_frame,
 )
 from cent_ans_tools.geo.project import MapGrid
 
@@ -59,13 +61,21 @@ PYRAMID_DIR_NAME = "pyramid"
 WORK_DIR = download.RAW_DIR / "pyramid_work"
 TILE_PX = 512
 ROOT_TILE_UNITS = 256
-#: Side of the baked pyramid frame: 16 root tiles of 256 units (the 4096² map
-#: before OM2). Since ADR 0115 the world is 28 x 24 root tiles; the frame sits
-#: at ``root_origin_tiles`` of ``relief_pyramid.json`` (tile (k, col, row) of the
-#: cache = world tile (col + dx·2^k, row + dy·2^k)). Every cooking step works in
-#: this frame so that a recook reproduces the published tiles.
+#: Side of the legacy pyramid frame: 16 root tiles of 256 units (the 4096² map
+#: before OM2). Since ADR 0115 the world is 28 x 24 root tiles. A cache whose
+#: manifest carries a non-zero ``root_origin_tiles`` is in this legacy square
+#: frame, placed at that offset (tile (k, col, row) of the cache = world tile
+#: (col + dx·2^k, row + dy·2^k)); since ADR 0121 (OMR R7) the cache is baked in
+#: the world frame (offset ``[0, 0]``, 28 x 24 root tiles). Geometry helpers
+#: taking ``bounds`` derive the frame size from them (:func:`frame_tiles`).
 E0_SIZE_PX = 8192
 E0_TILES = E0_SIZE_PX // TILE_PX
+#: Metres per world unit (map scale, fixed by ADR 0082) and per root tile.
+UNIT_M = 718.9765625
+ROOT_TILE_M = ROOT_TILE_UNITS * UNIT_M
+#: Tier-1 land box: every land of the frame (ADR 0121; was the GLO-90 box of the
+#: West, ``copernicus.FINE_BBOX``, before OMR R7).
+TIER1_BBOX = (-180.0, -90.0, 180.0, 90.0)
 
 TIER1_LEVELS = (1, 2)
 TIER2_LEVELS = (3, 4)
@@ -97,6 +107,20 @@ GLO90_RES_DEG = 1.0 / 1200.0
 #: 2 (SZ2): valley floors not dug (:func:`relief_shade.valley_floor`).
 BAKE_VERSION = 2
 TIER_NAMES = {TIER1_LEVELS: "tier1", TIER2_LEVELS: "tier2"}
+#: Bake version per tier. Tier 1: 3 (OMR R7, ADR 0121): world frame, every land
+#: of the 28 x 24 world from GLO-90 (was the West box only).
+TIER_VERSIONS = {"tier1": 3, "tier2": BAKE_VERSION}
+#: Tier-1 bake streamed by blocks of ``STREAM_BLOCK`` x ``STREAM_BLOCK`` E1 tiles:
+#: download the block's GLO-90 tiles, bake, delete the raw tiles no later block
+#: needs (outside ``copernicus.FINE_BBOX``, kept for ``geo relief-shade``).
+STREAM_BLOCK = 4
+#: Stop the streamed bake (cleanly, resumable) below this free disk space.
+STREAM_MIN_FREE_BYTES = 25 * 1024**3
+#: Manifest fields of E1-E2 (ADR 0121).
+TIER1_MANIFEST = {
+    "source": "Copernicus DEM GLO-90",
+    "bbox_lonlat": [-11.0, 28.0, 61.0, 66.0],
+}
 
 
 @dataclass(frozen=True)
@@ -136,23 +160,62 @@ class PyramidResult:
 
 
 def level_size_px(level: int) -> int:
-    """Side of the virtual grid of ``level`` in pixels (E0 = 8192)."""
+    """Side of the virtual grid of ``level`` in the legacy square frame (E0 = 8192)."""
     return E0_SIZE_PX << level
 
 
 def level_tiles(level: int) -> int:
-    """Tiles per side at ``level`` (E0 = 16)."""
+    """Tiles per side at ``level`` in the legacy square frame (E0 = 16)."""
     return E0_TILES << level
 
 
+def _root_count(length_m: float) -> int:
+    """Root tiles along a side of ``length_m`` (legacy 16 for synthetic bounds)."""
+    count = length_m / ROOT_TILE_M
+    rounded = round(count)
+    if rounded > 0 and abs(count - rounded) < 1e-6:
+        return int(rounded)
+    return E0_TILES
+
+
+def frame_tiles(bounds: tuple[float, float, float, float]) -> tuple[int, int]:
+    """``(cols, rows)`` of root tiles of the frame over ``bounds``.
+
+    Real bounds are whole root tiles of :data:`ROOT_TILE_M` (16 x 16 for the
+    legacy frame, 28 x 24 for the world); other (synthetic, test) bounds are
+    taken as the legacy square of 16 root tiles.
+    """
+    cols = _root_count(bounds[2] - bounds[0])
+    rows = _root_count(bounds[3] - bounds[1])
+    if cols == E0_TILES or rows == E0_TILES:
+        width, height = bounds[2] - bounds[0], bounds[3] - bounds[1]
+        if abs(width - height) < 1e-6 * max(width, 1.0):
+            return E0_TILES, E0_TILES
+    return cols, rows
+
+
+def frame_width_units(bounds: tuple[float, float, float, float]) -> float:
+    """Width of the frame in world units (4096 legacy, 7168 world)."""
+    return float(frame_tiles(bounds)[0] * ROOT_TILE_UNITS)
+
+
+def level_shape_tiles(
+    bounds: tuple[float, float, float, float], level: int
+) -> tuple[int, int]:
+    """``(cols, rows)`` of tiles of ``level`` over the frame."""
+    cols, rows = frame_tiles(bounds)
+    return cols << level, rows << level
+
+
 def level_grid(bounds: tuple[float, float, float, float], level: int) -> MapGrid:
-    """EPSG:3035 grid of ``level`` over the map bounds."""
-    return MapGrid(tuple(bounds), level_size_px(level))
+    """EPSG:3035 grid of ``level`` over the frame bounds."""
+    cols, rows = level_shape_tiles(bounds, level)
+    return MapGrid(tuple(bounds), cols * TILE_PX, rows * TILE_PX)
 
 
 def level_meters_per_px(bounds: tuple[float, float, float, float], level: int) -> float:
     """Pixel size of ``level`` in metres."""
-    return (bounds[2] - bounds[0]) / level_size_px(level)
+    return (bounds[2] - bounds[0]) / (level_shape_tiles(bounds, level)[0] * TILE_PX)
 
 
 def tile_window(key: TileKey) -> tuple[int, int, int, int]:
@@ -164,7 +227,7 @@ def tile_bounds(
     bounds: tuple[float, float, float, float], key: TileKey
 ) -> tuple[float, float, float, float]:
     """``(minx, miny, maxx, maxy)`` of a tile in EPSG:3035 metres."""
-    side = (bounds[2] - bounds[0]) / level_tiles(key.level)
+    side = (bounds[2] - bounds[0]) / level_shape_tiles(bounds, key.level)[0]
     minx = bounds[0] + key.col * side
     maxy = bounds[3] - key.row * side
     return minx, maxy - side, minx + side, maxy
@@ -184,7 +247,7 @@ def e0_coordinates(level: int, start: int, count: int) -> np.ndarray:
 def sample_e0_grid(
     array: np.ndarray, level: int, window: tuple[int, int, int, int], order: int = 1
 ) -> np.ndarray:
-    """Bilinear (``order=1``) or nearest (``order=0``) sample of an 8192² array.
+    """Bilinear (``order=1``) or nearest (``order=0``) sample of an E0-grid array.
 
     Args:
         array: E0-grid array (may be a memory map).
@@ -198,11 +261,11 @@ def sample_e0_grid(
     col0, row0, cols, rows = window
     xs = e0_coordinates(level, col0, cols)
     ys = e0_coordinates(level, row0, rows)
-    size = array.shape[0]
+    height, width = array.shape[:2]
     x_lo = max(int(np.floor(xs[0])) - 1, 0)
-    x_hi = min(int(np.ceil(xs[-1])) + 2, size)
+    x_hi = min(int(np.ceil(xs[-1])) + 2, width)
     y_lo = max(int(np.floor(ys[0])) - 1, 0)
-    y_hi = min(int(np.ceil(ys[-1])) + 2, size)
+    y_hi = min(int(np.ceil(ys[-1])) + 2, height)
     sub = np.asarray(array[y_lo:y_hi, x_lo:x_hi], dtype=np.float32)
     if order == 0:
         ix = np.clip(np.rint(xs).astype(np.int64) - x_lo, 0, sub.shape[1] - 1)
@@ -467,17 +530,20 @@ def root_origin_tiles(map_dir: Path = MAP_DIR) -> tuple[int, int]:
 def map_bounds(map_dir: Path = MAP_DIR) -> tuple[float, float, float, float]:
     """EPSG:3035 bounds of the pyramid frame (see :data:`E0_SIZE_PX`).
 
-    The frame is ``E0_TILES`` root tiles square, placed at ``root_origin_tiles``
-    inside the ``map.json`` world. World units of the frame (CAFV points, tile
-    addresses) are the world units minus ``root_origin_tiles × 256``.
+    World frame (``root_origin_tiles`` ``[0, 0]``, ADR 0121): the ``map.json``
+    bounds. Legacy frame: ``E0_TILES`` root tiles square, placed at
+    ``root_origin_tiles`` inside the world; world units of that frame (CAFV
+    points, tile addresses) are the world units minus ``root_origin_tiles × 256``.
     """
     metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
-    minx, _, _, maxy = metadata["bounds_projected"]
-    mpp = float(metadata["meters_per_px"])
+    minx, miny, maxx, maxy = (float(v) for v in metadata["bounds_projected"])
     dx, dy = root_origin_tiles(map_dir)
+    if (dx, dy) == (0, 0):
+        return (minx, miny, maxx, maxy)
+    mpp = float(metadata["meters_per_px"])
     unit_m = ROOT_TILE_UNITS * mpp
-    x0 = float(minx) + dx * unit_m
-    y1 = float(maxy) - dy * unit_m
+    x0 = minx + dx * unit_m
+    y1 = maxy - dy * unit_m
     side = E0_TILES * unit_m
     return (x0, y1 - side, x0 + side, y1)
 
@@ -504,13 +570,14 @@ def require_world_frame(map_dir: Path, step: str) -> None:
 
 
 def frame_fine_grid(map_dir: Path = MAP_DIR) -> MapGrid:
-    """The E0 grid (8192²) over the pyramid frame."""
-    return MapGrid(map_bounds(map_dir), E0_SIZE_PX)
+    """The E0 grid over the pyramid frame (8192² legacy, 14336 x 12288 world)."""
+    return level_grid(map_bounds(map_dir), 0)
 
 
 def e0_heights(map_dir: Path = MAP_DIR) -> np.ndarray:
-    """The E0 tiles of the pyramid frame (8192², metres, ``float32``)."""
+    """The E0 tiles of the pyramid frame (metres, ``float32``)."""
     dx, dy = root_origin_tiles(map_dir)
+    cols, rows_count = frame_tiles(map_bounds(map_dir))
     rows = [
         np.hstack(
             [
@@ -519,10 +586,10 @@ def e0_heights(map_dir: Path = MAP_DIR) -> np.ndarray:
                     / relief.TILE_DIR
                     / relief.TILE_PATTERN.format(col=col + dx, row=row + dy)
                 )
-                for col in range(E0_TILES)
+                for col in range(cols)
             ]
         )
-        for row in range(E0_TILES)
+        for row in range(rows_count)
     ]
     return terrain.uint16_to_height(np.vstack(rows)).astype(np.float32)
 
@@ -554,9 +621,11 @@ def bbox_mask_e0(
     grid0: MapGrid, bbox: tuple[float, float, float, float], step: int = 8
 ) -> np.ndarray:
     """E0-grid mask of the pixels inside a lon/lat box (sampled every ``step`` px)."""
-    coarse = grid0.width_px // step
-    centres = (np.arange(coarse) + 0.5) * step
-    px, py = np.meshgrid(centres, centres)
+    coarse_x = grid0.width_px // step
+    coarse_y = grid0.height_px // step
+    px, py = np.meshgrid(
+        (np.arange(coarse_x) + 0.5) * step, (np.arange(coarse_y) + 0.5) * step
+    )
     lon, lat = grid0.pixel_to_lonlat(px.ravel(), py.ravel())
     lon_min, lat_min, lon_max, lat_max = bbox
     inside = (
@@ -564,12 +633,12 @@ def bbox_mask_e0(
         & (np.asarray(lon) <= lon_max)
         & (np.asarray(lat) >= lat_min)
         & (np.asarray(lat) <= lat_max)
-    ).reshape(coarse, coarse)
+    ).reshape(coarse_y, coarse_x)
     return np.repeat(np.repeat(inside, step, axis=0), step, axis=1)
 
 
 def prepare_work(map_dir: Path = MAP_DIR, force: bool = False) -> dict[str, Path]:
-    """Cache the 8192² inputs shared by every worker (memory-mapped ``.npy``).
+    """Cache the E0-grid inputs shared by every worker (memory-mapped ``.npy``).
 
     - ``e0.npy``: E0 heights (m).
     - ``base.npy``: blurred Copernicus + ETOPO mosaic the E0 boost used.
@@ -787,10 +856,11 @@ def build(
     workers: int | None = None,
     map_dir: Path = MAP_DIR,
     limit: int | None = None,
+    stream: bool = True,
 ) -> PyramidResult:
     """Bake the requested levels (resuming: tiles on disk are kept unless ``force``).
 
-    A whole tier whose cache stamp is not the current :data:`BAKE_VERSION` is
+    A whole tier whose cache stamp is not the current :data:`TIER_VERSIONS` is
     rebaked as with ``force``, and an interrupted forced bake resumes: only
     tiles older than its start are rebaked (:mod:`bake_stamp`).
 
@@ -800,6 +870,8 @@ def build(
         workers: Processes (default: every core).
         map_dir: ``data/map``.
         limit: Bake at most this many units per tier (tests, trials).
+        stream: Tier 1: download the missing GLO-90 tiles block by block and
+            delete them once baked (:func:`_run_tier1_streamed`).
     """
     started = time.perf_counter()
     workers = workers or os.cpu_count() or 1
@@ -807,16 +879,20 @@ def build(
     written: list[tuple[int, int]] = []
     skipped = 0
     pyramid_dir = map_dir / PYRAMID_DIR_NAME
+    if world_frame.cache_origin(pyramid_dir) is None:
+        world_frame.write_frame(pyramid_dir, root_origin_tiles(map_dir))
     tier1 = tuple(level for level in levels if level in TIER1_LEVELS)
     if tier1:
         since = _begin_tier(pyramid_dir, TIER1_LEVELS, tier1, force)
         jobs, skip = _tier1_jobs(map_dir, tier1, since)
         skipped += skip
-        written += _run_units(
-            tier1_unit, jobs[:limit], paths, map_dir, workers, "E1-E2"
+        done, complete = _run_tier1_streamed(
+            jobs[:limit], paths, map_dir, workers, stream
         )
-        refresh_manifest(map_dir, tier1)
-        _finish_tier(map_dir, TIER1_LEVELS, tier1, since, limit, len(jobs))
+        written += done
+        refresh_manifest(map_dir, tier1, {level: TIER1_MANIFEST for level in tier1})
+        if complete:
+            _finish_tier(map_dir, TIER1_LEVELS, tier1, since, limit, len(jobs))
     tier2 = tuple(level for level in levels if level in TIER2_LEVELS)
     if tier2:
         from cent_ans_tools.geo import surface
@@ -843,6 +919,111 @@ def build(
     )
 
 
+def glo90_names_for(grid2: MapGrid, key: TileKey, available: set[str]) -> set[str]:
+    """GLO-90 tiles of the bucket read by :func:`tier1_unit` for E1 tile ``key``."""
+    from cent_ans_tools.geo import glo30
+
+    window2 = (key.col * 2 * TILE_PX, key.row * 2 * TILE_PX, 2 * TILE_PX, 2 * TILE_PX)
+    lon_min, lat_min, lon_max, lat_max = glo30.window_lonlat(grid2, window2)
+    names = set()
+    for lat in range(int(np.floor(lat_min)), int(np.ceil(lat_max))):
+        for lon in range(int(np.floor(lon_min)), int(np.ceil(lon_max))):
+            name = copernicus.tile_name(lon, lat)
+            if name in available:
+                names.add(name)
+    return names
+
+
+def _in_fine_bbox(name: str) -> bool:
+    corner = copernicus.parse_tile_name(name)
+    if corner is None:
+        return False
+    lon, lat = corner
+    lon_min, lat_min, lon_max, lat_max = copernicus.FINE_BBOX
+    return lon + 1 > lon_min and lon < lon_max and lat + 1 > lat_min and lat < lat_max
+
+
+def _run_tier1_streamed(
+    jobs: list[tuple],
+    paths: dict[str, Path],
+    map_dir: Path,
+    workers: int,
+    stream: bool,
+) -> tuple[list[tuple[int, int]], bool]:
+    """Bake tier-1 jobs block by block, fetching and freeing GLO-90 as it goes.
+
+    Blocks of :data:`STREAM_BLOCK`² E1 tiles, in row order. Before a block: stop
+    (resumable) if the disk has less than :data:`STREAM_MIN_FREE_BYTES` free,
+    download its missing GLO-90 tiles; after it: delete the raw tiles no later
+    block reads (outside ``copernicus.FINE_BBOX`` only).
+
+    Returns:
+        ``(level, bytes)`` written, and whether every job ran.
+    """
+    if not jobs:
+        return [], True
+    if not stream:
+        return _run_units(tier1_unit, jobs, paths, map_dir, workers, "E1-E2"), True
+    grid2 = level_grid(map_bounds(map_dir), 2)
+    available = set()
+    for line in copernicus.tile_list():
+        corner = copernicus.parse_tile_name(line)
+        if corner is not None:
+            available.add(copernicus.tile_name(*corner))
+    blocks: dict[tuple[int, int], list[tuple]] = {}
+    for job in jobs:
+        key = job[0]
+        blocks.setdefault(
+            (key.row // STREAM_BLOCK, key.col // STREAM_BLOCK), []
+        ).append(job)
+    order = sorted(blocks)
+    needs = {
+        block: set().union(
+            *(glo90_names_for(grid2, j[0], available) for j in blocks[block])
+        )
+        for block in order
+    }
+    last_use: dict[str, int] = {}
+    for index, block in enumerate(order):
+        for name in needs[block]:
+            last_use[name] = index
+    written: list[tuple[int, int]] = []
+    fetched_bytes = 0
+    for index, block in enumerate(order):
+        free = shutil.disk_usage(map_dir).free
+        if free < STREAM_MIN_FREE_BYTES:
+            print(
+                f"  E1-E2 : arrêt, {free / 1024**3:.1f} Gio libres "
+                f"(< {STREAM_MIN_FREE_BYTES / 1024**3:.0f}) ; relancer pour reprendre",
+                flush=True,
+            )
+            return written, False
+        missing = sorted(
+            name for name in needs[block] if not copernicus.tile_path(name).exists()
+        )
+        if missing:
+            fetched = copernicus.fetch_tiles(missing)
+            fetched_bytes += sum(p.stat().st_size for p in fetched if p.exists())
+        label = f"E1-E2 bloc {index + 1}/{len(order)}"
+        written += _run_units(tier1_unit, blocks[block], paths, map_dir, workers, label)
+        for name in needs[block]:
+            path = copernicus.tile_path(name)
+            if (
+                last_use[name] == index
+                and not _in_fine_bbox(name)
+                and path.exists()
+                and not path.is_symlink()
+            ):
+                path.unlink()
+        print(
+            f"  {label} : {len(blocks[block])} unités, {len(missing)} tuiles GLO-90 "
+            f"téléchargées ({fetched_bytes / 1e9:.2f} Go en tout), "
+            f"{shutil.disk_usage(map_dir).free / 1024**3:.1f} Gio libres",
+            flush=True,
+        )
+    return written, True
+
+
 def _begin_tier(
     pyramid_dir: Path,
     tier_levels: tuple[int, ...],
@@ -857,7 +1038,8 @@ def _begin_tier(
     """
     if levels != tier_levels:
         return time.time() if force else None
-    return bake_stamp.begin(pyramid_dir, TIER_NAMES[tier_levels], BAKE_VERSION, force)
+    name = TIER_NAMES[tier_levels]
+    return bake_stamp.begin(pyramid_dir, name, TIER_VERSIONS[name], force)
 
 
 def _finish_tier(
@@ -868,20 +1050,20 @@ def _finish_tier(
     limit: int | None,
     jobs: int,
 ) -> None:
-    """Stamp a whole tier as baked by :data:`BAKE_VERSION` once every job ran."""
+    """Stamp a whole tier as baked by :data:`TIER_VERSIONS` once every job ran."""
     if levels != tier_levels or (limit is not None and limit < jobs):
         return
     name = TIER_NAMES[tier_levels]
-    bake_stamp.finish(map_dir / PYRAMID_DIR_NAME, name, BAKE_VERSION, since)
-    set_manifest_bake_versions(map_dir, {name: BAKE_VERSION})
+    bake_stamp.finish(map_dir / PYRAMID_DIR_NAME, name, TIER_VERSIONS[name], since)
+    set_manifest_bake_versions(map_dir, {name: TIER_VERSIONS[name]})
 
 
 def _tier1_jobs(
     map_dir: Path, levels: tuple[int, ...], since: float | None
 ) -> tuple[list, int]:
-    """One job per E1 tile holding land of the fine bbox; done ones skipped."""
-    e1 = candidate_tiles(map_dir, 1, copernicus.FINE_BBOX)
-    e2 = candidate_tiles(map_dir, 2, copernicus.FINE_BBOX)
+    """One job per E1 tile holding land of the frame; done ones skipped."""
+    e1 = candidate_tiles(map_dir, 1, TIER1_BBOX)
+    e2 = candidate_tiles(map_dir, 2, TIER1_BBOX)
     jobs, skipped = [], 0
     for col, row in sorted(e1, key=lambda t: (t[1], t[0])):
         key = TileKey(1, col, row)

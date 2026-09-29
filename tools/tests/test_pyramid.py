@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from jsonschema import Draft202012Validator
 
-from cent_ans_tools.geo import pyramid, relief_shade, surface, terrain
+from cent_ans_tools.geo import copernicus, pyramid, relief_shade, surface, terrain
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 MAP_DIR = DATA / "map"
@@ -307,7 +307,17 @@ def test_e1_mean_matches_e0() -> None:
     median gap stays under a metre and the mean is unbiased.
     """
     diffs = []
+    # E0 is GLO-90 only inside the West box (ETOPO elsewhere, ADR 0121): compare there.
+    grid1 = pyramid.level_grid(pyramid.map_bounds(MAP_DIR), 1)
+    lon_min, lat_min, lon_max, lat_max = copernicus.FINE_BBOX
     for col, row in _cached(1)[::7]:
+        lon, lat = grid1.pixel_to_lonlat(
+            np.array([(col + 0.5) * 512]), np.array([(row + 0.5) * 512])
+        )
+        if not (
+            lon_min + 1 < lon[0] < lon_max - 1 and lat_min + 1 < lat[0] < lat_max - 1
+        ):
+            continue
         key = pyramid.TileKey(1, col, row)
         child = terrain.uint16_to_height(
             terrain.read_png16(pyramid.tile_path(MAP_DIR, key))
@@ -341,6 +351,8 @@ def test_e2_mean_is_e1() -> None:
         parent = parent[dy * 256 : (dy + 1) * 256, dx * 256 : (dx + 1) * 256]
         mean = relief_shade.block_mean(child.astype(np.float32), 2)
         land = parent > 1.0
+        if not land.any():  # Caspian depression, salt flats
+            continue
         assert np.percentile(np.abs(mean - parent)[land], 99) < 0.2
         checked += 1
     assert checked > 0
@@ -361,14 +373,24 @@ def test_tile_write_is_atomic(tmp_path: Path) -> None:
     shutil.rmtree(map_dir)
 
 
-def test_pyramid_frame_sits_at_root_origin_tiles() -> None:
-    """OM2 (ADR 0115): the baked pyramid keeps the former 4096² frame at (0, 5) root tiles."""
+def test_pyramid_is_in_the_world_frame() -> None:
+    """OMR R7 (ADR 0121): the pyramid is baked in the 28 x 24 world frame."""
     manifest = json.loads((MAP_DIR / "relief_pyramid.json").read_text(encoding="utf-8"))
-    assert manifest["root_origin_tiles"] == [0, 5]
-    assert pyramid.root_origin_tiles(MAP_DIR) == (0, 5)
-    assert pyramid.map_bounds(MAP_DIR) == (2169486.0, 1327858.0, 5114414.0, 4272786.0)
-    with pytest.raises(RuntimeError):
-        pyramid.require_world_frame(MAP_DIR, "test")
+    assert manifest["root_origin_tiles"] == [0, 0]
+    assert pyramid.root_origin_tiles(MAP_DIR) == (0, 0)
+    bounds = pyramid.map_bounds(MAP_DIR)
+    assert bounds == (2169486.0, 775684.0, 7323110.0, 5193076.0)
+    assert pyramid.frame_tiles(bounds) == (28, 24)
+    assert pyramid.frame_width_units(bounds) == 7168.0
+    assert pyramid.level_grid(bounds, 2).shape == (24 * 4 * 512, 28 * 4 * 512)
+    pyramid.require_world_frame(MAP_DIR, "test")
+
+
+def test_frame_tiles_of_legacy_and_synthetic_bounds() -> None:
+    """The legacy square frame and synthetic test bounds are 16 x 16 root tiles."""
+    assert pyramid.frame_tiles(BOUNDS) == (16, 16)
+    assert pyramid.frame_tiles((0.0, 0.0, 819200.0, 819200.0)) == (16, 16)
+    assert pyramid.frame_width_units(BOUNDS) == 4096.0
 
 
 def test_e0_heights_read_the_frame_window(tmp_path: Path) -> None:
@@ -376,6 +398,7 @@ def test_e0_heights_read_the_frame_window(tmp_path: Path) -> None:
     (tmp_path / "relief_pyramid.json").write_text(
         json.dumps({"root_origin_tiles": [1, 2]}), encoding="utf-8"
     )
+    shutil.copy(MAP_DIR / "map.json", tmp_path / "map.json")
     height_dir = tmp_path / "height"
     height_dir.mkdir()
     for row in range(2, 2 + pyramid.E0_TILES):

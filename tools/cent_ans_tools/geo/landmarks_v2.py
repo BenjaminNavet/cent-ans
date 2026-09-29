@@ -63,8 +63,10 @@ def local_to_lonlat(points: np.ndarray, origin: list[float]) -> np.ndarray:
 def local_to_units(
     points: np.ndarray, origin: list[float], bounds: list[float]
 ) -> np.ndarray:
-    """Local offsets to map world units (4096 px grid, +y southwards)."""
-    mpp = (bounds[2] - bounds[0]) / 4096.0
+    """Local offsets to map world units (+y southwards) over the frame ``bounds``."""
+    from cent_ans_tools.geo import pyramid  # noqa: PLC0415 - heavy, import cycle
+
+    mpp = (bounds[2] - bounds[0]) / pyramid.frame_width_units(tuple(bounds))
     points = np.asarray(points, dtype=np.float64).reshape(-1, 2)
     return np.column_stack(
         [
@@ -244,7 +246,7 @@ def fine_river_lines(
     from cent_ans_tools.geo import pyramid  # noqa: PLC0415 - heavy, import cycle
 
     bounds = pyramid.map_bounds(map_dir)  # frame of the fine tiles (OM2)
-    mpp = (bounds[2] - bounds[0]) / 4096.0
+    mpp = (bounds[2] - bounds[0]) / pyramid.frame_width_units(bounds)
     origin = city["origin_3035"]
     reach = float(city["extent_m"]) + 400.0
     center = local_to_units(np.zeros((1, 2)), origin, bounds)[0]

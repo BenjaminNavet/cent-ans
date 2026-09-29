@@ -192,7 +192,11 @@ def prepare_naturalearth(map_dir: Path, force: bool = False) -> Path:
     path = links_cache("naturalearth")
     if path.exists() and not force:
         return path
-    grid = MapGrid(pyramid.map_bounds(map_dir), 4096)
+    bounds = pyramid.map_bounds(map_dir)
+    cols, rows = pyramid.frame_tiles(bounds)
+    grid = MapGrid(
+        bounds, cols * pyramid.ROOT_TILE_UNITS, rows * pyramid.ROOT_TILE_UNITS
+    )
     table = hydro_sources.read_natural_earth(map_dir / "rivers.geojson", grid)
     table.save(path)
     return path
@@ -216,8 +220,8 @@ def core_mask(relief: fine_relief.FineRelief, points: np.ndarray) -> np.ndarray:
     u, v = relief.level_coords(points[:, 0], points[:, 1], 3)
     col = np.floor((u + 0.5) / fine_relief.TILE_PX).astype(np.int64)
     row = np.floor((v + 0.5) / fine_relief.TILE_PX).astype(np.int64)
-    side = grid.shape[0]
-    inside = (col >= 0) & (col < side) & (row >= 0) & (row < side)
+    rows, cols = grid.shape
+    inside = (col >= 0) & (col < cols) & (row >= 0) & (row < rows)
     out = np.zeros(len(points), dtype=bool)
     out[inside] = grid[row[inside], col[inside]]
     return out
@@ -229,13 +233,14 @@ def coverage_raster(
     """Cells (``COVERAGE_CELL_M``) reached by the national networks, dilated by one."""
     from scipy import ndimage
 
-    size = int(np.ceil((bounds[2] - bounds[0]) / COVERAGE_CELL_M))
-    grid = np.zeros((size, size), dtype=bool)
+    width = int(np.ceil((bounds[2] - bounds[0]) / COVERAGE_CELL_M))
+    height = int(np.ceil((bounds[3] - bounds[1]) / COVERAGE_CELL_M))
+    grid = np.zeros((height, width), dtype=bool)
     for table in tables:
         for line in table.lines:
             col = ((line[:, 0] - bounds[0]) // COVERAGE_CELL_M).astype(np.int64)
             row = ((bounds[3] - line[:, 1]) // COVERAGE_CELL_M).astype(np.int64)
-            ok = (col >= 0) & (col < size) & (row >= 0) & (row < size)
+            ok = (col >= 0) & (col < width) & (row >= 0) & (row < height)
             grid[row[ok], col[ok]] = True
     return ndimage.binary_dilation(grid, iterations=1)
 
@@ -244,10 +249,10 @@ def covered(
     raster: np.ndarray, bounds: tuple[float, float, float, float], points: np.ndarray
 ) -> np.ndarray:
     """Points in covered cells of :func:`coverage_raster`."""
-    size = raster.shape[0]
+    height, width = raster.shape
     col = ((points[:, 0] - bounds[0]) // COVERAGE_CELL_M).astype(np.int64)
     row = ((bounds[3] - points[:, 1]) // COVERAGE_CELL_M).astype(np.int64)
-    ok = (col >= 0) & (col < size) & (row >= 0) & (row < size)
+    ok = (col >= 0) & (col < width) & (row >= 0) & (row < height)
     out = np.zeros(len(points), dtype=bool)
     out[ok] = raster[row[ok], col[ok]]
     return out
@@ -759,9 +764,11 @@ def tile_lines(
     bounds: tuple[float, float, float, float],
 ) -> dict[tuple[int, int], fine_tiles.TileLines]:
     """Simplify, convert to world units and cut every line along the E2 tiles."""
-    mpp = (bounds[2] - bounds[0]) / 4096.0
+    mpp = (bounds[2] - bounds[0]) / pyramid.frame_width_units(bounds)
     side = fine_tiles.tile_units(fine_tiles.TILE_LEVEL)
-    limit = int(round(4096 / side))
+    frame_cols, frame_rows = pyramid.frame_tiles(bounds)
+    limit_cols = frame_cols << fine_tiles.TILE_LEVEL
+    limit_rows = frame_rows << fine_tiles.TILE_LEVEL
     tiles: dict[tuple[int, int], fine_tiles.TileLines] = defaultdict(
         fine_tiles.TileLines
     )
@@ -783,7 +790,7 @@ def tile_lines(
             ]
         )
         for col, row, xy, att in fine_tiles.split_by_tiles(units, attrs, side):
-            if not (0 <= col < limit and 0 <= row < limit):
+            if not (0 <= col < limit_cols and 0 <= row < limit_rows):
                 continue  # off the map (Natural Earth near the edges)
             piece_bits = att[:, 2].astype(np.int64)
             tiles[(col, row)].add(

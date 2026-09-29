@@ -54,13 +54,17 @@ class FineRelief:
         self.max_level = max_level
         self.min_level = min_level
         self.cache_tiles = cache_tiles
+        # Root tiles of the frame: 16 x 16 legacy, 28 x 24 world (ADR 0121).
+        from cent_ans_tools.geo import pyramid  # noqa: PLC0415 - import cycle
+
+        self.frame_cols, self.frame_rows = pyramid.frame_tiles(self.bounds)
         self._cache: OrderedDict[tuple[int, int, int], np.ndarray] = OrderedDict()
         self.present: dict[int, np.ndarray] = {}
         for level in range(min_level, max_level + 1):
-            side = E0_TILES << level
-            grid = np.zeros((side, side), dtype=bool)
+            cols, rows = self.frame_cols << level, self.frame_rows << level
+            grid = np.zeros((rows, cols), dtype=bool)
             for col, row in self._scan(level):
-                if 0 <= col < side and 0 <= row < side:
+                if 0 <= col < cols and 0 <= row < rows:
                     grid[row, col] = True
             self.present[level] = grid
 
@@ -106,7 +110,7 @@ class FineRelief:
 
     def pixel_m(self, level: int) -> float:
         """Pixel size of ``level`` in metres."""
-        return self.width_m / ((E0_TILES * TILE_PX) << level)
+        return self.width_m / ((self.frame_cols * TILE_PX) << level)
 
     def level_coords(
         self, x: np.ndarray, y: np.ndarray, level: int
@@ -129,8 +133,8 @@ class FineRelief:
             u, v = self.level_coords(x, y, level)
             col = np.floor((u + 0.5) / TILE_PX).astype(np.int64)
             row = np.floor((v + 0.5) / TILE_PX).astype(np.int64)
-            side = grid.shape[0]
-            inside = (col >= 0) & (col < side) & (row >= 0) & (row < side)
+            rows, cols = grid.shape
+            inside = (col >= 0) & (col < cols) & (row >= 0) & (row < rows)
             hit = np.zeros(x.shape, dtype=bool)
             hit[inside] = grid[row[inside], col[inside]]
             result[hit] = level
@@ -141,13 +145,13 @@ class FineRelief:
     def _gather(self, level: int, px: np.ndarray, py: np.ndarray) -> np.ndarray:
         """Pixel values at integer coordinates of ``level`` (NaN without a tile)."""
         out = np.full(px.shape, np.nan, dtype=np.float32)
-        side = self.present[level].shape[0]
-        px = np.clip(px, 0, side * TILE_PX - 1)
-        py = np.clip(py, 0, side * TILE_PX - 1)
+        rows, cols = self.present[level].shape
+        px = np.clip(px, 0, cols * TILE_PX - 1)
+        py = np.clip(py, 0, rows * TILE_PX - 1)
         col, row = px // TILE_PX, py // TILE_PX
-        key = row * side + col
+        key = row * cols + col
         for k in np.unique(key):
-            r, c = int(k // side), int(k % side)
+            r, c = int(k // cols), int(k % cols)
             if not self.present[level][r, c]:
                 continue
             mask = key == k

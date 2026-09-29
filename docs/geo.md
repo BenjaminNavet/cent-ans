@@ -125,7 +125,7 @@ Total ≈ 9 min 20. Après une modification des seules graines ou colonies :
   des masses terrestres de la grille ne les compte pas (Scandinavie et continent ne sont reliés
   que par elles). Une province insulaire trop loin de toute côte (Gotland) reçoit une liaison
   maritime vers la province la plus proche.
-- **Pyramide** : rien n'est recuit. `relief_pyramid.json` porte `root_origin_tiles: [0, 5]` :
+- **Pyramide** (avant R7, voir ADR 0121) : rien n'est recuit. `relief_pyramid.json` porte `root_origin_tiles: [0, 5]` :
   la tuile (k, col, row) du cache est la tuile monde (col, row + 5·2^k). Le code de cuisson
   travaille dans ce cadre (`pyramid.map_bounds` = ancien carré 4096², `FineRelief` relit E0 avec
   le décalage) ; les points des tuiles CAFV (fleuves et routes fins) sont en unités de ce cadre.
@@ -310,6 +310,34 @@ Décor sans état de jeu (spec § 3.3). Source : GeoNames `cities500` (CC BY 4.0
 `data/map/hamlets.json` : `[{"name", "px": [x, y], "province"}]`, nom GeoNames `name` (forme
 locale, pas `asciiname`), une entrée par ligne. Relevé du 2026-09-24 : 2 999 hameaux dans les 132
 provinces (71 306 candidats), 0,2 Mo.
+
+## Relief fin dans le cadre monde, palier 1 sur tout le monde (lot OMR R7, ADR 0121)
+
+Depuis R7, la pyramide est dans le cadre du monde (`root_origin_tiles` [0, 0], 28 × 24 tuiles
+racines) : l'ancien carré de l'Ouest ([0, 5]) a été **renommé** (tuile (k, c, r) → (k, c,
+r + 5·2^k), CAFV décalés de +1280 unités en y), pas recuit. Le palier 1 (E1-E2, GLO-90) couvre
+toutes les terres du monde OM et a été recuit en entier (`tier1` version 3) ; E3-E7 restent sur
+le cœur et les zones de détail de l'Ouest (pas de GLO-30 à l'Est).
+
+```sh
+uv run --project tools cent-ans geo pyramid --levels 1,2        # en flux : blocs de 4 × 4 tuiles E1
+uv run --project tools cent-ans geo relief-reframe              # cache d'avant R7 → cadre monde (sur place)
+uv run --project tools cent-ans geo relief-reframe --src <cache>   # depuis un autre cache (liens durs)
+```
+
+- **Flux** : pour chaque bloc, les tuiles GLO-90 manquantes sont téléchargées, le bloc cuit, puis
+  les tuiles qu'aucun bloc suivant ne lit sont supprimées (sauf l'emprise de l'Ouest, gardée pour
+  `geo relief-shade`) ; arrêt propre sous 25 Gio libres, reprise en relançant.
+- **Relevé du 29/09/2026** (M4 Pro, machine chargée, 8 processus) : 146 blocs, 1 902 tuiles GLO-90
+  téléchargées (6,66 Go, aucune conservée), 9 262 tuiles écrites (E1 1 968, E2 7 294), 2,68 Go,
+  12 min 35 s. Cache complet 4,98 Go (E1 590 Mo, E2 2,09 Go, E3-E7 inchangés, fleuves 44 Mo,
+  routes 21 Mo). Écart E1 (GLO-90) / E0 (ETOPO) à l'Est : moyen 4,9 m, médian 5,7 m, p95 42 m.
+- **Cadre du cache** : `pyramid/frame.json` ; sans lui, un cache est supposé d'avant R7 et
+  `geo relief-all` le recadre sur place avant toute autre étape.
+- **Aval régénéré** : `geo hydro-fine` (Natural Earth hors du cœur : 221 000 km, 4 446 tuiles),
+  `geo anchors-fine` (2 144 colonies, 3 545 tuiles de routes, 342 000 km) et `geo towns`
+  (2 137 villes), débloqués par le cadre monde.
+- Paquet « Cent Ans relief » v2 (`relief_hosting.json`), non publié.
 
 ## Relief en tuiles (`cent_ans_tools/geo/relief.py`)
 
