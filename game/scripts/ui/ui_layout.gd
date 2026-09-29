@@ -46,7 +46,7 @@ const ZONE_RECTS := {
 }
 const TOAST_SECONDS := 6.0
 ## NT6b : lignes visibles au plus d'un avis (le reste : points de suspension).
-const TOAST_MAX_LINES := 5
+const TOAST_MAX_LINES := 3
 const MAX_TOASTS := 3
 ## Voile des fenêtres modales (bible § 12.1 : noir 45 %).
 const MODAL_DIM := Color(0.0, 0.0, 0.0, 0.45)

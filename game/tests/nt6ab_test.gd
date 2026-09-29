@@ -130,7 +130,7 @@ func _check_map() -> void:
 	await _wait(20)
 	var panel: Control = map.ui.province_panel
 	if _check(panel.is_visible_in_tree(), "province panel open"):
-		var header := panel.tabs.get_global_rect().position.y - panel.get_node("VBox").get_global_rect().position.y
+		var header: float = panel.tabs.get_global_rect().position.y - panel.get_node("VBox").get_global_rect().position.y
 		_check(header <= HEADER_MAX_HEIGHT, "province header is %.0f px tall (max %.0f)" % [header, HEADER_MAX_HEIGHT])
 		_check(panel.tabs.get_global_rect().size.y >= 250.0, "tabs keep room: %.0f px" % panel.tabs.get_global_rect().size.y)
 	# Avis très longs : chaque avis reste dans la zone (retour à la ligne, hauteur bornée).
