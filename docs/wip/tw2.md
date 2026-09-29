@@ -1,4 +1,4 @@
-# WIP orchestrateur — TW2 mécaniques Total War (28/09) — REPRIS le 28/09 après-midi
+# WIP orchestrateur — TW2 mécaniques Total War (28/09) — TERMINÉ le 29/09 (tous les lots dans main)
 
 Plan : `docs/design/2026-09-28-tw2-mecaniques-total-war.md`. Mandat : enchaîner les lots sans validation.
 Mis en pause par le joueur le 28/09 (« on reprendra dans une future session ») ; rien de TW2 n'est dans main.
@@ -13,7 +13,7 @@ Chaque lot a sa note `docs/wip/tw2-<lot>.md` dans sa branche `feat/tw2-<lot>`.
 | T1 sort de la ville prise | feat/tw2-t1 (9851cd5d) | **dans main** (befaf258) |
 | T2 reconstitution + réserves | feat/tw2-t2 (fd7e7275) | **dans main** (befaf258) |
 | T3 mercenaires | feat/tw2-t3 (e4cdde5e) | **dans main** (c60a6e73) ; suites : surprime absente du panneau budget, illustrations provisoires |
-| T4 points de capture + rééquilibrage br3 (cible 4-7/10) | feat/tw2-t4 (597020f1) | agent stoppé pendant sa vérif finale ; capture, dernier carré, repli, UI, tests, ADR 0108 ; voir `docs/wip/tw2-t4.md` |
+| T4 points de capture + rééquilibrage br3 (cible 4-7/10) | feat/tw2-t4 | **dans main** (29/09) ; br3 7/2/3 ; point ouvert ADR 0108 : petite garnison, large brèche 0/4 contre échelles 2/4 |
 | T5 traditions d'armée | feat/tw2-t5 (f5db1d43) | **dans main** (b00e1e98) ; ADR 0112 (0109 pris par IB) ; suites : sonde d'équilibrage des rangs IA, traditions sur le marqueur 3D |
 
 ## integration/tw2 (worktree `../gp-tw2-merge`, 54e3c4b2)
@@ -42,3 +42,8 @@ code, dont RS F bataille/feu) n'est pas revérifiée.**
 - SB : pas d'indicateur « visé » pour béliers/beffrois.
 
 - Fusion T5 : correctif IA (armée entièrement licenciée pour dettes encore commandée le même tour) dans le commit de fusion.
+
+- Fusion T4 : correctif IA cavalier (plantage f5) ; test de brèche adapté au dernier carré (voir ADR 0108).
+
+## Reste (hors lots)
+- Vérification visuelle en jeu : barres de siège, fenêtre de prise de ville, drapeaux T4, panneaux mercenaires et traditions.
