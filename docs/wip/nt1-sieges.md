@@ -15,7 +15,16 @@ Branche : `feat/nt1-siege-layouts`. Cargo : `CARGO_TARGET_DIR=core/target-nt1`.
 - [x] Rendu Godot : donjon = tour agrandie (`battle_siege.gd`), script `game/tests/nt1_siege_shot.gd` (+ `debug_stage_place_siege`).
 - [x] ADR 0126.
 
+- [x] Vérifs : `cargo fmt`, `clippy -D warnings`, `cargo test` du workspace (170 suites vertes), pytest
+  (1271), `core/build.sh`, smoke Godot, `sb_siege_bars_test.gd`, `nt1_siege_shot.gd` en headless
+  (château : 8 bâtiments dont 1 donjon ; bourg : 31 ; cité : 59).
+
 ## Prochaine étape
-Vérifier `cargo test` du workspace, `core/build.sh`, smoke et tests Godot de siège.
+Lot terminé. Session principale : lancer `nt1_siege_shot.gd` avec affichage (captures dans
+`docs/audit/captures/nt/`) et juger le rendu.
 
 ## Points ouverts
+- Bourg moins dense que la cité (≈ 40 îlots) : à juger visuellement, réglable dans `places.borough`.
+- Donjon rendu en tour ronde agrandie (pas de maquette de donjon carré dans le kit).
+- Équilibre d'un assaut de château (petite enceinte, garnison serrée) à surveiller en partie pilote.
+- `nt1_siege_shot.gd` ne capture qu'avec affichage (en headless, il ne vérifie que la mise en place).

@@ -59,10 +59,14 @@ func _capture(data_dir: String, kind: String) -> bool:
 	var center: Vector2 = siege.get("center", Vector2(600, 560))
 	scene.camera_rig.look_at_point(Vector3(center.x, 0.0, center.y), 330.0 if kind != "castle" else 240.0, 0.0)
 	await _wait(1.5)
-	await RenderingServer.frame_post_draw
-	var image := root.get_texture().get_image()
-	var path := _out.path_join("nt1_%s.png" % kind)
-	print("nt1_siege_shot: %s (%s)" % [path, error_string(image.save_png(path))])
+	if DisplayServer.get_name() == "headless":
+		# Sans affichage, aucune image : le script ne vérifie que la mise en place du siège.
+		print("nt1_siege_shot: headless, no capture for %s" % kind)
+	else:
+		await RenderingServer.frame_post_draw
+		var image := root.get_texture().get_image()
+		var path := _out.path_join("nt1_%s.png" % kind)
+		print("nt1_siege_shot: %s (%s)" % [path, error_string(image.save_png(path))])
 	scene.queue_free()
 	await process_frame
 	return siege.get("place", "") == kind
