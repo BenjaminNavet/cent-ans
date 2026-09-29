@@ -298,9 +298,12 @@ fn random_province_event_defaults_to_map() {
 /// Spec § 7: from 1337 to 1400 (seed 1337), the player should meet on
 /// average between one map incident every 2 turns and one every 4 turns.
 ///
-/// Measured by FK1 (France, built-in minimal AI for the others, player
-/// idle): see the report in `docs/wip/fk.md`. Below the target until FK5
-/// adds its ~15 random province events: the bounds are then enforced.
+/// Measured by FK1 (France, `end_turn` with the built-in minimal AI, the
+/// player's decisions left to expire): 37 map incidents and 57 dialogs over
+/// 252 turns, 0.147 incident per turn (one every 6.8 turns). Below the
+/// target until FK5 adds its ~15 random province events; the bounds are
+/// then enforced. Slow (about 3 min in release): run with
+/// `cargo test --release -p sim-campaign --test fk_map_scenes -- --ignored`.
 #[test]
 #[ignore = "FK5: below 1 incident / 4 turns until the 15 new events land"]
 fn player_incident_rate_1337_1400() {

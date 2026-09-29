@@ -20,5 +20,10 @@ ADR 0122 ; note chantier `docs/wip/fk.md` (non modifiée ici pour éviter les co
 - [x] Pont : `get_map_scenes()`, `get_map_scene_rules()`, `presentation` dans `get_pending_decisions()`.
 - [x] Tests `fk_map_scenes.rs` (5 verts, taux d'incidents #[ignore] jusqu'à FK5).
 
+## Mesure du taux d'incidents (1337-1400, graine 1337, France)
+37 incidents `map` et 57 `dialog` en 252 tours : 0,147 incident par tour (un tous les 6,8 tours),
+sous la cible (1/4 à 1/2). FK5 (15 événements `random` de province) doit combler l'écart ; le test
+`player_incident_rate_1337_1400` reste `#[ignore]` (≈ 3 min en release).
+
 ## Prochaine étape
 Relecture, fusion dans `integration/fk`.
