@@ -17,6 +17,11 @@ var end_text: Label
 var _announced: String = "ongoing"
 ## Q1 : largeur des libellés à retour à la ligne (panneau de 620 px, marges comprises).
 const WRAP_WIDTH := 580.0
+## NT3 : hauteur de la zone défilante (objectifs + missions) ; réduite si la fenêtre est plus basse.
+const MAX_LIST_HEIGHT := 420.0
+## Hauteur réservée au titre, au score et aux marges du panneau.
+const PANEL_CHROME_HEIGHT := 230.0
+var list_scroll: ScrollContainer
 
 
 func setup(campaign_map: Node) -> void:
@@ -40,9 +45,16 @@ func setup(campaign_map: Node) -> void:
 	score_label = Label.new()
 	box.add_child(score_label)
 	box.add_child(HSeparator.new())
+	# NT3 : objectifs + missions défilent dans une zone de hauteur bornée (tient en 1280×720).
+	list_scroll = ScrollContainer.new()
+	list_scroll.name = "ObjectivesScroll"
+	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	list_scroll.custom_minimum_size = Vector2(WRAP_WIDTH + 16, MAX_LIST_HEIGHT)
+	box.add_child(list_scroll)
 	list = VBoxContainer.new()
 	list.add_theme_constant_override("separation", 10)
-	box.add_child(list)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list_scroll.add_child(list)
 	map.ui.add_child(panel)
 	panel.hide()
 
@@ -195,6 +207,9 @@ func open_panel() -> void:
 		row.add_child(text)
 		list.add_child(row)
 	_add_missions_section()
+	var screen_height := panel.get_viewport_rect().size.y
+	list_scroll.custom_minimum_size.y = clampf(screen_height - PANEL_CHROME_HEIGHT, 160.0, MAX_LIST_HEIGHT)
+	list_scroll.scroll_vertical = 0
 	panel.show()
 	_fit_centered.call_deferred(panel)
 
