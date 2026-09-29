@@ -44,6 +44,7 @@ var _anchor: Dictionary = {}  # dernière proposition : {ids, point, facing}
 func setup(p_scene: Node) -> void:
 	scene = p_scene
 	name = "FormationPicker"
+	add_to_group(SiegeHealthBars.OCCLUDER_GROUP)
 	if scene.battle != null and scene.battle.has_method("formation_presets"):
 		presets = scene.battle.call("formation_presets")
 	_build()

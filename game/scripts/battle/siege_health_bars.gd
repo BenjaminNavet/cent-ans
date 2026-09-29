@@ -19,6 +19,9 @@ const WALL_LIFT := 4.0
 const RAM_LIFT := 5.0
 const TOWER_LIFT := 4.0
 const DEFAULT_COLORS := {"attacker": Color(0.20, 0.33, 0.62), "defender": Color(0.62, 0.13, 0.08)}
+## Groupe des panneaux de bataille flottants hors zones `UiZones` (ordres du chef, formations…)
+## sous lesquels une barre est masquée.
+const OCCLUDER_GROUP := &"battle_hud_occluder"
 const NAMES := {"gate": "Porte", "wall": "Muraille", "ram": "Bélier", "tower": "Beffroi"}
 
 ## Couleur des camps (`battle_scene.side_colors`), clés « attacker » / « defender ».
@@ -164,7 +167,9 @@ func _process(_delta: float) -> void:
 
 
 ## Place chaque barre au-dessus de sa pièce (projection caméra, taille fixe à l'écran) ;
-## étiquette visible pour les pièces visées et sous la souris.
+## étiquette visible pour les pièces visées et sous la souris. Une barre qui passerait sous un
+## panneau d'interface (Journal de bataille, sélection, mini-carte…) est masquée plutôt que
+## dessinée à moitié sous lui.
 func _place() -> void:
 	var viewport := get_viewport()
 	var camera: Camera3D = viewport.get_camera_3d() if viewport != null else null
@@ -172,6 +177,7 @@ func _place() -> void:
 	var mouse := viewport.get_mouse_position() if viewport != null else Vector2(-1e6, -1e6)
 	if mouse_override != null:
 		mouse = mouse_override
+	var panels := ui_panel_rects()
 	for key in _bars:
 		var bar_node: Bar = _bars[key]
 		var s: Dictionary = _state.get(key, {})
@@ -186,7 +192,39 @@ func _place() -> void:
 		if not screen.grow(BAR_SIZE.x).has_point(point):
 			bar_node.visible = false
 			continue
+		var top_left := (point - BAR_SIZE * 0.5).round()
+		if _covered(Rect2(top_left + Vector2(-40, -22), BAR_SIZE + Vector2(80, 22)), panels):
+			bar_node.visible = false
+			continue
 		bar_node.visible = true
-		bar_node.position = (point - BAR_SIZE * 0.5).round()
+		bar_node.position = top_left
 		var hovered := Rect2(bar_node.position - Vector2(6, 24), BAR_SIZE + Vector2(12, 30)).has_point(mouse)
 		bar_node.caption.visible = hovered or bool(s["attacked"])
+
+
+## Rectangles écran des panneaux d'interface visibles : zones de `UiZones` (hors modale) et
+## panneaux du groupe `OCCLUDER_GROUP`.
+static func ui_panel_rects() -> Array[Rect2]:
+	var controls: Array[Control] = []
+	var layout := UiZones.layout()
+	if layout != null:
+		for zone in [UiZones.Zone.TOP_BAR, UiZones.Zone.BOTTOM_SELECTION, UiZones.Zone.MINIMAP, UiZones.Zone.SIDE_PANEL, UiZones.Zone.TOASTS]:
+			controls.append_array(layout.visible_occupants(zone))
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null:
+		for node in tree.get_nodes_in_group(OCCLUDER_GROUP):
+			if node is Control and (node as Control).is_visible_in_tree():
+				controls.append(node)
+	var out: Array[Rect2] = []
+	for control in controls:
+		# Repère écran (celui de `unproject_position`), transformation de la couche comprise.
+		out.append(control.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, control.size))
+	return out
+
+
+## Vrai si `area` (barre et son étiquette) chevauche l'un des panneaux.
+static func _covered(area: Rect2, panels: Array[Rect2]) -> bool:
+	for panel in panels:
+		if panel.intersects(area):
+			return true
+	return false

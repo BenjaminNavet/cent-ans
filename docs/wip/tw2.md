@@ -50,5 +50,7 @@ code, dont RS F bataille/feu) n'est pas revérifiée.**
   Corrigé : panneaux latéraux plus larges que la zone SIDE_PANEL (341 px logiques à 1280×720) coupés au bord
   droit (traditions 380, mercenaires 420) → `UiZones.claim` annule la largeur minimale propre du panneau ;
   noms de mercenaires tronqués → retour à la ligne.
-  Suites mineures : la barre « Muraille » du mur se projette sous le Journal de bataille ; bélier hors cadre
-  dans la capture `siege_bars`.
+  Suites mineures corrigées le 29/09 : une barre de siège qui passerait sous un panneau d'UI (zones
+  `UiZones` + groupe `SiegeHealthBars.OCCLUDER_GROUP` : ordres du chef, formations) est masquée ;
+  la capture `siege_bars` cadre le bélier en vérifiant par projection (relief compris) qu'il échappe aux panneaux.
+- Reste ouvert : équilibrage ADR 0108 (large brèche contre petite garnison).

@@ -120,8 +120,31 @@ func _shot_siege_bars(scene: Node, battle: Object, view: BattleSiege) -> void:
 	var span := gate_ground.distance_to(ram_ground)
 	var cam_distance := clampf(span * 1.8, 42.0, 70.0)
 	scene.paused = true
-	scene.camera_rig.look_at_point(focus, cam_distance, _yaw_out(siege, gate) + 0.4)
-	await _frames(6)
+	# Recule la caméra jusqu'à ce que la porte (et sa barre) et le bélier tiennent dans le cadre.
+	var yaw := _yaw_out(siege, gate) + 0.4
+	var gate_bar := gate_ground + Vector3(0.0, 14.0, 0.0)
+	var ram_top := ram_ground + Vector3(0.0, 4.0, 0.0)
+	var ram_tail := ram_ground - (gate_ground - ram_ground).normalized() * 5.0
+	var frame_points := [gate_bar, ram_ground, ram_top, ram_tail]
+	for engine in siege.get("engines", []):
+		if str(engine.get("kind", "")) == "ram" and float(engine.get("hp", 0.0)) > 0.0:
+			frame_points.append(Vector3(float(engine["x"]), 0.0, float(engine["z"])))
+	# Points posés sur le relief réel (le sol n'est pas à y = 0).
+	var ground: Callable = view.health_bars.height_at
+	if ground.is_valid():
+		for i in frame_points.size():
+			var p: Vector3 = frame_points[i]
+			frame_points[i] = p + Vector3(0.0, float(ground.call(p.x, p.z)), 0.0)
+	# Les panneaux du bas (ordres, formations, cartes) couvrent le tiers inférieur : on glisse
+	# le point visé vers le bélier (qui remonte à l'écran) et on recule un peu à chaque essai.
+	var toward_ram := (ram_ground - gate_ground).normalized()
+	for _attempt in 12:
+		scene.camera_rig.look_at_point(focus, cam_distance, yaw)
+		await _frames(6)
+		if _in_frame(frame_points):
+			break
+		focus += toward_ram * 4.0
+		cam_distance = minf(cam_distance + 4.0, 110.0)
 	var state := view.health_bars.state("piece:%d" % gate)
 	print("tw2_shot: siege_bars gate shown=%s ratio=%.2f ram_present=%s distance=%.0f" % [state.get("shown", false), float(state.get("ratio", 0.0)), not ram.is_empty(), cam_distance])
 	await _shot("%s_siege_bars.png" % _prefix)
@@ -179,6 +202,24 @@ func _out_dir(siege: Dictionary, piece: Dictionary) -> Vector2:
 func _yaw_out(siege: Dictionary, piece: int) -> float:
 	var out := _out_dir(siege, siege["pieces"][piece])
 	return atan2(out.x, out.y)
+
+
+## Vrai si tous les points se projettent dans l'écran (marge de 8 %), hors des panneaux d'interface.
+func _in_frame(points: Array) -> bool:
+	var camera := root.get_viewport().get_camera_3d()
+	var screen := root.get_visible_rect()
+	var safe := screen.grow_individual(-screen.size.x * 0.08, -screen.size.y * 0.08, -screen.size.x * 0.08, -screen.size.y * 0.08)
+	var panels := SiegeHealthBars.ui_panel_rects()
+	for point in points:
+		if camera.is_position_behind(point):
+			return false
+		var projected := camera.unproject_position(point)
+		if not safe.has_point(projected):
+			return false
+		for panel in panels:
+			if panel.grow(12.0).has_point(projected):
+				return false
+	return true
 
 
 func _frames(n: int) -> void:

@@ -62,6 +62,9 @@ func _check_states() -> void:
 	_check(not s["engine:7"]["shown"], "full-strength ram hidden")
 	_check(s["engine:8"]["shown"] and absf(float(s["engine:8"]["ratio"]) - 0.25) < 1e-4, "hurt tower shown at 25 %")
 	_check(str(s["engine:8"]["text"]) == "Beffroi : 9/36", "tower caption: %s" % s["engine:8"]["text"])
+	var journal: Array[Rect2] = [Rect2(10, 60, 360, 240)]
+	_check(SiegeHealthBars._covered(Rect2(300, 250, 172, 33), journal), "bar under the battle log is covered")
+	_check(not SiegeHealthBars._covered(Rect2(500, 250, 172, 33), journal), "bar clear of the battle log is shown")
 	var world: Vector3 = s["piece:1"]["world"]
 	_check(absf(world.y - (2.0 + 8.0 + SiegeHealthBars.WALL_LIFT)) < 1e-4 and absf(world.x - 27.0) < 1e-4, "gate bar above the wall walk: %s" % world)
 	_check(str(s["piece:1"]["side"]) == "defender" and str(s["engine:8"]["side"]) == "attacker", "owner sides")

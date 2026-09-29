@@ -49,6 +49,7 @@ func _init(p_scene: Node = null) -> void:
 
 func _ready() -> void:
 	panel = PanelContainer.new()
+	panel.add_to_group(SiegeHealthBars.OCCLUDER_GROUP)
 	panel.theme = load(THEME_PATH)
 	panel.anchor_top = 1.0
 	panel.anchor_bottom = 1.0
