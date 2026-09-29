@@ -121,6 +121,8 @@ pub mod folders {
     pub const REPLENISHMENT_RULES: &str = "replenishment.json";
     /// Mercenary companies (lot TW2-T3), inside `rules/`; optional.
     pub const MERCENARY_RULES: &str = "mercenaries.json";
+    /// Short-term campaign missions (lot NT3), at the data root; optional.
+    pub const MISSIONS: &str = "missions.json";
     /// Army traditions (lot TW2-T5), inside `rules/`; optional.
     pub const ARMY_TRADITION_RULES: &str = "army_traditions.json";
     /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
@@ -354,6 +356,9 @@ pub struct GameData {
     /// `data/rules/mercenaries.json` (lot TW2-T3, mercenary companies); the
     /// bundled file when absent.
     pub mercenary_rules: crate::entities::mercenaries::MercenaryRules,
+    /// `data/missions.json` (lot NT3, short-term missions); the bundled file
+    /// when absent.
+    pub mission_rules: crate::entities::missions::MissionRules,
     /// `data/rules/army_traditions.json` (lot TW2-T5, army traditions); the
     /// bundled file when absent.
     pub army_tradition_rules: crate::entities::army_traditions::ArmyTraditionRules,
@@ -444,6 +449,7 @@ impl GameData {
             capture_rules: Default::default(),
             replenishment_rules: Default::default(),
             mercenary_rules: Default::default(),
+            mission_rules: Default::default(),
             army_tradition_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             cover: Default::default(),
@@ -580,6 +586,10 @@ impl GameData {
         let mercenary_path = root.join(folders::RULES).join(folders::MERCENARY_RULES);
         if mercenary_path.is_file() {
             data.mercenary_rules = read_json(&mercenary_path)?;
+        }
+        let missions_path = root.join(folders::MISSIONS);
+        if missions_path.is_file() {
+            data.mission_rules = read_json(&missions_path)?;
         }
         let traditions_path = root
             .join(folders::RULES)

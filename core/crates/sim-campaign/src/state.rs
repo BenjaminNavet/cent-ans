@@ -962,6 +962,10 @@ pub struct CampaignState {
     /// Lot FE: title holdings (feudal hierarchy, ADR 0098).
     #[serde(default)]
     pub feudal: crate::feudal::FeudalState,
+    /// Lot NT3: the player's short-term missions (absent from older saves;
+    /// no change of [`STATE_VERSION`]).
+    #[serde(default)]
+    pub missions: crate::missions::MissionsState,
     /// Lot M3: the AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -1016,6 +1020,7 @@ impl CampaignState {
             captures: crate::capture::CaptureState::default(),
             mercenaries: crate::mercenaries::MercenaryState::default(),
             feudal: crate::feudal::FeudalState::default(),
+            missions: crate::missions::MissionsState::default(),
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
             last_battle_outcome: None,

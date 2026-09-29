@@ -160,6 +160,8 @@ pub(crate) fn apply(
     } else {
         (defender, defender_class, attacker, attacker_class)
     };
+    // NT3: a won battle counts towards the player's missions.
+    crate::missions::note_battle_won(state, winner.faction);
     if winner_class != BattleOutcomeClass::Victory || loser_class != BattleOutcomeClass::Defeat {
         let name = |f: &FactionId| {
             data.factions
