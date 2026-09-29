@@ -19,17 +19,15 @@ FK3 : clés de `map_scenes.json` lues par le rendu à aligner avec le schéma FK
 - FK5a : clic sur la scène non branché (seul le sceau ouvre la décision) ; pictogramme unique ; avis d'expiration lié au libellé « (délai écoulé) » (`EXPIRED_MARK`).
 - FK5b : taux 0,317/tour (cible atteinte, test #[ignore] 165 s) ; graine de `f7_events::montereau…` passée à 6 ; bateliers sans condition fleuve ; pas d'entrées codex.
 
-## FK6 (en cours, integration/fk 1ed3d8894)
-- Vérifs complètes vertes après fusion (cargo fmt/clippy/test, pytest 1275, smoke, fk_folk, fk2_assets, fk5_incidents).
-- A/B Paris (2213,3204 cadre monde ; anciennes coordonnées 2213,1924 = avant ADR 0121), d=45, 3 paires : 13,9 vs 14,5 i/s (−4,4 %, cible ≤ 5 %), 463 figurines + 149 accessoires, +25 appels. Le worktree a besoin du lien `data/map/pyramid` vers le cache de main.
-- Défauts : placement FolkScenes 100-310 ms (à ramener sous 8 ms) ; à d=12 sur Paris, aucune figurine visible malgré 121 posées. Agent cent-ans-dev en correction dans integration/fk. Captures (3/3 utilisées) : docs/audit/captures/fk/.
+## FK6 (fait 09-29/30)
+- Vérifs complètes vertes sur integration/fk après fusion de main (cargo fmt/clippy/test, pytest 1277, smoke, fk_folk, fk2_assets, fk5_incidents).
+- A/B Paris (2213,3204 cadre monde ; anciennes coordonnées 2213,1924 = avant ADR 0121), d=45 : avant correctifs 13,9 vs 14,5 i/s (−4,4 %) ; après correctifs mesure bruitée (ollama actif), paire propre 145 vs 145 i/s ; +78 appels de rendu, ≈ 436 figurines. Le worktree d'intégration a besoin du lien `data/map/pyramid` vers le cache de main.
+- Correctifs FK6 : préchauffage étalé (plus d'à-coup de 200-500 ms), caches par tour (placement 3-10 ms), emprises des villes emblématiques exclues, taille minimale à l'écran (`figure_min_view_fraction` 0,045, `figure_height` 1,26 : 8-21 px à d=12), capture qui attend `FolkPool.settled()`, `--fps-probe` imprime `folk`.
+- Captures : docs/audit/captures/fk/ (6/6 ; `paris_plague_close_final.png` = état final).
 
-## Prochaine étape
-FK6 : vérifs complètes sur integration/fk, A/B `--no-folk`, 3 captures, puis fusion dans main.
-
-## Ancienne étape
-Lancer la vague 1 (branches `feat/fk1-core`, `feat/fk2-assets`, `feat/fk3-folk`), intégration
-dans `integration/fk`.
-
-## Points ouverts
-- FK2 fini (feat/fk2-assets, a31bbf3a9) : 15 .glb + manifest.json, clips scythe/carry/plough (rig fin, 61 clips), figurines `villager_0..3` ; note docs/wip/fk2-assets.md. À vérifier en capture : faux vs jambe gauche, sac vs tête, torche non émissive, lisibilité à l'échelle de la carte ; rig grossier sans les 3 clips (repli marche/attente).
+## Reste ouvert (pour la partie pilote)
+- Scène de peste à d=12 peu lisible sur la capture finale (figurants surtout sur les routes) : juger en jeu.
+- Placement à d=45 : 9-10 ms (cible 8).
+- Fumées de scène visibles jusqu'au palier moyen ; crue = plaque opaque ; fuyards en ligne droite ; clic sur la scène n'ouvre pas l'incident (seul le sceau) ; pictogramme d'incident unique.
+- Bateliers sans condition fleuve ; pas d'entrées codex pour les 15 événements ; test de taux #[ignore] (165 s, 0,317/tour).
+- A/B à refaire sur machine calme.
