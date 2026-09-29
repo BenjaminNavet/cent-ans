@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "battle_prologue.schema.json",
+  "title": "Bataille-prologue guidée (NT4)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["description", "id", "title", "menu_label", "menu_detail", "battle", "enemy_passive", "steps"],
+  "properties": {
+    "description": {"type": "string"},
+    "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+    "title": {"type": "string", "minLength": 1},
+    "menu_label": {"type": "string", "minLength": 1},
+    "menu_detail": {"type": "string", "minLength": 1},
+    "advisor": {"type": "string"},
+    "battle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attacker", "defender", "terrain", "season", "player_side"],
+      "properties": {
+        "attacker": {"$ref": "#/$defs/army"},
+        "defender": {"$ref": "#/$defs/army"},
+        "terrain": {"enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"]},
+        "season": {"enum": ["spring", "summer", "autumn", "winter"]},
+        "weather": {"enum": ["", "clear", "rain", "fog", "snow"]},
+        "hour": {"type": "string"},
+        "siege": {"const": false},
+        "fortification": {"type": "integer", "minimum": 0},
+        "player_side": {"enum": ["attacker", "defender"]},
+        "seed": {"type": "integer", "minimum": 0}
+      }
+    },
+    "enemy_passive": {"type": "boolean"},
+    "steps": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "text", "objective", "condition"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "title": {"type": "string", "minLength": 1},
+          "text": {"type": "string", "minLength": 1},
+          "objective": {"type": "string", "minLength": 1},
+          "advice": {"type": "string"},
+          "target": {"type": "string", "pattern": "^(|cards|pause|minimap|enemy|unit:(infantry|ranged|cavalry|siege))$"},
+          "enemy_ai": {"type": "boolean"},
+          "condition": {"$ref": "#/$defs/condition"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "army": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["faction", "budget", "units"],
+      "properties": {
+        "faction": {"type": "string", "pattern": "^fac_[a-z0-9_]+$"},
+        "budget": {"type": "integer", "minimum": 0},
+        "units": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^unit_[a-z0-9_]+$"}}
+      }
+    },
+    "condition": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {"enum": ["manual", "camera_moved", "selection", "moved", "formation_changed", "unit_state", "paused", "victory"]},
+        "min_distance": {"type": "number", "exclusiveMinimum": 0},
+        "min_zoom": {"type": "number", "exclusiveMinimum": 0},
+        "min_yaw": {"type": "number", "exclusiveMinimum": 0},
+        "min_count": {"type": "integer", "minimum": 1},
+        "min_ratio": {"type": "number", "exclusiveMinimum": 0},
+        "category": {"enum": ["infantry", "ranged", "cavalry", "siege"]},
+        "states": {"type": "array", "minItems": 1, "items": {"enum": ["idle", "marching", "charging", "melee", "shooting", "routing", "rallied", "climbing"]}}
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {"if": {"properties": {"type": {"const": "unit_state"}}}, "then": {"required": ["states"]}}
+      ]
+    }
+  }
+}
