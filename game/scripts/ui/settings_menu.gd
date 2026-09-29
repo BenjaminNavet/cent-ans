@@ -16,6 +16,10 @@ var settings: Node = null
 ## Onglet ouvert d'emblée (nom d'onglet, ex. « Son » pour Menu → Son…) ; "" = le premier.
 var initial_tab: String = ""
 var _controls: Dictionary = {}  # clé → contrôle
+## NT6d : réaffectation des touches (action en attente de sa touche, boutons, avertissement).
+var _capturing: String = ""
+var _key_buttons: Dictionary = {}
+var _key_notice: Label = null
 
 
 func _ready() -> void:
@@ -243,48 +247,135 @@ func _build_sound(grid: GridContainer) -> void:
 	_check(grid, "voice/barks", "Répliques des unités", "Les régiments répondent à la sélection et aux ordres, crient à la charge et en déroute.")
 
 
-## Lot U7 : disposition du clavier et fiche des raccourcis, lue dans l'InputMap.
+## Lot U7 + NT6d : disposition du clavier (préréglage), puis liste des actions de l'`InputMap`
+## avec leur touche, un bouton « Changer » qui capture la prochaine touche (conflit : les deux
+## actions échangent leur touche, avec avertissement) et « Rétablir par défaut ».
 func _build_controls(grid: GridContainer) -> void:
 	_options(grid, "input/layout", "Disposition du clavier", Array(ShortcutSheet.LAYOUTS), Array(ShortcutSheet.LAYOUT_LABELS),
-		"Change les lettres affichées sur les boutons et dans l'aide. Les touches de déplacement suivent leur place sur le clavier (Z Q S D en AZERTY, W A S D en QWERTY).")
+		"Change les lettres affichées sur les boutons et dans l'aide. Les touches de déplacement suivent leur place sur le clavier (Z Q S D en AZERTY, W A S D en QWERTY). Les touches réaffectées ci-dessous s'ajoutent à ce préréglage.")
 	var sheet := GridContainer.new()
 	sheet.name = "ShortcutGrid"
-	sheet.columns = 2
-	sheet.add_theme_constant_override("h_separation", 18)
+	sheet.columns = 3
+	sheet.add_theme_constant_override("h_separation", 12)
 	sheet.add_theme_constant_override("v_separation", 2)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(0, 260)
+	scroll.custom_minimum_size = Vector2(0, 230)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(sheet)
-	_label(grid, "Raccourcis de la carte")
-	grid.add_child(scroll)
+	_label(grid, "Touches de la carte")
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_key_notice = Label.new()
+	_key_notice.name = "KeyNotice"
+	_key_notice.add_theme_color_override("font_color", HudStyle.RUBRIC)
+	_key_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_key_notice.visible = false
+	column.add_child(_key_notice)
+	column.add_child(scroll)
+	var restore := Button.new()
+	restore.name = "RestoreKeys"
+	restore.text = "Rétablir par défaut"
+	restore.tooltip_text = "Remet toutes les touches de la carte à leur valeur d'origine."
+	restore.pressed.connect(_on_restore_keys)
+	column.add_child(restore)
+	grid.add_child(column)
 	_fill_shortcuts(sheet)
 	settings.changed.connect(func(key: String) -> void:
-		if key == "input/layout" and is_instance_valid(sheet):
+		if (key == "input/layout" or key == KeyBindings.SETTING_KEY) and is_instance_valid(sheet):
 			_fill_shortcuts(sheet))
 
 
 func _fill_shortcuts(sheet: GridContainer) -> void:
+	_key_buttons.clear()
 	for child in sheet.get_children():
 		sheet.remove_child(child)
 		child.queue_free()
-	for section in ShortcutSheet.sections():
+	for section in KeyBindings.sections():
 		var title := Label.new()
 		title.text = str(section["title"])
 		title.add_theme_color_override("font_color", HudStyle.RUBRIC)
 		sheet.add_child(title)
 		sheet.add_child(Control.new())
-		for line in section["lines"]:
+		sheet.add_child(Control.new())
+		for row in section["actions"]:
+			var action: String = row[0]
+			var what := Label.new()
+			what.text = str(row[1])
+			UiType.apply(what, UiType.CAPTION)
+			what.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			sheet.add_child(what)
 			var keys := Label.new()
-			keys.text = str(line[0])
+			keys.text = ShortcutSheet.action_keys(action)
 			UiType.apply(keys, UiType.CAPTION)
 			keys.custom_minimum_size = Vector2(90, 0)
 			sheet.add_child(keys)
-			var what := Label.new()
-			what.text = str(line[1])
-			UiType.apply(what, UiType.CAPTION)
-			sheet.add_child(what)
+			var change := Button.new()
+			change.name = "Change_" + action
+			change.text = "Changer"
+			change.pressed.connect(_begin_capture.bind(action))
+			sheet.add_child(change)
+			_key_buttons[action] = change
+
+
+## Attend la prochaine touche pour `action` (touche principale).
+func _begin_capture(action: String) -> void:
+	_end_capture()
+	_capturing = action
+	var button := _key_buttons.get(action) as Button
+	if button != null:
+		button.text = "Appuyez sur une touche…"
+	_show_notice("« %s » : appuyez sur la nouvelle touche (Échap pour annuler)." % KeyBindings.label_of(action))
+
+
+func _end_capture() -> void:
+	if _capturing != "":
+		var button := _key_buttons.get(_capturing) as Button
+		if button != null and is_instance_valid(button):
+			button.text = "Changer"
+	_capturing = ""
+
+
+func _input(event: InputEvent) -> void:
+	if _capturing == "":
+		return
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	get_viewport().set_input_as_handled()
+	if key.keycode == KEY_ESCAPE:
+		_end_capture()
+		_show_notice("")
+		return
+	if key.keycode in [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META]:
+		return  # un modificateur seul n'est pas une touche
+	capture_key(key)
+
+
+## Applique `event` comme nouvelle touche de l'action en cours de capture (appelée par `_input`).
+func capture_key(event: InputEventKey) -> void:
+	var action := _capturing
+	if action == "":
+		return
+	_end_capture()
+	var code := KeyBindings.encode(event)
+	var other := KeyBindings.rebind(action, 0, code, settings)
+	if other != "":
+		_show_notice("Touche déjà utilisée par « %s » : les deux actions ont échangé leur touche." % KeyBindings.label_of(other))
+	else:
+		_show_notice("")
+
+
+func _on_restore_keys() -> void:
+	_end_capture()
+	KeyBindings.reset("", settings)
+	_show_notice("Touches rétablies par défaut.")
+
+
+func _show_notice(text: String) -> void:
+	if _key_notice != null and is_instance_valid(_key_notice):
+		_key_notice.text = text
+		_key_notice.visible = text != ""
 
 
 ## Lot U12 : mode daltonien, animations réduites, contraste renforcé.

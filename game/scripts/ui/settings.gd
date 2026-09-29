@@ -36,6 +36,8 @@ const DEFAULTS := {
 	"interface/news_filter": "interest",
 	# Lot U7 : disposition du clavier (« azerty » / « qwerty ») pour les libellés des touches.
 	"input/layout": "auto",
+	# Lot NT6d : touches réaffectées (action → liste de touches, voir `KeyBindings`).
+	"input/bindings": {},
 	# Lot U12 : accessibilité.
 	"access/colorblind": false,
 	"access/reduce_motion": false,
@@ -127,6 +129,7 @@ func _ready() -> void:
 			DisplayServer.window_get_size(), DisplayServer.window_get_mode()
 		)
 	load_settings()
+	KeyBindings.apply_saved(get_value(KeyBindings.SETTING_KEY))
 	apply_display()
 	get_tree().root.size_changed.connect(_apply_ui_scale)
 	get_tree().node_added.connect(_on_node_added)
@@ -229,6 +232,7 @@ func save_settings(to_path: String = "") -> Error:
 
 func reset_to_defaults() -> void:
 	values = DEFAULTS.duplicate()
+	KeyBindings.reset()
 	apply_display()
 	RenderQuality.reapply(get_tree())
 	save_settings()
