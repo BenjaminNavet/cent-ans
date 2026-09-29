@@ -31,6 +31,7 @@ var intro_button: Button
 var codex_button: Button
 var demos_button: Button
 var historical_button: Button  # EP7
+var custom_battle_button: Button  # NT2
 var replays_button: Button  # EP13
 var settings_button: Button
 var credits_button: Button
@@ -236,6 +237,7 @@ func _build_main_column() -> void:
 	intro_button = _menu_button(column, "Prologue : 1328-1337", open_intro)
 	codex_button = _menu_button(column, "Codex", open_codex)
 	historical_button = _menu_button(column, "Batailles historiques", open_historical)  # EP7
+	custom_battle_button = _menu_button(column, "Bataille personnalisée", open_custom_battle)  # NT2
 	demos_button = _menu_button(column, "Batailles de démonstration", open_demos)  # SG2
 	replays_button = _menu_button(column, "Rejeux", open_replays)  # EP13
 	settings_button = _menu_button(column, "Réglages", open_settings)
@@ -376,6 +378,11 @@ func open_intro() -> void:
 ## EP7 : batailles historiques (Crécy, Poitiers, Azincourt) sur leur site réel.
 func open_historical() -> void:
 	_open_overlay(HistoricalBattlesMenu.new())
+
+
+## NT2 : bataille personnalisée (deux armées achetées sur un budget de points, champ au choix).
+func open_custom_battle() -> void:
+	_open_overlay((load("res://scenes/ui/custom_battle_screen.tscn") as PackedScene).instantiate())
 
 
 ## SG2 : batailles de démonstration (sièges d'Avignon, de Bruges, de Paris...).
