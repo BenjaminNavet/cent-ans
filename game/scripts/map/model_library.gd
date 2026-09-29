@@ -25,7 +25,7 @@ static var _scenes: Dictionary = {}  # nom → PackedScene ou null
 static var _city_kinds: Dictionary = {}  # province_id → nom de modèle
 static var _capitals: Dictionary = {}  # province_id → true
 static var _capitals_loaded := false
-static var _tinted_meshes: Dictionary = {}  # "mesh|couleur" → Mesh teinté
+static var _tinted_materials: Dictionary = {}  # "matériau|couleur" → matériau teinté
 static var _unit_categories: Dictionary = {}  # unit_type → catégorie
 static var _rulers: Dictionary = {}  # faction_id → personnage
 
@@ -36,7 +36,7 @@ static func clear_cache() -> void:
 	_city_kinds.clear()
 	_capitals.clear()
 	_capitals_loaded = false
-	_tinted_meshes.clear()
+	_tinted_materials.clear()
 	_unit_categories.clear()
 	_rulers.clear()
 	_hamlet_meshes.clear()
@@ -81,29 +81,28 @@ static func is_building_model(model_name: String) -> bool:
 
 
 ## Teinte les surfaces dont le matériau s'appelle `Banner` (sous-arbre de `root`).
-## Le maillage est dupliqué (un par couleur, mis en cache) plutôt que d'utiliser
-## `set_surface_override_material`, qui produit des erreurs avec le rendu factice headless.
+## OMR-R2 : matériau de surface surchargé sur l'instance (un matériau teinté par couleur, en
+## cache) au lieu d'un maillage dupliqué par couleur : avec 177 factions, les copies de maillages
+## des maquettes pesaient ≈ 350 Mo.
 static func tint_banner(root: Node, color: Color) -> void:
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := child as MeshInstance3D
 		if mesh_instance.mesh == null:
 			continue
-		var key := "%s|%s" % [mesh_instance.mesh.resource_path + str(mesh_instance.mesh.get_rid().get_id()), color.to_html()]
-		if _tinted_meshes.has(key):
-			mesh_instance.mesh = _tinted_meshes[key]
-			continue
-		var tinted_mesh: Mesh = null
 		for surface in mesh_instance.mesh.get_surface_count():
 			var material := mesh_instance.mesh.surface_get_material(surface)
 			if material != null and material.resource_name == "Banner" and material is BaseMaterial3D:
-				if tinted_mesh == null:
-					tinted_mesh = mesh_instance.mesh.duplicate() as Mesh
-				var tinted := (material as BaseMaterial3D).duplicate() as BaseMaterial3D
-				tinted.albedo_color = color
-				tinted_mesh.surface_set_material(surface, tinted)
-		if tinted_mesh != null:
-			_tinted_meshes[key] = tinted_mesh
-			mesh_instance.mesh = tinted_mesh
+				mesh_instance.set_surface_override_material(surface, _tinted_material(material as BaseMaterial3D, color))
+
+
+static func _tinted_material(material: BaseMaterial3D, color: Color) -> BaseMaterial3D:
+	var key := "%d|%s" % [material.get_rid().get_id(), color.to_html()]
+	if _tinted_materials.has(key):
+		return _tinted_materials[key]
+	var tinted := material.duplicate() as BaseMaterial3D
+	tinted.albedo_color = color
+	_tinted_materials[key] = tinted
+	return tinted
 
 
 # --- Villes ------------------------------------------------------------------------

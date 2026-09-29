@@ -375,39 +375,34 @@ static func _max(values: PackedFloat32Array) -> float:
 ## Rubans : chaque sommet est sur la ligne médiane (le shader l'écarte de la demi-largeur).
 ## NORMAL = perpendiculaire signée ; UV = (largeur, côté ±1) ; UV2 = (abscisse vers l'aval, 0).
 func _build_mesh(pieces: Array) -> ArrayMesh:
+	# OMR-R2 : tronçons calculés en parallèle (tableaux dimensionnés d'avance, décalage de sommets
+	# connu par somme préfixe), puis concaténés dans l'ordre : même maillage qu'en série.
+	var valid: Array = []
+	for piece in pieces:
+		if (piece[0] as PackedVector2Array).size() >= 2:
+			valid.append(piece)
+	var bases := PackedInt32Array()
+	bases.resize(valid.size())
+	var total := 0
+	for n in valid.size():
+		bases[n] = total
+		total += (valid[n][0] as PackedVector2Array).size() * 2
+	var parts: Array = []
+	parts.resize(valid.size())
+	var task := WorkerThreadPool.add_group_task(func(n: int) -> void:
+		parts[n] = _piece_arrays(valid[n][0], valid[n][1], bases[n]), valid.size(), -1, true, "river meshes")
+	WorkerThreadPool.wait_for_group_task_completion(task)
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var uvs := PackedVector2Array()
 	var uv2s := PackedVector2Array()
 	var indices := PackedInt32Array()
-	for piece in pieces:
-		var points: PackedVector2Array = piece[0]
-		var widths: PackedFloat32Array = piece[1]
-		var count := points.size()
-		if count < 2:
-			continue
-		var base := vertices.size()
-		var along := 0.0
-		for i in count:
-			var p := points[i]
-			if i > 0:
-				along += p.distance_to(points[i - 1])
-			var prev := points[maxi(i - 1, 0)]
-			var next := points[mini(i + 1, count - 1)]
-			var dir := (next - prev).normalized()
-			if dir == Vector2.ZERO:
-				dir = Vector2.RIGHT
-			var perp := Vector3(-dir.y, 0.0, dir.x)
-			# Altitude × HEIGHT_SCALE sans relief exagéré : le shader pose la hauteur affichée (ZG8).
-			var center := Vector3(p.x, maxf(map_data.height_m_at(p.x, p.y), 0.0) * MapData.HEIGHT_SCALE, p.y)
-			for side in [1.0, -1.0]:
-				vertices.append(center)
-				normals.append(perp * side)
-				uvs.append(Vector2(widths[i], side))
-				uv2s.append(Vector2(along, 0.0))
-		for i in count - 1:
-			var a := base + i * 2
-			indices.append_array([a, a + 1, a + 3, a, a + 3, a + 2])
+	for part: Array in parts:
+		vertices.append_array(part[0])
+		normals.append_array(part[1])
+		uvs.append_array(part[2])
+		uv2s.append_array(part[3])
+		indices.append_array(part[4])
 	var result := ArrayMesh.new()
 	if vertices.is_empty():
 		return result
@@ -422,6 +417,54 @@ func _build_mesh(pieces: Array) -> ArrayMesh:
 	# Le shader déplace les sommets (demi-largeur, élargissement écran, décalage vertical).
 	result.custom_aabb = _grown_aabb(vertices)
 	return result
+
+
+## Sommets (deux par point : côté +1 puis −1), normales (perpendiculaire), UV (largeur, côté),
+## UV2 (abscisse curviligne) et indices d'un tronçon dont le premier sommet est `base`.
+func _piece_arrays(points: PackedVector2Array, widths: PackedFloat32Array, base: int) -> Array:
+	var count := points.size()
+	var vertices := PackedVector3Array()
+	vertices.resize(count * 2)
+	var normals := PackedVector3Array()
+	normals.resize(count * 2)
+	var uvs := PackedVector2Array()
+	uvs.resize(count * 2)
+	var uv2s := PackedVector2Array()
+	uv2s.resize(count * 2)
+	var indices := PackedInt32Array()
+	indices.resize((count - 1) * 6)
+	var along := 0.0
+	for i in count:
+		var p := points[i]
+		if i > 0:
+			along += p.distance_to(points[i - 1])
+		var prev := points[maxi(i - 1, 0)]
+		var next := points[mini(i + 1, count - 1)]
+		var dir := (next - prev).normalized()
+		if dir == Vector2.ZERO:
+			dir = Vector2.RIGHT
+		var perp := Vector3(-dir.y, 0.0, dir.x)
+		# Altitude × HEIGHT_SCALE sans relief exagéré : le shader pose la hauteur affichée (ZG8).
+		var center := Vector3(p.x, maxf(map_data.height_m_at(p.x, p.y), 0.0) * MapData.HEIGHT_SCALE, p.y)
+		var k := i * 2
+		vertices[k] = center
+		vertices[k + 1] = center
+		normals[k] = perp
+		normals[k + 1] = perp * -1.0
+		uvs[k] = Vector2(widths[i], 1.0)
+		uvs[k + 1] = Vector2(widths[i], -1.0)
+		uv2s[k] = Vector2(along, 0.0)
+		uv2s[k + 1] = Vector2(along, 0.0)
+	for i in count - 1:
+		var a := base + i * 2
+		var o := i * 6
+		indices[o] = a
+		indices[o + 1] = a + 1
+		indices[o + 2] = a + 3
+		indices[o + 3] = a
+		indices[o + 4] = a + 3
+		indices[o + 5] = a + 2
+	return [vertices, normals, uvs, uv2s, indices]
 
 
 static func _grown_aabb(vertices: PackedVector3Array) -> AABB:

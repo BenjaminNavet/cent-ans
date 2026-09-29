@@ -44,7 +44,7 @@ from pathlib import Path
 import numpy as np
 from scipy import ndimage
 
-from cent_ans_tools.geo import copernicus, download, relief, terrain
+from cent_ans_tools.geo import block_compress, copernicus, download, relief, terrain
 from cent_ans_tools.geo.project import MapGrid
 
 REPO_DIR = download.TOOLS_DIR.parent
@@ -279,8 +279,9 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefShadeResult:
     # Neutre en mer (le shader ne l'utilise que sur terre ; compression).
     detail[~land] = 0.0
     occ[~land] = 0.0
+    shade = encode_shade(detail, occ)
     shade_paths = terrain.write_png_bands(
-        encode_shade(detail, occ),
+        shade,
         map_dir,
         RELIEF_SHADE_STEM,
         "LA",
@@ -289,6 +290,13 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefShadeResult:
     (map_dir / RELIEF_SHADE).unlink(missing_ok=True)
     relief.update_map_json(map_dir)
     update_map_json(map_dir, names)
+    # OMR-R2 : copie GPU (BC5 + mipmaps) lue par le jeu à la place des bandes PNG.
+    block_compress.update_map_json(
+        map_dir,
+        block_compress.RELIEF_KEY,
+        block_compress.write_relief_bc5(shade, map_dir).meta,
+    )
+    del shade
     return ReliefShadeResult(
         tiles=len(paths),
         tiles_bytes=sum(p.stat().st_size for p in paths),

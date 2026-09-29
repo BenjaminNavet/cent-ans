@@ -437,17 +437,6 @@ func _append_pairs_of(i: int, both: bool) -> void:
 					_model_pairs.append(SettlementFit.pair_key(i, j))
 
 
-## DC6c : paires de la maquette `i` recalculées (maquette remplacée, CV1).
-func _refresh_pairs_of(i: int) -> void:
-	var kept := PackedInt64Array()
-	for key in _model_pairs:
-		if key >> 16 != i and key & 0xFFFF != i:
-			kept.append(key)
-	_model_pairs = kept
-	_append_pairs_of(i, true)
-	_model_pairs.sort()
-
-
 ## Masque les maquettes dont le centre est dans l'emprise affichée d'une voisine prioritaire
 ## (placée avant dans l'ordre de priorité) à `ABSORB_FACTOR` × leur rayon affiché près.
 func _update_absorption() -> void:
@@ -1766,35 +1755,73 @@ func real_radius(i: int) -> float:
 ## monde. Garde position, orientation, portée de visibilité et teinte de bannière ; l'écart
 ## aux voisines (`_fit_models`) est réappliqué.
 func replace_model(i: int, model: Node3D) -> void:
-	var holder: Node3D = model_holder(i)
-	if holder == null or model == null:
+	replace_models([[i, model]])
+
+
+## OMR-R2 : remplacements groupés `[[i, maquette], …]` (croissance CV1 au lancement : ~500
+## maquettes). Chaque maquette est posée et ajustée, puis paires, masquage et hauteurs
+## d'étiquettes sont recalculés une seule fois (au lieu d'une passe sur toutes les colonies par
+## maquette, ≈ 3 s au lancement de la carte Oural–Méditerranée).
+func replace_models(replacements: Array) -> void:
+	var replaced := {}
+	for entry: Array in replacements:
+		var i: int = entry[0]
+		var model: Node3D = entry[1]
+		var holder: Node3D = model_holder(i)
+		if holder == null or model == null:
+			continue
+		for child in holder.get_children():
+			holder.remove_child(child)
+			child.queue_free()
+		holder.add_child(model)
+		var aabb := _model_aabb(model)
+		_model_radius[i] = maxf(aabb.size.x, aabb.size.z) * 0.5
+		_model_top[i] = aabb.end.y
+		_base_radius[i] = _model_radius[i]
+		_base_top[i] = _model_top[i]
+		_fit_scale[i] = 1.0
+		_model_scale[i] = 1.0
+		_forget_scale(i)
+		for geometry in model.find_children("*", "GeometryInstance3D", true, false):
+			var g := geometry as GeometryInstance3D
+			g.visibility_range_end = tiers.model_range
+			g.visibility_range_end_margin = tiers.model_range * 0.15
+		if i < _colors.size():
+			ModelLibrary.tint_banner(holder, _colors[i])
+		_ground_model(i)
+		_fit_model(i)
+		_place_model(i)
+		replaced[i] = true
+	if replaced.is_empty():
 		return
-	for child in holder.get_children():
-		holder.remove_child(child)
-		child.queue_free()
-	holder.add_child(model)
-	var aabb := _model_aabb(model)
-	_model_radius[i] = maxf(aabb.size.x, aabb.size.z) * 0.5
-	_model_top[i] = aabb.end.y
-	_base_radius[i] = _model_radius[i]
-	_base_top[i] = _model_top[i]
-	_fit_scale[i] = 1.0
-	_model_scale[i] = 1.0
-	_forget_scale(i)
-	for geometry in model.find_children("*", "GeometryInstance3D", true, false):
-		var g := geometry as GeometryInstance3D
-		g.visibility_range_end = tiers.model_range
-		g.visibility_range_end_margin = tiers.model_range * 0.15
-	if i < _colors.size():
-		ModelLibrary.tint_banner(holder, _colors[i])
-	_ground_model(i)
-	_fit_model(i)
 	_forget_hamlet_exclusions()
-	_place_model(i)
 	if _pair_px.size() == _models.size():
-		_refresh_pairs_of(i)
+		_refresh_pairs_of_all(replaced)
 	_update_absorption()
 	_update_label_heights()
+
+
+## OMR-R2 : paires des maquettes `replaced` (clés) recalculées en une passe ; une paire de deux
+## maquettes remplacées n'est ajoutée qu'une fois (par la plus petite).
+func _refresh_pairs_of_all(replaced: Dictionary) -> void:
+	var kept := PackedInt64Array()
+	for key in _model_pairs:
+		if not replaced.has(key >> 16) and not replaced.has(key & 0xFFFF):
+			kept.append(key)
+	_model_pairs = kept
+	for i: int in replaced:
+		if _models[i] == null:
+			continue
+		var px := _pair_px[i]
+		var index := terrain.chunk_index_at(px.x, px.y)
+		for dy in [-1, 0, 1]:
+			for dx in [-1, 0, 1]:
+				for j in _settlements_by_chunk.get(index + dy * terrain.chunks_x + dx, PackedInt32Array()):
+					if j == i or _models[j] == null or (j < i and replaced.has(j)):
+						continue
+					if px.distance_to(_pair_px[j]) < _model_radius[i] + _model_radius[j]:
+						_model_pairs.append(SettlementFit.pair_key(i, j))
+	_model_pairs.sort()
 
 
 ## Hameau brûlé (même tirage que `_build_hamlets`), pour les fumées d'incendie.

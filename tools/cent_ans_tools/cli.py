@@ -263,6 +263,16 @@ def geo_relief_shade(
     _print_sizes("Relief de rendu", [result.render_heightmap, result.relief_shade])
 
 
+@geo_app.command("gpu-textures")
+def geo_gpu_textures() -> None:
+    """Copies GPU (OMR-R2) : relief_shade_bc5_<i>.bin (BC5 + mipmaps), wetlands_bc1_<i>.bin."""
+    from cent_ans_tools.geo import block_compress
+    from cent_ans_tools.geo import relief_shade as geo_relief_shade_step
+
+    paths = block_compress.build_from_pngs(geo_relief_shade_step.MAP_DIR)
+    _print_sizes("Textures GPU", paths)
+
+
 @geo_app.command("horizon")
 def geo_horizon(
     province: str = typer.Option(

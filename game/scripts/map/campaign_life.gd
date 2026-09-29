@@ -151,7 +151,7 @@ func _refresh_growth(sim: Object) -> void:
 	var live_ids: PackedStringArray = live.get("id", PackedStringArray())
 	for k in live_ids.size():
 		live_index[live_ids[k]] = k
-	var replaced := 0
+	var replacements: Array = []
 	var counts := [0, 0, 0, 0]
 	for i in _settlements.data.settlements.size():
 		var entry: Dictionary = _settlements.data.settlements[i]
@@ -183,11 +183,12 @@ func _refresh_growth(sim: Object) -> void:
 		var model := SettlementGrowth.build_model(level, absi(id.hash()) / 7, castle)
 		if model == null:
 			continue
-		# DC4 : maquette à pleine taille ; `replace_model` applique la réduction des voisines.
-		_settlements.replace_model(i, model)
-		replaced += 1
+		replacements.append([i, model])
+	# DC4 : maquettes à pleine taille ; `replace_models` applique la réduction des voisines
+	# (OMR-R2 : en un lot, passes globales une seule fois).
+	_settlements.replace_models(replacements)
 	stats["growth_ms"] = Time.get_ticks_msec() - t0
-	stats["growth_replaced"] = replaced
+	stats["growth_replaced"] = replacements.size()
 	stats["levels"] = counts
 
 

@@ -4,7 +4,7 @@
 //   rl_relief (gradient du relief), rl_landcover (poids des matériaux), rl_surface (couleur, eau).
 // Toutes les entrées sont optionnelles (drapeaux has_*), posées par ReliefLandcover.apply.
 //
-// - relief_shade (LA8, 2 px par unité) : L = détail d'altitude (Copernicus 90 m moyenné) par rapport à la
+// - relief_shade (LA8 ou BC5 RG, 2 px par unité) : L = détail d'altitude (Copernicus 90 m moyenné) par rapport à la
 //   heightmap de rendu (taille de la carte) filtrée bilinéairement, 128 + m / rl_detail_scale_m ; A = occlusion /
 //   courbure multi-échelle (128 neutre, < 128 creux et fonds de vallée, > 128 crêtes).
 // - wetlands (RGB8, taille de la carte) : R marais (roselières, mares), G pays d'étangs (Dombes, Brenne...),
@@ -12,6 +12,8 @@
 
 uniform sampler2D relief_shade : filter_linear_mipmap, repeat_disable, hint_default_black;
 uniform bool has_relief_shade = false;
+// OMR-R2 : relief_shade en RG (BC5, R = L, G = A) au lieu de LA8 (occlusion lue en .g, pas en .a).
+uniform bool relief_shade_rg = false;
 uniform float rl_detail_scale_m = 1.5;     // mètres par niveau du canal L (relief_shade.py)
 uniform float rl_detail_normal = 1.0;      // part du détail fin dans la normale d'ombrage
 uniform float rl_occlusion = 0.42;         // assombrissement des creux (occlusion = -1)
@@ -27,7 +29,8 @@ uniform float rl_pond_cell_px = 2.8;       // taille d'une cellule d'étang (pix
 uniform float rl_forest_edge = 0.35;       // ondulation des lisières (poids de forêt)
 
 float rl_occ_at(vec2 uv) {
-	return (texture(relief_shade, uv).a * 255.0 - 128.0) / 127.0;
+	vec4 t = texture(relief_shade, uv);
+	return ((relief_shade_rg ? t.g : t.a) * 255.0 - 128.0) / 127.0;
 }
 
 // Crochet 1 : détail du relief sous le pixel de la heightmap de la carte (gradient en m / pixel carte).
