@@ -690,6 +690,11 @@ pub struct SiegeWorks {
         skip_serializing_if = "crate::siege_layouts::PlaceKind::is_city"
     )]
     pub place: crate::siege_layouts::PlaceKind,
+    /// NT1: streets of a borough or castle (centre lines inside the walls,
+    /// the first one from before the gate); empty for the ring city and a
+    /// landmark (whose streets are in `landmark`).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub streets: Vec<Vec<(f64, f64)>>,
 }
 
 fn cross(o: (f64, f64), a: (f64, f64), b: (f64, f64)) -> f64 {
@@ -807,6 +812,7 @@ impl SiegeWorks {
             points: Vec::new(),
             landmark: None,
             place: crate::siege_layouts::PlaceKind::City,
+            streets: Vec::new(),
         };
         works.lay_generic_town(TownRules::bundled());
         works.apply_campaign_breach(breach, rng);

@@ -573,6 +573,7 @@ impl SiegeWorks {
             wind: (0.0, 0.0),
             landmark: None,
             place: crate::siege_layouts::PlaceKind::City,
+            streets: Vec::new(),
         };
         if works.front_walls().is_empty() {
             return None;

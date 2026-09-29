@@ -189,13 +189,12 @@
             "rotation_deg": { "$ref": "#/$defs/rotation" },
             "gate_offset": { "$ref": "#/$defs/chance", "description": "Décalage maximal de la porte le long de son côté (fraction de la demi-longueur utile)." },
             "market_m": { "$ref": "#/$defs/positive", "description": "Rayon de la place du marché (centre)." },
-            "main_street_m": { "$ref": "#/$defs/positive", "description": "Largeur de la grand-rue, de la porte à la porte opposée par le marché." },
+            "main_street_m": { "$ref": "#/$defs/positive", "description": "Largeur des rues du bourg : grand-rue (de la porte à la porte opposée par le marché), ruelles parallèles et rue transversale." },
             "street_bend_m": { "$ref": "#/$defs/distance", "description": "Déport latéral maximal de la grand-rue à mi-chemin." },
-            "back_lane_m": { "$ref": "#/$defs/positive", "description": "Largeur des ruelles parallèles à la grand-rue." },
             "back_lane_offset_m": { "$ref": "#/$defs/range", "description": "Distance des ruelles parallèles à l'axe de la grand-rue." },
             "cross_lane_chance": { "$ref": "#/$defs/chance", "description": "Probabilité d'une rue transversale par le marché." }
           },
-          "required": ["sides", "radius_m", "radius_jitter", "rotation_deg", "gate_offset", "market_m", "main_street_m", "street_bend_m", "back_lane_m", "back_lane_offset_m", "cross_lane_chance"],
+          "required": ["sides", "radius_m", "radius_jitter", "rotation_deg", "gate_offset", "market_m", "main_street_m", "street_bend_m", "back_lane_offset_m", "cross_lane_chance"],
           "additionalProperties": false
         }
       },

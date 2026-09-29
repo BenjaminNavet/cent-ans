@@ -117,6 +117,9 @@ fn street_angles(works: &SiegeWorks, radius: f64) -> Vec<f64> {
     };
     if works.landmark.is_some() {
         lines.push(vec![works.pieces[works.gate].midpoint(), works.center]);
+    } else if !works.streets.is_empty() {
+        // NT1: the streets of a borough or a castle.
+        lines.extend(works.streets.iter().cloned());
     } else {
         lines.extend(
             works

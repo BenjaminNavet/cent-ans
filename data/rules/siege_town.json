@@ -93,7 +93,6 @@
       "market_m": 26.0,
       "main_street_m": 10.0,
       "street_bend_m": 16.0,
-      "back_lane_m": 6.0,
       "back_lane_offset_m": [40.0, 52.0],
       "cross_lane_chance": 0.6
     }

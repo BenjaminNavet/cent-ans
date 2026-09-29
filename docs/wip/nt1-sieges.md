@@ -10,12 +10,12 @@ Branche : `feat/nt1-siege-layouts`. Cargo : `CARGO_TARGET_DIR=core/target-nt1`.
   `place_seed`, `SiegeWorks::generate_place`), `SiegeSetup.place`, `SiegeWorks.place`,
   `House.keep` (donjon, ne brûle pas), `for_battle(place, seed)`, campagne (`battle_request.rs`),
   pont (`houses[].keep`, `place`).
-- [ ] Génération château et bourg + tests (portes accessibles, rien hors enceinte ni sur le chemin
+- [x] Génération château et bourg + tests (portes accessibles, rien hors enceinte ni sur le chemin
   de ronde, déterminisme, provinces différentes).
 - [ ] Rendu Godot : donjon = tour agrandie (`battle_siege.gd`), script `game/tests/nt1_siege_shot.gd`.
 - [ ] ADR 0126.
 
 ## Prochaine étape
-Implémenter `generate_place` (château puis bourg) dans `siege_layouts.rs`.
+Rendu Godot du donjon, script de capture, ADR 0126 ; vérifier `cargo test` du workspace.
 
 ## Points ouverts
