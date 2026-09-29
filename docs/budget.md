@@ -134,3 +134,7 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot
 | 2026-09-29 | OpenRouter | P1 : variantes âgées D1-D3 (37 × openai/gpt-5-image-mini) | 1,69 $ | 1,69 $ | 3,85 $ |
 | 2026-09-29 | OpenRouter | P2 : portraits des personnages D4-D6 (49 × openai/gpt-5-image-mini) | 2,23 $ | 2,26 $ | 6,11 $ |
 | 2026-09-29 | OpenRouter | P2 : variantes âgées D4-D6 (42 × openai/gpt-5-image-mini) | 1,92 $ | 1,94 $ | 8,05 $ |
+| 2026-09-29 | OpenRouter | R6 : portrait d'Andronic III, couronne byzantine (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,10 $ |
+| 2026-09-29 | OpenRouter | R6 : variante âgée d'Andronic III, couronne byzantine (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,15 $ |
+| 2026-09-29 | OpenRouter | R6 : portrait d'Abu l-Hasan sans auréole (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,20 $ |
+| 2026-09-29 | OpenRouter | R6 : variante âgée d'Abu l-Hasan sans auréole (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,25 $ |

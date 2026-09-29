@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import time
 import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
@@ -52,9 +53,10 @@ class WikimediaTrack:
     out_name: str  # without extension; written as <out_name>.mp3
     work: str
     performers: str
-    culture: str  # france / england / burgundy / iberia / italy
-    context: str  # campaign / court / war
+    culture: str  # france / england / burgundy / iberia / italy / orthodox / islamic
+    context: str  # campaign / campaign_<region> / court / war
     licence: str  # verified once via the Commons API when this list was built (DA4)
+    max_seconds: float | None = None  # trim long recordings (keeps the bank small)
 
 
 WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
@@ -157,6 +159,106 @@ WIKIMEDIA_TRACKS: list[WikimediaTrack] = [
         "campaign",
         "CC BY-SA 3.0",
     ),
+    WikimediaTrack(
+        "File:Byzantine Ecclesiastical Hymn part1.ogg",
+        "byzantine_hymns_part1",
+        "Hymnes ecclésiastiques byzantines, 1re partie (chant byzantin)",
+        "Enregistrement Commons, auteur inconnu (2012)",
+        "orthodox",
+        "campaign_orthodox",
+        "CC0",
+        150.0,
+    ),
+    WikimediaTrack(
+        "File:Byzantine Ecclesiastical Hymns Part2.ogg",
+        "byzantine_hymns_part2",
+        "Hymnes ecclésiastiques byzantines, 2e partie (chant byzantin)",
+        "Église orthodoxe, enregistrement Commons (2012)",
+        "orthodox",
+        "campaign_orthodox",
+        "CC0",
+        150.0,
+    ),
+    WikimediaTrack(
+        "File:02 Carju Nebesnyj znamennyj raspev grind Moscow Patriarchal Choir.ogg",
+        "znamenny_carju_nebesnyj",
+        "« Царю Небесный » (Roi du Ciel), chant znamenny",
+        "Chœur « Drevnerusskij raspev » du Patriarcat de Moscou",
+        "orthodox",
+        "campaign_orthodox",
+        "CC0",
+        None,
+    ),
+    WikimediaTrack(
+        "File:05 Se Zhenih grjadet v polunowi znamennyj raspev grind Moscow Patriarchal Choir.ogg",
+        "znamenny_se_zhenih_grjadet",
+        "« Се Жених грядет в полунощи » (Voici l'Époux), chant znamenny",
+        "Chœur patriarcal de Moscou",
+        "orthodox",
+        "campaign_orthodox",
+        "CC0",
+        None,
+    ),
+    WikimediaTrack(
+        "File:07 Da molchit vsjaka plot chelovecha znamennyj raspev grind Moscow Patriarchal Choir.ogg",
+        "znamenny_da_molchit_vsjaka_plot",
+        "« Да молчит всякая плоть человеча » (Que toute chair humaine se taise), chant znamenny",
+        "Chœur patriarcal de Moscou",
+        "orthodox",
+        "campaign_orthodox",
+        "CC0",
+        150.0,
+    ),
+    WikimediaTrack(
+        "File:Art-song Maqam Sika (1931).ogg",
+        "maqam_sika_1931",
+        "Chant d'art en maqam Sika (Égypte), disque 20, Musik des Orients",
+        "Enregistrement du Congrès de musique arabe, Le Caire, 1931 (anonyme)",
+        "islamic",
+        "campaign_islamic",
+        "Public domain",
+        150.0,
+    ),
+    WikimediaTrack(
+        "File:Art-song Maqam Mezmum (1931).ogg",
+        "maqam_mezmum_1931",
+        "Chant d'art en maqam Mezmum (Tunisie), disque 23, Musik des Orients",
+        "Enregistrement du Congrès de musique arabe, Le Caire, 1931 (anonyme)",
+        "islamic",
+        "campaign_islamic",
+        "Public domain",
+        150.0,
+    ),
+    WikimediaTrack(
+        "File:Baschrav Kuzum Maqam Hijaz part 2 (1931).ogg",
+        "baschrav_maqam_hijaz_1931",
+        "Bachraf Kuzum en maqam Hijaz (Égypte), disque 22, Musik des Orients",
+        "Enregistrement du Congrès de musique arabe, Le Caire, 1931 (anonyme)",
+        "islamic",
+        "campaign_islamic",
+        "Public domain",
+        150.0,
+    ),
+    WikimediaTrack(
+        "File:Istakhbar Mezmoum.ogg",
+        "istikhbar_mezmoum",
+        "Istikhbar Mezmoum, improvisation vocale (san'a de Tlemcen, musique andalouse d'Algérie)",
+        "Lazaar Ben Dali Yahia (Laazar Sliman), 1929",
+        "islamic",
+        "campaign_islamic",
+        "Public domain",
+        150.0,
+    ),
+    WikimediaTrack(
+        "File:Husseyni Saz Semayissi .ogg",
+        "huseyni_saz_semai",
+        "Hüseyni saz semaisi (musique classique ottomane)",
+        "Hafız Kemal Bey (kemençe) et Hayriye Hanım (oud), avant 1939",
+        "islamic",
+        "campaign_islamic",
+        "Public domain",
+        150.0,
+    ),
 ]
 
 
@@ -221,7 +323,16 @@ def _commons_imageinfo(file_title: str) -> dict:
             "format": "json",
         }
     )
-    data = json.loads(_curl(f"{COMMONS_API}?{query}"))
+    # The Commons API rate-limits bursts: pause, and retry once after a longer wait.
+    for wait in (4, 45):
+        time.sleep(wait)
+        try:
+            data = json.loads(_curl(f"{COMMONS_API}?{query}"))
+            break
+        except json.JSONDecodeError:
+            continue
+    else:
+        raise RuntimeError(f"Commons: {file_title} limite de debit de l'API")
     pages = data["query"]["pages"]
     page = next(iter(pages.values()))
     if "imageinfo" not in page:
@@ -284,7 +395,8 @@ def _run_ffmpeg_atomic(cmd: list[str], dst: Path) -> None:
     skip retrying it).
     """
     dst.parent.mkdir(parents=True, exist_ok=True)
-    part = dst.with_suffix(dst.suffix + ".part")
+    # Keep the real extension last so ffmpeg still infers the container from it.
+    part = dst.with_name(f"{dst.stem}.part{dst.suffix}")
     part_cmd = [*cmd[:-1], str(part)]
     try:
         subprocess.run(part_cmd, check=True, capture_output=True)
@@ -440,7 +552,7 @@ def main() -> None:
         print(f"[wikimedia] {track.file_title}")
         try:
             src = fetch_wikimedia(track)
-            convert_music(src, dst)
+            convert_music(src, dst, max_seconds=track.max_seconds)
         except Exception as exc:  # noqa: BLE001 - reported, not fatal for the whole run
             failures.append(f"{track.file_title}: {exc}")
             print(f"  echec: {exc}")

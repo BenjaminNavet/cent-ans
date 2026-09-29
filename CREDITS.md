@@ -105,6 +105,23 @@ page par page (domaine public, CC0, CC BY ou CC BY-SA — jamais NC ni ND).
 Sources détaillées (URL, licence exacte, traitement) :
 `game/assets/third_party/music/wikimedia/SOURCE.md`.
 
+### Musique orthodoxe et orientale — Wikimedia Commons (OMR-R6)
+
+Playlists de campagne `campaign_orthodox` et `campaign_islamic` (cultures de l'Est et du Sud).
+Licence vérifiée page par page (domaine public ou CC0) ; extraits coupés à 150 s, normalisés
+à -16 LUFS, MP3 128 kbit/s.
+
+- Hymnes ecclésiastiques byzantins, parties 1 et 2 (enregistrement Commons, 2012) — CC0.
+- Chant znamenny : « Царю Небесный », « Се Жених грядет в полунощи », « Да молчит всякая плоть
+  человеча » — chœur du Patriarcat de Moscou, CC0.
+- Musik des Orients (Hornbostel, Berlin, 1931 ; Congrès de musique arabe du Caire) : chant d'art
+  en maqam Sika (Égypte), maqam Mezmum (Tunisie), Bachraf Kuzum en maqam Hijaz (Égypte) — domaine
+  public.
+- « Istikhbar Mezmoum », Lazaar Ben Dali Yahia (Tlemcen, 1929) — domaine public.
+- Hüseyni saz semaisi, Hafız Kemal Bey (kemençe) et Hayriye Hanım (oud) — domaine public.
+
+Détail (URL, licence exacte) : `game/assets/third_party/music/wikimedia/SOURCE.md`.
+
 ### Ars nova et Trecento — vrais enregistrements, Wikimedia Commons (DA7a)
 
 Interprétations réelles (pas de MIDI), placées en tête des playlists France, Italie, Bourgogne,
