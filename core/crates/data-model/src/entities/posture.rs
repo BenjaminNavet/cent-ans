@@ -101,6 +101,9 @@ impl Default for PostureRules {
                 scout_unit_types: [
                     "unit_hobelars",
                     "unit_jinetes",
+                    "unit_akinci",
+                    "unit_lithuanian_light_cavalry",
+                    "unit_steppe_horse_archers",
                     "unit_mounted_archers",
                     "unit_mounted_sergeants",
                 ]

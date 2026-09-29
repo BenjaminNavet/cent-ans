@@ -95,7 +95,7 @@ func _run() -> int:
 		line /= maxf(n, 1)
 		other /= maxf(m, 1)
 		var toward := (other - line).normalized()
-		var eye := line + toward * 55.0 + Vector3.UP * 14.0 + toward.cross(Vector3.UP) * 12.0
+		var eye := line + toward * 22.0 + Vector3.UP * 4.5 + toward.cross(Vector3.UP) * 6.0
 		camera.look_at_from_position(eye, line + Vector3.UP * 1.5)
 		for _f in 4:
 			await process_frame
@@ -109,7 +109,13 @@ func _run() -> int:
 ## Régiment de `unit_type` construit depuis `data/unit_types/`.
 func _from_data(data_dir: String, unit_type: String) -> Dictionary:
 	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join("unit_types/%s.json" % unit_type)))
-	return {"unit_type": unit_type, "name": str(d["name"]["display"]), "category": d["category"], "mounted": bool(d.get("mounted", false)), "soldiers": int(d["soldiers"]), "max_soldiers": int(d["soldiers"]), "morale": 70, "experience": 2, "stats": d["stats"], "abilities": d.get("abilities", [])}
+	var stats := {}
+	for key in d["stats"]:
+		stats[key] = int(d["stats"][key])
+	var unit := {"unit_type": unit_type, "name": str(d["name"]["display"]), "category": d["category"], "mounted": bool(d.get("mounted", false)), "soldiers": int(d["soldiers"]), "max_soldiers": int(d["soldiers"]), "morale": 70, "experience": 2, "stats": stats, "abilities": d.get("abilities", [])}
+	if d.has("missile"):
+		unit["missile"] = d["missile"]
+	return unit
 
 
 func _environment(world: Node3D) -> void:
