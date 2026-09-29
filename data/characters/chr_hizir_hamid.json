@@ -1,0 +1,49 @@
+{
+  "id": "chr_hizir_hamid",
+  "name": {
+    "display": "Hızır Bey",
+    "local": "Bedreddin Hızır",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Hamidoğulları",
+  "faction": "fac_hamid",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date inconnue ; fils de Dündar Bey (mort en 1324)."
+  },
+  "death": {
+    "value": "1358",
+    "uncertain": true,
+    "note": "Fin de règne vers 1358 selon les listes dynastiques."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Hamid",
+      "from": {
+        "value": "1335",
+        "uncertain": true
+      },
+      "note": "Premier règne 1326-1328, puis vers 1335-1358 après son frère İshak."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_hamid",
+  "status": "at_court",
+  "description": "Badr al-Din Hızır, fils de Dündar Bey : il reprend Eğirdir après la fuite de Timurtaş en Égypte ; son frère İshak lui dispute un temps le beylik.",
+  "sources": [
+    "Badr al-Din Hizr",
+    "Hamidids"
+  ]
+}

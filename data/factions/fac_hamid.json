@@ -9,6 +9,7 @@
   "adjective": "de Hamid",
   "government": "principality",
   "playable": true,
+  "ruler": "chr_hizir_hamid",
   "capital": "prov_hamid",
   "capital_city": "Eğirdir",
   "religion": "rel_islam",
@@ -37,6 +38,11 @@
       "faction": "fac_germiyan",
       "status": "peace",
       "note": "Voisin du nord, plus puissant."
+    },
+    {
+      "faction": "fac_karaman",
+      "status": "peace",
+      "note": "Voisin oriental qui convoite Beyşehir."
     }
   ],
   "ai_personality": {
@@ -45,8 +51,10 @@
     "trade": 50,
     "piety": 60
   },
-  "description": "Beylik des lacs de Pisidie, fondé vers 1300, en déclin ; le bey en exercice en 1337 n'est pas identifié.",
+  "description": "Beylik des lacs de Pisidie (Eğirdir, Isparta) ; restauré après la fuite de Timurtaş (1327), il a recueilli Beyşehir, l'ancienne terre des Eşrefoğulları éteints en 1326. Hızır Bey règne depuis 1335 environ.",
   "sources": [
-    "Hamidids"
+    "Hamidids",
+    "Eshrefids",
+    "Badr al-Din Hizr"
   ]
 }

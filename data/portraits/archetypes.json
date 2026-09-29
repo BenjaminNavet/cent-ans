@@ -245,7 +245,6 @@
         "fac_germiyan",
         "fac_hamid",
         "fac_teke",
-        "fac_esrefid",
         "fac_karaman",
         "fac_eretna",
         "fac_candar",
@@ -1128,10 +1127,6 @@
     },
     {
       "character": "chr_mariano_iv_d_arborea",
-      "band": "old"
-    },
-    {
-      "character": "chr_mehmed_esref",
       "band": "old"
     },
     {
