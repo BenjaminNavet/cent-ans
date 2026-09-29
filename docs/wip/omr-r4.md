@@ -8,7 +8,13 @@ Branche `feat/omr-r4`, worktree `../gp-omr-r4`. Ne touche ni revenus, ni garniso
   « rester indépendant », Horde : Caffa fusionné dans « Cœur de l'empire »).
 - [x] 2. Incertitudes om-d1..d6 : points tranchés ci-dessous.
 - [x] 3. Colonies ramenées de loin.
-- [ ] 4. Régénération géo (colonies déplacées/ajoutées, propriétaires changés) puis tests.
+- [x] 4. Régénération géo ciblée (polygones inchangés : seuls les propriétaires et les colonies
+  bougent) : `geo provinces` (1 min 06 ; diff de `provinces.geojson` = 3 propriétaires, aucune
+  géométrie), `geo settlements` (2 min), `geo navgrid` (8 s) ; commit `data: OMR R4 regenerated
+  geo artifacts`. Distances de rappel : Bejitchi 29 km, Kachine 22 km, Volok 10 km, autres ≈ 0.
+- [x] 5. Tests : pytest 1 246 ok, 2 sautés ; cargo test --workspace 1 222 ok, 1 échec recalé
+  (`cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses` : plus d'embuscade en
+  graine 4 après le changement de données ; graine 2 = 11 ordres, 3 embuscades, 0 refus).
 
 ## Décisions (sources : Wikipédia en/ru/tr sauf mention)
 ### Objectifs I1
@@ -80,6 +86,9 @@ Branche `feat/omr-r4`, worktree `../gp-omr-r4`. Ne touche ni revenus, ni garniso
 - Souverains non nommés : Teke, Karasi, Circassie, Alanie, Rostov, Beloozero, Haute-Oka, Perm,
   Viatka, Théodoro, Gabès.
 
+- Colonies encore ramenées à plus de 40 km (hors mandat, antérieures) : Illueca 56 km, Vestervig
+  47, Isaccea 44, Lemsal 44, Kronach 41, Nyköping 41.
+- Hızır Bey sans portrait (à générer).
+
 ## Prochaine étape
-Régénération géo (ordre `om-om2.md`), commit dédié aux artefacts, puis cargo test --workspace
-et pytest, recalage des tests liés aux données (compteurs de factions : −1).
+Lot terminé ; à intégrer dans `feat/omr`. Tests Godot non relancés (données seules).
