@@ -127,3 +127,13 @@ le point de la porte.)
 - Le joueur défenseur n'a pas l'IA de repli : il doit ramener lui-même ses troupes sur la place,
   où le dernier carré joue pour lui aussi.
 - L'alerte de la colonne n'a pas encore d'icône à l'encre DA5 (glyphe vectoriel de repli).
+- **Petite garnison, large brèche** (`siege.rs`, `a_wide_breach_…`, niveau 2, 4 graines) : la
+  garnison repliée sur la place tient, l'assaillant gagne **0/4 par la brèche contre 2/4 aux
+  échelles** (sans repli, les défenseurs restés aux murs se débandent en contagion) ; la brèche
+  reste bien moins coûteuse par défenseur tué. Le test n'exige plus que la brèche emporte la ville.
+  Essais écartés le 29/09 (br3 générique / Paris / Rouen, référence 7 / 2 / 3) : regroupement de
+  l'assaut derrière l'ouverture, par régiment ou en un point commun → brèche 2/4 mais 8 / 2 / 0 ;
+  « engagé » à deux régiments près de la place, ou arrêt du régiment en tête → sans effet. Piste :
+  un regroupement qui ne s'arrête pas sous les tours (Rouen), ou un repli sur la place seulement
+  quand la garnison ne peut plus tenir la brèche.
+- Mesures reprises le 29/09 après fusion de main (OM, RS F) : br3 inchangé (7 / 2 / 3).
