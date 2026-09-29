@@ -37,11 +37,36 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	var little := data.height_little_endian
 	var h_min := data.height_min_m
 	var h_range := data.height_max_m - data.height_min_m
+	# OMR-R2 : heightmap 16 bits little-endian (décodeur Rust) : minimum et maximum sur les valeurs
+	# brutes, converties en mètres une fois par cellule (conversion croissante : même résultat).
+	var raw16 := bpp == 2 and little and not generic_path
 	var rows := func(r: int) -> void:
 		var line := PackedFloat32Array()
 		line.resize(side.x)
 		var line_max := PackedFloat32Array()
 		line_max.resize(side.x)
+		if raw16:
+			var y_end := mini((r + 1) * cell, size.y)
+			for c in side.x:
+				var low := 65536
+				var high := -1
+				var x_end := mini((c + 1) * cell, size.x)
+				var y := r * cell
+				while y < y_end:
+					var o := (y * size.x + c * cell) * 2
+					var o_end := (y * size.x + x_end) * 2
+					while o < o_end:
+						var raw := bytes.decode_u16(o)
+						low = mini(low, raw)
+						high = maxi(high, raw)
+						o += step * 2
+					y += step
+				var best := h_min + (float(low) / 65535.0) * h_range if high >= 0 else INF
+				var top := h_min + (float(high) / 65535.0) * h_range if high >= 0 else -INF
+				line[c] = maxf(best if best < INF else 0.0, 0.0)
+				line_max[c] = maxf(top if top > -INF else 0.0, 0.0)
+			out_rows[r] = [line, line_max]
+			return
 		for c in side.x:
 			var best := INF
 			var top := -INF
@@ -116,6 +141,9 @@ static func _add_true_scale_zones(squash: PackedFloat32Array, side: Vector2i, ce
 				var i := r * side.x + c
 				squash[i] = maxf(squash[i], profile.true_scale_squash * w)
 
+
+## OMR-R2 : force le chemin générique (octet par octet) ; pour le test d'égalité des deux chemins.
+static var generic_path := false
 
 const MODE_MIN := 0
 const MODE_MEAN := 1
