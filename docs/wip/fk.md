@@ -6,8 +6,8 @@ Coût cloud : 0 $.
 ## État
 - [x] FK0 squelette : `map_scenes.rs` (API vide), `tests/fk_map_scenes.rs` (#[ignore]),
   `game/scripts/map/life_folk/*.gd` vides, `game/tests/fk_folk_test.gd` (SKIPPED), ADR 0122.
-- [~] Vague 1 lancée 09-29 (3 agents cent-ans-dev en worktree) : FK1 cœur, FK2 assets, FK3 pool + routine + charrettes.
-- [ ] Vague 2 : FK4 scènes, FK5 incidents + 15 événements.
+- [x] Vague 1 : FK1, FK2, FK3 fusionnés dans integration/fk (299233c8c), modèles FK2 rebranchés (234c1e845).
+- [~] Vague 2 lancée depuis integration/fk : FK4 scènes + alignement des clés map_scenes.json (feat/fk4-scenes), FK5a marqueurs/fenêtre/notification (feat/fk5-incidents), FK5b 15 événements + taux (feat/fk5-events).
 - [ ] FK6 : A/B `--no-folk`, captures (≤ 3), relecture, fusion.
 
 ## Intégration
