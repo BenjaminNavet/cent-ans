@@ -10,7 +10,8 @@ use crate::campaign_sim::{order_result, CampaignSim};
 impl CampaignSim {
     /// Decisions waiting for the player, oldest first:
     /// `[{id, event, title, text, historical, options[{index, text,
-    /// effects_text}], expires_in, province, province_name}]`.
+    /// effects_text}], expires_in, province, province_name, presentation}]`;
+    /// `presentation` (FK1) is `map` (incident posed on the map) or `dialog`.
     #[func]
     fn get_pending_decisions(&self) -> VarArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -42,6 +43,7 @@ impl CampaignSim {
                     "expires_in" => i64::from(view.expires_in),
                     "province" => view.province.as_ref().map_or("", |p| p.as_str()),
                     "province_name" => view.province_name.as_str(),
+                    "presentation" => view.presentation.as_str(),
                 }
                 .to_variant()
             })

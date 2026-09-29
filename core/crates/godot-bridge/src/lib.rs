@@ -51,6 +51,7 @@ mod campaign_sim_turn;
 mod campaign_sim_victory;
 mod campaign_sim_vision;
 mod campaign_sim_weather;
+mod campaign_sim_map_scenes;
 mod convert;
 mod data_store_rules;
 mod historical_battles;
