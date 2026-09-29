@@ -4,17 +4,19 @@ Spec : `docs/superpowers/specs/2026-09-29-dv-deux-vues-campagne-design.md`. ADR 
 Plan : `~/.claude/plans/docs-superpowers-specs-2026-09-29-dv-deu-delightful-snail.md`.
 Worktree `../game_project-dv`, branche `feat/dv`. Coût cloud : 0 $.
 
-## État
-- [x] DV0 squelette : `ZoomTiers` à deux vues (`strategic_weight`, `Tier.STRATEGIC`,
-  `model_range 1250`) ; `far_weight` / `medium_weight` gardés en enveloppes temporaires ;
-  `dv_two_views_test.gd` (SKIPPED) ; ADR 0124.
-- [ ] Vague 1 : DV1 câblage des vues (strategic_view, campaign_map, CityMarkers, armées, vie,
-  terrain politique) ; DV2 lieux (settlement_layer sans pictogramme, écu seul, HeraldryAtlas,
-  json allégé, légende).
-- [ ] DV3 : retrait des enveloppes, test activé, banc FPS à 1100, 2 captures, fusion.
-
-## Prochaine étape
-DV1 et DV2 lancés 09-29 (agents cent-ans-dev en worktree, branches feat/dv1, feat/dv2). Ensuite : fusion dans feat/dv, DV3. Banc A/B (main vs feat/dv) à d = 1100 lancé dos à dos, agents arrêtés.
+## État : TERMINÉ (30/09)
+- [x] DV0 squelette, ADR 0124.
+- [x] DV1 câblage des vues (strategic_view, CityMarkers supprimé, routes, armées, vie,
+  `political_amount = 0` dans terrain.gdshader) ; notes `docs/wip/dv1.md`.
+- [x] DV2 lieux (écu seul, HeraldryAtlas, json allégé, PNG et outil supprimés, légende) ;
+  notes `docs/wip/dv2.md`.
+- [x] DV3 enveloppes retirées, `dv_two_views_test` actif, main (FK) fusionné, ombres des
+  maquettes coupées > 500, banc A/B (ADR 0124), 2 captures (1100, 1400) conformes.
 
 ## Points ouverts
-- `integration/fk` touche campaign_map.gd, life_effects.gd, campaign_life.gd : petits conflits à la fusion.
+- Appels de dessin +21 % à d = 1100 : à mesurer sur machine calme (chantier FPS carte).
+- Taille et écart de l'écu au nom : à juger par le joueur en partie.
+- `da7d_overlap_test` au-dessus de son seuil sous charge (déjà le cas sur la base) ;
+  `sz4b_colonies_forests_test` 6 échecs antérieurs à DV ; erreur « SimFacade » à la compilation
+  de `map_mode_controller.gd:388` dans ux1 (le test passe).
+- Peintures sources `tools/assets/map_markers/*.jpg` inutilisées : à supprimer ou garder.

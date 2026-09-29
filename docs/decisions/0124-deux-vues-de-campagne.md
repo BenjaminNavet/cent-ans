@@ -36,3 +36,15 @@ Aucun pictogramme de ville à aucun zoom. Pas de bascule manuelle.
 - Les maquettes restent affichées trois fois plus loin (420 → 1250). C'est le risque de
   performance. Mesure à d = 1100 ; si le budget est dépassé : ombres des maquettes coupées
   au-delà de 500, puis LOD grossier au-delà de 500.
+
+## Mesure (30/09, banc `--bench-map --bench-distance=1100`, Haute, machine chargée)
+| | base (3b4882b7e) | DV sans coupure | DV + ombres des maquettes coupées > 500 |
+|---|---|---|---|
+| primitives p50 | 9,59 M | 10,44 M | 9,82 M |
+| appels de dessin p50 | 842 | 1 032 | 1 023 |
+| image p50 | 38 ms | — | 40 ms |
+
+La charge de la machine (35 à 140) rend les temps d'image indicatifs. Les primitives reviennent au
+niveau de la base (+2 %) ; les appels de dessin restent à +21 % (maquettes). Le LOD grossier
+au-delà de 500 n'est pas appliqué : il réduirait les primitives, pas les appels. À mesurer sur une
+machine calme avec le chantier FPS carte (`docs/wip/fps-carte.md`).
