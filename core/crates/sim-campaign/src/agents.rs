@@ -1580,8 +1580,27 @@ pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) 
             }
         }
     }
+    // OMR R3 (ADR 0117): a realm in debt dismisses its costliest agent each
+    // season (their upkeep kept small counties in the red).
+    let dismissed = (f.treasury < 0)
+        .then(|| {
+            state
+                .agents_of(faction)
+                .into_iter()
+                .max_by_key(|(id, a)| {
+                    let upkeep = rules(data).types.get(&a.kind).map_or(0, |t| t.upkeep);
+                    (upkeep, std::cmp::Reverse((*id).clone()))
+                })
+                .map(|(id, _)| id.clone())
+        })
+        .flatten();
+    if let Some(agent) = &dismissed {
+        orders.push(Order::DismissAgent {
+            agent: agent.clone(),
+        });
+    }
     for (id, agent) in state.agents_of(faction) {
-        if agent.acted {
+        if agent.acted || dismissed.as_ref() == Some(id) {
             continue;
         }
         let plan = match agent.kind {
