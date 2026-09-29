@@ -371,6 +371,11 @@ fn besiege_guyenne(data: &GameData) -> (CampaignState, sim_campaign::ArmyId, Set
     a.clear_plan();
     state.end_turn_with(data, idle);
     assert!(state.settlements[&city].siege.is_some());
+    // NT5 (ADR 0128): the ladders are built (an assault behind standing
+    // walls needs one ready engine).
+    if let Some(siege) = state.settlements.get_mut(&city).unwrap().siege.as_mut() {
+        siege.engine_work = data.siege_engine_rules.engines[0].work;
+    }
     let garrison = &mut state.settlements.get_mut(&city).unwrap().garrison;
     garrison.truncate(1);
     for unit in garrison.iter_mut() {
