@@ -16,7 +16,16 @@ Branche `feat/fk5-incidents` (base `integration/fk` 299233c8c). Spec
   affichés ; sinon repli sur la fenêtre), `open_decision(id)`, `notify_expired(events)` (toast
   « Délai écoulé, le conseil a tranché — … » depuis l'entrée de chronique « (délai écoulé) »).
 - [x] Alertes : un incident `map` n'est plus bloquant pour le bouton de fin de tour.
-- [ ] Test headless `game/tests/fk5_incidents_test.gd`, `smoke.gd`.
+- [x] Test headless `game/tests/fk5_incidents_test.gd` vert ; `smoke.gd` et `fk_folk_test.gd` verts.
 
 ## Prochaine étape
-Test headless, smoke, commit final.
+Relecture, fusion dans `integration/fk` (conflit probable mais trivial avec FK4 dans
+`CampaignLife.setup` : `_setup_folk()` puis `_setup_incidents()`).
+
+## Points ouverts
+- Pictogramme unique (`hud_chronicle_decision`) pour tous les incidents : un pictogramme par
+  `map_scene` demanderait d'exposer `map_scene` dans `get_pending_decisions`.
+- L'avis d'expiration repère l'entrée de chronique par la marque « (délai écoulé) » du cœur
+  (`ChronicleController.EXPIRED_MARK`) ; si le texte change dans `chronicle.rs`, changer la constante.
+- `--no-folk` coupe aussi les sceaux (repli sur la fenêtre de début de tour).
+- Clic sur la scène FK4 → fenêtre : non fait (FK4 pose la scène ; brancher `open_decision`).

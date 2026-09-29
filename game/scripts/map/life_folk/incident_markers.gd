@@ -112,7 +112,7 @@ func refresh(sim: Object) -> void:
 		if not is_map_decision(decision):
 			continue
 		var id := int(decision.get("id", -1))
-		var world := _world_of_province(str(decision["province"]))
+		var world: Variant = _world_of_province(str(decision["province"]))
 		if world == null:
 			continue
 		seen[id] = true
