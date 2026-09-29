@@ -213,7 +213,7 @@ impl Default for AgentEffects {
             sabotage_supplies: 15,
             sabotage_delay_turns: 2,
             sabotage_morale: 15,
-            incite_unrest: 15,
+            incite_unrest: 10,
             parley_opinion: 10,
             parley_opinion_per_level: 2,
             parley_turns: 12,

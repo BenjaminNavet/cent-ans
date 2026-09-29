@@ -478,7 +478,8 @@ fn inciting_raises_unrest() {
     let before = state.provinces[&province].population.peasants.unrest;
     act(&mut state, &data, &id, AgentActionKind::Incite, None);
     let after = state.provinces[&province].population.peasants.unrest;
-    assert_eq!(after, (before + 15).min(100));
+    let incite = sim_campaign::agents::rules(&data).effects.incite_unrest;
+    assert_eq!(after, (before + incite).min(100));
 }
 
 #[test]
