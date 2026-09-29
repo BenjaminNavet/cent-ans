@@ -42,3 +42,7 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
   (provinces, settlements, navgrid ; 8a1fbb9a5). Test cv3_ai_stances recalé (graine 2).
   À l'intégration : portrait Hızır Bey (enveloppe OM) ; conflits possibles avec R3 (données factions D).
   Incertitudes restantes : docs/wip/omr-r4.md.
+- R5 fini (feat/omr-r5, fb9e75774) : 10 unités de l'Est (mamelouks, archers des steppes, akıncı, yaya,
+  cavalerie serbe, pronoïaires, droujina, cavalerie lituanienne, frères teutoniques, almogavres),
+  doctrines IA, unit_looks.json (livrées/robes), emblèmes locaux, codex. Pas de règle core. Conflit
+  probable avec R3 sur data/ai/doctrines.json. Brabançons 12 % / archers écossais 84 % (hors bande, préexistant).
