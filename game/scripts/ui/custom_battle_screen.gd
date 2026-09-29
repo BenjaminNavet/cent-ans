@@ -24,6 +24,7 @@ const TERRAINS := [["plains", "Plaines"], ["hills", "Collines"], ["mountains", "
 const SEASONS := [["spring", "Printemps"], ["summer", "Été"], ["autumn", "Automne"], ["winter", "Hiver"]]
 const WEATHERS := [["", "Selon la saison"], ["clear", "Temps clair"], ["rain", "Pluie"], ["fog", "Brouillard"], ["snow", "Neige"]]
 const PLAYER_SIDES := [["attacker", "Camp 1"], ["defender", "Camp 2"], ["", "Aucun (IA contre IA)"]]
+const PLACES := [["city", "Cité"], ["borough", "Bourg fortifié"], ["castle", "Château"]]
 const CATEGORY_LABELS := {"infantry": "Infanterie", "ranged": "Tireurs", "cavalry": "Cavalerie", "siege": "Siège"}
 const DEFAULT_FACTIONS := {"attacker": "fac_france", "defender": "fac_england"}
 
@@ -48,6 +49,7 @@ var weather_option: OptionButton
 var hour_option: OptionButton
 var siege_check: CheckBox
 var fortification_spin: SpinBox
+var place_option: OptionButton
 var player_option: OptionButton
 var errors_label: Label
 var launch_button: Button
@@ -103,7 +105,7 @@ func _initial_config() -> Dictionary:
 		"attacker": {"faction": DEFAULT_FACTIONS["attacker"], "budget": int(rules.get("default_budget", 6000)), "units": []},
 		"defender": {"faction": DEFAULT_FACTIONS["defender"], "budget": int(rules.get("default_budget", 6000)), "units": []},
 		"terrain": "plains", "season": "summer", "weather": "", "hour": "",
-		"siege": false, "fortification": int(rules.get("default_fortification", 2)), "player_side": "attacker",
+		"siege": false, "place": "city", "fortification": int(rules.get("default_fortification", 2)), "player_side": "attacker",
 	}
 	var saved := saved_config()
 	for key in out:
@@ -303,6 +305,10 @@ func _build_field() -> Control:
 		config["fortification"] = int(value)
 		refresh())
 	grid.add_child(fortification_spin)
+	place_option = _field_option(grid, "Type de place", "custom_battle_place")
+	for entry in PLACES:
+		place_option.add_item(entry[1])
+	place_option.item_selected.connect(func(i: int) -> void: _set_key("place", PLACES[i][0]))
 	return grid
 
 
@@ -334,6 +340,7 @@ func _sync_controls() -> void:
 	player_option.selected = maxi(_index_of(PLAYER_SIDES, str(config["player_side"])), 0)
 	siege_check.set_pressed_no_signal(bool(config["siege"]))
 	fortification_spin.set_value_no_signal(float(config["fortification"]))
+	place_option.selected = maxi(_index_of(PLACES, str(config.get("place", "city"))), 0)
 	_refreshing = false
 
 
@@ -441,6 +448,7 @@ func refresh() -> void:
 		label.text = "Points : %d / %d — unités : %d / %d" % [int(side_report.get("cost", 0)), int(side_report.get("budget", 0)), int(side_report.get("units", 0)), int(side_report.get("max_units", 0))]
 		label.modulate = Color(1.0, 0.6, 0.5) if int(side_report.get("cost", 0)) > int(side_report.get("budget", 0)) else Color(1, 1, 1)
 	fortification_spin.editable = bool(config["siege"])
+	place_option.disabled = not bool(config["siege"])
 	var errors: Array = report.get("errors", [])
 	errors_label.text = "\n".join(PackedStringArray(errors))
 	errors_label.visible = not errors.is_empty()

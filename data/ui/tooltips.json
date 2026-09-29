@@ -409,6 +409,10 @@
       "title": "Siège",
       "body": "Le camp 2 tient une place fortifiée ; le camp 1 donne l'assaut aux murs."
     },
+    "custom_battle_place": {
+      "title": "Type de place",
+      "body": "Plan de la place assiégée : cité en anneaux de maisons, bourg fortifié le long d'une grand-rue, ou château avec donjon et basse-cour."
+    },
     "custom_battle_fortification": {
       "title": "Fortification",
       "body": "Niveau des murs de la place (0 à 3) : épaisseur, hauteur et solidité."
