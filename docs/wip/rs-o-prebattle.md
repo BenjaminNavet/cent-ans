@@ -12,10 +12,15 @@ re-layout sur `minimum_size_changed`, C2 de `p2d_ui_test.gd` déjà bloquant (ta
 
 ## État
 
-- [ ] vérifier les tests (p2d, smoke, po_ui, ib_plain, nv1, tests PreBattleDialog)
-- [ ] renforcer C2 : rectangle global du panneau dans l'écran (position comprise), pas seulement
-      la taille
+- [x] C2 de `p2d_ui_test.gd` renforcé (`_check_panel_fits`) : rectangle global du panneau dans
+      l'écran (position comprise), taille minimale combinée ≤ écran, boutons d'action dans le
+      panneau. Mutation vérifiée : sans défilement vertical des colonnes, 4 échecs à 1280×640
+      (minimum 724 px pour 711 px d'écran logique).
+- [x] tests verts : p2d_ui_test, smoke, po_ui_test, nv1_naval_test, ub1_ui_test.
+- [ ] `ib_plain_test` rouge **préexistant, hors lot** : littéral `tooltip_text` dans
+      `game/scripts/ui/diplomacy_panel.gd` (fichier non touché ici).
 
 ## Prochaine étape
 
-Lancer les tests après `--import`.
+Lot terminé ; fusion par l'orchestrateur. Aucun changement de `pre_battle_dialog.gd` /
+`naval_pre_battle_dialog.gd` nécessaire (correctif déjà dans `main`, 65dd44521).
