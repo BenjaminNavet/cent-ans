@@ -47,3 +47,4 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
   doctrines IA, unit_looks.json (livrées/robes), emblèmes locaux, codex. Pas de règle core. Conflit
   probable avec R3 sur data/ai/doctrines.json. Brabançons 12 % / archers écossais 84 % (hors bande, préexistant).
 - Intégration ../gp-omr (feat/omr) : R6, R2, R4, R5 fusionnés sans conflit. ADR 0118 conservé (0117 réservé par tw2-t4). Attente R1, R3, R7 ; tests complets après.
+- R1 fini (feat/omr-r1, ced09f8a2) : décisions IA identiques (turn_digest), CPU de planification ×0,42 (≈ 0,40 s/tour estimé ; à confirmer au calme par turn_perf 10 1 1), ADR 0119. Fusionné dans feat/omr. ADR : R3 a pris 0117, en collision avec tw2-t4 → renuméroter R3 à l'intégration (0120+).
