@@ -26,12 +26,19 @@ ADR : `docs/decisions/0128-plafond-et-engins-de-siege.md`.
 - [x] UI : siege_controller (engins, bouton grisé + infobulle), settlement/province panel (Former une armée > 20)
 - [x] `core/build.sh`, test Godot `nt5_cap_engines_test.gd` OK, `tw2_t3_mercenaries_test` OK
 - [x] Garde-fous bataille avant/après : `ep7_historical` 6/6, `ep9b_duel` 8/8, `ai` (dont `ai_beats_a_passive_ai_at_equal_forces`) 2/2, identiques
-- [ ] Sonde `century_probe` après (part de guerre FR–EN)
+- [x] Sonde `century_probe` après (part de guerre FR–EN) : dans la cible, aucun ajustement de données
 
 ## Chiffres d'équilibre
 Avant (main f36689196, `century_probe 464 1-6`, normale) : guerre FR-EN moy. 67,6 % [61-73], 6/6 dans
 55-75 % ; prises 949-1474 (moy. 1188) ; sièges réussis 34-52 %.
-Après : (à mesurer)
+Après (même sonde) : guerre FR-EN moy. 66,9 % [64-71], 6/6 dans 55-75 % ; prises moy. 1116 ;
+sièges réussis 37-43 % ; sièges engagés 446 → 452 ; révoltes 24,5 → 18,3 par partie.
+Effet de bord : batailles FR/EN par décennie 77,5 → 144,6 (armées plafonnées à 20 : plus d'osts
+distincts, donc plus de rencontres). Garde-fous bataille inchangés (voir État).
+
+## Points ouverts
+- Batailles FR/EN ×1,9 par décennie (N6) : à surveiller en partie pilote.
+- Le bélier n'a pas d'effet propre en résolution automatique (seul le beffroi ôte les murailles).
 
 ## Prochaine étape
-Suite sim-battle + garde-fous, build.sh + Godot, sonde century_probe après.
+Fusion dans `integration/nt` par le coordinateur.
