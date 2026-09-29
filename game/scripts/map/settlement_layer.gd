@@ -181,6 +181,13 @@ var _exaggeration_value := 1.0
 ## 0 : à calculer, 1 : posé, 2 : écarté ; graine de tirage par hameau (0 : à calculer).
 var _hamlet_keep: PackedByteArray = PackedByteArray()
 var _hamlet_seed: PackedInt64Array = PackedInt64Array()
+## RS-K3 : partie fixe d'une tuile de hameaux (morceau → [hameaux posés, points des hauteurs (5 par
+## hameau : centre puis emprise), lacets, échelles]) : une reconstruction (recalage du relief,
+## dévastation) ne relit plus que les hauteurs. Vidée avec les exclusions.
+var _hamlet_tiles: Dictionary = {}
+## RS-K3 : emprises des maquettes ordinaires autour d'un morceau (3 × 3 morceaux) : morceau →
+## [centres, rayons + marge] ; même validité que les exclusions des hameaux.
+var _model_disks: Dictionary = {}
 ## RS-K2 : échelle écran et boîte des marqueurs pour les décalages d'étiquettes, par image.
 var _lift_frame := -1
 var _lift_scale := 1.0
@@ -257,6 +264,10 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	_hamlet_seed.resize(data.hamlets.size())
 	_hamlet_seed.fill(-1)
 	_forget_hamlet_exclusions()
+	# RS-K3 : maillages des hameaux chargés au chargement de la carte (~15 ms la première fois),
+	# pas à la construction de la première tuile en jeu.
+	if not data.hamlets.is_empty():
+		ModelLibrary.hamlet_meshes()
 	_build_icons()
 	_build_selection_ring()
 	_setup_towns()
@@ -375,6 +386,30 @@ func on_settlement_model(px: Vector2) -> bool:
 	return false
 
 
+## RS-K3 : `on_settlement_model` avec les emprises voisines lues une fois par morceau (même test).
+func _on_model_disk(px: Vector2) -> bool:
+	var index := terrain.chunk_index_at(px.x, px.y)
+	var disks: Array = _model_disks.get(index, [])
+	if disks.is_empty():
+		var centers := PackedVector2Array()
+		var radii := PackedFloat64Array()
+		var margin := ModelLibrary.HAMLET_SCALE * 0.3
+		for dy in [-1, 0, 1]:
+			for dx in [-1, 0, 1]:
+				for j in _settlements_by_chunk.get(index + dy * terrain.chunks_x + dx, PackedInt32Array()):
+					if _models[j] != null and not _landmarks.has(j):
+						centers.append(model_px(j))
+						radii.append(_model_radius[j] + margin)
+		disks = [centers, radii]
+		_model_disks[index] = disks
+	var centers: PackedVector2Array = disks[0]
+	var radii: PackedFloat64Array = disks[1]
+	for k in centers.size():
+		if px.distance_to(centers[k]) < radii[k]:
+			return true
+	return false
+
+
 ## Vrai si un point carte est couvert par une ville emblématique (hameaux, végétation).
 func covered_by_landmark(px: Vector2) -> bool:
 	for landmark in _landmarks.values():
@@ -408,6 +443,8 @@ func _forget_hamlet_exclusions() -> void:
 		return
 	_hamlet_keep.resize(data.hamlets.size())
 	_hamlet_keep.fill(0)
+	_hamlet_tiles.clear()
+	_model_disks.clear()
 
 
 ## DC6c : paires de maquettes voisines qui peuvent se masquer (rayons à la taille de carte, les
@@ -970,9 +1007,12 @@ func update_view(camera_distance: float) -> void:
 		_declutter_timer = 0.0
 		_declutter_force = true
 	if MapData.vertical_scale() != _label_scale:
-		_labels_dirty = false
-		_update_label_heights()  # ZG4 : toutes les étiquettes du palier moyen suivent l'échelle
-	elif _labels_dirty:
+		# ZG4 : toutes les étiquettes suivent l'échelle verticale. RS-K3 (ADR 0051) : tour de
+		# réécriture étalé (`LABEL_SLICE` étiquettes par image, reprise au curseur ; un nouveau
+		# pas relance un tour complet).
+		_label_scale = MapData.vertical_scale()
+		_label_left = _labels.size()
+	if _labels_dirty:
 		_labels_dirty = false
 		# SZ6 : seules les colonies des morceaux recalés (hauteur de leur maquette ou de leur ville
 		# emblématique) changent.
@@ -981,6 +1021,10 @@ func update_view(camera_distance: float) -> void:
 			for i in _settlements_by_chunk.get(index, PackedInt32Array()):
 				_update_label_height(i, near)
 		_label_chunks.clear()
+	if _label_left > 0:
+		var tv := Time.get_ticks_usec()
+		_label_slice(FrameBudget.in_frame())
+		PerfProbe.lap("settle/labels/vscale", tv)  # RS-K3
 	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
@@ -1002,7 +1046,9 @@ func update_view(camera_distance: float) -> void:
 		_declutter_timer = declutter_interval
 		# DA7d : recalcul seulement si la caméra a bougé nettement (ou épinglés, palier changés).
 		if _declutter_force or _camera_moved():
-			declutter()
+			_declutter_begin()
+	if _dc_pos >= 0:
+		_declutter_step(FrameBudget.in_frame())
 	_update_declutter_fade()
 	PerfProbe.lap("settle/declutter", tp)
 
@@ -1022,6 +1068,13 @@ func _on_chunk_surface_changed(index: int) -> void:
 var _label_chunks: Dictionary = {}
 var _label_state := Vector2i(-1, -1)
 var _label_scale := -1.0
+## RS-K3 : tour de réécriture des étiquettes (échelle verticale) : étiquettes par image, curseur
+## et entrées restant à voir ; altitude du sol (m, avant affichage) sous chaque étiquette du palier
+## moyen, lue une fois (NAN : à lire).
+const LABEL_SLICE := 300
+var _label_cursor := 0
+var _label_left := 0
+var _label_ground_m: PackedFloat64Array = PackedFloat64Array()
 
 
 ## Hauteur des étiquettes : au-dessus de la maquette (près) ou de l'icône (moyen).
@@ -1030,8 +1083,28 @@ func _update_label_heights() -> void:
 	_label_state = Vector2i(int(near), 0)
 	_label_scale = MapData.vertical_scale()
 	_label_chunks.clear()
+	_label_left = 0
 	for i in _labels.size():
 		_update_label_height(i, near)
+
+
+## RS-K3 : tranche du tour de réécriture des étiquettes (toutes si `sliced` est faux).
+func _label_slice(sliced: bool) -> void:
+	var count := _labels.size()
+	if count == 0:
+		_label_left = 0
+		return
+	var near := _weights.x > 0.35
+	var done := 0
+	var i := _label_cursor % count
+	while _label_left > 0 and (not sliced or done < LABEL_SLICE):
+		_update_label_height(i, near)
+		done += 1
+		_label_left -= 1
+		i += 1
+		if i == count:
+			i = 0
+	_label_cursor = i
 
 
 func _update_label_height(i: int, near: bool) -> void:
@@ -1053,9 +1126,21 @@ func _update_label_height(i: int, near: bool) -> void:
 			label.position = label_at
 		label.offset = Vector2.ZERO
 	else:
-		# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
-		label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
-		label.offset = Vector2(0.0, _label_lift_px(i))
+		# Palier moyen : au-dessus de l'icône (décalage en pixels écran). RS-K3 : altitude du sol
+		# lue une fois (même valeur que `surface_world_at`), écritures seulement si elles changent.
+		if _label_ground_m.size() != _labels.size():
+			_label_ground_m.resize(_labels.size())
+			_label_ground_m.fill(NAN)
+		var ground_m := _label_ground_m[i]
+		if is_nan(ground_m):
+			ground_m = map_data.height_m_at(px.x, px.y)
+			_label_ground_m[i] = ground_m
+		var label_at := Vector3(px.x, maxf(MapData.display_height(ground_m, px.x, px.y), 0.0) + 0.5, px.y)
+		if label.position != label_at:
+			label.position = label_at
+		var offset := Vector2(0.0, _label_lift_px(i))
+		if label.offset != offset:
+			label.offset = offset
 
 
 ## Opacité d'une étiquette selon le type et le palier (cité : moyen et près ; ville : moyen
@@ -1078,63 +1163,139 @@ func _label_alpha(kind: String) -> float:
 ## mesurés avec la police (DC4, `_label_screen_rect`) ; grille spatiale (`MarkerDeclutter`),
 ## coût linéaire avec ~1 200 colonies. Remplace le masquage des seuls noms de DC4.
 func declutter() -> void:
+	if _declutter_begin():
+		_declutter_step(false)
+
+
+## RS-K3 (ADR 0051) : passe de dé-encombrement en cours, étalée sur les images (`DECLUTTER_SLICE`
+## colonies par image dans une image ouverte). Tout est mesuré avec l'état de caméra figé au début
+## de la passe (projection recalculée ici, même formule que `Camera3D.unproject_position`) : les
+## tranches restent cohérentes entre elles quand la caméra bouge.
+const DECLUTTER_SLICE := 600
+var _dc_sequence := PackedInt32Array()
+var _dc_pos := -1
+var _dc_pins := PackedInt32Array()
+var _dc_usec := 0
+var _dc_view := Transform3D()
+var _dc_projection := Projection()
+var _dc_size := Vector2.ONE
+var _dc_origin := Vector3.ZERO
+var _dc_eye := Vector3.FORWARD
+var _dc_near := 0.05
+var _dc_label_screen := Rect2()
+var _dc_marker_margin := 2.0
+var _dc_label_margin := 4.0
+var _dc_icons_on := false
+var _dc_box := Vector2(0.8, 0.8)
+var _dc_close_w := 0.0
+var _dc_label_range := INF
+var _dc_alpha_by_kind := {}
+var _dc_scale := 1.0
+
+
+## RS-K3 : commence une passe (état de caméra figé, obstacles et épinglés posés) ; faux sans caméra.
+func _declutter_begin() -> bool:
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if camera == null or data == null or _priority_order.is_empty():
-		return
+		return false
 	var t0 := Time.get_ticks_usec()
+	var tp := t0  # RS-K3 : sous-sections du banc `--bench-probe`
 	_declutter_force = false
 	_declutter_camera = _camera_state(camera)
 	var screen := get_viewport().get_visible_rect()
+	_dc_size = screen.size
+	_dc_view = camera.get_camera_transform().affine_inverse()
+	_dc_projection = camera.get_camera_projection()
+	var eye_transform := camera.global_transform
+	_dc_origin = eye_transform.origin
+	_dc_eye = -eye_transform.basis.z.normalized()
+	_dc_near = camera.near
 	var spill := float(markers.declutter_value("label_screen_margin", 0.2))
-	var label_screen := screen.grow_individual(screen.size.x * spill, screen.size.y * spill, screen.size.x * spill, screen.size.y * spill)
-	var marker_margin := float(markers.declutter_value("marker_margin_px", 2.0))
-	var label_margin := float(markers.declutter_value("label_margin_px", declutter_margin))
-	var icons_on := _icons != null and _icons.visible and _weights.x < 0.65
-	_placer.reset(_max_marker_px * icon_size_scale + marker_margin * 2.0)
+	_dc_label_screen = screen.grow_individual(screen.size.x * spill, screen.size.y * spill, screen.size.x * spill, screen.size.y * spill)
+	_dc_marker_margin = float(markers.declutter_value("marker_margin_px", 2.0))
+	_dc_label_margin = float(markers.declutter_value("label_margin_px", declutter_margin))
+	_dc_icons_on = _icons != null and _icons.visible and _weights.x < 0.65
+	_placer.reset(_max_marker_px * icon_size_scale + _dc_marker_margin * 2.0)
 	# CV3-0 (#7) : les plaques/étendards d'armée sont réservés avant les colonies (déjà placés,
 	# stables d'une frame à l'autre) ; un marqueur ou un nom de colonie qui les recouvre cède
 	# la place, au lieu de se superposer (étiquettes qui se chevauchaient au pied de l'armée).
 	if label_obstacles.is_valid():
 		for rect: Rect2 in label_obstacles.call(camera):
 			_placer.try_place(rect, -2, true)
-	var pins := _pinned_indices()
-	var box_fraction := markers.marker_box()
+	_dc_pins = _pinned_indices()
+	_dc_box = markers.marker_box()
 	# ZG4 : paliers vallée / site (vue rasante) : seulement les colonies proches, l'horizon ne se
 	# couvre pas de noms.
-	var close_w := tiers.valley_weight(_camera_distance) if tiers != null else 0.0
-	var label_range := tiers.close_label_range_factor * _camera_distance if tiers != null else INF
-	var alpha_by_kind := {}
+	_dc_close_w = tiers.valley_weight(_camera_distance) if tiers != null else 0.0
+	_dc_label_range = tiers.close_label_range_factor * _camera_distance if tiers != null else INF
+	_dc_alpha_by_kind = {}
 	for kind in KIND_INDEX:
-		alpha_by_kind[kind] = _label_alpha(kind)
-	var camera_at := camera.global_position
-	var scale := _label_screen_scale(camera)
-	var sequence := PackedInt32Array(pins)
+		_dc_alpha_by_kind[kind] = _label_alpha(kind)
+	_dc_scale = _label_screen_scale(camera)
+	_dc_sequence = PackedInt32Array(_dc_pins)
 	for i in _priority_order:
-		if not pins.has(i):
-			sequence.append(i)
-	for i in sequence:
-		var has_marker := icons_on and marker_in_tier(i)
+		if not _dc_pins.has(i):
+			_dc_sequence.append(i)
+	_dc_pos = 0
+	PerfProbe.lap("settle/declutter/prep", tp)
+	_dc_usec = Time.get_ticks_usec() - t0
+	return true
+
+
+## RS-K3 : point écran de `p` avec la caméra figée de la passe (`Camera3D.unproject_position`).
+func _dc_project(p: Vector3) -> Vector2:
+	var local := _dc_view * p
+	var clip := _dc_projection * Vector4(local.x, local.y, local.z, 1.0)
+	return Vector2((clip.x / clip.w * 0.5 + 0.5) * _dc_size.x, (-clip.y / clip.w * 0.5 + 0.5) * _dc_size.y)
+
+
+## RS-K3 : `Camera3D.is_position_behind` avec la caméra figée de la passe.
+func _dc_behind(p: Vector3) -> bool:
+	return _dc_eye.dot(p - _dc_origin) < _dc_near
+
+
+## RS-K3 : tranche de la passe en cours (toute la passe si `sliced` est faux).
+func _declutter_step(sliced: bool) -> void:
+	var t0 := Time.get_ticks_usec()
+	var end := _dc_sequence.size() if not sliced else mini(_dc_sequence.size(), _dc_pos + DECLUTTER_SLICE)
+	for n in range(_dc_pos, end):
+		var i := _dc_sequence[n]
+		var pinned := n < _dc_pins.size()
+		var has_marker := _dc_icons_on and marker_in_tier(i)
 		var shown := true
 		_marker_screen[i] = Vector2(-1.0e6, -1.0e6)
-		if has_marker and not camera.is_position_behind(_marker_world[i]):
-			var marker_rect := _marker_rect(i, camera, marker_margin, box_fraction)
+		if has_marker and not _dc_behind(_marker_world[i]):
+			# Emprise opaque du marqueur (cf. `_marker_rect`).
+			var size := marker_size(i)
+			var center := _dc_project(_marker_world[i]) - Vector2(0.0, size * ICON_CENTER_LIFT)
+			var box := _dc_box * size + Vector2(_dc_marker_margin, _dc_marker_margin) * 2.0
+			var marker_rect := Rect2(center - box * 0.5, box)
 			# Hors de l'écran élargi : rien à départager (recalcul dès que la caméra bouge).
-			if label_screen.intersects(marker_rect):
-				shown = _placer.try_place(marker_rect, i, pins.has(i))
+			if _dc_label_screen.intersects(marker_rect):
+				shown = _placer.try_place(marker_rect, i, pinned)
 				if shown:
 					_marker_screen[i] = marker_rect.get_center()
 		_set_marker_shown(i, shown)
-		var alpha: float = alpha_by_kind.get(_label_kind[i], _weights.x)
+		var alpha: float = _dc_alpha_by_kind.get(_label_kind[i], _weights.x)
 		if not shown or alpha < 0.02:
 			_show_label(i, false, alpha)
 			continue
-		var at := _labels[i].global_position
-		if (close_w > 0.5 and camera_at.distance_to(at) > label_range) or camera.is_position_behind(at):
+		var label := _labels[i]
+		var at := label.global_position
+		if (_dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range) or _dc_behind(at):
 			_show_label(i, false, alpha)
 			continue
-		var rect := _label_screen_rect(i, camera, scale, label_margin)
-		_show_label(i, label_screen.intersects(rect) and _placer.try_place(rect, i), alpha)
-	last_declutter_ms = float(Time.get_ticks_usec() - t0) / 1000.0
+		# Rectangle du nom (cf. `_label_screen_rect`).
+		var text := _label_text_size(i) * _dc_scale
+		var label_center := _dc_project(at) - label.offset * Vector2(-1.0, 1.0) * _dc_scale
+		var rect := Rect2(label_center - text * 0.5, text).grow(_dc_label_margin)
+		_show_label(i, _dc_label_screen.intersects(rect) and _placer.try_place(rect, i), alpha)
+	_dc_pos = end
+	_dc_usec += Time.get_ticks_usec() - t0
+	if _dc_pos >= _dc_sequence.size():
+		_dc_pos = -1
+		last_declutter_ms = float(_dc_usec) / 1000.0
+	PerfProbe.lap("settle/declutter/run", t0)
 
 
 ## Affiche ou masque l'étiquette `i` ; couleurs réécrites seulement quand l'opacité change.
@@ -1467,23 +1628,13 @@ func _hamlet_memo_ready() -> bool:
 	return _hamlet_keep.size() == data.hamlets.size() and _hamlet_seed.size() == data.hamlets.size()
 
 
-func _build_hamlets(index: int) -> void:
-	_hamlet_dirty.erase(index)
-	var previous: Node3D = _hamlet_nodes.get(index)
-	if previous != null:
-		previous.queue_free()
-	var node := Node3D.new()
-	node.name = "Hamlets_%d" % index
-	_hamlets_root.add_child(node)
-	_hamlet_nodes[index] = node
-	var meshes := ModelLibrary.hamlet_meshes()
-	if meshes.is_empty():
-		return
-	# Groupes : (variante, brûlé) → transformations.
-	var groups := {}
-	# PB3g : hauteurs (centre + 4 points de l'emprise) en un seul appel groupé.
-	var pending: Array = []
+## RS-K3 : hameaux posés du morceau `index` (exclusions et graines mémorisées au passage) et
+## points de leurs hauteurs : [hameaux, points (5 par hameau), lacets, échelles].
+func _hamlet_tile(index: int) -> Array:
+	var kept := PackedInt32Array()
 	var points := PackedVector2Array()
+	var yaws := PackedFloat32Array()
+	var scales := PackedFloat32Array()
 	var memo := _hamlet_memo_ready()
 	for h in _hamlets_by_chunk[index]:
 		var hamlet: Dictionary = data.hamlets[h]
@@ -1497,32 +1648,70 @@ func _build_hamlets(index: int) -> void:
 			continue
 		var seed_value: int = _hamlet_seed[h] if memo else -1
 		if seed_value < 0:
-			seed_value = _hash(str(hamlet["name"]) + str(px))
+			seed_value = _hamlet_seed_of(h)
 			if memo:
 				_hamlet_seed[h] = seed_value
 		px = hamlet_px(h)  # ZG5b : ancrage fin (tirages inchangés)
 		if keep == 0:
-			if on_settlement_model(px):
+			if _on_model_disk(px):
 				if memo:
 					_hamlet_keep[h] = 2
 				continue
 			if memo:
 				_hamlet_keep[h] = 1
-		var variant := seed_value % meshes.size()
-		var devastation: float = _devastation.get(hamlet["province"], 0.0)
-		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
-		var key := variant * 2 + (1 if burned else 0)
 		var yaw := float((seed_value / 13) % 628) / 100.0
 		var scale := ModelLibrary.HAMLET_SCALE * (0.85 + float((seed_value / 17) % 30) / 100.0)
+		kept.append(h)
+		yaws.append(yaw)
+		scales.append(scale)
 		points.append(px)
 		for k in 4:
 			var angle := k * TAU / 4.0 + yaw
 			points.append(Vector2(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
-		pending.append([key, px, yaw, scale])
+	return [kept, points, yaws, scales]
+
+
+## Graine de tirage du hameau `h` (variante, lacet, taille, incendie).
+func _hamlet_seed_of(h: int) -> int:
+	var hamlet: Dictionary = data.hamlets[h]
+	return _hash(str(hamlet["name"]) + str(hamlet["px"]))
+
+
+func _build_hamlets(index: int) -> void:
+	var tp := Time.get_ticks_usec()  # RS-K3 : sous-sections du banc `--bench-probe`
+	_hamlet_dirty.erase(index)
+	var previous: Node3D = _hamlet_nodes.get(index)
+	if previous != null:
+		previous.queue_free()
+	var node := Node3D.new()
+	node.name = "Hamlets_%d" % index
+	_hamlets_root.add_child(node)
+	_hamlet_nodes[index] = node
+	var meshes := ModelLibrary.hamlet_meshes()
+	if meshes.is_empty():
+		return
+	# Groupes : (variante, brûlé) → transformations.
+	var groups := {}
+	var tile: Array = _hamlet_tiles.get(index, [])
+	if tile.is_empty():
+		tile = _hamlet_tile(index)
+		if _hamlet_memo_ready():
+			_hamlet_tiles[index] = tile
+	var kept: PackedInt32Array = tile[0]
+	var points: PackedVector2Array = tile[1]
+	var yaws: PackedFloat32Array = tile[2]
+	var scales: PackedFloat32Array = tile[3]
+	var memo := _hamlet_memo_ready()
+	tp = PerfProbe.lap("settle/hamlets/prep", tp)
 	var heights := terrain.surface_heights_at(points)
-	for p in pending.size():
-		var key: int = pending[p][0]
-		var px: Vector2 = pending[p][1]
+	tp = PerfProbe.lap("settle/hamlets/heights", tp)
+	for p in kept.size():
+		var h := kept[p]
+		var seed_value := _hamlet_seed[h] if memo else _hamlet_seed_of(h)
+		var devastation: float = _devastation.get(data.hamlets[h]["province"], 0.0)
+		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
+		var key := (seed_value % meshes.size()) * 2 + (1 if burned else 0)
+		var px := points[p * 5]
 		var center := heights[p * 5]
 		var low := center
 		for k in range(1, 5):
@@ -1530,7 +1719,7 @@ func _build_hamlets(index: int) -> void:
 		if not groups.has(key):
 			groups[key] = []
 		# SZ4 : (x, z, lacet, échelle de carte, sol au centre, sol le plus bas de l'emprise de carte).
-		groups[key].append(PackedFloat32Array([px.x, px.y, pending[p][2], pending[p][3], center, low]))
+		groups[key].append(PackedFloat32Array([px.x, px.y, yaws[p], scales[p], center, low]))
 	for key in groups:
 		var entries: Array = groups[key]
 		var multimesh := MultiMesh.new()
@@ -1545,6 +1734,7 @@ func _build_hamlets(index: int) -> void:
 			mmi.material_override = _burned_material
 		mmi.visibility_range_end = tiers.hamlet_range + terrain.chunk_px
 		node.add_child(mmi)
+	PerfProbe.lap("settle/hamlets/mesh", tp)
 
 
 # --- Picking et sélection ------------------------------------------------------------
