@@ -18,9 +18,17 @@ Branche `feat/nt4-battle-prologue` (partie de `integration/nt`). Spec : ligne NT
 ## État
 - [x] Données + schéma + pytest
 - [x] Contrôleur, crochets de la scène, entrée de menu
-- [ ] Test Godot `game/tests/nt4_prologue_test.gd`, smoke
+- [x] Test Godot `game/tests/nt4_prologue_test.gd` (vert : étapes, évaluation pure, menu,
+  bataille réelle jusqu'à la victoire anglaise en 146 s), smoke, ep7, nt2, pytest verts
 
 ## Prochaine étape
-Écrire et faire passer le test Godot, puis smoke.
+Terminé ; à fusionner dans `integration/nt`. Partie pilote à faire par le joueur.
 
 ## Points ouverts
+- Aucune capture faite (consigne) : placement du parchemin sur le HUD de bataille et
+  surlignage des cibles (`cards`, `pause`, `unit:*`) à juger visuellement.
+- « Ennemi passif » = IA du cœur coupée : un régiment attaqué se défend et peut fuir (le test
+  mesure jusqu'à 110 m de déplacement ennemi après la charge) ; pas de consigne « tenir » au cœur.
+- Découvrabilité : l'entrée est dans « Batailles historiques » ; une invite au premier lancement
+  (à la TWW3) n'est pas faite.
+- Une défaite ferme le guide sans texte propre.
