@@ -36,5 +36,18 @@ toutes les colonies : paires, masquage, hauteurs d'étiquettes) ; 1re image 0,7.
 - [x] `ModelLibrary.tint_banner` : matériau surchargé par instance au lieu d'un maillage dupliqué
   par couleur (312 maillages copiés, ≈ 350 Mo de sommets en rendu réel ; sans effet en headless,
   le rendu factice ne garde pas les sommets).
-- [ ] suite : sommets lointains (1,4 s GDScript), rivières 1,1 s, colonies 1,0 s, 1re image,
-  mesures au calme (machine à 80 de charge)
+- [x] Sommets lointains : colonnes/lignes précalculées, grilles du fond en local (identique au bit,
+  `r2_chunk_vertices_test.gd`, 2,5 × plus rapide ; 1,4 s → 0,05 s en jeu, la contention du
+  relief ayant disparu).
+- [x] Rivières : tronçons en parallèle (`_piece_arrays`, tableaux dimensionnés d'avance).
+- [x] Zones humides en BC1 (`wetlands_bc1_0.bin`, 0,3 Mo ; 126 → 22 Mo ; test BC1 dans
+  `r2_relief_bc5_test.gd`) ; module renommé `block_compress.py`, commande `geo gpu-textures`.
+- [x] Fond de relief : min/max sur valeurs brutes 16 bits (identique, `r2_relief_floor_test.gd`).
+- [x] ADR 0118 (numéro à vérifier à l'intégration), docs/geo.md.
+- [ ] smoke.gd + tests carte (29 verts sauf da7d : seuil de temps de `declutter` 11 ms sous charge
+  50, à relancer au calme), A/B alterné (`scratchpad/ab.sh` : A = scripts de 8e31dbf, B = HEAD).
+
+## Prochaine étape
+Mesure A/B au calme, puis rapport. Pistes restantes si la cible n'est pas atteinte : colonies
+(1,0 s, 1 200 maquettes instanciées puis 517 remplacées par la croissance CV1), `FineGeoLayer.setup`
+(0,5-0,7 s), première image (0,7 s), chargement de la scène (1,5 s de compilation GDScript).
