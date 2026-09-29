@@ -1126,7 +1126,7 @@ func _on_end_turn(threaded: bool = false) -> void:
 	if victory != null:
 		victory.after_end_turn()
 	if chronicle != null:  # M10
-		chronicle.after_end_turn()
+		chronicle.after_end_turn(events)
 	if capture_fate != null:  # TW2-T1
 		capture_fate.after_end_turn()
 	if traditions != null:  # TW2-T5

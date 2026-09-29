@@ -299,6 +299,10 @@
       "title": "Camp retranché",
       "body": "Fossé et palissade : +{rule.entrenched_defense_percent} % en défense en résolution automatique, {rule.entrenched_supply_saving_percent} % de pertes de ravitaillement en moins. Exige le mouvement plein, hors des colonies."
     },
+    "hud_incident": {
+      "title": "Incident",
+      "body": "Une affaire locale attend votre décision dans cette province. Cliquez le sceau pour trancher ; à l'échéance, le conseil choisit à votre place."
+    },
     "hud_encounter": {
       "title": "Rencontre",
       "body": "Une occasion ou un péril sur la route. Menez une armée sur le site pour choisir que faire ; il disparaît à son expiration."

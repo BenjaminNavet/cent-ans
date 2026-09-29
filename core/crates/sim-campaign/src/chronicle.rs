@@ -1847,3 +1847,36 @@ fn resolve_plague_wave(state: &mut CampaignState, data: &GameData, events: &mut 
         state.chronicle.plague_wave = None;
     }
 }
+
+// =========================================================================
+// Staging (UI tests and screenshots, lot FK5)
+// =========================================================================
+
+impl CampaignState {
+    /// Offers `event` to the player as a pending decision (all its options,
+    /// the usual delay), anchored on `province`; returns its id, or `None`
+    /// for an unknown event or province. Staging only: no trigger, effect,
+    /// journal entry or scene applies.
+    pub fn debug_offer_decision(
+        &mut self,
+        data: &GameData,
+        event: &EventId,
+        province: Option<&ProvinceId>,
+    ) -> Option<u32> {
+        let event = data.events.get(event)?;
+        if province.is_some_and(|p| !self.provinces.contains_key(p)) {
+            return None;
+        }
+        let id = self.chronicle.next_decision_id.max(1);
+        self.chronicle.next_decision_id = id + 1;
+        self.chronicle.pending_decisions.push(Decision {
+            id,
+            event: event.id.clone(),
+            faction: self.player_faction.clone(),
+            province: province.cloned(),
+            options: (0..event.options.len()).collect(),
+            expires_turn: self.turn + DECISION_TURNS,
+        });
+        Some(id)
+    }
+}
