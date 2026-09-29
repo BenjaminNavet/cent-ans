@@ -36,3 +36,9 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
   Export embarque encore les PNG du relief (134 Mo) inutiles.
 - Disque : 13 Go libres ; profils cargo OM (om1-3, i1, i1main, ≈ 10,8 Go) supprimés, espace retenu
   par les instantanés locaux Time Machine. R7 en attente d'espace.
+- R4 fini (feat/omr-r4, 1cc69e53b) : 30 objectifs relus (4 remplacés, 4 reformulés), Eşrefoğulları
+  supprimés (éteints 1326, Beyşehir → Hamid, Hızır Bey ajouté sans portrait), Anchialos/Philippopolis
+  corrigées, Mazovie, anachronismes de noms, Volok/Gorokhovets/Kamianiets rattachées. Géo partielle
+  (provinces, settlements, navgrid ; 8a1fbb9a5). Test cv3_ai_stances recalé (graine 2).
+  À l'intégration : portrait Hızır Bey (enveloppe OM) ; conflits possibles avec R3 (données factions D).
+  Incertitudes restantes : docs/wip/omr-r4.md.
