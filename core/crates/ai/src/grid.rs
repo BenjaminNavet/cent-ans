@@ -16,7 +16,7 @@ use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap};
 use std::sync::{Arc, Mutex};
 
-use data_model::{AiGrid, FactionId, GameData, SettlementId, PLAIN_COST};
+use data_model::{AiGrid, FactionId, GameData, ProvinceId, SettlementId, PLAIN_COST};
 use sim_campaign::movement::{edges, is_sea_crossing, path_to, Reach};
 use sim_campaign::passage;
 use sim_campaign::{Army, ArmyId, CampaignState, Order};
@@ -129,26 +129,34 @@ impl<'a> GridPlanner<'a> {
         let mut forbidden: BTreeMap<SettlementId, FactionId> = BTreeMap::new();
         let mut crossable: BTreeSet<SettlementId> = BTreeSet::new();
         // OMR R1: `trespassed_owner` depends on the province's controller
-        // alone: asked once per controller instead of once per settlement.
+        // alone: asked once per controller, and the verdict (owner, may
+        // cross) read once per province instead of once per settlement.
         let mut by_controller: BTreeMap<&FactionId, Option<FactionId>> = BTreeMap::new();
-        for (id, settlement) in &state.settlements {
-            if &settlement.controller == faction {
-                continue;
-            }
-            let Some(controller) = state.province_controller(&settlement.province) else {
+        let mut by_province: BTreeMap<&ProvinceId, (FactionId, bool)> = BTreeMap::new();
+        for province in state.provinces.keys() {
+            let Some(controller) = state.province_controller(province) else {
                 continue;
             };
             let owner = by_controller
                 .entry(controller)
-                .or_insert_with(|| passage::trespassed_owner(state, faction, &settlement.province))
+                .or_insert_with(|| passage::trespassed_owner(state, faction, province))
                 .clone();
-            let Some(owner) = owner else {
+            if let Some(owner) = owner {
+                let open = may_cross(&owner);
+                by_province.insert(province, (owner, open));
+            }
+        }
+        for (id, settlement) in &state.settlements {
+            if &settlement.controller == faction {
+                continue;
+            }
+            let Some((owner, open)) = by_province.get(&settlement.province) else {
                 continue;
             };
-            if may_cross(&owner) {
+            if *open {
                 crossable.insert(id.clone());
             } else {
-                forbidden.insert(id.clone(), owner);
+                forbidden.insert(id.clone(), owner.clone());
             }
         }
         let hostile: Vec<(&ArmyId, &Army)> = state
@@ -186,11 +194,12 @@ impl<'a> GridPlanner<'a> {
                 enemy
             })
             .collect();
+        // `is_hostile_settlement` read on the settlements walked.
         let mut stops: BTreeSet<SettlementId> = state
             .settlements
-            .keys()
-            .filter(|id| state.is_hostile_settlement(faction, id))
-            .cloned()
+            .iter()
+            .filter(|(_, s)| state.is_at_war(faction, &s.controller))
+            .map(|(id, _)| id.clone())
             .collect();
         stops.extend(enemies.iter().filter_map(|e| e.settlement.clone()));
         GridPlanner {

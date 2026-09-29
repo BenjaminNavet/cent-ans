@@ -40,6 +40,12 @@ fn scope_answers_match_the_walks() {
         .iter()
         .map(|f| state.faction_income_effective(&data, f))
         .collect();
+    let rivals: Vec<BTreeSet<FactionId>> = ids
+        .iter()
+        .map(|f| sim_campaign::diplomacy::rivals(&state, f))
+        .collect();
+    let controlled: Vec<Vec<data_model::ProvinceId>> =
+        ids.iter().map(|f| state.controlled_provinces(f)).collect();
     let listed: Vec<BTreeSet<FactionId>> = ids
         .iter()
         .map(|a| state.neighbour_factions(&data, a))
@@ -61,6 +67,12 @@ fn scope_answers_match_the_walks() {
                 assert_eq!(state.faction_income_effective(&data, a), incomes[i], "{a}");
             }
             assert_eq!(state.faction_income_effective_walk(&data, a), incomes[i]);
+            for _ in 0..2 {
+                assert_eq!(sim_campaign::diplomacy::rivals(&state, a), rivals[i], "{a}");
+                assert_eq!(state.controlled_provinces(a), controlled[i], "{a}");
+            }
+            assert_eq!(sim_campaign::diplomacy::rivals_walk(&state, a), rivals[i]);
+            assert_eq!(state.controlled_provinces_walk(a), controlled[i]);
         }
         let unknown = FactionId::new("fac_nobody").unwrap();
         assert_eq!(state.faction_power(&unknown), 0.0);
@@ -68,6 +80,8 @@ fn scope_answers_match_the_walks() {
     }
     assert!(powers.iter().any(|p| *p > 0.0));
     assert!(incomes.iter().any(|i| *i > 0));
+    assert!(rivals.iter().any(|r| !r.is_empty()));
+    assert!(controlled.iter().any(|c| c.len() > 5));
     assert!(neighbours.iter().filter(|n| !n.is_empty()).count() > 20);
 }
 

@@ -25,7 +25,11 @@ cible ≤ 0,45 s, décisions de l'IA inchangées (empreinte `turn_digest` identi
   `agent_find_path` s'arrête à la cible, `nearest_city` lit la table ; `agent_dijkstra_by_ids`
   garde l'ancien calcul (référence). Test `sim-campaign/tests/omr_r1_agent_paths.rs`.
 - [x] C4 : `faction_income_effective` mémorisé dans la portée (`_walk` = calcul direct).
-- [ ] autres points chauds (re-profil)
+- [x] C5 : mémos de portée `diplomacy::rivals` (plan_alliances le demande pour la plupart des
+  factions) et `controlled_provinces` (`_walk` = calcul direct) ; GridPlanner : verdict de
+  passage par province (une recherche par colonie au lieu de deux + mémo), `stops` sans
+  relecture de la colonie.
+- [ ] autres points chauds (re-profil) pour la marge
 - [ ] Mesure finale
 
 ## Mesures
@@ -39,8 +43,9 @@ sensible à la charge. A/B toujours base et branche l'un après l'autre.
 | base (a8a9c5bf9) | 5,49 / 2,70 ms (≈ 0,96 s par tour de jeu) | 10,02 / 6,32 / 51,6 ms |
 | C1+C2 | bruit | 6,50 / 4,80 / 25,1 ms |
 | C1-C4 | bruit (charge 95) | 5,71 / 4,43 / 23,8 ms (base au même moment : 9,73) |
+| C1-C5 | bruit (charge 68) | 4,51 / 3,49 / 18,4 ms (base au même moment : 8,50 ; ×0,53) |
 
-Empreinte `turn_digest 12 1 7` : identique à la base après C1+C2, après C1-C4.
+Empreinte `turn_digest 12 1 7` : identique à la base après C1+C2, C1-C4, C1-C5.
 
 Attention (cible partagée) : un worktree de base construit avec le même profil `r1rel` fait
 passer ses crates pour à jour (dep-info vers l'autre chemin) ; base construite en `r1base`,

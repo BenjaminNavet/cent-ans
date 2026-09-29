@@ -34,6 +34,26 @@ pub(crate) struct Derived {
     /// [`CampaignState::faction_income_effective`] of the factions asked
     /// so far, with the data address they were computed with.
     income: Mutex<BTreeMap<(usize, FactionId), i64>>,
+    /// [`crate::diplomacy::rivals`] of the factions asked so far.
+    rivals: Mutex<BTreeMap<FactionId, BTreeSet<FactionId>>>,
+    /// [`CampaignState::controlled_provinces`] of the factions asked so far.
+    controlled: Mutex<BTreeMap<FactionId, Vec<data_model::ProvinceId>>>,
+}
+
+/// `map[key]`, computed by `compute` (outside the lock) when missing.
+fn memo<K: Ord, V: Clone>(map: &Mutex<BTreeMap<K, V>>, key: K, compute: impl FnOnce() -> V) -> V {
+    let known = map
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .get(&key)
+        .cloned();
+    known.unwrap_or_else(|| {
+        let value = compute();
+        map.lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .insert(key, value.clone());
+        value
+    })
 }
 
 impl Derived {
@@ -52,6 +72,8 @@ impl Derived {
             power,
             neighbours: OnceLock::new(),
             income: Mutex::new(BTreeMap::new()),
+            rivals: Mutex::new(BTreeMap::new()),
+            controlled: Mutex::new(BTreeMap::new()),
         }
     }
 
@@ -60,7 +82,7 @@ impl Derived {
         f64::from(armies) + f64::from(garrisons) / 2.0
     }
 
-    /// Income of `faction` (a memo of `compute`, filled outside the lock).
+    /// Income of `faction` (a memo of `compute`).
     pub(crate) fn income(
         &self,
         data: &GameData,
@@ -68,20 +90,25 @@ impl Derived {
         compute: impl FnOnce() -> i64,
     ) -> i64 {
         let key = (std::ptr::from_ref(data) as usize, faction.clone());
-        let known = self
-            .income
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .get(&key)
-            .copied();
-        known.unwrap_or_else(|| {
-            let value = compute();
-            self.income
-                .lock()
-                .unwrap_or_else(|e| e.into_inner())
-                .insert(key, value);
-            value
-        })
+        memo(&self.income, key, compute)
+    }
+
+    /// Rivals of `faction` (a memo of `compute`).
+    pub(crate) fn rivals(
+        &self,
+        faction: &FactionId,
+        compute: impl FnOnce() -> BTreeSet<FactionId>,
+    ) -> BTreeSet<FactionId> {
+        memo(&self.rivals, faction.clone(), compute)
+    }
+
+    /// Provinces `faction` controls (a memo of `compute`).
+    pub(crate) fn controlled_provinces(
+        &self,
+        faction: &FactionId,
+        compute: impl FnOnce() -> Vec<data_model::ProvinceId>,
+    ) -> Vec<data_model::ProvinceId> {
+        memo(&self.controlled, faction.clone(), compute)
     }
 
     /// Neighbours of every faction, or `None` when the index was built with

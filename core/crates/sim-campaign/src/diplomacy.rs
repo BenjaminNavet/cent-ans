@@ -2273,6 +2273,16 @@ pub fn claimed_provinces(state: &CampaignState, faction: &FactionId) -> BTreeSet
 /// Factions `faction` quarrels with: current enemies, the targets of its
 /// claims and the factions claiming its lands.
 pub fn rivals(state: &CampaignState, faction: &FactionId) -> BTreeSet<FactionId> {
+    // OMR R1: asked for most factions by each alliance plan: a memo while a
+    // planning scope is open.
+    if let Some(derived) = state.derived() {
+        return derived.rivals(faction, || rivals_walk(state, faction));
+    }
+    rivals_walk(state, faction)
+}
+
+/// [`rivals`] computed afresh.
+pub fn rivals_walk(state: &CampaignState, faction: &FactionId) -> BTreeSet<FactionId> {
     let Some(me) = state.factions.get(faction) else {
         return BTreeSet::new();
     };
