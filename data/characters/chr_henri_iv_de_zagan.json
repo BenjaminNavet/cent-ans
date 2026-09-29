@@ -15,8 +15,7 @@
     "uncertain": true
   },
   "death": {
-    "value": "1342",
-    "uncertain": true
+    "value": "1342-01-22"
   },
   "historical": true,
   "titles": [
@@ -42,7 +41,7 @@
   "piety": 50,
   "starting_location": "prov_glogow",
   "status": "at_court",
-  "description": "Duc de Żagań, père d'Henri V le Fer ; tient une part de Głogów dans l'orbite de la Bohême (dates approximatives).",
+  "description": "Duc de Żagań (1309/1321-1342), père d'Henri V le Fer ; vassal de Jean de Luxembourg depuis 1329, il a perdu Głogów au profit du roi en 1331.",
   "sources": [
     "Henri IV de Żagań"
   ]

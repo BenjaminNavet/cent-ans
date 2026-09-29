@@ -4,8 +4,8 @@
     "province": "prov_viatka",
     "kind": "city",
     "name": {
-      "display": "Khlynov",
-      "local": "Хлынов",
+      "display": "Viatka",
+      "local": "Вятка",
       "local_language": "russe"
     },
     "lonlat": [
@@ -19,7 +19,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Chef-lieu de la terre de Viatka (fondation traditionnelle en 1181, première mention en 1374).",
+    "description": "Chef-lieu de la terre de Viatka, colonie novgorodienne (fondation traditionnelle en 1181, citée en 1374 ; le nom de Khlynov n'apparaît qu'au XVe siècle).",
     "sources": [
       "Kirov"
     ]

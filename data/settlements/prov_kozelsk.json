@@ -51,17 +51,17 @@
     ]
   },
   {
-    "id": "set_kalouga",
+    "id": "set_vorotynsk",
     "province": "prov_kozelsk",
     "kind": "town",
     "name": {
-      "display": "Kalouga",
-      "local": "Калуга",
+      "display": "Vorotynsk",
+      "local": "Воротынск",
       "local_language": "russe"
     },
     "lonlat": [
-      36.27,
-      54.51
+      36.01,
+      54.49
     ],
     "weight": 4,
     "owner": null,
@@ -70,9 +70,9 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Bourg de l'Oka (première mention en 1371, existence antérieure incertaine).",
+    "description": "Bourg de la haute Oka (cité en 1155), centre d'une des principautés de la Haute-Oka (Kalouga n'est mentionnée qu'en 1371).",
     "sources": [
-      "Kalouga"
+      "Vorotynsk"
     ]
   }
 ]
