@@ -33,7 +33,8 @@ aléatoire de la campagne (tests d'équilibre graine-dépendants : `ep7_historic
   `submit_order_outcome`, donc ordres du joueur seulement) ; prise, bâtiment, place tenue et
   traités par l'état (traités : comparaison à un instantané alliances/trêves/suzerain/vassaux).
 - **Sauvegarde** : champ `CampaignState::missions` en `serde(default)`, sans changer
-  `STATE_VERSION` ; les avis (`notices`) ne sont pas sauvegardés.
+  `STATE_VERSION` ; les avis du dernier tour (`notices`) sont sauvegardés aussi (un état
+  rechargé est égal à l'état sauvé).
 - **Interface** : pont `get_missions` / `get_mission_notices` ; section « Missions » du panneau
   d'objectifs (touche O), avis en toast à l'obtention, la réussite et l'échec ; genre d'événement
   `mission` dans le journal et le rapport de saison.

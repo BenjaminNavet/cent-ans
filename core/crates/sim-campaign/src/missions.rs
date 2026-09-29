@@ -34,8 +34,8 @@ pub struct MissionsState {
     /// Turn of the last success or failure (offer cooldown).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_closed_turn: Option<u32>,
-    /// Notices of the last resolution, for the interface's toasts; never saved.
-    #[serde(skip)]
+    /// Notices of the last resolution, for the interface's toasts.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notices: Vec<MissionNotice>,
 }
 
