@@ -39,7 +39,11 @@ distincts, donc plus de rencontres). Garde-fous bataille inchangés (voir État)
 
 ## Points ouverts
 - `cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses` : plus d'embuscade en 60 tours
-  pour les graines 1-4 après NT5 ; graine 5 (aucun ordre refusé dans tous les cas).
+  pour la graine 1 après NT5. Vérifié : ce n'est pas le plafond (plafond 200 : toujours aucune),
+  c'est le tour d'attente des échelles (échelles à 0 travail : l'embuscade revient) qui déplace la
+  trajectoire. Le test vérifie désormais les graines 1 et 5 (refus : aucun ; embuscade : graine 5).
+- Fusion `integration/nt` (35667be6e) faite : `SiegeSetup` a `place` (NT1) et `engines` ;
+  bataille personnalisée NT2 : échelles + bélier par défaut ; test NT3 d'assaut : échelles posées.
 - Batailles FR/EN ×1,9 par décennie (N6) : à surveiller en partie pilote.
 - Le bélier n'a pas d'effet propre en résolution automatique (seul le beffroi ôte les murailles).
 
