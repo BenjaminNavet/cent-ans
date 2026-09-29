@@ -1188,6 +1188,10 @@
     {
       "character": "chr_umur_bey",
       "band": "old"
+    },
+    {
+      "character": "chr_hizir_hamid",
+      "band": "old"
     }
   ],
   "marks": {
