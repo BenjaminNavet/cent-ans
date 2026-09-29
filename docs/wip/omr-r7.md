@@ -39,15 +39,27 @@ Pyramide dans le cadre monde (`root_origin_tiles` [0, 0]) : tuiles E1-E7 existan
 cuisson tier1 3) ; tier2/tier3 inchangés (renommés seulement). `geo relief-reframe` et
 `relief-all` recadrent sur place un cache d'avant R7 (`pyramid/frame.json` absent).
 
-## État
-- [x] 1 squelette
-- [x] 2 mesures
-- [x] 3 cadre monde : outillage généralisé (pyramid, fine_relief, hydro_fine, fine_anchors,
-  detail_dem, landmarks_v2, relief_cache), `world_frame.py`, `geo relief-reframe` ; cache du
-  worktree recadré (liens durs vers celui du principal : 0 octet), manifestes décalés.
-- [ ] 4 cuisson E1-E2 monde en flux : en cours (146 blocs ; bloc 40 à 11 h, 2,1 Go GLO-90 téléchargés,
-  85 Gio libres ; journal `scratchpad/bake1.log`). Reprise : relancer `geo pyramid --levels 1,2`.
-- ADR 0121 écrit ; test `game/tests/omr_r7_east_relief_test.gd` (points à affiner sur les vraies pages).
+## État (fini, 29/09)
+- [x] 1 squelette, 2 mesures, 3 cadre monde (ADR 0121, `world_frame.py`, `geo relief-reframe`,
+  outillage à cadre rectangulaire).
+- [x] 4 E1-E2 sur toutes les terres : 146 blocs, 1 902 tuiles GLO-90 (6,66 Go) téléchargées puis
+  supprimées, 9 262 tuiles (2,68 Go) en 12 min 35 s ; cache 4,98 Go ; 83 Gio libres au plus bas.
+- [x] 5 paquet v2 (`relief_hosting.json`), rien publié.
+- [x] aval : hydro-fine (4 446 tuiles), anchors-fine (3 545 tuiles de routes), towns (2 137).
+- [x] 6 tests : pytest 1 254 ok ; Godot omr_r7_east_relief (Bosphore −40 m / Beykoz 349 m), zg5b,
+  om1, zg2, zg4, zg6, zg7b, zg7c, rs_k, pb3g OK ; smoke.gd OK. Capture `docs/img/omr-r7/bosphore.png`.
 
-## Prochaine étape
-Lancer `geo pyramid --levels 1,2` dans le worktree (arrière-plan), surveiller `df`.
+## Intégration (à faire par l'orchestrateur)
+- Échanger le cache : remplacer `data/map/pyramid` du checkout principal par celui du worktree
+  (E3-E7 y sont des liens durs vers l'ancien : `mv` du worktree après suppression de l'ancien,
+  ou `geo relief-reframe` puis `geo pyramid --levels 1,2` dans le principal).
+- `tools/geo/raw/pyramid_work/{e0,base,coast}.npy` du principal sont dans l'ancien cadre 8192² :
+  les supprimer (ou y déplacer ceux du worktree, cadre monde, 1,6 Go) avant toute cuisson.
+- Le cache `raw/hydro/cache/links_naturalearth.npz` du principal date d'avant OM2 : le supprimer
+  (celui du worktree est à jour). Caches `snap/` et `roads/` locaux au worktree.
+- Conflits possibles : `data/map/fine_anchors.json`, `towns_1340.json` si un autre lot les touche.
+
+## Points ouverts
+- Pas de GLO-30 (E3-E4) à l'Est : zoom minimal ≈ 5 unités à Constantinople contre 1,5 en France.
+- E0 de l'Est reste ETOPO (versionné) ; seul E1-E2 apporte Copernicus.
+- Erreurs « Lambda capture … freed » dans smoke.gd (préexistantes a priori, non liées).
