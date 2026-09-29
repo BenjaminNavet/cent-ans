@@ -974,13 +974,26 @@ def write_import(path, importer, slices=1):
             "detect_3d/compress_to=0",
         ]
     import_path = path + ".import"
+    uid = []
     if os.path.exists(import_path):
         with open(import_path) as f:
             text = f.read()
         if f'importer="{importer}"' in text and all(p in text for p in params):
             return
+        # FK2: keep the resource uid when the settings change (e.g. more atlas layers).
+        uid = [line for line in text.splitlines() if line.startswith("uid=")][:1]
     text = "\n".join(
-        ["[remap]", "", f'importer="{importer}"', "", "[params]", "", *params, ""]
+        [
+            "[remap]",
+            "",
+            f'importer="{importer}"',
+            *uid,
+            "",
+            "[params]",
+            "",
+            *params,
+            "",
+        ]
     )
     with open(import_path, "w") as f:
         f.write(text)
