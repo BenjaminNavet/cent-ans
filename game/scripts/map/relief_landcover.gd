@@ -10,7 +10,7 @@ extends RefCounted
 ##   Depuis OM2 (ADR 0115), écrit en bandes horizontales `relief_shade_<i>.png`
 ##   (`map.json.relief_shade.bands`) empilées ici en une seule image.
 ##   OMR-R2 : copie GPU `map.json.relief_shade.bc5` (BC5 = RGTC RG, mipmaps précalculés, parts
-##   zlib `relief_shade_bc5_<i>.bin`, écrite par `cent-ans geo relief-shade-bc5`) lue en priorité :
+##   zlib `relief_shade_bc5_<i>.bin`, écrite par `cent-ans geo gpu-textures`, ADR 0118) lue en priorité :
 ##   235 Mo au lieu de 470, ni décodage PNG ni calcul de mipmaps. Canaux R = L, G = A
 ##   (`relief_shade_rg` dans le shader).
 ## - `wetlands.png` (RGB8, 4096²) : R marais, G étangs, B prés humides. OMR-R2 : copie BC1
