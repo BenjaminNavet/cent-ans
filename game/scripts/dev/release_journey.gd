@@ -374,6 +374,10 @@ func _ab(map: Node) -> Dictionary:
 				image.save_png(shot_dir.path_join("d%d_%s.png" % [int(_map_ab), config.replace(":", "_")]))
 	_apply_config(map, "base")
 	var out: Dictionary = {}
+	# `--ab-passes` : temps GPU par passe du moteur (horodatages du profileur visuel), médianes
+	# sur 30 images de la configuration de base.
+	if "--ab-passes" in OS.get_cmdline_user_args():
+		out["passes"] = await _gpu_passes(map)
 	for config: String in configs:
 		var frame: Array = samples[config]
 		var g: Array = gpu[config]
@@ -385,6 +389,32 @@ func _ab(map: Node) -> Dictionary:
 		dr.sort()
 		out[config] = {"frame_ms": snappedf(frame[frame.size() / 2], 0.01), "gpu_ms": snappedf(g[g.size() / 2], 0.01),
 			"prims_k": int(pr[pr.size() / 2]) / 1000, "draws": int(dr[dr.size() / 2])}
+	return out
+
+
+func _gpu_passes(map: Node) -> Dictionary:
+	var rd := RenderingServer.get_rendering_device()
+	if rd == null:
+		return {}
+	_aim(map, _map_ab)
+	await _wait_map_settled(map, 8)
+	var per_pass: Dictionary = {}
+	for i in 30:
+		await get_tree().process_frame
+		var count := rd.get_captured_timestamps_count()
+		for k in range(1, count):
+			var pass_name := rd.get_captured_timestamp_name(k)
+			var ms := (rd.get_captured_timestamp_gpu_time(k) - rd.get_captured_timestamp_gpu_time(k - 1)) / 1000000.0
+			if not per_pass.has(pass_name):
+				per_pass[pass_name] = []
+			per_pass[pass_name].append(ms)
+	var out: Dictionary = {}
+	for pass_name: String in per_pass:
+		var values: Array = per_pass[pass_name]
+		values.sort()
+		var median: float = values[values.size() / 2]
+		if median >= 0.3:
+			out[pass_name] = snappedf(median, 0.01)
 	return out
 
 
