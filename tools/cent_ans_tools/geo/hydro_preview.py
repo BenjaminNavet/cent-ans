@@ -76,7 +76,7 @@ def render(
     rgb[heights <= 0.5] = [150, 180, 205]
     image = Image.fromarray(np.nan_to_num(rgb).astype(np.uint8), "RGB")
     draw = ImageDraw.Draw(image)
-    mpp = (bounds[2] - bounds[0]) / 4096.0
+    mpp = (bounds[2] - bounds[0]) / pyramid.frame_width_units(bounds)
     x0 = (cx - half_km * 1000 - bounds[0]) / mpp
     y0 = (bounds[3] - (cy + half_km * 1000)) / mpp
     scale = mpp / pixel  # image pixels per world unit

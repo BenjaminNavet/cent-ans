@@ -19,7 +19,10 @@ order, each step resuming from what is already on disk:
 A later step runs whenever an earlier one wrote tiles (it reads them). A tier
 baked by an older version of the code (stamp ``pyramid/bake.json`` older than the
 manifest's ``bake_versions``, :mod:`bake_stamp`) is stale and rebaked like a
-missing one. ``--check`` only lists what is missing or stale (exit code 1 if
+missing one. A cache left in another frame than the manifest's
+(``root_origin_tiles``, ADR 0119: caches baked before OMR R7 are in the legacy
+``[0, 5]`` frame) is first reframed in place (:mod:`world_frame`: renames, no
+rebake). ``--check`` only lists what is missing or stale (exit code 1 if
 anything is).
 """
 
@@ -30,7 +33,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from cent_ans_tools.geo import bake_stamp, download
+from cent_ans_tools.geo import bake_stamp, download, world_frame
 
 MAP_DIR = download.TOOLS_DIR.parent / "data" / "map"
 RAW_DIR = download.RAW_DIR
@@ -94,6 +97,8 @@ class CacheReport:
     raw_present: dict[str, bool]
     #: Tiers baked by an older bake version (``tier1`` … ``tier3``).
     stale: list[str] = field(default_factory=list)
+    #: Root tiles from the manifest's frame to the cache's (``None``: same frame).
+    frame_shift: tuple[int, int] | None = None
 
     @property
     def complete(self) -> bool:
@@ -102,6 +107,7 @@ class CacheReport:
             all(s.complete for s in self.levels.values())
             and all(s.complete for s in self.fine.values())
             and not self.stale
+            and self.frame_shift is None
         )
 
     @property
@@ -145,6 +151,11 @@ class CacheReport:
     def lines(self) -> list[str]:
         """Human-readable report (French, like the rest of the CLI)."""
         out = [f"Cache de relief : {self.pyramid_dir}"]
+        if self.frame_shift is not None:
+            out.append(
+                f"  Cache dans un autre cadre (décalage {list(self.frame_shift)} tuiles "
+                "racines, ADR 0119) — « geo relief-all » le recadre sans recuire"
+            )
         for level in range(1, MAX_LEVEL + 1):
             out.append(_layer_line(self.levels[level]))
         for layer in ("rivers", "roads"):
@@ -176,12 +187,15 @@ def _layer_line(status: LayerStatus) -> str:
     return line
 
 
-def expand_rle(rows: list[dict], cols: int) -> list[tuple[int, int]]:
+def expand_rle(
+    rows: list[dict], cols: int, rows_count: int | None = None
+) -> list[tuple[int, int]]:
     """``(col, row)`` of the tiles of one manifest ``tiles_rle`` list."""
+    rows_count = cols if rows_count is None else rows_count
     tiles = []
     for row_entry in rows:
         row = int(row_entry.get("row", -1))
-        if not 0 <= row < cols:
+        if not 0 <= row < rows_count:
             continue
         for start, length in row_entry.get("runs", []):
             tiles.extend(
@@ -230,9 +244,14 @@ def check(map_dir: Path = MAP_DIR, raw_dir: Path = RAW_DIR) -> CacheReport:
     pyramid_dir = map_dir / str(manifest.get("dir", "pyramid"))
     pattern = str(manifest.get("pattern", "E{level}/{col}_{row}.png"))
     entries = {int(e.get("level", 0)): e for e in manifest.get("levels", [])}
+    frame_cols, frame_rows = _frame_tiles(map_dir, manifest)
     levels = {}
     for level in range(1, MAX_LEVEL + 1):
-        tiles = expand_rle(entries.get(level, {}).get("tiles_rle", []), 16 << level)
+        tiles = expand_rle(
+            entries.get(level, {}).get("tiles_rle", []),
+            frame_cols << level,
+            frame_rows << level,
+        )
         paths = [
             pyramid_dir
             / pattern.replace("{level}", str(level))
@@ -256,7 +275,20 @@ def check(map_dir: Path = MAP_DIR, raw_dir: Path = RAW_DIR) -> CacheReport:
     stale = bake_stamp.stale_tiers(
         pyramid_dir, {str(k): int(v) for k, v in expected.items()}
     )
-    return CacheReport(map_dir, pyramid_dir, levels, fine, raw_present, stale)
+    origin = tuple(int(v) for v in manifest.get("root_origin_tiles", [0, 0]))
+    cache_origin = world_frame.cache_origin(pyramid_dir)
+    shift = None
+    if cache_origin is not None and cache_origin != origin:
+        shift = (cache_origin[0] - origin[0], cache_origin[1] - origin[1])
+    return CacheReport(map_dir, pyramid_dir, levels, fine, raw_present, stale, shift)
+
+
+def _frame_tiles(map_dir: Path, manifest: dict) -> tuple[int, int]:
+    """Root tiles ``(cols, rows)`` of the cache frame (16 x 16 legacy, else world)."""
+    if list(manifest.get("root_origin_tiles", [0, 0])) != [0, 0]:
+        return 16, 16
+    size = _read_json(map_dir / "map.json").get("size_px") or [4096, 4096]
+    return int(size[0]) // 256, int(size[1]) // 256
 
 
 # ----------------------------------------------------------------------- rebuild
@@ -354,6 +386,15 @@ def rebuild(
     """
     runners = runners or RUNNERS
     report = check(map_dir, raw_dir)
+    if report.frame_shift is not None:
+        log(f"== recadrage du cache (ADR 0119, décalage {list(report.frame_shift)})")
+        world_frame.reframe_cache(
+            report.pyramid_dir, report.pyramid_dir, report.frame_shift, log=log
+        )
+        world_frame.write_frame(
+            report.pyramid_dir, world_frame.manifest_origin(map_dir)
+        )
+        report = check(map_dir, raw_dir)
     plan = report.plan(force)
     ran: list[str] = []
     tier2_wrote = False

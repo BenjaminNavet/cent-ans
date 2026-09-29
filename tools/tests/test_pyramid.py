@@ -361,14 +361,24 @@ def test_tile_write_is_atomic(tmp_path: Path) -> None:
     shutil.rmtree(map_dir)
 
 
-def test_pyramid_frame_sits_at_root_origin_tiles() -> None:
-    """OM2 (ADR 0115): the baked pyramid keeps the former 4096² frame at (0, 5) root tiles."""
+def test_pyramid_is_in_the_world_frame() -> None:
+    """OMR R7 (ADR 0119): the pyramid is baked in the 28 x 24 world frame."""
     manifest = json.loads((MAP_DIR / "relief_pyramid.json").read_text(encoding="utf-8"))
-    assert manifest["root_origin_tiles"] == [0, 5]
-    assert pyramid.root_origin_tiles(MAP_DIR) == (0, 5)
-    assert pyramid.map_bounds(MAP_DIR) == (2169486.0, 1327858.0, 5114414.0, 4272786.0)
-    with pytest.raises(RuntimeError):
-        pyramid.require_world_frame(MAP_DIR, "test")
+    assert manifest["root_origin_tiles"] == [0, 0]
+    assert pyramid.root_origin_tiles(MAP_DIR) == (0, 0)
+    bounds = pyramid.map_bounds(MAP_DIR)
+    assert bounds == (2169486.0, 775684.0, 7323110.0, 5193076.0)
+    assert pyramid.frame_tiles(bounds) == (28, 24)
+    assert pyramid.frame_width_units(bounds) == 7168.0
+    assert pyramid.level_grid(bounds, 2).shape == (24 * 4 * 512, 28 * 4 * 512)
+    pyramid.require_world_frame(MAP_DIR, "test")
+
+
+def test_frame_tiles_of_legacy_and_synthetic_bounds() -> None:
+    """The legacy square frame and synthetic test bounds are 16 x 16 root tiles."""
+    assert pyramid.frame_tiles(BOUNDS) == (16, 16)
+    assert pyramid.frame_tiles((0.0, 0.0, 819200.0, 819200.0)) == (16, 16)
+    assert pyramid.frame_width_units(BOUNDS) == 4096.0
 
 
 def test_e0_heights_read_the_frame_window(tmp_path: Path) -> None:
@@ -376,6 +386,7 @@ def test_e0_heights_read_the_frame_window(tmp_path: Path) -> None:
     (tmp_path / "relief_pyramid.json").write_text(
         json.dumps({"root_origin_tiles": [1, 2]}), encoding="utf-8"
     )
+    shutil.copy(MAP_DIR / "map.json", tmp_path / "map.json")
     height_dir = tmp_path / "height"
     height_dir.mkdir()
     for row in range(2, 2 + pyramid.E0_TILES):

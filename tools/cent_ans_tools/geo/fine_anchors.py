@@ -72,14 +72,16 @@ ROAD_CHUNK_M = 2_500_000.0
 
 @dataclass(frozen=True)
 class Frame:
-    """World units (map pixels 4096) <-> EPSG:3035 metres."""
+    """World units (map pixels) <-> EPSG:3035 metres over the pyramid frame."""
 
     bounds: tuple[float, float, float, float]
 
     @property
     def mpp(self) -> float:
         """Metres per world unit."""
-        return (self.bounds[2] - self.bounds[0]) / 4096.0
+        return (self.bounds[2] - self.bounds[0]) / pyramid.frame_width_units(
+            self.bounds
+        )
 
     def to_m(self, units: np.ndarray) -> np.ndarray:
         """World units ``(n, 2)`` to metres."""
@@ -346,10 +348,14 @@ def _init_road_worker(map_dir: str, bounds: tuple[float, float, float, float]) -
 def wet_at(wet: np.ndarray, frame: Frame, x: np.ndarray, y: np.ndarray) -> np.ndarray:
     """Wetness 0-1 of ``wetlands.png`` (719 m pixels, nearest)."""
     u = np.clip(
-        ((np.asarray(x) - frame.bounds[0]) / frame.mpp).astype(np.int64), 0, 4095
+        ((np.asarray(x) - frame.bounds[0]) / frame.mpp).astype(np.int64),
+        0,
+        wet.shape[1] - 1,
     )
     v = np.clip(
-        ((frame.bounds[3] - np.asarray(y)) / frame.mpp).astype(np.int64), 0, 4095
+        ((frame.bounds[3] - np.asarray(y)) / frame.mpp).astype(np.int64),
+        0,
+        wet.shape[0] - 1,
     )
     return wet[v, u]
 
@@ -512,7 +518,9 @@ def build_roads(
         if stale.name not in current:
             stale.unlink()
     side = fine_tiles.tile_units(fine_tiles.TILE_LEVEL)
-    limit = int(round(4096 / side))
+    frame_cols, frame_rows = pyramid.frame_tiles(frame.bounds)
+    limit_cols = frame_cols << fine_tiles.TILE_LEVEL
+    limit_rows = frame_rows << fine_tiles.TILE_LEVEL
     tiles: dict[tuple[int, int], fine_tiles.TileLines] = defaultdict(
         fine_tiles.TileLines
     )
@@ -535,7 +543,7 @@ def build_roads(
             units = frame.to_units(xy)
             attrs = np.column_stack([z, causeway.astype(np.float64)])
             for col, row, pts, att in fine_tiles.split_by_tiles(units, attrs, side):
-                if not (0 <= col < limit and 0 <= row < limit):
+                if not (0 <= col < limit_cols and 0 <= row < limit_rows):
                     continue
                 flags = 0
                 if kind == "main":

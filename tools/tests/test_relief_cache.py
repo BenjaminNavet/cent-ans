@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from cent_ans_tools.geo import relief_cache
+from cent_ans_tools.geo import relief_cache, world_frame
 
 
 def _write_manifests(map_dir: Path) -> None:
@@ -44,6 +44,8 @@ def _write_manifests(map_dir: Path) -> None:
 
 
 def _bake_levels(map_dir: Path, levels: tuple[int, ...]) -> int:
+    # The real bake records the frame of the cache (ADR 0119).
+    world_frame.write_frame(map_dir / "pyramid", (0, 0))
     for level in levels:
         for col in (2, 3):
             path = map_dir / "pyramid" / f"E{level}" / f"{col}_1.png"
@@ -201,3 +203,36 @@ def test_cli_check_exit_code(tmp_path: Path, monkeypatch) -> None:  # noqa: ANN0
         _fake[step](map_dir, False, None, print)
     result = CliRunner().invoke(cli.app, ["geo", "relief-all", "--check"])
     assert result.exit_code == 0, result.output
+
+
+def test_cache_in_the_legacy_frame_is_reframed_in_place(tmp_path: Path) -> None:
+    """A cache without frame.json is in the pre-R7 frame (0, 5): renamed, not rebaked."""
+    map_dir = tmp_path / "map"
+    _write_manifests(map_dir)
+    manifest = json.loads((map_dir / "relief_pyramid.json").read_text())
+    manifest["root_origin_tiles"] = [0, 0]
+    # World addresses (row 1 at E1 = legacy row 1 - 10 is out of the legacy frame:
+    # use a tile that exists in both frames).
+    manifest["levels"] = [
+        {"level": 1, "tiles_rle": [{"row": 11, "runs": [[2, 1]]}]},
+    ]
+    (map_dir / "relief_pyramid.json").write_text(json.dumps(manifest))
+    (map_dir / "rivers_fine.json").write_text(json.dumps({"tiles": []}))
+    (map_dir / "fine_anchors.json").write_text(json.dumps({}))
+    legacy = map_dir / "pyramid" / "E1" / "2_1.png"
+    legacy.parent.mkdir(parents=True)
+    legacy.write_bytes(b"x")
+    report = relief_cache.check(map_dir, tmp_path / "raw")
+    assert report.frame_shift == (0, 5)
+    assert not report.complete
+    calls: list[tuple[str, bool]] = []
+    runners = {step: (lambda *a: 0) for step in relief_cache.RUNNERS}
+    runners = {
+        step: (lambda d, f, w, log, s=step: calls.append((s, f)) or 0)
+        for step in relief_cache.RUNNERS
+    }
+    relief_cache.rebuild(map_dir, runners=runners, raw_dir=tmp_path / "raw")
+    assert (map_dir / "pyramid" / "E1" / "2_11.png").exists()
+    assert not legacy.exists()
+    assert world_frame.cache_origin(map_dir / "pyramid") == (0, 0)
+    assert relief_cache.check(map_dir, tmp_path / "raw").frame_shift is None

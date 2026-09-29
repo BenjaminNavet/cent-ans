@@ -190,6 +190,9 @@ class PyramidGrid:
     minx: float
     maxy: float
     unit_m: float
+    #: Root tiles of the frame (16 x 16 legacy, 28 x 24 world, ADR 0119).
+    cols: int = ROOT_TILES
+    rows: int = ROOT_TILES
 
     @classmethod
     def from_map(cls, map_dir: Path = MAP_DIR) -> PyramidGrid:
@@ -197,16 +200,27 @@ class PyramidGrid:
         from cent_ans_tools.geo import pyramid  # noqa: PLC0415 - import cycle
 
         metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
-        minx, _, _, maxy = pyramid.map_bounds(map_dir)  # frame of the cache (OM2)
-        return cls(float(minx), float(maxy), float(metadata["meters_per_px"]))
+        bounds = pyramid.map_bounds(map_dir)  # frame of the cache (OM2)
+        cols, rows = pyramid.frame_tiles(bounds)
+        return cls(
+            float(bounds[0]),
+            float(bounds[3]),
+            float(metadata["meters_per_px"]),
+            cols,
+            rows,
+        )
 
     def pixel_m(self, level: int) -> float:
         """Metres per pixel of ``level``."""
         return self.unit_m * ROOT_TILE_UNITS / (2**level) / TILE_PX
 
     def tiles_per_side(self, level: int) -> int:
-        """Number of tiles along one side at ``level``."""
-        return ROOT_TILES * 2**level
+        """Number of tiles along the width at ``level``."""
+        return self.cols * 2**level
+
+    def tiles_per_column(self, level: int) -> int:
+        """Number of tiles along the height at ``level``."""
+        return self.rows * 2**level
 
     def tile_range(
         self, level: int, bbox: tuple[float, float, float, float]
@@ -214,6 +228,7 @@ class PyramidGrid:
         """Inclusive ``(col0, row0, col1, row1)`` of the tiles meeting ``bbox``."""
         size = self.pixel_m(level) * TILE_PX
         last = self.tiles_per_side(level) - 1
+        last_row = self.tiles_per_column(level) - 1
         minx, miny, maxx, maxy = bbox
         col0 = int(math.floor((minx - self.minx) / size))
         col1 = int(math.ceil((maxx - self.minx) / size)) - 1
@@ -223,7 +238,7 @@ class PyramidGrid:
             max(col0, 0),
             max(row0, 0),
             min(max(col1, col0), last),
-            min(max(row1, row0), last),
+            min(max(row1, row0), last_row),
         )
 
     def transform(self, level: int, col0: int, row0: int) -> Affine:
@@ -402,8 +417,9 @@ def ancestor_heights(
         tc0, tr0 = int((p0 - 1) // TILE_PX), int((q0 - 1) // TILE_PX)
         tc1, tr1 = int((p1 + 1) // TILE_PX), int((q1 + 1) // TILE_PX)
         last = grid.tiles_per_side(coarse) - 1
+        last_row = grid.tiles_per_column(coarse) - 1
         tc0, tr0 = max(tc0, 0), max(tr0, 0)
-        tc1, tr1 = min(tc1, last), min(tr1, last)
+        tc1, tr1 = min(tc1, last), min(tr1, last_row)
         if tc0 > tc1 or tr0 > tr1:
             continue
         mosaic = np.full(
