@@ -26,7 +26,7 @@ historienne, contenu Est), lots enchaînés sans redemander.
 Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` dans main.
 
 ## État
-- Vague 1 (R1-R6) lancée.
+- Vague 1 (R1-R6) lancée. R7 lancé après R5 (96 Go libres).
 - R6 fini (feat/omr-r6, 25504e100) : campaign_orthodox et campaign_islamic (5 pistes chacun, 24 Mo),
   portraits Andronic III / Abu l-Hasan refaits (0,18 $, cumul OM 8,25 $). Pas de steppe/nordique
   (aucune source libre). Écoute humaine à faire.
@@ -36,3 +36,15 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
   Export embarque encore les PNG du relief (134 Mo) inutiles.
 - Disque : 13 Go libres ; profils cargo OM (om1-3, i1, i1main, ≈ 10,8 Go) supprimés, espace retenu
   par les instantanés locaux Time Machine. R7 en attente d'espace.
+- R4 fini (feat/omr-r4, 1cc69e53b) : 30 objectifs relus (4 remplacés, 4 reformulés), Eşrefoğulları
+  supprimés (éteints 1326, Beyşehir → Hamid, Hızır Bey ajouté sans portrait), Anchialos/Philippopolis
+  corrigées, Mazovie, anachronismes de noms, Volok/Gorokhovets/Kamianiets rattachées. Géo partielle
+  (provinces, settlements, navgrid ; 8a1fbb9a5). Test cv3_ai_stances recalé (graine 2).
+  À l'intégration : portrait Hızır Bey (enveloppe OM) ; conflits possibles avec R3 (données factions D).
+  Incertitudes restantes : docs/wip/omr-r4.md.
+- R5 fini (feat/omr-r5, fb9e75774) : 10 unités de l'Est (mamelouks, archers des steppes, akıncı, yaya,
+  cavalerie serbe, pronoïaires, droujina, cavalerie lituanienne, frères teutoniques, almogavres),
+  doctrines IA, unit_looks.json (livrées/robes), emblèmes locaux, codex. Pas de règle core. Conflit
+  probable avec R3 sur data/ai/doctrines.json. Brabançons 12 % / archers écossais 84 % (hors bande, préexistant).
+- Intégration ../gp-omr (feat/omr) : R6, R2, R4, R5 fusionnés sans conflit. ADR 0118 conservé (0117 réservé par tw2-t4). Attente R1, R3, R7 ; tests complets après.
+- R1 fini (feat/omr-r1, ced09f8a2) : décisions IA identiques (turn_digest), CPU de planification ×0,42 (≈ 0,40 s/tour estimé ; à confirmer au calme par turn_perf 10 1 1), ADR 0119. Fusionné dans feat/omr. ADR : R3 a pris 0117, en collision avec tw2-t4 → renuméroter R3 à l'intégration (0120+).
