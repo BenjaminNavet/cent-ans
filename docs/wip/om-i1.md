@@ -71,6 +71,23 @@ les basses terres reliées à la mer (Pays-Bas) gardent le comportement d'avant.
   (index de morceau `% 16` → `chunks_x`), zg4 (256 morceaux → `chunk_count()`), zg8 (sonde des
   Pyrénées oubliée par la migration +1280).
 
+## Mesures (texte, machine partagée)
+- Chargement de la carte de campagne réelle (headless, `campaign_map.tscn`, script de sonde
+  hors dépôt) : OM 11,4 s (`startup.total_ms` 9 310 : relief_landcover 7,8 s, terrain 2,3 s,
+  décor 2,1 s, 672 morceaux) contre main 6,7 s (4 700 ; 256 morceaux). Mémoire : RSS max
+  2,89 Go contre 1,61 Go ; mémoire statique Godot 2,08 Go contre 1,10 Go (≈ ×1,8 pour ×2,6 de
+  surface). VRAM non mesurable en headless (estimation OM1 : 1,38 Go de textures de base).
+- Tour d'IA (`turn_perf 10 1 1`, profil release sans debug) : main 892 tours de faction,
+  moyenne 2,53 ms (p99 13,9, max 25) ; OM avant correctif 1 746 tours, 8,50 ms (p99 35,
+  max 117), 33,7 s ; après correctif 6,14 ms (médiane 3,71, p99 30, max 89 fac_empire), 25,5 s
+  (main 6,1 s). Par tour de jeu ≈ 1,07 s de planification IA (177 factions) contre 0,23 s.
+- Profil (`sample`) : 61 % du fil principal dans `city_state`, dont `are_neighbors` (O(P) par
+  paire de factions, appelé pour toutes les factions par l'émissaire IA, le commerce, le
+  changement d'allégeance). Correctif : `CampaignState::neighbour_factions` (une passe) aux
+  trois boucles, `are_neighbors` lit la cité sans relire la province. Test
+  `om_i1_neighbours.rs` (égalité avec `are_neighbors`). Reste : grille (`GridPlanner`),
+  `agent_dijkstra`, `attitude`, `faction_power` (O(armées + colonies) par appel).
+
 ## Prochaine étape
 Fin de `geo build`, contrôles (colonies hors province, provinces sans pixel, îles sans port),
 puis splat, relief-shade, navgrid, rivers-render, horizon.
