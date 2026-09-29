@@ -523,6 +523,78 @@
     504
    ],
    "variants": 2
+  },
+  "villager_0": {
+   "atlas_layer": 28,
+   "fine": true,
+   "lods": [
+    "villager_0_lod0.mesh.bin",
+    "villager_0_lod1.mesh.bin",
+    "villager_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "folk",
+   "tris": [
+    10674,
+    1317,
+    247
+   ],
+   "variants": 4
+  },
+  "villager_1": {
+   "atlas_layer": 29,
+   "fine": true,
+   "lods": [
+    "villager_1_lod0.mesh.bin",
+    "villager_1_lod1.mesh.bin",
+    "villager_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "folk",
+   "tris": [
+    9406,
+    1324,
+    255
+   ],
+   "variants": 3
+  },
+  "villager_2": {
+   "atlas_layer": 30,
+   "fine": true,
+   "lods": [
+    "villager_2_lod0.mesh.bin",
+    "villager_2_lod1.mesh.bin",
+    "villager_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    10550,
+    1310,
+    244
+   ],
+   "variants": 4
+  },
+  "villager_3": {
+   "atlas_layer": 31,
+   "fine": true,
+   "lods": [
+    "villager_3_lod0.mesh.bin",
+    "villager_3_lod1.mesh.bin",
+    "villager_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "folk_carry",
+   "tris": [
+    10023,
+    1312,
+    252
+   ],
+   "variants": 3
   }
  },
  "rigs": {

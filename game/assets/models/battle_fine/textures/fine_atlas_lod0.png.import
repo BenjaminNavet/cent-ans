@@ -1,30 +1,15 @@
 [remap]
 
 importer="2d_array_texture"
-type="CompressedTexture2DArray"
-uid="uid://b38cco2r42w1o"
-path.bptc="res://.godot/imported/fine_atlas_lod0.png-8764f2c9dab6b0ecf3b4d0b76b7e8e04.bptc.ctexarray"
-path.astc="res://.godot/imported/fine_atlas_lod0.png-8764f2c9dab6b0ecf3b4d0b76b7e8e04.astc.ctexarray"
-metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
-}
-
-[deps]
-
-source_file="res://assets/models/battle_fine/textures/fine_atlas_lod0.png"
-dest_files=["res://.godot/imported/fine_atlas_lod0.png-8764f2c9dab6b0ecf3b4d0b76b7e8e04.bptc.ctexarray", "res://.godot/imported/fine_atlas_lod0.png-8764f2c9dab6b0ecf3b4d0b76b7e8e04.astc.ctexarray"]
 
 [params]
 
 compress/mode=2
 compress/high_quality=true
 compress/lossy_quality=0.7
-compress/uastc_level=0
-compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/channel_pack=1
 mipmaps/generate=true
 mipmaps/limit=-1
 slices/horizontal=1
-slices/vertical=28
+slices/vertical=32
