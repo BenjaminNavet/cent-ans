@@ -58,6 +58,13 @@ var _seg_main := PackedByteArray()
 ## Case → PackedInt32Array des tronçons (milieu dans la case).
 var _cells: Dictionary = {}
 var _pool: FolkPool = null
+## FK6 : choix des grilles de semis par (sel, case) → Variant (nul : rien), valables tant que
+## la signature (saison, disette, réglages) ne change pas ; vidés à chaque `refresh`.
+var _pick_cache: Dictionary = {}
+var _pick_signature := ""
+## Tronçons proches du placement en cours (routes puis pèlerins : un seul parcours).
+var _near_segments := PackedInt32Array()
+var _near_key := Vector3(INF, INF, INF)
 ## Facteur de densité par province (index raster), vidé à chaque placement.
 var _factor_cache: Dictionary = {}
 
@@ -90,12 +97,16 @@ static func _cell_key(p: Vector2) -> Vector2i:
 
 
 func refresh(_sim: Object) -> void:
-	pass
+	_pick_cache.clear()
 
 
 func populate(pool: FolkPool, focus: Vector2, radius: float) -> void:
 	_pool = pool
 	_factor_cache.clear()
+	var signature := "%s|%d|%s|%s" % [season, idle_provinces.size(), off.keys(), pool.settings.hash()]
+	if signature != _pick_signature:
+		_pick_cache.clear()
+		_pick_signature = signature
 	var budget := pool.remaining()
 	if budget <= 0:
 		return
@@ -129,24 +140,35 @@ static func _h(a: int, b: int, c: int = 0) -> float:
 	return VegetationFields.hash01(a * 73856093 ^ b * 19349663 ^ c * 83492791)
 
 
-## Tronçons de route dont le milieu est dans le disque, plus proches d'abord.
-func _segments_near(focus: Vector2, radius: float) -> Array:
-	var found: Array = []
+## Tronçons de route dont le milieu est dans le disque, plus proches d'abord (indices). FK6 :
+## tri natif de clés entières (distance² quantifiée << 20 | indice) au lieu d'un `sort_custom`
+## sur des milliers de paires (≈ 10 ms près de Paris) ; résultat gardé pour le placement en cours.
+func _segments_near(focus: Vector2, radius: float) -> PackedInt32Array:
+	var key := Vector3(focus.x, focus.y, radius)
+	if key == _near_key:
+		return _near_segments
+	var keys := PackedInt64Array()
 	var lo := _cell_key(focus - Vector2(radius, radius))
 	var hi := _cell_key(focus + Vector2(radius, radius))
 	var r2 := radius * radius
+	var quant := 1000000.0 / maxf(r2, 1e-6)
 	for cy in range(lo.y, hi.y + 1):
 		for cx in range(lo.x, hi.x + 1):
 			var list: Variant = _cells.get(Vector2i(cx, cy))
 			if list == null:
 				continue
 			for index in list:
-				var mid := (_seg_a[index] + _seg_b[index]) * 0.5
-				var d2 := mid.distance_squared_to(focus)
+				var d2 := ((_seg_a[index] + _seg_b[index]) * 0.5).distance_squared_to(focus)
 				if d2 <= r2:
-					found.append([d2, index])
-	found.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
-	return found
+					keys.append((int(d2 * quant) << 20) | index)
+	keys.sort()
+	var out := PackedInt32Array()
+	out.resize(keys.size())
+	for k in keys.size():
+		out[k] = keys[k] & 0xFFFFF
+	_near_key = key
+	_near_segments = out
+	return out
 
 
 func _province_state(p: Vector2) -> Dictionary:
@@ -179,10 +201,9 @@ func _roads(focus: Vector2, radius: float, budget: int) -> int:
 		return 0
 	var per_unit := _setting("road_folk_per_unit", ROAD_FOLK_PER_UNIT)
 	var placed := 0
-	for entry in _segments_near(focus, radius):
+	for index in _segments_near(focus, radius):
 		if placed >= budget:
 			break
-		var index: int = entry[1]
 		var a := _seg_a[index]
 		var b := _seg_b[index]
 		var length := a.distance_to(b)
@@ -232,23 +253,41 @@ func _road_traveller(seed_id: int, k: int, a: Vector2, b: Vector2) -> int:
 ## Points d'une grille ancrée sur la carte (stables d'un placement à l'autre) retenus par
 ## `pick(p, i, j)` (résultat non nul), plus proches d'abord : [distance², position jittée, i, j,
 ## résultat]. Le tri ne porte que sur les points retenus.
-static func _grid(focus: Vector2, radius: float, step: float, salt: int, pick: Callable) -> Array:
-	var points: Array = []
+## Points d'une grille de semis (pas `step`, jitter stable) dans le disque, plus proches
+## d'abord : [[d², point, i, j, choix], …]. FK6 : `pick` mis en cache par (sel, case) pour le
+## tour (échantillonnage des masques une fois), tri natif de clés entières.
+func _grid(focus: Vector2, radius: float, step: float, salt: int, pick: Callable) -> Array:
+	var cache: Dictionary = _pick_cache.get(salt, {})
+	_pick_cache[salt] = cache
+	var candidates: Array = []
+	var keys := PackedInt64Array()
 	var i0 := int(floorf((focus.x - radius) / step))
 	var i1 := int(ceilf((focus.x + radius) / step))
 	var j0 := int(floorf((focus.y - radius) / step))
 	var j1 := int(ceilf((focus.y + radius) / step))
 	var r2 := radius * radius
+	var quant := 1000000.0 / maxf(r2, 1e-6)
 	for j in range(j0, j1 + 1):
 		for i in range(i0, i1 + 1):
 			var p := Vector2((i + _h(i, j, salt)) * step, (j + _h(i, j, salt + 1)) * step)
 			var d2 := p.distance_squared_to(focus)
 			if d2 > r2:
 				continue
-			var picked: Variant = pick.call(p, i, j)
+			var cell := Vector2i(i, j)
+			var picked: Variant
+			if cache.has(cell):
+				picked = cache[cell]
+			else:
+				picked = pick.call(p, i, j)
+				cache[cell] = picked
 			if picked != null:
-				points.append([d2, p, i, j, picked])
-	points.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
+				keys.append((int(d2 * quant) << 20) | candidates.size())
+				candidates.append([d2, p, i, j, picked])
+	keys.sort()
+	var points: Array = []
+	points.resize(keys.size())
+	for k in keys.size():
+		points[k] = candidates[keys[k] & 0xFFFFF]
 	return points
 
 
@@ -409,10 +448,9 @@ func _pilgrims(focus: Vector2, radius: float, budget: int) -> int:
 		return 0
 	var probability := _setting("pilgrim_probability", PILGRIM_PROBABILITY)
 	var placed := 0
-	for entry in _segments_near(focus, radius):
+	for index in _segments_near(focus, radius):
 		if placed >= budget:
 			break
-		var index: int = entry[1]
 		var a := _seg_a[index]
 		var b := _seg_b[index]
 		var target := Vector2.ZERO

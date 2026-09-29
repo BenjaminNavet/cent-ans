@@ -31,6 +31,9 @@ const DEFAULT_RADIUS := 60.0
 const DEFAULT_FIGURE_HEIGHT := 0.5
 const HUMAN_HEIGHT_M := 1.8
 const DEFAULT_MIN_VIEW_FRACTION := 0.018
+## Couples rôle:activité préchauffés (vie ordinaire, marchands) ; les autres sont créés à la
+## première demande.
+const WARM_FIGURES := ["peasant:walk", "peasant_b:walk", "porter:walk", "rider:ride", "pilgrim:walk", "merchant:walk", "guard:guard_walk", "peasant:plough", "peasant_b:plough", "porter:harvest", "reaper:scythe", "peasant:idle", "peasant_b:herd", "peasant:chop"]
 ## Déplacement du point visé (fraction du rayon) qui déclenche un nouveau placement.
 const MOVE_FRACTION := 0.2
 ## Variation relative d'échelle qui déclenche un nouveau placement.
@@ -114,7 +117,10 @@ func setup(map_data: MapData, terrain: TerrainBuilder, cap_override: int = -1) -
 	activity_radius = float(settings.get("activity_radius", DEFAULT_RADIUS))
 	figure_height = float(settings.get("figure_height", DEFAULT_FIGURE_HEIGHT))
 	figure_min_view_fraction = float(settings.get("figure_min_view_fraction", DEFAULT_MIN_VIEW_FRACTION))
-	_warm_queue = ["figure:peasant:walk"]
+	# Groupes de figurines de la routine et des marchands (≈ 0,2-1 ms chacun, 9 ms le premier).
+	_warm_queue = []
+	for pair in WARM_FIGURES:
+		_warm_queue.append("figure:" + pair)
 	for role in FolkModels.PROPS:
 		_warm_queue.append("prop:" + str(role))
 
@@ -515,6 +521,8 @@ func set_budget_exceeded(exceeded: bool) -> void:
 func _debug_dump() -> void:
 	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
 	print("FKDBG place focus=%s radius=%.2f scale=%.5f cam=%s level=%d" % [_focus, _radius, _scale, cam.global_position if cam else Vector3.ZERO, _level])
+	for provider in _providers:
+		print("FKDBG  provider %s %s" % [provider.get_script().get_global_name(), provider.get("stats")])
 	for key in _groups:
 		var g: Dictionary = _groups[key]
 		var n := int(g["count"])

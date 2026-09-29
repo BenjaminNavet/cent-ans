@@ -139,6 +139,8 @@ func _run() -> void:
 	# 3. Palier proche sur la route active : charrettes, marchands et routine.
 	var focus: Vector2 = active_edge[2]
 	_view(pool, focus, 45.0, 1.0)
+	var near_ms := float(pool.stats.get("place_ms", 0.0)) - float(pool.stats.get("create_ms", 0.0))
+	_check(near_ms <= 8.0, "routine + caravans placement %.2f ms (> 8 ms)" % near_ms)
 	print("fk_folk_test: near %s, caravans %s, routine %s" % [pool.stats, caravans.stats, routine.stats])
 	_check(pool.figure_count() > 0 and pool.figure_count() <= 600, "figures near: %d" % pool.figure_count())
 	_check(int(caravans.stats.get("carts", 0)) > 0, "merchant carts on the active route: %s" % caravans.stats)
