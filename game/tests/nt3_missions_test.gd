@@ -69,15 +69,15 @@ func _run() -> void:
 
 	# 3. Panneau d'objectifs.
 	map.victory.open_panel()
-	var heading := map.victory.list.find_child("MissionsHeading", true, false) as Label
+	var heading: Label = map.victory.list.find_child("MissionsHeading", true, false) as Label
 	_check(heading != null and heading.text == "Missions", "the objectives panel has a « Missions » section")
 	if missions.size() == 1:
-		var row := map.victory.list.find_child("Mission%d" % int(missions[0]["id"]), true, false)
+		var row: Node = map.victory.list.find_child("Mission%d" % int(missions[0]["id"]), true, false)
 		if _check(row != null, "one row per mission"):
-			var terms := row.find_child("Terms", true, false) as Label
+			var terms: Label = row.find_child("Terms", true, false) as Label
 			_check(terms != null and terms.text.contains("Échéance") and terms.text.contains("Récompense"),
 				"the row shows deadline and reward")
-			var head := row.find_child("Head", true, false) as Label
+			var head: Label = row.find_child("Head", true, false) as Label
 			_check(head != null and head.text.contains(str(missions[0]["title"])), "the row shows the title")
 	map.victory.panel.hide()
 	map.queue_free()
