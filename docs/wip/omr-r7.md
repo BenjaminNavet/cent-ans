@@ -45,7 +45,9 @@ cuisson tier1 3) ; tier2/tier3 inchangés (renommés seulement). `geo relief-ref
 - [x] 3 cadre monde : outillage généralisé (pyramid, fine_relief, hydro_fine, fine_anchors,
   detail_dem, landmarks_v2, relief_cache), `world_frame.py`, `geo relief-reframe` ; cache du
   worktree recadré (liens durs vers celui du principal : 0 octet), manifestes décalés.
-- [ ] 4 cuisson E1-E2 monde en flux
+- [ ] 4 cuisson E1-E2 monde en flux : en cours (146 blocs ; bloc 40 à 11 h, 2,1 Go GLO-90 téléchargés,
+  85 Gio libres ; journal `scratchpad/bake1.log`). Reprise : relancer `geo pyramid --levels 1,2`.
+- ADR 0119 écrit ; test `game/tests/omr_r7_east_relief_test.gd` (points à affiner sur les vraies pages).
 
 ## Prochaine étape
 Lancer `geo pyramid --levels 1,2` dans le worktree (arrière-plan), surveiller `df`.
