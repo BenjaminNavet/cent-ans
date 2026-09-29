@@ -970,11 +970,12 @@ func update_view(camera_distance: float) -> void:
 		_declutter_timer = 0.0
 		_declutter_force = true
 	if MapData.vertical_scale() != _label_scale:
-		_labels_dirty = false
-		var tv := Time.get_ticks_usec()
-		_update_label_heights()  # ZG4 : toutes les étiquettes du palier moyen suivent l'échelle
-		PerfProbe.lap("settle/labels/vscale", tv)  # RS-K3
-	elif _labels_dirty:
+		# ZG4 : toutes les étiquettes suivent l'échelle verticale. RS-K3 (ADR 0051) : tour de
+		# réécriture étalé (`LABEL_SLICE` étiquettes par image, reprise au curseur ; un nouveau
+		# pas relance un tour complet).
+		_label_scale = MapData.vertical_scale()
+		_label_left = _labels.size()
+	if _labels_dirty:
 		_labels_dirty = false
 		# SZ6 : seules les colonies des morceaux recalés (hauteur de leur maquette ou de leur ville
 		# emblématique) changent.
@@ -983,6 +984,10 @@ func update_view(camera_distance: float) -> void:
 			for i in _settlements_by_chunk.get(index, PackedInt32Array()):
 				_update_label_height(i, near)
 		_label_chunks.clear()
+	if _label_left > 0:
+		var tv := Time.get_ticks_usec()
+		_label_slice(FrameBudget.in_frame())
+		PerfProbe.lap("settle/labels/vscale", tv)  # RS-K3
 	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
@@ -1024,6 +1029,13 @@ func _on_chunk_surface_changed(index: int) -> void:
 var _label_chunks: Dictionary = {}
 var _label_state := Vector2i(-1, -1)
 var _label_scale := -1.0
+## RS-K3 : tour de réécriture des étiquettes (échelle verticale) : étiquettes par image, curseur
+## et entrées restant à voir ; altitude du sol (m, avant affichage) sous chaque étiquette du palier
+## moyen, lue une fois (NAN : à lire).
+const LABEL_SLICE := 300
+var _label_cursor := 0
+var _label_left := 0
+var _label_ground_m: PackedFloat64Array = PackedFloat64Array()
 
 
 ## Hauteur des étiquettes : au-dessus de la maquette (près) ou de l'icône (moyen).
@@ -1032,8 +1044,28 @@ func _update_label_heights() -> void:
 	_label_state = Vector2i(int(near), 0)
 	_label_scale = MapData.vertical_scale()
 	_label_chunks.clear()
+	_label_left = 0
 	for i in _labels.size():
 		_update_label_height(i, near)
+
+
+## RS-K3 : tranche du tour de réécriture des étiquettes (toutes si `sliced` est faux).
+func _label_slice(sliced: bool) -> void:
+	var count := _labels.size()
+	if count == 0:
+		_label_left = 0
+		return
+	var near := _weights.x > 0.35
+	var done := 0
+	var i := _label_cursor % count
+	while _label_left > 0 and (not sliced or done < LABEL_SLICE):
+		_update_label_height(i, near)
+		done += 1
+		_label_left -= 1
+		i += 1
+		if i == count:
+			i = 0
+	_label_cursor = i
 
 
 func _update_label_height(i: int, near: bool) -> void:
@@ -1055,9 +1087,21 @@ func _update_label_height(i: int, near: bool) -> void:
 			label.position = label_at
 		label.offset = Vector2.ZERO
 	else:
-		# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
-		label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
-		label.offset = Vector2(0.0, _label_lift_px(i))
+		# Palier moyen : au-dessus de l'icône (décalage en pixels écran). RS-K3 : altitude du sol
+		# lue une fois (même valeur que `surface_world_at`), écritures seulement si elles changent.
+		if _label_ground_m.size() != _labels.size():
+			_label_ground_m.resize(_labels.size())
+			_label_ground_m.fill(NAN)
+		var ground_m := _label_ground_m[i]
+		if is_nan(ground_m):
+			ground_m = map_data.height_m_at(px.x, px.y)
+			_label_ground_m[i] = ground_m
+		var label_at := Vector3(px.x, maxf(MapData.display_height(ground_m, px.x, px.y), 0.0) + 0.5, px.y)
+		if label.position != label_at:
+			label.position = label_at
+		var offset := Vector2(0.0, _label_lift_px(i))
+		if label.offset != offset:
+			label.offset = offset
 
 
 ## Opacité d'une étiquette selon le type et le palier (cité : moyen et près ; ville : moyen
