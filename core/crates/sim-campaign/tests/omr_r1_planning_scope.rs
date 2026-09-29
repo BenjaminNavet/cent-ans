@@ -36,6 +36,10 @@ fn scope_answers_match_the_walks() {
         .iter()
         .map(|a| neighbours_by_walk(&state, &data, &ids, a))
         .collect();
+    let incomes: Vec<i64> = ids
+        .iter()
+        .map(|f| state.faction_income_effective(&data, f))
+        .collect();
     let listed: Vec<BTreeSet<FactionId>> = ids
         .iter()
         .map(|a| state.neighbour_factions(&data, a))
@@ -52,12 +56,18 @@ fn scope_answers_match_the_walks() {
                 "{a}"
             );
             assert_eq!(state.neighbour_factions(&data, a), listed[i], "{a}");
+            // Twice: computed, then read from the memo.
+            for _ in 0..2 {
+                assert_eq!(state.faction_income_effective(&data, a), incomes[i], "{a}");
+            }
+            assert_eq!(state.faction_income_effective_walk(&data, a), incomes[i]);
         }
         let unknown = FactionId::new("fac_nobody").unwrap();
         assert_eq!(state.faction_power(&unknown), 0.0);
         assert!(!state.are_neighbors(&data, &unknown, &france));
     }
     assert!(powers.iter().any(|p| *p > 0.0));
+    assert!(incomes.iter().any(|i| *i > 0));
     assert!(neighbours.iter().filter(|n| !n.is_empty()).count() > 20);
 }
 

@@ -421,6 +421,18 @@ impl CampaignState {
     /// and buildings (spec § 1.4); unlike [`CampaignState::faction_income`]
     /// this is what `resolve_economy` actually applies to the treasury.
     pub fn faction_income_effective(&self, data: &GameData, faction: &FactionId) -> i64 {
+        // OMR R1: asked several times per plan (economy, coinage, agents,
+        // subsidies): a memo while a planning scope is open.
+        if let Some(derived) = self.derived() {
+            return derived.income(data, faction, || {
+                self.faction_income_effective_walk(data, faction)
+            });
+        }
+        self.faction_income_effective_walk(data, faction)
+    }
+
+    /// [`Self::faction_income_effective`] computed afresh.
+    pub fn faction_income_effective_walk(&self, data: &GameData, faction: &FactionId) -> i64 {
         let tax_rate = self
             .factions
             .get(faction)

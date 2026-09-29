@@ -16,6 +16,7 @@
 //! [`MovementRules`]).
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::{Arc, OnceLock};
 
 use crate::entities::province::Terrain;
 use crate::entities::settlement::{MovementRules, RetreatRules, SettlementEdge};
@@ -41,9 +42,69 @@ pub struct MovementGraph {
     pub adjacency: BTreeMap<SettlementId, Vec<GraphEdge>>,
     /// `true` when built by the fallback rules (no `settlement_graph.json`).
     pub fallback: bool,
+    /// OMR R1: [`GraphIndex`], built on the first [`MovementGraph::index`]
+    /// (the graph is not changed once built: `adjacency` is only read).
+    index: IndexCell,
+}
+
+/// OMR R1: the settlement graph over dense indices, for searches that
+/// would otherwise look every settlement id up in maps: settlements in id
+/// order (index order = id order, so ties break alike), the edges of each
+/// in the order of [`MovementGraph::edges`].
+#[derive(Debug, Default)]
+pub struct GraphIndex {
+    /// Every settlement with an edge (leaving or arriving), in id order.
+    pub ids: Vec<SettlementId>,
+    /// Edges leaving each settlement: (target index, cost).
+    pub edges: Vec<Vec<(u32, f64)>>,
+}
+
+impl GraphIndex {
+    fn new(adjacency: &BTreeMap<SettlementId, Vec<GraphEdge>>) -> Self {
+        let mut ids: BTreeSet<&SettlementId> = adjacency.keys().collect();
+        ids.extend(adjacency.values().flatten().map(|e| &e.to));
+        let ids: Vec<SettlementId> = ids.into_iter().cloned().collect();
+        let position = |id: &SettlementId| {
+            u32::try_from(ids.binary_search(id).expect("indexed")).expect("fewer than 2^32")
+        };
+        let edges = ids
+            .iter()
+            .map(|id| {
+                adjacency.get(id).map_or_else(Vec::new, |list| {
+                    list.iter().map(|e| (position(&e.to), e.cost)).collect()
+                })
+            })
+            .collect();
+        Self { ids, edges }
+    }
+
+    /// Index of `id`, if it is in the graph.
+    pub fn position(&self, id: &SettlementId) -> Option<u32> {
+        self.ids
+            .binary_search(id)
+            .ok()
+            .and_then(|i| u32::try_from(i).ok())
+    }
+}
+
+/// Lazily built [`GraphIndex`]: cloned with the graph, ignored by equality.
+#[derive(Debug, Clone, Default)]
+struct IndexCell(OnceLock<Arc<GraphIndex>>);
+
+impl PartialEq for IndexCell {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
 }
 
 impl MovementGraph {
+    /// OMR R1: the graph over dense indices (built once, on first use).
+    pub fn index(&self) -> &GraphIndex {
+        self.index
+            .0
+            .get_or_init(|| Arc::new(GraphIndex::new(&self.adjacency)))
+    }
+
     /// Edges leaving `from` (empty for an unknown or isolated settlement).
     pub fn edges(&self, from: &SettlementId) -> &[GraphEdge] {
         self.adjacency

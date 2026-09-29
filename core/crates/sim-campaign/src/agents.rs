@@ -344,8 +344,7 @@ impl CampaignState {
             return Some(Vec::new());
         }
         let cap = self.agent_movement_allowance(data, a.kind);
-        let table = agent_dijkstra(data, &a.location, None, cap);
-        movement::path_to(&table, target)
+        AgentTable::search(data, &a.location, None, cap, Some(target)).path_to(target)
     }
 
     /// Recruitment options of `settlement` for `faction`.
@@ -809,6 +808,17 @@ pub fn agent_dijkstra(
     budget: Option<u32>,
     cap: u32,
 ) -> BTreeMap<SettlementId, movement::Reach> {
+    AgentTable::search(data, start, budget, cap, None).into_reaches()
+}
+
+/// [`agent_dijkstra`] as it was before OMR R1 (settlement ids in maps): the
+/// reference of the equality tests.
+pub fn agent_dijkstra_by_ids(
+    data: &GameData,
+    start: &SettlementId,
+    budget: Option<u32>,
+    cap: u32,
+) -> BTreeMap<SettlementId, movement::Reach> {
     let mut best: BTreeMap<SettlementId, movement::Reach> = BTreeMap::new();
     let mut heap = BinaryHeap::new();
     best.insert(
@@ -841,6 +851,134 @@ pub fn agent_dijkstra(
         }
     }
     best
+}
+
+/// No settlement (unreached, or the start's previous).
+const NONE: u32 = u32::MAX;
+
+/// OMR R1: [`agent_dijkstra`] over the graph's dense indices
+/// ([`data_model::movement_graph::GraphIndex`]; index order = id order, so
+/// the heap breaks ties and the paths come out exactly as before).
+pub struct AgentTable<'a> {
+    data: &'a GameData,
+    start: SettlementId,
+    /// Index of the start, `None` when it has no edge (the table holds it alone).
+    origin: Option<u32>,
+    cost: Vec<u32>,
+    previous: Vec<u32>,
+}
+
+impl<'a> AgentTable<'a> {
+    /// Searches from `start`; with `until`, stops once that settlement's
+    /// cost is final (its path does not change after).
+    pub fn search(
+        data: &'a GameData,
+        start: &SettlementId,
+        budget: Option<u32>,
+        cap: u32,
+        until: Option<&SettlementId>,
+    ) -> Self {
+        let index = data.movement_graph.index();
+        let origin = index.position(start);
+        let mut table = Self {
+            data,
+            start: start.clone(),
+            origin,
+            cost: Vec::new(),
+            previous: Vec::new(),
+        };
+        let Some(origin) = origin else {
+            return table;
+        };
+        let until = until.and_then(|t| index.position(t));
+        let n = index.ids.len();
+        table.cost = vec![NONE; n];
+        table.previous = vec![NONE; n];
+        table.cost[origin as usize] = 0;
+        let mut heap = BinaryHeap::new();
+        heap.push(Reverse((0u32, origin)));
+        let step_cap = cap.max(1);
+        while let Some(Reverse((cost, current))) = heap.pop() {
+            if table.cost[current as usize] < cost {
+                continue;
+            }
+            if until == Some(current) {
+                break;
+            }
+            for &(next, edge_cost) in &index.edges[current as usize] {
+                let edge = (edge_cost.round() as u32).max(1);
+                let total = cost + edge.min(step_cap);
+                if budget.is_some_and(|b| total > b) {
+                    continue;
+                }
+                let known = table.cost[next as usize];
+                if known == NONE || total < known {
+                    table.cost[next as usize] = total;
+                    table.previous[next as usize] = current;
+                    heap.push(Reverse((total, next)));
+                }
+            }
+        }
+        table
+    }
+
+    /// Cost of reaching `id`, if reached.
+    pub fn cost(&self, id: &SettlementId) -> Option<u32> {
+        if self.origin.is_none() {
+            return (id == &self.start).then_some(0);
+        }
+        let i = self.data.movement_graph.index().position(id)? as usize;
+        (self.cost[i] != NONE).then_some(self.cost[i])
+    }
+
+    /// [`movement::path_to`] on this table (`None` when `target` is unreached).
+    pub fn path_to(&self, target: &SettlementId) -> Option<Vec<SettlementId>> {
+        if self.origin.is_none() {
+            return (target == &self.start).then(Vec::new);
+        }
+        let index = self.data.movement_graph.index();
+        let mut i = index.position(target)?;
+        if self.cost[i as usize] == NONE {
+            return None;
+        }
+        let mut path = Vec::new();
+        while self.previous[i as usize] != NONE {
+            path.push(index.ids[i as usize].clone());
+            i = self.previous[i as usize];
+        }
+        path.reverse();
+        Some(path)
+    }
+
+    /// The table as [`agent_dijkstra_by_ids`] returns it.
+    pub fn into_reaches(self) -> BTreeMap<SettlementId, movement::Reach> {
+        let Some(_) = self.origin else {
+            return BTreeMap::from([(
+                self.start,
+                movement::Reach {
+                    cost: 0,
+                    previous: None,
+                },
+            )]);
+        };
+        let index = self.data.movement_graph.index();
+        self.cost
+            .iter()
+            .zip(&self.previous)
+            .enumerate()
+            .filter(|(_, (cost, _))| **cost != NONE)
+            .map(|(i, (cost, previous))| {
+                (
+                    index.ids[i].clone(),
+                    movement::Reach {
+                        cost: *cost,
+                        previous: (*previous != NONE)
+                            .then(|| index.ids[*previous as usize].clone()),
+                    },
+                )
+            })
+            .collect()
+    }
 }
 
 // ----- orders -----------------------------------------------------------------
@@ -1916,12 +2054,12 @@ fn nearest_city(
     wanted: impl Fn(&CampaignState, &SettlementId, &ProvinceId) -> bool,
 ) -> Option<SettlementId> {
     let cap = state.agent_movement_allowance(data, agent.kind);
-    let table = agent_dijkstra(data, &agent.location, None, cap);
+    let table = AgentTable::search(data, &agent.location, None, cap, None);
     state
         .provinces
         .iter()
         .filter(|(province, p)| wanted(state, &p.city, province))
-        .filter_map(|(_, p)| table.get(&p.city).map(|r| (r.cost, p.city.clone())))
+        .filter_map(|(_, p)| table.cost(&p.city).map(|cost| (cost, p.city.clone())))
         .min()
         .map(|(_, city)| city)
 }

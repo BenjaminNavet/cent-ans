@@ -17,7 +17,7 @@
 //! `omr_r1_planning_scope.rs`), so no decision changes.
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, OnceLock, RwLock};
+use std::sync::{Arc, Mutex, OnceLock, RwLock};
 
 use data_model::{FactionId, GameData};
 
@@ -31,6 +31,9 @@ pub(crate) struct Derived {
     /// [`CampaignState::neighbour_factions`] of every faction, built on the
     /// first question with the data it was asked with (`data` address).
     neighbours: OnceLock<(usize, BTreeMap<FactionId, BTreeSet<FactionId>>)>,
+    /// [`CampaignState::faction_income_effective`] of the factions asked
+    /// so far, with the data address they were computed with.
+    income: Mutex<BTreeMap<(usize, FactionId), i64>>,
 }
 
 impl Derived {
@@ -48,12 +51,37 @@ impl Derived {
         Self {
             power,
             neighbours: OnceLock::new(),
+            income: Mutex::new(BTreeMap::new()),
         }
     }
 
     pub(crate) fn faction_power(&self, faction: &FactionId) -> f64 {
         let (armies, garrisons) = self.power.get(faction).copied().unwrap_or_default();
         f64::from(armies) + f64::from(garrisons) / 2.0
+    }
+
+    /// Income of `faction` (a memo of `compute`, filled outside the lock).
+    pub(crate) fn income(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        compute: impl FnOnce() -> i64,
+    ) -> i64 {
+        let key = (std::ptr::from_ref(data) as usize, faction.clone());
+        let known = self
+            .income
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .get(&key)
+            .copied();
+        known.unwrap_or_else(|| {
+            let value = compute();
+            self.income
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .insert(key, value);
+            value
+        })
     }
 
     /// Neighbours of every faction, or `None` when the index was built with
