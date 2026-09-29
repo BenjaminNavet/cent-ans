@@ -13,7 +13,8 @@ extends RefCounted
 ##   zlib `relief_shade_bc5_<i>.bin`, écrite par `cent-ans geo relief-shade-bc5`) lue en priorité :
 ##   235 Mo au lieu de 470, ni décodage PNG ni calcul de mipmaps. Canaux R = L, G = A
 ##   (`relief_shade_rg` dans le shader).
-## - `wetlands.png` (RGB8, 4096²) : R marais, G étangs, B prés humides.
+## - `wetlands.png` (RGB8, 4096²) : R marais, G étangs, B prés humides. OMR-R2 : copie BC1
+##   `map.json.wetlands_gpu` lue en priorité (22 Mo au lieu de 126).
 ## - `forest_kind.png` (L8, 2048², part de résineux) n'est pas lu ici : il est destiné au rendu
 ##   des forêts (lot V4), comme `splat.png`.
 ##
@@ -65,7 +66,9 @@ func _load() -> void:
 			_shade = _load_image(_map_dir, SHADE_FILE, Image.FORMAT_LA8)
 		if _shade != null:
 			_shade.generate_mipmaps()
-	_wet = _load_image(_map_dir, WETLANDS_FILE, Image.FORMAT_RGB8)
+	_wet = load_wetlands_gpu(_map_dir)
+	if _wet == null:
+		_wet = _load_image(_map_dir, WETLANDS_FILE, Image.FORMAT_RGB8)
 	_finish.call_deferred()
 
 
@@ -99,19 +102,30 @@ static func _load_image(map_dir: String, file_name: String, format: int) -> Imag
 	return image
 
 
+## Formats des copies GPU (`tools/cent_ans_tools/geo/block_compress.py`).
+const GPU_FORMATS := {"rgtc_rg": Image.FORMAT_RGTC_RG, "dxt1": Image.FORMAT_DXT1}
+
+
 ## OMR-R2 : image BC5 (RGTC RG) avec mipmaps de `map.json.relief_shade.bc5` ; null sans copie GPU
-## ou si une part manque ou ne correspond pas (repli sur les bandes PNG). Parts lues et
-## décompressées une à une (pic mémoire ≈ image + une part).
+## ou si une part manque ou ne correspond pas (repli sur les bandes PNG).
 static func load_bc5(map_dir: String) -> Image:
-	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("map.json")))
-	if not (meta is Dictionary and (meta as Dictionary).get("relief_shade") is Dictionary):
+	var relief: Variant = _map_meta(map_dir).get("relief_shade")
+	return load_gpu_copy(map_dir, relief.get("bc5") if relief is Dictionary else null)
+
+
+## OMR-R2 : zones humides en BC1 (`map.json.wetlands_gpu`) ; null sans copie GPU (repli PNG).
+static func load_wetlands_gpu(map_dir: String) -> Image:
+	return load_gpu_copy(map_dir, _map_meta(map_dir).get("wetlands_gpu"))
+
+
+## Copie GPU décrite par `entry` (format, taille, mipmaps, parts zlib) : parts lues et décompressées
+## une à une (pic mémoire ≈ image + une part) ; null si absente, incomplète ou incohérente.
+static func load_gpu_copy(map_dir: String, entry: Variant) -> Image:
+	if not entry is Dictionary or not GPU_FORMATS.has(str(entry.get("format", ""))) or str(entry.get("compression", "")) != "deflate":
 		return null
-	var bc5: Variant = meta["relief_shade"].get("bc5")
-	if not bc5 is Dictionary or str(bc5.get("format", "")) != "rgtc_rg" or str(bc5.get("compression", "")) != "deflate":
-		return null
-	var size: Array = bc5.get("size_px", [])
-	var part_bytes: Array = bc5.get("part_bytes", [])
-	var pattern := str(bc5.get("pattern", ""))
+	var size: Array = entry.get("size_px", [])
+	var part_bytes: Array = entry.get("part_bytes", [])
+	var pattern := str(entry.get("pattern", ""))
 	if size.size() != 2 or part_bytes.is_empty() or pattern == "":
 		return null
 	var data := PackedByteArray()
@@ -124,11 +138,17 @@ static func load_bc5(map_dir: String) -> Image:
 			push_warning("ReliefLandcover: %s unreadable" % path)
 			return null
 		data.append_array(raw)
-	var image := Image.create_from_data(int(size[0]), int(size[1]), true, Image.FORMAT_RGTC_RG, data)
+	var format: int = GPU_FORMATS[str(entry["format"])]
+	var image := Image.create_from_data(int(size[0]), int(size[1]), bool(entry.get("mipmaps", false)), format, data)
 	if image.is_empty():
-		push_warning("ReliefLandcover: BC5 relief %s does not match %d bytes" % [size, data.size()])
+		push_warning("ReliefLandcover: GPU copy %s %s does not match %d bytes" % [entry["format"], size, data.size()])
 		return null
 	return image
+
+
+static func _map_meta(map_dir: String) -> Dictionary:
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("map.json")))
+	return meta if meta is Dictionary else {}
 
 
 ## Bandes horizontales de `map.json.relief_shade.bands` empilées de haut en bas ; null sans bandes.

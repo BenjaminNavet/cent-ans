@@ -44,7 +44,7 @@ from pathlib import Path
 import numpy as np
 from scipy import ndimage
 
-from cent_ans_tools.geo import bc5, copernicus, download, relief, terrain
+from cent_ans_tools.geo import block_compress, copernicus, download, relief, terrain
 from cent_ans_tools.geo.project import MapGrid
 
 REPO_DIR = download.TOOLS_DIR.parent
@@ -291,7 +291,11 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefShadeResult:
     relief.update_map_json(map_dir)
     update_map_json(map_dir, names)
     # OMR-R2 : copie GPU (BC5 + mipmaps) lue par le jeu à la place des bandes PNG.
-    bc5.update_map_json(map_dir, bc5.write_parts(shade, map_dir).meta)
+    block_compress.update_map_json(
+        map_dir,
+        block_compress.RELIEF_KEY,
+        block_compress.write_relief_bc5(shade, map_dir).meta,
+    )
     del shade
     return ReliefShadeResult(
         tiles=len(paths),

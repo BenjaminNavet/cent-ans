@@ -134,5 +134,19 @@
         29360136
       ]
     }
+  },
+  "wetlands_gpu": {
+    "format": "dxt1",
+    "size_px": [
+      7168,
+      6144
+    ],
+    "mipmaps": false,
+    "bytes": 22020096,
+    "compression": "deflate",
+    "pattern": "wetlands_bc1_{part}.bin",
+    "part_bytes": [
+      22020096
+    ]
   }
 }

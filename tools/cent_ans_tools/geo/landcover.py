@@ -45,7 +45,7 @@ from rasterio.features import rasterize
 from scipy import ndimage
 from shapely.geometry import LineString, Polygon
 
-from cent_ans_tools.geo import download, kk10, splat, terrain
+from cent_ans_tools.geo import block_compress, download, kk10, splat, terrain
 from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
 from cent_ans_tools.geo.provinces import decode_ids
 
@@ -561,9 +561,14 @@ def build(
         splat_path, compress_level=9
     )
     wet_path = map_dir / "wetlands.png"
-    Image.fromarray(
-        np.clip(np.rint(wet * 255.0), 0, 255).astype(np.uint8), mode="RGB"
-    ).save(wet_path, compress_level=9)
+    wet8 = np.clip(np.rint(wet * 255.0), 0, 255).astype(np.uint8)
+    Image.fromarray(wet8, mode="RGB").save(wet_path, compress_level=9)
+    # OMR-R2 : copie GPU (BC1) lue par le jeu à la place du PNG.
+    block_compress.update_map_json(
+        map_dir,
+        block_compress.WETLANDS_KEY,
+        block_compress.write_wetlands_bc1(wet8, map_dir).meta,
+    )
     factor = FOREST_KIND_FACTOR
     kind = splat.downsample_mean(np.where(land, conifer, 0.0), factor)
     kind_path = map_dir / "forest_kind.png"
