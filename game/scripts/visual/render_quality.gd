@@ -57,6 +57,12 @@ const UPSCALE_BILINEAR := "bilinear"
 const UPSCALE_CHOICES: Array[String] = ["auto", "off", "quality", "performance"]
 const UPSCALE_LABELS: Array[String] = ["Automatique", "Désactivée", "MetalFX qualité", "MetalFX performance"]
 ## Mode et échelle des choix explicites du joueur (mesures : ADR 0080).
+## FPS carte (ADR 0123) : les échelles des préréglages sont réglées pour une définition de
+## référence de 1920 × 1080. Au-delà (écran Retina, 4K), le choix « Automatique » garde le même
+## nombre de pixels rendus (coût GPU du relief et des effets ≈ proportionnel aux pixels), sans
+## descendre sous `UPSCALE_MIN_SCALE`. Les choix explicites du joueur restent tels quels.
+const UPSCALE_REFERENCE_PIXELS := 1920.0 * 1080.0
+const UPSCALE_MIN_SCALE := 0.5
 const UPSCALE_PLAYER := {
 	"off": [UPSCALE_OFF, 1.0],
 	"quality": [UPSCALE_SPATIAL, 0.75],
@@ -222,7 +228,8 @@ static func apply_global(viewport: Viewport = null) -> void:
 
 
 ## PB3b : mode et échelle de la mise à l'échelle 3D : banc, puis réglage du joueur, sinon préréglage.
-static func upscale(p: Dictionary = {}) -> Dictionary:
+## `pixels` : pixels physiques du viewport 3D (0 : taille de la fenêtre principale).
+static func upscale(p: Dictionary = {}, pixels: float = 0.0) -> Dictionary:
 	if upscale_override != "":
 		return parse_upscale(upscale_override)
 	for arg in OS.get_cmdline_user_args():
@@ -239,7 +246,19 @@ static func upscale(p: Dictionary = {}) -> Dictionary:
 	if UPSCALE_PLAYER.has(choice):
 		var entry: Array = UPSCALE_PLAYER[choice]
 		return {"mode": entry[0], "scale": float(entry[1])}
-	return preset_upscale(p)
+	var up := preset_upscale(p)
+	if pixels <= 0.0:
+		var window_size := DisplayServer.window_get_size()
+		pixels = float(window_size.x * window_size.y)
+	up["scale"] = budget_scale(str(up["mode"]), float(up["scale"]), pixels)
+	return up
+
+
+## ADR 0123 : échelle d'un préréglage ramenée au budget de pixels de la définition de référence.
+static func budget_scale(mode: String, scale: float, pixels: float) -> float:
+	if mode == UPSCALE_OFF or pixels <= UPSCALE_REFERENCE_PIXELS:
+		return scale
+	return maxf(UPSCALE_MIN_SCALE, minf(scale, scale * sqrt(UPSCALE_REFERENCE_PIXELS / pixels)))
 
 
 ## Mise à l'échelle prévue par un préréglage (choix « Automatique »).
@@ -292,7 +311,8 @@ static func is_temporal(scaling_mode: int) -> bool:
 
 
 static func apply_upscale(viewport: Viewport, p: Dictionary) -> void:
-	var up := upscale(p)
+	var size := Vector2((viewport as Window).size) if viewport is Window else viewport.get_visible_rect().size
+	var up := upscale(p, size.x * size.y)
 	var scaling_mode := scaling_mode_for(str(up["mode"]), is_metal())
 	viewport.scaling_3d_mode = scaling_mode
 	viewport.scaling_3d_scale = float(up["scale"])
@@ -311,6 +331,14 @@ static func _install_particle_hook(tree: SceneTree) -> void:
 		return
 	_particle_hook = true
 	tree.node_added.connect(_on_node_added)
+	# ADR 0123 : le budget de pixels dépend de la taille de la fenêtre (plein écran, autre écran).
+	tree.root.size_changed.connect(_on_root_resized)
+
+
+static func _on_root_resized() -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null and tree.root != null:
+		apply_upscale(tree.root, preset())
 
 
 ## Différé : les scripts règlent souvent `amount` juste après `add_child`. Les particules d'un

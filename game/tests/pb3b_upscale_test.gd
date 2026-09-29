@@ -23,6 +23,14 @@ func _init() -> void:
 	_check(RenderQuality.scaling_mode_for(RenderQuality.UPSCALE_SPATIAL, false) == Viewport.SCALING_3D_MODE_FSR, "spatial fallback FSR")
 	_check(RenderQuality.scaling_mode_for(RenderQuality.UPSCALE_TEMPORAL, false) == Viewport.SCALING_3D_MODE_FSR2, "temporal fallback FSR2")
 	_check(RenderQuality.scaling_mode_for(RenderQuality.UPSCALE_OFF, true) == Viewport.SCALING_3D_MODE_BILINEAR, "off is bilinear")
+	# ADR 0123 : budget de pixels de la référence 1080p pour « Automatique ».
+	var spatial := RenderQuality.UPSCALE_SPATIAL
+	_check(is_equal_approx(RenderQuality.budget_scale(spatial, 0.75, 1920.0 * 1080.0), 0.75), "budget: 1080p keeps preset scale")
+	_check(is_equal_approx(RenderQuality.budget_scale(spatial, 0.75, 1440.0 * 900.0), 0.75), "budget: smaller window never upscales")
+	var retina := RenderQuality.budget_scale(spatial, 0.75, 2624.0 * 1644.0)
+	_check(retina > 0.51 and retina < 0.53, "budget: Retina 2624x1644 at 0.52 (%.3f)" % retina)
+	_check(is_equal_approx(RenderQuality.budget_scale(spatial, 0.75, 3840.0 * 2160.0), RenderQuality.UPSCALE_MIN_SCALE), "budget: 4K floored")
+	_check(RenderQuality.budget_scale(RenderQuality.UPSCALE_OFF, 1.0, 3840.0 * 2160.0) == 1.0, "budget: off stays native")
 	# Configurations des bancs.
 	var parsed := RenderQuality.parse_upscale("metalfx_t:0.67")
 	_check(parsed["mode"] == RenderQuality.UPSCALE_TEMPORAL and is_equal_approx(float(parsed["scale"]), 0.67), "parse metalfx_t:0.67")
