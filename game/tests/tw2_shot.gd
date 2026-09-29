@@ -56,7 +56,10 @@ func _siege_shots() -> void:
 	if index < 0:
 		push_error("tw2_shot: cannot stage the siege")
 		return
-	BattleScene.demo_args = PackedStringArray(["--siege-engines=unit_trebuchet", "--no-speech"])
+	# `--autoplay` (IA des deux camps dès le départ) saute aussi le déploiement, la cinématique
+	# d'ouverture et le commentaire du conseiller (Jean le Bel) sur le premier assaut, qui
+	# recouvrirait sinon la gauche de l'écran (battle_scene.gd `_advise_first_battle`).
+	BattleScene.demo_args = PackedStringArray(["--siege-engines=unit_trebuchet", "--no-speech", "--autoplay"])
 	var scene: Node = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
 	scene.configure(sim, index, 7)
 	root.add_child(scene)
@@ -84,8 +87,10 @@ func _siege_shots() -> void:
 	await process_frame
 
 
-## Cadre un mur/porte endommagé (bar forcée via `debug_set_piece_hp`) avec un engin proche
-## (le bélier, toujours présent à l'assaut, avance naturellement vers la porte).
+## Cadre un mur/porte endommagé (barre forcée via `debug_set_piece_hp`) avec un engin proche
+## (le bélier, toujours présent à l'assaut, avance naturellement vers la porte). Vue large,
+## centrée entre la porte et le bélier, pour que la porte, sa barre et l'engin tiennent tous
+## dans le cadre, loin de la zone TOASTS (Journal de bataille, coin haut gauche de l'écran).
 func _shot_siege_bars(scene: Node, battle: Object, view: BattleSiege) -> void:
 	var siege: Dictionary = battle.call("get_siege")
 	var gate := int(siege["gate"])
@@ -102,19 +107,23 @@ func _shot_siege_bars(scene: Node, battle: Object, view: BattleSiege) -> void:
 				siege = battle.call("get_siege")
 				var gate_piece: Dictionary = (siege["pieces"] as Array)[gate]
 				var mid: Vector2 = (Vector2(gate_piece["a"]) + Vector2(gate_piece["b"])) * 0.5
-				if pos.distance_to(mid) < 40.0:
+				if pos.distance_to(mid) < 60.0:
 					ram = unit
 		if not ram.is_empty():
 			break
 	siege = battle.call("get_siege")
 	battle.call("debug_set_piece_hp", gate, max_hp * 0.5)
 	await process_frame
-	var focus := _gate_point(siege, 6.0)
+	var gate_ground := _gate_point(siege, 0.0)
+	var ram_ground := Vector3(float(ram["x"]), 0.0, float(ram["z"])) if not ram.is_empty() else _gate_point(siege, 18.0)
+	var focus := (gate_ground + ram_ground) * 0.5
+	var span := gate_ground.distance_to(ram_ground)
+	var cam_distance := clampf(span * 1.8, 42.0, 70.0)
 	scene.paused = true
-	scene.camera_rig.look_at_point(focus, 30.0, _yaw_out(siege, gate) + 0.9)
+	scene.camera_rig.look_at_point(focus, cam_distance, _yaw_out(siege, gate) + 0.4)
 	await _frames(6)
 	var state := view.health_bars.state("piece:%d" % gate)
-	print("tw2_shot: siege_bars gate shown=%s ratio=%.2f ram_present=%s" % [state.get("shown", false), float(state.get("ratio", 0.0)), not ram.is_empty()])
+	print("tw2_shot: siege_bars gate shown=%s ratio=%.2f ram_present=%s distance=%.0f" % [state.get("shown", false), float(state.get("ratio", 0.0)), not ram.is_empty(), cam_distance])
 	await _shot("%s_siege_bars.png" % _prefix)
 	scene.paused = false
 
@@ -186,6 +195,9 @@ func _campaign_shots() -> void:
 		settings.call("use_test_file")
 		settings.call("set_value", "game/autosave_interval", 0, false)
 		settings.call("set_value", "tutorial/enabled", false, false)
+		# FE6 : le guide « Votre place dans la féodalité » (étape 1/3) recouvre sinon le centre
+		# de l'écran au premier tour (fe_ui_test.gd fait de même).
+		settings.call("set_value", "feudal_tutorial/done", true, false)
 	var facade: Node = root.get_node("/root/SimFacade")
 	facade.set_data_dir(MAP_PATHS.default_data_dir())
 	facade.pending_faction = "fac_france"
@@ -233,6 +245,15 @@ func _shot_sack_dialog(map: Node, sim: Object) -> void:
 		return
 	print("tw2_shot: sack_dialog window visible, decision=%d" % window.current_decision())
 	await _shot("%s_sack_dialog.png" % _prefix)
+	# Ferme la fenêtre avant la capture suivante (mercenaires, traditions) : décide « Occuper »
+	# (premier choix, sans effet perturbateur pour la suite).
+	var box: VBoxContainer = window.get("_options_box")
+	if box != null and box.get_child_count() > 0:
+		var occupy := (box.get_child(0) as Node).get_child(0) as Button
+		occupy.pressed.emit()
+		await process_frame
+		await process_frame
+	print("tw2_shot: sack_dialog window closed=%s" % (not window.visible))
 
 
 ## Panneau des mercenaires ouvert depuis le bandeau d'une armée du joueur.
@@ -264,7 +285,9 @@ func _shot_mercenaries(map: Node, sim: Object) -> void:
 	var rows := panel.find_children("PoolLabel", "Label", true, false)
 	print("tw2_shot: mercenaries panel visible, %d companies" % rows.size())
 	await _shot("%s_mercenaries.png" % _prefix)
-	button.pressed.emit()
+	# Ferme le panneau avant la capture suivante (`show_mercenaries` ne bascule pas : un second
+	# clic le rouvrirait tel quel).
+	panel.hide()
 	await process_frame
 
 
