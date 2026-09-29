@@ -35,7 +35,20 @@ Branche `feat/omr-r5`, worktree `../gp-omr-r5`. Plan d'ensemble : `docs/wip/omr.
 - [x] Looks de rendu : `battle_unit_looks.gd` + uniformes `plain_*`/`coat_*` du shader skinné ; script `tests/omr_r5_units_shot.gd`
 - [x] Tests core `ai/tests/omr_r5_eastern_units.rs`
 - [x] Sonde matrice budget égal : 10 types entre 30 et 80 % (brabançons 16→12 %, archers écossais 88→84 % : hors bande déjà sur main)
-- [ ] Vérifs finales (fmt, clippy, tests, pytest, import, smoke), 1 capture
+- [x] Vérifs finales : fmt, clippy, cargo test --workspace, pytest (1250), import, smoke, `omr_r5_units_shot.gd` headless ; 2 captures (couleurs mamelouks/steppe/droujina lisibles à ~20 m)
+
+## Écarts et points ouverts
+- Almogavres : les javelots sont décrits mais pas simulés (infanterie de mêlée) ; pas d'animation
+  de lancer à pied.
+- Miniatures : emblèmes locaux (silhouette game-icons dorée sur azur), pas des enluminures peintes
+  comme les autres unités ; à remplacer si une génération payante est autorisée un jour.
+- Imposteurs lointains partagés par (camp, famille, variante) : ils prennent la variante de rendu
+  du premier régiment qui les demande.
+- Sonde matrice : brabançons (16 % sur main → 12 %) et archers écossais (88 → 84 %) déjà hors bande
+  avant R5 ; non retouchés (hors lot).
+- Doctrines : `data/ai/doctrines.json` touché (9 factions de l'Est, poids régionaux dans `default`,
+  almogavres pour l'Aragon) : conflit possible avec R3 à l'intégration.
+- Pas de règle nouvelle dans `core/` (culture/faction/époque existants) : pas d'ADR.
 
 ## Prochaine étape
-Import Godot + smoke + omr_r5_units_shot (headless), cargo clippy/test workspace, pytest, 1 capture.
+Intégration dans `feat/omr` (lot terminé).
