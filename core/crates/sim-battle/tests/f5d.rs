@@ -35,6 +35,7 @@ fn a_ladder_escalade_wins_about_half_the_time() {
         let siege = SiegeSetup {
             fortification: 2,
             breach: 0,
+            engines: None,
         };
         let battle = setup(
             units(&data, &besiegers),

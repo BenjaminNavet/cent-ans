@@ -197,6 +197,12 @@ impl CampaignState {
             && self.army_territory(data, army_id) == Territory::Hostile
         {
             Some("aucune compagnie ne traite en terre ennemie".to_owned())
+        } else if army.units.len() >= data.army_rules.cap() {
+            // NT5 (N6): no company joins a full army.
+            Some(format!(
+                "armée complète ({} unités au plus)",
+                data.army_rules.max_units
+            ))
         } else if shut_in {
             Some("l'armée est enfermée dans une place assiégée".to_owned())
         } else if army_hires >= rules.hires_per_army_per_turn {

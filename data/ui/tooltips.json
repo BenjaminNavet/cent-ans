@@ -364,6 +364,18 @@
     "close": {"title": "Fermer"},
     "raze_building": {"title": "Raser le bâtiment"},
     "close_escape": {"title": "Fermer", "hint": "Échap"},
+    "army_full": {
+      "title": "Armée complète",
+      "body": "Une armée compte au plus 20 unités : décochez des unités, ou formez une seconde armée."
+    },
+    "assault_blocked": {
+      "title": "Assaut impossible",
+      "body": "Murailles intactes : il faut au moins un engin prêt (échelles, bélier ou beffroi)."
+    },
+    "siege_engines": {
+      "title": "Engins de siège",
+      "body": "Construits sur place par l'armée assiégeante, l'un après l'autre ; plus l'armée est nombreuse, plus vite ils sont prêts. Les engins prêts servent à l'assaut."
+    },
     "click_to_close": {"title": "Cliquer pour fermer"},
     "open_character_sheet": {"title": "Ouvrir la fiche du personnage"},
     "historical_sheet_codex": {"title": "Fiche historique (Codex)"},

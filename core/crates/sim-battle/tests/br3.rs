@@ -13,6 +13,7 @@ fn siege(data: &GameData, town: Option<&str>, seed: u64) -> BattleSim {
         Some(SiegeSetup {
             fortification: 2,
             breach: 0,
+            engines: None,
         }),
     );
     setup.siege_layout =

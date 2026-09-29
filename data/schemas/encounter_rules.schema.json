@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/encounter_rules.schema.json",
   "title": "Règles des rencontres de campagne",
-  "description": "Fichier data/rules/encounters.json (lot CV3-3) : nombre de sites, distances d'apparition et de déclenchement, taille maximale d'une armée. Voir docs/design/2026-09-27-campagne-vivante.md § 2.",
+  "description": "Fichier data/rules/encounters.json (lot CV3-3) : nombre de sites, distances d'apparition et de déclenchement (plafond d’unités par armée : data/rules/armies.json). Voir docs/design/2026-09-27-campagne-vivante.md § 2.",
   "type": "object",
   "properties": {
     "max_active": { "type": "integer", "minimum": 0, "description": "Sites présents sur la carte au plus." },
@@ -12,9 +12,8 @@
     "min_settlement_distance_km": { "type": "number", "minimum": 0, "description": "Distance minimale entre un site et toute colonie (km)." },
     "spawn_radius_km": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon (km) autour d'une colonie de la province où le site est tiré." },
     "spawn_attempts": { "type": "integer", "minimum": 1, "description": "Cellules essayées avant d'abandonner une apparition." },
-    "near_player_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (‰) de tirer la province parmi celles que le joueur contrôle ou borde." },
-    "max_army_units": { "type": "integer", "minimum": 1, "description": "Régiments par armée au plus (issue join)." }
+    "near_player_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (‰) de tirer la province parmi celles que le joueur contrôle ou borde." }
   },
-  "required": ["max_active", "spawn_per_season", "trigger_radius_km", "min_site_distance_km", "min_settlement_distance_km", "spawn_radius_km", "spawn_attempts", "near_player_permille", "max_army_units"],
+  "required": ["max_active", "spawn_per_season", "trigger_radius_km", "min_site_distance_km", "min_settlement_distance_km", "spawn_radius_km", "spawn_attempts", "near_player_permille"],
   "additionalProperties": false
 }

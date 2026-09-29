@@ -86,6 +86,7 @@ fn garrison_order_moves_units_within_the_cap() {
         supplies: 100,
         breach: 0,
         started_turn: 0,
+        engine_work: 0,
     });
     assert!(matches!(
         state.submit_order(

@@ -426,15 +426,26 @@ impl BattleSim {
             {
                 unit.dismount(speed, 0);
             }
-            let mut ram = Unit::from_setup(
-                units.len() as u32,
-                SideId::Attacker,
-                usize::MAX,
-                &ram_setup(),
-            );
-            ram.synthetic = true;
-            ram.ram = true;
-            units.push(ram);
+            let siege = setup.siege.as_ref().expect("siege battle");
+            // NT5 (N7): the ram only when built (always without campaign
+            // engines), and the siege towers built on the spot.
+            if siege.has_ram() {
+                let mut ram = Unit::from_setup(
+                    units.len() as u32,
+                    SideId::Attacker,
+                    usize::MAX,
+                    &ram_setup(),
+                );
+                ram.synthetic = true;
+                ram.ram = true;
+                units.push(ram);
+            }
+            for tower in siege.built_towers() {
+                let mut unit =
+                    Unit::from_setup(units.len() as u32, SideId::Attacker, usize::MAX, tower);
+                unit.synthetic = true;
+                units.push(unit);
+            }
         }
         let ai_enabled = match setup.player_side {
             Some(SideId::Attacker) => [false, true],
@@ -1666,6 +1677,10 @@ impl BattleSim {
             let t = &self.units[t as usize];
             (t.x - unit.x).powi(2) + (t.z - unit.z).powi(2) < 40.0 * 40.0
         });
+        // NT5 (N7): without ladders built, only a docked tower lets them up.
+        if !tower && !self.setup.siege.as_ref().is_none_or(|s| s.has_ladders()) {
+            return;
+        }
         let unit = &mut self.units[i];
         unit.climbing = Some(piece);
         unit.climb_progress = 0.0;

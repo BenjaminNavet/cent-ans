@@ -225,6 +225,7 @@ mod tests {
             supplies: 40,
             breach: 0,
             started_turn: 0,
+            engine_work: 0,
         });
 
         let row = province_snapshot_row(&state, &province_id).expect("known province");

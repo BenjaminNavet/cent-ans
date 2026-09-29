@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/army_rules.schema.json",
+  "title": "Règles des armées de campagne",
+  "description": "Fichier data/rules/armies.json (lot NT5, N6) : plafond d'unités par armée.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "max_units": { "type": "integer", "minimum": 1, "maximum": 40, "description": "Régiments par armée au plus (formation, fusion, mercenaires, rencontres)." }
+  },
+  "required": ["max_units"],
+  "additionalProperties": false
+}

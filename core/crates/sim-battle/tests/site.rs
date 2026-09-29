@@ -252,6 +252,7 @@ fn battles_carry_the_site_and_sieges_drop_it() {
     s.siege = Some(sim_battle::SiegeSetup {
         fortification: 1,
         breach: 0,
+        engines: None,
     });
     let siege = BattleSim::new(s, 3).unwrap();
     assert!(siege.field().village.is_none() && siege.field().coast.is_none());

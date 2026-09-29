@@ -91,6 +91,7 @@ fn a_besieged_settlement_blocks_the_preview() {
         supplies: 10,
         breach: 0,
         started_turn: turn,
+        engine_work: 0,
     });
     let preview = demolition_preview(&state, &data, &place, &bld("bld_market"));
     assert!(!preview.can_demolish);

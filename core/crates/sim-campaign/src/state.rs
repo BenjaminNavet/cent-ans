@@ -393,6 +393,10 @@ pub struct SiegeState {
     /// at once; it progresses from the next end of turn).
     #[serde(default)]
     pub started_turn: u32,
+    /// NT5 (N7): work points the besiegers have put into siege engines
+    /// (`data/rules/siege_engines.json`, built in list order).
+    #[serde(default)]
+    pub engine_work: u32,
 }
 
 fn full_supplies() -> u8 {

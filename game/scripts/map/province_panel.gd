@@ -318,6 +318,7 @@ func _fill_garrison(garrison: Array, selectable: bool) -> void:
 	garrison_header.text = "Garnison (%d unité%s)" % [garrison.size(), "s" if garrison.size() > 1 else ""]
 	_garrison_checks = PanelWidgets.fill_garrison(garrison_list, garrison, selectable)
 	create_army_button.disabled = garrison.is_empty()
+	PanelWidgets.bind_army_cap(create_army_button, _garrison_checks, SimFacade.army_unit_cap())  # NT5
 
 
 func _fill_recruitable(recruitable: Array) -> void:

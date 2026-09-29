@@ -531,6 +531,9 @@ pub enum OrderError {
     ForcedMarchForbids(&'static str),
     #[error("garnison complète : {cap} unités au plus dans ce type de colonie")]
     GarrisonFull { cap: usize },
+    /// NT5 (N6): the army would exceed `armies.json` `max_units`.
+    #[error("armée complète : {cap} unités au plus par armée")]
+    ArmyFull { cap: usize },
     #[error(transparent)]
     LearnSkill(#[from] LearnSkillError),
     #[error(transparent)]
@@ -571,6 +574,15 @@ pub enum OrderError {
     SettlementRuined,
     #[error("engagement impossible : {0}")]
     MercenaryUnavailable(String),
+}
+
+/// NT5 (N6): units `army` may still receive under `armies.json`
+/// `max_units` (0 when full or unknown).
+pub fn army_room(state: &CampaignState, data: &GameData, army: &ArmyId) -> usize {
+    state
+        .armies
+        .get(army)
+        .map_or(0, |a| data.army_rules.cap().saturating_sub(a.units.len()))
 }
 
 /// G1: recruitments every settlement can queue per turn before buildings.
@@ -1453,6 +1465,11 @@ impl CampaignState {
         }
         let garrison_len = self.settlements[settlement].garrison.len();
         let indices = unique_sorted(indices, garrison_len)?;
+        // NT5 (N6): no army above the unit cap.
+        let cap = data.army_rules.cap();
+        if indices.len() > cap {
+            return Err(OrderError::ArmyFull { cap });
+        }
         let province = self.settlements[settlement].province.clone();
         if let Some(character) = &general {
             self.check_general(faction, character, &province)?;
@@ -1502,6 +1519,11 @@ impl CampaignState {
         // engagement.
         if !self.armies_together(data, &source_army, target_army) {
             return Err(OrderError::NotSameProvince);
+        }
+        // NT5 (N6): the merged army stays within the unit cap.
+        let cap = data.army_rules.cap();
+        if source_army.units.len() + target_army.units.len() > cap {
+            return Err(OrderError::ArmyFull { cap });
         }
         let general = source_army.general.clone();
         self.armies.remove(source);

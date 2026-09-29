@@ -205,13 +205,51 @@ impl BattleOpening {
 }
 
 /// Siege battle parameters (M8 § 2): the defender holds a walled town.
-#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct SiegeSetup {
     /// Campaign fortification level (0-3): wall thickness, height and HP.
     pub fortification: u32,
     /// Campaign wall damage (0-100): from 50 a breach is already open.
     #[serde(default)]
     pub breach: u8,
+    /// NT5 (N7): the engines the besiegers built during the campaign siege.
+    /// `None` (older replays, hand-made setups): the ram every besieging
+    /// army brings and ladders for every foot regiment.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub engines: Option<SiegeEngineSetup>,
+}
+
+impl SiegeSetup {
+    /// The attacker brings a battering ram.
+    pub fn has_ram(&self) -> bool {
+        self.engines.as_ref().is_none_or(|e| e.ram)
+    }
+
+    /// The attacker's foot may scale the walls with ladders.
+    pub fn has_ladders(&self) -> bool {
+        self.engines.as_ref().is_none_or(|e| e.ladders)
+    }
+
+    /// Siege towers built on the spot (battle-only regiments).
+    pub fn built_towers(&self) -> &[UnitSetup] {
+        self.engines.as_ref().map_or(&[], |e| e.towers.as_slice())
+    }
+}
+
+/// NT5 (N7): engines built on the spot during a campaign siege
+/// (`data/rules/siege_engines.json`), brought to the siege battle. They are
+/// battle-only: no losses are reported to the campaign for them.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+pub struct SiegeEngineSetup {
+    /// A battering ram against the gate.
+    #[serde(default)]
+    pub ram: bool,
+    /// Ladders: foot regiments may scale intact walls.
+    #[serde(default)]
+    pub ladders: bool,
+    /// Siege towers, one regiment each (the tower unit type's stats).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub towers: Vec<UnitSetup>,
 }
 
 /// Full description of a battle.

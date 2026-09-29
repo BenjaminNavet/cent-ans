@@ -167,6 +167,13 @@ func faction_short_name(id: String) -> String:
 	return str(faction_info(id).get("short_name", id))
 
 
+## NT5 (N6) : unités par armée au plus (`data/rules/armies.json`, règle du cœur).
+func army_unit_cap() -> int:
+	if sim != null and sim.has_method("army_unit_cap"):
+		return int(sim.call("army_unit_cap"))
+	return 20
+
+
 # --- Sauvegardes ----------------------------------------------------------------
 
 

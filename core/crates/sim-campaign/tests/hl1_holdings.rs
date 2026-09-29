@@ -152,6 +152,7 @@ fn besieged_settlement_has_no_income_and_is_endangered() {
         supplies: 100,
         breach: 0,
         started_turn: 0,
+        engine_work: 0,
     });
 
     let overview = holdings_overview(&state, &data, &france());

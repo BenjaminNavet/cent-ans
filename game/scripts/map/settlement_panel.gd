@@ -255,6 +255,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	if garrison.is_empty():
 		PanelWidgets.placeholder(garrison_list, "Aucune garnison.")
 	create_army_button.disabled = garrison.is_empty()
+	PanelWidgets.bind_army_cap(create_army_button, _garrison_checks, SimFacade.army_unit_cap())  # NT5
 	actions.visible = player_owner
 	recruit_button.disabled = recruitable.is_empty()
 	if not player_owner:

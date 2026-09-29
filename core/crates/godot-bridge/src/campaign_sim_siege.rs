@@ -33,8 +33,11 @@ impl CampaignSim {
             .collect()
     }
 
-    /// `{available, odds, walls, breach, supplies, turns_left}` for an army
-    /// besieging a town; `available` is false otherwise.
+    /// `{available, odds, walls, breach, supplies, turns_left, engines,
+    /// blocker}` for an army besieging a town; `available` is false
+    /// otherwise. NT5: `engines` = `[{id, name, kind, ready, turns_left}]`
+    /// (built on the spot, in building order), `blocker` = why the assault
+    /// is refused (French, empty when it may be given).
     #[func]
     fn get_assault_odds(&self, army: GString) -> VarDictionary {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -56,6 +59,26 @@ impl CampaignSim {
             .and_then(|a| a.settlement())
             .and_then(|s| state.settlement_state(s))
             .and_then(|s| s.siege.clone());
+        let place = state.armies.get(&id).and_then(|a| a.settlement().cloned());
+        let engines: VarArray = place
+            .map(|p| state.siege_engines(data, &p))
+            .unwrap_or_default()
+            .iter()
+            .map(|e| {
+                let kind = serde_json::to_value(e.kind)
+                    .ok()
+                    .and_then(|v| v.as_str().map(str::to_owned))
+                    .unwrap_or_default();
+                vdict! {
+                    "id" => e.id.as_str(),
+                    "name" => e.name.as_str(),
+                    "kind" => kind.as_str(),
+                    "ready" => e.ready,
+                    "turns_left" => i64::from(e.turns_left),
+                }
+                .to_variant()
+            })
+            .collect();
         vdict! {
             "available" => true,
             "odds" => odds,
@@ -63,6 +86,16 @@ impl CampaignSim {
             "breach" => siege.as_ref().map_or(0, |s| i64::from(s.breach)),
             "supplies" => siege.as_ref().map_or(0, |s| i64::from(s.supplies)),
             "turns_left" => siege.as_ref().map_or(0, |s| i64::from(s.turns_left)),
+            "engines" => &engines,
+            "blocker" => state.assault_blocker(data, &id).unwrap_or_default().as_str(),
         }
+    }
+
+    /// NT5 (N6): regiments an army may hold at most (`data/rules/armies.json`).
+    #[func]
+    fn army_unit_cap(&self) -> i64 {
+        self.data
+            .as_ref()
+            .map_or(20, |data| i64::from(data.army_rules.max_units))
     }
 }

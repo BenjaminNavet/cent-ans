@@ -184,8 +184,6 @@ pub struct EncounterRules {
     /// Chance (‰) that a new site is drawn among the provinces the player
     /// controls or borders, when any is eligible.
     pub near_player_permille: u32,
-    /// Regiments an army may hold at most (`join` outcomes stop there).
-    pub max_army_units: u32,
 }
 
 impl Default for EncounterRules {
@@ -199,7 +197,6 @@ impl Default for EncounterRules {
             spawn_radius_km: 25.0,
             spawn_attempts: 24,
             near_player_permille: 500,
-            max_army_units: 20,
         }
     }
 }

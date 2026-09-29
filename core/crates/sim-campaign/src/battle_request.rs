@@ -825,6 +825,8 @@ impl CampaignState {
             siege: Some(SiegeSetup {
                 fortification: self.fortification_level(data, &request.location),
                 breach,
+                // NT5 (N7): the engines built during the siege.
+                engines: Some(self.battle_engines(data, &request.location)),
             }),
             siege_layout: siege_layout(data, &request.location),
             orders: data.battle_orders.values().cloned().collect(),
@@ -966,6 +968,7 @@ impl CampaignState {
                 supplies: 80,
                 breach: 0,
                 started_turn: 0,
+                engine_work: 0,
             });
         }
         self.pending_battles.push(BattleRequest {

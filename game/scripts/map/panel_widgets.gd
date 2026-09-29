@@ -25,6 +25,25 @@ static func placeholder(container: Node, text: String) -> void:
 
 ## Garnison : cases à cocher (formation d'armée) si `selectable`, sinon simples puces.
 ## Renvoie les cases dans l'ordre de la garnison.
+## NT5 (N6) : « Former une armée » grisé, avec une infobulle explicite, quand plus de `cap`
+## unités sont cochées (le cœur refuserait : `OrderError::ArmyFull`) ; suit chaque case cochée.
+static func bind_army_cap(button: Button, checks: Array[CheckBox], cap: int) -> void:
+	var refresh := func() -> void:
+		var selected := 0
+		for check in checks:
+			if check.button_pressed:
+				selected += 1
+		var full := selected > cap
+		button.disabled = selected == 0 or full
+		if full:
+			RichTooltip.attach_plain(button, "army_full", {"body": "%d unités cochées : une armée compte au plus %d unités. Décochez-en %d, ou formez une seconde armée ensuite." % [selected, cap, selected - cap]})
+		elif button.tooltip_text.contains("army_full"):
+			button.tooltip_text = ""
+	for check in checks:
+		check.toggled.connect(func(_on: bool) -> void: refresh.call())
+	refresh.call()
+
+
 static func fill_garrison(list: Container, garrison: Array, selectable: bool) -> Array[CheckBox]:
 	clear(list)
 	var checks: Array[CheckBox] = []

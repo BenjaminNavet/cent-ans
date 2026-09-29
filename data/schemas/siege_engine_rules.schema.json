@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/siege_engine_rules.schema.json",
+  "title": "Engins de siège construits sur place",
+  "description": "Fichier data/rules/siege_engines.json (lot NT5, N7) : cadence de construction et coût des engins d'un siège de campagne.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "men_per_work_point": { "type": "integer", "minimum": 1, "description": "Hommes des armées assiégeantes pour un point de travail par tour." },
+    "min_work_per_turn": { "type": "integer", "minimum": 1, "description": "Points de travail par tour au moins, quelle que soit la taille de l'armée." },
+    "engines": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Engins dans l'ordre de construction.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "kind": { "enum": ["ladders", "ram", "tower"], "description": "Rôle de l'engin dans la bataille de siège." },
+          "name": { "type": "string", "minLength": 1, "description": "Nom affiché (français)." },
+          "work": { "type": "integer", "minimum": 0, "description": "Points de travail pour l'achever (0 : prêt dès le début du siège)." },
+          "tower_unit_type": { "type": "string", "pattern": "^unit_[a-z0-9_]+$", "description": "Type d'unité du beffroi en bataille (kind tower)." }
+        },
+        "required": ["id", "kind", "name", "work"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["men_per_work_point", "min_work_per_turn", "engines"],
+  "additionalProperties": false
+}

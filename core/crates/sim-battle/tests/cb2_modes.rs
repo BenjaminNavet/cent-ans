@@ -369,6 +369,7 @@ fn siege_sim(data: &GameData, breach: bool) -> (BattleSim, usize) {
         Some(SiegeSetup {
             fortification: 3,
             breach: 0,
+            engines: None,
         }),
     );
     let mut sim = BattleSim::new(battle, 21).unwrap();

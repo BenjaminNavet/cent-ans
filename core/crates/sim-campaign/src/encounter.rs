@@ -585,7 +585,7 @@ pub fn option_availability(
     }
     match &option.outcome {
         Some(EncounterOutcome::Join { .. }) => {
-            let max = data.encounter_rules.max_army_units as usize;
+            let max = data.army_rules.cap();
             if army.units.len() >= max {
                 return Err(format!("armée au complet ({max} régiments)"));
             }
@@ -845,7 +845,7 @@ fn fresh_units(data: &GameData, units: &[EncounterUnits]) -> Vec<Unit> {
         .collect()
 }
 
-/// Outcome `join`: regiments join `army_id` up to `max_army_units`.
+/// Outcome `join`: regiments join `army_id` up to `armies.json` `max_units` (N6).
 fn join_units(
     state: &mut CampaignState,
     data: &GameData,
@@ -854,7 +854,7 @@ fn join_units(
     province: &ProvinceId,
     events: &mut Vec<GameEvent>,
 ) {
-    let max = data.encounter_rules.max_army_units as usize;
+    let max = data.army_rules.cap();
     let Some(army) = state.armies.get_mut(army_id) else {
         return;
     };

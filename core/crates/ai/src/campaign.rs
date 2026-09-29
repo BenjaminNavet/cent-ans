@@ -825,11 +825,19 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             keep += 1;
         }
         if settlement.garrison.len() > keep + 1 {
-            orders.push(Order::CreateArmy {
-                settlement: id.into(),
-                units_from_garrison: (keep..settlement.garrison.len()).collect(),
-                general: None,
-            });
+            // NT5 (N6): at most `max_units` per army; the rest forms other
+            // armies (the garrison shifts down as each one marches out).
+            let cap = data.army_rules.cap().max(1);
+            let mut left = settlement.garrison.len() - keep;
+            while left > 0 {
+                let size = left.min(cap);
+                orders.push(Order::CreateArmy {
+                    settlement: id.into(),
+                    units_from_garrison: (keep..keep + size).collect(),
+                    general: None,
+                });
+                left -= size;
+            }
         }
     }
 
@@ -1508,24 +1516,28 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         .collect();
     armies.sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
 
-    // Merge armies stationed together into the strongest one.
+    // Merge armies stationed together into the strongest one (NT5, N6:
+    // within the unit cap; an army that does not fit stays apart and takes
+    // the next ones).
+    let cap = data.army_rules.cap();
     let mut merged: BTreeSet<ArmyId> = BTreeSet::new();
-    let mut by_location: BTreeMap<SettlementId, ArmyId> = BTreeMap::new();
+    let mut by_location: BTreeMap<SettlementId, Vec<(ArmyId, usize)>> = BTreeMap::new();
     for (id, _) in &armies {
         let Some(location) = state.armies[id].settlement().cloned() else {
             continue;
         };
-        match by_location.get(&location) {
-            Some(target) => {
+        let size = state.armies[id].units.len();
+        let targets = by_location.entry(location).or_default();
+        match targets.iter_mut().find(|(_, units)| *units + size <= cap) {
+            Some((target, units)) => {
                 orders.push(Order::MergeArmies {
                     source: id.clone(),
                     target: target.clone(),
                 });
+                *units += size;
                 merged.insert(id.clone());
             }
-            None => {
-                by_location.insert(location, id.clone());
-            }
+            None => targets.push((id.clone(), size)),
         }
     }
     let power_at = |settlement: &SettlementId| -> f64 {
@@ -1730,10 +1742,12 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         // Keep a siege that is going our way.
         if choice.is_none() && besieging && !hopeless && ctx.threat_at(&anchor) < power * 1.2 {
             targeted.insert(anchor.clone());
-            // Storm the walls when the odds are good (M8).
+            // Storm the walls when the odds are good (M8) and, behind
+            // standing walls, an engine is ready (NT5, N7: built meanwhile).
             if state
                 .assault_odds(data, army_id)
                 .is_some_and(|(odds, _)| odds >= ASSAULT_ODDS)
+                && state.assault_blocker(data, army_id).is_none()
             {
                 orders.push(Order::Assault {
                     army: army_id.clone(),

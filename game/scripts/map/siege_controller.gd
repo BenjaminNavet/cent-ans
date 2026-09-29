@@ -9,6 +9,8 @@ extends Node
 var map: Node = null  # CampaignMap
 var box: VBoxContainer
 var status_label: Label
+## NT5 (N7) : engins construits sur place (« Échelles : prêtes · Bélier : 2 tours… »).
+var engines_label: Label
 var assault_button: Button
 var _army_id: String = ""
 
@@ -23,7 +25,15 @@ func setup(campaign_map: Node) -> void:
 	# action panel keeps that height, pushing « Donner l'assaut » off screen (Q3).
 	status_label.custom_minimum_size = Vector2(320, 0)
 	box.add_child(status_label)
+	engines_label = Label.new()
+	engines_label.name = "EnginesLabel"
+	engines_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	engines_label.custom_minimum_size = Vector2(320, 0)
+	engines_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	RichTooltip.attach_plain(engines_label, "siege_engines")
+	box.add_child(engines_label)
 	assault_button = Button.new()
+	assault_button.name = "AssaultButton"
 	assault_button.text = "Donner l'assaut"
 	assault_button.pressed.connect(_on_assault)
 	box.add_child(assault_button)
@@ -54,8 +64,31 @@ func _update(is_player: bool) -> void:
 	var turns := int(odds["turns_left"])
 	status_label.text = "Siège : vivres %d %% (reddition dans ~%d %s), brèche %d %% — %s." % [
 		int(odds["supplies"]), turns, "tour" if turns <= 1 else "tours", int(odds["breach"]), walls_text]
-	assault_button.text = "Donner l'assaut (chances ≈ %d %%)" % int(odds["odds"])
+	var engines: Array = odds.get("engines", [])
+	engines_label.text = engines_text(engines)
+	engines_label.visible = not engines.is_empty()
+	# NT5 : derrière des murailles intactes, pas d'assaut sans engin prêt (règle du cœur).
+	var blocker := str(odds.get("blocker", ""))
+	assault_button.disabled = blocker != ""
+	if blocker != "":
+		assault_button.text = "Donner l'assaut (aucun engin prêt)"
+		RichTooltip.attach_plain(assault_button, "assault_blocked", {"body": "Assaut impossible : %s." % blocker})
+	else:
+		assault_button.text = "Donner l'assaut (chances ≈ %d %%)" % int(odds["odds"])
+		assault_button.tooltip_text = ""
 	box.show()
+
+
+## NT5 : « Engins de siège — échelles : prêtes, bélier : 2 tours, beffroi : 5 tours. »
+static func engines_text(engines: Array) -> String:
+	var parts: Array = []
+	for engine in engines:
+		var name := str(engine.get("name", "?")).to_lower()
+		if bool(engine.get("ready", false)):
+			parts.append("%s : %s" % [name, "prêtes" if str(engine.get("kind", "")) == "ladders" else "prêt"])
+		else:
+			parts.append("%s : %s" % [name, FrText.count(int(engine.get("turns_left", 0)), "tour")])
+	return "Engins de siège — %s." % ", ".join(parts)
 
 
 func _on_assault() -> void:

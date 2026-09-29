@@ -6,6 +6,5 @@
   "min_settlement_distance_km": 3.0,
   "spawn_radius_km": 25.0,
   "spawn_attempts": 24,
-  "near_player_permille": 500,
-  "max_army_units": 20
+  "near_player_permille": 500
 }

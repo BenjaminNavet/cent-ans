@@ -84,6 +84,7 @@ pub mod save;
 pub mod settlements;
 pub mod setup_1337;
 pub mod siege;
+pub mod siege_engines;
 pub mod skills;
 pub mod stance;
 pub mod state;

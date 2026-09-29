@@ -88,7 +88,11 @@ pub(crate) fn plan_hires(
             b.0.total_cmp(&a.0)
                 .then_with(|| a.2.unit_type.cmp(&b.2.unit_type))
         });
-        let mut army_left = market.hires_left;
+        // NT5 (N6): no more companies than the army has room for.
+        let room = sim_campaign::orders::army_room(state, data, army_id);
+        let mut army_left = market
+            .hires_left
+            .min(u32::try_from(room).unwrap_or(u32::MAX));
         for (_, company, option) in options {
             let key = (option.band.clone(), region.clone());
             loop {

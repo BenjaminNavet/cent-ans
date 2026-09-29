@@ -432,6 +432,7 @@ fn sabotage_opens_a_breach_or_delays_works() {
         supplies: 80,
         breach: 10,
         started_turn: 0,
+        engine_work: 0,
     });
     act(
         &mut state,

@@ -51,7 +51,7 @@ fn faction_name(data: &GameData, id: &FactionId) -> String {
 
 /// Armies on `settlement` besieging its controller, sorted by id: armies in
 /// `Siege` stance, or any hostile army when the settlement is a village.
-fn besiegers(
+pub(crate) fn besiegers(
     state: &CampaignState,
     settlement: &SettlementId,
     controller: &FactionId,
@@ -123,12 +123,13 @@ pub(crate) fn resolve_sieges(
         }
         let fortification = state.fortification_level(data, &settlement_id);
         let besieging_general = state.armies[&lead].general.clone();
-        let siege_speed_percent =
-            besieging_general.as_ref().map_or(0.0, |g| {
-                skills::character_effects(state, data, g)
-                    .siege_speed
-                    .apply(0.0)
-            }) + crate::traditions::siege_speed_percent(data, &state.armies[&lead]);
+        let siege_speed_percent = siege_speed_percent(state, data, &lead);
+        // NT5 (N7): the besiegers build their engines.
+        let engine_gain = crate::siege_engines::work_per_turn(
+            data,
+            crate::siege_engines::men(state, &besiegers),
+            siege_speed_percent,
+        );
         // M8: the garrison sallies out when it outmatches the besiegers.
         if sortie(state, data, &settlement_id, &besiegers, events) {
             continue;
@@ -146,6 +147,7 @@ pub(crate) fn resolve_sieges(
             Some(siege) if siege.attacker == attacker && siege.started_turn == turn => {}
             Some(siege) if siege.attacker == attacker => {
                 siege.turns_elapsed += 1;
+                siege.engine_work = siege.engine_work.saturating_add(engine_gain);
                 siege.breach = siege.breach.saturating_add(breach_gain).min(100);
                 siege.supplies = siege.supplies.saturating_sub(drain);
                 siege.turns_left = turns_to_starve(siege.supplies, drain);
@@ -235,19 +237,7 @@ pub(crate) fn begin_siege(
 ) {
     let province_id = province_of(state, settlement_id);
     let fortification = state.fortification_level(data, settlement_id);
-    let siege_speed_percent = state
-        .armies
-        .get(army)
-        .and_then(|a| a.general.clone())
-        .map_or(0.0, |g| {
-            skills::character_effects(state, data, &g)
-                .siege_speed
-                .apply(0.0)
-        })
-        + state
-            .armies
-            .get(army)
-            .map_or(0.0, |a| crate::traditions::siege_speed_percent(data, a));
+    let siege_speed_percent = siege_speed_percent(state, data, army);
     let drain = supplies_drain(fortification, siege_speed_percent);
     let devastation = state
         .provinces
@@ -276,6 +266,7 @@ pub(crate) fn begin_siege(
         supplies,
         breach: 0,
         started_turn: turn,
+        engine_work: 0,
     });
     events.push(
         GameEvent::new(
@@ -290,6 +281,19 @@ pub(crate) fn begin_siege(
         .army(army)
         .faction(attacker),
     );
+}
+
+/// `SiegeSpeed` (percent) of `army` besieging: its general's skills and
+/// traits plus its traditions (0 for an unknown army).
+pub(crate) fn siege_speed_percent(state: &CampaignState, data: &GameData, army: &ArmyId) -> f64 {
+    let Some(a) = state.armies.get(army) else {
+        return 0.0;
+    };
+    a.general.as_ref().map_or(0.0, |g| {
+        skills::character_effects(state, data, g)
+            .siege_speed
+            .apply(0.0)
+    }) + crate::traditions::siege_speed_percent(data, a)
 }
 
 /// Food lost per turn of siege: a town lasts `SIEGE_BASE_TURNS +
@@ -389,6 +393,9 @@ pub enum AssaultError {
     UnknownArmy,
     #[error("cette armée n'assiège pas cette place")]
     NotBesieging,
+    /// NT5 (N7): walls standing and no engine ready yet.
+    #[error("assaut impossible : {0}")]
+    NoEngine(String),
 }
 
 impl CampaignState {
@@ -435,6 +442,9 @@ impl CampaignState {
             .is_some_and(|s| &s.attacker == faction);
         if !besieging {
             return Err(AssaultError::NotBesieging);
+        }
+        if let Some(reason) = self.assault_blocker(data, army) {
+            return Err(AssaultError::NoEngine(reason));
         }
         let mut events = Vec::new();
         storm(self, data, army, &mut events);
@@ -545,13 +555,15 @@ pub(crate) fn enter_village(
             supplies: 100,
             breach: 100,
             started_turn: turn,
+            engine_work: 0,
         });
     }
     storm(state, data, army, events);
 }
 
 /// `true` while the walls of `settlement` still count against `army`'s
-/// assault (a fortified place, breach under 50 and no siege tower).
+/// assault (a fortified place, breach under 50 and no siege tower, recruited
+/// or built on the spot, NT5).
 pub(crate) fn walls_stand(
     state: &CampaignState,
     data: &GameData,
@@ -566,6 +578,7 @@ pub(crate) fn walls_stand(
     state.fortification_level(data, settlement) > 0
         && breach < 50
         && !has_siege_towers(state, data, army)
+        && state.built_towers(data, settlement) == 0
 }
 
 /// G1: the armies storming the settlement with `army`: itself first, then

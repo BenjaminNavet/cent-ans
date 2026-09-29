@@ -29,6 +29,7 @@ fn siege(data: &GameData, extra: &[&str], seed: u64) -> BattleSim {
         Some(SiegeSetup {
             fortification: 2,
             breach: 0,
+            engines: None,
         }),
     );
     BattleSim::new(setup, seed).unwrap()

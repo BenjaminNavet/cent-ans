@@ -400,7 +400,7 @@ fn a_lost_encounter_battle_applies_on_loss() {
 #[test]
 fn a_join_outcome_respects_the_army_size_limit() {
     let data = data();
-    let max = data.encounter_rules.max_army_units as usize;
+    let max = data.army_rules.cap();
     let mut state = start(&data, "fac_france", 14);
     let (army, site) = meet(&mut state, &data, "enc_deserteurs_gallois");
     state.factions.get_mut(&fac("fac_france")).unwrap().treasury = 5_000;

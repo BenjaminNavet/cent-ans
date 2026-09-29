@@ -31,6 +31,7 @@ fn siege(data: &GameData, extra: &[&str], fortification: u32, seed: u64) -> Batt
         Some(SiegeSetup {
             fortification,
             breach: 0,
+            engines: None,
         }),
     );
     BattleSim::new(setup, seed).unwrap()
@@ -341,6 +342,7 @@ fn the_gate_gives_way_and_the_garrison_falls_back_to_the_square() {
         Some(SiegeSetup {
             fortification: 1,
             breach: 0,
+            engines: None,
         }),
     );
     let mut sim = BattleSim::new(setup, 43).unwrap();

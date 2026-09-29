@@ -24,6 +24,7 @@ fn siege(data: &GameData, extra: &[&str], fortification: u32) -> BattleSim {
         Some(SiegeSetup {
             fortification,
             breach: 0,
+            engines: None,
         }),
     );
     let mut sim = BattleSim::new(setup, 7).unwrap();

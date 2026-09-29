@@ -1,0 +1,10 @@
+{
+  "description": "Lot NT5 (N7, ADR 0128) : engins construits sur place pendant un siège de campagne. Chaque tour de siège, les hommes des armées assiégeantes fournissent hommes / men_per_work_point points de travail (au moins min_work_per_turn), majorés de la vitesse de siège du général et des traditions ; les engins se bâtissent l'un après l'autre dans l'ordre de la liste (échelles, bélier, beffroi), chacun pour son coût work. Derrière des murailles intactes, l'assaut n'est permis qu'avec au moins un engin prêt (ou une tour de siège recrutée, ou une brèche). Les engins prêts passent à la bataille de siège : échelles (escalade), bélier (porte), beffroi (unité tower_unit_type, sans pertes reportées en campagne) ; un beffroi prêt vaut une tour de siège pour la résolution automatique.",
+  "men_per_work_point": 100,
+  "min_work_per_turn": 4,
+  "engines": [
+    { "id": "ladders", "kind": "ladders", "name": "Échelles", "work": 8 },
+    { "id": "ram", "kind": "ram", "name": "Bélier", "work": 16 },
+    { "id": "siege_tower", "kind": "tower", "name": "Beffroi", "work": 40, "tower_unit_type": "unit_siege_tower" }
+  ]
+}

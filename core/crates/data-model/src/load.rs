@@ -121,6 +121,8 @@ pub mod folders {
     pub const REPLENISHMENT_RULES: &str = "replenishment.json";
     /// Mercenary companies (lot TW2-T3), inside `rules/`; optional.
     pub const MERCENARY_RULES: &str = "mercenaries.json";
+    pub const ARMY_RULES: &str = "armies.json";
+    pub const SIEGE_ENGINE_RULES: &str = "siege_engines.json";
     /// Army traditions (lot TW2-T5), inside `rules/`; optional.
     pub const ARMY_TRADITION_RULES: &str = "army_traditions.json";
     /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
@@ -354,6 +356,12 @@ pub struct GameData {
     /// `data/rules/mercenaries.json` (lot TW2-T3, mercenary companies); the
     /// bundled file when absent.
     pub mercenary_rules: crate::entities::mercenaries::MercenaryRules,
+    /// `data/rules/armies.json` (lot NT5, N6: army unit cap); the bundled
+    /// file when absent.
+    pub army_rules: crate::entities::army_rules::ArmyRules,
+    /// `data/rules/siege_engines.json` (lot NT5, N7: engines built during
+    /// a siege); the bundled file when absent.
+    pub siege_engine_rules: crate::entities::army_rules::SiegeEngineRules,
     /// `data/rules/army_traditions.json` (lot TW2-T5, army traditions); the
     /// bundled file when absent.
     pub army_tradition_rules: crate::entities::army_traditions::ArmyTraditionRules,
@@ -444,6 +452,8 @@ impl GameData {
             capture_rules: Default::default(),
             replenishment_rules: Default::default(),
             mercenary_rules: Default::default(),
+            army_rules: Default::default(),
+            siege_engine_rules: Default::default(),
             army_tradition_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             cover: Default::default(),
@@ -580,6 +590,14 @@ impl GameData {
         let mercenary_path = root.join(folders::RULES).join(folders::MERCENARY_RULES);
         if mercenary_path.is_file() {
             data.mercenary_rules = read_json(&mercenary_path)?;
+        }
+        let army_rules_path = root.join(folders::RULES).join(folders::ARMY_RULES);
+        if army_rules_path.is_file() {
+            data.army_rules = read_json(&army_rules_path)?;
+        }
+        let engines_path = root.join(folders::RULES).join(folders::SIEGE_ENGINE_RULES);
+        if engines_path.is_file() {
+            data.siege_engine_rules = read_json(&engines_path)?;
         }
         let traditions_path = root
             .join(folders::RULES)

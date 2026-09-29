@@ -349,6 +349,7 @@ fn siege_setup() -> (GameData, CampaignState, ArmyId, SettlementId, SettlementId
         supplies: 80,
         breach: 0,
         started_turn: 0,
+        engine_work: 0,
     };
     state.settlements.get_mut(&besieged).unwrap().siege = Some(siege("fac_england"));
     state.settlements.get_mut(&hostile).unwrap().siege = Some(siege("fac_france"));

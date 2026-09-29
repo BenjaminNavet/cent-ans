@@ -1,0 +1,4 @@
+{
+  "description": "Lot NT5 (N6, ADR 0128) : plafond d'unités par armée de campagne, comme en bataille (20 régiments). Il borne la formation d'une armée depuis une garnison, la fusion de deux armées, l'engagement de mercenaires et les ralliements des rencontres (issue join). Une armée déjà au-delà (partie ancienne) le garde mais ne reçoit plus d'unité.",
+  "max_units": 20
+}

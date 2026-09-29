@@ -123,6 +123,7 @@ fn siege_on_a_hub_cuts_the_route() {
         supplies: 100,
         breach: 0,
         started_turn: 0,
+        engine_work: 0,
     });
 
     let routes = trade::trade_routes(&state, &data);
