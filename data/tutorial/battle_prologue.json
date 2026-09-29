@@ -1,0 +1,112 @@
+{
+  "description": "Bataille-prologue guidée (lot NT4) : petite escarmouche de l'été 1337 aux marches de Guyenne, lancée depuis « Batailles historiques » du menu principal. `battle` est une configuration de bataille personnalisée (BattleSim.setup_custom, NT2) ; chaque étape a un texte du conseiller, un objectif, une condition de passage observée sur l'état de la bataille et, au besoin, un élément d'interface à surligner. L'ennemi reste passif jusqu'à l'étape marquée `enemy_ai`.",
+  "id": "battle_prologue",
+  "title": "Didacticiel de bataille : escarmouche en Agenais (été 1337)",
+  "menu_label": "Didacticiel de bataille",
+  "menu_detail": "Été 1337, aux marches de la Guyenne : une compagnie anglo-gasconne arrête un parti de fourrageurs français. Le conseiller vous apprend, pas à pas, à mener une bataille : caméra, sélection, marche, formation, charge, tir, pause tactique.",
+  "advisor": "Jean le Bel",
+  "battle": {
+    "attacker": {
+      "faction": "fac_france",
+      "budget": 6000,
+      "units": ["unit_urban_militia", "unit_urban_militia", "unit_crossbowmen", "unit_mounted_sergeants"]
+    },
+    "defender": {
+      "faction": "fac_england",
+      "budget": 6000,
+      "units": ["unit_men_at_arms_foot", "unit_longbowmen", "unit_longbowmen", "unit_knights"]
+    },
+    "terrain": "plains",
+    "season": "summer",
+    "weather": "clear",
+    "hour": "morning",
+    "siege": false,
+    "fortification": 2,
+    "player_side": "defender",
+    "seed": 1337
+  },
+  "enemy_passive": true,
+  "steps": [
+    {
+      "id": "intro",
+      "title": "L'escarmouche",
+      "text": "Été 1337. Philippe VI a confisqué la Guyenne ; ses fourrageurs courent l'Agenais. Vous menez une petite compagnie anglo-gasconne : des hommes d'armes à pied, deux compagnies d'archers et une poignée de chevaliers. En face : des milices, des arbalétriers et des sergents à cheval. Je vous guiderai pas à pas ; chaque étape s'achève quand l'objectif est rempli.",
+      "objective": "Cliquez sur « Continuer ».",
+      "condition": {"type": "manual"},
+      "target": ""
+    },
+    {
+      "id": "camera",
+      "title": "Regarder le champ",
+      "text": "Déplacez la vue avec Z, Q, S, D (W, A, S, D sur un clavier QWERTY) ou les flèches, ou en poussant la souris contre le bord de l'écran. A et E font pivoter la vue, la molette la rapproche ou l'éloigne, le bouton du milieu maintenu l'incline et la tourne. Un double clic sur la vignette d'un régiment centre la vue sur lui.",
+      "objective": "Déplacer, tourner ou zoomer la caméra.",
+      "condition": {"type": "camera_moved", "min_distance": 40.0, "min_zoom": 30.0, "min_yaw": 0.4},
+      "target": ""
+    },
+    {
+      "id": "select",
+      "title": "Choisir un régiment",
+      "text": "Cliquez sur un de vos régiments sur le champ, ou sur sa vignette dans la barre du bas. Maj + clic en ajoute d'autres ; un rectangle tracé au bouton gauche en prend plusieurs d'un coup ; Ctrl + A les prend tous.",
+      "objective": "Sélectionner un de vos régiments.",
+      "condition": {"type": "selection", "min_count": 1},
+      "target": "cards"
+    },
+    {
+      "id": "move",
+      "title": "Donner un ordre de marche",
+      "text": "Régiment sélectionné, un clic droit sur le sol l'y envoie ; un double clic droit le fait courir, au prix de sa fatigue. Le chemin s'affiche sur le sol avant de relâcher.",
+      "objective": "Faire marcher un régiment d'au moins 25 pas.",
+      "condition": {"type": "moved", "min_distance": 25.0},
+      "target": ""
+    },
+    {
+      "id": "formation",
+      "title": "Former la ligne",
+      "text": "Maintenez le clic droit et glissez : le trait tracé au sol donne le front et l'orientation du régiment. Un front large met plus d'hommes au contact ; un front étroit et profond tient mieux le choc. La touche T change la formation (ligne, colonne, schiltron, coin).",
+      "objective": "Changer le front ou la formation d'un régiment.",
+      "condition": {"type": "formation_changed", "min_ratio": 0.15},
+      "target": ""
+    },
+    {
+      "id": "charge",
+      "title": "La charge",
+      "text": "Sélectionnez vos chevaliers, puis faites un clic droit sur un régiment ennemi : ils chargent. Une charge frappe fort au premier choc, surtout de flanc ou de dos ; ne laissez pas la cavalerie s'enliser dans la mêlée, rappelez-la et chargez de nouveau.",
+      "objective": "Lancer une charge de cavalerie.",
+      "condition": {"type": "unit_state", "category": "cavalry", "states": ["charging", "melee"]},
+      "target": "unit:cavalry"
+    },
+    {
+      "id": "fire",
+      "title": "Le tir des archers",
+      "text": "Les archers tirent d'eux-mêmes sur l'ennemi à portée ; l'arc tracé au sol quand on les sélectionne montre jusqu'où portent leurs flèches. Approchez-les, ou désignez une cible d'un clic droit. Leur carquois se vide : ménagez les traits.",
+      "objective": "Faire tirer un régiment d'archers.",
+      "condition": {"type": "unit_state", "category": "ranged", "states": ["shooting"]},
+      "target": "unit:ranged"
+    },
+    {
+      "id": "pause",
+      "title": "La pause tactique",
+      "text": "L'ennemi va s'ébranler. La barre d'espace (ou le bouton de pause, en haut) arrête le temps : on peut alors examiner le champ et donner ses ordres en toute tranquillité. Ils partent à la reprise.",
+      "objective": "Mettre la bataille en pause.",
+      "condition": {"type": "paused"},
+      "target": "pause"
+    },
+    {
+      "id": "victory",
+      "title": "La victoire",
+      "text": "Les Français avancent. Reprenez le temps (barre d'espace), tenez la ligne avec les hommes d'armes, laissez les archers user l'assaillant et gardez les chevaliers pour frapper un flanc. Un régiment dont le moral cède s'enfuit ; quand tous fuient, la bataille est gagnée.",
+      "objective": "Mettre l'ennemi en déroute.",
+      "condition": {"type": "victory"},
+      "target": "",
+      "enemy_ai": true
+    },
+    {
+      "id": "outro",
+      "title": "Le champ est à vous",
+      "text": "Les fourrageurs refluent vers l'Agenais. Vous savez l'essentiel : F1 rappelle toutes les commandes pendant la bataille. Les batailles historiques vous attendent : Crécy, Poitiers, Azincourt.",
+      "objective": "Cliquez sur « Terminer ».",
+      "condition": {"type": "manual"},
+      "target": ""
+    }
+  ]
+}

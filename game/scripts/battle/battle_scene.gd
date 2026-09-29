@@ -102,6 +102,11 @@ static var demo_args: PackedStringArray = []
 ## composition gardée dans les réglages (captures, bancs).
 static var custom_config: Dictionary = {}
 var _custom: Dictionary = {}
+## NT4 : bataille-prologue guidée (`BattlePrologue.launch`), lue au `_ready` avec
+## `custom_config` puis oubliée ; pas de déploiement, de discours ni de conseiller spontané.
+static var prologue_data: Dictionary = {}
+var _prologue_data: Dictionary = {}
+var prologue: BattlePrologue = null
 var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -306,6 +311,9 @@ func _ready() -> void:
 	if campaign_sim == null and not custom_config.is_empty():
 		_custom = custom_config
 	custom_config = {}
+	if campaign_sim == null and not prologue_data.is_empty() and not _custom.is_empty():
+		_prologue_data = prologue_data
+	prologue_data = {}
 	if campaign_sim == null and not _custom.is_empty():
 		# NT2 : bataille personnalisée (menu « Bataille personnalisée »), hors campagne.
 		standalone = true
@@ -313,6 +321,8 @@ func _ready() -> void:
 			push_error("BattleScene: custom battle setup failed")
 			if _benchmark:
 				_bench_fail("custom battle setup failed")
+		elif not _prologue_data.is_empty():
+			_start_prologue()
 		return
 	if campaign_sim == null and _historical != "":
 		# EP7 : carte historique jouée hors campagne (menu « Batailles historiques »).
@@ -466,8 +476,19 @@ func begin_custom(config: Dictionary) -> bool:
 	var attacker := str((setup.get("attacker", {}) as Dictionary).get("faction_name", ""))
 	var defender := str((setup.get("defender", {}) as Dictionary).get("faction_name", ""))
 	_title_text = "Bataille personnalisée : %s contre %s" % [attacker, defender]
+	if not _prologue_data.is_empty():
+		_title_text = str(_prologue_data.get("title", _title_text))  # NT4
 	hud.set_title(_title_text, _weather_text, [side_colors[player_side], side_colors[enemy_side]])
 	return true
+
+
+## NT4 : branche le guide de la bataille-prologue (étapes, ennemi passif au début).
+func _start_prologue() -> void:
+	prologue = BattlePrologue.new()
+	prologue.name = "BattlePrologue"
+	prologue.setup(_prologue_data)
+	add_child(prologue)
+	prologue.attach(self)
 
 
 ## EP13 : rejeu du fichier `path` ; `replay_error` dit pourquoi en cas d'échec (autre format,
@@ -872,7 +893,7 @@ func _update_time_label() -> void:
 
 ## VO1 : le conseiller commente la première bataille (ou le premier assaut), après le discours.
 func _advise_first_battle() -> void:
-	if autoplay or _benchmark:
+	if autoplay or _benchmark or not _prologue_data.is_empty():  # NT4 : le guide parle déjà
 		return
 	var trigger := "first_assault" if siege_view != null else "first_battle"
 	if speech != null:
@@ -999,7 +1020,7 @@ func _setup_standards() -> void:
 ## BV3 : discours du général du joueur, au début du déploiement (ou de la bataille), en jeu
 ## seulement (pas en `--autoplay`, captures ni bancs), sauf `--speech-shot`.
 func _start_speech() -> void:
-	if _no_bv3 or _no_speech or (autoplay and _speech_shot == ""):
+	if _no_bv3 or _no_speech or (autoplay and _speech_shot == "") or not _prologue_data.is_empty():
 		return
 	var ours := float(battle.call("get_strength", player_side))
 	var theirs := maxf(float(battle.call("get_strength", enemy_side)), 1.0)
@@ -1717,7 +1738,7 @@ func _victory_hold() -> float:
 func _show_end() -> void:
 	finished_shown = true
 	var outcome: Dictionary = battle.call("get_outcome")
-	if not autoplay and not _benchmark:  # VO1 : conseiller
+	if not autoplay and not _benchmark and _prologue_data.is_empty():  # VO1 : conseiller
 		Advisor.say_trigger("first_victory" if str(outcome.get("winner", "")) == player_side else "first_defeat")
 	var sides := {}
 	for side in ["attacker", "defender"]:
@@ -2572,6 +2593,8 @@ func _open_deployment() -> void:
 		return  # EP13 : le déploiement enregistré est rejoué par le cœur
 	if autoplay and not _deploy_shot:
 		return
+	if not _prologue_data.is_empty():
+		return  # NT4 : le prologue commence en bataille, armées déjà rangées
 	if not historical.is_empty() and not bool(historical.get("site_only", false)):
 		return  # EP7 : déploiement historique imposé
 
