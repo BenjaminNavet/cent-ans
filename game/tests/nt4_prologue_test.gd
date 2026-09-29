@@ -100,7 +100,7 @@ func _check_menu_entry() -> void:
 
 func _check_battle() -> void:
 	var data := BattlePrologue.load_data()
-	BattleScene.custom_config = (data["battle"] as Dictionary).duplicate(true)
+	BattleScene.custom_config = BattlePrologue.battle_config(data)
 	BattleScene.prologue_data = data
 	var scene: Node = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
 	root.add_child(scene)

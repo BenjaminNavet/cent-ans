@@ -52,12 +52,25 @@ static func load_data(path: String = "") -> Dictionary:
 	return parsed if parsed is Dictionary else {}
 
 
+## Configuration de bataille personnalisée du prologue (le JSON lit les nombres en flottants ;
+## le cœur attend des entiers pour les budgets, la fortification et la graine).
+static func battle_config(prologue: Dictionary) -> Dictionary:
+	var out: Dictionary = (prologue.get("battle", {}) as Dictionary).duplicate(true)
+	for side in ["attacker", "defender"]:
+		if out.get(side) is Dictionary:
+			out[side]["budget"] = int(out[side].get("budget", 0))
+	for key in ["fortification", "seed"]:
+		if out.has(key):
+			out[key] = int(out[key])
+	return out
+
+
 ## Lance la bataille-prologue par le chemin des batailles personnalisées ; false sans données.
 static func launch(tree: SceneTree) -> bool:
 	var prologue := load_data()
 	if prologue.is_empty() or not prologue.has("battle"):
 		return false
-	BattleScene.custom_config = (prologue["battle"] as Dictionary).duplicate(true)
+	BattleScene.custom_config = battle_config(prologue)
 	BattleScene.prologue_data = prologue
 	var audio := tree.root.get_node_or_null("/root/AudioDirector")
 	if audio != null and audio.has_method("stop_all"):
