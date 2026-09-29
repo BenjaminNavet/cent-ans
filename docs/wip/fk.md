@@ -10,6 +10,10 @@ Coût cloud : 0 $.
 - [ ] Vague 2 : FK4 scènes, FK5 incidents + 15 événements.
 - [ ] FK6 : A/B `--no-folk`, captures (≤ 3), relecture, fusion.
 
+## Intégration
+Worktree `../game_project-fk`, branche `integration/fk` : FK2 + FK3 fusionnés (25273ae81). Rebranchement des modèles FK2 dans `FolkModels` en cours (figurines `villager_*`, accessoires face +X). FK1 (feat/fk1-core) : taux d'incidents mesuré 0,147/tour (sous la cible 0,25-0,5 ; FK5 ajoute 15 événements).
+FK3 : clés de `map_scenes.json` lues par le rendu à aligner avec le schéma FK1 (voir docs/wip/fk3-folk.md).
+
 ## Prochaine étape
 Lancer la vague 1 (branches `feat/fk1-core`, `feat/fk2-assets`, `feat/fk3-folk`), intégration
 dans `integration/fk`.
