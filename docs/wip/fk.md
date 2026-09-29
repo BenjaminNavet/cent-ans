@@ -19,6 +19,11 @@ FK3 : clés de `map_scenes.json` lues par le rendu à aligner avec le schéma FK
 - FK5a : clic sur la scène non branché (seul le sceau ouvre la décision) ; pictogramme unique ; avis d'expiration lié au libellé « (délai écoulé) » (`EXPIRED_MARK`).
 - FK5b : taux 0,317/tour (cible atteinte, test #[ignore] 165 s) ; graine de `f7_events::montereau…` passée à 6 ; bateliers sans condition fleuve ; pas d'entrées codex.
 
+## FK6 (en cours, integration/fk 1ed3d8894)
+- Vérifs complètes vertes après fusion (cargo fmt/clippy/test, pytest 1275, smoke, fk_folk, fk2_assets, fk5_incidents).
+- A/B Paris (2213,3204 cadre monde ; anciennes coordonnées 2213,1924 = avant ADR 0121), d=45, 3 paires : 13,9 vs 14,5 i/s (−4,4 %, cible ≤ 5 %), 463 figurines + 149 accessoires, +25 appels. Le worktree a besoin du lien `data/map/pyramid` vers le cache de main.
+- Défauts : placement FolkScenes 100-310 ms (à ramener sous 8 ms) ; à d=12 sur Paris, aucune figurine visible malgré 121 posées. Agent cent-ans-dev en correction dans integration/fk. Captures (3/3 utilisées) : docs/audit/captures/fk/.
+
 ## Prochaine étape
 FK6 : vérifs complètes sur integration/fk, A/B `--no-folk`, 3 captures, puis fusion dans main.
 
