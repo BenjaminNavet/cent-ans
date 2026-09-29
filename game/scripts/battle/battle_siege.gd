@@ -350,12 +350,13 @@ func _build_houses() -> void:
 	var houses_root := Node3D.new()
 	houses_root.name = "Houses"
 	add_child(houses_root)
+	_build_keeps()
 	if BuildingKit.available():
 		_build_kit_town(houses_root, center)
 		return
 	for i in house_sites.size():
 		var site: Dictionary = house_sites[i]
-		if i != church_index:
+		if i != church_index and not bool(site["keep"]):
 			var h := 4.0 + 3.0 * BuildingKit.hash01(i, 11)
 			_house(houses_root, site["p"], float(site["length"]) * 0.95, float(site["depth"]) * 0.95, h, -float(site["yaw"]))
 	BattleSiegeBatcher.batch_and_replace(houses_root)
@@ -398,7 +399,9 @@ func _build_kit_town(houses_root: Node3D, center: Vector2) -> void:
 		var depth := float(site["depth"])
 		var yaw := float(site["yaw"])
 		var handles: Array = []
-		if bool(site["church"]):
+		if bool(site["keep"]):
+			pass  # NT1 : le donjon est dessiné par `_build_keeps`.
+		elif bool(site["church"]):
 			handles.append(_kit_place("church", p, length, depth, yaw, rng))
 		elif bool(site["suburb"]):
 			var kind: String = ["cottage", "timber", "longere", "barn", "cottage"][rng.randi_range(0, 4)]
@@ -844,5 +847,26 @@ func _house_sites() -> Array:
 			"yaw": float(house.get("yaw", 0.0)),
 			"rows": int(house.get("rows", 2)),
 			"church": bool(house.get("church", false)),
+			"keep": bool(house.get("keep", false)),
 		})
 	return sites
+
+
+## NT1 (ADR 0126) : donjon d'un château = tour agrandie (même maquette que les tours de
+## l'enceinte), posée sur l'emprise carrée de la simulation (`houses[].keep`), plus haute que les
+## courtines. Aucune règle ici : emprise et position viennent du cœur.
+func _build_keeps() -> void:
+	for site in house_sites:
+		if not bool(site["keep"]):
+			continue
+		var keep_root := Node3D.new()
+		keep_root.name = "Keep"
+		add_child(keep_root)
+		var p: Vector2 = site["p"]
+		var side := maxf(float(site["length"]), float(site["depth"]))
+		_build_tower(keep_root, {
+			"x": p.x,
+			"z": p.y,
+			"radius": side * 0.6,
+			"height": wall_height + 14.0,
+		})
