@@ -377,6 +377,10 @@ def human_clip_specs():
         ("overhead", "Idle_Sword", False, poses.overhead, False),
         ("hit_b", "HitRecieve_2", False, None, False),
         ("hit_c", "Idle_Sword", False, poses.hit_stagger, False),
+        # Lot FK2: country work of the civilian figures (campaign map).
+        ("scythe", "Idle", True, poses.scythe, False),
+        ("carry", "Walk", True, poses.carry, False),
+        ("plough", "Walk", True, poses.plough, False),
     ]
 
 
@@ -544,6 +548,8 @@ HELD_ITEMS = {
     "hand_culverin",
     "javelin",
     "pavise",
+    "scythe",
+    "torch",
 }
 
 

@@ -835,11 +835,34 @@ def standard_pole(ctx, length=STANDARD_LENGTH, below=STANDARD_BELOW):
     tube(bm, _at(fr, (0, -below, 0)), _at(fr, (0, top, 0)), 0.022, 0.017, n, 0)
     if ctx.level < 2:
         tube(
-            bm, _at(fr, (0, -below, 0)), _at(fr, (0, -below + 0.06, 0)), 0.026, 0.024, n, 1
+            bm,
+            _at(fr, (0, -below, 0)),
+            _at(fr, (0, -below + 0.06, 0)),
+            0.026,
+            0.024,
+            n,
+            1,
         )
-        tube(bm, _at(fr, (0, top - 0.03, 0)), _at(fr, (0, top + 0.03, 0)), 0.026, 0.026, n, 1)
+        tube(
+            bm,
+            _at(fr, (0, top - 0.03, 0)),
+            _at(fr, (0, top + 0.03, 0)),
+            0.026,
+            0.026,
+            n,
+            1,
+        )
     tip_n = max(n - 1, 3)
-    tube(bm, _at(fr, (0, top, 0)), _at(fr, (0, top + 0.08, 0)), 0.018, 0.034, tip_n, 1, caps=False)
+    tube(
+        bm,
+        _at(fr, (0, top, 0)),
+        _at(fr, (0, top + 0.08, 0)),
+        0.018,
+        0.034,
+        tip_n,
+        1,
+        caps=False,
+    )
     tube(
         bm,
         _at(fr, (0, top + 0.08, 0)),
@@ -903,7 +926,9 @@ def drum_sticks(ctx, length=0.3):
         n = ctx.seg(5, 3, 3)
         tube(bm, c - along * 0.06, c + along * length, 0.011, 0.008, n, 0)
         if ctx.level < 2:
-            tube(bm, c + along * length, c + along * (length + 0.035), 0.018, 0.012, n, 0)
+            tube(
+                bm, c + along * length, c + along * (length + 0.035), 0.018, 0.012, n, 0
+            )
         finish(bm)
         obj = to_object(f"drumstick_{side}", bm, [ctx.material(C_WOOD, WOOD_LIGHT)])
         bind_rigid(obj, f"Wrist.{side}")
@@ -916,7 +941,15 @@ def busine(ctx):
     fr = prop_frame(ctx)
     bm = bmesh.new()
     n = ctx.seg(7, 4, 3)
-    tube(bm, _at(fr, (0, -HORN_BACK, 0)), _at(fr, (0, -HORN_BACK + 0.03, 0)), 0.014, 0.009, n, 0)
+    tube(
+        bm,
+        _at(fr, (0, -HORN_BACK, 0)),
+        _at(fr, (0, -HORN_BACK + 0.03, 0)),
+        0.014,
+        0.009,
+        n,
+        0,
+    )
     tube(
         bm,
         _at(fr, (0, -HORN_BACK + 0.03, 0)),
@@ -958,11 +991,166 @@ def busine(ctx):
         for face in panel:
             for loop in face.loops:
                 rel = loop.vert.co - top_a
-                loop[uv].uv = (0.15 + 0.7 * rel.dot(y) / 0.34, 0.1 + 0.8 * -rel.dot(z) / 0.3)
+                loop[uv].uv = (
+                    0.15 + 0.7 * rel.dot(y) / 0.34,
+                    0.1 + 0.8 * -rel.dot(z) / 0.3,
+                )
     obj = to_object(
         "busine",
         bm,
         [ctx.material(C_PLATE, (0.62, 0.45, 0.16)), ctx.material(C_ARMS, (1, 1, 1))],
     )
     bind_rigid(obj, "Prop")
+    return [obj]
+
+
+# --- Lot FK2: tools of the civilian figures (living campaign map) -------------------------
+
+SCYTHE_TOP = -0.42  # upper nib (left hand) along the snath, above the right fist
+SCYTHE_HEEL = 1.05  # heel of the blade along the snath, below the right fist
+SCYTHE_PITCH = math.radians(40.0)  # dip of the snath below the horizontal while mowing
+
+
+def scythe(ctx):
+    """Scythe: ash snath with two nibs, long curved blade at its foot (clip ``scythe``).
+
+    Built in the `Prop` frame: the right fist holds the lower nib (origin), the snath runs
+    towards +y down to the blade's heel, and up (-y) to the upper nib of the left hand; the
+    blade leaves the heel along -x (the mower's left), flat in the prop's (x, y) plane.
+    """
+    fr = prop_frame(ctx)
+    _o, x, y, z = fr
+    bm = bmesh.new()
+    n = ctx.seg(5, 4, 3)
+    tube(
+        bm,
+        _at(fr, (0, SCYTHE_TOP - 0.12, 0)),
+        _at(fr, (0, SCYTHE_HEEL, 0)),
+        0.017,
+        0.015,
+        n,
+        0,
+    )
+    if ctx.level < 2:
+        for yy in (0.0, SCYTHE_TOP):
+            tube(bm, _at(fr, (0, yy, 0)), _at(fr, (0, yy, 0.12)), 0.012, 0.012, 3, 0)
+    # Blade: three flat segments curving back towards the mower, flat on the ground when
+    # the snath dips by `SCYTHE_PITCH` (pose ``battle_skinned_poses.scythe``): in the prop
+    # frame, `ahead` is the horizontal forward and `flat` the ground normal at that pitch.
+    c, s = math.cos(SCYTHE_PITCH), math.sin(SCYTHE_PITCH)
+    ahead = y * c + z * s
+    flat = -y * s + z * c
+    heel = _at(fr, (0, SCYTHE_HEEL, 0))
+    pts = [(0.0, 0.0), (-0.3, -0.03), (-0.55, -0.1), (-0.75, -0.22)]
+    widths = [0.045, 0.04, 0.03, 0.012]
+    for (x0, b0), (x1, b1), w in zip(pts, pts[1:], widths, strict=False):
+        a = heel + x * x0 + ahead * b0
+        b = heel + x * x1 + ahead * b1
+        along = (b - a).normalized()
+        across = flat.cross(along).normalized()
+        box(
+            bm,
+            (a + b) / 2 + across * w * 0.5,
+            ((b - a).length / 2, w / 2, 0.003),
+            (along, across, flat),
+            1,
+        )
+    finish(bm)
+    obj = to_object(
+        "scythe",
+        bm,
+        [ctx.material(C_WOOD, WOOD_LIGHT), ctx.material(C_PLATE, (0.42, 0.42, 0.44))],
+    )
+    bind_rigid(obj, "Prop")
+    return [obj]
+
+
+def torch(ctx, length=0.7, below=0.25):
+    """Torch held in the right fist (`Prop`): wooden stave, pitch-soaked head, flame."""
+    fr = prop_frame(ctx)
+    bm = bmesh.new()
+    n = ctx.seg(6, 4, 3)
+    top = length - below
+    tube(bm, _at(fr, (0, -below, 0)), _at(fr, (0, top, 0)), 0.018, 0.022, n, 0)
+    tube(
+        bm, _at(fr, (0, top - 0.02, 0)), _at(fr, (0, top + 0.16, 0)), 0.04, 0.036, n, 1
+    )
+    tube(
+        bm,
+        _at(fr, (0, top + 0.12, 0)),
+        _at(fr, (0, top + 0.42, 0)),
+        0.055,
+        0.004,
+        n,
+        2,
+        caps=False,
+    )
+    if ctx.level < 2:
+        tube(
+            bm,
+            _at(fr, (0.02, top + 0.2, 0.01)),
+            _at(fr, (0.03, top + 0.5, 0.02)),
+            0.03,
+            0.002,
+            3,
+            2,
+            caps=False,
+        )
+    finish(bm)
+    obj = to_object(
+        "torch",
+        bm,
+        [
+            ctx.material(C_WOOD, WOOD),
+            ctx.material(C_LEATHER, (0.03, 0.025, 0.02)),
+            ctx.material(C_EXACT, (1.0, 0.45, 0.08)),
+        ],
+    )
+    bind_rigid(obj, "Prop")
+    return [obj]
+
+
+def sack(ctx):
+    """Sack or bundle carried on the right shoulder (clip ``carry``), bound to `Shoulder.R`."""
+    shoulder = ctx.head("UpperArm.R")
+    neck = ctx.head("Neck")
+    centre = shoulder + (shoulder - neck) * 0.1 + Vector((-0.04, 0.08, 0.14))
+    bm = bmesh.new()
+    n = ctx.seg(8, 6, 4)
+    # A lumpy bag lying across the shoulder, front to back.
+    tube(
+        bm,
+        centre + Vector((0, -0.2, 0.02)),
+        centre + Vector((0, 0.1, 0.0)),
+        0.1,
+        0.16,
+        n,
+        0,
+    )
+    tube(
+        bm,
+        centre + Vector((0, 0.1, 0.0)),
+        centre + Vector((0, 0.3, -0.06)),
+        0.16,
+        0.08,
+        n,
+        0,
+    )
+    if ctx.level < 2:
+        tube(
+            bm,
+            centre + Vector((0, -0.2, 0.02)),
+            centre + Vector((0, -0.27, 0.03)),
+            0.05,
+            0.03,
+            4,
+            1,
+        )
+    finish(bm)
+    obj = to_object(
+        "sack",
+        bm,
+        [ctx.material(C_CLOTH, (0.42, 0.36, 0.25)), ctx.material(C_LEATHER, LEATHER)],
+    )
+    bind_rigid(obj, "Shoulder.R")
     return [obj]

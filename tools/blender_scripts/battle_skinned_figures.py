@@ -707,3 +707,80 @@ FIGURES.update(
         },
     }
 )
+
+# --- Lot FK2: civilians of the living campaign map ------------------------------------------
+# Peasants and townsfolk without armour: undyed or dull cote (no livery: the faction colour
+# never shows), hose, felt cap, straw hat or bare head. Named `villager_*` so that they sort
+# after every battle figure (`battle_fine_figures.face_of` spreads the faces by sorted name).
+# Animated by the `folk` styles of `BattleSkinned.STYLES` (clips scythe, carry, plough).
+_FOLK_COLORS = {
+    "Farmer_Body:Beige": (eq.C_CLOTH, eq.LINEN),
+    "Farmer_Body:LightBlue": (eq.C_CLOTH, (0.17, 0.12, 0.08)),
+    "Farmer_Pants:LightBlue": (eq.C_CLOTH, (0.14, 0.12, 0.09)),
+    "Farmer_Head:Beige": (eq.C_CLOTH, STRAW),
+    "Farmer_Head:Red": (eq.C_CLOTH, (0.16, 0.10, 0.05)),
+    "Farmer_Feet:Brown": (eq.C_LEATHER, (0.10, 0.06, 0.03)),
+    "Farmer_Feet:Brown2": (eq.C_LEATHER, (0.07, 0.04, 0.02)),
+}
+_FOLK_BUDGET = budget(Adventurer_Head=0.75, Farmer_Head=0.8)
+FIGURES.update(
+    {
+        # Folk on the roads and in the villages, empty-handed: felt cap (v0), bare head (v1),
+        # straw hat (v2), linen coif (v3).
+        "villager_0": {
+            "rig": "human",
+            "style": "folk",
+            "parts": _CREW_PARTS,
+            "colors": _FOLK_COLORS,
+            "masks": {"Adventurer_Head": 0b1011, "Farmer_Head": 0b0100},
+            "budget": _FOLK_BUDGET,
+            "equipment": [
+                ("cloth_cap", 0b0001, {"colour": (0.20, 0.13, 0.07)}),
+                ("cloth_cap", 0b1000, {"colour": (0.55, 0.52, 0.45)}),
+            ],
+            "variants": 4,
+        },
+        # Mowers (clip scythe): straw hat or bare head, scythe in both hands.
+        "villager_1": {
+            "rig": "human",
+            "style": "folk",
+            "parts": _CREW_PARTS,
+            "colors": _FOLK_COLORS,
+            "masks": {"Adventurer_Head": 0b010, "Farmer_Head": 0b101},
+            "budget": _FOLK_BUDGET,
+            "equipment": [("scythe", 0)],
+            "variants": 3,
+        },
+        # Angry crowd (revolt): pitchfork (v0), torch (v1, v3), bill (v2); held like the
+        # militia's staff weapons (style militia: pike_idle, victory_pike...).
+        "villager_2": {
+            "rig": "human",
+            "style": "militia",
+            "parts": _CREW_PARTS,
+            "colors": _FOLK_COLORS,
+            "masks": {"Adventurer_Head": 0b1011, "Farmer_Head": 0b0100},
+            "budget": _FOLK_BUDGET,
+            "equipment": [
+                ("cloth_cap", 0b0010, {"colour": (0.20, 0.13, 0.07)}),
+                ("pitchfork", 0b0001),
+                ("torch", 0b1010),
+                ("bill", 0b0100),
+            ],
+            "variants": 4,
+        },
+        # Carriers (clip carry): sack on the right shoulder; masons, refugees with a bundle.
+        "villager_3": {
+            "rig": "human",
+            "style": "folk_carry",
+            "parts": _CREW_PARTS,
+            "colors": _FOLK_COLORS,
+            "masks": {"Adventurer_Head": 0b011, "Farmer_Head": 0b100},
+            "budget": _FOLK_BUDGET,
+            "equipment": [
+                ("cloth_cap", 0b001, {"colour": (0.55, 0.52, 0.45)}),
+                ("sack", 0),
+            ],
+            "variants": 3,
+        },
+    }
+)

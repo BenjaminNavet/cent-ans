@@ -763,6 +763,11 @@
      "loop": true,
      "start": 644
     },
+    "carry": {
+     "frames": 33,
+     "loop": true,
+     "start": 2884
+    },
     "climb": {
      "frames": 24,
      "loop": true,
@@ -933,6 +938,11 @@
      "loop": true,
      "start": 408
     },
+    "plough": {
+     "frames": 33,
+     "loop": true,
+     "start": 2917
+    },
     "push": {
      "frames": 33,
      "loop": true,
@@ -942,6 +952,11 @@
      "frames": 20,
      "loop": true,
      "start": 115
+    },
+    "scythe": {
+     "frames": 41,
+     "loop": true,
+     "start": 2843
     },
     "slash": {
      "frames": 25,
