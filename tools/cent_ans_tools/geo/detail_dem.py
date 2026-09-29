@@ -190,7 +190,7 @@ class PyramidGrid:
     minx: float
     maxy: float
     unit_m: float
-    #: Root tiles of the frame (16 x 16 legacy, 28 x 24 world, ADR 0119).
+    #: Root tiles of the frame (16 x 16 legacy, 28 x 24 world, ADR 0121).
     cols: int = ROOT_TILES
     rows: int = ROOT_TILES
 

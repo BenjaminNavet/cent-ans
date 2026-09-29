@@ -1,4 +1,4 @@
-# ADR 0119 — Relief fin dans le cadre monde, palier 1 étendu à tout le monde OM
+# ADR 0121 — Relief fin dans le cadre monde, palier 1 étendu à tout le monde OM
 
 Date : 2026-09-29. Statut : accepté. Lot OMR R7 (`docs/wip/omr-r7.md`), suite des ADR 0036, 0077
 et 0115.

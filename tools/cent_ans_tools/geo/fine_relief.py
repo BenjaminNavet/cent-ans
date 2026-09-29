@@ -54,7 +54,7 @@ class FineRelief:
         self.max_level = max_level
         self.min_level = min_level
         self.cache_tiles = cache_tiles
-        # Root tiles of the frame: 16 x 16 legacy, 28 x 24 world (ADR 0119).
+        # Root tiles of the frame: 16 x 16 legacy, 28 x 24 world (ADR 0121).
         from cent_ans_tools.geo import pyramid  # noqa: PLC0415 - import cycle
 
         self.frame_cols, self.frame_rows = pyramid.frame_tiles(self.bounds)

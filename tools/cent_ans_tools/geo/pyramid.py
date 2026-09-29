@@ -65,7 +65,7 @@ ROOT_TILE_UNITS = 256
 #: before OM2). Since ADR 0115 the world is 28 x 24 root tiles. A cache whose
 #: manifest carries a non-zero ``root_origin_tiles`` is in this legacy square
 #: frame, placed at that offset (tile (k, col, row) of the cache = world tile
-#: (col + dx·2^k, row + dy·2^k)); since ADR 0119 (OMR R7) the cache is baked in
+#: (col + dx·2^k, row + dy·2^k)); since ADR 0121 (OMR R7) the cache is baked in
 #: the world frame (offset ``[0, 0]``, 28 x 24 root tiles). Geometry helpers
 #: taking ``bounds`` derive the frame size from them (:func:`frame_tiles`).
 E0_SIZE_PX = 8192
@@ -73,7 +73,7 @@ E0_TILES = E0_SIZE_PX // TILE_PX
 #: Metres per world unit (map scale, fixed by ADR 0082) and per root tile.
 UNIT_M = 718.9765625
 ROOT_TILE_M = ROOT_TILE_UNITS * UNIT_M
-#: Tier-1 land box: every land of the frame (ADR 0119; was the GLO-90 box of the
+#: Tier-1 land box: every land of the frame (ADR 0121; was the GLO-90 box of the
 #: West, ``copernicus.FINE_BBOX``, before OMR R7).
 TIER1_BBOX = (-180.0, -90.0, 180.0, 90.0)
 
@@ -107,7 +107,7 @@ GLO90_RES_DEG = 1.0 / 1200.0
 #: 2 (SZ2): valley floors not dug (:func:`relief_shade.valley_floor`).
 BAKE_VERSION = 2
 TIER_NAMES = {TIER1_LEVELS: "tier1", TIER2_LEVELS: "tier2"}
-#: Bake version per tier. Tier 1: 3 (OMR R7, ADR 0119): world frame, every land
+#: Bake version per tier. Tier 1: 3 (OMR R7, ADR 0121): world frame, every land
 #: of the 28 x 24 world from GLO-90 (was the West box only).
 TIER_VERSIONS = {"tier1": 3, "tier2": BAKE_VERSION}
 #: Tier-1 bake streamed by blocks of ``STREAM_BLOCK`` x ``STREAM_BLOCK`` E1 tiles:
@@ -116,7 +116,7 @@ TIER_VERSIONS = {"tier1": 3, "tier2": BAKE_VERSION}
 STREAM_BLOCK = 4
 #: Stop the streamed bake (cleanly, resumable) below this free disk space.
 STREAM_MIN_FREE_BYTES = 25 * 1024**3
-#: Manifest fields of E1-E2 (ADR 0119).
+#: Manifest fields of E1-E2 (ADR 0121).
 TIER1_MANIFEST = {
     "source": "Copernicus DEM GLO-90",
     "bbox_lonlat": [-11.0, 28.0, 61.0, 66.0],
@@ -530,7 +530,7 @@ def root_origin_tiles(map_dir: Path = MAP_DIR) -> tuple[int, int]:
 def map_bounds(map_dir: Path = MAP_DIR) -> tuple[float, float, float, float]:
     """EPSG:3035 bounds of the pyramid frame (see :data:`E0_SIZE_PX`).
 
-    World frame (``root_origin_tiles`` ``[0, 0]``, ADR 0119): the ``map.json``
+    World frame (``root_origin_tiles`` ``[0, 0]``, ADR 0121): the ``map.json``
     bounds. Legacy frame: ``E0_TILES`` root tiles square, placed at
     ``root_origin_tiles`` inside the world; world units of that frame (CAFV
     points, tile addresses) are the world units minus ``root_origin_tiles × 256``.

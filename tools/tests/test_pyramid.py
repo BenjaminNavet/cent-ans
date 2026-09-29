@@ -362,7 +362,7 @@ def test_tile_write_is_atomic(tmp_path: Path) -> None:
 
 
 def test_pyramid_is_in_the_world_frame() -> None:
-    """OMR R7 (ADR 0119): the pyramid is baked in the 28 x 24 world frame."""
+    """OMR R7 (ADR 0121): the pyramid is baked in the 28 x 24 world frame."""
     manifest = json.loads((MAP_DIR / "relief_pyramid.json").read_text(encoding="utf-8"))
     assert manifest["root_origin_tiles"] == [0, 0]
     assert pyramid.root_origin_tiles(MAP_DIR) == (0, 0)

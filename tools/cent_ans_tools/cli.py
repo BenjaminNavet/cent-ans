@@ -570,7 +570,7 @@ def geo_relief_reframe(
         help="Décale aussi les manifestes versionnés (une seule fois, dans le dépôt)",
     ),
 ) -> None:
-    """Recadre le cache de relief dans le cadre du manifeste (ADR 0119), sans recuire.
+    """Recadre le cache de relief dans le cadre du manifeste (ADR 0121), sans recuire.
 
     Tuiles renommées (liens durs depuis --src), fleuves et routes fins décalés.
     """

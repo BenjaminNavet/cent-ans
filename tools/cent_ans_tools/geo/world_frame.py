@@ -1,4 +1,4 @@
-"""Move the relief cache into the world frame (lot OMR R7, ADR 0119).
+"""Move the relief cache into the world frame (lot OMR R7, ADR 0121).
 
 Before OMR R7 the relief pyramid was baked in the 4096² map of the West and
 kept in that frame after the world grew to 7168 x 6144 units (ADR 0115): the

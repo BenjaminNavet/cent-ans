@@ -44,7 +44,7 @@ def _write_manifests(map_dir: Path) -> None:
 
 
 def _bake_levels(map_dir: Path, levels: tuple[int, ...]) -> int:
-    # The real bake records the frame of the cache (ADR 0119).
+    # The real bake records the frame of the cache (ADR 0121).
     world_frame.write_frame(map_dir / "pyramid", (0, 0))
     for level in levels:
         for col in (2, 3):

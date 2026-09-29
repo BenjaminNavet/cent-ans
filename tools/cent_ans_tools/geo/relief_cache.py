@@ -20,7 +20,7 @@ A later step runs whenever an earlier one wrote tiles (it reads them). A tier
 baked by an older version of the code (stamp ``pyramid/bake.json`` older than the
 manifest's ``bake_versions``, :mod:`bake_stamp`) is stale and rebaked like a
 missing one. A cache left in another frame than the manifest's
-(``root_origin_tiles``, ADR 0119: caches baked before OMR R7 are in the legacy
+(``root_origin_tiles``, ADR 0121: caches baked before OMR R7 are in the legacy
 ``[0, 5]`` frame) is first reframed in place (:mod:`world_frame`: renames, no
 rebake). ``--check`` only lists what is missing or stale (exit code 1 if
 anything is).
@@ -154,7 +154,7 @@ class CacheReport:
         if self.frame_shift is not None:
             out.append(
                 f"  Cache dans un autre cadre (décalage {list(self.frame_shift)} tuiles "
-                "racines, ADR 0119) — « geo relief-all » le recadre sans recuire"
+                "racines, ADR 0121) — « geo relief-all » le recadre sans recuire"
             )
         for level in range(1, MAX_LEVEL + 1):
             out.append(_layer_line(self.levels[level]))
@@ -387,7 +387,7 @@ def rebuild(
     runners = runners or RUNNERS
     report = check(map_dir, raw_dir)
     if report.frame_shift is not None:
-        log(f"== recadrage du cache (ADR 0119, décalage {list(report.frame_shift)})")
+        log(f"== recadrage du cache (ADR 0121, décalage {list(report.frame_shift)})")
         world_frame.reframe_cache(
             report.pyramid_dir, report.pyramid_dir, report.frame_shift, log=log
         )

@@ -1,5 +1,5 @@
 extends SceneTree
-## Relief fin à l'Est et au Sud (lot OMR R7, ADR 0119) : pyramide dans le cadre monde.
+## Relief fin à l'Est et au Sud (lot OMR R7, ADR 0121) : pyramide dans le cadre monde.
 ##
 ## 1. Manifeste réel : `root_origin_tiles` [0, 0], étages E1-E2 listés au Bosphore, à Moscou,
 ##    au Caire et à Tunis ; Rouen garde ses étages fins (E4) dans le cadre monde.
@@ -56,7 +56,7 @@ func _run() -> void:
 	var manifest: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("relief_pyramid.json")))
 	if not _check(manifest is Dictionary, "manifeste illisible"):
 		return
-	_check((manifest as Dictionary).get("root_origin_tiles", []) == [0, 0], "root_origin_tiles %s" % (manifest as Dictionary).get("root_origin_tiles"))
+	_check(str((manifest as Dictionary).get("root_origin_tiles", [])) == str([0.0, 0.0]), "root_origin_tiles " + str((manifest as Dictionary).get("root_origin_tiles")))
 	var pyramid := ReliefPyramid.new()
 	# Tuiles listées (sans le contrôle de présence sur le disque) : `tiles_override` vide = manifeste.
 	if not pyramid.load_manifest(map_dir):
