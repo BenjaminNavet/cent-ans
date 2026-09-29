@@ -71,11 +71,6 @@ func near_weight(distance: float) -> float:
 	return 1.0 - smoothstep(near_threshold - near_fade * 0.5, near_threshold + near_fade * 0.5, distance)
 
 
-## DV0 : ancien palier « loin », gardé le temps de la vague 1 (retiré en DV3).
-func far_weight(distance: float) -> float:
-	return strategic_weight(distance)
-
-
 ## Lot ZG4 : poids [0, 1] du palier « vallée » et en deçà (1 sous le seuil, 0 au-dessus).
 func valley_weight(distance: float) -> float:
 	return 1.0 - smoothstep(valley_threshold - valley_fade * 0.5, valley_threshold + valley_fade * 0.5, distance)
@@ -94,11 +89,6 @@ func border_alpha(distance: float) -> float:
 ## Lot ZG4 : opacité du voile du brouillard de guerre (même principe).
 func fog_alpha(distance: float) -> float:
 	return lerpf(1.0, lerpf(0.7, site_fog_alpha, site_weight(distance)), valley_weight(distance))
-
-
-## DV0 : ancien palier « moyen », gardé le temps de la vague 1 (retiré en DV3).
-func medium_weight(distance: float) -> float:
-	return clampf(1.0 - near_weight(distance) - far_weight(distance), 0.0, 1.0)
 
 
 ## Réglages par défaut (`res://resources/zoom_tiers.tres`), ou une instance neuve si absente.
