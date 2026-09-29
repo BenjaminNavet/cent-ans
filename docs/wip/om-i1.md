@@ -95,3 +95,18 @@ Lot terminé. Points ouverts : Volok Lamski, Gorokhovets, Kamianiets ramenées d
 268 colonies ramenées dans leur province (la plupart côtières, < 20 km) ; objectifs ajoutés aux
 31 titres D à relire par un historien ; coût restant du tour d'IA (×4,6 par tour de jeu contre
 main) ; chargement (relief_landcover 7,8 s).
+
+## Vérification après fusion de feat/om (P2 + main : FE8, Q6, DZ ; b9e8a069b)
+- `git merge --ff-only feat/om` ; dylib i1 reconstruite ; import OK.
+- cargo test --workspace : 1 223 ok, 0 échec, 55 ignorés ; clippy, fmt OK ; pytest 1 246 ok,
+  2 sautés. Aucun test FE8 à recaler.
+- Godot : 22 tests carte + dz_diplo_borders, p2d_ui, q6_diplomacy, q6_side_panel, q6_toasts,
+  q6_ui : OK. q6_diplomacy / q6_ui impriment des `SCRIPT ERROR` (SimFacade introuvable à la
+  compilation) identiques sur main : préexistant. `q3_playtest.gd` est un pilote en fenêtre (pas
+  un test headless) : bloqué en headless, arrêté après 32 min ; il a réécrit
+  `user://settings.cfg` (fenêtré, 1920 × 1080, conseiller et voix réarmés).
+- century_probe 50 tours, graines 1-5 (1 min 42) : banqueroutes toutes factions 5,25 / fac. / déc.
+  [5,12-5,50] (FE8 50 t. avant F8 : 7,22 ; 464 t. après F8 : 3,21) ; petites factions 6,03-6,47
+  (réf. 50 t. avant F8 : 7,90-9,12) ; 28 factions d'avant FE 0,03-0,23 (464 t. après F8 : 0,12) ;
+  révoltes 15,2 / 200 t. [4-36] (464 t. après F8 : 8,7) ; commise de Guyenne 5/5 au tour 1 ;
+  guerre FR-EN 87 % [76-98] sur 50 t. ; recettes France t ≤ 50 : 1 713 089 (après F8 : 1 712 514).
