@@ -4,7 +4,8 @@ extends Control
 ## Écran titre et menu principal (F3, refait par MM1) : décor 3D vivant (`MenuBackdrop3D` : Paris
 ## au crépuscule, l'ost et ses bannières, plans de caméra lents enchaînés en fondu), titre enluminé
 ## (`IlluminatedTitle`), colonne de boutons à gauche (Nouvelle partie, Continuer, Charger une
-## partie, Prologue, Codex, Batailles de démonstration, Réglages, Crédits, Quitter), légende du plan en bas à droite.
+## partie, Prologue, Codex, Batailles historiques, Bataille personnalisée, Batailles de démonstration,
+## Rejeux, Réglages, Crédits, Quitter), légende du plan en bas à droite.
 ## « Nouvelle partie » ouvre le choix de faction (`FactionSelect`) en fondu ; « Commencer »
 ## passe par l'écran de chargement (`LoadingScreen`). Le prologue (`IntroCards`) est joué une fois
 ## au premier lancement, puis depuis le menu. Sans rendu (headless) ou avec `--no-menu-3d` : fond
