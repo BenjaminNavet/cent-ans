@@ -133,7 +133,7 @@ func _test_legend() -> void:
 	legend.build("political", context)
 	await process_frame
 	var labels := legend.entry_labels()
-	_check(labels.has("Cité") and labels.has("E : espion") and labels.has("Terres voilées"), "legend lists settlements, agents and fog: %s" % [labels])
+	_check(labels.has("Vue normale : maquette et écu") and labels.has("E : espion") and labels.has("Terres voilées"), "legend lists settlements, agents and fog: %s" % [labels])
 	_check(labels.has("Territoire occupé"), "legend explains occupied borders: %s" % [labels])  # RS-E : FR1 hachures
 	var political_count := legend.entry_count()
 	legend.set_mode("diplomacy")
