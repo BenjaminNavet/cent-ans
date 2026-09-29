@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/map_scenes_rules.schema.json",
+  "title": "Règles de la carte vivante",
+  "description": "Fichier data/rules/map_scenes.json (lots FK1, FK4) : source unique des réglages de la carte vivante, lus par le cœur (durées des scènes, seuil de dévastation) et par le rendu (réservoir de figurines, densités, scènes). Voir docs/design/2026-09-29-carte-vivante-folk.md §§ 2.1.1, 2.1.4 et 3. Purement visuel.",
+  "type": "object",
+  "$defs": {
+    "map_scene": {
+      "enum": ["plague", "famine", "revolt", "devastation", "siege", "construction", "fair", "celebration", "flood", "muster"],
+      "description": "Type de scène de province (liste fermée, identique à event.schema.json)."
+    },
+    "turns": { "type": "integer", "minimum": 1, "maximum": 40 },
+    "chance": { "type": "number", "minimum": 0, "maximum": 1 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "durations": {
+      "type": "object",
+      "description": "Tours pendant lesquels une scène née d'un événement reste sur la carte, par type.",
+      "propertyNames": { "$ref": "#/$defs/map_scene" },
+      "additionalProperties": { "$ref": "#/$defs/turns" }
+    },
+    "devastation_threshold": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Dévastation à partir de laquelle la province montre une scène devastation." },
+    "pool_cap": { "type": "integer", "minimum": 0, "maximum": 5000, "description": "Figurines vivantes au plus sur la vue rapprochée (FolkPool)." },
+    "activity_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Rayon (unités du monde) autour du centre de la caméra où vivent les figurines (FolkPool)." },
+    "figure_height": { "type": "number", "exclusiveMinimum": 0, "description": "Hauteur d'une figurine (unités du monde) à l'échelle de la carte (FolkPool)." },
+    "figure_min_view_fraction": { "type": "number", "minimum": 0, "maximum": 0.2, "description": "Hauteur minimale d'une figurine en fraction de la distance caméra, taille à l'écran à peu près constante au palier proche (FolkPool, FK6)." },
+    "road_folk_per_unit": { "type": "number", "minimum": 0, "description": "Voyageurs par unité de route à la population de référence (FolkRoutine)." },
+    "field_work_probability": { "$ref": "#/$defs/chance", "description": "Chance qu'un point de champ soit travaillé (FolkRoutine)." },
+    "herd_probability": { "$ref": "#/$defs/chance", "description": "Chance qu'un point de pâture porte un troupeau (FolkRoutine)." },
+    "woodcutter_probability": { "$ref": "#/$defs/chance", "description": "Chance qu'un point de forêt porte des bûcherons l'hiver (FolkRoutine)." },
+    "pilgrim_probability": { "$ref": "#/$defs/chance", "description": "Chance qu'un tronçon de route près d'une cité porte des pèlerins (FolkRoutine)." },
+    "carts_per_trade_value": { "type": "number", "minimum": 0, "description": "Charrettes bâchées par 10 unités de route et par unité de valeur d'une route commerciale (FolkCaravans)." },
+    "guard_value": { "type": "number", "minimum": 0, "description": "Valeur de route commerciale à partir de laquelle une charrette a un garde, deux au double (FolkCaravans)." },
+    "scene_figures_min": { "type": "integer", "minimum": 0, "maximum": 200, "description": "Figurants d'une scène de province à l'intensité 0 (FolkScenes)." },
+    "scene_figures_max": { "type": "integer", "minimum": 0, "maximum": 200, "description": "Figurants d'une scène de province à l'intensité 1 (FolkScenes)." }
+  },
+  "required": ["durations", "devastation_threshold", "pool_cap", "activity_radius", "figure_height", "figure_min_view_fraction", "road_folk_per_unit", "field_work_probability", "herd_probability", "woodcutter_probability", "pilgrim_probability", "carts_per_trade_value", "guard_value", "scene_figures_min", "scene_figures_max"],
+  "additionalProperties": false
+}

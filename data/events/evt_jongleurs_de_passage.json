@@ -1,0 +1,61 @@
+{
+  "id": "evt_jongleurs_de_passage",
+  "title": "Des jongleurs de passage",
+  "text": "Une troupe de jongleurs, avec ménestrels, montreurs d'ours et diseurs de fabliaux, s'arrête au bourg. Le peuple s'attroupe sur la place, mais le curé y voit des divertissements pernicieux.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 50
+  },
+  "scope": {
+    "type": "province"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Les inviter au château pour la veillée",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -250
+        },
+        {
+          "type": "unrest",
+          "amount": -6
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Les laisser jouer sur la place",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -3
+        },
+        {
+          "type": "piety",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Les chasser à l'instigation du curé",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 2
+        },
+        {
+          "type": "unrest",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Edmond Faral, Les Jongleurs en France au Moyen Âge, Champion, 1910",
+    "Fabliaux"
+  ]
+}

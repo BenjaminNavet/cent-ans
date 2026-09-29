@@ -10,6 +10,7 @@
     ]
   },
   "scope": { "type": "province" },
+  "map_scene": "plague",
   "options": [
     {
       "text": "Fonder une maison des Antonins",

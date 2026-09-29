@@ -81,8 +81,8 @@ pub use entities::encounter::{
     EncounterUnits, SpawnWar, ARMY_EFFECT_KINDS,
 };
 pub use entities::event::{
-    CharacterRef, Condition, Event, EventCategory, EventDate, EventEffect, EventOption, EventScope,
-    EventSeason, EventTrigger, ProvinceRef,
+    CharacterRef, Condition, Event, EventCategory, EventDate, EventEffect, EventOption,
+    EventPresentation, EventScope, EventSeason, EventTrigger, ProvinceRef, SceneKind,
 };
 pub use entities::faction::{
     AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
@@ -95,6 +95,7 @@ pub use entities::feudal_rules::{
 pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
 };
+pub use entities::map_scenes::{MapSceneRules, DEFAULT_SCENE_TURNS};
 pub use entities::mercenaries::{MercenaryAi, MercenaryArrears, MercenaryBand, MercenaryRules};
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;

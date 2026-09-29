@@ -1,0 +1,71 @@
+{
+  "id": "evt_pont_effondre",
+  "title": "Le pont s'est effondré",
+  "text": "Après les eaux de printemps, une arche du vieux pont s'est rompue et une charrette avec elle. Marchands et laboureurs doivent faire un long détour par le gué.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 60,
+    "conditions": [
+      {
+        "type": "season",
+        "season": "spring"
+      }
+    ]
+  },
+  "scope": {
+    "type": "province"
+  },
+  "map_scene": "flood",
+  "options": [
+    {
+      "text": "Rebâtir le pont en pierre",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -900
+        },
+        {
+          "type": "wealth",
+          "amount": 6
+        },
+        {
+          "type": "unrest",
+          "amount": -3
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Rétablir un passage de planches",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -250
+        },
+        {
+          "type": "wealth",
+          "amount": 1
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Rétablir un bac contre péage",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 100
+        },
+        {
+          "type": "unrest",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "sources": [
+    "Jean Favier, De l'or et des épices, Fayard, 1987",
+    "Robert-Henri Bautier, Les Foires de Champagne, 1953"
+  ]
+}

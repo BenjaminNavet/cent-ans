@@ -125,6 +125,8 @@ pub mod folders {
     pub const ARMY_TRADITION_RULES: &str = "army_traditions.json";
     /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
     pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
+    /// Living map scenes and figurines (lot FK1), inside `rules/`; optional.
+    pub const MAP_SCENE_RULES: &str = "map_scenes.json";
     /// Trade hubs and routes (lot C5); optional folder.
     pub const ECONOMY: &str = "economy";
     /// Trade catalogue, inside `economy/`; optional.
@@ -360,6 +362,9 @@ pub struct GameData {
     /// `data/rules/battle_outcome.json` (lot CV3-1, nuanced outcomes);
     /// [`crate::BattleOutcomeRules::default`] when absent.
     pub battle_outcome_rules: crate::entities::battle_outcome::BattleOutcomeRules,
+    /// `data/rules/map_scenes.json` (lot FK1, living map);
+    /// [`crate::MapSceneRules::default`] when absent.
+    pub map_scene_rules: crate::entities::map_scenes::MapSceneRules,
     /// Forest and wetland cover of the grid cells (lot CV3-1), decoded on
     /// first use; see [`GameData::cover_map`].
     pub cover: crate::cover::CoverHandle,
@@ -446,6 +451,7 @@ impl GameData {
             mercenary_rules: Default::default(),
             army_tradition_rules: Default::default(),
             battle_outcome_rules: Default::default(),
+            map_scene_rules: Default::default(),
             cover: Default::default(),
             movement_graph: Default::default(),
             settlement_grid: Default::default(),
@@ -592,6 +598,10 @@ impl GameData {
             .join(folders::BATTLE_OUTCOME_RULES);
         if outcome_path.is_file() {
             data.battle_outcome_rules = read_json(&outcome_path)?;
+        }
+        let map_scenes_path = root.join(folders::RULES).join(folders::MAP_SCENE_RULES);
+        if map_scenes_path.is_file() {
+            data.map_scene_rules = read_json(&map_scenes_path)?;
         }
         let trade_path = root.join(folders::ECONOMY).join(folders::TRADE);
         if trade_path.is_file() {

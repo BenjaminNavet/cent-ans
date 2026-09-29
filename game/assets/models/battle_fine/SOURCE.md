@@ -39,4 +39,8 @@ après `--` revient aux figurines Quaternius de `battle_skinned/` le temps de la
     `game/assets/third_party/animals/oga_rigged_horse/SOURCE.md`) ;
   - les `.import` (BC7, Texture2DArray) sont écrits par le script ; ne pas retoucher à la main.
   - Maillages `CAM2` (LOD0/LOD1 des figurines cuites) : UV d'atlas empaquetée dans `UV2.y`.
+- **Lot FK2 (carte vivante)** : clips `scythe`, `carry`, `plough` ajoutés en fin de rig `human`
+  (`battle_fine.py -- rigs`, clips antérieurs inchangés) et figurines civiles `villager_0..3`
+  (couches d'atlas 28 à 31, `battle_fine.py -- bake --only villager_N`) : faux, torche et sac
+  procéduraux (`battle_skinned_weapons.py`), aucune source nouvelle.
 - **Licence du dérivé** : CC0 1.0.

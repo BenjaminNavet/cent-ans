@@ -1,0 +1,69 @@
+{
+  "id": "evt_reliques_miraculeuses",
+  "title": "Des reliques miraculeuses",
+  "text": "Un ossement trouvé sous l'autel d'une chapelle en ruine passe pour celui d'un saint. On dit que des boiteux ont marché et les fidèles affluent avec des cierges.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 90
+  },
+  "scope": {
+    "type": "province"
+  },
+  "map_scene": "celebration",
+  "options": [
+    {
+      "text": "Faire bâtir un reliquaire et une châsse",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -700
+        },
+        {
+          "type": "piety",
+          "amount": 4
+        },
+        {
+          "type": "unrest",
+          "amount": -6
+        },
+        {
+          "type": "papal_favor",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Faire examiner la relique par l'évêque",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -2
+        },
+        {
+          "type": "piety",
+          "amount": 1
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Interdire le culte jusqu'à preuve du miracle",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 4
+        },
+        {
+          "type": "piety",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "André Vauchez, La Sainteté en Occident aux derniers siècles du Moyen Âge, 1981",
+    "Patrick Geary, Furta sacra, Princeton, 1978"
+  ]
+}

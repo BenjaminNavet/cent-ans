@@ -503,6 +503,17 @@ void vertex() {
 				}
 			}
 		}
+	#ifdef FK_TRAVEL
+		// Lot FK3 (carte vivante) : marche le long d'un segment droit en +Z du modèle, entièrement
+		// en shader. INSTANCE_CUSTOM = (longueur, vitesse, phase, dénivelé), unités du modèle ;
+		// longueur nulle = sur place. Au bout, retour au départ, masqué par un rétrécissement.
+		if (custom.x > 0.0) {
+			float s = mod(anim_time * custom.y + custom.z, custom.x);
+			float u = s / custom.x;
+			v *= smoothstep(0.0, 0.08, u) * (1.0 - smoothstep(0.92, 1.0, u));
+			v += vec3(0.0, custom.w * u, s);
+		}
+	#endif
 		VERTEX = shown ? v : vec3(0.0);
 		NORMAL = normalize(n);
 		v_color = COLOR.rgb;

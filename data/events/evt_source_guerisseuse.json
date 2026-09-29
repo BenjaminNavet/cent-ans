@@ -1,0 +1,64 @@
+{
+  "id": "evt_source_guerisseuse",
+  "title": "Une source guérisseuse",
+  "text": "Une source, près d'un vieux chêne, passe pour guérir les fièvres et les yeux malades. Des pèlerins de trois évêchés y viennent, et le curé se plaint de ces dévotions sans messe.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 90
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Faire bénir la source et y dresser une croix",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -200
+        },
+        {
+          "type": "health",
+          "amount": 4
+        },
+        {
+          "type": "piety",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Laisser faire les gens",
+      "effects": [
+        {
+          "type": "health",
+          "amount": 2
+        },
+        {
+          "type": "piety",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Faire combler la source",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 5
+        },
+        {
+          "type": "piety",
+          "amount": 1
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "André Vauchez, La Sainteté en Occident aux derniers siècles du Moyen Âge, 1981",
+    "Jacques Le Goff, La Civilisation de l'Occident médiéval, 1964"
+  ]
+}

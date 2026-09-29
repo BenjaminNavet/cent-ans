@@ -1,0 +1,64 @@
+{
+  "id": "evt_charbonniers_en_conflit",
+  "title": "Les charbonniers et le seigneur",
+  "text": "Les charbonniers de la forêt s'obstinent à couper le bois de chauffe que le seigneur veut réserver à la chasse. Les maîtres de forges s'en plaignent, car leurs fourneaux manquent de charbon.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 70
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Confirmer les droits d'usage des charbonniers",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -5
+        },
+        {
+          "type": "wealth",
+          "amount": 2
+        },
+        {
+          "type": "treasury",
+          "amount": -100
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Faire respecter la réserve seigneuriale",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 200
+        },
+        {
+          "type": "unrest",
+          "amount": 6
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Accorder la coupe contre une redevance",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 350
+        },
+        {
+          "type": "unrest",
+          "amount": 1
+        }
+      ],
+      "ai_weight": 3
+    }
+  ],
+  "sources": [
+    "Andrée Corvol, L'Homme et l'arbre sous l'Ancien Régime, Economica, 1984",
+    "Ordonnance de Brunoy sur les Eaux et Forêts (1346)"
+  ]
+}

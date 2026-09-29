@@ -299,6 +299,10 @@
       "title": "Camp retranché",
       "body": "Fossé et palissade : +{rule.entrenched_defense_percent} % en défense en résolution automatique, {rule.entrenched_supply_saving_percent} % de pertes de ravitaillement en moins. Exige le mouvement plein, hors des colonies."
     },
+    "hud_incident": {
+      "title": "Incident",
+      "body": "Une affaire locale attend votre décision dans cette province. Cliquez le sceau pour trancher ; à l'échéance, le conseil choisit à votre place."
+    },
     "hud_encounter": {
       "title": "Rencontre",
       "body": "Une occasion ou un péril sur la route. Menez une armée sur le site pour choisir que faire ; il disparaît à son expiration."
@@ -468,7 +472,7 @@
     "budget_delta_hint": {"title": "Par rapport à la saison passée."},
     "ransom_refused": {"title": "Refusé"},
     "close_decision_pending": {"title": "Fermer", "body": "La décision reste en attente."},
-    "decision_default_choice": {"title": "Sans réponse, le premier choix s'appliquera d'office à l'expiration."},
+    "decision_default_choice": {"title": "Sans réponse, le choix que ferait votre conseil (celui de l'IA) s'appliquera d'office à l'expiration."},
     "open_named_sheet": {"title": "Ouvrir la fiche"},
     "faction_attitude": {"title": "Attitude"},
     "treaty_clause_detail": {"title": "Clause"},

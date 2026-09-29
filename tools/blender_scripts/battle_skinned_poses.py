@@ -1656,3 +1656,71 @@ def ride_victory(arm, t):
     rotate_about(arm, "Neck", _hv(X_AXIS), -0.25)
     grip = pos(arm, "UpperArm.R") + _hv(Vector((-0.1, -0.08, 0.42 + 0.14 * pump)))
     _lance_at(arm, grip, _hv(Vector((-0.1, -0.3, 1.0))), _hv(Vector((0, -1, 0))))
+
+
+# --- Lot FK2: country work of the civilian figures (living campaign map) -------------------
+#
+# Appended after every other clip (earlier rows keep their place). `scythe` loops on `Idle`
+# (41 frames, feet planted); `carry` and `plough` loop on `Walk` (33 frames, walking in place
+# like the other walk clips; the renderer moves the figure).
+
+SCYTHE_REACH = 0.36  # right fist ahead of the hips (m)
+SCYTHE_SWING = 0.6  # half swing of the stroke (rad), right to left
+
+
+def scythe(arm, t):
+    """Mowing (loop): wide right-to-left stroke close to the ground, blade lifted back.
+
+    The right fist holds the lower nib, the left one the upper nib; the snath's foot (blade
+    heel) grazes the ground ahead and to the right, as in ``battle_skinned_weapons.scythe``.
+    """
+    import battle_skinned_weapons as weapons
+
+    cut = smooth(0.0, 0.55, t)
+    back = smooth(0.6, 1.0, t)
+    yaw = -SCYTHE_SWING + 2 * SCYTHE_SWING * (cut - back)
+    lift = _env(t, 0.55, 0.7, 0.85, 1.0)
+    _crouch(arm, 0.12)
+    rotate_about(arm, "Abdomen", X_AXIS, 0.42)
+    rotate_about(arm, "Abdomen", Z_AXIS, 0.7 * yaw)
+    turn = Matrix.Rotation(yaw, 3, "Z")
+    grip = pos(arm, "Hips") + turn @ Vector((-0.14, -SCYTHE_REACH, 0.05 + 0.08 * lift))
+    horizontal = (turn @ Vector((-0.4, -0.9, 0.0))).normalized()
+    drop = max(grip.z - 0.06 - 0.12 * lift, 0.2)
+    s = min(drop / weapons.SCYTHE_HEEL, 0.95)
+    axis = horizontal * math.sqrt(1.0 - s * s) + Vector((0, 0, -s))
+    prop = prop_matrix(grip, axis, Z_AXIS)
+    STATE["prop"] = prop
+    hand_to_prop(
+        arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + Vector((-0.5, 0.2, -0.4))
+    )
+    fist_on_prop(arm, prop)
+    hand_to_prop(
+        arm,
+        "L",
+        prop,
+        weapons.SCYTHE_TOP,
+        pos(arm, "UpperArm.L") + Vector((0.5, 0.1, -0.4)),
+    )
+
+
+scythe.frames = 41
+
+
+def carry(arm, t):
+    """Carrying a load on the right shoulder (loop on `Walk`), the right hand steadying it."""
+    rotate_about(arm, "Abdomen", X_AXIS, 0.12)
+    rotate_about(arm, "Neck", Vector((0, 1, 0)), -0.12)
+    shoulder = pos(arm, "UpperArm.R")
+    _arm_to(
+        arm, "R", shoulder + Vector((-0.03, -0.14, 0.1)), Vector((-0.3, -0.3, -0.45))
+    )
+
+
+def plough(arm, t):
+    """Ploughman (loop on `Walk`): leaning on the two stilts of the plough, hands fixed.
+
+    The stilts of ``folk_props.build_plough`` are 0.5 m ahead of the feet, 0.86 m up.
+    """
+    rotate_about(arm, "Abdomen", X_AXIS, 0.32)
+    _both_hands(arm, Vector((-0.22, -0.5, 0.86)), Vector((0.22, -0.5, 0.86)))

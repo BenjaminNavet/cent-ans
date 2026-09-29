@@ -15,6 +15,7 @@
   "scope": {
     "type": "province"
   },
+  "map_scene": "revolt",
   "options": [
     {
       "text": "Accorder une remise d'impôt",

@@ -24,6 +24,7 @@
   "scope": {
     "type": "province"
   },
+  "map_scene": "flood",
   "options": [
     {
       "text": "Faire relever les levées",
