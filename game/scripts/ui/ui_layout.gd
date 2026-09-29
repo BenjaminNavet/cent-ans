@@ -158,6 +158,9 @@ func claim(zone: Zone, control: Control, at_end: bool = false) -> void:
 		control.visibility_changed.connect(_on_occupant_visibility.bind(control))
 		control.tree_exiting.connect(_forget.bind(control), CONNECT_ONE_SHOT)
 	if zone == Zone.SIDE_PANEL:
+		# La zone fixe la largeur : une largeur minimale propre au panneau (380-420 px) dépasse la
+		# zone quand l'écran logique est étroit (341 px à 1280×720) et le texte est coupé au bord.
+		control.custom_minimum_size.x = 0.0
 		control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		control.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		(parent as CanvasItem).visible = control.visible

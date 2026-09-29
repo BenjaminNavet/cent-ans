@@ -46,4 +46,9 @@ code, dont RS F bataille/feu) n'est pas revérifiée.**
 - Fusion T4 : correctif IA cavalier (plantage f5) ; test de brèche adapté au dernier carré (voir ADR 0108).
 
 ## Reste (hors lots)
-- Vérification visuelle en jeu : barres de siège, fenêtre de prise de ville, drapeaux T4, panneaux mercenaires et traditions.
+- Vérification visuelle faite le 29/09 (`game/tests/tw2_shot.gd`, 5 captures) : barres, drapeaux, fenêtre de prise, panneaux OK.
+  Corrigé : panneaux latéraux plus larges que la zone SIDE_PANEL (341 px logiques à 1280×720) coupés au bord
+  droit (traditions 380, mercenaires 420) → `UiZones.claim` annule la largeur minimale propre du panneau ;
+  noms de mercenaires tronqués → retour à la ligne.
+  Suites mineures : la barre « Muraille » du mur se projette sous le Journal de bataille ; bélier hors cadre
+  dans la capture `siege_bars`.
