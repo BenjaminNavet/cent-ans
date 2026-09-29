@@ -659,6 +659,8 @@ pub(crate) fn apply_assault_result(
     };
     let province = province_of(state, settlement);
     let won = result.winner == crate::battle_auto::Winner::Attacker;
+    // NT3: a won assault (taken or repelled) counts towards the missions.
+    crate::missions::note_battle_won(state, if won { &faction } else { &defender_faction });
     let general = crate::movement::coalition_commander(state, attackers)
         .and_then(|id| state.armies.get(&id))
         .and_then(|a| a.general.clone());

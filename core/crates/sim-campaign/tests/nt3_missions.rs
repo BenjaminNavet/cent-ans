@@ -335,3 +335,66 @@ fn missions_survive_save_and_load_and_old_saves_load_empty() {
     assert!(old.missions.active.is_empty());
     assert!(old.missions.faction.is_none());
 }
+
+/// France's main army besieging English Guyenne, whose garrison is down to
+/// one exhausted company; battles auto-resolved.
+fn besiege_guyenne(data: &GameData) -> (CampaignState, sim_campaign::ArmyId, SettlementId) {
+    let idle = |_: &CampaignState, _: &GameData, _: &FactionId| Vec::<Order>::new();
+    let mut state = france(data, 6);
+    state.interactive_battles = false;
+    let guyenne = data_model::ProvinceId::new("prov_guyenne").unwrap();
+    let kent = data_model::ProvinceId::new("prov_kent").unwrap();
+    let city = state.province_city_id(&guyenne).cloned().unwrap();
+    let kent_city = state.province_city_id(&kent).cloned().unwrap();
+    let army = state
+        .armies
+        .iter()
+        .find(|(_, a)| a.faction == fac("fac_france"))
+        .map(|(id, _)| id.clone())
+        .unwrap();
+    let english: Vec<_> = state
+        .armies
+        .iter()
+        .filter(|(_, a)| {
+            a.settlement().and_then(|s| state.settlement_province(s)) == Some(&guyenne)
+                && a.faction != fac("fac_france")
+        })
+        .map(|(id, _)| id.clone())
+        .collect();
+    for id in english {
+        state.armies.get_mut(&id).unwrap().position =
+            sim_campaign::ArmyPosition::Settlement(kent_city.clone());
+    }
+    let a = state.armies.get_mut(&army).unwrap();
+    a.position = sim_campaign::ArmyPosition::Settlement(city.clone());
+    a.stance = sim_campaign::Stance::Siege;
+    a.clear_plan();
+    state.end_turn_with(data, idle);
+    assert!(state.settlements[&city].siege.is_some());
+    let garrison = &mut state.settlements.get_mut(&city).unwrap().garrison;
+    garrison.truncate(1);
+    for unit in garrison.iter_mut() {
+        unit.strength = 1;
+        unit.morale = 1;
+    }
+    (state, army, city)
+}
+
+#[test]
+fn a_won_assault_counts_as_a_won_battle() {
+    let data = real_data();
+    let (state, army, city) = besiege_guyenne(&data);
+    let mut m = mission(&state, MissionKind::WinBattle, state.turn + 6);
+    m.count = 1;
+    let mut state = with_mission(state, m);
+    state.submit_order(&data, Order::Assault { army }).unwrap();
+    assert_eq!(
+        state.settlements[&city].controller,
+        fac("fac_france"),
+        "the assault takes the town"
+    );
+    assert_eq!(state.missions.active[0].progress, 1);
+    let mut events = Vec::new();
+    resolve_missions(&mut state, &data, &mut events);
+    assert_eq!(state.mission_notices()[0].kind, NoticeKind::Succeeded);
+}
