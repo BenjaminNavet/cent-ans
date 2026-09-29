@@ -48,13 +48,13 @@
       }
     },
     {
-      "id": "obj_trebizond_limnia",
-      "title": "Limnia et Oinaion",
-      "description": "Recouvrer les bandons de l'ouest face aux Turcomans.",
+      "id": "obj_trebizond_sinope",
+      "title": "Sinope et Amisos",
+      "description": "Reprendre Sinope, tenue par Trébizonde de 1254 à 1265, et le port d'Amisos (Samsun) à l'ouest des bandons de Limnia.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_amasya"
+          "prov_sinope"
         ]
       }
     }

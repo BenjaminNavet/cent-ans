@@ -14,7 +14,6 @@
     "uncertain": true,
     "note": "Bordure d'or : distinction de jeu, non attestée."
   },
-  "de_jure_liege": "tit_bohemia",
   "de_jure_provinces": [
     "prov_warsaw"
   ],
@@ -42,6 +41,17 @@
       "description": "Ne pas devenir vassal du roi de Pologne.",
       "condition": {
         "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_warsaw_rawa",
+      "title": "Réunir la Mazovie",
+      "description": "Recueillir Rawa, l'héritage de Siemowit II (léguée aux fils de Trojden en 1345).",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_rawa"
+        ]
       }
     }
   ],

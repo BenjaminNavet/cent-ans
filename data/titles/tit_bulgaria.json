@@ -19,7 +19,7 @@
     "prov_sofia",
     "prov_dobrudja",
     "prov_varna",
-    "prov_philippopolis",
+    "prov_anchialos",
     "prov_zagora"
   ],
   "holder_1337": {
@@ -51,12 +51,12 @@
     },
     {
       "id": "obj_bulgaria_thrace",
-      "title": "Retour aux Balkans",
-      "description": "Reprendre Anchialos et la côte pontique.",
+      "title": "Philippopolis",
+      "description": "Reprendre Philippopolis et les forteresses des Rhodopes (cédées par la régence byzantine en 1344).",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_anchialos"
+          "prov_philippopolis"
         ]
       }
     }

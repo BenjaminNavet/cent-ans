@@ -47,13 +47,13 @@
       }
     },
     {
-      "id": "obj_cilicia_seleucia",
-      "title": "Séleucie et Korykos",
-      "description": "Recouvrer la côte de Séleucie, perdue au profit des Karamanides.",
+      "id": "obj_cilicia_marash",
+      "title": "Marash",
+      "description": "Recouvrer Marash (Germanicée), place arménienne perdue au profit des Mamelouks à la fin du XIIIe siècle.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
-          "prov_karaman"
+          "prov_elbistan"
         ]
       }
     }

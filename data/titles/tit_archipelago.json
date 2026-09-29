@@ -46,7 +46,7 @@
     {
       "id": "obj_archipelago_chios",
       "title": "Chios latine",
-      "description": "Reprendre Chios, perdue par les Zaccaria alliés de Naxos en 1329.",
+      "description": "Rendre Chios aux Latins : les Zaccaria génois l'ont tenue de 1304 à 1329, avant la reprise byzantine.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [

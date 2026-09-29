@@ -37,14 +37,11 @@
       }
     },
     {
-      "id": "obj_hama_aleppo",
+      "id": "obj_hama_free",
       "title": "L'héritage ayyoubide",
-      "description": "Rendre Alep à la maison d'Abu l-Fida.",
+      "description": "Les derniers Ayyoubides ne règnent à Hama que par la grâce du sultan (la principauté sera supprimée en 1341) : secouer la tutelle mamelouke.",
       "condition": {
-        "kind": "hold_provinces",
-        "provinces": [
-          "prov_aleppo"
-        ]
+        "kind": "be_independent"
       }
     }
   ],
