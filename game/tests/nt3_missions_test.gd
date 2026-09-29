@@ -79,6 +79,17 @@ func _run() -> void:
 				"the row shows deadline and reward")
 			var head: Label = row.find_child("Head", true, false) as Label
 			_check(head != null and head.text.contains(str(missions[0]["title"])), "the row shows the title")
+
+	# 4. Panneau défilant, hauteur bornée en 1280×720 (NT3 suite).
+	root.size = Vector2i(1280, 720)
+	await process_frame
+	map.victory.open_panel()
+	await process_frame
+	await process_frame
+	_check(map.victory.list.get_parent() is ScrollContainer, "objectives and missions scroll")
+	var panel_rect: Rect2 = map.victory.panel.get_global_rect()
+	_check(panel_rect.size.y <= 720.0 and panel_rect.position.y >= 0.0 and panel_rect.end.y <= 720.0,
+		"the objectives panel fits in 1280×720: %s" % panel_rect)
 	map.victory.panel.hide()
 	map.queue_free()
 	await process_frame
