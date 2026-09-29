@@ -12,7 +12,7 @@ Spec : `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T4. Branche `feat
       alerte « La place est menacée » ; `game/tests/t4_capture_points_test.gd` OK.
 - [x] Tests Rust `tests/t4_capture.rs` (6).
 - [x] Mesures : br3 7/2/3 (10 graines), 14/4/8 (20 graines) ; sg3 inchangé sauf Rouen 7 → 8/10. ADR 0108.
-- [ ] Fusion `integration/tw2`, tests complets, smoke, commit final.
+- [x] Fusion de main (29/09, orchestrateur), correctif cavalier (9145808e), test de brèche adapté ; tests complets.
 
 ## Points ouverts
 - Paris reste à 2/10 sur br3 (rues étroites, chaleur des incendies) : voir ADR 0108.
