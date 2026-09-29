@@ -72,6 +72,9 @@ const DEFAULTS := {
 	"battle/cinematic_slowmo": true,
 	# NT2 : dernière composition de la bataille personnalisée (JSON, "" : aucune).
 	"custom_battle/last": "",
+	# NT4 : didacticiel de bataille terminé, ou « Ne plus demander » à l'invite du premier lancement.
+	"battle_prologue/done": false,
+	"battle_prologue/never_ask": false,
 	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
 	"interface/intro_seen": false,
 	# VO1 : conseiller parlé (chroniqueur), répliques des unités, interventions déjà faites

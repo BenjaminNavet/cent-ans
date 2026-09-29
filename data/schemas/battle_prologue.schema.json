@@ -30,6 +30,15 @@
       }
     },
     "enemy_passive": {"type": "boolean"},
+    "defeat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "text"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1}
+      }
+    },
     "steps": {
       "type": "array",
       "minItems": 2,

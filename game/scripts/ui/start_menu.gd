@@ -67,7 +67,7 @@ func _ready() -> void:
 	faction_select.visible = false
 	add_child(faction_select)
 	faction_select.back_requested.connect(show_main)
-	faction_select.start_requested.connect(_on_start_requested)
+	faction_select.start_requested.connect(_on_start_gated)  # NT4 : invite au didacticiel
 	var facade := get_node_or_null("/root/SimFacade")
 	if facade != null:
 		var pending := str(facade.get("pending_faction"))
@@ -418,6 +418,11 @@ func overlay_open() -> bool:
 
 
 # --- Départ ------------------------------------------------------------------------------------
+
+
+## NT4 : au premier lancement, invite à jouer d'abord le didacticiel de bataille.
+func _on_start_gated(faction_id: String, seed_value: int, start_date: String) -> void:
+	BattlePrologueInvite.gate(self, _on_start_requested.bind(faction_id, seed_value, start_date))
 
 
 func _on_start_requested(faction_id: String, seed_value: int, _start_date: String) -> void:
