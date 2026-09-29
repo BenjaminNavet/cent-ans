@@ -22,5 +22,5 @@ Branche `feat/fk4-scenes` (base `integration/fk`, 299233c8c). Spec
   résolues en partie réelle) ; pytest OK (1275).
 
 ## Prochaine étape
-cargo test complet, puis rapport. Vérification visuelle (FK6) : orientation des étals et de
+Lot terminé (cargo test : 0 échec). Fusion dans `integration/fk` par l'orchestrateur. Vérification visuelle (FK6) : orientation des étals et de
 l'échafaudage, taille des nappes de crue, fumées de scène (taille des incendies CV1).
