@@ -101,7 +101,7 @@ const PRESETS := {
 		"glow": true, "fog_grid": [64, 32],
 		"relief_vertex_px": 8.0, "relief_items": 500, "relief_extra_depth": 3, "relief_pages": 192, "relief_shadow_cascades": 1,
 		"fine_relief": true, "terrain_near": 0.8, "veg_density": 0.75, "veg_detail": 0.8,
-		"veg_shadow_distance": 200.0, "map_shadow_range": 0.8, "map_shadow_splits": 4,
+		"veg_shadow_distance": 100.0, "map_shadow_range": 0.8, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.75, "grass": 0.75, "particles": 0.6,
 		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
 	},
@@ -115,8 +115,10 @@ const PRESETS := {
 		# gardé en Ultra) : aucune différence visible au zoom comté, ≈ 6 ms de GPU de moins. Q4 : 7,5 px
 		# (vue de Paris à 40 u., 1080p : 25,9 → 24,2 ms, 7,81 → 7,57 M primitives, captures identiques).
 		"relief_vertex_px": 7.5, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 1,
+		# FPS carte (29/09) : ombres des arbres coupées au-delà de 120 (300 avant) : au zoom
+		# stratégique (d = 150), −3,3 M primitives sur 9,8 M (−34 %), forêts à peine plus claires.
 		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
-		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
+		"veg_shadow_distance": 120.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
 		# PB3b (ADR 0080) : spatial 0,75, visuellement proche du natif en 1080p ; le temporel
 		# (anticrénelage compris) efface la pluie et traîne sur les ailes des moulins : écarté.

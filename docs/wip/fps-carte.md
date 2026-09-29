@@ -1,13 +1,28 @@
 # FPS carte — saccades au zoom / déplacement (demande du 29/09)
 
-**État : EN PAUSE**, à la demande du joueur, jusqu'à la fin de la session FK (`living-map-folk-scenes`,
-`docs/wip/fk.md`), qui touche au rendu de la carte. Des programmes tournaient à côté pendant les mesures
-(charge 2 → 7) : à refaire sur une machine calme. Aucune optimisation faite.
+**État : 2 correctifs dans main, estimés et non mesurés** (le joueur a demandé une estimation : la machine est
+chargée jusqu'au 30/09 à 6 h). Mesure réelle à faire sur une machine calme, après FK (`docs/wip/fk.md`).
+
+## Fait (29/09 soir)
+1. **Budget de pixels HiDPI** (ADR 0123, 1b94fc31) : « Automatique » garde le nombre de pixels
+   rendus de la référence 1080p. Sur l'écran du joueur (2624×1644), Haute passe de 75 % à 52 %
+   (vérifié dans une vraie fenêtre, libellé « MetalFX spatial 52 % »). Estimation (modèle en pixels de l'ADR 0080) :
+   −33 % à d = 150, −34 % à d = 12, −16 % à d = 40.
+2. **Ombres des arbres** coupées au-delà du zoom 120 en Haute (300 avant) et 100 en Moyenne (200 avant) :
+   d = 150 : 9,84 → 6,52 M primitives (compté) ; d = 30 inchangé. Capture comparée : forêts à
+   peine plus claires au zoom stratégique.
+
+## Pistes non faites (primitives comptées à d = 30 / 150)
+- 2 cascades d'ombre au lieu de 4 en Haute : −2,1 / −3,0 M primitives, mais ombres proches moins nettes.
+- Ombres des colonies au zoom stratégique : −0,9 M primitives et −838 appels de dessin à d = 150.
+- Ombres des effets de vie (`CampaignLife`) : −1,1 M. FK y travaille : attendre la fin de FK.
+- Pics pendant la descente : dus au rendu (les scripts ne dominent que dans 5-45 des 310-374 pics).
+  Il faut Metal System Trace pour les attribuer.
 
 ## Constat du joueur
 Le jeu saccade un peu, surtout sur la carte de campagne pendant les zooms et les déplacements.
 
-## Mesures préliminaires (main d1ea1de0, M4 Pro, fenêtre 2624×1644 Retina, qualité Haute auto)
+## Mesures préliminaires (sous charge, indicatives) (main d1ea1de0, M4 Pro, fenêtre 2624×1644 Retina, qualité Haute auto)
 - `--bench-map --bench-probe` (Metal), 3 passes : panoramique p50 53-59 ms, p99 97-289 ms,
   680-778 images > 50 ms ; descente p50 8-42 ms. Pour comparaison, RS-K2 donnait une image p50 de 17,6 ms.
 - Scripts : ~5 ms par image dans les pires images (sections `settle/*`, `life/*`, `lod/*` < 8 ms
