@@ -46,3 +46,4 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
   cavalerie serbe, pronoïaires, droujina, cavalerie lituanienne, frères teutoniques, almogavres),
   doctrines IA, unit_looks.json (livrées/robes), emblèmes locaux, codex. Pas de règle core. Conflit
   probable avec R3 sur data/ai/doctrines.json. Brabançons 12 % / archers écossais 84 % (hors bande, préexistant).
+- Intégration ../gp-omr (feat/omr) : R6, R2, R4, R5 fusionnés sans conflit. ADR 0118 conservé (0117 réservé par tw2-t4). Attente R1, R3, R7 ; tests complets après.
