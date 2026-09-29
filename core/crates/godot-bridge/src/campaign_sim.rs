@@ -284,6 +284,18 @@ impl CampaignSim {
             state.faction_net_last_turn(&faction).unwrap_or(0),
         );
         budget_into_dict(&mut dict, &economy, state.budget_history(&faction));
+        // NT6b: the mercenary premium is paid on top of the balance above
+        // (see `resolve_mercenaries`): expected next turn and last paid.
+        dict.set("mercenary_premium", state.mercenary_premium(data, &faction));
+        dict.set(
+            "mercenary_premium_last_turn",
+            state
+                .mercenaries
+                .premium_last_turn
+                .get(&faction)
+                .copied()
+                .unwrap_or(0),
+        );
         dict
     }
 
