@@ -28,9 +28,9 @@ const DEFAULT_CAP := 600
 const DEFAULT_RADIUS := 60.0
 ## Hauteur d'une figurine (unités monde) à l'échelle de la carte, au-dessus de `shrink_start` de
 ## `MapPropScale` ; elle rejoint la taille réelle (1,8 m) au palier vallée.
-const DEFAULT_FIGURE_HEIGHT := 0.5
+const DEFAULT_FIGURE_HEIGHT := 1.26
 const HUMAN_HEIGHT_M := 1.8
-const DEFAULT_MIN_VIEW_FRACTION := 0.018
+const DEFAULT_MIN_VIEW_FRACTION := 0.045
 ## Couples rôle:activité préchauffés (vie ordinaire, marchands) ; les autres sont créés à la
 ## première demande.
 const WARM_FIGURES := ["peasant:walk", "peasant_b:walk", "porter:walk", "rider:ride", "pilgrim:walk", "merchant:walk", "guard:guard_walk", "peasant:plough", "peasant_b:plough", "porter:harvest", "reaper:scythe", "peasant:idle", "peasant_b:herd", "peasant:chop"]

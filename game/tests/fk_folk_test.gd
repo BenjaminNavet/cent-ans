@@ -271,7 +271,9 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		var nearest := INF
 		for p in pool.instance_origins():
 			nearest = minf(nearest, p.distance_to(paris))
-		_check(nearest < disks[disks.size() - 1].z + 12.0, "%s: scene next to Paris (%.1f)" % [kind, nearest])
+		# Dispositions en mètres × échelle des figurines : la marge suit `figure_height` (0,5 à l'origine).
+		var margin := 12.0 * maxf(1.0, pool.figure_height / 0.5)
+		_check(nearest < disks[disks.size() - 1].z + margin, "%s: scene next to Paris (%.1f)" % [kind, nearest])
 		print("fk_folk_test: scene %s → %d figures, %d props" % [kind, full, props])
 		if kind in ["plague", "construction", "fair", "celebration", "flood"]:
 			_check(props > 0, "%s scene has props: %d" % [kind, props])
