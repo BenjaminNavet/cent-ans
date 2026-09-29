@@ -1,0 +1,28 @@
+{
+  "id": "cdx_droujina",
+  "title": "La droujina des princes russes",
+  "category": "unite",
+  "aliases": [
+    "droujina",
+    "druzhina",
+    "dvor"
+  ],
+  "era": {
+    "from": "900",
+    "to": "1500"
+  },
+  "summary": "Suite armée des princes de Rus' : cavaliers attachés à la personne du prince, qui combattent à la lance comme à l'arc. Au XIVe siècle, elle devient la cour (dvor) des grands-princes de [[cdx_moscou|Moscou]] et de Tver.",
+  "body": "La droujina des premiers siècles réunit les compagnons du prince, nourris à sa table et payés du tribut. Après la conquête mongole, les princes russes, tributaires de la [[cdx_horde_d_or|Horde d'Or]], adoptent une partie de l'armement des steppes : arc composite, sabre, cuirasse à lamelles, à côté de la lance et de la masse d'armes.\n\nEn 1337, Ivan Kalita, grand-prince de Vladimir et fidèle du khan Özbeg, fait de Moscou la première des principautés ; Tver, sa rivale, a été écrasée après la révolte de 1327. Les princes de Rus' occidentale passent peu à peu sous la domination lituanienne. En 1380, à Koulikovo, les droujines réunies par Dmitri Donskoï battent pour la première fois une armée de la Horde.",
+  "gameplay": "Compagnie de 60 hommes (cavaliers). Recrutement : 1000 livres payées à l'enrôlement, 3 saison(s) d'instruction ; entretien 92 livres par mois, soit 368 par saison. Caractéristiques : mêlée 68, armure 66, moral 74, vitesse 72, charge 76. Exige une province de culture russe, novgorodienne ou ruthène. La place doit compter assez de nobles (dix fois l'effectif). Cavalerie lourde polyvalente, au moral solide : le cœur d'une armée russe. Plus lente et moins protégée que des chevaliers d'Occident.",
+  "entity": "unit_druzhina",
+  "see_also": [
+    "cdx_moscou",
+    "cdx_horde_d_or",
+    "cdx_lituanie"
+  ],
+  "sources": [
+    "Droujina",
+    "Bataille de Koulikovo",
+    "J. Martin, Medieval Russia 980-1584, 2007"
+  ]
+}

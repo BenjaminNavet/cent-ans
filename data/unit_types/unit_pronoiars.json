@@ -1,0 +1,46 @@
+{
+  "id": "unit_pronoiars",
+  "name": {
+    "display": "Pronoïaires",
+    "local": "προνοιάριοι",
+    "local_language": "grec"
+  },
+  "category": "cavalry",
+  "source_class": "nobility",
+  "mounted": true,
+  "soldiers": 60,
+  "cost": {
+    "money": 900
+  },
+  "upkeep": 82,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 64,
+    "ranged": 0,
+    "range": 0,
+    "armor": 62,
+    "morale": 70,
+    "speed": 70,
+    "ammo": 0,
+    "charge": 70
+  },
+  "abilities": [
+    "charge_lance"
+  ],
+  "required_culture": [
+    "cul_greek"
+  ],
+  "required_faction": [
+    "fac_byzantium",
+    "fac_trebizond",
+    "fac_epirus"
+  ],
+  "figure": "cavalry_4",
+  "equipment": "Lance, épée, arc à l'occasion ; cotte de mailles ou klibanion lamellaire, casque conique, écu en amande ; cheval non caparaçonné.",
+  "description": "Cavaliers de l'[[cdx_empire_byzantin|Empire byzantin]] tardif, payés par la concession viagère des revenus d'une terre (pronoia) ; peu nombreux et mal soutenus par un trésor épuisé, ils mènent les campagnes d'Andronic III en Thessalie et en Épire.",
+  "sources": [
+    "Pronoia",
+    "M. C. Bartusis, The Late Byzantine Army: Arms and Society 1204-1453, 1992",
+    "D. M. Nicol, The Last Centuries of Byzantium, 1993"
+  ]
+}

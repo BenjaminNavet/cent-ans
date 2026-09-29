@@ -1,0 +1,27 @@
+{
+  "id": "cdx_cavalerie_lituanienne",
+  "title": "La cavalerie légère lituanienne",
+  "category": "unite",
+  "aliases": [
+    "cavalerie lituanienne",
+    "sulica",
+    "sulicas"
+  ],
+  "era": {
+    "from": "1250",
+    "to": "1500"
+  },
+  "summary": "Cavaliers de [[cdx_lituanie|Lituanie]] païenne, montés sur de petits chevaux des forêts et armés de javelots (sulicas). Ils mènent des raids profonds contre l'[[cdx_ordre_teutonique|Ordre teutonique]] et en Ruthénie.",
+  "body": "Sous Gediminas (vers 1316-1341), la Lituanie est le dernier grand État païen d'Europe. Ses guerriers, nobles et paysans libres, combattent surtout à cheval : les raids d'hiver, sur les rivières gelées, répondent aux « voyages » (Reisen) des croisés teutoniques. Le petit cheval local, le žemaitukas, est endurant et sûr dans les marais.\n\nLa sulica, javelot court, se lance au galop avant de se dérober. Les Lituaniens apprennent aussi des Tatars et des Ruthènes la feinte de fuite, qui surprendra les chevaliers de l'Ordre jusqu'à Tannenberg (1410).",
+  "gameplay": "Compagnie de 80 hommes (tireurs montés). Recrutement : 460 livres payées à l'enrôlement, 1 saison(s) d'instruction ; entretien 40 livres par mois, soit 160 par saison. Caractéristiques : mêlée 44, tir 50 à 70 m (10 volées), armure 22, moral 56, vitesse 86. Exige une province de culture lituanienne. La place doit compter assez de paysans (dix fois l'effectif). Escarmouche : lancent leurs javelots en marchant, rapides, au moral meilleur que la plupart des cavaliers légers. Peu de munitions : harcelez puis décrochez.",
+  "entity": "unit_lithuanian_light_cavalry",
+  "see_also": [
+    "cdx_lituanie",
+    "cdx_ordre_teutonique"
+  ],
+  "sources": [
+    "Grand-duché de Lituanie",
+    "Croisade lituanienne",
+    "S. C. Rowell, Lithuania Ascending, 1994"
+  ]
+}

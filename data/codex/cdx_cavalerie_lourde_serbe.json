@@ -1,0 +1,28 @@
+{
+  "id": "cdx_cavalerie_lourde_serbe",
+  "title": "La cavalerie lourde serbe",
+  "category": "unite",
+  "aliases": [
+    "cavalerie lourde serbe",
+    "vlastela",
+    "bataille de Velbajd",
+    "Velbajd"
+  ],
+  "era": {
+    "from": "1280",
+    "to": "1459"
+  },
+  "summary": "Noblesse terrienne de [[cdx_serbie|Serbie]], armée à la manière des chevaliers d'Occident. Elle écrase les Bulgares à Velbajd (1330) et porte les conquêtes d'Étienne Dušan.",
+  "body": "La vlastela, grands et petits seigneurs, tient ses terres du roi contre le service à cheval ; des pronoïaires à la byzantine s'y ajoutent dans les pays conquis. Les rois serbes engagent aussi des mercenaires allemands, catalans et italiens, et leur cavalerie emprunte à l'Occident la lance couchée, le haubert et les premières plates.\n\nLe 28 juillet 1330, à Velbajd (Kyustendil), le jeune Dušan mène la charge qui disperse l'armée du tsar bulgare Michel Chichman, mortellement blessé. Devenu roi (1331), puis empereur des Serbes et des Grecs (1346), Dušan conquiert la Macédoine, l'Albanie, l'Épire et la Thessalie.",
+  "gameplay": "Compagnie de 60 hommes (cavaliers). Recrutement : 1250 livres payées à l'enrôlement, 3 saison(s) d'instruction ; entretien 115 livres par mois, soit 460 par saison. Caractéristiques : mêlée 70, armure 70, moral 76, vitesse 68, charge 86. Exige une province de culture serbe. La place doit compter assez de nobles (dix fois l'effectif). Cavalerie de choc presque égale aux chevaliers d'Occident, un peu moins chère. Chargez de flanc ou de dos ; évitez les piques de front.",
+  "entity": "unit_serbian_heavy_cavalry",
+  "see_also": [
+    "cdx_serbie",
+    "cdx_empire_byzantin"
+  ],
+  "sources": [
+    "Bataille de Velbajd",
+    "Stefan Uroš IV Dušan",
+    "J. V. A. Fine, The Late Medieval Balkans, 1987"
+  ]
+}

@@ -976,6 +976,18 @@ def assets_entity_icons(
         console.print(f"[yellow]Sans source[/yellow] : {', '.join(report['missing'])}")
 
 
+@assets_app.command("unit-emblems")
+def assets_unit_emblems() -> None:
+    """OMR R5 : sources locales (emblème doré sur azur) des miniatures d'unités sans illustration."""
+    from cent_ans_tools import unit_emblems
+
+    paths = unit_emblems.build()
+    console.print(
+        f"[green]OK[/green] : {len(paths)} emblème(s) dans {unit_emblems.OUT_DIR} ; "
+        "encadrer ensuite avec « assets entity-icons --build-only »"
+    )
+
+
 @assets_app.command("menu-art")
 def assets_menu_art() -> None:
     """Dessine l'illustration du menu (carte ancienne 2560×1440) dans game/assets/ui/."""

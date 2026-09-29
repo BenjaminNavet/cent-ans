@@ -199,6 +199,8 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary, sid
 		_unit_info[id] = {"type": str(unit.get("type", "")), "kind": kind, "variant": variant, "side": side}
 		var skinned := BattleSkinned.has_figure(kind, variant)
 		var mat := _make_skinned_material(side, kind, variant, false, id) if skinned else _make_material(side, kind, variant, false)
+		if skinned:
+			BattleUnitLooks.apply(mat, str(unit.get("type", "")))
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.mesh = BattleSkinned.mesh(kind, variant, 0) if skinned else BattleMeshes.soldier(kind, variant)

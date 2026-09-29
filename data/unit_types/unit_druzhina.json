@@ -1,0 +1,43 @@
+{
+  "id": "unit_druzhina",
+  "name": {
+    "display": "Droujina",
+    "local": "дружина",
+    "local_language": "vieux russe"
+  },
+  "category": "cavalry",
+  "source_class": "nobility",
+  "mounted": true,
+  "soldiers": 60,
+  "cost": {
+    "money": 1000
+  },
+  "upkeep": 92,
+  "recruit_time_turns": 3,
+  "stats": {
+    "melee": 68,
+    "ranged": 0,
+    "range": 0,
+    "armor": 66,
+    "morale": 74,
+    "speed": 72,
+    "ammo": 0,
+    "charge": 76
+  },
+  "abilities": [
+    "charge_lance"
+  ],
+  "required_culture": [
+    "cul_russian",
+    "cul_novgorodian",
+    "cul_ruthenian"
+  ],
+  "figure": "cavalry_1",
+  "equipment": "Lance, sabre, masse d'armes, arc composite ; cotte de mailles ou cuirasse à lamelles, casque pointu à camail, écu en goutte.",
+  "description": "Suite armée des princes de Rus' (Moscou, Tver, Novgorod, Galicie-Volhynie), qui devient la cour (dvor) des grands-princes au XIVe siècle ; elle combat à la mode des steppes autant qu'à la lance, et vainc à Koulikovo (1380).",
+  "sources": [
+    "Droujina",
+    "Bataille de Koulikovo",
+    "J. Martin, Medieval Russia 980-1584, 2007"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "unit_serbian_heavy_cavalry",
+  "name": {
+    "display": "Cavalerie lourde serbe",
+    "local": "vlastela",
+    "local_language": "serbe"
+  },
+  "category": "cavalry",
+  "source_class": "nobility",
+  "mounted": true,
+  "soldiers": 60,
+  "cost": {
+    "money": 1250
+  },
+  "upkeep": 115,
+  "recruit_time_turns": 3,
+  "stats": {
+    "melee": 70,
+    "ranged": 0,
+    "range": 0,
+    "armor": 70,
+    "morale": 76,
+    "speed": 68,
+    "ammo": 0,
+    "charge": 86
+  },
+  "abilities": [
+    "charge_lance"
+  ],
+  "required_culture": [
+    "cul_serbian"
+  ],
+  "figure": "cavalry_0",
+  "equipment": "Lance de cavalier, épée, masse ; haubert et plates à l'occidentale, grand écu ; destrier caparaçonné.",
+  "description": "Noblesse terrienne (vlastela, pronijari) de [[cdx_serbie|Serbie]], armée à la manière des chevaliers d'Occident ; elle décide Velbazhd (1330) contre les Bulgares et porte les conquêtes d'Étienne Dušan en Macédoine et en Épire.",
+  "sources": [
+    "Bataille de Velbajd",
+    "Stefan Uroš IV Dušan",
+    "J. V. A. Fine, The Late Medieval Balkans, 1987"
+  ]
+}

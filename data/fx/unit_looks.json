@@ -1,0 +1,53 @@
+{
+  "description": "Variantes de rendu des figurines par type d'unité (lot OMR R5, rendu seulement) : part des soldats en livrée du camp (livery_share, sinon valeur de la figurine), étoffes des vêtements non teints à la livrée (cloth, couleurs sRGB, au plus 4, à la place de la palette commune) et robes des chevaux (coats : bay bai, chestnut alezan, black noir, grey gris, dun isabelle ; au plus 4). Les figurines restent celles du champ figure des types d'unité.",
+  "looks": {
+    "unit_mamluk_cavalry": {
+      "livery_share": 0.3,
+      "cloth": ["#e4dccb", "#a3261c", "#d1a13a", "#f0ece2"],
+      "coats": ["grey", "chestnut", "bay"]
+    },
+    "unit_steppe_horse_archers": {
+      "livery_share": 0.15,
+      "cloth": ["#7a6448", "#4b4034", "#2f3a4f", "#a08a62"],
+      "coats": ["dun", "bay", "black", "dun"]
+    },
+    "unit_akinci": {
+      "livery_share": 0.2,
+      "cloth": ["#9b2d20", "#b7893a", "#e2dac6", "#5a4630"],
+      "coats": ["bay", "chestnut", "grey"]
+    },
+    "unit_yaya": {
+      "livery_share": 0.25,
+      "cloth": ["#ece6d8", "#d9ceb4", "#a3342a", "#7b6a4c"]
+    },
+    "unit_serbian_heavy_cavalry": {
+      "livery_share": 0.8,
+      "cloth": ["#8e1f24", "#26335a", "#d8cdb2"],
+      "coats": ["black", "bay", "grey"]
+    },
+    "unit_pronoiars": {
+      "livery_share": 0.5,
+      "cloth": ["#5b2a4e", "#8e2a22", "#3d4a2c", "#cbb88c"],
+      "coats": ["bay", "chestnut", "grey"]
+    },
+    "unit_druzhina": {
+      "livery_share": 0.45,
+      "cloth": ["#a1261f", "#23345c", "#3f5530", "#c9b58a"],
+      "coats": ["bay", "black", "chestnut"]
+    },
+    "unit_lithuanian_light_cavalry": {
+      "livery_share": 0.15,
+      "cloth": ["#6e6554", "#4a3f33", "#8c7a5b", "#3b3b36"],
+      "coats": ["dun", "bay", "dun", "black"]
+    },
+    "unit_teutonic_knights": {
+      "livery_share": 0.2,
+      "cloth": ["#f1efe8", "#e6e3da"],
+      "coats": ["black", "bay", "grey"]
+    },
+    "unit_almogavars": {
+      "livery_share": 0.2,
+      "cloth": ["#6b5238", "#8a7556", "#d4c7a8", "#4c3d2c"]
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "id": "unit_teutonic_knights",
+  "name": {
+    "display": "Frères chevaliers teutoniques",
+    "local": "Ritterbrüder",
+    "local_language": "moyen haut allemand"
+  },
+  "category": "cavalry",
+  "source_class": "nobility",
+  "mounted": true,
+  "soldiers": 60,
+  "cost": {
+    "money": 1600
+  },
+  "upkeep": 150,
+  "recruit_time_turns": 3,
+  "stats": {
+    "melee": 76,
+    "ranged": 0,
+    "range": 0,
+    "armor": 80,
+    "morale": 86,
+    "speed": 68,
+    "ammo": 0,
+    "charge": 90
+  },
+  "abilities": [
+    "charge_lance",
+    "dismount"
+  ],
+  "required_faction": [
+    "fac_teutonic",
+    "fac_livonian_order"
+  ],
+  "figure": "cavalry_0",
+  "equipment": "Grande lance, épée, haubert et plates, heaume ou bassinet ; manteau blanc à croix noire ; destrier caparaçonné.",
+  "description": "Moines-soldats de l'[[cdx_ordre_teutonique|Ordre teutonique]] et de sa branche livonienne, peu nombreux et encadrant les « hôtes » croisés venus de tout l'Occident pour les Reisen contre la [[cdx_lituanie|Lituanie]] ; discipline de couvent, moral inébranlable.",
+  "sources": [
+    "Ordre Teutonique",
+    "Croisade lituanienne",
+    "W. Urban, The Teutonic Knights: a Military History, 2003",
+    "S. Ekdahl, « The Teutonic Knights and the Lithuanian Reisen », 1998"
+  ]
+}

@@ -22,7 +22,7 @@
         "id": {"$ref": "#/$defs/id"},
         "label": {"type": "string", "minLength": 1, "description": "Nom français (planche de contrôle)."},
         "group": {"type": "string", "enum": ["unit", "unit_category", "building", "technology", "skill", "resource", "diet", "trait"]},
-        "source": {"type": "string", "pattern": "^game/assets/.+\\.(jpg|png)$", "description": "Illustration peinte existante (chemin depuis la racine du dépôt) : miniature dérivée, gratuite."},
+        "source": {"type": "string", "pattern": "^(game/assets|tools/emblem_src)/.+\\.(jpg|png)$", "description": "Illustration peinte existante (chemin depuis la racine du dépôt) : miniature dérivée, gratuite ; ou emblème dessiné localement (tools/emblem_src, lot OMR R5, `cent-ans assets unit-emblems`)."},
         "crop": {
           "type": "object",
           "required": ["x", "y", "scale"],

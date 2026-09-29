@@ -9,10 +9,98 @@
       "unit_mounted_sergeants": 15,
       "unit_knights": 10,
       "unit_flemish_pikemen": 5,
-      "unit_routiers": 3
+      "unit_routiers": 3,
+      "unit_steppe_horse_archers": 12,
+      "unit_druzhina": 10,
+      "unit_serbian_heavy_cavalry": 8,
+      "unit_lithuanian_light_cavalry": 12,
+      "unit_almogavars": 6
     }
   },
   "factions": {
+    "fac_mamluks": {
+      "description": "Halqa et mamelouks royaux : archers montés lourds de la furūsiyya, appuyés par les milices et les auxiliaires bédouins.",
+      "mix": {
+        "unit_mamluk_cavalry": 35,
+        "unit_mounted_sergeants": 20,
+        "unit_crossbowmen": 20,
+        "unit_urban_militia": 25
+      }
+    },
+    "fac_golden_horde": {
+      "description": "Tümen de la Horde d'Or : archers montés kiptchaks, droujines des princes russes tributaires.",
+      "mix": {
+        "unit_steppe_horse_archers": 55,
+        "unit_mounted_sergeants": 15,
+        "unit_druzhina": 10,
+        "unit_urban_militia": 20
+      }
+    },
+    "fac_ottoman": {
+      "description": "Beylicat d'Orhan : akıncı et archers turkmènes, yaya soldés, milices des villes bithyniennes.",
+      "mix": {
+        "unit_akinci": 25,
+        "unit_steppe_horse_archers": 25,
+        "unit_yaya": 30,
+        "unit_urban_militia": 20
+      }
+    },
+    "fac_byzantium": {
+      "description": "Armée d'Andronic III : pronoïaires, archers et arbalétriers des villes, milices ; mercenaires turcs d'Umur d'Aydın.",
+      "mix": {
+        "unit_pronoiars": 25,
+        "unit_crossbowmen": 25,
+        "unit_urban_militia": 30,
+        "unit_mounted_sergeants": 10,
+        "unit_men_at_arms_foot": 10
+      }
+    },
+    "fac_serbia": {
+      "description": "Ost d'Étienne Dušan : cavalerie lourde de la vlastela, mercenaires allemands, infanterie des villes.",
+      "mix": {
+        "unit_serbian_heavy_cavalry": 30,
+        "unit_mounted_sergeants": 15,
+        "unit_crossbowmen": 20,
+        "unit_urban_militia": 25,
+        "unit_men_at_arms_foot": 10
+      }
+    },
+    "fac_lithuania": {
+      "description": "Raids de Gediminas : cavalerie légère aux javelots, droujines ruthènes, levées des forêts.",
+      "mix": {
+        "unit_lithuanian_light_cavalry": 40,
+        "unit_druzhina": 20,
+        "unit_urban_militia": 25,
+        "unit_crossbowmen": 15
+      }
+    },
+    "fac_teutonic": {
+      "description": "Frères chevaliers encadrant les hôtes croisés, sergents et arbalétriers des commanderies.",
+      "mix": {
+        "unit_teutonic_knights": 20,
+        "unit_knights": 10,
+        "unit_mounted_sergeants": 20,
+        "unit_crossbowmen": 30,
+        "unit_urban_militia": 20
+      }
+    },
+    "fac_livonian_order": {
+      "description": "Branche livonienne de l'Ordre : frères chevaliers, sergents, arbalétriers et levées estes et lettes.",
+      "mix": {
+        "unit_teutonic_knights": 20,
+        "unit_mounted_sergeants": 20,
+        "unit_crossbowmen": 30,
+        "unit_urban_militia": 30
+      }
+    },
+    "fac_moscow": {
+      "description": "Droujine d'Ivan Kalita, levées et arbalétriers des villes.",
+      "mix": {
+        "unit_druzhina": 40,
+        "unit_urban_militia": 35,
+        "unit_crossbowmen": 25
+      }
+    },
     "fac_england": {
       "description": "Armée des indentures : archers longs et hommes d'armes démontés des retenues, hobelars puis archers montés pour les chevauchées, lanciers gallois, arbalétriers gascons en Guyenne.",
       "mix": {
@@ -111,10 +199,11 @@
       "description": "Almogavares, arbalétriers catalans et chevalerie.",
       "mix": {
         "unit_crossbowmen": 30,
-        "unit_urban_militia": 25,
-        "unit_mounted_sergeants": 20,
-        "unit_knights": 15,
-        "unit_men_at_arms_foot": 10
+        "unit_urban_militia": 20,
+        "unit_almogavars": 15,
+        "unit_mounted_sergeants": 15,
+        "unit_knights": 12,
+        "unit_men_at_arms_foot": 8
       }
     },
     "fac_granada": {

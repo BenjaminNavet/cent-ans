@@ -1,0 +1,27 @@
+{
+  "id": "cdx_akinci",
+  "title": "Les akıncı",
+  "category": "unite",
+  "aliases": [
+    "akıncı",
+    "akinci",
+    "akindji",
+    "coureurs turcs"
+  ],
+  "era": {
+    "from": "1300",
+    "to": "1595"
+  },
+  "summary": "Cavaliers légers de la frontière [[cdx_ottomans|ottomane]], payés sur le butin : ils ravagent les terres byzantines, puis balkaniques, bien en avant de l'armée du sultan.",
+  "body": "Le mot vient du turc akın, le raid. Les akıncı sont des volontaires, souvent anciens nomades turkmènes, conduits par de grandes familles de la frontière (uç) comme les Mihaloğlu ou les descendants d'Evrenos. Ils ne reçoivent pas de solde : le butin et les captifs sont leur salaire, ce qui les rend nombreux et peu coûteux.\n\nSous Orhan (1324-1362), ils achèvent la conquête de la Bithynie (Nicée tombe en 1331, Nicomédie en 1337) avant de passer en Thrace après 1352. Mal armés, ils fuient la bataille rangée ; leur rôle est d'épuiser le pays ennemi et de renseigner.",
+  "gameplay": "Compagnie de 80 hommes (cavaliers). Recrutement : 420 livres payées à l'enrôlement, 1 saison(s) d'instruction ; entretien 34 livres par mois, soit 136 par saison. Caractéristiques : mêlée 46, armure 24, moral 50, vitesse 88, charge 48. Réservés aux Ottomans. La place doit compter assez de paysans (dix fois l'effectif). Cavalerie légère bon marché : éclaireurs (ils déjouent les embuscades) et chasseurs de tireurs. Leur solde est basse, mais ils ne tiennent pas contre des cavaliers lourds.",
+  "entity": "unit_akinci",
+  "see_also": [
+    "cdx_ottomans"
+  ],
+  "sources": [
+    "Akıncı",
+    "H. İnalcık, The Ottoman Empire: the Classical Age 1300-1600, 1973",
+    "C. Imber, The Ottoman Empire 1300-1650, 2002"
+  ]
+}

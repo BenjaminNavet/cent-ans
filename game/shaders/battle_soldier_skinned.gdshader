@@ -102,6 +102,12 @@ uniform vec2 chest_depth = vec2(-0.1, 0.3);
 uniform vec4 badge_cross : source_color = vec4(0.0);
 uniform vec4 badge_patch : source_color = vec4(0.0);
 uniform float livery_share = 0.7;
+// Lot OMR R5 (`data/fx/unit_looks.json`) : étoffes et robes propres au type d'unité, à la
+// place des palettes communes PLAIN / COATS quand le compte est non nul.
+uniform int plain_count = 0;
+uniform vec3 plain_colors[4];
+uniform int coat_count = 0;
+uniform vec3 coat_colors[4];
 uniform float highlight = 0.0;
 // Sang du régiment 0-1 (taches progressives, lot BV2) ; par soldat, fraction de
 // INSTANCE_CUSTOM.w (mode 3). Sans effet à 0.
@@ -612,7 +618,8 @@ void fragment() {
 			albedo = dyed * v_color;
 			livery_surface = true;
 		} else {
-			albedo = PLAIN[int(h6 * 7.99)] * mix(0.85, 1.15, v_var.z) * v_color * 1.6;
+			vec3 plain = plain_count > 0 ? plain_colors[min(int(h6 * float(plain_count)), plain_count - 1)] : PLAIN[int(h6 * 7.99)];
+			albedo = plain * mix(0.85, 1.15, v_var.z) * v_color * 1.6;
 		}
 		// DA1 : armoiries (nobles) ou croix de livrée (commun) sur la poitrine et le dos.
 		vec2 cq = vec2((v_rest.x - chest_box.x) / chest_box.z + 0.5, (chest_box.y + 0.5 * chest_box.w - v_rest.y) / chest_box.w);
@@ -689,7 +696,8 @@ void fragment() {
 		albedo = HAIR[int(h6 * 4.99)] * (v_color.r > 0.2 ? 1.2 : 1.0);
 		roughness = 0.7;
 	} else if (code == C_COAT) {
-		albedo = COATS[int(v_var.w * 4.99)] * v_color;
+		vec3 coat = coat_count > 0 ? coat_colors[min(int(v_var.w * float(coat_count)), coat_count - 1)] : COATS[int(v_var.w * 4.99)];
+		albedo = coat * v_color;
 		roughness = 0.6;
 	}
 #ifdef FG3_BAKED

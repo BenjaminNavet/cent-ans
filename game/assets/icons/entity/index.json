@@ -71,6 +71,56 @@
    0.55,
    0.9
   ],
+  "unit_mamluk_cavalry": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_steppe_horse_archers": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_akinci": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_yaya": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_serbian_heavy_cavalry": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_pronoiars": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_druzhina": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_lithuanian_light_cavalry": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_teutonic_knights": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "unit_almogavars": [
+   0.5,
+   0.5,
+   1.0
+  ],
   "unit_knights": [
    0.74,
    0.55,
@@ -915,6 +965,8 @@
   "tech_water_mills": "tech_water_mills.png",
   "tech_willow_bark": "tech_willow_bark.png",
   "tech_windmills": "tech_windmills.png",
+  "unit_akinci": "unit_akinci.png",
+  "unit_almogavars": "unit_almogavars.png",
   "unit_bombard": "unit_bombard.png",
   "unit_brabancons": "unit_brabancons.png",
   "unit_breton_knights": "unit_breton_knights.png",
@@ -928,6 +980,7 @@
   "unit_coutiliers": "unit_coutiliers.png",
   "unit_crossbowmen": "unit_crossbowmen.png",
   "unit_culveriners": "unit_culveriners.png",
+  "unit_druzhina": "unit_druzhina.png",
   "unit_ecorcheurs": "unit_ecorcheurs.png",
   "unit_english_retinue": "unit_english_retinue.png",
   "unit_flemish_pikemen": "unit_flemish_pikemen.png",
@@ -938,18 +991,25 @@
   "unit_hobelars": "unit_hobelars.png",
   "unit_jinetes": "unit_jinetes.png",
   "unit_knights": "unit_knights.png",
+  "unit_lithuanian_light_cavalry": "unit_lithuanian_light_cavalry.png",
   "unit_longbowmen": "unit_longbowmen.png",
+  "unit_mamluk_cavalry": "unit_mamluk_cavalry.png",
   "unit_mangonel": "unit_mangonel.png",
   "unit_men_at_arms_foot": "unit_men_at_arms_foot.png",
   "unit_mounted_archers": "unit_mounted_archers.png",
   "unit_mounted_sergeants": "unit_mounted_sergeants.png",
   "unit_ordonnance_gendarmes": "unit_ordonnance_gendarmes.png",
+  "unit_pronoiars": "unit_pronoiars.png",
   "unit_routiers": "unit_routiers.png",
   "unit_scots_archers": "unit_scots_archers.png",
   "unit_scottish_spearmen": "unit_scottish_spearmen.png",
+  "unit_serbian_heavy_cavalry": "unit_serbian_heavy_cavalry.png",
   "unit_siege_tower": "unit_siege_tower.png",
+  "unit_steppe_horse_archers": "unit_steppe_horse_archers.png",
+  "unit_teutonic_knights": "unit_teutonic_knights.png",
   "unit_trebuchet": "unit_trebuchet.png",
   "unit_urban_militia": "unit_urban_militia.png",
-  "unit_welsh_spearmen": "unit_welsh_spearmen.png"
+  "unit_welsh_spearmen": "unit_welsh_spearmen.png",
+  "unit_yaya": "unit_yaya.png"
  }
 }

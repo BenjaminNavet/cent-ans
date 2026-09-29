@@ -85,6 +85,17 @@ ICONS: dict[str, tuple[str, str]] = {
     # Lot TW2-T3 : compagnies de mercenaires.
     "unit_brabancons": ("lorc/halberd", "unit"),
     "unit_scots_archers": ("lorc/arrows-shield", "unit"),
+    # Lot OMR R5 : unités propres à l'Est.
+    "unit_mamluk_cavalry": ("lorc/crossed-sabres", "unit"),
+    "unit_steppe_horse_archers": ("delapouite/bow-arrow", "unit"),
+    "unit_akinci": ("lorc/wolf-head", "unit"),
+    "unit_yaya": ("delapouite/archer", "unit"),
+    "unit_serbian_heavy_cavalry": ("delapouite/cavalry", "unit"),
+    "unit_pronoiars": ("lorc/checked-shield", "unit"),
+    "unit_druzhina": ("lorc/lamellar", "unit"),
+    "unit_lithuanian_light_cavalry": ("lorc/spears", "unit"),
+    "unit_teutonic_knights": ("delapouite/templar-shield", "unit"),
+    "unit_almogavars": ("lorc/curvy-knife", "unit"),
     # Catégories d'unités (repli en bataille : clé `render`/`category`).
     "unit_category_infantry": ("lorc/crossed-swords", "unit"),
     "unit_category_ranged": ("lorc/bowman", "unit"),
