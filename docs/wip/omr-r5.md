@@ -32,10 +32,10 @@ Branche `feat/omr-r5`, worktree `../gp-omr-r5`. Plan d'ensemble : `docs/wip/omr.
 - [x] Icônes game-icons + miniatures locales (`tools/cent_ans_tools/unit_emblems.py`, sources `tools/emblem_src/`, `cent-ans assets unit-emblems` puis `entity-icons --build-only`)
 - [x] Codex (10 entrées `cdx_*`, catégorie unite)
 - [x] Looks de rendu : données + schéma (`data/fx/unit_looks.json`)
-- [ ] Looks de rendu : GDScript + shader
+- [x] Looks de rendu : `battle_unit_looks.gd` + uniformes `plain_*`/`coat_*` du shader skinné ; script `tests/omr_r5_units_shot.gd`
 - [x] Tests core `ai/tests/omr_r5_eastern_units.rs`
 - [x] Sonde matrice budget égal : 10 types entre 30 et 80 % (brabançons 16→12 %, archers écossais 88→84 % : hors bande déjà sur main)
 - [ ] Vérifs finales (fmt, clippy, tests, pytest, import, smoke), 1 capture
 
 ## Prochaine étape
-Looks de rendu (data/fx/unit_looks.json + shader), puis vérifs finales.
+Import Godot + smoke + omr_r5_units_shot (headless), cargo clippy/test workspace, pytest, 1 capture.

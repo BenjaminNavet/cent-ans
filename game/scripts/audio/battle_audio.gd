@@ -390,7 +390,7 @@ static func missile_kind(unit: Dictionary) -> String:
 		return "ball" if type == "unit_bombard" else "stone"
 	if type == "unit_culveriners":
 		return "bullet"
-	if type == "unit_jinetes":
+	if type == "unit_jinetes" or type == "unit_lithuanian_light_cavalry":
 		return "javelin"
 	if type.contains("crossbow"):
 		return "bolt"

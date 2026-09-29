@@ -102,13 +102,21 @@ fn each_eastern_unit_is_levied_at_home_in_1337() {
     let state = start(&data);
     let home = [
         ("unit_mamluk_cavalry", "fac_mamluks", "prov_cairo"),
-        ("unit_steppe_horse_archers", "fac_golden_horde", "prov_saray"),
+        (
+            "unit_steppe_horse_archers",
+            "fac_golden_horde",
+            "prov_saray",
+        ),
         ("unit_akinci", "fac_ottoman", "prov_bursa"),
         ("unit_yaya", "fac_ottoman", "prov_bursa"),
         ("unit_serbian_heavy_cavalry", "fac_serbia", "prov_kosovo"),
         ("unit_pronoiars", "fac_byzantium", "prov_constantinople"),
         ("unit_druzhina", "fac_moscow", "prov_moscow"),
-        ("unit_lithuanian_light_cavalry", "fac_lithuania", "prov_vilnius"),
+        (
+            "unit_lithuanian_light_cavalry",
+            "fac_lithuania",
+            "prov_vilnius",
+        ),
         ("unit_teutonic_knights", "fac_teutonic", "prov_pomesania"),
         ("unit_almogavars", "fac_aragon", "prov_barcelona"),
     ];
@@ -141,16 +149,36 @@ fn eastern_units_stay_in_their_region() {
     // Faction gate: mamluks, akıncı and Teutonic brethren are institutions,
     // not local levies.
     assert_eq!(
-        reason(&state, &data, "fac_golden_horde", "prov_saray", "unit_mamluk_cavalry").as_deref(),
+        reason(
+            &state,
+            &data,
+            "fac_golden_horde",
+            "prov_saray",
+            "unit_mamluk_cavalry"
+        )
+        .as_deref(),
         Some("réservé à d'autres factions")
     );
     assert_eq!(
-        reason(&state, &data, "fac_france", "prov_ile_de_france", "unit_akinci").as_deref(),
+        reason(
+            &state,
+            &data,
+            "fac_france",
+            "prov_ile_de_france",
+            "unit_akinci"
+        )
+        .as_deref(),
         Some("réservé à d'autres factions")
     );
     assert_eq!(
-        reason(&state, &data, "fac_lithuania", "prov_vilnius", "unit_teutonic_knights")
-            .as_deref(),
+        reason(
+            &state,
+            &data,
+            "fac_lithuania",
+            "prov_vilnius",
+            "unit_teutonic_knights"
+        )
+        .as_deref(),
         Some("réservé à d'autres factions")
     );
 }
@@ -161,7 +189,14 @@ fn almogavars_and_yaya_have_a_period() {
     let mut state = start(&data);
     state.year = 1401;
     assert_eq!(
-        reason(&state, &data, "fac_aragon", "prov_barcelona", "unit_almogavars").as_deref(),
+        reason(
+            &state,
+            &data,
+            "fac_aragon",
+            "prov_barcelona",
+            "unit_almogavars"
+        )
+        .as_deref(),
         Some("plus levée après 1400")
     );
     state.year = 1451;
