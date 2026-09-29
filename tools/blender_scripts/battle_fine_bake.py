@@ -932,11 +932,17 @@ def store_layer(fine_dir, level, index, count, rgba):
         strip = None
         if os.path.exists(path):
             strip = tiles.read_png(path)
-            if strip.shape != (size * count, size, 4):
+            if strip.shape[1:] != (size, 4) or strip.shape[0] % size:
                 strip = None
+        fresh = np.zeros((size * count, size, 4), np.uint8)
+        fresh[..., :] = (128, 128, 255, 255)
+        if strip is not None and strip.shape[0] != size * count:
+            # FK2: figures appended to the recipes grow the strip; earlier layers are kept.
+            keep = min(strip.shape[0], size * count)
+            fresh[:keep] = strip[:keep]
+            strip = fresh
         if strip is None:
-            strip = np.zeros((size * count, size, 4), np.uint8)
-            strip[..., :] = (128, 128, 255, 255)
+            strip = fresh
         strip[index * size : (index + 1) * size] = rgba
         tiles.write_png(path, strip)
         fcntl.flock(lock, fcntl.LOCK_UN)
@@ -968,13 +974,26 @@ def write_import(path, importer, slices=1):
             "detect_3d/compress_to=0",
         ]
     import_path = path + ".import"
+    uid = []
     if os.path.exists(import_path):
         with open(import_path) as f:
             text = f.read()
         if f'importer="{importer}"' in text and all(p in text for p in params):
             return
+        # FK2: keep the resource uid when the settings change (e.g. more atlas layers).
+        uid = [line for line in text.splitlines() if line.startswith("uid=")][:1]
     text = "\n".join(
-        ["[remap]", "", f'importer="{importer}"', "", "[params]", "", *params, ""]
+        [
+            "[remap]",
+            "",
+            f'importer="{importer}"',
+            *uid,
+            "",
+            "[params]",
+            "",
+            *params,
+            "",
+        ]
     )
     with open(import_path, "w") as f:
         f.write(text)
