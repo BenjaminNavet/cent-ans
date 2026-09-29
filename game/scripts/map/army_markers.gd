@@ -380,12 +380,12 @@ static func scale_for_distance(camera_distance: float) -> float:
 	return clampf(camera_distance * SCALE_PER_DISTANCE, MIN_SCALE, MAX_SCALE)
 
 
-## Lot CV2 : présence des figurines (1 aux paliers près et moyen, 0 au palier loin, fondu
-## sur la bande de transition de `ZoomTiers`) ; au loin restent l'étendard et la plaque.
+## Lot CV2 / DV : présence des figurines (1 en vue normale, 0 sur le parchemin, fondu sur la
+## bande de `ZoomTiers.strategic_weight`) ; au loin restent l'étendard et la plaque.
 func figure_weight(camera_distance: float) -> float:
 	if _zoom_tiers == null:
 		_zoom_tiers = ZoomTiers.load_default()
-	return 1.0 - _zoom_tiers.far_weight(camera_distance)
+	return 1.0 - _zoom_tiers.strategic_weight(camera_distance)
 
 
 func _process(delta: float) -> void:

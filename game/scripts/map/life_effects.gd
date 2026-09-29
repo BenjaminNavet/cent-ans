@@ -813,7 +813,8 @@ func _rewrite_smoke_slice(mmi: MultiMeshInstance3D, points: Array) -> void:
 
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	near_weight = tiers.near_weight(camera_distance) if tiers != null else 1.0
-	var medium := tiers.medium_weight(camera_distance) if tiers != null else 0.0
+	# DV : part de la vue normale hors détail proche (feux seuls au-delà de `near_threshold`).
+	var medium := clampf(1.0 - tiers.strategic_weight(camera_distance) - near_weight, 0.0, 1.0) if tiers != null else 0.0
 	var chimney_alpha := near_weight * _season_boost * 0.85 * MapPropScale.shared().chimney_alpha(camera_distance)
 	_chimneys.visible = chimney_alpha > 0.02
 	_chimney_material.set_shader_parameter("fade", chimney_alpha)

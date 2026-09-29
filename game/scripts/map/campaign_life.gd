@@ -259,5 +259,7 @@ func update_view(camera_distance: float) -> void:
 		var focus: Vector3 = rig.get("focus") if rig != null else Vector3.ZERO
 		# ZG4 : navires, bateaux et oiseaux à l'échelle de la carte masqués au palier « site ».
 		var keep := 1.0 - _tiers.site_weight(_camera_distance)
-		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, _tiers.medium_weight(_camera_distance) * keep)
+		# DV : bateaux et navires sur toute la vue normale (poids 1 − `strategic_weight`).
+		var normal := 1.0 - _tiers.strategic_weight(_camera_distance)
+		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, normal * keep)
 	PerfProbe.lap("life/ambient", tp)

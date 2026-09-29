@@ -239,10 +239,11 @@ func _update_routes(mmi: MultiMeshInstance3D, routes: Array, focus: Vector2, rad
 		mmi.multimesh.set_instance_transform(n, Transform3D(basis, Vector3(p.x, y + 0.05, p.y)))
 
 
-func update_view(focus: Vector2, near_weight: float, medium_weight: float) -> void:
+## DV : `normal_weight` = poids de la vue normale (1 − `ZoomTiers.strategic_weight`).
+func update_view(focus: Vector2, near_weight: float, normal_weight: float) -> void:
 	_time += get_process_delta_time()
 	_update_birds(focus, near_weight > 0.35)
-	var show_boats := near_weight > 0.35 or medium_weight > 0.5
+	var show_boats := near_weight > 0.35 or normal_weight > 0.5
 	_boats.visible = show_boats
 	_ships.visible = show_boats
 	if show_boats:
