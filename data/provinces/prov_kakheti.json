@@ -1,0 +1,90 @@
+{
+  "id": "prov_kakheti",
+  "name": {
+    "display": "Kakhétie et Héréthie",
+    "local": "კახეთი",
+    "local_language": "géorgien"
+  },
+  "region": "caucase",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Alazani"
+  ],
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Télavi",
+      "local": "თელავი",
+      "local_language": "géorgien"
+    },
+    "lat": 41.92,
+    "lon": 45.47
+  },
+  "geo": {
+    "capital_lonlat": [
+      45.47,
+      41.92
+    ],
+    "seed_lonlat": [
+      45.65,
+      41.85
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_georgia",
+  "culture": "cul_georgian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 36000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4300,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1100,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 430,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1000,
+  "description": "Pays du vin et des monastères, à l'est de la Géorgie, au pied du Grand Caucase.",
+  "sources": [
+    "Kakheti",
+    "Telavi"
+  ]
+}

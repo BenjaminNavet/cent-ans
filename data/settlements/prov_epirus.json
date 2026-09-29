@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_arta",
+    "province": "prov_epirus",
+    "kind": "city",
+    "name": {
+      "display": "Arta",
+      "local": "Ἄρτα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      20.985,
+      39.16
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du despotat d'Épire.",
+    "sources": [
+      "Arta"
+    ]
+  },
+  {
+    "id": "set_ioannina",
+    "province": "prov_epirus",
+    "kind": "town",
+    "name": {
+      "display": "Janina",
+      "local": "Ἰωάννινα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      20.85,
+      39.665
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Cité lacustre et forteresse.",
+    "sources": [
+      "Ioannina"
+    ]
+  },
+  {
+    "id": "set_vonitsa",
+    "province": "prov_epirus",
+    "kind": "castle",
+    "name": {
+      "display": "Vonitsa",
+      "local": "Βόνιτσα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      20.89,
+      38.93
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château du golfe d'Ambracie.",
+    "sources": [
+      "Vonitsa"
+    ]
+  }
+]

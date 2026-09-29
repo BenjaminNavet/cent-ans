@@ -1,0 +1,103 @@
+[
+  {
+    "id": "set_moulay_idriss",
+    "province": "prov_meknes",
+    "kind": "village",
+    "name": {
+      "display": "Moulay Idriss Zerhoun",
+      "local": "Mūlāy Idrīs Zarhūn",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -5.5236,
+      34.0553
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Sanctuaire d'Idris Ier, fondateur de la dynastie idrisside, sur le Zerhoun.",
+    "sources": [
+      "Moulay Idriss Zerhoun"
+    ]
+  },
+  {
+    "id": "set_meknes",
+    "province": "prov_meknes",
+    "kind": "city",
+    "name": {
+      "display": "Meknès",
+      "local": "Miknāsa",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -5.5547,
+      33.8935
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville de la tribu zénète des Meknassa ; cité fortifiée et marché du Saïs.",
+    "sources": [
+      "Meknès"
+    ]
+  },
+  {
+    "id": "set_azrou",
+    "province": "prov_meknes",
+    "kind": "village",
+    "name": {
+      "display": "Azrou",
+      "local": "Azrū",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -5.2233,
+      33.4344
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg berbère du Moyen Atlas, cèdres et pâturages de transhumance.",
+    "sources": [
+      "Azrou"
+    ]
+  },
+  {
+    "id": "set_volubilis",
+    "province": "prov_meknes",
+    "kind": "castle",
+    "name": {
+      "display": "Volubilis (Walīla)",
+      "local": "Walīlā",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -5.5546,
+      34.0719
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ruines romaines de Volubilis, site fortifié d'Idris Ier ; en 1337 simple bourg en ruine.",
+    "sources": [
+      "Volubilis"
+    ]
+  }
+]

@@ -1,0 +1,61 @@
+{
+  "id": "fac_riga",
+  "name": {
+    "display": "Ville de Riga",
+    "local": "Stadt Riga",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Riga",
+  "adjective": "rigois de la ville",
+  "government": "republic",
+  "playable": true,
+  "capital": "prov_riga",
+  "capital_city": "Riga",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "suzerain": "fac_livonian_order",
+  "primary_title": "tit_riga_city",
+  "heraldry": {
+    "blazon": "D'argent à deux clefs de gueules en sautoir.",
+    "description": "Clefs croisées de la ville de Riga (armes simplifiées).",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Blason simplifié du sceau de la ville, inversé pour la distinction visuelle."
+  },
+  "titles": [
+    "Conseil de Riga"
+  ],
+  "treasury": 9000,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hanseatic_trade"
+  ],
+  "relations": [
+    {
+      "faction": "fac_livonian_order",
+      "status": "vassal",
+      "note": "Soumise en 1330 après un siège de plus d'un an ; l'Ordre y tient le château Saint-Georges."
+    },
+    {
+      "faction": "fac_riga_archbishopric",
+      "status": "peace",
+      "note": "L'archevêque conteste l'emprise de la ville."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 20,
+    "diplomacy": 60,
+    "trade": 90,
+    "piety": 50
+  },
+  "description": "Grande ville hanséatique de la Dvina, dont le bois, le blé et la cire alimentent l'Occident ; vaincue en 1330 par l'Ordre, elle garde son conseil et rêve de retrouver son indépendance.",
+  "sources": [
+    "Riga",
+    "Siège de Riga (1329-1330)"
+  ]
+}

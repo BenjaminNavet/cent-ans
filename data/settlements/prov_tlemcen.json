@@ -1,0 +1,107 @@
+[
+  {
+    "id": "set_tlemcen",
+    "province": "prov_tlemcen",
+    "kind": "city",
+    "name": {
+      "display": "Tlemcen",
+      "local": "Tilimsān",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -1.315,
+      34.878
+    ],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_weaving_workshop"
+    ],
+    "port": false,
+    "description": "Capitale du royaume abd al-wadide, prise le 1er mai 1337 par les Mérinides.",
+    "sources": [
+      "Tlemcen"
+    ]
+  },
+  {
+    "id": "set_mansoura",
+    "province": "prov_tlemcen",
+    "kind": "castle",
+    "name": {
+      "display": "Al-Mansura",
+      "local": "Al-Manṣūra",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -1.3475,
+      34.8736
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville-camp bâtie par Abu Yaqub en 1299 pendant le premier siège, devenue bourg fortifié aux portes de Tlemcen.",
+    "sources": [
+      "Al-Mansura (Tlemcen)"
+    ]
+  },
+  {
+    "id": "set_oujda",
+    "province": "prov_tlemcen",
+    "kind": "town",
+    "name": {
+      "display": "Oujda",
+      "local": "Wajda",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -1.9086,
+      34.6814
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville frontière entre Maroc et Tlemcen, base arrière du siège.",
+    "sources": [
+      "Oujda"
+    ]
+  },
+  {
+    "id": "set_nedroma",
+    "province": "prov_tlemcen",
+    "kind": "village",
+    "name": {
+      "display": "Nédroma",
+      "local": "Nadrūma",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -1.7517,
+      35.0089
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Petite ville des Trara, aux portes du littoral.",
+    "sources": [
+      "Nedroma"
+    ]
+  }
+]

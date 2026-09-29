@@ -1,0 +1,59 @@
+{
+  "name": {
+    "display": "Comté de Desmond",
+    "local": "Earldom of Desmond",
+    "local_language": "moyen anglais"
+  },
+  "short_name": "Desmond",
+  "adjective": "desmondien",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_maurice_fitzgerald_i_de_desmond",
+  "heir": "chr_maurice_fitzgerald_ii_de_desmond",
+  "capital": "prov_desmond",
+  "capital_city": "Shanid",
+  "religion": "rel_catholic",
+  "culture": "cul_english",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_england",
+  "primary_title": "tit_desmond",
+  "heraldry": {
+    "blazon": "D'hermine au sautoir de gueules.",
+    "description": "Armes des FitzGerald de Desmond.",
+    "primary_color": "#F2F2F2",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Comte de Desmond",
+    "Seigneur palatin de Kerry"
+  ],
+  "treasury": 4500,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "vassal",
+      "note": "Comté palatin érigé le 27 août 1329 pour Maurice FitzGerald, dit « Maurice le Grand », après une révolte armée contre la couronne."
+    },
+    {
+      "faction": "fac_thomond",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 40,
+    "trade": 45,
+    "piety": 40
+  },
+  "description": "Maurice FitzGerald, dit « Maurice le Grand », 1er comte de Desmond : rebelle gracié devenu quasi-souverain du Munster grâce à la juridiction palatine du Kerry (1329). Sera brièvement lord justiciar d'Irlande.",
+  "sources": [
+    "Maurice FitzGerald, 1er comte de Desmond",
+    "Comté de Desmond"
+  ],
+  "id": "fac_desmond"
+}

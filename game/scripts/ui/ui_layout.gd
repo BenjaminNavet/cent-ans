@@ -226,7 +226,7 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	entry.set_meta(_TOAST_META, true)
 	entry.mouse_filter = Control.MOUSE_FILTER_STOP
 	entry.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	entry.tooltip_text = "Cliquer pour fermer"
+	RichTooltip.attach_plain(entry, "click_to_close")
 	entry.add_theme_stylebox_override("panel", HudStyle.note_box(8))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
@@ -354,13 +354,15 @@ func _build_host(host: Node) -> Dictionary:
 		node.offset_right = 0.0
 		node.offset_bottom = 0.0
 		zones[zone] = node
-	# Ordre d'affichage : zones de HUD, panneau latéral, avis, voile puis modale. Dans l'interface de
-	# campagne, `PanelStack.restack` respecte ces étages.
+	# Ordre d'affichage : zones de HUD et avis, panneau latéral, voile puis modale. Dans l'interface de
+	# campagne, `PanelStack.restack` respecte ces étages. Q6 : les avis et le journal (`TOASTS`)
+	# sont au niveau du HUD, sous toute fenêtre ouverte par le joueur (elle en recevait les clics) ;
+	# la carte ne les monte à l'étage `BANNER` que le temps du bandeau de fin de tour.
 	PanelStack.set_tier(zones[Zone.TOP_BAR], PanelStack.Tier.HUD)
 	PanelStack.set_tier(zones[Zone.BOTTOM_SELECTION], PanelStack.Tier.HUD)
 	PanelStack.set_tier(zones[Zone.MINIMAP], PanelStack.Tier.HUD)
 	PanelStack.set_tier(zones[Zone.SIDE_PANEL], PanelStack.Tier.PANEL)
-	PanelStack.set_tier(zones[Zone.TOASTS], PanelStack.Tier.BANNER)
+	PanelStack.set_tier(zones[Zone.TOASTS], PanelStack.Tier.HUD)
 	PanelStack.set_tier(dim, PanelStack.Tier.MODAL)
 	PanelStack.set_tier(zones[Zone.MODAL], PanelStack.Tier.MODAL)
 	for zone in [Zone.TOP_BAR, Zone.BOTTOM_SELECTION, Zone.MINIMAP, Zone.SIDE_PANEL, Zone.TOASTS]:
@@ -455,14 +457,17 @@ func _forget(control: Control) -> void:
 	if is_instance_valid(control):
 		var parent := control.get_parent()
 		if parent != null and parent.has_meta(_WRAPPER_META) and not parent.is_queued_for_deletion():
-			_free_wrapper.call_deferred(parent)
+			# Par identifiant : l'enveloppe peut être libérée avant l'appel différé (un argument
+			# typé Object refuse alors l'instance morte).
+			_free_wrapper.call_deferred(parent.get_instance_id())
 	_update_dim.call_deferred()
 
 
 ## Enveloppe défilante devenue vide (occupant sorti) ; rien si elle est partie avec son hôte.
-func _free_wrapper(wrapper: Object) -> void:
-	if is_instance_valid(wrapper) and not (wrapper as Node).is_queued_for_deletion() and (wrapper as Node).get_child_count() == 0:
-		(wrapper as Node).queue_free()
+func _free_wrapper(wrapper_id: int) -> void:
+	var wrapper := instance_from_id(wrapper_id) as Node
+	if wrapper != null and not wrapper.is_queued_for_deletion() and wrapper.get_child_count() == 0:
+		wrapper.queue_free()
 
 
 func _on_occupant_visibility(control: Control) -> void:

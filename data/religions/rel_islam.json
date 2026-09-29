@@ -1,14 +1,16 @@
 {
   "id": "rel_islam",
   "name": {
-    "display": "Islam (Grenade)",
+    "display": "Islam",
     "local": "al-Islām",
     "local_language": "arabe"
   },
   "kind": "other_faith",
-  "description": "Émirat nasride de Grenade et Mérinides du Maroc, adversaires de la Castille (bataille du Salado, 30 octobre 1340).",
+  "description": "Islam sunnite : Nasrides de Grenade, Mérinides, Hafsides, sultanat mamelouk, beyliks turcs d'Anatolie, Horde d'Or convertie sous Özbeg (1313). Bataille du Salado, 30 octobre 1340.",
   "sources": [
     "Royaume de Grenade",
-    "Bataille de Tarifa (1340)"
+    "Bataille de Tarifa (1340)",
+    "Sultanat mamelouk",
+    "Özbeg"
   ]
 }

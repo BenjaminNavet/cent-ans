@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_taranto",
+    "province": "prov_taranto",
+    "kind": "city",
+    "name": {
+      "display": "Tarente",
+      "local": "Taranto",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      17.2408,
+      40.4644
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Capitale de la principauté angevine de Tarente, apanage des cadets de la maison d'Anjou-Naples.",
+    "sources": [
+      "Principauté de Tarente"
+    ]
+  },
+  {
+    "id": "set_massafra",
+    "province": "prov_taranto",
+    "kind": "town",
+    "name": {
+      "display": "Massafra",
+      "local": "Massafra",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      17.1167,
+      40.5833
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg des Pouilles, à l'intérieur des terres de la principauté de Tarente.",
+    "sources": [
+      "Massafra"
+    ]
+  },
+  {
+    "id": "set_grottaglie",
+    "province": "prov_taranto",
+    "kind": "village",
+    "name": {
+      "display": "Grottaglie",
+      "local": "Grottaglie",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      17.4322,
+      40.5411
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg potier des Pouilles, dans la mouvance de Tarente.",
+    "sources": [
+      "Grottaglie"
+    ]
+  }
+]

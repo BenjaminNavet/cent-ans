@@ -1,0 +1,42 @@
+{
+  "id": "chr_adolf_ii_von_der_mark",
+  "name": {
+    "display": "Adolphe II de la Marck",
+    "local": "Adolf II. von der Mark",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "de la Marck",
+  "faction": "fac_mark",
+  "role": "ruler",
+  "birth": {
+    "value": "1295",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1347"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de la Marck"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_diplomat"
+  ],
+  "piety": 65,
+  "starting_location": "prov_westphalia",
+  "status": "at_court",
+  "description": "Comte de la Marck de 1328 à 1347. Sa maison, très liée à l'Église rhénane, a déjà donné plusieurs archevêques de Cologne et en donnera d'autres après lui.",
+  "sources": [
+    "Adolphe II de la Marck",
+    "Comté de la Marck"
+  ]
+}

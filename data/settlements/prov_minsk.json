@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_minsk",
+    "province": "prov_minsk",
+    "kind": "city",
+    "name": {
+      "display": "Minsk",
+      "local": "Mensk",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      27.559,
+      53.9006
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château et ville de la haute Svislač, chef-lieu d'une ancienne principauté.",
+    "sources": [
+      "Minsk"
+    ]
+  },
+  {
+    "id": "set_zaslauje",
+    "province": "prov_minsk",
+    "kind": "town",
+    "name": {
+      "display": "Zaslaŭje",
+      "local": "Izyaslavl",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      27.2833,
+      54.0
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Petite ville-château de la principauté de Minsk.",
+    "sources": [
+      "Zaslaŭje"
+    ]
+  },
+  {
+    "id": "set_barysau",
+    "province": "prov_minsk",
+    "kind": "town",
+    "name": {
+      "display": "Barysaŭ",
+      "local": "Borisov",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      28.505,
+      54.2267
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Bérézina, ancienne place-forte de Polotsk.",
+    "sources": [
+      "Barysaŭ"
+    ]
+  }
+]

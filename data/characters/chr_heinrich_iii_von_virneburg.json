@@ -1,0 +1,48 @@
+{
+  "id": "chr_heinrich_iii_von_virneburg",
+  "name": {
+    "display": "Henri III de Virnebourg",
+    "local": "Heinrich III. von Virneburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "male",
+  "house": "Virneburg",
+  "faction": "fac_mainz",
+  "role": "ruler",
+  "birth": {
+    "value": "1280",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1353-09-12",
+    "place": "Mayence",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Archevêque-électeur de Mayence",
+      "from": {
+        "value": "1328",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_pious",
+    "trait_stubborn"
+  ],
+  "piety": 75,
+  "starting_location": "prov_mainz",
+  "status": "at_court",
+  "description": "Archevêque-électeur de Mayence de 1328 à sa mort en 1353, archichancelier du royaume de Germanie ; il soutient d'abord puis combat l'empereur Louis IV de Wittelsbach dans le conflit avec la papauté avignonnaise.",
+  "sources": [
+    "Électorat de Mayence",
+    "Henri III de Virnebourg"
+  ]
+}

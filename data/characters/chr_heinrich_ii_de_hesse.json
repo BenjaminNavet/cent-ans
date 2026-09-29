@@ -1,0 +1,48 @@
+{
+  "id": "chr_heinrich_ii_de_hesse",
+  "name": {
+    "display": "Henri II de Hesse",
+    "local": "Heinrich II. von Hessen",
+    "local_language": "moyen haut-allemand"
+  },
+  "epithet": "le Fer",
+  "sex": "male",
+  "house": "Brabant-Hesse",
+  "faction": "fac_hesse",
+  "role": "ruler",
+  "birth": {
+    "value": "1302",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1376-06-05",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Landgrave de Hesse",
+      "from": {
+        "value": "1328",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 3
+  },
+  "traits": [
+    "trait_stern",
+    "trait_stubborn"
+  ],
+  "piety": 45,
+  "starting_location": "prov_hesse",
+  "status": "at_court",
+  "description": "Fils d'Otton Ier de Hesse, landgrave de Hesse depuis 1328 ; surnommé « le Fer » pour sa fermeté militaire, il consolide le landgraviat détaché de Thuringe par sa grand-mère Sophie de Brabant.",
+  "sources": [
+    "Henri II de Hesse",
+    "Landgraviat de Hesse"
+  ]
+}

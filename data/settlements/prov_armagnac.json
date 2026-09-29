@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_lectoure",
+    "province": "prov_armagnac",
+    "kind": "city",
+    "name": {
+      "display": "Lectoure",
+      "local": "Leitora",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.6247,
+      43.9377
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du comté d'Armagnac, résidence principale de Jean Ier d'Armagnac.",
+    "sources": [
+      "Comté d'Armagnac",
+      "Lectoure"
+    ]
+  },
+  {
+    "id": "set_fleurance",
+    "province": "prov_armagnac",
+    "kind": "town",
+    "name": {
+      "display": "Fleurance",
+      "local": "Flourença",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.6607,
+      43.8422
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bastide fondée en 1274 par les comtes d'Armagnac sur les rives du Gers.",
+    "sources": [
+      "Fleurance"
+    ]
+  },
+  {
+    "id": "set_mauvezin",
+    "province": "prov_armagnac",
+    "kind": "castle",
+    "name": {
+      "display": "Mauvezin",
+      "local": "Maubesin",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.8964,
+      43.7286
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château comtal d'Armagnac, verrou oriental du comté vers la Lomagne.",
+    "sources": [
+      "Mauvezin (Gers)"
+    ]
+  }
+]

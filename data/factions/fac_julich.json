@@ -1,0 +1,64 @@
+{
+  "id": "fac_julich",
+  "name": {
+    "display": "Duché de Juliers",
+    "local": "Herzogtum Jülich",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Juliers",
+  "adjective": "julichois",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_wilhelm_v_von_julich",
+  "capital": "prov_julich",
+  "capital_city": "Jülich",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_julich",
+  "heraldry": {
+    "blazon": "D'or au lion de sable, armé et lampassé de gueules, à la bordure de gueules.",
+    "description": "Armes de Juliers (lion de sable sur or) brisées d'une bordure de gueules pour les distinguer des armes historiques du Palatinat de Bavière, également au lion de sable sur or.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Duc de Juliers"
+  ],
+  "treasury": 6500,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Guillaume V, élevé au rang de duc en 1336 par Louis IV."
+    },
+    {
+      "faction": "fac_england",
+      "status": "alliance",
+      "note": "Beau-frère d'Édouard III (les deux ont épousé des filles de Guillaume Ier de Hainaut) ; pilier rhénan de la coalition anglo-impériale de 1337-1338 contre la France.",
+      "since": {
+        "value": "1337",
+        "uncertain": true
+      }
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 60,
+    "trade": 50,
+    "piety": 45
+  },
+  "description": "Comté de Juliers, élevé en duché par Louis IV en 1336 pour Guillaume V, qui a épousé Jeanne de Hainaut, sœur de la reine d'Angleterre Philippa ; figure clé de l'alliance anglo-impériale contre Philippe VI.",
+  "sources": [
+    "Guillaume Ier de Juliers",
+    "Duché de Juliers",
+    "Philippa de Hainaut"
+  ]
+}

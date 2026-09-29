@@ -1,0 +1,44 @@
+{
+  "id": "chr_boleslas_iii_de_plock",
+  "name": {
+    "display": "Boleslas III de Płock",
+    "local": "Bolesław III płocki",
+    "local_language": "polonais"
+  },
+  "sex": "male",
+  "house": "Piast de Mazovie",
+  "faction": "fac_plock",
+  "role": "ruler",
+  "birth": {
+    "value": "1322",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1351"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Płock",
+      "from": {
+        "value": "1336-05-23"
+      },
+      "note": "Hérite à la mort de son père, sous tutelle de Siemowit II et de Trojden Ier jusqu'en 1340."
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_prodigy"
+  ],
+  "piety": 50,
+  "starting_location": "prov_plock",
+  "status": "minor",
+  "description": "Fils unique de Wenceslas de Płock et d'Elżbieta, fille de Gediminas ; duc mineur sous la tutelle de ses oncles.",
+  "sources": [
+    "Boleslas III de Płock"
+  ]
+}

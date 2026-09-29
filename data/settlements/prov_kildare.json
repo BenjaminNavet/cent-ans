@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_kildare",
+    "province": "prov_kildare",
+    "kind": "city",
+    "name": {
+      "display": "Kildare",
+      "local": "Cill Dara",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -6.9106,
+      53.1589
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Cité épiscopale fondée autour du monastère de sainte Brigide, chef-lieu du comté.",
+    "sources": [
+      "Kildare (ville)"
+    ]
+  },
+  {
+    "id": "set_maynooth",
+    "province": "prov_kildare",
+    "kind": "castle",
+    "name": {
+      "display": "Maynooth",
+      "local": "Maigh Nuad",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -6.5925,
+      53.3815
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Château de Maynooth, principale résidence des comtes de Kildare depuis le XIIIe siècle.",
+    "sources": [
+      "Château de Maynooth"
+    ]
+  },
+  {
+    "id": "set_naas",
+    "province": "prov_kildare",
+    "kind": "town",
+    "name": {
+      "display": "Naas",
+      "local": "Nás na Ríogh",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -6.6669,
+      53.2156
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancien siège royal du Leinster, devenu bourg de marché anglo-normand.",
+    "sources": [
+      "Naas"
+    ]
+  }
+]

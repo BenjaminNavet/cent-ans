@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_thessalonica",
+    "province": "prov_thessalonica",
+    "kind": "city",
+    "name": {
+      "display": "Thessalonique",
+      "local": "Θεσσαλονίκη",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.9444,
+      40.6401
+    ],
+    "weight": 55,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_fair",
+      "bld_cathedral",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_scriptorium",
+      "bld_guild_hall",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Grand port de l'Empire, sanctuaire de saint Démétrios.",
+    "sources": [
+      "Thessalonique"
+    ]
+  },
+  {
+    "id": "set_athos_lavra",
+    "province": "prov_thessalonica",
+    "kind": "abbey",
+    "name": {
+      "display": "Grande Lavra du Mont Athos",
+      "local": "Μεγίστη Λαύρα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      24.15,
+      40.16
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère fondé en 963, cœur de la Sainte Montagne et de l'hésychasme.",
+    "sources": [
+      "Mont Athos"
+    ]
+  },
+  {
+    "id": "set_kassandreia",
+    "province": "prov_thessalonica",
+    "kind": "castle",
+    "name": {
+      "display": "Cassandrie",
+      "local": "Κασσάνδρεια",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      23.32,
+      40.04
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse de la péninsule de Cassandra.",
+    "sources": [
+      "Cassandra"
+    ]
+  }
+]

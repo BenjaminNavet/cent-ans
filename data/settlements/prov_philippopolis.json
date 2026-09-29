@@ -1,0 +1,107 @@
+[
+  {
+    "id": "set_plovdiv",
+    "province": "prov_philippopolis",
+    "kind": "city",
+    "name": {
+      "display": "Philippopolis",
+      "local": "Пловдив",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      24.75,
+      42.15
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Grande ville de la plaine de Thrace.",
+    "sources": [
+      "Plovdiv"
+    ]
+  },
+  {
+    "id": "set_stenimachos",
+    "province": "prov_philippopolis",
+    "kind": "castle",
+    "name": {
+      "display": "Stenimachos",
+      "local": "Стенимахос",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      24.87,
+      41.98
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse d'Asen (Asenovgrad).",
+    "sources": [
+      "Asen's Fortress"
+    ]
+  },
+  {
+    "id": "set_bachkovo",
+    "province": "prov_philippopolis",
+    "kind": "abbey",
+    "name": {
+      "display": "Batchkovo",
+      "local": "Бачковски манастир",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      24.85,
+      41.94
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère fondé en 1083.",
+    "sources": [
+      "Monastère de Bachkovo"
+    ]
+  },
+  {
+    "id": "set_tsepina",
+    "province": "prov_philippopolis",
+    "kind": "castle",
+    "name": {
+      "display": "Tsepina",
+      "local": "Цепина",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      24.4,
+      42.0
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse des Rhodopes bulgares.",
+    "sources": [
+      "Tsepina"
+    ]
+  }
+]

@@ -1,0 +1,58 @@
+{
+  "id": "chr_gediminas",
+  "name": {
+    "display": "Gediminas",
+    "local": "Gediminas",
+    "local_language": "lituanien"
+  },
+  "epithet": "le Grand",
+  "sex": "male",
+  "house": "Gediminides",
+  "faction": "fac_lithuania",
+  "role": "ruler",
+  "birth": {
+    "value": "1275",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1341-12",
+    "uncertain": true,
+    "place": "Veliuona"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Grand-duc de Lituanie",
+      "from": {
+        "value": "1316",
+        "uncertain": true
+      },
+      "note": "Succède à son frère Vytenis (1315-1316)."
+    }
+  ],
+  "skills": {
+    "command": 8,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_charismatic",
+    "trait_resolute"
+  ],
+  "piety": 40,
+  "family": {
+    "children": [
+      "chr_algirdas",
+      "chr_kestutis",
+      "chr_jaunutis",
+      "chr_aldona_de_lituanie"
+    ]
+  },
+  "starting_location": "prov_vilnius",
+  "status": "at_court",
+  "description": "Fondateur de la puissance lituanienne, il installe sa capitale à Vilnius vers 1323 et étend son pouvoir sur les terres ruthènes ; païen, il écrit aux papes et aux Hanséates, mais tient tête à l'Ordre teutonique.",
+  "sources": [
+    "Gediminas"
+  ]
+}

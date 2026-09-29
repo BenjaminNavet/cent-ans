@@ -40,10 +40,21 @@ static func available(sim: Object) -> bool:
 
 
 ## Clés de position par province (`ids`) ; vide si la simulation ne les calcule pas.
-static func stances(sim: Object, ids: PackedStringArray) -> PackedStringArray:
+## `viewer` (lot DZ) : faction dont on lit les relations ("" : le joueur).
+static func stances(sim: Object, ids: PackedStringArray, viewer: String = "") -> PackedStringArray:
 	if not available(sim):
 		return PackedStringArray()
+	if viewer != "" and sim.has_method("get_province_stances_for"):
+		return sim.call("get_province_stances_for", viewer, ids)
 	return sim.call("get_province_stances", ids)
+
+
+## Lot DZ : position de `viewer` envers chaque faction ({id: clé}, rebelles en guerre) ; vide si
+## la simulation ne la calcule pas.
+static func faction_stances(sim: Object, viewer: String) -> Dictionary:
+	if sim == null or viewer == "" or not sim.has_method("get_faction_stances_for"):
+		return {}
+	return sim.call("get_faction_stances_for", viewer)
 
 
 static func color_of(key: String) -> Color:

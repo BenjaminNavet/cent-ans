@@ -1,0 +1,93 @@
+{
+  "id": "fac_serbia",
+  "name": {
+    "display": "Royaume de Serbie",
+    "local": "Краљевина Србија",
+    "local_language": "serbe"
+  },
+  "short_name": "Serbie",
+  "adjective": "serbe",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_stefan_dusan",
+  "heir": "chr_stefan_uros_v",
+  "capital": "prov_kosovo",
+  "capital_city": "Prizren",
+  "religion": "rel_orthodox",
+  "culture": "cul_serbian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_serbia",
+  "heraldry": {
+    "blazon": "De gueules à l'aigle bicéphale d'argent.",
+    "description": "Aigle bicéphale blanc sur champ rouge, emblème des Nemanjić emprunté à Byzance (attesté surtout après 1346).",
+    "primary_color": "#9E1B25",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Le blason serbe est surtout attesté au XVe siècle."
+  },
+  "titles": [
+    "Roi de Serbie et du littoral"
+  ],
+  "treasury": 14000,
+  "prestige": 60,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_royal_taxation",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Paix de 1334 : gains territoriaux serbes en Macédoine."
+    },
+    {
+      "faction": "fac_bulgaria",
+      "status": "alliance",
+      "note": "Dušan a épousé Hélène, sœur d'Ivan Alexandre (1332).",
+      "since": {
+        "value": "1332"
+      }
+    },
+    {
+      "faction": "fac_bosnia",
+      "status": "peace",
+      "note": "Voisin bosniaque qui a pris le Hum en 1326."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "peace",
+      "note": "Rivalité sur les ports de Zeta."
+    },
+    {
+      "faction": "fac_hungary",
+      "status": "peace",
+      "note": "Frontière de Macsó ; campagne hongroise de 1335."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_hum",
+      "note": "Le Hum, perdu au profit de la Bosnie en 1326."
+    },
+    {
+      "kind": "province",
+      "province": "prov_serres",
+      "note": "Ambition macédonienne."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 75,
+    "diplomacy": 50,
+    "trade": 40,
+    "piety": 60
+  },
+  "description": "Le royaume des Nemanjić, en pleine expansion : Étienne Dušan, monté sur le trône en 1331 après avoir détrôné son père Stefan Dečanski, pousse ses frontières vers la Macédoine byzantine et rêve du titre impérial.",
+  "sources": [
+    "Stefan Dušan",
+    "Royaume de Serbie médiéval"
+  ]
+}

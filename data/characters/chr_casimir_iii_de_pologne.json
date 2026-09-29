@@ -1,0 +1,53 @@
+{
+  "id": "chr_casimir_iii_de_pologne",
+  "name": {
+    "display": "Casimir III de Pologne",
+    "local": "Kazimierz III Wielki",
+    "local_language": "polonais"
+  },
+  "epithet": "le Grand",
+  "sex": "male",
+  "house": "Piast",
+  "faction": "fac_poland",
+  "role": "ruler",
+  "birth": {
+    "value": "1310-04-30"
+  },
+  "death": {
+    "value": "1370-11-05",
+    "place": "Cracovie"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Pologne",
+      "from": {
+        "value": "1333-04-25"
+      },
+      "note": "Couronné à Cracovie le 25 avril 1333."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 9,
+    "court": 6
+  },
+  "traits": [
+    "trait_just",
+    "trait_builder",
+    "trait_diplomat",
+    "trait_lustful"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_aldona_de_lituanie"
+    ]
+  },
+  "starting_location": "prov_lesser_poland",
+  "status": "at_court",
+  "description": "Roi depuis 1333, jeune souverain juriste et bâtisseur, marié à Aldona de Lituanie ; il a renoncé à la Silésie (1335) pour sauver le reste du royaume et tient tête à l'Ordre teutonique avec l'aide de son beau-frère hongrois. Sans fils, il n'a pas d'héritier désigné.",
+  "sources": [
+    "Casimir III de Pologne"
+  ]
+}

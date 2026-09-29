@@ -126,7 +126,6 @@ fn update_class(
 ) {
     // F1: effects aimed at this class only (`Effect::class`).
     let class_fx = effects.classes.get(class);
-    let class_points = |value: crate::buildings::EffectValue| value.flat + value.percent;
 
     // ----- growth ----------------------------------------------------
     let health_factor = (f64::from(entry.health) - HEALTH_NEUTRAL) / HEALTH_NEUTRAL;
@@ -142,66 +141,280 @@ fn update_class(
     entry.count = new_count;
 
     // ----- health ------------------------------------------------------
-    let overpopulation = if cap > 0 {
-        ((population_total as f64 / cap as f64) - 1.0).max(0.0) * 20.0
-    } else {
-        0.0
+    let shared = SharedModifiers {
+        devastation,
+        tax_burden,
+        occupied,
+        foreign_religion,
+        disorder,
+        garrison_strength,
+        overpopulation: overpopulation(population_total, cap),
     };
-    let health_target = HEALTH_NEUTRAL
-        + effects.health.flat
-        + effects.health.percent
-        + class_points(class_fx.health)
-        + (f64::from(entry.goods_satisfaction) - 50.0) / 4.0
-        - overpopulation;
+    let health_target = health_target(effects, class, f64::from(entry.goods_satisfaction), &shared);
     entry.health = move_towards(entry.health, health_target, HEALTH_SPEED);
 
     // ----- wealth --------------------------------------------------------
-    let wealth_target = base_wealth(class)
-        + effects.wealth.flat
-        + effects.wealth.percent
-        + class_points(class_fx.wealth)
-        + effects.trade_income.flat
-        - tax_burden * 30.0
-        - f64::from(devastation) / 2.0;
+    let wealth_target = wealth_target(effects, class, &shared);
     entry.wealth = move_towards(entry.wealth, wealth_target, WEALTH_SPEED);
 
     // ----- goods satisfaction -------------------------------------------
-    let goods_target = GOODS_TARGET_BASE
-        + GOODS_TARGET_PER_CATEGORY * goods_category_count as f64
-        + effects.goods_satisfaction.flat
-        + effects.goods_satisfaction.percent
-        + class_points(class_fx.goods_satisfaction);
+    let goods_target = goods_target(effects, class, goods_category_count);
     entry.goods_satisfaction = move_towards(entry.goods_satisfaction, goods_target, GOODS_SPEED);
 
     // ----- unrest ----------------------------------------------------------
+    let unrest_target = unrest_target(
+        effects,
+        class,
+        f64::from(entry.goods_satisfaction),
+        f64::from(entry.health),
+        &shared,
+        rules,
+    );
+    entry.unrest = move_towards(entry.unrest, unrest_target, UNREST_SPEED);
+}
+
+/// Province-wide modifiers of the gauge targets (IB5: shared by
+/// [`update_class`] and the equilibrium previews).
+struct SharedModifiers {
+    devastation: u8,
+    tax_burden: f64,
+    occupied: bool,
+    foreign_religion: bool,
+    disorder: u8,
+    garrison_strength: u32,
+    overpopulation: f64,
+}
+
+fn overpopulation(population_total: u64, cap: u64) -> f64 {
+    if cap > 0 {
+        ((population_total as f64 / cap as f64) - 1.0).max(0.0) * 20.0
+    } else {
+        0.0
+    }
+}
+
+fn class_points(value: crate::buildings::EffectValue) -> f64 {
+    value.flat + value.percent
+}
+
+fn health_target(
+    effects: &EffectTotals,
+    class: SocialClass,
+    goods_satisfaction: f64,
+    shared: &SharedModifiers,
+) -> f64 {
+    HEALTH_NEUTRAL
+        + effects.health.flat
+        + effects.health.percent
+        + class_points(effects.classes.get(class).health)
+        + (goods_satisfaction - 50.0) / 4.0
+        - shared.overpopulation
+}
+
+fn wealth_target(effects: &EffectTotals, class: SocialClass, shared: &SharedModifiers) -> f64 {
+    base_wealth(class)
+        + effects.wealth.flat
+        + effects.wealth.percent
+        + class_points(effects.classes.get(class).wealth)
+        + effects.trade_income.flat
+        - shared.tax_burden * 30.0
+        - f64::from(shared.devastation) / 2.0
+}
+
+fn goods_target(effects: &EffectTotals, class: SocialClass, goods_category_count: usize) -> f64 {
+    GOODS_TARGET_BASE
+        + GOODS_TARGET_PER_CATEGORY * goods_category_count as f64
+        + effects.goods_satisfaction.flat
+        + effects.goods_satisfaction.percent
+        + class_points(effects.classes.get(class).goods_satisfaction)
+}
+
+/// Unrest target (0-100) given the class's goods satisfaction and health.
+fn unrest_target(
+    effects: &EffectTotals,
+    class: SocialClass,
+    goods_satisfaction: f64,
+    health: f64,
+    shared: &SharedModifiers,
+    rules: &data_model::PopulationRules,
+) -> f64 {
     // E2 (`data/rules/population.json`): taxes bite, garrisons and plenty
     // soothe only so much.
-    let garrison_relief = (f64::from(garrison_strength / 100) * rules.garrison_relief_per_100_men)
+    let garrison_relief = (f64::from(shared.garrison_strength / 100)
+        * rules.garrison_relief_per_100_men)
         .min(rules.garrison_relief_max);
-    let mut unrest_target = tax_burden * rules.tax_unrest_weight
-        + f64::from(devastation) / 2.0
-        + ((50.0 - f64::from(entry.goods_satisfaction)) / 3.0).max(-rules.goods_relief_max)
-        + (50.0 - f64::from(entry.health)) / 4.0
+    let mut unrest_target = shared.tax_burden * rules.tax_unrest_weight
+        + f64::from(shared.devastation) / 2.0
+        + ((50.0 - goods_satisfaction) / 3.0).max(-rules.goods_relief_max)
+        + (50.0 - health) / 4.0
         - garrison_relief;
-    if occupied {
+    if shared.occupied {
         unrest_target += rules.occupation_unrest;
     }
-    if foreign_religion {
+    if shared.foreign_religion {
         unrest_target += rules.foreign_religion_unrest;
     }
     // EQ1: recent captures, raids and regencies (the province's own
     // disorder gauge, which fades by itself).
     unrest_target +=
-        (f64::from(disorder) * rules.disorder_unrest_weight).min(rules.disorder_unrest_max);
+        (f64::from(shared.disorder) * rules.disorder_unrest_weight).min(rules.disorder_unrest_max);
     // Building `Unrest` effects: negative values are appeasement.
-    unrest_target += effects.unrest.flat + effects.unrest.percent + class_points(class_fx.unrest);
+    unrest_target += effects.unrest.flat
+        + effects.unrest.percent
+        + class_points(effects.classes.get(class).unrest);
     // F1 `Loyalty` (castles, a loyal governor): the local nobility holds
     // to its lord.
     if class == SocialClass::Nobility {
         unrest_target -= effects.loyalty.apply(0.0);
     }
-    unrest_target = unrest_target.clamp(0.0, 100.0);
-    entry.unrest = move_towards(entry.unrest, unrest_target, UNREST_SPEED);
+    unrest_target.clamp(0.0, 100.0)
+}
+
+/// Values the gauges of one class tend towards (IB5), each within 0-100.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct GaugeTargets {
+    pub health: f64,
+    pub wealth: f64,
+    pub goods_satisfaction: f64,
+    pub unrest: f64,
+}
+
+/// Inputs of a province's population update shared by its classes, read on
+/// the state before the update (IB5: also used by [`equilibrium`]).
+struct ProvinceInputs {
+    controller: FactionId,
+    devastation: u8,
+    disorder: u8,
+    garrison_strength: u32,
+    tax_burden: f64,
+    goods: std::collections::BTreeMap<data_model::ResourceId, u32>,
+    occupied: bool,
+    foreign_religion: bool,
+    /// Effects reaching each class, in [`SocialClass::ALL`] order.
+    class_effects: Vec<EffectTotals>,
+    cap: u64,
+    /// H4 plague resistance.
+    resistance: f64,
+}
+
+fn province_inputs(
+    state: &CampaignState,
+    data: &GameData,
+    id: &ProvinceId,
+) -> Option<ProvinceInputs> {
+    let (controller, owner, devastation, disorder, garrison_strength) = {
+        let p = state.provinces.get(id)?;
+        let city = state.settlements.get(&p.city)?;
+        (
+            city.controller.clone(),
+            city.owner.clone(),
+            p.devastation,
+            p.unrest,
+            state.weighted_garrison_strength(data, id),
+        )
+    };
+    let province_data = data.provinces.get(id)?;
+    let tax_burden = state
+        .factions
+        .get(&controller)
+        .map_or(data.economy_rules.tax_rates.normal.burden, |f| {
+            f.tax_rate.burden(&data.economy_rules)
+        });
+    let goods = state
+        .factions
+        .get(&controller)
+        .map(|f| f.goods.clone())
+        .unwrap_or_default();
+    let occupied = controller != owner;
+    // Obediences of one church are not foreign to each other (M5).
+    let foreign_religion = crate::religion::faction_religion(state, data, &controller)
+        .is_some_and(|r| !crate::religion::same_faith(data, &r, &province_data.religion));
+    // Buildings plus governor (M4), technologies (M6), plus regency,
+    // excommunication, embargo and heresy unrest (M5).
+    let mut effects = state.province_effects(data, id);
+    effects.merge(&crate::research::faction_province_tech_effects(
+        state,
+        data,
+        &controller,
+    ));
+    effects.unrest.flat += state.political_unrest(id);
+    // DF1: the player's provinces are calmer (easy) or quicker to
+    // grumble (hard).
+    effects.unrest.flat += state.difficulty_unrest(data, &controller);
+    let cap = state.province_capacity(data, id);
+    // H3: the province's diet, possibly aimed at one class.
+    let class_effects: Vec<EffectTotals> = SocialClass::ALL
+        .iter()
+        .map(|class| {
+            let mut merged = effects;
+            merged.merge(&crate::table::diet_class_effects(state, data, id, *class));
+            // H5: inflation and the coinage itself.
+            merged.merge(&crate::coinage::class_effects(state, &controller, *class));
+            merged
+        })
+        .collect();
+    // H4: a resistant province may be spared, and suffers less.
+    let resistance = crate::medicine::plague_resistance(state, data, id);
+    Some(ProvinceInputs {
+        controller,
+        devastation,
+        disorder,
+        garrison_strength,
+        tax_burden,
+        goods,
+        occupied,
+        foreign_religion,
+        class_effects,
+        cap,
+        resistance,
+    })
+}
+
+/// IB5: the values the gauges of each class of `province` tend towards under
+/// the current state, with their population, in [`SocialClass::ALL`] order.
+/// Goods satisfaction settles first, then health (which follows it), then
+/// unrest (which follows both): the fixed point of the seasonal update.
+pub fn equilibrium(
+    state: &CampaignState,
+    data: &GameData,
+    province: &ProvinceId,
+) -> Option<Vec<(SocialClass, u64, GaugeTargets)>> {
+    let inputs = province_inputs(state, data, province)?;
+    let population = &state.provinces.get(province)?.population;
+    let shared = SharedModifiers {
+        devastation: inputs.devastation,
+        tax_burden: inputs.tax_burden,
+        occupied: inputs.occupied,
+        foreign_religion: inputs.foreign_religion,
+        disorder: inputs.disorder,
+        garrison_strength: inputs.garrison_strength,
+        overpopulation: overpopulation(population.total(), inputs.cap),
+    };
+    Some(
+        SocialClass::ALL
+            .into_iter()
+            .zip(&inputs.class_effects)
+            .map(|(class, effects)| {
+                let categories = goods_categories(data, &inputs.goods, class);
+                let goods = goods_target(effects, class, categories).clamp(0.0, 100.0);
+                let health = health_target(effects, class, goods, &shared).clamp(0.0, 100.0);
+                let targets = GaugeTargets {
+                    health,
+                    wealth: wealth_target(effects, class, &shared).clamp(0.0, 100.0),
+                    goods_satisfaction: goods,
+                    unrest: unrest_target(
+                        effects,
+                        class,
+                        goods,
+                        health,
+                        &shared,
+                        &data.population_rules,
+                    ),
+                };
+                (class, population.get(class).count, targets)
+            })
+            .collect(),
+    )
 }
 
 /// Phase: growth, health, wealth, goods satisfaction, unrest, revolt.
@@ -213,61 +426,25 @@ pub(crate) fn resolve_population(
     let winter = state.season == crate::state::Season::Winter;
     let ids: Vec<ProvinceId> = state.provinces.keys().cloned().collect();
     for id in ids {
-        let (controller, owner, devastation, disorder, garrison_strength) = {
-            let p = &state.provinces[&id];
-            let Some(city) = state.settlements.get(&p.city) else {
-                continue;
-            };
-            (
-                city.controller.clone(),
-                city.owner.clone(),
-                p.devastation,
-                p.unrest,
-                state.province_garrison_strength(&id),
-            )
+        let Some(inputs) = province_inputs(state, data, &id) else {
+            continue;
         };
         let Some(province_data) = data.provinces.get(&id) else {
             continue;
         };
-        let tax_burden = state
-            .factions
-            .get(&controller)
-            .map_or(0.35, |f| f.tax_rate.burden());
-        let goods = state
-            .factions
-            .get(&controller)
-            .map(|f| f.goods.clone())
-            .unwrap_or_default();
-        let occupied = controller != owner;
-        // Obediences of one church are not foreign to each other (M5).
-        let foreign_religion = crate::religion::faction_religion(state, data, &controller)
-            .is_some_and(|r| !crate::religion::same_faith(data, &r, &province_data.religion));
-        // Buildings plus governor (M4), technologies (M6), plus regency,
-        // excommunication, embargo and heresy unrest (M5).
-        let mut effects = state.province_effects(data, &id);
-        effects.merge(&crate::research::faction_province_tech_effects(
-            state,
-            data,
-            &controller,
-        ));
-        effects.unrest.flat += state.political_unrest(&id);
-        // DF1: the player's provinces are calmer (easy) or quicker to
-        // grumble (hard).
-        effects.unrest.flat += state.difficulty_unrest(data, &controller);
-        let cap = state.province_capacity(data, &id);
-        // H3: the province's diet, possibly aimed at one class.
-        let class_effects: Vec<EffectTotals> = SocialClass::ALL
-            .iter()
-            .map(|class| {
-                let mut merged = effects;
-                merged.merge(&crate::table::diet_class_effects(state, data, &id, *class));
-                // H5: inflation and the coinage itself.
-                merged.merge(&crate::coinage::class_effects(state, &controller, *class));
-                merged
-            })
-            .collect();
-        // H4: a resistant province may be spared, and suffers less.
-        let resistance = crate::medicine::plague_resistance(state, data, &id);
+        let ProvinceInputs {
+            controller,
+            devastation,
+            disorder,
+            garrison_strength,
+            tax_burden,
+            goods,
+            occupied,
+            foreign_religion,
+            class_effects,
+            cap,
+            resistance,
+        } = inputs;
 
         let province = state.provinces.get_mut(&id).expect("exists");
         let population_total = province.population.total();

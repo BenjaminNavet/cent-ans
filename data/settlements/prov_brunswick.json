@@ -1,0 +1,137 @@
+[
+  {
+    "id": "set_brunswick",
+    "province": "prov_brunswick",
+    "kind": "city",
+    "name": {
+      "display": "Brunswick",
+      "local": "Brunswik",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      10.5268,
+      52.2689
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
+    "port": false,
+    "description": "Capitale du duché welf de Brunswick-Lunebourg, grande ville hanséatique de l'Oker.",
+    "sources": [
+      "Duché de Brunswick-Lunebourg"
+    ]
+  },
+  {
+    "id": "set_luneburg",
+    "province": "prov_brunswick",
+    "kind": "town",
+    "name": {
+      "display": "Lunebourg",
+      "local": "Lüneborch",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      10.4137,
+      53.2504
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville hanséatique fameuse pour ses salines (Saline de Lunebourg), qui alimentent le commerce du hareng de Scanie ; résidence de la branche welfe de Lunebourg.",
+    "sources": [
+      "Lunebourg"
+    ]
+  },
+  {
+    "id": "set_celle",
+    "province": "prov_brunswick",
+    "kind": "castle",
+    "name": {
+      "display": "Celle",
+      "local": "Zelle",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      10.0824,
+      52.6231
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château welf sur l'Aller, future résidence des ducs de Brunswick-Lunebourg après leur départ de Lunebourg au XVe siècle.",
+    "sources": [
+      "Celle"
+    ]
+  },
+  {
+    "id": "set_goslar",
+    "province": "prov_brunswick",
+    "kind": "town",
+    "name": {
+      "display": "Goslar",
+      "local": "Goslere",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      10.4257,
+      51.9058
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'Empire au pied du Rammelsberg, dont les mines d'argent et de cuivre font la richesse depuis le Xe siècle.",
+    "sources": [
+      "Goslar",
+      "Rammelsberg"
+    ]
+  },
+  {
+    "id": "set_hildesheim",
+    "province": "prov_brunswick",
+    "kind": "town",
+    "name": {
+      "display": "Hildesheim",
+      "local": "Hildensem",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      9.95,
+      52.15
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne cité épiscopale saxonne réputée pour son orfèvrerie et sa cathédrale.",
+    "sources": [
+      "Hildesheim"
+    ]
+  }
+]

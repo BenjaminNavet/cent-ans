@@ -44,7 +44,7 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	verdict_label.text = BattleUiKit.verdict(chance)
 	verdict_label.add_theme_color_override("font_color", BattleUiKit.verdict_color(chance))
 	chance_label.text = "Chances de victoire estimées : %d %% · %d navires contre %d" % [roundi(chance * 100.0), _ships_of(player_side), _ships_of(enemy_side)]
-	balance_bar.tooltip_text = "Estimation du cœur : cinq combats résolus automatiquement avec les mêmes flottes (navires, hauteur de bord, archers aux châteaux, hommes d'armes pour l'abordage)."
+	RichTooltip.attach_plain(balance_bar, "naval_balance_estimate")
 	balance_bar.queue_redraw()
 	for i in 2:
 		_fill_fleet(_columns[i], player_side if i == 0 else enemy_side)
@@ -58,7 +58,7 @@ func show_naval(sim: Object, p_battle: Dictionary) -> void:
 	fight_button.visible = PLAYABLE_3D
 	withdraw_button.text = "Rentrer au port" if player_side == "defender" else "Refuser le combat"
 	withdraw_button.disabled = false
-	withdraw_button.tooltip_text = "La flotte interceptée regagne son port sans combattre : l'armée ne traverse pas ce tour." if player_side == "defender" else "L'escadre ne s'engage pas ; la flotte ennemie, menacée, regagne son port."
+	RichTooltip.attach_plain(withdraw_button, "naval_withdraw", {"body": "La flotte interceptée regagne son port sans combattre : l'armée ne traverse pas ce tour." if player_side == "defender" else "L'escadre ne s'engage pas ; la flotte ennemie, menacée, regagne son port."})
 	_layout()
 	if not visible:
 		UiSounds.play("alert")
@@ -88,10 +88,10 @@ func _fill_fleet(column: VBoxContainer, side: String) -> void:
 	head.add_child(arms)
 	var names := VBoxContainer.new()
 	head.add_child(names)
-	names.add_child(BattleUiKit.label(str(side_setup.get("faction_name", faction)), 22, BattleUiKit.INK, true))
+	names.add_child(BattleUiKit.label(str(side_setup.get("faction_name", faction)), UiType.size(UiType.HEADING), BattleUiKit.INK, true))
 	var admiral := str(side_setup.get("admiral", ""))
 	if admiral != "" and admiral != "<null>":
-		names.add_child(BattleUiKit.label("Amiral : %s" % admiral, 15, BattleUiKit.INK_SOFT))
+		names.add_child(BattleUiKit.label("Amiral : %s" % admiral, UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT))
 	var ships: Array = side_setup.get("ships", [])
 	var classes := {}
 	var order: Array[String] = []
@@ -108,14 +108,14 @@ func _fill_fleet(column: VBoxContainer, side: String) -> void:
 	var parts: Array[String] = []
 	for name in order:
 		parts.append("%d %s%s" % [classes[name], name.to_lower(), "s" if int(classes[name]) > 1 else ""])
-	var fleet := BattleUiKit.label("%d navires : %s" % [ships.size(), ", ".join(parts)], 17, BattleUiKit.INK, false, true)
+	var fleet := BattleUiKit.label("%d navires : %s" % [ships.size(), ", ".join(parts)], UiType.size(UiType.BODY), BattleUiKit.INK, false, true)
 	fleet.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(fleet)
-	column.add_child(BattleUiKit.label("%s hommes embarqués" % BattleUiKit.thousands(soldiers), 16))
+	column.add_child(BattleUiKit.label("%s hommes embarqués" % BattleUiKit.thousands(soldiers), UiType.size(UiType.BODY)))
 	var units: Array = side_setup.get("units", [])
 	var composition := _composition(units)
 	if composition != "":
-		var label := BattleUiKit.label(composition, 14, BattleUiKit.INK_SOFT)
+		var label := BattleUiKit.label(composition, UiType.size(UiType.CAPTION), BattleUiKit.INK_SOFT)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		column.add_child(label)
 	var list := VBoxContainer.new()
@@ -128,9 +128,9 @@ func _fill_fleet(column: VBoxContainer, side: String) -> void:
 			men += int(crew.get("men", 0))
 		var ship_class: Dictionary = ship.get("class", {})
 		var line := "%s%s — %s, %d hommes" % ["⚑ " if bool(ship.get("flagship", false)) else "", str(ship.get("name", "")), str((ship_class.get("name", {}) as Dictionary).get("display", "")), men]
-		list.add_child(BattleUiKit.label(line, 14, BattleUiKit.INK))
+		list.add_child(BattleUiKit.label(line, UiType.size(UiType.CAPTION), BattleUiKit.INK))
 	if ships.size() > 8:
-		list.add_child(BattleUiKit.label("… et %d autres" % (ships.size() - 8), 14, BattleUiKit.INK_FADED))
+		list.add_child(BattleUiKit.label("… et %d autres" % (ships.size() - 8), UiType.size(UiType.CAPTION), BattleUiKit.INK_FADED))
 
 
 ## Saison et vent prévus (aperçu de la bataille à la même graine).

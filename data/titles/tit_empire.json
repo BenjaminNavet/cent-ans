@@ -14,25 +14,10 @@
   },
   "de_jure_provinces": [
     "prov_alsace",
-    "prov_brandenburg",
-    "prov_cologne",
     "prov_dauphine",
-    "prov_franconia",
     "prov_frisia",
-    "prov_liege",
-    "prov_lorraine",
-    "prov_lower_saxony",
-    "prov_mainz",
-    "prov_meissen",
-    "prov_montferrat",
-    "prov_namur",
     "prov_oberbayern",
-    "prov_palatinate",
-    "prov_swabia",
-    "prov_tirol",
-    "prov_trier",
-    "prov_utrecht",
-    "prov_westphalia"
+    "prov_swabia"
   ],
   "holder_1337": {
     "faction": "fac_empire",

@@ -1,0 +1,94 @@
+{
+  "id": "prov_transdanubia_west",
+  "name": {
+    "display": "Transdanubie occidentale",
+    "local": "Dunántúl nyugati része",
+    "local_language": "hongrois"
+  },
+  "region": "hongrie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Danube",
+    "Rába",
+    "Leitha"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Győr",
+      "local": "Győr",
+      "local_language": "hongrois"
+    },
+    "lat": 47.6875,
+    "lon": 17.6504
+  },
+  "geo": {
+    "capital_lonlat": [
+      17.6504,
+      47.6875
+    ],
+    "seed_lonlat": [
+      17.0,
+      47.5
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_hungary",
+  "culture": "cul_hungarian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Marches occidentales face à l'Autriche.",
+    "classes": {
+      "peasants": {
+        "count": 180000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3960,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 7200,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2600,
+  "description": "Marches occidentales du royaume face à l'Autriche : Győr, Sopron et l'abbaye de Pannonhalma gardent la route de Vienne.",
+  "sources": [
+    "Győr",
+    "Sopron",
+    "Pannonhalma"
+  ]
+}

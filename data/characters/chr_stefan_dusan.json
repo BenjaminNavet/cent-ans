@@ -1,0 +1,55 @@
+{
+  "id": "chr_stefan_dusan",
+  "name": {
+    "display": "Étienne Dušan",
+    "local": "Стефан Душан",
+    "local_language": "serbe"
+  },
+  "epithet": "le Puissant",
+  "sex": "male",
+  "house": "Nemanjić",
+  "faction": "fac_serbia",
+  "role": "ruler",
+  "birth": {
+    "value": "1308",
+    "uncertain": true,
+    "note": "Naissance vers 1308."
+  },
+  "death": {
+    "value": "1355-12-20"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Serbie",
+      "from": {
+        "value": "1331-09-08"
+      }
+    }
+  ],
+  "skills": {
+    "command": 8,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_energetic",
+    "trait_strong"
+  ],
+  "piety": 60,
+  "family": {
+    "spouses": [
+      "chr_helena_of_bulgaria"
+    ],
+    "children": [
+      "chr_stefan_uros_v"
+    ]
+  },
+  "starting_location": "prov_kosovo",
+  "status": "at_court",
+  "description": "Roi depuis 1331 ; guerrier ambitieux, il a battu les Byzantins en Macédoine et se prépare à devenir empereur (1346).",
+  "sources": [
+    "Stefan Dušan"
+  ]
+}

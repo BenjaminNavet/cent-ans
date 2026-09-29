@@ -82,7 +82,7 @@
     "terrain": {
       "type": "object",
       "description": "Effets par terrain ; un terrain absent est neutre.",
-      "propertyNames": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] },
+      "propertyNames": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"] },
       "additionalProperties": { "$ref": "#/$defs/terrain" }
     }
   },

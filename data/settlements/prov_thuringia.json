@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_erfurt",
+    "province": "prov_thuringia",
+    "kind": "city",
+    "name": {
+      "display": "Erfurt",
+      "local": "Erpesfurt",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.0299,
+      50.9787
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Grande ville de Thuringe, place de commerce du pastel (guède), sous la suzeraineté nominale de l'archevêque de Mayence mais largement autonome.",
+    "sources": [
+      "Erfurt"
+    ]
+  },
+  {
+    "id": "set_weimar",
+    "province": "prov_thuringia",
+    "kind": "town",
+    "name": {
+      "display": "Weimar",
+      "local": "Wimare",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.3299,
+      50.9795
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Résidence des comtes d'Orlamünde puis siège local des Wettin, sur l'Ilm.",
+    "sources": [
+      "Weimar"
+    ]
+  },
+  {
+    "id": "set_wartburg",
+    "province": "prov_thuringia",
+    "kind": "castle",
+    "name": {
+      "display": "Wartbourg",
+      "local": "Wartburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.3151,
+      50.9647
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse des landgraves de Thuringe dominant Eisenach, célèbre résidence de sainte Élisabeth de Hongrie au siècle précédent.",
+    "sources": [
+      "Wartburg"
+    ]
+  }
+]

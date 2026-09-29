@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_finlaggan",
+    "province": "prov_isles",
+    "kind": "city",
+    "name": {
+      "display": "Finlaggan",
+      "local": "Eilean Fhionnlagain",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -6.256,
+      55.803
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Île du Loch Finlaggan, à Islay : siège du conseil et lieu d'inauguration des seigneurs des Îles.",
+    "sources": [
+      "Finlaggan"
+    ]
+  },
+  {
+    "id": "set_dunyvaig",
+    "province": "prov_isles",
+    "kind": "castle",
+    "name": {
+      "display": "Dunyvaig",
+      "local": "Dùn Naomhaig",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -6.1,
+      55.628
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse navale du Clan Donald sur la côte sud d'Islay, gardant l'accès à Finlaggan.",
+    "sources": [
+      "Château de Dunyvaig"
+    ]
+  },
+  {
+    "id": "set_aros",
+    "province": "prov_isles",
+    "kind": "castle",
+    "name": {
+      "display": "Aros",
+      "local": "Àros",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -6.132,
+      56.451
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château d'Aros, sur l'île de Mull, place d'armes du Clan Donald face aux Highlands.",
+    "sources": [
+      "Château d'Aros"
+    ]
+  }
+]

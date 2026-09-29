@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_dusseldorf",
+    "province": "prov_berg",
+    "kind": "city",
+    "name": {
+      "display": "Düsseldorf",
+      "local": "Dusseldorp",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.7735,
+      51.2277
+    ],
+    "weight": 24,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville élevée au rang de cité en 1288, résidence favorite des comtes de Berg sur le Rhin.",
+    "sources": [
+      "Düsseldorf"
+    ]
+  },
+  {
+    "id": "set_burg_an_der_wupper",
+    "province": "prov_berg",
+    "kind": "castle",
+    "name": {
+      "display": "Burg an der Wupper",
+      "local": "Berge",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      7.1667,
+      51.1333
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château ancestral des comtes de Berg, berceau de la dynastie, dominant la vallée de la Wupper.",
+    "sources": [
+      "Château de Burg"
+    ]
+  },
+  {
+    "id": "set_lennep",
+    "province": "prov_berg",
+    "kind": "town",
+    "name": {
+      "display": "Lennep",
+      "local": "Lennep",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      7.2333,
+      51.1167
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville drapière du comté de Berg, dans les collines du Bergisches Land.",
+    "sources": [
+      "Lennep"
+    ]
+  }
+]

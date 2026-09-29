@@ -1,0 +1,47 @@
+{
+  "id": "chr_thomas_szecsenyi",
+  "name": {
+    "display": "Thomas Szécsényi",
+    "local": "Szécsényi Tamás",
+    "local_language": "hongrois"
+  },
+  "sex": "male",
+  "house": "Szécsényi",
+  "faction": "fac_transylvania",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1354",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Voïvode de Transylvanie",
+      "from": {
+        "value": "1321"
+      },
+      "note": "Voïvode de 1321 à 1342 (incertain)."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_veteran",
+    "trait_stern"
+  ],
+  "piety": 50,
+  "starting_location": "prov_transylvania",
+  "status": "on_campaign",
+  "description": "Voïvode de Transylvanie pour Charles Robert, fidèle serviteur du roi ; il tient la marche orientale du royaume.",
+  "sources": [
+    "Thomas Szécsényi"
+  ]
+}

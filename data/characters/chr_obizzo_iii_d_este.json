@@ -1,0 +1,47 @@
+{
+  "id": "chr_obizzo_iii_d_este",
+  "name": {
+    "display": "Obizzo III d'Este",
+    "local": "Obizzo III d'Este",
+    "local_language": "italien"
+  },
+  "sex": "male",
+  "house": "Este",
+  "faction": "fac_ferrara",
+  "role": "ruler",
+  "birth": {
+    "value": "1294"
+  },
+  "historical": true,
+  "skills": {
+    "command": 4,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_ferrara",
+  "status": "at_court",
+  "description": "Marquis de Ferrare, vicaire pontifical depuis 1329 après la guerre de Ferrare ; gouverne en 1337 conjointement avec ses frères Nicolò Ier et Aldobrandino II, selon un partage du pouvoir propre à la maison d'Este de cette génération.",
+  "sources": [
+    "Maison d'Este",
+    "Obizzo III d'Este"
+  ],
+  "titles": [
+    {
+      "title": "Marquis de Ferrare",
+      "from": {
+        "value": "1317",
+        "uncertain": true
+      }
+    },
+    {
+      "title": "Vicaire pontifical",
+      "from": {
+        "value": "1329"
+      }
+    }
+  ]
+}

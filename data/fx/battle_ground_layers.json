@@ -1,0 +1,21 @@
+{
+  "layers": [
+    {"id": "grass", "poly_haven_id": "sparse_grass", "tile_size_m": 5.0, "role": "grass"},
+    {"id": "meadow", "poly_haven_id": "rocky_terrain_02", "tile_size_m": 7.0, "role": "meadow"},
+    {"id": "forest", "poly_haven_id": "forest_leaves_04", "tile_size_m": 4.0, "role": "forest"},
+    {"id": "dirt", "poly_haven_id": "coast_sand_01", "tile_size_m": 5.0, "role": "dirt"},
+    {"id": "mud", "poly_haven_id": "muddy_tracks", "tile_size_m": 4.5, "role": "mud"},
+    {"id": "pebbles", "poly_haven_id": "river_small_rocks", "tile_size_m": 3.5, "role": "pebbles"},
+    {"id": "rock", "poly_haven_id": "aerial_rocks_02", "tile_size_m": 9.0, "role": "rock"},
+    {"id": "plough", "poly_haven_id": "farm_soil", "tile_size_m": 4.0, "role": "plough"},
+    {"id": "snow", "poly_haven_id": "snow_02", "tile_size_m": 6.0, "role": "snow"},
+    {"id": "flowering_meadow", "poly_haven_id": "leafy_grass", "tile_size_m": 6.0, "role": "flowering_meadow"},
+    {"id": "trodden_grass", "poly_haven_id": "grassy_cobblestone", "tile_size_m": 4.5, "role": "trodden_grass"},
+    {"id": "stubble", "poly_haven_id": "withered_grass", "tile_size_m": 5.0, "role": "stubble"},
+    {"id": "fresh_plough", "poly_haven_id": "farm_furrows", "tile_size_m": 4.0, "role": "fresh_plough"}
+  ],
+  "terrain_tints": {
+    "steppe": [1.02, 0.94, 0.72],
+    "desert": [1.18, 0.98, 0.66]
+  }
+}

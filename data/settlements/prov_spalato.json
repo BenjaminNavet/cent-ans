@@ -1,0 +1,87 @@
+[
+  {
+    "id": "set_spalato",
+    "province": "prov_spalato",
+    "kind": "city",
+    "name": {
+      "display": "Spalato",
+      "local": "Spalatum",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      16.44,
+      43.5081
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_fair",
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_guild_hall"
+    ],
+    "port": true,
+    "description": "Cité dans le palais de Dioclétien.",
+    "sources": [
+      "Split (Croatie)"
+    ]
+  },
+  {
+    "id": "set_trau",
+    "province": "prov_spalato",
+    "kind": "town",
+    "name": {
+      "display": "Trogir",
+      "local": "Tragurium",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      16.25,
+      43.517
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_collegiate_church"
+    ],
+    "port": true,
+    "description": "Ville-île de Dalmatie, dotée d'un statut communal.",
+    "sources": [
+      "Trogir"
+    ]
+  },
+  {
+    "id": "set_sebenico",
+    "province": "prov_spalato",
+    "kind": "town",
+    "name": {
+      "display": "Šibenik",
+      "local": "Sibenicum",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      15.895,
+      43.735
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_collegiate_church"
+    ],
+    "port": true,
+    "description": "Ville fondée par les Croates, cathédrale en construction.",
+    "sources": [
+      "Šibenik"
+    ]
+  }
+]

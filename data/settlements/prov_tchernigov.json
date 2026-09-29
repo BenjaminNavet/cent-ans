@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_tchernigov",
+    "province": "prov_tchernigov",
+    "kind": "city",
+    "name": {
+      "display": "Tchernigov",
+      "local": "Чернигов",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      31.29,
+      51.5
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ancienne grande cité de la Rus', déchue depuis la conquête mongole.",
+    "sources": [
+      "Tchernigov"
+    ]
+  },
+  {
+    "id": "set_novgorod_severski",
+    "province": "prov_tchernigov",
+    "kind": "town",
+    "name": {
+      "display": "Novgorod-Severski",
+      "local": "Новгород-Северский",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      33.26,
+      52.0
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Desna, capitale d'une principauté cadette.",
+    "sources": [
+      "Novhorod-Sivérsky"
+    ]
+  },
+  {
+    "id": "set_starodoub",
+    "province": "prov_tchernigov",
+    "kind": "town",
+    "name": {
+      "display": "Starodoub",
+      "local": "Стародуб",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      32.76,
+      52.59
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Starodoub-du-Nord, ville de la frontière de Briansk.",
+    "sources": [
+      "Starodoub"
+    ]
+  }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_blois",
+    "province": "prov_blois",
+    "kind": "city",
+    "name": {
+      "display": "Blois",
+      "local": "Bloys",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.3358,
+      47.5861
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du comté de Blois tenu par Guy Ier de Châtillon, père de Charles de Blois.",
+    "sources": [
+      "Blois",
+      "Comté de Blois"
+    ]
+  },
+  {
+    "id": "set_chaumont_sur_loire",
+    "province": "prov_blois",
+    "kind": "castle",
+    "name": {
+      "display": "Chaumont-sur-Loire",
+      "local": "Chaumont-sur-Loire",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.1839,
+      47.4771
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château dominant la Loire, tenu par les seigneurs d'Amboise en fief du comte de Blois.",
+    "sources": [
+      "Château de Chaumont-sur-Loire"
+    ]
+  },
+  {
+    "id": "set_montrichard",
+    "province": "prov_blois",
+    "kind": "castle",
+    "name": {
+      "display": "Montrichard",
+      "local": "Montrichard",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.1856,
+      47.3453
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Donjon et château sur le Cher, place forte méridionale du comté de Blois.",
+    "sources": [
+      "Montrichard"
+    ]
+  }
+]

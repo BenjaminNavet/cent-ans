@@ -5,7 +5,7 @@ extends SceneTree
 ## Usage : godot --headless --path game --script res://tests/pb1_veg_job.gd
 ## Sortie : lignes `PB1_VEG` (ms par étape, instances) et `PB1_VEG_TOTAL`.
 
-const POINTS := [Vector2(2144, 2054), Vector2(1900, 2098), Vector2(2213, 1924), Vector2(1700, 1500)]
+const POINTS := [Vector2(2144, 3334), Vector2(1900, 3378), Vector2(2213, 3204), Vector2(1700, 2780)]
 
 
 func _init() -> void:
@@ -38,7 +38,7 @@ func _run() -> void:
 		var job := VegetationTileJob.new()
 		job.mask = vegetation.mask
 		job.tile_index = index
-		job.origin_px = Vector2i((index % TerrainBuilder.CHUNKS) * terrain.chunk_px, (index / TerrainBuilder.CHUNKS) * terrain.chunk_px)
+		job.origin_px = Vector2i((index % terrain.chunks_x) * terrain.chunk_px, (index / terrain.chunks_x) * terrain.chunk_px)
 		job.size_px = terrain.chunk_px
 		job.spacing = vegetation.spacing
 		job.tree_scale = vegetation.tree_scale

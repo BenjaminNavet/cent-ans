@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_hadji_tarkhan",
+    "province": "prov_hadji_tarkhan",
+    "kind": "city",
+    "name": {
+      "display": "Hadji-Tarkhan",
+      "local": "Ḥājjī Ṭarkhān",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      47.95,
+      46.25
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville du delta de la Volga (emplacement approximatif, vieil Astrakhan).",
+    "sources": [
+      "Astrakhan"
+    ]
+  },
+  {
+    "id": "set_itil",
+    "province": "prov_hadji_tarkhan",
+    "kind": "town",
+    "name": {
+      "display": "Atil (Itil)",
+      "local": "Ätil",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      47.9,
+      46.02
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ruines de la capitale khazare, camp saisonnier (emplacement approximatif).",
+    "sources": [
+      "Atil (ville)"
+    ]
+  },
+  {
+    "id": "set_bereket",
+    "province": "prov_hadji_tarkhan",
+    "kind": "village",
+    "name": {
+      "display": "Pêcheries du delta",
+      "local": "Балыкчи",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      48.3,
+      45.85
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Campements de pêcheurs du delta de la Volga (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Delta de la Volga"
+    ]
+  }
+]

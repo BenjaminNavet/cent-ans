@@ -1,0 +1,90 @@
+{
+  "id": "prov_prilep",
+  "name": {
+    "display": "Prilep et Pélagonie",
+    "local": "Прилеп",
+    "local_language": "bulgare"
+  },
+  "region": "balkans",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Crna"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Prilep",
+      "local": "Прилеп",
+      "local_language": "bulgare"
+    },
+    "lat": 41.345,
+    "lon": 21.5546
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.5546,
+      41.345
+    ],
+    "seed_lonlat": [
+      21.5,
+      41.25
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_serbia",
+  "culture": "cul_bulgarian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5400,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2200,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 3500,
+  "description": "Pélagonie et Prilep, cédées par Byzance à la Serbie en 1334 ; pays slave macédonien orthodoxe. Le château de Marko (les tours de Marko) domine la ville.",
+  "sources": [
+    "Prilep",
+    "Bitola"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "id": "prov_epirus",
+  "name": {
+    "display": "Despotat d'Épire",
+    "local": "Ἤπειρος",
+    "local_language": "grec"
+  },
+  "region": "grece",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Arachthos",
+    "Thyamis"
+  ],
+  "ports": [
+    "Vonitsa"
+  ],
+  "sea_zones": [
+    "sea_ionian"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wood",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Arta",
+      "local": "Ἄρτα",
+      "local_language": "grec"
+    },
+    "lat": 39.16,
+    "lon": 20.985
+  },
+  "geo": {
+    "capital_lonlat": [
+      20.985,
+      39.16
+    ],
+    "seed_lonlat": [
+      20.8,
+      39.45
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_epirus",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 119000,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 30,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6300,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2600,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 750,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4000,
+  "description": "Despotat d'Arta et de Janina, aux mains des Orsini ; l'empereur Andronic III l'annexera en 1338 sans combat. Le pays vit une transition dynastique trouble.",
+  "sources": [
+    "Despotat d'Épire",
+    "Arta",
+    "Ioannina"
+  ]
+}

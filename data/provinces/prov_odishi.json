@@ -1,0 +1,100 @@
+{
+  "id": "prov_odishi",
+  "name": {
+    "display": "Odishi et Abkhazie",
+    "local": "ოდიში",
+    "local_language": "géorgien"
+  },
+  "region": "caucase",
+  "terrain": "forest",
+  "climate": "oceanic",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Rioni",
+    "Enguri"
+  ],
+  "ports": [
+    "Poti",
+    "Soukhoumi"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Zougdidi",
+      "local": "ზუგდიდი",
+      "local_language": "géorgien"
+    },
+    "lat": 42.51,
+    "lon": 41.87
+  },
+  "geo": {
+    "capital_lonlat": [
+      41.87,
+      42.51
+    ],
+    "seed_lonlat": [
+      41.8,
+      42.75
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_georgia",
+  "culture": "cul_georgian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 32000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 380,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 900,
+  "description": "Côte orientale de la mer Noire : Samegrelo (Odishi) des Dadiani, Abkhazie et Poti (Phasis), port de la Géorgie.",
+  "sources": [
+    "Odishi",
+    "Abkhazia",
+    "Poti"
+  ]
+}

@@ -10,8 +10,8 @@ extends SceneTree
 ##     d'une mise à jour ; éteinte au palier comté.
 ## Usage : godot --headless --path game --script res://tests/sz4b_colonies_forests_test.gd
 
-const CRECY := Vector2(2191.5, 1706.0)
-const ORLEANS_FOREST := Vector2(2180.0, 2053.0)
+const CRECY := Vector2(2191.5, 2986.0)
+const ORLEANS_FOREST := Vector2(2180.0, 3333.0)
 
 var _failures := 0
 

@@ -1,0 +1,53 @@
+{
+  "id": "tit_vidin",
+  "rank": "duchy",
+  "name": {
+    "display": "Despotat de Vidin",
+    "local": "Видински деспотат",
+    "local_language": "bulgare"
+  },
+  "heraldry": {
+    "blazon": "D'azur au lion d'argent couronné d'or.",
+    "description": "Lion d'argent : armes de convention pour le despotat de Vidin.",
+    "primary_color": "#2A5DA8",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Armes de convention : aucune attestation pour Vidin en 1337."
+  },
+  "de_jure_liege": "tit_bulgaria",
+  "de_jure_provinces": [
+    "prov_vidin"
+  ],
+  "holder_1337": {
+    "faction": "fac_vidin",
+    "sources": [
+      "Despotat de Vidin",
+      "Belaur"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_vidin_hold",
+      "title": "Tenir Vidin",
+      "description": "Belaur doit garder Vidin.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_vidin"
+      }
+    },
+    {
+      "id": "obj_vidin_indep",
+      "title": "Servir ou trahir",
+      "description": "Se libérer de la tutelle de Tarnovo.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Despotat du Danube occidental, apanage bulgare quasi indépendant.",
+  "sources": [
+    "Despotat de Vidin",
+    "Belaur"
+  ]
+}

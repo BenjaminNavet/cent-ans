@@ -1,0 +1,60 @@
+{
+  "id": "tit_norway",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Norvège",
+    "local": "Noregs konungsríki",
+    "local_language": "vieux norrois"
+  },
+  "heraldry": {
+    "blazon": "De gueules au lion d'or couronné, armé d'argent.",
+    "description": "Le lion couronné de Norvège, tenant la hache de saint Olaf.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_provinces": [
+    "prov_viken",
+    "prov_vestlandet",
+    "prov_trondelag",
+    "prov_halogaland"
+  ],
+  "holder_1337": {
+    "faction": "fac_sweden",
+    "sources": [
+      "Magnus IV de Suède",
+      "Royaume de Norvège",
+      "Union de la Suède et de la Norvège"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_norway_hold",
+      "title": "Roi de Norvège",
+      "description": "Garder la couronne de Norvège en union avec la Suède.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_norway"
+      }
+    },
+    {
+      "id": "obj_norway_provinces",
+      "title": "Un royaume uni",
+      "description": "Tenir Viken, Vestlandet, Trøndelag et Hålogaland.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_viken",
+          "prov_vestlandet",
+          "prov_trondelag",
+          "prov_halogaland"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume héréditaire de Norvège, en union personnelle avec la Suède sous Magnus Eriksson (roi depuis 1319, majeur en 1332) ; le conseil du royaume, mené par Erling Vidkunnsson, en assure le gouvernement.",
+  "sources": [
+    "Magnus IV de Suède",
+    "Royaume de Norvège",
+    "Union de la Suède et de la Norvège"
+  ]
+}

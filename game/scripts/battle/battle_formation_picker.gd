@@ -69,11 +69,11 @@ func _build() -> void:
 	header.flat = true
 	header.focus_mode = Control.FOCUS_NONE
 	header.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	header.add_theme_font_size_override("font_size", 14)
+	header.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	header.add_theme_color_override("font_color", INK)
 	header.add_theme_color_override("font_hover_color", INK)
 	header.add_theme_color_override("font_pressed_color", INK)
-	header.tooltip_text = "Replier ou déplier le sélecteur (les raccourcis Alt+Maj+1…6 restent actifs)."
+	RichTooltip.attach_plain(header, "formation_picker_toggle")
 	header.pressed.connect(toggle_collapsed)
 	outer.add_child(header)
 	body = VBoxContainer.new()
@@ -88,7 +88,7 @@ func _build() -> void:
 		var label := Label.new()
 		label.text = str(STANCE_LABELS[stance])
 		label.custom_minimum_size = Vector2(62, 0)
-		label.add_theme_font_size_override("font_size", 12)
+		label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 		label.add_theme_color_override("font_color", INK)
 		row.add_child(label)
 		for k in presets.size():
@@ -101,7 +101,7 @@ func _build() -> void:
 			button.text = str(preset["name_fr"])
 			button.toggle_mode = true
 			button.focus_mode = Control.FOCUS_NONE
-			button.add_theme_font_size_override("font_size", 12)
+			button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 			button.tooltip_text = tooltip_for(preset, k + 1)
 			button.pressed.connect(toggle.bind(id))
 			row.add_child(button)
@@ -117,7 +117,7 @@ func _build() -> void:
 	place_button.name = "PlaceButton"
 	place_button.text = "Placer en formation"
 	place_button.focus_mode = Control.FOCUS_NONE
-	place_button.tooltip_text = "Propose une place à chaque régiment de la sélection (sans sélection : toute l'armée) selon la formation choisie ; clic droit : déplacer la proposition ; second appui : valider."
+	RichTooltip.attach_plain(place_button, "formation_place_proposal")
 	place_button.pressed.connect(on_place_pressed)
 	actions.add_child(place_button)
 	cancel_button = Button.new()

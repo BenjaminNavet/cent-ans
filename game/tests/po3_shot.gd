@@ -11,7 +11,7 @@ extends SceneTree
 const RESOLUTION := "1280x720"
 const MAP := "res://scenes/campaign_map.tscn"
 ## Paris (px carte, cf. `pb1_bench.gd`).
-const PARIS := Vector2(2213, 1924)
+const PARIS := Vector2(2213, 3204)
 
 ## [nom, distance caméra].
 const VIEWS := [

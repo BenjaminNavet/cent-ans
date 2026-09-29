@@ -1,0 +1,91 @@
+{
+  "id": "prov_kutahya",
+  "name": {
+    "display": "Germiyan (Kütahya)",
+    "local": "Germiyan",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Porsuk"
+  ],
+  "resources": [
+    "res_wool",
+    "res_iron",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kütahya (Cotyaeum)",
+      "local": "Kütahya",
+      "local_language": "turc ottoman"
+    },
+    "lat": 39.42,
+    "lon": 29.98
+  },
+  "geo": {
+    "capital_lonlat": [
+      29.98,
+      39.42
+    ],
+    "seed_lonlat": [
+      29.95,
+      39.0
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_germiyan",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 46000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1400,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 550,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1300,
+  "description": "Plus puissant des beyliks de l'ouest, héritier de la vieille garde seldjoukide et suzerain de fait de ses voisins ; Kütahya en est le siège.",
+  "sources": [
+    "Germiyan",
+    "Kütahya",
+    "Afyonkarahisar"
+  ]
+}

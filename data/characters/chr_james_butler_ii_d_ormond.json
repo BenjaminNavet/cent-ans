@@ -1,0 +1,47 @@
+{
+  "name": {
+    "display": "James Butler",
+    "local": "James Butler",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Butler",
+  "faction": "fac_ormond",
+  "role": "heir",
+  "birth": {
+    "value": "1331-10-04",
+    "place": "Kilkenny"
+  },
+  "death": {
+    "value": "1382-10-18",
+    "place": "Knocktopher"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "2e comte d'Ormond",
+      "from": {
+        "value": "1338-01-06"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_cautious"
+  ],
+  "piety": 50,
+  "family": {
+    "father": "chr_james_butler_i_d_ormond"
+  },
+  "starting_location": "prov_ormond",
+  "status": "minor",
+  "description": "Cinq ans en 1337 ; confié en pupille à Maurice FitzGerald, 1er comte de Desmond, puis à Sir John Darcy, dont il épousera la fille Elizabeth. Justicier d'Irlande à trois reprises (1359, 1364, 1376).",
+  "sources": [
+    "James Butler, 2e comte d'Ormond"
+  ],
+  "id": "chr_james_butler_ii_d_ormond"
+}

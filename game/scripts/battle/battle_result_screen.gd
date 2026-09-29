@@ -212,7 +212,7 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	replay_button = Button.new()
 	replay_button.name = "Replay"
 	replay_button.text = "Revoir la bataille"
-	replay_button.tooltip_text = "Rejouer toute la bataille : lecture, pause, vitesse, saut dans le temps, caméra libre"
+	RichTooltip.attach_plain(replay_button, "battle_replay_full")
 	replay_button.custom_minimum_size = Vector2(240, 44)
 	BattleUiKit.button_font(replay_button, 19)
 	replay_button.visible = false

@@ -1,0 +1,44 @@
+{
+  "id": "chr_saruhan_bey",
+  "name": {
+    "display": "Saruhan Bey"
+  },
+  "sex": "male",
+  "house": "Saruhanoğulları",
+  "faction": "fac_saruhan",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1345"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Saruhan",
+      "from": {
+        "value": "1313"
+      },
+      "note": "Fondateur du beylik, mort en 1345."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_manisa",
+  "status": "at_court",
+  "description": "Fondateur éponyme du beylik ; dates de vie et de règne approximatives.",
+  "sources": [
+    "Saruhanids"
+  ]
+}

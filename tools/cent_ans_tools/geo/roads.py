@@ -114,7 +114,7 @@ def itinere_features(gpkg: Path, grid: MapGrid, labels: np.ndarray) -> list[dict
     frame = frame.to_crs(CRS_MAP)
     frame = frame[frame.intersects(box(*grid.bounds))]
     frame = frame.assign(geometry=frame.geometry.clip(box(*grid.bounds)))
-    size = labels.shape[0]
+    rows_max, cols_max = labels.shape
     features = []
     for row in frame.itertuples():
         pixel_geometry = _to_pixels(row.geometry, grid).simplify(SIMPLIFY_PX)
@@ -122,8 +122,8 @@ def itinere_features(gpkg: Path, grid: MapGrid, labels: np.ndarray) -> list[dict
             if line.length < 1.0:
                 continue
             coords = np.asarray(line.coords)
-            cols = np.clip(coords[:, 0].astype(int), 0, size - 1)
-            rows = np.clip(coords[:, 1].astype(int), 0, size - 1)
+            cols = np.clip(coords[:, 0].astype(int), 0, cols_max - 1)
+            rows = np.clip(coords[:, 1].astype(int), 0, rows_max - 1)
             if (labels[rows, cols] > 0).mean() < MIN_PLAYABLE_FRACTION:
                 continue
             features.append(
@@ -161,8 +161,8 @@ def covered_provinces(features: list[dict], labels: np.ndarray) -> set[int]:
 def cost_surface(map_dir: Path, grid: MapGrid, labels: np.ndarray) -> np.ndarray:
     """Work-grid travel cost: 1 + slope + river penalty, ``inf`` outside provinces."""
     heights = terrain.uint16_to_height(terrain.read_png16(map_dir / "heightmap.png"))
-    size = grid.size_px // WORK_FACTOR
-    small = heights.reshape(size, WORK_FACTOR, size, WORK_FACTOR).mean(axis=(1, 3))
+    rows, cols = grid.height_px // WORK_FACTOR, grid.width_px // WORK_FACTOR
+    small = heights.reshape(rows, WORK_FACTOR, cols, WORK_FACTOR).mean(axis=(1, 3))
     dy, dx = np.gradient(small, grid.meters_per_px * WORK_FACTOR)
     cost = 1.0 + SLOPE_COST * np.hypot(dx, dy)
     rivers = json.loads((map_dir / "rivers.geojson").read_text(encoding="utf-8"))
@@ -178,7 +178,7 @@ def cost_surface(map_dir: Path, grid: MapGrid, labels: np.ndarray) -> np.ndarray
                 (shapely.affinity.scale(g, scale, scale, origin=(0, 0)), v)
                 for g, v in majors
             ],
-            out_shape=(size, size),
+            out_shape=(rows, cols),
             fill=0,
             dtype=np.uint8,
         )
@@ -191,14 +191,13 @@ def least_cost_path(
     cost: np.ndarray, start: tuple[float, float], end: tuple[float, float]
 ) -> LineString | None:
     """Least-cost path between two map-pixel points, in map pixels (``None`` if unreachable)."""
-    size = cost.shape[0]
     (sx, sy), (ex, ey) = (
         (int(p[0] / WORK_FACTOR), int(p[1] / WORK_FACTOR)) for p in (start, end)
     )
     top = max(0, min(sy, ey) - WINDOW_MARGIN_PX)
     left = max(0, min(sx, ex) - WINDOW_MARGIN_PX)
-    bottom = min(size, max(sy, ey) + WINDOW_MARGIN_PX + 1)
-    right = min(size, max(sx, ex) + WINDOW_MARGIN_PX + 1)
+    bottom = min(cost.shape[0], max(sy, ey) + WINDOW_MARGIN_PX + 1)
+    right = min(cost.shape[1], max(sx, ex) + WINDOW_MARGIN_PX + 1)
     window = cost[top:bottom, left:right].copy()
     window[sy - top, sx - left] = 1.0
     window[ey - top, ex - left] = 1.0

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_lara",
+    "province": "prov_lara",
+    "kind": "city",
+    "name": {
+      "display": "Lara de los Infantes",
+      "local": "Lara de los Infantes",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.35,
+      42.0667
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château-berceau de la maison de Lara, l'une des plus anciennes lignées de la haute noblesse castillane.",
+    "sources": [
+      "Lara de los Infantes",
+      "Maison de Lara"
+    ]
+  },
+  {
+    "id": "set_san_pedro_de_arlanza",
+    "province": "prov_lara",
+    "kind": "abbey",
+    "name": {
+      "display": "San Pedro de Arlanza",
+      "local": "San Pedro de Arlanza",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.4667,
+      42.0333
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine, panthéon des comtes de Castille et des légendaires Infants de Lara.",
+    "sources": [
+      "Monastère de San Pedro de Arlanza"
+    ]
+  },
+  {
+    "id": "set_covarrubias",
+    "province": "prov_lara",
+    "kind": "town",
+    "name": {
+      "display": "Covarrubias",
+      "local": "Covarrubias",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.5238,
+      42.0958
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Bourg collégial voisin de Lara, ancienne résidence des comtes de Castille.",
+    "sources": [
+      "Covarrubias"
+    ]
+  }
+]

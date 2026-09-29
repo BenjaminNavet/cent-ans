@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_sivas",
+    "province": "prov_sivas",
+    "kind": "city",
+    "name": {
+      "display": "Sivas (Sébaste)",
+      "local": "Sivas",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      37.02,
+      39.75
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale d'Eretna.",
+    "sources": [
+      "Eretna"
+    ]
+  },
+  {
+    "id": "set_tokat",
+    "province": "prov_sivas",
+    "kind": "town",
+    "name": {
+      "display": "Tokat"
+    },
+    "lonlat": [
+      36.55,
+      40.31
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de commerce sur la route de la soie.",
+    "sources": [
+      "Eretna"
+    ]
+  },
+  {
+    "id": "set_divrigi",
+    "province": "prov_sivas",
+    "kind": "town",
+    "name": {
+      "display": "Divriği (Tephrike)",
+      "local": "Divriği",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      38.12,
+      39.37
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ulu Cami et darüşşifa, ville des mines de fer.",
+    "sources": [
+      "Eretna"
+    ]
+  }
+]

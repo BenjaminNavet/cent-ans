@@ -21,7 +21,7 @@ uniform float height_max_m = 4800.0;
 // `campaign_display_height` (source unique, double GDScript MapData.display_height).
 #include "res://shaders/campaign_relief.gdshaderinc"
 #define height_scale campaign_vertical_scale
-uniform vec2 map_size = vec2(4096.0, 4096.0);
+uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 uniform float meters_per_px = 719.0;
 
 uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
@@ -31,6 +31,11 @@ uniform int selected_id = 0;
 // Masque 1D par province (R8) : ~0,5 = atteignable par l'armée sélectionnée, 1 = sur le chemin.
 uniform sampler2D province_mask : filter_nearest, repeat_disable, hint_default_black;
 uniform bool mask_enabled = false;
+// FE6 : filtre « Féodalité » — couleur du tenant direct par province (alpha 0 = pas de hachure),
+// peinte en hachures obliques par-dessus le fond du royaume.
+uniform sampler2D hatch_colors : filter_nearest, repeat_disable, hint_default_transparent;
+uniform bool hatch_enabled = false;
+uniform float hatch_period_px = 9.0;
 uniform vec3 reachable_color : source_color = vec3(0.98, 0.93, 0.55);
 uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
 // Brouillard de guerre (lot C1, A1-03) : 1 = province vue, 0 = voilée. Le voile ne noircit
@@ -49,7 +54,7 @@ uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
 // M5a : brouillard par case (texture de vue R8 de la simulation, filtrage linéaire).
 uniform sampler2D fog_cells : filter_linear, repeat_disable, hint_default_white;
 uniform bool fog_by_cell = false;
-uniform vec2 fog_cells_size = vec2(4096.0, 4096.0);   // pixels carte couverts par la texture
+uniform vec2 fog_cells_size = vec2(1.0, 1.0);   // pixels carte couverts par la texture (fournis par le script)
 uniform float fog_edge_jitter_px = 7.0;
 uniform vec3 fog_rim_color = vec3(0.10, 0.065, 0.03);
 uniform float fog_rim_amount = 0.22;
@@ -104,6 +109,17 @@ uniform vec3 seabed_color = vec3(0.03, 0.07, 0.07);
 // Couleurs de water.gdshader (mer peinte là où le maillage dépasse le plan d'eau).
 uniform vec3 sea_shallow_color = vec3(0.045, 0.14, 0.14);
 uniform vec3 sea_deep_color = vec3(0.006, 0.028, 0.050);
+// GA4 (ADR 0105) : macro-variation à l'échelle de la carte (périodes en pixels carte) et mer
+// peinte à trois paliers de profondeur, réglées depuis `data/fx/campaign_terrain_textures.json`
+// (`CampaignTextures.apply_terrain`) ; `ga4_on` = 0 (`--no-ga4`) : rendu d'origine.
+uniform float ga4_on = 0.0;
+uniform vec4 ga4_macro_periods = vec4(9.0, 24.0, 60.0, 150.0);
+uniform vec4 ga4_macro_weights = vec4(0.4, 0.3, 0.2, 0.1);
+uniform float ga4_tint_amp = 1.0;
+uniform float ga4_lum_amp = 0.08;
+uniform vec3 sea_mid_color = vec3(0.018, 0.075, 0.095);
+uniform float sea_mid_depth_m = 25.0;
+uniform float sea_depth_falloff_m = 70.0;
 
 // Détail : taille d'une tuile de texture (pixels carte), part du détail, force des normales.
 uniform float tile_px = 3.0;
@@ -298,6 +314,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/relief_quadtree.gdshaderinc"  // ZG2 : relief streamé en quadtree
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
+#include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -514,6 +531,18 @@ void fragment() {
 		dn = vec3(0.0, 0.0, 0.85);
 	}
 	vec3 col = albedo * mix(1.0, tone, 1.0 - snow);
+	// GA4 : macro-variation de teinte (octaves fines d'abord) et de luminance (octaves larges
+	// d'abord), mêmes 4 échantillons de bruit ; visible aussi au dézoom (textures coupées).
+	if (ga4_on > 0.5) {
+		vec4 mo = vec4(value_noise(p / ga4_macro_periods.x + vec2(3.1, 7.7)),
+			value_noise(p / ga4_macro_periods.y + vec2(11.3, 1.9)),
+			value_noise(p / ga4_macro_periods.z + vec2(5.3, 17.2)),
+			value_noise(p / ga4_macro_periods.w + vec2(23.9, 13.4)));
+		float wsum4 = max(dot(ga4_macro_weights, vec4(1.0)), 1e-3);
+		float mh = dot(mo, ga4_macro_weights) / wsum4;
+		float ml = dot(mo, ga4_macro_weights.wzyx) / wsum4;
+		col *= ga_macro_variation(mh, ml, ga4_tint_amp, ga4_lum_amp);
+	}
 	// Canopée : ombrage de volume léger (les forêts paraissent plus sombres et granuleuses).
 	col *= 1.0 - 0.25 * w_forest / max(wsum, 1e-3) * (1.0 - value_noise(p * 1.7)) * detail_fade;
 	float open_w = (w_grass + w_farm) / max(wsum, 1e-3);
@@ -545,7 +574,7 @@ void fragment() {
 	vec3 water_col = lake_color;
 	if (hc <= 0.0) {
 		float depth = -hc;
-		vec3 wc = mix(sea_shallow_color, sea_deep_color, 1.0 - exp(-depth / 70.0));
+		vec3 wc = ga_depth_color(depth, sea_shallow_color, sea_mid_color, sea_deep_color, sea_mid_depth_m, sea_depth_falloff_m, ga4_on);  // GA4
 		water_col = mix(col, wc, mix(0.7, 0.97, smoothstep(0.0, 45.0, depth)));
 	}
 	if (lake_shore > 0.5) {
@@ -595,6 +624,21 @@ void fragment() {
 		vec3 colorized = mix(vec3(1.0), fc_lin / lf, faction_saturation) * lc;
 		vec3 target = mix(colorized, fc_lin * political_flat_gain, political * 0.55);
 		col = mix(col, target, fc.a * faction_amount * land_f);
+		if (hatch_enabled) {
+			vec4 hatch_c = texelFetch(hatch_colors, ivec2(clamp(id, 0, textureSize(hatch_colors, 0).x - 1), 0), 0);
+			if (hatch_c.a > 0.0) {
+				// Hachures obliques antialiasées (largeur d'un demi-pas), à la teinte du tenant.
+				// Pas élargi au dézoom (au moins six pixels d'écran) : pas de moiré.
+				float hatch_period = max(hatch_period_px, footprint * 6.0);
+				float hatch_s = fract((p.x + p.y) / hatch_period);
+				float hatch_aa = clamp(footprint / hatch_period, 0.02, 0.25);
+				float hatch_stripe = smoothstep(0.5 - hatch_aa, 0.5 + hatch_aa, hatch_s) * (1.0 - smoothstep(1.0 - hatch_aa, 1.0, hatch_s));
+				vec3 hatch_lin = pow(hatch_c.rgb, vec3(2.2));
+				float hatch_l = max(dot(hatch_lin, vec3(0.2126, 0.7152, 0.0722)), 0.02);
+				vec3 hatch_target = mix(mix(vec3(1.0), hatch_lin / hatch_l, faction_saturation) * lc, hatch_lin * political_flat_gain, political * 0.55);
+				col = mix(col, hatch_target, hatch_stripe * hatch_c.a * faction_amount * land_f);
+			}
+		}
 		if (mask_enabled) {
 			float m = texelFetch(province_mask, ivec2(clamp(id, 0, textureSize(province_mask, 0).x - 1), 0), 0).r;
 			float lcol = dot(col, vec3(0.2126, 0.7152, 0.0722));

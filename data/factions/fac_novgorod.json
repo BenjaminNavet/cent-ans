@@ -1,0 +1,85 @@
+{
+  "id": "fac_novgorod",
+  "name": {
+    "display": "République de Novgorod",
+    "local": "Господинъ Великiй Новгородъ",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Novgorod",
+  "adjective": "novgorodien",
+  "government": "republic",
+  "playable": true,
+  "ruler": "chr_fiodor_danilovitch",
+  "capital": "prov_novgorod",
+  "capital_city": "Novgorod",
+  "religion": "rel_orthodox",
+  "culture": "cul_novgorodian",
+  "succession_law": "elective",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_novgorod",
+  "heraldry": {
+    "blazon": "D'argent à la nef de gueules.",
+    "description": "Armes de convention de Novgorod : la nef des marchands (les sceaux de la république montrent surtout saint Georges et un trône).",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Posadnik de Novgorod"
+  ],
+  "treasury": 18000,
+  "prestige": 60,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hanseatic_trade"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_moscow",
+      "status": "peace",
+      "note": "Ivan Kalita est prince de Novgorod jusqu'en 1337 ; la république lui verse tribut et le tolère par contrainte."
+    },
+    {
+      "faction": "fac_pskov",
+      "status": "peace",
+      "note": "Pskov, « cadet » de Novgorod, s'affirme en 1337 sous le prince Alexandre."
+    },
+    {
+      "faction": "fac_perm",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_viatka",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_livonian_order",
+      "status": "peace",
+      "note": "Paix commerciale fragile, conflits de frontière en Ingrie et à Pskov."
+    },
+    {
+      "faction": "fac_sweden",
+      "status": "peace",
+      "note": "Traité de Nöteborg (1323) ; guerre de Magnus Eriksson en 1348."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 65,
+    "trade": 90,
+    "piety": 60
+  },
+  "description": "Vaste république marchande du nord, gouvernée par le vétché, le posadnik et l'archevêque Vassili Kalika ; elle s'étend de la Baltique à l'Oural, contrôle le commerce des fourrures avec la Hanse et n'admet qu'un prince invité, sans pouvoir.",
+  "sources": [
+    "République de Novgorod",
+    "Vassili Kalika",
+    "Novgorod"
+  ]
+}

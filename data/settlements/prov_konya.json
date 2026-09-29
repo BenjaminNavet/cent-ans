@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_konya",
+    "province": "prov_konya",
+    "kind": "city",
+    "name": {
+      "display": "Konya (Iconium)",
+      "local": "Konya",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      32.49,
+      37.87
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville sainte des Mevlevis, ancienne capitale seldjoukide.",
+    "sources": [
+      "Konya"
+    ]
+  },
+  {
+    "id": "set_eregli",
+    "province": "prov_konya",
+    "kind": "town",
+    "name": {
+      "display": "Ereğli (Héraclée)",
+      "local": "Ereğli",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      34.05,
+      37.51
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg au pied du Taurus.",
+    "sources": [
+      "Konya"
+    ]
+  },
+  {
+    "id": "set_karapinar",
+    "province": "prov_konya",
+    "kind": "village",
+    "name": {
+      "display": "Karapınar"
+    },
+    "lonlat": [
+      33.55,
+      37.72
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Village de la steppe de Konya.",
+    "sources": [
+      "Konya"
+    ]
+  }
+]

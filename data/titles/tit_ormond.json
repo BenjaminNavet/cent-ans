@@ -1,0 +1,54 @@
+{
+  "rank": "county",
+  "name": {
+    "display": "Comté d'Ormond",
+    "local": "Earldom of Ormond",
+    "local_language": "moyen anglais"
+  },
+  "heraldry": {
+    "blazon": "D'or au chef denché d'azur.",
+    "description": "Armes des Butler.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "de_jure_liege": "tit_ireland",
+  "de_jure_provinces": [
+    "prov_ormond"
+  ],
+  "holder_1337": {
+    "faction": "fac_ormond",
+    "sources": [
+      "James Butler, 1er comte d'Ormond"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_ormond_hold",
+      "title": "Garder le comté",
+      "description": "Les Butler doivent conserver leur comté et leur charge héréditaire de grand bouteiller d'Irlande.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_ormond"
+      }
+    },
+    {
+      "id": "obj_ormond_kilkenny",
+      "title": "Kilkenny",
+      "description": "Étendre le comté jusqu'à Kilkenny, future capitale de la maison.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_ormond",
+          "prov_leinster"
+        ]
+      }
+    }
+  ],
+  "description": "Comté érigé en 1328 pour James Butler, grand bouteiller héréditaire d'Irlande depuis 1177 ; la maison Butler déplacera son siège à Kilkenny au siècle suivant.",
+  "sources": [
+    "Comté d'Ormond",
+    "James Butler, 1er comte d'Ormond",
+    "Grand bouteiller d'Irlande"
+  ],
+  "id": "tit_ormond"
+}

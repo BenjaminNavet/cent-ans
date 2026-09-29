@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -105,7 +107,7 @@ def geo_build(
         False, "--force", help="Retélécharge les données brutes"
     ),
 ) -> None:
-    """Construit data/map/ (terrain, provinces, relief 8192², routes, colonies, hameaux, grille de navigation) et les aperçus."""
+    """Construit data/map/ (terrain, provinces, relief 14336 × 12288, routes, colonies, hameaux, grille de navigation) et les aperçus."""
     from cent_ans_tools.geo import build as geo_builder
 
     result = geo_builder.build(force=force)
@@ -123,7 +125,7 @@ def geo_build(
     _report_provinces(result.provinces)
     if result.relief:
         console.print(
-            f"Relief 8192² : {result.relief.tiles} tuiles, "
+            f"Relief fin : {result.relief.tiles} tuiles, "
             f"{result.relief.total_bytes / 1e6:.1f} Mo"
         )
     if result.roads:
@@ -192,7 +194,7 @@ def geo_hamlets(
 def geo_relief(
     force: bool = typer.Option(False, "--force", help="Retélécharge ETOPO"),
 ) -> None:
-    """Relief 8192² ETOPO seul (16 × 16 tuiles, data/map/height/) : repli ; voir geo relief-shade."""
+    """Relief fin ETOPO seul (28 × 24 tuiles, data/map/height/) : repli ; voir geo relief-shade."""
     from cent_ans_tools.geo import relief as geo_relief_step
 
     result = geo_relief_step.build(force=force)
@@ -250,7 +252,7 @@ def geo_relief_shade(
         False, "--force", help="Recalcule la mosaïque Copernicus (sinon cache .npy)"
     ),
 ) -> None:
-    """Relief fin Copernicus GLO-90 : tuiles 8192², heightmap_render.png, relief_shade.png."""
+    """Relief fin Copernicus GLO-90 : tuiles fines, heightmap_render.png, relief_shade_<i>.png."""
     from cent_ans_tools.geo import relief_shade as geo_relief_shade_step
 
     result = geo_relief_shade_step.build(force=force)
@@ -668,7 +670,7 @@ def geo_navgrid(
         False, "--lenient", help="Écrit la grille même si des colonies sont isolées"
     ),
 ) -> None:
-    """Génère navgrid.png (grille de navigation 2048²), son aperçu et map.json.navgrid."""
+    """Génère navgrid.png (grille de navigation W/2 × H/2), son aperçu et map.json.navgrid."""
     from cent_ans_tools.geo import navgrid as geo_navgrid_step
 
     _report_navgrid(geo_navgrid_step.build(strict=not lenient))
@@ -1358,6 +1360,45 @@ def assets_codex_art(
         "Illustrations du Codex",
         codex_art.convert,
     )
+
+
+@assets_app.command("materials")
+def assets_materials(
+    out_dir: Path = typer.Option(  # noqa: B008
+        ...,
+        "--out",
+        help="Dossier des images brutes et tuiles (hors dépôt, ex. scratch)",
+    ),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiants à générer seuls (sonde), répétable"
+    ),
+    sheet: Path | None = typer.Option(  # noqa: B008
+        None, "--sheet", help="Planche de contrôle PNG à écrire"
+    ),
+    lot: str = typer.Option("GA1", "--lot", help="Préfixe de ligne et plafond du lot"),
+) -> None:
+    """GA : matières tuilables générées (data/art/materials.yaml) + cartes dérivées.
+
+    Une image brute déjà présente dans --out est réutilisée sans appel payant.
+    """
+    import numpy as np
+    from PIL import Image
+
+    from cent_ans_tools import material_gen
+
+    entries = {
+        entry["id"]: entry for entry in material_gen.load_materials()["materials"]
+    }
+    ids = only or list(entries)
+    tiles = {}
+    for material_id in ids:
+        albedo = material_gen.generate(material_id, out_dir, lot=lot)
+        tiles[material_id] = np.asarray(Image.open(albedo).convert("RGB"))
+        console.print(f"[green]OK[/green] : {material_id} -> {albedo}")
+    if sheet is not None:
+        path = material_gen.contact_sheet(tiles, sheet, params=entries)
+        console.print(f"Planche : {path} ({path.stat().st_size // 1024} Ko)")
+    console.print(f"Cumul GA : {budget.total()} $")
 
 
 if __name__ == "__main__":

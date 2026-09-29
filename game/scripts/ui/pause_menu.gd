@@ -58,7 +58,7 @@ func _ready() -> void:
 	difficulty_label = Label.new()
 	difficulty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UiType.apply(difficulty_label, UiType.CAPTION)
-	difficulty_label.tooltip_text = "Choisie au lancement de la campagne, elle ne peut plus changer."
+	RichTooltip.attach_plain(difficulty_label, "pause_difficulty_fixed")
 	difficulty_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	box.add_child(difficulty_label)
 	refresh_difficulty()

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_craiova",
+    "province": "prov_oltenia",
+    "kind": "city",
+    "name": {
+      "display": "Craiova",
+      "local": "Craiova",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      23.7949,
+      44.3302
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Centre régional de l'Olténie, sur les plaines du Jiu (site incertain pour 1337).",
+    "sources": [
+      "Craiova"
+    ]
+  },
+  {
+    "id": "set_strehaia",
+    "province": "prov_oltenia",
+    "kind": "castle",
+    "name": {
+      "display": "Strehaia",
+      "local": "Strehaia",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      23.2075,
+      44.6242
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de la marche de l'Olténie occidentale (localisation approximative).",
+    "sources": [
+      "Strehaia"
+    ]
+  },
+  {
+    "id": "set_slatina",
+    "province": "prov_oltenia",
+    "kind": "village",
+    "name": {
+      "display": "Slatina",
+      "local": "Slatina",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      24.37,
+      44.43
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Poste de douane sur l'Olt, sur la route des marchands de Brașov (première mention 1368, à préciser).",
+    "sources": [
+      "Slatina"
+    ]
+  }
+]

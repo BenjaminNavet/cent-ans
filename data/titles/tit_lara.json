@@ -1,0 +1,54 @@
+{
+  "id": "tit_lara",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Lara",
+    "local": "Señorío de Lara",
+    "local_language": "castillan"
+  },
+  "heraldry": {
+    "blazon": "D'argent à deux chaudières échiquetées d'or et de gueules, engoulées de serpents de sinople.",
+    "description": "Chaudières (calderas) des grands majordomes royaux, emblème classique de la maison de Lara.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_castile",
+  "de_jure_provinces": [
+    "prov_lara"
+  ],
+  "holder_1337": {
+    "faction": "fac_lara",
+    "sources": [
+      "Juan Núñez III de Lara",
+      "Maison de Lara"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_lara_hold",
+      "title": "Garder Lara et Vizcaya",
+      "description": "Conserver les deux seigneuries réunies par mariage.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_lara",
+          "prov_biscay"
+        ]
+      }
+    },
+    {
+      "id": "obj_lara_cerda",
+      "title": "Le droit des La Cerda",
+      "description": "Faire valoir la prétention des La Cerda, dont les Lara sont héritiers, à la couronne de Castille.",
+      "condition": {
+        "kind": "hold_crown",
+        "title": "tit_castile"
+      }
+    }
+  ],
+  "description": "Berceau de l'une des plus anciennes maisons de la haute noblesse castillane, réconciliée avec Alphonse XI en 1337 après le siège de Lerma (1336).",
+  "sources": [
+    "Juan Núñez III de Lara",
+    "Maison de Lara"
+  ]
+}

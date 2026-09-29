@@ -1,0 +1,84 @@
+[
+  {
+    "id": "set_beroe",
+    "province": "prov_zagora",
+    "kind": "city",
+    "name": {
+      "display": "Béroé (Stara Zagora)",
+      "local": "Верея",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      25.635,
+      42.425
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Ville du cœur de la Thrace du Nord.",
+    "sources": [
+      "Stara Zagora"
+    ]
+  },
+  {
+    "id": "set_sliven",
+    "province": "prov_zagora",
+    "kind": "town",
+    "name": {
+      "display": "Sliven",
+      "local": "Сливен",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      26.32,
+      42.68
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourg des passes du Balkan oriental.",
+    "sources": [
+      "Sliven"
+    ]
+  },
+  {
+    "id": "set_karnobat",
+    "province": "prov_zagora",
+    "kind": "town",
+    "name": {
+      "display": "Karnobat",
+      "local": "Карнобат",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      26.98,
+      42.66
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de la route des Balkans.",
+    "sources": [
+      "Karnobat"
+    ]
+  }
+]

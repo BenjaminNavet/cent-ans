@@ -1,0 +1,62 @@
+{
+  "id": "fac_opole",
+  "name": {
+    "display": "Duché d'Opole",
+    "local": "Księstwo Opolskie",
+    "local_language": "polonais"
+  },
+  "short_name": "Opole",
+  "adjective": "d'Opole",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_boleslas_ii_d_opole",
+  "capital": "prov_upper_silesia",
+  "capital_city": "Opole",
+  "religion": "rel_catholic",
+  "culture": "cul_polish",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_bohemia",
+  "primary_title": "tit_opole",
+  "heraldry": {
+    "blazon": "D'azur à l'aigle d'or, becquée et membrée de gueules.",
+    "description": "Aigle d'or sur champ d'azur, armes des Piast d'Opole.",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Duc d'Opole et de Racibórz",
+    "Vassal du roi de Bohême"
+  ],
+  "treasury": 3500,
+  "prestige": 22,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_bohemia",
+      "status": "vassal",
+      "note": "Hommage des ducs de Haute-Silésie à Jean de Bohême depuis 1327."
+    },
+    {
+      "faction": "fac_poland",
+      "status": "peace",
+      "note": "Parenté piast et voisinage sur l'Oder haute."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 50,
+    "trade": 55,
+    "piety": 60
+  },
+  "description": "Duchés de Haute-Silésie (Opole, Racibórz, Cieszyn, Oświęcim, Opava) tenus par des branches piast vassales de la Bohême ; Boleslas II d'Opole en est le plus puissant.",
+  "sources": [
+    "Boleslas II d'Opole",
+    "Duché d'Opole",
+    "Haute-Silésie"
+  ]
+}

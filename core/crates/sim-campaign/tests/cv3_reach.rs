@@ -60,7 +60,7 @@ fn empty_spot(data: &GameData, radius_km: f32) -> [f32; 2] {
         .filter_map(|id| data.settlement_point(id))
         .collect();
     let radius = radius_km * px_per_km(data);
-    for y in (1600..3600).step_by(16) {
+    for y in (2880..4880).step_by(16) {
         for x in (400..2400).step_by(16) {
             let p = [x as f32, y as f32];
             if settlements

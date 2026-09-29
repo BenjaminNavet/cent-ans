@@ -1,0 +1,69 @@
+{
+  "name": {
+    "display": "Comté d'Ormond",
+    "local": "Earldom of Ormond",
+    "local_language": "moyen anglais"
+  },
+  "short_name": "Ormond",
+  "adjective": "ormondien",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_james_butler_i_d_ormond",
+  "heir": "chr_james_butler_ii_d_ormond",
+  "capital": "prov_ormond",
+  "capital_city": "Nenagh",
+  "religion": "rel_catholic",
+  "culture": "cul_english",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_england",
+  "primary_title": "tit_ormond",
+  "heraldry": {
+    "blazon": "D'or au chef denché d'azur.",
+    "description": "Armes des Butler.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "titles": [
+    "Comte d'Ormond",
+    "Grand bouteiller héréditaire d'Irlande"
+  ],
+  "treasury": 4000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "vassal",
+      "note": "Comté érigé en 1328 pour James Butler par Édouard III ; charge héréditaire de grand bouteiller d'Irlande depuis 1177."
+    },
+    {
+      "faction": "fac_kildare",
+      "status": "peace",
+      "note": "Rivalité de longue date entre les deux grandes maisons anglo-irlandaises pour le gouvernement du Pale."
+    },
+    {
+      "faction": "fac_thomond",
+      "status": "war",
+      "since": {
+        "value": "1318",
+        "uncertain": true
+      },
+      "note": "Frontière disputée avec le royaume gaélique de Thomond depuis Dysert O'Dea."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 60,
+    "trade": 50,
+    "piety": 55
+  },
+  "description": "James Butler, 1er comte d'Ormond, grand bouteiller héréditaire d'Irlande, mourra à Gowran en janvier 1338 ; son fils, encore enfant, est déjà promis à un riche mariage anglais. Les Butler, plus proches de la couronne que les FitzGerald, deviendront les plus fidèles serviteurs anglais d'Irlande.",
+  "sources": [
+    "James Butler, 1er comte d'Ormond",
+    "Comté d'Ormond"
+  ],
+  "id": "fac_ormond"
+}

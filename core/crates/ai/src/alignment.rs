@@ -35,6 +35,12 @@ pub fn campaign_roll(state: &CampaignState, faction: &FactionId, salt: u64) -> u
     (x ^ (x >> 31)) % 1000
 }
 
+/// Planning slot of `faction` (same as `plan_diplomacy`'s), for the
+/// other planners of this crate.
+pub fn slot_of(faction: &FactionId) -> u32 {
+    slot(faction)
+}
+
 /// Planning slot of `faction` (same as `plan_diplomacy`'s).
 fn slot(faction: &FactionId) -> u32 {
     faction
@@ -367,8 +373,20 @@ fn courted_princes<'a>(
     state
         .factions
         .iter()
-        .filter(|(id, f)| {
-            *id != faction && f.alive && f.suzerain.is_none() && id.as_str() != "fac_rebels"
+        .filter(|(id, f)| *id != faction && f.alive && id.as_str() != "fac_rebels")
+        // FE5 (ADR 0110): a vassal may be courted outside its suzerain (the
+        // princes of the Empire beside Edward III, 1337-1339) while that
+        // suzerain is neither our enemy nor our enemies' ally; allying with
+        // its suzerain's enemy would stay a felony.
+        .filter(|(_, f)| {
+            f.suzerain.as_ref().is_none_or(|liege| {
+                data.ai_feudal.foreign_alliance.allowed
+                    && liege != faction
+                    && !state.is_at_war(liege, faction)
+                    && enemies
+                        .iter()
+                        .all(|e| liege != *e && !state.is_allied(liege, e))
+            })
         })
         .filter(|(id, f)| !state.is_allied(faction, id) && !f.at_war_with.contains(faction))
         .filter(|(_, f)| enemies.iter().all(|e| !f.allies.contains(*e)))

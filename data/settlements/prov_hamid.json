@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_egirdir",
+    "province": "prov_hamid",
+    "kind": "city",
+    "name": {
+      "display": "Eğirdir"
+    },
+    "lonlat": [
+      30.85,
+      37.87
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse lacustre, capitale des Hamid.",
+    "sources": [
+      "Hamidids"
+    ]
+  },
+  {
+    "id": "set_isparta",
+    "province": "prov_hamid",
+    "kind": "town",
+    "name": {
+      "display": "Isparta (Baris)",
+      "local": "Isparta",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      30.29,
+      37.76
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Marché de la roseraie.",
+    "sources": [
+      "Hamidids"
+    ]
+  },
+  {
+    "id": "set_uluborlu",
+    "province": "prov_hamid",
+    "kind": "village",
+    "name": {
+      "display": "Uluborlu (Sozopolis)",
+      "local": "Uluborlu",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      30.45,
+      38.08
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ancienne Apollonia de Pisidie.",
+    "sources": [
+      "Hamidids"
+    ]
+  }
+]

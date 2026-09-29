@@ -4,10 +4,10 @@
 //   rl_relief (gradient du relief), rl_landcover (poids des matériaux), rl_surface (couleur, eau).
 // Toutes les entrées sont optionnelles (drapeaux has_*), posées par ReliefLandcover.apply.
 //
-// - relief_shade (LA8, 8192²) : L = détail d'altitude (Copernicus 90 m moyenné) par rapport à la
-//   heightmap de rendu 4096² filtrée bilinéairement, 128 + m / rl_detail_scale_m ; A = occlusion /
+// - relief_shade (LA8, 2 px par unité) : L = détail d'altitude (Copernicus 90 m moyenné) par rapport à la
+//   heightmap de rendu (taille de la carte) filtrée bilinéairement, 128 + m / rl_detail_scale_m ; A = occlusion /
 //   courbure multi-échelle (128 neutre, < 128 creux et fonds de vallée, > 128 crêtes).
-// - wetlands (RGB8, 4096²) : R marais (roselières, mares), G pays d'étangs (Dombes, Brenne...),
+// - wetlands (RGB8, taille de la carte) : R marais (roselières, mares), G pays d'étangs (Dombes, Brenne...),
 //   B prés humides et tourbières (data/map/wetlands.json + fonds de vallée).
 
 uniform sampler2D relief_shade : filter_linear_mipmap, repeat_disable, hint_default_black;
@@ -30,7 +30,7 @@ float rl_occ_at(vec2 uv) {
 	return (texture(relief_shade, uv).a * 255.0 - 128.0) / 127.0;
 }
 
-// Crochet 1 : détail du relief sous le pixel de la heightmap 4096 (gradient en m / pixel carte).
+// Crochet 1 : détail du relief sous le pixel de la heightmap de la carte (gradient en m / pixel carte).
 void rl_relief(vec2 uv, float footprint, inout vec2 grad_m) {
 	if (!has_relief_shade) {
 		return;

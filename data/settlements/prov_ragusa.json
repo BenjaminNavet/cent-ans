@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_ragusa",
+    "province": "prov_ragusa",
+    "kind": "city",
+    "name": {
+      "display": "Raguse",
+      "local": "Ragusium",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      18.092,
+      42.641
+    ],
+    "weight": 60,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_fair",
+      "bld_cathedral",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house",
+      "bld_guild_hall"
+    ],
+    "port": true,
+    "description": "Cité patricienne et port sur l'Adriatique.",
+    "sources": [
+      "Dubrovnik"
+    ]
+  },
+  {
+    "id": "set_ston",
+    "province": "prov_ragusa",
+    "kind": "town",
+    "name": {
+      "display": "Ston",
+      "local": "Stagno",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      17.696,
+      42.84
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Salines et grande muraille de la péninsule de Pelješac (1333).",
+    "sources": [
+      "Ston"
+    ]
+  },
+  {
+    "id": "set_lokrum",
+    "province": "prov_ragusa",
+    "kind": "abbey",
+    "name": {
+      "display": "Lokrum",
+      "local": "Lacroma",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      18.123,
+      42.625
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine de l'îlot de Lokrum.",
+    "sources": [
+      "Lokrum"
+    ]
+  }
+]

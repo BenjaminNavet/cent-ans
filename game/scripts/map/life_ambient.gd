@@ -85,7 +85,7 @@ func _build_birds() -> void:
 	_birds.multimesh = multimesh
 	_birds.material_override = material
 	_birds.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_birds.extra_cull_margin = 4096.0
+	_birds.extra_cull_margin = _world_margin()
 	add_child(_birds)
 	_flock_centers.resize(FLOCKS)
 	_flock_centers.fill(Vector2(-1e6, -1e6))
@@ -190,7 +190,7 @@ func _at_sea(a: Vector2, b: Vector2) -> bool:
 func _route_instance(node_name: String, count: int, model_scale: float) -> MultiMeshInstance3D:
 	var mmi := MultiMeshInstance3D.new()
 	mmi.name = node_name
-	mmi.extra_cull_margin = 4096.0
+	mmi.extra_cull_margin = _world_margin()
 	add_child(mmi)
 	var mesh := LifeEffects._first_mesh("ship")
 	if mesh == null or count == 0:
@@ -249,3 +249,10 @@ func update_view(focus: Vector2, near_weight: float, medium_weight: float) -> vo
 		var radius := 220.0 if near_weight > 0.35 else 480.0
 		_update_routes(_boats, _river_routes, focus, radius, false)
 		_update_routes(_ships, _sea_routes, focus, radius, true)
+
+
+## Marge d'élagage couvrant tout le monde (instances réparties sur la carte, ADR 0115).
+func _world_margin() -> float:
+	if _map_data == null:
+		return 16384.0
+	return float(maxi(_map_data.size.x, _map_data.size.y))

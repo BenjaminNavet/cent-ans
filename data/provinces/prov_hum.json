@@ -1,0 +1,95 @@
+{
+  "id": "prov_hum",
+  "name": {
+    "display": "Hum (Zahumlje)",
+    "local": "Хум",
+    "local_language": "serbe"
+  },
+  "region": "balkans",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Neretva",
+    "Trebišnjica"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wine",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Blagaj",
+      "local": "Благај",
+      "local_language": "serbe"
+    },
+    "lat": 43.25,
+    "lon": 17.91
+  },
+  "geo": {
+    "capital_lonlat": [
+      17.91,
+      43.25
+    ],
+    "seed_lonlat": [
+      17.95,
+      43.15
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_bosnia",
+  "culture": "cul_bosnian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 55000,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 30,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4500,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "Hum (Zahumlje), annexé par Étienne II en 1326 sur les Serbes ; il englobe la Neretva et l'arrière-pays de Raguse.",
+  "sources": [
+    "Hum",
+    "Stolac",
+    "Trebinje"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "tit_pallars",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Pallars Sobirà",
+    "local": "Comtat de Pallars Sobirà",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules, au lambel d'azur.",
+    "description": "Armes de la maison de Barcelone brisées, approximation faute de blason personnel des comtes de Pallars-Mataplana retrouvé avec certitude.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93",
+    "uncertain": true,
+    "note": "Blason des comtes de Pallars Sobirà du XIVe siècle non localisé avec certitude."
+  },
+  "de_jure_liege": "tit_aragon",
+  "de_jure_provinces": [
+    "prov_pallars"
+  ],
+  "holder_1337": {
+    "faction": "fac_pallars",
+    "sources": [
+      "Arnau Roger II de Pallars Sobirà",
+      "Comtat de Pallars Sobirà"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_pallars_heir",
+      "title": "Assurer sa succession",
+      "description": "Arnau Roger II, trois fois marié, n'a pas d'héritier direct.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_pallars"
+      }
+    },
+    {
+      "id": "obj_pallars_ribagorca",
+      "title": "Pallars et Ribagorce",
+      "description": "Étendre le Pallars au comté voisin de Ribagorce.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_ribagorca"
+      }
+    }
+  ],
+  "description": "Comté pyrénéen dont les comtes durent défendre les terres face aux prétentions de Comminges et de Foix, avec l'appui du roi d'Aragon ; Arnau Roger II mourra sans descendance en 1343.",
+  "sources": [
+    "Arnau Roger II de Pallars Sobirà",
+    "Comtat de Pallars Sobirà"
+  ]
+}

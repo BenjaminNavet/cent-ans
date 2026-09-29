@@ -22,9 +22,9 @@ func _ready() -> void:
 	for node in find_children("*", "Button", true, false):
 		var button := node as Button
 		if button.text == "Plus tard":
-			button.tooltip_text = "Sans réponse, l'option par défaut s'appliquera à la fin du tour."
+			RichTooltip.attach_plain(button, "decision_default_choice_turn")
 		elif button.text == "×":
-			button.tooltip_text = "Fermer (la rencontre reste en attente jusqu'à la fin du tour)"
+			RichTooltip.attach_plain(button, "close_encounter_pending")
 
 
 ## Affiche `encounter` (un élément de `get_pending_encounters`) ; `queue_size` en attente.
@@ -82,7 +82,7 @@ func _encounter_option_row(option: Dictionary) -> Control:
 	if bool(option.get("default", false)):
 		text += "  (par défaut)"
 	button.text = text
-	button.add_theme_font_size_override("font_size", 17)
+	button.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	var available := bool(option.get("available", true))
 	var reason := str(option.get("reason", ""))
@@ -104,7 +104,7 @@ func _encounter_option_row(option: Dictionary) -> Control:
 	if not lines.is_empty():
 		var summary := Label.new()
 		summary.text = "   " + " — ".join(lines)
-		summary.add_theme_font_size_override("font_size", 13)
+		summary.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 		summary.add_theme_color_override("font_color", RUBRIC if not available else FADED_INK)
 		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		summary.custom_minimum_size = Vector2(580, 0)

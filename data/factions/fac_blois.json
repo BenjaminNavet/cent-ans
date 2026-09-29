@@ -1,0 +1,66 @@
+{
+  "id": "fac_blois",
+  "name": {
+    "display": "Comté de Blois",
+    "local": "Comté de Bloys",
+    "local_language": "ancien français"
+  },
+  "short_name": "Blois",
+  "adjective": "blésois",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_guy_i_de_chatillon",
+  "heir": "chr_charles_de_blois",
+  "capital": "prov_blois",
+  "capital_city": "Blois",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_france",
+  "primary_title": "tit_blois",
+  "heraldry": {
+    "blazon": "De gueules à trois pals de vair, au chef d'or.",
+    "description": "Armes de la maison de Châtillon, comtes de Blois.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Comte de Blois",
+    "Comte de Dunois"
+  ],
+  "treasury": 5000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_brittany",
+      "status": "marriage_tie",
+      "note": "Charles de Blois, fils et héritier de Guy Ier, épouse Jeanne de Penthièvre le 4 juin 1337."
+    },
+    {
+      "faction": "fac_penthievre",
+      "status": "marriage_tie",
+      "note": "Mariage de Charles de Blois et de Jeanne de Penthièvre."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 40,
+    "piety": 60
+  },
+  "description": "Comté tenu par Guy Ier de Châtillon ; le mariage de son fils Charles avec Jeanne de Penthièvre, le 4 juin 1337, ouvre la voie à la guerre de Succession de Bretagne (1341-1364).",
+  "sources": [
+    "Guy Ier de Châtillon",
+    "Comté de Blois",
+    "Charles de Blois"
+  ]
+}

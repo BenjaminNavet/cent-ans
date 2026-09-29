@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_elbistan",
+    "province": "prov_elbistan",
+    "kind": "city",
+    "name": {
+      "display": "Elbistan (Albistan)",
+      "local": "Elbistan",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      37.19,
+      38.2
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des Dulkadir.",
+    "sources": [
+      "Dulkadir"
+    ]
+  },
+  {
+    "id": "set_maras",
+    "province": "prov_elbistan",
+    "kind": "town",
+    "name": {
+      "display": "Maraş (Germanicée)",
+      "local": "Maraş",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      36.94,
+      37.58
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville-frontière entre Mamelouks, Arméniens et Turkmènes.",
+    "sources": [
+      "Dulkadir"
+    ]
+  },
+  {
+    "id": "set_goksun",
+    "province": "prov_elbistan",
+    "kind": "village",
+    "name": {
+      "display": "Göksun (Coxon)",
+      "local": "Göksun",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      36.48,
+      38.02
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la route de Kayseri à Maraş (Coxon des croisés), dans l'orbite des Dulkadir (contrôle en 1337 incertain).",
+    "sources": [
+      "Göksun"
+    ]
+  }
+]

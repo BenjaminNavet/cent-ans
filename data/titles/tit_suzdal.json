@@ -1,0 +1,63 @@
+{
+  "id": "tit_suzdal",
+  "rank": "duchy",
+  "name": {
+    "display": "Principauté de Souzdal-Nijni Novgorod",
+    "local": "Княжество Суздальское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "D'azur à l'aigle d'argent.",
+    "description": "Blason de convention pour Souzdal (armes historiques : un faucon).",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_suzdal",
+    "prov_nijni",
+    "prov_murom"
+  ],
+  "holder_1337": {
+    "faction": "fac_suzdal",
+    "sources": [
+      "Principauté de Souzdal",
+      "Konstantin Vassilievitch de Souzdal"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_suzdal_hold",
+      "title": "Souzdal et Nijni",
+      "description": "Conserver la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_suzdal"
+      }
+    },
+    {
+      "id": "obj_suzdal_yarlyk",
+      "title": "Le yarlyk convoité",
+      "description": "Devenir grand-prince de Vladimir.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_vladimir"
+      }
+    },
+    {
+      "id": "obj_suzdal_free",
+      "title": "Sans maître",
+      "description": "Rester libre de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Lignée aînée des Riourikides du Nord-Est, prétendante au grand-principat ; Konstantin Vassilievitch tient Souzdal depuis 1331-1332, puis Nijni Novgorod (v. 1341). Il sera l'un des principaux concurrents de Moscou.",
+  "sources": [
+    "Principauté de Souzdal",
+    "Konstantin Vassilievitch de Souzdal"
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "id": "prov_theodoro",
+  "name": {
+    "display": "Théodoro (Gothie)",
+    "local": "Θεοδωρώ",
+    "local_language": "grec"
+  },
+  "region": "crimee",
+  "terrain": "hills",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Kacha",
+    "Tchernaïa"
+  ],
+  "ports": [
+    "Kalamita (Inkerman)"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Mangoup",
+      "local": "Μαγκούπ",
+      "local_language": "grec"
+    },
+    "lat": 44.6,
+    "lon": 33.8
+  },
+  "geo": {
+    "capital_lonlat": [
+      33.8,
+      44.6
+    ],
+    "seed_lonlat": [
+      33.85,
+      44.75
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_theodoro",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 26700,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 1800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 4,
+  "base_supply": 800,
+  "description": "Principauté de Théodoro, aux montagnes de Crimée méridionale : les Goths de Crimée, hellénisés, orthodoxes, sous la suzeraineté de la Horde ; la forteresse de Mangoup est imprenable. L'histoire de la principauté au XIVe siècle est mal connue.",
+  "sources": [
+    "Principauté de Théodoro",
+    "Mangoup"
+  ]
+}

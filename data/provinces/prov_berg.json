@@ -1,0 +1,92 @@
+{
+  "id": "prov_berg",
+  "name": {
+    "display": "Berg",
+    "local": "Berg",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "empire_rhin",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Rhin",
+    "Wupper"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_iron",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Düsseldorf",
+      "local": "Dusseldorp",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 51.2277,
+    "lon": 6.7735
+  },
+  "geo": {
+    "capital_lonlat": [
+      6.7735,
+      51.2277
+    ],
+    "seed_lonlat": [
+      6.8,
+      51.2
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_berg",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Comté rhénan boisé et minier ; population estimée par comparaison avec des territoires voisins de taille similaire.",
+    "classes": {
+      "peasants": {
+        "count": 52000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1400,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1600,
+  "description": "Comté de Berg, rive droite du Rhin face à Cologne, tenu par Adolphe VII (1308-1348), qui fait de Düsseldorf sa résidence favorite.",
+  "sources": [
+    "Adolphe VII de Berg",
+    "Comté de Berg",
+    "Düsseldorf"
+  ]
+}

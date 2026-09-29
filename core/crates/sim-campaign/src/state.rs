@@ -43,9 +43,10 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// stand on settlements). `6`: lot M2 free movement (`Army::position`,
 /// `movement_left`, `planned_path` replace `location`, `movement_points`,
 /// `path`; field battles carry a point). `7`: lot FE feudal titles
-/// (`feudal`: title holders, primary titles, felony cases).
+/// (`feudal`: title holders, primary titles, felony cases). `8`: lot OM1
+/// Urals–Mediterranean map (ADR 0115: map pixels moved +1280 in y, same layout).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 7;
+pub const STATE_VERSION: u32 = 8;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -223,6 +224,14 @@ pub struct Unit {
     /// G1: flat ranged bonus of the buildings of the levying province.
     #[serde(default, skip_serializing_if = "is_zero_u8")]
     pub levy_ranged: u8,
+    /// TW2-T5: thousandths of an experience level below `experience`, left by
+    /// the pro rata dilution of reinforcements (`traditions::add_recruits`).
+    #[serde(default, skip_serializing_if = "is_zero_u16")]
+    pub experience_residue: u16,
+}
+
+fn is_zero_u16(value: &u16) -> bool {
+    *value == 0
 }
 
 fn is_zero_u8(value: &u8) -> bool {
@@ -240,6 +249,7 @@ impl Unit {
             morale: unit_type.stats.morale,
             levy_armor: 0,
             levy_ranged: 0,
+            experience_residue: 0,
         }
     }
 }
@@ -248,7 +258,7 @@ impl Unit {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ArmyPosition {
-    /// In the field, at a free point of the map (pixels of the 4096² map).
+    /// In the field, at a free point of the map (map pixels).
     Field { x: f32, y: f32 },
     /// Stationed in a settlement: garrison, siege or friendly stop.
     Settlement(SettlementId),
@@ -302,6 +312,13 @@ pub struct Army {
     /// season, `crate::replenish`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fought_turn: Option<u32>,
+    /// TW2-T5: army experience, traditions, kept name and banner
+    /// (`crate::traditions`).
+    #[serde(
+        default,
+        skip_serializing_if = "crate::traditions::ArmyTraditions::is_empty"
+    )]
+    pub traditions: crate::traditions::ArmyTraditions,
 }
 
 impl Army {
@@ -319,6 +336,7 @@ impl Army {
             destination: None,
             morale_modifiers: Vec::new(),
             fought_turn: None,
+            traditions: Default::default(),
         }
     }
 
@@ -580,6 +598,10 @@ pub struct FactionState {
     pub army_upkeep_last_turn: i64,
     #[serde(default)]
     pub building_upkeep_last_turn: i64,
+    /// RS-C: seasons in a row closed in deficit (income below upkeep); the
+    /// AI demolishes buildings after `economy.json` `ai_demolition`.
+    #[serde(default)]
+    pub deficit_seasons: u32,
     #[serde(default)]
     pub projected_income: i64,
     /// A regency governs for a minor ruler (M4 spec § 2); tracked so the
@@ -791,6 +813,10 @@ impl CampaignState {
         let Some(army) = self.armies.get(id) else {
             return "une armée".to_owned();
         };
+        // TW2-T5: a veteran army keeps its name when its general changes.
+        if let Some(name) = &army.traditions.name {
+            return name.clone();
+        }
         let owner = match &army.general {
             Some(general) => self.character_name(data, general),
             None => data.factions.get(&army.faction).map_or_else(
@@ -929,6 +955,10 @@ pub struct CampaignState {
     /// ruins (absent from older saves; no change of [`STATE_VERSION`]).
     #[serde(default)]
     pub captures: crate::capture::CaptureState,
+    /// TW2-T3: mercenary reserves and this turn's hires (absent from older
+    /// saves; no change of [`STATE_VERSION`]).
+    #[serde(default)]
+    pub mercenaries: crate::mercenaries::MercenaryState,
     /// Lot FE: title holdings (feudal hierarchy, ADR 0098).
     #[serde(default)]
     pub feudal: crate::feudal::FeudalState,
@@ -984,6 +1014,7 @@ impl CampaignState {
             difficulty: crate::difficulty::Difficulty::Normal,
             encounters: crate::encounter::EncounterState::default(),
             captures: crate::capture::CaptureState::default(),
+            mercenaries: crate::mercenaries::MercenaryState::default(),
             feudal: crate::feudal::FeudalState::default(),
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
@@ -1129,8 +1160,19 @@ impl CampaignState {
                 .is_some_and(|f| f.at_war_with.contains(b))
     }
 
+    /// `a` and `b` fight on the same side: the same faction, allies, or a
+    /// suzerain and its direct vassal (the feudal tie stands for an
+    /// alliance, ADR 0114; read from the `suzerain` cache).
     pub fn is_allied(&self, a: &FactionId, b: &FactionId) -> bool {
-        a == b || self.factions.get(a).is_some_and(|f| f.allies.contains(b))
+        a == b
+            || self
+                .factions
+                .get(a)
+                .is_some_and(|f| f.allies.contains(b) || f.suzerain.as_ref() == Some(b))
+            || self
+                .factions
+                .get(b)
+                .is_some_and(|f| f.suzerain.as_ref() == Some(a))
     }
 
     /// Lot C5: a formal trade agreement is in force between `a` and `b` (also

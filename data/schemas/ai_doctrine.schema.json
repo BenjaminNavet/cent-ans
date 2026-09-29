@@ -19,6 +19,18 @@
       },
       "required": ["mix"],
       "additionalProperties": false
+    },
+    "rank_strategy": {
+      "type": "object",
+      "description": "Doctrine stratégique des factions d'un rang (lot FE5).",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "description": { "type": "string" },
+        "min_war_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance (avec alliés) à atteindre, en multiple de celle de la cible, de ses alliés et des suzerains probables, pour déclarer la guerre." },
+        "seek_protection_power_ratio": { "type": "number", "minimum": 1, "description": "Un souverain en guerre contre un voisin ce nombre de fois plus fort cherche un protecteur." }
+      },
+      "required": ["id", "min_war_power_ratio", "seek_protection_power_ratio"],
+      "additionalProperties": false
     }
   },
   "properties": {
@@ -28,6 +40,12 @@
       "type": "object",
       "propertyNames": { "pattern": "^fac_[a-z0-9_]+$" },
       "additionalProperties": { "$ref": "#/$defs/doctrine" }
+    },
+    "rank_strategies": {
+      "type": "object",
+      "description": "Doctrine stratégique par rang du titre principal (lot FE5).",
+      "propertyNames": { "enum": ["county", "duchy", "kingdom"] },
+      "additionalProperties": { "$ref": "#/$defs/rank_strategy" }
     }
   },
   "required": ["default"],

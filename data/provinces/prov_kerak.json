@@ -1,0 +1,94 @@
+{
+  "id": "prov_kerak",
+  "name": {
+    "display": "Kérak et Transjordanie",
+    "local": "الكرك",
+    "local_language": "arabe"
+  },
+  "region": "levant",
+  "terrain": "desert",
+  "climate": "arid",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Jourdain"
+  ],
+  "ports": [
+    "Ayla"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wheat",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kérak (Crac de Moab)",
+      "local": "الكرك",
+      "local_language": "arabe"
+    },
+    "lat": 31.18,
+    "lon": 35.7
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.7,
+      31.18
+    ],
+    "seed_lonlat": [
+      35.85,
+      30.7
+    ],
+    "voronoi_weight": 2.2
+  },
+  "owner": "fac_mamluks",
+  "culture": "cul_arabic",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 22000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 700,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 260,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 4,
+  "base_supply": 700,
+  "description": "Plateaux et déserts à l'est de la mer Morte ; Kérak, forteresse-prison des sultans (al-Nasir y a régné en exil), et Chaubak sur la route du hajj.",
+  "sources": [
+    "Kerak Castle",
+    "Shawbak",
+    "Transjordan"
+  ]
+}

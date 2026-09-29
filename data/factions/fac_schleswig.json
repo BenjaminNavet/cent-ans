@@ -1,0 +1,54 @@
+{
+  "id": "fac_schleswig",
+  "name": {
+    "display": "Duché de Slesvig",
+    "local": "Hertugdømmet Slesvig",
+    "local_language": "danois médiéval"
+  },
+  "short_name": "Slesvig",
+  "adjective": "slesvigois",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_valdemar_v_de_slesvig",
+  "capital": "prov_schleswig",
+  "capital_city": "Slesvig",
+  "religion": "rel_catholic",
+  "culture": "cul_danish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_schleswig",
+  "heraldry": {
+    "blazon": "D'or à deux léopards d'azur.",
+    "description": "Les deux lions bleus de Slesvig, sur or.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "titles": [
+    "Duc de Slesvig"
+  ],
+  "treasury": 6000,
+  "prestige": 32,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_hanseatic_trade"
+  ],
+  "relations": [
+    {
+      "faction": "fac_holstein",
+      "status": "peace",
+      "note": "Gérard III, ancien tuteur du duc, tient le Jutland voisin ; Valdemar se méfie de son emprise."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 50,
+    "piety": 50
+  },
+  "description": "Le Sønderjylland, fief danois de la lignée d'Abel, gouverné par Valdemar V qui a déjà porté brièvement la couronne ; entre les Holstein et le royaume sans roi, il peut tout gagner.",
+  "sources": [
+    "Duché de Slesvig",
+    "Valdemar III de Danemark"
+  ]
+}

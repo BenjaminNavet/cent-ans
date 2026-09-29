@@ -17,7 +17,7 @@ extends Node3D
 ## ou la boue ; haies des courtils et du bocage semées avec les buissons (et chênes têtards), fossés,
 ## cour du village, mares et plage cuits dans la splatmap ; maisons, clôtures, mares, roseaux et mer
 ## dans `BattleVillage`. Options après `--` : `--terrain=<plains|hills|mountains|forest|marsh|heath|
-## bocage>`, `--season=<spring|summer|autumn|winter>`, `--village` / `--no-village`, `--coast`,
+## bocage|steppe|desert>`, `--season=<spring|summer|autumn|winter>`, `--village` / `--no-village`, `--coast`,
 ## `--ground=<dry|muddy|snowy>` (rendu seulement, comme `--weather=`)
 ## (réécrivent la mise en place avant la simulation, captures) ; `--no-site` coupe le rendu B5
 ## (comparaisons de performance A/B).
@@ -64,6 +64,64 @@ const BIOMES := {
 	"mountains": {"relief": 3.4, "near_woods": 0.22, "far_woods": 0.18, "rocks": 2.2, "snow_line": 150.0, "ridges": 0.8, "rolls": 22.0},
 	"marsh": {"relief": 0.2, "near_woods": 0.42, "far_woods": 0.38, "rocks": 0.2, "snow_line": 10000.0, "ridges": 0.0, "rolls": 1.0},
 }
+
+## GA2 : identité des couches du sol (Poly Haven, ordre d'empilement, taille de répétition),
+## jamais codée en dur ici (`data/fx/battle_ground_layers.json`, schéma
+## `fx_battle_ground_layers.schema.json`) ; même repli que `BattleGore.settings()`.
+const GROUND_LAYERS_FILE := "fx/battle_ground_layers.json"
+## Taille fixe du tableau `layer_tile_size` du shader (couches réelles ≤ cette taille).
+const MAX_GROUND_LAYERS := 16
+static var _ground_layers: Array = []
+static var _ground_layers_loaded: bool = false
+static var _ground_role_index: Dictionary = {}
+## OM3 (ADR 0116) : teinte de l'herbe par terrain de province (`terrain_tints` du même fichier) ;
+## la steppe et le désert réutilisent le sol de plaine, teinté, tant qu'ils n'ont pas de décor dédié.
+static var _terrain_tints: Dictionary = {}
+
+
+## GA2 : couches du sol depuis les données (dossier de données du jeu, puis `data/` du dépôt).
+static func ground_layers() -> Array:
+	if _ground_layers_loaded:
+		return _ground_layers
+	_ground_layers_loaded = true
+	var candidates: Array[String] = []
+	var tree := Engine.get_main_loop() as SceneTree
+	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
+	if paths != null:
+		candidates.append(str(paths.get("data_dir")))
+	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
+	for dir in candidates:
+		var path := dir.path_join(GROUND_LAYERS_FILE)
+		if FileAccess.file_exists(path):
+			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+			if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
+				_ground_layers = (parsed as Dictionary)["layers"]
+				var tints: Variant = (parsed as Dictionary).get("terrain_tints", {})
+				if tints is Dictionary:
+					_terrain_tints = tints
+				for i in _ground_layers.size():
+					var role := str((_ground_layers[i] as Dictionary).get("role", ""))
+					if role != "":
+						_ground_role_index[role] = i
+				return _ground_layers
+	push_warning("BattleTerrain: %s introuvable, sol replié sur les couches historiques" % GROUND_LAYERS_FILE)
+	return _ground_layers
+
+
+## OM3 : multiplicateur de teinte de l'herbe pour un terrain de province (blanc si absent des données).
+static func terrain_tint(key: String) -> Color:
+	ground_layers()
+	var rgb: Variant = _terrain_tints.get(key, null)
+	if rgb is Array and (rgb as Array).size() == 3:
+		return Color(float(rgb[0]), float(rgb[1]), float(rgb[2]))
+	return Color(1, 1, 1)
+
+
+## GA2 : index (dans le `Texture2DArray`) de la couche portant ce rôle, -1 si absente des données.
+static func ground_role_index(role: String) -> int:
+	ground_layers()
+	return int(_ground_role_index.get(role, -1))
+
 
 const GROUND_SHADER := preload("res://shaders/battle_ground.gdshader")
 const WATER_SHADER := preload("res://shaders/battle_water.gdshader")
@@ -128,6 +186,10 @@ var decor_render := true
 ## volume, feuillus ramifiés par essence avec imposteurs au loin, détail du sol de près.
 ## `--no-da6` rend l'ancienne végétation (banc A/B, captures « avant »).
 var da6 := true
+## GA2 : couches supplémentaires du sol (prairie fleurie, herbe piétinée, chaume, labour frais)
+## et macro-variation de teinte/luminance (50–200 m). `--no-ga2` coupe la macro-variation
+## (comparaisons A/B ; les couches restent en place, sans coût de rendu notable si non utilisées).
+var ga2 := true
 var tree_view: BattleTrees = null
 ## DA6 : banc A/B dans un seul processus (`--bench-ab=da6,no-da6`) : les deux végétations sont
 ## construites, `set_da6_view` bascule de l'une à l'autre.
@@ -207,6 +269,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	woodland = float(terrain.get("woodland", 0.5))
 	site_render = not OS.get_cmdline_user_args().has("--no-site")
 	da6 = not OS.get_cmdline_user_args().has("--no-da6")
+	ga2 = not OS.get_cmdline_user_args().has("--no-ga2")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--bench-ab=") and arg.contains("da6"):
 			da6_ab = true
@@ -257,6 +320,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_plan_roads()
 	_build_textures()
 	_build_material(weather)
+	_apply_terrain_tint()
 	_setup_trample()
 	_add_mesh("Ground", _field_mesh(), true)
 	_add_mesh("NearRing", _ring_mesh(NEAR_RECT, NEAR_STEP, Rect2(0, 0, FIELD_W, FIELD_D), 0.0), true)
@@ -988,6 +1052,18 @@ func _stamp_disc(image: Image, center: Vector2, radius: float, channel: int, fea
 				image.set_pixel(ix, iz, c)
 
 
+## OM3 : la teinte du terrain (steppe, désert) s'ajoute à celle de la saison et du temps.
+func _apply_terrain_tint() -> void:
+	if not site_render or ground_material == null:
+		return
+	var tint := terrain_tint(terrain_key)
+	if tint == Color(1, 1, 1):
+		return
+	var current: Variant = ground_material.get_shader_parameter("grass_tint")
+	var base: Color = current if current is Color else Color(0.9, 1.0, 0.8)
+	ground_material.set_shader_parameter("grass_tint", base * tint)
+
+
 func _build_material(weather: String) -> void:
 	ground_material = ShaderMaterial.new()
 	ground_material.shader = GROUND_SHADER
@@ -1004,6 +1080,21 @@ func _build_material(weather: String) -> void:
 	ground_material.set_shader_parameter("near_detail_normal", NEAR_DETAIL_NORMAL)
 	ground_material.set_shader_parameter("near_detail_on", 1.0 if da6 else 0.0)
 	ground_material.set_shader_parameter("decor_saturation", decor_saturation())
+	# GA2 : identité des couches (nombre, taille de répétition) et index des rôles ajoutés
+	# (prairie fleurie, herbe piétinée, chaume, labour frais), lus depuis les données
+	# (`data/fx/battle_ground_layers.json`), jamais codés en dur dans le shader.
+	var ground_layer_list := ground_layers()
+	ground_material.set_shader_parameter("layer_count", ground_layer_list.size())
+	var tile_sizes := PackedFloat32Array()
+	tile_sizes.resize(MAX_GROUND_LAYERS)
+	for i in mini(ground_layer_list.size(), MAX_GROUND_LAYERS):
+		tile_sizes[i] = float((ground_layer_list[i] as Dictionary).get("tile_size_m", 6.0))
+	ground_material.set_shader_parameter("layer_tile_size", tile_sizes)
+	ground_material.set_shader_parameter("idx_flowering_meadow", ground_role_index("flowering_meadow"))
+	ground_material.set_shader_parameter("idx_trodden_grass", ground_role_index("trodden_grass"))
+	ground_material.set_shader_parameter("idx_stubble", ground_role_index("stubble"))
+	ground_material.set_shader_parameter("idx_fresh_plough", ground_role_index("fresh_plough"))
+	ground_material.set_shader_parameter("ga2_on", 1.0 if ga2 else 0.0)
 	if decor_on:
 		ground_material.set_shader_parameter("decor_fields", decor_fields)
 		ground_material.set_shader_parameter("decor_on", 1.0)

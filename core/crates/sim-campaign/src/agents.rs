@@ -1107,7 +1107,8 @@ impl CampaignState {
             AgentActionKind::Parley => {
                 let value = effects.parley_opinion
                     + effects.parley_opinion_per_level * (i32::from(agent.level) - 1);
-                self.add_modifier(
+                self.add_capped_modifier(
+                    data,
                     &plan.target_faction,
                     faction,
                     value,
@@ -1125,7 +1126,8 @@ impl CampaignState {
                 let value = (effects.parley_opinion
                     + effects.parley_opinion_per_level * (i32::from(agent.level) - 1))
                     / 2;
-                self.add_modifier(
+                self.add_capped_modifier(
+                    data,
                     &plan.target_faction,
                     faction,
                     value,
@@ -1545,7 +1547,10 @@ pub fn plan_agents(state: &CampaignState, data: &GameData, faction: &FactionId) 
     if !f.alive || faction.as_str() == REBELS_FACTION || faction.as_str() == PAPACY_FACTION {
         return Vec::new();
     }
-    let playable = data.factions.get(faction).is_some_and(|d| d.playable);
+    // F8: a playable faction too poor for a network of agents (their
+    // upkeep) behaves like a minor power.
+    let playable = data.factions.get(faction).is_some_and(|d| d.playable)
+        && state.faction_income_effective(data, faction) >= rules(data).ai_network_min_income;
     let mut orders = Vec::new();
     // Recruitment: one agent of each missing kind, one per season.
     if playable || f.treasury > 2 * AI_RECRUIT_RESERVE {
@@ -1805,6 +1810,7 @@ fn ai_emissary(
             None,
         );
     }
+    let neighbours = state.neighbour_factions(data, faction);
     let neighbour = state
         .factions
         .iter()
@@ -1814,7 +1820,7 @@ fn ai_emissary(
                 && other.as_str() != REBELS_FACTION
                 && !state.is_at_war(faction, other)
                 && !state.is_allied(faction, other)
-                && state.are_neighbors(data, faction, other)
+                && neighbours.contains(*other)
                 && !f.modifiers.iter().any(|m| {
                     &m.with == faction
                         && m.reason_fr == PARLEY_REASON

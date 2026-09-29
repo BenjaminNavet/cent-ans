@@ -1,0 +1,109 @@
+[
+  {
+    "id": "set_silistra",
+    "province": "prov_dobrudja",
+    "kind": "city",
+    "name": {
+      "display": "Drăstăr (Silistra)",
+      "local": "Дръстър",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      27.26,
+      44.12
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Grande forteresse du Danube inférieur.",
+    "sources": [
+      "Silistra"
+    ]
+  },
+  {
+    "id": "set_kaliakra",
+    "province": "prov_dobrudja",
+    "kind": "castle",
+    "name": {
+      "display": "Kaliakra",
+      "local": "Калиакра",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      28.467,
+      43.36
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse du cap sur la mer Noire.",
+    "sources": [
+      "Kaliakra"
+    ]
+  },
+  {
+    "id": "set_karvuna",
+    "province": "prov_dobrudja",
+    "kind": "town",
+    "name": {
+      "display": "Karvouna",
+      "local": "Карвуна",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      28.34,
+      43.43
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port de la côte pontique (Kavarna).",
+    "sources": [
+      "Kavarna"
+    ]
+  },
+  {
+    "id": "set_mangalia",
+    "province": "prov_dobrudja",
+    "kind": "town",
+    "name": {
+      "display": "Pangalia",
+      "local": "Мангалия",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      28.58,
+      43.82
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne Callatis, port de la côte.",
+    "sources": [
+      "Mangalia"
+    ]
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "id": "fac_haute_oka",
+  "name": {
+    "display": "Principautés de la Haute-Oka",
+    "local": "Верховские княжества",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Haute-Oka",
+  "adjective": "de la Haute-Oka",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_kozelsk",
+  "capital_city": "Kozelsk",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_haute_oka",
+  "heraldry": {
+    "blazon": "D'or à la bande de sinople.",
+    "description": "Blason de convention pour les principautés issues de Tchernigov.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2E7D32",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Princes de Kozelsk, Belev, Novossil et Odoïev"
+  ],
+  "treasury": 3000,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 50,
+    "trade": 40,
+    "piety": 60
+  },
+  "description": "Petites seigneuries des descendants des Olgovitchi de Tchernigov sur la haute Oka, tributaires de la Horde et bientôt disputées entre Moscou et la Lituanie ; les noms de leurs princes de 1337 ne sont pas retenus ici.",
+  "sources": [
+    "Principautés de la Haute-Oka",
+    "Kozelsk"
+  ]
+}

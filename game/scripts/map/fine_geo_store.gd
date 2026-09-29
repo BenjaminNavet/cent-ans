@@ -10,6 +10,7 @@ extends RefCounted
 
 const RIVERS_FILE := "rivers_fine.json"
 const ANCHORS_FILE := "fine_anchors.json"
+const PYRAMID_FILE := "relief_pyramid.json"
 const TILE_UNITS := 64.0
 
 var max_cached_tiles: int = 64
@@ -30,6 +31,12 @@ var _frame: int = 0
 ## remplissent le cache depuis des fils de travail (`fetch_threadsafe`).
 var _mutex := Mutex.new()
 var _broken: Dictionary = {1: {}, 2: {}}
+
+## Décalage d'origine du cache en tuiles E2 (`relief_pyramid.json` `root_origin_tiles` × 4,
+## ADR 0115) : tuiles et points CAFV sont écrits dans le cadre de la pyramide (carte 4096² d'avant
+## OM) ; l'index, les clés et les points chargés sont en coordonnées monde, seul le chemin de
+## fichier revient au cadre du cache. Les ancrages (`fine_anchors.json`) sont déjà en unités monde.
+var origin_tiles: Vector2i = Vector2i.ZERO
 
 ## Ancrages : id de colonie → {px: Vector2, z}; hameaux dans l'ordre de `hamlets.json`
 ## (Vector4 x, y, z, déplacement) ; franchissements dans l'ordre de `crossings_px.json`.
@@ -53,6 +60,13 @@ static func tile_rect(col: int, row: int) -> Rect2:
 func load_from(dir: String, tiles_root: String = "") -> bool:
 	map_dir = dir
 	var root := tiles_root if tiles_root != "" else dir
+	origin_tiles = Vector2i.ZERO
+	var pyramid: Variant = _read_json(dir.path_join(PYRAMID_FILE))
+	if pyramid is Dictionary:
+		var origin: Variant = (pyramid as Dictionary).get("root_origin_tiles", [0, 0])
+		if origin is Array and (origin as Array).size() == 2:
+			var per_root := int(ReliefPyramid.ROOT_TILE_UNITS / TILE_UNITS)
+			origin_tiles = Vector2i(int(origin[0]) * per_root, int(origin[1]) * per_root)
 	var rivers: Variant = _read_json(dir.path_join(RIVERS_FILE))
 	if rivers is Dictionary:
 		_load_index(1, rivers, root)
@@ -85,8 +99,11 @@ func has_tile(layer: int, col: int, row: int) -> bool:
 	return (_index[layer] as Dictionary).has(key_of(col, row))
 
 
+## Fichier de la tuile monde (col, row) : coordonnées du cache (décalage `origin_tiles` retiré).
 func tile_path(layer: int, col: int, row: int) -> String:
-	return str(_dirs[layer]).path_join(str(_patterns[layer]).replace("{col}", str(col)).replace("{row}", str(row)))
+	var c := col - origin_tiles.x
+	var r := row - origin_tiles.y
+	return str(_dirs[layer]).path_join(str(_patterns[layer]).replace("{col}", str(c)).replace("{row}", str(r)))
 
 
 ## Tuile chargée (null sinon) ; marque son utilisation (LRU).
@@ -119,7 +136,7 @@ func fetch_threadsafe(layer: int, col: int, row: int) -> CafvTile:
 	_mutex.unlock()
 	if tile != null or broken:
 		return tile
-	tile = CafvTile.load_file(tile_path(layer, col, row))
+	tile = CafvTile.load_file(tile_path(layer, col, row), origin_tiles)
 	_store(layer, key, tile)
 	return tile
 
@@ -138,7 +155,7 @@ func load_sync(layer: int, col: int, row: int) -> CafvTile:
 		_jobs.erase(jkey)
 		_store(layer, (entry["job"] as TileJob).key, (entry["job"] as TileJob).tile)
 		return get_tile(layer, col, row)
-	tile = CafvTile.load_file(tile_path(layer, col, row))
+	tile = CafvTile.load_file(tile_path(layer, col, row), origin_tiles)
 	_store(layer, key_of(col, row), tile)
 	return tile
 
@@ -152,6 +169,7 @@ func request(layer: int, col: int, row: int) -> void:
 		return
 	var job := TileJob.new()
 	job.path = tile_path(layer, col, row)
+	job.offset = origin_tiles
 	job.key = key_of(col, row)
 	_jobs[jkey] = {"task": WorkerThreadPool.add_task(job.run, false, "fine geo tile"), "job": job, "layer": layer}
 
@@ -214,7 +232,7 @@ func _load_index(layer: int, manifest: Dictionary, root: String) -> void:
 	_patterns[layer] = str(manifest.get("pattern", _patterns[layer]))
 	var index := {}
 	for tile: Dictionary in manifest.get("tiles", []):
-		index[key_of(int(tile.get("col", 0)), int(tile.get("row", 0)))] = true
+		index[key_of(int(tile.get("col", 0)) + origin_tiles.x, int(tile.get("row", 0)) + origin_tiles.y)] = true
 	_index[layer] = index
 
 
@@ -257,7 +275,8 @@ class TileJob:
 
 	var path: String = ""
 	var key: int = 0
+	var offset: Vector2i = Vector2i.ZERO
 	var tile: CafvTile
 
 	func run() -> void:
-		tile = CafvTile.load_file(path)
+		tile = CafvTile.load_file(path, offset)

@@ -16,7 +16,7 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 #include "res://shaders/parchment_common.gdshaderinc"
 uniform vec3 pm_river_ink = vec3(0.04, 0.10, 0.12);
 
-uniform vec2 map_size = vec2(4096.0, 4096.0);
+uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 // ZG4 : rubans cuits en altitude × `baked_vertical_scale` (MapData.HEIGHT_SCALE, SANS relief exagéré),
 // posés à la hauteur affichée courante (ZG8 : `campaign_display_height`) sans reconstruction.
 #include "res://shaders/campaign_relief.gdshaderinc"

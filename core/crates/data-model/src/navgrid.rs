@@ -26,7 +26,8 @@ use crate::load::GameData;
 pub const IMPASSABLE: u8 = 255;
 /// Cost of a plain cell: the unit of movement points on the grid.
 pub const PLAIN_COST: u8 = 10;
-/// Default grid side (cells) and map pixels per cell (2048² over 4096²).
+/// Grid side (cells) of a `GameData` built without any map (tests, tools): the grid of a
+/// real map follows `map.json` (`navgrid.size_px`, else `size_px` / scale, ADR 0115).
 pub const DEFAULT_GRID_SIZE: u32 = 2048;
 pub const DEFAULT_GRID_SCALE: u32 = 2;
 /// Default kilometres per cell (719 m per map pixel × 2).
@@ -265,7 +266,8 @@ pub struct RasterHandle {
 struct RasterSource {
     map_dir: PathBuf,
     navgrid_file: Option<String>,
-    grid_size: u32,
+    /// Cells along x and y of the all-plain grid used when no raster exists.
+    grid_size: (u32, u32),
     scale: u32,
     cell_km: f64,
     province_ids: Vec<Option<ProvinceId>>,
@@ -361,7 +363,7 @@ fn load_rasters(source: &RasterSource) -> MapRasters {
 /// Uniform grid from `land_mask.png` (plain on land, impassable at sea),
 /// or an all-plain grid when the mask is missing too.
 fn fallback_grid(source: &RasterSource) -> NavGrid {
-    let size = source.grid_size;
+    let (size_x, size_y) = source.grid_size;
     let scale = source.scale.max(1);
     let mut grid = match decode_gray8(&source.map_dir.join("land_mask.png")) {
         Ok((mask, width, height)) => {
@@ -386,7 +388,7 @@ fn fallback_grid(source: &RasterSource) -> NavGrid {
             }
             NavGrid::from_costs(cells_w, cells_h, scale, source.cell_km, costs)
         }
-        Err(_) => NavGrid::uniform(size, size, scale, source.cell_km, PLAIN_COST),
+        Err(_) => NavGrid::uniform(size_x, size_y, scale, source.cell_km, PLAIN_COST),
     };
     grid.fallback = true;
     grid
@@ -482,10 +484,22 @@ impl GameData {
             .get("scale")
             .and_then(|v| v.as_u64())
             .map_or(DEFAULT_GRID_SCALE, |v| v.max(1) as u32);
-        let grid_size = navgrid
-            .get("size_px")
-            .and_then(|v| v.as_u64())
-            .map_or(DEFAULT_GRID_SIZE, |v| v.max(1) as u32);
+        // `navgrid.size_px`: one side (square grid, before ADR 0115) or [w, h]; else the map
+        // size over the scale.
+        let grid_size = match navgrid.get("size_px") {
+            Some(serde_json::Value::Array(values)) if values.len() == 2 => {
+                let side = |i: usize| values[i].as_u64().map_or(1, |v| v.max(1) as u32);
+                Some((side(0), side(1)))
+            }
+            Some(value) => value.as_u64().map(|v| (v.max(1) as u32, v.max(1) as u32)),
+            None => None,
+        }
+        .or_else(|| {
+            self.map
+                .as_ref()
+                .map(|m| ((m.size_px[0] / scale).max(1), (m.size_px[1] / scale).max(1)))
+        })
+        .unwrap_or((DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE));
         let cell_km = self.map.as_ref().map_or(DEFAULT_CELL_KM, |m| {
             m.meters_per_px * f64::from(scale) / 1000.0
         });
@@ -545,25 +559,14 @@ impl GameData {
     }
 
     /// Map-pixel position of a settlement: `settlements_px.json`, else its
-    /// longitude/latitude projected linearly over the map extent.
+    /// longitude/latitude projected with the map (`MapMeta::lonlat_to_px`, EPSG:3035).
     pub fn settlement_point(&self, id: &SettlementId) -> Option<[f32; 2]> {
         if let Some(point) = self.settlement_px.get(id) {
             return Some(*point);
         }
         let settlement = self.settlements.get(id)?;
-        let (extent, size) = self
-            .map
-            .as_ref()
-            .and_then(|m| {
-                let extent = m.extra.get("extent_lonlat")?.as_array()?;
-                let values: Vec<f64> = extent.iter().filter_map(|v| v.as_f64()).collect();
-                (values.len() == 4)
-                    .then(|| ([values[0], values[1], values[2], values[3]], m.size_px))
-            })
-            .unwrap_or(([-11.0, 35.0, 16.0, 60.0], [4096, 4096]));
         let [lon, lat] = settlement.lonlat;
-        let x = (lon - extent[0]) / (extent[2] - extent[0]) * f64::from(size[0]);
-        let y = (extent[3] - lat) / (extent[3] - extent[1]) * f64::from(size[1]);
+        let [x, y] = self.map.as_ref()?.lonlat_to_px(lon, lat)?;
         Some([x as f32, y as f32])
     }
 }

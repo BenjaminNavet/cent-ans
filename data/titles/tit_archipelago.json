@@ -1,0 +1,63 @@
+{
+  "id": "tit_archipelago",
+  "rank": "county",
+  "name": {
+    "display": "Duché de l'Archipel",
+    "local": "Ducato dell'Arcipelago",
+    "local_language": "vénitien"
+  },
+  "heraldry": {
+    "blazon": "Écartelé d'argent et de gueules.",
+    "description": "Armes des Sanudo, ducs de l'Archipel, écartelées d'argent et de gueules.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Armes des Sanudo non vérifiées."
+  },
+  "de_jure_provinces": [
+    "prov_archipelago"
+  ],
+  "holder_1337": {
+    "faction": "fac_archipelago",
+    "sources": [
+      "Duché de l'Archipel",
+      "Nicolas Ier Sanudo"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_archipelago_hold",
+      "title": "Garder les Cyclades",
+      "description": "Nicolas Sanudo doit garder le duché.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_archipelago"
+      }
+    },
+    {
+      "id": "obj_archipelago_indep",
+      "title": "Libre entre Venise et les Turcs",
+      "description": "Rester indépendant.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_archipelago_chios",
+      "title": "Chios latine",
+      "description": "Reprendre Chios, perdue par les Zaccaria alliés de Naxos en 1329.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_chios"
+        ]
+      }
+    }
+  ],
+  "description": "Duché de Naxos, Paros, Milos : État latin des Cyclades sous protection vénitienne. Rang « comté » du schéma.",
+  "sources": [
+    "Duché de l'Archipel",
+    "Nicolas Ier Sanudo"
+  ]
+}

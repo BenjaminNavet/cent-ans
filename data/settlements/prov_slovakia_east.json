@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_kassa",
+    "province": "prov_slovakia_east",
+    "kind": "city",
+    "name": {
+      "display": "Kassa",
+      "local": "Kassa",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      21.2611,
+      48.7164
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Grande ville marchande de l'est du royaume, sur la route de Pologne.",
+    "sources": [
+      "Kassa"
+    ]
+  },
+  {
+    "id": "set_locse",
+    "province": "prov_slovakia_east",
+    "kind": "town",
+    "name": {
+      "display": "Lőcse",
+      "local": "Lőcse",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      20.5889,
+      49.0261
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville saxonne de Spiš, siège de l'union des villes de Szepes.",
+    "sources": [
+      "Lőcse"
+    ]
+  },
+  {
+    "id": "set_chateau_de_szepes",
+    "province": "prov_slovakia_east",
+    "kind": "castle",
+    "name": {
+      "display": "Château de Szepes",
+      "local": "Szepesi vár",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      20.7683,
+      48.9997
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Vaste forteresse royale au-dessus de la Hornád, l'une des plus grandes d'Europe centrale.",
+    "sources": [
+      "Château de Szepes"
+    ]
+  }
+]

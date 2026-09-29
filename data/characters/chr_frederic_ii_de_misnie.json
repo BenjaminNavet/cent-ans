@@ -1,0 +1,50 @@
+{
+  "id": "chr_frederic_ii_de_misnie",
+  "name": {
+    "display": "Frédéric II de Misnie",
+    "local": "Friedrich II. der Ernsthafte",
+    "local_language": "moyen haut-allemand"
+  },
+  "epithet": "le Sérieux",
+  "sex": "male",
+  "house": "Wettin",
+  "faction": "fac_meissen",
+  "role": "ruler",
+  "birth": {
+    "value": "1310-12-30"
+  },
+  "death": {
+    "value": "1349-11-18"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Margrave de Misnie",
+      "from": {
+        "value": "1324"
+      }
+    },
+    {
+      "title": "Landgrave de Thuringe",
+      "from": {
+        "value": "1323"
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_stern",
+    "trait_just"
+  ],
+  "piety": 60,
+  "starting_location": "prov_meissen",
+  "status": "at_court",
+  "description": "Margrave de Misnie et landgrave de Thuringe de la maison de Wettin, réunit les deux principautés dès 1323/1324 ; règne prudent centré sur Meissen et Erfurt.",
+  "sources": [
+    "Frédéric II de Misnie"
+  ]
+}

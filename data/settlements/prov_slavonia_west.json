@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_zagreb",
+    "province": "prov_slavonia_west",
+    "kind": "city",
+    "name": {
+      "display": "Zagreb",
+      "local": "Zagreb",
+      "local_language": "croate"
+    },
+    "lonlat": [
+      15.9775,
+      45.8131
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville épiscopale et Gradec, ville royale libre, sur la Save.",
+    "sources": [
+      "Zagreb"
+    ]
+  },
+  {
+    "id": "set_varazdin",
+    "province": "prov_slavonia_west",
+    "kind": "town",
+    "name": {
+      "display": "Varaždin",
+      "local": "Varaždin",
+      "local_language": "croate"
+    },
+    "lonlat": [
+      16.3366,
+      46.3057
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de la Drave, marche de Styrie et de Hongrie.",
+    "sources": [
+      "Varaždin"
+    ]
+  },
+  {
+    "id": "set_krizevci",
+    "province": "prov_slavonia_west",
+    "kind": "town",
+    "name": {
+      "display": "Križevci",
+      "local": "Körös",
+      "local_language": "croate"
+    },
+    "lonlat": [
+      16.5453,
+      46.0231
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville royale libre et comitat de Körös, sur la route de la Drave.",
+    "sources": [
+      "Križevci"
+    ]
+  }
+]

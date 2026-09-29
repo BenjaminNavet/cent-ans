@@ -1,0 +1,101 @@
+{
+  "id": "prov_finland",
+  "name": {
+    "display": "Finlande propre et Nyland",
+    "local": "Suomi",
+    "local_language": "finnois"
+  },
+  "region": "finlande",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Aurajoki"
+  ],
+  "coastal": true,
+  "ports": [
+    "Turku",
+    "Raseborg",
+    "Porvoo"
+  ],
+  "sea_zones": [
+    "sea_gulf_of_bothnia",
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Turku",
+      "local": "Åbo",
+      "local_language": "finnois"
+    },
+    "lat": 60.4518,
+    "lon": 22.2666
+  },
+  "geo": {
+    "capital_lonlat": [
+      22.2666,
+      60.4518
+    ],
+    "seed_lonlat": [
+      22.9,
+      60.7
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_finnish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 95000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6650,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2850,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1140,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field",
+    "bld_cathedral"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1900,
+  "description": "Le sud-ouest du pays finnois, colonisé et christianisé par la Suède : Åbo (Turku), siège de l'évêque de Finlande, le château de Raseborg et l'archipel d'Åland.",
+  "sources": [
+    "Finlande médiévale",
+    "Turku",
+    "Château de Raseborg"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "chr_ivan_alexander",
+  "name": {
+    "display": "Ivan Alexandre",
+    "local": "Иван Александър",
+    "local_language": "bulgare"
+  },
+  "sex": "male",
+  "house": "Chichman",
+  "faction": "fac_bulgaria",
+  "role": "ruler",
+  "birth": {
+    "value": "1301",
+    "uncertain": true,
+    "note": "Naissance vers 1301."
+  },
+  "death": {
+    "value": "1371-02-17"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Tsar de Bulgarie",
+      "from": {
+        "value": "1331-02"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_pious",
+    "trait_diplomat"
+  ],
+  "piety": 80,
+  "family": {
+    "spouses": [
+      "chr_theodora_basarab"
+    ],
+    "children": [
+      "chr_mihail_asen_iv"
+    ]
+  },
+  "starting_location": "prov_tarnovo",
+  "status": "at_court",
+  "description": "Tsar depuis 1331, neveu de Michel Chichman ; il rétablit la paix avec Byzance et la Serbie et laisse une riche production littéraire.",
+  "sources": [
+    "Ivan Alexander of Bulgaria"
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "id": "prov_serres",
+  "name": {
+    "display": "Serrès",
+    "local": "Σέρραι",
+    "local_language": "grec"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Strymon"
+  ],
+  "ports": [
+    "Christoupolis"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Serrès",
+      "local": "Σέρραι",
+      "local_language": "grec"
+    },
+    "lat": 41.085,
+    "lon": 23.548
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.548,
+      41.085
+    ],
+    "seed_lonlat": [
+      23.7,
+      41.1
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 126000,
+        "unrest": 14,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9000,
+        "unrest": 14,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2600,
+        "unrest": 9,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 750,
+        "unrest": 9,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4200,
+  "description": "Plaine du Strymon : Serrès, où Étienne Dušan se fera couronner empereur en 1345, et Christoupolis. Frontière avec la Serbie de Macédoine.",
+  "sources": [
+    "Serrès",
+    "Kavala"
+  ]
+}

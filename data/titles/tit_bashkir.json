@@ -1,0 +1,50 @@
+{
+  "id": "tit_bashkir",
+  "rank": "county",
+  "name": {
+    "display": "Tribus bachkires",
+    "local": "Башкорт",
+    "local_language": "bachkir"
+  },
+  "heraldry": {
+    "blazon": "De sinople à la lune d'argent.",
+    "description": "Blason de convention (vert et argent) pour les Bachkirs.",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Pas d'héraldique attestée."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_bachkirie"
+  ],
+  "holder_1337": {
+    "faction": "fac_bashkir",
+    "sources": [
+      "Bachkirs"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_bashkir_hold",
+      "title": "Garder la Bachkirie",
+      "description": "Conserver les terres des tribus.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_bashkir"
+      }
+    },
+    {
+      "id": "obj_bashkir_free",
+      "title": "Sans khan",
+      "description": "Se libérer de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Fédération de tribus nomades et éleveuses de l'Oural méridional, vassale de la Horde d'Or ; l'islamisation est en cours. Aucune ville ; les chefs de 1337 ne sont pas connus.",
+  "sources": [
+    "Bachkirs"
+  ]
+}

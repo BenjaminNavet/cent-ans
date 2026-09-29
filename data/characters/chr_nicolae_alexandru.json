@@ -1,0 +1,39 @@
+{
+  "id": "chr_nicolae_alexandru",
+  "name": {
+    "display": "Nicolas Alexandre de Valachie",
+    "local": "Nicolae Alexandru",
+    "local_language": "roumain"
+  },
+  "sex": "male",
+  "house": "Basarab",
+  "faction": "fac_wallachia",
+  "role": "heir",
+  "birth": {
+    "value": "1310",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1364-11-16"
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 65,
+  "family": {
+    "father": "chr_basarab_ier"
+  },
+  "starting_location": "prov_muntenia",
+  "status": "at_court",
+  "description": "Fils de Basarab Ier, futur prince de Valachie (1352) et fondateur de l'Église métropolitaine de Valachie ; naissance approximative.",
+  "sources": [
+    "Nicolas Alexandre de Valachie"
+  ]
+}

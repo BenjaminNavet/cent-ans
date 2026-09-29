@@ -123,11 +123,12 @@ pub(crate) fn resolve_sieges(
         }
         let fortification = state.fortification_level(data, &settlement_id);
         let besieging_general = state.armies[&lead].general.clone();
-        let siege_speed_percent = besieging_general.as_ref().map_or(0.0, |g| {
-            skills::character_effects(state, data, g)
-                .siege_speed
-                .apply(0.0)
-        });
+        let siege_speed_percent =
+            besieging_general.as_ref().map_or(0.0, |g| {
+                skills::character_effects(state, data, g)
+                    .siege_speed
+                    .apply(0.0)
+            }) + crate::traditions::siege_speed_percent(data, &state.armies[&lead]);
         // M8: the garrison sallies out when it outmatches the besiegers.
         if sortie(state, data, &settlement_id, &besiegers, events) {
             continue;
@@ -242,7 +243,11 @@ pub(crate) fn begin_siege(
             skills::character_effects(state, data, &g)
                 .siege_speed
                 .apply(0.0)
-        });
+        })
+        + state
+            .armies
+            .get(army)
+            .map_or(0.0, |a| crate::traditions::siege_speed_percent(data, a));
     let drain = supplies_drain(fortification, siege_speed_percent);
     let devastation = state
         .provinces
@@ -657,9 +662,27 @@ pub(crate) fn apply_assault_result(
     let general = crate::movement::coalition_commander(state, attackers)
         .and_then(|id| state.armies.get(&id))
         .and_then(|a| a.general.clone());
+    // TW2-T5: strengths before the assault, for the army experience.
+    let strength_before = crate::traditions::strengths(state, attackers);
+    let garrison_strength = state
+        .settlements
+        .get(settlement)
+        .map_or(0, |s| s.garrison.iter().map(|u| u.strength).sum::<u32>());
     for (id, outcome) in crate::movement::split_outcome(state, attackers, &result.attacker) {
         crate::movement::apply_outcome(state, data, &id, &outcome, events);
     }
+    crate::traditions::on_battle(
+        state,
+        data,
+        &crate::traditions::BattleSide {
+            armies: attackers,
+            strength_before: &strength_before,
+            won,
+            enemy_strength: garrison_strength,
+            multiplier: 1.0,
+        },
+        events,
+    );
     // F1: a storming general taken on the walls is held by the defender.
     crate::movement::assign_captor(state, general.as_ref(), &defender_faction);
     capture_garrison_general(state, data, settlement, &result.defender, &faction, events);
@@ -771,9 +794,23 @@ fn sortie(
         events,
     );
     apply_garrison_losses(state, settlement, &result.attacker);
+    let strength_before = crate::traditions::strengths(state, &targets);
     for (id, outcome) in crate::movement::split_outcome(state, &targets, &result.defender) {
         crate::movement::apply_outcome(state, data, &id, &outcome, events);
     }
+    // TW2-T5: the besiegers' experience of the sortie.
+    crate::traditions::on_battle(
+        state,
+        data,
+        &crate::traditions::BattleSide {
+            armies: &targets,
+            strength_before: &strength_before,
+            won: result.winner == crate::battle_auto::Winner::Defender,
+            enemy_strength: garrison.total_strength(),
+            multiplier: 1.0,
+        },
+        events,
+    );
     // F1: a besieging general taken in the sortie is held by the garrison.
     crate::movement::assign_captor(state, besieger_general.as_ref(), &garrison.faction);
     let won = result.winner == crate::battle_auto::Winner::Attacker;
@@ -919,7 +956,8 @@ pub(crate) fn resolve_raids(
         }
         let general = state.armies[&army_id].general.clone();
         let province = state.provinces.get_mut(&province_id).expect("exists");
-        let loot = (province_income(province) * RAID_LOOT_SHARE).round() as i64;
+        let loot =
+            (province_income(&data.economy_rules, province) * RAID_LOOT_SHARE).round() as i64;
         province.devastation = province
             .devastation
             .saturating_add(RAID_DEVASTATION)

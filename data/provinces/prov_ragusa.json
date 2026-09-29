@@ -1,0 +1,98 @@
+{
+  "id": "prov_ragusa",
+  "name": {
+    "display": "Raguse",
+    "local": "Dubrovnik",
+    "local_language": "italien"
+  },
+  "region": "balkans",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Raguse",
+    "Ston"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "resources": [
+    "res_salt",
+    "res_fish",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Raguse",
+      "local": "Ragusium",
+      "local_language": "italien"
+    },
+    "lat": 42.641,
+    "lon": 18.092
+  },
+  "geo": {
+    "capital_lonlat": [
+      18.092,
+      42.641
+    ],
+    "seed_lonlat": [
+      17.95,
+      42.75
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_ragusa",
+  "culture": "cul_dalmatian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 12000,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 10000,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1200,
+        "unrest": 3,
+        "health": 52,
+        "wealth": 80,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 3,
+        "health": 52,
+        "wealth": 85,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_counting_house",
+    "bld_guild_hall"
+  ],
+  "fortification_level": 4,
+  "base_supply": 500,
+  "description": "République patricienne sous suzeraineté vénitienne, aux salines de Ston (murailles commencées en 1333) et aux navires sur toutes les mers. Le patriciat gouverne, le Recteur change tous les mois.",
+  "sources": [
+    "Dubrovnik",
+    "Ston",
+    "Recteur de Raguse"
+  ]
+}

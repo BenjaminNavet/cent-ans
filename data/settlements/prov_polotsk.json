@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_polotsk",
+    "province": "prov_polotsk",
+    "kind": "city",
+    "name": {
+      "display": "Polotsk",
+      "local": "Polatsk",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      28.7856,
+      55.4879
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Vieille cité orthodoxe de la Dvina, avec la cathédrale Sainte-Sophie.",
+    "sources": [
+      "Polotsk"
+    ]
+  },
+  {
+    "id": "set_braslaw",
+    "province": "prov_polotsk",
+    "kind": "castle",
+    "name": {
+      "display": "Braslaw",
+      "local": "Braslaŭ",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      27.0333,
+      55.6333
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de la marche de Livonie, près des lacs.",
+    "sources": [
+      "Braslaw"
+    ]
+  },
+  {
+    "id": "set_lukoml",
+    "province": "prov_polotsk",
+    "kind": "castle",
+    "name": {
+      "display": "Loukoml",
+      "local": "Lukoml",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      29.08,
+      54.72
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville fortifiée de la terre de Polotsk sur le lac de Loukoml, citée dès 1078 dans les chroniques.",
+    "sources": [
+      "Lukoml"
+    ]
+  }
+]

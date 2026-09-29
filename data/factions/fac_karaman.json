@@ -1,0 +1,65 @@
+{
+  "id": "fac_karaman",
+  "name": {
+    "display": "Beylik de Karaman",
+    "local": "Karamanoğulları",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Karaman",
+  "adjective": "de Karaman",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_ibrahim_karaman",
+  "capital": "prov_karaman",
+  "capital_city": "Larende (Karaman)",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_karaman",
+  "heraldry": {
+    "blazon": "De sable au chevron d'or.",
+    "description": "Couleurs de convention des Karamanoğulları.",
+    "primary_color": "#2A2A2A",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey de Karaman"
+  ],
+  "treasury": 11000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_eretna",
+      "status": "peace",
+      "note": "Rival pour le plateau et pour l'héritage seldjoukide."
+    },
+    {
+      "faction": "fac_mamluks",
+      "status": "peace",
+      "note": "Voisin méridional, menaçant sur la frontière de Cilicie."
+    },
+    {
+      "faction": "fac_cilicia",
+      "status": "war",
+      "note": "Escarmouches de frontière sur la côte de Silifke."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 65,
+    "diplomacy": 45,
+    "trade": 50,
+    "piety": 60
+  },
+  "description": "Héritiers autoproclamés des Seldjoukides de Roum, les Karamanoğulları dominent le Taurus et Konya ; Badreddin Ibrahim règne depuis 1333.",
+  "sources": [
+    "Karamanids",
+    "Ibrahim of Karaman"
+  ]
+}

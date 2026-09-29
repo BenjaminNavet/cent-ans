@@ -1,0 +1,51 @@
+{
+  "id": "chr_otto_von_wolfskeel",
+  "name": {
+    "display": "Otto von Wolfskeel",
+    "local": "Otto von Wolfskeel",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "male",
+  "house": "Wolfskeel",
+  "faction": "fac_wurzburg",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1345-03-08"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince-évêque de Wurtzbourg",
+      "from": {
+        "value": "1333"
+      },
+      "to": {
+        "value": "1345"
+      }
+    },
+    {
+      "title": "Duc de Franconie",
+      "note": "Titre ducal attaché à l'évêché depuis 1168."
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cunning"
+  ],
+  "piety": 75,
+  "starting_location": "prov_franconia",
+  "status": "at_court",
+  "description": "Prince-évêque de Wurtzbourg de 1333 à sa mort en 1345, duc de Franconie de droit ; issu de la famille noble franconienne de Wolfskeel.",
+  "sources": [
+    "Otto von Wolfskeel"
+  ]
+}

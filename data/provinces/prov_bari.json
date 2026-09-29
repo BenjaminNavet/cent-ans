@@ -1,0 +1,96 @@
+{
+  "id": "prov_bari",
+  "name": {
+    "display": "Terre de Bari",
+    "local": "Terra di Bari",
+    "local_language": "italien"
+  },
+  "region": "italie_sud",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [],
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bari",
+      "local": "Bari",
+      "local_language": "italien"
+    },
+    "lat": 41.1171,
+    "lon": 16.8719
+  },
+  "geo": {
+    "capital_lonlat": [
+      16.8719,
+      41.1171
+    ],
+    "seed_lonlat": [
+      16.5,
+      41.1
+    ],
+    "voronoi_weight": 0.75
+  },
+  "owner": "fac_naples",
+  "culture": "cul_neapolitan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 52000,
+        "unrest": 12,
+        "health": 55,
+        "wealth": 50,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 5200,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1300,
+        "unrest": 7,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 624,
+        "unrest": 7,
+        "health": 60,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Pouilles du centre : Bari, Trani, Barletta, huile et vin, ports adriatiques. Chiffres estimés (uncertain)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2000,
+  "description": "La Terre de Bari, cœur agricole et marchand des Pouilles ; Bari et le sanctuaire de saint Nicolas, Trani, Barletta, ports où passent Vénitiens et Ragusains.",
+  "sources": [
+    "Terre de Bari",
+    "Bari",
+    "Trani"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "ports": [
+    "Bari",
+    "Trani",
+    "Barletta"
+  ]
+}

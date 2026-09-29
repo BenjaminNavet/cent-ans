@@ -1,0 +1,49 @@
+{
+  "id": "tit_germiyan",
+  "rank": "duchy",
+  "name": {
+    "display": "Beylik de Germiyan",
+    "local": "Germiyanoğulları",
+    "local_language": "turc ottoman"
+  },
+  "heraldry": {
+    "blazon": "D'or à la bande de sinople.",
+    "description": "Couleurs de convention des Germiyan.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2E7D46",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_provinces": [
+    "prov_kutahya"
+  ],
+  "holder_1337": {
+    "faction": "fac_germiyan",
+    "sources": [
+      "Germiyan"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_germiyan_independent",
+      "title": "Rester libre",
+      "description": "Garder l'indépendance de Germiyan.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_germiyan_aydin",
+      "title": "Les anciens sous-bachis",
+      "description": "Ramener Aydın, jadis vassal de Kütahya, sous la suzeraineté de Germiyan.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_aydin"
+      }
+    }
+  ],
+  "description": "Grand beylik de l'ouest de l'Anatolie, avec Kütahya et Afyon ; Yakub Ier (1300-1340) est le plus puissant bey d'Anatolie occidentale.",
+  "sources": [
+    "Germiyan"
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "id": "prov_attica",
+  "name": {
+    "display": "Attique et Béotie",
+    "local": "Ἀθῆναι",
+    "local_language": "grec"
+  },
+  "region": "grece",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Céphise"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wine",
+    "res_stone",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Athènes",
+      "local": "Ἀθῆναι",
+      "local_language": "grec"
+    },
+    "lat": 37.9838,
+    "lon": 23.7275
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.7275,
+      37.9838
+    ],
+    "seed_lonlat": [
+      23.3,
+      38.25
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_athens",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 140000,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16200,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 3000,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 750,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4700,
+  "description": "Duché d'Athènes tenu par la Compagnie catalane depuis Almyros (1311) puis par la maison de Sicile : Athènes, Thèbes, Livadie et Salona. Population grecque, élites catalanes et aragonaises.",
+  "sources": [
+    "Duché d'Athènes",
+    "Athènes",
+    "Thèbes"
+  ]
+}

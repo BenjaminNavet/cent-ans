@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_nijni_novgorod",
+    "province": "prov_nijni",
+    "kind": "city",
+    "name": {
+      "display": "Nijni Novgorod",
+      "local": "Нижний Новгород",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      44.0,
+      56.33
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse fondée en 1221 au confluent de l'Oka et de la Volga.",
+    "sources": [
+      "Nijni Novgorod"
+    ]
+  },
+  {
+    "id": "set_gorodets",
+    "province": "prov_nijni",
+    "kind": "town",
+    "name": {
+      "display": "Gorodets",
+      "local": "Городец",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      43.47,
+      56.65
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Gorodets-sur-la-Volga, ville de la frontière (Gorodets Radilov).",
+    "sources": [
+      "Gorodets"
+    ]
+  },
+  {
+    "id": "set_petchersky",
+    "province": "prov_nijni",
+    "kind": "abbey",
+    "name": {
+      "display": "Monastère des Grottes de Nijni",
+      "local": "Печерский Вознесенский монастырь",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      44.06,
+      56.33
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère fondé dans les années 1330 par saint Denis de Souzdal.",
+    "sources": [
+      "Monastère de l'Ascension-des-Grottes"
+    ]
+  }
+]

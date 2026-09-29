@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_kairouan",
+    "province": "prov_kairouan",
+    "kind": "city",
+    "name": {
+      "display": "Kairouan",
+      "local": "Al-Qayrawān",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      10.1,
+      35.6784
+    ],
+    "weight": 26,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville sainte du Maghreb, grande mosquée de Sidi Uqba ; déchue de son rang de capitale depuis le XIe siècle.",
+    "sources": [
+      "Kairouan"
+    ]
+  },
+  {
+    "id": "set_kef",
+    "province": "prov_kairouan",
+    "kind": "castle",
+    "name": {
+      "display": "Le Kef",
+      "local": "Al-Kāf",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      8.7167,
+      36.1667
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse des frontières de l'ouest tunisien, ancienne Sicca Veneria.",
+    "sources": [
+      "Le Kef"
+    ]
+  },
+  {
+    "id": "set_sbeitla",
+    "province": "prov_kairouan",
+    "kind": "village",
+    "name": {
+      "display": "Sbeïtla",
+      "local": "Sbīṭla",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      9.1167,
+      35.2333
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ruines de Sufetula au milieu des steppes.",
+    "sources": [
+      "Sbeïtla"
+    ]
+  }
+]

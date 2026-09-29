@@ -1,0 +1,53 @@
+{
+  "id": "tit_saruhan",
+  "rank": "duchy",
+  "name": {
+    "display": "Beylik de Saruhan",
+    "local": "Saruhanoğulları",
+    "local_language": "turc ottoman"
+  },
+  "heraldry": {
+    "blazon": "De sinople au chevron d'argent.",
+    "description": "Couleurs de convention des Saruhan.",
+    "primary_color": "#2E7D46",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_provinces": [
+    "prov_manisa"
+  ],
+  "holder_1337": {
+    "faction": "fac_saruhan",
+    "sources": [
+      "Saruhanids",
+      "Saruhan"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_saruhan_independent",
+      "title": "Rester libre",
+      "description": "Garder l'indépendance de Saruhan.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_saruhan_smyrna",
+      "title": "Smyrne",
+      "description": "Disputer Smyrne à l'émirat d'Aydın.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_izmir"
+        ]
+      }
+    }
+  ],
+  "description": "Beylik fondé vers 1300 par Saruhan Bey, riche plaine du Gediz ; allié des Aydın, tributaire de la piraterie de l'Égée.",
+  "sources": [
+    "Saruhanids",
+    "Saruhan"
+  ]
+}

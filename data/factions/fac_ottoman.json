@@ -1,0 +1,68 @@
+{
+  "id": "fac_ottoman",
+  "name": {
+    "display": "Beylik ottoman",
+    "local": "Osmanlı Beyliği",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Ottomans",
+  "adjective": "ottoman",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_orhan",
+  "heir": "chr_suleyman_pasha",
+  "capital": "prov_bursa",
+  "capital_city": "Bursa",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_ottoman",
+  "heraldry": {
+    "blazon": "De gueules au chef d'argent.",
+    "description": "Couleurs rouge et blanc portées par les Ottomans ; le croissant et l'étoile ne sont pas encore fixés, blason de jeu.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey des Ottomans",
+    "Gazi (guerrier de la foi)"
+  ],
+  "treasury": 9000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_karasi",
+      "status": "peace",
+      "note": "Voisin de l'ouest, tourné vers la Thrace ; Orhan le convoite."
+    },
+    {
+      "faction": "fac_germiyan",
+      "status": "peace",
+      "note": "Voisin méridional, le plus puissant des beyliks."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "war",
+      "note": "Défaite de Pélékanon (1329), chute de Nicée (1331) et de Nicomédie ; paix de 1333 contre tribut, reprise des hostilités."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 75,
+    "diplomacy": 40,
+    "trade": 45,
+    "piety": 65
+  },
+  "description": "Petit beylik de marche devenu en dix ans le plus dynamique des États turcs : Orhan a pris Bursa (1326), Nicée (1331) et prend Nicomédie en 1337, encerclant le Bosphore byzantin.",
+  "sources": [
+    "Orhan",
+    "Ottoman Empire",
+    "Siege of Nicaea (1331)"
+  ]
+}

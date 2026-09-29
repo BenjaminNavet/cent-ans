@@ -1,0 +1,60 @@
+{
+  "id": "fac_jalayirids",
+  "name": {
+    "display": "Djalayirides (marges occidentales)",
+    "local": "جلایریان",
+    "local_language": "arabe"
+  },
+  "short_name": "Djalayirides",
+  "adjective": "djalayiride",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_hasan_buzurg",
+  "capital": "prov_mosul",
+  "capital_city": "Mossoul",
+  "religion": "rel_islam",
+  "culture": "cul_arabic",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_jalayirids",
+  "heraldry": {
+    "blazon": "De gueules à la bordure d'or.",
+    "description": "Couleurs de convention des Djalayirides.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Sultan djalayiride (Bagdad)",
+    "Émir de Mossoul"
+  ],
+  "treasury": 9000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_mamluks",
+      "status": "peace",
+      "note": "Voisin de la Djézireh."
+    },
+    {
+      "faction": "fac_artuqids",
+      "status": "peace",
+      "note": "Voisin du nord."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 40,
+    "trade": 55,
+    "piety": 65
+  },
+  "description": "Prince mongol-turc, gouverneur de l'Ilkhanat déchu ; Hasan Buzurg s'installe à Bagdad (hors carte) et tient Mossoul par ses lieutenants. Capitale replacée à Mossoul pour la carte.",
+  "sources": [
+    "Jalayirids",
+    "Hasan Buzurg"
+  ]
+}

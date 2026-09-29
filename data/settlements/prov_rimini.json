@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_rimini",
+    "province": "prov_rimini",
+    "kind": "city",
+    "name": {
+      "display": "Rimini",
+      "local": "Arimino",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.5736,
+      44.0678
+    ],
+    "weight": 28,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port adriatique de Romagne sous la seigneurie des Malatesta.",
+    "sources": [
+      "Rimini",
+      "Malatesta"
+    ]
+  },
+  {
+    "id": "set_verucchio",
+    "province": "prov_rimini",
+    "kind": "castle",
+    "name": {
+      "display": "Verucchio",
+      "local": "Verucchio",
+      "local_language": "romagnol"
+    },
+    "lonlat": [
+      12.4211,
+      43.975
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château ancestral des Malatesta, berceau de la seigneurie avant leur installation à Rimini.",
+    "sources": [
+      "Verucchio"
+    ]
+  },
+  {
+    "id": "set_santarcangelo",
+    "province": "prov_rimini",
+    "kind": "village",
+    "name": {
+      "display": "Santarcangelo di Romagna",
+      "local": "Santarcangelo di Romagna",
+      "local_language": "romagnol"
+    },
+    "lonlat": [
+      12.4467,
+      44.0611
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de la seigneurie malatestienne, sur la voie Émilienne.",
+    "sources": [
+      "Santarcangelo di Romagna"
+    ]
+  }
+]

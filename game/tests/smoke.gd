@@ -220,8 +220,8 @@ func _run_campaign_map() -> void:
 	_check(data.province_count == 6, "expected 6 provinces, got %d" % data.province_count)
 	_check(data.index_of_id("prov_synth_3") == 3, "index_of_id(prov_synth_3) should be 3")
 	var terrain: TerrainBuilder = map.terrain
-	_check(terrain.chunk_count() == TerrainBuilder.CHUNKS * TerrainBuilder.CHUNKS,
-		"expected %d terrain chunks, got %d" % [TerrainBuilder.CHUNKS * TerrainBuilder.CHUNKS, terrain.chunk_count()])
+	_check(terrain.chunk_count() == terrain.chunks_x * terrain.chunks_y and terrain.chunks_x * terrain.chunk_px >= terrain.map_data.size.x and terrain.chunks_y * terrain.chunk_px >= terrain.map_data.size.y,
+		"expected %d × %d terrain chunks covering the map, got %d" % [terrain.chunks_x, terrain.chunks_y, terrain.chunk_count()])
 	for chunk in terrain.get_children():
 		if chunk is MeshInstance3D and (chunk.mesh == null or chunk.mesh.get_surface_count() == 0):
 			_fail("terrain chunk %s has no mesh surface" % chunk.name)
@@ -273,7 +273,14 @@ func _run_start_menu() -> void:
 	var menu: Control = scene.instantiate()
 	root.add_child(menu)
 	await process_frame
-	_check(menu.card_count() == 3, "start menu should show 3 faction cards, got %d" % menu.card_count())
+	# FE6 : une carte par départ recommandé (jouable) ; toutes les factions présentées sur la carte.
+	var presented := FrontEndData.recommended().size()
+	_check(presented >= 3 and menu.card_count() == presented, "start menu should show %d faction cards, got %d" % [presented, menu.card_count()])
+	var map_picker: Variant = menu.faction_select.get("map_picker") if menu.faction_select != null else null
+	_check(map_picker != null, "faction select should carry the faction map")
+	if map_picker != null and facade.store_loaded():
+		_check((map_picker.get("sheets") as Dictionary).size() == FrontEndData.factions().size(),
+			"faction map should present every playable faction (%d)" % FrontEndData.factions().size())
 	_check(menu.selected_faction == "fac_france", "default faction should be fac_france")
 	_check(menu.start_button.text.begins_with("Commencer"), "start button label")
 	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
@@ -328,6 +335,8 @@ func _run_campaign_loop() -> void:
 	_check(map.player_faction == "fac_france", "player faction should be fac_france, got %s" % map.player_faction)
 	_check(map.armies.army_count() > 0, "no army markers on the map")
 	_check(map.ui.faction_label.text != "" and map.ui.faction_label.text != "Cent Ans", "top bar faction label not set")
+
+	_run_feudal(map)  # FE6 : arbre féodal et filtre « Féodalité »
 
 	var army_ids: PackedStringArray = map.player_army_ids()
 	if not _check(not army_ids.is_empty(), "player has no army"):
@@ -398,6 +407,27 @@ func _run_campaign_loop() -> void:
 		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real" if facade.is_real else "mock", turn, date_loaded])
 	map.queue_free()
 	await process_frame
+
+
+## FE6 : l'arbre féodal s'ouvre sur la France (Bourgogne parmi ses vassaux), le filtre
+## « Féodalité » peint la carte ; détails dans `tests/fe_ui_test.gd`.
+func _run_feudal(map: Node) -> void:
+	var feudal: Node = map.get("feudal")
+	if feudal == null or not bool(feudal.call("available")):
+		print("smoke feudal: skipped (simulation without get_feudal_tree)")
+		return
+	feudal.call("open_for", "")
+	_check(feudal.get("panel").visible, "feudal tree panel should open")
+	_check(feudal.call("tree_item", "fac_france") != null and feudal.call("tree_item", "fac_burgundy") != null,
+		"feudal tree should list France and Burgundy")
+	feudal.get("panel").hide()
+	var modes: Node = map.get("map_modes")
+	modes.call("set_mode", "feudal")
+	_check(str(modes.get("mode")) == "feudal" and not (modes.get("feudal_lens").get("cells") as Dictionary).is_empty(),
+		"feudal map filter should colour the provinces")
+	modes.call("set_mode", "political")
+	if _failures == 0:
+		print("smoke OK: feudal tree and map filter")
 
 
 ## C6 : agents de campagne sur la vraie simulation (voir l'en-tête, étape 17).
@@ -1068,12 +1098,18 @@ func _run_diplomacy() -> void:
 		_check(stances.size() == 2 and stances[0] == "self", "get_province_stances: %s" % stances)
 		_check(DiplomaticStances.COLORS.has(stances[1]), "unknown stance %s" % stances[1])
 		_check(str((sim.call("get_faction_stance", "fac_flanders") as Dictionary).get("key", "")) != "", "get_faction_stance expected")
+		if sim.has_method("get_province_stances_for"):  # DZ : relations vues d'une autre faction
+			var seen: PackedStringArray = sim.call("get_province_stances_for", "fac_england", PackedStringArray(["prov_ile_de_france", "prov_guyenne"]))
+			var of_england: Dictionary = sim.call("get_faction_stances_for", "fac_england")
+			_check(seen.size() == 2 and seen[1] == "self" and seen[0] == str(of_england.get(FACTION_ID, "")), "get_province_stances_for: %s / %s" % [seen, of_england.get(FACTION_ID)])
+			_check(str(of_england.get("fac_rebels", "")) == "war", "rebels should be enemies of everyone")
+			_check((sim.call("get_province_stances_for", "fac_nobody", PackedStringArray(["prov_guyenne"])) as PackedStringArray).is_empty(), "unknown viewer should give nothing")
 		_check((sim.call("get_trespass", "fac_flanders") as Dictionary).has("theirs"), "get_trespass expected")
 		var army_ids: PackedStringArray = sim.call("get_army_ids")
 		for army_id in army_ids:
 			var army: Dictionary = sim.call("get_army", army_id)
 			if str(army.get("faction", "")) == FACTION_ID:
-				var passage: Dictionary = sim.call("find_path_trespass", army_id, 2000.0, 2000.0)
+				var passage: Dictionary = sim.call("find_path_trespass", army_id, 2000.0, 3280.0)
 				_check(passage.is_empty() or passage.has("ok"), "find_path_trespass should answer")
 				break
 

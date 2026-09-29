@@ -30,6 +30,10 @@ var active := false
 var force_active := false
 ## Incrémenté à chaque ville affichée ou retirée (`SettlementLayer` recalcule alors les maquettes).
 var version := 0
+## RS-K : villes affichées ou retirées depuis le dernier `take_changes` (id → vrai), bascule
+## d'activité comprise (villes construites) ; `_all_changed` : tout revoir (premier appel).
+var _changed_ids: Dictionary = {}
+var _all_changed := true
 var stats: Dictionary = {}
 
 var _ids: Array[String] = []
@@ -104,9 +108,9 @@ func _register_chunks(sid: String) -> void:
 	var size := float(terrain.chunk_px)
 	for cy in range(int(floor((a.y - e) / size)), int(floor((a.y + e) / size)) + 1):
 		for cx in range(int(floor((a.x - e) / size)), int(floor((a.x + e) / size)) + 1):
-			if cx < 0 or cy < 0 or cx >= TerrainBuilder.CHUNKS or cy >= TerrainBuilder.CHUNKS:
+			if cx < 0 or cy < 0 or cx >= terrain.chunks_x or cy >= terrain.chunks_y:
 				continue
-			var index := cy * TerrainBuilder.CHUNKS + cx
+			var index := cy * terrain.chunks_x + cx
 			if not _ids_by_chunk.has(index):
 				_ids_by_chunk[index] = []
 			(_ids_by_chunk[index] as Array).append(sid)
@@ -127,6 +131,15 @@ func is_shown(id: String) -> bool:
 		return false
 	var entry: Dictionary = _entries[id]
 	return entry.get("builder") != null
+
+
+## RS-K : changements depuis l'appel précédent : `{"all": bool, "ids": Array}` (`all` : toutes
+## les colonies sont à revoir, `ids` sinon). Remet à zéro.
+func take_changes() -> Dictionary:
+	var changes := {"all": _all_changed, "ids": _changed_ids.keys()}
+	_all_changed = false
+	_changed_ids = {}
+	return changes
 
 
 func plan_of(id: String) -> Dictionary:
@@ -165,21 +178,31 @@ func update_view(rig_distance: float) -> void:
 		active = now_active
 		visible = active
 		version += 1
+		# RS-K : seules les colonies dont la ville est construite changent d'affichage.
+		for id: String in _entries:
+			if (_entries[id] as Dictionary).get("builder") != null:
+				_changed_ids[id] = true
 		towns_changed.emit()
 	_last_distance = rig_distance
+	var tp := Time.get_ticks_usec()  # RS-K : sections `town/*` du banc `--bench-probe`
 	_poll_jobs()
+	tp = PerfProbe.lap("town/poll", tp)
 	if not active:
 		return
 	# ZG7a : HLOD maison par maison dans le shader (caméra principale, passe d'ombre comprise).
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if camera != null:
 		TownBuilder.set_lod_view(camera.global_position, _detail_range())
+	tp = PerfProbe.lap("town/lod_view", tp)
 	_stream_timer -= 1
 	if _stream_timer <= 0:
 		_stream_timer = 10
 		_stream(rig_distance)
+	tp = PerfProbe.lap("town/stream", tp)
 	_step_builders(int(profile.build_budget_ms * 1000.0))
+	tp = PerfProbe.lap("town/step", tp)
 	_check_reground()
+	PerfProbe.lap("town/reground", tp)
 
 
 func _camera_ground() -> Vector2:
@@ -377,6 +400,7 @@ func _step_builders(budget_usec: int) -> void:
 			entry["builder"] = b
 			entry["pending"] = null
 			version += 1
+			_changed_ids[id] = true
 			towns_changed.emit()
 		if not FrameBudget.has_time():
 			break
@@ -393,6 +417,7 @@ func _unload(id: String) -> void:
 	_entries.erase(id)
 	_cache_plan(id, entry["plan"])
 	version += 1
+	_changed_ids[id] = true
 	towns_changed.emit()
 
 

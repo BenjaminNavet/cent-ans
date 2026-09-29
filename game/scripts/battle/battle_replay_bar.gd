@@ -42,13 +42,13 @@ func _ready() -> void:
 	title_label.text = "Rejeu"
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_label.clip_text = true
-	title_label.add_theme_font_size_override("font_size", 16)
+	title_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	top.add_child(title_label)
 	play_button = Button.new()
 	play_button.name = "Play"
 	play_button.custom_minimum_size = Vector2(86, 0)
 	play_button.focus_mode = Control.FOCUS_NONE
-	play_button.tooltip_text = "Lecture / pause (Espace)"
+	RichTooltip.attach_plain(play_button, "replay_play_pause")
 	play_button.pressed.connect(func() -> void: play_toggled.emit())
 	top.add_child(play_button)
 	for speed in SPEEDS:
@@ -57,7 +57,7 @@ func _ready() -> void:
 		button.text = "×%d" % int(speed)
 		button.toggle_mode = true
 		button.focus_mode = Control.FOCUS_NONE
-		button.tooltip_text = "Vitesse ×%d (+ / −)" % int(speed)
+		RichTooltip.attach_plain(button, "replay_speed", {"title": "Vitesse ×%d" % int(speed), "hint": "+ / −"})
 		button.pressed.connect(func() -> void: speed_chosen.emit(speed))
 		top.add_child(button)
 		speed_buttons.append(button)
@@ -77,7 +77,7 @@ func _ready() -> void:
 	timeline.min_value = 0.0
 	timeline.step = 0.1
 	timeline.focus_mode = Control.FOCUS_NONE
-	timeline.tooltip_text = "Glissez pour aller à un moment de la bataille"
+	RichTooltip.attach_plain(timeline, "replay_timeline_scrub")
 	timeline.drag_started.connect(func() -> void: _dragging = true)
 	timeline.drag_ended.connect(_on_drag_ended)
 	timeline.gui_input.connect(_on_timeline_input)
@@ -91,7 +91,7 @@ func _ready() -> void:
 	divergence_label.name = "Divergence"
 	divergence_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	divergence_label.add_theme_color_override("font_color", Color(0.62, 0.12, 0.08))
-	divergence_label.add_theme_font_size_override("font_size", 14)
+	divergence_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	divergence_label.visible = false
 	box.add_child(divergence_label)
 

@@ -1,0 +1,99 @@
+{
+  "id": "prov_emporda",
+  "name": {
+    "display": "Empúries",
+    "local": "Empordà",
+    "local_language": "catalan"
+  },
+  "region": "aragon",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Roses"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "rivers": [
+    "Fluvià",
+    "Muga"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Castelló d'Empúries",
+      "local": "Castelló d'Empúries",
+      "local_language": "catalan"
+    },
+    "lat": 42.2564,
+    "lon": 3.0725
+  },
+  "geo": {
+    "capital_lonlat": [
+      3.0725,
+      42.2564
+    ],
+    "seed_lonlat": [
+      2.95,
+      42.2
+    ],
+    "voronoi_weight": 0.45
+  },
+  "owner": "fac_ribagorca",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 26000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 380,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ancien comté souverain d'Empúries, racheté par la couronne d'Aragon en 1325 (échange contre la baronnie de Pego) et donné en apanage à l'infant Pierre."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1000,
+  "description": "Comté d'Empúries, sur la côte de l'Alt Empordà ; racheté à la maison de Cardona par la couronne en 1325 et tenu en 1337 par l'infant Pierre d'Aragon avec le comté de Ribagorce.",
+  "sources": [
+    "Comté d'Empúries",
+    "Pierre d'Aragon, comte de Ribagorce et d'Empúries",
+    "Castelló d'Empúries"
+  ]
+}

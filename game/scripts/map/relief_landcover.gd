@@ -6,7 +6,9 @@ extends RefCounted
 ## `uv run --project tools cent-ans geo relief-shade` et `cent-ans geo landcover`.
 ## Rendu seulement ; fichiers optionnels (le shader garde son rendu V2 sans eux).
 ##
-## - `relief_shade.png` (LA8, 8192²) : L détail d'altitude, A occlusion/courbure (mipmaps).
+## - `relief_shade.png` (LA8, 2 × la carte) : L détail d'altitude, A occlusion/courbure (mipmaps).
+##   Depuis OM2 (ADR 0115), écrit en bandes horizontales `relief_shade_<i>.png`
+##   (`map.json.relief_shade.bands`) empilées ici en une seule image.
 ## - `wetlands.png` (RGB8, 4096²) : R marais, G étangs, B prés humides.
 ## - `forest_kind.png` (L8, 2048², part de résineux) n'est pas lu ici : il est destiné au rendu
 ##   des forêts (lot V4), comme `splat.png`.
@@ -52,7 +54,9 @@ static func pending() -> bool:
 
 
 func _load() -> void:
-	_shade = _load_image(_map_dir, SHADE_FILE, Image.FORMAT_LA8)
+	_shade = _load_bands(_map_dir, Image.FORMAT_LA8)
+	if _shade == null:
+		_shade = _load_image(_map_dir, SHADE_FILE, Image.FORMAT_LA8)
 	if _shade != null:
 		_shade.generate_mipmaps()
 	_wet = _load_image(_map_dir, WETLANDS_FILE, Image.FORMAT_RGB8)
@@ -86,6 +90,33 @@ static func _load_image(map_dir: String, file_name: String, format: int) -> Imag
 	if image.get_format() != format:
 		image.convert(format)
 	return image
+
+
+## Bandes horizontales de `map.json.relief_shade.bands` empilées de haut en bas ; null sans bandes.
+static func _load_bands(map_dir: String, format: int) -> Image:
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(map_dir.path_join("map.json")))
+	if not (meta is Dictionary and (meta as Dictionary).get("relief_shade") is Dictionary):
+		return null
+	var bands: Variant = meta["relief_shade"].get("bands")
+	if not bands is Dictionary:
+		return null
+	var pattern := String(bands.get("pattern", ""))
+	var images: Array[Image] = []
+	var height := 0
+	for i in int(bands.get("count", 0)):
+		var band := _load_image(map_dir, pattern.replace("{band}", str(i)), format)
+		if band == null:
+			return null
+		images.append(band)
+		height += band.get_height()
+	if images.is_empty():
+		return null
+	var full := Image.create_empty(images[0].get_width(), height, false, format)
+	var y := 0
+	for band in images:
+		full.blit_rect(band, Rect2i(Vector2i.ZERO, band.get_size()), Vector2i(0, y))
+		y += band.get_height()
+	return full
 
 
 static func _detail_scale_of(map_dir: String) -> float:

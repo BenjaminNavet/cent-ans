@@ -75,7 +75,7 @@ impl CampaignState {
 
 /// Destination of a `move_army` order (lot M2): a settlement (or a
 /// province, standing for its city), a map point `{x, y}` in pixels of the
-/// 4096² map, or a v1/C4 path whose last place is the destination.
+/// map, or a v1/C4 path whose last place is the destination.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum MoveOrderTarget {
@@ -171,6 +171,13 @@ pub enum Order {
         #[serde(alias = "province")]
         settlement: Place,
     },
+    /// RS-C: razes the completed `building` of `settlement`, refunding
+    /// `economy.json` `demolition_refund_percent` of its money cost.
+    Demolish {
+        #[serde(alias = "province")]
+        settlement: Place,
+        building: BuildingId,
+    },
     /// Sets the faction's tax bracket (spec § 1.4).
     SetTaxRate {
         rate: TaxRate,
@@ -257,6 +264,27 @@ pub enum Order {
     AnswerOffer {
         offer: u32,
         accept: bool,
+    },
+    /// FE (§ 4.3.5): the player's verdict on a private war offer.
+    ArbitratePrivateWar {
+        offer: u32,
+        verdict: crate::feudal::Arbitration,
+    },
+    /// FE5 (§ 4.4): the liege declares forfeiture against `vassal`, which
+    /// must be under an open felony case.
+    DeclareCommise {
+        vassal: FactionId,
+    },
+    /// FE5 (§ 4.4): grants `title` (not the primary one) to `grantee`.
+    GrantTitle {
+        title: data_model::TitleId,
+        grantee: FactionId,
+    },
+    /// FE5 (§ 4.2): the vassal revolts against its direct suzerain.
+    Revolt,
+    /// FE5 (§ 4.2): pays homage to `lord`, leaving the current suzerain.
+    SwitchAllegiance {
+        lord: FactionId,
     },
     RequestPapalMediation {
         target: FactionId,
@@ -366,6 +394,21 @@ pub enum Order {
     ChooseCaptureOutcome {
         decision: u32,
         outcome: crate::capture::CaptureOutcome,
+    },
+    // ----- TW2-T3: mercenary companies (`mercenaries.rs`) --------------------
+    /// `army` hires a company of `unit` from the reserve of the region it
+    /// stands in; the company joins at once.
+    HireMercenary {
+        army: ArmyId,
+        #[serde(alias = "unit_type")]
+        unit: UnitTypeId,
+    },
+    // ----- TW2-T5: army traditions (`traditions.rs`) -------------------------
+    /// `army` takes `tradition` (an id of `data/rules/army_traditions.json`)
+    /// for a rank it has reached.
+    ChooseArmyTradition {
+        army: ArmyId,
+        tradition: String,
     },
 }
 
@@ -478,6 +521,8 @@ pub enum OrderError {
     BuildUnavailable(String),
     #[error("aucune construction en cours dans cette colonie")]
     NoConstruction,
+    #[error("démolition impossible : {0}")]
+    DemolitionRefused(String),
     #[error("la colonie est assiégée")]
     SettlementBesieged,
     #[error("posture impossible : {0}")]
@@ -496,6 +541,8 @@ pub enum OrderError {
     Marriage(#[from] MarriageError),
     #[error(transparent)]
     Diplomacy(#[from] crate::diplomacy::DiplomacyError),
+    #[error(transparent)]
+    Feudal(#[from] crate::feudal::FeudalError),
     #[error(transparent)]
     Research(#[from] ResearchError),
     #[error(transparent)]
@@ -518,8 +565,12 @@ pub enum OrderError {
     Encounter(#[from] crate::encounter::EncounterError),
     #[error(transparent)]
     Capture(#[from] crate::capture::CaptureError),
+    #[error(transparent)]
+    Tradition(#[from] crate::traditions::TraditionError),
     #[error("la place est en ruine : ni recrutement ni chantier")]
     SettlementRuined,
+    #[error("engagement impossible : {0}")]
+    MercenaryUnavailable(String),
 }
 
 /// G1: recruitments every settlement can queue per turn before buildings.
@@ -718,6 +769,13 @@ impl CampaignState {
                 let settlement = self.resolve_place(&settlement)?;
                 self.order_cancel_build(data, faction, &settlement)
             }
+            Order::Demolish {
+                settlement,
+                building,
+            } => {
+                let settlement = self.resolve_place(&settlement)?;
+                crate::buildings::demolish(self, data, faction, &settlement, &building)
+            }
             Order::SetTaxRate { rate } => {
                 self.factions
                     .get_mut(faction)
@@ -812,6 +870,29 @@ impl CampaignState {
             Order::AnswerOffer { offer, accept } => {
                 Ok(self.answer_offer(data, faction, offer, accept)?)
             }
+            Order::ArbitratePrivateWar { offer, verdict } => {
+                Ok(self.arbitrate(data, faction, offer, verdict)?)
+            }
+            Order::DeclareCommise { vassal } => Ok(crate::feudal::declare_commise(
+                self, data, faction, &vassal,
+            )?),
+            Order::GrantTitle { title, grantee } => {
+                crate::feudal::grant_title(
+                    self,
+                    data,
+                    faction,
+                    &title,
+                    crate::feudal::Grantee::Faction(grantee),
+                )?;
+                Ok(())
+            }
+            Order::Revolt => {
+                crate::feudal::revolt(self, data, faction)?;
+                Ok(())
+            }
+            Order::SwitchAllegiance { lord } => Ok(crate::feudal::switch_allegiance(
+                self, data, faction, &lord,
+            )?),
             Order::RequestPapalMediation { target } => {
                 Ok(self.request_papal_mediation(data, faction, &target)?)
             }
@@ -829,6 +910,12 @@ impl CampaignState {
             }
             Order::ChooseCaptureOutcome { decision, outcome } => {
                 Ok(self.choose_capture_outcome(data, faction, decision, outcome)?)
+            }
+            Order::HireMercenary { army, unit } => {
+                self.order_hire_mercenary(data, faction, &army, &unit)
+            }
+            Order::ChooseArmyTradition { army, tradition } => {
+                self.choose_army_tradition(data, faction, &army, &tradition)
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
@@ -1177,6 +1264,11 @@ impl CampaignState {
         if settlement.siege.is_some() {
             return Some("la colonie est assiégée".to_owned());
         }
+        // TW2-T3 (ADR 0103): companies are hired by an army from its region's
+        // reserve (`HireMercenary`), never levied in a town.
+        if unit_type.mercenary {
+            return Some("compagnie de mercenaires : à engager depuis une armée".to_owned());
+        }
         let slots = self.recruit_slots(data, settlement_id);
         if self.recruits_ordered_this_turn(settlement) >= slots {
             return Some(format!("file de recrutement pleine ({slots} par tour)"));
@@ -1451,6 +1543,8 @@ impl CampaignState {
                 units,
                 planned_path: Vec::new(),
                 destination: None,
+                // TW2-T5: a detachment starts without traditions.
+                traditions: Default::default(),
                 ..template
             },
         );

@@ -274,7 +274,7 @@ func _build(data: Dictionary) -> void:
 	box.add_child(head)
 	var name_label := Label.new()
 	name_label.text = "%s — %s" % [str(data.get("name", "Le conseiller")), str(data.get("title", ""))]
-	name_label.add_theme_font_size_override("font_size", 14)
+	name_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	name_label.add_theme_color_override("font_color", HudStyle.RUBRIC)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -285,16 +285,16 @@ func _build(data: Dictionary) -> void:
 	_close_button.flat = true
 	_close_button.focus_mode = Control.FOCUS_NONE
 	_close_button.custom_minimum_size = Vector2(24, 20)
-	_close_button.add_theme_font_size_override("font_size", 16)
+	_close_button.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	_close_button.add_theme_color_override("font_color", HudStyle.RUBRIC)
-	_close_button.tooltip_text = "Faire taire le conseiller (Réglages → Son pour le désactiver)."
+	RichTooltip.attach_plain(_close_button, "advisor_silence")
 	_close_button.pressed.connect(dismiss)
 	head.add_child(_close_button)
 	_text_label = Label.new()
 	_text_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_text_label.custom_minimum_size = Vector2(200, 0)  # PO1 : largeur de la zone `TOASTS`
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_text_label.add_theme_font_size_override("font_size", 17)
+	_text_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	_text_label.add_theme_color_override("font_color", HudStyle.INK)
 	box.add_child(_text_label)
 	_panel.visible = false

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_ennis",
+    "province": "prov_thomond",
+    "kind": "city",
+    "name": {
+      "display": "Ennis",
+      "local": "Inis",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -8.986,
+      52.845
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Franciscains établis par Donnchadh Cairbreach Ó Briain v. 1240 ; centre religieux et politique de facto du royaume.",
+    "sources": [
+      "Ennis"
+    ]
+  },
+  {
+    "id": "set_clonroad",
+    "province": "prov_thomond",
+    "kind": "castle",
+    "name": {
+      "display": "Clonroad",
+      "local": "Cluain Ramhfhoda",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -8.98,
+      52.84
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence principale des Ó Briain, rois de Thomond, près d'Ennis.",
+    "sources": [
+      "Clonroad"
+    ]
+  },
+  {
+    "id": "set_bunratty",
+    "province": "prov_thomond",
+    "kind": "castle",
+    "name": {
+      "display": "Bunratty",
+      "local": "Bun Raite",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -8.808,
+      52.702
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse anglo-normande des de Clare, détruite par les Ó Briain après leur victoire de Dysert O'Dea (1318).",
+    "sources": [
+      "Château de Bunratty",
+      "Bataille de Dysert O'Dea"
+    ]
+  }
+]

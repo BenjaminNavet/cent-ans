@@ -12,11 +12,13 @@ use data_model::{
 };
 use godot::classes::RefCounted;
 use godot::prelude::*;
+use sim_campaign::buildings::demolition_preview;
 use sim_campaign::{
-    Army, ArmyId, BuildOption, CampaignState, CharacterView, Construction, EffectTotals,
-    EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
+    Army, ArmyId, BuildOption, CampaignState, CharacterView, Construction, DemolitionPreview,
+    EffectTotals, EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
 };
 
+use crate::campaign_sim_preview::{before_after_dict, requirements_array};
 use crate::campaign_sim_turn::TURN_PENDING_FR;
 use crate::convert::variant_to_json;
 
@@ -118,6 +120,8 @@ pub struct CampaignSim {
 #[godot_api]
 impl IRefCounted for CampaignSim {
     fn init(base: Base<RefCounted>) -> Self {
+        // FE5 (ADR 0110): the feudal decisions and their preview use the AI's scores.
+        ai::feudal::install();
         CampaignSim {
             data: None,
             state: None,
@@ -145,7 +149,9 @@ impl CampaignSim {
             }
         };
         match CampaignState::new_1337(&data, player, seed as u64) {
-            Ok(state) => {
+            Ok(mut state) => {
+                // Lot FE: the suzerains are a view of the title holdings.
+                sim_campaign::feudal::sync_suzerains(&mut state, &data);
                 self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);
@@ -248,13 +254,14 @@ impl CampaignSim {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
             return VarDictionary::new();
         };
-        let Some(city) = ProvinceId::new(id.to_string())
-            .ok()
-            .and_then(|id| state.province_city(data, &id))
-        else {
+        let Ok(id) = ProvinceId::new(id.to_string()) else {
             return VarDictionary::new();
         };
-        province_city_dict(data, &city)
+        let Some(city) = state.province_city(data, &id) else {
+            return VarDictionary::new();
+        };
+        let place = state.province_city_id(&id).map(|city| (state, city));
+        province_city_dict(data, &city, place)
     }
 
     /// Full economic panel of a faction (spec M3 § 2), or an empty
@@ -496,6 +503,10 @@ impl CampaignSim {
                     "pool_cap" => i64::from(option.pool.cap),
                     "pool_seasons_to_next" => option.pool.seasons_to_next.map_or(-1, i64::from),
                     "pool_label" => option.pool.label_fr().as_str(),
+                    // IB5: each requirement's state, for the tooltip.
+                    "requirements" => &requirements_array(
+                        &state.recruit_requirements(data, &settlement, &option.unit_type),
+                    ),
                 }
                 .to_variant()
             })
@@ -866,6 +877,44 @@ pub(crate) fn buildings_array(data: &GameData, buildings: &[BuildingId]) -> VarA
         .collect()
 }
 
+/// RS-N: `{building, name, can_demolish, reason, refund, upkeep_saved}` for
+/// one building of a settlement, for the « Raser » button.
+fn demolition_preview_dict(
+    data: &GameData,
+    building: &BuildingId,
+    preview: &DemolitionPreview,
+) -> VarDictionary {
+    let name = data
+        .buildings
+        .get(building)
+        .map_or_else(|| building.to_string(), |b| b.name.display.clone());
+    vdict! {
+        "building" => building.as_str(),
+        "name" => name.as_str(),
+        "can_demolish" => preview.can_demolish,
+        "reason" => preview.reason.as_deref().unwrap_or(""),
+        "refund" => preview.refund,
+        "upkeep_saved" => preview.upkeep_saved,
+    }
+}
+
+/// RS-N: demolition preview of every built building of `settlement`, in the
+/// order they stand in `buildings` (`state.demolition_preview`).
+pub(crate) fn demolition_preview_array(
+    state: &CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    buildings: &[BuildingId],
+) -> VarArray {
+    buildings
+        .iter()
+        .map(|id| {
+            let preview = demolition_preview(state, data, settlement, id);
+            demolition_preview_dict(data, id, &preview).to_variant()
+        })
+        .collect()
+}
+
 pub(crate) fn construction_dict(data: &GameData, construction: &Construction) -> VarDictionary {
     let name = data.buildings.get(&construction.building).map_or_else(
         || construction.building.to_string(),
@@ -878,7 +927,11 @@ pub(crate) fn construction_dict(data: &GameData, construction: &Construction) ->
     }
 }
 
-fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
+fn build_option_dict(
+    data: &GameData,
+    option: &BuildOption,
+    place: Option<(&CampaignState, &SettlementId)>,
+) -> VarDictionary {
     let category = data
         .buildings
         .get(&option.building)
@@ -887,7 +940,7 @@ fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
     for (resource, amount) in &option.imported {
         imported.set(resource.as_str(), i64::from(*amount));
     }
-    vdict! {
+    let mut dict = vdict! {
         "building" => option.building.as_str(),
         "name" => option.name.as_str(),
         "category" => category,
@@ -899,13 +952,28 @@ fn build_option_dict(data: &GameData, option: &BuildOption) -> VarDictionary {
         // units imported.
         "import_cost" => i64::from(option.import_cost),
         "imported" => &imported,
+    };
+    // IB5: each requirement's state and the "before → after" of the
+    // province statistics the building moves, for its tooltip.
+    if let Some((state, settlement)) = place {
+        let requirements = state.building_requirements(data, settlement, &option.building);
+        dict.set("requirements", &requirements_array(&requirements));
+        let preview = state.building_before_after(data, settlement, &option.building);
+        dict.set("before_after", &before_after_dict(&preview));
     }
+    dict
 }
 
-pub(crate) fn buildable_array(data: &GameData, options: &[BuildOption]) -> VarArray {
+/// Build option rows; with `place` (the state and the settlement), each row
+/// also carries `requirements` `[{id, met}]` and `before_after` (IB5).
+pub(crate) fn buildable_array(
+    data: &GameData,
+    options: &[BuildOption],
+    place: Option<(&CampaignState, &SettlementId)>,
+) -> VarArray {
     options
         .iter()
-        .map(|option| build_option_dict(data, option).to_variant())
+        .map(|option| build_option_dict(data, option, place).to_variant())
         .collect()
 }
 
@@ -952,13 +1020,17 @@ fn class_effects_dict(effects: &sim_campaign::buildings::ClassEffects) -> VarDic
     }
 }
 
-fn province_city_dict(data: &GameData, city: &ProvinceCity) -> VarDictionary {
+fn province_city_dict(
+    data: &GameData,
+    city: &ProvinceCity,
+    place: Option<(&CampaignState, &SettlementId)>,
+) -> VarDictionary {
     let mut dict = vdict! {
         "classes" => &population_classes_dict(&city.classes),
         "buildings" => &buildings_array(data, &city.buildings),
         "fortification_level" => i64::from(city.fortification_level),
         "capacity" => city.capacity as i64,
-        "buildable" => &buildable_array(data, &city.buildable),
+        "buildable" => &buildable_array(data, &city.buildable, place),
         "resources" => &ids(city.resources.iter()),
         "effects" => &effect_totals_dict(&city.effects),
     };

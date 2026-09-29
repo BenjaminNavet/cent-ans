@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_caffa",
+    "province": "prov_caffa",
+    "kind": "city",
+    "name": {
+      "display": "Caffa",
+      "local": "Caffa",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      35.38,
+      45.03
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_fair",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Colonie génoise fondée en 1266, plus grand comptoir de la mer Noire.",
+    "sources": [
+      "Caffa"
+    ]
+  },
+  {
+    "id": "set_cerco",
+    "province": "prov_caffa",
+    "kind": "town",
+    "name": {
+      "display": "Cerco (Kertch)",
+      "local": "Cerco",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      36.47,
+      45.35
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Comptoir génois du détroit de Kertch (Vospro), présence attestée dès le début du XIVe siècle (statut en 1337 incertain).",
+    "sources": [
+      "Kertch"
+    ]
+  },
+  {
+    "id": "set_kaffa_faubourg",
+    "province": "prov_caffa",
+    "kind": "village",
+    "name": {
+      "display": "Faubourgs orientaux de Caffa",
+      "local": "Caffa",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      35.55,
+      45.0
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourgs de la campagne de Caffa, colons génois, grecs et arméniens (nom générique).",
+    "sources": [
+      "Caffa"
+    ]
+  }
+]

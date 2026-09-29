@@ -1,0 +1,108 @@
+[
+  {
+    "id": "set_stettin",
+    "province": "prov_pomerania_stettin",
+    "kind": "city",
+    "name": {
+      "display": "Stettin",
+      "local": "Stettin",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      14.5528,
+      53.4285
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Château ducal des Griffons sur l'Oder et port hanséatique.",
+    "sources": [
+      "Szczecin"
+    ]
+  },
+  {
+    "id": "set_stargard",
+    "province": "prov_pomerania_stettin",
+    "kind": "town",
+    "name": {
+      "display": "Stargard",
+      "local": "Stargard",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      15.0503,
+      53.3365
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville murée de Poméranie, seconde du duché.",
+    "sources": [
+      "Stargard"
+    ]
+  },
+  {
+    "id": "set_gartz",
+    "province": "prov_pomerania_stettin",
+    "kind": "town",
+    "name": {
+      "display": "Gartz",
+      "local": "Gartz",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      14.3833,
+      53.2
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville de l'Oder frontalière de la Marche.",
+    "sources": [
+      "Gartz (Oder)"
+    ]
+  },
+  {
+    "id": "set_pyritz",
+    "province": "prov_pomerania_stettin",
+    "kind": "town",
+    "name": {
+      "display": "Pyritz",
+      "local": "Pyritz",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      14.9,
+      53.1
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la marche méridionale du duché.",
+    "sources": [
+      "Pyrzyce"
+    ]
+  }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_trento",
+    "province": "prov_trent",
+    "kind": "city",
+    "name": {
+      "display": "Trente",
+      "local": "Trento",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      11.1217,
+      46.0667
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Siège de la principauté épiscopale de Trente, cité romaine antique (Tridentum) sur l'Adige, verrou de la route entre Empire et Italie. Le château du Buonconsiglio, résidence des princes-évêques, s'élève dans ses murs.",
+    "sources": [
+      "Trente"
+    ]
+  },
+  {
+    "id": "set_rovereto",
+    "province": "prov_trent",
+    "kind": "town",
+    "name": {
+      "display": "Rovereto",
+      "local": "Rovereto",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      11.0403,
+      45.8906
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg sur l'Adige au sud de Trente, marche méridionale de la principauté épiscopale.",
+    "sources": [
+      "Rovereto"
+    ]
+  },
+  {
+    "id": "set_pergine",
+    "province": "prov_trent",
+    "kind": "village",
+    "name": {
+      "display": "Pergine",
+      "local": "Persen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.2378,
+      46.0642
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de la Valsugana, à la limite orientale linguistique germano-italienne de la principauté.",
+    "sources": [
+      "Pergine Valsugana"
+    ]
+  }
+]

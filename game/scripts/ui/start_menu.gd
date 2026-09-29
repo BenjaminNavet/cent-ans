@@ -70,8 +70,12 @@ func _ready() -> void:
 	if facade != null:
 		var pending := str(facade.get("pending_faction"))
 		faction_select.select(pending if pending != "" else "fac_france")
-	move_child(save_load_dialog, -1)
 	move_child(fade, -1)
+	# P2g : dialogue de chargement dans la zone `MODAL` de `UiLayout` (voile, centré sur sa taille,
+	# comme celui du menu pause). L'hôte par défaut de `UiLayout` vit hors de cette scène : le
+	# dialogue part avec le menu.
+	UiZones.put(UiZones.Zone.MODAL, save_load_dialog)
+	tree_exiting.connect(save_load_dialog.queue_free)
 	save_load_dialog.load_confirmed.connect(_on_load)
 	save_load_dialog.dialog_closed.connect(_refresh_saves)
 	_refresh_saves()
@@ -106,6 +110,10 @@ func _ready() -> void:
 			staged = true
 		elif arg == "--menu-stage=faction":
 			show_faction_select(true)
+			staged = true
+		elif arg == "--menu-stage=faction_map":  # FE6 : choix de faction sur la carte, fiche au survol
+			show_faction_select(true)
+			faction_select.stage_map("fac_foix_bearn")
 			staged = true
 		elif arg == "--menu-stage=demos":
 			open_demos()

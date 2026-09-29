@@ -1,0 +1,55 @@
+{
+  "id": "fac_pavia",
+  "name": {
+    "display": "Commune de Pavie",
+    "local": "Comune di Pavia",
+    "local_language": "lombard"
+  },
+  "short_name": "Pavie",
+  "adjective": "pavesan",
+  "government": "republic",
+  "playable": true,
+  "capital": "prov_pavia",
+  "capital_city": "Pavie",
+  "religion": "rel_catholic",
+  "culture": "cul_lombard",
+  "succession_law": "elective",
+  "primary_title": "tit_pavia",
+  "heraldry": {
+    "blazon": "D'or au lion d'azur, à la bordure de gueules.",
+    "description": "Simplification (le moteur de rendu ne trace pas la couleuvre) ; blason incertain, faction gibeline dominante à Pavie plutôt qu'armes familiales attestées.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1F3A93",
+    "uncertain": true,
+    "note": "Bordure de jeu ajoutée pour distinguer l'écu de celui du Palatinat (même simplification du lion)."
+  },
+  "titles": [
+    "Commune de Pavie"
+  ],
+  "treasury": 8000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_milan",
+      "status": "war",
+      "note": "Rivalité séculaire entre Pavie gibeline et Milan viscontienne ; Pavie ne tombera aux mains des Visconti qu'en 1359."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 45,
+    "trade": 55,
+    "piety": 40
+  },
+  "description": "Ancienne capitale du royaume lombard, commune gibeline déchirée entre les factions Beccaria et Langosco, farouchement indépendante face aux visées de sa puissante voisine milanaise.",
+  "sources": [
+    "Pavie",
+    "Beccaria (famille)"
+  ]
+}

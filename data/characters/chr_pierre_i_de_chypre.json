@@ -1,0 +1,43 @@
+{
+  "id": "chr_pierre_i_de_chypre",
+  "name": {
+    "display": "Pierre Ier de Chypre",
+    "local": "Pierre de Lusignan",
+    "local_language": "français"
+  },
+  "sex": "male",
+  "house": "Lusignan-Chypre",
+  "faction": "fac_cyprus",
+  "role": "heir",
+  "birth": {
+    "value": "1328-10-09"
+  },
+  "death": {
+    "value": "1369-01-17"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Héritier de Chypre"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 3,
+    "court": 5
+  },
+  "traits": [
+    "trait_chivalrous"
+  ],
+  "piety": 80,
+  "family": {
+    "father": "chr_hugues_iv_de_chypre",
+    "mother": "chr_alix_d_ibelin"
+  },
+  "starting_location": "prov_cyprus",
+  "status": "minor",
+  "description": "Fils aîné d'Hugues IV, enfant en 1337 ; futur roi croisé qui prendra Alexandrie (1365).",
+  "sources": [
+    "Peter I of Cyprus"
+  ]
+}

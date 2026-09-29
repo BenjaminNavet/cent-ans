@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_brest_berestia",
+    "province": "prov_brest",
+    "kind": "city",
+    "name": {
+      "display": "Brest",
+      "local": "Berestia",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      23.7341,
+      52.0976
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville-forteresse du Bug, enjeu des guerres galiciennes et lituaniennes.",
+    "sources": [
+      "Brest"
+    ]
+  },
+  {
+    "id": "set_drohiczyn",
+    "province": "prov_brest",
+    "kind": "castle",
+    "name": {
+      "display": "Drohiczyn",
+      "local": "Drohiczyn",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      22.6589,
+      52.3908
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ancien château des rois de Galicie sur le Bug, contesté par la Mazovie.",
+    "sources": [
+      "Drohiczyn"
+    ]
+  },
+  {
+    "id": "set_kobryn",
+    "province": "prov_brest",
+    "kind": "village",
+    "name": {
+      "display": "Kobryn",
+      "local": "Kobryn",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      24.3564,
+      52.2139
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg des marais du Moukhavets.",
+    "sources": [
+      "Kobryn"
+    ]
+  }
+]

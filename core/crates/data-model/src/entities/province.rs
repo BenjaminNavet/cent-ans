@@ -15,6 +15,10 @@ pub enum Terrain {
     Marsh,
     Heath,
     Bocage,
+    /// Dry open grassland (Pontic steppe): moves like plains, thin forage, cavalry country.
+    Steppe,
+    /// Arid land (Sahara fringe, Syrian desert): slow, very thin forage, summer attrition.
+    Desert,
 }
 
 impl Terrain {
@@ -28,6 +32,8 @@ impl Terrain {
             Terrain::Marsh => "marsh",
             Terrain::Heath => "heath",
             Terrain::Bocage => "bocage",
+            Terrain::Steppe => "steppe",
+            Terrain::Desert => "desert",
         }
     }
 }
@@ -39,6 +45,10 @@ pub enum Climate {
     Continental,
     Mediterranean,
     Mountain,
+    /// Hot and dry (North Africa, Levant, Mesopotamia).
+    Arid,
+    /// Dry continental grassland (Pontic-Caspian steppe).
+    Steppe,
 }
 
 /// Capital city with its localized name and optional WGS84 position.

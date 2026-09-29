@@ -1,0 +1,68 @@
+{
+  "id": "fac_plock",
+  "name": {
+    "display": "Duché de Płock",
+    "local": "Księstwo Płockie",
+    "local_language": "polonais"
+  },
+  "short_name": "Płock",
+  "adjective": "płockois",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_boleslas_iii_de_plock",
+  "capital": "prov_plock",
+  "capital_city": "Płock",
+  "religion": "rel_catholic",
+  "culture": "cul_polish",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_bohemia",
+  "primary_title": "tit_plock",
+  "heraldry": {
+    "blazon": "De gueules à l'aigle d'argent, à la bordure d'azur.",
+    "description": "Aigle blanc des Piast de Mazovie, bordure d'azur.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#1F3F8F",
+    "uncertain": true,
+    "note": "Bordure d'azur : brisure de jeu, distinction avec l'aigle royal de Pologne."
+  },
+  "titles": [
+    "Duc de Płock",
+    "Vassal du roi de Bohême"
+  ],
+  "treasury": 2500,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_bohemia",
+      "status": "vassal",
+      "note": "Hommage de Wenceslas de Płock à Jean de Luxembourg en 1329."
+    },
+    {
+      "faction": "fac_poland",
+      "status": "peace",
+      "note": "Casimir III est le cousin éloigné des ducs de Mazovie."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "alliance",
+      "note": "La mère de Boleslas III est Elżbieta, fille de Gediminas."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 65
+  },
+  "description": "Duché piast de la Vistule moyenne autour de Płock, siège de l'évêché ; le duc Boleslas III, encore mineur, est protégé par ses oncles Siemowit II et Trojden Ier jusqu'en 1340. Son père Wenceslas est mort en 1336.",
+  "sources": [
+    "Boleslas III de Płock",
+    "Wenceslas de Płock",
+    "Duché de Mazovie"
+  ]
+}

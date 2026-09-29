@@ -1,0 +1,93 @@
+{
+  "id": "prov_great_plain_east",
+  "name": {
+    "display": "Grande Plaine orientale (Partium)",
+    "local": "Tiszántúl",
+    "local_language": "hongrois"
+  },
+  "region": "hongrie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Tisza",
+    "Körös",
+    "Szamos"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Nagyvárad",
+      "local": "Nagyvárad",
+      "local_language": "hongrois"
+    },
+    "lat": 47.0458,
+    "lon": 21.9189
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.9189,
+      47.0458
+    ],
+    "seed_lonlat": [
+      21.9,
+      47.45
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_hungary",
+  "culture": "cul_hungarian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Partium : Bihar, Szatmár, Debrecen.",
+    "classes": {
+      "peasants": {
+        "count": 155000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3410,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 6200,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2300,
+  "description": "Pays à l'est de la Tisza (futur Partium) : Nagyvárad, évêché où repose saint Ladislas, Debrecen et Szatmár, entre plaine et contreforts de Transylvanie.",
+  "sources": [
+    "Oradea",
+    "Debrecen",
+    "Partium"
+  ]
+}

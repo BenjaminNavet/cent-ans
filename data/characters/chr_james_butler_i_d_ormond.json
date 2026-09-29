@@ -1,0 +1,54 @@
+{
+  "name": {
+    "display": "James Butler",
+    "local": "James Butler",
+    "local_language": "moyen anglais"
+  },
+  "sex": "male",
+  "house": "Butler",
+  "faction": "fac_ormond",
+  "role": "ruler",
+  "birth": {
+    "value": "1304-10-17",
+    "place": "Arklow"
+  },
+  "death": {
+    "value": "1338-01-06",
+    "place": "Gowran",
+    "note": "Mort peu après le début de la partie."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "1er comte d'Ormond",
+      "from": {
+        "value": "1328"
+      }
+    },
+    {
+      "title": "Grand bouteiller héréditaire d'Irlande"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_diplomat",
+    "trait_pious"
+  ],
+  "piety": 60,
+  "family": {
+    "children": [
+      "chr_james_butler_ii_d_ormond"
+    ]
+  },
+  "starting_location": "prov_ormond",
+  "status": "at_court",
+  "description": "Fils d'Edmond Butler, justicier d'Irlande ; grand bouteiller héréditaire d'Irlande, créé comte d'Ormond par Édouard III en 1328. Meurt à Gowran le 6 janvier 1338, peu après le début de la guerre de Cent Ans.",
+  "sources": [
+    "James Butler, 1er comte d'Ormond"
+  ],
+  "id": "chr_james_butler_i_d_ormond"
+}

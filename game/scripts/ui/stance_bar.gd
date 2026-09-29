@@ -72,7 +72,7 @@ static func icon_id(stance: String) -> String:
 
 ## Nom français d'une posture (bulle d'aide `RichTooltip.HUD_TEXTS`).
 static func stance_name(stance: String) -> String:
-	var spec: Array = RichTooltip.HUD_TEXTS.get(icon_id(stance), [stance.capitalize(), ""])
+	var spec: Array = RichTooltip.hud_entry(icon_id(stance))
 	return str(spec[0])
 
 

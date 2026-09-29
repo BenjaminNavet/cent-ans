@@ -1,0 +1,27 @@
+{
+  "id": "cdx_novgorod",
+  "title": "La République de Novgorod",
+  "category": "lieu",
+  "aliases": [
+    "Novgorod",
+    "république de Novgorod",
+    "Novgorod la Grande",
+    "veche"
+  ],
+  "era": {
+    "from": "862",
+    "to": "1478"
+  },
+  "summary": "Cité marchande du nord de la Russie, Novgorod se gouverne par une assemblée, le veche, et appelle un prince pour la défendre. Elle tient le commerce des fourrures avec la Hanse.",
+  "body": "Novgorod la Grande commande un vaste territoire allant de la Baltique à l'Oural. Son assemblée, le veche, élit le posadnik, magistrat de la ville, et l'archevêque ; elle invite un prince, souvent le grand-prince de Vladimir lui-même, à qui elle impose un contrat. En 1240 et 1242, le prince Alexandre Nevski y repousse les Suédois sur la Neva et les chevaliers teutoniques sur le lac Peïpous.\n\nLa ville est le grand entrepôt de la Hanse en Russie : les marchands allemands y tiennent leur comptoir, le Peterhof, où ils échangent draps et sel contre fourrures, cire et miel. Elle a même laissé, sur des écorces de bouleau, des lettres privées de ses habitants.",
+  "entity": "fac_novgorod",
+  "see_also": [
+    "cdx_hanse",
+    "cdx_moscou"
+  ],
+  "sources": [
+    "République de Novgorod",
+    "Alexandre Nevski",
+    "Lettres sur écorce de bouleau"
+  ]
+}

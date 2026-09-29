@@ -1,0 +1,89 @@
+[
+  {
+    "id": "set_constantinople",
+    "province": "prov_constantinople",
+    "kind": "city",
+    "name": {
+      "display": "Constantinople",
+      "local": "Κωνσταντινούπολις",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      28.9784,
+      41.0082
+    ],
+    "weight": 60,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_fair",
+      "bld_cathedral",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_scriptorium",
+      "bld_guild_hall",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Capitale de l'Empire, siège du patriarche ; Sainte-Sophie, le Grand Palais et les Blachernes.",
+    "sources": [
+      "Constantinople"
+    ]
+  },
+  {
+    "id": "set_pera",
+    "province": "prov_constantinople",
+    "kind": "town",
+    "name": {
+      "display": "Galata (Péra)",
+      "local": "Pera",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      28.9744,
+      41.0256
+    ],
+    "weight": 25,
+    "owner": "fac_genoa",
+    "fortification_level": 3,
+    "buildings": [
+      "bld_fair",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Colonie génoise sur la Corne d'Or, concédée en 1267 ; comptoir plus riche que la Ville elle-même.",
+    "sources": [
+      "Galata"
+    ]
+  },
+  {
+    "id": "set_stoudios",
+    "province": "prov_constantinople",
+    "kind": "abbey",
+    "name": {
+      "display": "Monastère de Stoudios",
+      "local": "Στούδιον",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      28.9236,
+      40.9986
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grand monastère studite, foyer de copistes.",
+    "sources": [
+      "Monastère de Stoudios"
+    ]
+  }
+]

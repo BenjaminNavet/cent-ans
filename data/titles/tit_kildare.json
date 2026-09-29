@@ -1,0 +1,51 @@
+{
+  "rank": "county",
+  "name": {
+    "display": "Comté de Kildare",
+    "local": "Earldom of Kildare",
+    "local_language": "moyen anglais"
+  },
+  "heraldry": {
+    "blazon": "D'argent au sautoir de gueules.",
+    "description": "Armes des FitzGerald.",
+    "primary_color": "#F2F2F2",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_ireland",
+  "de_jure_provinces": [
+    "prov_kildare"
+  ],
+  "holder_1337": {
+    "faction": "fac_kildare",
+    "sources": [
+      "Maurice FitzGerald, 4e comte de Kildare"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_kildare_hold",
+      "title": "Garder le comté",
+      "description": "Les FitzGerald de Kildare doivent conserver leur comté face aux révoltes gaéliques et aux rivaux anglo-irlandais.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_kildare"
+      }
+    },
+    {
+      "id": "obj_kildare_justiciar",
+      "title": "Le lieutenant du roi",
+      "description": "Devenir le premier officier de la couronne en Irlande.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_ormond"
+      }
+    }
+  ],
+  "description": "Comté érigé en 1316 pour John FitzGerald ; les comtes de Kildare, rivaux des Butler d'Ormond, domineront tour à tour le gouvernement du Pale.",
+  "sources": [
+    "Comté de Kildare",
+    "Maurice FitzGerald, 4e comte de Kildare",
+    "Château de Maynooth"
+  ],
+  "id": "tit_kildare"
+}

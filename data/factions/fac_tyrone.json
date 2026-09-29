@@ -1,0 +1,55 @@
+{
+  "name": {
+    "display": "Royaume de Tír Eoghain",
+    "local": "Ríoghacht Thír Eoghain",
+    "local_language": "gaélique irlandais"
+  },
+  "short_name": "Tyrone",
+  "adjective": "tyronien",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_henry_o_neill",
+  "capital": "prov_tyrone",
+  "capital_city": "Dungannon",
+  "religion": "rel_catholic",
+  "culture": "cul_irish",
+  "succession_law": "elective",
+  "primary_title": "tit_tyrone",
+  "heraldry": {
+    "blazon": "D'argent à la main dextre coupée de gueules.",
+    "description": "La « main rouge » de l'Ulster gaélique.",
+    "primary_color": "#F2F2F2",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Roi de Tír Eoghain"
+  ],
+  "treasury": 2000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "peace",
+      "note": "Aucun hommage rendu à la couronne ; frontière tenue avec le comté d'Ulster."
+    },
+    {
+      "faction": "fac_connacht",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 35,
+    "trade": 25,
+    "piety": 50
+  },
+  "description": "Henry Ó Néill règne sur Tír Eoghain depuis 1325, succession contestée par son cousin Aodh Reamhar. En 1337, il négocie la paix avec les MacMahon d'Oriel et les Maguire de Fermanagh. Royaume gaélique jamais entré dans la vassalité anglo-normande.",
+  "sources": [
+    "Henry Ó Néill",
+    "Royaume de Tír Eoghain"
+  ],
+  "id": "fac_tyrone"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "tit_galicia",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Galice",
+    "local": "Reino de Galicia",
+    "local_language": "castillan"
+  },
+  "heraldry": {
+    "blazon": "D'azur au calice d'or couvert d'une hostie d'argent, à l'orle de croix pattées d'argent.",
+    "description": "Armes traditionnelles du royaume de Galice, calice eucharistique en référence à Saint-Jacques-de-Compostelle.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_provinces": [
+    "prov_galicia"
+  ],
+  "holder_1337": {
+    "faction": "fac_castile",
+    "sources": [
+      "Kingdom of Galicia"
+    ]
+  },
+  "description": "Titre royal de la couronne de Castille (« Rey de Galicia » dans l'intitulation royale) ; gouverné directement par des adelantados, sans comte ou roi distinct en 1337.",
+  "sources": [
+    "Kingdom of Galicia"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "rel_pagan",
+  "name": {
+    "display": "Paganisme",
+    "local": "pagonybė",
+    "local_language": "lituanien"
+  },
+  "kind": "other_faith",
+  "description": "Cultes ancestraux de la Lituanie de Gediminas, dernier État païen d'Europe, et des peuples finno-ougriens de la Volga et du Nord.",
+  "sources": [
+    "Paganisme lituanien",
+    "Gediminas"
+  ]
+}

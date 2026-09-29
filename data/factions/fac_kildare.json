@@ -1,0 +1,68 @@
+{
+  "name": {
+    "display": "Comté de Kildare",
+    "local": "Earldom of Kildare",
+    "local_language": "moyen anglais"
+  },
+  "short_name": "Kildare",
+  "adjective": "kildarien",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_maurice_fitzgerald_iv_de_kildare",
+  "capital": "prov_kildare",
+  "capital_city": "Kildare",
+  "religion": "rel_catholic",
+  "culture": "cul_english",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_england",
+  "primary_title": "tit_kildare",
+  "heraldry": {
+    "blazon": "D'argent au sautoir de gueules.",
+    "description": "Armes des FitzGerald.",
+    "primary_color": "#F2F2F2",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Comte de Kildare",
+    "Baron d'Offaly"
+  ],
+  "treasury": 3500,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "vassal",
+      "note": "Comté érigé en 1316 pour John FitzGerald ; Maurice, 4e comte, gouverne depuis 1329."
+    },
+    {
+      "faction": "fac_ormond",
+      "status": "peace",
+      "note": "Rivalité de longue date entre les deux grandes maisons anglo-irlandaises pour le gouvernement du Pale."
+    },
+    {
+      "faction": "fac_leinster",
+      "status": "war",
+      "since": {
+        "value": "1330",
+        "uncertain": true
+      },
+      "note": "Guerre endémique contre les Mac Murchada et les clans gaéliques du Leinster."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 45
+  },
+  "description": "Maurice FitzGerald, 4e comte de Kildare, gouverne le comté depuis 1329 ; il matera l'insurrection des O'Dempsey du Leinster en 1339. Grande maison anglo-irlandaise, rivale des Butler d'Ormond pour le contrôle du Pale.",
+  "sources": [
+    "Maurice FitzGerald, 4e comte de Kildare",
+    "Comté de Kildare"
+  ],
+  "id": "fac_kildare"
+}

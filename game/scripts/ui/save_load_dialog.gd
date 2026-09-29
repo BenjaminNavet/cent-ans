@@ -9,8 +9,8 @@ extends CenterContainer
 ## autre moteur sont grisées). « Supprimer » efface l'emplacement choisi.
 ## Signaux `save_confirmed(name)` et `load_confirmed(path)`.
 ## Lot P2e (ADR 0097, bible DA § 12.2) : tailles de texte par `UiType`, ouverture et fermeture
-## par `UiMotion`. Rattachement inchangé (instancié par `pause_menu.gd`, `start_menu.gd` et
-## `map_ui.gd`, ces deux derniers hors lot) : voir `docs/wip/p2e-menus.md`.
+## par `UiMotion`. Lot P2g : ses trois propriétaires (`pause_menu.gd`, `start_menu.gd`,
+## `map_ui.gd`) le réclament dans la zone `MODAL` de `UiLayout` (voile, centré sur sa taille).
 
 signal save_confirmed(save_name: String)
 signal load_confirmed(path: String)

@@ -1,0 +1,54 @@
+{
+  "id": "tit_plock",
+  "rank": "county",
+  "name": {
+    "display": "Duché de Płock",
+    "local": "Księstwo Płockie",
+    "local_language": "polonais"
+  },
+  "heraldry": {
+    "blazon": "De gueules à l'aigle d'argent, à la bordure d'azur.",
+    "description": "Aigle blanc des Piast de Mazovie, bordure d'azur.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#1F3F8F",
+    "uncertain": true,
+    "note": "Bordure d'azur : brisure de jeu, distinction avec l'aigle royal de Pologne."
+  },
+  "de_jure_liege": "tit_bohemia",
+  "de_jure_provinces": [
+    "prov_plock"
+  ],
+  "holder_1337": {
+    "faction": "fac_plock",
+    "sources": [
+      "Boleslas III de Płock",
+      "Wenceslas de Płock",
+      "Duché de Mazovie"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_plock_hold",
+      "title": "Sauver le duché",
+      "description": "Le jeune duc doit conserver Płock jusqu'à sa majorité.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_plock"
+      }
+    },
+    {
+      "id": "obj_plock_free",
+      "title": "Sortir de la vassalité bohémienne",
+      "description": "Ne plus dépendre de Prague.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Duché de Mazovie de Płock, tenu en fief de la couronne de Bohême depuis 1329.",
+  "sources": [
+    "Boleslas III de Płock",
+    "Wenceslas de Płock",
+    "Duché de Mazovie"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "id": "tit_tripoli",
+  "rank": "county",
+  "name": {
+    "display": "Cheikhat de Tripoli",
+    "local": "Mashyakhat Ṭarābulus",
+    "local_language": "arabe maghrébin"
+  },
+  "heraldry": {
+    "blazon": "D'or à la bande de sinople.",
+    "description": "Bande verte sur or ; blason de jeu aux couleurs de la cité, sans source héraldique.",
+    "primary_color": "#E0B33A",
+    "secondary_color": "#2E7D4F",
+    "uncertain": true,
+    "note": "Aucune source héraldique : emblème conventionnel de jeu."
+  },
+  "de_jure_liege": "tit_hafsids",
+  "de_jure_provinces": [
+    "prov_tripolitania",
+    "prov_nafusa"
+  ],
+  "holder_1337": {
+    "faction": "fac_tripoli",
+    "sources": [
+      "Banu Thabit",
+      "Histoire de Tripoli"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_tripoli_hold",
+      "title": "Garder Tripoli",
+      "description": "Le cheikh doit conserver Tripoli.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_tripoli"
+      }
+    },
+    {
+      "id": "obj_tripoli_nafusa",
+      "title": "Maîtriser le Djebel",
+      "description": "Tenir la côte et le Djebel Nefousa.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tripolitania",
+          "prov_nafusa"
+        ]
+      }
+    },
+    {
+      "id": "obj_tripoli_sirte",
+      "title": "La côte de Syrte",
+      "description": "Étendre Tripoli vers l'est, jusqu'à Syrte.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_syrte"
+        ]
+      }
+    }
+  ],
+  "description": "Cité de Tripoli gouvernée par les Banu Thabit au nom des Hafsides, dans une quasi-indépendance.",
+  "sources": [
+    "Banu Thabit",
+    "Histoire de Tripoli"
+  ]
+}

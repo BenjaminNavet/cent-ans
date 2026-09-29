@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_pisa",
+    "province": "prov_pisa",
+    "kind": "city",
+    "name": {
+      "display": "Pise",
+      "local": "Pisa",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      10.4017,
+      43.7228
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_port",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_guild_hall",
+      "bld_market"
+    ],
+    "port": true,
+    "description": "République maritime rivale de Gênes et Florence, encore indépendante en 1337 malgré son déclin après Meloria (1284).",
+    "sources": [
+      "Pise",
+      "République de Pise"
+    ]
+  },
+  {
+    "id": "set_san_piero_a_grado",
+    "province": "prov_pisa",
+    "kind": "abbey",
+    "name": {
+      "display": "San Piero a Grado",
+      "local": "San Piero a Grado",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      10.3011,
+      43.6733
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": true,
+    "description": "Basilique et ancien port fluvial pisan sur l'Arno, lieu de débarquement traditionnel de saint Pierre selon la légende locale.",
+    "sources": [
+      "San Piero a Grado"
+    ]
+  },
+  {
+    "id": "set_vicopisano",
+    "province": "prov_pisa",
+    "kind": "castle",
+    "name": {
+      "display": "Vicopisano",
+      "local": "Vicopisano",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      10.5883,
+      43.6997
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Place forte pisane contrôlant l'Arno face à Florence.",
+    "sources": [
+      "Vicopisano"
+    ]
+  }
+]

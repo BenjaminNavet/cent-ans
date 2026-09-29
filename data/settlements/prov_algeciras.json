@@ -1,0 +1,86 @@
+[
+  {
+    "id": "set_algeciras",
+    "province": "prov_algeciras",
+    "kind": "city",
+    "name": {
+      "display": "Algésiras",
+      "local": "Al-Jazīra al-Khaḍrā'",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -5.4544,
+      36.1333
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field",
+      "bld_port"
+    ],
+    "port": true,
+    "sea_zone": "sea_mediterranean",
+    "description": "Port de débarquement des armées africaines ; Alphonse XI l'assiégera en 1342-1344.",
+    "sources": [
+      "Algésiras",
+      "Siège d'Algésiras (1342-1344)"
+    ]
+  },
+  {
+    "id": "set_gibraltar",
+    "province": "prov_algeciras",
+    "kind": "castle",
+    "name": {
+      "display": "Gibraltar",
+      "local": "Jabal Ṭāriq",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -5.3536,
+      36.1408
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Rocher pris à la Castille par Abu Malik ibn Abi l-Hasan en juin 1333.",
+    "sources": [
+      "Siège de Gibraltar (1333)"
+    ]
+  },
+  {
+    "id": "set_tarifa",
+    "province": "prov_algeciras",
+    "kind": "castle",
+    "name": {
+      "display": "Tarifa",
+      "local": "Ṭarīf",
+      "local_language": "espagnol"
+    },
+    "lonlat": [
+      -5.6014,
+      36.0139
+    ],
+    "weight": 8,
+    "owner": "fac_castile",
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château de Tarifa, tenu par la Castille depuis 1292 (Guzmán le Bon) ; enclave castillane, siège du Salado en 1340.",
+    "sources": [
+      "Tarifa"
+    ]
+  }
+]

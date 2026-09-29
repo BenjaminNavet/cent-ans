@@ -1,0 +1,100 @@
+{
+  "id": "prov_alicante",
+  "name": {
+    "display": "Alicante",
+    "local": "Alacant",
+    "local_language": "catalan"
+  },
+  "region": "aragon",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Alicante",
+    "Elche"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
+  ],
+  "rivers": [
+    "Vinalopó",
+    "Segura"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Alicante",
+      "local": "Alacant",
+      "local_language": "catalan"
+    },
+    "lat": 38.3452,
+    "lon": -0.481
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.481,
+      38.3452
+    ],
+    "seed_lonlat": [
+      -0.65,
+      38.2
+    ],
+    "voronoi_weight": 0.55
+  },
+  "owner": "fac_aragon",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 24000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 350,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ancienne gouvernance d'Oriola, rattachée au royaume de Valence après la sentence arbitrale de Torrellas (1304) qui la retire au royaume de Murcie castillan."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 900,
+  "description": "Sud du royaume de Valence, autour d'Alicante, Elche et Orihuela ; frontière contestée avec la Castille jusqu'à la sentence de Torrellas (1304).",
+  "sources": [
+    "Royaume de Valence",
+    "Alicante",
+    "Sentence arbitrale de Torrellas"
+  ]
+}

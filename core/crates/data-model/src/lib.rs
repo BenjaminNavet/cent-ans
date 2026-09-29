@@ -35,9 +35,14 @@ pub use entities::ai_diplomacy::{
     AiDiplomacy, JoinWarRules, MenacingNeighbourRules, NegotiationRules, PassageRules, PeaceRules,
     WarPlanningRules,
 };
-pub use entities::ai_doctrine::{AiDoctrines, Doctrine};
+pub use entities::ai_doctrine::{AiDoctrines, Doctrine, RankStrategy};
+pub use entities::ai_feudal::AiFeudal;
 pub use entities::ai_grid::{
     AiAmbush, AiEncounters, AiEntrenched, AiForcedMarch, AiGrid, AiPostures,
+};
+pub use entities::army_traditions::{
+    ArmyExperienceRules, ArmyTradition, ArmyTraditionRules, BranchWeights, TraditionAiWeights,
+    TraditionBranch, TraditionBranchDef, TraditionEffects,
 };
 pub use entities::auto_resolve::{
     AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
@@ -65,7 +70,10 @@ pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Ski
 pub use entities::chivalric_order::ChivalricOrder;
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
 pub use entities::difficulty::{DifficultyLevelData, DifficultyModifiers, DifficultyRules};
-pub use entities::economy_rules::EconomyRules;
+pub use entities::diplomacy_rules::{DiplomacyRules, OpinionMotive};
+pub use entities::economy_rules::{
+    AiDemolition, EconomyRules, TaxBracket, TaxBrackets, TaxPerHead,
+};
 pub use entities::edict::Edict;
 pub use entities::encounter::{
     Encounter, EncounterOption, EncounterOutcome, EncounterResult, EncounterRules, EncounterSpawn,
@@ -79,10 +87,14 @@ pub use entities::faction::{
     AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
     ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
-pub use entities::feudal_rules::{FeudalRules, LoyaltyWeights};
+pub use entities::feudal_rules::{
+    ArbitrationRules, ArbitrationWeights, EscalationRules, FelonyReason, FeudalRules, HostRules,
+    LoyaltyWeights, ProtectionScore, StartFelony,
+};
 pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
 };
+pub use entities::mercenaries::{MercenaryAi, MercenaryArrears, MercenaryBand, MercenaryRules};
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
 pub use entities::naval::{

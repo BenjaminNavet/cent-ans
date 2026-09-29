@@ -1,0 +1,28 @@
+{
+  "id": "cdx_chypre_lusignan",
+  "title": "Le royaume de Chypre des Lusignan",
+  "category": "lieu",
+  "aliases": [
+    "Chypre",
+    "royaume de Chypre",
+    "Lusignan de Chypre",
+    "Famagouste",
+    "Hugues IV de Chypre"
+  ],
+  "era": {
+    "from": "1192",
+    "to": "1489"
+  },
+  "summary": "Dernier royaume latin d'Orient, Chypre est tenu par les Lusignan. Son port de Famagouste est en 1337 l'un des plus riches de la Méditerranée orientale.",
+  "body": "Conquise par Richard Cœur de Lion en 1191, vendue aux Templiers puis cédée en 1192 aux Lusignan, l'île est devenue un royaume latin où s'est réfugiée la noblesse de Terre sainte après 1291. Hugues IV (1324-1359) y porte aussi le titre de roi de Jérusalem, sans en tenir le moindre pouce.\n\nFamagouste, où les marchands génois, vénitiens et catalans ont leurs quartiers, est devenue l'entrepôt des marchandises d'Orient. Le pape interdit le commerce avec les Mamelouks ; malgré l'interdit, l'île reste un lieu d'échanges avec l'Égypte et la Syrie.",
+  "entity": "fac_cyprus",
+  "see_also": [
+    "cdx_mamelouks",
+    "cdx_hospitaliers_rhodes"
+  ],
+  "sources": [
+    "Royaume de Chypre",
+    "Hugues IV de Chypre",
+    "Famagouste"
+  ]
+}

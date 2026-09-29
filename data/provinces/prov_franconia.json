@@ -1,8 +1,8 @@
 {
   "id": "prov_franconia",
   "name": {
-    "display": "Franconie",
-    "local": "Franken",
+    "display": "Évêché de Wurtzbourg",
+    "local": "Bistum Würzburg",
     "local_language": "moyen haut-allemand"
   },
   "region": "empire_sud",
@@ -11,7 +11,6 @@
   "neighbors": [],
   "rivers": [
     "Main",
-    "Regnitz",
     "Tauber"
   ],
   "coastal": false,
@@ -23,54 +22,54 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Nuremberg",
-      "local": "Nürnberg",
+      "display": "Wurtzbourg",
+      "local": "Wirzeburg",
       "local_language": "moyen haut-allemand"
     },
-    "lat": 49.4521,
-    "lon": 11.0767
+    "lat": 49.7913,
+    "lon": 9.9333
   },
   "geo": {
     "capital_lonlat": [
-      11.0767,
-      49.4521
+      9.9333,
+      49.7913
     ],
     "seed_lonlat": [
-      10.6,
-      49.75
+      9.95,
+      49.8
     ],
-    "voronoi_weight": 1.3
+    "voronoi_weight": 0.7
   },
-  "owner": "fac_empire",
+  "owner": "fac_wurzburg",
   "culture": "cul_german",
   "religion": "rel_catholic",
   "population": {
     "uncertain": true,
-    "note": "Nuremberg compte environ 20 000 habitants.",
+    "note": "Wurtzbourg compte environ 8 000 à 10 000 habitants. Province résiduelle après détachement de Nuremberg (prov_nuremberg) et Bamberg (prov_bamberg), lot FE4b.",
     "classes": {
       "peasants": {
-        "count": 330401,
+        "count": 170401,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 56000,
+        "count": 19000,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 10000,
+        "count": 3500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3599,
+        "count": 2099,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -80,20 +79,16 @@
   },
   "buildings": [
     "bld_market",
-    "bld_water_mill",
-    "bld_vineyard_press",
-    "bld_cathedral",
+    "bld_collegiate_church",
     "bld_stone_walls",
-    "bld_muster_field",
-    "bld_stables",
-    "bld_forge"
+    "bld_vineyard_press"
   ],
   "fortification_level": 2,
-  "base_supply": 5000,
-  "description": "Franconie : Nuremberg, cité impériale fidèle à Louis IV ; burgraves de Nuremberg (Hohenzollern) ; évêchés de Wurtzbourg et Bamberg. Métallurgie, commerce vers l'Italie.",
+  "base_supply": 2400,
+  "description": "Principauté épiscopale de Wurtzbourg sur le Main : les évêques, ducs de Franconie de droit depuis 1168, gouvernent un vaste territoire viticole autour de leur cité. Otto von Wolfskeel, évêque depuis 1333, y exerce l'autorité temporelle et spirituelle.",
   "sources": [
     "Franconie",
-    "Nuremberg",
-    "Évêché de Wurtzbourg"
+    "Évêché de Wurtzbourg",
+    "Otto von Wolfskeel"
   ]
 }

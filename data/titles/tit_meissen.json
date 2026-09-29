@@ -1,0 +1,32 @@
+{
+  "id": "tit_meissen",
+  "rank": "duchy",
+  "name": {
+    "display": "Marche de Misnie",
+    "local": "Markgrafschaft Meißen",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'or et de sable burelé, au crancelin de sinople brochant en bande.",
+    "description": "Armes de la maison de Wettin, le « crancelin » (couronne de rue) brochant sur les burelles d'or et de sable.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_meissen",
+    "prov_thuringia"
+  ],
+  "holder_1337": {
+    "faction": "fac_meissen",
+    "sources": [
+      "Frédéric II de Misnie",
+      "Marche de Misnie"
+    ]
+  },
+  "description": "Marche de Misnie et landgraviat de Thuringe réunis dès 1323/1324 sous Frédéric II de Wettin ; rang de duché retenu par convention politique (rang réel : margraviat et landgraviat).",
+  "sources": [
+    "Frédéric II de Misnie",
+    "Marche de Misnie"
+  ]
+}

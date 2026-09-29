@@ -143,7 +143,7 @@ func _rank_histogram(layer: SettlementLayer) -> Dictionary:
 
 ## Colonie (hors ville emblématique) ayant le plus de voisines dans `radius` unités.
 func _densest_point(layer: SettlementLayer, radius: float) -> Vector2:
-	var best := Vector2(2213, 1924)
+	var best := Vector2(2213, 3204)
 	var best_count := -1
 	var settlements: Array = layer.data.settlements
 	for i in settlements.size():

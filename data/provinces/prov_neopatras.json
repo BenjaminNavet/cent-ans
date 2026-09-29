@@ -1,0 +1,97 @@
+{
+  "id": "prov_neopatras",
+  "name": {
+    "display": "Néopatras",
+    "local": "Νέαι Πάτραι",
+    "local_language": "grec"
+  },
+  "region": "grece",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Sperchios"
+  ],
+  "ports": [
+    "Halmyros"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Néopatras",
+      "local": "Νέαι Πάτραι",
+      "local_language": "grec"
+    },
+    "lat": 38.92,
+    "lon": 22.25
+  },
+  "geo": {
+    "capital_lonlat": [
+      22.25,
+      38.92
+    ],
+    "seed_lonlat": [
+      22.35,
+      38.95
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_athens",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 98000,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 30,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5400,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 3300,
+  "description": "Duché de Néopatras (conquis en 1319 par la Compagnie catalane) : Sperchios, Zeitounion et Halmyros.",
+  "sources": [
+    "Duché de Néopatras",
+    "Zeitounion"
+  ]
+}

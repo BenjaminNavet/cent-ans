@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_mantova",
+    "province": "prov_mantova",
+    "kind": "city",
+    "name": {
+      "display": "Mantoue",
+      "local": "Mantoa",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      10.7936,
+      45.1564
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville-lacs sur le Mincio, seigneurie des Gonzague, reconnus vicaires impériaux par Louis IV de Bavière en 1329.",
+    "sources": [
+      "Mantoue",
+      "Maison Gonzague"
+    ]
+  },
+  {
+    "id": "set_gonzaga",
+    "province": "prov_mantova",
+    "kind": "village",
+    "name": {
+      "display": "Gonzaga",
+      "local": "Gonzaga",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      10.9169,
+      44.9508
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg d'origine de la maison Gonzague, qui lui donne son nom.",
+    "sources": [
+      "Gonzaga (localité)"
+    ]
+  },
+  {
+    "id": "set_san_benedetto_po",
+    "province": "prov_mantova",
+    "kind": "abbey",
+    "name": {
+      "display": "San Benedetto Po",
+      "local": "San Benedetto Po",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      10.9236,
+      45.0364
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine (Polirone) sur le Pô, fondée en 1007, riche propriétaire terrienne mantouane.",
+    "sources": [
+      "Abbaye de Polirone"
+    ]
+  }
+]

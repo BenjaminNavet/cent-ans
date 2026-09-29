@@ -1,0 +1,107 @@
+[
+  {
+    "id": "set_constantine",
+    "province": "prov_constantine",
+    "kind": "city",
+    "name": {
+      "display": "Constantine",
+      "local": "Qusanṭīna",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      6.6147,
+      36.365
+    ],
+    "weight": 28,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ville perchée sur son roc entouré des gorges du Rhumel, résidence des gouverneurs hafsides.",
+    "sources": [
+      "Constantine (Algérie)"
+    ]
+  },
+  {
+    "id": "set_mila",
+    "province": "prov_constantine",
+    "kind": "town",
+    "name": {
+      "display": "Milev",
+      "local": "Mīla",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      6.2644,
+      36.4503
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne ville berbère, grande mosquée du VIIIe siècle.",
+    "sources": [
+      "Mila (Algérie)"
+    ]
+  },
+  {
+    "id": "set_tiddis",
+    "province": "prov_constantine",
+    "kind": "village",
+    "name": {
+      "display": "Tiddis",
+      "local": "Tīddis",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      6.4667,
+      36.4667
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de montagne sur les ruines de Castellum Tiddis, au nord de Constantine.",
+    "sources": [
+      "Tiddis"
+    ]
+  },
+  {
+    "id": "set_collo",
+    "province": "prov_constantine",
+    "kind": "town",
+    "name": {
+      "display": "Collo",
+      "local": "Kūlū",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      6.5667,
+      37.0
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port kabyle du Collo.",
+    "sources": [
+      "Collo"
+    ]
+  }
+]

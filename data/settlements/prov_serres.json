@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_serres",
+    "province": "prov_serres",
+    "kind": "city",
+    "name": {
+      "display": "Serrès",
+      "local": "Σέρραι",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      23.548,
+      41.085
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Grande ville de Macédoine orientale.",
+    "sources": [
+      "Serrès"
+    ]
+  },
+  {
+    "id": "set_christoupolis",
+    "province": "prov_serres",
+    "kind": "town",
+    "name": {
+      "display": "Christoupolis",
+      "local": "Χριστούπολις",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      24.41,
+      40.94
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port du Strymon oriental (Kavala).",
+    "sources": [
+      "Kavala"
+    ]
+  },
+  {
+    "id": "set_drama",
+    "province": "prov_serres",
+    "kind": "castle",
+    "name": {
+      "display": "Drama",
+      "local": "Δράμα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      24.15,
+      41.15
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de la plaine de Drama.",
+    "sources": [
+      "Drama"
+    ]
+  }
+]

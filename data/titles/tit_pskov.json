@@ -1,0 +1,52 @@
+{
+  "id": "tit_pskov",
+  "rank": "county",
+  "name": {
+    "display": "République de Pskov",
+    "local": "Псковъ",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "D'azur au léopard d'argent.",
+    "description": "Léopard d'argent sur champ d'azur, emblème de Pskov attesté plus tard (XVIIIe siècle) mais rattaché à l'ancienne tradition de la ville.",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_novgorod",
+  "de_jure_provinces": [
+    "prov_pskov"
+  ],
+  "holder_1337": {
+    "faction": "fac_pskov",
+    "sources": [
+      "Pskov",
+      "République de Pskov"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_pskov_hold",
+      "title": "La ville libre",
+      "description": "Garder Pskov.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_pskov"
+      }
+    },
+    {
+      "id": "obj_pskov_free",
+      "title": "Sortir de l'ombre de Novgorod",
+      "description": "Devenir indépendante de Novgorod.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Ville-forteresse de la frontière livonienne, qui a offert l'asile à Alexandre de Tver (1327) contre la Horde et Moscou ; son vétché élit ses princes et veut se libérer de la tutelle de Novgorod (achevé en 1348).",
+  "sources": [
+    "Pskov",
+    "République de Pskov"
+  ]
+}

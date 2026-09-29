@@ -1,0 +1,91 @@
+{
+  "id": "prov_warsaw",
+  "name": {
+    "display": "Duché de Czersk et de Varsovie",
+    "local": "Księstwo czerskie",
+    "local_language": "polonais"
+  },
+  "region": "mazovie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Vistule",
+    "Świder"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Varsovie",
+      "local": "Warszawa",
+      "local_language": "polonais"
+    },
+    "lat": 52.2297,
+    "lon": 21.0122
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.0122,
+      52.2297
+    ],
+    "seed_lonlat": [
+      21.3,
+      52.35
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_warsaw",
+  "culture": "cul_polish",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Varsovie, encore petite ville ducale, dépasse Czersk qui décline.",
+    "classes": {
+      "peasants": {
+        "count": 90000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1980,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 4500,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1600,
+  "description": "Duché de Trojden Ier, de Czersk, de Varsovie et de Liw ; Varsovie, sur la Vistule, remplace peu à peu Czersk comme résidence ducale. Vassal de la Bohême depuis 1329 (incertain), pris entre Cracovie et l'Ordre.",
+  "sources": [
+    "Trojden Ier de Mazovie",
+    "Varsovie",
+    "Duché de Mazovie"
+  ]
+}

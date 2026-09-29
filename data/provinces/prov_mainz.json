@@ -1,7 +1,7 @@
 {
   "id": "prov_mainz",
   "name": {
-    "display": "Mayence et Hesse",
+    "display": "Mayence",
     "local": "Mainz",
     "local_language": "moyen haut-allemand"
   },
@@ -36,41 +36,41 @@
       49.9929
     ],
     "seed_lonlat": [
-      8.8,
-      50.4
+      8.4,
+      50.1
     ],
-    "voronoi_weight": 1.3
+    "voronoi_weight": 0.9
   },
-  "owner": "fac_empire",
+  "owner": "fac_mainz",
   "culture": "cul_german",
   "religion": "rel_catholic",
   "population": {
     "uncertain": true,
-    "note": "Mayence compte environ 15 000 habitants, Francfort 10 000.",
+    "note": "Mayence compte environ 15 000 habitants, Francfort 10 000. Effectifs réduits d'environ 16% par rapport à l'ancienne province 'Mayence et Hesse' après détachement du landgraviat de Hesse en prov_hesse.",
     "classes": {
       "peasants": {
-        "count": 310081,
+        "count": 260468,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 57000,
+        "count": 47880,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 9500,
+        "count": 7980,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3419,
+        "count": 2872,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -89,10 +89,10 @@
   ],
   "fortification_level": 2,
   "base_supply": 5000,
-  "description": "Électorat de Mayence (archevêque Henri de Virnebourg), Francfort (cité impériale, foires) et landgraviat de Hesse (Henri II). Chancellerie de l'Empire.",
+  "description": "Électorat de Mayence, archevêque Henri III de Virnebourg (1328-1353), archichancelier du royaume de Germanie ; Francfort, cité impériale et grande foire commerciale du Main ; vignobles du Rheingau et du Rheinhessen.",
   "sources": [
     "Électorat de Mayence",
-    "Landgraviat de Hesse",
+    "Henri III de Virnebourg",
     "Francfort-sur-le-Main"
   ]
 }

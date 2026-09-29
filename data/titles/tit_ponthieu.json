@@ -1,8 +1,8 @@
 {
   "id": "tit_ponthieu",
-  "rank": "duchy",
+  "rank": "county",
   "name": {
-    "display": "Ponthieu",
+    "display": "Comté de Ponthieu",
     "local": "Pontieu",
     "local_language": "ancien français"
   },

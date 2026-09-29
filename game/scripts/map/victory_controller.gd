@@ -29,7 +29,7 @@ func setup(campaign_map: Node) -> void:
 	var header := HBoxContainer.new()
 	var title := Label.new()
 	title.text = "Objectifs de campagne"
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
 	var close := Button.new()
@@ -90,12 +90,13 @@ func setup(campaign_map: Node) -> void:
 	end_box.add_theme_constant_override("separation", 10)
 	card.add_child(end_box)
 	end_title = Label.new()
+	# P2f : bannière de fin de partie, hors des 4 paliers UiType (dramatique voulu, cf. docs/wip/p2f-fonts.md).
 	end_title.add_theme_font_size_override("font_size", 40)
 	end_title.add_theme_color_override("font_color", Color(0.45, 0.10, 0.06))
 	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_box.add_child(end_title)
 	end_caption = Label.new()
-	end_caption.add_theme_font_size_override("font_size", 15)
+	end_caption.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	end_caption.add_theme_color_override("font_color", Color(0.40, 0.30, 0.18))
 	end_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_box.add_child(end_caption)
@@ -173,7 +174,7 @@ func open_panel() -> void:
 	score_label.custom_minimum_size.x = WRAP_WIDTH
 	# Audit A3 D2 : le score n'était pas expliqué.
 	score_label.mouse_filter = Control.MOUSE_FILTER_PASS
-	score_label.tooltip_text = "Score de campagne : provinces tenues, objectifs remplis, prestige et trésor. Il mesure votre réussite si la campagne s'achève à l'échéance sans que tous les objectifs soient remplis."
+	RichTooltip.attach_plain(score_label, "campaign_score")
 	if objectives.is_empty():
 		var none := Label.new()
 		none.text = "Cette faction n'a pas d'objectifs historiques : survivre et prospérer."
@@ -183,14 +184,14 @@ func open_panel() -> void:
 		var head := Label.new()
 		var done := bool(objective["done"])
 		head.text = "%s %s — %s" % ["✔" if done else "☐", objective["title"], objective["progress"]]
-		head.add_theme_font_size_override("font_size", 17)
+		head.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 		head.add_theme_color_override("font_color", Color(0.15, 0.45, 0.15) if done else Color(0.35, 0.22, 0.10))
 		row.add_child(head)
 		var text := Label.new()
 		text.text = str(objective["description"])
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		text.custom_minimum_size.x = WRAP_WIDTH
-		text.add_theme_font_size_override("font_size", 13)
+		text.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 		row.add_child(text)
 		list.add_child(row)
 	panel.show()

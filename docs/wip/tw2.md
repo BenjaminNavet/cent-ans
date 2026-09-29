@@ -1,22 +1,26 @@
-# WIP orchestrateur — TW2 mécaniques Total War (28/09) — EN PAUSE
+# WIP orchestrateur — TW2 mécaniques Total War (28/09) — REPRIS le 28/09 après-midi
 
 Plan : `docs/design/2026-09-28-tw2-mecaniques-total-war.md`. Mandat : enchaîner les lots sans validation.
 Mis en pause par le joueur le 28/09 (« on reprendra dans une future session ») ; rien de TW2 n'est dans main.
-ADR : SB 0107, T1 0101, T2 0102, T3 0103, T4 0108, T5 0109 (0100 pris par RS B, 0104-0106 par GA).
+ADR : SB 0107, T1 0101, T2 0102, T3 0103, T4 0108, T5 0112 (0100 pris par RS B, 0104-0106 par GA).
 Chaque lot a sa note `docs/wip/tw2-<lot>.md` dans sa branche `feat/tw2-<lot>`.
 
 ## État
 
 | Lot | Branche | État |
 |---|---|---|
-| SB barres de vie + rythme siège | feat/tw2-sb (6fcd5080) | fini, dans integration/tw2 ; br3 bascule 3/10→10/10 (rééquilibré par T4) |
-| T1 sort de la ville prise | feat/tw2-t1 (9851cd5d) | fini, dans integration/tw2 |
-| T2 reconstitution + réserves | feat/tw2-t2 (fd7e7275) | fini, dans integration/tw2 |
-| T3 mercenaires | feat/tw2-t3 (e4cdde5e) | agent stoppé ; ADR 0103 avec sonde, icônes faites, integration/tw2 déjà fusionnée ; voir `docs/wip/tw2-t3.md` de la branche |
+| SB barres de vie + rythme siège | feat/tw2-sb (6fcd5080) | **dans main** (befaf258) ; br3 bascule 3/10→10/10 (rééquilibré par T4) |
+| T1 sort de la ville prise | feat/tw2-t1 (9851cd5d) | **dans main** (befaf258) |
+| T2 reconstitution + réserves | feat/tw2-t2 (fd7e7275) | **dans main** (befaf258) |
+| T3 mercenaires | feat/tw2-t3 (e4cdde5e) | **dans main** (c60a6e73) ; suites : surprime absente du panneau budget, illustrations provisoires |
 | T4 points de capture + rééquilibrage br3 (cible 4-7/10) | feat/tw2-t4 (597020f1) | agent stoppé pendant sa vérif finale ; capture, dernier carré, repli, UI, tests, ADR 0108 ; voir `docs/wip/tw2-t4.md` |
-| T5 traditions d'armée | feat/tw2-t5 | pas lancé |
+| T5 traditions d'armée | feat/tw2-t5 (f5db1d43) | **dans main** (b00e1e98) ; ADR 0112 (0109 pris par IB) ; suites : sonde d'équilibrage des rangs IA, traditions sur le marqueur 3D |
 
-## integration/tw2 (worktree `../gp-tw2-merge`, 9c10e90e)
+## integration/tw2 (worktree `../gp-tw2-merge`, 54e3c4b2)
+
+Fusionnée dans main le 28/09 (befaf258) : fmt, clippy, 1116 tests Rust, build, smoke + 3 tests TW2 headless, pytest 880 verts.
+NB : pas de `timeout` sur macOS, lancer godot directement.
+
 
 = main (28/09 matin) + T1 + T2 + SB + correctif souris du test des barres + ADR SB renuméroté 0107.
 Vérifié avant la dernière fusion de main : fmt, clippy, cargo test, smoke (29 OK), 3 tests headless TW2,
@@ -36,3 +40,5 @@ code, dont RS F bataille/feu) n'est pas revérifiée.**
 - T1 : griser le recrutement d'une ruine ; marqueur de ruine sur la carte ; fréquence des pillages IA en partie pilote.
 - T2 : IA qui se met au repos pour se reconstituer.
 - SB : pas d'indicateur « visé » pour béliers/beffrois.
+
+- Fusion T5 : correctif IA (armée entièrement licenciée pour dettes encore commandée le même tour) dans le commit de fusion.

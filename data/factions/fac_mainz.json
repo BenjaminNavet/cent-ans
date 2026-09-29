@@ -1,0 +1,55 @@
+{
+  "id": "fac_mainz",
+  "name": {
+    "display": "Électorat de Mayence",
+    "local": "Erzstift Mainz",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Mayence",
+  "adjective": "mayençais",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_heinrich_iii_von_virneburg",
+  "capital": "prov_mainz",
+  "capital_city": "Mayence",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_mainz",
+  "heraldry": {
+    "blazon": "De gueules à la roue d'argent à six rais.",
+    "description": "La roue de Mayence, attribut héraldique de l'archevêché-électorat depuis le XIIIe siècle.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Archevêque-électeur de Mayence",
+    "Archichancelier du royaume de Germanie"
+  ],
+  "treasury": 9000,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Prince-électeur et archichancelier du royaume de Germanie, l'un des sept princes qui élisent le roi des Romains."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 65,
+    "trade": 55,
+    "piety": 80
+  },
+  "description": "Électorat ecclésiastique de Mayence, tenu par l'archevêque Henri III de Virnebourg, archichancelier du royaume de Germanie ; Francfort, grande foire du Main, relève de son ressort.",
+  "sources": [
+    "Électorat de Mayence",
+    "Henri III de Virnebourg"
+  ]
+}

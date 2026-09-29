@@ -1,0 +1,36 @@
+{
+  "id": "tit_moscow",
+  "rank": "county",
+  "name": {
+    "display": "Principauté de Moscou",
+    "local": "Княжество Московское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la bande d'or.",
+    "description": "Armes de convention de Moscou (le cavalier terrassant le dragon n'est fixé que plus tard).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_vladimir",
+  "de_jure_provinces": [
+    "prov_moscow",
+    "prov_kolomna"
+  ],
+  "holder_1337": {
+    "faction": "fac_moscow",
+    "sources": [
+      "Ivan Ier de Moscou",
+      "Grande-principauté de Moscou",
+      "Grande-principauté de Vladimir"
+    ]
+  },
+  "description": "Principauté de Moscou, apanage patrimonial des Daniilovitchi, dont Ivan Kalita est prince depuis 1325.",
+  "sources": [
+    "Ivan Ier de Moscou",
+    "Grande-principauté de Moscou",
+    "Grande-principauté de Vladimir"
+  ]
+}

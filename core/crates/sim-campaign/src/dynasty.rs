@@ -1018,20 +1018,66 @@ fn house_members<'a>(
         .collect()
 }
 
+/// Kin of `ruler` in lesser realms (FE, spec § 4.5): members of `house`, or
+/// the ruler's children, living in another faction whose primary title
+/// ranks below `faction`'s. Such an heir comes home to inherit (a Valois
+/// cadet ruling Alençon stays heir to the crown of France); kin in equal or
+/// greater realms only inherit on extinction, by personal union
+/// (`feudal::inherit_titles_on_extinction`).
+fn house_members_in_lesser_realms<'a>(
+    state: &'a CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    house: &str,
+    ruler: &CharacterId,
+) -> Vec<(&'a CharacterId, &'a CharacterState)> {
+    let Some(own_rank) = crate::feudal::primary_rank(state, data, faction) else {
+        return Vec::new();
+    };
+    state
+        .characters
+        .iter()
+        .filter(|(id, c)| {
+            c.alive
+                && &c.faction != faction
+                && *id != ruler
+                && (c.house == house || is_parent_of(ruler, c))
+                && c.faction.as_str() != crate::diplomacy::REBELS_FACTION
+                && state.factions.get(&c.faction).is_some_and(|f| f.alive)
+                && crate::feudal::primary_rank(state, data, &c.faction)
+                    .is_some_and(|r| r < own_rank)
+        })
+        .collect()
+}
+
 /// Heir of `faction` according to its `succession_law` (spec § 2). Falls
 /// back to the eldest living male of the house for any other value, matching
-/// the previous (M2) behaviour.
+/// the previous (M2) behaviour. Without any candidate at court, kin ruling
+/// or serving in a lesser realm is considered (see
+/// [`house_members_in_lesser_realms`]).
 pub(crate) fn pick_heir_by_law(
     state: &CampaignState,
     data: &GameData,
     faction: &FactionId,
     ruler: &CharacterId,
 ) -> Option<CharacterId> {
-    let ruler_house = state.characters.get(ruler)?.house.clone();
-    let law = data.factions.get(faction).map(|f| f.succession_law);
-    let members = house_members(state, faction, &ruler_house, ruler);
     let ruler_state = state.characters.get(ruler)?;
+    let law = data.factions.get(faction).map(|f| f.succession_law);
+    let members = house_members(state, faction, &ruler_state.house, ruler);
+    pick_by_law(law, ruler, ruler_state, &members).or_else(|| {
+        let abroad =
+            house_members_in_lesser_realms(state, data, faction, &ruler_state.house, ruler);
+        pick_by_law(law, ruler, ruler_state, &abroad)
+    })
+}
 
+/// Orders `members` by `law` (see [`pick_heir_by_law`]).
+fn pick_by_law(
+    law: Option<SuccessionLaw>,
+    ruler: &CharacterId,
+    ruler_state: &CharacterState,
+    members: &[(&CharacterId, &CharacterState)],
+) -> Option<CharacterId> {
     match law {
         Some(SuccessionLaw::Salic) => {
             // Ruler's sons, eldest first.
@@ -1078,7 +1124,7 @@ pub(crate) fn pick_heir_by_law(
             if let Some((id, _)) = daughters.first() {
                 return Some((*id).clone());
             }
-            let mut rest = members.clone();
+            let mut rest = members.to_vec();
             rest.sort_by_key(|(id, c)| (c.sex == Sex::Female, c.birth_year, (*id).clone()));
             rest.first().map(|(id, _)| (*id).clone())
         }
@@ -1091,7 +1137,7 @@ pub(crate) fn pick_heir_by_law(
             if let Some((id, _)) = children.first() {
                 return Some((*id).clone());
             }
-            let mut rest = members.clone();
+            let mut rest = members.to_vec();
             rest.sort_by_key(|(id, c)| (c.birth_year, (*id).clone()));
             rest.first().map(|(id, _)| (*id).clone())
         }

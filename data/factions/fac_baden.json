@@ -1,0 +1,55 @@
+{
+  "id": "fac_baden",
+  "name": {
+    "display": "Margraviat de Bade",
+    "local": "Markgrafschaft Baden",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Bade",
+  "adjective": "badois",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_rodolphe_hesso_de_bade",
+  "capital": "prov_baden",
+  "capital_city": "Baden-Baden",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_baden",
+  "heraldry": {
+    "blazon": "D'or à la bande de gueules.",
+    "description": "Armes historiques des margraves de Bade (branche de Zähringen), attestées depuis le XIIIe siècle.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#C8102E",
+    "uncertain": true,
+    "note": "Le margraviat est réellement divisé entre plusieurs branches cousines en 1337 ; ce blason est celui de la maison de Bade dans son ensemble."
+  },
+  "titles": [
+    "Margrave de Bade"
+  ],
+  "treasury": 4000,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 55
+  },
+  "description": "Margraviat de Bade sur le Rhin supérieur, autour de Baden-Baden et Pforzheim ; territoires réellement fragmentés entre branches cousines de la maison en 1337, ici simplifiés en une seule faction.",
+  "sources": [
+    "Margraviat de Bade",
+    "Rodolphe Hesso de Bade"
+  ]
+}

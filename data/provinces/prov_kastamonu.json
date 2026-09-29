@@ -1,0 +1,86 @@
+{
+  "id": "prov_kastamonu",
+  "name": {
+    "display": "Kastamonu"
+  },
+  "region": "anatolie",
+  "terrain": "mountains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Gökırmak"
+  ],
+  "resources": [
+    "res_wood",
+    "res_iron",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kastamonu"
+    },
+    "lat": 41.39,
+    "lon": 33.78
+  },
+  "geo": {
+    "capital_lonlat": [
+      33.78,
+      41.39
+    ],
+    "seed_lonlat": [
+      33.6,
+      41.3
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_candar",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 32000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 380,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1000,
+  "description": "Massif boisé du Pont occidental, siège des Candaroğulları (Süleyman Paşa), dont les mines de fer et de cuivre nourrissent l'arsenal de Sinope.",
+  "sources": [
+    "Candar dynasty",
+    "Kastamonu"
+  ]
+}

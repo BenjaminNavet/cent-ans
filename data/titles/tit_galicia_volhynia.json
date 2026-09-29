@@ -1,0 +1,69 @@
+{
+  "id": "tit_galicia_volhynia",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Galicie-Volhynie",
+    "local": "Королівство Русі",
+    "local_language": "ruthène"
+  },
+  "heraldry": {
+    "blazon": "D'azur au lion d'or, armé et lampassé de gueules, couronné d'or.",
+    "description": "Lion d'or des rois de Ruthénie sur azur.",
+    "primary_color": "#1F4FA8",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Lion passant réduit à un lion rampant pour le dessin."
+  },
+  "de_jure_provinces": [
+    "prov_lviv",
+    "prov_halych",
+    "prov_volodymyr",
+    "prov_lutsk"
+  ],
+  "holder_1337": {
+    "faction": "fac_galicia_volhynia",
+    "sources": [
+      "Boleslas-Iouri II de Galicie-Volhynie",
+      "Royaume de Galicie-Volhynie"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_galicia_hold",
+      "title": "Garder la couronne de Ruthénie",
+      "description": "Iouri II doit conserver son royaume.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_galicia_volhynia"
+      }
+    },
+    {
+      "id": "obj_galicia_core",
+      "title": "Tenir Léopol et la Volhynie",
+      "description": "Léopol et Volodymyr.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_lviv",
+          "prov_volodymyr"
+        ]
+      }
+    },
+    {
+      "id": "obj_galicia_volhynia_berestia",
+      "title": "Berestia",
+      "description": "Recouvrer la terre de Brest, passée aux Lituaniens.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_brest"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume de Galicie-Volhynie (Rus') fondé par Daniel de Galicie ; dernier roi : Iouri II (1323-1340).",
+  "sources": [
+    "Boleslas-Iouri II de Galicie-Volhynie",
+    "Royaume de Galicie-Volhynie"
+  ]
+}

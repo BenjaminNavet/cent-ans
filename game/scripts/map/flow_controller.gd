@@ -45,10 +45,15 @@ func setup(campaign_map: Node) -> void:
 	season_report = (load(SEASON_REPORT_SCENE) as PackedScene).instantiate()
 	season_report.name = "SeasonReport"
 	ui.add_child(season_report)
-	# Sous la fenêtre de chronique et le dialogue de bataille (ajoutés plus tôt / plus tard).
-	var chronicle: Node = map.get("chronicle")
-	if chronicle != null and chronicle.get("window") != null:
-		ui.move_child(season_report, (chronicle.get("window") as Node).get_index())
+	# Q6 : juste au-dessus de la zone `MODAL` (diplomatie, Cour, techniques…) et de son voile : la
+	# fin de tour ouvre la diplomatie sur une offre nouvelle dans l'image du rapport, qui doit
+	# rester cliquable par-dessus (même étage `MODAL`, `restack` garde cet ordre). L'ancien
+	# placement sous la fenêtre de chronique prenait son index dans la zone latérale où elle vit
+	# désormais, et mettait le rapport sous le voile et la diplomatie. Les dialogues ajoutés plus
+	# tard (bataille, fin de partie) restent au-dessus.
+	var modal_zone: Control = UiZones.layout().zone_node(UiZones.Zone.MODAL)
+	if modal_zone != null and modal_zone.get_parent() == ui:
+		ui.move_child(season_report, modal_zone.get_index() + 1)
 	season_report.entry_selected.connect(_on_report_entry)
 	# Q5 : le rapport cède la place à tout panneau que le joueur ouvre après lui (il restait
 	# par-dessus la fiche de colonie et la diplomatie, recrutement caché dessous).
@@ -417,7 +422,9 @@ func _on_panels_changed(ui: Node) -> void:
 	# rapport : ils restent dessous ; seuls ceux que le joueur ouvre ensuite le referment.
 	var same_frame := Engine.get_process_frames() - season_report.filled_frame <= 1
 	for panel in stack.visible_panels():
-		if stack.kind_of(panel) == PanelStack.Kind.MODAL or _panels_under_report.has(panel):
+		# Q6 : pause, réglages, sauvegarde (zone `MODAL`, sous le rapport) ferment aussi le rapport
+		# quand le joueur les ouvre après lui, comme tout autre panneau.
+		if panel == season_report or _panels_under_report.has(panel):
 			continue
 		if same_frame:
 			_panels_under_report.append(panel)

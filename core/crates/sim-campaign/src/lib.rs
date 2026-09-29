@@ -58,6 +58,7 @@ pub mod holdings;
 pub mod map_lens;
 pub mod march;
 pub mod medicine;
+pub mod mercenaries;
 pub mod movement;
 pub mod naval;
 pub mod navigation;
@@ -67,6 +68,7 @@ pub mod passage;
 pub mod path_plan;
 pub mod population;
 pub mod posture;
+pub mod preview;
 pub mod ransom;
 pub mod reach;
 pub mod recruit_pool;
@@ -85,6 +87,7 @@ pub mod stance;
 pub mod state;
 pub mod table;
 pub mod trade;
+pub mod traditions;
 pub mod treaty_explain;
 pub mod turn;
 pub mod victory;
@@ -100,7 +103,7 @@ pub use battle_auto::{
     FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
-pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
+pub use buildings::{BuildOption, DemolitionPreview, EffectTotals, EffectValue, ProvinceCity};
 pub use capture::{
     CaptureDecisionView, CaptureEffects, CaptureError, CaptureOptionView, CaptureOutcome,
     CaptureState, PendingCapture,
@@ -127,6 +130,7 @@ pub use encounter::{
 pub use events::{EventKind, GameEvent};
 pub use frontier::GarrisonRole;
 pub use march::{MoveReport, StopReason};
+pub use mercenaries::{MercenaryMarket, MercenaryOption, MercenaryState};
 pub use navigation::{Cell, GridPath};
 pub use orders::{
     MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, RecruitPrice,
@@ -138,7 +142,9 @@ pub use recruit_pool::PoolView;
 pub use replenish::{FactorKind, ReplenishFactor, ReplenishPreview, Territory};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
-pub use save::{CampaignError, FREE_MOVEMENT_STATE_VERSION, SETTLEMENTS_STATE_VERSION};
+pub use save::{
+    CampaignError, FREE_MOVEMENT_STATE_VERSION, SETTLEMENTS_STATE_VERSION, WIDE_MAP_STATE_VERSION,
+};
 pub use skills::LearnSkillError;
 pub use state::{
     Army, ArmyId, ArmyPosition, BattleRequest, CampaignState, CharacterState, Construction,
@@ -148,9 +154,14 @@ pub use state::{
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};
+pub use traditions::{ArmyTraditions, TraditionError, TraditionOption, TraditionView};
 pub use weather::{MapWeather, ProvinceWeather};
 
 #[cfg(test)]
 mod capture_tests;
 #[cfg(test)]
 mod review_tests;
+#[cfg(test)]
+mod rs_c_tests;
+#[cfg(test)]
+mod rs_n_tests;

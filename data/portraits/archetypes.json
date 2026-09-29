@@ -5,35 +5,277 @@
   "archetype_dir": "portraits/archetypes",
   "aged_dir": "portraits/aged",
   "age_bands": [
-    {"id": "child", "label": "Enfant", "max_age": 15, "prompt": "a child of about 8 years old"},
-    {"id": "young", "label": "Jeune", "max_age": 29, "prompt": "a young adult of about 22"},
-    {"id": "adult", "label": "Adulte", "max_age": 49, "prompt": "a mature adult of about 40"},
-    {"id": "old", "label": "Âgé", "prompt": "an elderly person of about 62, greying or white hair, lined face"}
+    {
+      "id": "child",
+      "label": "Enfant",
+      "max_age": 15,
+      "prompt": "a child of about 8 years old"
+    },
+    {
+      "id": "young",
+      "label": "Jeune",
+      "max_age": 29,
+      "prompt": "a young adult of about 22"
+    },
+    {
+      "id": "adult",
+      "label": "Adulte",
+      "max_age": 49,
+      "prompt": "a mature adult of about 40"
+    },
+    {
+      "id": "old",
+      "label": "Âgé",
+      "prompt": "an elderly person of about 62, greying or white hair, lined face"
+    }
   ],
   "cultures": [
     {
       "id": "france",
       "label": "France, Bourgogne et Pays-Bas",
-      "factions": ["fac_france", "fac_burgundy", "fac_brittany", "fac_flanders", "fac_brabant", "fac_hainaut", "fac_guelders", "fac_savoy", "fac_papacy", "fac_rebels"],
+      "factions": [
+        "fac_france",
+        "fac_burgundy",
+        "fac_brittany",
+        "fac_flanders",
+        "fac_brabant",
+        "fac_hainaut",
+        "fac_guelders",
+        "fac_savoy",
+        "fac_papacy",
+        "fac_rebels",
+        "fac_albret",
+        "fac_alencon",
+        "fac_armagnac",
+        "fac_blois",
+        "fac_bourbon",
+        "fac_foix_bearn",
+        "fac_penthievre",
+        "fac_lorraine"
+      ],
       "prompt": "French and Burgundian court fashion: fitted cotehardie, hood (chaperon) with long liripipe, fur-lined mantle, rich wool and silk in muted earth tones"
     },
     {
       "id": "england",
       "label": "Angleterre et Écosse",
-      "factions": ["fac_england", "fac_scotland"],
+      "factions": [
+        "fac_england",
+        "fac_scotland",
+        "fac_kildare",
+        "fac_ormond",
+        "fac_desmond",
+        "fac_lancaster"
+      ],
       "prompt": "English and Scottish fashion: cotehardie with low hip belt, hood with liripipe, heavy wool mantle with fur trim, sober colours"
     },
     {
       "id": "iberia",
       "label": "Ibérie",
-      "factions": ["fac_castile", "fac_aragon", "fac_portugal", "fac_navarre", "fac_granada"],
+      "factions": [
+        "fac_castile",
+        "fac_aragon",
+        "fac_portugal",
+        "fac_navarre",
+        "fac_granada",
+        "fac_majorca",
+        "fac_villena",
+        "fac_lara",
+        "fac_urgell",
+        "fac_pallars",
+        "fac_ribagorca",
+        "fac_luna",
+        "fac_calatrava",
+        "fac_marinids",
+        "fac_hafsids",
+        "fac_makki",
+        "fac_tripoli",
+        "fac_barqa"
+      ],
       "prompt": "Iberian (Castilian and Aragonese) fashion: long saya tunic, pellote over-gown with wide armholes, mantle with Mudejar geometric silk borders"
     },
     {
       "id": "italy_empire",
       "label": "Italie et Empire",
-      "factions": ["fac_empire", "fac_austria", "fac_bohemia", "fac_holstein", "fac_sweden", "fac_swiss", "fac_milan", "fac_verona", "fac_venice", "fac_genoa", "fac_florence", "fac_naples"],
+      "factions": [
+        "fac_empire",
+        "fac_austria",
+        "fac_bohemia",
+        "fac_holstein",
+        "fac_sweden",
+        "fac_swiss",
+        "fac_milan",
+        "fac_verona",
+        "fac_venice",
+        "fac_genoa",
+        "fac_florence",
+        "fac_naples",
+        "fac_mainz",
+        "fac_hesse",
+        "fac_palatinate",
+        "fac_trier",
+        "fac_cologne",
+        "fac_julich",
+        "fac_berg",
+        "fac_cleve",
+        "fac_mark",
+        "fac_brandenburg",
+        "fac_mecklenburg",
+        "fac_meissen",
+        "fac_brunswick",
+        "fac_bremen",
+        "fac_wurttemberg",
+        "fac_baden",
+        "fac_wurzburg",
+        "fac_nuremberg",
+        "fac_bamberg",
+        "fac_tirol",
+        "fac_trent",
+        "fac_liege",
+        "fac_utrecht",
+        "fac_namur",
+        "fac_mantua",
+        "fac_ferrara",
+        "fac_montferrat",
+        "fac_saluzzo",
+        "fac_pisa",
+        "fac_siena",
+        "fac_bologna",
+        "fac_perugia",
+        "fac_urbino",
+        "fac_rimini",
+        "fac_sicily",
+        "fac_taranto",
+        "fac_pavia",
+        "fac_holstein_kiel",
+        "fac_schleswig",
+        "fac_danish_estonia",
+        "fac_teutonic",
+        "fac_livonian_order",
+        "fac_riga_archbishopric",
+        "fac_riga",
+        "fac_dorpat",
+        "fac_osel_wiek",
+        "fac_courland",
+        "fac_pomerania_stettin",
+        "fac_pomerania_wolgast",
+        "fac_poland",
+        "fac_plock",
+        "fac_warsaw",
+        "fac_rawa",
+        "fac_legnica",
+        "fac_glogow",
+        "fac_opole",
+        "fac_swidnica",
+        "fac_hungary",
+        "fac_transylvania",
+        "fac_slavonia",
+        "fac_galicia_volhynia",
+        "fac_lithuania",
+        "fac_kiev",
+        "fac_wallachia",
+        "fac_byzantium",
+        "fac_epirus",
+        "fac_serbia",
+        "fac_bulgaria",
+        "fac_vidin",
+        "fac_bosnia",
+        "fac_ragusa",
+        "fac_durazzo",
+        "fac_athens",
+        "fac_archipelago",
+        "fac_hospitallers",
+        "fac_cyprus",
+        "fac_arborea"
+      ],
       "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
+    },
+    {
+      "id": "ireland",
+      "label": "Irlande et Hébrides gaéliques",
+      "factions": [
+        "fac_tyrone",
+        "fac_thomond",
+        "fac_connacht",
+        "fac_leinster",
+        "fac_isles"
+      ],
+      "prompt": "Gaelic Irish and Hebridean fashion: saffron-dyed linen leine (long tunic), brat wool cloak pinned with a brooch, léine sleeves, bare-legged or simple hose, no continental plate armour"
+    },
+    {
+      "id": "rus",
+      "label": "Rus' (Novgorod, Moscou, Tver, Smolensk)",
+      "factions": [
+        "fac_novgorod",
+        "fac_pskov",
+        "fac_perm",
+        "fac_viatka",
+        "fac_moscow",
+        "fac_tver",
+        "fac_ryazan",
+        "fac_suzdal",
+        "fac_rostov",
+        "fac_yaroslavl",
+        "fac_beloozero",
+        "fac_smolensk",
+        "fac_briansk",
+        "fac_haute_oka",
+        "fac_mordva",
+        "fac_theodoro"
+      ],
+      "prompt": "Rus' princely and boyar fashion: long kaftan or ankle-length tunic with embroidered collar, fur-trimmed caftan and tall fur hat (gorlatnaya shapka), wide belt, soft leather boots, thick beard, Orthodox cross pendant"
+    },
+    {
+      "id": "horde",
+      "label": "Horde d'Or, Bachkirs, Crimée",
+      "factions": [
+        "fac_golden_horde",
+        "fac_bashkir"
+      ],
+      "prompt": "Golden Horde steppe fashion: silk kaftan (del) with wrap closure, felt or fur-trimmed pointed hat, sash belt, composite bow quiver, moustache and thin beard, Turkic-Mongol features, gold jewellery for nobles"
+    },
+    {
+      "id": "anatolie",
+      "label": "Beyliks turcs d'Anatolie",
+      "factions": [
+        "fac_ottoman",
+        "fac_karasi",
+        "fac_saruhan",
+        "fac_aydin",
+        "fac_mentese",
+        "fac_germiyan",
+        "fac_hamid",
+        "fac_teke",
+        "fac_esrefid",
+        "fac_karaman",
+        "fac_eretna",
+        "fac_candar",
+        "fac_dulkadir"
+      ],
+      "prompt": "Anatolian Turkish beylik fashion: long silk kaftan with embroidered collar, wrapped turban or felt cap (kalpak), wide sash belt, soft leather boots, moustache and short beard, no plate armour, decorated composite bow"
+    },
+    {
+      "id": "levant",
+      "label": "Mamelouks, Levant et Mésopotamie",
+      "factions": [
+        "fac_mamluks",
+        "fac_hama",
+        "fac_artuqids",
+        "fac_jalayirids"
+      ],
+      "prompt": "Mamluk and Levantine fashion: long silk robe (qaba) with tiraz armbands, tall conical turban or kalawta cap, sash belt, curved sabre, embroidered gold thread for emirs, sunburnt features, Arabic or Turco-Circassian appearance"
+    },
+    {
+      "id": "caucase",
+      "label": "Trébizonde, Cilicie, Géorgie et Caucase",
+      "factions": [
+        "fac_trebizond",
+        "fac_cilicia",
+        "fac_georgia",
+        "fac_samtskhe",
+        "fac_circassia",
+        "fac_alania"
+      ],
+      "prompt": "Eastern Christian and Caucasian fashion: long brocade tunic with jewelled collar, fur-trimmed cloak, tall hat or crown, tooled belt with dagger, Byzantine-Georgian embroidery, thick beard, Caucasian highlanders in felt cloaks and papakha hats"
     }
   ],
   "default_culture": "france",
@@ -112,19 +354,175 @@
     ]
   },
   "cells": [
-    {"rank": "child", "sexes": ["male", "female"], "bands": ["child"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 3},
-    {"rank": "sovereign", "sexes": ["male", "female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
-    {"rank": "noble", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 4},
-    {"rank": "noble", "sexes": ["female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 3},
-    {"rank": "knight", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 4},
-    {"rank": "prelate", "sexes": ["male"], "bands": ["adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
-    {"rank": "prelate", "sexes": ["female"], "bands": ["adult", "old"], "cultures": ["any"], "faces": 1},
-    {"rank": "burgher", "sexes": ["male"], "bands": ["adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
-    {"rank": "burgher", "sexes": ["female"], "bands": ["adult"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1}
+    {
+      "rank": "child",
+      "sexes": [
+        "male",
+        "female"
+      ],
+      "bands": [
+        "child"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 3
+    },
+    {
+      "rank": "sovereign",
+      "sexes": [
+        "male",
+        "female"
+      ],
+      "bands": [
+        "young",
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 1
+    },
+    {
+      "rank": "noble",
+      "sexes": [
+        "male"
+      ],
+      "bands": [
+        "young",
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 4
+    },
+    {
+      "rank": "noble",
+      "sexes": [
+        "female"
+      ],
+      "bands": [
+        "young",
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 3
+    },
+    {
+      "rank": "knight",
+      "sexes": [
+        "male"
+      ],
+      "bands": [
+        "young",
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 4
+    },
+    {
+      "rank": "prelate",
+      "sexes": [
+        "male"
+      ],
+      "bands": [
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 1
+    },
+    {
+      "rank": "prelate",
+      "sexes": [
+        "female"
+      ],
+      "bands": [
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "any"
+      ],
+      "faces": 1
+    },
+    {
+      "rank": "burgher",
+      "sexes": [
+        "male"
+      ],
+      "bands": [
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 1
+    },
+    {
+      "rank": "burgher",
+      "sexes": [
+        "female"
+      ],
+      "bands": [
+        "adult"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 1
+    }
   ],
   "fallbacks": {
-    "rank": {"sovereign": "noble", "knight": "noble", "prelate": "noble", "burgher": "noble", "noble": "knight"},
-    "band": {"child": "young", "young": "adult", "adult": "old", "old": "adult"}
+    "rank": {
+      "sovereign": "noble",
+      "knight": "noble",
+      "prelate": "noble",
+      "burgher": "noble",
+      "noble": "knight"
+    },
+    "band": {
+      "child": "young",
+      "young": "adult",
+      "adult": "old",
+      "old": "adult"
+    }
   },
   "rank_rules": {
     "data_roles": {
@@ -141,44 +539,671 @@
       "burgher": "burgher"
     },
     "title_keywords": [
-      {"rank": "prelate", "words": ["évêque", "archevêque", "abbé", "abbesse", "cardinal", "pape", "prieur", "prieure", "chanoine"]},
-      {"rank": "burgher", "words": ["bourgeois", "marchand", "prévôt des marchands", "échevin", "doge", "capitaine du peuple"]},
-      {"rank": "sovereign", "words": ["roi ", "reine ", "empereur", "impératrice"]}
+      {
+        "rank": "prelate",
+        "words": [
+          "évêque",
+          "archevêque",
+          "abbé",
+          "abbesse",
+          "cardinal",
+          "pape",
+          "prieur",
+          "prieure",
+          "chanoine"
+        ]
+      },
+      {
+        "rank": "burgher",
+        "words": [
+          "bourgeois",
+          "marchand",
+          "prévôt des marchands",
+          "échevin",
+          "doge",
+          "capitaine du peuple"
+        ]
+      },
+      {
+        "rank": "sovereign",
+        "words": [
+          "roi ",
+          "reine ",
+          "empereur",
+          "impératrice"
+        ]
+      }
     ],
     "ruler_house_rank": "noble",
     "army_rank": "knight",
-    "default_rank": {"male": "knight", "female": "noble"}
+    "default_rank": {
+      "male": "knight",
+      "female": "noble"
+    }
   },
   "aged_variants": [
-    {"character": "chr_edward_iii", "band": "adult"},
-    {"character": "chr_edward_iii", "band": "old"},
-    {"character": "chr_philippe_vi", "band": "old"},
-    {"character": "chr_jean_de_normandie", "band": "adult"},
-    {"character": "chr_charles_v", "band": "adult"},
-    {"character": "chr_edward_of_woodstock", "band": "adult"},
-    {"character": "chr_philippe_le_hardi", "band": "adult"},
-    {"character": "chr_philippe_le_hardi", "band": "old"},
-    {"character": "chr_jean_de_berry", "band": "adult"},
-    {"character": "chr_jean_de_berry", "band": "old"},
-    {"character": "chr_jean_de_gand", "band": "adult"},
-    {"character": "chr_jean_de_gand", "band": "old"},
-    {"character": "chr_charles_vi", "band": "adult"},
-    {"character": "chr_louis_d_anjou", "band": "adult"},
-    {"character": "chr_philippa_of_hainault", "band": "adult"},
-    {"character": "chr_charles_ii_de_navarre", "band": "adult"},
-    {"character": "chr_pedro_iv", "band": "adult"},
-    {"character": "chr_charles_de_luxembourg", "band": "adult"},
-    {"character": "chr_david_ii", "band": "adult"},
-    {"character": "chr_robert_stewart", "band": "old"},
-    {"character": "chr_gautier_de_mauny", "band": "adult"},
-    {"character": "chr_henry_of_grosmont", "band": "adult"},
-    {"character": "chr_louis_de_male", "band": "adult"},
-    {"character": "chr_jeanne_de_penthievre", "band": "adult"},
-    {"character": "chr_petrarque", "band": "old"}
+    {
+      "character": "chr_edward_iii",
+      "band": "adult"
+    },
+    {
+      "character": "chr_edward_iii",
+      "band": "old"
+    },
+    {
+      "character": "chr_philippe_vi",
+      "band": "old"
+    },
+    {
+      "character": "chr_jean_de_normandie",
+      "band": "adult"
+    },
+    {
+      "character": "chr_charles_v",
+      "band": "adult"
+    },
+    {
+      "character": "chr_edward_of_woodstock",
+      "band": "adult"
+    },
+    {
+      "character": "chr_philippe_le_hardi",
+      "band": "adult"
+    },
+    {
+      "character": "chr_philippe_le_hardi",
+      "band": "old"
+    },
+    {
+      "character": "chr_jean_de_berry",
+      "band": "adult"
+    },
+    {
+      "character": "chr_jean_de_berry",
+      "band": "old"
+    },
+    {
+      "character": "chr_jean_de_gand",
+      "band": "adult"
+    },
+    {
+      "character": "chr_jean_de_gand",
+      "band": "old"
+    },
+    {
+      "character": "chr_charles_vi",
+      "band": "adult"
+    },
+    {
+      "character": "chr_louis_d_anjou",
+      "band": "adult"
+    },
+    {
+      "character": "chr_philippa_of_hainault",
+      "band": "adult"
+    },
+    {
+      "character": "chr_charles_ii_de_navarre",
+      "band": "adult"
+    },
+    {
+      "character": "chr_pedro_iv",
+      "band": "adult"
+    },
+    {
+      "character": "chr_charles_de_luxembourg",
+      "band": "adult"
+    },
+    {
+      "character": "chr_david_ii",
+      "band": "adult"
+    },
+    {
+      "character": "chr_robert_stewart",
+      "band": "old"
+    },
+    {
+      "character": "chr_gautier_de_mauny",
+      "band": "adult"
+    },
+    {
+      "character": "chr_henry_of_grosmont",
+      "band": "adult"
+    },
+    {
+      "character": "chr_louis_de_male",
+      "band": "adult"
+    },
+    {
+      "character": "chr_jeanne_de_penthievre",
+      "band": "adult"
+    },
+    {
+      "character": "chr_petrarque",
+      "band": "old"
+    },
+    {
+      "character": "chr_adolf_ii_von_der_mark",
+      "band": "old"
+    },
+    {
+      "character": "chr_adolf_vii_von_berg",
+      "band": "old"
+    },
+    {
+      "character": "chr_adolphe_de_la_marck",
+      "band": "old"
+    },
+    {
+      "character": "chr_albert_ii_de_mecklembourg",
+      "band": "old"
+    },
+    {
+      "character": "chr_amy_macruari",
+      "band": "old"
+    },
+    {
+      "character": "chr_arnau_roger_ii_de_pallars",
+      "band": "old"
+    },
+    {
+      "character": "chr_burchard_grelle",
+      "band": "old"
+    },
+    {
+      "character": "chr_catherine_de_valois_courtenay",
+      "band": "old"
+    },
+    {
+      "character": "chr_dietrich_ix_von_kleve",
+      "band": "old"
+    },
+    {
+      "character": "chr_donnchadh_mac_murchada",
+      "band": "old"
+    },
+    {
+      "character": "chr_ferrantino_malatesta",
+      "band": "old"
+    },
+    {
+      "character": "chr_frederic_ii_de_misnie",
+      "band": "old"
+    },
+    {
+      "character": "chr_gaston_iii_de_foix_bearn",
+      "band": "old"
+    },
+    {
+      "character": "chr_guillaume_i_de_namur",
+      "band": "old"
+    },
+    {
+      "character": "chr_guy_i_de_chatillon",
+      "band": "old"
+    },
+    {
+      "character": "chr_heinrich_ii_de_hesse",
+      "band": "old"
+    },
+    {
+      "character": "chr_henry_o_neill",
+      "band": "old"
+    },
+    {
+      "character": "chr_infant_pere_de_ribagorca",
+      "band": "old"
+    },
+    {
+      "character": "chr_james_butler_i_d_ormond",
+      "band": "old"
+    },
+    {
+      "character": "chr_james_butler_ii_d_ormond",
+      "band": "old"
+    },
+    {
+      "character": "chr_jaume_i_durgell",
+      "band": "old"
+    },
+    {
+      "character": "chr_jean_henri_de_luxembourg",
+      "band": "old"
+    },
+    {
+      "character": "chr_john_of_islay",
+      "band": "old"
+    },
+    {
+      "character": "chr_juan_nunez_iii_de_lara",
+      "band": "old"
+    },
+    {
+      "character": "chr_leopold_d_egloffstein",
+      "band": "old"
+    },
+    {
+      "character": "chr_lope_de_luna",
+      "band": "old"
+    },
+    {
+      "character": "chr_louis_v_de_baviere",
+      "band": "old"
+    },
+    {
+      "character": "chr_marguerite_de_tyrol",
+      "band": "old"
+    },
+    {
+      "character": "chr_marguerite_de_valois",
+      "band": "old"
+    },
+    {
+      "character": "chr_maurice_fitzgerald_i_de_desmond",
+      "band": "old"
+    },
+    {
+      "character": "chr_maurice_fitzgerald_ii_de_desmond",
+      "band": "old"
+    },
+    {
+      "character": "chr_maurice_fitzgerald_iv_de_kildare",
+      "band": "old"
+    },
+    {
+      "character": "chr_nolfo_da_montefeltro",
+      "band": "old"
+    },
+    {
+      "character": "chr_obizzo_iii_d_este",
+      "band": "old"
+    },
+    {
+      "character": "chr_otto_le_doux",
+      "band": "old"
+    },
+    {
+      "character": "chr_otto_von_wolfskeel",
+      "band": "old"
+    },
+    {
+      "character": "chr_philippe_iii_de_namur",
+      "band": "old"
+    },
+    {
+      "character": "chr_pierre_i_de_bourbon",
+      "band": "old"
+    },
+    {
+      "character": "chr_pietro_ii_di_sicilia",
+      "band": "old"
+    },
+    {
+      "character": "chr_ramon_berenguer_de_prades",
+      "band": "old"
+    },
+    {
+      "character": "chr_raoul_de_lorraine",
+      "band": "old"
+    },
+    {
+      "character": "chr_robert_de_tarente",
+      "band": "old"
+    },
+    {
+      "character": "chr_rodolphe_hesso_de_bade",
+      "band": "old"
+    },
+    {
+      "character": "chr_rudolf_ii_du_palatinat",
+      "band": "old"
+    },
+    {
+      "character": "chr_theodore_i_paleologue",
+      "band": "old"
+    },
+    {
+      "character": "chr_toirdelbach_o_conchobair",
+      "band": "old"
+    },
+    {
+      "character": "chr_ulrich_iv_de_wurtemberg",
+      "band": "old"
+    },
+    {
+      "character": "chr_walram_de_juliers",
+      "band": "old"
+    },
+    {
+      "character": "chr_wilhelm_v_von_julich",
+      "band": "old"
+    },
+    {
+      "character": "chr_aldona_de_lituanie",
+      "band": "old"
+    },
+    {
+      "character": "chr_alexandre_mikhailovitch",
+      "band": "old"
+    },
+    {
+      "character": "chr_algirdas",
+      "band": "old"
+    },
+    {
+      "character": "chr_barnim_iii_de_pomeranie",
+      "band": "old"
+    },
+    {
+      "character": "chr_barnim_iv_de_pomeranie",
+      "band": "old"
+    },
+    {
+      "character": "chr_bogislaw_v_de_pomeranie",
+      "band": "old"
+    },
+    {
+      "character": "chr_boleslas_ii_d_opole",
+      "band": "old"
+    },
+    {
+      "character": "chr_boleslas_iii_de_legnica",
+      "band": "old"
+    },
+    {
+      "character": "chr_boleslas_iii_de_plock",
+      "band": "old"
+    },
+    {
+      "character": "chr_boleslas_iouri_ii",
+      "band": "old"
+    },
+    {
+      "character": "chr_bolko_ii_de_swidnica",
+      "band": "old"
+    },
+    {
+      "character": "chr_casimir_iii_de_pologne",
+      "band": "old"
+    },
+    {
+      "character": "chr_charles_i_robert_de_hongrie",
+      "band": "old"
+    },
+    {
+      "character": "chr_dietrich_von_altenburg",
+      "band": "old"
+    },
+    {
+      "character": "chr_dmitri_alexandrovitch",
+      "band": "old"
+    },
+    {
+      "character": "chr_elisabeth_de_pologne",
+      "band": "old"
+    },
+    {
+      "character": "chr_engelbert_von_dolen",
+      "band": "old"
+    },
+    {
+      "character": "chr_fiodor_danilovitch",
+      "band": "old"
+    },
+    {
+      "character": "chr_fiodor_de_kiev",
+      "band": "old"
+    },
+    {
+      "character": "chr_henri_iv_de_zagan",
+      "band": "old"
+    },
+    {
+      "character": "chr_ivan_alexandrovitch",
+      "band": "old"
+    },
+    {
+      "character": "chr_ivan_kalita",
+      "band": "old"
+    },
+    {
+      "character": "chr_ivan_korotopol",
+      "band": "old"
+    },
+    {
+      "character": "chr_jaunutis",
+      "band": "old"
+    },
+    {
+      "character": "chr_johan_iii_de_holstein_kiel",
+      "band": "old"
+    },
+    {
+      "character": "chr_johann_ii_de_courlande",
+      "band": "old"
+    },
+    {
+      "character": "chr_kestutis",
+      "band": "old"
+    },
+    {
+      "character": "chr_konstantin_mikhailovitch",
+      "band": "old"
+    },
+    {
+      "character": "chr_konstantin_vassilievitch",
+      "band": "old"
+    },
+    {
+      "character": "chr_louis_ier_de_hongrie",
+      "band": "old"
+    },
+    {
+      "character": "chr_mikcs_ban",
+      "band": "old"
+    },
+    {
+      "character": "chr_nicolae_alexandru",
+      "band": "old"
+    },
+    {
+      "character": "chr_simeon_ivanovitch",
+      "band": "old"
+    },
+    {
+      "character": "chr_thomas_szecsenyi",
+      "band": "old"
+    },
+    {
+      "character": "chr_tini_beg",
+      "band": "old"
+    },
+    {
+      "character": "chr_valdemar_v_de_slesvig",
+      "band": "old"
+    },
+    {
+      "character": "chr_vassili_davidovitch",
+      "band": "old"
+    },
+    {
+      "character": "chr_abu_bakr_ii_hafside",
+      "band": "old"
+    },
+    {
+      "character": "chr_abu_inan_faris",
+      "band": "old"
+    },
+    {
+      "character": "chr_abu_l_hasan_ali",
+      "band": "old"
+    },
+    {
+      "character": "chr_agnes_de_perigord",
+      "band": "old"
+    },
+    {
+      "character": "chr_al_afdal_muhammad",
+      "band": "old"
+    },
+    {
+      "character": "chr_alix_d_ibelin",
+      "band": "old"
+    },
+    {
+      "character": "chr_andronikos_iii",
+      "band": "old"
+    },
+    {
+      "character": "chr_anna_of_savoy",
+      "band": "old"
+    },
+    {
+      "character": "chr_anna_palaiologina_epirus",
+      "band": "old"
+    },
+    {
+      "character": "chr_anuk",
+      "band": "old"
+    },
+    {
+      "character": "chr_basile_trebizonde",
+      "band": "old"
+    },
+    {
+      "character": "chr_beka_i",
+      "band": "old"
+    },
+    {
+      "character": "chr_belaur",
+      "band": "old"
+    },
+    {
+      "character": "chr_charles_de_durazzo",
+      "band": "old"
+    },
+    {
+      "character": "chr_eretna",
+      "band": "old"
+    },
+    {
+      "character": "chr_guillaume_ii_d_athenes",
+      "band": "old"
+    },
+    {
+      "character": "chr_hasan_buzurg",
+      "band": "old"
+    },
+    {
+      "character": "chr_helena_of_bulgaria",
+      "band": "old"
+    },
+    {
+      "character": "chr_hugues_iv_de_chypre",
+      "band": "old"
+    },
+    {
+      "character": "chr_ibrahim_karaman",
+      "band": "old"
+    },
+    {
+      "character": "chr_ioannes_kantakouzenos",
+      "band": "old"
+    },
+    {
+      "character": "chr_ioannes_v",
+      "band": "old"
+    },
+    {
+      "character": "chr_ivan_alexander",
+      "band": "old"
+    },
+    {
+      "character": "chr_karaca_bey",
+      "band": "old"
+    },
+    {
+      "character": "chr_leon_iv",
+      "band": "old"
+    },
+    {
+      "character": "chr_mariano_iv_d_arborea",
+      "band": "old"
+    },
+    {
+      "character": "chr_mehmed_esref",
+      "band": "old"
+    },
+    {
+      "character": "chr_mihail_asen_iv",
+      "band": "old"
+    },
+    {
+      "character": "chr_muhammad_ibn_thabit",
+      "band": "old"
+    },
+    {
+      "character": "chr_nicola_lanza",
+      "band": "old"
+    },
+    {
+      "character": "chr_nikephoros_ii_orsini",
+      "band": "old"
+    },
+    {
+      "character": "chr_orhan_mentese",
+      "band": "old"
+    },
+    {
+      "character": "chr_pierre_i_de_chypre",
+      "band": "old"
+    },
+    {
+      "character": "chr_pietro_iii_d_arborea",
+      "band": "old"
+    },
+    {
+      "character": "chr_salih_artuqid",
+      "band": "old"
+    },
+    {
+      "character": "chr_saruhan_bey",
+      "band": "old"
+    },
+    {
+      "character": "chr_stefan_dusan",
+      "band": "old"
+    },
+    {
+      "character": "chr_stefan_uros_v",
+      "band": "old"
+    },
+    {
+      "character": "chr_stjepan_ii_kotromanic",
+      "band": "old"
+    },
+    {
+      "character": "chr_suleyman_pasha",
+      "band": "old"
+    },
+    {
+      "character": "chr_theodora_basarab",
+      "band": "old"
+    },
+    {
+      "character": "chr_umur_bey",
+      "band": "old"
+    }
   ],
   "marks": {
-    "sick_traits": ["trait_sickly"],
-    "wound_traits": ["trait_wounded", "trait_maimed", "trait_one_eyed"],
+    "sick_traits": [
+      "trait_sickly"
+    ],
+    "wound_traits": [
+      "trait_wounded",
+      "trait_maimed",
+      "trait_one_eyed"
+    ],
     "mourning_years": 1
   }
 }

@@ -1,0 +1,90 @@
+{
+  "id": "prov_rostov",
+  "name": {
+    "display": "Rostov",
+    "local": "Ростов",
+    "local_language": "russe"
+  },
+  "region": "rus_centre",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Nero (lac)"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Rostov",
+      "local": "Ростов",
+      "local_language": "russe"
+    },
+    "lat": 57.19,
+    "lon": 39.41
+  },
+  "geo": {
+    "capital_lonlat": [
+      39.41,
+      57.19
+    ],
+    "seed_lonlat": [
+      39.5,
+      57.25
+    ],
+    "voronoi_weight": 0.7
+  },
+  "owner": "fac_rostov",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 57850,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 3900,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1950,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1300,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1300,
+  "description": "Rostov le Grand, plus ancien centre de la Rus' du Nord-Est et siège d'un évêché ; les princes de Rostov, divisés en deux moitiés, gravitent dans l'orbite de Moscou.",
+  "sources": [
+    "Principauté de Rostov",
+    "Rostov"
+  ]
+}

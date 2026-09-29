@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_novgorod",
+    "province": "prov_novgorod",
+    "kind": "city",
+    "name": {
+      "display": "Novgorod",
+      "local": "Великий Новгород",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      31.275,
+      58.522
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_fair",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Grande cité marchande, siège du vétché, de l'archevêque et du kremlin (détinets).",
+    "sources": [
+      "Novgorod"
+    ]
+  },
+  {
+    "id": "set_staraia_russa",
+    "province": "prov_novgorod",
+    "kind": "town",
+    "name": {
+      "display": "Staraïa Roussa",
+      "local": "Старая Русса",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      31.358,
+      57.992
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville des salines du lac Ilmen, qui fournissent le sel de Novgorod.",
+    "sources": [
+      "Staraïa Roussa"
+    ]
+  },
+  {
+    "id": "set_iouriev",
+    "province": "prov_novgorod",
+    "kind": "abbey",
+    "name": {
+      "display": "Monastère Saint-Georges (Iouriev)",
+      "local": "Юрьев монастырь",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      31.305,
+      58.483
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Grand monastère de Novgorod, sur la rive du Volkhov près du lac Ilmen.",
+    "sources": [
+      "Monastère Iouriev"
+    ]
+  }
+]

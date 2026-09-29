@@ -1,0 +1,93 @@
+{
+  "name": {
+    "display": "Kildare",
+    "local": "Cill Dara",
+    "local_language": "irlandais moyen"
+  },
+  "region": "irlande",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Liffey",
+    "Barrow"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kildare",
+      "local": "Cill Dara",
+      "local_language": "irlandais moyen"
+    },
+    "lat": 53.1589,
+    "lon": -6.9106
+  },
+  "geo": {
+    "capital_lonlat": [
+      -6.9106,
+      53.1589
+    ],
+    "seed_lonlat": [
+      -6.85,
+      53.15
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_kildare",
+  "culture": "cul_english",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1200,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 500,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Pale méridional, comté anglo-irlandais des FitzGerald ; population estimée par comparaison avec Dublin voisin."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2200,
+  "description": "Comté de Kildare, fief des FitzGerald, comtes de Kildare ; château de Maynooth, chef-lieu des terres du comte.",
+  "sources": [
+    "Maurice FitzGerald, 4e comte de Kildare",
+    "Comté de Kildare",
+    "Château de Maynooth"
+  ],
+  "id": "prov_kildare"
+}

@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_mardin",
+    "province": "prov_mardin",
+    "kind": "city",
+    "name": {
+      "display": "Mardin",
+      "local": "ماردين",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      40.74,
+      37.31
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse en nid d'aigle, capitale des Artuqides.",
+    "sources": [
+      "Artuqids"
+    ]
+  },
+  {
+    "id": "set_nusaybin",
+    "province": "prov_mardin",
+    "kind": "town",
+    "name": {
+      "display": "Nisibe (Nusaybin)",
+      "local": "نصيبين",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      41.22,
+      37.07
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne cité syriaque de la frontière.",
+    "sources": [
+      "Artuqids"
+    ]
+  },
+  {
+    "id": "set_dunaysir",
+    "province": "prov_mardin",
+    "kind": "village",
+    "name": {
+      "display": "Dunaysir (Kızıltepe)",
+      "local": "دنيسر",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      40.58,
+      37.19
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la plaine.",
+    "sources": [
+      "Artuqids"
+    ]
+  }
+]

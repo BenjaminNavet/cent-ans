@@ -1,0 +1,45 @@
+{
+  "id": "chr_eretna",
+  "name": {
+    "display": "Eretna"
+  },
+  "sex": "male",
+  "house": "Eretnides",
+  "faction": "fac_eretna",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1352",
+    "place": "Kayseri"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Gouverneur d'Anatolie",
+      "from": {
+        "value": "1327"
+      },
+      "note": "Nommé par les Ilkhans, autonome dès 1335."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_ambitious"
+  ],
+  "piety": 45,
+  "starting_location": "prov_sivas",
+  "status": "at_court",
+  "description": "Ouïghour ou Turc au service des Ilkhans ; il fonde un beylik autonome (naissance incertaine).",
+  "sources": [
+    "Eretna"
+  ]
+}

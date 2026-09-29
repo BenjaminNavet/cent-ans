@@ -1,0 +1,50 @@
+{
+  "id": "tit_pomerania_stettin",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Poméranie-Stettin",
+    "local": "Herzogtum Pommern-Stettin",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent au griffon de gueules, à la bordure de sable.",
+    "description": "Le griffon rouge des ducs de Poméranie, sur argent ; bordure de sable ajoutée en jeu pour distinguer la ligne de Stettin.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Brisure de jeu, non attestée (le griffon nu est l'écu du duché)."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_pomerania_stettin"
+  ],
+  "holder_1337": {
+    "faction": "fac_pomerania_stettin",
+    "sources": [
+      "Duché de Poméranie-Stettin"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_stettin_hold",
+      "title": "Le duché des Griffons",
+      "description": "Conserver Stettin.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_pomerania_stettin"
+      }
+    },
+    {
+      "id": "obj_stettin_indep",
+      "title": "Libre du Brandebourg",
+      "description": "Rester indépendant du margrave.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Duché des Griffons à Stettin ; fief revendiqué par le Brandebourg, immédiat de l'Empire dès 1338.",
+  "sources": [
+    "Duché de Poméranie-Stettin"
+  ]
+}

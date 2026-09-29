@@ -1,0 +1,90 @@
+{
+  "id": "prov_bachkirie",
+  "name": {
+    "display": "Bachkirie",
+    "local": "Башкортостан",
+    "local_language": "bachkir"
+  },
+  "region": "horde",
+  "terrain": "hills",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Belaïa",
+    "Oufa",
+    "Iaïk"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Oufa (site)",
+      "local": "Өфө",
+      "local_language": "bachkir"
+    },
+    "lat": 54.73,
+    "lon": 56.03
+  },
+  "geo": {
+    "capital_lonlat": [
+      56.03,
+      54.73
+    ],
+    "seed_lonlat": [
+      56.6,
+      54.4
+    ],
+    "voronoi_weight": 2.5
+  },
+  "owner": "fac_bashkir",
+  "culture": "cul_bashkir",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 42750,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 900,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 450,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_muster_field"
+  ],
+  "fortification_level": 0,
+  "base_supply": 900,
+  "description": "Tribus bachkires nomades (Bourdjan, Kipchak, Ioumran, Tabyn, Katai) de l'Oural méridional, vassales de la Horde d'Or ; le nom d'Oufa ne désigne ici qu'un site (la ville n'est fondée qu'en 1574).",
+  "sources": [
+    "Bachkirs",
+    "Bachkirie"
+  ]
+}

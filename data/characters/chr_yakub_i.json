@@ -1,0 +1,46 @@
+{
+  "id": "chr_yakub_i",
+  "name": {
+    "display": "Yakub Ier de Germiyan",
+    "local": "Yakub Bey",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Germiyanoğulları",
+  "faction": "fac_germiyan",
+  "role": "ruler",
+  "birth": {
+    "value": "1270",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1340"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Germiyan",
+      "from": {
+        "value": "1300"
+      },
+      "note": "Règne jusqu'en 1340."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_stern",
+    "trait_cunning"
+  ],
+  "piety": 50,
+  "starting_location": "prov_kutahya",
+  "status": "at_court",
+  "description": "Bey de Germiyan à son apogée ; date de naissance approximative.",
+  "sources": [
+    "Germiyan"
+  ]
+}

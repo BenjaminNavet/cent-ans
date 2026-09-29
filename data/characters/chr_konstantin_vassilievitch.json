@@ -1,0 +1,46 @@
+{
+  "id": "chr_konstantin_vassilievitch",
+  "name": {
+    "display": "Constantin Vassilievitch de Souzdal",
+    "local": "Константин Васильевич",
+    "local_language": "vieux russe"
+  },
+  "sex": "male",
+  "house": "Souzdal",
+  "faction": "fac_suzdal",
+  "role": "ruler",
+  "birth": {
+    "value": "1306",
+    "uncertain": true,
+    "note": "Dates approximatives."
+  },
+  "death": {
+    "value": "1355",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Souzdal",
+      "from": {
+        "value": "1331"
+      },
+      "note": "Grand-prince de Souzdal-Nijni Novgorod (v. 1341-1355) ; dates approximatives."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious"
+  ],
+  "piety": 60,
+  "starting_location": "prov_suzdal",
+  "status": "at_court",
+  "description": "Prince de Souzdal qui obtiendra Nijni Novgorod (v. 1341) et disputera le grand-principat à Moscou.",
+  "sources": [
+    "Konstantin Vassilievitch de Souzdal"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "id": "fac_taranto",
+  "name": {
+    "display": "Principauté de Tarente",
+    "local": "Principato di Taranto",
+    "local_language": "napolitain"
+  },
+  "short_name": "Tarente",
+  "adjective": "tarentin",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_taranto",
+  "capital_city": "Tarente",
+  "religion": "rel_catholic",
+  "culture": "cul_neapolitan",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_taranto",
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, au lambel d'argent.",
+    "description": "Armes d'Anjou-Sicile brisées d'un lambel d'argent, à la manière des branches cadettes angevines.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Prince de Tarente"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_universities"
+  ],
+  "relations": [
+    {
+      "faction": "fac_naples",
+      "status": "vassal",
+      "note": "Apanage angevin détaché du royaume de Naples pour les cadets de la maison."
+    },
+    {
+      "faction": "fac_papacy",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "truce",
+      "note": "Hostilité latente en Morée : Byzance grignote l'Achaïe."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 55,
+    "trade": 50,
+    "piety": 50
+  },
+  "description": "Principauté angevine des Pouilles, apanage des cadets de la maison d'Anjou-Naples. Le jeune Robert de Tarente, 11 ans, gouverne sous la régence de sa mère Catherine de Valois-Courtenay, impératrice titulaire de Constantinople, prétendante à la principauté d'Achaïe.",
+  "sources": [
+    "Principauté de Tarente",
+    "Catherine de Valois-Courtenay"
+  ],
+  "ruler": "chr_robert_de_tarente",
+  "suzerain": "fac_naples"
+}

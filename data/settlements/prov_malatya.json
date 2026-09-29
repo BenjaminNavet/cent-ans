@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_malatya",
+    "province": "prov_malatya",
+    "kind": "city",
+    "name": {
+      "display": "Malatya (Malatiya)",
+      "local": "ملطية",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      38.31,
+      38.35
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Garnison mamelouke face aux Turkmènes.",
+    "sources": [
+      "Malatya"
+    ]
+  },
+  {
+    "id": "set_hisn_mansur",
+    "province": "prov_malatya",
+    "kind": "castle",
+    "name": {
+      "display": "Hisn Mansur (Adıyaman)",
+      "local": "حصن منصور",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      38.28,
+      37.76
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de l'Euphrate.",
+    "sources": [
+      "Malatya"
+    ]
+  },
+  {
+    "id": "set_darende",
+    "province": "prov_malatya",
+    "kind": "village",
+    "name": {
+      "display": "Darende",
+      "local": "دارندة",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      37.5,
+      38.55
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la route de Sivas.",
+    "sources": [
+      "Malatya"
+    ]
+  }
+]

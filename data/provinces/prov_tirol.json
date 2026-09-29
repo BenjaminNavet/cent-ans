@@ -1,7 +1,7 @@
 {
   "id": "prov_tirol",
   "name": {
-    "display": "Tyrol et Trente",
+    "display": "Tyrol",
     "local": "Tirol",
     "local_language": "moyen haut-allemand"
   },
@@ -11,7 +11,6 @@
   "neighbors": [],
   "rivers": [
     "Inn",
-    "Adige",
     "Eisack"
   ],
   "coastal": false,
@@ -35,41 +34,41 @@
       47.2692
     ],
     "seed_lonlat": [
-      11.2,
-      46.9
+      11.3,
+      47.1
     ],
-    "voronoi_weight": 1.2
+    "voronoi_weight": 0.8
   },
-  "owner": "fac_empire",
+  "owner": "fac_tirol",
   "culture": "cul_german",
   "religion": "rel_catholic",
   "population": {
     "uncertain": true,
-    "note": "Bolzano et Trente comptent chacune environ 5 000 habitants.",
+    "note": "Bolzano compte environ 5 000 habitants. Province réduite après détachement de Trente (prov_trent), lot FE4b. Capitale conservée à Innsbruck, bien que Merano (Meran) ait été la résidence historique des comtes jusqu'au milieu du XIVe siècle.",
     "classes": {
       "peasants": {
-        "count": 194921,
+        "count": 149921,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 17600,
+        "count": 11600,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 5500,
+        "count": 3500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 1979,
+        "count": 1579,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -85,11 +84,11 @@
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 4000,
-  "description": "Comté de Tyrol tenu par Marguerite Maultasch et Jean-Henri de Luxembourg (répudié en 1341) ; évêchés de Brixen et de Trente. Col du Brenner, sel de Hall, argent de Schwaz.",
+  "base_supply": 3000,
+  "description": "Comté de Tyrol, tenu par Marguerite Maultasch, mariée depuis 1330 à Jean-Henri de Luxembourg, frère cadet du futur empereur Charles IV et fils de Jean de Bohême (répudié en 1341). Évêché de Brixen sous influence comtale. Col du Brenner, sel de Hall, argent de Schwaz.",
   "sources": [
     "Comté de Tyrol",
     "Marguerite de Tyrol",
-    "Principauté épiscopale de Trente"
+    "Jean-Henri de Luxembourg"
   ]
 }

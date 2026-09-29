@@ -1,0 +1,93 @@
+{
+  "id": "prov_slavonia_west",
+  "name": {
+    "display": "Slavonie occidentale",
+    "local": "Zagorje i Zagreb",
+    "local_language": "croate"
+  },
+  "region": "croatie",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Save",
+    "Drave",
+    "Mur"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Zagreb",
+      "local": "Zagreb",
+      "local_language": "croate"
+    },
+    "lat": 45.8131,
+    "lon": 15.9775
+  },
+  "geo": {
+    "capital_lonlat": [
+      15.9775,
+      45.8131
+    ],
+    "seed_lonlat": [
+      16.4,
+      45.95
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_slavonia",
+  "culture": "cul_croatian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Zagreb (Gradec et Kaptol) ; hauteurs viticoles du Zagorje.",
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2310,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3150,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "Slavonie de l'ouest autour de Zagreb (Kaptol, ville épiscopale, et Gradec, ville royale libre depuis 1242) ; siège du ban de Slavonie.",
+  "sources": [
+    "Zagreb",
+    "Ban de Slavonie",
+    "Slavonie"
+  ]
+}

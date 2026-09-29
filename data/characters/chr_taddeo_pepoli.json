@@ -1,0 +1,33 @@
+{
+  "id": "chr_taddeo_pepoli",
+  "name": {
+    "display": "Taddeo Pepoli",
+    "local": "Taddeo Pepoli",
+    "local_language": "italien"
+  },
+  "sex": "male",
+  "house": "Pepoli",
+  "faction": "fac_bologna",
+  "role": "noble",
+  "birth": {
+    "value": "1285"
+  },
+  "historical": true,
+  "skills": {
+    "command": 2,
+    "governance": 8,
+    "court": 6
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_pious"
+  ],
+  "piety": 50,
+  "starting_location": "prov_bologna",
+  "status": "at_court",
+  "description": "Juriste, docteur en droit et fils du banquier Romeo Pepoli ; s'impose depuis 1334 comme arbitre des factions bolonaises et s'emparera formellement du pouvoir le 28 août 1337.",
+  "sources": [
+    "Taddeo Pepoli",
+    "Bologne"
+  ]
+}

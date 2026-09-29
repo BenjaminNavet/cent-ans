@@ -25,6 +25,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use data_model::{
     CharacterId, FactionId, GameData, NegotiationRules, ProvinceId, SettlementId, SettlementKind,
+    TitleId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -45,6 +46,8 @@ pub const COUNTER_TRIBUTE_SEASONS: u32 = 8;
 pub const MAX_TRIBUTE_SEASONS: u32 = 40;
 /// Reason of the modifier left by a war declared on a hostage holder.
 pub const HOSTAGE_BETRAYAL_REASON: &str = "Otages abandonnés : parole trahie";
+/// Opinion reason of a signed treaty (capped motive `treaty`, RS-C).
+pub const TREATY_REASON: &str = "Traité signé";
 
 // =========================================================================
 // Types
@@ -124,6 +127,13 @@ pub enum Article {
         giver: Party,
         character: CharacterId,
     },
+    /// FE (F3, spec § 4.6): `giver` gives up a feudal title it holds; the
+    /// other party usurps it, or grants a lesser title to a direct vassal
+    /// (`feudal::conquer_title`).
+    DemandTitle {
+        giver: Party,
+        title: TitleId,
+    },
 }
 
 impl Article {
@@ -137,7 +147,8 @@ impl Article {
             | Article::CedeSettlement { giver, .. }
             | Article::Vassalage { giver }
             | Article::ReleaseCaptive { giver, .. }
-            | Article::Hostage { giver, .. } => Some(*giver),
+            | Article::Hostage { giver, .. }
+            | Article::DemandTitle { giver, .. } => Some(*giver),
             _ => None,
         }
     }
@@ -163,6 +174,7 @@ impl Article {
             Article::Vassalage { .. } => "vassalage",
             Article::ReleaseCaptive { .. } => "release_captive",
             Article::Hostage { .. } => "hostage",
+            Article::DemandTitle { .. } => "demand_title",
         }
     }
 }
@@ -447,6 +459,11 @@ pub fn check_treaty(
                 if state.is_allied(proposer, recipient) {
                     return Err(DiplomacyError::AlreadyAllied);
                 }
+                if crate::feudal::direct_tie(state, data, proposer, recipient) {
+                    return Err(DiplomacyError::Refused(
+                        crate::diplomacy::FEUDAL_TIE_ALLIANCE.to_owned(),
+                    ));
+                }
                 if at_war && !ends_war {
                     return Err(DiplomacyError::AlreadyAtWar);
                 }
@@ -525,6 +542,27 @@ pub fn check_treaty(
                 if ceded >= owned {
                     return Err(DiplomacyError::Refused(
                         "on ne cède pas sa dernière province".to_owned(),
+                    ));
+                }
+            }
+            Article::DemandTitle { title, .. } => {
+                let giver = giver.expect("giver");
+                if crate::feudal::holder_of(state, title) != Some(giver) {
+                    return Err(DiplomacyError::Refused(format!(
+                        "{} ne détient pas ce titre",
+                        faction_name(data, giver)
+                    )));
+                }
+                let held = crate::feudal::titles_of(state, giver).len();
+                let demanded = articles
+                    .iter()
+                    .filter(|a| {
+                        matches!(a, Article::DemandTitle { .. }) && a.giver() == article.giver()
+                    })
+                    .count();
+                if demanded >= held {
+                    return Err(DiplomacyError::Refused(
+                        "on ne cède pas son dernier titre".to_owned(),
                     ));
                 }
             }
@@ -954,6 +992,34 @@ fn article_value(
                 }
             }
         }
+        Article::DemandTitle { title, .. } => {
+            // The title's own provinces held by the giver, plus its rank.
+            let giver_id = if gives { recipient } else { proposer };
+            let capital = &state.factions[giver_id].capital;
+            let provinces: i32 = data
+                .titles
+                .get(title)
+                .map(|t| {
+                    t.de_jure_provinces
+                        .iter()
+                        .filter(|p| state.province_owner(p) == Some(giver_id))
+                        .map(|p| {
+                            if p == capital {
+                                rules.capital_cost
+                            } else {
+                                rules.province_cost
+                            }
+                        })
+                        .sum()
+                })
+                .unwrap_or(0);
+            let value = provinces + data.feudal_rules.title_loss_penalty;
+            if gives {
+                reasons.push(("Perte d'un titre".to_owned(), -value));
+            } else {
+                reasons.push(("Gain d'un titre".to_owned(), value * 3 / 4));
+            }
+        }
         Article::CedeSettlement { settlement, .. } => {
             let taker = if gives { proposer } else { recipient };
             let occupied = state
@@ -1081,6 +1147,14 @@ pub fn article_label(
             "{} livre {} en otage",
             who(giver),
             state.character_name(data, character)
+        ),
+        Article::DemandTitle { giver, title } => format!(
+            "{} remet le titre {} à {}",
+            who(giver),
+            data.titles
+                .get(title)
+                .map_or_else(|| title.to_string(), |t| t.name.display.clone()),
+            to(giver)
         ),
     }
 }
@@ -1419,6 +1493,10 @@ pub fn apply_treaty(
             Article::CedeProvince { province, .. } => {
                 cede_province(state, province, &giver.expect("giver"), &taker.expect("t"));
             }
+            Article::DemandTitle { title, .. } => {
+                crate::feudal::conquer_title(state, data, &taker.expect("taker"), title)
+                    .map_err(|e| DiplomacyError::Refused(e.to_string()))?;
+            }
             Article::CedeSettlement { settlement, .. } => {
                 let to = taker.expect("taker");
                 // As `cede_province`: the giver's garrison, recruits and
@@ -1456,8 +1534,8 @@ pub fn apply_treaty(
             }
         }
     }
-    state.add_modifier(recipient, proposer, 5, "Traité signé", 20);
-    state.add_modifier(proposer, recipient, 5, "Traité signé", 20);
+    state.add_capped_modifier(data, recipient, proposer, 5, TREATY_REASON, 20);
+    state.add_capped_modifier(data, proposer, recipient, 5, TREATY_REASON, 20);
     state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(proposer));
     Ok(())
 }

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_curtea_de_arges",
+    "province": "prov_muntenia",
+    "kind": "city",
+    "name": {
+      "display": "Curtea de Argeș",
+      "local": "Curtea de Argeș",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      24.6786,
+      45.1381
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Résidence princière de Basarab Ier au pied des Carpates.",
+    "sources": [
+      "Curtea de Argeș"
+    ]
+  },
+  {
+    "id": "set_campulung",
+    "province": "prov_muntenia",
+    "kind": "town",
+    "name": {
+      "display": "Câmpulung",
+      "local": "Câmpulung",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      25.05,
+      45.2667
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Première résidence des voïvodes de Valachie, ville au pied des Carpates, avec colons saxons.",
+    "sources": [
+      "Câmpulung"
+    ]
+  },
+  {
+    "id": "set_targoviste",
+    "province": "prov_muntenia",
+    "kind": "town",
+    "name": {
+      "display": "Târgoviște",
+      "local": "Târgoviște",
+      "local_language": "roumain"
+    },
+    "lonlat": [
+      25.4567,
+      44.9254
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg de marché sur la Ialomița, future résidence princière (mention écrite tardive, 1396 ; existence en 1337 probable, à préciser).",
+    "sources": [
+      "Târgoviște"
+    ]
+  }
+]

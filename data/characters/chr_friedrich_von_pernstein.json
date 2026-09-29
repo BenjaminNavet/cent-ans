@@ -1,0 +1,37 @@
+{
+  "id": "chr_friedrich_von_pernstein",
+  "name": {
+    "display": "Friedrich von Pernstein",
+    "local": "Friedrich von Pernstein",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Archevêché de Riga",
+  "faction": "fac_riga_archbishopric",
+  "role": "ruler",
+  "birth": {
+    "value": "1265",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1341"
+  },
+  "historical": true,
+  "skills": {
+    "command": 3,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 75,
+  "starting_location": "prov_riga_archbishopric",
+  "status": "at_court",
+  "description": "Archevêque de Riga de 1304 à 1341, prince d'Empire ; il n'a jamais accepté la suprématie de l'Ordre et se heurte à la ville et aux chevaliers.",
+  "sources": [
+    "Friedrich von Pernstein",
+    "Archevêché de Riga"
+  ]
+}

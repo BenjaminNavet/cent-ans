@@ -1,0 +1,41 @@
+{
+  "id": "chr_lope_de_luna",
+  "name": {
+    "display": "Lope de Luna",
+    "local": "Llop de Luna",
+    "local_language": "catalan"
+  },
+  "sex": "male",
+  "house": "Luna",
+  "faction": "fac_luna",
+  "role": "ruler",
+  "birth": {
+    "value": "1315"
+  },
+  "death": {
+    "value": "1360-06-19",
+    "place": "Pedrola"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Sire de Luna"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_loyal"
+  ],
+  "piety": 50,
+  "starting_location": "prov_luna",
+  "status": "at_court",
+  "description": "Neuvième sire de Luna, conseiller très écouté de Pierre IV d'Aragon ; obtiendra le titre de premier comte de Luna en 1348.",
+  "sources": [
+    "Lope de Luna"
+  ]
+}

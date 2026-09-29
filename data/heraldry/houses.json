@@ -1,62 +1,2467 @@
 {
   "description": "Armoiries des maisons (lot DA1). Une entrée par valeur du champ `house` de data/characters/*.json. `blazon` est lu par tools/cent_ans_tools/heraldry.py (grammaire de mots-clés, v2) pour dessiner game/assets/heraldry/houses/<id>.png ; `arms_of` : armes identiques à celles d'une faction (dessinées à partir du blason de la faction). `vassal_of` : factions dont les armées comptent des bannerets de cette maison (figurines nobles de bataille). `certainty` : attesté, incertain (sources discordantes) ou substitution (armes personnelles non retrouvées : armes de la ville ou de la charge).",
   "badges": {
-    "fac_france": { "cross": "argent", "patch": null, "note": "Croix droite blanche portée par les gens du roi de France (attestée au XIVe siècle, généralisée sous Charles VII)." },
-    "fac_england": { "cross": "gueules", "patch": "argent", "note": "Croix de saint Georges, rouge sur pièce blanche cousue devant et derrière (ordonnance de Richard II, 1385 ; usage antérieur)." },
-    "fac_scotland": { "cross": "argent", "patch": "azur", "note": "Sautoir de saint André, rendu en croix sur la pièce (ordonnance écossaise de 1385)." },
-    "fac_burgundy": { "cross": "gueules", "patch": null, "note": "Croix de saint André rouge des Bourguignons (XVe siècle), rendue en croix droite." }
+    "fac_france": {
+      "cross": "argent",
+      "patch": null,
+      "note": "Croix droite blanche portée par les gens du roi de France (attestée au XIVe siècle, généralisée sous Charles VII)."
+    },
+    "fac_england": {
+      "cross": "gueules",
+      "patch": "argent",
+      "note": "Croix de saint Georges, rouge sur pièce blanche cousue devant et derrière (ordonnance de Richard II, 1385 ; usage antérieur)."
+    },
+    "fac_scotland": {
+      "cross": "argent",
+      "patch": "azur",
+      "note": "Sautoir de saint André, rendu en croix sur la pièce (ordonnance écossaise de 1385)."
+    },
+    "fac_burgundy": {
+      "cross": "gueules",
+      "patch": null,
+      "note": "Croix de saint André rouge des Bourguignons (XVe siècle), rendue en croix droite."
+    }
   },
   "houses": [
-    { "id": "anjou_sicile", "name": "Anjou-Sicile", "arms_of": "fac_naples", "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.", "description": "Anjou ancien brisé d'un lambel : Charles d'Anjou, frère de Saint Louis, et ses descendants rois de Naples.", "source": "fr.wikipedia : Armorial des Capétiens (maison d'Anjou-Sicile)", "certainty": "attesté", "factions": ["fac_naples"], "vassal_of": ["fac_naples"] },
-    { "id": "armagnac", "name": "Armagnac", "blazon": "Écartelé : aux 1 et 4 d'argent au lion de gueules ; aux 2 et 3 de gueules au léopard lionné d'or.", "description": "Armagnac (lion) écartelé de Rodez (léopard lionné), depuis le mariage de Bernard VI avec Cécile de Rodez (1298).", "source": "fr.wikipedia : Maison d'Armagnac, armoiries", "certainty": "attesté", "factions": ["fac_france"], "vassal_of": ["fac_france"] },
-    { "id": "artevelde", "name": "Artevelde", "blazon": "De sable au lion d'argent, armé et lampassé de gueules, couronné d'or.", "description": "Armes de la ville de Gand, dont Jacques van Artevelde fut le capitaine (1338-1345) ; ses armes personnelles ne sont pas retrouvées.", "source": "fr.wikipedia : Armoiries de Gand", "certainty": "substitution", "factions": ["fac_flanders"], "vassal_of": ["fac_flanders"] },
-    { "id": "artois", "name": "Artois", "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules chargé de neuf châteaux d'or.", "description": "France ancien au lambel de gueules chargé de châteaux de Castille (Robert Ier d'Artois, fils de Blanche de Castille).", "source": "fr.wikipedia : Armorial des Capétiens (maison d'Artois)", "certainty": "attesté", "factions": ["fac_england"], "vassal_of": ["fac_england"] },
-    { "id": "auvergne_boulogne", "name": "Auvergne-Boulogne", "blazon": "Écartelé : aux 1 et 4 d'or au gonfanon de gueules frangé de sinople ; aux 2 et 3 d'or à trois tourteaux de gueules.", "description": "Gonfanon d'Auvergne écartelé des tourteaux de Boulogne, comtes d'Auvergne et de Boulogne.", "source": "fr.wikipedia : Liste des comtes d'Auvergne ; Armorial des familles d'Auvergne", "certainty": "attesté", "factions": ["fac_burgundy"], "vassal_of": ["fac_burgundy", "fac_france"] },
-    { "id": "avesnes", "name": "Avesnes", "arms_of": "fac_hainaut", "blazon": "Écartelé : aux 1 et 4 d'or au lion de sable ; aux 2 et 3 d'or au lion de gueules.", "description": "Lions de Flandre et de Hollande écartelés, comtes de Hainaut et de Hollande de la maison d'Avesnes.", "source": "fr.wikipedia : Maison d'Avesnes, armoiries", "certainty": "attesté", "factions": ["fac_hainaut", "fac_england"], "vassal_of": ["fac_hainaut", "fac_england"] },
-    { "id": "balliol", "name": "Balliol", "blazon": "De gueules à l'orle d'argent.", "description": "Armes des Balliol, seigneurs de Barnard Castle puis rois d'Écosse (Édouard Balliol, prétendant soutenu par Édouard III).", "source": "en.wikipedia : House of Balliol, arms", "certainty": "attesté", "factions": ["fac_england"], "vassal_of": ["fac_england"] },
-    { "id": "barcelone", "name": "Barcelone", "arms_of": "fac_aragon", "blazon": "D'or à quatre pals de gueules.", "description": "Les « barres » catalanes de la maison de Barcelone, rois d'Aragon et de Majorque.", "source": "fr.wikipedia : Armoiries de la Catalogne", "certainty": "attesté", "factions": ["fac_aragon"], "vassal_of": ["fac_aragon"] },
-    { "id": "behuchet", "name": "Béhuchet", "blazon": "De gueules à la croix d'or.", "description": "Croix d'or de l'écu du Mans, patrie de l'amiral Nicolas Béhuchet (armes de la ville simplifiées) ; ses armes personnelles ne sont pas retrouvées.", "source": "fr.wikipedia : Armorial des communes de la Sarthe (Le Mans), simplifié", "certainty": "substitution", "factions": ["fac_france"], "vassal_of": ["fac_france"] },
-    { "id": "boccanegra", "name": "Boccanegra", "blazon": "Écartelé en sautoir d'argent et de gueules, au chef d'argent chargé d'une croix de gueules.", "description": "Décussé d'argent et de gueules au chef de Gênes (croix de saint Georges) : Simon Boccanegra, premier doge (1339).", "source": "it.wikipedia : Boccanegra (famiglia), arma", "certainty": "attesté", "factions": ["fac_genoa"], "vassal_of": ["fac_genoa"] },
-    { "id": "bohun", "name": "Bohun", "blazon": "D'azur à la bande d'argent côtoyée de deux cotices d'or, accompagnée de six lionceaux d'or.", "description": "Bohun, comtes de Hereford et d'Essex, connétables d'Angleterre ; Guillaume de Bohun, comte de Northampton, commande à Morlaix et Crécy.", "source": "en.wikipedia : Bohun family, arms", "certainty": "attesté", "factions": ["fac_england"], "vassal_of": ["fac_england"] },
-    { "id": "bourbon", "name": "Bourbon", "blazon": "D'azur semé de fleurs de lis d'or, à la bande de gueules.", "description": "France ancien à la bande (bâton) de gueules : Bourbon avant l'adoption de France moderne.", "source": "fr.wikipedia : Armorial des Capétiens (maison de Bourbon)", "certainty": "attesté", "factions": ["fac_france"], "vassal_of": ["fac_france"] },
-    { "id": "bourgogne", "name": "Bourgogne", "arms_of": "fac_burgundy", "blazon": "Bandé d'or et d'azur de six pièces, à la bordure de gueules.", "description": "Bourgogne ancien, ducs capétiens de Bourgogne (jusqu'à Philippe de Rouvres, 1361).", "source": "fr.wikipedia : Armorial des Capétiens (maison de Bourgogne)", "certainty": "attesté", "factions": ["fac_burgundy", "fac_france"], "vassal_of": ["fac_burgundy", "fac_france"] },
-    { "id": "bourgogne_ivree", "name": "Bourgogne-Ivrée", "blazon": "Écartelé : aux 1 et 4 de gueules au château d'or ; aux 2 et 3 d'argent au lion de pourpre couronné d'or.", "description": "Castille et León écartelés, rois de Castille de la maison d'Ivrée.", "source": "fr.wikipedia : Armoiries de l'Espagne (Castille et León)", "certainty": "attesté", "factions": ["fac_castile"], "vassal_of": ["fac_castile"] },
-    { "id": "bourgogne_portugal", "name": "Bourgogne-Portugal", "arms_of": "fac_portugal", "blazon": "D'argent à cinq écussons d'azur posés en croix, chacun chargé de cinq besants d'argent en sautoir ; à la bordure de gueules chargée de châteaux d'or.", "description": "Quinas et bordure de Castille, rois de Portugal de la maison de Bourgogne.", "source": "fr.wikipedia : Armoiries du Portugal", "certainty": "attesté", "factions": ["fac_portugal", "fac_castile"], "vassal_of": ["fac_portugal"] },
-    { "id": "brienne", "name": "Brienne", "blazon": "D'azur semé de billettes d'or, au lion d'or brochant sur le tout.", "description": "Brienne, comtes d'Eu et de Guînes, connétables de France (Raoul Ier puis Raoul II).", "source": "fr.wikipedia : Maison de Brienne, armoiries", "certainty": "attesté", "factions": ["fac_france"], "vassal_of": ["fac_france"] },
-    { "id": "bruce", "name": "Bruce", "blazon": "D'or au sautoir de gueules, au chef de gueules.", "description": "Armes de la famille Bruce d'Annandale ; comme roi, David II porte les armes d'Écosse (bannière de faction).", "source": "en.wikipedia : Clan Bruce, arms", "certainty": "attesté", "factions": ["fac_scotland"], "vassal_of": ["fac_scotland"] },
-    { "id": "capet", "name": "Capet", "blazon": "D'azur semé de fleurs de lis d'or.", "description": "France ancien, armes des Capétiens directs (princesses Isabelle, Jeanne de Navarre, Jeanne de Bourgogne).", "source": "fr.wikipedia : Armoiries de la France", "certainty": "attesté", "factions": ["fac_england", "fac_navarre", "fac_burgundy"], "vassal_of": [] },
-    { "id": "chatillon", "name": "Châtillon", "blazon": "De gueules à trois pals de vair, au chef d'or.", "description": "Châtillon (Blois, Saint-Pol, Porcien) ; Charles de Blois, prétendant au duché de Bretagne.", "source": "fr.wikipedia : Maison de Châtillon, armoiries", "certainty": "attesté", "factions": ["fac_france"], "vassal_of": ["fac_france", "fac_brittany"] },
-    { "id": "clisson", "name": "Clisson", "blazon": "De gueules au lion d'argent, armé, lampassé et couronné d'or.", "description": "Clisson, barons bretons (Olivier IV décapité en 1343, Olivier V connétable).", "source": "fr.wikipedia : Famille de Clisson, armoiries", "certainty": "attesté", "factions": ["fac_brittany"], "vassal_of": ["fac_brittany"] },
-    { "id": "dampierre", "name": "Dampierre", "arms_of": "fac_flanders", "blazon": "D'or au lion de sable, armé et lampassé de gueules.", "description": "Lion de Flandre, comtes de Flandre de la maison de Dampierre.", "source": "fr.wikipedia : Maison de Dampierre ; Armoiries de la Flandre", "certainty": "attesté", "factions": ["fac_flanders"], "vassal_of": ["fac_flanders"] },
-    { "id": "dandolo", "name": "Dandolo", "blazon": "Coupé d'argent et de gueules.", "description": "Écu le plus ancien des Dandolo, famille de quatre doges de Venise (Andrea Dandolo, doge en 1343).", "source": "conoscerevenezia.it : La famiglia Dandolo ; armoriale.it", "certainty": "attesté", "factions": ["fac_venice"], "vassal_of": ["fac_venice"] },
-    { "id": "dreux_bretagne", "name": "Dreux-Bretagne", "blazon": "Échiqueté d'or et d'azur, au franc-quartier d'hermine, à la bordure de gueules.", "description": "Échiqueté de Dreux au franc-quartier d'hermine (Pierre Mauclerc) ; depuis Jean III (1316) les ducs portent l'hermine plain, reprise par la faction.", "source": "fr.wikipedia : Armorial des Capétiens (maison de Dreux) ; Armoiries de la Bretagne", "certainty": "attesté", "factions": ["fac_brittany"], "vassal_of": ["fac_brittany"] },
-    { "id": "evreux", "name": "Évreux", "blazon": "D'azur semé de fleurs de lis d'or, au bâton componé d'argent et de gueules.", "description": "France ancien au bâton componé, comtes d'Évreux puis rois de Navarre (Philippe d'Évreux, Charles le Mauvais).", "source": "fr.wikipedia : Armorial des Capétiens (maison d'Évreux)", "certainty": "attesté", "factions": ["fac_navarre"], "vassal_of": ["fac_navarre", "fac_france"] },
-    { "id": "foix", "name": "Foix", "blazon": "D'or à trois pals de gueules.", "description": "Pals de Foix (les comtes de Foix-Béarn écartèlent ensuite des vaches de Béarn).", "source": "fr.wikipedia : Comté de Foix, armoiries", "certainty": "attesté", "factions": ["fac_france"], "vassal_of": ["fac_france"] },
-    { "id": "folkungar", "name": "Folkungar", "blazon": "D'azur à trois barres ondées d'argent, au lion couronné d'or brochant sur le tout.", "description": "Lion de Bjälbo (Folkungalejonet) de la maison royale de Suède ; Magnus Eriksson l'associe aux trois couronnes.", "source": "en.wikipedia : Three Crowns ; sv.wikipedia : Folkungalejonet", "certainty": "attesté", "factions": ["fac_sweden"], "vassal_of": ["fac_sweden"] },
-    { "id": "fournier", "name": "Fournier", "blazon": "D'argent à la bordure de gueules.", "description": "Armes du pape Benoît XII (Jacques Fournier, 1334-1342).", "source": "fr.wikipedia : Armoiries papales (Benoît XII)", "certainty": "attesté", "factions": ["fac_papacy"], "vassal_of": ["fac_papacy"] },
-    { "id": "habsbourg", "name": "Habsbourg", "blazon": "D'or au lion de gueules, armé, lampassé et couronné d'azur.", "description": "Lion de Habsbourg, armes de la maison ; comme ducs d'Autriche, Albert II et Otton portent la fasce d'Autriche (bannière de faction).", "source": "fr.wikipedia : Maison de Habsbourg, armoiries", "certainty": "attesté", "factions": ["fac_austria"], "vassal_of": ["fac_austria"] },
-    { "id": "harcourt", "name": "Harcourt", "blazon": "De gueules à deux fasces d'or.", "description": "Harcourt, barons normands ; Godefroy d'Harcourt passe à Édouard III en 1346.", "source": "fr.wikipedia : Maison d'Harcourt, armoiries", "certainty": "attesté", "factions": ["fac_france"], "vassal_of": ["fac_france", "fac_england"] },
-    { "id": "la_tour_du_pin", "name": "La Tour-du-Pin", "blazon": "D'or au dauphin d'azur, crêté, barbé, loré, oreillé et peautré de gueules.", "description": "Dauphin de Viennois porté par les dauphins de la maison de La Tour-du-Pin (Humbert II cède le Dauphiné en 1349).", "source": "fr.wikipedia : Armoiries du Dauphiné", "certainty": "attesté", "factions": ["fac_empire"], "vassal_of": ["fac_empire"] },
-    { "id": "lancastre", "name": "Lancastre", "blazon": "De gueules à trois léopards d'or, au lambel d'azur chargé de neuf fleurs de lis d'or.", "description": "Angleterre brisée d'un lambel de France : Henri de Grosmont, comte puis duc de Lancastre.", "source": "en.wikipedia : Henry of Grosmont, arms", "certainty": "attesté", "factions": ["fac_england"], "vassal_of": ["fac_england"] },
-    { "id": "le_bel", "name": "Le Bel", "blazon": "De gueules au perron d'or.", "description": "Perron de Liège, armes de la cité dont Jean le Bel fut chanoine de Saint-Lambert ; ses armes personnelles ne sont pas retrouvées.", "source": "fr.wikipedia : Armoiries de Liège", "certainty": "substitution", "factions": ["fac_hainaut"], "vassal_of": [] },
-    { "id": "louvain", "name": "Louvain", "arms_of": "fac_brabant", "blazon": "De sable au lion d'or, armé et lampassé de gueules.", "description": "Lion de Brabant, ducs de Brabant de la maison de Louvain.", "source": "fr.wikipedia : Armoiries du Brabant", "certainty": "attesté", "factions": ["fac_brabant"], "vassal_of": ["fac_brabant"] },
-    { "id": "luxembourg", "name": "Luxembourg", "blazon": "Burelé d'argent et d'azur de dix pièces, au lion de gueules, armé, lampassé et couronné d'or, la queue fourchée et passée en sautoir, brochant sur le tout.", "description": "Luxembourg (Jean l'Aveugle, roi de Bohême, tué à Crécy ; Charles IV) ; comme rois de Bohême ils portent le lion d'argent (bannière de faction).", "source": "fr.wikipedia : Armoiries du Luxembourg ; Maison de Luxembourg", "certainty": "attesté", "factions": ["fac_bohemia", "fac_france"], "vassal_of": ["fac_bohemia", "fac_empire", "fac_france"] },
-    { "id": "mauny", "name": "Mauny", "blazon": "D'or à trois chevrons de sable.", "description": "Gautier de Mauny, chevalier hennuyer au service d'Édouard III.", "source": "en.wikipedia : Walter Manny, arms", "certainty": "attesté", "factions": ["fac_england"], "vassal_of": ["fac_england"] },
-    { "id": "montagu", "name": "Montagu", "blazon": "D'argent à trois fusées de gueules posées en fasce.", "description": "Montagu, comtes de Salisbury (Guillaume de Montagu, compagnon d'Édouard III).", "source": "en.wikipedia : William Montagu, 1st Earl of Salisbury, arms", "certainty": "attesté", "factions": ["fac_england"], "vassal_of": ["fac_england"] },
-    { "id": "moray", "name": "Moray", "blazon": "D'azur à trois étoiles d'argent.", "description": "Molettes de Murray (Andrew Murray de Bothwell, gardien de l'Écosse).", "source": "en.wikipedia : Clan Murray, arms", "certainty": "attesté", "factions": ["fac_scotland"], "vassal_of": ["fac_scotland"] },
-    { "id": "nasrides", "name": "Nasrides", "arms_of": "fac_granada", "blazon": "De gueules à la bande d'or engoulée de deux têtes de dragon, chargée de la devise nasride.", "description": "Bande nasride (« Il n'y a de vainqueur que Dieu »), émirs de Grenade.", "source": "fr.wikipedia : Nasrides, emblème", "certainty": "attesté", "factions": ["fac_granada"], "vassal_of": ["fac_granada"] },
-    { "id": "petrarca", "name": "Petrarca", "blazon": "D'or à la bande de gueules accompagnée en chef d'une étoile de gueules.", "description": "Bande et étoile rapportées par Gozze de Pesaro ; Gamurrini lui attribue l'ours des Incisa. Couleurs du champ non attestées.", "source": "iagiforum.info : « Come era fatto lo stemma di Francesco Petrarca ? »", "certainty": "incertain", "factions": ["fac_papacy"], "vassal_of": [] },
-    { "id": "plantagenet", "name": "Plantagenêt", "blazon": "Écartelé : aux 1 et 4 d'azur semé de fleurs de lis d'or ; aux 2 et 3 de gueules à trois léopards d'or.", "description": "France ancien écartelé d'Angleterre, pris par Édouard III en 1340 pour revendiquer la couronne de France.", "source": "en.wikipedia : Royal arms of England (1340)", "certainty": "attesté", "factions": ["fac_england"], "vassal_of": ["fac_england"] },
-    { "id": "quieret", "name": "Quiéret", "blazon": "D'hermine à trois fleurs de lis de gueules.", "description": "Quiéret, seigneurs picards ; Hugues Quiéret, amiral de France, tué à L'Écluse (1340). Les lis sont au pied nourri.", "source": "fr.wikipedia : Hugues Quiéret ; Armorial de Picardie", "certainty": "attesté", "factions": ["fac_france"], "vassal_of": ["fac_france"] },
-    { "id": "randolph", "name": "Randolph", "blazon": "D'or à trois coussins de gueules, au double trescheur fleuré et contre-fleuré de gueules.", "description": "Randolph, comtes de Moray (Agnès « Black Agnes », défenseuse de Dunbar en 1338).", "source": "en.wikipedia : Thomas Randolph, 1st Earl of Moray, arms", "certainty": "attesté", "factions": ["fac_scotland"], "vassal_of": ["fac_scotland"] },
-    { "id": "roger_de_beaufort", "name": "Roger de Beaufort", "blazon": "D'argent à la bande d'azur accompagnée de six roses de gueules boutonnées d'or, trois en chef et trois en pointe.", "description": "Armes du pape Clément VI (Pierre Roger, 1342-1352) et de la maison de Beaufort.", "source": "fr.wikipedia : Armoiries papales (Clément VI)", "certainty": "attesté", "factions": ["fac_france"], "vassal_of": ["fac_france", "fac_papacy"] },
-    { "id": "savoie", "name": "Savoie", "arms_of": "fac_savoy", "blazon": "De gueules à la croix d'argent.", "description": "Croix de Savoie, comtes de Savoie.", "source": "fr.wikipedia : Armoiries de la Savoie", "certainty": "attesté", "factions": ["fac_savoy"], "vassal_of": ["fac_savoy"] },
-    { "id": "schauenbourg", "name": "Schauenbourg", "arms_of": "fac_holstein", "blazon": "De gueules à la feuille d'ortie d'argent.", "description": "Feuille d'ortie de Holstein, comtes de la maison de Schauenbourg.", "source": "de.wikipedia : Holsteiner Nesselblatt", "certainty": "attesté", "factions": ["fac_holstein"], "vassal_of": ["fac_holstein"] },
-    { "id": "stewart", "name": "Stewart", "blazon": "D'or à la fasce échiquetée d'azur et d'argent.", "description": "Fasce échiquetée des grands sénéchaux d'Écosse (Robert Stewart, futur Robert II).", "source": "en.wikipedia : House of Stuart, arms", "certainty": "attesté", "factions": ["fac_scotland"], "vassal_of": ["fac_scotland"] },
-    { "id": "valois", "name": "Valois", "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules.", "description": "France ancien à la bordure de gueules de Charles de Valois ; roi, Philippe VI porte France plein (bannière de faction).", "source": "fr.wikipedia : Armorial des Capétiens (maison de Valois)", "certainty": "attesté", "factions": ["fac_france", "fac_hainaut"], "vassal_of": ["fac_france"] },
-    { "id": "visconti", "name": "Visconti", "arms_of": "fac_milan", "blazon": "D'argent à la guivre d'azur couronnée d'or, issante de gueules.", "description": "Biscione des Visconti, seigneurs de Milan.", "source": "fr.wikipedia : Biscione", "certainty": "attesté", "factions": ["fac_milan"], "vassal_of": ["fac_milan"] },
-    { "id": "wassenberg", "name": "Wassenberg", "arms_of": "fac_guelders", "blazon": "D'azur au lion d'or couronné, armé et lampassé de gueules.", "description": "Lion de Gueldre, comtes puis ducs de Gueldre de la maison de Wassenberg.", "source": "fr.wikipedia : Duché de Gueldre, armoiries", "certainty": "attesté", "factions": ["fac_guelders"], "vassal_of": ["fac_guelders"] },
-    { "id": "wittelsbach", "name": "Wittelsbach", "blazon": "Fuselé en bande d'argent et d'azur.", "description": "Fuselé de Bavière, armes des Wittelsbach ; empereur, Louis IV porte l'aigle (bannière de faction).", "source": "fr.wikipedia : Armoiries de la Bavière", "certainty": "attesté", "factions": ["fac_empire"], "vassal_of": ["fac_empire"] },
-    { "id": "della_scala", "name": "della Scala", "arms_of": "fac_verona", "blazon": "De gueules à l'échelle d'argent posée en pal.", "description": "Échelle des Scaligeri, seigneurs de Vérone.", "source": "it.wikipedia : Della Scala, stemma", "certainty": "attesté", "factions": ["fac_verona"], "vassal_of": ["fac_verona"] }
+    {
+      "id": "albret",
+      "name": "Albret",
+      "blazon": "De gueules plain.",
+      "description": "Armes pleines (sans meuble) de la maison d'Albret, l'un des plus anciens blasons de gueules plain de la noblesse gasconne.",
+      "source": "fr.wikipedia : Maison d'Albret, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_albret"
+      ],
+      "vassal_of": [
+        "fac_albret",
+        "fac_england"
+      ]
+    },
+    {
+      "id": "anjou_sicile",
+      "name": "Anjou-Sicile",
+      "arms_of": "fac_naples",
+      "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+      "description": "Anjou ancien brisé d'un lambel : Charles d'Anjou, frère de Saint Louis, et ses descendants rois de Naples.",
+      "source": "fr.wikipedia : Armorial des Capétiens (maison d'Anjou-Sicile)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_naples"
+      ],
+      "vassal_of": [
+        "fac_naples"
+      ]
+    },
+    {
+      "id": "armagnac",
+      "name": "Armagnac",
+      "blazon": "Écartelé : aux 1 et 4 d'argent au lion de gueules ; aux 2 et 3 de gueules au léopard lionné d'or.",
+      "description": "Armagnac (lion) écartelé de Rodez (léopard lionné), depuis le mariage de Bernard VI avec Cécile de Rodez (1298).",
+      "source": "fr.wikipedia : Maison d'Armagnac, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france"
+      ]
+    },
+    {
+      "id": "artevelde",
+      "name": "Artevelde",
+      "blazon": "De sable au lion d'argent, armé et lampassé de gueules, couronné d'or.",
+      "description": "Armes de la ville de Gand, dont Jacques van Artevelde fut le capitaine (1338-1345) ; ses armes personnelles ne sont pas retrouvées.",
+      "source": "fr.wikipedia : Armoiries de Gand",
+      "certainty": "substitution",
+      "factions": [
+        "fac_flanders"
+      ],
+      "vassal_of": [
+        "fac_flanders"
+      ]
+    },
+    {
+      "id": "artois",
+      "name": "Artois",
+      "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules chargé de neuf châteaux d'or.",
+      "description": "France ancien au lambel de gueules chargé de châteaux de Castille (Robert Ier d'Artois, fils de Blanche de Castille).",
+      "source": "fr.wikipedia : Armorial des Capétiens (maison d'Artois)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_england"
+      ],
+      "vassal_of": [
+        "fac_england"
+      ]
+    },
+    {
+      "id": "auvergne_boulogne",
+      "name": "Auvergne-Boulogne",
+      "blazon": "Écartelé : aux 1 et 4 d'or au gonfanon de gueules frangé de sinople ; aux 2 et 3 d'or à trois tourteaux de gueules.",
+      "description": "Gonfanon d'Auvergne écartelé des tourteaux de Boulogne, comtes d'Auvergne et de Boulogne.",
+      "source": "fr.wikipedia : Liste des comtes d'Auvergne ; Armorial des familles d'Auvergne",
+      "certainty": "attesté",
+      "factions": [
+        "fac_burgundy"
+      ],
+      "vassal_of": [
+        "fac_burgundy",
+        "fac_france"
+      ]
+    },
+    {
+      "id": "avesnes",
+      "name": "Avesnes",
+      "arms_of": "fac_hainaut",
+      "blazon": "Écartelé : aux 1 et 4 d'or au lion de sable ; aux 2 et 3 d'or au lion de gueules.",
+      "description": "Lions de Flandre et de Hollande écartelés, comtes de Hainaut et de Hollande de la maison d'Avesnes.",
+      "source": "fr.wikipedia : Maison d'Avesnes, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_hainaut",
+        "fac_england"
+      ],
+      "vassal_of": [
+        "fac_hainaut",
+        "fac_england"
+      ]
+    },
+    {
+      "id": "balliol",
+      "name": "Balliol",
+      "blazon": "De gueules à l'orle d'argent.",
+      "description": "Armes des Balliol, seigneurs de Barnard Castle puis rois d'Écosse (Édouard Balliol, prétendant soutenu par Édouard III).",
+      "source": "en.wikipedia : House of Balliol, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_england"
+      ],
+      "vassal_of": [
+        "fac_england"
+      ]
+    },
+    {
+      "id": "barcelone",
+      "name": "Barcelone",
+      "arms_of": "fac_aragon",
+      "blazon": "D'or à quatre pals de gueules.",
+      "description": "Les « barres » catalanes de la maison de Barcelone, rois d'Aragon et de Majorque.",
+      "source": "fr.wikipedia : Armoiries de la Catalogne",
+      "certainty": "attesté",
+      "factions": [
+        "fac_aragon"
+      ],
+      "vassal_of": [
+        "fac_aragon"
+      ]
+    },
+    {
+      "id": "behuchet",
+      "name": "Béhuchet",
+      "blazon": "De gueules à la croix d'or.",
+      "description": "Croix d'or de l'écu du Mans, patrie de l'amiral Nicolas Béhuchet (armes de la ville simplifiées) ; ses armes personnelles ne sont pas retrouvées.",
+      "source": "fr.wikipedia : Armorial des communes de la Sarthe (Le Mans), simplifié",
+      "certainty": "substitution",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france"
+      ]
+    },
+    {
+      "id": "boccanegra",
+      "name": "Boccanegra",
+      "blazon": "Écartelé en sautoir d'argent et de gueules, au chef d'argent chargé d'une croix de gueules.",
+      "description": "Décussé d'argent et de gueules au chef de Gênes (croix de saint Georges) : Simon Boccanegra, premier doge (1339).",
+      "source": "it.wikipedia : Boccanegra (famiglia), arma",
+      "certainty": "attesté",
+      "factions": [
+        "fac_genoa"
+      ],
+      "vassal_of": [
+        "fac_genoa"
+      ]
+    },
+    {
+      "id": "bohun",
+      "name": "Bohun",
+      "blazon": "D'azur à la bande d'argent côtoyée de deux cotices d'or, accompagnée de six lionceaux d'or.",
+      "description": "Bohun, comtes de Hereford et d'Essex, connétables d'Angleterre ; Guillaume de Bohun, comte de Northampton, commande à Morlaix et Crécy.",
+      "source": "en.wikipedia : Bohun family, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_england"
+      ],
+      "vassal_of": [
+        "fac_england"
+      ]
+    },
+    {
+      "id": "bourbon",
+      "name": "Bourbon",
+      "blazon": "D'azur semé de fleurs de lis d'or, à la bande de gueules.",
+      "description": "France ancien à la bande (bâton) de gueules : Bourbon avant l'adoption de France moderne.",
+      "source": "fr.wikipedia : Armorial des Capétiens (maison de Bourbon)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france"
+      ]
+    },
+    {
+      "id": "bourgogne",
+      "name": "Bourgogne",
+      "arms_of": "fac_burgundy",
+      "blazon": "Bandé d'or et d'azur de six pièces, à la bordure de gueules.",
+      "description": "Bourgogne ancien, ducs capétiens de Bourgogne (jusqu'à Philippe de Rouvres, 1361).",
+      "source": "fr.wikipedia : Armorial des Capétiens (maison de Bourgogne)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_burgundy",
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_burgundy",
+        "fac_france"
+      ]
+    },
+    {
+      "id": "bourgogne_ivree",
+      "name": "Bourgogne-Ivrée",
+      "blazon": "Écartelé : aux 1 et 4 de gueules au château d'or ; aux 2 et 3 d'argent au lion de pourpre couronné d'or.",
+      "description": "Castille et León écartelés, rois de Castille de la maison d'Ivrée.",
+      "source": "fr.wikipedia : Armoiries de l'Espagne (Castille et León)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_castile"
+      ],
+      "vassal_of": [
+        "fac_castile"
+      ]
+    },
+    {
+      "id": "bourgogne_portugal",
+      "name": "Bourgogne-Portugal",
+      "arms_of": "fac_portugal",
+      "blazon": "D'argent à cinq écussons d'azur posés en croix, chacun chargé de cinq besants d'argent en sautoir ; à la bordure de gueules chargée de châteaux d'or.",
+      "description": "Quinas et bordure de Castille, rois de Portugal de la maison de Bourgogne.",
+      "source": "fr.wikipedia : Armoiries du Portugal",
+      "certainty": "attesté",
+      "factions": [
+        "fac_portugal",
+        "fac_castile"
+      ],
+      "vassal_of": [
+        "fac_portugal"
+      ]
+    },
+    {
+      "id": "brienne",
+      "name": "Brienne",
+      "blazon": "D'azur semé de billettes d'or, au lion d'or brochant sur le tout.",
+      "description": "Brienne, comtes d'Eu et de Guînes, connétables de France (Raoul Ier puis Raoul II).",
+      "source": "fr.wikipedia : Maison de Brienne, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france"
+      ]
+    },
+    {
+      "id": "bruce",
+      "name": "Bruce",
+      "blazon": "D'or au sautoir de gueules, au chef de gueules.",
+      "description": "Armes de la famille Bruce d'Annandale ; comme roi, David II porte les armes d'Écosse (bannière de faction).",
+      "source": "en.wikipedia : Clan Bruce, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_scotland"
+      ],
+      "vassal_of": [
+        "fac_scotland"
+      ]
+    },
+    {
+      "id": "capet",
+      "name": "Capet",
+      "blazon": "D'azur semé de fleurs de lis d'or.",
+      "description": "France ancien, armes des Capétiens directs (princesses Isabelle, Jeanne de Navarre, Jeanne de Bourgogne).",
+      "source": "fr.wikipedia : Armoiries de la France",
+      "certainty": "attesté",
+      "factions": [
+        "fac_england",
+        "fac_navarre",
+        "fac_burgundy"
+      ],
+      "vassal_of": []
+    },
+    {
+      "id": "chatillon",
+      "name": "Châtillon",
+      "blazon": "De gueules à trois pals de vair, au chef d'or.",
+      "description": "Châtillon (Blois, Saint-Pol, Porcien) ; Charles de Blois, prétendant au duché de Bretagne.",
+      "source": "fr.wikipedia : Maison de Châtillon, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france",
+        "fac_brittany"
+      ]
+    },
+    {
+      "id": "clisson",
+      "name": "Clisson",
+      "blazon": "De gueules au lion d'argent, armé, lampassé et couronné d'or.",
+      "description": "Clisson, barons bretons (Olivier IV décapité en 1343, Olivier V connétable).",
+      "source": "fr.wikipedia : Famille de Clisson, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_brittany"
+      ],
+      "vassal_of": [
+        "fac_brittany"
+      ]
+    },
+    {
+      "id": "dampierre",
+      "name": "Dampierre",
+      "arms_of": "fac_flanders",
+      "blazon": "D'or au lion de sable, armé et lampassé de gueules.",
+      "description": "Lion de Flandre, comtes de Flandre de la maison de Dampierre.",
+      "source": "fr.wikipedia : Maison de Dampierre ; Armoiries de la Flandre",
+      "certainty": "attesté",
+      "factions": [
+        "fac_flanders"
+      ],
+      "vassal_of": [
+        "fac_flanders"
+      ]
+    },
+    {
+      "id": "dandolo",
+      "name": "Dandolo",
+      "blazon": "Coupé d'argent et de gueules.",
+      "description": "Écu le plus ancien des Dandolo, famille de quatre doges de Venise (Andrea Dandolo, doge en 1343).",
+      "source": "conoscerevenezia.it : La famiglia Dandolo ; armoriale.it",
+      "certainty": "attesté",
+      "factions": [
+        "fac_venice"
+      ],
+      "vassal_of": [
+        "fac_venice"
+      ]
+    },
+    {
+      "id": "dreux_bretagne",
+      "name": "Dreux-Bretagne",
+      "blazon": "Échiqueté d'or et d'azur, au franc-quartier d'hermine, à la bordure de gueules.",
+      "description": "Échiqueté de Dreux au franc-quartier d'hermine (Pierre Mauclerc) ; depuis Jean III (1316) les ducs portent l'hermine plain, reprise par la faction.",
+      "source": "fr.wikipedia : Armorial des Capétiens (maison de Dreux) ; Armoiries de la Bretagne",
+      "certainty": "attesté",
+      "factions": [
+        "fac_brittany"
+      ],
+      "vassal_of": [
+        "fac_brittany"
+      ]
+    },
+    {
+      "id": "evreux",
+      "name": "Évreux",
+      "blazon": "D'azur semé de fleurs de lis d'or, au bâton componé d'argent et de gueules.",
+      "description": "France ancien au bâton componé, comtes d'Évreux puis rois de Navarre (Philippe d'Évreux, Charles le Mauvais).",
+      "source": "fr.wikipedia : Armorial des Capétiens (maison d'Évreux)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_navarre"
+      ],
+      "vassal_of": [
+        "fac_navarre",
+        "fac_france"
+      ]
+    },
+    {
+      "id": "foix",
+      "name": "Foix",
+      "blazon": "D'or à trois pals de gueules.",
+      "description": "Pals de Foix (les comtes de Foix-Béarn écartèlent ensuite des vaches de Béarn).",
+      "source": "fr.wikipedia : Comté de Foix, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france"
+      ]
+    },
+    {
+      "id": "folkungar",
+      "name": "Folkungar",
+      "blazon": "D'azur à trois barres ondées d'argent, au lion couronné d'or brochant sur le tout.",
+      "description": "Lion de Bjälbo (Folkungalejonet) de la maison royale de Suède ; Magnus Eriksson l'associe aux trois couronnes.",
+      "source": "en.wikipedia : Three Crowns ; sv.wikipedia : Folkungalejonet",
+      "certainty": "attesté",
+      "factions": [
+        "fac_sweden"
+      ],
+      "vassal_of": [
+        "fac_sweden"
+      ]
+    },
+    {
+      "id": "fournier",
+      "name": "Fournier",
+      "blazon": "D'argent à la bordure de gueules.",
+      "description": "Armes du pape Benoît XII (Jacques Fournier, 1334-1342).",
+      "source": "fr.wikipedia : Armoiries papales (Benoît XII)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_papacy"
+      ],
+      "vassal_of": [
+        "fac_papacy"
+      ]
+    },
+    {
+      "id": "habsbourg",
+      "name": "Habsbourg",
+      "blazon": "D'or au lion de gueules, armé, lampassé et couronné d'azur.",
+      "description": "Lion de Habsbourg, armes de la maison ; comme ducs d'Autriche, Albert II et Otton portent la fasce d'Autriche (bannière de faction).",
+      "source": "fr.wikipedia : Maison de Habsbourg, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_austria"
+      ],
+      "vassal_of": [
+        "fac_austria"
+      ]
+    },
+    {
+      "id": "harcourt",
+      "name": "Harcourt",
+      "blazon": "De gueules à deux fasces d'or.",
+      "description": "Harcourt, barons normands ; Godefroy d'Harcourt passe à Édouard III en 1346.",
+      "source": "fr.wikipedia : Maison d'Harcourt, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france",
+        "fac_england"
+      ]
+    },
+    {
+      "id": "la_tour_du_pin",
+      "name": "La Tour-du-Pin",
+      "blazon": "D'or au dauphin d'azur, crêté, barbé, loré, oreillé et peautré de gueules.",
+      "description": "Dauphin de Viennois porté par les dauphins de la maison de La Tour-du-Pin (Humbert II cède le Dauphiné en 1349).",
+      "source": "fr.wikipedia : Armoiries du Dauphiné",
+      "certainty": "attesté",
+      "factions": [
+        "fac_empire"
+      ],
+      "vassal_of": [
+        "fac_empire"
+      ]
+    },
+    {
+      "id": "lancastre",
+      "name": "Lancastre",
+      "blazon": "De gueules à trois léopards d'or, au lambel d'azur chargé de neuf fleurs de lis d'or.",
+      "description": "Angleterre brisée d'un lambel de France : Henri de Grosmont, comte puis duc de Lancastre.",
+      "source": "en.wikipedia : Henry of Grosmont, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_england",
+        "fac_lancaster"
+      ],
+      "vassal_of": [
+        "fac_england",
+        "fac_lancaster"
+      ]
+    },
+    {
+      "id": "le_bel",
+      "name": "Le Bel",
+      "blazon": "De gueules au perron d'or.",
+      "description": "Perron de Liège, armes de la cité dont Jean le Bel fut chanoine de Saint-Lambert ; ses armes personnelles ne sont pas retrouvées.",
+      "source": "fr.wikipedia : Armoiries de Liège",
+      "certainty": "substitution",
+      "factions": [
+        "fac_hainaut"
+      ],
+      "vassal_of": []
+    },
+    {
+      "id": "louvain",
+      "name": "Louvain",
+      "arms_of": "fac_brabant",
+      "blazon": "De sable au lion d'or, armé et lampassé de gueules.",
+      "description": "Lion de Brabant, ducs de Brabant de la maison de Louvain.",
+      "source": "fr.wikipedia : Armoiries du Brabant",
+      "certainty": "attesté",
+      "factions": [
+        "fac_brabant"
+      ],
+      "vassal_of": [
+        "fac_brabant"
+      ]
+    },
+    {
+      "id": "luxembourg",
+      "name": "Luxembourg",
+      "blazon": "Burelé d'argent et d'azur de dix pièces, au lion de gueules, armé, lampassé et couronné d'or, la queue fourchée et passée en sautoir, brochant sur le tout.",
+      "description": "Luxembourg (Jean l'Aveugle, roi de Bohême, tué à Crécy ; Charles IV) ; comme rois de Bohême ils portent le lion d'argent (bannière de faction).",
+      "source": "fr.wikipedia : Armoiries du Luxembourg ; Maison de Luxembourg",
+      "certainty": "attesté",
+      "factions": [
+        "fac_bohemia",
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_bohemia",
+        "fac_empire",
+        "fac_france",
+        "fac_tirol",
+        "fac_trier"
+      ]
+    },
+    {
+      "id": "mauny",
+      "name": "Mauny",
+      "blazon": "D'or à trois chevrons de sable.",
+      "description": "Gautier de Mauny, chevalier hennuyer au service d'Édouard III.",
+      "source": "en.wikipedia : Walter Manny, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_england"
+      ],
+      "vassal_of": [
+        "fac_england"
+      ]
+    },
+    {
+      "id": "montagu",
+      "name": "Montagu",
+      "blazon": "D'argent à trois fusées de gueules posées en fasce.",
+      "description": "Montagu, comtes de Salisbury (Guillaume de Montagu, compagnon d'Édouard III).",
+      "source": "en.wikipedia : William Montagu, 1st Earl of Salisbury, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_england"
+      ],
+      "vassal_of": [
+        "fac_england"
+      ]
+    },
+    {
+      "id": "moray",
+      "name": "Moray",
+      "blazon": "D'azur à trois étoiles d'argent.",
+      "description": "Molettes de Murray (Andrew Murray de Bothwell, gardien de l'Écosse).",
+      "source": "en.wikipedia : Clan Murray, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_scotland"
+      ],
+      "vassal_of": [
+        "fac_scotland"
+      ]
+    },
+    {
+      "id": "nasrides",
+      "name": "Nasrides",
+      "arms_of": "fac_granada",
+      "blazon": "De gueules à la bande d'or engoulée de deux têtes de dragon, chargée de la devise nasride.",
+      "description": "Bande nasride (« Il n'y a de vainqueur que Dieu »), émirs de Grenade.",
+      "source": "fr.wikipedia : Nasrides, emblème",
+      "certainty": "attesté",
+      "factions": [
+        "fac_granada"
+      ],
+      "vassal_of": [
+        "fac_granada"
+      ]
+    },
+    {
+      "id": "petrarca",
+      "name": "Petrarca",
+      "blazon": "D'or à la bande de gueules accompagnée en chef d'une étoile de gueules.",
+      "description": "Bande et étoile rapportées par Gozze de Pesaro ; Gamurrini lui attribue l'ours des Incisa. Couleurs du champ non attestées.",
+      "source": "iagiforum.info : « Come era fatto lo stemma di Francesco Petrarca ? »",
+      "certainty": "incertain",
+      "factions": [
+        "fac_papacy"
+      ],
+      "vassal_of": []
+    },
+    {
+      "id": "plantagenet",
+      "name": "Plantagenêt",
+      "blazon": "Écartelé : aux 1 et 4 d'azur semé de fleurs de lis d'or ; aux 2 et 3 de gueules à trois léopards d'or.",
+      "description": "France ancien écartelé d'Angleterre, pris par Édouard III en 1340 pour revendiquer la couronne de France.",
+      "source": "en.wikipedia : Royal arms of England (1340)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_england"
+      ],
+      "vassal_of": [
+        "fac_england"
+      ]
+    },
+    {
+      "id": "quieret",
+      "name": "Quiéret",
+      "blazon": "D'hermine à trois fleurs de lis de gueules.",
+      "description": "Quiéret, seigneurs picards ; Hugues Quiéret, amiral de France, tué à L'Écluse (1340). Les lis sont au pied nourri.",
+      "source": "fr.wikipedia : Hugues Quiéret ; Armorial de Picardie",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france"
+      ]
+    },
+    {
+      "id": "randolph",
+      "name": "Randolph",
+      "blazon": "D'or à trois coussins de gueules, au double trescheur fleuré et contre-fleuré de gueules.",
+      "description": "Randolph, comtes de Moray (Agnès « Black Agnes », défenseuse de Dunbar en 1338).",
+      "source": "en.wikipedia : Thomas Randolph, 1st Earl of Moray, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_scotland"
+      ],
+      "vassal_of": [
+        "fac_scotland"
+      ]
+    },
+    {
+      "id": "roger_de_beaufort",
+      "name": "Roger de Beaufort",
+      "blazon": "D'argent à la bande d'azur accompagnée de six roses de gueules boutonnées d'or, trois en chef et trois en pointe.",
+      "description": "Armes du pape Clément VI (Pierre Roger, 1342-1352) et de la maison de Beaufort.",
+      "source": "fr.wikipedia : Armoiries papales (Clément VI)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france"
+      ],
+      "vassal_of": [
+        "fac_france",
+        "fac_papacy"
+      ]
+    },
+    {
+      "id": "savoie",
+      "name": "Savoie",
+      "arms_of": "fac_savoy",
+      "blazon": "De gueules à la croix d'argent.",
+      "description": "Croix de Savoie, comtes de Savoie.",
+      "source": "fr.wikipedia : Armoiries de la Savoie",
+      "certainty": "attesté",
+      "factions": [
+        "fac_savoy"
+      ],
+      "vassal_of": [
+        "fac_savoy"
+      ]
+    },
+    {
+      "id": "schauenbourg",
+      "name": "Schauenbourg",
+      "arms_of": "fac_holstein",
+      "blazon": "De gueules à la feuille d'ortie d'argent.",
+      "description": "Feuille d'ortie de Holstein, comtes de la maison de Schauenbourg.",
+      "source": "de.wikipedia : Holsteiner Nesselblatt",
+      "certainty": "attesté",
+      "factions": [
+        "fac_holstein"
+      ],
+      "vassal_of": [
+        "fac_holstein"
+      ]
+    },
+    {
+      "id": "stewart",
+      "name": "Stewart",
+      "blazon": "D'or à la fasce échiquetée d'azur et d'argent.",
+      "description": "Fasce échiquetée des grands sénéchaux d'Écosse (Robert Stewart, futur Robert II).",
+      "source": "en.wikipedia : House of Stuart, arms",
+      "certainty": "attesté",
+      "factions": [
+        "fac_scotland"
+      ],
+      "vassal_of": [
+        "fac_scotland"
+      ]
+    },
+    {
+      "id": "valois",
+      "name": "Valois",
+      "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules.",
+      "description": "France ancien à la bordure de gueules de Charles de Valois ; roi, Philippe VI porte France plein (bannière de faction).",
+      "source": "fr.wikipedia : Armorial des Capétiens (maison de Valois)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_france",
+        "fac_hainaut"
+      ],
+      "vassal_of": [
+        "fac_france"
+      ]
+    },
+    {
+      "id": "visconti",
+      "name": "Visconti",
+      "arms_of": "fac_milan",
+      "blazon": "D'argent à la guivre d'azur couronnée d'or, issante de gueules.",
+      "description": "Biscione des Visconti, seigneurs de Milan.",
+      "source": "fr.wikipedia : Biscione",
+      "certainty": "attesté",
+      "factions": [
+        "fac_milan"
+      ],
+      "vassal_of": [
+        "fac_milan"
+      ]
+    },
+    {
+      "id": "wassenberg",
+      "name": "Wassenberg",
+      "arms_of": "fac_guelders",
+      "blazon": "D'azur au lion d'or couronné, armé et lampassé de gueules.",
+      "description": "Lion de Gueldre, comtes puis ducs de Gueldre de la maison de Wassenberg.",
+      "source": "fr.wikipedia : Duché de Gueldre, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_guelders"
+      ],
+      "vassal_of": [
+        "fac_guelders"
+      ]
+    },
+    {
+      "id": "wittelsbach",
+      "name": "Wittelsbach",
+      "blazon": "Fuselé en bande d'argent et d'azur.",
+      "description": "Fuselé de Bavière, armes des Wittelsbach ; empereur, Louis IV porte l'aigle (bannière de faction).",
+      "source": "fr.wikipedia : Armoiries de la Bavière",
+      "certainty": "attesté",
+      "factions": [
+        "fac_empire"
+      ],
+      "vassal_of": [
+        "fac_empire",
+        "fac_brandenburg",
+        "fac_palatinate"
+      ]
+    },
+    {
+      "id": "della_scala",
+      "name": "della Scala",
+      "arms_of": "fac_verona",
+      "blazon": "De gueules à l'échelle d'argent posée en pal.",
+      "description": "Échelle des Scaligeri, seigneurs de Vérone.",
+      "source": "it.wikipedia : Della Scala, stemma",
+      "certainty": "attesté",
+      "factions": [
+        "fac_verona"
+      ],
+      "vassal_of": [
+        "fac_verona"
+      ]
+    },
+    {
+      "id": "fitzgerald_kildare",
+      "name": "FitzGerald de Kildare",
+      "blazon": "D'argent à la nef de gueules.",
+      "description": "Armes des FitzGerald, comtes de Kildare.",
+      "source": "researchgate.net : Fitzgerald Coat of Arms (Boutell 1966)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_kildare"
+      ],
+      "vassal_of": [
+        "fac_kildare",
+        "fac_england"
+      ]
+    },
+    {
+      "id": "fitzgerald_desmond",
+      "name": "FitzGerald de Desmond",
+      "blazon": "D'hermine au sautoir de gueules.",
+      "description": "Armes des FitzGerald de Desmond, brisées d'hermine (document du XIVe siècle) pour se distinguer de la branche de Kildare.",
+      "source": "researchgate.net : Fitzgerald Coat of Arms (Boutell 1966)",
+      "certainty": "attesté",
+      "factions": [
+        "fac_desmond"
+      ],
+      "vassal_of": [
+        "fac_desmond",
+        "fac_england"
+      ]
+    },
+    {
+      "id": "butler",
+      "name": "Butler",
+      "blazon": "D'or au chef denché d'azur.",
+      "description": "Armes des Butler, comtes d'Ormond, grands bouteillers héréditaires d'Irlande.",
+      "source": "Loughmoe Castle (manteau de cheminée) ; purcellfamily.org",
+      "certainty": "attesté",
+      "factions": [
+        "fac_ormond"
+      ],
+      "vassal_of": [
+        "fac_ormond",
+        "fac_england"
+      ]
+    },
+    {
+      "id": "o_neill",
+      "name": "Ó Néill",
+      "blazon": "D'argent à la croix de gueules.",
+      "description": "Approximation : les armes réelles attestées tardivement montrent une main droite coupée de gueules (la « main rouge » de l'Ulster), motif que le générateur héraldique du jeu ne sait pas dessiner ; une croix de gueules est utilisée ici comme aide-mémoire visuel distinct.",
+      "source": "en.wikipedia : Red Hand of Ulster",
+      "certainty": "incertain",
+      "factions": [
+        "fac_tyrone"
+      ],
+      "vassal_of": [
+        "fac_tyrone"
+      ]
+    },
+    {
+      "id": "o_briain",
+      "name": "Ó Briain",
+      "blazon": "De gueules à trois léopards d'or.",
+      "description": "Armes attestées seulement à partir de la reddition de 1543 (comté de Thomond des Tudor, reprenant les léopards d'Angleterre sans le mi-parti) ; utilisées ici par convention, anachronisme assumé pour 1337.",
+      "source": "clarelibraries.ie : The O'Brien Arms",
+      "certainty": "incertain",
+      "factions": [
+        "fac_thomond"
+      ],
+      "vassal_of": [
+        "fac_thomond"
+      ]
+    },
+    {
+      "id": "o_conchobhair",
+      "name": "Ó Conchobhair",
+      "blazon": "De sinople au lion rampant à la queue fourchée, couronné d'or.",
+      "description": "Blason attesté tardivement (armorial moderne), utilisé ici par convention.",
+      "source": "Armorial of Ireland",
+      "certainty": "incertain",
+      "factions": [
+        "fac_connacht"
+      ],
+      "vassal_of": [
+        "fac_connacht"
+      ]
+    },
+    {
+      "id": "mac_murchada",
+      "name": "Mac Murchada",
+      "blazon": "De gueules au lion rampant d'argent.",
+      "description": "Blason attesté tardivement (branche Kavanagh), utilisé ici par convention.",
+      "source": "mctiernan.com : McMurrough Family Blazon and Crest",
+      "certainty": "incertain",
+      "factions": [
+        "fac_leinster"
+      ],
+      "vassal_of": [
+        "fac_leinster"
+      ]
+    },
+    {
+      "id": "macdonald",
+      "name": "MacDonald",
+      "blazon": "D'azur à la nef (lymphad) d'argent, voiles ferlées.",
+      "description": "La nef des Hébrides, seul emblème attesté sur les sceaux des seigneurs des Îles avant l'aigle, ajouté par leurs descendants après 1363.",
+      "source": "clandonald-heritage.com : The Rising Eagle",
+      "certainty": "attesté",
+      "factions": [
+        "fac_isles"
+      ],
+      "vassal_of": [
+        "fac_isles",
+        "fac_scotland"
+      ]
+    },
+    {
+      "id": "macruairi",
+      "name": "MacRuairi",
+      "blazon": "D'or au chef de gueules.",
+      "description": "Blason générique, aucune source héraldique propre aux MacRuairi de Garmoran n'a été trouvée ; utilisé par convention pour distinguer visuellement la maison de celle des MacDonald.",
+      "source": "Amy MacRuairi",
+      "certainty": "incertain",
+      "factions": [],
+      "vassal_of": [
+        "fac_isles"
+      ]
+    },
+    {
+      "id": "berg",
+      "name": "Berg",
+      "arms_of": "fac_berg",
+      "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or, semé de cœurs de gueules.",
+      "description": "Lion semé de cœurs des comtes de Berg (armes de la maison de Berg).",
+      "source": "fr.wikipedia : Comté de Berg, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_berg"
+      ],
+      "vassal_of": [
+        "fac_berg"
+      ]
+    },
+    {
+      "id": "cleves",
+      "name": "Clèves",
+      "arms_of": "fac_cleve",
+      "blazon": "De gueules à l'écusson d'argent.",
+      "description": "Écusson d'argent des comtes de Clèves.",
+      "source": "fr.wikipedia : Comté de Clèves, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_cleve"
+      ],
+      "vassal_of": [
+        "fac_cleve"
+      ]
+    },
+    {
+      "id": "de_la_marck",
+      "name": "de la Marck",
+      "arms_of": "fac_mark",
+      "blazon": "D'or à trois chevrons de gueules.",
+      "description": "Chevrons de gueules des comtes de la Marck ; leur cadet Adolphe est prince-évêque de Liège.",
+      "source": "fr.wikipedia : Comté de la Marck, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_mark"
+      ],
+      "vassal_of": [
+        "fac_mark",
+        "fac_liege"
+      ]
+    },
+    {
+      "id": "mecklembourg",
+      "name": "Mecklembourg",
+      "arms_of": "fac_mecklenburg",
+      "blazon": "D'or à la tête de buffle de sable, accornée et allumée d'argent, languée de gueules, couronnée d'or.",
+      "description": "Tête de buffle des seigneurs puis ducs de Mecklembourg.",
+      "source": "fr.wikipedia : Maison de Mecklembourg, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_mecklenburg"
+      ],
+      "vassal_of": [
+        "fac_mecklenburg"
+      ]
+    },
+    {
+      "id": "wettin",
+      "name": "Wettin",
+      "arms_of": "fac_meissen",
+      "blazon": "D'or et de sable burelé, au crancelin de sinople brochant en bande.",
+      "description": "Crancelin de sinople des margraves de Misnie et landgraves de Thuringe, maison de Wettin.",
+      "source": "fr.wikipedia : Maison de Wettin, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_meissen"
+      ],
+      "vassal_of": [
+        "fac_meissen"
+      ]
+    },
+    {
+      "id": "welf",
+      "name": "Welf",
+      "arms_of": "fac_brunswick",
+      "blazon": "De gueules à deux léopards d'or l'un sur l'autre, à la bordure componée d'argent et d'azur.",
+      "description": "Léopards des Welf, ducs de Brunswick-Lunebourg, brisés d'une bordure componée pour la branche de Lunebourg.",
+      "source": "fr.wikipedia : Maison Welf, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_brunswick"
+      ],
+      "vassal_of": [
+        "fac_brunswick"
+      ]
+    },
+    {
+      "id": "juliers",
+      "name": "Juliers",
+      "arms_of": "fac_julich",
+      "blazon": "D'or au lion de sable, armé et lampassé de gueules, à la bordure de gueules.",
+      "description": "Lion de Juliers ; la maison donne aussi Walram, archevêque-électeur de Cologne.",
+      "source": "fr.wikipedia : Maison de Juliers, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_julich"
+      ],
+      "vassal_of": [
+        "fac_julich",
+        "fac_cologne"
+      ]
+    },
+    {
+      "id": "lorraine_maison",
+      "name": "Lorraine",
+      "arms_of": "fac_lorraine",
+      "blazon": "D'or à la bande de gueules chargée de trois alérions d'argent.",
+      "description": "Alérions de la maison ducale de Lorraine.",
+      "source": "fr.wikipedia : Duché de Lorraine, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_lorraine"
+      ],
+      "vassal_of": [
+        "fac_lorraine"
+      ]
+    },
+    {
+      "id": "wurtemberg",
+      "name": "Wurtemberg",
+      "arms_of": "fac_wurttemberg",
+      "blazon": "D'or à trois bois de cerf de sable, rangés en pal.",
+      "description": "Bois de cerf des comtes de Wurtemberg.",
+      "source": "fr.wikipedia : Maison de Wurtemberg, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_wurttemberg"
+      ],
+      "vassal_of": [
+        "fac_wurttemberg"
+      ]
+    },
+    {
+      "id": "bade",
+      "name": "Bade",
+      "arms_of": "fac_baden",
+      "blazon": "D'or à la bande de gueules.",
+      "description": "Bande de gueules des margraves de Bade.",
+      "source": "fr.wikipedia : Maison de Bade, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_baden"
+      ],
+      "vassal_of": [
+        "fac_baden"
+      ]
+    },
+    {
+      "id": "hohenzollern",
+      "name": "Hohenzollern",
+      "arms_of": "fac_nuremberg",
+      "blazon": "Parti : au 1 d'or au lion de sable, armé et lampassé de gueules (Zollern) ; au 2 d'argent au burg de sable (burgraviat).",
+      "description": "Armes pariées des burgraves de Nuremberg, maison de Hohenzollern.",
+      "source": "fr.wikipedia : Maison de Hohenzollern, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_nuremberg"
+      ],
+      "vassal_of": [
+        "fac_nuremberg"
+      ]
+    },
+    {
+      "id": "gorz_tyrol",
+      "name": "Görz-Tyrol",
+      "arms_of": "fac_tirol",
+      "blazon": "D'argent à l'aigle de gueules, becquée et membrée d'or, couronnée d'or.",
+      "description": "Aigle du comté de Tyrol, maison de Gorizia-Tyrol ; Marguerite Maultasch en est l'héritière.",
+      "source": "fr.wikipedia : Comté de Tyrol, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_tirol"
+      ],
+      "vassal_of": [
+        "fac_tirol"
+      ]
+    },
+    {
+      "id": "brabant_hesse",
+      "name": "Brabant-Hesse",
+      "arms_of": "fac_hesse",
+      "blazon": "Burelé d'azur et d'or, au lion de gueules, armé et couronné d'or, brochant sur le tout.",
+      "description": "Lion de Hesse (Sophie de Brabant, mère de Henri Ier « l'Enfant », fondateur de la lignée landgraviale).",
+      "source": "fr.wikipedia : Landgraviat de Hesse, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_hesse"
+      ],
+      "vassal_of": [
+        "fac_hesse"
+      ]
+    },
+    {
+      "id": "wolfskeel",
+      "name": "Wolfskeel",
+      "blazon": "D'argent à trois roses de gueules.",
+      "description": "Armes personnelles d'Otton de Wolfskeel, prince-évêque de Wurtzbourg, non retrouvées avec certitude : figure conventionnelle distinctive retenue faute de source.",
+      "source": "substitution éditoriale",
+      "certainty": "substitution",
+      "factions": [
+        "fac_wurzburg"
+      ],
+      "vassal_of": [
+        "fac_wurzburg"
+      ]
+    },
+    {
+      "id": "virneburg",
+      "name": "Virneburg",
+      "blazon": "D'azur à trois tours d'argent, ouvertes et ajourées de sable.",
+      "description": "Armes personnelles de Henri III de Virnebourg, archevêque-électeur de Mayence, non retrouvées avec certitude : tours parlantes (« Burg ») retenues par convention.",
+      "source": "substitution éditoriale (canting arms « Virneburg »)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_mainz"
+      ],
+      "vassal_of": [
+        "fac_mainz"
+      ]
+    },
+    {
+      "id": "grelle",
+      "name": "Grelle",
+      "blazon": "D'argent à trois tourteaux de sable.",
+      "description": "Armes personnelles de Burchard Grelle, archevêque de Brême, non retrouvées avec certitude : figure conventionnelle distinctive retenue faute de source.",
+      "source": "substitution éditoriale",
+      "certainty": "substitution",
+      "factions": [
+        "fac_bremen"
+      ],
+      "vassal_of": [
+        "fac_bremen"
+      ]
+    },
+    {
+      "id": "brno",
+      "name": "Brno",
+      "blazon": "De gueules au château d'argent, ouvert et ajouré de sable.",
+      "description": "Armes personnelles de Nicolas de Brno, prince-évêque de Trente, non retrouvées avec certitude : château parlant (Brno/Brünn) retenu par convention.",
+      "source": "substitution éditoriale (canting arms « Brno »)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_trent"
+      ],
+      "vassal_of": [
+        "fac_trent"
+      ]
+    },
+    {
+      "id": "egloffstein",
+      "name": "Egloffstein",
+      "blazon": "De sable à l'aigle d'argent, becquée et membrée d'or.",
+      "description": "Armes personnelles de Léopold d'Egloffstein, prince-évêque de Bamberg, non retrouvées avec certitude : aigle retenue par convention, tinctures distinguées de celles de l'Empire.",
+      "source": "substitution éditoriale",
+      "certainty": "substitution",
+      "factions": [
+        "fac_bamberg"
+      ],
+      "vassal_of": [
+        "fac_bamberg"
+      ]
+    },
+    {
+      "id": "de_diest",
+      "name": "de Diest",
+      "blazon": "D'or à trois fasces de sable.",
+      "description": "Armes personnelles de Jean (III) de Diest, prince-évêque d'Utrecht, non retrouvées avec certitude : fasces retenues par convention.",
+      "source": "substitution éditoriale",
+      "certainty": "substitution",
+      "factions": [
+        "fac_utrecht"
+      ],
+      "vassal_of": [
+        "fac_utrecht"
+      ]
+    },
+    {
+      "id": "majorque",
+      "name": "Majorque",
+      "arms_of": "fac_majorca",
+      "blazon": "D'or à quatre pals de gueules.",
+      "description": "Branche cadette de la maison de Barcelone régnant sur le royaume de Majorque.",
+      "source": "Kingdom of Majorca",
+      "certainty": "attesté",
+      "factions": [
+        "fac_majorca"
+      ],
+      "vassal_of": [
+        "fac_majorca"
+      ]
+    },
+    {
+      "id": "manuel",
+      "name": "Manuel",
+      "arms_of": "fac_villena",
+      "blazon": "Écartelé de Castille et de León, à la bordure d'argent.",
+      "description": "Branche cadette de la maison de Castille issue de l'infant Manuel, fils de Ferdinand III ; blason personnel de Juan Manuel non localisé avec certitude, approximé d'après sa filiation royale.",
+      "source": "Juan Manuel, Prince of Villena",
+      "certainty": "incertain",
+      "factions": [
+        "fac_villena"
+      ],
+      "vassal_of": [
+        "fac_villena"
+      ]
+    },
+    {
+      "id": "lara",
+      "name": "Lara",
+      "arms_of": "fac_lara",
+      "blazon": "D'argent à deux chaudières échiquetées d'or et de gueules, engoulées de serpents de sinople.",
+      "description": "Chaudières (calderas) des grands majordomes royaux, emblème classique de la maison de Lara.",
+      "source": "Maison de Lara, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_lara"
+      ],
+      "vassal_of": [
+        "fac_lara",
+        "fac_castile"
+      ]
+    },
+    {
+      "id": "aragon_urgell",
+      "name": "Aragon-Urgell",
+      "arms_of": "fac_urgell",
+      "blazon": "D'or au bœuf de gueules.",
+      "description": "Armes traditionnelles des comtes d'Urgell, branche cadette de la maison d'Aragon issue d'Alphonse IV.",
+      "source": "County of Urgell",
+      "certainty": "attesté",
+      "factions": [
+        "fac_urgell"
+      ],
+      "vassal_of": [
+        "fac_urgell",
+        "fac_aragon"
+      ]
+    },
+    {
+      "id": "pallars_mataplana",
+      "name": "Pallars-Mataplana",
+      "arms_of": "fac_pallars",
+      "blazon": "D'or à quatre pals de gueules, au lambel d'azur.",
+      "description": "Approximation faute de blason personnel des comtes de Pallars Sobirà du XIVe siècle retrouvé avec certitude.",
+      "source": "Comtat de Pallars Sobirà",
+      "certainty": "incertain",
+      "factions": [
+        "fac_pallars"
+      ],
+      "vassal_of": [
+        "fac_pallars",
+        "fac_aragon"
+      ]
+    },
+    {
+      "id": "luna",
+      "name": "Luna",
+      "arms_of": "fac_luna",
+      "blazon": "D'azur à la lune décroissante d'argent.",
+      "description": "Armes parlantes (« luna », la lune) de la maison de Luna.",
+      "source": "Maison de Luna, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_luna"
+      ],
+      "vassal_of": [
+        "fac_luna",
+        "fac_aragon"
+      ]
+    },
+    {
+      "id": "gonzaga",
+      "name": "Gonzaga",
+      "arms_of": "fac_mantua",
+      "blazon": "D'argent à la croix pattée de gueules.",
+      "description": "Armes primitives des Gonzague, seigneurs de Mantoue.",
+      "source": "it.wikipedia : Gonzaga, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_mantua"
+      ],
+      "vassal_of": [
+        "fac_mantua"
+      ]
+    },
+    {
+      "id": "este",
+      "name": "Este",
+      "arms_of": "fac_ferrara",
+      "blazon": "D'azur à l'aigle d'argent, becquée et membrée d'or.",
+      "description": "Aigle blanche des Este, marquis de Ferrare, avant l'adjonction du lambel de France (1352).",
+      "source": "it.wikipedia : Casa d'Este, stemma",
+      "certainty": "attesté",
+      "factions": [
+        "fac_ferrara"
+      ],
+      "vassal_of": [
+        "fac_ferrara"
+      ]
+    },
+    {
+      "id": "paleologue_montferrat",
+      "name": "Paléologue",
+      "arms_of": "fac_montferrat",
+      "blazon": "D'argent au chef de gueules.",
+      "description": "Armes traditionnelles des marquis de Montferrat, reprises par les Paléologue à leur avènement (1306).",
+      "source": "it.wikipedia : Marchesato del Monferrato, stemma",
+      "certainty": "attesté",
+      "factions": [
+        "fac_montferrat"
+      ],
+      "vassal_of": [
+        "fac_montferrat"
+      ]
+    },
+    {
+      "id": "saluces",
+      "name": "Saluces",
+      "arms_of": "fac_saluzzo",
+      "blazon": "D'azur au chef d'argent.",
+      "description": "Armes des marquis de Saluces.",
+      "source": "it.wikipedia : Marchesato di Saluzzo, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_saluzzo"
+      ],
+      "vassal_of": [
+        "fac_saluzzo"
+      ]
+    },
+    {
+      "id": "malatesta",
+      "name": "Malatesta",
+      "arms_of": "fac_rimini",
+      "blazon": "Fuselé d'argent et de gueules.",
+      "description": "Losanges enchaînés attribués aux Malatesta, seigneurs de Rimini ; blason incertain avant le XVe siècle.",
+      "source": "it.wikipedia : Malatesta, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_rimini"
+      ],
+      "vassal_of": [
+        "fac_rimini"
+      ]
+    },
+    {
+      "id": "montefeltro",
+      "name": "Montefeltro",
+      "arms_of": "fac_urbino",
+      "blazon": "D'or à l'aigle de sable.",
+      "description": "Aigle noire sur or attribuée aux Montefeltro, comtes d'Urbin ; le blason ducal fixé au XVe siècle ne s'applique pas à cette période.",
+      "source": "it.wikipedia : Montefeltro, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_urbino"
+      ],
+      "vassal_of": [
+        "fac_urbino"
+      ]
+    },
+    {
+      "id": "barcelone_sicile",
+      "name": "Barcelone-Sicile",
+      "arms_of": "fac_sicily",
+      "blazon": "Écartelé : aux 1 et 4, d'or à quatre pals de gueules ; aux 2 et 3, d'argent à l'aigle de sable.",
+      "description": "Armes aragono-souabes des rois de Sicile (Trinacrie) depuis la paix de Caltabellotta (1302).",
+      "source": "it.wikipedia : Regno di Sicilia (1282-1442), stemma",
+      "certainty": "attesté",
+      "factions": [
+        "fac_sicily",
+        "fac_athens"
+      ],
+      "vassal_of": [
+        "fac_sicily",
+        "fac_athens"
+      ]
+    },
+    {
+      "id": "anjou_tarente",
+      "name": "Anjou-Tarente",
+      "arms_of": "fac_taranto",
+      "blazon": "D'azur semé de fleurs de lis d'or, au lambel d'argent.",
+      "description": "Armes d'Anjou-Sicile brisées d'un lambel d'argent, à la manière des branches cadettes angevines.",
+      "source": "fr.wikipedia : Maison d'Anjou-Sicile, branches cadettes",
+      "certainty": "incertain",
+      "factions": [
+        "fac_taranto"
+      ],
+      "vassal_of": [
+        "fac_taranto"
+      ]
+    },
+    {
+      "id": "pepoli",
+      "name": "Pepoli",
+      "blazon": "De gueules à la croix pattée d'argent (armes communales de Bologne).",
+      "description": "Taddeo Pepoli, seigneur de fait de Bologne à partir du 28 août 1337, ne porte pas d'armes personnelles attestées avant sa reconnaissance comme vicaire pontifical (1340) : substitution par les armes communales.",
+      "source": "it.wikipedia : Pepoli, stemma",
+      "certainty": "substitution",
+      "factions": [
+        "fac_bologna"
+      ],
+      "vassal_of": [
+        "fac_bologna"
+      ]
+    },
+    {
+      "id": "valois_courtenay",
+      "name": "Valois-Courtenay",
+      "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+      "description": "Catherine de Valois-Courtenay, impératrice titulaire de Constantinople, fille de Charles de Valois : armes de Valois brisées comme les autres branches cadettes capétiennes.",
+      "source": "fr.wikipedia : Catherine II de Courtenay",
+      "certainty": "incertain",
+      "factions": [
+        "fac_taranto"
+      ],
+      "vassal_of": [
+        "fac_taranto"
+      ]
+    },
+    {
+      "id": "beccaria",
+      "name": "Beccaria",
+      "arms_of": "fac_pavia",
+      "blazon": "D'argent à la couleuvre d'azur couronnée d'or.",
+      "description": "Faction gibeline dominante à Pavie au XIVe siècle ; blason incertain, faute de sceau familial conservé pour cette période.",
+      "source": "it.wikipedia : Beccaria (famiglia), stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_pavia"
+      ],
+      "vassal_of": [
+        "fac_pavia"
+      ]
+    },
+    {
+      "id": "abel",
+      "name": "Abel",
+      "blazon": "D'or à deux léopards d'azur.",
+      "description": "Les ducs de Slesvig de la lignée d'Abel, fils cadet de Valdemar II ; armes du duché.",
+      "source": "fr.wikipedia : Duché de Slesvig, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_schleswig"
+      ],
+      "vassal_of": [
+        "fac_schleswig"
+      ]
+    },
+    {
+      "id": "ordre_teutonique",
+      "name": "Ordre Teutonique",
+      "arms_of": "fac_teutonic",
+      "blazon": "D'argent à la croix de sable.",
+      "description": "Croix noire de l'Ordre, portée par ses grands maîtres.",
+      "source": "fr.wikipedia : Ordre Teutonique, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_teutonic"
+      ],
+      "vassal_of": [
+        "fac_teutonic"
+      ]
+    },
+    {
+      "id": "ordre_livonien",
+      "name": "Ordre Livonien",
+      "arms_of": "fac_livonian_order",
+      "blazon": "D'argent à la croix de sable, à la bordure de gueules.",
+      "description": "Branche livonienne de l'Ordre ; bordure rouge de jeu.",
+      "source": "fr.wikipedia : Ordre Livonien",
+      "certainty": "incertain",
+      "factions": [
+        "fac_livonian_order"
+      ],
+      "vassal_of": [
+        "fac_livonian_order"
+      ]
+    },
+    {
+      "id": "archeveche_de_riga",
+      "name": "Archevêché de Riga",
+      "arms_of": "fac_riga_archbishopric",
+      "blazon": "D'azur à deux clefs d'or en sautoir.",
+      "description": "Clefs de saint Pierre : armes simplifiées de l'archevêché de Riga.",
+      "source": "de.wikipedia : Erzbistum Riga, Wappen",
+      "certainty": "substitution",
+      "factions": [
+        "fac_riga_archbishopric"
+      ],
+      "vassal_of": [
+        "fac_riga_archbishopric"
+      ]
+    },
+    {
+      "id": "eveche_de_dorpat",
+      "name": "Évêché de Dorpat",
+      "arms_of": "fac_dorpat",
+      "blazon": "De sable à deux clefs d'argent en sautoir.",
+      "description": "Armes simplifiées de l'évêché de Dorpat.",
+      "source": "de.wikipedia : Bistum Dorpat, Wappen",
+      "certainty": "substitution",
+      "factions": [
+        "fac_dorpat"
+      ],
+      "vassal_of": [
+        "fac_dorpat"
+      ]
+    },
+    {
+      "id": "eveche_d_osel_wiek",
+      "name": "Évêché d'Ösel-Wiek",
+      "arms_of": "fac_osel_wiek",
+      "blazon": "D'azur à la croix d'argent.",
+      "description": "Armes simplifiées de l'évêché d'Ösel-Wiek.",
+      "source": "de.wikipedia : Bistum Ösel-Wiek, Wappen",
+      "certainty": "substitution",
+      "factions": [
+        "fac_osel_wiek"
+      ],
+      "vassal_of": [
+        "fac_osel_wiek"
+      ]
+    },
+    {
+      "id": "eveche_de_courlande",
+      "name": "Évêché de Courlande",
+      "arms_of": "fac_courland",
+      "blazon": "De sinople à la croix d'argent.",
+      "description": "Armes simplifiées de l'évêché de Courlande.",
+      "source": "de.wikipedia : Bistum Kurland, Wappen",
+      "certainty": "substitution",
+      "factions": [
+        "fac_courland"
+      ],
+      "vassal_of": [
+        "fac_courland"
+      ]
+    },
+    {
+      "id": "greifen",
+      "name": "Greifen",
+      "arms_of": "fac_pomerania_stettin",
+      "blazon": "D'argent au griffon de gueules, à la bordure de sable.",
+      "description": "Le griffon rouge de Poméranie, armes des ducs de la maison des Greifen.",
+      "source": "fr.wikipedia : Maison de Poméranie, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_pomerania_stettin",
+        "fac_pomerania_wolgast"
+      ],
+      "vassal_of": [
+        "fac_pomerania_stettin",
+        "fac_pomerania_wolgast"
+      ]
+    },
+    {
+      "id": "piast",
+      "name": "Piast",
+      "arms_of": "fac_poland",
+      "blazon": "De gueules à l'aigle d'argent, couronnée, becquée et membrée d'or.",
+      "description": "Aigle blanc couronné des Piast de Pologne.",
+      "source": "pl.wikipedia : Herb Polski",
+      "certainty": "attesté",
+      "factions": [
+        "fac_poland"
+      ],
+      "vassal_of": [
+        "fac_poland",
+        "fac_hungary"
+      ]
+    },
+    {
+      "id": "piast_mazovie",
+      "name": "Piast de Mazovie",
+      "arms_of": "fac_plock",
+      "blazon": "De gueules à l'aigle d'argent, à la bordure d'azur.",
+      "description": "Aigle des Piast de Mazovie, bordure d'azur en brisure de jeu.",
+      "source": "pl.wikipedia : Herb Mazowsza",
+      "certainty": "incertain",
+      "factions": [
+        "fac_plock",
+        "fac_warsaw",
+        "fac_rawa",
+        "fac_galicia_volhynia"
+      ],
+      "vassal_of": [
+        "fac_plock",
+        "fac_warsaw",
+        "fac_rawa",
+        "fac_galicia_volhynia"
+      ]
+    },
+    {
+      "id": "piast_legnica",
+      "name": "Piast de Legnica",
+      "arms_of": "fac_legnica",
+      "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules.",
+      "description": "Aigle silésienne sur or, croissant d'argent omis.",
+      "source": "pl.wikipedia : Herb Piastów śląskich",
+      "certainty": "incertain",
+      "factions": [
+        "fac_legnica"
+      ],
+      "vassal_of": [
+        "fac_legnica"
+      ]
+    },
+    {
+      "id": "piast_glogow",
+      "name": "Piast de Głogów",
+      "arms_of": "fac_glogow",
+      "blazon": "D'argent à l'aigle de sable, becquée et membrée d'or.",
+      "description": "Armes de substitution pour les Piast de Głogów-Żagań.",
+      "source": "pl.wikipedia : Herb Głogowa",
+      "certainty": "substitution",
+      "factions": [
+        "fac_glogow"
+      ],
+      "vassal_of": [
+        "fac_glogow"
+      ]
+    },
+    {
+      "id": "piast_opole",
+      "name": "Piast d'Opole",
+      "arms_of": "fac_opole",
+      "blazon": "D'azur à l'aigle d'or, becquée et membrée de gueules.",
+      "description": "Aigle d'or sur azur des Piast d'Opole.",
+      "source": "pl.wikipedia : Herb Opola",
+      "certainty": "attesté",
+      "factions": [
+        "fac_opole"
+      ],
+      "vassal_of": [
+        "fac_opole"
+      ]
+    },
+    {
+      "id": "piast_swidnica",
+      "name": "Piast de Świdnica",
+      "arms_of": "fac_swidnica",
+      "blazon": "Parti : au 1 d'argent à la demi-aigle de gueules ; au 2 d'or à la demi-aigle de sable.",
+      "description": "Aigle silésienne partie de gueules et de sable sur argent et or.",
+      "source": "pl.wikipedia : Herb Świdnicy",
+      "certainty": "incertain",
+      "factions": [
+        "fac_swidnica"
+      ],
+      "vassal_of": [
+        "fac_swidnica"
+      ]
+    },
+    {
+      "id": "anjou_hongrie",
+      "name": "Anjou-Hongrie",
+      "arms_of": "fac_hungary",
+      "blazon": "Écartelé : aux 1 et 4 burelé d'argent et de gueules de huit pièces ; aux 2 et 3 d'azur semé de fleurs de lis d'or.",
+      "description": "Armes d'Anjou-Hongrie : bandes des Árpád et fleurs de lis d'Anjou.",
+      "source": "en.wikipedia : Coat of arms of Hungary",
+      "certainty": "attesté",
+      "factions": [
+        "fac_hungary"
+      ],
+      "vassal_of": [
+        "fac_hungary",
+        "fac_transylvania",
+        "fac_slavonia"
+      ]
+    },
+    {
+      "id": "szecsenyi",
+      "name": "Szécsényi",
+      "arms_of": "fac_transylvania",
+      "blazon": "D'azur à l'aigle de sable, becquée et membrée d'or.",
+      "description": "Armes de substitution pour le lignage Szécsényi.",
+      "source": "hu.wikipedia : Szécsényi család",
+      "certainty": "substitution",
+      "factions": [
+        "fac_transylvania"
+      ],
+      "vassal_of": [
+        "fac_transylvania"
+      ]
+    },
+    {
+      "id": "akos",
+      "name": "Ákos",
+      "arms_of": "fac_slavonia",
+      "blazon": "D'azur à la fasce d'argent, accompagnée en chef d'une étoile d'or.",
+      "description": "Armes de substitution pour le lignage des Ákos.",
+      "source": "hu.wikipedia : Ákos nemzetség",
+      "certainty": "substitution",
+      "factions": [
+        "fac_slavonia"
+      ],
+      "vassal_of": [
+        "fac_slavonia"
+      ]
+    },
+    {
+      "id": "gediminides",
+      "name": "Gediminides",
+      "arms_of": "fac_lithuania",
+      "blazon": "De gueules à trois pals d'argent, à la bordure d'or.",
+      "description": "Colonnes de Gediminas, approximées en trois pals.",
+      "source": "en.wikipedia : Vytis",
+      "certainty": "incertain",
+      "factions": [
+        "fac_lithuania"
+      ],
+      "vassal_of": [
+        "fac_lithuania"
+      ]
+    },
+    {
+      "id": "rurikides",
+      "name": "Rurikides",
+      "arms_of": "fac_kiev",
+      "blazon": "D'azur à la croix d'or.",
+      "description": "Substitution pour la principauté de Kiev (trident rurikide non dessinable).",
+      "source": "en.wikipedia : Tryzub",
+      "certainty": "substitution",
+      "factions": [
+        "fac_kiev"
+      ],
+      "vassal_of": [
+        "fac_kiev"
+      ]
+    },
+    {
+      "id": "basarab",
+      "name": "Basarab",
+      "arms_of": "fac_wallachia",
+      "blazon": "D'azur à l'aigle d'or, à la bordure de gueules.",
+      "description": "Aigle d'or sur azur, armes valaques attestées plus tard ; bordure de jeu.",
+      "source": "ro.wikipedia : Stema Țării Românești",
+      "certainty": "incertain",
+      "factions": [
+        "fac_wallachia"
+      ],
+      "vassal_of": [
+        "fac_wallachia"
+      ]
+    },
+    {
+      "id": "djotchides",
+      "name": "Djötchides",
+      "arms_of": "fac_golden_horde",
+      "blazon": "De gueules à la lune d'or.",
+      "description": "Descendants de Djötchi, fils aîné de Gengis Khan : maison régnante de la Horde d'Or. Pas d'héraldique attestée ; couleurs de convention.",
+      "source": "fr.wikipedia : Horde d'or",
+      "certainty": "substitution",
+      "factions": [
+        "fac_golden_horde"
+      ],
+      "vassal_of": [
+        "fac_golden_horde"
+      ]
+    },
+    {
+      "id": "moscou",
+      "name": "Moscou",
+      "arms_of": "fac_moscow",
+      "blazon": "De gueules à la bande d'or.",
+      "description": "Daniilovitchi, branche cadette des Riourikides, princes de Moscou. Pas d'armoiries fixées en 1337 ; substitution.",
+      "source": "fr.wikipedia : Ivan Ier de Moscou",
+      "certainty": "substitution",
+      "factions": [
+        "fac_moscow"
+      ],
+      "vassal_of": [
+        "fac_moscow"
+      ]
+    },
+    {
+      "id": "tver",
+      "name": "Tver",
+      "arms_of": "fac_tver",
+      "blazon": "De gueules au chevron d'or.",
+      "description": "Maison princière de Tver (Iaroslavitchi), armes de convention.",
+      "source": "fr.wikipedia : Principauté de Tver",
+      "certainty": "substitution",
+      "factions": [
+        "fac_tver",
+        "fac_pskov"
+      ],
+      "vassal_of": [
+        "fac_tver"
+      ]
+    },
+    {
+      "id": "riazan",
+      "name": "Riazan",
+      "arms_of": "fac_ryazan",
+      "blazon": "D'azur au pal d'or.",
+      "description": "Maison des princes de Riazan, armes de convention.",
+      "source": "fr.wikipedia : Principauté de Riazan",
+      "certainty": "substitution",
+      "factions": [
+        "fac_ryazan"
+      ],
+      "vassal_of": [
+        "fac_ryazan"
+      ]
+    },
+    {
+      "id": "souzdal",
+      "name": "Souzdal",
+      "arms_of": "fac_suzdal",
+      "blazon": "D'azur à l'aigle d'argent.",
+      "description": "Maison des princes de Souzdal-Nijni Novgorod, armes de convention.",
+      "source": "fr.wikipedia : Principauté de Souzdal",
+      "certainty": "substitution",
+      "factions": [
+        "fac_suzdal"
+      ],
+      "vassal_of": [
+        "fac_suzdal"
+      ]
+    },
+    {
+      "id": "iaroslavl",
+      "name": "Iaroslavl",
+      "arms_of": "fac_yaroslavl",
+      "blazon": "D'argent au chevron de sable.",
+      "description": "Maison des princes de Iaroslavl, armes de convention.",
+      "source": "fr.wikipedia : Principauté de Iaroslavl",
+      "certainty": "substitution",
+      "factions": [
+        "fac_yaroslavl"
+      ],
+      "vassal_of": [
+        "fac_yaroslavl"
+      ]
+    },
+    {
+      "id": "smolensk",
+      "name": "Smolensk",
+      "arms_of": "fac_smolensk",
+      "blazon": "De gueules à la guivre d'or.",
+      "description": "Maison des princes de Smolensk (Rostislavitchi), armes de convention ; la branche de Briansk en descend.",
+      "source": "fr.wikipedia : Principauté de Smolensk",
+      "certainty": "substitution",
+      "factions": [
+        "fac_smolensk",
+        "fac_briansk"
+      ],
+      "vassal_of": [
+        "fac_smolensk",
+        "fac_briansk"
+      ]
+    },
+    {
+      "id": "novgorod",
+      "name": "Novgorod",
+      "arms_of": "fac_novgorod",
+      "blazon": "D'argent à la nef de gueules.",
+      "description": "Notables (boyards) de la république de Novgorod, armes de convention.",
+      "source": "fr.wikipedia : République de Novgorod",
+      "certainty": "substitution",
+      "factions": [
+        "fac_novgorod"
+      ],
+      "vassal_of": [
+        "fac_novgorod"
+      ]
+    },
+    {
+      "id": "osmanogullar",
+      "name": "Osmanoğulları",
+      "arms_of": "fac_ottoman",
+      "blazon": "De gueules au chef d'argent.",
+      "description": "Maison régnante (Ottomans) ; Couleurs rouge et blanc portées par les Ottomans ; le croissant et l'étoile ne sont pas encore fixés, blason de jeu.",
+      "source": "Orhan (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_ottoman"
+      ],
+      "vassal_of": [
+        "fac_ottoman"
+      ]
+    },
+    {
+      "id": "karesiogullar",
+      "name": "Karesioğulları",
+      "arms_of": "fac_karasi",
+      "blazon": "D'azur à l'étoile d'or.",
+      "description": "Maison régnante (Karasi) ; Couleurs de convention des Karasi.",
+      "source": "Karasids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_karasi"
+      ],
+      "vassal_of": [
+        "fac_karasi"
+      ]
+    },
+    {
+      "id": "saruhanogullar",
+      "name": "Saruhanoğulları",
+      "arms_of": "fac_saruhan",
+      "blazon": "De sinople au chevron d'argent.",
+      "description": "Maison régnante (Saruhan) ; Couleurs de convention des Saruhan.",
+      "source": "Saruhanids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_saruhan"
+      ],
+      "vassal_of": [
+        "fac_saruhan"
+      ]
+    },
+    {
+      "id": "aydnogullar",
+      "name": "Aydınoğulları",
+      "arms_of": "fac_aydin",
+      "blazon": "D'argent à la nef de sinople.",
+      "description": "Maison régnante (Aydın) ; Nef en hommage à la flotte des Aydın ; couleurs de convention.",
+      "source": "Aydınids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_aydin"
+      ],
+      "vassal_of": [
+        "fac_aydin"
+      ]
+    },
+    {
+      "id": "menteseogullar",
+      "name": "Menteşeoğulları",
+      "arms_of": "fac_mentese",
+      "blazon": "De sable à la bande d'argent.",
+      "description": "Maison régnante (Menteşe) ; Couleurs de convention de Menteşe.",
+      "source": "Menteşe (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_mentese"
+      ],
+      "vassal_of": [
+        "fac_mentese"
+      ]
+    },
+    {
+      "id": "germiyanogullar",
+      "name": "Germiyanoğulları",
+      "arms_of": "fac_germiyan",
+      "blazon": "D'or à la bande de sinople.",
+      "description": "Maison régnante (Germiyan) ; Couleurs de convention des Germiyan.",
+      "source": "Germiyan (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_germiyan"
+      ],
+      "vassal_of": [
+        "fac_germiyan"
+      ]
+    },
+    {
+      "id": "hamidogullar",
+      "name": "Hamidoğulları",
+      "arms_of": "fac_hamid",
+      "blazon": "D'azur à la bande d'argent.",
+      "description": "Maison régnante (Hamid) ; Couleurs de convention des Hamid.",
+      "source": "Hamidids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_hamid"
+      ],
+      "vassal_of": [
+        "fac_hamid"
+      ]
+    },
+    {
+      "id": "tekeogullar",
+      "name": "Tekeoğulları",
+      "arms_of": "fac_teke",
+      "blazon": "D'or à la nef de sinople.",
+      "description": "Maison régnante (Teke) ; Nef d'Antalya ; couleurs de convention.",
+      "source": "Teke (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_teke"
+      ],
+      "vassal_of": [
+        "fac_teke"
+      ]
+    },
+    {
+      "id": "esrefogullar",
+      "name": "Eşrefoğulları",
+      "arms_of": "fac_esrefid",
+      "blazon": "De sinople au chevron d'or.",
+      "description": "Maison régnante (Eşrefoğulları) ; Couleurs de convention des Eşrefoğulları.",
+      "source": "Eshrefids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_esrefid"
+      ],
+      "vassal_of": [
+        "fac_esrefid"
+      ]
+    },
+    {
+      "id": "karamanogullar",
+      "name": "Karamanoğulları",
+      "arms_of": "fac_karaman",
+      "blazon": "De sable au chevron d'or.",
+      "description": "Maison régnante (Karaman) ; Couleurs de convention des Karamanoğulları.",
+      "source": "Karamanids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_karaman"
+      ],
+      "vassal_of": [
+        "fac_karaman"
+      ]
+    },
+    {
+      "id": "eretnides",
+      "name": "Eretnides",
+      "arms_of": "fac_eretna",
+      "blazon": "D'argent au sautoir d'azur.",
+      "description": "Maison régnante (Eretna) ; Couleurs de convention d'Eretna.",
+      "source": "Eretna (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_eretna"
+      ],
+      "vassal_of": [
+        "fac_eretna"
+      ]
+    },
+    {
+      "id": "candarogullar",
+      "name": "Candaroğulları",
+      "arms_of": "fac_candar",
+      "blazon": "De gueules au sautoir d'argent.",
+      "description": "Maison régnante (Candar) ; Couleurs de convention des Candar.",
+      "source": "Candar dynasty (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_candar"
+      ],
+      "vassal_of": [
+        "fac_candar"
+      ]
+    },
+    {
+      "id": "grands_comnenes",
+      "name": "Grands Comnènes",
+      "arms_of": "fac_trebizond",
+      "blazon": "D'or à l'aigle de sable.",
+      "description": "Maison régnante (Trébizonde) ; Aigle impérial des Grands Comnènes ; couleurs de convention.",
+      "source": "Empire of Trebizond (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_trebizond"
+      ],
+      "vassal_of": [
+        "fac_trebizond"
+      ]
+    },
+    {
+      "id": "hethoumides",
+      "name": "Héthoumides",
+      "arms_of": "fac_cilicia",
+      "blazon": "De gueules au lion d'or couronné d'argent.",
+      "description": "Maison régnante (Cilicie) ; Lion des Roupénides et des Héthoumides ; couleurs et couronne de convention.",
+      "source": "Kingdom of Armenia (Cilicia) (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_cilicia"
+      ],
+      "vassal_of": [
+        "fac_cilicia"
+      ]
+    },
+    {
+      "id": "dulkadirogullar",
+      "name": "Dulkadiroğulları",
+      "arms_of": "fac_dulkadir",
+      "blazon": "De sinople à la bande d'argent.",
+      "description": "Maison régnante (Dulkadir) ; Couleurs de convention des Dulkadir.",
+      "source": "Dulkadir (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_dulkadir"
+      ],
+      "vassal_of": [
+        "fac_dulkadir"
+      ]
+    },
+    {
+      "id": "bagratides",
+      "name": "Bagratides",
+      "arms_of": "fac_georgia",
+      "blazon": "D'argent à la croix de gueules, au chef d'or.",
+      "description": "Maison régnante (Géorgie) ; Croix de Géorgie ; chef d'or de convention.",
+      "source": "Kingdom of Georgia (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_georgia"
+      ],
+      "vassal_of": [
+        "fac_georgia"
+      ]
+    },
+    {
+      "id": "djakeli",
+      "name": "Djakéli",
+      "arms_of": "fac_samtskhe",
+      "blazon": "D'azur à la croix d'or.",
+      "description": "Maison régnante (Samtskhé) ; Croix des Djakéli ; couleurs de convention.",
+      "source": "Samtskhe-Saatabago (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_samtskhe"
+      ],
+      "vassal_of": [
+        "fac_samtskhe"
+      ]
+    },
+    {
+      "id": "adyghes",
+      "name": "Adyghés",
+      "arms_of": "fac_circassia",
+      "blazon": "De sinople à trois étoiles d'or.",
+      "description": "Maison régnante (Circassie) ; Étoiles du drapeau circassien ; couleurs de convention.",
+      "source": "Circassia (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_circassia"
+      ],
+      "vassal_of": [
+        "fac_circassia"
+      ]
+    },
+    {
+      "id": "alains",
+      "name": "Alains",
+      "arms_of": "fac_alania",
+      "blazon": "De gueules à la fasce d'argent.",
+      "description": "Maison régnante (Alanie) ; Couleurs de convention des Alains.",
+      "source": "Alania (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_alania"
+      ],
+      "vassal_of": [
+        "fac_alania"
+      ]
+    },
+    {
+      "id": "djalayirides",
+      "name": "Djalayirides",
+      "arms_of": "fac_jalayirids",
+      "blazon": "De gueules à la bordure d'or.",
+      "description": "Maison régnante (Djalayirides) ; Couleurs de convention des Djalayirides.",
+      "source": "Jalayirids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_jalayirids"
+      ],
+      "vassal_of": [
+        "fac_jalayirids"
+      ]
+    },
+    {
+      "id": "artuqides",
+      "name": "Artuqides",
+      "arms_of": "fac_artuqids",
+      "blazon": "D'or à la bande de sable.",
+      "description": "Maison régnante (Artuqides) ; Couleurs de convention des Artuqides.",
+      "source": "Artuqids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_artuqids"
+      ],
+      "vassal_of": [
+        "fac_artuqids"
+      ]
+    },
+    {
+      "id": "qalawunides",
+      "name": "Qalawunides",
+      "arms_of": "fac_mamluks",
+      "blazon": "D'or à la fasce de sable.",
+      "description": "Maison régnante (Mamelouks) ; Couleurs jaune et noir de l'étendard mamelouk ; blason de jeu.",
+      "source": "Mamluk Sultanate (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_mamluks"
+      ],
+      "vassal_of": [
+        "fac_mamluks"
+      ]
+    },
+    {
+      "id": "ayyoubides",
+      "name": "Ayyoubides",
+      "arms_of": "fac_hama",
+      "blazon": "D'or à la fasce d'azur.",
+      "description": "Maison régnante (Hama) ; Couleurs ayyoubides ; blason de jeu.",
+      "source": "Hama (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_hama"
+      ],
+      "vassal_of": [
+        "fac_hama"
+      ]
+    },
+    {
+      "id": "paleologue_byzance",
+      "name": "Paléologue de Byzance",
+      "arms_of": "fac_byzantium",
+      "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+      "description": "Maison régnante de l'Empire depuis 1261 (Michel VIII).",
+      "source": "Palaiologos",
+      "certainty": "attesté",
+      "factions": [
+        "fac_byzantium"
+      ],
+      "vassal_of": [
+        "fac_byzantium"
+      ]
+    },
+    {
+      "id": "cantacuzene",
+      "name": "Cantacuzène",
+      "arms_of": "fac_byzantium",
+      "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+      "description": "Grande famille de l'aristocratie byzantine ; armes non attestées, armes impériales par substitution.",
+      "source": "Kantakouzenos",
+      "certainty": "substitution",
+      "factions": [
+        "fac_byzantium"
+      ],
+      "vassal_of": [
+        "fac_byzantium"
+      ]
+    },
+    {
+      "id": "nemanjic",
+      "name": "Nemanjić",
+      "arms_of": "fac_serbia",
+      "blazon": "De gueules à l'aigle bicéphale d'argent.",
+      "description": "Dynastie de Serbie depuis Étienne Nemanja (vers 1166).",
+      "source": "Nemanjić dynasty",
+      "certainty": "incertain",
+      "factions": [
+        "fac_serbia"
+      ],
+      "vassal_of": [
+        "fac_serbia"
+      ]
+    },
+    {
+      "id": "chichman",
+      "name": "Chichman",
+      "arms_of": "fac_bulgaria",
+      "blazon": "De gueules au lion d'or couronné.",
+      "description": "Dynastie régnante en Bulgarie depuis 1323 (Michel Chichman) ; armes attribuées à l'empire.",
+      "source": "Shishman dynasty",
+      "certainty": "incertain",
+      "factions": [
+        "fac_bulgaria"
+      ],
+      "vassal_of": [
+        "fac_bulgaria"
+      ]
+    },
+    {
+      "id": "belaur",
+      "name": "Belaur",
+      "arms_of": "fac_vidin",
+      "blazon": "D'azur au lion d'argent couronné d'or.",
+      "description": "Armes de convention pour le despote de Vidin.",
+      "source": "Belaur",
+      "certainty": "substitution",
+      "factions": [
+        "fac_vidin"
+      ],
+      "vassal_of": [
+        "fac_vidin"
+      ]
+    },
+    {
+      "id": "kotromanic",
+      "name": "Kotromanić",
+      "arms_of": "fac_bosnia",
+      "blazon": "D'azur à six fleurs de lis d'or posées trois, deux et une.",
+      "description": "Maison des bans de Bosnie.",
+      "source": "Kotromanić dynasty",
+      "certainty": "incertain",
+      "factions": [
+        "fac_bosnia"
+      ],
+      "vassal_of": [
+        "fac_bosnia"
+      ]
+    },
+    {
+      "id": "orsini_epire",
+      "name": "Orsini d'Épire",
+      "arms_of": "fac_epirus",
+      "blazon": "Bandé d'argent et de gueules, au chef d'argent chargé d'une rose de gueules.",
+      "description": "Branche des Orsini de Céphalonie, despotes d'Épire.",
+      "source": "Orsini family",
+      "certainty": "incertain",
+      "factions": [
+        "fac_epirus"
+      ],
+      "vassal_of": [
+        "fac_epirus"
+      ]
+    },
+    {
+      "id": "anjou_durazzo",
+      "name": "Anjou-Durazzo",
+      "arms_of": "fac_durazzo",
+      "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules et au lambel d'argent.",
+      "description": "Branche d'Anjou-Sicile issue de Jean de Gravina, ducs de Durazzo.",
+      "source": "House of Anjou-Durazzo",
+      "certainty": "incertain",
+      "factions": [
+        "fac_durazzo"
+      ],
+      "vassal_of": [
+        "fac_durazzo"
+      ]
+    },
+    {
+      "id": "lanza",
+      "name": "Lanza",
+      "arms_of": "fac_athens",
+      "blazon": "D'or à quatre pals de gueules, à la bordure d'azur.",
+      "description": "Maison sicilienne du vicaire Nicolas Lanza ; armes du duché par substitution.",
+      "source": "Lanza family",
+      "certainty": "substitution",
+      "factions": [
+        "fac_athens"
+      ],
+      "vassal_of": [
+        "fac_athens"
+      ]
+    },
+    {
+      "id": "sanudo",
+      "name": "Sanudo",
+      "arms_of": "fac_archipelago",
+      "blazon": "Écartelé d'argent et de gueules.",
+      "description": "Maison vénitienne des ducs de Naxos depuis Marco Sanudo (1207).",
+      "source": "Sanudo",
+      "certainty": "incertain",
+      "factions": [
+        "fac_archipelago"
+      ],
+      "vassal_of": [
+        "fac_archipelago"
+      ]
+    },
+    {
+      "id": "villeneuve_hospitaliers",
+      "name": "Villeneuve",
+      "arms_of": "fac_hospitallers",
+      "blazon": "De gueules à la croix d'argent, au chef d'azur.",
+      "description": "Grand maître Hélion de Villeneuve : armes de l'Ordre par substitution.",
+      "source": "Hélion de Villeneuve",
+      "certainty": "substitution",
+      "factions": [
+        "fac_hospitallers"
+      ],
+      "vassal_of": [
+        "fac_hospitallers"
+      ]
+    },
+    {
+      "id": "lusignan_chypre",
+      "name": "Lusignan-Chypre",
+      "arms_of": "fac_cyprus",
+      "blazon": "Burelé d'argent et d'azur au lion de gueules couronné d'or.",
+      "description": "Maison royale de Chypre et de Jérusalem.",
+      "source": "House of Lusignan",
+      "certainty": "attesté",
+      "factions": [
+        "fac_cyprus"
+      ],
+      "vassal_of": [
+        "fac_cyprus"
+      ]
+    },
+    {
+      "id": "marinides",
+      "name": "Mérinides",
+      "blazon": "D'argent à la bordure de sable.",
+      "description": "Champ blanc, étendard des Banu Marin ; bordure de sable ajoutée pour la distinction en jeu.",
+      "source": "fr.wikipedia : Mérinides, drapeau",
+      "certainty": "incertain",
+      "factions": [
+        "fac_marinids"
+      ],
+      "vassal_of": [
+        "fac_marinids"
+      ]
+    },
+    {
+      "id": "hafsides",
+      "name": "Hafsides",
+      "blazon": "Coupé de gueules et d'argent.",
+      "description": "Bicolore blanc et rouge d'après les portulans.",
+      "source": "fr.wikipedia : Hafsides ; Atlas catalan (1375)",
+      "certainty": "incertain",
+      "factions": [
+        "fac_hafsids"
+      ],
+      "vassal_of": [
+        "fac_hafsids"
+      ]
+    },
+    {
+      "id": "banu_thabit",
+      "name": "Banu Thabit",
+      "blazon": "D'or à la bande de sinople.",
+      "description": "Emblème de jeu, aucune source héraldique connue.",
+      "source": "convention de jeu",
+      "certainty": "substitution",
+      "factions": [
+        "fac_tripoli"
+      ],
+      "vassal_of": [
+        "fac_tripoli"
+      ]
+    },
+    {
+      "id": "bas_serra",
+      "name": "Bas-Serra",
+      "blazon": "D'argent à la bordure de sinople.",
+      "description": "Arbre arraché d'Arborée ; non rendu, bordure de substitution.",
+      "source": "it.wikipedia : Giudicato d'Arborea, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_arborea"
+      ],
+      "vassal_of": [
+        "fac_arborea"
+      ]
+    }
   ]
 }

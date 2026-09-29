@@ -11,6 +11,52 @@ Lire ce fichier, `git worktree list`, `git branch --list 'feat/rs-*'`. Chaque lo
 `docs/wip/rs-<lot>.md`. Fusion : worktree `../gp-rs-merge` (branche `integration/rs`), puis ff-only
 vers `main`. ADR réservés : **0100** (lot B ; 0098 pris par FE), **0099** (lot F). GA réserve 0104-0106.
 
+## TERMINÉ (28/09 soir)
+
+Tous les lots RS sont dans `main` (dernier : f93c2359). Dernière vague : **P2f** (74 tailles en dur → `UiType` ;
+bannière de fin 40 px gardée), **P2d** (sort de la ville prise en `MODAL`, corps défilant ; avant-bataille et
+naval en `UiType`), **N** (bouton « Raser » + `settlement_demolition_preview` au pont, confirmation modale,
+infobulle IB `raze_building`). Conflits : P2d × P2f (`chronicle_window.gd`), P2f × IB2 (3 fichiers :
+infobulle IB + taille `UiType`), N × règle IB2 (plus de `tooltip_text` littéral).
+Worktree `../gp-rs-merge` et branche `integration/rs` supprimés.
+
+Suites possibles (non lancées) :
+- ~~`PreBattleDialog._layout()` déborde à 1280×640~~ — FAIT 28/09 (65dd4452) : colonnes et conditions défilantes,
+  bannière réduite sous 760 px, re-layout au changement de minimum ; C2 de `p2d_ui_test` bloquant.
+- ~~Icône dédiée « Raser »~~ — FAIT 28/09 : `act_raze` (`raze.png`, 0,04 $).
+- Écrans de siège en bataille (`battle_siege.gd`, points de capture) après TW2 T4.
+- Pics carte restants ~8 ms (`settle/labels`, `settle/declutter`), `docs/wip/rs-k2-perf.md`.
+- FE F8 : ost d'Empire sans distance, banqueroutes ×20 ; remonter le plancher c7a (ADR 0113) si l'ost est restreint.
+
+## Reprise (28/09 ~15 h)
+
+- P2c **fusionné** (67171a61) : smoke, `p2c_ui_test`, `po_ui_test` verts.
+- B : agent de reprise dans son worktree (century_probe 4 niveaux, 2 × 75), puis intégration.
+- **B fusionné** (ADR 0100 acceptée ; century_probe 4 niveaux dans la bande, voir `rs-b-order.md`).
+  Conflit sémantique B × TW2 (`capture.rs` appelait `province_income` sans règles) : main ne compilait
+  plus, corrigé 38954b4f.
+- **P2g fusionné** (48f1a5f8) : Tech/Cour/Fiche/Diplo/SaveLoadDialog en zone `MODAL` ; le voile couvre
+  la barre du haut (bible § 12.1). Incident : `q3_playtest.gd` lancé par l'agent a réécrit le
+  `settings.cfg` du joueur (`advisor_seen` vidé).
+- En cours : **C** (`feat/rs-c-diplo`, plafond par motif, démolition IA), **L** (`feat/rs-l-alerts`,
+  champ de siège au pont pour `alerts.gd`). P2d attend TW2 T4 (UI de capture).
+- **K fusionné** (perf carte : `town/models` 25 → 0 ms, images > 50 ms 106 → 87), **L fusionné**
+  (champs `siege_*` dans `get_provinces_snapshot`, `alerts.gd` en lecture groupée), **C fusionné**
+  (5aae540f, ADR **0111** renumérotée : plafond d'opinion par motif, ordre `Demolish` + IA en déficit).
+  Conflit sémantique C × FE (`feudal/transfer.rs`, champ `deficit_seasons`) corrigé à l'intégration.
+  `sz4*_test` exigent `data/map/pyramid` (ignoré par git) : liens symboliques dans les worktrees.
+- En cours : **M** (`feat/rs-m-c7a`, sonde c7a rouge sur main : France 34 286 < 40 000 depuis TW2/FE),
+  **K2** (`feat/rs-k2-perf`, `settle/*` et `life/*` au zoom). En attente : P2d (TW2 T4), P2f (après IB).
+- **K2 fusionné** (c18158c9 : images > 50 ms 50 → 1, pire 123 → 52 ms), **M fusionné** (2fda948b, ADR
+  **0113** : pas de bogue, plancher du trésor France de la sonde c7a 40 000 → 15 000 ; causes : rançons du roi
+  plus fréquentes avec TW2, ost d'Empire FE avec vassaux italiens ; banqueroutes century 1,09 vs 0,05 —
+  signalé à FE pour F8).
+- Reste : P2d (attend TW2 T4), P2f (attend IB). Suites facultatives : bouton « Raser » (UI), pics
+  `settle/labels`/`declutter` ~8 ms.
+- Vague 3 lancée : **P2g** (`feat/p2g-layout`, Tech/Diplo/Cour/Fiche/SaveLoadDialog dans `UiLayout`),
+  **K perf** (`feat/rs-k-perf`, `TownLayer` ~10 ms, `qt/collect`). `alerts.gd` (champ de siège au pont)
+  attend TW2 SB (même zone) ; C après B ; P2d après TW2 SB ; P2f en dernier.
+
 ## PAUSE (28/09 ~09 h 15, demande du joueur) — comment reprendre
 
 `main` = fec99a04 + ce commit : lots A, D, E, F, G, H, J, P2a, P2b, P2e fusionnés. Deux lots arrêtés, tout commité :
@@ -47,7 +93,7 @@ Note E : `alerts.gd` garde une lecture par province (détail du siège absent de
 |---|---|---|---|
 | P2a | cour, fiche perso, arbre familial | `feat/p2a-court` | **fusionné** (9b1ee0bb) ; cour et fiche restent hors `UiLayout` (même cause que P2b) |
 | P2b | techniques, diplomatie | `feat/p2b-tech-diplo` | **fusionné** (9b1ee0bb) — fini (9ceabff1) ; Tech/Diplo restent hors `UiLayout` (reparentage casse `map_ui._keep_on_screen`) |
-| P2c | codex, encyclopédie, infobulles | `feat/p2c-codex` | en cours (codex en `MODAL`) |
+| P2c | codex, encyclopédie, infobulles | `feat/p2c-codex` | **fusionné** (67171a61), codex en `MODAL` |
 | P2e | menus secondaires | `feat/p2e-menus` | **fusionné** (9b1ee0bb) — fini (816c775b) ; `SaveLoadDialog` de `start_menu`/`map_ui` pas en zone |
 | G | Bordeaux, Avignon, Calais, Bruges ; rives | `feat/rs-g-cities` | **fusionné** (9b1ee0bb) ; recuisson par le joueur |
 | J | pavois face à une cible cachée (test ignoré de D) | `feat/rs-j-pavise` | **fusionné** (9b1ee0bb), sondes ep7/ep9b/eq7 identiques |

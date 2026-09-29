@@ -10,6 +10,8 @@ use sim_campaign::{CampaignState, Order};
 
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    // FE5: the feudal AI decides, whatever the order of the tests.
+    ai::feudal::install();
     GameData::load(&root).expect("game data loads").0
 }
 
@@ -257,8 +259,12 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
     let anchor = state
         .factions
         .iter()
-        .filter(|(id, f)| {
-            **id != brabant && f.alive && f.suzerain.is_none() && id.as_str() != "fac_rebels"
+        // FE5 (ADR 0110): the Low Countries princes are vassals of the Empire.
+        .filter(|(id, f)| **id != brabant && f.alive && id.as_str() != "fac_rebels")
+        // The Low Countries only: FE4b's Rhenish princes (Cologne, Trier) sort
+        // first and would draw England's pension to the Rhine instead.
+        .filter(|(id, _)| {
+            ["fac_hainaut", "fac_guelders", "fac_flanders", "fac_julich"].contains(&id.as_str())
         })
         .map(|(id, _)| id.clone())
         .find(|id| {

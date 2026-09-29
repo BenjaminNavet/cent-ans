@@ -1,0 +1,109 @@
+[
+  {
+    "id": "set_marienburg",
+    "province": "prov_pomesania",
+    "kind": "city",
+    "name": {
+      "display": "Marienbourg",
+      "local": "Marienburg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      19.0402,
+      54.0383
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_armoury",
+      "bld_stables",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Résidence du grand maître : la plus grande forteresse de briques de l'Occident, sur la Nogat.",
+    "sources": [
+      "Château de Malbork"
+    ]
+  },
+  {
+    "id": "set_elbing",
+    "province": "prov_pomesania",
+    "kind": "town",
+    "name": {
+      "display": "Elbing",
+      "local": "Elbing",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      19.4041,
+      54.1561
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_guild_hall"
+    ],
+    "port": true,
+    "description": "Ville hanséatique de la lagune de la Vistule, de droit de Lübeck.",
+    "sources": [
+      "Elbląg"
+    ]
+  },
+  {
+    "id": "set_marienwerder",
+    "province": "prov_pomesania",
+    "kind": "abbey",
+    "name": {
+      "display": "Marienwerder",
+      "local": "Marienwerder",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      18.9333,
+      53.7333
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_collegiate_church",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Siège du chapitre de Pomésanie, château fortifié.",
+    "sources": [
+      "Kwidzyn"
+    ]
+  },
+  {
+    "id": "set_christburg",
+    "province": "prov_pomesania",
+    "kind": "castle",
+    "name": {
+      "display": "Christburg",
+      "local": "Christburg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      19.1333,
+      53.9333
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'Ordre, où fut signé le traité de 1249 avec les Prussiens.",
+    "sources": [
+      "Dzierzgoń"
+    ]
+  }
+]

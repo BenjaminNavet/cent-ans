@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_mdina",
+    "province": "prov_malta",
+    "kind": "city",
+    "name": {
+      "display": "Mdina",
+      "local": "Città Notabile",
+      "local_language": "italien"
+    },
+    "lonlat": [
+      14.4025,
+      35.8867
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de Malte, sur son plateau fortifié.",
+    "sources": [
+      "Mdina"
+    ]
+  },
+  {
+    "id": "set_birgu",
+    "province": "prov_malta",
+    "kind": "town",
+    "name": {
+      "display": "Birgu",
+      "local": "Il-Birgu",
+      "local_language": "maltais"
+    },
+    "lonlat": [
+      14.5226,
+      35.8874
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "sea_zone": "sea_mediterranean",
+    "description": "Port du Grand Port, futur foyer de l'ordre de Saint-Jean ; alors simple bourg de pêcheurs et de marins.",
+    "sources": [
+      "Birgu"
+    ]
+  },
+  {
+    "id": "set_gozo",
+    "province": "prov_malta",
+    "kind": "castle",
+    "name": {
+      "display": "Citadelle de Gozo",
+      "local": "Il-Kastell",
+      "local_language": "maltais"
+    },
+    "lonlat": [
+      14.2393,
+      36.0443
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Château de Gozo (Rabat), refuge de l'île.",
+    "sources": [
+      "Gozo"
+    ]
+  }
+]

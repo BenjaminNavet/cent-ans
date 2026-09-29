@@ -179,7 +179,7 @@ func _ready() -> void:
 func _scroll_button(text: String, direction: int) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.tooltip_text = "Faire défiler les navires"
+	RichTooltip.attach_plain(button, "naval_scroll_ships")
 	BattleUiKit.button_font(button, 22)
 	button.custom_minimum_size = Vector2(26, 0)
 	button.visible = false
@@ -313,7 +313,7 @@ func update_cards(ships: Array, selected: Array) -> void:
 		if _compact and status == "afloat":
 			text = "%d h · %s" % [men + sailors, text]
 		(card["status"] as Label).text = text
-		(card["panel"] as PanelContainer).tooltip_text = "%s (%s) — %d hommes, %d marins" % [ship["name"], ship["class_name"], men, sailors]
+		RichTooltip.attach_plain(card["panel"] as PanelContainer, "naval_ship_card", {"title": "%s (%s)" % [ship["name"], ship["class_name"]], "body": "%d hommes, %d marins" % [men, sailors]})
 		(card["status"] as Label).add_theme_color_override("font_color", BattleUiKit.RUBRIC if float(ship["fire"]) > 0.05 or status != "afloat" else BattleUiKit.INK_SOFT)
 		var panel: PanelContainer = card["panel"]
 		var chosen := selected.has(id)
@@ -356,7 +356,7 @@ func _make_card(ship: Dictionary) -> Dictionary:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(170, 96)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	panel.tooltip_text = "%s (%s)" % [ship["name"], ship["class_name"]]
+	RichTooltip.attach_plain(panel, "naval_ship_name", {"title": "%s (%s)" % [ship["name"], ship["class_name"]]})
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 1)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -375,7 +375,7 @@ func _make_card(ship: Dictionary) -> Dictionary:
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = BattleUiKit.GOOD
 	hull.add_theme_stylebox_override("fill", fill)
-	hull.tooltip_text = "Coque"
+	RichTooltip.attach_plain(hull, "naval_hull")
 	column.add_child(hull)
 	var crew := BattleUiKit.label("", 13, BattleUiKit.INK)
 	crew.mouse_filter = Control.MOUSE_FILTER_IGNORE

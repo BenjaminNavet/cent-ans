@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_sarai",
+    "province": "prov_saray",
+    "kind": "city",
+    "name": {
+      "display": "Saraï",
+      "local": "Sarāy",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      47.8,
+      48.58
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_fair",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Saraï de Batou, capitale du khan Özbeg.",
+    "sources": [
+      "Saraï (Horde d'Or)"
+    ]
+  },
+  {
+    "id": "set_sarai_al_jadid",
+    "province": "prov_saray",
+    "kind": "town",
+    "name": {
+      "display": "Saraï al-Djadid",
+      "local": "Sarāy al-Jadīd",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      46.05,
+      48.8
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "« Saraï-la-Neuve », fondée sous Özbeg (emplacement approximatif, à Tsarev).",
+    "sources": [
+      "Saraï al-Jadid"
+    ]
+  },
+  {
+    "id": "set_ukek",
+    "province": "prov_saray",
+    "kind": "town",
+    "name": {
+      "display": "Oukek",
+      "local": "Ükek",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      46.0,
+      51.4
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Volga moyenne, atelier monétaire de la Horde (près de Saratov).",
+    "sources": [
+      "Oukek"
+    ]
+  }
+]

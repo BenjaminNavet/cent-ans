@@ -11,6 +11,8 @@ use sim_campaign::{ArmyId, ArmyPosition, CampaignState, EventKind, Order};
 
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    // FE5: the feudal AI decides, whatever the order of the tests.
+    ai::feudal::install();
     GameData::load(&root).expect("game data loads").0
 }
 
@@ -358,26 +360,35 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
     }
     let france = mean(&|g| g.treasury[0] as f64);
     let england = mean(&|g| g.treasury[1] as f64);
+    let sieges = mean(&|g| f64::from(g.siege_turns) / 50.0);
+    let stuck = mean(&|g| f64::from(g.stuck_turns) / 50.0);
+    let landings = mean(&|g| f64::from(g.english_landings));
+    // RS-B: the band is printed before it is checked, so that a failure shows every figure.
+    println!(
+        "France {france:.0}, England {england:.0}, sieges/turn {sieges:.3}, stuck/turn {stuck:.2}, English landings {landings:.1}, battles {:.1}",
+        mean(&|g| f64::from(g.battles))
+    );
+    // RS-M (ADR 0113): 40 000 until TW2 (royal ransoms after battles) and FE
+    // (the Empire's host at war with France from turn 8); 24 336 on main of
+    // 2026-09-28, standard error of the 8-seed mean about 3 400. FE8 (ADR
+    // 0114, effective host): 32 603, floor raised to 20 000 (the mean less
+    // about three standard errors, rounded down to 5 000).
     assert!(
-        (40_000.0..=160_000.0).contains(&france),
+        (20_000.0..=160_000.0).contains(&france),
         "France's treasury {france}"
     );
     assert!(
         (5_000.0..=40_000.0).contains(&england),
         "England's treasury {england}"
     );
-    let sieges = mean(&|g| f64::from(g.siege_turns) / 50.0);
-    assert!((1.5..=8.0).contains(&sieges), "sieges per turn {sieges}");
-    let stuck = mean(&|g| f64::from(g.stuck_turns) / 50.0);
+    // RS-B (ADR 0100): 1.5 until the AI weighed its places' buildings by
+    // `province_effect_percent`; sieges went 1.65 -> 1.49 per turn on these
+    // seeds, 1.40 after merging main of 2026-09-28 (margin for chaos: 1.3).
+    assert!((1.3..=8.0).contains(&sieges), "sieges per turn {sieges}");
     assert!(stuck <= 1.0, "stuck armies per turn {stuck}");
-    let landings = mean(&|g| f64::from(g.english_landings));
     assert!(
         landings >= 1.0,
         "England lands on the continent ({landings} per game)"
-    );
-    println!(
-        "France {france:.0}, England {england:.0}, sieges/turn {sieges:.1}, stuck/turn {stuck:.2}, English landings {landings:.1}, battles {:.1}",
-        mean(&|g| f64::from(g.battles))
     );
 }
 

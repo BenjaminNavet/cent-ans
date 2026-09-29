@@ -1,0 +1,27 @@
+{
+  "id": "tit_finland",
+  "rank": "duchy",
+  "name": {
+    "display": "Finlande",
+    "local": "Suomi",
+    "local_language": "finnois"
+  },
+  "de_jure_liege": "tit_sweden",
+  "de_jure_provinces": [
+    "prov_finland",
+    "prov_tavastia",
+    "prov_viborg"
+  ],
+  "holder_1337": {
+    "faction": "fac_sweden",
+    "sources": [
+      "Finlande médiévale",
+      "Traité de Nöteborg (1323)"
+    ]
+  },
+  "description": "Terres finnoises du royaume de Suède : Finlande propre, Tavastie et Viborg-Carélie occidentale.",
+  "sources": [
+    "Finlande médiévale",
+    "Traité de Nöteborg (1323)"
+  ]
+}

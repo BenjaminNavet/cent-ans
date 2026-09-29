@@ -1,0 +1,90 @@
+{
+  "id": "prov_saluzzo",
+  "name": {
+    "display": "Saluces",
+    "local": "Saluzzo",
+    "local_language": "piémontais"
+  },
+  "region": "italie_nord",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Pô"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Saluces",
+      "local": "Saluzzo",
+      "local_language": "piémontais"
+    },
+    "lat": 44.6553,
+    "lon": 7.4906
+  },
+  "geo": {
+    "capital_lonlat": [
+      7.4906,
+      44.6553
+    ],
+    "seed_lonlat": [
+      7.45,
+      44.55
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_saluzzo",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 38000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 500,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Marquisat alpin peu peuplé, aux sources du Pô ; estimation par comparaison avec le Montferrat voisin."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2400,
+  "description": "Marquisat alleutier tenu directement de l'Empire par les marquis de Saluces, rivaux de la Savoie et du Montferrat pour le contrôle des cols alpins ; Thomas II, marquis depuis 1296, y compose son Chevalier errant.",
+  "sources": [
+    "Marquisat de Saluces",
+    "Thomas II de Saluces"
+  ]
+}
