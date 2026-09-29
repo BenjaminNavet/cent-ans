@@ -61,6 +61,16 @@ les basses terres reliées à la mer (Pays-Bas) gardent le comportement d'avant.
   premier pas (touché à l'automne 1347), plus Malaga.
 - f7_events passe (seed inchangée).
 
+## Godot
+- `core/build.sh` en profil debug avec la cible partagée compile godot-bridge contre des
+  dépendances d'un autre checkout (erreurs `set_pyramid`, `HarbouredFelon`) : dylib construite
+  en profil `i1` et copiée à la main dans `game/bin/libcent_ans.debug.dylib`.
+- import OK ; smoke.gd OK (7 min 20 en profil non optimisé).
+- Tests carte : om1_wide_world, om3_terrain, zg2, zg4, zg5b, zg6, zg7a, zg7b, zg7c, zg8, pb3g,
+  po5, rs_k (2), sz6, da7d, ga1, ga2, ga4, ga5, mf1, c5_settlements_ui : OK. Corrigés : zg2, zg8
+  (index de morceau `% 16` → `chunks_x`), zg4 (256 morceaux → `chunk_count()`), zg8 (sonde des
+  Pyrénées oubliée par la migration +1280).
+
 ## Prochaine étape
 Fin de `geo build`, contrôles (colonies hors province, provinces sans pixel, îles sans port),
 puis splat, relief-shade, navgrid, rivers-render, horizon.
