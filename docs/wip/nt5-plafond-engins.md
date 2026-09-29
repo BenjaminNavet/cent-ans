@@ -24,8 +24,9 @@ ADR : `docs/decisions/0128-plafond-et-engins-de-siege.md`.
 - [x] Tests d'assaut existants (m8, m8_battle, q5) : échelles posées avant l'ordre (`ladders_ready`) ;
   sièges de démo (`stage_siege_at`) : échelles + bélier comme avant
 - [x] UI : siege_controller (engins, bouton grisé + infobulle), settlement/province panel (Former une armée > 20)
-- [ ] Test Godot `nt5_cap_engines_test.gd` (après `core/build.sh`), smoke
-- [ ] Garde-fous équilibre avant/après
+- [x] `core/build.sh`, test Godot `nt5_cap_engines_test.gd` OK, `tw2_t3_mercenaries_test` OK
+- [x] Garde-fous bataille avant/après : `ep7_historical` 6/6, `ep9b_duel` 8/8, `ai` (dont `ai_beats_a_passive_ai_at_equal_forces`) 2/2, identiques
+- [ ] Sonde `century_probe` après (part de guerre FR–EN)
 
 ## Chiffres d'équilibre
 Avant (main f36689196, `century_probe 464 1-6`, normale) : guerre FR-EN moy. 67,6 % [61-73], 6/6 dans
