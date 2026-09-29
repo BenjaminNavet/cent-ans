@@ -30,3 +30,9 @@ Intégration : `../gp-omr` (`feat/omr`), tests complets, puis `merge --ff-only` 
 - R6 fini (feat/omr-r6, 25504e100) : campaign_orthodox et campaign_islamic (5 pistes chacun, 24 Mo),
   portraits Andronic III / Abu l-Hasan refaits (0,18 $, cumul OM 8,25 $). Pas de steppe/nordique
   (aucune source libre). Écoute humaine à faire.
+- R2 fini (feat/omr-r2, 02c77b1ba) : chargement ≈ ×2 plus rapide (≈ 6 s estimé au calme), relief BC5
+  + zones humides BC1 (ADR 0118, numéro à vérifier : 0117 pris par tw2-t4), +131 Mo au dépôt.
+  RSS ≈ 2,3 Go (cible 2,2 non démontrée, machine chargée). da7d (declutter < 4 ms) à relancer au calme.
+  Export embarque encore les PNG du relief (134 Mo) inutiles.
+- Disque : 13 Go libres ; profils cargo OM (om1-3, i1, i1main, ≈ 10,8 Go) supprimés, espace retenu
+  par les instantanés locaux Time Machine. R7 en attente d'espace.
