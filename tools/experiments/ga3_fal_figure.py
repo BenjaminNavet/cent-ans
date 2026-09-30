@@ -14,7 +14,11 @@ Stages, each cached in ``RAW_DIR/<unit>[_<attempt>]/`` (an existing output is ne
    ``ga3_figures.py`` can segment them on the generated albedo.
 2. ``sheet_cut.png``: ``fal-ai/bria/background/remove`` on the whole sheet.
 3. ``front.png``: the leftmost figure of the cut sheet (alpha columns), padded square.
-4. ``trellis2.glb``: ``fal-ai/trellis-2`` at 1024 on ``front.png`` (2048 texture).
+4. ``multi.glb`` (default, ``--model multi``): ``fal-ai/trellis/multi`` (0.02 $) on the
+   A-pose views (``--views front,back``: the generated profile often holds something);
+   ``trellis.glb`` (``--model trellis``, 0.02 $) on ``front.png``; ``trellis2.glb``
+   (``--model trellis2``, 0.30 $, lot L3a comparison only: the player keeps to the cheap
+   models) at 1024 on ``front.png`` (2048 texture).
 
 Raw responses are kept as ``result_<stage>.json``; the estimated cost of every paid call is
 appended to ``RAW_DIR/costs.json``.
@@ -31,7 +35,9 @@ from PIL import Image
 
 SR3 = Path.home() / "dev/cent-ans-raw/sr3"
 # Catalogue prices (USD): nano-banana-2 edit at 2K (1.5 x 0.08), bria, trellis-2 at 1024.
-PRICES = {"sheet": 0.12, "cut": 0.018, "trellis2": 0.30}
+PRICES = {"sheet": 0.12, "cut": 0.018, "trellis2": 0.30, "trellis": 0.02, "multi": 0.02}
+VIEW_NAMES = ("front", "side", "back")  # left to right on the sheet
+TRELLIS_ARGS = {"texture_size": 2048, "mesh_simplify": 0.9}
 COMMON = (
     "Edit this photographic character reference sheet. Keep the same man, the same face, the "
     "same headgear, belt, boots and materials, the same realistic museum-reenactor photographic "
@@ -75,8 +81,10 @@ def download(url: str, path: Path) -> None:
     urllib.request.urlretrieve(url, path)
 
 
-def front_crop(cut: Path, out: Path, size: int = 1536) -> tuple[int, int, int, int]:
-    """Leftmost figure of the cut sheet (alpha column runs), centred on a square canvas."""
+def view_crop(
+    cut: Path, out: Path, index: int = 0, size: int = 1536
+) -> tuple[int, int, int, int]:
+    """Figure `index` (left to right) of the cut sheet (alpha column runs), square canvas."""
     rgba = np.asarray(Image.open(cut).convert("RGBA"))
     alpha = rgba[..., 3] > 32
     cols = alpha.sum(axis=0) > 2
@@ -90,7 +98,7 @@ def front_crop(cut: Path, out: Path, size: int = 1536) -> tuple[int, int, int, i
     if start is not None:
         runs.append((start, len(cols)))
     runs = [r for r in runs if r[1] - r[0] > 0.03 * len(cols)]
-    x0, x1 = runs[0]
+    x0, x1 = runs[index]
     rows = np.nonzero(alpha[:, x0:x1].any(axis=1))[0]
     y0, y1 = int(rows[0]), int(rows[-1]) + 1
     crop = Image.fromarray(rgba[y0:y1, x0:x1])
@@ -98,7 +106,7 @@ def front_crop(cut: Path, out: Path, size: int = 1536) -> tuple[int, int, int, i
     canvas = Image.new("RGBA", (side, side), (0, 0, 0, 0))
     canvas.paste(crop, ((side - crop.width) // 2, (side - crop.height) // 2))
     canvas.resize((size, size), Image.LANCZOS).save(out)
-    print(f"FRONT runs={runs} crop=({x0},{y0})-({x1},{y1})")
+    print(f"VIEW {index} runs={runs} crop=({x0},{y0})-({x1},{y1})")
     return x0, y0, x1, y1
 
 
@@ -109,6 +117,10 @@ def main() -> None:
     parser.add_argument("--unit", required=True, choices=sorted(UNITS))
     parser.add_argument("--attempt", type=int, default=1)
     parser.add_argument("--seed", type=int, default=1337)
+    parser.add_argument(
+        "--model", choices=("multi", "trellis", "trellis2"), default="multi"
+    )
+    parser.add_argument("--views", default="front,back")
     args = parser.parse_args()
     name = args.unit if args.attempt == 1 else f"{args.unit}_{args.attempt}"
     out = args.raw / name
@@ -137,19 +149,49 @@ def main() -> None:
         url = fal_client.upload_file(str(sheet))
         res = run("fal-ai/bria/background/remove", {"image_url": url}, out, "cut")
         download(res["image"]["url"], cut)
+    for index, view in enumerate(VIEW_NAMES):
+        if not (out / f"{view}.png").exists():
+            view_crop(cut, out / f"{view}.png", index)
     front = out / "front.png"
-    if not front.exists():
-        front_crop(cut, front)
-    glb = out / "trellis2.glb"
-    if not glb.exists() and not (out / "STOP").exists():
-        url = fal_client.upload_file(str(front))
-        res = run(
-            "fal-ai/trellis-2",
-            {"image_url": url, "seed": args.seed, **TRELLIS2_ARGS},
-            out,
-            "trellis2",
-        )
-        download(res["model_glb"]["url"], glb)
+    if args.model == "multi":
+        views = args.views.split(",")
+        glb = out / f"multi_{'_'.join(views)}.glb"
+        if not glb.exists():
+            urls = [fal_client.upload_file(str(out / f"{v}.png")) for v in views]
+            res = run(
+                "fal-ai/trellis/multi",
+                {
+                    "image_urls": urls,
+                    "multiimage_algo": "stochastic",
+                    "seed": args.seed,
+                    **TRELLIS_ARGS,
+                },
+                out,
+                "multi",
+            )
+            download(res["model_mesh"]["url"], glb)
+    elif args.model == "trellis":
+        glb = out / "trellis.glb"
+        if not glb.exists():
+            url = fal_client.upload_file(str(front))
+            res = run(
+                "fal-ai/trellis",
+                {"image_url": url, "seed": args.seed, **TRELLIS_ARGS},
+                out,
+                "trellis",
+            )
+            download(res["model_mesh"]["url"], glb)
+    else:
+        glb = out / "trellis2.glb"
+        if not glb.exists() and not (out / "STOP").exists():
+            url = fal_client.upload_file(str(front))
+            res = run(
+                "fal-ai/trellis-2",
+                {"image_url": url, "seed": args.seed, **TRELLIS2_ARGS},
+                out,
+                "trellis2",
+            )
+            download(res["model_glb"]["url"], glb)
     log_path = args.raw / "costs.json"
     log = json.loads(log_path.read_text()) if log_path.exists() else []
     log.extend(COST_LOG)

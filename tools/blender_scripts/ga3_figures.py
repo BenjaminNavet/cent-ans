@@ -27,7 +27,8 @@ Run from the repository root::
 
     blender -b --factory-startup --python tools/blender_scripts/ga3_figures.py -- \
         <unit> [--raw ~/dev/cent-ans-raw/ga3/l3] [--renders]
-    python3 tools/blender_scripts/ga3_figures.py sheet <unit> <jpg> [--raw DIR]
+    python3 tools/blender_scripts/ga3_figures.py sheet <unit> <jpg> [--raw DIR] \
+        [--tags multi_front_back,trellis,trellis2]
 
 Output: ``game/assets/models/battle_ga3/`` (``<figure>_lod{0,1,2}.mesh.bin``,
 ``<figure>_albedo.png``, ``manifest.json`` whose entries override the fine figures in
@@ -52,7 +53,7 @@ RAW = os.path.expanduser("~/dev/cent-ans-raw/ga3/l3")
 UNITS = {
     "longbowman": {
         "figure": "archer_0",
-        "glb": "longbowman/trellis2.glb",
+        "glb": "longbowman/multi_front_back.glb",
         "reference": "longbowman/sheet.png",
         "top": 1.80,
         "equipment": ["longbow"],
@@ -61,7 +62,10 @@ UNITS = {
 KEY_LIVERY = (75.0, 170.0)  # saturated green
 KEY_CLOTH = (190.0, 265.0)  # saturated blue
 KEY_SAT = 0.28
-CLOSE_STEPS = 8  # px at the 2048 source: dirt spots inside a key colour zone are tinted too
+CLOSE_STEPS = (
+    8  # px at the 2048 source: dirt spots inside a key colour zone are tinted too
+)
+METAL_Z = 1.5  # m: steel code on the helmet only (dagger, buckles keep their texture)
 TRI_CAP = (11900, 1350, 260)  # battle_fine_figures.TRI_CAP (foot soldiers)
 TEX = 1024
 EQUIP_TRIS = {"longbowman": 310}  # level-0 equipment triangles (measured)
@@ -162,11 +166,17 @@ def source_maps(base, orm):
     h, w = src.shape[:2]
     covered = src.max(axis=-1) > 0.004
     hue, sat, val = _hue_sat(src)
-    live = (hue >= KEY_LIVERY[0]) & (hue <= KEY_LIVERY[1]) & (sat > KEY_SAT) & (val > 0.05)
-    cloth = (hue >= KEY_CLOTH[0]) & (hue <= KEY_CLOTH[1]) & (sat > KEY_SAT) & (val > 0.05)
+    live = (
+        (hue >= KEY_LIVERY[0]) & (hue <= KEY_LIVERY[1]) & (sat > KEY_SAT) & (val > 0.05)
+    )
+    cloth = (
+        (hue >= KEY_CLOTH[0]) & (hue <= KEY_CLOTH[1]) & (sat > KEY_SAT) & (val > 0.05)
+    )
     live = close_mask(live)
     cloth = close_mask(cloth) & ~live
-    metal = np.zeros((h, w), dtype=bool)
+    # Steel: the metallic map of TRELLIS 2, else grey bright texels; ``code_faces`` keeps it
+    # on the helmet only (above ``METAL_Z``).
+    metal = (sat < 0.15) & (val > 0.3) & ~live & ~cloth
     if orm is not None:
         mr = _pixels(orm)
         if mr.shape[:2] == (h, w):
@@ -223,15 +233,23 @@ def save_png(rgba, path, name):
     return img
 
 
-def preview_rgba(rgba, classes, lum, livery=(0.62, 0.08, 0.06), hose=(0.27, 0.16, 0.08)):
+def preview_rgba(
+    rgba, classes, lum, livery=(0.62, 0.08, 0.06), hose=(0.27, 0.16, 0.08)
+):
     """Albedo as the game tints it (linear): livery red, hose brown (renders only)."""
     import numpy as np
 
     rgb = _srgb_to_linear(rgba[..., :3])
     a = rgba[..., 3:4]
     l_lin = rgb @ np.array([0.3, 0.59, 0.11], dtype=np.float32)
-    live = np.asarray(livery, dtype=np.float32) * np.clip(l_lin / lum[0], 0.2, 2.0)[..., None]
-    cloth = np.asarray(hose, dtype=np.float32) * np.clip(l_lin / lum[1], 0.2, 2.0)[..., None]
+    live = (
+        np.asarray(livery, dtype=np.float32)
+        * np.clip(l_lin / lum[0], 0.2, 2.0)[..., None]
+    )
+    cloth = (
+        np.asarray(hose, dtype=np.float32)
+        * np.clip(l_lin / lum[1], 0.2, 2.0)[..., None]
+    )
     tinted = np.where(classes[..., 1:2] > 0.5, cloth, live)
     return rgb * (1 - a) + tinted * a
 
@@ -266,7 +284,8 @@ def face_classes(obj, classes):
 
 def coded_materials(image):
     """One material per class: game code and white base colour (custom properties read by
-    ``export_mesh``), the albedo image on the UV for the renders."""
+    ``export_mesh``), the albedo image on the UV for the renders.
+    """
     import bpy
 
     mats = []
@@ -296,6 +315,9 @@ def code_faces(obj, classes, mats):
     import numpy as np
 
     fc = face_classes(obj, classes)
+    for i, poly in enumerate(obj.data.polygons):
+        if fc[i] == 3 and (obj.matrix_world @ poly.center).z < METAL_Z:
+            fc[i] = 0
     obj.data.materials.clear()
     for m in mats:
         obj.data.materials.append(m)
@@ -320,7 +342,9 @@ def heat(obj, wrig):
     mw = obj.matrix_world.copy()
     obj.parent = None
     obj.matrix_world = mw
-    share = sum(1 for v in obj.data.vertices if v.groups) / max(1, len(obj.data.vertices))
+    share = sum(1 for v in obj.data.vertices if v.groups) / max(
+        1, len(obj.data.vertices)
+    )
     print(f"HEAT direct weighted={share:.3f}")
     return share
 
@@ -473,7 +497,9 @@ def lod_copy(obj, target, name):
         dup.modifiers.remove(m)
     before = len(dup.data.polygons)
     after = bs.weld_and_decimate(dup, target)
-    print(f"LOD {name} {before} -> {after} (target {target}) mods={[m.type for m in dup.modifiers]}")
+    print(
+        f"LOD {name} {before} -> {after} (target {target}) mods={[m.type for m in dup.modifiers]}"
+    )
     import battle_fine_proto as fp
 
     fp.attach(dup, obj.parent)
@@ -514,7 +540,7 @@ def tris(objs):
 # --- Build --------------------------------------------------------------------------------
 
 
-def build(unit_name, raw, renders):
+def build(unit_name, raw, renders, glb=None):
     """Whole chain for one unit; writes the meshes, the albedo and the manifest entry."""
     import battle_fine as bf
     import battle_fine_proto as fp
@@ -528,7 +554,8 @@ def build(unit_name, raw, renders):
     arm, _ = bf.load_fine_human()
     fp.prime_virtuals(arm)
     probe.HELMET_TOP = unit["top"]
-    obj = probe.import_figure(os.path.join(raw, unit["glb"]))
+    glb = glb or unit["glb"]
+    obj = probe.import_figure(os.path.join(raw, glb))
     raw_tris = probe.tris(obj)
     islands, dropped = probe.drop_islands(obj)
     scale = probe.normalise(obj, arm)
@@ -590,7 +617,7 @@ def build(unit_name, raw, renders):
         "ga3_albedo": albedo_name,
         "ga3_lum": [round(lum[0], 4), round(lum[1], 4)],
         "unit": unit_name,
-        "source": "fal-ai/nano-banana-2/edit + fal-ai/trellis-2 (tools/experiments/ga3_fal_figure.py)",
+        "source": f"fal-ai/nano-banana-2/edit + {os.path.basename(glb)} (tools/experiments/ga3_fal_figure.py)",
     }
     path = os.path.join(OUT_DIR, "manifest.json")
     manifest = {"figures": {}}
@@ -603,7 +630,8 @@ def build(unit_name, raw, renders):
         json.dump(manifest, f, indent=1, sort_keys=True)
     print("ENTRY", json.dumps(entry))
     if renders:
-        render_views(unit_name, fig, raw, arm, kept, rgba, classes, lum)
+        tag = os.path.splitext(os.path.basename(glb))[0]
+        render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum)
     bpy.ops.wm.save_as_mainfile(
         filepath=os.path.join(raw, unit_name, f"ga3_{unit_name}.blend")
     )
@@ -620,21 +648,23 @@ SHOTS = [
 ]
 
 
-def render_views(unit_name, fig, raw, arm, kept, rgba, classes, lum):
+def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
     """LOD0 beside the current fine figure (probe renders), game-like tint of the albedo."""
     import battle_fine_proto as fp
     import bpy
     import ga3_figure_probe as probe
     import numpy as np
 
-    out = os.path.join(raw, unit_name, "renders")
+    out = os.path.join(raw, unit_name, "renders_" + tag)
     os.makedirs(out, exist_ok=True)
     for level in (1, 2):
         body_obj, gear_objs = kept[level]
         for o in [body_obj, *gear_objs]:
             o.hide_render = True
     lin = preview_rgba(rgba, classes, lum)
-    srgb = np.where(lin <= 0.0031308, lin * 12.92, 1.055 * np.clip(lin, 0, 1) ** (1 / 2.4) - 0.055)
+    srgb = np.where(
+        lin <= 0.0031308, lin * 12.92, 1.055 * np.clip(lin, 0, 1) ** (1 / 2.4) - 0.055
+    )
     prev = np.concatenate([np.clip(srgb, 0, 1), np.ones_like(srgb[..., :1])], axis=-1)
     img = bpy.data.images.new("ga3_preview", prev.shape[1], prev.shape[0], alpha=True)
     img.pixels.foreach_set(prev.astype(np.float32).reshape(-1))
@@ -648,7 +678,11 @@ def render_views(unit_name, fig, raw, arm, kept, rgba, classes, lum):
     for o in kept[0][1]:
         fp.attach(o, arm)
     for label, clip, frac, eye, target in SHOTS:
-        for o in [o for o in bpy.data.objects if o.name.startswith("archer_0") and "ga3" not in o.name]:
+        for o in [
+            o
+            for o in bpy.data.objects
+            if o.name.startswith("archer_0") and "ga3" not in o.name
+        ]:
             bpy.data.objects.remove(o)
         for pb in arm.pose.bones:
             pb.matrix_basis.identity()
@@ -662,8 +696,10 @@ def render_views(unit_name, fig, raw, arm, kept, rgba, classes, lum):
     _ = math
 
 
-def sheet(unit_name, jpg, raw):
-    """Reference A-pose | rigged figure (bind, walk, shoot, back) beside the current one."""
+def sheet(unit_name, jpg, raw, tags):
+    """Reference A-pose | rigged figure of ``tags[0]`` (bind, walk, shoot, back) beside the
+    current one; last row: the walk and back renders of every generator in ``tags``.
+    """
     from PIL import Image, ImageDraw, ImageFont
 
     unit = UNITS[unit_name]
@@ -671,26 +707,41 @@ def sheet(unit_name, jpg, raw):
         font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 15)
     except OSError:
         font = ImageFont.load_default()
-    h = 460
+    h = 420
+
+    def tile(tag, name, label):
+        path = os.path.join(raw, unit_name, "renders_" + tag, name + ".png")
+        im = Image.open(path).convert("RGB")
+        return label, im.resize((int(im.width * h / im.height), h))
+
     ref = Image.open(os.path.join(raw, unit["reference"])).convert("RGB")
-    tiles = [("Référence A-pose (NB2)", ref.resize((int(ref.width * h / ref.height), h)))]
-    for name, label in (
-        ("bind", "GA3 liaison | archer_0 actuel"),
-        ("walk", "bow_walk"),
-        ("shoot", "bow_shoot"),
-        ("back", "dos (bow_walk)"),
-    ):
-        im = Image.open(os.path.join(raw, unit_name, "renders", name + ".png")).convert("RGB")
-        tiles.append((label, im.resize((int(im.width * h / im.height), h))))
-    rows = [tiles[:1] + tiles[1:2], tiles[2:]]
+    main_tag = tags[0]
+    rows = [
+        [
+            (
+                "Référence A-pose (NB2)",
+                ref.resize((int(ref.width * h / ref.height), h)),
+            ),
+            tile(main_tag, "bind", f"{main_tag} liaison | archer_0 actuel"),
+        ],
+        [
+            tile(main_tag, "walk", "bow_walk"),
+            tile(main_tag, "shoot", "bow_shoot"),
+            tile(main_tag, "back", "dos (bow_walk)"),
+        ],
+    ]
+    if len(tags) > 1:
+        rows.append([tile(t, "walk", t) for t in tags])
     width = max(sum(t.width for _, t in r) for r in rows)
-    canvas = Image.new("RGB", (width, 2 * (h + 26)), (30, 30, 32))
+    canvas = Image.new("RGB", (width, len(rows) * (h + 26)), (30, 30, 32))
     y = 0
     for r in rows:
         x = 0
         for label, t in r:
             canvas.paste(t, (x, y + 26))
-            ImageDraw.Draw(canvas).text((x + 6, y + 5), label, fill=(235, 230, 215), font=font)
+            ImageDraw.Draw(canvas).text(
+                (x + 6, y + 5), label, fill=(235, 230, 215), font=font
+            )
             x += t.width
         y += h + 26
     if width > 1600:
@@ -705,11 +756,17 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "sheet":
         args = sys.argv[2:]
         raw = args[args.index("--raw") + 1] if "--raw" in args else RAW
-        sheet(args[0], args[1], os.path.expanduser(raw))
+        tags = (
+            args[args.index("--tags") + 1].split(",")
+            if "--tags" in args
+            else ["multi_front_back"]
+        )
+        sheet(args[0], args[1], os.path.expanduser(raw), tags)
         return
     args = sys.argv[sys.argv.index("--") + 1 :]
     raw = args[args.index("--raw") + 1] if "--raw" in args else RAW
-    build(args[0], os.path.expanduser(raw), "--renders" in args)
+    glb = args[args.index("--glb") + 1] if "--glb" in args else None
+    build(args[0], os.path.expanduser(raw), "--renders" in args, glb)
 
 
 if __name__ == "__main__":

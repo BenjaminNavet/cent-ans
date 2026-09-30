@@ -1,0 +1,25 @@
+{
+ "figures": {
+  "archer_0": {
+   "ga3_albedo": "archer_0_albedo.png",
+   "ga3_lum": [
+    0.0801,
+    0.0163
+   ],
+   "lods": [
+    "archer_0_lod0.mesh.bin",
+    "archer_0_lod1.mesh.bin",
+    "archer_0_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11800,
+    1350,
+    260
+   ],
+   "unit": "longbowman",
+   "variants": 1
+  }
+ },
+ "source": "tools/blender_scripts/ga3_figures.py (GA3-L3, ADR 0140)"
+}
