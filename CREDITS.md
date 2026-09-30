@@ -413,7 +413,8 @@ Images générées pour combler les manques (`ld_avignon`, `vg_famine`, `vg_trea
 - **Portraits** (`game/assets/portraits/`) : images générées par IA via OpenRouter
   (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md`.
 - **Voix** (`game/assets/audio/voice/` : répliques des unités, discours des généraux,
-  conseiller) : voix **générées par synthèse vocale** (OpenAI `gpt-4o-mini-tts`), à partir des
+  conseiller) : voix **générées par synthèse vocale** (OpenAI `gpt-4o-mini-tts` via OpenRouter ;
+  répliques criées et cris de guerre en chœur : ElevenLabs v3 via fal.ai), à partir des
   textes du projet (`data/voice/`, `data/speeches/`) ; aucune voix d'acteur. Outil
   reproductible `tools/cent_ans_tools/voice_tts.py` (liste des fichiers, voix et coût dans
   `game/assets/audio/voice/manifest.json`), dépenses consignées dans `docs/budget.md`.

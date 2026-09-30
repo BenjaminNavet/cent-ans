@@ -83,6 +83,9 @@ MIN_SECONDS = 1.2
 TARGET_LUFS = -16.0
 # Shouts and war cries sit above the spoken lines, as they would on a field.
 SHOUT_LUFS = -13.0
+SHOUT_BUDGET_SESSION = "Voix criées VX"
+# ElevenLabs requests in flight at once (first takes fetched ahead of the checks).
+SHOUT_WORKERS = 6
 SPEECH_HASH_LEN = 12
 
 
@@ -487,6 +490,23 @@ def openrouter_checked(
     raise RejectedClip(reason, spent)
 
 
+def prefetch_shouts(jobs: list[Job], api_key: str) -> Decimal:
+    """Fetch the first take of every shout of ``jobs`` in parallel; returns the cost."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    shouts = list(dict.fromkeys(shout for job in jobs for shout in job.shouts))
+
+    def fetch(shout: voice_shout.Shout) -> Decimal:
+        try:
+            return voice_shout.synthesise(shout, api_key, CACHE_DIR)[1]
+        except RuntimeError as error:  # retried (and reported) by the checked pass
+            print(f"prefetch: {error}", file=sys.stderr)
+            return Decimal(0)
+
+    with ThreadPoolExecutor(SHOUT_WORKERS) as pool:
+        return sum(pool.map(fetch, shouts), Decimal(0))
+
+
 def shouted_clip(
     job: Job, api_key: str, attempts: int = 3
 ) -> tuple[Path, Decimal, str, str]:
@@ -712,6 +732,11 @@ def main(argv: list[str] | None = None) -> int:
         return 3
     run_cost = Decimal(0)
     shout_cost = Decimal(0)  # part of run_cost billed by fal.ai
+    if fal_key:
+        # First takes fetched in parallel; the checks below then mostly read the cache.
+        prefetched = prefetch_shouts(jobs, fal_key)
+        run_cost += prefetched
+        shout_cost += prefetched
     result = 0
     try:
         for index, job in enumerate(jobs, 1):
@@ -782,6 +807,7 @@ def main(argv: list[str] | None = None) -> int:
                 to_money(shout_estimate),
                 to_money(shout_cost),
                 path=args.budget_path,
+                session=SHOUT_BUDGET_SESSION,
             )
     return result
 

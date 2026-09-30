@@ -217,6 +217,17 @@ NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
 | 2026-09-30 | OpenRouter | SR3 : planche de référence militia (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,35 $ |
 | 2026-09-30 | OpenRouter | SR3 : planche de référence knight_mounted (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,42 $ |
 
+## Voix criées VX (30/09) — plafond propre de 2 $
+
+Répliques de combat et cris de guerre en chœur, ElevenLabs v3 via fal.ai (0,10 $ / 1000 caractères,
+balises comprises) ; `tools/cent_ans_tools/voice_tts.py --shouts`. Section placée avant RC pour ne
+pas détourner les écritures « dernière table » des autres lots.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul VX |
+|---|---|---|---|---|---|
+| 2026-09-30 | fal.ai | VX : cris de bataille ElevenLabs v3 (répliques criées, chœurs des cris de guerre), contrôle whisper, langue et hauteur | 0,04 $ | 0,02 $ | 0,02 $ |
+| 2026-09-30 | fal.ai | VX : passe interrompue (machine chargée), 14 répliques gardées + prises rejetées ; coût réel non relevé par l'outil, estimé (caractères × prises) | 0,06 $ | 0,06 $ | 0,08 $ |
+
 ## Fleuves et rivières RC (30/09) — plafond propre de 5 $ (matières d'eau Nano Banana 2, ADR 0141)
 
 Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot RC5 : 4 matières
