@@ -163,6 +163,10 @@ impl BattleSim {
         crate::push::deform_figures(unit, &self.push_rules, &mut positions);
         // BR3: no figure in a house or a prop.
         self.push_figures_out(unit, &mut positions);
+        // Bridge decks and wall walks: the figures file along the footing.
+        if let Some(poses) = self.footing_poses(unit, &positions) {
+            return poses;
+        }
         let (Some(piece), Some(works)) = (unit.climbing, &self.siege) else {
             return positions
                 .iter()
