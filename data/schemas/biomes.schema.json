@@ -60,7 +60,7 @@
     },
     "rules": {
       "type": "object",
-      "required": ["oceanic_max_km", "atlantic_boxes", "steppe_min_lat", "dry_min", "coastal_semi_arid_km", "coastal_semi_arid_max_lon", "boreal_min_lat", "mountain"],
+      "required": ["oceanic_max_km", "atlantic_boxes", "steppe_min_lat", "dry_min", "dry_noise_km", "dry_noise_amp", "dry_noise_seed", "coastal_semi_arid_km", "coastal_semi_arid_max_lon", "boreal_min_lat", "mountain"],
       "additionalProperties": false,
       "properties": {
         "oceanic_max_km": {"$ref": "#/$defs/km"},
@@ -71,6 +71,9 @@
         },
         "steppe_min_lat": {"$ref": "#/$defs/lat"},
         "dry_min": {"type": "number", "minimum": 0, "maximum": 1},
+        "dry_noise_km": {"type": "number", "exclusiveMinimum": 0},
+        "dry_noise_amp": {"type": "number", "minimum": 0, "maximum": 1},
+        "dry_noise_seed": {"type": "integer", "minimum": 0},
         "coastal_semi_arid_km": {"$ref": "#/$defs/km"},
         "coastal_semi_arid_max_lon": {"$ref": "#/$defs/lon"},
         "boreal_min_lat": {"$ref": "#/$defs/lat"},

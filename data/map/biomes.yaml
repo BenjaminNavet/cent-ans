@@ -52,6 +52,11 @@ rules:
   # Continental ou méditerranéen dont la sécheresse (landcover.dryness : steppe pontique,
   # plateau anatolien) dépasse ce seuil : steppe au nord de steppe_min_lat, semi-aride au sud.
   dry_min: 0.45
+  # Bruit basse fréquence ajouté à la sécheresse : lisière steppe / forêt irrégulière
+  # (la limite de landcover.dryness est une ligne brisée), en km, amplitude, graine.
+  dry_noise_km: 70.0
+  dry_noise_amp: 0.3
+  dry_noise_seed: 1343
   # Semi-aride (BS seulement) près de la Méditerranée (Attique, côtes du Levant) : méditerranéen.
   # Distance à la côte (km, coast_dist.png plafonné à ~46 km) et longitude max (pas la Caspienne).
   coastal_semi_arid_km: 22.0

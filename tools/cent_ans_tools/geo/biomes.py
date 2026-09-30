@@ -180,7 +180,20 @@ def _apply_dry_and_mountain(
     rules = legend["rules"]
     north = inputs.lat >= rules["steppe_min_lat"]
     humid = (biome == ids["continental"]) | (biome == ids["mediterranean"])
-    dry = humid & (inputs.dryness >= rules["dry_min"])
+    dryness = inputs.dryness
+    if rules["dry_noise_amp"] > 0:
+        from cent_ans_tools.geo import colormap
+
+        noise = colormap._grid_noise(
+            inputs.shape,
+            inputs.meters_per_px,
+            rules["dry_noise_km"] * 1000.0,
+            int(rules["dry_noise_seed"]),
+        )
+        dryness = dryness + rules["dry_noise_amp"] * (noise - 0.5) * 2.0
+        del noise
+    dry = humid & (dryness >= rules["dry_min"])
+    del dryness
     biome = np.where(dry & north, ids["steppe"], biome)
     biome = np.where(dry & ~north, ids["semi_arid"], biome)
 
