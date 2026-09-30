@@ -20,6 +20,7 @@ Vague 3 : I bancs (d = 1100, 150, 30), captures (≤ 6), docs `godot-map.md`.
 - [x] D : maquettes, SZ4b, DC4/DC6c, ombres retirés de `settlement_layer.gd` ; étiquettes, clic et anneau sur l'emprise réelle (`docs/wip/vt-d.md`).
   - [x] H : tests retirés (dc4, dc6c), adaptés (fc1, sz4b) ; résultats dans le rapport VT-H.
   - [x] C : `town_far.gdshader`, `roofscape.gdshaderinc`, `TownFarMask`, `tf_far_shader_test` (1e928affa).
+- [x] B : `TownFarBuilder` (F1 294 tri/ville, max 706 ; F2 50,5 ; v2 max 3 613 ; 1,4 s un fil), `tf_far_mesh_test` (`docs/wip/vt-b-far-builder.md`).
 - [x] F : `max_rig_distance` (16, hystérésis 10 %) sur `TownLayer` et `LandmarkCityLayer`, maquettes/fondu retirés, `built_ids()` sur les deux calques.
 
 ## Prochaine étape
