@@ -33,27 +33,28 @@ distribution:
   orchard_parcel_px: 2.2     # côté d'une parcelle de verger
   orchard_fill: 0.75         # part des candidats plantés dans une parcelle de verger
   hedge_boost: 3.0           # arbres isolés : × (1 + hedge_boost × densité de haies)
-  hedge_tree: 0.035          # part des pieds de haie qui sont des arbres (V4 : 0,07)
+  grove_core: 0.55           # bosquets : seul le cœur des taches de bruit (denses, rares)
+  hedge_tree: 0.025          # part des pieds de haie qui sont des arbres (V4 : 0,07)
   village_boost: 4.0         # arbres isolés : × (1 + village_boost) près des villages
   default_biome: 2           # repli sans data/map/biomes.png
 
 # Paramètres de semis par biome (probabilités par candidat, grille ~1,35 px).
 #   forest      facteur de la couverture forestière (steppe : presque nue)
 #   isolated    arbres isolés dans les champs (avant bonus haies / villages)
-#   grove       bosquets (bruit de bosquets × grove)
+#   grove       remplissage des bosquets (cœur des taches de bruit × grove)
 #   orchard     parcelles de verger dans l'anneau autour des villages
 #   orchard_ring_px  largeur de cet anneau au-delà de la clairière du village
 #   orchard_open     parcelles de verger sur toute terre cultivée (oliveraies)
 #   riparian    arbres de ripisylve le long des fleuves ; riparian_px : largeur de la bande
 #   scrub       broussailles de garrigue sur la terre non cultivée
 biomes:
-  "1": {name: oceanic, forest: 1.0, isolated: 0.0025, grove: 0.35, orchard: 0.4, orchard_ring_px: 5.0, orchard_open: 0.0, riparian: 0.45, riparian_px: 1.5, scrub: 0.0}
-  "2": {name: continental, forest: 1.0, isolated: 0.002, grove: 0.35, orchard: 0.3, orchard_ring_px: 4.5, orchard_open: 0.0, riparian: 0.45, riparian_px: 1.5, scrub: 0.0}
-  "3": {name: mediterranean, forest: 0.85, isolated: 0.0015, grove: 0.12, orchard: 0.45, orchard_ring_px: 6.0, orchard_open: 0.07, riparian: 0.35, riparian_px: 1.0, scrub: 0.06}
-  "4": {name: steppe, forest: 0.12, isolated: 0.0002, grove: 0.03, orchard: 0.04, orchard_ring_px: 3.0, orchard_open: 0.0, riparian: 0.3, riparian_px: 1.2, scrub: 0.004}
-  "5": {name: boreal, forest: 1.0, isolated: 0.002, grove: 0.4, orchard: 0.0, orchard_ring_px: 0.0, orchard_open: 0.0, riparian: 0.35, riparian_px: 1.5, scrub: 0.0}
-  "6": {name: mountain, forest: 1.0, isolated: 0.0015, grove: 0.25, orchard: 0.1, orchard_ring_px: 3.0, orchard_open: 0.0, riparian: 0.3, riparian_px: 1.0, scrub: 0.01}
-  "7": {name: semi_arid, forest: 0.35, isolated: 0.0005, grove: 0.04, orchard: 0.3, orchard_ring_px: 5.0, orchard_open: 0.03, riparian: 0.3, riparian_px: 1.0, scrub: 0.035}
+  "1": {name: oceanic, forest: 1.0, isolated: 0.002, grove: 0.8, orchard: 0.4, orchard_ring_px: 5.0, orchard_open: 0.0, riparian: 0.45, riparian_px: 1.5, scrub: 0.0}
+  "2": {name: continental, forest: 1.0, isolated: 0.0015, grove: 0.8, orchard: 0.3, orchard_ring_px: 4.5, orchard_open: 0.0, riparian: 0.45, riparian_px: 1.5, scrub: 0.0}
+  "3": {name: mediterranean, forest: 0.85, isolated: 0.0015, grove: 0.3, orchard: 0.45, orchard_ring_px: 6.0, orchard_open: 0.07, riparian: 0.35, riparian_px: 1.0, scrub: 0.06}
+  "4": {name: steppe, forest: 0.12, isolated: 0.0002, grove: 0.08, orchard: 0.04, orchard_ring_px: 3.0, orchard_open: 0.0, riparian: 0.3, riparian_px: 1.2, scrub: 0.004}
+  "5": {name: boreal, forest: 1.0, isolated: 0.002, grove: 0.85, orchard: 0.0, orchard_ring_px: 0.0, orchard_open: 0.0, riparian: 0.35, riparian_px: 1.5, scrub: 0.0}
+  "6": {name: mountain, forest: 1.0, isolated: 0.0015, grove: 0.6, orchard: 0.1, orchard_ring_px: 3.0, orchard_open: 0.0, riparian: 0.3, riparian_px: 1.0, scrub: 0.01}
+  "7": {name: semi_arid, forest: 0.35, isolated: 0.0005, grove: 0.12, orchard: 0.3, orchard_ring_px: 5.0, orchard_open: 0.03, riparian: 0.3, riparian_px: 1.0, scrub: 0.035}
 
 # Teintes saisonnières (foliage_common.gdshaderinc) : oak (roux-olive), beech (cuivré),
 # golden (jaune d'or : bouleau, érable, peuplier, mélèze), evergreen (persistant, poudré de

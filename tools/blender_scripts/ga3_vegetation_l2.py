@@ -232,8 +232,10 @@ def split_sheet_panels(
 
 
 def consistent_crops(crops: list[np.ndarray], spread: float = 1.3) -> bool:
-    """True when no view is broken: heights within ``spread`` of the median and no empty row band
-    (a fragment of a neighbouring tree glued above or below the silhouette)."""
+    """True when no view is broken (a neighbour's fragment glued above or below a tree).
+
+    Heights stay within ``spread`` of the median and no crop has an empty row band.
+    """
     heights = np.array([c.shape[0] for c in crops], dtype=np.float64)
     median = float(np.median(heights))
     if not (np.all(heights <= median * spread) and np.all(heights >= median / spread)):
@@ -534,9 +536,7 @@ def _save(arr: np.ndarray, path: Path) -> None:
     )
 
 
-def match_luminance(
-    cells: list[np.ndarray], target_lum: float
-) -> list[np.ndarray]:
+def match_luminance(cells: list[np.ndarray], target_lum: float) -> list[np.ndarray]:
     """Scale ``cells`` (sRGB RGBA) so their joint opaque linear luminance is ``target_lum``.
 
     Lot HB4: the new species keep their generated hue (olive silver, cypress dark green, birch

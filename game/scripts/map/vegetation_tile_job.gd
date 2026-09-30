@@ -475,7 +475,8 @@ func _species_candidate(raw: Array, rng: RandomNumberGenerator, rect: Rect2, x: 
 				role = TreeSpecies.Role.VERGER
 				scale_factor = 0.9
 		elif crops > 0.15:
-			var grove := _lerp_grid(_grove, gx, gy)
+			# Bosquets : seul le cœur des taches du bruit, densément planté.
+			var grove := smoothstep(species.d("grove_core", 0.55), 1.0, _lerp_grid(_grove, gx, gy))
 			var hedge := _lerp_grid(_hedge, gx, gy)
 			var p := crops * (grove * species.biome_param(b, 2) + species.biome_param(b, 1) * (1.0 + species.d("hedge_boost", 3.0) * hedge + species.d("village_boost", 4.0) * ring))
 			if roll < p:

@@ -13,7 +13,7 @@
     "distribution": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["massif_core", "massif_fill", "edge_fill", "stand_px", "stand_share", "altitude_fade_m", "river_reach_px", "conifer_raster", "orchard_parcel_px", "orchard_fill", "hedge_boost", "hedge_tree", "village_boost", "default_biome"],
+      "required": ["massif_core", "massif_fill", "edge_fill", "stand_px", "stand_share", "altitude_fade_m", "river_reach_px", "conifer_raster", "orchard_parcel_px", "orchard_fill", "hedge_boost", "grove_core", "hedge_tree", "village_boost", "default_biome"],
       "properties": {
         "massif_core": {"type": "number", "minimum": 0, "maximum": 1},
         "massif_fill": {"type": "number", "minimum": 0, "maximum": 1},
@@ -26,6 +26,7 @@
         "orchard_parcel_px": {"type": "number", "exclusiveMinimum": 0},
         "orchard_fill": {"type": "number", "minimum": 0, "maximum": 1},
         "hedge_boost": {"type": "number", "minimum": 0},
+        "grove_core": {"type": "number", "minimum": 0, "maximum": 0.99},
         "hedge_tree": {"type": "number", "minimum": 0, "maximum": 1},
         "village_boost": {"type": "number", "minimum": 0},
         "default_biome": {"type": "integer", "minimum": 1, "maximum": 7}

@@ -167,6 +167,7 @@ fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
             orchard_parcel_px: float_of(&dist, "orchard_parcel_px", d.orchard_parcel_px),
             orchard_fill: float_of(&dist, "orchard_fill", d.orchard_fill),
             hedge_boost: float_of(&dist, "hedge_boost", d.hedge_boost),
+            grove_core: float_of(&dist, "grove_core", d.grove_core),
             hedge_tree: float_of(&dist, "hedge_tree", d.hedge_tree),
             village_boost: float_of(&dist, "village_boost", d.village_boost),
             default_biome: int_of(&dist, "default_biome", d.default_biome as i64).clamp(1, 7)

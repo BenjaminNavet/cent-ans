@@ -1,7 +1,8 @@
 extends SceneTree
 
 ## Test headless du lot GA3-L2 (végétation générée de la carte de campagne) :
-##  1. textures GA3 : grille d'imposteurs 3 × 8 cellules de 256² (albédo + normale, VRAM, mipmaps),
+##  1. textures GA3 : grille d'imposteurs 8 azimuts × une ligne par essence (HB4 ; lignes 0-2
+##     contrôlées ici, les autres par `hb4_species_test.gd`) de 256² (albédo + normale, VRAM, mipmaps),
 ##     atlas de feuilles 1024 × 512, touffe d'herbe 512 × 256 dense (couverture ≫ 13 %) ;
 ##  2. option : `Ga3Vegetation.force(false)` (= `--no-ga3-veg`) rend les ressources FC ;
 ##  3. rochers : 3 variantes × 3 niveaux (≤ 120 / 60 / 18 triangles), semis de `GroundClutter`,
@@ -40,9 +41,11 @@ func _check(condition: bool, label: String) -> bool:
 
 
 func _test_textures() -> void:
+	# Lot HB4 : une ligne par essence du catalogue (lignes 0-2 : chêne, hêtre, sapin de FC2).
+	var rows := maxi(VegetationMeshes.IMPOSTOR_ROWS.size(), TreeSpecies.shared().count)
 	var sizes := {
-		Ga3Vegetation.IMPOSTOR_ALBEDO: Vector2i(VegetationMeshes.IMPOSTOR_VIEWS * 256, VegetationMeshes.IMPOSTOR_ROWS.size() * 256),
-		Ga3Vegetation.IMPOSTOR_NORMAL: Vector2i(VegetationMeshes.IMPOSTOR_VIEWS * 256, VegetationMeshes.IMPOSTOR_ROWS.size() * 256),
+		Ga3Vegetation.IMPOSTOR_ALBEDO: Vector2i(VegetationMeshes.IMPOSTOR_VIEWS * 256, rows * 256),
+		Ga3Vegetation.IMPOSTOR_NORMAL: Vector2i(VegetationMeshes.IMPOSTOR_VIEWS * 256, rows * 256),
 		Ga3Vegetation.LEAF_CARDS: Vector2i(1024, 512),
 		Ga3Vegetation.GRASS_TUFT: Vector2i(512, 256),
 	}

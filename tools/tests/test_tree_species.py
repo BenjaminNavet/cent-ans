@@ -18,9 +18,7 @@ SCHEMA = json.loads(
 CATALOGUE = yaml.safe_load(
     (REPO / "data/art/tree_species.yaml").read_text(encoding="utf-8")
 )
-COMPILED = json.loads(
-    (REPO / "data/art/tree_species.json").read_text(encoding="utf-8")
-)
+COMPILED = json.loads((REPO / "data/art/tree_species.json").read_text(encoding="utf-8"))
 
 
 def test_catalogue_and_table_match_schema() -> None:

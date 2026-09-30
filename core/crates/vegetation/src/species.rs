@@ -47,6 +47,7 @@ pub struct Distribution {
     pub orchard_parcel_px: f64,
     pub orchard_fill: f64,
     pub hedge_boost: f64,
+    pub grove_core: f64,
     pub hedge_tree: f64,
     pub village_boost: f64,
     pub default_biome: usize,
@@ -66,7 +67,8 @@ impl Default for Distribution {
             orchard_parcel_px: 2.2,
             orchard_fill: 0.75,
             hedge_boost: 3.0,
-            hedge_tree: 0.035,
+            grove_core: 0.55,
+            hedge_tree: 0.025,
             village_boost: 4.0,
             default_biome: 2,
         }

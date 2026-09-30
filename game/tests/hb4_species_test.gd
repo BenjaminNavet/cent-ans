@@ -15,6 +15,8 @@ const WITNESS_ORIGIN := Vector2i(2048, 3200)
 const WITNESS_SIZE := 256
 const VILLAGES: Array[Vector3] = [Vector3(2100, 3260, 3.0), Vector3(2230, 3400, 3.5), Vector3(2150, 3420, 2.5)]
 const GROWTH_CAP := 1.3
+## Distance au lit (px) en deçà de laquelle un arbre hors forêt compte comme ripisylve.
+const RIPARIAN_BAND := 2.5
 
 var _failures := 0
 
@@ -176,13 +178,14 @@ func _scatter(mask: VegetationMask, species: TreeSpecies, exclusions: PackedVect
 	return job
 
 
-## Arbres (haies exclues), emplacements non vides, essences, densité hors forêt (arbres par px²
-## de cellules grossières sans forêt).
+## Arbres (haies exclues), emplacements non vides, essences, densité hors forêt et hors ripisylve
+## (arbres par px² de cellules grossières sans forêt), arbres de ripisylve hors forêt.
 func _stats(job: VegetationTileJob, species: TreeSpecies) -> Dictionary:
 	var trees := 0
 	var slots := 0
 	var unencoded := 0
 	var open_trees := 0
+	var riparian_trees := 0
 	var names := {}
 	for slot in job.buffers.size():
 		var buffer: PackedFloat32Array = job.buffers[slot]
@@ -202,11 +205,15 @@ func _stats(job: VegetationTileJob, species: TreeSpecies) -> Dictionary:
 					names[species.ids[row]] = int(names.get(species.ids[row], 0)) + 1
 			var gx := (buffer[k + 3] - job.origin_px.x) / job.coarse_step
 			var gy := (buffer[k + 11] - job.origin_px.y) / job.coarse_step
+			# Champs : hors forêt et hors bande de ripisylve (comptée à part).
 			if job._lerp_grid(job._forest, gx, gy) < 0.02:
-				open_trees += 1
+				if job.mask.map_data.river_sd_at(buffer[k + 3], buffer[k + 11]) > RIPARIAN_BAND:
+					open_trees += 1
+				else:
+					riparian_trees += 1
 	var open_cells := 0
 	for value in job._forest:
 		if value < 0.02:
 			open_cells += 1
 	var open_area := float(open_cells) / maxf(job._forest.size(), 1.0) * WITNESS_SIZE * WITNESS_SIZE
-	return {"trees": trees, "slots": slots, "species": names, "unencoded": unencoded, "open_density": open_trees / maxf(open_area, 1.0)}
+	return {"trees": trees, "slots": slots, "species": names, "unencoded": unencoded, "open_density": open_trees / maxf(open_area, 1.0), "riparian": riparian_trees}

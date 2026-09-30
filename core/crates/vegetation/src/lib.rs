@@ -953,7 +953,8 @@ impl<'a> Scatter<'a> {
                     scale_factor = 0.9;
                 }
             } else if crops > 0.15 {
-                let grove = self.lerp_grid(GROVE, gx, gy);
+                // Copses: only the core of the grove noise patches, densely filled.
+                let grove = smoothstep(dist.grove_core, 1.0, self.lerp_grid(GROVE, gx, gy));
                 let hedge = self.lerp_grid(HEDGE, gx, gy);
                 let p = crops
                     * (grove * table.biome(b, B_GROVE)
