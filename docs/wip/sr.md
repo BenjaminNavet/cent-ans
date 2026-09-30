@@ -12,7 +12,7 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
   (normale/rugosité/déplacement du scan), `tile_m` physique (0,15/0,13/0,16/0,32/0,51/0,3/0,3/0,8 m),
   couches 8-11 recopiées ; plate ga_mix 0,6 ; planche `docs/img/sr/sr1_layers.jpg`.
 - [x] SR3 planches NB2 (session principale, ≤ 1 $) → liste d'écarts
-- [ ] SR2 usure et métal (après SR1, même shader)
+- [x] SR2 usure et métal (après SR1, même shader)
 - [ ] SR3b corrections des recettes Blender + recuisson
 - [ ] SR4 captures A/B, perf, tests, ADR 0136, fusion
 
@@ -25,11 +25,15 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - À juger en jeu (SR4) : échelle des fils (0,6-2 mm, fondus par les mipmaps de loin), normale
   plate/cuir renforcée (x4/x3), rugosité laine/gambeson/bois relevée.
 
-## SR2 — en cours (agent)
-- Squelette : uniformes `weathering` (0,6) et `sr2_mud_height` (0,45 ; cavalerie 0,65) dans
-  la variante FG3_BAKED, posés par `BattleSkinned._setup_fine_maps`, `--no-sr2` → 0.
-- Prochaine étape : effets dans le fragment (boue, crasse, acier, teintes), test `sr2_weathering_test.gd`.
-
-## SR5 — en cours (agent)
-- Include `game/shaders/building_aging.gdshaderinc` (usure procédurale, sans texture).
-- Prochaine étape : SR5a (atlas + villes), SR5b (`building_pbr.gdshader`, `--no-sr5`), tests.
+## SR2 — fait (agent)
+- Shader (variante FG3_BAKED seulement, < `fine_distance`, fondu sur 60-80 m) : uniformes
+  `weathering` (0,6) et `sr2_mud_height` (0,45 ; cavalerie 0,65 : jambes du cheval + ourlet du
+  caparaçon), posés par `BattleSkinned._setup_fine_maps` ; `--no-sr2` → 0 (sortie SR1 exacte,
+  bloc sauté). Boue des pieds (bord bruité, quantité par soldat), crasse des creux (AO cuite,
+  étoffe/cuir), acier vivant (rugosité 0,25-0,6 par taches, usure claire des arêtes par
+  courbure écran × bruit fin, rouille brune bas des mailles), teintes passées −15 %.
+- Écart : l'usure des arêtes vient de la courbure (dérivées de la normale / position, prises en
+  flux uniforme) plutôt que de « bruit × AO inversé » (les creux ne s'usent pas).
+- Perf : 0 lecture de texture ajoutée ; ≤ 5 `noise2` par fragment (plates 2+3, mailles 1+3).
+- Tests : `sr2_weathering_test.gd` (défaut, `--no-sr2`, `--coarse-figures`), fg3/ga1_maps, smoke OK.
+- À juger en SR4 (captures A/B `--no-sr2`) : dosage boue, arêtes, teintes.
