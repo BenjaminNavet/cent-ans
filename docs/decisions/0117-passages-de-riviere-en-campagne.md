@@ -22,8 +22,13 @@ mais ne reçoit pas le passage de la campagne.
   hors passage, pour ne pas dérégler l'équilibrage). Nombres dans `data/rules/river_crossings.json`
   (schéma `river_crossings_rules.schema.json`).
 - **Pronostic** : la ligne de modificateur nomme le passage et le fleuve (« Passage en force du pont
-  des Tourelles sur la Loire »), l'IA stratégique qui lit le pronostic évite donc naturellement de
-  forcer un pont tenu.
+  des Tourelles (Orléans) sur la Loire (−40 %, tireurs du défenseur +25 %) »).
+- **Largeur du lit** : un pont de route sur un ruisseau ne vaut pas un pont sur la Loire : l'effet est
+  proportionnel à la largeur du passage entre `min_width_px` et `full_width_px` (ponts et gués
+  historiques : effet plein) ; sous le minimum, pas de bataille de passage.
+- **IA stratégique** : elle ne lit pas le pronostic ; `attack_order` (`ai/src/grid.rs`) multiplie sa
+  puissance par le coefficient du passage qui la sépare de sa cible : elle ne force un pont tenu que
+  nettement plus forte.
 - **Bataille tactique** : `BattleSetup.crossing` (structure, nom, fleuve) ; le champ reçoit une
   rivière entre les deux lignes avec ce seul passage (goulet), l'IA de berge d'ADR 0033 le tient.
   Graines et batailles sans passage inchangées.
@@ -42,4 +47,7 @@ mais ne reçoit pas le passage de la campagne.
 - Les ponts deviennent des verrous : tenir la tête de pont vaut une armée plus forte ; contourner
   par un gué éloigné ou un autre pont devient un vrai choix.
 - Nouveaux réglages à équilibrer (sonde `balance_probe`).
-- La grille de navigation reste celle de M1 : les rivières ajoutées pour la densité ne bloquent pas.
+- Onze rivières de plus deviennent infranchissables hors passages (Marne, Yonne, Vienne, Charente,
+  Lot, Tarn, Allier, Cher, Moselle, Severn, Trent ; 40 ponts, gués et bacs médiévaux ajoutés à
+  `crossings.json`, grille régénérée) ; les rivières ajoutées pour la densité (réseau fin) ne
+  bloquent pas.

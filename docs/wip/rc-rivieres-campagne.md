@@ -16,7 +16,11 @@ Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano
       `min_width_px`/`full_width_px`, IA de grille pondérée ; tests
       `sim-campaign/tests/rc1_river_crossings.rs`.)
 - [x] RC2 — Bataille tactique : un seul passage de la structure demandée entre les deux lignes.
-- [ ] RC3 — Rendu : largeur, contraste, rivières mineures plus loin ; étiquettes des noms (français).
+- [x] RC3 — Rendu : largeur, contraste, rivières mineures plus loin ; étiquettes des noms (français).
+      Réglages `data/map/river_display.json` ; `RiverLabels` (`game/scripts/map/river_labels.gd`) ;
+      test `game/tests/rc3_river_labels_test.gd` ; captures `game/tests/rc3_rivers_shot.gd`.
+      **Reste : jugement visuel sur le Mac** (le rendu logiciel du conteneur cloud floute fort et ne
+      dessine pas l'eau des fleuves, même avant RC).
 - [x] RC4 — Densité : `rivers-render --fine-min-order` depuis la pyramide hydro fine (Mac du joueur).
       Outil fait et testé (pyramide synthétique). **À lancer sur le Mac** (pyramide présente),
       puis commiter `data/map/rivers_render.json`, `river_bed.png`, `crossings_px.json` :
@@ -28,8 +32,8 @@ Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano
   - [ ] génération sur le Mac (clé `OPENROUTER_API_KEY`, ~0,31 $ pour 4 images) :
         `uv run --project tools cent-ans assets materials --config data/art/water_materials.yaml --out game/assets/textures/water --sheet docs/research/rc5_water_sheet.png`
         (d'abord `--dry-run`) ; juger la planche, supprimer `<id>_raw.png` pour retenter.
-  - [ ] brancher `#include "res://shaders/water_detail.gdshaderinc"` + `WaterDetail.apply()` dans les
-        shaders mer / fleuve / rivière (session principale) ; régler `scale` à l'œil.
+  - [x] branché dans `water.gdshader` (mer côtière `sea`, large `ocean` selon la profondeur) et
+        `river_water.gdshader` (`river_large` / `river_small`) ; reste à régler `scale` à l'œil.
 - [x] RC6 — Rivières infranchissables supplémentaires : Marne, Yonne, Vienne, Charente, Lot, Tarn,
       Allier, Cher, Moselle (`Mosel`), Severn, Trent dans `navgrid.MAJOR_RIVERS` (Oise et Aisne absentes
       de `rivers.geojson`) ; 40 ponts, gués et bacs médiévaux ajoutés à `crossings.json` ; `navgrid.png`,
