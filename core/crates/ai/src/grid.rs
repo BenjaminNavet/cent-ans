@@ -434,6 +434,22 @@ impl<'a> GridPlanner<'a> {
     /// engagement radius of the enemy: armies merely sharing its anchor are
     /// not counted beforehand (they would be counted twice).
     pub fn attack_order(&self, army_id: &ArmyId) -> Option<Order> {
+        self.attack_order_sparing(army_id, &mut Vec::new())
+    }
+
+    /// NT9: [`GridPlanner::attack_order`] sparing the enemies already
+    /// engaged this turn: `engaged` holds the points of the enemies another
+    /// of our armies attacks; an enemy within the engagement radius of one
+    /// of them (it fights in that battle, or flees it beaten) is left alone.
+    /// Under the unit cap (N6) a host is several armies: without this each
+    /// one attacked the same enemy in turn, and the later ones hunted the
+    /// beaten remnant (battles FR/EN ×1.7). The chosen enemy's point is
+    /// added to `engaged`.
+    pub fn attack_order_sparing(
+        &self,
+        army_id: &ArmyId,
+        engaged: &mut Vec<[f32; 2]>,
+    ) -> Option<Order> {
         let state = self.state;
         let army = state.armies.get(army_id)?;
         let power = state.army_power(self.data, army_id);
@@ -453,6 +469,7 @@ impl<'a> GridPlanner<'a> {
                     .as_ref()
                     .is_none_or(|s| !state.is_hostile_settlement(self.faction, s))
             })
+            .filter(|e| engaged.iter().all(|p| distance(*p, e.point) > engage_px))
             .filter_map(|e| {
                 let d = distance(here, e.point);
                 if d > reach_px {
@@ -477,12 +494,15 @@ impl<'a> GridPlanner<'a> {
                         ours += state.army_power(self.data, id);
                     }
                 }
-                (ours >= self.rules.attack_ratio * theirs.max(e.power)).then_some((d, &e.id))
+                (ours >= self.rules.attack_ratio * theirs.max(e.power)).then_some((d, e))
             })
-            .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(b.1)))
-            .map(|(_, target)| Order::Attack {
-                army: army_id.clone(),
-                target_army: target.clone(),
+            .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)))
+            .map(|(_, target)| {
+                engaged.push(target.point);
+                Order::Attack {
+                    army: army_id.clone(),
+                    target_army: target.id.clone(),
+                }
             })
     }
 
