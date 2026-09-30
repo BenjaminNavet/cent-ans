@@ -221,3 +221,41 @@ jupon vert clé sans meuble, harnois acier, ni épée ni fourreau fondus).
   (arbalétriers), cavalry_3 (gendarmes d'ordonnance, harnois blanc, huque) et standard_1
   (porte-étendard monté, sans variante de visage : enveloppe). Chaque figurine générée garde
   une zone de livrée (lecture des camps en bataille).
+
+## Engins de siège, extension L5 : trébuchet et bélier générés animés (30/09)
+
+Les maillages L1/L1b du trébuchet et du bélier (`props_ga/ga3_{trebuchet,ram}_lod*.glb`,
+`wired: false`) habillent désormais les engins animés de `SiegeEnginesFx` / `SiegeAssaultFx`
+sans rien changer à l'animation. Aucune régénération (0 $).
+
+- **Découpe, pas de re-cuisson** : `tools/blender_scripts/ga3_siege_rig.py` reconstruit le rig
+  procédural de `siege_engines.py` (mêmes nœuds, mêmes pivots) et remplace le maillage des pièces
+  par les faces GA3 de la région correspondante, recalées dans le repère du nœud (UV et texture
+  cuite gardées). Régions mesurées une fois sur le LOD0 (verge ajustée par ACP sur le plan de
+  profil, montants, caisse, roues, poutre et ses deux suspentes) ; une face n'est donnée à une
+  pièce mobile que si son centre y est et, là où les pièces se touchent, tous ses sommets aussi.
+  Sortie : `siege/ga3_trebuchet(_lod).glb`, `siege/ga3_ram(_lod).glb` (lointain = LOD1 GA3 découpé,
+  le LOD2 est trop grossier pour être coupé), `siege/ga3_rigs.json` (échelles, pivots, faces).
+- **Trébuchet** : la géométrie générée n'est pas un engin fonctionnel (pivot au milieu de la
+  verge, caisse posée sur le bâti, montants trop serrés pour qu'elle passe). On garde donc la
+  cinématique procédurale et on y plie les pièces : bâti mis à l'échelle pour que les paliers
+  tombent sur l'axe (6,4 m), retourné en longueur (grand côté du bâti sous la grande verge), les
+  deux flancs écartés d'un vide progressif (0,6 m) pour que la caisse passe entre les montants ;
+  verge mise à l'échelle uniforme de la verge procédurale (10,9 m) et **pivot déplacé le long de
+  la verge** au rapport 8,5 / 2,2 m (l'ancien palier devient une frette) ; caisse et crochet mis
+  aux dimensions de la caisse procédurale (1,8 × 1,7 × 1,9 m), pendus à la charnière. La poche
+  générée (pierres toujours dedans) est retirée : **fronde, pierre et treuil restent
+  procéduraux**, avec un axe de fer et deux poteaux de treuil procéduraux.
+- **Bélier** : échelle 1,15 (tête de fer à +5,3 m comme le procédural), roue parasite sous le lit
+  retirée, quatre roues GA3 sur leurs propres centres (rayon 0,9 m), `BeamPivot` au sommet des
+  suspentes. Réglages remplacés pour cette variante (`data/fx/siege_engines.json`, `ga3.ram` :
+  `wheel_radius` 0,9, `beam_drop` 2,2 ; `SiegeEnginesFx.kind_settings`) : roues qui roulent sans
+  glisser, pendule de la poutre juste.
+- **Branchement** : `ga3` de `data/fx/siege_engines.json` (schéma) ; `SiegeEnginesFx.instantiate`
+  pose la variante (méta `ga3`) pour le modèle et son `_lod`, garde le nom du nœud ; `--no-ga3`
+  (même option que L1) rend les modèles procéduraux. Mangonneau, bombarde et beffroi : pas de
+  variante, inchangés.
+- **Limites** : proportions forcées (bâti ~0,86, caisse aplatie 0,42 × 0,46 en plan), texture
+  cuite étirée sur les traverses qui franchissent le vide central ; la poutre du bélier traverse
+  le toit aux grands balancements (déjà vrai en procédural) ; suspentes rigides autour d'un pivot
+  unique (pas de parallélogramme). Test `ga3_l5_siege_test.gd` (avec et sans `--no-ga3`).

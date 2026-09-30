@@ -289,6 +289,111 @@
         }
       }
     },
+    "ga3": {
+      "type": "object",
+      "description": "GA3-L5 : variantes générées des modèles animés (engin -> {model, réglages remplacés}). Absent : modèles procéduraux seuls.",
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "trebuchet": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model"
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]+$"
+            },
+            "wheel_radius": {
+              "$ref": "#/$defs/positive"
+            },
+            "beam_drop": {
+              "$ref": "#/$defs/positive"
+            }
+          }
+        },
+        "mangonel": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model"
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]+$"
+            },
+            "wheel_radius": {
+              "$ref": "#/$defs/positive"
+            },
+            "beam_drop": {
+              "$ref": "#/$defs/positive"
+            }
+          }
+        },
+        "bombard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model"
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]+$"
+            },
+            "wheel_radius": {
+              "$ref": "#/$defs/positive"
+            },
+            "beam_drop": {
+              "$ref": "#/$defs/positive"
+            }
+          }
+        },
+        "ram": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model"
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]+$"
+            },
+            "wheel_radius": {
+              "$ref": "#/$defs/positive"
+            },
+            "beam_drop": {
+              "$ref": "#/$defs/positive"
+            }
+          }
+        },
+        "siege_tower": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model"
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]+$"
+            },
+            "wheel_radius": {
+              "$ref": "#/$defs/positive"
+            },
+            "beam_drop": {
+              "$ref": "#/$defs/positive"
+            }
+          }
+        }
+      }
+    },
     "oil": {
       "type": "object",
       "additionalProperties": false,
@@ -461,7 +566,9 @@
                 },
                 "rest": {
                   "type": "array",
-                  "items": {"type": "number"},
+                  "items": {
+                    "type": "number"
+                  },
                   "minItems": 3,
                   "maxItems": 3,
                   "description": "Place de repos (x, z, cap en degrés) quand le servant ne travaille pas : hors du souffle de la bouche."

@@ -69,3 +69,27 @@ Chantier VT terminé sur `feat/vt` : fusion dans main par la session principale,
 - Rivières : plus de coupure sous les villes (5484cea26), les villes 1:1 enjambent la vraie rivière.
 - `smoke` OK après A-D, F-H. `at1_attack_order` échoue (l'armée assiège Bordeaux au lieu d'attaquer) : règle de simulation ; VT ne touche ni `core/` ni l'UI. Probablement antérieur, à confirmer sur main.
 - Code mort laissé : `life_effects._update_overlays` + `life_overlay.gdshader` (neige/suie sur maquettes) ; `ModelLibrary.HAMLET_SCALE` encore lu par settlement_layer.
+
+## Correctif 30/09 — Paris en dalles brunes (retour joueur)
+- Symptôme : vue rapprochée de Paris, dalles brunes plates qui flottent ou s'enfoncent, points
+  rouges (îlots 1:1 dans la bande de fondu) en avant.
+- Cause : le lointain des villes v2 (`build_v2_far` : Paris, Londres, Orléans…) était posé sur un
+  sol uniforme (altitude du centre) ; le relief affiché est exagéré, la jupe de 30 m ne suffit pas.
+  Les quartiers étaient en plus triangulés sur leur seul contour (triangles de 2 km).
+- Correctif (`fix/vt-v2-ground`) : instantané du relief sur l'emprise (`TownFarLayer._heights_at`,
+  même `TownPlan.Heights` que la ville 1:1), sol échantillonné par sommet ; nappe des quartiers
+  découpée en cellules de 200 m (`DISTRICT_CELL_M`), jupe densifiée. Test ajouté dans
+  `tf_far_mesh_test` (écart sommet/relief < 0,5 m).
+
+## Ville détaillée plus haut (30/09, ADR 0144, demande du joueur)
+- Portées : `max_rig_distance` 16 → 45, `block_range` 14 → 42, `stream_max` 18 → 48.
+- Toits des blocs : fondu vers la teinte « masse de toits » du lointain (1,2 → 3,5 u) ; essai
+  inverse (lointain en tuile des blocs) écarté, taches rouge sang de loin.
+- Banc `--bench-pan-only`, 1280 × 720, qualité Haute, 2 passes alternées, machine chargée
+  (charge 30-70) : d = 30 appels p50 411-414 → 436, primitives 2,77 → 2,80 M ; d = 40 appels
+  466-468 → 463-481, primitives 2,81-2,85 → 2,79-2,83 M ; coût CPU du rendu 0,6-0,7 ms dans les
+  deux ; i/s et pics dans le bruit (pics > 50 ms : 17 en base, 28 en nouveau, passes différentes).
+  En panoramique seules 2-4 villes 1:1 ont le temps de se charger (plans 2 fils) ; à l'arrêt,
+  Paris d = 35 : 7 villes construites, d = 22 : 9.
+- Captures d = 35 / 22 (locales) : Paris 1:1 active, même teinte que le lointain, plus de dalles.
+- À juger en partie réelle : chargement progressif en déplacement rapide ; banc sur machine calme.

@@ -17,6 +17,8 @@ const SHOTS := [
 	["paris_d1100", PARIS, 1100.0, 0.0],
 	["paris_d300", PARIS, 300.0, 0.0],
 	["paris_d60", PARIS, 60.0, 0.0],
+	["paris_d35", PARIS, 35.0, 0.0],
+	["paris_d22", PARIS, 22.0, 0.0],
 	["paris_d15", PARIS, 15.0, 0.0],
 	["amiens_d150", AMIENS, 150.0, 0.0],
 ]

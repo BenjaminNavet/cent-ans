@@ -125,6 +125,20 @@ void fragment() {
 			roughness = mix(roughness, roof_roughness, w);
 		}
 	}
+	// ADR 0144 : toits des blocs vus de loin → même teinte « masse de toits » que le lointain
+	// (`town_far.gdshader`) : pas de saut de couleur au passage bloc → lointain.
+	if (lod_mode == 2 && roofscape > 0.0 && layer >= roof_first && layer <= roof_last) {
+		float far_w = smoothstep(roofscape_near, roofscape_far, distance(world_m / meters_per_unit, CAMERA_POSITION_WORLD));
+		if (far_w > 0.0) {
+			float footprint = length(fwidth(world_m.xz));
+			float detail = 1.0 - smoothstep(roofscape_cell_m * 0.5, roofscape_cell_m * 2.0, footprint);
+			float r_cell;
+			float r_avg;
+			vec3 mean = mix(roofscape_average(r_avg), roofscape_color(world_m, r_cell), detail);
+			albedo = mix(albedo, mean, far_w);
+			roughness = mix(roughness, mix(r_avg, r_cell, detail), far_w);
+		}
+	}
 	ALBEDO = albedo;
 	ROUGHNESS = roughness;
 }

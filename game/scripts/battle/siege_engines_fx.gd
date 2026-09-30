@@ -16,6 +16,8 @@ extends Node3D
 ##   le chemin parcouru (position du cœur) ; poutre du bélier balancée (`SiegeAssaultFx`).
 ## `release()` donne aux projectiles (`SiegeAssaultFx`, `BattleEffects`) le point et l'instant
 ## où la fronde ou la bouche les lâche. Rendu seulement : aucune règle ici.
+## GA3-L5 : trébuchet et bélier peuvent être posés dans leur variante générée (`ga3_variant`,
+## mêmes nœuds animés, `--no-ga3` pour les modèles procéduraux).
 
 const SETTINGS_FILE := "fx/siege_engines.json"
 const WOOD_TINTS := {
@@ -82,13 +84,42 @@ static func _scene(model: String) -> PackedScene:
 	return scene
 
 
-## Nouvelle instance du modèle `model`, habillée des matières de bataille ; null si absent.
+## GA3-L5 (ADR 0140) : variante générée du modèle `model` (`ga3` des réglages, `_lod` suivi) ;
+## "" si aucune, absente ou coupée par `--no-ga3`. Même hiérarchie et mêmes noms de nœuds que
+## le modèle procédural (`tools/blender_scripts/ga3_siege_rig.py`) : l'animation est inchangée.
+static func ga3_variant(model: String) -> String:
+	if not Ga3Kit.requested():
+		return ""
+	var base := model.trim_suffix("_lod")
+	var entry: Variant = (settings().get("ga3", {}) as Dictionary).get(base, null)
+	if not (entry is Dictionary) or str((entry as Dictionary).get("model", "")) == "":
+		return ""
+	var variant := str(entry["model"]) + ("_lod" if model.ends_with("_lod") else "")
+	return variant if _scene(variant) != null else ""
+
+
+## Réglages de l'engin `kind` (`ram`, `siege_tower`…) pour le nœud `node` : ceux de sa variante
+## GA3 (roues, cordes de la poutre) remplacent les communs.
+static func kind_settings(kind: String, node: Node) -> Dictionary:
+	var c: Dictionary = settings().get(kind, {})
+	if node != null and node.has_meta("ga3"):
+		var over: Variant = (settings().get("ga3", {}) as Dictionary).get(kind, null)
+		if over is Dictionary:
+			c = c.merged(over, true)
+	return c
+
+
+## Nouvelle instance du modèle `model` (sa variante GA3 si elle existe), habillée des matières
+## de bataille ; null si absent. Le nœud garde le nom du modèle ; méta `ga3` = variante posée.
 static func instantiate(model: String) -> Node3D:
-	var scene := _scene(model)
+	var variant := ga3_variant(model)
+	var scene := _scene(variant if variant != "" else model)
 	if scene == null:
 		return null
 	var node := scene.instantiate() as Node3D
 	node.name = model.capitalize().replace(" ", "")
+	if variant != "":
+		node.set_meta("ga3", variant)
 	_dress(node)
 	return node
 
@@ -606,7 +637,7 @@ func _update_mover(unit: Dictionary, id: int, _dt: float) -> void:
 	if machine == null or not machine.visible:
 		return
 	var is_ram := str(unit.get("render", "")) == "ram"
-	var c: Dictionary = cfg.get("ram" if is_ram else "siege_tower", {})
+	var c := kind_settings("ram" if is_ram else "siege_tower", machine)
 	var pos := Vector3(float(unit["x"]), 0.0, float(unit["z"]))
 	if not _movers.has(id):
 		_movers[id] = {"last": pos, "roll": 0.0, "sway": 0.0}

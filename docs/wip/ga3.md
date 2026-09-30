@@ -388,4 +388,11 @@ Note `docs/wip/ga3-l4.md`, ADR 0140 § extension L4. Brutes `~/dev/cent-ans-raw/
 - [x] L3c : cavalier du chevalier `cavalry_0` sur le cheval fin (0,16 $, un essai). Voir « L3c ».
 - [x] L4 autres recettes des mêmes types (infantry_2/3/4/6/7/8, archer_1/4, cavalry_3, standard_1)
       + défauts (têtes variantes, mains fines, usure SR2) : 2,95 $. Voir « L4 ».
+- [x] L5 trébuchet et bélier générés branchés sur les engins animés (0 $, pas de régénération ;
+      ADR 0140 § L5, note `docs/wip/ga3-l5.md`) : `ga3_siege_rig.py` découpe les LOD GA3 sur les
+      nœuds du rig procédural (bâti / verge / caisse ; abri / roues / poutre), fronde, pierre et
+      treuil procéduraux ; `siege/ga3_{trebuchet,ram}(_lod).glb`, `ga3` de
+      `data/fx/siege_engines.json`, `--no-ga3`. **Point ouvert** : jugement en jeu (proportions
+      forcées du bâti et de la caisse, traverses étirées au centre, poutre du bélier qui traverse
+      le toit aux grands balancements) ; capture `docs/audit/captures/ga3/ga3_l5_siege.png`.
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.
