@@ -1,4 +1,4 @@
-# GA3-L3a — Figurine de bataille générée : longbowman (archer_0)
+# GA3-L3 — Figurines de bataille générées (L3a longbowman, L3b 4 unités à pied)
 
 Branche `feat/ga3`, worktree `../game_project-ga3`. Budget L3a ≤ 2 $ : dépensé 0,48 $
 (`docs/budget.md`). Brutes : `~/dev/cent-ans-raw/ga3/l3/longbowman/` (planche, découpes,
@@ -63,3 +63,20 @@ Contexte : `docs/wip/ga3.md` (S2, S3, § L3a), ADR 0140 § figurines.
   dos inventé ; trellis-2 : pas meilleur une fois remaillé à 11,5 k. Livré : multi.
 - 30/09 : capture en bataille : archers texturés (jaques de livrée rouge avec crasse, chapels,
   arcs et cordes, chausses variées) ; cadrage à côté du régiment, jugement sur le bord.
+
+# L3b — 4 unités à pied (en cours)
+Budget ≤ 1,50 $ (consigne : `trellis/multi` ou `trellis` seulement, ≤ 3 générations 3D par
+unité). Figurines retenues (une par type ; `data/unit_types` `figure` + `battle_meshes.VARIANTS`) :
+- `man_at_arms` → `infantry_0` (hommes d'armes à pied ; épée + écu) ; mêmes types : infantry_7, 8.
+- `crossbowman` → `archer_2` (Génois, pavois : la référence SR3 est génoise) ; archer_1, archer_4.
+- `sergeant` → `infantry_1` (piquiers flamands, pique) ; infantry_4.
+- `militia` → `infantry_5` (goedendag, Brabançons) ; infantry_2 (milice urbaine), 3, 6.
+
+## Étapes L3b
+- [x] 1. Prompts `ga3_fal_figure.py`, `UNITS` de `ga3_figures.py` en données (équipement tiré de
+      la recette fine, `metal_z`, clips), `equipment()` générique (registre fin puis V2 ; faces
+      `C_ARMS` gardent l'UV d'armoiries), shader `GA3_TEX` épargne `C_ARMS`, planche `board`
+- [ ] 2. Générations (planche NB2 + bria + multi face/dos) des 4 unités
+- [ ] 3. Blender : 4 figurines, rendus, planche `docs/img/ga3/l3b_units.jpg`
+- [ ] 4. Test `ga3_l3_figures_test.gd` 5 figurines, tests de non-régression, 1 capture Godot
+- [ ] 5. Docs `ga3.md` § L3b, ADR 0140, budget

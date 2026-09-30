@@ -1,4 +1,4 @@
-"""GA3-L3 battle figures: A-pose reference sheet -> cut-out front view -> TRELLIS 2 on fal.ai.
+"""GA3-L3 battle figures: A-pose reference sheet -> cut-out views -> TRELLIS on fal.ai.
 
 Run with the fal client (``FAL_KEY`` in the environment)::
 
@@ -58,6 +58,42 @@ UNITS = {
     "blue. The green jack and the blue hose are the only green and blue items. Keep the steel "
     "kettle hat, the leather belt, the brown leather boots; keep at the belt only a leather arrow "
     "bag with a sheaf of arrows hanging at the right hip and a sheathed dagger behind the left hip.",
+    # L3b: infantry_0 (men-at-arms on foot). No hose key: plate legs; the steel stays steel.
+    "man_at_arms": COMMON
+    + "Clothing changes: the short tight padded jupon (coat armour) worn over the coat of plates "
+    "keeps its cut, padding and dirt but is plain saturated vivid pure green wool without any "
+    "heraldic charge, stripe or badge (the livery colour); it is the only green item. All the "
+    "armour stays plain grey steel, not painted: pointed bascinet with the visor raised and the "
+    "mail aventail, mail sleeves, plate vambraces, couters, gauntlets, cuisses, poleyns, greaves "
+    "and sabatons. There is no blue item. Keep the low sword belt with an empty scabbard at the "
+    "left hip and a rondel dagger at the right hip; no sword drawn, no lance, no shield.",
+    # L3b: archer_2 (Genoese crossbowmen); archer_1 and archer_4 share the crossbow.
+    "crossbowman": COMMON
+    + "Clothing changes: the livery tabard over the padded aketon keeps its cut and dirt but is "
+    "plain saturated vivid pure green wool, one single colour, no stripes and no second colour "
+    "(the livery colour); the woollen hose are saturated vivid pure blue. The green tabard and "
+    "the blue hose are the only green and blue items; the aketon sleeves keep their natural "
+    "undyed linen colour. Keep the steel kettle hat, the mail, the leather belt with the "
+    "spanning hook, the boots. Remove the pavise, the crossbow and the quiver of bolts "
+    "entirely: nothing on the back, nothing at the hips except the belt hook and a sheathed "
+    "dagger.",
+    # L3b: infantry_1 (Flemish pikemen, sergeants); infantry_4 shares the pike.
+    "sergeant": COMMON
+    + "Clothing changes: the simple surcoat keeps its cut and dirt but is plain saturated vivid "
+    "pure green wool, one single colour (the livery colour); the woollen hose are saturated vivid "
+    "pure blue. The green surcoat and the blue hose are the only green and blue items; the "
+    "quilted gambeson sleeves keep their natural undyed colour. Keep the open bascinet, the mail "
+    "collar, the leather gloves, the leather belt with a purse and a sheathed dagger, the "
+    "leather boots. No polearm, no guisarme, no weapon in the hands.",
+    # L3b: infantry_5 (goedendag militia, Brabançons); infantry_2 (urban militia) next.
+    "militia": COMMON
+    + "Clothing changes: over the padded jack he wears a short open-sided livery tabard of plain "
+    "saturated vivid pure green wool, one single colour (the livery colour); the woollen hose are "
+    "saturated vivid pure blue. The green tabard and the blue hose are the only green and blue "
+    "items; the padded jack sleeves and the woollen hood keep their natural undyed colours. Keep "
+    "the iron kettle hat, the mail gorget, the leather belt with a purse and a sheathed dagger, "
+    "the boots. No goedendag, no club, no buckler, no shield: nothing held and nothing on the "
+    "back.",
 }
 TRELLIS2_ARGS = {
     "resolution": 1024,

@@ -29,6 +29,7 @@ Run from the repository root::
         <unit> [--raw ~/dev/cent-ans-raw/ga3/l3] [--renders]
     python3 tools/blender_scripts/ga3_figures.py sheet <unit> <jpg> [--raw DIR] \
         [--tags multi_front_back,trellis,trellis2]
+    python3 tools/blender_scripts/ga3_figures.py board <jpg> [--units a,b] [--raw DIR]
 
 Output: ``game/assets/models/battle_ga3/`` (``<figure>_lod{0,1,2}.mesh.bin``,
 ``<figure>_albedo.png``, ``manifest.json`` whose entries override the fine figures in
@@ -48,8 +49,11 @@ OUT_DIR = os.path.join(ROOT, "game", "assets", "models", "battle_ga3")
 FINE_DIR = os.path.join(ROOT, "game", "assets", "models", "battle_fine")
 RAW = os.path.expanduser("~/dev/cent-ans-raw/ga3/l3")
 
-# Per unit: figure replaced, source folder, helmet top (m), held equipment builders
-# (``battle_fine_weapons``), hue bands (degrees) of the key colours.
+# Per unit: fine figure replaced, generated mesh and reference (under RAW), helmet top (m),
+# held equipment (item names of the fine recipe: builder, variant mask and kwargs come from
+# ``battle_skinned_figures.FIGURES`` with the SR3b overrides), steel height (``metal_z``: faces
+# classed as steel below it keep the texture code; 0 = the whole harness is steel), and the
+# clips of the renders (walk, attack; the sheet shows them beside the current figure).
 UNITS = {
     "longbowman": {
         "figure": "archer_0",
@@ -57,6 +61,48 @@ UNITS = {
         "reference": "longbowman/sheet.png",
         "top": 1.80,
         "equipment": ["longbow"],
+        "metal_z": 1.5,
+        "clips": {"idle": "bow_idle", "walk": "bow_walk", "attack": "bow_shoot"},
+    },
+    # L3b. Others sharing the figure type: infantry_7, infantry_8 (harness / sword).
+    "man_at_arms": {
+        "figure": "infantry_0",
+        "glb": "man_at_arms/multi_front_back.glb",
+        "reference": "man_at_arms/sheet.png",
+        "top": 1.86,
+        "equipment": ["sword", "heater_shield"],
+        "metal_z": 0.0,
+        "clips": {"idle": "idle", "walk": "walk", "attack": "slash"},
+    },
+    # Others: archer_1, archer_4 (crossbow).
+    "crossbowman": {
+        "figure": "archer_2",
+        "glb": "crossbowman/multi_front_back.glb",
+        "reference": "crossbowman/sheet.png",
+        "top": 1.80,
+        "equipment": ["crossbow", "quiver", "pavise"],
+        "metal_z": 1.5,
+        "clips": {"idle": "xbow_idle", "walk": "walk", "attack": "xbow_shoot"},
+    },
+    # Others: infantry_4 (pike).
+    "sergeant": {
+        "figure": "infantry_1",
+        "glb": "sergeant/multi_front_back.glb",
+        "reference": "sergeant/sheet.png",
+        "top": 1.84,
+        "equipment": ["pike"],
+        "metal_z": 1.5,
+        "clips": {"idle": "pike_idle", "walk": "pike_walk", "attack": "pike_thrust"},
+    },
+    # Others: infantry_2, infantry_3, infantry_6 (staff weapons of the militia).
+    "militia": {
+        "figure": "infantry_5",
+        "glb": "militia/multi_front_back.glb",
+        "reference": "militia/sheet.png",
+        "top": 1.80,
+        "equipment": ["goedendag"],
+        "metal_z": 1.5,
+        "clips": {"idle": "pike_idle", "walk": "pike_walk", "attack": "pike_thrust"},
     },
 }
 KEY_LIVERY = (75.0, 170.0)  # saturated green
@@ -65,16 +111,15 @@ KEY_SAT = 0.28
 CLOSE_STEPS = (
     8  # px at the 2048 source: dirt spots inside a key colour zone are tinted too
 )
-METAL_Z = 1.5  # m: steel code on the helmet only (dagger, buckles keep their texture)
+METAL_Z = 1.5  # m, default ``metal_z``: steel code on the helmet only (dagger, buckles)
 TRI_CAP = (11900, 1350, 260)  # battle_fine_figures.TRI_CAP (foot soldiers)
 TEX = 1024
-EQUIP_TRIS = {"longbowman": 310}  # level-0 equipment triangles (measured)
 AUTO_LEVELS = 0.5  # percent clipped at each end (ga3_cleanup, L1)
 EQUIP_UV_SHIFT = -4.0
 SOLIDIFY = 0.012  # m, thickens the open TRELLIS sheets before the voxel remesh
 VOXEL = 0.008  # m
 # Material codes (battle_skinned_equipment / battle_soldier_skinned.gdshader).
-C_LIVERY, C_PLATE, C_CLOTH, C_EXACT = 0, 2, 4, 5
+C_LIVERY, C_PLATE, C_CLOTH, C_EXACT, C_ARMS = 0, 2, 4, 5, 6
 
 
 # --- Albedo and masks ---------------------------------------------------------------------
@@ -312,13 +357,13 @@ def coded_materials(image):
     return mats
 
 
-def code_faces(obj, classes, mats):
+def code_faces(obj, classes, mats, metal_z=METAL_Z):
     """Replace the TRELLIS material by the coded ones, per face class."""
     import numpy as np
 
     fc = face_classes(obj, classes)
     for i, poly in enumerate(obj.data.polygons):
-        if fc[i] == 3 and (obj.matrix_world @ poly.center).z < METAL_Z:
+        if fc[i] == 3 and (obj.matrix_world @ poly.center).z < metal_z:
             fc[i] = 0
     obj.data.materials.clear()
     for m in mats:
@@ -508,26 +553,65 @@ def lod_copy(obj, target, name):
     return dup
 
 
+def recipe_items(unit):
+    """(name, variant mask, kwargs) of the unit's held items, from the fine recipe."""
+    import battle_fine_sr as sr
+    import battle_skinned_figures as figures
+
+    fig = unit["figure"]
+    recipe = sr.fine_recipe(fig, figures.FIGURES[fig])
+    items = {}
+    for item in recipe.get("equipment", []):
+        items.setdefault(item[0], (item[1], item[2] if len(item) > 2 else {}))
+    out = []
+    for name in unit["equipment"]:
+        mask, kwargs = items.get(name, (0, {}))
+        out.append((name, mask, kwargs))
+    return out
+
+
 def equipment(unit, arm, level):
-    """Held weapons of the unit at `level` (procedural, bound to the rig's bones)."""
+    """Held items of the unit at `level` (procedural, bound to the rig's bones).
+
+    Same builders as the fine figure (``battle_fine_figures.build_figure``): the fine
+    ``battle_fine_gear`` / ``battle_fine_weapons`` registry, else the V2 weapons and
+    equipment. UVs move to negative u (untextured by ``GA3_TEX``) except on the painted
+    faces (``C_ARMS``: shields, pavise), which keep the heraldry UV.
+    """
     import battle_fine_gear as gear
-    import battle_fine_weapons as fw
     import battle_skinned as bs
     import battle_skinned_equipment as eq
+    import battle_skinned_weapons as weapons
 
     ctx = eq.Context(arm, level, bs.material, bs.bone_world)
     out = []
-    for name in unit["equipment"]:
-        objs = getattr(fw, name)(gear.Gear(ctx, None, [], "ga3_" + name, False))
+    for name, mask, kwargs in recipe_items(unit):
+        objs = gear.build(name, kwargs, gear.Gear(ctx, None, [], unit["figure"], False))
+        if objs is None:
+            builder = getattr(weapons, name, None) or getattr(eq, name)
+            objs = builder(ctx, **kwargs)
+            for obj in objs:
+                gear.unwrap(obj)
         for obj in objs:
-            gear.unwrap(obj)
-            uv = obj.data.uv_layers.active
-            if uv is not None:
-                for d in uv.data:
-                    d.uv = (d.uv[0] + EQUIP_UV_SHIFT, d.uv[1])
-            bs.set_face_mask(obj, bs.held_mask(name, 0, {}))
+            shift_equipment_uv(obj)
+            bs.set_face_mask(obj, bs.held_mask(name, mask, kwargs))
             out.append(obj)
     return out
+
+
+def shift_equipment_uv(obj):
+    """Move the UVs of `obj` to negative u, except on its ``C_ARMS`` faces."""
+    uv = obj.data.uv_layers.active
+    if uv is None:
+        return
+    mats = obj.data.materials
+    for poly in obj.data.polygons:
+        mat = mats[poly.material_index] if poly.material_index < len(mats) else None
+        if mat is not None and int(mat.get("code", -1)) == C_ARMS:
+            continue
+        for li in poly.loop_indices:
+            d = uv.data[li]
+            d.uv = (d.uv[0] + EQUIP_UV_SHIFT, d.uv[1])
 
 
 def tris(objs):
@@ -566,8 +650,12 @@ def build(unit_name, raw, renders, glb=None):
     src_rgb, src_cls, lum = source_maps(base, orm)
     src_albedo = image_from(src_rgb, "ga3_src_albedo")
     src_classes = image_from(src_cls, "ga3_src_classes", data=True)
-    # LOD0 budget: the cap minus the level-0 equipment (longbow, string, arrow: ~310).
-    eq_tris = EQUIP_TRIS.get(unit_name, 400)
+    # LOD0 budget: the cap minus the level-0 equipment (measured on a throwaway build).
+    probe_gear = equipment(unit, arm, 0)
+    eq_tris = tris(probe_gear)
+    for o in probe_gear:
+        bpy.data.objects.remove(o)
+    print(f"EQUIP level-0 tris={eq_tris}")
     low = closed_low(obj, TRI_CAP[0] - eq_tris - 100, f"{fig}_ga3_body")
     baked, classes = bake_low(obj, low, src_albedo, src_classes)
     bpy.data.objects.remove(obj)
@@ -582,7 +670,7 @@ def build(unit_name, raw, renders, glb=None):
     albedo_name = f"{fig}_albedo.png"
     albedo = save_png(rgba, os.path.join(OUT_DIR, albedo_name), albedo_name)
     mats = coded_materials(albedo)
-    code_faces(obj, classes[..., :3], mats)
+    code_faces(obj, classes[..., :3], mats, unit.get("metal_z", METAL_Z))
     bs.set_face_mask(obj, 0)
     obj.name = f"{fig}_ga3_body"
     with open(os.path.join(FINE_DIR, "manifest.json")) as f:
@@ -642,11 +730,12 @@ def build(unit_name, raw, renders, glb=None):
 
 # --- Renders and sheet --------------------------------------------------------------------
 
+# (file label, clip role of the unit's ``clips``, fraction, eye, target). L3a names kept.
 SHOTS = [
     ("bind", None, 0.0, (0.9, -3.3, 1.2), (0.45, 0, 0.95)),
-    ("walk", "bow_walk", 0.25, (0.9, -3.3, 1.2), (0.45, 0, 0.95)),
-    ("shoot", "bow_shoot", 0.5, (1.7, -2.9, 1.5), (0.45, 0, 1.1)),
-    ("back", "bow_walk", 0.6, (0.2, 3.4, 1.3), (0.45, 0, 0.95)),
+    ("walk", "walk", 0.25, (0.9, -3.3, 1.2), (0.45, 0, 0.95)),
+    ("shoot", "attack", 0.5, (1.7, -2.9, 1.5), (0.45, 0, 1.1)),
+    ("back", "walk", 0.6, (0.2, 3.4, 1.3), (0.45, 0, 0.95)),
 ]
 
 
@@ -679,11 +768,15 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
     cam = fp.camera()
     for o in kept[0][1]:
         fp.attach(o, arm)
-    for label, clip, frac, eye, target in SHOTS:
+    unit = UNITS[unit_name]
+    fig = unit["figure"]
+    clips = unit["clips"]
+    for label, role, frac, eye, target in SHOTS:
+        clip = clips[role] if role else None
         for o in [
             o
             for o in bpy.data.objects
-            if o.name.startswith("archer_0") and "ga3" not in o.name
+            if o.name.startswith(fig) and "ga3" not in o.name
         ]:
             bpy.data.objects.remove(o)
         for pb in arm.pose.bones:
@@ -691,7 +784,7 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
         if clip:
             fp.pose_clip(arm, clip, frac)
         bpy.context.view_layer.update()
-        probe.add_current_archer(clip, frac)
+        probe.add_current_archer(clip, frac, fig, clips["idle"])
         fp.look_at(cam, eye, target, 40)
         scene.render.resolution_x, scene.render.resolution_y = (560, 620)
         fp.render(os.path.join(out, f"{label}.png"))
@@ -726,12 +819,12 @@ def sheet(unit_name, jpg, raw, tags):
                 "Référence A-pose (NB2)",
                 ref.resize((int(ref.width * h / ref.height), h)),
             ),
-            tile(main_tag, "bind", f"{main_tag} liaison | archer_0 actuel"),
+            tile(main_tag, "bind", f"{main_tag} liaison | {unit['figure']} actuel"),
         ],
         [
-            tile(main_tag, "walk", "bow_walk"),
-            tile(main_tag, "shoot", "bow_shoot"),
-            tile(main_tag, "back", "dos (bow_walk)"),
+            tile(main_tag, "walk", unit["clips"]["walk"]),
+            tile(main_tag, "shoot", unit["clips"]["attack"]),
+            tile(main_tag, "back", f"dos ({unit['clips']['walk']})"),
         ],
     ]
     if len(tags) > 1:
@@ -755,8 +848,54 @@ def sheet(unit_name, jpg, raw, tags):
     print("SHEET", jpg, canvas.size)
 
 
+def board(jpg, raw, names, tag="multi_front_back"):
+    """Planche of several units: one row each, walk and attack (generated | current)."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    try:
+        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 15)
+    except OSError:
+        font = ImageFont.load_default()
+    h = 300
+    rows = []
+    for name in names:
+        unit = UNITS[name]
+        row = []
+        for shot, role in (("walk", "walk"), ("shoot", "attack")):
+            path = os.path.join(raw, name, "renders_" + tag, shot + ".png")
+            im = Image.open(path).convert("RGB")
+            label = f"{name} ({unit['figure']}) {unit['clips'][role]} : GA3 | actuel"
+            row.append((label, im.resize((int(im.width * h / im.height), h))))
+        rows.append(row)
+    width = max(sum(t.width for _, t in r) for r in rows)
+    canvas = Image.new("RGB", (width, len(rows) * (h + 24)), (30, 30, 32))
+    y = 0
+    for r in rows:
+        x = 0
+        for label, t in r:
+            canvas.paste(t, (x, y + 24))
+            ImageDraw.Draw(canvas).text(
+                (x + 6, y + 4), label, fill=(235, 230, 215), font=font
+            )
+            x += t.width
+        y += h + 24
+    os.makedirs(os.path.dirname(jpg), exist_ok=True)
+    canvas.save(jpg, quality=84)
+    print("BOARD", jpg, canvas.size)
+
+
 def main():
-    """Parse the Blender or sheet command line."""
+    """Parse the Blender, sheet or board command line."""
+    if len(sys.argv) > 1 and sys.argv[1] == "board":
+        args = sys.argv[2:]
+        raw = args[args.index("--raw") + 1] if "--raw" in args else RAW
+        units = (
+            args[args.index("--units") + 1].split(",")
+            if "--units" in args
+            else list(UNITS)
+        )
+        board(args[0], os.path.expanduser(raw), units)
+        return
     if len(sys.argv) > 1 and sys.argv[1] == "sheet":
         args = sys.argv[2:]
         raw = args[args.index("--raw") + 1] if "--raw" in args else RAW

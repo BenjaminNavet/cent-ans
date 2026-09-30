@@ -871,8 +871,9 @@ void fragment() {
 	// GA3-L3 : figurine générée (albédo sur l'UV du maillage ; équipement procédural en u < 0,
 	// non texturé). Alpha = zone teintable : livrée (C_LIVERY : livrée, armoiries, croix du jeu)
 	// ou étoffe (C_CLOTH : couleur naturelle par soldat), modulées par la luminance de la
-	// texture sur sa moyenne (plis, piqûres, crasse) ; ailleurs la couleur générée.
-	if (UV.x >= 0.0) {
+	// texture sur sa moyenne (plis, piqûres, crasse) ; ailleurs la couleur générée. Les faces
+	// peintes de l'équipement (C_ARMS : écu, pavois) gardent l'UV d'armoiries (L3b).
+	if (UV.x >= 0.0 && code != C_ARMS) {
 		vec4 g3 = texture(ga3_albedo, UV);
 		float g3_l = dot(g3.rgb, vec3(0.3, 0.59, 0.11));
 		if (code == C_LIVERY) {
