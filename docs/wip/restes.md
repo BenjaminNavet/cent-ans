@@ -5,6 +5,11 @@ Tri fait sur `main` 2c475b06 (agent Explore) : 20 points ouverts, faisables sans
 Exclus : parties pilotes, test sur vrai PC Windows, écoutes, publication du relief, dépenses cloud,
 FXAA, retrait de `--coarse-figures` (point 17, choix du joueur).
 
+## Décisions du joueur en attente (30/09, chantier NT)
+
+Mocap payante, clé fal.ai (GA3), chantier guerre civile / prétendants : détail et pistes d'achat dans
+`docs/wip/nt.md` § « Pour le joueur ».
+
 ## Reprendre
 
 Lire ce fichier, `git worktree list`, `git branch --list 'feat/rs-*'`. Chaque lot a son
