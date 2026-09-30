@@ -196,3 +196,15 @@ abandonne nos clips Quaternius.
   `fal_client.subscribe` bloqué après la fin des tâches Tripo/Meshy → résultats relus par
   `queue.fal.run/<app>/requests/<id>` (ids via `api.fal.ai/v1/models/requests/by-endpoint`). Planche
   `docs/img/ga3/s3_compare.jpg`, analyse dans « S3 comparatif ».
+
+## Lots de production (go joueur 30/09)
+- [ ] L1 décor : 10 objets flux-2 → bria → trellis → `ga3_cleanup.py --normal on --auto-levels 0.5`
+      (maison paysanne, église [trellis-2, LOD0 20-30 k], moulin, tente, palissade, puits, chariot,
+      trébuchet, bélier ; pièces fines : `trellis/multi` ou procédural gardé). Branchement décor de
+      bataille (`battle_decor`) derrière option, ADR (prochain numéro libre). ≈ 1 $.
+- [ ] L2 végétation campagne : imposteurs générés (3 essences, 8 azimuts via nano-banana-2) dans la
+      grille `campaign_impostors_albedo`, atlas de feuilles, herbe regénérée dense, rochers TRELLIS dans
+      `GroundClutter`, derrière option. ≈ 1,50 $.
+- [ ] L3 figurines : APRÈS fusion de `feat/sr`. Références A-pose mains vides → trellis-2 → chaîne S2
+      (notre squelette, nos clips, armes procédurales), masque de livrée. ≈ 2,50 $.
+- Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.
