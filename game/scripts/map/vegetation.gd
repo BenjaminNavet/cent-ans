@@ -612,6 +612,23 @@ func _meshes(lod: int) -> Array:
 		VegetationMeshes.essence("fir", detailed), hedge]
 
 
+## Lot FC5 : maillages de la forêt dense (`ForestDetail`) : cartes de feuillage au plus près
+## (`near`), imposteurs sinon ; `--no-fc5` : maillages bas partout (comportement SZ4b).
+func forest_meshes(near: bool) -> Array:
+	if _cards_material == null:
+		return [VegetationMeshes.essence("oak", false), VegetationMeshes.essence("beech", false),
+			VegetationMeshes.essence("fir", false), VegetationMeshes.hedge_low()]
+	return _meshes(Lod.NEAR if near else Lod.FAR)
+
+
+func forest_material(kind: int, near: bool) -> ShaderMaterial:
+	return _material if _cards_material == null else _material_for(kind, Lod.NEAR if near else Lod.FAR)
+
+
+func near_cards_active() -> bool:
+	return _cards_material != null
+
+
 ## Matériau d'un MultiMesh selon l'essence (`VegetationTileJob.Kind`) et le niveau de détail.
 func _material_for(kind: int, lod: int) -> ShaderMaterial:
 	if kind == VegetationTileJob.Kind.HEDGE:
