@@ -14,6 +14,7 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - [x] SR3 planches NB2 (session principale, ≤ 1 $) → liste d'écarts
 - [x] SR2 usure et métal (après SR1, même shader)
 - [ ] SR3b corrections des recettes Blender + recuisson
+- [x] SR5 bâtiments, gains rapides (usure atlas/villes, `building_pbr.gdshader`, `--no-sr5`)
 - [ ] SR4 captures A/B, perf, tests, ADR 0136, fusion
 
 ## Journal
@@ -37,3 +38,22 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - Perf : 0 lecture de texture ajoutée ; ≤ 5 `noise2` par fragment (plates 2+3, mailles 1+3).
 - Tests : `sr2_weathering_test.gd` (défaut, `--no-sr2`, `--coarse-figures`), fg3/ga1_maps, smoke OK.
 - À juger en SR4 (captures A/B `--no-sr2`) : dosage boue, arêtes, teintes.
+
+## SR5 — fait (agent)
+- Include `game/shaders/building_aging.gdshaderinc` (bruit procédural, sans texture ; bruit fin
+  ramené à sa moyenne quand un pixel couvre > 0,15-0,8 m) : boue au pied (0,5-1,4 m, y local),
+  coulures sous les appuis (colonnes ~2,5 m, appui 1 m + 3 m/étage), crasse, toits assombris et
+  moussus. Graine par bâtiment : origine de l'instance + INSTANCE_ID.
+- SR5a : `aging` (0,5) dans `building_atlas.gdshader` (maquettes + bataille) et
+  `town_building.gdshader` (recopié par `TownBuilder.material`).
+- SR5b : `building_pbr.gdshader` remplace le StandardMaterial3D de `_textured` (un matériau par
+  matière, même nombre de matériaux) ; `--no-sr5` : StandardMaterial3D et `aging` 0 partout.
+  Poids : `SR5_MOSS`/`SR5_GRIME` dans `building_materials.gd`.
+- `landmark.gdshader` non refactorisé (masques d'atlas, rendu VH4 inchangé).
+- Tests : `sr5_buildings_test.gd` (avec et sans `--no-sr5`), ga5, zg6, vh4, smoke OK.
+- À juger en jeu (SR4) : intensité 0,5, hauteur de boue (suppose y local = 0 au pied du kit).
+
+## À faire (hors gains rapides SR5)
+- Câblage `TimberFrame` : réexport Blender du kit, indice de couche d'atlas, choix régional.
+- Toits bleus du château Kenney à remplacer.
+- LOD grossier des maquettes (appels de dessin, chantier FPS carte).
