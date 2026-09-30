@@ -301,3 +301,49 @@ fn private_war_is_arbitrated_by_the_common_liege() {
         .iter()
         .all(|o| o.id != offer.id));
 }
+
+/// ADR 0146: the player attacking a fellow vassal of an AI lord keeps its
+/// war and gets a summons to make peace: obeying imposes the peace, defying
+/// keeps the war at a cost in loyalty (Riazan against Moscow, both vassals
+/// of the Golden Horde, could not besiege Kolomna).
+#[test]
+fn player_private_war_gets_a_peace_summons() {
+    let (ryazan, moscow) = (fac("fac_ryazan"), fac("fac_moscow"));
+    let summons = |state: &CampaignState| {
+        state.factions[&fac("fac_ryazan")]
+            .offers
+            .iter()
+            .find(|o| matches!(o.proposal, Proposal::PeaceSummons { .. }))
+            .expect("peace summons")
+            .clone()
+    };
+    let mut data = data();
+    data.feudal_rules
+        .escalation
+        .arbitration
+        .take_side_attitude_gap = 1000;
+    data.feudal_rules
+        .escalation
+        .arbitration
+        .impose_peace_power_ratio = 0.0;
+
+    // Defied: the war goes on, loyalty drops.
+    let mut state = start(&data, "fac_ryazan");
+    let lord = feudal::common_liege(&state, &data, &ryazan, &moscow).expect("common liege");
+    state.declare_war(&data, &ryazan, &moscow).unwrap();
+    assert!(state.is_at_war(&ryazan, &moscow), "war kept until answered");
+    let offer = summons(&state);
+    assert_eq!(offer.from, lord);
+    let loyalty_before = state.factions[&ryazan].loyalty;
+    state.answer_offer(&data, &ryazan, offer.id, false).unwrap();
+    assert!(state.is_at_war(&ryazan, &moscow));
+    assert!(state.factions[&ryazan].loyalty < loyalty_before || loyalty_before == 0);
+
+    // Obeyed: imposed peace and truce.
+    let mut state = start(&data, "fac_ryazan");
+    state.declare_war(&data, &ryazan, &moscow).unwrap();
+    let offer = summons(&state);
+    state.answer_offer(&data, &ryazan, offer.id, true).unwrap();
+    assert!(!state.is_at_war(&ryazan, &moscow));
+    assert!(state.has_truce(&ryazan, &moscow));
+}

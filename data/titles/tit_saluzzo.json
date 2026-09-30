@@ -7,10 +7,10 @@
     "local_language": "piémontais"
   },
   "heraldry": {
-    "blazon": "D'azur au chef d'argent.",
-    "description": "Armes des marquis de Saluces, branche cadette aléramique, en écho inversé de celles du Montferrat voisin.",
-    "primary_color": "#1F3A93",
-    "secondary_color": "#F5F1E6"
+    "blazon": "D'argent au chef d'azur.",
+    "description": "Armes des marquis de Saluces, branche cadette aléramique, en écho de celles du Montferrat voisin (même champ d'argent, chef d'azur au lieu de gueules).",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1F3A93"
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [

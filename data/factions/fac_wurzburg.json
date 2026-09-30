@@ -18,10 +18,11 @@
   "suzerain": "fac_empire",
   "primary_title": "tit_wurzburg",
   "heraldry": {
-    "blazon": "D'argent à la fasce de gueules (rastel de Franconie).",
-    "description": "« Rastel de Franconie » : armes ducales portées par les princes-évêques de Wurtzbourg en tant que ducs de Franconie.",
-    "primary_color": "#F5F1E6",
-    "secondary_color": "#C8102E"
+    "blazon": "D'argent au chef denché de gueules.",
+    "description": "« Râteau de Franconie » (coupé émanché de gueules et d'argent de trois pièces), armes ducales des princes-évêques de Wurtzbourg comme ducs de Franconie.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6",
+    "note": "Blason exact : coupé émanché de gueules et d'argent ; rendu en chef denché par le générateur."
   },
   "titles": [
     "Prince-évêque de Wurtzbourg",

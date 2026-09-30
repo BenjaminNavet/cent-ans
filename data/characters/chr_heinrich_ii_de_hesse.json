@@ -11,12 +11,12 @@
   "faction": "fac_hesse",
   "role": "ruler",
   "birth": {
-    "value": "1302",
-    "uncertain": true
+    "value": "1300",
+    "uncertain": true,
+    "note": "Né avant 1302."
   },
   "death": {
-    "value": "1376-06-05",
-    "uncertain": true
+    "value": "1376-06-03"
   },
   "historical": true,
   "titles": [
@@ -40,7 +40,7 @@
   "piety": 45,
   "starting_location": "prov_hesse",
   "status": "at_court",
-  "description": "Fils d'Otton Ier de Hesse, landgrave de Hesse depuis 1328 ; surnommé « le Fer » pour sa fermeté militaire, il consolide le landgraviat détaché de Thuringe par sa grand-mère Sophie de Brabant.",
+  "description": "Fils d'Otton Ier de Hesse, landgrave de Hesse depuis 1328 ; surnommé « le Fer » pour sa fermeté militaire, il consolide le landgraviat détaché de Thuringe par son arrière-grand-mère Sophie de Brabant.",
   "sources": [
     "Henri II de Hesse",
     "Landgraviat de Hesse"

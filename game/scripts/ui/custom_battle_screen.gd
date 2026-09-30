@@ -107,8 +107,8 @@ static func save_config(value: Dictionary) -> void:
 
 func _initial_config() -> Dictionary:
 	var out := {
-		"attacker": {"faction": DEFAULT_FACTIONS["attacker"], "budget": int(rules.get("default_budget", 6000)), "units": []},
-		"defender": {"faction": DEFAULT_FACTIONS["defender"], "budget": int(rules.get("default_budget", 6000)), "units": []},
+		"attacker": {"faction": DEFAULT_FACTIONS["attacker"], "budget": int(rules.get("default_budget", 12000)), "units": []},
+		"defender": {"faction": DEFAULT_FACTIONS["defender"], "budget": int(rules.get("default_budget", 12000)), "units": []},
 		"terrain": "plains", "season": "summer", "weather": "", "hour": "",
 		"siege": false, "place": "city", "fortification": int(rules.get("default_fortification", 2)), "player_side": "attacker",
 		"year": int(rules.get("default_year", 1337)), "engines": default_engines(),
@@ -225,7 +225,7 @@ func _build_side(side: String) -> Control:
 	var budget := SpinBox.new()
 	budget.name = "Budget"
 	budget.min_value = float(rules.get("min_budget", 1000))
-	budget.max_value = float(rules.get("max_budget", 30000))
+	budget.max_value = float(rules.get("max_budget", 60000))
 	budget.step = float(rules.get("budget_step", 500))
 	budget.value_changed.connect(func(value: float) -> void: set_budget(side, int(value)))
 	top.add_child(budget)
@@ -514,7 +514,7 @@ func can_buy(side: String, unit_id: String) -> bool:
 	var side_report: Dictionary = report.get(side, {})
 	var cost := int(side_report.get("cost", 0))
 	var budget := int(side_report.get("budget", config[side]["budget"]))
-	var max_units := int(side_report.get("max_units", rules.get("max_units_per_side", 20)))
+	var max_units := int(side_report.get("max_units", rules.get("max_units_per_side", 40)))
 	return cost + int(entry["cost"]) <= budget and (config[side]["units"] as Array).size() < max_units
 
 
@@ -573,6 +573,17 @@ func refresh() -> void:
 	launch_button.disabled = not bool(report.get("ok", false))
 
 
+## VN : taille (px) des miniatures d'unité des listes (même taille que les lignes de recrutement).
+const ROSTER_ICON := 22
+
+
+## VN : miniature de l'unité sur le bouton (autoload `IconLibrary`, absent des tests isolés).
+func _decorate(button: Button, unit_id: String) -> void:
+	var library := get_node_or_null("/root/IconLibrary")
+	if library != null:
+		library.call("decorate_button", button, unit_id, ROSTER_ICON, "unit")
+
+
 func _fill_roster(side: String) -> void:
 	var items: VBoxContainer = roster_boxes[side]
 	for child in items.get_children():
@@ -585,6 +596,7 @@ func _fill_roster(side: String) -> void:
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text = true
 		button.disabled = not can_buy(side, unit_id)
+		_decorate(button, unit_id)  # VN : miniature de l'unité
 		RichTooltip.set_tooltip(button, "unit", unit_id)
 		button.pressed.connect(func() -> void: buy(side, unit_id))
 		items.add_child(button)
@@ -604,6 +616,7 @@ func _fill_army(side: String) -> void:
 		button.text = "− %s (%d)" % [entry.get("name", unit_id), int(entry.get("cost", 0))]
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text = true
+		_decorate(button, unit_id)
 		RichTooltip.set_tooltip(button, "unit", unit_id)
 		button.pressed.connect(func() -> void: remove(side, index))
 		items.add_child(button)

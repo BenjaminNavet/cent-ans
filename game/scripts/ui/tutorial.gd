@@ -29,6 +29,7 @@ const TARGET_GAP := 22.0
 const TOP_RESERVED := 60.0
 ## Rayon de la surbrillance d'un point de la carte (armée, ville).
 const POINT_RADIUS := 34.0
+const TOC_MIN_HEIGHT := 90.0
 const HALO_COLOR := Color(0.93, 0.73, 0.26)
 const HALO_SHADOW := Color(0.18, 0.10, 0.03, 0.55)
 const MUTED := "#6b5a40"
@@ -46,6 +47,8 @@ var skip_all_button: Button
 var later_button: Button
 var toc_button: Button
 var toc_box: VBoxContainer
+## VN lot 3 : le sommaire défile quand le parchemin ne tient pas dans la hauteur de l'écran.
+var toc_scroll: ScrollContainer
 
 ## Cible courante : `{rect: Rect2}` (contrôle) ou `{point: Vector2}` (carte), vide sinon.
 var target: Dictionary = {}
@@ -55,6 +58,11 @@ var avoid_rects: Array = []
 ## UX2 : titres des étapes (sommaire) et étape affichée.
 var step_titles: PackedStringArray = PackedStringArray()
 var current_index := -1
+## VN : les fenêtres modales (`UiZones.Zone.MODAL` : rencontre, Codex…) sont centrées et grandes ;
+## le parchemin les masquerait ou les cacherait. Il s'efface donc tant qu'une est ouverte, sauf
+## pour les étapes dont l'objectif se joue dans une modale (`modal_ok` : technologies, cour).
+var modal_ok := false
+var _hidden_by_modal := false
 ## Vrai tant qu'aucun placement n'a été calculé pour l'étape (le parchemin ne saute pas ensuite
 ## tant que sa place reste libre).
 var _needs_placement := true
@@ -101,8 +109,13 @@ func _ready() -> void:
 	toc_box = VBoxContainer.new()
 	toc_box.name = "Toc"
 	toc_box.add_theme_constant_override("separation", 0)
-	toc_box.hide()
-	box.add_child(toc_box)
+	toc_scroll = ScrollContainer.new()
+	toc_scroll.name = "TocScroll"
+	toc_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	toc_scroll.hide()
+	toc_scroll.add_child(toc_box)
+	toc_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_child(toc_scroll)
 	text_label = _rich(15)
 	text_label.mouse_filter = Control.MOUSE_FILTER_PASS  # BP1 : survol des liens du Codex
 	box.add_child(text_label)
@@ -167,6 +180,7 @@ func set_steps(titles: PackedStringArray) -> void:
 ## `step` : entrée de `TutorialSteps.steps` ; `index` à partir de 0.
 func show_step(step: Dictionary, index: int, total: int) -> void:
 	current_index = index
+	modal_ok = bool(step.get("modal_ok", false))
 	title_label.text = str(step.get("title", ""))
 	progress_label.text = "Étape %d / %d" % [index + 1, total]
 	var text := CodexText.format(str(step.get("text", "")), true)
@@ -207,13 +221,31 @@ func set_avoid(rects: Array) -> void:
 func set_toc_open(open: bool) -> void:
 	if toc_button.button_pressed != open:
 		toc_button.set_pressed_no_signal(open)
-	toc_box.visible = open
+	toc_scroll.visible = open
+	_fit_toc_height()
 	panel.reset_size()
 	_needs_placement = true
 
 
 func toc_open() -> bool:
-	return toc_box.visible
+	return toc_scroll.visible
+
+
+## VN lot 3 : hauteur du sommaire bornée à la place restante sous la barre du haut (le reste du
+## parchemin garde sa taille) ; hors de cette borne, le sommaire défile.
+func _fit_toc_height() -> void:
+	if not toc_scroll.visible:
+		toc_scroll.custom_minimum_size.y = 0.0
+		return
+	var natural := toc_box.get_combined_minimum_size().y
+	var others := panel.get_combined_minimum_size().y - toc_scroll.custom_minimum_size.y
+	var room := size.y - TOP_RESERVED - BOTTOM_MARGIN - others
+	var wanted := clampf(room, TOC_MIN_HEIGHT, maxf(natural, TOC_MIN_HEIGHT)) if size.y > 0.0 else natural
+	wanted = minf(wanted, natural)
+	if not is_equal_approx(wanted, toc_scroll.custom_minimum_size.y):
+		toc_scroll.custom_minimum_size.y = wanted
+		panel.reset_size()
+		_needs_placement = true
 
 
 func _rebuild_toc() -> void:
@@ -335,6 +367,17 @@ func _process(delta: float) -> void:
 	_time += delta
 	if not visible:
 		return
+	var modal_open := false
+	if not modal_ok:
+		var layout := UiZones.layout()
+		modal_open = layout != null and layout.modal_open()
+	if modal_open != _hidden_by_modal:
+		_hidden_by_modal = modal_open
+		panel.visible = not modal_open
+		queue_redraw()
+	if _hidden_by_modal:
+		return
+	_fit_toc_height()
 	var origin := get_global_rect().position
 	var avoid: Array = []
 	for rect in avoid_rects:
@@ -356,6 +399,8 @@ func pulse() -> float:
 
 
 func _draw() -> void:
+	if _hidden_by_modal:
+		return
 	var rect := target_rect()
 	if rect.size.x <= 0.0:
 		return

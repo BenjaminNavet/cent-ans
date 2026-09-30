@@ -18,8 +18,7 @@
   "coastal": true,
   "ports": [
     "Venise",
-    "Chioggia",
-    "Trieste"
+    "Chioggia"
   ],
   "sea_zones": [
     "sea_adriatic"
@@ -99,7 +98,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 5000,
-  "description": "République de Venise (doge Francesco Dandolo), alliée des Carrare qui reprennent Padoue (août 1337) ; elle obtiendra Trévise en 1339 ; patriarcat d'Aquilée (Udine) au nord-est. Sel, verre de Murano, arsenal, commerce d'Orient.",
+  "description": "République de Venise (doge Francesco Dandolo), alliée des Carrare qui reprennent Padoue (août 1337) ; elle obtiendra Trévise en 1339 ; patriarcat d'Aquilée (Udine) au nord-est. Sel, verre de Murano, arsenal, commerce d'Orient. Trieste, commune indépendante disputée entre Venise et le patriarche, n'est pas un port vénitien (elle se donnera aux Habsbourg en 1382).",
   "sources": [
     "République de Venise",
     "Francesco Dandolo",

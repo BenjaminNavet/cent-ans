@@ -77,7 +77,9 @@ class ColormapInputs:
     ``coast_dist_px`` is the signed distance to the shore in map pixels (positive
     on land), ``conifer`` the conifer share of forests (0-1), ``wetlands`` the
     RGB8 marsh / ponds / wet meadow intensities, ``roads`` ``(type, N x 2)``,
-    ``towns`` ``(x, y, built_ha)``, ``reservoirs`` points on modern reservoirs.
+    ``towns`` ``(x, y, built_ha)``, ``reservoirs`` points on modern reservoirs,
+    ``biomes`` the indices of ``biomes.png`` (``None``: one global palette) and
+    ``river_km`` the distance to the nearest river (``None``: no valley).
     """
 
     land: np.ndarray
@@ -93,6 +95,8 @@ class ColormapInputs:
     settlements: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
     towns: list[tuple[float, float, float]] = field(default_factory=list)
     reservoirs: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
+    biomes: np.ndarray | None = None
+    river_km: np.ndarray | None = None
 
     @property
     def shape(self) -> tuple[int, int]:
@@ -299,6 +303,9 @@ class _Fields:
     pasture: np.ndarray  # share of pasture among cultivated blocks
     vine: np.ndarray  # vineyard suitability
     openfield: np.ndarray  # probability of open-field strips
+    biome_specs: list[dict] = field(default_factory=list)  # style of each weight
+    biome_w: np.ndarray | None = None  # K x h x w blended weights (coarse grid)
+    biome_step: int = 1  # map pixels per coarse cell
 
 
 def classify_water(
@@ -358,15 +365,201 @@ def _settlement_distance_km(inputs: ColormapInputs) -> np.ndarray:
     return (distance * inputs.meters_per_px / 1000.0).astype(np.float32)
 
 
-def _dryness(inputs: ColormapInputs, style: dict, noise: np.ndarray) -> np.ndarray:
+def _dryness(
+    inputs: ColormapInputs,
+    style: dict,
+    noise: np.ndarray,
+    dry_max: np.ndarray | None = None,
+) -> np.ndarray:
+    """Dryness 0-1: latitude + moisture noise, and the arid lands of ``landcover.dryness``.
+
+    With biomes, the latitude part is capped by the biome's ``dry_max`` (the
+    Tell or Andalusia stay olive rather than sand) while the arid belt and
+    steppes of :func:`landcover.dryness` (Sahara, Pontic steppe) keep full weight.
+    """
     from cent_ans_tools.geo import landcover
 
     base = style["base"]
     by_lat = smoothstep(base["dry_lat_start"], base["dry_lat_full"], inputs.lat)
     steppe = landcover.dryness(inputs.lon, inputs.lat, inputs.height_m, None)
-    dry = np.maximum(by_lat, steppe)
-    dry = dry + base["moisture_noise_amp"] * (noise - 0.5) * 2.0
-    return np.clip(dry, 0.0, 1.0).astype(np.float32)
+    moisture = base["moisture_noise_amp"] * (noise - 0.5) * 2.0
+    if dry_max is None:
+        dry = np.maximum(by_lat, steppe) + moisture
+        return np.clip(dry, 0.0, 1.0).astype(np.float32)
+    dry = np.minimum(np.clip(by_lat + moisture, 0.0, 1.0), dry_max)
+    return np.clip(np.maximum(dry, steppe), 0.0, 1.0).astype(np.float32)
+
+
+# ---------------------------------------------------------------------------
+# Biomes (chantier HB, ADR 0143)
+# ---------------------------------------------------------------------------
+
+
+def biome_weights(
+    biomes: np.ndarray | None, style: dict, mpp: float
+) -> tuple[list[dict], np.ndarray | None, int]:
+    """Blended biome weights on a coarse grid: ``(specs, K x h x w, step)``.
+
+    Each class of ``style.biomes.classes`` present in ``biomes`` (indices of
+    ``biomes.yaml``) gets a Gaussian-blurred presence (``transition_km``), so
+    palettes and field shapes fade over tens of kilometres instead of switching
+    at a line; weights sum to 1. Sea (0) takes the nearest land biome.
+    """
+    from scipy import ndimage
+
+    from cent_ans_tools.geo import biomes as geo_biomes
+
+    section = style.get("biomes")
+    if biomes is None or not section:
+        return [], None, 1
+    ids = geo_biomes.indices(geo_biomes.load_legend())
+    step = int(section["weight_step"])
+    small = np.ascontiguousarray(biomes[::step, ::step])
+    known = small > 0
+    if not known.any():
+        return [], None, 1
+    if not known.all():
+        index = ndimage.distance_transform_edt(
+            ~known, return_distances=False, return_indices=True
+        )
+        small = small[index[0], index[1]]
+    sigma = section["transition_km"] * 1000.0 / (mpp * step)
+    specs, layers = [], []
+    for name, spec in section["classes"].items():
+        present = small == ids[name]
+        if not present.any():
+            continue
+        layer = present.astype(np.float32)
+        if sigma > 0:
+            layer = ndimage.gaussian_filter(layer, sigma, mode="nearest")
+        specs.append({"name": name, **spec})
+        layers.append(layer)
+    if not layers:
+        return [], None, 1
+    weights = np.stack(layers)
+    weights /= np.maximum(weights.sum(axis=0, keepdims=True), 1e-6)
+    return specs, weights.astype(np.float32), step
+
+
+def _full(values: np.ndarray, step: int, shape: tuple[int, int]) -> np.ndarray:
+    """Coarse field (every ``step``-th map pixel) back on the map grid, bilinear."""
+    rows, cols = shape
+    if step == 1:
+        return values[:rows, :cols].astype(np.float32)
+    return upsample_rows(values, step, 0, rows)[:, :cols]
+
+
+def _blend_scalar(
+    biome: tuple[list[dict], np.ndarray | None, int],
+    key: str,
+    default: float,
+    shape: tuple[int, int],
+) -> np.ndarray | float:
+    """Per-pixel blend of the biome parameter ``key`` (``default`` where absent)."""
+    specs, weights, step = biome
+    if weights is None:
+        return default
+    coarse = np.zeros(weights.shape[1:], dtype=np.float32)
+    for k, spec in enumerate(specs):
+        coarse += weights[k] * np.float32(spec.get(key, default))
+    return _full(coarse, step, shape)
+
+
+def _land_color(
+    palette: dict,
+    spec: dict,
+    weights: np.ndarray,
+    dry: np.ndarray,
+    conifer: np.ndarray,
+    rocky: np.ndarray,
+    valley: np.ndarray,
+    mottle: np.ndarray,
+    patchiness: float,
+) -> np.ndarray:
+    """Land colour of one biome (``spec``) from the splat ``weights`` (... x 4).
+
+    Forests keep ``forest_keep`` of their weight (all of it near rivers,
+    ``valley``); the rest opens into grass. ``scrub`` of the open land (grass,
+    lost forest, heath) is garrigue / maquis, in patches (``mottle``).
+    """
+    pal = {**palette, **{k: hex_color(v) for k, v in spec.get("palette", {}).items()}}
+    grass, farm, forest, rockheath = (weights[..., i] for i in range(4))
+    keep = float(spec.get("forest_keep", 1.0))
+    kept = forest * (keep + (1.0 - keep) * valley) if keep < 1.0 else forest
+    open_land = grass + (forest - kept)
+    heath = rockheath * (1.0 - rocky)
+    share = float(spec.get("scrub", 0.0))
+    scrub = (
+        np.clip(share + patchiness * (mottle - 0.5) * 2.0, 0.0, 1.0)
+        if share > 0
+        else np.zeros_like(grass)
+    )
+    d = dry[..., None]
+    conifer = np.maximum(conifer, np.float32(spec.get("conifer_min", 0.0)))
+    color = (open_land * (1.0 - scrub))[..., None] * _lerp(
+        pal["grassland"], pal["grassland_dry"], d
+    )
+    color += farm[..., None] * _lerp(pal["farmland"], pal["farmland_dry"], d)
+    color += kept[..., None] * _lerp(
+        pal["forest_broadleaf"], pal["forest_conifer"], conifer[..., None]
+    )
+    color += (heath * (1.0 - scrub))[..., None] * pal["heath"]
+    color += (rockheath * rocky)[..., None] * pal["rock"]
+    if share > 0:
+        color += ((open_land + heath) * scrub)[..., None] * _lerp(
+            pal["scrub"], pal["scrub_light"], mottle[..., None]
+        )
+    return color.astype(np.float32)
+
+
+def _blended_land_color(
+    inputs: ColormapInputs,
+    style: dict,
+    palette: dict,
+    weights: np.ndarray,
+    dry: np.ndarray,
+    rocky: np.ndarray,
+    biome: tuple[list[dict], np.ndarray | None, int],
+) -> np.ndarray:
+    """Land colour, each biome palette weighted by its blended presence."""
+    specs, coarse, step = biome
+    shape = inputs.shape
+    zeros = np.zeros(shape, dtype=np.float32)
+    if coarse is None:
+        return _land_color(
+            palette, {}, weights, dry, inputs.conifer, rocky, zeros, zeros, 0.0
+        )
+    section = style["biomes"]
+    mpp = float(inputs.meters_per_px)
+    mottle = _grid_noise(
+        shape, mpp, section["scrub_noise_km"] * 1000.0, int(style["seed"]) + 5
+    )
+    valley = zeros
+    if inputs.river_km is not None:
+        width = section["valley_km"]
+        valley = smoothstep(width, 0.4 * width, inputs.river_km)
+    color = np.zeros((*shape, 3), dtype=np.float32)
+    total = np.zeros(shape, dtype=np.float32)
+    for k, spec in enumerate(specs):
+        w = _full(coarse[k], step, shape)
+        sel = w > 1e-3
+        if not sel.any():
+            continue
+        wk = w[sel]
+        color[sel] += wk[:, None] * _land_color(
+            palette,
+            spec,
+            weights[sel],
+            dry[sel],
+            inputs.conifer[sel],
+            rocky[sel],
+            valley[sel],
+            mottle[sel],
+            section["scrub_patchiness"],
+        )
+        total[sel] += wk
+        del w, sel, wk
+    return color / np.maximum(total, 1e-6)[..., None]
 
 
 def _base_color(
@@ -378,6 +571,7 @@ def _base_color(
     lake: np.ndarray,
     lake_sd: np.ndarray,
     snow: np.ndarray,
+    biome: tuple[list[dict], np.ndarray | None, int] = ([], None, 1),
 ) -> np.ndarray:
     palette = {k: hex_color(v) for k, v in style["palette"].items()}
     base_style = style["base"]
@@ -385,18 +579,8 @@ def _base_color(
     mpp = float(inputs.meters_per_px)
     shape = inputs.shape
     height = inputs.height_m
-    d = dry[..., None]
     rocky = smoothstep(base_style["rock_from_m"], base_style["rock_full_m"], height)
-    color = weights[..., 0:1] * _lerp(palette["grassland"], palette["grassland_dry"], d)
-    color += weights[..., 1:2] * _lerp(palette["farmland"], palette["farmland_dry"], d)
-    color += weights[..., 2:3] * _lerp(
-        palette["forest_broadleaf"],
-        palette["forest_conifer"],
-        inputs.conifer[..., None],
-    )
-    color += weights[..., 3:4] * _lerp(
-        palette["heath"], palette["rock"], rocky[..., None]
-    )
+    color = _blended_land_color(inputs, style, palette, weights, dry, rocky, biome)
     del rocky
 
     wet = inputs.wetlands
@@ -467,10 +651,12 @@ def compute_fields(inputs: ColormapInputs, style: dict) -> _Fields:
     moisture = _grid_noise(
         inputs.shape, mpp, base_style["moisture_noise_km"] * 1000.0, seed + 1
     )
-    dry = _dryness(inputs, style, moisture)
-    del moisture
+    biome = biome_weights(inputs.biomes, style, mpp)
+    dry_max = _blend_scalar(biome, "dry_max", 1.0, inputs.shape)
+    dry = _dryness(inputs, style, moisture, dry_max if biome[1] is not None else None)
+    del moisture, dry_max
     snow = smoothstep(base_style["snow_from_m"], base_style["snow_full_m"], height)
-    color = _base_color(inputs, style, weights, dry, land, lake, lake_sd, snow)
+    color = _base_color(inputs, style, weights, dry, land, lake, lake_sd, snow, biome)
 
     # Mosaïque : où, avec quelle probabilité, quelle forme.
     marsh = inputs.wetlands[..., 0].astype(np.float32) / 255.0
@@ -484,11 +670,15 @@ def compute_fields(inputs: ColormapInputs, style: dict) -> _Fields:
     near = np.exp(-_settlement_distance_km(inputs) / mosaic["settlement_decay_km"])
     near = mosaic["far_share"] + (1.0 - mosaic["far_share"]) * near
     presence = (
-        mosaic["gain_farmland"] * farm + mosaic["gain_grassland"] * grass
-    ) * near
+        (mosaic["gain_farmland"] * farm + mosaic["gain_grassland"] * grass)
+        * near
+        * _blend_scalar(biome, "presence", 1.0, inputs.shape)
+    )
     presence = np.where(land, np.clip(presence, 0.0, 1.0), 0.0).astype(np.float32)
     del near
-    pasture = (grass / np.maximum(grass + farm, 1e-6)).astype(np.float32)
+    pasture = grass / np.maximum(grass + farm, 1e-6)
+    pasture = pasture + _blend_scalar(biome, "pasture_shift", 0.0, inputs.shape)
+    pasture = np.clip(pasture, 0.0, 1.0).astype(np.float32)
 
     vine = mosaic["vine"]
     grad_y, grad_x = np.gradient(ndimage.gaussian_filter(height, 1.0), mpp)
@@ -499,13 +689,18 @@ def compute_fields(inputs: ColormapInputs, style: dict) -> _Fields:
     vine_ok = smoothstep(vine["min_slope"] * 0.6, vine["min_slope"], slope)
     vine_ok *= smoothstep(vine["min_south"] - 0.2, vine["min_south"], south)
     vine_ok *= smoothstep(vine["max_lat"] + 0.4, vine["max_lat"] - 0.4, inputs.lat)
+    vine_ok = np.clip(vine_ok * _blend_scalar(biome, "vine", 1.0, inputs.shape), 0, 1)
     del slope, south
 
     openfield = smoothstep(
         mosaic["openfield_lat_from"], mosaic["openfield_lat_full"], inputs.lat
     )
     openfield *= smoothstep(0.25, 0.45, farm)
+    openfield = np.clip(
+        openfield * _blend_scalar(biome, "openfield", 1.0, inputs.shape), 0.0, 1.0
+    )
     bocage = smoothstep(mosaic["hedge_grass_from"], mosaic["hedge_grass_full"], grass)
+    bocage = np.clip(bocage * _blend_scalar(biome, "bocage", 1.0, inputs.shape), 0, 1)
 
     return _Fields(
         base=color,
@@ -518,6 +713,9 @@ def compute_fields(inputs: ColormapInputs, style: dict) -> _Fields:
         pasture=pasture,
         vine=vine_ok.astype(np.float32),
         openfield=openfield.astype(np.float32),
+        biome_specs=biome[0],
+        biome_w=biome[1],
+        biome_step=biome[2],
     )
 
 
@@ -648,12 +846,8 @@ def _paint_mosaic(
     jitter = unit(hash_u64(seed + 11, world_i, world_j, strip))
     del world_i, world_j, strip
 
-    crops_c, crops_cum = _weighted(mosaic["crops"])
-    past_c, past_cum = _weighted(mosaic["pastures"])
-    color = np.where(
-        is_pasture[pick][..., None],
-        past_c[_pick(past_cum, draw)],
-        crops_c[_pick(crops_cum, draw)],
+    color = _block_colors(
+        fields, mosaic, seed, grid, (seed_x, seed_y), pick, is_pasture, draw
     )
     color = np.where(
         is_vine[pick][..., None], hex_color(mosaic["vine"]["color"]), color
@@ -669,6 +863,53 @@ def _paint_mosaic(
     hedge = np.clip(1.0 - edge_texels / HEDGE_TEXELS, 0.0, 1.0)
     hedge *= mosaic["hedge_strength"] * bocage * mask
     band.lerp(hex_color(style["palette"]["hedge"]), hedge)
+
+
+def _block_colors(
+    fields: _Fields,
+    mosaic: dict,
+    seed: int,
+    grid: tuple,
+    seeds_px: tuple[np.ndarray, np.ndarray],
+    pick: tuple[np.ndarray, np.ndarray],
+    is_pasture: np.ndarray,
+    draw: np.ndarray,
+) -> np.ndarray:
+    """Crop or pasture colour of every texel; each block draws its biome by weight."""
+    gi, gj = grid[0], grid[1]
+    pasture = is_pasture[pick]
+    specs = fields.biome_specs if fields.biome_w is not None else [{}]
+    if fields.biome_w is None:
+        block_biome = np.zeros(pick[0].shape, dtype=np.int64)
+    else:
+        step = fields.biome_step
+        seed_x, seed_y = seeds_px
+        cumulative = np.cumsum(
+            np.stack(
+                [
+                    _sample_nearest(layer, seed_x / step, seed_y / step)
+                    for layer in fields.biome_w
+                ]
+            ),
+            axis=0,
+        )
+        target = unit(hash_u64(seed + 12, gi, gj)) * cumulative[-1]
+        chosen = (target[None] >= cumulative).sum(axis=0)
+        block_biome = np.minimum(chosen, len(specs) - 1)[pick]
+    color = np.zeros((*pick[0].shape, 3), dtype=np.float32)
+    for k, spec in enumerate(specs):
+        sel = block_biome == k
+        if not sel.any():
+            continue
+        crops_c, crops_cum = _weighted(spec.get("crops", mosaic["crops"]))
+        past_c, past_cum = _weighted(spec.get("pastures", mosaic["pastures"]))
+        d = draw[sel]
+        color[sel] = np.where(
+            pasture[sel][:, None],
+            past_c[_pick(past_cum, d)],
+            crops_c[_pick(crops_cum, d)],
+        )
+    return color
 
 
 def _town_discs(
@@ -912,7 +1153,11 @@ def load_inputs(map_dir: Path = MAP_DIR) -> ColormapInputs:
             np.array([e["lon"] for e in entries]), np.array([e["lat"] for e in entries])
         )
         reservoirs = np.stack([np.asarray(rx), np.asarray(ry)], axis=-1)
+    from cent_ans_tools.geo import biomes as geo_biomes
+
     return ColormapInputs(
+        biomes=geo_biomes.read_biomes(map_dir),
+        river_km=river_distance_km(load_json("rivers.geojson"), land.shape, grid),
         land=land,
         splat=read("splat.png", "RGBA"),
         height_m=height.astype(np.float32),
@@ -927,6 +1172,38 @@ def load_inputs(map_dir: Path = MAP_DIR) -> ColormapInputs:
         towns=towns,
         reservoirs=reservoirs,
     )
+
+
+def river_distance_km(
+    rivers: dict, shape: tuple[int, int], grid: object
+) -> np.ndarray | None:
+    """Distance (km) to the nearest permanent river of ``rivers.geojson`` (map pixels)."""
+    from PIL import Image, ImageDraw
+    from scipy import ndimage
+
+    rows, cols = shape
+    canvas = Image.new("L", (cols, rows), 0)
+    draw = ImageDraw.Draw(canvas)
+    count = 0
+    for feature in rivers.get("features", []):
+        props = feature.get("properties") or {}
+        if "intermittent" in str(props.get("featurecla", "")).lower():
+            continue
+        geometry = feature.get("geometry") or {}
+        lines = geometry.get("coordinates", [])
+        if geometry.get("type") == "LineString":
+            lines = [lines]
+        elif geometry.get("type") != "MultiLineString":
+            continue
+        for line in lines:
+            if len(line) >= 2:
+                draw.line([(float(x), float(y)) for x, y in line], fill=255)
+                count += 1
+    if count == 0:
+        return None
+    river = np.asarray(canvas) > 0
+    distance = ndimage.distance_transform_edt(~river).astype(np.float32)
+    return distance * np.float32(grid.meters_per_px / 1000.0)
 
 
 def encode_chain_bc1(image: np.ndarray) -> bytes:

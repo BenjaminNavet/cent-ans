@@ -7,10 +7,10 @@
     "local_language": "émilien"
   },
   "heraldry": {
-    "blazon": "De gueules à la croix pattée d'argent.",
-    "description": "Armes communales de Bologne (« libertas »), reprises par la seigneurie de fait de Taddeo Pepoli en 1337.",
-    "primary_color": "#B0182B",
-    "secondary_color": "#F5F1E6"
+    "blazon": "D'argent à la croix de gueules.",
+    "description": "Croix rouge sur champ blanc de la commune de Bologne, accompagnée du chef d'azur à « LIBERTAS » d'or ; reprise par la seigneurie de fait de Taddeo Pepoli en 1337.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
   },
   "de_jure_provinces": [
     "prov_bologna"

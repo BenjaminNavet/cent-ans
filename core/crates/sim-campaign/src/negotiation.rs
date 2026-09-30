@@ -1345,7 +1345,7 @@ pub fn propose_treaty(
             .map(|(t, v)| format!("{t} ({v:+})"))
             .collect();
         return Err(DiplomacyError::Refused(format!(
-            "{} refuse ({} % de chances) : {}",
+            "{} refuse (il y avait {} % de chances d'accord) : {}",
             faction_name(data, recipient),
             verdict.chance,
             top.join(", ")

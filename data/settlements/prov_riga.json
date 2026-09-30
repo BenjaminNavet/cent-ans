@@ -32,7 +32,7 @@
   {
     "id": "set_dunamunde",
     "province": "prov_riga",
-    "kind": "abbey",
+    "kind": "castle",
     "name": {
       "display": "Dünamünde",
       "local": "Dünamünde",
@@ -46,11 +46,11 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_abbey",
+      "bld_castle",
       "bld_port"
     ],
     "port": true,
-    "description": "Abbaye cistercienne fortifiée à l'embouchure de la Dvina.",
+    "description": "Ancienne abbaye cistercienne fortifiée à l'embouchure de la Dvina, vendue à l'Ordre en 1305, qui en a fait un château.",
     "sources": [
       "Daugavgrīva"
     ]

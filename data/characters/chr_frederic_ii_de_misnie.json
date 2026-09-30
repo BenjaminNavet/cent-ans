@@ -11,7 +11,7 @@
   "faction": "fac_meissen",
   "role": "ruler",
   "birth": {
-    "value": "1310-12-30"
+    "value": "1310-11-30"
   },
   "death": {
     "value": "1349-11-18"
@@ -21,7 +21,7 @@
     {
       "title": "Margrave de Misnie",
       "from": {
-        "value": "1324"
+        "value": "1323"
       }
     },
     {
@@ -43,7 +43,7 @@
   "piety": 60,
   "starting_location": "prov_meissen",
   "status": "at_court",
-  "description": "Margrave de Misnie et landgrave de Thuringe de la maison de Wettin, réunit les deux principautés dès 1323/1324 ; règne prudent centré sur Meissen et Erfurt.",
+  "description": "Margrave de Misnie et landgrave de Thuringe de la maison de Wettin, héritier unique des deux principautés à la mort de son père (1323), majeur en 1329 ; règne prudent centré sur Meissen et la Wartbourg.",
   "sources": [
     "Frédéric II de Misnie"
   ]

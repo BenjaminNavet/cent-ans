@@ -913,8 +913,8 @@
       "id": "berg",
       "name": "Berg",
       "arms_of": "fac_berg",
-      "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or, semé de cœurs de gueules.",
-      "description": "Lion semé de cœurs des comtes de Berg (armes de la maison de Berg).",
+      "blazon": "D'argent au lion de gueules à la queue fourchée, armé, lampassé et couronné d'azur.",
+      "description": "Lion de Berg à la queue fourchée, couronné d'azur (le semé de cœurs est celui de Lunebourg).",
       "source": "fr.wikipedia : Comté de Berg, armoiries",
       "certainty": "attesté",
       "factions": [
@@ -943,8 +943,8 @@
       "id": "de_la_marck",
       "name": "de la Marck",
       "arms_of": "fac_mark",
-      "blazon": "D'or à trois chevrons de gueules.",
-      "description": "Chevrons de gueules des comtes de la Marck ; leur cadet Adolphe est prince-évêque de Liège.",
+      "blazon": "D'or à la fasce échiquetée d'argent et de gueules de trois tires.",
+      "description": "Fasce échiquetée des comtes de la Marck ; leur parent Adolphe est prince-évêque de Liège.",
       "source": "fr.wikipedia : Comté de la Marck, armoiries",
       "certainty": "attesté",
       "factions": [
@@ -974,8 +974,8 @@
       "id": "wettin",
       "name": "Wettin",
       "arms_of": "fac_meissen",
-      "blazon": "D'or et de sable burelé, au crancelin de sinople brochant en bande.",
-      "description": "Crancelin de sinople des margraves de Misnie et landgraves de Thuringe, maison de Wettin.",
+      "blazon": "D'or au lion de sable, armé, lampassé et couronné de gueules.",
+      "description": "Lion de Misnie des margraves de la maison de Wettin (couronne de gueules : brisure de jeu) ; les armes de Saxe au crancelin ne sont reprises qu'en 1423.",
       "source": "fr.wikipedia : Maison de Wettin, armoiries",
       "certainty": "attesté",
       "factions": [
@@ -1035,7 +1035,7 @@
       "id": "wurtemberg",
       "name": "Wurtemberg",
       "arms_of": "fac_wurttemberg",
-      "blazon": "D'or à trois bois de cerf de sable, rangés en pal.",
+      "blazon": "D'or à trois bois de cerf de sable, posés l'un sur l'autre.",
       "description": "Bois de cerf des comtes de Wurtemberg.",
       "source": "fr.wikipedia : Maison de Wurtemberg, armoiries",
       "certainty": "attesté",
@@ -1065,8 +1065,8 @@
       "id": "hohenzollern",
       "name": "Hohenzollern",
       "arms_of": "fac_nuremberg",
-      "blazon": "Parti : au 1 d'or au lion de sable, armé et lampassé de gueules (Zollern) ; au 2 d'argent au burg de sable (burgraviat).",
-      "description": "Armes pariées des burgraves de Nuremberg, maison de Hohenzollern.",
+      "blazon": "D'or au lion de sable, armé et couronné de gueules, à la bordure componée d'argent et de gueules.",
+      "description": "Armes du burgraviat de Nuremberg portées par les Hohenzollern de Franconie.",
       "source": "fr.wikipedia : Maison de Hohenzollern, armoiries",
       "certainty": "attesté",
       "factions": [
@@ -1095,8 +1095,8 @@
       "id": "brabant_hesse",
       "name": "Brabant-Hesse",
       "arms_of": "fac_hesse",
-      "blazon": "Burelé d'azur et d'or, au lion de gueules, armé et couronné d'or, brochant sur le tout.",
-      "description": "Lion de Hesse (Sophie de Brabant, mère de Henri Ier « l'Enfant », fondateur de la lignée landgraviale).",
+      "blazon": "D'azur au lion burelé d'argent et de gueules de dix pièces, armé et couronné d'or.",
+      "description": "Lion burelé des Ludowinges de Thuringe, repris par Sophie de Brabant et ses descendants landgraves de Hesse.",
       "source": "fr.wikipedia : Landgraviat de Hesse, armoiries",
       "certainty": "attesté",
       "factions": [
@@ -1179,10 +1179,10 @@
     {
       "id": "de_diest",
       "name": "de Diest",
-      "blazon": "D'or à trois fasces de sable.",
-      "description": "Armes personnelles de Jean (III) de Diest, prince-évêque d'Utrecht, non retrouvées avec certitude : fasces retenues par convention.",
-      "source": "substitution éditoriale",
-      "certainty": "substitution",
+      "blazon": "D'or à deux fasces de sable.",
+      "description": "Armes des seigneurs de Diest (deux fasces de sable sur or, attestées dès le XIIIe siècle), maison de Jean (III) de Diest, prince-évêque d'Utrecht.",
+      "source": "nl.wikipedia : Wapen van Diest (web)",
+      "certainty": "attesté",
       "factions": [
         "fac_utrecht"
       ],
@@ -1224,8 +1224,8 @@
       "id": "lara",
       "name": "Lara",
       "arms_of": "fac_lara",
-      "blazon": "D'argent à deux chaudières échiquetées d'or et de gueules, engoulées de serpents de sinople.",
-      "description": "Chaudières (calderas) des grands majordomes royaux, emblème classique de la maison de Lara.",
+      "blazon": "De gueules à deux chaudières échiquetées d'or et de sable, engoulées de serpents de sinople.",
+      "description": "Chaudières des grands majordomes royaux, emblème de la maison de Lara.",
       "source": "Maison de Lara, armoiries",
       "certainty": "attesté",
       "factions": [
@@ -1240,8 +1240,8 @@
       "id": "aragon_urgell",
       "name": "Aragon-Urgell",
       "arms_of": "fac_urgell",
-      "blazon": "D'or au bœuf de gueules.",
-      "description": "Armes traditionnelles des comtes d'Urgell, branche cadette de la maison d'Aragon issue d'Alphonse IV.",
+      "blazon": "Échiqueté d'or et de sable.",
+      "description": "Échiqueté des anciens comtes d'Urgell ; Jacques Ier l'écartèle avec les pals d'Aragon, rendu ici seul.",
       "source": "County of Urgell",
       "certainty": "attesté",
       "factions": [
@@ -1272,8 +1272,8 @@
       "id": "luna",
       "name": "Luna",
       "arms_of": "fac_luna",
-      "blazon": "D'azur à la lune décroissante d'argent.",
-      "description": "Armes parlantes (« luna », la lune) de la maison de Luna.",
+      "blazon": "De gueules à la lune décroissante d'argent.",
+      "description": "Armes parlantes de la maison de Luna : croissant d'argent, pointes en bas (renversé), sur champ de gueules, celui que portera le pape Benoît XIII (Pedro de Luna).",
       "source": "Maison de Luna, armoiries",
       "certainty": "attesté",
       "factions": [
@@ -1288,8 +1288,8 @@
       "id": "gonzaga",
       "name": "Gonzaga",
       "arms_of": "fac_mantua",
-      "blazon": "D'argent à la croix pattée de gueules.",
-      "description": "Armes primitives des Gonzague, seigneurs de Mantoue.",
+      "blazon": "Fascé d'or et de sable.",
+      "description": "Armes primitives des Gonzague (fasces d'or et de sable) ; la croix pattée aux quatre aigles (1433) et le lion de Bohême (1394) sont postérieurs.",
       "source": "it.wikipedia : Gonzaga, stemma",
       "certainty": "incertain",
       "factions": [
@@ -1333,7 +1333,7 @@
       "id": "saluces",
       "name": "Saluces",
       "arms_of": "fac_saluzzo",
-      "blazon": "D'azur au chef d'argent.",
+      "blazon": "D'argent au chef d'azur.",
       "description": "Armes des marquis de Saluces.",
       "source": "it.wikipedia : Marchesato di Saluzzo, stemma",
       "certainty": "incertain",
@@ -1512,7 +1512,7 @@
       "id": "eveche_de_dorpat",
       "name": "Évêché de Dorpat",
       "arms_of": "fac_dorpat",
-      "blazon": "De sable à deux clefs d'argent en sautoir.",
+      "blazon": "De gueules à l'épée et à la clef d'argent passées en sautoir.",
       "description": "Armes simplifiées de l'évêché de Dorpat.",
       "source": "de.wikipedia : Bistum Dorpat, Wappen",
       "certainty": "substitution",
@@ -1611,8 +1611,8 @@
       "id": "piast_legnica",
       "name": "Piast de Legnica",
       "arms_of": "fac_legnica",
-      "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules.",
-      "description": "Aigle silésienne sur or, croissant d'argent omis.",
+      "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules, chargée d'un croissant d'argent.",
+      "description": "Aigle silésienne au croissant d'argent.",
       "source": "pl.wikipedia : Herb Piastów śląskich",
       "certainty": "incertain",
       "factions": [
@@ -1626,8 +1626,8 @@
       "id": "piast_glogow",
       "name": "Piast de Głogów",
       "arms_of": "fac_glogow",
-      "blazon": "D'argent à l'aigle de sable, becquée et membrée d'or.",
-      "description": "Armes de substitution pour les Piast de Głogów-Żagań.",
+      "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules, chargée d'un croissant d'argent, à la bordure de gueules.",
+      "description": "Aigle de Silésie, bordure de gueules en brisure de jeu.",
       "source": "pl.wikipedia : Herb Głogowa",
       "certainty": "substitution",
       "factions": [
@@ -1671,7 +1671,7 @@
       "id": "anjou_hongrie",
       "name": "Anjou-Hongrie",
       "arms_of": "fac_hungary",
-      "blazon": "Écartelé : aux 1 et 4 burelé d'argent et de gueules de huit pièces ; aux 2 et 3 d'azur semé de fleurs de lis d'or.",
+      "blazon": "Écartelé : aux 1 et 4 fascé de gueules et d'argent de huit pièces ; aux 2 et 3 d'azur semé de fleurs de lis d'or, au lambel de gueules.",
       "description": "Armes d'Anjou-Hongrie : bandes des Árpád et fleurs de lis d'Anjou.",
       "source": "en.wikipedia : Coat of arms of Hungary",
       "certainty": "attesté",
@@ -2066,10 +2066,10 @@
       "id": "hethoumides",
       "name": "Héthoumides",
       "arms_of": "fac_cilicia",
-      "blazon": "De gueules au lion d'or couronné d'argent.",
-      "description": "Maison régnante (Cilicie) ; Lion des Roupénides et des Héthoumides ; couleurs et couronne de convention.",
-      "source": "Kingdom of Armenia (Cilicia) (Wikipédia)",
-      "certainty": "substitution",
+      "blazon": "D'or au lion de gueules.",
+      "description": "Lion de gueules sur or des rois d'Arménie, tel que le donnent les armoriaux occidentaux (écartelés des Lusignan d'Arménie).",
+      "source": "Kingdom of Armenia (Cilicia), Lusignan (Wikipédia)",
+      "certainty": "incertain",
       "factions": [
         "fac_cilicia"
       ],
@@ -2217,9 +2217,9 @@
       "name": "Paléologue de Byzance",
       "arms_of": "fac_byzantium",
       "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
-      "description": "Maison régnante de l'Empire depuis 1261 (Michel VIII).",
+      "description": "Maison régnante de l'Empire depuis 1261 (Michel VIII). Croix cantonnée de quatre briquets (les « quatre B »), rendus ici en fusées ; emblème connu par les armoriaux occidentaux, forme exacte en 1337 discutée.",
       "source": "Palaiologos",
-      "certainty": "attesté",
+      "certainty": "incertain",
       "factions": [
         "fac_byzantium"
       ],
@@ -2291,10 +2291,10 @@
       "id": "kotromanic",
       "name": "Kotromanić",
       "arms_of": "fac_bosnia",
-      "blazon": "D'azur à six fleurs de lis d'or posées trois, deux et une.",
-      "description": "Maison des bans de Bosnie.",
-      "source": "Kotromanić dynasty",
-      "certainty": "incertain",
+      "blazon": "D'azur à la bande d'argent accompagnée de six fleurs de lis d'or.",
+      "description": "Armes des Kotromanić : bande d'argent entre six fleurs de lis d'or sur azur, d'inspiration angevine (le rendu simplifié des factions ne trace que la bande).",
+      "source": "Kotromanić dynasty (Wikipédia)",
+      "certainty": "attesté",
       "factions": [
         "fac_bosnia"
       ],
@@ -2446,6 +2446,33 @@
       ],
       "vassal_of": [
         "fac_arborea"
+      ]
+    },
+    {
+      "id": "ibelin",
+      "name": "Ibelin",
+      "blazon": "D'or à la croix pattée de gueules.",
+      "description": "Armes des Ibelin, grande maison franque d'Outremer puis de Chypre, dont est issue la reine Alix.",
+      "source": "fr.wikipedia : Maison d'Ibelin, armoiries",
+      "certainty": "attesté",
+      "factions": [],
+      "vassal_of": [
+        "fac_cyprus"
+      ]
+    },
+    {
+      "id": "ordre_calatrava",
+      "name": "Ordre de Calatrava",
+      "arms_of": "fac_calatrava",
+      "blazon": "D'argent à la croix alésée de gueules.",
+      "description": "Croix de l'ordre (fleurdelisée dans les sources), portée par ses maîtres.",
+      "source": "fr.wikipedia : Ordre de Calatrava",
+      "certainty": "incertain",
+      "factions": [
+        "fac_calatrava"
+      ],
+      "vassal_of": [
+        "fac_calatrava"
       ]
     }
   ]

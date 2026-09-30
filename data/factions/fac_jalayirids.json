@@ -3,7 +3,7 @@
   "name": {
     "display": "Djalayirides (marges occidentales)",
     "local": "جلایریان",
-    "local_language": "arabe"
+    "local_language": "persan"
   },
   "short_name": "Djalayirides",
   "adjective": "djalayiride",
@@ -25,7 +25,7 @@
     "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
   },
   "titles": [
-    "Sultan djalayiride (Bagdad)",
+    "Émir djalayiride",
     "Émir de Mossoul"
   ],
   "treasury": 9000,
@@ -52,7 +52,7 @@
     "trade": 55,
     "piety": 65
   },
-  "description": "Prince mongol-turc, gouverneur de l'Ilkhanat déchu ; Hasan Buzurg s'installe à Bagdad (hors carte) et tient Mossoul par ses lieutenants. Capitale replacée à Mossoul pour la carte.",
+  "description": "Prince mongol de la tribu des Djalayir, gouverneur de l'Ilkhanat déchu, faiseur de khans après 1335 ; Hasan Buzurg s'installera à Bagdad (hors carte) vers 1339-1340 et tient Mossoul par ses lieutenants. Capitale replacée à Mossoul pour la carte. Ses rivaux chupanides (Tabriz) sont hors carte.",
   "sources": [
     "Jalayirids",
     "Hasan Buzurg"

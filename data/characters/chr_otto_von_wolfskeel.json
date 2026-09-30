@@ -1,7 +1,7 @@
 {
   "id": "chr_otto_von_wolfskeel",
   "name": {
-    "display": "Otto von Wolfskeel",
+    "display": "Otto II von Wolfskeel",
     "local": "Otto von Wolfskeel",
     "local_language": "moyen haut-allemand"
   },
@@ -14,7 +14,8 @@
     "uncertain": true
   },
   "death": {
-    "value": "1345-03-08"
+    "value": "1345-08-23",
+    "note": "Mort à la forteresse de Marienberg."
   },
   "historical": true,
   "titles": [

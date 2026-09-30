@@ -53,9 +53,11 @@ fn a_ladder_escalade_wins_about_half_the_time() {
 fn surplus_regiments_wait_and_march_in_from_their_edge() {
     use sim_battle::MAX_ON_FIELD;
     let data = data();
-    let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(12);
+    let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(22);
     let battle = setup(units(&data, &many), units(&data, &many[..8]), None);
-    let mut sim = BattleSim::new(battle, 4).unwrap();
+    // The standard field (its 40-regiment cap) whatever the head count.
+    let skirmish = sim_battle::BattleScale::named("skirmish").unwrap();
+    let mut sim = BattleSim::new_scaled(battle, 4, skirmish).unwrap();
     lab(&mut sim);
     let waiting: Vec<u32> = sim
         .units()
@@ -65,7 +67,7 @@ fn surplus_regiments_wait_and_march_in_from_their_edge() {
         .collect();
     assert_eq!(
         waiting,
-        vec![20, 21, 22, 23],
+        vec![40, 41, 42, 43],
         "the last four attackers wait"
     );
     assert!(sim
@@ -77,7 +79,7 @@ fn surplus_regiments_wait_and_march_in_from_their_edge() {
     // A fielded regiment is destroyed: the first waiting one marches in.
     sim.units_mut()[3].hp = 0.0;
     sim.step();
-    let fresh = &sim.units()[20];
+    let fresh = &sim.units()[40];
     assert!(!fresh.reserve && fresh.present());
     assert!(
         fresh.z < 30.0,

@@ -18,9 +18,9 @@
   "suzerain": "fac_aragon",
   "primary_title": "tit_luna",
   "heraldry": {
-    "blazon": "D'azur à la lune décroissante d'argent.",
-    "description": "Armes parlantes de la maison de Luna.",
-    "primary_color": "#1F3A93",
+    "blazon": "De gueules à la lune décroissante d'argent.",
+    "description": "Armes parlantes de la maison de Luna : croissant d'argent, pointes en bas (renversé), sur champ de gueules, celui que portera le pape Benoît XIII (Pedro de Luna).",
+    "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6"
   },
   "titles": [

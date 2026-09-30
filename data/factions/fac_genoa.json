@@ -14,7 +14,6 @@
   "religion": "rel_catholic",
   "culture": "cul_ligurian",
   "succession_law": "elective",
-  "suzerain": "fac_empire",
   "primary_title": "tit_genoa",
   "heraldry": {
     "blazon": "D'argent à la croix de gueules.",
@@ -51,7 +50,8 @@
     },
     {
       "faction": "fac_empire",
-      "status": "vassal"
+      "status": "peace",
+      "note": "Gênes ne reconnaît plus l'autorité impériale depuis la fin de la seigneurie d'Henri VII (1311-1313) ; aucune suzeraineté en 1337."
     },
     {
       "faction": "fac_golden_horde",
@@ -75,7 +75,7 @@
     "trade": 95,
     "piety": 40
   },
-  "description": "République marchande déchirée entre guelfes et gibelins ; sans doge avant l'élection de Simone Boccanegra le 23 septembre 1339. Exporte ses arbalétriers et ses galères.",
+  "description": "République marchande déchirée entre guelfes et gibelins ; depuis 1335, deux capitaines du peuple gibelins, Galeotto Spinola et Raffaele Doria, la gouvernent, et il n'y aura pas de doge avant l'élection de Simone Boccanegra le 23 septembre 1339. Exporte ses arbalétriers et ses galères.",
   "sources": [
     "République de Gênes",
     "Simone Boccanegra"

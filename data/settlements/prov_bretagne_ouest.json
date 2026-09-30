@@ -115,7 +115,7 @@
     "name": {
       "display": "Concarneau",
       "local": "Konk Kerne",
-      "local_language": "ancien français"
+      "local_language": "breton"
     },
     "lonlat": [
       -3.9186,
@@ -141,7 +141,7 @@
     "name": {
       "display": "Morlaix",
       "local": "Montroulez",
-      "local_language": "ancien français"
+      "local_language": "breton"
     },
     "lonlat": [
       -3.8281,
@@ -167,7 +167,7 @@
     "name": {
       "display": "Landévennec",
       "local": "Landevenneg",
-      "local_language": "ancien français"
+      "local_language": "breton"
     },
     "lonlat": [
       -4.2839,
@@ -193,7 +193,7 @@
     "name": {
       "display": "Landerneau",
       "local": "Landerne",
-      "local_language": "ancien français"
+      "local_language": "breton"
     },
     "lonlat": [
       -4.2569,
@@ -218,7 +218,7 @@
     "name": {
       "display": "Le Faou",
       "local": "Ar Faou",
-      "local_language": "ancien français"
+      "local_language": "breton"
     },
     "lonlat": [
       -4.1706,
@@ -243,7 +243,7 @@
     "name": {
       "display": "Daoulas",
       "local": "Daoulaz",
-      "local_language": "ancien français"
+      "local_language": "breton"
     },
     "lonlat": [
       -4.295,

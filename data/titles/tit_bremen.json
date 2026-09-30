@@ -8,11 +8,10 @@
   },
   "heraldry": {
     "blazon": "D'argent à la clef de gueules posée en pal, le panneton vers le chef.",
-    "description": "Clef, symbole traditionnel des principautés ecclésiastiques allemandes ; couleurs de Brême simplifiées et signalées incertaines.",
+    "description": "Clef de saint Pierre, patron de la cathédrale de Brême.",
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6",
-    "uncertain": true,
-    "note": "Armes plausibles, non attestées avec certitude pour 1337 ; le sceau capitulaire de Brême varie selon les sources."
+    "note": "Armes historiques : de gueules à deux clefs d'argent passées en sautoir ; une seule clef est dessinée pour ne pas reproduire l'écu pontifical."
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [

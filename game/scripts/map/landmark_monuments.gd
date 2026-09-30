@@ -123,8 +123,18 @@ static func _cathedral(st: SurfaceTool, p: Dictionary) -> float:
 			var bx := lerpf(x0 + 2.0, x1 - 2.0, float(b) / bays)
 			_box(st, id, Vector3(bx, 0, side * (width * 0.5 + 1.2)), Vector3(1.8, aisle + 4.0, 2.4), WALL, STONE_TINT)
 			_quad_oriented(st, id, Vector3(bx - 0.5, aisle + 3.0, side * (width * 0.5 + 0.5)), Vector3(bx + 0.5, aisle + 3.0, side * (width * 0.5 + 0.5)), Vector3(bx + 0.5, vault - 3.0, side * nave_w * 0.5), Vector3(bx - 0.5, vault - 3.0, side * nave_w * 0.5), WALL, STONE_TINT, Vector3(bx, 0, 0))
+			# VN : baies en tiers-point entre les contreforts (bas-côté et fenêtres hautes) : sans
+			# elles, la cathédrale se lisait comme un entrepôt.
+			if b < bays:
+				var wx := lerpf(x0 + 2.0, x1 - 2.0, (b + 0.5) / bays)
+				var bay_w := (x1 - x0 - 4.0) / bays
+				_lancet(st, id, wx, side * (width * 0.5 + 0.05), aisle * 0.25, aisle * 0.82, minf(bay_w * 0.4, 2.8), side)
+				_lancet(st, id, wx, side * (nave_w * 0.5 + 0.05), aisle_top + 1.0, vault - 1.5, minf(bay_w * 0.5, 3.4), side)
 	_box(st, id, Vector3((x0 + x1) * 0.5, 0, 0), Vector3(x1 - x0, vault, nave_w), WALL, STONE_TINT)
 	_gable_roof_x(st, id, x0, x1, nave_w * 0.5 + 0.6, vault, ridge, ROOF, not bool(p.get("open_west", false)), not round_apse)
+	# VN : façade ouest : portail et rose.
+	_lancet_x(st, id, x0 - 0.05, 0.0, 0.0, minf(vault * 0.36, 11.0), minf(nave_w * 0.42, 5.0), -1.0)
+	_rose(st, id, Vector3(x0 - 0.06, vault * 0.62, 0.0), minf(nave_w * 0.32, vault * 0.16))
 	# Chevet : abside (nef) et déambulatoire à chapelles (bas-côtés).
 	if round_apse:
 		var c := Transform3D(Basis(), Vector3(x1, 0, 0))
@@ -155,6 +165,10 @@ static func _cathedral(st: SurfaceTool, p: Dictionary) -> float:
 		var side_z := (-1.0 if str(tower.get("side", "north")) == "north" else 1.0) * (width * 0.5 - size * 0.5)
 		var tc := Vector3(x0 + size * 0.5 - 1.0, 0, side_z)
 		_box(st, id, tc, Vector3(size, h, size), WALL, STONE_TINT)
+		# VN : baies hautes de la tour (chambre des cloches) sur ses faces libres.
+		_lancet_x(st, id, tc.x - size * 0.5 - 0.05, tc.z, h * 0.72, h * 0.93, size * 0.3, -1.0)
+		var free_side := signf(side_z) if side_z != 0.0 else 1.0
+		_lancet(st, id, tc.x, tc.z + free_side * (size * 0.5 + 0.05), h * 0.72, h * 0.93, size * 0.3, free_side)
 		var spire := float(tower.get("spire_m", 0.0))
 		match str(tower.get("top", "flat")):
 			"pyramid", "spire":
@@ -275,6 +289,11 @@ static func _belfry(st: SurfaceTool, p: Dictionary) -> float:
 	var h := float(p.get("height", 30.0))
 	var id := Transform3D.IDENTITY
 	_box(st, id, Vector3.ZERO, Vector3(size, h, size), WALL, STONE_TINT)
+	# VN : baies de la chambre des cloches (ou du dernier étage) sur les quatre faces, fente plus bas.
+	for side: float in [-1.0, 1.0]:
+		_lancet(st, id, 0.0, side * (size * 0.5 + 0.05), h * 0.8, h * 0.95, size * 0.28, side)
+		_lancet_x(st, id, side * (size * 0.5 + 0.05), 0.0, h * 0.8, h * 0.95, size * 0.28, side)
+		_lancet(st, id, 0.0, side * (size * 0.5 + 0.05), h * 0.45, h * 0.55, size * 0.1, side)
 	# VH6 : donjon à toit plat et tourelles d'angle (Tour Blanche, tour du Joyau).
 	if str(p.get("top", "pyramid")) == "turrets":
 		var t := maxf(size * 0.16, 2.5)
@@ -300,6 +319,13 @@ static func _hall(st: SurfaceTool, p: Dictionary) -> float:
 	var eave := h * 0.4
 	_box(st, id, Vector3.ZERO, Vector3(length, eave, width), MASONRY, RUBBLE_TINT)
 	_gable_roof_x(st, id, -length * 0.5 - 0.5, length * 0.5 + 0.5, width * 0.5 + 0.8, eave, h, ROOF_TILE, true, true)
+	# VN : arcades ouvertes des halles sur les longs côtés, portes aux pignons.
+	var arches := maxi(int(length / 6.0), 2)
+	for side: float in [-1.0, 1.0]:
+		for k in arches:
+			var ax := lerpf(-length * 0.5, length * 0.5, (k + 0.5) / arches)
+			_lancet(st, id, ax, side * (width * 0.5 + 0.05), 0.0, eave * 0.85, minf(length / arches * 0.6, 3.6), side)
+		_lancet_x(st, id, side * (length * 0.5 + 0.05), 0.0, 0.0, eave * 0.85, minf(width * 0.25, 4.0), side)
 	return h
 
 
@@ -310,6 +336,13 @@ static func _palace(st: SurfaceTool, p: Dictionary) -> float:
 	var id := Transform3D.IDENTITY
 	_box(st, id, Vector3.ZERO, Vector3(length, h, width), WALL, STONE_TINT)
 	_gable_roof_x(st, id, -length * 0.5, length * 0.5, width * 0.5 + 0.5, h, h + width * 0.55, ROOF, true, true)
+	# VN : deux rangs de baies sur les longs côtés.
+	var bays := maxi(int(length / 5.0), 2)
+	for side: float in [-1.0, 1.0]:
+		for k in bays:
+			var wx := lerpf(-length * 0.5, length * 0.5, (k + 0.5) / bays)
+			_lancet(st, id, wx, side * (width * 0.5 + 0.05), h * 0.14, h * 0.4, 1.3, side)
+			_lancet(st, id, wx, side * (width * 0.5 + 0.05), h * 0.56, h * 0.86, 1.3, side)
 	for r in p.get("ranges", []):
 		var t := Transform3D(Basis(Vector3.UP, deg_to_rad(float(r[5]))), Vector3(float(r[0]), 0, -float(r[1])))
 		_box(st, t, Vector3.ZERO, Vector3(float(r[2]), float(r[4]), float(r[3])), WALL, STONE_TINT)
@@ -373,6 +406,39 @@ static func _earthwork(st: SurfaceTool, p: Dictionary) -> float:
 
 
 # --- Primitives (repère du monument, mètres) ------------------------------------------------
+
+
+## VN : teinte des vitraux et des portails (sombres, légèrement bleutés).
+const GLASS_TINT := Color(0.16, 0.19, 0.26)
+
+
+## VN : baie en tiers-point sur un mur de normale ±Z (`side`) : rectangle de `y0` à la naissance de
+## l'arc, puis pointe ; centre `x`, plan `z`, largeur `w`.
+static func _lancet(st: SurfaceTool, t: Transform3D, x: float, z: float, y0: float, y1: float, w: float, side: float) -> void:
+	var spring := y1 - w * 0.75
+	var ref := Vector3(x, (y0 + y1) * 0.5, z - side)
+	_quad_oriented(st, t, Vector3(x - w * 0.5, y0, z), Vector3(x + w * 0.5, y0, z), Vector3(x + w * 0.5, spring, z), Vector3(x - w * 0.5, spring, z), MASONRY, GLASS_TINT, ref)
+	var col := _color(MASONRY, GLASS_TINT)
+	_tri_oriented(st, t * Vector3(x - w * 0.5, spring, z), t * Vector3(x + w * 0.5, spring, z), t * Vector3(x, y1, z), col, t * ref)
+
+
+## VN : même baie sur un mur de normale ±X (façade ouest ou est), centrée en `z`.
+static func _lancet_x(st: SurfaceTool, t: Transform3D, x: float, z: float, y0: float, y1: float, w: float, side: float) -> void:
+	var spring := y1 - w * 0.75
+	var ref := Vector3(x - side, (y0 + y1) * 0.5, z)
+	_quad_oriented(st, t, Vector3(x, y0, z - w * 0.5), Vector3(x, y0, z + w * 0.5), Vector3(x, spring, z + w * 0.5), Vector3(x, spring, z - w * 0.5), MASONRY, GLASS_TINT, ref)
+	var col := _color(MASONRY, GLASS_TINT)
+	_tri_oriented(st, t * Vector3(x, spring, z - w * 0.5), t * Vector3(x, spring, z + w * 0.5), t * Vector3(x, y1, z), col, t * ref)
+
+
+## VN : rose (disque à 12 pans) sur la façade ouest (normale -X), centre `c`, rayon `r`.
+static func _rose(st: SurfaceTool, t: Transform3D, c: Vector3, r: float) -> void:
+	var col := _color(MASONRY, GLASS_TINT)
+	var ref := t * (c + Vector3(1.0, 0, 0))
+	for k in 12:
+		var a0 := TAU * k / 12.0
+		var a1 := TAU * (k + 1) / 12.0
+		_tri_oriented(st, t * c, t * (c + Vector3(0, sin(a0), cos(a0)) * r), t * (c + Vector3(0, sin(a1), cos(a1)) * r), col, ref)
 
 
 static func _color(layer: String, tint: Color = Color(1, 1, 1)) -> Color:

@@ -7,12 +7,10 @@
     "local_language": "moyen haut-allemand"
   },
   "heraldry": {
-    "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules.",
-    "description": "Aigle noir de Silésie sur fond d'or, brisé du croissant d'argent.",
+    "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules, chargée d'un croissant d'argent.",
+    "description": "Aigle de Silésie au croissant d'argent, armes des Piast de Basse-Silésie.",
     "primary_color": "#F2C230",
-    "secondary_color": "#1A1A1A",
-    "uncertain": true,
-    "note": "Croissant d'argent traditionnel omis du dessin."
+    "secondary_color": "#1A1A1A"
   },
   "de_jure_liege": "tit_bohemia",
   "de_jure_provinces": [

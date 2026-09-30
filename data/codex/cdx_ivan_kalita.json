@@ -1,0 +1,12 @@
+{
+  "id": "cdx_ivan_kalita",
+  "title": "Ivan Kalita",
+  "category": "personnage",
+  "aliases": ["Ivan Kalita", "Ivan Ier de Moscou", "Ivan Ier Kalita"],
+  "era": { "from": "v. 1288", "to": "1340" },
+  "summary": "Prince de Moscou de 1325 à 1340, Ivan Ier « Kalita » (« l'escarcelle ») obtient du khan le titre de grand-prince de Vladimir et la collecte du tribut russe, et fait de Moscou le siège du métropolite.",
+  "body": "Fils cadet de Daniel, premier prince de [[cdx_moscou|Moscou]], Ivan succède en 1325 à son frère Iouri, tué à la Horde par un prince de Tver. En août 1327, Tver se soulève contre l'envoyé du khan, Chevkal (Tchol Khan), massacré avec sa suite. Ivan se rend à Saraï et revient avec l'armée tatare qui ravage la principauté rivale. En récompense, [[cdx_ozbeg|Özbeg]] partage en 1328 la grande principauté entre Ivan et Alexandre de Souzdal ; à la mort de ce dernier, vers 1331, Ivan reste seul grand-prince de Vladimir.\n\nSon surnom de Kalita, la bourse, dit sa politique. Chargé de lever pour la [[cdx_horde_d_or|Horde d'Or]] le tribut des terres russes, il en garde assez pour acheter villages et droits dans les principautés voisines, racheter des captifs et payer la faveur du khan. Novgorod doit lui verser un tribut d'argent. Sous son règne, le pays moscovite connaît, selon les chroniques, un « grand silence » : les raids tatars l'épargnent.\n\nIvan attire à Moscou le métropolite Pierre, qui y meurt en 1326 et y est enterré dans la nouvelle cathédrale de la Dormition, de pierre ; son successeur Théognoste s'y établit à demeure. Ivan fait bâtir d'autres églises de pierre au Kremlin et, en 1339, une enceinte de chêne. Il meurt le 31 mars 1340 ; son fils Siméon le Fier obtient à son tour le yarlyk. L'historiographie russe fait de lui le premier « rassembleur des terres russes », au prix d'une fidélité sans faille à la Horde.",
+  "entity": "chr_ivan_kalita",
+  "see_also": ["cdx_moscou", "cdx_horde_d_or", "cdx_ozbeg", "cdx_novgorod", "cdx_droujina"],
+  "sources": ["Ivan Ier de Moscou", "Révolte de Tver (1327)", "Grande-principauté de Moscou", "J. Martin, Medieval Russia 980-1584, 2007"]
+}

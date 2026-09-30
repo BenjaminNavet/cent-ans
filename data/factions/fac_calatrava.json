@@ -17,8 +17,8 @@
   "suzerain": "fac_castile",
   "primary_title": "tit_calatrava",
   "heraldry": {
-    "blazon": "D'argent à la croix alésée de gueules.",
-    "description": "Croix de l'ordre militaire du Calatrava (fleurdelisée aux extrémités dans les sources ; rendue ici en croix alésée, forme la plus proche disponible dans le moteur de blasons).",
+    "blazon": "D'argent à la croix fleurdelisée de gueules.",
+    "description": "Croix fleurdelisée de gueules de l'ordre de Calatrava ; les entraves d'azur de l'écu ancien ne sont pas rendues.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B0182B"
   },
@@ -49,8 +49,9 @@
     "trade": 35,
     "piety": 80
   },
-  "description": "Ordre militaire fondé en 1158 à Calatrava pour tenir la frontière de La Manche ; chapitre électif, grand maître en exercice non identifié avec certitude pour 1337 (champ `ruler` omis).",
+  "description": "Ordre militaire fondé en 1158 à Calatrava pour tenir la frontière de La Manche ; chapitre électif, siège à Calatrava la Nueva et Almagro. Grand maître en 1337 : Juan Núñez de Prado (1328-1355), qui sera déposé puis tué sous Pierre Ier.",
   "sources": [
     "Ordre de Calatrava"
-  ]
+  ],
+  "ruler": "chr_juan_nunez_de_prado"
 }

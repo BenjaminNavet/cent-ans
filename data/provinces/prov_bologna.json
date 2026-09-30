@@ -3,7 +3,7 @@
   "name": {
     "display": "Bologne",
     "local": "Bulåggna",
-    "local_language": "lombard"
+    "local_language": "émilien"
   },
   "region": "italie_centre",
   "terrain": "plains",
@@ -23,7 +23,7 @@
     "name": {
       "display": "Bologne",
       "local": "Bulåggna",
-      "local_language": "lombard"
+      "local_language": "émilien"
     },
     "lat": 44.4949,
     "lon": 11.3426

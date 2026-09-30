@@ -49,7 +49,7 @@ void vertex() {
 	vec3 world = vec3(VERTEX.x, campaign_display_height(VERTEX.y, VERTEX.xz), VERTEX.z);
 	vec3 to_cam = CAMERA_POSITION_WORLD - world;
 	float dist = max(length(to_cam), 0.01);
-	float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
+	float world_per_px = dist * 2.0 / abs(PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
 	float floor_px = mix(min_px, main_min_px, COLOR.r);
 	// Chaussée : talus de part et d'autre (+60 % de largeur).
 	float real_half = 0.5 * UV.x * (1.0 + 0.6 * COLOR.g);

@@ -9,7 +9,7 @@
       "depth_m": 800,
       "line_gap_m": 300,
       "zone_depth_m": 300,
-      "max_regiments_per_side": 20
+      "max_regiments_per_side": 40
     },
     {
       "key": "large",
@@ -19,7 +19,7 @@
       "depth_m": 1200,
       "line_gap_m": 340,
       "zone_depth_m": 400,
-      "max_regiments_per_side": 40
+      "max_regiments_per_side": 80
     },
     {
       "key": "epic",
@@ -28,7 +28,7 @@
       "depth_m": 1600,
       "line_gap_m": 380,
       "zone_depth_m": 500,
-      "max_regiments_per_side": 80
+      "max_regiments_per_side": 160
     }
   ]
 }

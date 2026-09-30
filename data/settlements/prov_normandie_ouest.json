@@ -156,7 +156,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Cité épiscopale du Bessin, célèbre pour sa tapisserie brodée du siècle précédent.",
+    "description": "Cité épiscopale du Bessin, célèbre pour sa tapisserie brodée au XIe siècle.",
     "sources": [
       "Bayeux"
     ]
@@ -282,7 +282,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg de l'ordre de Malte, réputé pour son artisanat du cuivre.",
+    "description": "Commanderie des Hospitaliers de Saint-Jean (futur ordre de Malte), bourg réputé pour son artisanat du cuivre.",
     "sources": [
       "Villedieu-les-Poêles"
     ]

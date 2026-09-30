@@ -24,7 +24,7 @@
   "piety": 55,
   "starting_location": "prov_ferrara",
   "status": "at_court",
-  "description": "Marquis de Ferrare, vicaire pontifical depuis 1329 après la guerre de Ferrare ; gouverne en 1337 conjointement avec ses frères Nicolò Ier et Aldobrandino II, selon un partage du pouvoir propre à la maison d'Este de cette génération.",
+  "description": "Marquis de Ferrare, vicaire pontifical depuis 1329 après la guerre de Ferrare ; gouverne en 1337 avec son frère Nicolò Ier (leur aîné Rinaldo est mort en 1335), selon un partage du pouvoir propre à la maison d'Este de cette génération. Son fils Aldobrandino II est né en 1335.",
   "sources": [
     "Maison d'Este",
     "Obizzo III d'Este"
@@ -43,5 +43,9 @@
         "value": "1329"
       }
     }
-  ]
+  ],
+  "death": {
+    "value": "1352-03-20",
+    "place": "Ferrare"
+  }
 }

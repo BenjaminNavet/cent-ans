@@ -1,7 +1,9 @@
 {
   "id": "prov_konya",
   "name": {
-    "display": "Konya"
+    "display": "Konya",
+    "local": "Konya",
+    "local_language": "turc ottoman"
   },
   "region": "anatolie",
   "terrain": "steppe",

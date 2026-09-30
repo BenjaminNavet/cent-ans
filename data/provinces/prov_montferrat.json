@@ -3,7 +3,7 @@
   "name": {
     "display": "Montferrat",
     "local": "Monfrà",
-    "local_language": "lombard"
+    "local_language": "piémontais"
   },
   "region": "italie_nord",
   "terrain": "hills",
@@ -22,7 +22,7 @@
     "name": {
       "display": "Casal",
       "local": "Casal",
-      "local_language": "lombard"
+      "local_language": "piémontais"
     },
     "lat": 45.1339,
     "lon": 8.4548

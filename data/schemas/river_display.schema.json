@@ -20,6 +20,29 @@
     "deep_color": { "$ref": "#/$defs/rgb" },
     "bank_ink_color": { "$ref": "#/$defs/rgb" },
     "bank_ink_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+    "bank_ink_px": { "type": "number", "minimum": 0, "maximum": 10, "description": "HB7 : largeur du liseré de berge en pixels écran." },
+    "edge_soft_px": { "type": "number", "minimum": 0, "maximum": 10, "description": "HB7 : fondu du bord du ruban en pixels écran." },
+    "sky_color": { "$ref": "#/$defs/rgb" },
+    "sky_reflect": { "type": "number", "minimum": 0, "maximum": 1 },
+    "fine": {
+      "type": "object",
+      "description": "HB7 : rubans fins de près (réseau fin, river_fine.gdshader) ; les couleurs absentes reprennent celles du palier moyen.",
+      "properties": {
+        "min_px": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "order_px_scale": {
+          "type": "array", "items": { "type": "number", "minimum": 0 },
+          "minItems": 8, "maxItems": 8,
+          "description": "Facteur de min_px par ordre de Strahler 3 à 10."
+        },
+        "thin_fade": { "type": "number", "minimum": 0, "maximum": 1 },
+        "sky_reflect": { "type": "number", "minimum": 0, "maximum": 1 },
+        "shallow_alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+        "shallow_color": { "$ref": "#/$defs/rgb" },
+        "deep_color": { "$ref": "#/$defs/rgb" },
+        "sky_color": { "$ref": "#/$defs/rgb" }
+      },
+      "additionalProperties": false
+    },
     "labels": {
       "type": "object",
       "properties": {

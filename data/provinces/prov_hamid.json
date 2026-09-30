@@ -17,7 +17,9 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Eğirdir"
+      "display": "Eğirdir",
+      "local": "Eğirdir",
+      "local_language": "turc ottoman"
     },
     "lat": 37.87,
     "lon": 30.85
@@ -77,7 +79,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 900,
-  "description": "Pays des lacs de Pisidie, beylik des Hamidoğulları, qui a perdu Antalya et Kütahya au profit de voisins plus puissants.",
+  "description": "Pays des lacs de Pisidie, beylik des Hamidoğulları, dont Antalya est passée à la branche cadette de Teke.",
   "sources": [
     "Hamidids",
     "Eğirdir",

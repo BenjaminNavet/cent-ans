@@ -90,7 +90,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 3800,
-  "description": "Souabe résiduelle : après détachement du Wurtemberg (prov_wurttemberg) et de Bade (prov_baden), il ne reste qu'un fief très fragmenté — villes libres d'empire (Augsbourg, Ulm, Constance) et possessions dispersées des Habsbourg dites « Outre-Forêt » (Vorderösterreich), sans continuité territoriale réelle avec l'Autriche danubienne. Rattachée ici à fac_austria par simplification, faute de faction propre pour ces terres éparses.",
+  "description": "Souabe résiduelle : après détachement du Wurtemberg et de Bade, il ne reste qu'un fief très fragmenté — villes libres d'empire (Augsbourg, Ulm, Constance) et possessions dispersées des Habsbourg dites « Outre-Forêt » (Vorderösterreich), sans continuité territoriale réelle avec l'Autriche danubienne. Rattachée ici à l'Autriche par simplification, faute de faction propre pour ces terres éparses.",
   "sources": [
     "Duché de Souabe",
     "Vorderösterreich",

@@ -1,0 +1,79 @@
+{
+  "id": "evt_couronnement_de_dusan",
+  "title": "Le couronnement de Dušan",
+  "text": "Le jour de Pâques, à Skopje, l'archevêque de Peć, élevé au rang de patriarche, couronne [[cdx_etienne_dusan|Étienne Dušan]] « empereur des Serbes et des Romains » en présence du patriarche de Tarnovo et de l'archevêque d'Ohrid. Constantinople crie à l'usurpation.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "spring"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_serbia"
+      },
+      {
+        "type": "ruler_is",
+        "faction": "fac_serbia",
+        "character": "chr_stefan_dusan"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_serbia"
+  },
+  "options": [
+    {
+      "text": "Revendiquer l'héritage de Constantin",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 20
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "claim",
+          "kind": "throne",
+          "target": "fac_byzantium"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_byzantium",
+          "amount": -20,
+          "reason": "Couronnement impérial de Skopje"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "S'en tenir au titre de tsar des Serbes",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "celebration",
+  "historical_date": {
+    "value": "1346-04-16"
+  },
+  "sources": [
+    "Étienne Dušan",
+    "Empire serbe",
+    "Patriarcat de Peć",
+    "John V. A. Fine, The Late Medieval Balkans, 1987"
+  ]
+}

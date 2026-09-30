@@ -7,10 +7,10 @@
     "local_language": "lombard"
   },
   "heraldry": {
-    "blazon": "D'argent à la croix pattée de gueules.",
-    "description": "Armes primitives de la maison Gonzague, avant les augmentations impériales postérieures.",
-    "primary_color": "#F5F1E6",
-    "secondary_color": "#B0182B"
+    "blazon": "Fascé d'or et de sable.",
+    "description": "Armes primitives de la maison Gonzague (fasces d'or et de sable), avant le lion de Bohême (1394) et la croix pattée aux quatre aigles concédée par Sigismond (1433).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [

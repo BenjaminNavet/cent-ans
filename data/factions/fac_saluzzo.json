@@ -16,10 +16,10 @@
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_saluzzo",
   "heraldry": {
-    "blazon": "D'azur au chef d'argent.",
+    "blazon": "D'argent au chef d'azur.",
     "description": "Armes des marquis de Saluces.",
-    "primary_color": "#1F3A93",
-    "secondary_color": "#F5F1E6"
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1F3A93"
   },
   "titles": [
     "Marquis de Saluces"
@@ -47,7 +47,7 @@
     "trade": 40,
     "piety": 50
   },
-  "description": "Marquisat alleutier des sources du Pô. Thomas II, marquis depuis 1296, compose vers ces années Le Chevalier errant, long poème allégorique.",
+  "description": "Marquisat alleutier des sources du Pô, tenu depuis 1336 par Thomas II, pris entre les Visconti, les Savoie-Achaïe et les Anjou de Provence. Le Chevalier errant, long poème allégorique, sera l'œuvre de son petit-fils Thomas III vers 1400.",
   "sources": [
     "Marquisat de Saluces",
     "Thomas II de Saluces"

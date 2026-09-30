@@ -30,7 +30,7 @@
     {
       "id": "obj_majorca_hold",
       "title": "Sauver le royaume",
-      "description": "Jacques III doit conserver son royaume face aux visées de son cousin Pierre IV d'Aragon.",
+      "description": "Jacques III doit conserver son royaume, des Baléares à Montpellier, face aux visées de son cousin Pierre IV d'Aragon et du roi de France.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_majorca"
@@ -45,12 +45,12 @@
       }
     },
     {
-      "id": "obj_majorca_montpellier",
-      "title": "La seigneurie de Montpellier",
-      "description": "Recouvrer Montpellier, tenue par les rois de Majorque.",
+      "id": "obj_majorca_achaea",
+      "title": "L'héritage de Morée",
+      "description": "Faire valoir les droits de Jacques III sur la principauté d'Achaïe, reçus de son père Ferdinand de Majorque, mort en la disputant en 1316.",
       "condition": {
         "kind": "hold_title",
-        "title": "tit_montpellier"
+        "title": "tit_achaea"
       }
     }
   ],

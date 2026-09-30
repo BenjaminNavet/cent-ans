@@ -1,0 +1,79 @@
+{
+  "id": "evt_tzympe",
+  "title": "Les Ottomans à Tzympe",
+  "text": "Appelé par [[cdx_jean_cantacuzene|Jean Cantacuzène]] contre Jean V et ses alliés serbes, Süleyman Pacha, fils d'[[cdx_orhan|Orhan]], passe les Dardanelles. Il s'installe dans le fort de Tzympe, sur la rive d'Europe, et refuse de le rendre malgré l'or que lui offre l'empereur.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1352,
+      "season": "autumn"
+    },
+    "until_year": 1353,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_ottoman"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_byzantium"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_byzantium",
+        "province": "prov_thrace"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_ottoman"
+  },
+  "options": [
+    {
+      "text": "Garder la tête de pont d'Europe",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "claim",
+          "kind": "province",
+          "target": "prov_thrace"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_byzantium",
+          "amount": -15,
+          "reason": "Occupation de Tzympe"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rendre Tzympe contre l'or de l'empereur",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1352",
+    "uncertain": true,
+    "note": "Occupation datée de 1352 ou du début de 1353 selon les sources."
+  },
+  "sources": [
+    "Tzympe",
+    "Süleyman Pacha",
+    "Halil İnalcık, The Ottoman Empire: The Classical Age 1300-1600, 1973"
+  ]
+}

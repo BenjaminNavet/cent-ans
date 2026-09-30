@@ -3,7 +3,7 @@
   "name": {
     "display": "Négrepont",
     "local": "Εὔβοια",
-    "local_language": "vénitien"
+    "local_language": "grec"
   },
   "region": "egee",
   "terrain": "hills",
@@ -26,7 +26,7 @@
   "capital_city": {
     "name": {
       "display": "Négrepont",
-      "local": "Chalcis",
+      "local": "Negroponte",
       "local_language": "vénitien"
     },
     "lat": 38.46,

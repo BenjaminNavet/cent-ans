@@ -14,18 +14,17 @@
     "uncertain": true
   },
   "death": {
-    "value": "1347",
-    "uncertain": true
+    "value": "1347-11-12",
+    "note": "Mort à Mikulov."
   },
   "historical": true,
   "titles": [
     {
       "title": "Prince-évêque de Trente",
       "from": {
-        "value": "1338",
-        "uncertain": true
+        "value": "1338-07-13"
       },
-      "note": "Titulature attestée surtout à partir de 1338 ; retenu par approximation comme évêque en 1337, prédécesseur incertain faute de source vérifiée à ce budget."
+      "note": "Siège vacant d'octobre 1336 à 1338 ; évêque dès 1337 par simplification."
     }
   ],
   "skills": {
@@ -39,7 +38,7 @@
   "piety": 65,
   "starting_location": "prov_trent",
   "status": "at_court",
-  "description": "Évêque de Trente, moine dominicain d'origine morave. Sa nomination est mieux attestée à partir de 1338 : retenu ici en 1337 par simplification, faute de confirmation précise du titulaire exact à cette date exacte.",
+  "description": "Nicolas Alreim de Brno, doyen du chapitre d'Olomouc et chancelier de Charles, margrave de Moravie ; confirmé évêque de Trente par le pape le 13 juillet 1338. Le siège est vacant depuis la mort d'Henri de Metz (9 octobre 1336) : il est retenu dès 1337 par simplification.",
   "sources": [
     "Nicolas de Brno"
   ]

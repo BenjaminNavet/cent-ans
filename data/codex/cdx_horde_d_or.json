@@ -2,13 +2,7 @@
   "id": "cdx_horde_d_or",
   "title": "La Horde d'Or",
   "category": "lieu",
-  "aliases": [
-    "Horde d'Or",
-    "Özbeg",
-    "Uzbek Khan",
-    "khan de Kiptchak",
-    "yarlyk"
-  ],
+  "aliases": ["Horde d'Or", "khan de Kiptchak", "yarlyk"],
   "era": {
     "from": "1242",
     "to": "1502"
@@ -16,11 +10,7 @@
   "summary": "Héritière de l'empire mongol, la Horde d'Or domine en 1337 la steppe de la Volga au Dniepr et tient les princes russes en vassalité. Son khan Özbeg s'est converti à l'islam et fait de Saraï une capitale marchande.",
   "body": "Fondée après le retrait de Batu Khan en 1242, la Horde d'Or (ulus de Djötchi) règne sur la steppe pontique et la Volga. Ses khans exigent des princes russes un tribut et la reconnaissance de leur autorité : c'est le khan qui délivre le yarlyk, le titre qui confère la grande principauté de Vladimir. Les princes vont le chercher à Saraï, sur la basse Volga, parfois au péril de leur vie.\n\nÖzbeg (1313-1341) règne au sommet de la puissance de la Horde. Il fait de l'islam la religion de l'ordre khanal, tout en tolérant l'Église orthodoxe, dont le métropolite est exempté d'impôt. La Horde tire sa richesse du commerce des fourrures, des esclaves et des céréales, dont les débouchés passent par les comptoirs génois de Caffa et de Tana, sur la mer Noire. L'armée reste celle d'une société de cavaliers nomades, faite d'archers montés capables de longues chevauchées.",
   "entity": "fac_golden_horde",
-  "see_also": [
-    "cdx_moscou",
-    "cdx_mamelouks",
-    "cdx_lituanie"
-  ],
+  "see_also": ["cdx_moscou", "cdx_mamelouks", "cdx_lituanie", "cdx_ozbeg"],
   "sources": [
     "Horde d'Or",
     "Özbeg Khan",

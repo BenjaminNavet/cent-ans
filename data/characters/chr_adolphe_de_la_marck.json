@@ -14,7 +14,7 @@
     "uncertain": true
   },
   "death": {
-    "value": "1344-02-08"
+    "value": "1344-11-03"
   },
   "historical": true,
   "titles": [
@@ -38,7 +38,7 @@
   "family": {},
   "starting_location": "prov_liege",
   "status": "at_court",
-  "description": "Prince-évêque de Liège depuis 1313, issu de la maison de la Marck ; grand bâtisseur (palais épiscopal, fortifications) et fondateur du studium liégeois, il domine la vie politique de la principauté jusqu'à sa mort en 1344.",
+  "description": "Prince-évêque de Liège depuis 1313, issu de la maison de la Marck ; contraint en 1316 de concéder la paix de Fexhe, charte des libertés liégeoises, il lutte ensuite contre les villes et reste l'allié de la France jusqu'à sa mort en 1344.",
   "sources": [
     "Adolphe de la Marck"
   ]

@@ -144,7 +144,7 @@
     "name": {
       "display": "Vannes",
       "local": "Gwened",
-      "local_language": "ancien français"
+      "local_language": "breton"
     },
     "lonlat": [
       -2.7594,
@@ -235,7 +235,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville et seigneurie marchoise gardant la frontière avec le duché de Normandie.",
+    "description": "Ville et seigneurie marchoise gardant la frontière avec le Maine et l'Anjou.",
     "sources": [
       "Vitré (Ille-et-Vilaine)"
     ]

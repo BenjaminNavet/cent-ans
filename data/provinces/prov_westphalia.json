@@ -22,12 +22,12 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Münster",
-      "local": "Münster",
-      "local_language": "moyen haut-allemand"
+      "display": "Hamm",
+      "local": "Hamme",
+      "local_language": "moyen bas-allemand"
     },
-    "lat": 51.9607,
-    "lon": 7.6261
+    "lat": 51.6805,
+    "lon": 7.8228
   },
   "geo": {
     "capital_lonlat": [

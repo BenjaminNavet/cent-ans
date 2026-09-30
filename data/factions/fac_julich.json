@@ -1,8 +1,8 @@
 {
   "id": "fac_julich",
   "name": {
-    "display": "Duché de Juliers",
-    "local": "Herzogtum Jülich",
+    "display": "Margraviat de Juliers",
+    "local": "Markgrafschaft Jülich",
     "local_language": "moyen bas-allemand"
   },
   "short_name": "Juliers",
@@ -19,12 +19,12 @@
   "primary_title": "tit_julich",
   "heraldry": {
     "blazon": "D'or au lion de sable, armé et lampassé de gueules, à la bordure de gueules.",
-    "description": "Armes de Juliers (lion de sable sur or) brisées d'une bordure de gueules pour les distinguer des armes historiques du Palatinat de Bavière, également au lion de sable sur or.",
+    "description": "Armes de Juliers (lion de sable sur or, identique au lion de Flandre), brisées d'une bordure de gueules en jeu.",
     "primary_color": "#F2C230",
     "secondary_color": "#111111"
   },
   "titles": [
-    "Duc de Juliers"
+    "Margrave de Juliers"
   ],
   "treasury": 6500,
   "prestige": 40,
@@ -37,7 +37,7 @@
     {
       "faction": "fac_empire",
       "status": "vassal",
-      "note": "Guillaume V, élevé au rang de duc en 1336 par Louis IV."
+      "note": "Guillaume V, élevé au rang de margrave en 1336 (duc en 1356) par Louis IV."
     },
     {
       "faction": "fac_england",
@@ -55,7 +55,7 @@
     "trade": 50,
     "piety": 45
   },
-  "description": "Comté de Juliers, élevé en duché par Louis IV en 1336 pour Guillaume V, qui a épousé Jeanne de Hainaut, sœur de la reine d'Angleterre Philippa ; figure clé de l'alliance anglo-impériale contre Philippe VI.",
+  "description": "Comté de Juliers, élevé en margraviat par Louis IV en 1336 (duché en 1356) pour Guillaume V, qui a épousé Jeanne de Hainaut, sœur de la reine d'Angleterre Philippa ; figure clé de l'alliance anglo-impériale contre Philippe VI. Liberté de jeu : rang ducal dans le jeu dès 1337.",
   "sources": [
     "Guillaume Ier de Juliers",
     "Duché de Juliers",

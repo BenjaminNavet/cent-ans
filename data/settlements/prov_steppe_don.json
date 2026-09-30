@@ -4,8 +4,8 @@
     "province": "prov_steppe_don",
     "kind": "city",
     "name": {
-      "display": "Belaïa Vèja (Sarkel)",
-      "local": "Sarkel",
+      "display": "Camps de la Courbe du Don",
+      "local": "Дон",
       "local_language": "tatar kiptchak"
     },
     "lonlat": [
@@ -19,9 +19,10 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ancienne forteresse khazare du bas Don, réoccupée par les nomades (statut incertain).",
+    "description": "Campements d'hiver des tribus kiptchak de la Horde sur le bas Don, près du gué de l'ancienne Sarkel (Belaïa Vèja), forteresse khazare puis russe abandonnée depuis le XIIe siècle ; nom générique, emplacement incertain.",
     "sources": [
-      "Sarkel"
+      "Sarkel",
+      "Steppe pontique"
     ]
   },
   {

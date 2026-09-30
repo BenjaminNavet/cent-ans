@@ -84,6 +84,47 @@ fn the_town_has_a_closed_ring_with_a_gate_facing_the_attacker() {
 }
 
 #[test]
+fn regiments_on_the_wall_walk_are_drawn_on_top_of_the_wall() {
+    let data = data();
+    let sim = siege(&data, &[], 2, 0, 3);
+    let works = sim.siege().unwrap();
+    let mut checked = 0;
+    for unit in sim.units().iter().filter(|u| u.on_wall) {
+        for scale in [1.0, 2.0] {
+            let poses = sim.soldier_poses(unit, scale);
+            assert_eq!(poses.len(), unit.figure_count(scale) as usize);
+            for &[x, y, z, _] in &poses {
+                // On the wall's footprint, at the top of its piece.
+                let piece = works
+                    .pieces
+                    .iter()
+                    .min_by(|a, b| a.distance(x, z).total_cmp(&b.distance(x, z)))
+                    .unwrap();
+                assert!(
+                    piece.distance(x, z) <= works.thickness * 0.5,
+                    "{}: figure {:.1} m off the wall ({:.1} m thick)",
+                    unit.name,
+                    piece.distance(x, z),
+                    works.thickness
+                );
+                let f = sim.field();
+                let top = f
+                    .height(piece.a.0, piece.a.1)
+                    .min(f.height(piece.b.0, piece.b.1))
+                    + works.wall_height;
+                assert!(
+                    (y - top).abs() < 0.5,
+                    "{}: figure at {y:.1}, walk at {top:.1}",
+                    unit.name
+                );
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 100);
+}
+
+#[test]
 fn campaign_breach_opens_the_walls() {
     let data = data();
     let intact = siege(&data, &[], 2, 0, 5);

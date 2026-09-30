@@ -10,7 +10,8 @@
   "faction": "fac_taranto",
   "role": "regent",
   "birth": {
-    "value": "1303"
+    "value": "1303",
+    "uncertain": true
   },
   "historical": true,
   "skills": {
@@ -41,5 +42,9 @@
     "children": [
       "chr_robert_de_tarente"
     ]
+  },
+  "death": {
+    "value": "1346",
+    "place": "Naples"
   }
 }

@@ -1,0 +1,12 @@
+{
+  "id": "cdx_ozbeg",
+  "title": "Özbeg Khan",
+  "category": "personnage",
+  "aliases": ["Özbeg", "Uzbek Khan", "khan Özbeg"],
+  "era": { "from": "1282", "to": "1341" },
+  "summary": "Khan de la Horde d'Or de 1313 à 1341, Özbeg en marque l'apogée : il fait de l'islam la religion de l'État, tient les princes russes par le yarlyk et commerce avec Gênes, Venise et l'Égypte.",
+  "body": "Neveu du khan Toqta, Özbeg s'empare du pouvoir à sa mort, en 1312-1313, en faisant exécuter les princes et les émirs qui lui résistent, pour une part attachés aux cultes traditionnels des steppes. Converti à l'islam sunnite, il en fait la religion de l'élite de la [[cdx_horde_d_or|Horde d'Or]] ; il laisse pourtant à l'Église orthodoxe ses privilèges et exempte d'impôt le métropolite de Russie. En 1314, une mosquée est élevée en son nom à Solkhat, en Crimée.\n\nÖzbeg gouverne la Rus' par ses princes. Il donne et reprend le yarlyk de grand-prince de Vladimir : il fait exécuter à la Horde Michel de Tver en 1318, marie sa sœur à Iouri de Moscou, puis, après la révolte de Tver de 1327, qu'il fait écraser par une armée tatare accompagnée d'[[cdx_ivan_kalita|Ivan Kalita]], confie la collecte du tribut au prince de Moscou. Alexandre de Tver, rentré en grâce, est mis à mort à Saraï en 1339 avec son fils.\n\nMaître des routes de la steppe, il laisse les Génois revenir à [[cdx_caffa|Caffa]], d'où Toqta les avait chassés, et concède en 1332 aux Vénitiens un comptoir à Tana, à l'embouchure du Don. Il échange des ambassades avec les [[cdx_mamelouks|Mamelouks]] : en 1320, une princesse de sa famille épouse le sultan [[cdx_an_nasir_muhammad|an-Nasir Muhammad]]. Contre l'[[cdx_ilkhanat|Ilkhanat]], il dispute l'Azerbaïdjan sans succès durable. Le voyageur [[cdx_ibn_battuta|Ibn Battuta]], reçu dans son camp vers 1332, décrit la ville mobile de ses tentes et le rang de ses épouses.\n\nIl meurt en 1341. Son fils Tinibeg est tué par son frère Djanibeg, qui assiège Caffa en 1346 et sous qui la [[cdx_peste_noire|Peste noire]] frappe la Horde.",
+  "entity": "chr_ozbeg",
+  "see_also": ["cdx_horde_d_or", "cdx_ivan_kalita", "cdx_caffa", "cdx_moscou"],
+  "sources": ["Özbeg Khan", "Horde d'Or", "Révolte de Tver (1327)", "Ibn Battûta, Voyages, t. II", "I. Vásáry, Cumans and Tatars, 2005"]
+}

@@ -31,7 +31,7 @@
   "available_from": 1445,
   "figure": "infantry_6",
   "equipment": "Coustille (longue dague ou glaive à lame étroite), brigandine, salade, gantelets, épée courte.",
-  "description": "Valets armés de la « lance fournie » des [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] (un homme d'armes, un coutilier, un page, deux archers) ; combattent aux côtés de l'homme d'armes et achèvent les adversaires renversés.",
+  "description": "Valets armés de la « lance fournie » des [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] (un homme d'armes, un coutilier, un page, deux archers et un valet) ; combattent aux côtés de l'homme d'armes et achèvent les adversaires renversés.",
   "sources": [
     "Coutilier",
     "Compagnie d'ordonnance",

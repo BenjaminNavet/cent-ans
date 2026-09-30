@@ -26,7 +26,7 @@
       "from": {
         "value": "1327"
       },
-      "note": "Règne jusqu'en 1342 ; destitué et exilé."
+      "note": "Règne jusqu'en 1342 ; chassé par Iaroslav de Pronsk, tué en 1343."
     }
   ],
   "skills": {
@@ -41,7 +41,7 @@
   "piety": 55,
   "starting_location": "prov_ryazan",
   "status": "at_court",
-  "description": "Prince de Pronsk devenu grand-prince de Riazan en 1327 ; opposant à Moscou, il fut exilé en 1342 à la suite d'un procès à la Horde, et mourut en exil (date incertaine).",
+  "description": "Fils d'Ivan Iaroslavitch, mis à mort à la Horde en 1327, auquel il succède ; il fait tuer son cousin Alexandre de Pronsk (1340). Chassé en 1342 par Iaroslav de Pronsk, appuyé par les Tatars, il est tué en 1343.",
   "sources": [
     "Ivan II de Riazan"
   ]

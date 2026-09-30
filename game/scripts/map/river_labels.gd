@@ -20,6 +20,26 @@ const SAME_NAME_CLEARANCE := 0.6
 var _labels: Array[Label3D] = []
 
 
+## VN : portée plafonnée à `CAMERA_RANGE_FACTOR` × la distance caméra : en vue rasante (paliers
+## vallée et site), les noms des fleuves lointains ne s'alignent plus sur l'horizon (ils sont
+## dessinés sans test de profondeur, donc même derrière les montagnes).
+const CAMERA_RANGE_FACTOR := 40.0
+var _range_cap := INF
+
+
+## VN : applique le plafond de portée pour une distance caméra (unités) ; ne touche les étiquettes
+## que si le plafond change de plus de 10 %.
+func update_view(camera_distance: float) -> void:
+	var cap := camera_distance * CAMERA_RANGE_FACTOR
+	if is_finite(_range_cap) and absf(cap - _range_cap) < _range_cap * 0.1:
+		return
+	_range_cap = cap
+	for label in _labels:
+		var to := minf(float(label.get_meta("visible_to", INF)), cap)
+		label.visibility_range_end = to
+		label.visibility_range_end_margin = to * 0.15
+
+
 func count() -> int:
 	return _labels.size()
 
@@ -111,6 +131,7 @@ func _make_label(map_data: MapData, cfg: Dictionary, font: Font, text: String, p
 	label.double_sided = true
 	label.render_priority = 3  # sous les noms de colonies (4)
 	label.outline_render_priority = 2
+	label.set_meta("visible_to", visible_to)
 	label.visibility_range_end = visible_to
 	label.visibility_range_end_margin = visible_to * 0.15
 	label.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF

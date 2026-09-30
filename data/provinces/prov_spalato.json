@@ -3,7 +3,7 @@
   "name": {
     "display": "Spalato et Trogir",
     "local": "Split",
-    "local_language": "vénitien"
+    "local_language": "croate (slave)"
   },
   "region": "balkans",
   "terrain": "hills",
@@ -31,7 +31,7 @@
     "name": {
       "display": "Spalato",
       "local": "Spalatum",
-      "local_language": "vénitien"
+      "local_language": "latin"
     },
     "lat": 43.5081,
     "lon": 16.44

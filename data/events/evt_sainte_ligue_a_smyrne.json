@@ -1,0 +1,101 @@
+{
+  "id": "evt_sainte_ligue_a_smyrne",
+  "title": "La Sainte Ligue prend Smyrne",
+  "text": "La ligue navale voulue par Clément VI réunit les galères du pape, de Venise, de [[cdx_chypre_lusignan|Chypre]] et de Rhodes. Elle surprend le port de Smyrne et arrache le château de la mer à [[cdx_umur_d_aydin|Umur Bey]], qui tient encore la citadelle haute. Les [[cdx_hospitaliers_rhodes|Hospitaliers]] reçoivent la garde de la place.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1344,
+      "season": "autumn"
+    },
+    "until_year": 1345,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_hospitallers"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_aydin"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_aydin",
+        "province": "prov_izmir"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_hospitallers"
+  },
+  "options": [
+    {
+      "text": "Garder le château de la mer",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "piety",
+          "amount": 10
+        },
+        {
+          "type": "treasury",
+          "amount": -2500
+        },
+        {
+          "type": "devastation",
+          "province": "prov_izmir",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_izmir",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_aydin",
+          "amount": -15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_aydin",
+          "amount": -20,
+          "reason": "Prise du port de Smyrne"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser Vénitiens et Chypriotes porter l'effort",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "treasury",
+          "amount": -500
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_aydin",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "siege",
+  "historical_date": {
+    "value": "1344-10-28"
+  },
+  "sources": [
+    "Croisade de Smyrne",
+    "Umur Bey",
+    "Kenneth M. Setton, The Papacy and the Levant, I, 1976"
+  ]
+}

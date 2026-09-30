@@ -1,0 +1,12 @@
+{
+  "id": "cdx_gediminas",
+  "title": "Gediminas",
+  "category": "personnage",
+  "aliases": ["Gediminas", "Gédiminas", "Gedymin"],
+  "era": { "from": "v. 1275", "to": "1341" },
+  "summary": "Grand-duc de Lituanie de 1316 environ à 1341, Gediminas fait de Vilnius sa capitale, tient tête à l'Ordre teutonique et étend son pouvoir sur les terres ruthènes ; sa dynastie régnera sur la Lituanie et la Pologne.",
+  "body": "Successeur de son frère Vytenis vers 1316, Gediminas gouverne un État païen pris entre deux fronts : à l'ouest, les « voyages » annuels de l'[[cdx_ordre_teutonique|Ordre teutonique]] et de la branche livonienne ; à l'est, les principautés ruthènes affaiblies, tributaires de la [[cdx_horde_d_or|Horde d'Or]].\n\nEn 1323, il écrit au pape Jean XXII et aux villes de la [[cdx_hanse|Hanse]] : il se dit prêt à recevoir le baptême et invite marchands, artisans, chevaliers et paysans à s'établir dans son pays, en promettant la liberté de culte. Ces lettres, qui nomment Vilnius, sa « ville royale », aboutissent la même année à une paix avec l'Ordre de Livonie ; mais Gediminas se dérobe au baptême, que ses sujets païens et orthodoxes refusent.\n\nIl s'étend par la guerre et les mariages. Son fils Algirdas épouse l'héritière de Vitebsk, un autre, Lubart, celle de Volhynie ; sa fille Aldona épouse en 1325 le futur [[cdx_casimir_iii|Casimir III]] de Pologne, alliance dirigée contre l'Ordre, et une autre, Marie, le prince Dmitri de Tver. Pskov et Novgorod recherchent parfois sa protection. Il meurt pendant l'hiver 1341-1342 au siège d'un château teutonique, peut-être d'un coup d'arme à feu, et reçoit des funérailles païennes. Ses descendants, les Gediminides, fourniront à la Pologne la dynastie des Jagellon.",
+  "entity": "chr_gediminas",
+  "see_also": ["cdx_lituanie", "cdx_cavalerie_lituanienne", "cdx_ordre_teutonique", "cdx_casimir_iii"],
+  "sources": ["Gediminas", "Lettres de Gediminas", "Grand-duché de Lituanie", "S. C. Rowell, Lithuania Ascending, 1994"]
+}

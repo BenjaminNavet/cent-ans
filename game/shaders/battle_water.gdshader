@@ -20,6 +20,9 @@ uniform float clarity = 0.9; // mètres de visibilité
 uniform float turbidity : hint_range(0.0, 1.0) = 0.35;
 uniform float ripple : hint_range(0.0, 1.0) = 0.0; // gouttes de pluie
 
+// VN5 : lumière du moment (rgb : teinte du ciel reflété, a : niveau du jour), `BattleTimeOfDay`.
+global uniform vec4 battle_water_light;
+
 varying vec3 world_pos;
 
 void vertex() {
@@ -63,7 +66,7 @@ void fragment() {
 	// Hauts-fonds : le bord du ruban (UV.x près de 0 ou 1) garde une eau claire et verte.
 	float edge = 1.0 - smoothstep(0.0, 0.3, min(UV.x, 1.0 - UV.x));
 	murk *= mix(1.0, 0.45, edge);
-	vec3 water = mix(ground * shallow_color * 2.2, deep_color, murk);
+	vec3 water = mix(ground * shallow_color * 2.2, deep_color * battle_water_light.a, murk);
 	// Reflet du ciel (Fresnel de Schlick) : fort en incidence rasante, donc de loin.
 	// CR1 : ciel reflété assombri (le ciel vu sous 20-40° est
 	// plus foncé que la couleur d'horizon `sky_color`) et plafonné à 0,4 : quelques pour cent de
@@ -71,14 +74,14 @@ void fragment() {
 	vec3 view_n = normalize(mix(up_view, (VIEW_MATRIX * vec4(n.x, n.z, n.y, 0.0)).xyz, 0.25));
 	float cos_v = clamp(dot(view_n, normalize(-VERTEX)), 0.0, 1.0);
 	float fresnel = 0.03 + 0.97 * pow(1.0 - cos_v, 5.0);
-	vec3 sky = sky_color * 0.7 * mix(0.85, 1.1, texture(macro_noise, world_pos.xz * 0.004).r);
+	vec3 sky = sky_color * battle_water_light.rgb * 0.7 * mix(0.85, 1.1, texture(macro_noise, world_pos.xz * 0.004).r);
 	water = mix(water, sky, clamp(fresnel * 1.1, 0.0, 0.4) * smoothstep(0.02, 0.2, vertical));
 
 	// Écume sur les hauts-fonds et le long des rives, déchiquetée et entraînée par le courant.
 	float foam_noise = texture(macro_noise, flow * vec2(0.3, 0.12) + vec2(0.0, -t * 0.35)).r;
 	float shore = 1.0 - smoothstep(0.02, 0.12, vertical);
 	float foam = smoothstep(0.55, 0.8, foam_noise) * shore * 0.6;
-	water = mix(water, vec3(0.7, 0.72, 0.68), foam * 0.4);
+	water = mix(water, vec3(0.7, 0.72, 0.68) * battle_water_light.a, foam * 0.4);
 
 	ALBEDO = deep_color * 0.2 + vec3(foam * 0.4);
 	EMISSION = water * (1.0 - foam * 0.3);

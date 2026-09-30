@@ -6,7 +6,7 @@
     "name": {
       "display": "Berlin",
       "local": "Berlin",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       13.405,
@@ -37,7 +37,7 @@
     "name": {
       "display": "Francfort-sur-l'Oder",
       "local": "Frankinvorde",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       14.5378,
@@ -63,7 +63,7 @@
     "name": {
       "display": "Spandau",
       "local": "Spandowe",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       13.2033,
@@ -89,7 +89,7 @@
     "name": {
       "display": "Brandebourg-sur-la-Havel",
       "local": "Brandenborch",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       12.5561,

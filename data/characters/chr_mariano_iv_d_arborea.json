@@ -10,7 +10,8 @@
   "faction": "fac_arborea",
   "role": "prince",
   "birth": {
-    "value": "1317"
+    "value": "1317",
+    "uncertain": true
   },
   "death": {
     "value": "1375",

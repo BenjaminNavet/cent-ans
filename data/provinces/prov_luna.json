@@ -3,7 +3,7 @@
   "name": {
     "display": "Luna",
     "local": "Luna",
-    "local_language": "castillan"
+    "local_language": "aragonais"
   },
   "region": "aragon",
   "terrain": "plains",
@@ -22,7 +22,7 @@
     "name": {
       "display": "Luna",
       "local": "Luna",
-      "local_language": "castillan"
+      "local_language": "aragonais"
     },
     "lat": 42.0333,
     "lon": -0.8667

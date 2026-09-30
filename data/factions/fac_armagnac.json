@@ -18,11 +18,10 @@
   "suzerain": "fac_france",
   "primary_title": "tit_armagnac",
   "heraldry": {
-    "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or.",
-    "description": "Blasonnement traditionnel de la maison d'Armagnac ; attesté surtout à partir du XIVe-XVe siècle.",
+    "blazon": "D'argent au lion de gueules.",
+    "description": "Armes du comté d'Armagnac ; depuis 1298, les comtes les écartèlent de Rodez (de gueules au léopard lionné d'or).",
     "primary_color": "#F5F1E6",
-    "secondary_color": "#B0182B",
-    "uncertain": true
+    "secondary_color": "#B0182B"
   },
   "titles": [
     "Comte d'Armagnac",
@@ -38,7 +37,7 @@
     {
       "faction": "fac_france",
       "status": "vassal",
-      "note": "Jean Ier est lieutenant royal en Languedoc contre les Anglais de Gascogne."
+      "note": "Jean Ier sert Philippe VI contre les Anglais ; il contribue à la défaite des Anglo-Flamands devant Saint-Omer (1340)."
     },
     {
       "faction": "fac_foix_bearn",

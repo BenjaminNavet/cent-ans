@@ -81,12 +81,15 @@ Musique d'époque libre de droits, organisée par culture (bible DA § 9 : Franc
 Bourgogne/Flandre, Ibérie, Italie) et par contexte (campagne, cour, guerre, menu). Licence vérifiée
 page par page (domaine public, CC0, CC BY ou CC BY-SA — jamais NC ni ND).
 
-- Estampie « Retrove », Robertsbridge Codex (Angleterre, XIVe s.) — Metzner, CC BY-SA 3.0.
-- « Chominciamento di gioia » (Italie, XIVe s.) — Ririkuku, CC BY-SA 4.0.
-- Guillaume Dufay, « Se la face ay pale » — Ensemble Asteria, CC BY-SA 2.5.
-- Guillaume Dufay, « Ave Regina caelorum » — enregistrement Commons, CC0.
-- Folía d'Ahigal — Loreto Galindo, tamborilero (Fundación Joaquín Díaz), CC BY-SA 3.0.
-- Diego Ortiz, Recercadas primera et segunda (*Trattado de Glosas*, 1553) — Phillip W. Serna, CC BY-SA 4.0.
+- Estampie « Retrove », Robertsbridge Codex (Angleterre, v. 1360) — Metzner, CC BY-SA 3.0.
+- « Chominciamento di gioia », ms. Londres Add. 29987 (Italie, fin XIVe s.) — Ririkuku, CC BY-SA 4.0.
+- Guillaume Dufay, « Se la face ay pale » (v. 1430) — Ensemble Asteria, CC BY-SA 2.5.
+- Guillaume Dufay, « Ave Regina caelorum » (XVe s.) — enregistrement Commons, CC0.
+- Folía d'Ahigal, air traditionnel recueilli en 1988 — Loreto Galindo, tamborilero (Fundación
+  Joaquín Díaz), CC BY-SA 3.0. *Postérieur à la période* : la folía n'apparaît qu'à la fin du
+  XVe s. (Portugal, Espagne) et s'épanouit au XVIe s.
+- Diego Ortiz, Recercadas primera et segunda (*Trattado de Glosas*, Rome, 1553) — Phillip W. Serna,
+  CC BY-SA 4.0. *Postérieur à la période* (Renaissance, un siècle après la guerre).
 - Cantigas de Santa María (Alphonse X, XIIIe s.), tradition orale castillane — Fundación Joaquín
   Díaz, CC BY-SA 3.0.
 - Guillaume de Machaut, « Douce Dame Jolie » et « Riches d'amour et mandians d'amie » (Ars nova,
@@ -94,11 +97,11 @@ page par page (domaine public, CC0, CC BY ou CC BY-SA — jamais NC ni ND).
   domaine public.
 - Francesco Landini, « Ecco la primavera » et « Si dolce non sono » (XIVe s.) — réalisations MIDI,
   Tetraktys, domaine public.
-- « Deo gracias Anglia » (Agincourt Carol, anonyme, XVe s.) — réalisation instrumentale, domaine
-  public.
+- « Deo gracias Anglia » (Agincourt Carol, anonyme, après 1415) — réalisation instrumentale,
+  domaine public.
 - « Sumer is Icumen In » (rota anglaise, XIIIe s.) — Brandtnight2000, CC BY-SA 4.0.
-- Gilles Binchois, « Triste plaisir » et « Dueil angoisseux » — réalisations MIDI, Tetraktys,
-  CC BY 3.0.
+- Gilles Binchois, « Triste plaisir » et « Dueil angoisseux » (XVe s.) — réalisations MIDI,
+  Tetraktys, CC BY 3.0.
 - Démonstration de chalemie (Schalmei), utilisée aussi comme couche de bataille — Ajta,
   CC BY-SA 3.0.
 
@@ -112,13 +115,18 @@ Licence vérifiée page par page (domaine public ou CC0) ; extraits coupés à 1
 à -16 LUFS, MP3 128 kbit/s.
 
 - Hymnes ecclésiastiques byzantins, parties 1 et 2 (enregistrement Commons, 2012) — CC0.
+  Chant liturgique de tradition vivante, noté et interprété selon l'usage moderne.
 - Chant znamenny : « Царю Небесный », « Се Жених грядет в полунощи », « Да молчит всякая плоть
-  человеча » — chœur du Patriarcat de Moscou, CC0.
+  человеча » — chœur du Patriarcat de Moscou, CC0. Mélodies transmises par les manuscrits
+  des XVIe-XVIIe s. : *postérieures à la période*, mais d'une tradition déjà vivante au XIVe s.
 - Musik des Orients (Hornbostel, Berlin, 1931 ; Congrès de musique arabe du Caire) : chant d'art
   en maqam Sika (Égypte), maqam Mezmum (Tunisie), Bachraf Kuzum en maqam Hijaz (Égypte) — domaine
-  public.
-- « Istikhbar Mezmoum », Lazaar Ben Dali Yahia (Tlemcen, 1929) — domaine public.
+  public. Répertoires d'époque moderne, enregistrés en 1931 : *postérieurs à la période*.
+- « Istikhbar Mezmoum », Lazaar Ben Dali Yahia (Tlemcen, 1929) — domaine public. Tradition
+  arabo-andalouse héritée d'al-Andalus, dans sa forme moderne.
 - Hüseyni saz semaisi, Hafız Kemal Bey (kemençe) et Hayriye Hanım (oud) — domaine public.
+  *Postérieur à la période* : le saz semaisi est une forme de la musique ottomane classique
+  (XVIIe-XIXe s.).
 
 Détail (URL, licence exacte) : `game/assets/third_party/music/wikimedia/SOURCE.md`.
 
@@ -129,11 +137,12 @@ Angleterre, cour et menu ; les réalisations MIDI de DA4 restent en repli.
 
 - Studio der frühen Musik (Andrea von Ramm, Nigel Rogers, Sterling Jones, Thomas Binkley),
   concert du 23 octobre 1963 au Musikhistoriska museet de Stockholm, bande numérisée par
-  Musikverket / Svenskt visarkiv — **domaine public** : Jacopo da Bologna, « Fenice fu » ;
-  Saltarello anonyme italien (XIVe s.) ; « Onques ne fut » ; « Souvent souspire » ; Pierrekin de
-  la Coupele, « Chancon fas non pas villaine » ; « Hé Robinet » ; Gilles Binchois et Guillaume
-  Dufay, « Adieu m'amour » ; « Bryd one brere ».
-- « Bel fiore dança » (codex de Faenza) — Francesco Ariis, clavier, **CC BY 4.0**.
+  Musikverket / Svenskt visarkiv — **domaine public** : Jacopo da Bologna, « Fenice fu » (milieu
+  XIVe s.) ; Saltarello anonyme italien (ms. Londres Add. 29987, fin XIVe s.) ; « Onques ne
+  fut » ; « Souvent souspire » (v. 1300) ; Pierrekin de la Coupele, « Chancon fas non pas
+  villaine » (XIIIe s.) ; « Hé Robinet » (v. 1450) ; Gilles Binchois et Guillaume Dufay, « Adieu
+  m'amour » (XVe s.) ; « Bryd one brere » (Angleterre, v. 1300).
+- « Bel fiore dança » (codex de Faenza, début XVe s.) — Francesco Ariis, clavier, **CC BY 4.0**.
 
 Sources détaillées (URL, extrait, licence) : `game/assets/third_party/music/ars_nova/SOURCE.md`.
 
@@ -380,7 +389,7 @@ mention « Public domain » ou CC0). Recadrées et réduites par `tools/cent_ans
 - `vg_siege` : Jean Froissart, Chroniques, British Library, Royal 18 E I, f. 345 — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ACapture_of_Wark_Castle_-_Froissart%2C_Chroniques_de_France_et_d%27Angleterre%2C_Book_II_%28c.1460-1480%29%2C_f.345_-_BL_Royal_MS_18_E_I.jpg)).
 - `vg_church` : Couronnement de Clément VII (1378), archives iconographiques du palais du Roure, Avignon — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ACouronnement_Cl%C3%A9ment_VII.jpg)).
 - `vg_intrigue` : Jean Froissart, Chroniques, British Library, Royal 18 E I, f. 172 — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AMurder_of_Simon_Sudbury_-_Froissart%2C_Chroniques_de_France_et_d%27Angleterre%2C_Book_II_%28c.1460-1480%29%2C_f.172_-_BL_Royal_MS_18_E_I.jpg)).
-- `end_battle_victory` : Jean Froissart, Chroniques, BnF, ms. Français 2643 (bataille de Rosebecque) — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ASlagbijrozebeke.jpg)).
+- `end_battle_victory` : Jean Froissart, Chroniques, BnF, ms. Français 2644 (bataille de Rosebecque) — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ASlagbijrozebeke.jpg)).
 - `end_battle_defeat` : Martial d'Auvergne, Vigiles de Charles VII, BnF, ms. Français 5054, f. 11 — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AVigiles_du_roi_Charles_VII_06.jpg)).
 - `end_campaign_victory` : Martial d'Auvergne, Vigiles de Charles VII, BnF, ms. Français 5054 (Charles VII devant Tartas) — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AVigiles_du_roi_Charles_VII_14.jpg)).
 - `end_campaign_defeat` : Martial d'Auvergne, Vigiles de Charles VII, BnF, ms. Français 5054 (funérailles du duc François Ier de Bretagne) — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AVigiles_du_roi_Charles_VII_36.jpg)).

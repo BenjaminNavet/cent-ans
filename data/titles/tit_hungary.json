@@ -7,10 +7,11 @@
     "local_language": "hongrois"
   },
   "heraldry": {
-    "blazon": "Écartelé : aux 1 et 4 burelé d'argent et de gueules de huit pièces ; aux 2 et 3 d'azur semé de fleurs de lis d'or.",
-    "description": "Armes d'Anjou-Hongrie : bandes des Árpád et fleurs de lis d'Anjou.",
+    "blazon": "Écartelé : aux 1 et 4 fascé de gueules et d'argent de huit pièces ; aux 2 et 3 d'azur semé de fleurs de lis d'or, au lambel de gueules.",
+    "description": "Armes d'Anjou-Hongrie : fasces des Árpád et Anjou-Naples au lambel.",
     "primary_color": "#B01E2E",
-    "secondary_color": "#F5F1E6"
+    "secondary_color": "#F5F1E6",
+    "note": "Les sceaux de Charles Robert portent le plus souvent un parti ; l'écartelé est conservé pour le dessin."
   },
   "de_jure_provinces": [
     "prov_hungary_central",

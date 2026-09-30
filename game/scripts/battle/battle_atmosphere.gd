@@ -26,7 +26,9 @@ const PRESETS := {
 		"zenith": Color(0.62, 0.65, 0.68), "horizon": Color(0.78, 0.8, 0.8), "coverage": 0.92,
 		"cloud_light": Color(0.86, 0.87, 0.87), "cloud_shadow": Color(0.66, 0.68, 0.7),
 		"sky_energy": 0.9,
-		"fog": 0.0036, "fog_color": Color(0.74, 0.76, 0.77), "aerial": 0.0, "ambient": 1.1,
+		# VN5 : brouillard de fond allégé (vue de haut : écran gris uniforme, troupes invisibles) ;
+		# la nappe basse (hauteur de brouillard, `FogVolume`) garde le sol voilé.
+		"fog": 0.0017, "fog_color": Color(0.74, 0.76, 0.77), "aerial": 0.15, "ambient": 1.1,
 		"saturation": 0.85, "contrast": 1.0,
 	},
 	"rain": {
@@ -40,8 +42,9 @@ const PRESETS := {
 		"zenith": Color(0.58, 0.63, 0.7), "horizon": Color(0.8, 0.83, 0.87), "coverage": 0.88,
 		"cloud_light": Color(0.92, 0.93, 0.95), "cloud_shadow": Color(0.66, 0.69, 0.74),
 		"sky_energy": 0.95,
-		"fog": 0.0017, "fog_color": Color(0.8, 0.83, 0.87), "aerial": 0.2, "ambient": 1.05,
-		"saturation": 0.9, "contrast": 1.02,
+		# VN5 : brouillard allégé, contraste relevé (vue de haut, voile laiteux sans relief).
+		"fog": 0.0009, "fog_color": Color(0.78, 0.81, 0.86), "aerial": 0.35, "ambient": 1.0,
+		"saturation": 0.95, "contrast": 1.1,
 	},
 }
 
@@ -52,7 +55,7 @@ const TIME_KEYS: Array[String] = ["morning", "midday", "evening"]
 const DEFAULT_TIME := "midday"
 
 ## Densité du brouillard volumétrique par temps (actif selon le niveau de `RenderQuality`).
-const VOLUMETRIC_DENSITY := {"clear": 0.0012, "fog": 0.004, "rain": 0.0035, "snow": 0.004}
+const VOLUMETRIC_DENSITY := {"clear": 0.0012, "fog": 0.0026, "rain": 0.0035, "snow": 0.0022}
 
 
 ## PO4 : préréglage d'heure `time_key` (`time_of_day.<clé>`), {} si absent.
@@ -297,6 +300,11 @@ static func _add_precipitation(camera: Camera3D, rain: bool) -> void:
 	mat.albedo_color = Color(0.75, 0.8, 0.88, 0.16) if rain else Color(1, 1, 1, 0.85)
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y if rain else BaseMaterial3D.BILLBOARD_ENABLED
 	mat.billboard_keep_scale = true
+	# VN5 : gouttes et flocons effacés près de l'objectif (vus à 1-3 m, ils barraient l'image de
+	# longs traits blancs ou de taches).
+	mat.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
+	mat.distance_fade_min_distance = 4.0 if rain else 2.5
+	mat.distance_fade_max_distance = 14.0 if rain else 8.0
 	mesh.material = mat
 	particles.draw_pass_1 = mesh
 	particles.position = Vector3(0, 30, -45)

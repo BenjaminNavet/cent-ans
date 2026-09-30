@@ -25,7 +25,7 @@
       "bld_forge"
     ],
     "port": false,
-    "description": "Ville libre d'empire fidèle à Louis IV de Bavière, coexistant avec la forteresse voisine du burgrave (Kaiserburg) sans lui être soumise. Métallurgie et commerce vers l'Italie.",
+    "description": "Ville libre d'empire fidèle à Louis IV de Bavière, coexistant avec la forteresse voisine du burgrave (château du burgrave, accolé au château impérial) sans lui être soumise. Métallurgie et commerce vers l'Italie.",
     "sources": [
       "Nuremberg"
     ]
@@ -75,7 +75,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse épiscopale de Bamberg gardant la frontière nord de la Franconie, enclave près de Nuremberg.",
+    "description": "Forteresse épiscopale de Bamberg gardant la frontière nord de la Franconie, vers la Thuringe.",
     "sources": [
       "Kronach"
     ]

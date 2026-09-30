@@ -5,7 +5,7 @@
     "kind": "city",
     "name": {
       "display": "Modon",
-      "local": "Μεθώνη",
+      "local": "Modon",
       "local_language": "vénitien"
     },
     "lonlat": [
@@ -34,7 +34,7 @@
     "kind": "town",
     "name": {
       "display": "Coron",
-      "local": "Κορώνη",
+      "local": "Coron",
       "local_language": "vénitien"
     },
     "lonlat": [
@@ -62,7 +62,7 @@
     "kind": "castle",
     "name": {
       "display": "Navarin (Zonklon)",
-      "local": "Ναβαρίνο",
+      "local": "Porto Zonchio",
       "local_language": "vénitien"
     },
     "lonlat": [

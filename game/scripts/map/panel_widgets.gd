@@ -58,7 +58,8 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 			check.button_pressed = true
 			check.set_script(RichButton)
 			check.theme_type_variation = &"CheckBox"
-			narrow_button(check)
+			# VN : nom et effectifs passent à la ligne au lieu d'être coupés (« Milice urbaine — 12… »).
+			check.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
 			RichTooltip.set_tooltip(check, "unit", unit_type, unit)  # IB1 : infobulle en sections
 			list.add_child(check)
@@ -100,13 +101,19 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		RichTooltip.set_tooltip(button, "unit", unit_type, row)  # IB1 : infobulle en sections
 		button.pressed.connect(func() -> void: on_recruit.call(unit_type))
 		line.add_child(button)
-		var reason := str(row.get("reason", "Indisponible"))
-		if not available and not reason.begins_with("réserve"):
-			line.add_child(_note(reason_label(reason), wrap))
 		# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
 		if row.has("pool_label"):
 			line.add_child(_note(pool_label(row), wrap))
 		list.add_child(line)
+		# Q8 : le motif d'indisponibilité passe sous la ligne, pleine largeur ; à droite il
+		# partageait la place avec la réserve et se repliait mot à mot (« à / engager / depuis… »).
+		var reason := str(row.get("reason", "Indisponible"))
+		if not available and not reason.begins_with("réserve"):
+			var reason_note := _note(reason_label(reason), true)
+			if wrap:
+				line.add_child(reason_note)
+			else:
+				list.add_child(reason_note)
 
 
 ## Note à droite d'un bouton de ligne (`side_note`), ou pleine largeur sous le bouton si `wrap`.
@@ -257,7 +264,9 @@ static func fit_tabs_to_side_zone(panel: Control, tabs: TabContainer, max_height
 			(page as Control).custom_minimum_size.y = 0.0
 	var zone_height := UiZones.rect(UiZones.Zone.SIDE_PANEL).size.y
 	var others := panel.get_combined_minimum_size().y - tabs.get_combined_minimum_size().y
-	tabs.custom_minimum_size.y = clampf(zone_height - others, minf(SIDE_TABS_MIN_HEIGHT, max_height), max_height)
+	var wanted := clampf(zone_height - others, minf(SIDE_TABS_MIN_HEIGHT, max_height), max_height)
+	if not is_equal_approx(tabs.custom_minimum_size.y, wanted):
+		tabs.custom_minimum_size.y = wanted
 
 
 ## Q6 : bouton de ligne d'une liste du panneau latéral ; son libellé se coupe (points de

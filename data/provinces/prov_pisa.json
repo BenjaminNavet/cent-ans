@@ -84,9 +84,16 @@
   ],
   "fortification_level": 2,
   "base_supply": 4800,
-  "description": "République gibeline sur l'Arno, ancienne rivale maritime de Gênes (défaite à la Meloria, 1284) ; sans seigneur fort depuis la mort de Castruccio Castracani en 1328, gouvernée par ses Anciens.",
+  "description": "République gibeline sur l'Arno, ancienne rivale maritime de Gênes (défaite à la Meloria, 1284) ; gouvernée par ses Anciens sous l'ascendant du comte Fazio Novello della Gherardesca, capitaine général de 1329 à 1340.",
   "sources": [
     "République de Pise",
     "Castruccio Castracani"
+  ],
+  "ports": [
+    "Pise",
+    "Porto Pisano"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
   ]
 }

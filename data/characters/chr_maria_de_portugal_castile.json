@@ -1,7 +1,9 @@
 {
   "id": "chr_maria_de_portugal_castile",
   "name": {
-    "display": "Marie de Portugal"
+    "display": "Marie de Portugal",
+    "local": "Maria de Portugal",
+    "local_language": "portugais"
   },
   "sex": "female",
   "house": "Bourgogne-Portugal",

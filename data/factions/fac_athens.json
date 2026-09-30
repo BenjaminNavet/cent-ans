@@ -26,8 +26,7 @@
     "note": "Brisure de jeu (la Compagnie catalane portait aussi les armes d'Aragon)."
   },
   "titles": [
-    "Duc d'Athènes et de Néopatras",
-    "Comte de Malte et Gozo"
+    "Duc d'Athènes et de Néopatras"
   ],
   "treasury": 5000,
   "prestige": 35,
@@ -67,7 +66,7 @@
     "trade": 40,
     "piety": 55
   },
-  "description": "Duché conquis par la Compagnie catalane en 1311 après Halmyros, doublé de Néopatras en 1319 : à ce titre, Guillaume II, fils du roi de Sicile, tient sur le papier Athènes et Thèbes, gouvernées par un vicaire.",
+  "description": "Duché conquis par la Compagnie catalane en 1311 après Halmyros, doublé de Néopatras en 1319 : à ce titre, Guillaume II, fils du roi de Sicile, tient sur le papier Athènes et Thèbes, gouvernées par un vicaire ; Thèbes, et non Athènes, est la résidence effective des ducs et le siège du gouvernement catalan.",
   "sources": [
     "Duchy of Athens",
     "William II, Duke of Athens"

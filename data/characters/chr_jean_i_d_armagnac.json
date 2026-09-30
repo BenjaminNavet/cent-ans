@@ -10,8 +10,8 @@
   "faction": "fac_armagnac",
   "role": "ruler",
   "birth": {
-    "value": "1311",
-    "uncertain": true
+    "value": "1306",
+    "note": "Né peu avant le 6 mai 1306."
   },
   "death": {
     "value": "1373-05-16"
@@ -38,7 +38,7 @@
   "piety": 45,
   "starting_location": "prov_toulousain",
   "status": "at_court",
-  "description": "Grand seigneur du Midi, fidèle de [[cdx_philippe_vi|Philippe VI]] et rival acharné des comtes de Foix-Béarn ([[cdx_gaston_ii_de_foix_bearn|Gaston II]]) pour la domination du Languedoc et de la Gascogne. Lieutenant royal en Languedoc contre les Anglais de Gascogne.",
+  "description": "Grand seigneur du Midi, fidèle de [[cdx_philippe_vi|Philippe VI]] et rival acharné des comtes de Foix-Béarn ([[cdx_gaston_ii_de_foix_bearn|Gaston II]]) pour la domination du Languedoc et de la Gascogne. Par sa femme Béatrice de Clermont, il tient aussi le Charolais depuis 1327.",
   "sources": [
     "Jean Ier d'Armagnac",
     "Comté d'Armagnac"

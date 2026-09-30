@@ -16,6 +16,11 @@ const FADED_INK := Color(0.40, 0.30, 0.18)
 const RUBRIC := Color(0.55, 0.12, 0.10)
 const EVENT_ART_DIR := "res://assets/events/"
 const ART_SIZE := Vector2(580, 240)
+## VN : largeur du contenu (texte, choix) à 580 px, réduite pour tenir dans la zone `SIDE_PANEL`
+## (427 px en vue 1280×720) ; marges du parchemin en plus.
+const CONTENT_WIDTH := 580.0
+const FRAME_WIDTH := 100.0
+var _content_width := CONTENT_WIDTH
 ## P2d : part de la hauteur de l'écran (ou de la zone `UiLayout`) laissée au corps défilant
 ## (image, texte, choix) — une décision à plusieurs choix chiffrés (sort d'une place prise) peut
 ## dépasser 720 px de haut ; le titre et le pied restent visibles, le reste défile plutôt que de
@@ -40,7 +45,8 @@ func _ready() -> void:
 		theme = load("res://scenes/ui/parchment_theme.tres")
 	# Positionnée à la main (centre de l'écran) : la hauteur dépend du texte et des choix.
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
-	custom_minimum_size = Vector2(620, 0)
+	_content_width = content_width()
+	custom_minimum_size = Vector2(_content_width + 40.0, 0)
 	resized.connect(_center_on_screen)
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
@@ -69,7 +75,7 @@ func _ready() -> void:
 	_scroll.add_child(body)
 
 	_art = TextureRect.new()
-	_art.custom_minimum_size = ART_SIZE
+	_art.custom_minimum_size = Vector2(_content_width, ART_SIZE.y)
 	_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_art.clip_contents = true
@@ -83,7 +89,7 @@ func _ready() -> void:
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	# Wrap width fixed: at width 0 the title wraps one letter per line on the first layout and
 	# the window grew taller than the screen (Q3).
-	_title_label.custom_minimum_size = Vector2(580, 0)
+	_title_label.custom_minimum_size = Vector2(_content_width, 0)
 	body.add_child(_title_label)
 
 	_meta_label = Label.new()
@@ -97,7 +103,7 @@ func _ready() -> void:
 	_text_label.bbcode_enabled = true
 	_text_label.fit_content = true
 	_text_label.scroll_active = false
-	_text_label.custom_minimum_size = Vector2(580, 0)
+	_text_label.custom_minimum_size = Vector2(_content_width, 0)
 	UiType.apply(_text_label, UiType.BODY)
 	_text_label.add_theme_font_size_override("italics_font_size", UiType.size(UiType.BODY))
 	_text_label.add_theme_color_override("default_color", INK)
@@ -159,6 +165,27 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 	reset_size()
 	_center_on_screen()
 	call_deferred("_fit")
+	get_viewport().size_changed.connect(_on_view_resized, CONNECT_DEFERRED)
+
+
+## VN : largeur du contenu qui tient dans la zone `SIDE_PANEL` (580 px au plus).
+static func content_width() -> float:
+	return floorf(clampf(UiZones.rect(UiZones.Zone.SIDE_PANEL).size.x - FRAME_WIDTH, 240.0, CONTENT_WIDTH))
+
+
+## VN : la zone `SIDE_PANEL` change avec la fenêtre : largeurs du contenu recalculées.
+func _on_view_resized() -> void:
+	await get_tree().process_frame
+	_content_width = content_width()
+	custom_minimum_size.x = _content_width + 40.0
+	_art.custom_minimum_size.x = _content_width
+	_title_label.custom_minimum_size.x = _content_width
+	_text_label.custom_minimum_size.x = _content_width
+	for row in _options_box.get_children():
+		for child in row.get_children():
+			if child is Label:
+				(child as Label).custom_minimum_size.x = _content_width
+	_fit()
 
 
 func current_decision() -> int:
@@ -172,6 +199,7 @@ func _option_row(option: Dictionary) -> Control:
 	button.text = str(option.get("text", ""))
 	button.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # VN : un choix long passe à la ligne
 	var effects := str(option.get("effects_text", ""))
 	button.tooltip_text = effects if effects != "" else "Sans effet notable."
 	var index := int(option.get("index", 0))
@@ -189,7 +217,7 @@ func _option_row(option: Dictionary) -> Control:
 		UiType.apply(summary, UiType.CAPTION)
 		summary.add_theme_color_override("font_color", FADED_INK)
 		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		summary.custom_minimum_size = Vector2(580, 0)
+		summary.custom_minimum_size = Vector2(_content_width, 0)
 		row.add_child(summary)
 	return row
 

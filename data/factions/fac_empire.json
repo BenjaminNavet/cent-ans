@@ -44,7 +44,7 @@
         "value": "1337-08-26",
         "uncertain": true
       },
-      "note": "Alliance contre la France en échange de subsides anglais."
+      "note": "Alliance contre la France en échange de subsides anglais. Liberté de jeu : l'alliance, conclue en juillet-août 1337, est posée dès le printemps (aucun effet d'événement ne crée d'alliance)."
     },
     {
       "faction": "fac_papacy",
@@ -65,7 +65,7 @@
     },
     {
       "faction": "fac_genoa",
-      "status": "overlord"
+      "status": "peace"
     }
   ],
   "ai_personality": {

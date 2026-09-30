@@ -195,3 +195,8 @@ func _gui_input(event: InputEvent) -> void:
 	if pressed or dragged:
 		clicked.emit(to_world(event.position))
 		accept_event()
+
+
+## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe scriptée).
+func _make_custom_tooltip(for_text: String) -> Object:
+	return RichTooltip.panel_for(for_text, self)

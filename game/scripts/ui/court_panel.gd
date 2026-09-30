@@ -338,6 +338,10 @@ class CourtRow:
 			activated.emit()
 			accept_event()
 
+	## Q8 : infobulle en sections (`attach_plain` ne pose pas son hôte sur une classe scriptée).
+	func _make_custom_tooltip(for_text: String) -> Object:
+		return RichTooltip.panel_for(for_text, self)
+
 
 static func _initials(name: String) -> String:
 	var parts := name.split(" ", false)

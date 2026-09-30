@@ -17,12 +17,12 @@
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_cilicia",
   "heraldry": {
-    "blazon": "De gueules au lion d'or couronné d'argent.",
-    "description": "Lion des Roupénides et des Héthoumides ; couleurs et couronne de convention.",
-    "primary_color": "#B0182B",
-    "secondary_color": "#F2C230",
+    "blazon": "D'or au lion de gueules.",
+    "description": "Lion de gueules sur or des rois d'Arménie, tel que le donnent les armoriaux occidentaux (écartelés des Lusignan d'Arménie).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B",
     "uncertain": true,
-    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+    "note": "Armes connues par des sources occidentales ; l'usage arménien reste mal documenté."
   },
   "titles": [
     "Roi des Arméniens",

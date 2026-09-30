@@ -101,7 +101,7 @@ func _check_integration() -> void:
 	if not _check(_scene.battle != null, "battle demo failed to stage (run core/build.sh?)"):
 		return
 	var hud: CanvasLayer = _scene.hud
-	if not _check(hud.alerts_column != null and hud.alerts_column.get_parent() == hud.root, "alerts column is a child of hud.root"):
+	if not _check(hud.alerts_column != null and hud.root.is_ancestor_of(hud.alerts_column), "alerts column is under hud.root (VN4 : pile TOASTS)"):
 		return
 	var alerts: Array = _scene.battle.call("get_alerts")
 	_check(alerts is Array, "get_alerts() answers an Array (bridge wired)")

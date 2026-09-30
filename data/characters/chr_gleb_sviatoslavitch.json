@@ -1,0 +1,49 @@
+{
+  "id": "chr_gleb_sviatoslavitch",
+  "name": {
+    "display": "Gleb Sviatoslavitch de Briansk",
+    "local": "Глеб Святославич",
+    "local_language": "vieux russe"
+  },
+  "sex": "male",
+  "house": "Smolensk",
+  "faction": "fac_briansk",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true,
+    "note": "Date inconnue."
+  },
+  "death": {
+    "value": "1340",
+    "place": "Briansk",
+    "note": "Tué par l'assemblée (vétché) de Briansk."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Briansk",
+      "from": {
+        "value": "1334",
+        "uncertain": true
+      },
+      "note": "Supplante Dmitri en 1333 ou 1334."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_unpopular"
+  ],
+  "piety": 50,
+  "starting_location": "prov_briansk",
+  "status": "at_court",
+  "description": "Fils de Sviatoslav Glebovitch, prince de Briansk tué en 1310, de la maison de Smolensk ; il s'empare de Briansk en 1333 ou 1334 aux dépens de Dmitri. Impopulaire, il est tué en 1340 par le vétché de la ville, malgré l'intercession du métropolite Théognoste, et Dmitri recouvre alors la principauté.",
+  "sources": [
+    "Глеб Святославич (князь брянский), ru.wikipedia (web)",
+    "Briansk"
+  ]
+}

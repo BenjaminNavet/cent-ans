@@ -83,7 +83,7 @@ var player_faction: String = ""  # B2 : blason des vignettes
 ## CB4 : textes des capacités (`BattleSim.get_ability_catalog()`), posés par la scène.
 var ability_catalog: Dictionary = {}
 var _log_entries: Array[Dictionary] = []  # {time, text, count}, le plus récent en tête
-var log_expanded := true
+var log_expanded := false  # VN4 : une ligne par défaut (déplié, il couvrait le champ ; touche J)
 var log_toggle: Button
 var leader_seal: Control
 var withdraw_all_button: Button
@@ -238,6 +238,9 @@ func _update_log_toggle() -> void:
 func _build_alerts() -> void:
 	alerts_column = ALERTS_COLUMN.new()
 	root.add_child(alerts_column)
+	# VN4 : sous le journal dans la même pile (zone `TOASTS`, haut gauche) : posée en haut à
+	# gauche à part, elle recouvrait le journal et le titre de la bataille.
+	UiZones.put(UiZones.Zone.TOASTS, alerts_column)
 
 
 func _build_bottom() -> void:
@@ -726,7 +729,9 @@ func _render_log() -> void:
 			text += " (×%d)" % int(entry["count"])
 		var label := _label(text, 13)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.custom_minimum_size = Vector2(330, 0)
+		# VN4 : largeur donnée par la zone (une largeur minimale de 330 px la dépassait en
+		# 1280×720 : « replier » et la fin des lignes coupés au bord droit).
+		label.custom_minimum_size = Vector2(0, 0)
 		if i > 0:
 			label.modulate = Color(1, 1, 1, 0.8)
 		log_box.add_child(label)

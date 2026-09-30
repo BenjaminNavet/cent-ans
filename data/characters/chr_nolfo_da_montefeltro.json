@@ -10,7 +10,8 @@
   "faction": "fac_urbino",
   "role": "ruler",
   "birth": {
-    "value": "1293"
+    "value": "1293",
+    "uncertain": true
   },
   "historical": true,
   "skills": {
@@ -28,5 +29,10 @@
   "sources": [
     "Maison de Montefeltro",
     "Urbin"
-  ]
+  ],
+  "death": {
+    "value": "1364",
+    "uncertain": true,
+    "note": "Mort vers 1364."
+  }
 }

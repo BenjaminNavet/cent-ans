@@ -11,20 +11,19 @@
   "faction": "fac_brunswick",
   "role": "ruler",
   "birth": {
-    "value": "1292",
-    "uncertain": true
+    "value": "1292-06-24"
   },
   "death": {
-    "value": "1344-12-13"
+    "value": "1344-08-30",
+    "note": "Mort à Göttingen."
   },
   "historical": true,
   "titles": [
     {
-      "title": "Duc de Brunswick-Lunebourg",
+      "title": "Prince de Brunswick-Wolfenbüttel",
       "from": {
-        "value": "1330",
-        "uncertain": true,
-        "note": "Coseigneurie welfe ; date de prise de pouvoir effective disputée selon les branches."
+        "value": "1318",
+        "note": "Succède à son père Albert II ; le duché welf de Brunswick-Lunebourg reste partagé entre lignées."
       }
     }
   ],
@@ -40,7 +39,7 @@
   "piety": 55,
   "starting_location": "prov_brunswick",
   "status": "at_court",
-  "description": "Prince welf de la lignée de Lunebourg, retenu ici comme titulaire unique d'un duché en réalité fragmenté entre plusieurs cadets welfes en 1337.",
+  "description": "Fils aîné d'Albert II le Gras, prince de Brunswick-Wolfenbüttel depuis 1318 : il tient Göttingen et Wolfenbüttel (lignée de Brunswick, non de Lunebourg) ; retenu ici comme titulaire unique d'un duché en réalité partagé entre plusieurs lignées welfes en 1337.",
   "sources": [
     "Otto der Milde"
   ]

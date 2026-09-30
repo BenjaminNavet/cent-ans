@@ -1,0 +1,96 @@
+{
+  "id": "evt_dusan_prend_serres",
+  "title": "Dušan prend Serrès",
+  "text": "Profitant de la guerre civile byzantine, [[cdx_etienne_dusan|Étienne Dušan]] a conquis la Macédoine place après place. Serrès, la grande ville du Strymon, lui ouvre ses portes ; à Noël, il s'y fait proclamer empereur des Serbes et des Grecs.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1345,
+      "season": "autumn"
+    },
+    "until_year": 1346,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_serbia"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_byzantium"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_stefan_dusan"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_byzantium",
+        "province": "prov_serres"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_serbia"
+  },
+  "options": [
+    {
+      "text": "Confirmer les privilèges des archontes grecs",
+      "effects": [
+        {
+          "type": "transfer_province",
+          "province": "prov_serres",
+          "from": "fac_byzantium"
+        },
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "treasury",
+          "amount": -1000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_byzantium",
+          "amount": -25,
+          "reason": "Perte de Serrès"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rançonner la ville et rentrer en Serbie",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "devastation",
+          "province": "prov_serres",
+          "amount": 15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_byzantium",
+          "amount": -15,
+          "reason": "Sac de la plaine de Serrès"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1345-09-25"
+  },
+  "sources": [
+    "Étienne Dušan",
+    "Serrès",
+    "John V. A. Fine, The Late Medieval Balkans, 1987"
+  ]
+}

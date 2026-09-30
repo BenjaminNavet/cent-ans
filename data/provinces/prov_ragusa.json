@@ -3,7 +3,7 @@
   "name": {
     "display": "Raguse",
     "local": "Dubrovnik",
-    "local_language": "italien"
+    "local_language": "croate (slave)"
   },
   "region": "balkans",
   "terrain": "hills",
@@ -26,7 +26,7 @@
     "name": {
       "display": "Raguse",
       "local": "Ragusium",
-      "local_language": "italien"
+      "local_language": "latin"
     },
     "lat": 42.641,
     "lon": 18.092
@@ -89,7 +89,7 @@
   ],
   "fortification_level": 4,
   "base_supply": 500,
-  "description": "République patricienne sous suzeraineté vénitienne, aux salines de Ston (murailles commencées en 1333) et aux navires sur toutes les mers. Le patriciat gouverne, le Recteur change tous les mois.",
+  "description": "République patricienne sous suzeraineté vénitienne, aux salines de Ston (murailles commencées en 1333) et aux navires sur toutes les mers. Le patriciat gouverne sous un comte vénitien (le recteur mensuel n'apparaîtra qu'après 1358).",
   "sources": [
     "Dubrovnik",
     "Ston",

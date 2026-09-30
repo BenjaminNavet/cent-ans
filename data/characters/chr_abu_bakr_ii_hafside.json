@@ -11,6 +11,7 @@
   "role": "ruler",
   "birth": {
     "value": "1290",
+    "uncertain": true,
     "note": "Naissance non connue avec précision (vers 1290, incertain)."
   },
   "death": {

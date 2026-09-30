@@ -2,7 +2,7 @@
   "id": "fac_bosnia",
   "name": {
     "display": "Banat de Bosnie",
-    "local": "Бансство Босна",
+    "local": "Бановина Босна",
     "local_language": "serbe"
   },
   "short_name": "Bosnie",
@@ -17,12 +17,12 @@
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_bosnia",
   "heraldry": {
-    "blazon": "D'azur à six fleurs de lis d'or posées trois, deux et une.",
-    "description": "Armes des Kotromanić : fleurs de lis d'or sur azur, d'inspiration angevine (attestées à partir du milieu du XIVe siècle).",
+    "blazon": "D'azur à la bande d'argent accompagnée de six fleurs de lis d'or.",
+    "description": "Armes des Kotromanić : bande d'argent entre six fleurs de lis d'or sur azur, d'inspiration angevine (le rendu simplifié des factions ne trace que la bande).",
     "primary_color": "#1F3E8F",
-    "secondary_color": "#F2C230",
+    "secondary_color": "#F5F1E6",
     "uncertain": true,
-    "note": "Attesté plus tard (Tvrtko Ier) ; ici étendu à Étienne II."
+    "note": "Attestées sous Tvrtko Ier ; ici étendues à Étienne II."
   },
   "titles": [
     "Ban de Bosnie",
@@ -65,7 +65,7 @@
     "trade": 45,
     "piety": 50
   },
-  "description": "Banat de Bosnie d'Étienne II Kotromanić, un jeune ban qui a annexé le Hum en 1326 et se pose en arbitre entre la Hongrie, la Serbie et Venise.",
+  "description": "Banat de Bosnie d'Étienne II Kotromanić, ban depuis 1322, qui a annexé le Hum en 1326 et se pose en arbitre entre la Hongrie, la Serbie et Venise.",
   "sources": [
     "Stephen II, Ban of Bosnia",
     "Banat de Bosnie"

@@ -136,7 +136,7 @@
     "fortification_level": 2,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Château bâti vers 1310 par le cardinal Pierre de Budos, neveu du pape Clément V, dans le Sauternais.",
+    "description": "Château bâti vers 1308 par Raymond-Guilhem de Budos, neveu du pape Clément V, dans le Sauternais.",
     "sources": ["Château de Budos"]
   },
   {

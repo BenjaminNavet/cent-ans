@@ -26,7 +26,9 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Bursa"
+      "display": "Bursa",
+      "local": "Bursa",
+      "local_language": "turc ottoman"
     },
     "lat": 40.19,
     "lon": 29.06
@@ -87,7 +89,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 1300,
-  "description": "Cœur de l'État d'Osman : Bursa, prise en 1326, est la capitale d'Orhan ; Nicée (İznik), tombée en 1331, est devenue une médersa ottomane.",
+  "description": "Cœur de l'État d'Osman : Bursa, prise en 1326, est la capitale d'Orhan ; Nicée (İznik), tombée en 1331, abrite la première médersa ottomane.",
   "sources": [
     "Bursa",
     "Siege of Bursa (1326)",

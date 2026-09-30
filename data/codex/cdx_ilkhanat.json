@@ -1,0 +1,11 @@
+{
+  "id": "cdx_ilkhanat",
+  "title": "Ilkhanat",
+  "category": "institution",
+  "aliases": ["Ilkhanat", "Ilkhan", "Ilkhans", "Houlagides", "Abu Saïd Bahadur"],
+  "era": { "from": "1256", "to": "1335" },
+  "summary": "Empire mongol de Perse fondé par Houlagou, l'Ilkhanat domine l'Iran, l'Irak et l'Anatolie. La mort sans héritier de l'Ilkhan Abu Saïd, en 1335, le fait éclater : en 1337, ses émirs se disputent ses débris.",
+  "body": "Envoyé par le grand khan Möngke, Houlagou détruit les Assassins d'Alamut puis prend Bagdad en 1258 et met fin au califat abbasside. Ses descendants, les Ilkhans (« khans soumis » au grand khan), règnent sur l'Iran, l'Irak, le Caucase et l'Anatolie seldjoukide depuis Tabriz, puis Soltaniyeh. Arrêtés par les [[cdx_mamelouks|Mamelouks]] à Aïn Djalout (1260), ils les combattent pendant soixante ans et cherchent l'alliance des Latins ; leurs guerres les opposent aussi à la [[cdx_horde_d_or|Horde d'Or]], qui revendique l'Azerbaïdjan.\n\nL'Ilkhan Ghazan se convertit à l'islam en 1295. Son vizir Rashid al-Din écrit l'Histoire universelle (Jami al-tawarikh), la première histoire du monde, de la Chine à l'Europe. Abu Saïd (1316-1335) signe en 1323 la paix avec le sultan [[cdx_an_nasir_muhammad|an-Nasir Muhammad]].\n\nAbu Saïd meurt en novembre 1335 sans fils. Les khans fantoches se succèdent, placés par les grands émirs : les Djalayirides de Hasan Buzurg à Bagdad et Tabriz, les Tchobanides en Azerbaïdjan, les Indjouides à Chiraz, les Sarbedars au Khorassan. En Anatolie, le gouverneur Eretna se rend indépendant, et la [[cdx_georgie|Géorgie]] de Georges V recouvre sa liberté. L'Iran restera divisé jusqu'aux conquêtes de Tamerlan, à partir de 1381.",
+  "see_also": ["cdx_mamelouks", "cdx_horde_d_or", "cdx_georgie", "cdx_archers_des_steppes"],
+  "sources": ["Ilkhanat", "Abu Saïd (Ilkhan)", "Rashid al-Din", "C. Melville, The Fall of Amir Chupan and the Decline of the Ilkhanate, 1999"]
+}

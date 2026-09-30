@@ -1,0 +1,436 @@
+{
+ "layer_size": 1024,
+ "normal_size": 512,
+ "grid": [
+  3,
+  9
+ ],
+ "albedo": "res://assets/textures/terrain/hb_ground_albedo_array.jpg",
+ "normal": "res://assets/textures/terrain/hb_ground_normal_array.jpg",
+ "layers": [
+  {
+   "id": "wheat_ripe",
+   "layer": 0,
+   "role": "crop",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    7
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.2671,
+    0.1651,
+    0.0713
+   ]
+  },
+  {
+   "id": "barley_green",
+   "layer": 1,
+   "role": "crop",
+   "biomes": [
+    1,
+    2,
+    4,
+    5
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1515,
+    0.2022,
+    0.0441
+   ]
+  },
+  {
+   "id": "ploughed",
+   "layer": 2,
+   "role": "crop",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7
+   ],
+   "tile_m": 100,
+   "mean_linear": [
+    0.2521,
+    0.1664,
+    0.1016
+   ]
+  },
+  {
+   "id": "fallow",
+   "layer": 3,
+   "role": "crop",
+   "biomes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1936,
+    0.1825,
+    0.1154
+   ]
+  },
+  {
+   "id": "hay_meadow",
+   "layer": 4,
+   "role": "crop",
+   "biomes": [
+    1,
+    2,
+    5,
+    6
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1655,
+    0.1953,
+    0.0674
+   ]
+  },
+  {
+   "id": "pasture",
+   "layer": 5,
+   "role": "crop",
+   "biomes": [
+    1,
+    2,
+    4,
+    5,
+    6
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.1666,
+    0.1939,
+    0.0817
+   ]
+  },
+  {
+   "id": "vineyard_rows",
+   "layer": 6,
+   "role": "crop",
+   "biomes": [
+    2,
+    3
+   ],
+   "tile_m": 100,
+   "mean_linear": [
+    0.2254,
+    0.1748,
+    0.098
+   ]
+  },
+  {
+   "id": "olive_grove",
+   "layer": 7,
+   "role": "crop",
+   "biomes": [
+    3,
+    7
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.2106,
+    0.1774,
+    0.116
+   ]
+  },
+  {
+   "id": "apple_orchard",
+   "layer": 8,
+   "role": "crop",
+   "biomes": [
+    1,
+    2,
+    5
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.1577,
+    0.1972,
+    0.0744
+   ]
+  },
+  {
+   "id": "bocage_meadow",
+   "layer": 9,
+   "role": "crop",
+   "biomes": [
+    1
+   ],
+   "tile_m": 200,
+   "mean_linear": [
+    0.1687,
+    0.1951,
+    0.0639
+   ]
+  },
+  {
+   "id": "rye_field",
+   "layer": 10,
+   "role": "crop",
+   "biomes": [
+    2,
+    5
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1902,
+    0.1826,
+    0.1241
+   ]
+  },
+  {
+   "id": "buckwheat_field",
+   "layer": 11,
+   "role": "crop",
+   "biomes": [
+    1,
+    2,
+    5
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.21,
+    0.1764,
+    0.1269
+   ]
+  },
+  {
+   "id": "med_terraces",
+   "layer": 12,
+   "role": "crop",
+   "biomes": [
+    3,
+    7
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.2226,
+    0.174,
+    0.1144
+   ]
+  },
+  {
+   "id": "broadleaf_canopy",
+   "layer": 13,
+   "role": "canopy",
+   "biomes": [
+    1,
+    2
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.1406,
+    0.2045,
+    0.0535
+   ]
+  },
+  {
+   "id": "conifer_canopy",
+   "layer": 14,
+   "role": "canopy",
+   "biomes": [
+    2,
+    5,
+    6
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1378,
+    0.1956,
+    0.1502
+   ]
+  },
+  {
+   "id": "med_pine_open",
+   "layer": 15,
+   "role": "canopy",
+   "biomes": [
+    3,
+    7
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.2152,
+    0.1774,
+    0.1025
+   ]
+  },
+  {
+   "id": "boreal_mixed",
+   "layer": 16,
+   "role": "canopy",
+   "biomes": [
+    5
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.1753,
+    0.1929,
+    0.0588
+   ]
+  },
+  {
+   "id": "maquis",
+   "layer": 17,
+   "role": "canopy",
+   "biomes": [
+    3
+   ],
+   "tile_m": 100,
+   "mean_linear": [
+    0.1938,
+    0.1834,
+    0.105
+   ]
+  },
+  {
+   "id": "limestone_rock",
+   "layer": 18,
+   "role": "ground",
+   "biomes": [
+    3,
+    6,
+    7
+   ],
+   "tile_m": 100,
+   "mean_linear": [
+    0.1926,
+    0.1793,
+    0.1498
+   ]
+  },
+  {
+   "id": "granite_rock",
+   "layer": 19,
+   "role": "ground",
+   "biomes": [
+    1,
+    5,
+    6
+   ],
+   "tile_m": 100,
+   "mean_linear": [
+    0.1796,
+    0.1833,
+    0.1478
+   ]
+  },
+  {
+   "id": "scree",
+   "layer": 20,
+   "role": "ground",
+   "biomes": [
+    6
+   ],
+   "tile_m": 80,
+   "mean_linear": [
+    0.1815,
+    0.1809,
+    0.1666
+   ]
+  },
+  {
+   "id": "heather_moor",
+   "layer": 21,
+   "role": "ground",
+   "biomes": [
+    1,
+    5
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.2206,
+    0.1735,
+    0.1202
+   ]
+  },
+  {
+   "id": "golden_steppe",
+   "layer": 22,
+   "role": "ground",
+   "biomes": [
+    4,
+    7
+   ],
+   "tile_m": 200,
+   "mean_linear": [
+    0.2393,
+    0.1714,
+    0.0907
+   ]
+  },
+  {
+   "id": "feather_grass_steppe",
+   "layer": 23,
+   "role": "ground",
+   "biomes": [
+    4
+   ],
+   "tile_m": 150,
+   "mean_linear": [
+    0.1955,
+    0.1787,
+    0.1474
+   ]
+  },
+  {
+   "id": "peat_bog",
+   "layer": 24,
+   "role": "ground",
+   "biomes": [
+    1,
+    2,
+    5
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.2625,
+    0.1631,
+    0.0893
+   ]
+  },
+  {
+   "id": "alpine_meadow",
+   "layer": 25,
+   "role": "ground",
+   "biomes": [
+    6
+   ],
+   "tile_m": 120,
+   "mean_linear": [
+    0.1609,
+    0.196,
+    0.0779
+   ]
+  },
+  {
+   "id": "limestone_garrigue",
+   "layer": 26,
+   "role": "ground",
+   "biomes": [
+    3,
+    7
+   ],
+   "tile_m": 100,
+   "mean_linear": [
+    0.1874,
+    0.1793,
+    0.1651
+   ]
+  }
+ ]
+}

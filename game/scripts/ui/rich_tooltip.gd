@@ -210,6 +210,7 @@ static func fallback_of(text: String) -> String:
 ## IB1 : pose l'infobulle en sections de `kind`/`id` sur `control` (clé + repli dans
 ## `tooltip_text`, `live` en métadonnée) ; `_make_custom_tooltip` la reconstruit par `panel_for`.
 static func set_tooltip(control: Control, kind: String, id: String, live: Dictionary = {}) -> void:
+	_ensure_host(control)
 	control.set_meta(LIVE_META, live)
 	control.tooltip_text = tooltip_key(kind, id, to_bbcode(spec_for(KEY_PREFIX + kind + ":" + id, live)))
 
@@ -584,9 +585,19 @@ static func plain(title: String, body: String = "", hint: String = "") -> String
 ## qui route `_make_custom_tooltip` vers `panel_for`. `live` : `title`/`body`/`hint` dynamiques
 ## (ex. « Vitesse ×%d » selon la donnée du moment), sinon ceux de `tooltips.json`.
 static func attach_plain(control: Control, key: String, live: Dictionary = {}) -> void:
+	set_tooltip(control, "plain", key, live)
+
+
+## Q8 : un contrôle sans `_make_custom_tooltip` montrerait la clé « ib: » et le BBCode bruts :
+## contrôle natif → script générique `plain_tooltip_host.gd` ; classe scriptée → erreur (la
+## méthode manque à la classe).
+static func _ensure_host(control: Control) -> void:
+	if control.has_method("_make_custom_tooltip"):
+		return
 	if control.get_script() == null:
 		control.set_script(PLAIN_HOST_SCRIPT)
-	set_tooltip(control, "plain", key, live)
+	else:
+		push_error("RichTooltip: %s (%s) lacks _make_custom_tooltip (raw tooltip)" % [control.name, control.get_script().resource_path])
 
 
 # --- Unités -------------------------------------------------------------------------------

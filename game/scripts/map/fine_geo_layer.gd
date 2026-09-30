@@ -127,6 +127,7 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	river_material = ShaderMaterial.new()
 	river_material.shader = RIVER_SHADER
 	river_material.render_priority = 1
+	rivers.apply_fine_display(river_material)
 	road_material = ShaderMaterial.new()
 	road_material.shader = ROAD_SHADER
 	if OS.get_cmdline_user_args().has("--fine-debug"):

@@ -8,7 +8,7 @@
   "sex": "male",
   "house": "Karamanoğulları",
   "faction": "fac_karaman",
-  "role": "ruler",
+  "role": "prince",
   "birth": {
     "value": "1300",
     "uncertain": true,
@@ -22,9 +22,12 @@
     {
       "title": "Bey de Karaman",
       "from": {
-        "value": "1333"
+        "value": "1318"
       },
-      "note": "Règne jusqu'en 1349."
+      "to": {
+        "value": "1332"
+      },
+      "note": "Abdique en 1332 en faveur de son frère Halil ; reprend le pouvoir en 1340 et règne jusqu'en 1349."
     }
   ],
   "skills": {
@@ -39,8 +42,9 @@
   "piety": 55,
   "starting_location": "prov_karaman",
   "status": "at_court",
-  "description": "Bey de Karaman qui affronte Eretna et les Mamelouks ; naissance approximative.",
+  "description": "Bey de Karaman de 1318 à 1332, il abdique en faveur de son frère Alaeddin Halil et reprend le pouvoir à la mort de celui-ci en 1340 ; il affrontera Eretna et les Mamelouks jusqu'en 1349. Naissance approximative.",
   "sources": [
-    "Karamanids"
+    "Karamanids (web)",
+    "Halil of Karaman (web)"
   ]
 }

@@ -10,7 +10,8 @@
   "faction": "fac_mantua",
   "role": "ruler",
   "birth": {
-    "value": "1268"
+    "value": "1268",
+    "uncertain": true
   },
   "historical": true,
   "skills": {
@@ -42,5 +43,9 @@
         "value": "1329"
       }
     }
-  ]
+  ],
+  "death": {
+    "value": "1360-01-18",
+    "place": "Mantoue"
+  }
 }

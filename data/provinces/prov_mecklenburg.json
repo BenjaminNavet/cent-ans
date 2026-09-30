@@ -28,12 +28,12 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Schwerin",
-      "local": "Swerin",
+      "display": "Wismar",
+      "local": "Wismer",
       "local_language": "moyen bas-allemand"
     },
-    "lat": 53.6355,
-    "lon": 11.4132
+    "lat": 53.8912,
+    "lon": 11.461
   },
   "geo": {
     "capital_lonlat": [

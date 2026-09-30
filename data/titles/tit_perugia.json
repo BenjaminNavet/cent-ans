@@ -7,10 +7,10 @@
     "local_language": "ombrien"
   },
   "heraldry": {
-    "blazon": "D'or au griffon de sable.",
-    "description": "Griffon noir sur champ d'or, emblème communal de Pérouse.",
-    "primary_color": "#F2C230",
-    "secondary_color": "#111111"
+    "blazon": "De gueules au griffon d'argent couronné d'or.",
+    "description": "Griffon blanc couronné sur champ rouge, emblème communal de Pérouse.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
   },
   "de_jure_provinces": [
     "prov_perugia"

@@ -39,7 +39,7 @@
     {
       "faction": "fac_mamluks",
       "status": "vassal",
-      "note": "Vassal nominal du sultan mamelouk depuis 1260."
+      "note": "Longtemps vassal des Ilkhans (depuis 1260), l'émir se tourne vers le sultan mamelouk après l'effondrement ilkhanide."
     }
   ],
   "ai_personality": {

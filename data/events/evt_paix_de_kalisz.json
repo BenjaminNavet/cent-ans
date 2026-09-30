@@ -1,0 +1,89 @@
+{
+  "id": "evt_paix_de_kalisz",
+  "title": "La paix de Kalisz",
+  "text": "Pour sauver le royaume, [[cdx_casimir_iii|Casimir III]] traite avec l'[[cdx_ordre_teutonique|Ordre teutonique]] : les chevaliers rendent la Kuyavie et la terre de Dobrzyń, et le roi leur abandonne la Pomérélie « en aumône perpétuelle ». La sentence pontificale de Varsovie, qui donnait raison à la [[cdx_pologne|Pologne]], reste lettre morte.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1343,
+      "season": "summer"
+    },
+    "until_year": 1344,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_poland"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_teutonic"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_teutonic",
+        "province": "prov_kuyavia"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_teutonic",
+        "province": "prov_pomerelia"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_poland"
+  },
+  "options": [
+    {
+      "text": "Signer et recouvrer la Kuyavie",
+      "effects": [
+        {
+          "type": "transfer_province",
+          "province": "prov_kuyavia",
+          "from": "fac_teutonic"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_teutonic",
+          "amount": 20,
+          "reason": "Paix de Kalisz"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Refuser de renoncer à Dantzig",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "claim",
+          "kind": "province",
+          "target": "prov_pomerelia"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_teutonic",
+          "amount": -20,
+          "reason": "Refus de Kalisz"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1343-07-08"
+  },
+  "sources": [
+    "Traité de Kalisz (1343)",
+    "Casimir III de Pologne",
+    "Paul W. Knoll, The Rise of the Polish Monarchy, 1972"
+  ]
+}

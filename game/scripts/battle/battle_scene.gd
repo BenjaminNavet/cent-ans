@@ -2620,7 +2620,10 @@ func _apply_camera_override() -> void:
 	var parts := _camera_override.split(",")
 	if parts.size() < 4:
 		return
-	camera_rig.look_at_point(Vector3(float(parts[0]), 0, float(parts[1])), float(parts[2]), deg_to_rad(float(parts[3])))
+	var cam_z := float(parts[1])
+	if parts[1] == "river":
+		cam_z = terrain.river_center_z(float(parts[0]))  # VN : cadrage sur la rivière (captures)
+	camera_rig.look_at_point(Vector3(float(parts[0]), 0, cam_z), float(parts[2]), deg_to_rad(float(parts[3])))
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:

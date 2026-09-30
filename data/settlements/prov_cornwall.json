@@ -104,7 +104,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Bourg-marché autour du prieuré de saint Petroc, siège du parlement stannaire de Cornouailles.",
+    "description": "Bourg-marché autour du prieuré de saint Petroc, l'une des villes stannaires (de l'étain) de Cornouailles.",
     "sources": [
       "Bodmin",
       "Prieuré de Bodmin"
@@ -130,7 +130,7 @@
       "bld_market"
     ],
     "port": true,
-    "description": "Port et ville stannaire au fond de son estuaire, l'une des quatre villes de l'étain de Cornouailles.",
+    "description": "Port et ville stannaire au fond de son estuaire, l'une des villes stannaires (de l'étain) de Cornouailles.",
     "sources": [
       "Truro"
     ]

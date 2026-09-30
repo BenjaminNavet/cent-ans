@@ -66,7 +66,7 @@ fn head_count_picks_the_field() {
     let small = BattleSim::new(big_setup(10), 3).unwrap();
     assert_eq!(small.scale().key, "skirmish");
     assert_eq!((small.field().width, small.field().depth), (1200.0, 800.0));
-    assert_eq!(small.max_on_field(), 20);
+    assert_eq!(small.max_on_field(), 40);
 
     // 63 × 120 × 2 = 15 120 soldiers.
     let epic = BattleSim::new(big_setup(63), 3).unwrap();
@@ -115,9 +115,9 @@ fn forced_tier_and_sieges() {
 
 #[test]
 fn reinforcements_beyond_the_epic_cap() {
-    let sim = BattleSim::new(big_setup(90), 5).unwrap();
+    let sim = BattleSim::new(big_setup(180), 5).unwrap();
     let cap = sim.max_on_field();
-    assert_eq!(sim.reserves(SideId::Defender), 90 - cap);
+    assert_eq!(sim.reserves(SideId::Defender), 180 - cap);
 }
 
 /// AI against AI with 60 regiments a side: both sides close, fight and the

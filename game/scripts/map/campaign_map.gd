@@ -334,6 +334,14 @@ func _setup_settlements() -> void:
 		clutter.name = "GroundClutter"
 		add_child(clutter)
 		clutter.setup(map_data, terrain, vegetation, settlement_layer.vegetation_exclusions())
+	# HB5 : affleurements rocheux à l'échelle du paysage (pentes, crêtes, haute montagne, lande).
+	var outcrops := RockOutcrops.new()
+	outcrops.name = "RockOutcrops"
+	add_child(outcrops)
+	var road_lines: Array = []
+	for road: Dictionary in settlement_data.roads:
+		road_lines.append(road["points"])
+	outcrops.setup(map_data, terrain, vegetation, settlement_layer.vegetation_exclusions(), road_lines)
 	life = CampaignLife.new()  # CV1
 	life.name = "CampaignLife"
 	add_child(life)
@@ -1083,7 +1091,11 @@ func _trade_route_tooltip(route: Dictionary) -> String:
 		var reason := str(route.get("cut_reason", ""))
 		return "%s ↔ %s : route coupée (%s)" % [from_name, to_name, reason]
 	var goods: PackedStringArray = route.get("goods", PackedStringArray())
-	var goods_text := ", ".join(goods) if not goods.is_empty() else ""
+	# VN : noms des marchandises (« drap », « laine ») et non leurs ids (`res_cloth`).
+	var goods_names := PackedStringArray()
+	for good in goods:
+		goods_names.append(GameCatalog.display_name(str(good)).to_lower())
+	var goods_text := ", ".join(goods_names) if not goods_names.is_empty() else ""
 	var text := "%s ↔ %s — %d livres/saison" % [from_name, to_name, int(route.get("total_value", 0))]
 	if goods_text != "":
 		text += " (%s)" % goods_text
@@ -1363,9 +1375,9 @@ func _process(_delta: float) -> void:
 			_take_screenshot(_screenshot_path, true)
 
 
-## Lot ZG4 : paliers vallée / site : frontières et voile du brouillard de guerre estompés sur le
+## Lot ZG4 : paliers vallée / site : frontières et brume du brouillard de guerre estompées sur le
 ## matériau du terrain (valeurs par défaut du shader × `ZoomTiers.border_alpha` / `fog_alpha`).
-const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_veil_amount", "fog_cloud_amount", "fog_rim_amount"]
+const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_mist_max", "fog_mist_min"]
 var _close_tier_defaults: Dictionary = {}
 var _close_tier_alphas := Vector2(-1.0, -1.0)
 var _prop_scale: float = 1.0

@@ -60,6 +60,7 @@ const BASE := {
 		"text": "La jauge de recherche de la barre du haut indique la technologie en cours. Ouvrez l'arbre (touche T ou clic sur la jauge) et choisissez une technologie disponible : sans recherche, les points de la saison sont perdus.",
 		"objective": "Choisir une recherche.",
 		"target": "research",
+		"modal_ok": true,  # l'arbre des technologies est une fenêtre modale : le guide reste affiché
 	},
 	"diplomacy": {
 		"title": "La diplomatie",
@@ -96,6 +97,7 @@ const BASE := {
 		"text": "Ouvrez la cour (bouton de la barre ou touche C), choisissez un personnage puis « Nommer gouverneur » et une province. Sa compétence de gouvernance agit sur l'impôt, la construction et l'ordre public. Le bouton « Cour » du panneau de province filtre les gouverneurs possibles.",
 		"objective": "Nommer un gouverneur.",
 		"target": "governor",
+		"modal_ok": true,  # la cour est une fenêtre modale : le guide reste affiché
 	},
 	"outro": {
 		"title": "À vous de jouer",
@@ -138,12 +140,12 @@ const ADVICE := {
 		"chronicle": "Crécy (1346), Poitiers (1356), Azincourt (1415) : les grandes victoires attendent vos décisions.",
 		"tax": "Le Parlement consent l'impôt ; la révolte des Paysans (1381) est née d'une capitation trop lourde.",
 		"governor": "La Guyenne est lointaine : un sénéchal compétent y vaut une armée.",
-		"outro": "Faites-vous sacrer à Reims comme Henri VI (1431) et gardez l'héritage des Plantagenêts.",
+		"outro": "Faites-vous sacrer à Reims, ce qu'Henri VI ne put faire (couronné à Paris en 1431), et gardez l'héritage des Plantagenêts.",
 	},
 	"fac_burgundy": {
 		"intro": "Eudes IV, beau-frère de Philippe VI, tient un duché riche mais modeste. La Bourgogne grandira par les mariages et les héritages jusqu'à devenir, sous les Valois, la puissance du « grand-duc d'Occident ».",
 		"select_army": "L'armée ducale est petite : ménagez-la, chaque unité coûte cher à remplacer.",
-		"move_army": "Restez prudent au début : la Flandre viendra par mariage (1384) plutôt que par la guerre.",
+		"move_army": "Restez prudent au début : la Flandre viendra par mariage (1369) et héritage (1384) plutôt que par la guerre.",
 		"open_province": "Dijon, capitale du duché, au cœur des vignobles et des foires de Chalon.",
 		"city_tab": "Clergé et bourgeois sont riches en Bourgogne : les abbayes de Cîteaux et Cluny pèsent dans la province.",
 		"build": "Pressoirs et foires rapportent vite ; les murailles protégeront des Grandes Compagnies.",
@@ -152,7 +154,7 @@ const ADVICE := {
 		"end_turn": "Laissez France et Angleterre s'épuiser : chaque saison de paix enrichit le duché.",
 		"season_report": "Les successions des princes voisins sont des occasions : lisez la rubrique « Le monde ».",
 		"chronicle": "La querelle des Armagnacs et des Bourguignons (1407) fera de vous l'arbitre du royaume.",
-		"tax": "Les villes flamandes, riches et turbulentes, supportent mal l'impôt : Gand se révoltera en 1453.",
+		"tax": "Les villes flamandes, riches et turbulentes, supportent mal l'impôt : Gand se révoltera de 1449 à 1453.",
 		"governor": "Un gouverneur habile tient les Pays-Bas pendant que le duc négocie à Paris.",
 		"outro": "Indépendance, Pays-Bas et lien lorrain : l'échéance est 1477, l'année de Nancy.",
 	},
@@ -184,6 +186,7 @@ static func steps(faction_id: String, context: Dictionary = {}) -> Array[Diction
 			"advice": str(advice.get(step_id, "")),
 			"target": str(base.get("target", "")),
 			"manual": bool(base.get("manual", false)),
+			"modal_ok": bool(base.get("modal_ok", false)),
 		})
 	return result
 

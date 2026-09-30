@@ -16,8 +16,8 @@
   "succession_law": "elective",
   "primary_title": "tit_pisa",
   "heraldry": {
-    "blazon": "D'azur à la croix alésée d'argent.",
-    "description": "Croix couronnée alésée pour distinguer visuellement Pise de la Savoie (mêmes tinctures que la croix pisane traditionnelle, rendues par un tracé différent).",
+    "blazon": "De gueules à la croix pisane d'argent.",
+    "description": "Croix pisane (cléchée et pommetée) d'argent sur champ de gueules, armes de la commune de Pise.",
     "primary_color": "#B0182B",
     "secondary_color": "#F5F1E6"
   },
@@ -50,7 +50,7 @@
     "trade": 70,
     "piety": 40
   },
-  "description": "République gibeline sur l'Arno, affaiblie depuis la mort de Castruccio Castracani en 1328 ; gouvernée par ses Anciens, sans capitaine du peuple stable.",
+  "description": "République gibeline sur l'Arno, affaiblie depuis la mort de Castruccio Castracani en 1328 ; gouvernée par ses Anciens sous l'ascendant du comte Fazio Novello della Gherardesca (Donoratico), capitaine général de 1329 à sa mort en 1340.",
   "sources": [
     "République de Pise",
     "Castruccio Castracani"

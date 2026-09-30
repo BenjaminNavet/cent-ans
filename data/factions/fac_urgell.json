@@ -18,10 +18,10 @@
   "suzerain": "fac_aragon",
   "primary_title": "tit_urgell",
   "heraldry": {
-    "blazon": "D'or au bœuf de gueules.",
-    "description": "Armes traditionnelles des comtes d'Urgell.",
+    "blazon": "Échiqueté d'or et de sable.",
+    "description": "Échiqueté des anciens comtes d'Urgell ; Jacques Ier l'écartèle avec les pals d'Aragon, rendu ici seul.",
     "primary_color": "#F2C230",
-    "secondary_color": "#B0182B"
+    "secondary_color": "#111111"
   },
   "titles": [
     "Comte d'Urgell",
@@ -39,7 +39,7 @@
     {
       "faction": "fac_aragon",
       "status": "vassal",
-      "note": "Jacques Ier, fils cadet d'Alphonse IV, cousin germain de Pierre IV."
+      "note": "Jacques Ier, fils cadet d'Alphonse IV, frère cadet de Pierre IV."
     }
   ],
   "ai_personality": {

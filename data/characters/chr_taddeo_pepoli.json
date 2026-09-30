@@ -10,7 +10,8 @@
   "faction": "fac_bologna",
   "role": "noble",
   "birth": {
-    "value": "1285"
+    "value": "1285",
+    "uncertain": true
   },
   "historical": true,
   "skills": {
@@ -29,5 +30,9 @@
   "sources": [
     "Taddeo Pepoli",
     "Bologne"
-  ]
+  ],
+  "death": {
+    "value": "1347-09",
+    "place": "Bologne"
+  }
 }

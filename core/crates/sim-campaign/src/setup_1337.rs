@@ -14,8 +14,8 @@
 use std::collections::BTreeSet;
 
 use data_model::{
-    BuildingId, CharacterId, CharacterStatus, Faction, FactionId, GameData, ProvinceId,
-    RelationStatus, UnitTypeId,
+    BuildingId, CharacterId, CharacterStatus, Faction, FactionId, GameData, HistoricalDate,
+    ProvinceId, RelationStatus, UnitTypeId,
 };
 
 use crate::diplomacy::{Claim, FOREVER};
@@ -45,6 +45,21 @@ const LONGBOWMEN: &str = "unit_longbowmen";
 const MOUNTED_ARCHERS: &str = "unit_mounted_archers";
 
 /// Composition of the main army of `faction` (unit type ids, may repeat).
+/// Whether a recorded death falls before the campaign opens in spring 1337:
+/// a death later in 1337 (Frederick III of Sicily in June) or dated to the
+/// year only leaves the character alive at start.
+fn dead_before_start(death: &HistoricalDate) -> bool {
+    match death.year() {
+        Some(year) if year < 1337 => true,
+        Some(1337) => death
+            .value
+            .get(5..7)
+            .and_then(|month| month.parse::<u32>().ok())
+            .is_some_and(|month| month < 3),
+        _ => false,
+    }
+}
+
 fn main_army_composition(faction: &Faction) -> Vec<&'static str> {
     match faction.id.as_str() {
         "fac_france" => vec![
@@ -393,11 +408,7 @@ impl CampaignState {
                 CharacterState {
                     name: None,
                     faction: character.faction.clone(),
-                    alive: character
-                        .death
-                        .as_ref()
-                        .and_then(|d| d.year())
-                        .is_none_or(|y| y > 1337),
+                    alive: !character.death.as_ref().is_some_and(dead_before_start),
                     birth_year: character.birth.year().unwrap_or(1300),
                     sex: character.sex,
                     house: character.house.clone(),
@@ -436,8 +447,8 @@ impl CampaignState {
                     death_year: character
                         .death
                         .as_ref()
-                        .and_then(|d| d.year())
-                        .filter(|y| *y <= 1337),
+                        .filter(|d| dead_before_start(d))
+                        .and_then(|d| d.year()),
                     retinue: Vec::new(),
                 },
             );
