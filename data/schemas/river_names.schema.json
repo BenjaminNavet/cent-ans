@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/river_names.schema.json",
+  "title": "Noms français des cours d'eau",
+  "description": "Fichier data/map/river_names.json (chantier RC, ADR 0117).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "names": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "required": ["names"],
+  "additionalProperties": false
+}

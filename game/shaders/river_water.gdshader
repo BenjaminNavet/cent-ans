@@ -29,6 +29,15 @@ uniform float sky_reflect = 0.55;
 uniform vec3 foam_color : source_color = vec3(0.80, 0.82, 0.78);
 uniform float min_px = 1.6;
 uniform float thin_fade = 0.7;
+// RC (ADR 0117) : largeur écran minimale × facteur selon l'importance (UV2.y, 0-6) : au dézoom,
+// les grands fleuves restent plus épais que leurs affluents.
+uniform float importance_min_px_scale[7] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+// RC : liseré de berge à l'encre (contraste avec le relief, lecture cartographique au dézoom).
+uniform vec3 bank_ink_color : source_color = vec3(0.05, 0.13, 0.20);
+uniform float bank_ink_strength = 0.0;
+// RC : fondu des rivières mineures avec la distance (x = début, y = fin, unités monde ; y = 0 : aucun).
+uniform vec2 distance_fade = vec2(0.0, 0.0);
+uniform float far_alpha = 1.0;
 uniform float water_sink = 0.022;
 uniform float lift_base = 0.012;
 uniform float lift_per_distance = 0.0009;
@@ -52,6 +61,7 @@ varying vec2 v_flow;
 varying vec3 v_world;
 varying float v_carved;
 varying float v_width;
+varying float v_far;
 
 float hash21(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -76,10 +86,12 @@ void vertex() {
 	float true_px = UV.x / world_per_px;
 	float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
 	float width = UV.x * mix(1.0, carved_overlap, carved);
-	float half_w = 0.5 * max(width, min_px * world_per_px);
+	float imp_px = min_px * importance_min_px_scale[clamp(int(UV2.y + 0.5), 0, 6)];
+	float half_w = 0.5 * max(width, imp_px * world_per_px);
 	VERTEX += NORMAL * half_w;
 	VERTEX.y += mix(lift_base + lift_per_distance * dist, -water_sink, carved);
-	v_alpha = mix(1.0, clamp(true_px / min_px, 0.25, 1.0), thin_fade);
+	v_alpha = mix(1.0, clamp(true_px / imp_px, 0.25, 1.0), thin_fade);
+	v_far = distance_fade.y > 0.0 ? mix(1.0, far_alpha, smoothstep(distance_fade.x, distance_fade.y, dist)) : 1.0;
 	v_side = UV.y * half_w / max(0.5 * UV.x, 1e-4);
 	v_flow = vec2(UV2.x, UV.y * 0.5 * UV.x);
 	v_carved = carved;
@@ -140,6 +152,8 @@ void fragment() {
 	float contact = v_carved * (1.0 - smoothstep(0.0, 0.006, thickness)) * 0.5;
 	float foam = clamp(bank_foam + contact + riffle, 0.0, 1.0);
 	col = mix(col, foam_color, foam * 0.7);
+	// RC : liseré d'encre sur les bords du ruban (pas dans le lit creusé, où la berge suffit).
+	float ink = smoothstep(0.6, 0.92, edge) * bank_ink_strength * (1.0 - v_carved);
 
 	ALBEDO = col;
 	// Rides trop fines pour l'écran : surface plus mate (pas de scintillement du soleil).
@@ -153,10 +167,11 @@ void fragment() {
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
 	ALBEDO = mix(ALBEDO, sky_color, clamp(fresnel * sky_reflect + 0.12, 0.0, 0.8) * (1.0 - foam));
+	ALBEDO = mix(ALBEDO, bank_ink_color, ink);
 	// Bord : fondu (ruban) ou contact avec la berge (lit creusé : l'eau finit sur la pente).
-	float soft = 1.0 - smoothstep(0.7, 1.0, edge) * (1.0 - v_carved);
+	float soft = 1.0 - smoothstep(mix(0.7, 0.9, bank_ink_strength), 1.0, edge) * (1.0 - v_carved);
 	float carved_alpha = mix(0.7, 0.97, smoothstep(0.0, 0.35, depth_t));
-	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha;
+	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha * v_far;
 	ALPHA = clamp(alpha * (1.0 - ford * 0.35), 0.0, 1.0);
 	ALPHA *= 1.0 - fine_zone_mask(v_world.xz);  // ZG5b : relais du réseau fin
 	float pm_w = pm_weight();  // CM2 : trait d'encre bleue, sans reflet

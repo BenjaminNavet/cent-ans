@@ -22,6 +22,11 @@ mkdir -p "$GAME_BIN"
 TARGET_DIR="${CARGO_TARGET_DIR:-$CORE_DIR/target}"
 # Remove first: overwriting a loaded/signed dylib in place invalidates its code signature on
 # macOS and the next Godot launch is SIGKILLed (exit 137). A fresh inode avoids it.
-rm -f "$GAME_BIN/libcent_ans.$PROFILE.dylib"
-cp "$TARGET_DIR/$PROFILE/libcent_ans.dylib" "$GAME_BIN/libcent_ans.$PROFILE.dylib"
-echo "Copied libcent_ans.$PROFILE.dylib to game/bin/"
+# RC: Linux (cloud sessions, CI) builds a .so instead of a .dylib.
+EXT="dylib"
+if [[ "$(uname -s)" == "Linux" ]]; then
+    EXT="so"
+fi
+rm -f "$GAME_BIN/libcent_ans.$PROFILE.$EXT"
+cp "$TARGET_DIR/$PROFILE/libcent_ans.$EXT" "$GAME_BIN/libcent_ans.$PROFILE.$EXT"
+echo "Copied libcent_ans.$PROFILE.$EXT to game/bin/"
