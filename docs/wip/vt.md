@@ -25,3 +25,8 @@ Vague 3 : I bancs (d = 1100, 150, 30), captures (≤ 6), docs `godot-map.md`.
 
 ## Prochaine étape
 Lancer la vague 1 (A-D).
+
+## Notes d'intégration
+- Rivières : plus de coupure sous les villes (5484cea26), les villes 1:1 enjambent la vraie rivière.
+- `smoke` OK après A-D, F-H. `at1_attack_order` échoue (l'armée assiège Bordeaux au lieu d'attaquer) : règle de simulation ; VT ne touche ni `core/` ni l'UI. Probablement antérieur, à confirmer sur main.
+- Code mort laissé : `life_effects._update_overlays` + `life_overlay.gdshader` (neige/suie sur maquettes) ; `ModelLibrary.HAMLET_SCALE` encore lu par settlement_layer.
