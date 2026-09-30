@@ -106,6 +106,10 @@ uniform vec3 lake_color = vec3(0.035, 0.10, 0.115);
 uniform vec3 lake_bank_color = vec3(0.055, 0.058, 0.030);
 uniform vec3 lake_shallow_color = vec3(0.05, 0.085, 0.06);
 uniform float lake_bank_px = 1.6;
+// HB7 : niveau (m) au-dessus duquel une eau est un lac ; en dessous, c'est la mer (même seuil que
+// water.gdshader). À 0 m, les hauts-fonds de la mer d'Azov (MNT 0-1 m) devenaient des « lacs »
+// sombres à berge de vase, en taches et en escalier contre le plan d'eau de la mer.
+uniform float lake_level_m = 2.0;
 uniform float pond_max_px = 3.0;
 uniform float pond_probe_px = 6.0;
 uniform vec3 seabed_color = vec3(0.03, 0.07, 0.07);
@@ -340,6 +344,19 @@ void vertex() {
 	world_pos.y -= carve;
 }
 
+// HB7 : eau raster (coast_dist) dont le MNT dépasse `lake_level_m` : vrai lac seulement si aucune
+// eau sous le niveau de la mer à `lake_sea_probe_px` alentour (8 directions). Sinon c'est un défaut
+// de calage MNT / trait de côte au bord de la mer (delta du Don, flèches d'Azov) : peint comme la mer.
+uniform float lake_sea_probe_px = 4.0;
+float sea_nearby(vec2 uv) {
+	float lowest = 1e6;
+	for (int k = 0; k < 8; k++) {
+		float a = float(k) * 0.785398;
+		lowest = min(lowest, height_m_lod(uv + vec2(cos(a), sin(a)) * lake_sea_probe_px / map_size, 0.0));
+	}
+	return 1.0 - step(0.0, lowest);
+}
+
 void fragment() {
 	vec2 p = world_pos.xz;
 	vec2 uv = p / map_size;  // SZ2b : pixel carte i centré en x = i + 0,5, comme les outils (ADR 0086)
@@ -387,7 +404,7 @@ void fragment() {
 		vec2 probe = uv + to_water * (max(coast, 0.0) + 1.5) / map_size;
 		vec2 far_probe = uv + to_water * (max(coast, 0.0) + pond_probe_px) / map_size;
 		float far_coast = (texture(coast_dist, far_probe).r * 255.0 - 128.0) / coast_dist_scale;
-		lake_shore = max(step(0.5, height_m_lod(probe, 0.0)), step(-pond_max_px, far_coast));
+		lake_shore = max(step(lake_level_m, height_m_lod(probe, 0.0)) * (1.0 - sea_nearby(probe)), step(-pond_max_px, far_coast));
 	}
 
 	// --- Poids des matériaux ---
@@ -581,16 +598,20 @@ void fragment() {
 	}
 
 	// Fond marin (sous le plan d'eau) et lacs.
-	if (hc <= 0.0) {
+	if (hc <= 0.0 || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
 		col = mix(tint_sand * 0.5, seabed_color, smoothstep(-2.0, -30.0, hc));
 	}
 	// Eau peinte sur le terrain : lacs (au-dessus du niveau de la mer) et mer là où le maillage
 	// LOD dépasse le plan d'eau alors que la côte réelle (raster) est plus loin. Pour la mer, même
 	// rendu que water.gdshader (couleur selon la profondeur composée sur le fond marin).
-	float lake = (1.0 - land_f) * max(step(0.0, hc), step(-0.02, world_pos.y));
+	float lake = (1.0 - land_f) * max(step(lake_level_m, hc), step(-0.02, world_pos.y));
 	vec3 water_col = lake_color;
-	if (hc <= 0.0) {
-		float depth = -hc;
+	float sea_water = hc < lake_level_m ? 1.0 : 0.0;
+	if (sea_water < 0.5 && land_f < 0.99) {
+		sea_water = sea_nearby(uv);
+	}
+	if (sea_water > 0.5) {  // HB7 : mer jusqu'au niveau des lacs (hauts-fonds à 0-2 m compris)
+		float depth = max(-hc, 0.0);
 		vec3 wc = ga_depth_color(depth, sea_shallow_color, sea_mid_color, sea_deep_color, sea_mid_depth_m, sea_depth_falloff_m, ga4_on);  // GA4
 		water_col = mix(col, wc, mix(0.7, 0.97, smoothstep(0.0, 45.0, depth)));
 	}
