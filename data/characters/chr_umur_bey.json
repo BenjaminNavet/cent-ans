@@ -1,7 +1,9 @@
 {
   "id": "chr_umur_bey",
   "name": {
-    "display": "Umur Bey"
+    "display": "Umur Bey",
+    "local": "Umur Beğ",
+    "local_language": "turc ottoman"
   },
   "sex": "male",
   "house": "Aydınoğulları",
@@ -24,7 +26,7 @@
       "from": {
         "value": "1329"
       },
-      "note": "Frère cadet du bey d'Aydın Hızır ; en 1337, chef de la flotte d'Aydın."
+      "note": "Maître de la citadelle de Smyrne depuis 1329 ; bey d'Aydın depuis la mort de son père Mehmed (1334), bien que cadet de Hızır, qui tient Ayasoluk."
     }
   ],
   "skills": {

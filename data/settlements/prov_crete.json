@@ -37,7 +37,7 @@
     "kind": "town",
     "name": {
       "display": "La Canée",
-      "local": "Χανιά",
+      "local": "La Canea",
       "local_language": "vénitien"
     },
     "lonlat": [
@@ -66,7 +66,7 @@
     "kind": "town",
     "name": {
       "display": "Rethymno",
-      "local": "Ρέθυμνο",
+      "local": "Retimo",
       "local_language": "vénitien"
     },
     "lonlat": [
@@ -93,7 +93,7 @@
     "kind": "town",
     "name": {
       "display": "Sitia",
-      "local": "Σητεία",
+      "local": "Sitia",
       "local_language": "vénitien"
     },
     "lonlat": [

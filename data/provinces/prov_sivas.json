@@ -1,7 +1,9 @@
 {
   "id": "prov_sivas",
   "name": {
-    "display": "Sivas"
+    "display": "Sivas",
+    "local": "Sivas",
+    "local_language": "turc ottoman"
   },
   "region": "anatolie",
   "terrain": "hills",

@@ -19,7 +19,8 @@
     {
       "title": "Vicaire général du duché",
       "from": {
-        "value": "1330"
+        "value": "1331",
+        "uncertain": true
       }
     }
   ],
@@ -34,7 +35,7 @@
   "piety": 45,
   "starting_location": "prov_attica",
   "status": "at_court",
-  "description": "Vicaire général du duché depuis le retour d'Alphonse Fadrique en Sicile (1330), il gouverne en fait Athènes et Néopatras.",
+  "description": "Vicaire général du duché après le départ d'Alphonse Fadrique (vers 1331-1335) ; son successeur de 1337 est mal connu, le personnage tient lieu de gouverneur du duché.",
   "sources": [
     "Alfonso Fadrique",
     "Duchy of Athens"

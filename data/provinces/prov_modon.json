@@ -3,7 +3,7 @@
   "name": {
     "display": "Modon et Coron",
     "local": "Μεθώνη",
-    "local_language": "vénitien"
+    "local_language": "grec"
   },
   "region": "grece",
   "terrain": "hills",
@@ -26,7 +26,7 @@
   "capital_city": {
     "name": {
       "display": "Modon",
-      "local": "Μεθώνη",
+      "local": "Modon",
       "local_language": "vénitien"
     },
     "lat": 36.82,

@@ -1,7 +1,9 @@
 {
   "id": "chr_suleyman_pasha",
   "name": {
-    "display": "Süleyman Paşa"
+    "display": "Süleyman Paşa",
+    "local": "Süleyman Paşa",
+    "local_language": "turc ottoman"
   },
   "sex": "male",
   "house": "Osmanoğulları",

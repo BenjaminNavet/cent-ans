@@ -48,12 +48,12 @@
     {
       "faction": "fac_byzantium",
       "status": "peace",
-      "note": "Paix qui suit la défaite de Rusokastro (1332) ; Byzance tient Anchialos."
+      "note": "Paix de 1332 après Rusokastro : Byzance a dû laisser Anchialos et Mésembrie à la Bulgarie."
     },
     {
       "faction": "fac_vidin",
       "status": "overlord",
-      "note": "Belaur tient Vidin comme vassal, avec la turbulence habituelle."
+      "note": "Belaur, révolté depuis 1331, a été battu en 1336 ; Vidin est en voie de retour à la couronne."
     },
     {
       "faction": "fac_wallachia",

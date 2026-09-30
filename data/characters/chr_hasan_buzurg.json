@@ -3,7 +3,7 @@
   "name": {
     "display": "Hasan Buzurg",
     "local": "حسن بزرگ",
-    "local_language": "arabe"
+    "local_language": "persan"
   },
   "sex": "male",
   "house": "Djalayirides",
@@ -20,11 +20,11 @@
   "historical": true,
   "titles": [
     {
-      "title": "Sultan djalayiride",
+      "title": "Émir djalayiride",
       "from": {
         "value": "1336"
       },
-      "note": "Prend Bagdad en 1336-1338 ; date exacte incertaine."
+      "note": "Faiseur de khans après 1335 ; installé à Bagdad vers 1339-1340 après sa défaite face aux Chupanides (1338)."
     }
   ],
   "skills": {
