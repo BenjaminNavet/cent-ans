@@ -45,6 +45,9 @@ float importance_px_scale(float importance) {
 // RC : liseré de berge à l'encre (contraste avec le relief, lecture cartographique au dézoom).
 uniform vec3 bank_ink_color : source_color = vec3(0.05, 0.13, 0.20);
 uniform float bank_ink_strength = 0.0;
+// HB7 : liseré et fondu du bord en PIXELS écran (un ruban de 3 px n'est plus que liseré sombre).
+uniform float bank_ink_px = 0.8;
+uniform float edge_soft_px = 0.7;
 // RC : fondu des rivières mineures avec la distance (x = début, y = fin, unités monde ; y = 0 : aucun).
 uniform vec2 distance_fade = vec2(0.0, 0.0);
 uniform float far_alpha = 1.0;
@@ -111,7 +114,9 @@ void vertex() {
 		v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 		NORMAL = vec3(0.0, 1.0, 0.0);
 	} else {
-		float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
+		// HB7 : abs() : sous Metal/Vulkan la projection porte un retournement de Y ([1][1] < 0), ce qui
+		// rendait la largeur écran minimale inopérante (rubans sous-pixel, traits gris).
+		float world_per_px = dist * 2.0 / (abs(PROJECTION_MATRIX[1][1]) * VIEWPORT_SIZE.y);
 		float true_px = UV.x / world_per_px;
 		float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
 		float width = UV.x * mix(1.0, carved_overlap, carved);
@@ -121,7 +126,10 @@ void vertex() {
 		VERTEX.y += mix(lift_base + lift_per_distance * dist, -water_sink, carved);
 		v_alpha = mix(1.0, clamp(true_px / imp_px, 0.25, 1.0), thin_fade);
 		v_far = distance_fade.y > 0.0 ? mix(1.0, far_alpha, smoothstep(distance_fade.x, distance_fade.y, dist)) : 1.0;
-		v_side = UV.y * half_w / max(0.5 * UV.x, 1e-4);
+		// HB7 : hors du lit creusé, |v_side| = 1 au bord du ruban AFFICHÉ (élargi à `min_px`) : l'eau
+		// remplit toute la largeur écran au lieu de n'occuper que le cœur sous-pixel (trait gris).
+		// Dans le lit creusé, 1 = berge réelle (le ruban déborde sur la pente).
+		v_side = UV.y * mix(1.0, half_w / max(0.5 * UV.x, 1e-4), carved);
 		v_flow = vec2(UV2.x, UV.y * 0.5 * UV.x);
 		v_carved = carved;
 		v_width = UV.x;
@@ -186,7 +194,10 @@ void fragment() {
 	float foam = clamp(bank_foam + contact + riffle, 0.0, 1.0);
 	col = mix(col, foam_color, foam * 0.7);
 	// RC : liseré d'encre sur les bords du ruban (pas dans le lit creusé, où la berge suffit).
-	float ink = smoothstep(0.6, 0.92, edge) * bank_ink_strength * (1.0 - v_carved);
+	// HB7 : demi-largeur du ruban et distance au bord en pixels écran (dérivées écran de v_side).
+	float half_px = sheet ? 1000.0 : 1.0 / max(fwidth(v_side), 1e-4);
+	float px_edge = max(1.0 - edge, 0.0) * half_px;
+	float ink = (1.0 - smoothstep(0.0, bank_ink_px, px_edge)) * smoothstep(1.2, 3.0, half_px) * bank_ink_strength * (1.0 - v_carved);
 
 	ALBEDO = col;
 	// Rides trop fines pour l'écran : surface plus mate (pas de scintillement du soleil).
@@ -203,7 +214,7 @@ void fragment() {
 	ALBEDO = mix(ALBEDO, sky_color, clamp(fresnel * sky_reflect + 0.12, 0.0, 0.8) * (1.0 - foam));
 	ALBEDO = mix(ALBEDO, bank_ink_color, ink);
 	// Bord : fondu (ruban) ou contact avec la berge (lit creusé : l'eau finit sur la pente).
-	float soft = 1.0 - smoothstep(mix(0.7, 0.9, bank_ink_strength), 1.0, edge) * (1.0 - v_carved);
+	float soft = 1.0 - (1.0 - smoothstep(0.0, edge_soft_px, px_edge)) * (1.0 - v_carved);
 	float carved_alpha = mix(0.7, 0.97, smoothstep(0.0, 0.35, depth_t));
 	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha * v_far;
 	ALPHA = clamp(alpha * (1.0 - ford * 0.35), 0.0, 1.0);

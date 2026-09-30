@@ -23,7 +23,7 @@ varying float v_side;
 void vertex() {
 	vec3 view_pos = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float dist = max(length(view_pos), 0.01);
-	float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
+	float world_per_px = dist * 2.0 / abs(PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
 	float true_px = UV.x / world_per_px;
 	float half_w = 0.5 * max(UV.x, min_px * world_per_px);
 	VERTEX += NORMAL * half_w;

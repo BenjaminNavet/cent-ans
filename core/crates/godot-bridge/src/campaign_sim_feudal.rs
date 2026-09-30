@@ -424,7 +424,7 @@ impl CampaignSim {
     }
 
     /// Feudal calls waiting for the player (§ 4.3): `[{id, kind
-    /// ("protection", "arbitration"), from, from_name, aggressor,
+    /// ("protection", "arbitration", "summons" — ADR 0146), from, from_name, aggressor,
     /// aggressor_name, attacker, attacker_name, target, target_name, text,
     /// expires_in}]`.
     #[func]
@@ -447,6 +447,7 @@ impl CampaignSim {
                     Proposal::Arbitration { attacker, target } => {
                         ("arbitration", None, Some(attacker), Some(target))
                     }
+                    Proposal::PeaceSummons { target } => ("summons", None, None, Some(target)),
                     _ => return None,
                 };
                 let expires_in = offer

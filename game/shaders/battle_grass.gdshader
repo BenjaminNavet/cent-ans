@@ -216,7 +216,11 @@ void fragment() {
 	float l = dot(tex.rgb, vec3(0.3, 0.59, 0.11)) / tex_lum;
 	vec3 hue = tex.rgb / max(dot(tex.rgb, vec3(0.333)), 0.001) * 0.333;
 	ALBEDO = v_tint * clamp(l, 0.45, 1.5) * mix(vec3(1.0), hue * 3.0, 0.2) * v_shade;
-	ALPHA = tex.a;
+	// Mipmaps : l'alpha moyenné des petits niveaux amincit les brins au loin ; on le relève
+	// selon le niveau lu pour garder leur couverture (sans mipmaps : fourmillement).
+	vec2 texel = UV * vec2(textureSize(grass_texture, 0));
+	float mip = max(0.0, 0.5 * log2(max(dot(dFdx(texel), dFdx(texel)), dot(dFdy(texel), dFdy(texel)))));
+	ALPHA = clamp(tex.a * (1.0 + mip * 0.25), 0.0, 1.0);
 	if (da6_on > 0.5) {
 		// Pied de touffe dans l'ombre des brins, pointes un peu plus sèches ; cartes vues par la
 		// tranche amincies (le seuil d'alpha mange d'abord les bords des brins).
@@ -230,7 +234,7 @@ void fragment() {
 	// sinon la coupe franche scintille dès que la caméra bouge.
 	ALPHA_SCISSOR_THRESHOLD = 0.05;
 	ALPHA_ANTIALIASING_EDGE = 0.35;
-	ALPHA_TEXTURE_COORDINATE = UV * vec2(textureSize(grass_texture, 0));
+	ALPHA_TEXTURE_COORDINATE = texel;
 	ROUGHNESS = 0.9;
 	BACKLIGHT = vec3(0.18, 0.22, 0.08);
 }

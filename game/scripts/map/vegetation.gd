@@ -87,6 +87,11 @@ var quality_max_distance: float = -1.0
 ## GA3-L2 : imposteurs générés à toutes distances (cartes FC5 retirées, ≈ 250 → 2 triangles par
 ## arbre proche) ; faux avec `--no-ga3-veg` / `--no-ga3-near` ou sans imposteurs.
 var ga3_near_impostors: bool = false
+## Lot HB4 (ADR 0143) : essences par biome (`TreeSpecies`, `data/art/tree_species.json`) ;
+## `--no-hb4-species` rend le semis V4 (chêne, hêtre, conifère) pour les comparaisons A/B.
+@export var use_species: bool = true
+## Table active (null : semis V4).
+var species: TreeSpecies = null
 
 ## PF1 : préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
 ## zoom maximal des ombres.
@@ -163,6 +168,8 @@ func _ready() -> void:
 			use_impostors = false
 		elif arg == "--no-fc5":  # FC5 : maillages détaillés de près au lieu des cartes (A/B)
 			use_near_cards = false
+		elif arg == "--no-hb4-species":  # HB4 : semis V4 sans essences par biome (A/B)
+			use_species = false
 
 
 
@@ -183,6 +190,16 @@ func build(data: MapData) -> void:
 	mask = VegetationMask.new()
 	mask.setup(data)
 	stats["source"] = mask.source
+	species = null
+	if use_species and TreeSpecies.shared().ok:
+		species = TreeSpecies.shared()
+		mask.default_biome = int(species.d("default_biome", 2.0))
+		if _native != null:
+			if not _native.has_method("set_species") or not bool(_native.call("set_species", species.table())):
+				push_warning("Vegetation: native scatter without species table, GDScript scatter")
+				_native = null
+	stats["species"] = species.count if species != null else 0
+	stats["biomes"] = mask.has_biomes()
 	_material = ShaderMaterial.new()
 	_material.shader = FOLIAGE_SHADER
 	_impostor_material = _make_impostor_material() if use_impostors else null
@@ -194,7 +211,7 @@ func build(data: MapData) -> void:
 		_cards_material.shader = CARDS_SHADER
 		_cards_material.set_shader_parameter("card_texture", load(Ga3Vegetation.pick(Ga3Vegetation.LEAF_CARDS, VegetationMeshes.CARD_TEXTURE)))
 		if _impostor_material != null:  # FC6 : quadrilatère d'imposteur des arbres proches
-			for param in ["albedo_atlas", "normal_atlas", "views", "rows"]:
+			for param in ["albedo_atlas", "normal_atlas", "views", "rows", "species_rows"]:
 				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
 	_bind_forest_cover(data)
 	_season = -1
@@ -224,7 +241,14 @@ static func _make_impostor_material() -> ShaderMaterial:
 	material.set_shader_parameter("albedo_atlas", load(albedo_path))
 	material.set_shader_parameter("normal_atlas", load(normal_path))
 	material.set_shader_parameter("views", VegetationMeshes.IMPOSTOR_VIEWS)
-	material.set_shader_parameter("rows", VegetationMeshes.IMPOSTOR_ROWS.size())
+	# Lot HB4 : l'atlas GA3 porte une ligne par essence du catalogue (lignes 0-2 : chêne, hêtre,
+	# sapin comme FC2) ; la ligne vient alors de la donnée d'instance (`species_rows`).
+	var albedo: Texture2D = material.get_shader_parameter("albedo_atlas")
+	var rows := VegetationMeshes.IMPOSTOR_ROWS.size()
+	if albedo != null and albedo.get_width() > 0:
+		rows = maxi(rows, int(round(float(albedo.get_height()) / (float(albedo.get_width()) / VegetationMeshes.IMPOSTOR_VIEWS))))
+	material.set_shader_parameter("rows", rows)
+	material.set_shader_parameter("species_rows", rows > VegetationMeshes.IMPOSTOR_ROWS.size())
 	return material
 
 
@@ -704,6 +728,7 @@ func _start_job(index: int) -> void:
 		level = terrain.chunk_level(index)
 		job.ground_grid = terrain.surface_grid(index)
 	job.coarse_only = _native != null
+	job.species = species
 	var task := WorkerThreadPool.add_task(job.run, false, "vegetation tile %d" % index)
 	_jobs[index] = {"task": task, "job": job, "level": level}
 
@@ -711,8 +736,10 @@ func _start_job(index: int) -> void:
 ## Exclusions qui touchent une tuile (le semis teste chaque candidat contre toute la liste).
 func _exclusions_for(rect: Rect2) -> PackedVector3Array:
 	var result := PackedVector3Array()
+	# Lot HB4 : les clairières voisines comptent aussi pour l'anneau des vergers.
+	var ring := species.max_orchard_ring() if species != null else 0.0
 	for e in _exclusions:
-		if rect.grow(e.z).has_point(Vector2(e.x, e.y)):
+		if rect.grow(e.z + ring).has_point(Vector2(e.x, e.y)):
 			result.append(e)
 	return result
 

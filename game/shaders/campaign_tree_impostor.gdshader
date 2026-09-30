@@ -26,7 +26,7 @@ varying float v_essence;
 varying float v_world_y;
 
 void vertex() {
-	ImpostorVertex iv = impostor_vertex(MODEL_MATRIX, MAIN_CAM_INV_VIEW_MATRIX[3].xyz, UV, UV2.x, INSTANCE_CUSTOM.a, INSTANCE_CUSTOM.rgb);
+	ImpostorVertex iv = impostor_vertex(MODEL_MATRIX, MAIN_CAM_INV_VIEW_MATRIX[3].xyz, UV, impostor_row(INSTANCE_CUSTOM, UV2.x), INSTANCE_CUSTOM.a, species_tint(INSTANCE_CUSTOM));
 	VERTEX = iv.world;
 	v_uv0 = iv.uv0;
 	v_uv1 = iv.uv1;
@@ -37,7 +37,7 @@ void vertex() {
 	v_tint = iv.tint;
 	v_local = iv.local;
 	v_seed = INSTANCE_CUSTOM.a;
-	v_essence = UV2.x;
+	v_essence = species_season(INSTANCE_CUSTOM, UV2.x);
 	v_world_y = MODEL_MATRIX[3].y;
 }
 
@@ -54,5 +54,5 @@ void fragment() {
 	SPECULAR = 0.25;
 	AO = f.ao;
 	AO_LIGHT_AFFECT = 0.4;
-	BACKLIGHT = f.albedo * (v_essence < 1.5 ? mix(0.35, 0.1, campaign_season.w) : 0.35);
+	BACKLIGHT = f.albedo * (season_deciduous(v_essence) ? mix(0.35, 0.1, campaign_season.w) : 0.35);
 }

@@ -286,8 +286,13 @@ func _on_war_confirmed() -> void:
 	if not result.get("ok", false):
 		map.ui.show_toast(str(result.get("error", "Déclaration de guerre impossible")), true)
 		return
-	map.ui.show_toast("La guerre est déclarée.")
 	map.refresh_all()
+	# ADR 0146 : une guerre aussitôt éteinte (paix imposée) ne doit pas laisser l'armée entrer
+	# dans la place comme en temps de paix.
+	if not is_enemy_faction(str(pending["faction"])):
+		map.ui.show_toast("La guerre n'a pas pu commencer : voir le journal.", true)
+		return
+	map.ui.show_toast("La guerre est déclarée.")
 	_execute(str(pending["army"]), pending["target"])
 
 

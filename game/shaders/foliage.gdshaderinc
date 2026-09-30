@@ -43,7 +43,7 @@ void vertex() {
 	v_near = 1.0 - smoothstep(near_start, near_end, d_lod);
 	v_impostor = UV2.y > 1.5 ? 1.0 : 0.0;
 	if (v_impostor > 0.5) {
-		v_essence = UV.x;
+		v_essence = species_season(INSTANCE_CUSTOM, UV.x);
 		v_crown = 1.0;
 		v_seed = seed;
 		v_world_y = origin.y;
@@ -52,7 +52,7 @@ void vertex() {
 		if (v_near >= 1.0) {
 			VERTEX = vec3(0.0);  // arbre entièrement en cartes : quadrilatère dégénéré
 		} else {
-			ImpostorVertex iv = impostor_vertex(MODEL_MATRIX, cam, UV2 - vec2(0.0, 2.0), UV.x, seed, INSTANCE_CUSTOM.rgb);
+			ImpostorVertex iv = impostor_vertex(MODEL_MATRIX, cam, UV2 - vec2(0.0, 2.0), impostor_row(INSTANCE_CUSTOM, UV.x), seed, species_tint(INSTANCE_CUSTOM));
 			VERTEX = (inverse(MODEL_MATRIX) * vec4(iv.world, 1.0)).xyz;
 			v_uv0 = iv.uv0;
 			v_uv1 = iv.uv1;
@@ -65,7 +65,7 @@ void vertex() {
 		}
 	} else if (v_near <= 0.0) {
 		VERTEX = vec3(0.0);  // arbre entièrement en imposteur : cartes dégénérées
-		v_essence = UV.x;
+		v_essence = species_season(INSTANCE_CUSTOM, UV.x);
 		v_crown = UV.y;
 		v_seed = seed;
 		v_world_y = origin.y;
@@ -80,12 +80,12 @@ void vertex() {
 	float gust = 0.6 + 0.4 * sin(phase * 0.37);
 	float sway = (sin(phase + seed * 6.2831) * gust + 0.3 * sin(TIME * 2.3 + seed * 20.0)) * wind_strength;
 	float weight = COLOR.a * COLOR.a;
-	v_essence = UV.x;
+	v_essence = species_season(INSTANCE_CUSTOM, UV.x);
 	v_crown = UV.y;
 	v_seed = seed;
 	v_world_y = origin.y;
 	// Hiver : houppiers des feuillus dénudés, plus légers (on devine la ramure).
-	if (UV.y > 0.5 && UV.x < 1.5) {
+	if (UV.y > 0.5 && UV.x < 2.5 && season_deciduous(v_essence)) {
 		VERTEX.xz *= mix(1.0, 0.82, campaign_season.w);
 	}
 	v_local = VERTEX * 9.0 + vec3(seed * 17.0);
@@ -103,7 +103,7 @@ void vertex() {
 	// taille réelle reste enterré sous 80 m de sol (forêts invisibles au palier vallée).
 	VERTEX.y += FOLIAGE_GROUND_SINK * (1.0 - campaign_prop_scale);
 	v_ao = mix(0.55, 1.0, COLOR.a);
-	v_tint = INSTANCE_CUSTOM.rgb * tone;
+	v_tint = species_tint(INSTANCE_CUSTOM) * tone;
 #ifdef FOLIAGE_CARDS
 	}
 #endif
@@ -129,7 +129,7 @@ void fragment() {
 		SPECULAR = 0.25;
 		AO = f.ao;
 		AO_LIGHT_AFFECT = 0.4;
-		BACKLIGHT = f.albedo * (v_essence < 1.5 ? mix(0.35, 0.1, campaign_season.w) : 0.35);
+		BACKLIGHT = f.albedo * (season_deciduous(v_essence) ? mix(0.35, 0.1, campaign_season.w) : 0.35);
 	} else {
 		if (dither >= v_near) {
 			discard;
@@ -154,7 +154,7 @@ void fragment() {
 	if (v_crown > 0.5) {
 #ifdef FOLIAGE_WINTER_CUTOUT
 		// Hiver : houppier des feuillus ajouré (on voit le sol à travers).
-		if (v_essence < 1.5 && campaign_season.w > 0.5 && value_noise(v_local * 2.4) < 0.5) {
+		if (season_deciduous(v_essence) && campaign_season.w > 0.5 && value_noise(v_local * 2.4) < 0.5) {
 			discard;
 		}
 #endif
@@ -167,7 +167,7 @@ void fragment() {
 	AO = v_ao;
 	AO_LIGHT_AFFECT = 0.4;
 	// Lumière transmise à travers le feuillage, vue à contre-jour.
-	BACKLIGHT = albedo * (v_essence < 1.5 ? mix(0.35, 0.1, campaign_season.w) : 0.35);
+	BACKLIGHT = albedo * (season_deciduous(v_essence) ? mix(0.35, 0.1, campaign_season.w) : 0.35);
 #ifdef FOLIAGE_CARDS
 	}
 #endif

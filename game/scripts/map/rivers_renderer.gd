@@ -528,17 +528,36 @@ func _water_material(min_px: float) -> ShaderMaterial:
 
 ## RC : couleurs, liseré et facteurs de largeur de `river_display.json`.
 func _apply_display(material: ShaderMaterial) -> void:
-	for key in ["shallow_color", "deep_color", "bank_ink_color"]:
+	for key in ["shallow_color", "deep_color", "bank_ink_color", "sky_color"]:
 		var rgb: Array = display.get(key, [])
 		if rgb.size() == 3:
 			material.set_shader_parameter(key, Color(float(rgb[0]), float(rgb[1]), float(rgb[2])))
-	for key in ["thin_fade", "bank_ink_strength"]:
+	for key in ["thin_fade", "bank_ink_strength", "sky_reflect", "bank_ink_px", "edge_soft_px"]:
 		if display.has(key):
 			material.set_shader_parameter(key, float(display[key]))
 	var scale: Array = display.get("importance_min_px_scale", [])
 	if scale.size() == 7:
 		material.set_shader_parameter("importance_px_lo", Vector4(scale[0], scale[1], scale[2], scale[3]))
 		material.set_shader_parameter("importance_px_hi", Vector3(scale[4], scale[5], scale[6]))
+
+
+## HB7 : rubans fins de près (`river_fine.gdshader`) accordés aux rubans moyens : mêmes couleurs,
+## reflet et fondu ; largeur écran minimale `fine_min_px` × facteur par ordre de Strahler (3-10).
+func apply_fine_display(material: ShaderMaterial) -> void:
+	var fine_cfg: Dictionary = display.get("fine", {})
+	for key in ["shallow_color", "deep_color", "sky_color"]:
+		var rgb: Array = fine_cfg.get(key, display.get(key, []))
+		if rgb.size() == 3:
+			material.set_shader_parameter(key, Color(float(rgb[0]), float(rgb[1]), float(rgb[2])))
+	for key in ["thin_fade", "sky_reflect", "min_px", "shallow_alpha"]:
+		if fine_cfg.has(key):
+			material.set_shader_parameter(key, float(fine_cfg[key]))
+		elif display.has(key):
+			material.set_shader_parameter(key, float(display[key]))
+	var scale: Array = fine_cfg.get("order_px_scale", [])
+	if scale.size() == 8:
+		material.set_shader_parameter("order_px_lo", Vector4(scale[0], scale[1], scale[2], scale[3]))
+		material.set_shader_parameter("order_px_hi", Vector4(scale[4], scale[5], scale[6], scale[7]))
 
 
 func _set_fords(fords: Array[Vector4]) -> void:
