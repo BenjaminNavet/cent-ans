@@ -5,7 +5,7 @@ Mandat : amélioration visuelle libre, autonomie toute la nuit, 100 captures, fa
 rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 
 ## Compteur de captures lues
-79 / 100
+88 / 100
 
 ## Constats (état des lieux)
 - Bataille, vue moyenne : touffes d'herbe sombres en plaques sur sol brun (effet « détritus »),
@@ -39,21 +39,23 @@ rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 - Noms des fleuves plafonnés à 40 × la distance caméra (plus d'alignement sur l'horizon).
 - Chemins de bataille en terre brune ; miniature de bld_collegiate_church (0,08 $).
 
-## Délégué
-- Agent VN-UI (worktree ../gp-vn-ui, feat/vn-ui) : menu principal 720p, tutoriel sur modale,
-  panneau de province sous la mini-carte, bandeau de tour tronqué.
+## UI 720p (agent, fusionné ; détail docs/wip/vn-ui-720.md)
+- Lot 1 : menu principal tient en hauteur, tutoriel s'efface sous une modale, panneau de province
+  au-dessus de la mini-carte, bandeau de tour qui passe à la ligne (test `vn_ui_720_test`).
+- Lot 2 : chronique bornée, fiche de ville, journal en tête des avis, budget, objectifs, fiche
+  personnage (test `vn_ui_720_b_test`).
+- Session principale : fiche personnage centrée sous la barre du haut (elle s'ouvrait hors écran,
+  y = -1040, en fenêtre réelle).
 
 ## Points ouverts (à trancher / plus tard)
 - 147 factions sans miniature d'encyclopédie (~12 $ en fal.ai) + bld_collegiate_church : non fait
   (dépense non justifiée pour une seule page d'encyclopédie).
 - Tours de siège énormes (rayon 5+fortif m, cœur `siege_layouts.rs`) : règle du cœur, session
   siège en cours sur main → non touché.
-- Planche P2a : la fiche personnage ne s'ouvre pas (`--stage=skills`), mise en scène à vérifier.
-- UI 720p, 2e lot : chronique (texte coupé à droite), fiche de ville (garnison coupée), agents
-  (journal au milieu à gauche), budget (colonne « Écart » coupée), objectifs sur le journal,
-  bandeau de saison sous le panneau latéral.
+- `q6_ui_test` (SimFacade introuvable avec --script) et `fe_ui_test` échouent aussi sur main.
+- Écran de résultat : la rangée des régiments est coupée par le bas de la zone défilante en 1080p.
 - Champs de blé procéduraux en ovales (Crécy, Poitiers) plutôt qu'en parcelles.
 
 ## Prochaine étape
-Fusion de feat/vn-ui dans feat/vn quand l'agent a fini, smoke, puis fusion dans main (worktree
-dédié, ff-only) et capture de contrôle.
+Intégration dans main (ff-only) après le smoke ; ensuite, au choix : écran de résultat, points
+ouverts ci-dessus.
