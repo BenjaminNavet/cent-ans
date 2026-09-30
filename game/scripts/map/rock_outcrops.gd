@@ -69,12 +69,15 @@ var _frame: int = 0
 var _focus := Vector2.ZERO
 var _camera_distance: float = 1e9
 var _scale: float = 1.0
+var _warm := false
+var _log := false
 
 
 func _ready() -> void:
 	_rig = get_node_or_null(camera_rig_path) as Node3D
 	if "--no-outcrops" in OS.get_cmdline_user_args():
 		enabled = false
+	_log = "--outcrops-log" in OS.get_cmdline_user_args()
 
 
 ## Lit le catalogue (YAML en syntaxe de flux : lignes `#` retirées, puis JSON). {} si absent.
@@ -194,10 +197,27 @@ func _load_models() -> void:
 		material.shader = SHADER
 		material.set_shader_parameter("meters_per_unit", map_data.meters_per_px if map_data != null else 719.0)
 		material.set_shader_parameter("vertical_follow", float(settings.get("vertical_follow", 0.5)))
+		material.set_shader_parameter("min_pixels", float(settings.get("min_pixels", 4.0)))
+		material.set_shader_parameter("max_albedo", float(settings.get("max_albedo", 0.42)))
+		material.set_shader_parameter("pixel_fade", float(settings.get("pixel_fade", 3.0)))
+		material.set_shader_parameter("color_gain", color_gain(entry, float(settings.get("albedo_scale", 0.8))))
 		var source := (meshes[0] as Mesh).surface_get_material(0) as BaseMaterial3D
 		if source != null and source.albedo_texture != null:
 			material.set_shader_parameter("albedo_texture", source.albedo_texture)
 		models.append({"id": entry["id"], "entry": entry, "meshes": meshes, "triangles": triangles, "material": material, "biomes": _biome_mask(entry)})
+
+
+## Gain d'albédo (linéaire) ramenant la moyenne mesurée `albedo_mean` à la couleur visée `color`
+## (sRGB), multiplié par `scale`.
+static func color_gain(entry: Dictionary, scale: float) -> Vector3:
+	var target: Array = entry.get("color", [])
+	var mean: Array = entry.get("albedo_mean", [])
+	if target.size() != 3 or mean.size() != 3:
+		return Vector3(scale, scale, scale)
+	var gain := Vector3.ZERO
+	for c in 3:
+		gain[c] = pow(float(target[c]), 2.2) / maxf(float(mean[c]), 1e-3) * scale
+	return gain
 
 
 static func _triangles(mesh: Mesh) -> int:
@@ -280,6 +300,8 @@ func _process(_delta: float) -> void:
 	var focus_value: Variant = _rig.get("focus") if _rig != null else null
 	var at := Vector2(focus_value.x, focus_value.z) if focus_value is Vector3 else Vector2(camera.global_position.x, camera.global_position.z)
 	update_view(at, distance)
+	if _log and _frame % 60 == 0:
+		print("RockOutcrops: at %s d %.1f visible %s %s" % [at, distance, visible, JSON.stringify(stats)])
 
 
 ## Grossissement (1 de près, `far_scale` au loin) à la distance caméra `d`.
@@ -335,6 +357,11 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 		if _jobs.size() >= max_concurrent_jobs:
 			break
 		_start_job(item[1])
+	if not _warm and not _jobs.is_empty():
+		# Premier affichage : les tuiles les plus proches attendues (pas d'apparition progressive
+		# au lancement ni dans les captures), comme `Vegetation`.
+		_warm = true
+		flush()
 	_update_regrounds()
 	for key: Vector2i in _tiles:
 		var entry: Dictionary = _tiles[key]
@@ -479,6 +506,9 @@ func suitability(model: Dictionary, probe: Dictionary, biome: int, heath: float,
 
 ## Semis d'une tuile (sans nœud ni terrain : appelable depuis une tâche) :
 ## {"parts": {modèle: {"buffer", "points", "radii"}}, "ms"}.
+## Chaque affleurement accepté entraîne un groupe (`group`) : bande le long de la courbe de niveau
+## pour les falaises et barres (`along_contour`), amas serré sinon ; le bruit de regroupement,
+## seuillé (`cluster_threshold`), laisse des vides nets entre les groupes.
 func _seed_tile(key: Vector2i) -> Dictionary:
 	var t0 := Time.get_ticks_usec()
 	var rect := _tile_rect(key)
@@ -504,46 +534,43 @@ func _seed_tile(key: Vector2i) -> Dictionary:
 	var step := float(settings.get("grid_step", 2.0))
 	var p_max := float(settings.get("max_probability", 0.4))
 	var bias := float(settings.get("cluster_bias", 0.15))
-	var mpp := map_data.meters_per_px
-	var circles := PackedVector3Array()
+	var threshold: Array = settings.get("cluster_threshold", [0.15, 0.45])
+	var ctx := {
+		"rect": rect,
+		"circles": PackedVector3Array(),
+		"roads": _roads_by_tile.get(key, PackedVector2Array()),
+		"road_clearance": float(settings.get("road_clearance", 1.2)),
+		"river_clearance": float(settings.get("river_clearance", 1.5)),
+	}
 	var reach := _max_radius() + 1.0
 	for c in exclusions:
 		if rect.grow(c.z + reach).has_point(Vector2(c.x, c.y)):
-			circles.append(c)
-	var roads: PackedVector2Array = _roads_by_tile.get(key, PackedVector2Array())
-	var road_clearance := float(settings.get("road_clearance", 1.2))
-	var river_clearance := float(settings.get("river_clearance", 1.5))
-	var cells := int(ceil(rect.size.x / step))
+			(ctx["circles"] as PackedVector3Array).append(c)
 	var scores := PackedFloat32Array()
 	scores.resize(models.size())
+	var cells := int(ceil(rect.size.x / step))
 	for j in cells:
 		for i in cells:
 			var p := rect.position + (Vector2(i, j) + Vector2(rng.randf(), rng.randf())) * step
 			var roll := rng.randf()
 			var pick := rng.randf()
-			var size_t := rng.randf()
-			var yaw := rng.randf() * TAU
-			var stretch := rng.randf_range(0.85, 1.15)
-			var tint := rng.randf()
+			var seed_value := rng.randi()
 			if roll >= p_max or not map_data.is_land_px(int(p.x), int(p.y)):
 				continue
 			var bx := clampi(int((p.x - rect.position.x) / block_size), 0, blocks_side - 1)
 			var by := clampi(int((p.y - rect.position.y) / block_size), 0, blocks_side - 1)
 			if holds[by * blocks_side + bx] == 0:
 				continue
-			var cluster := clampf(noise.get_noise_2d(p.x, p.y) + 0.5 + bias, 0.0, 1.0)
+			var cluster := smoothstep(float(threshold[0]), float(threshold[1]), noise.get_noise_2d(p.x, p.y) + 0.5 * bias)
 			if roll >= p_max * cluster:
 				continue
 			var probe := _terrain_probe(p.x, p.y)
-			var biome := biome_at(p.x, p.y, probe["h"])
-			var heath := 0.0
-			if _mask != null and _mask.has_splat():
-				var splat := _mask.splat_at(p.x, p.y)
-				heath = splat.a * (1.0 - splat.b * 0.6)
-			var total := 0.0
 			var best := 0.0
+			var total := 0.0
+			var biome := biome_at(p.x, p.y, probe["h"])
+			var heath := _heath_at(p, probe)
 			for m in models.size():
-				scores[m] = suitability(models[m], probe, biome, heath, p.y)
+				scores[m] = suitability(models[m], probe, biome, heath.x, p.y) * heath.y
 				total += scores[m]
 				best = maxf(best, scores[m])
 			if best <= 0.0 or roll >= p_max * cluster * best:
@@ -555,50 +582,111 @@ func _seed_tile(key: Vector2i) -> Dictionary:
 				if pick * total <= acc and scores[m] > 0.0:
 					chosen = m
 					break
-			var entry: Dictionary = models[chosen]["entry"]
-			var size_units := lerpf(float(entry["size_m"][0]), float(entry["size_m"][1]), size_t) / mpp
-			var radius := size_units * 0.5
-			if not _clear_of_water(p, radius, river_clearance):
+			var local := RandomNumberGenerator.new()
+			local.seed = seed_value
+			if not _place(parts, chosen, p, probe, local, ctx):
 				continue
-			if not circles.is_empty() and _in_circles(p, radius, circles):
-				continue
-			if not roads.is_empty() and _near_roads(p, radius + road_clearance, roads):
-				continue
-			if bool(entry.get("along_contour", false)):
-				var grad: Vector2 = probe["grad"]
-				if grad.length() > 1e-4:
-					# Grand côté (X du modèle) le long de la courbe de niveau, un peu de jeu.
-					yaw = -atan2(grad.x, grad.y) + PI * 0.5 + (yaw - PI) * 0.08
-			var part: Dictionary = parts.get(chosen, {"buffer": PackedFloat32Array(), "points": PackedVector2Array(), "radii": PackedFloat32Array()})
-			var b := Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(size_units * stretch, size_units, size_units / stretch))
-			var buffer: PackedFloat32Array = part["buffer"]
-			var o := buffer.size()
-			buffer.resize(o + FLOATS_PER_INSTANCE)
-			buffer[o] = b.x.x
-			buffer[o + 1] = b.y.x
-			buffer[o + 2] = b.z.x
-			buffer[o + 3] = p.x
-			buffer[o + 4] = b.x.y
-			buffer[o + 5] = b.y.y
-			buffer[o + 6] = b.z.y
-			buffer[o + 8] = b.x.z
-			buffer[o + 9] = b.y.z
-			buffer[o + 10] = b.z.z
-			buffer[o + 11] = p.y
-			buffer[o + 12] = tint
-			part["buffer"] = buffer
-			# Tableaux compactés : copies à l'écriture, réaffectés explicitement.
-			var part_points: PackedVector2Array = part["points"]
-			part_points.append(p)
-			part["points"] = part_points
-			var part_radii: PackedFloat32Array = part["radii"]
-			part_radii.append(radius)
-			part["radii"] = part_radii
-			parts[chosen] = part
+			_place_group(parts, chosen, p, scores[chosen], local, ctx)
 	for m: int in parts:
 		_shuffle(parts[m], rng)
 	return {"parts": parts, "ms": (Time.get_ticks_usec() - t0) / 1000.0}
 
+
+## Lande / garrigue (x) et atténuation sous forêt dense (y) au point sondé.
+func _heath_at(p: Vector2, probe: Dictionary) -> Vector2:
+	if _mask == null or not _mask.has_splat():
+		return Vector2(0.0, 1.0)
+	var splat := _mask.splat_at(p.x, p.y)
+	var steep := smoothstep(0.15, 0.4, float(probe["slope"]))
+	var shade := 1.0 - float(settings.get("forest_shading", 0.7)) * smoothstep(0.3, 0.8, splat.b) * (1.0 - steep)
+	return Vector2(splat.a * (1.0 - splat.b * 0.6), shade)
+
+
+## Voisins d'un affleurement posé en `p` : bande le long de la courbe de niveau (falaises,
+## barres) ou amas autour, chacun gardé si l'aptitude locale reste ≥ 40 % de celle du parent.
+func _place_group(parts: Dictionary, chosen: int, p: Vector2, parent_score: float, local: RandomNumberGenerator, ctx: Dictionary) -> void:
+	var entry: Dictionary = models[chosen]["entry"]
+	var group: Array = entry.get("group", [0, 0])
+	var count := local.randi_range(int(group[0]), int(group[1]))
+	if count <= 0:
+		return
+	var mean_units := (float(entry["size_m"][0]) + float(entry["size_m"][1])) * 0.5 / map_data.meters_per_px
+	var contour := bool(entry.get("along_contour", false))
+	var cursor := [p, p]  # extrémités de la bande (deux sens)
+	for n in count:
+		var q: Vector2
+		if contour:
+			var side := n % 2
+			var from: Vector2 = cursor[side]
+			var grad: Vector2 = _terrain_probe(from.x, from.y)["grad"]
+			if grad.length() < 1e-4:
+				break
+			var along := Vector2(-grad.y, grad.x).normalized() * (1.0 if side == 0 else -1.0)
+			q = from + along * mean_units * local.randf_range(0.7, 0.95) + grad.normalized() * mean_units * local.randf_range(-0.15, 0.15)
+			cursor[side] = q
+		else:
+			q = p + Vector2.from_angle(local.randf() * TAU) * mean_units * local.randf_range(0.6, 1.3)
+		var rect: Rect2 = ctx["rect"]
+		if not rect.has_point(q) or not map_data.is_land_px(int(q.x), int(q.y)):
+			continue
+		var probe := _terrain_probe(q.x, q.y)
+		var score := suitability(models[chosen], probe, biome_at(q.x, q.y, probe["h"]), _heath_at(q, probe).x, q.y)
+		if score < parent_score * 0.4:
+			continue
+		_place(parts, chosen, q, probe, local, ctx)
+
+
+## Pose un affleurement du modèle `chosen` en `p` si l'emprise est libre (eau, colonies,
+## routes) ; vrai si posé.
+func _place(parts: Dictionary, chosen: int, p: Vector2, probe: Dictionary, local: RandomNumberGenerator, ctx: Dictionary) -> bool:
+	var entry: Dictionary = models[chosen]["entry"]
+	var size_units := lerpf(float(entry["size_m"][0]), float(entry["size_m"][1]), local.randf()) / map_data.meters_per_px
+	var radius := size_units * 0.5
+	var yaw := local.randf() * TAU
+	var stretch := local.randf_range(0.85, 1.15)
+	var tint := local.randf()
+	var dither := local.randf()
+	if not _clear_of_water(p, radius, float(ctx["river_clearance"])):
+		return false
+	var circles: PackedVector3Array = ctx["circles"]
+	if not circles.is_empty() and _in_circles(p, radius, circles):
+		return false
+	var roads: PackedVector2Array = ctx["roads"]
+	if not roads.is_empty() and _near_roads(p, radius + float(ctx["road_clearance"]), roads):
+		return false
+	if bool(entry.get("along_contour", false)):
+		var grad: Vector2 = probe["grad"]
+		if grad.length() > 1e-4:
+			# Grand côté (X du modèle) le long de la courbe de niveau, un peu de jeu.
+			yaw = -atan2(grad.x, grad.y) + PI * 0.5 + (yaw - PI) * 0.08
+	var part: Dictionary = parts.get(chosen, {"buffer": PackedFloat32Array(), "points": PackedVector2Array(), "radii": PackedFloat32Array()})
+	var b := Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(size_units * stretch, size_units, size_units / stretch))
+	var buffer: PackedFloat32Array = part["buffer"]
+	var o := buffer.size()
+	buffer.resize(o + FLOATS_PER_INSTANCE)
+	buffer[o] = b.x.x
+	buffer[o + 1] = b.y.x
+	buffer[o + 2] = b.z.x
+	buffer[o + 3] = p.x
+	buffer[o + 4] = b.x.y
+	buffer[o + 5] = b.y.y
+	buffer[o + 6] = b.z.y
+	buffer[o + 8] = b.x.z
+	buffer[o + 9] = b.y.z
+	buffer[o + 10] = b.z.z
+	buffer[o + 11] = p.y
+	buffer[o + 12] = tint
+	buffer[o + 13] = dither
+	part["buffer"] = buffer
+	# Tableaux compactés : copies à l'écriture, réaffectés explicitement.
+	var part_points: PackedVector2Array = part["points"]
+	part_points.append(p)
+	part["points"] = part_points
+	var part_radii: PackedFloat32Array = part["radii"]
+	part_radii.append(radius)
+	part["radii"] = part_radii
+	parts[chosen] = part
+	return true
 
 ## Pré-examen grossier (`side` × `side` sondes) : une zone sans relief, sans altitude ni lande
 ## ne porte rien.
@@ -704,8 +792,10 @@ func _surface_at(source: Dictionary, x: float, y: float) -> float:
 	return h if h > 0.0 else map_data.surface_world_at(x, y)
 
 
-## Pied de chaque instance au plus bas de son emprise (centre et quatre points à 0,6 rayon) :
-## l'affleurement sort de la pente au lieu de flotter au-dessus du versant aval.
+## Pied de chaque instance au centre de son emprise sur la surface affichée, et pente locale
+## (unités monde par unité, `INSTANCE_CUSTOM.zw`) : le shader cisaille le modèle pour que sa base
+## épouse le versant (relief exagéré), l'affleurement sortant de la pente au lieu d'y être
+## enfoui en amont et de flotter en aval.
 func _grounded(seeded: Dictionary, source: Dictionary) -> Dictionary:
 	var parts: Dictionary = seeded["parts"]
 	for m: int in parts:
@@ -719,13 +809,17 @@ func _regrounded(part: Dictionary, source: Dictionary) -> PackedFloat32Array:
 	var buffer: PackedFloat32Array = (part["buffer"] as PackedFloat32Array).duplicate()
 	var points: PackedVector2Array = part["points"]
 	var radii: PackedFloat32Array = part["radii"]
+	var max_grad := float(settings.get("max_shear", 3.0))
 	for n in points.size():
 		var p := points[n]
-		var r := radii[n] * 0.6
+		var r := maxf(radii[n], 0.2)
 		var h := _surface_at(source, p.x, p.y)
-		for offset: Vector2 in [Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r)]:
-			h = minf(h, _surface_at(source, p.x + offset.x, p.y + offset.y))
-		buffer[n * FLOATS_PER_INSTANCE + 7] = h - radii[n] * 0.04
+		var grad := Vector2(_surface_at(source, p.x + r, p.y) - _surface_at(source, p.x - r, p.y), _surface_at(source, p.x, p.y + r) - _surface_at(source, p.x, p.y - r)) / (2.0 * r)
+		grad = grad.limit_length(max_grad)
+		var o := n * FLOATS_PER_INSTANCE
+		buffer[o + 7] = h - radii[n] * 0.08
+		buffer[o + 14] = grad.x
+		buffer[o + 15] = grad.y
 	return buffer
 
 
@@ -764,7 +858,7 @@ func _aabb_of(buffer: PackedFloat32Array, radii: PackedFloat32Array) -> AABB:
 		var o := n * FLOATS_PER_INSTANCE
 		var c := Vector3(buffer[o + 3], buffer[o + 7], buffer[o + 11])
 		var r := radii[n] * 2.0 * grow
-		lo = lo.min(c - Vector3(r, r, r))
+		lo = lo.min(c - Vector3(r, r * 4.0, r))
 		hi = hi.max(c + Vector3(r, r * 6.0, r))
 	return AABB(lo, hi - lo)
 

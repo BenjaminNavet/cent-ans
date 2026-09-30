@@ -90,3 +90,17 @@ Test headless `hb2_materials_test.gd` OK (27 couches, DXT1). Prochaine étape : 
 Ouvert : jugement visuel en jeu (captures par la session principale) ; `biomes.png` réel (HB1)
 non testé ici ; rangs des vergers non alignés (parcelles hachées) ; tailles/teintes à régler sur
 capture (arbustes 0,3-0,7, olivier 0,7-1,0).
+### HB5 retouche visuelle (après fusion dans feat/hb, biomes.png présent)
+- Couleur ramenée à la roche locale (`color` / `albedo_mean` par modèle, `max_albedo` 0,42),
+  fondu tramé sous 4 px écran, groupes (bandes le long des courbes de niveau, amas), bruit de
+  regroupement seuillé, atténuation sous forêt dense, base cisaillée sur la pente affichée
+  (`INSTANCE_CUSTOM.zw`), grossissement lointain 5,5 (d ≥ 70), ombres jusqu'au LOD1, premier
+  affichage attendu (comme `Vegetation`), `--outcrops-log`.
+- Diagnostic (A/B en pixels, `--no-outcrops`) : les affleurements étaient bien dessinés mais de la
+  taille des arbres grossis et de la couleur du sol (écart moyen < 15/255) : camouflés.
+- Dernier état NON revu à l'image (budget de captures épuisé) : densité relevée
+  (`max_probability` 0,6) après un essai trop clairsemé. Test hb5 OK (Mont-Blanc 228, Écrins 289,
+  Sancy 30, Cantal 15 ; Beauce, mer 0) ; d = 60 : 2 828 visibles, 416 k triangles, 17 appels.
+Ouvert : lisibilité alpine toujours insuffisante sur la dernière planche vue ; piste plus sûre :
+roche au shader de terrain (HB3) sur pentes raides, les instances en appoint.
+
