@@ -59,6 +59,11 @@ Brutes (prompt, src, cut, glb, json) : `~/dev/cent-ans-raw/ga3/s4/`.
   cordages) : TRELLIS risque les mêmes fragments que l'arc de S2 → prévoir un essai `trellis/multi`
   (2-3 vues NB2) ou garder le procédural pour eux. TRELLIS 2 seulement pour un bâtiment-clé vu de
   près (église) et avec LOD0 relevé à 20-30 k : +0,30 $.
+- [ ] S5 végétation campagne (chêne + herbe/buisson + rocher) : voie A textures (cartes de feuilles
+      générées, recuisson `_mid`) vs voie B TRELLIS (décimation 250/90 tri) → `tools/blender_scripts/ga3_vegetation.py`,
+      candidats `game/assets/models/vegetation/ga3/`, planche `docs/img/ga3/s5_vegetation.jpg`.
+      En cours : images + détourage + TRELLIS faits (brutes `~/dev/cent-ans-raw/ga3/s5/`) ; suite = atlas,
+      décimation, planche, verdict.
 
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
