@@ -47,3 +47,9 @@ portée 700 → 1000 (pas de clé de préréglage FC1 ; `max_camera_distance` re
 Tests : `fc2_impostors_test.gd` OK (headless et fenêtré, hiver compris : shaders compilés),
 smoke, sz4b, fc1 OK. Triangles des arbres lointains (Orléans, d = 150) : 407 000 → 41 600
 (≈ 19,6 → 2 par arbre), même nombre de MultiMesh. Terminé ; jugement visuel à FC4.
+
+## FC5 — arbres proches semi-réalistes et herbe visible (agent FC2)
+État : squelette (sonde `game/tests/fc5_probe.gd`). Plan : variante « mid » des essences en cartes
+de feuilles (campaign_trees.glb, 300-600 tri feuillus, 150-250 sapin), shader de feuillage à cartes
+(texture, découpe alpha, saisons), tuiles proches ; `--no-fc5` ; herbe FC3 visible à d 10-35.
+Prochaine étape : mesures de base d = 25 / 150.
