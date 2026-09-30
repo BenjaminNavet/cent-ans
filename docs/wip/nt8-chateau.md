@@ -20,8 +20,8 @@ agrandie, basse-cour vide. Viser un château du XIVe (Vincennes, Largoët, Najac
 ## État
 - [x] Squelette (données, schéma, champs Rust, pont)
 - [x] Cœur (tours × 0,6, hauteur du donjon, basse-cour : puits + accessoires, communs ; test `castle_looks_like_a_castle`)
-- [ ] Rendu
+- [x] Rendu (donjon carré `_build_keep`, communs du kit ; test `nt8_castle_test.gd` vert)
 - [ ] Tests, capture
 
 ## Prochaine étape
-Rendu du donjon carré et des communs (`battle_siege.gd`), test Godot.
+Vérifs (clippy, cargo test workspace, pytest, smoke, sb, nt1), puis capture avec affichage.
