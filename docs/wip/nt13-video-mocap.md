@@ -3,7 +3,7 @@
 Branche `feat/nt13-video-mocap`. Orchestration : `docs/wip/nt.md`. Prédécesseur : NT12
 (`docs/wip/nt12-mocap.md`, reciblage CMU, `--mocap-trial`).
 
-## État : clips cuits, option `--video-trial` en place ; reste tests Godot et captures
+## État : TERMINÉ (30/09), prêt à fusionner ; jugement des captures par la session principale
 
 Vidéos du joueur (hors dépôt) : `~/dev/cent-ans-mocap-src/video/IMG_6455..6458.MOV` (4K
 portrait, 30 i/s) ; intermédiaires hors dépôt dans `~/dev/cent-ans-mocap-src/work/` : env
@@ -84,9 +84,34 @@ rendus de planche 5 s.
   épée-bouclier ; poignets MediaPipe grossiers (3 points de main) ; aucune vraie torsion de lame.
 
 ## Tests
-- pytest : `tools/tests/test_video_mocap_clean.py` (15).
-- Godot : `game/tests/nt13_video_test.gd` (défaut, forcé 0/1, vidéo prioritaire sur CMU).
+- pytest : `tools/tests/test_video_mocap_clean.py` (15) ; suite complète 1324 OK, 2 échecs
+  préexistants (icônes : `docs/img/da5*` absents du worktree).
+- Godot : `nt13_video_test.gd` (sans et avec `--video-trial` ; forçage 0/1 ; vidéo prioritaire
+  sur CMU), smoke, nt7_anim_test et an1b_clips_test (avec et sans `--video-trial`),
+  nt12_mocap_test (avec et sans `--mocap-trial`) : OK.
+- Captures `nt13_video_shot.gd` → `docs/audit/captures/nt/nt13_melee_{0..3,wide}.png` (dossier ignoré par git : fichiers dans le
+  worktree de l'agent, ou à régénérer ; actuel |
+  CMU | vidéo, non lues ; les trois tiers diffèrent, vérifié par différence d'image).
 
-## Prochaine étape
-Tests Godot (smoke, nt7_anim_test, an1b_clips_test, nt12_mocap_test, nt13_video_test avec et sans
-`--video-trial`), captures `nt13_video_shot.gd`, verdict.
+## Bogue corrigé (touche NT12)
+`BattleSkinned.reload()` appelé sur la classe exécutait en fait `Script.reload()` (méthode du
+script lui-même), qui remet les variables statiques à leur valeur initiale : `mocap_trial_forced`
+revenait à -1 et les captures A/B de NT12 (`nt12_mocap_shot.gd`) comparaient probablement le
+keyframé à lui-même. Renommé `reload_caches()` ; **refaire les captures NT12** si on veut les
+juger (les nouvelles captures NT13 contiennent un tiers CMU correct).
+
+## Verdict provisoire (planches Blender ; captures en jeu à juger)
+Reciblage fidèle : vue caméra conforme à la vidéo (garde, fente, coupes), pieds tenus (0 cm sur
+3 clips contre 2-18 cm pour CMU), gestes choisis pour le jeu. Mais : bâton à deux mains sur une
+figurine épée-bouclier (bras gauche keyframé), coupes jouées lentement (accélérées ×1,4-1,8,
+moins de « claquement » qu'un keyframé), poignet plafonné sur plusieurs clips, lacet réglé à la
+main. Globalement **égal** au keyframé, **mieux** que CMU (pieds, gestes), pas nettement mieux.
+
+## Conseils pour un second tournage
+- Téléphone fixe (trépied), cadrage corps entier avec marge, pieds visibles, 60 i/s si possible,
+  fond uni, vêtements près du corps et contrastés (les pieds noirs sur l'herbe passent).
+- Faire face à l'adversaire imaginaire **à 45° de la caméra** et frapper vers un repère fixe.
+- Une seule main sur l'arme (main droite) et un objet au bras gauche pour le bouclier ; bâton
+  court (≈ 80 cm) comme une épée, ou tenue de pique à deux mains pour les clips `pike_*`.
+- Gestes à pleine vitesse, 2-3 répétitions par prise, 1 s immobile en garde avant et après
+  (bouclage) ; filmer aussi parade, coup reçu, chute (sur tapis).
