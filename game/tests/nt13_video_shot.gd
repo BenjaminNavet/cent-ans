@@ -6,6 +6,8 @@ extends SceneTree
 ## prairie plate, comme `nt12_mocap_shot.gd`.
 ## Usage (avec affichage, pas en headless) :
 ##   godot --path game --resolution 1280x720 --script res://tests/nt13_video_shot.gd -- [--out-dir=<dossier>]
+## NT14 : l'essai vidéo contient désormais les clips du second tournage (guard, overhead, parry,
+## thrust) et la coupe NT13 ; « actuel » force les clips keyframés (`melee_forced` = 0).
 ## Écrit dans `docs/audit/captures/nt/` (défaut) :
 ## - `nt13_melee_0..3.png` : mêlée rapprochée, 4 instants à 0,25 s d'écart, actuel | CMU | vidéo
 ##   (1920 px de large) ;
@@ -54,10 +56,12 @@ func _init() -> void:
 	for trial in [0, 1, 2]:
 		BattleSkinned.mocap_trial_forced = 1 if trial == 1 else 0
 		BattleSkinned.video_trial_forced = 1 if trial == 2 else 0
+		BattleSkinned.melee_forced = 0  # NT14 : « actuel » = clips keyframés
 		BattleSkinned.reload_caches()
 		images[trial] = await _melee_run()
 	BattleSkinned.mocap_trial_forced = -1
 	BattleSkinned.video_trial_forced = -1
+	BattleSkinned.melee_forced = -1
 	BattleSkinned.reload_caches()
 	var failures := 0
 	var first: Array = images[0]

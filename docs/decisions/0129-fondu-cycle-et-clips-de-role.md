@@ -72,3 +72,24 @@ Levée de la première limite ci-dessus, sans état GPU par soldat supplémentai
   lit désormais le jeu par `pick_clip` (au-delà de 4 clips, `pick` rendait un indice faux).
 - Durée en donnée : `role_blend_s` = 0,25 s (`data/fx/battle_animation.json`) ; `--no-nt10`
   après `--` : changement sec (banc A/B).
+
+## Complément NT14 (2026-09-30) : clips de mêlée par défaut, meilleure source par geste
+Après les essais NT12 (mocap CMU), NT13 et NT14 (vidéos du joueur, MediaPipe), chaque geste de
+mêlée du rig fin `human` prend par défaut la source la mieux notée (glissement des pieds,
+tremblement, poignet, lisibilité sur planches Blender ; grille et mesures dans
+`docs/wip/nt14-video-set2.md`) :
+- `guard`, `overhead`, `thrust`, `parry` : second tournage vidéo (NT14 : épée à une main, bras du
+  bouclier reconstruit depuis un disque rouge suivi dans l'image) ;
+- `slash`, `hit`, `death` : keyframé (pas de meilleure prise ; la dernière image de `death` sert
+  aux cadavres).
+
+Mécanisme : celui des essais (`BattleSkinned._merge_mocap_trial`) appliqué au dossier
+`assets/models/battle_fine/melee/` (cuit par `nt13_video_trial.py -- bake-melee`, 4 clips,
+117 Ko) : les clips gardent leur nom et leur indice, leurs images sont ajoutées après celles du
+rig dans la texture d'os. Rien ne change pour le shader, les jeux de clips, le fondu de cycle ni
+le kit grossier. `--keyframed-melee` après `--` rétablit les clips keyframés ; `--video-trial` et
+`--mocap-trial` restent des options d'essai (A/B) et passent avant le défaut ; `melee_forced`
+(-1 / 0 / 1) sert aux tests et captures A/B.
+
+Coût : texture d'os du rig fin plus haute de 4 clips (quelques centaines de lignes RGBA32F), une
+lecture de texture identique par soldat. Banc : voir `docs/wip/nt14-video-set2.md`.
