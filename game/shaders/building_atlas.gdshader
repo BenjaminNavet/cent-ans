@@ -16,8 +16,10 @@ uniform bool use_normals = false;
 uniform vec4 layer_tint[16];
 // Répétitions par mètre (1 / taille de tuile de la texture).
 uniform float layer_tile[16];
-// Première couche unie (sans texture) : vitres, fer, toile.
+// Couches unies (sans texture) : vitres, fer, toile = `first_plain`..`plain_last` ; les couches
+// ajoutées après elles (lot TF : `TimberFrame`, indice 14) sont de nouveau texturées.
 uniform int first_plain = 11;
+uniform int plain_last = 13;
 // Neige sur les toits (0 = aucune) : couches `roof_first`..`roof_last`.
 uniform float snow = 0.0;
 uniform int roof_first = 7;
@@ -44,7 +46,8 @@ void vertex() {
 void fragment() {
 	vec4 tint = layer_tint[layer];
 	vec3 base = vec3(1.0);
-	if (layer < first_plain) {
+	bool textured = layer < first_plain || layer > plain_last;
+	if (textured) {
 		vec3 uvw = vec3(UV * layer_tile[layer], float(layer));
 		base = texture(albedo_array, uvw).rgb;
 		if (use_normals) {
@@ -54,7 +57,7 @@ void fragment() {
 	vec3 albedo = base * tint.rgb * COLOR.rgb;
 	// Dérivées hors de la branche (flux de contrôle uniforme).
 	float far = ba_far(local_m);
-	if (aging > 0.0 && layer < first_plain) {
+	if (aging > 0.0 && textured) {
 		bool roof = layer >= roof_first && layer <= roof_last;
 		float grime = roof ? 0.0 : 1.0;
 		float moss_k = roof ? 1.0 - snow : 0.25;
