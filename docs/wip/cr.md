@@ -26,8 +26,20 @@ Points ouverts :
 
 # CR2 — acier crédible (plates, casques)
 
-État : démarré 2026-09-30 (agent visuel, worktree `game_project-sr`, branche `feat/sr`). Captures brutes `~/dev/cent-ans-raw/cr2/`.
-Prochaine étape : captures de référence, bissection du chemin C_PLATE (`battle_soldier_skinned.gdshader`).
+État : shader fait (occlusion spéculaire, rugosité, crasse, martelage), casques en cours. Captures brutes `~/dev/cent-ans-raw/cr2/` (`shot.sh`).
+
+Causes établies par captures de débogage (`d_mirror`, `d_rad`, `d_ry`) :
+- Le seul environnement reflété est le ciel HDRI : son voile d'horizon, clair, couvre tout ce
+  que reflète une pièce verticale (miroir forcé : acier bleu pâle partout, aucun sol sombre).
+  Reflet coupé (RADIANCE noir) : la plate passe de 106 à 60 (sRGB) → le reflet fait la moitié
+  de sa luminance.
+- Rugosité SR2 0,45-0,75 : ce voile clair est moyenné en un gris uniforme sans structure
+  (aucune ligne d'horizon, aucun nuage) = « plastique blanc ». Martelage trop faible (0,05-0,22).
+Correctifs (`steel_occlusion`, 0 = rendu SR2) : occlusion spéculaire par `RADIANCE` (reflet
+×0,12 sous l'horizon → ×1 vers 40° de hauteur, élargi par la rugosité, ×0,35 dans les creux
+cuits) sur plate, garniture et maille ; rugosité 0,16-0,42 ; acier 0,42 ; film de crasse non
+métallique dans les creux et par plaques ; martelage +0,3.
+Prochaine étape : casques (bassinet plus pointu, visière sur cavalry_0 à la place du heaume).
 
 # CR3 — caparaçons en drap lourd
 
