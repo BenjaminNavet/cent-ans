@@ -75,6 +75,44 @@ static func cycle_blend_at(config: Dictionary, h: Vector4, anim_time: float, ble
 	return result
 
 
+## NT10 : durée (s) du fondu au changement de clip des figurines en mode CUSTOM (porte-étendards,
+## musiciens, servants d'engins) ; 0 avec `--no-nt10` après `--` (banc A/B, changement sec).
+static func role_blend_s() -> float:
+	if "--no-nt10" in OS.get_cmdline_user_args():
+		return 0.0
+	return float(animation_settings().get("role_blend_s", 0.0))
+
+
+## NT10 : suit le clip (indice global dans `clips[]`) d'une figurine en mode CUSTOM ; `state` est
+## un dictionnaire propre à la figurine (modifié : `cur`, `prev`, `at`). Renvoie le clip précédent
+## encore en fondu, ou −1 (le fondu passé, ou horloge revenue en arrière).
+static func fade_prev(state: Dictionary, clip: int, now: float) -> int:
+	var cur := int(state.get("cur", -1))
+	if cur != clip:
+		if cur >= 0:
+			state["prev"] = cur
+			state["at"] = now
+		state["cur"] = clip
+	var prev := int(state.get("prev", -1))
+	if prev >= 0:
+		var since := now - float(state.get("at", now))
+		if since < 0.0 or since > role_blend_s() + 0.1 or role_blend_s() <= 0.0:
+			state["prev"] = -1
+			prev = -1
+	return prev
+
+
+## NT10 : INSTANCE_CUSTOM.y du mode CUSTOM avec fondu (`custom_fade` du shader) : emplacement du
+## clip dans le jeu (0-31) + 32 × (clip précédent + 1) + 4096 × q, q = instant du changement en
+## 1/32 s modulo 64 s (arrondi par défaut : le fondu ne part jamais en avance). Entier exact en
+## flottant 32 bits (< 2^24).
+static func pack_fade(slot: int, prev_clip: int, changed_at: float) -> float:
+	if prev_clip < 0:
+		return float(slot)
+	var q := int(floorf(fposmod(changed_at, 64.0) * 32.0)) % 2048
+	return float((slot & 31) + 32 * (clampi(prev_clip, 0, 126) + 1) + 4096 * q)
+
+
 static func _hash1(n: float) -> float:
 	var x := sin(n * 12.9898 + 4.1414) * 43758.5453
 	return x - floorf(x)
@@ -385,6 +423,7 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 		table.append(Vector4(0, 1, 1, 0))
 	mat.set_shader_parameter("clips", table)
 	mat.set_shader_parameter("cycle_blend", cycle_blend_s())
+	mat.set_shader_parameter("role_blend", role_blend_s())
 	mat.set_shader_parameter("variant_count", int(figure(kind, variant).get("variants", 1)))
 	mat.set_shader_parameter("size_jitter", 0.0 if kind == "cavalry" else 0.05)
 	mat.set_shader_parameter("sever_bones", sever_table(kind, variant))

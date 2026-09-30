@@ -67,6 +67,17 @@ uniform float cycle_blend = 0.0;
 // Mode CYCLE (mêlée) : durée d'une passe ; mode VOLLEY (tir) : instant de la dernière volée,
 // durée du rechargement, instant de la décoche dans le clip (s).
 uniform float cycle_len = 1.5;
+// NT10 : fondu au changement de clip du mode CUSTOM (porte-étendards, musiciens, servants).
+// 0 : format historique. Sinon INSTANCE_CUSTOM.y = emplacement (0-31) + 32 × (indice du clip
+// précédent dans `clips[]` + 1, 0 = aucun) + 4096 × q, q = instant du changement en 1/32 s
+// modulo 64 s (le CPU efface le clip précédent une fois le fondu passé). Clip précédent lu à
+// anim_time − x (1 : même phase, rôles) ou anim_time − z (2 : début du geste précédent,
+// servants). z et w ne portent alors ni projection ni sang.
+uniform int custom_fade = 0;
+// NT10 : cuisson des imposteurs (`BattleImpostors`) : x ≥ 0 remplace l'identifiant haché (habit,
+// teintes, visage) de toutes les figurines du matériau ; y ≥ 0 force la variante (casque...).
+uniform vec2 bake_id = vec2(-1.0);
+uniform float role_blend = 0.25;
 uniform float volley_time = -1000.0;
 uniform float reload_time = 6.0;
 uniform float release_at = 1.0;
@@ -277,7 +288,7 @@ void choose(int mode, ivec4 set, int size, float speed, vec4 h, vec4 custom, flo
 		clip = id < float(split_count) || n < 2 ? pick_clip(set, 0) : pick_clip(set, 1 + min(int(h.x * float(n - 1)), n - 2));
 		t = anim_time * speed * mix(0.93, 1.07, h.y) + h.z * 11.0;
 	} else if (mode == M_CUSTOM) {
-		clip = pick_clip(set, int(mod(custom.y, float(n))));
+		clip = pick_clip(set, int(mod(mod(custom.y, 32.0), float(n))));
 		t = anim_time - custom.x;
 	} else if (mode == M_CYCLE) {
 		float local = anim_time * mix(0.9, 1.1, h.y) + h.z * cycle_len;
@@ -369,6 +380,20 @@ void anim_pose(int mode, ivec4 set, int size, float speed, vec4 h, vec4 custom, 
 			b = mix(pb, b, k);
 			c = mix(pc, c, k);
 		}
+	} else if (mode == M_CUSTOM && custom_fade > 0 && custom.y >= 32.0 && role_blend > 0.001) {
+		// NT10 : fondu depuis le clip précédent (voir `custom_fade`).
+		float packed = floor(custom.y / 32.0);
+		int pclip = int(mod(packed, 128.0) + 0.5) - 1;
+		float since = mod(anim_time - floor(custom.y / 4096.0) / 32.0, 64.0);
+		float k = smoothstep(0.0, role_blend, since);
+		if (pclip >= 0 && k < 1.0) {
+			float pt = custom_fade == 2 ? anim_time - custom.z : t;
+			vec4 pa; vec4 pb; vec4 pc;
+			pose_rows(pclip, pt, idx, w, smooth_frames, pa, pb, pc);
+			a = mix(pa, a, k);
+			b = mix(pb, b, k);
+			c = mix(pc, c, k);
+		}
 	}
 }
 
@@ -450,7 +475,7 @@ void vertex() {
 		// FG5 : soldat hors de la bande de ce calque, replié en un point sans skinning.
 		VERTEX = vec3(0.0);
 	} else {
-		float id = id_in_custom ? INSTANCE_CUSTOM.x : float(INSTANCE_ID);
+		float id = bake_id.x >= 0.0 ? bake_id.x : (id_in_custom ? INSTANCE_CUSTOM.x : float(INSTANCE_ID));
 		vec4 h = vec4(hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53), hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3));
 		vec4 custom = id_in_custom ? vec4(0.0) : INSTANCE_CUSTOM;
 		v_rest = VERTEX;
@@ -458,7 +483,7 @@ void vertex() {
 
 		// Variante du soldat : pièces absentes repliées en un point (triangles dégénérés).
 		int mask = int(UV2.x + 0.5);
-		int variant = min(int(h.w * float(variant_count)), variant_count - 1);
+		int variant = bake_id.y >= 0.0 ? int(bake_id.y + 0.5) % max(variant_count, 1) : min(int(h.w * float(variant_count)), variant_count - 1);
 		// Bits 0-5 : variantes ; bit 6 : arme tenue (EP12) ; bit 7 : pavois du dos (BV3).
 		int variant_bits = mask & 63;
 		bool shown = variant_bits == 0 || ((variant_bits >> variant) & 1) == 1;
@@ -509,7 +534,7 @@ void vertex() {
 		v *= mix(1.0 - size_jitter, 1.0 + size_jitter, h.y);
 		float own_blood = 0.0;
 		v_stump = 0.0;
-		if (clip_mode == M_CUSTOM) {
+		if (clip_mode == M_CUSTOM && custom_fade == 0) {
 			// Lot BV2 : projection balistique en arrière (-Z du modèle), partie tranchée masquée.
 			float part = floor(custom.w + 0.001);
 			own_blood = clamp((custom.w - part) / 0.99, 0.0, 1.0);
