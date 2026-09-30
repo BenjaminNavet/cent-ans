@@ -94,7 +94,7 @@ func update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void:
 func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void:
 	_frame += 1
 	var usable := vegetation != null and terrain != null and terrain.quadtree != null and vegetation.has_native()
-	var tree_scale := MapPropScale.shared().tree_scale(camera_distance)
+	var tree_scale := MapPropScale.shared().tree_scale()
 	var fraction := profile.fraction_for(tree_scale) * vegetation.quality_density if usable else 0.0
 	stats["fraction"] = fraction
 	_active = fraction >= profile.min_fraction

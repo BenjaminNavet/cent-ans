@@ -18,22 +18,39 @@ extends Resource
 ## moulin rétréci à côté d'un village géant), et chaque famille ne quitte sa taille de carte que
 ## quand E passe sous 1 / ratio.
 ##
-## VT / VT2 (ADR 0138) : l'exagération ne s'applique plus qu'aux **arbres** et aux **incendies**.
-## Hameaux, moulins et panaches de cheminée sont à l'échelle 1:1 à toute distance (échelle
-## constante), coupés au-delà d'une portée de visibilité quand ils deviennent sous-pixel.
+## VT / VT2 / VT3 (ADR 0138) : l'exagération ne s'applique plus qu'aux **incendies** (et, par
+## `clutter_scale`, aux touffes d'herbe du lot FC3, hors demande). Hameaux, moulins, panaches de
+## cheminée et **arbres** (VT3) sont à l'échelle 1:1 à toute distance (échelle constante), coupés
+## au-delà d'une portée de visibilité quand ils deviennent sous-pixel ; au-delà de la portée des
+## arbres, la forêt est portée par le terrain (canopée du shader `terrain.gdshader`).
 
 ## Distance du rig (unités monde, 1 unité ≈ 719 m) au-dessus de laquelle rien ne change.
 @export var shrink_start: float = 28.0
 ## Distance en deçà de laquelle tout est à sa taille réelle (seuil du palier vallée, SZ4b).
 @export var shrink_end: float = 8.0
-## Exagération à `shrink_start` (arbres et incendies y sont encore à leur taille de carte).
+## Exagération à `shrink_start` (les incendies y sont encore à leur taille de carte).
 @export var max_exaggeration: float = 125.0
-## Taille réelle / taille carte, par famille (1 unité ≈ 719 m). Arbres : ~1,5 unité de haut sur la
-## carte, 20-30 m en vrai. Hameaux : ~2 unités de large, 40-60 m en vrai. Fumées d'incendie :
-## 2 × 9 km sur la carte, ~60 × 400 m en vrai.
-@export var tree_ratio: float = 0.035
+## Taille réelle / taille carte, par famille (1 unité ≈ 719 m). Hameaux : ~2 unités de large,
+## 40-60 m en vrai. Fumées d'incendie : 2 × 9 km sur la carte, ~60 × 400 m en vrai.
 @export var hamlet_ratio: float = 0.03
 @export var fire_ratio: float = 0.05
+## VT3 : arbres à l'échelle 1:1 à toute distance (échelle constante, `tree_scale()`). Hauteurs de
+## modèle (`VegetationTileJob._make_instance`, 1 = hauteur du maillage) : chêne 1,1-1,7, hêtre
+## 1,35-1,95, conifère 1,3-2,1, haie 0,3-0,46 ; × 0,018 × 719 m : chêne 14-22 m, hêtre 17-25 m,
+## conifère 17-27 m, haie 4-6 m (avant VT3 : 0,035, soit 28-53 m, et grossis jusqu'à ×125).
+@export var tree_ratio: float = 0.018
+## Portée des arbres (distance du rig, unités) : au-delà, plus aucun arbre individuel (cartes,
+## maillages, imposteurs) n'est dessiné. Arbre de 20 m en 1080p, fov 55° : ≈ 29 / D px à D unités
+## de la caméra, soit 1 px vers D = 29. Fondu sur `visibility_fade` (dernier 20 %).
+@export var tree_max_distance: float = 30.0
+## Distance caméra → arbre (métrique du shader de feuillage : horizontale + moitié de la hauteur)
+## au-delà de laquelle un arbre n'est plus dessiné (≈ 1 px), éteint par graine sur
+## `tree_view_fade` × cette portée.
+@export var tree_view_range: float = 30.0
+@export var tree_view_fade: float = 0.35
+## Touffes d'herbe et broussailles (`GroundClutter`, FC3) : exagération d'avant VT3 conservée
+## (ancien `tree_ratio`), hors demande.
+@export var clutter_ratio: float = 0.035
 ## VT2 (ADR 0138, addendum) : moulins, panaches de cheminée (et figurants FK, `map_scenes.json`)
 ## sont à l'échelle 1:1 à toute distance, comme les villes et les hameaux : échelle constante
 ## `*_ratio` × leur taille de modèle, plus d'exagération. Moulin (`WINDMILL_SCALE` 4,6 × modèle) :
@@ -78,8 +95,32 @@ func scale_for(ratio: float, distance: float) -> float:
 	return minf(1.0, r * exaggeration(distance))
 
 
-func tree_scale(distance: float) -> float:
-	return scale_for(tree_ratio, distance)
+## VT3 : arbres à l'échelle 1:1 à toute distance (`tree_ratio` × leur taille de modèle).
+func tree_scale() -> float:
+	return clampf(tree_ratio, 1e-4, 1.0)
+
+
+## VT3 : poids [0, 1] des arbres individuels à la distance du rig `distance` (1 en deçà, 0 au-delà
+## de `tree_max_distance`, fondu sur `visibility_fade`).
+func trees_weight(distance: float) -> float:
+	return range_weight(distance, tree_max_distance)
+
+
+## VT3 : vrai si des arbres individuels sont dessinés à la distance du rig `distance`.
+func trees_visible(distance: float) -> bool:
+	return distance < tree_max_distance
+
+
+## Taille à l'écran (px) d'un objet de `height_m` mètres à `camera_distance` unités de la caméra,
+## pour un écran de `screen_px` px de haut et un champ vertical `fov_deg` (réglage des portées).
+static func pixels_for(height_m: float, camera_distance: float, screen_px: float = 1080.0, fov_deg: float = 55.0) -> float:
+	var px_per_unit := screen_px / (2.0 * maxf(camera_distance, 1e-4) * tan(deg_to_rad(fov_deg) * 0.5))
+	return height_m / 719.0 * px_per_unit
+
+
+## Touffes d'herbe (FC3) : échelle exagérée d'avant VT3 (`clutter_ratio`).
+func clutter_scale(distance: float) -> float:
+	return scale_for(clutter_ratio, distance)
 
 
 ## VT2 : moulins à l'échelle 1:1 à toute distance (`windmill_ratio` × leur taille de modèle).

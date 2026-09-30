@@ -218,7 +218,7 @@ func _process(_delta: float) -> void:
 ## visibilité, fondu. Sans coût quand la caméra est au-delà de la portée.
 func update_view(at: Vector2, camera_distance: float) -> void:
 	_frame += 1
-	var prop_scale := MapPropScale.shared().tree_scale(camera_distance)  # = `campaign_prop_scale`
+	var prop_scale := MapPropScale.shared().clutter_scale(camera_distance)  # VT3 : `clutter_scale` du shader
 	var fade := clampf((max_camera_distance - camera_distance) / maxf(fade_band, 0.001), 0.0, 1.0)
 	fade *= smoothstep(min_prop_scale, min_prop_scale * 2.0, prop_scale)
 	var active := enabled and fade > 0.001 and quality_density > 0.001 and (mask != null or weight_sampler.is_valid())

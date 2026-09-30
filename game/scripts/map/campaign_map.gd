@@ -1382,7 +1382,7 @@ func _exit_tree() -> void:
 
 
 func _apply_close_tiers(distance: float) -> void:
-	var props := MapPropScale.shared().tree_scale(distance)  # SZ4 : taille réelle au palier vallée
+	var props := MapPropScale.shared().tree_scale()  # VT3 : arbres 1:1 à toute distance
 	if absf(props - _prop_scale) > props * 0.01:
 		_prop_scale = props
 		RenderingServer.global_shader_parameter_set("campaign_prop_scale", props)
