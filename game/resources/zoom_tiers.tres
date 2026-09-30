@@ -4,14 +4,14 @@
 
 [resource]
 script = ExtResource("1_tiers")
-far_threshold = 620.0
-far_fade = 140.0
+strategic_threshold = 1200.0
+strategic_fade = 200.0
 near_threshold = 150.0
 near_fade = 40.0
-town_label_distance = 380.0
 fine_terrain_distance = 170.0
-model_range = 420.0
+model_range = 1250.0
 hamlet_range = 260.0
+model_shadow_distance = 500.0
 valley_threshold = 8.0
 valley_fade = 3.0
 site_threshold = 1.8

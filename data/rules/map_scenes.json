@@ -1,0 +1,29 @@
+{
+  "description": "Carte vivante (spec docs/design/2026-09-29-carte-vivante-folk.md §§ 2.1.1, 2.1.4, 3) : purement visuel. Source unique des réglages du cœur (durées, seuil de dévastation) et du rendu (game/scripts/map/life_folk, qui lit ce fichier). durations = tours pendant lesquels une scène née d'un événement de la chronique reste sur la carte, par type ; devastation_threshold = dévastation (0-100) à partir de laquelle une province montre des fuyards ; pool_cap = figurines vivantes au plus sur la vue rapprochée (divisé par deux si le budget d'image est dépassé) ; activity_radius = rayon (unités du monde) autour du centre de la caméra où vivent les figurines ; figure_height = hauteur d'une figurine (unités du monde) à l'échelle de la carte ; figure_min_view_fraction = hauteur minimale d'une figurine en fraction de la distance caméra (taille à l'écran à peu près constante au palier proche, sinon une figurine à l'échelle réelle ne fait qu'un pixel) ; road_folk_per_unit = voyageurs par unité de route à la population de référence ; field_work_probability, herd_probability, woodcutter_probability, pilgrim_probability = chances qu'un point de champ, de pâture, de forêt (hiver) ou un tronçon de route près d'une cité soit occupé ; carts_per_trade_value = charrettes par 10 unités de route et par unité de valeur d'une route commerciale ; guard_value = valeur de route à partir de laquelle une charrette a un garde (deux au double) ; scene_figures_min, scene_figures_max = figurants d'une scène de province à l'intensité 0 et 1.",
+  "durations": {
+    "plague": 4,
+    "famine": 3,
+    "revolt": 2,
+    "devastation": 3,
+    "siege": 1,
+    "construction": 2,
+    "fair": 1,
+    "celebration": 2,
+    "flood": 2,
+    "muster": 1
+  },
+  "devastation_threshold": 25,
+  "pool_cap": 600,
+  "activity_radius": 60.0,
+  "figure_height": 1.26,
+  "figure_min_view_fraction": 0.045,
+  "road_folk_per_unit": 0.12,
+  "field_work_probability": 0.35,
+  "herd_probability": 0.12,
+  "woodcutter_probability": 0.06,
+  "pilgrim_probability": 0.1,
+  "carts_per_trade_value": 0.02,
+  "guard_value": 40.0,
+  "scene_figures_min": 6,
+  "scene_figures_max": 24
+}

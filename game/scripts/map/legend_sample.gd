@@ -2,8 +2,10 @@ class_name LegendSample
 extends Control
 
 ## Lot UX1 : échantillon dessiné d'un symbole de la carte pour la légende (`MapLegend`).
-## Les symboles reprennent le vrai rendu : marqueurs peints de l'atlas du lot DA3
-## (`SettlementMarkers`, écu du royaume composé comme dans `settlement_icon.gdshader`), plaque d'effectif (`ArmyMarkers.build_plate`), jeton d'agent
+## Les symboles reprennent le vrai rendu : lieux de la vue normale (lot DV2, ADR 0124 : nom
+## surmonté de l'écu du royaume, tailles par rang de `SettlementMarkers`, comme
+## `settlement_icon.gdshader`), vignette à l'encre du parchemin (`ParchmentOverlay.paint_town`),
+## plaque d'effectif (`ArmyMarkers.build_plate`), jeton d'agent
 ## (`AgentController.Token`), étendard de faction (`ArmyMarker.standard_for`), couleurs de
 ## relation (`MapModeController.RELATION_COLORS`), anneaux et chemins aux couleurs des couches.
 ## `build(sample, context)` renvoie le contrôle adapté ; `context` : {player_color: Color,
@@ -138,15 +140,17 @@ func _draw() -> void:
 	var center := size * 0.5
 	match str(sample.get("type", "")):
 		"settlement":
-			var markers := catalog()
-			var pictogram := str(sample.get("pictogram", markers.pictogram_for(str(sample.get("kind", "village")), int(sample.get("rank", 2)))))
-			draw_marker(self, pictogram, center, 16.0, _owner_faction(str(sample.get("owner", "player"))), bool(sample.get("port", false)))
+			var kind := str(sample.get("kind", "village"))
+			var rank := int(sample.get("rank", 2))
+			draw_marker(self, center + Vector2(0.0, 7.0), catalog().size_px(kind, rank) * catalog().shield_size_factor() * 0.3, _owner_faction(str(sample.get("owner", "player"))), str(sample.get("name", "")))
 		"settlement_owners":
 			var factions: Array = [str(context.get("player_faction", ""))]
 			for entry in (context.get("factions", []) as Array).slice(0, 2):
 				factions.append(str(entry[0]))
 			for i in factions.size():
-				draw_marker(self, "city", Vector2(14.0 + i * 24.0, center.y), 12.0, factions[i])
+				draw_marker(self, Vector2(14.0 + i * 24.0, center.y + 6.0), 9.0, factions[i])
+		"parchment_town":
+			ParchmentOverlay.paint_town(self, center + Vector2(0.0, 9.0), 11.0)
 		"relation":
 			# DP2 : positions diplomatiques (allié, accord, neutre, tension...) d'abord.
 			var relation := str(sample.get("relation", ""))
@@ -228,30 +232,17 @@ static func catalog() -> SettlementMarkers:
 	return _markers
 
 
-## Marqueur de lieu (lot DA3) : pictogramme peint de l'atlas, insigne de port, écu du royaume
-## `faction` ("" : sans écu), placés comme dans `settlement_icon.gdshader`. `half` : demi-taille
-## en pixels ; la base du pictogramme est sous `center`.
-static func draw_marker(canvas: CanvasItem, pictogram: String, center: Vector2, half: float, faction: String, port: bool = false) -> void:
-	var markers := catalog()
-	if markers.atlas == null:
-		return
-	var box := Rect2(center - Vector2(half, half), Vector2(half, half) * 2.0)
-	var atlas_size := markers.atlas.get_size()
-	var cell := markers.cell_of(pictogram)
-	if cell >= 0:
-		var region := markers.cell_uv_rect(cell)
-		canvas.draw_texture_rect_region(markers.atlas, box, Rect2(region.position * atlas_size, region.size * atlas_size))
-	if port and markers.port_cell() >= 0:
-		var badge := _placed(box, markers.placement("badge"))
-		var badge_region := markers.cell_uv_rect(markers.port_cell())
-		canvas.draw_texture_rect_region(markers.atlas, badge, Rect2(badge_region.position * atlas_size, badge_region.size * atlas_size))
+## Lieu de la vue normale (lot DV2) : nom `name` (encre, base du texte sur `base`) surmonté de
+## l'écu du royaume `faction` ("" : sans écu), comme `settlement_icon.gdshader`. `half` :
+## demi-côté de l'écu en pixels. Sans nom, l'écu seul, sa base sur `base`.
+static func draw_marker(canvas: CanvasItem, base: Vector2, half: float, faction: String, name: String = "") -> void:
+	var top := base.y
+	if name != "":
+		var font := ThemeDB.fallback_font
+		var font_size := 11
+		var width := font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+		canvas.draw_string(font, Vector2(base.x - width * 0.5, base.y), name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, HudStyle.INK)
+		top = base.y - font.get_ascent(font_size)
 	var shield := PortraitLoader.heraldry_texture(faction)
 	if shield != null:
-		canvas.draw_texture_rect(shield, _placed(box, markers.placement("shield")), false)
-
-
-## Rectangle écran d'un élément placé (centre et demi-taille en fraction, origine en bas à gauche).
-static func _placed(box: Rect2, place: Vector3) -> Rect2:
-	var center := box.position + Vector2(place.x, 1.0 - place.y) * box.size
-	var half := place.z * box.size
-	return Rect2(center - half, half * 2.0)
+		canvas.draw_texture_rect(shield, Rect2(Vector2(base.x - half, top - 1.0 - half * 2.0), Vector2(half, half) * 2.0), false)

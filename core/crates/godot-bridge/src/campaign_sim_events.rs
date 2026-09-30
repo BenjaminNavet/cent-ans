@@ -1,6 +1,7 @@
 //! `CampaignSim` chronicle API (spec M10 § 3), in a secondary `#[godot_api]`
 //! block so that each milestone keeps its own file.
 
+use data_model::{EventId, ProvinceId};
 use godot::prelude::*;
 use sim_campaign::Order;
 
@@ -10,7 +11,8 @@ use crate::campaign_sim::{order_result, CampaignSim};
 impl CampaignSim {
     /// Decisions waiting for the player, oldest first:
     /// `[{id, event, title, text, historical, options[{index, text,
-    /// effects_text}], expires_in, province, province_name}]`.
+    /// effects_text}], expires_in, province, province_name, presentation}]`;
+    /// `presentation` (FK1) is `map` (incident posed on the map) or `dialog`.
     #[func]
     fn get_pending_decisions(&self) -> VarArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -42,6 +44,7 @@ impl CampaignSim {
                     "expires_in" => i64::from(view.expires_in),
                     "province" => view.province.as_ref().map_or("", |p| p.as_str()),
                     "province_name" => view.province_name.as_str(),
+                    "presentation" => view.presentation.as_str(),
                 }
                 .to_variant()
             })
@@ -74,5 +77,31 @@ impl CampaignSim {
             option: option.max(0) as usize,
         };
         order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+    }
+
+    /// Staging (UI tests, screenshots, FK5): offers `event` to the player as
+    /// a pending decision in `province` (`""`: none); returns its id, -1 if
+    /// refused (unknown event or province, turn being resolved).
+    #[func]
+    fn debug_offer_decision(&mut self, event: GString, province: GString) -> i64 {
+        if self.refuse_while_turn_pending("debug_offer_decision") {
+            return -1;
+        }
+        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+            return -1;
+        };
+        let Ok(event) = EventId::new(event.to_string()) else {
+            return -1;
+        };
+        let province = match province.to_string().as_str() {
+            "" => None,
+            id => match ProvinceId::new(id) {
+                Ok(p) => Some(p),
+                Err(_) => return -1,
+            },
+        };
+        state
+            .debug_offer_decision(data, &event, province.as_ref())
+            .map_or(-1, i64::from)
     }
 }

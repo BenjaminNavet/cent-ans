@@ -34,6 +34,9 @@ extends Node3D
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
+## FK6 : images d'attente au plus pour la vie de la carte avant une capture.
+const SCREENSHOT_LIFE_WAIT := 240
+var _screenshot_life_wait := 0
 const START_MENU_SCENE := "res://scenes/start_menu.tscn"
 ## Q2 : un second clic à moins de tant de pixels du précédent alterne armée / ville.
 const REPEAT_CLICK_PX := 12.0
@@ -42,7 +45,6 @@ const REPEAT_CLICK_PX := 12.0
 @onready var sea: Sea = $Sea
 @onready var rivers: RiversRenderer = $Rivers
 @onready var coast: CoastRenderer = $Coast
-@onready var cities: CityMarkers = $Cities
 @onready var armies: ArmyMarkers = $Armies
 @onready var path_preview: PathPreview = $PathPreview
 @onready var trade_layer: TradeRouteLayer = $TradeRouteLayer
@@ -141,10 +143,6 @@ func _ready() -> void:
 	var map_extent := maxf(map_data.size.x, map_data.size.y)
 	rivers.minor_max_distance = map_extent * 0.35
 	coast.build(map_data)
-	# Étiquettes visibles quand peu de provinces sont à l'écran : seuil ∝ 1/√(nombre de provinces).
-	cities.label_max_distance = map_extent * 0.35 * sqrt(20.0 / maxf(map_data.province_count, 1.0))
-	cities.labels_only = true  # C6 : noms de provinces (palier loin), colonies à part
-	cities.build(map_data)
 	_setup_settlements()
 	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
 	rivers.build(map_data, terrain, settlement_layer)
@@ -310,7 +308,7 @@ func _setup_settlements() -> void:
 	camera_rig.floor_zones_set = true
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
-		return settlement_layer.screen_label_rects(view_camera) + cities.screen_label_rects(view_camera)
+		return settlement_layer.screen_label_rects(view_camera)
 	# CV3-0 (#7) : réciproque — les colonies évitent à leur tour les plaques/étendards d'armée.
 	settlement_layer.label_obstacles = func(view_camera: Camera3D) -> Array:
 		return armies.screen_label_rects(view_camera)
@@ -1126,7 +1124,7 @@ func _on_end_turn(threaded: bool = false) -> void:
 	if victory != null:
 		victory.after_end_turn()
 	if chronicle != null:  # M10
-		chronicle.after_end_turn()
+		chronicle.after_end_turn(events)
 	if capture_fate != null:  # TW2-T1
 		capture_fate.after_end_turn()
 	if traditions != null:  # TW2-T5
@@ -1245,17 +1243,18 @@ func _process(_delta: float) -> void:
 	tp = PerfProbe.lap("map.vertical_scale", tp)
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
 	tp = PerfProbe.lap("map.update_lod", tp)
-	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
-	tp = PerfProbe.lap("map.cities", tp)
-	if zoom_tiers != null:  # C6 : paliers de zoom
-		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
+	if zoom_tiers != null:  # C6 / DV (ADR 0124) : deux vues, détail proche sous `near_threshold`
 		settlement_layer.update_view(distance)
 		tp = PerfProbe.lap("map.settlements", tp)
 		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
 		# palier « site » (routes drapées à leur vraie largeur : lot ZG5b).
+		# DV : traits (principales ; secondaires effacées d'elles-mêmes au-delà de
+		# `minor_fade_distance`) sur toute la vue normale hors détail proche, où les rubans de toutes
+		# les routes prennent le relais ; rien sur le parchemin.
 		var site_hide := 1.0 - zoom_tiers.site_weight(distance)
-		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
+		var near := zoom_tiers.near_weight(distance)
+		roads.update_view(clampf(1.0 - zoom_tiers.strategic_weight(distance) - near, 0.0, 1.0), near * site_hide)
 		tp = PerfProbe.lap("map.roads", tp)
 		if rivers.crossings != null:
 			# ZG5b : avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.
@@ -1290,6 +1289,11 @@ func _process(_delta: float) -> void:
 			settlement_layer.flush()
 			roads.flush(zoom_tiers.near_weight(distance) * (1.0 - zoom_tiers.site_weight(distance)))
 			rivers.flush_fine(distance)  # ZG5b
+		# FK6 : la capture attend aussi la vie de la carte (préchauffage des figurines et premier
+		# placement, différé tant que la caméra bouge), au plus `SCREENSHOT_LIFE_WAIT` images.
+		if _screenshot_countdown == 1 and life != null and life.folk != null and not life.folk.settled() and _screenshot_life_wait < SCREENSHOT_LIFE_WAIT:
+			_screenshot_life_wait += 1
+			return
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:
 			_take_screenshot(_screenshot_path, true)
@@ -1368,6 +1372,7 @@ func _update_fps_probe() -> void:
 			"hamlets": settlement_layer.hamlet_instance_count() if settlement_layer != null else 0,
 			"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 			"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			"folk": life.folk.stats if life != null and life.folk != null else {},
 		}))
 		_fps_probe_frames = -1
 		if _screenshot_path == "":
@@ -1733,6 +1738,8 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var err := image.save_png(path)
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
+	if life != null and life.folk != null:  # FK6 : contenu du réservoir au moment de la capture
+		print("CampaignMap: screenshot folk %s (waited %d frames)" % [JSON.stringify(life.folk.view_report(camera)), _screenshot_life_wait])
 	if OS.get_cmdline_user_args().has("--dump-near"):  # ZG4 : diagnostic, géométries autour de la caméra
 		var eye := camera.global_position
 		for node in get_tree().root.find_children("*", "GeometryInstance3D", true, false):

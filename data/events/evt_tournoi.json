@@ -15,6 +15,7 @@
   "scope": {
     "type": "faction"
   },
+  "map_scene": "celebration",
   "options": [
     {
       "text": "Donner un tournoi somptueux",

@@ -28,6 +28,7 @@ pub mod event;
 pub mod faction;
 pub mod feudal_rules;
 pub mod landmark;
+pub mod map_scenes;
 pub mod mercenaries;
 pub mod missions;
 pub mod movement;

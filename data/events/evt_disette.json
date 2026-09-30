@@ -15,6 +15,7 @@
   "scope": {
     "type": "province"
   },
+  "map_scene": "famine",
   "options": [
     {
       "text": "Ouvrir les greniers du prince",

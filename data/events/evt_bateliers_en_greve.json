@@ -1,0 +1,64 @@
+{
+  "id": "evt_bateliers_en_greve",
+  "title": "Les bateliers cessent le travail",
+  "text": "Les bateliers du fleuve refusent de haler les bateaux : ils réclament une hausse du prix du passage, que les péagers ont gelé. Les denrées s'amoncellent sur les quais.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 65
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Accorder la hausse aux bateliers",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -350
+        },
+        {
+          "type": "wealth",
+          "amount": 4
+        },
+        {
+          "type": "unrest",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Rogner le péage pour compenser",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -150
+        },
+        {
+          "type": "wealth",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Réquisitionner les bateaux",
+      "effects": [
+        {
+          "type": "wealth",
+          "amount": -4
+        },
+        {
+          "type": "unrest",
+          "amount": 6
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "sources": [
+    "Jacques Rossiaud, Le Rhône au Moyen Âge, Aubier, 2007",
+    "Jean Favier, De l'or et des épices, Fayard, 1987"
+  ]
+}

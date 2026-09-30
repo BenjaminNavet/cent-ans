@@ -209,7 +209,7 @@ func _test_camera() -> void:
 
 func _test_tiers() -> void:
 	var tiers := ZoomTiers.load_default()
-	_check(tiers.tier_at(900.0) == ZoomTiers.Tier.FAR, "far tier")
+	_check(tiers.tier_at(1400.0) == ZoomTiers.Tier.STRATEGIC, "strategic tier")
 	_check(tiers.tier_at(60.0) == ZoomTiers.Tier.NEAR, "county tier")
 	_check(tiers.tier_at(3.0) == ZoomTiers.Tier.VALLEY, "valley tier")
 	_check(tiers.tier_at(0.5) == ZoomTiers.Tier.SITE, "site tier")

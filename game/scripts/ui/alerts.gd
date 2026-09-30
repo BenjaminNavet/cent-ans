@@ -86,7 +86,8 @@ static func collect(map: Node, last_events: Array) -> Array:
 		for decision in sim.call("get_pending_decisions"):
 			result.append({
 				"id": "chronicle:%s" % str(decision.get("id", "")), "kind": "chronicle_decision", "severity": "warning",
-				"blocking": true, "decision_id": decision.get("id", -1),
+				# FK5 : un incident posé sur la carte peut courir (le conseil tranche à l'échéance).
+				"blocking": str(decision.get("presentation", "")) != "map", "decision_id": decision.get("id", -1),
 				"province_id": str(decision.get("province", "")),
 				"text": "Chronique : %s" % str(decision.get("title", "décision en attente")),
 			})

@@ -339,6 +339,20 @@ fn battle_outcome_rules_match_their_default() {
     assert_eq!(from_file, data_model::BattleOutcomeRules::default());
 }
 
+/// Lot FK1: `data/rules/map_scenes.json` is read, mirrored by the default
+/// and times every scene kind.
+#[test]
+fn map_scene_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.map_scene_rules.clone();
+    assert!(from_file.description.is_some(), "map_scenes.json not read");
+    from_file.description = None;
+    assert_eq!(from_file, data_model::MapSceneRules::default());
+    for kind in data_model::SceneKind::ALL {
+        assert!(from_file.durations.contains_key(&kind), "{kind:?}");
+    }
+}
+
 /// Lot CV3-1: the cover map is decoded from the real rasters and finds
 /// forests and wetlands somewhere.
 #[test]

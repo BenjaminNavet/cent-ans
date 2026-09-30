@@ -14,6 +14,11 @@ extends Node3D
 ##   --devastate=<province>:<0-100>[,...]   force une dévastation affichée (captures) ;
 ##   --no-life                               désactive la couche (mesures A/B) ;
 ##   --life-off=terrain,smoke,mills,ambient  désactive une partie (mesures de coût).
+## Chantier FK (carte vivante, `docs/design/2026-09-29-carte-vivante-folk.md`) : figurines de la
+## vue rapprochée (`life_folk/`), mêmes crochets `refresh` / `update_view` :
+##   --no-folk                                        désactive les figurines (mesures A/B) ;
+##   --folk-off=routine,caravans,scenes,incidents     désactive une partie ;
+##   --scene=<province>:<kind>[,...]                  force une scène de province (FK4, captures).
 
 var enabled: bool = true
 var seasons: SeasonVisuals = SeasonVisuals.new()
@@ -22,6 +27,17 @@ var terroir: TerroirMask = null
 var levels: Dictionary = {}
 var effects: LifeEffects = null
 var ambient: LifeAmbient = null
+## FK3 : réservoir de figurines et ses fournisseurs (FK4 : scènes, FK5 : incidents).
+var folk: FolkPool = null
+var folk_routine: FolkRoutine = null
+var folk_caravans: FolkCaravans = null
+var folk_scenes: FolkScenes = null
+## FK5 : sceaux des incidents (nul : `--no-life`, `--no-folk`, `--folk-off=incidents`).
+var incidents: IncidentMarkers = null
+var folk_enabled: bool = true
+var folk_off: Dictionary = {}
+## FK4 : scènes forcées par `--scene=` ({province, kind, settlement, intensity}).
+var forced_scenes: Array = []
 var forced_season: String = ""
 ## province_id → dévastation forcée (captures).
 var forced_devastation: Dictionary = {}
@@ -65,6 +81,43 @@ func setup(map: Node) -> void:
 	add_child(ambient)
 	ambient.setup(_map_data, _terrain, _settlements.data if _settlements != null else null)
 	stats.merge(ambient.stats, true)
+	_setup_folk()
+	_setup_incidents()
+
+
+## FK3 : réservoir et fournisseurs, servis dans l'ordre d'enregistrement quand le plafond est
+## atteint (FK4 : scènes avant les marchands ; FK5 : incidents).
+func _setup_folk() -> void:
+	if not folk_enabled:
+		return
+	folk = FolkPool.new()
+	folk.name = "Folk"
+	add_child(folk)
+	folk.setup(_map_data, _terrain)
+	folk.landmark_layer = _settlements
+	var settlement_data: SettlementData = _settlements.data if _settlements != null else null
+	if not folk_off.has("scenes"):
+		folk_scenes = FolkScenes.new()
+		folk_scenes.setup(_map_data, settlement_data, _settlements)
+		folk_scenes.forced = forced_scenes
+		folk.register(folk_scenes)
+	if not folk_off.has("caravans"):
+		folk_caravans = FolkCaravans.new()
+		folk_caravans.setup(_map_data, settlement_data)
+		folk.register(folk_caravans)
+	if not folk_off.has("routine"):
+		folk_routine = FolkRoutine.new()
+		folk_routine.setup(_map_data, settlement_data)
+		folk.register(folk_routine)
+
+
+## FK5 : sceaux des incidents, à tous les zooms (hors réservoir : aucune figurine).
+func _setup_incidents() -> void:
+	if not folk_enabled or folk_off.has("incidents"):
+		return
+	incidents = IncidentMarkers.new()
+	add_child(incidents)
+	incidents.setup(_map)
 
 
 func _parse_cmdline() -> void:
@@ -74,6 +127,13 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--life-off="):
 			for part in arg.trim_prefix("--life-off=").split(",", false):
 				_off[part] = true
+		elif arg == "--no-folk":
+			folk_enabled = false
+		elif arg.begins_with("--folk-off="):
+			for part in arg.trim_prefix("--folk-off=").split(",", false):
+				folk_off[part] = true
+		elif arg.begins_with("--scene="):
+			forced_scenes.append_array(FolkScenes.parse_forced(arg.trim_prefix("--scene=")))
 		elif arg.begins_with("--season="):
 			forced_season = arg.trim_prefix("--season=")
 		elif arg.begins_with("--devastate="):
@@ -87,6 +147,8 @@ func _parse_cmdline() -> void:
 func refresh(sim: Object) -> void:
 	if not enabled or sim == null:
 		return
+	if incidents != null:  # FK5 : une décision prise dans le tour retire son sceau
+		incidents.refresh(sim)
 	if forced_season == "" and sim.has_method("get_date_label"):
 		var season := SeasonVisuals.season_from_label(str(sim.call("get_date_label")))
 		# Premier affichage (nouvelle partie, chargement) : sans transition.
@@ -109,6 +171,38 @@ func refresh(sim: Object) -> void:
 		if vegetation != null and _settlements != null:
 			vegetation.set("extra_exclusions", _settlements.vegetation_exclusions())
 	_refresh_terroir()
+	_refresh_folk(sim)
+
+
+## FK3 : état lu par la routine (population, dévastation, saison, cités, terroirs), puis
+## relecture des fournisseurs (routes commerciales) ; une fois par tour.
+func _refresh_folk(sim: Object) -> void:
+	if folk == null:
+		return
+	if folk_routine != null:
+		folk_routine.province_states = province_states
+		folk_routine.season = seasons.season
+		folk_routine.terroir = terroir
+		var cities := PackedVector2Array()
+		if _settlements != null and _settlements.data != null:
+			# Cités : colonies de type « city » (Paris et les villes 1:1 ne passent pas par la
+			# croissance) et colonies promues cité (`SettlementGrowth`, niveau 3).
+			for entry in _settlements.data.settlements:
+				var level := int(levels.get(str(entry["id"]), -2)) / 2
+				if str(entry["kind"]) == "city" or level == 3:
+					cities.append(entry["px"])
+		folk_routine.cities = cities
+	folk.refresh(sim)
+	stats["folk"] = folk.stats
+	if folk_scenes != null:
+		# FK4 : disette → champs vides ; peste → cheminées éteintes ; bûchers et émeutes fument.
+		if folk_routine != null:
+			folk_routine.idle_provinces = folk_scenes.idle_provinces
+		if effects != null:
+			effects.quiet_settlements = folk_scenes.quiet_settlements
+			effects.scene_fires = folk_scenes.fire_points
+			effects.rebuild(province_states)
+		stats["folk_scenes"] = folk_scenes.stats
 
 
 ## Dévastation et population des provinces qui ont des colonies ou des hameaux.
@@ -259,5 +353,12 @@ func update_view(camera_distance: float) -> void:
 		var focus: Vector3 = rig.get("focus") if rig != null else Vector3.ZERO
 		# ZG4 : navires, bateaux et oiseaux à l'échelle de la carte masqués au palier « site ».
 		var keep := 1.0 - _tiers.site_weight(_camera_distance)
-		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, _tiers.medium_weight(_camera_distance) * keep)
-	PerfProbe.lap("life/ambient", tp)
+		# DV : bateaux et navires sur toute la vue normale (poids 1 − `strategic_weight`).
+		var normal := 1.0 - _tiers.strategic_weight(_camera_distance)
+		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, normal * keep)
+	tp = PerfProbe.lap("life/ambient", tp)
+	if folk != null and _tiers != null:
+		var folk_rig := _map.get("camera_rig") as Node3D if _map != null else null
+		var folk_focus: Vector3 = folk_rig.get("focus") if folk_rig != null else Vector3.ZERO
+		folk.update_view(Vector2(folk_focus.x, folk_focus.z), _camera_distance, _tiers.near_weight(_camera_distance))
+	PerfProbe.lap("life/folk", tp)

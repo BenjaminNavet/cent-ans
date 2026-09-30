@@ -1,0 +1,68 @@
+{
+  "id": "evt_pelerins_malades",
+  "title": "Des pèlerins malades",
+  "text": "Une troupe de pèlerins en route pour Compostelle s'est arrêtée dans la province : plusieurs sont fiévreux et l'on craint qu'ils ne répandent le mal. L'hôpital du bourg est plein.",
+  "kind": "random",
+  "trigger": {
+    "mean_time_to_happen": 70
+  },
+  "scope": {
+    "type": "province"
+  },
+  "options": [
+    {
+      "text": "Les héberger à l'hôpital aux frais du seigneur",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -450
+        },
+        {
+          "type": "health",
+          "amount": 3
+        },
+        {
+          "type": "piety",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Les loger hors des murs, dans une grange",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -150
+        },
+        {
+          "type": "health",
+          "amount": -1
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Les faire reprendre leur route",
+      "effects": [
+        {
+          "type": "health",
+          "amount": -4
+        },
+        {
+          "type": "piety",
+          "amount": -2
+        },
+        {
+          "type": "unrest",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Jean Verdon, Voyager au Moyen Âge, Perrin, 1998",
+    "Jean Chélini et Henri Branthomme, Les Chemins de Dieu, Hachette, 1982"
+  ]
+}

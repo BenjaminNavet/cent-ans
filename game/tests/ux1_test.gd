@@ -133,7 +133,7 @@ func _test_legend() -> void:
 	legend.build("political", context)
 	await process_frame
 	var labels := legend.entry_labels()
-	_check(labels.has("Cité") and labels.has("E : espion") and labels.has("Terres voilées"), "legend lists settlements, agents and fog: %s" % [labels])
+	_check(labels.has("Vue normale : maquette et écu") and labels.has("E : espion") and labels.has("Terres voilées"), "legend lists settlements, agents and fog: %s" % [labels])
 	_check(labels.has("Territoire occupé"), "legend explains occupied borders: %s" % [labels])  # RS-E : FR1 hachures
 	var political_count := legend.entry_count()
 	legend.set_mode("diplomacy")
@@ -147,7 +147,8 @@ func _test_legend() -> void:
 		_check((sample as Control).get_child_count() == 1, "sample %s has content" % sample.name)
 	var plates := legend.find_children("Plate_legend", "PanelContainer", true, false)
 	_check(plates.size() >= 3, "army plates drawn with the real plate builder (%d)" % plates.size())
-	_check(LegendSample.catalog().atlas != null and LegendSample.catalog().cell_of("city") >= 0, "settlement markers atlas (DA3)")
+	_check(LegendSample.catalog().is_valid() and LegendSample.catalog().size_px("city", 4) > 0.0, "settlement rank catalogue (DA3, DV2)")
+	_check(legend.find_children("Sample_parchment_town", "", true, false).size() == 1, "parchment ink vignette sample (DV2)")
 	legend.close_legend()
 	_check(not legend.visible, "close hides the legend")
 	legend.queue_free()

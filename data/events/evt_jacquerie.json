@@ -21,6 +21,7 @@
     "type": "province",
     "province": "prov_picardie"
   },
+  "map_scene": "revolt",
   "options": [
     {
       "text": "Laisser la noblesse châtier les Jacques",
