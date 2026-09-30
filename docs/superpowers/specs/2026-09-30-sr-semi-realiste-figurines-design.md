@@ -73,3 +73,24 @@ NB2 : ≤ 1 $ (SR3). Enveloppe NB2 globale ≈ 20 $ (3,10 $ déjà en NB). Secti
 ## 4. Hors périmètre (suite du mandat semi-réaliste)
 Campagne 3D : imposteurs d'arbres lointains (avec le chantier FPS carte), bâtiments. Parchemin
 peint de la vue stratégique : reste un registre carte, à reprendre après SR.
+
+## 5. SR5 — Bâtiments, gains rapides (ajout du 30/09, demande du joueur, 0 $)
+
+Constat : seul `landmark.gdshader` a une usure (`aging` : pied des murs, coulures, crasse,
+mousse sur les faces au ciel). Les maquettes de campagne (`building_atlas.gdshader`), les villes
+à l'échelle (`town_building.gdshader`) et les bâtiments de bataille (StandardMaterial3D par
+surface, `building_materials.gd`) n'en ont aucune, hormis le bruit cuit en couleur de sommet.
+
+Gains rapides :
+- **SR5a** usure procédurale (reprise de la logique `aging` du shader des monuments, sans
+  texture supplémentaire) dans `building_atlas.gdshader` et `town_building.gdshader`, adaptée
+  au lointain (effet plus doux, pas de coût en appels de dessin).
+- **SR5b** bâtiments de bataille : `building_materials.gd` passe des StandardMaterial3D
+  texturés à un ShaderMaterial partagé `building_pbr.gdshader` (mêmes textures 2k Poly Haven,
+  UV en mètres, neige conservée) + usure (boue et éclaboussures au pied, coulures sous les
+  appuis, mousse sur tuiles et chaume, variation par bâtiment).
+- Uniforme `aging` commun, drapeau `--no-sr5`.
+
+À faire (trop cher pour un gain rapide, noté dans `docs/wip/sr.md`) : câblage du colombage
+`TimberFrame` (réexport Blender + indices de couche + choix régional), remplacement des toits
+bleus du château Kenney, LOD grossier des maquettes (appels de dessin, chantier FPS carte).
