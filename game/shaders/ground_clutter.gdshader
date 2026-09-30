@@ -22,7 +22,7 @@ uniform float wind_speed = 1.4;
 // 0,105 / 0,165 / 0,045), pointes un peu plus claires pour détacher les touffes du sol.
 uniform vec3 grass_color : source_color = vec3(0.34, 0.44, 0.21);
 uniform vec3 grass_dry : source_color = vec3(0.46, 0.46, 0.27);
-uniform vec3 bush_color : source_color = vec3(0.24, 0.33, 0.15);
+uniform vec3 bush_color : source_color = vec3(0.28, 0.37, 0.18);
 // Lot FC5 : touffe en éventail (lot DA6, CC0) : alpha = brins, luminance = relief des brins.
 // Mipmaps + compensation de l'alpha : les brins restent lisibles quand la touffe fait 10 px.
 uniform sampler2D grass_texture : source_color, filter_linear_mipmap, repeat_disable;

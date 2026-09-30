@@ -36,14 +36,14 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var min_radius: float = 16.0
 @export var max_radius: float = 52.0
 ## Candidats par cellule à la densité 1 (préréglage Haute) sur une couverture pleine.
-@export var base_per_cell: int = 6000
+@export var base_per_cell: int = 4000
 ## Densité maximale d'un préréglage (Ultra) : nombre de candidats semés.
 @export var max_density: float = 1.5
 ## Hauteur (unités monde, taille de carte) d'une touffe d'herbe et d'une broussaille.
-## Lot FC5 : 0,26 / 0,5 (≈ 7 px à d = 25 en 720p) ; le shader les réduit comme
+## Lot FC5 : 0,22 / 0,42 (≈ 6 px à d = 25 en 720p) ; le shader les réduit comme
 ## `campaign_prop_scale`^`prop_scale_power` (plus lentement que les arbres : encore visibles à d = 10).
-@export var grass_height: float = 0.26
-@export var bush_height: float = 0.5
+@export var grass_height: float = 0.22
+@export var bush_height: float = 0.42
 @export var prop_scale_power: float = 0.5
 ## Échelle des arbres (`campaign_prop_scale`) sous laquelle les touffes disparaissent (trop
 ## petites pour valoir leur coût).
@@ -55,7 +55,7 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var max_reground_per_frame: int = 2
 @export var max_cached_cells: int = 96
 ## Plafond des instances visibles (toutes cellules).
-@export var max_visible_instances: int = 90000
+@export var max_visible_instances: int = 60000
 
 ## Préréglage de qualité : densité (0 : rien).
 var quality_density: float = 1.0
