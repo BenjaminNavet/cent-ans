@@ -181,6 +181,14 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   assemblées en atlas avec des couches procédurales (pans de bois, plomb, vitrail, vieillissement) :
   `game/assets/textures/landmarks/` (lot L3, détail dans son `SOURCE.md`).
 
+### Matières des figurines de bataille — CC0 1.0 (SR1)
+
+- **ambientCG** ([ambientcg.com](https://ambientcg.com), Lennart Demes) : Fabric045, Fabric061,
+  Fabric066, Fabric048, Chainmail002, Leather033A, Metal055A, Wood049 (1K-JPG : couleur, normale
+  GL, rugosité, déplacement). Réduites à 512² à l'échelle physique et centrées en albédo de
+  détail ; couches 0-7 des tableaux `game/assets/models/battle_fine/textures/fine_detail_*.png`
+  (détail dans son `SOURCE.md`).
+
 ### Détail proche du sol de bataille — CC0 1.0
 
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Grass Path 2 (Rob Tuytel), 2k,
