@@ -80,6 +80,7 @@ const TOP_CLEARANCE := 76.0
 
 func _ready() -> void:
 	Lettrine.attach(name_label)  # UI1 : titre à lettrine enluminée
+	item_rect_changed.connect(func() -> void: _keep_centered.call_deferred())
 	close_button.pressed.connect(func() -> void:
 		UiMotion.fade_out(self)  # P2a (ADR 0097, bible DA § 12.4)
 		closed.emit())
@@ -668,6 +669,20 @@ func fit_beside(left_edge: float, view_width: float, view_height: float = 0.0) -
 		var height := maxf(get_combined_minimum_size().y, minf(size.y, minf(DESIGN_HEIGHT, view_height - TOP_CLEARANCE)))
 		if not is_equal_approx(size.y, height):
 			size = Vector2(size.x, height)
+		_keep_centered()
+
+
+## VN : fiche centrée verticalement dans la zone `MODAL` (ancres au centre) : le centrage de la
+## zone, fait avec la taille minimale transitoire du premier remplissage (2 720 px), laissait le
+## haut de la fiche à -1 360 px, hors de l'écran. Différé depuis `item_rect_changed`.
+func _keep_centered() -> void:
+	if not is_equal_approx(anchor_top, 0.5) or not is_equal_approx(anchor_bottom, 0.5):
+		return
+	var half := size.y * 0.5
+	if is_equal_approx(offset_top, -half) and is_equal_approx(offset_bottom, half):
+		return
+	offset_top = -half
+	offset_bottom = half
 
 
 ## Deux colonnes (portrait à gauche, contenu à droite) ou une seule colonne défilante.
