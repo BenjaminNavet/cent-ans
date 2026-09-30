@@ -11,6 +11,15 @@
 //! rule.
 
 use std::f64::consts::TAU;
+use std::sync::Arc;
+
+pub mod species;
+pub use species::{Distribution, SpeciesTable};
+use species::{
+    B_FOREST, B_GROVE, B_ISOLATED, B_ORCHARD, B_ORCHARD_OPEN, B_ORCHARD_RING, B_RIPARIAN,
+    B_RIPARIAN_PX, B_SCRUB, CUSTOM_STRIDE, ROLE_EDGE, ROLE_ISOLATED, ROLE_MASSIF, ROLE_ORCHARD,
+    ROLE_RIPARIAN, ROLE_SCRUB,
+};
 const KIND_OAK: usize = 0;
 const KIND_BEECH: usize = 1;
 const KIND_CONIFER: usize = 2;
@@ -203,6 +212,10 @@ pub struct TileRequest {
     pub ground: Ground,
     /// Lot SZ4b: dense forest cell scattered inside the tile whose coarse grids are given.
     pub detail: Option<DetailArea>,
+    /// Lot HB4: biome index per coarse cell (`side × side`, nearest; empty = default biome).
+    pub biome: Vec<f32>,
+    /// Lot HB4: species table; `None` keeps the V4 scatter (oak, beech, conifer).
+    pub species: Option<Arc<SpeciesTable>>,
 }
 
 /// Lot SZ4b (dense forest near the camera at the valley tier): a sub-rectangle of the tile
@@ -610,6 +623,10 @@ impl<'a> Scatter<'a> {
                 let gy = (y - oy) / req.coarse_step;
                 let forest = self.lerp_grid(FOREST, gx, gy);
                 let yaw = self.rng.randf() * TAU;
+                if let Some(table) = req.species.as_deref() {
+                    self.species_candidate(table, x, y, roll, roll_kind, forest, yaw);
+                    continue;
+                }
                 let mut kind = None;
                 let mut scale_factor = 1.0;
                 if roll < forest * 0.9 {
@@ -783,8 +800,23 @@ impl<'a> Scatter<'a> {
         }
         let ground = req.display_ground(self.map, px, py, ground);
         let yaw = (-(next.1 - pos.1)).atan2(next.0 - pos.0) + self.rng.range(-0.15, 0.15);
-        if tree < HEDGE_TREE {
+        let hedge_tree = req
+            .species
+            .as_deref()
+            .map_or(HEDGE_TREE, |t| t.dist.hedge_tree);
+        if tree < hedge_tree {
             let tree_yaw = self.rng.randf() * TAU;
+            if let Some(table) = req.species.as_deref() {
+                // Lot HB4: hedge trees of the local biome (role "isolated").
+                let roll = self.rng.randf();
+                let (b, conifer) = self.biome_and_conifer(table, gx, gy);
+                let altitude = self.map.height_m_at(px, py);
+                let sd = self.map.river_sd_at(px, py);
+                if let Some(sp) = table.pick(ROLE_ISOLATED, b, altitude, sd, conifer, roll) {
+                    self.push_species(table, sp, px, ground, py, tree_yaw, 0.78);
+                }
+                return;
+            }
             self.push(KIND_OAK, px, ground, py, tree_yaw, 0.78);
         } else {
             self.push(KIND_HEDGE, px, ground, py, yaw, 1.0);
@@ -794,7 +826,7 @@ impl<'a> Scatter<'a> {
     /// `VegetationTileJob._make_instance`.
     fn push(&mut self, kind: usize, x: f64, ground: f64, y: f64, yaw: f64, scale_factor: f64) {
         let rng = &mut self.rng;
-        let (mut height, mut width, tint);
+        let (height, width, tint): (f64, f64, [f64; 3]);
         match kind {
             KIND_CONIFER => {
                 height = rng.range(1.3, 2.1);
@@ -833,6 +865,182 @@ impl<'a> Scatter<'a> {
                 };
             }
         }
+        self.emit(kind, x, ground, y, yaw, scale_factor, height, width, tint);
+    }
+
+    /// Lot HB4: biome (nearest coarse cell, default on sea / missing grid) and conifer share.
+    fn biome_and_conifer(&self, table: &SpeciesTable, gx: f64, gy: f64) -> (usize, f64) {
+        let side = self.req.side;
+        let default = table.dist.default_biome;
+        let b = if self.req.biome.len() >= side * side {
+            let i = (gx.round().max(0.0) as usize).min(side - 1);
+            let j = (gy.round().max(0.0) as usize).min(side - 1);
+            match self.req.biome[j * side + i] as usize {
+                0 => default,
+                b => b.min(species::BIOME_COUNT - 1),
+            }
+        } else {
+            default
+        };
+        (b, self.lerp_grid(CONIFER, gx, gy).clamp(0.0, 1.0))
+    }
+
+    /// Lot HB4: 1 inside the orchard ring around a settlement clearing (`ring` px wide beyond
+    /// its exclusion radius), fading to 0 at its outer edge.
+    fn village_ring(&self, x: f64, y: f64, ring: f64) -> f64 {
+        if ring <= 0.0 {
+            return 0.0;
+        }
+        let mut best = f64::INFINITY;
+        for &(ex, ey, r) in &self.req.exclusions {
+            let d = ((x - ex).powi(2) + (y - ey).powi(2)).sqrt() - r;
+            best = best.min(d);
+        }
+        if best <= 0.0 {
+            return 0.0;
+        }
+        1.0 - smoothstep(0.5 * ring, ring, best)
+    }
+
+    /// Lot HB4: role of a candidate (forest core or edge, riparian, orchard, isolated, scrub),
+    /// then its species; same rejection tests as the V4 scatter.
+    #[allow(clippy::too_many_arguments)]
+    fn species_candidate(
+        &mut self,
+        table: &SpeciesTable,
+        x: f64,
+        y: f64,
+        roll: f64,
+        roll_kind: f64,
+        forest_raw: f64,
+        yaw: f64,
+    ) {
+        let req = self.req;
+        let dist = &table.dist;
+        let gx = (x - req.origin.0) / req.coarse_step;
+        let gy = (y - req.origin.1) / req.coarse_step;
+        let tree_roll = self.rng.randf();
+        let (b, conifer) = self.biome_and_conifer(table, gx, gy);
+        let forest = (forest_raw * table.biome(b, B_FOREST)).clamp(0.0, 1.0);
+        let sd = self.map.river_sd_at(x, y);
+        if sd < RIVER_CLEARANCE {
+            return;
+        }
+        let core = forest >= dist.massif_core;
+        let fill = if core {
+            dist.massif_fill
+        } else {
+            dist.edge_fill
+        };
+        let mut role = None;
+        let mut scale_factor = 1.0;
+        if roll < forest * fill {
+            role = Some(if core { ROLE_MASSIF } else { ROLE_EDGE });
+            scale_factor = 1.0 + CANOPY_SPREAD * smoothstep(0.45, 0.9, forest);
+        } else if sd < RIVER_CLEARANCE + table.biome(b, B_RIPARIAN_PX)
+            && roll < table.biome(b, B_RIPARIAN) * (1.0 - forest)
+        {
+            role = Some(ROLE_RIPARIAN);
+            scale_factor = 0.95;
+        } else {
+            let crops = self.lerp_grid(CROPS, gx, gy);
+            let ring = self.village_ring(x, y, table.biome(b, B_ORCHARD_RING));
+            let p_orchard =
+                table.biome(b, B_ORCHARD) * ring + table.biome(b, B_ORCHARD_OPEN) * crops;
+            if crops > 0.3 && p_orchard > 0.0 && table.parcel_roll(x, y) < p_orchard {
+                if roll < dist.orchard_fill {
+                    role = Some(ROLE_ORCHARD);
+                    scale_factor = 0.9;
+                }
+            } else if crops > 0.15 {
+                let grove = self.lerp_grid(GROVE, gx, gy);
+                let hedge = self.lerp_grid(HEDGE, gx, gy);
+                let p = crops
+                    * (grove * table.biome(b, B_GROVE)
+                        + table.biome(b, B_ISOLATED)
+                            * (1.0 + dist.hedge_boost * hedge + dist.village_boost * ring));
+                if roll < p {
+                    role = Some(ROLE_ISOLATED);
+                    scale_factor = 0.9;
+                }
+            }
+            if role.is_none() {
+                let scrub = table.biome(b, B_SCRUB);
+                if scrub > 0.0 && roll < scrub * (1.0 - forest_raw) * (1.2 - crops).clamp(0.0, 1.0)
+                {
+                    role = Some(ROLE_SCRUB);
+                }
+            }
+        }
+        let Some(role) = role else {
+            return;
+        };
+        if self.excluded(x, y) || !self.has_point(x, y) || self.in_corridor(x, y) {
+            return;
+        }
+        let ground = req.height_world_at(self.map, x, y);
+        if ground <= 0.0 {
+            return;
+        }
+        let species_roll = if roll_kind < dist.stand_share {
+            table.stand_roll(x, y)
+        } else {
+            tree_roll
+        };
+        let altitude = self.map.height_m_at(x, y);
+        let pick = table
+            .pick(role, b, altitude, sd, conifer, species_roll)
+            .or_else(|| {
+                (role == ROLE_MASSIF)
+                    .then(|| table.pick(ROLE_EDGE, b, altitude, sd, conifer, species_roll))
+                    .flatten()
+            });
+        let Some(sp) = pick else {
+            return;
+        };
+        let ground = req.display_ground(self.map, x, y, ground);
+        self.push_species(table, sp, x, ground, y, yaw, scale_factor);
+    }
+
+    /// Lot HB4: one tree of species `sp` (size range of the catalogue, generic tint); the atlas
+    /// row and season class are encoded in the tint (`CUSTOM_STRIDE`).
+    #[allow(clippy::too_many_arguments)]
+    fn push_species(
+        &mut self,
+        table: &SpeciesTable,
+        sp: usize,
+        x: f64,
+        ground: f64,
+        y: f64,
+        yaw: f64,
+        scale_factor: f64,
+    ) {
+        let rng = &mut self.rng;
+        let height = rng.range(table.height[2 * sp] as f64, table.height[2 * sp + 1] as f64);
+        let width = height * rng.range(table.width[2 * sp] as f64, table.width[2 * sp + 1] as f64);
+        let b = rng.range(0.85, 1.15);
+        let mut tint = [b * rng.range(0.93, 1.05), b, b * rng.range(0.92, 1.06)];
+        tint[0] += (CUSTOM_STRIDE * (sp as f32 + 1.0)) as f64;
+        tint[1] += (CUSTOM_STRIDE * (table.season[sp] as f32 + 1.0)) as f64;
+        let kind = (table.kind[sp].clamp(0, KIND_CONIFER as i32)) as usize;
+        self.emit(kind, x, ground, y, yaw, scale_factor, height, width, tint);
+    }
+
+    /// Transform, seed and slot of one instance (`VegetationTileJob._make_instance`).
+    #[allow(clippy::too_many_arguments)]
+    fn emit(
+        &mut self,
+        kind: usize,
+        x: f64,
+        ground: f64,
+        y: f64,
+        yaw: f64,
+        scale_factor: f64,
+        mut height: f64,
+        mut width: f64,
+        tint: [f64; 3],
+    ) {
+        let rng = &mut self.rng;
         let tree_scale = self.req.tree_scale;
         height *= tree_scale
             * if scale_factor <= 1.0 {
@@ -999,6 +1207,94 @@ mod tests {
             exclusions: Vec::new(),
             ground: Ground::None,
             detail: None,
+            biome: Vec::new(),
+            species: None,
+        }
+    }
+
+    /// Species rows decoded from the packed buffers (`CUSTOM_STRIDE` encoding), per row.
+    fn species_rows(result: &TileResult) -> std::collections::BTreeMap<i32, usize> {
+        let mut rows = std::collections::BTreeMap::new();
+        for buffer in &result.buffers {
+            for item in buffer.as_chunks::<FLOATS_PER_INSTANCE>().0 {
+                let row = (item[12] / CUSTOM_STRIDE).floor() as i32 - 1;
+                *rows.entry(row).or_insert(0) += 1;
+            }
+        }
+        rows
+    }
+
+    /// Trees of a result (hedge bushes excluded).
+    fn trees(result: &TileResult) -> i32 {
+        let slots = result.counts.iter().enumerate();
+        slots
+            .filter(|(slot, _)| slot % KIND_COUNT != KIND_HEDGE)
+            .map(|(_, c)| c)
+            .sum()
+    }
+
+    fn species_request(biome: f32, forest: f32, crops: f32) -> TileRequest {
+        let mut req = request(forest, crops, 0.0, 1.0);
+        req.biome = vec![biome; req.side * req.side];
+        req.species = Some(Arc::new(species::tests::table()));
+        req
+    }
+
+    #[test]
+    fn species_forest_is_dense_encoded_and_mixed() {
+        let map = flat_map(30000); // ~ 260 m
+        let result = scatter_tile(&species_request(2.0, 1.0, 0.0), &map);
+        let rows = species_rows(&result);
+        let total: usize = rows.values().sum();
+        assert!(total > 1500, "dense massif: {total}");
+        assert!(!rows.contains_key(&-1), "every tree carries a species row");
+        // low altitude: oak only among massif species (fir is above 500 m)
+        assert_eq!(rows.keys().copied().collect::<Vec<_>>(), vec![0]);
+        let high = flat_map(60000); // ~ 900 m: oak and fir
+        let rows = species_rows(&scatter_tile(&species_request(6.0, 1.0, 0.0), &high));
+        assert!(rows.len() >= 2, "{rows:?}");
+    }
+
+    #[test]
+    fn species_steppe_and_fields_stay_sparse() {
+        let map = flat_map(30000);
+        let forest = scatter_tile(&species_request(2.0, 1.0, 0.0), &map);
+        let steppe = scatter_tile(&species_request(4.0, 1.0, 0.0), &map);
+        let fields = scatter_tile(&species_request(2.0, 0.0, 1.0), &map);
+        let count = trees;
+        assert!(
+            count(&steppe) * 5 < count(&forest),
+            "steppe {}",
+            count(&steppe)
+        );
+        // open fields: far fewer trees than the V4 scatter (hedge trees and a few isolated ones)
+        let mut legacy = species_request(2.0, 0.0, 1.0);
+        legacy.species = None;
+        let legacy = count(&scatter_tile(&legacy, &map));
+        assert!(
+            count(&fields) * 4 < legacy * 3,
+            "fields {} vs {legacy}",
+            count(&fields)
+        );
+    }
+
+    #[test]
+    fn species_orchards_ring_the_villages() {
+        let map = flat_map(30000);
+        let mut req = species_request(2.0, 0.0, 1.0);
+        let bare = trees(&scatter_tile(&req, &map));
+        req.exclusions = vec![(32.0, 32.0, 6.0)];
+        let result = scatter_tile(&req, &map);
+        let with_village = trees(&result);
+        assert!(
+            with_village > bare + 15,
+            "orchards {with_village} vs {bare}"
+        );
+        for buffer in &result.buffers {
+            for item in buffer.as_chunks::<FLOATS_PER_INSTANCE>().0 {
+                let d = ((item[3] - 32.0).powi(2) + (item[11] - 32.0).powi(2)).sqrt();
+                assert!(d >= 6.0, "no tree in the clearing");
+            }
         }
     }
 

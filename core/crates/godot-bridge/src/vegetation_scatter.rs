@@ -16,8 +16,8 @@ use godot::prelude::*;
 
 use crate::relief_lod_bridge::ReliefLod;
 use vegetation::{
-    reground, scatter_tile, DetailArea, Ground, MapRasters, ReliefFloor, TileRequest, TileResult,
-    PAGE_PX,
+    reground, scatter_tile, DetailArea, Distribution, Ground, MapRasters, ReliefFloor,
+    SpeciesTable, TileRequest, TileResult, PAGE_PX,
 };
 
 struct Job {
@@ -40,6 +40,8 @@ struct Done {
 pub struct VegetationScatter {
     map: Arc<MapRasters>,
     floor: Arc<ReliefFloor>,
+    /// Lot HB4: species table (`TreeSpecies.table()`), `None` = V4 scatter.
+    species: Option<Arc<SpeciesTable>>,
     jobs: Option<Sender<Job>>,
     done: Option<Receiver<Done>>,
     workers: Vec<JoinHandle<()>>,
@@ -53,6 +55,7 @@ impl IRefCounted for VegetationScatter {
         VegetationScatter {
             map: Arc::new(MapRasters::default()),
             floor: Arc::new(ReliefFloor::default()),
+            species: None,
             jobs: None,
             done: None,
             workers: Vec::new(),
@@ -117,6 +120,60 @@ fn ground_of(grid: &VarDictionary) -> Ground {
         },
         _ => Ground::None,
     }
+}
+
+fn floats_of(dict: &VarDictionary, key: &str) -> Vec<f32> {
+    dict.get(key)
+        .and_then(|v| v.try_to::<PackedFloat32Array>().ok())
+        .map(|a| a.to_vec())
+        .unwrap_or_default()
+}
+
+fn ints_of(dict: &VarDictionary, key: &str) -> Vec<i32> {
+    dict.get(key)
+        .and_then(|v| v.try_to::<PackedInt32Array>().ok())
+        .map(|a| a.to_vec())
+        .unwrap_or_default()
+}
+
+/// Lot HB4: `TreeSpecies.table()` → `SpeciesTable` (`None` when malformed).
+fn species_of(table: &VarDictionary) -> Option<SpeciesTable> {
+    let dist = table
+        .get("distribution")
+        .and_then(|v| v.try_to::<VarDictionary>().ok())
+        .unwrap_or_default();
+    let d = Distribution::default();
+    let parsed = SpeciesTable {
+        count: int_of(table, "count", 0).max(0) as usize,
+        base: floats_of(table, "base"),
+        alt_lo: floats_of(table, "alt_lo"),
+        alt_hi: floats_of(table, "alt_hi"),
+        river: floats_of(table, "river"),
+        conifer: floats_of(table, "conifer"),
+        kind: ints_of(table, "kind"),
+        season: ints_of(table, "season"),
+        height: floats_of(table, "height"),
+        width: floats_of(table, "width"),
+        biome_params: floats_of(table, "biome_params"),
+        dist: Distribution {
+            massif_core: float_of(&dist, "massif_core", d.massif_core),
+            massif_fill: float_of(&dist, "massif_fill", d.massif_fill),
+            edge_fill: float_of(&dist, "edge_fill", d.edge_fill),
+            stand_px: float_of(&dist, "stand_px", d.stand_px),
+            stand_share: float_of(&dist, "stand_share", d.stand_share),
+            altitude_fade_m: float_of(&dist, "altitude_fade_m", d.altitude_fade_m),
+            river_reach_px: float_of(&dist, "river_reach_px", d.river_reach_px),
+            conifer_raster: float_of(&dist, "conifer_raster", d.conifer_raster),
+            orchard_parcel_px: float_of(&dist, "orchard_parcel_px", d.orchard_parcel_px),
+            orchard_fill: float_of(&dist, "orchard_fill", d.orchard_fill),
+            hedge_boost: float_of(&dist, "hedge_boost", d.hedge_boost),
+            hedge_tree: float_of(&dist, "hedge_tree", d.hedge_tree),
+            village_boost: float_of(&dist, "village_boost", d.village_boost),
+            default_biome: int_of(&dist, "default_biome", d.default_biome as i64).clamp(1, 7)
+                as usize,
+        },
+    };
+    parsed.is_valid().then_some(parsed)
 }
 
 /// Lot SZ4b: optional dense-forest cell of a request (`detail_rect` Rect2, `keep`, `parts_side`,
@@ -224,6 +281,14 @@ impl VegetationScatter {
         });
     }
 
+    /// Lot HB4: species table for later requests (`TreeSpecies.table()`); an empty or malformed
+    /// dictionary restores the V4 scatter. True when a table is active.
+    #[func]
+    fn set_species(&mut self, table: VarDictionary) -> bool {
+        self.species = species_of(&table).map(Arc::new);
+        self.species.is_some()
+    }
+
     /// Starts `threads` scattering threads (clamped to 1..=16); later calls are ignored.
     #[func]
     fn start(&mut self, threads: i64) {
@@ -247,7 +312,7 @@ impl VegetationScatter {
     /// spacing, coarse_step, tree_scale, vertical_scale, side, coarse (Array of 7
     /// PackedFloat32Array: forest, crops, conifer, beech, hedge, grove, region), exclusions
     /// (PackedVector3Array), ground_grid (`TerrainBuilder.surface_grid`), relief_gain (ZG8),
-    /// relief_squash (SZ1).
+    /// relief_squash (SZ1), biome (HB4, PackedFloat32Array side × side, optional).
     /// False if not started or malformed.
     #[func]
     fn request(&mut self, id: i64, params: VarDictionary) -> bool {
@@ -308,6 +373,8 @@ impl VegetationScatter {
             exclusions,
             ground,
             detail: detail_of(&params),
+            biome: floats_of(&params, "biome"),
+            species: self.species.clone(),
         };
         self.send(Job {
             id,
@@ -356,6 +423,8 @@ impl VegetationScatter {
             exclusions: Vec::new(),
             ground: ground_of(&ground_grid),
             detail: None,
+            biome: Vec::new(),
+            species: None,
         };
         self.send(Job {
             id,

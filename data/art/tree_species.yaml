@@ -33,6 +33,7 @@ distribution:
   orchard_parcel_px: 2.2     # côté d'une parcelle de verger
   orchard_fill: 0.75         # part des candidats plantés dans une parcelle de verger
   hedge_boost: 3.0           # arbres isolés : × (1 + hedge_boost × densité de haies)
+  hedge_tree: 0.035          # part des pieds de haie qui sont des arbres (V4 : 0,07)
   village_boost: 4.0         # arbres isolés : × (1 + village_boost) près des villages
   default_biome: 2           # repli sans data/map/biomes.png
 

@@ -26,6 +26,7 @@
   "orchard_parcel_px": 2.2,
   "orchard_fill": 0.75,
   "hedge_boost": 3.0,
+  "hedge_tree": 0.035,
   "village_boost": 4.0,
   "default_biome": 2
  },
