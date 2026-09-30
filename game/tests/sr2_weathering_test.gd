@@ -42,8 +42,11 @@ func _init() -> void:
 		return
 	var checked := 0
 	for kind in ["infantry", "cavalry", "archer"]:
-		# GA3-L3 : `archer_0` est une figurine générée (sans FG3/SR2) : variante fine suivante.
-		var variant := 1 if BattleSkinned.figure(kind, 0).has("ga3_albedo") else 0
+		# GA3-L3 : les figurines générées (sans FG3/SR2 ; `archer_0`, `infantry_0`, `infantry_1`…)
+		# sont sautées : première variante fine.
+		var variant := 0
+		while BattleSkinned.figure(kind, variant).has("ga3_albedo"):
+			variant += 1
 		var mat := ShaderMaterial.new()
 		mat.shader = BattleSkinned.SHADER
 		BattleSkinned.setup_material(mat, kind, variant)

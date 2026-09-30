@@ -140,3 +140,23 @@ Meshy / TRELLIS 2). Unité pilote : le longbowman (`archer_0`), de bout en bout 
   `cavalry_alias`) et garder le cheval fin FG4 avec caparaçon et selle procéduraux ; un cheval
   TRELLIS demanderait un ajustement de squelette quadrupède (pas de repères automatiques) et
   perdrait la robe teintée par cheval.
+
+## Figurines de bataille, extension L3b (30/09)
+
+Quatre unités à pied de plus, même chaîne, une génération `trellis/multi` chacune (0,63 $) :
+homme d'armes → `infantry_0`, arbalétrier génois → `archer_2`, sergent → `infantry_1`
+(piquiers), milicien → `infantry_5` (goedendag). Une recette par type ; les autres recettes du
+même type (`infantry_2/3/4/6/7/8`, `archer_1/4`) restent fines.
+
+- **En données** : `UNITS` de `ga3_figures.py` déclare la figure, la hauteur du casque, les objets
+  tenus **par nom de la recette fine** (masque de variante, kwargs et surcharges SR3b lus dans
+  `battle_skinned_figures` / `battle_fine_sr`, construits comme `build_figure`), la hauteur de la
+  classe acier `metal_z` (0 pour le harnois : l'acier n'est jamais teint) et les clips des rendus.
+- **Faces peintes** : les faces `C_ARMS` de l'équipement (écu, pavois) gardent l'UV d'armoiries ;
+  `GA3_TEX` ne les remplace pas par l'albédo généré.
+- **Îlots** : seuls les îlots voxel < 2 % sont retirés (jambes détachées sous un tabard).
+- **Contrôle** : rendus du LOD0 exporté skinné avec la texture d'os du jeu, à côté de la figurine
+  fine dans la même pose.
+- **Limites ajoutées** : épée au fourreau de la référence fondue au maillage de l'homme d'armes ;
+  pas d'armoiries sur le jupon (livrée unie ; l'écu les porte). Points ouverts : variantes de
+  visages (une seule figure par recette), mains en moufle, usure SR2 sur les figurines GA3.
