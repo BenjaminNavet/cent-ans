@@ -6,8 +6,8 @@ fragmentation, sièges, trésor, coût par tour), IA contre IA depuis 1337.
 
 ## État
 - [x] Squelette
-- [ ] Métriques
+- [x] Métriques (compilées, en mesure)
 - [ ] Mesures graines 1-2, 60 tours
 
 ## Prochaine étape
-Implémenter les métriques (enregistreur appelé dans le planificateur de `end_turn_with`).
+Lancer `target/release/examples/ia_quality_probe 60 1 2`, clippy, commit final.
