@@ -1,8 +1,8 @@
 {
   "id": "chr_ulrich_iv_de_wurtemberg",
   "name": {
-    "display": "Ulrich IV de Wurtemberg",
-    "local": "Ulrich IV. von Württemberg",
+    "display": "Ulrich III de Wurtemberg",
+    "local": "Ulrich III. von Württemberg",
     "local_language": "moyen haut-allemand"
   },
   "sex": "male",
@@ -10,8 +10,9 @@
   "faction": "fac_wurttemberg",
   "role": "ruler",
   "birth": {
-    "value": "1315",
-    "uncertain": true
+    "value": "1288",
+    "uncertain": true,
+    "note": "Né entre 1286 et 1291."
   },
   "death": {
     "value": "1344-07-11"
@@ -37,7 +38,7 @@
   "piety": 50,
   "starting_location": "prov_wurttemberg",
   "status": "at_court",
-  "description": "Comte de Wurtemberg depuis 1325, jeune encore en 1337 ; il agrandira le comté vers Heidenheim et Göppingen avant sa mort prématurée en 1344.",
+  "description": "Comte de Wurtemberg depuis 1325, fils d'Eberhard Ier ; fidèle de Louis IV, il agrandit le comté par achats (Markgröningen en 1336, Tübingen en 1342) avant sa mort en Alsace en 1344.",
   "sources": [
     "Ulrich IV de Wurtemberg"
   ]

@@ -10,23 +10,21 @@
   "faction": "fac_bremen",
   "role": "ruler",
   "birth": {
-    "value": "1300",
+    "value": "1270",
     "uncertain": true,
-    "note": "Date de naissance non retrouvée avec certitude."
+    "note": "Né au XIIIe siècle ; année inconnue."
   },
   "death": {
-    "value": "1344-11-19",
-    "uncertain": true,
-    "note": "Fin de règne 1327-1344 attestée par plusieurs listes épiscopales, mais à vérifier plus précisément (nom et dates signalés incertains dans le mandat de ce lot)."
+    "value": "1344-08-12"
   },
   "historical": true,
   "titles": [
     {
       "title": "Archevêque de Brême",
       "from": {
-        "value": "1327",
-        "uncertain": true
-      }
+        "value": "1327-09-25"
+      },
+      "note": "Nommé par Jean XXII."
     }
   ],
   "skills": {

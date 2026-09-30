@@ -14,8 +14,9 @@
     "uncertain": true
   },
   "death": {
-    "value": "1344",
-    "uncertain": true
+    "value": "1344-12-31",
+    "uncertain": true,
+    "note": "Mort le 30 ou le 31 décembre 1344."
   },
   "historical": true,
   "skills": {
@@ -35,7 +36,7 @@
   },
   "starting_location": "prov_pomerania_stettin",
   "status": "at_court",
-  "description": "Duc de Poméranie-Stettin depuis 1309, âgé, il associe son fils Barnim à la régence.",
+  "description": "Duc de Poméranie-Stettin depuis le partage de 1295, âgé, il associe son fils Barnim au gouvernement depuis 1320.",
   "sources": [
     "Othon Ier de Poméranie"
   ]

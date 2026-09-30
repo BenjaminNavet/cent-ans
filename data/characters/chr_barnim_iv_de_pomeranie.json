@@ -11,12 +11,10 @@
   "faction": "fac_pomerania_wolgast",
   "role": "heir",
   "birth": {
-    "value": "1319",
-    "uncertain": true
+    "value": "1325"
   },
   "death": {
-    "value": "1365",
-    "uncertain": true
+    "value": "1365-08-22"
   },
   "historical": true,
   "skills": {
