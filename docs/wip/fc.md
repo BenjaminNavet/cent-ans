@@ -7,7 +7,7 @@ worktree `../game_project-fc`. Mandat : autonomie. Mesures seulement sur machine
 - [ ] FC0 base (attend la fin de SR3b/SR5 et de toute compilation)
 - [x] FC1 ombres maquettes/moulins par préréglage
 - [ ] FC2 arbres imposteurs
-- [ ] FC3 herbe et broussailles proches
+- [x] FC3 herbe et broussailles proches
 - [ ] FC4 banc A/B, captures, ADR 0137, fusion
 
 ## Journal
@@ -25,6 +25,8 @@ worktree `../game_project-fc`. Mandat : autonomie. Mesures seulement sur machine
   semis dans le `WorkerThreadPool`, pose ≤ 0,3 ms/cellule ; d = 30, Haute, couverture pleine :
   15 k touffes en 9 cellules (9 appels, sans ombre) ; plafond 30 k.
 - Masque procédural (brins / feuillage), pas de texture ; teinte saisonnière `campaign_season`.
+- Tests : smoke, cv1, settlements_render, c5, pb1_veg_job OK ; sz4b_colonies_forests échoue
+  (maquettes non réduites) : worktree sans `data/map/pyramid` (ignoré par git), sans lien avec FC1/FC3.
 - Points ouverts : réglage visuel (taille 0,14/0,26 u, couleurs) à juger en capture (FC4) ;
   +~10-17 appels de dessin sous d = 40 (objectif FC4 « aucune hausse » mesuré au zoom panoramique).
 
