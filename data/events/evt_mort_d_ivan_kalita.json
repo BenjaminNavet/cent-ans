@@ -1,0 +1,89 @@
+{
+  "id": "evt_mort_d_ivan_kalita",
+  "title": "La mort d'Ivan Kalita",
+  "text": "Ivan Kalita, « l'Escarcelle », meurt moine au Kremlin. Son fils Siméon doit courir à Saraï : seul le yarlyk du khan fait le grand-prince de Vladimir, et les princes de Tver et de Souzdal le briguent aussi.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1340,
+      "season": "spring"
+    },
+    "until_year": 1341,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_moscow"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_golden_horde"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_ivan_kalita"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_moscow"
+  },
+  "options": [
+    {
+      "text": "Porter à la Horde les présents et le tribut",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_ivan_kalita"
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_golden_horde",
+          "amount": 15,
+          "reason": "Présents de Siméon"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Garder l'argent et s'appuyer sur le métropolite",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_ivan_kalita"
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_golden_horde",
+          "amount": -15,
+          "reason": "Yarlyk négligé"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1340-03-31"
+  },
+  "sources": [
+    "Ivan Ier de Moscou",
+    "Siméon le Fier",
+    "John Fennell, The Emergence of Moscow 1304-1359, 1968"
+  ]
+}

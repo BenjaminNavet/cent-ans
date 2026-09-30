@@ -1,0 +1,82 @@
+{
+  "id": "evt_mort_d_ozbeg",
+  "title": "La mort d'Özbeg",
+  "text": "[[cdx_ozbeg|Özbeg]], le khan qui a fait de l'islam la religion de la [[cdx_horde_d_or|Horde d'Or]], meurt après trente ans de règne. Son fils aîné Tini Beg lui succède, mais son cadet Djanibek, soutenu par la khatun Taydula, guette le trône.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1341
+    },
+    "until_year": 1342,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_golden_horde"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_ozbeg"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_golden_horde"
+  },
+  "options": [
+    {
+      "text": "Faire proclamer Tini Beg au qurultay",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_ozbeg"
+        },
+        {
+          "type": "treasury",
+          "amount": -2000
+        },
+        {
+          "type": "unrest",
+          "province": "prov_saray",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser les émirs choisir entre les fils",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_ozbeg"
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_saray",
+          "amount": 20
+        },
+        {
+          "type": "unrest",
+          "province": "prov_crimee",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1341",
+    "uncertain": true,
+    "note": "Année sûre, mois discuté ; Djanibek tue Tini Beg en 1342."
+  },
+  "sources": [
+    "Özbeg Khan",
+    "Djanibek",
+    "Tini Beg",
+    "Charles J. Halperin, Russia and the Golden Horde, 1985"
+  ]
+}

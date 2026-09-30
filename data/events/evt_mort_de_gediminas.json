@@ -1,0 +1,77 @@
+{
+  "id": "evt_mort_de_gediminas",
+  "title": "La mort de Gediminas",
+  "text": "Le grand-duc [[cdx_gediminas|Gediminas]] meurt, peut-être frappé devant Bayerburg, et son corps est brûlé selon le rite païen avec son cheval et son serviteur. Il laisse Vilnius à son fils Jaunutis ; mais ses frères aînés Algirdas et Kęstutis tiennent déjà Vitebsk et Trakai.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1341,
+      "season": "winter"
+    },
+    "until_year": 1342,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_lithuania"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_gediminas"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_lithuania"
+  },
+  "options": [
+    {
+      "text": "Respecter la volonté du défunt",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_gediminas"
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "unrest",
+          "province": "prov_vilnius",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Partager les apanages entre les fils",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_gediminas"
+        },
+        {
+          "type": "loyalty",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1341-12",
+    "uncertain": true,
+    "note": "Mort entre décembre 1341 et le début de 1342 ; Algirdas écarte Jaunutis en 1345."
+  },
+  "sources": [
+    "Gediminas",
+    "Jaunutis",
+    "Algirdas",
+    "S. C. Rowell, Lithuania Ascending, 1994"
+  ]
+}

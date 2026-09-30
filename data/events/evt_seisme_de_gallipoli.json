@@ -1,0 +1,95 @@
+{
+  "id": "evt_seisme_de_gallipoli",
+  "title": "Le séisme de Gallipoli",
+  "text": "Dans la nuit, la terre tremble sur la Chersonèse de Thrace ; les murailles de Gallipoli s'effondrent et les habitants grecs s'enfuient. Süleyman Pacha y installe aussitôt des colons turcs venus d'Anatolie : les [[cdx_ottomans|Ottomans]] ont désormais une ville en Europe.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1354,
+      "season": "spring"
+    },
+    "until_year": 1355,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_ottoman"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_byzantium"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_byzantium",
+        "province": "prov_thrace"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_ottoman"
+  },
+  "options": [
+    {
+      "text": "Repeupler Gallipoli de ghazis et de nomades",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "claim",
+          "kind": "province",
+          "target": "prov_thrace"
+        },
+        {
+          "type": "devastation",
+          "province": "prov_thrace",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_thrace",
+          "amount": 15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_byzantium",
+          "amount": -20,
+          "reason": "Gallipoli occupée"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Piller les ruines et rentrer en Asie",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 2500
+        },
+        {
+          "type": "devastation",
+          "province": "prov_thrace",
+          "amount": 15
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "devastation",
+  "historical_date": {
+    "value": "1354-03-02",
+    "note": "Séisme de la nuit du 1er au 2 mars 1354."
+  },
+  "sources": [
+    "Gallipoli",
+    "Süleyman Pacha",
+    "Jean VI Cantacuzène",
+    "Donald M. Nicol, The Last Centuries of Byzantium, 1993"
+  ]
+}

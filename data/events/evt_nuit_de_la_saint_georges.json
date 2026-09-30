@@ -1,0 +1,89 @@
+{
+  "id": "evt_nuit_de_la_saint_georges",
+  "title": "La nuit de la Saint-Georges",
+  "text": "Dans la nuit de la Saint-Georges, les paysans estes de Harrie se soulèvent, brûlent les manoirs et le monastère de Padis et tuent les Allemands. Ils assiègent Reval et appellent les Suédois de Viborg. Le maître de l'ordre Livonien fait tuer leurs quatre « rois » venus parlementer à Weissenstein.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1343,
+      "season": "spring"
+    },
+    "until_year": 1344,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_livonian_order"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_danish_estonia"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_danish_estonia",
+        "province": "prov_harrien_wierland"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_livonian_order"
+  },
+  "options": [
+    {
+      "text": "Écraser la révolte et occuper Reval",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "devastation",
+          "province": "prov_harrien_wierland",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "prov_harrien_wierland",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_danish_estonia",
+          "amount": 10,
+          "reason": "Secours de l'Ordre"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Laisser les vassaux danois se débrouiller",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "unrest",
+          "province": "prov_harrien_wierland",
+          "amount": 25
+        },
+        {
+          "type": "devastation",
+          "province": "prov_harrien_wierland",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "revolt",
+  "historical_date": {
+    "value": "1343-04-23"
+  },
+  "sources": [
+    "Soulèvement de la nuit de la Saint-Georges",
+    "Estonie danoise",
+    "Hermann de Wartberge, Chronicon Livoniae"
+  ]
+}

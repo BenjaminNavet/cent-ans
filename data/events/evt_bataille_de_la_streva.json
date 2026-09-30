@@ -1,0 +1,84 @@
+{
+  "id": "evt_bataille_de_la_streva",
+  "title": "La bataille de la Streva",
+  "text": "Grossie de croisés venus de France et d'Angleterre à la faveur de la trêve, l'armée de l'[[cdx_ordre_teutonique|Ordre teutonique]] mène une expédition d'hiver en Lituanie. Sur la Streva gelée, près de Trakai, elle écrase l'armée lituanienne ; beaucoup se noient sous la glace, et les princes Narimantas et Manvydas, fils de Gediminas, seraient tombés ce jour-là.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1347,
+      "season": "winter"
+    },
+    "until_year": 1348,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_teutonic"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_lithuania"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_teutonic"
+  },
+  "options": [
+    {
+      "text": "Pousser la reyse jusqu'aux portes de Trakai",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "devastation",
+          "province": "prov_vilnius",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_lithuania",
+          "amount": -10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_lithuania",
+          "amount": -20,
+          "reason": "Déroute de la Streva"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Rentrer en Prusse avec le butin et les captifs",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "treasury",
+          "amount": 2000
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_lithuania",
+          "amount": -10,
+          "reason": "Reyse de 1348"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1348-02-02"
+  },
+  "sources": [
+    "Bataille de la Strėva",
+    "Narimantas",
+    "Wigand de Marbourg, Chronica nova Prutenica",
+    "S. C. Rowell, Lithuania Ascending, 1994"
+  ]
+}
