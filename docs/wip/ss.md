@@ -15,3 +15,7 @@ Terres ouvertes gris-beige pâle en vue moyenne/proche, ombrage du relief + hach
 
 ## Prochaine étape
 SS2a : dosage relief + palette cultures + routes dans `terrain.gdshader` / `road_line.gdshader` (indépendant de SS1).
+
+## SS3 — lacs (branche `feat/ss-lakes`, worktree `../gp-ss-lakes`)
+État : squelette (outil `cent-ans geo lakes`, schéma, `lakes_renderer.gd`, tests désactivés).
+Prochaine étape : générer `data/map/lakes.json`, tests pytest, renderer + mode nappe de `river_water.gdshader`.
