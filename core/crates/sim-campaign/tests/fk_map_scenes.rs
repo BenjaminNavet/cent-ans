@@ -108,6 +108,7 @@ fn map_scenes_are_deterministic() {
             supplies: 60,
             breach: 10,
             started_turn: turn.saturating_sub(1),
+            engine_work: 0,
         });
         settlement.construction = Some(Construction {
             building,
