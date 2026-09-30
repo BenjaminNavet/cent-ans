@@ -1,15 +1,17 @@
 # SS — sol « satellite » de la campagne
 
-Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md` (validée par le joueur le 2026-09-30, autonomie totale).
+Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md` ; ADR 0141. Branche `feat/ss`, worktree `../gp-ss` (dylib copiée, `data/map/pyramid` = lien vers le checkout principal, import fait).
+Autonomie totale (joueur 30/09). GA3 fusionnée avant démarrage (condition du joueur remplie).
 
-## État
-- Spec commitée. Aucun code.
-- **En attente** : le joueur demande d'attendre la fin de la session qui travaille les assets de campagne (`feat/ga3`, worktree `game_project-ga3`) avant de démarrer. Démarrer quand `feat/ga3` est fusionnée dans main (ou que le joueur le dit).
+## Diagnostic (captures avant, `game/tests/ss_shot.gd`, Paris 900/300/90)
+Terres ouvertes gris-beige pâle en vue moyenne/proche, ombrage du relief + hachures dominants, parcelles invisibles hors `fp_near`, routes = traits crème uniformes.
+
+## Lots
+- [ ] SS1 outil `cent-ans geo colormap` (agent, branche `feat/ss-colormap`, worktree `../gp-ss-cm`) : BC1 14336×12288 + mipmaps, `map.json.colormap.bc1`, style YAML + schéma, pytest.
+- [ ] SS2 shader (session principale) : chargement `colormap` (ReliefLandcover.load_gpu_copy), couleur de base, parcelles colorées par bloc, relief abaissé, `road_line` en terre, repli ; test headless `ss_colormap_test.gd`.
+- [ ] SS3 lacs (agent, branche `feat/ss-lakes`, worktree `../gp-ss-lakes`) : `data/map/lakes.json` (outil) + `lakes_renderer.gd` + test.
+- [ ] SS4 fal.ai textures de détail (après captures de SS2).
+- [ ] SS5 captures après, banc perf, statut ADR.
 
 ## Prochaine étape
-SS1 squelette dans un worktree `feat/ss` : `tools/cent_ans_tools/geo/colormap.py`, `data/map/colormap_style.yaml`, `data/schemas/colormap_style.schema.json`, test pytest désactivé.
-
-## Points ouverts
-- Format des tuiles : reprendre celui que charge déjà la pyramide de relief (ADR 0036).
-- Numéro d'ADR : prochain libre au moment d'écrire (0139, 0140 pris sur gp-merge).
-- Code « SL » déjà pris (sea lanes) → chantier renommé SS.
+SS2a : dosage relief + palette cultures + routes dans `terrain.gdshader` / `road_line.gdshader` (indépendant de SS1).
