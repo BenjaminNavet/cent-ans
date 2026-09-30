@@ -40,9 +40,11 @@ const DUST_DISTANCE := 420.0
 const SPEED := [48.0, 62.0, 110.0, 34.0]
 const ARC := [0.16, 0.06, 0.02, 0.3]
 const STICK := [30.0, 30.0, 0.0, 0.0]
-const DUST_COLOR := Color(0.6, 0.52, 0.4)  # CR1 : terre sèche (0.74, 0.66, 0.52 virait au blanc)
+const DUST_COLOR := Color(0.52, 0.45, 0.34)  # CR1 : terre sèche (0.74, 0.66, 0.52 virait au blanc)
 ## BV1 : mottes projetées par les sabots (émetteurs réaffectés comme la poussière).
 const CLOD_EMITTERS := 6
+## CR1 : au-delà de cette hauteur au-dessus du sol (lit compris), le régiment est sur un pont.
+const BRIDGE_CLEARANCE_M := 2.5
 const CLOD_DISTANCE := 260.0
 ## Couleur de la poussière et des mottes selon le sol (`get_terrain().ground`).
 const GROUND_DUST := {"dry": Color(0.74, 0.66, 0.52), "muddy": Color(0.52, 0.45, 0.36), "snowy": Color(0.9, 0.92, 0.96)}
@@ -250,7 +252,8 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 			elif enabled_dust and d < column_distance and int(unit.get("soldiers", 0)) >= column_men:
 				columns.append({"unit": unit, "pos": pos, "strength": dust_factor(unit), "score": float(unit.get("soldiers", 0)) / (1.0 + d / 300.0)})
 			# BV1 : mottes projetées par les sabots à la charge (terre, boue ou neige), sur tout sol.
-			if mounted and fast and d < CLOD_DISTANCE and not _clods.is_empty():
+			# CR1 : jamais sur le tablier de pierre d'un pont.
+			if mounted and fast and d < CLOD_DISTANCE and not _clods.is_empty() and not _on_bridge(pos):
 				clodsy.append(entry)
 	if _dust_spots.is_empty():
 		_assign(_dust, dusty)
@@ -508,6 +511,11 @@ func _missile_kind(unit: Dictionary) -> int:
 func _wet_span(unit: Dictionary, pos: Vector3) -> Vector2:
 	if not _water_at.is_valid():
 		return Vector2(1, 0)
+	# CR1 : régiment sur un pont (hauteur de marche bien au-dessus du lit) : pas de gerbes. Avant,
+	# l'emprise au-dessus de la rivière suffisait : disques d'écume blancs au niveau du tablier,
+	# le long du parapet.
+	if _on_bridge(pos):
+		return Vector2(1, 0)
 	var fwd := _forward(unit)
 	var half := float(unit.get("depth", 6.0)) * 0.5 + 1.0
 	var lo := INF
@@ -522,6 +530,11 @@ func _wet_span(unit: Dictionary, pos: Vector3) -> Vector2:
 		return Vector2(1, 0)
 	var step := half * 0.5
 	return Vector2(maxf(lo - step * 0.5, -half), minf(hi + step * 0.5, half))
+
+
+## CR1 : position de marche bien au-dessus du sol (lit de rivière compris) : sur un pont.
+func _on_bridge(pos: Vector3) -> bool:
+	return _height_at.is_valid() and pos.y > float(_height_at.call(pos.x, pos.z)) + BRIDGE_CLEARANCE_M
 
 
 ## PB3c : `_wet_span` relu seulement quand le régiment a bougé (position, cap, profondeur) : la
@@ -667,7 +680,7 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		mat.scale_max = 6.0
 		grow.add_point(Vector2(0, 0.35))
 		grow.add_point(Vector2(1, 1.0))
-		mat.color_ramp = _ramp([0.0, 0.15, 1.0], [0.0, 0.45, 0.0])  # CR1 : 0.6 → 0.45
+		mat.color_ramp = _ramp([0.0, 0.15, 1.0], [0.0, 0.32, 0.0])  # CR1 : 0.6 → 0.32
 	elif node_name.begins_with("Splash"):
 		# B7 : gerbes plus nombreuses, plus grosses et plus opaques (à peine visibles avant).
 		mat.spread = 28.0
@@ -687,8 +700,8 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		mat.emission_shape_offset = Vector3(0, 0.45, 0)  # à hauteur de sabot, pas sous le sol
 		mat.direction = Vector3(0, 0.8, -0.6)
 		mat.spread = 28.0
-		mat.initial_velocity_min = 2.5
-		mat.initial_velocity_max = 6.5
+		mat.initial_velocity_min = 2.0  # CR1 : 2,5-6,5 m/s lançait les mottes à 2 m de haut
+		mat.initial_velocity_max = 4.5
 		mat.gravity = Vector3(0, -9.8, 0)
 		mat.scale_min = 0.04  # CR1 : mottes de 4 à 10 cm (12-24 cm lisaient comme des pavés)
 		mat.scale_max = 0.1

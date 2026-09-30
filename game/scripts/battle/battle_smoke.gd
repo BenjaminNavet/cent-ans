@@ -18,6 +18,8 @@ const SMOKE_SHADER := preload("res://shaders/fire_smoke.gdshader")
 const SMOKE_FLIPBOOK := "res://assets/textures/fx/smoke_flipbook.png"
 const LINGER_POOL := 4
 const MAX_GLOWS := 4
+## CR1 : volutes fondues à moins de ce nombre de mètres de la caméra (gros plans).
+const NEAR_FADE_M := 25.0
 
 var cfg: Dictionary = {}
 var wind_dir: Vector2 = Vector2(1, 0)
@@ -219,6 +221,7 @@ func _draw_material(color: Color) -> Material:
 		mat.set_shader_parameter("ember_glow_energy", 0.0)
 		mat.set_shader_parameter("density", 1.1)
 		mat.set_shader_parameter("soft_distance", 3.0)
+		mat.set_shader_parameter("near_fade", NEAR_FADE_M)
 		return mat
 	var fallback := StandardMaterial3D.new()
 	fallback.albedo_color = color
