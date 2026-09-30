@@ -41,3 +41,9 @@ Mocap payante (corps à corps, combats appariés), clé fal.ai (GA3), chantier g
 ## Vague 4 (lancée après fusion de la vague 3, 063999ef0)
 - NT10 fondu des rôles, imposteurs (casques, ombre, sang), herbe hors champ
 - NT11 camp tenu (didacticiel), époque et engins en bataille personnalisée, donjon (escalier, toit en terrasse)
+
+## Vague 4 — fusionnée (30/09)
+- NT10 fondu 0,25 s des rôles (porte-étendards, musiciens, servants, étoffe) ; correctif indice de clip du drapeau ; imposteurs : 3 variantes casque/habit, ombre disque, sang ; herbe couchée +100 m hors champ. A/B : pas de perte mesurable.
+- NT11 option cœur « camp tenu » (didacticiel) ; bataille perso : année 1337-1453 (roster filtré, 7 types datés), engins choisis ; donjon : porte haute + escalier, toit en terrasse (40 %).
+- Vérifs : pytest 1301, cargo test, clippy, smoke, tests Godot verts sauf `fe_ui_test` (préexistant).
+- Ouvert : fondus et foule à juger en jeu (captures nt10_* non lues, budget atteint) ; escalier hors emprise de la simulation ; ombre non orientée au soleil.
