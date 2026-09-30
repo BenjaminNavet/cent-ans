@@ -3,8 +3,7 @@
 Branche `feat/nt14-video-set2`. Orchestration : `docs/wip/nt.md`. Prédécesseurs : NT13
 (`docs/wip/nt13-video-mocap.md`), NT12 (`docs/wip/nt12-mocap.md`).
 
-## État : EN COURS (30/09) — pipeline, cuissons, défaut `melee/` et tests Godot écrits ;
-reste : exécution des tests Godot, captures A/B NT12/NT13, banc i/s, complément ADR 0129.
+## État : TERMINÉ (30/09), prêt à fusionner ; jugement en jeu par la session principale
 
 Vidéos (hors dépôt) : `~/dev/cent-ans-mocap-src/video/IMG_6459..6461.MOV` (1080×1920 après
 rotation, 59,94 i/s, 4,4 à 5,7 s). Intermédiaires hors dépôt dans `~/dev/cent-ans-mocap-src/work/` :
@@ -117,7 +116,35 @@ points de main MediaPipe grossiers ; il reste sous celui du keyframé (2,0-2,6, 
   convexe du disque tournée vers l'adversaire.
 
 ## Tests
-- pytest `tools/tests/test_video_mocap_clean.py` : 25 (dont 10 NT14).
-- Godot : `nt14_melee_test.gd` (défaut, `--keyframed-melee`, forçage 0/1, essai prioritaire),
-  `nt13_video_test.gd` (+ parry, défaut écarté), `nt12_mocap_test.gd` (défaut écarté), smoke,
-  nt7_anim_test, an1b_clips_test, nt10_test, bv3_check : à exécuter.
+- pytest : `tools/tests/test_video_mocap_clean.py` 25 (dont 10 NT14) ; suite complète 1346 OK,
+  2 échecs préexistants (icônes `docs/img/da5*` absents du worktree).
+- Godot, sans option, avec `--keyframed-melee`, `--video-trial` et `--coarse-figures` :
+  `nt14_melee_test`, `nt13_video_test` (+ parry), `nt12_mocap_test` (+ `--mocap-trial`),
+  nt7_anim_test, an1b_clips_test, nt10_test, bv3_check, smoke : OK. (`nt12_mocap_test` et
+  `nt14_melee_test` écartent désormais les options d'essai de la ligne de commande.)
+
+## Captures A/B refaites (non lues)
+`nt12_mocap_shot.gd` → `docs/audit/captures/nt/nt12_melee_{0..3,wide}.png` (keyframé | CMU) ;
+`nt13_video_shot.gd` → `nt13_melee_{0..3,wide}.png` (keyframé | CMU | vidéo NT13+NT14). Les
+passes « actuel » forcent le keyframé (`melee_forced` = 0). Panneaux tous différents (écart
+moyen de luminance 16,7-19,7 en rapproché, 8,3-9,9 en large). Dossier ignoré par git : dans le
+worktree de l'agent.
+
+## Banc i/s
+`tools/bench_ep1.sh --units=50 --bench-at=90`, 11 966 soldats, 1600×900, qualité haute,
+3 + 3 passes alternées, machine partagée :
+
+| | défaut `melee/` | `--keyframed-melee` |
+|---|---|---|
+| i/s moyen par passe | 50,9 ; 59,4 ; 59,3 (médiane 59,3) | 64,3 ; 46,0 ; 58,6 (médiane 58,6) |
+| ms médiane par passe | 20,0 ; 16,7 ; 16,7 | 16,7 ; 21,7 ; 16,7 |
+
+Écart dans le bruit (± 15 % d'une passe à l'autre), médianes à +1 % : sous le plafond de 5 %.
+
+## Points ouverts
+- Jugement en jeu (captures ci-dessus, bataille réelle) : le défaut NT14 est choisi sur mesures
+  et planches Blender seulement.
+- Lame : orientation tirée de 3 points de main MediaPipe, erreurs de 20-40° sur l'estoc ; un
+  bâton de couleur vive, suivi comme le disque, la donnerait directement.
+- Coupe horizontale (`slash`), coup reçu, chute non filmés : un troisième tournage les donnerait.
+- `--video-trial` et `--mocap-trial` gardés comme options d'essai A/B.

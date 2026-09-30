@@ -92,4 +92,6 @@ le kit grossier. `--keyframed-melee` après `--` rétablit les clips keyframés 
 (-1 / 0 / 1) sert aux tests et captures A/B.
 
 Coût : texture d'os du rig fin plus haute de 4 clips (quelques centaines de lignes RGBA32F), une
-lecture de texture identique par soldat. Banc : voir `docs/wip/nt14-video-set2.md`.
+lecture de texture identique par soldat. Banc (`tools/bench_ep1.sh --units=50 --bench-at=90`,
+11 966 soldats, 3 + 3 passes alternées) : médiane 59,3 i/s contre 58,6 avec `--keyframed-melee`,
+écart dans le bruit de la machine partagée, sous le plafond de 5 % (`docs/wip/nt14-video-set2.md`).
