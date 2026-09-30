@@ -2269,8 +2269,64 @@ fn plan_horse(
             anchor.1 - view.forward * 15.0,
         )
     };
+    let (x, z) = wing_behind_foot(view, roles, i, (x, z));
     view.move_to(i, x, z, false, Some(facing));
 }
+
+/// IA night (suite of EQ7): the attacker's horse holding its wing (or
+/// behind the centre) while it waits for its foot, once under the enemy
+/// arrows, stands no further forward than that foot. Posted from the advancing line's anchor, the knights used
+/// to ride ahead of their slow foot and stand idle under the enemy longbows,
+/// losing most of their men before their charge. Measured on
+/// `tests/ia_survey.rs` (16 seeds, 4 reliefs, both sides): the French army
+/// attacking an English army that waits for it 5 -> 44 wins of 64, against
+/// a novice 38 -> 51; mirrored armies unchanged. The defender's horse, which
+/// waits for the enemy, keeps its post (moving it cost 20 wins of 64).
+fn wing_behind_foot(view: &View, roles: &Roles, i: usize, post: (f64, f64)) -> (f64, f64) {
+    if view.side != SideId::Attacker {
+        return post;
+    }
+    // Only a horse the enemy shooters have been hitting: elsewhere it keeps
+    // its post ahead (the horse clashes that open a battle).
+    if view.units[i].missile_timer >= WING_UNDER_FIRE_S {
+        return post;
+    }
+    let foot: Vec<usize> = roles
+        .line
+        .iter()
+        .copied()
+        .filter(|&k| view.units[k].able())
+        .collect();
+    // Once the foot is about to strike, the horse moves up with it.
+    let closing = foot.iter().any(|&k| {
+        view.nearest_enemy(k, |_| true)
+            .is_some_and(|(_, d)| d < WING_RELEASE_M)
+    });
+    if closing {
+        return post;
+    }
+    match view.centroid(&foot) {
+        Some((_, foot_z))
+            if (post.1 - (foot_z - view.forward * WING_BEHIND_FOOT)) * view.forward > 0.0 =>
+        {
+            (post.0, foot_z - view.forward * WING_BEHIND_FOOT)
+        }
+        _ => post,
+    }
+}
+
+/// IA night: the attacker's waiting horse stands this far (metres) behind
+/// its foot's centre ...
+const WING_BEHIND_FOOT: f64 = 15.0;
+/// ... until a foot regiment is this close (metres) to an enemy one (80 m:
+/// 672 wins of 768 against the novice and the passive side, before 618;
+/// 150 m: 651, 250 m: 610).
+const WING_RELEASE_M: f64 = 80.0;
+/// IA night: the rule holds for a horse that took missile casualties within
+/// this many seconds (40 s: 670 wins of 768, mirrored armies unchanged and
+/// the demo's first contact still near 70 s; always: 672, but the first
+/// contact at 192 s).
+const WING_UNDER_FIRE_S: f64 = 40.0;
 
 /// EQ7 (suite of ADR 0052): the horse of an attacker with foot does not
 /// ride at enemy horse or at a shaken regiment covered by enemy shooters who

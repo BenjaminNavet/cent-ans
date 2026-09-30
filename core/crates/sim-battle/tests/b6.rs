@@ -190,16 +190,19 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// range of loaded archers): seeds 3 and 11 go to the French (268 s and
 /// 245 s); over seeds 0-63 the French win 57/64 instead of 31/64
 /// (`eq7_cavalry::probe_mixed_battle`).
+/// IA night (the attacker's horse under the arrows waits behind its foot,
+/// not ahead of it): seed 3 stays French (227 s), seed 11 goes back to the
+/// English (317 s); over seeds 0-63 the French win 62/64 instead of 57/64.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "268 Some(Attacker) [20, 43, 42, 100, 100, 19, 39, 100, 66, 15]",
+            "227 Some(Attacker) [44, 33, 41, 100, 100, 37, 0, 107, 20, 4]",
         ),
         (
             11,
-            "245 Some(Attacker) [21, 51, 55, 100, 100, 17, 59, 118, 48, 14]",
+            "317 Some(Defender) [5, 20, 0, 100, 100, 15, 52, 87, 109, 0]",
         ),
     ];
     for (seed, digest_before) in expected {

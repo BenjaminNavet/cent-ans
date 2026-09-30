@@ -419,8 +419,10 @@ fn a_replay_recorded_before_cb1_still_reads() {
     // The sample already parts from today's rules at tick 1120 (1 min 52 s)
     // on `main` before CB1 (rule changes since EP13): CB1 must not make it
     // part any earlier.
+    // IA night: the attacker's horse under the arrows now waits behind its
+    // foot; the sample parts from the rules at tick 704 (1 min 10 s).
     assert!(
-        player.divergence().is_none_or(|d| d.tick >= 1120),
+        player.divergence().is_none_or(|d| d.tick >= 704),
         "{:?}",
         player.divergence()
     );

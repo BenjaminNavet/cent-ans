@@ -199,7 +199,11 @@ fn terrains() -> Vec<Terrain> {
 }
 
 /// (name, AI army, foe army) pairs.
-fn armies() -> Vec<(&'static str, &'static [&'static str], &'static [&'static str])> {
+fn armies() -> Vec<(
+    &'static str,
+    &'static [&'static str],
+    &'static [&'static str],
+)> {
     let all: Vec<(&str, &[&str], &[&str])> = vec![
         ("mirror", &MIXED, &MIXED),
         ("en_vs_fr", &ENGLISH, &FRENCH),

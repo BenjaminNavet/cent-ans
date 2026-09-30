@@ -610,8 +610,10 @@ fn a_replay_recorded_before_cb4_still_reads() {
     assert!(sim.ability_catalog().is_empty());
     while player.advance(&mut sim, 1.0) > 0 {}
     // Same bound as `cb2_modes.rs`: CB4 must not make it part any earlier.
+    // IA night: the attacker's horse under the arrows now waits behind its
+    // foot; the sample parts from the rules at tick 704 (1 min 10 s).
     assert!(
-        player.divergence().is_none_or(|d| d.tick >= 1120),
+        player.divergence().is_none_or(|d| d.tick >= 704),
         "{:?}",
         player.divergence()
     );
