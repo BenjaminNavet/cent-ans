@@ -551,6 +551,10 @@ func _draped_node(node_name: String, prepared: Dictionary, lift_m: float, top: f
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
+## VN : part bâtie (`_built_density`) en dessous de laquelle une maille du sol n'est pas tracée.
+const GROUND_MIN_BUILT := 0.12
+
+
 ## Sol en bandes de `GROUND_STRIP_ROWS` rangées : une bande par tâche (envoi au GPU étalé).
 static func _ground_strips(plan: Dictionary) -> Array:
 	var ground: Dictionary = plan.get("ground", {})
@@ -622,8 +626,10 @@ static func _ground_arrays(plan: Dictionary, built: PackedFloat32Array, row0: in
 		if mask[k] == 1:
 			var p: Vector2 = origin + Vector2(k % n, k / n) * step
 			var edge := float(ground["edge"][k]) if ground.has("edge") else clampf((TownPlan.radius_at(radii, atan2(p.y, p.x)) - p.length()) / 40.0, 0.0, 1.0)
-			var yard := Color(0.24, 0.26, 0.18).lerp(Color(0.25, 0.23, 0.18), edge)
-			colors[k] = layer_color("Rubble", Color(0.17, 0.23, 0.11).lerp(yard, built[k]))
+			# VN : terre battue et jardins plus clairs (vue de loin, la ville reposait sur une
+			# galette presque noire au milieu d'un relief bien plus clair).
+			var yard := Color(0.64, 0.6, 0.49).lerp(Color(0.68, 0.6, 0.47), edge)
+			colors[k] = layer_color("Rubble", Color(0.5, 0.6, 0.34).lerp(yard, built[k]))
 			lo = minf(lo, h[k])
 			hi = maxf(hi, h[k])
 	if lo == INF:
@@ -633,6 +639,11 @@ static func _ground_arrays(plan: Dictionary, built: PackedFloat32Array, row0: in
 		for i in n - 1:
 			var k0 := j * n + i
 			if mask[k0] == 0 or mask[k0 + 1] == 0 or mask[k0 + n] == 0 or mask[k0 + n + 1] == 0:
+				continue
+			# VN : pas de sol de ville loin des maisons et des rues (le relief et sa colormap
+			# restent visibles) : la ville n'est plus posée sur un disque sombre au bord net,
+			# son sol suit les îlots.
+			if maxf(maxf(built[k0], built[k0 + 1]), maxf(built[k0 + n], built[k0 + n + 1])) < GROUND_MIN_BUILT:
 				continue
 			for k: int in [k0, k0 + 1, k0 + n + 1, k0, k0 + n + 1, k0 + n]:
 				var p: Vector2 = origin + Vector2(k % n, k / n) * step
