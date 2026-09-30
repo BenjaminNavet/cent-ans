@@ -44,6 +44,9 @@ func _init() -> void:
 	var base_frames: int = BattleSkinned._texture_frames(BattleSkinned.FINE_DIR + str(base.get("texture", "")))
 	var melee_frames: int = BattleSkinned._texture_frames(BattleSkinned.MELEE_DIR + str(melee.get("texture", "")))
 	_check(base_frames > 0 and melee_frames > 0, "en-têtes CAB1 lisibles")
+	# Options d'essai de la ligne de commande écartées : on compare le défaut à la cuisson.
+	BattleSkinned.video_trial_forced = 0
+	BattleSkinned.mocap_trial_forced = 0
 	for forced in [0, 1]:
 		BattleSkinned.melee_forced = forced
 		BattleSkinned.reload_caches()
@@ -57,6 +60,7 @@ func _init() -> void:
 	_check(str(both.get("mocap_trial_dir", "")) == BattleSkinned.VIDEO_TRIAL_DIR, "essai vidéo prioritaire")
 	BattleSkinned.melee_forced = -1
 	BattleSkinned.video_trial_forced = -1
+	BattleSkinned.mocap_trial_forced = -1
 	BattleSkinned.reload_caches()
 	print("NT14 melee (keyframed=%s): %s" % [cmd_keyframed, "OK" if ok else "FAIL"])
 	quit(0 if ok else 1)
