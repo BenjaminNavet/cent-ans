@@ -679,10 +679,16 @@ func _keep_centered() -> void:
 	if not is_equal_approx(anchor_top, 0.5) or not is_equal_approx(anchor_bottom, 0.5):
 		return
 	var half := size.y * 0.5
-	if is_equal_approx(offset_top, -half) and is_equal_approx(offset_bottom, half):
+	var top := -half
+	var parent := get_parent() as Control
+	if parent != null:
+		# Jamais sur la barre du haut : décalée vers le bas si le centre la fait mordre dessus.
+		var center_y := parent.global_position.y + parent.size.y * 0.5
+		top += maxf(TOP_CLEARANCE - (center_y - half), 0.0)
+	if is_equal_approx(offset_top, top) and is_equal_approx(offset_bottom, top + size.y):
 		return
-	offset_top = -half
-	offset_bottom = half
+	offset_top = top
+	offset_bottom = top + size.y
 
 
 ## Deux colonnes (portrait à gauche, contenu à droite) ou une seule colonne défilante.
