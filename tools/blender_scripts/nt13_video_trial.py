@@ -675,6 +675,8 @@ def solve_clip(rest, clip):
         poss.append(pos)
         wrists.append(wrist)
     wrists = filter_wrist(rest, rots, wrists)
+    if clip.disc is not None:
+        filter_chain(rest, rots, poss, ("UpperArm.L", "LowerArm.L", "Wrist.L"))
     pin_feet(rest, clip, rots, poss)
     out = []
     for rot, pos in zip(rots, poss, strict=True):
@@ -687,6 +689,27 @@ def solve_clip(rest, clip):
 
 
 WRIST_SPIKE_DEG = 12.0
+
+
+def filter_chain(rest, rots, poss, bones, cutoff=2.0, beta=0.3):
+    """NT14: despike and smooth the rotations of a bone chain, then redo its positions.
+
+    Used on the shield arm: the disc's tilt sign and the elbow's turn are picked frame by
+    frame, and a pick that flips for one or two frames shakes the shield.
+    """
+    tgt = rest.tgt
+    for bone in bones:
+        q = np.array([list(r[bone].to_quaternion()) for r in rots])
+        q = vc.smooth_quats(
+            vc.despike_quats(q, WRIST_SPIKE_DEG), float(bs.FPS), cutoff, beta
+        )
+        for t, row in enumerate(q):
+            rots[t][bone] = Quaternion([float(x) for x in row]).to_matrix()
+    for rot, pos in zip(rots, poss, strict=True):
+        for bone in bones:
+            p = PARENT[bone]
+            offset = tgt.rest[p].to_3x3().transposed() @ (tgt.head[bone] - tgt.head[p])
+            pos[bone] = pos[p] + rot[p] @ offset
 
 
 def filter_wrist(rest, rots, wrists):
@@ -725,11 +748,12 @@ def extra_quality(tgt, solved, wrists):
             math.degrees(float(np.mean(acc))) if acc else 0.0, 2
         ),
         "tremor_deg": tremor(solved),
+        "tremor_worst": sorted(tremor(solved, True).items(), key=lambda kv: -kv[1])[:3],
         "wrist_r_bend_max_deg": round(max(bend), 1),
     }
 
 
-def tremor(solved):
+def tremor(solved, per_bone=False):
     """NT14: high-frequency shake (degrees) of a solved clip.
 
     Mean angle between each bone's rotation and its 5-frame binomial average (1 4 6 4 1).
@@ -745,6 +769,11 @@ def tremor(solved):
         avg = sum(k[i] * q[i : len(q) - 4 + i] for i in range(5))
         avg /= np.linalg.norm(avg, axis=-1, keepdims=True)
         res.append(vc.quat_angle(q[2:-2], avg))
+    if per_bone:
+        return {
+            b: round(math.degrees(float(np.mean(r))), 2)
+            for b, r in zip(ORDER, res, strict=True)
+        }
     return round(math.degrees(float(np.mean(res))), 2)
 
 

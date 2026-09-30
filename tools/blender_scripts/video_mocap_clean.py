@@ -524,12 +524,14 @@ def disc_points(centre, major, fit, aspect, anchor_depth=0.0, fov_deg=65.0):
     return np.stack((s * c[:, 0] * aspect + tx, y, -s * c[:, 1] + tz), axis=-1)
 
 
-def disc_normals(major, minor, angle, disc, chest):
+def disc_normals(major, minor, angle, disc, chest, keep=0.7):
     """Unit normals (frames, 3) of the disc's front face (Z-up, Y away from the camera).
 
     The ellipse's axis ratio gives the tilt out of the image plane, its minor axis the tilt's
     direction; of the four candidates (tilt sign, face sign) the one facing most away from
-    `chest` (frames, 3) towards the disc is kept (a shield's face looks out).
+    `chest` (frames, 3) towards the disc is kept (a shield's face looks out), plus `keep`
+    times its agreement with the previous frame's pick (the tilt sign is ambiguous frame by
+    frame: without it the pick flips back and forth when the disc faces the camera).
     """
     ratio = np.clip(np.asarray(minor) / np.maximum(np.asarray(major), 1e-9), 0.0, 1.0)
     phi = np.arccos(ratio)
@@ -547,6 +549,8 @@ def disc_normals(major, minor, angle, disc, chest):
             n = np.cos(phi[t]) * toward + tilt * np.sin(phi[t]) * m[t]
             for face in (1.0, -1.0):
                 sc = float(np.dot(face * n, out[t]))
+                if t > 0:
+                    sc += keep * float(np.dot(face * n, res[t - 1]))
                 if sc > score:
                     best, score = face * n, sc
         res[t] = best
