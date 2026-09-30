@@ -20,8 +20,8 @@ uniform float wind_strength = 0.12;
 uniform float wind_speed = 1.4;
 // Lot FC5 : teintes proches de la prairie du terrain (`terrain.gdshader`, tint_grass linéaire
 // 0,105 / 0,165 / 0,045), pointes un peu plus claires pour détacher les touffes du sol.
-uniform vec3 grass_color : source_color = vec3(0.34, 0.44, 0.21);
-uniform vec3 grass_dry : source_color = vec3(0.46, 0.46, 0.27);
+uniform vec3 grass_color : source_color = vec3(0.42, 0.52, 0.26);
+uniform vec3 grass_dry : source_color = vec3(0.56, 0.54, 0.32);
 uniform vec3 bush_color : source_color = vec3(0.28, 0.37, 0.18);
 // Lot FC5 : touffe en éventail (lot DA6, CC0) : alpha = brins, luminance = relief des brins.
 // Mipmaps + compensation de l'alpha : les brins restent lisibles quand la touffe fait 10 px.
@@ -58,6 +58,10 @@ void vertex() {
 	float up = 1.0 - UV.y;
 	float prop = pow(max(campaign_prop_scale, 1e-4), prop_scale_power);
 	VERTEX *= prop;
+	// Lot L5 : touffes d'herbe plus étroites (brins verticaux lisibles de haut, pas des boules).
+	if (INSTANCE_CUSTOM.x < 0.5) {
+		VERTEX.xz *= 0.7;
+	}
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 root = MODEL_MATRIX[3].xyz;
 	v_patch = value_noise(root.xz / 7.0) * 0.65 + value_noise(root.xz / 2.3) * 0.35;
@@ -131,7 +135,7 @@ void fragment() {
 		color = base;
 	}
 	// Pied des touffes assombri (occlusion au sol).
-	color *= mix(0.6, 1.06, smoothstep(0.0, 0.8, up));
+	color *= mix(0.78, 1.1, smoothstep(0.0, 0.8, up));
 	ALBEDO = color;
 	ROUGHNESS = 0.95;
 	BACKLIGHT = color * 0.3;

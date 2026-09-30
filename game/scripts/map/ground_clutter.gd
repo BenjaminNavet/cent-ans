@@ -42,7 +42,7 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 ## Hauteur (unités monde, taille de carte) d'une touffe d'herbe et d'une broussaille.
 ## Lot FC5 : 0,22 / 0,42 (≈ 6 px à d = 25 en 720p) ; le shader les réduit comme
 ## `campaign_prop_scale`^`prop_scale_power` (plus lentement que les arbres : encore visibles à d = 10).
-@export var grass_height: float = 0.22
+@export var grass_height: float = 0.18  # L5 : plus fines, plus claires, plus nombreuses
 @export var bush_height: float = 0.42
 @export var prop_scale_power: float = 0.3
 ## Lot FC6 : au zoom rapproché (d < `close_distance`), part des candidats semés jusqu'à
@@ -66,6 +66,8 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 ## Plafond des instances visibles (toutes cellules).
 @export var max_visible_instances: int = 60000
 
+## Lot L5 : `--no-clutter` coupe les touffes (A/B).
+var enabled: bool = true
 ## Préréglage de qualité : densité (0 : rien).
 var quality_density: float = 1.0
 var map_data: MapData
@@ -97,6 +99,8 @@ func _ready() -> void:
 	add_to_group(RenderQuality.CLIENT_GROUP)
 	apply_render_quality(RenderQuality.preset())
 	_rig = get_node_or_null(camera_rig_path) as Node3D
+	if "--no-clutter" in OS.get_cmdline_user_args():  # L5 : captures et mesures A/B
+		enabled = false
 
 
 func apply_render_quality(p: Dictionary) -> void:
@@ -201,7 +205,7 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 	var prop_scale := MapPropScale.shared().tree_scale(camera_distance)  # = `campaign_prop_scale`
 	var fade := clampf((max_camera_distance - camera_distance) / maxf(fade_band, 0.001), 0.0, 1.0)
 	fade *= smoothstep(min_prop_scale, min_prop_scale * 2.0, prop_scale)
-	var active := fade > 0.001 and quality_density > 0.001 and (mask != null or weight_sampler.is_valid())
+	var active := enabled and fade > 0.001 and quality_density > 0.001 and (mask != null or weight_sampler.is_valid())
 	if not active:
 		if visible:
 			visible = false
@@ -231,13 +235,21 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 	# Cellules les plus proches du point visé d'abord.
 	missing.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return _cell_rect(a).get_center().distance_squared_to(at) < _cell_rect(b).get_center().distance_squared_to(at))
 	var built := 0
+	# L5 : un seul instantané des pages (parcours de toutes les pages chargées) pour toutes les
+	# cellules lancées dans l'image.
+	var shared_source := {}
+	if threaded and not missing.is_empty() and _jobs.size() < max_concurrent_jobs:
+		var span := _cell_rect(missing[0])
+		for n in mini(missing.size(), max_concurrent_jobs - _jobs.size()):
+			span = span.merge(_cell_rect(missing[n]))
+		var t_snap := Time.get_ticks_usec()
+		shared_source = _height_source(span)
+		stats["snapshot_ms_max"] = maxf(float(stats.get("snapshot_ms_max", 0.0)), (Time.get_ticks_usec() - t_snap) / 1000.0)
 	for key in missing:
 		if threaded:
 			if _jobs.size() >= max_concurrent_jobs:
 				break
-			var t_snap := Time.get_ticks_usec()
-			var source := _height_source(_cell_rect(key))
-			stats["snapshot_ms_max"] = maxf(float(stats.get("snapshot_ms_max", 0.0)), (Time.get_ticks_usec() - t_snap) / 1000.0)
+			var source := shared_source
 			var holder := {"result": {}}
 			holder["task"] = WorkerThreadPool.add_task(func() -> void: holder["result"] = _ground_seeded(_seed_cell(key), source), false, "GroundClutter")
 			_jobs[key] = holder
