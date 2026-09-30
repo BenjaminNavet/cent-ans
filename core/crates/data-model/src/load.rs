@@ -692,6 +692,7 @@ impl GameData {
         checker.check_chivalric_orders();
         checker.check_retinue();
         checker.check_trade();
+        checker.check_sea_lanes();
         if checker.errors.is_empty() {
             Ok(())
         } else {
@@ -1030,6 +1031,36 @@ impl ReferenceChecker<'_> {
                 });
             }
             self.require_all(&route.id, "goods", &route.goods, &data.resources);
+        }
+    }
+
+    /// Lot SL1: each sea lane links two known port settlements.
+    fn check_sea_lanes(&mut self) {
+        let data = self.data;
+        let mut seen = std::collections::BTreeSet::new();
+        for lane in &data.naval.sea_lanes.lanes {
+            if !seen.insert(lane.id.clone()) {
+                self.errors.push(ReferenceError {
+                    entity: lane.id.clone(),
+                    field: "id".to_owned(),
+                    target: format!("duplicate {}", lane.id),
+                });
+            }
+            for (field, end) in [("from", &lane.from), ("to", &lane.to)] {
+                match data.settlements.get(end) {
+                    None => self.errors.push(ReferenceError {
+                        entity: lane.id.clone(),
+                        field: field.to_owned(),
+                        target: end.to_string(),
+                    }),
+                    Some(settlement) if !settlement.port => self.errors.push(ReferenceError {
+                        entity: lane.id.clone(),
+                        field: field.to_owned(),
+                        target: format!("{end} (pas un port)"),
+                    }),
+                    Some(_) => {}
+                }
+            }
         }
     }
 

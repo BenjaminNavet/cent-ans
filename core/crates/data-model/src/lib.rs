@@ -99,7 +99,8 @@ pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
 pub use entities::naval::{
     FactionFleet, FactionShipNames, Marines, NavalData, NavalFleets, NavalRules, NavalShipNames,
-    Propulsion, ShipClass,
+    Propulsion, SeaLane, SeaLaneKind, SeaLaneKindRules, SeaLaneRules, SeaLanes, SeasonValues,
+    ShipClass,
 };
 pub use entities::population_rules::PopulationRules;
 pub use entities::posture::{

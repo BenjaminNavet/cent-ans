@@ -79,6 +79,7 @@ pub mod retinue;
 pub mod rng;
 pub mod rule_constants;
 pub mod save;
+pub mod sea_lanes;
 pub mod settlements;
 pub mod setup_1337;
 pub mod siege;
