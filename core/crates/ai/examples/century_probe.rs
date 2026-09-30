@@ -1030,6 +1030,18 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 println!("{:>16}   event {:?}: {}", "", event.kind, event.text_fr);
             }
         }
+        // NT9: `ARMY_COUNT=1` prints the field armies of France and England each turn.
+        if std::env::var("ARMY_COUNT").is_ok() {
+            let n = state
+                .armies
+                .values()
+                .filter(|a| {
+                    !a.units.is_empty()
+                        && matches!(a.faction.as_str(), "fac_france" | "fac_england")
+                })
+                .count();
+            println!("AC [{seed}] {n}");
+        }
         for event in &events {
             match event.kind {
                 EventKind::Bankruptcy => {

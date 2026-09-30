@@ -39,7 +39,8 @@ Date : 2026-09-29. Statut : accepté. Spec : `docs/superpowers/specs/2026-09-29-
    Sans bélier construit, pas de bélier ; sans échelles, l'escalade n'est possible que depuis un
    beffroi accosté ; les beffrois construits sont des régiments synthétiques (pas de pertes
    reportées en campagne). En résolution automatique, un beffroi prêt vaut une tour de siège
-   (murailles sans effet) ; le bélier n'y a pas d'effet propre.
+   (murailles sans effet) ; un bélier prêt y majore les coups de l'assaillant de
+   `auto_assault_bonus_percent` (20 %, porte enfoncée ; NT9) tant que les murailles tiennent.
 
 ## Conséquences
 
@@ -53,3 +54,31 @@ Date : 2026-09-29. Statut : accepté. Spec : `docs/superpowers/specs/2026-09-29-
 - UI : panneau de siège (liste des engins, tours restants, bouton d'assaut grisé avec infobulle),
   « Former une armée » grisé avec infobulle au-delà de 20 unités cochées.
 - Les tests qui donnaient l'assaut au tour même du siège avancent la construction d'un tour.
+
+## Révision NT9 (2026-09-30, `docs/wip/nt9-equilibre.md`)
+
+- **Bélier en résolution automatique** : `siege_engines.json` `auto_assault_bonus_percent`
+  (bélier 20) ; `BattleContext.assault_bonus_percent` multiplie `walls_attacker` (0,7 → 0,84) ;
+  `assault_odds` (IA, UI) et la prévision de bataille (« Porte enfoncée par le bélier ») le
+  prennent aussi. Effet mesuré faible (sièges réussis 39 → 39 %, guerre FR–EN inchangée).
+- **Batailles ×1,9 : cause** : sous le plafond, un ost est plusieurs armées ; chaque armée de
+  l'IA recevait son propre ordre `Attack` sur l'ennemi le plus proche : plusieurs armées
+  attaquaient tour à tour la même armée ennemie ou ses restes (batailles « même province, même
+  saison » 17 % → 31 %). **Correction (IA)** : une seule attaque par armée ennemie et par tour
+  (`GridPlanner::attack_order_sparing` : un ennemi à portée d'engagement d'une cible déjà
+  attaquée ce tour est laissé). Restreindre la règle aux armées placées avec le premier
+  assaillant a été mesuré sans effet (132,5/déc.) : les armées convergent de plusieurs lieux.
+- **Chiffres** (`century_probe 464`, normale, graines 1-6 | 7-12) — batailles FR/EN / déc. :
+  avant N6/N7 (f36689196) 77,5 | 60,1 ; main 129,1 | 138,5 ; NT9 106,4 | 124,7 (×1,68 sur 12
+  graines, main ×1,94). Guerre FR–EN : avant 67,6 | 69 % (12/12 dans 55-75 %), main 68 | 69 %
+  (11/12), NT9 64 | 64 % (10/12 : 51 % graine 6, Angleterre tournée vers une autre revendication ;
+  76 % graine 12).
+- **Excès restant, admis** : il ne vient plus d'un artefact (répétitions revenues à 15-17 %,
+  batailles à sens unique « 0 contre n » 50 % → 36-40 %) mais du nombre d'armées : à effectif
+  égal, le plafond de 20 unités donne environ deux fois plus d'osts, qui se rencontrent
+  séparément, en batailles plus disputées. L'excès est tardif : batailles de terrain par tranche de
+  40 ans (graines 1-6) avant 616 / 982 / 1193, NT9 692 / 1288 / 1717 ; sur 1337-1377, armées
+  FR+EN de campagne 6,7 → 9,1 par tour pour 354 → 327 batailles (graines 1-3) : le plafond ne
+  mord qu'une fois les royaumes riches, là où l'ost unique d'avant atteignait 58 000 hommes. Effet
+  voulu du plafond (TW a beaucoup de batailles) ; le compteur compte en outre les lignes de
+  journal de chaque bataille (victoire héroïque, avis « pendant le tour », rang de tradition).

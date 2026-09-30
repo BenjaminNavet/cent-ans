@@ -452,7 +452,7 @@ fn one_attack_per_enemy_army_and_turn() {
     f.units.truncate(1);
     let england = fac("fac_england");
     let planner = ai::grid::GridPlanner::new(&state, &data, &england);
-    let target =|order: Option<Order>| match order {
+    let target = |order: Option<Order>| match order {
         Some(Order::Attack { target_army, .. }) => Some(target_army),
         _ => None,
     };
