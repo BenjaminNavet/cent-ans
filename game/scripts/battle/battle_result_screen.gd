@@ -255,7 +255,8 @@ func _build_banner(big_title: String, battle_title: String, outcome: Dictionary,
 	subtitle_label.add_theme_constant_override("outline_size", 5)
 	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	center.add_child(subtitle_label)
-	if str(_class_outcome.get("label", "")) != "":  # CV3-4 : classe du résultat (cœur)
+	# CV3-4 : classe du résultat (cœur) ; VN : pas de pastille qui répète le grand titre.
+	if str(_class_outcome.get("label", "")) != "" and str(_class_outcome["label"]) != big_title:
 		outcome_band = OutcomeBand.create(str(_class_outcome["class"]), str(_class_outcome["label"]), 20)
 		outcome_band.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		center.add_child(outcome_band)
