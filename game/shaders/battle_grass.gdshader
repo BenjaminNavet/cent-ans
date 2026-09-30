@@ -71,6 +71,16 @@ void vertex() {
 		clump = bt_value_noise(wp * 0.55 + 7.1);
 		density = smoothstep(0.08, 0.38, patches) * mix(0.62, 1.0, smoothstep(0.3, 0.72, clump)) * (1.0 - snow * 0.93);
 	}
+	// VN : dans les parcelles de blé et de chaume du décor, tiges serrées partout (sinon ils ne poussaient que dans
+	// les plaques d'herbe : blé en ovales, Crécy, Poitiers).
+	if (decor_on > 0.5 && fade > 0.0) {
+		vec2 duv0 = (wp + (da6_on > 0.5 ? bt_edge_warp(wp) : vec2(0.0)) - splat_rect.xy) / splat_rect.zw;
+		vec4 df0 = texture(decor_fields, duv0);
+		float kind0 = floor(df0.r * 8.0 + 0.5);
+		if (df0.a > 0.5 && (kind0 == 2.0 || kind0 == 6.0)) {
+			density = mix(density, 0.92, smoothstep(0.0, 0.5, df0.b));
+		}
+	}
 	v_tint = vec3(0.0);
 	v_shade = 0.0;
 	v_normal = vec3(0.0, 1.0, 0.0);

@@ -74,8 +74,10 @@ vec3 bt_field_info_ex(vec2 p, float ramp, float soft) {
 	float massif = bt_value_noise(p * 0.0012 + 3.1);
 	float z = smoothstep(0.0, ramp, edge);
 	if (soft > 0.5) {
-		z *= smoothstep(0.37, 0.41, massif);
-		if (massif < 0.37) {
+		// VN : massif lu au centre de la parcelle (entière ou absente) : lu au point, sa lisière
+		// courbe découpait les parcelles en ovales (blé de Crécy, Poitiers).
+		vec2 center = transpose(rot) * ((cell + 0.5) * size);
+		if (bt_value_noise(center * 0.0012 + 3.1) < 0.39) {
 			kind = 0.0;
 		}
 	} else if (massif < 0.38) {

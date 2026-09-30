@@ -296,6 +296,14 @@ void fragment() {
 	tint = mix(tint, tint * vec3(0.78, 0.92, 0.72), dip * 0.7);
 	tint = mix(tint, tint * vec3(1.14, 1.06, 0.8), crest * 0.55);
 	albedo = mix(albedo, albedo * tint, grassy);
+	// VN : sol des blés et des chaumes couleur de paille : au-delà du disque d'herbe (~95 m autour
+	// du point regardé) le champ n'était que terre sombre, et les épis s'arrêtaient en ovale.
+	if (field.x == 2.0) {
+		float rows = 0.5 + 0.5 * sin(field.y * 6.2832 / 1.1);
+		vec3 straw = decor_kind == 6.0 ? vec3(0.5, 0.42, 0.26) : vec3(0.56, 0.44, 0.2);
+		straw *= mix(0.86, 1.08, macro) * mix(0.9, 1.06, fine) * mix(0.93, 1.03, rows);
+		albedo = mix(albedo, straw, field_w * 0.8 * (1.0 - w[int(L_SNOW)]));
+	}
 	albedo *= mix(0.84, 1.1, macro) * mix(0.93, 1.05, fine);
 	// DA6 : détail de près (sol net sous la caméra rapprochée). La couche dominante est relue à
 	// ~1/4 de son échelle, tournée : sa luminance seule module l'albédo (grain, brindilles,
