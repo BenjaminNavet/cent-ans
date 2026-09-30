@@ -16,6 +16,7 @@ var _failures := 0
 
 func _init() -> void:
 	await process_frame
+	Ga3Vegetation.force(false)  # GA3-L2 : ce test porte sur l'état FC (cartes proches, atlas FC2)
 	_test_atlases()
 	await _test_map()
 	if _failures > 0:

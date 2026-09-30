@@ -182,6 +182,22 @@ def split_sheet(
     return crops
 
 
+def drop_specks(crop: np.ndarray, fraction: float = 0.02) -> np.ndarray:
+    """Clear detached blobs smaller than ``fraction`` of the main one (ground-shadow remnants)."""
+    from scipy import ndimage
+
+    labels, count = ndimage.label(crop[..., 3] > 0.5)
+    if count <= 1:
+        return crop
+    areas = ndimage.sum(np.ones(labels.shape), labels, index=np.arange(1, count + 1))
+    keep = np.isin(labels, 1 + np.nonzero(areas >= fraction * areas.max())[0])
+    near = ndimage.binary_dilation(keep, iterations=2)
+    out = crop.copy()
+    out[..., 3] *= near
+    yy, xx = np.nonzero(out[..., 3] > 0.02)
+    return out[yy.min() : yy.max() + 1, xx.min() : xx.max() + 1]
+
+
 def silhouette_box(cell: np.ndarray) -> tuple[float, float, float]:
     """(top row, bottom row, foot column) of an RGBA cell's opaque silhouette."""
     ys, xs = np.nonzero(cell[..., 3] > 0.5)
@@ -401,7 +417,9 @@ def impostor_atlases() -> tuple[np.ndarray, np.ndarray]:
     normal[...] = (0.5, 0.5, 1.0, 1.0)
     for row, name in enumerate(ESSENCES):
         box, colour = fc_row_reference(fc, row)
-        crops = split_sheet(_load(RAW / f"{name}_sheet_cut.png"))
+        crops = [
+            drop_specks(c) for c in split_sheet(_load(RAW / f"{name}_sheet_cut.png"))
+        ]
         cells = match_mean([fit_cell(c, box) for c in crops], colour)
         for view, cell in enumerate(cells):
             y0, x0 = row * CELL, view * CELL
@@ -535,7 +553,7 @@ def rocks_step() -> None:
     )
     sources = {
         "ga3_rock_a": S5 / "rock_trellis.glb",
-        "ga3_rock_b": RAW / "rock_b_trellis.glb",
+        "ga3_rock_b": RAW / "rock_b_trellis_s7.glb",
         "ga3_rock_c": RAW / "rock_c_trellis.glb",
     }
     for name, source in sources.items():
