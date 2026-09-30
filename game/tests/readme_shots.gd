@@ -11,6 +11,7 @@ const SHOTS := [
 	["londres", Vector2(2018.0, 2767.5), 4.5, 0.0],
 	["londres_site", Vector2(2018.0, 2767.5), -1.0, 0.0],
 	["rouen", Vector2(2097.0, 3099.4), -1.0, 0.0],
+	["rouen_est", Vector2(2097.0, 3099.4), -1.0, 140.0],
 	["orleans", Vector2(2152.0, 3346.5), -1.0, 0.0],
 	["orleans_vallee", Vector2(2152.0, 3346.5), 5.0, 0.0],
 ]
