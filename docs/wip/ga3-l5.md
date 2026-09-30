@@ -11,14 +11,19 @@ pièce recalée dans le repère du nœud procédural qu'anime `SiegeEnginesFx` /
 et `ga3_<engin>_lod.glb` (hiérarchie identique au procédural). `SiegeEnginesFx.instantiate`
 choisit la variante GA3 (`data/fx/siege_engines.json`, `ga3`) sauf `--no-ga3`.
 
-## État
-- [x] Squelette (note, script Blender, test désactivé)
-- [x] Script `tools/blender_scripts/ga3_siege_rig.py` : trébuchet
-- [x] Script : bélier
-- [x] Branchement Godot (`siege_engines.json` `ga3` + schéma + pytest, `SiegeEnginesFx.ga3_variant/kind_settings/instantiate`, `SiegeAssaultFx` lit `kind_settings`)
-- [ ] Test `game/tests/ga3_l5_siege_test.gd` (écrit, à faire passer) + tests de siège + smoke
-- [ ] Capture unique de contrôle
-- [ ] ADR 0140 § L5, `docs/wip/ga3.md`
+## État (terminé, 30/09)
+- [x] Squelette, script `tools/blender_scripts/ga3_siege_rig.py` (trébuchet, bélier), `siege_engines.py` protégé par `__main__`
+- [x] Branchement : `ga3` de `data/fx/siege_engines.json` (+ schéma, pytest), `SiegeEnginesFx.ga3_variant` /
+      `kind_settings` / `instantiate` (méta `ga3`), `SiegeAssaultFx` lit `kind_settings` (corde de la poutre)
+- [x] Tests : `ga3_l5_siege_test.gd` (avec et sans `--no-ga3`), smoke, `ga3_l1_decor_test` (x2),
+      `nt5_cap_engines_test` (x2), `nt8_castle_test`, `nt10_test`, `nt7_anim_test`, `sb_siege_bars_test`
+- [x] Capture unique `ga3_l5_siege_shot.gd` → `docs/audit/captures/ga3/ga3_l5_siege.png` (non suivie)
+- [x] ADR 0140 § L5, `docs/wip/ga3.md`, notes du catalogue
 
-## Prochaine étape
-Import Godot du worktree (plante parfois : relancer), puis `ga3_l5_siege_test.gd` avec et sans `--no-ga3`.
+## Points ouverts
+- Jugement en jeu par le joueur (bataille de siège réelle).
+- Tache sombre sur le bâti arrière du trébuchet (fond de la caisse GA3 resté sur le bâti, vu
+  dans la capture) : retirer les faces basses de l'ancienne assise de la caisse si gênant.
+- Proportions forcées (bâti ×0,86, caisse aplatie en plan), traverses étirées par le vide
+  central ; poutre du bélier qui traverse le toit aux grands balancements (déjà en procédural).
+- Servants (`crew.layouts`) inchangés : placés pour le bâti procédural (3,8 m de large ; GA3 ≈ 7 m).
