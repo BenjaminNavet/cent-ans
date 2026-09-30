@@ -196,3 +196,9 @@ NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul SR |
 |---|---|---|---|---|---|
 | 2026-09-30 | — | SR (squelette) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence man_at_arms (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,07 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence longbowman (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,14 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence crossbowman (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,21 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence sergeant (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,28 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence militia (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,35 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence knight_mounted (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,42 $ |
