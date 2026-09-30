@@ -17,6 +17,8 @@ signal speed_pressed(index: int)  # -1 : pause, 0..3 : index dans BattleScene.SP
 signal minimap_clicked(world: Vector2)
 signal leader_clicked(double: bool)  # UB1 : sceau du chef (clic : sélection, double : caméra)
 signal ui_feedback(kind: String)  # UB1 : sons d'interface (« card », « alert », « cancel »)
+signal quit_confirmed  # « Quitter la bataille » confirmé
+signal quit_cancelled  # « Reprendre »
 signal ability_pressed(unit_id: int, ability_id: String)  # CB4 : bouton de capacité d'une carte
 
 const UNIT_CARD := preload("res://scripts/battle/unit_card.gd")
@@ -86,6 +88,7 @@ var log_toggle: Button
 var leader_seal: Control
 var withdraw_all_button: Button
 var confirm_panel: PanelContainer
+var quit_panel: PanelContainer  # Échap sans sélection : « Quitter la bataille ? »
 var _leader: Dictionary = {}  # général du joueur (setup) : character, name, command
 var _leader_unit: Dictionary = {}  # son régiment (get_units)
 var _leader_portrait: Texture2D = null
@@ -453,52 +456,75 @@ func _draw_leader_seal() -> void:
 
 ## « Retraite générale » : demande de confirmation (audit A3 B3).
 func _build_confirm() -> void:
-	confirm_panel = PanelContainer.new()
-	confirm_panel.name = "ConfirmWithdrawAll"
-	confirm_panel.anchor_left = 0.5
-	confirm_panel.anchor_right = 0.5
-	confirm_panel.anchor_top = 0.38
-	confirm_panel.anchor_bottom = 0.38
-	confirm_panel.offset_left = -260
-	confirm_panel.offset_right = 260
-	confirm_panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(18))
-	confirm_panel.visible = false
-	root.add_child(confirm_panel)
+	confirm_panel = _build_dialog("ConfirmWithdrawAll", "Sonner la retraite générale ?", "Tous vos régiments encore en ordre quittent le champ. La bataille sera perdue, mais l'ost sera sauf.", "Sonner la retraite", "Tenir le champ", func() -> void: command_pressed.emit("withdraw_all"))
+	# Échap sans sélection : « Quitter la bataille » (texte fixé par `ask_quit`).
+	quit_panel = _build_dialog("ConfirmQuitBattle", "Quitter la bataille ?", "", "Quitter la bataille", "Reprendre", func() -> void: quit_confirmed.emit())
+	quit_panel.get_node("Box/Buttons/Cancel").pressed.connect(func() -> void: quit_cancelled.emit())
+
+
+## Panneau de confirmation centré (titre, texte, bouton oui / non) ; les deux boutons le ferment.
+func _build_dialog(panel_name: String, title_text: String, body: String, yes_text: String, no_text: String, on_yes: Callable) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = panel_name
+	panel.anchor_left = 0.5
+	panel.anchor_right = 0.5
+	panel.anchor_top = 0.38
+	panel.anchor_bottom = 0.38
+	panel.offset_left = -260
+	panel.offset_right = 260
+	panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(18))
+	panel.visible = false
+	root.add_child(panel)
 	var box := VBoxContainer.new()
+	box.name = "Box"
 	box.add_theme_constant_override("separation", 10)
-	confirm_panel.add_child(box)
-	var title := BattleUiKit.label("Sonner la retraite générale ?", 26, BattleUiKit.RUBRIC, true)
+	panel.add_child(box)
+	var title := BattleUiKit.label(title_text, 26, BattleUiKit.RUBRIC, true)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
-	var text := BattleUiKit.label("Tous vos régiments encore en ordre quittent le champ. La bataille sera perdue, mais l'ost sera sauf.", 16)
+	var text := BattleUiKit.label(body, 16)
+	text.name = "Text"
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.custom_minimum_size = Vector2(480, 0)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(text)
 	var row := HBoxContainer.new()
+	row.name = "Buttons"
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 16)
 	box.add_child(row)
 	var yes := Button.new()
 	yes.name = "Confirm"
-	yes.text = "Sonner la retraite"
+	yes.text = yes_text
 	yes.focus_mode = Control.FOCUS_NONE
 	yes.pressed.connect(func() -> void:
-		confirm_panel.visible = false
-		command_pressed.emit("withdraw_all"))
+		panel.visible = false
+		on_yes.call())
 	row.add_child(yes)
 	var no := Button.new()
 	no.name = "Cancel"
-	no.text = "Tenir le champ"
+	no.text = no_text
 	no.focus_mode = Control.FOCUS_NONE
 	no.pressed.connect(func() -> void:
-		confirm_panel.visible = false
+		panel.visible = false
 		ui_feedback.emit("cancel"))
 	row.add_child(no)
+	return panel
 
 
 func ask_withdraw_all() -> void:
 	confirm_panel.visible = true
+	ui_feedback.emit("alert")
+
+
+## « Quitter la bataille ? » : `campaign` = l'armée quitte le champ et la main revient à la carte.
+func ask_quit(campaign: bool) -> void:
+	var text := quit_panel.get_node("Box/Text") as Label
+	if campaign:
+		text.text = "Vos régiments encore en ordre quittent le champ : la bataille est perdue, mais l'ost est sauf. Retour à la carte de campagne."
+	else:
+		text.text = "La bataille est perdue ; retour au menu principal."
+	quit_panel.visible = true
 	ui_feedback.emit("alert")
 
 

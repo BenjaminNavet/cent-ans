@@ -112,6 +112,14 @@ pub enum Command {
         units: Vec<u32>,
         ability: String,
     },
+    /// The side quits the battle (« Quitter la bataille »): every regiment
+    /// still in order withdraws and the battle ends at once, lost. Allowed
+    /// during deployment. `side` defaults to the issuing side. Additive:
+    /// older replays read unchanged.
+    Concede {
+        #[serde(default)]
+        side: Option<SideId>,
+    },
 }
 
 fn default_true() -> bool {
@@ -136,6 +144,7 @@ impl Command {
             | Command::LeaderOrder { units, .. }
             | Command::SetMode { units, .. }
             | Command::UseAbility { units, .. } => units,
+            Command::Concede { .. } => &[],
         }
     }
 }

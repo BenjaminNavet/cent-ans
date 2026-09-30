@@ -1090,6 +1090,18 @@ impl BattleSim {
         if self.finished {
             return Err(CommandError::Finished);
         }
+        if let Command::Concede { side: named } = command {
+            let giver = match (side, named) {
+                (Some(owner), Some(named)) if owner != named => {
+                    return Err(CommandError::WrongSide)
+                }
+                (Some(owner), _) => owner,
+                (None, Some(named)) => named,
+                (None, None) => return Err(CommandError::NoSide),
+            };
+            self.concede(giver);
+            return Ok(());
+        }
         let setup_order = matches!(
             command,
             Command::Formation { .. } | Command::FireAtWill { .. } | Command::SetMode { .. }
@@ -1352,9 +1364,35 @@ impl BattleSim {
                 enabled,
             } => self.set_mode(&units, mode, enabled)?,
             Command::UseAbility { units, ability } => self.use_ability(&units, &ability)?,
-            Command::LeaderOrder { .. } => unreachable!("handled above"),
+            Command::LeaderOrder { .. } | Command::Concede { .. } => {
+                unreachable!("handled above")
+            }
         }
         Ok(())
+    }
+
+    /// `Command::Concede`: every regiment of `side` still in order leaves
+    /// the field (survivors saved, as with a general retreat) and the battle
+    /// ends now, lost by `side`, even during deployment.
+    fn concede(&mut self, side: SideId) {
+        self.deploying = false;
+        let units: Vec<u32> = self
+            .units
+            .iter()
+            .filter(|u| {
+                u.side == side && u.present() && u.state != UnitState::Routing && !u.withdrawing
+            })
+            .map(|u| u.id)
+            .collect();
+        if !units.is_empty() {
+            // Cannot fail: the battle runs and every unit is present, in order, of `side`.
+            let _ = self.apply_command(Command::Withdraw { units }, Some(side));
+        }
+        self.log("Retraite générale : l'armée quitte le champ.".to_owned(), Some(side));
+        let end_conditions = self.end_conditions;
+        self.end_conditions = true;
+        self.check_end();
+        self.end_conditions = end_conditions;
     }
 
     /// Destinations of a group move for regiments standing at `anchors`

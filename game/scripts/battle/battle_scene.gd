@@ -278,6 +278,8 @@ func _ready() -> void:
 	input.selection_changed.connect(_on_input_selection_changed)
 	input.camera_focus_requested.connect(_on_input_camera_focus)
 	input.pause_toggled.connect(_toggle_pause)
+	hud.quit_confirmed.connect(quit_battle)
+	hud.quit_cancelled.connect(func() -> void: paused = _paused_before_quit_menu)
 	input.speed_step.connect(_on_speed_step)
 	input.help_toggled.connect(hud.toggle_help)
 	input.markers_toggled.connect(_on_input_markers_toggled)
@@ -1841,6 +1843,42 @@ func handle_group_key(number: int, save: bool) -> void:
 
 func _toggle_pause() -> void:
 	paused = not paused
+
+
+var _paused_before_quit_menu := false
+
+
+## Échap sans sélection : ouvre (bataille en pause) ou ferme « Quitter la bataille ? ».
+func toggle_quit_menu() -> void:
+	if battle == null or replay_mode or finished_shown or battle.call("is_finished"):
+		return
+	if hud.confirm_panel.visible:
+		hud.confirm_panel.visible = false
+		return
+	if hud.quit_panel.visible:
+		hud.quit_panel.visible = false
+		paused = _paused_before_quit_menu
+		return
+	_paused_before_quit_menu = paused
+	paused = true
+	hud.ask_quit(not standalone)
+
+
+## « Quitter la bataille » : l'armée quitte le champ (règle `concede` du cœur, déploiement
+## compris) ; l'écran de fin s'ouvre aussitôt et son bouton rend la main à la carte (ou au menu).
+func quit_battle() -> void:
+	if battle == null or replay_mode or battle.call("is_finished"):
+		return
+	var result: Dictionary = battle.call("issue_command", {"type": "concede"})
+	if not bool(result.get("ok", false)):
+		hud.show_toast("Impossible de quitter : %s." % str(result.get("error", "?")))
+		paused = _paused_before_quit_menu
+		return
+	if deployment != null:
+		deployment.dismiss()
+	selected.clear()
+	paused = false
+	_end_wait = _victory_hold()
 
 
 ## Boutons de vitesse du HUD (F5b) : -1 = pause (bascule), 0..2 = SPEEDS[index] et reprise.

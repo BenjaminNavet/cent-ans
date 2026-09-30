@@ -92,9 +92,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				# CB3 : Échap sort d'abord de la vue tactique si elle est ouverte.
 				if scene.tactical_view != null and scene.tactical_view.active:
 					scene.tactical_view.exit()
-				else:
+				elif not scene.selected.is_empty():
 					scene.selected.clear()
 					selection_changed.emit(scene.selected)
+				else:
+					scene.toggle_quit_menu()  # rien de sélectionné : « Quitter la bataille ? »
 			KEY_F12:
 				screenshot_requested.emit()
 	elif event is InputEventMouseButton:

@@ -50,14 +50,21 @@ func finish() -> bool:
 	if not bool(result.get("ok", false)):
 		scene.hud.show_toast(str(result.get("error", "?")))
 		return false
+	dismiss()
+	scene.hud.add_events([{"time": 0.0, "text_fr": "La bataille commence."}])
+	return true
+
+
+## Zone et bandeau retirés sans lancer la bataille (« Quitter la bataille » pendant le déploiement).
+func dismiss() -> void:
+	if not active:
+		return
 	active = false
 	zone_view.queue_free()
 	for view in extra_views:
 		view.queue_free()
 	extra_views.clear()
 	banner.queue_free()
-	scene.hud.add_events([{"time": 0.0, "text_fr": "La bataille commence."}])
-	return true
 
 
 ## Clic droit (`p0 == p1`) : la sélection se range autour du point, orientation gardée ;
