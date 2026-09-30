@@ -26,7 +26,9 @@ const PRESETS := {
 		"zenith": Color(0.62, 0.65, 0.68), "horizon": Color(0.78, 0.8, 0.8), "coverage": 0.92,
 		"cloud_light": Color(0.86, 0.87, 0.87), "cloud_shadow": Color(0.66, 0.68, 0.7),
 		"sky_energy": 0.9,
-		"fog": 0.0036, "fog_color": Color(0.74, 0.76, 0.77), "aerial": 0.0, "ambient": 1.1,
+		# VN5 : brouillard de fond allégé (vue de haut : écran gris uniforme, troupes invisibles) ;
+		# la nappe basse (hauteur de brouillard, `FogVolume`) garde le sol voilé.
+		"fog": 0.0017, "fog_color": Color(0.74, 0.76, 0.77), "aerial": 0.15, "ambient": 1.1,
 		"saturation": 0.85, "contrast": 1.0,
 	},
 	"rain": {
@@ -53,7 +55,7 @@ const TIME_KEYS: Array[String] = ["morning", "midday", "evening"]
 const DEFAULT_TIME := "midday"
 
 ## Densité du brouillard volumétrique par temps (actif selon le niveau de `RenderQuality`).
-const VOLUMETRIC_DENSITY := {"clear": 0.0012, "fog": 0.004, "rain": 0.0035, "snow": 0.0022}
+const VOLUMETRIC_DENSITY := {"clear": 0.0012, "fog": 0.0026, "rain": 0.0035, "snow": 0.0022}
 
 
 ## PO4 : préréglage d'heure `time_key` (`time_of_day.<clé>`), {} si absent.
