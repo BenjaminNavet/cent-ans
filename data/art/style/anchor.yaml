@@ -1,10 +1,10 @@
 # NB-DA: style anchor (bible DA § 13). Joined as image 1 to every NB generation of the
 # 2D illumination register ("Image 1 is the style reference").
 file: anchor.jpg
-chosen: v3
+chosen: v0
 model: google/gemini-3.1-flash-image
 image_config: {aspect_ratio: "3:2", image_size: 2K}
-seed: 1340
+seed: 1337
 resized_to: [1536, 1030]
 sources:
   - "Grandes Chroniques de France, BnF fr. 2609, f. 18r (Clovis) — domaine public"
