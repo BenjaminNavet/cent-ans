@@ -49,7 +49,9 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 ## petites pour valoir leur coût).
 @export var min_prop_scale: float = 0.025
 ## Cellules posées par image (semis fait dans le `WorkerThreadPool` si `threaded`).
-@export var max_cells_per_frame: int = 2
+## Lot FC6 : une seule cellule posée par image (le semis et les hauteurs sont faits dans le
+## `WorkerThreadPool` ; le fil principal ne crée que le MultiMesh).
+@export var max_cells_per_frame: int = 1
 @export var max_concurrent_jobs: int = 4
 @export var threaded: bool = true
 @export var max_reground_per_frame: int = 2
@@ -77,6 +79,7 @@ var _mesh: ArrayMesh
 var _cells: Dictionary = {}  # Vector2i → {"mmi", "points": PackedVector2Array, "buffer", "last_seen"}
 var _dirty: Dictionary = {}  # Vector2i → vrai (recalage à faire)
 var _jobs: Dictionary = {}  # Vector2i → {"task": int, "result": Dictionary}
+var _ground_jobs: Dictionary = {}  # FC6 : Vector2i → {"task", "mmi", "buffer"[, "stale"]}
 var _frame: int = 0
 var _focus := Vector2.ZERO
 var _radius: float = 0.0
@@ -119,11 +122,14 @@ func _wait_jobs() -> void:
 	for holder: Dictionary in _jobs.values():
 		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
 	_jobs.clear()
+	for holder: Dictionary in _ground_jobs.values():
+		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
+	_ground_jobs.clear()
 
 
 ## Tâches de semis en cours (tests, captures).
 func pending_jobs() -> int:
-	return _jobs.size()
+	return _jobs.size() + _ground_jobs.size()
 
 
 func clear() -> void:
@@ -220,11 +226,14 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 		if threaded:
 			if _jobs.size() >= max_concurrent_jobs:
 				break
+			var t_snap := Time.get_ticks_usec()
+			var source := _height_source(_cell_rect(key))
+			stats["snapshot_ms_max"] = maxf(float(stats.get("snapshot_ms_max", 0.0)), (Time.get_ticks_usec() - t_snap) / 1000.0)
 			var holder := {"result": {}}
-			holder["task"] = WorkerThreadPool.add_task(func() -> void: holder["result"] = _seed_cell(key), false, "GroundClutter")
+			holder["task"] = WorkerThreadPool.add_task(func() -> void: holder["result"] = _ground_seeded(_seed_cell(key), source), false, "GroundClutter")
 			_jobs[key] = holder
 		elif built < max_cells_per_frame:
-			_install_cell(key, _seed_cell(key))
+			_install_cell(key, _ground_seeded(_seed_cell(key), _height_source(_cell_rect(key))))
 			built += 1
 	for key: Vector2i in _jobs.keys():
 		if built >= max_cells_per_frame:
@@ -235,15 +244,10 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
 		_jobs.erase(key)
 		_install_cell(key, holder["result"])
+		if holder.get("stale", false):
+			_dirty[key] = true  # surface changée pendant le semis
 		built += 1
-	var regrounded := 0
-	for key: Vector2i in _dirty.keys():
-		if regrounded >= max_reground_per_frame:
-			break
-		_dirty.erase(key)
-		if _cells.has(key):
-			_reground_cell(key)
-			regrounded += 1
+	_update_regrounds()
 	for key: Vector2i in _cells:
 		var entry: Dictionary = _cells[key]
 		var shown := wanted.has(key)
@@ -405,17 +409,8 @@ func _install_cell(key: Vector2i, seeded: Dictionary) -> void:
 	var points: PackedVector2Array = seeded.get("points", PackedVector2Array())
 	var buffer: PackedFloat32Array = seeded.get("buffer", PackedFloat32Array())
 	var count := points.size()
-	var heights := _heights(points)
-	var bottom := INF
-	var high := -INF
-	for n in count:
-		var h := heights[n]
-		buffer[n * FLOATS_PER_INSTANCE + 7] += h
-		bottom = minf(bottom, h)
-		high = maxf(high, h)
-	if count == 0:
-		bottom = 0.0
-		high = 0.0
+	var bottom: float = seeded.get("bottom", 0.0)
+	var high: float = seeded.get("high", 0.0)
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.use_custom_data = true
@@ -445,30 +440,113 @@ func _excluded(p: Vector2, circles: PackedVector3Array) -> bool:
 	return false
 
 
-func _heights(points: PackedVector2Array) -> PackedFloat32Array:
-	if height_sampler.is_valid():
+## Lot FC6 : source de hauteurs lisible depuis un fil de travail, prise sur le fil principal :
+## instantané des pages du quadtree qui touchent `rect` (octets partagés en copie sur écriture),
+## sinon {} (échantillonneur de test ou heightmap de la carte, lus directement).
+func _height_source(rect: Rect2) -> Dictionary:
+	if height_sampler.is_valid() or terrain == null or terrain.quadtree == null or terrain.map_data == null:
+		return {}
+	return terrain.quadtree.surface_snapshot(rect.grow(1.0), Vector2.ZERO)
+
+
+## Hauteurs des points depuis `source` (`_height_source`) ; appelable hors du fil principal.
+func _heights_from(points: PackedVector2Array, source: Dictionary) -> PackedFloat32Array:
+	if source.is_empty() and height_sampler.is_valid():
 		return height_sampler.call(points)
-	if terrain != null and terrain.map_data != null:
-		return terrain.surface_heights_at(points)
 	var result := PackedFloat32Array()
+	if source.is_empty():  # sans quadtree : heightmap de la carte (lisible hors fil principal)
+		result.resize(points.size())
+		if map_data != null:
+			for n in points.size():
+				result[n] = map_data.surface_world_at(points[n].x, points[n].y)
+		return result
 	result.resize(points.size())
-	if map_data != null:
-		for n in points.size():
-			result[n] = map_data.surface_world_at(points[n].x, points[n].y)
+	for n in points.size():
+		result[n] = maxf(ReliefQuadtree.sample_snapshot(source, points[n].x, points[n].y), 0.0)
 	return result
 
 
-## Recalage (surface affichée changée) : hauteurs seules, depuis la copie processeur du tampon.
-func _reground_cell(key: Vector2i) -> void:
+## Lot FC6 (fil de travail) : pose les touffes semées sur la surface, bornes verticales.
+func _ground_seeded(seeded: Dictionary, source: Dictionary) -> Dictionary:
+	var points: PackedVector2Array = seeded.get("points", PackedVector2Array())
+	var buffer: PackedFloat32Array = seeded.get("buffer", PackedFloat32Array())
+	var heights := _heights_from(points, source)
+	var bottom := INF
+	var high := -INF
+	for n in points.size():
+		var h := heights[n]
+		buffer[n * FLOATS_PER_INSTANCE + 7] += h
+		bottom = minf(bottom, h)
+		high = maxf(high, h)
+	if points.is_empty():
+		bottom = 0.0
+		high = 0.0
+	seeded["buffer"] = buffer
+	seeded["bottom"] = bottom
+	seeded["high"] = high
+	return seeded
+
+
+## Lot FC6 : recalages (surface affichée changée) dans le `WorkerThreadPool` ; au plus une
+## cellule remplacée par image sur le fil principal.
+func _update_regrounds() -> void:
+	for key: Vector2i in _ground_jobs.keys():
+		var holder: Dictionary = _ground_jobs[key]
+		if not WorkerThreadPool.is_task_completed(int(holder["task"])):
+			continue
+		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
+		_ground_jobs.erase(key)
+		var entry: Dictionary = _cells.get(key, {})
+		if not entry.is_empty() and entry["mmi"] == holder["mmi"]:
+			var t0 := Time.get_ticks_usec()
+			var buffer: PackedFloat32Array = holder["buffer"]
+			entry["buffer"] = buffer
+			(entry["mmi"] as MultiMeshInstance3D).multimesh.buffer = buffer
+			stats["reground_ms_max"] = maxf(float(stats.get("reground_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
+		if holder.get("stale", false):
+			_dirty[key] = true
+		break
+	var started := 0
+	for key: Vector2i in _dirty.keys():
+		if started >= max_reground_per_frame:
+			break
+		if _ground_jobs.has(key):
+			continue
+		_dirty.erase(key)
+		if not _cells.has(key):
+			continue
+		var entry: Dictionary = _cells[key]
+		var points: PackedVector2Array = entry["points"]
+		if points.is_empty():
+			continue
+		if not threaded:
+			_reground_cell(key, _height_source(_cell_rect(key)))
+			continue
+		var holder := {"mmi": entry["mmi"], "buffer": PackedFloat32Array()}
+		var source := _height_source(_cell_rect(key))
+		var old: PackedFloat32Array = entry["buffer"]
+		holder["task"] = WorkerThreadPool.add_task(func() -> void: holder["buffer"] = _regrounded(points, old, source), false, "GroundClutter reground")
+		_ground_jobs[key] = holder
+		started += 1
+
+
+## Nouveau tampon (hauteurs seules) depuis la copie processeur ; appelable hors du fil principal.
+func _regrounded(points: PackedVector2Array, old: PackedFloat32Array, source: Dictionary) -> PackedFloat32Array:
+	var buffer := old.duplicate()
+	var heights := _heights_from(points, source)
+	for n in points.size():
+		var o := n * FLOATS_PER_INSTANCE
+		buffer[o + 7] = heights[n] - buffer[o + 5] * 0.08
+	return buffer
+
+
+## Recalage direct (sans fil de travail).
+func _reground_cell(key: Vector2i, source: Dictionary = {}) -> void:
 	var entry: Dictionary = _cells[key]
 	var points: PackedVector2Array = entry["points"]
 	if points.is_empty():
 		return
-	var heights := _heights(points)
-	var buffer: PackedFloat32Array = entry["buffer"]
-	for n in points.size():
-		var o := n * FLOATS_PER_INSTANCE
-		buffer[o + 7] = heights[n] - buffer[o + 5] * 0.08
+	var buffer := _regrounded(points, entry["buffer"], source)
 	entry["buffer"] = buffer
 	(entry["mmi"] as MultiMeshInstance3D).multimesh.buffer = buffer
 
@@ -484,6 +562,11 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 	for key: Vector2i in _cells:
 		if _cell_rect(key).intersects(rect, true):
 			_dirty[key] = true
+	# FC6 : semis ou recalage en cours sur l'ancienne surface → à refaire une fois installé.
+	for jobs: Dictionary in [_jobs, _ground_jobs]:
+		for key: Vector2i in jobs:
+			if _cell_rect(key).intersects(rect, true):
+				(jobs[key] as Dictionary)["stale"] = true
 
 
 ## Instances affichées par cellule : part `quality_density / max_density` des candidats, bornée
