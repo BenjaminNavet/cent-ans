@@ -253,11 +253,32 @@ def test_image_world_fit_and_disc_points():
     )
     centre = image[:, vc.WRIST_L, :2]
     major = np.array([0.2, 0.2, 0.25, 0.16])
+    flat = vc.disc_points(centre, major, fit, aspect, anchor_depth=0.0)
+    assert np.allclose(flat[:2, 0], zup[:2, vc.WRIST_L, 0])  # at the body's distance
+    assert np.allclose(flat[:2, 2], zup[:2, vc.WRIST_L, 2])
     disc = vc.disc_points(centre, major, fit, aspect, anchor_depth=-0.3)
-    assert np.allclose(disc[:, 0], zup[:, vc.WRIST_L, 0])
-    assert np.allclose(disc[:, 2], zup[:, vc.WRIST_L, 2])
     assert disc[0, 1] == pytest.approx(-0.3)
     assert disc[2, 1] < -0.3 < disc[3, 1]  # bigger: nearer (Y away from the camera)
+    axis_x = s * 0.5 * aspect + tx
+    # nearer than the body: pulled towards the optical axis (perspective)
+    assert abs(disc[0, 0] - axis_x) < abs(flat[0, 0] - axis_x) or np.isclose(
+        flat[0, 0], axis_x
+    )
+
+
+def test_reach_anchor_puts_the_farthest_frame_at_reach():
+    """The anchor found puts the farthest disc frame at the reach, in front of the body."""
+    base = np.array([[0.3, 0.0, 0.2], [0.35, 0.1, 0.5], [0.2, -0.1, 0.3]])
+    shoulder = np.tile([0.1, 0.0, 0.5], (3, 1))
+
+    def points_at(anchor):
+        return base + np.array([0.0, anchor, 0.0])
+
+    a = vc.reach_anchor(points_at, shoulder, 0.6)
+    far = np.linalg.norm(points_at(a) - shoulder, axis=-1).max()
+    assert far == pytest.approx(0.6, abs=0.01)
+    assert a < 0.0
+    assert vc.reach_anchor(points_at, shoulder, 0.1) > -0.2  # unreachable: closest
 
 
 def test_disc_normals_face_out_and_tilt():

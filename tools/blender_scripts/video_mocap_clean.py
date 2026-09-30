@@ -515,6 +515,9 @@ def disc_points(centre, major, fit, aspect, anchor_depth=0.0, fov_deg=65.0):
     distance of the body is ``s / (2 tan(fov / 2))`` (`fov_deg` = field of view along the
     image height); the disc's apparent size against its median gives its distance relative to
     the body's, `anchor_depth` being the depth (Y, metres) of the disc at its median size.
+    Perspective: a disc nearer than the body (the hips, at the body's distance) is seen farther
+    from the image centre than it is, its offset from the optical axis is scaled back by the
+    ratio of the distances.
     """
     s, tx, tz = (np.asarray(v, dtype=np.float64) for v in fit)
     c = np.asarray(centre, dtype=np.float64)
@@ -522,21 +525,26 @@ def disc_points(centre, major, fit, aspect, anchor_depth=0.0, fov_deg=65.0):
     dist = s / (2.0 * np.tan(np.radians(fov_deg) / 2.0))
     ref = np.median(size)
     y = anchor_depth + dist * (ref / np.maximum(size, 1e-6) - 1.0)
-    return np.stack((s * c[:, 0] * aspect + tx, y, -s * c[:, 1] + tz), axis=-1)
+    k = np.maximum(dist + y, 0.2) / dist
+    axis_x = s * 0.5 * aspect + tx
+    axis_z = -s * 0.5 + tz
+    x = axis_x + (s * c[:, 0] * aspect + tx - axis_x) * k
+    z = axis_z + (-s * c[:, 1] + tz - axis_z) * k
+    return np.stack((x, y, z), axis=-1)
 
 
-def reach_anchor(disc, shoulder, reach, lo=-1.0, hi=0.3, steps=261):
-    """Depth offset (Y, metres) putting a hand-held disc at most `reach` from the shoulder.
+def reach_anchor(points_at, shoulder, reach, lo=-1.0, hi=0.3, steps=261):
+    """Depth anchor (Y, metres) putting a hand-held disc at most `reach` from the shoulder.
 
-    `disc` (frames, 3) comes from ``disc_points`` with ``anchor_depth=0``; its depth is only
-    known up to an offset. The offset kept is the one in front of the body (towards the camera,
-    -Y) where the farthest frame is exactly `reach` from `shoulder` (frames, 3): the disc is in
-    the hand, and the clip's widest block or push stretches the arm.
+    `points_at(anchor)` gives the disc (frames, 3) for an anchor depth (``disc_points``): the
+    size gives its depth only up to that offset. The anchor kept is the one in front of the
+    body (towards the camera, -Y) where the farthest frame is exactly `reach` from `shoulder`
+    (frames, 3): the disc is in the hand, and the widest block or push stretches the arm.
     """
-    d = np.asarray(disc, dtype=np.float64) - np.asarray(shoulder, dtype=np.float64)
+    sh = np.asarray(shoulder, dtype=np.float64)
     anchors = np.linspace(hi, lo, steps)
     far = np.array(
-        [np.max(np.linalg.norm(d + np.array([0.0, a, 0.0]), axis=-1)) for a in anchors]
+        [np.max(np.linalg.norm(points_at(a) - sh, axis=-1)) for a in anchors]
     )
     k = int(np.argmin(far))
     if far[k] >= reach:

@@ -57,8 +57,9 @@ WRIST_SWING_DEG = 65.0
 WRIST_TWIST_DEG = 110.0
 # NT14: one-handed grip (fist landmarks smoothed): a thrust needs the fist bent further.
 WRIST_SWING_ONE_HAND_DEG = 80.0
-# NT14: the disc's farthest frame of a video is this fraction of an arm's length away.
-DISC_REACH = 0.8
+# NT14: the disc's farthest frame of a video is this many arm's lengths (shoulder to wrist)
+# from the shoulder (the fist grips the back of the bowl, its rim centre is a hand further).
+DISC_REACH = 1.0
 # NT14: face normal of the heater shield (FG0 kit, `battle_fine_equipment.heater_shield`) in
 # the rest frame of LowerArm.L: smallest principal axis of its vertices, pointing away from the
 # forearm (its centre sits 77 % of the way to the wrist). Measured on `infantry_0`.
@@ -284,11 +285,14 @@ def disc_track(data, video, first, last, rate):
     fit = tuple(vc.one_euro(f, rate, 1.0, 0.2) for f in fit)
     z = vc.one_euro(vc.to_zup(world), rate, 1.5, 0.3)
     axes = disc["axes"]
-    pts = vc.disc_points(disc["centre"], axes[:, 0], fit, aspect, 0.0)
-    pts = vc.one_euro(pts, rate, 1.5, 0.3)
+
+    def points_at(anchor):
+        pts = vc.disc_points(disc["centre"], axes[:, 0], fit, aspect, anchor)
+        return vc.one_euro(pts, rate, 1.5, 0.3)
+
     lengths = vc.segment_lengths(z)
     arm = lengths[(vc.SHOULDER_R, vc.ELBOW_R)] + lengths[(vc.ELBOW_R, vc.WRIST_R)]
-    pts[:, 1] += vc.reach_anchor(pts, z[:, vc.SHOULDER_L], DISC_REACH * arm)
+    pts = points_at(vc.reach_anchor(points_at, z[:, vc.SHOULDER_L], DISC_REACH * arm))
     chest = 0.5 * (z[:, vc.SHOULDER_L] + z[:, vc.SHOULDER_R])
     normals = vc.disc_normals(axes[:, 0], axes[:, 1], disc["angle"], pts, chest)
     normals = vc.smooth_directions(normals, rate, 1.0, 0.3)
@@ -489,54 +493,48 @@ def blade_sides(clip, blades):
     return out
 
 
-SHIELD_STANDOFF_M = 0.05  # fist behind the disc's rim plane
-POLE_STEPS = 72
+SHIELD_CENTRE = 0.77  # the heater shield's centre, as a fraction of the forearm
+FOREARM_STEPS = 72
 
 
 def shield_arm_rotations(rest, clip, index, j, state):
-    """NT14: left arm deltas (upper, lower) putting the fist behind the tracked disc.
+    """NT14: left arm deltas (upper, lower) putting the heater shield where the disc is.
 
-    Two-bone reach from the shoulder to the disc (distance scaled from the performer's arm to
-    the figure's, capped to the reach); the elbow's turn about the shoulder-fist line is picked
-    so that the forearm lies in the disc's plane (a strapped shield lies along the forearm),
-    the elbow low and outwards, close to the previous frame's; the forearm's roll then turns
-    the shield's face (``Rest.shield_face``) onto the disc's normal.
+    The shield is strapped along the forearm, the disc was gripped at its back: the forearm is
+    laid in the disc's plane (its direction scanned around the disc's normal) with the shield's
+    centre (``SHIELD_CENTRE`` of the forearm) on the disc's centre, the shoulder-disc distance
+    scaled from the performer's arm (right arm lengths: the left one hides) to the figure's.
+    The direction kept best fits the upper arm's length, with the elbow not above the shoulder,
+    the wrist farther than the elbow, and close to the previous frame's; the forearm's roll
+    then turns the shield's face (``Rest.shield_face``) onto the disc's normal.
     """
     l1, l2 = rest.arm_l
     shoulder = j[vc.SHOULDER_L]
     normal = clip.normals[index]
-    target = clip.disc[index] - normal * (SHIELD_STANDOFF_M * clip.scale)
     perf = (
-        clip.lengths[(vc.SHOULDER_L, vc.ELBOW_L)]
-        + clip.lengths[(vc.ELBOW_L, vc.WRIST_L)]
+        clip.lengths[(vc.SHOULDER_R, vc.ELBOW_R)]
+        + clip.lengths[(vc.ELBOW_R, vc.WRIST_R)]
     ) * clip.scale
-    reach = (target - shoulder) * ((l1 + l2) / max(perf, 1e-6))
-    dist = min(max(reach.length, abs(l1 - l2) + 1e-4), (l1 + l2) * 0.985)
-    axis = reach.normalized()
-    along = (l1 * l1 - l2 * l2 + dist * dist) / (2.0 * dist)
-    height = math.sqrt(max(l1 * l1 - along * along, 0.0))
-    p1 = (-rest.up) - axis * (-rest.up).dot(axis)
-    if p1.length < 1e-6:
-        p1 = axis.orthogonal()
-    p1.normalize()
-    p2 = axis.cross(p1)
-    prev = state.get("shield_pole")
+    centre = (clip.disc[index] - shoulder) * ((l1 + l2) / max(perf, 1e-6))
+    a = normal.orthogonal().normalized()
+    b = normal.cross(a).normalized()
+    prev = state.get("shield_fore")
     best, best_score = None, math.inf
-    for k in range(POLE_STEPS):
-        th = 2.0 * math.pi * k / POLE_STEPS
-        dirn = p1 * math.cos(th) + p2 * math.sin(th)
-        elbow = axis * along + dirn * height
-        fore = (axis * dist - elbow).normalized()
-        score = 2.0 * abs(fore.dot(normal))
-        score += 0.6 * max(0.0, dirn.dot(rest.up)) - 0.3 * dirn.dot(rest.left)
+    for k in range(FOREARM_STEPS):
+        th = 2.0 * math.pi * k / FOREARM_STEPS
+        d = a * math.cos(th) + b * math.sin(th)
+        elbow = centre - d * (SHIELD_CENTRE * l2)
+        err = (elbow.length - l1) / l1
+        score = 4.0 * err * err
+        score += 0.5 * max(0.0, elbow.normalized().dot(rest.up))
+        score += 0.5 * max(0.0, elbow.length - (elbow + d * l2).length) / l2
         if prev is not None:
-            score += 0.8 * (1.0 - dirn.dot(prev))
+            score += 0.8 * (1.0 - d.dot(prev))
         if score < best_score:
-            best, best_score = dirn, score
-    state["shield_pole"] = best
-    elbow = axis * along + best * height
-    u = elbow
-    lo = axis * dist - elbow
+            best, best_score = d, score
+    state["shield_fore"] = best
+    u = (centre - best * (SHIELD_CENTRE * l2)).normalized() * l1
+    lo = best * l2
     u0, l0, h0 = rest.limb["arm.L"]
     hinge = u.cross(lo)
     if hinge.length < 1e-6:
