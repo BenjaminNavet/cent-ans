@@ -19,11 +19,46 @@ Brutes (hors dépôt) : `~/dev/cent-ans-raw/ga3/` ; références figurines : `~/
       (rig + anim) / TRELLIS 2 1024 sur les vues de `sr3/longbowman.png` → planche
       `docs/img/ga3/s3_compare.jpg` (`tools/blender_scripts/ga3_compare_render.py`). Script fal hors
       dépôt `~/dev/cent-ans-raw/ga3/s3/fal_s3.py`, brutes au même endroit. **En cours** : 3 appels lancés.
-- [ ] S4 décor v2 : prompt corrigé (flux-2) → détourage bria → `trellis` et `trellis-2` sur la même
-      image → `ga3_cleanup.py` étendu (exposition, normal/rugosité) → `props_ga/ga3_house2_t{1,2}_lod*.glb` ;
-      planche `docs/img/ga3/s4_house_v2.jpg`. Script fal : `tools/experiments/ga3_fal_decor.py`
-      (étapes en cache), brutes `~/dev/cent-ans-raw/ga3/s4/`. **En cours** : image + détourage faits
-      (propres, un niveau, chaume, sans cheminée), génération 3D lancée ; ensuite cleanup v2 puis planche.
+- [x] S4 décor v2 : prompt corrigé (flux-2) → détourage bria → `trellis` et `trellis-2` sur la même
+      image → `ga3_cleanup.py` étendu → `props_ga/ga3_house2_t{1,2}_lod*.glb` ; planche
+      `docs/img/ga3/s4_house_v2.jpg` (locale, `docs/img/` ignoré sur main). Voir « S4 décor v2 ».
+
+## S4 décor v2 (30/09)
+Chaîne : `tools/experiments/ga3_fal_decor.py OUT --prompt-file P` (flux-2 1024² → bria → trellis /
+trellis-2, chaque étape en cache, réponses fal gardées) puis `tools/blender_scripts/ga3_cleanup.py`
+(nouvelles options `--exposure`, `--auto-levels P`, `--gamma`, `--normal auto|on|off`,
+`--roughness auto|off` ; défauts = comportement S1, vérifié : 7 998 / 4 000 / 1 200 tri) ; planche
+`tools/blender_scripts/ga3_sheet.py` (Cycles, même caméra/soleil) + `magick` pour l'assemblage.
+Brutes (prompt, src, cut, glb, json) : `~/dev/cent-ans-raw/ga3/s4/`.
+- Image : prompt « single small 14th-century French peasant cottage, one storey only with a low attic,
+  … thatched roof, small smoke hole in the thatch and no chimney, … no brick, no glass … isolated on
+  plain mid-grey, no ground, no grass » → un niveau, chaume, pans de bois, soubassement de moellons,
+  pas de cheminée : anachronismes S1 réglés. Détourage bria propre → **plus aucun socle d'herbe**
+  (`--strip-base` inutile).
+- TRELLIS (0,02 $, ≈ 1 min) : 43,7 k tri bruts → 7 999 / 3 999 / 1 199, 7,99 × 5,93 × 5,62 m.
+  Géométrie nette (pignon, débord du toit, soubassement), texture lisible.
+- TRELLIS 2 1024 (0,30 $, même délai) : 98 k tri, albédo 2048 + metallicRoughness, **pas de normal
+  map fournie** (le relief n'est que dans la géométrie). Décimé à 8 k, le chaume s'effondre : toit
+  creusé, trous, faîtage déchiqueté (surface fine non manifold, 285 arêtes). LOD1/2 : la décimation
+  « collapse » cale à ~5,7 k tri quoi qu'on demande → repli automatique par remaillage voxel
+  (`decimated_copy`), 3 690 / 1 101 tri. Rugosité cuite depuis la source, normal map cuite.
+- Albédo : `--auto-levels 1 --gamma 1.1` corrige S1 (terne) mais **sur-éclaircit** le chaume de la v2
+  TRELLIS (paille presque blanche sous soleil) : pour le lot, `--auto-levels 0.5` sans gamma, ou
+  exposition seule, à juger par objet. `--normal on` cuit le relief du maillage source sur les LOD
+  (utile pour TRELLIS aussi).
+- Écarts : pas d'import Godot lancé (pas de `.import` ni textures extraites pour `ga3_house2_*`, le
+  lot d'intégration le fera ; éviter d'importer ici pendant que S2/S3 tournent) ; planche non commitée
+  (`docs/img/` n'est plus suivi sur main, alors que S1/S2 le sont sur `feat/ga3` : à trancher à la fusion).
+- **Verdict** : TRELLIS 2 ne vaut pas ×15 pour le décor de bataille : à budget de triangles égal (8 k),
+  sa géométrie fine se décime plus mal et son PBR n'apporte presque rien vu de loin ; texture un peu
+  plus juste en teinte, c'est tout. **TRELLIS + détourage** est la chaîne du lot.
+- **Chaîne recommandée pour le lot décor** (maison ×2-3 variantes, église, moulin, chariot, tente,
+  palissade, puits, trébuchet, bélier) : flux-2 1024² (0,012) → bria (0,018) → trellis 0,02 (seed
+  fixe, 2 graines si raté) → `ga3_cleanup.py --normal on --auto-levels 0.5`. ≈ 0,05 $/essai,
+  ~2 essais/objet → ≈ 1 $ pour ~10 objets. Objets fins (trébuchet, bélier, chariot : poutres, roues,
+  cordages) : TRELLIS risque les mêmes fragments que l'arc de S2 → prévoir un essai `trellis/multi`
+  (2-3 vues NB2) ou garder le procédural pour eux. TRELLIS 2 seulement pour un bâtiment-clé vu de
+  près (église) et avec LOD0 relevé à 20-30 k : +0,30 $.
 
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
@@ -75,3 +110,6 @@ Brutes (hors dépôt) : `~/dev/cent-ans-raw/ga3/` ; références figurines : `~/
     (triangles, rig, clips OK). Conditions d'un go : références en A-pose mains vides sans objet
     tenu (armes et carquois procéduraux), masque de livrée (zones teintables) + décalque de blason,
     albédo « dé-éclairé » (délighting) et intégration au format `CAM2` (atlas de détail, LOD1/2).
+- 30/09 S4 (décor v2) : flux-2 + bria + trellis / trellis-2 (0,35 $), `ga3_cleanup.py` étendu
+  (étalonnage albédo, cuisson normal/rugosité, repli voxel de la décimation), `ga3_sheet.py`,
+  `ga3_fal_decor.py`. Verdict : TRELLIS + détourage pour le lot (~1 $), TRELLIS 2 non retenu.
