@@ -639,7 +639,7 @@ def caparison(body, mount, level, hem=0.46, dagged=False):
     irregular organ-pipe folds that deepen and flare towards the hem; the hem waves around
     the hocks (optionally dagged at LOD0); slits over the fore and hind legs, the panel in
     front of the fore slit and behind the hind slit partly carried by the upper leg so the
-    cloth parts when the horse strides. The arms cover the whole cloth (charges ~25 cm),
+    cloth parts when the horse strides. The arms cover the whole cloth (charges ~22 cm),
     not a shield pasted on each flank. Vertices: the top arc over the back takes a third
     of the ring, each flank a third (the old ring spent two thirds on the back).
     """
@@ -793,11 +793,11 @@ def caparison(body, mount, level, hem=0.46, dagged=False):
         if f.normal.dot(c - Vector((0, c.y, 1.0))) < 0:
             f.normal_flip()
     uv = bm.loops.layers.uv.new("UVMap")
-    # Whole-cloth arms, one scale both ways (`cloth_m` of cloth per unit, charges ~25 cm):
+    # Whole-cloth arms, one scale both ways (`cloth_m` of cloth per unit, charges ~22 cm):
     # u along the body, mirrored on the right flank so the charges face the head on both
     # sides (seam at the spine: the side is the face's, not the vertex's); v = distance
     # along the ring from the spine, 0.04 at the spine.
-    cloth_m = 1.8
+    cloth_m = 1.5
     ymid = (y0 + y1) / 2
     for f, keys in faces_uv:
         if not f.is_valid:

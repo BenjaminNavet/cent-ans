@@ -39,7 +39,15 @@ Correctifs (`steel_occlusion`, 0 = rendu SR2) : occlusion spéculaire par `RADIA
 ×0,12 sous l'horizon → ×1 vers 40° de hauteur, élargi par la rugosité, ×0,35 dans les creux
 cuits) sur plate, garniture et maille ; rugosité 0,16-0,42 ; acier 0,42 ; film de crasse non
 métallique dans les creux et par plaques ; martelage +0,3.
-Prochaine étape : casques (bassinet plus pointu, visière sur cavalry_0 à la place du heaume).
+Maille : la lumière directe (que ni l'AO ni RADIANCE ne touchent) la blanchissait comme un
+tricot à contre-jour (`d_mail` : diffus rouge vif une fois le reflet coupé) → albédo ×0,55
+(ombre d'anneau à anneau), rugosité ≥ 0,5, reflet ×0,5.
+Casques : bassinet à calotte ogivale (arcs de rayon 1,6, pointe à +7,5 cm tirée vers la nuque),
+dos rentré vers la nuque (plus de paroi verticale « boîte de conserve ») dans les deux
+constructeurs (`battle_fine_equipment.bassinet` du kit FG0, `battle_fine_gear.bassinet_shell`) ;
+cavalry_0 variante 0 : bassinet à visière en museau de chien + camail au lieu du grand heaume
+(visière omise au LOD2). Recuisson des 14 figurines à bassinet ou caparaçon.
+Prochaine étape : tests, captures finales, grille A/B.
 
 # CR3 — caparaçons en drap lourd
 
