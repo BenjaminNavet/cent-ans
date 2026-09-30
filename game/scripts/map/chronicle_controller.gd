@@ -23,11 +23,10 @@ func setup(campaign_map: Node) -> void:
 	window = (load(WINDOW_SCENE) as PackedScene).instantiate()
 	window.name = "ChronicleWindow"
 	window.hide()
-	# PO1 : fenêtre de la chronique rangée dans une zone, puis inscrite dans la pile (Échap,
-	# exclusivité avec les grands panneaux) — dans cet ordre : un reparentage après inscription la
-	# désinscrirait. Q8 : zone `MODAL`, comme le sort de place (P2d) — `SIDE_PANEL` (≈ 380 px à
-	# 1280×720) laissait la fenêtre (620 px au moins) sortir de l'écran à droite.
-	UiZones.put(UiZones.Zone.MODAL, window)
+	# PO1 : fenêtre de la chronique dans la zone `SIDE_PANEL` (un seul panneau à la fois), puis
+	# inscrite dans la pile (Échap, exclusivité avec les grands panneaux) — dans cet ordre : un
+	# reparentage après inscription la désinscrirait.
+	UiZones.put(UiZones.Zone.SIDE_PANEL, window)
 	map.ui.register_panel(window, PanelStack.Kind.CENTRAL)
 	window.option_chosen.connect(_on_option_chosen)
 	var court_button: Button = map.ui.court_button

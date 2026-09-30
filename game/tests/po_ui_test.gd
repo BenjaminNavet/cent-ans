@@ -4,7 +4,7 @@ extends SceneTree
 ## - C1 (PO1) : aucun texte d'outil visible hors mode dev (`uv run`, `res://`, `user://`, `--…`,
 ##   chemins de fichier, identifiants bruts en snake_case) dans les `Label` / `RichTextLabel`.
 ## - C2 (PO1) : zones `UiLayout` sans chevauchement à 1280×720 et 1920×1080 ; un seul occupant de
-##   `SIDE_PANEL` après l'ouverture successive de la province et du registre (chronique : zone modale).
+##   `SIDE_PANEL` après l'ouverture successive de la province, de la chronique et du registre.
 ## - C3 (PO2) : aucune taille de police sous `Caption` (14 px de base) et 4 tailles au plus dans
 ##   les contrôles visibles de la tranche (menu, choix de faction, carte de campagne : barre du
 ##   haut, panneau de province, panneau de colonie, bandeau d'ost, cloche de fin de tour, rapport
@@ -364,10 +364,7 @@ func _check_campaign_layout() -> void:
 	_check_side_single(layout, map.ui.province_panel, "province")
 	map.chronicle.window.show()
 	await process_frame
-	# Q8 : la chronique est en zone modale (620 px de large ne tiennent pas dans la zone latérale) ;
-	# elle ferme toujours la fiche de province.
-	_check_c2(layout.visible_occupants(layout.Zone.MODAL).has(map.chronicle.window), "chronicle should open in the MODAL zone")
-	_check_c2(not map.ui.province_panel.is_visible_in_tree(), "the chronicle should close the province panel")
+	_check_side_single(layout, map.chronicle.window, "chronicle")
 	map.units_ctl.toggle()
 	await process_frame
 	_check_side_single(layout, map.units_ctl.panel, "roster")
