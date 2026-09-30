@@ -273,6 +273,15 @@ def geo_gpu_textures() -> None:
     _print_sizes("Textures GPU", paths)
 
 
+@geo_app.command("colormap")
+def geo_colormap() -> None:
+    """Carte de couleur du sol (SS, ADR 0141) : colormap_bc1_<i>.bin (BC1 + mipmaps), aperçu JPEG."""
+    from cent_ans_tools.geo import colormap as geo_colormap_step
+
+    paths = geo_colormap_step.build()
+    _print_sizes("Carte de couleur du sol", paths)
+
+
 @geo_app.command("horizon")
 def geo_horizon(
     province: str = typer.Option(

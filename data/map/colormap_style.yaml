@@ -1,0 +1,140 @@
+# Carte de couleur du sol de campagne (chantier SS, ADR 0141).
+# Lue par `cent-ans geo colormap` (tools/cent_ans_tools/geo/colormap.py), validée par
+# data/schemas/colormap_style.schema.json. Couleurs sRGB « #rrggbb ». Toute retouche de
+# palette se fait ici puis re-cuisson ; aucune couleur dans le code ni dans le shader.
+# Cible : vue satellite façon Total War (Attila / Pharaoh), saison moyenne (fin de printemps).
+
+seed: 1341
+# Texels de la carte de couleur par pixel de carte (7168 x 6144 -> 14336 x 12288, ~360 m/texel).
+scale: 2
+
+palette:
+  sea_deep: "#1d3848"
+  sea_shallow: "#2e5d66"
+  grassland: "#5f8a2e"
+  grassland_dry: "#9c9443"
+  farmland: "#8f8a3e"
+  farmland_dry: "#b59a4f"
+  forest_broadleaf: "#2c4a1c"
+  forest_conifer: "#1f3a22"
+  heath: "#6f6a3c"
+  rock: "#8b8272"
+  snow: "#e9edf0"
+  coast_sand: "#d2bf8c"
+  marsh: "#4e6334"
+  ponds: "#3b5a4e"
+  wet_meadow: "#4f7d34"
+  road: "#c9ad7e"
+  lake_deep: "#24505e"
+  lake_shallow: "#4f8279"
+  lake_shore: "#bfae84"
+  reeds: "#77843e"
+  town_ground: "#8c7558"
+  town_gardens: "#5d7c2c"
+  hedge: "#2f4420"
+
+# Base régionale.
+base:
+  # Sécheresse : 0 au nord de dry_lat_start, 1 au sud de dry_lat_full (+ steppes et zone aride
+  # de landcover.dryness). Les couleurs *_dry s'y substituent.
+  dry_lat_start: 47.0
+  dry_lat_full: 38.5
+  # Variation d'humidité (bruit basse fréquence) ajoutée à la sécheresse.
+  moisture_noise_km: 90.0
+  moisture_noise_amp: 0.35
+  # Bruit de luminosité contre l'aplat.
+  brightness_noise_km: 35.0
+  brightness_noise_amp: 0.16
+  # Roche plutôt que lande au-dessus de cette altitude (fondu en mètres).
+  rock_from_m: 1300.0
+  rock_full_m: 2300.0
+  # Neige persistante.
+  snow_from_m: 2650.0
+  snow_full_m: 2900.0
+  # Intensité des zones humides (wetlands.png R marais, G étangs, B prés humides).
+  wetland_strength: [0.75, 0.8, 0.55]
+  # Sable côtier (mer seulement) : largeur, altitude max et part des côtes (bruit).
+  coast_sand_width_m: 900.0
+  coast_sand_max_height_m: 25.0
+  coast_sand_share: 0.55
+  coast_sand_noise_km: 25.0
+  # Mer : du clair (côte) au sombre (large).
+  sea_shallow_width_m: 12000.0
+
+# Mosaïque agricole (blocs Voronoï déformés, lanières d'openfield, bocage).
+mosaic:
+  block_size_m: 1800.0
+  # Déformation des bords de blocs (part de la taille de bloc) et échelle du bruit.
+  warp_share: 0.35
+  warp_cells: 3.0
+  # Openfield en lanières au nord : allongement des blocs et latitude d'apparition.
+  strip_ratio: 2.6
+  openfield_lat_from: 46.5
+  openfield_lat_full: 48.5
+  strip_orientation_km: 60.0
+  # Densité : part cultivée = (gain_farmland * cultures + gain_grassland * prairie) x proximité.
+  gain_farmland: 1.9
+  gain_grassland: 0.8
+  # Proximité des colonies : far_share loin de tout, 1 à côté (décroissance en km).
+  settlement_decay_km: 6.0
+  far_share: 0.45
+  # Jamais sur roche, neige, eau, forêt dense, marais (seuils de part).
+  max_rock: 0.45
+  max_forest: 0.55
+  max_marsh: 0.5
+  opacity: 0.9
+  # Variation de luminosité d'un bloc à l'autre.
+  block_jitter: 0.12
+  # Bocage : haies sombres aux bords de blocs là où la prairie domine.
+  hedge_strength: 0.35
+  hedge_grass_from: 0.5
+  hedge_grass_full: 0.75
+  # Teinte dorée des cultures au sud (x sécheresse).
+  dry_crop_tint: "#c9a654"
+  dry_crop_amount: 0.35
+  crops:
+    - {name: ble, color: "#caa43c", weight: 0.26}
+    - {name: orge, color: "#b9ab58", weight: 0.16}
+    - {name: seigle_avoine, color: "#a19a4a", weight: 0.1}
+    - {name: jachere, color: "#8c6b43", weight: 0.16}
+    - {name: labour, color: "#5d4331", weight: 0.14}
+    - {name: pre, color: "#5c8c30", weight: 0.18}
+  pastures:
+    - {name: pre, color: "#5a8a2c", weight: 0.45}
+    - {name: pature, color: "#72903a", weight: 0.35}
+    - {name: pre_fauche, color: "#8a9a44", weight: 0.2}
+  vine:
+    color: "#5b5a2c"
+    # Pente minimale (m/m sur la grille de 719 m), exposition sud minimale (0-1), latitude max.
+    min_slope: 0.02
+    min_south: 0.35
+    max_lat: 49.6
+    share: 0.65
+
+# Routes (roads.geojson, coordonnées en pixels de carte), terre claire.
+roads:
+  opacity: 0.85
+  # Adoucissement du bord (texels).
+  soft_px: 0.6
+  types:
+    main: {width_m: 14.0, min_px: 1.5}
+    secondary: {width_m: 8.0, min_px: 1.1}
+    computed: {width_m: 6.0, min_px: 1.0}
+
+# Lacs : eau intérieure de land_mask.png non connectée au bord de la carte.
+lakes:
+  # Au-delà de cette surface (pixels de carte), l'eau est une mer (mer Noire, Caspienne).
+  max_area_px: 60000
+  shore_width_m: 420.0
+  reeds_width_m: 520.0
+  reeds_share: 0.7
+  reeds_noise_km: 6.0
+  shallow_width_m: 1800.0
+
+# Auréoles de villes (towns_1340.json) : sol battu dans l'emprise bâtie, jardins autour.
+towns:
+  # Rayon de l'emprise = sqrt(built_ha / pi) ; auréole de jardins = garden_factor x ce rayon.
+  ground_min_px: 0.8
+  ground_opacity: 0.75
+  garden_factor: 2.4
+  garden_opacity: 0.45
