@@ -10,7 +10,7 @@
   "faction": "fac_saluzzo",
   "role": "ruler",
   "birth": {
-    "value": "1287"
+    "value": "1304"
   },
   "historical": true,
   "skills": {
@@ -24,16 +24,17 @@
   "piety": 50,
   "starting_location": "prov_saluzzo",
   "status": "at_court",
-  "description": "Marquis de Saluces depuis 1296, l'un des plus longs règnes de la maison ; auteur vers ces années du Chevalier errant, long poème allégorique mêlant récit chevaleresque et traité moral.",
+  "description": "Fils de Frédéric Ier, marquis de Saluces depuis 1336 ; pris entre les Visconti, dont il a épousé une fille (Ricciarda), la maison de Savoie-Achaïe et les Anjou de Provence, il défend l'indépendance du marquisat. Le Chevalier errant est l'œuvre de son petit-fils Thomas III.",
   "sources": [
     "Thomas II de Saluces",
-    "Marquisat de Saluces"
+    "Marquisat de Saluces",
+    "Thomas II of Saluzzo (web)"
   ],
   "titles": [
     {
       "title": "Marquis de Saluces",
       "from": {
-        "value": "1296"
+        "value": "1336"
       }
     }
   ]

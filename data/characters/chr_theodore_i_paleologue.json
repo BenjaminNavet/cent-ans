@@ -10,7 +10,9 @@
   "faction": "fac_montferrat",
   "role": "ruler",
   "birth": {
-    "value": "1291"
+    "value": "1290",
+    "uncertain": true,
+    "place": "Constantinople"
   },
   "historical": true,
   "skills": {
@@ -24,14 +26,14 @@
   "piety": 45,
   "starting_location": "prov_montferrat",
   "status": "at_court",
-  "description": "Second fils de l'empereur byzantin Andronic II Paléologue, appelé au marquisat de Montferrat en 1306 par la volonté testamentaire du dernier marquis aléramique Jean Ier ; mort en juillet 1338, peu après le début de la partie.",
+  "description": "Fils de l'empereur byzantin Andronic II Paléologue et d'Yolande (Irène) de Montferrat, appelé au marquisat en 1306 par le testament de son oncle Jean Ier, dernier marquis aléramique ; mort à Trino le 24 avril 1338, un an après le début de la partie.",
   "sources": [
     "Théodore Ier de Montferrat",
     "Marquisat de Montferrat"
   ],
   "death": {
-    "value": "1338-07",
-    "uncertain": true
+    "value": "1338-04-24",
+    "place": "Trino"
   },
   "titles": [
     {

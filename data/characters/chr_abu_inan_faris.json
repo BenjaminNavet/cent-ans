@@ -14,8 +14,9 @@
     "note": "Date de naissance approximative (1329)."
   },
   "death": {
-    "value": "1358-05-10",
-    "note": "Étranglé à Fès sur ordre de son vizir."
+    "value": "1358",
+    "uncertain": true,
+    "note": "Étranglé à Fès par son vizir al-Hasan ibn Umar al-Fududi en 759 de l'hégire (1358 ; janvier ou décembre selon les sources)."
   },
   "historical": true,
   "skills": {

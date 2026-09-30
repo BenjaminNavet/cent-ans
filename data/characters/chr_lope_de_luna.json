@@ -10,7 +10,8 @@
   "faction": "fac_luna",
   "role": "ruler",
   "birth": {
-    "value": "1315"
+    "value": "1315",
+    "uncertain": true
   },
   "death": {
     "value": "1360-06-19",

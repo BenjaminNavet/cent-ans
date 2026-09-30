@@ -13,7 +13,9 @@
     "value": "1308"
   },
   "death": {
-    "value": "1364"
+    "value": "1366",
+    "uncertain": true,
+    "note": "Cède Empúries à son fils Jean en 1364, puis disparaît des sources (mort vers 1366)."
   },
   "historical": true,
   "titles": [],
@@ -26,6 +28,6 @@
   "piety": 50,
   "starting_location": "prov_barcelona",
   "status": "at_court",
-  "description": "Fils cadet de Jacques II d'Aragon, frère de l'infant Pierre de Ribagorce et oncle de Pierre IV ; encore sans domaine propre en 1337, il ne recevra le comté de Prades qu'en 1341 (échange avec son frère Pierre contre le comté d'Empúries).",
+  "description": "Dernier fils de Jacques II d'Aragon, frère de l'infant Pierre de Ribagorce et oncle de Pierre IV ; comte de Prades et baron d'Entença depuis 1324, il échangera ces domaines en 1341 contre le comté d'Empúries de son frère Pierre.",
   "sources": ["Ramon Berenguer, comte de Prades"]
 }

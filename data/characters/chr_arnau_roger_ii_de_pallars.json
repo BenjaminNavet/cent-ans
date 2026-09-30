@@ -10,7 +10,8 @@
   "faction": "fac_pallars",
   "role": "ruler",
   "birth": {
-    "value": "1299"
+    "value": "1299",
+    "uncertain": true
   },
   "death": {
     "value": "1343"

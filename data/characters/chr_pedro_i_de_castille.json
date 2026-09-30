@@ -1,7 +1,9 @@
 {
   "id": "chr_pedro_i_de_castille",
   "name": {
-    "display": "Pierre Ier de Castille"
+    "display": "Pierre Ier de Castille",
+    "local": "Pedro I",
+    "local_language": "castillan"
   },
   "epithet": "le Cruel",
   "sex": "male",

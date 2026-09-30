@@ -4,7 +4,7 @@
     "display": "Alix d'Ibelin"
   },
   "sex": "female",
-  "house": "Lusignan-Chypre",
+  "house": "Ibelin",
   "faction": "fac_cyprus",
   "role": "consort",
   "birth": {
@@ -13,7 +13,9 @@
     "note": "Naissance vers 1304."
   },
   "death": {
-    "value": "1386"
+    "value": "1386",
+    "uncertain": true,
+    "note": "Encore en vie en 1386."
   },
   "historical": true,
   "titles": [

@@ -10,7 +10,8 @@
   "faction": "fac_sicily",
   "role": "heir",
   "birth": {
-    "value": "1304"
+    "value": "1305-07",
+    "uncertain": true
   },
   "historical": true,
   "skills": {
@@ -24,13 +25,17 @@
   "piety": 55,
   "starting_location": "prov_sicilia",
   "status": "at_court",
-  "description": "Fils aîné de Frédéric III, il succède à son père à la mort de ce dernier le 25 juin 1337.",
+  "description": "Fils aîné de Frédéric III, associé au trône et couronné dès 1321 ; seul roi à la mort de son père le 25 juin 1337, il laisse gouverner les Chiaramonte et les Palizzi.",
   "sources": [
     "Pierre II de Sicile"
   ],
   "titles": [
     {
-      "title": "Roi de Trinacrie (futur)"
+      "title": "Roi de Trinacrie, associé au trône",
+      "from": {
+        "value": "1321"
+      },
+      "note": "Couronné du vivant de son père ; seul roi à la mort de Frédéric III, le 25 juin 1337."
     }
   ],
   "family": {

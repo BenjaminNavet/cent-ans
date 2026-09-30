@@ -10,7 +10,8 @@
   "faction": "fac_urbino",
   "role": "ruler",
   "birth": {
-    "value": "1293"
+    "value": "1293",
+    "uncertain": true
   },
   "historical": true,
   "skills": {

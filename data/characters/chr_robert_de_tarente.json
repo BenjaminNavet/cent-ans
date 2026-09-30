@@ -10,7 +10,9 @@
   "faction": "fac_taranto",
   "role": "ruler",
   "birth": {
-    "value": "1326"
+    "value": "1319",
+    "uncertain": true,
+    "note": "1319 ou 1326 selon les sources."
   },
   "historical": true,
   "skills": {
@@ -24,7 +26,7 @@
   "piety": 45,
   "starting_location": "prov_taranto",
   "status": "minor",
-  "description": "Fils cadet de Philippe Ier de Tarente et de Catherine de Valois-Courtenay, il porte depuis 1332 le titre de prince de Tarente à la mort de son père, sous la régence de sa mère.",
+  "description": "Fils aîné survivant de Philippe Ier de Tarente et de Catherine de Valois-Courtenay, prince de Tarente depuis la mort de son père (fin 1331), sous la régence de sa mère.",
   "sources": [
     "Principauté de Tarente",
     "Philippe Ier de Tarente"
@@ -33,7 +35,7 @@
     {
       "title": "Prince de Tarente",
       "from": {
-        "value": "1332"
+        "value": "1331-12"
       }
     }
   ],

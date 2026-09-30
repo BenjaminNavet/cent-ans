@@ -10,7 +10,8 @@
   "faction": "fac_mantua",
   "role": "ruler",
   "birth": {
-    "value": "1268"
+    "value": "1268",
+    "uncertain": true
   },
   "historical": true,
   "skills": {

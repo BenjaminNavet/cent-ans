@@ -10,7 +10,8 @@
   "faction": "fac_bologna",
   "role": "noble",
   "birth": {
-    "value": "1285"
+    "value": "1285",
+    "uncertain": true
   },
   "historical": true,
   "skills": {
