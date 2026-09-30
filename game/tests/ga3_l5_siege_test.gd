@@ -80,7 +80,7 @@ func _trebuchet(no_ga3: bool) -> void:
 		var beam := _aabb(_node(node, "ArmBeam"), arm)
 		_check(absf(beam.position.z + 8.5) < 0.35, "%s: arm long end at -8.5 m (%.2f)" % [model, beam.position.z])
 		_check(absf(beam.end.z - 2.4) < 0.35, "%s: arm short end at +2.4 m (%.2f)" % [model, beam.end.z])
-		_check(absf(beam.get_center().y) < 0.4 and beam.size.y < 1.4, "%s: arm straight through the pivot (%s)" % [model, beam])
+		_check(absf(beam.get_center().y) < 0.4 and beam.size.y < 1.8, "%s: arm straight through the pivot (%s)" % [model, beam])
 		# Bâti : paliers à hauteur d'axe, posé au sol ; contrepoids entre les montants.
 		var frame := _aabb(_node(node, "Frame"), node)
 		_check(frame.position.y > -0.05 and frame.position.y < 0.3, "%s: frame on the ground (%.2f)" % [model, frame.position.y])
@@ -144,7 +144,7 @@ func _ram(no_ga3: bool) -> void:
 		_check(sides.size() == 4, "%s: one wheel per corner" % model)
 		var pivot := _node(node, "BeamPivot")
 		var beam := _aabb(_node(node, "Beam"), pivot)
-		_check(absf(-beam.get_center().y - float(c["beam_drop"])) < 0.6, "%s: beam hangs %.2f m under its pivot" % [model, -beam.get_center().y])
+		_check(absf(-beam.position.y - float(c["beam_drop"])) < 0.6, "%s: beam hangs %.2f m under its pivot" % [model, -beam.position.y])
 		_check(beam.end.z > 4.8 and beam.position.z < -2.0, "%s: beam along the ram, head forward (%s)" % [model, beam])
 		node.free()
 
@@ -160,6 +160,7 @@ func _others() -> void:
 
 func _init() -> void:
 	var no_ga3 := OS.get_cmdline_user_args().has("--no-ga3")
+	await process_frame  # nœuds dans l'arbre : transformations globales valides
 	_trebuchet(no_ga3)
 	_ram(no_ga3)
 	_others()

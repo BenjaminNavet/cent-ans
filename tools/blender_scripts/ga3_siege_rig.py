@@ -47,7 +47,10 @@ import siege_engines as se  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 PROPS = ROOT / "game" / "assets" / "models" / "props_ga"
-LODS = (("", 0), ("_lod", 2))  # suffix of the output, GA3 LOD used
+LODS = (
+    ("", 0),
+    ("_lod", 1),
+)  # suffix of the output, GA3 LOD used (LOD2 too coarse to cut)
 
 # Procedural targets (Godot metres, ``siege_engines.py``).
 TREB_ARM_TOTAL = se.TREB_LONG + se.TREB_SHORT + 0.2  # long tip to short tip
@@ -231,21 +234,42 @@ def arm_coords(c: Vector, m: dict) -> Vector:
     return Vector((p.dot(m["d"]), p.dot(m["n"])))
 
 
-def on_arm(c: Vector, m: dict) -> bool:
-    """Face centre on the GA3 throwing arm (beam, iron bands, end hooks)."""
+def on_arm(c: Vector, m: dict, tol: float = 0.0) -> bool:
+    """Point on the GA3 throwing arm (beam, iron bands, end hooks), ``tol`` m looser."""
     t, v = arm_coords(c, m)
-    return abs(c.y) < 0.55 and abs(v) < 0.55 and m["ta"] - 0.4 < t < m["tb"] + 0.4
+    half = 0.55 + tol
+    return abs(c.y) < half and abs(v) < half and m["ta"] - 0.4 < t < m["tb"] + 0.4
+
+
+def in_box(c: Vector, m: dict, tol: float = 0.0) -> bool:
+    """Point in the GA3 counterweight box region (box, stones, hanger), ``tol`` m looser."""
+    bx0, _bx1, _by0, _by1, bz0, bz1 = m["box"]
+    return (
+        bx0 - 0.05 - tol <= c.x
+        and bz0 - 0.05 - tol <= c.z <= bz1 + 0.05 + tol
+        and abs(c.y) < 2.1 + tol
+    )
+
+
+def face_points(mesh: bpy.types.Mesh) -> list[list[Vector]]:
+    """Vertices of each face (world)."""
+    return [[mesh.vertices[v].co.copy() for v in p.vertices] for p in mesh.polygons]
 
 
 def trebuchet(mesh: bpy.types.Mesh, m: dict) -> dict:
     """Dresses the procedural trebuchet rig (built in the scene) with the GA3 pieces."""
     objs = {o.name: o for o in bpy.data.objects}
-    bx0, bx1, by0, by1, bz0, bz1 = m["box"]
     labels = {"frame": set(), "arm": set(), "box": set()}
+    points = face_points(mesh)
     for i, c in enumerate(centroids(mesh)):
-        if on_arm(c, m):
+        # Where parts touch (arm between the posts, box on the base), a moving part takes
+        # a face only when all its corners lie in the part (LOD triangles can be long).
+        near_posts = abs(c.x - m["x_post"]) < 1.2
+        if (not near_posts and on_arm(c, m, 0.1)) or (
+            on_arm(c, m) and all(on_arm(p, m, 0.08) for p in points[i])
+        ):
             labels["arm"].add(i)
-        elif bx0 - 0.05 <= c.x and bz0 - 0.05 <= c.z <= bz1 + 0.05 and abs(c.y) < 2.1:
+        elif in_box(c, m) and all(in_box(p, m, 0.12) for p in points[i]):
             labels["box"].add(i)
         elif c.x < -4.2 and c.z > 3.0:
             continue  # sling bag with its stones: the procedural sling is kept
@@ -283,7 +307,14 @@ def trebuchet(mesh: bpy.types.Mesh, m: dict) -> dict:
     axle.beam((-half, 0.0, 0.0), (half, 0.0, 0.0), 0.12, 0.12, 8, "Iron")
     axle.build("Axle", objs["Arm"])
 
-    # Counterweight: GA3 box and hanger scaled to the procedural box, hanging from the hinge.
+    # Counterweight: GA3 box and hanger scaled to the procedural box, hanging from the hinge
+    # (extents of the box faces' corners, measured on LOD0).
+    if "box_extent" not in m:
+        corners = [p for i in labels["box"] for p in points[i]]
+        m["box_extent"] = tuple(
+            f(getattr(p, axis) for p in corners) for axis in "xyz" for f in (min, max)
+        )
+    bx0, bx1, by0, by1, bz0, bz1 = m["box_extent"]
     hinge = objs["Counterweight"].matrix_world.translation.copy()
     sx = BOX_WIDTH / (by1 - by0)
     sz = BOX_DEPTH / (bx1 - bx0)
@@ -356,12 +387,19 @@ def measure_ram(cs: list[Vector]) -> dict:
     }
 
 
-def on_ram_beam(c: Vector, m: dict) -> bool:
-    """Face centre on the GA3 ram log, its iron head or its two hangers."""
-    if abs(c.y) < 0.65 and LOG_BOTTOM < c.z < 2.45:
+def on_ram_beam(c: Vector, m: dict, tol: float = 0.0) -> bool:
+    """Point on the GA3 ram log, its iron head or its two hangers, ``tol`` m looser."""
+    if abs(c.y) < 0.65 + tol and LOG_BOTTOM - tol < c.z < 2.45 + tol:
         return True
-    near = min(abs(c.x - h) for h in m["hangers"]) < HANGER_HALF
-    return near and abs(c.y) < 0.5 and 2.45 <= c.z < 3.85
+    near = min(abs(c.x - h) for h in m["hangers"]) < HANGER_HALF + tol
+    return near and abs(c.y) < 0.5 + tol and 2.45 - tol <= c.z < 3.85 + tol
+
+
+def in_wheel(c: Vector, w: dict, tol: float = 0.0) -> bool:
+    """Point in a GA3 wheel (disc about its axle, between its faces), ``tol`` m looser."""
+    radius = w["r"] * 1.08 + tol
+    inside = (c.x - w["x"]) ** 2 + (c.z - w["z"]) ** 2 < radius**2
+    return inside and w["y"][0] - 0.06 - tol <= c.y <= w["y"][1] + 0.06 + tol
 
 
 def ram(mesh: bpy.types.Mesh, m: dict) -> dict:
@@ -369,17 +407,17 @@ def ram(mesh: bpy.types.Mesh, m: dict) -> dict:
     objs = {o.name: o for o in bpy.data.objects}
     labels = {"shed": set(), "beam": set()}
     wheel_faces = [set() for _ in m["wheels"]]
+    points = face_points(mesh)
     for i, c in enumerate(centroids(mesh)):
         if abs(c.y) < 0.75 and c.z < 1.2 and m["debris"][0] < c.x < m["debris"][1]:
             continue  # spurious centre wheel and post under the bed
         wheel = -1
         for k, w in enumerate(m["wheels"]):
-            inside = (c.x - w["x"]) ** 2 + (c.z - w["z"]) ** 2 < (w["r"] * 1.08) ** 2
-            if inside and w["y"][0] - 0.06 <= c.y <= w["y"][1] + 0.06:
+            if in_wheel(c, w) and all(in_wheel(p, w, 0.1) for p in points[i]):
                 wheel = k
         if wheel >= 0:
             wheel_faces[wheel].add(i)
-        elif on_ram_beam(c, m):
+        elif on_ram_beam(c, m) and all(on_ram_beam(p, m, 0.1) for p in points[i]):
             labels["beam"].add(i)
         else:
             labels["shed"].add(i)
