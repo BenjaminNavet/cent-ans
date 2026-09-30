@@ -23,3 +23,13 @@ Points ouverts :
 - Rebord blanc au pied des piles du pont (écume EP3 ou dessus des avant-becs) : non traité.
 - Les mottes restent visibles en rondelles brunes à 2-3 m : acceptable, à juger.
 - Eau : `EMISSION` ne suit pas la lumière du jour (au crépuscule la rivière reste claire) ; non traité.
+
+# CR2 — acier crédible (plates, casques)
+
+État : démarré 2026-09-30 (agent visuel, worktree `game_project-sr`, branche `feat/sr`). Captures brutes `~/dev/cent-ans-raw/cr2/`.
+Prochaine étape : captures de référence, bissection du chemin C_PLATE (`battle_soldier_skinned.gdshader`).
+
+# CR3 — caparaçons en drap lourd
+
+État : pas commencé.
+Prochaine étape : lire `tools/blender_scripts/battle_fine_horse.py` (`caparison`), plan drapé/ourlet/fentes.
