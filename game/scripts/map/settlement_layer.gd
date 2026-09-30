@@ -940,8 +940,14 @@ func _declutter_step(sliced: bool) -> void:
 			continue
 		var label := _labels[i]
 		var at := label.global_position
-		if _dc_behind(at) or (_dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range):
+		if _dc_behind(at):
 			_set_marker_shown(i, true)
+			_show_label(i, false, alpha)
+			continue
+		if _dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range and not pinned:
+			# VN : en vue rasante, l'écu des colonies lointaines part avec son nom (sinon une
+			# rangée d'écus flottait sur l'horizon).
+			_set_marker_shown(i, false)
 			_show_label(i, false, alpha)
 			continue
 		# VT : nom décalé au-dessus de l'emprise projetée (suit le zoom à chaque passe).
