@@ -237,6 +237,18 @@ Note `docs/wip/ga3-l4.md`, ADR 0140 § extension L4. Brutes `~/dev/cent-ans-raw/
   huque rendue comme jupon ; standard_1 : dos de tête incohérent sur la planche NB2 (tête nue
   au dos, bassinet de face) ; texture 1024 × 1536 × 16 figurines (≈ 37 Mo de sources PNG).
 
+## Contrôle en bataille réelle (30/09, session principale)
+Main à `fbfd95815` (L4 + L5 fusionnés), tests smoke, `ga3_l3_figures_test`, `ga3_l5_siege_test`,
+`sr2_weathering_test` verts sur main. Commande : `godot --path game --resolution 1280x720
+res://scenes/battle/battle.tscn -- --historical=crecy --closeup --closeup-distance=10 --no-hud
+--screenshot=<png>` (la scène doit être donnée, sinon le menu s'ouvre). Capture : ligne française
+(hommes d'armes et chevaliers générés, livrée rouge à croix blanche, harnois) lisible et texturée,
+« 29 GA3 variants » de décor ; au premier plan les archers anglais dans une pose au sol identique
+avec `--no-ga3-fig` (pas une régression GA3). Visages, mains et bouchon du cou **non jugeables** à
+cette distance ; `--shot-at=150` avec `--closeup` cadre le vide (plus de mêlée). Budget de 4
+captures tenu. Reste au joueur : gros plan à la main (`tools/launch.sh`, Crécy, zoom sur une
+mêlée) pour visages/mains, et un siège pour le trébuchet/bélier (capture L5 seule vue).
+
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
 - 30/09 : **S1 fait** (≈ 10 min de bout en bout, 0,05 $). Image `fal-ai/flux/dev` 1024² (0,026 $,
