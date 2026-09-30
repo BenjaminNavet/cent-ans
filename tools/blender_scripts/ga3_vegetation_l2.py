@@ -547,27 +547,33 @@ def atlas_step() -> None:
 
 # ---------------------------------------------------------------- rocks step
 def rocks_step() -> None:
-    """Three TRELLIS rocks through ``ga3_cleanup.py``: 120 / 60 / 18 triangles, 1 m, 256 px."""
+    """Three TRELLIS rocks through ``ga3_cleanup.py``: 120 / 60 / 18 triangles, 1 m, 256 px.
+
+    The raw TRELLIS albedos are dark (linear mean 0.05-0.09, first in-game capture: black blobs
+    on the pale Auvergne ground); ``--exposure`` lifts each one to ~0.17, the terrain rock tint
+    (``terrain.gdshader`` ``tint_rock`` 0.19 / 0.17 / 0.15).
+    """
     blender = (
         shutil.which("blender") or "/Applications/Blender.app/Contents/MacOS/Blender"
     )
     sources = {
-        "ga3_rock_a": S5 / "rock_trellis.glb",
-        "ga3_rock_b": RAW / "rock_b_trellis_s7.glb",
-        "ga3_rock_c": RAW / "rock_c_trellis.glb",
+        "ga3_rock_a": (S5 / "rock_trellis.glb", 3.4),
+        "ga3_rock_b": (RAW / "rock_b_trellis_s7.glb", 2.0),
+        "ga3_rock_c": (RAW / "rock_c_trellis.glb", 2.1),
     }
-    for name, source in sources.items():
+    for name, (source, exposure) in sources.items():
         cmd = [
             blender, "-b", "--factory-startup", "--python", str(REPO / "tools/blender_scripts/ga3_cleanup.py"), "--",
             str(source), str(OUT_MODELS), name, "--length", "1.0", "--lod0", "120", "--tex", "256", "--normal", "off",
+            "--exposure", str(exposure),
         ]  # fmt: skip
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         lines = [
             line
             for line in result.stdout.splitlines()
-            if "tri" in line.lower() or "error" in line.lower()
+            if "tri" in line.lower() or "error" in line.lower() or "grade" in line
         ]
-        print(name, result.returncode, *lines[-4:], sep="\n  ")
+        print(name, result.returncode, *lines[-6:], sep="\n  ")
     print("OK rocks")
 
 
