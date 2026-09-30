@@ -5,6 +5,12 @@
 
 #include "res://shaders/foliage_common.gdshaderinc"
 
+#ifdef FOLIAGE_CARDS
+// Lot FC5 : atlas des cartes (couleur normalisée à 0,5 : ×2 ici), découpe alpha.
+uniform sampler2D card_texture : source_color, filter_linear_mipmap, repeat_disable;
+uniform float card_alpha_cut = 0.5;
+#endif
+
 varying float v_ao;
 varying vec3 v_tint;
 varying vec3 v_local;
@@ -52,6 +58,19 @@ void fragment() {
 	vec3 tint = v_tint;
 	float leaves = value_noise(v_local) * 0.6 + value_noise(v_local * 2.3) * 0.4;
 	vec3 albedo = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
+#ifdef FOLIAGE_CARDS
+	ALPHA = 1.0;
+	ALPHA_SCISSOR_THRESHOLD = card_alpha_cut;
+	if (v_crown > 0.5) {
+		vec4 card = texture(card_texture, UV2);
+		float lod = max(textureQueryLod(card_texture, UV2).x, 0.0);
+		ALPHA = card.a * (1.0 + lod * 0.35);
+		albedo = COLOR.rgb * tint * card.rgb * 2.0 * mix(0.88, 1.08, leaves);
+	}
+	if (!FRONT_FACING) {
+		NORMAL = -NORMAL;  // houppier : même normale arrondie des deux côtés de la carte
+	}
+#endif
 	if (v_crown > 0.5) {
 #ifdef FOLIAGE_WINTER_CUTOUT
 		// Hiver : houppier des feuillus ajouré (on voit le sol à travers).

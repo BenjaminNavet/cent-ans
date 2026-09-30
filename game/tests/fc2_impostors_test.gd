@@ -90,7 +90,7 @@ func _test_map() -> void:
 	print("fc2: census with impostors %s" % after)
 	_check(int(after["impostor"]) > 0, "far tiles use the impostor mesh")
 	_check(int(after["low"]) == 0, "no low mesh left for oak/beech/fir")
-	_check(int(after["detailed"]) > 0, "near tiles keep the detailed mesh")
+	_check(int(after["detailed"]) + int(after.get("near", 0)) > 0, "near tiles keep a detailed mesh (FC5: leaf cards)")
 	# Hiver : variante ajourée du feuillage maillé, imposteurs dans le même shader (rendu fenêtré :
 	# compile les deux).
 	var life: Variant = map.get("life")

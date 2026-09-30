@@ -25,6 +25,9 @@ extends Node3D
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 const IMPOSTOR_SHADER := preload("res://shaders/campaign_tree_impostor.gdshader")
+const CARDS_SHADER := preload("res://shaders/foliage_cards.gdshader")
+## Niveaux de détail d'une partie de tuile (`_apply_lod`).
+enum Lod { FAR, DETAILED, NEAR }
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Pas (px de carte) de la grille de candidats ; plus petit = forêts plus denses.
@@ -69,6 +72,12 @@ const IMPOSTOR_SHADER := preload("res://shaders/campaign_tree_impostor.gdshader"
 ## texturé par les atlas cuits sous Blender, 2 triangles) au lieu du maillage bas (≈ 20 triangles) ;
 ## haies inchangées. `--no-fc2` rend les maillages bas (comparaisons A/B).
 @export var use_impostors: bool = true
+## Lot FC5 : parties à moins de `near_distance` (× `veg_detail`) : chênes, hêtres et sapins en
+## cartes de feuillage (`VegetationMeshes.essence_mid`, ≈ 150-330 triangles) ; entre
+## `near_distance` et `detail_distance`, imposteurs (ombres gardées) au lieu des maillages
+## détaillés de 90 triangles. `--no-fc5` rend les maillages détaillés.
+@export var use_near_cards: bool = true
+@export var near_distance: float = 60.0
 
 ## PF1 : préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
 ## zoom maximal des ombres.
@@ -96,6 +105,8 @@ var _material: ShaderMaterial
 ## Lot FC2 : matériau des imposteurs (null : atlas absents ou `--no-fc2`) ; mêmes uniformes de
 ## feuillage que `_material` (`_set_foliage_param`).
 var _impostor_material: ShaderMaterial
+## Lot FC5 : matériau des cartes de feuillage (null : texture absente ou `--no-fc5`).
+var _cards_material: ShaderMaterial
 var _tiles: Dictionary = {}  # index → {"node": Node3D, "mmis": Array[MultiMeshInstance3D], "counts", "last_seen"}
 var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob, "level": int[, "native": id]}
 ## Lot PB2 : pool natif (`VegetationScatter`) ou null ; requêtes en cours (id → index de tuile).
@@ -123,7 +134,7 @@ func apply_render_quality(p: Dictionary) -> void:
 	quality_shadow_distance = float(p.get("veg_shadow_distance", shadow_camera_distance))
 	for entry: Dictionary in _tiles.values():
 		for part: Dictionary in entry["parts"]:
-			part.erase("detailed")  # LOD réévalué à la prochaine mise à jour
+			part.erase("lod")  # LOD réévalué à la prochaine mise à jour
 
 
 func _ready() -> void:
@@ -139,6 +150,8 @@ func _ready() -> void:
 			use_forest_detail = false
 		elif arg == "--no-fc2":  # FC2 : maillages bas au loin au lieu des imposteurs (A/B)
 			use_impostors = false
+		elif arg == "--no-fc5":  # FC5 : maillages détaillés de près au lieu des cartes (A/B)
+			use_near_cards = false
 
 
 
@@ -161,6 +174,11 @@ func build(data: MapData) -> void:
 	_material = ShaderMaterial.new()
 	_material.shader = FOLIAGE_SHADER
 	_impostor_material = _make_impostor_material() if use_impostors else null
+	_cards_material = null
+	if use_near_cards and ResourceLoader.exists(VegetationMeshes.CARD_TEXTURE) and VegetationMeshes.essence_mid("oak") != null:
+		_cards_material = ShaderMaterial.new()
+		_cards_material.shader = CARDS_SHADER
+		_cards_material.set_shader_parameter("card_texture", load(VegetationMeshes.CARD_TEXTURE))
 	_bind_forest_cover(data)
 	_season = -1
 	_exclusions.clear()
@@ -202,7 +220,7 @@ func impostor_material() -> ShaderMaterial:
 ## {"impostor", "low", "detailed", "impostor_triangles", "low_triangles"} (triangles des instances
 ## visibles).
 func lod_census() -> Dictionary:
-	var census := {"impostor": 0, "low": 0, "detailed": 0, "impostor_triangles": 0, "low_triangles": 0}
+	var census := {"impostor": 0, "low": 0, "detailed": 0, "near": 0, "impostor_triangles": 0, "low_triangles": 0, "detailed_triangles": 0, "near_triangles": 0}
 	for entry: Dictionary in _tiles.values():
 		if not (entry["node"] as Node3D).visible:
 			continue
@@ -220,8 +238,12 @@ func lod_census() -> Dictionary:
 				if mmi.material_override == _impostor_material and _impostor_material != null:
 					census["impostor"] += 1
 					census["impostor_triangles"] += triangles
-				elif part.get("detailed", false):
+				elif mmi.material_override == _cards_material and _cards_material != null:
+					census["near"] += 1
+					census["near_triangles"] += triangles
+				elif int(part.get("lod", Lod.FAR)) != Lod.FAR:
 					census["detailed"] += 1
+					census["detailed_triangles"] += triangles
 				else:
 					census["low"] += 1
 					census["low_triangles"] += triangles
@@ -239,6 +261,8 @@ static func _triangles(mesh: Mesh) -> int:
 ## Uniforme commune du feuillage (`foliage_common.gdshaderinc`) : maillages et imposteurs.
 func _set_foliage_param(param: String, value: Variant) -> void:
 	_material.set_shader_parameter(param, value)
+	if _cards_material != null:
+		_cards_material.set_shader_parameter(param, value)
 	if _impostor_material != null:
 		_impostor_material.set_shader_parameter(param, value)
 
@@ -525,16 +549,19 @@ static func _rect_distance(rect: Rect2, point: Vector2) -> float:
 ## au seuil d'éclaircissement du point le plus proche de la tuile sont invisibles partout.
 func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float, density: float, camera_distance: float) -> void:
 	var detailed := d < detail_distance * quality_detail
+	var lod: int = Lod.FAR
+	if detailed:
+		lod = Lod.NEAR if _cards_material != null and d < near_distance * quality_detail else Lod.DETAILED
 	var mmis: Array = entry["mmis"]
-	if entry.get("detailed", null) != detailed:
-		entry["detailed"] = detailed
-		var meshes := _meshes(detailed)
+	if entry.get("lod", -1) != lod:
+		entry["lod"] = lod
+		var meshes := _meshes(lod)
 		for kind in mmis.size():
 			var mmi: MultiMeshInstance3D = mmis[kind]
 			if mmi != null and mmi.multimesh.mesh != meshes[kind]:
 				mmi.multimesh = _with_mesh(mmi.multimesh, meshes[kind], _tiles[entry["tile"]]["buffers"][entry["slot0"] + kind])
 			if mmi != null:
-				mmi.material_override = _material_for(kind, detailed)
+				mmi.material_override = _material_for(kind, lod)
 	# Ombres portées des tuiles proches seulement (au loin elles ne se voient plus) et seulement
 	# au zoom global le plus rapproché (`shadow_camera_distance`) : au zoom moyen, des ombres
 	# d'arbres individuelles ne se distinguent déjà plus mais coûtent toujours plein tarif côté
@@ -572,17 +599,28 @@ static func _with_mesh(old: MultiMesh, mesh: Mesh, buffer: PackedFloat32Array) -
 ## Un maillage par essence (ordre de `VegetationTileJob.Kind`) ; lot V4 : chêne, hêtre et
 ## conifère modélisés sous Blender (`VegetationMeshes.essence`).
 ## Lot FC2 : au loin, imposteurs pour les trois essences (haies : maillage bas).
-func _meshes(detailed: bool) -> Array:
-	if not detailed and _impostor_material != null:
-		return [VegetationMeshes.impostor("oak"), VegetationMeshes.impostor("beech"),
-			VegetationMeshes.impostor("fir"), VegetationMeshes.hedge_low()]
+## Lot FC5 : de près, cartes de feuillage ; entre les deux portées, imposteurs si les cartes sont
+## actives (sinon maillages détaillés). Haies : maillage détaillé dès `detail_distance`.
+func _meshes(lod: int) -> Array:
+	var detailed := lod != Lod.FAR
+	var hedge := VegetationMeshes.hedge() if detailed else VegetationMeshes.hedge_low()
+	if lod == Lod.NEAR and _cards_material != null:
+		return [VegetationMeshes.essence_mid("oak"), VegetationMeshes.essence_mid("beech"), VegetationMeshes.essence_mid("fir"), hedge]
+	if _impostor_material != null and (lod == Lod.FAR or _cards_material != null):
+		return [VegetationMeshes.impostor("oak"), VegetationMeshes.impostor("beech"), VegetationMeshes.impostor("fir"), hedge]
 	return [VegetationMeshes.essence("oak", detailed), VegetationMeshes.essence("beech", detailed),
-		VegetationMeshes.essence("fir", detailed), VegetationMeshes.hedge() if detailed else VegetationMeshes.hedge_low()]
+		VegetationMeshes.essence("fir", detailed), hedge]
 
 
 ## Matériau d'un MultiMesh selon l'essence (`VegetationTileJob.Kind`) et le niveau de détail.
-func _material_for(kind: int, detailed: bool) -> ShaderMaterial:
-	return _impostor_material if not detailed and _impostor_material != null and kind != VegetationTileJob.Kind.HEDGE else _material
+func _material_for(kind: int, lod: int) -> ShaderMaterial:
+	if kind == VegetationTileJob.Kind.HEDGE:
+		return _material
+	if lod == Lod.NEAR and _cards_material != null:
+		return _cards_material
+	if _impostor_material != null and (lod == Lod.FAR or _cards_material != null):
+		return _impostor_material
+	return _material
 
 
 func _start_job(index: int) -> void:
@@ -798,7 +836,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 	var node := Node3D.new()
 	node.name = "Tile_%d" % index
 	var parts: Array = []
-	var meshes := _meshes(false)
+	var meshes := _meshes(Lod.FAR)
 	var part_px := float(chunk_px) / VegetationTileJob.PARTS_SIDE
 	var slots: Array = []
 	for part_index in VegetationTileJob.PARTS:
@@ -821,7 +859,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 			var mmi := MultiMeshInstance3D.new()
 			mmi.name = ["Oak", "Beech", "Conifer", "Hedge"][kind]
 			mmi.multimesh = multimesh
-			mmi.material_override = _material_for(kind, false)
+			mmi.material_override = _material_for(kind, Lod.FAR)
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			part_node.add_child(mmi)
 			mmis.append(mmi)

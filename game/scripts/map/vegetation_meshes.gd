@@ -25,6 +25,8 @@ const IMPOSTOR_ALBEDO := "res://assets/textures/vegetation/campaign_impostors_al
 const IMPOSTOR_NORMAL := "res://assets/textures/vegetation/campaign_impostors_normal.png"
 const IMPOSTOR_ROWS: Array[String] = ["oak", "beech", "fir"]
 const IMPOSTOR_VIEWS := 8
+## Lot FC5 : atlas des cartes de feuillage des arbres proches (`build_leaf_cards.py`).
+const CARD_TEXTURE := "res://assets/textures/vegetation/campaign_leaf_cards.png"
 ## Palettes (albédo linéaire) : feuillage sombre / clair, écorce.
 const PALETTES := {
 	"oak": [Color(0.040, 0.068, 0.026), Color(0.118, 0.155, 0.056), Color(0.20, 0.15, 0.10)],
@@ -72,6 +74,35 @@ static func impostor(name: String) -> ArrayMesh:
 	return mesh
 
 
+## Lot FC5 : variante proche semi-réaliste (cartes de feuillage + tronc et branches, ≈ 330
+## triangles pour les feuillus, 145 pour le sapin), dessinée avec `foliage_cards.gdshader`
+## (texture `CARD_TEXTURE`, découpe alpha). UV2 = coordonnées dans l'atlas des cartes (moitié
+## gauche : feuilles, droite : brindille de sapin). Null si le GLB n'a pas la variante.
+static func essence_mid(name: String) -> ArrayMesh:
+	var key := "%s_mid" % name
+	if _cache.has(key):
+		return _cache[key]
+	var mesh: ArrayMesh = null
+	if ResourceLoader.exists(TREES_GLB):
+		var scene := load(TREES_GLB) as PackedScene
+		var root := scene.instantiate() if scene != null else null
+		if root != null:
+			var crown := root.find_child("%s_mid_crown" % name, true, false) as MeshInstance3D
+			var trunk := root.find_child("%s_mid_trunk" % name, true, false) as MeshInstance3D
+			if crown != null:
+				var palette: Array = PALETTES.get(name, PALETTES["oak"])
+				var st := SurfaceTool.new()
+				st.begin(Mesh.PRIMITIVE_TRIANGLES)
+				var card_offset := 0.5 if name == "fir" else 0.0
+				_append_part(st, crown, root, palette, true, float(ESSENCE_ID.get(name, 0.0)), card_offset)
+				if trunk != null:
+					_append_part(st, trunk, root, palette, false, float(ESSENCE_ID.get(name, 0.0)))
+				mesh = st.commit()
+			root.free()
+	_cache[key] = mesh
+	return mesh
+
+
 static func _load_essence(name: String, detailed: bool) -> ArrayMesh:
 	if not ResourceLoader.exists(TREES_GLB):
 		return null
@@ -96,7 +127,9 @@ static func _load_essence(name: String, detailed: bool) -> ArrayMesh:
 
 ## Ajoute une partie importée : couleurs de sommet (feuillage selon l'exposition, écorce), normales
 ## « gonflées » depuis le centre du houppier (ombrage doux), UV = (essence, 1 houppier / 0 tronc).
-static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, palette: Array, is_crown: bool, essence_id: float) -> void:
+## `card_offset` ≥ 0 (lot FC5) : cartes de feuillage, UV2 = UV importé ramené dans la moitié de
+## l'atlas des cartes qui commence à `card_offset`.
+static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, palette: Array, is_crown: bool, essence_id: float, card_offset: float = -1.0) -> void:
 	var xform := Transform3D.IDENTITY
 	var node: Node = part
 	while node != null and node != root:
@@ -110,6 +143,7 @@ static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, pale
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL] if arrays[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
 		var order: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+		var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV] if card_offset >= 0.0 and arrays[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array()
 		if order.is_empty():
 			order.resize(vertices.size())
 			for i in vertices.size():
@@ -125,6 +159,8 @@ static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, pale
 				st.set_color(color)
 				st.set_normal((dir * 0.88 + n * 0.12 + Vector3.UP * 0.12).normalized())
 				st.set_uv(Vector2(essence_id, 1.0))
+				if i < uvs.size():
+					st.set_uv2(Vector2(card_offset + clampf(uvs[i].x, 0.0, 1.0) * 0.5, uvs[i].y))
 			else:
 				var bark: Color = palette[2]
 				bark.a = clampf(v.y * 0.3, 0.0, 0.15)
