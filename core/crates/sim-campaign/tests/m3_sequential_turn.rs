@@ -37,18 +37,20 @@ fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
 fn ai_factions_play_one_after_the_other_in_id_order() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
-    let played = RefCell::new(Vec::new());
-    state.end_turn_with(&data, |_, _, faction| {
-        played.borrow_mut().push(faction.clone());
-        Vec::new()
-    });
-    let played = played.into_inner();
+    // Living at the start of the turn: a faction destroyed during the turn
+    // has still played its own part of it.
     let expected: Vec<FactionId> = state
         .factions
         .iter()
         .filter(|(id, f)| f.alive && id.as_str() != "fac_france")
         .map(|(id, _)| id.clone())
         .collect();
+    let played = RefCell::new(Vec::new());
+    state.end_turn_with(&data, |_, _, faction| {
+        played.borrow_mut().push(faction.clone());
+        Vec::new()
+    });
+    let played = played.into_inner();
     assert_eq!(
         played, expected,
         "every living AI faction, by id, not the player"
