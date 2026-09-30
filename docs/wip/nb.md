@@ -43,8 +43,11 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
 - 09-30 : NB-DA fait (0,40 $), v0 retenue par le joueur (après v3). Prochaine étape : NB0.
 
 ## Points ouverts
-- Piste A (après NB1) : refaire les 12 matières GA1 des figurines en NB2 2K avec une
-  ancre « réalisme peint » propre à la 3D (jamais l'ancre enluminure), ~1,50 $.
+- **Figurines : le joueur choisit la piste C (30/09)** — planches de référence par type
+  d'unité (face, profil, dos) en NB2, ~1 $, comme guide de retouche des modèles Blender ou
+  d'entrée TRELLIS. Chantier propre à spécifier (brainstorming) ; à trancher dans la spec :
+  la spec GA excluait les soldats 3D entièrement générés (TRELLIS réservé aux objets de décor).
+  Pistes A (12 matières GA1 en NB2 2K) et B (motifs de livrée) non retenues pour l'instant.
 - NB1 restreint aux 4 cadres à marges larges (panel_illuminated 38 px, panel 20, top_bar,
   tooltip 12) : barres, curseur, onglets, boutons, encart (1-9 px) restent procéduraux ;
   gain réel limité par la taille 1× du kit (interface 2× = chantier suivant).
