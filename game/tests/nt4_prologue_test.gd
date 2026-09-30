@@ -168,6 +168,15 @@ func _check_battle() -> void:
 	_advance(prologue, "fire")
 	var enemy_moved := _max_shift(enemy_start, _positions(battle, "attacker"))
 	print("nt4: passive enemy max shift %.1f m" % enemy_moved)
+	for unit in battle.call("get_units"):
+		if str(unit["side"]) == "attacker":
+			var from: Vector2 = enemy_start.get(int(unit["id"]), Vector2.ZERO)
+			var shift := from.distance_to(Vector2(float(unit["x"]), float(unit["z"])))
+			print("nt4:   enemy %d %s shift %.1f m" % [int(unit["id"]), str(unit.get("state", "?")), shift])
+			# NT11 (camp tenu) : seule la déroute sous la pression déplace l'ennemi ; la poussée d'une
+			# mêlée peut le décaler de quelques mètres.
+			if str(unit.get("state", "")) != "routing":
+				_check(shift < 8.0, "held enemy %d stayed in place (%.1f m)" % [int(unit["id"]), shift])
 	# Pause.
 	scene.set("paused", false)
 	_check(not prologue.check_now(), "not paused yet")
