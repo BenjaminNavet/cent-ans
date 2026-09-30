@@ -5,7 +5,7 @@ Mandat : amélioration visuelle libre, autonomie toute la nuit, 100 captures, fa
 rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 
 ## Compteur de captures lues
-61 / 100
+79 / 100
 
 ## Constats (état des lieux)
 - Bataille, vue moyenne : touffes d'herbe sombres en plaques sur sol brun (effet « détritus »),
@@ -34,6 +34,10 @@ rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 - VN8 bandeau d'ost de campagne : cartes illustrées comme en bataille.
 - VN9 12 miniatures d'unités manquantes (fal.ai, 0,96 $, budget.md).
 - Brouillard : allégé au-dessus de la nappe basse.
+- Bataille personnalisée : miniatures d'unités dans les listes.
+- Villes génériques 1:1 : sol en terre/jardins (plus de galette noire), pas de sol loin des maisons.
+- Noms des fleuves plafonnés à 40 × la distance caméra (plus d'alignement sur l'horizon).
+- Chemins de bataille en terre brune ; miniature de bld_collegiate_church (0,08 $).
 
 ## Délégué
 - Agent VN-UI (worktree ../gp-vn-ui, feat/vn-ui) : menu principal 720p, tutoriel sur modale,
@@ -51,4 +55,5 @@ rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 - Champs de blé procéduraux en ovales (Crécy, Poitiers) plutôt qu'en parcelles.
 
 ## Prochaine étape
-Suite des visuels de bataille / 2e lot UI à l'agent.
+Fusion de feat/vn-ui dans feat/vn quand l'agent a fini, smoke, puis fusion dans main (worktree
+dédié, ff-only) et capture de contrôle.
