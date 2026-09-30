@@ -21,7 +21,12 @@ agrandie, basse-cour vide. Viser un château du XIVe (Vincennes, Largoët, Najac
 - [x] Squelette (données, schéma, champs Rust, pont)
 - [x] Cœur (tours × 0,6, hauteur du donjon, basse-cour : puits + accessoires, communs ; test `castle_looks_like_a_castle`)
 - [x] Rendu (donjon carré `_build_keep`, communs du kit ; test `nt8_castle_test.gd` vert)
-- [ ] Tests, capture
+- [x] Tests : cargo fmt, clippy -D warnings (sim-battle, godot-bridge), cargo test workspace, pytest (726 ciblés), smoke, sb_siege_bars_test, nt1_siege_shot (headless), nt8_castle_test ; capture `nt1_castle.png` régénérée (non lue)
 
 ## Prochaine étape
-Vérifs (clippy, cargo test workspace, pytest, smoke, sb, nt1), puis capture avec affichage.
+Lot terminé. Session principale : juger `docs/audit/captures/nt/nt1_castle.png`.
+
+## Points ouverts
+- Pas d'escalier vers une porte haute (porte au pied, pour garder l'emprise de la simulation).
+- Tours du château : rayon (5 + fortification) × 0,6, soit 6 m au plus ; hauteur inchangée.
+- Toit en pavillon sur tous les donjons (pas de variante en terrasse).
