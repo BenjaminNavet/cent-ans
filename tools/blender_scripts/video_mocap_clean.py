@@ -368,24 +368,25 @@ def ground_tilt(points, above=0.03, rounds=3):
 
     MediaPipe's world frame follows the camera: a camera looking down tilts the ground, and a
     foot farther from the camera then seems higher (NT13-NT14: a staggered stance read as a
-    lifted foot, no contact, the foot sliding). The ground plane ``Z = a X + b Y + c`` is fitted
-    to the heel and toe points, dropping those more than `above` metres over it (lifted feet)
-    for `rounds` rounds; the rotation turns its normal onto +Z (tilts over 25 degrees are
-    ignored: not a camera pitch).
+    lifted foot, no contact, the foot sliding). The ground line ``Z = b Y + c`` is fitted to
+    the heel and toe points, dropping those more than `above` metres over it (lifted feet) for
+    `rounds` rounds; the rotation turns its normal onto +Z (tilts over 25 degrees are ignored:
+    not a camera pitch). Pitch only: a phone on a tripod does not roll, and a roll fitted to
+    noisy feet leans the whole body sideways.
     """
     pts = np.asarray(points, dtype=np.float64)
     idx = [HEEL_L, TOE_L, HEEL_R, TOE_R]
     p = pts[:, idx].reshape(-1, 3)
     keep = np.ones(len(p), bool)
-    coef = np.zeros(3)
+    coef = np.zeros(2)
     for _ in range(rounds):
-        a = np.stack((p[keep, 0], p[keep, 1], np.ones(keep.sum())), axis=1)
+        a = np.stack((p[keep, 1], np.ones(keep.sum())), axis=1)
         coef, *_ = np.linalg.lstsq(a, p[keep, 2], rcond=None)
-        resid = p[:, 2] - (coef[0] * p[:, 0] + coef[1] * p[:, 1] + coef[2])
+        resid = p[:, 2] - (coef[0] * p[:, 1] + coef[1])
         keep = resid < above
         if keep.sum() < 8:
             break
-    n = np.array([-coef[0], -coef[1], 1.0])
+    n = np.array([0.0, -coef[0], 1.0])
     n /= np.linalg.norm(n)
     angle = np.arccos(np.clip(n[2], -1.0, 1.0))
     if angle < 1e-6 or angle > np.radians(25.0):
@@ -522,6 +523,26 @@ def disc_points(centre, major, fit, aspect, anchor_depth=0.0, fov_deg=65.0):
     ref = np.median(size)
     y = anchor_depth + dist * (ref / np.maximum(size, 1e-6) - 1.0)
     return np.stack((s * c[:, 0] * aspect + tx, y, -s * c[:, 1] + tz), axis=-1)
+
+
+def reach_anchor(disc, shoulder, reach, lo=-1.0, hi=0.3, steps=261):
+    """Depth offset (Y, metres) putting a hand-held disc at most `reach` from the shoulder.
+
+    `disc` (frames, 3) comes from ``disc_points`` with ``anchor_depth=0``; its depth is only
+    known up to an offset. The offset kept is the one in front of the body (towards the camera,
+    -Y) where the farthest frame is exactly `reach` from `shoulder` (frames, 3): the disc is in
+    the hand, and the clip's widest block or push stretches the arm.
+    """
+    d = np.asarray(disc, dtype=np.float64) - np.asarray(shoulder, dtype=np.float64)
+    anchors = np.linspace(hi, lo, steps)
+    far = np.array(
+        [np.max(np.linalg.norm(d + np.array([0.0, a, 0.0]), axis=-1)) for a in anchors]
+    )
+    k = int(np.argmin(far))
+    if far[k] >= reach:
+        return float(anchors[k])
+    beyond = np.flatnonzero(far[k:] >= reach)
+    return float(anchors[k + beyond[0]]) if len(beyond) else float(lo)
 
 
 def disc_normals(major, minor, angle, disc, chest, keep=0.7):

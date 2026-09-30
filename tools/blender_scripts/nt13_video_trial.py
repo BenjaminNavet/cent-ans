@@ -55,6 +55,14 @@ LOOP_BLEND = 6
 # Caps of the right wrist's turn away from the keyframed grip: bend, and twist about the forearm.
 WRIST_SWING_DEG = 65.0
 WRIST_TWIST_DEG = 110.0
+# NT14: one-handed grip (fist landmarks smoothed): a thrust needs the fist bent further.
+WRIST_SWING_ONE_HAND_DEG = 80.0
+# NT14: the disc's farthest frame of a video is this fraction of an arm's length away.
+DISC_REACH = 0.8
+# NT14: face normal of the heater shield (FG0 kit, `battle_fine_equipment.heater_shield`) in
+# the rest frame of LowerArm.L: smallest principal axis of its vertices, pointing away from the
+# forearm (its centre sits 77 % of the way to the wrist). Measured on `infantry_0`.
+SHIELD_FACE_LOCAL = (0.3263, 0.029, 0.9448)
 
 
 def clip(name, video, first, last, speed, loop, yaw, note, **opts):
@@ -240,11 +248,9 @@ class Rest:
         k = (wrist.inverted() @ prop_rest).to_3x3().normalized()
         self.grip_blade = (k @ Vector((0.0, 1.0, 0.0))).normalized()
         self.grip_edge = (k @ Vector((0.0, 0.0, 1.0))).normalized()
-        # NT14: the shield's face at rest, from the keyframed guard (forearm across the belly,
-        # shield facing forward): face = forward rotated back by the guard's forearm turn.
-        guard = (tgt.rest["Chest"] @ tgt.shield_rel["LowerArm.L"]).to_3x3().normalized()
-        turn = guard @ tgt.rest["LowerArm.L"].to_3x3().normalized().inverted()
-        self.shield_face = (turn.inverted() @ self.fwd).normalized()
+        # NT14: the heater shield's face at rest (armature space).
+        lower = tgt.rest["LowerArm.L"].to_3x3().normalized()
+        self.shield_face = (lower @ Vector(SHIELD_FACE_LOCAL)).normalized()
         self.arm_l = (
             (h["LowerArm.L"] - h["UpperArm.L"]).length,
             (h["Wrist.L"] - h["LowerArm.L"]).length,
@@ -266,26 +272,28 @@ def disc_track(data, video, first, last, rate):
 
     ``<video>_disc.npz`` (``track_disc.py``) gives the disc in the image; the image is mapped
     onto MediaPipe's world frame by the trusted landmarks (``image_world_fit``), the depth
-    comes from the disc's apparent size, anchored on the median depth of MediaPipe's (hidden,
-    guessed) left wrist.
+    comes from the disc's apparent size against its median over the whole video, offset so
+    that the disc's farthest frame of the video is `DISC_REACH` of an arm's length from the
+    left shoulder (``reach_anchor``; the left arm's own landmarks hide behind the disc).
     """
     disc = np.load(os.path.join(POSE_DIR, f"{video}_disc.npz"))
-    sl = slice(first, last + 1)
-    world = data["world"][sl]
+    world = data["world"]
     w, h = (float(x) for x in data["size"])
     aspect = w / h
-    fit = vc.image_world_fit(world, data["image"][sl], aspect, data["visibility"][sl])
+    fit = vc.image_world_fit(world, data["image"], aspect, data["visibility"])
     fit = tuple(vc.one_euro(f, rate, 1.0, 0.2) for f in fit)
-    z = vc.to_zup(world)
-    anchor = float(np.clip(np.median(z[:, vc.WRIST_L, 1]), -0.5, -0.15))
-    axes = disc["axes"][sl]
-    pts = vc.disc_points(disc["centre"][sl], axes[:, 0], fit, aspect, anchor)
+    z = vc.one_euro(vc.to_zup(world), rate, 1.5, 0.3)
+    axes = disc["axes"]
+    pts = vc.disc_points(disc["centre"], axes[:, 0], fit, aspect, 0.0)
     pts = vc.one_euro(pts, rate, 1.5, 0.3)
-    chest = vc.one_euro(
-        0.5 * (z[:, vc.SHOULDER_L] + z[:, vc.SHOULDER_R]), rate, 1.5, 0.3
-    )
-    normals = vc.disc_normals(axes[:, 0], axes[:, 1], disc["angle"][sl], pts, chest)
-    return pts, vc.smooth_directions(normals, rate, 1.0, 0.3)
+    lengths = vc.segment_lengths(z)
+    arm = lengths[(vc.SHOULDER_R, vc.ELBOW_R)] + lengths[(vc.ELBOW_R, vc.WRIST_R)]
+    pts[:, 1] += vc.reach_anchor(pts, z[:, vc.SHOULDER_L], DISC_REACH * arm)
+    chest = 0.5 * (z[:, vc.SHOULDER_L] + z[:, vc.SHOULDER_R])
+    normals = vc.disc_normals(axes[:, 0], axes[:, 1], disc["angle"], pts, chest)
+    normals = vc.smooth_directions(normals, rate, 1.0, 0.3)
+    sl = slice(first, last + 1)
+    return pts[sl], normals[sl]
 
 
 class Clip:
@@ -591,7 +599,12 @@ def solve(rest, clip, index, state, blade, side):
     dev = (
         r["LowerArm.R"].inverted() @ wrist_abs @ tgt.rest["Wrist.R"].to_3x3().inverted()
     ).to_quaternion()
-    dev = cap_swing_twist(dev, rest.limb["arm.R"][1], WRIST_SWING_DEG, WRIST_TWIST_DEG)
+    swing = (
+        WRIST_SWING_ONE_HAND_DEG
+        if clip.spec["grip"] == "right_hand"
+        else WRIST_SWING_DEG
+    )
+    dev = cap_swing_twist(dev, rest.limb["arm.R"][1], swing, WRIST_TWIST_DEG)
     r["Wrist.R"] = r["LowerArm.R"] @ dev.to_matrix()
     for side in ("L", "R"):
         heel = j[vc.HEEL_L if side == "L" else vc.HEEL_R]
