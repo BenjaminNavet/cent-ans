@@ -19,6 +19,12 @@ static var _cache: Dictionary = {}
 const TREES_GLB := "res://assets/models/vegetation/campaign_trees.glb"
 ## Identifiant d'essence (UV.x des sommets, lu par `foliage.gdshader` pour la teinte saisonnière).
 const ESSENCE_ID := {"oak": 0.0, "beech": 1.0, "fir": 2.0, "hedge": 3.0}
+## Lot FC2 : atlas des imposteurs (`tools/blender_scripts/campaign_tree_impostors.py`), une ligne
+## par essence dans cet ordre, `IMPOSTOR_VIEWS` colonnes (azimuts cuits).
+const IMPOSTOR_ALBEDO := "res://assets/textures/vegetation/campaign_impostors_albedo.png"
+const IMPOSTOR_NORMAL := "res://assets/textures/vegetation/campaign_impostors_normal.png"
+const IMPOSTOR_ROWS: Array[String] = ["oak", "beech", "fir"]
+const IMPOSTOR_VIEWS := 8
 ## Palettes (albédo linéaire) : feuillage sombre / clair, écorce.
 const PALETTES := {
 	"oak": [Color(0.040, 0.068, 0.026), Color(0.118, 0.155, 0.056), Color(0.20, 0.15, 0.10)],
@@ -39,6 +45,29 @@ static func essence(name: String, detailed: bool) -> ArrayMesh:
 			mesh = conifer() if detailed else conifer_low()
 		else:
 			mesh = deciduous() if detailed else deciduous_low()
+	_cache[key] = mesh
+	return mesh
+
+
+## Lot FC2 : quadrilatère d'imposteur d'une essence (`oak`, `beech`, `fir`), 2 triangles. Les
+## sommets sont recalculés par `campaign_tree_impostor.gdshader` (panneau face à la caméra) :
+## UV = coin (x droite, y 0 en haut), UV2.x = ligne de l'essence dans l'atlas. Boîte englobante
+## explicite : celle d'un arbre de hauteur 1 (le MultiMesh en déduit la sienne).
+static func impostor(name: String) -> ArrayMesh:
+	var key := "impostor_%s" % name
+	if _cache.has(key):
+		return _cache[key]
+	var row := float(IMPOSTOR_ROWS.find(name))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var corners: Array[Vector2] = [Vector2(0, 0), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)]
+	for uv in corners:
+		st.set_uv(uv)
+		st.set_uv2(Vector2(row, 0.0))
+		st.set_normal(Vector3.BACK)
+		st.add_vertex(Vector3(uv.x - 0.5, 1.0 - uv.y, 0.0))
+	var mesh := st.commit()
+	mesh.custom_aabb = AABB(Vector3(-0.9, -0.5, -0.9), Vector3(1.8, 1.8, 1.8))
 	_cache[key] = mesh
 	return mesh
 
