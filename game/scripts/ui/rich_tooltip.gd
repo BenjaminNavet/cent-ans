@@ -588,7 +588,7 @@ static func attach_plain(control: Control, key: String, live: Dictionary = {}) -
 		control.set_script(PLAIN_HOST_SCRIPT)
 	elif not control.has_method("_make_custom_tooltip"):
 		# Q8 : sans cette méthode, Godot affiche la clé et le BBCode bruts.
-		push_error("attach_plain: %s lacks _make_custom_tooltip (raw tooltip)" % control.get_script().resource_path)
+		push_error("attach_plain: %s (%s) lacks _make_custom_tooltip (raw tooltip)" % [control.name, control.get_script().resource_path])
 	set_tooltip(control, "plain", key, live)
 
 

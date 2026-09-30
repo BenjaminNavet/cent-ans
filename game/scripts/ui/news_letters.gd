@@ -313,6 +313,7 @@ class Letter:
 			HudStyle.draw_texture_fit(self, _heraldry, center + Vector2(0, 0.5), inner * 1.45)
 
 
-## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe scriptée).
-func _make_custom_tooltip(for_text: String) -> Object:
-	return RichTooltip.panel_for(for_text, self)
+	## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe
+	## scriptée ; Q8 : sans elle, clé et BBCode bruts).
+	func _make_custom_tooltip(for_text: String) -> Object:
+		return RichTooltip.panel_for(for_text, self)
