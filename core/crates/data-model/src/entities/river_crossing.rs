@@ -21,6 +21,13 @@ pub struct RiverCrossingRules {
     pub description: Option<String>,
     /// A crossing farther than this from the battle is ignored (km).
     pub search_radius_km: f64,
+    /// Bed width (map px, `width` of `crossings_px.json`) at or below which
+    /// a crossing has no effect.
+    #[serde(default = "default_min_width_px")]
+    pub min_width_px: f64,
+    /// Bed width from which a crossing has its full effect (linear between).
+    #[serde(default = "default_full_width_px")]
+    pub full_width_px: f64,
     /// Multiplier of the attacker's damage, by crossing structure.
     pub attacker_factor: CrossingFactors,
     /// Multiplier of the defender's ranged damage, by crossing structure.
@@ -31,6 +38,14 @@ impl Default for RiverCrossingRules {
     fn default() -> Self {
         serde_json::from_str(BUNDLED).expect("bundled data/rules/river_crossings.json is valid")
     }
+}
+
+fn default_min_width_px() -> f64 {
+    0.2
+}
+
+fn default_full_width_px() -> f64 {
+    0.45
 }
 
 /// One coefficient per crossing structure.
@@ -64,6 +79,9 @@ pub struct MapCrossing {
     pub px: [f32; 2],
     /// Direction of the river at the crossing (map pixels, unit length).
     pub dir: [f32; 2],
+    /// Width of the river bed at the crossing (map pixels); 0 when unknown.
+    #[serde(default)]
+    pub width: f32,
 }
 
 #[derive(Deserialize)]
@@ -106,6 +124,7 @@ mod tests {
         assert!(rules.search_radius_km > 0.0);
         assert!(rules.attacker_factor.stone_bridge < 1.0);
         assert!(rules.defender_ranged_factor.ford > 1.0);
+        assert!(rules.full_width_px > rules.min_width_px);
     }
 
     #[test]
@@ -115,5 +134,6 @@ mod tests {
         let file: CrossingFile = serde_json::from_str(text).unwrap();
         assert_eq!(file.crossings[0].kind, "bridge");
         assert_eq!(file.crossings[0].px, [1.0, 2.0]);
+        assert_eq!(file.crossings[0].width, 1.2);
     }
 }

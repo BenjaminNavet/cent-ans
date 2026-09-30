@@ -8,7 +8,8 @@
 //! attacker's damage and the defender's ranged damage
 //! (`data/rules/river_crossings.json`), instead of the province river flag.
 
-use data_model::{CrossingFactors, GameData, MapCrossing};
+use data_model::{CrossingFactors, GameData, MapCrossing, RiverCrossingRules};
+use serde::{Deserialize, Serialize};
 use sim_battle::{BattleCrossing, CrossingStructure};
 
 use crate::march::px_per_km;
@@ -18,10 +19,67 @@ use crate::state::{ArmyId, CampaignState};
 /// on neither bank.
 const BANK_EPSILON_PX: f32 = 1e-3;
 
+/// The crossing effect of an auto-resolved battle (`BattleContext.crossing`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrossingEffect {
+    pub structure: CrossingStructure,
+    /// Share of the structure's full effect, per mille (river bed width).
+    pub strength_permille: u16,
+}
+
+impl CrossingEffect {
+    fn strength(&self) -> f64 {
+        f64::from(self.strength_permille.min(1000)) / 1000.0
+    }
+
+    /// Multiplier of the attacker's damage.
+    pub fn attacker_factor(&self, rules: &RiverCrossingRules) -> f64 {
+        scaled(
+            factor(&rules.attacker_factor, self.structure),
+            self.strength(),
+        )
+    }
+
+    /// Multiplier of the defender's ranged damage.
+    pub fn defender_ranged_factor(&self, rules: &RiverCrossingRules) -> f64 {
+        scaled(
+            factor(&rules.defender_ranged_factor, self.structure),
+            self.strength(),
+        )
+    }
+}
+
+/// `coefficient` applied at `strength` (0-1) of its effect.
+pub fn scaled(coefficient: f64, strength: f64) -> f64 {
+    1.0 + (coefficient - 1.0) * strength.clamp(0.0, 1.0)
+}
+
+/// Share (0-1) of its structure's effect a crossing has, from the width of
+/// the river bed (`min_width_px` → none, `full_width_px` → full). An
+/// unknown width gives the full effect to a named crossing (`bridge`,
+/// `ford`) and none to an anonymous road bridge.
+pub fn crossing_strength(rules: &RiverCrossingRules, crossing: &MapCrossing) -> f64 {
+    let width = f64::from(crossing.width);
+    if width <= 0.0 {
+        return if crossing.kind == "road" { 0.0 } else { 1.0 };
+    }
+    let span = rules.full_width_px - rules.min_width_px;
+    if span <= f64::EPSILON {
+        return if width >= rules.full_width_px {
+            1.0
+        } else {
+            0.0
+        };
+    }
+    ((width - rules.min_width_px) / span).clamp(0.0, 1.0)
+}
+
 /// The crossing a battle is fought at.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CrossingSite {
     pub structure: CrossingStructure,
+    /// Share of the structure's effect (0-1, above 0), from the bed width.
+    pub strength: f64,
     /// Name of the crossing, empty for an anonymous road bridge.
     pub name: String,
     /// French name of the river, empty when unknown.
@@ -29,6 +87,14 @@ pub struct CrossingSite {
 }
 
 impl CrossingSite {
+    /// The `BattleContext.crossing` of an auto-resolved battle fought here.
+    pub fn effect(&self) -> CrossingEffect {
+        CrossingEffect {
+            structure: self.structure,
+            strength_permille: (self.strength.clamp(0.0, 1.0) * 1000.0).round() as u16,
+        }
+    }
+
     /// The `BattleSetup.crossing` of a tactical battle fought here.
     pub fn battle_crossing(&self) -> BattleCrossing {
         BattleCrossing {
@@ -85,6 +151,7 @@ fn opposite_banks(crossing: &MapCrossing, a: [f32; 2], b: [f32; 2]) -> bool {
 
 /// The crossing of a battle between an attacker at map pixel `attacker` and
 /// a defender at `defender` (see the module docs); the nearest one wins.
+/// A crossing over a bed too narrow to matter (strength 0) is ignored.
 pub fn crossing_between(
     data: &GameData,
     attacker: [f32; 2],
@@ -98,15 +165,21 @@ pub fn crossing_between(
         (attacker[0] + defender[0]) / 2.0,
         (attacker[1] + defender[1]) / 2.0,
     ];
+    let rules = &data.river_crossing_rules;
     data.crossings
         .iter()
         .filter_map(|c| {
             let d = distance(c.px, defender).min(distance(c.px, middle));
-            (d <= radius && opposite_banks(c, attacker, defender)).then_some((d, c))
+            if d > radius || !opposite_banks(c, attacker, defender) {
+                return None;
+            }
+            let strength = crossing_strength(rules, c);
+            (strength > 0.0).then_some((d, c, strength))
         })
         .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)))
-        .map(|(_, c)| CrossingSite {
+        .map(|(_, c, strength)| CrossingSite {
             structure: structure_of(c),
+            strength,
             name: c.name.clone(),
             river_display: data.river_display_name(&c.river).to_owned(),
         })
@@ -129,9 +202,9 @@ pub fn crossing_site(
 }
 
 fn starts_with_vowel(word: &str) -> bool {
-    word.chars().next().is_some_and(|c| {
-        "AEIOUYHÀÂÄÉÈÊËÎÏÔÖÙÛÜaeiouyhàâäéèêëîïôöùûü".contains(c)
-    })
+    word.chars()
+        .next()
+        .is_some_and(|c| "AEIOUYHÀÂÄÉÈÊËÎÏÔÖÙÛÜaeiouyhàâäéèêëîïôöùûü".contains(c))
 }
 
 /// « de X » with the French contractions (« du pont de Blois », « des ponts
@@ -197,8 +270,9 @@ fn percent(coefficient: f64) -> String {
 /// +25 %) ».
 pub fn forecast_line(data: &GameData, site: &CrossingSite) -> String {
     let rules = &data.river_crossing_rules;
-    let attacker = percent(factor(&rules.attacker_factor, site.structure));
-    let ranged = percent(factor(&rules.defender_ranged_factor, site.structure));
+    let effect = site.effect();
+    let attacker = percent(effect.attacker_factor(rules));
+    let ranged = percent(effect.defender_ranged_factor(rules));
     let river = river_with_article(&site.river_display);
     let head = if !site.name.is_empty() {
         format!("Passage en force {} sur {river}", of_name(&site.name))
@@ -242,6 +316,7 @@ mod tests {
             river: String::new(),
             px: [100.0, 100.0],
             dir: [1.0, 0.0],
+            width: 0.0,
         }
     }
 
@@ -266,6 +341,32 @@ mod tests {
         assert_eq!(
             structure_of(&crossing("wood", "road")),
             CrossingStructure::WoodBridge
+        );
+    }
+
+    #[test]
+    fn narrow_beds_weaken_or_cancel_a_crossing() {
+        let rules = RiverCrossingRules::default();
+        let mut road = crossing("wood", "road");
+        assert_eq!(crossing_strength(&rules, &road), 0.0);
+        road.width = 0.16;
+        assert_eq!(crossing_strength(&rules, &road), 0.0);
+        road.width = ((rules.min_width_px + rules.full_width_px) / 2.0) as f32;
+        let half = crossing_strength(&rules, &road);
+        assert!((half - 0.5).abs() < 1e-3, "{half}");
+        road.width = 1.3;
+        assert_eq!(crossing_strength(&rules, &road), 1.0);
+        let named = crossing("stone", "bridge");
+        assert_eq!(crossing_strength(&rules, &named), 1.0);
+        let effect = CrossingEffect {
+            structure: CrossingStructure::WoodBridge,
+            strength_permille: 500,
+        };
+        let full = rules.attacker_factor.wood_bridge;
+        assert!((effect.attacker_factor(&rules) - (1.0 - (1.0 - full) / 2.0)).abs() < 1e-9);
+        let ranged = rules.defender_ranged_factor.wood_bridge;
+        assert!(
+            (effect.defender_ranged_factor(&rules) - (1.0 + (ranged - 1.0) / 2.0)).abs() < 1e-9
         );
     }
 

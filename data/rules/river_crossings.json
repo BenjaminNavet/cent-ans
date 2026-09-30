@@ -1,6 +1,8 @@
 {
   "description": "Batailles de passage de la carte de campagne (chantier RC, ADR 0117) : un combat livré près d'un pont, d'un gué ou d'un bac, assaillant et défenseur sur des rives opposées.",
   "search_radius_km": 8.0,
+  "min_width_px": 0.2,
+  "full_width_px": 0.45,
   "attacker_factor": {
     "stone_bridge": 0.6,
     "wood_bridge": 0.65,

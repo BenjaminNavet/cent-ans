@@ -7,6 +7,16 @@
   "properties": {
     "description": { "type": "string" },
     "search_radius_km": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+    "min_width_px": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Largeur du lit (px carte, champ width de crossings_px.json) en dessous de laquelle un passage n'a aucun effet."
+    },
+    "full_width_px": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Largeur du lit à partir de laquelle le passage a son plein effet ; interpolation linéaire entre les deux."
+    },
     "attacker_factor": { "$ref": "#/$defs/by_structure" },
     "defender_ranged_factor": { "$ref": "#/$defs/by_structure" }
   },

@@ -582,7 +582,7 @@ pub(crate) fn auto_fight_with_opening(
         // RC: a real crossing replaces the province river flag.
         river_crossing: crossing.is_none() && province.is_some_and(|p| !p.rivers.is_empty()),
         walls: false,
-        crossing: crossing.as_ref().map(|c| c.structure),
+        crossing: crossing.as_ref().map(|c| c.effect()),
     };
     let attackers = battle_coalition(state, data, attacker_id, &defender.faction);
     let defenders = battle_coalition(state, data, defender_id, &attacker.faction);

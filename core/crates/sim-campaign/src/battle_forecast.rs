@@ -187,10 +187,9 @@ impl CampaignState {
                     )
                 }),
                 // RC: a real crossing replaces the province river flag.
-                river_crossing: site.is_none()
-                    && province.is_some_and(|p| !p.rivers.is_empty()),
+                river_crossing: site.is_none() && province.is_some_and(|p| !p.rivers.is_empty()),
                 walls: false,
-                crossing: site.as_ref().map(|c| c.structure),
+                crossing: site.as_ref().map(|c| c.effect()),
             };
             (
                 movement::coalition_side(self, data, &attackers),
@@ -226,9 +225,9 @@ impl CampaignState {
             // defender's archers (folded into its ranged bonus, which
             // `side_power` applies to ranged regiments only).
             let rules = &data.river_crossing_rules;
-            attacker_modifier *=
-                crate::river_crossing::factor(&rules.attacker_factor, site.structure);
-            let ranged = crate::river_crossing::factor(&rules.defender_ranged_factor, site.structure);
+            let effect = site.effect();
+            attacker_modifier *= effect.attacker_factor(rules);
+            let ranged = effect.defender_ranged_factor(rules);
             defender_side.general_ranged_percent =
                 ((1.0 + defender_side.general_ranged_percent / 100.0) * ranged - 1.0) * 100.0;
             modifiers.push(crate::river_crossing::forecast_line(data, site));

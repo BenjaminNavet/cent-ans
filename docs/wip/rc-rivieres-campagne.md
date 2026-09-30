@@ -10,9 +10,12 @@ Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano
 ## Lots
 - [x] RC0 — Squelette : `BattleSetup.crossing` (`BattleCrossing`, `CrossingStructure`),
       `data/rules/river_crossings.json` + schéma, `data/map/river_names.json` + schéma, ADR 0117.
-- [ ] RC1 — Cœur campagne : chargement de `crossings_px.json`, détection du passage (rives
+- [x] RC1 — Cœur campagne : chargement de `crossings_px.json`, détection du passage (rives
       opposées), coefficient d'assaillant / tireurs du défenseur, pronostic nommé, `setup.crossing`.
-- [ ] RC2 — Bataille tactique : un seul passage de la structure demandée entre les deux lignes.
+      (`sim_campaign::river_crossing`, `BattleContext.crossing`, effet réduit selon la largeur du lit
+      `min_width_px`/`full_width_px`, IA de grille pondérée ; tests
+      `sim-campaign/tests/rc1_river_crossings.rs`.)
+- [x] RC2 — Bataille tactique : un seul passage de la structure demandée entre les deux lignes.
 - [ ] RC3 — Rendu : largeur, contraste, rivières mineures plus loin ; étiquettes des noms (français).
 - [x] RC4 — Densité : `rivers-render --fine-min-order` depuis la pyramide hydro fine (Mac du joueur).
       Outil fait et testé (pyramide synthétique). **À lancer sur le Mac** (pyramide présente),
@@ -36,4 +39,6 @@ Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano
 - 2026-09-30 : RC0.
 - 2026-09-30 : RC5 pipeline prêt (génération à faire sur le Mac).
 - 2026-09-30 : RC4 (outil `--fine-min-order` ; données à régénérer sur le Mac).
+- 2026-09-30 : RC1 (batailles de passage en campagne : pronostic nommé, `setup.crossing`, IA).
 - 2026-09-30 : RC6 (11 rivières de plus infranchissables hors ponts et gués, 40 passages).
+- 2026-09-30 : RC2 (rivière large entre les lignes, un seul passage : pont de pierre, de bois, de bateaux = bois étroit, gué, bac = gué étroit ; flux dérivé `CROSSING_STREAM`, batailles sans passage inchangées ; `tests/rc2_crossing.rs`).
