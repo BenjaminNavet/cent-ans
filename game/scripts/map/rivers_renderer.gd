@@ -22,7 +22,6 @@ const RENDER_FILE := "rivers_render.json"
 ## Largeur (px carte) au-delà de laquelle un cours d'eau est « majeur » même d'importance faible.
 const MAJOR_WIDTH := 0.5
 ## Part du rayon d'une maquette de colonie couverte par la ville (l'eau passe dessous).
-const SETTLEMENT_COVER := 0.8
 
 @export var base_width: float = 0.1
 @export var width_per_importance: float = 0.1
@@ -64,7 +63,8 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 	map_data = data
 	terrain = terrain_builder
 	_load_rivers()
-	covers = _settlement_covers(settlements)
+	# VT (ADR 0138) : plus de maquette à cacher, les villes 1:1 enjambent la vraie rivière : aucune coupure.
+	covers = []
 	_cover_cells.clear()
 	var touched := _index_cover_segments()
 	_clear_river_bed_under_covers()
@@ -206,23 +206,6 @@ func _load_rivers() -> void:
 		widths.resize(points.size())
 		widths.fill(base_width + width_per_importance * int(river["importance"]))
 		rivers.append({"name": river["name"], "importance": river["importance"], "points": points, "widths": widths})
-
-
-## Emprises couvertes par les villes (rayon réel) (hors zones personnalisées).
-func _settlement_covers(settlements: SettlementLayer) -> Array[Vector4]:
-	var result: Array[Vector4] = []
-	if settlements == null or settlements.data == null:
-		return result
-	var exclusions := settlements.vegetation_exclusions()
-	var count := mini(settlements.data.settlements.size(), exclusions.size())
-	for i in count:
-		var e := exclusions[i]
-		# VT : `vegetation_exclusions` rend le finage ; l'emprise bâtie est le rayon réel de la ville.
-		var built_radius := settlements.model_radius(i)
-		if built_radius <= 0.3 or in_custom_zone(Vector2(e.x, e.y)):
-			continue
-		result.append(Vector4(e.x, e.y, built_radius * SETTLEMENT_COVER, i))
-	return result
 
 
 func _covered(p: Vector2) -> bool:
