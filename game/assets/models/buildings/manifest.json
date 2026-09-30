@@ -1,282 +1,392 @@
 {
  "barn_0": {
   "depth": 8.14,
+  "framed": false,
   "height": 10.72,
   "kind": "barn",
   "length": 13.92,
   "ruined": false,
+  "southern": false,
   "triangles": 636
  },
  "barn_1": {
   "depth": 8.43,
+  "framed": false,
   "height": 10.49,
   "kind": "barn",
   "length": 13.43,
   "ruined": false,
+  "southern": false,
   "triangles": 434
  },
  "barn_2": {
   "depth": 7.67,
+  "framed": false,
   "height": 9.94,
   "kind": "barn",
   "length": 14.91,
   "ruined": false,
+  "southern": false,
   "triangles": 562
  },
  "barn_ruin_0": {
   "depth": 7.53,
+  "framed": false,
   "height": 1.6,
   "kind": "barn",
   "length": 17.52,
   "ruined": true,
+  "southern": false,
   "triangles": 583
  },
  "barrels_0": {
   "depth": 1.3,
+  "framed": false,
   "height": 1.7,
   "kind": "barrels",
   "length": 2.53,
   "ruined": false,
+  "southern": false,
   "triangles": 440
  },
  "barrels_1": {
   "depth": 1.3,
+  "framed": false,
   "height": 1.7,
   "kind": "barrels",
   "length": 2.54,
   "ruined": false,
+  "southern": false,
   "triangles": 172
  },
  "barrels_2": {
   "depth": 1.3,
+  "framed": false,
   "height": 1.7,
   "kind": "barrels",
   "length": 1.89,
   "ruined": false,
+  "southern": false,
   "triangles": 248
  },
  "bridge_stone_bay_0": {
   "depth": 8.8,
+  "framed": false,
   "height": 8.1,
   "kind": "bridge_stone_bay",
   "length": 9.0,
   "ruined": false,
+  "southern": false,
   "triangles": 230
  },
  "bridge_stone_end_0": {
   "depth": 6.0,
+  "framed": false,
   "height": 8.5,
   "kind": "bridge_stone_end",
   "length": 5.0,
   "ruined": false,
+  "southern": false,
   "triangles": 76
  },
  "bridge_wood_bay_0": {
   "depth": 5.3,
+  "framed": false,
   "height": 8.0,
   "kind": "bridge_wood_bay",
   "length": 4.0,
   "ruined": false,
+  "southern": false,
   "triangles": 212
  },
  "bridge_wood_end_0": {
   "depth": 5.0,
+  "framed": false,
   "height": 8.2,
   "kind": "bridge_wood_end",
   "length": 5.0,
   "ruined": false,
+  "southern": false,
   "triangles": 132
  },
  "campfire_0": {
   "depth": 1.6,
+  "framed": false,
   "height": 1.1,
   "kind": "campfire",
   "length": 1.6,
   "ruined": false,
+  "southern": false,
   "triangles": 236
  },
  "campfire_1": {
   "depth": 1.6,
+  "framed": false,
   "height": 1.1,
   "kind": "campfire",
   "length": 1.6,
   "ruined": false,
+  "southern": false,
   "triangles": 236
  },
  "cart_0": {
   "depth": 1.65,
+  "framed": false,
   "height": 1.9,
   "kind": "cart",
   "length": 4.6,
   "ruined": false,
+  "southern": false,
   "triangles": 610
  },
  "cart_1": {
   "depth": 1.65,
+  "framed": false,
   "height": 1.9,
   "kind": "cart",
   "length": 4.6,
   "ruined": false,
+  "southern": false,
   "triangles": 322
  },
  "cart_2": {
   "depth": 1.65,
+  "framed": false,
   "height": 1.9,
   "kind": "cart",
   "length": 4.6,
   "ruined": false,
+  "southern": false,
   "triangles": 322
  },
  "cart_3": {
   "depth": 1.65,
+  "framed": false,
   "height": 1.9,
   "kind": "cart",
   "length": 4.6,
   "ruined": false,
+  "southern": false,
   "triangles": 338
  },
  "church_0": {
   "depth": 8.0,
+  "framed": false,
   "height": 21.61,
   "kind": "church",
   "length": 19.0,
   "ruined": false,
+  "southern": false,
   "triangles": 1140
  },
  "church_1": {
   "depth": 8.5,
+  "framed": false,
   "height": 24.87,
   "kind": "church",
   "length": 21.0,
   "ruined": false,
+  "southern": false,
   "triangles": 1160
  },
  "church_2": {
   "depth": 13.0,
+  "framed": false,
   "height": 34.57,
   "kind": "church",
   "length": 36.0,
   "ruined": false,
+  "southern": false,
   "triangles": 1628
  },
  "cottage_0": {
   "depth": 5.61,
+  "framed": true,
   "height": 7.23,
   "kind": "cottage",
   "length": 8.9,
   "ruined": false,
+  "southern": false,
   "triangles": 1458
  },
  "cottage_1": {
   "depth": 5.01,
+  "framed": false,
   "height": 7.02,
   "kind": "cottage",
   "length": 7.93,
   "ruined": false,
+  "southern": false,
   "triangles": 578
  },
  "cottage_2": {
   "depth": 5.22,
+  "framed": false,
   "height": 7.12,
   "kind": "cottage",
   "length": 10.05,
   "ruined": false,
+  "southern": false,
   "triangles": 636
  },
  "cottage_3": {
   "depth": 5.33,
+  "framed": false,
   "height": 6.09,
   "kind": "cottage",
   "length": 10.32,
   "ruined": false,
+  "southern": false,
   "triangles": 454
  },
  "cottage_4": {
   "depth": 6.18,
+  "framed": false,
   "height": 6.98,
   "kind": "cottage",
   "length": 7.97,
   "ruined": false,
+  "southern": false,
   "triangles": 544
  },
  "cottage_5": {
   "depth": 5.49,
+  "framed": true,
   "height": 6.93,
   "kind": "cottage",
   "length": 8.84,
   "ruined": false,
+  "southern": false,
   "triangles": 1348
+ },
+ "cottage_6": {
+  "depth": 5.23,
+  "framed": false,
+  "height": 4.83,
+  "kind": "cottage",
+  "length": 8.52,
+  "ruined": false,
+  "southern": true,
+  "triangles": 372
+ },
+ "cottage_7": {
+  "depth": 5.34,
+  "framed": false,
+  "height": 4.8,
+  "kind": "cottage",
+  "length": 8.55,
+  "ruined": false,
+  "southern": true,
+  "triangles": 538
+ },
+ "cottage_8": {
+  "depth": 5.26,
+  "framed": false,
+  "height": 4.88,
+  "kind": "cottage",
+  "length": 8.41,
+  "ruined": false,
+  "southern": true,
+  "triangles": 438
+ },
+ "cottage_9": {
+  "depth": 5.4,
+  "framed": false,
+  "height": 4.77,
+  "kind": "cottage",
+  "length": 9.6,
+  "ruined": false,
+  "southern": true,
+  "triangles": 364
  },
  "cottage_ruin_0": {
   "depth": 5.92,
+  "framed": false,
   "height": 2.7,
   "kind": "cottage",
   "length": 8.37,
   "ruined": true,
+  "southern": false,
   "triangles": 355
  },
  "cottage_ruin_1": {
   "depth": 5.59,
+  "framed": false,
   "height": 2.7,
   "kind": "cottage",
   "length": 8.09,
   "ruined": true,
+  "southern": false,
   "triangles": 355
  },
  "graves_0": {
   "depth": 4.0,
+  "framed": false,
   "height": 0.8,
   "kind": "graves",
   "length": 6.0,
   "ruined": false,
+  "southern": false,
   "triangles": 70
  },
  "graves_1": {
   "depth": 4.0,
+  "framed": false,
   "height": 0.8,
   "kind": "graves",
   "length": 6.0,
   "ruined": false,
+  "southern": false,
   "triangles": 120
  },
  "graves_2": {
   "depth": 4.0,
+  "framed": false,
   "height": 0.8,
   "kind": "graves",
   "length": 6.0,
   "ruined": false,
+  "southern": false,
   "triangles": 70
  },
  "hall_0": {
   "depth": 13.85,
+  "framed": false,
   "height": 11.11,
   "kind": "hall",
   "length": 18.97,
   "ruined": false,
+  "southern": false,
   "triangles": 1846
  },
  "haystack_0": {
   "depth": 3.84,
+  "framed": false,
   "height": 4.54,
   "kind": "haystack",
   "length": 3.84,
   "ruined": false,
+  "southern": false,
   "triangles": 150
  },
  "haystack_1": {
   "depth": 4.17,
+  "framed": false,
   "height": 4.21,
   "kind": "haystack",
   "length": 4.17,
   "ruined": false,
+  "southern": false,
   "triangles": 150
  },
  "haystack_2": {
   "depth": 2.41,
+  "framed": false,
   "height": 1.96,
   "kind": "haystack",
   "length": 2.41,
   "ruined": false,
+  "southern": false,
   "triangles": 68
  },
  "horse_0": {
@@ -305,402 +415,562 @@
  },
  "longere_0": {
   "depth": 6.02,
+  "framed": false,
   "height": 6.94,
   "kind": "longere",
   "length": 16.4,
   "ruined": false,
+  "southern": false,
   "triangles": 803
  },
  "longere_1": {
   "depth": 5.98,
+  "framed": false,
   "height": 7.43,
   "kind": "longere",
   "length": 18.99,
   "ruined": false,
+  "southern": false,
   "triangles": 798
  },
  "longere_2": {
   "depth": 6.39,
+  "framed": false,
   "height": 7.51,
   "kind": "longere",
   "length": 14.42,
   "ruined": false,
+  "southern": false,
   "triangles": 787
  },
  "longere_ruin_0": {
   "depth": 5.99,
+  "framed": false,
   "height": 2.7,
   "kind": "longere",
   "length": 18.99,
   "ruined": true,
+  "southern": false,
   "triangles": 571
  },
  "lychgate_0": {
   "depth": 2.5,
+  "framed": false,
   "height": 3.79,
   "kind": "lychgate",
   "length": 3.0,
   "ruined": false,
+  "southern": false,
   "triangles": 124
  },
  "manor_0": {
   "depth": 7.95,
+  "framed": false,
   "height": 23.38,
   "kind": "manor",
   "length": 20.48,
   "ruined": false,
+  "southern": false,
   "triangles": 2647
  },
  "pavilion_0": {
   "depth": 5.99,
+  "framed": false,
   "height": 5.42,
   "kind": "pavilion",
   "length": 5.99,
   "ruined": false,
+  "southern": false,
   "triangles": 76
  },
  "pavilion_1": {
   "depth": 5.49,
+  "framed": false,
   "height": 5.07,
   "kind": "pavilion",
   "length": 5.49,
   "ruined": false,
+  "southern": false,
   "triangles": 76
  },
  "pavilion_2": {
   "depth": 5.48,
+  "framed": false,
   "height": 5.4,
   "kind": "pavilion",
   "length": 5.48,
   "ruined": false,
+  "southern": false,
   "triangles": 76
  },
  "stall_0": {
   "depth": 1.79,
+  "framed": false,
   "height": 2.5,
   "kind": "stall",
   "length": 3.34,
   "ruined": false,
+  "southern": false,
   "triangles": 524
  },
  "stall_1": {
   "depth": 1.84,
+  "framed": false,
   "height": 2.5,
   "kind": "stall",
   "length": 3.17,
   "ruined": false,
+  "southern": false,
   "triangles": 342
  },
  "stall_2": {
   "depth": 1.69,
+  "framed": false,
   "height": 2.5,
   "kind": "stall",
   "length": 3.19,
   "ruined": false,
+  "southern": false,
   "triangles": 288
  },
  "stall_3": {
   "depth": 1.73,
+  "framed": false,
   "height": 2.5,
   "kind": "stall",
   "length": 2.78,
   "ruined": false,
+  "southern": false,
   "triangles": 440
  },
  "stall_4": {
   "depth": 1.72,
+  "framed": false,
   "height": 2.5,
   "kind": "stall",
   "length": 3.36,
   "ruined": false,
+  "southern": false,
   "triangles": 524
  },
  "stonehouse_0": {
   "depth": 7.35,
+  "framed": false,
   "height": 11.87,
   "kind": "stonehouse",
   "length": 13.28,
   "ruined": false,
+  "southern": false,
   "triangles": 1932
  },
  "stonehouse_1": {
   "depth": 8.41,
+  "framed": false,
   "height": 11.31,
   "kind": "stonehouse",
   "length": 11.94,
   "ruined": false,
+  "southern": false,
   "triangles": 1546
  },
  "stonehouse_2": {
   "depth": 8.41,
+  "framed": false,
   "height": 12.22,
   "kind": "stonehouse",
   "length": 12.85,
   "ruined": false,
+  "southern": false,
   "triangles": 1589
  },
  "stonehouse_ruin_0": {
   "depth": 8.44,
+  "framed": false,
   "height": 3.2,
   "kind": "stonehouse",
   "length": 11.93,
   "ruined": true,
+  "southern": false,
   "triangles": 487
  },
  "tent_0": {
   "depth": 4.98,
+  "framed": false,
   "height": 2.55,
   "kind": "tent",
   "length": 4.38,
   "ruined": false,
+  "southern": false,
   "triangles": 168
  },
  "tent_1": {
   "depth": 5.04,
+  "framed": false,
   "height": 2.53,
   "kind": "tent",
   "length": 4.28,
   "ruined": false,
+  "southern": false,
   "triangles": 168
  },
  "tent_2": {
   "depth": 4.77,
+  "framed": false,
   "height": 2.3,
   "kind": "tent",
   "length": 4.26,
   "ruined": false,
+  "southern": false,
   "triangles": 168
  },
  "timber_0": {
   "depth": 6.83,
+  "framed": true,
   "height": 11.11,
   "kind": "timber",
   "length": 10.74,
   "ruined": false,
+  "southern": false,
   "triangles": 4286
  },
  "timber_1": {
   "depth": 7.33,
+  "framed": true,
   "height": 10.81,
   "kind": "timber",
   "length": 11.6,
   "ruined": false,
+  "southern": false,
   "triangles": 3246
  },
  "timber_2": {
   "depth": 7.78,
+  "framed": true,
   "height": 12.23,
   "kind": "timber",
   "length": 9.11,
   "ruined": false,
+  "southern": false,
   "triangles": 3868
  },
  "timber_3": {
   "depth": 7.92,
+  "framed": true,
   "height": 11.16,
   "kind": "timber",
   "length": 11.59,
   "ruined": false,
+  "southern": false,
   "triangles": 3416
  },
  "timber_4": {
   "depth": 7.33,
+  "framed": true,
   "height": 11.11,
   "kind": "timber",
   "length": 11.46,
   "ruined": false,
+  "southern": false,
   "triangles": 4528
  },
  "timber_5": {
   "depth": 7.85,
+  "framed": true,
   "height": 10.93,
   "kind": "timber",
   "length": 11.67,
   "ruined": false,
+  "southern": false,
   "triangles": 3421
+ },
+ "timber_6": {
+  "depth": 6.89,
+  "framed": false,
+  "height": 7.99,
+  "kind": "timber",
+  "length": 9.2,
+  "ruined": false,
+  "southern": true,
+  "triangles": 540
+ },
+ "timber_7": {
+  "depth": 6.16,
+  "framed": false,
+  "height": 7.79,
+  "kind": "timber",
+  "length": 9.8,
+  "ruined": false,
+  "southern": true,
+  "triangles": 618
+ },
+ "timber_8": {
+  "depth": 6.04,
+  "framed": false,
+  "height": 7.58,
+  "kind": "timber",
+  "length": 10.33,
+  "ruined": false,
+  "southern": true,
+  "triangles": 438
  },
  "timber_ruin_0": {
   "depth": 7.25,
+  "framed": false,
   "height": 3.2,
   "kind": "timber",
   "length": 11.37,
   "ruined": true,
+  "southern": false,
   "triangles": 451
  },
  "timber_ruin_1": {
   "depth": 7.05,
+  "framed": false,
   "height": 3.2,
   "kind": "timber",
   "length": 8.26,
   "ruined": true,
+  "southern": false,
   "triangles": 379
  },
  "townhouse_0": {
   "depth": 11.74,
+  "framed": true,
   "height": 13.95,
   "kind": "townhouse",
   "length": 7.03,
   "ruined": false,
+  "southern": false,
   "triangles": 3994
  },
  "townhouse_1": {
   "depth": 11.58,
+  "framed": true,
   "height": 10.56,
   "kind": "townhouse",
   "length": 5.65,
   "ruined": false,
+  "southern": false,
   "triangles": 2096
  },
  "townhouse_2": {
   "depth": 11.72,
+  "framed": true,
   "height": 13.75,
   "kind": "townhouse",
   "length": 6.13,
   "ruined": false,
+  "southern": false,
   "triangles": 4240
  },
  "townhouse_3": {
   "depth": 10.05,
+  "framed": true,
   "height": 10.12,
   "kind": "townhouse",
   "length": 5.55,
   "ruined": false,
+  "southern": false,
   "triangles": 3474
  },
  "townhouse_4": {
   "depth": 9.76,
+  "framed": true,
   "height": 10.57,
   "kind": "townhouse",
   "length": 5.88,
   "ruined": false,
+  "southern": false,
   "triangles": 3108
  },
  "townhouse_5": {
   "depth": 10.04,
+  "framed": true,
   "height": 11.84,
   "kind": "townhouse",
   "length": 6.92,
   "ruined": false,
+  "southern": false,
   "triangles": 3224
+ },
+ "townhouse_6": {
+  "depth": 9.72,
+  "framed": false,
+  "height": 10.4,
+  "kind": "townhouse",
+  "length": 7.03,
+  "ruined": false,
+  "southern": true,
+  "triangles": 1012
+ },
+ "townhouse_7": {
+  "depth": 11.88,
+  "framed": false,
+  "height": 7.6,
+  "kind": "townhouse",
+  "length": 6.3,
+  "ruined": false,
+  "southern": true,
+  "triangles": 866
+ },
+ "townhouse_8": {
+  "depth": 10.42,
+  "framed": false,
+  "height": 10.27,
+  "kind": "townhouse",
+  "length": 5.62,
+  "ruined": false,
+  "southern": true,
+  "triangles": 808
  },
  "townhouse_ruin_0": {
   "depth": 11.02,
+  "framed": false,
   "height": 5.75,
   "kind": "townhouse",
   "length": 5.89,
   "ruined": true,
+  "southern": false,
   "triangles": 907
  },
  "townhouse_ruin_1": {
   "depth": 11.81,
+  "framed": false,
   "height": 3.2,
   "kind": "townhouse",
   "length": 5.8,
   "ruined": true,
+  "southern": false,
   "triangles": 427
  },
  "vine_row_0": {
   "depth": 0.8,
+  "framed": false,
   "height": 1.4,
   "kind": "vine_row",
   "length": 10.0,
   "ruined": false,
+  "southern": false,
   "triangles": 326
  },
  "vine_row_1": {
   "depth": 0.8,
+  "framed": false,
   "height": 1.4,
   "kind": "vine_row",
   "length": 10.0,
   "ruined": false,
+  "southern": false,
   "triangles": 276
  },
  "wagon_0": {
   "depth": 2.0,
+  "framed": false,
   "height": 2.3,
   "kind": "wagon",
   "length": 5.6,
   "ruined": false,
+  "southern": false,
   "triangles": 624
  },
  "wagon_1": {
   "depth": 2.0,
+  "framed": false,
   "height": 2.3,
   "kind": "wagon",
   "length": 5.6,
   "ruined": false,
+  "southern": false,
   "triangles": 916
  },
  "wagon_2": {
   "depth": 2.0,
+  "framed": false,
   "height": 2.3,
   "kind": "wagon",
   "length": 5.6,
   "ruined": false,
+  "southern": false,
   "triangles": 916
  },
  "wall_run_0": {
   "depth": 0.6,
+  "framed": false,
   "height": 1.42,
   "kind": "wall_run",
   "length": 10.0,
   "ruined": false,
+  "southern": false,
   "triangles": 120
  },
  "wall_run_1": {
   "depth": 0.6,
+  "framed": false,
   "height": 1.42,
   "kind": "wall_run",
   "length": 10.0,
   "ruined": false,
+  "southern": false,
   "triangles": 120
  },
  "watermill_0": {
   "depth": 6.48,
+  "framed": false,
   "height": 6.67,
   "kind": "watermill",
   "length": 10.61,
   "ruined": false,
+  "southern": false,
   "triangles": 1158
  },
  "watermill_1": {
   "depth": 6.2,
+  "framed": true,
   "height": 6.73,
   "kind": "watermill",
   "length": 11.27,
   "ruined": false,
+  "southern": false,
   "triangles": 2028
  },
  "well_0": {
   "depth": 2.2,
+  "framed": false,
   "height": 3.4,
   "kind": "well",
   "length": 2.2,
   "ruined": false,
+  "southern": false,
   "triangles": 118
  },
  "windmill_0": {
   "depth": 7.0,
+  "framed": false,
   "height": 14.53,
   "kind": "windmill",
   "length": 7.0,
   "ruined": false,
+  "southern": false,
   "triangles": 506
  },
  "woodpile_0": {
   "depth": 1.5,
+  "framed": false,
   "height": 0.9,
   "kind": "woodpile",
   "length": 2.93,
   "ruined": false,
+  "southern": false,
   "triangles": 497
  },
  "woodpile_1": {
   "depth": 1.5,
+  "framed": false,
   "height": 0.9,
   "kind": "woodpile",
   "length": 3.42,
   "ruined": false,
+  "southern": false,
   "triangles": 497
  }
 }

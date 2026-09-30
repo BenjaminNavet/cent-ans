@@ -273,6 +273,8 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	ground_key = str(terrain.get("ground", "dry"))
 	woodland = float(terrain.get("woodland", 0.5))
 	site_render = not OS.get_cmdline_user_args().has("--no-site")
+	# Lot TF : colombage ou enduit/pierre selon la région de la province (`--no-tf` : choix d'avant).
+	BuildingKit.region_style = {} if OS.get_cmdline_user_args().has("--no-tf") else BuildingRegions.style_for_province(province_id)
 	da6 = not OS.get_cmdline_user_args().has("--no-da6")
 	ga2 = not OS.get_cmdline_user_args().has("--no-ga2")
 	for arg in OS.get_cmdline_user_args():

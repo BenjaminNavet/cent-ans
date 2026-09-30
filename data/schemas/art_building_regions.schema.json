@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_building_regions.schema.json",
+  "title": "Style régional des maisons du kit (lot TF)",
+  "description": "Choix régional des maisons de bataille (`BuildingRegions` — `game/scripts/visual/building_regions.gd`, `BuildingKit.pick`). Clé de `regions` : champ `region` des fichiers `data/provinces/*.json` ; `default` pour les régions absentes. `framed` : probabilité qu'une maison des types à variantes (`cottage`, `timber`, `townhouse`) soit à pans de bois (surface `TimberFrame` du kit) ; `southern` : les maisons sans colombage prennent les variantes du Midi (enduit ou pierre, tuiles canal, faible pente).",
+  "type": "object",
+  "required": ["default", "regions"],
+  "additionalProperties": false,
+  "$defs": {
+    "style": {
+      "type": "object",
+      "required": ["framed", "southern"],
+      "additionalProperties": false,
+      "properties": {
+        "framed": {"type": "number", "minimum": 0, "maximum": 1},
+        "southern": {"type": "boolean"},
+        "note": {"type": "string"}
+      }
+    }
+  },
+  "properties": {
+    "default": {"$ref": "#/$defs/style"},
+    "regions": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z][a-z_]*$"},
+      "additionalProperties": {"$ref": "#/$defs/style"}
+    }
+  }
+}

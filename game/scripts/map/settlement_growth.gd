@@ -25,7 +25,8 @@ const CITE_POPULATION := 600000.0
 const CASTLE_FORTIFICATION := 6
 ## Pièces Kenney du château (tour carrée + toit, tours hexagonales).
 const KENNEY_DIR := "res://assets/third_party/buildings/kenney_castle_kit/"
-const KENNEY_TINT := Color(0.5, 0.5, 0.5)
+## Lot TF : mètres par unité Kenney (une tour carrée ≈ 8 m) : UV de l'atlas et usure en mètres.
+const KENNEY_METERS := 8.0
 
 
 ## Niveau visuel d'une colonie, -1 si elle n'en a pas (château, abbaye) ou est exclue.
@@ -81,8 +82,11 @@ static func build_model(level: int, variant_seed: int, castle: bool) -> Node3D:
 
 
 ## Château de Kenney Castle Kit : donjon carré coiffé, deux tours hexagonales, courtine ;
-## pièces fusionnées en un seul maillage (un appel de rendu par château, mis en cache), teinté
-## pierre (la texture commune du kit est conservée : toits bleus → ardoise).
+## pièces fusionnées en un seul maillage (un appel de rendu par château, mis en cache).
+## Lot TF : converti au matériau atlas `Building` des maquettes (`BuildingMaterials`, variante
+## `far`) au lieu de la palette Kenney teintée (toits bleus) : chaque face lit sa couleur dans la
+## palette du kit, les bleus deviennent ardoise (`RoofSlate`), les bruns sombres bois (`Timber`),
+## le reste pierre de taille (`Masonry`) ; UV en mètres projetées selon la normale.
 static var _castle_mesh: ArrayMesh = null
 static var _castle_loaded := false
 
@@ -94,7 +98,7 @@ static func kenney_castle() -> Node3D:
 	var instance := MeshInstance3D.new()
 	instance.name = "KenneyCastle"
 	instance.mesh = mesh
-	instance.scale = Vector3.ONE * 0.85
+	instance.scale = Vector3.ONE * (0.85 / KENNEY_METERS)
 	return instance
 
 
@@ -129,12 +133,75 @@ static func _kenney_castle_mesh() -> ArrayMesh:
 				if material == null:
 					material = mesh_instance.mesh.surface_get_material(surface) as StandardMaterial3D
 		root.free()
-	if material != null:
-		material = material.duplicate() as StandardMaterial3D
-		material.albedo_color = KENNEY_TINT
-		tool.set_material(material)
-	_castle_mesh = tool.commit()
+	var palette: Image = null
+	if material != null and material.albedo_texture != null:
+		palette = material.albedo_texture.get_image()
+		if palette != null and palette.is_compressed():
+			palette.decompress()
+	_castle_mesh = _to_atlas(tool.commit(), palette)
 	return _castle_mesh
+
+
+## Lot TF : maillage Kenney (palette) → maillage de l'atlas `Building` : sommets en mètres
+## (`KENNEY_METERS`), couche de chaque face dans l'alpha de la couleur de sommet, RVB = nuance
+## de la palette (relief des pièces conservé), UV projetées selon la normale de la face.
+static func _to_atlas(source: ArrayMesh, palette: Image) -> ArrayMesh:
+	var arrays := source.surface_get_arrays(0)
+	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var uvs: Variant = arrays[Mesh.ARRAY_TEX_UV]
+	var indices: Variant = arrays[Mesh.ARRAY_INDEX]
+	var order := PackedInt32Array()
+	if indices != null and (indices as PackedInt32Array).size() > 0:
+		order = indices
+	else:
+		order.resize(vertices.size())
+		for i in vertices.size():
+			order[i] = i
+	var layers := BuildingMaterials.atlas_layers()
+	var slate := layers.find("RoofSlate")
+	var timber := layers.find("Timber")
+	var stone := layers.find("Masonry")
+	var out_v := PackedVector3Array()
+	var out_n := PackedVector3Array()
+	var out_uv := PackedVector2Array()
+	var out_c := PackedColorArray()
+	for t in range(0, order.size() - 2, 3):
+		var a := vertices[order[t]] * KENNEY_METERS
+		var b := vertices[order[t + 1]] * KENNEY_METERS
+		var c := vertices[order[t + 2]] * KENNEY_METERS
+		var normal := (c - a).cross(b - a).normalized()
+		var sample := Color(0.6, 0.6, 0.6)
+		if palette != null and uvs != null:
+			var uv_list: PackedVector2Array = uvs
+			var uv: Vector2 = (uv_list[order[t]] + uv_list[order[t + 1]] + uv_list[order[t + 2]]) / 3.0
+			var px := clampi(int(fposmod(uv.x, 1.0) * palette.get_width()), 0, palette.get_width() - 1)
+			var py := clampi(int(fposmod(uv.y, 1.0) * palette.get_height()), 0, palette.get_height() - 1)
+			sample = palette.get_pixel(px, py)
+		var layer := stone
+		if sample.b > sample.r + 0.12 and sample.b > sample.g + 0.04:
+			layer = slate
+		elif sample.r > sample.b + 0.08 and sample.get_luminance() < 0.42:
+			layer = timber
+		var shade := clampf(0.8 + (sample.get_luminance() - 0.5) * 0.5, 0.6, 1.05)
+		var color := Color(shade, shade, shade, (float(layer) + 0.5) / 16.0)
+		var n := normal.abs()
+		for p in [a, b, c]:
+			var q: Vector3 = p
+			var uv_m := Vector2(q.x, q.z) if n.y > maxf(n.x, n.z) else (Vector2(q.z, -q.y) if n.x > n.z else Vector2(q.x, -q.y))
+			out_v.append(q)
+			out_n.append(normal)
+			out_uv.append(uv_m)
+			out_c.append(color)
+	var out := []
+	out.resize(Mesh.ARRAY_MAX)
+	out[Mesh.ARRAY_VERTEX] = out_v
+	out[Mesh.ARRAY_NORMAL] = out_n
+	out[Mesh.ARRAY_TEX_UV] = out_uv
+	out[Mesh.ARRAY_COLOR] = out_c
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out)
+	mesh.surface_set_material(0, BuildingMaterials.material("Building", "far"))
+	return mesh
 
 
 static func _relative(root: Node, node: Node3D) -> Transform3D:

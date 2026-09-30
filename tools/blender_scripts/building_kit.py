@@ -63,6 +63,16 @@ ROOF_TINTS = {
     ],
 }
 WHITE = (1.0, 1.0, 1.0)
+# Lot TF (ADR 0105 addendum): surface of the panels of half-timbered walls (``style.frame``).
+# ``high`` detail: daub infill (torchis) under the modelled ``Timber`` beams; ``low`` detail
+# (only plates and corner posts modelled): painted beam lattice. Last layers of the atlas.
+FRAME_PANEL = "TimberFrame"
+FRAME_PANEL_FAR = "TimberFrameFar"
+
+
+def frame_panel(detail: str) -> str:
+    """Panel surface of a half-timbered wall at a level of detail."""
+    return FRAME_PANEL if detail == "high" else FRAME_PANEL_FAR
 
 
 @dataclass
@@ -565,6 +575,9 @@ def floor_walls(
     """Four walls of one storey on rectangle (x0, y0)-(x1, y1) at height ``z``."""
     corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
     stone = wall_mat in ("Rubble", "Ashlar")
+    if framed:
+        # Lot TF: daub panels of a half-timbered wall carry their own atlas layer.
+        wall_mat = frame_panel(detail)
     depth = 0.3 if stone else 0.14
     for i in range(4):
         a, b = corners[i], corners[(i + 1) % 4]
@@ -766,7 +779,7 @@ def house(
                     D,
                     z,
                     style.pitch,
-                    gwall,
+                    frame_panel(detail) if style.frame and gwall == "Plaster" else gwall,
                     sign,
                     color=style.stone_tint
                     if gwall in ("Rubble", "Ashlar")
@@ -971,7 +984,24 @@ def pick(rng, items):
     return items[rng.randrange(len(items))]
 
 
-def cottage(g, rng, detail="high", length=None, depth=None, ruined=False):
+def southern_style(st: Style, rng) -> None:
+    """Lot TF: southern (Midi) variant of a house style, applied after the usual draws.
+
+    No exposed framing (plastered or stone walls), low-pitched canal tile roof, gable. Only the
+    ``southern=True`` variants call it, so the random stream of the existing seeds is unchanged.
+    """
+    st.frame = None
+    st.roof = pick(rng, ["RoofTile", "RoofTile", "RoofFlat"])
+    st.roof_tint = pick(rng, ROOF_TINTS[st.roof])
+    st.shape = "gable"
+    st.pitch = rng.uniform(26.0, 34.0)
+    st.jetty = 0.0
+    st.dormers = 0
+
+
+def cottage(
+    g, rng, detail="high", length=None, depth=None, ruined=False, southern=False
+):
     """Rural cottage: one storey, daub or rubble walls, thick thatch (sometimes tiles)."""
     L = length or rng.uniform(7.5, 10.5)
     D = depth or rng.uniform(5.0, 6.2)
@@ -993,6 +1023,8 @@ def cottage(g, rng, detail="high", length=None, depth=None, ruined=False):
         extras={"vent": rng.random() < 0.5},
         ruined=ruined,
     )
+    if southern:
+        southern_style(st, rng)
     info = house(g, rng, L, D, st, detail)
     if not ruined and detail == "high" and rng.random() < 0.5:
         _lean_to(g, rng, L, D, st, detail)
@@ -1057,7 +1089,9 @@ def longere(g, rng, detail="high", length=None, depth=None, ruined=False):
     return house(g, rng, L, D, st, detail)
 
 
-def timber_house(g, rng, detail="high", length=None, depth=None, ruined=False):
+def timber_house(
+    g, rng, detail="high", length=None, depth=None, ruined=False, southern=False
+):
     """Two-storey half-timbered house with a jettied upper floor (village or town)."""
     L = length or rng.uniform(8.0, 12.0)
     D = depth or rng.uniform(6.0, 7.5)
@@ -1080,10 +1114,14 @@ def timber_house(g, rng, detail="high", length=None, depth=None, ruined=False):
         stone_tint=pick(rng, STONE_TINTS),
         ruined=ruined,
     )
+    if southern:
+        southern_style(st, rng)
     return house(g, rng, L, D, st, detail)
 
 
-def town_house(g, rng, detail="high", length=None, depth=None, ruined=False):
+def town_house(
+    g, rng, detail="high", length=None, depth=None, ruined=False, southern=False
+):
     """Narrow town house, gable on the street, 2-3 jettied storeys, shop on the ground floor."""
     W = length or rng.uniform(5.2, 7.2)  # frontage
     D = depth or rng.uniform(9.0, 12.0)
@@ -1108,6 +1146,8 @@ def town_house(g, rng, detail="high", length=None, depth=None, ruined=False):
         stone_tint=pick(rng, STONE_TINTS),
         ruined=ruined,
     )
+    if southern:
+        southern_style(st, rng)
     return house(g, rng, W, D, st, detail)
 
 

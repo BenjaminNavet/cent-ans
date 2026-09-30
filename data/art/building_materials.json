@@ -112,14 +112,25 @@
     },
     {
       "name": "TimberFrame",
+      "diffuse": "buildings/timber_daub_diff",
+      "normal": "buildings/medieval_wall_01_nor",
+      "roughness_map": "buildings/medieval_wall_01_rough",
+      "tile_size_m": 2.2,
+      "tint": [1.05, 1.02, 0.97],
+      "roughness": 0.95,
+      "poly_haven_id": "",
+      "wired": true
+    },
+    {
+      "name": "TimberFrameFar",
       "diffuse": "buildings/timber_frame_diff",
       "normal": "buildings/timber_frame_nor",
       "roughness_map": "buildings/timber_frame_rough",
-      "tile_size_m": 2.2,
-      "tint": [1.0, 1.0, 1.0],
+      "tile_size_m": 3.0,
+      "tint": [1.12, 1.09, 1.03],
       "roughness": 0.85,
       "poly_haven_id": "",
-      "wired": false
+      "wired": true
     }
   ],
   "plain": [
@@ -129,6 +140,7 @@
   ],
   "atlas_layers": [
     "Plaster", "Rubble", "Ashlar", "Masonry", "Timber", "Planks", "Door",
-    "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas"
+    "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas",
+    "TimberFrame", "TimberFrameFar"
   ]
 }
