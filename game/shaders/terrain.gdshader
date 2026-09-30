@@ -160,7 +160,7 @@ uniform float political_full = 2.8;
 // que des seuils d'empreinte repoussés : l'empreinte à une distance donnée dépend de la résolution
 // (HiDPI, ADR 0123). Remettre 1.0 pour retrouver l'ancien palier « loin » (A/B).
 uniform float political_amount = 0.0;
-uniform float faction_alpha_near = 0.10;
+uniform float faction_alpha_near = 0.04;  // HB : 0,10 → 0,04, la teinte de faction grisait le sol de près (les frontières suffisent)
 uniform float faction_alpha_far = 0.50;
 uniform float faction_saturation = 0.55;
 uniform float political_flat_gain = 0.45;
@@ -331,6 +331,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 #include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
+#include "res://shaders/hb_ground.gdshaderinc"  // HB3 : habillage par biome (ADR 0143)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -575,6 +576,9 @@ void fragment() {
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
 	fp_parcels(p, uv, footprint, grad_m, slope, hc, s, lu, terroir, open_w, w_forest / max(wsum, 1e-3), col, roughness, n);  // ZG5b
 	sg_apply(uv, footprint, snow, land_f, col);  // SS2
+	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
+		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, col);  // HB3
+	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
@@ -604,11 +608,13 @@ void fragment() {
 		water_col = mix(lake_color, lake_shallow_color, 1.0 - smoothstep(-1.6, 0.0, coast));
 	}
 	rl_surface(p, uv, footprint, land_f, col, lake, water_col, roughness);  // lot R1
+	if (hb_debug > 8.5 && hb_debug < 9.5) { hb_dbg = col; }  // HB3 : sonde
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
 
 	// --- Couche politique ---
+	if (hb_debug > 9.5 && hb_debug < 10.5) { hb_dbg = col; }  // HB3 : sonde
 	float political = smoothstep(political_start, political_full, footprint) * political_amount;
 	// Au dézoom maximal : terrain un peu désaturé, façon carte.
 	float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
@@ -729,15 +735,21 @@ void fragment() {
 	}
 
 	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
+	if (hb_debug > 10.5 && hb_debug < 11.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 wx_emit = vec3(0.0);
 	col = weather_ground(col, p, hc, slope, footprint, roughness, wx_emit);  // CM2 : météo
+	if (hb_debug > 11.5 && hb_debug < 12.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
+	if (hb_debug > 12.5 && hb_debug < 13.5) { hb_dbg = col; }  // HB3 : sonde
 	fr1_borders(p, uv, footprint, col, pm_emit);  // FR1 : frontières de faction lumineuses
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2
 	ROUGHNESS = roughness;
+	if (hb_debug > 0.5) {
+		ALBEDO = hb_dbg;
+	}
 	SPECULAR = mix(0.3, 0.1, lake);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 }

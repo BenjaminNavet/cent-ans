@@ -1,0 +1,153 @@
+{
+  "description": "HB3 (ADR 0143) : habillage du sol par biome en vue moyenne et proche (terrain.gdshader, hb_ground.gdshaderinc). Par biome (indices de data/map/biomes.yaml) : taille des parcelles (m), allongement des lanières, force des haies, présence agricole, cultures pondérées, sol sauvage (deux matières mélangées), canopée des forêts et roche. Identifiants de data/art/ground_materials.yaml.",
+  "biomes": {
+    "1": {
+      "name": "océanique",
+      "cell_m": 230,
+      "strip": 1.3,
+      "hedge": 1.0,
+      "farm": 1.0,
+      "crops": {
+        "bocage_meadow": 2.5,
+        "pasture": 2.0,
+        "wheat_ripe": 2.0,
+        "hay_meadow": 1.5,
+        "ploughed": 1.5,
+        "barley_green": 1.2,
+        "apple_orchard": 0.8,
+        "buckwheat_field": 0.8,
+        "fallow": 0.8
+      },
+      "wild": [
+        "heather_moor",
+        "pasture"
+      ],
+      "canopy": "broadleaf_canopy",
+      "rock": "granite_rock"
+    },
+    "2": {
+      "name": "continental",
+      "cell_m": 300,
+      "strip": 3.0,
+      "hedge": 0.15,
+      "farm": 1.0,
+      "crops": {
+        "wheat_ripe": 3.0,
+        "barley_green": 2.0,
+        "ploughed": 2.0,
+        "rye_field": 1.0,
+        "fallow": 1.5,
+        "hay_meadow": 1.2,
+        "pasture": 1.0,
+        "vineyard_rows": 0.4,
+        "apple_orchard": 0.4,
+        "buckwheat_field": 0.3
+      },
+      "wild": [
+        "hay_meadow",
+        "fallow"
+      ],
+      "canopy": "broadleaf_canopy",
+      "rock": "limestone_rock"
+    },
+    "3": {
+      "name": "méditerranéen",
+      "cell_m": 170,
+      "strip": 1.6,
+      "hedge": 0.35,
+      "farm": 0.85,
+      "crops": {
+        "olive_grove": 3.0,
+        "vineyard_rows": 2.5,
+        "wheat_ripe": 2.0,
+        "med_terraces": 1.5,
+        "fallow": 1.5,
+        "ploughed": 1.0
+      },
+      "wild": [
+        "limestone_garrigue",
+        "maquis"
+      ],
+      "canopy": "med_pine_open",
+      "rock": "limestone_rock"
+    },
+    "4": {
+      "name": "steppe",
+      "cell_m": 900,
+      "strip": 2.5,
+      "hedge": 0.0,
+      "farm": 0.35,
+      "crops": {
+        "wheat_ripe": 1.0,
+        "fallow": 1.0,
+        "pasture": 1.0,
+        "ploughed": 0.5
+      },
+      "wild": [
+        "feather_grass_steppe",
+        "golden_steppe"
+      ],
+      "canopy": "broadleaf_canopy",
+      "rock": "limestone_rock"
+    },
+    "5": {
+      "name": "boréal",
+      "cell_m": 200,
+      "strip": 1.5,
+      "hedge": 0.0,
+      "farm": 0.6,
+      "crops": {
+        "rye_field": 3.0,
+        "barley_green": 2.0,
+        "hay_meadow": 2.0,
+        "pasture": 1.5,
+        "buckwheat_field": 1.0,
+        "fallow": 1.0
+      },
+      "wild": [
+        "peat_bog",
+        "heather_moor"
+      ],
+      "canopy": "boreal_mixed",
+      "rock": "granite_rock"
+    },
+    "6": {
+      "name": "montagnard",
+      "cell_m": 200,
+      "strip": 1.4,
+      "hedge": 0.1,
+      "farm": 0.7,
+      "crops": {
+        "hay_meadow": 3.0,
+        "pasture": 3.0,
+        "fallow": 1.0
+      },
+      "wild": [
+        "alpine_meadow",
+        "scree"
+      ],
+      "canopy": "conifer_canopy",
+      "rock": "scree"
+    },
+    "7": {
+      "name": "semi-aride",
+      "cell_m": 400,
+      "strip": 2.0,
+      "hedge": 0.1,
+      "farm": 0.7,
+      "crops": {
+        "fallow": 3.0,
+        "wheat_ripe": 2.0,
+        "ploughed": 1.5,
+        "olive_grove": 1.0,
+        "med_terraces": 0.5
+      },
+      "wild": [
+        "golden_steppe",
+        "limestone_garrigue"
+      ],
+      "canopy": "med_pine_open",
+      "rock": "limestone_rock"
+    }
+  }
+}
