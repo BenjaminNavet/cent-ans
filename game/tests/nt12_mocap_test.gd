@@ -25,6 +25,12 @@ func _json(path: String) -> Dictionary:
 
 func _init() -> void:
 	var trial_on := BattleSkinned.mocap_trial_enabled()
+	if not BattleSkinned.fine_enabled():
+		# Kit grossier (`--coarse-figures`) : l'essai ne s'applique pas.
+		_check(not trial_on, "essai inactif sur le kit grossier")
+		print("NT12 mocap (coarse): %s" % ("OK" if ok else "FAIL"))
+		quit(0 if ok else 1)
+		return
 	var base: Dictionary = _json(BattleSkinned.FINE_DIR + "manifest.json").get("rigs", {}).get("human", {})
 	var trial := _json(BattleSkinned.MOCAP_TRIAL_DIR + "manifest.json")
 	_check(not base.is_empty(), "manifeste fin lisible")
