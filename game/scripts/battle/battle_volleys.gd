@@ -76,7 +76,12 @@ var _stakes: MultiMesh
 var _pavises: MultiMesh
 var _stake_rows: int = 0
 var _pavise_rows: int = 0
-var _planted: Dictionary = {}  # unit id -> {stakes: bool, pavise: Vector2 (dernier plant), rows}
+## unit id -> {stakes, pavise: Vector2 (dernier plant), facing (du dernier plant), rows,
+## first/count : instances de la dernière rangée de pavois dans `_pavises`}
+var _planted: Dictionary = {}
+## Pivot sur place au-delà duquel la dernière rangée de pavois est replantée devant le nouveau
+## front (sinon, un régiment tourné en déploiement garde ses pavois dans le dos).
+const PAVISE_REPLANT_ANGLE := 0.52  # ~30°
 
 
 func setup(height_at: Callable) -> void:
@@ -134,19 +139,29 @@ func update_fieldworks(units: Array) -> void:
 		if not bool(unit.get("present", false)):
 			continue
 		var id := int(unit["id"])
-		var rec: Dictionary = _planted.get(id, {"stakes": false, "pavise": Vector2(INF, INF), "rows": 0})
+		var rec: Dictionary = _planted.get(id, {"stakes": false, "pavise": Vector2(INF, INF), "facing": 0.0, "rows": 0, "first": -1, "count": 0})
 		_planted[id] = rec
 		if bool(unit.get("stakes", false)) and not bool(rec["stakes"]):
 			rec["stakes"] = true
 			_plant_stakes(unit)
 		var still := str(unit.get("state", "")) != "marching" and str(unit.get("state", "")) != "charging"
-		if bool(unit.get("pavise_cover", false)) and still and int(rec["rows"]) < 3:
+		if bool(unit.get("pavise_cover", false)) and still:
 			var here := Vector2(float(unit["x"]), float(unit["z"]))
+			var facing := float(unit.get("facing", 0.0))
 			var last: Vector2 = rec["pavise"]
-			if last.x == INF or here.distance_to(last) > 12.0:
+			if (last.x == INF or here.distance_to(last) > 12.0) and int(rec["rows"]) < 3:
 				rec["pavise"] = here
+				rec["facing"] = facing
 				rec["rows"] = int(rec["rows"]) + 1
-				_plant_pavises(unit)
+				var first := _pavises.visible_instance_count
+				_plant_pavises(unit, first)
+				rec["first"] = first
+				rec["count"] = _pavises.visible_instance_count - first
+			elif int(rec["first"]) >= 0 and absf(angle_difference(float(rec["facing"]), facing)) > PAVISE_REPLANT_ANGLE:
+				# Pivot sur place : la dernière rangée suit le nouveau front.
+				rec["pavise"] = here
+				rec["facing"] = facing
+				_plant_pavises(unit, int(rec["first"]), int(rec["count"]))
 
 
 ## Volée résolue par le cœur (`get_shots()`), traits et carreaux seulement. Renvoie les points
@@ -379,22 +394,32 @@ func _plant_stakes(unit: Dictionary) -> void:
 			_add_fieldwork(_stakes, Transform3D(basis, p), Color(1, 1, 1))
 
 
-func _plant_pavises(unit: Dictionary) -> void:
-	if _pavise_rows >= MAX_PAVISE_ROWS:
-		return
-	_pavise_rows += 1
+## Rangée de pavois devant `unit`, écrite à partir de l'instance `first` ; `slots` ≥ 0 : réécrit
+## une rangée existante de `slots` instances (les places en trop sont masquées).
+func _plant_pavises(unit: Dictionary, first: int, slots: int = -1) -> void:
+	if slots < 0:
+		if _pavise_rows >= MAX_PAVISE_ROWS:
+			return
+		_pavise_rows += 1
 	var facing := float(unit.get("facing", 0.0))
 	var fwd := Vector3(sin(facing), 0, cos(facing))
 	var right := Vector3(cos(facing), 0, -sin(facing))
 	var width := float(unit.get("width", 20.0))
 	var front := Vector3(float(unit["x"]), 0, float(unit["z"])) + fwd * (float(unit.get("depth", 4.0)) * 0.5 + 0.9)
 	var n := mini(int(width / 1.05), 36)
+	if slots >= 0:
+		n = mini(n, slots)
 	var tint := Color(0.62, 0.24, 0.2) if str(unit.get("side", "")) == "defender" else Color(0.3, 0.36, 0.62)
 	for k in n:
 		var p := front + right * ((float(k) - (n - 1) * 0.5) * 1.05) + fwd * _rng.randf_range(-0.12, 0.12)
 		p.y = _h(p.x, p.z)
 		var basis := Basis(right, deg_to_rad(-12.0 + _rng.randf_range(-3, 3))) * Basis(Vector3.UP, facing + _rng.randf_range(-0.08, 0.08))
-		_add_fieldwork(_pavises, Transform3D(basis, p), tint)
+		if slots < 0:
+			_add_fieldwork(_pavises, Transform3D(basis, p), tint)
+		else:
+			_pavises.set_instance_transform(first + k, Transform3D(basis, p))
+	for k in range(n, maxi(slots, 0)):
+		_pavises.set_instance_transform(first + k, Transform3D(Basis().scaled(Vector3.ZERO), Vector3.ZERO))
 
 
 func _add_fieldwork(mm: MultiMesh, xf: Transform3D, tint: Color) -> void:
