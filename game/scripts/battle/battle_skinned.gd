@@ -384,6 +384,8 @@ static func _merge_ga3(figures: Dictionary) -> void:
 		entry["variants"] = int(g.get("variants", 1))
 		entry["ga3_albedo"] = GA3_DIR + str(g["ga3_albedo"])
 		entry["ga3_lum"] = g.get("ga3_lum", [0.2, 0.2])
+		# L4 : hauteur du cou (teint du soldat au-dessus) ; `variants` = têtes greffées.
+		entry["ga3_head_y"] = float(g.get("head_y", 99.0))
 		# L3c : le cavalier généré monte le cheval fin exporté (`fine_horse`) : le cheval, son
 		# harnais et son caparaçon gardent leur atlas FG3 (source 2 robe, 1 caparaçon) ; les
 		# sommets du cavalier n'en lisent aucun (source 0).
@@ -403,6 +405,10 @@ static func _setup_ga3(mat: ShaderMaterial, kind: String, variant: int) -> void:
 	mat.set_shader_parameter("ga3_albedo", load(str(fig["ga3_albedo"])))
 	var lum: Array = fig.get("ga3_lum", [0.2, 0.2])
 	mat.set_shader_parameter("ga3_lum", Vector2(float(lum[0]), float(lum[1])))
+	mat.set_shader_parameter("ga3_head_y", float(fig.get("ga3_head_y", 99.0)))
+	# L4 : usure SR2 des figurines générées (boue, crasse, acier patiné), `--no-sr2` : 0.
+	mat.set_shader_parameter("weathering", sr2_weathering())
+	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
 
 
 ## Définitions du shader d'une figurine générée : `GA3_TEX`, précédée de `FG3_BAKED` quand
