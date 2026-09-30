@@ -10,7 +10,7 @@ session : ne pas la lancer ici ; fusionner vite pour la débloquer.
 > premier lot non coché. Brutes hors dépôt : `~/dev/cent-ans-raw/`.
 
 ## Lots
-- [ ] L1 — FC : corriger `fc2_impostors_test` (échec après fusion de main), fusion `--ff-only`.
+- [x] L1 — FC : corriger `fc2_impostors_test` (échec après fusion de main), fusion `--ff-only`.
 - [ ] L2 — CR2+CR3 : acier crédible, bassinets, caparaçons drapés ; fusion.
 - [ ] L3 — CR4 cheval et lances : crinière et queue en mèches (cartes alpha), robe avec normale
       de poil, lances d'angles et de longueurs variés, flammes en tissu ondulant ; recuisson,
