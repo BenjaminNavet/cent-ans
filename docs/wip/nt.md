@@ -24,8 +24,24 @@ Spec : `docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md`. ADR : 0126 (t
 - NT2 : roster sans époque ni technologies ; engins par défaut échelles + bélier.
 - Captures de contrôle NT1/NT2 : à faire (scripts `nt1_siege_shot.gd`, `nt2_shot.gd`, fenêtre requise).
 
-## Pour le joueur
-Mocap payante (corps à corps, combats appariés), clé fal.ai (GA3), chantier guerre civile / prétendants.
+## Pour le joueur — 3 décisions en attente (30/09)
+
+1. **Capture de mouvement (mocap) payante** — plus gros écart restant avec TWW3 : corps à corps,
+   combats appariés, réactions. Hors enveloppe v1 (ordre de grandeur 50-300 $). Pistes (licence
+   commerciale, FBX, à reciblage sur le squelette MakeHuman par le pipeline Blender AN1b) :
+   - Fab (ex-Marketplace Unreal) : « 260 Sword and Shield Mocap Animations » ; licence Standard Fab
+     utilisable hors Unreal sauf mention contraire (vérifier la fiche).
+   - MoCap Online : packs épée/bouclier, armes d'hast, réactions ; licence Standard libre de
+     redevance jusqu'à 1 M$ de revenu, FBX/Blender inclus ; pack gratuit « T.C. Sword » pour tester
+     le reciblage avant achat.
+   - Game Dev Hero (itch.io) : 287-355 animations épée/bouclier, squelette UE5 + FBX.
+   Mixamo exclu (licence). **Dépôt public** : ne jamais commiter les fichiers mocap bruts (FBX,
+   BIP) ; les garder hors dépôt (dossier local ignoré) et ne commiter que les clips cuits, après
+   lecture de la clause de redistribution de la licence choisie.
+2. **Clé fal.ai (GA3, image → 3D)** — pour enrichir figurines (textures peintes) et roster
+   (39 types d'unités). Voir `docs/wip/ga.md` l.196.
+3. **Chantier guerre civile / prétendants** (Armagnacs et Bourguignons, États généraux, aide
+   extraordinaire, coalitions N5/N8) — taille L, spec à écrire en brainstorming avec le joueur.
 
 ## Vague 3 (30/09 ~02:45)
 - NT7 fondus entre clips de mêlée + clips porte-étendard / musicien / servants d'engins (pipeline ADR 0096, sans mocap)
