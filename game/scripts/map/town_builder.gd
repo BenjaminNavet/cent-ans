@@ -26,6 +26,10 @@ const STREET_GROUP := 40
 const DETAIL_CELL_M := 1000.0
 ## RS-G : côté des cellules de fusion des monuments v2 (m).
 const MONUMENT_CELL_M := 600.0
+## Teintes des blocs simples (murs enduits, toit de tuiles) ; le lointain (`town_far.gdshader`)
+## reprend celle du toit pour que le passage bloc → lointain ne change pas de couleur.
+const BLOCK_WALL_TINT := Color(0.47, 0.42, 0.36)
+const BLOCK_ROOF_TINT := Color(0.8, 0.58, 0.5)
 const BLOCK_HEIGHT := {"townhouse": 13.5, "timber": 11.2, "stonehouse": 11.2, "cottage": 7.2, "longere": 7.3, "barn": 11.6}
 
 static var _manifest: Dictionary = {}
@@ -189,8 +193,8 @@ static func block_mesh() -> Mesh:
 		return _meshes["__block"]
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var wall := layer_color("Plaster", Color(0.47, 0.42, 0.36))
-	var roof := layer_color("RoofTile", Color(0.8, 0.58, 0.5))
+	var wall := layer_color("Plaster", BLOCK_WALL_TINT)
+	var roof := layer_color("RoofTile", BLOCK_ROOF_TINT)
 	var eave := 0.52
 	var y0 := -0.15
 	var corners := [Vector3(-0.5, 0, -0.5), Vector3(0.5, 0, -0.5), Vector3(0.5, 0, 0.5), Vector3(-0.5, 0, 0.5)]

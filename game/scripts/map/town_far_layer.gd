@@ -148,6 +148,8 @@ func _make_material() -> ShaderMaterial:
 		for p in ["albedo_array", "layer_tint", "roof_first", "roof_last"]:
 			mat.set_shader_parameter(p, atlas.get_shader_parameter(p))
 	mat.set_shader_parameter("meters_per_unit", _mpu)
+	mat.set_shader_parameter("block_roof_layer", BuildingMaterials.atlas_layers().find("RoofTile"))
+	mat.set_shader_parameter("block_roof_tint", TownBuilder.BLOCK_ROOF_TINT)
 	mat.set_shader_parameter("roofscape", profile.roofscape_strength)
 	mat.set_shader_parameter("roofscape_near", profile.roofscape_near)
 	mat.set_shader_parameter("roofscape_far", profile.roofscape_far)

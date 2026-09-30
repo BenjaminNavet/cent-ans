@@ -5,12 +5,12 @@
 [resource]
 script = ExtResource("1_town")
 detail_range = 1.6
-block_range = 14.0
+block_range = 42.0
 stream_min = 4.0
 stream_factor = 2.5
-stream_max = 18.0
+stream_max = 48.0
 unload_factor = 1.3
-max_rig_distance = 16.0
+max_rig_distance = 45.0
 rig_hysteresis = 0.1
 roofscape_near = 1.2
 roofscape_far = 3.5
