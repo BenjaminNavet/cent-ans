@@ -83,7 +83,7 @@ var player_faction: String = ""  # B2 : blason des vignettes
 ## CB4 : textes des capacités (`BattleSim.get_ability_catalog()`), posés par la scène.
 var ability_catalog: Dictionary = {}
 var _log_entries: Array[Dictionary] = []  # {time, text, count}, le plus récent en tête
-var log_expanded := true
+var log_expanded := false  # VN4 : une ligne par défaut (déplié, il couvrait le champ ; touche J)
 var log_toggle: Button
 var leader_seal: Control
 var withdraw_all_button: Button
@@ -238,6 +238,9 @@ func _update_log_toggle() -> void:
 func _build_alerts() -> void:
 	alerts_column = ALERTS_COLUMN.new()
 	root.add_child(alerts_column)
+	# VN4 : sous le journal dans la même pile (zone `TOASTS`, haut gauche) : posée en haut à
+	# gauche à part, elle recouvrait le journal et le titre de la bataille.
+	UiZones.put(UiZones.Zone.TOASTS, alerts_column)
 
 
 func _build_bottom() -> void:
