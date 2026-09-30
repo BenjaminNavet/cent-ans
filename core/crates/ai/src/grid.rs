@@ -87,6 +87,15 @@ const ROAD_SAMPLE_PX: f32 = 8.0;
 
 type TableKey = (SettlementId, u32, u32, Vec<usize>, bool);
 
+/// NT9: an attack ordered this turn (see [`GridPlanner::attack_order_sparing`]).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Engagement {
+    /// Where the attacking army stood.
+    pub from: [f32; 2],
+    /// Where its target stood.
+    pub target: [f32; 2],
+}
+
 fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
     ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
 }
@@ -437,18 +446,19 @@ impl<'a> GridPlanner<'a> {
         self.attack_order_sparing(army_id, &mut Vec::new())
     }
 
-    /// NT9: [`GridPlanner::attack_order`] sparing the enemies already
-    /// engaged this turn: `engaged` holds the points of the enemies another
-    /// of our armies attacks; an enemy within the engagement radius of one
-    /// of them (it fights in that battle, or flees it beaten) is left alone.
-    /// Under the unit cap (N6) a host is several armies: without this each
-    /// one attacked the same enemy in turn, and the later ones hunted the
-    /// beaten remnant (battles FR/EN ×1.7). The chosen enemy's point is
-    /// added to `engaged`.
+    /// NT9: [`GridPlanner::attack_order`] for one army of a host: `engaged`
+    /// holds the attacks already ordered this turn. An army standing within
+    /// the engagement radius of an earlier attacker (the same host) leaves
+    /// alone the enemies within that radius of its target (they fight in
+    /// that battle, or flee it beaten). Under the unit cap (N6) a host is
+    /// several armies: without this each one attacked the same enemy in
+    /// turn and the later ones hunted the beaten remnant, where the single
+    /// army of before N6 fought once. The chosen attack is added to
+    /// `engaged`.
     pub fn attack_order_sparing(
         &self,
         army_id: &ArmyId,
-        engaged: &mut Vec<[f32; 2]>,
+        engaged: &mut Vec<Engagement>,
     ) -> Option<Order> {
         let state = self.state;
         let army = state.armies.get(army_id)?;
@@ -469,7 +479,11 @@ impl<'a> GridPlanner<'a> {
                     .as_ref()
                     .is_none_or(|s| !state.is_hostile_settlement(self.faction, s))
             })
-            .filter(|e| engaged.iter().all(|p| distance(*p, e.point) > engage_px))
+            .filter(|e| {
+                engaged.iter().all(|g| {
+                    distance(g.from, here) > engage_px || distance(g.target, e.point) > engage_px
+                })
+            })
             .filter_map(|e| {
                 let d = distance(here, e.point);
                 if d > reach_px {
@@ -498,7 +512,10 @@ impl<'a> GridPlanner<'a> {
             })
             .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)))
             .map(|(_, target)| {
-                engaged.push(target.point);
+                engaged.push(Engagement {
+                    from: here,
+                    target: target.point,
+                });
                 Order::Attack {
                     army: army_id.clone(),
                     target_army: target.id.clone(),
