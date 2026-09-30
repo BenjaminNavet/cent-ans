@@ -10,6 +10,7 @@ pub mod alignment;
 pub mod campaign;
 pub mod diplomacy_eval;
 pub mod doctrine;
+pub mod experiment;
 pub mod feudal;
 pub mod grid;
 mod mercenaries;

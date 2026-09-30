@@ -45,6 +45,14 @@ pub const SEA_INVASION_FACTOR: f64 = 0.6;
 pub const SEA_THREAT_FACTOR: f64 = 0.5;
 /// An army defends a province when it is at least this strong relative to the threat.
 pub const DEFENCE_RATIO: f64 = 0.7;
+/// IA night: weight of a friendly place under siege among the places to
+/// defend (a place merely threatened: 1).
+pub const BESIEGED_DEFENCE_WEIGHT: f64 = 3.0;
+/// IA night: an army does not march on an enemy place whose hostile armies
+/// (on it or one edge away) reach this share of its own power.
+pub const FIELD_GUARD_RATIO: f64 = 1.0;
+/// IA night: an army starts no siege with less supply than this.
+pub const SIEGE_MIN_SUPPLY: u8 = 50;
 /// Share of income spent on armies at war / at peace.
 pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
@@ -307,6 +315,31 @@ impl<'a> Context<'a> {
                     power
                 }
             })
+            .sum()
+    }
+
+    /// IA night (trial "reach2"): hostile army power anchored on
+    /// `settlement` or up to two edges away: the relief that can fall on a
+    /// siege there within a turn or so.
+    fn threat_near(&self, settlement: &SettlementId) -> f64 {
+        let mut nodes: BTreeSet<SettlementId> = BTreeSet::new();
+        nodes.insert(settlement.clone());
+        for (near, _) in edges(self.data, settlement) {
+            for (far, _) in edges(self.data, &near) {
+                nodes.insert(far);
+            }
+            nodes.insert(near);
+        }
+        self.anchors
+            .iter()
+            .filter(|(_, anchor)| nodes.contains(*anchor))
+            .filter(|(id, _)| {
+                self.state
+                    .armies
+                    .get(*id)
+                    .is_some_and(|a| self.state.is_at_war(self.faction, &a.faction))
+            })
+            .map(|(id, _)| self.state.army_power(self.data, id))
             .sum()
     }
 
@@ -689,7 +722,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
 
     let mut budget = ctx.treasury - ctx.reserve();
     let share = if ctx.at_war() {
-        WAR_MILITARY_SHARE
+        if crate::experiment::on(ctx.faction, "warshare") {
+            0.85
+        } else {
+            WAR_MILITARY_SHARE
+        }
     } else {
         PEACE_MILITARY_SHARE
     };
@@ -1783,10 +1820,13 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             targeted.insert(anchor.clone());
             // Storm the walls when the odds are good (M8) and, behind
             // standing walls, an engine is ready (NT5, N7: built meanwhile).
-            if state
-                .assault_odds(data, army_id)
-                .is_some_and(|(odds, _)| odds >= ASSAULT_ODDS)
-                && state.assault_blocker(data, army_id).is_none()
+            if state.assault_odds(data, army_id).is_some_and(|(odds, _)| {
+                odds >= if crate::experiment::on(ctx.faction, "assault50") {
+                    50
+                } else {
+                    ASSAULT_ODDS
+                }
+            }) && state.assault_blocker(data, army_id).is_none()
             {
                 orders.push(Order::Assault {
                     army: army_id.clone(),
@@ -1820,7 +1860,16 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                         } else {
                             1.0
                         };
-                        let value = weight * (ctx.settlement_income(id) + threat)
+                        // IA night: a place under siege comes before one
+                        // merely threatened (an army used to guard its own
+                        // threatened place while a besieged one fell).
+                        let besieged = state.settlements.get(id).is_some_and(|s| s.siege.is_some());
+                        let urgency = if besieged && crate::experiment::on(ctx.faction, "defend") {
+                            BESIEGED_DEFENCE_WEIGHT
+                        } else {
+                            1.0
+                        };
+                        let value = urgency * weight * (ctx.settlement_income(id) + threat)
                             / (1.0 + steps(reach.cost));
                         (value, id.clone())
                     })
@@ -1839,7 +1888,28 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                     state.is_hostile_settlement(ctx.faction, id) && !targeted.contains(*id)
                 })
                 .filter(|(id, _)| {
-                    state.settlement_defensive_power(data, id) * SIEGE_SUPERIORITY < power
+                    state.settlement_defensive_power(data, id)
+                        * if crate::experiment::on(ctx.faction, "siege12") {
+                            1.2
+                        } else {
+                            SIEGE_SUPERIORITY
+                        }
+                        < power
+                })
+                // IA night: not onto a place a stronger enemy field army
+                // stands by (the march ended in a lost battle).
+                .filter(|(id, _)| {
+                    !crate::experiment::on(ctx.faction, "guard")
+                        || ctx.threat_at(id) < power * FIELD_GUARD_RATIO
+                })
+                .filter(|(id, _)| {
+                    !crate::experiment::on(ctx.faction, "reach2")
+                        || ctx.threat_near(id) < power * FIELD_GUARD_RATIO
+                })
+                // IA night (trial "supply"): a hungry army does not sit
+                // down before a place (it starved there and gave up).
+                .filter(|_| {
+                    !crate::experiment::on(ctx.faction, "supply") || army.supply >= SIEGE_MIN_SUPPLY
                 })
                 .filter_map(|(id, reach)| province(id).map(|p| (id, reach, p)))
                 // Landings only for claimed provinces (England in France, not

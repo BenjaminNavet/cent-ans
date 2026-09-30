@@ -69,5 +69,17 @@ est rapide (tour de campagne < 50 ms par faction, spec M3 ; coût de l'IA par ti
   qu'une armée ennemie plus forte couvre (`threat_at`) → graines 1-4 : plutôt pire, très bruité ;
   comparaison sur 8 graines de plus en cours.
 
+- c1 sur 12 graines (sonde globale) : sièges 43 → 53, pris 19,7 → 23,1, pertes sans secours
+  4,9 → 5,7 : bruit ; la sonde globale ne tranche pas.
+- **Nouvel outil : duel A/B** (`ai::experiment` + `examples/ai_duel_probe.rs <règles> <tours>
+  <factions> <graines>`) : une faction joue la règle à l'essai, les autres les règles actuelles ;
+  on compare son sort (places pondérées, provinces, puissance, trésor) à la même partie jouée sans
+  essai. Déterministe (A = B sans règle). 8 factions (France, Angleterre, Écosse, Castille, Empire,
+  Hongrie, Venise, Flandre) × graines 1-4, 60 tours.
+- Résultats (mieux / pire sur 32, delta moyen des places) : `defend` (place assiégée ×3) 5/10,
+  −7,6 ; `guard` (pas de siège sous une armée plus forte à 1 arête) 10/11, −1,9 ; les deux 9/13,
+  −1,3 → **rejetées**.
+
 ## Prochaine étape
-Trancher c1 sur 12 graines ; secours : estimer les armées ennemies à portée d'un tour.
+Duels `reach2` (armées à 2 arêtes), `supply` (pas de siège sous 50 de vivres), puis `siege12`,
+`assault50`, `attack125`, `warshare` (paramètres).
