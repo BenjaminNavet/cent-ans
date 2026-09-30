@@ -783,6 +783,8 @@ impl CampaignState {
         let Some(army_faction) = self.armies.get(army).map(|a| a.faction.clone()) else {
             return;
         };
+        // Lot SL1: gales on the way (the army still stands in its port).
+        crate::sea_lanes::weather_the_crossing(self, data, army, to_port, events);
         if let Some(a) = self.armies.get_mut(army) {
             a.movement_left = 0;
             a.clear_plan();

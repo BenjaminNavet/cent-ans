@@ -17,7 +17,11 @@
 //!   (the DP1 treaty article [`crate::negotiation::Article::TradeAgreement`],
 //!   stored once in the ledger, see [`CampaignState::has_trade_agreement`])
 //!   raises the value by [`AGREEMENT_BONUS_PERCENT`]; war erases it;
-//! - **coinage**: a debased currency trades less well (H5).
+//! - **coinage**: a debased currency trades less well (H5);
+//! - **sea legs** (lot SL1, [`crate::sea_lanes::trade_sea_legs`]): an enemy
+//!   holding a sea crossed or blockading a port of the way cuts the route,
+//!   lesser enemy control lowers its security, gales lower its value in
+//!   autumn and winter.
 //!
 //! Value is split evenly between the controllers of the two hubs (customs at
 //! each end); a route whose two hubs share a controller pays that faction in
@@ -178,6 +182,14 @@ fn resolve_route(
         from_faction != to_faction && state.has_trade_agreement(&from_faction, &to_faction);
 
     let (security, threat_reason) = path_security(state, data, &path, &from_faction, &to_faction);
+    // Lot SL1: sea legs (enemy squadrons, blockades, gales).
+    let sea = crate::sea_lanes::trade_sea_legs(state, data, &path, &from_faction, &to_faction);
+    if let Some(reason) = sea.cut_reason {
+        view.cut_reason = Some(reason);
+        return Some(view);
+    }
+    let security = security * sea.security;
+    let threat_reason = threat_reason.or(sea.threat_reason);
     view.security = security;
     if security <= 0.0 {
         view.cut = true;
@@ -196,7 +208,12 @@ fn resolve_route(
     } else {
         (coinage_factor(state, &from_faction) + coinage_factor(state, &to_faction)) / 2.0
     };
-    let mut value = route.base_value as f64 * distance * declining * security * price_factor;
+    let mut value = route.base_value as f64
+        * distance
+        * declining
+        * security
+        * price_factor
+        * sea.season_factor;
     if view.agreement {
         value *= 1.0 + AGREEMENT_BONUS_PERCENT / 100.0;
     }
