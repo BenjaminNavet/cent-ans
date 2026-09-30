@@ -8,7 +8,9 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 > Lis ce fichier et `git log --oneline feat/sr -15`, continue à la première case non cochée.
 
 ## Lots
-- [ ] SR1 matières scannées ambientCG (agent `cent-ans-dev`)
+- [x] SR1 matières scannées ambientCG (agent `cent-ans-dev`) — couches 0-7 = scans CC0 entiers
+  (normale/rugosité/déplacement du scan), `tile_m` physique (0,15/0,13/0,16/0,32/0,51/0,3/0,3/0,8 m),
+  couches 8-11 recopiées ; plate ga_mix 0,6 ; planche `docs/img/sr/sr1_layers.jpg`.
 - [x] SR3 planches NB2 (session principale, ≤ 1 $) → liste d'écarts
 - [ ] SR2 usure et métal (après SR1, même shader)
 - [ ] SR3b corrections des recettes Blender + recuisson
@@ -17,17 +19,8 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 ## Journal
 - 09-30 : spec écrite, worktree créé.
 
-## SR1 — en cours (agent)
-- État : chaîne `source: ambientcg` faite, 8 scans en cache, tableaux reconstruits
-  (`cent-ans assets materials --out <scratch> --scans --build --layers-sheet docs/img/sr/sr1_layers.jpg`),
-  shader `GA1_TILE_SIZE` + plate ga_mix 0,6, tests pytest verts.
-- Prochaine étape : SOURCE.md/CREDITS.md, tests Godot (build + import + ga1_maps_test, smoke).
-
-## SR3b — en cours (agent)
-- État : écarts écrits (`docs/research/sr3b-ecarts.md`) ; retenus 1-6 (camail sous chapel,
-  manchettes de gantelets, gants de cuir, bourse+dague, bocle à la ceinture, chausses).
-- Code écrit (`battle_fine_sr.py`, crochets dans `battle_fine_figures`/`gear`/`equipment`).
-- Cuisson d'essai archer_0/archer_2/infantry_0 OK (pièces vérifiées par boîtes englobantes).
-- En cours : recuisson des 22 autres recettes touchées (`bake --only …`, ~20 min) ;
-  inchangées : crew_0/1, villager_0-3, cavalry_5.
-- Prochaine étape : tests Godot (fg3_maps_test, fk2_assets_test, smoke) puis commit des binaires.
+## SR1 — fait (agent)
+- Chaîne : `uv run --project tools cent-ans assets materials --out <scratch> --scans --build --layers-sheet docs/img/sr/sr1_layers.jpg`.
+- Tests : pytest `test_material_gen.py` + `test_sr1_scans.py` (21), `ga1_maps_test.gd` OK (2,33 Mo), `smoke.gd` OK.
+- À juger en jeu (SR4) : échelle des fils (0,6-2 mm, fondus par les mipmaps de loin), normale
+  plate/cuir renforcée (x4/x3), rugosité laine/gambeson/bois relevée.
