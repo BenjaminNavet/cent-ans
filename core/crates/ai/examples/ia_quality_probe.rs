@@ -92,6 +92,8 @@ struct ArmySnap {
     resting: bool,
     /// Standing in a place of its own with an enemy army within 2 provinces.
     guarding: bool,
+    /// Besieging an enemy place.
+    besieging: bool,
     /// Enemy places empty and within this turn's reach (metric 1).
     capturable: Vec<SettlementId>,
 }
@@ -233,6 +235,11 @@ impl Recorder {
                     point: state.army_point(data, army),
                     resting,
                     guarding,
+                    besieging: army
+                        .settlement()
+                        .and_then(|s| state.settlements.get(s))
+                        .and_then(|s| s.siege.as_ref())
+                        .is_some_and(|s| &s.attacker == faction),
                     capturable,
                 },
             );
@@ -262,8 +269,24 @@ impl Recorder {
     }
 }
 
-/// One example: (turn, faction, army, place, kind rank).
-type Example = (u32, FactionId, ArmyId, SettlementId, u8);
+/// One example: (turn, faction, army, place, kind rank, what the army was
+/// doing when its faction planned).
+type Example = (u32, FactionId, ArmyId, SettlementId, u8, &'static str);
+
+impl ArmySnap {
+    /// What the army was doing when its faction planned (examples).
+    fn note(&self) -> &'static str {
+        if self.besieging {
+            "assiégeait"
+        } else if self.resting {
+            "au repos"
+        } else if self.guarding {
+            "gardait une place menacée"
+        } else {
+            "libre"
+        }
+    }
+}
 
 /// Counters of one seed.
 #[derive(Default)]
@@ -487,6 +510,7 @@ fn measure(
                 id.clone(),
                 place.clone(),
                 kind(place),
+                snap.note(),
             ));
         }
         if at_real_war(&snap.faction) {
@@ -527,6 +551,7 @@ fn measure(
                 army.clone(),
                 sid.clone(),
                 kind(sid),
+                rec.armies.get(army).map_or("?", ArmySnap::note),
             ));
         }
     }
@@ -649,12 +674,30 @@ fn measure(
     }
 }
 
-/// Prints the first examples, cities first then by turn.
-fn print_examples(title: &str, examples: &mut [Example]) {
-    examples.sort_by(|a, b| (a.4, a.0, &a.2).cmp(&(b.4, b.0, &b.2)));
-    println!("\n{title}");
-    for (turn, faction, army, place, _) in examples.iter().take(EXAMPLES) {
-        println!("- t{turn} {faction} {army} → {place}");
+/// Prints the examples grouped by (faction, army, place): the most
+/// repeated first, then cities first.
+fn print_examples(title: &str, examples: &[Example]) {
+    let mut groups: BTreeMap<(&FactionId, &ArmyId, &SettlementId), (Vec<u32>, u8, &str)> =
+        BTreeMap::new();
+    for (turn, faction, army, place, kind, note) in examples {
+        let group = groups
+            .entry((faction, army, place))
+            .or_insert((Vec::new(), *kind, note));
+        group.0.push(*turn);
+    }
+    let mut groups: Vec<_> = groups.into_iter().collect();
+    groups.sort_by(|a, b| (b.1 .0.len(), a.1 .1).cmp(&(a.1 .0.len(), b.1 .1)));
+    println!(
+        "\n{title} ({} cas, {} groupes)",
+        examples.len(),
+        groups.len()
+    );
+    for ((faction, army, place), (turns, _, note)) in groups.iter().take(EXAMPLES) {
+        let first = turns.first().copied().unwrap_or(0);
+        println!(
+            "- {faction} {army} → {place} : {} tour(s) dès t{first} ({note})",
+            turns.len()
+        );
     }
 }
 
@@ -670,7 +713,7 @@ fn main() {
     let (data, _) = GameData::load(&root).expect("data");
     let mut rows: Vec<Vec<f64>> = Vec::new();
     for seed in &seeds {
-        let mut report = run(&data, *seed, turns);
+        let report = run(&data, *seed, turns);
         let row = report.row();
         println!("\n## Graine {seed} ({turns} tours)\n");
         println!("| mesure | valeur |");
@@ -679,8 +722,8 @@ fn main() {
             println!("| {header} | {value:.2} |");
         }
         if verbose {
-            print_examples("Prises manquées :", &mut report.missed_examples);
-            print_examples("Pertes sans secours :", &mut report.undefended_examples);
+            print_examples("Prises manquées", &report.missed_examples);
+            print_examples("Pertes sans secours", &report.undefended_examples);
             println!("\nBatailles suicidaires :");
             for line in report.suicide_examples.iter().take(EXAMPLES) {
                 println!("- {line}");
