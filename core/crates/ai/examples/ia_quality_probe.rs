@@ -39,7 +39,8 @@
 //!    mean turns to capture; captures seen without a siege are "direct".
 //!    Each siege ending without capture gets one cause, first match wins:
 //!    peace (the two sides no longer at war), battle (a besieger fought
-//!    this turn or was destroyed: relief army or sortie), failed assault
+//!    this turn or is gone from the map: relief army or sortie; France's
+//!    own battles count, the snapshot is taken before it moves), failed assault
 //!    (a besieger ordered `Assault`), starving/broken (supply < 30 or
 //!    strength < 40 % when its faction planned), then the besieger left of
 //!    its own will, told by the orders its faction gave it: C7a give-up
@@ -550,12 +551,7 @@ fn run(data: &GameData, seed: u64, turns: u32) -> Report {
                 },
             );
         }
-        recorder.borrow_mut().record(&state, data, &france);
-        let orders = ai::plan_turn(&state, data, &france);
-        recorder.borrow_mut().record_orders(&state, data, &orders);
-        for order in orders {
-            let _ = state.submit_order(data, order);
-        }
+        // Before France moves: its battles and captures count too.
         let before = Before {
             sieges: state
                 .settlements
@@ -586,6 +582,12 @@ fn run(data: &GameData, seed: u64, turns: u32) -> Report {
                 .map(|(id, s)| (id.clone(), s.controller.clone()))
                 .collect(),
         };
+        recorder.borrow_mut().record(&state, data, &france);
+        let orders = ai::plan_turn(&state, data, &france);
+        recorder.borrow_mut().record_orders(&state, data, &orders);
+        for order in orders {
+            let _ = state.submit_order(data, order);
+        }
         let events = state.end_turn_with(data, |s, d, f| {
             recorder.borrow_mut().record(s, d, f);
             let orders = ai::plan_turn(s, d, f);
@@ -858,8 +860,10 @@ fn siege_end_cause(
     }
     let armies = &siege.besiegers;
     let first = |pred: &dyn Fn(&ArmyId) -> bool| armies.iter().find(|id| pred(id)).cloned();
+    // A besieger gone from the map: destroyed (a merge keeps the siege).
     if let Some(id) = first(&|id| {
         destroyed.contains(id)
+            || !state.armies.contains_key(id)
             || state
                 .armies
                 .get(id)
@@ -894,7 +898,7 @@ fn siege_end_cause(
         Some(id) => match state.armies.get(id) {
             Some(a) if a.is_at(place) => format!("{id} toujours sur place, siège levé"),
             Some(_) => format!("{id} partie sans ordre enregistré"),
-            None => format!("{id} disparue (fusion ?)"),
+            None => format!("{id} disparue"),
         },
     };
     (8, note)
