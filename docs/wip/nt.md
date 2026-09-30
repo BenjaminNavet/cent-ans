@@ -26,3 +26,8 @@ Spec : `docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md`. ADR : 0126 (t
 
 ## Pour le joueur
 Mocap payante (corps à corps, combats appariés), clé fal.ai (GA3), chantier guerre civile / prétendants.
+
+## Vague 3 (30/09 ~02:45)
+- NT7 fondus entre clips de mêlée + clips porte-étendard / musicien / servants d'engins (pipeline ADR 0096, sans mocap)
+- NT8 château : donjon carré procédural, échelle des tours du type château (capture : tours trop massives)
+- NT9 équilibre NT5 : mesurer batailles FR/EN par décennie, corriger si besoin ; bélier en résolution automatique ; sorties de garnison comptées pour les missions
