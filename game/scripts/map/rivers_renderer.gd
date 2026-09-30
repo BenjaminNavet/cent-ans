@@ -19,6 +19,8 @@ extends MeshInstance3D
 const MAJOR_IMPORTANCE := 3
 const WATER_SHADER := preload("res://shaders/river_water.gdshader")
 const RENDER_FILE := "rivers_render.json"
+## RC (ADR 0141) : largeurs écran, couleurs, fondu des mineures, étiquettes des noms.
+const DISPLAY_FILE := "river_display.json"
 ## Largeur (px carte) au-delà de laquelle un cours d'eau est « majeur » même d'importance faible.
 const MAJOR_WIDTH := 0.5
 ## Part du rayon d'une maquette de colonie couverte par la ville (l'eau passe dessous).
@@ -49,6 +51,13 @@ var cover_segments: Array[PackedInt32Array] = []
 var segment_cells: Dictionary = {}
 var stats: Dictionary = {}
 
+## RC : contenu de `river_display.json` ({} sans fichier : réglages exportés ci-dessus).
+var display: Dictionary = {}
+## RC : noms des cours d'eau (`RiverLabels`, null si désactivés).
+var labels: RiverLabels
+## Plus grande dimension de la carte (unités monde) : les distances de `display` en sont des fractions.
+var _extent := 1.0
+
 var _minor: MeshInstance3D
 var _minor_visible := true
 var _water_major: ShaderMaterial
@@ -62,6 +71,8 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 	var t0 := Time.get_ticks_msec()
 	map_data = data
 	terrain = terrain_builder
+	_extent = maxf(map_data.size.x, map_data.size.y)
+	_load_display()
 	_load_rivers()
 	# VT (ADR 0138) : plus de maquette à cacher, les villes 1:1 enjambent la vraie rivière : aucune coupure.
 	covers = []
@@ -74,6 +85,7 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 		var river: Dictionary = rivers[ri]
 		for piece in _cut_by_covers(river["points"], river["widths"], touched.get(ri, [])):
 			var major: bool = int(river["importance"]) >= MAJOR_IMPORTANCE or _max(piece[1]) >= MAJOR_WIDTH
+			piece.append(int(river["importance"]))
 			(major_lines if major else minor_lines).append(piece)
 	mesh = _build_mesh(major_lines)
 	_water_major = _water_material(major_min_px)
@@ -84,6 +96,10 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 	_minor.name = "MinorRivers"
 	_minor.mesh = _build_mesh(minor_lines)
 	_water_minor = _water_material(minor_min_px)
+	var fade: Array = display.get("minor_fade", [])
+	if fade.size() == 2:
+		_water_minor.set_shader_parameter("distance_fade", Vector2(float(fade[0]), float(fade[1])) * _extent)
+		_water_minor.set_shader_parameter("far_alpha", float(display.get("minor_far_alpha", 1.0)))
 	_minor.material_override = _water_minor
 	_minor.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_minor)
@@ -95,6 +111,15 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 	add_child(crossings)
 	crossings.build(self, settlements)
 	_set_fords(crossings.ford_uniforms())
+	if labels != null:
+		labels.queue_free()
+		labels = null
+	var label_cfg: Dictionary = display.get("labels", {})
+	if bool(label_cfg.get("enabled", false)):
+		labels = RiverLabels.new()
+		labels.name = "Labels"
+		add_child(labels)
+		labels.build(self, label_cfg, _load_river_names())
 	if fine != null:
 		fine.queue_free()
 	fine = FineGeoLayer.new()
@@ -113,6 +138,7 @@ func build(data: MapData, terrain_builder: TerrainBuilder = null, settlements: S
 		"covers": covers.size(),
 		"zones": zones.size(),
 		"bridges": crossings.bridge_count(),
+		"labels": labels.count() if labels != null else 0,
 		"fine": fine != null,
 		"build_ms": Time.get_ticks_msec() - t0,
 	}
@@ -167,6 +193,29 @@ func _update_carved_rects() -> void:
 
 
 # --- Données ------------------------------------------------------------------------------
+
+
+## RC : `river_display.json` ; les réglages exportés servent de repli.
+func _load_display() -> void:
+	display = {}
+	var path := map_data.map_dir.path_join(DISPLAY_FILE)
+	if FileAccess.file_exists(path):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if parsed is Dictionary:
+			display = parsed
+	major_min_px = float(display.get("major_min_px", major_min_px))
+	minor_min_px = float(display.get("minor_min_px", minor_min_px))
+	if display.has("minor_max_distance"):
+		minor_max_distance = float(display["minor_max_distance"]) * _extent
+
+
+## RC : noms français (`river_names.json` : nom source → nom affiché).
+func _load_river_names() -> Dictionary:
+	var path := map_data.map_dir.path_join("river_names.json")
+	if not FileAccess.file_exists(path):
+		return {}
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	return parsed.get("names", {}) if parsed is Dictionary else {}
 
 
 func _load_rivers() -> void:
@@ -356,7 +405,8 @@ static func _max(values: PackedFloat32Array) -> float:
 
 
 ## Rubans : chaque sommet est sur la ligne médiane (le shader l'écarte de la demi-largeur).
-## NORMAL = perpendiculaire signée ; UV = (largeur, côté ±1) ; UV2 = (abscisse vers l'aval, 0).
+## NORMAL = perpendiculaire signée ; UV = (largeur, côté ±1) ; UV2 = (abscisse vers l'aval,
+## importance 0-6 : largeur écran minimale, lot RC).
 func _build_mesh(pieces: Array) -> ArrayMesh:
 	# OMR-R2 : tronçons calculés en parallèle (tableaux dimensionnés d'avance, décalage de sommets
 	# connu par somme préfixe), puis concaténés dans l'ordre : même maillage qu'en série.
@@ -373,7 +423,7 @@ func _build_mesh(pieces: Array) -> ArrayMesh:
 	var parts: Array = []
 	parts.resize(valid.size())
 	var task := WorkerThreadPool.add_group_task(func(n: int) -> void:
-		parts[n] = _piece_arrays(valid[n][0], valid[n][1], bases[n]), valid.size(), -1, true, "river meshes")
+		parts[n] = _piece_arrays(valid[n][0], valid[n][1], bases[n], float(valid[n][2]) if valid[n].size() > 2 else 0.0), valid.size(), -1, true, "river meshes")
 	WorkerThreadPool.wait_for_group_task_completion(task)
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
@@ -404,7 +454,7 @@ func _build_mesh(pieces: Array) -> ArrayMesh:
 
 ## Sommets (deux par point : côté +1 puis −1), normales (perpendiculaire), UV (largeur, côté),
 ## UV2 (abscisse curviligne) et indices d'un tronçon dont le premier sommet est `base`.
-func _piece_arrays(points: PackedVector2Array, widths: PackedFloat32Array, base: int) -> Array:
+func _piece_arrays(points: PackedVector2Array, widths: PackedFloat32Array, base: int, importance: float = 0.0) -> Array:
 	var count := points.size()
 	var vertices := PackedVector3Array()
 	vertices.resize(count * 2)
@@ -436,8 +486,8 @@ func _piece_arrays(points: PackedVector2Array, widths: PackedFloat32Array, base:
 		normals[k + 1] = perp * -1.0
 		uvs[k] = Vector2(widths[i], 1.0)
 		uvs[k + 1] = Vector2(widths[i], -1.0)
-		uv2s[k] = Vector2(along, 0.0)
-		uv2s[k + 1] = Vector2(along, 0.0)
+		uv2s[k] = Vector2(along, importance)
+		uv2s[k + 1] = Vector2(along, importance)
 	for i in count - 1:
 		var a := base + i * 2
 		var o := i * 6
@@ -461,6 +511,11 @@ func _water_material(min_px: float) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = WATER_SHADER
 	material.set_shader_parameter("min_px", min_px)
+	_apply_display(material)
+	# RC5 : détail Nano Banana 2 (grands fleuves / rivières) ; repli procédural sans texture.
+	var detail_id := "river_large" if min_px == major_min_px else "river_small"
+	WaterDetail.apply(material, detail_id)
+	material.set_shader_parameter("water_detail_flow", WaterDetail.flow_speed(detail_id))
 	material.set_shader_parameter("map_size", Vector2(map_data.size))
 	material.set_shader_parameter("river_bank_px", bank_px)
 	if terrain != null and terrain.river_bed_texture() != null:
@@ -469,6 +524,21 @@ func _water_material(min_px: float) -> ShaderMaterial:
 		terrain.material.set_shader_parameter("river_bank_px", bank_px)
 	material.render_priority = 1
 	return material
+
+
+## RC : couleurs, liseré et facteurs de largeur de `river_display.json`.
+func _apply_display(material: ShaderMaterial) -> void:
+	for key in ["shallow_color", "deep_color", "bank_ink_color"]:
+		var rgb: Array = display.get(key, [])
+		if rgb.size() == 3:
+			material.set_shader_parameter(key, Color(float(rgb[0]), float(rgb[1]), float(rgb[2])))
+	for key in ["thin_fade", "bank_ink_strength"]:
+		if display.has(key):
+			material.set_shader_parameter(key, float(display[key]))
+	var scale: Array = display.get("importance_min_px_scale", [])
+	if scale.size() == 7:
+		material.set_shader_parameter("importance_px_lo", Vector4(scale[0], scale[1], scale[2], scale[3]))
+		material.set_shader_parameter("importance_px_hi", Vector3(scale[4], scale[5], scale[6]))
 
 
 func _set_fords(fords: Array[Vector4]) -> void:

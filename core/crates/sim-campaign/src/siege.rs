@@ -635,6 +635,7 @@ pub(crate) fn auto_assault(
         river_crossing: false,
         walls,
         assault_bonus_percent: state.engine_assault_bonus(data, &settlement),
+        crossing: None,
     };
     // N1: phased auto-resolve; walls stand for the terrain, the season
     // still brings its weather.

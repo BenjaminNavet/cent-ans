@@ -1,0 +1,29 @@
+{
+  "description": "Détail d'eau de la carte de campagne (lot RC5, ADR 0141). Par identifiant de matière (`sea`, `ocean`, `river_large`, `river_small`, textures game/assets/textures/water/<id>_normal.png et _albedo.png générées par `cent-ans assets materials --config data/art/water_materials.yaml`) : strength = poids du détail dans le shader (0 = rendu procédural seul), scale = répétitions de la tuile par unité monde (valeurs provisoires, à régler à l'œil sur la carte), flow_speed = vitesse d'écoulement de la normale (0 pour la mer). Sans texture, WaterDetail laisse strength à 0.",
+  "materials": {
+    "sea": {
+      "description": "Mer côtière (Manche, Atlantique) : petites vagues gris-vert, sans écoulement.",
+      "strength": 0.35,
+      "scale": 2.0,
+      "flow_speed": 0.0
+    },
+    "ocean": {
+      "description": "Océan ouvert : longue houle bleu-gris sombre, échelle large.",
+      "strength": 0.3,
+      "scale": 1.0,
+      "flow_speed": 0.0
+    },
+    "river_large": {
+      "description": "Grand fleuve (Loire, Seine) : rides douces et filets de courant, eau limoneuse brun-vert.",
+      "strength": 0.5,
+      "scale": 4.0,
+      "flow_speed": 0.05
+    },
+    "river_small": {
+      "description": "Petite rivière claire sur galets et herbes : plus clair, rides fines.",
+      "strength": 0.45,
+      "scale": 6.0,
+      "flow_speed": 0.08
+    }
+  }
+}
