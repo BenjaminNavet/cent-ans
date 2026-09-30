@@ -61,6 +61,20 @@ Hypothèses d'estimation : 1290 jetons d'image (facturation Google pour une imag
 1024×1024), 300 jetons de prompt, 100 jetons de texte. Les modèles OpenAI facturent
 plutôt ~1056 jetons en qualité moyenne, l'estimation est donc légèrement prudente.
 
+### `cent_ans_tools.material_gen` — matières d'eau RC5 (ADR 0117)
+
+- `cent-ans assets materials --config <yaml>` : fichier de matières au choix (défaut
+  `data/art/materials.yaml`). `--dry-run` affiche les prompts et le coût estimé sans appel ;
+  `--envelope <$>` abaisse le plafond. Un bloc `budget` du fichier (`section`, `lot`, `cap`,
+  `estimate_per_image`) exige que la dernière section de `docs/budget.md` porte ce titre et
+  refuse tout appel qui ferait dépasser le plafond (5 $ pour RC).
+- `data/art/water_materials.yaml` (schéma `water_materials.schema.json`) : `sea`, `ocean`,
+  `river_large`, `river_small`, modèle `google/gemini-3.1-flash-image`. Une image brute déjà
+  présente n'est pas repayée : la supprimer pour retenter un mauvais tirage.
+- Côté Godot : `game/shaders/water_detail.gdshaderinc` (uniforms `water_detail_*`, neutre à
+  force 0) et `WaterDetail.apply(material, id)` (`game/scripts/map/water_detail.gd`), réglages
+  dans `data/fx/water_detail.json` ; sans texture, repli procédural.
+
 ### `cent_ans_tools.blender`
 
 - `run_blender_script(script_path, *args)` : exécute

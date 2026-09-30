@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "water_materials.schema.json",
+  "title": "Matières d'eau générées tuilables (RC5)",
+  "description": "Prompts et paramètres des textures de détail d'eau de la carte de campagne (`tools/cent_ans_tools/material_gen.py --config`) : image source `size`², tuile finale `tile_size`², cartes dérivées (hauteur, normale OpenGL, rugosité). Le bloc `budget` nomme la section de `docs/budget.md`, le plafond et l'estimation par image ; la dépense est refusée au-delà.",
+  "type": "object",
+  "required": ["model", "size", "tile_size", "budget", "materials"],
+  "additionalProperties": false,
+  "properties": {
+    "model": {"type": "string", "minLength": 1},
+    "size": {"type": "integer", "minimum": 256},
+    "tile_size": {"type": "integer", "minimum": 64},
+    "budget": {
+      "type": "object",
+      "required": ["section", "cap", "estimate_per_image"],
+      "additionalProperties": false,
+      "properties": {
+        "section": {"type": "string", "minLength": 1, "description": "Début du titre de la section de docs/budget.md, qui doit être la dernière."},
+        "lot": {"type": "string", "pattern": "^[A-Z]+[0-9]+$", "description": "Préfixe des lignes du grand livre."},
+        "cap": {"type": "number", "exclusiveMinimum": 0, "description": "Plafond de la section (dollars)."},
+        "estimate_per_image": {"type": "number", "exclusiveMinimum": 0, "description": "Coût estimé d'une image (dollars)."}
+      }
+    },
+    "materials": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "prompt"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "prompt": {"type": "string", "minLength": 20},
+          "blend_width": {"type": "integer", "minimum": 1},
+          "height_strength": {"type": "number", "exclusiveMinimum": 0},
+          "roughness_bias": {"type": "number", "minimum": -1, "maximum": 1}
+        }
+      }
+    }
+  }
+}

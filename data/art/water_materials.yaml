@@ -1,0 +1,67 @@
+# RC5 : textures de détail d'eau tuilables de la carte de campagne (ADR 0117), générées par
+# Nano Banana 2 (OpenRouter) via tools/cent_ans_tools/material_gen.py :
+#   uv run --project tools cent-ans assets materials --config data/art/water_materials.yaml \
+#     --out game/assets/textures/water --sheet docs/research/rc5_water_sheet.png
+# Sortie : <id>_albedo.png + <id>_normal.png (+ height/roughness) ; Godot les lit via WaterDetail
+# (data/fx/water_detail.json). Direction artistique : réalisme peint, couleurs sourdes
+# (docs/design/2026-09-25-bible-da.md). Prompts : vue verticale plate, lumière diffuse égale,
+# ni rivage ni objet (le pipeline rend l'image tuilable ensuite).
+model: google/gemini-3.1-flash-image
+size: 1024
+tile_size: 512
+budget:
+  section: Fleuves et rivières RC
+  lot: RC5
+  cap: 5.00
+  estimate_per_image: 0.078
+materials:
+  - id: sea
+    prompt: >-
+      Seamless flat texture swatch of the open water surface of the English Channel and
+      coastal Atlantic seen from high above, gentle short waves and faint foam-free ripples,
+      subtle wind streaks, muted grey-green colour with slightly darker troughs, painterly
+      realistic style for a medieval strategy map. Photographed straight down, orthographic
+      top-down view, perfectly even diffuse lighting, no sun glint, no specular highlights, no
+      cast shadows, no perspective, no vignette, the water fills the entire frame edge to
+      edge. No shore, no land, no boats, no objects, no text, no border.
+    blend_width: 128
+    height_strength: 0.8
+    roughness_bias: -0.4
+  - id: ocean
+    prompt: >-
+      Seamless flat texture swatch of deep open Atlantic ocean surface seen from high above,
+      long regular swell with broad soft undulations and fine wind ripples on top, dark
+      blue-grey colour with slightly lighter crests, painterly realistic style for a
+      medieval strategy map. Photographed straight down, orthographic top-down view,
+      perfectly even diffuse lighting, no sun glint, no specular highlights, no cast
+      shadows, no perspective, no vignette, the water fills the entire frame edge to edge.
+      No shore, no land, no boats, no whitecaps, no objects, no text, no border.
+    blend_width: 128
+    height_strength: 0.7
+    roughness_bias: -0.45
+  - id: river_large
+    prompt: >-
+      Seamless flat texture swatch of the surface of a wide slow lowland river like the Loire
+      or the Seine, soft small ripples and long gentle current streaks all running in one
+      direction from top to bottom, silty brown-green opaque water with lighter and darker
+      streaks, painterly realistic style for a medieval strategy map. Photographed straight
+      down, orthographic top-down view, perfectly even diffuse lighting, no sun glint, no
+      specular highlights, no cast shadows, no perspective, no vignette, the water fills the
+      entire frame edge to edge. No banks, no shore, no reeds, no boats, no objects, no
+      text, no border.
+    blend_width: 128
+    height_strength: 0.6
+    roughness_bias: -0.35
+  - id: river_small
+    prompt: >-
+      Seamless flat texture swatch of the surface of a small clear shallow river seen from
+      above, transparent lighter green-brown water over rounded pebbles and swaying water
+      weed, fine ripples and gentle current lines all running in one direction from top to
+      bottom, painterly realistic style for a medieval strategy map. Photographed straight
+      down, orthographic top-down view, perfectly even diffuse lighting, no sun glint, no
+      specular highlights, no cast shadows, no perspective, no vignette, the streambed and
+      water fill the entire frame edge to edge. No banks, no shore, no boulders, no fish, no
+      objects, no text, no border.
+    blend_width: 128
+    height_strength: 0.9
+    roughness_bias: -0.3

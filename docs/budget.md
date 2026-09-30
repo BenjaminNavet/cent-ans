@@ -134,3 +134,14 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot
 | 2026-09-29 | OpenRouter | P1 : variantes âgées D1-D3 (37 × openai/gpt-5-image-mini) | 1,69 $ | 1,69 $ | 3,85 $ |
 | 2026-09-29 | OpenRouter | P2 : portraits des personnages D4-D6 (49 × openai/gpt-5-image-mini) | 2,23 $ | 2,26 $ | 6,11 $ |
 | 2026-09-29 | OpenRouter | P2 : variantes âgées D4-D6 (42 × openai/gpt-5-image-mini) | 1,92 $ | 1,94 $ | 8,05 $ |
+
+## Fleuves et rivières RC (30/09) — plafond propre de 5 $ (matières d'eau Nano Banana 2, ADR 0117)
+
+Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot RC5 : 4 matières
+(`sea`, `ocean`, `river_large`, `river_small`) × `google/gemini-3.1-flash-image` (~0,078 $ l'image),
+reprises éventuelles comprises : ~0,62 $ prévu. Plafond vérifié par `data/art/water_materials.yaml`
+(bloc `budget`) avant chaque appel payant.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul RC |
+|---|---|---|---|---|---|
+| 2026-09-30 | — | RC5 : squelette, prompts et essai à blanc (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |

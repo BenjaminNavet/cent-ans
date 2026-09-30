@@ -1,0 +1,29 @@
+# RC — Fleuves et rivières de la carte de campagne
+
+ADR : `docs/decisions/0117-passages-de-riviere-en-campagne.md`. Branche : `feat/rivieres-campagne`.
+Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano Banana 2).
+
+## Consigne de reprise
+> Lis ce fichier et `git log --oneline feat/rivieres-campagne -20`, puis continue à la première
+> case non cochée.
+
+## Lots
+- [x] RC0 — Squelette : `BattleSetup.crossing` (`BattleCrossing`, `CrossingStructure`),
+      `data/rules/river_crossings.json` + schéma, `data/map/river_names.json` + schéma, ADR 0117.
+- [ ] RC1 — Cœur campagne : chargement de `crossings_px.json`, détection du passage (rives
+      opposées), coefficient d'assaillant / tireurs du défenseur, pronostic nommé, `setup.crossing`.
+- [ ] RC2 — Bataille tactique : un seul passage de la structure demandée entre les deux lignes.
+- [ ] RC3 — Rendu : largeur, contraste, rivières mineures plus loin ; étiquettes des noms (français).
+- [ ] RC4 — Densité : `rivers-render --fine-min-order` depuis la pyramide hydro fine (Mac du joueur).
+- [ ] RC5 — Matières d'eau Nano Banana 2 (partiel) :
+  - [x] pipeline : `data/art/water_materials.yaml`, `--config/--dry-run/--envelope`, section RC de
+        `docs/budget.md` (5 $), `water_detail.gdshaderinc`, `WaterDetail.apply`, `data/fx/water_detail.json`.
+  - [ ] génération sur le Mac (clé `OPENROUTER_API_KEY`, ~0,31 $ pour 4 images) :
+        `uv run --project tools cent-ans assets materials --config data/art/water_materials.yaml --out game/assets/textures/water --sheet docs/research/rc5_water_sheet.png`
+        (d'abord `--dry-run`) ; juger la planche, supprimer `<id>_raw.png` pour retenter.
+  - [ ] brancher `#include "res://shaders/water_detail.gdshaderinc"` + `WaterDetail.apply()` dans les
+        shaders mer / fleuve / rivière (session principale) ; régler `scale` à l'œil.
+
+## Journal
+- 2026-09-30 : RC0.
+- 2026-09-30 : RC5 pipeline prêt (génération à faire sur le Mac).
