@@ -22,7 +22,7 @@ lit le texte, il ne crie pas, quelle que soit la consigne.
   à la place de la réplique de charge.
 
 ## Conséquences
-- 67 répliques et 9 fichiers de cri (5 cris) refaits, 0,66 $ (section VX de `docs/budget.md`).
-- Parlers régionaux (gascon, gallois, flamand), « À eux ! À eux ! » et « ¡Santiago! » gardent la
+- 69 répliques et 10 fichiers de cri refaits, 0,76 $ (dont un passage perdu par un reset d'une autre session, refait depuis le cache) (section VX de `docs/budget.md`).
+- Gascon (retiré des cris), quelques répliques galloises et flamandes, « À eux ! À eux ! » et « ¡Santiago! » gardent la
   lecture VO1 : ElevenLabs les rend mal (gascon inintelligible) ou whisper ne peut les juger.
 - Outil : `voice_tts.py --shouts` (dépendances `faster-whisper`, `librosa` par `uv run --with`).

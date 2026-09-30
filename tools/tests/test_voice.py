@@ -223,7 +223,8 @@ def test_shouted_situations_go_to_elevenlabs() -> None:
         situation = job.path.split("_", 1)[1].rsplit("_", 1)[0]
         situation = "general_down" if situation == "general" else situation
         tag = barks["situations"][situation].get("shout_tag", "")
-        if not tag:
+        language = job.path.split("/")[1].split("_")[0]
+        if not tag or not barks["languages"][language].get("shout_voices"):
             assert not job.shouts, job.path
             continue
         assert len(job.shouts) == 1, job.path

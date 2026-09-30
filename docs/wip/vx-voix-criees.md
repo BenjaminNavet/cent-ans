@@ -20,11 +20,11 @@ français comparable (whisper fr 0,8-0,96). Sur les répliques calmes, léger ac
 - Traitement combat : passe-haut, compression, présence 2,6 kHz, −13 LUFS (−16 pour la parole).
 
 ## État
-Terminé (ADR 0145). 67 répliques criées + 9 fichiers de cri (5 chœurs), 0,66 $ ; vo1_voice_test,
+Terminé (ADR 0145), branche `feat/vx`. 69 répliques criées + 10 fichiers de cri, 0,76 $ ; vo1_voice_test,
 smoke et pytest OK. Première charge d'un camp = chœur de sa faction (`BattleVoices.war_cry`).
 
 ## Points ouverts
 - Écoute joueur (Montjoie en fin de discours et à la première charge).
-- Restent en VO1 : gascon, gallois, flamand (ElevenLabs inintelligible ou whisper aveugle),
+- Restent en VO1 : gascon (retiré des cris), 3 répliques galloises/flamandes,
   « À eux ! À eux ! », « ¡Santiago! » (chœur < 3 voix valides).
 - 21 phrases de discours récentes (steppe, désert…) jamais vocalisées : clé OpenRouter absente.

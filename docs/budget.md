@@ -229,6 +229,8 @@ pas détourner les écritures « dernière table » des autres lots.
 | 2026-09-30 | fal.ai | VX : passe interrompue (machine chargée), 14 répliques gardées + prises rejetées ; coût réel non relevé par l'outil, estimé (caractères × prises) | 0,06 $ | 0,06 $ | 0,08 $ |
 | 2026-09-30 | fal.ai | VX : passe complète (74 clips : répliques criées et chœurs), prises rejetées comprises | 0,36 $ | 0,46 $ | 0,54 $ |
 | 2026-09-30 | fal.ai | VX : rattrapage (18 clips : langues régionales, chœurs), prises rejetées comprises | 0,07 $ | 0,12 $ | 0,66 $ |
+| 2026-09-30 | fal.ai | VX : cris de bataille ElevenLabs v3 (répliques criées, chœurs des cris de guerre), contrôle whisper, langue et hauteur | 0,21 $ | 0,05 $ | 0,71 $ |
+| 2026-09-30 | fal.ai | VX : passe coupée à 55/90 (délai de tâche, machine surchargée), coût non relevé par l outil : estimé (prises refaites) | 0,05 $ | 0,05 $ | 0,76 $ |
 
 ## Fleuves et rivières RC (30/09) — plafond propre de 5 $ (matières d'eau Nano Banana 2, ADR 0141)
 
