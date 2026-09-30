@@ -325,7 +325,7 @@ def _bassinet_rim(hf, a, open_face=True):
     return brow * f + jaw * (1 - f)
 
 
-def bassinet_shell(g, name="bassinet", open_face=True, point=0.05, low=True):
+def bassinet_shell(g, name="bassinet", open_face=True, point=0.075, low=True):
     """Pointed bassinet of the 1340s-1380s: tall skull drawn back to a point, rolled edge.
 
     `low`: the sides come down to the jaw (with aventail); otherwise to the ear's top.
@@ -358,9 +358,12 @@ def bassinet_shell(g, name="bassinet", open_face=True, point=0.05, low=True):
                 u = t / side
                 pts.append(hf.at(a, 1.0 + 0.02 * u, z0 + (zc - z0) * u))
                 continue
-            # Gothic arch drawn back to the point: radius falls linearly at the apex.
+            # CR2: ogival (gothic) arch drawn back to the point: two circle arcs of radius
+            # 1.6 skull radii meeting at the apex (a tall pointed skull, not a dome).
             u = (t - side) / (1.0 - side)
-            k = 1.02 * (1.0 - u) * (1.0 + 1.1 * u)
+            rho = 1.6
+            h = u * math.sqrt(rho**2 - (rho - 1) ** 2)
+            k = 1.02 * ((1 - rho) + math.sqrt(max(rho**2 - h * h, 0.0)))
             z = z_arch + (apex_z - z_arch) * u
             pts.append(hf.at(a, max(k, 0.03), z, dy=point * u**1.6))
         return pts

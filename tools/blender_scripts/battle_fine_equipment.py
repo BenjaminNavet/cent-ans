@@ -532,7 +532,14 @@ def bassinet(lm, n=36, rows=12):
     rx = (lm.head_max.x - lm.head_min.x) / 2 + 0.006
     ry = (lm.head_max.y - lm.head_min.y) / 2 + 0.010
     top = lm.top.z + 0.014
-    apex = Vector((cx, cy + ry * 0.35, top + 0.045))
+    # CR2: tall gothic (ogival) skull of the 1360s-1380s, not a rounded dome: two circle
+    # arcs of radius `rho` (in skull radii) meeting at the apex, drawn back over the nape.
+    rho = 1.6
+    arch = math.sqrt(rho**2 - (rho - 1) ** 2)
+    base = lm.eye.z + 0.035 + 0.02
+    r0 = (rx + ry) / 2
+    height = max(arch * r0, top + 0.06 - base)
+    apex = Vector((cx, cy + ry * 0.5, base + height + 0.004))
     bm = bmesh.new()
     rings = []
     for r in range(rows):
@@ -548,9 +555,10 @@ def bassinet(lm, n=36, rows=12):
                 k = 1.0 + 0.02 * (t / 0.35)
             else:
                 u = (t - 0.35) / 0.65
-                z = zc + 0.02 + (top - zc - 0.02) * math.sin(u * math.pi / 2) ** 0.9
-                k = 1.02 * math.cos(u * math.pi / 2) ** 0.75
-            c = Vector((cx, cy + (apex.y - cy) * max(0.0, t - 0.35) * 1.2, z))
+                z = base + height * u
+                h = u * arch
+                k = 1.02 * max(0.02, (1 - rho) + math.sqrt(max(rho**2 - h * h, 0.0)))
+            c = Vector((cx, cy + (apex.y - cy) * max(0.0, (t - 0.35) / 0.65) ** 1.5, z))
             row.append(
                 bm.verts.new(
                     c + Vector((rx * k * math.cos(a), ry * k * math.sin(a), 0))
