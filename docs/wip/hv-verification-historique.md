@@ -14,13 +14,16 @@ Branche d'intégration : `feat/hv` (worktree `../gp-hv`). Rapports : `docs/histo
 
 | Lot | Périmètre | État |
 |---|---|---|
-| HV1 | France, Pays-Bas, îles Britanniques (factions, titres, personnages, provinces, colonies) | lancé |
-| HV2 | Empire, Europe centrale, Baltique, Scandinavie, Hongrie | lancé |
+| HV1 | France, Pays-Bas, îles Britanniques (factions, titres, personnages, provinces, colonies) | fusionné (96) |
+| HV2 | Empire, Europe centrale, Baltique, Scandinavie, Hongrie | fusionné (200) |
 | HV3 | Ibérie, Italie, Maghreb, Égypte, Levant, Chypre | fusionné (127) |
 | HV4 | Balkans, Grèce, Anatolie, Horde, Caucase, Rus', Mésopotamie | fusionné (151) |
 | HV5 | Codex, événements, rencontres, missions, discours, écrans, ordres de chevalerie | fusionné (27 + 15 fiches) |
 | HV6 | Unités, techs, bâtiments, traits, compétences, religions, noms, édits, ressources, villes 1:1 v2 | fusionné (169) |
 | HV7 | Décisions « à décider » de HV3/4/6 (18 points) | lancé |
+| HV8 | Décisions de HV1/2/5 (12 points) | lancé |
+| HV9 | Textes d'UI, crédits musicaux, chaînes GDScript, manuel | lancé |
+| HV10 | 12-18 événements historiques pour l'Est et le Sud (1337-1360) | lancé |
 
 Prochaine étape : attendre les lots, fusionner dans feat/hv, trancher les points « à décider », cargo test + pytest, ff main.
 
