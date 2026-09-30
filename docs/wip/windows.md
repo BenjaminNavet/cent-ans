@@ -45,3 +45,8 @@ Objectif : le jeu se lance et s'exporte sous Windows x86_64.
 - **Release GitHub non créée** (permission refusée à l'agent) : commande à lancer par le joueur,
   notes dans `docs/wip/windows-release-notes.md` :
   `gh release create preview-windows-2026-09-26 "export/Cent Ans Windows.zip" --target 6e68ed1b --prerelease --title "Cent Ans — préversion Windows (26/09/2026)" --notes-file docs/wip/windows-release-notes.md`
+
+## Vérification 2026-09-30
+- CI Windows run 36664599846 vert sur `main` d95f45b9 (≈ 575 commits après le portage) : DLL
+  11 min, import 3 min, smoke 14 min. Lancé en poussant `windows/check-2026-09-30` (le
+  `workflow_dispatch` est refusé à l'agent, 403).
