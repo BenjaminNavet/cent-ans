@@ -25,7 +25,9 @@ data/map/pyramid/
 tools/nb_raw/
 
 # Screenshots / captures (outputs of game/tests/*_shot.gd, kept local only)
-docs/img/
+# except comparison boards the player wants versioned (GA3 generated assets)
+docs/img/*
+!docs/img/ga3/
 docs/audit/captures/
 docs/audit/**/*.png
 docs/audit/**/*.jpg
