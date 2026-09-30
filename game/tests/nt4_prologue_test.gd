@@ -119,6 +119,8 @@ func _check_battle() -> void:
 	_check((battle.call("get_units") as Array).size() == 8, "4 regiments each")
 	_check(prologue.overlay != null and prologue.overlay.visible, "guide shown")
 	_check(not prologue.enemy_ai_enabled, "enemy passive at first")
+	_check(bool(battle.call("get_hold", "attacker")), "NT11: enemy holds its ground during the guide")
+	_check(not bool(battle.call("get_hold", "defender")), "NT11: the player side is free")
 	_check(prologue.current_step_id() == "intro", "starts on intro")
 	scene.set("paused", true)  # le test fait avancer la bataille lui-même
 	var enemy_start := _positions(battle, "attacker")
@@ -173,6 +175,7 @@ func _check_battle() -> void:
 	_pass(prologue, "pause")
 	_check(prologue.current_step_id() == "victory", "pause -> victory")
 	_check(prologue.enemy_ai_enabled, "enemy wakes up on the victory step")
+	_check(not bool(battle.call("get_hold", "attacker")), "NT11: hold lifted on the victory step")
 	# Victoire : l'IA mène aussi le joueur jusqu'à la fin.
 	battle.call("set_ai", "defender", true)
 	for _i in 1200:

@@ -176,7 +176,9 @@ impl BattleSim {
         let rules = &UnitModeRules::bundled().skirmish;
         for i in 0..self.units.len() {
             let unit = &self.units[i];
+            // NT11: a side holding its ground does not step back.
             if !unit.skirmish
+                || self.holds(unit.side)
                 || !unit.shoots()
                 || !unit.present()
                 || !contacts[i].is_empty()
