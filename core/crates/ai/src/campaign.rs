@@ -1674,9 +1674,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .get(&anchor)
                 .and_then(|s| s.siege.as_ref())
                 .is_some_and(|s| s.turns_elapsed >= SIEGE_PATIENCE_TURNS && s.turns_left > 2)
-            && !state
+            && state
                 .assault_odds(data, army_id)
-                .is_some_and(|(odds, _)| odds >= ASSAULT_ODDS);
+                .is_none_or(|(odds, _)| odds < ASSAULT_ODDS);
         if hopeless {
             targeted.insert(anchor.clone());
         }
