@@ -1,22 +1,20 @@
 # SS — sol « satellite » de la campagne
 
-Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md` ; ADR 0141. Branche `feat/ss`, worktree `../gp-ss` (dylib copiée, `data/map/pyramid` = lien vers le checkout principal, import fait).
-Autonomie totale (joueur 30/09). GA3 fusionnée avant démarrage (condition du joueur remplie).
+Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md` ; ADR 0141. Autonomie totale (joueur 30/09).
 
-## Diagnostic (captures avant, `game/tests/ss_shot.gd`, Paris 900/300/90)
-Terres ouvertes gris-beige pâle en vue moyenne/proche, ombrage du relief + hachures dominants, parcelles invisibles hors `fp_near`, routes = traits crème uniformes.
+## État : fusionné dans main, en attente du jugement du joueur
+- [x] SS1 `cent-ans geo colormap` : BC1 14336×12288 + mipmaps, 4 parts (~46 Mo), cuisson ~2 min 20 ; style `data/map/colormap_style.yaml` ; aperçu `data/map/colormap_preview.jpg` ; note `docs/wip/ss1-colormap.md`.
+- [x] SS2 shader : `satellite_ground.gdshaderinc` (crochet après `fp_parcels`), chargement `ReliefLandcover.load_colormap`, repli sans carte ; routes principales en terre (`road_renderer.gd`), estompées de loin avec la carte ; relief moins exagéré de près (`shading_relief_near` 1,3).
+- [x] **Cause principale du « relief IGN » trouvée** : le brouillard matinal météo (`weather_ground`) peignait le sol en gris clair jusqu'à 80 % dans les basses terres (tout le bassin parisien). Plafonné à `weather_mist_max` 0,15 et teinté par le sol. Mesure (Paris, distance 90, été) : sol rendu 125/112/91 (beige gris) → 108/95/71 ; avant la météo 94/81/55.
+- [x] SS3 lacs : `cent-ans geo lakes` → `data/map/lakes.json` (762 nappes, 67 nommées), `lakes_renderer.gd`, mode `sheet` de `river_water.gdshader`.
+- [ ] SS4 fal.ai : **reporté**, pas nécessaire au vu des captures ; à rouvrir si le joueur trouve le détail proche trop flou (textures chaume/labour/vigne/grève).
+- [x] SS5 tests : smoke 30/30, `ss_colormap_test`, `ss_lakes_test`, `cv1_campaign_life_test`, 20 pytest. Banc : toutes vues au plafond 60 Hz (vsync macOS) avec et sans carte : pas de régression visible ; banc GPU réel sur machine calme à faire (comme `fps-carte.md`).
 
-## Lots
-- [ ] SS1 outil `cent-ans geo colormap` (agent, branche `feat/ss-colormap`, worktree `../gp-ss-cm`) : BC1 14336×12288 + mipmaps, `map.json.colormap.bc1`, style YAML + schéma, pytest.
-- [ ] SS2 shader (session principale) : chargement `colormap` (ReliefLandcover.load_gpu_copy), couleur de base, parcelles colorées par bloc, relief abaissé, `road_line` en terre, repli ; test headless `ss_colormap_test.gd`.
-- [ ] SS3 lacs (agent, branche `feat/ss-lakes`, worktree `../gp-ss-lakes`) : `data/map/lakes.json` (outil) + `lakes_renderer.gd` + test.
-- [ ] SS4 fal.ai textures de détail (après captures de SS2).
-- [ ] SS5 captures après, banc perf, statut ADR.
+## Outils de diagnostic
+`game/tests/ss_shot.gd` : captures par distance, `--stats` (couleur moyenne sans lire l'image), `--param=`, `--env=`, `--hide=`, `--bench`, `--season=`.
 
-## Prochaine étape
-SS2a : dosage relief + palette cultures + routes dans `terrain.gdshader` / `road_line.gdshader` (indépendant de SS1).
-
-## SS3 — lacs (branche `feat/ss-lakes`, worktree `../gp-ss-lakes`)
-État : outil `cent-ans geo lakes` (`tools/cent_ans_tools/geo/lakes.py`) → `data/map/lakes.json` : 762 nappes (67 nommées), 13 473 sommets ; composantes d'eau intérieure ≥ 30 px, découpées en bassins plats (un niveau chacun, hauteur modale de `heightmap_render.png`, tolérance 3 m) ; ignorées : 87 sous le niveau de la mer, 230 sans bassin plat (vallées reconstituées de retenues, lacs trop fins comme le Loch Ness) ; retenues exclues : `modern_reservoirs.json` + « Reservoir » Natural Earth sauf lacs naturels régulés (liste `NATURAL_REGULATED_LAKES`). Noms : `--natural-earth <main>/tools/geo/raw/natural_earth/ne_10m_lakes/ne_10m_lakes.shp` (absent du worktree). 10 tests pytest.
-Rendu : `game/scripts/map/lakes_renderer.gd` (triangulation, débord 0,5 px sous la rive, 12 088 triangles, 15 ms), mode `sheet` de `river_water.gdshader`, branché dans `campaign_map.gd` (masqué sur le parchemin). `terrain.gdshader` non modifié (l'eau peinte reste dessous, nappe à 0,88 d'opacité). Test `ss_lakes_test.gd` OK.
-smoke.gd OK. Prochaine étape : jugement visuel par la session principale (pas de capture ici), fusion dans feat/ss par l'orchestrateur.
+## Points ouverts
+- Détail proche encore un peu flou (parcelles procédurales × teinte de la carte, `sg_near_keep` 0,45).
+- Bosses du relief de près : viennent surtout de l'exagération verticale (géométrie), pas de l'ombrage.
+- 5 retenues modernes encore en eau dans `land_mask.png` (Sainte-Croix, Der, Orient, Ebro, Riaño) : peintes en terre dans la carte mais l'eau peinte du shader peut rester.
+- Neige hivernale de plaine (CV1) inchangée.

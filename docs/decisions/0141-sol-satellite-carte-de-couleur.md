@@ -1,6 +1,6 @@
 # 0141 — Sol « satellite » : carte de couleur précalculée
 
-Date : 2026-09-30. Chantier SS. Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md`.
+Date : 2026-09-30. Chantier SS. Statut : appliquée (fusionnée le 2026-09-30). Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md`.
 
 ## Contexte
 
@@ -22,3 +22,7 @@ Le terrain est déjà la couche la plus chère (~40 ms masqué/affiché, `docs/w
 - +60–90 Mo dans le dépôt ; +~117 Mo de VRAM (BC1 avec mipmaps). Une lecture de texture remplace une partie du procédural lointain : coût GPU attendu ≤ actuel, vérifié au banc.
 - Toute modification de palette passe par l'outil (re-cuisson ~minutes), pas par le shader.
 - La carte de couleur est une saison moyenne ; `campaign_life` continue de moduler saisons et terroirs de près.
+
+## Constat d'application
+
+La cause principale de l'aspect « relief IGN » n'était pas l'absence de textures mais le brouillard matinal météo peint sur le sol (gris clair jusqu'à 80 % dans les basses terres). Il est plafonné (`weather_mist_max` 0,15, voile teinté par le sol) ; l'atmosphère de près donne déjà la profondeur. fal.ai n'a pas été nécessaire.

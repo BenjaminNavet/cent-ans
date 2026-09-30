@@ -4,7 +4,8 @@ extends SceneTree
 ## Usage : godot --path game --resolution 1600x900 --script res://tests/ss_shot.gd --
 ##   --out=<dossier> [--prefix=avant-] [--at=<x>,<z>] [--distances=900,300,90]
 ##   [--hide=<nœud>,…] [--param=<uniforme>=<float>]… [--env=<propriété Environment>=<float>]… (réglage du matériau du terrain) [--stats] (moyenne/écart-type
-##   RGB du bas de l'image, sol sans figures, pour comparer sans lire l'image)
+##   RGB du bas de l'image, sol sans figures, pour comparer sans lire l'image) [--bench] (ms par image
+##   sur 240 images, sans vsync si lancé avec `--disable-vsync`)
 ## Écrit `<prefix>sol-<distance>.png` (960 px de large) par distance ; HUD masqué.
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -22,6 +23,7 @@ func _init() -> void:
 	var stats := false
 	var env_params := {}
 	var hide := PackedStringArray()
+	var bench := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -42,6 +44,8 @@ func _init() -> void:
 			env_params[ekv[0]] = float(ekv[1])
 		elif arg.begins_with("--hide="):
 			hide = arg.trim_prefix("--hide=").split(",")
+		elif arg == "--bench":
+			bench = true
 		elif arg == "--stats":
 			stats = true
 	DirAccess.make_dir_recursive_absolute(out_dir)
@@ -89,6 +93,12 @@ func _init() -> void:
 				if material != null:
 					material.set_shader_parameter(key, params[key])
 			await process_frame
+		if bench:
+			var t0 := Time.get_ticks_usec()
+			for i in 240:
+				await process_frame
+			print("SS bench %ssol-%d %.2f ms/frame" % [prefix, int(distance), (Time.get_ticks_usec() - t0) / 240000.0])
+			continue
 		if stats:
 			var mats := {}
 			for mi in map.find_children("*", "MeshInstance3D", true, false):
