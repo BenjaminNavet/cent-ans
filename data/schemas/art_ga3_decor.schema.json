@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "art_ga3_decor.schema.json",
   "title": "Décor 3D de bataille généré (lot GA3-L1)",
-  "description": "Catalogue des objets de décor générés par image-vers-3D (`tools/experiments/ga3_fal_decor.py --catalog`, `tools/blender_scripts/ga3_cleanup.py`) et leur branchement dans le décor de bataille (`Ga3Kit` — `game/scripts/visual/ga3_kit.gd`). ADR 0138.",
+  "description": "Catalogue des objets de décor générés par image-vers-3D (`tools/experiments/ga3_fal_decor.py --catalog`, `tools/blender_scripts/ga3_cleanup.py`) et leur branchement dans le décor de bataille (`Ga3Kit` — `game/scripts/visual/ga3_kit.gd`). ADR 0140.",
   "type": "object",
   "required": ["style_prefix", "style_suffix", "cleanup", "objects"],
   "additionalProperties": false,

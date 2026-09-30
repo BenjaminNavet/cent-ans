@@ -1,8 +1,8 @@
 class_name TownLayer
 extends Node3D
 
-## Lot ZG6 (ADR 0036) : villes ordinaires à l'échelle réelle aux paliers « vallée » et « site »
-## (caméra rapprochée de ZG4, pyramide de relief en cache). Rendu seulement.
+## Lot ZG6 (ADR 0036, 0138) : villes ordinaires à l'échelle réelle quand le rig est à moins de
+## `TownRenderProfile.max_rig_distance` (pyramide de relief en cache). Rendu seulement.
 ## - Données : `data/map/towns_1340.json` (`TownData`, outil `cent-ans geo towns`).
 ## - Streaming : les villes à moins de `TownRenderProfile` × distance du rig de la caméra sont
 ##   planifiées dans des fils de travail (`TownPlan.generate` sur un instantané des pages du
@@ -13,7 +13,8 @@ extends Node3D
 ##   pages plus fines déclenchent un recalcul des hauteurs (fil de travail, puis reconstruction
 ##   échangée d'un bloc quand elle est prête).
 ## - Qualité : `RenderQuality` (PF1) règle portées, rayon de chargement et ombres.
-## `SettlementLayer` masque la maquette d'une colonie dont la ville 1:1 est affichée.
+## Plus de maquette (ADR 0138) : le lointain est rendu par `TownFarLayer`, qui enfonce sa ville
+## quand la ville 1:1 est construite (`built_ids()`).
 
 signal towns_changed
 
@@ -24,7 +25,7 @@ var data: TownData
 var terrain: TerrainBuilder
 var map_data: MapData
 var tiers: ZoomTiers
-## Vrai quand le rendu 1:1 est actif (pyramide présente et palier vallée atteint).
+## Vrai quand le rendu 1:1 est actif (pyramide présente et rig sous `max_rig_distance`).
 var active := false
 ## Force l'activité sans pyramide (tests headless).
 var force_active := false
@@ -72,14 +73,13 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 	TownBuilder.manifest()  # chargé ici : les fils de travail le lisent (`TownBuilder.prepare`)
 	data = p_data if p_data != null else TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
 	_ids.clear()
-	# VH7 : une colonie ordinaire qui a une ville 1:1 v2 sans maquette (Orléans) est rendue par
-	# `LandmarkCityLayer`, pas ici (sauf `--no-landmarks-1to1`).
+	# Une colonie qui a une ville 1:1 v2 est rendue par `LandmarkCityLayer`, pas ici (sauf `--no-landmarks-1to1`).
 	var v2_enabled := not "--no-landmarks-1to1" in OS.get_cmdline_user_args()
 	for id in settlement_ids:
 		var sid := str(id)
 		if v2_enabled and not LandmarkV2Library.for_settlement(sid).is_empty():
 			continue
-		if data.has_town(sid) and LandmarkLibrary.for_settlement(sid).is_empty():
+		if data.has_town(sid):
 			_ids.append(sid)
 			_anchor[sid] = data.anchor_of(sid)
 			_extent[sid] = data.extent_units(sid)
@@ -133,6 +133,17 @@ func is_shown(id: String) -> bool:
 	return entry.get("builder") != null
 
 
+## ADR 0138 : colonies dont la ville 1:1 est construite et affichée (masque de `TownFarLayer`).
+func built_ids() -> Array[String]:
+	var out: Array[String] = []
+	if not active:
+		return out
+	for id: String in _entries:
+		if (_entries[id] as Dictionary).get("builder") != null:
+			out.append(id)
+	return out
+
+
 ## RS-K : changements depuis l'appel précédent : `{"all": bool, "ids": Array}` (`all` : toutes
 ## les colonies sont à revoir, `ids` sinon). Remet à zéro.
 func take_changes() -> Dictionary:
@@ -173,7 +184,8 @@ func update_view(rig_distance: float) -> void:
 	if data == null or _ids.is_empty():
 		return
 	var usable := not _disabled and (force_active or (terrain != null and terrain.quadtree != null))
-	var now_active := usable and tiers.valley_weight(rig_distance) >= profile.min_valley_weight
+	var limit := profile.max_rig_distance * (1.0 + profile.rig_hysteresis if active else 1.0)
+	var now_active := usable and rig_distance < limit
 	if now_active != active:
 		active = now_active
 		visible = active

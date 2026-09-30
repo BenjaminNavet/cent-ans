@@ -37,6 +37,7 @@
         "relief_m": {"type": "number", "minimum": 0},
         "z_m": {"type": "number"},
         "radii": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 8, "description": "Rayon du polygone (m) par relèvement régulier, 0 = est, sens horaire vu du dessus (vers le sud)."},
+        "ground_m": {"type": "array", "items": {"type": "number"}, "description": "Hauteurs de sol (m) : indice 0 = centre, 1..N = anneau à 0,5 x radii[k], N+1..2N = anneau à 1,0 x radii[k] (N = len(radii), mêmes relèvements). Repli sur z_m si le relief manque."},
         "gates": {
           "type": "array",
           "items": {

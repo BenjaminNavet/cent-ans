@@ -1,4 +1,4 @@
-# 0138 — Pipeline image-vers-3D pour le décor de bataille (GA3-L1)
+# 0140 — Pipeline image-vers-3D pour le décor de bataille (GA3-L1)
 
 Date : 2026-09-30. Statut : acceptée (go du joueur sur les sondes GA3, lot L1).
 Notes : `docs/wip/ga3.md` (sondes S1-S5, lot L1), `docs/wip/ga.md` §GA3.

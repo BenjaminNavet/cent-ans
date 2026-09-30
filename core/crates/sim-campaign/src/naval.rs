@@ -190,7 +190,8 @@ impl NavalState {
     }
 }
 
-/// Sea crossed between two ports: the sea the arrival port opens onto
+/// Sea crossed between two ports: the sea of their lane (lot SL1), else the
+/// sea the arrival port opens onto
 /// (`Settlement::sea_zone`: Calais, Dover on the Channel), else the
 /// departure port's if the arrival province touches it, else a sea both
 /// provinces touch, else the first sea of the departure.
@@ -207,6 +208,9 @@ pub fn crossing_sea(
             .map(|p| p.sea_zones.clone())
             .unwrap_or_default()
     };
+    if let Some(sea) = crate::sea_lanes::lane_sea(data, from, to) {
+        return Some(sea);
+    }
     let port_sea = |s: &SettlementId| data.settlements.get(s).and_then(|s| s.sea_zone.clone());
     let (a, b) = (seas(from), seas(to));
     if let Some(sea) = port_sea(to) {
@@ -277,6 +281,8 @@ pub(crate) fn intercept(
     let Some((hostile, chance)) = interceptor(state, data, &faction, &sea) else {
         return Crossing::Clear;
     };
+    // Lot SL1: open-sea lanes are harder to watch than the coasts.
+    let chance = chance * crate::sea_lanes::intercept_factor(data, from, to);
     if chance <= 0.0 || state.rng.unit_f64() >= chance {
         return Crossing::Clear;
     }

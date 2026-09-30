@@ -14,7 +14,7 @@ Worktree `game_project-ga3`, branche `feat/ga3`. Spec : `docs/wip/ga3.md` (S5, �
 - [x] Candidats S5 retirés de `game/assets/models/vegetation/ga3/` (régénérables par `ga3_vegetation.py`).
 - [x] Tests : `ga3_l2_vegetation_test.gd` OK ; pytest `tools/tests/test_ga3_vegetation_l2.py`.
 - [x] Tests existants : smoke, fc2 (forcé en FC), fc3, sz6 OK ; sz4b échoue à l'identique avec `--no-ga3-veg` (préexistant).
-- [x] Perf `--fps-probe`, planche locale `docs/img/ga3/l2_vegetation.jpg`, ADR 0138 § végétation, budget 0,47 $.
+- [x] Perf `--fps-probe`, planche locale `docs/img/ga3/l2_vegetation.jpg`, ADR 0140 § végétation, budget 0,47 $.
 - [x] Rochers relevés (`--exposure`) après la capture : trop sombres sur sol clair.
 
 ## Mesures

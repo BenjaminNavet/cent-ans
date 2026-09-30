@@ -192,7 +192,7 @@ abandonne nos clips Quaternius.
     8 azimuts via nano-banana-2/edit), normal map plate ou dérivée de la luminance, et décider si les
     cartes `_mid` restent en deçà de 37-45 m. Rochers = nouveau genre dans `GroundClutter` (aujourd'hui
     herbe + buisson seulement) ou dans `Vegetation`, avec un MultiMesh dédié.
-- 30/09 **L1 décor de bataille** (1,10 $ ; ADR 0138). 9 objets, tous réussis en TRELLIS vue unique
+- 30/09 **L1 décor de bataille** (1,10 $ ; ADR 0140). 9 objets, tous réussis en TRELLIS vue unique
   (église en TRELLIS 2) ; triangles LOD0/1/2 : maison 7 999/3 999/1 199 (S4 recalibrée, aligné),
   église 24 997/12 499/3 749 (22 × 15 × 17,4 m), moulin sur pivot 7 999/3 999/1 199 (14 m),
   tente 3 000/1 500/450, palissade 2 998/1 500/446 (segment 3,1 m, pieux 1,9 m), puits
@@ -221,7 +221,7 @@ abandonne nos clips Quaternius.
   facettes/creux TRELLIS au pignon droit, toit du puits en bardeaux brun-rouge sombre, peaux du
   bélier brun-rouge unies aux bords déchiquetés. Tests `ga3_l1_decor_test.gd` (72 / 0 avec
   `--no-ga3`) et smoke OK.
-- 30/09 **L2 végétation campagne** (0,47 $ ; section « Végétation » de l'ADR 0138 ; note `docs/wip/ga3-l2.md`).
+- 30/09 **L2 végétation campagne** (0,47 $ ; section « Végétation » de l'ADR 0140 ; note `docs/wip/ga3-l2.md`).
   `ga3_vegetation_l2.py` (brutes `~/dev/cent-ans-raw/ga3/l2/`) : par essence flux-2 → **une** planche
   nano-banana-2/edit 4 × 2 (8 azimuts cohérents) → bria ; grille `ga3/ga3_impostors_{albedo,normal}.png`
   au cadrage FC2 ; les imposteurs remplacent aussi les cartes proches (d = 25 : 2,40 M → 0,05 M
@@ -239,11 +239,11 @@ abandonne nos clips Quaternius.
   `docs/img/ga3/s3_compare.jpg`, analyse dans « S3 comparatif ».
 
 ## Lots de production (go joueur 30/09)
-- [x] L1 décor (1,10 $, ADR 0138) : 9 objets flux-2 → bria → trellis → `ga3_cleanup.py --normal on
+- [x] L1 décor (1,10 $, ADR 0140) : 9 objets flux-2 → bria → trellis → `ga3_cleanup.py --normal on
       --auto-levels 0.5` ; catalogue `data/art/ga3_decor.json` (+ schéma, pytest) ; brutes
       `~/dev/cent-ans-raw/ga3/l1/` et `l1p/` (pièces fines) ; `ga3_fal_decor.py --catalog`,
       `ga3_decor_build.py`, planche `docs/img/ga3/l1_decor.jpg` (`ga3_decor_sheet.py`). Voir journal.
-- [x] L2 végétation campagne (0,47 $, ADR 0138 § végétation) : imposteurs générés (3 essences, 8 azimuts,
+- [x] L2 végétation campagne (0,47 $, ADR 0140 § végétation) : imposteurs générés (3 essences, 8 azimuts,
       une planche nano-banana-2 par essence) dans une grille au format `campaign_impostors_albedo`, aussi
       pour les arbres proches ; atlas de feuilles, herbe dense, rochers TRELLIS dans `GroundClutter` ;
       `--no-ga3-veg`, `--no-ga3-near`. Voir journal et `docs/wip/ga3-l2.md`.

@@ -230,9 +230,8 @@ func _read_provinces(sim: Object) -> void:
 		}
 
 
-## Croissance des colonies : remplace la maquette quand le niveau visuel change. La maquette
-## par défaut de chaque type (village → village, ville → ville murée) n'est pas remplacée tant
-## que le niveau lui correspond.
+## Niveau visuel des colonies (`levels`, lu par les foules pour les cités). VT : plus de maquette
+## à remplacer (villes 1:1, la croissance visuelle CV1 est abandonnée).
 func _refresh_growth(sim: Object) -> void:
 	if _settlements == null or _settlements.data == null:
 		return
@@ -245,7 +244,6 @@ func _refresh_growth(sim: Object) -> void:
 	var live_ids: PackedStringArray = live.get("id", PackedStringArray())
 	for k in live_ids.size():
 		live_index[live_ids[k]] = k
-	var replacements: Array = []
 	var counts := [0, 0, 0, 0]
 	for i in _settlements.data.settlements.size():
 		var entry: Dictionary = _settlements.data.settlements[i]
@@ -271,18 +269,7 @@ func _refresh_growth(sim: Object) -> void:
 		if key == current:
 			continue
 		levels[id] = key
-		var holder := _settlements.model_holder(i)
-		if holder == null:
-			continue
-		var model := SettlementGrowth.build_model(level, absi(id.hash()) / 7, castle)
-		if model == null:
-			continue
-		replacements.append([i, model])
-	# DC4 : maquettes à pleine taille ; `replace_models` applique la réduction des voisines
-	# (OMR-R2 : en un lot, passes globales une seule fois).
-	_settlements.replace_models(replacements)
 	stats["growth_ms"] = Time.get_ticks_msec() - t0
-	stats["growth_replaced"] = replacements.size()
 	stats["levels"] = counts
 
 

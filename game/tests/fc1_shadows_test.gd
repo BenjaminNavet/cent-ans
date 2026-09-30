@@ -1,6 +1,6 @@
 extends SceneTree
 
-## FC1 : ombres des maquettes de colonies et des moulins réglées par le préréglage de qualité.
+## FC1 : ombres des moulins (les maquettes de colonies n'existent plus, ADR 0138) réglées par le préréglage de qualité.
 ## Usage : godot --headless --path game --script res://tests/fc1_shadows_test.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
 
@@ -10,7 +10,6 @@ var _failures := 0
 func _init() -> void:
 	await process_frame
 	_test_preset_values()
-	_test_settlement_layer()
 	_test_windmills()
 	RenderQuality.override_level = ""
 	print("fc1_shadows_test: %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
@@ -21,32 +20,8 @@ func _test_preset_values() -> void:
 	var expected := {"low": 0.0, "medium": 150.0, "high": 250.0, "ultra": 500.0, "legacy": 500.0}
 	for level: String in expected:
 		_check(is_equal_approx(float(RenderQuality.PRESETS[level]["model_shadow_distance"]), expected[level]), "%s model_shadow_distance" % level)
-	# Legacy : même seuil que `ZoomTiers.model_shadow_distance` (comportement d'avant FC1).
-	_check(is_equal_approx(float(RenderQuality.PRESETS["legacy"]["model_shadow_distance"]), ZoomTiers.new().model_shadow_distance), "legacy keeps the zoom tier threshold")
-
-
-func _test_settlement_layer() -> void:
-	var layer := SettlementLayer.new()
-	layer.tiers = ZoomTiers.new()
-	root.add_child(layer)
-	layer.add_to_group(RenderQuality.CLIENT_GROUP)
-	var part := MeshInstance3D.new()
-	part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	layer.add_child(part)
-	layer._shadow_geometries.append(part)
-	RenderQuality.override_level = "low"
-	RenderQuality.apply_clients(self)
-	_check(is_zero_approx(layer.model_shadow_limit()), "low preset reaches the settlement layer")
-	layer._update_model_shadows(5.0, true)
-	_check(part.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "low: no settlement shadows even up close")
-	RenderQuality.override_level = "high"
-	RenderQuality.apply_clients(self)
-	_check(is_equal_approx(layer.model_shadow_limit(), 250.0), "high preset reaches the settlement layer")
-	layer._update_model_shadows(100.0)
-	_check(part.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON, "high: shadows at d = 100")
-	layer._update_model_shadows(300.0)
-	_check(part.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "high: no shadows at d = 300")
-	layer.free()
+	# Legacy : seuil d'avant FC1 (l'ancien `ZoomTiers.model_shadow_distance`, VT-G : retiré).
+	_check(is_equal_approx(float(RenderQuality.PRESETS["legacy"]["model_shadow_distance"]), 500.0), "legacy keeps the zoom tier threshold")
 
 
 func _test_windmills() -> void:

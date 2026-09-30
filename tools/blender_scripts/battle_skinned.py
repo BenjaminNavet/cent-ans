@@ -894,6 +894,26 @@ def pole_entry(recipe, arm):
     }
 
 
+def prop_entry(recipe, arm):
+    """Lot CR4: rest frame of the held lance (`Prop` bone), Godot rest space.
+
+    `prop_grip` (the hand), `prop_axis` (towards the head), `prop_side` (the pennon's
+    normal): the shader varies length, angle and pennon per rider around the grip.
+    Empty unless the recipe fights with a lance.
+    """
+    if recipe.get("style") != "lance":
+        return {}
+    c, _x, y, z = weapons.prop_frame(equip.Context(arm, 0, material, bone_world))
+    grip = TO_GODOT @ c
+    axis = (TO_GODOT.to_3x3() @ y).normalized()
+    side = (TO_GODOT.to_3x3() @ z).normalized()
+    return {
+        "prop_grip": [round(v, 5) for v in grip],
+        "prop_axis": [round(v, 5) for v in axis],
+        "prop_side": [round(v, 5) for v in side],
+    }
+
+
 def rig_stub(name, bones):
     """Rig index only (mesh export without re-baking)."""
     rig = Rig(name)

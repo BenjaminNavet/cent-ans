@@ -37,16 +37,8 @@ extends Resource
 ## Opacité des panaches de cheminée à taille réelle (fondu avec l'échelle) : un filet de fumée de
 ## 20 m vu à un kilomètre n'est qu'un voile.
 @export var chimney_real_alpha: float = 0.5
-## Lot SZ4b : maquettes des colonies (villages, villes, châteaux, abbayes). Taille réelle propre à
-## chaque colonie : rayon bâti vers 1340 (`towns_1340.json`, lot ZG6) × `settlement_footprint_gain`
-## / rayon de la maquette. Rapport par défaut (emprise inconnue) et bornes.
-@export var settlement_default_ratio: float = 0.15
-@export var settlement_ratio_min: float = 0.05
-@export var settlement_ratio_max: float = 0.6
-## La maquette montre aussi faubourgs, jardins et champs proches.
-@export var settlement_footprint_gain: float = 1.25
 ## Variation relative d'échelle en deçà de laquelle les instances recalculées sur le processeur
-## (moulins, hameaux, maquettes) ne sont pas réécrites (évite une réécriture par image pendant un
+## (moulins, panaches) ne sont pas réécrites (évite une réécriture par image pendant un
 ## zoom).
 @export var rewrite_step: float = 0.04
 
@@ -82,8 +74,10 @@ func windmill_scale(distance: float) -> float:
 	return scale_for(windmill_ratio, distance)
 
 
-func hamlet_scale(distance: float) -> float:
-	return scale_for(hamlet_ratio, distance)
+## VT (ADR 0138) : les hameaux sont à l'échelle 1:1 à toute distance (pas d'exagération) :
+## toujours `hamlet_ratio` × leur taille de modèle. `distance` est gardé pour la signature commune.
+func hamlet_scale(_distance: float) -> float:
+	return clampf(hamlet_ratio, 1e-4, 1.0)
 
 
 func chimney_scale(distance: float) -> float:
@@ -97,18 +91,6 @@ func chimney_alpha(distance: float) -> float:
 
 func fire_scale(distance: float) -> float:
 	return scale_for(fire_ratio, distance)
-
-
-## Échelle d'une maquette de colonie dont la taille réelle vaut `ratio` × sa taille de carte.
-func settlement_scale(ratio: float, distance: float) -> float:
-	return settlement_scale_with(ratio, exaggeration(distance))
-
-
-## RS-K2 : `settlement_scale` pour une exagération `exaggeration(distance)` déjà calculée (une
-## fois par pas de zoom pour les ~1 200 colonies).
-func settlement_scale_with(ratio: float, exaggeration_value: float) -> float:
-	var r := clampf(clampf(ratio, settlement_ratio_min, settlement_ratio_max), 1e-4, 1.0)
-	return minf(1.0, r * exaggeration_value)
 
 
 ## Vrai si l'échelle `now` s'écarte assez de `applied` pour réécrire des instances.
