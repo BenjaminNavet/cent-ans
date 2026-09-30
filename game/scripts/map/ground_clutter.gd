@@ -21,6 +21,8 @@ extends Node3D
 ## Purement visuel : aucune règle de jeu.
 
 const SHADER := preload("res://shaders/ground_clutter.gdshader")
+## Lot FC5 : touffe d'herbe texturée (copie mipmappée de `grass_blades.png`, `build_leaf_cards.py`).
+const GRASS_TEXTURE := "res://assets/textures/vegetation/campaign_grass_tuft.png"
 const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalisées
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
@@ -34,15 +36,18 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var min_radius: float = 16.0
 @export var max_radius: float = 52.0
 ## Candidats par cellule à la densité 1 (préréglage Haute) sur une couverture pleine.
-@export var base_per_cell: int = 1680
+@export var base_per_cell: int = 2600
 ## Densité maximale d'un préréglage (Ultra) : nombre de candidats semés.
 @export var max_density: float = 1.5
 ## Hauteur (unités monde, taille de carte) d'une touffe d'herbe et d'une broussaille.
-@export var grass_height: float = 0.14
-@export var bush_height: float = 0.26
+## Lot FC5 : 0,3 / 0,5 (≈ 8 px à d = 25 en 720p) ; le shader les réduit comme
+## `campaign_prop_scale`^`prop_scale_power` (plus lentement que les arbres : encore visibles à d = 10).
+@export var grass_height: float = 0.3
+@export var bush_height: float = 0.5
+@export var prop_scale_power: float = 0.5
 ## Échelle des arbres (`campaign_prop_scale`) sous laquelle les touffes disparaissent (trop
 ## petites pour valoir leur coût).
-@export var min_prop_scale: float = 0.2
+@export var min_prop_scale: float = 0.025
 ## Cellules posées par image (semis fait dans le `WorkerThreadPool` si `threaded`).
 @export var max_cells_per_frame: int = 2
 @export var max_concurrent_jobs: int = 4
@@ -50,7 +55,7 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var max_reground_per_frame: int = 2
 @export var max_cached_cells: int = 96
 ## Plafond des instances visibles (toutes cellules).
-@export var max_visible_instances: int = 30000
+@export var max_visible_instances: int = 45000
 
 ## Préréglage de qualité : densité (0 : rien).
 var quality_density: float = 1.0
@@ -254,6 +259,10 @@ func _ensure_resources() -> void:
 		return
 	_material = ShaderMaterial.new()
 	_material.shader = SHADER
+	_material.set_shader_parameter("prop_scale_power", prop_scale_power)
+	if ResourceLoader.exists(GRASS_TEXTURE):
+		_material.set_shader_parameter("grass_texture", load(GRASS_TEXTURE))
+		_material.set_shader_parameter("has_grass_texture", true)
 	_mesh = crossed_cards_mesh()
 
 

@@ -12,7 +12,7 @@ Essences (height 1.0, base at the origin, Y up in Godot / Z up here):
 Each essence has a detailed variant (crown + trunk, about ninety triangles) and a ``_low``
 variant (about twenty triangles, no trunk) for distant tiles. Lot FC5: a ``_mid`` variant
 (``<essence>_mid_crown`` = UV-mapped leaf cards, ``<essence>_mid_trunk`` = trunk and limbs; about
-330 triangles for oak and beech, 160 for fir) for the tiles nearest to the camera, drawn with the
+250 triangles for oak and beech, 145 for fir) for the tiles nearest to the camera, drawn with the
 leaf-card texture (``campaign_leaf_cards.png``) and alpha scissor. Objects are named
 ``<essence>[_low]_crown`` and ``<essence>_trunk``: Godot (``VegetationMeshes``) merges them,
 paints vertex colours and inflates the crown normals, so the palette stays in the game code.
@@ -194,11 +194,11 @@ def broadleaf_mid(rng: random.Random, lumps: list, trunk_top: float, trunk_r: tu
             d = random_unit(rng)
             points.append(center + Vector((d.x * radii.x, d.y * radii.y, d.z * radii.z)) * rng.uniform(0.55, 0.95))
     top = Vector((0, 0, trunk_top))
-    for k, point in enumerate(points[:5]):
-        add_limb(trunk, top + Vector((0, 0, -0.06 * k / 5)), top.lerp(point, 0.8), trunk_r[1] * 0.6)
+    for k, point in enumerate(points[:4]):
+        add_limb(trunk, top + Vector((0, 0, -0.06 * k / 4)), top.lerp(point, 0.8), trunk_r[1] * 0.6)
     for point in points:
         outward = (point - crown_center).normalized()
-        for _ in range(3):
+        for _ in range(2):
             normal = outward * 0.7 + random_unit(rng) * 0.7 + Vector((0, 0, 0.3))
             size = rng.uniform(*card)
             add_card(crown, uv_layer, point + random_unit(rng) * card[0] * 0.25, normal, random_unit(rng), size, size)
@@ -212,7 +212,7 @@ def oak_mid(rng: random.Random) -> dict:
         (Vector((-0.25, 0.16, 0.60)), Vector((0.27, 0.25, 0.2))),
         (Vector((0.02, -0.28, 0.56)), Vector((0.25, 0.24, 0.19))),
     ]
-    return broadleaf_mid(rng, lumps, 0.42, (0.065, 0.045), 46, (0.22, 0.3), Vector((0, 0, 0.6)))
+    return broadleaf_mid(rng, lumps, 0.42, (0.065, 0.045), 50, (0.25, 0.33), Vector((0, 0, 0.6)))
 
 
 def beech_mid(rng: random.Random) -> dict:
@@ -222,7 +222,7 @@ def beech_mid(rng: random.Random) -> dict:
         (Vector((0.18, -0.1, 0.52)), Vector((0.22, 0.22, 0.19))),
         (Vector((-0.19, 0.12, 0.52)), Vector((0.22, 0.22, 0.19))),
     ]
-    return broadleaf_mid(rng, lumps, 0.55, (0.045, 0.028), 42, (0.2, 0.28), Vector((0, 0, 0.66)))
+    return broadleaf_mid(rng, lumps, 0.55, (0.045, 0.028), 46, (0.23, 0.31), Vector((0, 0, 0.66)))
 
 
 def fir_mid(rng: random.Random) -> dict:

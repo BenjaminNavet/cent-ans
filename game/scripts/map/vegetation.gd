@@ -73,11 +73,11 @@ enum Lod { FAR, DETAILED, NEAR }
 ## haies inchangées. `--no-fc2` rend les maillages bas (comparaisons A/B).
 @export var use_impostors: bool = true
 ## Lot FC5 : parties à moins de `near_distance` (× `veg_detail`) : chênes, hêtres et sapins en
-## cartes de feuillage (`VegetationMeshes.essence_mid`, ≈ 150-330 triangles) ; entre
+## cartes de feuillage (`VegetationMeshes.essence_mid`, ≈ 145-250 triangles) ; entre
 ## `near_distance` et `detail_distance`, imposteurs (ombres gardées) au lieu des maillages
 ## détaillés de 90 triangles. `--no-fc5` rend les maillages détaillés.
 @export var use_near_cards: bool = true
-@export var near_distance: float = 60.0
+@export var near_distance: float = 45.0
 
 ## PF1 : préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
 ## zoom maximal des ombres.

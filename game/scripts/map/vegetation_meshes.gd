@@ -74,7 +74,7 @@ static func impostor(name: String) -> ArrayMesh:
 	return mesh
 
 
-## Lot FC5 : variante proche semi-réaliste (cartes de feuillage + tronc et branches, ≈ 330
+## Lot FC5 : variante proche semi-réaliste (cartes de feuillage + tronc et branches, ≈ 250
 ## triangles pour les feuillus, 145 pour le sapin), dessinée avec `foliage_cards.gdshader`
 ## (texture `CARD_TEXTURE`, découpe alpha). UV2 = coordonnées dans l'atlas des cartes (moitié
 ## gauche : feuilles, droite : brindille de sapin). Null si le GLB n'a pas la variante.

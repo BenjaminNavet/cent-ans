@@ -12,13 +12,21 @@ global uniform vec4 campaign_season;
 global uniform float campaign_prop_scale;
 
 uniform float fade : hint_range(0.0, 1.0) = 1.0;
+// Lot FC5 : réduction avec `campaign_prop_scale`^puissance (0,5 : plus lente que les arbres).
+uniform float prop_scale_power = 0.5;
 uniform vec2 focus = vec2(0.0);
 uniform float radius = 40.0;
 uniform float wind_strength = 0.12;
 uniform float wind_speed = 1.4;
-uniform vec3 grass_color : source_color = vec3(0.30, 0.42, 0.14);
-uniform vec3 grass_dry : source_color = vec3(0.52, 0.48, 0.22);
-uniform vec3 bush_color : source_color = vec3(0.17, 0.27, 0.10);
+// Lot FC5 : teintes proches de la prairie du terrain (`terrain.gdshader`, tint_grass linéaire
+// 0,105 / 0,165 / 0,045), pointes un peu plus claires pour détacher les touffes du sol.
+uniform vec3 grass_color : source_color = vec3(0.38, 0.47, 0.24);
+uniform vec3 grass_dry : source_color = vec3(0.55, 0.51, 0.31);
+uniform vec3 bush_color : source_color = vec3(0.24, 0.33, 0.15);
+// Lot FC5 : touffe en éventail (lot DA6, CC0) : alpha = brins, luminance = relief des brins.
+// Mipmaps + compensation de l'alpha : les brins restent lisibles quand la touffe fait 10 px.
+uniform sampler2D grass_texture : source_color, filter_linear_mipmap, repeat_disable;
+uniform bool has_grass_texture = false;
 uniform vec3 autumn_color : source_color = vec3(0.45, 0.30, 0.12);
 uniform vec3 winter_color : source_color = vec3(0.36, 0.32, 0.24);
 
@@ -46,11 +54,12 @@ void vertex() {
 	v_tint = INSTANCE_CUSTOM.y;
 	v_seed = INSTANCE_CUSTOM.z;
 	float up = 1.0 - UV.y;
-	VERTEX *= campaign_prop_scale;
+	float prop = pow(max(campaign_prop_scale, 1e-4), prop_scale_power);
+	VERTEX *= prop;
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	// Vent : pointe des brins seulement (buisson plus raide).
 	float sway = sin(TIME * wind_speed + INSTANCE_CUSTOM.z * 6.283 + world.x * 0.35 + world.z * 0.21);
-	float bend = up * up * wind_strength * (v_kind > 0.5 ? 0.35 : 1.0) * campaign_prop_scale;
+	float bend = up * up * wind_strength * (v_kind > 0.5 ? 0.35 : 1.0) * prop;
 	VERTEX.x += sway * bend;
 	VERTEX.z += sway * bend * 0.4;
 	// Fondu : les rangs au-dessus du seuil (distance caméra, bord du disque) sont retirés.
@@ -86,13 +95,26 @@ float bush(vec2 uv, float seed) {
 
 void fragment() {
 	bool is_bush = v_kind > 0.5;
-	float mask = is_bush ? bush(UV, v_seed) : blades(UV, v_seed);
+	float mask;
+	float shade = 1.0;
+	if (is_bush) {
+		mask = bush(UV, v_seed);
+	} else if (has_grass_texture) {
+		// Une touffe sur deux retournée : moins de répétition.
+		vec2 uv = vec2(v_seed > 0.5 ? 1.0 - UV.x : UV.x, UV.y);
+		vec4 t = texture(grass_texture, uv);
+		float lod = max(textureQueryLod(grass_texture, uv).x, 0.0);
+		mask = t.a * (1.0 + lod * 0.4);
+		shade = mix(0.75, 1.2, dot(t.rgb, vec3(0.3, 0.59, 0.11)));
+	} else {
+		mask = blades(UV, v_seed);
+	}
 	if (mask < 0.5) {
 		discard;
 	}
 	float up = 1.0 - UV.y;
 	vec3 base = is_bush ? bush_color : mix(grass_color, grass_dry, v_tint * 0.6);
-	base *= mix(0.9, 1.12, v_tint);
+	base *= mix(0.9, 1.12, v_tint) * shade;
 	vec4 w = campaign_season;
 	// Printemps tendre, été sec, automne roux, hiver brun-gris.
 	vec3 color = base * (w.x * vec3(1.03, 1.12, 0.92) + w.y * vec3(1.05, 1.0, 0.85));
@@ -103,7 +125,7 @@ void fragment() {
 		color = base;
 	}
 	// Pied des touffes assombri (occlusion au sol).
-	color *= mix(0.55, 1.0, smoothstep(0.0, 0.6, up));
+	color *= mix(0.55, 1.12, smoothstep(0.0, 0.8, up));
 	ALBEDO = color;
 	ROUGHNESS = 0.95;
 	BACKLIGHT = color * 0.3;

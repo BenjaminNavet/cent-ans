@@ -8,6 +8,9 @@ brindille de sapin (Poly Haven `fir_tree_01`, CC0). Chaque moitié est divisée 
 moyenne (linéaire) puis multipliée par 0,5 : la texture ne module que la palette des sommets
 (`VegetationMeshes.PALETTES`), le shader (`foliage.gdshaderinc`, FOLIAGE_CARDS) multiplie par 2.
 Couleurs des pixels transparents diffusées depuis les bords (pas de franges au mipmapping).
+
+Produit aussi `campaign_grass_tuft.png` : copie de `../battle/grass_blades.png` (lot DA6, CC0),
+importée ici avec mipmaps pour les touffes d'herbe de la carte (`GroundClutter`, lot FC5).
 """
 
 from pathlib import Path
@@ -66,6 +69,11 @@ def main() -> None:
     atlas = np.concatenate(halves, axis=1)
     Image.fromarray(np.round(atlas * 255).astype(np.uint8), "RGBA").save(HERE / "campaign_leaf_cards.png")
     print("campaign_leaf_cards.png", atlas.shape[1], atlas.shape[0])
+    tuft = Image.open(REPO / "game/assets/textures/battle/grass_blades.png").convert("RGBA")
+    arr = np.asarray(tuft).astype(np.float32) / 255.0
+    arr[..., :3] = bleed(arr[..., :3], arr[..., 3] > 0.5)
+    Image.fromarray(np.round(arr * 255).astype(np.uint8), "RGBA").save(HERE / "campaign_grass_tuft.png")
+    print("campaign_grass_tuft.png", tuft.size)
 
 
 if __name__ == "__main__":
