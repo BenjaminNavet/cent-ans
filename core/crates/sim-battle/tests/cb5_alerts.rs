@@ -138,7 +138,9 @@ fn reinforcements_alert_fires_when_a_reserve_marches_in() {
     let data = data();
     let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(22);
     let battle = setup(units(&data, &many), units(&data, &many[..8]), None);
-    let mut sim = BattleSim::new(battle, 4).unwrap();
+    // The standard field (its 40-regiment cap) whatever the head count.
+    let skirmish = sim_battle::BattleScale::named("skirmish").unwrap();
+    let mut sim = BattleSim::new_scaled(battle, 4, skirmish).unwrap();
     lab(&mut sim);
     assert!(sim.units()[40].reserve);
     // A fielded regiment is destroyed: the first waiting one marches in.

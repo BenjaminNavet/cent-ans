@@ -4,7 +4,7 @@
     {
       "key": "skirmish",
       "label": "Escarmouche",
-      "max_soldiers": 8000,
+      "max_soldiers": 4000,
       "width_m": 1200,
       "depth_m": 800,
       "line_gap_m": 300,
@@ -14,7 +14,7 @@
     {
       "key": "large",
       "label": "Grande bataille",
-      "max_soldiers": 16000,
+      "max_soldiers": 8000,
       "width_m": 1800,
       "depth_m": 1200,
       "line_gap_m": 340,

@@ -68,8 +68,8 @@ fn head_count_picks_the_field() {
     assert_eq!((small.field().width, small.field().depth), (1200.0, 800.0));
     assert_eq!(small.max_on_field(), 40);
 
-    // 70 × 120 × 2 = 16 800 soldiers.
-    let epic = BattleSim::new(big_setup(70), 3).unwrap();
+    // 63 × 120 × 2 = 15 120 soldiers.
+    let epic = BattleSim::new(big_setup(63), 3).unwrap();
     assert_eq!(epic.scale().key, "epic");
     let field = epic.field();
     assert_eq!((field.width, field.depth), (2400.0, 1600.0));
