@@ -34,7 +34,7 @@ QUATERNIUS = (
 # name: (texture id or None, texture tile size in metres, fallback linear colour, roughness)
 MATERIALS = {
     "Plaster": ("lime_plaster", 2.2, (0.62, 0.58, 0.5), 0.95),
-    "TimberFrame": ("timber_frame", 2.2, (0.5, 0.46, 0.4), 0.85),
+    "TimberFrame": ("timber_frame", 3.0, (0.5, 0.46, 0.4), 0.85),
     "Rubble": ("stone_wall", 2.4, (0.36, 0.33, 0.28), 0.95),
     "Ashlar": ("rustic_stone_wall", 2.1, (0.42, 0.39, 0.33), 0.9),
     "Masonry": ("battle/castle_wall_varriation", 3.0, (0.45, 0.43, 0.4), 0.9),
@@ -58,6 +58,7 @@ MATERIAL_TINT = {
     "RoofTile": (0.85, 0.78, 0.76),
     "Plaster": (1.05, 1.02, 0.97),
     "Door": (0.7, 0.62, 0.55),
+    "TimberFrame": (1.12, 1.09, 1.03),
 }
 
 

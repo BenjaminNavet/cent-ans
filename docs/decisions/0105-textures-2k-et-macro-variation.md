@@ -189,3 +189,38 @@ ses vagues d'une houle procédurale (trois évaluations par pixel) et sa couleur
   cache de relief relié, passes alternées avec et sans `--no-ga4`.
 - Changer d'asset : éditer `poly_haven_id` dans les données puis `cent-ans geo textures`
   (réécrit tableaux, normale d'eau et moyennes).
+
+## Section TF (câblage du colombage, toits du château Kenney)
+
+Date : 2026-09-30. Lot L4 de `docs/wip/realisme-suite.md` (`docs/wip/tf.md`). Tranche le point
+laissé ouvert en §GA5.3.
+
+1. **Couche en fin d'atlas.** `TimberFrame` devient la couche 14 de l'atlas `Building` (après
+   `Canvas`) : les indices déjà bakés dans l'alpha des couleurs de sommet des `.glb` restent
+   valides, aucun modèle ancien n'est à réexporter pour rester juste. Les shaders
+   (`building_atlas`, `town_building`) remplacent le seuil `first_plain` par un bloc uni
+   `first_plain`..`plain_last` (11..13, calculé par `BuildingMaterials._atlas()` d'après `plain`),
+   donc toute couche texturée ajoutée ensuite garde sa texture.
+2. **Surface du kit.** Le kit Blender nomme `TimberFrame` les panneaux des murs à pans de bois
+   (`style.frame`, murs et pignons enduits) ; les poutres réelles restent de la géométrie `Timber`
+   par-dessus. Le lattis peint de la texture double donc l'ossature réelle (façade plus dense,
+   lue comme du colombage serré) ; au niveau de détail `low` (kit des villes ZG6), où seules
+   sablières et poteaux d'angle sont modelés, c'est la texture qui porte le motif. Réexportés :
+   kit de bataille (`game/assets/models/buildings/`, 28 fichiers changés, 10 nouveaux) et kit des
+   villes (`town_kit/`, 12 fichiers). Non réexportés : maquettes de colonies CV1 et monuments
+   (panneaux `Plaster` inchangés, rendu identique).
+3. **Choix régional par données.** `data/art/building_regions.json` (schéma
+   `art_building_regions.schema.json`), clé = `region` des provinces : part de colombage
+   (`framed`) et variantes du Midi (`southern` : enduit ou pierre, tuiles canal, pente 26-34°,
+   nouveaux modèles `cottage_6..9`, `timber_6..8`, `townhouse_6..8`, marqués dans le manifeste).
+   Normandie, Île-de-France, Picardie (`france_nord` 0,85), Flandre (0,75), Angleterre (0,4-0,8),
+   Rhénanie (0,8) : colombage courant ; Guyenne, Languedoc, Provence (≤ 0,1, Midi). `BuildingKit.pick`
+   applique ce style (`BuildingKit.region_style`, posé par `BattleTerrain.build` d'après la
+   province ; `--no-tf` = choix d'avant) aux maisons de village, de siège et de décor. Hors
+   province (démo, banc) et hors types régionaux : choix d'avant, variantes du Midi exclues.
+4. **Château Kenney.** Les toits bleus de la palette Kenney (teinte grise multipliée, CV1) sont
+   remplacés en convertissant le maillage fusionné au matériau atlas partagé (`far`) : chaque face
+   lit sa couleur dans la palette, bleu → `RoofSlate`, brun sombre → `Timber`, reste → `Masonry`,
+   UV en mètres projetées. Toujours un maillage, une surface, un appel de rendu par château, et le
+   matériau est celui des maquettes (pas de matériau en plus).
+

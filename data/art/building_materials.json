@@ -115,8 +115,8 @@
       "diffuse": "buildings/timber_frame_diff",
       "normal": "buildings/timber_frame_nor",
       "roughness_map": "buildings/timber_frame_rough",
-      "tile_size_m": 2.2,
-      "tint": [1.0, 1.0, 1.0],
+      "tile_size_m": 3.0,
+      "tint": [1.12, 1.09, 1.03],
       "roughness": 0.85,
       "poly_haven_id": "",
       "wired": true

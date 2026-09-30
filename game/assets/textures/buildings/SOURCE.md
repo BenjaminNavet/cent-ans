@@ -39,18 +39,12 @@ lattis de poteaux/sablières/entretoises dessiné algorithmiquement (`build_text
 seed déterministe) et mélangé entre `lime_plaster` (remplissage, déjà CC0 Poly Haven) et
 `rough_wood` assombri/désaturé (poutres, déjà CC0 Poly Haven) — aucun nouvel asset externe, 0 $.
 
-`TimberFrame` est une matière **prête mais non câblée** : `data/art/building_materials.json`
-la marque `"wired": false` et elle n'est pas dans `atlas_layers`. Elle est utilisable dès
-aujourd'hui via `BuildingMaterials.material("TimberFrame")` (matériau individuel), mais aucune
-surface du kit Blender (`tools/blender_scripts/building_kit.py`) ne porte ce nom pour l'instant,
-et l'ajouter à l'atlas `Building` demanderait un changement + réexport du kit côté
-`kit_export.py` (l'indice de couche de l'atlas est baké dans la couleur de sommet des `.glb`
-déjà exportés — un ajout en milieu de tableau les désaligne, un ajout en fin de tableau tombe
-après `first_plain` et serait traité comme une matière unie par `building_atlas.gdshader`).
-Choix de conception à trancher côté joueur/lead avant de câbler : quelle proportion de bâtiments
-(quel type, quelle région — la charpenterie apparente est plus caractéristique de Normandie/
-Île-de-France/Angleterre que du Midi) reçoit `TimberFrame` à la place de `Plaster`. Voir
-`docs/wip/ga.md`, section GA5.
+`TimberFrame` est **câblée** depuis le lot TF (`"wired": true`) : panneaux des murs à pans de
+bois du kit Blender (`building_kit.FRAME_PANEL`, sous les poutres réelles), dernière couche de
+l'atlas `Building` (indice 14, `building_{albedo,normal}_array.jpg` à 15 tranches) ; le shader
+traite les couches unies comme un bloc `first_plain`..`plain_last` (11..13), la couche 14 reste
+texturée. Tuile 3 m, teinte éclaircie (1,12) : le lattis peint double les poutres réelles, plus
+espacé et plus clair il alourdit moins la façade. Voir ADR 0105 §TF.
 
 ## Régénérer
 
