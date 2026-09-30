@@ -2,10 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ddiiffsgeerda"
+path.bptc="res://.godot/imported/campaign_impostors_normal.png-67d308381c0d3fccf05953210233cc69.bptc.ctex"
+path.astc="res://.godot/imported/campaign_impostors_normal.png-67d308381c0d3fccf05953210233cc69.astc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/textures/vegetation/campaign_impostors_normal.png"
+dest_files=["res://.godot/imported/campaign_impostors_normal.png-67d308381c0d3fccf05953210233cc69.bptc.ctex", "res://.godot/imported/campaign_impostors_normal.png-67d308381c0d3fccf05953210233cc69.astc.ctex"]
 
 [params]
 

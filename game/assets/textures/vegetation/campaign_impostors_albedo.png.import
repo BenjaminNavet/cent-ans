@@ -2,10 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bihueoa1os1pl"
+path.bptc="res://.godot/imported/campaign_impostors_albedo.png-00fea033f73f8f2e55c82022c291fe37.bptc.ctex"
+path.astc="res://.godot/imported/campaign_impostors_albedo.png-00fea033f73f8f2e55c82022c291fe37.astc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/textures/vegetation/campaign_impostors_albedo.png"
+dest_files=["res://.godot/imported/campaign_impostors_albedo.png-00fea033f73f8f2e55c82022c291fe37.bptc.ctex", "res://.godot/imported/campaign_impostors_albedo.png-00fea033f73f8f2e55c82022c291fe37.astc.ctex"]
 
 [params]
 
