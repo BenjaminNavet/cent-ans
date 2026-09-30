@@ -64,3 +64,23 @@ au lieu d'un écu collé sur chaque flanc ; anneau redistribué (1/3 dos, 1/3 pa
 nombre de triangles. Balancement : déjà fait par AN1a (`sm_weight` part 1, vitesse du régiment).
 État : terminé (recuit, échelle 1,5 m par unité d'écu : meubles ~22 cm, bordure = liseré du drap).
 Prochaine étape : jugement du joueur.
+
+# CR4 — maille, cheval, lances (lot L3)
+
+État : CR4 terminé (grille `docs/img/cr/cr4_ab.jpg`, captures `~/dev/cent-ans-raw/cr4/`, 4 sur 30) ; jugement du joueur attendu.
+Fait (shader) : maille rasante sans Fresnel (métal et réflectance → 0 à contre-jour : le f90 de
+Godot suit f0), creux du scan presque noirs (relief `d.b`), albédo ×0,55 ; robe : tuile de poil
+couché tournée vers l'arrière et le bas sur le tronc (tuile claire unie remplacée), crins en tuile
+de cheveux, crins et bas des jambes noirs des bais/isabelles, paturons plus foncés, balzane
+postérieure gauche 1 cheval sur 6 ; lance : longueur ±10 %, angle ±3°/±2° par cavalier autour de
+la prise de repos (`prop_grip/axis/side` du manifeste, os `Prop`), flamme ondulante (60 % des
+cavaliers), fût veiné le long de l'axe, prise noircie et lustrée.
+Fait (Blender) : crinière et queue en mèches prismatiques (`battle_fine_cavalry.strands`, 44/22
+mèches au LOD0) à la place des cartes CC0 dont le shader ignore l'alpha (blocs sombres).
+Écart : pas de cartes alpha (discard dans le shader des soldats = coût pour toute la troupe) ;
+mèches géométriques à la place.
+Recuisson cavalry_0-6 et standard_1. LOD0 : cavalry_0 16 406, cavalry_3 17 034 (plafond 17 414),
+standard_1 16 530, autres 14 813-15 857 (les mèches coûtent moins que les cartes doublées).
+Tests : smoke, fg3_maps, sr2_weathering, an1a_motion, an1b_clips, nt7_anim verts.
+Points ouverts : maille encore gris moyen tacheté au soleil (anneaux du scan à 4 px sur la tuile
+d'albédo 256 px) ; sens du poil peu lisible sous 5 m ; flamme petite, à juger en mouvement.

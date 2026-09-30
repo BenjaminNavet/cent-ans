@@ -56,9 +56,11 @@ fn crossings_to_calais_are_fought_in_the_channel() {
         crossing("set_dover", "set_sluis"),
         Some(sea("sea_north_sea"))
     );
+    // Lot SL1: a sea lane carries its own sea both ways (route de l'Étape,
+    // through the Strait of Dover).
     assert_eq!(
         crossing("set_calais", "set_londres"),
-        Some(sea("sea_north_sea"))
+        Some(sea("sea_channel"))
     );
 }
 

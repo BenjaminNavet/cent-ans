@@ -84,6 +84,9 @@ var quality_max_distance: float = -1.0
 @export var near_distance: float = 45.0
 ## Lot FC6 : largeur du fondu tramé cartes → imposteur, par arbre, en deçà de `near_distance`.
 @export var near_fade: float = 8.0
+## GA3-L2 : imposteurs générés à toutes distances (cartes FC5 retirées, ≈ 250 → 2 triangles par
+## arbre proche) ; faux avec `--no-ga3-veg` / `--no-ga3-near` ou sans imposteurs.
+var ga3_near_impostors: bool = false
 
 ## PF1 : préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
 ## zoom maximal des ombres.
@@ -182,10 +185,12 @@ func build(data: MapData) -> void:
 	_material.shader = FOLIAGE_SHADER
 	_impostor_material = _make_impostor_material() if use_impostors else null
 	_cards_material = null
-	if use_near_cards and ResourceLoader.exists(VegetationMeshes.CARD_TEXTURE) and VegetationMeshes.essence_mid("oak") != null:
+	# GA3-L2 : imposteurs générés aussi pour les arbres proches (pas de cartes de feuillage).
+	ga3_near_impostors = _impostor_material != null and Ga3Vegetation.near_impostors()
+	if use_near_cards and not ga3_near_impostors and ResourceLoader.exists(VegetationMeshes.CARD_TEXTURE) and VegetationMeshes.essence_mid("oak") != null:
 		_cards_material = ShaderMaterial.new()
 		_cards_material.shader = CARDS_SHADER
-		_cards_material.set_shader_parameter("card_texture", load(VegetationMeshes.CARD_TEXTURE))
+		_cards_material.set_shader_parameter("card_texture", load(Ga3Vegetation.pick(Ga3Vegetation.LEAF_CARDS, VegetationMeshes.CARD_TEXTURE)))
 		if _impostor_material != null:  # FC6 : quadrilatère d'imposteur des arbres proches
 			for param in ["albedo_atlas", "normal_atlas", "views", "rows"]:
 				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
@@ -205,13 +210,17 @@ func build(data: MapData) -> void:
 
 
 ## Lot FC2 : matériau des imposteurs, null si un atlas manque (repli sur les maillages bas).
+## GA3-L2 : grille générée (`Ga3Vegetation`) sauf `--no-ga3-veg`, même cadrage.
 static func _make_impostor_material() -> ShaderMaterial:
-	if not ResourceLoader.exists(VegetationMeshes.IMPOSTOR_ALBEDO) or not ResourceLoader.exists(VegetationMeshes.IMPOSTOR_NORMAL):
+	var ga3 := Ga3Vegetation.enabled() and Ga3Vegetation.has_impostors()
+	var albedo_path := Ga3Vegetation.IMPOSTOR_ALBEDO if ga3 else VegetationMeshes.IMPOSTOR_ALBEDO
+	var normal_path := Ga3Vegetation.IMPOSTOR_NORMAL if ga3 else VegetationMeshes.IMPOSTOR_NORMAL
+	if not ResourceLoader.exists(albedo_path) or not ResourceLoader.exists(normal_path):
 		return null
 	var material := ShaderMaterial.new()
 	material.shader = IMPOSTOR_SHADER
-	material.set_shader_parameter("albedo_atlas", load(VegetationMeshes.IMPOSTOR_ALBEDO))
-	material.set_shader_parameter("normal_atlas", load(VegetationMeshes.IMPOSTOR_NORMAL))
+	material.set_shader_parameter("albedo_atlas", load(albedo_path))
+	material.set_shader_parameter("normal_atlas", load(normal_path))
 	material.set_shader_parameter("views", VegetationMeshes.IMPOSTOR_VIEWS)
 	material.set_shader_parameter("rows", VegetationMeshes.IMPOSTOR_ROWS.size())
 	return material
@@ -629,7 +638,7 @@ func _meshes(lod: int) -> Array:
 	var hedge := VegetationMeshes.hedge() if detailed else VegetationMeshes.hedge_low()
 	if lod == Lod.NEAR and _cards_material != null:
 		return [VegetationMeshes.essence_mid("oak"), VegetationMeshes.essence_mid("beech"), VegetationMeshes.essence_mid("fir"), hedge]
-	if _impostor_material != null and (lod == Lod.FAR or _cards_material != null):
+	if _impostor_material != null and (lod == Lod.FAR or _cards_material != null or ga3_near_impostors):
 		return [VegetationMeshes.impostor("oak"), VegetationMeshes.impostor("beech"), VegetationMeshes.impostor("fir"), hedge]
 	return [VegetationMeshes.essence("oak", detailed), VegetationMeshes.essence("beech", detailed),
 		VegetationMeshes.essence("fir", detailed), hedge]
@@ -638,14 +647,14 @@ func _meshes(lod: int) -> Array:
 ## Lot FC5 : maillages de la forêt dense (`ForestDetail`) : cartes de feuillage au plus près
 ## (`near`), imposteurs sinon ; `--no-fc5` : maillages bas partout (comportement SZ4b).
 func forest_meshes(near: bool) -> Array:
-	if _cards_material == null:
+	if _cards_material == null and not ga3_near_impostors:
 		return [VegetationMeshes.essence("oak", false), VegetationMeshes.essence("beech", false),
 			VegetationMeshes.essence("fir", false), VegetationMeshes.hedge_low()]
 	return _meshes(Lod.NEAR if near else Lod.FAR)
 
 
 func forest_material(kind: int, near: bool) -> ShaderMaterial:
-	return _material if _cards_material == null else _material_for(kind, Lod.NEAR if near else Lod.FAR)
+	return _material if _cards_material == null and not ga3_near_impostors else _material_for(kind, Lod.NEAR if near else Lod.FAR)
 
 
 func near_cards_active() -> bool:
@@ -658,7 +667,7 @@ func _material_for(kind: int, lod: int) -> ShaderMaterial:
 		return _material
 	if lod == Lod.NEAR and _cards_material != null:
 		return _cards_material
-	if _impostor_material != null and (lod == Lod.FAR or _cards_material != null):
+	if _impostor_material != null and (lod == Lod.FAR or _cards_material != null or ga3_near_impostors):
 		return _impostor_material
 	return _material
 

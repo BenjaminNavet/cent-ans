@@ -249,6 +249,29 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 	# cavaliers salissent le bas des jambes du cheval et l'ourlet du caparaçon (~0,65 m).
 	mat.set_shader_parameter("weathering", sr2_weathering())
 	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
+	_setup_lance(mat, fig)
+
+
+## CR4 : lance propre au cavalier (longueur, angle, flamme) autour de la prise de repos du
+## manifeste (`prop_grip`, `prop_axis`, `prop_side`), os `Prop` du squelette de la figurine.
+static func _setup_lance(mat: ShaderMaterial, fig: Dictionary) -> void:
+	if not fig.has("prop_grip"):
+		mat.set_shader_parameter("prop_bone", -1)
+		return
+	var bones: Array = (manifest().get("rigs", {}) as Dictionary).get(str(fig.get("rig", "")), {}).get("bones", [])
+	var bone := -1
+	for i in bones.size():
+		if str(bones[i]).ends_with("Prop"):
+			bone = i
+			break
+	mat.set_shader_parameter("prop_bone", bone)
+	mat.set_shader_parameter("prop_grip", _vec3(fig["prop_grip"]))
+	mat.set_shader_parameter("prop_axis", _vec3(fig["prop_axis"]))
+	mat.set_shader_parameter("prop_side", _vec3(fig["prop_side"]))
+
+
+static func _vec3(values: Array) -> Vector3:
+	return Vector3(float(values[0]), float(values[1]), float(values[2]))
 
 
 static func manifest() -> Dictionary:

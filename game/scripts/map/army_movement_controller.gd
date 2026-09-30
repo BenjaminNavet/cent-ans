@@ -297,18 +297,14 @@ func order_target(army_id: String, target: Dictionary) -> Dictionary:
 				return order_attack(army_id, str(target["id"]))
 			return order_move_point(army_id, target["point"])
 		"settlement":
+			# SL1 : port relié par la mer au port où se tient l'armée (route maritime ou court
+			# passage) : on embarque, plutôt que de faire le tour par les terres.
+			var crossing := _try_embark(army_id, str(target["id"]))
+			if crossing.get("ok", false):
+				return crossing
 			if relation_to(target_faction(target)) == "war":
 				return order_attack_settlement(army_id, str(target["id"]))
-			var report := order_move_settlement(army_id, str(target["id"]))
-			if report.get("ok", false):
-				return report
-			# Port d'outre-mer : traversée si l'armée se tient dans un port relié (le cœur valide).
-			var army: Dictionary = map.sim.call("get_army", army_id)
-			if str(army.get("settlement", "")) != "" and map.sim.has_method("embark_army"):
-				var crossing := order_embark(army_id, str(target["id"]))
-				if crossing.get("ok", false):
-					return crossing
-			return report
+			return order_move_settlement(army_id, str(target["id"]))
 		"ground":
 			return order_move_point(army_id, target["point"])
 	return {"ok": false, "error": "Aucune cible."}
@@ -361,6 +357,20 @@ func order_assault(army_id: String) -> Dictionary:
 	if map.has_method("_offer_pending_battles"):
 		map.call("_offer_pending_battles")
 	return result
+
+
+## SL1 : traversée vers `port` si l'armée se tient dans un port qui lui est relié par la mer
+## (`is_sea_link`) ; `{}` sinon (le cœur valide le reste : saison entière, interception).
+func _try_embark(army_id: String, port: String) -> Dictionary:
+	if not map.sim.has_method("embark_army"):
+		return {}
+	var army: Dictionary = map.sim.call("get_army", army_id)
+	var from := str(army.get("settlement", ""))
+	if from == "" or from == port:
+		return {}
+	if map.sim.has_method("is_sea_link") and not bool(map.sim.call("is_sea_link", from, port)):
+		return {}
+	return order_embark(army_id, port)
 
 
 func order_embark(army_id: String, port: String) -> Dictionary:

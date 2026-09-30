@@ -42,6 +42,8 @@ var prop_count := 0
 var vine_segments := 0
 var horse_count := 0
 var tent_count := 0
+## GA3-L1 : instances remplacées par une variante générée (`Ga3Kit`), camps compris.
+var ga3_count := 0
 
 
 func build(terrain: BattleTerrain, decor: Dictionary, weather: String) -> void:
@@ -67,11 +69,12 @@ func build(terrain: BattleTerrain, decor: Dictionary, weather: String) -> void:
 	walls.build(root)
 	_build_moats(decor.get("moats", []), weather)
 	_build_vineyards(decor.get("areas", []), bool(decor.get("vines_leafy", true)))
+	ga3_count = landmarks.ga3_count() + houses.ga3_count() + props.ga3_count()
 	for camp in decor.get("camps", []):
 		_build_camp(camp)
 	set_process(false)
-	print("BattleDecor: %s, %d buildings, %d props, %d vine segments, %d tents, %d horses" % [
-		str(decor.get("profile", "")), building_count, prop_count, vine_segments, tent_count, horse_count])
+	print("BattleDecor: %s, %d buildings, %d props, %d vine segments, %d tents, %d horses, %d GA3 variants" % [
+		str(decor.get("profile", "")), building_count, prop_count, vine_segments, tent_count, horse_count, ga3_count])
 
 
 ## Vrai si le décor pose ses propres camps (EP8 ne pose alors pas ses feux par défaut).
@@ -405,6 +408,7 @@ func _build_camp(camp: Dictionary) -> void:
 	root.name = "Camp_" + side
 	add_child(root)
 	batch.build(root)
+	ga3_count += batch.ga3_count()
 	horses.build(root)
 	_build_posts(root, posts)
 	_build_fires(root, fires)

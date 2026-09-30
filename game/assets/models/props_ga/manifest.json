@@ -1,0 +1,128 @@
+{
+ "ga3_cart": {
+  "depth": 2.954,
+  "fit": "real",
+  "height": 2.149,
+  "kit_kind": "cart",
+  "length": 4.593,
+  "share": 0.5,
+  "triangles": [
+   3000,
+   1500,
+   847
+  ],
+  "wired": true
+ },
+ "ga3_church": {
+  "depth": 15.062,
+  "fit": "length",
+  "height": 17.439,
+  "kit_kind": "church",
+  "length": 22.008,
+  "share": 1.0,
+  "triangles": [
+   24997,
+   12499,
+   3749
+  ],
+  "wired": true
+ },
+ "ga3_house": {
+  "depth": 5.662,
+  "fit": "footprint",
+  "height": 5.518,
+  "kit_kind": "cottage",
+  "length": 8.009,
+  "share": 0.5,
+  "triangles": [
+   7998,
+   4000,
+   1200
+  ],
+  "wired": true
+ },
+ "ga3_palisade": {
+  "depth": 0.705,
+  "fit": "real",
+  "height": 1.891,
+  "kit_kind": "palisade",
+  "length": 3.128,
+  "share": 1.0,
+  "triangles": [
+   2998,
+   1500,
+   446
+  ],
+  "wired": true
+ },
+ "ga3_ram": {
+  "depth": 3.635,
+  "fit": "real",
+  "height": 4.664,
+  "kit_kind": "ram",
+  "length": 7.009,
+  "share": 0.0,
+  "triangles": [
+   2999,
+   1500,
+   968
+  ],
+  "wired": false
+ },
+ "ga3_tent": {
+  "depth": 4.404,
+  "fit": "real",
+  "height": 3.123,
+  "kit_kind": "tent",
+  "length": 4.995,
+  "share": 0.5,
+  "triangles": [
+   3000,
+   1500,
+   450
+  ],
+  "wired": true
+ },
+ "ga3_trebuchet": {
+  "depth": 7.116,
+  "fit": "real",
+  "height": 11.045,
+  "kit_kind": "trebuchet",
+  "length": 12.156,
+  "share": 0.0,
+  "triangles": [
+   2999,
+   1499,
+   641
+  ],
+  "wired": false
+ },
+ "ga3_well": {
+  "depth": 2.473,
+  "fit": "real",
+  "height": 3.405,
+  "kit_kind": "well",
+  "length": 2.648,
+  "share": 1.0,
+  "triangles": [
+   3000,
+   1500,
+   450
+  ],
+  "wired": true
+ },
+ "ga3_windmill": {
+  "depth": 7.677,
+  "fit": "real",
+  "height": 14.006,
+  "kit_kind": "windmill",
+  "length": 14.429,
+  "share": 1.0,
+  "triangles": [
+   7999,
+   3999,
+   1199
+  ],
+  "wired": true
+ }
+}
