@@ -29,5 +29,10 @@
   "sources": [
     "Maison de Montefeltro",
     "Urbin"
-  ]
+  ],
+  "death": {
+    "value": "1364",
+    "uncertain": true,
+    "note": "Mort vers 1364."
+  }
 }

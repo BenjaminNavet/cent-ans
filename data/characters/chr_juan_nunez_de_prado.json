@@ -1,0 +1,48 @@
+{
+  "id": "chr_juan_nunez_de_prado",
+  "name": {
+    "display": "Juan Núñez de Prado",
+    "local": "Juan Núñez de Prado",
+    "local_language": "castillan"
+  },
+  "sex": "male",
+  "house": "Ordre de Calatrava",
+  "faction": "fac_calatrava",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date inconnue ; maître de l'ordre dès 1328."
+  },
+  "death": {
+    "value": "1355",
+    "note": "Déposé en 1354 sur ordre de Pierre Ier, puis mis à mort à Maqueda."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Maître de l'ordre de Calatrava",
+      "from": {
+        "value": "1328"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_veteran"
+  ],
+  "piety": 70,
+  "starting_location": "prov_calatrava",
+  "status": "at_court",
+  "description": "Maître de l'ordre de Calatrava de 1328 à 1355, élu à la déposition de García López de Padilla, qui lui dispute longtemps la maîtrise ; il mène l'ordre sur la frontière de Grenade sous Alphonse XI, avant d'être déposé puis mis à mort sous Pierre Ier.",
+  "sources": [
+    "Ordre de Calatrava",
+    "Orden de Calatrava (es)",
+    "Juan Núñez de Prado (web)"
+  ]
+}

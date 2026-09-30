@@ -1,0 +1,45 @@
+{
+  "id": "chr_halil_karaman",
+  "name": {
+    "display": "Alaeddin Halil Bey",
+    "local": "Alâeddin Halil",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Karamanoğulları",
+  "faction": "fac_karaman",
+  "role": "ruler",
+  "birth": {
+    "value": "1305",
+    "uncertain": true,
+    "note": "Date inconnue ; frère cadet de Musa et d'İbrahim."
+  },
+  "death": {
+    "value": "1340"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Karaman",
+      "from": {
+        "value": "1332"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave"
+  ],
+  "piety": 55,
+  "starting_location": "prov_karaman",
+  "status": "at_court",
+  "description": "Frère cadet de Musa et d'İbrahim, bey de Karaman depuis 1332, date à laquelle İbrahim abdique en sa faveur ; il règne à Larende face à Eretna et aux Mamelouks jusqu'à sa mort en 1340, après quoi İbrahim reprend le pouvoir. La première moitié du XIVe siècle karamanide reste mal documentée.",
+  "sources": [
+    "Halil of Karaman (web)",
+    "Karamanids (web)"
+  ]
+}

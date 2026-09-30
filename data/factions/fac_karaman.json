@@ -9,7 +9,7 @@
   "adjective": "de Karaman",
   "government": "principality",
   "playable": true,
-  "ruler": "chr_ibrahim_karaman",
+  "ruler": "chr_halil_karaman",
   "capital": "prov_karaman",
   "capital_city": "Larende (Karaman)",
   "religion": "rel_islam",
@@ -57,7 +57,7 @@
     "trade": 50,
     "piety": 60
   },
-  "description": "Héritiers autoproclamés des Seldjoukides de Roum, les Karamanoğulları dominent le Taurus et Konya ; Badreddin Ibrahim règne depuis 1333.",
+  "description": "Héritiers autoproclamés des Seldjoukides de Roum, les Karamanoğulları dominent le Taurus et Konya ; Alaeddin Halil règne depuis 1332, son frère İbrahim ayant abdiqué en sa faveur.",
   "sources": [
     "Karamanids",
     "Ibrahim of Karaman"

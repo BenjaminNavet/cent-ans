@@ -15,11 +15,7 @@
     "Serchio"
   ],
   "coastal": true,
-  "ports": [
-    "Pise",
-    "Porto Pisano",
-    "Talamone"
-  ],
+  "ports": [],
   "sea_zones": [
     "sea_mediterranean"
   ],

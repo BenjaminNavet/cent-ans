@@ -1,0 +1,48 @@
+{
+  "id": "chr_malatesta_guastafamiglia",
+  "name": {
+    "display": "Malatesta II Malatesta",
+    "local": "Malatesta Malatesta",
+    "local_language": "italien"
+  },
+  "epithet": "Guastafamiglia",
+  "sex": "male",
+  "house": "Malatesta",
+  "faction": "fac_rimini",
+  "role": "ruler",
+  "birth": {
+    "value": "1299",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1364-08-27"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Seigneur de Rimini",
+      "from": {
+        "value": "1335"
+      },
+      "note": "Coseigneur avec son frère Galeotto après l'éviction de Ferrantino."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_ruthless"
+  ],
+  "piety": 40,
+  "starting_location": "prov_rimini",
+  "status": "at_court",
+  "description": "Fils de Pandolfo Ier Malatesta, surnommé « Guastafamiglia » (« fléau de la famille ») pour avoir évincé et emprisonné en 1335 son cousin Ferrantino ; il tient Rimini avec son frère Galeotto, obtient le vicariat pontifical et étend la seigneurie sur Pesaro, Fano et la Marche d'Ancône jusqu'à sa mort en 1364.",
+  "sources": [
+    "Maison Malatesta",
+    "Malatesta II Malatesta (web)",
+    "Rimini"
+  ]
+}

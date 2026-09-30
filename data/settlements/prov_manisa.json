@@ -64,7 +64,7 @@
       38.67
     ],
     "weight": 6,
-    "owner": null,
+    "owner": "fac_genoa",
     "fortification_level": 1,
     "buildings": [
       "bld_market",
@@ -73,7 +73,9 @@
     "port": true,
     "description": "Port de l'alun tenu par les Génois (Cattaneo) ; assiégé en 1336 par Andronic III et Saruhan, il reste génois sous suzeraineté byzantine jusqu'en 1340.",
     "sources": [
-      "Saruhanids"
+      "Saruhanids",
+      "Phocaea",
+      "Domenico Cattaneo"
     ]
   }
 ]
