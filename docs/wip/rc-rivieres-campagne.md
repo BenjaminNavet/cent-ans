@@ -14,7 +14,11 @@ Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano
       opposées), coefficient d'assaillant / tireurs du défenseur, pronostic nommé, `setup.crossing`.
 - [ ] RC2 — Bataille tactique : un seul passage de la structure demandée entre les deux lignes.
 - [ ] RC3 — Rendu : largeur, contraste, rivières mineures plus loin ; étiquettes des noms (français).
-- [ ] RC4 — Densité : `rivers-render --fine-min-order` depuis la pyramide hydro fine (Mac du joueur).
+- [x] RC4 — Densité : `rivers-render --fine-min-order` depuis la pyramide hydro fine (Mac du joueur).
+      Outil fait et testé (pyramide synthétique). **À lancer sur le Mac** (pyramide présente),
+      puis commiter `data/map/rivers_render.json`, `river_bed.png`, `crossings_px.json` :
+      `uv run --project tools cent-ans geo rivers-render --fine-min-order 5`
+      (ajuster avec `--fine-min-length-km`, 15 par défaut ; ordre 4 pour plus de densité).
 - [ ] RC5 — Matières d'eau Nano Banana 2 (partiel) :
   - [x] pipeline : `data/art/water_materials.yaml`, `--config/--dry-run/--envelope`, section RC de
         `docs/budget.md` (5 $), `water_detail.gdshaderinc`, `WaterDetail.apply`, `data/fx/water_detail.json`.
@@ -27,3 +31,4 @@ Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano
 ## Journal
 - 2026-09-30 : RC0.
 - 2026-09-30 : RC5 pipeline prêt (génération à faire sur le Mac).
+- 2026-09-30 : RC4 (outil `--fine-min-order` ; données à régénérer sur le Mac).
