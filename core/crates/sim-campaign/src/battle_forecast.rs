@@ -156,6 +156,7 @@ impl CampaignState {
                 defender_terrain_bonus: false,
                 river_crossing: false,
                 walls,
+                assault_bonus_percent: self.engine_assault_bonus(data, &request.location),
             };
             (
                 movement::coalition_side(self, data, &attackers),
@@ -180,6 +181,7 @@ impl CampaignState {
                 }),
                 river_crossing: province.is_some_and(|p| !p.rivers.is_empty()),
                 walls: false,
+                assault_bonus_percent: 0,
             };
             (
                 movement::coalition_side(self, data, &attackers),
@@ -213,6 +215,13 @@ impl CampaignState {
         if context.walls {
             attacker_modifier *= 0.7;
             modifiers.push("Murailles intactes (−30 % à l'assaillant)".to_owned());
+            if context.assault_bonus_percent > 0 {
+                attacker_modifier *= 1.0 + f64::from(context.assault_bonus_percent) / 100.0;
+                modifiers.push(format!(
+                    "Porte enfoncée par le bélier (+{} %)",
+                    context.assault_bonus_percent
+                ));
+            }
         }
         let defender_modifier = if context.defender_terrain_bonus {
             modifiers.push("Le défenseur tient un terrain favorable (+15 %)".to_owned());

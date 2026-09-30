@@ -179,6 +179,10 @@ pub struct BattleContext {
     pub river_crossing: bool,
     /// Attacker assaults fortifications.
     pub walls: bool,
+    /// NT9: behind standing walls, the attacker's damage is raised by this
+    /// percentage (built engines such as the ram, `siege_engines.json`).
+    #[serde(default)]
+    pub assault_bonus_percent: u32,
 }
 
 /// Field, season and weather of a battle (lot N1). `weather: None` draws
@@ -844,7 +848,7 @@ pub fn resolve_with(
         a.damage *= rules.river_attacker;
     }
     if context.walls {
-        a.damage *= rules.walls_attacker;
+        a.damage *= rules.walls_attacker * (1.0 + f64::from(context.assault_bonus_percent) / 100.0);
         d.ranged *= rules.walls_defender_ranged;
     }
     d.damage *= match terrain {
@@ -1122,11 +1126,30 @@ mod tests {
                 defender_terrain_bonus: true,
                 river_crossing: true,
                 walls: false,
+                assault_bonus_percent: 0,
             },
             &mut CampaignRng::from_seed(1),
         );
         assert!(hills.defender.power > neutral.defender.power);
         assert!(hills.attacker.power < neutral.attacker.power);
+    }
+
+    /// NT9: the engines' assault bonus softens the walls for the attacker.
+    #[test]
+    fn a_broken_gate_softens_the_walls() {
+        let walls = |assault_bonus_percent| {
+            resolve_auto(
+                &infantry(4),
+                &infantry(4),
+                &BattleContext {
+                    walls: true,
+                    assault_bonus_percent,
+                    ..BattleContext::default()
+                },
+                &mut CampaignRng::from_seed(1),
+            )
+        };
+        assert!(walls(20).attacker.power > walls(0).attacker.power);
     }
 
     #[test]
