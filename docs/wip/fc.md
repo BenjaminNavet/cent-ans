@@ -68,3 +68,9 @@ du terrain, 4 000 candidats/cellule. Pose sur le fil principal ≈ 16 ms/cellule
 Captures : `~/dev/cent-ans-raw/fc5/` (avant/après `fc5_before_after_25.jpg`, `final_15/25`).
 Ouvert : herbe encore discrète à d = 15 (lue comme petites touffes/buissons à d = 25) ; pose des
 cellules d'herbe à sortir du fil principal ; bord net entre cartes et imposteurs à 45.
+
+## FC6 — herbe sans à-coup, transition cartes/imposteurs, herbe à d 12-20 (agent FC2)
+État : démarré. Plan : hauteurs des touffes calculées dans le `WorkerThreadPool` (instantané
+`ReliefQuadtree.surface_snapshot`), fil principal = MultiMesh seul (≤ 1 cellule/image, ≤ 1 ms) ;
+fondu tramé cartes ↔ imposteurs sur ~8 u autour de `near_distance` ; herbe un peu plus visible
+à d 12-20, inchangée à d ≥ 30.
