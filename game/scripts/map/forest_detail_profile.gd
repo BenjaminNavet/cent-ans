@@ -32,7 +32,7 @@ extends Resource
 @export var radius_factor: float = 3.5
 @export var radius_min: float = 6.0
 @export var radius_max: float = 50.0
-@export var fade_from: float = 0.55
+@export var fade_from: float = 0.4
 ## Budget d'instances affichées : au-delà, le rayon se resserre (gain lissé, ≥ `min_gain`).
 @export var instance_budget: int = 300000
 @export var min_gain: float = 0.35

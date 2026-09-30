@@ -104,8 +104,10 @@ Décision :
   contraste, quatre octaves filtrées par la taille du pixel) sur la part de forêt du splat.
 - Couvert : forêt dense au pas réel (~21 m), part pleine jusqu'à d = 8, 0,35 à la portée ;
   plancher natif du pas de semis abaissé (0,05 → 0,01 u).
-- Seuls les incendies (événement de jeu) restent exagérés ; les touffes d'herbe FC3 gardent,
-  hors demande, l'ancienne courbe (`clutter_scale`), découplée des arbres.
+- Touffes d'herbe, broussailles et rochers (FC3, GA3-L2) aussi à l'échelle 1:1 (herbe ~0,6 m,
+  broussailles ~1,8 m, rochers ~1 m), dessinés sous d = 2,6 seulement. Seuls les incendies
+  (événement de jeu) restent exagérés.
+- Teinte des forêts du terrain éclaircie vers celle des houppiers (transition terrain → arbres).
 
 Conséquences :
 - Au-delà de d = 30, aucun coût d'arbre (appels de dessin, instances, ombres) ; la lecture des

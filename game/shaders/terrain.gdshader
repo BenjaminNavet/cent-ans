@@ -135,6 +135,11 @@ uniform float canopy_min_px = 6.0;
 uniform float canopy_octave_gain = 0.8;
 uniform float canopy_bump = 0.45;
 uniform float canopy_contrast = 0.35;
+// VT3 : éclaircissement de la teinte des forêts vers celle des houppiers 1:1 (vue d'avion, une
+// forêt est surtout faite de cimes au soleil) : le passage terrain → arbres ne montre plus des
+// houppiers clairs sur un sol presque noir ; les massifs lointains se rapprochent de la teinte des
+// arbres dessinés avant VT3.
+uniform vec3 canopy_lift = vec3(1.8, 1.65, 1.25);
 // Parcellaire : demi-largeur (px carte) du pied de haie et des chemins.
 uniform float hedge_width = 0.16;
 uniform float track_width = 0.10;
@@ -545,7 +550,7 @@ void fragment() {
 	}
 
 	// --- Textures ---
-	vec3 forest_tint = season_forest(tint_forest, value_noise(p * 0.45));  // CV1
+	vec3 forest_tint = season_forest(tint_forest, value_noise(p * 0.45)) * canopy_lift;  // CV1, VT3
 	float detail_fade = 1.0 - smoothstep(0.7, 1.8, footprint);
 	vec3 albedo = vec3(0.0);
 	vec3 dn = vec3(0.0, 0.0, 0.0);

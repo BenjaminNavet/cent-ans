@@ -50,6 +50,11 @@ var quality_max_distance: float = -1.0
 ## série sans plus de parallélisme réel. Les tuiles restantes arrivent ensuite normalement (même
 ## budget que le chargement en tâche de fond), en général en une poignée de frames.
 @export var warm_start_tiles: int = 5
+## VT3 : amorçage bloquant permis seulement pendant ce nombre d'images après `build` (chargement).
+## Les arbres n'étant plus dessinés au-delà de d = 30, le premier affichage peut venir bien plus
+## tard (premier zoom sous la portée) : l'attendre bloquait alors le fil principal 240-300 ms
+## (mesuré) ; hors de cette fenêtre, les premières tuiles arrivent en tâche de fond.
+@export var warm_start_frames: int = 60
 ## Lot PB2 : semis natif (`VegetationScatter`, Rust) quand l'extension l'expose ; sinon tout le
 ## semis tourne en GDScript dans le `WorkerThreadPool`.
 @export var use_native_scatter: bool = true
@@ -128,6 +133,7 @@ var _rig: Node3D
 var _frame: int = 0
 var _log_bursts := false
 var _warm := false
+var _built_frame := 0
 ## Saison du feuillage : 3 en hiver (variante ajourée), 1 sinon ; -1 : pas encore lue.
 var _season: int = -1
 
@@ -166,6 +172,7 @@ func _exit_tree() -> void:
 
 func build(data: MapData) -> void:
 	clear()
+	_built_frame = Engine.get_process_frames()
 	map_data = data
 	_native = _make_native(data) if use_native_scatter else null
 	_native_floor_version = -1
@@ -553,6 +560,8 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	# Premier affichage : les tuiles les plus proches sont semées en parallèle et attendues
 	# (pas d'apparition progressive au lancement ni dans les captures).
+	if not _warm and Engine.get_process_frames() - _built_frame > warm_start_frames:
+		_warm = true  # VT3 : plus d'amorçage bloquant après le chargement
 	var budget := max_concurrent_jobs if _warm else maxi(max_concurrent_jobs, warm_start_tiles)
 	for item in wanted:
 		if _jobs.size() >= budget:

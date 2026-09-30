@@ -25,19 +25,21 @@ est portée par le terrain (canopée). Les incendies restent exagérés. Worktre
 
 ## TERMINÉ (30/09), à fusionner par l'orchestrateur (branche feat/vt3)
 
+## Compléments (demande de l'orchestrateur, 30/09)
+- [x] Herbe, broussailles, rochers FC3 au 1:1 (portée 2,6, fondu), `clutter_scale` retiré,
+  `MapPropScale` réduit à `fire_scale` pour l'exagération ; fc3, ga3_l2, sz4 adaptés.
+- [x] d = 5 grand massif : `canopy_lift` (teinte de forêt vers les houppiers), `fade_from` 0,4 ;
+  capture de contrôle regardée (6/6 du budget visuel) : couvert continu, relief de canopée,
+  passage vers le lointain sans rupture ; cimes un peu jaunes (bords clairs des imposteurs).
+- [x] Amorçage bloquant tardif (240-300 ms mesurés) : limité aux 60 images après `build`.
+
 ## Points ouverts
-- Herbe et broussailles FC3 encore grossies (`clutter_scale`, ancienne courbe) : touffes de
-  ~45 m à d ≤ 8, plus hautes que les arbres 1:1. Hors demande ; à passer au 1:1 (ou à couper)
-  si le joueur le demande.
-- Vue d = 5 dans un grand massif : budget de la forêt dense atteint (gain ~0,55, rayon ~10 u) ;
-  au-delà, arbres plus clairsemés sur la canopée du terrain (plus sombre que les houppiers).
-  Jugement à confirmer en partie réelle ; leviers : `instance_budget`, `tree_view_fade`, teinte
-  de la canopée.
-- Premier passage sous d = 30 après un chargement loin : amorçage bloquant des tuiles de
-  végétation (`warm_start_tiles`), comme avant au premier affichage.
+- Herbe 1:1 : quasi invisible (≤ 1 px au-delà de d ≈ 1-2,6) ; densité ≈ 2 500 touffes / u²
+  (une pour ~200 m²), campagne rase de près. À réévaluer en partie réelle.
+- Cimes des arbres un peu jaunes à d = 5 (liseré clair des imposteurs GA3 sur la canopée).
 - Imposteurs lointains de la végétation (au-delà de `detail_distance` 170) morts en jeu ; laissés
   pour les A/B (`fc2_impostors_test`).
-- Worktree `../game_project-vt3-base` supprimé après le banc.
+- Saut de caméra 300 → 10 : pire image ~60 ms due aux autres couches (terrain, villes), hors VT3.
 
 ## Prochaine étape
 Fusion dans main par la session principale ; jugement du joueur en partie réelle.

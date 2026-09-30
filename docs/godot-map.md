@@ -1779,7 +1779,8 @@ l'exagération commune de SZ4b.
 Plus d'exagération pour les arbres de la carte (tuiles `Vegetation`, forêt dense `ForestDetail`,
 haies, vergers, arbres isolés) : échelle constante à toute distance, et une **portée** au-delà de
 laquelle aucun arbre individuel n'est dessiné. Au-delà, la forêt est portée par le terrain
-(canopée). Seuls les incendies (et, hors demande, les touffes d'herbe FC3) restent grossis.
+(canopée). Touffes d'herbe, broussailles et rochers FC3 / GA3-L2 passent aussi au 1:1 : seuls les
+incendies restent grossis.
 
 | | Avant | Après |
 |---|---|---|
@@ -1790,10 +1791,14 @@ laquelle aucun arbre individuel n'est dessiné. Au-delà, la forêt est portée 
 | Loin | arbres de ~1 km en imposteurs | canopée du terrain (`canopy_field`) |
 
 - `MapPropScale` : `tree_scale()` sans argument, `trees_weight(d)`, `trees_visible(d)`,
-  `pixels_for(m, D)` (taille à l'écran), `clutter_scale(d)` (courbe d'avant pour l'herbe, paramètre
-  `clutter_scale` des shaders `ground_clutter` / `ground_rocks`, découplé de
-  `campaign_prop_scale`). `scale_for` / `shrink_*` / `max_exaggeration` restent pour
-  `fire_scale` et `clutter_scale`.
+  `pixels_for(m, D)` (taille à l'écran). `scale_for` / `exaggeration` / `progress` retirés :
+  `shrink_*` et `max_exaggeration` ne servent plus qu'à `fire_scale`.
+- Touffes FC3 (`GroundClutter`) : taille réelle dans les instances (`grass_height_m` 0,6,
+  `bush_height_m` 1,8, `rock_size_m` 1,0, ± aléa ; avant : ~45 / 110 / 90 m près du sol), plus de
+  réduction dans les shaders (`clutter_scale`, `prop_scale_power`, `min_prop_scale` retirés) ;
+  portée `max_camera_distance` 2,6 (broussaille de 1,8 m ≈ 1 px), fondu 0,8 ; disque 1,5-3,2 u,
+  cellules de 2 u, ≈ 2 500 candidats / u² ; rochers 40 par cellule, niveaux de détail à 0,8 / 1,6.
+  Au-delà, la texture du terrain suffit.
 - `Vegetation` : `fade_start/fade_end` du feuillage = portée des arbres (fermée en fondu à
   l'approche de d = 30) ; plus de courbe de densité au dézoom (`density_*`, `fade_*_factor`
   retirés) ; tuiles semées (sans être affichées) jusqu'à `tile_prefetch_distance` 120 u (la
@@ -1802,6 +1807,14 @@ laquelle aucun arbre individuel n'est dessiné. Au-delà, la forêt est portée 
   niveaux lointains ne servent plus qu'aux essais (`fc2_impostors_test` réduit les portées).
 - `ForestDetail` : rayon borné par `tree_view_range`, gain du budget appliqué après les bornes
   (`min_gain` 0,2). Pont natif : plancher du pas de semis 0,05 → 0,01 (`vegetation_scatter.rs`).
+- Teinte des forêts du terrain éclaircie vers celle des houppiers (`canopy_lift` 1,8 / 1,65 /
+  1,25) : à d = 5, les arbres ne se détachent plus en points clairs sur un sol presque noir
+  (pixels sombres de la zone boisée 35-39 % → 19-26 %), les massifs lointains sont un peu plus
+  clairs. Forêt dense : décroissance dès 0,4 × le rayon (`fade_from`, 0,55 avant).
+- Amorçage bloquant des tuiles de végétation (`warm_start_tiles`) limité aux `warm_start_frames`
+  (60) images qui suivent `build` : le premier passage sous d = 30 après un chargement vu de loin
+  bloquait 240-300 ms (mesuré) ; il est désormais asynchrone (pire image au saut 300 → 10 :
+  57-61 ms, contre 65-69 ms végétation coupée : le reste vient des autres couches).
 - Canopée du terrain (`terrain.gdshader`, `canopy_field`) : quatre octaves de bruit à dérivées
   analytiques (période 0,05 u ≈ 36 m, puis × 4 : bouquets, peuplements, massifs), chacune éteinte
   quand sa période passe sous `canopy_min_px` (6) pixels ; relief des houppiers dans la normale
@@ -1834,7 +1847,8 @@ aucun coût mesurable de la canopée. À d = 1100, aucun arbre ni avant ni aprè
 préréglage 700) : écarts de bruit. Fil principal : aucune image > 50 ms en VT3 (base : 33 dans une
 passe à d = 150 sous charge) ; sections les plus chères de la sonde inchangées (`update_lod`,
 `settlements`, `life`), la forêt dense n'y apparaît pas. Chargement de la carte inchangé
-(5,3-6,4 s).
+(5,3-6,4 s). Après le passage de l'herbe au 1:1, de la teinte de canopée et du fondu : une passe
+VT3 à d = 5 donne 559 appels de dessin, 3,71 M primitives, 74 i/s, pire image 28 ms.
 
 ## Interface des colonies (lot C5)
 
