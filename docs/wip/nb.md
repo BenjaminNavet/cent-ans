@@ -36,7 +36,7 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
       `ui_illumination.build`) + tests — agent `cent-ans-mech`. Commit.
 - [x] Prompts des 4 cadres + 6 décors dans `ui_ornaments.yaml` ; `--dry-run`.
 - [x] Génération 3 variantes/pièce → planche avant/après → **jugement joueur** (`selected`) : panel_illuminated v1, panel v2, top_bar v2, tooltip v2.
-- [ ] Rebuild du kit, `smoke.gd`, une capture en jeu. ADR 0135. Commit, fusion dans `main`.
+- [x] Rebuild du kit, `smoke.gd` OK (dylib recompilée : champ `map_scene`), captures `docs/img/nb1/`, ADR 0135, fusionné dans `main`.
 
 ## Journal
 - 09-30 : spec approuvée, worktree créé.
@@ -57,3 +57,4 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
   rang, mer, rose des vents, cartouches, style ancre v0 (≈ 60-80 sprites, ~5 $). Chantier
   « parchemin peint » à spécifier après NB1, plafond propre ~8 $.
 - 09-30 : NB1 installé (4 PNG), ADR 0135, 3,10 $ au total. Reste : smoke + capture en jeu dans main.
+- 09-30 : NB1 fusionné et clos. Nouveau mandat du joueur : autonomie, semi-réaliste campagne/bataille, figurines = vrais soldats en armure, NB2 ≈ 20 $ au total, sans variantes. Suite : chantier SR (`docs/wip/sr.md`).
