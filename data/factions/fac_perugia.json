@@ -16,10 +16,10 @@
   "succession_law": "elective",
   "primary_title": "tit_perugia",
   "heraldry": {
-    "blazon": "D'or au griffon de sable.",
-    "description": "Griffon noir de Pérouse.",
-    "primary_color": "#F2C230",
-    "secondary_color": "#111111"
+    "blazon": "De gueules au griffon d'argent couronné d'or.",
+    "description": "Griffon blanc couronné de Pérouse, sur champ rouge.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
   },
   "titles": [
     "République de Pérouse"

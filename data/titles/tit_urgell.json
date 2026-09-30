@@ -7,10 +7,10 @@
     "local_language": "catalan"
   },
   "heraldry": {
-    "blazon": "D'or au bœuf de gueules.",
-    "description": "Armes traditionnelles des comtes d'Urgell.",
+    "blazon": "Échiqueté d'or et de sable.",
+    "description": "Échiqueté des anciens comtes d'Urgell ; Jacques Ier l'écartèle avec les pals d'Aragon, rendu ici seul.",
     "primary_color": "#F2C230",
-    "secondary_color": "#B0182B"
+    "secondary_color": "#111111"
   },
   "de_jure_liege": "tit_aragon",
   "de_jure_provinces": [

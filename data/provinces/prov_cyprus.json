@@ -3,7 +3,7 @@
   "name": {
     "display": "Chypre",
     "local": "Κύπρος",
-    "local_language": "français"
+    "local_language": "grec"
   },
   "region": "chypre",
   "terrain": "hills",
@@ -30,7 +30,7 @@
     "name": {
       "display": "Nicosie",
       "local": "Λευκωσία",
-      "local_language": "français"
+      "local_language": "grec"
     },
     "lat": 35.175,
     "lon": 33.382

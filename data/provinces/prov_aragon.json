@@ -3,7 +3,7 @@
   "name": {
     "display": "Aragon",
     "local": "Aragón",
-    "local_language": "castillan"
+    "local_language": "aragonais"
   },
   "region": "aragon",
   "terrain": "plains",
@@ -26,7 +26,7 @@
     "name": {
       "display": "Saragosse",
       "local": "Çaragoça",
-      "local_language": "castillan"
+      "local_language": "aragonais"
     },
     "lat": 41.6488,
     "lon": -0.8891

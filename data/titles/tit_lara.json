@@ -7,10 +7,10 @@
     "local_language": "castillan"
   },
   "heraldry": {
-    "blazon": "D'argent à deux chaudières échiquetées d'or et de gueules, engoulées de serpents de sinople.",
+    "blazon": "De gueules à deux chaudières échiquetées d'or et de sable, engoulées de serpents de sinople.",
     "description": "Chaudières (calderas) des grands majordomes royaux, emblème classique de la maison de Lara.",
-    "primary_color": "#F5F1E6",
-    "secondary_color": "#B0182B"
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
   },
   "de_jure_liege": "tit_castile",
   "de_jure_provinces": [

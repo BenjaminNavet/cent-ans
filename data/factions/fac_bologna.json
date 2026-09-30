@@ -17,9 +17,9 @@
   "primary_title": "tit_bologna",
   "heraldry": {
     "blazon": "D'argent à la croix alésée de gueules.",
-    "description": "Croix communale alésée (le moteur de rendu simplifié ne distingue pas la croix pattée de la croix pleine) ; armes de Bologne (« libertas ») décrites dans le titre.",
-    "primary_color": "#B0182B",
-    "secondary_color": "#F5F1E6"
+    "description": "Croix communale rouge sur champ blanc, rendue alésée par le moteur simplifié ; armes complètes de Bologne (chef « LIBERTAS ») décrites dans le titre.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
   },
   "titles": [
     "Commune de Bologne"

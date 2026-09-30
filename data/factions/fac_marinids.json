@@ -18,11 +18,11 @@
   "primary_title": "tit_marinids",
   "heraldry": {
     "blazon": "De gueules au chef d'or.",
-    "description": "Bannière blanche des Mérinides (Banu Marin) ; l'étendard blanc est attesté par les chroniqueurs, sans meuble héraldique. Bordure de sable ajoutée pour la distinction visuelle en jeu.",
+    "description": "Les Mérinides (Banu Marin) n'ont pas d'armoiries : les chroniqueurs attestent un étendard blanc, sans meuble. Écu rouge et or de convention pour la distinction en jeu.",
     "primary_color": "#A01E1E",
-    "secondary_color": "#2F6B3A",
+    "secondary_color": "#E0B33A",
     "uncertain": true,
-    "note": "Champ blanc attesté ; bordure de sable : brisure de jeu, non attestée."
+    "note": "Étendard blanc attesté ; écu de gueules au chef d'or : convention de jeu, non attestée."
   },
   "titles": [
     "Sultan du Maghreb",
@@ -51,7 +51,7 @@
     {
       "faction": "fac_hafsids",
       "status": "marriage_tie",
-      "note": "Abu l-Hasan a épousé une fille d'Abu Bakr II (à préciser) ; le Maghreb central reste en jeu entre les deux."
+      "note": "Abu l-Hasan a épousé Fatima, fille d'Abu Bakr II, au début de son règne ; le Maghreb central reste en jeu entre les deux."
     },
     {
       "faction": "fac_aragon",

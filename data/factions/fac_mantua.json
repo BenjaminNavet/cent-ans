@@ -16,10 +16,10 @@
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_mantova",
   "heraldry": {
-    "blazon": "D'or au lion de gueules.",
-    "description": "Simplification du blason (le moteur de rendu ne trace pas la croix pattée) ; armes complètes conservées dans data/heraldry/houses.json et le titre.",
-    "primary_color": "#F5F1E6",
-    "secondary_color": "#B0182B"
+    "blazon": "Fascé d'or et de sable.",
+    "description": "Armes primitives des Gonzague (fasces d'or et de sable) ; la croix pattée aux quatre aigles (1433) et le lion de Bohême (1394) sont postérieurs.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
   },
   "titles": [
     "Seigneur de Mantoue",
