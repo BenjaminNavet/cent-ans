@@ -60,13 +60,16 @@ func _test_in_range() -> void:
 	var r := clutter.radius()
 	print("fc3: high d=30 full cover: %d tufts in %d cells, build max %.1f ms" % [shown, clutter.visible_cells().size(), float(clutter.stats["build_ms_max"])])
 	var cells := clutter.visible_cells()
-	var bad := 0
+	var outside := 0
+	var far := 0
 	for cell: Dictionary in cells:
 		var rect: Rect2 = cell["rect"]
 		for p: Vector2 in cell["points"]:
-			if not rect.has_point(p) or p.distance_to(at) > r + clutter.cell_size * 1.5:
-				bad += 1
-	_check(bad == 0, "high: instances only within range (%d cells, r = %.0f)" % [cells.size(), r])
+			if not rect.grow(1e-3).has_point(p):
+				outside += 1
+			elif p.distance_to(at) > r + clutter.cell_size * 1.5:
+				far += 1
+	_check(outside == 0 and far == 0, "high: instances only within range (%d cells, r = %.0f, %d outside their cell, %d too far)" % [cells.size(), r, outside, far])
 	# Ultra : plus de touffes, toujours sous le plafond.
 	RenderQuality.override_level = "ultra"
 	RenderQuality.apply_clients(self)

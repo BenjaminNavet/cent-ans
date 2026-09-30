@@ -102,6 +102,14 @@ func _test_map() -> void:
 		_check(vegetation.foliage_material().shader == Vegetation.FOLIAGE_WINTER_SHADER, "winter foliage variant")
 		_check(vegetation.impostor_material().shader == Vegetation.IMPOSTOR_SHADER, "impostors keep their shader in winter")
 		(seasons as SeasonVisuals).set_season("summer", true)
+	_check(int(after.get("near", 0)) > 0, "FC5: nearest parts in leaf cards")
+	# FC5 repli (`--no-fc5`) : maillages détaillés de près, imposteurs au loin.
+	vegetation.use_near_cards = false
+	vegetation.build(data)
+	await _settle(rig, focus, 150.0, vegetation)
+	var no_cards := vegetation.lod_census()
+	print("fc2: census without leaf cards (--no-fc5) %s" % no_cards)
+	_check(not vegetation.near_cards_active() and int(no_cards["near"]) == 0 and int(no_cards["detailed"]) > 0, "--no-fc5 falls back to the detailed meshes")
 	# Repli : maillages bas au loin.
 	vegetation.use_impostors = false
 	vegetation.build(data)

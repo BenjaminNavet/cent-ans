@@ -8,6 +8,7 @@ worktree `../game_project-fc`. Mandat : autonomie. Mesures seulement sur machine
 - [x] FC1 ombres maquettes/moulins par préréglage
 - [x] FC2 arbres imposteurs
 - [x] FC3 herbe et broussailles proches
+- [x] FC5 arbres proches en cartes, herbe visible (hors plan initial)
 - [ ] FC4 banc A/B, captures, ADR 0137, fusion
 
 ## Journal
@@ -49,7 +50,21 @@ smoke, sz4b, fc1 OK. Triangles des arbres lointains (Orléans, d = 150) : 407 00
 (≈ 19,6 → 2 par arbre), même nombre de MultiMesh. Terminé ; jugement visuel à FC4.
 
 ## FC5 — arbres proches semi-réalistes et herbe visible (agent FC2)
-État : squelette (sonde `game/tests/fc5_probe.gd`). Plan : variante « mid » des essences en cartes
-de feuilles (campaign_trees.glb, 300-600 tri feuillus, 150-250 sapin), shader de feuillage à cartes
-(texture, découpe alpha, saisons), tuiles proches ; `--no-fc5` ; herbe FC3 visible à d 10-35.
-Prochaine étape : mesures de base d = 25 / 150.
+État : fait (commits `wip: FC5 …`). Mesures `game/tests/fc5_probe.gd` (Orléans 2122,3362, 720p) :
+- d = 25 : 7,73 M → 8,65 M primitives (+0,92 M, plafond +2 M), 842 → 845 appels ;
+- d = 15 : 9,03 M ; d = 150 : 5,20 M → 4,39 M (imposteurs entre 45 et 170 au lieu des 90 tri).
+Tests : fc2 (avec repli `--no-fc5`), fc3 (tolérance de bord de cellule), fc1, smoke, sz4b OK.
+Arbres : variante « mid » dans `campaign_trees.glb` (`<essence>_mid_crown/_trunk`, cartes UV :
+chêne 248, hêtre 232, sapin 144 tri), `VegetationMeshes.essence_mid`, shader
+`foliage_cards.gdshader` (FOLIAGE_CARDS dans `foliage.gdshaderinc` : atlas
+`campaign_leaf_cards.png` de `build_leaf_cards.py`, découpe alpha, normale arrondie des deux côtés,
+hiver ajouré). `vegetation.gd` : 3 niveaux (cartes < `near_distance` 45, imposteurs avec ombres
+jusqu'à `detail_distance`, imposteurs au-delà) ; `ForestDetail` : cartes à < 0,4 × d du point
+visé, imposteurs ailleurs (au lieu des boules de 20 tri). `--no-fc5` = comportement FC2.
+Imposteurs/cartes : niveau de mipmap borné (sinon carrés pleins pour les arbres de 3 px).
+Herbe (FC3) : touffes texturées (`campaign_grass_tuft.png`, copie mipmappée de grass_blades),
+0,22 / 0,42 de haut, réduction en `prop_scale`^0,5 (visible jusqu'à d ≈ 10), teintes de la prairie
+du terrain, 4 000 candidats/cellule. Pose sur le fil principal ≈ 16 ms/cellule (FC3 : 7-12 ms).
+Captures : `~/dev/cent-ans-raw/fc5/` (avant/après `fc5_before_after_25.jpg`, `final_15/25`).
+Ouvert : herbe encore discrète à d = 15 (lue comme petites touffes/buissons à d = 25) ; pose des
+cellules d'herbe à sortir du fil principal ; bord net entre cartes et imposteurs à 45.
