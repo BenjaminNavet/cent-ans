@@ -64,3 +64,9 @@ au lieu d'un écu collé sur chaque flanc ; anneau redistribué (1/3 dos, 1/3 pa
 nombre de triangles. Balancement : déjà fait par AN1a (`sm_weight` part 1, vitesse du régiment).
 État : terminé (recuit, échelle 1,5 m par unité d'écu : meubles ~22 cm, bordure = liseré du drap).
 Prochaine étape : jugement du joueur.
+
+# CR4 — maille, cheval, lances (lot L3)
+
+État : démarré 2026-09-30 (même worktree `feat/sr`, budget 30 captures, `~/dev/cent-ans-raw/cr4/`).
+Prochaine étape : 1) camail « fourrure blanche » du gros chevalier ; 2) crinière et queue en mèches,
+robe à normale de poil, variété de robes, sabots ; 3) lances variées, fût veiné, flammes en tissu.
