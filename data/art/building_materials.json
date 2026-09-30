@@ -119,7 +119,7 @@
       "tint": [1.0, 1.0, 1.0],
       "roughness": 0.85,
       "poly_haven_id": "",
-      "wired": false
+      "wired": true
     }
   ],
   "plain": [
@@ -129,6 +129,7 @@
   ],
   "atlas_layers": [
     "Plaster", "Rubble", "Ashlar", "Masonry", "Timber", "Planks", "Door",
-    "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas"
+    "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas",
+    "TimberFrame"
   ]
 }

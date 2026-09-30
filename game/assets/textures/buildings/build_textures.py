@@ -12,11 +12,9 @@ Run: ``uv run --with pillow --with numpy python build_textures.py`` in this fold
 * ``timber_frame_{diff,nor,rough}.jpg`` (lot GA5): half-timbered wall (torchis/colombage) —
   procedural beam lattice (studs, rails, diagonal braces) composited over ``lime_plaster``
   (daub infill) and ``rough_wood`` (timber), both already CC0 Poly Haven sources used elsewhere
-  in this kit; no new external asset, deterministic (seeded). Not part of ``LAYERS``/the atlas
-  (see ``docs/wip/ga.md`` GA5 for why: the atlas layer index is baked into exported `.glb`
-  vertex colours by `tools/blender_scripts/kit_export.py`, so adding a layer there needs a
-  Blender-side change and re-export, out of scope for this lot). Available as a standalone
-  ``BuildingMaterials`` entry (``TimberFrame``) for future wiring.
+  in this kit; no new external asset, deterministic (seeded). Lot TF: last layer of ``LAYERS``
+  (index 14, after the solid layers, so the indices baked into older `.glb` files stay valid);
+  the kit names the panels of half-timbered walls ``TimberFrame``.
 """
 
 from pathlib import Path
@@ -39,6 +37,7 @@ LAYERS = [
     None,  # Window
     None,  # Iron
     None,  # Canvas
+    "timber_frame",  # TimberFrame (lot TF: appended last, see kit_export.ATLAS_LAYERS)
 ]
 SLICE = 512
 

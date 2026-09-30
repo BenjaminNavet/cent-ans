@@ -977,7 +977,24 @@ def pick(rng, items):
     return items[rng.randrange(len(items))]
 
 
-def cottage(g, rng, detail="high", length=None, depth=None, ruined=False):
+def southern_style(st: Style, rng) -> None:
+    """Lot TF: southern (Midi) variant of a house style, applied after the usual draws.
+
+    No exposed framing (plastered or stone walls), low-pitched canal tile roof, gable. Only the
+    ``southern=True`` variants call it, so the random stream of the existing seeds is unchanged.
+    """
+    st.frame = None
+    st.roof = pick(rng, ["RoofTile", "RoofTile", "RoofFlat"])
+    st.roof_tint = pick(rng, ROOF_TINTS[st.roof])
+    st.shape = "gable"
+    st.pitch = rng.uniform(26.0, 34.0)
+    st.jetty = 0.0
+    st.dormers = 0
+
+
+def cottage(
+    g, rng, detail="high", length=None, depth=None, ruined=False, southern=False
+):
     """Rural cottage: one storey, daub or rubble walls, thick thatch (sometimes tiles)."""
     L = length or rng.uniform(7.5, 10.5)
     D = depth or rng.uniform(5.0, 6.2)
@@ -999,6 +1016,8 @@ def cottage(g, rng, detail="high", length=None, depth=None, ruined=False):
         extras={"vent": rng.random() < 0.5},
         ruined=ruined,
     )
+    if southern:
+        southern_style(st, rng)
     info = house(g, rng, L, D, st, detail)
     if not ruined and detail == "high" and rng.random() < 0.5:
         _lean_to(g, rng, L, D, st, detail)
@@ -1063,7 +1082,9 @@ def longere(g, rng, detail="high", length=None, depth=None, ruined=False):
     return house(g, rng, L, D, st, detail)
 
 
-def timber_house(g, rng, detail="high", length=None, depth=None, ruined=False):
+def timber_house(
+    g, rng, detail="high", length=None, depth=None, ruined=False, southern=False
+):
     """Two-storey half-timbered house with a jettied upper floor (village or town)."""
     L = length or rng.uniform(8.0, 12.0)
     D = depth or rng.uniform(6.0, 7.5)
@@ -1086,10 +1107,14 @@ def timber_house(g, rng, detail="high", length=None, depth=None, ruined=False):
         stone_tint=pick(rng, STONE_TINTS),
         ruined=ruined,
     )
+    if southern:
+        southern_style(st, rng)
     return house(g, rng, L, D, st, detail)
 
 
-def town_house(g, rng, detail="high", length=None, depth=None, ruined=False):
+def town_house(
+    g, rng, detail="high", length=None, depth=None, ruined=False, southern=False
+):
     """Narrow town house, gable on the street, 2-3 jettied storeys, shop on the ground floor."""
     W = length or rng.uniform(5.2, 7.2)  # frontage
     D = depth or rng.uniform(9.0, 12.0)
@@ -1114,6 +1139,8 @@ def town_house(g, rng, detail="high", length=None, depth=None, ruined=False):
         stone_tint=pick(rng, STONE_TINTS),
         ruined=ruined,
     )
+    if southern:
+        southern_style(st, rng)
     return house(g, rng, W, D, st, detail)
 
 

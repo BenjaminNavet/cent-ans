@@ -257,12 +257,17 @@ def export_glb(obj: bpy.types.Object, path: Path) -> None:
 # Battle set: kind -> list of (seed, dims or {}, ruined)
 BATTLE_SET = {
     "cottage": [(s, {}, False) for s in (11, 12, 13, 14, 15, 16)]
-    + [(17, {}, True), (18, {}, True)],
+    + [(17, {}, True), (18, {}, True)]
+    # Lot TF: southern (Midi) variants, no exposed framing, low tile roofs (appended last so the
+    # older model names keep their index).
+    + [(s, {"southern": True}, False) for s in (181, 182, 183, 184)],
     "longere": [(21, {}, False), (22, {}, False), (23, {}, False), (24, {}, True)],
     "timber": [(s, {}, False) for s in (31, 32, 33, 34, 35, 36)]
-    + [(37, {}, True), (38, {}, True)],
+    + [(37, {}, True), (38, {}, True)]
+    + [(s, {"southern": True}, False) for s in (185, 186, 187)],
     "townhouse": [(s, {}, False) for s in (41, 42, 43, 44, 45, 46)]
-    + [(47, {}, True), (48, {}, True)],
+    + [(47, {}, True), (48, {}, True)]
+    + [(s, {"southern": True}, False) for s in (188, 189, 190)],
     "stonehouse": [(51, {}, False), (52, {}, False), (53, {}, False), (54, {}, True)],
     "barn": [(61, {}, False), (62, {}, False), (63, {}, False), (64, {}, True)],
     "church": [
@@ -306,8 +311,15 @@ def export_battle(out_dir: Path, kinds: list[str] | None = None) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     manifest = {}
     manifest_path = out_dir / "manifest.json"
-    if kinds and manifest_path.exists():
-        manifest = json.loads(manifest_path.read_text())
+    if manifest_path.exists():
+        # Keep the entries of kinds not written here (horses of ``export_horses``, and every other
+        # kind when ``kinds`` is given); the written kinds are rebuilt from scratch.
+        written = set(kinds or BATTLE_SET)
+        manifest = {
+            name: entry
+            for name, entry in json.loads(manifest_path.read_text()).items()
+            if entry.get("kind") not in written
+        }
     for kind, entries in BATTLE_SET.items():
         if kinds and kind not in kinds:
             continue
@@ -328,6 +340,9 @@ def export_battle(out_dir: Path, kinds: list[str] | None = None) -> None:
                 "depth": round(info["depth"], 2),
                 "height": round(info["height"], 2),
                 "triangles": info["triangles"],
+                # Lot TF: regional choice (`data/art/building_regions.json`).
+                "framed": kit.FRAME_PANEL in g.polys,
+                "southern": bool(dims.get("southern", False)),
             }
             print("MODEL", name, info["triangles"])
     (out_dir / "manifest.json").write_text(

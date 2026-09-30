@@ -11,13 +11,12 @@ extends RefCounted
 ##
 ## Lot GA5 : `SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` viennent de `data/art/building_materials.json`
 ## (schéma `art_building_materials.schema.json`), jamais codés en dur ici — même repli que
-## `BattleTerrain.ground_layers()`. `TimberFrame` (torchis/colombage, lot GA5) y figure avec
-## `wired = false` : la matière est prête (texture, entrée `SPECS`) mais aucune surface du kit
-## Blender ne porte ce nom pour l'instant (voir docs/wip/ga.md, section GA5, pour la raison :
-## l'indice de couche de l'atlas `Building` est baké dans les `.glb` exportés, donc l'y ajouter
-## demande un changement + réexport côté `tools/blender_scripts/kit_export.py`, hors périmètre
-## de ce lot). `TimberFrame` reste donc utilisable uniquement via `material("TimberFrame")`
-## (matériau individuel, pas l'atlas).
+## `BattleTerrain.ground_layers()`.
+##
+## Lot TF : `TimberFrame` (torchis/colombage) est câblée : panneaux des murs à pans de bois du kit
+## Blender (`building_kit.FRAME_PANEL`), dernière couche de l'atlas `Building` (indice 14, ajoutée
+## en fin de tableau pour ne pas décaler les indices déjà bakés dans les `.glb`), texturée malgré
+## sa place après les couches unies (`first_plain`..`plain_last` du shader).
 
 const TEX := "res://assets/textures/"
 const DATA_FILE := "art/building_materials.json"
@@ -158,7 +157,16 @@ static func _atlas(variant: String) -> ShaderMaterial:
 			tiles.append(1.0)
 	mat.set_shader_parameter("layer_tint", tints)
 	mat.set_shader_parameter("layer_tile", tiles)
-	mat.set_shader_parameter("first_plain", ATLAS_LAYERS.find("Window"))
+	# Lot TF : les couches unies forment un bloc contigu (`first_plain`..`plain_last`) ; les
+	# couches texturées ajoutées après lui (`TimberFrame`) gardent leur texture.
+	var plain_first := -1
+	var plain_last := -2
+	for i in ATLAS_LAYERS.size():
+		if PLAIN.has(ATLAS_LAYERS[i]):
+			plain_first = i if plain_first < 0 else plain_first
+			plain_last = i
+	mat.set_shader_parameter("first_plain", plain_first if plain_first >= 0 else 16)
+	mat.set_shader_parameter("plain_last", plain_last)
 	mat.set_shader_parameter("roof_first", ATLAS_LAYERS.find("RoofTile"))
 	mat.set_shader_parameter("roof_last", ATLAS_LAYERS.find("Thatch"))
 	mat.set_shader_parameter("snow", 1.0 if variant == "snow" else 0.0)
