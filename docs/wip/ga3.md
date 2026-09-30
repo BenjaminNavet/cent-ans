@@ -15,6 +15,11 @@ Brutes (hors dépôt) : `~/dev/cent-ans-raw/ga3/` ; références figurines : `~/
 - [x] S2 figurine : longbowman (`sr3/longbowman.png`, vues multiples) → TRELLIS → nettoyage →
       rattachement au squelette de bataille existant (poids automatiques) → rendu marche + tir ;
       planche `docs/img/ga3/s2_archer.jpg` ; verdict technique (déformations, triangles, coût).
+- [ ] S4 décor v2 : prompt corrigé (flux-2) → détourage bria → `trellis` et `trellis-2` sur la même
+      image → `ga3_cleanup.py` étendu (exposition, normal/rugosité) → `props_ga/ga3_house2_t{1,2}_lod*.glb` ;
+      planche `docs/img/ga3/s4_house_v2.jpg`. Script fal : `tools/experiments/ga3_fal_decor.py`
+      (étapes en cache), brutes `~/dev/cent-ans-raw/ga3/s4/`. **En cours** : image + détourage faits
+      (propres, un niveau, chaume, sans cheminée), génération 3D lancée ; ensuite cleanup v2 puis planche.
 
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
