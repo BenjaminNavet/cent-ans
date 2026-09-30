@@ -28,6 +28,7 @@ tools/nb_raw/
 # except comparison boards the player wants versioned (GA3 generated assets)
 docs/img/*
 !docs/img/ga3/
+!docs/img/readme/
 docs/audit/captures/
 docs/audit/**/*.png
 docs/audit/**/*.jpg
