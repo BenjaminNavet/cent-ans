@@ -18,7 +18,7 @@ Une **pyramide de couleur (albédo) précalculée hors ligne** remplace la coule
 
 Module `tools/cent_ans_tools/geo/colormap.py`, sous-commande `cent-ans geo colormap`.
 
-- **Format (ADR 0141, révisé après captures)** : une texture RGB unique 14336×12288 (~360 m/texel), mipmaps précalculées, BC1 en parts zlib, entrée `map.json` `colormap.bc1` — même chemin que `wetlands_gpu` (`block_compress.write_wetlands_bc1`, `ReliefLandcover.load_wetlands_gpu`). Pas de pyramide en tuiles. Le détail sous ~360 m vient des parcelles procédurales du shader, colorées par leur bloc.
+- **Format (ADR 0142, révisé après captures)** : une texture RGB unique 14336×12288 (~360 m/texel), mipmaps précalculées, BC1 en parts zlib, entrée `map.json` `colormap.bc1` — même chemin que `wetlands_gpu` (`block_compress.write_wetlands_bc1`, `ReliefLandcover.load_wetlands_gpu`). Pas de pyramide en tuiles. Le détail sous ~360 m vient des parcelles procédurales du shader, colorées par leur bloc.
 - **Style** : `data/map/colormap_style.yaml` validé par `data/schemas/colormap_style.schema.json` (palettes, largeurs de routes par `type`, densités, graine).
 - **Déterminisme** : graine fixe ; même entrée → mêmes octets.
 
@@ -64,7 +64,7 @@ Budget 3–6 $, consigné dans `docs/budget.md`.
 3. SS3 — branchement shader, dosage du relief, repli, test headless.
 4. SS4 — lacs (extraction + `lakes_renderer.gd`).
 5. SS5 — textures (et éventuels objets) fal.ai.
-6. SS6 — captures, banc de performance ; ADR `docs/decisions/0141-sol-satellite-carte-de-couleur.md` (écrit dès SS1).
+6. SS6 — captures, banc de performance ; ADR `docs/decisions/0142-sol-satellite-carte-de-couleur.md` (écrit dès SS1).
 
 ## Hors périmètre
 

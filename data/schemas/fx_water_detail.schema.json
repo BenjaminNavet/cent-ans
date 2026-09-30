@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_water_detail.schema.json",
+  "title": "Détail d'eau de la carte de campagne (RC5)",
+  "description": "Réglages par matière d'eau des textures de détail (ADR 0141), lus par `game/scripts/map/water_detail.gd`.",
+  "type": "object",
+  "required": ["description", "materials"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string", "minLength": 1},
+    "materials": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description", "strength", "scale", "flow_speed"],
+        "additionalProperties": false,
+        "properties": {
+          "description": {"type": "string", "minLength": 1},
+          "strength": {"type": "number", "minimum": 0, "maximum": 1},
+          "scale": {"type": "number", "exclusiveMinimum": 0},
+          "flow_speed": {"type": "number", "minimum": 0}
+        }
+      }
+    }
+  }
+}

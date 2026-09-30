@@ -495,7 +495,20 @@ impl<'a> GridPlanner<'a> {
                         ours += state.army_power(self.data, id);
                     }
                 }
-                (ours >= self.rules.attack_ratio * theirs.max(e.power)).then_some((d, e))
+                let needed = self.rules.attack_ratio * theirs.max(e.power);
+                if ours < needed {
+                    return None;
+                }
+                // RC (ADR 0141): forcing a bridge, ford or ferry held on
+                // the far bank weakens our side as in the resolver.
+                if let Some(site) =
+                    sim_campaign::river_crossing::crossing_between(self.data, here, e.point)
+                {
+                    ours *= site
+                        .effect()
+                        .attacker_factor(&self.data.river_crossing_rules);
+                }
+                (ours >= needed).then_some((d, e))
             })
             .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.id.cmp(&b.1.id)))
             .map(|(_, target)| {

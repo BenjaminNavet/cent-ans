@@ -1,6 +1,6 @@
 # SS — sol « satellite » de la campagne
 
-Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md` ; ADR 0141. Autonomie totale (joueur 30/09).
+Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md` ; ADR 0142. Autonomie totale (joueur 30/09).
 
 ## État : fusionné dans main, en attente du jugement du joueur
 - [x] SS1 `cent-ans geo colormap` : BC1 14336×12288 + mipmaps, 4 parts (~46 Mo), cuisson ~2 min 20 ; style `data/map/colormap_style.yaml` ; aperçu `data/map/colormap_preview.jpg` ; note `docs/wip/ss1-colormap.md`.

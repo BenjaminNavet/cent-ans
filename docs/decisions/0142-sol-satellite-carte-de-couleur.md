@@ -1,4 +1,4 @@
-# 0141 — Sol « satellite » : carte de couleur précalculée
+# 0142 — Sol « satellite » : carte de couleur précalculée
 
 Date : 2026-09-30. Chantier SS. Statut : appliquée (fusionnée le 2026-09-30). Spec : `docs/superpowers/specs/2026-09-30-ss-sol-satellite-design.md`.
 

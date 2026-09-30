@@ -179,6 +179,12 @@ uniform ivec2 sm_leg_bones = ivec2(-1, -2);
 uniform ivec2 sm_tail_bones = ivec2(-1, -2);
 uniform float sm_mane_tint = 0.3294;
 
+#ifdef GA3_TEX
+// GA3-L3 : albédo de la figurine générée (RGB) et masque teintable (A), partagé par ses LOD ;
+// luminance linéaire moyenne des zones livrée (x) et étoffe (y) de la texture.
+uniform sampler2D ga3_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
+uniform vec2 ga3_lum = vec2(0.2);
+#endif
 #ifdef FG3_BAKED
 // Atlas des figurines fines (couche = figurine) : RG normale de forme (espace tangent de l'UV
 // d'atlas), B occlusion cuite, A masque selon la matière (barbe/cheveux : densité ; peau :
@@ -861,6 +867,25 @@ void fragment() {
 			}
 		}
 	}
+#ifdef GA3_TEX
+	// GA3-L3 : figurine générée (albédo sur l'UV du maillage ; équipement procédural en u < 0,
+	// non texturé). Alpha = zone teintable : livrée (C_LIVERY : livrée, armoiries, croix du jeu)
+	// ou étoffe (C_CLOTH : couleur naturelle par soldat), modulées par la luminance de la
+	// texture sur sa moyenne (plis, piqûres, crasse) ; ailleurs la couleur générée. Les faces
+	// peintes de l'équipement (C_ARMS : écu, pavois) gardent l'UV d'armoiries (L3b).
+	if (UV.x >= 0.0 && code != C_ARMS) {
+		vec4 g3 = texture(ga3_albedo, UV);
+		float g3_l = dot(g3.rgb, vec3(0.3, 0.59, 0.11));
+		if (code == C_LIVERY) {
+			albedo = mix(g3.rgb, albedo * clamp(g3_l / ga3_lum.x, 0.2, 2.2), g3.a);
+		} else if (code == C_CLOTH) {
+			vec3 hose = PLAIN[int(fract(h6 * 3.7 + v_var.w) * 7.99)] * mix(0.85, 1.15, v_var.z) * 1.5;
+			albedo = mix(g3.rgb, hose * clamp(g3_l / ga3_lum.y, 0.2, 2.2), g3.a);
+		} else {
+			albedo = g3.rgb;
+		}
+	}
+#endif
 #ifdef FG3_BAKED
 	// Lot FG3 : cartes cuites (LOD0/LOD1 des figurines fines ; LOD2 : v_src = 0, rien de
 	// plus). v_src est constant sur tout un maillage LOD0/LOD1 (1, 3 ou 2 pour le cheval, tous

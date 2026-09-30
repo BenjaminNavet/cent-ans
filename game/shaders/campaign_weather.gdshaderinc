@@ -18,7 +18,7 @@ uniform float weather_edge_px = 30.0;
 // Q3) ; l'atmosphère de près (ZG4) donne déjà le voile en profondeur.
 uniform float weather_mist_near = 0.2;
 uniform float weather_mist_near_footprint = 0.06;
-// SS2 (ADR 0141) : opacité maximale de la nappe peinte sur le sol (0,8 auparavant) : au-delà, le
+// SS2 (ADR 0142) : opacité maximale de la nappe peinte sur le sol (0,8 auparavant) : au-delà, le
 // gris clair recouvrait tout le bassin parisien et effaçait champs et carte de couleur (« relief
 // IGN ») ; la nappe reste un voile léger, teinté par le sol.
 uniform float weather_mist_max = 0.15;

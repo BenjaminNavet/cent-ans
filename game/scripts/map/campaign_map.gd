@@ -93,7 +93,7 @@ var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenan
 var ai_replay: AiTurnReplay = null  # CT1 : marches des armées IA rejouées en fin de tour
 ## Lot C6 : paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
-## Lot SS3 (ADR 0141) : nappes d'eau des lacs (`data/map/lakes.json`), vue 3D seulement.
+## Lot SS3 (ADR 0142) : nappes d'eau des lacs (`data/map/lakes.json`), vue 3D seulement.
 var lakes: LakesRenderer = null
 var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null

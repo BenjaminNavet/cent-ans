@@ -413,7 +413,16 @@ fn nearby_friendly_armies_are_counted_once() {
     f.position = ArmyPosition::field(east_of(&data, "set_meaux", 20.0));
     f.units.truncate(1);
     f.units[0].strength = 100;
-    let ours = state.army_power(&data, &english) + state.army_power(&data, &second_id);
+    let mut ours = state.army_power(&data, &english) + state.army_power(&data, &second_id);
+    // RC (ADR 0141): east of Meaux the Marne lies between the armies; the AI
+    // weighs the crossing it would force, as the resolver does.
+    if let Some(site) = sim_campaign::river_crossing::crossing_between(
+        &data,
+        meaux,
+        east_of(&data, "set_meaux", 20.0),
+    ) {
+        ours *= site.effect().attacker_factor(&data.river_crossing_rules);
+    }
     let per_man = state.army_power(&data, &french) / 100.0;
     let ratio = data.ai_grid.attack_ratio;
     let england = fac("fac_england");

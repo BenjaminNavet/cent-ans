@@ -369,8 +369,13 @@ impl BattleSim {
         let drawn = Weather::draw(setup.season, &mut rng);
         let weather = forced_weather.unwrap_or(drawn);
         let is_siege = setup.siege.is_some();
-        let mut field =
-            Battlefield::generate_site_sized(&setup.field_site(), scale.field, weather, &mut rng);
+        let mut field = Battlefield::generate_site_crossing(
+            &setup.field_site(),
+            setup.field_crossing(),
+            scale.field,
+            weather,
+            &mut rng,
+        );
         if !is_siege {
             // EP6: countryside and camps (derived stream), then the hand-made
             // decor of a historical map.
@@ -3131,7 +3136,7 @@ impl BattleSim {
                 None => return,
             }
         } else {
-            let winner = if (able[1] == 0 && able[0] > 0) || (square_held && able[0] > 0) {
+            let winner = if able[0] > 0 && (able[1] == 0 || square_held) {
                 SideId::Attacker
             } else {
                 SideId::Defender

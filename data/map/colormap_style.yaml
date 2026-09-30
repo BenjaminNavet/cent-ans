@@ -1,4 +1,4 @@
-# Carte de couleur du sol de campagne (chantier SS, ADR 0141).
+# Carte de couleur du sol de campagne (chantier SS, ADR 0142).
 # Lue par `cent-ans geo colormap` (tools/cent_ans_tools/geo/colormap.py), validée par
 # data/schemas/colormap_style.schema.json. Couleurs sRGB « #rrggbb ». Toute retouche de
 # palette se fait ici puis re-cuisson ; aucune couleur dans le code ni dans le shader.

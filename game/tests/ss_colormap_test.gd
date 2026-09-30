@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Lot SS2 (ADR 0141) : carte de couleur du sol. Vérifie que le shader du terrain compile avec
+## Lot SS2 (ADR 0142) : carte de couleur du sol. Vérifie que le shader du terrain compile avec
 ## `satellite_ground.gdshaderinc`, et selon `map.json` :
 ## - avec `colormap.bc1` : image DXT1 à la taille annoncée, mipmaps, couleurs non grises (le défaut
 ##   que le chantier corrige) et différentes entre champs, forêt et mer ;

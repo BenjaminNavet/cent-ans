@@ -1,4 +1,4 @@
-"""Campaign ground colour map, "satellite" style (chantier SS, ADR 0141).
+"""Campaign ground colour map, "satellite" style (chantier SS, ADR 0142).
 
 ``cent-ans geo colormap`` bakes the albedo of the campaign ground as seen from a
 satellite (Total War: Attila / Pharaoh): a saturated brown / green / golden

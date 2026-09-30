@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "lakes.schema.json",
   "title": "Lacs de la carte de campagne (SS3)",
-  "description": "Contours simplifiés (px carte, 1 px = 719 m) et niveaux d'eau des lacs, extraits de land_mask.png par `cent-ans geo lakes` (ADR 0141 §4). Rendu seulement (lakes_renderer.gd).",
+  "description": "Contours simplifiés (px carte, 1 px = 719 m) et niveaux d'eau des lacs, extraits de land_mask.png par `cent-ans geo lakes` (ADR 0142 §4). Rendu seulement (lakes_renderer.gd).",
   "type": "object",
   "required": ["description", "params", "lakes"],
   "additionalProperties": false,

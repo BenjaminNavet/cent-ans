@@ -11,7 +11,7 @@ extends Node3D
 ##   tuile de terrain au niveau proche ou fin, reconstruit quand la tuile change de niveau.
 
 ## Palier moyen (lot C7b) : cœur et liseré des routes principales, largeur écran selon la distance.
-## SS2 (ADR 0141) : terre battue claire et liseré discret (plus de trait crème cartographique) ;
+## SS2 (ADR 0142) : terre battue claire et liseré discret (plus de trait crème cartographique) ;
 ## avec la carte de couleur, les routes y sont peintes de loin : `main_far_alpha_colormap`.
 @export var main_fill: Color = Color(0.66, 0.56, 0.41, 1.0)
 @export var main_casing: Color = Color(0.36, 0.28, 0.18, 0.45)

@@ -18,6 +18,9 @@ const FINE_RIG_PREFIX := "fine_"
 ## NT12 : essai de mocap gratuite (CMU) reciblée sur le rig fin `human` ; `--mocap-trial` après
 ## `--` ajoute ses images à la texture d'os et y repointe les clips substitués.
 const MOCAP_TRIAL_DIR := "res://assets/models/battle_fine/mocap_trial/"
+## NT13 : clips tirés des vidéos du joueur (pose MediaPipe) reciblés sur le rig fin `human` ;
+## `--video-trial` après `--`, même mécanisme que l'essai NT12 (prioritaire s'il est aussi demandé).
+const VIDEO_TRIAL_DIR := "res://assets/models/battle_fine/video_trial/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
@@ -35,6 +38,7 @@ static var _meshes: Dictionary = {}
 static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
 static var mocap_trial_forced: int = -1  # NT12 : voir `mocap_trial_enabled`
+static var video_trial_forced: int = -1  # NT13 : voir `video_trial_enabled`
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation: Dictionary = {}
@@ -127,7 +131,10 @@ static func _hash1(n: float) -> float:
 static var _corpse_shader: Shader = null
 
 
-static func corpse_shader() -> Shader:
+static func corpse_shader(kind: String = "", variant: int = 0) -> Shader:
+	# GA3-L3 : une figurine générée garde son albédo.
+	if kind != "" and figure(kind, variant).has("ga3_albedo"):
+		return _variant(["BV2_CORPSE", "GA3_TEX"])
 	# FG3 : avec les figurines fines, les cadavres gardent les cartes cuites (même variante,
 	# uniformes `fine_*` à leur valeur neutre pour une figurine sans atlas).
 	if fine_enabled() and fine_maps_ready():
@@ -319,21 +326,86 @@ static func _merge_fine(base: Dictionary) -> void:
 		figures[fig_name] = entry
 	base["rigs"] = rigs
 	base["figures"] = figures
-	if mocap_trial_enabled():
-		_merge_mocap_trial(rigs)
+	if video_trial_enabled():
+		_merge_mocap_trial(rigs, VIDEO_TRIAL_DIR)
+	elif mocap_trial_enabled():
+		_merge_mocap_trial(rigs, MOCAP_TRIAL_DIR)
+	if ga3_figures_enabled():
+		_merge_ga3(figures)
+
+
+## GA3-L3 (ADR 0140) : figurines générées (image → 3D, `tools/blender_scripts/ga3_figures.py`)
+## à la place de figurines fines : même rig, mêmes clips, même format `CAM1` ; l'entrée fine
+## garde style, noblesse et prises, le manifeste GA3 remplace LOD, triangles et variantes,
+## ajoute l'albédo (`ga3_albedo`, variante `GA3_TEX` du shader) et retire l'atlas FG3.
+const GA3_DIR := "res://assets/models/battle_ga3/"
+
+
+## Figurines générées actives : par défaut ; `--no-ga3-fig` après `--` rend les figurines fines.
+static func ga3_figures_enabled() -> bool:
+	return fine_enabled() and not OS.get_cmdline_user_args().has("--no-ga3-fig")
+
+
+static func _merge_ga3(figures: Dictionary) -> void:
+	var text := FileAccess.get_file_as_string(GA3_DIR + "manifest.json")
+	var parsed = JSON.parse_string(text) if text != "" else null
+	if not parsed is Dictionary:
+		return
+	var generated: Dictionary = (parsed as Dictionary).get("figures", {})
+	for fig_name in generated:
+		if not figures.has(fig_name):
+			continue
+		var g: Dictionary = generated[fig_name]
+		if not ResourceLoader.exists(GA3_DIR + str(g.get("ga3_albedo", ""))):
+			push_warning("BattleSkinned: albédo GA3 absent pour %s" % fig_name)
+			continue
+		var entry: Dictionary = figures[fig_name]
+		var lods: Array = []
+		for file in g.get("lods", []):
+			lods.append(GA3_DIR + str(file))
+		entry["lods"] = lods
+		entry["tris"] = g.get("tris", [])
+		entry["variants"] = int(g.get("variants", 1))
+		entry["ga3_albedo"] = GA3_DIR + str(g["ga3_albedo"])
+		entry["ga3_lum"] = g.get("ga3_lum", [0.2, 0.2])
+		entry.erase("atlas_layer")
+
+
+## GA3-L3 : variante `GA3_TEX` (cadavre compris) et albédo d'une figurine générée.
+static func _setup_ga3(mat: ShaderMaterial, kind: String, variant: int) -> void:
+	var fig := figure(kind, variant)
+	if not fig.has("ga3_albedo"):
+		return
+	if mat.shader != SHADER and not _variants.values().has(mat.shader):
+		return
+	var corpse := mat.shader != null and mat.shader.code.contains("#define BV2_CORPSE")
+	mat.shader = _variant(["BV2_CORPSE", "GA3_TEX"] if corpse else ["GA3_TEX"])
+	mat.set_shader_parameter("ga3_albedo", load(str(fig["ga3_albedo"])))
+	var lum: Array = fig.get("ga3_lum", [0.2, 0.2])
+	mat.set_shader_parameter("ga3_lum", Vector2(float(lum[0]), float(lum[1])))
 
 
 ## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
 ## `mocap_trial_forced` (captures A/B dans un même processus) : -1 = ligne de commande, 0/1 forcé,
-## puis `reload()`.
+## puis `reload_caches()`.
 static func mocap_trial_enabled() -> bool:
 	if mocap_trial_forced >= 0:
 		return fine_enabled() and mocap_trial_forced == 1
 	return fine_enabled() and OS.get_cmdline_user_args().has("--mocap-trial")
 
 
+## NT13 : essai vidéo actif (figurines fines seulement, défauts inchangés sans l'option).
+## `video_trial_forced` : -1 = ligne de commande, 0/1 forcé (captures A/B), puis `reload_caches()`.
+static func video_trial_enabled() -> bool:
+	if video_trial_forced >= 0:
+		return fine_enabled() and video_trial_forced == 1
+	return fine_enabled() and OS.get_cmdline_user_args().has("--video-trial")
+
+
 ## NT12 : vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.
-static func reload() -> void:
+## NT13 : ne pas nommer `reload` : `BattleSkinned.reload()` appelle `Script.reload()` du script
+## lui-même, qui remet les variables statiques (dont `*_trial_forced`) à leur valeur initiale.
+static func reload_caches() -> void:
 	_loaded = false
 	_manifest = {}
 	_textures = {}
@@ -341,12 +413,13 @@ static func reload() -> void:
 
 
 ## NT12 : repointe les clips substitués du rig fin vers les images mocap, placées après les
-## images du rig (même os ; la texture est concaténée par `bone_texture`).
-static func _merge_mocap_trial(rigs: Dictionary) -> void:
-	var text := FileAccess.get_file_as_string(MOCAP_TRIAL_DIR + "manifest.json")
+## images du rig (même os ; la texture est concaténée par `bone_texture`). NT13 : `dir` = dossier
+## de l'essai (`MOCAP_TRIAL_DIR` CMU ou `VIDEO_TRIAL_DIR` vidéo).
+static func _merge_mocap_trial(rigs: Dictionary, dir: String = MOCAP_TRIAL_DIR) -> void:
+	var text := FileAccess.get_file_as_string(dir + "manifest.json")
 	var parsed = JSON.parse_string(text) if text != "" else null
 	if not parsed is Dictionary:
-		push_warning("BattleSkinned: essai mocap sans manifeste %s" % MOCAP_TRIAL_DIR)
+		push_warning("BattleSkinned: essai mocap sans manifeste %s" % dir)
 		return
 	var trial: Dictionary = parsed
 	var key := FINE_RIG_PREFIX + str(trial.get("rig", "human"))
@@ -369,8 +442,9 @@ static func _merge_mocap_trial(rigs: Dictionary) -> void:
 		clips[clip_name] = c
 		substituted.append(clip_name)
 	entry["clips"] = clips
-	entry["mocap_texture"] = MOCAP_TRIAL_DIR + str(trial.get("texture", ""))
+	entry["mocap_texture"] = dir + str(trial.get("texture", ""))
 	entry["mocap_clips"] = substituted
+	entry["mocap_trial_dir"] = dir
 
 
 ## Nombre d'images d'une texture d'os `CAB1` (en-tête seul), 0 si illisible.
@@ -549,6 +623,7 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 	mat.set_shader_parameter("variant_count", int(figure(kind, variant).get("variants", 1)))
 	mat.set_shader_parameter("size_jitter", 0.0 if kind == "cavalry" else 0.05)
 	mat.set_shader_parameter("sever_bones", sever_table(kind, variant))
+	_setup_ga3(mat, kind, variant)
 	_setup_fine_maps(mat, kind, variant)
 
 

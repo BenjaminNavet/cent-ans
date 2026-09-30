@@ -1,0 +1,170 @@
+extends SceneTree
+
+## Lot NT13 : captures côte à côte de la même mêlée : clips keyframés actuels (gauche), essai CMU
+## NT12 (`--mocap-trial`, milieu) et clips tirés des vidéos du joueur (`--video-trial`, droite).
+## Écrites, jamais lues par l'agent (la session principale juge). Hors simulation, sur une
+## prairie plate, comme `nt12_mocap_shot.gd`.
+## Usage (avec affichage, pas en headless) :
+##   godot --path game --resolution 1280x720 --script res://tests/nt13_video_shot.gd -- [--out-dir=<dossier>]
+## Écrit dans `docs/audit/captures/nt/` (défaut) :
+## - `nt13_melee_0..3.png` : mêlée rapprochée, 4 instants à 0,25 s d'écart, actuel | CMU | vidéo
+##   (1920 px de large) ;
+## - `nt13_melee_wide.png` : même mêlée vue de plus loin (lisibilité à distance de jeu).
+
+const SKY_SHADER := preload("res://shaders/battle_sky.gdshader")
+const STEPS := 4
+
+## Simulation factice : `get_soldier_buffer` rend les figurines rangées des régiments du décor.
+class FakeBattle:
+	extends RefCounted
+	var units: Array = []
+
+	func get_soldier_buffer(side: String, kind: String) -> PackedFloat32Array:
+		var out := PackedFloat32Array()
+		for unit in units:
+			if str(unit["side"]) != side or str(unit["render"]) != kind or not bool(unit["present"]):
+				continue
+			var facing := float(unit["facing"])
+			var c := cos(facing)
+			var s := sin(facing)
+			var n := int(unit["figures"])
+			var files := int(ceil(float(unit["width"]) / (2.6 if kind == "cavalry" else 1.0)))
+			for i in n:
+				var fx := (float(i % files) - (files - 1) * 0.5) * float(unit["width"]) / files
+				var fz := (float(i / files) + 0.5) * (2.8 if kind == "cavalry" else 1.1) - float(unit["depth"]) * 0.5
+				var x := float(unit["x"]) + c * fx - s * fz
+				var z := float(unit["z"]) - s * fx - c * fz
+				out.append_array(PackedFloat32Array([c, 0, s, x, 0, 1, 0, float(unit["y"]), -s, 0, c, z]))
+		return out
+
+
+var _center := Vector3(600, 0, 400)
+var _out_dir := "../docs/audit/captures/nt"
+
+
+func _init() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--out-dir="):
+			_out_dir = arg.trim_prefix("--out-dir=")
+	_out_dir = ProjectSettings.globalize_path("res://").path_join(_out_dir).simplify_path() if _out_dir.is_relative_path() else _out_dir
+	DirAccess.make_dir_recursive_absolute(_out_dir)
+	await process_frame
+	var images := {}
+	# 0 = actuel, 1 = CMU (NT12), 2 = vidéo (NT13).
+	for trial in [0, 1, 2]:
+		BattleSkinned.mocap_trial_forced = 1 if trial == 1 else 0
+		BattleSkinned.video_trial_forced = 1 if trial == 2 else 0
+		BattleSkinned.reload_caches()
+		images[trial] = await _melee_run()
+	BattleSkinned.mocap_trial_forced = -1
+	BattleSkinned.video_trial_forced = -1
+	BattleSkinned.reload_caches()
+	var failures := 0
+	var first: Array = images[0]
+	for k in first.size():
+		var name := "nt13_melee_wide.png" if k == first.size() - 1 else "nt13_melee_%d.png" % k
+		failures += _save_row([images[0][k], images[1][k], images[2][k]], name)
+	print("nt13_video_shot: %s (%s)" % ["OK" if failures == 0 else "FAIL", _out_dir])
+	quit(0 if failures == 0 else 1)
+
+
+## Même mise en scène et mêmes pas de temps pour les deux passes : STEPS vues rapprochées puis
+## une vue large.
+func _melee_run() -> Array:
+	var world := Node3D.new()
+	root.add_child(world)
+	_environment(world)
+	var terrain := BattleTerrain.new()
+	world.add_child(terrain)
+	var heights := PackedFloat32Array()
+	heights.resize(121 * 81)
+	terrain.build({"nx": 121, "nz": 81, "resolution": 10.0, "heights": heights, "terrain": "plains", "season": "summer", "ground": "dry", "woodland": 0.0}, "clear")
+	var camera := Camera3D.new()
+	camera.fov = 45.0
+	camera.far = 3000.0
+	world.add_child(camera)
+	var soldiers := BattleSoldiers.new()
+	world.add_child(soldiers)
+	var fake := FakeBattle.new()
+	var c := _center
+	fake.units = [
+		_stage_unit(1, "attacker", "unit_men_at_arms_foot", "infantry", Vector3(c.x, 0, c.z - 3.2), 0.0, 48, false),
+		_stage_unit(2, "defender", "unit_men_at_arms_foot", "infantry", Vector3(c.x, 0, c.z + 3.2), PI, 48, false),
+	]
+	for unit in fake.units:
+		unit["y"] = terrain.world_height(float(unit["x"]), float(unit["z"]))
+		unit["state"] = "melee"
+		unit["depth"] = 4.4
+	fake.units[0]["target"] = 2
+	fake.units[1]["target"] = 1
+	soldiers.setup(fake.units, _colors(), _factions())
+	camera.look_at_from_position(c + Vector3(6.5, 2.2, -1.0), c + Vector3(0, 1.0, 0))
+	var dt := 1.0 / 30.0
+	for i in 45:
+		soldiers.update(fake, fake.units, dt, [])
+		await process_frame
+	var out: Array = []
+	for k in STEPS:
+		out.append(await _grab())
+		for j in 5:
+			soldiers.update(fake, fake.units, 0.05, [])
+			await process_frame
+	camera.look_at_from_position(c + Vector3(22.0, 9.0, -10.0), c + Vector3(0, 0.8, 0))
+	await process_frame
+	out.append(await _grab())
+	world.queue_free()
+	await process_frame
+	return out
+
+
+func _grab() -> Image:
+	await RenderingServer.frame_post_draw
+	return root.get_texture().get_image()
+
+
+## Assemble actuel | CMU | vidéo, ramené à 1920 px de large.
+func _save_row(parts: Array, name: String) -> int:
+	var first: Image = parts[0]
+	var w := first.get_width()
+	var h := first.get_height()
+	var row := Image.create(w * parts.size(), h, false, first.get_format())
+	for i in parts.size():
+		row.blit_rect(parts[i], Rect2i(0, 0, w, h), Vector2i(w * i, 0))
+	row.resize(1920, int(h * 1920.0 / (w * parts.size())), Image.INTERPOLATE_LANCZOS)
+	var path := _out_dir.path_join(name)
+	var err := row.save_png(path)
+	print("nt13_video_shot: %s (%s)" % [path, error_string(err)])
+	return 0 if err == OK else 1
+
+
+func _stage_unit(id: int, side: String, type: String, render: String, pos: Vector3, facing: float, count: int, general: bool) -> Dictionary:
+	var width := 24.0 if render != "cavalry" else 30.0
+	return {"id": id, "side": side, "type": type, "render": render, "soldiers": count, "figures": count, "initial_soldiers": count, "present": true, "x": pos.x, "y": pos.y, "z": pos.z, "facing": facing, "width": width, "depth": ceil(float(count) / width) * (2.8 if render == "cavalry" else 1.1), "state": "idle", "running": false, "ammo": 0, "is_general": general}
+
+
+func _colors() -> Dictionary:
+	return {"attacker": Color(0.16, 0.25, 0.62), "defender": Color(0.72, 0.12, 0.12)}
+
+
+func _factions() -> Dictionary:
+	return {"attacker": "fac_france", "defender": "fac_england"}
+
+
+func _environment(world: Node3D) -> void:
+	var sky_mat := ShaderMaterial.new()
+	sky_mat.shader = SKY_SHADER
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	var env := Environment.new()
+	env.background_mode = Environment.BG_SKY
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	var we := WorldEnvironment.new()
+	we.environment = env
+	world.add_child(we)
+	var sun := DirectionalLight3D.new()
+	sun.rotation = Vector3(deg_to_rad(-48), deg_to_rad(-35), 0)
+	sun.light_energy = 1.6
+	sun.shadow_enabled = true
+	world.add_child(sun)

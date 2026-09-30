@@ -1,7 +1,7 @@
 class_name LakesRenderer
 extends MeshInstance3D
 
-## Lot SS3 (ADR 0141 §4) : nappes d'eau des lacs de la carte de campagne, rendu seulement.
+## Lot SS3 (ADR 0142 §4) : nappes d'eau des lacs de la carte de campagne, rendu seulement.
 ##
 ## Contours et niveaux lus dans `data/map/lakes.json` (`cent-ans geo lakes`) : chaque lac est un
 ## polygone triangulé (`Geometry2D.triangulate_polygon`), élargi de `shore_overlap_px` pour

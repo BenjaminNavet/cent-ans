@@ -275,7 +275,7 @@ def geo_gpu_textures() -> None:
 
 @geo_app.command("colormap")
 def geo_colormap() -> None:
-    """Carte de couleur du sol (SS, ADR 0141) : colormap_bc1_<i>.bin (BC1 + mipmaps), aperçu JPEG."""
+    """Carte de couleur du sol (SS, ADR 0142) : colormap_bc1_<i>.bin (BC1 + mipmaps), aperçu JPEG."""
     from cent_ans_tools.geo import colormap as geo_colormap_step
 
     paths = geo_colormap_step.build()
@@ -417,11 +417,40 @@ def _report_landcover() -> None:
 
 
 @geo_app.command("rivers-render")
-def geo_rivers_render() -> None:
+def geo_rivers_render(
+    fine_min_order: int = typer.Option(
+        0,
+        "--fine-min-order",
+        help="Verse les rivières du réseau fin (pyramide hydro_fine) d'ordre de Strahler "
+        ">= N (5 conseillé) ; 0 = Natural Earth seul",
+    ),
+    fine_min_length_km: float = typer.Option(
+        15.0,
+        "--fine-min-length-km",
+        help="Longueur minimale (km) d'une rivière fine versée",
+    ),
+) -> None:
     """Génère rivers_render.json, river_bed.png et crossings_px.json (rendu des fleuves, V4)."""
     from cent_ans_tools.geo import river_render
 
-    result = river_render.build()
+    fine = (
+        river_render.FineOptions(fine_min_order, fine_min_length_km)
+        if fine_min_order > 0
+        else None
+    )
+    result = river_render.build(fine=fine)
+    if fine is not None and result.fine_missing:
+        console.print(
+            f"[yellow]Réseau fin introuvable ({result.fine_missing}) : rivières fines "
+            "ignorées, rendu depuis Natural Earth seul. Lancer d'abord "
+            "`cent-ans geo hydro-fine` sur une machine qui a la pyramide.[/yellow]"
+        )
+    elif fine is not None:
+        console.print(
+            f"Réseau fin : {result.fine_added} tronçons versés (ordre >= "
+            f"{fine.min_order}, >= {fine.min_length_km:g} km), "
+            f"{result.fine_dropped} doublons de Natural Earth écartés"
+        )
     _print_sizes("Rendu des fleuves", [result.render, result.bed, result.crossings])
     console.print(
         f"{result.rivers} tronçons, {result.points} points ; "
@@ -1447,7 +1476,11 @@ def assets_materials(
     sheet: Path | None = typer.Option(  # noqa: B008
         None, "--sheet", help="Planche de contrôle PNG à écrire"
     ),
-    lot: str = typer.Option("GA1", "--lot", help="Préfixe de ligne et plafond du lot"),
+    lot: str | None = typer.Option(
+        None,
+        "--lot",
+        help="Préfixe de ligne et plafond du lot (défaut : GA1 ou le bloc budget)",
+    ),
     scans: bool = typer.Option(
         False, "--scans", help="Matières scannées (ambientCG) seules, sans appel payant"
     ),
@@ -1459,40 +1492,78 @@ def assets_materials(
     layers_sheet: Path | None = typer.Option(  # noqa: B008
         None, "--layers-sheet", help="Planche JPEG des couches construites (--build)"
     ),
+    config: Path | None = typer.Option(  # noqa: B008
+        None,
+        "--config",
+        help="Fichier de matières (défaut data/art/materials.yaml ; RC5 : water_materials.yaml)",
+    ),
+    envelope: float | None = typer.Option(
+        None,
+        "--envelope",
+        help="Enveloppe maximale en dollars (abaisse le plafond du bloc budget)",
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Affiche les prompts et le coût estimé, sans appel payant",
+    ),
 ) -> None:
-    """GA/SR : matières tuilables (data/art/materials.yaml), générées ou scannées.
+    """GA/SR/RC5 : matières tuilables (--config), générées ou scannées, + cartes dérivées.
 
     Une image brute déjà présente dans --out (ou un scan en cache) est réutilisée sans
     appel. --scans --build : scans SR1 + tableaux, couches générées gardées telles quelles.
     """
+    from decimal import Decimal
+
     import numpy as np
     from PIL import Image
 
     from cent_ans_tools import material_gen
 
-    entries = {
-        entry["id"]: entry for entry in material_gen.load_materials()["materials"]
-    }
+    path = config or material_gen.MATERIALS_PATH
+    document = material_gen.load_materials(path)
+    entries = {entry["id"]: entry for entry in document["materials"]}
     ids = only or [
         material_id
         for material_id, entry in entries.items()
         if not scans or material_gen.scan_asset_id(entry)
     ]
+    unknown = [material_id for material_id in ids if material_id not in entries]
+    if unknown:
+        raise typer.BadParameter(f"Matière inconnue dans {path} : {', '.join(unknown)}")
+    cap = envelope if envelope is None else Decimal(str(envelope))
+    if dry_run:
+        report = material_gen.plan(ids, out_dir, materials_path=path)
+        for item in report["items"]:
+            state = "brute réutilisée" if item["reuse"] else f"{item['cost']} $"
+            console.print(f"[bold]{item['id']}[/bold] ({state})\n{item['prompt']}\n")
+        limit = report["cap"] if cap is None else min(cap, report["cap"] or cap)
+        console.print(
+            f"Modèle {report['model']} : {len(report['items'])} matière(s), "
+            f"coût estimé {report['total']} $"
+            + (f" (plafond {limit} $)" if limit is not None else "")
+        )
+        if limit is not None and report["total"] > limit:
+            console.print("[red]Estimation au-dessus du plafond.[/red]")
+            raise typer.Exit(1)
+        return
     tiles = {}
     for material_id in ids:
-        albedo = material_gen.generate(material_id, out_dir, lot=lot)
+        albedo = material_gen.generate(
+            material_id, out_dir, lot=lot, materials_path=path, envelope=cap
+        )
         tiles[material_id] = np.asarray(Image.open(albedo).convert("RGB"))
         console.print(f"[green]OK[/green] : {material_id} -> {albedo}")
     if sheet is not None:
-        path = material_gen.contact_sheet(tiles, sheet, params=entries)
-        console.print(f"Planche : {path} ({path.stat().st_size // 1024} Ko)")
+        contact = material_gen.contact_sheet(tiles, sheet, params=entries)
+        console.print(f"Planche : {contact} ({contact.stat().st_size // 1024} Ko)")
     if build:
         for kind, path in material_gen.build_fine_arrays(out_dir).items():
             console.print(f"Tableau {kind} : {path}")
         if layers_sheet is not None:
             path = material_gen.layers_sheet(layers_sheet)
             console.print(f"Planche : {path} ({path.stat().st_size // 1024} Ko)")
-    console.print(f"Cumul GA : {budget.total()} $")
+    console.print(f"Cumul de la section : {budget.total()} $")
 
 
 @assets_app.command("ui-ornaments")

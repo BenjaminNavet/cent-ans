@@ -1,4 +1,4 @@
-// Lot SS2 (ADR 0141) — sol « satellite » : carte de couleur précalculée (`cent-ans geo colormap`,
+// Lot SS2 (ADR 0142) — sol « satellite » : carte de couleur précalculée (`cent-ans geo colormap`,
 // BC1 14336×12288 ≈ 360 m/texel, mipmaps) comme couleur de base en vue large et moyenne.
 // Inclus par terrain.gdshader ; un crochet d'une ligne après le parcellaire fin (fp_parcels).
 // De près, le procédural (parcelles, sillons, haies) garde son dessin : la carte n'en donne plus

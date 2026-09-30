@@ -13,17 +13,17 @@
     "muster": 1
   },
   "devastation_threshold": 25,
-  "pool_cap": 600,
+  "pool_cap": 260,
   "activity_radius": 60.0,
   "figure_height": 1.26,
   "figure_min_view_fraction": 0.045,
-  "road_folk_per_unit": 0.12,
-  "field_work_probability": 0.35,
-  "herd_probability": 0.12,
-  "woodcutter_probability": 0.06,
-  "pilgrim_probability": 0.1,
-  "carts_per_trade_value": 0.02,
+  "road_folk_per_unit": 0.05,
+  "field_work_probability": 0.18,
+  "herd_probability": 0.07,
+  "woodcutter_probability": 0.04,
+  "pilgrim_probability": 0.05,
+  "carts_per_trade_value": 0.01,
   "guard_value": 40.0,
-  "scene_figures_min": 6,
-  "scene_figures_max": 24
+  "scene_figures_min": 4,
+  "scene_figures_max": 16
 }

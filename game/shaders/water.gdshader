@@ -50,6 +50,15 @@ uniform vec2 ga4_velocity_a = vec2(0.05, 0.02);
 uniform vec2 ga4_velocity_b = vec2(-0.03, 0.045);
 uniform float ga4_normal_strength = 0.35;
 uniform vec3 mid_color = vec3(0.018, 0.075, 0.095);
+// RC5 (ADR 0141) : détail tuilable Nano Banana 2 — `sea` (water_detail_*, eaux côtières) et
+// `ocean` (ocean_detail_*, large), fondus selon la profondeur ; force 0 = rendu inchangé.
+#include "res://shaders/water_detail.gdshaderinc"
+uniform sampler2D ocean_detail_normal : hint_normal, repeat_enable, filter_linear_mipmap;
+uniform sampler2D ocean_detail_albedo : source_color, repeat_enable, filter_linear_mipmap;
+uniform float ocean_detail_strength = 0.0;
+uniform float ocean_detail_scale = 1.0;
+// Profondeurs (m) du passage de la mer côtière au large.
+uniform vec2 ocean_detail_depth = vec2(30.0, 120.0);
 uniform float mid_depth_m = 25.0;
 // Lot CM2 : mer des portulans (vue stratégique parchemin).
 #include "res://shaders/parchment_sea.gdshaderinc"
@@ -131,6 +140,23 @@ void fragment() {
 		float ws = wave_strength * (1.0 - smoothstep(0.15, 0.8, footprint));
 		n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
 	}
+	// RC5 : détail côtier puis large (normale ajoutée, teinte relative), estompé au dézoom.
+	float rc_near = 1.0 - smoothstep(0.6, 2.5, footprint) * 0.8;
+	float rc_ocean = smoothstep(ocean_detail_depth.x, ocean_detail_depth.y, depth);
+	vec3 rc_sea_n = water_detail_normal_ws(p, TIME, vec2(0.0)) - vec3(0.0, 1.0, 0.0);
+	vec3 rc_ocean_n = vec3(0.0);
+	vec3 rc_ocean_col = col;
+	if (ocean_detail_strength > 0.0) {
+		vec2 ou = p * ocean_detail_scale;
+		vec3 on = texture(ocean_detail_normal, ou + vec2(TIME * 0.004, 0.0)).xyz * 2.0 - 1.0;
+		rc_ocean_n = vec3(on.x, 0.0, -on.y) * ocean_detail_strength;
+		vec3 mean_o = max(textureLod(ocean_detail_albedo, vec2(0.5), 9.0).rgb, vec3(0.02));
+		vec3 ratio_o = clamp(texture(ocean_detail_albedo, ou).rgb / mean_o, vec3(0.5), vec3(1.6));
+		rc_ocean_col = col * mix(vec3(1.0), ratio_o, ocean_detail_strength);
+	}
+	vec3 rc_sea_col = water_detail_tint(col, p * water_detail_scale);
+	col = mix(col, mix(rc_sea_col, rc_ocean_col, rc_ocean), rc_near);
+	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
 	col *= 1.0 + h0 * 0.06 * (1.0 - smoothstep(0.25, 1.2, footprint));
 

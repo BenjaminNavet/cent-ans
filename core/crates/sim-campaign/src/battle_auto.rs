@@ -24,7 +24,8 @@
 //! campaign state.
 
 use data_model::{
-    Ability, AutoResolveRules, GameData, Province, Terrain, UnitCategory, UnitType, WeatherChances,
+    Ability, AutoResolveRules, GameData, Province, RiverCrossingRules, Terrain, UnitCategory,
+    UnitType, WeatherChances,
 };
 use serde::{Deserialize, Serialize};
 use sim_battle::Weather;
@@ -183,6 +184,11 @@ pub struct BattleContext {
     /// percentage (built engines such as the ram, `siege_engines.json`).
     #[serde(default)]
     pub assault_bonus_percent: u32,
+    /// RC (ADR 0141): the attacker forces this river crossing; its
+    /// coefficients (`data/rules/river_crossings.json`) replace
+    /// `river_crossing`.
+    #[serde(default)]
+    pub crossing: Option<crate::river_crossing::CrossingEffect>,
 }
 
 /// Field, season and weather of a battle (lot N1). `weather: None` draws
@@ -421,7 +427,7 @@ pub fn resolve_profiled(
         season: Some(state.season),
         weather: None,
     };
-    resolve_with(
+    resolve_with_crossings(
         attacker_side,
         &attacker_profiles,
         defender_side,
@@ -429,6 +435,7 @@ pub fn resolve_profiled(
         context,
         &conditions,
         &data.auto_resolve,
+        &data.river_crossing_rules,
         &mut state.rng,
     )
 }
@@ -830,6 +837,34 @@ pub fn resolve_with(
     rules: &AutoResolveRules,
     rng: &mut CampaignRng,
 ) -> BattleResult {
+    static BUNDLED_CROSSINGS: std::sync::OnceLock<RiverCrossingRules> = std::sync::OnceLock::new();
+    resolve_with_crossings(
+        attacker,
+        attacker_profiles,
+        defender,
+        defender_profiles,
+        context,
+        conditions,
+        rules,
+        BUNDLED_CROSSINGS.get_or_init(RiverCrossingRules::default),
+        rng,
+    )
+}
+
+/// [`resolve_with`] with the river crossing rules given (RC: the campaign
+/// passes `data.river_crossing_rules`; [`resolve_with`] uses the bundled file).
+#[allow(clippy::too_many_arguments)]
+pub fn resolve_with_crossings(
+    attacker: &Side,
+    attacker_profiles: &[UnitProfile],
+    defender: &Side,
+    defender_profiles: &[UnitProfile],
+    context: &BattleContext,
+    conditions: &FieldConditions,
+    rules: &AutoResolveRules,
+    crossing_rules: &RiverCrossingRules,
+    rng: &mut CampaignRng,
+) -> BattleResult {
     let weather = conditions.weather.unwrap_or_else(|| {
         conditions
             .season
@@ -844,7 +879,10 @@ pub fn resolve_with(
     };
     let mut a = Host::new(attacker, attacker_profiles, false);
     let mut d = Host::new(defender, defender_profiles, true);
-    if context.river_crossing {
+    if let Some(crossing) = context.crossing {
+        a.damage *= crossing.attacker_factor(crossing_rules);
+        d.ranged *= crossing.defender_ranged_factor(crossing_rules);
+    } else if context.river_crossing {
         a.damage *= rules.river_attacker;
     }
     if context.walls {
@@ -1127,6 +1165,7 @@ mod tests {
                 river_crossing: true,
                 walls: false,
                 assault_bonus_percent: 0,
+                crossing: None,
             },
             &mut CampaignRng::from_seed(1),
         );
@@ -1150,6 +1189,40 @@ mod tests {
             )
         };
         assert!(walls(20).attacker.power > walls(0).attacker.power);
+    }
+
+    #[test]
+    fn a_crossing_replaces_the_river_flag() {
+        let fight = |context: BattleContext| {
+            resolve_auto(
+                &infantry(4),
+                &infantry(4),
+                &context,
+                &mut CampaignRng::from_seed(1),
+            )
+        };
+        let river = fight(BattleContext {
+            river_crossing: true,
+            ..BattleContext::default()
+        });
+        let bridge = fight(BattleContext {
+            river_crossing: false,
+            crossing: Some(crate::river_crossing::CrossingEffect {
+                structure: sim_battle::CrossingStructure::StoneBridge,
+                strength_permille: 1000,
+            }),
+            ..BattleContext::default()
+        });
+        let both = fight(BattleContext {
+            river_crossing: true,
+            crossing: Some(crate::river_crossing::CrossingEffect {
+                structure: sim_battle::CrossingStructure::StoneBridge,
+                strength_permille: 1000,
+            }),
+            ..BattleContext::default()
+        });
+        assert!(bridge.attacker.power < river.attacker.power);
+        assert_eq!(bridge.attacker.power, both.attacker.power);
     }
 
     #[test]

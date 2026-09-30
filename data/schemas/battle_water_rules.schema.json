@@ -144,8 +144,21 @@
       },
       "required": ["main_width_m", "track_width_m", "wander_m", "ford_road_chance"],
       "additionalProperties": false
+    },
+    "crossing": {
+      "description": "Bataille à un passage de campagne (lot RC2, ADR 0141) : rivière large entre les lignes, un seul passage près du centre. Un bac est figuré par un gué étroit (le débarcadère disputé), un pont de bateaux par un pont de bois au tablier le plus étroit.",
+      "type": "object",
+      "properties": {
+        "bridge_river_width_m": { "$ref": "#/$defs/span", "description": "Largeur moyenne de la rivière à un pont, un pont de bateaux ou un bac." },
+        "ford_river_width_m": { "$ref": "#/$defs/span", "description": "Largeur moyenne de la rivière à un gué." },
+        "amplitude_m": { "$ref": "#/$defs/span", "description": "Amplitude des méandres (faible : la rivière reste entre les lignes)." },
+        "passage_jitter_m": { "$ref": "#/$defs/metres", "description": "Écart maximal du passage au centre du champ." },
+        "ferry_half_width_m": { "$ref": "#/$defs/metres", "description": "Demi-largeur du gué étroit qui figure un bac." }
+      },
+      "required": ["bridge_river_width_m", "ford_river_width_m", "amplitude_m", "passage_jitter_m", "ferry_half_width_m"],
+      "additionalProperties": false
     }
   },
-  "required": ["river", "streams", "movement", "deep_water", "combat", "roads"],
+  "required": ["river", "streams", "movement", "deep_water", "combat", "roads", "crossing"],
   "additionalProperties": false
 }

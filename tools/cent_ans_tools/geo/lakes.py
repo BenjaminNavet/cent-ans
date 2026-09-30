@@ -1,4 +1,4 @@
-"""Lake outlines for the campaign water meshes (lot SS3, ADR 0141 §4).
+"""Lake outlines for the campaign water meshes (lot SS3, ADR 0142 §4).
 
 A lake is a component of inland water of ``data/map/land_mask.png``: water
 not connected to the image border (the sea), of at least ``min_area_px``
@@ -415,7 +415,7 @@ def build(
     )
     document = {
         "description": (
-            "Lacs de la carte de campagne (lot SS3, ADR 0141) : eau intérieure de "
+            "Lacs de la carte de campagne (lot SS3, ADR 0142) : eau intérieure de "
             "land_mask.png non reliée à la mer, au-dessus du niveau de la mer, hors "
             "retenues modernes ; contour simplifié en px carte, niveau en mètres "
             f"({render}). Généré par `cent-ans geo lakes`. Rendu seulement."

@@ -7,7 +7,7 @@ extends Node3D
 ## - Un `MultiMesh` par (rôle, activité) pour les figurines skinnées des batailles (mêmes
 ##   maillages et texture d'os que `ArmyFigures`, shader `battle_soldier_skinned` compilé avec
 ##   `FK_TRAVEL`) et un par accessoire (`folk_prop.gdshader`) ; modèles : `FolkModels`.
-## - Plafond fixe de figurines (`pool_cap` de `data/rules/map_scenes.json`, repli 600), divisé par
+## - Plafond fixe de figurines (`pool_cap` de `data/rules/map_scenes.json`, repli 260), divisé par
 ##   deux tant que le budget d'image (`FrameBudget`) est dépassé ; accessoires : un quart du
 ##   plafond.
 ## - Actif au palier proche seulement (`ZoomTiers.near_weight`), dans un rayon autour du point
@@ -24,7 +24,7 @@ extends Node3D
 ## Ils posent leurs figurines avec `add` (en marche) et `add_static` (sur place).
 
 const DATA_FILE := "rules/map_scenes.json"
-const DEFAULT_CAP := 600
+const DEFAULT_CAP := 260
 const DEFAULT_RADIUS := 60.0
 ## Hauteur d'une figurine (unités monde) à l'échelle de la carte, au-dessus de `shrink_start` de
 ## `MapPropScale` ; elle rejoint la taille réelle (1,8 m) au palier vallée.
@@ -475,9 +475,14 @@ func _figure_material(role: String, activity: String, kind: String, variant: int
 	material.set_shader_parameter("trim", livery.darkened(0.3))
 	material.set_shader_parameter("has_heraldry", false)
 	BattleSkinned.setup_material(material, kind, variant)
-	# Déplacement en shader : variante `FK_TRAVEL` (conserve `FG3_BAKED` des figurines fines).
-	var fine := material.shader != BattleSkinned.SHADER and material.shader.code.contains("#define FG3_BAKED")
-	material.shader = BattleSkinned._variant(["FG3_BAKED", "FK_TRAVEL"] if fine else ["FK_TRAVEL"])
+	# Déplacement en shader : variante `FK_TRAVEL` (conserve `FG3_BAKED` des figurines fines et
+	# `GA3_TEX` des figurines générées, GA3-L3).
+	var defines := []
+	for keep in ["FG3_BAKED", "GA3_TEX"]:
+		if material.shader != BattleSkinned.SHADER and material.shader.code.contains("#define " + keep):
+			defines.append(keep)
+	defines.append("FK_TRAVEL")
+	material.shader = BattleSkinned._variant(defines)
 	material.set_shader_parameter("livery_share", 0.4)
 	material.set_shader_parameter("plain_count", FolkModels.DRAB.size())
 	material.set_shader_parameter("plain_colors", PackedColorArray(FolkModels.DRAB))

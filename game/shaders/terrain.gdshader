@@ -137,7 +137,7 @@ uniform float rock_line_m = 1700.0;
 // CV3-0 (#5) : 1.8 -> 2.1, la plaine entre Paris et Orléans restait peu lisible en vue régionale
 // (l'écrasement des montagnes, indépendant, reste inchangé).
 uniform float shading_relief = 2.1;
-// SS2 (ADR 0141) : de près (empreinte < `shading_relief_near_footprint`), l'exagération retombe à
+// SS2 (ADR 0142) : de près (empreinte < `shading_relief_near_footprint`), l'exagération retombe à
 // `shading_relief_near` : la carte de couleur porte la lecture du paysage, le relief ne doit plus
 // dominer (effet « carte IGN »).
 uniform float shading_relief_near = 1.3;
@@ -327,7 +327,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
-#include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0141)
+#include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)

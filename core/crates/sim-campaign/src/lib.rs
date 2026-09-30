@@ -79,6 +79,7 @@ pub mod religion;
 pub mod replenish;
 pub mod research;
 pub mod retinue;
+pub mod river_crossing;
 pub mod rng;
 pub mod rule_constants;
 pub mod save;
@@ -104,8 +105,8 @@ pub use agents::{
 };
 pub use ai_replay::{AiMoveKind, AiMoveNotability, AiMoveRecord};
 pub use battle_auto::{
-    resolve_auto, resolve_field, resolve_with, BattleContext, BattleResult, BattleUnit,
-    FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,
+    resolve_auto, resolve_field, resolve_with, resolve_with_crossings, BattleContext, BattleResult,
+    BattleUnit, FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
 pub use buildings::{BuildOption, DemolitionPreview, EffectTotals, EffectValue, ProvinceCity};

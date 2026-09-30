@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Test headless du lot SS3 (ADR 0141 §4, lacs maillés), sur les vraies données :
+## Test headless du lot SS3 (ADR 0142 §4, lacs maillés), sur les vraies données :
 ##  1. `data/map/lakes.json` chargé par `LakesRenderer`, au moins un lac maillé, dont le Léman ;
 ##  2. niveau cohérent avec le terrain affiché (`MapData.height_m_at` au centre de masse : Léman
 ##     à `LEVEL_TOLERANCE_M` près, 90 % des lacs aussi — le centre d'un lac en croissant ou d'un
