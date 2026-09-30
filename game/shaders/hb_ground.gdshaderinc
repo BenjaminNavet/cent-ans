@@ -5,10 +5,11 @@
 // Inclus par terrain.gdshader ; un crochet d'une ligne après la carte de couleur (sg_apply).
 // Posé par HbGround.apply (`has_hb` faux sans tableaux : rendu SS inchangé).
 //
-// Table `hb_table` (16 × 8, ligne = indice de biome), valeurs dans [0, 1] (échelles de HbGround) :
+// Table `hb_table` (17 × 8, ligne = indice de biome), valeurs dans [0, 1] (échelles de HbGround) :
 //   x 0..11 : cultures (R couche / 255, G poids cumulé × 0,5 (1 : case vide), B tuile / 1000 m) ;
 //   x 12 : canopée (R, B ; A = taille de parcelle / 5000 m) ; x 13 : roche (R, B ; A = haies / 2) ;
-//   x 14 / 15 : sols sauvages a / b (R, B ; A = allongement / 10 / présence agricole).
+//   x 14 / 15 : sols sauvages a / b (R, B ; A = allongement / 10 / présence agricole) ;
+//   x 16 : teinte multiplicative du biome (RVB / 2).
 
 uniform sampler2DArray hb_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D hb_biomes : filter_nearest, repeat_disable;
@@ -161,6 +162,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	vec3 rock_col = hb_sample(rock.r, rock.b, p, dpx, dpy, 0.0);
 	float total = max(open_w + forest_w + rock_share, 1e-3);
 	vec3 hb_col = (open_col * open_w + canopy_col * forest_w + rock_col * rock_share) / total;
+	hb_col *= texelFetch(hb_table, ivec2(16, b), 0).rgb * 2.0;
 	// Teinte : une part de celle de la carte de couleur (cohérence avec la vue lointaine).
 	float lum_hb = dot(hb_col, vec3(0.2126, 0.7152, 0.0722));
 	float lum_c = max(dot(col, vec3(0.2126, 0.7152, 0.0722)), 1e-3);

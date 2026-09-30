@@ -9,17 +9,18 @@ extends RefCounted
 
 const MIX_FILE := "art/ground_biome_mix.json"
 const BIOMES_FILE := "map/biomes.png"
-const TABLE_WIDTH := 16
+const TABLE_WIDTH := 17
 const TABLE_HEIGHT := 8
 const CROP_SLOTS := 12
 ## Valeurs de la table ramenées dans [0, 1] (une texture peut borner ses canaux) : couche / 255,
 ## poids cumulé × 0,5 (case vide : 1), tuile / 1000 m, taille de parcelle / 5000 m, haie / 2,
-## allongement / 10 ; même échelle dans `hb_ground.gdshaderinc`.
+## allongement / 10, teinte / 2 ; même échelle dans `hb_ground.gdshaderinc`.
 const LAYER_NORM := 255.0
 const TILE_NORM := 1000.0
 const CELL_NORM := 5000.0
 const HEDGE_NORM := 2.0
 const STRIP_NORM := 10.0
+const TINT_NORM := 2.0
 
 
 ## Pose les paramètres du matériau ; rend vrai si l'habillage est actif.
@@ -88,6 +89,8 @@ static func build_table(mix: Dictionary, layers: Dictionary) -> Image:
 		image.set_pixel(13, row, Color(float(layers[entry["rock"]]) / LAYER_NORM, 0.0, _tile_m(entry["rock"]) / TILE_NORM, float(entry["hedge"]) / HEDGE_NORM))
 		image.set_pixel(14, row, Color(float(layers[wild[0]]) / LAYER_NORM, 0.0, _tile_m(wild[0]) / TILE_NORM, float(entry["strip"]) / STRIP_NORM))
 		image.set_pixel(15, row, Color(float(layers[wild[1]]) / LAYER_NORM, 0.0, _tile_m(wild[1]) / TILE_NORM, float(entry["farm"])))
+		var tint: Array = entry.get("tint", [1.0, 1.0, 1.0])
+		image.set_pixel(16, row, Color(float(tint[0]) / TINT_NORM, float(tint[1]) / TINT_NORM, float(tint[2]) / TINT_NORM, 1.0))
 	return image
 
 

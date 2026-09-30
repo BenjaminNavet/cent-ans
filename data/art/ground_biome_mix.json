@@ -1,5 +1,5 @@
 {
-  "description": "HB3 (ADR 0143) : habillage du sol par biome en vue moyenne et proche (terrain.gdshader, hb_ground.gdshaderinc). Par biome (indices de data/map/biomes.yaml) : taille des parcelles (m), allongement des lanières, force des haies, présence agricole, cultures pondérées, sol sauvage (deux matières mélangées), canopée des forêts et roche. Identifiants de data/art/ground_materials.yaml.",
+  "description": "HB3 (ADR 0143) : habillage du sol par biome en vue moyenne et proche (terrain.gdshader, hb_ground.gdshaderinc). Par biome (indices de data/map/biomes.yaml) : taille des parcelles (m), allongement des lanières, force des haies, présence agricole, cultures pondérées, sol sauvage (deux matières mélangées), canopée des forêts, roche et teinte multiplicative (RVB). Identifiants de data/art/ground_materials.yaml.",
   "biomes": {
     "1": {
       "name": "océanique",
@@ -23,7 +23,12 @@
         "pasture"
       ],
       "canopy": "broadleaf_canopy",
-      "rock": "granite_rock"
+      "rock": "granite_rock",
+      "tint": [
+        1.0,
+        1.02,
+        0.95
+      ]
     },
     "2": {
       "name": "continental",
@@ -48,7 +53,12 @@
         "fallow"
       ],
       "canopy": "broadleaf_canopy",
-      "rock": "limestone_rock"
+      "rock": "limestone_rock",
+      "tint": [
+        1.02,
+        1.0,
+        0.92
+      ]
     },
     "3": {
       "name": "méditerranéen",
@@ -69,7 +79,12 @@
         "maquis"
       ],
       "canopy": "med_pine_open",
-      "rock": "limestone_rock"
+      "rock": "limestone_rock",
+      "tint": [
+        1.06,
+        1.02,
+        0.9
+      ]
     },
     "4": {
       "name": "steppe",
@@ -88,7 +103,12 @@
         "golden_steppe"
       ],
       "canopy": "broadleaf_canopy",
-      "rock": "limestone_rock"
+      "rock": "limestone_rock",
+      "tint": [
+        0.9,
+        1.06,
+        0.72
+      ]
     },
     "5": {
       "name": "boréal",
@@ -109,7 +129,12 @@
         "heather_moor"
       ],
       "canopy": "boreal_mixed",
-      "rock": "granite_rock"
+      "rock": "granite_rock",
+      "tint": [
+        0.95,
+        1.02,
+        0.95
+      ]
     },
     "6": {
       "name": "montagnard",
@@ -127,7 +152,12 @@
         "scree"
       ],
       "canopy": "conifer_canopy",
-      "rock": "scree"
+      "rock": "scree",
+      "tint": [
+        0.96,
+        1.04,
+        0.94
+      ]
     },
     "7": {
       "name": "semi-aride",
@@ -147,7 +177,12 @@
         "limestone_garrigue"
       ],
       "canopy": "med_pine_open",
-      "rock": "limestone_rock"
+      "rock": "limestone_rock",
+      "tint": [
+        1.04,
+        0.98,
+        0.86
+      ]
     }
   }
 }

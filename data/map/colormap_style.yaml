@@ -234,12 +234,12 @@ biomes:
     # Herbe dorée / paille, quasi sans arbres (hors vallées), peu de champs.
     steppe:
       palette:
-        grassland: "#b3a45c"
-        grassland_dry: "#c2ad6a"
-        farmland: "#b8a054"
+        grassland: "#9a9a48"
+        grassland_dry: "#b0a455"
+        farmland: "#aa9a4c"
         farmland_dry: "#c4a860"
         forest_broadleaf: "#3c5226"
-        heath: "#a8995e"
+        heath: "#8f8c50"
       forest_keep: 0.08
       presence: 0.3
       pasture_shift: 0.4
@@ -251,9 +251,9 @@ biomes:
         - {name: millet, color: "#b99c52", weight: 0.3}
         - {name: jachere, color: "#9c8452", weight: 0.3}
       pastures:
-        - {name: herbe, color: "#aa9f5a", weight: 0.5}
-        - {name: stipa, color: "#c4b578", weight: 0.3}
-        - {name: pature, color: "#94984e", weight: 0.2}
+        - {name: herbe, color: "#8f944c", weight: 0.5}
+        - {name: stipa, color: "#b4ab6c", weight: 0.3}
+        - {name: pature, color: "#7f8c44", weight: 0.2}
     # Conifères sombres, tourbières, clairières, peu de champs.
     boreal:
       palette:

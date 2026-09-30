@@ -47,10 +47,10 @@ uniform bool fog_enabled = false;
 uniform vec3 fog_veil : source_color = vec3(0.90, 0.88, 0.82);
 // HB (ADR 0143) : brouillard de guerre façon Total War, assombri et un peu désaturé, sans le voile
 // clair qui pâlissait tout le territoire non vu en carte « IGN » (0,78 / 0,36 / 0,32, ton 1,15).
-uniform float fog_desaturation = 0.4;
+uniform float fog_desaturation = 0.25;
 uniform float fog_veil_amount = 0.1;
 uniform float fog_cloud_amount = 0.22;
-uniform float fog_tone = 0.78;           // luminance du territoire non vu (< 1 : assombri)
+uniform float fog_tone = 0.72;           // luminance du territoire non vu (< 1 : assombri)
 uniform float fog_cloud_scale = 0.045;    // par pixel carte (≈ 22 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
 uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
