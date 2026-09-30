@@ -187,6 +187,67 @@ def atlas_step() -> None:
     print("OK atlas")
 
 
+# ---------------------------------------------------------------- sheet assembly (Pillow)
+SHEET_ROWS = [
+    ("arbre proche", ["near_current", "near_A", "near_A_impostor", "near_B"]),
+    ("bosquet", ["grove_current", "grove_A", "grove_A_impostor", "grove_B"]),
+    (
+        "sol",
+        [
+            "clutter_grass_current",
+            "clutter_grass_A",
+            "clutter_bush_B",
+            "clutter_rock_B",
+        ],
+    ),
+]
+SHEET_LABELS = {
+    "near_current": "actuel FC5 (cartes procédurales, 250 tri)",
+    "near_A": "A : atlas de feuilles flux-2 (même géométrie)",
+    "near_A_impostor": "A' : imposteur (image flux-2, 2 tri)",
+    "near_B": "B : TRELLIS remaillé 250 tri, albédo 256",
+    "clutter_grass_current": "herbe actuelle (DA6, teinte du shader absente)",
+    "clutter_grass_A": "herbe A (flux-2 détourée)",
+    "clutter_bush_B": "buisson B (TRELLIS 120 tri)",
+    "clutter_rock_B": "rocher B (TRELLIS 120 tri)",
+}
+
+
+def montage_step() -> None:
+    """Assemble the Blender cells into ``docs/img/ga3/s5_vegetation.jpg`` (<= 1600 px)."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    cells = RAW / "cells"
+    band = 22
+    width = CELL_W * 4
+    sheet = Image.new("RGB", (width, len(SHEET_ROWS) * (CELL_H + band)), (20, 20, 20))
+    draw = ImageDraw.Draw(sheet)
+    try:
+        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 14)
+    except OSError:
+        font = ImageFont.load_default()
+    for row, (title, names) in enumerate(SHEET_ROWS):
+        y = row * (CELL_H + band)
+        for col, name in enumerate(names):
+            sheet.paste(
+                Image.open(cells / f"{name}.png").convert("RGB"),
+                (col * CELL_W, y + band),
+            )
+            label = SHEET_LABELS.get(name) or SHEET_LABELS.get(
+                name.replace("grove", "near"), name
+            )
+            draw.text(
+                (col * CELL_W + 6, y + 3),
+                f"{title} - {label}",
+                fill=(235, 235, 235),
+                font=font,
+            )
+    out = REPO / "docs/img/ga3/s5_vegetation.jpg"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(out, quality=85)
+    print("OK", out, sheet.size)
+
+
 # ---------------------------------------------------------------- Blender steps
 # route B: (source glb, output name, voxel divisions, [triangle targets], texture px)
 DECIMATE = [
@@ -218,6 +279,18 @@ def decimate_step(_argv: list[str]) -> None:
         bpy.ops.wm.read_factory_settings(use_empty=True)
         source = gc.import_joined(str(RAW / f"{src}_trellis.glb"))
         raw = gc.triangle_count(source)
+        for slot in source.material_slots:
+            bsdf = (
+                slot.material.node_tree.nodes.get("Principled BSDF")
+                if slot.material
+                else None
+            )
+            if (
+                bsdf is not None
+            ):  # TRELLIS materials are metallic: the diffuse-colour bake would be black
+                for link in list(bsdf.inputs["Metallic"].links):
+                    slot.material.node_tree.links.remove(link)
+                bsdf.inputs["Metallic"].default_value = 0.0
         gc.normalise(source, 1.0)
         for level, target in enumerate(targets):
             low = source.copy()
@@ -355,11 +428,15 @@ def _tree_variants() -> dict:
         trunk.data.materials.clear()
         trunk.data.materials.append(bark)
         protos[key] = [crown, trunk]
-    bpy.ops.mesh.primitive_plane_add(size=1.0)
+    bpy.ops.mesh.primitive_plane_add(size=1.35)
     quad = bpy.context.active_object
     quad.rotation_euler = (math.pi / 2, 0, 0)
     bpy.ops.object.transform_apply(rotation=True)
-    quad.location = (0, 0, 0.5)
+    quad.location = (
+        0,
+        0,
+        0.47,
+    )  # tree fills ~75 % of the image, base 15 % above its bottom
     bpy.ops.object.transform_apply(location=True)
     quad.data.materials.append(
         _mat("impostor", image=RAW / "oak_tree_cut.png", alpha=True)
@@ -547,5 +624,7 @@ if __name__ == "__main__":
         fal_step(sys.argv[2:])
     elif len(sys.argv) > 1 and sys.argv[1] == "atlas":
         atlas_step()
+    elif len(sys.argv) > 1 and sys.argv[1] == "montage":
+        montage_step()
     else:
         print(__doc__)

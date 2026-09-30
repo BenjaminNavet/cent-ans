@@ -59,11 +59,9 @@ Brutes (prompt, src, cut, glb, json) : `~/dev/cent-ans-raw/ga3/s4/`.
   cordages) : TRELLIS risque les mêmes fragments que l'arc de S2 → prévoir un essai `trellis/multi`
   (2-3 vues NB2) ou garder le procédural pour eux. TRELLIS 2 seulement pour un bâtiment-clé vu de
   près (église) et avec LOD0 relevé à 20-30 k : +0,30 $.
-- [ ] S5 végétation campagne (chêne + herbe/buisson + rocher) : voie A textures (cartes de feuilles
-      générées, recuisson `_mid`) vs voie B TRELLIS (décimation 250/90 tri) → `tools/blender_scripts/ga3_vegetation.py`,
-      candidats `game/assets/models/vegetation/ga3/`, planche `docs/img/ga3/s5_vegetation.jpg`.
-      En cours : images + détourage + TRELLIS faits (brutes `~/dev/cent-ans-raw/ga3/s5/`) ; suite = atlas,
-      décimation, planche, verdict.
+- [x] S5 végétation campagne (chêne + herbe/buisson + rocher) : voie A textures vs voie B TRELLIS →
+      `tools/blender_scripts/ga3_vegetation.py`, candidats `game/assets/models/vegetation/ga3/` (rien de branché),
+      planche `docs/img/ga3/s5_vegetation.jpg` (locale, `docs/img/` ignoré sur main). Verdict ci-dessous.
 
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
@@ -118,3 +116,36 @@ Brutes (prompt, src, cut, glb, json) : `~/dev/cent-ans-raw/ga3/s4/`.
 - 30/09 S4 (décor v2) : flux-2 + bria + trellis / trellis-2 (0,35 $), `ga3_cleanup.py` étendu
   (étalonnage albédo, cuisson normal/rugosité, repli voxel de la décimation), `ga3_sheet.py`,
   `ga3_fal_decor.py`. Verdict : TRELLIS + détourage pour le lot (~1 $), TRELLIS 2 non retenu.
+- 30/09 **S5 végétation campagne** (0,21 $ ; brutes `~/dev/cent-ans-raw/ga3/s5/`, dont `fal_log.json` avec les
+  prompts). Script `ga3_vegetation.py` en étapes : `fal` (flux-2 1024² → bria → trellis pour B), `atlas`
+  (normalisation FC5 : couleur / moyenne linéaire × 0,5, moitié sapin conservée), `decimate` (Blender),
+  `sheet` (cellules Cycles : même teinte de palette ×2 et découpe alpha 0,5 que `foliage.gdshaderinc`),
+  `montage`. Lit l'arbre `_mid` et l'atlas FC5 dans le checkout `main` (FC n'est pas dans `feat/ga3`).
+  - **A textures** : `ga3_leaf_cards.png` (1024 × 512, moitié gauche = amas de feuilles de chêne flux-2
+    détouré, couverture 66 % contre 33 %), remplaçant direct de `campaign_leaf_cards.png`. Sur la même
+    géométrie `_mid` : feuilles lobées lisibles, mais le gain est faible — ce sont les 100 cartes et leur
+    répartition qui font la silhouette « chou ». `ga3_grass_tuft.png` : vraies couleurs paille/vert, mais
+    brins fins → 13 % de couverture, la découpe à 0,5 en perd ; à régénérer en touffe plus dense.
+  - **A' imposteur** (image flux-2 du chêne entier détourée sur un quad face caméra, 2 tri) : de loin le
+    plus réaliste, proche comme en bosquet (silhouette, tronc noueux, trous de ciel). Limites : une seule vue
+    (même arbre de tous côtés), éclairage cuit, pas de normal map, parallaxe nulle en plongée forte.
+  - **B TRELLIS** : la décimation par effondrement cale à 3,3-4,8 k tri (centaines d'îlots de feuilles) ;
+    remaillage voxel grossier (1/22) puis 250 / 90 tri (`ga3_oak_250/90.glb`, albédo 256/128) → **boule en
+    pâte** confirmée, tronc avalé : no-go pour les arbres. Buisson 120 / 50 tri : boules texturées
+    passables en couvre-sol lointain. **Rocher 120 / 60 / 18 tri** (`ga3_cleanup.py --lod0 120 --tex 256`,
+    collapse direct) : bon, lichen lisible, go. Piège : matériaux TRELLIS métalliques → cuisson noire si
+    `Metallic` n'est pas forcé à 0 (corrigé).
+  - **Verdict** : voie **A'/A** pour la végétation (imposteurs générés + atlas de feuilles), **B seulement
+    pour les rochers** (et au mieux les buissons lointains). Lot complet ≈ 1-1,5 $ avec reprises :
+    3 essences × (1 carte de feuilles/rameau + 3-4 variantes d'imposteur) ≈ 15 × 0,03 $ ; 3 herbes + 3 buissons
+    (cartes) ≈ 0,2 $ ; 4 rochers TRELLIS ≈ 0,2 $.
+  - **Perf** : A = nul (même géométrie, même atlas 1024 × 512). A' = −248 tri par arbre proche si
+    l'imposteur remplace les cartes, sinon nul ; texture : réutiliser la grille `campaign_impostors_albedo`
+    (2048 × 768, 3 × 8 cases de 256²) → 0 draw call en plus. B rochers : 120 tri, 1 MultiMesh + 1 texture
+    256² par type (ou un atlas commun → 1 draw call pour tous).
+  - **Branchement** : A = copier `ga3_leaf_cards.png` sur `campaign_leaf_cards.png` (drop-in ; agrandir
+    les cartes de 20-30 % si besoin). A' = générer la grille d'imposteurs (variantes dans les 8 colonnes, ou
+    8 azimuts via nano-banana-2/edit), normal map plate ou dérivée de la luminance, et décider si les
+    cartes `_mid` restent en deçà de 37-45 m. Rochers = nouveau genre dans `GroundClutter` (aujourd'hui
+    herbe + buisson seulement) ou dans `Vegetation`, avec un MultiMesh dédié.
+

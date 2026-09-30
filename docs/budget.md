@@ -115,6 +115,7 @@ GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
 | 2026-09-30 | fal.ai | GA3-S1 : maison à colombages (1 × fal-ai/flux/dev 1024², 0,025 $/MP + 1 × fal-ai/trellis 0,02 $) | 0,05 $ | 0,05 $ | 0,64 $ |
 | 2026-09-30 | fal.ai | GA3-S2 : longbowman image→3D (1 × fal-ai/trellis/multi, 3 vues découpées de `sr3/longbowman.png`, 0,02 $) | 0,02 $ | 0,02 $ | 0,66 $ |
 | 2026-09-30 | fal.ai | GA3-S4 : maison v2 (1 × fal-ai/flux-2 1024² 0,012 $ + 1 × fal-ai/bria/background/remove 0,018 $ + 1 × fal-ai/trellis 0,02 $ + 1 × fal-ai/trellis-2 1024 0,30 $) | 0,35 $ | 0,35 $ | 1,01 $ |
+| 2026-09-30 | fal.ai | GA3-S5 : végétation campagne (5 × fal-ai/flux-2 1024² 0,012 $/MP + 5 × fal-ai/bria/background/remove 0,018 $ + 3 × fal-ai/trellis 0,02 $ : chêne, buisson, rocher) | 0,21 $ | 0,21 $ | 1,22 $ |
 
 ## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
 
