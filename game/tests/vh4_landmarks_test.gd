@@ -200,14 +200,13 @@ func _test_layer() -> void:
 	layer.update_view(1.0)
 	layer.flush(Vector2(z.x, z.y))
 	_check(layer.is_shown("set_rouen"), "Rouen 1:1 shown near the camera")
-	layer.update_view(5.0)
-	var mid := layer.fade("set_rouen")
-	layer.update_view(1.0)
-	var near := layer.fade("set_rouen")
-	_check(near < 0.05, "maquette faded out at site tier (%.2f)" % near)
-	_check(mid >= near, "fade monotonic (%.2f ≥ %.2f)" % [mid, near])
+	_check(layer.built_ids().has("set_rouen"), "built_ids lists Rouen")
+	layer.update_view(layer.profile.max_rig_distance * 0.95)
+	_check(layer.is_shown("set_rouen"), "Rouen 1:1 still shown below max_rig_distance")
+	layer.update_view(layer.profile.max_rig_distance * 1.05)
+	_check(layer.is_shown("set_rouen"), "hysteresis keeps Rouen shown just above max_rig_distance")
 	layer.update_view(60.0)
-	_check(not layer.visible and layer.fade("set_rouen") == 1.0, "strategic view: maquette only")
+	_check(not layer.visible and layer.built_ids().is_empty(), "far view: no 1:1 city, TownFarLayer only")
 	layer.queue_free()
 	await process_frame
 
@@ -326,20 +325,15 @@ func _test_orleans() -> void:
 	get_root().add_child(layer)
 	layer.force_active = true
 	layer.setup(null, null, ZoomTiers.load_default(), ["set_orleans"])
-	_check(layer.has_city("set_orleans") and not layer.has_maquette("set_orleans"), "Orléans 1:1 without maquette")
+	_check(layer.has_city("set_orleans"), "Orléans 1:1 known")
 	var z := layer.zone_of("set_orleans")
 	layer.focus_override = Vector2(z.x, z.y)
 	layer.update_view(1.0)
 	layer.flush(Vector2(z.x, z.y))
 	_check(layer.is_shown("set_orleans"), "Orléans 1:1 shown at site tier")
-	var tiers := ZoomTiers.load_default()
-	var d := 1.0
-	while d < 60.0 and tiers.valley_weight(d) >= layer.profile.min_valley_weight:
-		d *= 1.1
-	while d < 60.0 and tiers.valley_weight(d) < LandmarkCityLayer.PREPARE_VALLEY:
-		d /= 1.05
-	layer.update_view(d)
-	_check(not layer.is_shown("set_orleans"), "hidden while colony maquettes are shown (d=%.1f, valley %.2f)" % [d, tiers.valley_weight(d)])
+	_check(layer.built_ids().has("set_orleans"), "built_ids lists Orléans")
+	layer.update_view(layer.profile.max_rig_distance * 1.5)
+	_check(not layer.is_shown("set_orleans"), "hidden beyond max_rig_distance")
 	layer.queue_free()
 	await process_frame
 

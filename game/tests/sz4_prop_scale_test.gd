@@ -36,7 +36,8 @@ func _test_curve() -> void:
 	var props := MapPropScale.shared()
 	_check(props != null and ResourceLoader.exists("res://resources/map_prop_scale.tres"), "shared resource")
 	for d in [60.0, 150.0, 620.0, props.shrink_start]:
-		_check(is_equal_approx(props.tree_scale(d), 1.0) and is_equal_approx(props.hamlet_scale(d), 1.0), "far scale is 1 at d=%.1f" % d)
+		_check(is_equal_approx(props.tree_scale(d), 1.0), "far scale is 1 at d=%.1f" % d)
+		_check(is_equal_approx(props.hamlet_scale(d), props.hamlet_ratio), "hamlets 1:1 at d=%.1f (VT)" % d)
 	_check(is_equal_approx(props.windmill_scale(props.shrink_end), props.windmill_ratio), "real size at shrink_end")
 	_check(is_equal_approx(props.hamlet_scale(1.0), props.hamlet_ratio), "real size below shrink_end")
 	var previous := 1.0
@@ -86,10 +87,10 @@ func _test_map() -> void:
 	print("sz4_prop_scale_test: samples (hamlet, windmill, chimney, hamlets visible) %s" % samples)
 	var hamlet_base := ModelLibrary.HAMLET_SCALE
 	var far: Array = samples[60.0]
-	_check(is_equal_approx(far[0], hamlet_base), "hamlets at map scale far away")
+	_check(is_equal_approx(far[0], hamlet_base * props.hamlet_ratio), "hamlets at real size far away (VT: 1:1 at every distance)")
 	_check(is_equal_approx(far[1], 1.0), "windmills at map scale far away")
 	var valley: Array = samples[6.0]
-	_check(valley[0] > 0.0 and valley[0] < hamlet_base * props.hamlet_scale(6.0) * 1.3, "hamlets shrunk at the valley tier (%s)" % valley[0])
+	_check(is_equal_approx(valley[0], hamlet_base * props.hamlet_ratio), "hamlets still real size at the valley tier (%s)" % valley[0])
 	_check(valley[1] > 0.0 and valley[1] <= props.windmill_scale(6.0) * (1.0 + props.rewrite_step) + 1e-4, "windmills shrunk at the valley tier")
 	_check(valley[2] != null and absf(float(valley[2]) - props.chimney_scale(6.0)) < 1e-4, "chimney smoke scale at the valley tier")
 	_check(bool((samples[2.0] as Array)[3]), "hamlets kept at the site tier")

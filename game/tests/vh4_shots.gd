@@ -96,7 +96,7 @@ func _init() -> void:
 			for b: Dictionary in lc.plan_of(settlement).get("bridges", []):
 				print("VH4 bridge %s deck %.1f water %.1f bank %.1f m" % [b["id"], b["deck"], b["water"], b["bank"]])
 		print("VH4 shot %s d=%.2f (min %.2f) fade %.2f city %s" % [path, rig.target_distance, rig.min_distance_at(focus),
-			lc.fade(settlement) if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
+			(1.0 if lc.is_shown(settlement) else 0.0) if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
 	if fps:
 		var places: Array = [["rouen", ROUEN], ["paris", PARIS]] if city == "paris" else [["rouen", ROUEN], ["amiens", AMIENS]]
 		for place: Array in places:

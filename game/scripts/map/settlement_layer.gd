@@ -137,6 +137,8 @@ var _camera_distance := 1000.0
 var towns: TownLayer
 ## VH4 (ADR 0078) : villes emblématiques à l'échelle 1:1 (format v2), voir `LandmarkCityLayer`.
 var landmark_cities: LandmarkCityLayer
+## VT-E (ADR 0138) : lointain des villes à l'échelle 1:1 (tuiles F1/F2), voir `TownFarLayer`.
+var town_far: TownFarLayer
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
@@ -674,6 +676,9 @@ func update_view(camera_distance: float) -> void:
 	tp = PerfProbe.lap("settle/towns", tp)
 	_update_landmark_cities(camera_distance)
 	tp = PerfProbe.lap("settle/landmarks", tp)
+	if town_far != null:  # VT-E : après les calques 1:1 (masque d'enfoncement à jour)
+		town_far.update_view(camera_distance)
+	tp = PerfProbe.lap("settle/townfar", tp)
 	_update_hamlet_scale(camera_distance)
 	var th := PerfProbe.lap("settle/hamlets/scale", tp)  # RS-K2
 	_update_hamlets()
@@ -1289,6 +1294,9 @@ func flush() -> void:
 	if landmark_cities != null:  # VH4 : villes emblématiques 1:1
 		landmark_cities.flush()
 		_update_landmark_cities(_camera_distance)
+	if town_far != null:  # VT-E : lointain des villes
+		town_far.flush()
+		town_far.update_view(_camera_distance)
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -1656,6 +1664,9 @@ func _setup_towns() -> void:
 	landmark_cities = LandmarkCityLayer.new()
 	add_child(landmark_cities)
 	landmark_cities.setup(map_data, terrain, tiers, ids)
+	town_far = TownFarLayer.new()
+	add_child(town_far)
+	town_far.setup(map_data, terrain, tiers, ids, [towns, landmark_cities], towns.data)
 
 
 ## VH4 : villes emblématiques 1:1.
