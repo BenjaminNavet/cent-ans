@@ -302,7 +302,7 @@ void fragment() {
 		float rows = 0.5 + 0.5 * sin(field.y * 6.2832 / 1.1);
 		vec3 straw = decor_kind == 6.0 ? vec3(0.5, 0.42, 0.26) : vec3(0.56, 0.44, 0.2);
 		straw *= mix(0.86, 1.08, macro) * mix(0.9, 1.06, fine) * mix(0.93, 1.03, rows);
-		albedo = mix(albedo, straw, field_w * 0.8 * (1.0 - w[int(L_SNOW)]));
+		albedo = mix(albedo, straw, field_w * (decor_kind > 0.0 ? 0.8 : 0.6) * (1.0 - w[int(L_SNOW)]));
 	}
 	albedo *= mix(0.84, 1.1, macro) * mix(0.93, 1.05, fine);
 	// DA6 : détail de près (sol net sous la caméra rapprochée). La couche dominante est relue à
@@ -388,6 +388,8 @@ void fragment() {
 	// taches violacées).
 	float puddle = smoothstep(0.62, 0.8, texture(macro_noise, p * 0.021 + vec2(0.53, 0.29)).r);
 	albedo = mix(albedo, vec3(0.17, 0.14, 0.1) * (0.75 + 0.5 * fine) * mix(1.0, 0.6, puddle), w_mud * 0.7 * (1.0 - w[int(L_SNOW)]));
+	// VN : chemins et terre battue en terre brune (vus de près : bande de sable gris-beige).
+	albedo = mix(albedo, albedo * vec3(0.8, 0.66, 0.48), w_dirt * 0.8 * (1.0 - w[int(L_SNOW)]));
 	float bank_wet = smoothstep(0.3, 0.8, sb.r) * max(w_mud, w_pebbles) * (1.0 - w[int(L_SNOW)]);
 	albedo = mix(albedo, albedo * vec3(0.66, 0.72, 0.58), bank_wet * 0.6);
 	albedo *= 1.0 - dip * 0.08;
