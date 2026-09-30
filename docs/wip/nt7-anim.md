@@ -25,8 +25,14 @@ ADR : `docs/decisions/0129-fondu-cycle-et-clips-de-role.md` ; ADR 0096 « Limite
 4. Tests : `nt7_anim_test.gd` (défaut, `--coarse-figures`, `--no-nt7`), captures
    `nt7_anim_shot.gd` → `docs/audit/captures/nt/nt7_*.png` (non lues).
 
-## État
-Banc A/B en cours (`--units=50 --bench-at=90`, rapproché et standard, passes alternées).
+## État : TERMINÉ (30/09), prêt à fusionner
+Banc A/B (ADR 0129) : rapproché 25,4 i/s avec / 24,6 sans ; standard 34,2 / 33,9 (bruit ±3 %,
+perte non mesurable, < 5 %). Tests : nt7_anim_test (défaut, `--coarse-figures`, `--no-nt7`),
+an1b_clips_test (fin, grossier), an1a_motion_test, fk2_assets_test, smoke, bv3_check,
+pytest (schémas animation et engins) : OK. Rust non touché.
 
-## Prochaine étape
-Résultats du banc dans l'ADR 0129 ; smoke, bv3_check, fk2/an1a/an1b ; commit final.
+## Points ouverts
+- Rendu des nouveaux clips à juger par la session principale (`docs/audit/captures/nt/nt7_*.png`,
+  non lues) puis en jeu (poses keyframées sans contrôle visuel).
+- Figurines de rôle (mode CUSTOM) et servants : changements de clip encore secs.
+- Kit grossier non recuit.
