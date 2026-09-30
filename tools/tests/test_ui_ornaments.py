@@ -55,10 +55,13 @@ def test_seam_fix_seam_error() -> None:
 
 
 def test_fallback_is_procedural(tmp_path: Path) -> None:
-    """A missing NB piece leaves the procedural drawing unchanged (and is committed)."""
+    """Without an NB override, a piece is the committed procedural drawing."""
     written = ui_illumination.build(tmp_path)
     committed = ui_illumination.OUTPUT_DIR
+    overridden = {path.name for path in (committed / "nb").glob("*.png")}
     for path in written:
+        if path.name in overridden:
+            continue
         assert path.read_bytes() == (committed / path.name).read_bytes(), path.name
     assert (tmp_path / "kit.json").read_text() == (committed / "kit.json").read_text()
 
