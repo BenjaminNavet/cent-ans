@@ -46,11 +46,13 @@
     },
     {
       "id": "obj_majorca_montpellier",
-      "title": "La seigneurie de Montpellier",
-      "description": "Recouvrer Montpellier, tenue par les rois de Majorque.",
+      "title": "Tenir Montpellier",
+      "description": "Jacques III est seigneur de Montpellier, mais doit tenir la ville elle-même, convoitée par Pierre IV et par le roi de France, qui l'achètera en 1349.",
       "condition": {
-        "kind": "hold_title",
-        "title": "tit_montpellier"
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_montpellier"
+        ]
       }
     }
   ],
