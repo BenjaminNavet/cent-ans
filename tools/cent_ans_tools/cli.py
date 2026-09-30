@@ -444,8 +444,8 @@ def geo_lakes(
     simplify_px: float = typer.Option(
         0.6, "--simplify-px", help="Tolérance de simplification du contour (px)"
     ),
-    natural_earth: Path = typer.Option(
-        None, "--natural-earth", help="ne_10m_lakes.shp (noms), défaut : tools/geo/raw"
+    natural_earth: str = typer.Option(
+        "", "--natural-earth", help="ne_10m_lakes.shp (noms), défaut : tools/geo/raw"
     ),
 ) -> None:
     """Contours et niveaux des lacs : data/map/lakes.json (lot SS3)."""
@@ -453,7 +453,10 @@ def geo_lakes(
 
     params = lakes.LakesParams(min_area_px=min_area_px, simplify_px=simplify_px)
     result = lakes.build(
-        params=params, natural_earth=natural_earth or lakes.NATURAL_EARTH_LAKES
+        params=params,
+        natural_earth=Path(natural_earth)
+        if natural_earth
+        else lakes.NATURAL_EARTH_LAKES,
     )
     _print_sizes("Lacs", [result.output])
     console.print(

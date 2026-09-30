@@ -17,5 +17,5 @@ Terres ouvertes gris-beige pâle en vue moyenne/proche, ombrage du relief + hach
 SS2a : dosage relief + palette cultures + routes dans `terrain.gdshader` / `road_line.gdshader` (indépendant de SS1).
 
 ## SS3 — lacs (branche `feat/ss-lakes`, worktree `../gp-ss-lakes`)
-État : squelette (outil `cent-ans geo lakes`, schéma, `lakes_renderer.gd`, tests désactivés).
-Prochaine étape : générer `data/map/lakes.json`, tests pytest, renderer + mode nappe de `river_water.gdshader`.
+État : outil `cent-ans geo lakes` fait (803 lacs, 18 275 sommets, retenues modernes exclues : `modern_reservoirs.json` + « Reservoir » Natural Earth sauf lacs naturels régulés), `data/map/lakes.json` généré (noms via `--natural-earth <main>/tools/geo/raw/natural_earth/ne_10m_lakes/ne_10m_lakes.shp`), 8 tests pytest.
+Prochaine étape : `lakes_renderer.gd` + mode nappe de `river_water.gdshader`, test headless.

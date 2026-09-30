@@ -4,7 +4,8 @@ A lake is a component of inland water of ``data/map/land_mask.png``: water
 not connected to the image border (the sea), of at least ``min_area_px``
 pixels, whose water level is above sea level (below it, the sea plane of
 ``water.gdshader`` already covers it: Caspian, closed-off seas, polders).
-Modern dam reservoirs (``modern_reservoirs.json``, ADR 0036) are left out.
+Modern dam reservoirs are left out: ``modern_reservoirs.json`` (ADR 0036)
+and the Natural Earth ``Reservoir`` features (Volga, Dnieper cascades...).
 
 For each lake the tool writes, in map pixels (1 px = 1 world unit, 719 m;
 pixel ``i`` covers ``[i, i + 1]``, centred at ``i + 0.5`` as in ``MapData``)::
@@ -51,6 +52,25 @@ NATURAL_EARTH_LAKES = (
 )
 
 Image.MAX_IMAGE_PIXELS = None
+
+#: Natural lakes that Natural Earth files as ``Reservoir`` because a modern dam
+#: regulates them: they existed in 1340 and stay lakes (names as printed).
+NATURAL_REGULATED_LAKES = frozenset(
+    {
+        "Ilmen",
+        "Imandra",
+        "Kemijärvi",
+        "Koitere",
+        "Koubenskoïe",
+        "Kovdozero",
+        "Mjøsa",
+        "Ondosero",
+        "Oulu",
+        "Oumbozero",
+        "Rikkavesi",
+        "Stora Lulevatten",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -182,30 +202,41 @@ def reservoir_labels(
     return result
 
 
-def natural_earth_names(
+def natural_earth_lookup(
     labels: np.ndarray, grid: project.MapGrid, shapefile: Path, radius: int
-) -> dict[int, str]:
-    """Names of the components from Natural Earth lakes (largest lake wins)."""
+) -> tuple[dict[int, str], dict[int, str]]:
+    """Names and reservoirs of the components from Natural Earth lakes.
+
+    The largest Natural Earth feature whose label point falls on a component
+    decides: a lake gives its name (French first), a ``Reservoir`` (dam lake,
+    mostly 20th century: Rybinsk, Kuibyshev...) marks the component as modern.
+
+    Returns:
+        ``(names, reservoirs)``: label -> name, label -> ``ne:<name>``.
+    """
     if not shapefile.exists():
-        return {}
+        return {}, {}
     import geopandas as gpd
 
     frame = gpd.read_file(shapefile)
-    frame = frame[frame["featurecla"] != "Reservoir"]
     frame = frame.assign(_area=frame.geometry.area).sort_values(
         "_area", ascending=False
     )
     names: dict[int, str] = {}
+    reservoirs: dict[int, str] = {}
     for _, row in frame.iterrows():
         name = row.get("name_fr") or row.get("name") or ""
-        if not isinstance(name, str) or not name:
-            continue
+        name = name if isinstance(name, str) else ""
         point = row.geometry.representative_point()
         px, py = grid.lonlat_to_pixel(point.x, point.y)
         label = _label_near(labels, float(px), float(py), radius)
-        if label and label not in names:
+        if not label or label in names or label in reservoirs:
+            continue
+        if row.get("featurecla") == "Reservoir" and name not in NATURAL_REGULATED_LAKES:
+            reservoirs[label] = f"ne:{name or row.get('ne_id')}"
+        elif name:
             names[label] = name
-    return names
+    return names, reservoirs
 
 
 def extract(
@@ -294,9 +325,12 @@ def build(
         for label, rid in excluded.items()
         if labelled[1][label] >= params.min_area_px
     }
-    names = natural_earth_names(
+    names, ne_reservoirs = natural_earth_lookup(
         labelled[0], grid, natural_earth, params.name_radius_px
     )
+    for label, rid in ne_reservoirs.items():
+        if labelled[1][label] >= params.min_area_px:
+            excluded.setdefault(label, rid)
     lakes, below_sea = extract(
         land,
         heights,
