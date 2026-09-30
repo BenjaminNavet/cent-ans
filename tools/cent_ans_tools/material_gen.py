@@ -1,9 +1,13 @@
-"""GA: AI-generated tileable materials and their derived maps.
+"""GA/SR: tileable materials of the fine figures and their maps.
 
-Pipeline: prompt (``data/art/materials.yaml``) -> 1024x1024 image via
+Generated (GA1): prompt (``data/art/materials.yaml``) -> 1024x1024 image via
 :func:`cent_ans_tools.openrouter.generate_image` (budget-guarded) -> tileable
 (half offset + seam blend) -> derived maps (height from high-passed luminance,
 OpenGL normal, roughness) -> contact sheet for review.
+
+Scanned (SR1): ``source: ambientcg:<Id>`` -> CC0 1K-JPG maps downloaded once into
+``~/dev/cent-ans-raw/sr1/`` -> tile at physical scale (``scan_m``/``tile_m``) with the
+scan's own normal, roughness and displacement.
 """
 
 from __future__ import annotations
@@ -30,6 +34,17 @@ LOT_CAPS = {"GA1": Decimal("4.00")}
 _LUMA = np.array([0.2126, 0.7152, 0.0722], dtype=np.float64)
 # Largest review sheet kept in the repository.
 SHEET_MAX_BYTES = 1_000_000
+
+# SR1: CC0 PBR scans from ambientCG (``source: ambientcg:<AssetId>``).
+AMBIENTCG_API = "https://ambientcg.com/api/v2/full_json"
+AMBIENTCG_SOURCE_PREFIX = "ambientcg:"
+AMBIENTCG_RESOLUTION = "1K-JPG"
+# Generic client identification only: no personal data leaves the machine.
+AMBIENTCG_USER_AGENT = "cent-ans-sr/0.1"
+# Raw downloads stay outside the repository (never deleted by the pipeline).
+SCAN_CACHE_DIR = Path.home() / "dev" / "cent-ans-raw" / "sr1"
+# Map suffixes of an ambientCG material zip used by the pipeline.
+SCAN_MAPS = ("Color", "NormalGL", "Roughness", "Displacement")
 
 
 # --- data -----------------------------------------------------------------------
@@ -231,6 +246,8 @@ def generate(
 ) -> Path:
     """Generate one material (paid unless its raw image exists) and return its albedo tile.
 
+    A scanned material (``source: ambientcg:<Id>``) is fetched and cut instead (free).
+
     The raw image is kept as ``<out_dir>/<id>_raw.png``; an existing raw image is
     reused without any call, so an interrupted batch never pays twice. The spend is
     recorded by :func:`openrouter.generate_image` in the GA section of the ledger.
@@ -240,6 +257,10 @@ def generate(
     out_dir = Path(out_dir)
     document = load_materials(materials_path)
     entry = material_entry(material_id, materials_path)
+    if scan_asset_id(entry) is not None:
+        return process_scan(material_id, out_dir, materials_path=materials_path)[
+            "albedo"
+        ]
     raw_path = out_dir / f"{material_id}_raw.png"
     if not raw_path.exists():
         _check_ledger(Path(budget_path), lot)
@@ -254,6 +275,216 @@ def generate(
     return process(material_id, raw_path, out_dir, materials_path=materials_path)[
         "albedo"
     ]
+
+
+# --- scanned materials (SR1, ambientCG CC0) ---------------------------------------
+
+
+def scan_asset_id(entry: dict[str, Any]) -> str | None:
+    """AmbientCG asset id of a ``source: ambientcg:<Id>`` entry, ``None`` if generated."""
+    source = entry.get("source")
+    if not source:
+        return None
+    if not source.startswith(AMBIENTCG_SOURCE_PREFIX):
+        raise ValueError(f"Source de matière inconnue : {source}")
+    return source[len(AMBIENTCG_SOURCE_PREFIX) :]
+
+
+def _http_get(url: str) -> bytes:
+    """GET ``url`` with a generic User-Agent (no personal data in the headers)."""
+    import urllib.request
+
+    request = urllib.request.Request(url, headers={"User-Agent": AMBIENTCG_USER_AGENT})
+    with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
+        return response.read()
+
+
+def _scan_map_paths(asset_dir: Path, asset_id: str) -> dict[str, Path]:
+    return {
+        name: asset_dir / f"{asset_id}_{AMBIENTCG_RESOLUTION}_{name}.jpg"
+        for name in SCAN_MAPS
+    }
+
+
+def ambientcg_download_url(metadata: dict[str, Any], asset_id: str) -> str:
+    """URL of the ``AMBIENTCG_RESOLUTION`` zip in an API v2 ``full_json`` answer."""
+    for asset in metadata.get("foundAssets", []):
+        if asset.get("assetId", "").lower() != asset_id.lower():
+            continue
+        folders = asset.get("downloadFolders", {})
+        for folder in folders.values():
+            categories = folder.get("downloadFiletypeCategories", {})
+            for download in categories.get("zip", {}).get("downloads", []):
+                if download.get("attribute") == AMBIENTCG_RESOLUTION:
+                    return download["fullDownloadPath"]
+    raise KeyError(
+        f"Pas d'archive {AMBIENTCG_RESOLUTION} pour {asset_id} sur ambientCG"
+    )
+
+
+def fetch_ambientcg(
+    asset_id: str,
+    cache_dir: Path = SCAN_CACHE_DIR,
+    *,
+    http_get: Any = None,
+) -> dict[str, Path]:
+    """Return the Color/NormalGL/Roughness/Displacement maps of an ambientCG asset.
+
+    Downloads the ``1K-JPG`` zip once (API v2) into ``<cache_dir>/<asset_id>/`` and
+    extracts the four maps; a complete cache is reused without any network access.
+    """
+    import io
+    import json
+    import zipfile
+
+    http_get = http_get or _http_get
+    asset_dir = Path(cache_dir) / asset_id
+    paths = _scan_map_paths(asset_dir, asset_id)
+    if all(path.exists() for path in paths.values()):
+        return paths
+    asset_dir.mkdir(parents=True, exist_ok=True)
+    zip_path = asset_dir / f"{asset_id}_{AMBIENTCG_RESOLUTION}.zip"
+    if not zip_path.exists():
+        metadata = json.loads(
+            http_get(f"{AMBIENTCG_API}?id={asset_id}&include=downloadData")
+        )
+        (asset_dir / "metadata.json").write_text(json.dumps(metadata, indent=1))
+        zip_path.write_bytes(http_get(ambientcg_download_url(metadata, asset_id)))
+    with zipfile.ZipFile(io.BytesIO(zip_path.read_bytes())) as archive:
+        for path in paths.values():
+            path.write_bytes(archive.read(path.name))
+    return paths
+
+
+def _decode_normal(normal: np.ndarray) -> np.ndarray:
+    vectors = normal[..., :3].astype(np.float64) / 127.5 - 1.0
+    return vectors / np.maximum(np.linalg.norm(vectors, axis=-1, keepdims=True), 1e-6)
+
+
+def _encode_normal(vectors: np.ndarray) -> np.ndarray:
+    vectors = vectors / np.maximum(
+        np.linalg.norm(vectors, axis=-1, keepdims=True), 1e-6
+    )
+    return np.clip(np.rint((vectors * 0.5 + 0.5) * 255.0), 0, 255).astype(np.uint8)
+
+
+def _periodic_resize(image: np.ndarray, size: int) -> np.ndarray:
+    """Resize a tileable image to ``size``² and keep it seamless (3x3 mosaic centre)."""
+    if image.shape[0] == size and image.shape[1] == size:
+        return image
+    reps = (3, 3, 1) if image.ndim == 3 else (3, 3)
+    mosaic = Image.fromarray(np.tile(image, reps))
+    mosaic = mosaic.resize((size * 3, size * 3), Image.Resampling.LANCZOS)
+    return np.asarray(mosaic)[size : 2 * size, size : 2 * size]
+
+
+def scan_tile(
+    maps: dict[str, np.ndarray],
+    *,
+    scan_m: float,
+    tile_m: float,
+    tile_size: int,
+    blend_width: int = 64,
+    crop_centre: tuple[float, float] = (0.5, 0.5),
+    normal_strength: float = 1.0,
+    roughness_bias: float = 0.0,
+) -> dict[str, np.ndarray]:
+    """Cut a tileable ``tile_m`` tile out of a ``scan_m`` scan (physical scale kept).
+
+    ``maps`` holds the scan's ``albedo`` (H x W x 3), ``normal`` (OpenGL, H x W x 3),
+    ``roughness`` and ``height`` (H x W) as uint8. A tile covering the whole scan keeps
+    the scan's own seamless wrap; a smaller one is a square crop around ``crop_centre``
+    (fractions of the scan) made tileable with the same blend on every map, normals
+    renormalised after blending and resizing. ``blend_width`` is in output pixels.
+    Returns ``albedo``, ``normal``, ``height`` (centred on 128) and ``roughness``, all
+    ``tile_size``².
+    """
+    if not 0 < tile_m <= scan_m * 1.0001:
+        raise ValueError(f"tile_m ({tile_m}) doit être dans ]0, scan_m = {scan_m}]")
+    height_px, width_px = maps["albedo"].shape[:2]
+    scan_px = min(height_px, width_px)
+    side = min(scan_px, int(round(scan_px * tile_m / scan_m)))
+    whole = side >= scan_px and height_px == width_px
+    tiles: dict[str, np.ndarray] = {}
+    for name in ("albedo", "normal", "roughness", "height"):
+        image = maps[name]
+        if not whole:
+            centre_x = int(round(crop_centre[0] * width_px))
+            centre_y = int(round(crop_centre[1] * height_px))
+            left = int(np.clip(centre_x - side // 2, 0, width_px - side))
+            top = int(np.clip(centre_y - side // 2, 0, height_px - side))
+            image = image[top : top + side, left : left + side]
+            blend = int(round(blend_width * side / tile_size))
+            image = make_tileable(image, int(np.clip(blend, 1, side // 2 - 1)))
+        tiles[name] = image
+    vectors = _decode_normal(tiles["normal"])
+    vectors[..., :2] *= normal_strength
+    normal = _encode_normal(vectors)
+    normal = _encode_normal(_decode_normal(_periodic_resize(normal, tile_size)))
+    albedo = _periodic_resize(tiles["albedo"][..., :3], tile_size)
+    roughness = _periodic_resize(tiles["roughness"], tile_size).astype(np.float64)
+    roughness = np.clip(roughness / 255.0 + roughness_bias, 0.0, 1.0)
+    relief = _periodic_resize(tiles["height"], tile_size).astype(np.float64)
+    relief -= relief.mean()
+    spread = float(np.percentile(np.abs(relief), 98)) or 1.0
+    relief = np.clip(0.5 + 0.5 * relief / spread, 0.0, 1.0)
+
+    def to_u8(values: np.ndarray) -> np.ndarray:
+        return np.clip(np.rint(values * 255.0), 0, 255).astype(np.uint8)
+
+    return {
+        "albedo": albedo,
+        "normal": normal,
+        "height": to_u8(relief),
+        "roughness": to_u8(roughness),
+    }
+
+
+def _read_scan(paths: dict[str, Path]) -> dict[str, np.ndarray]:
+    return {
+        "albedo": np.asarray(Image.open(paths["Color"]).convert("RGB")),
+        "normal": np.asarray(Image.open(paths["NormalGL"]).convert("RGB")),
+        "roughness": np.asarray(Image.open(paths["Roughness"]).convert("L")),
+        "height": np.asarray(Image.open(paths["Displacement"]).convert("L")),
+    }
+
+
+def process_scan(
+    material_id: str,
+    out_dir: Path,
+    *,
+    materials_path: Path = MATERIALS_PATH,
+    cache_dir: Path = SCAN_CACHE_DIR,
+    http_get: Any = None,
+) -> dict[str, Path]:
+    """Fetch (cached) and cut the scan of a ``source: ambientcg`` entry (no paid call).
+
+    Writes ``<id>_albedo.png``, ``_normal.png``, ``_height.png`` and ``_roughness.png``
+    (``tile_size``²) in ``out_dir``, like :func:`process` for a generated material.
+    """
+    document = load_materials(materials_path)
+    entry = material_entry(material_id, materials_path)
+    asset_id = scan_asset_id(entry)
+    if asset_id is None:
+        raise ValueError(f"{material_id} n'est pas une matière scannée")
+    maps = _read_scan(fetch_ambientcg(asset_id, cache_dir, http_get=http_get))
+    tiles = scan_tile(
+        maps,
+        scan_m=float(entry["scan_m"]),
+        tile_m=float(entry["tile_m"]),
+        tile_size=int(document["tile_size"]),
+        blend_width=int(entry.get("blend_width", 64)),
+        crop_centre=tuple(entry.get("crop_centre", (0.5, 0.5))),
+        normal_strength=float(entry.get("normal_strength", 1.0)),
+        roughness_bias=float(entry.get("roughness_bias", 0.0)),
+    )
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    paths = {}
+    for name, values in tiles.items():
+        paths[name] = out_dir / f"{material_id}_{name}.png"
+        Image.fromarray(values).save(paths[name])
+    return paths
 
 
 # --- review sheet ----------------------------------------------------------------
@@ -369,6 +600,23 @@ def centred_albedo(albedo: np.ndarray, saturation: float) -> np.ndarray:
     return np.clip(np.rint(centred * 255.0), 0, 255).astype(np.uint8)
 
 
+def _previous_layers(
+    out_dir: Path, count: int
+) -> tuple[list[np.ndarray], list[np.ndarray]] | None:
+    """Layers of the arrays already in ``out_dir`` if both exist with ``count`` layers."""
+    detail_path, albedo_path = out_dir / DETAIL_ARRAY, out_dir / ALBEDO_ARRAY
+    if not (detail_path.exists() and albedo_path.exists()):
+        return None
+    detail = np.asarray(Image.open(detail_path).convert("RGBA"))
+    albedo = np.asarray(Image.open(albedo_path).convert("RGB"))
+    if detail.shape[0] % count or albedo.shape[0] % count:
+        raise ValueError(f"Tableaux existants incompatibles avec {count} couches")
+    return (
+        np.split(detail, count),
+        np.split(albedo, count),
+    )
+
+
 def build_fine_arrays(
     tile_dir: Path,
     out_dir: Path = FINE_TEXTURES_DIR,
@@ -384,16 +632,28 @@ def build_fine_arrays(
     - ``fine_detail_ga1.png``: ``tile_size``² RGBA, RG normal (OpenGL), B relief
       (height), A roughness -- same packing as the FG3 tiles of ADR 0088;
     - ``fine_detail_albedo.png``: ``ALBEDO_LAYER_SIZE``² RGB, centred albedo factor.
+
+    A material without tiles in ``tile_dir`` keeps its layer of the arrays already in
+    ``out_dir`` (same order), copied verbatim: kept layers are never regenerated (SR1).
     """
     entries = load_materials(materials_path)["materials"]
+    previous = _previous_layers(Path(out_dir), len(entries))
     detail_layers = []
     albedo_layers = []
-    for entry in entries:
+    for index, entry in enumerate(entries):
         material_id = entry["id"]
 
         def read(name: str, material_id: str = material_id) -> np.ndarray:
             return np.asarray(Image.open(Path(tile_dir) / f"{material_id}_{name}.png"))
 
+        if not (Path(tile_dir) / f"{material_id}_normal.png").exists():
+            if previous is None:
+                raise FileNotFoundError(
+                    f"Ni tuiles de {material_id} dans {tile_dir} ni tableaux existants"
+                )
+            detail_layers.append(previous[0][index])
+            albedo_layers.append(previous[1][index])
+            continue
         normal, height, roughness = read("normal"), read("height"), read("roughness")
         detail_layers.append(
             np.dstack([normal[..., 0], normal[..., 1], height, roughness])
@@ -420,3 +680,57 @@ def build_fine_arrays(
         paths["albedo"], optimize=True
     )
     return paths
+
+
+def layers_sheet(
+    out_path: Path,
+    textures_dir: Path = FINE_TEXTURES_DIR,
+    *,
+    materials_path: Path = MATERIALS_PATH,
+    cell: int = 150,
+    max_bytes: int = 400_000,
+) -> Path:
+    """Write a JPEG review sheet of the built arrays: per layer, albedo 2x2 and normal.
+
+    Reads ``fine_detail_albedo.png`` and ``fine_detail_ga1.png`` (all layers, kept ones
+    included), four layers per row; lowers the JPEG quality until under ``max_bytes``.
+    """
+    entries = load_materials(materials_path)["materials"]
+    count = len(entries)
+    detail = np.split(
+        np.asarray(Image.open(Path(textures_dir) / DETAIL_ARRAY).convert("RGBA")), count
+    )
+    albedo = np.split(
+        np.asarray(Image.open(Path(textures_dir) / ALBEDO_ARRAY).convert("RGB")), count
+    )
+    per_row, gap, label = 4, 10, 26
+    pair = 2 * cell + 4
+    rows = (count + per_row - 1) // per_row
+    sheet = Image.new(
+        "RGB", (per_row * (pair + gap) + gap, rows * (cell + label + gap)), (40, 38, 34)
+    )
+    draw = ImageDraw.Draw(sheet)
+    font = _font(18)
+    for index, entry in enumerate(entries):
+        left = gap + (index % per_row) * (pair + gap)
+        top = (index // per_row) * (cell + label + gap)
+        source = entry.get("source", "généré GA1")
+        caption = f"{index} {entry['id']} — {source} — {entry['tile_m']} m"
+        draw.text((left, top + 3), caption, fill=(230, 220, 200), font=font)
+        tiled = Image.fromarray(np.tile(albedo[index], (2, 2, 1)))
+        normal_rgb = detail[index][..., :2]
+        vectors = normal_rgb.astype(np.float64) / 127.5 - 1.0
+        z = np.sqrt(np.clip(1.0 - (vectors**2).sum(axis=-1), 0.0, 1.0))
+        normal = np.dstack(
+            [normal_rgb, np.rint((z * 0.5 + 0.5) * 255).astype(np.uint8)]
+        )
+        for column, image in enumerate((tiled, Image.fromarray(normal))):
+            resized = image.resize((cell, cell), Image.Resampling.LANCZOS)
+            sheet.paste(resized, (left + column * (cell + 4), top + label))
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    for quality in (85, 75, 65, 55, 45):
+        sheet.save(out_path, "JPEG", quality=quality, optimize=True)
+        if out_path.stat().st_size <= max_bytes:
+            break
+    return out_path

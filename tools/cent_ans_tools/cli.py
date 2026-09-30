@@ -1397,10 +1397,22 @@ def assets_materials(
         None, "--sheet", help="Planche de contrôle PNG à écrire"
     ),
     lot: str = typer.Option("GA1", "--lot", help="Préfixe de ligne et plafond du lot"),
+    scans: bool = typer.Option(
+        False, "--scans", help="Matières scannées (ambientCG) seules, sans appel payant"
+    ),
+    build: bool = typer.Option(
+        False,
+        "--build",
+        help="Reconstruire les tableaux des figurines (couches sans tuile : conservées)",
+    ),
+    layers_sheet: Path | None = typer.Option(  # noqa: B008
+        None, "--layers-sheet", help="Planche JPEG des couches construites (--build)"
+    ),
 ) -> None:
-    """GA : matières tuilables générées (data/art/materials.yaml) + cartes dérivées.
+    """GA/SR : matières tuilables (data/art/materials.yaml), générées ou scannées.
 
-    Une image brute déjà présente dans --out est réutilisée sans appel payant.
+    Une image brute déjà présente dans --out (ou un scan en cache) est réutilisée sans
+    appel. --scans --build : scans SR1 + tableaux, couches générées gardées telles quelles.
     """
     import numpy as np
     from PIL import Image
@@ -1410,7 +1422,11 @@ def assets_materials(
     entries = {
         entry["id"]: entry for entry in material_gen.load_materials()["materials"]
     }
-    ids = only or list(entries)
+    ids = only or [
+        material_id
+        for material_id, entry in entries.items()
+        if not scans or material_gen.scan_asset_id(entry)
+    ]
     tiles = {}
     for material_id in ids:
         albedo = material_gen.generate(material_id, out_dir, lot=lot)
@@ -1419,6 +1435,12 @@ def assets_materials(
     if sheet is not None:
         path = material_gen.contact_sheet(tiles, sheet, params=entries)
         console.print(f"Planche : {path} ({path.stat().st_size // 1024} Ko)")
+    if build:
+        for kind, path in material_gen.build_fine_arrays(out_dir).items():
+            console.print(f"Tableau {kind} : {path}")
+        if layers_sheet is not None:
+            path = material_gen.layers_sheet(layers_sheet)
+            console.print(f"Planche : {path} ({path.stat().st_size // 1024} Ko)")
     console.print(f"Cumul GA : {budget.total()} $")
 
 
