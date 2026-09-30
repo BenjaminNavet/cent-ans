@@ -268,7 +268,7 @@ def test_shout_words_check_accepts_homophones_only() -> None:
     assert voice_shout.words_match(
         "Montjoie ! Saint-Denis !", "Mon joie, Saint-Denis !"
     )
-    assert not voice_shout.words_match("Sus à eux !", "Sous-A-E")
+    assert not voice_shout.words_match("Sus à eux !", "Allez-y !")
     assert not voice_shout.words_match("Montjoie ! Saint-Denis !", "Bonsoir ! Salut !")
 
 
@@ -280,3 +280,12 @@ def test_shout_filter_chain_is_louder_and_compressed() -> None:
     assert "acompressor" not in spoken and f"I={voice_tts.TARGET_LUFS}" in spoken
     assert "acompressor" in shouted and f"I={voice_tts.SHOUT_LUFS}" in shouted
     assert "aecho" in chorus and "aecho" not in shouted
+
+
+def test_shout_checks_tolerate_diacritics_and_regional_languages() -> None:
+    """Whisper's macrons and its blindness to Occitan do not reject good takes."""
+    assert voice_shout.words_match("Tiratz ! Tiratz !", "Tīrāts! Tīrāts!")
+    barks = _load("voice/barks.json")
+    spec = barks["languages"]["oc"]
+    shout = voice_tts.shout_for("Sant Jòrdi !", "[shouting]", "Liam", "oc", spec)
+    assert "fr" in shout.also_languages

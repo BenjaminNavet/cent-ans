@@ -43,6 +43,14 @@ MIN_LANGUAGE_PROBABILITY = 0.5
 MIN_LETTER_RATIO = 0.72
 # Whisper language of a bark language without an ElevenLabs code.
 WHISPER_LANGUAGE = {"an": "fr", "sco": "en"}
+# Languages whisper may recognise for a take of a bark language: it hardly ever detects
+# Occitan, Anglo-Norman knights also shout English names (« Saint George ! Guyenne ! »).
+ACCEPTED_LANGUAGES = {
+    "an": ("fr", "en"),
+    "oc": ("oc", "fr", "ca", "es"),
+    "cy": ("cy", "en"),
+    "nl": ("nl", "af", "de"),
+}
 CHORUS_LAYERS_PER_VOICE = 2
 CHORUS_MAX_DELAY_S = 0.06
 # Resampling shifts pitch and length together (a few % only, so the words stay put).
@@ -60,6 +68,8 @@ class Shout:
     voice: str
     language_code: str = ""
     check_language: str = ""
+    # Other languages whisper may detect for this take (the check passes on their sum).
+    also_languages: tuple[str, ...] = ()
 
     @property
     def prompt(self) -> str:
@@ -139,7 +149,7 @@ def _samples(path: Path, rate: int):
     return librosa.load(str(path), sr=rate, mono=True)[0]
 
 
-def listen(path: Path, language: str) -> tuple[str, float]:
+def listen(path: Path, language: str, also: tuple[str, ...] = ()) -> tuple[str, float]:
     """Whisper transcript of ``path`` and the probability that it is in ``language``.
 
     Language detection runs separately from the transcription forced to ``language``.
@@ -147,7 +157,8 @@ def listen(path: Path, language: str) -> tuple[str, float]:
     samples = _samples(path, 16000)
     model = _whisper()
     _, info = model.transcribe(samples, beam_size=1)
-    probability = dict(info.all_language_probs or []).get(language, 0.0)
+    probabilities = dict(info.all_language_probs or [])
+    probability = sum(probabilities.get(code, 0.0) for code in {language, *also})
     segments, _ = model.transcribe(samples, language=language, beam_size=5)
     return " ".join(segment.text.strip() for segment in segments), probability
 
@@ -164,7 +175,11 @@ def median_pitch(path: Path) -> float:
 
 
 def _letters(text: str) -> str:
-    return "".join(ch for ch in text.lower() if ch.isalpha())
+    """Lower-case letters of ``text`` without diacritics (« Tīrāts » -> « tirats »)."""
+    import unicodedata
+
+    decomposed = unicodedata.normalize("NFKD", text.lower())
+    return "".join(ch for ch in decomposed if ch.isalpha() and ch.isascii())
 
 
 def words_match(text: str, heard: str) -> bool:
@@ -189,7 +204,7 @@ def check(shout: Shout, raw: Path, seconds: float) -> tuple[str, str]:
     low, high = plausible_seconds(shout.text)
     if not low <= seconds <= high + 1.0:
         return "", f"{seconds:.1f} s (expected {low:.1f}-{high + 1.0:.1f})"
-    heard, probability = listen(raw, shout.check_language)
+    heard, probability = listen(raw, shout.check_language, shout.also_languages)
     if not words_match(shout.text, heard):
         return heard, f"heard {heard!r}"
     if probability < MIN_LANGUAGE_PROBABILITY:
