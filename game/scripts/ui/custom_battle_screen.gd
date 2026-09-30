@@ -573,6 +573,17 @@ func refresh() -> void:
 	launch_button.disabled = not bool(report.get("ok", false))
 
 
+## VN : taille (px) des miniatures d'unité des listes (même taille que les lignes de recrutement).
+const ROSTER_ICON := 22
+
+
+## VN : miniature de l'unité sur le bouton (autoload `IconLibrary`, absent des tests isolés).
+func _decorate(button: Button, unit_id: String) -> void:
+	var library := get_node_or_null("/root/IconLibrary")
+	if library != null:
+		library.call("decorate_button", button, unit_id, ROSTER_ICON, "unit")
+
+
 func _fill_roster(side: String) -> void:
 	var items: VBoxContainer = roster_boxes[side]
 	for child in items.get_children():
@@ -585,6 +596,7 @@ func _fill_roster(side: String) -> void:
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text = true
 		button.disabled = not can_buy(side, unit_id)
+		_decorate(button, unit_id)  # VN : miniature de l'unité
 		RichTooltip.set_tooltip(button, "unit", unit_id)
 		button.pressed.connect(func() -> void: buy(side, unit_id))
 		items.add_child(button)
@@ -604,6 +616,7 @@ func _fill_army(side: String) -> void:
 		button.text = "− %s (%d)" % [entry.get("name", unit_id), int(entry.get("cost", 0))]
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text = true
+		_decorate(button, unit_id)
 		RichTooltip.set_tooltip(button, "unit", unit_id)
 		button.pressed.connect(func() -> void: remove(side, index))
 		items.add_child(button)
