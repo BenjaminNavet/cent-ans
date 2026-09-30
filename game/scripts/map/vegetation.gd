@@ -35,6 +35,10 @@ enum Lod { FAR, DETAILED, NEAR }
 @export var tree_scale: float = 1.0
 ## Au-delà de cette distance caméra → point visé, plus d'arbres.
 @export var max_camera_distance: float = 700.0
+## Lot L5 : portée selon le préréglage (`veg_max_distance`, Basse 500 … Ultra 1100), appliquée
+## seulement avec les imposteurs (FC2) ; sans eux, `max_camera_distance`. La densité garde sa
+## courbe jusqu'à `max_camera_distance` (mêmes arbres qu'avant en deçà), puis `density_min`.
+var quality_max_distance: float = -1.0
 ## Portée de l'éclaircissement, en multiples de la distance caméra (bornes absolues en plus).
 @export var fade_start_factor: float = 1.2
 @export var fade_end_factor: float = 2.1
@@ -134,6 +138,7 @@ func apply_render_quality(p: Dictionary) -> void:
 	quality_density = float(p.get("veg_density", 1.0))
 	quality_detail = float(p.get("veg_detail", 1.0))
 	quality_shadow_distance = float(p.get("veg_shadow_distance", shadow_camera_distance))
+	quality_max_distance = float(p.get("veg_max_distance", -1.0))
 	for entry: Dictionary in _tiles.values():
 		for part: Dictionary in entry["parts"]:
 			part.erase("lod")  # LOD réévalué à la prochaine mise à jour
@@ -210,6 +215,13 @@ static func _make_impostor_material() -> ShaderMaterial:
 	material.set_shader_parameter("views", VegetationMeshes.IMPOSTOR_VIEWS)
 	material.set_shader_parameter("rows", VegetationMeshes.IMPOSTOR_ROWS.size())
 	return material
+
+
+## Lot L5 : zoom au-delà duquel plus aucun arbre (préréglage si les imposteurs sont actifs).
+func effective_max_distance() -> float:
+	if quality_max_distance > 0.0 and use_impostors and (_impostor_material != null or map_data == null):
+		return quality_max_distance
+	return max_camera_distance
 
 
 ## Lot FC2 : imposteurs actifs (matériau prêt).
@@ -477,12 +489,13 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	_frame += 1
 	_collect_jobs()
 	_collect_ground_jobs()
-	var active := enabled and camera_distance < max_camera_distance
+	var max_distance := effective_max_distance()
+	var active := enabled and camera_distance < max_distance
 	visible = active
 	if not active or _material == null:
 		return
 	# Au voisinage de la distance maximale, la portée se referme : les arbres s'effacent.
-	var closing := 1.0 - smoothstep(max_camera_distance * 0.7, max_camera_distance, camera_distance)
+	var closing := 1.0 - smoothstep(max_distance * 0.7, max_distance, camera_distance)
 	var fade_start := maxf(camera_distance * fade_start_factor, fade_min_start) * closing
 	var fade_end := maxf(camera_distance * fade_end_factor, fade_min_end) * closing
 	_set_foliage_param("view_origin", camera_position)
