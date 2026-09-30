@@ -1709,7 +1709,7 @@ vue stratégique (poids ≥ 0,99, parchemin au-delà de 1200). Villes v2 : loint
 
 **Repérage, clic.** Nom et écu (DV2) ; étiquettes, clic (rayon minimal 8 px) et anneau de sélection
 sur l'emprise réelle. Hameaux, moulins, panaches de cheminée et figurants FK à taille réelle
-(VT2, ci-dessous) ; incendies et arbres exagérés. Végétation exclue du finage. Rivières : plus de coupure sous les villes, la ville 1:1 enjambe la vraie rivière.
+(VT2, ci-dessous) ; arbres 1:1 (VT3) ; seuls les incendies restent exagérés. Végétation exclue du finage. Rivières : plus de coupure sous les villes, la ville 1:1 enjambe la vraie rivière.
 
 **Options.** `--no-town-far` (lointain coupé), `--no-landmarks-1to1` (villes v2 rendues comme les
 autres). Réglages : `@export` de `town_far_layer.gd` (`f1_tile`, `f2_tile`, `f1_range`,
@@ -1773,6 +1773,50 @@ l'exagération commune de SZ4b.
   le plancher de caméra reste à 7). Constats (640 × 400) : à d = 15, moulins et fumées sont
   invisibles, comme les maisons de Paris (une tache brune) ; à d = 1, moulin ≈ 9 px, figurants
   ≈ 1 px ; les arbres, restés grossis, dominent tout.
+
+### Arbres 1:1 (VT3, addendum à l'ADR 0138)
+
+Plus d'exagération pour les arbres de la carte (tuiles `Vegetation`, forêt dense `ForestDetail`,
+haies, vergers, arbres isolés) : échelle constante à toute distance, et une **portée** au-delà de
+laquelle aucun arbre individuel n'est dessiné. Au-delà, la forêt est portée par le terrain
+(canopée). Seuls les incendies (et, hors demande, les touffes d'herbe FC3) restent grossis.
+
+| | Avant | Après |
+|---|---|---|
+| Échelle | `tree_ratio` 0,035 × E(d), E jusqu'à ×125 (houppier ~1 km à d ≥ 28, un quartier de Paris à d = 15) | `tree_ratio` 0,018 constant : chêne 14-22 m, hêtre 17-25 m, conifère 17-27 m, haie 4-6 m (mesuré : médiane 19,7 m, p10-p90 15,7-24,5 m) |
+| Portée des arbres | tuiles jusqu'à 700 u (préréglage 500-1 100) | rig < `tree_max_distance` 30 ; par arbre, distance caméra < `tree_view_range` 30 (arbre de 20 m ≈ 1 px en 1080p, fov 55°), éteint par graine sur 35 % |
+| Forêt dense | part `fraction_for(s)` (couvert constant, d ≤ 8 surtout) ; pas natif relevé à 0,05 u (36 m) | `fraction_at(d)` : 1 jusqu'à d = 8, 0,35 à d = 30, 0 au-delà ; pas 0,022 × 1,35 = 0,03 u (21 m), cellules 8 u × 2 parties, budget 300 k instances |
+| Ombres des arbres | jusqu'à d = 300 | jusqu'à d = 12 (`tree_shadow_distance`) |
+| Loin | arbres de ~1 km en imposteurs | canopée du terrain (`canopy_field`) |
+
+- `MapPropScale` : `tree_scale()` sans argument, `trees_weight(d)`, `trees_visible(d)`,
+  `pixels_for(m, D)` (taille à l'écran), `clutter_scale(d)` (courbe d'avant pour l'herbe, paramètre
+  `clutter_scale` des shaders `ground_clutter` / `ground_rocks`, découplé de
+  `campaign_prop_scale`). `scale_for` / `shrink_*` / `max_exaggeration` restent pour
+  `fire_scale` et `clutter_scale`.
+- `Vegetation` : `fade_start/fade_end` du feuillage = portée des arbres (fermée en fondu à
+  l'approche de d = 30) ; plus de courbe de densité au dézoom (`density_*`, `fade_*_factor`
+  retirés) ; tuiles semées (sans être affichées) jusqu'à `tile_prefetch_distance` 120 u (la
+  forêt dense a besoin des grilles de la tuile) ; `effective_max_distance()` plafonné par la
+  portée ; `tree_shadow_limit()`. Toutes les tuiles visibles étant sous `detail_distance`, les
+  niveaux lointains ne servent plus qu'aux essais (`fc2_impostors_test` réduit les portées).
+- `ForestDetail` : rayon borné par `tree_view_range`, gain du budget appliqué après les bornes
+  (`min_gain` 0,2). Pont natif : plancher du pas de semis 0,05 → 0,01 (`vegetation_scatter.rs`).
+- Canopée du terrain (`terrain.gdshader`, `canopy_field`) : quatre octaves de bruit à dérivées
+  analytiques (période 0,05 u ≈ 36 m, puis × 4 : bouquets, peuplements, massifs), chacune éteinte
+  quand sa période passe sous `canopy_min_px` (6) pixels ; relief des houppiers dans la normale
+  (`canopy_bump` 0,45) et contraste de teinte (`canopy_contrast` 0,35), pondérés par la part de
+  forêt. Les massifs restent lisibles de loin (grain, ombrage) sans arbre dessiné ; sous les
+  arbres, la même canopée assure la transition (les arbres s'éteignent par graine sur elle).
+- Finage (VT) : exclusions de végétation autour des villes inchangées.
+- Tests : `vt3_trees_test.gd` (échelle, hauteurs réelles, portée ≈ 1 px, carte : rien à
+  d = 300 / 60, arbres à d = 10), `sz4b_colonies_forests_test.gd` (part dense, forêt dense à
+  d = 20, rien au-delà de 30), `sz4_prop_scale_test.gd`, `fc2_impostors_test.gd`,
+  `settlements_render_test.gd`. Captures : `godot --path game --resolution 640x400 --script
+  res://tests/vt3_shots.gd -- --out=<dossier> --hide-armies --map-weather=clear` (forêt d'Orléans
+  d = 300, 40, 5 ; Paris d = 15).
+
+VT3_BENCH_PLACEHOLDER
 
 ## Interface des colonies (lot C5)
 
