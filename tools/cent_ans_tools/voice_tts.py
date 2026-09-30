@@ -99,6 +99,8 @@ class Job:
     # ElevenLabs takes (VX): none = OpenRouter reading, one = shouted bark, several = a
     # war cry chorus.
     shouts: tuple[voice_shout.Shout, ...] = ()
+    # Same shouted bark in the other voices of its language, tried when a take fails.
+    fallbacks: tuple[voice_shout.Shout, ...] = ()
 
     @property
     def model(self) -> str:
@@ -159,9 +161,16 @@ def bark_jobs(barks: dict) -> list[Job]:
             for index, line in enumerate(lines):
                 voice = voices[index % len(voices)]
                 shouts: tuple[voice_shout.Shout, ...] = ()
+                fallbacks: tuple[voice_shout.Shout, ...] = ()
                 if tag and shout_voices:
-                    voice = shout_voices[index % len(shout_voices)]
-                    shouts = (shout_for(line["text"], tag, voice, language, spec),)
+                    start = index % len(shout_voices)
+                    order = shout_voices[start:] + shout_voices[:start]
+                    voice = order[0]
+                    takes = [
+                        shout_for(line["text"], tag, name, language, spec)
+                        for name in order
+                    ]
+                    shouts, fallbacks = (takes[0],), tuple(takes[1:])
                 jobs.append(
                     Job(
                         "barks",
@@ -170,6 +179,7 @@ def bark_jobs(barks: dict) -> list[Job]:
                         voice,
                         instructions,
                         shouts=shouts,
+                        fallbacks=fallbacks,
                     )
                 )
     return jobs
@@ -280,8 +290,10 @@ def all_jobs() -> list[Job]:
 
 
 def pending(jobs: list[Job], manifest: dict | None = None) -> list[Job]:
-    """Jobs whose output file does not exist yet, or whose clip was voiced by another
-    model than the one the data now asks for (a reading now meant to be shouted)."""
+    """Jobs without an output file, or whose clip was voiced by another model.
+
+    The second case is a reading that the data now asks to be shouted (VX).
+    """
     manifest = load_manifest() if manifest is None else manifest
 
     def stale(job: Job) -> bool:
@@ -475,10 +487,29 @@ def openrouter_checked(
     raise RejectedClip(reason, spent)
 
 
-def shouted_clip(job: Job, api_key: str, attempts: int = 3) -> tuple[Path, Decimal, str]:
-    """Checked ElevenLabs take of a shouted bark, or the chorus of a war cry (raw file,
-    money spent, transcript heard). Raises ``RejectedShout`` when a take keeps failing."""
+def shouted_clip(
+    job: Job, api_key: str, attempts: int = 3
+) -> tuple[Path, Decimal, str, str]:
+    """Checked ElevenLabs take of a shouted bark, or the chorus of a war cry.
+
+    Returns the raw file, the money spent, the transcript heard and the voice used. A
+    bark that keeps failing in its voice is tried in the other voices of its language
+    (``fallbacks``). Raises ``RejectedShout`` when every voice fails.
+    """
     spent = Decimal(0)
+    if len(job.shouts) == 1:
+        reasons = []
+        for shout in job.shouts + job.fallbacks:
+            try:
+                raw, cost, said = voice_shout.checked(
+                    shout, api_key, CACHE_DIR, attempts
+                )
+            except voice_shout.RejectedShout as error:
+                spent += error.cost
+                reasons.append(str(error))
+                continue
+            return raw, spent + cost, said, shout.voice
+        raise voice_shout.RejectedShout(" / ".join(reasons), spent)
     raws, heard = [], ""
     for shout in job.shouts:
         try:
@@ -488,12 +519,10 @@ def shouted_clip(job: Job, api_key: str, attempts: int = 3) -> tuple[Path, Decim
         spent += cost
         raws.append(raw)
         heard = heard or said
-    if len(raws) == 1:
-        return raws[0], spent, heard
     chorus = voice_shout.chorus_cache_path(list(job.shouts), CACHE_DIR)
     if not chorus.exists():
         voice_shout.mix_chorus(raws, chorus, seed=job.text)
-    return chorus, spent, heard
+    return chorus, spent, heard, job.voice
 
 
 def filter_chain(reverb: bool, shout: bool = False, chorus: bool = False) -> str:
@@ -509,7 +538,7 @@ def filter_chain(reverb: bool, shout: bool = False, chorus: bool = False) -> str
         filters.append("aecho=0.9:0.6:37|61:0.22|0.12")
     if chorus:
         # Open field: late, weak reflections from the woods and the far ranks.
-        filters.append("aecho=0.85:0.7:140|260|410:0.22|0.14|0.08")
+        filters.append("aecho=0.9:0.6:150|290:0.12|0.06")
     if shout or chorus:
         filters += [
             "highpass=f=90",
@@ -604,6 +633,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--limit", type=int, default=0, help="at most N clips")
     parser.add_argument(
+        "--shouts", action="store_true", help="only the ElevenLabs shouted clips (VX)"
+    )
+    parser.add_argument(
         "--backend", choices=["openrouter", "openai"], default="openrouter"
     )
     parser.add_argument(
@@ -645,6 +677,8 @@ def main(argv: list[str] | None = None) -> int:
     jobs = pending(all_jobs())
     if args.only:
         jobs = [job for job in jobs if job.kind in args.only]
+    if args.shouts:
+        jobs = [job for job in jobs if job.shouts]
     if args.limit:
         jobs = jobs[: args.limit]
     manifest = load_manifest()
@@ -685,10 +719,11 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"stopped before the cap ({args.cap} $)")
                 break
             model = OPENROUTER_MODEL if args.backend == "openrouter" else MODEL
+            used_voice = job.voice
             try:
                 if job.shouts:
                     model = job.model
-                    raw, cost, said = shouted_clip(job, fal_key, max(3, args.attempts))
+                    raw, cost, said, used_voice = shouted_clip(job, fal_key, 2)
                     shout_cost += cost
                 elif args.backend == "openrouter":
                     raw, cost, said = openrouter_checked(job, api_key, args.attempts)
@@ -714,7 +749,7 @@ def main(argv: list[str] | None = None) -> int:
             run_cost += cost
             manifest[f"{job.path}.ogg"] = {
                 "text": job.text,
-                "voice": job.voice,
+                "voice": used_voice,
                 "model": model,
                 "transcript": said,
                 "seconds": round(seconds, 2),

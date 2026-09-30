@@ -7,6 +7,9 @@ extends Node
 ## (`VoiceLines.language_for` : français, anglais, anglo-normand pour la noblesse anglaise,
 ## gascon, flamand, gallois, écossais), corpus `data/voice/barks.json`.
 ##
+## Première charge d'un camp (VX) : le cri de guerre de sa faction, repris en chœur
+## (`speech/<voix>/<sha1>.ogg`, même fichier que la fin du discours), à la place de la réplique.
+##
 ## Pas de rafales : une réplique à la fois (une plus prioritaire interrompt la courante),
 ## écart global minimal entre deux répliques, délai de recharge et probabilité par situation.
 ## Muet pendant le discours du général et quand le conseiller parle ; désactivable
@@ -20,6 +23,10 @@ const EVENT_PREFIX := "vo_"
 ## Portée des répliques spatialisées (m) et taille de source.
 const SPATIAL_MAX_DISTANCE := 240.0
 const SPATIAL_UNIT_SIZE := 22.0
+## Le cri d'une armée porte plus loin qu'une réplique (VX).
+const CRY_MAX_DISTANCE := 700.0
+const CRY_UNIT_SIZE := 60.0
+const CRY_PRIORITY := 8
 
 var scene: Node = null
 var enabled: bool = true
@@ -37,6 +44,7 @@ var _time: float = 0.0
 var _track: Dictionary = {}  # id → {state, present, soldiers}
 var _selection: Array = []
 var _victory_done: bool = false
+var _side_cried: Dictionary = {}  # camp → vrai une fois son cri de guerre lancé
 var _rng := RandomNumberGenerator.new()
 
 
@@ -108,7 +116,8 @@ func update(delta: float) -> void:
 			continue
 		var prev_state := str(prev["state"])
 		if state == "charging" and prev_state != "charging":
-			play("charge", unit)
+			if not war_cry(unit):
+				play("charge", unit)
 		elif state == "routing" and prev_state != "routing":
 			play("rout", unit)
 	if battle != null and bool(battle.call("is_finished")) and not _victory_done:
@@ -227,6 +236,36 @@ func play(situation_name: String, unit: Dictionary, force: bool = false) -> bool
 	return true
 
 
+## Cri de guerre du camp de `unit` à sa première charge (une fois par camp et par bataille).
+## Faux si le camp a déjà crié ou si rien n'est joué (désactivé, muet, cri non généré).
+func war_cry(unit: Dictionary) -> bool:
+	var side := str(unit["side"])
+	if _side_cried.has(side):
+		return false
+	_side_cried[side] = true
+	if not enabled or _muted():
+		return false
+	var faction := _side_faction(side)
+	var cry := VoiceLines.war_cry(faction)
+	var relative := VoiceLines.speech_path(VoiceLines.speech_voice(faction, side), cry)
+	var stream := VoiceLines.stream(relative)
+	if cry == "" or stream == null:
+		return false
+	_last_any = _time
+	_current_priority = CRY_PRIORITY
+	_current_until = _time + stream.get_length()
+	history.append({"id": relative, "situation": "war_cry", "unit": int(unit["id"]), "time": _time})
+	if history.size() > 24:
+		history.pop_front()
+	if silent:
+		return true
+	var line := {"id": "cry_" + relative.get_file()}
+	if _battle_audio() == null or not _play_spatial(relative, line, BattleAudio._pos(unit) + Vector3(0, 1.7, 0), CRY_UNIT_SIZE, CRY_MAX_DISTANCE):
+		_player.stream = stream
+		_player.play()
+	return true
+
+
 func _battle_audio() -> BattleAudio:
 	var audio := BattleAudio.active
 	return audio if audio != null and is_instance_valid(audio) and audio.bank != null else null
@@ -240,7 +279,7 @@ func _too_far(position: Vector3) -> bool:
 
 ## Réplique en 3D par le pool d'AU1 : l'événement `vo_<id>` est déclaré à la volée dans la
 ## banque de la bataille (bus « Voix », une instance, priorité haute).
-func _play_spatial(relative: String, line: Dictionary, position: Vector3) -> bool:
+func _play_spatial(relative: String, line: Dictionary, position: Vector3, unit_size: float = SPATIAL_UNIT_SIZE, max_distance: float = SPATIAL_MAX_DISTANCE) -> bool:
 	var audio := _battle_audio()
 	if audio == null:
 		return false
@@ -250,7 +289,7 @@ func _play_spatial(relative: String, line: Dictionary, position: Vector3) -> boo
 		entry.merge({
 			"files": ["voice/" + relative], "bus": BUS, "priority": 9, "volume_db": 0.0,
 			"pitch": [0.98, 1.02], "max_instances": 1, "cooldown_s": 0.0,
-			"unit_size_m": SPATIAL_UNIT_SIZE, "max_distance_m": SPATIAL_MAX_DISTANCE,
+			"unit_size_m": unit_size, "max_distance_m": max_distance,
 		}, true)
 		audio.bank.events[event_name] = entry
 	return BattleAudio.play_at(event_name, position)

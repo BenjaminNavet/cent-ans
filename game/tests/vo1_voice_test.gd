@@ -140,6 +140,15 @@ func _check_barks(settings: Node) -> void:
 	voices._time += 10.0
 	scene.units[1]["state"] = "charging"
 	voices.update(0.1)
+	var cry_seen := false
+	for entry in voices.history:
+		cry_seen = cry_seen or (str(entry["situation"]) == "war_cry" and int(entry["unit"]) == 2)
+	_check(cry_seen, "first charge of a side: its war cry")
+	scene.units[1]["state"] = "idle"
+	voices.update(0.1)
+	voices._time += 10.0
+	scene.units[1]["state"] = "charging"
+	voices.update(0.1)
 	var charge_seen := false
 	for entry in voices.history:
 		charge_seen = charge_seen or (str(entry["situation"]) == "charge" and int(entry["unit"]) == 2)

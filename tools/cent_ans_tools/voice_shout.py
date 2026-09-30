@@ -44,8 +44,10 @@ MIN_LETTER_RATIO = 0.72
 # Whisper language of a bark language without an ElevenLabs code.
 WHISPER_LANGUAGE = {"an": "fr", "sco": "en"}
 CHORUS_LAYERS_PER_VOICE = 2
-CHORUS_MAX_DELAY_S = 0.12
-CHORUS_PITCH = (0.94, 1.06)
+CHORUS_MAX_DELAY_S = 0.06
+# Resampling shifts pitch and length together (a few % only, so the words stay put).
+CHORUS_PITCH = (0.96, 1.04)
+CHORUS_GAIN = (0.25, 0.4)
 MIX_RATE = 44100
 
 
@@ -66,7 +68,9 @@ class Shout:
 
     def cache_key(self) -> str:
         """Key of the raw answer in the local cache."""
-        blob = "\n".join([MODEL, str(STABILITY), self.voice, self.language_code, self.prompt])
+        blob = "\n".join(
+            [MODEL, str(STABILITY), self.voice, self.language_code, self.prompt]
+        )
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:24]
 
     def cost(self) -> Decimal:
@@ -100,7 +104,9 @@ def synthesise(shout: Shout, api_key: str, cache_dir: Path) -> tuple[Path, Decim
     headers = {"Authorization": f"Key {api_key}", "Content-Type": "application/json"}
     response = httpx.post(FAL_URL, headers=headers, json=body, timeout=180.0)
     if response.status_code != 200:
-        raise RuntimeError(f"{shout.prompt}: HTTP {response.status_code} {response.text[:300]}")
+        raise RuntimeError(
+            f"{shout.prompt}: HTTP {response.status_code} {response.text[:300]}"
+        )
     url = response.json().get("audio", {}).get("url")
     if not url:
         raise RuntimeError(f"{shout.prompt}: no audio in {response.text[:300]}")
@@ -134,8 +140,10 @@ def _samples(path: Path, rate: int):
 
 
 def listen(path: Path, language: str) -> tuple[str, float]:
-    """Whisper transcript of ``path`` read as ``language``, and the probability that the
-    clip is in ``language`` (language detection run separately)."""
+    """Whisper transcript of ``path`` and the probability that it is in ``language``.
+
+    Language detection runs separately from the transcription forced to ``language``.
+    """
     samples = _samples(path, 16000)
     model = _whisper()
     _, info = model.transcribe(samples, beam_size=1)
@@ -160,8 +168,10 @@ def _letters(text: str) -> str:
 
 
 def words_match(text: str, heard: str) -> bool:
-    """``heard`` says ``text``: most words, or most letters (homophones such as
-    « sauve qui peut » / « sauf qu'il peut » and accented names pass)."""
+    """``heard`` says ``text``: most of its words, or most of its letters.
+
+    Homophones (« sauve qui peut » / « sauf qu'il peut ») and accented names pass.
+    """
     from cent_ans_tools.voice_tts import transcript_matches
 
     if any(mark in heard for mark in "<>*[]()"):
@@ -225,31 +235,37 @@ def _decode_trimmed(raw: Path, out: Path) -> None:
 
 
 def mix_chorus(raws: list[Path], out: Path, seed: str) -> None:
-    """Chorus WAV of ``raws``: the first take leads, every take is laid
-    ``CHORUS_LAYERS_PER_VOICE`` times with its own pitch, delay and gain (deterministic
-    for ``seed``)."""
+    """Chorus WAV of ``raws`` (deterministic for ``seed``).
+
+    The first take leads at full gain. Every other take is time-stretched to the
+    lead's length (pitch kept) so that the syllables fall together, then laid
+    ``CHORUS_LAYERS_PER_VOICE`` times, each with its own small pitch shift, delay and
+    lower gain: the ranks answer the leader without smearing the words.
+    """
+    import librosa
     import numpy
     import soundfile
 
     rng = random.Random(seed)
-    layers = []
+    takes = []
     with tempfile.TemporaryDirectory() as tmp:
         for index, raw in enumerate(raws):
             wav = Path(tmp) / f"{index}.wav"
             _decode_trimmed(raw, wav)
             samples, _ = soundfile.read(str(wav), dtype="float32")
-            samples = samples / max(1e-6, float(numpy.abs(samples).max()))
-            for layer in range(CHORUS_LAYERS_PER_VOICE):
-                lead = index == 0 and layer == 0
-                factor = 1.0 if lead else rng.uniform(*CHORUS_PITCH)
-                # Resampling shifts pitch and length together, like a faster singer.
-                length = max(1, int(len(samples) / factor))
-                shifted = numpy.interp(
-                    numpy.arange(length) * factor, numpy.arange(len(samples)), samples
-                )
-                delay = 0 if lead else int(rng.uniform(0.02, CHORUS_MAX_DELAY_S) * MIX_RATE)
-                gain = 1.0 if lead else rng.uniform(0.55, 0.85)
-                layers.append((delay, gain * shifted))
+            takes.append(samples / max(1e-6, float(numpy.abs(samples).max())))
+    lead = takes[0]
+    layers = [(0, lead)]
+    for take in takes[1:]:
+        aligned = librosa.effects.time_stretch(take, rate=len(take) / len(lead))
+        for _layer in range(CHORUS_LAYERS_PER_VOICE):
+            factor = rng.uniform(*CHORUS_PITCH)
+            length = max(1, int(len(aligned) / factor))
+            shifted = numpy.interp(
+                numpy.arange(length) * factor, numpy.arange(len(aligned)), aligned
+            )
+            delay = int(rng.uniform(0.01, CHORUS_MAX_DELAY_S) * MIX_RATE)
+            layers.append((delay, rng.uniform(*CHORUS_GAIN) * shifted))
     total = max(delay + len(layer) for delay, layer in layers)
     mix = numpy.zeros(total, dtype="float32")
     for delay, layer in layers:

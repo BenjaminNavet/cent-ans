@@ -117,6 +117,12 @@ static func speech_voice(faction: String, general_id: String) -> String:
 	return str(voices[absi(hash(general_id)) % voices.size()])
 
 
+## VX : cri de guerre de `faction` (`order_war_cry.json`, sinon le cri par défaut des discours).
+static func war_cry(faction: String) -> String:
+	var cries: Dictionary = data("battle_orders/order_war_cry.json").get("labels_by_faction", {})
+	return str(cries.get(faction, data("speeches/battle_speeches.json").get("default_cry", "")))
+
+
 static func speech_path(voice: String, text: String) -> String:
 	return "speech/%s/%s" % [voice, text.sha1_text().substr(0, SPEECH_HASH_LEN)]
 

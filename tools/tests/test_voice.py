@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
-from cent_ans_tools import voice_tts
+from cent_ans_tools import voice_shout, voice_tts
 from cent_ans_tools.budget import BudgetLedger
 
 DATA = Path(__file__).resolve().parents[2] / "data"
@@ -214,3 +214,69 @@ def test_main_recheck_keeps_forgotten_cost_in_the_recorded_spend(
     ledger = BudgetLedger(budget_file)
     # 0.05 $ already spent on the forgotten clip + 0.01 $ for its redo.
     assert ledger.entries[-1].actual == Decimal("0.06")
+
+
+def test_shouted_situations_go_to_elevenlabs() -> None:
+    """VX: shouted situations get one ElevenLabs take with their tag, calm ones none."""
+    barks = _load("voice/barks.json")
+    for job in voice_tts.bark_jobs(barks):
+        situation = job.path.split("_", 1)[1].rsplit("_", 1)[0]
+        situation = "general_down" if situation == "general" else situation
+        tag = barks["situations"][situation].get("shout_tag", "")
+        if not tag:
+            assert not job.shouts, job.path
+            continue
+        assert len(job.shouts) == 1, job.path
+        shout = job.shouts[0]
+        assert shout.prompt.startswith(tag) and shout.text == job.text
+        assert shout.check_language, job.path
+        assert job.model == voice_shout.MODEL
+
+
+def test_war_cries_are_choruses_in_their_language() -> None:
+    """VX: every cry is a chorus of several voices; English cries checked in English."""
+    jobs = voice_tts.speech_jobs(
+        _load("speeches/battle_speeches.json"),
+        _load("voice/speech_voices.json"),
+        _load("battle_orders/order_war_cry.json")["labels_by_faction"],
+    )
+    cries = {job.text: job for job in jobs if job.shouts}
+    assert "Montjoie ! Saint-Denis !" in cries
+    assert len(cries["Montjoie ! Saint-Denis !"].shouts) >= 2
+    assert {s.language_code for s in cries["Saint George !"].shouts} == {"en"}
+    assert {s.language_code for s in cries["¡Santiago!"].shouts} == {"es"}
+
+
+def test_reading_is_stale_once_the_data_asks_for_a_shout(tmp_path, monkeypatch) -> None:
+    """A clip voiced by another model than its job's is pending again."""
+    shout = voice_shout.Shout("Sus !", "[shouting]", "Callum", "fr", "fr")
+    job = voice_tts.Job(
+        "barks", "barks/fr_attack_01", "Sus !", "Callum", "", shouts=(shout,)
+    )
+    monkeypatch.setattr(voice_tts, "VOICE_DIR", tmp_path)
+    job.output.parent.mkdir(parents=True)
+    job.output.write_bytes(b"ogg")
+    old = {"barks/fr_attack_01.ogg": {"model": voice_tts.OPENROUTER_MODEL}}
+    new = {"barks/fr_attack_01.ogg": {"model": voice_shout.MODEL}}
+    assert voice_tts.pending([job], old) == [job]
+    assert voice_tts.pending([job], new) == []
+
+
+def test_shout_words_check_accepts_homophones_only() -> None:
+    """Letters-level match lets homophones pass, not garbled takes."""
+    assert voice_shout.words_match("Sauve qui peut !", "Sauf qu'il peut !")
+    assert voice_shout.words_match(
+        "Montjoie ! Saint-Denis !", "Mon joie, Saint-Denis !"
+    )
+    assert not voice_shout.words_match("Sus à eux !", "Sous-A-E")
+    assert not voice_shout.words_match("Montjoie ! Saint-Denis !", "Bonsoir ! Salut !")
+
+
+def test_shout_filter_chain_is_louder_and_compressed() -> None:
+    """Shouts and choruses are compressed and sit above the spoken lines."""
+    spoken = voice_tts.filter_chain(False)
+    shouted = voice_tts.filter_chain(False, shout=True)
+    chorus = voice_tts.filter_chain(False, chorus=True)
+    assert "acompressor" not in spoken and f"I={voice_tts.TARGET_LUFS}" in spoken
+    assert "acompressor" in shouted and f"I={voice_tts.SHOUT_LUFS}" in shouted
+    assert "aecho" in chorus and "aecho" not in shouted
