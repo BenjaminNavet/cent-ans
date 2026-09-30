@@ -35,7 +35,14 @@ from PIL import Image
 
 SR3 = Path.home() / "dev/cent-ans-raw/sr3"
 # Catalogue prices (USD): nano-banana-2 edit at 2K (1.5 x 0.08), bria, trellis-2 at 1024.
-PRICES = {"sheet": 0.12, "cut": 0.018, "trellis2": 0.30, "trellis": 0.02, "multi": 0.02}
+PRICES = {
+    "sheet": 0.12,
+    "sheet1k": 0.08,
+    "cut": 0.018,
+    "trellis2": 0.30,
+    "trellis": 0.02,
+    "multi": 0.02,
+}
 VIEW_NAMES = ("front", "side", "back")  # left to right on the sheet
 TRELLIS_ARGS = {"texture_size": 2048, "mesh_simplify": 0.9}
 COMMON = (
@@ -108,6 +115,215 @@ UNITS = {
     "scabbard or dagger hanging from it; no lance, no shield, nothing on the back. Legs slightly "
     "apart, clear gap between the thighs.",
 }
+# L4: the remaining recipes are edits of an L3 A-pose sheet (same layout, pose and scale):
+# only the kit changes. Parent unit per derived unit (its ``sheet.png`` under ``L3_RAW``).
+L3_RAW = Path.home() / "dev/cent-ans-raw/ga3/l3"
+EDIT = (
+    "Edit this photographic A-pose character reference sheet (three full-length views of the "
+    "same man: front on the left, left profile in the middle, back on the right). Keep exactly "
+    "the same layout, the same pose (strict A-pose, arms straight and away from the body, hands "
+    "open and empty, nothing held, nothing crossing the body), the same position and scale of "
+    "each figure with the feet on the same line, the same plain uniform neutral mid-grey "
+    "background, the same soft studio light and the same realistic museum-reenactor "
+    "photographic style with wear and dirt. No ground shadow, no text. "
+)
+KEY_RULE = (
+    " The saturated vivid pure green garment is the only green item and the saturated vivid "
+    "pure blue hose are the only blue items; nothing else is green or blue."
+)
+DERIVED = {
+    # infantry_7: English retinue men-at-arms (pollaxe).
+    "retinue": (
+        "man_at_arms",
+        EDIT
+        + "Change the soldier into an English retinue man-at-arms of about 1415: full "
+        "harness of plain grey steel (breastplate, complete arm and leg harness, gauntlets, "
+        "sabatons), a short tight padded jupon of plain saturated vivid pure green wool over "
+        "the breastplate without any charge or stripe (the livery colour), a visored bascinet "
+        "with the visor raised and a steel bevor at the chin instead of the mail aventail. "
+        "Remove the sword and its scabbard entirely; only a rondel dagger at the right hip. "
+        "A different face: a man in his thirties with a short brown beard. There is no blue "
+        "item; the green jupon is the only green item.",
+    ),
+    # infantry_8: routiers (sword and rondache).
+    "routier": (
+        "man_at_arms",
+        EDIT
+        + "Change the soldier into a mercenary routier of the 1360s with mismatched gear: "
+        "remove all the plate armour of the arms and legs and the sword and scabbard; he wears "
+        "a riveted brigandine covered with plain saturated vivid pure green cloth (the livery "
+        "colour, rows of brass rivet heads) over a mail shirt whose short mail sleeves show "
+        "over brown padded sleeves, an open bascinet without aventail over a dark brown woollen "
+        "hood whose cape lies on the shoulders, leather gloves, saturated vivid pure blue "
+        "woollen hose, worn brown leather boots, a leather belt with a sheathed dagger. A "
+        "scarred unshaven face." + KEY_RULE,
+    ),
+    # infantry_2: urban militia (spear, bill).
+    "urban_militia": (
+        "militia",
+        EDIT
+        + "Change the soldier into a town militiaman: a plain undyed linen tunic with long "
+        "sleeves under a short open-sided livery tabard of plain saturated vivid pure green "
+        "wool, saturated vivid pure blue woollen hose, a round red-brown felt cap instead of "
+        "the helmet, no mail gorget, no hood, bare hands, a leather belt with a purse and a "
+        "sheathed knife, simple brown leather ankle shoes. A round-faced man with a brown "
+        "moustache." + KEY_RULE,
+    ),
+    # infantry_3: Welsh spearmen (spear, small buckler).
+    "welsh_spearman": (
+        "militia",
+        EDIT
+        + "Change the soldier into a Welsh spearman: a knee-length woollen tunic divided "
+        "vertically in two colours, the half on the wearer's right plain saturated vivid pure "
+        "green (the livery colour) and the half on the wearer's left natural undyed off-white; "
+        "bare legs with bare skin from the knee down and simple low leather shoes; a small "
+        "round grey felt cap, no helmet, no mail, no tabard, no hood; a leather belt with a "
+        "long knife. A lean dark-haired man with a black moustache. The green half of the "
+        "tunic is the only green item; there is no blue item.",
+    ),
+    # infantry_4: Scottish schiltron (long spear, targe on the back).
+    "schiltron": (
+        "sergeant",
+        EDIT
+        + "Change the soldier into a Scottish spearman of the schiltron: a thick brown "
+        "quilted padded jack reaching mid-thigh with its brown quilted sleeves, a short "
+        "sleeveless tabard of plain saturated vivid pure green wool over it (the livery "
+        "colour), a flat dark brown woollen bonnet instead of the bascinet, no mail, leather "
+        "gloves, saturated vivid pure blue woollen hose, brown leather boots, a leather belt "
+        "with a sheathed dirk. A fair-haired man with a short fair beard." + KEY_RULE,
+    ),
+    # infantry_6: coutiliers (coustille).
+    "coutilier": (
+        "militia",
+        EDIT
+        + "Change the soldier into a French coutilier of about 1450: a riveted brigandine "
+        "covered with plain saturated vivid pure green cloth (the livery colour) with rows of "
+        "rivet heads, padded sleeves with mail at the elbows, a steel sallet with a short tail "
+        "and a steel bevor at the chin instead of the kettle hat and the mail gorget, no hood, "
+        "leather gloves, saturated vivid pure blue woollen hose, brown leather boots, a leather "
+        "belt with a sheathed dagger. A clean-shaven face." + KEY_RULE,
+    ),
+    # archer_1: crossbowmen (crossbow, bolt case).
+    "plain_crossbowman": (
+        "crossbowman",
+        EDIT
+        + "Change the livery tabard and the aketon into one padded quilted gambeson "
+        "reaching mid-thigh, body and sleeves all of plain saturated vivid pure green cloth "
+        "(the livery colour); an open bascinet without aventail instead of the kettle hat, no "
+        "mail; keep the saturated vivid pure blue hose, the leather belt with the spanning "
+        "hook and the sheathed dagger, the boots. A man with a thin brown beard."
+        + KEY_RULE,
+    ),
+    # archer_4: Gascon crossbowmen (crossbow, bolt case, pavise).
+    "gascon_crossbowman": (
+        "crossbowman",
+        EDIT
+        + "Change the soldier into a Gascon crossbowman: a haubergeon (mail shirt) with "
+        "long mail sleeves reaching the wrists, worn under a short livery tabard of plain "
+        "saturated vivid pure green wool, an open bascinet with a mail aventail instead of the "
+        "kettle hat; keep the saturated vivid pure blue hose, the leather belt with the "
+        "spanning hook and a sheathed dagger, the boots. A dark-eyed man with a black "
+        "moustache." + KEY_RULE,
+    ),
+    # cavalry_3: ordonnance gendarmes (lance), rider dismounted.
+    "gendarme": (
+        "knight",
+        EDIT
+        + "Change the knight into a French ordonnance gendarme of about 1450: polished "
+        "bright white plate harness (full armour, plain steel, no fabric on the arms and legs), "
+        "over the breastplate a short sleeveless open-sided livery huque of plain saturated "
+        "vivid pure green cloth reaching the upper thighs, a steel sallet with the visor raised "
+        "and a steel bevor at the chin instead of the bascinet and the aventail. No sword, no "
+        "scabbard, no dagger, nothing held. There is no blue item and no red item; the green "
+        "huque is the only green item. Legs slightly apart, clear gap between the thighs.",
+    ),
+    # standard_1: mounted standard bearer (pole), rider dismounted.
+    "standard_bearer": (
+        "knight",
+        EDIT
+        + "Change the knight into a young squire, the standard bearer: the same plain grey "
+        "steel harness and the same plain saturated vivid pure green jupon (the livery colour, "
+        "no charge), an open bascinet without visor and without aventail but with a mail "
+        "collar, a clean-shaven young face with brown hair showing. No sword, no scabbard, no "
+        "dagger, nothing held. There is no blue item and no red item; the green jupon is the "
+        "only green item. Legs slightly apart, clear gap between the thighs.",
+    ),
+}
+UNITS.update({name: prompt for name, (_parent, prompt) in DERIVED.items()})
+# L4: face variants. An edit of the unit's own A-pose sheet that changes the head only; the
+# body stays identical so that ``ga3_figures.py`` grafts the new head on the shared body.
+VARIANT = (
+    "Edit this photographic A-pose character reference sheet. Change ONLY the head of the man, "
+    "consistently in all three views: {}. Everything from the collar down stays exactly "
+    "identical: same body, same clothing, armour and colours (the saturated green and blue "
+    "garments unchanged), same belt, same boots, same hands, same A-pose, same position and "
+    "scale of each figure with the feet on the same line, same plain mid-grey background, same "
+    "photographic style. Nothing green or blue on the head. Nothing held in the hands."
+)
+VARIANTS = {
+    "longbowman": [
+        "an older man of about fifty with a short grey beard and deeply weathered tanned skin, "
+        "wearing a round brown felt cap instead of the steel kettle hat",
+    ],
+    "man_at_arms": [
+        "a younger man with a thick black moustache and olive skin, wearing the same pointed "
+        "bascinet with the visor removed and the same mail aventail",
+    ],
+    "crossbowman": [
+        "a dark-haired man with a full black beard and olive Mediterranean skin, wearing an "
+        "open steel bascinet instead of the kettle hat, over the same mail collar",
+    ],
+    "sergeant": [
+        "a red-haired man with a ginger beard and pale freckled skin, wearing a steel kettle "
+        "hat instead of the bascinet, over the same mail collar",
+    ],
+    "militia": [
+        "a bald older man with grey stubble and weathered skin, bare-headed without any helmet",
+    ],
+    "knight": [
+        "a clean-shaven young man with a fair complexion, wearing a rounded bascinet with a "
+        "closed pointed visor (hounskull) over the same mail aventail",
+    ],
+    "retinue": [
+        "an older man with a grey beard, wearing a steel sallet with a short tail instead of "
+        "the bascinet, over the same bevor",
+    ],
+    "routier": [
+        "a bald man with a black beard, without the bascinet: only the dark brown hood worn up "
+        "on the head",
+    ],
+    "urban_militia": [
+        "a thin older man with a long grey beard, wearing an open steel kettle hat instead of "
+        "the felt cap",
+    ],
+    "welsh_spearman": [
+        "a young red-haired man with a short red beard, bare-headed without the cap",
+    ],
+    "schiltron": [
+        "a dark-haired man with a black beard, wearing an open steel bascinet instead of the "
+        "bonnet",
+    ],
+    "coutilier": [
+        "a man with a brown moustache, wearing a steel sallet without the bevor (the chin "
+        "bare above the same collar)",
+    ],
+    "plain_crossbowman": [
+        "a clean-shaven man with tanned skin, wearing a steel kettle hat instead of the "
+        "bascinet",
+    ],
+    "gascon_crossbowman": [
+        "an older man with a grey moustache and weathered skin, wearing a steel kettle hat "
+        "instead of the bascinet, over the same mail aventail",
+    ],
+    "gendarme": [
+        "an older man with a grey moustache and a weathered face, the same sallet with the "
+        "visor raised over the same bevor",
+    ],
+    "standard_bearer": [
+        "a man with a short brown beard, wearing a steel kettle hat instead of the bascinet, "
+        "over the same mail collar",
+    ],
+}
 # SR3 source sheet per unit when it is not ``<unit>.png``.
 SOURCES = {"knight": "knight_mounted.png"}
 TRELLIS2_ARGS = {
@@ -161,6 +377,30 @@ def view_crop(
     return x0, y0, x1, y1
 
 
+def figure_box(cut: Path) -> dict:
+    """Front figure of the cut sheet: top and feet rows over the sheet height (L4).
+
+    The head variants and the derived units keep the pose and the scale of their source
+    sheet: ``ga3_figures.py`` scales their helmet height by the ratio of the figure heights.
+    """
+    rgba = np.asarray(Image.open(cut).convert("RGBA"))
+    alpha = rgba[..., 3] > 32
+    cols = alpha.sum(axis=0) > 2
+    # First run of columns wider than 3 % of the sheet (the front view; crumbs skipped).
+    x0 = x1 = None
+    for x, on in enumerate(list(cols) + [False]):
+        if on and x0 is None:
+            x0 = x
+        elif not on and x0 is not None:
+            if x - x0 > 0.03 * len(cols):
+                x1 = x
+                break
+            x0 = None
+    rows = np.nonzero(alpha[:, x0:x1].any(axis=1))[0]
+    h = alpha.shape[0]
+    return {"top": float(rows[0]) / h, "feet": float(rows[-1] + 1) / h, "height": h}
+
+
 def main() -> None:
     """Run the cached stages for one unit."""
     parser = argparse.ArgumentParser()
@@ -172,29 +412,48 @@ def main() -> None:
         "--model", choices=("multi", "trellis", "trellis2"), default="multi"
     )
     parser.add_argument("--views", default="front,back")
+    parser.add_argument(
+        "--variant",
+        type=int,
+        default=1,
+        help="L4 face variant k >= 2: head-only edit of the unit's own sheet (VARIANTS)",
+    )
+    parser.add_argument("--resolution", choices=("1K", "2K"), default="2K")
     args = parser.parse_args()
     name = args.unit if args.attempt == 1 else f"{args.unit}_{args.attempt}"
+    if args.variant > 1:
+        name = f"{args.unit}_v{args.variant}" + (
+            "" if args.attempt == 1 else f"_{args.attempt}"
+        )
+        prompt = VARIANT.format(VARIANTS[args.unit][args.variant - 2])
+        own = L3_RAW if (L3_RAW / args.unit / "sheet.png").exists() else args.raw
+        source = own / args.unit / "sheet.png"
+    elif args.unit in DERIVED:
+        prompt = UNITS[args.unit]
+        source = L3_RAW / DERIVED[args.unit][0] / "sheet.png"
+    else:
+        prompt = UNITS[args.unit]
+        source = SR3 / SOURCES.get(args.unit, f"{args.unit}.png")
     out = args.raw / name
     out.mkdir(parents=True, exist_ok=True)
-    (out / "prompt.txt").write_text(UNITS[args.unit])
+    (out / "prompt.txt").write_text(prompt)
+    (out / "source.txt").write_text(str(source))
     sheet = out / "sheet.png"
     if not sheet.exists():
-        src = fal_client.upload_file(
-            str(SR3 / SOURCES.get(args.unit, f"{args.unit}.png"))
-        )
+        src = fal_client.upload_file(str(source))
         res = run(
             "fal-ai/nano-banana-2/edit",
             {
-                "prompt": UNITS[args.unit],
+                "prompt": prompt,
                 "image_urls": [src],
                 "num_images": 1,
                 "aspect_ratio": "16:9",
-                "resolution": "2K",
+                "resolution": args.resolution,
                 "output_format": "png",
                 "seed": args.seed + args.attempt - 1,
             },
             out,
-            "sheet",
+            "sheet" if args.resolution == "2K" else "sheet1k",
         )
         download(res["images"][0]["url"], sheet)
     cut = out / "sheet_cut.png"
@@ -202,6 +461,9 @@ def main() -> None:
         url = fal_client.upload_file(str(sheet))
         res = run("fal-ai/bria/background/remove", {"image_url": url}, out, "cut")
         download(res["image"]["url"], cut)
+    box = out / "box.json"
+    if not box.exists():
+        box.write_text(json.dumps(figure_box(cut)))
     for index, view in enumerate(VIEW_NAMES):
         if not (out / f"{view}.png").exists():
             view_crop(cut, out / f"{view}.png", index)
