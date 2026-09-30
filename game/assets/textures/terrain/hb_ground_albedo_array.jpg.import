@@ -2,10 +2,18 @@
 
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
+uid="uid://bm4ydplv0o6cl"
+path.s3tc="res://.godot/imported/hb_ground_albedo_array.jpg-ed383f42e26574e13233d53a8def4a55.s3tc.ctexarray"
+path.etc2="res://.godot/imported/hb_ground_albedo_array.jpg-ed383f42e26574e13233d53a8def4a55.etc2.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/textures/terrain/hb_ground_albedo_array.jpg"
+dest_files=["res://.godot/imported/hb_ground_albedo_array.jpg-ed383f42e26574e13233d53a8def4a55.s3tc.ctexarray", "res://.godot/imported/hb_ground_albedo_array.jpg-ed383f42e26574e13233d53a8def4a55.etc2.ctexarray"]
 
 [params]
 

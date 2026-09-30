@@ -24,4 +24,4 @@ Session principale :
 - Manifeste `data/art/ground_materials_pack.json` (id → couche, `mean_linear`) ; chargeur `GroundMaterials.load_arrays()` (`game/scripts/map/ground_materials.gd`) ; non branché dans `terrain.gdshader` (HB3).
 - Brutes et planche 2×2 : `~/dev/cent-ans-raw/hb/materials/` (`board_2x2.jpg`, mesures `tiles/report.json`).
 Limites : blé et orge gardent des lignes de semis/traces faiblement visibles en 2×2 (orge : la reprise « nadir » donne un motif radial de drone, rejetée) ; seigle légèrement quadrillé ; la teinte d'origine reste dans l'albédo (seule la luminance est égalisée).
-Prochaine étape : test headless `hb2_materials_test.gd`, puis jugement de la planche par la session principale.
+Test headless `hb2_materials_test.gd` OK (27 couches, DXT1). Prochaine étape : jugement de la planche par la session principale.

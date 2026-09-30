@@ -2,10 +2,18 @@
 
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
+uid="uid://bv5jcp7pqvlyc"
+path.s3tc="res://.godot/imported/hb_ground_normal_array.jpg-2c58159b384d50db2ecb4d71151185ab.s3tc.ctexarray"
+path.etc2="res://.godot/imported/hb_ground_normal_array.jpg-2c58159b384d50db2ecb4d71151185ab.etc2.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/textures/terrain/hb_ground_normal_array.jpg"
+dest_files=["res://.godot/imported/hb_ground_normal_array.jpg-2c58159b384d50db2ecb4d71151185ab.s3tc.ctexarray", "res://.godot/imported/hb_ground_normal_array.jpg-2c58159b384d50db2ecb4d71151185ab.etc2.ctexarray"]
 
 [params]
 

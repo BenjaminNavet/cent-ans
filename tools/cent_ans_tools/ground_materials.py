@@ -518,7 +518,11 @@ def pack(
     albedo_grid.save(albedo_path, quality=ALBEDO_QUALITY, subsampling=0)
     normal_grid.save(normal_path, quality=NORMAL_QUALITY, subsampling=0)
     for path in (albedo_path, normal_path):
-        Path(f"{path}.import").write_text(import_file(columns, rows, path.name))
+        imported = Path(f"{path}.import")
+        slicing = f"slices/horizontal={columns}\nslices/vertical={rows}"
+        # Keep Godot's own .import (uid, imported paths) while the grid is unchanged.
+        if not imported.exists() or slicing not in imported.read_text():
+            imported.write_text(import_file(columns, rows, path.name))
     total = albedo_path.stat().st_size + normal_path.stat().st_size
     if total > MAX_PACK_BYTES:
         raise ValueError(f"tableaux trop lourds : {total / 1e6:.1f} Mo > 40 Mo")
