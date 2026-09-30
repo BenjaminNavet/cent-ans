@@ -70,7 +70,17 @@ Ouvert : herbe encore discrète à d = 15 (lue comme petites touffes/buissons à
 cellules d'herbe à sortir du fil principal ; bord net entre cartes et imposteurs à 45.
 
 ## FC6 — herbe sans à-coup, transition cartes/imposteurs, herbe à d 12-20 (agent FC2)
-État : démarré. Plan : hauteurs des touffes calculées dans le `WorkerThreadPool` (instantané
-`ReliefQuadtree.surface_snapshot`), fil principal = MultiMesh seul (≤ 1 cellule/image, ≤ 1 ms) ;
-fondu tramé cartes ↔ imposteurs sur ~8 u autour de `near_distance` ; herbe un peu plus visible
-à d 12-20, inchangée à d ≥ 30.
+État : fait.
+- Herbe : semis **et** hauteurs dans le `WorkerThreadPool` (instantané
+  `ReliefQuadtree.surface_snapshot` pris sur le fil principal, ≈ 0,02-0,05 ms), recalages aussi en
+  tâche ; fil principal = création du MultiMesh seule, 1 cellule par image. Sonde (`fc5_probe`) :
+  pose 0,11-0,17 ms/cellule (FC5 : 16 ms), recalage 0,02-0,03 ms.
+- Transition à `near_distance` : les arbres proches (`essence_mid`) portent aussi un quadrilatère
+  d'imposteur (UV2.y ≥ 2) ; `foliage_cards.gdshader` fond par arbre, tramé Bayer complémentaire,
+  sur `near_fade` = 8 u (distance horizontale + moitié de la hauteur caméra, mesure de
+  `_apply_lod`) ; aucun appel de dessin de plus (+2 tri/arbre proche). Corps des imposteurs mis en
+  commun : `campaign_tree_impostor.gdshaderinc`.
+- Herbe à d 12-20 : réduction en `prop_scale`^0,3 (au lieu de 0,5) et part des candidats ×1,5
+  sous d = 20 (sans nouveau semis) ; rien ne change à d ≥ 30 (échelle 1, part normale).
+- Primitives : d = 25 8,68 M, d = 15 9,08 M (FC5 : 8,65 / 9,03). Captures `fc6_15.png`,
+  `fc6_25.png`, `fc6_boundary_25.jpg` dans `~/dev/cent-ans-raw/fc5/`.
