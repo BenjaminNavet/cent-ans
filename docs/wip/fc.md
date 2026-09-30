@@ -86,6 +86,16 @@ cellules d'herbe à sortir du fil principal ; bord net entre cartes et imposteur
   `fc6_25.png`, `fc6_boundary_25.jpg` dans `~/dev/cent-ans-raw/fc5/`.
 
 ## L5 — herbe lisible à d 12-20, portée des arbres par préréglage (agent FC2)
-État : démarré. Plan : touffes plus fines (plus de brins, moins de broussailles), variation de
-teinte calée sur la prairie du terrain, densité ; clé `veg_max_distance` (Basse 500, Moyenne 700,
-Haute 900, Ultra 1100, défaut 700) → `Vegetation.max_camera_distance` si imposteurs.
+État : fait.
+- Herbe : cellules 24 u (3 600 candidats, ≈ 6,3/u²), part ×1,5 sous d = 20 et ramenée à la
+  densité FC5 au-delà de d = 30 (`far_share` 0,62) ; broussailles réduites (0,04 + lisière 0,4 +
+  lande 0,25), touffes plus fines (0,18 u, cartes 0,7 de large), plus claires, taches sèches/drues
+  par bruit de position (comme la prairie du terrain) ; `--no-clutter` pour les A/B. Fil principal :
+  pose 0,14 ms/cellule, un seul instantané de pages par image (≈ 0,1 ms) pour toutes les cellules
+  lancées.
+- Clé `veg_max_distance` (`RenderQuality`, Basse 500, Moyenne 700, Haute 900, Ultra 1100,
+  legacy 700) → `Vegetation.effective_max_distance()` si imposteurs ; densité inchangée en deçà
+  de 700. Primitives (Haute) : d = 150 4,44 → 4,36 M ; d = 400 2,76 → 2,76 M ; d = 650 1,68 →
+  1,96 M ; d = 850 : 1,58 M (plus d'arbres avant).
+- Captures `~/dev/cent-ans-raw/fc5/` : `l5b_before_after_25.jpg` (FC6 | L5), `l5_clutter_ab_25.jpg`.
+- Ouvert : quelques broussailles sombres encore lues comme des boules sur les landes/lisières.

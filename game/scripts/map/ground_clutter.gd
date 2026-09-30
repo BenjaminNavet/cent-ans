@@ -36,7 +36,7 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var min_radius: float = 16.0
 @export var max_radius: float = 52.0
 ## Candidats par cellule à la densité 1 (préréglage Haute) sur une couverture pleine.
-@export var base_per_cell: int = 4000  # L5 : ≈ 7 candidats/u² (FC5 : 3,9)
+@export var base_per_cell: int = 3600  # L5 : ≈ 6,3 candidats/u² (FC5 : 3,9), pose ≤ 0,2 ms
 ## Densité maximale d'un préréglage (Ultra) : nombre de candidats semés.
 @export var max_density: float = 1.5
 ## Hauteur (unités monde, taille de carte) d'une touffe d'herbe et d'une broussaille.
@@ -51,7 +51,7 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var close_boost: float = 1.5
 ## Lot L5 : part affichée à d ≥ `close_distance` + 10 : ramène la densité par unité² à celle de
 ## FC5 (cellules plus petites, même nombre de candidats) : rien ne change au-delà de d = 30.
-@export var far_share: float = 0.56
+@export var far_share: float = 0.62
 ## Échelle des arbres (`campaign_prop_scale`) sous laquelle les touffes disparaissent (trop
 ## petites pour valoir leur coût).
 @export var min_prop_scale: float = 0.025
