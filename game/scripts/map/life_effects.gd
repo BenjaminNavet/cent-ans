@@ -14,13 +14,15 @@ const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
 const OVERLAY_SHADER := preload("res://shaders/life_overlay.gdshader")
 const WINDMILL_SHADER := preload("res://shaders/life_windmill.gdshader")
 ## Moulins à vent par type de colonie, échelle monde, position du moyeu (repère du corps).
-const WINDMILLS := {"city": 2, "town": 1, "village": 1}
+const WINDMILLS := {"city": 1, "town": 1, "village": 1}
+## Une colonie sur N seulement a ses moulins, par type (carte moins chargée en éléments animés).
+const WINDMILL_ONE_IN := {"city": 1, "town": 2, "village": 3}
 const WINDMILL_SCALE := 4.6
 const WINDMILL_HUB := Vector3(0.0, 0.3, 0.08)
 ## Dévastation (%) à partir de laquelle villages et bourgs sont en ruine, et ruine maximale.
 const RUIN_MIN_DEVASTATION := 45.0
 ## Panaches de cheminée par type de colonie.
-const CHIMNEYS := {"city": 5, "town": 3, "village": 2, "abbey": 2, "castle": 1}
+const CHIMNEYS := {"city": 3, "town": 2, "village": 1, "abbey": 1, "castle": 1}
 ## Taille d'un panache de cheminée (largeur, hauteur ; × `MapPropScale.chimney_ratio`, VT2) et
 ## d'incendie (unités monde à l'échelle de la carte, × `fire_scale`).
 const CHIMNEY_SIZE := Vector2(1.3, 4.0)
@@ -233,6 +235,8 @@ func _build_windmills(province_states: Dictionary) -> void:
 		var entry: Dictionary = data.settlements[i]
 		var count := int(WINDMILLS.get(str(entry["kind"]), 0))
 		var seed_value := absi((str(entry["id"]) + "mill").hash())
+		if seed_value % int(WINDMILL_ONE_IN.get(str(entry["kind"]), 1)) != 0:
+			count = 0
 		var devastation := float(province_states.get(str(entry["province"]), {}).get("devastation", 0.0))
 		for k in count:
 			var angle := float((seed_value / (k + 2)) % 628) / 100.0

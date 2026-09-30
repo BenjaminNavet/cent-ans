@@ -56,7 +56,8 @@ func _init() -> void:
 		mat.shader = BattleSkinned.SHADER
 		BattleSkinned.setup_material(mat, kind, variant)
 		var has_layer := entry.has("atlas_layer") and fine
-		var variant_on := mat.shader != BattleSkinned.SHADER
+		# GA3-L3 : une figurine générée (variante `GA3_TEX`) n'a pas d'atlas FG3.
+		var variant_on := mat.shader.code.contains("#define FG3_BAKED")
 		if has_layer != variant_on:
 			print("FG3 %s : variante %s attendue %s" % [fig_name, variant_on, has_layer])
 			ok = false
