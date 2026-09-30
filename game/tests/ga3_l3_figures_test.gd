@@ -70,6 +70,7 @@ func _check_generated(kind: String, variant: int) -> bool:
 		var gear := 0
 		var livery := 0
 		var rider := 0
+		var body_plain := 0  # corps texturé hors armoiries (caparaçon du cheval : C_ARMS)
 		var horse_textured := 0
 		for i in uvs.size():
 			var total := 0.0
@@ -84,6 +85,8 @@ func _check_generated(kind: String, variant: int) -> bool:
 			elif uvs[i].x < -1.0:
 				gear += 1
 			var code := int(colors[i].a * 16.0 + 0.5)
+			if code != C_ARMS and uvs[i].x >= 0.0 and uvs[i].x <= 1.0 and uvs[i].y >= 0.0 and uvs[i].y <= 1.0:
+				body_plain += 1
 			if code == C_LIVERY:
 				livery += 1
 			if mounted:
@@ -95,7 +98,7 @@ func _check_generated(kind: String, variant: int) -> bool:
 		if bad_bone > 0 or bad_weight > 0 or body == 0 or gear == 0 or livery == 0:
 			push_error("ga3_l3: %s LOD%d os hors rig %d, poids %d, corps %d, équipement %d, livrée %d" % [name, level, bad_bone, bad_weight, body, gear, livery])
 			ok = false
-		if mounted and (rider < body or horse_textured > 0):
+		if mounted and (rider < body_plain or horse_textured > 0):
 			push_error("ga3_l3: %s LOD%d cavalier %d sommets sur R: (corps %d), cheval texturé %d" % [name, level, rider, body, horse_textured])
 			ok = false
 		print("ga3_l3: %s LOD%d %d triangles, %d sommets (corps %d, équipement %d, livrée %d)" % [name, level, tris, uvs.size(), body, gear, livery])

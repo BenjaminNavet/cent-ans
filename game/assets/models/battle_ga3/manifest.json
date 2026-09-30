@@ -24,6 +24,30 @@
    "unit": "longbowman",
    "variants": 2
   },
+  "archer_1": {
+   "faces": [
+    "plain_crossbowman_v2"
+   ],
+   "ga3_albedo": "archer_1_albedo.png",
+   "ga3_lum": [
+    0.049,
+    0.0116
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "archer_1_lod0.mesh.bin",
+    "archer_1_lod1.mesh.bin",
+    "archer_1_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11588,
+    1318,
+    260
+   ],
+   "unit": "plain_crossbowman",
+   "variants": 2
+  },
   "archer_2": {
    "faces": [
     "crossbowman_v2"
@@ -46,6 +70,30 @@
     260
    ],
    "unit": "crossbowman",
+   "variants": 2
+  },
+  "archer_4": {
+   "faces": [
+    "gascon_crossbowman_v2"
+   ],
+   "ga3_albedo": "archer_4_albedo.png",
+   "ga3_lum": [
+    0.0393,
+    0.0165
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "archer_4_lod0.mesh.bin",
+    "archer_4_lod1.mesh.bin",
+    "archer_4_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11646,
+    1309,
+    260
+   ],
+   "unit": "gascon_crossbowman",
    "variants": 2
   },
   "cavalry_0": {
@@ -71,6 +119,31 @@
     584
    ],
    "unit": "knight",
+   "variants": 2
+  },
+  "cavalry_3": {
+   "faces": [
+    "gendarme_v2"
+   ],
+   "fine_horse": true,
+   "ga3_albedo": "cavalry_3_albedo.png",
+   "ga3_lum": [
+    0.0524,
+    0.0152
+   ],
+   "head_y": 2.2989,
+   "lods": [
+    "cavalry_3_lod0.mesh.bin",
+    "cavalry_3_lod1.mesh.bin",
+    "cavalry_3_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    16492,
+    2016,
+    500
+   ],
+   "unit": "gendarme",
    "variants": 2
   },
   "infantry_0": {
@@ -121,6 +194,78 @@
    "unit": "sergeant",
    "variants": 2
   },
+  "infantry_2": {
+   "faces": [
+    "urban_militia_v2"
+   ],
+   "ga3_albedo": "infantry_2_albedo.png",
+   "ga3_lum": [
+    0.0606,
+    0.0165
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "infantry_2_lod0.mesh.bin",
+    "infantry_2_lod1.mesh.bin",
+    "infantry_2_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11532,
+    1310,
+    260
+   ],
+   "unit": "urban_militia",
+   "variants": 2
+  },
+  "infantry_3": {
+   "faces": [
+    "welsh_spearman_v2"
+   ],
+   "ga3_albedo": "infantry_3_albedo.png",
+   "ga3_lum": [
+    0.0406,
+    0.0059
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "infantry_3_lod0.mesh.bin",
+    "infantry_3_lod1.mesh.bin",
+    "infantry_3_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11203,
+    1310,
+    260
+   ],
+   "unit": "welsh_spearman",
+   "variants": 2
+  },
+  "infantry_4": {
+   "faces": [
+    "schiltron_v2"
+   ],
+   "ga3_albedo": "infantry_4_albedo.png",
+   "ga3_lum": [
+    0.1068,
+    0.021
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "infantry_4_lod0.mesh.bin",
+    "infantry_4_lod1.mesh.bin",
+    "infantry_4_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11540,
+    1317,
+    260
+   ],
+   "unit": "schiltron",
+   "variants": 2
+  },
   "infantry_5": {
    "faces": [
     "militia_v2"
@@ -143,6 +288,78 @@
     260
    ],
    "unit": "militia",
+   "variants": 2
+  },
+  "infantry_6": {
+   "faces": [
+    "coutilier_v2"
+   ],
+   "ga3_albedo": "infantry_6_albedo.png",
+   "ga3_lum": [
+    0.0573,
+    0.0217
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "infantry_6_lod0.mesh.bin",
+    "infantry_6_lod1.mesh.bin",
+    "infantry_6_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11382,
+    1322,
+    260
+   ],
+   "unit": "coutilier",
+   "variants": 2
+  },
+  "infantry_7": {
+   "faces": [
+    "retinue_v2"
+   ],
+   "ga3_albedo": "infantry_7_albedo.png",
+   "ga3_lum": [
+    0.0513,
+    0.0111
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "infantry_7_lod0.mesh.bin",
+    "infantry_7_lod1.mesh.bin",
+    "infantry_7_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11162,
+    1321,
+    260
+   ],
+   "unit": "retinue",
+   "variants": 2
+  },
+  "infantry_8": {
+   "faces": [
+    "routier_v2"
+   ],
+   "ga3_albedo": "infantry_8_albedo.png",
+   "ga3_lum": [
+    0.0693,
+    0.0485
+   ],
+   "head_y": 1.5127,
+   "lods": [
+    "infantry_8_lod0.mesh.bin",
+    "infantry_8_lod1.mesh.bin",
+    "infantry_8_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    11532,
+    1310,
+    260
+   ],
+   "unit": "routier",
    "variants": 2
   },
   "standard_1": {
