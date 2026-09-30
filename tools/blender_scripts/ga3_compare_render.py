@@ -9,7 +9,7 @@ Blender headless::
 
 Each ``--panel`` is a glb plus a label; ``--yaw`` (degrees) turns that model so it faces the
 camera, ``--frame`` picks an animation frame (``rest`` = armature rest pose, default: no
-animation change). Two rows: three-quarter front and three-quarter back. Each model is scaled
+animation change), ``--unmetal`` undoes the Meshy rigged glb material bugs. Two rows: three-quarter front and three-quarter back. Each model is scaled
 to 1.80 m, feet on the ground. The mesh statistics (triangles, textures and the material
 inputs they feed, mesh objects and loose parts, bones) are written to ``--stats``.
 """
