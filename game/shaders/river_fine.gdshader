@@ -106,7 +106,9 @@ void vertex() {
 	vec3 world = vec3(VERTEX.x, campaign_display_height(VERTEX.y, VERTEX.xz), VERTEX.z);
 	vec3 to_cam = CAMERA_POSITION_WORLD - world;
 	float dist = max(length(to_cam), 0.01);
-	float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
+	// HB7 : abs() : sous Metal/Vulkan la projection porte un retournement de Y ([1][1] < 0), ce qui
+	// rendait la largeur écran minimale inopérante (rubans sous-pixel, traits gris).
+	float world_per_px = dist * 2.0 / (abs(PROJECTION_MATRIX[1][1]) * VIEWPORT_SIZE.y);
 	float mark = floor(UV2.y / 100.0 + 0.001);
 	float order = UV2.y - 100.0 * mark;
 	float px_min = min_px * order_px_scale(order);

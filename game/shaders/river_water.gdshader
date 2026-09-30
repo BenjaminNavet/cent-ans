@@ -83,7 +83,6 @@ varying vec3 v_world;
 varying float v_carved;
 varying float v_width;
 varying float v_far;
-varying float v_half_px;  // HB7 : demi-largeur affichée en pixels écran
 
 float hash21(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -109,14 +108,15 @@ void vertex() {
 		v_alpha = 1.0;
 		v_far = 1.0;
 		v_side = 0.0;
-		v_half_px = 1000.0;
 		v_flow = world.xz * vec2(0.35, 0.5);
 		v_carved = 0.0;
 		v_width = 0.0;
 		v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 		NORMAL = vec3(0.0, 1.0, 0.0);
 	} else {
-		float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
+		// HB7 : abs() : sous Metal/Vulkan la projection porte un retournement de Y ([1][1] < 0), ce qui
+		// rendait la largeur écran minimale inopérante (rubans sous-pixel, traits gris).
+		float world_per_px = dist * 2.0 / (abs(PROJECTION_MATRIX[1][1]) * VIEWPORT_SIZE.y);
 		float true_px = UV.x / world_per_px;
 		float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
 		float width = UV.x * mix(1.0, carved_overlap, carved);
@@ -130,7 +130,6 @@ void vertex() {
 		// remplit toute la largeur écran au lieu de n'occuper que le cœur sous-pixel (trait gris).
 		// Dans le lit creusé, 1 = berge réelle (le ruban déborde sur la pente).
 		v_side = UV.y * mix(1.0, half_w / max(0.5 * UV.x, 1e-4), carved);
-		v_half_px = half_w / world_per_px;
 		v_flow = vec2(UV2.x, UV.y * 0.5 * UV.x);
 		v_carved = carved;
 		v_width = UV.x;
@@ -195,8 +194,10 @@ void fragment() {
 	float foam = clamp(bank_foam + contact + riffle, 0.0, 1.0);
 	col = mix(col, foam_color, foam * 0.7);
 	// RC : liseré d'encre sur les bords du ruban (pas dans le lit creusé, où la berge suffit).
-	float px_edge = max(1.0 - edge, 0.0) * v_half_px;  // HB7 : pixels jusqu'au bord du ruban
-	float ink = (1.0 - smoothstep(0.0, bank_ink_px, px_edge)) * smoothstep(1.2, 3.0, v_half_px) * bank_ink_strength * (1.0 - v_carved);
+	// HB7 : demi-largeur du ruban et distance au bord en pixels écran (dérivées écran de v_side).
+	float half_px = sheet ? 1000.0 : 1.0 / max(fwidth(v_side), 1e-4);
+	float px_edge = max(1.0 - edge, 0.0) * half_px;
+	float ink = (1.0 - smoothstep(0.0, bank_ink_px, px_edge)) * smoothstep(1.2, 3.0, half_px) * bank_ink_strength * (1.0 - v_carved);
 
 	ALBEDO = col;
 	// Rides trop fines pour l'écran : surface plus mate (pas de scintillement du soleil).
