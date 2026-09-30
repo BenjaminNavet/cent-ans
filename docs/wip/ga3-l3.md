@@ -64,7 +64,7 @@ Contexte : `docs/wip/ga3.md` (S2, S3, § L3a), ADR 0140 § figurines.
 - 30/09 : capture en bataille : archers texturés (jaques de livrée rouge avec crasse, chapels,
   arcs et cordes, chausses variées) ; cadrage à côté du régiment, jugement sur le bord.
 
-# L3c — cavalier du chevalier (30/09, en cours)
+# L3c — cavalier du chevalier (30/09, fait)
 Budget ≤ 1 $ (consigne : `trellis/multi` ou `trellis` seulement, ≤ 3 générations 3D) : 0,16 $,
 1 génération. Recette retenue : `cavalry_0` (chevaliers : `unit_knights`, bretons, teutoniques,
 serbes). Autres recettes du même type laissées fines : `cavalry_3` (gendarmes d'ordonnance,
@@ -87,7 +87,8 @@ harnois blanc), `standard_1` (porte-étendard monté).
 - [x] 2. Contrôle numérique : équipement aux mêmes os/positions que la figurine fine ; cavalier
       posé (c_idle, c_charge, c_thrust) dans la boîte du cavalier fin
 - [x] 3. Jeu (manifeste, shader), `ga3_l3_figures_test.gd` étendu (deux modes), pytest manifeste
-- [ ] 4. Tests cavalerie, smoke, an1a, fg3_maps, sr2 ; docs ga3.md § L3c, ADR 0140
+- [x] 4. Tests cavalerie, smoke, an1a, an1b, fg3_maps, sr2, nt7, nt10, b1, pb3c, hud ; docs
+      ga3.md § L3c, ADR 0140 § extension L3c
 
 # L3b — 4 unités à pied (fait)
 Budget ≤ 1,50 $ (consigne : `trellis/multi` ou `trellis` seulement, ≤ 3 générations 3D par
@@ -121,6 +122,7 @@ unité). Figurines retenues (une par type ; `data/unit_types` `figure` + `battle
 - Seuil des îlots voxel 30 % → 2 %.
 
 ## Suite
-- L3c : cavalier du chevalier. Autres recettes des mêmes types si validé par le joueur.
+- Autres recettes des mêmes types (dont `cavalry_3`, `standard_1`) si validé par le joueur.
+- Capture en bataille du chevalier (charge) : jupon et selle / caparaçon.
 - Capture en bataille ciblant les fantassins (Crécy : `--historical=crecy`, hommes d'armes,
   Génois, archers) à faire par la session principale.

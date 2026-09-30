@@ -173,6 +173,39 @@ attaque, GA3 | figurine fine actuelle, toutes deux dans les poses du jeu). 0,63 
   fourreau fondue de l'homme d'armes, jupon sans armoiries, visages un peu rougis par
   l'étalonnage.
 
+## L3c — cavalier du chevalier (30/09)
+Recette `cavalry_0` (chevaliers ; `cavalry_3` gendarmes et `standard_1` porte-étendard restent
+fines). Planche locale `docs/img/ga3/l3c_knight.jpg` (référence à pied | repos `c_idle`, charge
+`c_charge`, coup de lance `c_thrust`, dos ; GA3 | figurine fine actuelle, LOD0 exportés skinnés
+avec la texture d'os du jeu). 0,16 $ (une génération `trellis/multi`).
+- **Référence** : `nano-banana-2/edit` depuis `sr3/knight_mounted.png`, redessiné à pied du
+  premier coup (A-pose, jupon vert clé uni, harnois acier, bassinet et camail ; ni épée ni
+  fourreau à la ceinture sur demande). Seuls bleus : sangles des brassards et genouillères
+  (classe étoffe, 2 %).
+- **3D** : 14 330 tri bruts, heat 100 %, faces fixe/livrée/étoffe/acier 4 909 / 1 434 / 197 / 1 346.
+- **Montage** : chaîne L3b sur le rig `human`, puis copie dans le repère du cavalier en selle
+  (`Mount.r_rest`), groupes `R:`, export seul ; `merge_horse` y ajoute les triangles du cheval
+  fin exporté (os du cheval seuls : 7 602 / 992 / 310) avec leurs UV d'atlas FG3. LOD
+  16 502 / 1 992 / 594 tri (fine : 16 406 / 1 982 / 529).
+- **Jeu** : `fine_horse` → `atlas_layer` gardé, matériau `FG3_BAKED` + `GA3_TEX`
+  (`BattleSkinned._ga3_defines` ; `_setup_fine_maps` passe avant `_setup_ga3`) : robe, caparaçon,
+  usure et lance CR4 inchangés ; `--no-ga3-fig` rend `cavalry_0` fine. Shader cumulé compilé
+  sans erreur (rendu réel, script jetable).
+- **Correctif** : une copie de maillage porte déjà les noms de groupes (Blender ≥ 3) : les
+  recréer laissait le cavalier sur l'os 0 du cheval ; ils sont renommés `R:`.
+- **Contrôle** : équipement aux mêmes os et positions que la figurine fine ; cavalier posé
+  (repos, charge, coup) dans la boîte du cavalier fin (skinning numérique des deux fichiers).
+- Tests : `ga3_l3_figures_test.gd` (chevalier : plafonds montés, atlas et `FG3_BAKED` gardés,
+  cavalier sur `R:`, cheval sans UV d'albédo ; témoin `cavalry_1` ; deux modes), pytest
+  manifeste (+ cheval identique au fin), smoke, an1a, an1b, fg3_maps, sr2, nt7, nt10, b1,
+  pb3c, hud : OK.
+- **Écarts** : planche regardée une fois, avant le correctif des groupes (rendu d'après non
+  regardé, budget de 3 images : le contrôle d'après est numérique) ; verrou Godot
+  `/tmp/ga3-godot.lock` non pris pendant les tests ; pas de capture en bataille.
+- **Points ouverts** : jupon et cuissots du cavalier générés plus épais que le cavalier fin
+  (interpénétration possible avec la selle ou le caparaçon en charge, à juger en bataille) ;
+  une variante (plus d'alternance bassinet à visière) ; LOD2 à 594 tri (fin : 529).
+
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
 - 30/09 : **S1 fait** (≈ 10 min de bout en bout, 0,05 $). Image `fal-ai/flux/dev` 1024² (0,026 $,
@@ -321,6 +354,7 @@ attaque, GA3 | figurine fine actuelle, toutes deux dans les poses du jeu). 0,63 
       `--no-ga3-fig`. Voir « L3a ».
 - [x] L3b : `man_at_arms` → `infantry_0`, `crossbowman` → `archer_2`, `sergeant` → `infantry_1`,
       `militia` → `infantry_5` (0,63 $, un essai chacune). Voir « L3b ».
-- [ ] L3c : cavalier du chevalier sur le cheval fin (voir ADR 0140 § figurines, « Extension ») ;
-      autres recettes des mêmes types (infantry_2/3/4/6/7/8, archer_1/4) si le joueur valide.
+- [x] L3c : cavalier du chevalier `cavalry_0` sur le cheval fin (0,16 $, un essai). Voir « L3c ».
+- [ ] Autres recettes des mêmes types (infantry_2/3/4/6/7/8, archer_1/4, cavalry_3, standard_1)
+      si le joueur valide.
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.
