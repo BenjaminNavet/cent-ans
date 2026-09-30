@@ -16,3 +16,7 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 
 ## Journal
 - 09-30 : spec écrite, worktree créé.
+
+## SR1 — en cours (agent)
+- État : squelette ; chaîne `source: ambientcg:<Id>` à écrire dans `material_gen.py`.
+- Prochaine étape : téléchargement + traitement des 8 scans, `scan_m`/`tile_m`, shader, tests.
