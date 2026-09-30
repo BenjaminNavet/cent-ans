@@ -62,6 +62,14 @@ pub(crate) fn load_shared_data(data_dir: &Path) -> Result<(Arc<GameData>, Arc<[S
         godot_warn!("game data: {warning}");
     }
     let data = Arc::new(data);
+    // IA night: decode the lazy rasters (navigation grid, cover map) off the
+    // main thread right away: the first AI turn that weighed an ambush used
+    // to decode the cover map itself (about 1.2 s in the end of turn).
+    let warm = Arc::clone(&data);
+    std::thread::spawn(move || {
+        let _ = warm.navgrid();
+        let _ = warm.cover_map();
+    });
     *guard = Some((
         data_dir.to_path_buf(),
         Arc::clone(&data),

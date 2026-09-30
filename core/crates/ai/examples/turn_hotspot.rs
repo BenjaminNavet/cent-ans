@@ -35,6 +35,11 @@ fn main() {
             .collect();
         for faction in factions {
             if turn == target_turn && faction == target {
+                // `HOTSPOT_WAIT=1`: time to attach a sampler (`sample <pid> 3`).
+                if std::env::var("HOTSPOT_WAIT").is_ok() {
+                    eprintln!("pid {} ready", std::process::id());
+                    std::thread::sleep(std::time::Duration::from_secs(4));
+                }
                 let started = Instant::now();
                 for _ in 0..reps {
                     let one = Instant::now();
