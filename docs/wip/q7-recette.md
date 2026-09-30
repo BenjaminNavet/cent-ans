@@ -32,5 +32,5 @@ Demande du joueur : tester une partie et corriger les bugs. Pilote `game/tests/q
 - Un worktree n'a pas `data/map/pyramid` (ignoré par git, 4,7 Go) : lien symbolique vers main
   avant toute recette, sinon relief absent.
 
-## Prochaine étape
-Partie de contrôle complète, puis fusion dans main.
+## État
+TERMINÉ 2026-09-30 : partie de contrôle (9 saisons d'affilée, sauvegarde/chargement OK), fusionné dans main (ff).
