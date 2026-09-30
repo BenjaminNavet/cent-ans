@@ -5,7 +5,7 @@ Mandat : amélioration visuelle libre, autonomie toute la nuit, 100 captures, fa
 rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 
 ## Compteur de captures lues
-39 / 100
+61 / 100
 
 ## Constats (état des lieux)
 - Bataille, vue moyenne : touffes d'herbe sombres en plaques sur sol brun (effet « détritus »),
@@ -28,12 +28,20 @@ rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
   sous le journal, formations repliées au début du combat.
 - VN5 pluie/neige effacées près de l'objectif, neige moins laiteuse, eau suivant l'heure.
 - Infobulle des routes commerciales : noms des marchandises.
+- VN6 champs de blé/chaume : sol couleur paille, parcelles entières (plus d'ovales).
+- VN7 monuments 1:1 : baies, portail, rose (cathédrales), arcades (halles), baies (palais, beffrois).
+- Écus des colonies lointaines masqués en vue rasante (plus de rangée d'écus sur l'horizon).
+- VN8 bandeau d'ost de campagne : cartes illustrées comme en bataille.
+- VN9 12 miniatures d'unités manquantes (fal.ai, 0,96 $, budget.md).
+- Brouillard : allégé au-dessus de la nappe basse.
 
 ## Délégué
 - Agent VN-UI (worktree ../gp-vn-ui, feat/vn-ui) : menu principal 720p, tutoriel sur modale,
   panneau de province sous la mini-carte, bandeau de tour tronqué.
 
 ## Points ouverts (à trancher / plus tard)
+- 147 factions sans miniature d'encyclopédie (~12 $ en fal.ai) + bld_collegiate_church : non fait
+  (dépense non justifiée pour une seule page d'encyclopédie).
 - Tours de siège énormes (rayon 5+fortif m, cœur `siege_layouts.rs`) : règle du cœur, session
   siège en cours sur main → non touché.
 - Planche P2a : la fiche personnage ne s'ouvre pas (`--stage=skills`), mise en scène à vérifier.
