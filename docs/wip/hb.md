@@ -14,3 +14,8 @@ Session principale :
 - [ ] HB3 shader : parcellaire de vue moyenne texturé, canopée, roche (après HB1+HB2).
 - [ ] HB7 rivières : vérification de lisibilité (RC).
 - [ ] HB8 captures, banc, docs.
+
+## HB2 — matières de sol fal.ai (branche `feat/hb-materials`, worktree `../gp-hb-mat`)
+État : squelette (catalogue `data/art/ground_materials.yaml` 27 matières, schémas, module `tools/cent_ans_tools/ground_materials.py`, CLI `cent-ans assets ground-materials generate|seamless|pack`, chargeur `game/scripts/map/ground_materials.gd`, test `game/tests/hb2_materials_test.gd`).
+Prochaine étape : tests pytest, génération flux-2-pro (≈ 0,03 $/image), raccord, pack, test headless.
+Brutes : `~/dev/cent-ans-raw/hb/materials/` (planche `board_2x2.jpg`, mesures `tiles/report.json`).
