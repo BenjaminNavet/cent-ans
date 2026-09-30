@@ -33,8 +33,15 @@ func _screen() -> Rect2:
 	return Rect2(Vector2.ZERO, Vector2(LOGICAL))
 
 
-## 1. Menu principal : toutes les entrées tiennent, même avec « Continuer » et sa ligne de détail.
+## 1. Menu principal : toutes les entrées tiennent, même avec « Continuer » et sa ligne de détail,
+## à la hauteur logique de 1280×720 (800) et à des hauteurs plus basses (échelle d'interface 1,0 : 720).
 func _menu() -> void:
+	for height in [800, 720, 640]:
+		await _menu_at(height)
+
+
+func _menu_at(height: int) -> void:
+	_viewport.size = Vector2i(LOGICAL.x, height)
 	var menu: Control = (load("res://scenes/start_menu.tscn") as PackedScene).instantiate()
 	_viewport.add_child(menu)
 	for i in 10:
@@ -44,15 +51,16 @@ func _menu() -> void:
 	menu._continue_detail.get_parent().show()
 	for i in 4:
 		await process_frame
-	var screen := _screen()
+	var screen := Rect2(Vector2.ZERO, Vector2(LOGICAL.x, height))
 	var previous_bottom := 0.0
 	for button: Button in menu._menu_buttons:
 		if not button.visible:
 			continue
 		var rect := button.get_global_rect()
-		_check(screen.encloses(rect), "menu button '%s' %s outside %s" % [button.text, rect, screen])
+		_check(screen.encloses(rect), "menu@%d button '%s' %s outside %s" % [height, button.text, rect, screen])
 		_check(rect.position.y >= previous_bottom - 0.5, "menu button '%s' overlaps the previous one" % button.text)
 		previous_bottom = rect.end.y
-	_check(previous_bottom <= screen.end.y, "menu list ends at %s, below the screen" % previous_bottom)
+	_check(previous_bottom <= screen.end.y, "menu@%d list ends at %s, below the screen" % [height, previous_bottom])
 	menu.queue_free()
+	_viewport.size = LOGICAL
 	await process_frame

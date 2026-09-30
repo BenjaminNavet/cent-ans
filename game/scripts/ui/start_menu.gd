@@ -228,7 +228,7 @@ func _build_main_column() -> void:
 	column.add_theme_constant_override("separation", 4)
 	main_column.add_child(column)
 	_column = column
-	main_column.resized.connect(_fit_column)
+	resized.connect(_fit_column)
 	column.add_child(IlluminatedTitle.new())
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 8)
@@ -263,7 +263,7 @@ func _build_main_column() -> void:
 func _fit_column() -> void:
 	if _column == null or main_column == null:
 		return
-	var available := main_column.size.y - 16.0 - 24.0  # marges haute et basse de la colonne
+	var available := size.y - 16.0 - 24.0  # hauteur de l'écran moins les marges haute et basse
 	var chosen: Array = FIT_LEVELS[FIT_LEVELS.size() - 1]
 	for level: Array in FIT_LEVELS:
 		_apply_fit_level(level)
