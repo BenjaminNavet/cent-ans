@@ -37,6 +37,16 @@
 //!    power is under 25 % of the faction's largest army.
 //! 6. **Sieges**: started, captured, abandoned (lifted without capture),
 //!    mean turns to capture; captures seen without a siege are "direct".
+//!    Each siege ending without capture gets one cause, first match wins:
+//!    peace (the two sides no longer at war), battle (a besieger fought
+//!    this turn or was destroyed: relief army or sortie), failed assault
+//!    (a besieger ordered `Assault`), starving/broken (supply < 30 or
+//!    strength < 40 % when its faction planned), then the besieger left of
+//!    its own will, told by the orders its faction gave it: C7a give-up
+//!    (fortress level >= `FORTRESS_LEVEL`, `SIEGE_PATIENCE_TURNS` elapsed,
+//!    more than 2 turns left, assault odds below `ASSAULT_ODDS`), a move
+//!    to a hostile place (retarget), to a friendly place (defence or
+//!    retreat), another move; else unknown.
 //! 7. **Treasury**: share of faction-turns with a negative treasury, and
 //!    with a treasury above 12 seasons of `income_last_turn` (hoarding).
 //! 8. **Cost**: simulation ms per turn (the recorder's own time excluded)
@@ -51,7 +61,9 @@ use std::time::{Duration, Instant};
 
 use data_model::{FactionId, GameData, ProvinceId, SettlementId, SettlementKind};
 use sim_campaign::movement::{edges, is_sea_crossing, path_to};
-use sim_campaign::{ArmyId, CampaignState, EventKind, GameEvent, MoveTarget, Order, Stance};
+use sim_campaign::{
+    ArmyId, CampaignState, EventKind, GameEvent, MoveOrderTarget, MoveTarget, Order, Place, Stance,
+};
 
 const REBELS: &str = "fac_rebels";
 /// Attacker power below this share of the defender's: a suicide battle.
@@ -94,6 +106,10 @@ struct ArmySnap {
     guarding: bool,
     /// Besieging an enemy place.
     besieging: bool,
+    /// Supply < 30 or strength < 40 % (siege end cause).
+    starving: bool,
+    /// Besieging a fortress beyond the AI's patience (C7a give-up test).
+    hopeless: bool,
     /// Enemy places empty and within this turn's reach (metric 1).
     capturable: Vec<SettlementId>,
 }
@@ -106,6 +122,34 @@ struct Threatened {
     relievers: Vec<ArmyId>,
 }
 
+/// Where the first move order of an army led.
+#[derive(Clone)]
+enum MoveKind {
+    Hostile(SettlementId),
+    Friendly(SettlementId),
+    Other,
+}
+
+/// The orders an army received this turn.
+#[derive(Default)]
+struct ArmyPlan {
+    assault: bool,
+    first_move: Option<MoveKind>,
+}
+
+/// Why a siege ended without capture, in the order causes are tested.
+const SIEGE_END_CAUSES: &[&str] = &[
+    "fin: paix",
+    "fin: bataille",
+    "fin: assaut raté",
+    "fin: affamée/brisée",
+    "fin: abandon C7a",
+    "fin: reciblage",
+    "fin: défense/retraite",
+    "fin: autre marche",
+    "fin: inconnue",
+];
+
 /// What each faction saw when it planned this turn.
 #[derive(Default)]
 struct Recorder {
@@ -113,6 +157,8 @@ struct Recorder {
     threatened: BTreeMap<SettlementId, Threatened>,
     /// `Attack` orders: attacker → target power at planning time.
     attacks: BTreeMap<ArmyId, f64>,
+    /// What each army was ordered this turn (siege end causes).
+    plans: BTreeMap<ArmyId, ArmyPlan>,
     /// Per planning faction: strongest hostile army by province.
     hostile_max: BTreeMap<FactionId, BTreeMap<ProvinceId, f64>>,
     /// Time spent recording (excluded from the simulation time).
@@ -227,6 +273,24 @@ impl Recorder {
                     }
                 }
             }
+            let starving = army.supply < LOW_SUPPLY
+                || (full > 0 && f64::from(strength) < LOW_STRENGTH * f64::from(full));
+            // As `plan_armies` (lot C7a): a fortress holding out beyond patience.
+            let hopeless = army.settlement().is_some_and(|place| {
+                state.fortification_level(data, place) >= ai::campaign::FORTRESS_LEVEL
+                    && state
+                        .settlements
+                        .get(place)
+                        .and_then(|s| s.siege.as_ref())
+                        .is_some_and(|s| {
+                            &s.attacker == faction
+                                && s.turns_elapsed >= ai::campaign::SIEGE_PATIENCE_TURNS
+                                && s.turns_left > 2
+                        })
+                    && state
+                        .assault_odds(data, id)
+                        .is_none_or(|(odds, _)| odds < ai::campaign::ASSAULT_ODDS)
+            });
             self.armies.insert(
                 id.clone(),
                 ArmySnap {
@@ -240,6 +304,8 @@ impl Recorder {
                         .and_then(|s| state.settlements.get(s))
                         .and_then(|s| s.siege.as_ref())
                         .is_some_and(|s| &s.attacker == faction),
+                    starving,
+                    hopeless,
                     capturable,
                 },
             );
@@ -258,12 +324,46 @@ impl Recorder {
         self.spent += started.elapsed();
     }
 
-    /// Notes the `Attack` orders of a plan.
+    /// Notes the `Attack`, `Assault` and first move orders of a plan.
     fn record_orders(&mut self, state: &CampaignState, data: &GameData, orders: &[Order]) {
         for order in orders {
-            if let Order::Attack { army, target_army } = order {
-                self.attacks
-                    .insert(army.clone(), state.army_power(data, target_army));
+            match order {
+                Order::Attack { army, target_army } => {
+                    self.attacks
+                        .insert(army.clone(), state.army_power(data, target_army));
+                }
+                Order::Assault { army } => {
+                    self.plans.entry(army.clone()).or_default().assault = true;
+                }
+                Order::MoveArmy { army, target } => {
+                    let plan = self.plans.entry(army.clone()).or_default();
+                    if plan.first_move.is_some() {
+                        continue;
+                    }
+                    let faction = state.armies.get(army).map(|a| &a.faction);
+                    let place = match target {
+                        MoveOrderTarget::Place(Place::Settlement(s)) => Some(s),
+                        MoveOrderTarget::Path(path) => path.iter().rev().find_map(|p| match p {
+                            Place::Settlement(s) => Some(s),
+                            Place::Province(_) => None,
+                        }),
+                        _ => None,
+                    };
+                    plan.first_move = Some(match (faction, place) {
+                        (Some(f), Some(s)) if state.is_hostile_settlement(f, s) => {
+                            MoveKind::Hostile(s.clone())
+                        }
+                        (Some(f), Some(s)) if state.is_friendly_settlement(f, s) => {
+                            MoveKind::Friendly(s.clone())
+                        }
+                        _ => MoveKind::Other,
+                    });
+                }
+                Order::Embark { army, .. } => {
+                    let plan = self.plans.entry(army.clone()).or_default();
+                    plan.first_move.get_or_insert(MoveKind::Other);
+                }
+                _ => {}
             }
         }
     }
@@ -309,6 +409,12 @@ struct Report {
     sieges_captured: u32,
     sieges_abandoned: u32,
     siege_turns: u32,
+    /// Sieges ended without capture, by [`SIEGE_END_CAUSES`].
+    siege_ends: [u32; 9],
+    siege_end_examples: Vec<(usize, String)>,
+    abandoned_elapsed: u32,
+    abandoned_levels: u32,
+    captured_levels: u32,
     direct_captures: u32,
     faction_turns: u32,
     negative_treasury: u32,
@@ -337,6 +443,18 @@ const HEADERS: &[&str] = &[
     "% thésaurisation",
     "ms/tour sim",
     "ms/tour sonde",
+    "fin: paix",
+    "fin: bataille",
+    "fin: assaut raté",
+    "fin: affamée/brisée",
+    "fin: abandon C7a",
+    "fin: reciblage",
+    "fin: défense/retraite",
+    "fin: autre marche",
+    "fin: inconnue",
+    "tours écoulés à l'abandon",
+    "niv. fort. abandonnés",
+    "niv. fort. pris",
 ];
 
 impl Report {
@@ -355,7 +473,7 @@ impl Report {
     /// The values, in [`HEADERS`] order.
     fn row(&self) -> Vec<f64> {
         let ms_per_turn = |d: Duration| d.as_secs_f64() * 1000.0 / f64::from(self.turns.max(1));
-        vec![
+        [
             f64::from(self.missed_army_turns),
             Self::per(self.missed_army_turns, self.turns),
             f64::from(self.undefended_losses),
@@ -375,12 +493,30 @@ impl Report {
             ms_per_turn(self.sim),
             ms_per_turn(self.probe),
         ]
+        .into_iter()
+        .chain(self.siege_ends.iter().map(|n| f64::from(*n)))
+        .chain([
+            Self::per(self.abandoned_elapsed, self.sieges_abandoned),
+            Self::per(self.abandoned_levels, self.sieges_abandoned),
+            Self::per(self.captured_levels, self.sieges_captured),
+        ])
+        .collect()
     }
 }
 
-/// Sieges before the turn (place → attacker, first turn) and controllers.
+/// A siege under way before the turn.
+struct SiegeBefore {
+    attacker: FactionId,
+    started: u32,
+    elapsed: u32,
+    level: u32,
+    /// The attacker's armies standing on the place.
+    besiegers: Vec<ArmyId>,
+}
+
+/// Sieges and controllers before the turn.
 struct Before {
-    sieges: BTreeMap<SettlementId, (FactionId, u32)>,
+    sieges: BTreeMap<SettlementId, SiegeBefore>,
     controllers: BTreeMap<SettlementId, FactionId>,
 }
 
@@ -426,7 +562,22 @@ fn run(data: &GameData, seed: u64, turns: u32) -> Report {
                 .iter()
                 .filter_map(|(id, s)| {
                     let siege = s.siege.as_ref()?;
-                    Some((id.clone(), (siege.attacker.clone(), siege.started_turn)))
+                    let besiegers = state
+                        .armies
+                        .iter()
+                        .filter(|(_, a)| a.is_at(id) && a.faction == siege.attacker)
+                        .map(|(army, _)| army.clone())
+                        .collect();
+                    Some((
+                        id.clone(),
+                        SiegeBefore {
+                            attacker: siege.attacker.clone(),
+                            started: siege.started_turn,
+                            elapsed: siege.turns_elapsed,
+                            level: state.fortification_level(data, id),
+                            besiegers,
+                        },
+                    ))
                 })
                 .collect(),
             controllers: state
@@ -639,26 +790,43 @@ fn measure(
             && before
                 .sieges
                 .get(sid)
-                .is_none_or(|(a, t)| a != &siege.attacker || *t != siege.started_turn)
+                .is_none_or(|b| b.attacker != siege.attacker || b.started != siege.started_turn)
         {
             report.sieges_started += 1;
         }
     }
-    for (sid, (attacker, started)) in &before.sieges {
-        if attacker.as_str() == REBELS
+    let destroyed: BTreeSet<&ArmyId> = events
+        .iter()
+        .filter(|e| e.kind == EventKind::ArmyDestroyed)
+        .filter_map(|e| e.army.as_ref())
+        .collect();
+    for (sid, siege) in &before.sieges {
+        if siege.attacker.as_str() == REBELS
             || sieges_after
                 .get(sid)
-                .is_some_and(|(a, t)| *a == attacker && t == started)
+                .is_some_and(|(a, t)| *a == &siege.attacker && *t == siege.started)
         {
             continue;
         }
         let controller = &state.settlements[sid].controller;
-        if state.is_allied(attacker, controller) {
+        if state.is_allied(&siege.attacker, controller) {
             report.sieges_captured += 1;
-            report.siege_turns += state.turn.saturating_sub(*started);
-        } else {
-            report.sieges_abandoned += 1;
+            report.siege_turns += state.turn.saturating_sub(siege.started);
+            report.captured_levels += siege.level;
+            continue;
         }
+        report.sieges_abandoned += 1;
+        report.abandoned_elapsed += siege.elapsed;
+        report.abandoned_levels += siege.level;
+        let (cause, detail) = siege_end_cause(state, rec, sid, siege, controller, turn, &destroyed);
+        report.siege_ends[cause] += 1;
+        report.siege_end_examples.push((
+            cause,
+            format!(
+                "t{turn} {} devant {sid} (niv. {}, {} tours) : {detail}",
+                siege.attacker, siege.level, siege.elapsed
+            ),
+        ));
     }
     for (sid, previous) in &before.controllers {
         let s = &state.settlements[sid];
@@ -667,11 +835,69 @@ fn measure(
             && before
                 .sieges
                 .get(sid)
-                .is_none_or(|(a, _)| !state.is_allied(a, &s.controller))
+                .is_none_or(|b| !state.is_allied(&b.attacker, &s.controller))
         {
             report.direct_captures += 1;
         }
     }
+}
+
+/// Why `siege` ended without capture: index in [`SIEGE_END_CAUSES`] and
+/// a detail naming the besieger and what it was told.
+fn siege_end_cause(
+    state: &CampaignState,
+    rec: &Recorder,
+    place: &SettlementId,
+    siege: &SiegeBefore,
+    controller: &FactionId,
+    turn: u32,
+    destroyed: &BTreeSet<&ArmyId>,
+) -> (usize, String) {
+    if !state.is_at_war(&siege.attacker, controller) {
+        return (0, format!("paix avec {controller}"));
+    }
+    let armies = &siege.besiegers;
+    let first = |pred: &dyn Fn(&ArmyId) -> bool| armies.iter().find(|id| pred(id)).cloned();
+    if let Some(id) = first(&|id| {
+        destroyed.contains(id)
+            || state
+                .armies
+                .get(id)
+                .is_some_and(|a| a.fought_turn == Some(turn))
+    }) {
+        let fate = if state.armies.contains_key(&id) {
+            "a combattu"
+        } else {
+            "détruite"
+        };
+        return (1, format!("{id} {fate}"));
+    }
+    if let Some(id) = first(&|id| rec.plans.get(id).is_some_and(|p| p.assault)) {
+        return (2, format!("{id} a donné l'assaut"));
+    }
+    if let Some(id) = first(&|id| rec.armies.get(id).is_some_and(|s| s.starving)) {
+        return (3, format!("{id} affamée ou brisée"));
+    }
+    if let Some(id) = first(&|id| rec.armies.get(id).is_some_and(|s| s.hopeless)) {
+        return (4, format!("{id} renonce (C7a)"));
+    }
+    for id in armies {
+        match rec.plans.get(id).and_then(|p| p.first_move.clone()) {
+            Some(MoveKind::Hostile(to)) => return (5, format!("{id} part vers {to} (hostile)")),
+            Some(MoveKind::Friendly(to)) => return (6, format!("{id} part vers {to} (amie)")),
+            Some(MoveKind::Other) => return (7, format!("{id} autre marche")),
+            None => {}
+        }
+    }
+    let note = match armies.first() {
+        None => "aucune armée sur place avant le tour".to_owned(),
+        Some(id) => match state.armies.get(id) {
+            Some(a) if a.is_at(place) => format!("{id} toujours sur place, siège levé"),
+            Some(_) => format!("{id} partie sans ordre enregistré"),
+            None => format!("{id} disparue (fusion ?)"),
+        },
+    };
+    (8, note)
 }
 
 /// (faction, army, place) of a group of examples.
@@ -729,6 +955,22 @@ fn main() {
             println!("\nBatailles suicidaires :");
             for line in report.suicide_examples.iter().take(EXAMPLES) {
                 println!("- {line}");
+            }
+            println!("\nSièges finis sans prise :");
+            for (cause, name) in SIEGE_END_CAUSES.iter().enumerate() {
+                let lines: Vec<&String> = report
+                    .siege_end_examples
+                    .iter()
+                    .filter(|(c, _)| *c == cause)
+                    .map(|(_, l)| l)
+                    .collect();
+                if lines.is_empty() {
+                    continue;
+                }
+                println!("- {name} ({}) :", lines.len());
+                for line in lines.iter().take(3) {
+                    println!("  - {line}");
+                }
             }
         }
         rows.push(row);
