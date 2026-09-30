@@ -929,7 +929,8 @@ func _build_textures() -> void:
 		var siege: Dictionary = terrain["siege"]
 		var center: Vector2 = siege.get("center", Vector2(600, 560))
 		# Dans les murs : terre battue ; autour : pas de parcelles.
-		_stamp_disc(a, center, 150.0, 1, 30.0, 0.55)
+		# VN : terre battue moins couvrante (vue de haut : ville posée sur du sable uniforme).
+		_stamp_disc(a, center, 150.0, 1, 30.0, 0.4)
 		_stamp_disc(b, center, 260.0, 1, 60.0)
 	splat_a = ImageTexture.create_from_image(a)
 	splat_b = ImageTexture.create_from_image(b)
