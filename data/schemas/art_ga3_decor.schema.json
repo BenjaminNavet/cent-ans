@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_ga3_decor.schema.json",
+  "title": "Décor 3D de bataille généré (lot GA3-L1)",
+  "description": "Catalogue des objets de décor générés par image-vers-3D (`tools/experiments/ga3_fal_decor.py --catalog`, `tools/blender_scripts/ga3_cleanup.py`) et leur branchement dans le décor de bataille (`Ga3Kit` — `game/scripts/visual/ga3_kit.gd`). ADR 0138.",
+  "type": "object",
+  "required": ["style_prefix", "style_suffix", "cleanup", "objects"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "style_prefix": {"type": "string", "description": "Début commun des prompts d'image."},
+    "style_suffix": {"type": "string", "description": "Fin commune des prompts (époque, fond gris, sans sol)."},
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "auto_levels": {"type": "number", "minimum": 0, "maximum": 10},
+        "gamma": {"type": "number", "exclusiveMinimum": 0},
+        "normal": {"enum": ["auto", "on", "off"]}
+      }
+    },
+    "objects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "prompt", "model", "scale_axis", "size_m", "lod0", "tex", "kit_kind", "fit", "share", "wired"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "label": {"type": "string"},
+          "source": {"type": "string", "description": "Dossier de brutes d'une sonde réutilisée (ex. `s4`) : pas de nouvel appel fal."},
+          "raw": {"type": "string", "description": "Dossier des brutes retenu, relatif à `~/dev/cent-ans-raw/ga3/` (défaut `l1/<id>`, `l1/<id>_2` pour un second essai)."},
+          "glb": {"type": "string", "description": "Maillage brut retenu dans `raw` (défaut : `<model>.glb`)."},
+          "strip_base": {"type": "number", "minimum": 0, "description": "`ga3_cleanup.py --strip-base` (socle reconstruit), 0 = rien."},
+          "island_min": {"type": "number", "minimum": 0, "maximum": 0.2, "description": "Îlots plus petits que cette part des sommets retirés (défaut 0,01)."},
+          "prompt": {"type": "string", "description": "Sujet de l'image, entre `style_prefix` et `style_suffix`."},
+          "model": {"enum": ["trellis", "trellis-2", "multi"], "description": "`multi` = `fal-ai/trellis/multi` sur la vue source + vues regénérées (pièces fines)."},
+          "seed": {"type": "integer"},
+          "scale_axis": {"enum": ["length", "height"], "description": "Dimension mise à `size_m` : plus grand côté horizontal ou hauteur."},
+          "size_m": {"type": "number", "exclusiveMinimum": 0},
+          "lod0": {"type": "integer", "minimum": 100, "maximum": 30000, "description": "Plafond de triangles du LOD0 (LOD1 50 %, LOD2 15 %)."},
+          "tex": {"type": "integer", "enum": [256, 512, 1024, 2048]},
+          "yaw_deg": {"type": "number", "description": "Rotation (°, autour de la verticale) après l'alignement automatique : faîtage/longueur sur +X, façade vers +Z (repère du kit)."},
+          "align": {"type": "boolean", "default": true, "description": "Alignement automatique de l'emprise (rectangle d'aire minimale) sur les axes."},
+          "kit_kind": {"type": "string", "description": "Type du kit BR1 (`manifest.json`) que l'objet remplace en partie."},
+          "fit": {"enum": ["footprint", "length", "real"], "description": "Mise à l'emprise visée par le kit : `footprint` (longueur et profondeur, étirement borné), `length` (échelle uniforme sur la longueur, bornée à ±20 %), `real` (taille réelle générée)."},
+          "share": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part des modèles de ce type remplacés par la variante GA3 (tirage déterministe)."},
+          "wired": {"type": "boolean", "description": "false = généré mais non branché (modèle procédural ou animé gardé)."},
+          "note": {"type": "string"}
+        }
+      }
+    }
+  }
+}

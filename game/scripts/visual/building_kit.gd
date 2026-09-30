@@ -159,25 +159,40 @@ class Batch:
 	var visibility_end := 0.0
 	var _items: Dictionary = {}  # nom → Array[Transform3D]
 	var _instances: Dictionary = {}  # nom → MultiMeshInstance3D (après build)
+	var _ga3: Ga3Kit.Batch = null  # variantes générées (GA3-L1), null sans elles
 
 	func _init(p_variant: String = "", p_visibility_end: float = 0.0) -> void:
 		variant = p_variant
 		visibility_end = p_visibility_end
 
-	## Ajoute un bâtiment ; renvoie sa poignée [nom, indice] (pour le cacher plus tard).
+	## Ajoute un bâtiment ; renvoie sa poignée [nom, indice] (pour le cacher plus tard). Lot
+	## GA3-L1 : le modèle peut être remplacé par sa variante générée (`Ga3Kit.variant_for`, pas
+	## sous la neige) ; la poignée désigne alors l'instance GA3 (nom en `ga3_`).
 	func add(model_name: String, xform: Transform3D) -> Array:
+		if variant != "snow":
+			var ga3 := Ga3Kit.variant_for(model_name, xform)
+			if ga3 != "":
+				if _ga3 == null:
+					_ga3 = Ga3Kit.Batch.new(visibility_end)
+				return _ga3.add(ga3, Ga3Kit.fitted_transform(ga3, model_name, xform))
 		if not _items.has(model_name):
 			_items[model_name] = []
 		(_items[model_name] as Array).append(xform)
 		return [model_name, (_items[model_name] as Array).size() - 1]
 
 	func count() -> int:
-		var total := 0
+		var total := 0 if _ga3 == null else _ga3.count()
 		for model_name in _items:
 			total += (_items[model_name] as Array).size()
 		return total
 
+	## Nombre d'instances GA3 (variantes générées) de ce lot.
+	func ga3_count() -> int:
+		return 0 if _ga3 == null else _ga3.count()
+
 	func build(parent: Node3D) -> void:
+		if _ga3 != null:
+			_ga3.build(parent)
 		for model_name in _items:
 			var mesh := BuildingKit.mesh(model_name, variant)
 			if mesh == null:
@@ -199,12 +214,17 @@ class Batch:
 
 	## Transformation actuelle d'une poignée (Transform3D() si inconnue).
 	func get_transform(handle: Array) -> Transform3D:
+		if _ga3 != null and str(handle[0]).begins_with("ga3_"):
+			return _ga3.get_transform(handle)
 		var mmi: MultiMeshInstance3D = _instances.get(handle[0])
 		if mmi == null:
 			return Transform3D()
 		return mmi.multimesh.get_instance_transform(int(handle[1]))
 
 	func set_transform(handle: Array, xform: Transform3D) -> void:
+		if _ga3 != null and str(handle[0]).begins_with("ga3_"):
+			_ga3.set_transform(handle, xform)
+			return
 		var mmi: MultiMeshInstance3D = _instances.get(handle[0])
 		if mmi != null:
 			mmi.multimesh.set_instance_transform(int(handle[1]), xform)
