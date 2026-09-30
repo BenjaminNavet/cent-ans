@@ -65,5 +65,12 @@
     "track_width_m": 3.5,
     "wander_m": 28,
     "ford_road_chance": 0.7
+  },
+  "crossing": {
+    "bridge_river_width_m": [30, 46],
+    "ford_river_width_m": [18, 30],
+    "amplitude_m": [5, 15],
+    "passage_jitter_m": 50,
+    "ferry_half_width_m": 8
   }
 }

@@ -353,8 +353,13 @@ impl BattleSim {
         let mut rng = BattleRng::from_seed(seed);
         let weather = Weather::draw(setup.season, &mut rng);
         let is_siege = setup.siege.is_some();
-        let mut field =
-            Battlefield::generate_site_sized(&setup.field_site(), scale.field, weather, &mut rng);
+        let mut field = Battlefield::generate_site_crossing(
+            &setup.field_site(),
+            setup.field_crossing(),
+            scale.field,
+            weather,
+            &mut rng,
+        );
         if !is_siege {
             // EP6: countryside and camps (derived stream), then the hand-made
             // decor of a historical map.

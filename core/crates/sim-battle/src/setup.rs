@@ -314,6 +314,15 @@ impl BattleSetup {
         }
     }
 
+    /// RC2: the structure of the campaign crossing the field is drawn
+    /// around (`None` without a crossing and in a siege).
+    pub fn field_crossing(&self) -> Option<CrossingStructure> {
+        if self.siege.is_some() {
+            return None;
+        }
+        self.crossing.as_ref().map(|c| c.structure)
+    }
+
     pub fn side(&self, side: SideId) -> &SideSetup {
         match side {
             SideId::Attacker => &self.attacker,
