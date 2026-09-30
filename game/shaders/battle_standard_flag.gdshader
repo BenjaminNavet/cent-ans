@@ -13,7 +13,7 @@ render_mode cull_disabled, diffuse_burley;
 
 uniform sampler2D bone_tex : filter_nearest, repeat_disable;
 uniform float bone_fps = 24.0;
-uniform vec4 clips[64];
+uniform vec4 clips[96];
 uniform ivec4 clip_set = ivec4(0);
 uniform int clip_set_size = 1;
 uniform float anim_time = 0.0;

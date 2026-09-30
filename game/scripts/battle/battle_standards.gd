@@ -379,7 +379,7 @@ func _group(side: String, role: String) -> Dictionary:
 	if _groups.has(key):
 		return _groups[key]
 	var figure: Array = FIGURES[role]
-	var mat := _figure_material(side, role, SETS[role])
+	var mat := _figure_material(side, role, role_set(role))
 	var lods: Array = []
 	for level in 3:
 		var mmi := _new_mmi(BattleSkinned.mesh(str(figure[0]), int(figure[1]), level), mat, level < 2)
@@ -421,7 +421,7 @@ func _flag_layer(key: String) -> Dictionary:
 	mat.set_shader_parameter("skinned", skinned)
 	if skinned:
 		BattleSkinned.setup_material(mat, kind, variant)
-		var config := _custom_config(kind, variant, DEATH_SETS[role] if ground else SETS[role])
+		var config := _custom_config(kind, variant, DEATH_SETS[role] if ground else role_set(role))
 		mat.set_shader_parameter("clip_set", BattleSkinned._ivec(config["set"]))
 		mat.set_shader_parameter("clip_set_size", (config["set"] as Array).size())
 		var bones: Array = BattleSkinned.rig(kind, variant).get("bones", [])
@@ -474,17 +474,62 @@ static func _flush(mmi: MultiMeshInstance3D, rows: Array) -> void:
 # --- Image ------------------------------------------------------------------------------------
 
 
-## Clip (indice dans le jeu du rôle) selon l'état du régiment.
-static func clip_for(role: String, state: String, running: bool) -> int:
+## NT7 : états qui ont un clip propre par rôle (`data/fx/battle_animation.json`, `role_clips`),
+## ajoutés après les quatre clips de `SETS` dans cet ordre quand le rig les a.
+const ROLE_EXTRAS := ["charging", "victory", "idle_alt"]
+static var _role_sets: Dictionary = {}  # rôle -> {names: [...], extra: {état: indice}}
+
+
+## NT7 : jeu de clips d'un rôle (quatre clips EP5 + clips propres présents dans le rig).
+static func role_set(role: String) -> Array:
+	return _role_entry(role)["names"]
+
+
+static func _role_entry(role: String) -> Dictionary:
+	if _role_sets.has(role):
+		return _role_sets[role]
+	var names: Array = (SETS[role] as Array).duplicate()
+	var extra := {}
+	var figure: Array = FIGURES[role]
+	var clips: Dictionary = {}
+	if BattleSkinned.has_figure(str(figure[0]), int(figure[1])):
+		clips = BattleSkinned.rig(str(figure[0]), int(figure[1])).get("clips", {})
+	var wanted: Dictionary = (BattleSkinned.animation_settings().get("role_clips", {}) as Dictionary).get(role, {})
+	for state in ROLE_EXTRAS:
+		var clip := str(wanted.get(state, ""))
+		if clip == "" or not clips.has(clip):
+			continue
+		var at := names.find(clip)
+		if at < 0 and names.size() < BattleSkinned.MAX_SET:
+			names.append(clip)
+			at = names.size() - 1
+		if at >= 0:
+			extra[state] = at
+	var entry := {"names": names, "extra": extra}
+	_role_sets[role] = entry
+	return entry
+
+
+## Clip (indice dans le jeu du rôle) selon l'état du régiment. NT7 : clips propres de charge
+## (`charging`), de victoire (`victory`, état de rendu du camp vainqueur) et variante d'attente
+## (`idle_alt`, un porteur sur deux selon `phase`) quand le rig les a ; sinon jeu EP5.
+static func clip_for(role: String, state: String, running: bool, phase: float = 0.0) -> int:
+	var extra: Dictionary = _role_entry(role)["extra"]
 	match state:
 		"marching":
 			return 2 if running else 1
 		"charging":
+			if extra.has("charging"):
+				return int(extra["charging"])
 			return 3 if role == "horn" or role == "drum" else 2
 		"melee":
 			return 3
 		"routing":
 			return 2
+		"victory":
+			return int(extra.get("victory", 3 if role == "horn" or role == "drum" else 0))
+	if extra.has("idle_alt") and fmod(absf(phase) * 7.31, 1.0) < 0.5:
+		return int(extra["idle_alt"])
 	return 0
 
 
@@ -565,11 +610,14 @@ func _place_unit(unit: Dictionary, rec: Dictionary, soldiers: BattleSoldiers, ca
 	if slots.is_empty():
 		return reserved
 	var state := str(unit.get("state", "idle"))
+	# NT7 : acclamation du camp vainqueur (même règle de rendu que BattleSoldiers).
+	if soldiers.victor_side != "" and str(unit.get("side", "")) == soldiers.victor_side and state != "routing" and state != "climbing":
+		state = "victory"
 	var running := bool(unit.get("running", false))
 	var standard := str(unit.get("standard", "carried"))
 	var role := str(rec["role"])
 	var dedicated := bool(rec["dedicated"])
-	var clip := clip_for(role, state, running)
+	var clip := clip_for(role, state, running, float(rec["phase"]))
 	var phase := float(rec["phase"])
 	var rig := "cavalry" if bool(rec["mounted"]) else "human"
 	var layers: Array = rec["layers"]
@@ -615,7 +663,7 @@ func _place_unit(unit: Dictionary, rec: Dictionary, soldiers: BattleSoldiers, ca
 		var group := _group(str(rec["side"]), instrument)
 		var d := camera_pos.distance_to(xform.origin)
 		var level := 0 if d < lod0 else (1 if d < lod1 else 2)
-		_append(group["rows"][level], xform, Vector4(phase + float(k) * 0.37, float(clip_for(instrument, state, running)), 0.0, 0.0))
+		_append(group["rows"][level], xform, Vector4(phase + float(k) * 0.37, float(clip_for(instrument, state, running, float(rec["phase"]) + float(k) * 0.37)), 0.0, 0.0))
 		reserved.append(slot)
 		figure_count += 1
 		_sound(rec, instrument, state, xform.origin, camera_pos)

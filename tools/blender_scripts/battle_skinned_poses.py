@@ -943,7 +943,7 @@ drum_beat.frames = 24
 # Busine player: the trumpet on `Prop` (mouthpiece `HORN_BACK` m behind the fist).
 
 
-def _horn(arm, raise_t):
+def _horn(arm, raise_t, elevation=22.0):
     import battle_skinned_weapons as weapons
 
     shoulder = pos(arm, "UpperArm.R")
@@ -953,7 +953,7 @@ def _horn(arm, raise_t):
         rotate_about(arm, "Torso", Vector((1, 0, 0)), -0.1 * raise_t)
     head = pos(arm, "Head")
     mouth = head + Vector((-0.01, -0.13, 0.06))
-    blow_axis = aim_dir(22.0, -4.0)
+    blow_axis = aim_dir(elevation, -4.0)
     blow_grip = mouth + blow_axis * weapons.HORN_BACK
     grip = low_grip.lerp(blow_grip, raise_t)
     axis = low_axis.lerp(blow_axis, raise_t).normalized()
@@ -1724,3 +1724,125 @@ def plough(arm, t):
     """
     rotate_about(arm, "Abdomen", X_AXIS, 0.32)
     _both_hands(arm, Vector((-0.22, -0.5, 0.86)), Vector((0.22, -0.5, 0.86)))
+
+
+# --- Lot NT7: own clips of the standard bearers, musicians and siege crews ----------------
+#
+# Appended after every other clip (earlier rows keep their place, ADR 0096 / 0129).
+
+
+def std_charge(arm, t):
+    """Charging (loop on `Run`): the standard raised high and swept from side to side."""
+    s = math.sin(2.0 * math.pi * t)
+    rotate_about(arm, "Torso", Z_AXIS, 0.12 * s)
+    _std_hold(
+        arm,
+        Vector((0.42 * s, -0.22, 1.0)),
+        forward=0.06,
+        lift=0.22 + 0.05 * abs(s),
+        side=0.06 * s,
+    )
+
+
+def std_plant(arm, t):
+    """At rest (loop on `Idle`): the butt planted by the right foot, both fists on the pole."""
+    s = math.sin(2.0 * math.pi * t)
+    butt = pos(arm, "Foot.R") + Vector((-0.04, -0.3, 0.0))
+    butt.z = 0.03
+    axis = Vector((0.02 * s, 0.04, 1.0)).normalized()
+    grip = butt + axis * STD_BELOW
+    prop = prop_matrix(grip, axis, Vector((0, -1, 0)))
+    STATE["prop"] = prop
+    _std_hands(arm, prop)
+
+
+std_plant.frames = 82  # two `Idle` loops (3.4 s): a slow sway
+
+
+def std_victory(arm, t):
+    """Victory (loop on `Idle`): the standard held up at arm's length, swept in wide arcs."""
+    s = math.sin(2.0 * math.pi * t)
+    rotate_about(arm, "Torso", Z_AXIS, 0.2 * s)
+    rotate_about(arm, "Neck", X_AXIS, -0.28)
+    _std_hold(
+        arm,
+        Vector((0.7 * s, -0.08, 1.0)),
+        forward=0.02,
+        lift=0.4 + 0.08 * abs(s),
+        side=0.1 * s,
+    )
+
+
+std_victory.frames = 58  # 2.4 s, as `std_wave`
+
+
+def drum_run(arm, t):
+    """Beating the charge on the run (loop on `Run`): one stroke per hand and stride."""
+    _drum_hands(arm, 1, t)
+
+
+def drum_victory(arm, t):
+    """Victory (loop on `Idle`): a long quick roll, head thrown back."""
+    rotate_about(arm, "Neck", X_AXIS, -0.25)
+    _drum_hands(arm, 8, t)
+
+
+drum_victory.frames = 48
+
+
+def horn_run(arm, t):
+    """Sounding the charge on the run (loop on `Run`): the busine held at the lips."""
+    _horn(arm, 1.0)
+
+
+def horn_victory(arm, t):
+    """Victory fanfare (loop on `Idle`): the busine raised skywards, leaning back."""
+    blow = smooth(0.0, 0.12, t) * (1 - smooth(0.88, 1.0, t))
+    rotate_about(arm, "Abdomen", X_AXIS, -0.12 * blow)
+    _horn(arm, blow, elevation=48.0)
+
+
+horn_victory.frames = 82
+
+
+def load_heavy(arm, t):
+    """Loading a heavy stone (loop on `Idle`): deep squat, stone to the shoulder, pressed up.
+
+    Variant of `load` for the trebuchet and mangonel loaders (the sling or the cup is higher
+    than a bombard's muzzle).
+    """
+    stoop = smooth(0.0, 0.16, t) * (1.0 - smooth(0.3, 0.5, t))
+    lift = smooth(0.3, 0.5, t)
+    press = smooth(0.58, 0.74, t) * (1.0 - smooth(0.86, 1.0, t))
+    _crouch(arm, 0.42 * stoop + 0.1 * lift * (1.0 - press))
+    rotate_about(arm, "Abdomen", X_AXIS, 0.1 + 0.85 * stoop - 0.08 * press)
+    chest = pos(arm, "Chest")
+    low = chest + Vector((0, -0.4, -0.66))
+    shoulder = chest + Vector((-0.1, -0.2, 0.12))
+    up = chest + Vector((-0.02, -0.46, 0.42))
+    hands = low.lerp(shoulder, lift).lerp(up, press)
+    _both_hands(arm, hands + Vector((-0.13, 0, 0)), hands + Vector((0.13, 0, 0.04)))
+
+
+load_heavy.frames = 60
+
+
+def push_shoulder(arm, t):
+    """Pushing with the left shoulder into the beam (loop on `Walk`), hands braced."""
+    rotate_about(arm, "Abdomen", X_AXIS, 0.55)
+    rotate_about(arm, "Torso", Z_AXIS, -0.35)
+    chest = pos(arm, "Chest")
+    _both_hands(
+        arm,
+        chest + Vector((-0.12, -0.5, 0.22)),
+        chest + Vector((0.16, -0.34, -0.02)),
+    )
+
+
+def ride_std_charge(arm, t):
+    """Mounted charge: at the gallop, the standard raised one-handed and swept, reins left."""
+    _ride_legs(arm)
+    _lean(arm, 0.12)
+    s = math.sin(2.0 * math.pi * t)
+    rotate_about(arm, "Torso", _hv(Vector((0, 0, 1))), 0.1 * s)
+    _ride_std(arm, sway=0.32 * s, tilt=0.12, lift=0.14 + 0.04 * abs(s))

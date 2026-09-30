@@ -40,9 +40,26 @@ func begin(now: float) -> void:
 	_frame.clear()
 
 
-## Clip d'un rôle (`clips` des réglages), ou le nom tel quel.
-func clip_of(role: String) -> String:
-	return str(cfg.get("clips", {}).get(role, role))
+## Clip d'un rôle (`clips` des réglages), ou le nom tel quel. NT7 : `clips_by_engine[engine]`
+## surcharge le rôle pour un type d'engin (chargeur de trébuchet : pierre lourde) ; une liste
+## alterne les gestes d'un servant à l'autre (`index`) ; un clip absent du rig (kit antérieur)
+## revient au premier de la liste ou au clip par défaut du rôle.
+func clip_of(role: String, engine: String = "", index: int = 0) -> String:
+	var default: Variant = cfg.get("clips", {}).get(role, role)
+	var value: Variant = (cfg.get("clips_by_engine", {}) as Dictionary).get(engine, {}).get(role, default)
+	var options: Array = value if value is Array else [value]
+	var fallback: Array = default if default is Array else [default]
+	var clip := str(options[posmod(index, options.size())]) if not options.is_empty() else role
+	var rig_clips: Dictionary = {}
+	var kind := str(cfg.get("figure_kind", "crew"))
+	if BattleSkinned.has_figure(kind, 0):
+		rig_clips = BattleSkinned.rig(kind, 0).get("clips", {})
+	if rig_clips.is_empty() or rig_clips.has(clip):
+		return clip
+	for c in options + fallback:
+		if rig_clips.has(str(c)):
+			return str(c)
+	return str(fallback[0]) if not fallback.is_empty() else role
 
 
 ## Servant `key` (stable d'une image à l'autre) posé en `xform`, faisant le geste `clip`.
