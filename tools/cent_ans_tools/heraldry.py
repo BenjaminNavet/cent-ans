@@ -1054,11 +1054,24 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
             width = 0.7 - index * 0.06
             spot = [(0.5, 0.2 + index * 0.25)]
             paint_charge(image, "leopard", spot, width, paints, height=0.24)
-    elif blazon.has("lion"):
+    elif blazon.has("lion", "griffon"):
+        # No griffin drawing: the rampant lion stands in for it (Perugia, Pomerania).
         lion, crowned = lion_variant(blazon.text)
         paints = charge_paints(lion, charge, blazon.text, blazon.field)
         size = 0.6 if blazon.has("trescheur", "bordure") else 0.74
         paint_charge(image, lion, [(0.5, 0.47)], size, paints, crowned=crowned)
+    elif blazon.has("croix fleurdelisee", "croix pisane", "croix clechee"):
+        # Couped cross whose arms end in knobs (Pisa) or lozenge buds (Calatrava).
+        draw.rectangle(_px([(0.44, 0.2), (0.56, 0.68)]), fill=charge)
+        draw.rectangle(_px([(0.26, 0.38), (0.74, 0.5)]), fill=charge)
+        for x, y in ((0.5, 0.17), (0.5, 0.71), (0.23, 0.44), (0.77, 0.44)):
+            if blazon.has("croix fleurdelisee"):
+                points = [(x, y - 0.06), (x + 0.06, y), (x, y + 0.06), (x - 0.06, y)]
+                draw.polygon(_px(points), fill=charge)
+            else:
+                draw.ellipse(
+                    _px([(x - 0.05, y - 0.05), (x + 0.05, y + 0.05)]), fill=charge
+                )
     elif blazon.has("croix alesee"):
         draw.rectangle(_px([(0.42, 0.18), (0.58, 0.7)]), fill=charge)
         draw.rectangle(_px([(0.24, 0.36), (0.76, 0.52)]), fill=charge)
