@@ -104,6 +104,21 @@ UNITS = {
         "metal_z": 1.5,
         "clips": {"idle": "pike_idle", "walk": "pike_walk", "attack": "pike_thrust"},
     },
+    # L3c: the knight's rider on the fine FG4 horse of cavalry_0 (``mounted``: built on the
+    # human rig, moved onto the ``cavalry`` rider bones, merged with the fine horse of the
+    # exported figure, see ``build_mounted``). Others sharing the unit type: cavalry_3
+    # (gendarmes, white harness), standard_1 (mounted standard bearer).
+    "knight": {
+        "figure": "cavalry_0",
+        "glb": "knight/multi_front_back.glb",
+        "reference": "knight/sheet.png",
+        "top": 1.84,
+        "equipment": ["heater_shield", "lance"],
+        "scabbard": True,
+        "metal_z": 0.0,
+        "mounted": True,
+        "clips": {"idle": "c_idle", "walk": "c_charge", "attack": "c_thrust"},
+    },
 }
 KEY_LIVERY = (75.0, 170.0)  # saturated green
 KEY_CLOTH = (190.0, 265.0)  # saturated blue
@@ -113,6 +128,7 @@ CLOSE_STEPS = (
 )
 METAL_Z = 1.5  # m, default ``metal_z``: steel code on the helmet only (dagger, buckles)
 TRI_CAP = (11900, 1350, 260)  # battle_fine_figures.TRI_CAP (foot soldiers)
+RIDER_CAP = (9000, 1000, 180)  # battle_fine_figures.RIDER_CAP (the horse is FG4's)
 TEX = 1024
 AUTO_LEVELS = 0.5  # percent clipped at each end (ga3_cleanup, L1)
 EQUIP_UV_SHIFT = -4.0
@@ -632,23 +648,56 @@ def equipment(unit, arm, level):
     """
     import battle_fine_gear as gear
     import battle_skinned as bs
+    import battle_skinned_cavalry as cav
     import battle_skinned_equipment as eq
     import battle_skinned_weapons as weapons
 
+    mounted = unit.get("mounted", False)
     ctx = eq.Context(arm, level, bs.material, bs.bone_world)
     out = []
     for name, mask, kwargs in recipe_items(unit):
-        objs = gear.build(name, kwargs, gear.Gear(ctx, None, [], unit["figure"], False))
+        objs = gear.build(
+            name, kwargs, gear.Gear(ctx, None, [], unit["figure"], mounted)
+        )
         if objs is None:
-            builder = getattr(weapons, name, None) or getattr(eq, name)
+            builder = (
+                (getattr(cav, name, None) if mounted else None)
+                or getattr(weapons, name, None)
+                or getattr(eq, name)
+            )
             objs = builder(ctx, **kwargs)
             for obj in objs:
                 gear.unwrap(obj)
         for obj in objs:
             shift_equipment_uv(obj)
-            bs.set_face_mask(obj, bs.held_mask(name, mask, kwargs))
+            # Riders take the recipe mask as is (``battle_fine_figures.build_figure``).
+            bs.set_face_mask(obj, mask if mounted else bs.held_mask(name, mask, kwargs))
             out.append(obj)
+    if unit.get("scabbard"):
+        out.extend(scabbard(arm))
     return out
+
+
+def scabbard(arm):
+    """Sword in its scabbard at the left hip (``battle_fine_equipment.scabbard``, FINE_KIT).
+
+    The fine builder only reads two landmarks of the fitted body: the left hip joint and
+    the waist height (``Landmarks``), taken here from the rig.
+    """
+    from types import SimpleNamespace
+
+    import battle_fine_equipment as fe
+    import battle_fine_gear as gear
+    import battle_skinned as bs
+
+    bone = {b.name: arm.matrix_world @ b.head_local for b in arm.data.bones}
+    lm = SimpleNamespace(bone=bone, waist_z=bone["Abdomen"].z + 0.02)
+    objs = fe.scabbard(lm)
+    for obj in objs:
+        gear.unwrap(obj)
+        shift_equipment_uv(obj)
+        bs.set_face_mask(obj, 0)
+    return objs
 
 
 def shift_equipment_uv(obj):
@@ -688,8 +737,20 @@ def build(unit_name, raw, renders, glb=None):
 
     unit = UNITS[unit_name]
     fig = unit["figure"]
+    mounted = unit.get("mounted", False)
+    cap = RIDER_CAP if mounted else TRI_CAP
     os.makedirs(OUT_DIR, exist_ok=True)
+    seat = None
+    if mounted:
+        import battle_skinned_cavalry as cav
+
+        # Rest of the fine rider on the saddle (``cavalry`` rig): the whole chain runs on
+        # the human rig, the rider is moved there at export (same armature data).
+        bf.use_fine_mount()
+        r_rest = cav.Mount().r_rest.copy()
     arm, _ = bf.load_fine_human()
+    if mounted:
+        seat = r_rest @ arm.matrix_world.inverted()
     fp.prime_virtuals(arm)
     probe.HELMET_TOP = unit["top"]
     glb = glb or unit["glb"]
@@ -708,7 +769,7 @@ def build(unit_name, raw, renders, glb=None):
     for o in probe_gear:
         bpy.data.objects.remove(o)
     print(f"EQUIP level-0 tris={eq_tris}")
-    low = closed_low(obj, TRI_CAP[0] - eq_tris - 100, f"{fig}_ga3_body")
+    low = closed_low(obj, cap[0] - eq_tris - 100, f"{fig}_ga3_body")
     baked, classes = bake_low(obj, low, src_albedo, src_classes)
     bpy.data.objects.remove(obj)
     obj = low
@@ -728,7 +789,8 @@ def build(unit_name, raw, renders, glb=None):
     obj.name = f"{fig}_ga3_body"
     with open(os.path.join(FINE_DIR, "manifest.json")) as f:
         fine = json.load(f)
-    rig = bs.rig_stub("human", fine["rigs"]["human"]["bones"])
+    rig_name = "cavalry" if mounted else "human"
+    rig = bs.rig_stub(rig_name, fine["rigs"][rig_name]["bones"])
     for pb in arm.pose.bones:
         pb.matrix_basis.identity()
     bpy.context.view_layer.update()
@@ -740,17 +802,29 @@ def build(unit_name, raw, renders, glb=None):
         if level == 0:
             body_obj = obj
         else:
-            body_obj = lod_copy(obj, TRI_CAP[level] - g_tris, f"{fig}_ga3_lod{level}")
+            body_obj = lod_copy(obj, cap[level] - g_tris, f"{fig}_ga3_lod{level}")
         name = f"{fig}_lod{level}.mesh.bin"
-        counts.append(
-            bs.export_mesh(
-                [body_obj, *gear_objs],
-                rig,
-                bs.human_bone_alias,
-                os.path.join(OUT_DIR, name),
-                influences=bs.INFLUENCES[level],
+        if mounted:
+            counts.append(
+                export_mounted(
+                    [body_obj, *gear_objs],
+                    seat,
+                    rig,
+                    fine["rigs"][rig_name]["bones"],
+                    level,
+                    os.path.join(OUT_DIR, name),
+                )
             )
-        )
+        else:
+            counts.append(
+                bs.export_mesh(
+                    [body_obj, *gear_objs],
+                    rig,
+                    bs.human_bone_alias,
+                    os.path.join(OUT_DIR, name),
+                    influences=bs.INFLUENCES[level],
+                )
+            )
         files.append(name)
         kept[level] = (body_obj, gear_objs)
     entry = {
@@ -760,6 +834,7 @@ def build(unit_name, raw, renders, glb=None):
         "ga3_albedo": albedo_name,
         "ga3_lum": [round(lum[0], 4), round(lum[1], 4)],
         "unit": unit_name,
+        **({"fine_horse": True} if mounted else {}),
         "source": f"fal-ai/nano-banana-2/edit + {os.path.basename(glb)} (tools/experiments/ga3_fal_figure.py)",
     }
     path = os.path.join(OUT_DIR, "manifest.json")
@@ -781,6 +856,150 @@ def build(unit_name, raw, renders, glb=None):
     print("OK")
 
 
+# --- Mounted figures (L3c) ----------------------------------------------------------------
+
+
+def export_mounted(objs, seat, rig, bones, level, path):
+    """Rider `objs` moved onto the saddle (`seat`), merged with the fine horse; triangles.
+
+    The rider pieces are copied into the ``cavalry`` rest frame with their groups renamed
+    ``R:`` (``battle_skinned_cavalry._rename_groups``) and exported alone; the horse, its
+    harness and bards come from the exported fine figure (``merge_horse``).
+    """
+    import battle_skinned as bs
+    import battle_skinned_cavalry as cav
+    import bpy
+
+    copies = []
+    for o in objs:
+        me = o.data.copy()
+        me.transform(seat @ o.matrix_world)
+        c = bpy.data.objects.new(o.name + "_rider", me)
+        bpy.context.scene.collection.objects.link(c)
+        for g in o.vertex_groups:
+            c.vertex_groups.new(
+                name=g.name if g.name.startswith("R:") else "R:" + g.name
+            )
+        copies.append(c)
+    tmp = path + ".rider"
+    rider = bs.export_mesh(
+        copies, rig, cav.cavalry_alias, tmp, influences=bs.INFLUENCES[level]
+    )
+    for c in copies:
+        bpy.data.objects.remove(c)
+    fine = os.path.join(FINE_DIR, os.path.basename(path))
+    horse = merge_horse(fine, tmp, path, bones)
+    os.remove(tmp)
+    print(f"MOUNTED lod{level} rider={rider} horse={horse}")
+    return rider + horse
+
+
+def read_cam(path):
+    """Arrays of a ``CAM1`` / ``CAM2`` file (``battle_skinned.export_mesh``)."""
+    import struct
+    import zlib
+
+    with open(path, "rb") as f:
+        data = f.read()
+    n, m, _size = struct.unpack("<III", data[4:16])
+    raw = zlib.decompress(data[16:])
+    atlas = data[:4] == b"CAM2"
+    per = 22 if atlas else 21
+    floats = struct.unpack(f"<{n * per}f", raw[: n * per * 4])
+    idx = list(struct.unpack(f"<{m}I", raw[n * per * 4 : n * per * 4 + m * 4]))
+    out, offset = {}, 0
+    for key, width in (
+        ("pos", 3),
+        ("nor", 3),
+        ("col", 4),
+        ("uv", 2),
+        ("bone", 4),
+        ("weight", 4),
+        ("mask", 1),
+        ("atlas", 1),
+    ):
+        if key == "atlas" and not atlas:
+            out[key] = None
+            break
+        out[key] = [
+            list(floats[offset + i * width : offset + (i + 1) * width])
+            for i in range(n)
+        ]
+        offset += n * width
+    out["idx"] = idx
+    return out
+
+
+def write_cam(path, cam):
+    """Write `cam` (``read_cam`` layout) as ``CAM2`` when it carries atlas UVs."""
+    import struct
+    import zlib
+
+    n = len(cam["pos"])
+    raw = bytearray()
+    keys = ["pos", "nor", "col", "uv", "bone", "weight", "mask"]
+    if cam["atlas"] is not None:
+        keys.append("atlas")
+    for key in keys:
+        for item in cam[key]:
+            raw += struct.pack(f"<{len(item)}f", *item)
+    raw += struct.pack(f"<{len(cam['idx'])}I", *cam["idx"])
+    with open(path, "wb") as f:
+        f.write(b"CAM2" if cam["atlas"] is not None else b"CAM1")
+        f.write(struct.pack("<III", n, len(cam["idx"]), len(raw)))
+        f.write(zlib.compress(bytes(raw), 9))
+
+
+def merge_horse(fine_path, rider_path, out_path, bones):
+    """Fine horse of `fine_path` (every triangle on horse bones only) plus the rider file.
+
+    The horse keeps its FG3 atlas UVs (coat, caparison: ``atlas_layer`` of the fine figure)
+    and its UVs move to negative u (untextured by ``GA3_TEX``) except on the ``C_ARMS``
+    faces (caparison arms). The rider's vertices carry no atlas UV (source 0: no FG3 read).
+    Returns the horse triangle count.
+    """
+    horse_bones = {i for i, b in enumerate(bones) if not b.startswith("R:")}
+    fine = read_cam(fine_path)
+    rider = read_cam(rider_path)
+    on_horse = [
+        all(int(b + 0.5) in horse_bones for b, w in zip(bs_, ws, strict=True) if w > 0)
+        for bs_, ws in zip(fine["bone"], fine["weight"], strict=True)
+    ]
+    remap, out = {}, {k: [] for k in fine if k != "idx"}
+    out["idx"] = []
+    kept = 0
+    for t in range(0, len(fine["idx"]), 3):
+        tri = fine["idx"][t : t + 3]
+        if not all(on_horse[i] for i in tri):
+            continue
+        kept += 1
+        for i in tri:
+            if i not in remap:
+                remap[i] = len(out["pos"])
+                for k in out:
+                    if k == "idx" or fine[k] is None:
+                        continue
+                    item = list(fine[k][i])
+                    if k == "uv" and int(fine["col"][i][3] + 0.5) != C_ARMS:
+                        item[0] += EQUIP_UV_SHIFT
+                    out[k].append(item)
+            out["idx"].append(remap[i])
+    if fine["atlas"] is None:
+        out["atlas"] = None
+    base = len(out["pos"])
+    for k in out:
+        if k == "idx":
+            continue
+        if k == "atlas":
+            if out["atlas"] is not None:
+                out["atlas"].extend([[0.0]] * len(rider["pos"]))
+            continue
+        out[k].extend(rider[k])
+    out["idx"].extend(i + base for i in rider["idx"])
+    write_cam(out_path, out)
+    return kept
+
+
 # --- Renders and sheet --------------------------------------------------------------------
 
 # (file label, clip role of the unit's ``clips``, fraction, eye, target). L3a names kept.
@@ -790,6 +1009,14 @@ SHOTS = [
     ("shoot", "attack", 0.5, (1.7, -2.9, 1.5), (0.45, 0, 1.1)),
     ("back", "walk", 0.6, (0.2, 3.4, 1.3), (0.45, 0, 0.95)),
 ]
+# L3c: rider on the horse (rest, charge, lance thrust, back), the current figure at +X.
+MOUNTED_SHOTS = [
+    ("bind", None, 0.0, (3.2, -5.2, 2.4), (0.9, 0, 1.5)),
+    ("walk", "walk", 0.3, (3.2, -5.2, 2.4), (0.9, 0, 1.5)),
+    ("shoot", "attack", 0.5, (4.2, -3.8, 2.6), (0.9, 0, 1.6)),
+    ("back", "walk", 0.6, (1.4, 5.6, 2.4), (0.9, 0, 1.5)),
+]
+MOUNTED_OFFSET = 1.8  # m along +X between the generated and the current mounted figure
 
 
 def cam_uvs(path):
@@ -805,7 +1032,7 @@ def cam_uvs(path):
     return [floats[2 * i : 2 * i + 2] for i in range(n)]
 
 
-def game_posed(fig, clip, frac, idle, image):
+def game_posed(fig, clip, frac, idle, image, rig_name="human"):
     """The exported GA3 LOD0 of `fig` skinned on the CPU with the game's bone texture.
 
     Same frames as the current figure beside it (``add_current_archer``): the held items
@@ -817,7 +1044,7 @@ def game_posed(fig, clip, frac, idle, image):
     import ga3_figure_probe as probe
 
     with open(os.path.join(FINE_DIR, "manifest.json")) as f:
-        rig = json.load(f)["rigs"]["human"]
+        rig = json.load(f)["rigs"][rig_name]
     frames = fc.load_bones(os.path.join(FINE_DIR, rig["texture"]))
     path = os.path.join(OUT_DIR, f"{fig}_lod0.mesh.bin")
     *mesh, _atlas = probe.load_cam(path)
@@ -886,7 +1113,9 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
     unit = UNITS[unit_name]
     fig = unit["figure"]
     clips = unit["clips"]
-    for label, role, frac, eye, target in SHOTS:
+    mounted = unit.get("mounted", False)
+    rig_name = "cavalry" if mounted else "human"
+    for label, role, frac, eye, target in MOUNTED_SHOTS if mounted else SHOTS:
         clip = clips[role] if role else None
         for o in [
             o
@@ -896,13 +1125,22 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
             bpy.data.objects.remove(o)
         for pb in arm.pose.bones:
             pb.matrix_basis.identity()
-        if clip:
+        if clip and not mounted:
             fp.pose_clip(arm, clip, frac)
         bpy.context.view_layer.update()
-        probe.add_current_archer(clip, frac, fig, clips["idle"])
-        game_posed(fig, clip, frac, clips["idle"], img)
+        probe.add_current_archer(
+            clip,
+            frac,
+            fig,
+            clips["idle"],
+            rig_name,
+            MOUNTED_OFFSET if mounted else None,
+        )
+        game_posed(fig, clip, frac, clips["idle"], img, rig_name)
         fp.look_at(cam, eye, target, 40)
-        scene.render.resolution_x, scene.render.resolution_y = (560, 620)
+        scene.render.resolution_x, scene.render.resolution_y = (
+            (760, 620) if mounted else (560, 620)
+        )
         fp.render(os.path.join(out, f"{label}.png"))
     _ = math
 
