@@ -4,7 +4,9 @@ Run headless from the repository root:
 
     blender -b --factory-startup --python tools/blender_scripts/ga3_cleanup.py -- \
         SOURCE.glb OUT_DIR NAME [--length 8.0] [--lod0 8000] [--tex 1024] \
-        [--strip-base 0.0] [--raw-render PATH.png]
+        [--strip-base 0.0] [--raw-render PATH.png] \
+        [--exposure 1.0] [--gamma 1.0] [--auto-levels 0.0] [--normal auto|on|off] \
+        [--roughness auto|off]
 
 Writes ``OUT_DIR/NAME_lod0.glb``, ``NAME_lod1.glb`` and ``NAME_lod2.glb`` (plan
 ``docs/wip/ga.md`` section GA3, probe S1 in ``docs/wip/ga3.md``):
@@ -19,6 +21,12 @@ Writes ``OUT_DIR/NAME_lod0.glb``, ``NAME_lod1.glb`` and ``NAME_lod2.glb`` (plan
 4. Fresh UV (smart projection) per LOD and a Cycles bake of the source albedo (diffuse
    colour only, selected-to-active from the cleaned source mesh): ``--tex`` px square for
    LOD0, half for LOD1, quarter for LOD2.
+   Optional grading of the baked albedo (probe S4): ``--exposure`` multiplies it,
+   ``--auto-levels P`` stretches the P-th / (100-P)-th percentiles of the covered texels to
+   black / white, ``--gamma`` > 1 lifts the mid-tones. When the source material carries a
+   normal map (TRELLIS 2), a tangent-space normal map is baked too (``--normal on`` forces
+   it: the high-poly relief is then baked on the low LODs; ``off`` disables it); likewise
+   a roughness map when the source roughness is textured (``--roughness auto``).
 5. glTF export (Z up in Blender -> Y up in Godot), one mesh, one opaque rough material,
    texture embedded as JPEG.
 
@@ -33,6 +41,7 @@ from pathlib import Path
 
 import bmesh
 import bpy
+import numpy as np
 from mathutils import Vector
 
 ISLAND_MIN_FRACTION = 0.01  # islands below 1 % of the vertices are debris
@@ -52,6 +61,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tex", type=int, default=1024)
     parser.add_argument("--strip-base", type=float, default=0.0)
     parser.add_argument("--raw-render", default="")
+    parser.add_argument("--exposure", type=float, default=1.0)
+    parser.add_argument("--gamma", type=float, default=1.0)
+    parser.add_argument("--auto-levels", type=float, default=0.0)
+    parser.add_argument("--normal", choices=("auto", "on", "off"), default="auto")
+    parser.add_argument("--roughness", choices=("auto", "off"), default="auto")
     return parser.parse_args(argv)
 
 
@@ -215,10 +229,62 @@ def decimated_copy(
     return obj
 
 
-def bake_albedo(
-    source: bpy.types.Object, low: bpy.types.Object, size: int
-) -> bpy.types.Image:
-    """Smart-UV ``low`` and bake the source diffuse colour into a ``size`` px image."""
+def source_inputs_linked(source: bpy.types.Object, socket: str) -> bool:
+    """Whether any material of ``source`` feeds its BSDF ``socket`` from a node (texture)."""
+    for slot in source.material_slots:
+        tree = slot.material.node_tree if slot.material else None
+        bsdf = tree.nodes.get("Principled BSDF") if tree else None
+        if bsdf is not None and bsdf.inputs[socket].is_linked:
+            return True
+    return False
+
+
+def grade(image: bpy.types.Image, args: argparse.Namespace) -> None:
+    """Exposure, auto-levels and gamma on the covered texels of a baked albedo."""
+    if args.exposure == 1.0 and args.gamma == 1.0 and args.auto_levels <= 0.0:
+        return
+    pixels = np.empty(len(image.pixels), dtype=np.float32)
+    image.pixels.foreach_get(pixels)
+    rgb = pixels.reshape(-1, 4)[:, :3]
+    covered = rgb.max(axis=1) > 0.004  # unbaked texels stay black
+    rgb *= args.exposure
+    if args.auto_levels > 0.0 and covered.any():
+        values = rgb[covered]
+        low = float(np.percentile(values, args.auto_levels))
+        high = float(np.percentile(values, 100.0 - args.auto_levels))
+        rgb[:] = (rgb - low) / max(1e-3, high - low)
+    np.clip(rgb, 0.0, 1.0, out=rgb)
+    rgb **= 1.0 / args.gamma
+    rgb[~covered] = 0.0
+    image.pixels.foreach_set(pixels)
+    image.update()
+    mean = rgb[covered].mean(axis=0) if covered.any() else rgb.mean(axis=0)
+    print(f"GA3 grade {image.name}: mean sRGB {mean.round(3).tolist()}")
+
+
+def bake_pass(
+    source: bpy.types.Object,
+    low: bpy.types.Object,
+    node: bpy.types.Node,
+    kind: str,
+    **options: object,
+) -> None:
+    """Selected-to-active Cycles bake of ``kind`` from ``source`` into ``node``'s image."""
+    low.active_material.node_tree.nodes.active = node
+    select_only(low, source)
+    source.select_set(True)
+    bpy.context.view_layer.objects.active = low
+    bpy.ops.object.bake(type=kind, **options)
+    node.image.pack()
+
+
+def bake_maps(
+    source: bpy.types.Object,
+    low: bpy.types.Object,
+    size: int,
+    args: argparse.Namespace,
+) -> None:
+    """Smart-UV ``low`` and bake the source albedo (plus normal / roughness maps)."""
     low.data.materials.clear()
     for layer in list(low.data.uv_layers):
         low.data.uv_layers.remove(layer)
@@ -229,18 +295,21 @@ def bake_albedo(
     bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.004)
     bpy.ops.object.mode_set(mode="OBJECT")
 
-    image = bpy.data.images.new(f"{low.name}_albedo", size, size, alpha=False)
     material = bpy.data.materials.new(f"{low.name}_mat")
     material.use_nodes = True
-    nodes = material.node_tree.nodes
+    nodes, links = material.node_tree.nodes, material.node_tree.links
     bsdf = nodes["Principled BSDF"]
     bsdf.inputs["Metallic"].default_value = 0.0
     bsdf.inputs["Roughness"].default_value = 0.9
-    tex = nodes.new("ShaderNodeTexImage")
-    tex.image = image
-    material.node_tree.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
-    nodes.active = tex
     low.data.materials.append(material)
+
+    def texture(suffix: str, colour: bool) -> bpy.types.Node:
+        image = bpy.data.images.new(f"{low.name}_{suffix}", size, size, alpha=False)
+        if not colour:
+            image.colorspace_settings.name = "Non-Color"
+        node = nodes.new("ShaderNodeTexImage")
+        node.image = image
+        return node
 
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
@@ -254,12 +323,37 @@ def bake_albedo(
     bake.use_pass_direct = False
     bake.use_pass_indirect = False
     bake.use_pass_color = True
-    select_only(low, source)
-    source.select_set(True)
-    bpy.context.view_layer.objects.active = low
-    bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"})
-    image.pack()
-    return image
+
+    albedo = texture("albedo", colour=True)
+    bake_pass(source, low, albedo, "DIFFUSE", pass_filter={"COLOR"})
+    grade(albedo.image, args)
+    albedo.image.pack()
+    maps = ["albedo"]
+
+    roughness = None
+    if args.roughness == "auto" and source_inputs_linked(source, "Roughness"):
+        roughness = texture("roughness", colour=False)
+        bake_pass(source, low, roughness, "ROUGHNESS")
+        maps.append("roughness")
+    normal = None
+    if args.normal == "on" or (
+        args.normal == "auto" and source_inputs_linked(source, "Normal")
+    ):
+        normal = texture("normal", colour=False)
+        bake.normal_space = "TANGENT"
+        bake_pass(source, low, normal, "NORMAL")
+        maps.append("normal")
+
+    # Links only after baking (a baked image must not feed the target material).
+    links.new(albedo.outputs["Color"], bsdf.inputs["Base Color"])
+    if roughness is not None:
+        links.new(roughness.outputs["Color"], bsdf.inputs["Roughness"])
+    if normal is not None:
+        normal_map = nodes.new("ShaderNodeNormalMap")
+        links.new(normal.outputs["Color"], normal_map.inputs["Color"])
+        links.new(normal_map.outputs["Normal"], bsdf.inputs["Normal"])
+    low["ga3_maps"] = ",".join(maps)
+    print(f"GA3 {low.name}: baked {', '.join(maps)} at {size} px")
 
 
 def export(obj: bpy.types.Object, path: Path) -> None:
@@ -273,7 +367,7 @@ def export(obj: bpy.types.Object, path: Path) -> None:
         export_image_format="JPEG",
         export_yup=True,
         export_normals=True,
-        export_tangents=False,
+        export_tangents="normal" in obj.get("ga3_maps", ""),
         export_animations=False,
     )
 
@@ -293,6 +387,9 @@ def main() -> None:
             else None
         )
         if bsdf is not None:
+            # A metallic source would darken the diffuse-colour bake: force dielectric.
+            for link in list(bsdf.inputs["Metallic"].links):
+                slot.material.node_tree.links.remove(link)
             bsdf.inputs["Metallic"].default_value = 0.0
     clean(source)
     normalise(source, args.length)
@@ -306,7 +403,7 @@ def main() -> None:
         target = int(args.lod0 * fraction)
         name = f"{args.name}_lod{level}"
         low = decimated_copy(source if lod0 is None else lod0, name, target)
-        bake_albedo(source, low, max(128, args.tex >> level))
+        bake_maps(source, low, max(128, args.tex >> level), args)
         export(low, out_dir / f"{name}.glb")
         dims = low.dimensions
         print(
