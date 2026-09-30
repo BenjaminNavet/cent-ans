@@ -1,4 +1,4 @@
-# Lanceur depuis les sources (LCH) — ADR 0117 — TERMINÉ sous Linux le 2026-09-30
+# Lanceur depuis les sources (LCH) — ADR 0117 — TERMINÉ le 2026-09-30 (Linux + Windows vérifiés)
 
 Branche `feat/launcher`. Objectif : un lanceur à double-cliquer pour macOS, Linux et Windows,
 qui recompile le cœur Rust et refait l'import headless seulement quand c'est nécessaire.
@@ -17,6 +17,9 @@ qui recompile le cœur Rust et refait l'import headless seulement quand c'est n�
 - [x] Changement dans `core/` → recompilation de godot-bridge, `.so` recopiée, pas d'import.
 - [x] Godot trouvé sans `GODOT` (`~/Downloads/Godot_v4.7.2-stable_linux.x86_64`) ; message clair sinon.
 - [x] `shellcheck` propre sur les scripts.
-- [ ] macOS (`Lancer Cent Ans.command`) et Windows (`Lancer Cent Ans.bat`) : non testables ici, à
-  essayer sur la machine du joueur.
+- [x] Windows : le workflow `windows` passe par `Lancer Cent Ans.bat` (Git Bash trouvé, DLL
+  compilée, import, smoke 30 « smoke OK ») — run 36667905653 vert, étape unique 16 min 43.
+- [ ] macOS (`Lancer Cent Ans.command`) : non testable ici, à essayer sur le Mac.
+- Branches distantes `windows/check-2026-09-30` et `windows/launcher` à supprimer à la main
+  (le proxy git coupe la suppression demandée par l'agent).
 - L'import a créé 16 `.uid` de tests manquants dans le dépôt : commités à part.
