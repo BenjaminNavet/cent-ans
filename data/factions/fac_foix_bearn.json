@@ -25,7 +25,7 @@
   },
   "titles": [
     "Comte de Foix",
-    "Vicomte souverain de Béarn"
+    "Vicomte de Béarn"
   ],
   "treasury": 5500,
   "prestige": 35,
@@ -37,7 +37,7 @@
     {
       "faction": "fac_france",
       "status": "peace",
-      "note": "Hommage rendu pour le seul comté de Foix ; le Béarn est tenu en alleu, sans hommage."
+      "note": "Hommage rendu au roi de France pour le comté de Foix ; le Béarn relève en principe du duc d'Aquitaine (le roi d'Angleterre), hommage que Gaston Fébus refusera en 1347."
     },
     {
       "faction": "fac_armagnac",
@@ -51,7 +51,7 @@
     "trade": 35,
     "piety": 55
   },
-  "description": "Gaston II tient le comté de Foix en fief du roi de France et la vicomté de Béarn en alleu souverain (double allégeance) ; rival de la maison d'Armagnac, il meurt en 1343 au retour de la croisade du Salado, laissant le Béarn à son fils Gaston III, le futur Gaston Fébus.",
+  "description": "Gaston II tient le comté de Foix en fief du roi de France et la vicomté de Béarn du duc d'Aquitaine, roi d'Angleterre (double allégeance) ; rival de la maison d'Armagnac, il meurt en 1343 pendant le siège d'Algésiras, laissant le Béarn à son fils Gaston III, le futur Gaston Fébus.",
   "sources": [
     "Gaston II de Foix-Béarn",
     "Vicomté de Béarn"

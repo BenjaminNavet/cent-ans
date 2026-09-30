@@ -1179,10 +1179,10 @@
     {
       "id": "de_diest",
       "name": "de Diest",
-      "blazon": "D'or à trois fasces de sable.",
-      "description": "Armes personnelles de Jean (III) de Diest, prince-évêque d'Utrecht, non retrouvées avec certitude : fasces retenues par convention.",
-      "source": "substitution éditoriale",
-      "certainty": "substitution",
+      "blazon": "D'or à deux fasces de sable.",
+      "description": "Armes des seigneurs de Diest (deux fasces de sable sur or, attestées dès le XIIIe siècle), maison de Jean (III) de Diest, prince-évêque d'Utrecht.",
+      "source": "nl.wikipedia : Wapen van Diest (web)",
+      "certainty": "attesté",
       "factions": [
         "fac_utrecht"
       ],

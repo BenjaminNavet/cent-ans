@@ -18,15 +18,13 @@
   "suzerain": "fac_england",
   "primary_title": "tit_albret",
   "heraldry": {
-    "blazon": "De gueules à deux léopards d'or, armés et lampassés d'azur, l'un sur l'autre.",
-    "description": "Armes de la maison d'Albret ; blasonnement incertain pour 1337, reconstitué d'après les sceaux ultérieurs.",
+    "blazon": "De gueules plain.",
+    "description": "Écu de gueules plain, armes des sires d'Albret jusqu'en 1389, quand Charles VI accorde à Arnaud Amanieu d'écarteler de France.",
     "primary_color": "#B0182B",
-    "secondary_color": "#F2C230",
-    "uncertain": true
+    "secondary_color": "#B0182B"
   },
   "titles": [
-    "Sire d'Albret",
-    "Sénéchal héréditaire de Gascogne"
+    "Sire d'Albret"
   ],
   "treasury": 2200,
   "prestige": 15,
@@ -37,7 +35,7 @@
     {
       "faction": "fac_england",
       "status": "vassal",
-      "note": "Sénéchal héréditaire de Gascogne pour le duc d'Aquitaine, tenu par le roi d'Angleterre."
+      "note": "Vassal gascon du duc d'Aquitaine, c'est-à-dire du roi d'Angleterre ; Bernard Ezi reste fidèle à Édouard III au début de la guerre."
     },
     {
       "faction": "fac_france",
@@ -50,7 +48,7 @@
     "trade": 55,
     "piety": 40
   },
-  "description": "Petite seigneurie gasconne sur la Baïse, sénéchaux héréditaires de Gascogne pour le duc d'Aquitaine ; la maison d'Albret basculera plusieurs fois d'allégeance pendant la guerre.",
+  "description": "Petite seigneurie gasconne sur la Baïse, vassaux du duc d'Aquitaine (le roi d'Angleterre) ; la maison d'Albret basculera plusieurs fois d'allégeance pendant la guerre.",
   "sources": [
     "Nérac",
     "Maison d'Albret"

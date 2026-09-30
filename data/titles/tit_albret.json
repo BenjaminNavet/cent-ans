@@ -7,11 +7,10 @@
     "local_language": "gascon"
   },
   "heraldry": {
-    "blazon": "De gueules à deux léopards d'or, armés et lampassés d'azur, l'un sur l'autre.",
-    "description": "Armes de la maison d'Albret ; blasonnement incertain pour 1337, reconstitué d'après les sceaux ultérieurs.",
+    "blazon": "De gueules plain.",
+    "description": "Écu de gueules plain, armes des sires d'Albret jusqu'en 1389, quand Charles VI accorde à Arnaud Amanieu d'écarteler de France.",
     "primary_color": "#B0182B",
-    "secondary_color": "#F2C230",
-    "uncertain": true
+    "secondary_color": "#B0182B"
   },
   "de_jure_liege": "tit_guyenne",
   "de_jure_provinces": [
@@ -48,7 +47,7 @@
       }
     }
   ],
-  "description": "Seigneurie gasconne, rang réduit à comté par convention de schéma (rang réel : simple seigneurie). Sénéchaussée héréditaire de Gascogne pour le duc d'Aquitaine (le roi d'Angleterre).",
+  "description": "Seigneurie gasconne, rang réduit à comté par convention de schéma (rang réel : simple seigneurie). Tenue du duc d'Aquitaine (le roi d'Angleterre).",
   "sources": [
     "Maison d'Albret",
     "Nérac"

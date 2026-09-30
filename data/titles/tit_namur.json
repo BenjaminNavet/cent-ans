@@ -29,7 +29,7 @@
     {
       "id": "obj_namur_hold",
       "title": "Garder le marquisat",
-      "description": "La maison de Dampierre-Namur doit conserver son comté, érigé en marquisat d'Empire en 1336.",
+      "description": "La maison de Dampierre-Namur doit conserver son comté, marquisat d'Empire depuis 1188.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_namur"
@@ -45,7 +45,7 @@
       }
     }
   ],
-  "description": "Comté de Namur, élevé au rang honorifique de marquisat par l'empereur Louis IV en 1336 ; tenu par la branche cadette de Dampierre, issue des comtes de Flandre.",
+  "description": "Comté de Namur, élevé au rang honorifique de marquisat par Frédéric Barberousse en 1188 ; tenu par la branche cadette de Dampierre, issue des comtes de Flandre.",
   "sources": [
     "Philippe III de Namur",
     "Comté de Namur"

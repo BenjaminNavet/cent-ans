@@ -1,7 +1,7 @@
 {
   "name": {
-    "display": "Donnchadh Mac Murchada",
-    "local": "Donnchadh Mac Murchadha",
+    "display": "Domhnall mac Airt Mac Murchada",
+    "local": "Domhnall mac Airt Mac Murchadha",
     "local_language": "gaélique irlandais"
   },
   "sex": "male",
@@ -13,8 +13,9 @@
     "uncertain": true
   },
   "death": {
-    "value": "1347",
-    "uncertain": true
+    "value": "1338",
+    "uncertain": true,
+    "note": "Mort vers 1338 selon le Dictionary of Irish Biography."
   },
   "historical": true,
   "titles": [
@@ -39,7 +40,7 @@
   "status": "at_court",
   "description": "Élu roi de Leinster en 1328 ; emprisonné à Dublin par les Anglais, il s'évade en janvier 1331 et mène depuis une guérilla dans les montagnes de Wicklow, capturant Clonmore et Arklow. Descendant de Diarmait Mac Murchada.",
   "sources": [
-    "Donnchadh Mac Murchada",
+    "MacMurrough (Mac Murchadha), Domhnall (DIB)",
     "Royaume de Leinster"
   ],
   "id": "chr_donnchadh_mac_murchada"

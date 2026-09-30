@@ -18,8 +18,8 @@
   "heraldry": {
     "blazon": "De gueules à la bande d'argent.",
     "description": "Approximation du fuselé traditionnel des Malatesta (le moteur de rendu simplifié des factions ne trace pas de fuselé) ; blason incertain, voir le titre.",
-    "primary_color": "#F5F1E6",
-    "secondary_color": "#B0182B"
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
   },
   "titles": [
     "Seigneur de Rimini",

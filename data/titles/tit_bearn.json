@@ -2,7 +2,7 @@
   "id": "tit_bearn",
   "rank": "county",
   "name": {
-    "display": "Vicomté souveraine de Béarn",
+    "display": "Vicomté de Béarn",
     "local": "Bearn",
     "local_language": "gascon"
   },
@@ -35,7 +35,7 @@
     {
       "id": "obj_bearn_independence",
       "title": "Le Béarn souverain",
-      "description": "Maintenir le Béarn hors de toute suzeraineté, tenu en alleu.",
+      "description": "Soustraire le Béarn à toute suzeraineté, comme le fera Gaston Fébus en 1347.",
       "condition": {
         "kind": "be_independent"
       }
@@ -50,7 +50,7 @@
       }
     }
   ],
-  "description": "Vicomté tenue en alleu, sans hommage, selon la prétention de la maison de Foix-Béarn (rang de comté par convention de schéma ; titre souverain, sans suzerain de jure).",
+  "description": "Vicomté relevant en 1337 du duc d'Aquitaine (le roi d'Angleterre) ; Gaston Fébus la déclarera tenue « de Dieu seul » en 1347. Titre sans suzerain de jure dans le jeu, par anticipation de cette souveraineté (rang de comté par convention de schéma).",
   "sources": [
     "Vicomté de Béarn",
     "Gaston II de Foix-Béarn"

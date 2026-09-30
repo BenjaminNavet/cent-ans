@@ -7,11 +7,10 @@
     "local_language": "occitan"
   },
   "heraldry": {
-    "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or.",
-    "description": "Blasonnement traditionnel de la maison d'Armagnac ; attesté surtout à partir du XIVe-XVe siècle.",
+    "blazon": "D'argent au lion de gueules.",
+    "description": "Armes du comté d'Armagnac ; depuis 1298, les comtes les écartèlent de Rodez (de gueules au léopard lionné d'or).",
     "primary_color": "#F5F1E6",
-    "secondary_color": "#B0182B",
-    "uncertain": true
+    "secondary_color": "#B0182B"
   },
   "de_jure_liege": "tit_france",
   "de_jure_provinces": [
@@ -44,7 +43,7 @@
       }
     }
   ],
-  "description": "Comté gascon tenu par Jean Ier d'Armagnac, lieutenant royal en Languedoc, rival acharné de Gaston II de Foix-Béarn.",
+  "description": "Comté gascon tenu par Jean Ier d'Armagnac, fidèle de Philippe VI, rival acharné de Gaston II de Foix-Béarn.",
   "sources": [
     "Jean Ier d'Armagnac",
     "Comté d'Armagnac"

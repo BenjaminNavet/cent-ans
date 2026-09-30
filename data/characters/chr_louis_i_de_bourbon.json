@@ -26,7 +26,11 @@
       "note": "Comté de Bourbon érigé en duché-pairie par Charles IV pour son cousin."
     },
     {
-      "title": "Comte de Clermont-en-Beauvaisis"
+      "title": "Comte de la Marche",
+      "from": {
+        "value": "1327"
+      },
+      "note": "Reçu en 1327 en échange du comté de Clermont-en-Beauvaisis, qu'il tenait depuis 1317."
     }
   ],
   "skills": {
