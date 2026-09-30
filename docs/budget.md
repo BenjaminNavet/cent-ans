@@ -154,3 +154,21 @@ NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
 | 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v1 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,20 $ |
 | 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v2 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,30 $ |
 | 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v3 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,40 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait sans ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,47 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait avec ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,54 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait sans ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 0,57 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait avec ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 0,60 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait sans ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 0,74 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait avec ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 0,88 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event sans ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,95 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event avec ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 1,02 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event sans ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,05 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event avec ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,08 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event sans ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,22 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event avec ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,36 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon sans ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 1,43 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon avec ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 1,50 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon sans ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,53 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon avec ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,56 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon sans ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,70 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon avec ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,84 $ |
