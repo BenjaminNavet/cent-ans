@@ -68,5 +68,15 @@ Prochaine étape : jugement du joueur.
 # CR4 — maille, cheval, lances (lot L3)
 
 État : démarré 2026-09-30 (même worktree `feat/sr`, budget 30 captures, `~/dev/cent-ans-raw/cr4/`).
-Prochaine étape : 1) camail « fourrure blanche » du gros chevalier ; 2) crinière et queue en mèches,
-robe à normale de poil, variété de robes, sabots ; 3) lances variées, fût veiné, flammes en tissu.
+Fait (shader) : maille rasante sans Fresnel (métal et réflectance → 0 à contre-jour : le f90 de
+Godot suit f0), creux du scan presque noirs (relief `d.b`), albédo ×0,55 ; robe : tuile de poil
+couché tournée vers l'arrière et le bas sur le tronc (tuile claire unie remplacée), crins en tuile
+de cheveux, crins et bas des jambes noirs des bais/isabelles, paturons plus foncés, balzane
+postérieure gauche 1 cheval sur 6 ; lance : longueur ±10 %, angle ±3°/±2° par cavalier autour de
+la prise de repos (`prop_grip/axis/side` du manifeste, os `Prop`), flamme ondulante (60 % des
+cavaliers), fût veiné le long de l'axe, prise noircie et lustrée.
+Fait (Blender) : crinière et queue en mèches prismatiques (`battle_fine_cavalry.strands`, 44/22
+mèches au LOD0) à la place des cartes CC0 dont le shader ignore l'alpha (blocs sombres).
+Écart : pas de cartes alpha (discard dans le shader des soldats = coût pour toute la troupe) ;
+mèches géométriques à la place.
+Prochaine étape : recuisson cavalerie, captures, tests, grille `cr4_ab.jpg`.
