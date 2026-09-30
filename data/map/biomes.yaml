@@ -1,0 +1,86 @@
+# Carte des biomes de la campagne (chantier HB, ADR 0143).
+# Légende de data/map/biomes.png (indice 8 bits, 7168 x 6144 = grille de map.json, EPSG:3035)
+# et paramètres de sa cuisson par `cent-ans geo biomes` (tools/cent_ans_tools/geo/biomes.py).
+# Validé par data/schemas/biomes.schema.json. Aucun seuil dans le code : tout est ici.
+# Les indices sont FIGÉS (lus par la carte de couleur, les matières de sol et les essences).
+
+classes:
+  - {index: 0, name: sea, label: "Mer / hors carte"}
+  - {index: 1, name: oceanic, label: "Océanique"}
+  - {index: 2, name: continental, label: "Continental"}
+  - {index: 3, name: mediterranean, label: "Méditerranéen"}
+  - {index: 4, name: steppe, label: "Steppe"}
+  - {index: 5, name: boreal, label: "Boréal"}
+  - {index: 6, name: mountain, label: "Montagnard / alpin"}
+  - {index: 7, name: semi_arid, label: "Semi-aride"}
+
+# Source : Köppen-Geiger 1 km, Beck et al. (2023), Scientific Data 10, 724, CC BY 4.0.
+# Période 1901-1930 : la plus ancienne du jeu de données, la moins réchauffée (plus proche
+# du climat de 1340 que 1991-2020). Archive téléchargée dans tools/geo/raw/koppen/ (hors dépôt).
+source:
+  name: "Beck et al. 2023, Köppen-Geiger 1 km, 1901-1930"
+  license: "CC BY 4.0"
+  url: "https://ndownloader.figshare.com/files/61012822"
+  archive: "koppen_geiger_tif.zip"
+  member: "1901_1930/koppen_geiger_0p00833333.tif"
+  # Codes 1..30 du raster (legend.txt de l'archive), dans l'ordre.
+  codes: [Af, Am, Aw, BWh, BWk, BSh, BSk, Csa, Csb, Csc, Cwa, Cwb, Cwc, Cfa, Cfb, Cfc,
+          Dsa, Dsb, Dsc, Dsd, Dwa, Dwb, Dwc, Dwd, Dfa, Dfb, Dfc, Dfd, ET, EF]
+
+# Correspondance Köppen -> biome avant les règles d'ajustement ci-dessous.
+koppen:
+  oceanic: [Cfb, Cfc]
+  continental: [Cfa, Dfa, Dfb, Dsa, Dsb, Dwa, Dwb, Cwa, Cwb, Cwc, Af, Am, Aw]
+  mediterranean: [Csa, Csb, Csc]
+  semi_arid: [BSh, BSk, BWh, BWk]
+  boreal: [Dfc, Dfd, Dsc, Dsd, Dwc, Dwd]
+  mountain: [ET, EF]
+
+rules:
+  # Océanique (bocage) seulement près de l'Atlantique ouvert : golfe de Gascogne, Manche
+  # à l'ouest du Cotentin, mer d'Irlande, mer du Nord au nord de la Frise. Au-delà, le Cfb
+  # du Bassin parisien, de la Picardie, de l'Allemagne ou des Balkans est continental
+  # (openfield). Distance en km à la mer « atlantique » (boîtes lon/lat ci-dessous).
+  oceanic_max_km: 150.0
+  # Boîtes [lon_min, lat_min, lon_max, lat_max] où la mer compte comme atlantique.
+  atlantic_boxes:
+    - [-40.0, 20.0, -5.6, 80.0]
+    - [-40.0, 43.2, -1.5, 80.0]
+    - [-40.0, 53.3, 10.5, 80.0]
+  # Steppes (BS/BW et continental sec) au nord de cette latitude ; au sud, semi-aride.
+  steppe_min_lat: 44.0
+  # Continental ou méditerranéen dont la sécheresse (landcover.dryness : steppe pontique,
+  # plateau anatolien) dépasse ce seuil : steppe au nord de steppe_min_lat, semi-aride au sud.
+  dry_min: 0.45
+  # Bruit basse fréquence ajouté à la sécheresse : lisière steppe / forêt irrégulière
+  # (la limite de landcover.dryness est une ligne brisée), en km, amplitude, graine.
+  dry_noise_km: 70.0
+  dry_noise_amp: 0.3
+  dry_noise_seed: 1343
+  # Semi-aride (BS seulement) près de la Méditerranée (Attique, côtes du Levant) : méditerranéen.
+  # Distance à la côte (km, coast_dist.png plafonné à ~46 km) et longitude max (pas la Caspienne).
+  coastal_semi_arid_km: 22.0
+  coastal_semi_arid_max_lon: 37.0
+  # Continental Dfb au nord de cette latitude : boréal (Finlande du sud, Russie du nord).
+  boreal_min_lat: 59.5
+  # Montagnard au-dessus de base_m à ref_lat, abaissé de per_deg_m par degré vers le nord ;
+  # + dry_extra_m pour les climats secs (plateaux d'Anatolie et d'Iran restent semi-arides).
+  mountain:
+    base_m: 1150.0
+    ref_lat: 46.0
+    per_deg_m: 22.0
+    dry_extra_m: 700.0
+    # Toundra (ET) en dessous du seuil montagnard : boréal.
+    tundra_lowland: boreal
+
+# Lissage : fondu gaussien des classes (argmax), puis suppression des îlots.
+smoothing:
+  sigma_km: 5.0
+  min_area_km2: 300.0
+
+# Repli déterministe sans source Köppen (téléchargement impossible) : règles simples.
+fallback:
+  # Méditerranéen au sud de cette latitude (plaines), semi-aride si sec et loin de la côte.
+  mediterranean_max_lat: 44.2
+  semi_arid_coast_km: 60.0
+  semi_arid_max_lat: 42.0

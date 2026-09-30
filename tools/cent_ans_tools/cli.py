@@ -282,6 +282,15 @@ def geo_colormap() -> None:
     _print_sizes("Carte de couleur du sol", paths)
 
 
+@geo_app.command("biomes")
+def geo_biomes() -> None:
+    """Carte des biomes (HB, ADR 0143) : biomes.png (indices 0-7) depuis Köppen-Geiger 1 km."""
+    from cent_ans_tools.geo import biomes as geo_biomes_step
+
+    paths = geo_biomes_step.build()
+    _print_sizes("Carte des biomes", paths)
+
+
 @geo_app.command("horizon")
 def geo_horizon(
     province: str = typer.Option(
