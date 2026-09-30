@@ -73,11 +73,11 @@ mosaic:
   openfield_lat_full: 48.5
   strip_orientation_km: 60.0
   # Densité : part cultivée = (gain_farmland * cultures + gain_grassland * prairie) x proximité.
-  gain_farmland: 1.35
-  gain_grassland: 0.55
+  gain_farmland: 1.9
+  gain_grassland: 0.8
   # Proximité des colonies : far_share loin de tout, 1 à côté (décroissance en km).
   settlement_decay_km: 6.0
-  far_share: 0.35
+  far_share: 0.45
   # Jamais sur roche, neige, eau, forêt dense, marais (seuils de part).
   max_rock: 0.45
   max_forest: 0.55
@@ -86,9 +86,9 @@ mosaic:
   # Variation de luminosité d'un bloc à l'autre.
   block_jitter: 0.12
   # Bocage : haies sombres aux bords de blocs là où la prairie domine.
-  hedge_strength: 0.45
-  hedge_grass_from: 0.35
-  hedge_grass_full: 0.6
+  hedge_strength: 0.35
+  hedge_grass_from: 0.5
+  hedge_grass_full: 0.75
   # Teinte dorée des cultures au sud (x sécheresse).
   dry_crop_tint: "#c9a654"
   dry_crop_amount: 0.35
