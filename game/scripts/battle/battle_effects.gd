@@ -690,8 +690,8 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		mat.initial_velocity_min = 2.5
 		mat.initial_velocity_max = 6.5
 		mat.gravity = Vector3(0, -9.8, 0)
-		mat.scale_min = 0.05  # CR1 : mottes de 5 à 12 cm (12-24 cm lisaient comme des pavés)
-		mat.scale_max = 0.12
+		mat.scale_min = 0.04  # CR1 : mottes de 4 à 10 cm (12-24 cm lisaient comme des pavés)
+		mat.scale_max = 0.1
 		mat.angular_velocity_min = -360.0
 		mat.angular_velocity_max = 360.0
 		grow.add_point(Vector2(0, 1.0))
@@ -848,9 +848,10 @@ static func _dust_texture() -> ImageTexture:
 	for y in SIZE:
 		for x in SIZE:
 			var r := Vector2(x + 0.5 - SIZE * 0.5, y + 0.5 - SIZE * 0.5).length() / (SIZE * 0.5)
-			var fall := 1.0 - smoothstep(0.15, 1.0, r)
 			var n := noise.get_noise_2d(x, y) * 0.5 + 0.5
-			var a := clampf(fall * fall * smoothstep(0.25, 0.8, n) * 1.3, 0.0, 1.0)
+			# Bord bosselé : le bruit décale aussi la retombée (pas de contour circulaire).
+			var fall := 1.0 - smoothstep(0.1, 0.95, r + (n - 0.5) * 0.7)
+			var a := clampf(fall * fall * smoothstep(0.2, 0.8, n) * 1.3, 0.0, 1.0)
 			var shade := lerpf(0.9, 1.05, n)
 			image.set_pixel(x, y, Color(shade, shade, shade, a))
 	image.generate_mipmaps()
@@ -864,7 +865,7 @@ func _splash_material() -> StandardMaterial3D:
 
 ## Motte : petit éclat de terre irrégulier, éclairé (terre ou boue), non flou.
 ## CR1 : l'ancienne texture (dégradé carré, 12-24 cm, découpe nette) donnait des cubes noirs à
-## contre-jour dans les gros plans ; désormais silhouette bosselée (`_clod_texture`), 5-12 cm,
+## contre-jour dans les gros plans ; désormais silhouette bosselée (`_clod_texture`), 4-10 cm,
 ## rétroéclairage (terre fine, jamais noire face au soleil) et fondu tramé en fin de vie.
 func _clod_material() -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
@@ -889,7 +890,7 @@ static func _clod_texture() -> ImageTexture:
 	rng.seed = 7
 	var lobes: Array[float] = []
 	for k in 7:
-		lobes.append(rng.randf_range(0.7, 1.0))
+		lobes.append(rng.randf_range(0.5, 1.0))
 	for y in SIZE:
 		for x in SIZE:
 			var d := Vector2(x + 0.5 - SIZE * 0.5, y + 0.5 - SIZE * 0.5) / (SIZE * 0.5)
