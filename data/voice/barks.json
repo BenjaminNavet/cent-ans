@@ -32,7 +32,6 @@
     "oc": {
       "label": "gascon",
       "voices": ["verse"],
-      "shout_voices": ["Liam"],
       "instructions": "Parle en gascon (occitan), avec l'accent chantant du sud-ouest de la France. Tu es un arbalétrier gascon du XIVe siècle : voix vive, méridionale."
     },
     "nl": {
