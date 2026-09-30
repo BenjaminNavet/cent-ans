@@ -118,6 +118,7 @@ AUTO_LEVELS = 0.5  # percent clipped at each end (ga3_cleanup, L1)
 EQUIP_UV_SHIFT = -4.0
 SOLIDIFY = 0.012  # m, thickens the open TRELLIS sheets before the voxel remesh
 VOXEL = 0.008  # m
+KEEP_ISLAND = 0.02  # share of the voxel vertices under which an island is dropped
 # Material codes (battle_skinned_equipment / battle_soldier_skinned.gdshader).
 C_LIVERY, C_PLATE, C_CLOTH, C_EXACT, C_ARMS = 0, 2, 4, 5, 6
 
@@ -460,7 +461,9 @@ def closed_low(hi, target, name):
             mod.mode = "VOXEL"
         with bpy.context.temp_override(object=low, active_object=low):
             bpy.ops.object.modifier_apply(modifier=mod.name)
-    islands, dropped = probe.drop_islands(low, keep_ratio=0.3)
+    # Legs under a tabard may come out as islands of their own (≈ 6 % each, crossbowman):
+    # only the voxel crumbs go.
+    islands, dropped = probe.drop_islands(low, keep_ratio=KEEP_ISLAND)
     dense = len(low.data.polygons)
     for _ in range(4):
         if len(low.data.polygons) <= target * 1.02:
@@ -739,8 +742,69 @@ SHOTS = [
 ]
 
 
+def cam_uvs(path):
+    """Per-vertex UVs of an exported ``CAM1`` / ``CAM2`` file (Blender convention)."""
+    import struct
+    import zlib
+
+    with open(path, "rb") as f:
+        data = f.read()
+    n = struct.unpack("<I", data[4:8])[0]
+    raw = zlib.decompress(data[16:])
+    floats = struct.unpack(f"<{n * 2}f", raw[n * 10 * 4 : n * 12 * 4])
+    return [floats[2 * i : 2 * i + 2] for i in range(n)]
+
+
+def game_posed(fig, clip, frac, idle, image):
+    """The exported GA3 LOD0 of `fig` skinned on the CPU with the game's bone texture.
+
+    Same frames as the current figure beside it (``add_current_archer``): the held items
+    follow the virtual bones (``Prop``) exactly as in the game. Body faces carry the preview
+    albedo, equipment faces (u < 0, ``C_ARMS``) their vertex colour.
+    """
+    import battle_fine_check as fc
+    import bpy
+    import ga3_figure_probe as probe
+
+    with open(os.path.join(FINE_DIR, "manifest.json")) as f:
+        rig = json.load(f)["rigs"]["human"]
+    frames = fc.load_bones(os.path.join(FINE_DIR, rig["texture"]))
+    path = os.path.join(OUT_DIR, f"{fig}_lod0.mesh.bin")
+    *mesh, _atlas = probe.load_cam(path)
+    uvs = cam_uvs(path)
+    c = rig["clips"][clip or idle]
+    fr = c["start"] + int(round((frac if clip else 0.0) * (c["frames"] - 1)))
+    obj = fc.skinned_object(f"{fig}_ga3_game", mesh, frames[fr], 0)
+    me = obj.data
+    layer = me.uv_layers.new(name="UVMap")
+    colours = mesh[1]
+    body = bpy.data.materials.new("ga3_game_body")
+    body.use_nodes = True
+    tex = body.node_tree.nodes.new("ShaderNodeTexImage")
+    tex.image = image
+    body.node_tree.links.new(
+        tex.outputs[0], body.node_tree.nodes["Principled BSDF"].inputs["Base Color"]
+    )
+    body.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.8
+    me.materials.append(body)
+    me.materials.append(probe._vertex_colour_material())
+    for poly in me.polygons:
+        gear_face = False
+        for li in poly.loop_indices:
+            vi = me.loops[li].vertex_index
+            layer.data[li].uv = uvs[vi]
+            code = int(colours[vi][3] + 0.5)  # CAM colour alpha = raw code
+            gear_face = gear_face or uvs[vi][0] < 0.0 or code == C_ARMS
+        poly.material_index = 1 if gear_face else 0
+    return obj
+
+
 def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
-    """LOD0 beside the current fine figure (probe renders), game-like tint of the albedo."""
+    """Exported LOD0 beside the current fine figure, both in the game's poses (L3b).
+
+    Game-like tint of the albedo; the Blender-posed objects stay hidden (their virtual
+    bones do not follow the clips' overrides).
+    """
     import battle_fine_proto as fp
     import bpy
     import ga3_figure_probe as probe
@@ -766,8 +830,9 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
                     n.image = img
     scene = probe.setup_eevee()
     cam = fp.camera()
-    for o in kept[0][1]:
-        fp.attach(o, arm)
+    for body_obj, gear_objs in kept.values():
+        for o in [body_obj, *gear_objs]:
+            o.hide_render = True
     unit = UNITS[unit_name]
     fig = unit["figure"]
     clips = unit["clips"]
@@ -776,7 +841,7 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
         for o in [
             o
             for o in bpy.data.objects
-            if o.name.startswith(fig) and "ga3" not in o.name
+            if o.name.startswith(fig) and ("ga3" not in o.name or "_ga3_game" in o.name)
         ]:
             bpy.data.objects.remove(o)
         for pb in arm.pose.bones:
@@ -785,6 +850,7 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
             fp.pose_clip(arm, clip, frac)
         bpy.context.view_layer.update()
         probe.add_current_archer(clip, frac, fig, clips["idle"])
+        game_posed(fig, clip, frac, clips["idle"], img)
         fp.look_at(cam, eye, target, 40)
         scene.render.resolution_x, scene.render.resolution_y = (560, 620)
         fp.render(os.path.join(out, f"{label}.png"))
@@ -849,22 +915,22 @@ def sheet(unit_name, jpg, raw, tags):
 
 
 def board(jpg, raw, names, tag="multi_front_back"):
-    """Planche of several units: one row each, walk and attack (generated | current)."""
+    """Planche of several units: one column each, walk above attack (generated | current)."""
     from PIL import Image, ImageDraw, ImageFont
 
     try:
         font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 15)
     except OSError:
         font = ImageFont.load_default()
-    h = 300
+    h = 380
     rows = []
-    for name in names:
-        unit = UNITS[name]
+    for shot, role in (("walk", "walk"), ("shoot", "attack")):
         row = []
-        for shot, role in (("walk", "walk"), ("shoot", "attack")):
+        for name in names:
+            unit = UNITS[name]
             path = os.path.join(raw, name, "renders_" + tag, shot + ".png")
             im = Image.open(path).convert("RGB")
-            label = f"{name} ({unit['figure']}) {unit['clips'][role]} : GA3 | actuel"
+            label = f"{unit['figure']} {unit['clips'][role]} : GA3 | actuel"
             row.append((label, im.resize((int(im.width * h / im.height), h))))
         rows.append(row)
     width = max(sum(t.width for _, t in r) for r in rows)

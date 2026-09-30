@@ -76,7 +76,11 @@ unité). Figurines retenues (une par type ; `data/unit_types` `figure` + `battle
 - [x] 1. Prompts `ga3_fal_figure.py`, `UNITS` de `ga3_figures.py` en données (équipement tiré de
       la recette fine, `metal_z`, clips), `equipment()` générique (registre fin puis V2 ; faces
       `C_ARMS` gardent l'UV d'armoiries), shader `GA3_TEX` épargne `C_ARMS`, planche `board`
-- [ ] 2. Générations (planche NB2 + bria + multi face/dos) des 4 unités
-- [ ] 3. Blender : 4 figurines, rendus, planche `docs/img/ga3/l3b_units.jpg`
-- [ ] 4. Test `ga3_l3_figures_test.gd` 5 figurines, tests de non-régression, 1 capture Godot
+- [x] 2. Générations (planche NB2 + bria + multi face/dos) des 4 unités : 1 essai chacune,
+      0,632 $ (planches propres, A-pose, mains vides ; épée au fourreau de l'homme d'armes gardée)
+- [x] 3. Blender : 4 figurines (heat 100 %), rendus aux poses du jeu (LOD0 exporté skinné CPU
+      avec la texture d'os, comme la figurine actuelle), planche `docs/img/ga3/l3b_units.jpg` ;
+      îlots voxel < 2 % seulement retirés (jambes sous le tabard de l'arbalétrier = îlots)
+- [ ] 4. Test `ga3_l3_figures_test.gd` 5 figurines (fait, deux modes OK), tests de
+      non-régression, 1 capture Godot
 - [ ] 5. Docs `ga3.md` § L3b, ADR 0140, budget
