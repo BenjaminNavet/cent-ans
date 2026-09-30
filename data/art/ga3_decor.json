@@ -11,7 +11,7 @@
     {
       "id": "house",
       "label": "Maison paysanne à pans de bois et chaume",
-      "prompt": "small 14th-century French peasant cottage, one storey only with a low attic under the roof, walls of lime-washed wattle and daub infill between exposed weathered dark oak timber framing, steep thick straw thatched roof with a plain ridge, a small smoke hole in the thatch near the ridge and no chimney, one low plank door with iron strap hinges, one small unglazed window with a wooden shutter, low rubble fieldstone sill wall at the foot of the walls.",
+      "prompt": "small 14th-century French peasant cottage, one storey only with a low attic under the roof, walls of lime-washed wattle and daub infill between exposed weathered dark oak timber framing, steep roof of very thick old straw thatch that is dark grey-brown and weathered, darkened by years of rain and smoke, the thatch smooth, dense and evenly combed with a uniform surface and thick rounded eaves, a plain ridge, a small smoke hole in the thatch near the ridge and no chimney, one low plank door with iron strap hinges, one small unglazed window with a wooden shutter, low rubble fieldstone sill wall at the foot of the walls.",
       "model": "trellis",
       "scale_axis": "length",
       "size_m": 8.0,
@@ -22,7 +22,10 @@
       "share": 0.5,
       "wired": true,
       "raw": "s4",
-      "glb": "trellis.glb"
+      "glb": "trellis.glb",
+      "cleanup": {
+        "auto_levels": 0.1
+      }
     },
     {
       "id": "church",
@@ -86,7 +89,7 @@
     {
       "id": "well",
       "label": "Puits",
-      "prompt": "medieval village well, a round low wall of rough fieldstone blocks, two wooden posts carrying a crossbeam with a wooden windlass and crank, a hemp rope and a wooden bucket bound with iron hoops, a small pitched plank roof over the windlass.",
+      "prompt": "medieval village well, a round low wall of rough fieldstone blocks, two wooden posts carrying a crossbeam with a wooden windlass and crank, a hemp rope and a wooden bucket bound with iron hoops, a small pitched roof of dark weathered brown oak shingles over the windlass, the roof dark and wooden like the posts.",
       "model": "trellis",
       "scale_axis": "height",
       "size_m": 3.4,
@@ -133,8 +136,8 @@
     {
       "id": "ram",
       "label": "Bélier couvert",
-      "prompt": "medieval covered battering ram, a long tree-trunk ram with an iron cap hung by chains inside a low wheeled wooden gallery, the pitched roof of the gallery covered with rawhides, four solid wooden wheels, heavy oak frame.",
-      "model": "multi",
+      "prompt": "medieval covered battering ram, a long tree-trunk ram with an iron cap hung by chains inside a low wheeled wooden gallery, the pitched roof of the gallery made of thick dark weathered oak planks covered with wet dark brown leather hides of one plain uniform colour, four solid wooden wheels, heavy oak frame.",
+      "model": "trellis",
       "scale_axis": "length",
       "size_m": 7.0,
       "lod0": 3000,

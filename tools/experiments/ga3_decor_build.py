@@ -6,7 +6,8 @@ Run from the repository root once the raw meshes exist (``ga3_fal_decor.py --cat
 
 For each object of ``data/art/ga3_decor.json``: ``blender -b`` runs
 ``tools/blender_scripts/ga3_cleanup.py`` on ``RAW/<raw>/<glb>`` with the object's size, triangle
-cap, texture size and the catalogue's albedo grading, writing
+cap, texture size and the catalogue's albedo grading (the object's ``cleanup`` overrides the
+common one key by key), writing
 ``game/assets/models/props_ga/ga3_<id>_lod{0,1,2}.glb``. Then
 ``game/assets/models/props_ga/manifest.json`` gathers, per object, the kit type it stands in
 for, its share, its measured footprint (``length`` along X, ``depth`` along Z, ``height``) and
@@ -51,6 +52,8 @@ def cleanup_command(entry: dict, source: Path, cleanup: dict, stats: Path) -> li
         str(entry["lod0"]),
         "--tex",
         str(entry["tex"]),
+        "--exposure",
+        str(cleanup.get("exposure", 1.0)),
         "--auto-levels",
         str(cleanup.get("auto_levels", 0.0)),
         "--gamma",
@@ -101,7 +104,8 @@ def main() -> None:
             continue
         source = raw_mesh(entry, Path(args.raw))
         stats_path = source.parent / f"stats_{entry['id']}.json"
-        command = cleanup_command(entry, source, catalog["cleanup"], stats_path)
+        cleanup = {**catalog["cleanup"], **entry.get("cleanup", {})}
+        command = cleanup_command(entry, source, cleanup, stats_path)
         log = source.parent / f"cleanup_{entry['id']}.log"
         with log.open("w") as handle:
             subprocess.run(command, check=True, stdout=handle, stderr=subprocess.STDOUT)
