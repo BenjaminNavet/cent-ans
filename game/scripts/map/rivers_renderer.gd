@@ -162,6 +162,8 @@ func update_visibility(camera_distance: float) -> void:
 		_update_carved_rects()
 	if fine != null:
 		fine.update_view(camera_distance)
+	if labels != null:
+		labels.update_view(camera_distance)  # VN
 	var should_show := camera_distance < minor_max_distance
 	if should_show == _minor_visible or _minor == null:
 		return
