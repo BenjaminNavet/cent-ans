@@ -18,7 +18,7 @@ session : ne pas la lancer ici ; fusionner vite pour la débloquer.
 - [ ] L4 — Colombage `TimberFrame` (SR5, à faire) : réexport du kit Blender avec la couche en fin
       de tableau et correction de `first_plain`, choix régional (Normandie, Île-de-France,
       Angleterre, Flandre : colombage ; Midi : pierre/torchis), toits bleus du château Kenney.
-- [ ] L5 — Herbe de campagne plus lisible (d 12-20), clé `veg_max_distance` par préréglage
+- [x] L5 — Herbe de campagne plus lisible (d 12-20), clé `veg_max_distance` par préréglage
       (portée des imposteurs 700 → 1000 en Haute/Ultra si le budget le permet).
 - [ ] L6 — FC4 banc A/B Metal sur machine calme (aucun agent actif) : `main` avant FC contre
       après, 3 passes chacun, résultats dans `docs/wip/fc.md` et l'ADR 0137.
