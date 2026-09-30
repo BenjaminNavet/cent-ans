@@ -11,6 +11,7 @@
 //! on the square with passages left open in front of every street.
 
 use crate::siege::{House, SiegeWorks};
+use crate::siege_layouts::PlaceKind;
 use crate::site::Village;
 use crate::town::{hash01, Footprint, Prop, PropKind, TownRules};
 
@@ -19,6 +20,7 @@ const SALT_KIND: u64 = 0xB3_0002;
 const SALT_SLIDE: u64 = 0xB3_0003;
 const SALT_SIDE: u64 = 0xB3_0004;
 const SALT_MARKET: u64 = 0xB3_0005;
+const SALT_BAILEY: u64 = 0xB3_0006;
 
 /// Key of a house for the hashed draws: its index and position.
 fn key(index: usize, x: f64, z: f64) -> u64 {
@@ -233,13 +235,75 @@ fn market(works: &SiegeWorks, rules: &TownRules, seed: u64) -> Vec<Prop> {
     out
 }
 
+/// NT8: the bailey of a castle: a well in the middle and a few carts,
+/// barrels and woodpiles scattered round it, clear of the lanes (to the
+/// gate and the keep).
+fn bailey(works: &SiegeWorks, rules: &TownRules, seed: u64) -> Vec<Prop> {
+    let c = &rules.places.castle;
+    let (cx, cz) = works.center;
+    let well = rules.props.size(PropKind::Well);
+    let mut out = vec![Prop {
+        kind: PropKind::Well,
+        x: cx,
+        z: cz,
+        yaw: 0.0,
+        length: well.length_m,
+        depth: well.depth_m,
+        house: None,
+    }];
+    let (lo, hi) = (c.bailey_props[0], c.bailey_props[1].max(c.bailey_props[0]));
+    let wanted = lo + ((hash01(seed, SALT_BAILEY) * f64::from(hi - lo + 1)) as u32).min(hi - lo);
+    let passage = rules.props.market.passage_m * 0.5;
+    let lanes: Vec<Vec<(f64, f64)>> = works.streets.clone();
+    let clear_of_lanes = |f: &Footprint| {
+        lanes.iter().all(|line| {
+            line.windows(2).all(|w| {
+                f.distance_to_segment(w[0], w[1]) >= passage - f.bounding_radius().min(passage)
+            })
+        })
+    };
+    let mut placed = 0;
+    for attempt in 0..wanted * 6 {
+        if placed == wanted {
+            break;
+        }
+        let salt = SALT_BAILEY + 10 + u64::from(attempt) * 4;
+        let kind = pick(&c.bailey_kinds, hash01(seed, salt));
+        let size = rules.props.size(kind);
+        let a = hash01(seed, salt + 1) * std::f64::consts::TAU;
+        let r = works.square_radius * (0.35 + 0.5 * hash01(seed, salt + 2));
+        let (x, z) = (cx + a.sin() * r, cz + a.cos() * r);
+        // Mostly lined up on the centre, a little askew.
+        let turn = (hash01(seed, salt + 3) * 2.0 - 1.0) * 0.5;
+        let yaw = crate::siege::yaw_facing(-a.sin(), -a.cos()) + turn;
+        let prop = Prop {
+            kind,
+            x,
+            z,
+            yaw,
+            length: size.length_m,
+            depth: size.depth_m,
+            house: None,
+        };
+        let f = prop.footprint();
+        let near_well = (x - cx).hypot(z - cz) < f.bounding_radius() + well.length_m + 2.0;
+        if near_well || !clear_of_lanes(&f) {
+            continue;
+        }
+        out.push(prop);
+        placed += 1;
+    }
+    out
+}
+
 /// Props of a besieged town (blocks, suburbs, market square).
 pub fn siege_props(works: &SiegeWorks, rules: &TownRules) -> Vec<Prop> {
     let p = &rules.props;
     let (cx, cz) = works.center;
     let mut props = Vec::new();
+    let castle = (works.place == PlaceKind::Castle).then_some(&rules.places.castle);
     for (i, h) in works.houses.iter().enumerate() {
-        if h.church {
+        if h.church || h.keep {
             continue;
         }
         let fp = h.footprint();
@@ -260,7 +324,10 @@ pub fn siege_props(works: &SiegeWorks, rules: &TownRules) -> Vec<Prop> {
             let sign = if r == 0 { 1.0 } else { -1.0 };
             let (fx, fz) = fp.front();
             let towards_square = (fx * (cx - h.x) + fz * (cz - h.z)) * sign > 0.0;
-            let kinds = if towards_square {
+            let kinds = if let Some(c) = castle {
+                // NT8: the outbuildings of a castle (stables, stores).
+                &c.lean_to_kinds
+            } else if towards_square {
                 &p.square_kinds
             } else {
                 &p.street_kinds
@@ -271,7 +338,11 @@ pub fn siege_props(works: &SiegeWorks, rules: &TownRules) -> Vec<Prop> {
         }
     }
     let seed = key(works.houses.len(), cx, cz);
-    props.extend(market(works, rules, seed));
+    if castle.is_some() {
+        props.extend(bailey(works, rules, seed));
+    } else {
+        props.extend(market(works, rules, seed));
+    }
     let footprints: Vec<Footprint> = works.houses.iter().map(House::footprint).collect();
     keep_clear(props, &footprints)
 }
