@@ -1,4 +1,4 @@
-# 0144 — Ville détaillée plus haut, toits lointains de la couleur des blocs
+# 0144 — Ville détaillée plus haut, une seule teinte de toits de loin
 
 Date : 2026-09-30. Statut : acceptée. Amende l'ADR 0138.
 
@@ -14,11 +14,13 @@ joueur trouve ce contraste gênant et veut la ville détaillée plus haut.
   (`resources/town_render.tres` et valeurs par défaut de `TownRenderProfile`). L'enfoncement du
   lointain suit (`block_range` × qualité × `sink_factor`). Les facteurs de qualité sont inchangés
   (bas : blocs jusqu'à 25).
-- Toits du maillage lointain : moyenne de la couche `RoofTile` × teinte des blocs
-  (`TownBuilder.BLOCK_ROOF_TINT`), avec la variation par cellule de la masse de toits ; le passage
-  bloc → lointain garde la même couleur (`town_far.gdshader`, `block_roof_layer`).
+- Toits des blocs simples (`lod_mode` 2 de `town_building.gdshader`) : fondu vers la teinte
+  « masse de toits » (`roofscape.gdshaderinc`, celle du lointain) de `roofscape_near` à
+  `roofscape_far` (1,2 → 3,5 u). Essai écarté : aligner le lointain sur la tuile des blocs
+  (× 0,8 ; 0,58 ; 0,5) donnait de loin des taches rouge sang.
 
 ## Conséquences
 - Plus de villes chargées en 1:1 aux hauteurs moyennes (rayon de chargement jusqu'à 48 u) : coût
   mesuré dans `docs/wip/vt.md` (banc d = 30 et 40).
-- Les villes vues de très loin prennent la teinte de tuile au lieu du mélange de couches.
+- De près (< 1,2 u), les blocs gardent leur tuile ; au-delà, blocs, sol bâti et lointain ont la
+  même teinte.

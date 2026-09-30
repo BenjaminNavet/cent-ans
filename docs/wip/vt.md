@@ -80,3 +80,16 @@ Chantier VT terminé sur `feat/vt` : fusion dans main par la session principale,
   même `TownPlan.Heights` que la ville 1:1), sol échantillonné par sommet ; nappe des quartiers
   découpée en cellules de 200 m (`DISTRICT_CELL_M`), jupe densifiée. Test ajouté dans
   `tf_far_mesh_test` (écart sommet/relief < 0,5 m).
+
+## Ville détaillée plus haut (30/09, ADR 0144, demande du joueur)
+- Portées : `max_rig_distance` 16 → 45, `block_range` 14 → 42, `stream_max` 18 → 48.
+- Toits des blocs : fondu vers la teinte « masse de toits » du lointain (1,2 → 3,5 u) ; essai
+  inverse (lointain en tuile des blocs) écarté, taches rouge sang de loin.
+- Banc `--bench-pan-only`, 1280 × 720, qualité Haute, 2 passes alternées, machine chargée
+  (charge 30-70) : d = 30 appels p50 411-414 → 436, primitives 2,77 → 2,80 M ; d = 40 appels
+  466-468 → 463-481, primitives 2,81-2,85 → 2,79-2,83 M ; coût CPU du rendu 0,6-0,7 ms dans les
+  deux ; i/s et pics dans le bruit (pics > 50 ms : 17 en base, 28 en nouveau, passes différentes).
+  En panoramique seules 2-4 villes 1:1 ont le temps de se charger (plans 2 fils) ; à l'arrêt,
+  Paris d = 35 : 7 villes construites, d = 22 : 9.
+- Captures d = 35 / 22 (locales) : Paris 1:1 active, même teinte que le lointain, plus de dalles.
+- À juger en partie réelle : chargement progressif en déplacement rapide ; banc sur machine calme.

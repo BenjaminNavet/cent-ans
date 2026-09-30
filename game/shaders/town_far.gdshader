@@ -23,10 +23,6 @@ uniform int roof_first = 7;
 uniform int roof_last = 10;
 uniform float snow = 0.0;
 uniform float meters_per_unit = 719.0;
-// Toits : couche et teinte des blocs simples de la ville 1:1 (`TownBuilder.block_mesh`), pour que
-// le passage bloc → lointain garde la même couleur ; < 0 : teinte « masse de toits » multi-couches.
-uniform int block_roof_layer = -1;
-uniform vec3 block_roof_tint = vec3(0.8, 0.58, 0.5);
 // Poids de la teinte de toits partagée sur les faces de toit (0 : COLOR seule).
 uniform float roof_mix = 1.0;
 #include "res://shaders/campaign_relief.gdshaderinc"
@@ -78,23 +74,7 @@ void fragment() {
 		float detail = 1.0 - smoothstep(roofscape_cell_m * 0.5, roofscape_cell_m * 2.0, footprint);
 		float r_cell;
 		float r_avg;
-		vec3 roof;
-		if (block_roof_layer >= 0) {
-			// Moyenne de la tuile des blocs (même filtrage que de loin), variation de luminosité et
-			// ruelles par cellule comme `roofscape_color`.
-			vec3 tile = textureLod(albedo_array, vec3(0.5, 0.5, float(block_roof_layer)), 12.0).rgb
-				* layer_tint[block_roof_layer].rgb * block_roof_tint;
-			float h = roof_hash(floor(world_m.xz / roofscape_cell_m));
-			vec2 f = abs(fract(world_m.xz / roofscape_cell_m) - 0.5) * 2.0;
-			float gap = smoothstep(0.72, 0.95, max(f.x, f.y));
-			float cell = mix(0.85, 1.1, fract(h * 7.31)) * mix(1.0, 0.7, gap);
-			roof = tile * mix(1.0, cell, detail);
-			if (snow > 0.0) {
-				roof = mix(roof, vec3(0.9, 0.92, 0.97), snow);
-			}
-		} else {
-			roof = mix(roofscape_average(r_avg), roofscape_color(world_m, r_cell), detail);
-		}
+		vec3 roof = mix(roofscape_average(r_avg), roofscape_color(world_m, r_cell), detail);
 		albedo = mix(albedo, roof, up);
 	}
 	ALBEDO = albedo;
