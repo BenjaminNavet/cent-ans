@@ -32,6 +32,9 @@ const TITLE := "Formations de groupe"
 ## RS-F : sélecteur replié (seul l'en-tête reste) ; retenu toute la bataille (le nœud vit avec
 ## la scène de bataille).
 var collapsed := false
+## VN4 : replié de lui-même quand le combat commence (hors déploiement, jeu en marche), sauf si
+## le joueur l'a déjà replié ou déplié : ouvert, il couvrait le champ au-dessus du bandeau.
+var _auto_collapse_done := false
 var header: Button
 var body: VBoxContainer
 
@@ -75,7 +78,9 @@ func _build() -> void:
 	header.add_theme_color_override("font_hover_color", INK)
 	header.add_theme_color_override("font_pressed_color", INK)
 	RichTooltip.attach_plain(header, "formation_picker_toggle")
-	header.pressed.connect(toggle_collapsed)
+	header.pressed.connect(func() -> void:
+		_auto_collapse_done = true
+		toggle_collapsed())
 	outer.add_child(header)
 	body = VBoxContainer.new()
 	body.name = "Body"
@@ -228,6 +233,9 @@ func _deploying() -> bool:
 func _process(_delta: float) -> void:
 	if scene == null:
 		return
+	if not _auto_collapse_done and not _deploying() and not bool(scene.paused):
+		_auto_collapse_done = true
+		set_collapsed(true)
 	if place_button.visible != _deploying():
 		if not _deploying():
 			pending.clear()

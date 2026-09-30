@@ -130,7 +130,7 @@ func _ready() -> void:
 	court_panel.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
 	court_panel.closed.connect(func() -> void: court_panel.hide())
 	# Le journal occupe la même colonne : masqué tant que la cour est ouverte.
-	court_panel.visibility_changed.connect(func() -> void: event_log.visible = not court_panel.visible)
+	hide_log_while(court_panel)
 	court_panel.hide()
 	character_sheet.closed.connect(func() -> void: character_sheet.hide())
 	character_sheet.character_requested.connect(func(id: String) -> void: character_selected.emit(id))
@@ -147,7 +147,7 @@ func _ready() -> void:
 	tech_panel.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
 	tech_panel.closed.connect(func() -> void: tech_panel.hide())
 	# Le panneau recouvre le journal : masqué tant que les technologies sont ouvertes.
-	tech_panel.visibility_changed.connect(func() -> void: event_log.visible = not tech_panel.visible and not court_panel.visible)
+	hide_log_while(tech_panel)
 	# --- C5 : routes commerciales ---
 	trade_button.toggled.connect(func(_pressed: bool) -> void: trade_layer_toggle_requested.emit())
 	tech_panel.hide()
@@ -811,7 +811,7 @@ func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 
 
 ## Capacité affichée du bandeau (`8/20`) tant que la simulation n'expose pas `max_units`.
-const DEFAULT_ARMY_CAPACITY := 20
+const DEFAULT_ARMY_CAPACITY := 40
 const HUD_MARGIN := 16.0
 const LOG_WIDTH := 420.0
 
@@ -834,6 +834,23 @@ func selected_army_widget() -> ArmyStrip:
 ## Accesseur stable (tutoriel F8) : la cloche de fin de saison (nœud `EndTurnCluster`).
 func end_turn_control() -> EndTurnCluster:
 	return end_turn_cluster
+
+
+## VN : panneaux centrés qui recouvrent la colonne du journal (cour, technologies, objectifs) : le
+## journal se masque tant que l'un d'eux est ouvert.
+var _log_hiders: Array[Control] = []
+
+
+func hide_log_while(panel: Control) -> void:
+	_log_hiders.append(panel)
+	panel.visibility_changed.connect(_update_log_visibility)
+
+
+func _update_log_visibility() -> void:
+	var covered := false
+	for panel in _log_hiders:
+		covered = covered or (is_instance_valid(panel) and panel.visible)
+	event_log.visible = not covered
 
 
 ## Lot U5 (audit A3, T5) : bandeau « Tour des autres factions » affiché pendant la résolution de
@@ -878,9 +895,13 @@ func _setup_turn_banner() -> void:
 	turn_banner.add_child(column)
 	_turn_banner_title = HudStyle.label("Tour des autres factions", UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	_turn_banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# VN : le bandeau vit dans la zone `TOASTS` (étroite en 1280×720) : ses textes passent à la
+	# ligne au lieu d'être coupés à droite.
+	_turn_banner_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_turn_banner_title)
 	_turn_banner_detail = HudStyle.label("", UiType.size(UiType.BODY), HudStyle.INK_SOFT)
 	_turn_banner_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_turn_banner_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_turn_banner_detail)
 	add_child(turn_banner)
 	turn_banner.hide()
@@ -987,6 +1008,8 @@ func _setup_zones() -> void:
 	UiZones.put(UiZones.Zone.SIDE_PANEL, news_letters)
 	news_letters.size_flags_horizontal = Control.SIZE_SHRINK_END
 	UiZones.put(UiZones.Zone.TOASTS, event_log)
+	# VN : le journal reste en haut de la pile (les avis s'empilent dessous, sans le repousser).
+	event_log.get_parent().move_child(event_log, 0)
 	UiZones.put(UiZones.Zone.TOASTS, turn_banner)
 	# Q6 : la zone des avis reste sous les fenêtres du joueur (étage HUD) ; elle ne passe devant les
 	# panneaux (étage BANNER, Q4) que le temps du bandeau de fin de tour.
@@ -1214,7 +1237,7 @@ func layout_hud() -> void:
 		court_panel.set_max_right(view.x - CharacterSheet.COMPACT_WIDTH - 2.0 * CharacterSheet.SCREEN_MARGIN)
 	else:
 		court_panel.set_max_right(INF)
-	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x)
+	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x, view.y)
 	# U1 : panneaux centraux gardés à l'écran (bouton × visible), puis la minicarte se masque
 	# dès qu'un grand panneau la recouvrirait (elle ne passe jamais par-dessus).
 	var wide_panel_open := false

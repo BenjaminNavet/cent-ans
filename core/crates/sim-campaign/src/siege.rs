@@ -77,6 +77,65 @@ pub(crate) fn province_of(state: &CampaignState, settlement: &SettlementId) -> P
         .unwrap_or_else(|| ProvinceId::new("prov_unknown").expect("well-formed id"))
 }
 
+/// Ends the siege of `settlement`, if any, with a `SiegeLifted` event.
+fn lift_siege(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(entry) = state.settlements.get_mut(settlement) else {
+        return;
+    };
+    if entry.siege.take().is_none() {
+        return;
+    }
+    let controller = entry.controller.clone();
+    events.push(
+        GameEvent::new(
+            EventKind::SiegeLifted,
+            format!(
+                "Le siège {} est levé.",
+                crate::events::de(&settlement_name(data, settlement))
+            ),
+        )
+        .province(&province_of(state, settlement))
+        .faction(&controller),
+    );
+}
+
+/// `army_id` besieged `settlement` before an order: once it has marched
+/// off, it leaves the siege stance, and the siege is lifted at once when
+/// nobody else besieges the place (not at the end of the turn, which left
+/// the camp drawn around the place and on the army).
+pub(crate) fn leave_siege(
+    state: &mut CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    settlement: &SettlementId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(army) = state.armies.get_mut(army_id) else {
+        return;
+    };
+    if army.is_at(settlement) {
+        return;
+    }
+    if army.stance == Stance::Siege {
+        army.stance = Stance::Normal;
+    }
+    let Some(controller) = state
+        .settlements
+        .get(settlement)
+        .map(|s| s.controller.clone())
+    else {
+        return;
+    };
+    if besiegers(state, settlement, &controller).is_empty() {
+        lift_siege(state, data, settlement, events);
+    }
+}
+
 /// Phase 3: progress, start or lift sieges; capture settlements.
 pub(crate) fn resolve_sieges(
     state: &mut CampaignState,
@@ -90,24 +149,7 @@ pub(crate) fn resolve_sieges(
         let besiegers = besiegers(state, &settlement_id, &controller);
         let defenders = state.friendly_armies_at(&controller, &settlement_id);
         if besiegers.is_empty() || !defenders.is_empty() {
-            if state
-                .settlements
-                .get_mut(&settlement_id)
-                .and_then(|s| s.siege.take())
-                .is_some()
-            {
-                events.push(
-                    GameEvent::new(
-                        EventKind::SiegeLifted,
-                        format!(
-                            "Le siège {} est levé.",
-                            crate::events::de(&settlement_name(data, &settlement_id))
-                        ),
-                    )
-                    .province(&province_id)
-                    .faction(&controller),
-                );
-            }
+            lift_siege(state, data, &settlement_id, events);
             continue;
         }
         let attacker = siege_leader(state, &settlement_id, &besiegers);

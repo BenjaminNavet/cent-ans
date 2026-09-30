@@ -1236,6 +1236,7 @@ func _build_material() -> void:
 	material.set_shader_parameter("has_landuse", true)
 	material.set_shader_parameter("has_textures", _albedo_array != null)
 	ReliefLandcover.apply(material, map_data)  # lot R1 : relief fin, zones humides
+	HbGround.apply(material, map_data.map_dir.get_base_dir())  # HB3 : habillage par biome
 	# ZG8 : roche sur les falaises du relief exagéré (désactivée avec le profil).
 	var relief := ReliefExaggerationProfile.load_default()
 	material.set_shader_parameter("cliff_slope_start", relief.cliff_slope_start if relief.enabled else 0.0)

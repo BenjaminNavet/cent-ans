@@ -118,6 +118,8 @@ var _labels_dirty: bool = false
 var _labels_root: Node3D
 var _hamlets_root: Node3D
 var _selection_ring: MeshInstance3D
+## Q8 : l'anneau de sélection disparaît quand la caméra est à moins de N rayons de la ville.
+const RING_HIDE_DISTANCE_FACTOR := 4.0
 var _settlements_by_chunk: Dictionary = {}
 var _hamlets_by_chunk: Dictionary = {}
 var _hamlet_nodes: Dictionary = {}  # index de tuile → Node3D
@@ -940,8 +942,14 @@ func _declutter_step(sliced: bool) -> void:
 			continue
 		var label := _labels[i]
 		var at := label.global_position
-		if _dc_behind(at) or (_dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range):
+		if _dc_behind(at):
 			_set_marker_shown(i, true)
+			_show_label(i, false, alpha)
+			continue
+		if _dc_close_w > 0.5 and _dc_origin.distance_to(at) > _dc_label_range and not pinned:
+			# VN : en vue rasante, l'écu des colonies lointaines part avec son nom (sinon une
+			# rangée d'écus flottait sur l'horizon).
+			_set_marker_shown(i, false)
 			_show_label(i, false, alpha)
 			continue
 		# VT : nom décalé au-dessus de l'emprise projetée (suit le zoom à chaque passe).
@@ -1526,10 +1534,13 @@ func _update_selection_ring() -> void:
 		return
 	var index: int = data.index_by_id.get(selected_id, -1) if data != null else -1
 	var show := index >= 0 and _footprints_on()
+	# Q8 : dessiné sans test de profondeur, l'anneau vu de plus près que sa taille devenait un
+	# disque jaune plein, puis un arc en travers du ciel au zoom minimal : masqué au sol.
+	var radius := _model_radius[index] * 1.1 if index >= 0 else 0.0
+	show = show and _camera_distance > radius * RING_HIDE_DISTANCE_FACTOR
 	_selection_ring.visible = show
 	if show:
 		# VT : anneau autour de l'emprise réelle.
-		var radius := _model_radius[index] * 1.1
 		var px := model_px(index)
 		_selection_ring.position = Vector3(px.x, _ground_y[index] + 0.15, px.y)
 		_selection_ring.scale = Vector3(radius, 1.0, radius)

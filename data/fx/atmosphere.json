@@ -90,7 +90,7 @@
       "sky": {"spring": "misty_morning", "summer": "misty_morning", "autumn": "dawn", "winter": "misty_morning"},
       "sun_energy_scale": 0.286, "sun_elevation_scale": 0.72, "sun_tint": [1.0, 1.032, 1.095],
       "sky_luminance": 0.7, "sky_saturation": 0.6, "sky_tint": [1.0, 0.99, 0.97], "sun_disc": 0.0, "haze": 0.7,
-      "grade": {"contrast": 0.95, "saturation": 0.86, "lift": [0.02, 0.02, 0.022]}
+      "grade": {"contrast": 1.04, "saturation": 0.9, "lift": [0.006, 0.006, 0.008]}
     },
     "rain": {
       "sky": {"spring": "overcast", "summer": "storm", "autumn": "storm", "winter": "overcast"},

@@ -85,7 +85,8 @@
             "impose_peace_power_ratio": { "type": "number", "minimum": 0, "description": "L'IA impose la paix si elle est au moins ce multiple de la force de l'attaquant." },
             "take_side_attitude_gap": { "type": "integer", "minimum": 0, "description": "L'IA prend parti si son attitude envers une partie dépasse l'autre d'au moins cet écart." },
             "imposed_peace_loyalty_drop": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté perdue par l'attaquant contraint à la paix." },
-            "opposed_loyalty_drop": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté perdue par le vassal que son seigneur combat." }
+            "opposed_loyalty_drop": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté perdue par le vassal que son seigneur combat." },
+            "defied_summons_loyalty_drop": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté perdue par le joueur qui passe outre la sommation de paix de son seigneur (ADR 0146)." }
           },
           "additionalProperties": false
         }

@@ -108,6 +108,7 @@ func _check_hud() -> void:
 	_check(names[1] == "Chevaliers I" and names[3] == "Chevaliers II" and names[2] == "Archers", "distinct names: %s" % [names])
 	var hud := BattleHud.new()
 	root.add_child(hud)
+	hud.toggle_log()  # VN4 : journal replié par défaut, on le déplie pour lire les regroupements
 	hud.add_events([{"time": 10.0, "text_fr": "Les Archers plantent leurs pieux."}, {"time": 11.0, "text_fr": "Les Archers plantent leurs pieux."}, {"time": 12.0, "text_fr": "Charge !"}])
 	_check(hud.log_line_count() == 2, "log: repeated lines should be grouped (%d)" % hud.log_line_count())
 	var grouped := false

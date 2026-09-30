@@ -83,7 +83,9 @@ static func night_panel(alpha: float = 0.78) -> StyleBoxFlat:
 
 
 ## Bouton de menu principal : texte doré sur fond transparent, filet d'or et halo au survol.
-static func style_menu_button(button: Button, size: int = 28) -> void:
+## `vpad` : marge verticale des cartouches (4 par défaut ; le menu principal la réduit quand la
+## fenêtre est basse, `StartMenu._fit_column`).
+static func style_menu_button(button: Button, size: int = 28, vpad: int = 4) -> void:
 	button.flat = false
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.add_theme_font_override("font", title_font())
@@ -98,8 +100,8 @@ static func style_menu_button(button: Button, size: int = 28) -> void:
 	var normal := StyleBoxEmpty.new()
 	normal.content_margin_left = 22
 	normal.content_margin_right = 22
-	normal.content_margin_top = 4
-	normal.content_margin_bottom = 4
+	normal.content_margin_top = vpad
+	normal.content_margin_bottom = vpad
 	var hover := StyleBoxFlat.new()
 	hover.bg_color = Color(0.0, 0.0, 0.0, 0.0)
 	hover.bg_color = Color(GOLD_DARK, 0.18)
@@ -107,8 +109,8 @@ static func style_menu_button(button: Button, size: int = 28) -> void:
 	hover.border_width_left = 3
 	hover.content_margin_left = 22
 	hover.content_margin_right = 22
-	hover.content_margin_top = 4
-	hover.content_margin_bottom = 4
+	hover.content_margin_top = vpad
+	hover.content_margin_bottom = vpad
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("focus", hover)

@@ -169,51 +169,51 @@
  },
  "barks/an_attack_01.ogg": {
   "text": "Avant, bannières !",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Avant, bannières !",
-  "seconds": 2.6,
-  "cost_usd": 0.00027
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Avant, pannière !",
+  "seconds": 1.55,
+  "cost_usd": 0.0
  },
  "barks/an_attack_02.ogg": {
   "text": "À eux, pour le droit du roi !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "À eux, pour le droit du roi !",
-  "seconds": 1.79,
-  "cost_usd": 0.00026
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "À eux pour le droit du roi.",
+  "seconds": 1.93,
+  "cost_usd": 0.0
  },
  "barks/an_charge_01.ogg": {
   "text": "Saint George ! Guyenne !",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Saint George ! Guyenne !",
-  "seconds": 1.9,
-  "cost_usd": 0.00059
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Sainte-George, Guyenne!",
+  "seconds": 1.95,
+  "cost_usd": 0.0
  },
  "barks/an_charge_02.ogg": {
   "text": "Pour le roi de France et d'Angleterre !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "pour le roy de France et d'Angleterre !",
-  "seconds": 3.03,
-  "cost_usd": 0.00033
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "pour le roi de France et d'Angleterre.",
+  "seconds": 2.27,
+  "cost_usd": 0.0
  },
  "barks/an_general_01.ogg": {
   "text": "Hélas ! Monseigneur est abattu !",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Hélas ! Monseigneur est abattu !",
-  "seconds": 2.41,
-  "cost_usd": 0.00029
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Et là, mon Seigneur est abattu !",
+  "seconds": 2.42,
+  "cost_usd": 0.0
  },
  "barks/an_general_02.ogg": {
   "text": "Relevez la bannière ! Relevez-la !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Relevez la bannière ! Relever-la !",
-  "seconds": 2.74,
-  "cost_usd": 0.00031
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Relevez la bannière ! Relevez-la !",
+  "seconds": 2.17,
+  "cost_usd": 0.0
  },
  "barks/an_move_01.ogg": {
   "text": "Il sera fait ainsi.",
@@ -257,35 +257,35 @@
  },
  "barks/an_victory_01.ogg": {
   "text": "Dieu a montré notre droit !",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Dieu a montré notre droit !",
-  "seconds": 2.25,
-  "cost_usd": 0.00028
+  "seconds": 1.92,
+  "cost_usd": 0.0
  },
  "barks/cy_attack_01.ogg": {
   "text": "Arnynt!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Arnynt!",
-  "seconds": 0.66,
-  "cost_usd": 0.00017
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Anant!",
+  "seconds": 0.97,
+  "cost_usd": 0.0
  },
  "barks/cy_charge_01.ogg": {
   "text": "I'r gad!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "I'r gad!",
-  "seconds": 0.84,
-  "cost_usd": 0.00019
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Iogad!",
+  "seconds": 1.28,
+  "cost_usd": 0.0
  },
  "barks/cy_charge_02.ogg": {
   "text": "Dewi Sant!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Dewi Sant!",
-  "seconds": 0.91,
-  "cost_usd": 0.00021
+  "seconds": 1.36,
+  "cost_usd": 0.0
  },
  "barks/cy_move_01.ogg": {
   "text": "Ymlaen!",
@@ -305,11 +305,11 @@
  },
  "barks/cy_rout_02.ogg": {
   "text": "Duw a'n helpo!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Duw a'n helpo!",
-  "seconds": 1.32,
-  "cost_usd": 0.00021
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Dwi anhelpo!",
+  "seconds": 1.42,
+  "cost_usd": 0.0
  },
  "barks/cy_select_01.ogg": {
   "text": "Ie, arglwydd.",
@@ -329,115 +329,115 @@
  },
  "barks/en_attack_01.ogg": {
   "text": "Have at them!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Have at them!",
-  "seconds": 0.77,
-  "cost_usd": 0.00019
+  "seconds": 0.99,
+  "cost_usd": 0.0
  },
  "barks/en_attack_02.ogg": {
   "text": "Nock! Draw! Loose!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Nock! Draw! Loose!",
-  "seconds": 2.52,
-  "cost_usd": 0.00031
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Knock! Draw! Loose!",
+  "seconds": 2.73,
+  "cost_usd": 0.0
  },
  "barks/en_attack_03.ogg": {
   "text": "Let the shafts fly!",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Let the shafts fly!",
-  "seconds": 1.85,
-  "cost_usd": 0.00022
+  "seconds": 1.96,
+  "cost_usd": 0.0
  },
  "barks/en_attack_04.ogg": {
   "text": "At them, and spare none!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "At them, and spare none!",
-  "seconds": 2.45,
-  "cost_usd": 0.00029
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "At them and spare none.",
+  "seconds": 1.89,
+  "cost_usd": 0.0
  },
  "barks/en_attack_05.ogg": {
   "text": "Aye, we'll teach them.",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Aye, we'll teach them.",
-  "seconds": 1.56,
-  "cost_usd": 0.00024
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "I will teach them.",
+  "seconds": 2.08,
+  "cost_usd": 0.0
  },
  "barks/en_charge_01.ogg": {
   "text": "Saint George!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Saint George!",
-  "seconds": 1.77,
-  "cost_usd": 0.00022
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "St. George!",
+  "seconds": 1.79,
+  "cost_usd": 0.0
  },
  "barks/en_charge_02.ogg": {
   "text": "For God and King Edward!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "FOR GOD AND KING EDWARD!",
-  "seconds": 1.9,
-  "cost_usd": 0.00024
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "for God and King Edward.",
+  "seconds": 2.43,
+  "cost_usd": 0.0
  },
  "barks/en_charge_03.ogg": {
   "text": "Into them, lads!",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "INTO THEM, LADS!",
-  "seconds": 1.45,
-  "cost_usd": 0.00024
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Into them lads!",
+  "seconds": 1.58,
+  "cost_usd": 0.0
  },
  "barks/en_charge_04.ogg": {
   "text": "Spur on! Spur on!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Spur on! Spur on!",
-  "seconds": 2.31,
-  "cost_usd": 0.00069
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Spur on, spur on!",
+  "seconds": 2.05,
+  "cost_usd": 0.0
  },
  "barks/en_charge_05.ogg": {
   "text": "Havoc! Havoc!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Havoc! Havoc!",
-  "seconds": 1.59,
-  "cost_usd": 0.00025
+  "seconds": 1.62,
+  "cost_usd": 0.0
  },
  "barks/en_general_01.ogg": {
   "text": "Our lord is down!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Our lord is down!",
-  "seconds": 1.89,
-  "cost_usd": 0.00026
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Her lord is down!",
+  "seconds": 1.12,
+  "cost_usd": 0.0
  },
  "barks/en_general_02.ogg": {
   "text": "The banner has fallen!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "The banner has fallen!",
-  "seconds": 2.35,
-  "cost_usd": 0.00026
+  "seconds": 1.36,
+  "cost_usd": 0.0
  },
  "barks/en_general_03.ogg": {
   "text": "They have slain our captain!",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "They have slain our captain!",
-  "seconds": 2.33,
-  "cost_usd": 0.00029
+  "seconds": 1.68,
+  "cost_usd": 0.0
  },
  "barks/en_general_04.ogg": {
   "text": "Christ have mercy, the lord is taken!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Christ have mercy, the lord is taken!",
-  "seconds": 2.98,
-  "cost_usd": 0.00033
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Christ have mercy, the Lord is taken.",
+  "seconds": 2.59,
+  "cost_usd": 0.0
  },
  "barks/en_move_01.ogg": {
   "text": "Aye, we go.",
@@ -481,43 +481,43 @@
  },
  "barks/en_rout_01.ogg": {
   "text": "Run! Run for your lives!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Run! Run for your lives!",
-  "seconds": 2.95,
-  "cost_usd": 0.00032
+  "seconds": 1.72,
+  "cost_usd": 0.0
  },
  "barks/en_rout_02.ogg": {
   "text": "We are undone!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "We are undone!",
-  "seconds": 1.17,
-  "cost_usd": 0.00022
+  "seconds": 1.49,
+  "cost_usd": 0.0
  },
  "barks/en_rout_03.ogg": {
   "text": "Back! Fall back!",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Back! Fall back!",
-  "seconds": 1.57,
-  "cost_usd": 0.00023
+  "seconds": 1.93,
+  "cost_usd": 0.0
  },
  "barks/en_rout_04.ogg": {
   "text": "God save us, they are too many!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "God save us, they are too many!",
-  "seconds": 2.74,
-  "cost_usd": 0.00031
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "God save us, there are too many!",
+  "seconds": 2.0,
+  "cost_usd": 0.0
  },
  "barks/en_rout_05.ogg": {
   "text": "Every man for himself!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Every man for himself!",
-  "seconds": 2.17,
-  "cost_usd": 0.00028
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Every man for himself.",
+  "seconds": 1.36,
+  "cost_usd": 0.0
  },
  "barks/en_select_01.ogg": {
   "text": "My lord?",
@@ -569,91 +569,91 @@
  },
  "barks/en_victory_01.ogg": {
   "text": "The day is ours!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "The day is ours!",
-  "seconds": 1.7,
-  "cost_usd": 0.00025
+  "seconds": 1.16,
+  "cost_usd": 0.0
  },
  "barks/en_victory_02.ogg": {
   "text": "Saint George and victory!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Saint George and victory!",
-  "seconds": 1.67,
-  "cost_usd": 0.00022
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "St. George and victory!",
+  "seconds": 2.11,
+  "cost_usd": 0.0
  },
  "barks/en_victory_03.ogg": {
   "text": "They flee! God be thanked!",
-  "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "They flee! God be thanked!",
-  "seconds": 2.65,
-  "cost_usd": 0.00029
+  "seconds": 2.54,
+  "cost_usd": 0.0
  },
  "barks/en_victory_04.ogg": {
   "text": "Ransoms for all, lads!",
-  "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Ransoms for all, lads!",
-  "seconds": 2.48,
-  "cost_usd": 0.00028
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Ransoms for all lads",
+  "seconds": 1.64,
+  "cost_usd": 0.0
  },
  "barks/en_victory_05.ogg": {
   "text": "England! England!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "ENGLAND! ENGLAND!",
-  "seconds": 2.32,
-  "cost_usd": 0.00027
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "England! England!",
+  "seconds": 1.93,
+  "cost_usd": 0.0
  },
  "barks/fr_attack_01.ogg": {
   "text": "Sus à eux !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Sus à eux !",
-  "seconds": 0.83,
-  "cost_usd": 0.00143
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Sous-à-eux !",
+  "seconds": 1.13,
+  "cost_usd": 0.0
  },
  "barks/fr_attack_02.ogg": {
   "text": "À l'ennemi !",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "À l'ennemi !",
-  "seconds": 0.87,
-  "cost_usd": 0.00121
+  "seconds": 1.05,
+  "cost_usd": 0.0115
  },
  "barks/fr_attack_03.ogg": {
   "text": "Tirez, et visez bien !",
-  "voice": "verse",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Tirez, et visez bien !",
-  "seconds": 1.76,
-  "cost_usd": 0.00026
+  "voice": "Liam",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Tirez et visez bien !",
+  "seconds": 1.91,
+  "cost_usd": 0.0
  },
  "barks/fr_attack_04.ogg": {
   "text": "Qu'ils sentent nos lances !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Qu'ils sentent nos lances !",
-  "seconds": 1.56,
-  "cost_usd": 0.00023
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "qu'ils sentent nos lances.",
+  "seconds": 1.97,
+  "cost_usd": 0.0
  },
  "barks/fr_attack_05.ogg": {
   "text": "Frappez ferme, et gardez le rang !",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Frappez ferme, et gardez le rang !",
-  "seconds": 2.53,
-  "cost_usd": 0.00031
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Trapez ferme et gardez le rang !",
+  "seconds": 1.96,
+  "cost_usd": 0.0
  },
  "barks/fr_charge_01.ogg": {
   "text": "Montjoie ! Saint-Denis !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Montjoie ! Saint-Denis !",
-  "seconds": 2.2,
-  "cost_usd": 0.00028
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Mon joie, Saint-Denis !",
+  "seconds": 2.35,
+  "cost_usd": 0.0
  },
  "barks/fr_charge_02.ogg": {
   "text": "À eux ! À eux !",
@@ -665,59 +665,59 @@
  },
  "barks/fr_charge_03.ogg": {
   "text": "Piquez des deux !",
-  "voice": "verse",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "PIQUEZ DES DEUX !",
-  "seconds": 1.09,
-  "cost_usd": 0.00025
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "piquez des deux",
+  "seconds": 1.29,
+  "cost_usd": 0.0084
  },
  "barks/fr_charge_04.ogg": {
   "text": "Pour Dieu et pour le roi !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "POUR DIEU ET POUR LE ROI !",
-  "seconds": 3.35,
-  "cost_usd": 0.00085
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "pour Dieu et pour le Roi !",
+  "seconds": 2.28,
+  "cost_usd": 0.0
  },
  "barks/fr_charge_05.ogg": {
   "text": "Baissez les lances, et chargez !",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Baissez les lances, et chargez !",
-  "seconds": 2.26,
-  "cost_usd": 0.0003
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Baissez l'élance et chargez!",
+  "seconds": 2.28,
+  "cost_usd": 0.0
  },
  "barks/fr_general_01.ogg": {
   "text": "Monseigneur est tombé !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Monseigneur est tombé !",
-  "seconds": 1.4,
-  "cost_usd": 0.00026
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Mon Seigneur est tombé !",
+  "seconds": 1.67,
+  "cost_usd": 0.0
  },
  "barks/fr_general_02.ogg": {
   "text": "La bannière est à bas !",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "La bannière est à bas !",
-  "seconds": 1.08,
-  "cost_usd": 0.00024
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "La bannière est à bas.",
+  "seconds": 1.59,
+  "cost_usd": 0.0
  },
  "barks/fr_general_03.ogg": {
   "text": "Notre chef est mort ! Que Dieu ait son âme !",
-  "voice": "verse",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Notre chef est mort ! Que Dieu ait son âme !",
-  "seconds": 2.68,
-  "cost_usd": 0.00032
+  "voice": "Liam",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Notre chef est mort, que Dieu ait son âme.",
+  "seconds": 3.43,
+  "cost_usd": 0.0
  },
  "barks/fr_general_04.ogg": {
   "text": "Ils ont pris monseigneur !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "ILS ONT PRIS MONSEIGNEUR !",
-  "seconds": 1.75,
-  "cost_usd": 0.00029
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Ils ont pris mon Seigneur !",
+  "seconds": 2.02,
+  "cost_usd": 0.0
  },
  "barks/fr_move_01.ogg": {
   "text": "Nous y allons.",
@@ -761,43 +761,43 @@
  },
  "barks/fr_rout_01.ogg": {
   "text": "Sauve qui peut !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Sauve qui peut !",
-  "seconds": 1.04,
-  "cost_usd": 0.0016
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Sauf qu'il peut !",
+  "seconds": 1.07,
+  "cost_usd": 0.0
  },
  "barks/fr_rout_02.ogg": {
   "text": "Nous sommes trahis !",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Nous sommes trahis !",
-  "seconds": 2.14,
-  "cost_usd": 0.00078
+  "voice": "Daniel",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Nous sommes trahis.",
+  "seconds": 1.2,
+  "cost_usd": 0.0
  },
  "barks/fr_rout_03.ogg": {
   "text": "Fuyez ! Tout est perdu !",
-  "voice": "verse",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Liam",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Fuyez ! Tout est perdu !",
-  "seconds": 2.79,
-  "cost_usd": 0.00032
+  "seconds": 1.74,
+  "cost_usd": 0.0
  },
  "barks/fr_rout_04.ogg": {
   "text": "Dieu nous garde ! Arrière !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Dieu nous garde ! Arrière !",
-  "seconds": 1.94,
-  "cost_usd": 0.00027
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Dieu nous garde, arrière !",
+  "seconds": 2.4,
+  "cost_usd": 0.0
  },
  "barks/fr_rout_05.ogg": {
   "text": "Ils sont trop ! Repliez-vous !",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Ils sont trop ! Repliez-vous !",
-  "seconds": 1.91,
-  "cost_usd": 0.00081
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Ils sont trop, repliez-vous !",
+  "seconds": 2.05,
+  "cost_usd": 0.0
  },
  "barks/fr_select_01.ogg": {
   "text": "Monseigneur ?",
@@ -849,43 +849,43 @@
  },
  "barks/fr_victory_01.ogg": {
   "text": "Victoire ! Dieu est avec nous !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Victoire ! Dieu est avec nous !",
-  "seconds": 2.54,
-  "cost_usd": 0.0003
+  "seconds": 2.31,
+  "cost_usd": 0.0
  },
  "barks/fr_victory_02.ogg": {
   "text": "Noël ! Noël !",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Noël ! Noël !",
-  "seconds": 1.65,
-  "cost_usd": 0.00027
+  "seconds": 2.49,
+  "cost_usd": 0.017
  },
  "barks/fr_victory_03.ogg": {
   "text": "Le champ est à nous !",
-  "voice": "verse",
-  "model": "openai/gpt-audio-mini",
+  "voice": "Liam",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Le champ est à nous !",
-  "seconds": 3.57,
-  "cost_usd": 0.00034
+  "seconds": 1.87,
+  "cost_usd": 0.0
  },
  "barks/fr_victory_04.ogg": {
   "text": "Ils fuient ! Montjoie !",
-  "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Ils fuient ! Montjoie !",
-  "seconds": 2.91,
-  "cost_usd": 0.00031
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Il fuit! Mon joie!",
+  "seconds": 2.24,
+  "cost_usd": 0.0
  },
  "barks/fr_victory_05.ogg": {
   "text": "Gloire à Dieu et à la bannière des lis !",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Gloire à Dieu et à la bannière des lis !",
-  "seconds": 2.79,
-  "cost_usd": 0.00033
+  "voice": "Callum",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Groire à Dieu et à la bannière d'Élie.",
+  "seconds": 2.59,
+  "cost_usd": 0.0
  },
  "barks/nl_attack_01.ogg": {
   "text": "Sla toe!",
@@ -905,19 +905,19 @@
  },
  "barks/nl_charge_01.ogg": {
   "text": "Vlaanderen die Leeuw!",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "VLAANDEREN DIE LEEUW!",
-  "seconds": 1.44,
-  "cost_usd": 0.00113
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Vlaanderen, die leeuw.",
+  "seconds": 1.99,
+  "cost_usd": 0.0
  },
  "barks/nl_charge_02.ogg": {
   "text": "Houdt de rij! Houdt de rij!",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Houdt de rij! Houdt de rij!",
-  "seconds": 2.46,
-  "cost_usd": 0.00029
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Houd de rij! Houd de rij!",
+  "seconds": 2.27,
+  "cost_usd": 0.0
  },
  "barks/nl_move_01.ogg": {
   "text": "Voorwaarts!",
@@ -937,19 +937,19 @@
  },
  "barks/nl_rout_01.ogg": {
   "text": "Vlucht! Vlucht!",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "VLUCHT! VLUCHT!",
-  "seconds": 1.6,
-  "cost_usd": 0.00025
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Vlucht! Vlucht!",
+  "seconds": 1.51,
+  "cost_usd": 0.0
  },
  "barks/nl_rout_02.ogg": {
   "text": "Wij zijn verloren!",
-  "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Wij zijn verloren!",
-  "seconds": 1.31,
-  "cost_usd": 0.00022
+  "voice": "Bill",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "We zijn verloren!",
+  "seconds": 1.32,
+  "cost_usd": 0.0
  },
  "barks/nl_select_01.ogg": {
   "text": "Ja, heer?",
@@ -1049,35 +1049,35 @@
  },
  "barks/sco_attack_01.ogg": {
   "text": "Spears doun! Hauld fast!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Spears doun! Hauld fast!",
-  "seconds": 2.82,
-  "cost_usd": 0.00031
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Spears down! Hold fast!",
+  "seconds": 2.33,
+  "cost_usd": 0.0
  },
  "barks/sco_attack_02.ogg": {
   "text": "Gie them the point!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Gie them the point!",
-  "seconds": 1.12,
-  "cost_usd": 0.00114
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Key them the point!",
+  "seconds": 1.29,
+  "cost_usd": 0.0
  },
  "barks/sco_charge_01.ogg": {
   "text": "A Douglas! A Douglas!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "A Douglas! A Douglas!",
-  "seconds": 2.31,
-  "cost_usd": 0.00025
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "A Douglas. A Douglas.",
+  "seconds": 1.92,
+  "cost_usd": 0.0
  },
  "barks/sco_charge_02.ogg": {
   "text": "Saint Andrew!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "SAINT ANDREW!",
-  "seconds": 1.37,
-  "cost_usd": 0.00056
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "St. Andrew!",
+  "seconds": 1.19,
+  "cost_usd": 0.0
  },
  "barks/sco_move_01.ogg": {
   "text": "Forrit, lads!",
@@ -1089,19 +1089,19 @@
  },
  "barks/sco_rout_01.ogg": {
   "text": "Rin, lads, rin!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Rin, lads, rin!",
-  "seconds": 1.82,
-  "cost_usd": 0.00026
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "RIN LADS! RIN!",
+  "seconds": 1.46,
+  "cost_usd": 0.0
  },
  "barks/sco_rout_02.ogg": {
   "text": "The schiltron's broken!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "The schiltron's broken!",
-  "seconds": 1.67,
-  "cost_usd": 0.00024
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "The skilltron's broken!",
+  "seconds": 1.28,
+  "cost_usd": 0.0
  },
  "barks/sco_select_01.ogg": {
   "text": "Aye, my laird.",
@@ -1121,11 +1121,11 @@
  },
  "barks/sco_victory_01.ogg": {
   "text": "Scotland! Scotland!",
-  "voice": "fable",
-  "model": "openai/gpt-audio-mini",
+  "voice": "George",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "Scotland! Scotland!",
-  "seconds": 2.16,
-  "cost_usd": 0.00025
+  "seconds": 2.01,
+  "cost_usd": 0.0
  },
  "speech/ash/0dab20ca2635.ogg": {
   "text": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",
@@ -1218,10 +1218,10 @@
  "speech/ash/37ed935fac56.ogg": {
   "text": "À moi ! En avant !",
   "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "À MOI ! EN AVANT !",
-  "seconds": 2.7,
-  "cost_usd": 0.00032
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "À moi ! En avant !",
+  "seconds": 2.18,
+  "cost_usd": 0.0
  },
  "speech/ash/38d7d7e00dbe.ogg": {
   "text": "Gens de France, souvenez-vous de vos pères et de la bannière des lis.",
@@ -1242,10 +1242,10 @@
  "speech/ash/51abd54348a4.ogg": {
   "text": "Saint Andrew !",
   "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Saint Andrew !",
-  "seconds": 2.7,
-  "cost_usd": 0.00109
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Saint Andrew!",
+  "seconds": 1.86,
+  "cost_usd": 0.0
  },
  "speech/ash/58a3456df680.ogg": {
   "text": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
@@ -1258,10 +1258,10 @@
  "speech/ash/711395e2e30a.ogg": {
   "text": "¡Santiago!",
   "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "¡Santiago !",
-  "seconds": 2.55,
-  "cost_usd": 0.00181
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "¡Santiago!",
+  "seconds": 1.28,
+  "cost_usd": 0.0126
  },
  "speech/ash/74f7e164cd0f.ogg": {
   "text": "Tenez la hauteur : qu'ils montent jusqu'à nous, essoufflés.",
@@ -1394,10 +1394,10 @@
  "speech/ash/f82aed743fbf.ogg": {
   "text": "Montjoie ! Saint-Denis !",
   "voice": "ash",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "MONJOIE ! SAINT-DENIS !",
-  "seconds": 2.32,
-  "cost_usd": 0.00122
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Mon joie, Saint-Denis !",
+  "seconds": 2.59,
+  "cost_usd": 0.0
  },
  "speech/ash/fd4039b01f58.ogg": {
   "text": "Nous les passerons comme le vent passe les blés.",
@@ -1442,10 +1442,10 @@
  "speech/ballad/1a41ddf4cd6c.ogg": {
   "text": "Saint George !",
   "voice": "ballad",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "SAINT GEORGE !",
-  "seconds": 1.35,
-  "cost_usd": 0.00125
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "St. George!",
+  "seconds": 1.73,
+  "cost_usd": 0.0
  },
  "speech/ballad/1b0450e2b978.ogg": {
   "text": "Le froid mord, mais le combat réchauffe : en avant !",
@@ -1666,10 +1666,10 @@
  "speech/echo/1a41ddf4cd6c.ogg": {
   "text": "Saint George !",
   "voice": "echo",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Saint George !",
-  "seconds": 2.86,
-  "cost_usd": 0.00182
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "St. George!",
+  "seconds": 1.73,
+  "cost_usd": 0.0
  },
  "speech/echo/1b0450e2b978.ogg": {
   "text": "Le froid mord, mais le combat réchauffe : en avant !",
@@ -1946,10 +1946,10 @@
  "speech/onyx/37ed935fac56.ogg": {
   "text": "À moi ! En avant !",
   "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
   "transcript": "À moi ! En avant !",
-  "seconds": 1.95,
-  "cost_usd": 0.00179
+  "seconds": 2.18,
+  "cost_usd": 0.0
  },
  "speech/onyx/38d7d7e00dbe.ogg": {
   "text": "Gens de France, souvenez-vous de vos pères et de la bannière des lis.",
@@ -1970,10 +1970,10 @@
  "speech/onyx/51abd54348a4.ogg": {
   "text": "Saint Andrew !",
   "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "SAINT ANDREW !",
-  "seconds": 2.9,
-  "cost_usd": 0.0006
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Saint Andrew!",
+  "seconds": 1.86,
+  "cost_usd": 0.0
  },
  "speech/onyx/58a3456df680.ogg": {
   "text": "La lande est rase et le vent y souffle : que vos traits volent avec lui.",
@@ -2122,10 +2122,10 @@
  "speech/onyx/f82aed743fbf.ogg": {
   "text": "Montjoie ! Saint-Denis !",
   "voice": "onyx",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Montjoie ! Saint-Denis !",
-  "seconds": 2.52,
-  "cost_usd": 0.00032
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Mon joie, Saint-Denis !",
+  "seconds": 2.59,
+  "cost_usd": 0.0
  },
  "speech/onyx/fd4039b01f58.ogg": {
   "text": "Nous les passerons comme le vent passe les blés.",
@@ -2138,10 +2138,10 @@
  "speech/verse/04a31647ce9a.ogg": {
   "text": "Montjoie Saint-Andrieu !",
   "voice": "verse",
-  "model": "openai/gpt-audio-mini",
-  "transcript": "Montjoie... SAINT-ANDRIEU ! ",
-  "seconds": 4.18,
-  "cost_usd": 0.00041
+  "model": "fal-ai/elevenlabs/tts/eleven-v3",
+  "transcript": "Mon joie, Saint-Andrieu !",
+  "seconds": 2.18,
+  "cost_usd": 0.0
  },
  "speech/verse/0dab20ca2635.ogg": {
   "text": "Le sol est traître : restez sur le ferme, laissez-les s'embourber.",

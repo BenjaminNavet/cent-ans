@@ -275,6 +275,11 @@ func _fill_calls() -> void:
 				func() -> void: answer_call(offer, true))
 			_button(row, "Se dérober", "Perte de prestige et de loyauté de vos vassaux ; le vassal peut changer d'allégeance.", "Shirk",
 				func() -> void: answer_call(offer, false))
+		elif str(call.get("kind", "")) == "summons":  # ADR 0146 : sommation de paix du suzerain
+			_button(row, "Obéir", "Paix blanche et trêve avec %s." % str(call.get("target_name", "")), "Obey",
+				func() -> void: answer_call(offer, true, "Vous faites la paix."))
+			_button(row, "Passer outre", "La guerre continue ; votre loyauté envers votre suzerain baisse.", "Defy",
+				func() -> void: answer_call(offer, false, "Vous passez outre."))
 		else:
 			_button(row, "Imposer la paix", "Paix blanche et trêve entre vos deux vassaux.", "ImposePeace",
 				func() -> void: arbitrate(offer, "impose_peace", ""))
@@ -430,8 +435,10 @@ func switch_allegiance(lord: String) -> bool:
 	return _after(map.sim.call("feudal_switch_allegiance", lord), "Hommage prêté.")
 
 
-func answer_call(offer: int, accept: bool) -> bool:
-	return _after(map.sim.call("answer_offer", offer, accept), "Vous intervenez." if accept else "Vous vous dérobez.")
+func answer_call(offer: int, accept: bool, done := "") -> bool:
+	if done == "":
+		done = "Vous intervenez." if accept else "Vous vous dérobez."
+	return _after(map.sim.call("answer_offer", offer, accept), done)
 
 
 func arbitrate(offer: int, verdict: String, side: String) -> bool:

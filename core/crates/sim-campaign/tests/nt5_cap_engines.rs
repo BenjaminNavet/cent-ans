@@ -81,38 +81,38 @@ fn besiege_guyenne(data: &GameData, seed: u64) -> (CampaignState, ArmyId) {
 #[test]
 fn the_cap_is_data() {
     let data = data();
-    assert_eq!(data.army_rules.max_units, 20);
+    assert_eq!(data.army_rules.max_units, 40);
 }
 
 #[test]
-fn a_21st_unit_cannot_form_an_army() {
+fn a_41st_unit_cannot_form_an_army() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     let paris = state
         .province_city_id(&prov("prov_ile_de_france"))
         .unwrap()
         .clone();
-    state.settlements.get_mut(&paris).unwrap().garrison = units(&data, "unit_crossbowmen", 25);
+    state.settlements.get_mut(&paris).unwrap().garrison = units(&data, "unit_crossbowmen", 45);
     let refused = state.submit_order(
         &data,
         Order::CreateArmy {
             settlement: paris.clone().into(),
-            units_from_garrison: (0..21).collect(),
+            units_from_garrison: (0..41).collect(),
             general: None,
         },
     );
-    assert_eq!(refused, Err(OrderError::ArmyFull { cap: 20 }));
+    assert_eq!(refused, Err(OrderError::ArmyFull { cap: 40 }));
     assert!(refused
         .unwrap_err()
         .to_string()
-        .contains("20 unités au plus"));
+        .contains("40 unités au plus"));
     let before = state.armies.len();
     state
         .submit_order(
             &data,
             Order::CreateArmy {
                 settlement: paris.into(),
-                units_from_garrison: (0..20).collect(),
+                units_from_garrison: (0..40).collect(),
                 general: None,
             },
         )
@@ -126,7 +126,7 @@ fn a_merge_stays_within_the_cap() {
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     let target = french_army(&state);
     let place = state.armies[&target].settlement().unwrap().clone();
-    state.armies.get_mut(&target).unwrap().units = units(&data, "unit_crossbowmen", 15);
+    state.armies.get_mut(&target).unwrap().units = units(&data, "unit_crossbowmen", 35);
     let mut source_army = state.armies[&target].clone();
     source_army.general = None;
     source_army.units = units(&data, "unit_crossbowmen", 6);
@@ -139,8 +139,8 @@ fn a_merge_stays_within_the_cap() {
             target: target.clone(),
         },
     );
-    assert_eq!(refused, Err(OrderError::ArmyFull { cap: 20 }));
-    assert_eq!(state.armies[&target].units.len(), 15);
+    assert_eq!(refused, Err(OrderError::ArmyFull { cap: 40 }));
+    assert_eq!(state.armies[&target].units.len(), 35);
     state.armies.get_mut(&source).unwrap().units.truncate(5);
     state
         .submit_order(
@@ -151,7 +151,7 @@ fn a_merge_stays_within_the_cap() {
             },
         )
         .unwrap();
-    assert_eq!(state.armies[&target].units.len(), 20);
+    assert_eq!(state.armies[&target].units.len(), 40);
     assert!(!state.armies.contains_key(&source));
     assert!(state.armies[&target].is_at(&place));
 }
@@ -161,7 +161,7 @@ fn a_full_army_hires_no_company() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
     let army = french_army(&state);
-    state.armies.get_mut(&army).unwrap().units = units(&data, "unit_crossbowmen", 20);
+    state.armies.get_mut(&army).unwrap().units = units(&data, "unit_crossbowmen", 40);
     let market = state.mercenary_market(&data, &army).unwrap();
     let blocked = market.blocked.expect("a full army hires nobody");
     assert!(blocked.contains("armée complète"), "{blocked}");

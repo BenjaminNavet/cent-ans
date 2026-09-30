@@ -159,6 +159,10 @@ quick_load={
 
 [shader_globals]
 
+battle_water_light={
+"type": "vec4",
+"value": Vector4(1, 1, 1, 1)
+}
 campaign_season={
 "type": "vec4",
 "value": Vector4(1, 0, 0, 0)

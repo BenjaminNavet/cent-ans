@@ -95,3 +95,8 @@ func _set_hover(hovered: bool) -> void:
 	var style := get_theme_stylebox("panel") as StyleBoxFlat
 	if style != null:
 		style.border_color = HudStyle.WAX if hovered else HudStyle.GOLD
+
+
+## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe scriptée).
+func _make_custom_tooltip(for_text: String) -> Object:
+	return RichTooltip.panel_for(for_text, self)

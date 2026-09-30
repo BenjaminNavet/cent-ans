@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ground_materials.schema.json",
+  "title": "Matières de sol de la carte de campagne (HB2, ADR 0143)",
+  "description": "Textures tuilables vues du ciel générées par fal.ai (`tools/cent_ans_tools/ground_materials.py`), empaquetées en tableaux de textures `game/assets/textures/terrain/hb_ground_*_array.jpg`. `layer` = couche du tableau (contiguë depuis 0). Biomes : indices de l'ADR 0143 (1 océanique, 2 continental, 3 méditerranéen, 4 steppe, 5 boréal, 6 montagnard, 7 semi-aride).",
+  "type": "object",
+  "required": [
+    "model",
+    "size",
+    "layer_size",
+    "blend_width",
+    "target_luminance",
+    "style_prefix",
+    "scale_sentence",
+    "style_suffix",
+    "materials"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "model": {"type": "string", "minLength": 1},
+    "size": {"type": "integer", "minimum": 256},
+    "layer_size": {"type": "integer", "enum": [256, 512, 1024, 2048]},
+    "normal_size": {
+      "description": "Côté des couches du tableau de normales (défaut : layer_size) ; plus petit pour tenir le budget de 40 Mo.",
+      "type": "integer",
+      "enum": [256, 512, 1024, 2048]
+    },
+    "blend_width": {"type": "integer", "minimum": 8},
+    "target_luminance": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+    "style_prefix": {"type": "string", "minLength": 20},
+    "scale_sentence": {"type": "string", "pattern": "\\{tile_m\\}"},
+    "style_suffix": {"type": "string"},
+    "materials": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "layer", "role", "biomes", "tile_m", "seed", "prompt"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "layer": {"type": "integer", "minimum": 0},
+          "role": {"type": "string", "enum": ["crop", "canopy", "ground"]},
+          "biomes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "integer", "minimum": 1, "maximum": 7}
+          },
+          "tile_m": {"type": "number", "minimum": 10, "maximum": 1000},
+          "seed": {"type": "integer", "minimum": 0},
+          "prompt": {"type": "string", "minLength": 20},
+          "attempt": {
+            "description": "Reprise retenue (1 = première génération, 2 = graine + 1000).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3
+          },
+          "prompt_retry": {
+            "description": "Prompt remplaçant `prompt` pour les reprises (attempt >= 2).",
+            "type": "string",
+            "minLength": 20
+          },
+          "height_strength": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    }
+  }
+}

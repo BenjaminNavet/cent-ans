@@ -227,6 +227,10 @@ pas détourner les écritures « dernière table » des autres lots.
 |---|---|---|---|---|---|
 | 2026-09-30 | fal.ai | VX : cris de bataille ElevenLabs v3 (répliques criées, chœurs des cris de guerre), contrôle whisper, langue et hauteur | 0,04 $ | 0,02 $ | 0,02 $ |
 | 2026-09-30 | fal.ai | VX : passe interrompue (machine chargée), 14 répliques gardées + prises rejetées ; coût réel non relevé par l'outil, estimé (caractères × prises) | 0,06 $ | 0,06 $ | 0,08 $ |
+| 2026-09-30 | fal.ai | VX : passe complète (74 clips : répliques criées et chœurs), prises rejetées comprises | 0,36 $ | 0,46 $ | 0,54 $ |
+| 2026-09-30 | fal.ai | VX : rattrapage (18 clips : langues régionales, chœurs), prises rejetées comprises | 0,07 $ | 0,12 $ | 0,66 $ |
+| 2026-09-30 | fal.ai | VX : cris de bataille ElevenLabs v3 (répliques criées, chœurs des cris de guerre), contrôle whisper, langue et hauteur | 0,21 $ | 0,05 $ | 0,71 $ |
+| 2026-09-30 | fal.ai | VX : passe coupée à 55/90 (délai de tâche, machine surchargée), coût non relevé par l outil : estimé (prises refaites) | 0,05 $ | 0,05 $ | 0,76 $ |
 
 ## Fleuves et rivières RC (30/09) — plafond propre de 5 $ (matières d'eau Nano Banana 2, ADR 0141)
 
@@ -238,3 +242,25 @@ reprises éventuelles comprises : ~0,62 $ prévu. Plafond vérifié par `data/ar
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul RC |
 |---|---|---|---|---|---|
 | 2026-09-30 | — | RC5 : squelette, prompts et essai à blanc (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+
+## Habillage par biomes HB (30/09) — plafond propre de 8 $ (fal.ai, ADR 0143)
+
+Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Matières de sol (HB2), essences (HB4), rochers (HB5).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul HB |
+|---|---|---|---|---|---|
+| 2026-09-30 | — | HB : plan et ADR 0143 (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-30 | fal.ai | HB5 rochers : 6 affleurements (flux-2 + bria + trellis, 0,05 $ chacun, aucune reprise) | 0,30 $ | 0,30 $ | 0,30 $ |
+| 2026-09-30 | fal.ai | HB2 sonde : 3 matières (vigne, garrigue, steppe), `fal-ai/flux-2-pro` 1024² (0,03 $/Mpx) | 0,09 $ | 0,09 $ | 0,39 $ |
+| 2026-09-30 | fal.ai | HB2 : 24 autres matières de sol, flux-2-pro 1024² | 0,76 $ | 0,76 $ | 1,15 $ |
+| 2026-09-30 | fal.ai | HB2 reprises : 6 (blé, orge, pré de fauche, seigle, boréale, maquis) + 2 (orge, boréale) | 0,25 $ | 0,25 $ | 1,40 $ |
+| 2026-09-30 | fal.ai | HB4 sonde essences : olivier + chêne kermès (flux-2 0,0126 + nano-banana-2/edit 0,08 + bria 0,018 par essence ; tarifs API fal vérifiés le 30/09) | 0,22 $ | 0,22 $ | 1,62 $ |
+| 2026-09-30 | fal.ai | HB4 essences : 18 nouvelles + reprise chêne kermès (arbuste en boule, graine 7), 19 × 0,11 $ | 2,09 $ | 2,09 $ | 3,71 $ |
+| 2026-09-30 | fal.ai | HB4 reprise bouleau (houppier trop clairsemé, graine 7) | 0,11 $ | 0,11 $ | 3,82 $ |
+
+## Nuit visuelle VN (30/09) — fal.ai (OpenRouter indisponible), enveloppe propre 5 $
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul VN |
+|---|---|---|---|---|---|
+| 2026-09-30 | fal.ai | VN9 : miniatures des 12 types d'unités sans illustration (12 × fal-ai/nano-banana-2/edit 1K, référence de style unit_knights / unit_longbowmen) — prix catalogue | 0,96 $ | 0,96 $ | 0,96 $ |
+| 2026-09-30 | fal.ai | VN9b : miniature de bld_collegiate_church, seul bâtiment sans illustration (1 × fal-ai/nano-banana-2/edit 1K) — prix catalogue | 0,08 $ | 0,08 $ | 1,04 $ |

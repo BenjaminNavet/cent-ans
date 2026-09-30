@@ -422,13 +422,22 @@ class RegimentCard:
 	var show_name := true
 	var _hover := false
 	var _name_label: Label
+	## VN : illustration peinte du type (comme les cartes de bataille), null sans illustration.
+	var _art: Texture2D = null
 
 	func _ready() -> void:
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		tooltip_text = strip.tooltip_for(unit)
+		_art = UnitCard.illustration_for(str(unit.get("unit_type", "")))
 		var fitted := ArmyStrip.fit_name(strip.unit_name(unit), get_theme_default_font(), custom_minimum_size.x - 10.0)
 		_name_label = HudStyle.label(str(fitted["text"]), int(fitted["font_size"]))
+		if _art != null:
+			# Nom clair, cerné, dans le bandeau sombre du bas de l'illustration.
+			_name_label.add_theme_color_override("font_color", Color(1.0, 0.97, 0.88))
+			_name_label.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.02))
+			_name_label.add_theme_constant_override("outline_size", 4)
+			_name_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		# Retour à la ligne aux espaces seulement : jamais de coupure au milieu d'un mot.
@@ -448,6 +457,10 @@ class RegimentCard:
 		_layout()
 
 	func _layout() -> void:
+		if _art != null:
+			_name_label.position = Vector2(5, size.y - 72)
+			_name_label.size = Vector2(size.x - 8, 46)
+			return
 		_name_label.position = Vector2(7, 46)
 		_name_label.size = Vector2(size.x - 10, 44)
 
@@ -469,6 +482,9 @@ class RegimentCard:
 
 	func _draw() -> void:
 		var rect := Rect2(Vector2.ZERO, size)
+		if _art != null:
+			_draw_illustrated(rect)
+			return
 		var bg := HudStyle.PARCHMENT_LIGHT if not _hover else HudStyle.PARCHMENT_LIGHT.lightened(0.25)
 		draw_rect(rect, bg)
 		# Liseré de moral : bande verticale à gauche, hauteur et teinte selon le moral.
@@ -501,6 +517,44 @@ class RegimentCard:
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * fill, bar.size.y)), HudStyle.gauge_color(fill))
 		draw_rect(bar, HudStyle.INK_SOFT, false, 1.0)
 		# Cadre : encre, ou rubrique + filet d'or si sélectionné.
+		if selected:
+			draw_rect(rect.grow(-1), HudStyle.RUBRIC, false, 2.0)
+			draw_rect(rect.grow(-4), HudStyle.GOLD, false, 1.0)
+		else:
+			draw_rect(rect, HudStyle.INK_SOFT, false, 1.0)
+
+
+	## VN : carte illustrée (illustration recadrée, bandeau sombre en bas avec le nom, l'effectif et
+	## sa barre ; liseré de moral à gauche, cadre de sélection) — mêmes informations que la
+	## carte au trait.
+	func _draw_illustrated(rect: Rect2) -> void:
+		var tex := _art.get_size()
+		var crop_w := minf(tex.x, tex.y * size.x / maxf(size.y, 1.0))
+		var crop_h := minf(tex.y, tex.x * size.y / maxf(size.x, 1.0))
+		draw_texture_rect_region(_art, rect, Rect2((tex.x - crop_w) * 0.5, 0, crop_w, crop_h))
+		if _hover:
+			draw_rect(rect, Color(1, 0.95, 0.8, 0.14))
+		var shade_top := size.y - 80.0
+		draw_polygon(PackedVector2Array([Vector2(0, shade_top), Vector2(size.x, shade_top), Vector2(size.x, size.y), Vector2(0, size.y)]),
+			PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0), Color(0, 0, 0, 0.9), Color(0, 0, 0, 0.9)]))
+		var ratio := strip.morale_ratio(unit)
+		draw_rect(Rect2(0, 0, 4, size.y), Color(0.1, 0.07, 0.04, 0.8))
+		draw_rect(Rect2(0, size.y * (1.0 - ratio), 4, size.y * ratio), HudStyle.gauge_color(ratio))
+		var font := get_theme_default_font()
+		if Accessibility.colorblind():
+			draw_string_outline(font, Vector2(7, 14), Accessibility.level_symbol(ratio), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 3, Color(0.08, 0.05, 0.02))
+			draw_string(font, Vector2(7, 14), Accessibility.level_symbol(ratio), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 0.97, 0.88))
+		var strength := int(unit.get("strength", 0))
+		var max_strength := maxi(int(unit.get("max_strength", 0)), 1)
+		var text := "%d/%d" % [strength, max_strength]
+		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11)
+		var at := Vector2((size.x - text_size.x) * 0.5 + 2, size.y - 15)
+		draw_string_outline(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color(0.08, 0.05, 0.02))
+		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.93, 0.88, 0.74))
+		var bar := Rect2(9, size.y - 10, size.x - 14, 5)
+		var fill := clampf(float(strength) / float(max_strength), 0.0, 1.0)
+		draw_rect(bar, Color(0.15, 0.1, 0.06, 0.9))
+		draw_rect(Rect2(bar.position, Vector2(bar.size.x * fill, bar.size.y)), HudStyle.gauge_color(fill))
 		if selected:
 			draw_rect(rect.grow(-1), HudStyle.RUBRIC, false, 2.0)
 			draw_rect(rect.grow(-4), HudStyle.GOLD, false, 1.0)

@@ -56,6 +56,7 @@ func _ready() -> void:
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 2)
 	add_child(_box)
+	visible = false
 	set_process(false)
 
 
@@ -181,8 +182,11 @@ func _importance(kind: String) -> int:
 func _rebuild() -> void:
 	for child in _box.get_children():
 		child.queue_free()
-	for entry in visible_entries():
+	var shown := visible_entries()
+	for entry in shown:
 		_box.add_child(_row(entry))
+	# VN4 : sans alerte, pas de bandeau de parchemin vide en haut à gauche.
+	visible = not shown.is_empty()
 
 
 func _row(entry: Dictionary) -> Control:

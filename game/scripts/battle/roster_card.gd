@@ -163,3 +163,8 @@ func _draw_laurel(center: Vector2) -> void:
 	draw_arc(center, 6.0, PI * 0.15, PI * 0.85, 8, BattleUiKit.GOLD, 2.0)
 	draw_arc(center, 6.0, PI * 1.15, PI * 1.85, 8, BattleUiKit.GOLD, 2.0)
 	draw_circle(center, 2.0, BattleUiKit.GOLD)
+
+
+## Infobulle en sections (`attach_plain` ne pose pas `plain_tooltip_host.gd` sur une classe scriptée).
+func _make_custom_tooltip(for_text: String) -> Object:
+	return RichTooltip.panel_for(for_text, self)

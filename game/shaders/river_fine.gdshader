@@ -40,6 +40,15 @@ uniform vec3 reed_color : source_color = vec3(0.36, 0.38, 0.18);
 uniform vec3 reed_dry_color : source_color = vec3(0.55, 0.48, 0.30);
 
 uniform float min_px = 1.2;
+// HB7 : largeur écran minimale × facteur selon l'ordre de Strahler (3-6 dans `order_px_lo`,
+// 7-10 dans `order_px_hi`) : relais sans saut des rubans moyens (RiversRenderer, par importance).
+uniform vec4 order_px_lo = vec4(1.0);
+uniform vec4 order_px_hi = vec4(1.0);
+
+float order_px_scale(float order) {
+	int i = clamp(int(order + 0.5), 3, 10) - 3;
+	return i < 4 ? order_px_lo[i] : order_px_hi[i - 4];
+}
 uniform float thin_fade = 0.7;
 // Déplacement vers la caméra (unités monde par unité de distance) : l'eau n'est pas mangée par
 // les facettes du relief entre deux sommets du quadtree.
@@ -97,20 +106,25 @@ void vertex() {
 	vec3 world = vec3(VERTEX.x, campaign_display_height(VERTEX.y, VERTEX.xz), VERTEX.z);
 	vec3 to_cam = CAMERA_POSITION_WORLD - world;
 	float dist = max(length(to_cam), 0.01);
-	float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
-	float water_half = 0.5 * UV.x;
+	// HB7 : abs() : sous Metal/Vulkan la projection porte un retournement de Y ([1][1] < 0), ce qui
+	// rendait la largeur écran minimale inopérante (rubans sous-pixel, traits gris).
+	float world_per_px = dist * 2.0 / (abs(PROJECTION_MATRIX[1][1]) * VIEWPORT_SIZE.y);
+	float mark = floor(UV2.y / 100.0 + 0.001);
+	float order = UV2.y - 100.0 * mark;
+	float px_min = min_px * order_px_scale(order);
+	// HB7 : l'élargissement écran est de l'EAU (pas une bande de berge grise d'un pixel) ; les
+	// bandes de berge s'ajoutent au-delà, à leur largeur réelle.
+	float water_half = max(0.5 * UV.x, px_min * world_per_px * 0.5);
 	float band_m = max(COLOR.g * tidal_band, max(COLOR.b * wetland_band, COLOR.r * divagating_band));
-	float band = band_m > 0.0 ? max(water_half * band_m, band_min_m / meters_per_unit) : 0.0;
-	float half_w = max(water_half + band, min_px * world_per_px * 0.5);
+	float band = band_m > 0.0 ? max(0.5 * UV.x * band_m, band_min_m / meters_per_unit) : 0.0;
+	float half_w = water_half + band;
 	world += NORMAL * half_w;
 	world += to_cam / dist * min(depth_bias * dist, 0.5);
 	VERTEX = world;
 	float true_px = UV.x / world_per_px;
-	float mark = floor(UV2.y / 100.0 + 0.001);
-	float order = UV2.y - 100.0 * mark;
 	v_open = mark < 0.5 ? 1.0 : (mark < 1.5 ? cover_open : zone_open);
 	float reach = order_distance * exp2(order - 3.0);
-	v_alpha = mix(1.0, clamp(true_px / min_px, 0.25, 1.0), thin_fade) * (1.0 - smoothstep(reach * 0.75, reach, dist));
+	v_alpha = mix(1.0, clamp(true_px / px_min, 0.25, 1.0), thin_fade) * (1.0 - smoothstep(reach * 0.75, reach, dist));
 	v_side = UV.y * half_w / max(water_half, 1e-5);
 	v_band = half_w / max(water_half, 1e-5);
 	v_flow = vec2(UV2.x, UV.y * half_w);

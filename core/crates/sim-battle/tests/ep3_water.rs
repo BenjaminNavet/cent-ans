@@ -297,6 +297,55 @@ fn a_regiment_wider_than_the_bridge_files_across_slowly() {
 }
 
 #[test]
+fn a_regiment_on_a_bridge_is_drawn_on_the_deck() {
+    let (seed, bx) = bridged_seed();
+    let mut sim = river_lab(seed);
+    let b = sim
+        .field()
+        .bridges
+        .iter()
+        .find(|b| (b.x - bx).abs() < 1.0)
+        .unwrap()
+        .clone();
+    // Foot in line across the deck's axis, heading over the river.
+    let facing = b.dir.0.atan2(b.dir.1);
+    place(&mut sim, 1, b.x, b.z, facing);
+    let unit = sim.units()[1].clone();
+    assert!(unit.extent().0 > b.width * 3.0);
+    for scale in [1.0, 2.0] {
+        let poses = sim.soldier_poses(&unit, scale);
+        assert_eq!(poses.len(), unit.figure_count(scale) as usize);
+        for &[x, y, z, _] in &poses {
+            let (along, across) = b.local(x, z);
+            assert!(
+                across.abs() <= b.width * 0.5,
+                "figure {across:.1} m off the axis of a {:.1} m deck",
+                b.width
+            );
+            assert!((y - sim.field().walk_height(x, z)).abs() < 1e-9);
+            if along.abs() <= b.span * 0.5 {
+                assert!(y >= b.deck - 1e-9, "figure under the deck");
+            }
+        }
+    }
+    // Off the bridge, the line keeps its width.
+    let r = sim.field().river.clone().unwrap();
+    let x = bx - 200.0;
+    place(
+        &mut sim,
+        1,
+        x,
+        r.center_z(x) - r.width_at(x) * 0.5 - 60.0,
+        facing,
+    );
+    let unit = sim.units()[1].clone();
+    let poses = sim.soldier_poses(&unit, 1.0);
+    let spread = poses.iter().map(|p| p[0]).fold(f64::MIN, f64::max)
+        - poses.iter().map(|p| p[0]).fold(f64::MAX, f64::min);
+    assert!(spread > b.width * 3.0);
+}
+
+#[test]
 fn marching_in_column_on_the_road_is_faster() {
     let data = data();
     let mut timings = Vec::new();

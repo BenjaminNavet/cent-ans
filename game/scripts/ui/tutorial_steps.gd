@@ -60,6 +60,7 @@ const BASE := {
 		"text": "La jauge de recherche de la barre du haut indique la technologie en cours. Ouvrez l'arbre (touche T ou clic sur la jauge) et choisissez une technologie disponible : sans recherche, les points de la saison sont perdus.",
 		"objective": "Choisir une recherche.",
 		"target": "research",
+		"modal_ok": true,  # l'arbre des technologies est une fenêtre modale : le guide reste affiché
 	},
 	"diplomacy": {
 		"title": "La diplomatie",
@@ -96,6 +97,7 @@ const BASE := {
 		"text": "Ouvrez la cour (bouton de la barre ou touche C), choisissez un personnage puis « Nommer gouverneur » et une province. Sa compétence de gouvernance agit sur l'impôt, la construction et l'ordre public. Le bouton « Cour » du panneau de province filtre les gouverneurs possibles.",
 		"objective": "Nommer un gouverneur.",
 		"target": "governor",
+		"modal_ok": true,  # la cour est une fenêtre modale : le guide reste affiché
 	},
 	"outro": {
 		"title": "À vous de jouer",
@@ -184,6 +186,7 @@ static func steps(faction_id: String, context: Dictionary = {}) -> Array[Diction
 			"advice": str(advice.get(step_id, "")),
 			"target": str(base.get("target", "")),
 			"manual": bool(base.get("manual", false)),
+			"modal_ok": bool(base.get("modal_ok", false)),
 		})
 	return result
 
