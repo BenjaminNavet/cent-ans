@@ -58,7 +58,8 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 			check.button_pressed = true
 			check.set_script(RichButton)
 			check.theme_type_variation = &"CheckBox"
-			narrow_button(check)
+			# VN : nom et effectifs passent à la ligne au lieu d'être coupés (« Milice urbaine — 12… »).
+			check.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
 			RichTooltip.set_tooltip(check, "unit", unit_type, unit)  # IB1 : infobulle en sections
 			list.add_child(check)
@@ -257,7 +258,9 @@ static func fit_tabs_to_side_zone(panel: Control, tabs: TabContainer, max_height
 			(page as Control).custom_minimum_size.y = 0.0
 	var zone_height := UiZones.rect(UiZones.Zone.SIDE_PANEL).size.y
 	var others := panel.get_combined_minimum_size().y - tabs.get_combined_minimum_size().y
-	tabs.custom_minimum_size.y = clampf(zone_height - others, minf(SIDE_TABS_MIN_HEIGHT, max_height), max_height)
+	var wanted := clampf(zone_height - others, minf(SIDE_TABS_MIN_HEIGHT, max_height), max_height)
+	if not is_equal_approx(tabs.custom_minimum_size.y, wanted):
+		tabs.custom_minimum_size.y = wanted
 
 
 ## Q6 : bouton de ligne d'une liste du panneau latéral ; son libellé se coupe (points de

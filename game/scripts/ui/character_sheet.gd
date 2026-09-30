@@ -73,6 +73,9 @@ var compact: bool = false
 const WIDE_WIDTH := 1000.0
 const COMPACT_WIDTH := 600.0
 const SCREEN_MARGIN := 16.0
+const TALL_VIEW_HEIGHT := 960.0
+const DESIGN_HEIGHT := 800.0
+const TOP_CLEARANCE := 76.0
 
 
 func _ready() -> void:
@@ -647,15 +650,24 @@ func _transfer_to(target_id: String) -> void:
 ## Place la fiche à droite de `left_edge` (bord droit du panneau ouvert à gauche, 0 sinon)
 ## dans une vue de largeur `view_width` : pleine largeur (1000 px, deux colonnes) si la place
 ## suffit, sinon repli en une colonne défilante, plus étroite.
-func fit_beside(left_edge: float, view_width: float) -> void:
+## VN : `view_height` (0 = inconnue) : sous `TALL_VIEW_HEIGHT` la colonne du portrait passe elle aussi
+## dans la page défilante (repli), sinon la fiche (904 px au minimum) dépasse l'écran ; sa hauteur
+## est ramenée à la hauteur de conception bornée par l'écran (elle restait gonflée à 2 720 px, la
+## hauteur transitoire du premier remplissage, hors de l'écran).
+func fit_beside(left_edge: float, view_width: float, view_height: float = 0.0) -> void:
 	var available := view_width - left_edge - 2.0 * SCREEN_MARGIN
 	var width := WIDE_WIDTH
 	if available < WIDE_WIDTH:
 		width = maxf(COMPACT_WIDTH, available)
-	set_compact(available < WIDE_WIDTH)
+	var short := view_height > 0.0 and view_height < TALL_VIEW_HEIGHT
+	set_compact(available < WIDE_WIDTH or short)
 	custom_minimum_size.x = width
 	offset_right = -SCREEN_MARGIN
 	offset_left = -SCREEN_MARGIN - width
+	if view_height > 0.0 and visible:
+		var height := maxf(get_combined_minimum_size().y, minf(size.y, minf(DESIGN_HEIGHT, view_height - TOP_CLEARANCE)))
+		if not is_equal_approx(size.y, height):
+			size = Vector2(size.x, height)
 
 
 ## Deux colonnes (portrait à gauche, contenu à droite) ou une seule colonne défilante.

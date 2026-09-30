@@ -55,6 +55,11 @@ var avoid_rects: Array = []
 ## UX2 : titres des étapes (sommaire) et étape affichée.
 var step_titles: PackedStringArray = PackedStringArray()
 var current_index := -1
+## VN : les fenêtres modales (`UiZones.Zone.MODAL` : rencontre, Codex…) sont centrées et grandes ;
+## le parchemin les masquerait ou les cacherait. Il s'efface donc tant qu'une est ouverte, sauf
+## pour les étapes dont l'objectif se joue dans une modale (`modal_ok` : technologies, cour).
+var modal_ok := false
+var _hidden_by_modal := false
 ## Vrai tant qu'aucun placement n'a été calculé pour l'étape (le parchemin ne saute pas ensuite
 ## tant que sa place reste libre).
 var _needs_placement := true
@@ -167,6 +172,7 @@ func set_steps(titles: PackedStringArray) -> void:
 ## `step` : entrée de `TutorialSteps.steps` ; `index` à partir de 0.
 func show_step(step: Dictionary, index: int, total: int) -> void:
 	current_index = index
+	modal_ok = bool(step.get("modal_ok", false))
 	title_label.text = str(step.get("title", ""))
 	progress_label.text = "Étape %d / %d" % [index + 1, total]
 	var text := CodexText.format(str(step.get("text", "")), true)
@@ -335,6 +341,16 @@ func _process(delta: float) -> void:
 	_time += delta
 	if not visible:
 		return
+	var modal_open := false
+	if not modal_ok:
+		var layout := UiZones.layout()
+		modal_open = layout != null and layout.modal_open()
+	if modal_open != _hidden_by_modal:
+		_hidden_by_modal = modal_open
+		panel.visible = not modal_open
+		queue_redraw()
+	if _hidden_by_modal:
+		return
 	var origin := get_global_rect().position
 	var avoid: Array = []
 	for rect in avoid_rects:
@@ -356,6 +372,8 @@ func pulse() -> float:
 
 
 func _draw() -> void:
+	if _hidden_by_modal:
+		return
 	var rect := target_rect()
 	if rect.size.x <= 0.0:
 		return

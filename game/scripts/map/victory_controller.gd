@@ -56,6 +56,7 @@ func setup(campaign_map: Node) -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list_scroll.add_child(list)
 	map.ui.add_child(panel)
+	map.ui.hide_log_while(panel)  # VN : le panneau recouvre le bouton « Déplier » du journal
 	panel.hide()
 
 	# AR1 : écran de fin illustré — enluminure plein écran, cartouche de parchemin en bas.
