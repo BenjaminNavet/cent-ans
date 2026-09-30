@@ -18,12 +18,17 @@ extends Node3D
 ##   devient trop petite.
 ## - Recalage sur la surface affichée : cellules touchées par `chunk_surface_changed` /
 ##   `surface_rect_changed` re-posées (hauteurs seules) par tranches.
+## - Lot GA3-L2 : touffe d'herbe générée dense (`Ga3Vegetation.GRASS_TUFT`) et rochers TRELLIS
+##   (3 variantes × 3 niveaux de détail) sur roche/lande, pentes et reliefs : un `MultiMesh`
+##   enfant de celui de la cellule (même visibilité, même éviction), variante tirée par cellule,
+##   niveau de détail commun choisi par la distance caméra. `--no-ga3-veg` : état FC.
 ## Purement visuel : aucune règle de jeu.
 
 const SHADER := preload("res://shaders/ground_clutter.gdshader")
 ## Lot FC5 : touffe d'herbe texturée (copie mipmappée de `grass_blades.png`, `build_leaf_cards.py`).
 const GRASS_TEXTURE := "res://assets/textures/vegetation/campaign_grass_tuft.png"
 const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalisées
+const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Distance caméra au-delà de laquelle plus aucune touffe (fondu sur `fade_band` en deçà).
@@ -65,6 +70,12 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var max_cached_cells: int = 96
 ## Plafond des instances visibles (toutes cellules).
 @export var max_visible_instances: int = 60000
+## Lot GA3-L2 : rochers. Candidats par cellule (probabilité `_rock_weight`), longueur (unités,
+## avant `campaign_prop_scale`), distances caméra des niveaux de détail 120 → 60 → 18 triangles.
+@export var use_rocks: bool = true
+@export var rock_candidates: int = 120
+@export var rock_size: float = 0.34
+@export var rock_lod_distances: Vector2 = Vector2(12.0, 24.0)
 
 ## Lot L5 : `--no-clutter` coupe les touffes (A/B).
 var enabled: bool = true
@@ -79,6 +90,8 @@ var exclusions: PackedVector3Array = PackedVector3Array()
 ## terrain.
 var weight_sampler: Callable
 var height_sampler: Callable
+## Tests : `rock_sampler(x, y) -> float` (probabilité de rocher) remplace le masque.
+var rock_sampler: Callable
 var stats: Dictionary = {"cells": 0, "visible_cells": 0, "instances": 0, "visible": 0, "build_ms_max": 0.0}  # build_ms_max : pose sur le fil principal
 
 var _vegetation: Node
@@ -93,6 +106,9 @@ var _frame: int = 0
 var _focus := Vector2.ZERO
 var _camera_distance: float = 1e9
 var _radius: float = 0.0
+var _rock_meshes: Array = []  # [variante][niveau] (`Ga3Vegetation.rock_meshes`)
+var _rock_materials: Array[ShaderMaterial] = []
+var _rock_lod: int = 0
 
 
 func _ready() -> void:
@@ -220,6 +236,11 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 	_material.set_shader_parameter("fade", fade)
 	_material.set_shader_parameter("focus", at)
 	_material.set_shader_parameter("radius", _radius)
+	for rock_material in _rock_materials:
+		rock_material.set_shader_parameter("fade", fade)
+		rock_material.set_shader_parameter("focus", at)
+		rock_material.set_shader_parameter("radius", _radius)
+	_update_rock_lod(rock_lod_for(camera_distance))
 	var lo := Vector2i(floori((at.x - _radius) / cell_size), floori((at.y - _radius) / cell_size))
 	var hi := Vector2i(floori((at.x + _radius) / cell_size), floori((at.y + _radius) / cell_size))
 	var wanted: Dictionary = {}
@@ -285,10 +306,33 @@ func _ensure_resources() -> void:
 	_material = ShaderMaterial.new()
 	_material.shader = SHADER
 	_material.set_shader_parameter("prop_scale_power", prop_scale_power)
-	if ResourceLoader.exists(GRASS_TEXTURE):
-		_material.set_shader_parameter("grass_texture", load(GRASS_TEXTURE))
+	var grass_path := Ga3Vegetation.pick(Ga3Vegetation.GRASS_TUFT, GRASS_TEXTURE)
+	if ResourceLoader.exists(grass_path):
+		_material.set_shader_parameter("grass_texture", load(grass_path))
 		_material.set_shader_parameter("has_grass_texture", true)
 	_mesh = crossed_cards_mesh()
+	_rock_meshes = Ga3Vegetation.rock_meshes() if use_rocks else []
+	_rock_materials.clear()
+	for lods: Array in _rock_meshes:
+		var rock_material := ShaderMaterial.new()
+		rock_material.shader = ROCK_SHADER
+		rock_material.set_shader_parameter("prop_scale_power", prop_scale_power)
+		var source := (lods[0] as Mesh).surface_get_material(0) as BaseMaterial3D
+		if source != null and source.albedo_texture != null:
+			rock_material.set_shader_parameter("albedo_texture", source.albedo_texture)
+		_rock_materials.append(rock_material)
+
+
+## Nombre de variantes de rochers chargées (0 : pas de rochers).
+func rock_variants() -> int:
+	return _rock_meshes.size()
+
+
+## Niveau de détail des rochers (0, 1, 2) pour une distance caméra.
+func rock_lod_for(camera_distance: float) -> int:
+	if camera_distance < rock_lod_distances.x:
+		return 0
+	return 1 if camera_distance < rock_lod_distances.y else 2
 
 
 ## Trois cartes verticales croisées à 60°, 1 × 1, pied à l'origine (UV.y = 0 en haut).
@@ -420,7 +464,76 @@ func _seed_cell(key: Vector2i) -> Dictionary:
 	var count := points.size()
 	for n in count:  # rang : ordre de semis (aléatoire), coupe du fondu
 		buffer[n * FLOATS_PER_INSTANCE + 15] = float(n) / float(maxi(count, 1))
-	return {"points": points, "buffer": buffer, "top": top}
+	var seeded := {"points": points, "buffer": buffer, "top": top}
+	if not _rock_meshes.is_empty():
+		var rocks := _seed_rocks(key, rect, forest, circles)
+		if not (rocks["points"] as PackedVector2Array).is_empty():
+			seeded["rocks"] = rocks
+			seeded["top"] = maxf(top, float(rocks["top"]))
+	return seeded
+
+
+## Lot GA3-L2 : probabilité de rocher au point (x, y) : roche/lande de la splatmap (canal A),
+## pente, altitude et terrain de province (montagnes, collines) ; moins sous la forêt.
+func _rock_weight(x: float, y: float, forest: float) -> float:
+	if rock_sampler.is_valid():
+		return rock_sampler.call(x, y)
+	if map_data == null or mask == null or not map_data.is_land_px(int(x), int(y)):
+		return 0.0
+	var rock := 0.0
+	if mask.has_splat():
+		rock += mask.splat_at(x, y).a * 0.35
+	rock += smoothstep(0.25, 0.7, mask.slope_at(x, y)) * 0.45
+	rock += smoothstep(500.0, 1400.0, map_data.height_m_at(x, y)) * 0.3
+	var kind := mask.terrain_at(x, y)
+	rock += 0.2 if kind == "mountains" else (0.06 if kind == "hills" else 0.0)
+	return clampf(rock, 0.0, 0.85) * (1.0 - forest * 0.7)
+
+
+## Lot GA3-L2 : semis des rochers d'une cellule (flux aléatoire propre : le semis des touffes
+## est inchangé). Une variante par cellule ; lacet, échelle anisotrope, pied au sol.
+func _seed_rocks(key: Vector2i, rect: Rect2, forest: PackedFloat32Array, circles: PackedVector3Array) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(Vector3i(key.x, key.y, 0x6A3))
+	var points := PackedVector2Array()
+	var buffer := PackedFloat32Array()
+	buffer.resize(rock_candidates * FLOATS_PER_INSTANCE)
+	var top := 0.0
+	var o := 0
+	for n in rock_candidates:
+		var p := rect.position + Vector2(rng.randf(), rng.randf()) * cell_size
+		var roll := rng.randf()
+		var yaw := rng.randf() * TAU
+		var size := rock_size * rng.randf_range(0.45, 1.4) * (1.0 if rng.randf() > 0.12 else 1.8)
+		var squash := rng.randf_range(0.65, 1.1)
+		var stretch := rng.randf_range(0.8, 1.2)
+		var tint := rng.randf()
+		var local := (p - rect.position) / cell_size * 3.0
+		var w := _rock_weight(p.x, p.y, forest[clampi(int(local.y), 0, 2) * 3 + clampi(int(local.x), 0, 2)])
+		if roll >= w or (not circles.is_empty() and _excluded(p, circles)):
+			continue
+		points.append(p)
+		var b := Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(size * stretch, size * squash, size / stretch))
+		buffer[o] = b.x.x
+		buffer[o + 1] = b.y.x
+		buffer[o + 2] = b.z.x
+		buffer[o + 3] = p.x - rect.position.x
+		buffer[o + 4] = b.x.y
+		buffer[o + 5] = b.y.y
+		buffer[o + 6] = b.z.y
+		buffer[o + 8] = b.x.z
+		buffer[o + 9] = b.y.z
+		buffer[o + 10] = b.z.z
+		buffer[o + 11] = p.y - rect.position.y
+		buffer[o + 12] = tint
+		o += FLOATS_PER_INSTANCE
+		top = maxf(top, size * squash)
+	buffer.resize(o)
+	var count := points.size()
+	for n in count:
+		buffer[n * FLOATS_PER_INSTANCE + 15] = float(n) / float(maxi(count, 1))
+	var variant := posmod(hash(key), maxi(_rock_meshes.size(), 1))
+	return {"points": points, "buffer": buffer, "top": top, "variant": variant}
 
 
 ## Pose (fil principal) : hauteurs de la surface affichée, `MultiMeshInstance3D`.
@@ -450,6 +563,17 @@ func _install_cell(key: Vector2i, seeded: Dictionary) -> void:
 	mmi.visible = false  # rendu visible par `update_view` si la cellule est dans le disque
 	add_child(mmi)
 	_cells[key] = {"mmi": mmi, "points": points, "buffer": buffer, "last_seen": _frame}
+	if seeded.has("rocks") and not _rock_meshes.is_empty():
+		var rocks: Dictionary = seeded["rocks"]
+		var variant := clampi(int(rocks["variant"]), 0, _rock_meshes.size() - 1)
+		var rock_mmi := MultiMeshInstance3D.new()
+		rock_mmi.name = "Rocks"
+		rock_mmi.multimesh = _rock_multimesh(_rock_meshes[variant][_rock_lod], rocks["buffer"], multimesh.custom_aabb)
+		rock_mmi.material_override = _rock_materials[variant]
+		rock_mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		rock_mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		mmi.add_child(rock_mmi)
+		_cells[key]["rocks"] = {"mmi": rock_mmi, "points": rocks["points"], "buffer": rocks["buffer"], "variant": variant}
 	stats["cells"] = _cells.size()
 	stats["build_ms_max"] = maxf(float(stats["build_ms_max"]), (Time.get_ticks_usec() - t0) / 1000.0)
 
@@ -503,6 +627,16 @@ func _ground_seeded(seeded: Dictionary, source: Dictionary) -> Dictionary:
 		bottom = 0.0
 		high = 0.0
 	seeded["buffer"] = buffer
+	if seeded.has("rocks"):
+		var rocks: Dictionary = seeded["rocks"]
+		var rock_points: PackedVector2Array = rocks["points"]
+		var rock_buffer: PackedFloat32Array = rocks["buffer"]
+		var rock_heights := _heights_from(rock_points, source)
+		for n in rock_points.size():
+			rock_buffer[n * FLOATS_PER_INSTANCE + 7] = rock_heights[n]
+			bottom = minf(bottom, rock_heights[n])
+			high = maxf(high, rock_heights[n])
+		rocks["buffer"] = rock_buffer
 	seeded["bottom"] = bottom
 	seeded["high"] = high
 	return seeded
@@ -523,6 +657,8 @@ func _update_regrounds() -> void:
 			var buffer: PackedFloat32Array = holder["buffer"]
 			entry["buffer"] = buffer
 			(entry["mmi"] as MultiMeshInstance3D).multimesh.buffer = buffer
+			if entry.has("rocks") and holder.has("rock_buffer"):
+				_set_rock_buffer(entry["rocks"], holder["rock_buffer"])
 			stats["reground_ms_max"] = maxf(float(stats.get("reground_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
 		if holder.get("stale", false):
 			_dirty[key] = true
@@ -546,18 +682,24 @@ func _update_regrounds() -> void:
 		var holder := {"mmi": entry["mmi"], "buffer": PackedFloat32Array()}
 		var source := _height_source(_cell_rect(key))
 		var old: PackedFloat32Array = entry["buffer"]
-		holder["task"] = WorkerThreadPool.add_task(func() -> void: holder["buffer"] = _regrounded(points, old, source), false, "GroundClutter reground")
+		var rocks: Dictionary = entry.get("rocks", {})
+		var job := func() -> void:
+			holder["buffer"] = _regrounded(points, old, source)
+			if not rocks.is_empty():
+				holder["rock_buffer"] = _regrounded(rocks["points"], rocks["buffer"], source, 0.0)
+		holder["task"] = WorkerThreadPool.add_task(job, false, "GroundClutter reground")
 		_ground_jobs[key] = holder
 		started += 1
 
 
 ## Nouveau tampon (hauteurs seules) depuis la copie processeur ; appelable hors du fil principal.
-func _regrounded(points: PackedVector2Array, old: PackedFloat32Array, source: Dictionary) -> PackedFloat32Array:
+## `sink` : enfoncement du pied en part de la hauteur (touffes 0,08 ; rochers 0, fait par le shader).
+func _regrounded(points: PackedVector2Array, old: PackedFloat32Array, source: Dictionary, sink: float = 0.08) -> PackedFloat32Array:
 	var buffer := old.duplicate()
 	var heights := _heights_from(points, source)
 	for n in points.size():
 		var o := n * FLOATS_PER_INSTANCE
-		buffer[o + 7] = heights[n] - buffer[o + 5] * 0.08
+		buffer[o + 7] = heights[n] - buffer[o + 5] * sink
 	return buffer
 
 
@@ -570,6 +712,65 @@ func _reground_cell(key: Vector2i, source: Dictionary = {}) -> void:
 	var buffer := _regrounded(points, entry["buffer"], source)
 	entry["buffer"] = buffer
 	(entry["mmi"] as MultiMeshInstance3D).multimesh.buffer = buffer
+	if entry.has("rocks"):
+		var rocks: Dictionary = entry["rocks"]
+		_set_rock_buffer(rocks, _regrounded(rocks["points"], rocks["buffer"], source, 0.0))
+
+
+## Lot GA3-L2 : MultiMesh des rochers d'une cellule (boîte de la cellule, pas de relecture GPU).
+static func _rock_multimesh(mesh: Mesh, buffer: PackedFloat32Array, aabb: AABB) -> MultiMesh:
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.use_custom_data = true
+	multimesh.mesh = mesh
+	multimesh.instance_count = buffer.size() / FLOATS_PER_INSTANCE
+	if multimesh.instance_count > 0:
+		multimesh.buffer = buffer
+	multimesh.custom_aabb = aabb
+	return multimesh
+
+
+func _set_rock_buffer(rocks: Dictionary, buffer: PackedFloat32Array) -> void:
+	rocks["buffer"] = buffer
+	var rock_mmi: MultiMeshInstance3D = rocks["mmi"]
+	if is_instance_valid(rock_mmi):
+		rock_mmi.multimesh.buffer = buffer
+
+
+## Lot GA3-L2 : niveau de détail commun des rochers (MultiMesh recréés depuis la copie processeur,
+## comme `Vegetation._with_mesh` : changer `mesh` après `buffer` relirait le tampon au GPU).
+func _update_rock_lod(lod: int) -> void:
+	if lod == _rock_lod or _rock_meshes.is_empty():
+		_rock_lod = lod
+		return
+	_rock_lod = lod
+	for entry: Dictionary in _cells.values():
+		if not entry.has("rocks"):
+			continue
+		var rocks: Dictionary = entry["rocks"]
+		var rock_mmi: MultiMeshInstance3D = rocks["mmi"]
+		rock_mmi.multimesh = _rock_multimesh(_rock_meshes[int(rocks["variant"])][lod], rocks["buffer"], rock_mmi.multimesh.custom_aabb)
+
+
+## Rochers affichés (cellules visibles) et triangles correspondants (niveau courant).
+func rock_stats() -> Dictionary:
+	var count := 0
+	var triangles := 0
+	var calls := 0
+	for entry: Dictionary in _cells.values():
+		if not entry.has("rocks") or not (entry["mmi"] as MultiMeshInstance3D).visible:
+			continue
+		var rock_mmi: MultiMeshInstance3D = entry["rocks"]["mmi"]
+		var n := rock_mmi.multimesh.instance_count
+		count += n
+		calls += 1
+		var mesh := rock_mmi.multimesh.mesh
+		var tris := 0
+		for s in mesh.get_surface_count():
+			var idx: PackedInt32Array = mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX]
+			tris += idx.size() / 3
+		triangles += n * tris
+	return {"rocks": count, "triangles": triangles, "draw_calls": calls, "lod": _rock_lod}
 
 
 func _on_chunk_surface_changed(index: int) -> void:
