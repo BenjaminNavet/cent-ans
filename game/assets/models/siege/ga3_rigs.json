@@ -1,0 +1,78 @@
+{
+  "ga3_ram": {
+    "beam_drop": 2.452,
+    "beam_pivot": [
+      0.0,
+      4.213,
+      0.413
+    ],
+    "faces": {
+      "beam": 282,
+      "shed": 1698,
+      "wheels": [
+        221,
+        200,
+        220,
+        247
+      ]
+    },
+    "scale": 1.15,
+    "triangles": 2868,
+    "wheel_radius": 0.896
+  },
+  "ga3_ram_lod": {
+    "beam_drop": 2.418,
+    "beam_pivot": [
+      0.0,
+      4.213,
+      0.413
+    ],
+    "faces": {
+      "beam": 130,
+      "shed": 662,
+      "wheels": [
+        143,
+        131,
+        149,
+        174
+      ]
+    },
+    "scale": 1.15,
+    "triangles": 1389,
+    "wheel_radius": 0.896
+  },
+  "ga3_trebuchet": {
+    "arm_pivot_from_long_tip_m": 8.5,
+    "arm_scale": 0.9258,
+    "box_scale": [
+      0.421,
+      0.834,
+      0.461
+    ],
+    "faces": {
+      "arm": 199,
+      "box": 1219,
+      "frame": 1300
+    },
+    "frame_scale": 0.8613,
+    "side_gap_m": 0.608,
+    "triangles": 2942
+  },
+  "ga3_trebuchet_lod": {
+    "arm_pivot_from_long_tip_m": 8.5,
+    "arm_scale": 0.9258,
+    "box_scale": [
+      0.421,
+      0.834,
+      0.461
+    ],
+    "faces": {
+      "arm": 82,
+      "box": 571,
+      "frame": 740
+    },
+    "frame_scale": 0.8613,
+    "side_gap_m": 0.608,
+    "triangles": 1557
+  }
+}

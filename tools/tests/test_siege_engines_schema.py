@@ -81,3 +81,14 @@ def test_battle_demos_match_schema() -> None:
         for engine in demo.get("engines", []):
             assert engine in engines, (demo["id"], engine)
     assert {"avignon", "bruges"} <= {demo.get("landmark") for demo in demos["demos"]}
+
+
+def test_ga3_variants_have_their_models() -> None:
+    """GA3-L5: every generated variant of an animated engine exists at both levels of detail."""
+    settings = _load("fx/siege_engines.json")
+    for engine, variant in settings.get("ga3", {}).items():
+        if engine == "description":
+            continue
+        assert engine in (*settings["engines"].values(), "ram", "siege_tower"), engine
+        for suffix in ("", "_lod"):
+            assert (MODELS / f"{variant['model']}{suffix}.glb").is_file(), variant

@@ -552,4 +552,5 @@ def main() -> None:
     print("siege engines:", {k: v["triangles"] for k, v in manifest.items()})
 
 
-main()
+if __name__ == "__main__":
+    main()

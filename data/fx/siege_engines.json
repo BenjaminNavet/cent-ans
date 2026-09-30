@@ -60,6 +60,17 @@
     "sway_deg": 1.6,
     "sway_per_m": 0.55
   },
+  "ga3": {
+    "description": "Lot GA3-L5 (ADR 0140) : variante générée d'un modèle animé (tools/blender_scripts/ga3_siege_rig.py : maillage GA3 découpé sur les nœuds du modèle procédural, mêmes noms). `model` = glb de models_dir (et `<model>_lod.glb`) ; les autres clés remplacent les réglages de l'engin pour cette variante (roues et cordes de la poutre plus grandes). `--no-ga3` rend le modèle procédural.",
+    "trebuchet": {
+      "model": "ga3_trebuchet"
+    },
+    "ram": {
+      "model": "ga3_ram",
+      "wheel_radius": 0.9,
+      "beam_drop": 2.2
+    }
+  },
   "oil": {
     "steam_amount": 90,
     "steam_lifetime_s": 3.2,
@@ -157,7 +168,11 @@
           "yaw_deg": 180,
           "role": "swab",
           "figure": 1,
-          "rest": [-1.5, 0.6, 60]
+          "rest": [
+            -1.5,
+            0.6,
+            60
+          ]
         },
         {
           "x": 1.3,

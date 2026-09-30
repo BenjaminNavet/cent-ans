@@ -135,7 +135,7 @@
       "wired": false,
       "raw": "l1p/trebuchet",
       "glb": "trellis.glb",
-      "note": "Vue unique et trellis/multi équivalentes (un seul îlot) ; non branché : le trébuchet de bataille est animé (SiegeEnginesFx, bras qui pivote), un maillage figé ne le remplace pas."
+      "note": "Vue unique et trellis/multi équivalentes (un seul îlot) ; pas dans le kit du décor (`wired` faux) ; L5 : découpé en pièces animées (bâti, verge, caisse) par `ga3_siege_rig.py` → `siege/ga3_trebuchet.glb`, posé par `SiegeEnginesFx` (ADR 0140 § L5)."
     },
     {
       "id": "ram",
@@ -151,7 +151,7 @@
       "share": 0.0,
       "wired": false,
       "raw": "l1b/ram",
-      "note": "L1b : toit en planches couvertes de peaux brunes unies (peaux L1 « vache pie »), vue unique TRELLIS."
+      "note": "L1b : toit en planches couvertes de peaux brunes unies (peaux L1 « vache pie »), vue unique TRELLIS. L5 : découpé (abri, roues, poutre) par `ga3_siege_rig.py` → `siege/ga3_ram.glb`, posé par `SiegeEnginesFx` (ADR 0140 § L5)."
     }
   ]
 }

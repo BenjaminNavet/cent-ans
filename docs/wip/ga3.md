@@ -360,6 +360,13 @@ avec la texture d'os du jeu). 0,16 $ (une génération `trellis/multi`).
 - [x] L3b : `man_at_arms` → `infantry_0`, `crossbowman` → `archer_2`, `sergeant` → `infantry_1`,
       `militia` → `infantry_5` (0,63 $, un essai chacune). Voir « L3b ».
 - [x] L3c : cavalier du chevalier `cavalry_0` sur le cheval fin (0,16 $, un essai). Voir « L3c ».
+- [x] L5 trébuchet et bélier générés branchés sur les engins animés (0 $, pas de régénération ;
+      ADR 0140 § L5, note `docs/wip/ga3-l5.md`) : `ga3_siege_rig.py` découpe les LOD GA3 sur les
+      nœuds du rig procédural (bâti / verge / caisse ; abri / roues / poutre), fronde, pierre et
+      treuil procéduraux ; `siege/ga3_{trebuchet,ram}(_lod).glb`, `ga3` de
+      `data/fx/siege_engines.json`, `--no-ga3`. **Point ouvert** : jugement en jeu (proportions
+      forcées du bâti et de la caisse, traverses étirées au centre, poutre du bélier qui traverse
+      le toit aux grands balancements) ; capture `docs/audit/captures/ga3/ga3_l5_siege.png`.
 - [ ] Autres recettes des mêmes types (infantry_2/3/4/6/7/8, archer_1/4, cavalry_3, standard_1)
       si le joueur valide.
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.
