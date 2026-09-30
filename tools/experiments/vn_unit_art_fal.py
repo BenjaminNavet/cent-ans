@@ -23,22 +23,22 @@ from cent_ans_tools import entry_art
 
 ENDPOINT = "fal-ai/nano-banana-2/edit"
 PRICE_USD = 0.08  # 1K, catalogue price
-UNIT_DIR = entry_art.REPO_DIR / "data" / "unit_types"
 # Style references: a mounted and a foot miniature already in the game.
 REFERENCE_MOUNTED = entry_art.ILLUSTRATIONS_DIR / "unit_knights.jpg"
 REFERENCE_FOOT = entry_art.ILLUSTRATIONS_DIR / "unit_longbowmen.jpg"
+REFERENCE_BUILDING = entry_art.ILLUSTRATIONS_DIR / "bld_abbey.jpg"
 STYLE_NOTE = (
     "The reference image only shows the painting style to match (Gothic manuscript "
     "miniature technique, palette, gilded diapered background, ink outlines); paint a new "
-    "scene with different soldiers, do not copy its figures."
+    "scene with its own subject, do not copy its figures or buildings."
 )
 
 
-def missing_units() -> list[str]:
-    """Unit type ids without an illustration."""
+def missing_units(category: str = "unit_types") -> list[str]:
+    """Entry ids of ``category`` without an illustration."""
     return sorted(
         path.stem
-        for path in UNIT_DIR.glob("*.json")
+        for path in (entry_art.REPO_DIR / "data" / category).glob("*.json")
         if not (entry_art.ILLUSTRATIONS_DIR / f"{path.stem}.jpg").exists()
     )
 
@@ -57,8 +57,12 @@ def main() -> None:
     parser.add_argument("raw_dir", type=Path)
     parser.add_argument("--only", default="")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--category", default="unit_types", choices=["unit_types", "buildings"]
+    )
     args = parser.parse_args()
-    ids = missing_units()
+    ids = missing_units(args.category)
+    data_dir = entry_art.REPO_DIR / "data" / args.category
     if args.only:
         ids = [i for i in ids if i in args.only.split(",")]
     print(f"{len(ids)} unit(s): {', '.join(ids)} (~{len(ids) * PRICE_USD:.2f} $)")
@@ -71,12 +75,15 @@ def main() -> None:
     spent = 0.0
     for unit_id in ids:
         raw = args.raw_dir / f"{unit_id}.png"
-        entry = json.loads((UNIT_DIR / f"{unit_id}.json").read_text())
+        entry = json.loads((data_dir / f"{unit_id}.json").read_text())
         if not raw.exists():
-            reference = REFERENCE_MOUNTED if is_mounted(entry) else REFERENCE_FOOT
+            if args.category == "buildings":
+                reference = REFERENCE_BUILDING
+            else:
+                reference = REFERENCE_MOUNTED if is_mounted(entry) else REFERENCE_FOOT
             if reference not in uploaded:
                 uploaded[reference] = fal_client.upload_file(str(reference))
-            prompt = entry_art.build_prompt("unit_types", entry) + "\n" + STYLE_NOTE
+            prompt = entry_art.build_prompt(args.category, entry) + "\n" + STYLE_NOTE
             result = fal_client.subscribe(
                 ENDPOINT,
                 arguments={

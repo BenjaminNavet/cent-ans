@@ -244,3 +244,4 @@ reprises éventuelles comprises : ~0,62 $ prévu. Plafond vérifié par `data/ar
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul VN |
 |---|---|---|---|---|---|
 | 2026-09-30 | fal.ai | VN9 : miniatures des 12 types d'unités sans illustration (12 × fal-ai/nano-banana-2/edit 1K, référence de style unit_knights / unit_longbowmen) — prix catalogue | 0,96 $ | 0,96 $ | 0,96 $ |
+| 2026-09-30 | fal.ai | VN9b : miniature de bld_collegiate_church, seul bâtiment sans illustration (1 × fal-ai/nano-banana-2/edit 1K) — prix catalogue | 0,08 $ | 0,08 $ | 1,04 $ |
