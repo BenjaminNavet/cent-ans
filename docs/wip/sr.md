@@ -24,3 +24,8 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - Tests : pytest `test_material_gen.py` + `test_sr1_scans.py` (21), `ga1_maps_test.gd` OK (2,33 Mo), `smoke.gd` OK.
 - À juger en jeu (SR4) : échelle des fils (0,6-2 mm, fondus par les mipmaps de loin), normale
   plate/cuir renforcée (x4/x3), rugosité laine/gambeson/bois relevée.
+
+## SR2 — en cours (agent)
+- Squelette : uniformes `weathering` (0,6) et `sr2_mud_height` (0,45 ; cavalerie 0,65) dans
+  la variante FG3_BAKED, posés par `BattleSkinned._setup_fine_maps`, `--no-sr2` → 0.
+- Prochaine étape : effets dans le fragment (boue, crasse, acier, teintes), test `sr2_weathering_test.gd`.

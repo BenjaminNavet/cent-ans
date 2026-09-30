@@ -208,6 +208,10 @@ const vec3 FG3_HAIR[7] = vec3[](
 	vec3(0.26, 0.10, 0.04), vec3(0.035, 0.03, 0.028), vec3(0.20, 0.18, 0.16),
 	vec3(0.42, 0.40, 0.37)
 );
+// Lot SR2 : usure (0 : rendu SR1 exact) posée par BattleSkinned (`--no-sr2` : 0) ; hauteur de
+// repos (m) jusqu'où monte la boue (piétons ~ genoux, cavaliers : jambes du cheval, caparaçon).
+uniform float weathering = 0.6;
+uniform float sr2_mud_height = 0.45;
 varying vec2 v_atlas;
 varying flat int v_src;
 #endif
