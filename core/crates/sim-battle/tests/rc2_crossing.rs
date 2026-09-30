@@ -72,7 +72,8 @@ fn one_passage_of_the_right_kind_between_the_lines() {
                 let crossings = f.crossings();
                 assert_eq!(crossings.len(), 1, "{tag}: {crossings:?}");
                 let c = crossings[0];
-                let main_bridges: Vec<_> = f.bridges.iter().filter(|b| b.stream.is_none()).collect();
+                let main_bridges: Vec<_> =
+                    f.bridges.iter().filter(|b| b.stream.is_none()).collect();
                 match structure {
                     CrossingStructure::StoneBridge
                     | CrossingStructure::WoodBridge
@@ -94,8 +95,7 @@ fn one_passage_of_the_right_kind_between_the_lines() {
                         assert!(c.ford.is_some(), "{tag}");
                         if structure == CrossingStructure::Ferry {
                             assert_eq!(
-                                r.fords[0].half_width,
-                                rules.crossing.ferry_half_width_m,
+                                r.fords[0].half_width, rules.crossing.ferry_half_width_m,
                                 "{tag}"
                             );
                         }

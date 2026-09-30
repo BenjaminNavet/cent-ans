@@ -340,8 +340,7 @@ impl Battlefield {
         weather: Weather,
         rng: &mut BattleRng,
     ) -> Self {
-        let mut field =
-            Self::generate_base(size, site.terrain, site.river, crossing, weather, rng);
+        let mut field = Self::generate_base(size, site.terrain, site.river, crossing, weather, rng);
         field.season = site.season;
         let mut stream = rng.derive(SITE_STREAM);
         let parts: Vec<Zone> = field

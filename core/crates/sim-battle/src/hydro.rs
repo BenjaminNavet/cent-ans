@@ -662,7 +662,10 @@ pub(crate) fn crossing_river(
     stream: &mut BattleRng,
 ) -> River {
     let (r, c) = (&rules.river, &rules.crossing);
-    let bridged = !matches!(structure, CrossingStructure::Ford | CrossingStructure::Ferry);
+    let bridged = !matches!(
+        structure,
+        CrossingStructure::Ford | CrossingStructure::Ferry
+    );
     let z0 = (size.attacker_line_z() + size.defender_line_z()) * 0.5 + stream.range(-15.0, 15.0);
     let amplitude = draw_span(c.amplitude_m, stream);
     let wavelength = stream.range(500.0, 900.0);

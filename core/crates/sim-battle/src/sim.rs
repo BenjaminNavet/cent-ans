@@ -3098,7 +3098,7 @@ impl BattleSim {
                 None => return,
             }
         } else {
-            let winner = if (able[1] == 0 && able[0] > 0) || (square_held && able[0] > 0) {
+            let winner = if able[0] > 0 && (able[1] == 0 || square_held) {
                 SideId::Attacker
             } else {
                 SideId::Defender
