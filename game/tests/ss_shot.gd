@@ -3,10 +3,11 @@ extends SceneTree
 ## Lot SS : captures du sol de campagne à plusieurs hauteurs (avant/après la pyramide de couleur).
 ## Usage : godot --path game --resolution 1600x900 --script res://tests/ss_shot.gd --
 ##   --out=<dossier> [--prefix=avant-] [--at=<x>,<z>] [--distances=900,300,90]
-##   [--param=<uniforme>=<float>]… [--env=<propriété Environment>=<float>]… (réglage du matériau du terrain) [--stats] (moyenne/écart-type
+##   [--hide=<nœud>,…] [--param=<uniforme>=<float>]… [--env=<propriété Environment>=<float>]… (réglage du matériau du terrain) [--stats] (moyenne/écart-type
 ##   RGB du bas de l'image, sol sans figures, pour comparer sans lire l'image)
 ## Écrit `<prefix>sol-<distance>.png` (960 px de large) par distance ; HUD masqué.
 
+const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const PARIS := Vector2(2213.2, 3203.9)
 const WIDTH := 960
 const SETTLE_FRAMES := 150
@@ -20,6 +21,7 @@ func _init() -> void:
 	var params := {}
 	var stats := false
 	var env_params := {}
+	var hide := PackedStringArray()
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -38,6 +40,8 @@ func _init() -> void:
 		elif arg.begins_with("--env="):
 			var ekv := arg.trim_prefix("--env=").split("=")
 			env_params[ekv[0]] = float(ekv[1])
+		elif arg.begins_with("--hide="):
+			hide = arg.trim_prefix("--hide=").split(",")
 		elif arg == "--stats":
 			stats = true
 	DirAccess.make_dir_recursive_absolute(out_dir)
@@ -46,6 +50,11 @@ func _init() -> void:
 	if settings != null:
 		settings.call("use_test_file")
 		settings.call("set_value", "tutorial/enabled", false, false)
+	var facade: Node = root.get_node("/root/SimFacade")
+	facade.set_data_dir(MAP_PATHS.default_data_dir())
+	facade.pending_faction = "fac_france"  # Paris vu (pas de brouillard de guerre sur la capture)
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
 	root.add_child(map)
 	for i in 5:
@@ -72,8 +81,22 @@ func _init() -> void:
 		rig.look_at_point(ground, maxf(distance, rig.min_distance_at(ground)))
 		rig.snap()
 		for i in SETTLE_FRAMES:
+			for node_name in hide:  # calques masqués (diagnostic)
+				var node := map.find_child(node_name, true, false) as Node3D
+				if node != null:
+					node.visible = false
+			for key in params:  # la carte repose certains réglages à chaque image
+				if material != null:
+					material.set_shader_parameter(key, params[key])
 			await process_frame
 		if stats:
+			var mats := {}
+			for mi in map.find_children("*", "MeshInstance3D", true, false):
+				var m := (mi as MeshInstance3D).material_override as ShaderMaterial
+				if m != null and m.shader != null and m.shader.resource_path.ends_with("terrain.gdshader") and (mi as MeshInstance3D).is_visible_in_tree():
+					mats[m] = int(mats.get(m, 0)) + 1
+			for m in mats:
+				print("SS terrain material %s (main %s) on %d meshes, has_colormap %s" % [m, m == material, mats[m], m.get_shader_parameter("has_colormap")])
 			_stats("%ssol-%d" % [prefix, int(distance)])
 		else:
 			_shot(out_dir, "%ssol-%d" % [prefix, int(distance)])
