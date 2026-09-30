@@ -1,8 +1,8 @@
 shader_type spatial;
-render_mode cull_disabled, depth_draw_opaque, diffuse_lambert_wrap, specular_disabled;
+render_mode cull_disabled, depth_draw_opaque, diffuse_lambert_wrap, specular_disabled, alpha_to_coverage;
 
 // Lot FC3 : touffes d'herbe et broussailles proches de la carte de campagne (`GroundClutter`).
-// Cartes croisées (UV.y = 0 en haut), masque procédural (brins ou feuillage), coupe alpha, vent
+// Cartes croisées (UV.y = 0 en haut), masque procédural (brins ou feuillage), alpha-to-coverage, vent
 // léger, teinte saisonnière (poids `campaign_season` du lot CV1), fondu dithered par distance
 // caméra (`fade`) et au bord du disque visible (`focus`, `radius`). Aucune ombre (réglée par le
 // script). Données par instance (`INSTANCE_CUSTOM`) : x = sorte (0 herbe, 1 broussaille),
@@ -72,7 +72,8 @@ void vertex() {
 	}
 }
 
-// Brins : sept lames effilées, penchées au hasard.
+// Brins : sept lames effilées, penchées au hasard. Retourne une marge signée (> 0 dans un brin)
+// pour l'anticrénelage du bord (`edge_alpha`).
 float blades(vec2 uv, float seed) {
 	float up = 1.0 - uv.y;
 	float a = 0.0;
@@ -83,37 +84,44 @@ float blades(vec2 uv, float seed) {
 		float lean = (hash1(fi + 3.7) - 0.5) * 0.5;
 		float x = cx + lean * up * up;
 		float w = 0.055 * (1.0 - up / h);
-		a = max(a, step(abs(uv.x - x), w) * step(up, h));
+		a = max(a, min(w - abs(uv.x - x), (h - up) * 0.1));
 	}
 	return a;
 }
 
-// Broussaille : masse arrondie au bord déchiqueté.
+// Broussaille : masse arrondie au bord déchiqueté (marge signée, voir `blades`).
 float bush(vec2 uv, float seed) {
 	vec2 p = (uv - vec2(0.5, 0.55)) * vec2(2.0, 2.3);
 	float body = 1.0 - length(p);
 	float leaves = value_noise(uv * 11.0 + seed * 31.0) * 0.55 + value_noise(uv * 23.0 - seed * 13.0) * 0.3;
-	return step(0.35, body + leaves * 0.6);
+	return body + leaves * 0.6 - 0.35;
+}
+
+// Marge signée → alpha autour de 0,5 (un pixel écran ≈ 0,25) : le bord est lissé par
+// l'alpha-to-coverage au lieu d'une coupe franche qui scintille dès que la caméra bouge.
+float edge_alpha(float margin) {
+	return 0.5 + 0.25 * margin / max(fwidth(margin), 1e-5);
 }
 
 void fragment() {
 	bool is_bush = v_kind > 0.5;
-	float mask;
 	float shade = 1.0;
+	// Alpha-to-coverage (bord lissé par le MSAA) : coupe à 0,05, bord à 0,5, alpha épaissi avec
+	// le niveau de mipmap (`ALPHA_TEXTURE_COORDINATE`) pour que les brins lointains tiennent.
+	ALPHA_SCISSOR_THRESHOLD = 0.05;
+	ALPHA_ANTIALIASING_EDGE = 0.45;
+	ALPHA_TEXTURE_COORDINATE = UV;
 	if (is_bush) {
-		mask = bush(UV, v_seed);
+		ALPHA = edge_alpha(bush(UV, v_seed));
 	} else if (has_grass_texture) {
 		// Une touffe sur deux retournée : moins de répétition.
 		vec2 uv = vec2(v_seed > 0.5 ? 1.0 - UV.x : UV.x, UV.y);
 		vec4 t = texture(grass_texture, uv);
-		float lod = max(textureQueryLod(grass_texture, uv).x, 0.0);
-		mask = t.a * (1.0 + lod * 0.4);
+		ALPHA = t.a;
+		ALPHA_TEXTURE_COORDINATE = uv * vec2(textureSize(grass_texture, 0));
 		shade = mix(0.8, 1.1, dot(t.rgb, vec3(0.3, 0.59, 0.11)));
 	} else {
-		mask = blades(UV, v_seed);
-	}
-	if (mask < 0.5) {
-		discard;
+		ALPHA = edge_alpha(blades(UV, v_seed));
 	}
 	float up = 1.0 - UV.y;
 	// Taches plus sèches ou plus drues (bruit de position), petit écart par touffe.

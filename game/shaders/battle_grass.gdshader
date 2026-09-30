@@ -5,7 +5,7 @@
 // les chemins, la boue, les galets, les labours, sous l'eau), les parcelles (blé doré, jachère
 // haute) et la neige. Balancement au vent dans le sommet, fondu au bord du disque.
 shader_type spatial;
-render_mode cull_disabled, diffuse_burley, specular_disabled, depth_draw_opaque;
+render_mode cull_disabled, diffuse_burley, specular_disabled, depth_draw_opaque, alpha_to_coverage;
 
 #include "res://shaders/battle_common.gdshaderinc"
 
@@ -226,7 +226,11 @@ void fragment() {
 		ALPHA *= mix(0.45, 1.0, smoothstep(0.12, 0.5, v_facing));
 		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, decor_saturation);
 	}
-	ALPHA_SCISSOR_THRESHOLD = 0.4;
+	// Alpha-to-coverage : bord des brins lissé par le MSAA (bord à 0,4 comme l'ancienne coupe),
+	// sinon la coupe franche scintille dès que la caméra bouge.
+	ALPHA_SCISSOR_THRESHOLD = 0.05;
+	ALPHA_ANTIALIASING_EDGE = 0.35;
+	ALPHA_TEXTURE_COORDINATE = UV * vec2(textureSize(grass_texture, 0));
 	ROUGHNESS = 0.9;
 	BACKLIGHT = vec3(0.18, 0.22, 0.08);
 }

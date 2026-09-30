@@ -333,7 +333,10 @@ void fragment() {
 	}
 	// Sillons des labours.
 	if (w_plough > 0.0) {
-		float furrow = 0.5 + 0.5 * sin(field.y * 6.2832 / furrow_period);
+		// Sillons estompés vers leur teinte moyenne quand leur période passe sous ~4 pixels
+		// (sinon moiré et scintillement au loin).
+		float furrow_px = fwidth(field.y / furrow_period);
+		float furrow = mix(0.5, 0.5 + 0.5 * sin(field.y * 6.2832 / furrow_period), 1.0 - smoothstep(0.12, 0.3, furrow_px));
 		albedo *= mix(1.0, mix(0.72, 1.05, furrow), w[int(L_PLOUGH)]);
 		// EP6 : blé en herbe des semis (rangs verts sur la terre).
 		if (decor_kind == 4.0) {
