@@ -289,7 +289,7 @@ func _ready() -> void:
 	_parse_cmdline()
 
 
-## Lot C6 : colonies (icônes, maquettes, étiquettes), hameaux et routes, paliers de zoom.
+## Lot C6 : colonies (villes 1:1, étiquettes), hameaux et routes, paliers de zoom.
 func _setup_settlements() -> void:
 	zoom_tiers = ZoomTiers.load_default()
 	settlement_data = SettlementData.load_from(MapPaths.data_dir, MapPaths.map_dir())
@@ -559,7 +559,7 @@ func player_army_ids() -> PackedStringArray:
 
 ## Intercepteur de clic gauche du picker : vrai si une armée ou une colonie a été cliquée.
 ## Q2 : quand une armée stationne dans une ville, le clic va à ce qui est sous le curseur
-## (jeton ou figurines : l'armée ; maquette ou icône de la ville : la colonie, dont le panneau
+## (jeton ou figurines : l'armée ; ville 1:1 ou icône de la ville : la colonie, dont le panneau
 ## ouvre recrutement, chantiers et province) ; un second clic au même endroit alterne.
 func _try_select_army(screen_position: Vector2) -> bool:
 	var army_hit: Dictionary = armies.pick_screen_scored(screen_position)
@@ -586,7 +586,7 @@ func _try_select_army(screen_position: Vector2) -> bool:
 	if settlement_id == "":
 		_last_pick_target = ""
 		return false
-	# C6 : clic sur une icône ou une maquette de colonie.
+	# C6 : clic sur une icône ou une ville (1:1) de colonie.
 	_last_pick_target = "settlement:" + settlement_id
 	if selected_army != "":
 		deselect_army()

@@ -185,7 +185,7 @@ func _collect_towns() -> void:
 		if kind != "city" and kind != "town":
 			continue
 		var p := settlements.model_px(i)
-		_towns.append(Vector3(p.x, p.y, settlements.model_radius(i) * 1.6 + 0.4))
+		_towns.append(Vector3(p.x, p.y, settlements.model_radius(i) * 1.3 + 0.05))
 
 
 # --- Mise à jour par image -------------------------------------------------------------
@@ -248,7 +248,7 @@ func _update_open() -> void:
 	if lc != null:
 		for ids in _open_zone_cities:
 			for id in ids:
-				zone_open = maxf(zone_open, 1.0 - lc.fade(id))
+				zone_open = maxf(zone_open, 1.0 if lc.is_shown(id) else 0.0)
 	if cover_open != _cover_open:
 		_cover_open = cover_open
 		river_material.set_shader_parameter("cover_open", cover_open)

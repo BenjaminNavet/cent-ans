@@ -22,6 +22,13 @@ const CHIMNEYS := {"city": 5, "town": 3, "village": 2, "abbey": 2, "castle": 1}
 ## Taille d'un panache de cheminée (largeur, hauteur) et d'incendie (unités monde).
 const CHIMNEY_SIZE := Vector2(1.3, 4.0)
 const FIRE_SIZE := Vector2(3.0, 13.0)
+## VT-G (villes à l'échelle 1:1) : le rayon de colonie est le rayon réel. Cheminées réparties dans
+## 70 % de l'emprise, au niveau du faîte ; incendies de siège dans les faubourgs (90 %) ; moulins
+## sur une couronne à 1,6-2,2 rayons (hors faubourgs et enceinte).
+const CHIMNEY_RADIUS_RATIO := 0.7
+const CHIMNEY_TOP_RATIO := 1.0
+const FIRE_RADIUS_RATIO := 0.9
+const WINDMILL_RING_MIN := 1.6
 ## Dévastation (%) au-delà de laquelle les hameaux brûlés fument encore.
 const FIRE_MIN_DEVASTATION := 25.0
 
@@ -61,8 +68,6 @@ var _snow := 0.0
 ## SZ4 : échelles appliquées (moulins : instances réécrites ; fumées : paramètre du matériau).
 var _windmill_scale := 1.0
 var _smoke_scales := Vector2(-1.0, -1.0)
-## SZ4b : échelle de référence des maquettes appliquée aux positions (pas de `rewrite_step`).
-var _settlement_ref := 1.0
 var _camera_distance := 1000.0
 ## FC1 : les moulins ne portent ombre que sous `veg_shadow_distance` (comme les arbres) ; bascule
 ## seulement au franchissement du seuil.
@@ -159,8 +164,9 @@ func rebuild(province_states: Dictionary) -> void:
 		var px: Vector2 = entry["px"]
 		var seed_value := absi(str(entry["id"]).hash())
 		var state: Dictionary = province_states.get(str(entry["province"]), {})
-		var radius := _layer.model_radius(i) * 0.55
-		var top := _layer.model_top(i) * 0.45
+		# VT-G : rayon et hauteur réels (1 u ≈ 719 m) ; cheminées dans l'emprise bâtie, en tête de toit.
+		var radius := _layer.model_radius(i) * CHIMNEY_RADIUS_RATIO
+		var top := _layer.model_top(i) * CHIMNEY_TOP_RATIO
 		# FK4 : colonie pestiférée, cheminées éteintes.
 		var chimneys := 0 if quiet_settlements.has(str(entry["id"])) else int(CHIMNEYS.get(kind, 1))
 		for k in chimneys:
@@ -171,7 +177,7 @@ func rebuild(province_states: Dictionary) -> void:
 		if bool(state.get("siege", false)) and (kind == "city" or kind == "town"):
 			for k in 3:
 				var angle_f := float((seed_value / (k + 5)) % 628) / 100.0
-				_fire_points.append(_settlement_point(i, Vector2(cos(angle_f), sin(angle_f)) * _layer.model_radius(i) * 0.9, 0.2, float(k) / 3.0))
+				_fire_points.append(_settlement_point(i, Vector2(cos(angle_f), sin(angle_f)) * _layer.model_radius(i) * FIRE_RADIUS_RATIO, 0.2, float(k) / 3.0))
 	for h in data.hamlets.size():
 		var hamlet: Dictionary = data.hamlets[h]
 		var hpx: Vector2 = hamlet["px"]
@@ -186,7 +192,6 @@ func rebuild(province_states: Dictionary) -> void:
 	# FK4 : fumées de bûcher (peste) et d'émeute (révolte) des scènes de province.
 	for k in scene_fires.size():
 		_fire_points.append(_fixed_point(scene_fires[k], 0.1, float(k % 7) / 7.0))
-	_settlement_ref = _reference_scale()
 	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE, 0.0)
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
 	_build_windmills(province_states)
@@ -214,11 +219,9 @@ func _rebuild_key(province_states: Dictionary) -> String:
 		var siege := bool(state.get("siege", false))
 		if siege:
 			amount = maxf(amount, 0.3)
-		var holder := _layer.model_holder(i)
-		var model_id := holder.get_child(0).get_instance_id() if holder != null and holder.get_child_count() > 0 else 0
-		parts.append("%d%d%d%d%d:%s:%s:%d" % [int(siege), int(devastation >= FIRE_MIN_DEVASTATION),
+		parts.append("%d%d%d%d%d:%s:%s" % [int(siege), int(devastation >= FIRE_MIN_DEVASTATION),
 			int(devastation >= RUIN_MIN_DEVASTATION), int(amount > 0.0), int(round(amount * 5.0)),
-			_layer.model_radius(i), _layer.model_top(i), model_id])
+			_layer.model_radius(i), _layer.model_top(i)])
 	var burned := PackedByteArray()
 	burned.resize(data.hamlets.size())
 	for h in data.hamlets.size():
@@ -241,7 +244,7 @@ func _build_windmills(province_states: Dictionary) -> void:
 		var devastation := float(province_states.get(str(entry["province"]), {}).get("devastation", 0.0))
 		for k in count:
 			var angle := float((seed_value / (k + 2)) % 628) / 100.0
-			var distance := _layer.model_radius(i) * (1.35 + float((seed_value / (k + 5)) % 60) / 100.0)
+			var distance := _layer.model_radius(i) * (WINDMILL_RING_MIN + float((seed_value / (k + 5)) % 60) / 100.0)
 			var pose := _settlement_point(i, Vector2(cos(angle), sin(angle)) * distance, 0.0, 0.0)
 			_windmill_points.append([pose[0], float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0,
 				devastation < RUIN_MIN_DEVASTATION, _pose_y(pose), i, pose[4], pose[5], pose[6]])
@@ -364,7 +367,8 @@ func _pose_y(point: Array) -> float:
 func _scale_pair(i: int) -> Vector2:
 	if _memo_depth > 0 and _scale_memo.has(i):
 		return _scale_memo[i]
-	var pair := Vector2(_layer.model_scale_at(i, _camera_distance), _layer.model_scale_at(i, 0.0))
+	# VT-G : plus de maquette grossie, donc plus d'échelle de colonie (toujours 1).
+	var pair := Vector2.ONE
 	if _memo_depth > 0:
 		_scale_memo[i] = pair
 	return pair
@@ -380,12 +384,6 @@ func _end_pass() -> void:
 	_memo_depth -= 1
 	if _memo_depth == 0:
 		_scale_memo.clear()
-
-
-## SZ4b : exagération commune à la distance courante (réécriture des positions par pas).
-func _reference_scale() -> float:
-	var props := MapPropScale.shared()
-	return props.exaggeration(_camera_distance)  # exagération commune (lot SZ4b)
 
 
 func _windmill_transforms(point: Array) -> Array:
@@ -705,15 +703,8 @@ func _apply_prop_scale(camera_distance: float) -> void:
 		_fire_material.set_shader_parameter("prop_scale", smoke.y)
 	_camera_distance = camera_distance
 	var mill := props.windmill_scale(camera_distance)
-	var reference := _reference_scale()
-	var moved := props.needs_rewrite(_settlement_ref, reference)
 	var tp := Time.get_ticks_usec()  # RS-K : sous-sections du banc `--bench-probe`
-	if moved:
-		# SZ4b : moulins et panaches suivent l'échelle de la maquette de leur colonie.
-		_settlement_ref = reference
-		_smoke_dirty[_chimneys] = true
-		_smoke_dirty[_fires] = true
-		_mills_dirty = true
+	# VT-G : les colonies sont à l'échelle 1:1, leurs moulins et panaches ne suivent plus de maquette.
 	if props.needs_rewrite(_windmill_scale, mill):
 		_windmill_scale = mill
 		_mills_dirty = true

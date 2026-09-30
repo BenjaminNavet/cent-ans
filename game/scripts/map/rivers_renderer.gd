@@ -208,7 +208,7 @@ func _load_rivers() -> void:
 		rivers.append({"name": river["name"], "importance": river["importance"], "points": points, "widths": widths})
 
 
-## Emprises couvertes par les maquettes de colonies (hors zones personnalisées).
+## Emprises couvertes par les villes (rayon réel) (hors zones personnalisées).
 func _settlement_covers(settlements: SettlementLayer) -> Array[Vector4]:
 	var result: Array[Vector4] = []
 	if settlements == null or settlements.data == null:
@@ -217,11 +217,11 @@ func _settlement_covers(settlements: SettlementLayer) -> Array[Vector4]:
 	var count := mini(settlements.data.settlements.size(), exclusions.size())
 	for i in count:
 		var e := exclusions[i]
-		# `vegetation_exclusions` : rayon de la maquette × 1,1 + 0,5.
-		var model_radius := (e.z - 0.5) / 1.1
-		if model_radius <= 0.3 or in_custom_zone(Vector2(e.x, e.y)):
+		# VT : `vegetation_exclusions` rend le finage ; l'emprise bâtie est le rayon réel de la ville.
+		var built_radius := settlements.model_radius(i)
+		if built_radius <= 0.3 or in_custom_zone(Vector2(e.x, e.y)):
 			continue
-		result.append(Vector4(e.x, e.y, model_radius * SETTLEMENT_COVER, i))
+		result.append(Vector4(e.x, e.y, built_radius * SETTLEMENT_COVER, i))
 	return result
 
 
