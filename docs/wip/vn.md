@@ -5,7 +5,7 @@ Mandat : amélioration visuelle libre, autonomie toute la nuit, 100 captures, fa
 rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 
 ## Compteur de captures lues
-88 / 100
+94 / 100
 
 ## Constats (état des lieux)
 - Bataille, vue moyenne : touffes d'herbe sombres en plaques sur sol brun (effet « détritus »),
@@ -56,6 +56,12 @@ rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 - Écran de résultat : la rangée des régiments est coupée par le bas de la zone défilante en 1080p.
 - Champs de blé procéduraux en ovales (Crécy, Poitiers) plutôt qu'en parcelles.
 
+## Intégré dans main
+7e68b23e3 (ff-only, 30/09 23:30), dylib reconstruite.
+
+## En cours
+Agent VN-UI lot 3 (worktree ../gp-vn-ui3, feat/vn-ui3) : diplomatie qui déborde à droite en 720p,
+sommaire du tutoriel coupé en bas, cartes des régiments de l'écran de résultat coupées.
+
 ## Prochaine étape
-Intégration dans main (ff-only) après le smoke ; ensuite, au choix : écran de résultat, points
-ouverts ci-dessus.
+Fusion du lot 3 (tests + smoke), intégration dans main.
