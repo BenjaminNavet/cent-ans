@@ -143,6 +143,10 @@ const int CODE_UNARMED = 8;
 // Lisibilité lointaine (A1-01) : la livrée s'éclaire au-delà de `far_start` mètres.
 uniform float far_start = 70.0;
 uniform float far_boost = 0.35;
+// CR2 : occlusion des reflets de l'acier (0 : rendu SR2). Le ciel est le seul environnement
+// reflété : sous ~20° de hauteur, où l'acier réel reflète sol, troupe et lisières, le reflet
+// du voile d'horizon (clair) est assombri, et les creux cuits ne reflètent presque rien.
+uniform float steel_occlusion = 1.0;
 
 // Lot AN1a (ADR 0096) : mouvement secondaire (bas des surcots et jaques, caparaçons, crinières,
 // queues), ajouté après le skinning, dans le repère posé de la figurine (+Z = avant). Poids par
@@ -789,6 +793,7 @@ void fragment() {
 	// plus). v_src est constant sur tout un maillage LOD0/LOD1 (1, 3 ou 2 pour le cheval, tous
 	// non nuls) : les dérivées restent en flux uniforme ; lectures en textureGrad.
 	float fg_ao = 1.0;
+	float cr2_grime = 0.0;
 	if (v_src != 0) {
 		vec3 fg_dp1 = dFdx(VERTEX);
 		vec3 fg_dp2 = dFdy(VERTEX);
@@ -837,7 +842,8 @@ void fragment() {
 			} else if (code == C_PLATE) {
 				// Martelage : fort sur les casques (masque), léger sur les autres plates.
 				tl = FG3_TILE_HAMMERED;
-				amt = mix(0.05, 0.22, mask);
+				// CR2 : martelage lisible (reflets ondulés) ; plus fort sur les casques (masque).
+				amt = mix(0.05, 0.22, mask) + 0.3 * steel_occlusion;
 				relief = 0.06;
 			} else if (code == C_TRIM) {
 				tl = FG3_TILE_HAMMERED;
@@ -928,9 +934,13 @@ void fragment() {
 				if (gl >= 0 && code == C_MAIL) {
 					// GA1 : anneaux et creux portés par l'albédo généré ; rugosité de la tuile
 					// (anneaux lisses ~0,35, creux plus rugueux).
-					albedo = v_color * mix(0.85, 1.1, v_var.z) * ga_albedo;
+					// CR2 : ×0,55 : l'ombre portée d'un anneau sur l'autre (le soleil, que l'AO ne
+					// touche pas, blanchissait la maille comme un tricot).
+					albedo = v_color * mix(0.85, 1.1, v_var.z) * ga_albedo * mix(1.0, 0.55, steel_occlusion);
 					metallic = 0.6;
-					roughness = d.a;
+					// CR2 : pas de reflet plus lisse que 0,5 : les anneaux se masquent l'un l'autre
+					// (sinon voile blanc à contre-jour, halo du glow).
+					roughness = max(d.a, mix(0.0, 0.5, steel_occlusion));
 					fg_ao = mix(0.55, 1.0, fg_ao);
 				} else if (code == C_MAIL) {
 					// Mailles lisibles sans être noires : anneaux clairs, creux sombres, moins
@@ -978,13 +988,23 @@ void fragment() {
 				// plus lisse sur les arêtes (courbure : dérivées de la normale / de la position).
 				if (code == C_PLATE) {
 					float lf = noise2(q * 3.0 + v_var.xy * 17.0);
-					float rough = clamp(mix(0.45, 0.75, lf) + (roughness - 0.4) * 0.4, 0.4, 0.8);
+					// CR2 : acier forgé mat mais pas plâtreux (0,3-0,5) : une rugosité de 0,45-0,75
+					// fondait tout le ciel en un voile uniforme (le « plastique blanc »).
+					float rough = clamp(mix(mix(0.45, 0.2, steel_occlusion), mix(0.75, 0.42, steel_occlusion), lf)
+						+ (roughness - 0.4) * mix(0.4, 0.2, steel_occlusion), mix(0.4, 0.16, steel_occlusion), 0.8);
 					roughness = mix(roughness, rough, sr_w);
 					// Acier forgé : gris sourd (F0 réel ≈ 0,55), pas le blanc chromé du rendu FG.
-					vec3 steel = vec3(0.50, 0.50, 0.52) * mix(0.85, 1.1, lf);
+					vec3 steel = mix(vec3(0.50, 0.50, 0.52), vec3(0.42, 0.415, 0.40), steel_occlusion) * mix(0.85, 1.1, lf);
 					albedo = mix(albedo, steel * (0.6 + 0.4 * dot(albedo, vec3(0.33))), 0.7 * sr_w);
 					// Crasse et graisse dans les creux de l'armure.
 					albedo *= mix(1.0, mix(0.55, 1.0, fg_ao), sr_w);
+					// CR2 : film de crasse (graisse, poussière brune) dans les creux et par plaques :
+					// ni métallique ni lisse, il casse le reflet uniforme.
+					float gb = smoothstep(0.5, 0.85, noise2(q * 7.0 + v_var.zw * 29.0));
+					cr2_grime = clamp((1.0 - smoothstep(0.5, 0.95, fg_ao)) * 0.8 + gb * 0.35, 0.0, 1.0) * sr_w * steel_occlusion;
+					albedo = mix(albedo, vec3(0.13, 0.11, 0.085), 0.75 * cr2_grime);
+					roughness = mix(roughness, 0.85, cr2_grime);
+					metallic = mix(metallic, 0.2, cr2_grime);
 					float curv = (length(fg_dn1) + length(fg_dn2)) / max(length(fg_dp1) + length(fg_dp2), 1e-5);
 					float wear = smoothstep(0.55, 0.85, noise2(q * 55.0 + 3.1)) * smoothstep(12.0, 50.0, curv);
 					albedo *= 1.0 + 0.25 * wear * sr_w;
@@ -1045,6 +1065,25 @@ void fragment() {
 	METALLIC = metallic;
 	ROUGHNESS = clamp(roughness, 0.05, 1.0);
 	SPECULAR = specular;
+	if (steel_occlusion > 0.0 && (code == C_PLATE || code == C_TRIM || code == C_MAIL)) {
+		// CR2 : occlusion spéculaire. RADIANCE (a) mêle le reflet du ciel au noir : le reflet
+		// n'atteint le ciel libre qu'en montant (troupe, sol, lisières et bannières, absents du
+		// ciel, bouchent l'horizon), et presque pas dans les creux cuits. Transition élargie
+		// avec la rugosité.
+		vec3 r_view = reflect(-VIEW, NORMAL);
+		float ry = (INV_VIEW_MATRIX * vec4(r_view, 0.0)).y;
+		float w = 0.3 * ROUGHNESS;
+		float sky_seen = smoothstep(0.02 - w, 0.62 + w, ry);
+		float occ = mix(0.12, 1.0, sky_seen * sky_seen);
+		if (code == C_MAIL) {
+			// Anneaux entrelacés : chacun cache une bonne part du ciel à ses voisins.
+			occ *= 0.5;
+		}
+#ifdef FG3_BAKED
+		occ *= mix(0.35, 1.0, smoothstep(0.35, 0.95, AO));
+#endif
+		RADIANCE = vec4(vec3(0.0), (1.0 - occ) * steel_occlusion);
+	}
 	if (livery_surface && far > 0.0) {
 		EMISSION = dyed * far * far_boost;
 	}

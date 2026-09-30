@@ -325,7 +325,7 @@ def _bassinet_rim(hf, a, open_face=True):
     return brow * f + jaw * (1 - f)
 
 
-def bassinet_shell(g, name="bassinet", open_face=True, point=0.05, low=True):
+def bassinet_shell(g, name="bassinet", open_face=True, point=0.085, low=True):
     """Pointed bassinet of the 1340s-1380s: tall skull drawn back to a point, rolled edge.
 
     `low`: the sides come down to the jaw (with aventail); otherwise to the ear's top.
@@ -348,7 +348,9 @@ def bassinet_shell(g, name="bassinet", open_face=True, point=0.05, low=True):
 
     def profile(a):
         z0 = rim_z(a)
-        pts = rolled_rim(hf, a, 1.0, z0, detail=detail)
+        # CR2: the back curves in to the nape (no vertical tin-can wall).
+        tuck = 0.08 * back(a) if z0 < zc else 0.0
+        pts = rolled_rim(hf, a, 1.0 - tuck, z0, detail=detail)
         side = 0.3 if z0 < zc else 0.0
         z_arch = max(z0, zc) if side else z0
         for r in range(1, rows + 1):
@@ -356,11 +358,16 @@ def bassinet_shell(g, name="bassinet", open_face=True, point=0.05, low=True):
             if t <= side:
                 # Straight sides from the jaw up to the brow.
                 u = t / side
-                pts.append(hf.at(a, 1.0 + 0.02 * u, z0 + (zc - z0) * u))
+                pts.append(
+                    hf.at(a, 1.0 + 0.02 * u - tuck * (1 - u) ** 2, z0 + (zc - z0) * u)
+                )
                 continue
-            # Gothic arch drawn back to the point: radius falls linearly at the apex.
+            # CR2: ogival (gothic) arch drawn back to the point: two circle arcs of radius
+            # 1.6 skull radii meeting at the apex (a tall pointed skull, not a dome).
             u = (t - side) / (1.0 - side)
-            k = 1.02 * (1.0 - u) * (1.0 + 1.1 * u)
+            rho = 1.6
+            h = u * math.sqrt(rho**2 - (rho - 1) ** 2)
+            k = 1.02 * ((1 - rho) + math.sqrt(max(rho**2 - h * h, 0.0)))
             z = z_arch + (apex_z - z_arch) * u
             pts.append(hf.at(a, max(k, 0.03), z, dy=point * u**1.6))
         return pts
@@ -592,7 +599,8 @@ def fine_bassinet(g, aventail=True, visor=False):
         return cerveliere(g)
     helm, hf = bassinet_shell(g, low=aventail or visor)
     out = [helm]
-    if visor:
+    if visor and g.level < 2:
+        # CR2: no snout at LOD2 (a few pixels there; keeps the knights' LOD2 in its cap).
         out.append(globals()["visor"](g, hf))
     if aventail:
         out += globals()["aventail"](g, hf)

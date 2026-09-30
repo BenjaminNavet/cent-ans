@@ -1,4 +1,5 @@
-# Built by core/build.sh (macOS) and core/build-windows.sh (Windows)
+# Built by core/build.sh (macOS, Linux) and core/build-windows.sh (Windows)
 *.dylib
+*.so
 *.dll
 *.pdb
