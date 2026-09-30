@@ -30,6 +30,7 @@ const MODEL_DIR := "res://assets/models/rocks/hb/"
 const SHADER := preload("res://shaders/rock_outcrops.gdshader")
 const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalisées
 const LODS := 3
+const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## Grille grossière (par côté) du pré-examen d'une tuile : une tuile plate et basse est vide.
 const PRECHECK := 12
 
@@ -93,7 +94,7 @@ func setup(data: MapData, terrain_builder: TerrainBuilder, vegetation: Node = nu
 	map_data = data
 	_vegetation = vegetation
 	if catalogue_path == "":
-		catalogue_path = MapPaths.default_data_dir().path_join(CATALOGUE_FILE)
+		catalogue_path = MAP_PATHS.default_data_dir().path_join(CATALOGUE_FILE)
 	catalogue = load_catalogue(catalogue_path)
 	settings = catalogue.get("render", {})
 	var margin := float(settings.get("settlement_margin", 1.0))
@@ -126,7 +127,7 @@ func _exit_tree() -> void:
 func _wait_jobs() -> void:
 	for jobs: Dictionary in [_jobs, _ground_jobs]:
 		for holder: Dictionary in jobs.values():
-			WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
+			_job_done(holder, true)
 		jobs.clear()
 
 
@@ -374,15 +375,25 @@ func _start_job(key: Vector2i) -> void:
 	_jobs[key] = holder
 
 
+## Tâche terminée (et attendue une seule fois : un identifiant attendu n'est plus valide).
+static func _job_done(holder: Dictionary, block: bool = false) -> bool:
+	if holder.get("done", false):
+		return true
+	if not block and not WorkerThreadPool.is_task_completed(int(holder["task"])):
+		return false
+	WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
+	holder["done"] = true
+	return true
+
+
 func _collect_jobs() -> void:
 	var installed := 0
 	for key: Vector2i in _jobs.keys():
 		if installed >= max_installs_per_frame:
 			break
 		var holder: Dictionary = _jobs[key]
-		if not WorkerThreadPool.is_task_completed(int(holder["task"])):
+		if not _job_done(holder):
 			continue
-		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
 		_jobs.erase(key)
 		_install_tile(key, holder["result"])
 		if holder.get("stale", false):
@@ -392,14 +403,20 @@ func _collect_jobs() -> void:
 
 ## Attend toutes les tâches et installe (tests, captures).
 func flush() -> void:
-	for jobs: Dictionary in [_jobs, _ground_jobs]:
-		for holder: Dictionary in jobs.values():
-			WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
 	var saved := max_installs_per_frame
+	var saved_ground := max_reground_per_frame
 	max_installs_per_frame = 1 << 20
-	_collect_jobs()
-	_update_regrounds()
+	max_reground_per_frame = 1 << 20
+	for _attempt in 8:
+		for jobs: Dictionary in [_jobs, _ground_jobs]:
+			for holder: Dictionary in jobs.values():
+				_job_done(holder, true)
+		_collect_jobs()
+		_update_regrounds()
+		if _jobs.is_empty() and _ground_jobs.is_empty() and _dirty.is_empty():
+			break
 	max_installs_per_frame = saved
+	max_reground_per_frame = saved_ground
 
 
 ## Biome (indices ADR 0143) au point (x, y) : `biomes.png`, sinon repli altitude / position.
@@ -497,7 +514,7 @@ func _seed_tile(key: Vector2i) -> Dictionary:
 			var yaw := rng.randf() * TAU
 			var stretch := rng.randf_range(0.85, 1.15)
 			var tint := rng.randf()
-			if not map_data.is_land_px(int(p.x), int(p.y)):
+			if roll >= p_max or not map_data.is_land_px(int(p.x), int(p.y)):
 				continue
 			var cluster := clampf(noise.get_noise_2d(p.x, p.y) + 0.5 + bias, 0.0, 1.0)
 			if roll >= p_max * cluster:
@@ -555,8 +572,13 @@ func _seed_tile(key: Vector2i) -> Dictionary:
 			buffer[o + 11] = p.y
 			buffer[o + 12] = tint
 			part["buffer"] = buffer
-			(part["points"] as PackedVector2Array).append(p)
-			(part["radii"] as PackedFloat32Array).append(radius)
+			# Tableaux compactés : copies à l'écriture, réaffectés explicitement.
+			var part_points: PackedVector2Array = part["points"]
+			part_points.append(p)
+			part["points"] = part_points
+			var part_radii: PackedFloat32Array = part["radii"]
+			part_radii.append(radius)
+			part["radii"] = part_radii
 			parts[chosen] = part
 	for m: int in parts:
 		_shuffle(parts[m], rng)
@@ -661,7 +683,9 @@ func _height_source(rect: Rect2) -> Dictionary:
 func _surface_at(source: Dictionary, x: float, y: float) -> float:
 	if source.is_empty():
 		return map_data.surface_world_at(x, y)
-	return maxf(ReliefQuadtree.sample_snapshot(source, x, y), 0.0)
+	var h := ReliefQuadtree.sample_snapshot(source, x, y)
+	# Page pas encore décodée (octets nuls) : la heightmap de la carte en attendant le recalage.
+	return h if h > 0.0 else map_data.surface_world_at(x, y)
 
 
 ## Pied de chaque instance au plus bas de son emprise (centre et quatre points à 0,6 rayon) :
@@ -779,9 +803,8 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 func _update_regrounds() -> void:
 	for key: Vector2i in _ground_jobs.keys():
 		var holder: Dictionary = _ground_jobs[key]
-		if not WorkerThreadPool.is_task_completed(int(holder["task"])):
+		if not _job_done(holder):
 			continue
-		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
 		_ground_jobs.erase(key)
 		var entry: Dictionary = _tiles.get(key, {})
 		if not entry.is_empty() and is_same(entry["parts"], holder["parts"]):

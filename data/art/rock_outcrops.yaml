@@ -13,7 +13,7 @@
   "style_suffix": ", seen as a detailed photogrammetry scan of a real landscape rock formation, three-quarter view from slightly above at about 30 degrees, the whole formation visible with a margin, isolated on a plain uniform neutral mid-grey studio background, no sky, no ground plane, no trees, no people, no buildings, soft diffuse overcast daylight, photorealistic, sharp focus, high detail",
   "cleanup": {"lod0": 400, "tex": 512, "length": 1.0, "strip_base": 0.02},
   "render": {
-    "tile_units": 128,
+    "tile_units": 256,
     "grid_step": 2.0,
     "max_probability": 0.4,
     "cluster_scale": 0.035,
@@ -27,11 +27,11 @@
     "fade_end": 1200.0,
     "far_share": 0.55,
     "max_visible_triangles": 900000,
-    "max_cached_tiles": 96,
+    "max_cached_tiles": 48,
     "max_view_radius": 1000.0,
     "shadow_max_lod": 0,
-    "view_radius_factor": 2.2,
-    "min_view_radius": 96.0,
+    "view_radius_factor": 1.8,
+    "min_view_radius": 160.0,
     "road_clearance": 1.2,
     "river_clearance": 1.5,
     "settlement_margin": 1.0
