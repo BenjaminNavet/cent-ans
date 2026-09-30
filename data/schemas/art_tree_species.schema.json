@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_tree_species.schema.json",
+  "title": "Essences d'arbres de la carte de campagne (lot HB4)",
+  "description": "Catalogue `data/art/tree_species.yaml` (et sa compilation `tree_species.json`, qui ajoute `row` et `season_class`) : essences générées par la chaîne GA3 L2 (`tools/blender_scripts/ga3_vegetation_l2.py`), une ligne de l'atlas d'imposteurs par essence, et leur répartition par biome (`data/map/biomes.png`, ADR 0143). Rendu seulement.",
+  "type": "object",
+  "required": ["distribution", "biomes", "species"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "roles": {"type": "array", "items": {"$ref": "#/$defs/role"}},
+    "seasons": {"type": "object", "additionalProperties": {"type": "integer"}},
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["massif_core", "massif_fill", "edge_fill", "stand_px", "stand_share", "altitude_fade_m", "river_reach_px", "conifer_raster", "orchard_parcel_px", "orchard_fill", "hedge_boost", "grove_core", "hedge_tree", "village_boost", "default_biome"],
+      "properties": {
+        "massif_core": {"type": "number", "minimum": 0, "maximum": 1},
+        "massif_fill": {"type": "number", "minimum": 0, "maximum": 1},
+        "edge_fill": {"type": "number", "minimum": 0, "maximum": 1},
+        "stand_px": {"type": "number", "exclusiveMinimum": 0},
+        "stand_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "altitude_fade_m": {"type": "number", "exclusiveMinimum": 0},
+        "river_reach_px": {"type": "number", "exclusiveMinimum": 0},
+        "conifer_raster": {"type": "number", "minimum": 0, "maximum": 1},
+        "orchard_parcel_px": {"type": "number", "exclusiveMinimum": 0},
+        "orchard_fill": {"type": "number", "minimum": 0, "maximum": 1},
+        "hedge_boost": {"type": "number", "minimum": 0},
+        "grove_core": {"type": "number", "minimum": 0, "maximum": 0.99},
+        "hedge_tree": {"type": "number", "minimum": 0, "maximum": 1},
+        "village_boost": {"type": "number", "minimum": 0},
+        "default_biome": {"type": "integer", "minimum": 1, "maximum": 7}
+      }
+    },
+    "biomes": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[1-7]$"},
+      "minProperties": 7,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "forest", "isolated", "grove", "orchard", "orchard_ring_px", "orchard_open", "riparian", "riparian_px", "scrub"],
+        "properties": {
+          "name": {"type": "string"},
+          "forest": {"type": "number", "minimum": 0, "maximum": 1.5},
+          "isolated": {"type": "number", "minimum": 0, "maximum": 0.1},
+          "grove": {"type": "number", "minimum": 0, "maximum": 1},
+          "orchard": {"type": "number", "minimum": 0, "maximum": 1},
+          "orchard_ring_px": {"type": "number", "minimum": 0},
+          "orchard_open": {"type": "number", "minimum": 0, "maximum": 1},
+          "riparian": {"type": "number", "minimum": 0, "maximum": 1},
+          "riparian_px": {"type": "number", "minimum": 0},
+          "scrub": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "species": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "latin", "mesh", "frame", "season", "biomes", "altitude_m", "river", "roles", "height", "width", "tone", "prompt"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "name": {"type": "string"},
+          "latin": {"type": "string"},
+          "mesh": {"enum": ["oak", "beech", "conifer"], "description": "Maillage et ligne de repli sans atlas GA3."},
+          "frame": {"enum": ["oak", "beech", "fir"], "description": "Ligne FC2 dont l'essence reprend le cadrage."},
+          "season": {"enum": ["oak", "beech", "evergreen", "golden"]},
+          "biomes": {
+            "type": "object",
+            "propertyNames": {"pattern": "^[1-7]$"},
+            "additionalProperties": {"type": "number", "minimum": 0}
+          },
+          "altitude_m": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+          "river": {"type": "number", "minimum": -1, "maximum": 3},
+          "roles": {
+            "type": "object",
+            "propertyNames": {"$ref": "#/$defs/role"},
+            "additionalProperties": {"type": "number", "minimum": 0}
+          },
+          "height": {"$ref": "#/$defs/range"},
+          "width": {"$ref": "#/$defs/range"},
+          "tone": {"type": "number", "exclusiveMinimum": 0, "maximum": 2},
+          "prompt": {"type": "string", "minLength": 20},
+          "row": {"type": "integer", "minimum": 0},
+          "season_class": {"type": "integer", "minimum": 0, "maximum": 4},
+          "seed": {"type": "integer", "description": "Graine flux-2 (défaut 1337), pour une reprise."}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "role": {"enum": ["massif", "lisiere", "isole", "verger", "ripisylve", "garrigue"]},
+    "range": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0, "maximum": 4}, "minItems": 2, "maxItems": 2}
+  }
+}

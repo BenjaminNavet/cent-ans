@@ -64,3 +64,29 @@ Limites : blé et orge gardent des lignes de semis/traces faiblement visibles en
 Test headless `hb2_materials_test.gd` OK (27 couches, DXT1). Prochaine étape : jugement de la planche par la session principale.
 - Suite (retours) : lisière forêt-steppe = score (limite historique 35 % + Köppen BSk/Dfa/Dfb flouté 60 km 65 %, à l'est de 24-28° E) + bruit 300/80/25 km → lisière sinueuse, bosquets en îlots (écart à la droite ~1,1° contre 0,36°) ; carte de couleur : `dry_max` par biome (méditerranéen 0,35, semi-aride 0,5, montagnard 0,6), zones arides de `dryness` gardées → Tell olive, hauts plateaux intermédiaires, Sahara sable. Tests 56 verts.
 - Points ouverts : terrasses méditerranéennes non dessinées ; Dobroudja semi-aride (BSk intérieur au sud de 44° N).
+## HB4 — essences et répartition par biome (branche `feat/hb-trees`, worktree `../gp-hb-trees`)
+État : **lot terminé** (non fusionné).
+- Catalogue `data/art/tree_species.yaml` (23 essences : chêne, hêtre, sapin, érable, châtaignier,
+  bouleau, épicéa, pins sylvestre/maritime/parasol/d'Alep/noir, chêne vert, olivier, cyprès,
+  peuplier, saule, pommier, mélèze ; arbustes chêne kermès, lentisque, genévrier, arbousier),
+  schéma `art_tree_species.schema.json`, compilation `data/art/tree_species.json` (Godot ne lit pas
+  le YAML ; `ga3_vegetation_l2.py species`, pytest de synchronisation).
+- Génération fal (chaîne GA3 L2 étendue, même cadre/graine/fond) : 2,42 $ (dont reprises chêne
+  kermès et bouleau). Atlas GA3 **commun** 8 × 23 cellules 256² (lignes 0-2 inchangées) ; découpe
+  des planches par panneau quand une vue est cassée (troncs fins des grands pins).
+  Planche locale : `~/dev/cent-ans-raw/ga3/hb4/species_board.jpg`.
+- Semis : rôle (cœur, lisière, ripisylve, verger, isolé/bosquet, garrigue) puis essence par
+  biome × altitude × fleuve × part de résineux (forest_kind), tirage par peuplements de 3 px.
+  Rust `vegetation::species` + `VegetationScatter.set_species` ; miroir GDScript `TreeSpecies` /
+  `VegetationTileJob._species_candidate`. Biome : `VegetationMask.biome_at` (`biomes.png`, repli
+  biome 2). Tous les paramètres dans le YAML. `--no-hb4-species` : semis V4 (A/B).
+- Rendu : ligne d'atlas et classe de saison dans INSTANCE_CUSTOM (r/g + 4 × (n + 1)), nouvelle
+  classe « or » (bouleau, érable, peuplier, saule, mélèze) ; même maillage, même matériau :
+  **aucun appel de dessin de plus** (MMI d'imposteurs à d = 25 : 39 → 39 ; triangles −3 %).
+- Tuile témoin (Orléans, 256², biome 2) : arbres 10 037 → 9 420 (−6 %), densité hors forêt et
+  hors ripisylve 0,038 → 0,010 arbre/px² ; steppe 1 459 arbres ; ≥ 5 essences par biome.
+- Tests : `hb4_species_test.gd`, `ga3_l2_vegetation_test.gd` (taille d'atlas lue du catalogue),
+  smoke, fc2, sz1, sz4b, sz6, settlements OK ; pytest `test_tree_species.py` ; cargo `vegetation`.
+Ouvert : jugement visuel en jeu (captures par la session principale) ; `biomes.png` réel (HB1)
+non testé ici ; rangs des vergers non alignés (parcelles hachées) ; tailles/teintes à régler sur
+capture (arbustes 0,3-0,7, olivier 0,7-1,0).

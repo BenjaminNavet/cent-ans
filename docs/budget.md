@@ -236,3 +236,6 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Mat
 | 2026-09-30 | fal.ai | HB2 sonde : 3 matières (vigne, garrigue, steppe), `fal-ai/flux-2-pro` 1024² (0,03 $/Mpx) | 0,09 $ | 0,09 $ | 0,39 $ |
 | 2026-09-30 | fal.ai | HB2 : 24 autres matières de sol, flux-2-pro 1024² | 0,76 $ | 0,76 $ | 1,15 $ |
 | 2026-09-30 | fal.ai | HB2 reprises : 6 (blé, orge, pré de fauche, seigle, boréale, maquis) + 2 (orge, boréale) | 0,25 $ | 0,25 $ | 1,40 $ |
+| 2026-09-30 | fal.ai | HB4 sonde essences : olivier + chêne kermès (flux-2 0,0126 + nano-banana-2/edit 0,08 + bria 0,018 par essence ; tarifs API fal vérifiés le 30/09) | 0,22 $ | 0,22 $ | 1,62 $ |
+| 2026-09-30 | fal.ai | HB4 essences : 18 nouvelles + reprise chêne kermès (arbuste en boule, graine 7), 19 × 0,11 $ | 2,09 $ | 2,09 $ | 3,71 $ |
+| 2026-09-30 | fal.ai | HB4 reprise bouleau (houppier trop clairsemé, graine 7) | 0,11 $ | 0,11 $ | 3,82 $ |
