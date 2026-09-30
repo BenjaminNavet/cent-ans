@@ -59,9 +59,12 @@ rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 ## Intégré dans main
 7e68b23e3 (ff-only, 30/09 23:30), dylib reconstruite.
 
-## En cours
-Agent VN-UI lot 3 (worktree ../gp-vn-ui3, feat/vn-ui3) : diplomatie qui déborde à droite en 720p,
-sommaire du tutoriel coupé en bas, cartes des régiments de l'écran de résultat coupées.
+## Lot 3 UI (fusionné, 147affacd)
+Diplomatie resserrée (min 1060 px), sommaire du tutoriel défilant, faits notables de l'écran de
+résultat dans leur propre défilement (cartes des régiments visibles ; > ~20 régiments/camp : 3e
+rangée coupée). Test vn_ui_720_c_test (vues 1138×640 à 1920×1080). ub1_ui_test adapté au journal
+replié par défaut (VN4).
 
 ## Prochaine étape
-Fusion du lot 3 (tests + smoke), intégration dans main.
+Chantier clos. Restent les points ouverts ci-dessus (tours de siège, miniatures de factions ~12 $).
+
