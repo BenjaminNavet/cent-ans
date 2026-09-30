@@ -315,6 +315,11 @@ func _setup_settlements() -> void:
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
+		# FC3 : touffes d'herbe et broussailles proches (masque de la végétation, mêmes clairières).
+		var clutter := GroundClutter.new()
+		clutter.name = "GroundClutter"
+		add_child(clutter)
+		clutter.setup(map_data, terrain, vegetation, settlement_layer.vegetation_exclusions())
 	life = CampaignLife.new()  # CV1
 	life.name = "CampaignLife"
 	add_child(life)

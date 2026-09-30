@@ -492,7 +492,8 @@ def build_cavalry(recipe, level):
         bs.set_face_mask(m, 0)
         out.append(m)
     ctx_h = eq.Context(mount.harm, level, bs.material, bs.bone_world)
-    for name, mask in recipe.get("horse_equipment", []):
+    for item in recipe.get("horse_equipment", []):
+        name, mask = item[0], item[1]  # CR3: optional kwargs (fine pipeline only)
         builder = {
             "caparison": lambda c: caparison(mount, c),
             "chanfron": lambda c: chanfron(mount, c),

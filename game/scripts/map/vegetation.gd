@@ -24,6 +24,10 @@ extends Node3D
 
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
+const IMPOSTOR_SHADER := preload("res://shaders/campaign_tree_impostor.gdshader")
+const CARDS_SHADER := preload("res://shaders/foliage_cards.gdshader")
+## Niveaux de détail d'une partie de tuile (`_apply_lod`).
+enum Lod { FAR, DETAILED, NEAR }
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Pas (px de carte) de la grille de candidats ; plus petit = forêts plus denses.
@@ -31,6 +35,10 @@ const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 @export var tree_scale: float = 1.0
 ## Au-delà de cette distance caméra → point visé, plus d'arbres.
 @export var max_camera_distance: float = 700.0
+## Lot L5 : portée selon le préréglage (`veg_max_distance`, Basse 500 … Ultra 1100), appliquée
+## seulement avec les imposteurs (FC2) ; sans eux, `max_camera_distance`. La densité garde sa
+## courbe jusqu'à `max_camera_distance` (mêmes arbres qu'avant en deçà), puis `density_min`.
+var quality_max_distance: float = -1.0
 ## Portée de l'éclaircissement, en multiples de la distance caméra (bornes absolues en plus).
 @export var fade_start_factor: float = 1.2
 @export var fade_end_factor: float = 2.1
@@ -64,6 +72,18 @@ const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 @export var shadow_camera_distance: float = 300.0
 ## Recalages (lot C7b) simultanés au plus.
 @export var max_ground_jobs: int = 2
+## Lot FC2 : au-delà de `detail_distance`, chênes, hêtres et conifères en imposteurs (quadrilatère
+## texturé par les atlas cuits sous Blender, 2 triangles) au lieu du maillage bas (≈ 20 triangles) ;
+## haies inchangées. `--no-fc2` rend les maillages bas (comparaisons A/B).
+@export var use_impostors: bool = true
+## Lot FC5 : parties à moins de `near_distance` (× `veg_detail`) : chênes, hêtres et sapins en
+## cartes de feuillage (`VegetationMeshes.essence_mid`, ≈ 145-250 triangles) ; entre
+## `near_distance` et `detail_distance`, imposteurs (ombres gardées) au lieu des maillages
+## détaillés de 90 triangles. `--no-fc5` rend les maillages détaillés.
+@export var use_near_cards: bool = true
+@export var near_distance: float = 45.0
+## Lot FC6 : largeur du fondu tramé cartes → imposteur, par arbre, en deçà de `near_distance`.
+@export var near_fade: float = 8.0
 
 ## PF1 : préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
 ## zoom maximal des ombres.
@@ -88,6 +108,11 @@ var enabled: bool = true
 var stats: Dictionary = {"tiles": 0, "instances": 0, "build_ms_total": 0.0, "build_ms_max": 0.0, "source": "", "regrounds": 0, "reground_ms_max": 0.0}
 
 var _material: ShaderMaterial
+## Lot FC2 : matériau des imposteurs (null : atlas absents ou `--no-fc2`) ; mêmes uniformes de
+## feuillage que `_material` (`_set_foliage_param`).
+var _impostor_material: ShaderMaterial
+## Lot FC5 : matériau des cartes de feuillage (null : texture absente ou `--no-fc5`).
+var _cards_material: ShaderMaterial
 var _tiles: Dictionary = {}  # index → {"node": Node3D, "mmis": Array[MultiMeshInstance3D], "counts", "last_seen"}
 var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob, "level": int[, "native": id]}
 ## Lot PB2 : pool natif (`VegetationScatter`) ou null ; requêtes en cours (id → index de tuile).
@@ -113,9 +138,10 @@ func apply_render_quality(p: Dictionary) -> void:
 	quality_density = float(p.get("veg_density", 1.0))
 	quality_detail = float(p.get("veg_detail", 1.0))
 	quality_shadow_distance = float(p.get("veg_shadow_distance", shadow_camera_distance))
+	quality_max_distance = float(p.get("veg_max_distance", -1.0))
 	for entry: Dictionary in _tiles.values():
 		for part: Dictionary in entry["parts"]:
-			part.erase("detailed")  # LOD réévalué à la prochaine mise à jour
+			part.erase("lod")  # LOD réévalué à la prochaine mise à jour
 
 
 func _ready() -> void:
@@ -129,6 +155,10 @@ func _ready() -> void:
 			use_native_scatter = false
 		elif arg == "--no-forest-detail":  # SZ4b : captures « avant », mesures A/B
 			use_forest_detail = false
+		elif arg == "--no-fc2":  # FC2 : maillages bas au loin au lieu des imposteurs (A/B)
+			use_impostors = false
+		elif arg == "--no-fc5":  # FC5 : maillages détaillés de près au lieu des cartes (A/B)
+			use_near_cards = false
 
 
 
@@ -150,6 +180,15 @@ func build(data: MapData) -> void:
 	stats["source"] = mask.source
 	_material = ShaderMaterial.new()
 	_material.shader = FOLIAGE_SHADER
+	_impostor_material = _make_impostor_material() if use_impostors else null
+	_cards_material = null
+	if use_near_cards and ResourceLoader.exists(VegetationMeshes.CARD_TEXTURE) and VegetationMeshes.essence_mid("oak") != null:
+		_cards_material = ShaderMaterial.new()
+		_cards_material.shader = CARDS_SHADER
+		_cards_material.set_shader_parameter("card_texture", load(VegetationMeshes.CARD_TEXTURE))
+		if _impostor_material != null:  # FC6 : quadrilatère d'imposteur des arbres proches
+			for param in ["albedo_atlas", "normal_atlas", "views", "rows"]:
+				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
 	_bind_forest_cover(data)
 	_season = -1
 	_exclusions.clear()
@@ -165,21 +204,101 @@ func build(data: MapData) -> void:
 		forest_detail.setup(self, terrain)
 
 
+## Lot FC2 : matériau des imposteurs, null si un atlas manque (repli sur les maillages bas).
+static func _make_impostor_material() -> ShaderMaterial:
+	if not ResourceLoader.exists(VegetationMeshes.IMPOSTOR_ALBEDO) or not ResourceLoader.exists(VegetationMeshes.IMPOSTOR_NORMAL):
+		return null
+	var material := ShaderMaterial.new()
+	material.shader = IMPOSTOR_SHADER
+	material.set_shader_parameter("albedo_atlas", load(VegetationMeshes.IMPOSTOR_ALBEDO))
+	material.set_shader_parameter("normal_atlas", load(VegetationMeshes.IMPOSTOR_NORMAL))
+	material.set_shader_parameter("views", VegetationMeshes.IMPOSTOR_VIEWS)
+	material.set_shader_parameter("rows", VegetationMeshes.IMPOSTOR_ROWS.size())
+	return material
+
+
+## Lot L5 : zoom au-delà duquel plus aucun arbre (préréglage si les imposteurs sont actifs).
+func effective_max_distance() -> float:
+	if quality_max_distance > 0.0 and use_impostors and (_impostor_material != null or map_data == null):
+		return quality_max_distance
+	return max_camera_distance
+
+
+## Lot FC2 : imposteurs actifs (matériau prêt).
+func impostors_active() -> bool:
+	return _impostor_material != null
+
+
+func impostor_material() -> ShaderMaterial:
+	return _impostor_material
+
+
+## Lot FC2 (tests, bancs) : MultiMesh d'arbres (haies exclues) des parties visibles, par maillage :
+## {"impostor", "low", "detailed", "impostor_triangles", "low_triangles"} (triangles des instances
+## visibles).
+func lod_census() -> Dictionary:
+	var census := {"impostor": 0, "low": 0, "detailed": 0, "near": 0, "impostor_triangles": 0, "low_triangles": 0, "detailed_triangles": 0, "near_triangles": 0}
+	for entry: Dictionary in _tiles.values():
+		if not (entry["node"] as Node3D).visible:
+			continue
+		for part: Dictionary in entry["parts"]:
+			if not (part["node"] as Node3D).visible:
+				continue
+			var mmis: Array = part["mmis"]
+			for kind in mini(mmis.size(), VegetationTileJob.Kind.HEDGE):
+				var mmi: MultiMeshInstance3D = mmis[kind]
+				if mmi == null:
+					continue
+				var multimesh := mmi.multimesh
+				var shown := multimesh.visible_instance_count if multimesh.visible_instance_count >= 0 else multimesh.instance_count
+				var triangles := shown * _triangles(multimesh.mesh)
+				if mmi.material_override == _impostor_material and _impostor_material != null:
+					census["impostor"] += 1
+					census["impostor_triangles"] += triangles
+				elif mmi.material_override == _cards_material and _cards_material != null:
+					census["near"] += 1
+					census["near_triangles"] += triangles
+				elif int(part.get("lod", Lod.FAR)) != Lod.FAR:
+					census["detailed"] += 1
+					census["detailed_triangles"] += triangles
+				else:
+					census["low"] += 1
+					census["low_triangles"] += triangles
+	return census
+
+
+static func _triangles(mesh: Mesh) -> int:
+	var total := 0
+	for s in mesh.get_surface_count():
+		var indices: Variant = mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX]
+		total += (indices as PackedInt32Array).size() / 3 if indices != null else (mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+	return total
+
+
+## Uniforme commune du feuillage (`foliage_common.gdshaderinc`) : maillages et imposteurs.
+func _set_foliage_param(param: String, value: Variant) -> void:
+	_material.set_shader_parameter(param, value)
+	if _cards_material != null:
+		_cards_material.set_shader_parameter(param, value)
+	if _impostor_material != null:
+		_impostor_material.set_shader_parameter(param, value)
+
+
 ## Lot PO3 : couverture forestière réduite (1024 px) pour les lisières du feuillage
 ## (`foliage.gdshaderinc` : arbres plus bas et clairsemés sur la rampe de la couverture).
 func _bind_forest_cover(data: MapData) -> void:
 	var image := mask.forest_cover_image(1024)
-	_material.set_shader_parameter("has_forest_cover", image != null)
+	_set_foliage_param("has_forest_cover", image != null)
 	if image == null:
 		return
 	var params := mask.forest_cover_params()
 	var channel := Vector4.ZERO
 	channel[int(params["channel"])] = 1.0
-	_material.set_shader_parameter("forest_cover", ImageTexture.create_from_image(image))
-	_material.set_shader_parameter("cover_map_size", Vector2(data.size))
-	_material.set_shader_parameter("cover_channel", channel)
-	_material.set_shader_parameter("cover_low", float(params["low"]))
-	_material.set_shader_parameter("cover_high", float(params["high"]))
+	_set_foliage_param("forest_cover", ImageTexture.create_from_image(image))
+	_set_foliage_param("cover_map_size", Vector2(data.size))
+	_set_foliage_param("cover_channel", channel)
+	_set_foliage_param("cover_low", float(params["low"]))
+	_set_foliage_param("cover_high", float(params["high"]))
 
 
 ## Lot PB2 : pool natif de semis, partageant la heightmap et le lit des fleuves de `data`.
@@ -370,20 +489,26 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	_frame += 1
 	_collect_jobs()
 	_collect_ground_jobs()
-	var active := enabled and camera_distance < max_camera_distance
+	var max_distance := effective_max_distance()
+	var active := enabled and camera_distance < max_distance
 	visible = active
 	if not active or _material == null:
 		return
 	# Au voisinage de la distance maximale, la portée se referme : les arbres s'effacent.
-	var closing := 1.0 - smoothstep(max_camera_distance * 0.7, max_camera_distance, camera_distance)
+	var closing := 1.0 - smoothstep(max_distance * 0.7, max_distance, camera_distance)
 	var fade_start := maxf(camera_distance * fade_start_factor, fade_min_start) * closing
 	var fade_end := maxf(camera_distance * fade_end_factor, fade_min_end) * closing
-	_material.set_shader_parameter("view_origin", camera_position)
-	_material.set_shader_parameter("fade_start", fade_start)
-	_material.set_shader_parameter("fade_end", maxf(fade_end, fade_start + 1.0))
+	_set_foliage_param("view_origin", camera_position)
+	_set_foliage_param("fade_start", fade_start)
+	_set_foliage_param("fade_end", maxf(fade_end, fade_start + 1.0))
 	var density := lerpf(1.0, density_min, clampf((camera_distance - density_full_distance) / maxf(max_camera_distance - density_full_distance, 1.0), 0.0, 1.0))
 	density *= quality_density
-	_material.set_shader_parameter("density", density)
+	_set_foliage_param("density", density)
+	if _cards_material != null:
+		# Sans imposteurs (`--no-fc2`), cartes jusqu'au bout des parties proches.
+		var near_end := near_distance * quality_detail if _impostor_material != null else 1e9
+		_cards_material.set_shader_parameter("near_end", near_end)
+		_cards_material.set_shader_parameter("near_start", near_end - near_fade)
 	var wanted: Array = []
 	var camera_xz := Vector2(camera_position.x, camera_position.z)
 	# Même métrique que le shader : distance horizontale + moitié de la hauteur de la caméra.
@@ -447,14 +572,19 @@ static func _rect_distance(rect: Rect2, point: Vector2) -> float:
 ## au seuil d'éclaircissement du point le plus proche de la tuile sont invisibles partout.
 func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float, density: float, camera_distance: float) -> void:
 	var detailed := d < detail_distance * quality_detail
+	var lod: int = Lod.FAR
+	if detailed:
+		lod = Lod.NEAR if _cards_material != null and d < near_distance * quality_detail else Lod.DETAILED
 	var mmis: Array = entry["mmis"]
-	if entry.get("detailed", null) != detailed:
-		entry["detailed"] = detailed
-		var meshes := _meshes(detailed)
+	if entry.get("lod", -1) != lod:
+		entry["lod"] = lod
+		var meshes := _meshes(lod)
 		for kind in mmis.size():
 			var mmi: MultiMeshInstance3D = mmis[kind]
 			if mmi != null and mmi.multimesh.mesh != meshes[kind]:
 				mmi.multimesh = _with_mesh(mmi.multimesh, meshes[kind], _tiles[entry["tile"]]["buffers"][entry["slot0"] + kind])
+			if mmi != null:
+				mmi.material_override = _material_for(kind, lod)
 	# Ombres portées des tuiles proches seulement (au loin elles ne se voient plus) et seulement
 	# au zoom global le plus rapproché (`shadow_camera_distance`) : au zoom moyen, des ombres
 	# d'arbres individuelles ne se distinguent déjà plus mais coûtent toujours plein tarif côté
@@ -491,9 +621,46 @@ static func _with_mesh(old: MultiMesh, mesh: Mesh, buffer: PackedFloat32Array) -
 
 ## Un maillage par essence (ordre de `VegetationTileJob.Kind`) ; lot V4 : chêne, hêtre et
 ## conifère modélisés sous Blender (`VegetationMeshes.essence`).
-func _meshes(detailed: bool) -> Array:
+## Lot FC2 : au loin, imposteurs pour les trois essences (haies : maillage bas).
+## Lot FC5 : de près, cartes de feuillage ; entre les deux portées, imposteurs si les cartes sont
+## actives (sinon maillages détaillés). Haies : maillage détaillé dès `detail_distance`.
+func _meshes(lod: int) -> Array:
+	var detailed := lod != Lod.FAR
+	var hedge := VegetationMeshes.hedge() if detailed else VegetationMeshes.hedge_low()
+	if lod == Lod.NEAR and _cards_material != null:
+		return [VegetationMeshes.essence_mid("oak"), VegetationMeshes.essence_mid("beech"), VegetationMeshes.essence_mid("fir"), hedge]
+	if _impostor_material != null and (lod == Lod.FAR or _cards_material != null):
+		return [VegetationMeshes.impostor("oak"), VegetationMeshes.impostor("beech"), VegetationMeshes.impostor("fir"), hedge]
 	return [VegetationMeshes.essence("oak", detailed), VegetationMeshes.essence("beech", detailed),
-		VegetationMeshes.essence("fir", detailed), VegetationMeshes.hedge() if detailed else VegetationMeshes.hedge_low()]
+		VegetationMeshes.essence("fir", detailed), hedge]
+
+
+## Lot FC5 : maillages de la forêt dense (`ForestDetail`) : cartes de feuillage au plus près
+## (`near`), imposteurs sinon ; `--no-fc5` : maillages bas partout (comportement SZ4b).
+func forest_meshes(near: bool) -> Array:
+	if _cards_material == null:
+		return [VegetationMeshes.essence("oak", false), VegetationMeshes.essence("beech", false),
+			VegetationMeshes.essence("fir", false), VegetationMeshes.hedge_low()]
+	return _meshes(Lod.NEAR if near else Lod.FAR)
+
+
+func forest_material(kind: int, near: bool) -> ShaderMaterial:
+	return _material if _cards_material == null else _material_for(kind, Lod.NEAR if near else Lod.FAR)
+
+
+func near_cards_active() -> bool:
+	return _cards_material != null
+
+
+## Matériau d'un MultiMesh selon l'essence (`VegetationTileJob.Kind`) et le niveau de détail.
+func _material_for(kind: int, lod: int) -> ShaderMaterial:
+	if kind == VegetationTileJob.Kind.HEDGE:
+		return _material
+	if lod == Lod.NEAR and _cards_material != null:
+		return _cards_material
+	if _impostor_material != null and (lod == Lod.FAR or _cards_material != null):
+		return _impostor_material
+	return _material
 
 
 func _start_job(index: int) -> void:
@@ -709,7 +876,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 	var node := Node3D.new()
 	node.name = "Tile_%d" % index
 	var parts: Array = []
-	var meshes := _meshes(false)
+	var meshes := _meshes(Lod.FAR)
 	var part_px := float(chunk_px) / VegetationTileJob.PARTS_SIDE
 	var slots: Array = []
 	for part_index in VegetationTileJob.PARTS:
@@ -732,7 +899,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 			var mmi := MultiMeshInstance3D.new()
 			mmi.name = ["Oak", "Beech", "Conifer", "Hedge"][kind]
 			mmi.multimesh = multimesh
-			mmi.material_override = _material
+			mmi.material_override = _material_for(kind, Lod.FAR)
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			part_node.add_child(mmi)
 			mmis.append(mmi)

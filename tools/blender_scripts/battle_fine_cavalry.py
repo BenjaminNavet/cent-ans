@@ -624,52 +624,166 @@ def flanchards(body, mount):
 TORSO = fh.TORSO
 
 
-def caparison(body, mount, level, hem=0.48):
-    """Two-piece trapper in livery, parted at the saddle (FG0 shape), arms on the flanks."""
+def _leg_anchor(table, pts_all, bone):
+    """Mean rest position of the body vertices dominated by `bone` (None if absent)."""
+    sel = [p for p, w in zip(pts_all, table, strict=True) if _dominant(w) == bone]
+    if not sel:
+        return None
+    return sum(sel, Vector()) / len(sel)
+
+
+def caparison(body, mount, level, hem=0.46, dagged=False):
+    """Two-piece trapper in livery, parted at the saddle, armorial over the whole cloth.
+
+    CR3: heavy cloth rather than a rigid ring: the flanks hang from the back in broad,
+    irregular organ-pipe folds that deepen and flare towards the hem; the hem waves around
+    the hocks (optionally dagged at LOD0); slits over the fore and hind legs, the panel in
+    front of the fore slit and behind the hind slit partly carried by the upper leg so the
+    cloth parts when the horse strides. The arms cover the whole cloth (charges ~22 cm),
+    not a shield pasted on each flank. Vertices: the top arc over the back takes a third
+    of the ring, each flank a third (the old ring spent two thirds on the back).
+    """
     stations = (26, 10, 5)[level]
     around = (24, 10, 6)[level]
     table = fh.weight_table(body)
+    body_pts = [v.co.copy() for v in body.data.vertices]
     pts = [
-        (v.co.copy(), w)
-        for v, w in zip(body.data.vertices, table, strict=True)
-        if _dominant(w) in TORSO
+        (p, w) for p, w in zip(body_pts, table, strict=True) if _dominant(w) in TORSO
     ]
     ys = [p.y for p, _w in pts]
     y0, y1 = min(ys) + 0.12, max(ys) - 0.1
+    flank_n = max(2, round(around / 3))
+    top_n = around - 2 * flank_n
+    # Slits over the legs (side, station, leg bone); the side of a leg from its mean x.
+    slits = []
+    for fore, bone in ((True, "FrontUpperLeg"), (False, "BackUpperLeg")):
+        for s_ in "LR":
+            c = _leg_anchor(table, body_pts, f"{bone}.{s_}")
+            if c is None:
+                continue
+            k = round((c.y - y0) / (y1 - y0) * stations)
+            if 1 <= k <= stations - 1:
+                slits.append((1.0 if c.x > 0 else -1.0, k, fore, f"{bone}.{s_}"))
+
+    def fold(u, sx):
+        # Irregular broad folds (heavy wool), not mirrored between the flanks.
+        ph = 0.0 if sx > 0 else 2.1
+        return 0.7 * math.sin(u * math.pi * 12.5 + 0.7 + ph) + 0.3 * math.sin(
+            u * math.pi * 29.0 + 1.9 + 1.7 * ph
+        )
+
+    def hem_z(u, sx):
+        ph = 0.0 if sx > 0 else 1.3
+        z = hem + 0.022 * math.sin(u * math.pi * 5.0 + 1.1 + ph)
+        return z + 0.012 * math.sin(u * math.pi * 17.0 + ph)
+
     bm = bmesh.new()
     rings = []
+    ring_uv = []
     for k in range(stations + 1):
         u = k / stations
         y = y0 + (y1 - y0) * u
         near = [p for p, _w in pts if abs(p.y - y) < 0.08]
         half = max((abs(p.x) for p in near), default=0.3) + 0.03
         top = max((p.z for p in near), default=1.4) + 0.035
+        shoulder = top - 0.33
         ring = []
+        uvs = []
         for j in range(around + 1):
-            a = math.pi * j / around
-            side = math.cos(a)
-            lift = math.sin(a)
-            if lift > 0.5:
+            if flank_n <= j <= around - flank_n:
+                # Top arc over the back (30° to 150° as before).
+                a = math.radians(30 + 120 * (j - flank_n) / max(top_n, 1))
+                side, lift = math.cos(a), math.sin(a)
                 z = top - (1 - lift) * 0.33
                 x = half * side * 1.04
-            else:
-                f = lift / 0.5
-                z = hem + (top - 0.33 - hem) * f
+                f = 1.0
                 sx = 1.0 if side > 0 else -1.0
-                fold = (
-                    (0.022 if level == 0 else 0.0)
-                    * (1 - f)
-                    * math.sin(u * math.pi * 11 + 0.7)
-                )
-                x = sx * (half * (1.02 + 0.07 * (1 - f)) + fold)
+            else:
+                sx = 1.0 if j < flank_n else -1.0
+                f = (j if j < flank_n else around - j) / flank_n  # 1 at the back, 0 hem
+                hz = hem_z(u, sx)
+                if dagged and level == 0 and j in (0, around) and k % 2 == 1:
+                    hz -= 0.055  # dags: pointed tongues at every other station
+                g = (1 - f) ** 1.3
+                z = hz + (shoulder - hz) * f
+                depth = (0.05 if level == 0 else 0.03 if level == 1 else 0.0) * g
+                x = sx * (half * (1.02 + 0.1 * (1 - f) ** 1.5) + depth * fold(u, sx))
             ring.append(bm.verts.new(Vector((x, y, z))))
+            uvs.append((u, 0.0, f, sx))
         rings.append(ring)
+        ring_uv.append(uvs)
+    # Distance along each ring from the spine (UV v), before any vertex is deleted.
+    spine = [[0.0] * (around + 1) for _k in range(stations + 1)]
+    mid = around // 2
+    for k in range(stations + 1):
+        for step in (1, -1):
+            acc = 0.0
+            j = mid
+            while 0 <= j + step <= around:
+                acc += (rings[k][j + step].co - rings[k][j].co).length
+                j += step
+                spine[k][j] = acc
     gap = (mount.seat.y - 0.24, mount.seat.y + 0.2)
-    for ra, rb in zip(rings, rings[1:], strict=False):
-        if gap[0] < (ra[0].co.y + rb[0].co.y) / 2 < gap[1]:
+    # Slit copies: at a slit station, the lower flank rows of the faces behind (fore slit)
+    # or in front (hind slit) use separate vertices, 1 cm outside (panels overlap).
+    slit_rows = {}
+    for sx, k, fore, _bone in slits:
+        for j in range(around + 1):
+            f = ring_uv[k][j][2]
+            if (
+                ring_uv[k][j][3] != sx
+                or f > 0.55
+                or not (j < flank_n or j > around - flank_n)
+            ):
+                continue
+            co = rings[k][j].co
+            slit_rows[(k, j, fore)] = bm.verts.new(co + Vector((0.01 * sx, 0, 0)))
+    carried = {}  # vertex -> (leg bone, share)
+
+    def vert(k, j, face_k):
+        v = rings[k][j]
+        for fore in (True, False):
+            alt = slit_rows.get((k, j, fore))
+            if alt is None:
+                continue
+            # Fore slit: faces behind it (face_k >= k) take the copy; hind: faces in front.
+            if (fore and face_k >= k) or (not fore and face_k < k):
+                return alt
+        return v
+
+    faces_uv = []
+    for k in range(stations):
+        ra_y = (rings[k][0].co.y + rings[k + 1][0].co.y) / 2
+        if gap[0] < ra_y < gap[1]:
             continue
         for j in range(around):
-            bm.faces.new((ra[j], ra[j + 1], rb[j + 1], rb[j]))
+            quad = (
+                vert(k, j, k),
+                vert(k, j + 1, k),
+                vert(k + 1, j + 1, k),
+                vert(k + 1, j, k),
+            )
+            f = bm.faces.new(quad)
+            faces_uv.append((f, ((k, j), (k, j + 1), (k + 1, j + 1), (k + 1, j))))
+    # Leg share: in front of the fore slit / behind the hind slit, lower flank only.
+    for sx, k_s, fore, bone in slits:
+        for k in range(stations + 1):
+            if (fore and k > k_s) or (not fore and k < k_s):
+                continue
+            reach = abs(k - k_s) / max(stations * 0.25, 1)
+            for j in range(around + 1):
+                uvj = ring_uv[k][j]
+                if (
+                    uvj[3] != sx
+                    or uvj[2] > 0.6
+                    or not (j < flank_n or j > around - flank_n)
+                ):
+                    continue
+                share = 0.45 * (1 - uvj[2] / 0.6) ** 1.2 * max(0.0, 1 - reach)
+                if share <= 0.02:
+                    continue
+                v = rings[k][j]
+                carried[v] = (bone, share)
     bmesh.ops.delete(
         bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS"
     )
@@ -679,13 +793,27 @@ def caparison(body, mount, level, hem=0.48):
         if f.normal.dot(c - Vector((0, c.y, 1.0))) < 0:
             f.normal_flip()
     uv = bm.loops.layers.uv.new("UVMap")
+    # Whole-cloth arms, one scale both ways (`cloth_m` of cloth per unit, charges ~22 cm):
+    # u along the body, mirrored on the right flank so the charges face the head on both
+    # sides (seam at the spine: the side is the face's, not the vertex's); v = distance
+    # along the ring from the spine, 0.04 at the spine.
+    cloth_m = 1.5
     ymid = (y0 + y1) / 2
-    zmid = hem + 0.45
-    for f in bm.faces:
+    for f, keys in faces_uv:
+        if not f.is_valid:
+            continue
+        flip = f.calc_center_median().x < 0
+        # (loops looked up by vertex: `normal_flip` reverses the loop order)
+        at = {vert(k, j, keys[0][0]): (k, j) for k, j in keys}
         for loop in f.loops:
-            p = loop.vert.co
-            uu = (p.y - ymid) / 0.75 + 0.5
-            loop[uv].uv = (uu if p.x > 0 else 1 - uu, 0.5 - (p.z - zmid) / 0.75)
+            k, j = at[loop.vert]
+            du = (loop.vert.co.y - ymid) / cloth_m
+            loop[uv].uv = (0.5 - du if flip else 0.5 + du, 0.04 + spine[k][j] / cloth_m)
+    carried_idx = {}
+    bm.verts.index_update()
+    for v, val in carried.items():
+        if v.is_valid:
+            carried_idx[v.index] = val
     obj = eq.to_object("caparison", bm, [bs.material(eq.C_ARMS, (1, 1, 1))])
     tree = KDTree(len(pts))
     for i, (p, _w) in enumerate(pts):
@@ -695,7 +823,13 @@ def caparison(body, mount, level, hem=0.48):
     for v in obj.data.vertices:
         p = v.co
         _co, idx, _d = tree.find(Vector((p.x * 0.6, p.y, max(p.z, 1.0))))
-        weights.append(dict(pts[idx][1]))
+        w = dict(pts[idx][1])
+        leg = carried_idx.get(v.index)
+        if leg is not None:
+            bone, share = leg
+            w = {b: x * (1 - share) for b, x in w.items()}
+            w[bone] = w.get(bone, 0.0) + share
+        weights.append(w)
     fh.set_weights(obj, weights)
     return obj
 
@@ -739,9 +873,11 @@ def harness(recipe, body, mount, level):
     if level == 0:
         for obj in bridle(body, mount):
             out.append((obj, 0))
-    for name, mask in recipe.get("horse_equipment", []):
+    for item in recipe.get("horse_equipment", []):
+        name, mask = item[0], item[1]
+        kwargs = item[2] if len(item) > 2 else {}
         if name == "caparison":
-            out.append((caparison(body, mount, level), mask))
+            out.append((caparison(body, mount, level, **kwargs), mask))
         elif name == "chanfron":
             out.append((chanfron(body, mount), mask))
         elif name == "flanchards":
