@@ -201,6 +201,50 @@ def split_sheet(
     return crops
 
 
+def split_sheet_panels(
+    rgba: np.ndarray, cols: int = SHEET_COLS, rows: int = SHEET_ROWS
+) -> list[np.ndarray]:
+    """Cut a sheet by assigning each connected piece to the grid panel of its centre (HB4).
+
+    Robust when thin trunks detach crowns from their base (tall pines): every fragment follows
+    its own panel instead of the nearest large component.
+    """
+    from scipy import ndimage
+
+    alpha = rgba[..., 3] > 0.5
+    labels, count = ndimage.label(alpha)
+    h, w = alpha.shape
+    centres = ndimage.center_of_mass(alpha, labels, np.arange(1, count + 1))
+    panel_of = np.full(count + 1, -1)
+    for index, (cy, cx) in enumerate(centres, start=1):
+        r = min(int(cy / (h / rows)), rows - 1)
+        c = min(int(cx / (w / cols)), cols - 1)
+        panel_of[index] = r * cols + c
+    owner = panel_of[labels]
+    crops = []
+    for k in range(cols * rows):
+        mask = (owner == k) & alpha
+        yy, xx = np.nonzero(mask)
+        crop = rgba[yy.min() : yy.max() + 1, xx.min() : xx.max() + 1].copy()
+        crop[..., 3] *= mask[yy.min() : yy.max() + 1, xx.min() : xx.max() + 1]
+        crops.append(crop)
+    return crops
+
+
+def consistent_crops(crops: list[np.ndarray], spread: float = 1.3) -> bool:
+    """True when no view is broken: heights within ``spread`` of the median and no empty row band
+    (a fragment of a neighbouring tree glued above or below the silhouette)."""
+    heights = np.array([c.shape[0] for c in crops], dtype=np.float64)
+    median = float(np.median(heights))
+    if not (np.all(heights <= median * spread) and np.all(heights >= median / spread)):
+        return False
+    for crop in crops:
+        filled = (crop[..., 3] > 0.5).any(axis=1)
+        if (~filled).sum() > 0.02 * crop.shape[0]:
+            return False
+    return True
+
+
 def drop_specks(crop: np.ndarray, fraction: float = 0.02) -> np.ndarray:
     """Clear detached blobs smaller than ``fraction`` of the main one (ground-shadow remnants)."""
     from scipy import ndimage
@@ -508,7 +552,11 @@ def match_luminance(
 
 
 def _species_cells(name: str, box: tuple[float, float, float]) -> list[np.ndarray]:
-    crops = [drop_specks(c) for c in split_sheet(_load(RAW / f"{name}_sheet_cut.png"))]
+    sheet = _load(RAW / f"{name}_sheet_cut.png")
+    crops = [drop_specks(c) for c in split_sheet(sheet)]
+    if not consistent_crops(crops):
+        crops = [drop_specks(c, 0.005) for c in split_sheet_panels(sheet)]
+        print(f"   {name}: panel split (consistent: {consistent_crops(crops)})")
     return [fit_cell(c, box) for c in crops]
 
 

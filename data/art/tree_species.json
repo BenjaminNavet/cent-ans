@@ -326,8 +326,9 @@
     0.7,
     0.9
    ],
-   "tone": 1.12,
-   "prompt": "a single mature silver birch tree (Betula pendula) standing alone, slender white trunk with black marks, light airy narrow crown of small fresh green leaves on drooping branches",
+   "tone": 1.05,
+   "seed": 7,
+   "prompt": "a single mature silver birch tree (Betula pendula) standing alone, slender white trunk with black marks, full dense oval crown of small bright green leaves on drooping branches, the foliage mass clearly visible",
    "row": 5,
    "season_class": 4
   },

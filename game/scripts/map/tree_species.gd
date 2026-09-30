@@ -149,6 +149,14 @@ func biome_param(b: int, key: int) -> float:
 	return biome_params[clampi(b, 0, BIOME_COUNT - 1) * BIOME_STRIDE + key]
 
 
+## Plus grande largeur d'anneau de vergers (px) : clairières à prendre en compte autour d'une tuile.
+func max_orchard_ring() -> float:
+	var ring := 0.0
+	for b in range(1, BIOME_COUNT):
+		ring = maxf(ring, biome_param(b, 4))
+	return ring
+
+
 ## Tables aplaties pour `VegetationScatter.set_species` (Rust).
 func table() -> Dictionary:
 	return {

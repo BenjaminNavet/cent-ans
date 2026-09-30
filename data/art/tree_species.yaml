@@ -154,10 +154,12 @@ species:
     roles: {massif: 0.3, lisiere: 1.2, isole: 0.6, ripisylve: 0.5}
     height: [1.1, 1.6]
     width: [0.7, 0.9]
-    tone: 1.12
+    tone: 1.05
+    seed: 7
     prompt: >-
       a single mature silver birch tree (Betula pendula) standing alone, slender white trunk with
-      black marks, light airy narrow crown of small fresh green leaves on drooping branches
+      black marks, full dense oval crown of small bright green leaves on drooping branches, the
+      foliage mass clearly visible
   - id: spruce
     name: Épicéa
     latin: Picea abies

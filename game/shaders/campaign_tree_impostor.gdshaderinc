@@ -16,6 +16,13 @@ uniform float ortho = 1.7;
 uniform float foot = 0.2588;
 uniform float alpha_cut = 0.5;
 uniform float max_lod = 2.5;
+// Lot HB4 : atlas d'une ligne par essence du catalogue ; la ligne vient de la donnée d'instance
+// (`species_row`) au lieu de l'essence du maillage.
+uniform bool species_rows = false;
+
+float impostor_row(vec4 custom, float essence) {
+	return species_rows ? species_row(custom, essence) : essence;
+}
 
 struct ImpostorVertex {
 	vec3 world;
@@ -95,7 +102,7 @@ ImpostorFragment impostor_fragment(vec2 frag, vec2 uv0, vec2 uv1, float blend, v
 	vec4 t = textureLod(albedo_atlas, uv, lod);
 	vec4 nt = textureLod(normal_atlas, uv, lod);
 	float leaves = value_noise(vec3(local * 24.0, seed * 17.0));
-	bool broadleaf = essence < 1.5;
+	bool broadleaf = season_deciduous(essence);
 	// Hiver : feuillus ajourés (on voit le sol à travers), comme `foliage_winter.gdshader`.
 	o.cut = broadleaf && campaign_season.w > 0.5 && value_noise(vec3(local * 40.0, seed * 29.0)) < 0.45;
 	vec3 n = nt.rgb * 2.0 - 1.0;
