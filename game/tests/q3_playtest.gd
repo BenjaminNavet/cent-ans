@@ -392,11 +392,11 @@ func phase_trade() -> void:
 		await wait(10)
 	else:
 		log_q("trade: no visible trade button")
-	await key(KEY_X)
+	await key(KEY_V)  # `map_toggle_trade` (V depuis la barre des modes de carte)
 	await wait(20)
-	log_q("trade: after X, trade_mode %s, diplomacy mode %s" % [map.trade_mode, map.diplomacy.get("mode") if map.diplomacy != null else "?"])
-	await shot("trade-key-x")
-	await key(KEY_X)
+	log_q("trade: after V, trade_mode %s, diplomacy mode %s" % [map.trade_mode, map.diplomacy.get("mode") if map.diplomacy != null else "?"])
+	await shot("trade-key-v")
+	await key(KEY_V)
 	await wait(10)
 
 
