@@ -16,10 +16,12 @@ pixel ``i`` covers ``[i, i + 1]``, centred at ``i + 0.5`` as in ``MapData``)::
 ``polygon_px`` is the simplified outer contour (marching squares at the
 water/land edge, Douglas-Peucker preserving topology); islands are counted
 but not cut out (the island ground, above the water, hides the sheet).
-``level_m`` is the most frequent height of the rendered heightmap
-(``heightmap_render.png``, the surface the game draws) inside the eroded
-lake: Copernicus flattens lakes to one value (same reasoning as
-:mod:`cent_ans_tools.geo.surface`). ``name`` comes from Natural Earth lakes
+``level_m`` is a most frequent height of the rendered heightmap
+(``heightmap_render.png``, the surface the game draws): Copernicus flattens
+lakes to one value (same reasoning as :mod:`cent_ans_tools.geo.surface`).
+A water component holding several levels (lake chains) is split into flat
+basins, one lake each; water that is flat nowhere (a reconstructed reservoir
+valley) is skipped (:func:`flat_basins`). ``name`` comes from Natural Earth lakes
 (French name first) when the raw layer is present, else it is empty.
 Rendering only (``lakes_renderer.gd``), no game rule.
 """
@@ -83,6 +85,10 @@ class LakesParams:
     simplify_px: float = 0.6
     #: Lakes at or below this level are left to the sea plane.
     min_level_m: float = 0.5
+    #: Height tolerance of a flat basin (see :func:`flat_basins`).
+    flat_tolerance_m: float = 3.0
+    #: Most basins (water levels) cut out of one water component.
+    max_basins: int = 8
     #: Search radius around a reservoir point (the point is on the water).
     reservoir_radius_px: int = 3
     #: Search radius around a Natural Earth label point.
@@ -98,6 +104,7 @@ class LakesResult:
     vertices: int = 0
     excluded_reservoirs: list[str] = field(default_factory=list)
     below_sea: int = 0
+    not_flat: int = 0
     named: int = 0
 
 
@@ -122,22 +129,77 @@ def inland_water_labels(land: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return labels, sizes
 
 
-def lake_level(heights: np.ndarray, component: np.ndarray) -> float:
-    """Water level (m): most frequent height of the eroded component.
+def lake_level(
+    heights: np.ndarray, component: np.ndarray, tolerance_m: float = 3.0
+) -> tuple[float, float]:
+    """Water level (m) and flatness of a lake.
 
     Args:
         heights: Heights in metres, same shape as ``component``.
         component: Boolean mask of the lake.
+        tolerance_m: Height tolerance of the flatness measure.
 
     Returns:
-        The modal height (0.1 m bins) inside the component eroded by one
-        pixel (the component itself when erosion empties it).
+        ``(level, flat)``: the modal height (0.1 m bins) inside the component
+        eroded by one pixel (the component itself when erosion empties it),
+        and the share of those pixels within ``tolerance_m`` of it.
     """
     inner = ndimage.binary_erosion(component)
     values = heights[inner if inner.any() else component]
     bins = np.round(values * 10.0).astype(np.int64)
     uniq, counts = np.unique(bins, return_counts=True)
-    return float(uniq[counts.argmax()]) / 10.0
+    level = float(uniq[counts.argmax()]) / 10.0
+    return level, float(np.mean(np.abs(values - level) <= tolerance_m))
+
+
+def flat_basins(
+    heights: np.ndarray, component: np.ndarray, params: LakesParams
+) -> list[tuple[float, np.ndarray]]:
+    """Split a water component into flat basins, one per water level.
+
+    A component of the land mask can hold several water levels (the Saimaa
+    and Päijänne systems, chains of lakes joined by rivers) or none at all
+    (a modern reservoir whose valley the rendered heightmap reconstructs).
+    Repeatedly: the modal height of the remaining pixels is a level; its core
+    is the remaining pixels within ``flat_tolerance_m`` of it; each connected
+    core of at least ``min_area_px`` pixels is a basin, grown by two pixels
+    over the component where the ground is not lower than the level (blended
+    shore pixels, so the outline reaches the bank). Sloped water yields only
+    small cores and no basin.
+
+    Returns:
+        ``[(level, mask)]`` with ``mask`` the grown basin (same shape).
+    """
+    remaining = component.copy()
+    basins: list[tuple[float, np.ndarray]] = []
+    tol = params.flat_tolerance_m
+    for _ in range(params.max_basins):
+        if remaining.sum() < params.min_area_px:
+            break
+        values = heights[remaining]
+        bins = np.round(values * 10.0).astype(np.int64)
+        uniq, counts = np.unique(bins, return_counts=True)
+        level = float(uniq[counts.argmax()]) / 10.0
+        core = remaining & (np.abs(heights - level) <= tol)
+        remaining &= ~core
+        cores, count = ndimage.label(core)
+        sizes = np.bincount(cores.ravel())
+        # A basin is a solid area: shore rings of blended pixels and the thin
+        # bands of a sloped valley vanish under a one-pixel erosion.
+        big = [
+            index
+            for index in range(1, count + 1)
+            if sizes[index] * 2 >= params.min_area_px
+            and ndimage.binary_erosion(cores == index).sum() * 8
+            >= params.min_area_px
+        ]
+        if not big and core.sum() * 2 < params.min_area_px:
+            break
+        rim = component & (heights >= level - tol)
+        for index in big:
+            grown = ndimage.binary_dilation(cores == index, iterations=2) & rim
+            basins.append((level, grown))
+    return basins
 
 
 def outline(component: np.ndarray, simplify_px: float) -> tuple[Polygon, int]:
@@ -260,45 +322,56 @@ def extract(
         labels: Precomputed :func:`inland_water_labels` result.
 
     Returns:
-        ``(lakes, below_sea)``: lake records sorted by decreasing area, and
-        the number of components skipped for being at or below sea level.
+        ``(lakes, skipped)``: lake records sorted by decreasing area, and the
+        number of components skipped as ``{"below_sea", "not_flat"}``.
     """
     lab, sizes = labels if labels is not None else inland_water_labels(land)
     excluded = excluded or {}
     names = names or {}
     boxes = ndimage.find_objects(lab)
     lakes: list[dict] = []
-    below_sea = 0
+    skipped = {"below_sea": 0, "not_flat": 0}
     for label in np.flatnonzero(sizes >= params.min_area_px):
         if label in excluded:
             continue
         box = boxes[label - 1]
         component = lab[box] == label
-        level = lake_level(heights[box], component)
+        level, _ = lake_level(heights[box], component, params.flat_tolerance_m)
         if level <= params.min_level_m:
-            below_sea += 1
+            skipped["below_sea"] += 1
             continue
-        polygon, islands = outline(component, params.simplify_px)
+        basins = [
+            (basin_level, mask)
+            for basin_level, mask in flat_basins(heights[box], component, params)
+            if basin_level > params.min_level_m
+        ]
+        if not basins:
+            skipped["not_flat"] += 1
+            continue
+        basins.sort(key=lambda basin: -int(basin[1].sum()))
         x0, y0 = box[1].start, box[0].start
-        coords = np.asarray(polygon.exterior.coords)[:-1] + (x0, y0)
-        if len(coords) < 3:
-            continue
-        cy, cx = ndimage.center_of_mass(component)
-        lakes.append(
-            {
-                "id": "",
-                "name": names.get(int(label), ""),
-                "level_m": round(level, 1),
-                "area_km2": round(float(sizes[label]) * meters_per_px**2 / 1e6, 1),
-                "center_px": [round(cx + x0 + 0.5, 2), round(cy + y0 + 0.5, 2)],
-                "islands": islands,
-                "polygon_px": [[round(x, 2), round(y, 2)] for x, y in coords],
-            }
-        )
+        for rank, (basin_level, mask) in enumerate(basins):
+            polygon, islands = outline(mask, params.simplify_px)
+            coords = np.asarray(polygon.exterior.coords)[:-1] + (x0, y0)
+            if len(coords) < 3:
+                continue
+            cy, cx = ndimage.center_of_mass(mask)
+            area = float(mask.sum()) * meters_per_px**2 / 1e6
+            lakes.append(
+                {
+                    "id": "",
+                    "name": names.get(int(label), "") if rank == 0 else "",
+                    "level_m": round(basin_level, 1),
+                    "area_km2": round(area, 1),
+                    "center_px": [round(cx + x0 + 0.5, 2), round(cy + y0 + 0.5, 2)],
+                    "islands": islands,
+                    "polygon_px": [[round(x, 2), round(y, 2)] for x, y in coords],
+                }
+            )
     lakes.sort(key=lambda lake: -lake["area_km2"])
     for index, lake in enumerate(lakes):
         lake["id"] = f"lake_{index:03d}"
-    return lakes, below_sea
+    return lakes, skipped
 
 
 def build(
@@ -331,7 +404,7 @@ def build(
     for label, rid in ne_reservoirs.items():
         if labelled[1][label] >= params.min_area_px:
             excluded.setdefault(label, rid)
-    lakes, below_sea = extract(
+    lakes, skipped = extract(
         land,
         heights,
         grid.meters_per_px,
@@ -351,6 +424,8 @@ def build(
             "min_area_px": params.min_area_px,
             "simplify_px": params.simplify_px,
             "min_level_m": params.min_level_m,
+            "flat_tolerance_m": params.flat_tolerance_m,
+            "max_basins": params.max_basins,
         },
         "lakes": lakes,
     }
@@ -363,6 +438,7 @@ def build(
         lakes=len(lakes),
         vertices=sum(len(lake["polygon_px"]) for lake in lakes),
         excluded_reservoirs=sorted(excluded.values()),
-        below_sea=below_sea,
+        below_sea=skipped["below_sea"],
+        not_flat=skipped["not_flat"],
         named=sum(1 for lake in lakes if lake["name"]),
     )

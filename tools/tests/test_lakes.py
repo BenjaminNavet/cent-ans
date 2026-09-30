@@ -50,8 +50,8 @@ def test_extract_keeps_lakes_above_sea_level() -> None:
     """Lakes A and C are kept, the polder and the puddle are not."""
     land, heights = _world()
     params = lakes.LakesParams(min_area_px=10)
-    found, below_sea = lakes.extract(land, heights, 719.0, params)
-    assert below_sea == 1
+    found, skipped = lakes.extract(land, heights, 719.0, params)
+    assert skipped == {"below_sea": 1, "not_flat": 0}
     assert [lake["level_m"] for lake in found] == [100.0, 50.0]
     first = found[0]
     assert first["id"] == "lake_000"
@@ -118,7 +118,20 @@ def test_lake_level_is_the_mode() -> None:
     heights[2, 2:8] = 95.0
     component = np.zeros((10, 10), dtype=bool)
     component[2:8, 2:8] = True
-    assert lakes.lake_level(heights, component) == 80.0
+    level, flat = lakes.lake_level(heights, component)
+    assert level == 80.0
+    assert flat == 1.0
+
+
+def test_sloped_water_is_not_a_lake() -> None:
+    """Water over a slope (reconstructed reservoir valley) is skipped."""
+    land, heights = _world()
+    heights[10:20, 20:32] = np.linspace(100.0, 160.0, 12)[None, :]
+    found, skipped = lakes.extract(
+        land, heights, 719.0, lakes.LakesParams(min_area_px=10)
+    )
+    assert skipped["not_flat"] == 1
+    assert [lake["level_m"] for lake in found] == [50.0]
 
 
 def test_lakes_json_matches_schema() -> None:
@@ -132,3 +145,16 @@ def test_lakes_json_matches_schema() -> None:
     assert not errors, [error.message for error in errors[:5]]
     geneva = [lake for lake in document["lakes"] if lake["name"] == "Léman"]
     assert geneva and 340.0 < geneva[0]["level_m"] < 400.0
+
+
+def test_lake_chain_splits_into_basins() -> None:
+    """Two levels in one water component give two lakes at their own level."""
+    land, heights = _world()
+    heights[10:20, 26:32] = 90.0  # eastern half of lake A 10 m lower
+    found, skipped = lakes.extract(
+        land, heights, 719.0, lakes.LakesParams(min_area_px=10)
+    )
+    assert skipped["not_flat"] == 0
+    assert sorted(lake["level_m"] for lake in found) == [50.0, 90.0, 100.0]
+    upper = next(lake for lake in found if lake["level_m"] == 100.0)
+    assert Polygon(upper["polygon_px"]).bounds[2] < 30.0

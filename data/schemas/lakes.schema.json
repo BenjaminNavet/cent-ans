@@ -18,12 +18,14 @@
     "description": {"type": "string"},
     "params": {
       "type": "object",
-      "required": ["min_area_px", "simplify_px", "min_level_m"],
+      "required": ["min_area_px", "simplify_px", "min_level_m", "flat_tolerance_m", "max_basins"],
       "additionalProperties": false,
       "properties": {
         "min_area_px": {"type": "integer", "minimum": 1},
         "simplify_px": {"type": "number", "minimum": 0},
-        "min_level_m": {"type": "number"}
+        "min_level_m": {"type": "number"},
+        "flat_tolerance_m": {"type": "number", "minimum": 0},
+        "max_basins": {"type": "integer", "minimum": 1}
       }
     },
     "lakes": {
