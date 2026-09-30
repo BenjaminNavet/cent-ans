@@ -106,3 +106,11 @@ capture (arbustes 0,3-0,7, olivier 0,7-1,0).
 Ouvert : lisibilité alpine toujours insuffisante sur la dernière planche vue ; piste plus sûre :
 roche au shader de terrain (HB3) sur pentes raides, les instances en appoint.
 
+## HB7 — lisibilité des rivières (branche `feat/hb-rivers`, worktree `../gp-hb-rivers`)
+- **Cause principale** : `world_per_px` des rubans (`river_water.gdshader`, `river_fine.gdshader`) prend `PROJECTION_MATRIX[1][1]`, **négatif sous Metal/Vulkan** (retournement de Y) : la largeur écran minimale (`min_px`) n'a jamais agi sur le Mac, rubans à leur largeur réelle (sous-pixel au-delà de ~50 unités) et `thin_fade` au plancher → trait gris. Corrigé par `abs()`. Même motif (non corrigé, hors lot) dans `road_line`, `road_fine`, `terrain_line`, `sea_lane`, `settlement_icon`.
+- Causes secondaires : bord du ruban moyen normalisé par la largeur réelle (cœur seul opaque) ; palier fin sans réglage (`min_px` 1,2, élargissement dessiné en berge grise) ; eau trop sombre (fond gris-bleu 0,25/0,43/0,52, ciel gris).
+- Corrections : élargissement = eau dans les deux paliers ; liseré/fondu du bord en pixels (dérivées écran) ; palette bleu-vert plus claire, reflet de ciel bleu ; `river_display.json` : `major_min_px` 4, facteurs par importance jusqu'à ×1,75 (Seine ≈ 7 px), `fine` (min_px 4, facteur par ordre de Strahler, mêmes couleurs) ; schéma complété (`sky_reflect` manquait).
+- Mer d'Azov (demande du coordinateur) : `terrain.gdshader` peignait en « lac » sombre (et berge de vase) l'eau raster dont le MNT est ≥ 0 m → taches et bandes en escalier. Seuil `lake_level_m` = 2 m (aussi dans `water.gdshader`) et test `sea_nearby` (eau sous 0 m à 4 px alentour → mer). Pixels sombres dans la vue ÷ 6.
+- Planches : `docs/research/hb7_rivieres_avant_apres.jpg` (gauche avant, droite après : Rouen 600/250/80, Orléans, Lyon, Vienne 250), `docs/research/hb7_azov_avant_apres.jpg`.
+- Tests : `game/tests/hb7_river_width_test.gd` (largeur ≥ 6 px d'un fleuve majeur de 20 à 1200, relais fin/moyen, abs(), eau bleue) ; rc3, ss_lakes, zg5b, smoke verts.
+- Reste : `git merge feat/hb` refusé par le classifieur d'autorisations (à faire par la session principale ; conflits attendus sur `river_display.json` et `terrain.gdshader` mineurs) ; bande d'eau peinte encore un peu plus sombre le long de la côte nord d'Azov (maillage LOD au-dessus du plan d'eau).
