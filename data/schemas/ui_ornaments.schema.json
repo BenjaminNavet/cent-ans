@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ui_ornaments.schema.json",
+  "title": "Ornements d'interface générés (NB)",
+  "description": "Pièces du kit d'interface enluminée redessinées par Nano Banana 2 (`tools/cent_ans_tools/ui_ornaments.py`) d'après un guide de forme (texture procédurale agrandie) et l'ancre de style, plus des pièces de décor isolées.",
+  "type": "object",
+  "required": ["model", "guide_scale", "pieces", "decor"],
+  "additionalProperties": false,
+  "properties": {
+    "model": {"type": "string", "minLength": 1},
+    "guide_scale": {"type": "integer", "minimum": 1, "maximum": 16},
+    "pieces": {"type": "array", "items": {"$ref": "#/$defs/request"}},
+    "decor": {"type": "array", "items": {"$ref": "#/$defs/request"}}
+  },
+  "$defs": {
+    "request": {
+      "type": "object",
+      "required": ["id", "prompt", "aspect_ratio", "image_size", "variants"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "prompt": {"type": "string", "minLength": 1},
+        "aspect_ratio": {"enum": ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"]},
+        "image_size": {"enum": ["512", "1K", "2K", "4K"]},
+        "variants": {"type": "integer", "minimum": 1, "maximum": 6},
+        "seed": {"type": "integer"},
+        "selected": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

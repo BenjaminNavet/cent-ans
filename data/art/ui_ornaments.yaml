@@ -1,0 +1,7 @@
+# NB1: Nano Banana 2 redraw of the illuminated UI kit (spec 2026-09-30 NB, ADR 0135).
+# Each piece id matches game/assets/ui/illumination/kit.json; `selected` is the variant
+# kept after the player's judgement (absent = procedural fallback).
+model: google/gemini-3.1-flash-image
+guide_scale: 6
+pieces: []
+decor: []

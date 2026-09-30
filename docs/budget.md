@@ -141,3 +141,12 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot
 | 2026-09-29 | OpenRouter | OMR : portrait de Hızır Bey, 1re tentative avec auréole, écartée (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,30 $ |
 | 2026-09-29 | OpenRouter | OMR : portrait de Hızır Bey, bey de Hamid (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,35 $ |
 | 2026-09-29 | OpenRouter | OMR : variante âgée de Hızır Bey (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,40 $ |
+
+## Nano Banana NB (30/09) — plafond propre de 10 $ (clé OpenRouter personnelle du joueur)
+
+Spec `docs/superpowers/specs/2026-09-30-nb-nano-banana-interface-design.md`. NB-DA ≤ 1 $,
+NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul NB |
+|---|---|---|---|---|---|
+| 2026-09-30 | — | NB-S (squelette) | 0,00 $ | 0,00 $ | 0,00 $ |
