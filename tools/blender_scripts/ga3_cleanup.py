@@ -204,19 +204,12 @@ def strip_base(obj: bpy.types.Object, height: float, length: float) -> None:
     print(f"GA3 strip-base: {len(doomed)} faces of the ground patch removed")
 
 
-def decimated_copy(
-    source: bpy.types.Object, name: str, target: int
-) -> bpy.types.Object:
-    """Copy of ``source`` collapse-decimated to at most ``target`` triangles."""
-    obj = source.copy()
-    obj.data = source.data.copy()
-    obj.name = name
-    bpy.context.scene.collection.objects.link(obj)
-    select_only(obj)
+def collapse_to(obj: bpy.types.Object, target: int) -> None:
+    """Collapse-decimate ``obj`` (active, selected) to at most ``target`` triangles."""
     triangulate = obj.modifiers.new("tri", "TRIANGULATE")
     bpy.ops.object.modifier_apply(modifier=triangulate.name)
     ratio = min(1.0, target / max(1, triangle_count(obj)))
-    for _ in range(4):
+    for _ in range(8):
         decimate = obj.modifiers.new("dec", "DECIMATE")
         decimate.decimate_type = "COLLAPSE"
         decimate.ratio = ratio
@@ -226,6 +219,33 @@ def decimated_copy(
         if count <= target:
             break
         ratio = 0.97 * target / count
+    print(f"GA3 collapse: {triangle_count(obj)} / {target}")
+
+
+def decimated_copy(
+    source: bpy.types.Object, name: str, target: int
+) -> bpy.types.Object:
+    """Copy of ``source`` collapse-decimated to at most ``target`` triangles."""
+    obj = source.copy()
+    obj.data = source.data.copy()
+    obj.name = name
+    bpy.context.scene.collection.objects.link(obj)
+    # UV seams weigh on collapse decimation; the LOD is unwrapped and baked afresh anyway.
+    for layer in list(obj.data.uv_layers):
+        obj.data.uv_layers.remove(layer)
+    select_only(obj)
+    collapse_to(obj, target)
+    if triangle_count(obj) > 1.05 * target:
+        # Collapse stalls on pinched, non-manifold regions (TRELLIS 2 thatch: ~5.7 k
+        # triangles whatever the ratio). A voxel remesh closes the surface; the LOD is
+        # unwrapped and baked from the untouched source afterwards, so nothing is lost.
+        stalled = triangle_count(obj)
+        remesh = obj.modifiers.new("vox", "REMESH")
+        remesh.mode = "VOXEL"
+        remesh.voxel_size = max(obj.dimensions) / 120.0
+        bpy.ops.object.modifier_apply(modifier=remesh.name)
+        collapse_to(obj, target)
+        print(f"GA3 {name}: collapse stalled at {stalled}, voxel remesh fallback")
     return obj
 
 
