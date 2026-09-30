@@ -73,8 +73,9 @@ void vertex() {
 	}
 	// VN : dans les parcelles de blé et de chaume du décor, tiges serrées partout (sinon ils ne poussaient que dans
 	// les plaques d'herbe : blé en ovales, Crécy, Poitiers).
-	if (decor_on > 0.5 && fade > 0.0) {
-		vec2 duv0 = (wp + (da6_on > 0.5 ? bt_edge_warp(wp) : vec2(0.0)) - splat_rect.xy) / splat_rect.zw;
+	// Seulement pour les touffes qu'on allait écarter (une lecture de texture, sans déformation).
+	if (decor_on > 0.5 && fade > 0.0 && r3 >= density) {
+		vec2 duv0 = (wp - splat_rect.xy) / splat_rect.zw;
 		vec4 df0 = texture(decor_fields, duv0);
 		float kind0 = floor(df0.r * 8.0 + 0.5);
 		if (df0.a > 0.5 && (kind0 == 2.0 || kind0 == 6.0)) {
