@@ -10,8 +10,8 @@ extends SceneTree
 ## Usage : godot --headless --path game --script res://tests/tf_far_layer_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
-## Temps principal max par image toléré (ms) : budget 3 ms + une tuile ; marge machine chargée.
-const FRAME_MAX_MS := 12.0
+## Temps principal max par image toléré (ms) : budget 2 ms + une tuile (≤ ~1 ms) ; marge machine chargée.
+const FRAME_MAX_MS := 8.0
 
 
 ## Calque 1:1 simulé : `version` et `built_ids()`, comme `TownLayer` / `LandmarkCityLayer`.

@@ -35,8 +35,11 @@ const SHADER := preload("res://shaders/town_far.gdshader")
 @export var hide_strategic_weight: float = 0.99
 ## Enfoncement d'une ville construite en 1:1 sous `sink_factor` × portée des blocs.
 @export var sink_factor: float = 0.95
-## Budget de construction des tuiles par image (ms, fil principal).
-@export var build_budget_ms: float = 3.0
+## Fils de travail de la génération (0 : moitié des cœurs, 4 au plus : au-delà, la génération
+## GDScript ne va pas plus vite, 1,2 s mesurées à 4 comme à 8 fils).
+@export var generation_threads: int = 0
+## Budget de construction des tuiles par image (ms, fil principal ; une tuile ≤ ~1 ms de plus).
+@export var build_budget_ms: float = 2.0
 ## Facteurs par niveau de `RenderQuality` : portée de F1, ombres de F1.
 @export var quality: Dictionary = {
 	"low": {"f1": 0.5, "shadows": false},
@@ -243,7 +246,7 @@ func _start_generation() -> void:
 	if _tiles.is_empty():
 		return
 	_gen_start_usec = Time.get_ticks_usec()
-	var threads := maxi(1, OS.get_processor_count() / 2)
+	var threads := generation_threads if generation_threads > 0 else clampi(OS.get_processor_count() / 2, 1, 4)
 	_group = WorkerThreadPool.add_group_task(_run_tile, _tiles.size(), threads, false, "town far tiles")
 
 
@@ -314,8 +317,13 @@ func _build_step(budget_usec: int) -> void:
 		if result.is_empty():
 			break
 		var tb := Time.get_ticks_usec()
+		var first := _built == 0
 		_build_tile(result)
-		_step_max_usec = maxi(_step_max_usec, Time.get_ticks_usec() - tb)
+		var took := Time.get_ticks_usec() - tb
+		if first:
+			stats["build_first_tile_ms"] = took / 1000.0  # premier matériau, premier maillage
+		else:
+			_step_max_usec = maxi(_step_max_usec, took)
 		if Time.get_ticks_usec() - t0 >= budget_usec or not FrameBudget.has_time():
 			break
 	_poll_group()
