@@ -1,5 +1,5 @@
 {
-  "description": "Bataille-prologue guidée (lot NT4) : petite escarmouche de l'été 1337 aux marches de Guyenne, lancée depuis « Batailles historiques » du menu principal. `battle` est une configuration de bataille personnalisée (BattleSim.setup_custom, NT2) ; chaque étape a un texte du conseiller, un objectif, une condition de passage observée sur l'état de la bataille et, au besoin, un élément d'interface à surligner. L'ennemi reste passif jusqu'à l'étape marquée `enemy_ai`.",
+  "description": "Bataille-prologue guidée (lot NT4) : petite escarmouche de l'été 1337 aux marches de Guyenne, lancée depuis « Batailles historiques » du menu principal. `battle` est une configuration de bataille personnalisée (BattleSim.setup_custom, NT2) ; chaque étape a un texte du conseiller, un objectif, une condition de passage observée sur l'état de la bataille et, au besoin, un élément d'interface à surligner. L'ennemi reste passif et tient sa position (camp tenu, NT11 : ni marche ni recul volontaire, la déroute sous forte pression restant possible) jusqu'à l'étape marquée `enemy_ai`.",
   "id": "battle_prologue",
   "title": "Didacticiel de bataille : escarmouche en Agenais (été 1337)",
   "menu_label": "Didacticiel de bataille",

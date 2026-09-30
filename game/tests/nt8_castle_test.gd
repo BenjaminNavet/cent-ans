@@ -56,7 +56,14 @@ func _init() -> void:
 			var size: Vector3 = (body.mesh as BoxMesh).size
 			_check(absf(size.y - h) < 0.01, "keep drawn at the core's height (%.1f)" % size.y)
 			_check(absf(size.x - float(keep["length"])) < 0.01 and absf(size.z - float(keep["depth"])) < 0.01, "keep on the core's footprint")
-		_check((keep_nodes[0] as Node3D).get_node_or_null("KeepRoof") != null, "keep roof")
+		_check_keep_variant(keep_nodes[0] as Node3D, bool(keep.get("terrace", false)))
+		# NT11 : l'autre toit, dessiné sur le même site (les deux variantes sont rendues).
+		var sites: Array = (render.get("house_sites") as Array).filter(func(s: Dictionary) -> bool: return bool(s["keep"]))
+		if _check_ret(sites.size() == 1, "keep site"):
+			var other: Dictionary = (sites[0] as Dictionary).duplicate()
+			other["terrace"] = not bool(keep.get("terrace", false))
+			render.call("_build_keep", other)
+			_check_keep_variant(render.get_child(render.get_child_count() - 1) as Node3D, bool(other["terrace"]))
 	var props: Array = siege.get("props", [])
 	var wells := props.filter(func(p: Dictionary) -> bool: return str(p["kind"]) == "well").size()
 	var stalls := props.filter(func(p: Dictionary) -> bool: return str(p["kind"]) == "stall").size()
@@ -67,6 +74,25 @@ func _init() -> void:
 	await process_frame
 	print("nt8_castle_test: %s" % ("OK" if _failures == 0 else "%d FAILURE(S)" % _failures))
 	quit(1 if _failures > 0 else 0)
+
+
+## NT11 : toit (pavillon ou terrasse crénelée), porte haute et escalier extérieur d'un donjon.
+func _check_keep_variant(keep: Node3D, terrace: bool) -> void:
+	var roof := keep.get_node_or_null("KeepRoof")
+	var deck := keep.get_node_or_null("KeepTerrace")
+	if terrace:
+		_check(roof == null and deck != null and keep.get_node_or_null("KeepWatch") != null, "terrace keep: crenellated deck and watch turret")
+	else:
+		_check(roof != null and deck == null, "pavilion roof keep")
+	var stair := keep.get_node_or_null("KeepStair")
+	_check(stair != null and stair.get_node_or_null("KeepStairLanding") != null, "outside stair with a landing")
+	var door := keep.get_node_or_null("KeepDoor") as Node3D
+	_check(door != null and door.position.y > 5.0, "raised keep door (%.1f m)" % (door.position.y if door != null else -1.0))
+
+
+func _check_ret(ok: bool, label: String) -> bool:
+	_check(ok, label)
+	return ok
 
 
 func _check(ok: bool, label: String) -> void:

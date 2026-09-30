@@ -251,6 +251,10 @@ pub struct House {
     /// own height, every other building).
     #[serde(default, skip_serializing_if = "zero_height")]
     pub height: f64,
+    /// NT11: a keep roofed with a crenellated terrace (else a pavilion
+    /// roof), drawn from the place's seed.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub terrace: bool,
 }
 
 fn two_rows() -> u8 {
@@ -278,6 +282,7 @@ impl House {
             rows: 2,
             keep: false,
             height: 0.0,
+            terrace: false,
         }
     }
 

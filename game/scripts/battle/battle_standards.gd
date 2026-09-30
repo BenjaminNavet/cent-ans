@@ -361,9 +361,41 @@ func _figure_material(side: String, role: String, clip_names: Array) -> ShaderMa
 	BattleSkinned.apply_config(mat, _custom_config(kind, variant, clip_names), 0.0)
 	# AN1a : surcot et caparaçon au vent (pas pour le porte-étendard tombé).
 	BattleSecondaryMotion.setup_material(mat, kind, variant)
-	if not clip_names.is_empty() and str(clip_names[0]).ends_with("death"):
+	var dead := not clip_names.is_empty() and str(clip_names[0]).ends_with("death")
+	if dead:
 		mat.set_shader_parameter("sm_enabled", false)
+	# NT10 : fondu au changement de clip (INSTANCE_CUSTOM.y empaqueté, clip précédent même phase).
+	mat.set_shader_parameter("custom_fade", 0 if dead else 1)
 	return mat
+
+
+## NT10 : indices globaux (`clips[]` du rig) du jeu de clips d'un rôle ; vide sans figurine skinnée.
+static var _role_ids_cache: Dictionary = {}
+
+
+static func role_ids(role: String) -> Array:
+	if _role_ids_cache.has(role):
+		return _role_ids_cache[role]
+	var figure: Array = FIGURES[role]
+	var kind := str(figure[0])
+	var variant := int(figure[1])
+	var ids: Array = []
+	if BattleSkinned.has_figure(kind, variant):
+		var rig := BattleSkinned.rig(kind, variant)
+		for c in role_set(role):
+			ids.append(BattleSkinned.clip_index(rig, str(c)))
+	_role_ids_cache[role] = ids
+	return ids
+
+
+## NT10 : INSTANCE_CUSTOM.y d'une figurine de rôle jouant l'emplacement `slot` de son jeu, avec le
+## clip précédent en fondu (`state` : dictionnaire propre à la figurine).
+func _fade_y(role: String, slot: int, state: Dictionary) -> float:
+	var ids := role_ids(role)
+	if ids.is_empty() or slot < 0 or slot >= ids.size():
+		return float(slot)
+	var prev := BattleSkinned.fade_prev(state, int(ids[slot]), _anim_time)
+	return BattleSkinned.pack_fade(slot, prev, float(state.get("at", 0.0)))
 
 
 func _custom_config(kind: String, variant: int, clip_names: Array) -> Dictionary:
@@ -618,6 +650,9 @@ func _place_unit(unit: Dictionary, rec: Dictionary, soldiers: BattleSoldiers, ca
 	var role := str(rec["role"])
 	var dedicated := bool(rec["dedicated"])
 	var clip := clip_for(role, state, running, float(rec["phase"]))
+	if not rec.has("fade"):
+		rec["fade"] = {}
+	var clip_y := _fade_y(role, clip, rec["fade"])
 	var phase := float(rec["phase"])
 	var rig := "cavalry" if bool(rec["mounted"]) else "human"
 	var layers: Array = rec["layers"]
@@ -637,7 +672,7 @@ func _place_unit(unit: Dictionary, rec: Dictionary, soldiers: BattleSoldiers, ca
 		if frame == null:
 			continue
 		var xform: Transform3D = frame
-		var custom := Vector4(phase, float(clip), float(entry[1]), float(entry[2]) + fmod(phase * 0.13, 1.0))
+		var custom := Vector4(phase, clip_y, float(entry[1]), float(entry[2]) + fmod(phase * 0.13, 1.0))
 		if dedicated:
 			var group := _group(str(rec["side"]), role)
 			var d := camera_pos.distance_to(xform.origin)
@@ -663,7 +698,11 @@ func _place_unit(unit: Dictionary, rec: Dictionary, soldiers: BattleSoldiers, ca
 		var group := _group(str(rec["side"]), instrument)
 		var d := camera_pos.distance_to(xform.origin)
 		var level := 0 if d < lod0 else (1 if d < lod1 else 2)
-		_append(group["rows"][level], xform, Vector4(phase + float(k) * 0.37, float(clip_for(instrument, state, running, float(rec["phase"]) + float(k) * 0.37)), 0.0, 0.0))
+		if not rec.has("fade_mus"):
+			rec["fade_mus"] = [{}, {}]
+		var mus_clip := clip_for(instrument, state, running, float(rec["phase"]) + float(k) * 0.37)
+		var mus_y := _fade_y(instrument, mus_clip, (rec["fade_mus"] as Array)[mini(k, 1)])
+		_append(group["rows"][level], xform, Vector4(phase + float(k) * 0.37, mus_y, 0.0, 0.0))
 		reserved.append(slot)
 		figure_count += 1
 		_sound(rec, instrument, state, xform.origin, camera_pos)
@@ -710,7 +749,9 @@ func _place_fallen(camera_pos: Vector3, max_d: float) -> void:
 		var custom := Vector4(float(entry["instant"]), 0.0, float(entry["layer"]), FLAG_GROUND + 0.5)
 		if bool(entry["dedicated"]):
 			var group := _dead_group(str(entry["side"]), role)
-			_append(group["rows"], xform, custom)
+			# NT10 : le corps n'hérite pas de la couche d'étoffe (z) ni de l'état du drapeau (w),
+			# lus par le shader skinné comme projection et membre tranché ; un peu de sang seul.
+			_append(group["rows"], xform, Vector4(float(entry["instant"]), 0.0, 0.0, 0.5))
 		if bool(entry["flag"]):
 			_append((_flag_layer("ground/" + rig) as Dictionary)["rows"], xform, custom)
 			fallen_count += 1

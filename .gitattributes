@@ -1,3 +1,6 @@
 # Shell scripts must keep LF line endings: Git for Windows (core.autocrlf=true by default)
 # would otherwise check them out with CRLF and Git Bash fails on "\r" (ADR 0087).
 *.sh text eol=lf
+# Launchers (ADR 0117): the macOS .command runs in bash (LF), the Windows .bat in cmd (CRLF).
+*.command text eol=lf
+*.bat text eol=crlf

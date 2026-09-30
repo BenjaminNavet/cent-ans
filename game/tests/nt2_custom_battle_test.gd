@@ -62,6 +62,24 @@ func _check_screen() -> void:
 	screen.set_faction("defender", "fac_ottoman")
 	_check(bool(screen.report.get("ok", false)), "crossbowmen kept for the Ottomans? %s" % str(screen.report.get("errors")))
 	screen.set_faction("defender", "fac_england")
+	# NT11 : année (roster d'époque) et engins du siège.
+	_check(int(screen.config["year"]) == 1337 and int(screen.year_spin.value) == 1337, "default year 1337")
+	_check(screen.roster_entry("fac_france", "unit_francs_archers").is_empty(), "no francs-archers in 1337")
+	screen.set_year(1450)
+	_check(not screen.roster_entry("fac_france", "unit_francs_archers").is_empty(), "francs-archers in 1450")
+	_check(screen.buy("attacker", "unit_francs_archers"), "buy francs-archers in 1450")
+	_check(bool(screen.report.get("ok", false)), "1450 composition valid: %s" % str(screen.report.get("errors")))
+	screen.set_year(1337)
+	_check(not (screen.config["attacker"]["units"] as Array).has("unit_francs_archers"), "francs-archers dropped back in 1337")
+	_check((screen.config["attacker"]["units"] as Array).size() == 1, "other units kept")
+	var engines: Dictionary = screen.config["engines"]
+	_check(bool(engines["ladders"]) and bool(engines["ram"]) and int(engines["towers"]) == 0, "default engines: ladders and ram")
+	_check(screen.engines_button.disabled, "engines menu greyed out without siege")
+	screen.set_engines(false, true, 9)
+	var max_towers := int(screen.rules.get("max_siege_towers", 2))
+	_check(int(screen.config["engines"]["towers"]) == max_towers, "towers capped at %d" % max_towers)
+	_check(screen.engines_button.text.contains("bélier") and not screen.engines_button.text.contains("échelles"), "engines summary: %s" % screen.engines_button.text)
+	screen.set_engines(true, true, 0)
 	var config: Dictionary = screen.battle_config()
 	_check(config["attacker"]["budget"] is int and config["fortification"] is int, "integer budgets in the config")
 	var sim: Object = ClassDB.instantiate("BattleSim")
@@ -115,6 +133,22 @@ func _check_launch() -> void:
 		battle.call("tick", 0.1)
 		_check(float(battle.call("get_elapsed")) > 0.0, "first battle tick")
 	_check(BattleScene.custom_config.is_empty(), "custom config consumed")
+	scene.queue_free()
+	await process_frame
+	# NT11 : siège avec un beffroi choisi, sans bélier.
+	config["siege"] = true
+	config["place"] = "castle"
+	config["engines"] = {"ladders": true, "ram": false, "towers": 1}
+	BattleScene.custom_config = config
+	scene = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
+	root.add_child(scene)
+	await process_frame
+	await process_frame
+	battle = scene.get("battle")
+	_check(battle != null, "siege built from the custom config")
+	if battle != null:
+		var towers := (battle.call("get_units") as Array).filter(func(u: Dictionary) -> bool: return str(u.get("type", "")) == "unit_siege_tower")
+		_check(towers.size() == 1, "one siege tower chosen (%d)" % towers.size())
 	scene.queue_free()
 	await process_frame
 

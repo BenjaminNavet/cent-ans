@@ -9,6 +9,7 @@ mod capture;
 mod decision;
 mod deployment;
 mod fire;
+mod hold;
 mod indirect;
 mod modes;
 mod obstacles;
@@ -117,6 +118,8 @@ pub struct BattleSim {
     ticks: u64,
     accumulator: f64,
     ai_enabled: [bool; 2],
+    /// NT11: "hold ground" per side (see `sim/hold.rs`).
+    hold: [bool; 2],
     end_conditions: bool,
     finished: bool,
     winner: Option<SideId>,
@@ -488,6 +491,7 @@ impl BattleSim {
             ticks: 0,
             accumulator: 0.0,
             ai_enabled,
+            hold: [false; 2],
             end_conditions: true,
             finished: false,
             winner: None,
@@ -1426,7 +1430,11 @@ impl BattleSim {
                 if self.ai_enabled[side.index()] {
                     for command in ai::plan(self, side) {
                         // EP7: held waves and posted regiments (historical maps).
-                        if let Some(command) = self.scenario_filter(command) {
+                        // NT11: a side holding its ground keeps its place.
+                        if let Some(command) = self
+                            .scenario_filter(command)
+                            .and_then(|command| self.hold_filter(side, command))
+                        {
                             let _ = self.apply_command(command, Some(side));
                         }
                     }

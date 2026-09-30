@@ -55,3 +55,20 @@ Perte non mesurable dans le bruit, bien sous le plafond de 5 %.
   au changement d'état ; servants : changement de couche MultiMesh, sec aussi.
 - Clips jugés sur captures fixes seulement (`game/tests/nt7_anim_shot.gd`) : à juger en jeu.
 - Kit grossier Quaternius non recuit (repli sur les anciens jeux).
+
+## Complément NT10 (2026-09-30) : fondu des clips de rôle et des servants
+Levée de la première limite ci-dessus, sans état GPU par soldat supplémentaire :
+- **Empaquetage de INSTANCE_CUSTOM.y** (mode CUSTOM, uniforme `custom_fade` ≠ 0) : emplacement
+  du clip dans le jeu (0-31) + 32 × (indice global du clip précédent + 1) + 4096 × q, q = instant
+  du changement en 1/32 s modulo 64 s, arrondi par défaut (entier exact < 2^24 en flottant 32
+  bits ; le fondu ne part jamais en avance). Le CPU (`BattleSkinned.fade_prev`) suit le clip de
+  chaque figurine et efface le clip précédent une fois le fondu passé (pas de retour après 64 s).
+- `custom_fade` = 1 (porte-étendards, musiciens) : clip précédent lu à la même phase ;
+  `custom_fade` = 2 (servants) : lu depuis le début de l'ancien geste (INSTANCE_CUSTOM.z). Dans
+  les deux cas, z et w ne portent plus projection ni membre tranché (les porte-étendards
+  recevaient la couche d'étoffe et l'état du drapeau à cet endroit : défaut corrigé, de même
+  pour les porte-étendards tombés).
+- L'étoffe (`battle_standard_flag.gdshader`) relit le même y et suit le fondu de la hampe ; elle
+  lit désormais le jeu par `pick_clip` (au-delà de 4 clips, `pick` rendait un indice faux).
+- Durée en donnée : `role_blend_s` = 0,25 s (`data/fx/battle_animation.json`) ; `--no-nt10`
+  après `--` : changement sec (banc A/B).

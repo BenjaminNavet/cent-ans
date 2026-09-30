@@ -51,6 +51,61 @@
       "minimum": 0,
       "maximum": 3,
       "description": "Niveau de fortification le plus haut réglable."
+    },
+    "default_year": {
+      "type": "integer",
+      "minimum": 1300,
+      "maximum": 1500,
+      "description": "Année proposée par défaut (NT11) : le roster ne garde que les unités disponibles cette année-là."
+    },
+    "min_year": {
+      "type": "integer",
+      "minimum": 1300,
+      "maximum": 1500,
+      "description": "Première année réglable."
+    },
+    "max_year": {
+      "type": "integer",
+      "minimum": 1300,
+      "maximum": 1500,
+      "description": "Dernière année réglable."
+    },
+    "default_engines": {
+      "type": "object",
+      "description": "Engins de l'assiégeant proposés par défaut (NT11).",
+      "properties": {
+        "ladders": {
+          "type": "boolean",
+          "description": "Échelles d'escalade."
+        },
+        "ram": {
+          "type": "boolean",
+          "description": "Bélier contre la porte."
+        },
+        "towers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Beffrois."
+        }
+      },
+      "required": [
+        "ladders",
+        "ram",
+        "towers"
+      ],
+      "additionalProperties": false
+    },
+    "max_siege_towers": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 6,
+      "description": "Beffrois au plus (hors budget et hors plafond d'unités)."
+    },
+    "siege_tower_unit_type": {
+      "type": "string",
+      "pattern": "^unit_[a-z0-9_]+$",
+      "description": "Type d'unité d'un beffroi (statistiques du régiment-engin)."
     }
   },
   "required": [
@@ -61,7 +116,13 @@
     "max_units_per_side",
     "general_command",
     "default_fortification",
-    "max_fortification"
+    "max_fortification",
+    "default_year",
+    "min_year",
+    "max_year",
+    "default_engines",
+    "max_siege_towers",
+    "siege_tower_unit_type"
   ],
   "additionalProperties": false
 }

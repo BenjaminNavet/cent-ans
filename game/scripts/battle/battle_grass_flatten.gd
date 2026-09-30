@@ -13,7 +13,7 @@ extends RefCounted
 
 ## EP1 : 1 m sur le champ standard, 2 m sur les grands champs (mémoire, envoi GPU).
 var TEXEL := 1.0
-## Rectangle couvert (le champ de bataille et ses abords, en mètres).
+## Rectangle couvert (le champ de bataille et `MARGIN` m d'abords de chaque côté, en mètres).
 var RECT := Rect2(0.0, -100.0, 1200.0, 1000.0)
 ## Envoi de la texture au plus toutes les `STEP` secondes de bataille.
 const STEP := 0.5
@@ -38,9 +38,14 @@ var _last: Dictionary = {}  # id -> position (x, z) au dernier passage
 var _map: RefCounted = null
 
 
+## NT10 : marge (m) couverte de chaque côté du champ ; les régiments qui sortent du champ par un
+## flanc (déroute, retraite) couchent encore l'herbe. Au-delà, le shader ne lit plus rien.
+const MARGIN := 100.0
+
+
 ## `field` : largeur et profondeur du champ (EP1), 1200 × 800 par défaut.
 func setup(field: Vector2 = Vector2(1200.0, 800.0)) -> void:
-	RECT = Rect2(0.0, -100.0, field.x, field.y + 200.0)
+	RECT = Rect2(-MARGIN, -MARGIN, field.x + 2.0 * MARGIN, field.y + 2.0 * MARGIN)
 	TEXEL = 1.0 if field.x * field.y <= 1200.0 * 800.0 * 1.5 else 2.0
 	_w = int(RECT.size.x / TEXEL)
 	_h = int(RECT.size.y / TEXEL)

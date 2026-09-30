@@ -19,6 +19,14 @@ static var _cache: Dictionary = {}
 const TREES_GLB := "res://assets/models/vegetation/campaign_trees.glb"
 ## Identifiant d'essence (UV.x des sommets, lu par `foliage.gdshader` pour la teinte saisonnière).
 const ESSENCE_ID := {"oak": 0.0, "beech": 1.0, "fir": 2.0, "hedge": 3.0}
+## Lot FC2 : atlas des imposteurs (`tools/blender_scripts/campaign_tree_impostors.py`), une ligne
+## par essence dans cet ordre, `IMPOSTOR_VIEWS` colonnes (azimuts cuits).
+const IMPOSTOR_ALBEDO := "res://assets/textures/vegetation/campaign_impostors_albedo.png"
+const IMPOSTOR_NORMAL := "res://assets/textures/vegetation/campaign_impostors_normal.png"
+const IMPOSTOR_ROWS: Array[String] = ["oak", "beech", "fir"]
+const IMPOSTOR_VIEWS := 8
+## Lot FC5 : atlas des cartes de feuillage des arbres proches (`build_leaf_cards.py`).
+const CARD_TEXTURE := "res://assets/textures/vegetation/campaign_leaf_cards.png"
 ## Palettes (albédo linéaire) : feuillage sombre / clair, écorce.
 const PALETTES := {
 	"oak": [Color(0.040, 0.068, 0.026), Color(0.118, 0.155, 0.056), Color(0.20, 0.15, 0.10)],
@@ -41,6 +49,71 @@ static func essence(name: String, detailed: bool) -> ArrayMesh:
 			mesh = deciduous() if detailed else deciduous_low()
 	_cache[key] = mesh
 	return mesh
+
+
+## Lot FC2 : quadrilatère d'imposteur d'une essence (`oak`, `beech`, `fir`), 2 triangles. Les
+## sommets sont recalculés par `campaign_tree_impostor.gdshader` (panneau face à la caméra) :
+## UV = coin (x droite, y 0 en haut), UV2.x = ligne de l'essence dans l'atlas. Boîte englobante
+## explicite : celle d'un arbre de hauteur 1 (le MultiMesh en déduit la sienne).
+static func impostor(name: String) -> ArrayMesh:
+	var key := "impostor_%s" % name
+	if _cache.has(key):
+		return _cache[key]
+	var row := float(IMPOSTOR_ROWS.find(name))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var corners: Array[Vector2] = [Vector2(0, 0), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)]
+	for uv in corners:
+		st.set_uv(uv)
+		st.set_uv2(Vector2(row, 0.0))
+		st.set_normal(Vector3.BACK)
+		st.add_vertex(Vector3(uv.x - 0.5, 1.0 - uv.y, 0.0))
+	var mesh := st.commit()
+	mesh.custom_aabb = AABB(Vector3(-0.9, -0.5, -0.9), Vector3(1.8, 1.8, 1.8))
+	_cache[key] = mesh
+	return mesh
+
+
+## Lot FC5 : variante proche semi-réaliste (cartes de feuillage + tronc et branches, ≈ 250
+## triangles pour les feuillus, 145 pour le sapin), dessinée avec `foliage_cards.gdshader`
+## (texture `CARD_TEXTURE`, découpe alpha). UV2 = coordonnées dans l'atlas des cartes (moitié
+## gauche : feuilles, droite : brindille de sapin). Null si le GLB n'a pas la variante.
+static func essence_mid(name: String) -> ArrayMesh:
+	var key := "%s_mid" % name
+	if _cache.has(key):
+		return _cache[key]
+	var mesh: ArrayMesh = null
+	if ResourceLoader.exists(TREES_GLB):
+		var scene := load(TREES_GLB) as PackedScene
+		var root := scene.instantiate() if scene != null else null
+		if root != null:
+			var crown := root.find_child("%s_mid_crown" % name, true, false) as MeshInstance3D
+			var trunk := root.find_child("%s_mid_trunk" % name, true, false) as MeshInstance3D
+			if crown != null:
+				var palette: Array = PALETTES.get(name, PALETTES["oak"])
+				var st := SurfaceTool.new()
+				st.begin(Mesh.PRIMITIVE_TRIANGLES)
+				var card_offset := 0.5 if name == "fir" else 0.0
+				_append_part(st, crown, root, palette, true, float(ESSENCE_ID.get(name, 0.0)), card_offset)
+				if trunk != null:
+					_append_part(st, trunk, root, palette, false, float(ESSENCE_ID.get(name, 0.0)))
+				_append_impostor_quad(st, float(ESSENCE_ID.get(name, 0.0)))
+				mesh = st.commit()
+			root.free()
+	_cache[key] = mesh
+	return mesh
+
+
+## Lot FC6 : quadrilatère d'imposteur ajouté aux arbres proches (UV2 = coin + (0, 2), UV.x =
+## essence) : `foliage_cards.gdshader` passe de l'un à l'autre par arbre, en fondu tramé.
+static func _append_impostor_quad(st: SurfaceTool, essence_id: float) -> void:
+	var corners: Array[Vector2] = [Vector2(0, 0), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)]
+	for uv in corners:
+		st.set_color(Color(0.1, 0.1, 0.1, 0.0))
+		st.set_normal(Vector3.BACK)
+		st.set_uv(Vector2(essence_id, 1.0))
+		st.set_uv2(uv + Vector2(0.0, 2.0))
+		st.add_vertex(Vector3(uv.x - 0.5, 1.0 - uv.y, 0.0))
 
 
 static func _load_essence(name: String, detailed: bool) -> ArrayMesh:
@@ -67,7 +140,9 @@ static func _load_essence(name: String, detailed: bool) -> ArrayMesh:
 
 ## Ajoute une partie importée : couleurs de sommet (feuillage selon l'exposition, écorce), normales
 ## « gonflées » depuis le centre du houppier (ombrage doux), UV = (essence, 1 houppier / 0 tronc).
-static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, palette: Array, is_crown: bool, essence_id: float) -> void:
+## `card_offset` ≥ 0 (lot FC5) : cartes de feuillage, UV2 = UV importé ramené dans la moitié de
+## l'atlas des cartes qui commence à `card_offset`.
+static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, palette: Array, is_crown: bool, essence_id: float, card_offset: float = -1.0) -> void:
 	var xform := Transform3D.IDENTITY
 	var node: Node = part
 	while node != null and node != root:
@@ -81,6 +156,7 @@ static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, pale
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL] if arrays[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
 		var order: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+		var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV] if card_offset >= 0.0 and arrays[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array()
 		if order.is_empty():
 			order.resize(vertices.size())
 			for i in vertices.size():
@@ -96,6 +172,8 @@ static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, pale
 				st.set_color(color)
 				st.set_normal((dir * 0.88 + n * 0.12 + Vector3.UP * 0.12).normalized())
 				st.set_uv(Vector2(essence_id, 1.0))
+				if i < uvs.size():
+					st.set_uv2(Vector2(card_offset + clampf(uvs[i].x, 0.0, 1.0) * 0.5, uvs[i].y))
 			else:
 				var bark: Color = palette[2]
 				bark.a = clampf(v.y * 0.3, 0.0, 0.15)

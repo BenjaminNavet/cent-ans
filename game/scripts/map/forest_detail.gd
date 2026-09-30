@@ -19,6 +19,9 @@ extends Node3D
 ## - Recalage sur la surface affichée (pages du quadtree) quand une tuile change, groupé par tuile.
 
 var profile: ForestDetailProfile
+## Lot FC5 : parties à moins de `near_factor` × distance caméra du point visé en cartes de
+## feuillage (les autres en imposteurs) ; borne le coût des arbres proches.
+var near_factor: float = 0.4
 var vegetation: Vegetation
 var terrain: TerrainBuilder
 var stats: Dictionary = {"cells": 0, "instances": 0, "visible": 0, "fraction": 0.0, "radius": 0.0, "jobs": 0, "scatter_ms_max": 0.0, "regrounds": 0}
@@ -175,11 +178,13 @@ func _apply_parts(entry: Dictionary, focus: Vector2, fraction: float, radius: fl
 	var keep: float = entry["keep"]
 	var total := 0
 	var detail_limit := profile.detail_factor * camera_distance
+	var near_limit := near_factor * camera_distance if vegetation.near_cards_active() else -1.0
 	for part: Dictionary in entry["parts"]:
 		var d := _rect_distance(part["rect"], focus)
 		var share := snappedf(clampf(fraction * _falloff(d, radius) / keep, 0.0, 1.0), 0.004)
 		var cast := shadows and d < detail_limit
-		var state := Vector3(share, 0.0, 1.0 if cast else 0.0)
+		var near := d < near_limit
+		var state := Vector3(share, 1.0 if near else 0.0, 1.0 if cast else 0.0)
 		# PB : rien à écrire si l'état n'a pas changé ; sinon au plus `max_part_updates` parties
 		# réécrites par image (les autres gardent leur état, réessayées à l'image suivante).
 		if part.get("state", Vector3(-1, -1, -1)) == state or _part_updates_left <= 0:
@@ -202,6 +207,9 @@ func _apply_parts(entry: Dictionary, focus: Vector2, fraction: float, radius: fl
 		var cut := maxf(1.0 - share - band * 0.5, 0.0)
 		var shown := minf(share + band * 0.5, 1.0)
 		var count_part := 0
+		if part.get("near", false) != near:
+			part["near"] = near
+			_swap_meshes(entry, part, near)
 		for mmi in part["mmis"]:
 			if mmi == null:
 				continue
@@ -217,9 +225,33 @@ func _apply_parts(entry: Dictionary, focus: Vector2, fraction: float, radius: fl
 	return total
 
 
-func _meshes(detailed: bool) -> Array:
-	return [VegetationMeshes.essence("oak", detailed), VegetationMeshes.essence("beech", detailed),
-		VegetationMeshes.essence("fir", detailed), VegetationMeshes.hedge() if detailed else VegetationMeshes.hedge_low()]
+## Lot FC5 : maillages d'une partie (cartes de près, imposteurs sinon) ; MultiMesh recréé depuis
+## la copie processeur du tampon (comme `Vegetation._with_mesh`), boîte fixe gardée.
+func _swap_meshes(entry: Dictionary, part: Dictionary, near: bool) -> void:
+	var meshes := _meshes(near)
+	var buffers: Array = entry["buffers"]
+	var mmis: Array = part["mmis"]
+	for kind in mmis.size():
+		var mmi: MultiMeshInstance3D = mmis[kind]
+		if mmi == null or mmi.multimesh.mesh == meshes[kind]:
+			continue
+		var old := mmi.multimesh
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = old.transform_format
+		multimesh.use_custom_data = old.use_custom_data
+		multimesh.mesh = meshes[kind]
+		multimesh.instance_count = old.instance_count
+		multimesh.buffer = buffers[int(part["slot0"]) + kind]
+		multimesh.custom_aabb = old.custom_aabb
+		multimesh.visible_instance_count = old.visible_instance_count
+		mmi.multimesh = multimesh
+		mmi.material_override = vegetation.forest_material(kind, near)
+
+
+## Lot FC5 : cartes de feuillage au plus près, imposteurs ailleurs (`Vegetation.forest_meshes`) ;
+## maillages bas avec `--no-fc5`.
+func _meshes(near: bool) -> Array:
+	return vegetation.forest_meshes(near)
 
 
 # --- Semis -----------------------------------------------------------------------------------
@@ -389,14 +421,14 @@ func _install(key: int, job: Dictionary, result: Dictionary) -> void:
 			multimesh.custom_aabb = AABB(Vector3(part_rect.position.x, -5.0, part_rect.position.y), Vector3(part_rect.size.x, 60.0, part_rect.size.y))
 			var mmi := MultiMeshInstance3D.new()
 			mmi.multimesh = multimesh
-			mmi.material_override = vegetation.foliage_material()
+			mmi.material_override = vegetation.forest_material(kind, false)
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			part_node.add_child(mmi)
 			mmis.append(mmi)
 			slots.append(mmi)
 		node.add_child(part_node)
 		var cell := Vector2(part_index % side, part_index / side)
-		parts.append({"node": part_node, "mmis": mmis, "rect": Rect2(rect.position + cell * part_size, part_size)})
+		parts.append({"node": part_node, "mmis": mmis, "rect": Rect2(rect.position + cell * part_size, part_size), "slot0": part_index * VegetationTileJob.KIND_COUNT})
 	add_child(node)
 	_cells[key] = {"node": node, "parts": parts, "keep": job["keep"], "counts": counts, "buffers": buffers,
 		"slots": slots, "tile": job["tile"], "rect": rect, "last_seen": _frame}

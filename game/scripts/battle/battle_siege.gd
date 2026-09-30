@@ -18,6 +18,10 @@ const WOOD_DARK := Color(0.30, 0.20, 0.12)
 const PAVING := Color(0.55, 0.52, 0.46)
 const PLASTER := Color(0.82, 0.77, 0.66)
 const LADDER := Color(0.72, 0.55, 0.30)
+## NT11 : escalier extérieur du donjon (seuil de la porte haute, largeur, hauteur de marche).
+const KEEP_DOOR_SILL_M := 6.5
+const KEEP_STAIR_WIDTH_M := 2.2
+const KEEP_STEP_RISE_M := 0.32
 
 var siege: Dictionary = {}
 var height_at: Callable
@@ -916,13 +920,15 @@ func _house_sites() -> Array:
 			"church": bool(house.get("church", false)),
 			"keep": bool(house.get("keep", false)),
 			"height": float(house.get("height", 0.0)),
+			"terrace": bool(house.get("terrace", false)),
 		})
 	return sites
 
 
 ## NT1 (ADR 0126) + NT8 : donjon carré d'un château (Vincennes, Largoët), posé sur l'emprise de
 ## la simulation (`houses[].keep`) : talus, fût carré, cordon, mâchicoulis sur consoles, parapet
-## crénelé, échauguettes d'angle coiffées d'ardoise et toit en pavillon. Hauteur, emprise et
+## crénelé, échauguettes d'angle coiffées d'ardoise et toit en pavillon ou terrasse crénelée (NT11),
+## porte haute et escalier extérieur (NT11). Hauteur, emprise et
 ## position viennent du cœur (`houses[].height`, règle `keep_height_above_wall_m`).
 func _build_keeps() -> void:
 	for site in house_sites:
@@ -950,6 +956,8 @@ func _build_keep(site: Dictionary) -> void:
 	var stone := _textured("stone", STONE)
 	var dark := _textured("stone", STONE_DARK)
 	var slate := _textured("slate", Color(0.55, 0.56, 0.6), 0.75)
+	# NT11 : toit en terrasse crénelée ou en pavillon, tiré par le cœur (graine de la place).
+	var terrace := bool(site.get("terrace", false))
 	# Talus (base élargie) puis fût.
 	_keep_box(node, Vector3(length + 2.0, 4.0, depth + 2.0), Vector3(0, 2.0, 0), dark, "KeepBatter")
 	var body := _keep_box(node, Vector3(length, h, depth), Vector3(0, h * 0.5, 0), stone, "KeepBody")
@@ -977,7 +985,9 @@ func _build_keep(site: Dictionary) -> void:
 			merlons.append(Transform3D(basis, basis * Vector3(x, h + gallery_h + 0.65, across + over - 0.3)))
 	_multi(node, Vector3(0.55, 1.2, 0.8), corbels, dark)
 	_multi(node, Vector3(1.1, 1.3, 0.6), merlons, stone)
-	# Échauguettes aux quatre angles, coiffées d'un cône d'ardoise.
+	# Échauguettes aux quatre angles, coiffées d'un cône d'ardoise (crénelées sur un donjon en
+	# terrasse).
+	var turret_merlons: Array = []
 	for sx in [-1.0, 1.0]:
 		for sz in [-1.0, 1.0]:
 			var c := Vector3(sx * (length * 0.5 + over * 0.4), 0, sz * (depth * 0.5 + over * 0.4))
@@ -991,6 +1001,11 @@ func _build_keep(site: Dictionary) -> void:
 			turret.material_override = stone
 			turret.position = c + Vector3(0, h + 0.5, 0)
 			node.add_child(turret)
+			if terrace:
+				for k in 6:
+					var a := TAU * float(k) / 6.0
+					turret_merlons.append(Transform3D(Basis(Vector3.UP, -a), c + Vector3(cos(a) * 1.6, h + 3.25 + 0.6, sin(a) * 1.6)))
+				continue
 			var cap := MeshInstance3D.new()
 			var cone := CylinderMesh.new()
 			cone.top_radius = 0.0
@@ -1001,20 +1016,24 @@ func _build_keep(site: Dictionary) -> void:
 			cap.material_override = slate
 			cap.position = c + Vector3(0, h + 3.25 + 2.0, 0)
 			node.add_child(cap)
-	# Toit en pavillon (pyramide à quatre pans) en retrait du chemin de ronde.
-	var roof := MeshInstance3D.new()
-	roof.name = "KeepRoof"
-	var pyramid := CylinderMesh.new()
-	var half := minf(length, depth) * 0.5
-	pyramid.top_radius = 0.0
-	pyramid.bottom_radius = half * sqrt(2.0) * 0.92
-	pyramid.height = half * 1.2
-	pyramid.radial_segments = 4
-	roof.mesh = pyramid
-	roof.material_override = slate
-	roof.rotation.y = PI * 0.25
-	roof.position = Vector3(0, h + gallery_h + pyramid.height * 0.5, 0)
-	node.add_child(roof)
+	if terrace:
+		_multi(node, Vector3(0.8, 1.1, 0.5), turret_merlons, stone)
+		_build_keep_terrace(node, length, depth, h + gallery_h, stone, dark, slate)
+	else:
+		# Toit en pavillon (pyramide à quatre pans) en retrait du chemin de ronde.
+		var roof := MeshInstance3D.new()
+		roof.name = "KeepRoof"
+		var pyramid := CylinderMesh.new()
+		var half := minf(length, depth) * 0.5
+		pyramid.top_radius = 0.0
+		pyramid.bottom_radius = half * sqrt(2.0) * 0.92
+		pyramid.height = half * 1.2
+		pyramid.radial_segments = 4
+		roof.mesh = pyramid
+		roof.material_override = slate
+		roof.rotation.y = PI * 0.25
+		roof.position = Vector3(0, h + gallery_h + pyramid.height * 0.5, 0)
+		node.add_child(roof)
 	# Fenêtres et archères, porte haute côté basse-cour.
 	if _slit_mat == null:
 		_slit_mat = _material(Color(0.05, 0.05, 0.05))
@@ -1029,8 +1048,67 @@ func _build_keep(site: Dictionary) -> void:
 				var tall := 1.6 if level < 0.6 else 2.2
 				slits.append(Transform3D(basis.scaled(Vector3(1.0, tall / 1.6, 1.0)), basis * Vector3(x, h * level, across + 0.05)))
 	_multi(node, Vector3(0.35, 1.6, 0.3), slits, _slit_mat)
-	# Porte au pied, côté basse-cour (l'emprise de la simulation reste celle du fût).
-	_keep_box(node, Vector3(2.4, 3.6, 0.4), Vector3(0, 1.8 + 0.5, depth * 0.5 + 1.05), _textured("wood", Color(0.55, 0.45, 0.38)), "KeepDoor")
+	# NT11 : porte haute côté basse-cour, atteinte par un escalier de pierre extérieur (rendu
+	# seul : l'emprise de la simulation reste celle du fût).
+	_build_keep_stair(node, length, depth, minf(KEEP_DOOR_SILL_M, h * 0.35), dark)
+	_keep_box(node, Vector3(2.2, 3.4, 0.4), Vector3(0, 0.5 + minf(KEEP_DOOR_SILL_M, h * 0.35) + 1.7, depth * 0.5 + 0.15), _textured("wood", Color(0.55, 0.45, 0.38)), "KeepDoor")
+
+
+## NT11 : escalier droit adossé à la façade côté basse-cour (+Z), du pied de l'angle gauche au
+## palier devant la porte haute (seuil `sill` au-dessus du pied).
+func _build_keep_stair(node: Node3D, length: float, depth: float, sill: float, mat: Material) -> void:
+	var stair := Node3D.new()
+	stair.name = "KeepStair"
+	node.add_child(stair)
+	var base := 0.5  # pied du donjon (le nœud est posé 0,5 m sous le point le plus bas)
+	var landing := KEEP_STAIR_WIDTH_M + 1.2
+	var face := depth * 0.5
+	# Palier : du fût jusqu'au-delà du talus.
+	_keep_box(stair, Vector3(landing, base + sill, landing), Vector3(0, (base + sill) * 0.5, face + landing * 0.5), mat, "KeepStairLanding")
+	# Volée : marches pleines, de l'angle gauche jusqu'au palier.
+	var start := -length * 0.5 + 0.8
+	var run := -landing * 0.5 - start
+	var n := maxi(int(ceil(sill / KEEP_STEP_RISE_M)), 4)
+	var tread := run / float(n)
+	var z := face + 1.0 + KEEP_STAIR_WIDTH_M * 0.5
+	var steps: Array = []
+	for k in n:
+		var top := base + sill * float(k + 1) / float(n + 1)
+		var x := start + (float(k) + 0.5) * tread
+		steps.append(Transform3D(Basis().scaled(Vector3(1.0, top, 1.0)), Vector3(x, top * 0.5, z)))
+	_multi(stair, Vector3(tread, 1.0, KEEP_STAIR_WIDTH_M), steps, mat)
+	# Garde-corps plein du côté vide.
+	var rail_len := run
+	var rail := _keep_box(stair, Vector3(rail_len, 1.0, 0.35), Vector3(start + rail_len * 0.5, base + sill * 0.5 + 0.5, z + KEEP_STAIR_WIDTH_M * 0.5 - 0.17), mat)
+	rail.rotation.z = atan2(sill, rail_len)
+
+
+## NT11 : terrasse crénelée : dalle au niveau du chemin de ronde, guette d'angle carrée à
+## créneaux et lanterne d'escalier coiffée d'ardoise.
+func _build_keep_terrace(node: Node3D, length: float, depth: float, top: float, stone: Material, dark: Material, slate: Material) -> void:
+	_keep_box(node, Vector3(length, 0.4, depth), Vector3(0, top + 0.2, 0), dark, "KeepTerrace")
+	var g := Vector3(length * 0.5 - 2.2, 0, -depth * 0.5 + 2.2)
+	_keep_box(node, Vector3(4.0, 5.0, 4.0), g + Vector3(0, top + 2.5, 0), stone, "KeepWatch")
+	var merlons: Array = []
+	for face in 4:
+		var basis := Basis(Vector3.UP, PI * 0.5 * face)
+		for k in 3:
+			var x := (float(k) - 1.0) * 1.35
+			merlons.append(Transform3D(basis, g + basis * Vector3(x, top + 5.6, 1.8)))
+	_multi(node, Vector3(0.8, 1.2, 0.45), merlons, stone)
+	var hatch := Vector3(-length * 0.25, 0, depth * 0.2)
+	_keep_box(node, Vector3(2.4, 2.4, 2.4), hatch + Vector3(0, top + 1.2, 0), stone)
+	var cap := MeshInstance3D.new()
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = 2.0
+	cone.height = 2.2
+	cone.radial_segments = 4
+	cap.mesh = cone
+	cap.material_override = slate
+	cap.rotation.y = PI * 0.25
+	cap.position = hatch + Vector3(0, top + 2.4 + 1.1, 0)
+	node.add_child(cap)
 
 
 static func _keep_box(parent: Node3D, size: Vector3, pos: Vector3, mat: Material, name := "") -> MeshInstance3D:

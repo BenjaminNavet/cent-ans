@@ -8,6 +8,7 @@
   "properties": {
     "description": {"type": "string"},
     "cycle_blend_s": {"type": "number", "minimum": 0.0, "maximum": 0.6},
+    "role_blend_s": {"type": "number", "minimum": 0.0, "maximum": 0.6},
     "role_clips": {
       "type": "object",
       "additionalProperties": false,

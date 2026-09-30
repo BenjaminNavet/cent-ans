@@ -40,6 +40,9 @@ uniform vec2 flag_wave_speed = vec2(2.5, 7.5);
 uniform float flag_ripple = 0.0;
 uniform vec4 flag_gait_wind = vec4(0.0);
 uniform float flag_wind_scale = 1.0;
+// NT10 : fondu au changement de clip du porteur (même empaquetage de INSTANCE_CUSTOM.y que le
+// shader skinné, `custom_fade` = 1) ; 0 = changement sec.
+uniform float role_blend = 0.0;
 
 varying float v_fold;
 varying float v_far;
@@ -49,6 +52,12 @@ varying float v_full;
 
 int pick(ivec4 s, int i) {
 	return i == 0 ? s.x : (i == 1 ? s.y : (i == 2 ? s.z : s.w));
+}
+
+// AN1b : jeu jusqu'à 8 clips (emplacement i : composante i % 4, octet i / 4), comme le shader
+// skinné (NT10 : `pick` seul lisait un indice faux dès 5 clips dans le jeu, NT7).
+int pick_clip(ivec4 s, int i) {
+	return (pick(s, i & 3) >> ((i >> 2) * 8)) & 255;
 }
 
 void clip_rows(int clip, float t, out int r0, out int r1, out float f) {
@@ -87,9 +96,9 @@ void vertex() {
 	float gait = 0.0;
 	if (skinned) {
 		int n = max(clip_set_size, 1);
-		int slot = int(mod(inst.y, float(n)));
+		int slot = int(mod(mod(inst.y, 32.0), float(n)));
 		gait = slot == 0 ? flag_gait_wind.x : (slot == 1 ? flag_gait_wind.y : (slot == 2 ? flag_gait_wind.z : flag_gait_wind.w));
-		int clip = pick(clip_set, slot);
+		int clip = pick_clip(clip_set, slot);
 		int r0;
 		int r1;
 		float f;
@@ -97,6 +106,17 @@ void vertex() {
 		vec4 a = bone_row(0, r0, r1, f);
 		vec4 b = bone_row(1, r0, r1, f);
 		vec4 c = bone_row(2, r0, r1, f);
+		if (inst.y >= 32.0 && role_blend > 0.001) {
+			int pclip = int(mod(floor(inst.y / 32.0), 128.0) + 0.5) - 1;
+			float since = mod(anim_time - floor(inst.y / 4096.0) / 32.0, 64.0);
+			float k = smoothstep(0.0, role_blend, since);
+			if (pclip >= 0 && k < 1.0) {
+				clip_rows(pclip, anim_time - inst.x, r0, r1, f);
+				a = mix(bone_row(0, r0, r1, f), a, k);
+				b = mix(bone_row(1, r0, r1, f), b, k);
+				c = mix(bone_row(2, r0, r1, f), c, k);
+			}
+		}
 		vec4 p = vec4(pole_top, 1.0);
 		top = vec3(dot(a, p), dot(b, p), dot(c, p));
 		axis = normalize(vec3(dot(a.xyz, pole_axis), dot(b.xyz, pole_axis), dot(c.xyz, pole_axis)));
