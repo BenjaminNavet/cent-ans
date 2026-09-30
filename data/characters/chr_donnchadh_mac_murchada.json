@@ -36,6 +36,11 @@
     "trait_brave"
   ],
   "piety": 35,
+  "family": {
+    "children": [
+      "chr_domhnall_mac_domhnaill_mac_murchada"
+    ]
+  },
   "starting_location": "prov_leinster",
   "status": "at_court",
   "description": "Élu roi de Leinster en 1328 ; emprisonné à Dublin par les Anglais, il s'évade en janvier 1331 et mène depuis une guérilla dans les montagnes de Wicklow, capturant Clonmore et Arklow. Descendant de Diarmait Mac Murchada.",

@@ -9,6 +9,7 @@
   "government": "kingdom",
   "playable": true,
   "ruler": "chr_donnchadh_mac_murchada",
+  "heir": "chr_domhnall_mac_domhnaill_mac_murchada",
   "capital": "prov_leinster",
   "capital_city": "Ferns",
   "religion": "rel_catholic",
