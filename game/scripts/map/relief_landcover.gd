@@ -34,6 +34,7 @@ var _map_dir: String
 var _detail_scale: float = 1.5
 var _shade: Image
 var _wet: Image
+var _colormap: Image
 var _t0: int = 0
 var _task: int = -1
 
@@ -43,6 +44,7 @@ var _task: int = -1
 static func apply(material: ShaderMaterial, map_data: MapData) -> void:
 	material.set_shader_parameter("has_relief_shade", false)
 	material.set_shader_parameter("has_wetlands", false)
+	material.set_shader_parameter("has_colormap", false)
 	var loader := ReliefLandcover.new()
 	loader._material = material
 	loader._map_data = map_data
@@ -69,6 +71,7 @@ func _load() -> void:
 	_wet = load_wetlands_gpu(_map_dir)
 	if _wet == null:
 		_wet = _load_image(_map_dir, WETLANDS_FILE, Image.FORMAT_RGB8)
+	_colormap = load_colormap(_map_dir)
 	_finish.call_deferred()
 
 
@@ -83,9 +86,13 @@ func _finish() -> void:
 	if _wet != null:
 		_material.set_shader_parameter("wetlands", ImageTexture.create_from_image(_wet))
 	_material.set_shader_parameter("has_wetlands", _wet != null)
+	if _colormap != null:
+		_material.set_shader_parameter("colormap", ImageTexture.create_from_image(_colormap))
+	_material.set_shader_parameter("has_colormap", _colormap != null)
 	_map_data.timings["relief_landcover_ms"] = Time.get_ticks_msec() - _t0
 	_shade = null
 	_wet = null
+	_colormap = null
 	_loaders.erase(self)
 
 
@@ -116,6 +123,13 @@ static func load_bc5(map_dir: String) -> Image:
 ## OMR-R2 : zones humides en BC1 (`map.json.wetlands_gpu`) ; null sans copie GPU (repli PNG).
 static func load_wetlands_gpu(map_dir: String) -> Image:
 	return load_gpu_copy(map_dir, _map_meta(map_dir).get("wetlands_gpu"))
+
+
+## SS2 (ADR 0141) : carte de couleur du sol en BC1 avec mipmaps (`map.json.colormap.bc1`) ; null
+## sans copie (ancien rendu procédural).
+static func load_colormap(map_dir: String) -> Image:
+	var colormap: Variant = _map_meta(map_dir).get("colormap")
+	return load_gpu_copy(map_dir, colormap.get("bc1") if colormap is Dictionary else null)
 
 
 ## Copie GPU décrite par `entry` (format, taille, mipmaps, parts zlib) : parts lues et décompressées

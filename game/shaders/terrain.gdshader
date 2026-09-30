@@ -322,6 +322,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
+#include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0141)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -565,6 +566,7 @@ void fragment() {
 	n = normalize(vec3(n.x + dn.x * dstrength, n.y, n.z - dn.y * dstrength));
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
 	fp_parcels(p, uv, footprint, grad_m, slope, hc, s, lu, terroir, open_w, w_forest / max(wsum, 1e-3), col, roughness, n);  // ZG5b
+	sg_apply(uv, footprint, snow, land_f, col);  // SS2
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
