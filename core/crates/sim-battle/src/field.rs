@@ -11,7 +11,7 @@ use crate::relief;
 use crate::rng::BattleRng;
 use crate::scale::FieldSize;
 pub use crate::scale::GRID_RESOLUTION;
-use crate::setup::BattleSeason;
+use crate::setup::{BattleSeason, CrossingStructure};
 use crate::site::{
     self, Coast, FieldSite, Ground, Obstacle, Occupied, SiteFeatures, Village, HEDGE_COVER_REACH,
     OBSTACLE_REACH,
@@ -234,6 +234,10 @@ pub struct Battlefield {
     /// EP6: hamlets, mills, church, manor, plots, props and the camps.
     #[serde(default)]
     pub decor: crate::decor::Decor,
+    /// RC2: the field is a campaign river crossing (its single passage is
+    /// the only bridge or ford of the main river).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crossing: Option<CrossingStructure>,
 }
 
 fn default_terrain() -> Terrain {
@@ -300,7 +304,7 @@ impl Battlefield {
         weather: Weather,
         rng: &mut BattleRng,
     ) -> Self {
-        let mut field = Self::generate_base(size, terrain, river, weather, rng);
+        let mut field = Self::generate_base(size, terrain, river, None, weather, rng);
         field.finish_water(rng);
         field
     }
@@ -321,7 +325,22 @@ impl Battlefield {
         weather: Weather,
         rng: &mut BattleRng,
     ) -> Self {
-        let mut field = Self::generate_base(size, site.terrain, site.river, weather, rng);
+        Self::generate_site_crossing(site, None, size, weather, rng)
+    }
+
+    /// [`Self::generate_site_sized`] at a campaign river crossing (RC2, ADR
+    /// 0141): with `crossing`, the main river runs between the battle lines
+    /// with that single passage near the centre (drawn from a derived
+    /// stream: `rng` advances exactly as without it); `None` is the plain
+    /// site, draw for draw.
+    pub fn generate_site_crossing(
+        site: &FieldSite,
+        crossing: Option<CrossingStructure>,
+        size: FieldSize,
+        weather: Weather,
+        rng: &mut BattleRng,
+    ) -> Self {
+        let mut field = Self::generate_base(size, site.terrain, site.river, crossing, weather, rng);
         field.season = site.season;
         let mut stream = rng.derive(SITE_STREAM);
         let parts: Vec<Zone> = field
@@ -398,6 +417,7 @@ impl Battlefield {
         size: FieldSize,
         terrain: Terrain,
         river: bool,
+        crossing: Option<CrossingStructure>,
         weather: Weather,
         rng: &mut BattleRng,
     ) -> Self {
@@ -470,7 +490,17 @@ impl Battlefield {
         // draws above are the pre-EP3 ones).
         let mut hydro_stream = rng.derive(hydro::HYDRO_STREAM);
         let water_rules = hydro::WaterRules::bundled();
-        if let Some(r) = river_def.as_mut() {
+        if let Some(structure) = crossing {
+            // RC2: the crossing's river replaces the drawn one (the draws
+            // above still happen: `rng` is unchanged).
+            let mut stream = rng.derive(hydro::CROSSING_STREAM);
+            river_def = Some(hydro::crossing_river(
+                structure,
+                &size,
+                water_rules,
+                &mut stream,
+            ));
+        } else if let Some(r) = river_def.as_mut() {
             hydro::shape_river(r, terrain, width, water_rules, &mut hydro_stream);
         }
         let mut heights = Vec::with_capacity(nx * nz);
@@ -550,6 +580,7 @@ impl Battlefield {
             oxbows: Vec::new(),
             roads: Vec::new(),
             decor: Default::default(),
+            crossing,
         };
         hydro::draw_streams(&mut field, water_rules, &mut hydro_stream);
         field

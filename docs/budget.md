@@ -213,3 +213,14 @@ NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
 | 2026-09-30 | OpenRouter | SR3 : planche de référence sergeant (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,28 $ |
 | 2026-09-30 | OpenRouter | SR3 : planche de référence militia (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,35 $ |
 | 2026-09-30 | OpenRouter | SR3 : planche de référence knight_mounted (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,42 $ |
+
+## Fleuves et rivières RC (30/09) — plafond propre de 5 $ (matières d'eau Nano Banana 2, ADR 0141)
+
+Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot RC5 : 4 matières
+(`sea`, `ocean`, `river_large`, `river_small`) × `google/gemini-3.1-flash-image` (~0,078 $ l'image),
+reprises éventuelles comprises : ~0,62 $ prévu. Plafond vérifié par `data/art/water_materials.yaml`
+(bloc `budget`) avant chaque appel payant.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul RC |
+|---|---|---|---|---|---|
+| 2026-09-30 | — | RC5 : squelette, prompts et essai à blanc (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |

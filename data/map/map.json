@@ -148,5 +148,24 @@
     "part_bytes": [
       22020096
     ]
+  },
+  "colormap": {
+    "bc1": {
+      "format": "dxt1",
+      "size_px": [
+        14336,
+        12288
+      ],
+      "mipmaps": true,
+      "bytes": 117440544,
+      "compression": "deflate",
+      "pattern": "colormap_bc1_{part}.bin",
+      "part_bytes": [
+        29360136,
+        29360136,
+        29360136,
+        29360136
+      ]
+    }
   }
 }

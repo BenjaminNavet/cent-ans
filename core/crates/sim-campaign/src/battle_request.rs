@@ -543,11 +543,16 @@ impl CampaignState {
         let defender = movement::coalition_army(self, &defenders).expect("live battle");
         let province = data.provinces.get(&request.province);
         let player_side = self.player_side_of(data, request);
+        // RC: a battle across a river near a bridge, ford or ferry.
+        let crossing =
+            crate::river_crossing::crossing_site(self, data, &request.attacker, &request.defender)
+                .map(|site| site.battle_crossing());
         let mut setup = BattleSetup {
             province: request.province.to_string(),
             province_name: province_name(data, &request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),
-            river: province.is_some_and(|p| !p.rivers.is_empty()),
+            river: crossing.is_some() || province.is_some_and(|p| !p.rivers.is_empty()),
+            crossing,
             season: battle_season(self.season),
             coastal: province.is_some_and(|p| p.coastal),
             village: None,
@@ -813,6 +818,7 @@ impl CampaignState {
         let mut defender = side_setup(self, data, &request.attacker, &garrison);
         defender.army = String::new();
         let mut setup = BattleSetup {
+            crossing: None,
             province: request.province.to_string(),
             province_name: province_name(data, &request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),

@@ -10,6 +10,9 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 // Hauteur : dans les tuiles de relief fin (lit creusé, river_bed.gdshaderinc), l'eau descend de
 // `water_sink` sous la berge ; ailleurs elle flotte de `lift_base + lift_per_distance × d`
 // au-dessus du relief (LOD grossier qui ne suit pas le fond de vallée).
+// Lot SS3 (ADR 0142) : mode « nappe » (`sheet`) pour les lacs de LakesRenderer : sommets posés
+// tels quels (pas d'élargissement ni de lit creusé), flottant du même décalage que les fleuves,
+// rides sans courant, opacité `sheet_alpha`, pas de relais du réseau fin.
 
 #include "res://shaders/river_bed.gdshaderinc"
 // Lot CM2 : fleuves à l'encre bleue en vue parchemin.
@@ -29,6 +32,22 @@ uniform float sky_reflect = 0.55;
 uniform vec3 foam_color : source_color = vec3(0.80, 0.82, 0.78);
 uniform float min_px = 1.6;
 uniform float thin_fade = 0.7;
+// RC (ADR 0141) : largeur écran minimale × facteur selon l'importance (UV2.y, 0-6) : au dézoom,
+// les grands fleuves restent plus épais que leurs affluents.
+// Importances 0-3 dans `importance_px_lo`, 4-6 dans `importance_px_hi`.
+uniform vec4 importance_px_lo = vec4(1.0);
+uniform vec3 importance_px_hi = vec3(1.0);
+
+float importance_px_scale(float importance) {
+	int i = clamp(int(importance + 0.5), 0, 6);
+	return i < 4 ? importance_px_lo[i] : importance_px_hi[i - 4];
+}
+// RC : liseré de berge à l'encre (contraste avec le relief, lecture cartographique au dézoom).
+uniform vec3 bank_ink_color : source_color = vec3(0.05, 0.13, 0.20);
+uniform float bank_ink_strength = 0.0;
+// RC : fondu des rivières mineures avec la distance (x = début, y = fin, unités monde ; y = 0 : aucun).
+uniform vec2 distance_fade = vec2(0.0, 0.0);
+uniform float far_alpha = 1.0;
 uniform float water_sink = 0.022;
 uniform float lift_base = 0.012;
 uniform float lift_per_distance = 0.0009;
@@ -44,7 +63,15 @@ uniform float depth_full = 0.05;
 uniform vec4 fords[32];
 uniform int ford_count = 0;
 
+uniform bool sheet = false;
+uniform float sheet_alpha = 0.88;
+uniform float sheet_deep = 0.75;
+
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
+// RC5 (ADR 0141) : détail tuilable Nano Banana 2 (`river_large` / `river_small`) le long du
+// courant ; force 0 (défaut, texture absente) = rendu procédural seul.
+#include "res://shaders/water_detail.gdshaderinc"
+uniform float water_detail_flow = 0.05;
 
 varying float v_alpha;
 varying float v_side;
@@ -52,6 +79,7 @@ varying vec2 v_flow;
 varying vec3 v_world;
 varying float v_carved;
 varying float v_width;
+varying float v_far;
 
 float hash21(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -72,20 +100,34 @@ void vertex() {
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 view_pos = (VIEW_MATRIX * vec4(world, 1.0)).xyz;
 	float dist = max(length(view_pos), 0.01);
-	float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
-	float true_px = UV.x / world_per_px;
-	float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
-	float width = UV.x * mix(1.0, carved_overlap, carved);
-	float half_w = 0.5 * max(width, min_px * world_per_px);
-	VERTEX += NORMAL * half_w;
-	VERTEX.y += mix(lift_base + lift_per_distance * dist, -water_sink, carved);
-	v_alpha = mix(1.0, clamp(true_px / min_px, 0.25, 1.0), thin_fade);
-	v_side = UV.y * half_w / max(0.5 * UV.x, 1e-4);
-	v_flow = vec2(UV2.x, UV.y * 0.5 * UV.x);
-	v_carved = carved;
-	v_width = UV.x;
-	v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	NORMAL = vec3(0.0, 1.0, 0.0);
+	if (sheet) {
+		VERTEX.y += lift_base + lift_per_distance * dist;
+		v_alpha = 1.0;
+		v_far = 1.0;
+		v_side = 0.0;
+		v_flow = world.xz * vec2(0.35, 0.5);
+		v_carved = 0.0;
+		v_width = 0.0;
+		v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		NORMAL = vec3(0.0, 1.0, 0.0);
+	} else {
+		float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
+		float true_px = UV.x / world_per_px;
+		float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
+		float width = UV.x * mix(1.0, carved_overlap, carved);
+		float imp_px = min_px * importance_px_scale(UV2.y);
+		float half_w = 0.5 * max(width, imp_px * world_per_px);
+		VERTEX += NORMAL * half_w;
+		VERTEX.y += mix(lift_base + lift_per_distance * dist, -water_sink, carved);
+		v_alpha = mix(1.0, clamp(true_px / imp_px, 0.25, 1.0), thin_fade);
+		v_far = distance_fade.y > 0.0 ? mix(1.0, far_alpha, smoothstep(distance_fade.x, distance_fade.y, dist)) : 1.0;
+		v_side = UV.y * half_w / max(0.5 * UV.x, 1e-4);
+		v_flow = vec2(UV2.x, UV.y * 0.5 * UV.x);
+		v_carved = carved;
+		v_width = UV.x;
+		v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		NORMAL = vec3(0.0, 1.0, 0.0);
+	}
 }
 
 void fragment() {
@@ -102,11 +144,11 @@ void fragment() {
 	float depth_t = clamp(thickness / depth_full, 0.0, 1.0);
 	// Loin (non creusé) : profondeur fictive décroissant vers les bords du ruban.
 	float fake_depth = 1.0 - smoothstep(0.35, 1.05, edge);
-	float deep = mix(fake_depth, depth_t, v_carved);
+	float deep = sheet ? sheet_deep : mix(fake_depth, depth_t, v_carved);
 
 	// Écoulement : deux couches de bruit étirées dans le sens du courant, décalées dans le temps.
 	vec2 q = vec2(v_flow.x * 0.8, v_flow.y * 2.2) * ripple_scale;
-	float t = TIME * flow_speed * ripple_scale;
+	float t = TIME * flow_speed * ripple_scale * (sheet ? 0.25 : 1.0);
 	float n1 = vnoise(q + vec2(-t, 0.0));
 	float n2 = vnoise(q * 1.9 + vec2(-t * 1.6, 3.7));
 	float nx = vnoise(q + vec2(-t + 0.07, 0.0)) - n1;
@@ -116,7 +158,7 @@ void fragment() {
 	float ford = 0.0;
 	float riffle = 0.0;
 	// Gués : seulement de près (au loin, ils font moins d'un pixel).
-	int fords_here = fwidth(v_flow.x) < 0.5 ? ford_count : 0;
+	int fords_here = (!sheet && fwidth(v_flow.x) < 0.5) ? ford_count : 0;
 	for (int i = 0; i < 32; i++) {
 		if (i >= fords_here) {
 			break;
@@ -135,11 +177,16 @@ void fragment() {
 
 	vec3 col = mix(shallow_color, deep_color, deep);
 	col *= 0.92 + 0.16 * n2;
+	// RC5 : coordonnées du courant (abscisse aval, travers) : la texture suit le lit.
+	vec2 rc_uv = vec2(v_flow.x, v_flow.y) * water_detail_scale;
+	col = water_detail_tint(col, rc_uv);
 	// Écume légère au contact des berges et sur les remous du gué.
 	float bank_foam = smoothstep(0.82, 1.0, edge) * (0.5 + 0.5 * n2) * (1.0 - v_carved) * 0.25;
 	float contact = v_carved * (1.0 - smoothstep(0.0, 0.006, thickness)) * 0.5;
 	float foam = clamp(bank_foam + contact + riffle, 0.0, 1.0);
 	col = mix(col, foam_color, foam * 0.7);
+	// RC : liseré d'encre sur les bords du ruban (pas dans le lit creusé, où la berge suffit).
+	float ink = smoothstep(0.6, 0.92, edge) * bank_ink_strength * (1.0 - v_carved);
 
 	ALBEDO = col;
 	// Rides trop fines pour l'écran : surface plus mate (pas de scintillement du soleil).
@@ -150,15 +197,21 @@ void fragment() {
 	// Rides atténuées quand elles deviennent plus fines que le pixel (pas de scintillement).
 	float ripple_fade = 1.0 - smoothstep(0.08, 0.45, fwidth(q.x));
 	vec3 n = normalize(vec3(-nx * ripple_strength * 10.0 * ripple_fade, 1.0, -ny * ripple_strength * 10.0 * ripple_fade));
+	n = normalize(n + (water_detail_normal_ws(v_flow, TIME, vec2(-water_detail_flow, 0.0)) - vec3(0.0, 1.0, 0.0)) * ripple_fade);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
 	ALBEDO = mix(ALBEDO, sky_color, clamp(fresnel * sky_reflect + 0.12, 0.0, 0.8) * (1.0 - foam));
+	ALBEDO = mix(ALBEDO, bank_ink_color, ink);
 	// Bord : fondu (ruban) ou contact avec la berge (lit creusé : l'eau finit sur la pente).
-	float soft = 1.0 - smoothstep(0.7, 1.0, edge) * (1.0 - v_carved);
+	float soft = 1.0 - smoothstep(mix(0.7, 0.9, bank_ink_strength), 1.0, edge) * (1.0 - v_carved);
 	float carved_alpha = mix(0.7, 0.97, smoothstep(0.0, 0.35, depth_t));
-	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha;
+	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha * v_far;
 	ALPHA = clamp(alpha * (1.0 - ford * 0.35), 0.0, 1.0);
-	ALPHA *= 1.0 - fine_zone_mask(v_world.xz);  // ZG5b : relais du réseau fin
+	if (sheet) {
+		ALPHA = sheet_alpha;
+	} else {
+		ALPHA *= 1.0 - fine_zone_mask(v_world.xz);  // ZG5b : relais du réseau fin
+	}
 	float pm_w = pm_weight();  // CM2 : trait d'encre bleue, sans reflet
 	ALBEDO = mix(ALBEDO, pm_river_ink * (1.0 - pm_emission), pm_w);
 	EMISSION = pm_river_ink * pm_emission * pm_emission_gain * pm_w;

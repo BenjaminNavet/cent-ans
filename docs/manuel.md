@@ -188,7 +188,8 @@ un point quelconque de la carte, ou dans une colonie (stationnée, en garnison o
 - **Stationner** : sur une colonie amie, l'armée **stationne** : elle peut y laisser des unités en
   garnison et en ressortir dans la même saison si elle a encore des points.
 - **Fleuves et gués** : les grands fleuves (Loire, Seine, Somme, Rhône, Saône, Garonne, Dordogne, Meuse,
-  Escaut, Rhin, Tamise…) ne se franchissent qu'aux **ponts et gués** de 1337 (Orléans, Blois, Tours,
+  Escaut, Rhin, Tamise…) et les grandes rivières du théâtre de la guerre (Marne, Yonne, Vienne, Charente,
+  Lot, Tarn, Allier, Cher, Moselle, Severn, Trent) ne se franchissent qu'aux **ponts et gués** de 1337 (Orléans, Blois, Tours,
   Avignon, Pont-Saint-Esprit, London Bridge, Blanchetaque sur la Somme…), aux villes bâties sur leur rive et
   là où une ancienne voie romaine passe près d'une ville. Les rivières secondaires ralentissent seulement.
   Le chemin fait donc parfois un détour jusqu'au pont le plus proche.

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/river_crossings_rules.schema.json",
+  "title": "Règles des batailles de passage",
+  "description": "Fichier data/rules/river_crossings.json (chantier RC, ADR 0141).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "search_radius_km": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+    "min_width_px": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Largeur du lit (px carte, champ width de crossings_px.json) en dessous de laquelle un passage n'a aucun effet."
+    },
+    "full_width_px": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Largeur du lit à partir de laquelle le passage a son plein effet ; interpolation linéaire entre les deux."
+    },
+    "attacker_factor": { "$ref": "#/$defs/by_structure" },
+    "defender_ranged_factor": { "$ref": "#/$defs/by_structure" }
+  },
+  "required": ["search_radius_km", "attacker_factor", "defender_ranged_factor"],
+  "additionalProperties": false,
+  "$defs": {
+    "factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 3 },
+    "by_structure": {
+      "type": "object",
+      "properties": {
+        "stone_bridge": { "$ref": "#/$defs/factor" },
+        "wood_bridge": { "$ref": "#/$defs/factor" },
+        "boat_bridge": { "$ref": "#/$defs/factor" },
+        "ferry": { "$ref": "#/$defs/factor" },
+        "ford": { "$ref": "#/$defs/factor" }
+      },
+      "required": ["stone_bridge", "wood_bridge", "boat_bridge", "ferry", "ford"],
+      "additionalProperties": false
+    }
+  }
+}
