@@ -1,0 +1,91 @@
+{
+  "id": "evt_prise_d_algesiras",
+  "title": "La prise d'Algésiras",
+  "text": "Depuis l'été 1342, Alphonse XI assiège Algésiras avec des croisés venus de toute la Chrétienté, des galères génoises et l'argent du pape. Affamée, la ville capitule le 26 mars 1344 ; la garnison mérinide gagne Gibraltar, qui tient encore, ou l'Afrique.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1344,
+      "season": "spring"
+    },
+    "until_year": 1345,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_castile"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_marinids"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_marinids",
+        "province": "prov_algeciras"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_castile"
+  },
+  "options": [
+    {
+      "text": "Pousser le siège jusqu'à la reddition",
+      "effects": [
+        {
+          "type": "transfer_province",
+          "province": "prov_algeciras",
+          "from": "fac_marinids"
+        },
+        {
+          "type": "treasury",
+          "amount": -5000
+        },
+        {
+          "type": "prestige",
+          "amount": 15
+        },
+        {
+          "type": "piety",
+          "amount": 10
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_marinids",
+          "amount": -15
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_marinids",
+          "amount": -20,
+          "reason": "Perte d'Algésiras"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Accepter tribut et trêve de dix ans",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 3000
+        },
+        {
+          "type": "prestige",
+          "amount": -5
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "siege",
+  "historical_date": {
+    "value": "1344-03-26"
+  },
+  "sources": [
+    "Siège d'Algésiras (1342-1344)",
+    "Alphonse XI de Castille",
+    "Joseph F. O'Callaghan, The Gibraltar Crusade, 2011"
+  ]
+}

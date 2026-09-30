@@ -1,0 +1,72 @@
+{
+  "id": "evt_zakonik",
+  "title": "Le Zakonik de Dušan",
+  "text": "Réunie à Skopje, l'assemblée des seigneurs et des prélats adopte le code de l'empereur : 135 articles fixent les droits de l'Église, des nobles et des paysans, punissent les juges vénaux et l'hérésie. Tout le royaume, dit le préambule, doit vivre sous une seule loi.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1349,
+      "season": "spring"
+    },
+    "until_year": 1350,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_serbia"
+      },
+      {
+        "type": "ruler_is",
+        "faction": "fac_serbia",
+        "character": "chr_stefan_dusan"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_serbia"
+  },
+  "options": [
+    {
+      "text": "Promulguer le code dans tout l'empire",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "all",
+          "amount": -10
+        },
+        {
+          "type": "add_trait",
+          "character": "ruler",
+          "trait": "trait_just"
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "text": "Ménager les grands seigneurs",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "loyalty",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1349-05-21"
+  },
+  "sources": [
+    "Code de Dušan",
+    "Étienne Dušan",
+    "John V. A. Fine, The Late Medieval Balkans, 1987"
+  ]
+}

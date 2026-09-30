@@ -1,0 +1,96 @@
+{
+  "id": "evt_siege_de_caffa",
+  "title": "Le siège de Caffa",
+  "text": "Djanibek assiège à nouveau [[cdx_caffa|Caffa]], où se sont réfugiés les marchands chassés de Tana. Mais la peste ravage son armée ; selon le notaire Gabriel de Mussis, les Tatars lancent leurs morts par-dessus les murs avant de lever le camp. Les galères génoises emporteront le mal vers la mer Noire et la Méditerranée.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "summer"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_golden_horde"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_genoa"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_genoa",
+        "province": "prov_caffa"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_golden_horde"
+  },
+  "options": [
+    {
+      "text": "Presser le siège malgré l'épidémie",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "health",
+          "province": "prov_caffa",
+          "amount": -20
+        },
+        {
+          "type": "health",
+          "province": "prov_crimee",
+          "amount": -15
+        },
+        {
+          "type": "devastation",
+          "province": "prov_caffa",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_genoa",
+          "amount": -20,
+          "reason": "Siège de Caffa"
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Lever le camp et traiter avec les Génois",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -5
+        },
+        {
+          "type": "health",
+          "province": "prov_crimee",
+          "amount": -10
+        },
+        {
+          "type": "treasury",
+          "amount": 2000
+        }
+      ],
+      "ai_weight": 2
+    }
+  ],
+  "map_scene": "plague",
+  "historical_date": {
+    "value": "1346",
+    "uncertain": true,
+    "note": "Siège de 1345-1346 ; le récit des cadavres lancés est de Gabriel de Mussis (vers 1348)."
+  },
+  "sources": [
+    "Siège de Caffa",
+    "Peste noire",
+    "Gabriel de Mussis, Historia de morbo",
+    "Mark Wheelis, « Biological Warfare at the 1346 Siege of Caffa », Emerging Infectious Diseases, 2002"
+  ]
+}

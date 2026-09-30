@@ -1,0 +1,92 @@
+{
+  "id": "evt_desastre_de_kairouan",
+  "title": "Le désastre de Kairouan",
+  "text": "Maître de Tunis depuis l'automne, [[cdx_abu_al_hasan_ali|Abu l-Hasan]] a voulu soumettre les tribus arabes de l'Ifriqiya. Elles l'écrasent sous Kairouan, où il reste assiégé ; le bruit de sa mort court jusqu'à Fès, et son fils Abu Inan se fait proclamer sultan à Tlemcen.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1348,
+      "season": "spring"
+    },
+    "until_year": 1349,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_marinids"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_hafsids"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_abu_l_hasan_ali"
+      },
+      {
+        "type": "ruler_is",
+        "faction": "fac_marinids",
+        "character": "chr_abu_l_hasan_ali"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_marinids"
+  },
+  "options": [
+    {
+      "text": "Tenir Kairouan et rallier les tribus à prix d'or",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -4000
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_tlemcen",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "prov_fes",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Abandonner l'Ifriqiya aux Hafsides",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -20
+        },
+        {
+          "type": "unrest",
+          "province": "prov_tlemcen",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_hafsids",
+          "amount": 15,
+          "reason": "Retrait mérinide d'Ifriqiya"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1348-04",
+    "note": "Bataille livrée près de Kairouan en avril 1348 (jour discuté)."
+  },
+  "sources": [
+    "Abu al-Hasan Ali ibn Othman",
+    "Abu Inan Faris",
+    "Ibn Khaldoun, Histoire des Berbères (trad. de Slane)"
+  ]
+}

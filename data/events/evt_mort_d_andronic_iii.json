@@ -1,0 +1,97 @@
+{
+  "id": "evt_mort_d_andronic_iii",
+  "title": "La mort d'Andronic III",
+  "text": "[[cdx_andronic_iii|Andronic III]] meurt de fièvre à Constantinople ; son fils Jean V n'a que neuf ans. L'impératrice Anne de Savoie, le patriarche et le mégaduc Apokaukos écartent le grand domestique [[cdx_jean_cantacuzene|Jean Cantacuzène]], qui se fait proclamer empereur à Didymotique : la guerre civile déchire l'[[cdx_empire_byzantin|Empire]].",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1341,
+      "season": "summer"
+    },
+    "until_year": 1341,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_byzantium"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_andronikos_iii"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_byzantium"
+  },
+  "options": [
+    {
+      "text": "Soutenir la régence d'Anne de Savoie",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_andronikos_iii"
+        },
+        {
+          "type": "treasury",
+          "amount": -3000
+        },
+        {
+          "type": "unrest",
+          "province": "prov_adrianople",
+          "amount": 20
+        },
+        {
+          "type": "unrest",
+          "province": "prov_thrace",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "prov_thessalonica",
+          "amount": 15
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "text": "Se rallier à Cantacuzène et à l'aristocratie",
+      "effects": [
+        {
+          "type": "kill_character",
+          "id": "chr_andronikos_iii"
+        },
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_constantinople",
+          "amount": 15
+        },
+        {
+          "type": "unrest",
+          "province": "prov_thessalonica",
+          "amount": 20
+        },
+        {
+          "type": "devastation",
+          "province": "prov_thrace",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "map_scene": "revolt",
+  "historical_date": {
+    "value": "1341-06-15",
+    "note": "Cantacuzène est proclamé empereur à Didymotique le 26 octobre 1341."
+  },
+  "sources": [
+    "Andronic III Paléologue",
+    "Guerre civile byzantine de 1341-1347",
+    "Donald M. Nicol, The Last Centuries of Byzantium, 1993"
+  ]
+}
