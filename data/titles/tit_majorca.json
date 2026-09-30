@@ -30,7 +30,7 @@
     {
       "id": "obj_majorca_hold",
       "title": "Sauver le royaume",
-      "description": "Jacques III doit conserver son royaume face aux visées de son cousin Pierre IV d'Aragon.",
+      "description": "Jacques III doit conserver son royaume, des Baléares à Montpellier, face aux visées de son cousin Pierre IV d'Aragon et du roi de France.",
       "condition": {
         "kind": "hold_title",
         "title": "tit_majorca"
@@ -42,17 +42,6 @@
       "description": "Ne jamais rendre hommage lige à la couronne d'Aragon.",
       "condition": {
         "kind": "be_independent"
-      }
-    },
-    {
-      "id": "obj_majorca_montpellier",
-      "title": "Tenir Montpellier",
-      "description": "Jacques III est seigneur de Montpellier en fief du roi de France, qui convoite la ville et l'achètera en 1349.",
-      "condition": {
-        "kind": "hold_provinces",
-        "provinces": [
-          "prov_montpellier"
-        ]
       }
     },
     {
