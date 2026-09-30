@@ -61,6 +61,7 @@ UNITS = {
 KEY_LIVERY = (75.0, 170.0)  # saturated green
 KEY_CLOTH = (190.0, 265.0)  # saturated blue
 KEY_SAT = 0.28
+CLOSE_STEPS = 8  # px at the 2048 source: dirt spots inside a key colour zone are tinted too
 TRI_CAP = (11900, 1350, 260)  # battle_fine_figures.TRI_CAP (foot soldiers)
 TEX = 1024
 EQUIP_TRIS = {"longbowman": 310}  # level-0 equipment triangles (measured)
@@ -110,6 +111,27 @@ def _srgb_to_linear(c):
     return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
 
 
+def _grow(mask, steps, value):
+    """Binary dilation (`value` True) or erosion (False) by `steps` 3x3 passes."""
+    import numpy as np
+
+    out = mask.copy()
+    for _ in range(steps):
+        pad = np.pad(out, 1, constant_values=not value)
+        acc = out.copy()
+        for dy in (0, 1, 2):
+            for dx in (0, 1, 2):
+                win = pad[dy : dy + out.shape[0], dx : dx + out.shape[1]]
+                acc = (acc | win) if value else (acc & win)
+        out = acc
+    return out
+
+
+def close_mask(mask, steps=CLOSE_STEPS):
+    """Morphological closing: dirt spots inside a key-coloured garment join the zone."""
+    return _grow(_grow(mask, steps, True), steps, False)
+
+
 def texture_images(obj):
     """(base colour image, metallic-roughness image or None) of the TRELLIS material."""
     base, orm = None, None
@@ -142,6 +164,8 @@ def source_maps(base, orm):
     hue, sat, val = _hue_sat(src)
     live = (hue >= KEY_LIVERY[0]) & (hue <= KEY_LIVERY[1]) & (sat > KEY_SAT) & (val > 0.05)
     cloth = (hue >= KEY_CLOTH[0]) & (hue <= KEY_CLOTH[1]) & (sat > KEY_SAT) & (val > 0.05)
+    live = close_mask(live)
+    cloth = close_mask(cloth) & ~live
     metal = np.zeros((h, w), dtype=bool)
     if orm is not None:
         mr = _pixels(orm)

@@ -475,9 +475,14 @@ func _figure_material(role: String, activity: String, kind: String, variant: int
 	material.set_shader_parameter("trim", livery.darkened(0.3))
 	material.set_shader_parameter("has_heraldry", false)
 	BattleSkinned.setup_material(material, kind, variant)
-	# Déplacement en shader : variante `FK_TRAVEL` (conserve `FG3_BAKED` des figurines fines).
-	var fine := material.shader != BattleSkinned.SHADER and material.shader.code.contains("#define FG3_BAKED")
-	material.shader = BattleSkinned._variant(["FG3_BAKED", "FK_TRAVEL"] if fine else ["FK_TRAVEL"])
+	# Déplacement en shader : variante `FK_TRAVEL` (conserve `FG3_BAKED` des figurines fines et
+	# `GA3_TEX` des figurines générées, GA3-L3).
+	var defines := []
+	for keep in ["FG3_BAKED", "GA3_TEX"]:
+		if material.shader != BattleSkinned.SHADER and material.shader.code.contains("#define " + keep):
+			defines.append(keep)
+	defines.append("FK_TRAVEL")
+	material.shader = BattleSkinned._variant(defines)
 	material.set_shader_parameter("livery_share", 0.4)
 	material.set_shader_parameter("plain_count", FolkModels.DRAB.size())
 	material.set_shader_parameter("plain_colors", PackedColorArray(FolkModels.DRAB))
