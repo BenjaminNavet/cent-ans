@@ -2,7 +2,7 @@
   {
     "id": "set_munster",
     "province": "prov_westphalia",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Münster",
       "local": "Münster",
@@ -25,7 +25,7 @@
       "bld_stables"
     ],
     "port": false,
-    "description": "Duché de Westphalie (archevêque de Cologne), évêchés de Münster, Paderborn et Osnabrück, comté de La Marck (Adolphe II). Villes hanséatiques de Dortmund et Soest.",
+    "description": "Cité épiscopale des princes-évêques de Münster, rattachée par simplification à la province du comté de la Marck ; ville hanséatique en essor.",
     "sources": [
       "Westphalie",
       "Principauté épiscopale de Münster",
@@ -192,7 +192,7 @@
   {
     "id": "set_hamm",
     "province": "prov_westphalia",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Hamm",
       "local": "Hamme",

@@ -2,7 +2,7 @@
   {
     "id": "set_schwerin",
     "province": "prov_mecklenburg",
-    "kind": "city",
+    "kind": "town",
     "name": {
       "display": "Schwerin",
       "local": "Swerin",
@@ -55,7 +55,7 @@
   {
     "id": "set_wismar",
     "province": "prov_mecklenburg",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Wismar",
       "local": "Wismer",
