@@ -133,12 +133,12 @@ CLIPS_NT14 = [
     clip(
         "overhead",
         "IMG_6459",
-        100,
-        280,
-        1.3,
+        96,
+        170,
+        1.2,
         False,
         "auto",
-        "raised, cut down, follow-through",
+        "raised over the head, cut down forwards, follow-through (then a second raise, unused)",
         **NT14,
     ),
     clip(
