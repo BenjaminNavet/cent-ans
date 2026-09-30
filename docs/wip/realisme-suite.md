@@ -12,10 +12,10 @@ session : ne pas la lancer ici ; fusionner vite pour la débloquer.
 ## Lots
 - [x] L1 — FC : corriger `fc2_impostors_test` (échec après fusion de main), fusion `--ff-only`.
 - [x] L2 — CR2+CR3 : acier crédible, bassinets, caparaçons drapés ; fusion.
-- [ ] L3 — CR4 cheval et lances : crinière et queue en mèches (cartes alpha), robe avec normale
+- [x] L3 — CR4 cheval et lances : crinière et queue en mèches (cartes alpha), robe avec normale
       de poil, lances d'angles et de longueurs variés, flammes en tissu ondulant ; recuisson,
       captures A/B (agent visuel unique, ≤ 30 captures).
-- [ ] L4 — Colombage `TimberFrame` (SR5, à faire) : réexport du kit Blender avec la couche en fin
+- [x] L4 — Colombage `TimberFrame` (SR5, à faire) : réexport du kit Blender avec la couche en fin
       de tableau et correction de `first_plain`, choix régional (Normandie, Île-de-France,
       Angleterre, Flandre : colombage ; Midi : pierre/torchis), toits bleus du château Kenney.
 - [x] L5 — Herbe de campagne plus lisible (d 12-20), clé `veg_max_distance` par préréglage

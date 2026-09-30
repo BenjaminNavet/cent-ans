@@ -12,11 +12,12 @@ Run: ``uv run --with pillow --with numpy python build_textures.py`` in this fold
 * ``timber_frame_{diff,nor,rough}.jpg`` (lot GA5): half-timbered wall (torchis/colombage) —
   procedural beam lattice (studs, rails, diagonal braces) composited over ``lime_plaster``
   (daub infill) and ``rough_wood`` (timber), both already CC0 Poly Haven sources used elsewhere
-  in this kit; no new external asset, deterministic (seeded). Not part of ``LAYERS``/the atlas
-  (see ``docs/wip/ga.md`` GA5 for why: the atlas layer index is baked into exported `.glb`
-  vertex colours by `tools/blender_scripts/kit_export.py`, so adding a layer there needs a
-  Blender-side change and re-export, out of scope for this lot). Available as a standalone
-  ``BuildingMaterials`` entry (``TimberFrame``) for future wiring.
+  in this kit; no new external asset, deterministic (seeded). Lot TF: layer 15 of ``LAYERS``
+  (``TimberFrameFar``), on framed walls of the ``low`` detail kit that has no modelled studs.
+* ``timber_daub_diff.jpg`` (lot TF): daub infill (torchis) of half-timbered panels, layer 14
+  (``TimberFrame``), under the modelled beams of the ``high`` detail kit; normals and roughness
+  are those of ``medieval_wall_01``. Layers appended after the solid ones so the indices baked
+  into older `.glb` files stay valid.
 """
 
 from pathlib import Path
@@ -39,6 +40,8 @@ LAYERS = [
     None,  # Window
     None,  # Iron
     None,  # Canvas
+    "timber_daub",  # TimberFrame (lot TF: daub infill under the modelled beams)
+    "timber_frame",  # TimberFrameFar (lot TF: painted lattice, low detail without beams)
 ]
 SLICE = 512
 
@@ -59,20 +62,28 @@ def main() -> None:
             if layer.startswith("battle/")
             else Path(f"{layer}_diff.jpg")
         )
-        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.Resampling.LANCZOS)
+        image = (
+            Image.open(path)
+            .convert("RGB")
+            .resize((SLICE, SLICE), Image.Resampling.LANCZOS)
+        )
         sheet.paste(image, (0, index * SLICE))
     sheet.save("building_albedo_array.jpg", quality=88, optimize=True)
     normals = Image.new("RGB", (SLICE, SLICE * len(LAYERS)), (128, 128, 255))
     for index, layer in enumerate(LAYERS):
         if layer is None:
             continue
-        name = "medieval_wall_01" if layer == "lime_plaster" else layer
+        name = "medieval_wall_01" if layer in ("lime_plaster", "timber_daub") else layer
         path = (
             Path("..") / f"{name}_nor.jpg"
             if name.startswith("battle/")
             else Path(f"{name}_nor.jpg")
         )
-        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.Resampling.LANCZOS)
+        image = (
+            Image.open(path)
+            .convert("RGB")
+            .resize((SLICE, SLICE), Image.Resampling.LANCZOS)
+        )
         normals.paste(image, (0, index * SLICE))
     normals.save("building_normal_array.jpg", quality=90, optimize=True)
 
@@ -112,6 +123,47 @@ def _beam_mask(size: int) -> Image.Image:
                 fill=200,
             )
     return mask.filter(ImageFilter.GaussianBlur(size * 0.004))
+
+
+def timber_daub(size: int = 2048) -> None:
+    """Daub infill of half-timbered panels (torchis, lot TF): no painted beams.
+
+    Lime plaster warmed towards ochre (clay under a worn lime wash), low-frequency earthy
+    blotches and short straw flecks; relief and normals stay those of ``medieval_wall_01``.
+    Deterministic (seeded), derived from CC0 sources only.
+    """
+    rng = np.random.default_rng(1337)
+    base = np.asarray(
+        Image.open("lime_plaster_diff.jpg")
+        .convert("RGB")
+        .resize((size, size), Image.Resampling.LANCZOS)
+    ).astype(np.float32)
+    warm = base * np.array([1.02, 0.99, 0.92], dtype=np.float32)
+    # Earthy blotches where the lime wash wore off (tileable: blurred wrapped noise).
+    noise = rng.random((size // 64, size // 64)).astype(np.float32)
+    blot = Image.fromarray((noise * 255).astype(np.uint8)).resize(
+        (size, size), Image.Resampling.BICUBIC
+    )
+    blot_arr = np.asarray(blot.filter(ImageFilter.GaussianBlur(size * 0.01))).astype(
+        np.float32
+    )
+    earth = np.clip((blot_arr / 255.0 - 0.55) * 2.2, 0.0, 1.0)[..., None] * 0.18
+    ochre = np.array([168.0, 140.0, 100.0], dtype=np.float32)
+    daub = warm * (1 - earth) + ochre * earth
+    image = Image.fromarray(daub.clip(0, 255).astype(np.uint8))
+    draw = ImageDraw.Draw(image)
+    for _ in range(size // 2):
+        x, y = rng.random(2) * size
+        angle = rng.random() * np.pi
+        length = size * (0.004 + rng.random() * 0.01)
+        dx, dy = np.cos(angle) * length, np.sin(angle) * length
+        shade = int(165 + rng.random() * 40)
+        draw.line(
+            [(x, y), (x + dx, y + dy)],
+            fill=(shade + 12, shade + 4, int(shade * 0.78)),
+            width=max(1, size // 1024),
+        )
+    image.save("timber_daub_diff.jpg", quality=88, optimize=True)
 
 
 def timber_frame(size: int = 2048) -> None:
@@ -177,5 +229,6 @@ def timber_frame(size: int = 2048) -> None:
 
 
 if __name__ == "__main__":
+    timber_daub()
     main()
     timber_frame()

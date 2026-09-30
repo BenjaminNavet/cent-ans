@@ -15,6 +15,9 @@ extends RefCounted
 const DIR := "res://assets/models/battle_skinned/"
 const FINE_DIR := "res://assets/models/battle_fine/"
 const FINE_RIG_PREFIX := "fine_"
+## NT12 : essai de mocap gratuite (CMU) reciblée sur le rig fin `human` ; `--mocap-trial` après
+## `--` ajoute ses images à la texture d'os et y repointe les clips substitués.
+const MOCAP_TRIAL_DIR := "res://assets/models/battle_fine/mocap_trial/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
@@ -31,6 +34,7 @@ static var _loaded: bool = false
 static var _meshes: Dictionary = {}
 static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
+static var mocap_trial_forced: int = -1  # NT12 : voir `mocap_trial_enabled`
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation: Dictionary = {}
@@ -245,6 +249,29 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 	# cavaliers salissent le bas des jambes du cheval et l'ourlet du caparaçon (~0,65 m).
 	mat.set_shader_parameter("weathering", sr2_weathering())
 	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
+	_setup_lance(mat, fig)
+
+
+## CR4 : lance propre au cavalier (longueur, angle, flamme) autour de la prise de repos du
+## manifeste (`prop_grip`, `prop_axis`, `prop_side`), os `Prop` du squelette de la figurine.
+static func _setup_lance(mat: ShaderMaterial, fig: Dictionary) -> void:
+	if not fig.has("prop_grip"):
+		mat.set_shader_parameter("prop_bone", -1)
+		return
+	var bones: Array = (manifest().get("rigs", {}) as Dictionary).get(str(fig.get("rig", "")), {}).get("bones", [])
+	var bone := -1
+	for i in bones.size():
+		if str(bones[i]).ends_with("Prop"):
+			bone = i
+			break
+	mat.set_shader_parameter("prop_bone", bone)
+	mat.set_shader_parameter("prop_grip", _vec3(fig["prop_grip"]))
+	mat.set_shader_parameter("prop_axis", _vec3(fig["prop_axis"]))
+	mat.set_shader_parameter("prop_side", _vec3(fig["prop_side"]))
+
+
+static func _vec3(values: Array) -> Vector3:
+	return Vector3(float(values[0]), float(values[1]), float(values[2]))
 
 
 static func manifest() -> Dictionary:
@@ -292,6 +319,79 @@ static func _merge_fine(base: Dictionary) -> void:
 		figures[fig_name] = entry
 	base["rigs"] = rigs
 	base["figures"] = figures
+	if mocap_trial_enabled():
+		_merge_mocap_trial(rigs)
+
+
+## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
+## `mocap_trial_forced` (captures A/B dans un même processus) : -1 = ligne de commande, 0/1 forcé,
+## puis `reload()`.
+static func mocap_trial_enabled() -> bool:
+	if mocap_trial_forced >= 0:
+		return fine_enabled() and mocap_trial_forced == 1
+	return fine_enabled() and OS.get_cmdline_user_args().has("--mocap-trial")
+
+
+## NT12 : vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.
+static func reload() -> void:
+	_loaded = false
+	_manifest = {}
+	_textures = {}
+	_configs = {}
+
+
+## NT12 : repointe les clips substitués du rig fin vers les images mocap, placées après les
+## images du rig (même os ; la texture est concaténée par `bone_texture`).
+static func _merge_mocap_trial(rigs: Dictionary) -> void:
+	var text := FileAccess.get_file_as_string(MOCAP_TRIAL_DIR + "manifest.json")
+	var parsed = JSON.parse_string(text) if text != "" else null
+	if not parsed is Dictionary:
+		push_warning("BattleSkinned: essai mocap sans manifeste %s" % MOCAP_TRIAL_DIR)
+		return
+	var trial: Dictionary = parsed
+	var key := FINE_RIG_PREFIX + str(trial.get("rig", "human"))
+	if not rigs.has(key):
+		return
+	var entry: Dictionary = rigs[key]
+	if entry.get("bones", []) != trial.get("bones", []):
+		push_warning("BattleSkinned: os de l'essai mocap différents du rig %s" % key)
+		return
+	var base_frames := _texture_frames(_path(str(entry.get("texture", ""))))
+	if base_frames <= 0:
+		return
+	var clips: Dictionary = entry.get("clips", {})
+	var substituted: Array = []
+	for clip_name in trial.get("clips", {}):
+		if not clips.has(clip_name):
+			continue  # l'essai ne crée pas de clip : il remplace
+		var c: Dictionary = (trial["clips"][clip_name] as Dictionary).duplicate()
+		c["start"] = base_frames + int(c["start"])
+		clips[clip_name] = c
+		substituted.append(clip_name)
+	entry["clips"] = clips
+	entry["mocap_texture"] = MOCAP_TRIAL_DIR + str(trial.get("texture", ""))
+	entry["mocap_clips"] = substituted
+
+
+## Nombre d'images d'une texture d'os `CAB1` (en-tête seul), 0 si illisible.
+static func _texture_frames(path: String) -> int:
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null or f.get_length() < 12:
+		return 0
+	if f.get_buffer(4).get_string_from_ascii() != "CAB1":
+		return 0
+	f.get_32()
+	return int(f.get_32())
+
+
+## Données brutes d'une texture `CAB1` : [os, images, octets RGBA32F], vide si illisible.
+static func _read_cab(path: String) -> Array:
+	var bytes := FileAccess.get_file_as_bytes(path)
+	if bytes.size() <= 12 or bytes.slice(0, 4).get_string_from_ascii() != "CAB1":
+		return []
+	var bones := bytes.decode_u32(4)
+	var frames := bytes.decode_u32(8)
+	return [bones, frames, bytes.slice(12).decompress(bones * 3 * frames * 16, FileAccess.COMPRESSION_DEFLATE)]
 
 
 ## Chemin d'un binaire du manifeste (relatif à `DIR`, ou absolu pour les figurines fines).
@@ -401,12 +501,20 @@ static func bone_texture(rig_name: String) -> ImageTexture:
 	if _textures.has(rig_name):
 		return _textures[rig_name]
 	var entry: Dictionary = manifest().get("rigs", {}).get(rig_name, {})
-	var bytes := FileAccess.get_file_as_bytes(_path(str(entry.get("texture", ""))))
+	var cab := _read_cab(_path(str(entry.get("texture", ""))))
 	var tex: ImageTexture = null
-	if bytes.size() > 12 and bytes.slice(0, 4).get_string_from_ascii() == "CAB1":
-		var bones := bytes.decode_u32(4)
-		var frames := bytes.decode_u32(8)
-		var raw := bytes.slice(12).decompress(bones * 3 * frames * 16, FileAccess.COMPRESSION_DEFLATE)
+	if not cab.is_empty():
+		var bones: int = cab[0]
+		var frames: int = cab[1]
+		var raw: PackedByteArray = cab[2]
+		# NT12 : images mocap à la suite de celles du rig (`--mocap-trial`).
+		if entry.has("mocap_texture"):
+			var extra := _read_cab(str(entry["mocap_texture"]))
+			if not extra.is_empty() and int(extra[0]) == bones:
+				raw.append_array(extra[2])
+				frames += int(extra[1])
+			else:
+				push_warning("BattleSkinned: texture mocap illisible %s" % entry["mocap_texture"])
 		var image := Image.create_from_data(bones * 3, frames, false, Image.FORMAT_RGBAF, raw)
 		tex = ImageTexture.create_from_image(image)
 	else:
