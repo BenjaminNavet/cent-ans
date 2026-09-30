@@ -122,6 +122,7 @@ func _ready() -> void:
 	edict_section.visibility_changed.connect(func() -> void: edict_rule.visible = edict_section.visible)
 	_build_settlements_tab()  # C5
 	get_viewport().size_changed.connect(queue_fit_height)  # Q6
+	minimum_size_changed.connect(queue_fit_height)  # VN : l'en-tête grandit (fil d'Ariane…) après coup
 	breadcrumb = HFlowContainer.new()  # FE6
 	breadcrumb.name = "FeudalBreadcrumb"
 	breadcrumb.add_theme_constant_override("h_separation", 2)

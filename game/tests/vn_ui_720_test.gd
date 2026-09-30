@@ -4,6 +4,7 @@ extends SceneTree
 ## fenêtre modale, panneau de province vs mini-carte, bandeau de fin de tour).
 ## Usage : godot --headless --path game --script res://tests/vn_ui_720_test.gd
 
+const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const LOGICAL := Vector2i(1422, 800)
 
 var _failures := 0
@@ -20,6 +21,7 @@ func _init() -> void:
 	await process_frame
 	await _menu()
 	await _tutorial_vs_modal()
+	await _map_views()
 	print("vn_ui_720_test: %s" % ("OK" if _failures == 0 else "FAIL (%d)" % _failures))
 	quit(0 if _failures == 0 else 1)
 
@@ -97,4 +99,57 @@ func _tutorial_vs_modal() -> void:
 	modal.hide()
 	overlay.queue_free()
 	modal.queue_free()
+	await process_frame
+
+
+## 3 et 4. Carte de campagne (20 s de chargement) : panneau de province et bandeau de fin de tour.
+func _map_views() -> void:
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.call("use_test_file")
+		settings.call("set_value", "game/autosave_interval", 0, false)
+		settings.call("set_value", "tutorial/enabled", false, false)
+		settings.call("set_value", "interface/season_report", false, false)
+	var facade: Node = root.get_node("/root/SimFacade")
+	facade.set_data_dir(MAP_PATHS.default_data_dir())
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
+	_viewport.add_child(map)
+	for i in 30:
+		await process_frame
+	var ui: Node = map.ui
+	# 3. Panneau de province : dans la zone SIDE_PANEL, au-dessus de la mini-carte ; garnison lisible.
+	map._stage_screenshot_province()
+	for i in 30:
+		await process_frame
+	var panel: Control = ui.province_panel
+	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL)
+	var mini: Control = map.minimap_ctl.get("minimap")
+	var panel_rect := panel.get_global_rect()
+	_check(panel.visible, "province panel visible")
+	_check(panel_rect.end.y <= side.end.y + 1.0, "province panel bottom %s below its zone %s" % [panel_rect.end.y, side.end.y])
+	_check(panel_rect.end.y <= mini.get_global_rect().position.y, "province panel %s runs under the minimap %s" % [panel_rect, mini.get_global_rect()])
+	_check(ui.province_panel.garrison_list.get_child_count() > 0, "province panel lists a garrison")
+	for row: Button in ui.province_panel.garrison_list.get_children():
+		_check(not row.clip_text and row.size.y >= row.get_minimum_size().y, "garrison row '%s' is cut (size %s)" % [row.text, row.size])
+		_check(row.get_global_rect().end.x <= panel_rect.end.x, "garrison row '%s' sticks out of the panel" % row.text)
+	# 4. Bandeau « Tour des autres factions » : ses textes tiennent dans le bandeau, dans la zone TOASTS.
+	ui.show_turn_banner()
+	for i in 5:
+		await process_frame
+	var banner: Control = ui.turn_banner
+	var toasts := UiZones.rect(UiZones.Zone.TOASTS)
+	var banner_rect := banner.get_global_rect()
+	_check(banner.visible, "turn banner visible")
+	_check(banner_rect.end.x <= toasts.end.x + 1.0, "turn banner %s wider than its zone %s" % [banner_rect, toasts])
+	for label: Label in [ui._turn_banner_title, ui._turn_banner_detail]:
+		var rect := label.get_global_rect()
+		_check(rect.position.x >= banner_rect.position.x and rect.end.x <= banner_rect.end.x, "banner text '%s' sticks out of the banner" % label.text)
+		var lines := label.get_line_count()
+		var line_height := label.get_line_height()
+		_check(label.size.y + 0.5 >= lines * line_height, "banner text '%s' is cut (%d lines in %s px)" % [label.text, lines, label.size.y])
+		_check(label.autowrap_mode != TextServer.AUTOWRAP_OFF or label.get_minimum_size().x <= label.size.x, "banner text '%s' is wider than its label" % label.text)
+	map.queue_free()
 	await process_frame

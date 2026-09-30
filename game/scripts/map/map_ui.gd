@@ -878,9 +878,13 @@ func _setup_turn_banner() -> void:
 	turn_banner.add_child(column)
 	_turn_banner_title = HudStyle.label("Tour des autres factions", UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	_turn_banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# VN : le bandeau vit dans la zone `TOASTS` (étroite en 1280×720) : ses textes passent à la
+	# ligne au lieu d'être coupés à droite.
+	_turn_banner_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_turn_banner_title)
 	_turn_banner_detail = HudStyle.label("", UiType.size(UiType.BODY), HudStyle.INK_SOFT)
 	_turn_banner_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_turn_banner_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_turn_banner_detail)
 	add_child(turn_banner)
 	turn_banner.hide()
