@@ -296,7 +296,8 @@ impl VegetationScatter {
                 float_of(&params, "origin_y", 0.0),
             ),
             size_px: float_of(&params, "size_px", 256.0),
-            spacing: float_of(&params, "spacing", 1.5).max(0.05),
+            // VT3: real-size trees need a ~0.03-unit pitch in dense forest cells (0.05 before).
+            spacing: float_of(&params, "spacing", 1.5).max(0.01),
             coarse_step: float_of(&params, "coarse_step", 4.0).max(1.0),
             tree_scale: float_of(&params, "tree_scale", 1.0),
             vertical_scale: float_of(&params, "vertical_scale", 1.0),
