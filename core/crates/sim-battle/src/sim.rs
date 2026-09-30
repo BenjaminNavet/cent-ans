@@ -1388,7 +1388,10 @@ impl BattleSim {
             // Cannot fail: the battle runs and every unit is present, in order, of `side`.
             let _ = self.apply_command(Command::Withdraw { units }, Some(side));
         }
-        self.log("Retraite générale : l'armée quitte le champ.".to_owned(), Some(side));
+        self.log(
+            "Retraite générale : l'armée quitte le champ.".to_owned(),
+            Some(side),
+        );
         let end_conditions = self.end_conditions;
         self.end_conditions = true;
         self.check_end();
