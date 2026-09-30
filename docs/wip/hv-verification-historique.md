@@ -16,9 +16,12 @@ Branche d'intégration : `feat/hv` (worktree `../gp-hv`). Rapports : `docs/histo
 |---|---|---|
 | HV1 | France, Pays-Bas, îles Britanniques (factions, titres, personnages, provinces, colonies) | lancé |
 | HV2 | Empire, Europe centrale, Baltique, Scandinavie, Hongrie | lancé |
-| HV3 | Ibérie, Italie, Maghreb, Égypte, Levant, Chypre | lancé |
-| HV4 | Balkans, Grèce, Anatolie, Horde, Caucase, Rus', Mésopotamie | lancé |
-| HV5 | Codex, événements, rencontres, missions, discours, écrans, ordres de chevalerie | lancé |
-| HV6 | Unités, techs, bâtiments, traits, compétences, religions, noms, édits, ressources, villes 1:1 v2 | lancé |
+| HV3 | Ibérie, Italie, Maghreb, Égypte, Levant, Chypre | fusionné (127) |
+| HV4 | Balkans, Grèce, Anatolie, Horde, Caucase, Rus', Mésopotamie | fusionné (151) |
+| HV5 | Codex, événements, rencontres, missions, discours, écrans, ordres de chevalerie | fusionné (27 + 15 fiches) |
+| HV6 | Unités, techs, bâtiments, traits, compétences, religions, noms, édits, ressources, villes 1:1 v2 | fusionné (169) |
+| HV7 | Décisions « à décider » de HV3/4/6 (18 points) | lancé |
 
 Prochaine étape : attendre les lots, fusionner dans feat/hv, trancher les points « à décider », cargo test + pytest, ff main.
+
+Reste à faire après HV1/HV2 : décisions HV5 (chr_umur_bey chef d'Aydın dès 1334, mort printemps 1348 ; chr_ivan_kalita note grand-princé partagé depuis 1328 ; chr_otto_le_doux titre Brunswick-Wolfenbüttel depuis 1318) + décisions HV1/HV2.
