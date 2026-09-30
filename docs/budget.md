@@ -238,3 +238,9 @@ reprises éventuelles comprises : ~0,62 $ prévu. Plafond vérifié par `data/ar
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul RC |
 |---|---|---|---|---|---|
 | 2026-09-30 | — | RC5 : squelette, prompts et essai à blanc (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+
+## Nuit visuelle VN (30/09) — fal.ai (OpenRouter indisponible), enveloppe propre 5 $
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul VN |
+|---|---|---|---|---|---|
+| 2026-09-30 | fal.ai | VN9 : miniatures des 12 types d'unités sans illustration (12 × fal-ai/nano-banana-2/edit 1K, référence de style unit_knights / unit_longbowmen) — prix catalogue | 0,96 $ | 0,96 $ | 0,96 $ |
