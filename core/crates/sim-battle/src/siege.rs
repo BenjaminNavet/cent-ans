@@ -247,10 +247,18 @@ pub struct House {
     /// a block but never burns).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub keep: bool,
+    /// NT8: height of a keep in metres from the ground (0: the renderer's
+    /// own height, every other building).
+    #[serde(default, skip_serializing_if = "zero_height")]
+    pub height: f64,
 }
 
 fn two_rows() -> u8 {
     2
+}
+
+fn zero_height(value: &f64) -> bool {
+    *value == 0.0
 }
 
 impl House {
@@ -269,6 +277,7 @@ impl House {
             church: false,
             rows: 2,
             keep: false,
+            height: 0.0,
         }
     }
 

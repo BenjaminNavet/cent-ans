@@ -172,11 +172,16 @@
             "keep_side_m": { "$ref": "#/$defs/range", "description": "Côté du donjon carré (m)." },
             "keep_distance": { "$ref": "#/$defs/chances", "description": "Distance du donjon au centre, en fraction du rayon." },
             "keep_arc_deg": { "type": "number", "minimum": 0, "maximum": 180, "description": "Ouverture de l'arc, au fond (+z), où se tient le donjon." },
-            "buildings": { "$ref": "#/$defs/counts", "description": "Nombre [min, max] de bâtiments adossés à la courtine." },
+            "buildings": { "$ref": "#/$defs/counts", "description": "Nombre [min, max] de bâtiments adossés à la courtine (communs, écuries)." },
             "wall_walk_m": { "$ref": "#/$defs/distance", "description": "Largeur libre derrière la courtine." },
-            "lane_m": { "$ref": "#/$defs/positive", "description": "Largeur du passage porte - basse-cour - donjon." }
+            "lane_m": { "$ref": "#/$defs/positive", "description": "Largeur du passage porte - basse-cour - donjon." },
+            "tower_radius_scale": { "$ref": "#/$defs/factor", "description": "NT8 : facteur du rayon des tours du château (tours de flanquement plus fines que celles d'une ville)." },
+            "keep_height_above_wall_m": { "$ref": "#/$defs/positive", "description": "NT8 : hauteur du donjon au-dessus des courtines (m)." },
+            "bailey_props": { "$ref": "#/$defs/counts", "description": "NT8 : nombre [min, max] d'accessoires posés dans la basse-cour (hors puits)." },
+            "bailey_kinds": { "$ref": "#/$defs/kinds", "description": "NT8 : accessoires de la basse-cour." },
+            "lean_to_kinds": { "$ref": "#/$defs/kinds", "description": "NT8 : accessoires devant les communs et écuries adossés." }
           },
-          "required": ["sides", "radius_m", "radius_jitter", "rotation_deg", "gate_offset", "wall_height_bonus_m", "courtyard_m", "keep_side_m", "keep_distance", "keep_arc_deg", "buildings", "wall_walk_m", "lane_m"],
+          "required": ["sides", "radius_m", "radius_jitter", "rotation_deg", "gate_offset", "wall_height_bonus_m", "courtyard_m", "keep_side_m", "keep_distance", "keep_arc_deg", "buildings", "wall_walk_m", "lane_m", "tower_radius_scale", "keep_height_above_wall_m", "bailey_props", "bailey_kinds", "lean_to_kinds"],
           "additionalProperties": false
         },
         "borough": {

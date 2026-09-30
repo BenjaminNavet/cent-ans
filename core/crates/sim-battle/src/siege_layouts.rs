@@ -30,7 +30,7 @@ use crate::siege::{
     WallPiece, GATE_WIDTH, TOWN_CENTER,
 };
 use crate::siege_layout::MAX_PIECE;
-use crate::town::{hash01, Footprint, TownRules};
+use crate::town::{hash01, Footprint, PropKind, TownRules};
 
 /// Kind of besieged place (NT1).
 #[derive(
@@ -83,6 +83,15 @@ pub struct CastleRules {
     pub buildings: [u32; 2],
     pub wall_walk_m: f64,
     pub lane_m: f64,
+    /// NT8: factor on the radius of the castle's towers.
+    pub tower_radius_scale: f64,
+    /// NT8: height of the keep above the curtain walls.
+    pub keep_height_above_wall_m: f64,
+    /// NT8: props in the bailey (besides the well).
+    pub bailey_props: [u32; 2],
+    pub bailey_kinds: Vec<PropKind>,
+    /// NT8: props in front of the lean-to outbuildings.
+    pub lean_to_kinds: Vec<PropKind>,
 }
 
 /// Plan of the fortified borough (`places.borough`).

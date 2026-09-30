@@ -1441,6 +1441,8 @@ impl BattleSim {
                     "church" => h.church,
                     // NT1: a castle keep (drawn as a great tower).
                     "keep" => h.keep,
+                    // NT8: the keep's height (0 for other buildings).
+                    "height" => h.height,
                 }
                 .to_variant()
             })
