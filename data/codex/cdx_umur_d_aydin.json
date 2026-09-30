@@ -1,0 +1,12 @@
+{
+  "id": "cdx_umur_d_aydin",
+  "title": "Umur d'Aydın",
+  "category": "personnage",
+  "aliases": ["Umur d'Aydın", "Umur Bey", "Umur Pacha"],
+  "era": { "from": "v. 1309", "to": "1348" },
+  "summary": "Émir turc de Smyrne et chef du beylik d'Aydın, Umur lance ses flottes sur l'Égée et la Grèce, allié de Byzance et ami de Jean Cantacuzène ; une ligue chrétienne lui prend le port de Smyrne en 1344.",
+  "body": "Fils de Mehmed Bey, fondateur du beylik d'Aydın sur la côte égéenne de l'Anatolie, Umur prend le château du port de Smyrne vers 1329. À la mort de son père, en 1334, il devient le principal chef du beylik, que ses frères se partagent ; l'aîné, Hızır, tient Éphèse. Ses galères et ses fustes, montées par des guerriers de la foi, pillent les îles et les côtes de l'Égée, de l'Eubée à la Morée, et ramènent des captifs par milliers.\n\nUmur choisit pourtant l'alliance byzantine. Vers 1335, il traite avec [[cdx_andronic_iii|Andronic III]] contre les Génois de Phocée ; il se lie d'une amitié durable avec [[cdx_jean_cantacuzene|Jean Cantacuzène]], qu'il vient secourir en Thrace pendant la guerre civile (1342-1345) avec des milliers d'hommes. Une épopée turque du XVe siècle, le Düsturname d'Enveri, célèbre ses exploits.\n\nSes raids provoquent la réaction des Latins. Une ligue réunissant le pape, Venise, Chypre et les [[cdx_hospitaliers_rhodes|Hospitaliers]] brûle sa flotte et s'empare du château du port de Smyrne le 28 octobre 1344. Umur est tué en 1348 en tentant de le reprendre, d'une flèche reçue à l'assaut. Smyrne reste aux Hospitaliers jusqu'en 1402.",
+  "entity": "chr_umur_bey",
+  "see_also": ["cdx_hospitaliers_rhodes", "cdx_jean_cantacuzene", "cdx_chypre_lusignan", "cdx_ottomans"],
+  "sources": ["Umur Bey", "Beylik d'Aydın", "Croisades de Smyrne", "P. Lemerle, L'Émirat d'Aydin, Byzance et l'Occident, 1957"]
+}

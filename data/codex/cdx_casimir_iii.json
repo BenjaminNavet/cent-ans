@@ -1,0 +1,12 @@
+{
+  "id": "cdx_casimir_iii",
+  "title": "Casimir III le Grand",
+  "category": "personnage",
+  "aliases": ["Casimir III", "Casimir le Grand", "Kazimierz III", "Casimir III le Grand"],
+  "era": { "from": "1310", "to": "1370" },
+  "summary": "Roi de Pologne de 1333 à 1370, Casimir III préfère la négociation à la guerre : il achète la paix avec la Bohême et l'Ordre teutonique, gagne la Ruthénie rouge, codifie les lois et fonde l'université de Cracovie.",
+  "body": "Fils de Ladislas le Bref, Casimir est couronné à Cracovie le 25 avril 1333. Il hérite d'un royaume menacé : Jean de Luxembourg, roi de Bohême, se dit roi de Pologne, et l'[[cdx_ordre_teutonique|Ordre teutonique]] occupe la Pomérélie, la Cuiavie et le pays de Dobrzyń. Avec l'appui de son beau-frère, Charles Robert de Hongrie, il traite : à Trenčín puis à Visegrád (1335), [[cdx_jean_de_luxembourg|Jean de Luxembourg]] renonce à la couronne polonaise contre l'abandon de la Silésie. Par la paix de Kalisz (1343), l'Ordre rend la Cuiavie et Dobrzyń, et garde la Pomérélie.\n\nCasimir se tourne vers l'est. Époux d'Aldona, fille de [[cdx_gediminas|Gediminas]], il intervient en Galicie après l'empoisonnement de Iouri II Boleslas, prince de Galicie-Volhynie (1340) et gagne, au terme de longues guerres avec la Lituanie, la Ruthénie rouge et Lviv.\n\nIl laisse l'image d'un roi bâtisseur : selon le mot célèbre, il a « trouvé une Pologne de bois et laissé une Pologne de pierre ». Il fait fortifier villes et châteaux, fait rédiger les statuts de Wiślica et de Piotrków, confirme et étend les privilèges des Juifs et fonde en 1364 l'[[cdx_universites|université]] de Cracovie. Mort le 5 novembre 1370 sans fils légitime, il est le dernier roi Piast ; la couronne passe à son neveu Louis de Hongrie.",
+  "entity": "chr_casimir_iii_de_pologne",
+  "see_also": ["cdx_pologne", "cdx_ordre_teutonique", "cdx_hongrie_angevine", "cdx_gediminas"],
+  "sources": ["Casimir III de Pologne", "Congrès de Visegrád (1335)", "Traité de Kalisz (1343)", "P. W. Knoll, The Rise of the Polish Monarchy, 1972"]
+}

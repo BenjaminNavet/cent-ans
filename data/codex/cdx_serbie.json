@@ -2,13 +2,7 @@
   "id": "cdx_serbie",
   "title": "La Serbie de Stefan Dušan",
   "category": "lieu",
-  "aliases": [
-    "Serbie",
-    "royaume de Serbie",
-    "Stefan Dušan",
-    "Dušan",
-    "Étienne Dušan"
-  ],
+  "aliases": ["Serbie", "royaume de Serbie"],
   "era": {
     "from": "1217",
     "to": "1371"
@@ -16,10 +10,7 @@
   "summary": "Royaume orthodoxe des Balkans, la Serbie profite du déclin byzantin. Après Velbažd (1330), Stefan Dušan, roi en 1331, s'apprête à conquérir la Macédoine.",
   "body": "Devenue royaume en 1217, la Serbie prospère grâce à ses mines d'argent, dont l'exploitation est confiée à des Saxons. En 1330, le roi Stefan Uroš III bat les Bulgares à Velbažd ; l'année suivante, son fils Stefan Dušan le dépose et prend la couronne.\n\nDušan attaque l'Empire byzantin affaibli par ses guerres civiles ; il prendra la Macédoine et l'Épire et se fera couronner empereur en 1346. Son Code (Zakonik) de 1349 fixe l'ordre juridique du pays.",
   "entity": "fac_serbia",
-  "see_also": [
-    "cdx_empire_byzantin",
-    "cdx_bulgarie"
-  ],
+  "see_also": ["cdx_empire_byzantin", "cdx_bulgarie", "cdx_etienne_dusan"],
   "sources": [
     "Stefan Dušan",
     "Royaume de Serbie",

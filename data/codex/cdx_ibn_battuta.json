@@ -1,0 +1,11 @@
+{
+  "id": "cdx_ibn_battuta",
+  "title": "Ibn Battuta",
+  "category": "personnage",
+  "aliases": ["Ibn Battuta", "Ibn Battûta", "Rihla"],
+  "era": { "from": "1304", "to": "v. 1368" },
+  "summary": "Lettré de Tanger parti en pèlerinage en 1325, Ibn Battuta voyage près de trente ans, du Maroc à la Chine : son récit, la Rihla, décrit l'Anatolie d'Orhan, la Horde d'Özbeg, Constantinople et l'Égypte des Mamelouks.",
+  "body": "Né à Tanger en 1304 dans une famille de juristes, Ibn Battuta part en juin 1325 pour La Mecque. Il n'en revient qu'en 1349, après avoir parcouru le Proche-Orient, l'Arabie, la côte d'Afrique orientale, l'Anatolie, les steppes de la [[cdx_horde_d_or|Horde d'Or]], l'Inde, où il sert le sultan de Delhi comme cadi, les Maldives, puis la Chine.\n\nAu début des années 1330 (la chronologie est discutée), il traverse les beyliks turcs d'Anatolie, où il rencontre [[cdx_orhan|Orhan]] à Brousse et [[cdx_umur_d_aydin|Umur]] à Smyrne. Il gagne ensuite par la Crimée le camp d'[[cdx_ozbeg|Özbeg]], dont il décrit la ville de tentes et les épouses ; il accompagne l'une d'elles, fille de l'empereur byzantin, jusqu'à Constantinople. Sur le chemin du retour, en 1348, il voit la [[cdx_peste_noire|Peste noire]] frapper Damas et Le Caire.\n\nRentré à Fès, il repart pour Grenade, puis traverse le Sahara jusqu'au royaume du Mali (1352-1353). Le sultan [[cdx_marinides|mérinide]] Abu Inan le fait alors raconter ses voyages au lettré Ibn Juzayy, qui en tire en 1355 la Rihla. Ibn Battuta meurt vers 1368-1369, cadi dans une ville du Maroc. On discute la véracité de certains épisodes, empruntés à d'autres auteurs, mais le livre reste un témoignage sans égal sur le monde musulman du XIVe siècle.",
+  "see_also": ["cdx_marinides", "cdx_horde_d_or", "cdx_mamelouks", "cdx_ottomans"],
+  "sources": ["Ibn Battûta", "Rihla", "Ibn Battûta, Voyages, trad. C. Defremery et B. R. Sanguinetti, rééd. La Découverte, 1982", "R. E. Dunn, The Adventures of Ibn Battuta, 1986"]
+}

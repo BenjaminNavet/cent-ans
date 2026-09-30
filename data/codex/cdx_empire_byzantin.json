@@ -2,13 +2,7 @@
   "id": "cdx_empire_byzantin",
   "title": "L'Empire byzantin des Paléologues",
   "category": "lieu",
-  "aliases": [
-    "Empire byzantin",
-    "Byzance",
-    "Paléologue",
-    "Paléologues",
-    "Constantinople"
-  ],
+  "aliases": ["Empire byzantin", "Byzance", "Paléologue", "Paléologues", "Constantinople"],
   "era": {
     "from": "1261",
     "to": "1453"
@@ -16,11 +10,7 @@
   "summary": "Reprise aux Latins en 1261, Constantinople règne encore sur la Thrace, la Macédoine et une partie de la Morée. En 1337, l'Empire d'Andronic III est réduit et pressé de toutes parts par les Turcs, les Serbes et les Vénitiens.",
   "body": "Reconquis par Michel VIII Paléologue en 1261, l'Empire byzantin n'est plus qu'un État moyen de la mer Égée et des Balkans. Les guerres civiles et la perte de l'Asie Mineure l'ont affaibli : Nicée tombe aux mains d'Orhan en 1331 et Nicomédie en 1337. Andronic III (1328-1341) tente de reprendre pied en Épire et en Thessalie, dont il annexe une partie, mais il ne peut endiguer la poussée des beyliks turcs.\n\nL'Empire garde pourtant un immense prestige : la capitale, bien que dépeuplée, reste l'une des plus grandes villes de la chrétienté et le foyer de la foi orthodoxe : son patriarche, dont dépend l'Église russe, garde une primauté d'honneur sur les Églises bulgare et serbe, devenues autocéphales. Le commerce est aux mains des Génois, maîtres de Péra, face à Constantinople, et des Vénitiens, qui ont leur quartier dans la ville.",
   "entity": "fac_byzantium",
-  "see_also": [
-    "cdx_ottomans",
-    "cdx_serbie",
-    "cdx_grand_schisme"
-  ],
+  "see_also": ["cdx_ottomans", "cdx_serbie", "cdx_grand_schisme", "cdx_andronic_iii"],
   "sources": [
     "Empire byzantin",
     "Andronic III Paléologue",

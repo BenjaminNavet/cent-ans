@@ -1,0 +1,12 @@
+{
+  "id": "cdx_etienne_dusan",
+  "title": "Étienne Dušan",
+  "category": "personnage",
+  "aliases": ["Étienne Dušan", "Stefan Dušan", "Dušan", "Stefan Uroš IV Dušan"],
+  "era": { "from": "v. 1308", "to": "1355" },
+  "summary": "Vainqueur des Bulgares à Velbažd (1330), roi de Serbie en 1331, Étienne Dušan conquiert la Macédoine, l'Albanie, l'Épire et la Thessalie et se fait couronner en 1346 « empereur des Serbes et des Grecs ».",
+  "body": "Fils du roi Stefan Uroš III, le jeune Dušan mène le 28 juillet 1330, à Velbažd, la charge de la [[cdx_cavalerie_lourde_serbe|cavalerie serbe]] qui disperse l'armée du tsar bulgare Michel Chichman. L'année suivante, soutenu par la noblesse, il se soulève contre son père, le fait emprisonner, et se fait couronner roi le 8 septembre 1331 ; le vieux roi meurt en captivité en novembre. En 1332, Dušan épouse Hélène, sœur du tsar bulgare Ivan Alexandre, scellant la paix avec la [[cdx_bulgarie|Bulgarie]].\n\nIl tourne alors ses armes vers l'[[cdx_empire_byzantin|Empire byzantin]]. En 1334, il prend Ohrid, Prilep et Strumica, avant de traiter avec [[cdx_andronic_iii|Andronic III]]. La guerre civile byzantine de 1341-1347 lui ouvre la Macédoine : il prend Serrès en septembre 1345. À Pâques 1346, à Skopje, il fait élever l'archevêque serbe au rang de patriarche, qui le couronne empereur des Serbes et des Grecs. Il soumet ensuite l'Albanie, l'Épire et la Thessalie (1348).\n\nSon Code (Zakonik), promulgué en 1349 et complété en 1354, fixe les droits de l'Église, des nobles et des paysans. Dušan meurt le 20 décembre 1355, sans avoir pris Constantinople ni Thessalonique. Sous son fils Uroš V, les grands seigneurs se partagent l'empire, bientôt exposé aux [[cdx_ottomans|Ottomans]].",
+  "entity": "chr_stefan_dusan",
+  "see_also": ["cdx_serbie", "cdx_cavalerie_lourde_serbe", "cdx_empire_byzantin", "cdx_via_egnatia"],
+  "sources": ["Stefan Uroš IV Dušan", "Bataille de Velbajd", "Code de Dušan", "J. V. A. Fine, The Late Medieval Balkans, 1987"]
+}

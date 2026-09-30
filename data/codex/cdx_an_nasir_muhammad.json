@@ -1,0 +1,12 @@
+{
+  "id": "cdx_an_nasir_muhammad",
+  "title": "An-Nasir Muhammad",
+  "category": "personnage",
+  "aliases": ["an-Nasir Muhammad", "al-Nasir Muhammad", "al-Nâsir Muhammad"],
+  "era": { "from": "1285", "to": "1341" },
+  "summary": "Fils du sultan Qalawun, an-Nasir Muhammad règne trois fois sur l'Égypte et la Syrie ; son troisième règne (1310-1341) est l'apogée du sultanat mamelouk.",
+  "body": "Fils de Qalawun, il est fait sultan à huit ans (1293-1294), puis de nouveau de 1299 à 1309, chaque fois jouet des grands émirs. Pendant ce deuxième règne, les [[cdx_mamelouks|Mamelouks]] battent en 1303, près de Damas, à Marj al-Saffar (Shaqhab), la dernière grande invasion de l'Ilkhan Ghazan. Retiré à Kerak, il revient au Caire en 1310, élimine les émirs qui l'avaient écarté et gouverne seul trente et un ans.\n\nIl fait refaire le cadastre des terres (le rawk) pour redistribuer les revenus des fiefs (iqṭā') à ses fidèles, achète en grand nombre de jeunes esclaves pour ses [[cdx_cavaliers_mamelouks|mamelouks]] et fait la paix avec l'[[cdx_ilkhanat|Ilkhanat]] en 1323. En 1320, il épouse une princesse de la famille d'[[cdx_ozbeg|Özbeg]], le khan de la Horde d'Or, dont les steppes fournissent ses recrues. Le commerce des [[cdx_epices_medievales|épices]] de l'océan Indien, qui transite par la mer Rouge, Alexandrie et Damas, enrichit l'État.\n\nGrand bâtisseur, il fait creuser le canal d'Alexandrie (1311), élever à la Citadelle du Caire une mosquée et des palais, et Le Caire, l'une des plus grandes villes du monde, se couvre de fondations pieuses. Ses armées ravagent la Petite-Arménie de Cilicie, en 1322 et en 1337. Il meurt le 7 juin 1341. Ses fils et petits-fils, souvent enfants, se succèdent rapidement sous la tutelle des émirs, tandis que la [[cdx_peste_noire|Peste noire]] frappe l'Égypte en 1347-1349.",
+  "entity": "chr_al_nasir_muhammad",
+  "see_also": ["cdx_mamelouks", "cdx_cavaliers_mamelouks", "cdx_ozbeg", "cdx_chypre_lusignan"],
+  "sources": ["Al-Nasir Muhammad", "Sultanat mamelouk", "Bataille de Marj al-Saffar (1303)", "R. Irwin, The Middle East in the Middle Ages: the Early Mamluk Sultanate 1250-1382, 1986"]
+}

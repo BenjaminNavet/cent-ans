@@ -1,0 +1,13 @@
+{
+  "id": "cdx_orhan",
+  "title": "Orhan",
+  "category": "personnage",
+  "aliases": ["Orhan", "Orhan Gazi", "Orhan Ier"],
+  "exclude_contexts": ["Orhan de Menteşe", "Orhan Bey de Menteşe"],
+  "era": { "from": "v. 1281", "to": "1362" },
+  "summary": "Fils d'Osman, Orhan fait du petit beylik ottoman de Bithynie un État : il prend Brousse (1326), Nicée (1331) et Nicomédie (1337), puis prend pied en Europe.",
+  "body": "Orhan succède à son père Osman vers 1324 ; la date exacte, entre 1323 et 1326, est discutée. Le 6 avril 1326, après un long blocus, Brousse (Bursa) se rend : elle devient la capitale des [[cdx_ottomans|Ottomans]], qui y frappent bientôt leur première monnaie d'argent, l'akçe. En juin 1329, à Pélékanon, Orhan bat l'empereur [[cdx_andronic_iii|Andronic III]], venu secourir Nicée ; la ville tombe en 1331, Nicomédie en 1337. À Nicée, il fonde en 1331 la première médersa ottomane.\n\nSelon la tradition, il crée ses premières troupes soldées, les [[cdx_yaya|yaya]] à pied et les müsellem à cheval, à côté des raiders de la frontière, les [[cdx_akinci|akıncı]]. Vers 1345, il annexe le beylik voisin de Karasi, qui lui donne une façade sur les Dardanelles et des marins. Le voyageur [[cdx_ibn_battuta|Ibn Battuta]], qui le rencontre à Brousse, le tient pour le plus riche des princes turcomans.\n\nLa guerre civile byzantine lui ouvre l'Europe. Allié de [[cdx_jean_cantacuzene|Jean Cantacuzène]], dont il épouse la fille Théodora en 1346, il envoie ses troupes en Thrace ; son fils Süleyman Pacha s'installe à Tzympé en 1352, puis à Gallipoli en 1354, dont un séisme a abattu les murailles. Orhan meurt en 1362 ; son fils Murad Ier poursuit la conquête des Balkans.",
+  "entity": "chr_orhan",
+  "see_also": ["cdx_ottomans", "cdx_empire_byzantin", "cdx_yaya", "cdx_jean_cantacuzene"],
+  "sources": ["Orhan", "Bataille de Pélékanon", "Siège de Nicée (1328-1331)", "H. İnalcık, The Ottoman Empire: the Classical Age 1300-1600, 1973", "C. Imber, The Ottoman Empire 1300-1650, 2002"]
+}

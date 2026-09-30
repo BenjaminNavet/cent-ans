@@ -1,0 +1,11 @@
+{
+  "id": "cdx_hesychasme",
+  "title": "Hésychasme",
+  "category": "religion",
+  "aliases": ["hésychasme", "hésychaste", "hésychastes", "Grégoire Palamas", "palamisme"],
+  "era": { "from": "v. 1300", "to": "1351" },
+  "summary": "Pratique de prière silencieuse des moines du mont Athos, l'hésychasme est attaqué en 1336-1337 par le moine calabrais Barlaam et défendu par Grégoire Palamas. La querelle déchire Byzance jusqu'au concile de 1351.",
+  "body": "L'hésychasme (du grec hêsychia, le repos, le silence) est une manière de prier née chez les moines d'Orient et renouvelée au début du XIVe siècle au mont Athos par Grégoire le Sinaïte. Le moine, assis, la tête inclinée, règle son souffle en répétant la « prière de Jésus » (« Seigneur Jésus-Christ, Fils de Dieu, aie pitié de moi ») ; au terme de cette ascèse, disent les maîtres, il peut contempler la lumière divine qui transfigura le Christ au mont Thabor.\n\nVers 1336-1337, Barlaam de Calabre, moine grec d'Italie venu à Constantinople, raille ces pratiques et nie qu'un homme puisse voir Dieu autrement que par l'intelligence. Le moine athonite Grégoire Palamas lui répond dans ses Triades : on ne connaît pas l'essence de Dieu, mais on peut participer à ses « énergies », dont la lumière du Thabor. Le concile de Constantinople de juin 1341, présidé par [[cdx_andronic_iii|Andronic III]], condamne Barlaam, qui repart pour l'Italie.\n\nLa querelle se mêle à la guerre civile : Palamas, proche de [[cdx_jean_cantacuzene|Jean Cantacuzène]], est emprisonné par la régence, puis triomphe avec lui. Devenu archevêque de Thessalonique, il est confirmé par le concile de 1351 et canonisé en 1368. La doctrine devient celle de l'Église orthodoxe ; par les moines de Tarnovo, de Serbie et de Rus', l'hésychasme nourrit la vie spirituelle de la [[cdx_bulgarie|Bulgarie]], de la [[cdx_serbie|Serbie]] et de la Russie.",
+  "see_also": ["cdx_empire_byzantin", "cdx_andronic_iii", "cdx_jean_cantacuzene", "cdx_bulgarie"],
+  "sources": ["Hésychasme", "Grégoire Palamas", "Barlaam de Seminara", "J. Meyendorff, Introduction à l'étude de Grégoire Palamas, 1959"]
+}
