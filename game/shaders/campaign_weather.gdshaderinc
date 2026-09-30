@@ -18,6 +18,10 @@ uniform float weather_edge_px = 30.0;
 // Q3) ; l'atmosphère de près (ZG4) donne déjà le voile en profondeur.
 uniform float weather_mist_near = 0.2;
 uniform float weather_mist_near_footprint = 0.06;
+// SS2 (ADR 0142) : opacité maximale de la nappe peinte sur le sol (0,8 auparavant) : au-delà, le
+// gris clair recouvrait tout le bassin parisien et effaçait champs et carte de couleur (« relief
+// IGN ») ; la nappe reste un voile léger, teinté par le sol.
+uniform float weather_mist_max = 0.15;
 // CV3-0 (#3) : en vue large, seules les zones de forte intensité (ou l'orage, toujours couvert)
 // gardent des nuées ; posé par CampaignWeatherView selon la distance caméra (0 de près, jusqu'à
 // ~0.5 de loin — la pluie/neige légère (k proche de 0.45) disparaît, la forte (k proche de 1) reste).
@@ -117,7 +121,8 @@ vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, in
 		float patches = smoothstep(0.3, 0.75, wx_fbm(p * 0.02 - TIME * weather_wind * 0.004));
 		float mist = w.b * mix(0.3, 0.75, low) * mix(0.35, 1.0, weather_fog_morning) * (0.35 + 0.65 * patches);
 		mist *= mix(weather_mist_near, 1.0, smoothstep(weather_mist_near_footprint * 0.5, weather_mist_near_footprint * 2.0, footprint));
-		col = mix(col, vec3(0.62, 0.64, 0.66), clamp(mist, 0.0, 0.8));
+		vec3 veil = mix(vec3(0.62, 0.64, 0.66), col * 1.6, 0.35);
+		col = mix(col, veil, clamp(mist, 0.0, weather_mist_max));
 	}
 	// Ombre des nuées qui passent.
 	col *= 1.0 - 0.35 * wx_cloud(p + weather_wind * 6.0, w);

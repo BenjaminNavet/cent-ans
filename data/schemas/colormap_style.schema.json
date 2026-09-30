@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "colormap_style.schema.json",
+  "title": "Style de la carte de couleur du sol de campagne (chantier SS)",
+  "description": "Palette sRGB et paramètres de `cent-ans geo colormap` (`tools/cent_ans_tools/geo/colormap.py`, ADR 0142) : base régionale, mosaïque agricole, routes, lacs, auréoles de villes. Graine fixe : même style et mêmes entrées donnent les mêmes octets.",
+  "type": "object",
+  "required": ["seed", "scale", "palette", "base", "mosaic", "roads", "lakes", "towns"],
+  "additionalProperties": false,
+  "$defs": {
+    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "share": {"type": "number", "minimum": 0, "maximum": 1},
+    "positive": {"type": "number", "exclusiveMinimum": 0},
+    "weighted": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "color", "weight"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "color": {"$ref": "#/$defs/color"},
+          "weight": {"$ref": "#/$defs/positive"}
+        }
+      }
+    }
+  },
+  "properties": {
+    "seed": {"type": "integer", "minimum": 0},
+    "scale": {"type": "integer", "minimum": 1, "maximum": 4, "description": "Texels par pixel de carte (par côté)."},
+    "palette": {
+      "type": "object",
+      "required": ["sea_deep", "sea_shallow", "grassland", "grassland_dry", "farmland", "farmland_dry", "forest_broadleaf", "forest_conifer", "heath", "rock", "snow", "coast_sand", "marsh", "ponds", "wet_meadow", "road", "lake_deep", "lake_shallow", "lake_shore", "reeds", "town_ground", "town_gardens", "hedge"],
+      "additionalProperties": {"$ref": "#/$defs/color"}
+    },
+    "base": {
+      "type": "object",
+      "required": ["dry_lat_start", "dry_lat_full", "moisture_noise_km", "moisture_noise_amp", "brightness_noise_km", "brightness_noise_amp", "rock_from_m", "rock_full_m", "snow_from_m", "snow_full_m", "wetland_strength", "coast_sand_width_m", "coast_sand_max_height_m", "coast_sand_share", "coast_sand_noise_km", "sea_shallow_width_m"],
+      "additionalProperties": false,
+      "properties": {
+        "dry_lat_start": {"type": "number"},
+        "dry_lat_full": {"type": "number"},
+        "moisture_noise_km": {"$ref": "#/$defs/positive"},
+        "moisture_noise_amp": {"$ref": "#/$defs/share"},
+        "brightness_noise_km": {"$ref": "#/$defs/positive"},
+        "brightness_noise_amp": {"$ref": "#/$defs/share"},
+        "rock_from_m": {"type": "number"},
+        "rock_full_m": {"type": "number"},
+        "snow_from_m": {"type": "number"},
+        "snow_full_m": {"type": "number"},
+        "wetland_strength": {"type": "array", "items": {"$ref": "#/$defs/share"}, "minItems": 3, "maxItems": 3},
+        "coast_sand_width_m": {"type": "number", "minimum": 0},
+        "coast_sand_max_height_m": {"type": "number"},
+        "coast_sand_share": {"$ref": "#/$defs/share"},
+        "coast_sand_noise_km": {"$ref": "#/$defs/positive"},
+        "sea_shallow_width_m": {"$ref": "#/$defs/positive"}
+      }
+    },
+    "mosaic": {
+      "type": "object",
+      "required": ["block_size_m", "warp_share", "warp_cells", "strip_ratio", "openfield_lat_from", "openfield_lat_full", "strip_orientation_km", "gain_farmland", "gain_grassland", "settlement_decay_km", "far_share", "max_rock", "max_forest", "max_marsh", "opacity", "block_jitter", "hedge_strength", "hedge_grass_from", "hedge_grass_full", "dry_crop_tint", "dry_crop_amount", "crops", "pastures", "vine"],
+      "additionalProperties": false,
+      "properties": {
+        "block_size_m": {"type": "number", "minimum": 200},
+        "warp_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "warp_cells": {"$ref": "#/$defs/positive"},
+        "strip_ratio": {"type": "number", "minimum": 1},
+        "openfield_lat_from": {"type": "number"},
+        "openfield_lat_full": {"type": "number"},
+        "strip_orientation_km": {"$ref": "#/$defs/positive"},
+        "gain_farmland": {"type": "number", "minimum": 0},
+        "gain_grassland": {"type": "number", "minimum": 0},
+        "settlement_decay_km": {"$ref": "#/$defs/positive"},
+        "far_share": {"$ref": "#/$defs/share"},
+        "max_rock": {"$ref": "#/$defs/share"},
+        "max_forest": {"$ref": "#/$defs/share"},
+        "max_marsh": {"$ref": "#/$defs/share"},
+        "opacity": {"$ref": "#/$defs/share"},
+        "block_jitter": {"$ref": "#/$defs/share"},
+        "hedge_strength": {"$ref": "#/$defs/share"},
+        "hedge_grass_from": {"$ref": "#/$defs/share"},
+        "hedge_grass_full": {"$ref": "#/$defs/share"},
+        "dry_crop_tint": {"$ref": "#/$defs/color"},
+        "dry_crop_amount": {"$ref": "#/$defs/share"},
+        "crops": {"$ref": "#/$defs/weighted"},
+        "pastures": {"$ref": "#/$defs/weighted"},
+        "vine": {
+          "type": "object",
+          "required": ["color", "min_slope", "min_south", "max_lat", "share"],
+          "additionalProperties": false,
+          "properties": {
+            "color": {"$ref": "#/$defs/color"},
+            "min_slope": {"type": "number", "minimum": 0},
+            "min_south": {"$ref": "#/$defs/share"},
+            "max_lat": {"type": "number"},
+            "share": {"$ref": "#/$defs/share"}
+          }
+        }
+      }
+    },
+    "roads": {
+      "type": "object",
+      "required": ["opacity", "soft_px", "types"],
+      "additionalProperties": false,
+      "properties": {
+        "opacity": {"$ref": "#/$defs/share"},
+        "soft_px": {"$ref": "#/$defs/positive"},
+        "types": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Par valeur de la propriété `type` de roads.geojson ; un type absent n'est pas peint.",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["width_m", "min_px"],
+            "additionalProperties": false,
+            "properties": {
+              "width_m": {"$ref": "#/$defs/positive"},
+              "min_px": {"type": "number", "minimum": 1}
+            }
+          }
+        }
+      }
+    },
+    "lakes": {
+      "type": "object",
+      "required": ["max_area_px", "shore_width_m", "reeds_width_m", "reeds_share", "reeds_noise_km", "shallow_width_m"],
+      "additionalProperties": false,
+      "properties": {
+        "max_area_px": {"type": "integer", "minimum": 1},
+        "shore_width_m": {"$ref": "#/$defs/positive"},
+        "reeds_width_m": {"type": "number", "minimum": 0},
+        "reeds_share": {"$ref": "#/$defs/share"},
+        "reeds_noise_km": {"$ref": "#/$defs/positive"},
+        "shallow_width_m": {"$ref": "#/$defs/positive"}
+      }
+    },
+    "towns": {
+      "type": "object",
+      "required": ["ground_min_px", "ground_opacity", "garden_factor", "garden_opacity"],
+      "additionalProperties": false,
+      "properties": {
+        "ground_min_px": {"$ref": "#/$defs/positive"},
+        "ground_opacity": {"$ref": "#/$defs/share"},
+        "garden_factor": {"type": "number", "minimum": 1},
+        "garden_opacity": {"$ref": "#/$defs/share"}
+      }
+    }
+  }
+}

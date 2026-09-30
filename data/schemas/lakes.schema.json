@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lakes.schema.json",
+  "title": "Lacs de la carte de campagne (SS3)",
+  "description": "Contours simplifiés (px carte, 1 px = 719 m) et niveaux d'eau des lacs, extraits de land_mask.png par `cent-ans geo lakes` (ADR 0142 §4). Rendu seulement (lakes_renderer.gd).",
+  "type": "object",
+  "required": ["description", "params", "lakes"],
+  "additionalProperties": false,
+  "$defs": {
+    "point": {
+      "type": "array",
+      "items": {"type": "number", "minimum": 0},
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "params": {
+      "type": "object",
+      "required": ["min_area_px", "simplify_px", "min_level_m", "flat_tolerance_m", "max_basins"],
+      "additionalProperties": false,
+      "properties": {
+        "min_area_px": {"type": "integer", "minimum": 1},
+        "simplify_px": {"type": "number", "minimum": 0},
+        "min_level_m": {"type": "number"},
+        "flat_tolerance_m": {"type": "number", "minimum": 0},
+        "max_basins": {"type": "integer", "minimum": 1}
+      }
+    },
+    "lakes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "level_m", "area_km2", "center_px", "islands", "polygon_px"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^lake_[0-9]{3,}$"},
+          "name": {"type": "string", "description": "Nom (Natural Earth, français d'abord) ; vide si inconnu."},
+          "level_m": {"type": "number", "exclusiveMinimum": 0, "maximum": 4800, "description": "Niveau de l'eau (m), hauteur modale de heightmap_render.png dans le lac."},
+          "area_km2": {"type": "number", "minimum": 0},
+          "center_px": {"$ref": "#/$defs/point"},
+          "islands": {"type": "integer", "minimum": 0, "description": "Contours intérieurs (îles) non découpés."},
+          "polygon_px": {"type": "array", "items": {"$ref": "#/$defs/point"}, "minItems": 3, "description": "Contour extérieur simplifié, non fermé."}
+        }
+      }
+    }
+  }
+}

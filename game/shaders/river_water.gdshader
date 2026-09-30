@@ -10,6 +10,9 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 // Hauteur : dans les tuiles de relief fin (lit creusé, river_bed.gdshaderinc), l'eau descend de
 // `water_sink` sous la berge ; ailleurs elle flotte de `lift_base + lift_per_distance × d`
 // au-dessus du relief (LOD grossier qui ne suit pas le fond de vallée).
+// Lot SS3 (ADR 0142) : mode « nappe » (`sheet`) pour les lacs de LakesRenderer : sommets posés
+// tels quels (pas d'élargissement ni de lit creusé), flottant du même décalage que les fleuves,
+// rides sans courant, opacité `sheet_alpha`, pas de relais du réseau fin.
 
 #include "res://shaders/river_bed.gdshaderinc"
 // Lot CM2 : fleuves à l'encre bleue en vue parchemin.
@@ -60,6 +63,10 @@ uniform float depth_full = 0.05;
 uniform vec4 fords[32];
 uniform int ford_count = 0;
 
+uniform bool sheet = false;
+uniform float sheet_alpha = 0.88;
+uniform float sheet_deep = 0.75;
+
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
 // RC5 (ADR 0141) : détail tuilable Nano Banana 2 (`river_large` / `river_small`) le long du
 // courant ; force 0 (défaut, texture absente) = rendu procédural seul.
@@ -93,22 +100,34 @@ void vertex() {
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 view_pos = (VIEW_MATRIX * vec4(world, 1.0)).xyz;
 	float dist = max(length(view_pos), 0.01);
-	float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
-	float true_px = UV.x / world_per_px;
-	float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
-	float width = UV.x * mix(1.0, carved_overlap, carved);
-	float imp_px = min_px * importance_px_scale(UV2.y);
-	float half_w = 0.5 * max(width, imp_px * world_per_px);
-	VERTEX += NORMAL * half_w;
-	VERTEX.y += mix(lift_base + lift_per_distance * dist, -water_sink, carved);
-	v_alpha = mix(1.0, clamp(true_px / imp_px, 0.25, 1.0), thin_fade);
-	v_far = distance_fade.y > 0.0 ? mix(1.0, far_alpha, smoothstep(distance_fade.x, distance_fade.y, dist)) : 1.0;
-	v_side = UV.y * half_w / max(0.5 * UV.x, 1e-4);
-	v_flow = vec2(UV2.x, UV.y * 0.5 * UV.x);
-	v_carved = carved;
-	v_width = UV.x;
-	v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	NORMAL = vec3(0.0, 1.0, 0.0);
+	if (sheet) {
+		VERTEX.y += lift_base + lift_per_distance * dist;
+		v_alpha = 1.0;
+		v_far = 1.0;
+		v_side = 0.0;
+		v_flow = world.xz * vec2(0.35, 0.5);
+		v_carved = 0.0;
+		v_width = 0.0;
+		v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		NORMAL = vec3(0.0, 1.0, 0.0);
+	} else {
+		float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
+		float true_px = UV.x / world_per_px;
+		float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
+		float width = UV.x * mix(1.0, carved_overlap, carved);
+		float imp_px = min_px * importance_px_scale(UV2.y);
+		float half_w = 0.5 * max(width, imp_px * world_per_px);
+		VERTEX += NORMAL * half_w;
+		VERTEX.y += mix(lift_base + lift_per_distance * dist, -water_sink, carved);
+		v_alpha = mix(1.0, clamp(true_px / imp_px, 0.25, 1.0), thin_fade);
+		v_far = distance_fade.y > 0.0 ? mix(1.0, far_alpha, smoothstep(distance_fade.x, distance_fade.y, dist)) : 1.0;
+		v_side = UV.y * half_w / max(0.5 * UV.x, 1e-4);
+		v_flow = vec2(UV2.x, UV.y * 0.5 * UV.x);
+		v_carved = carved;
+		v_width = UV.x;
+		v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		NORMAL = vec3(0.0, 1.0, 0.0);
+	}
 }
 
 void fragment() {
@@ -125,11 +144,11 @@ void fragment() {
 	float depth_t = clamp(thickness / depth_full, 0.0, 1.0);
 	// Loin (non creusé) : profondeur fictive décroissant vers les bords du ruban.
 	float fake_depth = 1.0 - smoothstep(0.35, 1.05, edge);
-	float deep = mix(fake_depth, depth_t, v_carved);
+	float deep = sheet ? sheet_deep : mix(fake_depth, depth_t, v_carved);
 
 	// Écoulement : deux couches de bruit étirées dans le sens du courant, décalées dans le temps.
 	vec2 q = vec2(v_flow.x * 0.8, v_flow.y * 2.2) * ripple_scale;
-	float t = TIME * flow_speed * ripple_scale;
+	float t = TIME * flow_speed * ripple_scale * (sheet ? 0.25 : 1.0);
 	float n1 = vnoise(q + vec2(-t, 0.0));
 	float n2 = vnoise(q * 1.9 + vec2(-t * 1.6, 3.7));
 	float nx = vnoise(q + vec2(-t + 0.07, 0.0)) - n1;
@@ -139,7 +158,7 @@ void fragment() {
 	float ford = 0.0;
 	float riffle = 0.0;
 	// Gués : seulement de près (au loin, ils font moins d'un pixel).
-	int fords_here = fwidth(v_flow.x) < 0.5 ? ford_count : 0;
+	int fords_here = (!sheet && fwidth(v_flow.x) < 0.5) ? ford_count : 0;
 	for (int i = 0; i < 32; i++) {
 		if (i >= fords_here) {
 			break;
@@ -188,7 +207,11 @@ void fragment() {
 	float carved_alpha = mix(0.7, 0.97, smoothstep(0.0, 0.35, depth_t));
 	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha * v_far;
 	ALPHA = clamp(alpha * (1.0 - ford * 0.35), 0.0, 1.0);
-	ALPHA *= 1.0 - fine_zone_mask(v_world.xz);  // ZG5b : relais du réseau fin
+	if (sheet) {
+		ALPHA = sheet_alpha;
+	} else {
+		ALPHA *= 1.0 - fine_zone_mask(v_world.xz);  // ZG5b : relais du réseau fin
+	}
 	float pm_w = pm_weight();  // CM2 : trait d'encre bleue, sans reflet
 	ALBEDO = mix(ALBEDO, pm_river_ink * (1.0 - pm_emission), pm_w);
 	EMISSION = pm_river_ink * pm_emission * pm_emission_gain * pm_w;

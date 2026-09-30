@@ -18,7 +18,7 @@ Une **pyramide de couleur (albédo) précalculée hors ligne** remplace la coule
 
 Module `tools/cent_ans_tools/geo/colormap.py`, sous-commande `cent-ans geo colormap`.
 
-- **Découpage** : identique à la pyramide de relief (ADR 0036) — tuiles 512 px, `E{level}/{col}_{row}`, même origine et même RLE de présence. Sortie `data/map/colormap/`, manifeste `data/map/colormap.json`. Étages de ~180 m/px à ~20 m/px (le plus fin retenu selon la taille disque ; cible ≤ 400 Mo compressés, format BC1/BC7 ou JPEG selon ce que charge déjà la pyramide de relief).
+- **Format (ADR 0142, révisé après captures)** : une texture RGB unique 14336×12288 (~360 m/texel), mipmaps précalculées, BC1 en parts zlib, entrée `map.json` `colormap.bc1` — même chemin que `wetlands_gpu` (`block_compress.write_wetlands_bc1`, `ReliefLandcover.load_wetlands_gpu`). Pas de pyramide en tuiles. Le détail sous ~360 m vient des parcelles procédurales du shader, colorées par leur bloc.
 - **Style** : `data/map/colormap_style.yaml` validé par `data/schemas/colormap_style.schema.json` (palettes, largeurs de routes par `type`, densités, graine).
 - **Déterminisme** : graine fixe ; même entrée → mêmes octets.
 
@@ -32,7 +32,7 @@ Couches peintes, dans l'ordre :
 
 ## 2. Rendu — `terrain.gdshader`
 
-- Couleur de base = échantillon de la pyramide de couleur (chargement progressif comme le relief).
+- Couleur de base = échantillon de la carte de couleur (vue large et moyenne).
 - Textures 2k existantes : détail en luminance seulement, fondu avec la distance.
 - Relief : `shading_relief` et occlusion de `relief_shade_*` réduits ; valeurs dans les paramètres du matériau, ajustées sur captures.
 - Parcellaire procédural (`fine_parcels`, l. 415–492) : désactivé au-dessus du palier « détail proche » (150), conservé dessous par-dessus la carte.
@@ -64,7 +64,7 @@ Budget 3–6 $, consigné dans `docs/budget.md`.
 3. SS3 — branchement shader, dosage du relief, repli, test headless.
 4. SS4 — lacs (extraction + `lakes_renderer.gd`).
 5. SS5 — textures (et éventuels objets) fal.ai.
-6. SS6 — captures, banc de performance, ADR `docs/decisions/NNNN-sol-satellite-pyramide-de-couleur.md` (prochain numéro libre au moment de l’écriture ; 0139–0140 déjà pris sur gp-merge).
+6. SS6 — captures, banc de performance ; ADR `docs/decisions/0142-sol-satellite-carte-de-couleur.md` (écrit dès SS1).
 
 ## Hors périmètre
 
