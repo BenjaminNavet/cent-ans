@@ -58,3 +58,4 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
   « parchemin peint » à spécifier après NB1, plafond propre ~8 $.
 - 09-30 : NB1 installé (4 PNG), ADR 0135, 3,10 $ au total. Reste : smoke + capture en jeu dans main.
 - 09-30 : NB1 fusionné et clos. Nouveau mandat du joueur : autonomie, semi-réaliste campagne/bataille, figurines = vrais soldats en armure, NB2 ≈ 20 $ au total, sans variantes. Suite : chantier SR (`docs/wip/sr.md`).
+- 09-30 : erreur — worktree supprimé avec `--force` : `tools/nb_raw/` perdu (brutes NB-DA/NB0/NB1 et les 6 décors non installés, ~0,42 $). Ce qui est livré est commité. À l'avenir, brutes dans `~/dev/cent-ans-raw/` (hors worktree).
