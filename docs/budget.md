@@ -120,6 +120,7 @@ GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
 | 2026-09-30 | fal.ai | GA3-L1 : décor de bataille, 8 objets neufs (8 × fal-ai/flux-2 1024² 0,012 $ + 16 × fal-ai/bria/background/remove 0,018 $ + 7 × fal-ai/trellis 0,02 $ + 1 × fal-ai/trellis-2 1024 0,30 $ église + 8 × fal-ai/flux-2/edit vues ≈ 0,024 $ + 4 × fal-ai/trellis/multi 0,02 $ ; maison reprise de S4) — prix catalogue | 1,10 $ | 1,10 $ | 4,64 $ |
 | 2026-09-30 | fal.ai | GA3-L2 : végétation campagne (5 × fal-ai/flux-2 1024² 0,012 $ + 1 × flux-2 1024×512 + 3 × fal-ai/nano-banana-2/edit 0,08 $ planches 8 azimuts + 6 × fal-ai/bria/background/remove 0,018 $ + 3 × fal-ai/trellis 0,02 $ rochers, dont 1 reprise) — prix catalogue | 0,47 $ | 0,47 $ | 5,11 $ |
 | 2026-09-30 | fal.ai | GA3-L1b : reprise maison, puits, bélier, un essai chacun (3 × fal-ai/flux-2 1024² 0,012 $ + 3 × fal-ai/bria/background/remove 0,018 $ + 3 × fal-ai/trellis 0,02 $ ; 1 envoi bria échoué au téléchargement, compté) — prix catalogue | 0,17 $ | 0,17 $ | 5,28 $ |
+| 2026-09-30 | fal.ai | GA3-L3a : figurine longbowman (1 × fal-ai/nano-banana-2/edit 2K 0,12 $ planche A-pose 3 vues + 1 × fal-ai/bria/background/remove 0,018 $ + 1 × fal-ai/trellis/multi 0,02 $ face+dos, livrée + 1 × fal-ai/trellis 0,02 $ comparaison + 1 × fal-ai/trellis-2 1024 0,30 $ parti avant la consigne « moins cher », comparaison seulement) — prix catalogue | 0,48 $ | 0,48 $ | 5,76 $ |
 
 ## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
 
