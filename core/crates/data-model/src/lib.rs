@@ -124,6 +124,7 @@ pub use entities::resource::{Resource, ResourceCategory};
 pub use entities::retinue::{
     Acquisition, AcquisitionTrigger, Companion, CompanionCategory, CompanionConditions, Retinue,
 };
+pub use entities::river_crossing::{CrossingFactors, MapCrossing, RiverCrossingRules};
 pub use entities::settlement::{
     CapitalGuard, FullProvinceBonus, MovementRules, RetreatRules, Settlement, SettlementEdge,
     SettlementGraph, SettlementKind, SettlementRules,

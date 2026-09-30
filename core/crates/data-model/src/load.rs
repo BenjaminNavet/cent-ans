@@ -131,6 +131,8 @@ pub mod folders {
     pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
     /// Living map scenes and figurines (lot FK1), inside `rules/`; optional.
     pub const MAP_SCENE_RULES: &str = "map_scenes.json";
+    /// River crossing battles (chantier RC), inside `rules/`; optional.
+    pub const RIVER_CROSSING_RULES: &str = "river_crossings.json";
     /// Trade hubs and routes (lot C5); optional folder.
     pub const ECONOMY: &str = "economy";
     /// Trade catalogue, inside `economy/`; optional.
@@ -142,6 +144,10 @@ pub mod folders {
     pub const MOVEMENT_RULES: &str = "rules.json";
     /// Inside `MAP`: map-pixel position of each settlement (lot C3).
     pub const SETTLEMENT_PX: &str = "settlements_px.json";
+    /// Inside `MAP`: bridges, fords and ferries in map pixels (chantier RC).
+    pub const CROSSINGS_PX: &str = "crossings_px.json";
+    /// Inside `MAP`: French names of the rivers (chantier RC).
+    pub const RIVER_NAMES: &str = "river_names.json";
     pub const MAP_META: &str = "map.json";
     pub const PROVINCE_GEOMETRY: &str = "provinces.geojson";
 }
@@ -378,6 +384,15 @@ pub struct GameData {
     /// `data/rules/map_scenes.json` (lot FK1, living map);
     /// [`crate::MapSceneRules::default`] when absent.
     pub map_scene_rules: crate::entities::map_scenes::MapSceneRules,
+    /// `data/rules/river_crossings.json` (chantier RC, ADR 0141); the
+    /// bundled file when absent.
+    pub river_crossing_rules: crate::entities::river_crossing::RiverCrossingRules,
+    /// `data/map/crossings_px.json` (chantier RC): bridges, fords and
+    /// ferries of the campaign map; empty when absent.
+    pub crossings: Vec<crate::entities::river_crossing::MapCrossing>,
+    /// `data/map/river_names.json`: French name of each river (source name
+    /// → display name); see [`GameData::river_display_name`].
+    pub river_names: BTreeMap<String, String>,
     /// Forest and wetland cover of the grid cells (lot CV3-1), decoded on
     /// first use; see [`GameData::cover_map`].
     pub cover: crate::cover::CoverHandle,
@@ -406,6 +421,16 @@ pub struct GameData {
 }
 
 impl GameData {
+    /// French display name of river `source` (`river_names.json`), the
+    /// source name itself when unnamed or hidden.
+    pub fn river_display_name<'a>(&'a self, source: &'a str) -> &'a str {
+        self.river_names
+            .get(source)
+            .map(String::as_str)
+            .filter(|n| !n.is_empty())
+            .unwrap_or(source)
+    }
+
     /// Loads every entity folder under `root` (the `data/` directory), then
     /// validates cross-references.
     ///
@@ -468,6 +493,9 @@ impl GameData {
             army_tradition_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             map_scene_rules: Default::default(),
+            river_crossing_rules: Default::default(),
+            crossings: Vec::new(),
+            river_names: BTreeMap::new(),
             cover: Default::default(),
             movement_graph: Default::default(),
             settlement_grid: Default::default(),
@@ -631,6 +659,18 @@ impl GameData {
         if map_scenes_path.is_file() {
             data.map_scene_rules = read_json(&map_scenes_path)?;
         }
+        let crossing_rules_path = root
+            .join(folders::RULES)
+            .join(folders::RIVER_CROSSING_RULES);
+        if crossing_rules_path.is_file() {
+            data.river_crossing_rules = read_json(&crossing_rules_path)?;
+        }
+        data.crossings = crate::entities::river_crossing::read_crossings(
+            &root.join(folders::MAP).join(folders::CROSSINGS_PX),
+        );
+        data.river_names = crate::entities::river_crossing::read_river_names(
+            &root.join(folders::MAP).join(folders::RIVER_NAMES),
+        );
         let trade_path = root.join(folders::ECONOMY).join(folders::TRADE);
         if trade_path.is_file() {
             data.trade = Some(read_json(&trade_path)?);

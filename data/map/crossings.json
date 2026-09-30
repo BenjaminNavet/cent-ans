@@ -960,6 +960,395 @@
       "note": "Place forte gardant le passage de la haute Somme."
     },
     {
+      "id": "bridge_pont_de_charenton",
+      "name": "Pont de Charenton",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Marne",
+      "lonlat": [2.414, 48.822],
+      "source": "Wikipédia (fr), « Pont de Charenton »",
+      "note": "Clé de Paris par l'est, disputée en 1358 et 1465."
+    },
+    {
+      "id": "bridge_pont_de_lagny",
+      "name": "Pont de Lagny",
+      "type": "bridge",
+      "structure": "wood",
+      "river": "Marne",
+      "lonlat": [2.709, 48.873],
+      "source": "Wikipédia (fr), « Siège de Lagny (1432) »"
+    },
+    {
+      "id": "bridge_pont_de_meaux",
+      "name": "Pont de Meaux",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Marne",
+      "lonlat": [2.878, 48.96],
+      "source": "Wikipédia (fr), « Marché de Meaux »",
+      "note": "Pont reliant la ville au Marché, assiégé par les Jacques en 1358."
+    },
+    {
+      "id": "bridge_pont_de_chateau_thierry",
+      "name": "Pont de Château-Thierry",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Marne",
+      "lonlat": [3.403, 49.044],
+      "source": "Wikipédia (fr), « Château-Thierry »"
+    },
+    {
+      "id": "bridge_pont_de_chalons",
+      "name": "Pont de Châlons",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Marne",
+      "lonlat": [4.363, 48.957],
+      "source": "Wikipédia (fr), « Châlons-en-Champagne »"
+    },
+    {
+      "id": "bridge_pont_de_sens",
+      "name": "Pont de Sens",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Yonne",
+      "lonlat": [3.279, 48.197],
+      "source": "Wikipédia (fr), « Sens (Yonne) »"
+    },
+    {
+      "id": "bridge_pont_d_auxerre",
+      "name": "Pont d'Auxerre",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Yonne",
+      "lonlat": [3.574, 47.796],
+      "source": "Wikipédia (fr), « Pont Paul-Bert »",
+      "note": "Pont médiéval remplacé par le pont Paul-Bert (1857)."
+    },
+    {
+      "id": "bridge_pont_de_cravant",
+      "name": "Pont de Cravant",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Yonne",
+      "lonlat": [3.69, 47.683],
+      "source": "Wikipédia (fr), « Bataille de Cravant »",
+      "note": "Bataille du pont en 1423."
+    },
+    {
+      "id": "bridge_pont_de_chinon",
+      "name": "Pont de Chinon",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Vienne",
+      "lonlat": [0.242, 47.164],
+      "source": "Wikipédia (fr), « Chinon »"
+    },
+    {
+      "id": "bridge_pont_de_chatellerault",
+      "name": "Pont de Châtellerault",
+      "type": "bridge",
+      "structure": "wood",
+      "river": "Vienne",
+      "lonlat": [0.546, 46.817],
+      "source": "Wikipédia (fr), « Bataille de Poitiers (1356) »",
+      "note": "Le Prince Noir y passe la Vienne en 1356 ; le pont Henri-IV (1611) le remplace."
+    },
+    {
+      "id": "bridge_pont_de_chauvigny",
+      "name": "Pont de Chauvigny",
+      "type": "bridge",
+      "structure": "wood",
+      "river": "Vienne",
+      "lonlat": [0.645, 46.568],
+      "source": "Wikipédia (fr), « Bataille de Poitiers (1356) »",
+      "note": "Jean II y passe la Vienne en 1356."
+    },
+    {
+      "id": "bridge_pont_de_lussac",
+      "name": "Pont de Lussac",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Vienne",
+      "lonlat": [0.727, 46.404],
+      "source": "Wikipédia (fr), « Jean Chandos »",
+      "note": "Chandos y est mortellement blessé en 1369."
+    },
+    {
+      "id": "bridge_pont_saint_martial_limoges",
+      "name": "Pont Saint-Martial (Limoges)",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Vienne",
+      "lonlat": [1.265, 45.826],
+      "source": "Wikipédia (fr), « Pont Saint-Martial »",
+      "note": "Pont du XIIIe siècle sur piles romaines."
+    },
+    {
+      "id": "bridge_pont_de_taillebourg",
+      "name": "Pont de Taillebourg",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Charente",
+      "lonlat": [-0.643, 45.841],
+      "source": "Wikipédia (fr), « Bataille de Taillebourg »",
+      "note": "Bataille du pont en 1242."
+    },
+    {
+      "id": "bridge_pont_de_saintes",
+      "name": "Pont de Saintes",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Charente",
+      "lonlat": [-0.627, 45.746],
+      "source": "Wikipédia (fr), « Arc de Germanicus »",
+      "note": "Pont romain et médiéval, l'arc se dressait dessus jusqu'en 1843."
+    },
+    {
+      "id": "bridge_pont_de_cognac",
+      "name": "Pont de Cognac",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Charente",
+      "lonlat": [-0.33, 45.696],
+      "source": "Wikipédia (fr), « Cognac »"
+    },
+    {
+      "id": "bridge_pont_de_jarnac",
+      "name": "Pont de Jarnac",
+      "type": "bridge",
+      "structure": "wood",
+      "river": "Charente",
+      "lonlat": [-0.175, 45.681],
+      "source": "Wikipédia (fr), « Bataille de Jarnac »",
+      "note": "Pont rompu en 1569 ; ouvrage médiéval supposé."
+    },
+    {
+      "id": "bridge_pont_vieux_de_villeneuve_sur_lot",
+      "name": "Pont Vieux de Villeneuve-sur-Lot",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Lot",
+      "lonlat": [0.705, 44.408],
+      "source": "Wikipédia (fr), « Pont Vieux (Villeneuve-sur-Lot) »",
+      "note": "Construit de 1282 à 1289."
+    },
+    {
+      "id": "bridge_pont_vieux_de_cahors",
+      "name": "Pont Vieux de Cahors",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Lot",
+      "lonlat": [1.443, 44.444],
+      "source": "Wikipédia (fr), « Pont Valentré »",
+      "note": "Pont du XIIe siècle (détruit en 1906) ; le pont Valentré (1308-1378) n'est pas achevé en 1337."
+    },
+    {
+      "id": "bridge_pont_vieux_d_espalion",
+      "name": "Pont Vieux d'Espalion",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Lot",
+      "lonlat": [2.768, 44.522],
+      "source": "Wikipédia (fr), « Pont-Vieux d'Espalion »"
+    },
+    {
+      "id": "bridge_pont_vieux_de_montauban",
+      "name": "Pont Vieux de Montauban",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Tarn",
+      "lonlat": [1.349, 44.015],
+      "source": "Wikipédia (fr), « Pont Vieux (Montauban) »",
+      "note": "Construit de 1311 à 1335, en brique."
+    },
+    {
+      "id": "bridge_pont_vieux_d_albi",
+      "name": "Pont Vieux d'Albi",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Tarn",
+      "lonlat": [2.146, 43.93],
+      "source": "Wikipédia (fr), « Pont-Vieux (Albi) »",
+      "note": "Construit vers 1035-1040."
+    },
+    {
+      "id": "bridge_vieux_pont_de_millau",
+      "name": "Vieux pont de Millau",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Tarn",
+      "lonlat": [3.074, 44.097],
+      "source": "Wikipédia (fr), « Vieux pont de Millau »",
+      "note": "Pont du XIIe siècle."
+    },
+    {
+      "id": "bridge_pont_du_chateau",
+      "name": "Pont-du-Château",
+      "type": "bridge",
+      "structure": "wood",
+      "river": "Allier",
+      "lonlat": [3.249, 45.797],
+      "source": "Wikipédia (fr), « Pont-du-Château »",
+      "note": "Pont et château sur l'Allier, qui donnent son nom au bourg."
+    },
+    {
+      "id": "ford_bac_de_vichy",
+      "name": "Bac de Vichy",
+      "type": "ford",
+      "structure": "ferry",
+      "river": "Allier",
+      "lonlat": [3.418, 46.126],
+      "source": "Wikipédia (fr), « Vichy »",
+      "note": "Bac ; pont médiéval incertain."
+    },
+    {
+      "id": "ford_bac_de_moulins",
+      "name": "Bac de Moulins",
+      "type": "ford",
+      "structure": "ferry",
+      "river": "Allier",
+      "lonlat": [3.327, 46.563],
+      "source": "Wikipédia (fr), « Pont Régemortes »",
+      "note": "Bac ; les ponts médiévaux furent emportés par les crues."
+    },
+    {
+      "id": "bridge_pont_de_montrichard",
+      "name": "Pont de Montrichard",
+      "type": "bridge",
+      "structure": "wood",
+      "river": "Cher",
+      "lonlat": [1.186, 47.343],
+      "source": "Wikipédia (fr), « Montrichard »"
+    },
+    {
+      "id": "bridge_pont_de_vierzon",
+      "name": "Pont de Vierzon",
+      "type": "bridge",
+      "structure": "wood",
+      "river": "Cher",
+      "lonlat": [2.069, 47.221],
+      "source": "Wikipédia (fr), « Vierzon »",
+      "note": "Ville prise par le Prince Noir en 1356."
+    },
+    {
+      "id": "bridge_pont_a_mousson",
+      "name": "Pont-à-Mousson",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Moselle",
+      "lonlat": [6.056, 48.905],
+      "source": "Wikipédia (fr), « Pont-à-Mousson »"
+    },
+    {
+      "id": "bridge_ponts_de_metz",
+      "name": "Ponts de Metz",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Moselle",
+      "lonlat": [6.17, 49.123],
+      "source": "Wikipédia (fr), « Metz »",
+      "note": "Moyen-Pont et pont des Morts, médiévaux."
+    },
+    {
+      "id": "bridge_pont_romain_de_treves",
+      "name": "Pont romain de Trèves",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Moselle",
+      "lonlat": [6.626, 49.751],
+      "source": "Wikipedia (de), « Römerbrücke (Trier) »",
+      "note": "Piles romaines, tablier médiéval."
+    },
+    {
+      "id": "ford_rhyd_chwima",
+      "name": "Gué de Rhyd Chwima (Montgomery)",
+      "type": "ford",
+      "structure": "ford",
+      "river": "Severn",
+      "lonlat": [-3.155, 52.574],
+      "source": "Wikipedia (en), « Treaty of Montgomery »",
+      "note": "Gué des rencontres anglo-galloises (1267)."
+    },
+    {
+      "id": "bridge_pont_de_shrewsbury",
+      "name": "Ponts de Shrewsbury",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Severn",
+      "lonlat": [-2.757, 52.708],
+      "source": "Wikipedia (en), « Welsh Bridge »",
+      "note": "Pont Saint-Georges (médiéval), prédécesseur du Welsh Bridge."
+    },
+    {
+      "id": "bridge_pont_de_bridgnorth",
+      "name": "Pont de Bridgnorth",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Severn",
+      "lonlat": [-2.418, 52.534],
+      "source": "Wikipedia (en), « Bridgnorth »"
+    },
+    {
+      "id": "bridge_pont_de_worcester",
+      "name": "Pont de Worcester",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Severn",
+      "lonlat": [-2.227, 52.192],
+      "source": "Wikipedia (en), « Worcester Bridge »",
+      "note": "Pont médiéval remplacé en 1781."
+    },
+    {
+      "id": "bridge_pont_de_gloucester",
+      "name": "Pont de Gloucester",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Severn",
+      "lonlat": [-2.257, 51.866],
+      "source": "Wikipedia (en), « Westgate Bridge »",
+      "note": "Pont médiéval de Westgate."
+    },
+    {
+      "id": "bridge_pont_de_burton",
+      "name": "Pont de Burton",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Trent",
+      "lonlat": [-1.625, 52.806],
+      "source": "Wikipedia (en), « Battle of Burton Bridge »",
+      "note": "Bataille du pont en 1322."
+    },
+    {
+      "id": "bridge_pont_de_swarkestone",
+      "name": "Pont de Swarkestone",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Trent",
+      "lonlat": [-1.455, 52.853],
+      "source": "Wikipedia (en), « Swarkestone Bridge »",
+      "note": "Pont du XIIIe siècle."
+    },
+    {
+      "id": "bridge_pont_de_nottingham",
+      "name": "Pont de Nottingham",
+      "type": "bridge",
+      "structure": "stone",
+      "river": "Trent",
+      "lonlat": [-1.137, 52.936],
+      "source": "Wikipedia (en), « Trent Bridge »",
+      "note": "Pont de Hethbeth, médiéval, prédécesseur du Trent Bridge."
+    },
+    {
+      "id": "bridge_pont_de_newark",
+      "name": "Pont de Newark",
+      "type": "bridge",
+      "structure": "wood",
+      "river": "Trent",
+      "lonlat": [-0.815, 53.079],
+      "source": "Wikipedia (en), « Newark-on-Trent »"
+    },
+    {
       "id": "pass_mont_cenis",
       "name": "Col du Mont-Cenis",
       "type": "pass",

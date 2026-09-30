@@ -259,6 +259,31 @@ pub struct SiegeEngineSetup {
     pub towers: Vec<UnitSetup>,
 }
 
+/// Structure of a campaign river crossing (`data/map/crossings_px.json`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CrossingStructure {
+    StoneBridge,
+    #[default]
+    WoodBridge,
+    BoatBridge,
+    Ferry,
+    Ford,
+}
+
+/// The battle is fought at a river crossing of the campaign map (RC, ADR
+/// 0141): the attacker stands on the far bank and must force the passage.
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct BattleCrossing {
+    pub structure: CrossingStructure,
+    /// Name of the crossing (empty for an anonymous road bridge).
+    #[serde(default)]
+    pub name: String,
+    /// French name of the river.
+    #[serde(default)]
+    pub river: String,
+}
+
 /// Full description of a battle.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BattleSetup {
@@ -314,6 +339,10 @@ pub struct BattleSetup {
     /// replays).
     #[serde(default, skip_serializing_if = "BattleOpening::is_standard")]
     pub opening: BattleOpening,
+    /// RC: the battle is fought at a campaign river crossing (bridge, ford,
+    /// ferry): the field gets that single passage as a choke point.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crossing: Option<BattleCrossing>,
 }
 
 impl BattleSetup {
@@ -328,6 +357,15 @@ impl BattleSetup {
             season: self.season,
             village: if siege { Some(false) } else { self.village },
         }
+    }
+
+    /// RC2: the structure of the campaign crossing the field is drawn
+    /// around (`None` without a crossing and in a siege).
+    pub fn field_crossing(&self) -> Option<CrossingStructure> {
+        if self.siege.is_some() {
+            return None;
+        }
+        self.crossing.as_ref().map(|c| c.structure)
     }
 
     pub fn side(&self, side: SideId) -> &SideSetup {

@@ -167,17 +167,59 @@ def derive_maps(
 # --- generation ------------------------------------------------------------------
 
 
-def _check_ledger(budget_path: Path, lot: str) -> None:
-    """Refuse a paid call unless the ledger's last section is GA and the lot has room."""
+def budget_settings(document: dict[str, Any]) -> dict[str, Any]:
+    """Ledger settings of a materials document: section prefix, cap, lot, image estimate.
+
+    Without a ``budget`` block (``materials.yaml``, GA1) the GA section and its lot caps
+    apply, as before. A block (``water_materials.yaml``, RC5) names its own section, its
+    own ceiling and a per-image estimate, so the run is capped without any network call.
+    """
+    block = document.get("budget")
+    if not block:
+        return {
+            "section": GA_SECTION_PREFIX,
+            "cap": None,
+            "lot": None,
+            "estimate": None,
+        }
+    return {
+        "section": block["section"],
+        "cap": Decimal(str(block["cap"])),
+        "lot": block.get("lot"),
+        "estimate": Decimal(str(block["estimate_per_image"])),
+    }
+
+
+def _check_ledger(
+    budget_path: Path,
+    lot: str,
+    *,
+    section: str = GA_SECTION_PREFIX,
+    cap: Decimal | None = None,
+    estimate: Decimal = Decimal("0.00"),
+) -> None:
+    """Refuse a paid call unless the ledger's last section is ``section`` and has room.
+
+    With ``cap`` (RC5 envelope) the whole section's cumulative spend plus ``estimate``
+    must stay within it; otherwise the per-lot ceiling of ``LOT_CAPS`` (GA1) applies.
+    """
     ledger = budget.BudgetLedger(budget_path)
     title = ledger.current_session.title or ""
-    if not title.startswith(GA_SECTION_PREFIX):
+    if not title.startswith(section):
         raise RuntimeError(
-            f"La dernière section de {budget_path} n'est pas « {GA_SECTION_PREFIX} » "
+            f"La dernière section de {budget_path} n'est pas « {section} » "
             f"(trouvé : « {title} ») : la dépense serait mal consignée."
         )
-    cap = LOT_CAPS.get(lot)
-    if cap is None:
+    if cap is not None:
+        spent_total = ledger.total()
+        if spent_total + estimate > cap:
+            raise budget.BudgetExceeded(
+                f"Plafond de la section « {section} » : {spent_total} $ dépensés "
+                f"+ {estimate} $ estimés > {cap} $"
+            )
+        return
+    lot_cap = LOT_CAPS.get(lot)
+    if lot_cap is None:
         return
     spent = sum(
         (
@@ -187,9 +229,9 @@ def _check_ledger(budget_path: Path, lot: str) -> None:
         ),
         Decimal("0.00"),
     )
-    if spent >= cap:
+    if spent >= lot_cap:
         raise budget.BudgetExceeded(
-            f"Plafond du lot {lot} atteint : {spent} $ / {cap} $"
+            f"Plafond du lot {lot} atteint : {spent} $ / {lot_cap} $"
         )
 
 
@@ -240,17 +282,19 @@ def generate(
     material_id: str,
     out_dir: Path,
     *,
-    lot: str = "GA1",
+    lot: str | None = None,
     materials_path: Path = MATERIALS_PATH,
     budget_path: Path = budget.DEFAULT_BUDGET_PATH,
+    envelope: Decimal | None = None,
 ) -> Path:
     """Generate one material (paid unless its raw image exists) and return its albedo tile.
 
     A scanned material (``source: ambientcg:<Id>``) is fetched and cut instead (free).
 
     The raw image is kept as ``<out_dir>/<id>_raw.png``; an existing raw image is
-    reused without any call, so an interrupted batch never pays twice. The spend is
-    recorded by :func:`openrouter.generate_image` in the GA section of the ledger.
+    reused without any call, so an interrupted batch never pays twice (delete it to
+    retry a bad draw). The spend is recorded by :func:`openrouter.generate_image` in
+    the ledger. ``envelope`` lowers the section cap of a ``budget`` block (RC5).
     """
     from cent_ans_tools import openrouter
 
@@ -261,9 +305,20 @@ def generate(
         return process_scan(material_id, out_dir, materials_path=materials_path)[
             "albedo"
         ]
+    settings = budget_settings(document)
+    lot = lot or settings["lot"] or "GA1"
     raw_path = out_dir / f"{material_id}_raw.png"
     if not raw_path.exists():
-        _check_ledger(Path(budget_path), lot)
+        cap = settings["cap"]
+        if cap is not None and envelope is not None:
+            cap = min(cap, envelope)
+        _check_ledger(
+            Path(budget_path),
+            lot,
+            section=settings["section"],
+            cap=cap,
+            estimate=settings["estimate"] or Decimal("0.00"),
+        )
         model = document["model"]
         openrouter.generate_image(
             model,
@@ -485,6 +540,39 @@ def process_scan(
         paths[name] = out_dir / f"{material_id}_{name}.png"
         Image.fromarray(values).save(paths[name])
     return paths
+def plan(
+    ids: list[str] | None,
+    out_dir: Path,
+    *,
+    materials_path: Path = MATERIALS_PATH,
+) -> dict[str, Any]:
+    """Dry run: prompts and estimated cost of a batch, without any API call.
+
+    Returns ``{"model", "items": [{"id", "prompt", "reuse", "cost"}], "total", "cap"}``;
+    an image whose raw file already exists in ``out_dir`` costs nothing.
+    """
+    document = load_materials(materials_path)
+    settings = budget_settings(document)
+    per_image = settings["estimate"] or Decimal("0.00")
+    wanted = ids or [entry["id"] for entry in document["materials"]]
+    items = []
+    for material_id in wanted:
+        entry = material_entry(material_id, materials_path)
+        reuse = (Path(out_dir) / f"{material_id}_raw.png").exists()
+        items.append(
+            {
+                "id": material_id,
+                "prompt": entry["prompt"],
+                "reuse": reuse,
+                "cost": Decimal("0.00") if reuse else per_image,
+            }
+        )
+    return {
+        "model": document["model"],
+        "items": items,
+        "total": sum((item["cost"] for item in items), Decimal("0.00")),
+        "cap": settings["cap"],
+    }
 
 
 # --- review sheet ----------------------------------------------------------------

@@ -29,12 +29,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::field::{Battlefield, River, Zone};
 use crate::rng::BattleRng;
+use crate::scale::FieldSize;
+use crate::setup::CrossingStructure;
 
 /// Salt of the derived stream of the river network (width, fords, bridges,
 /// banks, streams, oxbow).
 pub(crate) const HYDRO_STREAM: u64 = 0xE3_0A;
 /// Salt of the derived stream of the roads.
 pub(crate) const ROADS_STREAM: u64 = 0xE3_0B;
+/// Salt of the derived stream of a campaign crossing's river (RC2, ADR
+/// 0141): drawn only when the setup has a crossing, so the other battles
+/// keep every draw.
+pub(crate) const CROSSING_STREAM: u64 = 0xC2_0A;
 
 // ----- rules -------------------------------------------------------------------
 
@@ -162,6 +168,23 @@ pub struct RoadRules {
     pub ford_road_chance: f64,
 }
 
+/// RC2 (ADR 0141): the river of a battle fought at a campaign crossing.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CrossingSiteRules {
+    /// Mean width of the river at a bridge, a boat bridge or a ferry: too
+    /// wide to wade anywhere but at the passage.
+    pub bridge_river_width_m: Span,
+    /// Mean width of the river at a ford.
+    pub ford_river_width_m: Span,
+    /// Meander amplitude (kept small: the river stays between the lines).
+    pub amplitude_m: Span,
+    /// The passage lies within this distance of the field's centre (x).
+    pub passage_jitter_m: f64,
+    /// Half-width of the shallow landing standing for a ferry.
+    pub ferry_half_width_m: f64,
+}
+
 /// Contents of `data/rules/battle_water.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -174,6 +197,7 @@ pub struct WaterRules {
     pub deep_water: DeepWaterRules,
     pub combat: WaterCombatRules,
     pub roads: RoadRules,
+    pub crossing: CrossingSiteRules,
 }
 
 const BUNDLED: &str = include_str!("../../../../data/rules/battle_water.json");
@@ -587,6 +611,11 @@ pub(crate) fn shape_river(
     river.bridge_xs = xs;
     // Banks: stretches of steep or marshy bank on either side, away from
     // the crossings.
+    river.banks = draw_banks(field_width, r, stream);
+}
+
+/// Stretches of steep or marshy bank on either side of the main river.
+fn draw_banks(field_width: f64, r: &RiverRules, stream: &mut BattleRng) -> Vec<Bank> {
     let mut banks = Vec::new();
     for north in [false, true] {
         let mut x = stream.range(0.0, 120.0);
@@ -611,7 +640,77 @@ pub(crate) fn shape_river(
             x += len + stream.range(40.0, 200.0);
         }
     }
-    river.banks = banks;
+    banks
+}
+
+/// RC2 (ADR 0141): the main river of a battle fought at a campaign
+/// crossing, drawn from its own stream: across the field between the two
+/// battle lines, wide, with exactly one passage near the centre:
+///
+/// - stone or wooden bridge: that bridge, no ford;
+/// - bridge of boats: a wooden bridge at the narrow end of the deck widths
+///   (no boat-bridge model yet);
+/// - ford: a single ford, no bridge;
+/// - ferry: a single narrow ford (approximation: the landing, fought over
+///   as a shallow crossing; no boat is simulated).
+///
+/// Banks as on any river; streams, oxbow and roads follow as usual.
+pub(crate) fn crossing_river(
+    structure: CrossingStructure,
+    size: &FieldSize,
+    rules: &WaterRules,
+    stream: &mut BattleRng,
+) -> River {
+    let (r, c) = (&rules.river, &rules.crossing);
+    let bridged = !matches!(
+        structure,
+        CrossingStructure::Ford | CrossingStructure::Ferry
+    );
+    let z0 = (size.attacker_line_z() + size.defender_line_z()) * 0.5 + stream.range(-15.0, 15.0);
+    let amplitude = draw_span(c.amplitude_m, stream);
+    let wavelength = stream.range(500.0, 900.0);
+    let phase = stream.range(0.0, TAU);
+    let width = draw_span(
+        if bridged {
+            c.bridge_river_width_m
+        } else {
+            c.ford_river_width_m
+        },
+        stream,
+    );
+    let width_amp = stream.range(0.0, r.width_variation * 0.5);
+    let width_wave = stream.range(260.0, 620.0);
+    let width_phase = stream.range(0.0, TAU);
+    let x = size.center_x() + stream.range(-c.passage_jitter_m, c.passage_jitter_m);
+    let (fords, bridge_xs) = match structure {
+        CrossingStructure::Ford => {
+            let half = draw_span(r.ford_half_width_m, stream);
+            let half_width = (half * (24.0 / width.max(10.0)).clamp(0.6, 1.2)).max(12.0);
+            (vec![crate::field::Ford { x, half_width }], Vec::new())
+        }
+        CrossingStructure::Ferry => (
+            vec![crate::field::Ford {
+                x,
+                half_width: c.ferry_half_width_m,
+            }],
+            Vec::new(),
+        ),
+        _ => (Vec::new(), vec![x]),
+    };
+    let banks = draw_banks(size.width, r, stream);
+    River {
+        z0,
+        amplitude,
+        wavelength,
+        phase,
+        width,
+        fords,
+        width_amp,
+        width_wave,
+        width_phase,
+        banks,
+        bridge_xs,
+    }
 }
 
 /// Carving of the main river bed at (x, z) (metres to subtract), with its
@@ -861,16 +960,30 @@ pub(crate) fn build_bridges(field: &mut Battlefield, rules: &WaterRules, stream:
     let r = &rules.river;
     for &x in &river.bridge_xs {
         let span = river.width_at(x);
-        let stone =
-            river.width >= r.stone_bridge_from_width_m || stream.unit() < r.stone_bridge_chance;
-        let width = draw_span(
-            if stone {
-                r.bridge_width_m.stone
-            } else {
-                r.bridge_width_m.wood
-            },
-            stream,
-        );
+        // RC2: the campaign crossing decides the kind; a bridge of boats is
+        // a wooden deck at the narrow end of the widths.
+        let (stone, width) = match field.crossing {
+            Some(CrossingStructure::StoneBridge) => {
+                (true, draw_span(r.bridge_width_m.stone, stream))
+            }
+            Some(CrossingStructure::WoodBridge) => {
+                (false, draw_span(r.bridge_width_m.wood, stream))
+            }
+            Some(CrossingStructure::BoatBridge) => (false, r.bridge_width_m.wood[0]),
+            _ => {
+                let stone = river.width >= r.stone_bridge_from_width_m
+                    || stream.unit() < r.stone_bridge_chance;
+                let width = draw_span(
+                    if stone {
+                        r.bridge_width_m.stone
+                    } else {
+                        r.bridge_width_m.wood
+                    },
+                    stream,
+                );
+                (stone, width)
+            }
+        };
         let arches = if stone {
             ((span / 9.0).round() as u32).max(1)
         } else {
@@ -992,7 +1105,8 @@ pub(crate) fn lay_roads(field: &mut Battlefield, rules: &WaterRules, stream: &mu
     };
     let crossings = field.crossings();
     for crossing in &crossings {
-        let kind = if crossing.bridge.is_some() {
+        // RC2: the campaign road always runs through the crossing.
+        let kind = if crossing.bridge.is_some() || field.crossing.is_some() {
             RoadKind::Main
         } else if stream.unit() < rr.ford_road_chance {
             RoadKind::Track

@@ -470,6 +470,7 @@ impl HistoricalMap {
             })
         };
         Ok(BattleSetup {
+            crossing: None,
             province: self.province.clone(),
             province_name: self.province_name.clone(),
             terrain: self.terrain,

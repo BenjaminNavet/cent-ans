@@ -42,9 +42,14 @@ func _init() -> void:
 		return
 	var checked := 0
 	for kind in ["infantry", "cavalry", "archer"]:
+		# GA3-L3 : les figurines générées (sans FG3/SR2 ; `archer_0`, `infantry_0`, `infantry_1`…)
+		# sont sautées : première variante fine.
+		var variant := 0
+		while BattleSkinned.figure(kind, variant).has("ga3_albedo"):
+			variant += 1
 		var mat := ShaderMaterial.new()
 		mat.shader = BattleSkinned.SHADER
-		BattleSkinned.setup_material(mat, kind, 0)
+		BattleSkinned.setup_material(mat, kind, variant)
 		if mat.shader == BattleSkinned.SHADER:
 			print("SR2 %s : pas de variante FG3_BAKED (cartes absentes ?)" % kind)
 			ok = false

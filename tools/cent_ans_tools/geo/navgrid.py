@@ -20,7 +20,7 @@ Layers, in order (costs from ``data/movement/rules.json``):
 2. **Minor rivers** (every ``rivers.geojson`` line that is not a major river):
    ``+ minor_river_extra``.
 3. **Roads** (``roads.geojson``, 1 cell wide): ``× road_cost_factor``.
-4. **Major rivers** (:data:`MAJOR_RIVERS`): impassable. Rasterised with
+4. **Major rivers** (:data:`MAJOR_RIVERS`, 26 since lot RC6): impassable. Rasterised with
    ``all_touched`` and closed diagonally (:func:`four_connected`) so that an
    8-neighbour move can never slip between two diagonal river cells.
 5. **Crossings** that reopen the major rivers: bridges and fords of
@@ -87,6 +87,19 @@ MAJOR_RIVERS: dict[str, tuple[str, ...]] = {
     "ebro": ("Ebro",),
     "danube": ("Danube", "Donau"),
     "somme": ("Somme",),
+    # Lot RC6: rivers of the Hundred Years' War theatre (Oise and Aisne are
+    # not in rivers.geojson).
+    "marne": ("Marne",),
+    "yonne": ("Yonne",),
+    "vienne": ("Vienne",),
+    "charente": ("Charente",),
+    "lot": ("Lot",),
+    "tarn": ("Tarn",),
+    "allier": ("Allier",),
+    "cher": ("Cher",),
+    "moselle": ("Mosel",),
+    "severn": ("Severn",),
+    "trent": ("Trent",),
 }
 # French names used by crossings.json -> major river key.
 RIVER_FR: dict[str, str] = {
@@ -105,6 +118,17 @@ RIVER_FR: dict[str, str] = {
     "Èbre": "ebro",
     "Danube": "danube",
     "Somme": "somme",
+    "Marne": "marne",
+    "Yonne": "yonne",
+    "Vienne": "vienne",
+    "Charente": "charente",
+    "Lot": "lot",
+    "Tarn": "tarn",
+    "Allier": "allier",
+    "Cher": "cher",
+    "Moselle": "moselle",
+    "Severn": "severn",
+    "Trent": "trent",
 }
 
 # Terrain classification (cell = 1.44 km; slope = rise / run on that grid).

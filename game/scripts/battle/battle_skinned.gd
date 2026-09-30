@@ -134,7 +134,10 @@ static func _hash1(n: float) -> float:
 static var _corpse_shader: Shader = null
 
 
-static func corpse_shader() -> Shader:
+static func corpse_shader(kind: String = "", variant: int = 0) -> Shader:
+	# GA3-L3 : une figurine générée garde son albédo.
+	if kind != "" and figure(kind, variant).has("ga3_albedo"):
+		return _variant(["BV2_CORPSE", "GA3_TEX"])
 	# FG3 : avec les figurines fines, les cadavres gardent les cartes cuites (même variante,
 	# uniformes `fine_*` à leur valeur neutre pour une figurine sans atlas).
 	if fine_enabled() and fine_maps_ready():
@@ -332,6 +335,8 @@ static func _merge_fine(base: Dictionary) -> void:
 		_merge_mocap_trial(rigs, MOCAP_TRIAL_DIR)
 	elif melee_default_enabled():
 		_merge_mocap_trial(rigs, MELEE_DIR)
+	if ga3_figures_enabled():
+		_merge_ga3(figures)
 
 
 ## NT14 (ADR 0129, complément) : clips de mêlée par défaut du rig fin `human`, choisis geste par
@@ -343,6 +348,57 @@ static func melee_default_enabled() -> bool:
 	if melee_forced >= 0:
 		return fine_enabled() and melee_forced == 1
 	return fine_enabled() and not OS.get_cmdline_user_args().has("--keyframed-melee")
+
+
+## GA3-L3 (ADR 0140) : figurines générées (image → 3D, `tools/blender_scripts/ga3_figures.py`)
+## à la place de figurines fines : même rig, mêmes clips, même format `CAM1` ; l'entrée fine
+## garde style, noblesse et prises, le manifeste GA3 remplace LOD, triangles et variantes,
+## ajoute l'albédo (`ga3_albedo`, variante `GA3_TEX` du shader) et retire l'atlas FG3.
+const GA3_DIR := "res://assets/models/battle_ga3/"
+
+
+## Figurines générées actives : par défaut ; `--no-ga3-fig` après `--` rend les figurines fines.
+static func ga3_figures_enabled() -> bool:
+	return fine_enabled() and not OS.get_cmdline_user_args().has("--no-ga3-fig")
+
+
+static func _merge_ga3(figures: Dictionary) -> void:
+	var text := FileAccess.get_file_as_string(GA3_DIR + "manifest.json")
+	var parsed = JSON.parse_string(text) if text != "" else null
+	if not parsed is Dictionary:
+		return
+	var generated: Dictionary = (parsed as Dictionary).get("figures", {})
+	for fig_name in generated:
+		if not figures.has(fig_name):
+			continue
+		var g: Dictionary = generated[fig_name]
+		if not ResourceLoader.exists(GA3_DIR + str(g.get("ga3_albedo", ""))):
+			push_warning("BattleSkinned: albédo GA3 absent pour %s" % fig_name)
+			continue
+		var entry: Dictionary = figures[fig_name]
+		var lods: Array = []
+		for file in g.get("lods", []):
+			lods.append(GA3_DIR + str(file))
+		entry["lods"] = lods
+		entry["tris"] = g.get("tris", [])
+		entry["variants"] = int(g.get("variants", 1))
+		entry["ga3_albedo"] = GA3_DIR + str(g["ga3_albedo"])
+		entry["ga3_lum"] = g.get("ga3_lum", [0.2, 0.2])
+		entry.erase("atlas_layer")
+
+
+## GA3-L3 : variante `GA3_TEX` (cadavre compris) et albédo d'une figurine générée.
+static func _setup_ga3(mat: ShaderMaterial, kind: String, variant: int) -> void:
+	var fig := figure(kind, variant)
+	if not fig.has("ga3_albedo"):
+		return
+	if mat.shader != SHADER and not _variants.values().has(mat.shader):
+		return
+	var corpse := mat.shader != null and mat.shader.code.contains("#define BV2_CORPSE")
+	mat.shader = _variant(["BV2_CORPSE", "GA3_TEX"] if corpse else ["GA3_TEX"])
+	mat.set_shader_parameter("ga3_albedo", load(str(fig["ga3_albedo"])))
+	var lum: Array = fig.get("ga3_lum", [0.2, 0.2])
+	mat.set_shader_parameter("ga3_lum", Vector2(float(lum[0]), float(lum[1])))
 
 
 ## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
@@ -583,6 +639,7 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 	mat.set_shader_parameter("variant_count", int(figure(kind, variant).get("variants", 1)))
 	mat.set_shader_parameter("size_jitter", 0.0 if kind == "cavalry" else 0.05)
 	mat.set_shader_parameter("sever_bones", sever_table(kind, variant))
+	_setup_ga3(mat, kind, variant)
 	_setup_fine_maps(mat, kind, variant)
 
 

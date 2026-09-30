@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/river_display.schema.json",
+  "title": "Affichage des cours d'eau de la carte de campagne",
+  "description": "Fichier data/map/river_display.json (chantier RC, ADR 0141).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "major_min_px": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+    "minor_min_px": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+    "importance_min_px_scale": { "$ref": "#/$defs/by_importance" },
+    "thin_fade": { "type": "number", "minimum": 0, "maximum": 1 },
+    "minor_max_distance": { "type": "number", "exclusiveMinimum": 0, "maximum": 5 },
+    "minor_fade": {
+      "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 5 },
+      "minItems": 2, "maxItems": 2
+    },
+    "minor_far_alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+    "shallow_color": { "$ref": "#/$defs/rgb" },
+    "deep_color": { "$ref": "#/$defs/rgb" },
+    "bank_ink_color": { "$ref": "#/$defs/rgb" },
+    "bank_ink_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+    "labels": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "font_size": { "type": "integer", "minimum": 6, "maximum": 64 },
+        "weight": { "type": "integer", "minimum": 100, "maximum": 900 },
+        "letter_spacing": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "color": { "$ref": "#/$defs/rgb" },
+        "outline_color": { "$ref": "#/$defs/rgb" },
+        "outline_alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+        "outline_px": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "pixel_size": { "type": "number", "exclusiveMinimum": 0 },
+        "flat": { "type": "boolean" },
+        "min_segment_px": { "type": "number", "minimum": 0 },
+        "spacing_px": { "$ref": "#/$defs/by_importance" },
+        "max_distance_by_importance": { "$ref": "#/$defs/by_importance" },
+        "min_importance": { "type": "integer", "minimum": 0, "maximum": 6 },
+        "clear_px_from_settlements": { "type": "number", "minimum": 0 },
+        "max_labels": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "rgb": {
+      "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 },
+      "minItems": 3, "maxItems": 3
+    },
+    "by_importance": {
+      "type": "array", "items": { "type": "number", "minimum": 0 },
+      "minItems": 7, "maxItems": 7
+    }
+  }
+}

@@ -41,6 +41,7 @@ pub fn setup(
     siege: Option<SiegeSetup>,
 ) -> BattleSetup {
     BattleSetup {
+        crossing: None,
         province: "prov_test".to_owned(),
         province_name: "Test".to_owned(),
         terrain: Terrain::Plains,
