@@ -46,7 +46,9 @@ def missing_units() -> list[str]:
 def is_mounted(entry: dict) -> bool:
     """Cavalry types get the mounted reference."""
     text = json.dumps(entry).lower()
-    return any(word in text for word in ("cavalry", "mounted", "horse", "cavalerie", "cheval"))
+    return any(
+        word in text for word in ("cavalry", "mounted", "horse", "cavalerie", "cheval")
+    )
 
 
 def main() -> None:
