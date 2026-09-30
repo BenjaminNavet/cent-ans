@@ -22,7 +22,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Capitale du comté puis duché de Juliers sur la Roer, résidence de Guillaume V.",
+    "description": "Capitale du comté puis margraviat (1336) de Juliers sur la Roer, résidence de Guillaume V.",
     "sources": [
       "Jülich"
     ]
@@ -48,7 +48,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville close du duché de Juliers sur la Roer, entre Cologne et Aix-la-Chapelle.",
+    "description": "Ville close du comté de Juliers sur la Roer, entre Cologne et Aix-la-Chapelle.",
     "sources": [
       "Düren"
     ]

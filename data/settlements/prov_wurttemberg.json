@@ -22,7 +22,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Résidence des comtes de Wurtemberg depuis le XIIIe siècle, sur ses haras (Stutengarten, « jardin des juments »).",
+    "description": "Résidence des comtes de Wurtemberg depuis le début du XIVe siècle, sur ses haras (Stutengarten, « jardin des juments »).",
     "sources": [
       "Stuttgart"
     ]
@@ -73,7 +73,7 @@
       "bld_stone_walls"
     ],
     "port": false,
-    "description": "Ville comtale sur le Neckar, ancien siège d'un comté palatin absorbé par le Wurtemberg au XIIIe siècle.",
+    "description": "Ville comtale sur le Neckar, siège des comtes palatins de Tübingen, qui la vendront au Wurtemberg en 1342.",
     "sources": [
       "Tübingen"
     ]

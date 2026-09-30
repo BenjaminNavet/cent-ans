@@ -37,7 +37,7 @@
     "kind": "town",
     "name": {
       "display": "Spire",
-      "local": "Spira",
+      "local": "Spîre",
       "local_language": "moyen haut-allemand"
     },
     "lonlat": [
@@ -64,7 +64,7 @@
     "kind": "town",
     "name": {
       "display": "Worms",
-      "local": "Wormatia",
+      "local": "Wormez",
       "local_language": "moyen haut-allemand"
     },
     "lonlat": [
@@ -194,7 +194,7 @@
     "kind": "town",
     "name": {
       "display": "Kaiserslautern",
-      "local": "Lutra",
+      "local": "Lûtern",
       "local_language": "moyen haut-allemand"
     },
     "lonlat": [
@@ -235,7 +235,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Abbaye bénédictine impériale fondée en 1030, nécropole des empereurs saliens près de Dürkheim.",
+    "description": "Abbaye bénédictine fondée vers 1025 par Conrad II sur un château salien près de Dürkheim.",
     "sources": [
       "Abbaye de Limbourg (Bad Dürkheim)"
     ]

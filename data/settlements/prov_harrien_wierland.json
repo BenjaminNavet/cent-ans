@@ -73,7 +73,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Château danois de la frontière face à Ivangorod et à Novgorod.",
+    "description": "Château danois de la frontière sur la Narova, face à la terre de Novgorod.",
     "sources": [
       "Narva"
     ]
@@ -98,7 +98,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Forteresse du Jerwen, au centre de l'Estonie danoise.",
+    "description": "Forteresse du Jerwen bâtie par l'ordre Livonien vers 1265, aux confins de l'Estonie danoise.",
     "sources": [
       "Paide"
     ]
