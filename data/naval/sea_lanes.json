@@ -1,0 +1,319 @@
+{
+  "description": "Routes maritimes de 1337 (lot SL1, ADR 0117) : grandes lignes de navigation entre ports, en plus des courts passages entre provinces voisines du graphe des colonies. Chaque route relie deux ports (colonies « port »), traverse une mer (maîtrise et interception NV1) et se classe en cabotage (« coastal ») ou haute mer (« open_sea »). Coût sur le graphe : longueur × cost_per_km, au moins min_cost_steps pas ; une armée qui embarque y passe toujours la saison. Gros temps : pertes des régiments embarqués par saison (storm_loss_percent) ; commerce : facteur de saison (trade_season_factor) ; interception : facteur par type (intercept_factor, la haute mer échappe mieux aux escadres). Une mer tenue par un ennemi (maîtrise ≥ blockade_control de data/naval/rules.json) coupe le commerce qui y passe ; en dessous, la sécurité baisse de hostile_control_security × maîtrise. Tracé géographique : data/map/sea_lanes_px.json (cent-ans geo sea-lanes).",
+  "rules": {
+    "cost_per_km": 0.5,
+    "min_cost_steps": 2.0,
+    "hostile_control_security": 0.6,
+    "kinds": {
+      "coastal": {
+        "name": "cabotage",
+        "storm_loss_percent": {
+          "spring": 0,
+          "summer": 0,
+          "autumn": 1,
+          "winter": 3
+        },
+        "trade_season_factor": {
+          "spring": 1.0,
+          "summer": 1.0,
+          "autumn": 1.0,
+          "winter": 0.85
+        },
+        "intercept_factor": 1.0
+      },
+      "open_sea": {
+        "name": "haute mer",
+        "storm_loss_percent": {
+          "spring": 1,
+          "summer": 0,
+          "autumn": 3,
+          "winter": 8
+        },
+        "trade_season_factor": {
+          "spring": 1.0,
+          "summer": 1.0,
+          "autumn": 0.9,
+          "winter": 0.6
+        },
+        "intercept_factor": 0.75
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "lane_southampton_bordeaux",
+      "name": "Route du vin de Gascogne",
+      "from": "set_southampton",
+      "to": "set_bordeaux",
+      "sea": "sea_bay_of_biscay",
+      "kind": "open_sea",
+      "description": "Flotte du vin : chaque automne, des centaines de nefs chargent à Bordeaux le vin nouveau pour Southampton et Londres ; artère du duché d'Aquitaine anglais.",
+      "source": "Wikipédia (fr), « Vin de Bordeaux » (commerce avec l'Angleterre au Moyen Âge)"
+    },
+    {
+      "id": "lane_bristol_bordeaux",
+      "name": "Route de Bristol",
+      "from": "set_bristol",
+      "to": "set_bordeaux",
+      "sea": "sea_bay_of_biscay",
+      "kind": "open_sea",
+      "description": "Bristol, second port du vin gascon, contourne la Cornouaille et Ouessant pour gagner la Gironde.",
+      "source": "Wikipédia (en), « Bristol » (Middle Ages)"
+    },
+    {
+      "id": "lane_plymouth_bayonne",
+      "name": "Route de Bayonne",
+      "from": "set_plymouth",
+      "to": "set_bayonne",
+      "sea": "sea_bay_of_biscay",
+      "kind": "open_sea",
+      "description": "Bayonne, port anglais de l'Adour, arme ses nefs pour le roi et commerce avec l'Angleterre par le golfe de Gascogne.",
+      "source": "Wikipédia (fr), « Bayonne » (période anglaise)"
+    },
+    {
+      "id": "lane_dartmouth_la_rochelle",
+      "name": "Route de La Rochelle",
+      "from": "set_dartmouth",
+      "to": "set_la_rochelle",
+      "sea": "sea_bay_of_biscay",
+      "kind": "open_sea",
+      "description": "Sel de Brouage et vin d'Aunis vers les ports du Devon ; la flotte anglaise y est défaite par les Castillans en 1372.",
+      "source": "Wikipédia (fr), « Bataille de La Rochelle (1372) »"
+    },
+    {
+      "id": "lane_plymouth_brest",
+      "name": "Passage de Bretagne",
+      "from": "set_plymouth",
+      "to": "set_brest",
+      "sea": "sea_channel",
+      "kind": "open_sea",
+      "description": "Les expéditions anglaises de la guerre de Succession de Bretagne (1342) traversent de Plymouth vers Brest, tenue par les Anglais jusqu'en 1397.",
+      "source": "Wikipédia (fr), « Guerre de Succession de Bretagne »"
+    },
+    {
+      "id": "lane_portsmouth_cherbourg",
+      "name": "Traversée du Cotentin",
+      "from": "set_portsmouth",
+      "to": "set_cherbourg",
+      "sea": "sea_channel",
+      "kind": "open_sea",
+      "description": "Route de la chevauchée de 1346 : la flotte d'Édouard III part de Portsmouth et débarque à Saint-Vaast-la-Hougue.",
+      "source": "Wikipédia (fr), « Chevauchée d'Édouard III en 1346 »"
+    },
+    {
+      "id": "lane_winchelsea_dieppe",
+      "name": "Route des Cinq-Ports",
+      "from": "set_winchelsea",
+      "to": "set_dieppe",
+      "sea": "sea_channel",
+      "kind": "open_sea",
+      "description": "Winchelsea et Rye, membres des Cinq-Ports, face aux Normands de Dieppe : raids et représailles de part et d'autre de la Manche.",
+      "source": "Wikipédia (fr), « Cinq-Ports »"
+    },
+    {
+      "id": "lane_southampton_sluis",
+      "name": "Route des galées de Flandre",
+      "from": "set_southampton",
+      "to": "set_sluis",
+      "sea": "sea_channel",
+      "kind": "coastal",
+      "description": "Les galées de Gênes et de Venise font escale à Southampton avant de remonter la Manche vers L'Écluse et Bruges.",
+      "source": "Wikipédia (en), « Flanders Galleys »"
+    },
+    {
+      "id": "lane_sandwich_sluis",
+      "name": "Route de l'Écluse",
+      "from": "set_sandwich",
+      "to": "set_sluis",
+      "sea": "sea_north_sea",
+      "kind": "open_sea",
+      "description": "Traversée de la flotte d'Édouard III vers le Zwin en juin 1340, conclue par la bataille de l'Écluse.",
+      "source": "Wikipédia (fr), « Bataille de L'Écluse »"
+    },
+    {
+      "id": "lane_londres_sluis",
+      "name": "Route de la laine",
+      "from": "set_londres",
+      "to": "set_sluis",
+      "sea": "sea_north_sea",
+      "kind": "open_sea",
+      "description": "La laine anglaise descend la Tamise vers le Zwin, avant-port de Bruges, où elle alimente les métiers flamands.",
+      "source": "Wikipédia (fr), « Commerce de la laine en Angleterre médiévale »"
+    },
+    {
+      "id": "lane_londres_calais",
+      "name": "Route de l'Étape",
+      "from": "set_londres",
+      "to": "set_calais",
+      "sea": "sea_channel",
+      "kind": "coastal",
+      "description": "Après 1363, toute laine exportée d'Angleterre doit passer par l'Étape de Calais.",
+      "source": "Wikipédia (fr), « Étape de Calais »"
+    },
+    {
+      "id": "lane_hull_hamburg",
+      "name": "Route de la Hanse",
+      "from": "set_hull",
+      "to": "set_hamburg",
+      "sea": "sea_north_sea",
+      "kind": "open_sea",
+      "description": "Les marchands hanséates échangent draps et laine du Yorkshire contre bois, poix et fourrures de la Baltique.",
+      "source": "Wikipédia (fr), « Hanse »"
+    },
+    {
+      "id": "lane_boston_bergen",
+      "name": "Route de la morue",
+      "from": "set_boston",
+      "to": "set_bergen",
+      "sea": "sea_north_sea",
+      "kind": "open_sea",
+      "description": "Le comptoir hanséate de Boston reçoit le stockfish de Bergen, grand marché de la morue séchée.",
+      "source": "Wikipédia (en), « Boston, Lincolnshire » (Hanseatic League)"
+    },
+    {
+      "id": "lane_bristol_waterford",
+      "name": "Passage d'Irlande",
+      "from": "set_bristol",
+      "to": "set_waterford",
+      "sea": "sea_irish_sea",
+      "kind": "open_sea",
+      "description": "Liaison régulière entre Bristol et les ports anglo-irlandais du Munster et du Leinster.",
+      "source": "Wikipédia (en), « Waterford » (Middle Ages)"
+    },
+    {
+      "id": "lane_plymouth_a_coruna",
+      "name": "Route de Saint-Jacques",
+      "from": "set_plymouth",
+      "to": "set_a_coruna",
+      "sea": "sea_atlantic",
+      "kind": "open_sea",
+      "description": "Pèlerins anglais vers Compostelle ; en 1386, Jean de Gand débarque à La Corogne pour disputer la couronne de Castille.",
+      "source": "Wikipédia (fr), « Jean de Gand »"
+    },
+    {
+      "id": "lane_bordeaux_la_rochelle",
+      "name": "Cabotage de Saintonge",
+      "from": "set_bordeaux",
+      "to": "set_la_rochelle",
+      "sea": "sea_bay_of_biscay",
+      "kind": "coastal",
+      "description": "Cabotage le long des côtes de Saintonge, de la Gironde au pertuis d'Antioche.",
+      "source": "Wikipédia (fr), « La Rochelle » (Moyen Âge)"
+    },
+    {
+      "id": "lane_bordeaux_bayonne",
+      "name": "Cabotage des Landes",
+      "from": "set_bordeaux",
+      "to": "set_bayonne",
+      "sea": "sea_bay_of_biscay",
+      "kind": "coastal",
+      "description": "Les deux grands ports du duché d'Aquitaine reliés le long de la côte landaise.",
+      "source": "Wikipédia (fr), « Duché d'Aquitaine »"
+    },
+    {
+      "id": "lane_la_rochelle_nantes",
+      "name": "Cabotage du Poitou",
+      "from": "set_la_rochelle",
+      "to": "set_nantes",
+      "sea": "sea_bay_of_biscay",
+      "kind": "coastal",
+      "description": "Sel de la baie de Bourgneuf et vin du Poitou vers l'estuaire de la Loire.",
+      "source": "Wikipédia (fr), « Baie de Bourgneuf » (sel)"
+    },
+    {
+      "id": "lane_nantes_brest",
+      "name": "Cabotage de Bretagne",
+      "from": "set_nantes",
+      "to": "set_brest",
+      "sea": "sea_bay_of_biscay",
+      "kind": "coastal",
+      "description": "Tour de la Bretagne sud, de l'estuaire de la Loire à la rade de Brest.",
+      "source": "Wikipédia (fr), « Duché de Bretagne »"
+    },
+    {
+      "id": "lane_bayonne_bilbao",
+      "name": "Cabotage cantabrique",
+      "from": "set_bayonne",
+      "to": "set_bilbao",
+      "sea": "sea_bay_of_biscay",
+      "kind": "coastal",
+      "description": "Les marins basques et cantabriques relient Bayonne aux ports de Biscaye, alliés de la Castille.",
+      "source": "Wikipédia (fr), « Hermandad de las Marismas »"
+    },
+    {
+      "id": "lane_bilbao_a_coruna",
+      "name": "Côte cantabrique",
+      "from": "set_bilbao",
+      "to": "set_a_coruna",
+      "sea": "sea_bay_of_biscay",
+      "kind": "coastal",
+      "description": "La côte nord de l'Espagne, des ports de la Hermandad jusqu'à la Galice.",
+      "source": "Wikipédia (fr), « Hermandad de las Marismas »"
+    },
+    {
+      "id": "lane_a_coruna_lisbonne",
+      "name": "Côte de Galice et de Portugal",
+      "from": "set_a_coruna",
+      "to": "set_lisbonne",
+      "sea": "sea_atlantic",
+      "kind": "coastal",
+      "description": "Cabotage atlantique de la Galice à l'estuaire du Tage.",
+      "source": "Wikipédia (fr), « Lisbonne » (Moyen Âge)"
+    },
+    {
+      "id": "lane_lisbonne_cadiz",
+      "name": "Côte de l'Algarve",
+      "from": "set_lisbonne",
+      "to": "set_cadiz",
+      "sea": "sea_atlantic",
+      "kind": "coastal",
+      "description": "Du Tage à la baie de Cadix par le cap Saint-Vincent.",
+      "source": "Wikipédia (fr), « Cadix » (Moyen Âge)"
+    },
+    {
+      "id": "lane_cadiz_palma",
+      "name": "Route du Détroit",
+      "from": "set_cadiz",
+      "to": "set_palma",
+      "sea": "sea_mediterranean",
+      "kind": "open_sea",
+      "description": "Les galées italiennes franchissent le détroit de Gibraltar et font escale à Majorque sur la route de Flandre.",
+      "source": "Wikipédia (en), « Flanders Galleys »"
+    },
+    {
+      "id": "lane_genes_palma",
+      "name": "Route de Majorque",
+      "from": "set_genes",
+      "to": "set_palma",
+      "sea": "sea_mediterranean",
+      "kind": "open_sea",
+      "description": "Gênes et Majorque, relais des galées de Flandre et du commerce catalan.",
+      "source": "Wikipédia (fr), « Royaume de Majorque »"
+    },
+    {
+      "id": "lane_genes_aigues_mortes",
+      "name": "Route d'Aigues-Mortes",
+      "from": "set_genes",
+      "to": "set_aigues_mortes",
+      "sea": "sea_mediterranean",
+      "kind": "coastal",
+      "description": "Seul port royal français en Méditerranée ; les arbalétriers génois soldés par le roi de France y débarquent.",
+      "source": "Wikipédia (fr), « Aigues-Mortes »"
+    },
+    {
+      "id": "lane_genes_naples",
+      "name": "Route tyrrhénienne",
+      "from": "set_genes",
+      "to": "set_naples",
+      "sea": "sea_mediterranean",
+      "kind": "coastal",
+      "description": "Cabotage de la Ligurie à Naples par Pise et les côtes du Latium.",
+      "source": "Wikipédia (fr), « République de Gênes »"
+    }
+  ],
+  "sources": [
+    "Wikipédia (fr), « Marine au Moyen Âge »",
+    "Wikipédia (en), « Flanders Galleys »",
+    "Wikipédia (fr), « Guerre de Cent Ans » (opérations navales)"
+  ]
+}
