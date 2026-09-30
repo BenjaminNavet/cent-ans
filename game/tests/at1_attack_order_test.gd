@@ -103,6 +103,23 @@ func _run() -> void:
 		var now_at_war: PackedStringArray = sim.call("get_faction_summary", "fac_france").get("at_war_with", PackedStringArray())
 		_check(now_at_war.has(faction), "confirming should declare war on %s" % faction)
 		_check(ctl.relation_to(faction) == "war", "the relation cache should follow the declaration")
+
+	# 4. Vassal : attaquable après déclaration de guerre, qui rompt l'hommage.
+	var vassal := ""
+	for entry in sim.call("get_diplomacy", "fac_france"):
+		if str(entry.get("status", "")) == "vassal":
+			vassal = str(entry["id"])
+			break
+	if _check(vassal != "", "France should have a vassal"):
+		map.select_army(armies[0])
+		_check(ctl.relation_to(vassal) == "peace", "a vassal should be attackable after a declaration")
+		var target := {"kind": "army", "id": "", "point": Vector2.ZERO, "faction": vassal}
+		_check(ctl.is_attack_target(target), "a vassal army should be an attack target")
+		ctl.ask_war(armies[0], target)
+		_check(ctl.war_dialog.visible, "attacking a vassal should ask for confirmation")
+		ctl.war_dialog.call("_on_confirm")
+		var at_war_now: PackedStringArray = sim.call("get_faction_summary", "fac_france").get("at_war_with", PackedStringArray())
+		_check(at_war_now.has(vassal), "confirming should declare war on the vassal %s" % vassal)
 	map.queue_free()
 	await process_frame
 

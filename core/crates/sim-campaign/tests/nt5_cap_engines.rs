@@ -352,3 +352,42 @@ fn a_ready_ram_helps_the_auto_resolved_assault() {
     assert!(walls, "the ram does not bring the walls down");
     assert!(with > without, "{with} > {without}");
 }
+
+/// Playtest 09-30: a siege begun by a march during the turn (immediate
+/// marches) builds its engines at that turn's end, as the ETA promised.
+#[test]
+fn engines_are_built_from_the_turn_the_siege_begins() {
+    let data = data();
+    let (mut state, _army) = besiege_guyenne(&data, 4);
+    let city = guyenne(&state);
+    let turn = state.turn;
+    {
+        let siege = state
+            .settlements
+            .get_mut(&city)
+            .unwrap()
+            .siege
+            .as_mut()
+            .unwrap();
+        siege.started_turn = turn;
+        siege.engine_work = 0;
+    }
+    let supplies = state
+        .settlement_state(&city)
+        .unwrap()
+        .siege
+        .clone()
+        .unwrap()
+        .supplies;
+    let rate = state.engine_rate(&data, &city);
+    state.end_turn_with(&data, idle);
+    let siege = state
+        .settlement_state(&city)
+        .unwrap()
+        .siege
+        .clone()
+        .unwrap();
+    assert_eq!(siege.engine_work, rate);
+    assert_eq!(siege.supplies, supplies, "supplies still wait a turn (M2)");
+    assert!(state.siege_engines(&data, &city)[0].ready);
+}

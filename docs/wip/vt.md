@@ -69,3 +69,14 @@ Chantier VT terminé sur `feat/vt` : fusion dans main par la session principale,
 - Rivières : plus de coupure sous les villes (5484cea26), les villes 1:1 enjambent la vraie rivière.
 - `smoke` OK après A-D, F-H. `at1_attack_order` échoue (l'armée assiège Bordeaux au lieu d'attaquer) : règle de simulation ; VT ne touche ni `core/` ni l'UI. Probablement antérieur, à confirmer sur main.
 - Code mort laissé : `life_effects._update_overlays` + `life_overlay.gdshader` (neige/suie sur maquettes) ; `ModelLibrary.HAMLET_SCALE` encore lu par settlement_layer.
+
+## Correctif 30/09 — Paris en dalles brunes (retour joueur)
+- Symptôme : vue rapprochée de Paris, dalles brunes plates qui flottent ou s'enfoncent, points
+  rouges (îlots 1:1 dans la bande de fondu) en avant.
+- Cause : le lointain des villes v2 (`build_v2_far` : Paris, Londres, Orléans…) était posé sur un
+  sol uniforme (altitude du centre) ; le relief affiché est exagéré, la jupe de 30 m ne suffit pas.
+  Les quartiers étaient en plus triangulés sur leur seul contour (triangles de 2 km).
+- Correctif (`fix/vt-v2-ground`) : instantané du relief sur l'emprise (`TownFarLayer._heights_at`,
+  même `TownPlan.Heights` que la ville 1:1), sol échantillonné par sommet ; nappe des quartiers
+  découpée en cellules de 200 m (`DISTRICT_CELL_M`), jupe densifiée. Test ajouté dans
+  `tf_far_mesh_test` (écart sommet/relief < 0,5 m).
