@@ -336,13 +336,19 @@ func _overlay_step(step: Dictionary) -> Dictionary:
 	}
 
 
+## IA ennemie coupée = camp tenu (NT11, option du cœur `set_hold`) : l'ennemi garde sa place et
+## ne recule pas de lui-même ; il peut encore se débander sous une forte pression. L'étape
+## `enemy_ai` (victoire) rend l'IA et retire le camp tenu.
 func _set_enemy_ai(enabled: bool) -> void:
 	enemy_ai_enabled = enabled
 	if scene == null:
 		return
 	var battle: Object = scene.get("battle")
 	if battle != null:
-		battle.call("set_ai", str(scene.get("enemy_side")), enabled)
+		var side := str(scene.get("enemy_side"))
+		battle.call("set_ai", side, enabled)
+		if battle.has_method("set_hold"):
+			battle.call("set_hold", side, not enabled)
 
 
 ## Contrôle ou point à surligner pour la cible `target` ({} : rien).

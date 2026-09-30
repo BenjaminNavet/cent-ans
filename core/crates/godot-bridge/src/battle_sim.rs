@@ -741,6 +741,25 @@ impl BattleSim {
         }
     }
 
+    /// NT11: "hold ground" for `side` (`"attacker"`/`"defender"`): its
+    /// regiments keep their place (no AI move, no skirmish step back), the
+    /// rout under pressure aside (guided battle prologue).
+    #[func]
+    fn set_hold(&mut self, side: GString, enabled: bool) {
+        if let Some(side) = parse_side(&side) {
+            self.drive(sim_battle::ReplayAction::SetHold { side, enabled });
+        }
+    }
+
+    /// NT11: does `side` hold its ground?
+    #[func]
+    fn get_hold(&self, side: GString) -> bool {
+        match (&self.sim, parse_side(&side)) {
+            (Some(sim), Some(side)) => sim.holds(side),
+            _ => false,
+        }
+    }
+
     /// F5a: opens the deployment phase (call right after `setup`, before
     /// any `tick`). `false` once the battle has started.
     #[func]
@@ -1443,6 +1462,8 @@ impl BattleSim {
                     "keep" => h.keep,
                     // NT8: the keep's height (0 for other buildings).
                     "height" => h.height,
+                    // NT11: a keep with a crenellated terrace roof.
+                    "terrace" => h.terrace,
                 }
                 .to_variant()
             })

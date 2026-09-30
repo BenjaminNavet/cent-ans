@@ -167,6 +167,8 @@ pub enum ReplayAction {
     StartHour { hour: f64 },
     /// `set_ai` (autoplay).
     SetAi { side: SideId, enabled: bool },
+    /// `set_hold` (NT11, "hold ground").
+    SetHold { side: SideId, enabled: bool },
     /// `begin_deployment` (F5a).
     BeginDeployment,
     /// `deploy_unit` (F5a).
@@ -200,6 +202,7 @@ impl ReplayAction {
         match self {
             ReplayAction::StartHour { hour } => sim.set_start_hour(*hour),
             ReplayAction::SetAi { side, enabled } => sim.set_ai(*side, *enabled),
+            ReplayAction::SetHold { side, enabled } => sim.set_hold(*side, *enabled),
             ReplayAction::BeginDeployment => {
                 sim.begin_deployment();
             }
