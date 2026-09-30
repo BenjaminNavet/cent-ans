@@ -96,7 +96,7 @@ static func fade_prev(state: Dictionary, clip: int, now: float) -> int:
 	var prev := int(state.get("prev", -1))
 	if prev >= 0:
 		var since := now - float(state.get("at", now))
-		if since < 0.0 or since > role_blend_s() + 0.1:
+		if since < 0.0 or since > role_blend_s() + 0.1 or role_blend_s() <= 0.0:
 			state["prev"] = -1
 			prev = -1
 	return prev
