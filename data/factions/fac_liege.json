@@ -39,12 +39,12 @@
     {
       "faction": "fac_empire",
       "status": "vassal",
-      "note": "Principauté d'Église relevant nominalement de l'Empire ; Adolphe de la Marck tient aussi ses terres patrimoniales du roi de France."
+      "note": "Principauté d'Église relevant nominalement de l'Empire ; Adolphe de la Marck, cadet des comtes westphaliens de la Marck, n'y tient pas de terres patrimoniales."
     },
     {
       "faction": "fac_france",
       "status": "peace",
-      "note": "La maison de la Marck est proche de la couronne de France, alliée traditionnelle de Liège contre les comtes de Looz et de Flandre."
+      "note": "Adolphe de la Marck penche pour Philippe VI et restera dans le camp français quand Édouard III ralliera les princes des Pays-Bas (1337-1339)."
     },
     {
       "faction": "fac_namur",
@@ -57,7 +57,7 @@
     "trade": 65,
     "piety": 75
   },
-  "description": "Grande principauté épiscopale mosane, gouvernée depuis 1313 par Adolphe de la Marck, bâtisseur et fondateur du studium liégeois ; houillères, forges et dinanderie font sa richesse.",
+  "description": "Grande principauté épiscopale mosane, gouvernée depuis 1313 par Adolphe de la Marck, contraint en 1316 de concéder la paix de Fexhe qui borne son pouvoir ; houillères, forges et dinanderie font sa richesse.",
   "sources": [
     "Adolphe de la Marck",
     "Principauté de Liège"

@@ -92,7 +92,7 @@
     "name": {
       "display": "Kilkenny",
       "local": "Cill Chainnigh",
-      "local_language": "anglo-normand"
+      "local_language": "gaélique irlandais"
     },
     "lonlat": [
       -7.25,
@@ -105,7 +105,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ville marchande et siège du parlement d'Irlande, sur la Nore.",
+    "description": "Ville marchande des Butler sur la Nore, où se réunit parfois le parlement d'Irlande.",
     "sources": [
       "Kilkenny"
     ]

@@ -18,8 +18,8 @@
   "suzerain": "fac_france",
   "primary_title": "tit_alencon",
   "heraldry": {
-    "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
-    "description": "Armes de France ancien brisées d'un lambel de gueules, marque des cadets de Valois.",
+    "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules chargée de huit besants d'argent.",
+    "description": "Armes de France ancien brisées d'une bordure de gueules besantée d'argent, portées par Charles II d'Alençon (la bordure de gueules seule est celle de son père Charles de Valois).",
     "primary_color": "#1F3A93",
     "secondary_color": "#B0182B"
   },
@@ -48,7 +48,7 @@
     "trade": 35,
     "piety": 55
   },
-  "description": "Comté-apanage érigé en 1325 pour Charles II d'Alençon, frère cadet de Philippe VI ; il mènera la charge de la chevalerie française à Crécy en 1346.",
+  "description": "Comté-apanage donné en 1293 à Charles de Valois, dont hérite en 1325 son fils Charles II d'Alençon, frère cadet de Philippe VI ; il mènera la charge de la chevalerie française à Crécy en 1346.",
   "sources": [
     "Charles II d'Alençon",
     "Comté d'Alençon"

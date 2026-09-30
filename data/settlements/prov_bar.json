@@ -80,7 +80,7 @@
     "fortification_level": 0,
     "buildings": ["bld_abbey"],
     "port": false,
-    "description": "Prieuré Notre-Dame fondé en 1144 par Renaud II, duc de Bar, sur l'Aire.",
+    "description": "Prieuré Notre-Dame fondé en 1144 par les comtes de Bar (le comté ne devient duché qu'en 1354), sur l'Aire.",
     "sources": ["Pierrefitte-sur-Aire"]
   },
   {
@@ -108,7 +108,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg ducal sur la route de Bar-le-Duc à Toul, résidence occasionnelle des ducs de Bar.",
+    "description": "Bourg ducal sur la route de Bar-le-Duc à Toul, résidence occasionnelle des comtes de Bar.",
     "sources": ["Void-Vacon"]
   },
   {

@@ -14,8 +14,7 @@
     "uncertain": true
   },
   "death": {
-    "value": "1359",
-    "uncertain": true
+    "value": "1358"
   },
   "historical": true,
   "titles": [
@@ -25,9 +24,6 @@
         "value": "1324",
         "uncertain": true
       }
-    },
-    {
-      "title": "Sénéchal héréditaire de Gascogne"
     }
   ],
   "skills": {
@@ -42,7 +38,7 @@
   "piety": 40,
   "starting_location": "prov_albret",
   "status": "at_court",
-  "description": "Sire d'Albret, sénéchal héréditaire de Gascogne pour le duc d'Aquitaine ; sa maison changera plusieurs fois de camp au cours de la guerre de Cent Ans.",
+  "description": "Sire d'Albret, grand vassal gascon du duc d'Aquitaine, fidèle à Édouard III au début de la guerre ; sa maison changera plusieurs fois de camp au cours de la guerre de Cent Ans.",
   "sources": [
     "Maison d'Albret",
     "Nérac"

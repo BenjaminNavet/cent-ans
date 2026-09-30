@@ -14,8 +14,8 @@
     "uncertain": true
   },
   "death": {
-    "value": "1343-08-26",
-    "note": "Mort de maladie à Séville en revenant de la croisade du Salado."
+    "value": "1343-09-26",
+    "note": "Mort pendant le siège d'Algésiras, où il sert Alphonse XI de Castille (à Séville selon certaines sources)."
   },
   "historical": true,
   "titles": [
@@ -24,7 +24,7 @@
     },
     {
       "title": "Vicomte de Béarn",
-      "note": "Tenu en alleu, sans hommage, selon la maison de Foix-Béarn."
+      "note": "Relève du duc d'Aquitaine (le roi d'Angleterre) ; Gaston Fébus le déclarera souverain en 1347."
     }
   ],
   "skills": {
@@ -39,7 +39,7 @@
   "piety": 55,
   "starting_location": "prov_bearn",
   "status": "at_court",
-  "description": "Maître du Béarn et du comté de Foix, allié de [[cdx_philippe_vi|Philippe VI]] et rival des comtes d'Armagnac ([[cdx_jean_i_d_armagnac|Jean Ier]]) pour la prééminence en Gascogne. Il combat les Maures d'Espagne et meurt en 1343 au retour de la campagne du Salado ; père du futur Gaston Fébus.",
+  "description": "Maître du Béarn et du comté de Foix, allié de [[cdx_philippe_vi|Philippe VI]] et rival des comtes d'Armagnac ([[cdx_jean_i_d_armagnac|Jean Ier]]) pour la prééminence en Gascogne. Il combat les Maures d'Espagne et meurt en 1343 au siège d'Algésiras ; père du futur Gaston Fébus.",
   "sources": [
     "Gaston II de Foix-Béarn",
     "Vicomté de Béarn"

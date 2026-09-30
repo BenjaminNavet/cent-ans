@@ -7,8 +7,9 @@
     "local_language": "moyen néerlandais"
   },
   "heraldry": {
-    "blazon": "De gueules à la croix d'argent, chargée en abîme d'un écusson de gueules à trois pals de vair.",
-    "description": "Croix d'argent du Sticht (attestée dès 1291 sur le sceau de l'évêque Jean de Sierck), brisée depuis Jean de Diest (1328) d'un écusson aux armes patrimoniales de la maison de Diest.",
+    "blazon": "Écartelé : aux 1 et 4 de gueules à la croix d'argent ; aux 2 et 3 d'or à deux fasces de sable.",
+    "description": "Croix d'argent sur gueules du Sticht (la principauté épiscopale d'Utrecht), écartelée des armes de la maison de Diest (d'or à deux fasces de sable), selon l'usage des évêques d'Utrecht ; l'écartelé exact de Jean de Diest n'est pas attesté.",
+    "uncertain": true,
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6"
   },
