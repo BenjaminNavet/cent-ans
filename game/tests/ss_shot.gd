@@ -3,6 +3,7 @@ extends SceneTree
 ## Lot SS : captures du sol de campagne à plusieurs hauteurs (avant/après la pyramide de couleur).
 ## Usage : godot --path game --resolution 1600x900 --script res://tests/ss_shot.gd --
 ##   --out=<dossier> [--prefix=avant-] [--at=<x>,<z>] [--distances=900,300,90]
+##   [--close=<propriété>=<float>] [--relief=<propriété>=<float>] (profils de caméra / relief HB6)
 ##   [--hide=<nœud>,…] [--param=<uniforme>=<float>]… [--env=<propriété Environment>=<float>]… (réglage du matériau du terrain) [--stats] (moyenne/écart-type
 ##   RGB du bas de l'image, sol sans figures, pour comparer sans lire l'image) [--bench] (ms par image
 ##   sur 240 images, sans vsync si lancé avec `--disable-vsync`)
@@ -24,6 +25,7 @@ func _init() -> void:
 	var env_params := {}
 	var hide := PackedStringArray()
 	var bench := false
+	var held_profiles: Array[Resource] = []  # garde les profils modifiés dans le cache de ressources
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -44,6 +46,11 @@ func _init() -> void:
 			env_params[ekv[0]] = float(ekv[1])
 		elif arg.begins_with("--hide="):
 			hide = arg.trim_prefix("--hide=").split(",")
+		elif arg.begins_with("--close=") or arg.begins_with("--relief="):
+			var profile: Resource = CloseCameraProfile.load_default() if arg.begins_with("--close=") else ReliefExaggerationProfile.load_default()
+			var pkv := arg.split("=", true, 1)[1].split("=")
+			profile.set(pkv[0], float(pkv[1]))
+			held_profiles.append(profile)
 		elif arg == "--bench":
 			bench = true
 		elif arg == "--stats":

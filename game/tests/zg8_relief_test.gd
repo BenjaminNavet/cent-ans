@@ -173,7 +173,9 @@ func _test_real_map() -> void:
 	print("zg8_relief_test: Pyrenees peak h=%.0f m floor=%.0f m lift=%.0f m (gain %.2f)" % [best_h, MapData.relief_floor_at(best.x, best.y), lift_peak, MapData.relief_gain()])
 	# ZG7c : relief local plafonné (`local_relief_cap_m`) : rehaussé, mais sans doubler la montagne.
 	var cap := ReliefExaggerationProfile.load_default().local_relief_cap_m
-	_check(best_h > 2000.0 and lift_peak > 100.0, "Pyrenean peak should be raised (%.0f m)" % lift_peak)
+	# HB6 (ADR 0143) : gain lointain abaissé (0,42 → 0,12) et montagnes écrasées dès la vue
+	# stratégique (`mountain_squash_far`) : le sommet peut être abaissé, jamais écrasé (≥ 50 %).
+	_check(best_h > 2000.0 and best_h + lift_peak > 0.5 * best_h, "Pyrenean peak crushed (%.0f m)" % lift_peak)
 	_check(cap <= 0.0 or best_h - MapData.relief_floor_at(best.x, best.y) < 3.0 * cap, "local relief of the peak should be capped (%.0f m above the floor)" % (best_h - MapData.relief_floor_at(best.x, best.y)))
 	_check(map_data.height_world_at(best.x, best.y) == MapData.display_height(map_data.height_m_at(best.x, best.y), best.x, best.y), "height_world_at = display height")
 
