@@ -131,19 +131,19 @@ fn battle(
     let log = std::env::var("IA_LOG").is_ok();
     let mut tick = 0u64;
     while !sim.is_finished() {
-        if foe == Foe::Naive && tick % period == 0 {
+        if foe == Foe::Naive && tick.is_multiple_of(period) {
             for command in naive_orders(&sim, foe_side) {
                 let _ = sim.apply_command(command, Some(foe_side));
             }
         }
-        if self_naive && tick % period == 0 {
+        if self_naive && tick.is_multiple_of(period) {
             for command in naive_orders(&sim, ai_side) {
                 let _ = sim.apply_command(command, Some(ai_side));
             }
         }
         sim.step();
         tick += 1;
-        if log && tick % (20.0 / DT).round() as u64 == 0 {
+        if log && tick.is_multiple_of((20.0 / DT).round() as u64) {
             println!("t={:.0}", sim.elapsed());
             for u in sim.units().iter().filter(|u| !u.synthetic) {
                 println!(
