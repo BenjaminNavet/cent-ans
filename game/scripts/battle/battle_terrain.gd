@@ -884,7 +884,9 @@ func _build_textures() -> void:
 			var width := _river_widths[i] if i < _river_widths.size() else float(terrain["river"]["width"])
 			var ford := _in_ford(p.x)
 			# EP3 : gués larges et caillouteux, galets plus serrés.
-			_stamp_disc(a, p, width * (1.25 if ford else 0.98), 3, 5.0)
+			# VN2 : hors gué, galets seulement sur une frange au bord de l'eau (avant : ~0,5 × la
+			# largeur de grève grise et nue de chaque côté, rivière « canal »).
+			_stamp_disc(a, p, width * (1.25 if ford else 0.56), 3, 4.0 if ford else 2.5)
 			_stamp_disc(b, p, width * 1.25, 0, 8.0)
 			# EP3 : berges marécageuses (boue, herbe humide) ou escarpées (terre nue au bord).
 			for bank in banks:
@@ -893,7 +895,8 @@ func _build_textures() -> void:
 				var side := 1.0 if bool(bank["north"]) else -1.0
 				var edge := p + Vector2(0.0, side * (width * 0.5 + 6.0))
 				if str(bank["kind"]) == "marsh":
-					_stamp_disc(a, edge, 12.0, 2, 8.0, 0.8)
+					# VN2 : boue en taches au bord de l'eau (avant : bande pâle continue de 12 m).
+					_stamp_disc(a, p + Vector2(0.0, side * (width * 0.5 + 2.0)), 6.0, 2, 6.0, 0.55)
 					_stamp_disc(b, edge, 20.0, 0, 10.0)
 				else:
 					_stamp_disc(a, p + Vector2(0.0, side * (width * 0.5 + 2.0)), 3.5, 3, 2.0, 0.7)

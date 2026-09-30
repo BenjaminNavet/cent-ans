@@ -200,6 +200,8 @@ void fragment() {
 	w_dirt = max(w_dirt, thin_soil * 0.5);
 	w_pebbles = max(w_pebbles, thin_soil * outcrops * 0.5);
 	w_rock *= 1.0 - dip * 0.8;
+	// VN2 : berges de rivière (lit creusé, pente forte) en herbe humide et non en roche nue.
+	w_rock *= 1.0 - smoothstep(0.1, 0.5, sb.r) * 0.9;
 	// GA2 : labour frais (parcelle « labour » du décor, EP6 `decor_kind == 1`) tient une texture
 	// dédiée (`farm_furrows`) distincte du labour ambiant/procédural (loin des parcelles).
 	bool decor_labour = decor_kind == 1.0 && idx_fresh_plough >= 0;
@@ -366,10 +368,14 @@ void fragment() {
 	float mud_trample = trampled * (1.0 - snowy_w);
 	albedo = mix(albedo, albedo * vec3(0.62, 0.54, 0.46), mud_trample * 0.7);
 	// Berges humides et sol trempé par la pluie.
-	float wet = clamp(max(wetness * (0.55 + 0.45 * macro), sb.r * 0.4), 0.0, 1.0) * (1.0 - w[int(L_SNOW)]);
+	float wet = clamp(max(wetness * (0.55 + 0.45 * macro), sb.r * mix(0.4, 0.85, max(w_mud, w_pebbles))), 0.0, 1.0) * (1.0 - w[int(L_SNOW)]);
 	// Lot R2 : l'eau reste dans les creux (plus humides sous la pluie), ombre douce des fonds.
 	wet = clamp(wet + dip * (0.12 + wetness * 0.45) * (1.0 - w[int(L_SNOW)]), 0.0, 1.0);
 	albedo *= mix(1.0, 0.62, wet);
+	// VN2 : grève et vase au bord de l'eau : terre sombre, mouillée, un peu verdie (avant :
+	// gravier pâle et sec en bande continue le long de la rivière).
+	float bank_wet = smoothstep(0.3, 0.8, sb.r) * max(w_mud, w_pebbles) * (1.0 - w[int(L_SNOW)]);
+	albedo = mix(albedo, albedo * vec3(0.62, 0.66, 0.55), bank_wet * 0.85);
 	albedo *= 1.0 - dip * 0.08;
 
 	// GA2 : macro-variation supplémentaire (4 octaves, 50 à 200 m) de teinte et de luminance,

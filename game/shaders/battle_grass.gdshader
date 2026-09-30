@@ -69,7 +69,7 @@ void vertex() {
 	if (da6_on > 0.5) {
 		float patches = bt_value_noise(wp * 0.04 + 5.3) * 0.7 + bt_value_noise(wp * 0.11 + 1.9) * 0.3;
 		clump = bt_value_noise(wp * 0.55 + 7.1);
-		density = smoothstep(0.22, 0.5, patches) * mix(0.4, 1.0, smoothstep(0.3, 0.72, clump)) * (1.0 - snow * 0.93);
+		density = smoothstep(0.08, 0.38, patches) * mix(0.62, 1.0, smoothstep(0.3, 0.72, clump)) * (1.0 - snow * 0.93);
 	}
 	v_tint = vec3(0.0);
 	v_shade = 0.0;
@@ -84,7 +84,7 @@ void vertex() {
 		vec4 sa = texture(splat_a, suv);
 		vec4 sb = texture(splat_b, suv);
 		density *= 1.0 - smoothstep(0.2, 0.5, max(max(sa.g, sa.b), sa.a));
-		density *= 1.0 - smoothstep(0.3, 0.7, sb.r) * 0.8;
+		density *= 1.0 - smoothstep(0.3, 0.7, sb.r) * 0.35; // VN2 : berges herbues
 		density *= mix(1.0, 0.45, smoothstep(0.3, 0.8, sa.r)); // sous-bois : clairsemé
 		vec2 calm_d = max(calm_rect.xy - wp, wp - calm_rect.zw);
 		float outside_calm = smoothstep(0.0, 60.0, max(calm_d.x, calm_d.y));
@@ -102,7 +102,8 @@ void vertex() {
 		float dry = smoothstep(0.42, 0.66, patch * 0.7 + patch2 * 0.45);
 		float lush = smoothstep(0.45, 0.7, (1.0 - patch) * 0.75 + patch2 * 0.35);
 		v_tint = mix(v_tint, v_tint * (soft ? vec3(0.9, 0.85, 0.6) : vec3(1.35, 1.12, 0.62)), dry * 0.85);
-		v_tint = mix(v_tint, v_tint * vec3(0.7, 0.86, 0.66), lush * 0.8);
+		// VN1 : prairie grasse plus verte mais pas plus sombre que le sol (touffes « détritus »).
+		v_tint = mix(v_tint, v_tint * (soft ? vec3(0.86, 1.0, 0.8) : vec3(0.7, 0.86, 0.66)), lush * 0.8);
 		height_mul *= mix(1.0, 1.25, lush) * mix(1.0, 0.8, dry);
 		float in_field = outside_calm * (1.0 - sb.g) * field.z;
 		if (decor_on > 0.5) {
@@ -123,7 +124,7 @@ void vertex() {
 				} else if (field.x == 6.0) {
 					// Chaume : tiges courtes et blondes.
 					height_mul *= 0.5;
-					v_tint = mix(v_tint, soft ? vec3(0.85, 0.73, 0.46) : vec3(1.2, 1.02, 0.62), in_field * 0.8);
+					v_tint = mix(v_tint, soft ? vec3(0.6, 0.5, 0.3) : vec3(1.2, 1.02, 0.62), in_field * 0.8);
 					field.x = 0.0;
 				}
 			}
@@ -214,6 +215,10 @@ void fragment() {
 	// La carte ne donne que la découpe et les nuances claires/sombres des brins ; la couleur
 	// vient du sol (v_tint) pour que l'herbe prolonge la texture du terrain.
 	float l = dot(tex.rgb, vec3(0.3, 0.59, 0.11)) / tex_lum;
+	// VN1 : au-delà de ~30 m, contraste des brins et pied sombre atténués : vue de haut, les
+	// touffes lointaines faisaient un moucheté sombre (« détritus ») sur le sol plus clair.
+	float far_k = smoothstep(22.0, 70.0, length(VERTEX)) * da6_on;
+	l = mix(l, 1.05, far_k * 0.65);
 	vec3 hue = tex.rgb / max(dot(tex.rgb, vec3(0.333)), 0.001) * 0.333;
 	ALBEDO = v_tint * clamp(l, 0.45, 1.5) * mix(vec3(1.0), hue * 3.0, 0.2) * v_shade;
 	// Mipmaps : l'alpha moyenné des petits niveaux amincit les brins au loin ; on le relève
@@ -225,10 +230,11 @@ void fragment() {
 		// Pied de touffe dans l'ombre des brins, pointes un peu plus sèches ; cartes vues par la
 		// tranche amincies (le seuil d'alpha mange d'abord les bords des brins).
 		float top = 1.0 - UV.y;
-		ALBEDO *= mix(0.7, 1.0, smoothstep(0.0, 0.55, top));
+		ALBEDO *= mix(mix(0.8, 1.0, far_k), 1.0, smoothstep(0.0, 0.55, top)) * mix(1.0, 1.1, far_k);
 		ALBEDO = mix(ALBEDO, ALBEDO * vec3(1.08, 1.04, 0.9), top * top * 0.5);
 		ALPHA *= mix(0.45, 1.0, smoothstep(0.12, 0.5, v_facing));
-		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, decor_saturation);
+		// VN1 : brins un peu moins désaturés que le sol (la prairie restait olive terne).
+		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, min(decor_saturation * 1.25, 1.0));
 	}
 	// Alpha-to-coverage : bord des brins lissé par le MSAA (bord à 0,4 comme l'ancienne coupe),
 	// sinon la coupe franche scintille dès que la caméra bouge.
