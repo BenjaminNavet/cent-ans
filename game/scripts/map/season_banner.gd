@@ -22,6 +22,7 @@ var _tween: Tween
 func _init() -> void:
 	name = "SeasonBanner"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	z_index = 100  # VN : le cartouche passe au-dessus des panneaux (panneau de faction, latéral)
 	add_theme_stylebox_override("panel", HudStyle.illuminated_box(14))
 	_label = Label.new()
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE

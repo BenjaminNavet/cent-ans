@@ -134,11 +134,18 @@ func _grid_row(grid: GridContainer, key: String) -> Label:
 	key_label.text = key
 	grid.add_child(key_label)
 	var value := Label.new()
+	value.set_meta(&"row_key", key_label)
 	value.text = "—"
 	value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_child(value)
 	return value
+
+
+## VN : affiche ou masque une ligne (clé et valeur) de la grille d'informations.
+func _show_row(value: Label, shown: bool) -> void:
+	value.visible = shown
+	(value.get_meta(&"row_key") as Control).visible = shown
 
 
 func _tab_box(title: String) -> VBoxContainer:
@@ -241,11 +248,14 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	var controller := str(detail.get("controller", owner))
 	owner_value.text = _faction(owner, label_of)
 	controller_value.text = _faction(controller, label_of) if controller != owner else "— (le propriétaire)"
+	_show_row(controller_value, controller != owner)  # VN : lignes sans information masquées (place à la garnison)
 	fortification_value.text = "Niveau %d" % int(detail.get("fortification_level", 0))
 	var siege: Dictionary = detail.get("siege", {}) if detail.get("siege") is Dictionary else {}
 	if siege.is_empty():
 		siege_value.text = "Aucun"
+		_show_row(siege_value, false)
 	else:
+		_show_row(siege_value, true)
 		siege_value.text = "%s, %s, brèche %d" % [_faction(str(siege.get("attacker", "")), label_of), FrText.count(int(siege.get("turns_left", 0)), "tour"), int(siege.get("breach", 0))]
 	income_value.text = "%s / saison (%d %% de la province)" % [Money.amount(int(detail.get("income", 0))), int(round(float(detail.get("weight_share", 0.0)) * 100.0))]
 	# Garnison et recrutement.

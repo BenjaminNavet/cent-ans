@@ -130,7 +130,7 @@ func _ready() -> void:
 	court_panel.character_selected.connect(func(id: String) -> void: character_selected.emit(id))
 	court_panel.closed.connect(func() -> void: court_panel.hide())
 	# Le journal occupe la même colonne : masqué tant que la cour est ouverte.
-	court_panel.visibility_changed.connect(func() -> void: event_log.visible = not court_panel.visible)
+	hide_log_while(court_panel)
 	court_panel.hide()
 	character_sheet.closed.connect(func() -> void: character_sheet.hide())
 	character_sheet.character_requested.connect(func(id: String) -> void: character_selected.emit(id))
@@ -147,7 +147,7 @@ func _ready() -> void:
 	tech_panel.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
 	tech_panel.closed.connect(func() -> void: tech_panel.hide())
 	# Le panneau recouvre le journal : masqué tant que les technologies sont ouvertes.
-	tech_panel.visibility_changed.connect(func() -> void: event_log.visible = not tech_panel.visible and not court_panel.visible)
+	hide_log_while(tech_panel)
 	# --- C5 : routes commerciales ---
 	trade_button.toggled.connect(func(_pressed: bool) -> void: trade_layer_toggle_requested.emit())
 	tech_panel.hide()
@@ -836,6 +836,23 @@ func end_turn_control() -> EndTurnCluster:
 	return end_turn_cluster
 
 
+## VN : panneaux centrés qui recouvrent la colonne du journal (cour, technologies, objectifs) : le
+## journal se masque tant que l'un d'eux est ouvert.
+var _log_hiders: Array[Control] = []
+
+
+func hide_log_while(panel: Control) -> void:
+	_log_hiders.append(panel)
+	panel.visibility_changed.connect(_update_log_visibility)
+
+
+func _update_log_visibility() -> void:
+	var covered := false
+	for panel in _log_hiders:
+		covered = covered or (is_instance_valid(panel) and panel.visible)
+	event_log.visible = not covered
+
+
 ## Lot U5 (audit A3, T5) : bandeau « Tour des autres factions » affiché pendant la résolution de
 ## la fin de saison. `end_turn_gate` (posé par `FlowController`) dit si la fin de tour aura lieu
 ## tout de suite (pas de confirmation en attente) ; invalide = oui.
@@ -991,6 +1008,8 @@ func _setup_zones() -> void:
 	UiZones.put(UiZones.Zone.SIDE_PANEL, news_letters)
 	news_letters.size_flags_horizontal = Control.SIZE_SHRINK_END
 	UiZones.put(UiZones.Zone.TOASTS, event_log)
+	# VN : le journal reste en haut de la pile (les avis s'empilent dessous, sans le repousser).
+	event_log.get_parent().move_child(event_log, 0)
 	UiZones.put(UiZones.Zone.TOASTS, turn_banner)
 	# Q6 : la zone des avis reste sous les fenêtres du joueur (étage HUD) ; elle ne passe devant les
 	# panneaux (étage BANNER, Q4) que le temps du bandeau de fin de tour.
@@ -1218,7 +1237,7 @@ func layout_hud() -> void:
 		court_panel.set_max_right(view.x - CharacterSheet.COMPACT_WIDTH - 2.0 * CharacterSheet.SCREEN_MARGIN)
 	else:
 		court_panel.set_max_right(INF)
-	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x)
+	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x, view.y)
 	# U1 : panneaux centraux gardés à l'écran (bouton × visible), puis la minicarte se masque
 	# dès qu'un grand panneau la recouvrirait (elle ne passe jamais par-dessus).
 	var wide_panel_open := false

@@ -164,4 +164,7 @@ func _cell(text: String, right: bool, font_size: int) -> Label:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	else:
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# VN : la colonne des rubriques cède la place aux montants (panneau étroit) : le libellé
+		# passe à la ligne au lieu de pousser « Écart » hors du cadre.
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
