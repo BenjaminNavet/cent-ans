@@ -157,9 +157,21 @@ attaque, GA3 | figurine fine actuelle, toutes deux dans les poses du jeu). 0,63 
 - **Rendus** : le LOD0 exporté est skinné sur le CPU avec la texture d'os du jeu (comme la
   figurine actuelle) : l'arme suit les os virtuels (`Prop`) exactement comme en bataille (le
   rendu Blender posé plaçait l'arbalète et l'épée à l'horizontale).
+- **Poids** : la chaleur des os fuyait des doigts (aliasés en `Wrist`) vers cuisses et tibias
+  (AN1a : chausses du sergent déplacées) ; `strip_arm_leaks` retire les poids de bras sous
+  0,6 m et renormalise ; faces de livrée sous 0,5 m rendues à la couleur générée. `archer_0`
+  reconstruit avec ces correctifs.
 - Tests : `ga3_l3_figures_test.gd` (5 figurines, témoins `archer_1`/`infantry_2`, deux modes),
-  `sr2_weathering_test.gd` (saute toutes les figurines générées), pytest
-  `tools/tests/test_ga3_figures_manifest.py`.
+  `an1a_motion_test.gd` (étendu aux figurines générées), `sr2_weathering_test.gd` (saute
+  toutes les figurines générées), an1b, fg3_maps, nt7, nt10, nt12, fk2, fk_folk, smoke, pytest
+  `tools/tests/test_ga3_figures_manifest.py` : OK.
+- **Écart** : la seule capture Godot en bataille (gros plan de mêlée par défaut) cadre la
+  cavalerie française : aucun fantassin généré visible ; jugement sur la planche (LOD0 exporté,
+  poses du jeu). Capture ciblée (Crécy) laissée à la session principale.
+- **Points ouverts** : variantes de visages (une figure par recette ; plusieurs générations
+  par recette = variantes), mains en moufle, usure SR2 absente sur les figurines GA3, épée au
+  fourreau fondue de l'homme d'armes, jupon sans armoiries, visages un peu rougis par
+  l'étalonnage.
 
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.

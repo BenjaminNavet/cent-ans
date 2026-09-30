@@ -81,6 +81,21 @@ unité). Figurines retenues (une par type ; `data/unit_types` `figure` + `battle
 - [x] 3. Blender : 4 figurines (heat 100 %), rendus aux poses du jeu (LOD0 exporté skinné CPU
       avec la texture d'os, comme la figurine actuelle), planche `docs/img/ga3/l3b_units.jpg` ;
       îlots voxel < 2 % seulement retirés (jambes sous le tabard de l'arbalétrier = îlots)
-- [ ] 4. Test `ga3_l3_figures_test.gd` 5 figurines (fait, deux modes OK), tests de
-      non-régression, 1 capture Godot
-- [ ] 5. Docs `ga3.md` § L3b, ADR 0140, budget
+- [x] 4. Tests : `ga3_l3_figures_test.gd` (5 figurines, deux modes), an1a (étendu aux figurines
+      générées, deux modes), an1b, sr2 (saute les figurines générées), fg3_maps, nt7, nt10, nt12,
+      fk2, fk_folk, smoke, pytest `test_ga3_figures_manifest.py` : OK. Capture Godot en bataille
+      (1, `--closeup --closeup-distance=14 --no-hud`) : cadrée sur la cavalerie française, aucune
+      figurine à pied visible — jugement sur la planche (poses du jeu).
+- [x] 5. Docs `ga3.md` § L3b, ADR 0140 § extension L3b, budget (0,63 $)
+
+## Correctifs L3b (valent aussi pour archer_0, reconstruit)
+- Fuites de poids « heat » des mains (doigts aliasés en `Wrist`) vers les cuisses et tibias :
+  `strip_arm_leaks` retire tout poids de bras sous 0,6 m (après la chaleur et en pose de liaison)
+  et renormalise ; sans cela le mouvement secondaire (AN1a) et les bras déplaçaient les chausses.
+- Faces de livrée atteignant les tibias (< 0,5 m) rendues à la couleur générée.
+- Seuil des îlots voxel 30 % → 2 %.
+
+## Suite
+- L3c : cavalier du chevalier. Autres recettes des mêmes types si validé par le joueur.
+- Capture en bataille ciblant les fantassins (Crécy : `--historical=crecy`, hommes d'armes,
+  Génois, archers) à faire par la session principale.
