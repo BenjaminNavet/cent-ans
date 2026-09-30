@@ -73,7 +73,9 @@ def load_catalog(path: Path = CATALOG_PATH) -> dict[str, Any]:
     return document
 
 
-def build_prompt(document: dict[str, Any], entry: dict[str, Any], attempt: int = 1) -> str:
+def build_prompt(
+    document: dict[str, Any], entry: dict[str, Any], attempt: int = 1
+) -> str:
     """Full prompt of ``entry`` (retry prompt for attempts >= 2 when given)."""
     body = entry["prompt"]
     if attempt >= 2 and entry.get("prompt_retry"):
@@ -168,7 +170,9 @@ def generate(
 
 # ------------------------------------------------------------------ seamless
 def _srgb_to_linear(values: np.ndarray) -> np.ndarray:
-    return np.where(values <= 0.04045, values / 12.92, ((values + 0.055) / 1.055) ** 2.4)
+    return np.where(
+        values <= 0.04045, values / 12.92, ((values + 0.055) / 1.055) ** 2.4
+    )
 
 
 def _linear_to_srgb(values: np.ndarray) -> np.ndarray:
@@ -204,25 +208,32 @@ def _loop_cut(error: np.ndarray) -> np.ndarray:
     return path
 
 
-def _seam_mask(error: np.ndarray, centre: int, half_band: int, feather: float) -> np.ndarray:
+def _seam_mask(
+    error: np.ndarray, centre: int, half_band: int, feather: float
+) -> np.ndarray:
     """Weight (0..1) along columns: 1 between two loop cuts around column ``centre``.
 
-    ``error`` is rows x cols; the left cut runs in ``[centre - half_band, centre)``, the
-    right one in ``[centre, centre + half_band)``.
+    ``error`` is rows x cols; the left cut runs in ``[centre - half_band, centre - margin)``,
+    the right one in ``[centre + margin, centre + half_band)``.
     """
     rows, cols = error.shape
-    left = _loop_cut(error[:, centre - half_band : centre]) + centre - half_band
-    right = _loop_cut(error[:, centre : centre + half_band]) + centre
-    columns = np.arange(cols)[np.newaxis, :]
-    mask = ((columns >= left[:, np.newaxis]) & (columns <= right[:, np.newaxis])).astype(
-        np.float64
+    margin = int(np.ceil(3 * feather)) + 1  # keep the feathered cut off the seam itself
+    left = (
+        _loop_cut(error[:, centre - half_band : centre - margin]) + centre - half_band
     )
+    right = _loop_cut(error[:, centre + margin : centre + half_band]) + centre + margin
+    columns = np.arange(cols)[np.newaxis, :]
+    mask = (
+        (columns >= left[:, np.newaxis]) & (columns <= right[:, np.newaxis])
+    ).astype(np.float64)
     if feather > 0:
         mask = gaussian_filter(mask, feather, mode="wrap")
     return mask
 
 
-def make_seamless(image: np.ndarray, half_band: int, feather: float = 1.5) -> np.ndarray:
+def make_seamless(
+    image: np.ndarray, half_band: int, feather: float = 1.5
+) -> np.ndarray:
     """Seamlessly tileable copy of ``image`` (H x W x 3 float) by min-error cuts.
 
     After a half-tile roll the original borders meet on a central cross. The vertical arm
@@ -231,7 +242,7 @@ def make_seamless(image: np.ndarray, half_band: int, feather: float = 1.5) -> np
     crossing by the unrolled source. Cuts close on themselves so the result wraps.
     """
     height, width = image.shape[:2]
-    if not 4 <= half_band < min(height, width) // 2:
+    if not 16 <= half_band < min(height, width) // 2:
         raise ValueError(f"demi-bande hors bornes : {half_band}")
     source = image.astype(np.float64)
     rolled_xy = np.roll(source, (height // 2, width // 2), axis=(0, 1))
@@ -253,7 +264,9 @@ def make_seamless(image: np.ndarray, half_band: int, feather: float = 1.5) -> np
     )
 
 
-def flatten_lighting(linear: np.ndarray, sigma: float, strength: float = 0.7) -> np.ndarray:
+def flatten_lighting(
+    linear: np.ndarray, sigma: float, strength: float = 0.7
+) -> np.ndarray:
     """Divide out large-scale luminance variation (wrap-around blur), keeping chroma."""
     luminance = linear @ _LUMA
     low = gaussian_filter(luminance, sigma, mode="wrap")
@@ -423,7 +436,9 @@ def pack(
         albedo = Image.open(tiles / f"{entry['id']}_albedo.png").convert("RGB")
         normal = Image.open(tiles / f"{entry['id']}_normal.png").convert("RGB")
         if albedo.size != (size, size) or normal.size != (size, size):
-            raise ValueError(f"{entry['id']} : tuile de taille {albedo.size}, {size}² attendu")
+            raise ValueError(
+                f"{entry['id']} : tuile de taille {albedo.size}, {size}² attendu"
+            )
         cell = (entry["layer"] % columns * size, entry["layer"] // columns * size)
         albedo_grid.paste(albedo, cell)
         normal_grid.paste(normal, cell)
@@ -435,14 +450,16 @@ def pack(
                 "role": entry["role"],
                 "biomes": entry["biomes"],
                 "tile_m": entry["tile_m"],
-                "mean_linear": [round(float(v), 4) for v in mean.reshape(-1, 3).mean(0)],
+                "mean_linear": [
+                    round(float(v), 4) for v in mean.reshape(-1, 3).mean(0)
+                ],
             }
         )
     texture_dir.mkdir(parents=True, exist_ok=True)
     albedo_path = texture_dir / ALBEDO_NAME
     normal_path = texture_dir / NORMAL_NAME
-    albedo_grid.save(albedo_path, quality=ALBEDO_QUALITY, subsampling=0, optimize=True)
-    normal_grid.save(normal_path, quality=NORMAL_QUALITY, subsampling=0, optimize=True)
+    albedo_grid.save(albedo_path, quality=ALBEDO_QUALITY, subsampling=0)
+    normal_grid.save(normal_path, quality=NORMAL_QUALITY, subsampling=0)
     for path in (albedo_path, normal_path):
         Path(f"{path}.import").write_text(import_file(columns, rows, path.name))
     total = albedo_path.stat().st_size + normal_path.stat().st_size
@@ -467,9 +484,7 @@ def _font(size: int) -> ImageFont.ImageFont | ImageFont.FreeTypeFont:
         return ImageFont.load_default()
 
 
-def board(
-    document: dict[str, Any], raw_dir: Path = RAW_DIR, cell: int = 512
-) -> Path:
+def board(document: dict[str, Any], raw_dir: Path = RAW_DIR, cell: int = 512) -> Path:
     """Review sheet: each albedo tile repeated 2 x 2 (seams at the cell centre lines)."""
     materials = document["materials"]
     columns = 6
@@ -486,7 +501,9 @@ def board(
         for dx in (0, cell // 2):
             for dy in (0, cell // 2):
                 sheet.paste(tile, (x + dx, y + 28 + dy))
-        draw.text((x + 6, y + 3), f"{entry['layer']} {entry['id']}", fill="white", font=font)
+        draw.text(
+            (x + 6, y + 3), f"{entry['layer']} {entry['id']}", fill="white", font=font
+        )
     target = raw_dir / "board_2x2.jpg"
     sheet.save(target, quality=85)
     return target
