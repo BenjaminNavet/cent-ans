@@ -4,6 +4,7 @@ Run from the repository root (CMU takes in ``$CENT_ANS_MOCAP_SRC/cmu``, default
 ``~/dev/cent-ans-mocap-src/cmu``, outside the repository)::
 
     blender -b --factory-startup --python tools/blender_scripts/nt12_mocap_trial.py
+    blender -b --factory-startup --python tools/blender_scripts/nt12_mocap_trial.py -- render DIR
 
 Source: CMU Graphics Lab Motion Capture Database (http://mocap.cs.cmu.edu, "free for all
 uses", may be redistributed, not resold as is), ASF/AMC at 120 fps read by ``mocap_asf``.
@@ -51,6 +52,9 @@ SRC_DIR = os.environ.get(
 )
 OUT_DIR = os.path.join(bf.FINE_DIR, "mocap_trial")
 STEP = asf.SOURCE_FPS // bs.FPS  # 120 fps -> 24 fps
+GROUND_MARGIN = (
+    0.07  # metres between a joint centre (other than the feet) and the ground
+)
 LOOP_BLEND = 6  # frames blended back to the first one at the end of a looped clip
 
 # (clip substituted, subject, take, first and last source frame at 120 fps, loop, note)
@@ -121,6 +125,7 @@ class Target:
     def __init__(self, arm):
         """Read rest matrices, heads and axes of `arm`."""
         self.arm = arm
+        self.unit = arm.matrix_world.to_scale()[0] or 1.0  # metres per armature unit
         self.rest = {b.name: b.matrix_local.copy() for b in arm.data.bones}
         self.head = {n: m.to_translation() for n, m in self.rest.items()}
         self.up = (self.head["Head"] - self.head["Body"]).normalized()
@@ -267,6 +272,17 @@ def clip_bases(tgt, clip):
     low = min(solved[0][f].to_translation().dot(tgt.up) for f in ("Foot.L", "Foot.R"))
     shift = Matrix.Translation(tgt.up * (tgt.foot_rest - low))
     solved = [{b: shift @ m for b, m in s.items()} for s in solved]
+    # No joint under the ground (falls): lift the frame by the deepest overshoot.
+    lifted = []
+    for s in solved:
+        lift = 0.0
+        for bone, (_sb, _c, _p) in MAP.items():
+            margin = 0.0 if bone.startswith("Foot") else GROUND_MARGIN / tgt.unit
+            depth = tgt.foot_rest + margin - s[bone].to_translation().dot(tgt.up)
+            lift = max(lift, depth)
+        up = Matrix.Translation(tgt.up * lift)
+        lifted.append({b: up @ m for b, m in s.items()})
+    solved = lifted
     bases = [to_basis(tgt, s) for s in solved]
     if loop and len(bases) > LOOP_BLEND + 1:
         n = len(bases)
@@ -285,7 +301,7 @@ def quality(tgt, solved):
         for s in solved:
             p = s[foot].to_translation()
             if (
-                p.dot(up) - tgt.foot_rest < 0.03 * 100 / 97
+                p.dot(up) - tgt.foot_rest < 0.03 / tgt.unit
             ):  # ~3 cm above its rest height
                 flat = p - up * p.dot(up)
                 if planted is None:
@@ -304,10 +320,11 @@ def quality(tgt, solved):
     for a, b in zip(solved, solved[1:], strict=False):
         qa = a["Wrist.R"].to_quaternion()
         qb = b["Wrist.R"].to_quaternion()
-        spin = max(spin, math.degrees(qa.rotation_difference(qb).angle))
+        angle = math.degrees(qa.rotation_difference(qb).angle)
+        spin = max(spin, min(angle, 360.0 - angle))
     return {
-        "foot_slide_units": round(slide, 3),
-        "foot_below_rest_units": round(below, 3),
+        "foot_slide_m": round(slide * tgt.unit, 3),
+        "foot_below_rest_m": round(below * tgt.unit, 3),
         "wrist_r_max_deg_per_frame": round(spin, 1),
     }
 
@@ -318,7 +335,6 @@ def bake():
     import battle_skinned_poses as poses
 
     tgt = Target(arm)
-    unit = (arm.matrix_world.to_scale()[0]) or 1.0
     rig = bs.Rig("human")
     for b in bs.HUMAN_BONES:
         rig.add(arm, b, b)
@@ -337,8 +353,6 @@ def bake():
             rig.add_frame(rig.frame_matrices())
         rig.end_clip(name, start, loop)
         q = quality(tgt, solved)
-        q["foot_slide_m"] = round(q.pop("foot_slide_units") * unit, 3)
-        q["foot_below_rest_m"] = round(q.pop("foot_below_rest_units") * unit, 3)
         report[name] = {
             "source": f"CMU {take}.amc frames {first}-{last} @120fps",
             "note": note,
@@ -360,5 +374,56 @@ def bake():
     print("OK", OUT_DIR)
 
 
+RENDER_FRACS = (0.0, 0.35, 0.7, 1.0)
+RENDER_EYE = ((2.4, -4.2, 1.5), (0.0, -0.2, 0.85))
+
+
+def render(out):
+    """Workbench renders of each clip, keyframed (``k``) then mocap (``m``), on ``infantry_0``.
+
+    Files ``<clip>_<k|m>_<i>.png`` in `out` (fractions ``RENDER_FRACS`` of the clip).
+    """
+    import battle_fine_figures as ff
+    import battle_fine_proto as fp
+    import battle_skinned_poses as poses
+
+    os.makedirs(out, exist_ok=True)
+    arm, objs, _recipe = ff.build_figure("infantry_0", 0)
+    for o in objs:
+        attr = o.data.attributes.get("vmask")
+        for d in attr.data if attr else ():
+            d.value &= 0b0011_1111
+    objs = fp.apply_variant(objs, 0)
+    ff._pose_objects(arm, objs)
+    fp.PROBE["rig"] = fp.probe_rig(arm)
+    fp.setup_workbench((360, 480))
+    cam = fp.camera()
+    fp.look_at(cam, RENDER_EYE[0], RENDER_EYE[1], 40)
+    tgt = Target(arm)
+    for clip in CLIPS:
+        name = clip[0]
+        bases, _solved = clip_bases(tgt, clip)
+        for i, frac in enumerate(RENDER_FRACS):
+            fp.pose_clip(arm, name, frac)
+            fp.follow_prop(objs)
+            fp.render(os.path.join(out, f"{name}_k_{i}.png"))
+            basis = bases[int(round(frac * (len(bases) - 1)))]
+            for pb in arm.pose.bones:
+                pb.matrix_basis = basis.get(pb.name, Matrix.Identity(4))
+            poses.reset_state()
+            bpy.context.view_layer.update()
+            fp.follow_prop(objs)
+            fp.render(os.path.join(out, f"{name}_m_{i}.png"))
+
+
+def main():
+    """``bake`` (default) or ``render DIR`` after ``--``."""
+    args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+    if args and args[0] == "render":
+        render(args[1] if len(args) > 1 else "/tmp/nt12_render")
+    else:
+        bake()
+
+
 if __name__ == "__main__":
-    bake()
+    main()
