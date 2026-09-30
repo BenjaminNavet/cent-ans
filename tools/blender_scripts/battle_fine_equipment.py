@@ -538,8 +538,8 @@ def bassinet(lm, n=36, rows=12):
     arch = math.sqrt(rho**2 - (rho - 1) ** 2)
     base = lm.eye.z + 0.035 + 0.02
     r0 = (rx + ry) / 2
-    height = max(arch * r0, top + 0.06 - base)
-    apex = Vector((cx, cy + ry * 0.5, base + height + 0.004))
+    height = max(arch * r0, top + 0.075 - base)
+    apex = Vector((cx, cy + ry * 0.6, base + height + 0.004))
     bm = bmesh.new()
     rings = []
     for r in range(rows):
@@ -552,7 +552,12 @@ def bassinet(lm, n=36, rows=12):
             zc = lm.eye.z + 0.035
             if t < 0.35:
                 z = z0 + (zc + 0.02 - z0) * (t / 0.35)
-                k = 1.0 + 0.02 * (t / 0.35)
+                # CR2: the back curves in to the nape (no vertical tin-can wall).
+                k = (
+                    1.0
+                    + 0.02 * (t / 0.35)
+                    - 0.08 * max(0.0, math.sin(a)) * (1 - t / 0.35) ** 2
+                )
             else:
                 u = (t - 0.35) / 0.65
                 z = base + height * u
