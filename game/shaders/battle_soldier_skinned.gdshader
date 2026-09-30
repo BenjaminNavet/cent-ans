@@ -1046,6 +1046,10 @@ void fragment() {
 		float w = 0.3 * ROUGHNESS;
 		float sky_seen = smoothstep(0.02 - w, 0.62 + w, ry);
 		float occ = mix(0.12, 1.0, sky_seen * sky_seen);
+		if (code == C_MAIL) {
+			// Anneaux entrelacés : chacun cache une bonne part du ciel à ses voisins.
+			occ *= 0.5;
+		}
 #ifdef FG3_BAKED
 		occ *= mix(0.35, 1.0, smoothstep(0.35, 0.95, AO));
 #endif

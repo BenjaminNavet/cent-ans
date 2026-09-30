@@ -696,8 +696,6 @@ def caparison(body, mount, level, hem=0.46, dagged=False):
                 side, lift = math.cos(a), math.sin(a)
                 z = top - (1 - lift) * 0.33
                 x = half * side * 1.04
-                arc = abs(side) / 0.866
-                v = 0.04 + 0.16 * arc
                 f = 1.0
                 sx = 1.0 if side > 0 else -1.0
             else:
@@ -710,11 +708,21 @@ def caparison(body, mount, level, hem=0.46, dagged=False):
                 z = hz + (shoulder - hz) * f
                 depth = (0.05 if level == 0 else 0.03 if level == 1 else 0.0) * g
                 x = sx * (half * (1.02 + 0.1 * (1 - f) ** 1.5) + depth * fold(u, sx))
-                v = 0.2 + 0.42 * (1 - f)
             ring.append(bm.verts.new(Vector((x, y, z))))
-            uvs.append((u if sx > 0 else 1 - u, v, f, sx))
+            uvs.append((u, 0.0, f, sx))
         rings.append(ring)
         ring_uv.append(uvs)
+    # Distance along each ring from the spine (UV v), before any vertex is deleted.
+    spine = [[0.0] * (around + 1) for _k in range(stations + 1)]
+    mid = around // 2
+    for k in range(stations + 1):
+        for step in (1, -1):
+            acc = 0.0
+            j = mid
+            while 0 <= j + step <= around:
+                acc += (rings[k][j + step].co - rings[k][j].co).length
+                j += step
+                spine[k][j] = acc
     gap = (mount.seat.y - 0.24, mount.seat.y + 0.2)
     # Slit copies: at a slit station, the lower flank rows of the faces behind (fore slit)
     # or in front (hind slit) use separate vertices, 1 cm outside (panels overlap).
@@ -785,14 +793,22 @@ def caparison(body, mount, level, hem=0.46, dagged=False):
         if f.normal.dot(c - Vector((0, c.y, 1.0))) < 0:
             f.normal_flip()
     uv = bm.loops.layers.uv.new("UVMap")
-    # Whole-cloth arms: u along the body (the charges face the head on both flanks), v from
-    # the spine (0.04) to the hem (0.62): ~1.7 m of cloth per unit either way.
+    # Whole-cloth arms, one scale both ways (`cloth_m` of cloth per unit, charges ~25 cm):
+    # u along the body, mirrored on the right flank so the charges face the head on both
+    # sides (seam at the spine: the side is the face's, not the vertex's); v = distance
+    # along the ring from the spine, 0.04 at the spine.
+    cloth_m = 1.8
+    ymid = (y0 + y1) / 2
     for f, keys in faces_uv:
         if not f.is_valid:
             continue
-        for loop, (k, j) in zip(f.loops, keys, strict=True):
-            uu, vv, _f, _sx = ring_uv[k][j]
-            loop[uv].uv = (0.02 + 0.96 * uu, vv)
+        flip = f.calc_center_median().x < 0
+        # (loops looked up by vertex: `normal_flip` reverses the loop order)
+        at = {vert(k, j, keys[0][0]): (k, j) for k, j in keys}
+        for loop in f.loops:
+            k, j = at[loop.vert]
+            du = (loop.vert.co.y - ymid) / cloth_m
+            loop[uv].uv = (0.5 - du if flip else 0.5 + du, 0.04 + spine[k][j] / cloth_m)
     carried_idx = {}
     bm.verts.index_update()
     for v, val in carried.items():
