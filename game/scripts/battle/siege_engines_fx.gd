@@ -16,6 +16,8 @@ extends Node3D
 ##   le chemin parcouru (position du cœur) ; poutre du bélier balancée (`SiegeAssaultFx`).
 ## `release()` donne aux projectiles (`SiegeAssaultFx`, `BattleEffects`) le point et l'instant
 ## où la fronde ou la bouche les lâche. Rendu seulement : aucune règle ici.
+## GA3-L5 : trébuchet et bélier peuvent être posés dans leur variante générée (`ga3_variant`,
+## mêmes nœuds animés, `--no-ga3` pour les modèles procéduraux).
 
 const SETTINGS_FILE := "fx/siege_engines.json"
 const WOOD_TINTS := {
