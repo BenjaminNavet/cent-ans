@@ -532,7 +532,7 @@ func _apply_display(material: ShaderMaterial) -> void:
 		var rgb: Array = display.get(key, [])
 		if rgb.size() == 3:
 			material.set_shader_parameter(key, Color(float(rgb[0]), float(rgb[1]), float(rgb[2])))
-	for key in ["thin_fade", "bank_ink_strength"]:
+	for key in ["thin_fade", "bank_ink_strength", "sky_reflect"]:
 		if display.has(key):
 			material.set_shader_parameter(key, float(display[key]))
 	var scale: Array = display.get("importance_min_px_scale", [])
