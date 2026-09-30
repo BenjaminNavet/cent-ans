@@ -195,13 +195,13 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	# dupliqué, `bake_id` du shader skinné) ; une seule copie sans NT10 (atlas de BV3).
 	var share: Variant = mat.get_shader_parameter("livery_share")
 	var count: Variant = mat.get_shader_parameter("variant_count")
-	var ids: Array = bake_ids(copies, 0.7 if share == null else float(share)) if copies > 1 else []
+	var copy_ids: Array = bake_ids(copies, 0.7 if share == null else float(share)) if copies > 1 else []
 	var variants := 1 if count == null else maxi(int(count), 1)
 	for copy in copies:
 		var copy_mat := mat
 		if copies > 1:
 			copy_mat = mat.duplicate()
-			copy_mat.set_shader_parameter("bake_id", Vector2(float(ids[copy]), float(copy % variants)))
+			copy_mat.set_shader_parameter("bake_id", Vector2(float(copy_ids[copy]), float(copy % variants)))
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_custom_data = true
