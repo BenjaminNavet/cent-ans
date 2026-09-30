@@ -100,13 +100,19 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		RichTooltip.set_tooltip(button, "unit", unit_type, row)  # IB1 : infobulle en sections
 		button.pressed.connect(func() -> void: on_recruit.call(unit_type))
 		line.add_child(button)
-		var reason := str(row.get("reason", "Indisponible"))
-		if not available and not reason.begins_with("réserve"):
-			line.add_child(_note(reason_label(reason), wrap))
 		# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
 		if row.has("pool_label"):
 			line.add_child(_note(pool_label(row), wrap))
 		list.add_child(line)
+		# Q8 : le motif d'indisponibilité passe sous la ligne, pleine largeur ; à droite il
+		# partageait la place avec la réserve et se repliait mot à mot (« à / engager / depuis… »).
+		var reason := str(row.get("reason", "Indisponible"))
+		if not available and not reason.begins_with("réserve"):
+			var reason_note := _note(reason_label(reason), true)
+			if wrap:
+				line.add_child(reason_note)
+			else:
+				list.add_child(reason_note)
 
 
 ## Note à droite d'un bouton de ligne (`side_note`), ou pleine largeur sous le bouton si `wrap`.
