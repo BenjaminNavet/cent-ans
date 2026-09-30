@@ -1123,6 +1123,10 @@ def render_shield(blazon: Blazon) -> Image.Image:
     """Render a shield for ``blazon`` as a 128x128 RGBA image."""
     field = Image.new("RGB", (CANVAS, CANVAS))
     _draw_field(ImageDraw.Draw(field), blazon)
+    divided = _FIELD_DIVIDED.match(blazon.text)
+    if divided and divided[1] == "echiquete":
+        # Checky fields (Urgell) come from grammar v2.
+        _draw_field_v2(field, blazon.text)
     _draw_charges(field, blazon)
     return finish_shield(field)
 

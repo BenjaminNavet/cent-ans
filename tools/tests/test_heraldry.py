@@ -75,6 +75,7 @@ def test_new_charges_render_distinct_from_plain_field() -> None:
         "fac_isles",
         "fac_luna",
         "fac_ormond",
+        "fac_urgell",
     ]
     for faction_id in new_charge_factions:
         heraldry_data = factions[faction_id]["heraldry"]
