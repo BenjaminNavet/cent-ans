@@ -39,6 +39,10 @@ const HOSTILE := Color(0.72, 0.36, 0.22)
 ## Taille plancher de la carte des relations (elle grandit ensuite jusqu'à remplir sa colonne).
 const MAP_MIN_WIDTH := 200.0
 const MAP_MIN_HEIGHT := 150.0
+## VN lot 3 : largeurs planchers des colonnes de puissances et de négociation (elles grandissent avec
+## l'écran ; plus étroites que l'ancien 290 + 500, le panneau tient dans une vue de 1138 px).
+const FACTION_COLUMN_MIN_WIDTH := 230.0
+const DETAIL_COLUMN_MIN_WIDTH := 380.0
 const NEUTRAL := Color(0.62, 0.60, 0.55)
 const GIFT_AMOUNT := 1000
 const DONATION_AMOUNT := 1000
@@ -236,7 +240,7 @@ func _build_header() -> Control:
 
 func _build_faction_column() -> Control:
 	var column := VBoxContainer.new()
-	column.custom_minimum_size = Vector2(290, 0)
+	column.custom_minimum_size = Vector2(FACTION_COLUMN_MIN_WIDTH, 0)
 	column.add_theme_constant_override("separation", 6)
 	column.add_child(_section("Les puissances"))
 	var filter := OptionButton.new()
@@ -312,7 +316,7 @@ func _legend() -> Control:
 
 func _build_detail_column() -> Control:
 	var column := VBoxContainer.new()
-	column.custom_minimum_size = Vector2(500, 0)
+	column.custom_minimum_size = Vector2(DETAIL_COLUMN_MIN_WIDTH, 0)
 	column.add_theme_constant_override("separation", 6)
 	_head = VBoxContainer.new()
 	_head.add_theme_constant_override("separation", 2)
@@ -385,7 +389,8 @@ func _build_negotiation() -> Control:
 	var chance_row := HBoxContainer.new()
 	chance_row.add_theme_constant_override("separation", 8)
 	_chance_label = _label("", UiType.HEADING, HudStyle.INK)
-	_chance_label.custom_minimum_size = Vector2(250, 0)
+	_chance_label.custom_minimum_size = Vector2(150, 0)
+	_chance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	chance_row.add_child(_chance_label)
 	_chance_bar = ProgressBar.new()
 	_chance_bar.min_value = 0
@@ -937,7 +942,7 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 	var label := _label(label_text, UiType.BODY, HudStyle.INK)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.custom_minimum_size = Vector2(120, 0)
+	label.custom_minimum_size = Vector2(70, 0)
 	var tips := PackedStringArray()
 	for reason in value.get("reasons", []):
 		tips.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])

@@ -32,12 +32,15 @@ const BANNERS := {
 	"defeat": "res://assets/events/evt_azincourt.jpg",
 }
 const CARD_SIZE := Vector2(54, 80)
+## Hauteur maximale de la liste des faits notables avant qu'elle ne défile (quatre lignes).
+const MENTIONS_MAX_HEIGHT := 88.0
 
 var title_label: Label
 var subtitle_label: Label
 var return_button: Button
 var replay_button: Button  # EP13 : caché tant que la scène n'offre pas de rejeu
 var mentions_box: VBoxContainer
+var mentions_scroll: ScrollContainer
 var aftermath_box: HBoxContainer
 var hero_label: Label
 var panel: PanelContainer
@@ -106,6 +109,13 @@ func _label(text: String, size: int = 14, color: Color = INK, bold: bool = false
 	return label
 
 
+## Hauteur des faits notables : leur contenu, plafonné (le contenu regagne des lignes quand la largeur baisse).
+func _bound_mentions() -> void:
+	if mentions_scroll == null or mentions_box == null:
+		return
+	mentions_scroll.custom_minimum_size.y = minf(mentions_box.get_combined_minimum_size().y, MENTIONS_MAX_HEIGHT)
+
+
 func _layout() -> void:
 	if panel == null:
 		return
@@ -171,12 +181,22 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	mentions_box = VBoxContainer.new()
 	mentions_box.name = "Mentions"
 	mentions_box.add_theme_constant_override("separation", 1)
-	content.add_child(mentions_box)
+	# VN lot 3 : les faits notables ont leur propre défilement au-delà de `MENTIONS_MAX_HEIGHT`, pour
+	# que les cartes des régiments restent visibles à l'ouverture (1080p compris).
+	mentions_scroll = ScrollContainer.new()
+	mentions_scroll.name = "MentionsScroll"
+	mentions_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	mentions_scroll.add_child(mentions_box)
+	mentions_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_child(mentions_scroll)
 	for line in mentions(player_side, sides, units, outcome):
 		var label := _label("• " + line, 14)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.custom_minimum_size = Vector2(1000, 0)
+		label.custom_minimum_size = Vector2(700, 0)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		mentions_box.add_child(label)
+	mentions_scroll.custom_minimum_size.y = minf(mentions_box.get_combined_minimum_size().y, MENTIONS_MAX_HEIGHT)
+	mentions_box.resized.connect(_bound_mentions)
 	content.add_child(BattleUiKit.rule())
 	# Un camp par colonne : cartes des régiments puis tableau.
 	var hero := _hero(units, player_side)
