@@ -94,7 +94,22 @@ UNITS = {
     "the iron kettle hat, the mail gorget, the leather belt with a purse and a sheathed dagger, "
     "the boots. No goedendag, no club, no buckler, no shield: nothing held and nothing on the "
     "back.",
+    # L3c: the knight's rider (cavalry_0), generated dismounted and set back on the fine
+    # FG4 horse by ``ga3_figures.py`` (cavalry rig). Plate legs: no hose key.
+    "knight": COMMON
+    + "The source shows the knight mounted: show the same knight dismounted, standing on his "
+    "own feet, without the horse, the saddle, the lance or the shield. Clothing changes: the "
+    "short tight padded jupon (coat armour) worn over the plate keeps its cut, padding and dirt "
+    "but is plain saturated vivid pure green wool without any heraldic charge, lion, lily, "
+    "quartering or stripe (the livery colour); it is the only green item. All the armour stays "
+    "plain grey steel, not painted: rounded bascinet with the mail aventail, spaulders, plate "
+    "vambraces, couters, gauntlets, cuisses, poleyns, greaves and sabatons with spurs. There is "
+    "no blue item and no red item. Keep the knightly belt low on the hips, without any sword, "
+    "scabbard or dagger hanging from it; no lance, no shield, nothing on the back. Legs slightly "
+    "apart, clear gap between the thighs.",
 }
+# SR3 source sheet per unit when it is not ``<unit>.png``.
+SOURCES = {"knight": "knight_mounted.png"}
 TRELLIS2_ARGS = {
     "resolution": 1024,
     "texture_size": 2048,
@@ -164,7 +179,9 @@ def main() -> None:
     (out / "prompt.txt").write_text(UNITS[args.unit])
     sheet = out / "sheet.png"
     if not sheet.exists():
-        src = fal_client.upload_file(str(SR3 / f"{args.unit}.png"))
+        src = fal_client.upload_file(
+            str(SR3 / SOURCES.get(args.unit, f"{args.unit}.png"))
+        )
         res = run(
             "fal-ai/nano-banana-2/edit",
             {

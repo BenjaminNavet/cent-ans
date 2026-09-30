@@ -160,3 +160,29 @@ même type (`infantry_2/3/4/6/7/8`, `archer_1/4`) restent fines.
 - **Limites ajoutées** : épée au fourreau de la référence fondue au maillage de l'homme d'armes ;
   pas d'armoiries sur le jupon (livrée unie ; l'écu les porte). Points ouverts : variantes de
   visages (une seule figure par recette), mains en moufle, usure SR2 sur les figurines GA3.
+
+## Figurines de bataille, extension L3c : cavalier du chevalier (30/09)
+
+Recette `cavalry_0` (chevaliers : `unit_knights`, chevaliers bretons, teutoniques, serbes) ;
+`cavalry_3` (gendarmes, harnois blanc) et `standard_1` (porte-étendard) restent fines. Une
+génération `trellis/multi` (0,16 $) depuis `sr3/knight_mounted.png` redessiné **à pied** (A-pose,
+jupon vert clé sans meuble, harnois acier, ni épée ni fourreau fondus).
+
+- **Chaîne** : toute la chaîne L3b sur le rig `human` (mêmes données d'os que le cavalier fin :
+  proportions fines), puis translation dans le repère du cavalier en selle (`Mount.r_rest`) et
+  groupes renommés `R:` ; la pose de liaison du rig `cavalry` est le cavalier **debout sur la
+  selle**, les clips le mettent en selle (jambes aux étriers). Plafond `RIDER_CAP`
+  (9 000 / 1 000 / 180, équipement compris ; LOD2 à 284 à cause de l'équipement).
+- **Cheval** : pas reconstruit ; les triangles du cheval, du harnais, de la selle et du
+  caparaçon (sommets sur les seuls os du cheval) sont repris du fichier fin exporté
+  `battle_fine/cavalry_0_lod*.mesh.bin` avec leurs UV d'atlas FG3 ; la figurine générée garde
+  donc `atlas_layer` (`fine_horse` au manifeste) et le matériau cumule `FG3_BAKED` et `GA3_TEX`
+  (robe CC0 en relief, caparaçon cuit, usure SR2, lance CR4). Les sommets du cavalier ont une
+  source d'atlas nulle (aucune lecture FG3). Conséquence : reconstruire la figurine fine
+  `cavalry_0` impose de relancer `ga3_figures.py -- knight` (pytest de contrôle).
+- **Équipement** : écu (armoiries du jeu, `C_ARMS`), lance (`battle_skinned_cavalry.lance`,
+  masque de la recette tel quel comme les cavaliers fins), épée au fourreau
+  (`battle_fine_equipment.scabbard`, repères lus sur le rig). Acier en `C_PLATE`/`C_EXACT`
+  (`metal_z` 0), jamais teint ; jupon en livrée.
+- **Limites** : une seule variante (le bassinet ouvert de la génération remplace l'alternance
+  bassinet à visière / ouvert) ; jupon sans armoiries (l'écu et le caparaçon les portent).

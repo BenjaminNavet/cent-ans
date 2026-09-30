@@ -40,6 +40,27 @@
    "unit": "crossbowman",
    "variants": 1
   },
+  "cavalry_0": {
+   "fine_horse": true,
+   "ga3_albedo": "cavalry_0_albedo.png",
+   "ga3_lum": [
+    0.0727,
+    0.018
+   ],
+   "lods": [
+    "cavalry_0_lod0.mesh.bin",
+    "cavalry_0_lod1.mesh.bin",
+    "cavalry_0_lod2.mesh.bin"
+   ],
+   "source": "fal-ai/nano-banana-2/edit + multi_front_back.glb (tools/experiments/ga3_fal_figure.py)",
+   "tris": [
+    16502,
+    1992,
+    594
+   ],
+   "unit": "knight",
+   "variants": 1
+  },
   "infantry_0": {
    "ga3_albedo": "infantry_0_albedo.png",
    "ga3_lum": [
