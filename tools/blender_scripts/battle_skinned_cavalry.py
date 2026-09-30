@@ -158,6 +158,8 @@ def clip_specs():
         ("c_rear", "Idle", "Idle", poses.ride_rear, False, 32),
         ("c_stumble", "Gallop", "Idle", poses.ride_stumble, False, 90),
         ("c_victory", "Idle_2", "Idle", poses.ride_victory, False, None),
+        # Lot NT7: mounted standard bearer at the charge (two gallop strides).
+        ("c_std_charge", "Gallop", "Idle", poses.ride_std_charge, False, 30),
     ]
 
 
@@ -220,6 +222,7 @@ def bake_cavalry_rig():
                 "c_std_gallop",
                 "c_std_wave",
                 "c_victory",
+                "c_std_charge",
             ),
         )
     rig.write()
