@@ -232,3 +232,6 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Mat
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul HB |
 |---|---|---|---|---|---|
 | 2026-09-30 | — | HB : plan et ADR 0143 (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-30 | fal.ai | HB4 sonde essences : olivier + chêne kermès (flux-2 0,0126 + nano-banana-2/edit 0,08 + bria 0,018 par essence ; tarifs API fal vérifiés le 30/09) | 0,22 $ | 0,22 $ | 0,22 $ |
+| 2026-09-30 | fal.ai | HB4 essences : 18 nouvelles + reprise chêne kermès (arbuste en boule, graine 7), 19 × 0,11 $ | 2,09 $ | 2,09 $ | 2,31 $ |
+| 2026-09-30 | fal.ai | HB4 reprise bouleau (houppier trop clairsemé, graine 7) | 0,11 $ | 0,11 $ | 2,42 $ |
