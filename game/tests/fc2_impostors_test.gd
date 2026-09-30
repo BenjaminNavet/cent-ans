@@ -90,7 +90,6 @@ func _test_map() -> void:
 	print("fc2: census with impostors %s" % after)
 	_check(int(after["impostor"]) > 0, "far tiles use the impostor mesh")
 	_check(int(after["low"]) == 0, "no low mesh left for oak/beech/fir")
-	_check(int(after["detailed"]) + int(after.get("near", 0)) > 0, "near tiles keep a detailed mesh (FC5: leaf cards)")
 	# Hiver : variante ajourée du feuillage maillé, imposteurs dans le même shader (rendu fenêtré :
 	# compile les deux).
 	var life: Variant = map.get("life")
@@ -102,7 +101,13 @@ func _test_map() -> void:
 		_check(vegetation.foliage_material().shader == Vegetation.FOLIAGE_WINTER_SHADER, "winter foliage variant")
 		_check(vegetation.impostor_material().shader == Vegetation.IMPOSTOR_SHADER, "impostors keep their shader in winter")
 		(seasons as SeasonVisuals).set_season("summer", true)
-	_check(int(after.get("near", 0)) > 0, "FC5: nearest parts in leaf cards")
+	# FC5 : cartes de feuillage sous `near_distance` (45) seulement ; à d = 150 la caméra peut être
+	# plus loin que cela de toutes les parties (fenêtre headless : tangage et hauteur différents).
+	await _settle(rig, focus, 25.0, vegetation)
+	var close := vegetation.lod_census()
+	print("fc2: census at d=25 %s" % close)
+	_check(int(close.get("near", 0)) > 0, "FC5: nearest parts in leaf cards (d=25)")
+	_check(int(close["low"]) == 0 and int(close["detailed"]) == 0, "FC5: no 90/20-triangle meshes for oak/beech/fir (d=25)")
 	# FC5 repli (`--no-fc5`) : maillages détaillés de près, imposteurs au loin.
 	vegetation.use_near_cards = false
 	vegetation.build(data)
