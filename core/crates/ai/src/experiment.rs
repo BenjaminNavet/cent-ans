@@ -3,7 +3,11 @@
 //! `ai_duel_probe` lets one faction play the trial rules while every other
 //! keeps the current ones, and compares that faction's fate with the same
 //! game played on the current rules only. Nobody plays a trial by default:
-//! the game is not affected.
+//! the game is not affected (ADR 0148).
+//!
+//! A trial rule reads, where it applies:
+//! `if crate::experiment::on(ctx.faction, "my_rule") { new } else { current }`;
+//! an adopted rule loses its gate.
 use std::collections::BTreeSet;
 use std::sync::RwLock;
 

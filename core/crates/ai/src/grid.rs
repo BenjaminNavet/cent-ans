@@ -495,12 +495,7 @@ impl<'a> GridPlanner<'a> {
                         ours += state.army_power(self.data, id);
                     }
                 }
-                let ratio = if crate::experiment::on(self.faction, "attack125") {
-                    1.25
-                } else {
-                    self.rules.attack_ratio
-                };
-                let needed = ratio * theirs.max(e.power);
+                let needed = self.rules.attack_ratio * theirs.max(e.power);
                 if ours < needed {
                     return None;
                 }

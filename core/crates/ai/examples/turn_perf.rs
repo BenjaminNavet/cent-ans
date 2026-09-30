@@ -71,6 +71,8 @@ fn main() {
     let data = GameData::load(&root).expect("game data loads").0;
     // Decode the grid and label its components once, outside the measures.
     let _ = data.navgrid().component(0, 0);
+    // IA night: and the cover map, as the game does at load (bridge).
+    let _ = data.cover_map();
     let france = FactionId::new("fac_france").expect("id");
     let mut all: Vec<Duration> = Vec::new();
     let mut by_faction: BTreeMap<FactionId, (Duration, Duration, u32)> = BTreeMap::new();
