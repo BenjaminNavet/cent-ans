@@ -9,6 +9,8 @@ const DATA_PATH := "ui/front_end.json"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 
 static var _data: Dictionary = {}
+## Indices des citations pas encore montrées dans la session (voir `random_quote`).
+static var _quote_bag: Array = []
 
 
 static func data() -> Dictionary:
@@ -84,12 +86,19 @@ static func loading() -> Dictionary:
 	return data().get("loading", {})
 
 
-## Tirage d'une citation {text, author, source, date} ({} si aucune).
+## Tirage d'une citation {text, author, source, date} ({} si aucune). Sans `rng`, tirage « sac
+## mélangé » : aucune citation ne revient avant que toutes aient été montrées dans la session.
 static func random_quote(rng: RandomNumberGenerator = null) -> Dictionary:
 	var quotes: Array = loading().get("quotes", [])
 	if quotes.is_empty():
 		return {}
-	return quotes[_pick(quotes.size(), rng)]
+	if rng != null:
+		return quotes[_pick(quotes.size(), rng)]
+	if _quote_bag.is_empty():
+		for index in quotes.size():
+			_quote_bag.append(index)
+		_quote_bag.shuffle()
+	return quotes[mini(int(_quote_bag.pop_back()), quotes.size() - 1)]
 
 
 static func random_tip(rng: RandomNumberGenerator = null) -> String:

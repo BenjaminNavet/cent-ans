@@ -14,6 +14,8 @@ extends RefCounted
 const SPLAT_FILE := "splat.png"
 ## Lot V4 : sources interchangeables de la couverture forestière et des essences.
 const FOREST_COVER_FILE := "forest_cover.json"
+## Lot HB4 (ADR 0143) : carte des biomes (indice 8 bits, 0 mer, 1 océanique … 7 semi-aride).
+const BIOMES_FILE := "biomes.png"
 const CHANNELS := {"r": 0, "g": 1, "b": 2, "a": 3}
 
 ## Densité de forêt de base par terrain dominant (repli procédural).
@@ -70,6 +72,10 @@ var _essence_channels: Vector3i = Vector3i(0, 1, 2)
 var _conifer_bytes: PackedByteArray = PackedByteArray()
 var _conifer_size: Vector2i = Vector2i.ZERO
 var _conifer_channel: int = 0
+## Lot HB4 : biomes (octets L8) ; vide : `default_biome` partout.
+var _biome_bytes: PackedByteArray = PackedByteArray()
+var _biome_size: Vector2i = Vector2i.ZERO
+var default_biome: int = 2
 var _beech: Dictionary = {"altitude_low_m": 150.0, "altitude_high_m": 750.0, "patch_px": 22.0, "south_oak": 0.35}
 
 
@@ -78,6 +84,7 @@ func setup(data: MapData) -> void:
 	_load_splat()
 	_load_forest_cover()
 	_load_province_terrains()
+	_load_biomes()
 	# Densité de haies partagée avec le shader de terrain (canal B, bocage flouté).
 	var landuse := VegetationFields.landuse(data)
 	_landuse_size = landuse.get_size()
@@ -152,6 +159,46 @@ func _load_forest_cover() -> void:
 	var beech: Variant = config.get("beech")
 	if beech is Dictionary:
 		_beech.merge(beech, true)
+
+
+## Lot HB4 : `data/map/biomes.png` (produit par `cent-ans geo biomes`, lot HB1) ; absent :
+## repli sur `default_biome`.
+func _load_biomes() -> void:
+	var path := map_data.map_dir.path_join(BIOMES_FILE)
+	if not FileAccess.file_exists(path):
+		return
+	var image := Image.load_from_file(path)
+	if image == null or image.is_empty():
+		push_warning("VegetationMask: %s unreadable, default biome" % BIOMES_FILE)
+		return
+	set_biome_image(image)
+
+
+## Lot HB4 : biomes depuis une image (tests : image synthétique) ; null les retire.
+func set_biome_image(image: Image) -> void:
+	if image == null:
+		_biome_bytes = PackedByteArray()
+		_biome_size = Vector2i.ZERO
+		return
+	if image.get_format() != Image.FORMAT_L8:
+		image = image.duplicate() as Image
+		image.convert(Image.FORMAT_L8)
+	_biome_size = image.get_size()
+	_biome_bytes = image.get_data()
+
+
+func has_biomes() -> bool:
+	return not _biome_bytes.is_empty()
+
+
+## Biome (1..7) au pixel carte le plus proche ; mer (0) ou raster absent : `default_biome`.
+func biome_at(x: float, y: float) -> int:
+	if _biome_bytes.is_empty():
+		return default_biome
+	var px := clampi(int(x * _biome_size.x / maxf(map_data.size.x, 1.0)), 0, _biome_size.x - 1)
+	var py := clampi(int(y * _biome_size.y / maxf(map_data.size.y, 1.0)), 0, _biome_size.y - 1)
+	var b := int(_biome_bytes[py * _biome_size.x + px])
+	return b if b > 0 and b < 8 else default_biome
 
 
 static func _rgba8(path: String) -> Image:

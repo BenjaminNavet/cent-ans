@@ -1,0 +1,442 @@
+# HB4 : essences d'arbres et d'arbustes de la carte de campagne (ADR 0143), et leur répartition
+# par biome (indices figés de data/map/biomes.png : 1 océanique, 2 continental,
+# 3 méditerranéen, 4 steppe, 5 boréal, 6 montagnard/alpin, 7 semi-aride ; 0 = mer).
+# Validé par data/schemas/art_tree_species.schema.json.
+#
+# Source unique : les imposteurs sont générés par
+#   uv run --with fal-client python tools/blender_scripts/ga3_vegetation_l2.py fal
+#   uv run --project tools python tools/blender_scripts/ga3_vegetation_l2.py atlas
+# (une ligne de l'atlas GA3 par essence, dans l'ordre de `species`, les trois premières
+# inchangées : chêne, hêtre, sapin) ; la même commande `atlas` compile ce fichier en
+# data/art/tree_species.json, lu par le jeu (Godot ne lit pas le YAML). Rendu seulement.
+#
+# Rôles d'un arbre (tirés par le semis) :
+#   massif    cœur des forêts (couverture forestière >= distribution.massif_core)
+#   lisiere   bord des forêts
+#   isole     arbres des champs, des haies et bosquets
+#   verger    vergers autour des villages et oliveraies
+#   ripisylve bords des fleuves et rivières
+#   garrigue  broussailles de la lande sèche (maquis ouvert, steppe)
+# Poids d'une essence = biomes[b] × roles[r] × fenêtre d'altitude × (1 + river × proximité
+# du fleuve) × part de résineux (forest_kind.png, lot R1) ; tirage par peuplements
+# (cellules de distribution.stand_px) pour des taches d'une même essence.
+
+distribution:
+  massif_core: 0.6           # couverture forestière au-delà de laquelle on est « au cœur »
+  massif_fill: 0.95          # part des candidats plantés au cœur (canopée continue)
+  edge_fill: 0.8             # part des candidats plantés en lisière (× couverture)
+  stand_px: 3.0              # côté (px carte) d'un peuplement d'une même essence
+  stand_share: 0.7           # part des arbres qui suivent l'essence de leur peuplement
+  altitude_fade_m: 150.0     # fondu des poids hors de la plage d'altitude d'une essence
+  river_reach_px: 3.0        # portée (px) de l'affinité aux fleuves (proximité 1 → 0)
+  conifer_raster: 0.6        # poids de forest_kind.png dans le choix résineux / feuillus
+  orchard_parcel_px: 2.2     # côté d'une parcelle de verger
+  orchard_fill: 0.75         # part des candidats plantés dans une parcelle de verger
+  hedge_boost: 3.0           # arbres isolés : × (1 + hedge_boost × densité de haies)
+  grove_core: 0.55           # bosquets : seul le cœur des taches de bruit (denses, rares)
+  hedge_tree: 0.025          # part des pieds de haie qui sont des arbres (V4 : 0,07)
+  village_boost: 4.0         # arbres isolés : × (1 + village_boost) près des villages
+  default_biome: 2           # repli sans data/map/biomes.png
+
+# Paramètres de semis par biome (probabilités par candidat, grille ~1,35 px).
+#   forest      facteur de la couverture forestière (steppe : presque nue)
+#   isolated    arbres isolés dans les champs (avant bonus haies / villages)
+#   grove       remplissage des bosquets (cœur des taches de bruit × grove)
+#   orchard     parcelles de verger dans l'anneau autour des villages
+#   orchard_ring_px  largeur de cet anneau au-delà de la clairière du village
+#   orchard_open     parcelles de verger sur toute terre cultivée (oliveraies)
+#   riparian    arbres de ripisylve le long des fleuves ; riparian_px : largeur de la bande
+#   scrub       broussailles de garrigue sur la terre non cultivée
+biomes:
+  "1": {name: oceanic, forest: 1.0, isolated: 0.002, grove: 0.8, orchard: 0.4, orchard_ring_px: 5.0, orchard_open: 0.0, riparian: 0.45, riparian_px: 1.5, scrub: 0.0}
+  "2": {name: continental, forest: 1.0, isolated: 0.0015, grove: 0.8, orchard: 0.3, orchard_ring_px: 4.5, orchard_open: 0.0, riparian: 0.45, riparian_px: 1.5, scrub: 0.0}
+  "3": {name: mediterranean, forest: 0.85, isolated: 0.0015, grove: 0.3, orchard: 0.45, orchard_ring_px: 6.0, orchard_open: 0.07, riparian: 0.35, riparian_px: 1.0, scrub: 0.06}
+  "4": {name: steppe, forest: 0.12, isolated: 0.0002, grove: 0.08, orchard: 0.04, orchard_ring_px: 3.0, orchard_open: 0.0, riparian: 0.3, riparian_px: 1.2, scrub: 0.004}
+  "5": {name: boreal, forest: 1.0, isolated: 0.002, grove: 0.85, orchard: 0.0, orchard_ring_px: 0.0, orchard_open: 0.0, riparian: 0.35, riparian_px: 1.5, scrub: 0.0}
+  "6": {name: mountain, forest: 1.0, isolated: 0.0015, grove: 0.6, orchard: 0.1, orchard_ring_px: 3.0, orchard_open: 0.0, riparian: 0.3, riparian_px: 1.0, scrub: 0.01}
+  "7": {name: semi_arid, forest: 0.35, isolated: 0.0005, grove: 0.12, orchard: 0.3, orchard_ring_px: 5.0, orchard_open: 0.03, riparian: 0.3, riparian_px: 1.0, scrub: 0.035}
+
+# Teintes saisonnières (foliage_common.gdshaderinc) : oak (roux-olive), beech (cuivré),
+# golden (jaune d'or : bouleau, érable, peuplier, mélèze), evergreen (persistant, poudré de
+# neige en hiver). `mesh` : maillage et ligne de repli sans atlas GA3 (oak, beech, conifer) ;
+# `frame` : ligne FC2 dont l'essence reprend le cadrage ; `tone` : luminance relative à la
+# moyenne GA3 de sa famille (feuillus : chêne, résineux : sapin). Tailles en unités de carte.
+species:
+  - id: oak
+    name: Chêne pédonculé
+    latin: Quercus robur
+    mesh: oak
+    frame: oak
+    season: oak
+    biomes: {"1": 1.0, "2": 1.0, "6": 0.3}
+    altitude_m: [0, 900]
+    river: 0.0
+    roles: {massif: 1.0, lisiere: 0.8, isole: 1.2}
+    height: [1.1, 1.7]
+    width: [0.95, 1.25]
+    tone: 1.0
+    prompt: >-
+      a single mature pedunculate oak tree (Quercus robur) standing alone, short thick gnarled
+      trunk, broad irregular domed crown of dense summer foliage with visible leaf clumps and a
+      few sky gaps
+  - id: beech
+    name: Hêtre
+    latin: Fagus sylvatica
+    mesh: beech
+    frame: beech
+    season: beech
+    biomes: {"1": 0.9, "2": 0.8, "6": 0.8}
+    altitude_m: [100, 1500]
+    river: -0.3
+    roles: {massif: 1.2, lisiere: 0.5, isole: 0.2}
+    height: [1.35, 1.95]
+    width: [0.8, 1.0]
+    tone: 1.0
+    prompt: >-
+      a single mature European beech tree (Fagus sylvatica) standing alone, smooth silver-grey
+      trunk, tall dense oval crown of fresh green summer foliage with visible leaf clumps
+  - id: fir
+    name: Sapin pectiné
+    latin: Abies alba
+    mesh: conifer
+    frame: fir
+    season: evergreen
+    biomes: {"2": 0.3, "5": 0.3, "6": 1.2}
+    altitude_m: [500, 1800]
+    river: 0.0
+    roles: {massif: 1.0, lisiere: 0.6, isole: 0.1}
+    height: [1.3, 2.1]
+    width: [0.85, 1.05]
+    tone: 1.0
+    prompt: >-
+      a single mature silver fir tree (Abies alba) standing alone, straight conical evergreen,
+      dense dark green layered branches down to near the ground, narrow pointed top
+  - id: maple
+    name: Érable sycomore
+    latin: Acer pseudoplatanus
+    mesh: beech
+    frame: oak
+    season: golden
+    biomes: {"1": 0.35, "2": 0.4, "6": 0.45}
+    altitude_m: [0, 1500]
+    river: 0.3
+    roles: {massif: 0.25, lisiere: 1.0, isole: 0.6}
+    height: [1.2, 1.7]
+    width: [0.9, 1.1]
+    tone: 1.05
+    prompt: >-
+      a single mature sycamore maple tree (Acer pseudoplatanus) standing alone, straight grey
+      trunk, broad rounded dense crown of large five-lobed bright green summer leaves
+  - id: chestnut
+    name: Châtaignier
+    latin: Castanea sativa
+    mesh: oak
+    frame: oak
+    season: oak
+    biomes: {"1": 0.25, "2": 0.2, "3": 0.25, "6": 0.3}
+    altitude_m: [100, 1000]
+    river: 0.0
+    roles: {massif: 0.5, lisiere: 0.9, isole: 0.3}
+    height: [1.2, 1.7]
+    width: [1.0, 1.2]
+    tone: 0.95
+    prompt: >-
+      a single old sweet chestnut tree (Castanea sativa) standing alone, massive short furrowed
+      spiralling trunk, wide rounded crown of long glossy serrated dark green leaves
+  - id: birch
+    name: Bouleau
+    latin: Betula pendula
+    mesh: beech
+    frame: beech
+    season: golden
+    biomes: {"1": 0.15, "2": 0.3, "4": 0.8, "5": 1.0, "6": 0.2}
+    altitude_m: [0, 1700]
+    river: 0.4
+    roles: {massif: 0.3, lisiere: 1.2, isole: 0.6, ripisylve: 0.5}
+    height: [1.1, 1.6]
+    width: [0.7, 0.9]
+    tone: 1.05
+    seed: 7
+    prompt: >-
+      a single mature silver birch tree (Betula pendula) standing alone, slender white trunk with
+      black marks, full dense oval crown of small bright green leaves on drooping branches, the
+      foliage mass clearly visible
+  - id: spruce
+    name: Épicéa
+    latin: Picea abies
+    mesh: conifer
+    frame: fir
+    season: evergreen
+    biomes: {"2": 0.2, "5": 1.2, "6": 1.0}
+    altitude_m: [0, 2100]
+    river: 0.0
+    roles: {massif: 1.2, lisiere: 0.6, isole: 0.1}
+    height: [1.5, 2.3]
+    width: [0.7, 0.85]
+    tone: 0.92
+    prompt: >-
+      a single tall Norway spruce tree (Picea abies) standing alone, straight narrow spire-shaped
+      evergreen, very dark green drooping branches with hanging twigs down to the ground
+  - id: scots_pine
+    name: Pin sylvestre
+    latin: Pinus sylvestris
+    mesh: conifer
+    frame: fir
+    season: evergreen
+    biomes: {"1": 0.1, "2": 0.35, "4": 0.4, "5": 1.0, "6": 0.5, "7": 0.1}
+    altitude_m: [0, 1900]
+    river: -0.2
+    roles: {massif: 0.9, lisiere: 1.0, isole: 0.4}
+    height: [1.4, 2.0]
+    width: [0.8, 1.0]
+    tone: 1.0
+    prompt: >-
+      a single mature Scots pine tree (Pinus sylvestris) standing alone, tall straight trunk
+      with orange-red bark in its upper part, bare lower trunk, irregular flat-topped crown of
+      blue-green needles
+  - id: maritime_pine
+    name: Pin maritime
+    latin: Pinus pinaster
+    mesh: conifer
+    frame: fir
+    season: evergreen
+    biomes: {"1": 0.25, "3": 0.35}
+    altitude_m: [0, 700]
+    river: -0.3
+    roles: {massif: 1.0, lisiere: 0.7, isole: 0.3}
+    height: [1.4, 2.0]
+    width: [0.85, 1.0]
+    tone: 1.0
+    prompt: >-
+      a single mature maritime pine tree (Pinus pinaster) standing alone, tall slightly leaning
+      trunk with deeply fissured dark reddish bark, open irregular crown of long green needles
+      in the upper half
+  - id: stone_pine
+    name: Pin parasol
+    latin: Pinus pinea
+    mesh: conifer
+    frame: oak
+    season: evergreen
+    biomes: {"3": 0.35, "7": 0.15}
+    altitude_m: [0, 600]
+    river: 0.0
+    roles: {massif: 0.3, lisiere: 0.6, isole: 1.0, verger: 0.1}
+    height: [1.2, 1.7]
+    width: [1.0, 1.25]
+    tone: 1.0
+    prompt: >-
+      a single mature Italian stone pine tree (Pinus pinea) standing alone, bare straight trunk
+      with orange-grey plated bark, wide flat umbrella-shaped crown of dense dark green needles
+  - id: holm_oak
+    name: Chêne vert
+    latin: Quercus ilex
+    mesh: oak
+    frame: oak
+    season: evergreen
+    biomes: {"3": 1.2, "7": 0.5}
+    altitude_m: [0, 1200]
+    river: 0.0
+    roles: {massif: 1.2, lisiere: 0.8, isole: 0.8}
+    height: [0.95, 1.4]
+    width: [1.0, 1.2]
+    tone: 0.85
+    prompt: >-
+      a single mature holm oak tree (Quercus ilex) standing alone, short dark trunk, dense
+      rounded compact evergreen crown of small leathery dark grey-green leaves
+  - id: olive
+    name: Olivier
+    latin: Olea europaea
+    mesh: oak
+    frame: oak
+    season: evergreen
+    biomes: {"3": 1.0, "7": 0.8}
+    altitude_m: [0, 700]
+    river: 0.0
+    roles: {verger: 1.0, isole: 0.4, garrigue: 0.1}
+    height: [0.7, 1.0]
+    width: [1.0, 1.2]
+    tone: 1.1
+    prompt: >-
+      a single ancient olive tree (Olea europaea) standing alone, thick twisted gnarled hollow
+      trunk, broad irregular open crown of silvery grey-green narrow leaves
+  - id: cypress
+    name: Cyprès
+    latin: Cupressus sempervirens
+    mesh: conifer
+    frame: fir
+    season: evergreen
+    biomes: {"3": 0.5, "7": 0.3}
+    altitude_m: [0, 800]
+    river: 0.0
+    roles: {massif: 0.05, lisiere: 0.2, isole: 0.9, verger: 0.08}
+    height: [1.4, 2.0]
+    width: [0.9, 1.0]
+    tone: 0.85
+    prompt: >-
+      a single tall Mediterranean cypress tree (Cupressus sempervirens) standing alone, very
+      narrow columnar flame-shaped evergreen, dense dark green foliage from the base to the
+      pointed tip
+  - id: poplar
+    name: Peuplier noir
+    latin: Populus nigra
+    mesh: beech
+    frame: beech
+    season: golden
+    biomes: {"1": 1.0, "2": 1.0, "3": 0.8, "4": 1.0, "5": 0.5, "6": 0.5, "7": 0.8}
+    altitude_m: [0, 1200]
+    river: 1.5
+    roles: {ripisylve: 1.2, isole: 0.1, lisiere: 0.1}
+    height: [1.6, 2.3]
+    width: [0.65, 0.8]
+    tone: 1.05
+    prompt: >-
+      a single tall black poplar tree (Populus nigra) standing alone, straight grey furrowed
+      trunk, tall narrow upright crown of fluttering triangular bright green leaves
+  - id: willow
+    name: Saule blanc
+    latin: Salix alba
+    mesh: beech
+    frame: oak
+    season: golden
+    biomes: {"1": 1.0, "2": 1.0, "3": 0.6, "4": 1.0, "5": 0.8, "6": 0.4, "7": 0.6}
+    altitude_m: [0, 1200]
+    river: 1.5
+    roles: {ripisylve: 1.0, isole: 0.05}
+    height: [1.0, 1.4]
+    width: [1.0, 1.25]
+    tone: 1.12
+    prompt: >-
+      a single mature white willow tree (Salix alba) standing alone, short leaning split trunk,
+      broad rounded loose crown of narrow silvery pale green leaves on long flexible branches
+  - id: apple
+    name: Pommier
+    latin: Malus domestica
+    mesh: oak
+    frame: oak
+    season: oak
+    biomes: {"1": 1.0, "2": 1.0, "6": 0.6, "4": 0.5}
+    altitude_m: [0, 1100]
+    river: 0.0
+    roles: {verger: 1.0, isole: 0.15}
+    height: [0.65, 0.95]
+    width: [1.05, 1.25]
+    tone: 1.05
+    prompt: >-
+      a single old apple tree (Malus domestica) in an orchard, short crooked trunk, low wide
+      rounded spreading crown of green summer foliage dotted with small red and green apples
+  - id: larch
+    name: Mélèze
+    latin: Larix decidua
+    mesh: conifer
+    frame: fir
+    season: golden
+    biomes: {"5": 0.3, "6": 0.7}
+    altitude_m: [1000, 2300]
+    river: 0.0
+    roles: {massif: 0.6, lisiere: 1.0, isole: 0.5}
+    height: [1.4, 2.0]
+    width: [0.75, 0.9]
+    tone: 1.1
+    prompt: >-
+      a single mature European larch tree (Larix decidua) standing alone, straight trunk, light
+      open conical crown of soft fresh light green needle tufts on slightly drooping branches
+  - id: aleppo_pine
+    name: Pin d'Alep
+    latin: Pinus halepensis
+    mesh: conifer
+    frame: oak
+    season: evergreen
+    biomes: {"3": 0.9, "7": 1.0}
+    altitude_m: [0, 900]
+    river: -0.2
+    roles: {massif: 0.8, lisiere: 1.0, isole: 0.7, garrigue: 0.15}
+    height: [1.1, 1.6]
+    width: [0.95, 1.15]
+    tone: 1.12
+    prompt: >-
+      a single Aleppo pine tree (Pinus halepensis) standing alone, crooked leaning grey trunk,
+      sparse irregular airy crown of light yellow-green needles with sky gaps
+  - id: black_pine
+    name: Pin noir
+    latin: Pinus nigra
+    mesh: conifer
+    frame: fir
+    season: evergreen
+    biomes: {"3": 0.3, "6": 0.45, "7": 0.25}
+    altitude_m: [400, 1800]
+    river: -0.2
+    roles: {massif: 1.0, lisiere: 0.7, isole: 0.3}
+    height: [1.4, 2.0]
+    width: [0.85, 1.05]
+    tone: 0.85
+    prompt: >-
+      a single mature black pine tree (Pinus nigra) standing alone, straight dark grey trunk,
+      dense broad dome-topped crown of stiff very dark green needles
+  - id: kermes_oak
+    name: Chêne kermès
+    latin: Quercus coccifera
+    mesh: oak
+    frame: oak
+    season: evergreen
+    biomes: {"3": 1.0, "7": 0.8}
+    altitude_m: [0, 900]
+    river: 0.0
+    roles: {massif: 0.7, lisiere: 0.9, garrigue: 1.2}
+    seed: 7
+    height: [0.3, 0.45]
+    width: [1.1, 1.3]
+    tone: 0.95
+    prompt: >-
+      a single dense low kermes oak shrub (Quercus coccifera) about one and a half metres tall,
+      much wider than tall, multi-stemmed hemispherical mound of tiny spiny holly-like dark green
+      leaves with foliage reaching down to the ground, no single trunk
+  - id: lentisk
+    name: Lentisque
+    latin: Pistacia lentiscus
+    mesh: oak
+    frame: oak
+    season: evergreen
+    biomes: {"3": 1.0, "7": 0.6}
+    altitude_m: [0, 600]
+    river: 0.0
+    roles: {massif: 0.5, lisiere: 0.8, garrigue: 1.0}
+    height: [0.3, 0.5]
+    width: [1.1, 1.3]
+    tone: 1.0
+    prompt: >-
+      a single dense mastic shrub (Pistacia lentiscus) about two metres tall, wider than tall,
+      multi-stemmed rounded bush of small glossy olive-green leaflets with a few reddish twigs,
+      foliage reaching down to the ground, no single trunk
+  - id: juniper
+    name: Genévrier
+    latin: Juniperus oxycedrus
+    mesh: conifer
+    frame: fir
+    season: evergreen
+    biomes: {"3": 0.7, "4": 1.0, "6": 0.3, "7": 1.0}
+    altitude_m: [0, 1800]
+    river: -0.3
+    roles: {lisiere: 0.6, isole: 0.3, garrigue: 1.0}
+    height: [0.35, 0.6]
+    width: [0.8, 1.0]
+    tone: 0.9
+    prompt: >-
+      a single prickly juniper shrub (Juniperus oxycedrus) about two and a half metres tall,
+      dense irregular conical bush of sharp grey-green needles, multi-stemmed, foliage reaching
+      down to the ground
+  - id: arbutus
+    name: Arbousier
+    latin: Arbutus unedo
+    mesh: oak
+    frame: oak
+    season: evergreen
+    biomes: {"3": 0.7, "1": 0.05}
+    altitude_m: [0, 800]
+    river: 0.0
+    roles: {massif: 0.6, lisiere: 1.0, garrigue: 0.5}
+    height: [0.45, 0.7]
+    width: [1.0, 1.2]
+    tone: 1.0
+    prompt: >-
+      a single strawberry tree shrub (Arbutus unedo) about three metres tall, several reddish
+      stems, dense rounded crown of glossy dark green leaves with a few round red fruits

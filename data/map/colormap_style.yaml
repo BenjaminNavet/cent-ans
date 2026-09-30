@@ -32,6 +32,9 @@ palette:
   town_ground: "#8c7558"
   town_gardens: "#5d7c2c"
   hedge: "#2f4420"
+  # Garrigue / maquis (biomes méditerranéen et semi-aride, HB) : sombre et clair, en taches.
+  scrub: "#6e7446"
+  scrub_light: "#a39a6a"
 
 # Base régionale.
 base:
@@ -138,3 +141,186 @@ towns:
   ground_opacity: 0.75
   garden_factor: 2.4
   garden_opacity: 0.45
+
+# Biomes (chantier HB, ADR 0143) : data/map/biomes.png (légende data/map/biomes.yaml).
+# Chaque classe surcharge une partie de la palette des terres et module la mosaïque ; les
+# poids des biomes sont fondus sur transition_km (pas de frontière nette). Paramètres :
+#   palette        couleurs remplaçant celles de la palette globale (terres seulement)
+#   dry_max        plafond de la sécheresse venue de la latitude (les zones arides et steppes
+#                  de landcover.dryness gardent leur poids : Sahara, steppe pontique)
+#   forest_keep    part des forêts de splat.png conservée (le reste s'ouvre en herbe ou en
+#                  garrigue) ; les forêts restent entières à moins de valley_km d'une rivière
+#   conifer_min    part minimale de résineux dans les forêts
+#   scrub          part de garrigue / maquis sur les terres non cultivées (herbe, lande)
+#   presence       multiplicateur de la probabilité qu'un bloc soit cultivé
+#   pasture_shift  ajout à la part de prés parmi les blocs cultivés
+#   bocage, openfield, vine  multiplicateurs des haies, lanières et vignes
+#   crops, pastures          listes remplaçant celles de la mosaïque (blocs de ce biome)
+biomes:
+  transition_km: 25.0
+  # Pixels de carte par cellule de la grille des poids (fondu de dizaines de km).
+  weight_step: 4
+  scrub_noise_km: 6.0
+  scrub_patchiness: 0.35
+  valley_km: 4.0
+  classes:
+    # Bocage vert vif, prés, haies.
+    oceanic:
+      palette:
+        grassland: "#4f8f2a"
+        grassland_dry: "#789a3a"
+        farmland: "#7e8a38"
+        farmland_dry: "#a39a4a"
+        forest_broadleaf: "#264a1a"
+      presence: 1.0
+      pasture_shift: 0.3
+      bocage: 1.8
+      openfield: 0.25
+      vine: 0.3
+      pastures:
+        - {name: pre, color: "#4c8a26", weight: 0.5}
+        - {name: pature, color: "#62923a", weight: 0.3}
+        - {name: pre_fauche, color: "#7a9c40", weight: 0.2}
+    # Openfield doré / brun, forêts de feuillus.
+    continental:
+      palette:
+        grassland: "#6b8a34"
+        farmland: "#a8913f"
+        farmland_dry: "#b89a52"
+        forest_broadleaf: "#2e4a1e"
+      presence: 1.05
+      pasture_shift: -0.15
+      bocage: 0.35
+      openfield: 1.3
+      crops:
+        - {name: ble, color: "#cfa53e", weight: 0.28}
+        - {name: orge, color: "#bda95a", weight: 0.16}
+        - {name: seigle_avoine, color: "#a89a4c", weight: 0.12}
+        - {name: jachere, color: "#8e6c44", weight: 0.16}
+        - {name: labour, color: "#5f4331", weight: 0.16}
+        - {name: pre, color: "#648c34", weight: 0.12}
+    # Sols ocre / rouges, oliveraies gris-vert, vigne ; garrigue et maquis bas dominants
+    # hors cultures, pas de futaie dense de feuillus (chênes verts et pins d'Alep épars).
+    mediterranean:
+      palette:
+        grassland: "#7a8a3e"
+        grassland_dry: "#9c9452"
+        farmland: "#a8834a"
+        farmland_dry: "#b98a55"
+        forest_broadleaf: "#3f5230"
+        forest_conifer: "#34482a"
+        heath: "#8a7a50"
+        scrub: "#56663a"
+        scrub_light: "#86885a"
+      dry_max: 0.35
+      forest_keep: 0.35
+      scrub: 0.7
+      presence: 0.8
+      pasture_shift: -0.3
+      bocage: 0.1
+      openfield: 0.2
+      vine: 1.8
+      crops:
+        - {name: ble, color: "#c9a24a", weight: 0.2}
+        - {name: orge, color: "#bfa35c", weight: 0.12}
+        - {name: olivier, color: "#7a8260", weight: 0.26}
+        - {name: vigne, color: "#6a6634", weight: 0.08}
+        - {name: jachere, color: "#a8704a", weight: 0.14}
+        - {name: labour, color: "#8a4a32", weight: 0.14}
+        - {name: potager, color: "#7f8a44", weight: 0.06}
+      pastures:
+        - {name: pature_seche, color: "#a39a58", weight: 0.6}
+        - {name: pre, color: "#7f8a44", weight: 0.4}
+    # Herbe dorée / paille, quasi sans arbres (hors vallées), peu de champs.
+    steppe:
+      palette:
+        grassland: "#9a9a48"
+        grassland_dry: "#b0a455"
+        farmland: "#aa9a4c"
+        farmland_dry: "#c4a860"
+        forest_broadleaf: "#3c5226"
+        heath: "#8f8c50"
+      forest_keep: 0.08
+      presence: 0.3
+      pasture_shift: 0.4
+      bocage: 0.0
+      openfield: 0.1
+      vine: 0.2
+      crops:
+        - {name: ble, color: "#cfa84a", weight: 0.4}
+        - {name: millet, color: "#b99c52", weight: 0.3}
+        - {name: jachere, color: "#9c8452", weight: 0.3}
+      pastures:
+        - {name: herbe, color: "#8f944c", weight: 0.5}
+        - {name: stipa, color: "#b4ab6c", weight: 0.3}
+        - {name: pature, color: "#7f8c44", weight: 0.2}
+    # Conifères sombres, tourbières, clairières, peu de champs.
+    boreal:
+      palette:
+        grassland: "#5f7f3a"
+        grassland_dry: "#78854a"
+        farmland: "#8a8442"
+        forest_broadleaf: "#2e4524"
+        forest_conifer: "#17301c"
+        heath: "#6a6546"
+      conifer_min: 0.75
+      presence: 0.35
+      pasture_shift: 0.2
+      bocage: 0.1
+      openfield: 0.2
+      vine: 0.0
+      crops:
+        - {name: seigle, color: "#a39a4a", weight: 0.35}
+        - {name: orge, color: "#b0a456", weight: 0.25}
+        - {name: avoine, color: "#9c9a50", weight: 0.15}
+        - {name: jachere, color: "#7a6440", weight: 0.15}
+        - {name: essart, color: "#4e3c2c", weight: 0.1}
+    # Alpages verts, forêts de sapins, roche au-dessus (base.rock_from_m).
+    mountain:
+      palette:
+        grassland: "#5d8f36"
+        grassland_dry: "#869a48"
+        heath: "#6f8a42"
+        farmland: "#8a8a44"
+        forest_broadleaf: "#294420"
+        forest_conifer: "#1c3820"
+      dry_max: 0.6
+      conifer_min: 0.65
+      presence: 0.5
+      pasture_shift: 0.45
+      bocage: 0.3
+      openfield: 0.0
+      vine: 0.6
+      pastures:
+        - {name: alpage, color: "#5c8e32", weight: 0.5}
+        - {name: pre_fauche, color: "#7c9a3e", weight: 0.3}
+        - {name: pature, color: "#6a8a3a", weight: 0.2}
+    # Terre ocre-rose, maigres cultures, maquis clair.
+    semi_arid:
+      palette:
+        grassland: "#a89a62"
+        grassland_dry: "#caa87a"
+        farmland: "#b88f62"
+        farmland_dry: "#c69a6c"
+        forest_broadleaf: "#5a6040"
+        forest_conifer: "#4a5636"
+        heath: "#b09070"
+        scrub: "#8a8a5c"
+        scrub_light: "#b8a47c"
+      dry_max: 0.5
+      forest_keep: 0.25
+      scrub: 0.45
+      presence: 0.5
+      pasture_shift: -0.2
+      bocage: 0.0
+      openfield: 0.1
+      vine: 0.8
+      crops:
+        - {name: ble, color: "#c8a452", weight: 0.3}
+        - {name: orge, color: "#c0a868", weight: 0.25}
+        - {name: jachere, color: "#c49474", weight: 0.25}
+        - {name: olivier, color: "#8a8c66", weight: 0.1}
+        - {name: labour, color: "#9a6a4c", weight: 0.1}
+      pastures:
+        - {name: parcours, color: "#b4a070", weight: 0.7}
+        - {name: pre, color: "#8e8c52", weight: 0.3}

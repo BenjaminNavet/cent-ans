@@ -20,6 +20,13 @@ Steps (raw files in ``~/dev/cent-ans-raw/ga3/l2/``, run from the repository root
   the thin blades survive the 0.5 cut).
 * ``rocks``: ``ga3_cleanup.py`` (Blender) on the three TRELLIS rocks, 120 / 60 / 18 triangles,
   1 m long, 256 px albedo.
+* ``species`` (lot HB4, ADR 0143): compiles ``data/art/tree_species.yaml`` into
+  ``data/art/tree_species.json`` (the game does not read YAML). ``atlas`` does it too.
+
+Lot HB4 extends the essences to the catalogue ``data/art/tree_species.yaml``: ``fal`` generates
+every species of the catalogue (same prompt frame, seed and chain as the first three), ``atlas``
+writes one impostor row per species in catalogue order (rows 0-2 unchanged: oak, beech, fir), a
+single shared atlas so the tree draw calls do not grow, and ``board`` a local contact sheet.
 
 Outputs: ``game/assets/textures/vegetation/ga3/`` and ``game/assets/models/vegetation/ga3/``.
 Consumed by ``game/scripts/map/ga3_vegetation.gd`` (``--no-ga3-veg`` restores the FC assets).
@@ -35,15 +42,21 @@ from pathlib import Path
 import numpy as np
 
 RAW = Path.home() / "dev/cent-ans-raw/ga3/l2"
+BOARD = Path.home() / "dev/cent-ans-raw/ga3/hb4/species_board.jpg"
 S5 = Path.home() / "dev/cent-ans-raw/ga3/s5"
 REPO = Path(__file__).resolve().parents[2]
 VEG = REPO / "game/assets/textures/vegetation"
 OUT_TEX = VEG / "ga3"
 OUT_MODELS = REPO / "game/assets/models/vegetation/ga3"
+SPECIES_YAML = REPO / "data/art/tree_species.yaml"
+SPECIES_JSON = REPO / "data/art/tree_species.json"
 
 CELL = 256
 VIEWS = 8
-ESSENCES = ("oak", "beech", "fir")  # VegetationMeshes.IMPOSTOR_ROWS
+ESSENCES = ("oak", "beech", "fir")  # VegetationMeshes.IMPOSTOR_ROWS (FC2 rows)
+# Season classes of ``foliage_common.gdshaderinc`` (``foliage_season``); 3 is the hedge.
+SEASON_CLASSES = {"oak": 0, "beech": 1, "evergreen": 2, "golden": 4}
+ROLES = ("massif", "lisiere", "isole", "verger", "ripisylve", "garrigue")
 SHEET_COLS, SHEET_ROWS = 4, 2
 
 GREY = (
@@ -66,6 +79,12 @@ TREE_VIEW = (
     ", the whole tree visible from trunk base to crown top with a margin, seen from slightly "
     "above at about 25 degrees elevation, "
 )
+SHRUB_VIEW = (
+    ", the whole shrub visible from its base on the ground line to its top with a margin, seen "
+    "from slightly above at about 25 degrees elevation, "
+)
+# Species below this height (map units) are shrubs (maquis, garrigue): shrub framing.
+SHRUB_HEIGHT = 0.8
 SHEET_PROMPT = (
     "Turnaround reference sheet of the exact same tree as in the input image, shown 8 times in a "
     "grid of 4 columns and 2 rows. Each panel shows the tree rotated a further 45 degrees around "
@@ -182,6 +201,52 @@ def split_sheet(
     return crops
 
 
+def split_sheet_panels(
+    rgba: np.ndarray, cols: int = SHEET_COLS, rows: int = SHEET_ROWS
+) -> list[np.ndarray]:
+    """Cut a sheet by assigning each connected piece to the grid panel of its centre (HB4).
+
+    Robust when thin trunks detach crowns from their base (tall pines): every fragment follows
+    its own panel instead of the nearest large component.
+    """
+    from scipy import ndimage
+
+    alpha = rgba[..., 3] > 0.5
+    labels, count = ndimage.label(alpha)
+    h, w = alpha.shape
+    centres = ndimage.center_of_mass(alpha, labels, np.arange(1, count + 1))
+    panel_of = np.full(count + 1, -1)
+    for index, (cy, cx) in enumerate(centres, start=1):
+        r = min(int(cy / (h / rows)), rows - 1)
+        c = min(int(cx / (w / cols)), cols - 1)
+        panel_of[index] = r * cols + c
+    owner = panel_of[labels]
+    crops = []
+    for k in range(cols * rows):
+        mask = (owner == k) & alpha
+        yy, xx = np.nonzero(mask)
+        crop = rgba[yy.min() : yy.max() + 1, xx.min() : xx.max() + 1].copy()
+        crop[..., 3] *= mask[yy.min() : yy.max() + 1, xx.min() : xx.max() + 1]
+        crops.append(crop)
+    return crops
+
+
+def consistent_crops(crops: list[np.ndarray], spread: float = 1.3) -> bool:
+    """True when no view is broken (a neighbour's fragment glued above or below a tree).
+
+    Heights stay within ``spread`` of the median and no crop has an empty row band.
+    """
+    heights = np.array([c.shape[0] for c in crops], dtype=np.float64)
+    median = float(np.median(heights))
+    if not (np.all(heights <= median * spread) and np.all(heights >= median / spread)):
+        return False
+    for crop in crops:
+        filled = (crop[..., 3] > 0.5).any(axis=1)
+        if (~filled).sum() > 0.02 * crop.shape[0]:
+            return False
+    return True
+
+
 def drop_specks(crop: np.ndarray, fraction: float = 0.02) -> np.ndarray:
     """Clear detached blobs smaller than ``fraction`` of the main one (ground-shadow remnants)."""
     from scipy import ndimage
@@ -293,6 +358,64 @@ def fc_row_reference(
     return tuple(np.mean(boxes, axis=0).tolist()), np.mean(colours, axis=0)
 
 
+# ---------------------------------------------------------------- species catalogue (HB4)
+def load_species(path: Path = SPECIES_YAML) -> dict:
+    """The species catalogue (``data/art/tree_species.yaml``)."""
+    import yaml
+
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def is_shrub(species: dict) -> bool:
+    """Maquis / garrigue shrub (low plant, shrub framing in the prompt)."""
+    return float(species["height"][1]) < SHRUB_HEIGHT
+
+
+def species_prompt(species: dict) -> str:
+    """Reference-view prompt of a species (same frame as the first three essences)."""
+    subject = " ".join(str(species["prompt"]).split())
+    view = SHRUB_VIEW if is_shrub(species) else TREE_VIEW
+    return subject[0].upper() + subject[1:] + view + GREY
+
+
+def compile_species(catalogue: dict) -> dict:
+    """Runtime table (``tree_species.json``): catalogue + atlas ``row`` and ``season_class``.
+
+    Rows follow the catalogue order; the first three must be the FC2 rows (oak, beech, fir) so
+    the FC atlas and meshes stay valid fallbacks.
+    """
+    ids = [s["id"] for s in catalogue["species"]]
+    if tuple(ids[:3]) != ESSENCES:
+        raise ValueError(f"the first species must be {ESSENCES}, got {ids[:3]}")
+    if len(set(ids)) != len(ids):
+        raise ValueError("duplicate species id")
+    out = {
+        "description": "Compilé depuis data/art/tree_species.yaml par "
+        "tools/blender_scripts/ga3_vegetation_l2.py (species / atlas). Ne pas éditer.",
+        "roles": list(ROLES),
+        "seasons": dict(SEASON_CLASSES),
+        "distribution": catalogue["distribution"],
+        "biomes": catalogue["biomes"],
+        "species": [],
+    }
+    for row, species in enumerate(catalogue["species"]):
+        entry = dict(species)
+        entry["prompt"] = " ".join(str(species["prompt"]).split())
+        entry["row"] = row
+        entry["season_class"] = SEASON_CLASSES[species["season"]]
+        out["species"].append(entry)
+    return out
+
+
+def species_step() -> None:
+    """Write ``data/art/tree_species.json`` from the YAML catalogue."""
+    table = compile_species(load_species())
+    SPECIES_JSON.write_text(
+        json.dumps(table, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    print(f"OK species ({len(table['species'])})")
+
+
 # ---------------------------------------------------------------- fal step
 def _download(url: str, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -319,17 +442,21 @@ def fal_step(only: list[str]) -> None:
         _download(out, RAW / f"{name}_cut.png")
         return out
 
-    for name, subject in TREES.items():
+    for species in load_species()["species"]:
+        name = species["id"]
         if (only and name not in only) or (RAW / f"{name}_sheet_cut.png").exists():
             continue
-        prompt = subject[0].upper() + subject[1:] + TREE_VIEW + GREY
+        prompt = TREES[name] if name in TREES else species_prompt(species)
+        if name in TREES:
+            prompt = prompt[0].upper() + prompt[1:] + TREE_VIEW + GREY
+        noun = "shrub" if is_shrub(species) else "tree"
         ref = run(
             "fal-ai/flux-2",
             {
                 "prompt": prompt,
                 "image_size": "square_hd",
                 "num_images": 1,
-                "seed": 1337,
+                "seed": int(species.get("seed", 1337)),
                 "output_format": "png",
             },
         )["images"][0]["url"]
@@ -337,7 +464,7 @@ def fal_step(only: list[str]) -> None:
         sheet = run(
             "fal-ai/nano-banana-2/edit",
             {
-                "prompt": SHEET_PROMPT,
+                "prompt": SHEET_PROMPT.replace(" tree", " " + noun),
                 "image_urls": [ref],
                 "num_images": 1,
                 "aspect_ratio": "16:9",
@@ -409,28 +536,95 @@ def _save(arr: np.ndarray, path: Path) -> None:
     )
 
 
-def impostor_atlases() -> tuple[np.ndarray, np.ndarray]:
-    """GA3 impostor grid (albedo, normal) in the FC2 layout, from the cut turnaround sheets."""
+def match_luminance(cells: list[np.ndarray], target_lum: float) -> list[np.ndarray]:
+    """Scale ``cells`` (sRGB RGBA) so their joint opaque linear luminance is ``target_lum``.
+
+    Lot HB4: the new species keep their generated hue (olive silver, cypress dark green, birch
+    light) and only take the brightness of their family, so they sit with the first three.
+    """
+    weights = np.array([0.2126, 0.7152, 0.0722])
+    lin = [srgb_to_linear(c[..., :3]) for c in cells]
+    opaque = np.concatenate(
+        [lin_c[c[..., 3] > 0.5] for lin_c, c in zip(lin, cells, strict=True)]
+    )
+    mean = opaque.mean(axis=0)
+    return match_mean(cells, mean * target_lum / max(float(mean @ weights), 1e-4))
+
+
+def _species_cells(name: str, box: tuple[float, float, float]) -> list[np.ndarray]:
+    sheet = _load(RAW / f"{name}_sheet_cut.png")
+    crops = [drop_specks(c) for c in split_sheet(sheet)]
+    if not consistent_crops(crops):
+        crops = [drop_specks(c, 0.005) for c in split_sheet_panels(sheet)]
+        print(f"   {name}: panel split (consistent: {consistent_crops(crops)})")
+    return [fit_cell(c, box) for c in crops]
+
+
+def impostor_atlases(
+    species: list[dict] | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """GA3 impostor grid (albedo, normal): one row per catalogue species, FC2 framing.
+
+    Rows 0-2 (oak, beech, fir) are matched to the FC2 row colours as before; the other species
+    are framed like their ``frame`` FC2 row and brought to the luminance of their family (GA3 oak
+    for broadleaves, GA3 fir for conifers) times their ``tone``.
+    """
+    if species is None:
+        species = load_species()["species"]
     fc = _load(VEG / "campaign_impostors_albedo.png")
-    albedo = np.zeros_like(fc)
-    normal = np.zeros_like(fc)
+    rows = len(species)
+    albedo = np.zeros((rows * CELL, VIEWS * CELL, 4), dtype=np.float32)
+    normal = np.zeros_like(albedo)
     normal[...] = (0.5, 0.5, 1.0, 1.0)
-    for row, name in enumerate(ESSENCES):
-        box, colour = fc_row_reference(fc, row)
-        crops = [
-            drop_specks(c) for c in split_sheet(_load(RAW / f"{name}_sheet_cut.png"))
-        ]
-        cells = match_mean([fit_cell(c, box) for c in crops], colour)
+    weights = np.array([0.2126, 0.7152, 0.0722])
+    family_lum: dict[str, float] = {}
+    for row, entry in enumerate(species):
+        name = entry["id"]
+        if row < len(ESSENCES):
+            box, colour = fc_row_reference(fc, row)
+            cells = match_mean(_species_cells(name, box), colour)
+            family_lum["conifer" if name == "fir" else name] = float(colour @ weights)
+        else:
+            box, _ = fc_row_reference(fc, ESSENCES.index(entry["frame"]))
+            family = "conifer" if entry["mesh"] == "conifer" else "oak"
+            target = family_lum[family] * float(entry.get("tone", 1.0))
+            cells = match_luminance(_species_cells(name, box), target)
         for view, cell in enumerate(cells):
             y0, x0 = row * CELL, view * CELL
             albedo[y0 : y0 + CELL, x0 : x0 + CELL] = cell
-            lum = srgb_to_linear(cell[..., :3]) @ np.array([0.2126, 0.7152, 0.0722])
+            lum = srgb_to_linear(cell[..., :3]) @ weights
             normal[y0 : y0 + CELL, x0 : x0 + CELL] = crown_normals(cell[..., 3], lum)
         cov = np.mean([(c[..., 3] > 0.5).mean() for c in cells])
-        print(
-            f"{name}: box {np.round(box, 1)}, target {colour.round(3)}, coverage {cov:.3f}"
-        )
+        print(f"{row:2d} {name}: box {np.round(box, 1)}, coverage {cov:.3f}")
     return albedo, normal
+
+
+def board_step() -> None:
+    """Local contact sheet of the atlas (one row per species, labelled), for visual review."""
+    from PIL import Image, ImageDraw
+
+    species = load_species()["species"]
+    atlas = Image.open(OUT_TEX / "ga3_impostors_albedo.png").convert("RGBA")
+    cell = CELL // 2
+    views = 4  # 0, 90, 180, 270 degrees
+    per_col = (len(species) + 1) // 2
+    label_w = 150
+    width = 2 * (label_w + views * cell)
+    sheet = Image.new("RGB", (width, per_col * cell), (128, 128, 128))
+    draw = ImageDraw.Draw(sheet)
+    for row, entry in enumerate(species):
+        col, r = divmod(row, per_col)
+        x0 = col * (label_w + views * cell)
+        y0 = r * cell
+        draw.text((x0 + 6, y0 + cell // 2 - 6), f"{row} {entry['id']}", fill=(0, 0, 0))
+        for k in range(views):
+            src = atlas.crop(
+                (k * 2 * CELL, row * CELL, (k * 2 + 1) * CELL, (row + 1) * CELL)
+            ).resize((cell, cell), Image.LANCZOS)
+            sheet.paste(src, (x0 + label_w + k * cell, y0), src)
+    BOARD.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(BOARD, quality=88)
+    print("OK board", BOARD)
 
 
 def leaf_cards() -> np.ndarray:
@@ -526,7 +720,8 @@ def _write_import(png: Path, fix_border: bool) -> None:
 
 
 def atlas_step() -> None:
-    """Write the four GA3 textures (and their import settings)."""
+    """Write the four GA3 textures (and their import settings) and the species table."""
+    species_step()
     albedo, normal = impostor_atlases()
     outputs = {
         "ga3_impostors_albedo.png": (albedo, False),
@@ -585,5 +780,9 @@ if __name__ == "__main__":
         atlas_step()
     elif step == "rocks":
         rocks_step()
+    elif step == "species":
+        species_step()
+    elif step == "board":
+        board_step()
     else:
-        sys.exit("usage: ga3_vegetation_l2.py fal|atlas|rocks")
+        sys.exit("usage: ga3_vegetation_l2.py fal|atlas|rocks|species|board")

@@ -142,6 +142,13 @@ pub enum Proposal {
         attacker: FactionId,
         target: FactionId,
     },
+    /// ADR 0146: the proposer, lord of both the player and `target`, summons
+    /// the player to end the private war it declared on `target`. Accept:
+    /// imposed peace; refuse or let expire: the war goes on, at a cost in
+    /// loyalty. Only sent to the player.
+    PeaceSummons {
+        target: FactionId,
+    },
 }
 
 impl Proposal {
@@ -149,7 +156,9 @@ impl Proposal {
     pub fn is_feudal_call(&self) -> bool {
         matches!(
             self,
-            Proposal::Protection { .. } | Proposal::Arbitration { .. }
+            Proposal::Protection { .. }
+                | Proposal::Arbitration { .. }
+                | Proposal::PeaceSummons { .. }
         )
     }
 }
@@ -958,7 +967,9 @@ pub fn evaluate(
         Proposal::Obedience { .. } => {
             reasons.push(("Choix d'obédience".to_owned(), 0));
         }
-        Proposal::Protection { .. } | Proposal::Arbitration { .. } => {
+        Proposal::Protection { .. }
+        | Proposal::Arbitration { .. }
+        | Proposal::PeaceSummons { .. } => {
             reasons.push(("Devoir féodal".to_owned(), 0));
         }
         Proposal::Treaty { articles } => {
@@ -1499,6 +1510,16 @@ impl CampaignState {
                     &crate::feudal::Arbitration::ImposePeace,
                 );
             }
+            Proposal::PeaceSummons { target } => {
+                crate::feudal::apply_arbitration(
+                    self,
+                    data,
+                    proposer,
+                    recipient,
+                    target,
+                    &crate::feudal::Arbitration::ImposePeace,
+                );
+            }
         }
         Ok(())
     }
@@ -1547,7 +1568,9 @@ impl CampaignState {
             Proposal::Treaty { articles } => {
                 crate::negotiation::check_treaty(self, data, proposer, recipient, articles)?;
             }
-            Proposal::Protection { .. } | Proposal::Arbitration { .. } => {
+            Proposal::Protection { .. }
+            | Proposal::Arbitration { .. }
+            | Proposal::PeaceSummons { .. } => {
                 return Err(DiplomacyError::Refused(
                     "un appel féodal ne se propose pas".to_owned(),
                 ));
@@ -1945,6 +1968,10 @@ fn offer_text(
         Proposal::Arbitration { attacker, target } => format!(
             "Guerre privée : {} attaque {}, tous deux vos vassaux.",
             faction_name(data, attacker),
+            faction_name(data, target)
+        ),
+        Proposal::PeaceSummons { target } => format!(
+            "{name} vous somme de faire la paix avec {}.",
             faction_name(data, target)
         ),
     }

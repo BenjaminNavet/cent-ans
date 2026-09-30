@@ -302,6 +302,9 @@ pub struct ArbitrationRules {
     pub imposed_peace_loyalty_drop: u8,
     /// Loyalty lost at once by the vassal its lord fights.
     pub opposed_loyalty_drop: u8,
+    /// Loyalty lost at once by the player who defies its lord's summons to
+    /// make peace (ADR 0146).
+    pub defied_summons_loyalty_drop: u8,
 }
 
 impl Default for ArbitrationRules {
@@ -312,6 +315,7 @@ impl Default for ArbitrationRules {
             take_side_attitude_gap: 40,
             imposed_peace_loyalty_drop: 5,
             opposed_loyalty_drop: 20,
+            defied_summons_loyalty_drop: 15,
         }
     }
 }

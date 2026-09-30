@@ -53,7 +53,9 @@ func _test_formula() -> void:
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
 	var s := MapData.vertical_scale()
 	var g := MapData.relief_gain()
-	_check(g > 0.0, "gain should be positive with a published floor (%f)" % g)
+	# HB6 (ADR 0143) : gain lointain négatif (collines aplanies au-dessus du fond, carte moins
+	# « papier froissé ») ; il doit seulement être celui du profil, et laisser 1 + g > 0.
+	_check(absf(g - ReliefExaggerationProfile.load_default().gain_far) < 1e-6 and 1.0 + g > 0.0, "gain = gain_far with a published floor (%f)" % g)
 	# Centre de la cellule (2, 2) : x = 2·8 + 3,5.
 	var x := 19.5
 	var z := 19.5
@@ -62,7 +64,7 @@ func _test_formula() -> void:
 	_check(absf(MapData.display_height(60.0, x, z) - 60.0 * s) < 1e-6, "below the floor: unchanged")
 	var peak := MapData.display_height(1100.0, x, z)
 	_check(absf(peak - s * (1100.0 + g * 1000.0)) < 1e-5, "peak raised by the local gain")
-	_check(peak > 1100.0 * s, "peak higher than ZG4")
+	_check(signf(peak - 1100.0 * s) == signf(g), "peak moved by the sign of the gain vs ZG4")
 	_check(MapData.display_height(0.0, 3.5, 3.5) == 0.0, "coast stays at sea level")
 	_check(absf(MapData.display_height(-50.0, 3.5, 3.5) + 50.0 * s) < 1e-6, "sea floor unchanged")
 	_check(MapData.display_height(0.0, x, z) == 0.0, "coast stays at sea level under a raised floor")
@@ -173,7 +175,9 @@ func _test_real_map() -> void:
 	print("zg8_relief_test: Pyrenees peak h=%.0f m floor=%.0f m lift=%.0f m (gain %.2f)" % [best_h, MapData.relief_floor_at(best.x, best.y), lift_peak, MapData.relief_gain()])
 	# ZG7c : relief local plafonné (`local_relief_cap_m`) : rehaussé, mais sans doubler la montagne.
 	var cap := ReliefExaggerationProfile.load_default().local_relief_cap_m
-	_check(best_h > 2000.0 and lift_peak > 100.0, "Pyrenean peak should be raised (%.0f m)" % lift_peak)
+	# HB6 (ADR 0143) : gain lointain abaissé (0,42 → 0,12) et montagnes écrasées dès la vue
+	# stratégique (`mountain_squash_far`) : le sommet peut être abaissé, jamais écrasé (≥ 50 %).
+	_check(best_h > 2000.0 and best_h + lift_peak > 0.5 * best_h, "Pyrenean peak crushed (%.0f m)" % lift_peak)
 	_check(cap <= 0.0 or best_h - MapData.relief_floor_at(best.x, best.y) < 3.0 * cap, "local relief of the peak should be capped (%.0f m above the floor)" % (best_h - MapData.relief_floor_at(best.x, best.y)))
 	_check(map_data.height_world_at(best.x, best.y) == MapData.display_height(map_data.height_m_at(best.x, best.y), best.x, best.y), "height_world_at = display height")
 
