@@ -544,6 +544,7 @@ impl CampaignState {
         let province = data.provinces.get(&request.province);
         let player_side = self.player_side_of(data, request);
         let mut setup = BattleSetup {
+            crossing: None,
             province: request.province.to_string(),
             province_name: province_name(data, &request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),
@@ -812,6 +813,7 @@ impl CampaignState {
         let mut defender = side_setup(self, data, &request.attacker, &garrison);
         defender.army = String::new();
         let mut setup = BattleSetup {
+            crossing: None,
             province: request.province.to_string(),
             province_name: province_name(data, &request.province),
             terrain: province.map_or(Terrain::Plains, |p| p.terrain),

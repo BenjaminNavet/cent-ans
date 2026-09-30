@@ -131,8 +131,8 @@ pub use replay::{
 pub use rng::BattleRng;
 pub use scale::{BattleScale, BattleScaleRules, FieldSize, ScaleTier};
 pub use setup::{
-    BattleOpening, BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup,
-    UnitSetup,
+    BattleCrossing, BattleOpening, BattleSeason, BattleSetup, CrossingStructure, GeneralSetup,
+    SideId, SideSetup, SiegeSetup, UnitSetup,
 };
 pub use shot::{MissileKind, ShotCover, ShotEvent};
 pub use siege::{PieceKind, SiegeWorkRules, SiegeWorks, Tower, WallPiece};

@@ -487,6 +487,10 @@ func _water_material(min_px: float) -> ShaderMaterial:
 	material.shader = WATER_SHADER
 	material.set_shader_parameter("min_px", min_px)
 	_apply_display(material)
+	# RC5 : détail Nano Banana 2 (grands fleuves / rivières) ; repli procédural sans texture.
+	var detail_id := "river_large" if min_px == major_min_px else "river_small"
+	WaterDetail.apply(material, detail_id)
+	material.set_shader_parameter("water_detail_flow", WaterDetail.flow_speed(detail_id))
 	material.set_shader_parameter("map_size", Vector2(map_data.size))
 	material.set_shader_parameter("river_bank_px", bank_px)
 	if terrain != null and terrain.river_bed_texture() != null:

@@ -73,6 +73,7 @@ fn main() {
             .unwrap_or(6);
         for seed in 0..seeds {
             let setup = BattleSetup {
+                crossing: None,
                 province: String::new(),
                 province_name: String::new(),
                 terrain: Terrain::Plains,
@@ -183,6 +184,7 @@ fn main() {
         let (mut total, mut att_wins) = (0.0, 0);
         for seed in 0..10 {
             let setup = BattleSetup {
+                crossing: None,
                 province: String::new(),
                 province_name: String::new(),
                 terrain: Terrain::Plains,
@@ -237,6 +239,7 @@ fn main() {
         _ => ("unit_knights", "unit_urban_militia"),
     };
     let setup = BattleSetup {
+        crossing: None,
         province: String::new(),
         province_name: String::new(),
         terrain: Terrain::Plains,

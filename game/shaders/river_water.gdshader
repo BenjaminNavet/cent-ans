@@ -54,6 +54,10 @@ uniform vec4 fords[32];
 uniform int ford_count = 0;
 
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
+// RC5 (ADR 0117) : détail tuilable Nano Banana 2 (`river_large` / `river_small`) le long du
+// courant ; force 0 (défaut, texture absente) = rendu procédural seul.
+#include "res://shaders/water_detail.gdshaderinc"
+uniform float water_detail_flow = 0.05;
 
 varying float v_alpha;
 varying float v_side;
@@ -147,6 +151,9 @@ void fragment() {
 
 	vec3 col = mix(shallow_color, deep_color, deep);
 	col *= 0.92 + 0.16 * n2;
+	// RC5 : coordonnées du courant (abscisse aval, travers) : la texture suit le lit.
+	vec2 rc_uv = vec2(v_flow.x, v_flow.y) * water_detail_scale;
+	col = water_detail_tint(col, rc_uv);
 	// Écume légère au contact des berges et sur les remous du gué.
 	float bank_foam = smoothstep(0.82, 1.0, edge) * (0.5 + 0.5 * n2) * (1.0 - v_carved) * 0.25;
 	float contact = v_carved * (1.0 - smoothstep(0.0, 0.006, thickness)) * 0.5;
@@ -164,6 +171,7 @@ void fragment() {
 	// Rides atténuées quand elles deviennent plus fines que le pixel (pas de scintillement).
 	float ripple_fade = 1.0 - smoothstep(0.08, 0.45, fwidth(q.x));
 	vec3 n = normalize(vec3(-nx * ripple_strength * 10.0 * ripple_fade, 1.0, -ny * ripple_strength * 10.0 * ripple_fade));
+	n = normalize(n + (water_detail_normal_ws(v_flow, TIME, vec2(-water_detail_flow, 0.0)) - vec3(0.0, 1.0, 0.0)) * ripple_fade);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
 	ALBEDO = mix(ALBEDO, sky_color, clamp(fresnel * sky_reflect + 0.12, 0.0, 0.8) * (1.0 - foam));

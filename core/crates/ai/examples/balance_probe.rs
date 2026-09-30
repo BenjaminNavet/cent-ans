@@ -988,6 +988,7 @@ fn run_3d(data: &GameData, scenario: &Scenario, runs: u32) -> Reference3d {
     };
     for seed in 0..u64::from(runs) {
         let setup = BattleSetup {
+            crossing: None,
             province: String::new(),
             province_name: String::new(),
             terrain: scenario.terrain,

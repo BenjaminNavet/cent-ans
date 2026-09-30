@@ -35,12 +35,13 @@ static func spec() -> Dictionary:
 	return _spec
 
 
-## Applique la matière `id` à `material` ; renvoie true si le détail est actif.
+## Applique la matière `id` à `material` (uniformes `<prefix>_normal`, `_albedo`, `_scale`,
+## `_strength` ; `ocean_detail` pour le large de la mer) ; renvoie true si le détail est actif.
 ## Renvoie false (force laissée à 0, repli procédural) si la texture ou les données manquent.
-static func apply(material: ShaderMaterial, id: String) -> bool:
+static func apply(material: ShaderMaterial, id: String, prefix: String = "water_detail") -> bool:
 	if material == null:
 		return false
-	material.set_shader_parameter("water_detail_strength", 0.0)
+	material.set_shader_parameter(prefix + "_strength", 0.0)
 	var entry: Variant = spec().get(id)
 	var normal_path := TEXTURE_DIR + id + "_normal.png"
 	if not entry is Dictionary or not ResourceLoader.exists(normal_path):
@@ -48,12 +49,12 @@ static func apply(material: ShaderMaterial, id: String) -> bool:
 	var normal := load(normal_path) as Texture2D
 	if normal == null:
 		return false
-	material.set_shader_parameter("water_detail_normal", normal)
+	material.set_shader_parameter(prefix + "_normal", normal)
 	var albedo_path := TEXTURE_DIR + id + "_albedo.png"
 	if ResourceLoader.exists(albedo_path):
-		material.set_shader_parameter("water_detail_albedo", load(albedo_path) as Texture2D)
-	material.set_shader_parameter("water_detail_scale", float(entry.get("scale", 1.0)))
-	material.set_shader_parameter("water_detail_strength", float(entry.get("strength", 0.0)))
+		material.set_shader_parameter(prefix + "_albedo", load(albedo_path) as Texture2D)
+	material.set_shader_parameter(prefix + "_scale", float(entry.get("scale", 1.0)))
+	material.set_shader_parameter(prefix + "_strength", float(entry.get("strength", 0.0)))
 	return true
 
 

@@ -34,6 +34,7 @@ fn side(faction: &str, name: &str, units: Vec<UnitSetup>) -> SideSetup {
 
 fn setup(attacker: Vec<UnitSetup>, defender: Vec<UnitSetup>) -> BattleSetup {
     BattleSetup {
+        crossing: None,
         province: "prov_test".to_owned(),
         province_name: "Test".to_owned(),
         terrain: Terrain::Plains,
