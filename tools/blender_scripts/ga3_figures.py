@@ -138,7 +138,7 @@ def _derived(figure, parent, equipment, clips, metal_z=1.5, **extra):
         "parent": parent,
         "glb": f"l4/{name}/multi_front_back.glb",
         "reference": f"l4/{name}/sheet.png",
-        "faces": [f"l4/{name}_v2"],
+        "faces": extra.pop("faces", [f"l4/{name}_v2"]),
         "equipment": equipment,
         "metal_z": metal_z,
         "clips": dict(zip(("idle", "walk", "attack"), clips, strict=True)),
@@ -207,6 +207,8 @@ UNITS.update(
             0.0,
             name="standard_bearer",
             mounted=True,
+            # Budget: the one recipe without a face variant (seen from afar, one per army).
+            faces=[],
         ),
     }
 )
@@ -824,6 +826,7 @@ HEAD_OVERLAP = (
     0.04  # m: a variant head reaches this far below the cut, inside the collar
 )
 FACE_TEX = TEX // 2  # texels of a variant head's square in the strip under the atlas
+GRAFT_MAX_OFFSET = 0.02  # m, horizontal shift of a variant head onto the neck
 HAND_MIN = 0.5  # fine hand: triangles whose vertices all weigh this much on a wrist
 MITTEN_MIN = (
     0.6  # generated mitten: body triangles whose vertices all weigh this on a wrist
@@ -1005,6 +1008,10 @@ def graft_weights(head, body, z_cut):
 
     d = band(body) - band(head)
     d.z = 0.0
+    # Same normalisation (chest centred): a large offset means a different collar (visor,
+    # bevor), not a misplaced head; it is clamped.
+    if d.length > GRAFT_MAX_OFFSET:
+        d *= GRAFT_MAX_OFFSET / d.length
     head.data.transform(Matrix.Translation(d))
     for o in bpy.context.selected_objects:
         o.select_set(False)
@@ -1702,24 +1709,37 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
         if "ga3" not in o.name or "_ga3_game" in o.name:
             bpy.data.objects.remove(o)
     count = 1 + len(unit.get("faces", []))
+    neutral = "c_idle" if mounted else "idle"
+
+    def body_points(o):
+        # Generated body faces only (material 0): not the weapon raised above the head.
+        me = o.data
+        return [
+            me.vertices[i].co
+            for p in me.polygons
+            if p.material_index == 0
+            for i in p.vertices
+        ]
+
     posed = []
     for v in range(count):
-        o = game_posed(fig, None, 0.0, clips["idle"], img, rig_name, v)
+        o = game_posed(fig, neutral, 0.0, neutral, img, rig_name, v)
         o.location.x += 0.6 * v
         posed.append(o)
-    zs = [v.co.z for v in posed[0].data.vertices]
-    head_z = max(zs) - 0.17
-    xs = [v.co.x for v in posed[0].data.vertices if v.co.z > head_z]
-    cx = 0.5 * (min(xs) + max(xs)) + 0.3 * (count - 1)
+    pts = body_points(posed[0])
+    head_z = max(p.z for p in pts) - 0.17
+    xs = [p.x for p in pts if p.z > head_z]
+    x0 = 0.5 * (min(xs) + max(xs))
+    cx = x0 + 0.3 * (count - 1)
     fp.look_at(cam, (cx + 0.25, -2.4, head_z + 0.12), (cx, 0.0, head_z - 0.08), 50)
     scene.render.resolution_x, scene.render.resolution_y = (560, 420)
     fp.render(os.path.join(out, "faces.png"))
-    # Hands of variant 0 (fine fists grafted at LOD0) around the waist, rest of the idle clip.
-    for o in posed[1:]:
+    # Hands of variant 0 (fine fists grafted at LOD0) in the weapon's rest clip.
+    for o in posed:
         bpy.data.objects.remove(o)
-    x0 = 0.5 * (min(xs) + max(xs))
-    hand_z = head_z - (0.55 if not mounted else 0.6)
-    fp.look_at(cam, (x0 + 0.35, -1.7, hand_z + 0.2), (x0, 0.0, hand_z), 35)
+    game_posed(fig, None, 0.0, clips["idle"], img, rig_name, 0)
+    hand_z = head_z - 0.5
+    fp.look_at(cam, (x0 + 0.35, -1.8, hand_z + 0.2), (x0, 0.0, hand_z), 35)
     fp.render(os.path.join(out, "hands.png"))
     _ = math
 

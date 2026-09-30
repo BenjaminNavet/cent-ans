@@ -21,15 +21,22 @@ const CAPS_MOUNTED := [16800, 2050, 620]
 const C_LIVERY := 0
 const C_ARMS := 6
 ## Figurines générées (famille, variante) et figurines témoins restées fines.
-const GENERATED := [["archer", 0], ["infantry", 0], ["archer", 2], ["infantry", 1], ["infantry", 5], ["cavalry", 0]]
-const UNTOUCHED := [["archer", 1], ["infantry", 2], ["cavalry", 1]]
+## L4 : les dix recettes restantes des mêmes types (infantry_2/3/4/6/7/8, archer_1/4, cavalry_3,
+## standard_1), et au moins deux têtes (variantes) par figurine sauf `standard_1`.
+const GENERATED := [
+	["archer", 0], ["infantry", 0], ["archer", 2], ["infantry", 1], ["infantry", 5], ["cavalry", 0],
+	["infantry", 2], ["infantry", 3], ["infantry", 4], ["infantry", 6], ["infantry", 7], ["infantry", 8],
+	["archer", 1], ["archer", 4], ["cavalry", 3], ["standard", 1],
+]
+const SINGLE_HEAD := ["standard_1"]
+const UNTOUCHED := [["archer", 3], ["cavalry", 1], ["standard", 0]]
 
 
 func _check_generated(kind: String, variant: int) -> bool:
 	var ok := true
 	var name := "%s_%d" % [kind, variant]
 	var fig := BattleSkinned.figure(kind, variant)
-	var mounted := kind == "cavalry"
+	var mounted := str(fig.get("rig", "")).ends_with("cavalry")
 	if not fig.has("ga3_albedo") or fig.has("atlas_layer") != mounted:
 		push_error("ga3_l3: %s non remplacée (%s)" % [name, fig.keys()])
 		return false
@@ -92,6 +99,20 @@ func _check_generated(kind: String, variant: int) -> bool:
 			push_error("ga3_l3: %s LOD%d cavalier %d sommets sur R: (corps %d), cheval texturé %d" % [name, level, rider, body, horse_textured])
 			ok = false
 		print("ga3_l3: %s LOD%d %d triangles, %d sommets (corps %d, équipement %d, livrée %d)" % [name, level, tris, uvs.size(), body, gear, livery])
+	# L4 : têtes variantes (masques de variante, bit v) au LOD0, teint au-dessus du cou.
+	var heads := int(fig.get("variants", 1))
+	if heads < (1 if name in SINGLE_HEAD else 2) or float(fig.get("ga3_head_y", 99.0)) > 3.0:
+		push_error("ga3_l3: %s %d têtes, cou %s" % [name, heads, fig.get("ga3_head_y")])
+		ok = false
+	var lod0 := BattleSkinned.mesh(kind, variant, 0).surface_get_arrays(0)
+	var masks: PackedVector2Array = lod0[Mesh.ARRAY_TEX_UV2]
+	var seen := {}
+	for m in masks:
+		seen[int(m.x + 0.5) & 63] = true
+	for v in heads if heads > 1 else 0:
+		if not seen.has(1 << v):
+			push_error("ga3_l3: %s sans tête de variante %d" % [name, v])
+			ok = false
 	if BattleSkinned.chest_box(kind, variant).is_empty():
 		push_error("ga3_l3: %s sans buste en livrée (armoiries)" % name)
 		ok = false
@@ -100,7 +121,7 @@ func _check_generated(kind: String, variant: int) -> bool:
 	BattleSkinned.setup_material(mat, kind, variant)
 	var tex := mat.get_shader_parameter("ga3_albedo") as Texture2D
 	var lum: Vector2 = mat.get_shader_parameter("ga3_lum")
-	if not mat.shader.code.contains("#define GA3_TEX") or tex == null or tex.get_width() > 1024 or lum.x <= 0.0:
+	if not mat.shader.code.contains("#define GA3_TEX") or tex == null or tex.get_width() > 1024 or tex.get_height() > 1536 or lum.x <= 0.0:
 		push_error("ga3_l3: %s matériau GA3 incomplet" % name)
 		ok = false
 	var corpse := BattleSkinned.corpse_shader(kind, variant)
