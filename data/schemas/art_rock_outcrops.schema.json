@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "art_rock_outcrops.schema.json",
+  "title": "Affleurements rocheux de la carte de campagne (lot HB5)",
+  "description": "Catalogue `data/art/rock_outcrops.yaml` : modèles générés (chaîne GA3 fal.ai, `tools/blender_scripts/hb_rock_outcrops.py`), réglages de la couche `RockOutcrops` (`game/scripts/map/rock_outcrops.gd`) et règles de pose par biome (indices ADR 0143 : 1 océanique, 2 continental, 3 méditerranéen, 4 steppe, 5 boréal, 6 montagnard, 7 semi-aride).",
+  "type": "object",
+  "required": ["style_suffix", "cleanup", "render", "fallback_biomes", "outcrops"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "style_suffix": {"type": "string", "description": "Fin commune des prompts d'image (vue, fond gris, sans sol)."},
+    "cleanup": {
+      "type": "object",
+      "required": ["lod0", "tex", "length"],
+      "additionalProperties": false,
+      "properties": {
+        "lod0": {"type": "integer", "minimum": 60, "maximum": 2000, "description": "Plafond de triangles du LOD0 (LOD1 50 %, LOD2 15 %, `ga3_cleanup.py`)."},
+        "tex": {"type": "integer", "enum": [256, 512, 1024]},
+        "length": {"type": "number", "exclusiveMinimum": 0, "description": "Plus grand côté horizontal du modèle nettoyé (m) : 1 = modèle normalisé, mis à `size_m` à la pose."},
+        "strip_base": {"type": "number", "minimum": 0, "description": "`--strip-base` (socle reconstruit par TRELLIS), en part de `length`."}
+      }
+    },
+    "render": {
+      "type": "object",
+      "required": ["tile_units", "grid_step", "max_probability", "near_distance", "far_distance", "far_scale", "vertical_follow", "lod_distances", "fade_start", "fade_end", "max_visible_triangles"],
+      "additionalProperties": false,
+      "properties": {
+        "tile_units": {"type": "number", "exclusiveMinimum": 0, "description": "Côté d'une tuile de pose (unités monde) : un `MultiMeshInstance3D` par modèle et par tuile."},
+        "grid_step": {"type": "number", "exclusiveMinimum": 0, "description": "Pas de la grille tramée des candidats (unités)."},
+        "max_probability": {"type": "number", "minimum": 0, "maximum": 1, "description": "Probabilité d'un affleurement par candidat à aptitude pleine."},
+        "cluster_scale": {"type": "number", "exclusiveMinimum": 0, "description": "Fréquence du bruit de regroupement (1 / unités)."},
+        "cluster_bias": {"type": "number", "minimum": -1, "maximum": 1, "description": "Décalage du bruit de regroupement (> 0 : plus d'affleurements)."},
+        "near_distance": {"type": "number", "minimum": 0, "description": "Distance caméra en deçà de laquelle les affleurements sont à leur taille réelle."},
+        "far_distance": {"type": "number", "minimum": 0, "description": "Distance caméra au-delà de laquelle ils sont grossis de `far_scale`."},
+        "far_scale": {"type": "number", "minimum": 1, "description": "Grossissement lointain (lisibilité en vue moyenne)."},
+        "vertical_follow": {"type": "number", "minimum": 0, "maximum": 1, "description": "Exposant de l'exagération verticale du relief appliqué à la hauteur des modèles."},
+        "lod_distances": {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2, "description": "Distances caméra → tuile des passages LOD0 → LOD1 → LOD2."},
+        "fade_start": {"type": "number", "minimum": 0},
+        "fade_end": {"type": "number", "minimum": 0, "description": "Distance caméra au-delà de laquelle plus rien (vue parchemin, ADR 0124)."},
+        "far_share": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part des instances gardée sur les tuiles en LOD2."},
+        "max_visible_triangles": {"type": "integer", "minimum": 1000, "description": "Plafond des triangles affichés, toutes tuiles (part réduite au-delà)."},
+        "max_cached_tiles": {"type": "integer", "minimum": 4},
+        "max_view_radius": {"type": "number", "minimum": 0},
+        "shadow_max_lod": {"type": "integer", "minimum": -1, "maximum": 2, "description": "Tuiles de niveau ≤ à celui-ci projettent une ombre (-1 : jamais)."},
+        "view_radius_factor": {"type": "number", "exclusiveMinimum": 0, "description": "Rayon des tuiles posées autour du point visé : distance caméra × facteur."},
+        "min_view_radius": {"type": "number", "minimum": 0},
+        "road_clearance": {"type": "number", "minimum": 0, "description": "Dégagement (unités) autour des routes, plus le rayon de l'affleurement."},
+        "river_clearance": {"type": "number", "minimum": 0, "description": "Distance signée minimale (px carte) aux berges des fleuves."},
+        "settlement_margin": {"type": "number", "minimum": 0, "description": "Marge (unités) ajoutée aux clairières des colonies."}
+      }
+    },
+    "fallback_biomes": {
+      "type": "object",
+      "description": "Repli sans `data/map/biomes.png` : biome estimé par l'altitude et la position (parts de la carte).",
+      "required": ["alpine_altitude_m", "south_y", "north_y", "east_x", "steppe_x"],
+      "additionalProperties": false,
+      "properties": {
+        "alpine_altitude_m": {"type": "number"},
+        "south_y": {"type": "number", "minimum": 0, "maximum": 1},
+        "north_y": {"type": "number", "minimum": 0, "maximum": 1},
+        "east_x": {"type": "number", "minimum": 0, "maximum": 1},
+        "steppe_x": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "outcrops": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "prompt", "size_m", "biomes", "min_slope", "min_altitude_m", "max_altitude_m", "ridge", "heath", "density"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Modèles `game/assets/models/rocks/hb/<id>_lod{0,1,2}.glb`."},
+          "label": {"type": "string"},
+          "prompt": {"type": "string", "description": "Sujet de l'image, suivi de `style_suffix`."},
+          "seed": {"type": "integer"},
+          "exposure": {"type": "number", "exclusiveMinimum": 0, "description": "`ga3_cleanup.py --exposure` (albédo TRELLIS souvent sombre)."},
+          "size_m": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 2, "maxItems": 2, "description": "Plus grand côté horizontal réel (m), tiré entre ces bornes."},
+          "biomes": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 7}, "minItems": 1, "uniqueItems": true},
+          "min_slope": {"type": "number", "minimum": 0, "description": "Pente minimale (dénivelé / distance sur ±2 px carte)."},
+          "min_altitude_m": {"type": "number"},
+          "max_altitude_m": {"type": "number"},
+          "ridge": {"type": "number", "minimum": 0, "maximum": 1, "description": "Poids des crêtes (courbure convexe)."},
+          "heath": {"type": "number", "minimum": 0, "maximum": 1, "description": "Poids de la lande / garrigue (splatmap, canal A)."},
+          "density": {"type": "number", "minimum": 0, "maximum": 1, "description": "Poids relatif du modèle parmi ceux du biome."},
+          "along_contour": {"type": "boolean", "description": "Grand côté posé le long des courbes de niveau (falaises, barres) plutôt qu'en lacet aléatoire."}
+        }
+      }
+    }
+  }
+}

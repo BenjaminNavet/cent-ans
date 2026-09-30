@@ -14,3 +14,11 @@ Session principale :
 - [ ] HB3 shader : parcellaire de vue moyenne texturé, canopée, roche (après HB1+HB2).
 - [ ] HB7 rivières : vérification de lisibilité (RC).
 - [ ] HB8 captures, banc, docs.
+
+## HB5 rochers (branche `feat/hb-rocks`, worktree `../gp-hb-rocks`)
+État : catalogue `data/art/rock_outcrops.yaml` + schéma + pytest ; génération fal lancée
+(`tools/blender_scripts/hb_rock_outcrops.py fal`, brutes `~/dev/cent-ans-raw/hb/rocks/`) ;
+couche `game/scripts/map/rock_outcrops.gd` + shader `rock_outcrops.gdshader` écrits, branchés dans
+`campaign_map.gd` ; test `game/tests/hb5_rocks_test.gd`.
+Prochaine étape : `hb_rock_outcrops.py cleanup` (LOD 400/200/60), import Godot, test hb5 + smoke,
+mesures, budget.
