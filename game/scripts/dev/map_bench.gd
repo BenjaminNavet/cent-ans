@@ -15,6 +15,8 @@ extends Node
 ## panoramique et zoom. Rapporte aussi les recalages d'échelle verticale et les cuissons des
 ## maquettes.
 ## SZ6 : `--bench-probe` attribue les pics aux sections de `PerfProbe` (`probe` dans le rapport).
+## VT-I : `--bench-pan-only` s'arrête après le panoramique (mesure à une seule distance) ; le rapport
+## donne aussi `startup_total_ms` (chargement de la carte) et `town_far` (statistiques du lointain).
 
 ## Étapes (x, y carte, distance) : Caen → Rouen → Paris → Chartres → Évreux, puis zoom sur Paris.
 const PAN_PATH: Array[Vector2] = [
@@ -48,6 +50,7 @@ var _cpu_render_ms: PackedFloat32Array = PackedFloat32Array()
 var _primitives: PackedFloat32Array = PackedFloat32Array()
 var _draw_calls: PackedFloat32Array = PackedFloat32Array()
 var _descent_only := false
+var _pan_only := false
 var _descent_site := 0
 var _descent_sites: Array[Vector2] = DESCENT_SITES
 var _descent_hold := DESCENT_HOLD
@@ -97,6 +100,8 @@ func _ready() -> void:
 			pan_seconds = float(arg.trim_prefix("--bench-seconds="))
 		elif arg == "--bench-descent-only":
 			_descent_only = true
+		elif arg == "--bench-pan-only":
+			_pan_only = true
 		elif arg == "--bench-towns":
 			_descent_sites = TOWN_DESCENT_SITES
 			_descent_hold = TOWN_DESCENT_HOLD
@@ -236,6 +241,9 @@ func _process(delta: float) -> void:
 			if _phase_t >= pan_seconds:
 				_phase = "zoom"
 				_phase_t = 0.0
+				if _pan_only:
+					_report(now)
+					_phase = "done"
 		"zoom":
 			_frame_ms.append((now - _last_us) / 1000.0)
 			_sample()
@@ -356,6 +364,12 @@ func _report(now: int) -> void:
 		"primitives_p50": _median(_primitives),
 		"draw_calls_p50": _median(_draw_calls),
 	}
+	var campaign := terrain.get_parent()
+	if campaign != null and "startup_stats" in campaign:
+		report["startup_total_ms"] = (campaign.get("startup_stats") as Dictionary).get("total_ms", 0)
+	var layer: Node = campaign.get("settlement_layer") if campaign != null and "settlement_layer" in campaign else null
+	if layer != null and "town_far" in layer and layer.get("town_far") != null:
+		report["town_far"] = (layer.get("town_far") as Node).get("stats")
 	if terrain.quadtree != null:
 		report.merge(terrain.quadtree.perf_stats())
 	# ZG5b : réseau fin (mise à jour par image, maillages, pages creusées).

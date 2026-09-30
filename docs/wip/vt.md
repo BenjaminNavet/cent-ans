@@ -31,6 +31,12 @@ Vague 3 : I bancs (d = 1100, 150, 30), captures (≤ 6), docs `godot-map.md`.
   `block_range` × qualité × 0,95. Test `tf_far_layer_test.gd`.
 - [x] F : `max_rig_distance` (16, hystérésis 10 %) sur `TownLayer` et `LandmarkCityLayer`, maquettes/fondu retirés, `built_ids()` sur les deux calques.
 
+## Lot I (en cours)
+- [x] Banc : `--bench-pan-only` (mesure à une seule distance), `startup_total_ms` et `town_far` dans le rapport.
+- [ ] Bancs base (worktree détaché `../game_project-vt-base`, à supprimer) / VT à d = 1100, 150, 30.
+- [ ] Captures `game/tests/vt_shots.gd` → `docs/img/vt/`.
+- [ ] Docs `godot-map.md`, ADR 0138 acceptée.
+
 ## Prochaine étape
 Lot I : bancs (d = 1100, 150, 30), captures (≤ 6), docs `godot-map.md`.
 À juger sur capture (E) : fondu F1/F2 à d ≈ 300 ; bande 0,86-1,1 × `block_range` où blocs et
