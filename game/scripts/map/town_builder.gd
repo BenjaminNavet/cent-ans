@@ -121,7 +121,7 @@ static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters
 	mat.shader = SHADER
 	var atlas := BuildingMaterials.material("Building", "far") as ShaderMaterial
 	if atlas != null:
-		for p in ["albedo_array", "layer_tint", "layer_tile", "first_plain", "roof_first", "roof_last"]:
+		for p in ["albedo_array", "layer_tint", "layer_tile", "first_plain", "roof_first", "roof_last", "aging"]:
 			mat.set_shader_parameter(p, atlas.get_shader_parameter(p))
 	mat.set_shader_parameter("base_source", base_source)
 	mat.set_shader_parameter("box_uv", box_uv)

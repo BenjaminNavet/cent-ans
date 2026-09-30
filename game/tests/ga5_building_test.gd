@@ -24,6 +24,14 @@ func _texture_bytes(tex: Texture2D) -> int:
 	return int(tex.get_width() * tex.get_height() * per_texel * 4.0 / 3.0)
 
 
+## Lot SR5b : les matières texturées sont des ShaderMaterial (`building_pbr.gdshader`), ou des
+## StandardMaterial3D avec `--no-sr5`.
+func _tex(mat: Material, param: String) -> Texture2D:
+	if mat is ShaderMaterial:
+		return (mat as ShaderMaterial).get_shader_parameter(param) as Texture2D
+	return mat.get(param) as Texture2D
+
+
 func _init() -> void:
 	var ok := true
 	var names := BuildingMaterials.SPECS.keys()
@@ -46,27 +54,30 @@ func _init() -> void:
 
 	var total := 0
 	for name in names:
-		var mat := BuildingMaterials.material(name) as StandardMaterial3D
+		var mat := BuildingMaterials.material(name)
 		if mat == null:
 			print("GA5: matériau %s introuvable" % name)
 			ok = false
 			continue
-		if mat.albedo_texture == null:
+		var albedo_tex := _tex(mat, "albedo_texture")
+		var normal_tex := _tex(mat, "normal_texture")
+		var rough_tex := _tex(mat, "roughness_texture")
+		if albedo_tex == null:
 			print("GA5: %s sans albédo_texture" % name)
 			ok = false
 			continue
-		var diff_bytes := _texture_bytes(mat.albedo_texture)
-		var nor_bytes := _texture_bytes(mat.normal_texture)
-		var rough_bytes := _texture_bytes(mat.roughness_texture)
+		var diff_bytes := _texture_bytes(albedo_tex)
+		var nor_bytes := _texture_bytes(normal_tex)
+		var rough_bytes := _texture_bytes(rough_tex)
 		total += diff_bytes + nor_bytes + rough_bytes
 		print(
 			"GA5 %s: albedo %dx%d (%.2f Mo), normal %s, rough %s" % [
 				name,
-				mat.albedo_texture.get_width() if mat.albedo_texture else 0,
-				mat.albedo_texture.get_height() if mat.albedo_texture else 0,
+				albedo_tex.get_width(),
+				albedo_tex.get_height(),
 				diff_bytes / 1048576.0,
-				("%.2f Mo" % (nor_bytes / 1048576.0)) if mat.normal_texture else "absente",
-				("%.2f Mo" % (rough_bytes / 1048576.0)) if mat.roughness_texture else "absente",
+				("%.2f Mo" % (nor_bytes / 1048576.0)) if normal_tex else "absente",
+				("%.2f Mo" % (rough_bytes / 1048576.0)) if rough_tex else "absente",
 			]
 		)
 

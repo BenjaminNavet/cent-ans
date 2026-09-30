@@ -43,12 +43,20 @@ uniform float roofscape_near = 1.2;
 uniform float roofscape_far = 3.5;
 uniform float roofscape_cell_m = 9.0;
 uniform float roofscape_gain = 1.0;
+// Lot SR5 : usure procédurale douce (`building_aging.gdshaderinc`), 0 = rendu d'avant SR5.
+// Hauteur au-dessus du pied = y du sommet relatif à l'origine de l'instance (avant pose sur le
+// relief), en mètres ; position locale (m) relative à l'ancrage pour le bruit.
+uniform float aging : hint_range(0.0, 2.0) = 0.5;
+
+#include "res://shaders/building_aging.gdshaderinc"
 
 varying flat int layer;
 varying float tint_shift;
 varying vec3 world_m;
 varying vec3 world_n;
 varying float v_built;
+varying vec3 v_age_pos;
+varying flat float v_seed;
 
 void vertex() {
 	layer = clamp(int(COLOR.a * 16.0), 0, 15);
@@ -60,6 +68,10 @@ void vertex() {
 	if (base_source == 2) {
 		anchor_xz = (MODEL_MATRIX * vec4(CUSTOM0.g, 0.0, CUSTOM0.b, 1.0)).xz;
 	}
+	// Maillages drapés (base_source 1) : l'ancrage est le sommet lui-même ; bruit en position monde.
+	vec2 age_origin = base_source == 1 ? vec2(0.0) : anchor_xz;
+	v_age_pos = vec3(VERTEX.x - age_origin.x, VERTEX.y - MODEL_MATRIX[3].y, VERTEX.z - age_origin.y) * meters_per_unit;
+	v_seed = base_source == 1 ? 0.5 : ba_seed(vec3(anchor_xz.x, 0.0, anchor_xz.y), INSTANCE_ID);
 	float keep = 1.0;
 	if (lod_mode > 0) {
 		// Hauteur approchée de l'instance (sans le relief ZG8) : suffit au choix du niveau.
@@ -98,6 +110,13 @@ void fragment() {
 		base = texture(albedo_array, vec3(uv * layer_tile[layer], float(layer))).rgb;
 	}
 	vec3 albedo = base * tint.rgb * COLOR.rgb * (1.0 + tint_shift * 0.35);
+	float far = ba_far(v_age_pos);
+	if (aging > 0.0 && layer < first_plain) {
+		bool roof = layer >= roof_first && layer <= roof_last;
+		float age = aging * (0.6 + 0.8 * v_seed);
+		vec3 n = normalize(world_n);
+		albedo = ba_age(albedo, v_age_pos, n, v_age_pos.y, v_seed, roof ? 0.0 : 1.0, roof ? 1.0 - snow : 0.25, age, far);
+	}
 	if (snow > 0.0 && layer >= roof_first && layer <= roof_last) {
 		albedo = mix(albedo, vec3(0.9, 0.92, 0.97) * (0.85 + 0.15 * base.r), snow);
 	}
