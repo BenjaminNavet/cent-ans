@@ -184,6 +184,10 @@ func _draw() -> void:
 		"trade_route":
 			draw_line(center + Vector2(-26, -4), center + Vector2(26, -4), TRADE, 3.0, true)
 			draw_dashed_line(center + Vector2(-26, 6), center + Vector2(26, 6), TRADE_CUT, 2.0, 4.0)
+		"sea_lane":
+			# SL1 : tirets de `SeaLaneLayer` (haute mer, cabotage ennemi).
+			draw_dashed_line(center + Vector2(-26, -4), center + Vector2(26, -4), SeaLaneLayer.INK, 2.5, 8.0)
+			draw_dashed_line(center + Vector2(-26, 6), center + Vector2(26, 6), SeaLaneLayer.INK_HOSTILE, 2.5, 4.0)
 		"minimap_army":
 			draw_rect(Rect2(center - Vector2(14, 11), Vector2(28, 22)), CampaignMinimap.LOWLAND)
 			if str(sample.get("owner", "player")) == "player":

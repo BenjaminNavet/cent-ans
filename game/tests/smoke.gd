@@ -128,6 +128,7 @@ func _init() -> void:
 	await _run_technologies()
 	await _run_diplomacy()
 	await _run_trade()  # C5
+	_run_sea_lanes()  # SL1
 	await _run_battle()
 	await _run_chronicle()
 	await _run_assets()  # M10 assets
@@ -1142,6 +1143,37 @@ func _run_diplomacy() -> void:
 	if _failures == 0:
 		print("smoke OK: diplomacy (real), %d factions, peace verdict %s, embargo + war declared, %d diplomatic events in 20 turns, favour %d" % [
 			entries.size(), "accept" if verdict.get("accept", false) else "refuse", diplomatic_events, int(religion.get("papal_favor", 0))])
+## SL1 (ADR 0117) : routes maritimes (pont `get_sea_lanes` / `is_sea_link`, géométrie de la
+## couche, infobulle). Vraie simulation uniquement.
+func _run_sea_lanes() -> void:
+	if not (ClassDB.class_exists("CampaignSim") and ClassDB.instantiate("CampaignSim").has_method("get_sea_lanes")):
+		print("smoke sea lanes: skipped, CampaignSim has no get_sea_lanes (run core/build.sh)")
+		return
+	var sim: Object = ClassDB.instantiate("CampaignSim")
+	if not _check(sim.call("new_campaign", _project_root().path_join("data"), "fac_england", 1337), "sea lanes: new_campaign failed"):
+		return
+	var lanes: Array = sim.call("get_sea_lanes")
+	_check(lanes.size() >= 20, "get_sea_lanes should list >= 20 lanes, got %d" % lanes.size())
+	var wine: Dictionary = {}
+	for lane_variant in lanes:
+		if str((lane_variant as Dictionary).get("id", "")) == "lane_southampton_bordeaux":
+			wine = lane_variant
+	_check(not wine.is_empty(), "lane_southampton_bordeaux expected")
+	_check(bool(sim.call("is_sea_link", "set_southampton", "set_bordeaux")), "Southampton-Bordeaux should be a sea link")
+	_check(not bool(sim.call("is_sea_link", "set_southampton", "set_paris")), "Southampton-Paris is no sea link")
+	var map_data := MapData.new()
+	map_data.map_dir = _project_root().path_join("data/map")
+	var layer := SeaLaneLayer.new()
+	layer.setup(map_data)
+	_check(layer.has_lanes(), "sea_lanes_px.json should load")
+	_check(layer.lane_points("set_bordeaux", "set_southampton").size() > 2, "lane geometry should reverse")
+	var tip := SeaLaneLayer.tooltip(wine)
+	_check(tip.contains("Gascogne"), "sea lane tooltip should name the sea: %s" % tip)
+	layer.free()
+	if _failures == 0:
+		print("smoke OK: sea lanes, %d lanes" % lanes.size())
+
+
 ## C5 (docs/design/2026-09-24-rapprochement-total-war.md) : routes commerciales et accords.
 ## Vraie simulation uniquement (le mock n'a pas de commerce).
 func _run_trade() -> void:
