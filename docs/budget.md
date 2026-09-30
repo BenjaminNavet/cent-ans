@@ -141,3 +141,52 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot
 | 2026-09-29 | OpenRouter | OMR : portrait de Hızır Bey, 1re tentative avec auréole, écartée (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,30 $ |
 | 2026-09-29 | OpenRouter | OMR : portrait de Hızır Bey, bey de Hamid (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,35 $ |
 | 2026-09-29 | OpenRouter | OMR : variante âgée de Hızır Bey (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 8,40 $ |
+
+## Nano Banana NB (30/09) — plafond propre de 10 $ (clé OpenRouter personnelle du joueur)
+
+Spec `docs/superpowers/specs/2026-09-30-nb-nano-banana-interface-design.md`. NB-DA ≤ 1 $,
+NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul NB |
+|---|---|---|---|---|---|
+| 2026-09-30 | — | NB-S (squelette) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v0 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,10 $ |
+| 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v1 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,20 $ |
+| 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v2 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,30 $ |
+| 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v3 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,40 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait sans ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,47 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait avec ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,54 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait sans ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 0,57 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait avec ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 0,60 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait sans ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 0,74 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde portrait avec ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 0,88 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event sans ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,95 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event avec ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 1,02 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event sans ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,05 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event avec ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,08 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event sans ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,22 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde event avec ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,36 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon sans ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 1,43 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon avec ancre (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 1,50 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon sans ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,53 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon avec ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,56 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon sans ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,70 $ |
+| 2026-09-30 | OpenRouter | NB0 : sonde icon avec ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,84 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel_illuminated v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 1,91 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel_illuminated v1 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 1,98 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel_illuminated v2 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,05 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,12 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel v1 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,19 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel v2 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,26 $ |
+| 2026-09-30 | OpenRouter | NB1 : top_bar v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,33 $ |
+| 2026-09-30 | OpenRouter | NB1 : top_bar v1 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,40 $ |
+| 2026-09-30 | OpenRouter | NB1 : top_bar v2 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,47 $ |
+| 2026-09-30 | OpenRouter | NB1 : tooltip v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,54 $ |
+| 2026-09-30 | OpenRouter | NB1 : tooltip v1 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,61 $ |
+| 2026-09-30 | OpenRouter | NB1 : tooltip v2 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,68 $ |
+| 2026-09-30 | OpenRouter | NB1 : initial_dragon v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,75 $ |
+| 2026-09-30 | OpenRouter | NB1 : fleuron_divider v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,82 $ |
+| 2026-09-30 | OpenRouter | NB1 : drollery_hare v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,89 $ |
+| 2026-09-30 | OpenRouter | NB1 : drollery_musician v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,96 $ |
+| 2026-09-30 | OpenRouter | NB1 : corner_rinceau v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 3,03 $ |
+| 2026-09-30 | OpenRouter | NB1 : cartouche_title v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 3,10 $ |

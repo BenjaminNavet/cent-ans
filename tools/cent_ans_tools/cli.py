@@ -1422,5 +1422,50 @@ def assets_materials(
     console.print(f"Cumul GA : {budget.total()} $")
 
 
+@assets_app.command("ui-ornaments")
+def assets_ui_ornaments(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Estime sans appel payant"),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiants à traiter seuls, répétable"
+    ),
+    sheet: Path | None = typer.Option(  # noqa: B008
+        None, "--sheet", help="Planche avant/après PNG à écrire"
+    ),
+    install: bool = typer.Option(
+        False, "--install", help="Installer les variantes `selected` dans nb/"
+    ),
+) -> None:
+    """NB : kit d'interface redessiné (data/art/ui_ornaments.yaml)."""
+    import json
+
+    from cent_ans_tools import ui_ornaments as orn
+
+    config = orn.load_ornaments()
+    kit = json.loads((orn.KIT_DIR / "kit.json").read_text(encoding="utf-8"))
+    if install:
+        selected = {
+            entry["id"]: entry["selected"]
+            for entry in config["pieces"]
+            if "selected" in entry and (not only or entry["id"] in only)
+        }
+        written = orn.install(selected, kit)
+        for path in written:
+            console.print(f"[green]OK[/green] : {path}")
+        if sheet is not None:
+            before = [orn.KIT_DIR / f"{path.stem}.png" for path in written]
+            console.print(f"Planche : {orn.contact_sheet(before, written, sheet)}")
+        return
+    if only:
+        config = {
+            **config,
+            "pieces": [e for e in config["pieces"] if e["id"] in only],
+            "decor": [e for e in config["decor"] if e["id"] in only],
+        }
+    anchor = orn.ANCHOR_PATH.read_bytes() if orn.ANCHOR_PATH.exists() else b""
+    requests = orn.build_requests(kit, anchor, config)
+    orn.generate(requests, dry_run=dry_run, model=config["model"])
+    console.print(f"Cumul : {budget.total()} $")
+
+
 if __name__ == "__main__":
     app()
