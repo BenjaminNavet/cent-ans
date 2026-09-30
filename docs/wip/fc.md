@@ -6,7 +6,7 @@ worktree `../game_project-fc`. Mandat : autonomie. Mesures seulement sur machine
 ## Lots
 - [ ] FC0 base (attend la fin de SR3b/SR5 et de toute compilation)
 - [x] FC1 ombres maquettes/moulins par préréglage
-- [ ] FC2 arbres imposteurs
+- [x] FC2 arbres imposteurs
 - [x] FC3 herbe et broussailles proches
 - [ ] FC4 banc A/B, captures, ADR 0137, fusion
 
@@ -44,4 +44,6 @@ inchangé). `vegetation.gd` : tuiles au-delà de `detail_distance` → `Vegetati
 `--no-fc2` = maillages bas ; `lod_census()` pour tests/bancs. Contact : `docs/img/fc/fc2_impostors.jpg`.
 Non fait : ForestDetail (garde le maillage bas : changer de maillage y coûte ~1 ms/MultiMesh) ;
 portée 700 → 1000 (pas de clé de préréglage FC1 ; `max_camera_distance` reste 700).
-Prochaine étape : import Godot, `fc2_impostors_test.gd`, tests végétation, smoke.
+Tests : `fc2_impostors_test.gd` OK (headless et fenêtré, hiver compris : shaders compilés),
+smoke, sz4b, fc1 OK. Triangles des arbres lointains (Orléans, d = 150) : 407 000 → 41 600
+(≈ 19,6 → 2 par arbre), même nombre de MultiMesh. Terminé ; jugement visuel à FC4.

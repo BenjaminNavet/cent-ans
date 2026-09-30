@@ -91,6 +91,17 @@ func _test_map() -> void:
 	_check(int(after["impostor"]) > 0, "far tiles use the impostor mesh")
 	_check(int(after["low"]) == 0, "no low mesh left for oak/beech/fir")
 	_check(int(after["detailed"]) > 0, "near tiles keep the detailed mesh")
+	# Hiver : variante ajourée du feuillage maillé, imposteurs dans le même shader (rendu fenêtré :
+	# compile les deux).
+	var life: Variant = map.get("life")
+	var seasons: Variant = (life as Object).get("seasons") if life is Object else null
+	if seasons is SeasonVisuals:
+		(seasons as SeasonVisuals).set_season("winter", true)
+		for i in 40:
+			await process_frame
+		_check(vegetation.foliage_material().shader == Vegetation.FOLIAGE_WINTER_SHADER, "winter foliage variant")
+		_check(vegetation.impostor_material().shader == Vegetation.IMPOSTOR_SHADER, "impostors keep their shader in winter")
+		(seasons as SeasonVisuals).set_season("summer", true)
 	# Repli : maillages bas au loin.
 	vegetation.use_impostors = false
 	vegetation.build(data)
