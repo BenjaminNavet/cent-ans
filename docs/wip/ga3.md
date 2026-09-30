@@ -234,6 +234,9 @@ abandonne nos clips Quaternius.
       une planche nano-banana-2 par essence) dans une grille au format `campaign_impostors_albedo`, aussi
       pour les arbres proches ; atlas de feuilles, herbe dense, rochers TRELLIS dans `GroundClutter` ;
       `--no-ga3-veg`, `--no-ga3-near`. Voir journal et `docs/wip/ga3-l2.md`.
+- [ ] L1b reprise de 3 objets L1 (maison : chaume sombre et lisse ; puits : toit en bardeaux sombres ;
+      bélier : toit en planches / peaux brunes unies). Prompts dans `ga3_decor.json`, surcharge
+      d'étalonnage par objet (`cleanup`), brutes `~/dev/cent-ans-raw/ga3/l1b/`. En cours : appels fal.
 - [ ] L3 figurines : APRÈS fusion de `feat/sr`. Références A-pose mains vides → trellis-2 → chaîne S2
       (notre squelette, nos clips, armes procédurales), masque de livrée. ≈ 2,50 $.
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.

@@ -10,15 +10,7 @@
     "description": {"type": "string"},
     "style_prefix": {"type": "string", "description": "Début commun des prompts d'image."},
     "style_suffix": {"type": "string", "description": "Fin commune des prompts (époque, fond gris, sans sol)."},
-    "cleanup": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "auto_levels": {"type": "number", "minimum": 0, "maximum": 10},
-        "gamma": {"type": "number", "exclusiveMinimum": 0},
-        "normal": {"enum": ["auto", "on", "off"]}
-      }
-    },
+    "cleanup": {"$ref": "#/$defs/cleanup"},
     "objects": {
       "type": "array",
       "minItems": 1,
@@ -47,8 +39,22 @@
           "fit": {"enum": ["footprint", "length", "real"], "description": "Mise à l'emprise visée par le kit : `footprint` (longueur et profondeur, étirement borné), `length` (échelle uniforme sur la longueur, bornée à ±20 %), `real` (taille réelle générée)."},
           "share": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part des modèles de ce type remplacés par la variante GA3 (tirage déterministe)."},
           "wired": {"type": "boolean", "description": "false = généré mais non branché (modèle procédural ou animé gardé)."},
+          "cleanup": {"$ref": "#/$defs/cleanup", "description": "Surcharge par objet de l'étalonnage commun (ex. `auto_levels` plus faible pour un chaume sombre)."},
           "note": {"type": "string"}
         }
+      }
+    }
+  },
+  "$defs": {
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Étalonnage de l'albédo cuit (`ga3_cleanup.py --exposure/--auto-levels/--gamma`) et normal map.",
+      "properties": {
+        "exposure": {"type": "number", "exclusiveMinimum": 0},
+        "auto_levels": {"type": "number", "minimum": 0, "maximum": 10},
+        "gamma": {"type": "number", "exclusiveMinimum": 0},
+        "normal": {"enum": ["auto", "on", "off"]}
       }
     }
   }
