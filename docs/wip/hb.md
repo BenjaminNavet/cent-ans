@@ -21,4 +21,5 @@ Session principale :
 - Parts des terres : océanique 4,5 %, continental 32,9, méditerranéen 9,5, steppe 8,5, boréal 17,2, montagnard 5,6, semi-aride 21,8.
 - Carte de couleur : section `biomes` de `colormap_style.yaml` (palettes, garrigue en taches, forêts gardées près des rivières en steppe, cultures/prés par biome tirés par bloc, multiplicateurs bocage/openfield/vigne/présence), poids fondus sur 25 km. Re-cuite (pic mémoire ~11,6 Go).
 - Tests : `tools/tests/test_biomes.py` (38, dont 21 lieux réels : Athènes/Péloponnèse = 3, Rostov/Volgograd = 4…), `test_colormap.py` inchangé et vert.
-- Points ouverts : lisière ouest de la steppe droite vers 26-28° E (héritée de `landcover.dryness`) ; terrasses méditerranéennes non dessinées ; Dobroudja semi-aride (BSk intérieur au sud de 44° N).
+- Suite (retours) : lisière forêt-steppe = score (limite historique 35 % + Köppen BSk/Dfa/Dfb flouté 60 km 65 %, à l'est de 24-28° E) + bruit 300/80/25 km → lisière sinueuse, bosquets en îlots (écart à la droite ~1,1° contre 0,36°) ; carte de couleur : `dry_max` par biome (méditerranéen 0,35, semi-aride 0,5, montagnard 0,6), zones arides de `dryness` gardées → Tell olive, hauts plateaux intermédiaires, Sahara sable. Tests 56 verts.
+- Points ouverts : terrasses méditerranéennes non dessinées ; Dobroudja semi-aride (BSk intérieur au sud de 44° N).
