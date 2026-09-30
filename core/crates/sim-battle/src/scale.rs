@@ -243,11 +243,11 @@ mod tests {
     fn tiers_grow_with_the_head_count() {
         let rules = BattleScaleRules::bundled();
         assert_eq!(rules.tier_for(1000).key, "skirmish");
-        assert_eq!(rules.tier_for(4000).key, "skirmish");
-        assert_eq!(rules.tier_for(4001).key, "large");
-        assert_eq!(rules.tier_for(30_000).key, "epic");
-        let epic = rules.tier_for(30_000);
-        assert!(epic.max_regiments_per_side >= 40);
+        assert_eq!(rules.tier_for(8000).key, "skirmish");
+        assert_eq!(rules.tier_for(8001).key, "large");
+        assert_eq!(rules.tier_for(60_000).key, "epic");
+        let epic = rules.tier_for(60_000);
+        assert!(epic.max_regiments_per_side >= 80);
         assert!(epic.width_m >= 2400.0);
     }
 }
