@@ -31,7 +31,14 @@ uniform float min_px = 1.6;
 uniform float thin_fade = 0.7;
 // RC (ADR 0117) : largeur écran minimale × facteur selon l'importance (UV2.y, 0-6) : au dézoom,
 // les grands fleuves restent plus épais que leurs affluents.
-uniform float importance_min_px_scale[7] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+// Importances 0-3 dans `importance_px_lo`, 4-6 dans `importance_px_hi`.
+uniform vec4 importance_px_lo = vec4(1.0);
+uniform vec3 importance_px_hi = vec3(1.0);
+
+float importance_px_scale(float importance) {
+	int i = clamp(int(importance + 0.5), 0, 6);
+	return i < 4 ? importance_px_lo[i] : importance_px_hi[i - 4];
+}
 // RC : liseré de berge à l'encre (contraste avec le relief, lecture cartographique au dézoom).
 uniform vec3 bank_ink_color : source_color = vec3(0.05, 0.13, 0.20);
 uniform float bank_ink_strength = 0.0;
@@ -90,7 +97,7 @@ void vertex() {
 	float true_px = UV.x / world_per_px;
 	float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
 	float width = UV.x * mix(1.0, carved_overlap, carved);
-	float imp_px = min_px * importance_min_px_scale[clamp(int(UV2.y + 0.5), 0, 6)];
+	float imp_px = min_px * importance_px_scale(UV2.y);
 	float half_w = 0.5 * max(width, imp_px * world_per_px);
 	VERTEX += NORMAL * half_w;
 	VERTEX.y += mix(lift_base + lift_per_distance * dist, -water_sink, carved);

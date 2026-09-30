@@ -512,7 +512,8 @@ func _apply_display(material: ShaderMaterial) -> void:
 			material.set_shader_parameter(key, float(display[key]))
 	var scale: Array = display.get("importance_min_px_scale", [])
 	if scale.size() == 7:
-		material.set_shader_parameter("importance_min_px_scale", PackedFloat32Array(scale))
+		material.set_shader_parameter("importance_px_lo", Vector4(scale[0], scale[1], scale[2], scale[3]))
+		material.set_shader_parameter("importance_px_hi", Vector3(scale[4], scale[5], scale[6]))
 
 
 func _set_fords(fords: Array[Vector4]) -> void:
