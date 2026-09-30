@@ -28,20 +28,20 @@
  ],
  "clip_sources": {
   "guard": {
-   "note": "stick on the right shoulder, swaying",
+   "note": "stick on the right shoulder, still",
    "quality": {
     "contact_frames": [
-     16,
-     28
+     39,
+     39
     ],
-    "foot_below_rest_m": -0.0,
-    "foot_slide_m": 0.235,
-    "jitter_deg_per_frame2": 2.22,
-    "wrist_r_bend_max_deg": 113.0,
-    "wrist_r_max_deg_per_frame": 1.7
+    "foot_below_rest_m": 0.0,
+    "foot_slide_m": 0.0,
+    "jitter_deg_per_frame2": 2.86,
+    "wrist_r_bend_max_deg": 113.8,
+    "wrist_r_max_deg_per_frame": 0.8
    },
    "solve_s": 0.0,
-   "source": "player video IMG_6456 frames 0-34 @30fps, x1.0 speed",
+   "source": "player video IMG_6455 frames 0-48 @30fps, x1.0 speed",
    "yaw_deg": 45.0
   },
   "overhead": {
@@ -98,24 +98,24 @@
  },
  "clips": {
   "guard": {
-   "frames": 28,
+   "frames": 39,
    "loop": true,
    "start": 0
   },
   "overhead": {
    "frames": 37,
    "loop": false,
-   "start": 28
+   "start": 39
   },
   "slash": {
    "frames": 35,
    "loop": false,
-   "start": 65
+   "start": 76
   },
   "thrust": {
    "frames": 40,
    "loop": false,
-   "start": 100
+   "start": 111
   }
  },
  "fps": 24,

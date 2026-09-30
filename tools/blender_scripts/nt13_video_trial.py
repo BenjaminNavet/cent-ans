@@ -524,11 +524,13 @@ def bake():
 
 
 RENDER_FRACS = (0.0, 0.25, 0.5, 0.75, 1.0)
-RENDER_EYE = ((2.4, -4.2, 1.5), (0.0, -0.2, 0.85))
+RENDER_EYE = ((1.7, -3.0, 1.35), (0.0, -0.2, 0.85))
 
 
 def render(out):
-    """Workbench renders of each clip: keyframed ``k``, CMU ``m`` (NT12 clips), video ``v``.
+    """Workbench renders of each clip: keyframed ``k``, CMU ``m`` (NT12), video ``v`` and ``c``.
+
+    ``c`` shows the video clip from the source camera's side, to compare with the video.
 
     Files ``<clip>_<k|m|v>_<i>.png`` in `out` at ``RENDER_FRACS`` of the clip, plus
     ``frames.json`` (video and source frame of each render, for the contact sheet).
@@ -563,7 +565,11 @@ def render(out):
 
     for spec in CLIPS:
         name, video, first, last, speed, _loop, _yaw, _note = spec
-        bases, _solved, _w, _clip = clip_bases(tgt, rest, spec)
+        bases, _solved, _w, clip = clip_bases(tgt, rest, spec)
+        # Camera of the source video (in front of the performer), for the ``c`` renders.
+        look = arm.matrix_world.to_3x3().normalized() @ (clip.rot @ Vector((0, -1, 0)))
+        look.z = 0.0
+        eye_c = Vector(RENDER_EYE[1]) + look.normalized() * 3.4 + Vector((0, 0, 0.45))
         cmu_bases = nt12.clip_bases(tgt, cmu[name])[0] if name in cmu else None
         for i, frac in enumerate(RENDER_FRACS):
             fp.pose_clip(arm, name, frac)
@@ -574,6 +580,9 @@ def render(out):
                 fp.render(os.path.join(out, f"{name}_m_{i}.png"))
             show(bases[int(round(frac * (len(bases) - 1)))])
             fp.render(os.path.join(out, f"{name}_v_{i}.png"))
+            fp.look_at(cam, eye_c, RENDER_EYE[1], 40)
+            fp.render(os.path.join(out, f"{name}_c_{i}.png"))
+            fp.look_at(cam, RENDER_EYE[0], RENDER_EYE[1], 40)
             index[f"{name}_{i}"] = [video, int(round(first + frac * (last - first)))]
     with open(os.path.join(out, "frames.json"), "w") as f:
         json.dump(index, f, indent=1)
