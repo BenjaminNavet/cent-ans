@@ -126,12 +126,13 @@ func _run() -> void:
 	world.add_child(vegetation)
 	vegetation.bind_terrain(terrain)
 	vegetation.build(map_data)
-	vegetation.update_view(camera.global_position, 55.0)
+	# VT3 : arbres 1:1 dessinés en deçà de `MapPropScale.tree_max_distance` (30) seulement.
+	vegetation.update_view(camera.global_position, 20.0)
 	for _i in 30:
 		if vegetation.pending_jobs() == 0:
 			break
 		await process_frame
-		vegetation.update_view(camera.global_position, 55.0)
+		vegetation.update_view(camera.global_position, 20.0)
 	vegetation.flush_ground()
 	_check(vegetation.instance_count() > 0, "no tree near Paris")
 	var fine_tree_tiles := 0
