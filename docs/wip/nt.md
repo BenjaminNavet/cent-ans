@@ -37,3 +37,7 @@ Mocap payante (corps à corps, combats appariés), clé fal.ai (GA3), chantier g
 - NT8 château : tours rayon ≤ 6 m, donjon carré 32,5 m (toit en pavillon), basse-cour meublée. Ouvert : porte du donjon sans escalier ; une seule forme de toit.
 - NT9 : une attaque IA par armée ennemie et par tour ; batailles FR/EN ×1,68 (au lieu de ×1,94) vs avant N6/N7, justifié ADR 0128 ; guerre FR–EN 64 % (10/12 graines dans 55-75) ; bélier +20 % en résolution auto ; sorties comptées pour les missions ; cv3_ai_stances rétabli graine 1.
 - Intégration : schéma NT7 sans `$id` corrigé (465 pytest cassés sinon) ; pytest 1287, cargo test, clippy, smoke, tests Godot verts sauf `fe_ui_test` (préexistant, hors NT).
+
+## Vague 4 (lancée après fusion de la vague 3, 063999ef0)
+- NT10 fondu des rôles, imposteurs (casques, ombre, sang), herbe hors champ
+- NT11 camp tenu (didacticiel), époque et engins en bataille personnalisée, donjon (escalier, toit en terrasse)
