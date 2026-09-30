@@ -186,3 +186,38 @@ jupon vert clé sans meuble, harnois acier, ni épée ni fourreau fondus).
   (`metal_z` 0), jamais teint ; jupon en livrée.
 - **Limites** : une seule variante (le bassinet ouvert de la génération remplace l'alternance
   bassinet à visière / ouvert) ; jupon sans armoiries (l'écu et le caparaçon les portent).
+
+## Figurines de bataille, extension L4 : variantes, mains, usure, recettes restantes (30/09)
+- **Variantes de visage = têtes greffées**, pas de corps dupliqués (le coût en sommets d'une
+  figurine à deux corps masqués se paierait sur tous les soldats, LOD2 et ombres compris). La
+  planche de la variante est un *edit* NB2 (1K) de la planche A-pose déjà générée qui ne change
+  que la tête (âge, barbe, teint, couvre-chef) : corps identique au pixel près, donc même
+  normalisation ; la hauteur du casque vient du rapport des hauteurs de figure sur les deux
+  planches découpées. La figurine est coupée à mi-cou (`neck_cut`, os `Neck`/`Head`) : tête A
+  masque de variante bit 0, tête k bit k (descend 4 cm sous la coupe, dans le col), corps
+  commun bouché au cou. Tête k : voxel + collapse (≈ 900 tri au LOD0, 110 au LOD1 ; LOD2 : tête
+  A pour tous), poids copiés du corps (surface la plus proche), décalage horizontal ≤ 2 cm,
+  cuite dans une bande de carrés 512² sous l'atlas (albédo 1024 × 1536, deux têtes au plus),
+  zones clés ramenées à la luminance moyenne de la figurine. Tirage par soldat : le mécanisme
+  des variantes fines (`variant_count`, hachage d'instance). Le nombre de têtes ne dépasse pas
+  les variantes de la recette fine (les masques d'équipement de la recette restent valides :
+  l'écu de l'homme d'armes n'est porté que par la variante 0, comme la figurine fine).
+- **Mains** : les moufles générées sont remplacées au LOD0 (niveau `CAM`, après l'export) par
+  les poings fermés de la figurine fine exportée du même nom : même rig, poing fermé en pose de
+  liaison autour des prises, gants et gantelets de la recette. Moufle = triangles du corps
+  (u ≥ 0) entièrement sur un poignet (poids ≥ 0,6) ; main fine = triangles tous sur ce poignet
+  (≥ 0,5), à moins de 16 cm de la moufle, hors pièces de variante ou tenues. Couleur et code
+  (`C_SKIN`, cuir, plates) de la figurine fine, UV en u < 0. Plus robuste qu'une main « fermée »
+  sculptée sur la génération : rejeté.
+- **Usure SR2 dans `GA3_TEX`** (sans atlas, bruit procédural seulement) : teintes passées,
+  crasse par taches en quantité propre au soldat, acier patiné sur `C_PLATE`, boue montant des
+  pieds (`sr2_mud_height`), fondue au-delà de 60-80 m ; `--no-sr2` l'annule. Teint : sur les
+  texels couleur chair au-dessus du cou (`head_y` du manifeste), rougeur de l'étalonnage
+  réduite et teint du soldat (même tirage que les mains fines `C_SKIN`).
+- **Recettes restantes** (une génération chacune, planche éditée depuis la planche L3 du même
+  type) : infantry_7 (retenue anglaise, harnois, hache d'armes), infantry_8 (routiers,
+  brigandine, épée et rondache), infantry_2 (milice urbaine), infantry_3 (Gallois, tunique
+  mi-partie), infantry_4 (schiltron), infantry_6 (coutiliers), archer_1 et archer_4
+  (arbalétriers), cavalry_3 (gendarmes d'ordonnance, harnois blanc, huque) et standard_1
+  (porte-étendard monté, sans variante de visage : enveloppe). Chaque figurine générée garde
+  une zone de livrée (lecture des camps en bataille).

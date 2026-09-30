@@ -211,6 +211,32 @@ avec la texture d'os du jeu). 0,16 $ (une génération `trellis/multi`).
   (interpénétration possible avec la selle ou le caparaçon en charge, à juger en bataille) ;
   une variante (plus d'alternance bassinet à visière) ; LOD2 à 594 tri (fin : 529).
 
+## L4 — recettes restantes + défauts (30/09)
+Note `docs/wip/ga3-l4.md`, ADR 0140 § extension L4. Brutes `~/dev/cent-ans-raw/ga3/l4/`
+(planches, glb, rendus `<unité>/renders_multi_front_back/`, `.blend`). Planche locale
+`docs/img/ga3/l4_units.jpg` (16 unités : marche GA3 | fine, têtes des variantes, mains).
+2,95 $ (25 générations 1K : 0,118 $ chacune), aucune reprise.
+- **Variantes** : 2 têtes pour 15 figurines (standard_1 : 1). Planche NB2 éditée « tête
+  seule » depuis la planche de l'unité (corps identique, vérifié sur le longbowman), greffe à
+  mi-cou, bande 512² sous l'atlas (1024 × 1536), masques de variante bits 0/1.
+- **Mains** : poings fermés de la figurine fine greffés au LOD0 (gants, gantelets) ; écart
+  moyen poignet/manche 1,3-4 cm (mesure `HANDS gap`).
+- **Usure** : SR2 dans `GA3_TEX` (boue, crasse par soldat, acier patiné), teint du soldat et
+  rougeur réduite sur la peau au-dessus du cou. `sr2_weathering_test.gd` vérifie aussi les
+  figurines générées.
+- **Recettes neuves** : planches éditées depuis les planches L3 (A-pose, clés vert/bleu
+  gardées) du premier coup ; tous les fantassins (infantry_0-8) sont désormais générés.
+- Tests : `ga3_l3_figures_test.gd` (16 figurines, têtes, deux modes), an1a, an1b, fg3_maps,
+  nt7, nt10, sr2, smoke (deux modes), pytest manifeste : OK.
+- **Écarts** : standard_1 sans variante (enveloppe) ; épée au fourreau fondue de l'homme
+  d'armes (infantry_0) gardée (pas de nouvelle génération A) ; la retenue (infantry_7) garde
+  aussi une épée au fourreau malgré le prompt ; rendus « têtes » vus de dos pour les clips de
+  repos qui tournent le soldat (arbalétriers, sergent, coutilier) ; pas de capture Godot
+  (vérification en bataille à la session principale).
+- **Points ouverts** : seam poignet et bouchon du cou à juger en bataille ; gendarme :
+  huque rendue comme jupon ; standard_1 : dos de tête incohérent sur la planche NB2 (tête nue
+  au dos, bassinet de face) ; texture 1024 × 1536 × 16 figurines (≈ 37 Mo de sources PNG).
+
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
 - 30/09 : **S1 fait** (≈ 10 min de bout en bout, 0,05 $). Image `fal-ai/flux/dev` 1024² (0,026 $,
@@ -360,6 +386,6 @@ avec la texture d'os du jeu). 0,16 $ (une génération `trellis/multi`).
 - [x] L3b : `man_at_arms` → `infantry_0`, `crossbowman` → `archer_2`, `sergeant` → `infantry_1`,
       `militia` → `infantry_5` (0,63 $, un essai chacune). Voir « L3b ».
 - [x] L3c : cavalier du chevalier `cavalry_0` sur le cheval fin (0,16 $, un essai). Voir « L3c ».
-- [ ] Autres recettes des mêmes types (infantry_2/3/4/6/7/8, archer_1/4, cavalry_3, standard_1)
-      si le joueur valide.
+- [x] L4 autres recettes des mêmes types (infantry_2/3/4/6/7/8, archer_1/4, cavalry_3, standard_1)
+      + défauts (têtes variantes, mains fines, usure SR2) : 2,95 $. Voir « L4 ».
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.
