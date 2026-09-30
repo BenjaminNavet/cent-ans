@@ -21,11 +21,13 @@
       "fit": "footprint",
       "share": 0.5,
       "wired": true,
-      "raw": "s4",
+      "raw": "l1b/house",
       "glb": "trellis.glb",
       "cleanup": {
-        "auto_levels": 0.1
-      }
+        "auto_levels": 0.2,
+        "gamma": 1.15
+      },
+      "note": "L1b : chaume regénéré sombre et lisse (le chaume S4 sortait blanchi et bosselé), étalonnage `auto_levels` 0,2 (au lieu de 0,5 : moins d'écrêtage vers le blanc) et `gamma` 1,15 (albédo moyen 0,17 sinon, chaume dominant)."
     },
     {
       "id": "church",
@@ -98,7 +100,9 @@
       "kit_kind": "well",
       "fit": "real",
       "share": 1.0,
-      "wired": true
+      "wired": true,
+      "raw": "l1b/well",
+      "note": "L1b : toit en bardeaux de chêne sombres (le toit L1 sortait blanchi)."
     },
     {
       "id": "cart",
@@ -146,7 +150,8 @@
       "fit": "real",
       "share": 0.0,
       "wired": false,
-      "raw": "l1p/ram"
+      "raw": "l1b/ram",
+      "note": "L1b : toit en planches couvertes de peaux brunes unies (peaux L1 « vache pie »), vue unique TRELLIS."
     }
   ]
 }

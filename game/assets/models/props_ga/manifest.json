@@ -28,16 +28,16 @@
   "wired": true
  },
  "ga3_house": {
-  "depth": 5.861,
+  "depth": 5.662,
   "fit": "footprint",
-  "height": 5.607,
+  "height": 5.518,
   "kit_kind": "cottage",
-  "length": 7.971,
+  "length": 8.009,
   "share": 0.5,
   "triangles": [
-   7999,
-   3999,
-   1199
+   7998,
+   4000,
+   1200
   ],
   "wired": true
  },
@@ -56,16 +56,16 @@
   "wired": true
  },
  "ga3_ram": {
-  "depth": 3.445,
+  "depth": 3.635,
   "fit": "real",
-  "height": 4.367,
+  "height": 4.664,
   "kit_kind": "ram",
-  "length": 7.004,
+  "length": 7.009,
   "share": 0.0,
   "triangles": [
-   3000,
+   2999,
    1500,
-   824
+   968
   ],
   "wired": false
  },
@@ -98,16 +98,16 @@
   "wired": false
  },
  "ga3_well": {
-  "depth": 2.474,
+  "depth": 2.473,
   "fit": "real",
-  "height": 3.394,
+  "height": 3.405,
   "kit_kind": "well",
-  "length": 2.581,
+  "length": 2.648,
   "share": 1.0,
   "triangles": [
-   2999,
-   1499,
-   1100
+   3000,
+   1500,
+   450
   ],
   "wired": true
  },

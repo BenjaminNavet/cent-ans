@@ -208,6 +208,19 @@ abandonne nos clips Quaternius.
   d'intégration en jeu à faire par la session principale (église vers (915, 707) sur la bataille
   par défaut). Défauts : enfoncement fixe 0,35 m (pas de fondations), toit du puits blanchi,
   peaux du bélier « vache pie ».
+- 30/09 **L1b reprise décor** (0,17 $ ; brutes `~/dev/cent-ans-raw/ga3/l1b/`). Prompts réécrits dans
+  `ga3_decor.json` (maison : chaume « very thick old straw thatch, dark grey-brown, smooth, evenly
+  combed » ; puits : « dark weathered brown oak shingles » ; bélier : « thick dark oak planks covered
+  with wet dark brown leather hides of one plain uniform colour », passé de `multi` à `trellis`).
+  Nouveau : surcharge d'étalonnage par objet (`cleanup` dans l'entrée, `$defs/cleanup` du schéma,
+  `exposure` ajouté ; fusion clé par clé dans `ga3_decor_build.py`). Maison : `auto_levels` 0,2 +
+  `gamma` 1,15 (albédo moyen sRGB 0,18 ; 0,17 avec l'ancien 0,5 — le chaume sombre domine, le
+  blanchi venait surtout de l'image S4). Un essai suffisait pour les trois. Triangles LOD0/1/2 :
+  maison 7 998/4 000/1 200, puits 3 000/1 500/450, bélier 2 999/1 500/968. Planche
+  `docs/img/ga3/l1_decor.jpg` refaite (3 × 3, 520 px) : chaume sombre et épais mais quelques
+  facettes/creux TRELLIS au pignon droit, toit du puits en bardeaux brun-rouge sombre, peaux du
+  bélier brun-rouge unies aux bords déchiquetés. Tests `ga3_l1_decor_test.gd` (72 / 0 avec
+  `--no-ga3`) et smoke OK.
 - 30/09 **L2 végétation campagne** (0,47 $ ; section « Végétation » de l'ADR 0138 ; note `docs/wip/ga3-l2.md`).
   `ga3_vegetation_l2.py` (brutes `~/dev/cent-ans-raw/ga3/l2/`) : par essence flux-2 → **une** planche
   nano-banana-2/edit 4 × 2 (8 azimuts cohérents) → bria ; grille `ga3/ga3_impostors_{albedo,normal}.png`
@@ -234,9 +247,8 @@ abandonne nos clips Quaternius.
       une planche nano-banana-2 par essence) dans une grille au format `campaign_impostors_albedo`, aussi
       pour les arbres proches ; atlas de feuilles, herbe dense, rochers TRELLIS dans `GroundClutter` ;
       `--no-ga3-veg`, `--no-ga3-near`. Voir journal et `docs/wip/ga3-l2.md`.
-- [ ] L1b reprise de 3 objets L1 (maison : chaume sombre et lisse ; puits : toit en bardeaux sombres ;
-      bélier : toit en planches / peaux brunes unies). Prompts dans `ga3_decor.json`, surcharge
-      d'étalonnage par objet (`cleanup`), brutes `~/dev/cent-ans-raw/ga3/l1b/`. En cours : appels fal.
+- [x] L1b reprise de 3 objets L1 (0,17 $, un essai chacun) : maison (chaume sombre, lisse, épais), puits
+      (toit en bardeaux de chêne sombres), bélier (planches + peaux brunes unies, vue unique). Voir journal.
 - [ ] L3 figurines : APRÈS fusion de `feat/sr`. Références A-pose mains vides → trellis-2 → chaîne S2
       (notre squelette, nos clips, armes procédurales), masque de livrée. ≈ 2,50 $.
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.
