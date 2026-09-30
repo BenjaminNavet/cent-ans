@@ -80,6 +80,23 @@ est rapide (tour de campagne < 50 ms par faction, spec M3 ; coût de l'IA par ti
   −7,6 ; `guard` (pas de siège sous une armée plus forte à 1 arête) 10/11, −1,9 ; les deux 9/13,
   −1,3 → **rejetées**.
 
-## Prochaine étape
-Duels `reach2` (armées à 2 arêtes), `supply` (pas de siège sous 50 de vivres), puis `siege12`,
-`assault50`, `attack125`, `warshare` (paramètres).
+- `reach2` (armées ennemies à 2 arêtes) 5/14, −9,1 ; `supply` (pas de siège sous 50 de vivres)
+  5/8, −1,4 ; `siege12` (supériorité de siège 1,2 au lieu de 1,5) 8/8, +0,7 ; `assault50` (assaut
+  dès 50 % au lieu de 65) 10/7, +0,65 ; `attack125` (attaque à 1,25:1 au lieu de 1,5) 4/8, −1,7 ;
+  `warshare` (85 % du budget à l'armée en guerre au lieu de 70) 8/9, −1,3 → **aucune règle de
+  campagne ne gagne son duel ; réglages inchangés** (ADR 0148). Portes d'essai retirées ; l'outil
+  `ai::experiment` reste (inactif par défaut).
+- Coût campagne après préchauffage (même préchauffage que le jeu, `turn_perf --sequential 20 1
+  1 2`, machine chargée à 70-127) : moyenne 3,6 ms, p99 19 ms, pire 41 ms (Empire) < 50 ms.
+
+## État : TERMINÉ sur la branche ; reste la fusion dans main
+
+## Points ouverts
+- Défenseur IA contre le novice en bocage / montagne (11/16) : ses archers perdent le duel
+  d'archerie ; le contre-tir n'a rien donné.
+- Sièges de campagne abandonnés au 1er tour (armée de secours) : les parades essayées (`guard`,
+  `reach2`) font perdre la faction qui les joue ; à revoir côté règle (levée de siège ?) plutôt
+  qu'IA.
+- Petits royaumes (≤ 2 provinces) jamais assiégés sans prétention (F4, voulu) : des armées
+  restent oisives devant eux pendant des guerres longues.
+- Sièges tactiques non mesurés (une autre session modifie `siege_assault.rs`).
