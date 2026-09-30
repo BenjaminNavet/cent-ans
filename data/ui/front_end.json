@@ -341,7 +341,7 @@
     {
       "id": "fac_albret",
       "tagline": "Sénéchaux de Gascogne, maîtres du double jeu",
-      "intro": "Bernard Ezi II tient Nérac et la Baïse, sénéchal héréditaire de Gascogne pour le duc d'Aquitaine, qui n'est autre qu'Édouard III. Petite seigneurie entre deux couronnes rivales, Albret sait vendre son épée au plus offrant : sa maison changera plusieurs fois de camp au fil de la guerre.",
+      "intro": "Bernard Ezi II tient Nérac et la Baïse, grand vassal gascon du duc d'Aquitaine, qui n'est autre qu'Édouard III. Petite seigneurie entre deux couronnes rivales, Albret sait vendre son épée au plus offrant : sa maison changera plusieurs fois de camp au fil de la guerre.",
       "strengths": [
         "Sénéchaussée héréditaire : autorité sur la noblesse gasconne",
         "Position centrale en Guyenne, entre Bordeaux et Toulouse",
@@ -405,7 +405,7 @@
     {
       "id": "fac_bourbon",
       "tagline": "Le duché-pairie du sang de saint Louis",
-      "intro": "Louis Ier de Bourbon, petit-fils de saint Louis, tient depuis 1327 le premier duché-pairie érigé par la couronne. Proche conseiller de Philippe VI, il a la confiance du roi et les moyens d'une grande maison : sa lignée régnera un jour sur la France.",
+      "intro": "Louis Ier de Bourbon, petit-fils de saint Louis, tient depuis 1327 le duché de Bourbon, érigé pour lui en duché-pairie. Proche conseiller de Philippe VI, il a la confiance du roi et les moyens d'une grande maison : sa lignée régnera un jour sur la France.",
       "strengths": [
         "Duché-pairie riche, au cœur du royaume",
         "Confiance du roi, accès privilégié à la cour",
@@ -469,7 +469,7 @@
     {
       "id": "fac_ormond",
       "tagline": "Les grands bouteillers d'Irlande",
-      "intro": "James Butler, 1er comte d'Ormond, grand bouteiller héréditaire d'Irlande, tient la vallée de la Suir. Sa mort prochaine (janvier 1338) laissera un héritier de six ans en pupille : à vous d'assurer la continuité de la maison Butler.",
+      "intro": "James Butler, 1er comte d'Ormond, grand bouteiller héréditaire d'Irlande, tient la vallée de la Suir. Sa mort prochaine (début 1338) laissera un héritier de six ans en pupille : à vous d'assurer la continuité de la maison Butler.",
       "strengths": [
         "Charge héréditaire de grand bouteiller, prestige à la cour",
         "Terres riches de la Suir et du Nore",
@@ -549,7 +549,7 @@
     {
       "id": "fac_leinster",
       "tagline": "La guérilla des montagnes de Wicklow",
-      "intro": "Donnchadh Mac Murchada, évadé des prisons de Dublin en 1331, mène depuis les montagnes de Wicklow une guerre incessante contre le Pale anglais. Le plus fragile des royaumes gaéliques, mais aussi le plus proche du cœur du pouvoir anglais en Irlande.",
+      "intro": "Domhnall mac Airt Mac Murchada, évadé des prisons de Dublin en 1331, mène depuis les montagnes de Wicklow une guerre incessante contre le Pale anglais. Le plus fragile des royaumes gaéliques, mais aussi le plus proche du cœur du pouvoir anglais en Irlande.",
       "strengths": [
         "Terrain montagneux, quasi imprenable",
         "Guérilla proche du Pale, pression constante sur Dublin",
@@ -613,7 +613,7 @@
     {
       "id": "fac_hesse",
       "tagline": "Le jeune landgraviat de Hesse",
-      "intro": "Henri II « le Fer » tient depuis 1328 le landgraviat détaché de Thuringe par son grand-père Henri Ier l'Enfant, petit-fils de sainte Élisabeth de Hongrie et de Sophie de Brabant.",
+      "intro": "Henri II « le Fer » tient depuis 1328 le landgraviat détaché de Thuringe par son grand-père Henri Ier l'Enfant, fils de Sophie de Brabant et petit-fils de sainte Élisabeth de Hongrie.",
       "strengths": [
         "Position centrale entre Rhin et Saxe",
         "Dynastie stable, lignage brabançon prestigieux",
@@ -676,8 +676,8 @@
     },
     {
       "id": "fac_julich",
-      "tagline": "Juliers, jeune duché et allié de l'Angleterre",
-      "intro": "Guillaume V de Juliers, élevé duc par l'empereur Louis IV en 1336, époux d'une sœur de la reine d'Angleterre Philippa de Hainaut, est un pilier de la coalition anglo-impériale contre la France.",
+      "tagline": "Juliers, jeune margraviat et allié de l'Angleterre",
+      "intro": "Guillaume V de Juliers, élevé margrave par l'empereur Louis IV en 1336 (il ne sera duc qu'en 1356), époux d'une sœur de la reine d'Angleterre Philippa de Hainaut, est un pilier de la coalition anglo-impériale contre la France.",
       "strengths": [
         "Duché tout neuf, faveur impériale",
         "Alliance anglaise active dès 1337",
@@ -724,7 +724,7 @@
     {
       "id": "fac_mark",
       "tagline": "La Marck, pépinière d'archevêques",
-      "intro": "Adolphe II, comte de la Marck depuis 1328, dirige une maison westphalienne qui a déjà donné plusieurs archevêques à Cologne, dont son propre cousin Adolphe de la Marck, prince-évêque de Liège.",
+      "intro": "Adolphe II, comte de la Marck depuis 1328, dirige une maison westphalienne en pleine ascension, dont son oncle Adolphe de la Marck est prince-évêque de Liège.",
       "strengths": [
         "Réseau ecclésiastique étendu (Cologne, Liège)",
         "Terres westphaliennes fertiles"
@@ -769,7 +769,7 @@
     {
       "id": "fac_meissen",
       "tagline": "Misnie et Thuringe, l'ascension des Wettin",
-      "intro": "Frédéric II « le Sérieux » réunit depuis 1324 le margraviat de Misnie et le landgraviat de Thuringe : la maison de Wettin bâtit ici les bases de sa future électorale saxonne.",
+      "intro": "Frédéric II « le Sérieux » réunit depuis 1323 le margraviat de Misnie et le landgraviat de Thuringe : la maison de Wettin bâtit ici les bases de son futur électorat de Saxe.",
       "strengths": [
         "Grand territoire, deux principautés réunies",
         "Dynastie ambitieuse aux ressources solides",
@@ -785,7 +785,7 @@
     {
       "id": "fac_brunswick",
       "tagline": "Brunswick-Lunebourg, le prestige welf divisé",
-      "intro": "Otton « le Doux », de la maison Welf, tient la branche de Lunebourg d'un duché de Brunswick-Lunebourg alors fragmenté entre plusieurs cousins.",
+      "intro": "Otton « le Doux », de la maison Welf, tient la principauté de Brunswick (Wolfenbüttel), l'une des branches d'un duché de Brunswick-Lunebourg alors fragmenté entre plusieurs cousins.",
       "strengths": [
         "Prestige ancien de la maison Welf",
         "Terres saxonnes riches"
@@ -815,7 +815,7 @@
     {
       "id": "fac_wurttemberg",
       "tagline": "Wurtemberg, comté montant de Souabe",
-      "intro": "Ulrich IV, comte de Wurtemberg depuis 1325, affirme son autorité au cœur de la Souabe fragmentée, face aux villes libres impériales voisines.",
+      "intro": "Ulrich III, comte de Wurtemberg depuis 1325, affirme son autorité au cœur de la Souabe fragmentée, face aux villes libres impériales voisines.",
       "strengths": [
         "Position centrale en Souabe",
         "Terres agricoles et viticoles du Neckar"
@@ -918,7 +918,7 @@
     {
       "id": "fac_liege",
       "tagline": "Liège, la grande principauté mosane",
-      "intro": "Adolphe de la Marck, prince-évêque de Liège depuis 1313, dirige l'une des plus riches principautés ecclésiastiques d'Europe, fondatrice d'une université naissante sur la Meuse.",
+      "intro": "Adolphe de la Marck, prince-évêque de Liège depuis 1313, dirige l'une des plus riches principautés ecclésiastiques d'Europe, sur la Meuse, face à des villes jalouses de leurs libertés.",
       "strengths": [
         "Riche évêché, industrie et commerce mosans",
         "Défenses solides de la cité épiscopale",
@@ -1012,7 +1012,7 @@
     {
       "id": "fac_urgell",
       "tagline": "Le jeune comte des Pyrénées",
-      "intro": "Jacques Ier, cousin germain de Pierre IV d'Aragon, tient depuis l'âge de huit ans le comté d'Urgell, l'un des plus anciens de Catalogne.",
+      "intro": "Jacques Ier, frère cadet de Pierre IV d'Aragon, tient depuis l'âge de sept ans le comté d'Urgell, l'un des plus anciens de Catalogne.",
       "strengths": [
         "Comté ancien et prestigieux",
         "Lien de sang direct avec la couronne d'Aragon",
@@ -1137,7 +1137,7 @@
     {
       "id": "fac_saluzzo",
       "tagline": "Le marquisat des chevaliers errants",
-      "intro": "Thomas II, marquis de Saluces depuis 1296, règne en alleu sur les sources du Pô, composant son grand poème allégorique Le Chevalier errant tout en défendant son indépendance face à ses puissants voisins.",
+      "intro": "Thomas II, marquis de Saluces depuis 1336, règne sur les sources du Pô et défend son indépendance face à ses puissants voisins, la Savoie, le Dauphiné et les Angevins de Provence.",
       "strengths": [
         "Fief alleutier, sans suzerain direct",
         "Cols alpins stratégiques",
@@ -1169,7 +1169,7 @@
     {
       "id": "fac_siena",
       "tagline": "La rivale bancaire de Florence",
-      "intro": "Gouvernée par le Governo dei Nove depuis 1287, Sienne est à l'apogée de sa prospérité bancaire et achève la Torre del Mangia, tout en rivalisant sans relâche avec Florence pour la suprématie toscane.",
+      "intro": "Gouvernée par le Governo dei Nove depuis 1287, Sienne est à l'apogée de sa prospérité et s'apprête à élever la Torre del Mangia (1338-1348), tout en rivalisant sans relâche avec Florence pour la suprématie toscane.",
       "strengths": [
         "Prospérité bancaire et commerciale",
         "Gouvernement communal stable (Neuf)",
@@ -1377,7 +1377,7 @@
     {
       "id": "fac_riga_archbishopric",
       "tagline": "Le primat sans capitale",
-      "intro": "Friedrich de Pernstein règne en prince d'Empire sur des châteaux dispersés, avec une ville qui lui échappe et un Ordre qui l'écrase. Depuis vingt ans, il défend l'autonomie de l'Église de Livonie.",
+      "intro": "Friedrich de Pernstein règne en prince d'Empire sur des châteaux dispersés, avec une ville qui lui échappe et un Ordre qui l'écrase. Depuis plus de trente ans, il défend l'autonomie de l'Église de Livonie.",
       "strengths": [
         "Autorité spirituelle sur toute la Livonie",
         "Châteaux sur la Dvina et la Gauja",
@@ -1489,7 +1489,7 @@
     {
       "id": "fac_poland",
       "tagline": "Reconstruire le royaume des Piast",
-      "intro": "À 27 ans, Casimir III hérite d'un royaume à peine rassemblé : la Silésie est perdue, Kuyavie et Dobrzyń tenues par les chevaliers teutoniques, la Bohême voisine convoite la Mazovie. Mais Cracovie est riche du sel de Wieliczka et deux beaux-frères puissants, le roi de Hongrie et le grand-duc de Lituanie, soutiennent la couronne.",
+      "intro": "À 27 ans, Casimir III hérite d'un royaume à peine rassemblé : la Silésie est perdue, Kuyavie et Dobrzyń tenues par les chevaliers teutoniques, la Bohême voisine convoite la Mazovie. Mais Cracovie est riche du sel de Wieliczka et deux parents puissants, son beau-frère le roi de Hongrie et son beau-père le grand-duc de Lituanie, soutiennent la couronne.",
       "strengths": [
         "Alliés puissants : Hongrie et Lituanie",
         "Sel de Wieliczka et fortune de Cracovie",
