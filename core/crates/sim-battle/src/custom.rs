@@ -43,6 +43,29 @@ pub struct CustomBattleRules {
     /// Fortification level (0-3) of the besieged place, by default.
     pub default_fortification: u32,
     pub max_fortification: u32,
+    /// NT11: year of the battle proposed by default, and its bounds; the
+    /// roster keeps the units available that year.
+    pub default_year: i32,
+    pub min_year: i32,
+    pub max_year: i32,
+    /// NT11: engines of the besiegers proposed by default.
+    pub default_engines: CustomEngines,
+    /// NT11: siege towers at most (engines: out of budget and cap).
+    pub max_siege_towers: u32,
+    /// NT11: unit type of a siege tower.
+    pub siege_tower_unit_type: String,
+}
+
+/// NT11: the besiegers' engines chosen on the screen.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct CustomEngines {
+    #[serde(default)]
+    pub ladders: bool,
+    #[serde(default)]
+    pub ram: bool,
+    /// Siege towers (clamped to `max_siege_towers`).
+    #[serde(default)]
+    pub towers: u32,
 }
 
 const BUNDLED: &str = include_str!("../../../../data/rules/custom_battle.json");
@@ -101,6 +124,12 @@ pub struct CustomBattle {
     /// against AI.
     #[serde(default)]
     pub player_side: String,
+    /// NT11: year of the battle (the roster's period); `None`: the default.
+    #[serde(default)]
+    pub year: Option<i32>,
+    /// NT11: engines of the besiegers; `None`: the default.
+    #[serde(default)]
+    pub engines: Option<CustomEngines>,
 }
 
 /// Cost and size of one side, for the screen.
@@ -138,22 +167,31 @@ pub fn faction_name(faction: &Faction) -> String {
 }
 
 /// Whether `faction` may field `unit_type` in a custom battle: the
-/// campaign's faction and culture restrictions (period and technology are
-/// ignored: the battle is out of time).
+/// campaign's faction and culture restrictions (technology is ignored: no
+/// research in a custom battle). The period is [`in_period`].
 pub fn in_roster(unit_type: &UnitType, faction: &Faction) -> bool {
     (unit_type.required_faction.is_empty() || unit_type.required_faction.contains(&faction.id))
         && (unit_type.required_culture.is_empty()
             || unit_type.required_culture.contains(&faction.culture))
 }
 
-/// The roster of `faction`: unit types it may buy, by category then cost.
+/// NT11: whether `unit_type` is raised in `year` (its `available_from` /
+/// `available_until` dates, as in the campaign's recruitment).
+pub fn in_period(unit_type: &UnitType, year: i32) -> bool {
+    unit_type.available_from.is_none_or(|from| year >= from)
+        && unit_type.available_until.is_none_or(|until| year <= until)
+}
+
+/// The roster of `faction` in `year`: unit types it may buy, by category
+/// then cost.
 pub fn roster<'a>(
     unit_types: &'a BTreeMap<UnitTypeId, UnitType>,
     faction: &Faction,
+    year: i32,
 ) -> Vec<&'a UnitType> {
     let mut out: Vec<&UnitType> = unit_types
         .values()
-        .filter(|u| in_roster(u, faction))
+        .filter(|u| in_roster(u, faction) && in_period(u, year))
         .collect();
     out.sort_by_key(|u| (u.category as u8, u.cost.money, u.id.as_str().to_owned()));
     out
@@ -235,6 +273,22 @@ impl CustomBattle {
         SideId::parse(&self.player_side)
     }
 
+    /// NT11: year of the battle (the default when unset, clamped to the
+    /// bounds).
+    pub fn year(&self, rules: &CustomBattleRules) -> i32 {
+        self.year
+            .unwrap_or(rules.default_year)
+            .clamp(rules.min_year, rules.max_year)
+    }
+
+    /// NT11: engines of the besiegers (the default when unset; towers
+    /// clamped to the maximum).
+    pub fn engines(&self, rules: &CustomBattleRules) -> CustomEngines {
+        let mut engines = self.engines.unwrap_or(rules.default_engines);
+        engines.towers = engines.towers.min(rules.max_siege_towers);
+        engines
+    }
+
     /// Fortification level of the besieged place.
     pub fn fortification(&self, rules: &CustomBattleRules) -> u32 {
         self.fortification
@@ -246,6 +300,13 @@ impl CustomBattle {
     /// keys. `ok` is true when [`Self::battle_setup`] will succeed.
     pub fn validate(&self, data: &CustomData, rules: &CustomBattleRules) -> CustomReport {
         let mut report = CustomReport::default();
+        let year = self.year(rules);
+        if let Some(asked) = self.year.filter(|y| *y != year) {
+            report.errors.push(format!(
+                "année {asked} hors des bornes ({} à {})",
+                rules.min_year, rules.max_year
+            ));
+        }
         for side in SideId::BOTH {
             let label = match side {
                 SideId::Attacker => "Camp 1",
@@ -285,7 +346,13 @@ impl CustomBattle {
                     .ok()
                     .and_then(|id| data.unit_types.get(&id));
                 match unit_type {
-                    Some(u) if in_roster(u, faction) => side_report.cost += u.cost.money,
+                    Some(u) if in_roster(u, faction) && in_period(u, year) => {
+                        side_report.cost += u.cost.money
+                    }
+                    Some(u) if in_roster(u, faction) => report.errors.push(format!(
+                        "{label} : {} n'est pas levée en {year}",
+                        u.name.display
+                    )),
                     Some(u) => report.errors.push(format!(
                         "{label} : {} n'est pas levée par {name}",
                         u.name.display
@@ -419,13 +486,8 @@ impl CustomBattle {
                 fortification: self.fortification(rules),
                 breach: 0,
                 place: self.place.unwrap_or_default(),
-                // NT5 (ADR 0128): no engine choice on the screen yet; the
-                // besiegers bring ladders and a ram (no tower).
-                engines: Some(crate::setup::SiegeEngineSetup {
-                    ram: true,
-                    ladders: true,
-                    towers: Vec::new(),
-                }),
+                // NT11: the engines chosen on the screen (NT5, ADR 0128).
+                engines: Some(self.engine_setup(data, rules)),
             }),
             siege_layout: None,
             orders,
@@ -434,6 +496,33 @@ impl CustomBattle {
             decor_plan: None,
             opening: Default::default(),
         })
+    }
+}
+
+impl CustomBattle {
+    /// NT11: the besiegers' engines as a battle setup; towers take the
+    /// stats of `siege_tower_unit_type` (none when that type is missing).
+    pub fn engine_setup(
+        &self,
+        data: &CustomData,
+        rules: &CustomBattleRules,
+    ) -> crate::setup::SiegeEngineSetup {
+        let engines = self.engines(rules);
+        let tower = UnitTypeId::new(rules.siege_tower_unit_type.as_str())
+            .ok()
+            .and_then(|id| data.unit_types.get(&id));
+        let towers = tower
+            .map(|t| {
+                (0..engines.towers)
+                    .map(|_| UnitSetup::from_unit_type(t, t.soldiers, t.stats.morale, 0))
+                    .collect()
+            })
+            .unwrap_or_default();
+        crate::setup::SiegeEngineSetup {
+            ram: engines.ram,
+            ladders: engines.ladders,
+            towers,
+        }
     }
 }
 
