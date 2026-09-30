@@ -181,8 +181,16 @@ func _run() -> void:
 
 	# Printemps : attelages de labour (charrue FK2 ou maquette) qui remontent leur sillon.
 	routine.season = "spring"
+	# Rayon d'activité 1:1 (VT2) et densités réduites : on force le travail des champs pour ne pas
+	# dépendre du tirage sur ce seul point.
+	var field_probability: Variant = pool.settings.get("field_work_probability")
+	pool.settings["field_work_probability"] = 1.0
 	pool.invalidate()
 	_view(pool, focus, NEAR_D, 1.0)
+	if field_probability == null:
+		pool.settings.erase("field_work_probability")
+	else:
+		pool.settings["field_work_probability"] = field_probability
 	var ploughs := pool.get_node_or_null("Folk_plough") as MultiMeshInstance3D
 	_check(ploughs != null and ploughs.multimesh.instance_count > 0 and pool.instance_custom("plough", 0).r > 0.0, "plough teams in spring: %s" % routine.stats)
 
