@@ -34,6 +34,7 @@ static var _loaded: bool = false
 static var _meshes: Dictionary = {}
 static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
+static var mocap_trial_forced: int = -1  # NT12 : voir `mocap_trial_enabled`
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation: Dictionary = {}
@@ -300,8 +301,20 @@ static func _merge_fine(base: Dictionary) -> void:
 
 
 ## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
+## `mocap_trial_forced` (captures A/B dans un même processus) : -1 = ligne de commande, 0/1 forcé,
+## puis `reload()`.
 static func mocap_trial_enabled() -> bool:
+	if mocap_trial_forced >= 0:
+		return fine_enabled() and mocap_trial_forced == 1
 	return fine_enabled() and OS.get_cmdline_user_args().has("--mocap-trial")
+
+
+## NT12 : vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.
+static func reload() -> void:
+	_loaded = false
+	_manifest = {}
+	_textures = {}
+	_configs = {}
 
 
 ## NT12 : repointe les clips substitués du rig fin vers les images mocap, placées après les
