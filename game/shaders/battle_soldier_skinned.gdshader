@@ -1015,7 +1015,7 @@ void fragment() {
 					albedo = v_color * mix(0.85, 1.1, v_var.z) * ga_albedo * mix(1.0, 0.55, steel_occlusion);
 					// CR4 : anneaux lisibles : creux (relief bas du scan) presque noirs, anneaux gris
 					// fer ; la tuile seule, centrée en luminance, donnait un voile gris uniforme.
-					albedo *= mix(1.0, mix(0.12, 1.35, smoothstep(0.38, 0.66, d.b)), steel_occlusion);
+					albedo *= mix(1.0, mix(0.08, 0.95, smoothstep(0.38, 0.66, d.b)), steel_occlusion);
 					metallic = 0.6;
 					// CR2 : pas de reflet plus lisse que 0,5 : les anneaux se masquent l'un l'autre
 					// (sinon voile blanc à contre-jour, halo du glow).

@@ -225,7 +225,7 @@ STRANDS = {
     "horse_tail": ((22, 5), (6, 2), (2, 1)),
     "horse_mane": ((44, 4), (10, 2), (4, 1)),
 }
-STRAND_WIDTH = {"horse_tail": (0.021, 0.004), "horse_mane": (0.016, 0.003)}
+STRAND_WIDTH = {"horse_tail": (0.03, 0.008), "horse_mane": (0.018, 0.004)}
 
 
 def _golden(i, n):
@@ -277,8 +277,8 @@ def _tail_paths(verts, card_table, n, rings):
             c = _polyline_at(centres, t)
             m = min(int(t * (bins - 1) + 0.5), bins - 1)
             vals, vecs = np.linalg.eigh(axes[m])
-            e1 = Vector(vecs[:, 2]) * math.sqrt(max(vals[2], 1e-6)) * 1.6
-            e2 = Vector(vecs[:, 1]) * math.sqrt(max(vals[1], 1e-6)) * 1.6
+            e1 = Vector(vecs[:, 2]) * math.sqrt(max(vals[2], 1e-6)) * 1.25
+            e2 = Vector(vecs[:, 1]) * math.sqrt(max(vals[1], 1e-6)) * 1.25
             spread = 0.25 + 0.75 * min(1.0, t * 3.0)  # the locks gather at the dock
             pts.append(c + (e1 * a + e2 * b) * spread)
         paths.append(pts)
