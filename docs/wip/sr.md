@@ -9,7 +9,7 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 
 ## Lots
 - [ ] SR1 matières scannées ambientCG (agent `cent-ans-dev`)
-- [ ] SR3 planches NB2 (session principale, ≤ 1 $) → liste d'écarts
+- [x] SR3 planches NB2 (session principale, ≤ 1 $) → liste d'écarts
 - [ ] SR2 usure et métal (après SR1, même shader)
 - [ ] SR3b corrections des recettes Blender + recuisson
 - [ ] SR4 captures A/B, perf, tests, ADR 0136, fusion
