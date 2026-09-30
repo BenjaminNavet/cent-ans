@@ -1,4 +1,4 @@
-# SL — Sol « satellite » de la carte de campagne
+# SS — Sol « satellite » de la carte de campagne
 
 Date : 2026-09-30. Statut : conception validée par le joueur.
 
@@ -53,18 +53,18 @@ Budget 3–6 $, consigné dans `docs/budget.md`.
 ## 5. Tests et vérification
 
 - pytest : déterminisme ; présence d'une route, d'un lac avec rive et de parcelles sur des tuiles témoins ; validation du YAML par le schéma.
-- Test headless Godot `game/tests/sl_colormap_test.gd` : chargement des tuiles, compilation du shader, repli sans pyramide.
-- Captures `game/tests/sl_shot.gd` : avant/après vue large et vue moyenne (budget 3 captures).
+- Test headless Godot `game/tests/ss_colormap_test.gd` : chargement des tuiles, compilation du shader, repli sans pyramide.
+- Captures `game/tests/ss_shot.gd` : avant/après vue large et vue moyenne (budget 3 captures).
 - Performance : temps GPU du terrain ≤ l'actuel (banc de `docs/wip/fps-carte.md`).
 
 ## 6. Lots
 
-1. SL1 — squelette : module, schéma, YAML, test pytest désactivé, note `docs/wip/sl.md`.
-2. SL2 — couches 1–5 peintes, pyramide générée, tests pytest.
-3. SL3 — branchement shader, dosage du relief, repli, test headless.
-4. SL4 — lacs (extraction + `lakes_renderer.gd`).
-5. SL5 — textures (et éventuels objets) fal.ai.
-6. SL6 — captures, banc de performance, ADR `docs/decisions/0139-sol-satellite-pyramide-de-couleur.md` (numéro à confirmer au moment de l'écriture).
+1. SS1 — squelette : module, schéma, YAML, test pytest désactivé, note `docs/wip/ss.md`.
+2. SS2 — couches 1–5 peintes, pyramide générée, tests pytest.
+3. SS3 — branchement shader, dosage du relief, repli, test headless.
+4. SS4 — lacs (extraction + `lakes_renderer.gd`).
+5. SS5 — textures (et éventuels objets) fal.ai.
+6. SS6 — captures, banc de performance, ADR `docs/decisions/NNNN-sol-satellite-pyramide-de-couleur.md` (prochain numéro libre au moment de l’écriture ; 0139–0140 déjà pris sur gp-merge).
 
 ## Hors périmètre
 
