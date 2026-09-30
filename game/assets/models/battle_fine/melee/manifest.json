@@ -58,7 +58,7 @@
    },
    "set": "nt14",
    "shield": "disc",
-   "solve_s": 0.8,
+   "solve_s": 0.7,
    "source": "player video IMG_6461 frames 12-72 @60fps, x1.0 speed",
    "yaw_deg": 75.1
   },
@@ -93,7 +93,7 @@
    },
    "set": "nt14",
    "shield": "disc",
-   "solve_s": 0.9,
+   "solve_s": 1.0,
    "source": "player video IMG_6459 frames 96-170 @60fps, x1.2 speed",
    "yaw_deg": 71.6
   },
@@ -131,41 +131,6 @@
    "solve_s": 0.8,
    "source": "player video IMG_6460 frames 62-175 @60fps, x1.2 speed",
    "yaw_deg": 23.3
-  },
-  "slash": {
-   "grip": "two_hands",
-   "note": "horizontal cut and back",
-   "quality": {
-    "contact_frames": [
-     35,
-     35
-    ],
-    "foot_below_rest_m": 0.0,
-    "foot_slide_m": 0.0,
-    "jitter_deg_per_frame2": 12.6,
-    "tremor_deg": 0.93,
-    "tremor_worst": [
-     [
-      "LowerArm.R",
-      2.69
-     ],
-     [
-      "UpperArm.R",
-      2.64
-     ],
-     [
-      "Wrist.R",
-      2.37
-     ]
-    ],
-    "wrist_r_bend_max_deg": 94.2,
-    "wrist_r_max_deg_per_frame": 25.9
-   },
-   "set": "nt13",
-   "shield": "keyframed",
-   "solve_s": 0.0,
-   "source": "player video IMG_6458 frames 12-72 @30fps, x1.4 speed",
-   "yaw_deg": 45.0
   },
   "thrust": {
    "grip": "right_hand",
@@ -207,31 +172,26 @@
   "guard": {
    "frames": 25,
    "loop": true,
-   "start": 35
+   "start": 0
   },
   "overhead": {
    "frames": 25,
    "loop": false,
-   "start": 60
+   "start": 25
   },
   "parry": {
    "frames": 38,
    "loop": false,
-   "start": 85
-  },
-  "slash": {
-   "frames": 35,
-   "loop": false,
-   "start": 0
+   "start": 50
   },
   "thrust": {
    "frames": 32,
    "loop": false,
-   "start": 123
+   "start": 88
   }
  },
  "fps": 24,
  "rig": "human",
- "source": "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/nt13-video-mocap.md and docs/wip/nt14-video-set2.md",
+ "source": "tools/blender_scripts/nt13_video_trial.py (bake-melee) - default melee clips chosen per gesture among keyframed / CMU (NT12) / player videos (NT13, NT14), see docs/wip/nt14-video-set2.md and ADR 0129",
  "texture": "human.bones.bin"
 }

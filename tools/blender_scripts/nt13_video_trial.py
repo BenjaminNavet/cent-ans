@@ -55,16 +55,118 @@ LOOP_BLEND = 6
 # Caps of the right wrist's turn away from the keyframed grip: bend, and twist about the forearm.
 WRIST_SWING_DEG = 65.0
 WRIST_TWIST_DEG = 110.0
+# NT14: one-handed grip (fist landmarks smoothed): a thrust needs the fist bent further.
+WRIST_SWING_ONE_HAND_DEG = 80.0
+# NT14: the disc's farthest frame of a video is this many arm's lengths (shoulder to wrist)
+# from the shoulder (the fist grips the back of the bowl, its rim centre is a hand further).
+DISC_REACH = 1.0
+# NT14: face normal of the heater shield (FG0 kit, `battle_fine_equipment.heater_shield`) in
+# the rest frame of LowerArm.L: smallest principal axis of its vertices, pointing away from the
+# forearm (its centre sits 77 % of the way to the wrist). Measured on `infantry_0`.
+SHIELD_FACE_LOCAL = (0.3263, 0.029, 0.9448)
 
-# (clip substituted, video, first and last video frame at 30 fps, speed-up, loop,
-#  yaw: direction of the video (degrees about up, 0 = towards the camera, 90 = the image's
-#  right) that becomes the figure's forward, note)
-CLIPS = [
-    ("guard", "IMG_6455", 0, 48, 1.0, True, 45.0, "stick on the right shoulder, still"),
-    ("overhead", "IMG_6455", 54, 135, 1.8, False, 45.0, "raised then cut down across"),
-    ("slash", "IMG_6458", 12, 72, 1.4, False, 45.0, "horizontal cut and back"),
-    ("thrust", "IMG_6457", 57, 126, 1.4, False, 70.0, "two-handed lunge and back"),
+
+def clip(name, video, first, last, speed, loop, yaw, note, **opts):
+    """One substituted clip.
+
+    `first`, `last`: video frames (at the video's own rate); `speed`: speed-up; `yaw`: direction
+    of the video (degrees about up, 0 = towards the camera, 90 = the image's right) that becomes
+    the figure's forward, or ``"auto"`` (``video_mocap_clean.facing_yaw``, over `yaw_range`
+    video frames when given). Options (NT14): ``grip`` ``"two_hands"`` (NT13: the stick's line
+    through both wrists) or ``"right_hand"`` (from the right hand's landmarks); ``shield``
+    ``"keyframed"`` (NT12/NT13: keyframed guard arm on the video chest) or ``"disc"`` (left arm
+    solved from the tracked red disc, ``tools/video_mocap/track_disc.py``); ``reach``
+    (``"disc"``: the facing follows the shield, for a parry); ``set`` (``"nt13"``/``"nt14"``).
+    """
+    spec = {
+        "name": name,
+        "video": video,
+        "first": first,
+        "last": last,
+        "speed": speed,
+        "loop": loop,
+        "yaw": yaw,
+        "note": note,
+        "grip": "two_hands",
+        "shield": "keyframed",
+        "reach": None,
+        "yaw_range": None,
+        "set": "nt13",
+    }
+    spec.update(opts)
+    return spec
+
+
+# NT13: first shoot (4K portrait 30 fps, stick in both hands, no shield).
+CLIPS_NT13 = [
+    clip(
+        "guard",
+        "IMG_6455",
+        0,
+        48,
+        1.0,
+        True,
+        45.0,
+        "stick on the right shoulder, still",
+    ),
+    clip(
+        "overhead", "IMG_6455", 54, 135, 1.8, False, 45.0, "raised then cut down across"
+    ),
+    clip("slash", "IMG_6458", 12, 72, 1.4, False, 45.0, "horizontal cut and back"),
+    clip("thrust", "IMG_6457", 57, 126, 1.4, False, 70.0, "two-handed lunge and back"),
 ]
+# NT14: second shoot (1080p portrait 60 fps, stick in the right hand, red disc as a shield).
+NT14 = {"grip": "right_hand", "shield": "disc", "set": "nt14"}
+CLIPS_NT14 = [
+    clip(
+        "guard",
+        "IMG_6461",
+        12,
+        72,
+        1.0,
+        True,
+        "auto",
+        "sword low, disc before the chest",
+        yaw_range=(72, 165),
+        **NT14,
+    ),
+    clip(
+        "overhead",
+        "IMG_6459",
+        96,
+        170,
+        1.2,
+        False,
+        "auto",
+        "raised over the head, cut down forwards, follow-through (then a second raise, unused)",
+        **NT14,
+    ),
+    clip(
+        "parry",
+        "IMG_6460",
+        62,
+        175,
+        1.2,
+        False,
+        "auto",
+        "disc thrown up high, crouched",
+        reach="disc",
+        **NT14,
+    ),
+    clip(
+        "thrust",
+        "IMG_6461",
+        72,
+        165,
+        1.2,
+        False,
+        "auto",
+        "lunge and one-handed thrust",
+        **NT14,
+    ),
+]
+# Baked into ``video_trial/``: per gesture the better of NT13 and NT14 (docs/wip/nt14-video-set2.md).
+CLIPS = [CLIPS_NT13[2]] + CLIPS_NT14
 
 SHIELD_ARM = nt12.SHIELD_ARM
 LIMBS = {
@@ -147,6 +249,13 @@ class Rest:
         k = (wrist.inverted() @ prop_rest).to_3x3().normalized()
         self.grip_blade = (k @ Vector((0.0, 1.0, 0.0))).normalized()
         self.grip_edge = (k @ Vector((0.0, 0.0, 1.0))).normalized()
+        # NT14: the heater shield's face at rest (armature space).
+        lower = tgt.rest["LowerArm.L"].to_3x3().normalized()
+        self.shield_face = (lower @ Vector(SHIELD_FACE_LOCAL)).normalized()
+        self.arm_l = (
+            (h["LowerArm.L"] - h["UpperArm.L"]).length,
+            (h["Wrist.L"] - h["LowerArm.L"]).length,
+        )
 
     @staticmethod
     def _lu(left, up):
@@ -159,19 +268,56 @@ def lu(left, up):
     return nt12.frame_of(left.copy(), up.copy())
 
 
+def disc_track(data, video, first, last, rate):
+    """NT14: centre and front-face normal of the shield disc (hip-centred Z-up, source frames).
+
+    ``<video>_disc.npz`` (``track_disc.py``) gives the disc in the image; the image is mapped
+    onto MediaPipe's world frame by the trusted landmarks (``image_world_fit``), the depth
+    comes from the disc's apparent size against its median over the whole video, offset so
+    that the disc's farthest frame of the video is `DISC_REACH` of an arm's length from the
+    left shoulder (``reach_anchor``; the left arm's own landmarks hide behind the disc).
+    """
+    disc = np.load(os.path.join(POSE_DIR, f"{video}_disc.npz"))
+    world = data["world"]
+    w, h = (float(x) for x in data["size"])
+    aspect = w / h
+    fit = vc.image_world_fit(world, data["image"], aspect, data["visibility"])
+    fit = tuple(vc.one_euro(f, rate, 1.0, 0.2) for f in fit)
+    z = vc.one_euro(vc.to_zup(world), rate, 1.5, 0.3)
+    axes = disc["axes"]
+
+    def points_at(anchor):
+        pts = vc.disc_points(disc["centre"], axes[:, 0], fit, aspect, anchor)
+        return vc.one_euro(pts, rate, 1.5, 0.3)
+
+    lengths = vc.segment_lengths(z)
+    arm = lengths[(vc.SHOULDER_R, vc.ELBOW_R)] + lengths[(vc.ELBOW_R, vc.WRIST_R)]
+    pts = points_at(vc.reach_anchor(points_at, z[:, vc.SHOULDER_L], DISC_REACH * arm))
+    chest = 0.5 * (z[:, vc.SHOULDER_L] + z[:, vc.SHOULDER_R])
+    normals = vc.disc_normals(axes[:, 0], axes[:, 1], disc["angle"], pts, chest)
+    normals = vc.smooth_directions(normals, rate, 1.0, 0.3)
+    sl = slice(first, last + 1)
+    return pts[sl], normals[sl]
+
+
 class Clip:
     """One cleaned video clip mapped to armature space."""
 
     def __init__(self, tgt, spec):
         """Clean the landmarks of `spec` and map them onto the target's frame and size."""
-        name, video, first, last, speed, loop, yaw, note = spec
+        video, first, last = spec["video"], spec["first"], spec["last"]
+        speed, loop, yaw = spec["speed"], spec["loop"], spec["yaw"]
         t0 = time.time()
         data = np.load(os.path.join(POSE_DIR, f"{video}.npz"))
         rate = float(data["fps"])
         world = data["world"][first : last + 1]
         image = data["image"][first : last + 1]
-        cleaned = vc.clean(world, image, rate * speed, float(bs.FPS))
+        extra, normals = {}, None
+        if spec["shield"] == "disc":
+            extra["disc"], normals = disc_track(data, video, first, last, rate * speed)
+        cleaned = vc.clean(world, image, rate * speed, float(bs.FPS), extra=extra)
         pts = cleaned["points"]
+        disc = cleaned["extra"].get("disc")
         self.contacts = cleaned["contacts"]
         self.lengths = cleaned["lengths"]
         if loop:  # no drift over a loop: the root ends where it started
@@ -179,6 +325,20 @@ class Clip:
             drift[2] = 0.0
             k = np.linspace(0.0, 1.0, len(pts))[:, None, None]
             pts = pts - drift[None, None, :] * k
+            if disc is not None:
+                disc = disc - drift[None, :] * k[:, 0]
+        if yaw == "auto":  # NT14: towards the opponent (the strike, the chest's facing)
+            if spec["yaw_range"]:
+                a, b = spec["yaw_range"]
+                other = vc.clean(
+                    data["world"][a : b + 1], data["image"][a : b + 1], rate
+                )
+                yaw = vc.facing_yaw(other["points"])
+            elif spec["reach"] == "disc" and disc is not None:
+                yaw = vc.facing_yaw(pts, disc)
+            else:
+                yaw = vc.facing_yaw(pts)
+        self.yaw = round(float(yaw), 1)
         # Source frame: performer's left = image right (+X), forward = towards the camera.
         c, s = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
         fwd = Vector((s, -c, 0.0))
@@ -193,6 +353,12 @@ class Clip:
         self.frames = [
             [ground + rot @ (vec(p - r0) * scale) for p in frame] for frame in pts
         ]
+        self.disc = self.normals = None
+        if disc is not None:
+            self.disc = [ground + rot @ (vec(p - r0) * scale) for p in disc]
+            levelled = normals @ cleaned["level"].T
+            n24 = vc.resample(levelled, rate * speed, float(bs.FPS))[: len(pts)]
+            self.normals = [(rot @ vec(n)).normalized() for n in n24]
         self.rot = rot
         self.spec = spec
         self.rate = rate
@@ -268,6 +434,27 @@ def blade_directions(clip, min_gap):
     return lines if votes >= 0.0 else [-v for v in lines]
 
 
+def hand_sides(clip, blades):
+    """NT14 (one-handed grip): roll reference of the fist, the hand's axis off the blade.
+
+    The hand's axis (wrist to the middle of the index and pinky landmarks, smoothed) is never
+    along a sword held in the fist, unlike the forearm (``blade_sides``), so no frame is
+    ill-defined.
+    """
+    axes = np.array(
+        [
+            list((j[vc.INDEX_R] + j[vc.PINKY_R]) * 0.5 - j[vc.WRIST_R])
+            for j in clip.frames
+        ]
+    )
+    axes = vc.smooth_directions(axes, float(bs.FPS), 1.2, 0.3)
+    out = []
+    for a, blade in zip(axes, blades, strict=True):
+        s = vec(a) - blade * vec(a).dot(blade)
+        out.append(s.normalized() if s.length > 1e-6 else blade.orthogonal())
+    return out
+
+
 def blade_sides(clip, blades):
     """Roll reference of the fist about the blade, per frame: the forearm off the blade.
 
@@ -306,6 +493,59 @@ def blade_sides(clip, blades):
     return out
 
 
+SHIELD_CENTRE = 0.77  # the heater shield's centre, as a fraction of the forearm
+FOREARM_STEPS = 72
+
+
+def shield_arm_rotations(rest, clip, index, j, state):
+    """NT14: left arm deltas (upper, lower) putting the heater shield where the disc is.
+
+    The shield is strapped along the forearm, the disc was gripped at its back: the forearm is
+    laid in the disc's plane (its direction scanned around the disc's normal) with the shield's
+    centre (``SHIELD_CENTRE`` of the forearm) on the disc's centre, the shoulder-disc distance
+    scaled from the performer's arm (right arm lengths: the left one hides) to the figure's.
+    The direction kept best fits the upper arm's length, with the elbow not above the shoulder,
+    the wrist farther than the elbow, and close to the previous frame's; the forearm's roll
+    then turns the shield's face (``Rest.shield_face``) onto the disc's normal.
+    """
+    l1, l2 = rest.arm_l
+    shoulder = j[vc.SHOULDER_L]
+    normal = clip.normals[index]
+    perf = (
+        clip.lengths[(vc.SHOULDER_R, vc.ELBOW_R)]
+        + clip.lengths[(vc.ELBOW_R, vc.WRIST_R)]
+    ) * clip.scale
+    centre = (clip.disc[index] - shoulder) * ((l1 + l2) / max(perf, 1e-6))
+    a = normal.orthogonal().normalized()
+    b = normal.cross(a).normalized()
+    prev = state.get("shield_fore")
+    best, best_score = None, math.inf
+    for k in range(FOREARM_STEPS):
+        th = 2.0 * math.pi * k / FOREARM_STEPS
+        d = a * math.cos(th) + b * math.sin(th)
+        elbow = centre - d * (SHIELD_CENTRE * l2)
+        err = (elbow.length - l1) / l1
+        score = 4.0 * err * err
+        score += 0.5 * max(0.0, elbow.normalized().dot(rest.up))
+        score += 0.5 * max(0.0, elbow.length - (elbow + d * l2).length) / l2
+        if prev is not None:
+            score += 0.8 * (1.0 - d.dot(prev))
+        if score < best_score:
+            best, best_score = d, score
+    state["shield_fore"] = best
+    u = (centre - best * (SHIELD_CENTRE * l2)).normalized() * l1
+    lo = best * l2
+    u0, l0, h0 = rest.limb["arm.L"]
+    hinge = u.cross(lo)
+    if hinge.length < 1e-6:
+        hinge = state.get("arm.L") or h0
+    hinge.normalize()
+    state["arm.L"] = hinge
+    r_upper = basis(u, hinge) @ basis(u0, h0).transposed()
+    r_lower = basis(lo, normal) @ basis(l0, rest.shield_face).transposed()
+    return r_upper, r_lower
+
+
 def solve(rest, clip, index, state, blade, side):
     """Armature-space pose matrices of every mapped bone for one clip frame."""
     tgt = rest.tgt
@@ -342,6 +582,10 @@ def solve(rest, clip, index, state, blade, side):
         state[key] = hinge
         r[upper] = ru
         r[lower] = rl
+    if clip.disc is not None:
+        r["UpperArm.L"], r["LowerArm.L"] = shield_arm_rotations(
+            rest, clip, index, j, state
+        )
     r["Wrist.L"] = r["LowerArm.L"]
     # Right wrist: blade along the stick, hand as close as possible to the forearm line.
     local = basis(rest.grip_blade, Vector((0.0, 1.0, 0.0)))
@@ -353,7 +597,12 @@ def solve(rest, clip, index, state, blade, side):
     dev = (
         r["LowerArm.R"].inverted() @ wrist_abs @ tgt.rest["Wrist.R"].to_3x3().inverted()
     ).to_quaternion()
-    dev = cap_swing_twist(dev, rest.limb["arm.R"][1], WRIST_SWING_DEG, WRIST_TWIST_DEG)
+    swing = (
+        WRIST_SWING_ONE_HAND_DEG
+        if clip.spec["grip"] == "right_hand"
+        else WRIST_SWING_DEG
+    )
+    dev = cap_swing_twist(dev, rest.limb["arm.R"][1], swing, WRIST_TWIST_DEG)
     r["Wrist.R"] = r["LowerArm.R"] @ dev.to_matrix()
     for side in ("L", "R"):
         heel = j[vc.HEEL_L if side == "L" else vc.HEEL_R]
@@ -392,7 +641,9 @@ def pin_feet(rest, clip, rots, poss):
         up_leg, low_leg, foot = f"UpperLeg.{side}", f"LowerLeg.{side}", f"Foot.{side}"
         ankle = np.array([to_frame_coords(rest, poss[t][foot]) for t in range(n)])
         ground = float(to_frame_coords(rest, tgt.head[foot])[2])
-        targets, weights = vc.pin_targets(ankle, clip.contacts[:n, i], ground=ground)
+        targets, weights = vc.step_targets(
+            ankle, clip.contacts[:n, i], ground=ground, unit=clip.scale
+        )
         for t in range(n):
             want = ankle[t].copy()
             if weights[t] > 0.0:
@@ -419,21 +670,78 @@ def solve_clip(rest, clip):
     """Pose matrices (armature space) of every frame of a clip, feet pinned."""
     state = {}
     rots, poss, wrists = [], [], []
-    blades = blade_directions(clip, 0.12 * clip.scale)
-    sides = blade_sides(clip, blades)
+    one_hand = clip.spec["grip"] == "right_hand"
+    blades = blade_directions(clip, math.inf if one_hand else 0.12 * clip.scale)
+    if one_hand:  # NT14: the fist's landmarks are noisy frame to frame
+        smooth = vc.smooth_directions(
+            np.array([list(b) for b in blades]), float(bs.FPS), 1.2, 0.3
+        )
+        blades = [vec(b) for b in smooth]
+        sides = hand_sides(clip, blades)
+    else:
+        sides = blade_sides(clip, blades)
     for i in range(len(clip.frames)):
         rot, pos, wrist = solve(rest, clip, i, state, blades[i], sides[i])
         rots.append(rot)
         poss.append(pos)
         wrists.append(wrist)
+    wrists = filter_wrist(rest, rots, wrists)
+    if clip.disc is not None:
+        filter_chain(rest, rots, poss, ("UpperArm.L", "LowerArm.L", "Wrist.L"))
     pin_feet(rest, clip, rots, poss)
     out = []
     for rot, pos in zip(rots, poss, strict=True):
         mats = {b: Matrix.Translation(pos[b]) @ rot[b].to_4x4() for b in ORDER}
-        for b in SHIELD_ARM:
-            mats[b] = mats["Chest"] @ rest.tgt.shield_rel[b]
+        if clip.disc is None:
+            for b in SHIELD_ARM:
+                mats[b] = mats["Chest"] @ rest.tgt.shield_rel[b]
         out.append(mats)
     return out, wrists
+
+
+WRIST_SPIKE_DEG = 12.0
+
+
+def filter_chain(rest, rots, poss, bones, cutoff=2.0, beta=0.3):
+    """NT14: despike and smooth the rotations of a bone chain, then redo its positions.
+
+    Used on the shield arm: the disc's tilt sign and the elbow's turn are picked frame by
+    frame, and a pick that flips for one or two frames shakes the shield.
+    """
+    tgt = rest.tgt
+    for bone in bones:
+        q = np.array([list(r[bone].to_quaternion()) for r in rots])
+        q = vc.smooth_quats(
+            vc.despike_quats(q, WRIST_SPIKE_DEG), float(bs.FPS), cutoff, beta
+        )
+        for t, row in enumerate(q):
+            rots[t][bone] = Quaternion([float(x) for x in row]).to_matrix()
+    for rot, pos in zip(rots, poss, strict=True):
+        for bone in bones:
+            p = PARENT[bone]
+            offset = tgt.rest[p].to_3x3().transposed() @ (tgt.head[bone] - tgt.head[p])
+            pos[bone] = pos[p] + rot[p] @ offset
+
+
+def filter_wrist(rest, rots, wrists):
+    """NT14: right wrist spikes removed and its turn smoothed (in place on `rots`).
+
+    The wrist's turn relative to the forearm (``solve``'s capped deviation) loses its one-frame
+    spikes (``despike_quats``) and is smoothed (zero-phase One-Euro); the wrist bone is rebuilt
+    on its forearm. Returns the filtered deviations.
+    """
+    q = np.array([[w.w, w.x, w.y, w.z] for w in wrists])
+    q = vc.smooth_quats(vc.despike_quats(q, WRIST_SPIKE_DEG), float(bs.FPS), 3.0, 0.3)
+    tgt = rest.tgt
+    lower_rest = tgt.rest["LowerArm.R"].to_3x3().inverted()
+    wrist_rest = tgt.rest["Wrist.R"].to_3x3()
+    out = []
+    for t, row in enumerate(q):
+        dev = Quaternion([float(x) for x in row])
+        r_lower = rots[t]["LowerArm.R"] @ lower_rest
+        rots[t]["Wrist.R"] = r_lower @ dev.to_matrix() @ wrist_rest
+        out.append(dev)
+    return out
 
 
 def extra_quality(tgt, solved, wrists):
@@ -450,8 +758,34 @@ def extra_quality(tgt, solved, wrists):
         "jitter_deg_per_frame2": round(
             math.degrees(float(np.mean(acc))) if acc else 0.0, 2
         ),
+        "tremor_deg": tremor(solved),
+        "tremor_worst": sorted(tremor(solved, True).items(), key=lambda kv: -kv[1])[:3],
         "wrist_r_bend_max_deg": round(max(bend), 1),
     }
+
+
+def tremor(solved, per_bone=False):
+    """NT14: high-frequency shake (degrees) of a solved clip.
+
+    Mean angle between each bone's rotation and its 5-frame binomial average (1 4 6 4 1).
+    Unlike the jitter (angular acceleration), a fast but smooth strike scores low: only
+    frame-to-frame wobble remains after such a short average.
+    """
+    if len(solved) < 5:
+        return 0.0
+    res = []
+    k = np.array([1.0, 4.0, 6.0, 4.0, 1.0]) / 16.0
+    for bone in ORDER:
+        q = vc.continuous_quats([list(m[bone].to_quaternion()) for m in solved])
+        avg = sum(k[i] * q[i : len(q) - 4 + i] for i in range(5))
+        avg /= np.linalg.norm(avg, axis=-1, keepdims=True)
+        res.append(vc.quat_angle(q[2:-2], avg))
+    if per_bone:
+        return {
+            b: round(math.degrees(float(np.mean(r))), 2)
+            for b, r in zip(ORDER, res, strict=True)
+        }
+    return round(math.degrees(float(np.mean(res))), 2)
 
 
 def clip_bases(tgt, rest, spec):
@@ -459,7 +793,7 @@ def clip_bases(tgt, rest, spec):
     clip = Clip(tgt, spec)
     solved, wrists = solve_clip(rest, clip)
     bases = [nt12.to_basis(tgt, s) for s in solved]
-    if spec[5] and len(bases) > LOOP_BLEND + 1:
+    if spec["loop"] and len(bases) > LOOP_BLEND + 1:
         n = len(bases)
         for j in range(LOOP_BLEND):
             k = n - LOOP_BLEND + j
@@ -479,16 +813,63 @@ def setup():
     return arm, rig, tgt, Rest(tgt, arm)
 
 
-def bake():
-    """Bake the substituted clips into ``OUT_DIR`` and write its manifest."""
+def measure(tgt, solved, wrists=None):
+    """Quality measures of a solved clip (NT12's plus jitter and wrist bend)."""
+    q = nt12.quality(tgt, solved)
+    q.update(extra_quality(tgt, solved, wrists or [Quaternion()]))
+    if wrists is None:
+        q.pop("wrist_r_bend_max_deg", None)
+    return q
+
+
+def video_entry(tgt, rest, spec):
+    """Bases, quality and manifest record of a video clip."""
+    t0 = time.time()
+    bases, solved, wrists, clip = clip_bases(tgt, rest, spec)
+    q = measure(tgt, solved, wrists)
+    q["contact_frames"] = [int(c) for c in clip.contacts.sum(axis=0)]
+    fps = round(clip.rate)
+    record = {
+        "source": (
+            f"player video {spec['video']} frames {spec['first']}-{spec['last']} "
+            f"@{fps}fps, x{spec['speed']} speed"
+        ),
+        "set": spec["set"],
+        "note": spec["note"],
+        "grip": spec["grip"],
+        "shield": spec["shield"],
+        "yaw_deg": clip.yaw,
+        "quality": q,
+        "solve_s": round(time.time() - t0, 1),
+    }
+    return bases, spec["loop"], record
+
+
+def cmu_entry(tgt, spec):
+    """Bases, quality and manifest record of an NT12 CMU clip."""
+    t0 = time.time()
+    bases, solved = nt12.clip_bases(tgt, spec)
+    record = {
+        "source": f"CMU mocap subject {spec[1]} take {spec[2]} frames {spec[3]}-{spec[4]} @120fps",
+        "set": "nt12",
+        "note": spec[6],
+        "quality": measure(tgt, solved),
+        "solve_s": round(time.time() - t0, 1),
+    }
+    return bases, spec[5], record
+
+
+def bake_entries(entries, out_dir, source):
+    """Bake `entries` ((clip, kind ``"video"``/``"cmu"``, spec)) into `out_dir` + manifest."""
     import battle_skinned_poses as poses
 
     arm, rig, tgt, rest = setup()
     report = {}
-    for spec in CLIPS:
-        name, video, first, last, speed, loop, yaw, note = spec
-        t0 = time.time()
-        bases, solved, wrists, clip = clip_bases(tgt, rest, spec)
+    for name, kind, spec in entries:
+        if kind == "cmu":
+            bases, loop, record = cmu_entry(tgt, spec)
+        else:
+            bases, loop, record = video_entry(tgt, rest, spec)
         start = rig.begin_clip()
         for basis_ in bases:
             for pb in arm.pose.bones:
@@ -497,42 +878,111 @@ def bake():
             bpy.context.view_layer.update()
             rig.add_frame(rig.frame_matrices())
         rig.end_clip(name, start, loop)
-        q = nt12.quality(tgt, solved)
-        q.update(extra_quality(tgt, solved, wrists))
-        q["contact_frames"] = [int(c) for c in clip.contacts.sum(axis=0)]
-        report[name] = {
-            "source": f"player video {video} frames {first}-{last} @30fps, x{speed} speed",
-            "note": note,
-            "yaw_deg": yaw,
-            "quality": q,
-            "solve_s": round(time.time() - t0, 1),
-        }
-        print("QUALITY", name, json.dumps(q), f"{time.time() - t0:.1f}s")
-    os.makedirs(OUT_DIR, exist_ok=True)
-    bs.OUT_DIR = OUT_DIR
+        report[name] = record
+        print("QUALITY", name, record["set"], json.dumps(record["quality"]))
+    os.makedirs(out_dir, exist_ok=True)
+    bs.OUT_DIR = out_dir
     rig.write()
     manifest = rig.manifest()
     manifest["rig"] = "human"
     manifest["clip_sources"] = report
-    manifest["source"] = (
-        "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, "
-        "MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/nt13-video-mocap.md"
-    )
-    with open(os.path.join(OUT_DIR, "manifest.json"), "w") as f:
+    manifest["source"] = source
+    with open(os.path.join(out_dir, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=1, sort_keys=True)
-    print("OK", OUT_DIR)
+    print("OK", out_dir)
+
+
+def bake():
+    """Bake the substituted clips of the ``--video-trial`` option into ``OUT_DIR``."""
+    bake_entries(
+        [(s["name"], "video", s) for s in CLIPS],
+        OUT_DIR,
+        "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, "
+        "MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/nt13-video-mocap.md "
+        "and docs/wip/nt14-video-set2.md",
+    )
+
+
+# NT14 (ADR 0129, complement): default melee clips of the fine figures, per gesture the best
+# source (keyframed clips are simply not substituted). `--keyframed-melee` restores them all.
+MELEE_DIR = os.path.join(bf.FINE_DIR, "melee")
+MELEE_DEFAULT = {
+    "guard": ("video", CLIPS_NT14[0]),
+    "overhead": ("video", CLIPS_NT14[1]),
+    "parry": ("video", CLIPS_NT14[2]),
+    "thrust": ("video", CLIPS_NT14[3]),
+}
+
+
+def bake_melee():
+    """Bake the default melee clips (``MELEE_DEFAULT``) into ``MELEE_DIR``."""
+    bake_entries(
+        [(name, kind, spec) for name, (kind, spec) in MELEE_DEFAULT.items()],
+        MELEE_DIR,
+        "tools/blender_scripts/nt13_video_trial.py (bake-melee) - default melee clips chosen "
+        "per gesture among keyframed / CMU (NT12) / player videos (NT13, NT14), see "
+        "docs/wip/nt14-video-set2.md and ADR 0129",
+    )
+
+
+def keyframed_solved(arm, name):
+    """Armature-space matrices of every frame of a keyframed ``human`` clip."""
+    import battle_fine_proto as fp
+
+    specs = {c[0]: c for c in bs.human_clip_specs()}
+    _n, source, _loop, overrides, _mirror = specs[name]
+    act = bs.find_action(source, "CharacterArmature")
+    first, last = (int(round(v)) for v in act.frame_range)
+    count = getattr(overrides, "frames", None) or (last - first + 1)
+    out = []
+    for i in range(count):
+        fp.pose_clip(arm, name, i / max(count - 1, 1))
+        out.append({b: arm.pose.bones[b].matrix.copy() for b in ORDER})
+    bs.rest_pose(arm)
+    return out
+
+
+def measure_all(path):
+    """Quality of every candidate of every melee gesture, to `path` (JSON) and stdout."""
+    arm, _rig, tgt, rest = setup()
+    import battle_fine_proto as fp
+
+    fp.prime_virtuals(arm)
+    res = {}
+    gestures = ("guard", "slash", "overhead", "thrust", "parry", "hit", "death")
+    for name in gestures:
+        row = {}
+        try:
+            row["keyframed"] = measure(tgt, keyframed_solved(arm, name))
+        except Exception as exc:  # noqa: BLE001 - report and go on
+            row["keyframed"] = {"error": str(exc)}
+        for spec in nt12.CLIPS:
+            if spec[0] == name:
+                row["nt12"] = cmu_entry(tgt, spec)[2]["quality"]
+        for spec in CLIPS_NT13 + CLIPS_NT14:
+            if spec["name"] == name:
+                _b, _l, record = video_entry(tgt, rest, spec)
+                row[spec["set"]] = dict(record["quality"], yaw_deg=record["yaw_deg"])
+        res[name] = row
+        for src, q in row.items():
+            print("MEASURE", name, src, json.dumps(q))
+    with open(path, "w") as f:
+        json.dump(res, f, indent=1, sort_keys=True)
+    print("OK", path)
 
 
 RENDER_FRACS = (0.0, 0.25, 0.5, 0.75, 1.0)
 RENDER_EYE = ((1.7, -3.0, 1.35), (0.0, -0.2, 0.85))
 
 
-def render(out):
-    """Workbench renders of each clip: keyframed ``k``, CMU ``m`` (NT12), video ``v`` and ``c``.
+def render(out, specs=None):
+    """Workbench renders of each clip: keyframed ``k``, CMU ``m`` (NT12), NT13 ``v``, NT14 ``w``.
 
-    ``c`` shows the video clip from the source camera's side, to compare with the video.
+    ``c`` shows the newest video clip from the source camera's side, to compare with the video.
+    `specs` defaults to the gestures of ``CLIPS_NT14`` (plus NT13's own), each rendered from
+    every source that has it.
 
-    Files ``<clip>_<k|m|v>_<i>.png`` in `out` at ``RENDER_FRACS`` of the clip, plus
+    Files ``<clip>_<k|m|v|w|c>_<i>.png`` in `out` at ``RENDER_FRACS`` of the clip, plus
     ``frames.json`` (video and source frame of each render, for the contact sheet).
     """
     import battle_fine_figures as ff
@@ -554,6 +1004,9 @@ def render(out):
     tgt = nt12.Target(arm)
     rest = Rest(tgt, arm)
     cmu = {c[0]: c for c in nt12.CLIPS}
+    nt13 = {c["name"]: c for c in CLIPS_NT13}
+    nt14 = {c["name"]: c for c in CLIPS_NT14}
+    names = specs or list(dict.fromkeys(list(nt14) + list(nt13)))
     index = {}
 
     def show(basis_):
@@ -563,14 +1016,22 @@ def render(out):
         bpy.context.view_layer.update()
         fp.follow_prop(objs)
 
-    for spec in CLIPS:
-        name, video, first, last, speed, _loop, _yaw, _note = spec
-        bases, _solved, _w, clip = clip_bases(tgt, rest, spec)
+    for name in names:
+        newest = nt14.get(name) or nt13[name]
+        video_bases = {}
+        clip = None
+        for tag, table in (("v", nt13), ("w", nt14)):
+            if name in table:
+                bases, _solved, _w, c = clip_bases(tgt, rest, table[name])
+                video_bases[tag] = bases
+                if table[name] is newest:
+                    clip = c
         # Camera of the source video (in front of the performer), for the ``c`` renders.
         look = arm.matrix_world.to_3x3().normalized() @ (clip.rot @ Vector((0, -1, 0)))
         look.z = 0.0
         eye_c = Vector(RENDER_EYE[1]) + look.normalized() * 3.4 + Vector((0, 0, 0.45))
         cmu_bases = nt12.clip_bases(tgt, cmu[name])[0] if name in cmu else None
+        newest_tag = "w" if name in nt14 else "v"
         for i, frac in enumerate(RENDER_FRACS):
             fp.pose_clip(arm, name, frac)
             fp.follow_prop(objs)
@@ -578,21 +1039,32 @@ def render(out):
             if cmu_bases:
                 show(cmu_bases[int(round(frac * (len(cmu_bases) - 1)))])
                 fp.render(os.path.join(out, f"{name}_m_{i}.png"))
+            for tag, bases in video_bases.items():
+                show(bases[int(round(frac * (len(bases) - 1)))])
+                fp.render(os.path.join(out, f"{name}_{tag}_{i}.png"))
+            bases = video_bases[newest_tag]
             show(bases[int(round(frac * (len(bases) - 1)))])
-            fp.render(os.path.join(out, f"{name}_v_{i}.png"))
             fp.look_at(cam, eye_c, RENDER_EYE[1], 40)
             fp.render(os.path.join(out, f"{name}_c_{i}.png"))
             fp.look_at(cam, RENDER_EYE[0], RENDER_EYE[1], 40)
-            index[f"{name}_{i}"] = [video, int(round(first + frac * (last - first)))]
+            first, last = newest["first"], newest["last"]
+            index[f"{name}_{i}"] = [
+                newest["video"],
+                int(round(first + frac * (last - first))),
+            ]
     with open(os.path.join(out, "frames.json"), "w") as f:
         json.dump(index, f, indent=1)
 
 
 def main():
-    """``bake`` (default) or ``render DIR`` after ``--``."""
+    """``bake`` (default), ``bake-melee``, ``measure FILE`` or ``render DIR [clips]`` after ``--``."""
     args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     if args and args[0] == "render":
-        render(args[1] if len(args) > 1 else "/tmp/nt13_render")
+        render(args[1] if len(args) > 1 else "/tmp/nt14_render", args[2:] or None)
+    elif args and args[0] == "measure":
+        measure_all(args[1] if len(args) > 1 else "/tmp/nt14_measures.json")
+    elif args and args[0] == "bake-melee":
+        bake_melee()
     else:
         bake()
 

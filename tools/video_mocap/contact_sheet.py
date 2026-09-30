@@ -1,10 +1,10 @@
-"""Lot NT13: contact sheets of the video retargeting (keyframed / CMU / video / source frame).
+"""Lots NT13-NT14: contact sheets of the video retargeting (keyframed / CMU / videos / source).
 
-Reads the renders of ``nt13_video_trial.py -- render DIR`` (``<clip>_<k|m|v>_<i>.png`` and
+Reads the renders of ``nt13_video_trial.py -- render DIR`` (``<clip>_<k|m|v|w|c>_<i>.png`` and
 ``frames.json``), grabs the matching source video frames with ffmpeg, and writes one sheet per
 clip. Everything stays outside the repository (personal videos)::
 
-    uv run --project tools python tools/video_mocap/contact_sheet.py RENDER_DIR VIDEO_DIR OUT_DIR
+    uv run --project tools python tools/video_mocap/contact_sheet.py RENDER_DIR VIDEO_DIR OUT_DIR [PREFIX]
 """
 
 import json
@@ -17,8 +17,9 @@ from PIL import Image, ImageDraw
 ROWS = (
     ("k", "keyframé"),
     ("m", "CMU (NT12)"),
-    ("v", "vidéo (NT13)"),
-    ("c", "NT13, vue caméra"),
+    ("v", "vidéo NT13"),
+    ("w", "vidéo NT14"),
+    ("c", "vidéo, vue caméra"),
     ("src", "source"),
 )
 CELL = (270, 360)
@@ -57,8 +58,9 @@ def fit(img: Image.Image) -> Image.Image:
 
 
 def main() -> int:
-    """Write ``nt13_<clip>.png`` for every clip of the render index."""
+    """Write ``<prefix>_<clip>.png`` (default ``nt13``) for every clip of the render index."""
     render, videos, out = (Path(a) for a in sys.argv[1:4])
+    prefix = sys.argv[4] if len(sys.argv) > 4 else "nt13"
     out.mkdir(parents=True, exist_ok=True)
     index = json.loads((render / "frames.json").read_text())
     clips = sorted({key.rsplit("_", 1)[0] for key in index})
@@ -80,8 +82,8 @@ def main() -> int:
                     path = render / f"{clip}_{tag}_{i}.png"
                 if path and path.exists():
                     sheet.paste(fit(Image.open(path)), (110 + c * CELL[0], r * CELL[1]))
-        sheet.save(out / f"nt13_{clip}.png")
-        print("OK", out / f"nt13_{clip}.png")
+        sheet.save(out / f"{prefix}_{clip}.png")
+        print("OK", out / f"{prefix}_{clip}.png")
     return 0
 
 
