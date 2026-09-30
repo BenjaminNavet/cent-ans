@@ -48,6 +48,11 @@ var selected_faction: String:
 		return faction_select.selected_faction if faction_select != null else "fac_france"
 
 var _continue_detail: Label
+var _column: VBoxContainer
+var _menu_buttons: Array[Button] = []
+## Paliers de compaction de la colonne (taille de police, marge verticale des boutons, écart) :
+## le premier qui tient dans la hauteur de l'écran est retenu (1920×1080 : toujours le premier).
+const FIT_LEVELS := [[0, 4, 4], [-2, 3, 3], [-4, 2, 2], [-6, 1, 1], [-8, 0, 0]]
 var _caption: Label
 var _leaving := false
 var _overlay: Control = null  # réglages, crédits ou prologue ouverts
@@ -222,6 +227,8 @@ func _build_main_column() -> void:
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 4)
 	main_column.add_child(column)
+	_column = column
+	main_column.resized.connect(_fit_column)
 	column.add_child(IlluminatedTitle.new())
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 8)
@@ -248,6 +255,28 @@ func _build_main_column() -> void:
 
 	status_label = FrontEndStyle.label("", UiType.size(UiType.CAPTION), Color(1.0, 0.75, 0.6), FrontEndStyle.body_italic(), 4)
 	column.add_child(status_label)
+	_fit_column.call_deferred()
+
+
+## Fait tenir la colonne dans la hauteur de l'écran (fenêtre 1280×720 : hauteur logique 800) en
+## réduisant police, marges et écarts des boutons par paliers ; inchangée si elle tient déjà.
+func _fit_column() -> void:
+	if _column == null or main_column == null:
+		return
+	var available := main_column.size.y - 16.0 - 24.0  # marges haute et basse de la colonne
+	var chosen: Array = FIT_LEVELS[FIT_LEVELS.size() - 1]
+	for level: Array in FIT_LEVELS:
+		_apply_fit_level(level)
+		if _column.get_combined_minimum_size().y <= available:
+			chosen = level
+			break
+	_apply_fit_level(chosen)
+
+
+func _apply_fit_level(level: Array) -> void:
+	_column.add_theme_constant_override("separation", int(level[2]))
+	for button in _menu_buttons:
+		FrontEndStyle.style_menu_button(button, UiType.size(UiType.TITLE) + int(level[0]), int(level[1]))
 
 
 func _menu_button(parent: Control, text: String, action: Callable) -> Button:
@@ -258,6 +287,7 @@ func _menu_button(parent: Control, text: String, action: Callable) -> Button:
 	button.custom_minimum_size = Vector2(360, 0)
 	button.pressed.connect(action)
 	parent.add_child(button)
+	_menu_buttons.append(button)
 	return button
 
 
@@ -308,6 +338,7 @@ func _refresh_saves() -> void:
 	var loaded: bool = facade_node != null and bool(facade_node.call("store_loaded"))
 	status_label.text = "" if loaded else "Données de jeu introuvables : le jeu est incomplet, réinstallez-le."
 	status_label.visible = status_label.text != ""
+	_fit_column.call_deferred()
 
 
 ## Capture de l'écran (`-- --screenshot=<chemin.png>`) puis sortie.
