@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "biomes.schema.json",
+  "title": "Légende et paramètres de la carte des biomes (chantier HB)",
+  "description": "`data/map/biomes.yaml` : légende de `data/map/biomes.png` (indices figés 0-7) et seuils de sa cuisson par `cent-ans geo biomes` (`tools/cent_ans_tools/geo/biomes.py`, ADR 0143).",
+  "type": "object",
+  "required": ["classes", "source", "koppen", "rules", "smoothing", "fallback"],
+  "additionalProperties": false,
+  "$defs": {
+    "biome": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid"]},
+    "km": {"type": "number", "minimum": 0},
+    "lat": {"type": "number", "minimum": -90, "maximum": 90},
+    "lon": {"type": "number", "minimum": -180, "maximum": 180}
+  },
+  "properties": {
+    "classes": {
+      "type": "array",
+      "description": "Indices figés : 0 mer, 1 océanique, 2 continental, 3 méditerranéen, 4 steppe, 5 boréal, 6 montagnard, 7 semi-aride.",
+      "prefixItems": [
+        {"type": "object", "properties": {"index": {"const": 0}, "name": {"const": "sea"}}},
+        {"type": "object", "properties": {"index": {"const": 1}, "name": {"const": "oceanic"}}},
+        {"type": "object", "properties": {"index": {"const": 2}, "name": {"const": "continental"}}},
+        {"type": "object", "properties": {"index": {"const": 3}, "name": {"const": "mediterranean"}}},
+        {"type": "object", "properties": {"index": {"const": 4}, "name": {"const": "steppe"}}},
+        {"type": "object", "properties": {"index": {"const": 5}, "name": {"const": "boreal"}}},
+        {"type": "object", "properties": {"index": {"const": 6}, "name": {"const": "mountain"}}},
+        {"type": "object", "properties": {"index": {"const": 7}, "name": {"const": "semi_arid"}}}
+      ],
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["index", "name", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "index": {"type": "integer", "minimum": 0, "maximum": 7},
+          "name": {"type": "string", "pattern": "^[a-z][a-z_]*$"},
+          "label": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["name", "license", "url", "archive", "member", "codes"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string"},
+        "license": {"type": "string"},
+        "url": {"type": "string", "pattern": "^https://"},
+        "archive": {"type": "string"},
+        "member": {"type": "string"},
+        "codes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Z][A-Za-z]{1,2}$"}}
+      }
+    },
+    "koppen": {
+      "type": "object",
+      "description": "Biome -> classes Köppen (avant ajustements).",
+      "propertyNames": {"$ref": "#/$defs/biome"},
+      "additionalProperties": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+    },
+    "rules": {
+      "type": "object",
+      "required": ["oceanic_max_km", "atlantic_boxes", "steppe_min_lat", "dry_min", "coastal_semi_arid_km", "coastal_semi_arid_max_lon", "boreal_min_lat", "mountain"],
+      "additionalProperties": false,
+      "properties": {
+        "oceanic_max_km": {"$ref": "#/$defs/km"},
+        "atlantic_boxes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}}
+        },
+        "steppe_min_lat": {"$ref": "#/$defs/lat"},
+        "dry_min": {"type": "number", "minimum": 0, "maximum": 1},
+        "coastal_semi_arid_km": {"$ref": "#/$defs/km"},
+        "coastal_semi_arid_max_lon": {"$ref": "#/$defs/lon"},
+        "boreal_min_lat": {"$ref": "#/$defs/lat"},
+        "mountain": {
+          "type": "object",
+          "required": ["base_m", "ref_lat", "per_deg_m", "dry_extra_m", "tundra_lowland"],
+          "additionalProperties": false,
+          "properties": {
+            "base_m": {"type": "number"},
+            "ref_lat": {"$ref": "#/$defs/lat"},
+            "per_deg_m": {"type": "number", "minimum": 0},
+            "dry_extra_m": {"type": "number", "minimum": 0},
+            "tundra_lowland": {"$ref": "#/$defs/biome"}
+          }
+        }
+      }
+    },
+    "smoothing": {
+      "type": "object",
+      "required": ["sigma_km", "min_area_km2"],
+      "additionalProperties": false,
+      "properties": {
+        "sigma_km": {"$ref": "#/$defs/km"},
+        "min_area_km2": {"$ref": "#/$defs/km"}
+      }
+    },
+    "fallback": {
+      "type": "object",
+      "required": ["mediterranean_max_lat", "semi_arid_coast_km", "semi_arid_max_lat"],
+      "additionalProperties": false,
+      "properties": {
+        "mediterranean_max_lat": {"$ref": "#/$defs/lat"},
+        "semi_arid_coast_km": {"$ref": "#/$defs/km"},
+        "semi_arid_max_lat": {"$ref": "#/$defs/lat"}
+      }
+    }
+  }
+}

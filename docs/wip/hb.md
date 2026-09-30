@@ -14,3 +14,7 @@ Session principale :
 - [ ] HB3 shader : parcellaire de vue moyenne texturé, canopée, roche (après HB1+HB2).
 - [ ] HB7 rivières : vérification de lisibilité (RC).
 - [ ] HB8 captures, banc, docs.
+
+## HB1 — biomes (branche `feat/hb-biomes`, worktree `../gp-hb-biomes`)
+- État : squelette (légende `data/map/biomes.yaml`, schéma, `geo/biomes.py`, commande `cent-ans geo biomes`, tests désactivés). Source Köppen-Geiger Beck 2023 1901-1930 téléchargée dans `tools/geo/raw/koppen/` (lien `tools/geo/raw` vers le dépôt principal).
+- Prochaine étape : classification + lissage, cuisson de `biomes.png`, puis palettes par biome dans la carte de couleur.
