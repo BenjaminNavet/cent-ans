@@ -24,7 +24,9 @@ const KINDS := ["plague", "famine", "revolt", "devastation", "siege", "construct
 const FIGURES_MIN := 6
 const FIGURES_MAX := 24
 ## Rayon (unités monde) d'une maquette de colonie sans `SettlementLayer` (tests).
-const DEFAULT_MODEL_RADIUS := 2.0
+const DEFAULT_MODEL_RADIUS := 0.5
+## Marge (unités monde, ≈ 60 m réels) entre le bord de la colonie et une scène de fumée.
+const SIDE_MARGIN := 0.08
 ## Marge (m) entre le bord de la maquette et le cœur de la scène.
 const EDGE_M := 6.0
 ## Distance (unités monde) au centre de la colonie en deçà de laquelle un fleuve déborde (crue).
@@ -166,11 +168,11 @@ static func _h(a: int, b: int) -> float:
 	return VegetationFields.hash01(a * 73856093 ^ b * 19349663)
 
 
-## Rayon (unités monde) de la maquette de la colonie à l'échelle courante.
+## Rayon réel (unités monde) de la colonie (VT : villes 1:1, plus de maquette grossie).
 func _model_radius(index: int) -> float:
 	if _layer == null:
 		return DEFAULT_MODEL_RADIUS
-	return _layer.model_radius(index) * _layer.model_scale(index)
+	return _layer.model_radius(index)
 
 
 ## FK6 : rayon (unités monde) de l'emprise de la colonie `index` autour de son centre : maquette
@@ -196,9 +198,9 @@ static func _side(scene: Dictionary) -> Vector2:
 	return Vector2(cos(angle), sin(angle))
 
 
-## Point au bord de la maquette (`factor` × rayon), du côté de la scène (fumées).
+## Point au bord de la colonie (`factor` × rayon + `SIDE_MARGIN`), du côté de la scène (fumées).
 func _side_point(scene: Dictionary, factor: float) -> Vector2:
-	return (scene["center"] as Vector2) + _side(scene) * (_footprint(int(scene["index"])) * factor + 0.5)
+	return (scene["center"] as Vector2) + _side(scene) * (_footprint(int(scene["index"])) * factor + SIDE_MARGIN)
 
 
 func _figures_for(intensity: float) -> int:

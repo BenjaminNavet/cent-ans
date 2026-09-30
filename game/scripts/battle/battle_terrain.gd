@@ -275,6 +275,8 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	site_render = not OS.get_cmdline_user_args().has("--no-site")
 	# Lot TF : colombage ou enduit/pierre selon la région de la province (`--no-tf` : choix d'avant).
 	BuildingKit.region_style = {} if OS.get_cmdline_user_args().has("--no-tf") else BuildingRegions.style_for_province(province_id)
+	# Lot GA3-L1 : variantes générées du kit dans le décor (`--no-ga3` : kit seul).
+	Ga3Kit.active = Ga3Kit.requested()
 	da6 = not OS.get_cmdline_user_args().has("--no-da6")
 	ga2 = not OS.get_cmdline_user_args().has("--no-ga2")
 	for arg in OS.get_cmdline_user_args():

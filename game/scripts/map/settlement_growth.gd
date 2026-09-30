@@ -16,7 +16,7 @@ const LEVEL_NAMES: Array[String] = ["village", "bourg", "ville", "cité"]
 const EXCLUDED: Array[String] = ["set_paris"]
 ## Maquettes par niveau (`game/assets/models/settlements/`).
 const LEVEL_MODELS := [["village_a", "village_b"], ["bourg_a", "bourg_b"], ["town_a", "town_b"], ["cite_a", "cite_b"]]
-## Échelle monde par niveau (unités Blender → pixels carte), cf. `ModelLibrary.SETTLEMENT_SCALE`.
+## Échelle monde par niveau (unités Blender → pixels carte).
 const LEVEL_SCALE := [3.8, 4.1, 4.4, 4.6]
 const WALL_BUILDINGS: Array[String] = ["bld_stone_walls", "bld_palisade", "bld_walls"]
 ## Population de province (habitants) au-delà de laquelle un village devient bourg, une ville cité.

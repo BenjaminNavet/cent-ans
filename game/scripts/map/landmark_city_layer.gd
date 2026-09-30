@@ -1,25 +1,20 @@
 class_name LandmarkCityLayer
 extends Node3D
 
-## Lot VH4 (ADR 0078) : villes emblématiques à l'échelle 1:1 (format v2) aux paliers « vallée »
-## et « site », sur le relief fin. Rendu seulement.
+## Lot VH4 (ADR 0078, 0138) : villes emblématiques à l'échelle 1:1 (format v2) quand le rig est à
+## moins de `TownRenderProfile.max_rig_distance`, sur le relief fin. Rendu seulement.
 ## - Données : `data/landmarks_v2/<id>.json` (`LandmarkV2Library`).
 ## - Plan dans un fil de travail (`LandmarkPlan.generate` sur un instantané des pages du
 ##   quadtree, puis `TownBuilder.prepare`), construction par étapes (`TownBuilder.step`, budget
 ##   `TownRenderProfile.build_budget_ms` et `FrameBudget`, ADR 0051). Mêmes portées, HLOD par
 ##   maison et hauteurs (mètres posés par le shader, hauteur affichée ZG8) que les villes
 ##   ordinaires ZG6 ; nœuds des maisons par cellule d'îlots (`plan.detail_cell_m`).
-## - Transition (ADR 0078) : la ville se prépare dès que la caméra approche (`prepare_valley`
-##   du palier vallée) ; `fade(id)` rend l'opacité de la maquette L1/L2 (1 → 0 entre les poids
-##   vallée `render.fade_valley`), que `SettlementLayer` applique à `LandmarkModel`.
+## - Plus de maquette (ADR 0138) : la ville 1:1 remplace la ville ZG6 correspondante ; le lointain
+##   est rendu par `TownFarLayer`, qui enfonce sa ville quand celle-ci est construite (`built_ids()`).
 ## - Pages de relief plus fines : hauteurs recalculées (`LandmarkPlan.reground`) puis bloc
 ##   reconstruit et échangé.
 
 signal cities_changed
-
-## Poids du palier vallée à partir duquel la ville est planifiée et construite (avant le fondu).
-const PREPARE_VALLEY := 0.15
-const DEFAULT_FADE := [0.35, 0.65]
 
 var profile: TownRenderProfile
 var terrain: TerrainBuilder
@@ -34,16 +29,11 @@ var stats: Dictionary = {}
 var _cities: Dictionary = {}  # settlement id → ville v2
 var _anchor: Dictionary = {}  # id → Vector2 (unités)
 var _extent: Dictionary = {}  # id → rayon (unités)
-## VH7 : villes sans maquette L1/L2 (Orléans) : colonie ordinaire en vue stratégique ; la ville
-## 1:1 remplace la ville ZG6 et ne s'affiche qu'à partir du même poids vallée
-## (`TownRenderProfile.min_valley_weight`), quand les maquettes des colonies sont masquées.
-var _maquette: Dictionary = {}  # id → bool
 var _ids_by_chunk: Dictionary = {}
 var _entries: Dictionary = {}  # id → {plan, builder, pending, dirty_ms}
 var _jobs: Dictionary = {}  # id → [task, kind]
 var _results: Dictionary = {}
 var _mutex := Mutex.new()
-var _valley := 0.0
 var _last_distance := INF
 var _quality: Dictionary = {}
 var _disabled := false
@@ -66,7 +56,6 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 		_cities[sid] = city
 		_anchor[sid] = LandmarkV2Library.anchor_units(city)
 		_extent[sid] = LandmarkV2Library.extent_units(city)
-		_maquette[sid] = city.has("landmark") and not LandmarkLibrary.for_settlement(sid).is_empty()
 		if terrain != null and terrain.chunk_px > 0:
 			_register_chunks(sid)
 	if terrain != null:
@@ -124,7 +113,7 @@ static func _dated_signature(city: Dictionary, p_year: int) -> String:
 	return sig
 
 
-## Faux avec `--no-landmarks-1to1` (rendu d'avant VH4 : maquette et plancher ZG4b).
+## Faux avec `--no-landmarks-1to1` (rendu d'avant VH4).
 func is_enabled() -> bool:
 	return not _disabled
 
@@ -139,16 +128,7 @@ func city_ids() -> Array:
 
 ## Vrai si la ville 1:1 de la colonie `id` est construite et affichée.
 func is_shown(id: String) -> bool:
-	return _entries.has(id) and (_entries[id] as Dictionary).get("builder") != null and visible and _city_visible(id)
-
-
-## Vrai si la colonie `id` a une maquette L1/L2 (fondu) ; faux : colonie ordinaire (VH7).
-func has_maquette(id: String) -> bool:
-	return bool(_maquette.get(id, false))
-
-
-func _city_visible(id: String) -> bool:
-	return has_maquette(id) or _valley >= profile.min_valley_weight
+	return _entries.has(id) and (_entries[id] as Dictionary).get("builder") != null and visible
 
 
 func plan_of(id: String) -> Dictionary:
@@ -161,13 +141,15 @@ func zone_of(id: String) -> Vector3:
 	return Vector3(a.x, a.y, float(_extent[id]))
 
 
-## Opacité (0-1) de la maquette L1/L2 de `id` : 1 tant que la ville 1:1 n'est pas prête,
-## puis fondu entre les poids vallée `render.fade_valley`.
-func fade(id: String) -> float:
-	if _disabled or not is_shown(id):
-		return 1.0
-	var range_v: Array = (_cities[id] as Dictionary).get("render", {}).get("fade_valley", DEFAULT_FADE)
-	return 1.0 - smoothstep(float(range_v[0]), float(range_v[1]), _valley)
+## ADR 0138 : villes dont la ville 1:1 est construite et affichée (masque de `TownFarLayer`).
+func built_ids() -> Array[String]:
+	var out: Array[String] = []
+	if not visible:
+		return out
+	for id: String in _entries:
+		if (_entries[id] as Dictionary).get("builder") != null:
+			out.append(id)
+	return out
 
 
 func apply_render_quality(_preset: Dictionary) -> void:
@@ -193,8 +175,8 @@ func update_view(rig_distance: float) -> void:
 		return
 	_last_distance = rig_distance
 	var usable := not _disabled and (force_active or (terrain != null and terrain.quadtree != null))
-	_valley = tiers.valley_weight(rig_distance) if usable else 0.0
-	var now_visible := usable and _valley >= PREPARE_VALLEY
+	var limit := profile.max_rig_distance * (1.0 + profile.rig_hysteresis if visible else 1.0)
+	var now_visible := usable and rig_distance < limit
 	if now_visible != visible:
 		visible = now_visible
 		version += 1
@@ -208,20 +190,6 @@ func update_view(rig_distance: float) -> void:
 	_stream(rig_distance)
 	_step_builders(int(profile.build_budget_ms * 1000.0))
 	_check_reground()
-	_apply_city_visibility()
-
-
-## VH7 : villes sans maquette masquées tant que le palier vallée n'a pas atteint celui des villes ZG6.
-func _apply_city_visibility() -> void:
-	for id in _entries:
-		if has_maquette(id):
-			continue
-		var b: TownBuilder = (_entries[id] as Dictionary).get("builder")
-		var show := _city_visible(id)
-		if b != null and b.root.visible != show:
-			b.root.visible = show
-			version += 1
-			cities_changed.emit()
 
 
 func _camera_ground() -> Vector2:
@@ -343,7 +311,7 @@ func _step_builders(budget_usec: int) -> void:
 			var previous: TownBuilder = entry.get("builder")
 			if previous != null:
 				previous.free_nodes()
-			b.root.visible = _city_visible(id)
+			b.root.visible = true
 			entry["builder"] = b
 			entry["pending"] = null
 			stats["build_task_max_ms"] = b.task_max_usec / 1000.0

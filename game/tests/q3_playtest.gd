@@ -912,10 +912,23 @@ func phase_settings() -> void:
 
 func end_turn() -> void:
 	var t := Time.get_ticks_msec()
+	var date_before := str(map.sim.call("get_date_label"))
+	var focus := root.gui_get_focus_owner()
 	await key(KEY_ENTER)
 	await wait(3)
 	log_q("end turn: %d ms (date %s, treasury %s)" % [Time.get_ticks_msec() - t, map.sim.call("get_date_label"), _treasury()])
 	await wait(60)
+	# Q7 : calcul du tour (fil) et relecture de l'IA finis avant de juger.
+	var waited := 0
+	while waited < 1200 and (map.end_turn_running or (map.ai_replay != null and map.ai_replay.playing)):
+		await wait(1)
+		waited += 1
+	# Q7 : Entrée sans effet — qui avait le focus, quelles fenêtres étaient ouvertes.
+	if str(map.sim.call("get_date_label")) == date_before:
+		var open: Array = []
+		for panel in map.ui.panels.visible_panels():
+			open.append(str((panel as Node).name))
+		log_q("END TURN IGNORED: date still %s, focus before %s, visible panels %s, blocking alert %s, bell visible %s enabled %s, running %s, subwindows %s, focus after %s" % [date_before, focus.get_path() if focus != null else "none", open, map.ui.end_turn_cluster.blocking_alert(), map.ui.end_turn_cluster.is_visible_in_tree(), map.ui.end_turn_cluster.get("_enabled"), map.end_turn_running, root.get_embedded_subwindows().map(func(w: Window) -> String: return "%s(%s)" % [w.name, w.get_class()]), root.gui_get_focus_owner().get_path() if root.gui_get_focus_owner() != null else "none"])
 	await dismiss_dialogs()
 
 
@@ -966,6 +979,10 @@ func dismiss_dialogs() -> void:
 			await wait(5)
 			continue
 		var chronicle: Control = map.chronicle.window if map.chronicle != null else null
+		# Q7 : sort de la place prise (même fenêtre, autre contrôleur, TW2-T1).
+		var capture_window: Control = map.capture_fate.window if map.get("capture_fate") != null else null
+		if (chronicle == null or not chronicle.visible) and capture_window != null and capture_window.visible:
+			chronicle = capture_window
 		if chronicle != null and chronicle.visible:
 			await shot("chronicle-decision")
 			var choice: BaseButton = null
@@ -1010,7 +1027,7 @@ func click(control: Control, button := MOUSE_BUTTON_LEFT) -> void:
 	await move_to(point)
 	var hovered: Control = root.gui_get_hovered_control()
 	if hovered != null and hovered != control and not control.is_ancestor_of(hovered):
-		log_q("OVERLAP: click on %s (%s) at %s hit %s" % [control.name, _text_of(control), point, hovered.get_path()])
+		log_q("OVERLAP: click on %s (%s) at %s hit %s" % [control.get_path(), _text_of(control), point, hovered.get_path()])
 	await click_at(point, button)
 
 

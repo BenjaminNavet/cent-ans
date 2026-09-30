@@ -68,6 +68,9 @@ var _last_pick_target := ""
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
 var trade_mode: bool = false  # C5 : couche des routes commerciales
+var sea_lanes_layer: SeaLaneLayer  # SL1 : routes maritimes
+var _sea_lane_hover := false  # SL1 : infobulle d'une route maritime affichée
+var _sea_lane_mouse := Vector2(-1.0, -1.0)  # SL1 : survol recalculé quand la souris bouge
 var _faction_panel_id: String = ""
 var _court_open: bool = false
 var _open_character_id: String = ""
@@ -179,6 +182,11 @@ func _ready() -> void:
 	turn_light.setup(self)
 	path_preview.setup(map_data)
 	trade_layer.setup(map_data, settlement_layer, settlement_data)  # C5
+	sea_lanes_layer = SeaLaneLayer.new()  # SL1 : routes maritimes sur la mer
+	sea_lanes_layer.name = "SeaLanes"
+	add_child(sea_lanes_layer)
+	sea_lanes_layer.setup(map_data)
+	trade_layer.sea_lanes = sea_lanes_layer  # les tronçons maritimes suivent les routes
 	_connect_ui()
 	ReliefCacheNotice.report(ui, map_dir, MapPaths.relief_root())  # ZG7b : cache de relief absent
 	settlements_ctl = SettlementController.new()  # C5
@@ -289,7 +297,7 @@ func _ready() -> void:
 	_parse_cmdline()
 
 
-## Lot C6 : colonies (icônes, maquettes, étiquettes), hameaux et routes, paliers de zoom.
+## Lot C6 : colonies (villes 1:1, étiquettes), hameaux et routes, paliers de zoom.
 func _setup_settlements() -> void:
 	zoom_tiers = ZoomTiers.load_default()
 	settlement_data = SettlementData.load_from(MapPaths.data_dir, MapPaths.map_dir())
@@ -438,6 +446,7 @@ func refresh_all() -> void:
 		units_ctl.refresh()
 	if holdings_ctl != null:  # liste « Colonies » (HL2)
 		holdings_ctl.refresh()
+	_refresh_sea_lanes()  # SL1 : avant le commerce (tracé des tronçons maritimes)
 	_refresh_trade_layer()  # C5 : routes commerciales
 	if map_modes != null:  # MF1 : repeint par-dessus les couleurs politiques
 		map_modes.refresh()
@@ -559,7 +568,7 @@ func player_army_ids() -> PackedStringArray:
 
 ## Intercepteur de clic gauche du picker : vrai si une armée ou une colonie a été cliquée.
 ## Q2 : quand une armée stationne dans une ville, le clic va à ce qui est sous le curseur
-## (jeton ou figurines : l'armée ; maquette ou icône de la ville : la colonie, dont le panneau
+## (jeton ou figurines : l'armée ; ville 1:1 ou icône de la ville : la colonie, dont le panneau
 ## ouvre recrutement, chantiers et province) ; un second clic au même endroit alterne.
 func _try_select_army(screen_position: Vector2) -> bool:
 	var army_hit: Dictionary = armies.pick_screen_scored(screen_position)
@@ -586,7 +595,7 @@ func _try_select_army(screen_position: Vector2) -> bool:
 	if settlement_id == "":
 		_last_pick_target = ""
 		return false
-	# C6 : clic sur une icône ou une maquette de colonie.
+	# C6 : clic sur une icône ou une ville (1:1) de colonie.
 	_last_pick_target = "settlement:" + settlement_id
 	if selected_army != "":
 		deselect_army()
@@ -1011,6 +1020,40 @@ func _refresh_trade_layer() -> void:
 	trade_layer.refresh(routes, camera_rig.distance, visible_provinces)
 
 
+## SL1 : routes maritimes du tour (mer, maîtrise, gros temps) sur la couche.
+func _refresh_sea_lanes() -> void:
+	if sim == null or sea_lanes_layer == null or not sim.has_method("get_sea_lanes"):
+		return
+	sea_lanes_layer.refresh(sim.call("get_sea_lanes"), player_faction)
+
+
+## SL1 : infobulle de la route maritime sous la souris, quand aucune route commerciale ne la
+## prend ; en quittant la route, le survol de province reprend la main.
+func _update_sea_lane_hover() -> void:
+	if ui == null or sea_lanes_layer == null or not sea_lanes_layer.has_lanes():
+		return
+	if get_viewport().gui_get_hovered_control() != null or (movement_ctl != null and movement_ctl.active()):
+		return
+	var mouse := get_viewport().get_mouse_position()
+	if mouse == _sea_lane_mouse:
+		return
+	_sea_lane_mouse = mouse
+	var lane: Dictionary = {}
+	var hit := picker.pick_ray_screen(mouse)
+	if not hit.is_empty():
+		var threshold := clampf(camera_rig.distance * 0.008, 2.0, 30.0)
+		lane = sea_lanes_layer.nearest_lane(Vector2(hit["x"], hit["z"]), threshold)
+	if lane.is_empty():
+		if _sea_lane_hover:
+			_sea_lane_hover = false
+			ui.set_hovered(_with_mode_value(province_info(hovered_index)) if hovered_index > 0 else {})
+		return
+	if trade_mode and trade_layer.nearest_route(Vector2(hit["x"], hit["z"]), clampf(camera_rig.distance * 0.01, 3.0, 40.0)).size() > 0:
+		return
+	_sea_lane_hover = true
+	ui.set_hover_trade(SeaLaneLayer.tooltip(lane))
+
+
 ## Infobulle de la route commerciale sous la souris (couche visible uniquement).
 func _update_trade_hover() -> void:
 	if not trade_mode or ui == null:
@@ -1097,7 +1140,12 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 ## `threaded` (PB3d) : le cœur résout le tour dans un fil et la carte continue de s'animer ; les
 ## appels directs (tests, captures, mode headless) restent synchrones.
 func _on_end_turn(threaded: bool = false) -> void:
-	if sim == null or end_turn_running or ui.is_dialog_open() or (ai_replay != null and ai_replay.playing):
+	# Q7 : Entrée pendant la relecture du tour de l'IA la passe (comme Espace) au lieu de ne rien
+	# faire ; la saison suivante ne se lance pas, son rapport reste à lire.
+	if ai_replay != null and ai_replay.playing:
+		ai_replay.skip()
+		return
+	if sim == null or end_turn_running or ui.is_dialog_open():
 		return
 	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
 		return
@@ -1265,6 +1313,8 @@ func _process(_delta: float) -> void:
 			# ZG5b : avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.
 			rivers.crossings.visible = site_hide > 0.5 or rivers.fine != null
 		trade_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
+		if sea_lanes_layer != null:  # SL1
+			sea_lanes_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
 		_apply_close_tiers(distance)
 		tp = PerfProbe.lap("map.close_tiers", tp)
 	if life != null:  # CV1
@@ -1284,6 +1334,7 @@ func _process(_delta: float) -> void:
 	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
 	armies.update_scale(camera_rig.distance)
 	_update_trade_hover()  # C5
+	_update_sea_lane_hover()  # SL1
 	tp = PerfProbe.lap("map.misc", tp)
 	if _screenshot_countdown > 0:
 		# C6 : la capture attend le relief fin et les rubans / hameaux des tuiles proches.

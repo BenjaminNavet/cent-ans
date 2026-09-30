@@ -318,6 +318,8 @@ func _build_fences(obstacles: Array) -> void:
 ## CV3-2 : palissade basse d'un camp retranché (`kind == "palisade"`) : pieux de 1,7 m serrés
 ## tous les 0,45 m, un peu penchés vers l'ennemi, liés par deux traverses ; un seul maillage.
 func _build_palisades(obstacles: Array) -> void:
+	if _ga3_palisades(obstacles):
+		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var count := 0
@@ -350,6 +352,42 @@ func _build_palisades(obstacles: Array) -> void:
 	mi.material_override = _mat("beam")
 	mi.visibility_range_end = 1200.0
 	add_child(mi)
+
+
+## Lot GA3-L1 : palissade en segments générés (`Ga3Kit`, variante `palisade`) : chaque tronçon
+## de la simulation reçoit un nombre entier de segments étirés en longueur (±25 %), posés sur le
+## sol. Faux (procédural gardé) sans variante, sous la neige ou avec `--no-ga3`.
+func _ga3_palisades(obstacles: Array) -> bool:
+	if not Ga3Kit.active or _snowy:
+		return false
+	var variants := Ga3Kit.variants_of("palisade")
+	if variants.is_empty():
+		return false
+	var model: String = variants[0]
+	var segment := float((Ga3Kit.manifest()[model] as Dictionary)["length"])
+	var batch := Ga3Kit.Batch.new(1200.0 * RenderQuality.battle_lod_scale)
+	for o in obstacles:
+		if str(o["kind"]) != "palisade":
+			continue
+		var a: Vector2 = o["a"]
+		var b: Vector2 = o["b"]
+		var length := a.distance_to(b)
+		if length < 0.1:
+			continue
+		var dir := (b - a) / length
+		var n := maxi(int(round(length / segment)), 1)
+		var stretch := clampf(length / (n * segment), 0.75, 1.25)
+		for k in n:
+			var p := a.lerp(b, (k + 0.5) / float(n))
+			var basis := Basis(Vector3.UP, -atan2(dir.y, dir.x)) * Basis.from_scale(Vector3(stretch, 1.0, 1.0))
+			batch.add(model, Transform3D(basis, Vector3(p.x, _terrain.height_at(p.x, p.y) - 0.08, p.y)))
+	if batch.count() == 0:
+		return false
+	var root := Node3D.new()
+	root.name = "Palisades"
+	add_child(root)
+	batch.build(root)
+	return true
 
 
 ## Boîte orientée (lacet `yaw` autour de y) ajoutée au SurfaceTool (faces à plat, normales générées).

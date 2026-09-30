@@ -149,6 +149,23 @@ def bearings(count: int) -> np.ndarray:
     return np.arange(count) * (2.0 * math.pi / count)
 
 
+def ground_grid(height: HeightFn, radii: np.ndarray, z_centre: float) -> list[float]:
+    """Ground heights (m): centre, then rings at 0.5 and 1.0 x ``radii`` (same bearings).
+
+    Flat list of ``1 + 2 * len(radii)`` values rounded to 0.1 m; a point the relief
+    pyramid does not cover falls back on ``z_centre``.
+    """
+    angles = bearings(len(radii))
+    values = [z_centre]
+    for factor in (0.5, 1.0):
+        heights = np.asarray(
+            height(np.cos(angles) * radii * factor, np.sin(angles) * radii * factor),
+            dtype=np.float64,
+        )
+        values.extend(np.where(np.isfinite(heights), heights, z_centre).tolist())
+    return [round(float(v), 1) for v in values]
+
+
 def polygon_area(radii: np.ndarray) -> float:
     """Area (m²) of the star polygon of ``radii`` on evenly spaced bearings."""
     n = len(radii)
@@ -574,6 +591,7 @@ def plan_town(
     angles = bearings(len(radii))
     h_poly = height(np.cos(angles) * radii, np.sin(angles) * radii)
     h0 = height(np.zeros(1), np.zeros(1))
+    z_centre = float(h0[0]) if np.isfinite(h0[0]) else 0.0
     return {
         "id": settlement["id"],
         "kind": settlement["kind"],
@@ -592,6 +610,7 @@ def plan_town(
         else 0.0,
         "z_m": round(float(h0[0]), 2) if np.isfinite(h0[0]) else 0.0,
         "radii": [round(float(r), 1) for r in radii],
+        "ground_m": ground_grid(height, radii, z_centre),
         "gates": [
             {"bearing": round(math.degrees(g["bearing"]), 1), "type": g["type"]}
             for g in gates

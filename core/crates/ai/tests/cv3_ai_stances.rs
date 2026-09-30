@@ -691,9 +691,10 @@ fn the_stance_ai_is_deterministic() {
     // Two campaign runs from the same seed take the same stances.
     let mut real = real_data();
     enable_ai_stances(&mut real);
-    // Seed 1: seed 7 lost its ambush when FE added the French fiefs (the
-    // trajectory is seed-sensitive; this test checks determinism).
-    let first = campaign_stance_orders(&real, 1, 24);
-    assert!(!first.is_empty(), "stance orders by turn 24 (seed 1)");
-    assert_eq!(first, campaign_stance_orders(&real, 1, 24));
+    // Seed 2: seed 7 lost its ambush when FE added the French fiefs, seed 1
+    // when SL1 added the sea lanes (the trajectory is seed-sensitive; this
+    // test checks determinism).
+    let first = campaign_stance_orders(&real, 2, 24);
+    assert!(!first.is_empty(), "stance orders by turn 24 (seed 2)");
+    assert_eq!(first, campaign_stance_orders(&real, 2, 24));
 }

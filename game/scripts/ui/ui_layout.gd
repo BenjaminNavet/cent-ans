@@ -266,7 +266,9 @@ func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> C
 	box.move_child(entry, 0)
 	UiMotion.fade_in(entry)
 	if seconds > 0.0:
-		get_tree().create_timer(seconds).timeout.connect(func() -> void: _dismiss_toast(entry))
+		# Q7 : identifiant d'instance, l'avis a pu être fermé avant (clic, changement d'écran).
+		var entry_id := entry.get_instance_id()
+		get_tree().create_timer(seconds).timeout.connect(func() -> void: _dismiss_toast(instance_from_id(entry_id) as Control))
 	_refresh_toasts()
 	return entry
 

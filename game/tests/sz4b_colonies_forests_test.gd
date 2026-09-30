@@ -1,11 +1,9 @@
 extends SceneTree
 
 ## Test headless du lot SZ4b (suites SZ4) :
-##  1. courbes : maquettes à la taille de carte au-delà de 28 unités, à leur taille réelle au seuil
-##     du palier vallée, décroissance continue ; part de la forêt dense (couvert constant) ;
-##  2. carte de campagne près de Crécy : échelle des maquettes, moulins et panaches liés à leur
-##     colonie (dans / autour de l'emprise réelle au palier vallée), maquette masquée seulement
-##     quand sa ville 1:1 est affichée ;
+##  1. courbes : part de la forêt dense (couvert constant) ;
+##  2. carte de campagne près de Crécy : emprise réelle, moulins et panaches liés à leur colonie
+##     (dans / autour de l'emprise réelle) ; plus de maquette agrandie (ADR 0138) ;
 ##  3. forêt d'Orléans au palier vallée : couche dense semée, densité et budget d'instances, coût
 ##     d'une mise à jour ; éteinte au palier comté.
 ## Usage : godot --headless --path game --script res://tests/sz4b_colonies_forests_test.gd
@@ -36,21 +34,7 @@ func _check(condition: bool, label: String) -> bool:
 
 
 func _test_curves() -> void:
-	var props := MapPropScale.shared()
 	_check(ResourceLoader.exists("res://resources/forest_detail.tres"), "forest detail resource")
-	for ratio in [0.08, 0.15, 0.4]:
-		_check(is_equal_approx(props.settlement_scale(ratio, 40.0), 1.0), "model at map scale far away (%.2f)" % ratio)
-		_check(is_equal_approx(props.settlement_scale(ratio, props.shrink_end), ratio), "model at real size at the valley threshold (%.2f)" % ratio)
-	var previous := 1.0
-	var max_jump := 0.0
-	var d := props.shrink_start + 1.0
-	while d > props.shrink_end - 1.0:
-		var s := props.settlement_scale(0.1, d)
-		_check(s <= previous + 1e-6, "model scale monotonic at d=%.2f" % d)
-		max_jump = maxf(max_jump, absf(log(previous) - log(s)))
-		previous = s
-		d -= 0.05
-	_check(max_jump < 0.06, "model scale continuous (max log step %.3f)" % max_jump)
 	var forest := ForestDetailProfile.shared()
 	_check(is_zero_approx(forest.fraction_for(1.0)), "no dense forest at map scale")
 	_check(forest.fraction_for(forest.full_scale) > 0.99, "full dense forest at real size")
@@ -92,17 +76,11 @@ func _test_map() -> void:
 			best = dist
 			index = i
 	var focus := Vector3(CRECY.x, data.surface_world_at(CRECY.x, CRECY.y), CRECY.y)
-	var scales := {}
-	for d: float in [60.0, 20.0, 14.0, 10.0, 6.0]:
-		await _settle(rig, focus, d, layer)
-		scales[d] = layer.model_scale(index)
+	await _settle(rig, focus, 6.0, layer)
 	var real := layer.real_radius(index)
-	print("sz4b: %s real radius %.3f u, model radius %.3f u, scales %s" % [layer.data.settlements[index]["id"], real, layer.model_radius(index), scales])
-	_check(is_equal_approx(float(scales[60.0]), 1.0), "model at map scale in strategic view")
-	_check(float(scales[14.0]) < 1.0 and float(scales[14.0]) <= float(scales[20.0]) and float(scales[10.0]) < float(scales[14.0]), "model shrinks progressively")
+	print("sz4b: %s real radius %.3f u, model radius %.3f u" % [layer.data.settlements[index]["id"], real, layer.model_radius(index)])
 	_check(real > 0.0, "real footprint known")
-	var at_valley := layer.model_radius(index) * float(scales[6.0])
-	_check(absf(at_valley - real) < real * 0.25, "model at its real footprint at the valley tier (%.3f vs %.3f)" % [at_valley, real])
+	_check(layer.model_holder(index) == null, "no enlarged model (ADR 0138)")
 	# Moulins et panaches de la colonie : autour / dans l'emprise réelle.
 	var effects := life.effects if life != null else null
 	if _check(effects != null, "life effects"):
@@ -119,23 +97,6 @@ func _test_map() -> void:
 				smokes += 1
 				_check((point[0] as Vector2).distance_to(center) <= real * 0.8, "chimney smoke inside the real town")
 		print("sz4b: %d windmills, %d chimneys follow the model" % [mills, smokes])
-	# Maquette masquée seulement quand la ville 1:1 est affichée.
-	var towns := layer.towns
-	if towns != null and towns.active:
-		var shown := 0
-		var kept := 0
-		for i in layer.data.settlements.size():
-			var holder := layer.model_holder(i)
-			if holder == null:
-				continue
-			var is_shown := towns.is_shown(str(layer.data.settlements[i]["id"]))
-			_check(holder.visible != is_shown, "model hidden iff its 1:1 town is shown (%s)" % layer.data.settlements[i]["id"])
-			if is_shown:
-				shown += 1
-			else:
-				kept += 1
-		print("sz4b: towns shown %d, models kept %d" % [shown, kept])
-		_check(kept > 0, "models kept outside the town streaming radius")
 	# Forêt dense.
 	var vegetation: Vegetation = map.get_node_or_null("Vegetation")
 	var detail: ForestDetail = vegetation.forest_detail if vegetation != null else null

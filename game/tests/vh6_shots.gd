@@ -80,7 +80,7 @@ func _init() -> void:
 		image.save_jpg(path, 0.85)
 		var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
 		print("VH6 shot %s d=%.2f (min %.2f) fade %.2f city %s" % [path, rig.target_distance, rig.min_distance_at(focus),
-			lc.fade("set_londres") if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
+			(1.0 if lc.is_shown("set_londres") else 0.0) if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
 	if fps:
 		for place: Array in [["london", CITY], ["london_pont", BRIDGE], ["rouen", ROUEN]]:
 			for d: float in [1.6, 0.6]:
