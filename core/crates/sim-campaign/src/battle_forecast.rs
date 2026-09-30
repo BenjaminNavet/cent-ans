@@ -146,6 +146,7 @@ impl CampaignState {
     fn forecast_request(&self, data: &GameData, request: &BattleRequest) -> Option<BattleForecast> {
         let mut modifiers = Vec::new();
         let mut garrison_is_player = false;
+        let mut site = None;
         let (mut attacker_side, mut defender_side, context, attackers, defenders) = if request.siege
         {
             let attackers = crate::siege::assault_coalition(self, &request.attacker);
@@ -156,6 +157,7 @@ impl CampaignState {
                 defender_terrain_bonus: false,
                 river_crossing: false,
                 walls,
+                crossing: None,
             };
             (
                 movement::coalition_side(self, data, &attackers),
@@ -171,6 +173,12 @@ impl CampaignState {
                 .get(&request.defender)
                 .and_then(|d| self.army_province(data, d))
                 .and_then(|p| data.provinces.get(&p));
+            site = crate::river_crossing::crossing_site(
+                self,
+                data,
+                &request.attacker,
+                &request.defender,
+            );
             let context = BattleContext {
                 defender_terrain_bonus: province.is_some_and(|p| {
                     matches!(
@@ -178,8 +186,11 @@ impl CampaignState {
                         Terrain::Hills | Terrain::Forest | Terrain::Mountains
                     )
                 }),
-                river_crossing: province.is_some_and(|p| !p.rivers.is_empty()),
+                // RC: a real crossing replaces the province river flag.
+                river_crossing: site.is_none()
+                    && province.is_some_and(|p| !p.rivers.is_empty()),
                 walls: false,
+                crossing: site.as_ref().map(|c| c.structure),
             };
             (
                 movement::coalition_side(self, data, &attackers),
@@ -209,6 +220,18 @@ impl CampaignState {
         if context.river_crossing {
             attacker_modifier *= 0.8;
             modifiers.push("L'assaillant franchit une rivière (−20 %)".to_owned());
+        }
+        if let Some(site) = &site {
+            // RC: the attacker's coefficient of the crossing, and the
+            // defender's archers (folded into its ranged bonus, which
+            // `side_power` applies to ranged regiments only).
+            let rules = &data.river_crossing_rules;
+            attacker_modifier *=
+                crate::river_crossing::factor(&rules.attacker_factor, site.structure);
+            let ranged = crate::river_crossing::factor(&rules.defender_ranged_factor, site.structure);
+            defender_side.general_ranged_percent =
+                ((1.0 + defender_side.general_ranged_percent / 100.0) * ranged - 1.0) * 100.0;
+            modifiers.push(crate::river_crossing::forecast_line(data, site));
         }
         if context.walls {
             attacker_modifier *= 0.7;

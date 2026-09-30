@@ -615,6 +615,7 @@ pub(crate) fn auto_assault(
         defender_terrain_bonus: false,
         river_crossing: false,
         walls,
+        crossing: None,
     };
     // N1: phased auto-resolve; walls stand for the terrain, the season
     // still brings its weather.

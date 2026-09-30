@@ -97,6 +97,7 @@ pub use entities::landmark::{
 pub use entities::mercenaries::{MercenaryAi, MercenaryArrears, MercenaryBand, MercenaryRules};
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
+pub use entities::river_crossing::{CrossingFactors, MapCrossing, RiverCrossingRules};
 pub use entities::naval::{
     FactionFleet, FactionShipNames, Marines, NavalData, NavalFleets, NavalRules, NavalShipNames,
     Propulsion, ShipClass,

@@ -24,10 +24,11 @@
 //! campaign state.
 
 use data_model::{
-    Ability, AutoResolveRules, GameData, Province, Terrain, UnitCategory, UnitType, WeatherChances,
+    Ability, AutoResolveRules, GameData, Province, RiverCrossingRules, Terrain, UnitCategory,
+    UnitType, WeatherChances,
 };
 use serde::{Deserialize, Serialize};
-use sim_battle::Weather;
+use sim_battle::{CrossingStructure, Weather};
 
 use crate::rng::CampaignRng;
 use crate::state::{ArmyId, CampaignState, Season};
@@ -179,6 +180,11 @@ pub struct BattleContext {
     pub river_crossing: bool,
     /// Attacker assaults fortifications.
     pub walls: bool,
+    /// RC (ADR 0117): the attacker forces this river crossing; its
+    /// coefficients (`data/rules/river_crossings.json`) replace
+    /// `river_crossing`.
+    #[serde(default)]
+    pub crossing: Option<CrossingStructure>,
 }
 
 /// Field, season and weather of a battle (lot N1). `weather: None` draws
@@ -417,7 +423,7 @@ pub fn resolve_profiled(
         season: Some(state.season),
         weather: None,
     };
-    resolve_with(
+    resolve_with_crossings(
         attacker_side,
         &attacker_profiles,
         defender_side,
@@ -425,6 +431,7 @@ pub fn resolve_profiled(
         context,
         &conditions,
         &data.auto_resolve,
+        &data.river_crossing_rules,
         &mut state.rng,
     )
 }
@@ -826,6 +833,34 @@ pub fn resolve_with(
     rules: &AutoResolveRules,
     rng: &mut CampaignRng,
 ) -> BattleResult {
+    static BUNDLED_CROSSINGS: std::sync::OnceLock<RiverCrossingRules> = std::sync::OnceLock::new();
+    resolve_with_crossings(
+        attacker,
+        attacker_profiles,
+        defender,
+        defender_profiles,
+        context,
+        conditions,
+        rules,
+        BUNDLED_CROSSINGS.get_or_init(RiverCrossingRules::default),
+        rng,
+    )
+}
+
+/// [`resolve_with`] with the river crossing rules given (RC: the campaign
+/// passes `data.river_crossing_rules`; [`resolve_with`] uses the bundled file).
+#[allow(clippy::too_many_arguments)]
+pub fn resolve_with_crossings(
+    attacker: &Side,
+    attacker_profiles: &[UnitProfile],
+    defender: &Side,
+    defender_profiles: &[UnitProfile],
+    context: &BattleContext,
+    conditions: &FieldConditions,
+    rules: &AutoResolveRules,
+    crossing_rules: &RiverCrossingRules,
+    rng: &mut CampaignRng,
+) -> BattleResult {
     let weather = conditions.weather.unwrap_or_else(|| {
         conditions
             .season
@@ -840,7 +875,10 @@ pub fn resolve_with(
     };
     let mut a = Host::new(attacker, attacker_profiles, false);
     let mut d = Host::new(defender, defender_profiles, true);
-    if context.river_crossing {
+    if let Some(structure) = context.crossing {
+        a.damage *= crate::river_crossing::factor(&crossing_rules.attacker_factor, structure);
+        d.ranged *= crate::river_crossing::factor(&crossing_rules.defender_ranged_factor, structure);
+    } else if context.river_crossing {
         a.damage *= rules.river_attacker;
     }
     if context.walls {
@@ -1122,6 +1160,7 @@ mod tests {
                 defender_terrain_bonus: true,
                 river_crossing: true,
                 walls: false,
+                crossing: None,
             },
             &mut CampaignRng::from_seed(1),
         );

@@ -819,6 +819,7 @@ fn scenario_context(scenario: &Scenario) -> BattleContext {
         ),
         river_crossing: scenario.river,
         walls: false,
+        crossing: None,
     }
 }
 

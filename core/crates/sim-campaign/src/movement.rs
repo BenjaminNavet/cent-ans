@@ -571,6 +571,7 @@ pub(crate) fn auto_fight_with_opening(
     let province = state
         .army_province(data, defender)
         .and_then(|p| data.provinces.get(&p));
+    let crossing = crate::river_crossing::crossing_site(state, data, attacker_id, defender_id);
     let context = BattleContext {
         defender_terrain_bonus: province.is_some_and(|p| {
             matches!(
@@ -578,8 +579,10 @@ pub(crate) fn auto_fight_with_opening(
                 Terrain::Hills | Terrain::Forest | Terrain::Mountains
             )
         }),
-        river_crossing: province.is_some_and(|p| !p.rivers.is_empty()),
+        // RC: a real crossing replaces the province river flag.
+        river_crossing: crossing.is_none() && province.is_some_and(|p| !p.rivers.is_empty()),
         walls: false,
+        crossing: crossing.as_ref().map(|c| c.structure),
     };
     let attackers = battle_coalition(state, data, attacker_id, &defender.faction);
     let defenders = battle_coalition(state, data, defender_id, &attacker.faction);
