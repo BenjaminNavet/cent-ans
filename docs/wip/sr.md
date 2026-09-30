@@ -27,4 +27,7 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - État : écarts écrits (`docs/research/sr3b-ecarts.md`) ; retenus 1-6 (camail sous chapel,
   manchettes de gantelets, gants de cuir, bourse+dague, bocle à la ceinture, chausses).
 - Code écrit (`battle_fine_sr.py`, crochets dans `battle_fine_figures`/`gear`/`equipment`).
-- Prochaine étape : cuisson d'essai archer_0, puis recuisson des recettes touchées.
+- Cuisson d'essai archer_0/archer_2/infantry_0 OK (pièces vérifiées par boîtes englobantes).
+- En cours : recuisson des 22 autres recettes touchées (`bake --only …`, ~20 min) ;
+  inchangées : crew_0/1, villager_0-3, cavalry_5.
+- Prochaine étape : tests Godot (fg3_maps_test, fk2_assets_test, smoke) puis commit des binaires.
