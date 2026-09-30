@@ -19,7 +19,10 @@ Brutes (hors dépôt) : `~/dev/cent-ans-raw/ga3/` ; références figurines : `~/
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
 - 30/09 : **S1 fait** (≈ 10 min de bout en bout, 0,05 $). Image `fal-ai/flux/dev` 1024² (0,026 $,
-  6 s ; prompt dans le docstring de la planche ci-dessous, brutes `~/dev/cent-ans-raw/ga3/s1/`) →
+  6 s ; brutes `~/dev/cent-ans-raw/ga3/s1/`). Prompt : « Photorealistic photograph of a small
+  14th-century French peasant half-timbered house, exposed dark oak timber framing with lime-washed
+  wattle and daub infill, steep thatched roof, … Three-quarter view from slightly above, … isolated on a
+  plain uniform neutral mid-grey studio background, no ground, … soft diffuse overcast lighting » →
   `fal-ai/trellis` (0,02 $, 25 s ; `texture_size` 1024, `mesh_simplify` 0,95, seed 1337) : 25 409 tri,
   UV + texture 1024² déjà fournis → `ga3_cleanup.py … ga3_house --strip-base 0.35` (Blender, < 1 min) :
   LOD0 7 998 / LOD1 4 000 / LOD2 1 200 tri, 8,00 × 6,77 × 7,71 m (h), pied à y = 0, albédo recuit
