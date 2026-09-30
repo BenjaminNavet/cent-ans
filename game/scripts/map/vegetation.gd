@@ -56,6 +56,9 @@ var quality_max_distance: float = -1.0
 ## Lot SZ4b : forêt dense autour du point visé (`ForestDetail`, semis natif requis).
 @export var use_forest_detail: bool = true
 @export var max_cached_tiles: int = 64
+## VT3 : tuiles semées (sans être affichées) jusqu'à cette distance caméra : la portée des arbres
+## 1:1 (≈ 30) est plus courte qu'une tuile, et la forêt dense a besoin des grilles de la tuile.
+@export var tile_prefetch_distance: float = 120.0
 @export var cast_shadows: bool = true
 ## Au-delà de cette distance caméra (zoom global, pas la distance d'une tuile), plus aucune
 ## ombre de végétation : à cette échelle les ombres portées des arbres/haies ne sont plus
@@ -536,14 +539,15 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 			if _tiles.has(index):
 				var entry: Dictionary = _tiles[index]
 				(entry["node"] as Node3D).visible = in_range
-				if in_range:
+				if d < maxf(fade_end, tile_prefetch_distance):
 					entry["last_seen"] = _frame
+				if in_range:
 					for part: Dictionary in entry["parts"]:
 						var part_d := _rect_distance(part["rect"], camera_xz) + lift
 						(part["node"] as Node3D).visible = part_d < fade_end
 						if part_d < fade_end:
 							_apply_lod(part, part_d, fade_start, fade_end, density, camera_distance)
-			elif in_range and not _jobs.has(index):
+			elif d < maxf(fade_end, tile_prefetch_distance) and not _jobs.has(index):
 				wanted.append([d, index])
 	_start_ground_jobs()
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])

@@ -3,7 +3,8 @@ extends SceneTree
 ## Test headless du lot FC2 (arbres imposteurs de la carte) :
 ##  1. atlas albédo et normale : présents, importés en compression VRAM avec mipmaps, 8 vues ×
 ##     3 essences ; quadrilatère d'imposteur de 2 triangles par essence ;
-##  2. carte de campagne (forêt d'Orléans, zoom moyen) : tuiles lointaines en imposteurs (matériau
+##  2. carte de campagne (forêt d'Orléans, d = 25 ; VT3 : portées de détail réduites, les arbres 1:1
+##     s'arrêtant à ≈ 30 unités) : tuiles lointaines en imposteurs (matériau
 ##     dédié), tuiles proches en maillage détaillé, haies inchangées ; triangles lointains avant /
 ##     après ;
 ##  3. repli `--no-fc2` (use_impostors = false puis reconstruction) : maillages bas au loin.
@@ -86,7 +87,17 @@ func _test_map() -> void:
 		await process_frame
 	_check(vegetation.impostors_active(), "impostor material ready")
 	var focus := Vector3(ORLEANS_FOREST.x, data.surface_world_at(ORLEANS_FOREST.x, ORLEANS_FOREST.y), ORLEANS_FOREST.y)
-	await _settle(rig, focus, 150.0, vegetation)
+	# FC5 : cartes de feuillage sous `near_distance` (45) seulement.
+	await _settle(rig, focus, 25.0, vegetation)
+	var close := vegetation.lod_census()
+	print("fc2: census at d=25 %s" % close)
+	_check(int(close.get("near", 0)) > 0, "FC5: nearest parts in leaf cards (d=25)")
+	_check(int(close["low"]) == 0 and int(close["detailed"]) == 0, "FC5: no 90/20-triangle meshes for oak/beech/fir (d=25)")
+	# VT3 : arbres 1:1 coupés à ≈ 30 unités de la caméra, en deçà de `detail_distance` (170) :
+	# portées de détail réduites pour exercer les niveaux lointains à d = 25.
+	vegetation.detail_distance = 14.0
+	vegetation.near_distance = 7.0
+	await _settle(rig, focus, 25.0, vegetation)
 	var after := vegetation.lod_census()
 	print("fc2: census with impostors %s" % after)
 	_check(int(after["impostor"]) > 0, "far tiles use the impostor mesh")
@@ -102,24 +113,18 @@ func _test_map() -> void:
 		_check(vegetation.foliage_material().shader == Vegetation.FOLIAGE_WINTER_SHADER, "winter foliage variant")
 		_check(vegetation.impostor_material().shader == Vegetation.IMPOSTOR_SHADER, "impostors keep their shader in winter")
 		(seasons as SeasonVisuals).set_season("summer", true)
-	# FC5 : cartes de feuillage sous `near_distance` (45) seulement ; à d = 150 la caméra peut être
-	# plus loin que cela de toutes les parties (fenêtre headless : tangage et hauteur différents).
-	await _settle(rig, focus, 25.0, vegetation)
-	var close := vegetation.lod_census()
-	print("fc2: census at d=25 %s" % close)
-	_check(int(close.get("near", 0)) > 0, "FC5: nearest parts in leaf cards (d=25)")
-	_check(int(close["low"]) == 0 and int(close["detailed"]) == 0, "FC5: no 90/20-triangle meshes for oak/beech/fir (d=25)")
 	# FC5 repli (`--no-fc5`) : maillages détaillés de près, imposteurs au loin.
 	vegetation.use_near_cards = false
 	vegetation.build(data)
-	await _settle(rig, focus, 150.0, vegetation)
+	await _settle(rig, focus, 25.0, vegetation)
 	var no_cards := vegetation.lod_census()
 	print("fc2: census without leaf cards (--no-fc5) %s" % no_cards)
 	_check(not vegetation.near_cards_active() and int(no_cards["near"]) == 0 and int(no_cards["detailed"]) > 0, "--no-fc5 falls back to the detailed meshes")
 	# Repli : maillages bas au loin.
 	vegetation.use_impostors = false
+	vegetation.detail_distance = 1.0  # toutes les parties au niveau lointain
 	vegetation.build(data)
-	await _settle(rig, focus, 150.0, vegetation)
+	await _settle(rig, focus, 25.0, vegetation)
 	var before := vegetation.lod_census()
 	print("fc2: census without impostors (--no-fc2) %s" % before)
 	_check(not vegetation.impostors_active(), "--no-fc2 disables the impostor material")

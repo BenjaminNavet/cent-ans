@@ -1,8 +1,8 @@
 extends SceneTree
 
 ## Test headless du lot SZ4 (objets à l'échelle aux paliers intermédiaires) :
-##  1. `MapPropScale` : 1 au loin (lisibilité stratégique conservée), taille réelle de près,
-##     décroissance monotone et continue (aucun saut entre deux distances voisines) ;
+##  1. `MapPropScale` : incendies à 1 au loin (lisibilité stratégique conservée), taille réelle de
+##     près, décroissance monotone et continue (aucun saut) ; arbres 1:1 constants (VT3) ;
 ##  2. réglages lus depuis `res://resources/map_prop_scale.tres` ;
 ##  3. carte de campagne (headless) près de Crécy : hameaux, moulins et panaches de cheminée à
 ##     l'échelle 1:1 à toute distance (VT, VT2) ; moulins et panaches coupés au-delà de leur
@@ -36,9 +36,12 @@ func _test_curve() -> void:
 	var props := MapPropScale.shared()
 	_check(props != null and ResourceLoader.exists("res://resources/map_prop_scale.tres"), "shared resource")
 	for d in [60.0, 150.0, 620.0, props.shrink_start]:
-		_check(is_equal_approx(props.tree_scale(d), 1.0), "far scale is 1 at d=%.1f" % d)
+		_check(is_equal_approx(props.fire_scale(d), 1.0), "far fire scale is 1 at d=%.1f" % d)
 		_check(is_equal_approx(props.hamlet_scale(d), props.hamlet_ratio), "hamlets 1:1 at d=%.1f (VT)" % d)
-	_check(is_equal_approx(props.tree_scale(props.shrink_end), props.tree_ratio), "trees at real size at shrink_end")
+	_check(is_equal_approx(props.fire_scale(props.shrink_end), props.fire_ratio), "fires at real size at shrink_end")
+	# VT3 : arbres 1:1 à toute distance (échelle constante), herbe FC3 sur l'ancienne courbe.
+	_check(is_equal_approx(props.tree_scale(), props.tree_ratio), "trees 1:1 (VT3)")
+	_check(is_equal_approx(props.clutter_scale(60.0), 1.0) and is_equal_approx(props.clutter_scale(props.shrink_end), props.clutter_ratio), "grass clutter keeps the pre-VT3 curve")
 	_check(is_equal_approx(props.hamlet_scale(1.0), props.hamlet_ratio), "real size below shrink_end")
 	# VT2 : moulins et panaches 1:1 à toute distance (échelle constante, sans argument).
 	_check(is_equal_approx(props.windmill_scale(), props.windmill_ratio), "windmills 1:1 (VT2)")
@@ -57,7 +60,7 @@ func _test_curve() -> void:
 	var max_jump := 0.0
 	var d := props.shrink_start + 1.0
 	while d > props.shrink_end - 1.0:
-		var s := props.tree_scale(d)
+		var s := props.fire_scale(d)
 		_check(s <= previous + 1e-6, "monotonic at d=%.2f" % d)
 		max_jump = maxf(max_jump, absf(log(previous) - log(s)))
 		previous = s
