@@ -16,6 +16,7 @@ Vague 3 : I bancs (d = 1100, 150, 30), captures (≤ 6), docs `godot-map.md`.
 ## État
 - [x] Plan, ADR 0138, cette note.
 - [ ] Vague 1
+  - [x] C : `town_far.gdshader`, `roofscape.gdshaderinc`, `TownFarMask`, `tf_far_shader_test` (1e928affa).
 
 ## Prochaine étape
 Lancer la vague 1 (A-D).
