@@ -1622,3 +1622,69 @@ def assets_ui_ornaments(
 
 if __name__ == "__main__":
     app()
+
+
+ground_app = typer.Typer(
+    help="HB2 : matières de sol de la carte de campagne (fal.ai, ADR 0143).",
+    no_args_is_help=True,
+)
+assets_app.add_typer(ground_app, name="ground-materials")
+
+
+@ground_app.command("generate")
+def ground_generate(
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiants à générer seuls, répétable"
+    ),
+    attempt: int | None = typer.Option(
+        None, "--attempt", help="Reprise (graine + 1000 par reprise)"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche les appels et leur coût, sans appel payant"
+    ),
+) -> None:
+    """Génère les images brutes manquantes (hors dépôt, jamais payées deux fois)."""
+    from cent_ans_tools import ground_materials
+
+    catalog = ground_materials.load_catalog()
+    report = ground_materials.generate(
+        catalog, only=only or None, attempt=attempt, dry_run=dry_run
+    )
+    verb = "prévus" if dry_run else "faits"
+    console.print(
+        f"{len(report['planned'])} appel(s) {verb}, {report['cost']:.3f} $ "
+        f"({catalog['model']})"
+    )
+    if dry_run:
+        for name in report["planned"]:
+            console.print(f"  {name}")
+
+
+@ground_app.command("seamless")
+def ground_seamless(
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiants à traiter seuls, répétable"
+    ),
+) -> None:
+    """Raccord sans couture, égalisation, normale/rugosité, puis planche 2×2."""
+    from cent_ans_tools import ground_materials
+
+    catalog = ground_materials.load_catalog()
+    for row in ground_materials.seamless(catalog, only=only or None):
+        console.print(
+            f"{row['id']:<22} couture {row['seam_raw']:>5} -> {row['seam']:<5} "
+            f"taches {row['blotch']}"
+        )
+    console.print(f"Planche : {ground_materials.board(catalog)}")
+
+
+@ground_app.command("pack")
+def ground_pack() -> None:
+    """Empaquette les tuiles en tableaux Texture2DArray + manifeste."""
+    from cent_ans_tools import ground_materials
+
+    report = ground_materials.pack(ground_materials.load_catalog())
+    console.print(
+        f"[green]OK[/green] : {report['layers']} couches, grille {report['grid']}, "
+        f"{report['bytes'] / 1e6:.1f} Mo"
+    )
