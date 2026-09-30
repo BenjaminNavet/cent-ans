@@ -40,3 +40,11 @@ avec SR2 qui salit le bas des jambes), 11 déjà conforme, 12 hors lot.
 
 Les additions vivent dans `battle_fine_sr.py` (tables par recette, pièces rigides) et
 n'altèrent pas les recettes Quaternius (`battle_skinned_figures`, rendu `--coarse-figures`).
+
+## Résultat (30/09)
+Triangles LOD0 avant → après : archer_0 10 926 → 11 260, archer_1 10 210 → 10 862, archer_2
+11 422 → 11 879, archer_3 9 776 → 10 110, archer_5 9 471 → 9 615, infantry_1 11 069 → 11 722,
+infantry_3 9 862 → 10 006, infantry_5 11 131 → 11 783, musician_0/1 +144 ; recettes déjà au
+plafond (infantry_0/2/4/6/7/8, archer_4, standard_0, montés) inchangées à ± 35 (`fit_budget`
+redistribue). LOD1 et LOD2 inchangés (± 15). Pièces LOD0 : bourse 46-48, dague 94-104, bocle
+190 (LOD1 ≈ 40), camail ≈ 700 (LOD1 ≈ 100) ; manchettes dans le rôle `plates` (1 500).

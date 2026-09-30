@@ -13,7 +13,7 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
   couches 8-11 recopiées ; plate ga_mix 0,6 ; planche `docs/img/sr/sr1_layers.jpg`.
 - [x] SR3 planches NB2 (session principale, ≤ 1 $) → liste d'écarts
 - [x] SR2 usure et métal (après SR1, même shader)
-- [ ] SR3b corrections des recettes Blender + recuisson
+- [x] SR3b corrections des recettes Blender + recuisson (6 écarts, 25 recettes recuites)
 - [x] SR5 bâtiments, gains rapides (usure atlas/villes, `building_pbr.gdshader`, `--no-sr5`)
 - [ ] SR4 captures A/B, perf, tests, ADR 0136, fusion
 
@@ -52,6 +52,20 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - `landmark.gdshader` non refactorisé (masques d'atlas, rendu VH4 inchangé).
 - Tests : `sr5_buildings_test.gd` (avec et sans `--no-sr5`), ga5, zg6, vh4, smoke OK.
 - À juger en jeu (SR4) : intensité 0,5, hauteur de boue (suppose y local = 0 au pied du kit).
+
+## SR3b — fait (agent)
+- Écarts : `docs/research/sr3b-ecarts.md`. Code : `tools/blender_scripts/battle_fine_sr.py`
+  (surcharges fines seulement ; recettes Quaternius intactes) + crochets `battle_fine_figures`,
+  `battle_fine_gear` (camail sous chapel, manchettes de gantelets), `battle_fine_equipment`
+  (`aventail(top=)`).
+- Corrigés : camail sous le chapel (7 recettes), gantelets de plates à manchette évasée (6
+  harnois), gants de cuir (7 sergents), bourse + dague / dague à rouelle (18 à pied), bocle à la
+  ceinture (archer_0/3, infantry_2), chausses par recette (15 recettes).
+- Recuisson `bake --only` de 25 recettes (inchangées : crew_*, villager_*, cavalry_5) ; LOD0
+  sous le plafond (max 11 879 à pied, 17 414 monté) ; LOD1/LOD2 inchangés (± 15).
+- Tests : `fg3_maps_test` OK (32 cuites), `fk2_assets_test` OK, `smoke` OK.
+- Reste : jugement visuel en SR4 (captures A/B) ; bottes montantes, col du gamboison, pavois
+  d'archer_1 (écarts 7, 8, 10) ; couleur de chausses par soldat = shader (SR2).
 
 ## À faire (hors gains rapides SR5)
 - Câblage `TimberFrame` : réexport Blender du kit, indice de couche d'atlas, choix régional.
