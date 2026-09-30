@@ -1,5 +1,6 @@
 # WIN (ADR 0087): proves the game runs on Windows x86_64 — native MSVC build of the
-# GDExtension, Godot import, then the headless smoke test (dummy renderer, no GPU).
+# GDExtension, Godot import, then the headless smoke test (dummy renderer, no GPU), all through
+# the double-click launcher "Lancer Cent Ans.bat" (ADR 0117).
 # Manual or on the windows/* branches only: Windows minutes count double on a private repo.
 name: windows
 
@@ -26,10 +27,6 @@ jobs:
         with:
           workspaces: core
 
-      - name: Build cent_ans.dll (debug)
-        shell: bash
-        run: core/build-windows.sh
-
       - name: Install Godot
         shell: bash
         run: |
@@ -37,17 +34,19 @@ jobs:
           unzip -q godot.zip -d godot
           ls godot
 
-      - name: Import
-        shell: bash
-        run: ./godot/Godot_v${GODOT_VERSION}_win64_console.exe --headless --path game --import
-
-      - name: Smoke test
-        shell: bash
+      # The double-click launcher (ADR 0117) does the whole chain as a player would: finds Git
+      # Bash, builds cent_ans.dll, runs the headless import, then starts Godot. Here Godot runs
+      # the smoke test, which exits 1 on any failure, including "CampaignSim class not
+      # registered" (cent_ans.dll not loaded). The console build prints the log.
+      - name: Launcher, build, import and smoke test
+        shell: cmd
+        env:
+          GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
         run: |
-          set -o pipefail
-          # Exit code 1 on any failure, including "CampaignSim class not registered"
-          # (cent_ans.dll not loaded).
-          ./godot/Godot_v${GODOT_VERSION}_win64_console.exe --headless --path game --script res://tests/smoke.gd 2>&1 | tee smoke.log
+          call "Lancer Cent Ans.bat" -- --headless --script res://tests/smoke.gd > smoke.log 2>&1
+          set RC=%errorlevel%
+          type smoke.log
+          exit /b %RC%
 
       - uses: actions/upload-artifact@v4
         if: always()
