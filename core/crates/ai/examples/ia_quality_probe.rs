@@ -674,11 +674,13 @@ fn measure(
     }
 }
 
+/// (faction, army, place) of a group of examples.
+type GroupKey<'a> = (&'a FactionId, &'a ArmyId, &'a SettlementId);
+
 /// Prints the examples grouped by (faction, army, place): the most
 /// repeated first, then cities first.
 fn print_examples(title: &str, examples: &[Example]) {
-    let mut groups: BTreeMap<(&FactionId, &ArmyId, &SettlementId), (Vec<u32>, u8, &str)> =
-        BTreeMap::new();
+    let mut groups: BTreeMap<GroupKey, (Vec<u32>, u8, &str)> = BTreeMap::new();
     for (turn, faction, army, place, kind, note) in examples {
         let group = groups
             .entry((faction, army, place))
