@@ -60,7 +60,7 @@
     },
     "rules": {
       "type": "object",
-      "required": ["oceanic_max_km", "atlantic_boxes", "steppe_min_lat", "dry_min", "dry_noise_km", "dry_noise_amp", "dry_noise_seed", "coastal_semi_arid_km", "coastal_semi_arid_max_lon", "boreal_min_lat", "mountain"],
+      "required": ["oceanic_max_km", "atlantic_boxes", "steppe_min_lat", "dry_min", "dry_noise_km", "dry_noise_amp", "dry_noise_seed", "forest_steppe", "coastal_semi_arid_km", "coastal_semi_arid_max_lon", "boreal_min_lat", "mountain"],
       "additionalProperties": false,
       "properties": {
         "oceanic_max_km": {"$ref": "#/$defs/km"},
@@ -74,6 +74,22 @@
         "dry_noise_km": {"type": "number", "exclusiveMinimum": 0},
         "dry_noise_amp": {"type": "number", "minimum": 0, "maximum": 1},
         "dry_noise_seed": {"type": "integer", "minimum": 0},
+        "forest_steppe": {
+          "type": "object",
+          "required": ["threshold", "line_max", "line_weight", "koppen_weights", "koppen_sigma_km", "lon_from", "lon_to", "noise", "seed"],
+          "additionalProperties": false,
+          "properties": {
+            "threshold": {"type": "number"},
+            "line_max": {"type": "number", "exclusiveMinimum": 0},
+            "line_weight": {"type": "number", "minimum": 0, "maximum": 1},
+            "koppen_weights": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}},
+            "koppen_sigma_km": {"$ref": "#/$defs/km"},
+            "lon_from": {"$ref": "#/$defs/lon"},
+            "lon_to": {"$ref": "#/$defs/lon"},
+            "noise": {"type": "array", "items": {"type": "array", "prefixItems": [{"type": "number", "exclusiveMinimum": 0}, {"type": "number", "minimum": 0}], "minItems": 2, "maxItems": 2}},
+            "seed": {"type": "integer", "minimum": 0}
+          }
+        },
         "coastal_semi_arid_km": {"$ref": "#/$defs/km"},
         "coastal_semi_arid_max_lon": {"$ref": "#/$defs/lon"},
         "boreal_min_lat": {"$ref": "#/$defs/lat"},
