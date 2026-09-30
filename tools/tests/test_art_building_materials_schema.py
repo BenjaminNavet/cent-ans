@@ -48,10 +48,25 @@ def test_atlas_layers_are_known_materials() -> None:
         assert layer in names, layer
 
 
-def test_timber_frame_present_and_unwired() -> None:
-    """Lot GA5 adds the half-timber (torchis/colombage) material, not yet in the kit's atlas."""
+def test_timber_frame_wired_last_layer() -> None:
+    """Lot TF: the half-timber material is wired and appended as the last atlas layer.
+
+    Appending keeps the layer indices already baked into exported ``.glb`` vertex colours.
+    """
     document = _document()
     by_name = {m["name"]: m for m in document["textured"]}
     assert "TimberFrame" in by_name
-    assert by_name["TimberFrame"].get("wired", True) is False
-    assert "TimberFrame" not in document["atlas_layers"]
+    assert by_name["TimberFrame"].get("wired", True) is True
+    assert document["atlas_layers"][-1] == "TimberFrame"
+    assert document["atlas_layers"].index("TimberFrame") == 14
+
+
+def test_timber_frame_used_by_exported_models() -> None:
+    """At least one exported battle model has half-timbered walls (manifest ``framed``)."""
+    manifest = json.loads(
+        (
+            DATA.parent / "game" / "assets" / "models" / "buildings" / "manifest.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert any(entry.get("framed") for entry in manifest.values())
+    assert any(entry.get("southern") for entry in manifest.values())

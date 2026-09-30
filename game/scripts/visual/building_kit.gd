@@ -36,22 +36,52 @@ static func available() -> bool:
 	return not manifest().is_empty()
 
 
-## Modèles d'un type (`cottage`, `timber`, `townhouse`…), intacts ou en ruine.
-static func models_of(kind: String, ruined: bool = false) -> Array:
+## Lot TF : style régional des maisons de la bataille en cours (`BuildingRegions.style_for_province`,
+## posé par `BattleTerrain.build`) : `framed` (part de colombage), `southern` (variantes du Midi).
+## Vide : choix d'avant TF (colombage selon les modèles, sans variantes du Midi).
+static var region_style: Dictionary = {}
+## Types dont le kit exporte des variantes à colombage et du Midi (`manifest.json` : `framed`,
+## `southern`).
+const REGIONAL_KINDS: Array[String] = ["cottage", "timber", "townhouse"]
+
+
+## Modèles d'un type (`cottage`, `timber`, `townhouse`…), intacts ou en ruine. Lot TF : les
+## variantes du Midi (`southern`) ne sortent que si `southern` le demande.
+static func models_of(kind: String, ruined: bool = false, southern: bool = false) -> Array:
 	var out := []
 	var all := manifest()
 	for model_name in all:
 		var entry: Dictionary = all[model_name]
-		if str(entry["kind"]) == kind and bool(entry["ruined"]) == ruined:
+		if str(entry["kind"]) == kind and bool(entry["ruined"]) == ruined and bool(entry.get("southern", false)) == southern:
 			out.append(model_name)
 	out.sort()
 	return out
 
 
+## Lot TF : candidats d'un type selon le style régional (`region_style`) ; tire à pied de colombage
+## ou non (`framed`), puis garde les modèles de ce genre (variantes du Midi si `southern`). Sans
+## modèle qui convienne : maisons de pierre pour `timber`/`townhouse`, sinon tous les modèles.
+static func regional_candidates(kind: String, rng: RandomNumberGenerator, style: Dictionary) -> Array:
+	var want_framed := rng.randf() < float(style.get("framed", 0.5))
+	var southern := bool(style.get("southern", false))
+	var all := manifest()
+	var out := []
+	var pool := models_of(kind, false, southern and not want_framed)
+	for model_name in pool:
+		if bool((all[model_name] as Dictionary).get("framed", false)) == want_framed:
+			out.append(model_name)
+	if out.is_empty() and not want_framed and kind != "cottage":
+		out = models_of("stonehouse")
+	return out if not out.is_empty() else models_of(kind)
+
+
 ## Le modèle de `kind` dont les proportions épousent le mieux `length` × `width` (tirage parmi
-## les deux meilleurs pour varier) ; "" si aucun.
+## les deux meilleurs pour varier) ; "" si aucun. Lot TF : maisons intactes des types régionaux
+## choisies selon `region_style` (colombage au nord, enduit et pierre au Midi).
 static func pick(kind: String, length: float, width: float, rng: RandomNumberGenerator, ruined: bool = false) -> String:
 	var candidates := models_of(kind, ruined)
+	if not ruined and not region_style.is_empty() and kind in REGIONAL_KINDS:
+		candidates = regional_candidates(kind, rng, region_style)
 	if candidates.is_empty():
 		return ""
 	var target := length / maxf(width, 0.1)

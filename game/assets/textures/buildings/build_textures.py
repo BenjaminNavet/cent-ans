@@ -58,7 +58,11 @@ def main() -> None:
             if layer.startswith("battle/")
             else Path(f"{layer}_diff.jpg")
         )
-        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.Resampling.LANCZOS)
+        image = (
+            Image.open(path)
+            .convert("RGB")
+            .resize((SLICE, SLICE), Image.Resampling.LANCZOS)
+        )
         sheet.paste(image, (0, index * SLICE))
     sheet.save("building_albedo_array.jpg", quality=88, optimize=True)
     normals = Image.new("RGB", (SLICE, SLICE * len(LAYERS)), (128, 128, 255))
@@ -71,7 +75,11 @@ def main() -> None:
             if name.startswith("battle/")
             else Path(f"{name}_nor.jpg")
         )
-        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.Resampling.LANCZOS)
+        image = (
+            Image.open(path)
+            .convert("RGB")
+            .resize((SLICE, SLICE), Image.Resampling.LANCZOS)
+        )
         normals.paste(image, (0, index * SLICE))
     normals.save("building_normal_array.jpg", quality=90, optimize=True)
 
