@@ -190,3 +190,9 @@ NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
 | 2026-09-30 | OpenRouter | NB1 : drollery_musician v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,96 $ |
 | 2026-09-30 | OpenRouter | NB1 : corner_rinceau v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 3,03 $ |
 | 2026-09-30 | OpenRouter | NB1 : cartouche_title v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 3,10 $ |
+
+## Figurines semi-réalistes SR (30/09) — plafond propre de 3 $ (NB2, enveloppe NB2 globale ≈ 20 $)
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul SR |
+|---|---|---|---|---|---|
+| 2026-09-30 | — | SR (squelette) | 0,00 $ | 0,00 $ | 0,00 $ |
