@@ -71,6 +71,11 @@ func _init() -> void:
 	var tri2 := int(s.get("triangles_f2", 0))
 	_check(tri1 > 200 * n and tri1 < 450 * n, "F1 triangles %d for %d towns" % [tri1, n])
 	_check(tri2 > 40 * n and tri2 < 80 * n, "F2 triangles %d for %d towns" % [tri2, n])
+	var tv := Time.get_ticks_usec()
+	layer._on_vertical_scale_changed(MapData.vertical_scale(), MapData.vertical_scale())
+	var rescale_ms := (Time.get_ticks_usec() - tv) / 1000.0
+	print("tf_far_layer_test: boîtes recalées (échelle verticale) en %.2f ms" % rescale_ms)
+	_check(rescale_ms < 5.0, "vertical rescale of tile AABBs %.2f ms" % rescale_ms)
 	_test_ranges(layer, tiers)
 	_test_mask(layer, towns, cities, data)
 	_test_strategic(layer, tiers)
