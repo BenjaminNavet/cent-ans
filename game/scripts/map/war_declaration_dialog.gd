@@ -55,10 +55,15 @@ func _init() -> void:
 	hide()
 
 
-## Ouvre la confirmation contre `faction_name` ; `target_label` nomme ce qui est attaqué.
-func ask(sim: Object, faction_id: String, faction_name: String, target_label: String) -> void:
+## Ouvre la confirmation contre `faction_name` ; `target_label` nomme ce qui est attaqué,
+## `status` la relation actuelle (`get_diplomacy`) pour signaler un lien vassalique rompu.
+func ask(sim: Object, faction_id: String, faction_name: String, target_label: String, status := "") -> void:
 	_title.text = "Déclarer la guerre à %s ?" % faction_name
 	var lines := PackedStringArray(["Attaquer %s nous met en guerre avec %s." % [target_label, faction_name]])
+	if status == "vassal":
+		lines.append("%s est notre vassal : la guerre rompt son hommage." % faction_name)
+	elif status == "suzerain":
+		lines.append("%s est notre suzerain : la guerre rompt notre hommage." % faction_name)
 	if sim != null and sim.has_method("evaluate_proposal"):
 		var verdict: Dictionary = sim.call("evaluate_proposal", {"type": "declare_war", "target": faction_id})
 		var parts := PackedStringArray()

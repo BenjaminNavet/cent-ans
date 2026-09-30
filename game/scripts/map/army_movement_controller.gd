@@ -207,15 +207,16 @@ func target_faction(target: Dictionary) -> String:
 
 
 ## Lot AT1 : relation du joueur avec `faction` pour un ordre d'attaque : "war" (attaque
-## directe), "peace" (paix ou trêve : attaque après déclaration de guerre), "friend" (soi,
-## allié, vassal, suzerain, faction inconnue : pas d'attaque).
+## directe), "peace" (paix, trêve, vassal ou suzerain : attaque après déclaration de guerre,
+## qui rompt le lien vassalique côté simulation), "friend" (soi, allié, faction inconnue :
+## pas d'attaque).
 func relation_to(faction: String) -> String:
 	if faction == "" or faction == map.player_faction:
 		return "friend"
 	if is_enemy_faction(faction):
 		return "war"
 	var status := str(_relation_entry(faction).get("status", ""))
-	return "peace" if status in ["peace", "truce"] else "friend"
+	return "peace" if status in ["peace", "truce", "vassal", "suzerain"] else "friend"
 
 
 func _relation_entry(faction: String) -> Dictionary:
@@ -270,8 +271,9 @@ func _ripple_at(target: Dictionary) -> void:
 func ask_war(army_id: String, target: Dictionary) -> void:
 	var faction := target_faction(target)
 	_pending_attack = {"army": army_id, "target": target, "faction": faction}
-	var faction_name := str(_relation_entry(faction).get("name", faction))
-	war_dialog.ask(map.sim, faction, faction_name, _target_label(target))
+	var entry := _relation_entry(faction)
+	var faction_name := str(entry.get("name", faction))
+	war_dialog.ask(map.sim, faction, faction_name, _target_label(target), str(entry.get("status", "")))
 
 
 func _on_war_confirmed() -> void:
