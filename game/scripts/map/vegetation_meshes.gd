@@ -97,10 +97,23 @@ static func essence_mid(name: String) -> ArrayMesh:
 				_append_part(st, crown, root, palette, true, float(ESSENCE_ID.get(name, 0.0)), card_offset)
 				if trunk != null:
 					_append_part(st, trunk, root, palette, false, float(ESSENCE_ID.get(name, 0.0)))
+				_append_impostor_quad(st, float(ESSENCE_ID.get(name, 0.0)))
 				mesh = st.commit()
 			root.free()
 	_cache[key] = mesh
 	return mesh
+
+
+## Lot FC6 : quadrilatère d'imposteur ajouté aux arbres proches (UV2 = coin + (0, 2), UV.x =
+## essence) : `foliage_cards.gdshader` passe de l'un à l'autre par arbre, en fondu tramé.
+static func _append_impostor_quad(st: SurfaceTool, essence_id: float) -> void:
+	var corners: Array[Vector2] = [Vector2(0, 0), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)]
+	for uv in corners:
+		st.set_color(Color(0.1, 0.1, 0.1, 0.0))
+		st.set_normal(Vector3.BACK)
+		st.set_uv(Vector2(essence_id, 1.0))
+		st.set_uv2(uv + Vector2(0.0, 2.0))
+		st.add_vertex(Vector3(uv.x - 0.5, 1.0 - uv.y, 0.0))
 
 
 static func _load_essence(name: String, detailed: bool) -> ArrayMesh:

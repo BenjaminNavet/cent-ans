@@ -9,6 +9,21 @@
 // Lot FC5 : atlas des cartes (couleur normalisée à 0,5 : ×2 ici), découpe alpha.
 uniform sampler2D card_texture : source_color, filter_linear_mipmap, repeat_disable;
 uniform float card_alpha_cut = 0.5;
+// Lot FC6 : les arbres proches portent aussi un quadrilatère d'imposteur (UV2.y ≥ 2 : coin + 2) ;
+// fondu tramé par arbre entre `near_start` et `near_end` (distance horizontale à la caméra + moitié
+// de sa hauteur, même mesure que `Vegetation._apply_lod`) : cartes en deçà, imposteur au-delà.
+uniform float near_start = 37.0;
+uniform float near_end = 45.0;
+#include "res://shaders/campaign_tree_impostor.gdshaderinc"
+varying float v_near;
+varying float v_impostor;
+varying vec2 v_uv0;
+varying vec2 v_uv1;
+varying float v_blend;
+varying vec3 v_right;
+varying vec3 v_up;
+varying vec3 v_face;
+varying vec2 v_quad;
 #endif
 
 varying float v_ao;
@@ -22,6 +37,43 @@ varying float v_world_y;
 void vertex() {
 	vec3 origin = MODEL_MATRIX[3].xyz;
 	float seed = INSTANCE_CUSTOM.a;
+#ifdef FOLIAGE_CARDS
+	vec3 cam = MAIN_CAM_INV_VIEW_MATRIX[3].xyz;
+	float d_lod = distance(origin.xz, cam.xz) + abs(cam.y) * 0.5;
+	v_near = 1.0 - smoothstep(near_start, near_end, d_lod);
+	v_impostor = UV2.y > 1.5 ? 1.0 : 0.0;
+	if (v_impostor > 0.5) {
+		v_essence = UV.x;
+		v_crown = 1.0;
+		v_seed = seed;
+		v_world_y = origin.y;
+		v_ao = 1.0;
+		v_local = vec3(0.0);
+		if (v_near >= 1.0) {
+			VERTEX = vec3(0.0);  // arbre entièrement en cartes : quadrilatère dégénéré
+		} else {
+			ImpostorVertex iv = impostor_vertex(MODEL_MATRIX, cam, UV2 - vec2(0.0, 2.0), UV.x, seed, INSTANCE_CUSTOM.rgb);
+			VERTEX = (inverse(MODEL_MATRIX) * vec4(iv.world, 1.0)).xyz;
+			v_uv0 = iv.uv0;
+			v_uv1 = iv.uv1;
+			v_blend = iv.blend;
+			v_right = iv.right;
+			v_up = iv.up;
+			v_face = iv.face;
+			v_tint = iv.tint;
+			v_quad = iv.local;
+		}
+	} else if (v_near <= 0.0) {
+		VERTEX = vec3(0.0);  // arbre entièrement en imposteur : cartes dégénérées
+		v_essence = UV.x;
+		v_crown = UV.y;
+		v_seed = seed;
+		v_world_y = origin.y;
+		v_ao = 1.0;
+		v_local = vec3(0.0);
+		v_tint = vec3(1.0);
+	} else {
+#endif
 	float keep = foliage_keep(origin, seed);
 	// Vent : rafales lentes qui balaient la carte, plus un frémissement propre à chaque arbre.
 	float phase = TIME * wind_speed + origin.x * 0.045 + origin.z * 0.03;
@@ -52,9 +104,37 @@ void vertex() {
 	VERTEX.y += FOLIAGE_GROUND_SINK * (1.0 - campaign_prop_scale);
 	v_ao = mix(0.55, 1.0, COLOR.a);
 	v_tint = INSTANCE_CUSTOM.rgb * tone;
+#ifdef FOLIAGE_CARDS
+	}
+#endif
 }
 
 void fragment() {
+#ifdef FOLIAGE_CARDS
+	// FC6 : tramage complémentaire (même seuil de Bayer) entre cartes et imposteur.
+	float dither = bayer4(FRAGCOORD.xy);
+	if (v_impostor > 0.5) {
+		if (dither < v_near) {
+			discard;
+		}
+		ImpostorFragment f = impostor_fragment(FRAGCOORD.xy, v_uv0, v_uv1, v_blend, v_right, v_up, v_face, v_tint, v_quad, v_seed, v_essence, v_world_y);
+		if (f.cut) {
+			discard;
+		}
+		NORMAL = normalize((VIEW_MATRIX * vec4(f.world_normal, 0.0)).xyz);
+		ALBEDO = f.albedo;
+		ALPHA = f.alpha;
+		ALPHA_SCISSOR_THRESHOLD = alpha_cut;
+		ROUGHNESS = roughness_value;
+		SPECULAR = 0.25;
+		AO = f.ao;
+		AO_LIGHT_AFFECT = 0.4;
+		BACKLIGHT = f.albedo * (v_essence < 1.5 ? mix(0.35, 0.1, campaign_season.w) : 0.35);
+	} else {
+		if (dither >= v_near) {
+			discard;
+		}
+#endif
 	vec3 tint = v_tint;
 	float leaves = value_noise(v_local) * 0.6 + value_noise(v_local * 2.3) * 0.4;
 	vec3 albedo = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
@@ -88,4 +168,7 @@ void fragment() {
 	AO_LIGHT_AFFECT = 0.4;
 	// Lumière transmise à travers le feuillage, vue à contre-jour.
 	BACKLIGHT = albedo * (v_essence < 1.5 ? mix(0.35, 0.1, campaign_season.w) : 0.35);
+#ifdef FOLIAGE_CARDS
+	}
+#endif
 }

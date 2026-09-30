@@ -78,6 +78,8 @@ enum Lod { FAR, DETAILED, NEAR }
 ## détaillés de 90 triangles. `--no-fc5` rend les maillages détaillés.
 @export var use_near_cards: bool = true
 @export var near_distance: float = 45.0
+## Lot FC6 : largeur du fondu tramé cartes → imposteur, par arbre, en deçà de `near_distance`.
+@export var near_fade: float = 8.0
 
 ## PF1 : préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
 ## zoom maximal des ombres.
@@ -179,6 +181,9 @@ func build(data: MapData) -> void:
 		_cards_material = ShaderMaterial.new()
 		_cards_material.shader = CARDS_SHADER
 		_cards_material.set_shader_parameter("card_texture", load(VegetationMeshes.CARD_TEXTURE))
+		if _impostor_material != null:  # FC6 : quadrilatère d'imposteur des arbres proches
+			for param in ["albedo_atlas", "normal_atlas", "views", "rows"]:
+				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
 	_bind_forest_cover(data)
 	_season = -1
 	_exclusions.clear()
@@ -486,6 +491,11 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	var density := lerpf(1.0, density_min, clampf((camera_distance - density_full_distance) / maxf(max_camera_distance - density_full_distance, 1.0), 0.0, 1.0))
 	density *= quality_density
 	_set_foliage_param("density", density)
+	if _cards_material != null:
+		# Sans imposteurs (`--no-fc2`), cartes jusqu'au bout des parties proches.
+		var near_end := near_distance * quality_detail if _impostor_material != null else 1e9
+		_cards_material.set_shader_parameter("near_end", near_end)
+		_cards_material.set_shader_parameter("near_start", near_end - near_fade)
 	var wanted: Array = []
 	var camera_xz := Vector2(camera_position.x, camera_position.z)
 	# Même métrique que le shader : distance horizontale + moitié de la hauteur de la caméra.
