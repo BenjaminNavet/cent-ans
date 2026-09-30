@@ -37,15 +37,16 @@ koppen:
   mountain: [ET, EF]
 
 rules:
-  # Océanique seulement près de l'Atlantique (Manche, mer du Nord, golfe de Gascogne) :
-  # au-delà, le Cfb du Bassin parisien, de l'Allemagne ou des Balkans est continental
+  # Océanique (bocage) seulement près de l'Atlantique ouvert : golfe de Gascogne, Manche
+  # à l'ouest du Cotentin, mer d'Irlande, mer du Nord au nord de la Frise. Au-delà, le Cfb
+  # du Bassin parisien, de la Picardie, de l'Allemagne ou des Balkans est continental
   # (openfield). Distance en km à la mer « atlantique » (boîtes lon/lat ci-dessous).
   oceanic_max_km: 150.0
   # Boîtes [lon_min, lat_min, lon_max, lat_max] où la mer compte comme atlantique.
   atlantic_boxes:
     - [-40.0, 20.0, -5.6, 80.0]
-    - [-40.0, 43.2, -1.0, 80.0]
-    - [-40.0, 46.0, 10.5, 80.0]
+    - [-40.0, 43.2, -1.5, 80.0]
+    - [-40.0, 53.3, 10.5, 80.0]
   # Steppes (BS/BW et continental sec) au nord de cette latitude ; au sud, semi-aride.
   steppe_min_lat: 44.0
   # Continental ou méditerranéen dont la sécheresse (landcover.dryness : steppe pontique,

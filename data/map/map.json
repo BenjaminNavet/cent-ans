@@ -167,5 +167,10 @@
         29360136
       ]
     }
+  },
+  "biomes": {
+    "file": "biomes.png",
+    "legend": "biomes.yaml",
+    "source": "Beck et al. 2023, K\u00f6ppen-Geiger 1 km, 1901-1930"
   }
 }
