@@ -1083,7 +1083,11 @@ func _trade_route_tooltip(route: Dictionary) -> String:
 		var reason := str(route.get("cut_reason", ""))
 		return "%s ↔ %s : route coupée (%s)" % [from_name, to_name, reason]
 	var goods: PackedStringArray = route.get("goods", PackedStringArray())
-	var goods_text := ", ".join(goods) if not goods.is_empty() else ""
+	# VN : noms des marchandises (« drap », « laine ») et non leurs ids (`res_cloth`).
+	var goods_names := PackedStringArray()
+	for good in goods:
+		goods_names.append(GameCatalog.display_name(str(good)).to_lower())
+	var goods_text := ", ".join(goods_names) if not goods_names.is_empty() else ""
 	var text := "%s ↔ %s — %d livres/saison" % [from_name, to_name, int(route.get("total_value", 0))]
 	if goods_text != "":
 		text += " (%s)" % goods_text
