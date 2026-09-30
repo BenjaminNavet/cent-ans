@@ -26,7 +26,8 @@ func _init() -> void:
 	_check_material("cavalry", 0, true)
 	_check_corpse()
 	_check_flag()
-	for kind_variant in [["infantry", 0], ["infantry", 4], ["archer", 0], ["cavalry", 0], ["standard", 1]]:
+	# GA3-L3b : figurines générées comprises (archer_2, infantry_1, infantry_5).
+	for kind_variant in [["infantry", 0], ["infantry", 4], ["archer", 0], ["cavalry", 0], ["standard", 1], ["archer", 2], ["infantry", 1], ["infantry", 5]]:
 		for level in 3:
 			_check_mesh(str(kind_variant[0]), int(kind_variant[1]), level)
 	if _failures == 0:

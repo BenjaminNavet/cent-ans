@@ -118,6 +118,19 @@ AUTO_LEVELS = 0.5  # percent clipped at each end (ga3_cleanup, L1)
 EQUIP_UV_SHIFT = -4.0
 SOLIDIFY = 0.012  # m, thickens the open TRELLIS sheets before the voxel remesh
 VOXEL = 0.008  # m
+LIVERY_MIN_Z = 0.5  # m: livery faces reaching below (shins) keep the generated colour
+ARM_MIN_Z = 0.6  # m: no arm bone weights below (see ``strip_arm_leaks``)
+# Arm and hand bones of the fine rig (fingers are aliased to ``Wrist`` at export).
+ARM_BONE_KEYS = (
+    "Shoulder",
+    "Arm",
+    "Wrist",
+    "Index",
+    "Middle",
+    "Ring",
+    "Pinky",
+    "Thumb",
+)
 KEEP_ISLAND = 0.02  # share of the voxel vertices under which an island is dropped
 # Material codes (battle_skinned_equipment / battle_soldier_skinned.gdshader).
 C_LIVERY, C_PLATE, C_CLOTH, C_EXACT, C_ARMS = 0, 2, 4, 5, 6
@@ -363,8 +376,17 @@ def code_faces(obj, classes, mats, metal_z=METAL_Z):
     import numpy as np
 
     fc = face_classes(obj, classes)
+    verts = obj.data.vertices
+    mw = obj.matrix_world
     for i, poly in enumerate(obj.data.polygons):
-        if fc[i] == 3 and (obj.matrix_world @ poly.center).z < metal_z:
+        if fc[i] == 3 and (mw @ poly.center).z < metal_z:
+            fc[i] = 0
+        # No livery garment reaches the shins: stray key-coloured texels there (grime on
+        # greaves) would flutter with the cloth motion (AN1a) once decimated.
+        if (
+            fc[i] == 1
+            and min((mw @ verts[v].co).z for v in poly.vertices) < LIVERY_MIN_Z
+        ):
             fc[i] = 0
     obj.data.materials.clear()
     for m in mats:
@@ -393,8 +415,35 @@ def heat(obj, wrig):
     share = sum(1 for v in obj.data.vertices if v.groups) / max(
         1, len(obj.data.vertices)
     )
-    print(f"HEAT direct weighted={share:.3f}")
+    print(f"HEAT direct weighted={share:.3f} arm leaks removed={strip_arm_leaks(obj)}")
     return share
+
+
+def strip_arm_leaks(obj):
+    """Drop arm weights below ``ARM_MIN_Z`` (heat leaks from the A-pose hands to the legs).
+
+    The hands hang at about 0.8 m: an arm bone moving a shin (sergeant: hose weighted to
+    ``Wrist.R``) is always a leak. The remaining weights are renormalised.
+    """
+    arm_groups = {
+        g.index for g in obj.vertex_groups if any(k in g.name for k in ARM_BONE_KEYS)
+    }
+    mw = obj.matrix_world
+    fixed = 0
+    for v in obj.data.vertices:
+        if (mw @ v.co).z >= ARM_MIN_Z:
+            continue
+        # Indices first: removing a group invalidates the ``v.groups`` elements.
+        leak = [g.group for g in v.groups if g.group in arm_groups]
+        rest = sum(g.weight for g in v.groups if g.group not in arm_groups)
+        if not leak or rest <= 1e-4:
+            continue
+        for index in leak:
+            obj.vertex_groups[index].remove([v.index])
+        for g in v.groups:
+            g.weight /= rest
+        fixed += 1
+    return fixed
 
 
 def skin_to_bind(obj, arm):
@@ -664,6 +713,7 @@ def build(unit_name, raw, renders, glb=None):
     bpy.data.objects.remove(obj)
     obj = low
     ok, limbs = skin_to_bind(obj, arm)
+    print(f"ARM leaks in the bind pose: {strip_arm_leaks(obj)}")
     print("HEAT_OK", ok, {k: tuple(round(x, 3) for x in v) for k, v in limbs.items()})
     if not ok:
         raise SystemExit("GA3: bone heat failed")
