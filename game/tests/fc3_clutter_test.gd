@@ -16,6 +16,7 @@ func _init() -> void:
 	_test_far_camera()
 	_test_deterministic()
 	_test_mesh()
+	_test_threaded()
 	RenderQuality.override_level = ""
 	print("fc3_clutter_test: %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
@@ -26,6 +27,7 @@ func _make(level: String) -> GroundClutter:
 	var clutter := GroundClutter.new()
 	root.add_child(clutter)
 	clutter.max_cells_per_frame = 1000
+	clutter.threaded = false
 	clutter.weight_sampler = func(_x: float, _y: float) -> Vector2: return Vector2(1.0, 0.2)
 	clutter.height_sampler = func(points: PackedVector2Array) -> PackedFloat32Array:
 		var h := PackedFloat32Array()
@@ -108,6 +110,25 @@ func _test_deterministic() -> void:
 	_check(same, "same cells → same tufts")
 	a.free()
 	b.free()
+
+
+## Semis dans le `WorkerThreadPool`, pose sur le fil principal : même résultat qu'en direct.
+func _test_threaded() -> void:
+	var direct := _make("high")
+	direct.update_view(Vector2(700, 700), 30.0)
+	var pooled := _make("high")
+	pooled.threaded = true
+	pooled.max_cells_per_frame = 4
+	var guard := 0
+	pooled.update_view(Vector2(700, 700), 30.0)
+	while (pooled.pending_jobs() > 0 or pooled.visible_cells().size() < direct.visible_cells().size()) and guard < 2000:
+		guard += 1
+		OS.delay_msec(1)
+		pooled.update_view(Vector2(700, 700), 30.0)
+	_check(pooled.visible_instances() == direct.visible_instances() and pooled.visible_instances() > 0, "threaded seeding matches direct seeding (%d / %d)" % [pooled.visible_instances(), direct.visible_instances()])
+	print("fc3: threaded install max %.2f ms per cell (main thread)" % float(pooled.stats["build_ms_max"]))
+	direct.free()
+	pooled.free()
 
 
 func _test_mesh() -> void:

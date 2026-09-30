@@ -43,7 +43,10 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 ## Échelle des arbres (`campaign_prop_scale`) sous laquelle les touffes disparaissent (trop
 ## petites pour valoir leur coût).
 @export var min_prop_scale: float = 0.2
+## Cellules posées par image (semis fait dans le `WorkerThreadPool` si `threaded`).
 @export var max_cells_per_frame: int = 2
+@export var max_concurrent_jobs: int = 4
+@export var threaded: bool = true
 @export var max_reground_per_frame: int = 2
 @export var max_cached_cells: int = 96
 ## Plafond des instances visibles (toutes cellules).
@@ -60,7 +63,7 @@ var exclusions: PackedVector3Array = PackedVector3Array()
 ## terrain.
 var weight_sampler: Callable
 var height_sampler: Callable
-var stats: Dictionary = {"cells": 0, "visible_cells": 0, "instances": 0, "visible": 0, "build_ms_max": 0.0}
+var stats: Dictionary = {"cells": 0, "visible_cells": 0, "instances": 0, "visible": 0, "build_ms_max": 0.0}  # build_ms_max : pose sur le fil principal
 
 var _vegetation: Node
 var _rig: Node3D
@@ -68,6 +71,7 @@ var _material: ShaderMaterial
 var _mesh: ArrayMesh
 var _cells: Dictionary = {}  # Vector2i → {"mmi", "points": PackedVector2Array, "buffer", "last_seen"}
 var _dirty: Dictionary = {}  # Vector2i → vrai (recalage à faire)
+var _jobs: Dictionary = {}  # Vector2i → {"task": int, "result": Dictionary}
 var _frame: int = 0
 var _focus := Vector2.ZERO
 var _radius: float = 0.0
@@ -102,7 +106,23 @@ func setup(data: MapData, terrain_builder: TerrainBuilder, vegetation: Node = nu
 		terrain.surface_rect_changed.connect(_on_surface_rect_changed)
 
 
+func _exit_tree() -> void:
+	_wait_jobs()
+
+
+func _wait_jobs() -> void:
+	for holder: Dictionary in _jobs.values():
+		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
+	_jobs.clear()
+
+
+## Tâches de semis en cours (tests, captures).
+func pending_jobs() -> int:
+	return _jobs.size()
+
+
 func clear() -> void:
+	_wait_jobs()
 	for entry: Dictionary in _cells.values():
 		(entry["mmi"] as Node).queue_free()
 	_cells.clear()
@@ -176,21 +196,41 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 	_material.set_shader_parameter("fade", fade)
 	_material.set_shader_parameter("focus", at)
 	_material.set_shader_parameter("radius", _radius)
-	var built := 0
 	var lo := Vector2i(floori((at.x - _radius) / cell_size), floori((at.y - _radius) / cell_size))
 	var hi := Vector2i(floori((at.x + _radius) / cell_size), floori((at.y + _radius) / cell_size))
 	var wanted: Dictionary = {}
+	var missing: Array[Vector2i] = []
 	for cy in range(lo.y, hi.y + 1):
 		for cx in range(lo.x, hi.x + 1):
 			var key := Vector2i(cx, cy)
 			if not _cell_in_disc(key, at, _radius) or not _cell_on_map(key):
 				continue
 			wanted[key] = true
-			if not _cells.has(key) and built < max_cells_per_frame:
-				var t0 := Time.get_ticks_usec()
-				_build_cell(key)
-				stats["build_ms_max"] = maxf(float(stats["build_ms_max"]), (Time.get_ticks_usec() - t0) / 1000.0)
-				built += 1
+			if not _cells.has(key) and not _jobs.has(key):
+				missing.append(key)
+	# Cellules les plus proches du point visé d'abord.
+	missing.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return _cell_rect(a).get_center().distance_squared_to(at) < _cell_rect(b).get_center().distance_squared_to(at))
+	var built := 0
+	for key in missing:
+		if threaded:
+			if _jobs.size() >= max_concurrent_jobs:
+				break
+			var holder := {"result": {}}
+			holder["task"] = WorkerThreadPool.add_task(func() -> void: holder["result"] = _seed_cell(key), false, "GroundClutter")
+			_jobs[key] = holder
+		elif built < max_cells_per_frame:
+			_install_cell(key, _seed_cell(key))
+			built += 1
+	for key: Vector2i in _jobs.keys():
+		if built >= max_cells_per_frame:
+			break
+		var holder: Dictionary = _jobs[key]
+		if not WorkerThreadPool.is_task_completed(int(holder["task"])):
+			continue
+		WorkerThreadPool.wait_for_task_completion(int(holder["task"]))
+		_jobs.erase(key)
+		_install_cell(key, holder["result"])
+		built += 1
 	var regrounded := 0
 	for key: Vector2i in _dirty.keys():
 		if regrounded >= max_reground_per_frame:
@@ -295,7 +335,9 @@ func _forest_grid(rect: Rect2) -> PackedFloat32Array:
 	return grid
 
 
-func _build_cell(key: Vector2i) -> void:
+## Semis d'une cellule (sans nœud ni terrain : appelable depuis une tâche) : points, tampon
+## MultiMesh à hauteur 0 (posé par `_install_cell`), sommet des touffes.
+func _seed_cell(key: Vector2i) -> Dictionary:
 	var rect := _cell_rect(key)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(Vector3i(key.x, key.y, 0xFC3))
@@ -306,8 +348,10 @@ func _build_cell(key: Vector2i) -> void:
 			circles.append(c)
 	var candidates := int(round(base_per_cell * max_density))
 	var points := PackedVector2Array()
-	var custom := PackedFloat32Array()  # sorte, teinte, phase ; lacet, taille
-	var shape := PackedFloat32Array()
+	var buffer := PackedFloat32Array()
+	buffer.resize(candidates * FLOATS_PER_INSTANCE)
+	var top := 0.0
+	var o := 0
 	for n in candidates:
 		var p := rect.position + Vector2(rng.randf(), rng.randf()) * cell_size
 		var roll := rng.randf()
@@ -317,39 +361,52 @@ func _build_cell(key: Vector2i) -> void:
 		var yaw := rng.randf() * TAU
 		var size := rng.randf_range(0.7, 1.3)
 		var local := (p - rect.position) / cell_size * 3.0
-		var f := forest[clampi(int(local.y), 0, 2) * 3 + clampi(int(local.x), 0, 2)]
-		var w := _weight(p.x, p.y, f)
-		if roll >= w.x or _excluded(p, circles):
+		var w := _weight(p.x, p.y, forest[clampi(int(local.y), 0, 2) * 3 + clampi(int(local.x), 0, 2)])
+		if roll >= w.x or (not circles.is_empty() and _excluded(p, circles)):
 			continue
 		points.append(p)
 		var bush := 1.0 if kind_roll < w.y else 0.0
-		custom.append_array([bush, tint, phase])
-		shape.append_array([yaw, size * (bush_height if bush > 0.5 else grass_height)])
-	var heights := _heights(points)
-	var count := points.size()
-	var buffer := PackedFloat32Array()
-	buffer.resize(count * FLOATS_PER_INSTANCE)
-	var top := 0.0
-	for n in count:
-		var s := shape[n * 2 + 1]
-		var yaw := shape[n * 2]
+		var s := size * (bush_height if bush > 0.5 else grass_height)
 		var c := cos(yaw) * s
 		var si := sin(yaw) * s
-		var o := n * FLOATS_PER_INSTANCE
-		var h := heights[n] - s * 0.08  # pied légèrement enfoncé
 		buffer[o] = c
 		buffer[o + 2] = si
-		buffer[o + 3] = points[n].x - rect.position.x
+		buffer[o + 3] = p.x - rect.position.x
 		buffer[o + 5] = s
-		buffer[o + 7] = h
+		buffer[o + 7] = -s * 0.08  # pied légèrement enfoncé ; + hauteur du sol à la pose
 		buffer[o + 8] = -si
 		buffer[o + 10] = c
-		buffer[o + 11] = points[n].y - rect.position.y
-		buffer[o + 12] = custom[n * 3]
-		buffer[o + 13] = custom[n * 3 + 1]
-		buffer[o + 14] = custom[n * 3 + 2]
-		buffer[o + 15] = float(n) / float(maxi(count, 1))  # rang : ordre de semis (aléatoire)
-		top = maxf(top, h + s)
+		buffer[o + 11] = p.y - rect.position.y
+		buffer[o + 12] = bush
+		buffer[o + 13] = tint
+		buffer[o + 14] = phase
+		o += FLOATS_PER_INSTANCE
+		top = maxf(top, s)
+	buffer.resize(o)
+	var count := points.size()
+	for n in count:  # rang : ordre de semis (aléatoire), coupe du fondu
+		buffer[n * FLOATS_PER_INSTANCE + 15] = float(n) / float(maxi(count, 1))
+	return {"points": points, "buffer": buffer, "top": top}
+
+
+## Pose (fil principal) : hauteurs de la surface affichée, `MultiMeshInstance3D`.
+func _install_cell(key: Vector2i, seeded: Dictionary) -> void:
+	var t0 := Time.get_ticks_usec()
+	var rect := _cell_rect(key)
+	var points: PackedVector2Array = seeded.get("points", PackedVector2Array())
+	var buffer: PackedFloat32Array = seeded.get("buffer", PackedFloat32Array())
+	var count := points.size()
+	var heights := _heights(points)
+	var bottom := INF
+	var high := -INF
+	for n in count:
+		var h := heights[n]
+		buffer[n * FLOATS_PER_INSTANCE + 7] += h
+		bottom = minf(bottom, h)
+		high = maxf(high, h)
+	if count == 0:
+		bottom = 0.0
+		high = 0.0
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.use_custom_data = true
@@ -357,10 +414,7 @@ func _build_cell(key: Vector2i) -> void:
 	multimesh.instance_count = count
 	if count > 0:
 		multimesh.buffer = buffer
-	var bottom := heights[0] if count > 0 else 0.0
-	for h in heights:
-		bottom = minf(bottom, h)
-	multimesh.custom_aabb = AABB(Vector3(-1.0, bottom - 1.0, -1.0), Vector3(cell_size + 2.0, top - bottom + 3.0, cell_size + 2.0))
+	multimesh.custom_aabb = AABB(Vector3(-1.0, bottom - 1.0, -1.0), Vector3(cell_size + 2.0, high - bottom + float(seeded.get("top", 0.0)) + 3.0, cell_size + 2.0))
 	var mmi := MultiMeshInstance3D.new()
 	mmi.name = "Clutter_%d_%d" % [key.x, key.y]
 	mmi.multimesh = multimesh
@@ -368,9 +422,11 @@ func _build_cell(key: Vector2i) -> void:
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	mmi.position = Vector3(rect.position.x, 0.0, rect.position.y)
+	mmi.visible = false  # rendu visible par `update_view` si la cellule est dans le disque
 	add_child(mmi)
 	_cells[key] = {"mmi": mmi, "points": points, "buffer": buffer, "last_seen": _frame}
 	stats["cells"] = _cells.size()
+	stats["build_ms_max"] = maxf(float(stats["build_ms_max"]), (Time.get_ticks_usec() - t0) / 1000.0)
 
 
 func _excluded(p: Vector2, circles: PackedVector3Array) -> bool:
