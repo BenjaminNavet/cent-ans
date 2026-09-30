@@ -47,6 +47,12 @@ var kingdom_filter: OptionButton = null
 var rank_filter: OptionButton = null
 var _faction_list: VBoxContainer = null
 var _faction_buttons: Dictionary = {}  # faction_id → Button
+## Q7 (tests) : nombre d'ajustements `_fit` effectués.
+var fit_count := 0
+## Q7 : agrandissements permis après un ajustement complet (fenêtre, faction) avant réduction seule.
+const FIT_GROW_BUDGET := 3
+var _fit_grow_budget := FIT_GROW_BUDGET
+var _fit_queued := false
 const RANK_FILTERS := [["", "Tous les rangs"], ["kingdom", "Royaumes"], ["duchy", "Duchés"], ["county", "Comtés"]]
 
 
@@ -57,7 +63,9 @@ func _ready() -> void:
 	# Q2 : en 1280×720 le bas de l'écran (bouton « Commencer ») sortait de la fenêtre.
 	resized.connect(_fit)
 	# Onglets, fiche plus longue : la taille minimale du contenu peut dépasser FIT_SIZE.
-	_content.minimum_size_changed.connect(_fit, CONNECT_DEFERRED)
+	# Q7 : une fois par image au plus (en différé, la boucle se rejouait dans le même vidage de
+	# la file de messages jusqu'à la saturer et faire planter le jeu en vue 1280×720).
+	_content.minimum_size_changed.connect(_queue_content_fit)
 	_fit.call_deferred()
 	var entries := FrontEndData.start_dates()
 	if not entries.is_empty():
@@ -67,13 +75,25 @@ func _ready() -> void:
 
 ## Q2 : réduit l'écran d'un bloc quand la fenêtre est plus petite que sa taille minimale
 ## (1280×720 : cartes, fiche et boutons restent tous visibles et cliquables).
-func _fit() -> void:
+func _fit(shrink_only := false) -> void:
+	fit_count += 1
+	if not shrink_only:
+		_fit_grow_budget = FIT_GROW_BUDGET
 	if _content == null:
 		return
 	var view := size
 	var needed := _content.get_combined_minimum_size()
 	var fit_size := Vector2(maxf(FIT_SIZE.x, needed.x), maxf(FIT_SIZE.y, needed.y))
 	var factor := clampf(minf(view.x / fit_size.x, view.y / fit_size.y), 0.5, 1.0)
+	# Q7 : le texte replié rend la hauteur minimale dépendante de la largeur, donc du facteur ;
+	# après quelques agrandissements, l'ajustement ne fait plus que réduire (sinon il oscille).
+	if shrink_only:
+		if factor > _content.scale.x:
+			if _fit_grow_budget <= 0:
+				return
+			_fit_grow_budget -= 1
+		elif is_equal_approx(factor, _content.scale.x):
+			return
 	# Ancres au-delà de 1 : la mise en page donne la taille (vue / facteur), l'échelle la réduit.
 	_content.scale = Vector2.ONE * factor
 	_content.anchor_left = 0.0
@@ -82,6 +102,15 @@ func _fit() -> void:
 	_content.anchor_bottom = 1.0 / factor
 	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
 		_content.set_offset(side, 0.0)
+
+
+func _queue_content_fit() -> void:
+	if _fit_queued or not is_inside_tree():
+		return
+	_fit_queued = true
+	get_tree().process_frame.connect(func() -> void:
+		_fit_queued = false
+		_fit(true), CONNECT_ONE_SHOT)
 
 
 func _facade() -> Node:
@@ -660,6 +689,7 @@ func select(faction_id: String) -> void:
 	if not _cards.has(faction_id) and FrontEndData.faction(faction_id).is_empty():
 		return
 	selected_faction = faction_id
+	_fit_grow_budget = FIT_GROW_BUDGET  # Q7 : nouvelle fiche, l'écran peut de nouveau s'agrandir
 	for id in _cards:
 		var panel: PanelContainer = _cards[id]
 		var styles: Array = _card_styles[id]

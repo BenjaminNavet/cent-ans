@@ -159,6 +159,13 @@ func _check_capture_window(map: Node) -> void:
 		return
 	_collect(window)
 	await _check_fits_screen(window, "ChronicleWindow (sort de la ville prise)")
+	# Q7 : les choix restent visibles sans défiler (en vue 720 l'enluminure les cachait).
+	var options: VBoxContainer = window.get("_options_box")
+	var view_rect := Rect2(Vector2.ZERO, root.get_visible_rect().size)
+	for row in options.get_children():
+		var choice := (row as Control).get_child(0) as Control
+		_check(view_rect.encloses(choice.get_global_rect().grow(-0.5)) and window.get_global_rect().encloses(choice.get_global_rect().grow(-0.5)),
+			"Q7: capture choice %s at %s outside the screen / window" % [_text_of_button(choice), choice.get_global_rect()])
 	# Referme la décision (« Occuper », premier choix) pour ne pas gêner la suite du test.
 	var box: VBoxContainer = window.get("_options_box")
 	if box.get_child_count() > 0:
@@ -285,3 +292,7 @@ func _check_naval_dialog() -> void:
 		_check((sim.call("get_pending_naval_battles") as Array).is_empty(), "the naval interception should be resolved")
 	root.size = Vector2i(1280, 720)
 	await process_frame
+
+
+func _text_of_button(control: Control) -> String:
+	return (control as Button).text if control is Button else str(control.name)
