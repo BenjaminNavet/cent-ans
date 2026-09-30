@@ -19,7 +19,8 @@
           "kind": { "enum": ["ladders", "ram", "tower"], "description": "Rôle de l'engin dans la bataille de siège." },
           "name": { "type": "string", "minLength": 1, "description": "Nom affiché (français)." },
           "work": { "type": "integer", "minimum": 0, "description": "Points de travail pour l'achever (0 : prêt dès le début du siège)." },
-          "tower_unit_type": { "type": "string", "pattern": "^unit_[a-z0-9_]+$", "description": "Type d'unité du beffroi en bataille (kind tower)." }
+          "tower_unit_type": { "type": "string", "pattern": "^unit_[a-z0-9_]+$", "description": "Type d'unité du beffroi en bataille (kind tower)." },
+          "auto_assault_bonus_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "NT9 : engin prêt, coups de l'assaillant majorés de ce pourcentage en assaut auto-résolu derrière des murailles debout (bélier : porte enfoncée)." }
         },
         "required": ["id", "kind", "name", "work"],
         "additionalProperties": false

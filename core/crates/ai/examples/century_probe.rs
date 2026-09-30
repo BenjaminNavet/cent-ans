@@ -1030,6 +1030,18 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 println!("{:>16}   event {:?}: {}", "", event.kind, event.text_fr);
             }
         }
+        // NT9: `ARMY_COUNT=1` prints the field armies of France and England each turn.
+        if std::env::var("ARMY_COUNT").is_ok() {
+            let n = state
+                .armies
+                .values()
+                .filter(|a| {
+                    !a.units.is_empty()
+                        && matches!(a.faction.as_str(), "fac_france" | "fac_england")
+                })
+                .count();
+            println!("AC [{seed}] {n}");
+        }
         for event in &events {
             match event.kind {
                 EventKind::Bankruptcy => {
@@ -1049,6 +1061,10 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                         && names.iter().any(|n| event.text_fr.contains(n.as_str())) =>
                 {
                     report.battles_fr_en += 1;
+                    // NT9: `BATTLE_TRACE=1` prints each counted FR/EN battle line.
+                    if std::env::var("BATTLE_TRACE").is_ok() {
+                        println!("BT [{seed}] {} | {}", state.date_label(), event.text_fr);
+                    }
                 }
                 EventKind::ProvinceCaptured => report.captures += 1,
                 EventKind::Revolt if !event.text_fr.contains("passe aux mains") => {

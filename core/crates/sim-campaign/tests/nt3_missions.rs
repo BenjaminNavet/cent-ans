@@ -339,8 +339,16 @@ fn missions_survive_save_and_load_and_old_saves_load_empty() {
 /// France's main army besieging English Guyenne, whose garrison is down to
 /// one exhausted company; battles auto-resolved.
 fn besiege_guyenne(data: &GameData) -> (CampaignState, sim_campaign::ArmyId, SettlementId) {
+    besiege_guyenne_as(data, "fac_france")
+}
+
+/// As `besiege_guyenne`, `player` playing the campaign.
+fn besiege_guyenne_as(
+    data: &GameData,
+    player: &str,
+) -> (CampaignState, sim_campaign::ArmyId, SettlementId) {
     let idle = |_: &CampaignState, _: &GameData, _: &FactionId| Vec::<Order>::new();
-    let mut state = france(data, 6);
+    let mut state = CampaignState::new_1337(data, fac(player), 6).unwrap();
     state.interactive_battles = false;
     let guyenne = data_model::ProvinceId::new("prov_guyenne").unwrap();
     let kent = data_model::ProvinceId::new("prov_kent").unwrap();
@@ -402,4 +410,39 @@ fn a_won_assault_counts_as_a_won_battle() {
     let mut events = Vec::new();
     resolve_missions(&mut state, &data, &mut events);
     assert_eq!(state.mission_notices()[0].kind, NoticeKind::Succeeded);
+}
+
+/// NT9: a sortie is a battle for the missions — here the player's English
+/// garrison sallies out and routs weak French besiegers.
+#[test]
+fn a_won_sortie_counts_as_a_won_battle() {
+    let data = real_data();
+    let (state, army, city) = besiege_guyenne_as(&data, "fac_england");
+    let m = mission(&state, MissionKind::WinBattle, state.turn + 6);
+    let mut state = with_mission(state, m);
+    state.armies.get_mut(&army).unwrap().units.truncate(1);
+    let knights = sim_campaign::Unit {
+        unit_type: data_model::UnitTypeId::new("unit_knights").unwrap(),
+        strength: 100,
+        max_strength: 100,
+        experience: 2,
+        morale: 80,
+        levy_armor: 0,
+        levy_ranged: 0,
+        experience_residue: 0,
+    };
+    let garrison = &mut state.settlements.get_mut(&city).unwrap().garrison;
+    garrison.clear();
+    for _ in 0..8 {
+        garrison.push(knights.clone());
+    }
+    let idle = |_: &CampaignState, _: &GameData, _: &FactionId| Vec::<Order>::new();
+    let events = state.end_turn_with(&data, idle);
+    assert!(
+        events
+            .iter()
+            .any(|e| e.text_fr.contains("Sortie") && e.text_fr.contains("mis en fuite")),
+        "{events:?}"
+    );
+    assert_eq!(state.missions.active[0].progress, 1);
 }

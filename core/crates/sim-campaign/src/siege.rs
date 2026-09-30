@@ -411,7 +411,13 @@ impl CampaignState {
             return None;
         }
         let walls = walls_stand(self, data, army, place);
-        let attack = self.army_power(data, army) * if walls { 0.7 } else { 1.0 };
+        // NT9: a ready ram (gate broken) softens the walls, as in `auto_assault`.
+        let walls_factor = if walls {
+            0.7 * (1.0 + f64::from(self.engine_assault_bonus(data, place)) / 100.0)
+        } else {
+            1.0
+        };
+        let attack = self.army_power(data, army) * walls_factor;
         let defence = crate::state::unit_power(data, &settlement.garrison)
             * (1.0 + f64::from(self.fortification_level(data, place)) * 0.1);
         let odds = (100.0 * attack / (attack + defence).max(1.0)).round() as u32;
@@ -628,6 +634,7 @@ pub(crate) fn auto_assault(
         defender_terrain_bonus: false,
         river_crossing: false,
         walls,
+        assault_bonus_percent: state.engine_assault_bonus(data, &settlement),
     };
     // N1: phased auto-resolve; walls stand for the terrain, the season
     // still brings its weather.
@@ -844,6 +851,15 @@ fn sortie(
         )
         .province(&province_of(state, settlement))
         .faction(&garrison.faction),
+    );
+    // NT9: a sortie is a battle for the missions (either side may win it).
+    crate::missions::note_battle_won(
+        state,
+        if won {
+            &garrison.faction
+        } else {
+            &besieger_faction
+        },
     );
     if won {
         state.record_battle(&garrison.faction, &besieger_faction, false);

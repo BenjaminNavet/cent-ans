@@ -60,6 +60,15 @@ pub struct SiegeEngineRule {
     /// Unit type of the siege tower in battle (`kind: tower`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tower_unit_type: Option<UnitTypeId>,
+    /// NT9: once ready, the assailant's damage in an auto-resolved assault
+    /// behind standing walls is raised by this percentage (the ram breaks
+    /// the gate).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub auto_assault_bonus_percent: u32,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 /// Contents of `data/rules/siege_engines.json`.

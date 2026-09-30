@@ -78,6 +78,7 @@ fn auto_resolve_agrees_with_3d_battles() {
             defender_terrain_bonus: false,
             river_crossing: scenario.river,
             walls: false,
+            assault_bonus_percent: 0,
         };
         let conditions = FieldConditions {
             terrain: Some(scenario.terrain),
