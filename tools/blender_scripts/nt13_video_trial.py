@@ -630,7 +630,9 @@ def pin_feet(rest, clip, rots, poss):
         up_leg, low_leg, foot = f"UpperLeg.{side}", f"LowerLeg.{side}", f"Foot.{side}"
         ankle = np.array([to_frame_coords(rest, poss[t][foot]) for t in range(n)])
         ground = float(to_frame_coords(rest, tgt.head[foot])[2])
-        targets, weights = vc.pin_targets(ankle, clip.contacts[:n, i], ground=ground)
+        targets, weights = vc.step_targets(
+            ankle, clip.contacts[:n, i], ground=ground, unit=clip.scale
+        )
         for t in range(n):
             want = ankle[t].copy()
             if weights[t] > 0.0:

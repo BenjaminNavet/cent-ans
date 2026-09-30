@@ -293,6 +293,40 @@ def pin_targets(foot, contact, ground=None, ramp=2):
     return targets, weights
 
 
+def step_targets(foot, contact, ground=None, unit=1.0, max_gap=12, ramp=2):
+    """Like ``pin_targets``, plus steps: a foot leaving one planted run for another one.
+
+    NT14: between two planted runs at most `max_gap` frames apart, the foot is carried from the
+    first pin to the second (smoothstep in the horizontal plane) on an arc lifted by a third of
+    the step's length, 4 to 8 cm (`unit` = coordinate units per metre); the weight stays 1, so
+    the video's shuffle (the foot skating along the ground) becomes a clean step. A step under
+    3 cm keeps the foot down (the pins are merged into one).
+    """
+    foot = np.asarray(foot, dtype=np.float64)
+    targets, weights = pin_targets(foot, contact, ground, ramp)
+    runs = _runs(contact)
+    for (_s0, e0), (s1, _e1) in zip(runs, runs[1:], strict=False):
+        if s1 - e0 > max_gap:
+            continue
+        a = targets[e0 - 1].copy()
+        b = targets[s1].copy()
+        d = float(np.linalg.norm((b - a)[:2]))
+        lift = (
+            0.0
+            if d < 0.03 * unit
+            else float(np.clip(d / 3.0, 0.04 * unit, 0.08 * unit))
+        )
+        span = s1 - e0 + 1
+        for t in range(e0, s1):
+            u = (t - e0 + 1) / span
+            k = u * u * (3.0 - 2.0 * u)
+            p = a * (1.0 - k) + b * k
+            p[2] = a[2] * (1.0 - u) + b[2] * u + lift * np.sin(np.pi * u)
+            targets[t] = p
+            weights[t] = 1.0
+    return targets, weights
+
+
 def two_bone_ik(a, b, c, target, eps=1e-9):
     """New middle and end joints of chain `a`-`b`-`c` so that the end reaches `target`.
 

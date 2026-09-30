@@ -196,3 +196,140 @@ def test_clean_end_to_end_shapes():
     assert out["contacts"].shape == (24, 2)
     feet = out["points"][:, [i for f in vc.FEET for i in f], 2]
     assert np.allclose(feet.min(axis=1), 0.0, atol=0.02)
+
+
+# --- NT14 ------------------------------------------------------------------------------
+
+
+def test_run_frames_scale_with_rate():
+    """Contact run lengths are durations: twice the frames at 60 fps."""
+    assert vc.run_frames(0.1, 30.0, 3) == 3
+    assert vc.run_frames(0.1, 60.0, 3) == 6
+    assert vc.run_frames(0.01, 30.0, 2) == 2
+
+
+def _tilted_feet(pitch_deg, n=20):
+    """Z-up points whose feet stand on a ground tilted about X (camera pitch), staggered."""
+    pts = np.zeros((n, 33, 3))
+    pts[:, :, 2] = 0.9
+    feet = {vc.HEEL_L: (0.1, 0.3), vc.TOE_L: (0.1, 0.1), vc.HEEL_R: (-0.1, -0.2)}
+    feet[vc.TOE_R] = (-0.1, -0.4)
+    for i, (x, y) in feet.items():
+        pts[:, i] = (x, y, 0.0)
+    a = np.radians(pitch_deg)
+    rot = np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+    return pts @ rot.T
+
+
+def test_ground_tilt_levels_a_pitched_ground():
+    """The heels and toes end on one flat ground after levelling; lifted feet are ignored."""
+    pts = _tilted_feet(12.0)
+    pts[:5, vc.TOE_R, 2] += 0.2  # a few lifted samples
+    level = vc.ground_tilt(pts)
+    assert np.allclose(level @ level.T, np.eye(3), atol=1e-9)
+    out = pts @ level.T
+    idx = [vc.HEEL_L, vc.TOE_L, vc.HEEL_R]
+    assert np.ptp(out[5:, idx, 2]) < 1e-6
+
+
+def test_ground_tilt_ignores_a_steep_fit():
+    """A fit steeper than 25 degrees is not a camera pitch: no levelling."""
+    assert np.allclose(vc.ground_tilt(_tilted_feet(40.0)), np.eye(3))
+
+
+def test_image_world_fit_and_disc_points():
+    """Image points map back onto the world; a bigger disc is nearer the camera."""
+    n = 4
+    rng = np.random.default_rng(2)
+    world = rng.normal(0.0, 0.4, (n, 33, 3))
+    s, tx, tz, aspect = 1.8, -0.9, 0.7, 0.5625
+    zup = vc.to_zup(world)
+    image = np.zeros((n, 33, 3))
+    image[..., 0] = (zup[..., 0] - tx) / (s * aspect)
+    image[..., 1] = -(zup[..., 2] - tz) / s
+    fit = vc.image_world_fit(world, image, aspect)
+    assert (
+        np.allclose(fit[0], s) and np.allclose(fit[1], tx) and np.allclose(fit[2], tz)
+    )
+    centre = image[:, vc.WRIST_L, :2]
+    major = np.array([0.2, 0.2, 0.25, 0.16])
+    disc = vc.disc_points(centre, major, fit, aspect, anchor_depth=-0.3)
+    assert np.allclose(disc[:, 0], zup[:, vc.WRIST_L, 0])
+    assert np.allclose(disc[:, 2], zup[:, vc.WRIST_L, 2])
+    assert disc[0, 1] == pytest.approx(-0.3)
+    assert disc[2, 1] < -0.3 < disc[3, 1]  # bigger: nearer (Y away from the camera)
+
+
+def test_disc_normals_face_out_and_tilt():
+    """A round disc faces the camera; a flattened one tilts, facing away from the chest."""
+    disc = np.array([[0.3, -0.3, 1.2], [0.3, -0.3, 1.2]])
+    chest = np.array([[0.0, 0.0, 1.3], [0.0, 0.0, 1.3]])
+    n = vc.disc_normals([0.3, 0.3], [0.3, 0.15], [0.0, 0.0], disc, chest)
+    assert np.allclose(n[0], [0.0, -1.0, 0.0])
+    assert np.degrees(np.arccos(-n[1, 1])) == pytest.approx(60.0)
+    assert np.dot(n[1], disc[1] - chest[1]) > 0.0
+    assert abs(n[1, 0]) < 1e-9  # major axis along x: the tilt is about x
+
+
+def _quat_z(deg):
+    a = np.radians(deg) / 2.0
+    return [np.cos(a), 0.0, 0.0, np.sin(a)]
+
+
+def test_despike_quats_removes_single_frame_flicks():
+    """A one-frame flick is replaced; a steady turn is kept; signs are made continuous."""
+    q = np.array([_quat_z(d) for d in (0, 2, 40, 6, 8, 10)])
+    q[4] = -q[4]
+    out = vc.despike_quats(q, 12.0)
+    assert np.degrees(vc.quat_angle(out[2], _quat_z(4))) < 1.0
+    assert np.dot(out[4], out[3]) > 0.0
+    ramp = np.array([_quat_z(d) for d in range(0, 150, 25)])
+    assert np.allclose(vc.despike_quats(ramp, 12.0), ramp)
+
+
+def test_smooth_quats_stay_unit():
+    """Smoothed quaternions are unit length and close to a slow input."""
+    rng = np.random.default_rng(4)
+    q = np.array([_quat_z(d + rng.normal(0.0, 2.0)) for d in np.linspace(0, 60, 48)])
+    out = vc.smooth_quats(q, 24.0)
+    assert np.allclose(np.linalg.norm(out, axis=-1), 1.0)
+    assert np.degrees(vc.quat_angle(out[24], _quat_z(60 * 24 / 47))) < 3.0
+
+
+def test_facing_yaw_follows_chest_and_strike():
+    """Facing the camera and striking forward gives 0; turned to the image right, 90."""
+    n = 10
+    pts = np.zeros((n, 33, 3))
+    pts[:, vc.SHOULDER_L] = (0.2, 0.0, 1.4)  # performer's left = image right
+    pts[:, vc.SHOULDER_R] = (-0.2, 0.0, 1.4)
+    pts[:, vc.WRIST_R] = (-0.1, -0.2, 1.1)
+    pts[-2:, vc.WRIST_R] = (-0.05, -0.7, 1.2)  # thrust towards the camera
+    assert vc.facing_yaw(pts) == pytest.approx(0.0, abs=6.0)
+    turned = pts.copy()
+    turned[:, vc.SHOULDER_L] = (0.0, 0.2, 1.4)
+    turned[:, vc.SHOULDER_R] = (0.0, -0.2, 1.4)
+    turned[-2:, vc.WRIST_R] = (0.7, 0.0, 1.2)
+    assert vc.facing_yaw(turned) == pytest.approx(90.0, abs=6.0)
+    disc = np.tile([0.6, 0.0, 1.3], (n, 1))
+    assert vc.facing_yaw(turned, disc) == pytest.approx(90.0, abs=6.0)
+
+
+def test_step_targets_carry_the_foot_between_pins():
+    """Between two planted runs the foot is carried on a lifted arc, never skating."""
+    n = 16
+    foot = np.zeros((n, 3))
+    foot[8:, 0] = 0.3  # the video's foot shuffles 30 cm along the ground
+    contact = np.zeros(n, bool)
+    contact[:5] = True
+    contact[10:] = True
+    targets, weights = vc.step_targets(foot, contact, ground=0.0)
+    assert np.all(weights == 1.0)
+    assert np.allclose(targets[:5], [0.0, 0.0, 0.0])
+    assert np.allclose(targets[10:], [0.3, 0.0, 0.0])
+    mid = targets[5:10]
+    assert np.all(np.diff(mid[:, 0]) > 0.0)
+    assert 0.04 <= mid[:, 2].max() <= 0.08
+    short = foot.copy()
+    short[8:, 0] = 0.01
+    t2, _w = vc.step_targets(short, contact, ground=0.0)
+    assert np.allclose(t2[5:10, 2], 0.0)
