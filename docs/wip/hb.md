@@ -22,3 +22,8 @@ Session principale :
 - Carte de couleur : section `biomes` de `colormap_style.yaml` (palettes, garrigue en taches, forêts gardées près des rivières en steppe, cultures/prés par biome tirés par bloc, multiplicateurs bocage/openfield/vigne/présence), poids fondus sur 25 km. Re-cuite (pic mémoire ~11,6 Go).
 - Tests : `tools/tests/test_biomes.py` (38, dont 21 lieux réels : Athènes/Péloponnèse = 3, Rostov/Volgograd = 4…), `test_colormap.py` inchangé et vert.
 - Points ouverts : lisière ouest de la steppe droite vers 26-28° E (héritée de `landcover.dryness`) ; terrasses méditerranéennes non dessinées ; Dobroudja semi-aride (BSk intérieur au sud de 44° N).
+
+## HB7 — lisibilité des rivières (branche `feat/hb-rivers`, worktree `../gp-hb-rivers`)
+- Diagnostic : (1) palier moyen `river_water.gdshader` : `v_side` normalisé par la largeur RÉELLE, donc le ruban élargi à `min_px` n'était opaque que sur son cœur sous-pixel (bords fondus, liseré d'encre sur le reste) → trait gris ; (2) palier proche `river_fine.gdshader` : `min_px` jamais réglé (1,2 px) et l'élargissement dessiné en bande de berge (gravier) → trait gris sombre d'un pixel ; couleurs et reflet différents des rubans moyens.
+- Fait : élargissement = eau dans les deux paliers ; liseré et fondu du bord en pixels (`bank_ink_px`, `edge_soft_px`) ; palier fin accordé (`river_display.json` → `fine` : `min_px`, `order_px_scale` par ordre de Strahler 3-10, couleurs/reflet repris du palier moyen) ; `sky_color`, `sky_reflect` au schéma.
+- Prochaine étape : captures avant/après (Rouen, Orléans, Lyon, Vienne), réglages, test headless de largeur.

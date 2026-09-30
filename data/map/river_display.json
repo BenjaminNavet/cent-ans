@@ -9,9 +9,18 @@
   "minor_far_alpha": 0.55,
   "shallow_color": [0.25, 0.43, 0.52],
   "deep_color": [0.09, 0.23, 0.36],
-  "bank_ink_color": [0.05, 0.13, 0.20],
+  "bank_ink_color": [0.05, 0.13, 0.2],
   "bank_ink_strength": 0.55,
+  "bank_ink_px": 0.8,
+  "edge_soft_px": 0.7,
   "sky_reflect": 0.25,
+  "sky_color": [0.56, 0.68, 0.78],
+  "fine": {
+    "min_px": 3.2,
+    "order_px_scale": [0.4, 0.5, 0.6, 0.75, 0.95, 1.15, 1.35, 1.5],
+    "thin_fade": 0.35,
+    "sky_reflect": 0.35
+  },
   "labels": {
     "enabled": true,
     "font_size": 13,
