@@ -1587,7 +1587,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let mut defended: BTreeSet<SettlementId> = BTreeSet::new();
     let mut targeted: BTreeSet<SettlementId> = BTreeSet::new();
     // NT9: enemies another of our armies attacks this turn (one attack each).
-    let mut engaged: Vec<crate::grid::Engagement> = Vec::new();
+    let mut engaged: Vec<[f32; 2]> = Vec::new();
     // CV3-6: a siege of ours or against us in progress (no encounter detours).
     let realm_besieged = state.settlements.values().any(|s| {
         s.siege

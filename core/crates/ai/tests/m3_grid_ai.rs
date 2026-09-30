@@ -431,3 +431,43 @@ fn nearby_friendly_armies_are_counted_once() {
         "the joint host attacks a weaker army"
     );
 }
+
+/// NT9: two armies of a host (N6 cap) do not both attack the same enemy in
+/// one turn; the second leaves it to the first.
+#[test]
+fn one_attack_per_enemy_army_and_turn() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    at_war(&mut state, "fac_england", "fac_france");
+    let english = main_army(&state, "fac_england");
+    let french = main_army(&state, "fac_france");
+    state.armies.get_mut(&english).unwrap().position =
+        ArmyPosition::field(east_of(&data, "set_meaux", 60.0));
+    let mut second = state.armies[&english].clone();
+    second.position = ArmyPosition::field(east_of(&data, "set_meaux", 62.0));
+    let second_id = ArmyId::from_index(9999);
+    state.armies.insert(second_id.clone(), second);
+    let f = state.armies.get_mut(&french).unwrap();
+    f.position = ArmyPosition::field(east_of(&data, "set_meaux", 40.0));
+    f.units.truncate(1);
+    let england = fac("fac_england");
+    let planner = ai::grid::GridPlanner::new(&state, &data, &england);
+    let target =|order: Option<Order>| match order {
+        Some(Order::Attack { target_army, .. }) => Some(target_army),
+        _ => None,
+    };
+    assert_eq!(
+        target(planner.attack_order(&second_id)),
+        Some(french.clone())
+    );
+    let mut engaged = Vec::new();
+    assert_eq!(
+        target(planner.attack_order_sparing(&english, &mut engaged)),
+        Some(french.clone())
+    );
+    assert_ne!(
+        target(planner.attack_order_sparing(&second_id, &mut engaged)),
+        Some(french),
+        "the second army leaves the engaged enemy alone"
+    );
+}
