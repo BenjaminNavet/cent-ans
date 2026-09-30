@@ -19,6 +19,7 @@ func _init() -> void:
 	root.add_child(_viewport)
 	await process_frame
 	await _menu()
+	await _tutorial_vs_modal()
 	print("vn_ui_720_test: %s" % ("OK" if _failures == 0 else "FAIL (%d)" % _failures))
 	quit(0 if _failures == 0 else 1)
 
@@ -63,4 +64,37 @@ func _menu_at(height: int) -> void:
 	_check(previous_bottom <= screen.end.y, "menu@%d list ends at %s, below the screen" % [height, previous_bottom])
 	menu.queue_free()
 	_viewport.size = LOGICAL
+	await process_frame
+
+
+## 2. Tutoriel : le parchemin s'efface sous une fenêtre modale (`UiZones.Zone.MODAL`) et revient à
+## sa fermeture ; une étape jouée dans une modale (`modal_ok`) le garde.
+func _tutorial_vs_modal() -> void:
+	var overlay: TutorialOverlay = (load("res://scenes/ui/tutorial.tscn") as PackedScene).instantiate()
+	_viewport.add_child(overlay)
+	var modal := Panel.new()
+	modal.custom_minimum_size = Vector2(600, 400)
+	_viewport.add_child(modal)
+	UiZones.put(UiZones.Zone.MODAL, modal)
+	modal.hide()
+	overlay.show_step({"title": "Votre place dans la féodalité", "text": "x", "objective": "y"}, 0, 3)
+	for i in 4:
+		await process_frame
+	_check(overlay.panel.visible, "tutorial panel visible without modal")
+	modal.show()
+	for i in 4:
+		await process_frame
+	_check(not overlay.panel.visible, "tutorial panel hidden while a modal window is open")
+	modal.hide()
+	for i in 4:
+		await process_frame
+	_check(overlay.panel.visible, "tutorial panel back after the modal closes")
+	overlay.show_step({"title": "Les technologies", "text": "x", "objective": "y", "modal_ok": true}, 1, 3)
+	modal.show()
+	for i in 4:
+		await process_frame
+	_check(overlay.panel.visible, "modal_ok step keeps its panel over a modal")
+	modal.hide()
+	overlay.queue_free()
+	modal.queue_free()
 	await process_frame
