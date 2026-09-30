@@ -52,6 +52,9 @@ SRC_DIR = os.environ.get(
 POSE_DIR = os.path.join(SRC_DIR, "work", "poses")
 OUT_DIR = os.path.join(bf.FINE_DIR, "video_trial")
 LOOP_BLEND = 6
+# Caps of the right wrist's turn away from the keyframed grip: bend, and twist about the forearm.
+WRIST_SWING_DEG = 65.0
+WRIST_TWIST_DEG = 110.0
 
 # (clip substituted, video, first and last video frame at 30 fps, speed-up, loop,
 #  yaw: direction of the video (degrees about up, 0 = towards the camera, 90 = the image's
@@ -208,6 +211,28 @@ class Clip:
         self.scale = scale
 
 
+def cap_swing_twist(q, axis, swing_max, twist_max):
+    """`q` with its swing (off `axis`) and twist (about `axis`) angles capped, in degrees."""
+    axis = axis.normalized()
+    proj = axis * Vector(q[1:]).dot(axis)
+    twist = Quaternion((q.w, proj.x, proj.y, proj.z))
+    if twist.magnitude < 1e-9:
+        twist = Quaternion()
+    twist.normalize()
+    swing = q @ twist.inverted()
+
+    def cap(r, limit):
+        angle = math.degrees(r.angle)
+        if angle > 180.0:
+            angle = 360.0 - angle
+            r = Quaternion((-r.w, -r.x, -r.y, -r.z))
+        if angle <= limit or r.axis.length < 1e-9:
+            return r
+        return Quaternion(r.axis, math.radians(limit))
+
+    return cap(swing, swing_max) @ cap(twist, twist_max)
+
+
 def limb_rotations(rest, key, j, parent_rot, prev_hinge):
     """Armature-space delta rotations of a limb pair (upper, lower) and the hinge used."""
     _upper, _lower, (a, b, c) = LIMBS[key]
@@ -230,24 +255,67 @@ def limb_rotations(rest, key, j, parent_rot, prev_hinge):
     return r_upper, r_lower, hinge.normalized()
 
 
-def blade_direction(j, min_gap):
-    """Stick direction from both wrists, tip side from the right hand (index - pinky).
+def blade_directions(clip, min_gap):
+    """Stick direction of every frame of `clip` (armature space).
 
-    Hands closer than `min_gap` (armature units): the right hand's own landmarks only.
+    The line through both wrists (both hands hold the stick; the right hand's own landmarks
+    when the hands are closer than `min_gap`, armature units) is kept continuous from frame to
+    frame (a stick cannot swap ends in 1/24 s); its tip side is the one most frames' right
+    hand points to (index and thumb side of the fist, landmarks too noisy frame by frame).
     """
-    line = j[vc.WRIST_L] - j[vc.WRIST_R]
-    side = j[vc.INDEX_R] - j[vc.PINKY_R]
-    thumb = j[vc.THUMB_R] - j[vc.WRIST_R]
-    hint = side.normalized() + thumb.normalized() * 0.5
-    if line.length < min_gap:
-        return hint.normalized()
-    line.normalize()
-    if line.dot(hint) < 0.0:
-        line = -line
-    return line
+    lines, votes = [], 0.0
+    for j in clip.frames:
+        side = j[vc.INDEX_R] - j[vc.PINKY_R]
+        thumb = j[vc.THUMB_R] - j[vc.WRIST_R]
+        hint = side.normalized() + thumb.normalized() * 0.5
+        line = j[vc.WRIST_L] - j[vc.WRIST_R]
+        line = hint.normalized() if line.length < min_gap else line.normalized()
+        if lines and line.dot(lines[-1]) < 0.0:
+            line = -line
+        lines.append(line)
+        votes += line.dot(hint.normalized())
+    return lines if votes >= 0.0 else [-v for v in lines]
 
 
-def solve(rest, clip, index, state):
+def blade_sides(clip, blades):
+    """Roll reference of the fist about the blade, per frame: the forearm off the blade.
+
+    Where the stick runs along the forearm this is ill-defined: such frames take the axis of
+    the nearest well-defined frames (interpolated in time, made perpendicular to their own
+    blade), so the fist never spins when the stick passes along the forearm.
+    """
+    raw, strength = [], []
+    for j, blade in zip(clip.frames, blades, strict=True):
+        fore = (j[vc.WRIST_R] - j[vc.ELBOW_R]).normalized()
+        side = fore - blade * fore.dot(blade)
+        raw.append(side.normalized() if side.length > 1e-6 else blade.orthogonal())
+        strength.append(side.length)
+    good = [i for i, s_ in enumerate(strength) if s_ >= 0.6]
+    if not good:
+        j = clip.frames[0]
+        hinge = (j[vc.ELBOW_R] - j[vc.SHOULDER_R]).cross(j[vc.WRIST_R] - j[vc.ELBOW_R])
+        good_axis = [hinge.normalized()] * len(blades)
+    else:
+        good_axis = []
+        for i in range(len(blades)):
+            before = [g for g in good if g <= i]
+            after = [g for g in good if g >= i]
+            if before and after and before[-1] != after[0]:
+                p, n = before[-1], after[0]
+                w = (i - p) / (n - p)
+                good_axis.append(raw[p] * (1.0 - w) + raw[n] * w)
+            else:
+                good_axis.append(raw[before[-1] if before else after[0]])
+    out = []
+    for i, blade in enumerate(blades):
+        filled = good_axis[i] - blade * good_axis[i].dot(blade)
+        filled = filled.normalized() if filled.length > 1e-6 else raw[i]
+        w = smoothstep(0.3, 0.6, strength[i])
+        out.append((raw[i] * w + filled * (1.0 - w)).normalized())
+    return out
+
+
+def solve(rest, clip, index, state, blade, side):
     """Armature-space pose matrices of every mapped bone for one clip frame."""
     tgt = rest.tgt
     j = clip.frames[index]
@@ -285,14 +353,17 @@ def solve(rest, clip, index, state):
         r[lower] = rl
     r["Wrist.L"] = r["LowerArm.L"]
     # Right wrist: blade along the stick, hand as close as possible to the forearm line.
-    blade = blade_direction(j, 0.12 * clip.scale)
-    forearm = (
-        r["LowerArm.R"] @ tgt.rest["LowerArm.R"].to_3x3() @ Vector((0.0, 1.0, 0.0))
-    )
     local = basis(rest.grip_blade, Vector((0.0, 1.0, 0.0)))
-    want = basis(blade, forearm)
+    want = basis(blade, side)
     wrist_abs = want @ local.transposed()
-    r["Wrist.R"] = wrist_abs @ tgt.rest["Wrist.R"].to_3x3().inverted()
+    # Deviation from the keyframed hand-forearm relation, split into a twist about the
+    # forearm (pronation, carried by the wrist bone here) and a swing (the fist bending),
+    # each capped: a stick running along the forearm would otherwise fold the fist back.
+    dev = (
+        r["LowerArm.R"].inverted() @ wrist_abs @ tgt.rest["Wrist.R"].to_3x3().inverted()
+    ).to_quaternion()
+    dev = cap_swing_twist(dev, rest.limb["arm.R"][1], WRIST_SWING_DEG, WRIST_TWIST_DEG)
+    r["Wrist.R"] = r["LowerArm.R"] @ dev.to_matrix()
     for side in ("L", "R"):
         heel = j[vc.HEEL_L if side == "L" else vc.HEEL_R]
         toe = j[vc.TOE_L if side == "L" else vc.TOE_R]
@@ -300,7 +371,7 @@ def solve(rest, clip, index, state):
         foot_left = foot_fwd.cross(up)  # left = forward x up
         r["Foot." + side] = lu(foot_left, up) @ rest.foot.transposed()
     rot = {b: r[b] @ tgt.rest[b].to_3x3() for b in ORDER}
-    wrist_rel = (rot["LowerArm.R"].inverted() @ rot["Wrist.R"]).to_quaternion()
+    wrist_rel = dev
     pos = {}
     for b in ORDER:
         p = PARENT[b]
@@ -357,8 +428,10 @@ def solve_clip(rest, clip):
     """Pose matrices (armature space) of every frame of a clip, feet pinned."""
     state = {}
     rots, poss, wrists = [], [], []
+    blades = blade_directions(clip, 0.12 * clip.scale)
+    sides = blade_sides(clip, blades)
     for i in range(len(clip.frames)):
-        rot, pos, wrist = solve(rest, clip, i, state)
+        rot, pos, wrist = solve(rest, clip, i, state, blades[i], sides[i])
         rots.append(rot)
         poss.append(pos)
         wrists.append(wrist)

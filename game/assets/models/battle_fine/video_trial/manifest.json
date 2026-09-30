@@ -1,0 +1,125 @@
+{
+ "bones": [
+  "Root",
+  "Body",
+  "Hips",
+  "Abdomen",
+  "Torso",
+  "Chest",
+  "Neck",
+  "Head",
+  "Shoulder.L",
+  "UpperArm.L",
+  "LowerArm.L",
+  "Wrist.L",
+  "Shoulder.R",
+  "UpperArm.R",
+  "LowerArm.R",
+  "Wrist.R",
+  "UpperLeg.L",
+  "LowerLeg.L",
+  "Foot.L",
+  "UpperLeg.R",
+  "LowerLeg.R",
+  "Foot.R",
+  "Prop",
+  "Nock",
+  "Arrow"
+ ],
+ "clip_sources": {
+  "guard": {
+   "note": "stick on the right shoulder, swaying",
+   "quality": {
+    "contact_frames": [
+     16,
+     28
+    ],
+    "foot_below_rest_m": -0.0,
+    "foot_slide_m": 0.235,
+    "jitter_deg_per_frame2": 2.22,
+    "wrist_r_bend_max_deg": 113.0,
+    "wrist_r_max_deg_per_frame": 1.7
+   },
+   "solve_s": 0.0,
+   "source": "player video IMG_6456 frames 0-34 @30fps, x1.0 speed",
+   "yaw_deg": 45.0
+  },
+  "overhead": {
+   "note": "raised then cut down across",
+   "quality": {
+    "contact_frames": [
+     37,
+     37
+    ],
+    "foot_below_rest_m": 0.0,
+    "foot_slide_m": 0.0,
+    "jitter_deg_per_frame2": 5.37,
+    "wrist_r_bend_max_deg": 72.5,
+    "wrist_r_max_deg_per_frame": 13.4
+   },
+   "solve_s": 0.0,
+   "source": "player video IMG_6455 frames 54-135 @30fps, x1.8 speed",
+   "yaw_deg": 45.0
+  },
+  "slash": {
+   "note": "horizontal cut and back",
+   "quality": {
+    "contact_frames": [
+     35,
+     35
+    ],
+    "foot_below_rest_m": 0.0,
+    "foot_slide_m": 0.0,
+    "jitter_deg_per_frame2": 12.73,
+    "wrist_r_bend_max_deg": 103.6,
+    "wrist_r_max_deg_per_frame": 31.2
+   },
+   "solve_s": 0.0,
+   "source": "player video IMG_6458 frames 12-72 @30fps, x1.4 speed",
+   "yaw_deg": 45.0
+  },
+  "thrust": {
+   "note": "two-handed lunge and back",
+   "quality": {
+    "contact_frames": [
+     23,
+     21
+    ],
+    "foot_below_rest_m": -0.0,
+    "foot_slide_m": 0.185,
+    "jitter_deg_per_frame2": 3.44,
+    "wrist_r_bend_max_deg": 122.1,
+    "wrist_r_max_deg_per_frame": 15.1
+   },
+   "solve_s": 0.0,
+   "source": "player video IMG_6457 frames 57-126 @30fps, x1.4 speed",
+   "yaw_deg": 70.0
+  }
+ },
+ "clips": {
+  "guard": {
+   "frames": 28,
+   "loop": true,
+   "start": 0
+  },
+  "overhead": {
+   "frames": 37,
+   "loop": false,
+   "start": 28
+  },
+  "slash": {
+   "frames": 35,
+   "loop": false,
+   "start": 65
+  },
+  "thrust": {
+   "frames": 40,
+   "loop": false,
+   "start": 100
+  }
+ },
+ "fps": 24,
+ "rig": "human",
+ "source": "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/nt13-video-mocap.md",
+ "texture": "human.bones.bin"
+}

@@ -164,14 +164,25 @@ def clean_runs(mask, min_run=3, max_gap=2):
 
 
 def foot_contacts(
-    image, rate, scale=None, speed_max=0.35, lift_max=0.04, min_run=3, max_gap=2
+    image,
+    rate,
+    scale=None,
+    speed_max=0.35,
+    lift_max=0.04,
+    min_run=3,
+    max_gap=2,
+    heights=None,
+    lift_m=0.07,
 ):
     """Planted feet (frames, 2) from normalised image landmarks (frames, 33, >=2).
 
-    A foot is planted while its lowest point (heel or toe) is within `lift_max` body heights
-    of the other foot's in the image and its speed is under `speed_max` body heights per
-    second. `scale` (frames,) is the body height in image units (shoulders to ankles by
-    default), which makes the thresholds independent of the distance to the camera.
+    A foot is planted while its speed in the image is under `speed_max` body heights per
+    second and it is not lifted: with `heights` (frames, 2), the 3D height of each foot's
+    lowest point, not more than `lift_m` above the other foot; without, its lowest point
+    within `lift_max` body heights of the other foot's in the image (fooled by a staggered
+    stance: the rear foot stands higher in the image). `scale` (frames,) is the body height in
+    image units (shoulders to ankles by default), which makes the thresholds independent of
+    the distance to the camera.
     """
     img = np.asarray(image, dtype=np.float64)[..., :2]
     if scale is None:
@@ -194,7 +205,10 @@ def foot_contacts(
             v[1:-1] = np.minimum(
                 step[:-1], step[1:]
             )  # a planted frame is slow on one side
-        lifted = (low[1 - f] - low[f]) / scale > lift_max
+        if heights is not None:
+            lifted = heights[:, f] - heights[:, 1 - f] > lift_m
+        else:
+            lifted = (low[1 - f] - low[f]) / scale > lift_max
         out[:, f] = clean_runs((v / scale < speed_max) & ~lifted, min_run, max_gap)
     return out
 
@@ -327,7 +341,10 @@ def clean(world, image, rate, out_rate=24.0, min_cutoff=1.5, beta=0.3):
     lengths = segment_lengths(pts)
     pts = enforce_lengths(pts, lengths=lengths)
     img = one_euro(np.asarray(image, dtype=np.float64)[..., :2], rate, min_cutoff, beta)
-    contacts = foot_contacts(img, rate)
+    heights = np.stack(
+        [pts[:, [heel, toe], 2].min(axis=1) for _a, heel, toe in FEET], 1
+    )
+    contacts = foot_contacts(img, rate, heights=heights)
     root = one_euro(root_trajectory(pts, contacts), rate, 1.0, 0.0)
     pts = pts + root[:, None, :]
     return {

@@ -106,6 +106,19 @@ def test_foot_contacts_planted_and_stepping():
     assert not contacts[15:25, 1].any()
 
 
+def test_foot_contacts_staggered_stance_uses_heights():
+    """A rear foot higher in the image is still planted when its 3D height says so."""
+    img = _walking_image()
+    for i in vc.FEET[1]:
+        img[:, i, 1] = (
+            img[:, vc.FEET[0][0], 1] - 0.08
+        )  # static, 8 % higher in the image
+        img[:, i, 0] = 0.45
+    assert not vc.foot_contacts(img, 30.0)[:, 1].any()
+    heights = np.zeros((len(img), 2))
+    assert vc.foot_contacts(img, 30.0, heights=heights)[:, 1].all()
+
+
 def test_root_trajectory_follows_the_planted_foot():
     """A planted foot sliding back relative to the hips means the body moved forward."""
     n = 10
