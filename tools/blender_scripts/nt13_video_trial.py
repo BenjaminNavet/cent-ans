@@ -60,16 +60,7 @@ WRIST_TWIST_DEG = 110.0
 #  yaw: direction of the video (degrees about up, 0 = towards the camera, 90 = the image's
 #  right) that becomes the figure's forward, note)
 CLIPS = [
-    (
-        "guard",
-        "IMG_6456",
-        0,
-        34,
-        1.0,
-        True,
-        45.0,
-        "stick on the right shoulder, swaying",
-    ),
+    ("guard", "IMG_6455", 0, 48, 1.0, True, 45.0, "stick on the right shoulder, still"),
     ("overhead", "IMG_6455", 54, 135, 1.8, False, 45.0, "raised then cut down across"),
     ("slash", "IMG_6458", 12, 72, 1.4, False, 45.0, "horizontal cut and back"),
     ("thrust", "IMG_6457", 57, 126, 1.4, False, 70.0, "two-handed lunge and back"),
