@@ -172,3 +172,21 @@ NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
 | 2026-09-30 | OpenRouter | NB0 : sonde icon avec ancre (google/gemini-3.1-flash-lite-image, 1K) | 0,04 $ | 0,03 $ | 1,56 $ |
 | 2026-09-30 | OpenRouter | NB0 : sonde icon sans ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,70 $ |
 | 2026-09-30 | OpenRouter | NB0 : sonde icon avec ancre (google/gemini-3-pro-image, 1K) | 0,14 $ | 0,14 $ | 1,84 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel_illuminated v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 1,91 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel_illuminated v1 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 1,98 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel_illuminated v2 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,05 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,12 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel v1 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,19 $ |
+| 2026-09-30 | OpenRouter | NB1 : panel v2 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,26 $ |
+| 2026-09-30 | OpenRouter | NB1 : top_bar v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,33 $ |
+| 2026-09-30 | OpenRouter | NB1 : top_bar v1 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,40 $ |
+| 2026-09-30 | OpenRouter | NB1 : top_bar v2 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,47 $ |
+| 2026-09-30 | OpenRouter | NB1 : tooltip v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,54 $ |
+| 2026-09-30 | OpenRouter | NB1 : tooltip v1 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,61 $ |
+| 2026-09-30 | OpenRouter | NB1 : tooltip v2 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,68 $ |
+| 2026-09-30 | OpenRouter | NB1 : initial_dragon v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,75 $ |
+| 2026-09-30 | OpenRouter | NB1 : fleuron_divider v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,82 $ |
+| 2026-09-30 | OpenRouter | NB1 : drollery_hare v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,89 $ |
+| 2026-09-30 | OpenRouter | NB1 : drollery_musician v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,96 $ |
+| 2026-09-30 | OpenRouter | NB1 : corner_rinceau v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 3,03 $ |
+| 2026-09-30 | OpenRouter | NB1 : cartouche_title v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 3,10 $ |
