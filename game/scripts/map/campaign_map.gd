@@ -334,6 +334,14 @@ func _setup_settlements() -> void:
 		clutter.name = "GroundClutter"
 		add_child(clutter)
 		clutter.setup(map_data, terrain, vegetation, settlement_layer.vegetation_exclusions())
+	# HB5 : affleurements rocheux à l'échelle du paysage (pentes, crêtes, haute montagne, lande).
+	var outcrops := RockOutcrops.new()
+	outcrops.name = "RockOutcrops"
+	add_child(outcrops)
+	var road_lines: Array = []
+	for road: Dictionary in settlement_data.roads:
+		road_lines.append(road["points"])
+	outcrops.setup(map_data, terrain, vegetation, settlement_layer.vegetation_exclusions(), road_lines)
 	life = CampaignLife.new()  # CV1
 	life.name = "CampaignLife"
 	add_child(life)

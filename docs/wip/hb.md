@@ -23,3 +23,31 @@ Session principale :
 - Carte de couleur : section `biomes` de `colormap_style.yaml` (palettes, garrigue en taches, forêts gardées près des rivières en steppe, cultures/prés par biome tirés par bloc, multiplicateurs bocage/openfield/vigne/présence), poids fondus sur 25 km. Re-cuite (pic mémoire ~11,6 Go).
 - Tests : `tools/tests/test_biomes.py` (38, dont 21 lieux réels : Athènes/Péloponnèse = 3, Rostov/Volgograd = 4…), `test_colormap.py` inchangé et vert.
 - Points ouverts : lisière ouest de la steppe droite vers 26-28° E (héritée de `landcover.dryness`) ; terrasses méditerranéennes non dessinées ; Dobroudja semi-aride (BSk intérieur au sud de 44° N).
+
+## HB5 rochers (branche `feat/hb-rocks`, worktree `../gp-hb-rocks`)
+État : terminé, non fusionné.
+- Modèles (0,30 $, aucune reprise) : `game/assets/models/rocks/hb/<id>_lod{0,1,2}.glb`, falaise
+  calcaire, chaos de granit, barre stratifiée, aiguille alpine, grès rouge, blocs erratiques
+  moussus. `tools/blender_scripts/hb_rock_outcrops.py fal|cleanup` (brutes
+  `~/dev/cent-ans-raw/hb/rocks/`) ; formes à aiguilles (collapse Blender calé à ~1 200 triangles)
+  par `hb_rock_lods.py` (remaillage voxel grossier par LOD, `voxel_divs`). Triangles : 278-542 /
+  137-231 / 45-60.
+- Catalogue `data/art/rock_outcrops.yaml` (syntaxe de flux, lu par Godot sans les lignes `#`) +
+  `data/schemas/art_rock_outcrops.schema.json` + `tools/tests/test_art_rock_outcrops_schema.py`.
+- Couche `RockOutcrops` (`game/scripts/map/rock_outcrops.gd`, shader `rock_outcrops.gdshader`),
+  branchée dans `campaign_map.gd` après `GroundClutter`. Tuiles de 256 u (une par tuile de
+  terrain), semis dans le `WorkerThreadPool` (pré-examen par blocs de 16 u), un MultiMesh par
+  modèle et par tuile ; biome lu dans `biomes.png` (repli altitude / position tant que HB1 n'est
+  pas fusionné) ; pied au plus bas de l'emprise sur la surface affichée, recalage sur
+  `chunk_surface_changed` ; taille réelle de près, ×2,6 au-delà de d = 110, hauteur ×
+  exagération^0,5 ; falaises et barres posées le long des courbes de niveau ; effacement
+  950 → 1200. `--no-outcrops` pour les A/B.
+- Test `game/tests/hb5_rocks_test.gd` OK (Mont-Blanc 223, Écrins 257, Sancy 59, Cantal 51 dans
+  r = 40 ; Beauce et golfe de Gascogne 0 ; 60 pieds vérifiés, écart max 0,8 u) ; smoke OK.
+- Mesures (Alpes, test headless) : d = 60 : 3 572 instances, 529 k triangles, 25 appels ;
+  d = 250 : 6 631 / 366 k / 87 ; d = 400 : 8 976 / 498 k / 137 (plafond 900 k jamais atteint).
+  `--fps-probe` 1280 × 720 A/B (machine chargée, FPS non significatifs) : d = 250 +147 k
+  primitives, +52 appels ; d = 400 +223 k, +80 appels. Semis d'une tuile alpine ≤ 0,8 s (fil de
+  travail), pose ≤ 0,6 ms (fil principal).
+Ouvert : jugement visuel (aucune capture faite) ; réglage de densité et du grossissement une fois
+`biomes.png` (HB1) fusionné ; ombres limitées au LOD0.
