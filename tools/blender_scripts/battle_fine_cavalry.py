@@ -218,6 +218,195 @@ def horse_materials(pieces):
             me.materials.append(bs.material(eq.C_EXACT, EYE_RGB))
 
 
+# CR4: mane and tail as strand locks (triangular prisms) instead of the CC0 hair cards,
+# whose alpha the battle shader does not read (solid dark blocks). Per level: (strands,
+# rings before the tip); LOD0 stays within the cards' doubled budget (mane 1200, tail 700).
+STRANDS = {
+    "horse_tail": ((22, 5), (6, 2), (2, 1)),
+    "horse_mane": ((44, 4), (10, 2), (4, 1)),
+}
+STRAND_WIDTH = {"horse_tail": (0.021, 0.004), "horse_mane": (0.016, 0.003)}
+
+
+def _golden(i, n):
+    """Point `i` of `n` spread over the unit disk (sunflower pattern)."""
+    r = math.sqrt((i + 0.5) / n)
+    a = i * 2.39996
+    return r * math.cos(a), r * math.sin(a)
+
+
+def _polyline_at(pts, t):
+    """Point at parameter `t` in [0, 1] along the polyline `pts` (uniform per segment)."""
+    if t <= 0:
+        return pts[0].copy()
+    x = min(t, 1.0) * (len(pts) - 1)
+    i = min(int(x), len(pts) - 2)
+    return pts[i].lerp(pts[i + 1], x - i)
+
+
+def _tail_paths(verts, card_table, n, rings):
+    """Strand polylines of the tail: centroid line from the dock, cross-section spread."""
+    import numpy as np
+
+    root_pts = [
+        v for v, w in zip(verts, card_table, strict=True) if _dominant(w) == "Tail1"
+    ] or [max(verts, key=lambda v: v.z)]
+    root = sum(root_pts, Vector()) / len(root_pts)
+    d = [(v - root).length for v in verts]
+    far = max(d)
+    bins = 8
+    centres, axes = [], []
+    for m in range(bins):
+        lo, hi = far * m / bins, far * (m + 1) / bins
+        sel = [v for v, x in zip(verts, d, strict=True) if lo <= x <= hi] or [root]
+        c = sum(sel, Vector()) / len(sel)
+        centres.append(c)
+        arr = (
+            np.array([tuple(v - c) for v in sel]) if len(sel) > 2 else np.eye(3) * 0.01
+        )
+        cov = arr.T @ arr / max(len(sel), 1)
+        axes.append(cov)
+    centres[0] = root
+    paths = []
+    for i in range(n):
+        a, b = _golden(i, n)
+        length = 0.72 + 0.28 * ((i * 0.6180339) % 1.0)
+        pts = []
+        for j in range(rings + 1):
+            t = length * j / rings
+            c = _polyline_at(centres, t)
+            m = min(int(t * (bins - 1) + 0.5), bins - 1)
+            vals, vecs = np.linalg.eigh(axes[m])
+            e1 = Vector(vecs[:, 2]) * math.sqrt(max(vals[2], 1e-6)) * 1.6
+            e2 = Vector(vecs[:, 1]) * math.sqrt(max(vals[1], 1e-6)) * 1.6
+            spread = 0.25 + 0.75 * min(1.0, t * 3.0)  # the locks gather at the dock
+            pts.append(c + (e1 * a + e2 * b) * spread)
+        paths.append(pts)
+    return paths
+
+
+def _mane_paths(verts, n, rings):
+    """Strand polylines of the mane: from the crest down the card, along the neck."""
+    import numpy as np
+
+    mean = sum(verts, Vector()) / len(verts)
+    arr = np.array([tuple(v - mean) for v in verts])
+    _vals, vecs = np.linalg.eigh(arr.T @ arr)
+    e = Vector(vecs[:, 2])
+    s = [(v - mean).dot(e) for v in verts]
+    lo, hi = min(s), max(s)
+    bins = max(6, min(14, n // 3))
+    lines = []
+    for m in range(bins):
+        a, b = lo + (hi - lo) * m / bins, lo + (hi - lo) * (m + 1) / bins
+        sel = [v for v, x in zip(verts, s, strict=True) if a <= x <= b]
+        if len(sel) < 3:
+            lines.append(None)
+            continue
+        root = max(sel, key=lambda v: v.z)
+        sel.sort(key=lambda v: (v - root).length)
+        groups = [
+            sel[len(sel) * k // rings : len(sel) * (k + 1) // rings]
+            for k in range(rings)
+        ]
+        line = [root] + [sum(g, Vector()) / len(g) for g in groups if g]
+        while len(line) < rings + 1:
+            line.append(line[-1].copy())
+        lines.append(line)
+    good = [x for x in lines if x is not None]
+    lines = [x if x is not None else good[0] for x in lines]
+    paths = []
+    for i in range(n):
+        u = (i + 0.5) / n * (bins - 1)
+        k = min(int(u), bins - 2) if bins > 1 else 0
+        f = u - k
+        base = [
+            p.lerp(q, f)
+            for p, q in zip(lines[k], lines[min(k + 1, bins - 1)], strict=True)
+        ]
+        jit = ((i * 0.7548776) % 1.0 - 0.5) * 0.012
+        length = 0.75 + 0.25 * ((i * 0.5698403) % 1.0)
+        pts = [
+            _polyline_at(base, length * j / rings) + e * jit for j in range(rings + 1)
+        ]
+        paths.append(pts)
+    return paths
+
+
+def strands(card, level, mount):
+    """Replace the hair card `card` by strand locks with its weights and material."""
+    name = card.name
+    n, rings = STRANDS[name][level]
+    w0, w1 = STRAND_WIDTH[name]
+    table = fh.weight_table(card)
+    verts = [card.matrix_world @ v.co for v in card.data.vertices]
+    paths = (
+        _tail_paths(verts, table, n, rings)
+        if name == "horse_tail"
+        else _mane_paths(verts, n, rings)
+    )
+    bm = bmesh.new()
+    uv_of = {}
+    for pts in paths:
+        ring_prev = None
+        for j, p in enumerate(pts):
+            t = j / rings
+            if j == rings:
+                tip = bm.verts.new(p)
+                uv_of[tip] = (0.5, 1.0)
+                for k in range(3):
+                    bm.faces.new((ring_prev[k], ring_prev[(k + 1) % 3], tip))
+                break
+            tan = (pts[j + 1] - p).normalized()
+            ref = Vector((1, 0, 0)) if abs(tan.x) < 0.9 else Vector((0, 1, 0))
+            nrm = tan.cross(ref).normalized()
+            bi = tan.cross(nrm)
+            w = w0 + (w1 - w0) * t
+            ring = []
+            for k in range(3):
+                ang = 2 * math.pi * k / 3
+                v = bm.verts.new(p + (nrm * math.cos(ang) + bi * math.sin(ang)) * w)
+                uv_of[v] = (k / 3, t)
+                ring.append(v)
+            if ring_prev is not None:
+                for k in range(3):
+                    bm.faces.new(
+                        (
+                            ring_prev[k],
+                            ring_prev[(k + 1) % 3],
+                            ring[(k + 1) % 3],
+                            ring[k],
+                        )
+                    )
+            ring_prev = ring
+    for f in bm.faces:
+        f.normal_update()
+    uv = bm.loops.layers.uv.new("UVTex")
+    for f in bm.faces:
+        for loop in f.loops:
+            loop[uv].uv = uv_of[loop.vert]
+    me = bpy.data.meshes.new(name + "_strands")
+    bm.to_mesh(me)
+    bm.free()
+    obj = bpy.data.objects.new(name + "_strands", me)
+    bpy.context.scene.collection.objects.link(obj)
+    for m in card.data.materials:
+        me.materials.append(m)
+    weights = fh.nearest_weights(obj, card, table)
+    fh.set_weights(obj, weights)
+    mod = obj.modifiers.new("arm", "ARMATURE")
+    mod.object = mount.harm
+    obj.parent = mount.harm
+    obj.matrix_parent_inverse = mount.harm.matrix_world.inverted()
+    me.shade_smooth()
+    for k in list(card.keys()):
+        obj[k] = card[k]
+    bpy.data.objects.remove(card)
+    obj.name = name
+    me.name = name
+    return obj
+
+
 def fine_horse(mount, level, htype):
     """The fine horse at `level` (fitted, slimmed, decimated, coded); returns pieces."""
     lod0 = HORSE_LOD[0]
@@ -247,10 +436,10 @@ def fine_horse(mount, level, htype):
         if o.name.startswith("horse_eye") and not budget["eyes"]:
             bpy.data.objects.remove(o)
             continue
-        if level > 0 and o.name in budget:
-            decimate_rest(o, budget[o.name])
         if o.name in CARDS:
-            double_sided(o)
+            o = strands(o, level, mount)  # CR4 (no card decimation, no back faces)
+        elif level > 0 and o.name in budget:
+            decimate_rest(o, budget[o.name])
         out.append(o)
     if ref is not None:
         copy_shade(body, ref)

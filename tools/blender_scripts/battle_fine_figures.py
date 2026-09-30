@@ -1098,6 +1098,7 @@ def export_figure(fig_name, rigs, bake=False):
     if recipe["rig"] == "cavalry":
         arm = poses.RIDE["mount"].rarm
     entry.update(bs.pole_entry(recipe, arm))
+    entry.update(bs.prop_entry(recipe, arm))
     return entry
 
 
