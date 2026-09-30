@@ -232,3 +232,4 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Mat
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul HB |
 |---|---|---|---|---|---|
 | 2026-09-30 | — | HB : plan et ADR 0143 (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-30 | fal.ai | HB5 rochers : 6 affleurements (flux-2 + bria + trellis, 0,05 $ chacun, aucune reprise) | 0,30 $ | 0,30 $ | 0,30 $ |

@@ -33,6 +33,8 @@ const LODS := 3
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## Grille grossière (par côté) du pré-examen d'une tuile : une tuile plate et basse est vide.
 const PRECHECK := 12
+## Côté (unités) des blocs pré-examinés dans une tuile (3 × 3 sondes chacun).
+const BLOCK_UNITS := 16.0
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 @export var threaded: bool = true
@@ -481,8 +483,17 @@ func _seed_tile(key: Vector2i) -> Dictionary:
 	var t0 := Time.get_ticks_usec()
 	var rect := _tile_rect(key)
 	var parts: Dictionary = {}
-	if not _tile_may_hold(rect):
+	if not _tile_may_hold(rect, PRECHECK):
 		return {"parts": parts, "ms": (Time.get_ticks_usec() - t0) / 1000.0}
+	# Blocs de `BLOCK_UNITS` : ceux qui ne portent rien (plaine basse) sautent leurs candidats.
+	var blocks_side := maxi(1, int(round(rect.size.x / BLOCK_UNITS)))
+	var block_size := rect.size.x / blocks_side
+	var holds := PackedByteArray()
+	holds.resize(blocks_side * blocks_side)
+	for bj in blocks_side:
+		for bi in blocks_side:
+			var block := Rect2(rect.position + Vector2(bi, bj) * block_size, Vector2(block_size, block_size))
+			holds[bj * blocks_side + bi] = 1 if _tile_may_hold(block.grow(2.0), 3) else 0
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(Vector3i(key.x, key.y, 0x4B5))
 	var noise := FastNoiseLite.new()
@@ -515,6 +526,10 @@ func _seed_tile(key: Vector2i) -> Dictionary:
 			var stretch := rng.randf_range(0.85, 1.15)
 			var tint := rng.randf()
 			if roll >= p_max or not map_data.is_land_px(int(p.x), int(p.y)):
+				continue
+			var bx := clampi(int((p.x - rect.position.x) / block_size), 0, blocks_side - 1)
+			var by := clampi(int((p.y - rect.position.y) / block_size), 0, blocks_side - 1)
+			if holds[by * blocks_side + bx] == 0:
 				continue
 			var cluster := clampf(noise.get_noise_2d(p.x, p.y) + 0.5 + bias, 0.0, 1.0)
 			if roll >= p_max * cluster:
@@ -585,8 +600,9 @@ func _seed_tile(key: Vector2i) -> Dictionary:
 	return {"parts": parts, "ms": (Time.get_ticks_usec() - t0) / 1000.0}
 
 
-## Pré-examen grossier : une tuile sans relief, sans altitude ni lande ne porte rien.
-func _tile_may_hold(rect: Rect2) -> bool:
+## Pré-examen grossier (`side` × `side` sondes) : une zone sans relief, sans altitude ni lande
+## ne porte rien.
+func _tile_may_hold(rect: Rect2, side: int) -> bool:
 	var min_slope := INF
 	var min_alt := INF
 	var any_heath := false
@@ -595,9 +611,9 @@ func _tile_may_hold(rect: Rect2) -> bool:
 		min_slope = minf(min_slope, float(entry["min_slope"]))
 		min_alt = minf(min_alt, float(entry["min_altitude_m"]))
 		any_heath = any_heath or float(entry["heath"]) > 0.0
-	for j in PRECHECK:
-		for i in PRECHECK:
-			var p := rect.position + (Vector2(i, j) + Vector2(0.5, 0.5)) * rect.size / PRECHECK
+	for j in side:
+		for i in side:
+			var p := rect.position + (Vector2(i, j) + Vector2(0.5, 0.5)) * rect.size / side
 			if not map_data.is_land_px(int(p.x), int(p.y)):
 				continue
 			var probe := _terrain_probe(p.x, p.y)
@@ -695,6 +711,7 @@ func _grounded(seeded: Dictionary, source: Dictionary) -> Dictionary:
 	for m: int in parts:
 		var part: Dictionary = parts[m]
 		part["buffer"] = _regrounded(part, source)
+		part["aabb"] = _aabb_of(part["buffer"], part["radii"])
 	return seeded
 
 
@@ -729,7 +746,7 @@ func _install_tile(key: Vector2i, seeded: Dictionary) -> void:
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		mmi.visible = false
-		var record := {"mmi": mmi, "model": m, "buffer": buffer, "points": part["points"], "radii": part["radii"], "aabb": _aabb_of(buffer, part["radii"])}
+		var record := {"mmi": mmi, "model": m, "buffer": buffer, "points": part["points"], "radii": part["radii"], "aabb": part.get("aabb", AABB())}
 		mmi.multimesh = _multimesh(models[m]["meshes"][2], buffer, record["aabb"])
 		add_child(mmi)
 		entry["parts"].append(record)
