@@ -1,0 +1,272 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/sea_lanes.schema.json",
+  "title": "Routes maritimes",
+  "description": "Fichier data/naval/sea_lanes.json (lot SL1, ADR 0117) : grandes routes de navigation entre ports, règles de coût, de gros temps, de commerce et d'interception.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rules",
+    "lanes"
+  ],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cost_per_km",
+        "min_cost_steps",
+        "hostile_control_security",
+        "kinds"
+      ],
+      "properties": {
+        "cost_per_km": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Points de mouvement par kilomètre de route maritime."
+        },
+        "min_cost_steps": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Coût minimal d'une route, en pas (× points_per_step)."
+        },
+        "hostile_control_security": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Sécurité perdue par une route commerciale par point de maîtrise ennemie de la mer (× maîtrise / 100)."
+        },
+        "kinds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "coastal",
+            "open_sea"
+          ],
+          "properties": {
+            "coastal": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "storm_loss_percent",
+                "trade_season_factor",
+                "intercept_factor"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Nom affiché du type de route."
+                },
+                "storm_loss_percent": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "spring",
+                    "summer",
+                    "autumn",
+                    "winter"
+                  ],
+                  "properties": {
+                    "spring": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "summer": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "autumn": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "winter": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "description": "Pertes (% des hommes) des régiments embarqués par gros temps, selon la saison."
+                },
+                "trade_season_factor": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "spring",
+                    "summer",
+                    "autumn",
+                    "winter"
+                  ],
+                  "properties": {
+                    "spring": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "summer": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "autumn": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "winter": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "description": "Facteur de valeur du commerce passant par la route, selon la saison."
+                },
+                "intercept_factor": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Facteur de la chance d'interception d'une traversée (NV1)."
+                }
+              }
+            },
+            "open_sea": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "storm_loss_percent",
+                "trade_season_factor",
+                "intercept_factor"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Nom affiché du type de route."
+                },
+                "storm_loss_percent": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "spring",
+                    "summer",
+                    "autumn",
+                    "winter"
+                  ],
+                  "properties": {
+                    "spring": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "summer": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "autumn": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "winter": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "description": "Pertes (% des hommes) des régiments embarqués par gros temps, selon la saison."
+                },
+                "trade_season_factor": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "spring",
+                    "summer",
+                    "autumn",
+                    "winter"
+                  ],
+                  "properties": {
+                    "spring": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "summer": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "autumn": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "winter": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "description": "Facteur de valeur du commerce passant par la route, selon la saison."
+                },
+                "intercept_factor": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "description": "Facteur de la chance d'interception d'une traversée (NV1)."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "lanes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "from",
+          "to",
+          "sea",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^lane_[a-z0-9_]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^set_[a-z0-9_]+$",
+            "description": "Port de départ (colonie « port »)."
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^set_[a-z0-9_]+$",
+            "description": "Port d'arrivée (colonie « port »)."
+          },
+          "sea": {
+            "type": "string",
+            "pattern": "^sea_[a-z0-9_]+$",
+            "description": "Mer traversée : maîtrise, interception, blocus."
+          },
+          "kind": {
+            "enum": [
+              "coastal",
+              "open_sea"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

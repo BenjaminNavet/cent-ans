@@ -414,6 +414,18 @@ def geo_rivers_render() -> None:
         )
 
 
+@geo_app.command("sea-lanes")
+def geo_sea_lanes() -> None:
+    """Trace les routes maritimes sur l'eau : sea_lanes_px.json (lot SL1)."""
+    from cent_ans_tools.geo import sea_lanes
+
+    result = sea_lanes.build()
+    _print_sizes("Routes maritimes", [result.output])
+    console.print(f"{result.lanes} routes, {result.total_km:.0f} km au total")
+    for warning in result.warnings:
+        console.print(f"[yellow]{warning}[/yellow]")
+
+
 @geo_app.command("detail-dem")
 def geo_detail_dem(
     zones: str = typer.Option(
