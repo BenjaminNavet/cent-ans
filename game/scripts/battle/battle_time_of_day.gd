@@ -38,6 +38,7 @@ func capture(env: Environment, sun: DirectionalLight3D, p_weather: String) -> vo
 	_env = env
 	_sun = sun
 	weather = p_weather
+	RenderingServer.global_shader_parameter_set("battle_water_light", Vector4.ONE)  # VN5 : neutre
 	var preset: Dictionary = BattleAtmosphere.PRESETS.get(weather, BattleAtmosphere.PRESETS["clear"])
 	_base = {
 		"elevation": -rad_to_deg(sun.rotation.x),
@@ -126,6 +127,10 @@ func apply(hour: float) -> void:
 	# L'ambiance ne prend qu'une part de la teinte (les faces à l'ombre restent lisibles).
 	_env.ambient_light_color = (_base["ambient_color"] as Color) * fog_tint.lerp(Color.WHITE, 0.5)
 	_env.tonemap_exposure = float(_base["exposure"]) * float(k["exposure"])
+	# VN5 : l'eau (émissive, `battle_water.gdshader`) suit la lumière : ciel reflété teinté comme
+	# l'horizon, fond assombri avec le jour (sinon bande bleu-gris lumineuse au crépuscule).
+	var water_tint: Color = (k["horizon_tint"] as Color) * clampf(light_level * 1.1 + 0.1, 0.2, 1.0)
+	RenderingServer.global_shader_parameter_set("battle_water_light", Vector4(water_tint.r, water_tint.g, water_tint.b, clampf(light_level, 0.2, 1.0)))
 	var want_hdri := _using_hdri and bool(k["hdri"])
 	if want_hdri:
 		if _env.sky != _hdri_sky:
