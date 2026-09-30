@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Captures de contrôle du lot VT2 (moulins, panaches de cheminée et figurants FK à l'échelle 1:1,
 ## ADR 0138 addendum) : Paris à d = 15 (ville 1:1, moulins de sa couronne, fumées), puis un moulin
-## de Paris à d = 3 (sous `figure_max_distance` : gens, bêtes, charrettes) et d = 1 (moulin, maisons
+## des environs de Paris à d = 3 (sous `figure_max_distance` : gens, bêtes, charrettes) et d = 1 (moulin, maisons
 ## et figurants côte à côte).
 ## Fenêtre réelle (pas headless) :
 ##   godot --path game --resolution 640x400 --script res://tests/vt2_shots.gd -- --out=<dossier>
@@ -14,8 +14,8 @@ const PARIS := Vector2(2212.9, 3204.5)
 ## [nom, point (null : un moulin de Paris), distance du rig (unités), cap (degrés)]
 const SHOTS := [
 	["paris_d15", PARIS, 15.0, 0.0],
-	["paris_mill_d3", null, 3.0, 0.0],
-	["paris_mill_d1", null, 1.0, 0.0],
+	["mill_d3", null, 3.0, 0.0],
+	["mill_d1", null, 1.0, 0.0],
 ]
 
 
@@ -47,7 +47,7 @@ func _init() -> void:
 	var life: CampaignLife = map.get("life")
 	for layer in root.find_children("*", "CanvasLayer", true, false):
 		(layer as CanvasLayer).visible = false
-	var mill := _paris_mill(settlements, life)
+	var mill := _paris_mill(settlements, life, rig, data)
 	print("VT2 Paris windmill at %s" % mill)
 	for shot: Array in SHOTS:
 		if only != "" and not (shot[0] as String) in only.split(","):
@@ -77,24 +77,40 @@ func _init() -> void:
 			effects.get_node("Chimneys").visible if effects != null else "-",
 			JSON.stringify(effects.stats) if effects != null else "-",
 			JSON.stringify(folk.view_report(cam)) if folk != null else "-"])
+		# Moulin visé : taille à l'écran estimée (hors tout, ailes comprises) et distance de l'œil.
+		# Position à l'écran indicative seulement (écart constaté avec le rendu, non élucidé).
+		var mill_top := (0.3 + 0.288) * LifeEffects.WINDMILL_SCALE * MapPropScale.shared().windmill_scale()
+		var base := Vector3(mill.x, terrain.surface_height_at(mill.x, mill.y) if terrain != null else data.surface_world_at(mill.x, mill.y), mill.y)
+		var stored := -1.0
+		if effects != null:
+			for mp: Array in effects.get("_windmill_points"):
+				if (mp[0] as Vector2).is_equal_approx(mill):
+					stored = float(mp[4])
+		print("VT2 ground %s mill_y=%.5f surface_now=%.5f heightmap=%.5f" % [shot[0], stored, base.y, data.surface_world_at(mill.x, mill.y)])
+		print("VT2 probe %s eye_to_mill=%.2f mill_px=%.1f at %s" % [shot[0], cam.global_position.distance_to(base),
+			(cam.unproject_position(base) - cam.unproject_position(base + Vector3(0.0, mill_top, 0.0))).length(), cam.unproject_position(base)])
 	map.queue_free()
 	await process_frame
 	quit(0)
 
 
-## Un moulin de la couronne de Paris (repli : Paris).
-func _paris_mill(settlements: SettlementLayer, life: CampaignLife) -> Vector2:
+## Le moulin à moins de 40 u de Paris où la caméra descend le plus bas (le plancher des villes
+## emblématiques tient la caméra à d ≥ 7 autour de Paris ; repli : Paris).
+func _paris_mill(settlements: SettlementLayer, life: CampaignLife, rig: CampaignCamera, data: MapData) -> Vector2:
 	if settlements == null or life == null or life.effects == null:
 		return PARIS
-	var index := -1
-	for i in settlements.data.settlements.size():
-		if str(settlements.data.settlements[i]["id"]) == "set_paris":
-			index = i
-			break
+	var best := PARIS
+	var best_min := INF
 	for point: Array in life.effects.get("_windmill_points"):
-		if int(point[5]) == index:
-			return point[0]
-	return PARIS
+		var px: Vector2 = point[0]
+		if px.distance_to(PARIS) > 40.0:
+			continue
+		var floor_d := rig.min_distance_at(Vector3(px.x, data.surface_world_at(px.x, px.y), px.y))
+		if floor_d < best_min - 1e-3:
+			best_min = floor_d
+			best = px
+	print("VT2 mill floor distance %.2f" % best_min)
+	return best
 
 
 func _settle(terrain: TerrainBuilder, settlements: SettlementLayer, life: CampaignLife) -> void:

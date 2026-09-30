@@ -159,7 +159,7 @@ func rebuild(province_states: Dictionary) -> void:
 		var seed_value := absi(str(entry["id"]).hash())
 		var state: Dictionary = province_states.get(str(entry["province"]), {})
 		# VT-G : rayon et hauteur réels (1 u ≈ 719 m) ; cheminées dans l'emprise bâtie, en tête de toit.
-		var radius := _layer.model_radius(i) * CHIMNEY_RADIUS_RATIO
+		var radius := _footprint_radius(i) * CHIMNEY_RADIUS_RATIO
 		var top := _layer.model_top(i) * CHIMNEY_TOP_RATIO
 		# FK4 : colonie pestiférée, cheminées éteintes.
 		var chimneys := 0 if quiet_settlements.has(str(entry["id"])) else int(CHIMNEYS.get(kind, 1))
@@ -236,7 +236,7 @@ func _build_windmills(province_states: Dictionary) -> void:
 		var devastation := float(province_states.get(str(entry["province"]), {}).get("devastation", 0.0))
 		for k in count:
 			var angle := float((seed_value / (k + 2)) % 628) / 100.0
-			var distance := _layer.model_radius(i) * (WINDMILL_RING_MIN + float((seed_value / (k + 5)) % 60) / 100.0)
+			var distance := _footprint_radius(i) * (WINDMILL_RING_MIN + float((seed_value / (k + 5)) % 60) / 100.0)
 			var pose := _settlement_point(i, Vector2(cos(angle), sin(angle)) * distance, 0.0, 0.0)
 			_windmill_points.append([pose[0], float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0,
 				devastation < RUIN_MIN_DEVASTATION, _pose_y(pose), i, pose[4], pose[5], pose[6]])
@@ -316,6 +316,17 @@ func _write_windmills(indices: Array) -> void:
 
 func _surface_y(px: Vector2) -> float:
 	return _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
+
+
+## VT2 : rayon bâti de la colonie `i` (unités monde) : emprise réelle de `SettlementLayer`, ou, pour
+## une ville v2 absente de `towns_1340.json` (Paris, Londres…), son `extent_m` : sans quoi ses
+## moulins (à taille réelle) tombaient au milieu de ses rues.
+func _footprint_radius(i: int) -> float:
+	var radius := _layer.model_radius(i)
+	var city := LandmarkV2Library.for_settlement(str(_layer.data.settlements[i]["id"]))
+	if not city.is_empty():
+		radius = maxf(radius, LandmarkV2Library.extent_units(city))
+	return radius
 
 
 ## SZ4b : point lié à la colonie `i` : décalage `offset` (échelle de la carte) autour de la maquette

@@ -1759,13 +1759,20 @@ l'exagération commune de SZ4b.
 - `LifeEffects` : taille réelle écrite dans les instances des panaches (matériau `prop_scale` 1 ;
   les incendies gardent `fire_scale`), moulins à échelle constante ; plus de réécriture d'échelle
   (moulins, panaches) pendant un zoom ; nœuds des moulins masqués au-delà de leur portée.
+- Couronne des moulins et semis des cheminées sur le rayon bâti ; pour une ville v2 absente de
+  `towns_1340.json` (Paris, Londres…), `extent_m` de `data/landmarks_v2/` (sans quoi les moulins
+  de Paris, à taille réelle, tombaient dans ses rues).
 - `FolkPool` : `world_scale()` constant ; `figure_height` et `figure_min_view_fraction` retirés
   (données, schéma, miroir `MapSceneRules` du cœur) au profit de `figure_max_distance` ; niveau de
   détail 1 sous d = 1, 2 au-delà ; rayon d'activité `min(activity_radius, max(1,3 d, 6))` = 6 u.
 - Tests : `sz4_prop_scale_test.gd` (échelles, tailles réelles, portées, instances),
   `fk_folk_test.gd` (vue rapprochée à d = 2, échelle 1:1, rien au-delà de la portée). Captures :
   `godot --path game --resolution 640x400 --script res://tests/vt2_shots.gd -- --out=<dossier>
-  --hide-armies --map-weather=clear` (Paris d = 15, un moulin de Paris à d = 3 et 1).
+  --hide-armies --map-weather=clear` (Paris d = 15, le moulin des environs de Paris où la caméra
+  descend le plus bas, à d = 3 et 1 ; demande la pyramide de relief `data/map/pyramid/`, sans quoi
+  le plancher de caméra reste à 7). Constats (640 × 400) : à d = 15, moulins et fumées sont
+  invisibles, comme les maisons de Paris (une tache brune) ; à d = 1, moulin ≈ 9 px, figurants
+  ≈ 1 px ; les arbres, restés grossis, dominent tout.
 
 ## Interface des colonies (lot C5)
 
