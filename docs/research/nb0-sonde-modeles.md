@@ -21,4 +21,4 @@ Prompts : construits par `portraits.build_prompt`, `event_art.build_prompt`,
 NB2 + ancre par défaut ; Lite + ancre pour les icônes en grand nombre.
 
 ## Verdict du joueur
-(en attente)
+NB2 + ancre validé par le joueur (30/09) pour NB1 et les chantiers suivants.

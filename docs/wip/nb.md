@@ -28,8 +28,8 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
 - [x] `data/art/style/anchor.jpg` (v0, 1536 px JPEG) + `anchor.yaml` ; bible DA § 13. Commit.
 
 ### NB0 — Sonde des modèles (≤ 1,5 $)
-- [ ] 3 sujets × {NB2, Lite, Pro} × {sans, avec ancre}, 1K ; grille `docs/research/nb0_models.png`.
-- [ ] **Jugement joueur** → `docs/research/nb0-sonde-modeles.md`. Commit.
+- [x] 3 sujets × {NB2, Lite, Pro} × {sans, avec ancre}, 1K ; grille `docs/research/nb0_models.png`.
+- [x] **Jugement joueur** → `docs/research/nb0-sonde-modeles.md`. Commit.
 
 ### NB1 — Kit d'interface (≤ 5 $)
 - [x] Chaîne locale (`key_out`, `fit_to_piece`, `seam_fix`, `contact_sheet`, repli dans
