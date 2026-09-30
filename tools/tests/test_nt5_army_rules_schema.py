@@ -23,9 +23,9 @@ def _check(rules: str, schema: str) -> None:
 
 
 def test_army_rules_match_schema() -> None:
-    """The army cap file matches its schema; the cap is 20 as in battle."""
+    """The army cap file matches its schema; the cap is 40 as in battle."""
     _check("armies.json", "army_rules.schema.json")
-    assert _load(DATA / "rules" / "armies.json")["max_units"] == 20
+    assert _load(DATA / "rules" / "armies.json")["max_units"] == 40
 
 
 def test_siege_engine_rules_match_schema() -> None:

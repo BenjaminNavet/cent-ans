@@ -107,8 +107,8 @@ static func save_config(value: Dictionary) -> void:
 
 func _initial_config() -> Dictionary:
 	var out := {
-		"attacker": {"faction": DEFAULT_FACTIONS["attacker"], "budget": int(rules.get("default_budget", 6000)), "units": []},
-		"defender": {"faction": DEFAULT_FACTIONS["defender"], "budget": int(rules.get("default_budget", 6000)), "units": []},
+		"attacker": {"faction": DEFAULT_FACTIONS["attacker"], "budget": int(rules.get("default_budget", 12000)), "units": []},
+		"defender": {"faction": DEFAULT_FACTIONS["defender"], "budget": int(rules.get("default_budget", 12000)), "units": []},
 		"terrain": "plains", "season": "summer", "weather": "", "hour": "",
 		"siege": false, "place": "city", "fortification": int(rules.get("default_fortification", 2)), "player_side": "attacker",
 		"year": int(rules.get("default_year", 1337)), "engines": default_engines(),
@@ -225,7 +225,7 @@ func _build_side(side: String) -> Control:
 	var budget := SpinBox.new()
 	budget.name = "Budget"
 	budget.min_value = float(rules.get("min_budget", 1000))
-	budget.max_value = float(rules.get("max_budget", 30000))
+	budget.max_value = float(rules.get("max_budget", 60000))
 	budget.step = float(rules.get("budget_step", 500))
 	budget.value_changed.connect(func(value: float) -> void: set_budget(side, int(value)))
 	top.add_child(budget)
@@ -514,7 +514,7 @@ func can_buy(side: String, unit_id: String) -> bool:
 	var side_report: Dictionary = report.get(side, {})
 	var cost := int(side_report.get("cost", 0))
 	var budget := int(side_report.get("budget", config[side]["budget"]))
-	var max_units := int(side_report.get("max_units", rules.get("max_units_per_side", 20)))
+	var max_units := int(side_report.get("max_units", rules.get("max_units_per_side", 40)))
 	return cost + int(entry["cost"]) <= budget and (config[side]["units"] as Array).size() < max_units
 
 

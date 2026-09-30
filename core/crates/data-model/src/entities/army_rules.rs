@@ -98,7 +98,7 @@ mod tests {
 
     #[test]
     fn bundled_rules_parse() {
-        assert_eq!(ArmyRules::default().max_units, 20);
+        assert_eq!(ArmyRules::default().max_units, 40);
         let engines = SiegeEngineRules::default();
         assert_eq!(engines.engines[0].kind, BuiltEngineKind::Ladders);
     }

@@ -133,7 +133,7 @@
         "depth_m": { "type": "number", "minimum": 800, "maximum": 2400 },
         "line_gap_m": { "type": "number", "minimum": 200, "maximum": 1500 },
         "zone_depth_m": { "type": "number", "minimum": 200, "maximum": 1000 },
-        "max_regiments_per_side": { "type": "integer", "minimum": 10, "maximum": 120 }
+        "max_regiments_per_side": { "type": "integer", "minimum": 10, "maximum": 200 }
       }
     },
     "relief": {

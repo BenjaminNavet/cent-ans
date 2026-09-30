@@ -69,6 +69,7 @@ func _test_army_strip() -> void:
 	var layout := strip.card_layout(20)
 	_check(int(layout["rows"]) <= 2, "20 units should fit in 2 rows, got %s" % layout)
 	_check(int(strip.card_layout(8)["rows"]) == 1, "8 units should fit in 1 row")
+	_check(int(strip.card_layout(40)["rows"]) <= 4, "40 units should fit in 4 rows, got %s" % strip.card_layout(40))
 
 	# Noms : jamais coupés au milieu d'un mot (mot entier ou abréviation terminée par un point).
 	var font := strip.get_theme_default_font()

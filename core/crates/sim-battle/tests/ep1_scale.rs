@@ -66,7 +66,7 @@ fn head_count_picks_the_field() {
     let small = BattleSim::new(big_setup(10), 3).unwrap();
     assert_eq!(small.scale().key, "skirmish");
     assert_eq!((small.field().width, small.field().depth), (1200.0, 800.0));
-    assert_eq!(small.max_on_field(), 20);
+    assert_eq!(small.max_on_field(), 40);
 
     // 63 × 120 × 2 = 15 120 soldiers.
     let epic = BattleSim::new(big_setup(63), 3).unwrap();

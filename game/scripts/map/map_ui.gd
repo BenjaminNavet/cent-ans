@@ -811,7 +811,7 @@ func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 
 
 ## Capacité affichée du bandeau (`8/20`) tant que la simulation n'expose pas `max_units`.
-const DEFAULT_ARMY_CAPACITY := 20
+const DEFAULT_ARMY_CAPACITY := 40
 const HUD_MARGIN := 16.0
 const LOG_WIDTH := 420.0
 
