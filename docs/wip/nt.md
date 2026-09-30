@@ -39,6 +39,7 @@ Spec : `docs/superpowers/specs/2026-09-29-nt-nuit-tww3-design.md`. ADR : 0126 (t
    BIP) ; les garder hors dépôt (dossier local ignoré) et ne commiter que les clips cuits, après
    lecture de la clause de redistribution de la licence choisie.
    **Essai NT12 (30/09, 0 $)** : base CMU (seule obtenue sans formulaire) reciblée sur 6 clips de mêlée, option `--mocap-trial` ; gain non net (pieds qui glissent 2-18 cm, pas de vrai impact ni mort, bras gauche repris du keyframé). Détail `docs/research/mocap-gratuite.md`, `docs/wip/nt12-mocap.md`. À télécharger à la main pour poursuivre l'essai (formulaire/e-mail) : MoCap Online T.C. Sword (redistribution publique interdite → hors dépôt), Rokoko 13 combats + 10 armes (redistribution non précisée → hors dépôt), Quaternius UAL2 (CC0) ; dossier `~/dev/cent-ans-mocap-src/`.
+   **Essai NT13 (30/09, 0 $)** : vidéos du joueur → MediaPipe (Apache 2.0) → reciblage, option `--video-trial` (guard, overhead, slash, thrust). Verdict : égal au keyframé, mieux que CMU ; mouvement naturel mais bruit (slash), glissement des pieds (thrust 18 cm), profondeur faible. Second tournage conseillé : trépied, 60 i/s, 45° de la caméra, épée à une main + bouclier, pleine vitesse, 1 s immobile avant/après. Captures NT12 à refaire (bogue `reload` corrigé en NT13). Note `docs/wip/nt13-video-mocap.md`.
 2. **Clé fal.ai (GA3, image → 3D)** — pour enrichir figurines (textures peintes) et roster
    (39 types d'unités). Voir `docs/wip/ga.md` l.196.
 3. **Chantier guerre civile / prétendants** (Armagnacs et Bourguignons, États généraux, aide

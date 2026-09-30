@@ -7,7 +7,7 @@ extends Node3D
 ## - Un `MultiMesh` par (rôle, activité) pour les figurines skinnées des batailles (mêmes
 ##   maillages et texture d'os que `ArmyFigures`, shader `battle_soldier_skinned` compilé avec
 ##   `FK_TRAVEL`) et un par accessoire (`folk_prop.gdshader`) ; modèles : `FolkModels`.
-## - Plafond fixe de figurines (`pool_cap` de `data/rules/map_scenes.json`, repli 600), divisé par
+## - Plafond fixe de figurines (`pool_cap` de `data/rules/map_scenes.json`, repli 260), divisé par
 ##   deux tant que le budget d'image (`FrameBudget`) est dépassé ; accessoires : un quart du
 ##   plafond.
 ## - Actif au palier proche seulement (`ZoomTiers.near_weight`), dans un rayon autour du point
@@ -24,7 +24,7 @@ extends Node3D
 ## Ils posent leurs figurines avec `add` (en marche) et `add_static` (sur place).
 
 const DATA_FILE := "rules/map_scenes.json"
-const DEFAULT_CAP := 600
+const DEFAULT_CAP := 260
 const DEFAULT_RADIUS := 60.0
 ## Hauteur d'une figurine (unités monde) à l'échelle de la carte, au-dessus de `shrink_start` de
 ## `MapPropScale` ; elle rejoint la taille réelle (1,8 m) au palier vallée.

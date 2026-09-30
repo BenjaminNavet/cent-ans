@@ -9,15 +9,15 @@ extends Node3D
 ## Palier près (oiseaux) et près/moyen (bateaux) ; un `MultiMesh` par famille.
 
 const BIRDS_SHADER := preload("res://shaders/life_birds.gdshader")
-const FLOCKS := 8
+const FLOCKS := 3
 const BIRDS_PER_FLOCK := 9
 ## Rayon (px carte) autour du point visé où vivent les vols.
 const FLOCK_AREA := 70.0
 ## Importance minimale (Strahler) d'un fleuve navigable et longueur par bateau (px carte).
 const RIVER_MIN_IMPORTANCE := 5
-const RIVER_PX_PER_BOAT := 120.0
-const MAX_RIVER_BOATS := 90
-const MAX_SEA_LANES := 40
+const RIVER_PX_PER_BOAT := 260.0
+const MAX_RIVER_BOATS := 40
+const MAX_SEA_LANES := 20
 const SEA_LANE_MIN_PX := 35.0
 const SEA_LANE_MAX_PX := 260.0
 const RIVER_BOAT_SCALE := 0.8

@@ -18,6 +18,9 @@ const FINE_RIG_PREFIX := "fine_"
 ## NT12 : essai de mocap gratuite (CMU) reciblée sur le rig fin `human` ; `--mocap-trial` après
 ## `--` ajoute ses images à la texture d'os et y repointe les clips substitués.
 const MOCAP_TRIAL_DIR := "res://assets/models/battle_fine/mocap_trial/"
+## NT13 : clips tirés des vidéos du joueur (pose MediaPipe) reciblés sur le rig fin `human` ;
+## `--video-trial` après `--`, même mécanisme que l'essai NT12 (prioritaire s'il est aussi demandé).
+const VIDEO_TRIAL_DIR := "res://assets/models/battle_fine/video_trial/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
@@ -35,6 +38,7 @@ static var _meshes: Dictionary = {}
 static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
 static var mocap_trial_forced: int = -1  # NT12 : voir `mocap_trial_enabled`
+static var video_trial_forced: int = -1  # NT13 : voir `video_trial_enabled`
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation: Dictionary = {}
@@ -322,8 +326,10 @@ static func _merge_fine(base: Dictionary) -> void:
 		figures[fig_name] = entry
 	base["rigs"] = rigs
 	base["figures"] = figures
-	if mocap_trial_enabled():
-		_merge_mocap_trial(rigs)
+	if video_trial_enabled():
+		_merge_mocap_trial(rigs, VIDEO_TRIAL_DIR)
+	elif mocap_trial_enabled():
+		_merge_mocap_trial(rigs, MOCAP_TRIAL_DIR)
 	if ga3_figures_enabled():
 		_merge_ga3(figures)
 
@@ -381,15 +387,25 @@ static func _setup_ga3(mat: ShaderMaterial, kind: String, variant: int) -> void:
 
 ## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
 ## `mocap_trial_forced` (captures A/B dans un même processus) : -1 = ligne de commande, 0/1 forcé,
-## puis `reload()`.
+## puis `reload_caches()`.
 static func mocap_trial_enabled() -> bool:
 	if mocap_trial_forced >= 0:
 		return fine_enabled() and mocap_trial_forced == 1
 	return fine_enabled() and OS.get_cmdline_user_args().has("--mocap-trial")
 
 
+## NT13 : essai vidéo actif (figurines fines seulement, défauts inchangés sans l'option).
+## `video_trial_forced` : -1 = ligne de commande, 0/1 forcé (captures A/B), puis `reload_caches()`.
+static func video_trial_enabled() -> bool:
+	if video_trial_forced >= 0:
+		return fine_enabled() and video_trial_forced == 1
+	return fine_enabled() and OS.get_cmdline_user_args().has("--video-trial")
+
+
 ## NT12 : vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.
-static func reload() -> void:
+## NT13 : ne pas nommer `reload` : `BattleSkinned.reload()` appelle `Script.reload()` du script
+## lui-même, qui remet les variables statiques (dont `*_trial_forced`) à leur valeur initiale.
+static func reload_caches() -> void:
 	_loaded = false
 	_manifest = {}
 	_textures = {}
@@ -397,12 +413,13 @@ static func reload() -> void:
 
 
 ## NT12 : repointe les clips substitués du rig fin vers les images mocap, placées après les
-## images du rig (même os ; la texture est concaténée par `bone_texture`).
-static func _merge_mocap_trial(rigs: Dictionary) -> void:
-	var text := FileAccess.get_file_as_string(MOCAP_TRIAL_DIR + "manifest.json")
+## images du rig (même os ; la texture est concaténée par `bone_texture`). NT13 : `dir` = dossier
+## de l'essai (`MOCAP_TRIAL_DIR` CMU ou `VIDEO_TRIAL_DIR` vidéo).
+static func _merge_mocap_trial(rigs: Dictionary, dir: String = MOCAP_TRIAL_DIR) -> void:
+	var text := FileAccess.get_file_as_string(dir + "manifest.json")
 	var parsed = JSON.parse_string(text) if text != "" else null
 	if not parsed is Dictionary:
-		push_warning("BattleSkinned: essai mocap sans manifeste %s" % MOCAP_TRIAL_DIR)
+		push_warning("BattleSkinned: essai mocap sans manifeste %s" % dir)
 		return
 	var trial: Dictionary = parsed
 	var key := FINE_RIG_PREFIX + str(trial.get("rig", "human"))
@@ -425,8 +442,9 @@ static func _merge_mocap_trial(rigs: Dictionary) -> void:
 		clips[clip_name] = c
 		substituted.append(clip_name)
 	entry["clips"] = clips
-	entry["mocap_texture"] = MOCAP_TRIAL_DIR + str(trial.get("texture", ""))
+	entry["mocap_texture"] = dir + str(trial.get("texture", ""))
 	entry["mocap_clips"] = substituted
+	entry["mocap_trial_dir"] = dir
 
 
 ## Nombre d'images d'une texture d'os `CAB1` (en-tête seul), 0 si illisible.
