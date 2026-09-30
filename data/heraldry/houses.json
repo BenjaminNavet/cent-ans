@@ -2217,9 +2217,9 @@
       "name": "Paléologue de Byzance",
       "arms_of": "fac_byzantium",
       "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
-      "description": "Maison régnante de l'Empire depuis 1261 (Michel VIII).",
+      "description": "Maison régnante de l'Empire depuis 1261 (Michel VIII). Croix cantonnée de quatre briquets (les « quatre B »), rendus ici en fusées ; emblème connu par les armoriaux occidentaux, forme exacte en 1337 discutée.",
       "source": "Palaiologos",
-      "certainty": "attesté",
+      "certainty": "incertain",
       "factions": [
         "fac_byzantium"
       ],
