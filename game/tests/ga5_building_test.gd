@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Lot GA5 : matières de bâtiments en 2k (données `data/art/building_materials.json`, lue par
 ## `BuildingMaterials`) — vérifie que les 12 matières texturées (dont `TimberFrame`, torchis/
-## colombage, non câblée au kit) chargent, mesure la mémoire VRAM ajoutée par le passage 1k → 2k
+## colombage, câblée au kit par le lot TF) chargent, mesure la mémoire VRAM ajoutée par le passage 1k → 2k
 ## (albédo) / 512 → 1k (normale, rugosité), format réel comme `ga2_ground_test.gd`.
 ## Usage : godot --headless --path game --script res://tests/ga5_building_test.gd
 
@@ -40,16 +40,16 @@ func _init() -> void:
 	BuildingMaterials.material("Plaster")
 	names = BuildingMaterials.SPECS.keys()
 	print("GA5 matières texturées : %d" % names.size())
-	if names.size() != 12:
-		print("GA5: 12 matières texturées attendues (11 historiques + TimberFrame), trouvé %d" % names.size())
+	if names.size() != 13:
+		print("GA5: 13 matières texturées attendues (11 historiques + TimberFrame, TimberFrameFar), trouvé %d" % names.size())
 		ok = false
 	if not ("TimberFrame" in names):
 		print("GA5: TimberFrame absente des données")
 		ok = false
-	if not ("TimberFrame" in BuildingMaterials.ATLAS_LAYERS):
-		print("GA5 TimberFrame absente de l'atlas (attendu : pas encore câblée au kit Blender)")
-	else:
-		print("GA5: TimberFrame ne devrait pas être dans l'atlas avant réexport du kit")
+	# Lot TF : `TimberFrame` câblée, dernière couche de l'atlas (indice 14), texturée malgré sa
+	# place après les couches unies (détail : `tf_timber_frame_test.gd`).
+	if BuildingMaterials.ATLAS_LAYERS.find("TimberFrame") != 14:
+		print("GA5: TimberFrame attendue en couche 14 de l'atlas (lot TF), trouvé %d" % BuildingMaterials.ATLAS_LAYERS.find("TimberFrame"))
 		ok = false
 
 	var total := 0

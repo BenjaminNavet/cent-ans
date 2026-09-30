@@ -16,6 +16,8 @@ uniform sampler2DArray albedo_array : source_color, filter_linear_mipmap_anisotr
 uniform vec4 layer_tint[16];
 uniform float layer_tile[16];
 uniform int first_plain = 11;
+// Lot TF : dernière couche unie ; les couches suivantes (`TimberFrame`) sont texturées.
+uniform int plain_last = 13;
 uniform float snow = 0.0;
 uniform int roof_first = 7;
 uniform int roof_last = 10;
@@ -100,7 +102,8 @@ float roof_hash(vec2 p) {
 void fragment() {
 	vec4 tint = layer_tint[layer];
 	vec3 base = vec3(1.0);
-	if (layer < first_plain) {
+	bool textured = layer < first_plain || layer > plain_last;
+	if (textured) {
 		vec2 uv = UV;
 		if (box_uv) {
 			vec3 n = abs(world_n);
@@ -111,7 +114,7 @@ void fragment() {
 	}
 	vec3 albedo = base * tint.rgb * COLOR.rgb * (1.0 + tint_shift * 0.35);
 	float far = ba_far(v_age_pos);
-	if (aging > 0.0 && layer < first_plain) {
+	if (aging > 0.0 && textured) {
 		bool roof = layer >= roof_first && layer <= roof_last;
 		float age = aging * (0.6 + 0.8 * v_seed);
 		vec3 n = normalize(world_n);

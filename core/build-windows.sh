@@ -34,5 +34,13 @@ esac
 
 mkdir -p "$GAME_BIN"
 TARGET_DIR="${CARGO_TARGET_DIR:-$CORE_DIR/target}"
-cp "$TARGET_DIR/$TARGET/$PROFILE/cent_ans.dll" "$GAME_BIN/cent_ans.$PROFILE.dll"
+SRC="$TARGET_DIR/$TARGET/$PROFILE/cent_ans.dll"
+DEST="$GAME_BIN/cent_ans.$PROFILE.dll"
+# Only replace an outdated DLL (lanceur, ADR 0117): Windows refuses to overwrite a DLL that a
+# running Godot has loaded.
+if cmp -s "$SRC" "$DEST"; then
+    echo "cent_ans.$PROFILE.dll is up to date in game/bin/"
+    exit 0
+fi
+cp "$SRC" "$DEST"
 echo "Copied cent_ans.$PROFILE.dll to game/bin/"

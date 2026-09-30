@@ -39,18 +39,12 @@ lattis de poteaux/sablières/entretoises dessiné algorithmiquement (`build_text
 seed déterministe) et mélangé entre `lime_plaster` (remplissage, déjà CC0 Poly Haven) et
 `rough_wood` assombri/désaturé (poutres, déjà CC0 Poly Haven) — aucun nouvel asset externe, 0 $.
 
-`TimberFrame` est une matière **prête mais non câblée** : `data/art/building_materials.json`
-la marque `"wired": false` et elle n'est pas dans `atlas_layers`. Elle est utilisable dès
-aujourd'hui via `BuildingMaterials.material("TimberFrame")` (matériau individuel), mais aucune
-surface du kit Blender (`tools/blender_scripts/building_kit.py`) ne porte ce nom pour l'instant,
-et l'ajouter à l'atlas `Building` demanderait un changement + réexport du kit côté
-`kit_export.py` (l'indice de couche de l'atlas est baké dans la couleur de sommet des `.glb`
-déjà exportés — un ajout en milieu de tableau les désaligne, un ajout en fin de tableau tombe
-après `first_plain` et serait traité comme une matière unie par `building_atlas.gdshader`).
-Choix de conception à trancher côté joueur/lead avant de câbler : quelle proportion de bâtiments
-(quel type, quelle région — la charpenterie apparente est plus caractéristique de Normandie/
-Île-de-France/Angleterre que du Midi) reçoit `TimberFrame` à la place de `Plaster`. Voir
-`docs/wip/ga.md`, section GA5.
+Lot TF : ce lattis peint est la matière `TimberFrameFar` (couche 15 de l'atlas `Building`),
+posée seulement au niveau de détail `low` (kit des villes) où les poteaux ne sont pas modelés.
+Au niveau `high` (bataille), les panneaux sous les poutres modelées prennent `TimberFrame`
+(couche 14) = `timber_daub_diff.jpg` : torchis clair, sans poutres peintes, dérivé de
+`lime_plaster_diff.jpg` (réchauffé vers l'ocre, taches de terre, brins de paille ; seed fixe,
+`build_textures.py::timber_daub()`), normales et rugosité de `medieval_wall_01`. Voir ADR 0105 §TF.
 
 ## Régénérer
 

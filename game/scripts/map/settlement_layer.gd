@@ -73,6 +73,9 @@ var markers: SettlementMarkers
 ## Lot DV : pièces de maquettes qui portent ombre, et état courant de la coupure des ombres.
 var _shadow_geometries: Array[GeometryInstance3D] = []
 var _model_shadows := true
+## FC1 : zoom au-delà duquel les maquettes ne portent plus d'ombre, selon le préréglage de
+## qualité (`model_shadow_distance`) ; < 0 : `tiers.model_shadow_distance` (avant FC1).
+var quality_model_shadow_distance: float = -1.0
 ## Lot DV2 : atlas des écus des détenteurs.
 var heraldry := HeraldryAtlas.new()
 var _marker_rank: PackedInt32Array = PackedInt32Array()
@@ -202,7 +205,23 @@ var _lift_frame := -1
 var _lift_scale := 1.0
 
 
+## FC1 : préréglage de qualité (groupe `RenderQuality.CLIENT_GROUP`).
+func apply_render_quality(p: Dictionary) -> void:
+	quality_model_shadow_distance = float(p.get("model_shadow_distance", -1.0))
+	if data != null:
+		_update_model_shadows(_camera_distance, true)
+
+
+func model_shadow_limit() -> float:
+	if quality_model_shadow_distance >= 0.0:
+		return quality_model_shadow_distance
+	return tiers.model_shadow_distance if tiers != null else 500.0
+
+
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
+	if not is_in_group(RenderQuality.CLIENT_GROUP):
+		add_to_group(RenderQuality.CLIENT_GROUP)
+		quality_model_shadow_distance = float(RenderQuality.preset().get("model_shadow_distance", -1.0))
 	for child in get_children():
 		child.queue_free()
 	map_data = map
@@ -343,9 +362,9 @@ func _limit_model(model: Node) -> void:
 
 ## Lot DV (ADR 0124) : les maquettes restent jusqu'à ~1250 ; au-delà de `model_shadow_distance`,
 ## leurs ombres coûtent des appels de dessin sans se voir. Bascule seulement au franchissement.
-func _update_model_shadows(camera_distance: float) -> void:
-	var shadows := camera_distance < tiers.model_shadow_distance
-	if shadows == _model_shadows:
+func _update_model_shadows(camera_distance: float, force := false) -> void:
+	var shadows := camera_distance < model_shadow_limit()
+	if shadows == _model_shadows and not force:
 		return
 	_model_shadows = shadows
 	var setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

@@ -5,6 +5,11 @@ Tri fait sur `main` 2c475b06 (agent Explore) : 20 points ouverts, faisables sans
 Exclus : parties pilotes, test sur vrai PC Windows, écoutes, publication du relief, dépenses cloud,
 FXAA, retrait de `--coarse-figures` (point 17, choix du joueur).
 
+## Décisions du joueur en attente (30/09, chantier NT)
+
+Mocap payante, clé fal.ai (GA3), chantier guerre civile / prétendants : détail et pistes d'achat dans
+`docs/wip/nt.md` § « Pour le joueur ».
+
 ## Reprendre
 
 Lire ce fichier, `git worktree list`, `git branch --list 'feat/rs-*'`. Chaque lot a son
@@ -22,8 +27,9 @@ Worktree `../gp-rs-merge` et branche `integration/rs` supprimés.
 
 Suites du 29/09 (toutes dans `main`) : O (test C2 de l'avant-bataille durci ; correctif déjà fait par 65dd4452),
 P (icône « Raser » déjà faite, 982dec2b, 0,05 $), K3 (`settle/labels` p99 8,9 → 1,8 ms, `declutter` 16,7 → 5,8,
-`map.settlements` 19,4 → 8,0), correctif IB2 de `diplomacy_panel.gd`. Reste hors RS : écrans de siège en
-bataille (après TW2 T4), FE F8. `da7d_overlap_test` (seuil 4 ms) échoue sous charge, base comprise.
+`map.settlements` 19,4 → 8,0), correctif IB2 de `diplomacy_panel.gd`. Écrans de siège en bataille : T4 dans main,
+aucune taille en dur restante ; la session NT (sièges) les reprend, rien à faire côté RS. **RS clos (30/09).**
+Reste hors RS : FE F8. `da7d_overlap_test` (seuil 4 ms) échoue sous charge, base comprise.
 
 Suites possibles (état au 28/09 soir) :
 - ~~`PreBattleDialog._layout()` déborde à 1280×640~~ — FAIT 28/09 (65dd4452) : colonnes et conditions défilantes,

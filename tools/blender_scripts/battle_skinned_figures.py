@@ -222,7 +222,7 @@ FIGURES = {
         ],
         "variants": 2,
     },
-    # Knights: as the men-at-arms, great helm or bassinet, shield and lance, horse in a
+    # Knights: as the men-at-arms, visored or open bassinet, shield and lance, horse in a
     # caparison of the side's livery and arms.
     "cavalry_0": {
         "rig": "cavalry",
@@ -235,7 +235,9 @@ FIGURES = {
         "horse_budget": HORSE_BUDGET,
         "horse_equipment": [("caparison", 0), ("saddle", 0)],
         "equipment": [
-            ("great_helm", 1),
+            # CR2: visored bassinet (hounskull) with aventail rather than the great helm,
+            # which read as a tin can in close-up (and was a tournament helm by the 1340s).
+            ("bassinet", 1, {"visor": True}),
             ("bassinet", 2),
             ("heater_shield", 0),
             ("lance", 0),
@@ -506,7 +508,7 @@ FIGURES.update(
                 ("saddle", 0),
                 ("chanfron", 0),
                 ("flanchards", 1),
-                ("caparison", 2),
+                ("caparison", 2, {"dagged": True}),
             ],
             "equipment": [
                 ("sallet", 1, {"bevor": True, "colour": WHITE_HARNESS}),
