@@ -22,11 +22,23 @@ uniform int first_plain = 11;
 uniform float snow = 0.0;
 uniform int roof_first = 7;
 uniform int roof_last = 10;
+// Lot SR5 : usure procédurale (`building_aging.gdshaderinc`) : boue et coulures sur les murs,
+// toits assombris et moussus ; 0 = rendu d'avant SR5 (`--no-sr5`). Repère local du modèle du
+// kit en mètres, pied du bâtiment à y = 0.
+uniform float aging : hint_range(0.0, 2.0) = 0.5;
+
+#include "res://shaders/building_aging.gdshaderinc"
 
 varying flat int layer;
+varying vec3 local_m;
+varying vec3 local_n;
+varying flat float seed;
 
 void vertex() {
 	layer = clamp(int(COLOR.a * 16.0), 0, 15);
+	local_m = VERTEX;
+	local_n = NORMAL;
+	seed = ba_seed(MODEL_MATRIX[3].xyz, INSTANCE_ID);
 }
 
 void fragment() {
@@ -40,6 +52,15 @@ void fragment() {
 		}
 	}
 	vec3 albedo = base * tint.rgb * COLOR.rgb;
+	// Dérivées hors de la branche (flux de contrôle uniforme).
+	float far = ba_far(local_m);
+	if (aging > 0.0 && layer < first_plain) {
+		bool roof = layer >= roof_first && layer <= roof_last;
+		float grime = roof ? 0.0 : 1.0;
+		float moss_k = roof ? 1.0 - snow : 0.25;
+		float age = aging * (0.6 + 0.8 * seed);
+		albedo = ba_age(albedo, local_m, normalize(local_n), local_m.y, seed, grime, moss_k, age, far);
+	}
 	if (snow > 0.0 && layer >= roof_first && layer <= roof_last) {
 		albedo = mix(albedo, vec3(0.9, 0.92, 0.97) * (0.85 + 0.15 * base.r), snow);
 	}

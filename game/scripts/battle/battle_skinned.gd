@@ -205,6 +205,16 @@ static func fine_maps_ready() -> bool:
 	return not fine_maps().is_empty()
 
 
+## Lot SR2 : usure des figurines fines cuites (0-1). `--no-sr2` après `--` : 0 (rendu SR1 exact).
+const SR2_WEATHERING := 0.85
+const SR2_MUD_HEIGHT := 0.45
+const SR2_MUD_HEIGHT_HORSE := 0.65
+
+
+static func sr2_weathering() -> float:
+	return 0.0 if OS.get_cmdline_user_args().has("--no-sr2") else SR2_WEATHERING
+
+
 ## GA1 : albédo de détail généré actif (absent avec `--no-ga1` ou sans les tableaux).
 static func ga1_enabled() -> bool:
 	return fine_maps().has("detail_albedo")
@@ -231,6 +241,10 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 		mat.set_shader_parameter("fine_detail_albedo", maps["detail_albedo"])
 	mat.set_shader_parameter("fine_horse", maps["horse"])
 	mat.set_shader_parameter("fine_layer", int(fig["atlas_layer"]))
+	# SR2 : usure (boue des pieds, crasse des creux, acier vivant, teintes passées) ; les
+	# cavaliers salissent le bas des jambes du cheval et l'ourlet du caparaçon (~0,65 m).
+	mat.set_shader_parameter("weathering", sr2_weathering())
+	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
 
 
 static func manifest() -> Dictionary:

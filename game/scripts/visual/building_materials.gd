@@ -33,6 +33,18 @@ static var ROOFS: Array = []
 ## `building_albedo_array.jpg` / `building_normal_array.jpg`.
 static var ATLAS_LAYERS: Array = []
 const ATLAS_SHADER := preload("res://shaders/building_atlas.gdshader")
+## Lot SR5b : matériau partagé des matières nommées (usure procédurale, `building_aging`).
+const PBR_SHADER := preload("res://shaders/building_pbr.gdshader")
+## Lot SR5 : intensité par défaut de l'usure des bâtiments (0 : rendu d'avant SR5).
+const SR5_AGING := 0.5
+## Mousse sur les faces au ciel par matière (défaut : `SR5_WALL_MOSS`, sommets de mur).
+const SR5_MOSS := {"RoofTile": 1.0, "Thatch": 0.8, "RoofSlate": 0.5, "RoofFlat": 0.6}
+const SR5_WALL_MOSS := 0.25
+## Poids des salissures de mur (boue, coulures) ; 0 pour les toits.
+const SR5_GRIME := {"Door": 0.5, "Timber": 0.7, "Planks": 0.8, "TimberFrame": 0.8}
+## `--no-sr5` après `--` : StandardMaterial3D d'avant SR5 et usure nulle (comparaison A/B).
+## Modifiable par les tests (suivi de `clear_cache()`).
+static var sr5_enabled: bool = not OS.get_cmdline_user_args().has("--no-sr5")
 
 static var _materials: Dictionary = {}  # "variante|nom" → Material
 static var _meshes: Dictionary = {}  # "variante|id du maillage" → Mesh
@@ -106,16 +118,17 @@ static func material(name: String, variant: String = "") -> Material:
 		var atlas := _atlas(variant)
 		_materials[key] = atlas
 		return atlas
-	var mat: StandardMaterial3D = null
+	var mat: Material = null
 	if SPECS.has(name):
-		mat = _textured(name, variant)
+		mat = _textured(name, variant) if sr5_enabled else _textured_standard(name, variant)
 	elif PLAIN.has(name):
-		mat = StandardMaterial3D.new()
-		mat.albedo_color = PLAIN[name][0]
-		mat.roughness = PLAIN[name][1]
-		mat.vertex_color_use_as_albedo = name != "Window"
+		var plain := StandardMaterial3D.new()
+		plain.albedo_color = PLAIN[name][0]
+		plain.roughness = PLAIN[name][1]
+		plain.vertex_color_use_as_albedo = name != "Window"
 		if name == "Canvas":
-			mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+			plain.cull_mode = BaseMaterial3D.CULL_DISABLED
+		mat = plain
 	if mat != null:
 		mat.resource_name = name
 	_materials[key] = mat
@@ -149,13 +162,45 @@ static func _atlas(variant: String) -> ShaderMaterial:
 	mat.set_shader_parameter("roof_first", ATLAS_LAYERS.find("RoofTile"))
 	mat.set_shader_parameter("roof_last", ATLAS_LAYERS.find("Thatch"))
 	mat.set_shader_parameter("snow", 1.0 if variant == "snow" else 0.0)
+	mat.set_shader_parameter("aging", SR5_AGING if sr5_enabled else 0.0)
 	if variant != "far":
 		mat.set_shader_parameter("normal_array", load(TEX + "buildings/building_normal_array.jpg"))
 		mat.set_shader_parameter("use_normals", true)
 	return mat
 
 
-static func _textured(name: String, variant: String) -> StandardMaterial3D:
+## Lot SR5b : même rendu que `_textured_standard` (mêmes textures, teinte, UV en mètres, neige)
+## dans `building_pbr.gdshader`, plus l'usure procédurale.
+static func _textured(name: String, variant: String) -> ShaderMaterial:
+	var spec: Array = SPECS[name]
+	var mat := ShaderMaterial.new()
+	mat.shader = PBR_SHADER
+	var roof: bool = name in ROOFS
+	var snow := variant == "snow" and roof
+	mat.set_shader_parameter("albedo_color", Color(0.93, 0.95, 1.0) if snow else spec[4])
+	mat.set_shader_parameter("use_albedo_texture", not snow)
+	if not snow:
+		mat.set_shader_parameter("albedo_texture", load(TEX + str(spec[0]) + ".jpg"))
+	var rough := 0.8 if snow else float(spec[5])
+	if variant != "far":
+		mat.set_shader_parameter("use_normal", true)
+		mat.set_shader_parameter("normal_texture", load(TEX + str(spec[1]) + ".jpg"))
+		mat.set_shader_parameter("normal_scale", 0.6 if snow else 1.0)
+		if str(spec[2]) != "":
+			mat.set_shader_parameter("roughness_texture", load(TEX + str(spec[2]) + ".jpg"))
+			mat.set_shader_parameter("use_roughness_texture", true)
+			rough = 1.0
+	mat.set_shader_parameter("roughness", rough)
+	var tile := 1.0 / float(spec[3])
+	mat.set_shader_parameter("uv_scale", Vector2(tile, tile))
+	mat.set_shader_parameter("aging", SR5_AGING)
+	mat.set_shader_parameter("aging_grime", 0.0 if roof else float(SR5_GRIME.get(name, 1.0)))
+	mat.set_shader_parameter("aging_moss", 0.0 if snow else float(SR5_MOSS.get(name, SR5_WALL_MOSS)))
+	return mat
+
+
+## Matériau d'avant SR5 (`--no-sr5`).
+static func _textured_standard(name: String, variant: String) -> StandardMaterial3D:
 	var spec: Array = SPECS[name]
 	var mat := StandardMaterial3D.new()
 	var snow := variant == "snow" and name in ROOFS

@@ -209,7 +209,9 @@ const int GA1_TILE_SKIN = 8;
 const int GA1_TILE_HAIR = 9;
 const int GA1_TILE_COAT_LIGHT = 10;
 const int GA1_TILE_COAT_DARK = 11;
-const float GA1_TILE_SIZE[12] = float[](0.1, 0.05, 0.06, 0.16, 0.1, 0.12, 0.16, 0.3, 0.06, 0.05, 0.1, 0.1);
+// SR1 : couches 0-7 = scans ambientCG CC0 à l'échelle physique (mailles ~9 mm, fils de 0,6-2 mm,
+// piqûres de 4 cm, veinage de planche) ; tests tools/tests/test_material_gen.py, test_sr1_scans.py.
+const float GA1_TILE_SIZE[12] = float[](0.15, 0.13, 0.16, 0.32, 0.51, 0.3, 0.3, 0.8, 0.06, 0.05, 0.1, 0.1);
 // Teints (multipliés par la couleur du sommet) : pâle, clair rosé, hâlé, olivâtre, buriné,
 // brun (bible : variation par soldat).
 const vec3 FG3_SKIN[6] = vec3[](
@@ -222,6 +224,10 @@ const vec3 FG3_HAIR[7] = vec3[](
 	vec3(0.26, 0.10, 0.04), vec3(0.035, 0.03, 0.028), vec3(0.20, 0.18, 0.16),
 	vec3(0.42, 0.40, 0.37)
 );
+// Lot SR2 : usure (0 : rendu SR1 exact) posée par BattleSkinned (`--no-sr2` : 0) ; hauteur de
+// repos (m) jusqu'où monte la boue (piétons ~ genoux, cavaliers : jambes du cheval, caparaçon).
+uniform float weathering = 0.85;
+uniform float sr2_mud_height = 0.45;
 varying vec2 v_atlas;
 varying flat int v_src;
 #endif
@@ -790,6 +796,9 @@ void fragment() {
 		vec2 fg_da2 = dFdy(v_atlas);
 		vec2 fg_dq1 = dFdx(q);
 		vec2 fg_dq2 = dFdy(q);
+		// SR2 : dérivées de la normale interpolée (courbure des arêtes d'acier), en flux uniforme.
+		vec3 fg_dn1 = dFdx(NORMAL);
+		vec3 fg_dn2 = dFdy(NORMAL);
 		if (dist < fine_distance) {
 			vec4 at;
 			if (v_src == 2) {
@@ -872,7 +881,8 @@ void fragment() {
 					ga_mix = 1.0;
 				} else if (code == C_PLATE || code == C_TRIM) {
 					gl = GA1_TILE_PLATE;
-					ga_mix = code == C_PLATE ? 0.45 : 0.3;
+					// SR1 : 0,6 (GA1 0,45) pour que les taches et traces de lime du scan se voient.
+					ga_mix = code == C_PLATE ? 0.6 : 0.3;
 				} else if (code == C_LIVERY || code == C_ARMS) {
 					gl = GA1_TILE_FUSTIAN;
 					ga_mix = 0.6;
@@ -942,6 +952,67 @@ void fragment() {
 				} else {
 					roughness = mix(roughness, roughness * (0.6 + 0.8 * d.a), min(amt, 1.0));
 				}
+			}
+			// Lot SR2 : usure, sans aucune lecture de texture (bruit procédural seulement).
+			// Fondue avant la limite des cartes (pas de saut au passage LOD1 → LOD2) ; tout est
+			// multiplié par `sr_w` : weathering = 0 redonne exactement le rendu SR1.
+			float sr_w = weathering * (1.0 - smoothstep(fine_distance * 0.75, fine_distance, dist));
+			if (sr_w > 0.0) {
+				// Étoffes teintes : livrée, tissu, armoiries, caparaçon (robe du cheval exclue).
+				bool dyed_cloth = code == C_LIVERY || code == C_CLOTH || code == C_ARMS || (code == C_COAT && v_src != 2);
+				bool fabric = dyed_cloth || code == C_QUILT;
+				// 4. Teintes passées (teintures végétales, −15 %) éclaircies vers le gris de l'étoffe ;
+				// la livrée lointaine (`dyed`, far_boost) n'est pas touchée.
+				if (dyed_cloth) {
+					float sr_l = dot(albedo, vec3(0.3, 0.59, 0.11));
+					albedo = mix(albedo, vec3(sr_l) * 1.08, 0.25 * sr_w);
+				}
+				// 2. Crasse des creux : l'occlusion cuite assombrit et désature étoffe et cuir.
+				if (fabric || code == C_LEATHER) {
+					float cav = (1.0 - fg_ao) * sr_w;
+					float sr_l = dot(albedo, vec3(0.3, 0.59, 0.11));
+					albedo = mix(albedo, vec3(sr_l) * vec3(0.9, 0.85, 0.75), 0.6 * cav);
+					albedo *= 1.0 - 0.35 * cav;
+				}
+				// 3. Acier vivant : rugosité des plates par taches (0,25-0,6) ; usure plus claire et
+				// plus lisse sur les arêtes (courbure : dérivées de la normale / de la position).
+				if (code == C_PLATE) {
+					float lf = noise2(q * 3.0 + v_var.xy * 17.0);
+					float rough = clamp(mix(0.45, 0.75, lf) + (roughness - 0.4) * 0.4, 0.4, 0.8);
+					roughness = mix(roughness, rough, sr_w);
+					// Acier forgé : gris sourd (F0 réel ≈ 0,55), pas le blanc chromé du rendu FG.
+					vec3 steel = vec3(0.50, 0.50, 0.52) * mix(0.85, 1.1, lf);
+					albedo = mix(albedo, steel * (0.6 + 0.4 * dot(albedo, vec3(0.33))), 0.7 * sr_w);
+					// Crasse et graisse dans les creux de l'armure.
+					albedo *= mix(1.0, mix(0.55, 1.0, fg_ao), sr_w);
+					float curv = (length(fg_dn1) + length(fg_dn2)) / max(length(fg_dp1) + length(fg_dp2), 1e-5);
+					float wear = smoothstep(0.55, 0.85, noise2(q * 55.0 + 3.1)) * smoothstep(12.0, 50.0, curv);
+					albedo *= 1.0 + 0.25 * wear * sr_w;
+					roughness -= 0.12 * wear * sr_w;
+				} else if (code == C_MAIL) {
+					// Légère rouille brune dans le bas des mailles (sous la taille).
+					float low = 1.0 - smoothstep(sr2_mud_height * 1.6, sr2_mud_height * 2.4, v_rest.y);
+					float ox = low * smoothstep(0.45, 0.8, noise2(q * 6.0 + v_var.zw * 23.0)) * 0.5 * sr_w;
+					albedo = mix(albedo, vec3(0.20, 0.10, 0.045), ox);
+					roughness = mix(roughness, 0.8, ox);
+					metallic = mix(metallic, 0.3, ox);
+				}
+				// 1. Boue et poussière montant des pieds (bord bruité), quantité propre au soldat ;
+				// forte sur étoffe et cuir, légère sur l'acier, aucune sur les cheveux.
+				float sr_k = fabric || code == C_LEATHER ? 1.0
+					: (code == C_COAT ? 0.9 : (code == C_WOOD || code == C_SKIN ? 0.7
+					: (code == C_PLATE || code == C_MAIL || code == C_TRIM ? 0.45 : 0.0)));
+				float edge_n = noise2(v_rest.xz * 9.0 + v_var.xy * 13.0) * 0.7 + noise2(v_rest.xz * 31.0) * 0.3;
+				float mud_top = sr2_mud_height * mix(0.75, 1.1, v_var.w);
+				float rise = 1.0 - smoothstep(mud_top * 0.45, mud_top, v_rest.y + (edge_n - 0.5) * 0.14);
+				float blotch = mix(0.55, 1.0, smoothstep(0.25, 0.7, noise2(q * 9.0 + v_var.yz * 31.0)));
+				float mud = rise * blotch * sr_k * mix(0.35, 1.0, fract(v_var.z * 13.7 + v_var.w * 5.3)) * 0.85 * sr_w;
+				// Terre sèche, plus sombre (humide) au ras du sol.
+				vec3 mud_c = mix(vec3(0.16, 0.12, 0.08), vec3(0.30, 0.25, 0.18), smoothstep(0.0, 0.12, v_rest.y))
+					* mix(0.8, 1.1, edge_n);
+				albedo = mix(albedo, mud_c, mud);
+				roughness = mix(roughness, 0.9, mud);
+				metallic = mix(metallic, 0.0, mud);
 			}
 			albedo *= mix(1.0, fg_ao, 0.55);
 			NORMAL = n;

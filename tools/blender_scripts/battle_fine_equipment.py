@@ -589,12 +589,15 @@ def bassinet(lm, n=36, rows=12):
     return [obj], (cx, cy, rx, ry)
 
 
-def aventail(lm, frame, bvh, extra=(), n=36, rows=12):
+def aventail(lm, frame, bvh, extra=(), n=36, rows=12, top=None):
     """Mail aventail laced to the bassinet, draped over the shoulders as a short cape.
 
     Each column hangs from the helmet rim (under the chin at the face) and follows the
     larger of its free hang and the hauberk surface below (ray cast), 14 mm off it.
+    `top(a)`: height of the upper edge at angle `a` outside the face (default: the
+    bassinet's rim; SR3b: higher under a kettle hat, as the collar of a mail coif).
     """
+    rim = top or (lambda a: _rim_z(lm, a))
     cx, cy, rx, ry = frame
     neck = lm.bone["Neck"]
     axis = Vector((neck.x, neck.y + 0.005, 0))
@@ -608,7 +611,7 @@ def aventail(lm, frame, bvh, extra=(), n=36, rows=12):
             front = max(0.0, -math.sin(a))
             d = Vector((math.cos(a), math.sin(a), 0))
             face = eq.smoothstep(0.45, 0.75, front)
-            z_top = (_rim_z(lm, a) + 0.004) * (1 - face) + (lm.chin.z + 0.012) * face
+            z_top = (rim(a) + 0.004) * (1 - face) + (lm.chin.z + 0.012) * face
             k = 0.97 + 0.03 * face
             top_r = math.hypot(rx * k * d.x, ry * k * d.y)
             z_bot = lm.shoulder_z - 0.07 - 0.07 * abs(d.y)
