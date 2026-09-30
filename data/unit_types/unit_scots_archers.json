@@ -29,10 +29,12 @@
   ],
   "figure": "archer_3",
   "missile": "arrow",
-  "equipment": "Arc d'if, jaque rembourrée, bassinet ou chapel, épée et bouclier rond (targe) ; croix de Saint-André cousue sur la jaque.",
-  "description": "Archers et gens d'armes d'[[cdx_ecosse|Écosse]] qui louent leur service : l'Armée d'Écosse du comte de Buchan et d'Archibald Douglas sert le dauphin Charles (Baugé 1421, Verneuil 1424) ; ses survivants forment la Garde écossaise des rois de France.",
+  "equipment": "Arc d'if, jaque rembourrée, bassinet ou chapel, épée et bouclier rond (targe) ; croix de Saint-André cousue sur la jaque (prescrite par l'ordonnance de 1385).",
+  "description": "Archers d'[[cdx_ecosse|Écosse]], levés surtout dans la forêt d'Ettrick (Selkirk), dont les compagnies tombèrent à Falkirk (1298) ; trop peu nombreux face aux archers anglais, ils n'ont rien pu à Dupplin Moor (1332) ni à Halidon Hill (1333). Leur postérité est l'Armée d'Écosse du comte de Buchan et d'Archibald Douglas au service du dauphin Charles (Baugé 1421, Verneuil 1424), dont les survivants forment la Garde écossaise des rois de France.",
   "sources": [
     "B. Chevalier, « Les Écossais dans les armées de Charles VII », dans Jeanne d'Arc, une époque, un rayonnement, CNRS, 1982",
-    "B. Ditcham, The Employment of Foreign Mercenary Troops in the French Royal Armies 1415-1470, thèse, Université d'Édimbourg, 1979"
+    "B. Ditcham, The Employment of Foreign Mercenary Troops in the French Royal Armies 1415-1470, thèse, Université d'Édimbourg, 1979",
+    "Bataille de Falkirk (1298)",
+    "Bataille de Halidon Hill (1333)"
   ]
 }

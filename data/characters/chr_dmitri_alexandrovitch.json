@@ -8,7 +8,7 @@
   "sex": "male",
   "house": "Smolensk",
   "faction": "fac_briansk",
-  "role": "ruler",
+  "role": "claimant",
   "birth": {
     "value": "1305",
     "uncertain": true,
@@ -40,8 +40,8 @@
     ]
   },
   "starting_location": "prov_briansk",
-  "status": "at_court",
-  "description": "Prince de Briansk (vers 1314-1334, puis 1340-1352), parent du prince de Smolensk (patronyme discuté : Alexandrovitch ou Romanovitch) ; en 1333 ou 1334, sur ordre d'Özbeg, il marche avec des Tatars contre Smolensk, puis fait la paix. Chassé de Briansk en 1334 au profit de Gleb Sviatoslavitch, il n'y revient qu'en 1340.",
+  "status": "in_exile",
+  "description": "Prince de Briansk (vers 1314-1334, puis 1340-1352), parent du prince de Smolensk (patronyme discuté : Alexandrovitch ou Romanovitch) ; en 1333 ou 1334, sur ordre d'Özbeg, il marche avec des Tatars contre Smolensk, puis fait la paix. Chassé de Briansk en 1334 au profit de Gleb Sviatoslavitch, il est en 1337 un prince sans principauté et n'y revient qu'en 1340.",
   "sources": [
     "Ivan Alexandrovitch de Smolensk"
   ]

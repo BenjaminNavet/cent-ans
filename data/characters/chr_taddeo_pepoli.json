@@ -30,5 +30,9 @@
   "sources": [
     "Taddeo Pepoli",
     "Bologne"
-  ]
+  ],
+  "death": {
+    "value": "1347-09",
+    "place": "Bologne"
+  }
 }

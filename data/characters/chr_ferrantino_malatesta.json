@@ -8,7 +8,7 @@
   "sex": "male",
   "house": "Malatesta",
   "faction": "fac_rimini",
-  "role": "ruler",
+  "role": "noble",
   "birth": {
     "value": "1258",
     "uncertain": true
@@ -24,11 +24,15 @@
   ],
   "piety": 40,
   "starting_location": "prov_rimini",
-  "status": "at_court",
-  "description": "Fils de Malatestino dell'Occhio, seigneur de Rimini en 1326-1330 puis en 1334-1335 ; son cousin Malatesta « Guastafamiglia » l'a évincé et emprisonné en 1335, et tient Rimini en 1337 avec son frère Galeotto. Les Malatesta étendent leur influence sur les cités voisines de la côte adriatique.",
+  "status": "captive",
+  "description": "Fils de Malatestino dell'Occhio, seigneur de Rimini en 1326-1330 puis en 1334-1335 ; son cousin Malatesta « Guastafamiglia » l'a évincé et emprisonné en 1335, et tient Rimini en 1337 avec son frère Galeotto. Au printemps 1337, Ferrantino est prisonnier des siens ; il mourra en 1353 sans avoir recouvré la seigneurie.",
   "sources": [
     "Maison Malatesta",
     "Rimini",
     "Ferrantino Malatesta (web)"
-  ]
+  ],
+  "death": {
+    "value": "1353",
+    "uncertain": true
+  }
 }

@@ -40,5 +40,9 @@
   ],
   "family": {
     "father": "chr_federico_iii_de_sicile"
+  },
+  "death": {
+    "value": "1342-08-15",
+    "place": "Calascibetta"
   }
 }

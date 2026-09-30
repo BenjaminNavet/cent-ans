@@ -42,5 +42,9 @@
     "children": [
       "chr_robert_de_tarente"
     ]
+  },
+  "death": {
+    "value": "1346",
+    "place": "Naples"
   }
 }

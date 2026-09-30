@@ -88,5 +88,12 @@
   "sources": [
     "République de Pise",
     "Castruccio Castracani"
+  ],
+  "ports": [
+    "Pise",
+    "Porto Pisano"
+  ],
+  "sea_zones": [
+    "sea_mediterranean"
   ]
 }
