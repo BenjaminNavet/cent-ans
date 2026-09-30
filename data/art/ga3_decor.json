@@ -2,12 +2,15 @@
   "description": "Lot GA3-L1 : décor 3D de bataille généré (image flux-2 → détourage bria → TRELLIS sur fal.ai → `tools/blender_scripts/ga3_cleanup.py`). Chaque objet donne son prompt, sa taille réelle, son plafond de triangles et le type du kit qu'il remplace en partie (`kit_kind`, `share`). Les glb vont dans `game/assets/models/props_ga/` avec `manifest.json` (généré : emprise mesurée, triangles). `wired: false` = généré mais non branché (modèle procédural ou animé gardé). ADR 0138.",
   "style_prefix": "Photorealistic photograph of a single",
   "style_suffix": "Rural medieval France circa 1340, humble, weathered and slightly irregular, hand-made materials, no brick, no glass, no metal sheet, no modern elements, no people, no animals. Three-quarter view from slightly above, the whole object fully visible and centred, isolated object floating on a plain uniform neutral mid-grey studio background, no ground, no grass, no plants, no terrain, no base, no shadow on the floor, soft even diffuse overcast lighting, bright natural colours, sharp detail.",
-  "cleanup": {"auto_levels": 0.5, "gamma": 1.0, "normal": "on"},
+  "cleanup": {
+    "auto_levels": 0.5,
+    "gamma": 1.0,
+    "normal": "on"
+  },
   "objects": [
     {
       "id": "house",
       "label": "Maison paysanne à pans de bois et chaume",
-      "source": "s4",
       "prompt": "small 14th-century French peasant cottage, one storey only with a low attic under the roof, walls of lime-washed wattle and daub infill between exposed weathered dark oak timber framing, steep thick straw thatched roof with a plain ridge, a small smoke hole in the thatch near the ridge and no chimney, one low plank door with iron strap hinges, one small unglazed window with a wooden shutter, low rubble fieldstone sill wall at the foot of the walls.",
       "model": "trellis",
       "scale_axis": "length",
@@ -16,7 +19,9 @@
       "tex": 1024,
       "kit_kind": "cottage",
       "share": 0.5,
-      "wired": true
+      "wired": true,
+      "raw": "s4",
+      "glb": "trellis.glb"
     },
     {
       "id": "church",

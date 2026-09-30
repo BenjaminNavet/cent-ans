@@ -6,7 +6,8 @@ Run headless from the repository root:
         SOURCE.glb OUT_DIR NAME [--length 8.0] [--lod0 8000] [--tex 1024] \
         [--strip-base 0.0] [--raw-render PATH.png] \
         [--exposure 1.0] [--gamma 1.0] [--auto-levels 0.0] [--normal auto|on|off] \
-        [--roughness auto|off]
+        [--roughness auto|off] [--align] [--yaw DEG] [--scale-axis length|height] \
+        [--island-min 0.01] [--stats PATH.json]
 
 Writes ``OUT_DIR/NAME_lod0.glb``, ``NAME_lod1.glb`` and ``NAME_lod2.glb`` (plan
 ``docs/wip/ga.md`` section GA3, probe S1 in ``docs/wip/ga3.md``):
@@ -29,6 +30,12 @@ Writes ``OUT_DIR/NAME_lod0.glb``, ``NAME_lod1.glb`` and ``NAME_lod2.glb`` (plan
    a roughness map when the source roughness is textured (``--roughness auto``).
 5. glTF export (Z up in Blender -> Y up in Godot), one mesh, one opaque rough material,
    texture embedded as JPEG.
+
+Lot GA3-L1 (catalogue ``data/art/ga3_decor.json``): ``--align`` turns the footprint's
+minimum-area rectangle onto the axes (longest side along X, ridge along +X in Godot), then
+``--yaw`` adds a turn about the vertical (facade towards +Z in Godot, i.e. -Y in Blender);
+``--scale-axis height`` sets the height to ``--length`` instead of the longest horizontal side;
+``--stats`` writes the triangles and dimensions of each LOD as JSON.
 
 ``--raw-render`` also writes a Workbench render of the untouched import (textured), used
 for the probe's comparison sheet.
@@ -66,6 +73,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--auto-levels", type=float, default=0.0)
     parser.add_argument("--normal", choices=("auto", "on", "off"), default="auto")
     parser.add_argument("--roughness", choices=("auto", "off"), default="auto")
+    parser.add_argument("--align", action="store_true")
+    parser.add_argument("--yaw", type=float, default=0.0)
+    parser.add_argument("--scale-axis", choices=("length", "height"), default="length")
+    parser.add_argument("--island-min", type=float, default=ISLAND_MIN_FRACTION)
+    parser.add_argument("--stats", default="")
     return parser.parse_args(argv)
 
 
@@ -131,7 +143,34 @@ def render_raw(path: str) -> None:
     bpy.data.objects.remove(cam)
 
 
-def clean(obj: bpy.types.Object) -> None:
+def align(obj: bpy.types.Object, enabled: bool, yaw_deg: float) -> None:
+    """Turn the footprint's minimum-area rectangle onto the axes, longest side on X, then yaw."""
+    coords = np.array([(v.co.x, v.co.y) for v in obj.data.vertices], dtype=np.float64)
+    angle = 0.0
+    if enabled and len(coords):
+        best = None
+        for step in range(180):
+            theta = math.radians(step * 0.5)
+            c, s_ = math.cos(theta), math.sin(theta)
+            x = coords[:, 0] * c - coords[:, 1] * s_
+            y = coords[:, 0] * s_ + coords[:, 1] * c
+            width, depth = np.ptp(x), np.ptp(y)
+            area = width * depth
+            if best is None or area < best[0]:
+                best = (area, theta + (0.0 if width >= depth else math.pi / 2))
+        angle = best[1]
+    angle += math.radians(yaw_deg)
+    if angle == 0.0:
+        return
+    c, s_ = math.cos(angle), math.sin(angle)
+    for vert in obj.data.vertices:
+        x, y = vert.co.x, vert.co.y
+        vert.co.x, vert.co.y = x * c - y * s_, x * s_ + y * c
+    obj.data.update()
+    print(f"GA3 align: turned {math.degrees(angle):.1f} deg")
+
+
+def clean(obj: bpy.types.Object, island_min: float = ISLAND_MIN_FRACTION) -> None:
     """Merge duplicates, drop debris islands, recompute outward normals."""
     bm = bmesh.new()
     bm.from_mesh(obj.data)
@@ -153,7 +192,7 @@ def clean(obj: bpy.types.Object) -> None:
                     seen.add(other.index)
                     stack.append(other)
         islands.append(island)
-    threshold = ISLAND_MIN_FRACTION * len(bm.verts)
+    threshold = island_min * len(bm.verts)
     debris = [v for island in islands if len(island) < threshold for v in island]
     bmesh.ops.delete(bm, geom=debris, context="VERTS")
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -162,12 +201,13 @@ def clean(obj: bpy.types.Object) -> None:
     print(f"GA3 clean: {len(islands)} islands, {len(debris)} debris vertices removed")
 
 
-def normalise(obj: bpy.types.Object, length: float) -> None:
-    """Scale to ``length`` metres (longest horizontal side), origin at the footprint centre."""
+def normalise(obj: bpy.types.Object, length: float, axis: str = "length") -> None:
+    """Scale to ``length`` metres (longest horizontal side, or height), origin at the footprint centre."""
     verts = [v.co for v in obj.data.vertices]
     lo = Vector(min(c[i] for c in verts) for i in range(3))
     hi = Vector(max(c[i] for c in verts) for i in range(3))
-    factor = length / max(hi.x - lo.x, hi.y - lo.y)
+    span = hi.z - lo.z if axis == "height" else max(hi.x - lo.x, hi.y - lo.y)
+    factor = length / span
     offset = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z))
     for vert in obj.data.vertices:
         vert.co = (vert.co - offset) * factor
@@ -411,14 +451,16 @@ def main() -> None:
             for link in list(bsdf.inputs["Metallic"].links):
                 slot.material.node_tree.links.remove(link)
             bsdf.inputs["Metallic"].default_value = 0.0
-    clean(source)
-    normalise(source, args.length)
+    clean(source, args.island_min)
+    align(source, args.align, args.yaw)
+    normalise(source, args.length, args.scale_axis)
     if args.strip_base > 0.0:
         strip_base(source, args.strip_base, args.length)
-        normalise(source, args.length)
+        normalise(source, args.length, args.scale_axis)
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     lod0 = None
+    stats = {"raw_triangles": raw_tris, "lods": []}
     for level, fraction in enumerate(LOD_FRACTIONS):
         target = int(args.lod0 * fraction)
         name = f"{args.name}_lod{level}"
@@ -430,8 +472,18 @@ def main() -> None:
             f"GA3 {name}: {triangle_count(low)} tris (raw {raw_tris}), "
             f"{dims.x:.2f} x {dims.y:.2f} x {dims.z:.2f} m"
         )
+        stats["lods"].append(
+            {
+                "triangles": triangle_count(low),
+                "size": [round(dims.x, 3), round(dims.y, 3), round(dims.z, 3)],
+            }
+        )
         if lod0 is None:
             lod0 = low
+    if args.stats:
+        import json
+
+        Path(args.stats).write_text(json.dumps(stats, indent=1))
 
 
 if __name__ == "__main__":
