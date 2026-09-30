@@ -15,7 +15,7 @@
   "render": {
     "tile_units": 256,
     "grid_step": 3.5,
-    "max_probability": 0.25,
+    "max_probability": 0.6,
     "cluster_scale": 0.035,
     "cluster_bias": 0.15,
     "near_distance": 10.0,
@@ -31,7 +31,7 @@
     "max_shear": 3.0,
     "min_pixels": 4.0,
     "pixel_fade": 3.0,
-    "cluster_threshold": [0.15, 0.45],
+    "cluster_threshold": [-0.05, 0.25],
     "forest_shading": 0.7,
     "max_visible_triangles": 900000,
     "max_cached_tiles": 48,
