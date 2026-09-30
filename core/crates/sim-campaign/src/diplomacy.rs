@@ -354,10 +354,10 @@ impl CampaignState {
         }
         let mut out = BTreeSet::new();
         for (id, province) in &self.provinces {
-            if !self
+            if self
                 .settlements
                 .get(&province.city)
-                .is_some_and(|city| &city.controller == a)
+                .is_none_or(|city| &city.controller != a)
             {
                 continue;
             }

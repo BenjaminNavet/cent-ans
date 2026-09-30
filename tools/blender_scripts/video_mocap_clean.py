@@ -293,6 +293,40 @@ def pin_targets(foot, contact, ground=None, ramp=2):
     return targets, weights
 
 
+def step_targets(foot, contact, ground=None, unit=1.0, max_gap=12, ramp=2):
+    """Like ``pin_targets``, plus steps: a foot leaving one planted run for another one.
+
+    NT14: between two planted runs at most `max_gap` frames apart, the foot is carried from the
+    first pin to the second (smoothstep in the horizontal plane) on an arc lifted by a third of
+    the step's length, 4 to 8 cm (`unit` = coordinate units per metre); the weight stays 1, so
+    the video's shuffle (the foot skating along the ground) becomes a clean step. A step under
+    3 cm keeps the foot down (the pins are merged into one).
+    """
+    foot = np.asarray(foot, dtype=np.float64)
+    targets, weights = pin_targets(foot, contact, ground, ramp)
+    runs = _runs(contact)
+    for (_s0, e0), (s1, _e1) in zip(runs, runs[1:], strict=False):
+        if s1 - e0 > max_gap:
+            continue
+        a = targets[e0 - 1].copy()
+        b = targets[s1].copy()
+        d = float(np.linalg.norm((b - a)[:2]))
+        lift = (
+            0.0
+            if d < 0.03 * unit
+            else float(np.clip(d / 3.0, 0.04 * unit, 0.08 * unit))
+        )
+        span = s1 - e0 + 1
+        for t in range(e0, s1):
+            u = (t - e0 + 1) / span
+            k = u * u * (3.0 - 2.0 * u)
+            p = a * (1.0 - k) + b * k
+            p[2] = a[2] * (1.0 - u) + b[2] * u + lift * np.sin(np.pi * u)
+            targets[t] = p
+            weights[t] = 1.0
+    return targets, weights
+
+
 def two_bone_ik(a, b, c, target, eps=1e-9):
     """New middle and end joints of chain `a`-`b`-`c` so that the end reaches `target`.
 
@@ -329,22 +363,89 @@ def two_bone_ik(a, b, c, target, eps=1e-9):
     return b_new, c_new
 
 
-def clean(world, image, rate, out_rate=24.0, min_cutoff=1.5, beta=0.3):
+def ground_tilt(points, above=0.03, rounds=3):
+    """Rotation (3, 3) levelling the ground under Z-up `points` (frames, 33, 3).
+
+    MediaPipe's world frame follows the camera: a camera looking down tilts the ground, and a
+    foot farther from the camera then seems higher (NT13-NT14: a staggered stance read as a
+    lifted foot, no contact, the foot sliding). The ground line ``Z = b Y + c`` is fitted to
+    the heel and toe points, dropping those more than `above` metres over it (lifted feet) for
+    `rounds` rounds; the rotation turns its normal onto +Z (tilts over 25 degrees are ignored:
+    not a camera pitch). Pitch only: a phone on a tripod does not roll, and a roll fitted to
+    noisy feet leans the whole body sideways.
+    """
+    pts = np.asarray(points, dtype=np.float64)
+    idx = [HEEL_L, TOE_L, HEEL_R, TOE_R]
+    p = pts[:, idx].reshape(-1, 3)
+    keep = np.ones(len(p), bool)
+    coef = np.zeros(2)
+    for _ in range(rounds):
+        a = np.stack((p[keep, 1], np.ones(keep.sum())), axis=1)
+        coef, *_ = np.linalg.lstsq(a, p[keep, 2], rcond=None)
+        resid = p[:, 2] - (coef[0] * p[:, 1] + coef[1])
+        keep = resid < above
+        if keep.sum() < 8:
+            break
+    n = np.array([0.0, -coef[0], 1.0])
+    n /= np.linalg.norm(n)
+    angle = np.arccos(np.clip(n[2], -1.0, 1.0))
+    if angle < 1e-6 or angle > np.radians(25.0):
+        return np.eye(3)
+    axis = np.cross(n, [0.0, 0.0, 1.0])
+    axis /= np.linalg.norm(axis)
+    k = np.array(
+        [[0.0, -axis[2], axis[1]], [axis[2], 0.0, -axis[0]], [-axis[1], axis[0], 0.0]]
+    )
+    return np.eye(3) + np.sin(angle) * k + (1.0 - np.cos(angle)) * (k @ k)
+
+
+def run_frames(seconds, rate, least=1):
+    """A duration in seconds as a number of frames at `rate` (at least `least`)."""
+    return max(least, int(round(seconds * rate)))
+
+
+def clean(
+    world,
+    image,
+    rate,
+    out_rate=24.0,
+    min_cutoff=1.5,
+    beta=0.3,
+    extra=None,
+    level_ground=True,
+):
     """Full clean-up of one video clip.
+
+    `rate` is the playback rate of the source frames (video rate times the speed-up). NT14:
+    contact runs are durations (0.1 s runs, 0.067 s gaps: 3 and 2 frames at 30 fps, twice as
+    many at 60 fps); `extra` (name -> (frames, 3) hip-centred Z-up points, e.g. the shield disc
+    of ``disc_points``) gets the same levelling, root motion and resampling; `level_ground`
+    rotates everything so that the ground under the heels and toes is flat (``ground_tilt``).
 
     Returns a dict: ``points`` (frames, 33, 3) Z-up metres with the root motion added (at
     `out_rate`), ``root`` (frames, 3), ``contacts`` (frames, 2) bool, ``lengths`` (segment ->
-    metres).
+    metres), ``level`` (the levelling rotation), ``extra`` (name -> resampled points).
     """
     pts = to_zup(world)
     pts = one_euro(pts, rate, min_cutoff, beta)
     lengths = segment_lengths(pts)
     pts = enforce_lengths(pts, lengths=lengths)
+    level = ground_tilt(pts) if level_ground else np.eye(3)
+    pts = pts @ level.T
+    extra = {
+        k: np.asarray(v, dtype=np.float64) @ level.T for k, v in (extra or {}).items()
+    }
     img = one_euro(np.asarray(image, dtype=np.float64)[..., :2], rate, min_cutoff, beta)
     heights = np.stack(
         [pts[:, [heel, toe], 2].min(axis=1) for _a, heel, toe in FEET], 1
     )
-    contacts = foot_contacts(img, rate, heights=heights)
+    contacts = foot_contacts(
+        img,
+        rate,
+        heights=heights,
+        min_run=run_frames(0.1, rate, 3),
+        max_gap=run_frames(0.067, rate, 2),
+    )
     root = one_euro(root_trajectory(pts, contacts), rate, 1.0, 0.0)
     pts = pts + root[:, None, :]
     return {
@@ -352,4 +453,208 @@ def clean(world, image, rate, out_rate=24.0, min_cutoff=1.5, beta=0.3):
         "root": resample(root, rate, out_rate),
         "contacts": resample_mask(contacts, rate, out_rate),
         "lengths": lengths,
+        "level": level,
+        "extra": {
+            k: resample(np.asarray(v, dtype=np.float64) + root, rate, out_rate)
+            for k, v in (extra or {}).items()
+        },
     }
+
+
+# --- NT14: shield disc, wrist spikes, facing ---------------------------------------------
+
+# Landmarks trusted to map the image onto the world frame (the left arm hides behind the disc).
+FIT_LANDMARKS = (
+    SHOULDER_L,
+    SHOULDER_R,
+    ELBOW_R,
+    WRIST_R,
+    HIP_L,
+    HIP_R,
+    KNEE_L,
+    KNEE_R,
+    ANKLE_L,
+    ANKLE_R,
+)
+
+
+def image_world_fit(world, image, aspect, visibility=None, vis_min=0.7):
+    """Per-frame scale and offsets mapping image points onto the Z-up world frame.
+
+    World X ~ ``s * x * aspect + tx`` and world Z ~ ``-s * y + tz`` (image x right, y down,
+    normalised by the width and the height; `aspect` = width / height), least squares over the
+    `FIT_LANDMARKS` seen with a visibility of at least `vis_min`. Returns ``(s, tx, tz)``, each
+    (frames,); `s` is in metres per image height.
+    """
+    w = to_zup(world)
+    img = np.asarray(image, dtype=np.float64)
+    n = len(w)
+    s, tx, tz = np.zeros(n), np.zeros(n), np.zeros(n)
+    idx = list(FIT_LANDMARKS)
+    for t in range(n):
+        keep = idx
+        if visibility is not None:
+            good = [i for i in idx if visibility[t, i] >= vis_min]
+            keep = good if len(good) >= 4 else idx
+        k = len(keep)
+        a = np.zeros((2 * k, 3))
+        a[:k, 0] = img[t, keep, 0] * aspect
+        a[k:, 0] = -img[t, keep, 1]
+        a[:k, 1] = 1.0
+        a[k:, 2] = 1.0
+        v = np.concatenate((w[t, keep, 0], w[t, keep, 2]))
+        sol, *_ = np.linalg.lstsq(a, v, rcond=None)
+        s[t], tx[t], tz[t] = sol
+    return s, tx, tz
+
+
+def disc_points(centre, major, fit, aspect, anchor_depth=0.0, fov_deg=65.0):
+    """Hip-centred Z-up positions (frames, 3) of a tracked disc's centre.
+
+    X and Z come from the image centre through `fit` (``image_world_fit``). Depth: the camera
+    distance of the body is ``s / (2 tan(fov / 2))`` (`fov_deg` = field of view along the
+    image height); the disc's apparent size against its median gives its distance relative to
+    the body's, `anchor_depth` being the depth (Y, metres) of the disc at its median size.
+    Perspective: a disc nearer than the body (the hips, at the body's distance) is seen farther
+    from the image centre than it is, its offset from the optical axis is scaled back by the
+    ratio of the distances.
+    """
+    s, tx, tz = (np.asarray(v, dtype=np.float64) for v in fit)
+    c = np.asarray(centre, dtype=np.float64)
+    size = np.asarray(major, dtype=np.float64) * s  # metres at the body's distance
+    dist = s / (2.0 * np.tan(np.radians(fov_deg) / 2.0))
+    ref = np.median(size)
+    y = anchor_depth + dist * (ref / np.maximum(size, 1e-6) - 1.0)
+    k = np.maximum(dist + y, 0.2) / dist
+    axis_x = s * 0.5 * aspect + tx
+    axis_z = -s * 0.5 + tz
+    x = axis_x + (s * c[:, 0] * aspect + tx - axis_x) * k
+    z = axis_z + (-s * c[:, 1] + tz - axis_z) * k
+    return np.stack((x, y, z), axis=-1)
+
+
+def reach_anchor(points_at, shoulder, reach, lo=-1.0, hi=0.3, steps=261):
+    """Depth anchor (Y, metres) putting a hand-held disc at most `reach` from the shoulder.
+
+    `points_at(anchor)` gives the disc (frames, 3) for an anchor depth (``disc_points``): the
+    size gives its depth only up to that offset. The anchor kept is the one in front of the
+    body (towards the camera, -Y) where the farthest frame is exactly `reach` from `shoulder`
+    (frames, 3): the disc is in the hand, and the widest block or push stretches the arm.
+    """
+    sh = np.asarray(shoulder, dtype=np.float64)
+    anchors = np.linspace(hi, lo, steps)
+    far = np.array(
+        [np.max(np.linalg.norm(points_at(a) - sh, axis=-1)) for a in anchors]
+    )
+    k = int(np.argmin(far))
+    if far[k] >= reach:
+        return float(anchors[k])
+    beyond = np.flatnonzero(far[k:] >= reach)
+    return float(anchors[k + beyond[0]]) if len(beyond) else float(lo)
+
+
+def disc_normals(major, minor, angle, disc, chest, keep=0.7):
+    """Unit normals (frames, 3) of the disc's front face (Z-up, Y away from the camera).
+
+    The ellipse's axis ratio gives the tilt out of the image plane, its minor axis the tilt's
+    direction; of the four candidates (tilt sign, face sign) the one facing most away from
+    `chest` (frames, 3) towards the disc is kept (a shield's face looks out), plus `keep`
+    times its agreement with the previous frame's pick (the tilt sign is ambiguous frame by
+    frame: without it the pick flips back and forth when the disc faces the camera).
+    """
+    ratio = np.clip(np.asarray(minor) / np.maximum(np.asarray(major), 1e-9), 0.0, 1.0)
+    phi = np.arccos(ratio)
+    ang = np.asarray(angle, dtype=np.float64) + np.pi / 2.0  # minor axis in the image
+    m = np.stack(
+        (np.cos(ang), np.zeros_like(ang), -np.sin(ang)), axis=-1
+    )  # y down -> -Z
+    toward = np.array([0.0, -1.0, 0.0])
+    out = np.asarray(disc, dtype=np.float64) - np.asarray(chest, dtype=np.float64)
+    out /= np.maximum(np.linalg.norm(out, axis=-1, keepdims=True), 1e-9)
+    res = np.zeros_like(out)
+    for t in range(len(phi)):
+        best, score = None, -np.inf
+        for tilt in (1.0, -1.0):
+            n = np.cos(phi[t]) * toward + tilt * np.sin(phi[t]) * m[t]
+            for face in (1.0, -1.0):
+                sc = float(np.dot(face * n, out[t]))
+                if t > 0:
+                    sc += keep * float(np.dot(face * n, res[t - 1]))
+                if sc > score:
+                    best, score = face * n, sc
+        res[t] = best
+    return res
+
+
+def smooth_directions(v, rate, min_cutoff=1.5, beta=0.3):
+    """Zero-phase One-Euro smoothing of unit vectors (frames, 3), renormalised."""
+    out = one_euro(np.asarray(v, dtype=np.float64), rate, min_cutoff, beta)
+    return out / np.maximum(np.linalg.norm(out, axis=-1, keepdims=True), 1e-9)
+
+
+def quat_angle(a, b):
+    """Angle (radians) between unit quaternions (w, x, y, z), last axis."""
+    d = np.abs(np.sum(np.asarray(a) * np.asarray(b), axis=-1))
+    return 2.0 * np.arccos(np.clip(d, 0.0, 1.0))
+
+
+def continuous_quats(q):
+    """Unit quaternions (frames, 4) with signs flipped to stay on one hemisphere."""
+    q = np.array(q, dtype=np.float64)
+    for t in range(1, len(q)):
+        if np.dot(q[t], q[t - 1]) < 0.0:
+            q[t] = -q[t]
+    return q
+
+
+def despike_quats(q, spike_deg=12.0):
+    """Unit quaternions (frames, 4) with isolated spikes replaced by their neighbours' mean.
+
+    A frame is a spike when it is more than `spike_deg` away from both neighbours while the
+    neighbours are close to each other (less than half of that): a wrist cannot flick out and
+    back within one frame.
+    """
+    q = continuous_quats(q)
+    lim = np.radians(spike_deg)
+    for t in range(1, len(q) - 1):
+        a = quat_angle(q[t - 1], q[t])
+        b = quat_angle(q[t], q[t + 1])
+        c = quat_angle(q[t - 1], q[t + 1])
+        if min(a, b) > lim and c < 0.5 * min(a, b):
+            m = q[t - 1] + q[t + 1]
+            q[t] = m / np.linalg.norm(m)
+    return q
+
+
+def smooth_quats(q, rate, min_cutoff=2.0, beta=0.2):
+    """Zero-phase One-Euro smoothing of unit quaternions (frames, 4), sign-continuous."""
+    out = one_euro(continuous_quats(q), rate, min_cutoff, beta)
+    return out / np.maximum(np.linalg.norm(out, axis=-1, keepdims=True), 1e-9)
+
+
+def facing_yaw(points, reach=WRIST_R, top=0.2):
+    """Direction of the opponent (degrees about up; 0 = towards the camera, 90 = image right).
+
+    Mean of the chest's facing (normal of the shoulder line, horizontal) and of the reaching
+    hand's direction from the hips, over the `top` fraction of frames where that hand is
+    farthest from the hips horizontally (the strike or the block): the adversary is where the
+    blow lands and where the chest turns to. Z-up points (frames, 33, 3), X image right (the
+    performer's left when facing the camera), Y away from the camera. `reach` is a landmark
+    index or a (frames, 3) track (the shield disc).
+    """
+    pts = np.asarray(points, dtype=np.float64)
+    hips = 0.5 * (pts[:, HIP_L] + pts[:, HIP_R])
+    if np.ndim(reach) == 0:
+        reach = pts[:, reach]
+    hand = np.asarray(reach, dtype=np.float64) - hips
+    hand[:, 2] = 0.0
+    dist = np.linalg.norm(hand, axis=-1)
+    k = max(1, int(round(top * len(pts))))
+    sel = np.argsort(dist)[-k:]
+    left = pts[sel, SHOULDER_L] - pts[sel, SHOULDER_R]
+    face = np.cross(left, [0.0, 0.0, 1.0])  # left x up = forward
+    face[:, 2] = 0.0
+    face /= np.maximum(np.linalg.norm(face, axis=-1, keepdims=True), 1e-9)
+    hand_dir = hand[sel] / np.maximum(dist[sel, None], 1e-9)
+    d = face.mean(axis=0) + hand_dir.mean(axis=0)
+    return float(np.degrees(np.arctan2(d[0], -d[1])))  # forward = (sin, -cos)

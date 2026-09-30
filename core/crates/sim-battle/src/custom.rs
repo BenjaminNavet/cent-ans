@@ -495,6 +495,7 @@ impl CustomBattle {
             standards,
             decor_plan: None,
             opening: Default::default(),
+            crossing: None,
         })
     }
 }

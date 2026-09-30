@@ -137,6 +137,11 @@ uniform float rock_line_m = 1700.0;
 // CV3-0 (#5) : 1.8 -> 2.1, la plaine entre Paris et Orléans restait peu lisible en vue régionale
 // (l'écrasement des montagnes, indépendant, reste inchangé).
 uniform float shading_relief = 2.1;
+// SS2 (ADR 0142) : de près (empreinte < `shading_relief_near_footprint`), l'exagération retombe à
+// `shading_relief_near` : la carte de couleur porte la lecture du paysage, le relief ne doit plus
+// dominer (effet « carte IGN »).
+uniform float shading_relief_near = 1.3;
+uniform float shading_relief_near_footprint = 0.25;
 // ZG8 : roche sur les pentes raides du relief EXAGÉRÉ localement (pente affichée ramenée à l'échelle
 // ×1 : pente vraie × (1 + gain local)), m/m ; 0 / 0 : désactivé (posés par TerrainBuilder).
 uniform float cliff_slope_start = 0.0;
@@ -322,6 +327,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
+#include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -359,7 +365,7 @@ void fragment() {
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
 	vec2 grad_disp = campaign_display_gradient(hc, grad_m, p);  // ZG8 : pente de la surface affichée
 	float cliff = cliff_slope_full > cliff_slope_start ? smoothstep(cliff_slope_start, cliff_slope_full, length(grad_disp) / (height_scale * meters_per_px)) : 0.0;
-	vec2 g = grad_disp * shading_relief;
+	vec2 g = grad_disp * mix(shading_relief_near, shading_relief, smoothstep(0.0, shading_relief_near_footprint, footprint));
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
 
 	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
@@ -565,6 +571,7 @@ void fragment() {
 	n = normalize(vec3(n.x + dn.x * dstrength, n.y, n.z - dn.y * dstrength));
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
 	fp_parcels(p, uv, footprint, grad_m, slope, hc, s, lu, terroir, open_w, w_forest / max(wsum, 1e-3), col, roughness, n);  // ZG5b
+	sg_apply(uv, footprint, snow, land_f, col);  // SS2
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4

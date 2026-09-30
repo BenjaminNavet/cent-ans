@@ -93,6 +93,8 @@ var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenan
 var ai_replay: AiTurnReplay = null  # CT1 : marches des armées IA rejouées en fin de tour
 ## Lot C6 : paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
+## Lot SS3 (ADR 0142) : nappes d'eau des lacs (`data/map/lakes.json`), vue 3D seulement.
+var lakes: LakesRenderer = null
 var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
 var roads: RoadRenderer = null
@@ -150,6 +152,10 @@ func _ready() -> void:
 	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
 	rivers.build(map_data, terrain, settlement_layer)
 	rivers.attach_roads(roads)  # ZG5b : routes drapées fines
+	lakes = LakesRenderer.new()  # SS3
+	lakes.name = "Lakes"
+	add_child(lakes)
+	lakes.build(map_data)
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
@@ -1330,6 +1336,8 @@ func _process(_delta: float) -> void:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
+	if lakes != null and zoom_tiers != null:  # SS3
+		lakes.update_view(zoom_tiers.strategic_weight(camera_rig.distance))
 	tp = PerfProbe.lap("map.rivers", tp)
 	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
 	armies.update_scale(camera_rig.distance)

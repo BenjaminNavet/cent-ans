@@ -41,6 +41,7 @@ pub mod religion;
 pub mod replenishment;
 pub mod resource;
 pub mod retinue;
+pub mod river_crossing;
 pub mod settlement;
 pub mod skill;
 pub mod technology;

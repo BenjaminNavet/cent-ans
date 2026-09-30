@@ -106,6 +106,23 @@ Total ≈ 9 min 20. Après une modification des seules graines ou colonies :
 `geo provinces`, `geo roads` (routes, colonies, tracés), `geo hamlets`, `geo splat`,
 `geo navgrid`, `geo rivers-render`, `geo horizon` (le relief ne dépend pas des provinces).
 
+**Rivières fines dans la couche de campagne** (lot RC4, ADR 0141) : sur une machine qui a la
+pyramide `data/map/pyramid/hydro_fine/` (après `geo hydro-fine`),
+
+```sh
+uv run --project tools cent-ans geo rivers-render --fine-min-order 5   # --fine-min-length-km 15 par défaut
+```
+
+verse dans `rivers_render.json` (donc lit de `river_bed.png` et ponts de route de
+`crossings_px.json`) les rivières du réseau fin (TOPAGE, OS Open Rivers, EU-Hydro ; les lignes
+Natural Earth du réseau fin sont ignorées) d'ordre de Strahler ≥ N et de longueur ≥ L km, avec
+leur nom de `features.json` et une importance basse (ordre − 3, bornée à 0-2). Les points CAFV
+(cadre de la pyramide) sont décalés de `root_origin_tiles` × 256 vers les pixels carte ; les
+parties à moins de 2,5 px d'un fleuve Natural Earth affiché sont retirées (seules les portions
+nouvelles d'au moins L km restent, prolongées d'un sommet pour rejoindre le fleuve). Sans
+pyramide : message, rendu Natural Earth seul. Sans l'option, sortie identique à l'octet près.
+Rendu seulement : `navgrid.png` n'est pas refaite.
+
 - **Bruts** : 26 tuiles ETOPO (14 ajoutées, ≈ 480 Mo), KK10 1330-1349 sur lon −37 → 69,
   lat 24 → 71 (`kk10_1330_1349_om.npz`, 1,1 Mo, 16 s), Natural Earth
   `ne_10m_geography_regions_polys` (déserts nommés). Pas de GLO-90/GLO-30/WorldCover à l'Est :

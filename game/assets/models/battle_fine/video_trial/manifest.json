@@ -28,40 +28,112 @@
  ],
  "clip_sources": {
   "guard": {
-   "note": "stick on the right shoulder, still",
+   "grip": "right_hand",
+   "note": "sword low, disc before the chest",
    "quality": {
     "contact_frames": [
-     39,
-     39
+     25,
+     25
     ],
     "foot_below_rest_m": 0.0,
     "foot_slide_m": 0.0,
-    "jitter_deg_per_frame2": 2.86,
-    "wrist_r_bend_max_deg": 113.8,
-    "wrist_r_max_deg_per_frame": 0.8
+    "jitter_deg_per_frame2": 0.06,
+    "tremor_deg": 0.03,
+    "tremor_worst": [
+     [
+      "Foot.L",
+      0.11
+     ],
+     [
+      "UpperArm.L",
+      0.05
+     ],
+     [
+      "Wrist.L",
+      0.05
+     ]
+    ],
+    "wrist_r_bend_max_deg": 55.3,
+    "wrist_r_max_deg_per_frame": 0.3
    },
-   "solve_s": 0.0,
-   "source": "player video IMG_6455 frames 0-48 @30fps, x1.0 speed",
-   "yaw_deg": 45.0
+   "set": "nt14",
+   "shield": "disc",
+   "solve_s": 0.8,
+   "source": "player video IMG_6461 frames 12-72 @60fps, x1.0 speed",
+   "yaw_deg": 75.1
   },
   "overhead": {
-   "note": "raised then cut down across",
+   "grip": "right_hand",
+   "note": "raised over the head, cut down forwards, follow-through (then a second raise, unused)",
    "quality": {
     "contact_frames": [
-     37,
-     37
+     25,
+     25
     ],
     "foot_below_rest_m": 0.0,
     "foot_slide_m": 0.0,
-    "jitter_deg_per_frame2": 5.37,
-    "wrist_r_bend_max_deg": 72.5,
-    "wrist_r_max_deg_per_frame": 13.4
+    "jitter_deg_per_frame2": 15.61,
+    "tremor_deg": 1.41,
+    "tremor_worst": [
+     [
+      "LowerArm.R",
+      4.06
+     ],
+     [
+      "LowerArm.L",
+      3.7
+     ],
+     [
+      "Wrist.L",
+      3.7
+     ]
+    ],
+    "wrist_r_bend_max_deg": 70.7,
+    "wrist_r_max_deg_per_frame": 25.0
    },
-   "solve_s": 0.0,
-   "source": "player video IMG_6455 frames 54-135 @30fps, x1.8 speed",
-   "yaw_deg": 45.0
+   "set": "nt14",
+   "shield": "disc",
+   "solve_s": 0.9,
+   "source": "player video IMG_6459 frames 96-170 @60fps, x1.2 speed",
+   "yaw_deg": 71.6
+  },
+  "parry": {
+   "grip": "right_hand",
+   "note": "disc thrown up high, crouched",
+   "quality": {
+    "contact_frames": [
+     35,
+     38
+    ],
+    "foot_below_rest_m": 0.0,
+    "foot_slide_m": 0.013,
+    "jitter_deg_per_frame2": 11.43,
+    "tremor_deg": 0.73,
+    "tremor_worst": [
+     [
+      "UpperArm.L",
+      2.45
+     ],
+     [
+      "LowerArm.L",
+      2.06
+     ],
+     [
+      "Wrist.L",
+      2.05
+     ]
+    ],
+    "wrist_r_bend_max_deg": 74.5,
+    "wrist_r_max_deg_per_frame": 6.8
+   },
+   "set": "nt14",
+   "shield": "disc",
+   "solve_s": 0.8,
+   "source": "player video IMG_6460 frames 62-175 @60fps, x1.2 speed",
+   "yaw_deg": 23.3
   },
   "slash": {
+   "grip": "two_hands",
    "note": "horizontal cut and back",
    "quality": {
     "contact_frames": [
@@ -70,56 +142,96 @@
     ],
     "foot_below_rest_m": 0.0,
     "foot_slide_m": 0.0,
-    "jitter_deg_per_frame2": 12.73,
-    "wrist_r_bend_max_deg": 103.6,
-    "wrist_r_max_deg_per_frame": 31.2
+    "jitter_deg_per_frame2": 12.6,
+    "tremor_deg": 0.93,
+    "tremor_worst": [
+     [
+      "LowerArm.R",
+      2.69
+     ],
+     [
+      "UpperArm.R",
+      2.64
+     ],
+     [
+      "Wrist.R",
+      2.37
+     ]
+    ],
+    "wrist_r_bend_max_deg": 94.2,
+    "wrist_r_max_deg_per_frame": 25.9
    },
+   "set": "nt13",
+   "shield": "keyframed",
    "solve_s": 0.0,
    "source": "player video IMG_6458 frames 12-72 @30fps, x1.4 speed",
    "yaw_deg": 45.0
   },
   "thrust": {
-   "note": "two-handed lunge and back",
+   "grip": "right_hand",
+   "note": "lunge and one-handed thrust",
    "quality": {
     "contact_frames": [
-     23,
-     21
+     32,
+     32
     ],
-    "foot_below_rest_m": -0.0,
-    "foot_slide_m": 0.185,
-    "jitter_deg_per_frame2": 3.44,
-    "wrist_r_bend_max_deg": 122.1,
-    "wrist_r_max_deg_per_frame": 15.1
+    "foot_below_rest_m": 0.0,
+    "foot_slide_m": 0.0,
+    "jitter_deg_per_frame2": 18.46,
+    "tremor_deg": 1.63,
+    "tremor_worst": [
+     [
+      "UpperArm.R",
+      4.84
+     ],
+     [
+      "LowerArm.R",
+      4.47
+     ],
+     [
+      "LowerArm.L",
+      3.84
+     ]
+    ],
+    "wrist_r_bend_max_deg": 62.5,
+    "wrist_r_max_deg_per_frame": 28.4
    },
-   "solve_s": 0.0,
-   "source": "player video IMG_6457 frames 57-126 @30fps, x1.4 speed",
-   "yaw_deg": 70.0
+   "set": "nt14",
+   "shield": "disc",
+   "solve_s": 0.8,
+   "source": "player video IMG_6461 frames 72-165 @60fps, x1.2 speed",
+   "yaw_deg": 75.9
   }
  },
  "clips": {
   "guard": {
-   "frames": 39,
+   "frames": 25,
    "loop": true,
-   "start": 0
+   "start": 35
   },
   "overhead": {
-   "frames": 37,
+   "frames": 25,
    "loop": false,
-   "start": 39
+   "start": 60
+  },
+  "parry": {
+   "frames": 38,
+   "loop": false,
+   "start": 85
   },
   "slash": {
    "frames": 35,
    "loop": false,
-   "start": 76
+   "start": 0
   },
   "thrust": {
-   "frames": 40,
+   "frames": 32,
    "loop": false,
-   "start": 111
+   "start": 123
   }
  },
  "fps": 24,
  "rig": "human",
- "source": "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/nt13-video-mocap.md",
+ "source": "tools/blender_scripts/nt13_video_trial.py - the player's own phone videos, MediaPipe Pose Landmarker heavy (Apache 2.0), see docs/wip/nt13-video-mocap.md and docs/wip/nt14-video-set2.md",
  "texture": "human.bones.bin"
 }

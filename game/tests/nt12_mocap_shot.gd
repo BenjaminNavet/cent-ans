@@ -51,9 +51,11 @@ func _init() -> void:
 	var images := {}
 	for trial in [0, 1]:
 		BattleSkinned.mocap_trial_forced = trial
+		BattleSkinned.melee_forced = 0  # NT14 : sans l'essai, clips keyframés (pas le défaut melee/)
 		BattleSkinned.reload_caches()
 		images[trial] = await _melee_run()
 	BattleSkinned.mocap_trial_forced = -1
+	BattleSkinned.melee_forced = -1
 	BattleSkinned.reload_caches()
 	var failures := 0
 	var left: Array = images[0]

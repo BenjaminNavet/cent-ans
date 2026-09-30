@@ -70,6 +70,9 @@ class RiverRenderResult:
     points: int
     snapped: int
     unsnapped: list[str]
+    fine_added: int = 0  # fine river pieces merged (``--fine-min-order``)
+    fine_dropped: int = 0  # fine lines dropped as duplicates of a Natural Earth river
+    fine_missing: str | None = None  # why the fine network was not read
 
 
 def importance_of(props: dict) -> int:
@@ -506,8 +509,210 @@ def load_zones(styles: dict, to_pixel) -> list[dict]:  # noqa: ANN001
     return zones
 
 
-def build(map_dir: Path = MAP_DIR) -> RiverRenderResult:
-    """Write ``rivers_render.json``, ``river_bed.png`` and ``crossings_px.json``."""
+# ------------------------------------------------------- fine rivers (lot RC4, ADR 0141)
+
+FINE_MANIFEST_FILE = "rivers_fine.json"
+FINE_DEFAULT_MIN_LENGTH_KM = 15.0
+FINE_DEDUP_PX = 2.5  # a fine vertex this close to a Natural Earth river duplicates it
+FINE_CHAIN_EPS = 1e-3  # tile pieces of one feature share their border vertex
+FINE_SKIPPED_SOURCES = ("naturalearth",)  # already in rivers.geojson
+
+
+@dataclass(frozen=True)
+class FineOptions:
+    """Selection of the fine network (``--fine-min-order``, ``--fine-min-length-km``)."""
+
+    min_order: int
+    min_length_km: float = FINE_DEFAULT_MIN_LENGTH_KM
+
+
+@dataclass
+class FineLines:
+    """Fine lines read from the pyramid, in map pixels (world frame)."""
+
+    lines: list[dict]  # name, order, source, points (map px)
+    read: int  # features passing the order / length filter
+
+
+def fine_importance(order: int) -> int:
+    """Low display importance (0-2) of a fine river from its Strahler order."""
+    return int(np.clip(order - 3, 0, 2))
+
+
+def chain_pieces(pieces: list[np.ndarray]) -> list[np.ndarray]:
+    """Join the tile pieces of one feature back into polylines (shared border vertices)."""
+    remaining = [np.asarray(p, dtype=np.float64) for p in pieces if len(p) >= 2]
+    chains: list[np.ndarray] = []
+    while remaining:
+        chain = remaining.pop(0)
+        grown = True
+        while grown:
+            grown = False
+            for k, piece in enumerate(remaining):
+                if np.all(np.abs(piece[0] - chain[-1]) < FINE_CHAIN_EPS):
+                    chain = np.vstack([chain, piece[1:]])
+                elif np.all(np.abs(piece[-1] - chain[0]) < FINE_CHAIN_EPS):
+                    chain = np.vstack([piece[:-1], chain])
+                else:
+                    continue
+                remaining.pop(k)
+                grown = True
+                break
+        chains.append(chain)
+    return chains
+
+
+def fine_missing_reason(map_dir: Path) -> str | None:
+    """Why the fine network cannot be read here (None when the pyramid is present)."""
+    manifest_path = map_dir / FINE_MANIFEST_FILE
+    if not manifest_path.exists():
+        return f"{FINE_MANIFEST_FILE} absent"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    tiles_dir = map_dir / manifest["dir"]
+    if not tiles_dir.is_dir():
+        return f"dossier {manifest['dir']} absent (pyramide hors git)"
+    if not (map_dir / manifest["features_file"]).exists():
+        return f"{manifest['features_file']} absent"
+    return None
+
+
+def read_fine_lines(map_dir: Path, options: FineOptions) -> FineLines:
+    """Fine lines of order ≥ ``min_order`` and length ≥ ``min_length_km``, in map px.
+
+    CAFV points are in the pyramid frame (``rivers_fine.json`` : « pixels carte 4096 »,
+    origin north-west); the frame sits at ``root_origin_tiles`` × 256 in the map
+    (ADR 0115), one frame unit per map pixel (:func:`pyramid.map_bounds`).
+    """
+    from cent_ans_tools.geo import fine_tiles, pyramid
+
+    manifest = json.loads((map_dir / FINE_MANIFEST_FILE).read_text(encoding="utf-8"))
+    features = json.loads(
+        (map_dir / manifest["features_file"]).read_text(encoding="utf-8")
+    )["features"]
+    wanted = {
+        i
+        for i, f in enumerate(features)
+        if int(f.get("order", 0)) >= options.min_order
+        and float(f.get("length_km", 0.0)) >= options.min_length_km
+        and f.get("source", "") not in FINE_SKIPPED_SOURCES
+    }
+    dx, dy = pyramid.root_origin_tiles(map_dir)
+    offset = np.array([dx, dy], dtype=np.float64) * fine_tiles.ROOT_TILE_UNITS
+    pieces: dict[int, list[np.ndarray]] = {}
+    tiles_dir = map_dir / manifest["dir"]
+    for entry in manifest.get("tiles", []):
+        path = tiles_dir / manifest["pattern"].format(
+            col=entry["col"], row=entry["row"]
+        )
+        if not path.exists():
+            continue
+        for line in fine_tiles.decode(path.read_bytes())["lines"]:
+            if line["feature"] in wanted:
+                pieces.setdefault(line["feature"], []).append(
+                    line["xy"].astype(np.float64) + offset
+                )
+    lines = []
+    for feature in sorted(pieces):
+        props = features[feature]
+        for chain in chain_pieces(pieces[feature]):
+            lines.append(
+                {
+                    "name": props.get("name", "") or "",
+                    "order": int(props.get("order", 0)),
+                    "source": props.get("source", ""),
+                    "points": chain,
+                }
+            )
+    return FineLines(lines=lines, read=len(wanted))
+
+
+def near_rivers(points: np.ndarray, rivers: list[dict], radius: float) -> np.ndarray:
+    """Mask of ``points`` within ``radius`` px of any polyline of ``rivers``."""
+    import shapely
+    from shapely import STRtree
+
+    if not rivers or len(points) == 0:
+        return np.zeros(len(points), dtype=bool)
+    tree = STRtree([shapely.LineString(r["points"]) for r in rivers])
+    hits = tree.query(shapely.points(points), predicate="dwithin", distance=radius)
+    near = np.zeros(len(points), dtype=bool)
+    near[np.unique(hits[0])] = True
+    return near
+
+
+def polyline_length_px(points: np.ndarray) -> float:
+    """Length of a polyline in map px."""
+    return float(np.hypot(*np.diff(points, axis=0).T).sum()) if len(points) > 1 else 0.0
+
+
+def dedup_fine(
+    lines: list[dict], existing: list[dict], min_length_px: float
+) -> tuple[list[dict], int]:
+    """Cut the fine lines where they follow a displayed river; keep the long new runs.
+
+    A vertex within :data:`FINE_DEDUP_PX` of an existing river duplicates it. The runs
+    of new vertices are kept when at least ``min_length_px`` long, each extended by one
+    vertex on both sides so that a tributary still reaches the river it joins.
+    Returns the kept pieces and the number of lines dropped entirely.
+    """
+    kept: list[dict] = []
+    dropped = 0
+    for line in lines:
+        points: np.ndarray = line["points"]
+        near = near_rivers(points, existing, FINE_DEDUP_PX)
+        pieces = []
+        start = None
+        for i, flag in enumerate([*near, True]):
+            if not flag and start is None:
+                start = i
+            elif flag and start is not None:
+                run = points[max(start - 1, 0) : min(i + 1, len(points))]
+                if len(run) >= 2 and polyline_length_px(run) >= min_length_px:
+                    pieces.append({**line, "points": run})
+                start = None
+        if not pieces:
+            dropped += 1
+        kept.extend(pieces)
+    return kept, dropped
+
+
+def prepare_fine(
+    lines: list[dict], height_m: np.ndarray, styles: dict, zones: list[dict]
+) -> list[dict]:
+    """Fine lines as displayed rivers: low importance, width by importance, tapered."""
+    rivers: list[dict] = []
+    for line in lines:
+        points = np.asarray(line["points"], dtype=np.float64)
+        if len(points) < 2:
+            continue
+        ends = sample_bilinear(height_m, points[[0, -1], 0], points[[0, -1], 1])
+        if ends[0] < ends[1]:
+            points = points[::-1]
+        importance = fine_importance(line["order"])
+        points = chaikin(points, SMOOTH_ITERATIONS)
+        heights = sample_bilinear(height_m, points[:, 0], points[:, 1])
+        widths = mouth_width(None, importance, styles) * taper(heights, styles)
+        for run_points, run_widths in split_outside(points, widths, zones):
+            rivers.append(
+                {
+                    "name": line["name"],
+                    "importance": importance,
+                    "points": run_points,
+                    "widths": run_widths,
+                    "fine": True,
+                }
+            )
+    return rivers
+
+
+def build(
+    map_dir: Path = MAP_DIR, fine: FineOptions | None = None
+) -> RiverRenderResult:
+    """Write ``rivers_render.json``, ``river_bed.png`` and ``crossings_px.json``.
+
+    With ``fine``, the medium rivers of the fine network (lot ZG5a) are merged when the
+    pyramid is present (rendering only; the navigation grid is not touched).
+    """
     styles = json.loads((map_dir / STYLES_FILE).read_text(encoding="utf-8"))
     grid = load_grid(map_dir)
 
@@ -521,6 +726,19 @@ def build(map_dir: Path = MAP_DIR) -> RiverRenderResult:
         "features"
     ]
     rivers = prepare_rivers(features, height_m.astype(np.float32), styles, zones)
+    fine_added = fine_dropped = 0
+    fine_missing = None
+    if fine is not None:
+        fine_missing = fine_missing_reason(map_dir)
+        if fine_missing is None:
+            fine_lines = read_fine_lines(map_dir, fine)
+            km_per_px = float(grid_meters_per_px(map_dir)) / 1000.0
+            kept, fine_dropped = dedup_fine(
+                fine_lines.lines, rivers, fine.min_length_km / km_per_px
+            )
+            extra = prepare_fine(kept, height_m.astype(np.float32), styles, zones)
+            fine_added = len(extra)
+            rivers += extra
 
     render_path = map_dir / RENDER_FILE
     payload = {
@@ -588,4 +806,13 @@ def build(map_dir: Path = MAP_DIR) -> RiverRenderResult:
         points=sum(len(r["points"]) for r in rivers),
         snapped=sum(1 for c in placed if c["snapped"]),
         unsnapped=unsnapped,
+        fine_added=fine_added,
+        fine_dropped=fine_dropped,
+        fine_missing=fine_missing,
     )
+
+
+def grid_meters_per_px(map_dir: Path) -> float:
+    """``meters_per_px`` of ``map.json``."""
+    metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
+    return float(metadata["meters_per_px"])
