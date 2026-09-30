@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10,<3.13"
-# dependencies = ["mediapipe>=0.10.14", "opencv-python-headless>=4.9", "numpy>=1.26"]
+# dependencies = ["mediapipe==0.10.21", "opencv-python-headless>=4.9", "numpy>=1.26"]
 # ///
 """Lot NT13: 3D pose landmarks of a phone video (MediaPipe Pose Landmarker "heavy").
 
@@ -46,8 +46,16 @@ def main() -> int:
         print("cannot open", args.video, file=sys.stderr)
         return 1
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    # Phone videos store portrait as landscape plus a rotation tag: apply it ourselves.
+    cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 0)
+    turn = {
+        90: cv2.ROTATE_90_CLOCKWISE,
+        -90: cv2.ROTATE_90_COUNTERCLOCKWISE,
+        270: cv2.ROTATE_90_COUNTERCLOCKWISE,
+        180: cv2.ROTATE_180,
+    }.get(int(round(cap.get(cv2.CAP_PROP_ORIENTATION_META))))
     opts = vision.PoseLandmarkerOptions(
-        base_options=BaseOptions(model_asset_path=args.model),
+        base_options=BaseOptions(model_asset_path=args.model, delegate=BaseOptions.Delegate.CPU),
         running_mode=vision.RunningMode.VIDEO,
         num_poses=1,
         min_pose_detection_confidence=0.5,
@@ -63,6 +71,8 @@ def main() -> int:
             ok, frame = cap.read()
             if not ok:
                 break
+            if turn is not None:
+                frame = cv2.rotate(frame, turn)
             h, w = frame.shape[:2]
             scale = args.long_side / max(h, w)
             if scale < 1.0:
