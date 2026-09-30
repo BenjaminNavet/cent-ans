@@ -17,4 +17,5 @@ Session principale :
 
 ## HB1 — biomes (branche `feat/hb-biomes`, worktree `../gp-hb-biomes`)
 - État : `geo/biomes.py` implémenté (Köppen Beck 2023 1901-1930 + règles + lissage) ; `biomes.png` cuit (0,3 Mo) ; parts : océanique 4,5 %, continental 32,9, méditerranéen 9,5, steppe 8,5, boréal 17,2, montagnard 5,6, semi-aride 21,8. Source dans `tools/geo/raw/koppen/` (lien `tools/geo/raw` vers le dépôt principal).
-- Prochaine étape : palettes par biome dans `colormap_style.yaml` + `colormap.py`, tests, re-cuisson.
+- Palettes par biome : section `biomes` de `colormap_style.yaml` (+ schéma), `colormap.py` fond les palettes (poids gaussiens `transition_km`), garrigue en taches, forêts gardées près des rivières (steppe), cultures par biome tirées par bloc.
+- Prochaine étape : tests `test_biomes.py`, re-cuisson colormap.
