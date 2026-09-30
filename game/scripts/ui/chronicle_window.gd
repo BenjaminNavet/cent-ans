@@ -108,9 +108,12 @@ func _ready() -> void:
 		bubbles.call("attach", _text_label)
 	body.add_child(HSeparator.new())
 
+	# Q7 : choix hors de la page défilante, toujours visibles (en vue 720 l'enluminure seule
+	# remplissait le corps borné et les choix restaient sous le pli, « Plus tard » seul visible).
 	_options_box = VBoxContainer.new()
+	_options_box.name = "Options"
 	_options_box.add_theme_constant_override("separation", 6)
-	body.add_child(_options_box)
+	root.add_child(_options_box)
 
 	var footer := HBoxContainer.new()
 	_queue_label = Label.new()
@@ -199,7 +202,7 @@ func _fit() -> void:
 	_center_on_screen()
 
 
-## P2d : borne la hauteur du corps défilant (image, texte, choix) à `BODY_MAX_RATIO` de l'écran
+## P2d : borne la hauteur du corps défilant (image, texte ; les choix sont dessous, Q7) à `BODY_MAX_RATIO` de l'écran
 ## (ou de la zone `UiLayout`, hôte de la fenêtre) : une décision chargée (plusieurs choix chiffrés,
 ## texte long) défile au lieu de pousser la fenêtre hors de l'écran (titre et pied toujours
 ## visibles). Rien à borner sous `BODY_MIN_HEIGHT` : le contenu tient déjà.
@@ -210,7 +213,10 @@ func _clamp_body_height() -> void:
 	var area := (parent as Control).size if parent is Control else get_viewport_rect().size
 	if area.y <= 0.0:
 		return
-	var budget := maxf(BODY_MIN_HEIGHT, area.y * BODY_MAX_RATIO)
+	# Q7 : le corps prend au plus la place que laissent l'en-tête, les choix et le pied.
+	_scroll.custom_minimum_size.y = 0.0
+	var room := area.y - get_combined_minimum_size().y - 16.0
+	var budget := maxf(BODY_MIN_HEIGHT * 0.5, minf(room, maxf(BODY_MIN_HEIGHT, area.y * BODY_MAX_RATIO)))
 	# Hauteur du contenu, pas du ScrollContainer : sa taille minimale propre est nulle en défilement
 	# vertical (Q6 : la fenêtre s'ouvrait avec un corps vide, choix inaccessibles).
 	var content := _scroll.get_child(0) as Control

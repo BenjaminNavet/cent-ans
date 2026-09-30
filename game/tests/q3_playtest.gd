@@ -966,6 +966,10 @@ func dismiss_dialogs() -> void:
 			await wait(5)
 			continue
 		var chronicle: Control = map.chronicle.window if map.chronicle != null else null
+		# Q7 : sort de la place prise (même fenêtre, autre contrôleur, TW2-T1).
+		var capture_window: Control = map.capture_fate.window if map.get("capture_fate") != null else null
+		if (chronicle == null or not chronicle.visible) and capture_window != null and capture_window.visible:
+			chronicle = capture_window
 		if chronicle != null and chronicle.visible:
 			await shot("chronicle-decision")
 			var choice: BaseButton = null
@@ -1010,7 +1014,7 @@ func click(control: Control, button := MOUSE_BUTTON_LEFT) -> void:
 	await move_to(point)
 	var hovered: Control = root.gui_get_hovered_control()
 	if hovered != null and hovered != control and not control.is_ancestor_of(hovered):
-		log_q("OVERLAP: click on %s (%s) at %s hit %s" % [control.name, _text_of(control), point, hovered.get_path()])
+		log_q("OVERLAP: click on %s (%s) at %s hit %s" % [control.get_path(), _text_of(control), point, hovered.get_path()])
 	await click_at(point, button)
 
 
