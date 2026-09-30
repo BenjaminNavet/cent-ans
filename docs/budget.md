@@ -232,3 +232,6 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Mat
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul HB |
 |---|---|---|---|---|---|
 | 2026-09-30 | — | HB : plan et ADR 0143 (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-30 | fal.ai | HB2 sonde : 3 matières (vigne, garrigue, steppe), `fal-ai/flux-2-pro` 1024² (0,03 $/Mpx) | 0,09 $ | 0,09 $ | 0,09 $ |
+| 2026-09-30 | fal.ai | HB2 : 24 autres matières de sol, flux-2-pro 1024² | 0,76 $ | 0,76 $ | 0,85 $ |
+| 2026-09-30 | fal.ai | HB2 reprises : 6 (blé, orge, pré de fauche, seigle, boréale, maquis) + 2 (orge, boréale) | 0,25 $ | 0,25 $ | 1,10 $ |

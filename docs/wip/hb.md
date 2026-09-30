@@ -16,6 +16,12 @@ Session principale :
 - [ ] HB8 captures, banc, docs.
 
 ## HB2 — matières de sol fal.ai (branche `feat/hb-materials`, worktree `../gp-hb-mat`)
-État : squelette (catalogue `data/art/ground_materials.yaml` 27 matières, schémas, module `tools/cent_ans_tools/ground_materials.py`, CLI `cent-ans assets ground-materials generate|seamless|pack`, chargeur `game/scripts/map/ground_materials.gd`, test `game/tests/hb2_materials_test.gd`).
-Prochaine étape : tests pytest, génération flux-2-pro (≈ 0,03 $/image), raccord, pack, test headless.
-Brutes : `~/dev/cent-ans-raw/hb/materials/` (planche `board_2x2.jpg`, mesures `tiles/report.json`).
+État : 27 matières générées (`fal-ai/flux-2-pro` 1024², 35 appels, 1,10 $), raccordées, empaquetées.
+- Catalogue `data/art/ground_materials.yaml` (schéma `ground_materials.schema.json`) : 13 cultures, 5 canopées, 9 sols ; biomes ADR 0143 ; `attempt` = reprise retenue.
+- Chaîne `tools/cent_ans_tools/ground_materials.py`, CLI `cent-ans assets ground-materials generate|seamless|pack` (`generate --dry-run` ; fal : `uv run --project tools --with fal-client python -c "from cent_ans_tools.cli import app; app()" assets ground-materials generate`).
+  Raccord : aplanissement des dégradés (flou large en miroir), demi-tuile, bandes de couture remplacées entre deux coupes d'erreur minimale fermées (programmation dynamique), puis aplanissement de l'éclairage (flou périodique), luminance moyenne linéaire égalisée à 0,18, normale/rugosité depuis la luminance passe-haut.
+- Tableaux `game/assets/textures/terrain/hb_ground_albedo_array.jpg` (grille 3×9 de 1024², 16,6 Mo) et `hb_ground_normal_array.jpg` (3×9 de 512², R,G normale OpenGL, B rugosité, 8 Mo), importés en `CompressedTexture2DArray` comme GA4.
+- Manifeste `data/art/ground_materials_pack.json` (id → couche, `mean_linear`) ; chargeur `GroundMaterials.load_arrays()` (`game/scripts/map/ground_materials.gd`) ; non branché dans `terrain.gdshader` (HB3).
+- Brutes et planche 2×2 : `~/dev/cent-ans-raw/hb/materials/` (`board_2x2.jpg`, mesures `tiles/report.json`).
+Limites : blé et orge gardent des lignes de semis/traces faiblement visibles en 2×2 (orge : la reprise « nadir » donne un motif radial de drone, rejetée) ; seigle légèrement quadrillé ; la teinte d'origine reste dans l'albédo (seule la luminance est égalisée).
+Prochaine étape : test headless `hb2_materials_test.gd`, puis jugement de la planche par la session principale.
