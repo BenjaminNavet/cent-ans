@@ -1,14 +1,15 @@
 extends SceneTree
 
-## Lot NT12 : captures côte à côte de la même mêlée, clips keyframés actuels (gauche) et essai de
-## mocap CMU reciblée (droite, `--mocap-trial`). Écrites, jamais lues par l'agent (la session
-## principale juge). Hors simulation, sur une prairie plate, comme `nt7_anim_shot.gd`.
+## Lot NT13 : captures côte à côte de la même mêlée : clips keyframés actuels (gauche), essai CMU
+## NT12 (`--mocap-trial`, milieu) et clips tirés des vidéos du joueur (`--video-trial`, droite).
+## Écrites, jamais lues par l'agent (la session principale juge). Hors simulation, sur une
+## prairie plate, comme `nt12_mocap_shot.gd`.
 ## Usage (avec affichage, pas en headless) :
-##   godot --path game --resolution 1280x720 --script res://tests/nt12_mocap_shot.gd -- [--out-dir=<dossier>]
+##   godot --path game --resolution 1280x720 --script res://tests/nt13_video_shot.gd -- [--out-dir=<dossier>]
 ## Écrit dans `docs/audit/captures/nt/` (défaut) :
-## - `nt12_melee_0..3.png` : mêlée rapprochée, 4 instants à 0,25 s d'écart, gauche actuel /
-##   droite mocap (1280 px de large) ;
-## - `nt12_melee_wide.png` : même mêlée vue de plus loin (lisibilité à distance de jeu).
+## - `nt13_melee_0..3.png` : mêlée rapprochée, 4 instants à 0,25 s d'écart, actuel | CMU | vidéo
+##   (1920 px de large) ;
+## - `nt13_melee_wide.png` : même mêlée vue de plus loin (lisibilité à distance de jeu).
 
 const SKY_SHADER := preload("res://shaders/battle_sky.gdshader")
 const STEPS := 4
@@ -49,19 +50,21 @@ func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(_out_dir)
 	await process_frame
 	var images := {}
-	for trial in [0, 1]:
-		BattleSkinned.mocap_trial_forced = trial
+	# 0 = actuel, 1 = CMU (NT12), 2 = vidéo (NT13).
+	for trial in [0, 1, 2]:
+		BattleSkinned.mocap_trial_forced = 1 if trial == 1 else 0
+		BattleSkinned.video_trial_forced = 1 if trial == 2 else 0
 		BattleSkinned.reload_caches()
 		images[trial] = await _melee_run()
 	BattleSkinned.mocap_trial_forced = -1
+	BattleSkinned.video_trial_forced = -1
 	BattleSkinned.reload_caches()
 	var failures := 0
-	var left: Array = images[0]
-	var right: Array = images[1]
-	for k in left.size():
-		var name := "nt12_melee_wide.png" if k == left.size() - 1 else "nt12_melee_%d.png" % k
-		failures += _save_pair(left[k], right[k], name)
-	print("nt12_mocap_shot: %s (%s)" % ["OK" if failures == 0 else "FAIL", _out_dir])
+	var first: Array = images[0]
+	for k in first.size():
+		var name := "nt13_melee_wide.png" if k == first.size() - 1 else "nt13_melee_%d.png" % k
+		failures += _save_row([images[0][k], images[1][k], images[2][k]], name)
+	print("nt13_video_shot: %s (%s)" % ["OK" if failures == 0 else "FAIL", _out_dir])
 	quit(0 if failures == 0 else 1)
 
 
@@ -119,18 +122,20 @@ func _grab() -> Image:
 	return root.get_texture().get_image()
 
 
-## Assemble gauche (actuel) | droite (mocap), ramené à 1280 px de large.
-func _save_pair(left: Image, right: Image, name: String) -> int:
-	var w := left.get_width()
-	var h := left.get_height()
-	var pair := Image.create(w * 2, h, false, left.get_format())
-	pair.blit_rect(left, Rect2i(0, 0, w, h), Vector2i(0, 0))
-	pair.blit_rect(right, Rect2i(0, 0, w, h), Vector2i(w, 0))
-	pair.resize(1280, int(h * 1280.0 / (w * 2)), Image.INTERPOLATE_LANCZOS)
+## Assemble actuel | CMU | vidéo, ramené à 1920 px de large.
+func _save_row(parts: Array, name: String) -> int:
+	var first: Image = parts[0]
+	var w := first.get_width()
+	var h := first.get_height()
+	var row := Image.create(w * parts.size(), h, false, first.get_format())
+	for i in parts.size():
+		row.blit_rect(parts[i], Rect2i(0, 0, w, h), Vector2i(w * i, 0))
+	row.resize(1920, int(h * 1920.0 / (w * parts.size())), Image.INTERPOLATE_LANCZOS)
 	var path := _out_dir.path_join(name)
-	var err := pair.save_png(path)
-	print("nt12_mocap_shot: %s (%s)" % [path, error_string(err)])
+	var err := row.save_png(path)
+	print("nt13_video_shot: %s (%s)" % [path, error_string(err)])
 	return 0 if err == OK else 1
+
 
 func _stage_unit(id: int, side: String, type: String, render: String, pos: Vector3, facing: float, count: int, general: bool) -> Dictionary:
 	var width := 24.0 if render != "cavalry" else 30.0
