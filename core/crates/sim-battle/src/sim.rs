@@ -9,6 +9,7 @@ mod capture;
 mod decision;
 mod deployment;
 mod fire;
+mod footing;
 mod hold;
 mod indirect;
 mod modes;

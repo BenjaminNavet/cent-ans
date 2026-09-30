@@ -86,6 +86,8 @@ SHOUT_LUFS = -13.0
 SHOUT_BUDGET_SESSION = "Voix criées VX"
 # ElevenLabs requests in flight at once (first takes fetched ahead of the checks).
 SHOUT_WORKERS = 6
+# A war cry chorus keeps its takes that pass the checks, if at least this many do.
+MIN_CHORUS_VOICES = 3
 SPEECH_HASH_LEN = 12
 
 
@@ -194,7 +196,8 @@ def shout_for(
     """ElevenLabs request of ``text`` in bark language ``language`` (``spec``)."""
     code = spec.get("language_code", "")
     check = code or voice_shout.WHISPER_LANGUAGE.get(language, language)
-    return voice_shout.Shout(text, tag, voice, code, check)
+    also = voice_shout.ACCEPTED_LANGUAGES.get(language, ())
+    return voice_shout.Shout(text, tag, voice, code, check, also)
 
 
 def advisor_jobs(advisor: dict) -> list[Job]:
@@ -530,16 +533,21 @@ def shouted_clip(
                 continue
             return raw, spent + cost, said, shout.voice
         raise voice_shout.RejectedShout(" / ".join(reasons), spent)
-    raws, heard = [], ""
+    raws, kept, heard, reasons = [], [], "", []
     for shout in job.shouts:
         try:
             raw, cost, said = voice_shout.checked(shout, api_key, CACHE_DIR, attempts)
-        except voice_shout.RejectedShout as error:
-            raise voice_shout.RejectedShout(str(error), spent + error.cost) from error
+        except voice_shout.RejectedShout as error:  # the chorus goes on without it
+            spent += error.cost
+            reasons.append(str(error))
+            continue
         spent += cost
         raws.append(raw)
+        kept.append(shout)
         heard = heard or said
-    chorus = voice_shout.chorus_cache_path(list(job.shouts), CACHE_DIR)
+    if len(raws) < MIN_CHORUS_VOICES:
+        raise voice_shout.RejectedShout(" / ".join(reasons), spent)
+    chorus = voice_shout.chorus_cache_path(kept, CACHE_DIR)
     if not chorus.exists():
         voice_shout.mix_chorus(raws, chorus, seed=job.text)
     return chorus, spent, heard, job.voice
