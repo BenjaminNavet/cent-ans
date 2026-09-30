@@ -62,8 +62,8 @@ void fragment() {
 	ALPHA = 1.0;
 	ALPHA_SCISSOR_THRESHOLD = card_alpha_cut;
 	if (v_crown > 0.5) {
-		vec4 card = texture(card_texture, UV2);
-		float lod = max(textureQueryLod(card_texture, UV2).x, 0.0);
+		float lod = clamp(textureQueryLod(card_texture, UV2).x, 0.0, 4.0);
+		vec4 card = textureLod(card_texture, UV2, lod);
 		ALPHA = card.a * (1.0 + lod * 0.35);
 		albedo = COLOR.rgb * tint * card.rgb * 2.0 * mix(0.88, 1.08, leaves);
 	}

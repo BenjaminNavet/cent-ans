@@ -25,6 +25,7 @@ uniform int rows = 3;
 uniform float ortho = 1.7;
 uniform float foot = 0.2588;
 uniform float alpha_cut = 0.5;
+uniform float max_lod = 2.5;
 
 varying vec2 v_uv0;
 varying vec2 v_uv1;
@@ -92,9 +93,11 @@ float bayer4(vec2 frag) {
 
 void fragment() {
 	vec2 uv = v_blend > bayer4(FRAGCOORD.xy) ? v_uv1 : v_uv0;
-	vec4 t = texture(albedo_atlas, uv);
-	vec4 nt = texture(normal_atlas, uv);
-	float lod = max(textureQueryLod(albedo_atlas, uv).x, 0.0);
+	// Niveau de mipmap borné : très loin (arbres de quelques pixels), l'alpha moyen de la cellule
+	// entière, même compensé, remplirait tout le quadrilatère (carrés pleins).
+	float lod = clamp(textureQueryLod(albedo_atlas, uv).x, 0.0, max_lod);
+	vec4 t = textureLod(albedo_atlas, uv, lod);
+	vec4 nt = textureLod(normal_atlas, uv, lod);
 	float leaves = value_noise(vec3(v_local * 24.0, v_seed * 17.0));
 	bool broadleaf = v_essence < 1.5;
 	// Hiver : feuillus ajourés (on voit le sol à travers), comme `foliage_winter.gdshader`.

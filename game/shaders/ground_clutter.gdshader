@@ -20,8 +20,8 @@ uniform float wind_strength = 0.12;
 uniform float wind_speed = 1.4;
 // Lot FC5 : teintes proches de la prairie du terrain (`terrain.gdshader`, tint_grass linéaire
 // 0,105 / 0,165 / 0,045), pointes un peu plus claires pour détacher les touffes du sol.
-uniform vec3 grass_color : source_color = vec3(0.38, 0.47, 0.24);
-uniform vec3 grass_dry : source_color = vec3(0.55, 0.51, 0.31);
+uniform vec3 grass_color : source_color = vec3(0.34, 0.44, 0.21);
+uniform vec3 grass_dry : source_color = vec3(0.46, 0.46, 0.27);
 uniform vec3 bush_color : source_color = vec3(0.24, 0.33, 0.15);
 // Lot FC5 : touffe en éventail (lot DA6, CC0) : alpha = brins, luminance = relief des brins.
 // Mipmaps + compensation de l'alpha : les brins restent lisibles quand la touffe fait 10 px.
@@ -105,7 +105,7 @@ void fragment() {
 		vec4 t = texture(grass_texture, uv);
 		float lod = max(textureQueryLod(grass_texture, uv).x, 0.0);
 		mask = t.a * (1.0 + lod * 0.4);
-		shade = mix(0.75, 1.2, dot(t.rgb, vec3(0.3, 0.59, 0.11)));
+		shade = mix(0.8, 1.1, dot(t.rgb, vec3(0.3, 0.59, 0.11)));
 	} else {
 		mask = blades(UV, v_seed);
 	}
@@ -113,7 +113,7 @@ void fragment() {
 		discard;
 	}
 	float up = 1.0 - UV.y;
-	vec3 base = is_bush ? bush_color : mix(grass_color, grass_dry, v_tint * 0.6);
+	vec3 base = is_bush ? bush_color : mix(grass_color, grass_dry, v_tint * v_tint * 0.5);
 	base *= mix(0.9, 1.12, v_tint) * shade;
 	vec4 w = campaign_season;
 	// Printemps tendre, été sec, automne roux, hiver brun-gris.
@@ -125,7 +125,7 @@ void fragment() {
 		color = base;
 	}
 	// Pied des touffes assombri (occlusion au sol).
-	color *= mix(0.55, 1.12, smoothstep(0.0, 0.8, up));
+	color *= mix(0.6, 1.06, smoothstep(0.0, 0.8, up));
 	ALBEDO = color;
 	ROUGHNESS = 0.95;
 	BACKLIGHT = color * 0.3;
