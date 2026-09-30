@@ -150,3 +150,7 @@ NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul NB |
 |---|---|---|---|---|---|
 | 2026-09-30 | — | NB-S (squelette) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v0 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,10 $ |
+| 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v1 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,20 $ |
+| 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v2 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,30 $ |
+| 2026-09-30 | OpenRouter | NB-DA : planche maîtresse v3 (google/gemini-3.1-flash-image, 2K) | 0,11 $ | 0,10 $ | 0,40 $ |
