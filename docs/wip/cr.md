@@ -43,5 +43,10 @@ Prochaine étape : casques (bassinet plus pointu, visière sur cavalry_0 à la p
 
 # CR3 — caparaçons en drap lourd
 
-État : pas commencé.
-Prochaine étape : lire `tools/blender_scripts/battle_fine_horse.py` (`caparison`), plan drapé/ourlet/fentes.
+État : `battle_fine_cavalry.caparison` réécrit (le constructeur utilisé ; celui de `battle_fine_horse.py` est mort) :
+plis irréguliers en tuyaux d'orgue qui se creusent vers l'ourlet (5 cm LOD0), évasement, ourlet
+ondulé à 0,46 m ± 3 cm (jarrets), dents (`dagged`) pour cavalry_3, fentes aux jambes (panneau
+avant/arrière porté à 45 % par le haut de la jambe), armoiries sur tout le drap (meubles ~25 cm)
+au lieu d'un écu collé sur chaque flanc ; anneau redistribué (1/3 dos, 1/3 par flanc) : même
+nombre de triangles. Balancement : déjà fait par AN1a (`sm_weight` part 1, vitesse du régiment).
+Prochaine étape : cuisson cavalry_0 d'essai, capture, puis cuisson complète (bassinets partout).
