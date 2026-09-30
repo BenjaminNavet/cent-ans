@@ -123,6 +123,9 @@ GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
 | 2026-09-30 | fal.ai | GA3-L3a : figurine longbowman (1 × fal-ai/nano-banana-2/edit 2K 0,12 $ planche A-pose 3 vues + 1 × fal-ai/bria/background/remove 0,018 $ + 1 × fal-ai/trellis/multi 0,02 $ face+dos, livrée + 1 × fal-ai/trellis 0,02 $ comparaison + 1 × fal-ai/trellis-2 1024 0,30 $ parti avant la consigne « moins cher », comparaison seulement) — prix catalogue | 0,48 $ | 0,48 $ | 5,76 $ |
 | 2026-09-30 | fal.ai | GA3-L3b : figurines homme d'armes, arbalétrier, sergent, milicien, un essai chacune (4 × fal-ai/nano-banana-2/edit 2K 0,12 $ planche A-pose 3 vues + 4 × fal-ai/bria/background/remove 0,018 $ + 4 × fal-ai/trellis/multi 0,02 $ face+dos) — prix catalogue | 0,63 $ | 0,63 $ | 6,39 $ |
 | 2026-09-30 | fal.ai | GA3-L3c : cavalier du chevalier, un essai (1 × fal-ai/nano-banana-2/edit 2K 0,12 $ planche A-pose 3 vues à pied depuis sr3/knight_mounted + 1 × fal-ai/bria/background/remove 0,018 $ + 1 × fal-ai/trellis/multi 0,02 $ face+dos) — prix catalogue | 0,16 $ | 0,16 $ | 6,55 $ |
+| 2026-09-30 | fal.ai | GA3-L4 : variantes de visage des 6 figurines L3 (6 × fal-ai/nano-banana-2/edit 1K 0,08 $ planche éditée, tête seule + 6 × fal-ai/bria/background/remove 0,018 $ + 6 × fal-ai/trellis/multi 0,02 $ face+dos) — prix catalogue | 0,71 $ | 0,71 $ | 7,26 $ |
+| 2026-09-30 | fal.ai | GA3-L4 : 10 recettes restantes, un essai chacune (10 × fal-ai/nano-banana-2/edit 1K 0,08 $ planche A-pose éditée depuis une planche L3 + 10 × fal-ai/bria/background/remove 0,018 $ + 10 × fal-ai/trellis/multi 0,02 $) — prix catalogue | 1,18 $ | 1,18 $ | 8,44 $ |
+| 2026-09-30 | fal.ai | GA3-L4 : variantes de visage de 9 recettes neuves (9 × nano-banana-2/edit 1K 0,08 $ + 9 × bria 0,018 $ + 9 × trellis/multi 0,02 $ ; standard_1 sans variante, enveloppe L4 ≤ 3 $) — prix catalogue | 1,06 $ | 1,06 $ | 9,50 $ |
 
 ## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
 

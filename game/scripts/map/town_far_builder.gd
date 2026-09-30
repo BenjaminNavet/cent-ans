@@ -32,6 +32,8 @@ const EAVE_DEFAULT_M := 9.0
 const CROWN_M := 3.0
 ## Variation d'égout par relèvement (± m), déterministe par ville.
 const EAVE_JITTER_M := 1.0
+## Côté (m) des cellules qui découpent la nappe d'un quartier v2 (sommets posés sur le relief).
+const DISTRICT_CELL_M := 200.0
 ## Fraction du rayon de l'anneau intérieur (convention de `ground_m`).
 const INNER_RING := 0.5
 ## Bord de la nappe en fraction du rayon quand la ville est close (le mur est au rayon).
@@ -186,6 +188,8 @@ class Ground:
 	var radii := PackedFloat32Array()
 	var g := PackedFloat32Array()
 	var z := 0.0
+	## Relief échantillonné (villes v2) : prime sur `ground_m` et `z_m`.
+	var heights: TownPlan.Heights = null
 
 	func _init(town: Dictionary) -> void:
 		z = float(town.get("z_m", 0.0))
@@ -198,6 +202,8 @@ class Ground:
 					g.append(float(v))
 
 	func at(p: Vector2) -> float:
+		if heights != null:
+			return heights.height_m(p.x, p.y)
 		if g.is_empty():
 			return z
 		var d := p.length()
@@ -286,13 +292,15 @@ static func build_f2(town: Dictionary, town_index: int, meters_per_unit: float) 
 
 ## Lointain d'une ville v2 (`data/landmarks_v2/*.json`) : quartiers, enceintes, plus grands
 ## monuments. `anchor` (unités carte) : `LandmarkV2Library.anchor_units(city)` par défaut (le fil
-## principal doit avoir chargé la bibliothèque) ; `ground_z_m` : sol uniforme (sinon `city.z_m`,
-## sinon 0) — la jupe masque l'écart.
-static func build_v2_far(city: Dictionary, town_index: int, meters_per_unit: float, anchor: Vector2 = Vector2(NAN, NAN), ground_z_m: float = NAN, year: int = V2_YEAR) -> Dictionary:
+## principal doit avoir chargé la bibliothèque) ; `heights` : relief sous la ville (repère local,
+## le même ancrage), sinon sol uniforme `ground_z_m` (sinon `city.z_m`, sinon 0). Le relief
+## affiché est exagéré : un sol uniforme laisse des dalles flotter ou s'enfoncer (Paris, 30/09).
+static func build_v2_far(city: Dictionary, town_index: int, meters_per_unit: float, anchor: Vector2 = Vector2(NAN, NAN), ground_z_m: float = NAN, year: int = V2_YEAR, heights: TownPlan.Heights = null) -> Dictionary:
 	if is_nan(anchor.x):
 		anchor = LandmarkV2Library.anchor_units(city)
 	var acc := Acc.new(anchor, meters_per_unit, town_index)
 	var ground := Ground.new({"z_m": ground_z_m if not is_nan(ground_z_m) else float(city.get("z_m", 0.0))})
+	ground.heights = heights
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(city.get("seed", 1))
 	var roof := _roof_color("city", rng)
@@ -628,29 +636,63 @@ static func _district(acc: Acc, ground: Ground, poly: PackedVector2Array, eave: 
 		poly.remove_at(poly.size() - 1)
 	if poly.size() < 3:
 		return
-	var tris := Geometry2D.triangulate_polygon(poly)
 	var v0 := acc.pm.size()
 	var i0 := acc.indices.size()
-	var ids := PackedInt32Array()
+	# Nappe découpée en cellules de DISTRICT_CELL_M : ses sommets suivent le relief (un quartier de
+	# 2 km sur un seul triangle traverserait les collines). Sommets partagés entre cellules.
+	var ids := {}
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
 	for p in poly:
-		ids.append(acc.vert(p, ground.at(p), eave, Vector3.UP, roof))
-	if tris.size() >= 3:
-		for t in range(0, tris.size(), 3):
-			acc.tri(ids[tris[t]], ids[tris[t + 1]], ids[tris[t + 2]], Vector3.UP)
-	else:
+		lo = lo.min(p)
+		hi = hi.max(p)
+	var cells := Vector2i(ceili((hi.x - lo.x) / DISTRICT_CELL_M), ceili((hi.y - lo.y) / DISTRICT_CELL_M)).maxi(1)
+	for cy in cells.y:
+		for cx in cells.x:
+			var c0 := lo + Vector2(cx, cy) * DISTRICT_CELL_M
+			var cell := PackedVector2Array([c0, c0 + Vector2(DISTRICT_CELL_M, 0.0), c0 + Vector2.ONE * DISTRICT_CELL_M, c0 + Vector2(0.0, DISTRICT_CELL_M)])
+			for piece: PackedVector2Array in Geometry2D.intersect_polygons(poly, cell):
+				var tris := Geometry2D.triangulate_polygon(piece)
+				if tris.size() < 3:
+					continue
+				var pid := PackedInt32Array()
+				for p in piece:
+					var key := Vector2i(roundi(p.x * 10.0), roundi(p.y * 10.0))
+					if not ids.has(key):
+						ids[key] = acc.vert(p, ground.at(p), eave, Vector3.UP, roof)
+					pid.append(ids[key])
+				for t in range(0, tris.size(), 3):
+					acc.tri(pid[tris[t]], pid[tris[t + 1]], pid[tris[t + 2]], Vector3.UP)
+	if acc.indices.size() == i0:
 		# Contour qui se recoupe : éventail depuis le barycentre.
 		var c := Vector2.ZERO
 		for p in poly:
 			c += p
 		c /= poly.size()
 		var ci := acc.vert(c, ground.at(c), eave, Vector3.UP, roof)
+		var ring := PackedInt32Array()
+		for p in poly:
+			ring.append(acc.vert(p, ground.at(p), eave, Vector3.UP, roof))
 		for k in poly.size():
-			acc.tri(ci, ids[k], ids[(k + 1) % poly.size()], Vector3.UP)
+			acc.tri(ci, ring[k], ring[(k + 1) % poly.size()], Vector3.UP)
 	acc.smooth(v0, acc.pm.size(), i0)
+	var edge := _densify(poly, DISTRICT_CELL_M * 0.5)
 	var rel := PackedFloat32Array()
-	rel.resize(poly.size())
+	rel.resize(edge.size())
 	rel.fill(eave)
-	_skirt(acc, ground, poly, rel, false, FACADE)
+	_skirt(acc, ground, edge, rel, false, FACADE)
+
+
+## Contour fermé dont aucun côté ne dépasse `step` (points intermédiaires réguliers).
+static func _densify(pts: PackedVector2Array, step: float) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	for k in pts.size():
+		var a := pts[k]
+		var b := pts[(k + 1) % pts.size()]
+		var n := maxi(1, ceili(a.distance_to(b) / step))
+		for j in n:
+			out.append(a.lerp(b, float(j) / n))
+	return out
 
 
 static func _v2_wall(acc: Acc, ground: Ground, w: Dictionary, year: int) -> void:

@@ -143,8 +143,12 @@ pub(crate) fn resolve_sieges(
         let settlement = state.settlements.get_mut(&settlement_id).expect("exists");
         match &mut settlement.siege {
             // Lot M2: a siege begun during this turn (an army entered the
-            // place) only starts counting at the next one.
-            Some(siege) if siege.attacker == attacker && siege.started_turn == turn => {}
+            // place) only starts counting at the next one. Its engines are
+            // built from the start: marches are immediate, the army spends
+            // the rest of the turn in camp (the ETA shown counts this turn).
+            Some(siege) if siege.attacker == attacker && siege.started_turn == turn => {
+                siege.engine_work = siege.engine_work.saturating_add(engine_gain);
+            }
             Some(siege) if siege.attacker == attacker => {
                 siege.turns_elapsed += 1;
                 siege.engine_work = siege.engine_work.saturating_add(engine_gain);

@@ -35,6 +35,17 @@ def test_generated_figures_replace_fine_figures():
         "infantry_1",
         "infantry_5",
         "cavalry_0",
+        # L4: the remaining recipes of the same types.
+        "infantry_2",
+        "infantry_3",
+        "infantry_4",
+        "infantry_6",
+        "infantry_7",
+        "infantry_8",
+        "archer_1",
+        "archer_4",
+        "cavalry_3",
+        "standard_1",
     } <= set(figures)
     for fig, entry in figures.items():
         mounted = entry.get("fine_horse", False)
@@ -51,7 +62,20 @@ def test_generated_figures_replace_fine_figures():
         assert tris[0] > tris[1] > tris[2], fig
         for lod in entry["lods"]:
             assert (GA3_DIR / lod).exists(), lod
-        assert entry["variants"] == 1
+        # L4: one head per face variant (head A + ``faces``), no more than the fine
+        # recipe's variants (its equipment masks), neck height for the skin tone.
+        unit = script.UNITS[entry["unit"]]
+        assert entry["variants"] == 1 + len(unit["faces"]) == 1 + len(entry["faces"]), (
+            fig
+        )
+        assert entry["variants"] <= fine[fig]["variants"], fig
+        assert 1.3 < entry["head_y"] < 2.6, fig
+
+
+def test_face_variants_everywhere_but_one():
+    """L4: at least two heads per generated figure, except the mounted standard bearer."""
+    for name, unit in _script().UNITS.items():
+        assert len(unit["faces"]) >= (0 if name == "standard_bearer" else 1), name
 
 
 def test_units_are_data():

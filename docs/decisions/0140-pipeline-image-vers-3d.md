@@ -186,3 +186,76 @@ jupon vert clé sans meuble, harnois acier, ni épée ni fourreau fondus).
   (`metal_z` 0), jamais teint ; jupon en livrée.
 - **Limites** : une seule variante (le bassinet ouvert de la génération remplace l'alternance
   bassinet à visière / ouvert) ; jupon sans armoiries (l'écu et le caparaçon les portent).
+
+## Figurines de bataille, extension L4 : variantes, mains, usure, recettes restantes (30/09)
+- **Variantes de visage = têtes greffées**, pas de corps dupliqués (le coût en sommets d'une
+  figurine à deux corps masqués se paierait sur tous les soldats, LOD2 et ombres compris). La
+  planche de la variante est un *edit* NB2 (1K) de la planche A-pose déjà générée qui ne change
+  que la tête (âge, barbe, teint, couvre-chef) : corps identique au pixel près, donc même
+  normalisation ; la hauteur du casque vient du rapport des hauteurs de figure sur les deux
+  planches découpées. La figurine est coupée à mi-cou (`neck_cut`, os `Neck`/`Head`) : tête A
+  masque de variante bit 0, tête k bit k (descend 4 cm sous la coupe, dans le col), corps
+  commun bouché au cou. Tête k : voxel + collapse (≈ 900 tri au LOD0, 110 au LOD1 ; LOD2 : tête
+  A pour tous), poids copiés du corps (surface la plus proche), décalage horizontal ≤ 2 cm,
+  cuite dans une bande de carrés 512² sous l'atlas (albédo 1024 × 1536, deux têtes au plus),
+  zones clés ramenées à la luminance moyenne de la figurine. Tirage par soldat : le mécanisme
+  des variantes fines (`variant_count`, hachage d'instance). Le nombre de têtes ne dépasse pas
+  les variantes de la recette fine (les masques d'équipement de la recette restent valides :
+  l'écu de l'homme d'armes n'est porté que par la variante 0, comme la figurine fine).
+- **Mains** : les moufles générées sont remplacées au LOD0 (niveau `CAM`, après l'export) par
+  les poings fermés de la figurine fine exportée du même nom : même rig, poing fermé en pose de
+  liaison autour des prises, gants et gantelets de la recette. Moufle = triangles du corps
+  (u ≥ 0) entièrement sur un poignet (poids ≥ 0,6) ; main fine = triangles tous sur ce poignet
+  (≥ 0,5), à moins de 16 cm de la moufle, hors pièces de variante ou tenues. Couleur et code
+  (`C_SKIN`, cuir, plates) de la figurine fine, UV en u < 0. Plus robuste qu'une main « fermée »
+  sculptée sur la génération : rejeté.
+- **Usure SR2 dans `GA3_TEX`** (sans atlas, bruit procédural seulement) : teintes passées,
+  crasse par taches en quantité propre au soldat, acier patiné sur `C_PLATE`, boue montant des
+  pieds (`sr2_mud_height`), fondue au-delà de 60-80 m ; `--no-sr2` l'annule. Teint : sur les
+  texels couleur chair au-dessus du cou (`head_y` du manifeste), rougeur de l'étalonnage
+  réduite et teint du soldat (même tirage que les mains fines `C_SKIN`).
+- **Recettes restantes** (une génération chacune, planche éditée depuis la planche L3 du même
+  type) : infantry_7 (retenue anglaise, harnois, hache d'armes), infantry_8 (routiers,
+  brigandine, épée et rondache), infantry_2 (milice urbaine), infantry_3 (Gallois, tunique
+  mi-partie), infantry_4 (schiltron), infantry_6 (coutiliers), archer_1 et archer_4
+  (arbalétriers), cavalry_3 (gendarmes d'ordonnance, harnois blanc, huque) et standard_1
+  (porte-étendard monté, sans variante de visage : enveloppe). Chaque figurine générée garde
+  une zone de livrée (lecture des camps en bataille).
+
+## Engins de siège, extension L5 : trébuchet et bélier générés animés (30/09)
+
+Les maillages L1/L1b du trébuchet et du bélier (`props_ga/ga3_{trebuchet,ram}_lod*.glb`,
+`wired: false`) habillent désormais les engins animés de `SiegeEnginesFx` / `SiegeAssaultFx`
+sans rien changer à l'animation. Aucune régénération (0 $).
+
+- **Découpe, pas de re-cuisson** : `tools/blender_scripts/ga3_siege_rig.py` reconstruit le rig
+  procédural de `siege_engines.py` (mêmes nœuds, mêmes pivots) et remplace le maillage des pièces
+  par les faces GA3 de la région correspondante, recalées dans le repère du nœud (UV et texture
+  cuite gardées). Régions mesurées une fois sur le LOD0 (verge ajustée par ACP sur le plan de
+  profil, montants, caisse, roues, poutre et ses deux suspentes) ; une face n'est donnée à une
+  pièce mobile que si son centre y est et, là où les pièces se touchent, tous ses sommets aussi.
+  Sortie : `siege/ga3_trebuchet(_lod).glb`, `siege/ga3_ram(_lod).glb` (lointain = LOD1 GA3 découpé,
+  le LOD2 est trop grossier pour être coupé), `siege/ga3_rigs.json` (échelles, pivots, faces).
+- **Trébuchet** : la géométrie générée n'est pas un engin fonctionnel (pivot au milieu de la
+  verge, caisse posée sur le bâti, montants trop serrés pour qu'elle passe). On garde donc la
+  cinématique procédurale et on y plie les pièces : bâti mis à l'échelle pour que les paliers
+  tombent sur l'axe (6,4 m), retourné en longueur (grand côté du bâti sous la grande verge), les
+  deux flancs écartés d'un vide progressif (0,6 m) pour que la caisse passe entre les montants ;
+  verge mise à l'échelle uniforme de la verge procédurale (10,9 m) et **pivot déplacé le long de
+  la verge** au rapport 8,5 / 2,2 m (l'ancien palier devient une frette) ; caisse et crochet mis
+  aux dimensions de la caisse procédurale (1,8 × 1,7 × 1,9 m), pendus à la charnière. La poche
+  générée (pierres toujours dedans) est retirée : **fronde, pierre et treuil restent
+  procéduraux**, avec un axe de fer et deux poteaux de treuil procéduraux.
+- **Bélier** : échelle 1,15 (tête de fer à +5,3 m comme le procédural), roue parasite sous le lit
+  retirée, quatre roues GA3 sur leurs propres centres (rayon 0,9 m), `BeamPivot` au sommet des
+  suspentes. Réglages remplacés pour cette variante (`data/fx/siege_engines.json`, `ga3.ram` :
+  `wheel_radius` 0,9, `beam_drop` 2,2 ; `SiegeEnginesFx.kind_settings`) : roues qui roulent sans
+  glisser, pendule de la poutre juste.
+- **Branchement** : `ga3` de `data/fx/siege_engines.json` (schéma) ; `SiegeEnginesFx.instantiate`
+  pose la variante (méta `ga3`) pour le modèle et son `_lod`, garde le nom du nœud ; `--no-ga3`
+  (même option que L1) rend les modèles procéduraux. Mangonneau, bombarde et beffroi : pas de
+  variante, inchangés.
+- **Limites** : proportions forcées (bâti ~0,86, caisse aplatie 0,42 × 0,46 en plan), texture
+  cuite étirée sur les traverses qui franchissent le vide central ; la poutre du bélier traverse
+  le toit aux grands balancements (déjà vrai en procédural) ; suspentes rigides autour d'un pivot
+  unique (pas de parallélogramme). Test `ga3_l5_siege_test.gd` (avec et sans `--no-ga3`).

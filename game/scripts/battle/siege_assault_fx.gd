@@ -359,7 +359,7 @@ func _update_rams(units: Array) -> void:
 			ram["anchor"] = -1.0
 		if ram.has("pivot"):
 			# Pendule : reculer la tête de `offset` m sous des cordes de `beam_drop` m.
-			var ram_cfg: Dictionary = SiegeEnginesFx.settings().get("ram", {})
+			var ram_cfg := SiegeEnginesFx.kind_settings("ram", machine)
 			var drop := float(ram_cfg.get("beam_drop", 1.95))
 			var limit := deg_to_rad(float(ram_cfg.get("max_swing_deg", 48.0)))
 			(ram["pivot"] as Node3D).rotation.x = clampf(asin(clampf(-offset / drop, -0.95, 0.95)), -limit, limit)

@@ -8,16 +8,16 @@ extends Resource
 
 ## Maisons du kit (détail) jusqu'à cette distance, puis blocs simples jusqu'à `block_range`.
 @export var detail_range: float = 1.6
-@export var block_range: float = 14.0
+@export var block_range: float = 42.0
 ## Rayon de chargement autour de la caméra : clamp(`stream_factor` × distance du rig,
 ## `stream_min`, `stream_max`) ; déchargement au-delà de `unload_factor` × ce rayon.
 @export var stream_min: float = 4.0
 @export var stream_factor: float = 2.5
-@export var stream_max: float = 18.0
+@export var stream_max: float = 48.0
 @export var unload_factor: float = 1.3
 ## ADR 0138 : les villes 1:1 (ZG6, VH) sont actives sous cette distance du rig (unités) ; au-delà,
 ## le lointain est rendu par `TownFarLayer`. Hystérésis de `rig_hysteresis` (part) à la sortie.
-@export var max_rig_distance: float = 16.0
+@export var max_rig_distance: float = 45.0
 @export var rig_hysteresis: float = 0.1
 ## Lot SZ4 : vu de loin, le sol bâti prend la teinte moyenne des toits du kit (imposteur des
 ## maisons devenues sous-pixel ; sans lui, une ville vue à 4 km n'était qu'un disque de terre

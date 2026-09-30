@@ -184,6 +184,9 @@ uniform float sm_mane_tint = 0.3294;
 // luminance linéaire moyenne des zones livrée (x) et étoffe (y) de la texture.
 uniform sampler2D ga3_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
 uniform vec2 ga3_lum = vec2(0.2);
+// GA3-L4 : hauteur de repos (m) du cou : au-dessus, les texels couleur chair prennent le teint
+// du soldat (et perdent la rougeur de l'étalonnage).
+uniform float ga3_head_y = 99.0;
 #endif
 #ifdef FG3_BAKED
 // Atlas des figurines fines (couche = figurine) : RG normale de forme (espace tangent de l'UV
@@ -242,12 +245,15 @@ const vec3 FG3_HAIR[7] = vec3[](
 	vec3(0.26, 0.10, 0.04), vec3(0.035, 0.03, 0.028), vec3(0.20, 0.18, 0.16),
 	vec3(0.42, 0.40, 0.37)
 );
-// Lot SR2 : usure (0 : rendu SR1 exact) posée par BattleSkinned (`--no-sr2` : 0) ; hauteur de
-// repos (m) jusqu'où monte la boue (piétons ~ genoux, cavaliers : jambes du cheval, caparaçon).
-uniform float weathering = 0.85;
-uniform float sr2_mud_height = 0.45;
 varying vec2 v_atlas;
 varying flat int v_src;
+#endif
+#if defined(FG3_BAKED) || defined(GA3_TEX)
+// Lot SR2 : usure (0 : rendu SR1 exact) posée par BattleSkinned (`--no-sr2` : 0) ; hauteur de
+// repos (m) jusqu'où monte la boue (piétons ~ genoux, cavaliers : jambes du cheval, caparaçon).
+// GA3-L4 : aussi pour les figurines générées (variante GA3_TEX, sans atlas).
+uniform float weathering = 0.85;
+uniform float sr2_mud_height = 0.45;
 #endif
 
 varying vec3 v_color;
@@ -883,6 +889,54 @@ void fragment() {
 			albedo = mix(g3.rgb, hose * clamp(g3_l / ga3_lum.y, 0.2, 2.2), g3.a);
 		} else {
 			albedo = g3.rgb;
+			// L4 : texels couleur chair de la tête (clairs, rouge > vert > bleu, moins saturés
+			// que le cuir) : rougeur de l'étalonnage réduite, teint du soldat (même tirage que
+			// les mains fines C_SKIN greffées, ramené autour du teint généré).
+			if (v_rest.y > ga3_head_y) {
+				float sat = (g3.r - g3.b) / max(g3.r, 1e-3);
+				float skin = smoothstep(0.08, 0.16, g3_l) * smoothstep(0.03, 0.08, g3.r - g3.g)
+					* smoothstep(0.0, 0.02, g3.g - g3.b) * (1.0 - smoothstep(0.8, 0.9, sat));
+				vec3 calm = mix(g3.rgb, vec3(g3_l) * vec3(1.3, 0.93, 0.74), 0.4);
+				vec3 tone = mix(vec3(1.1, 1.06, 1.0), vec3(0.62, 0.5, 0.4), h6) / vec3(0.93, 0.86, 0.79);
+				albedo = mix(albedo, calm * tone, skin);
+			}
+		}
+		// L4 : usure SR2 (bruit procédural seulement, rien à 0) : teintes passées, crasse par
+		// taches en quantité propre au soldat, acier patiné (C_PLATE), boue montant des pieds.
+		float sr_w = weathering * (1.0 - smoothstep(60.0, 80.0, dist));
+		if (sr_w > 0.0) {
+			bool dyed_cloth = code == C_LIVERY || code == C_CLOTH;
+			float sr_l = dot(albedo, vec3(0.3, 0.59, 0.11));
+			if (dyed_cloth) {
+				albedo = mix(albedo, vec3(sr_l) * 1.08, 0.2 * sr_w);
+			}
+			float dirty = fract(v_var.x * 5.7 + v_var.w * 9.1);
+			float blot = smoothstep(0.35, 0.8, noise2(q * 4.0 + v_var.xy * 23.0));
+			float grime = (code == C_PLATE ? 0.5 : 1.0) * blot * mix(0.1, 0.55, dirty) * sr_w;
+			albedo = mix(albedo, vec3(sr_l) * vec3(0.6, 0.54, 0.45), 0.6 * grime);
+			roughness = mix(roughness, 0.9, grime * 0.5);
+			if (code == C_PLATE) {
+				// Acier forgé : rugosité par taches, gris sourd, film de crasse brune.
+				float lf = noise2(q * 3.0 + v_var.xy * 17.0);
+				roughness = mix(roughness, mix(0.3, 0.7, lf), sr_w);
+				vec3 steel = vec3(0.46, 0.46, 0.46) * mix(0.85, 1.1, lf);
+				albedo = mix(albedo, steel * (0.6 + 0.4 * dot(albedo, vec3(0.33))), 0.4 * sr_w);
+				float gb = smoothstep(0.5, 0.85, noise2(q * 7.0 + v_var.zw * 29.0)) * mix(0.3, 0.8, dirty) * sr_w;
+				albedo = mix(albedo, vec3(0.13, 0.11, 0.085), 0.6 * gb);
+				roughness = mix(roughness, 0.85, gb);
+				metallic = mix(metallic, 0.2, gb);
+			}
+			float sr_k = code == C_PLATE ? 0.45 : 1.0;
+			float edge_n = noise2(v_rest.xz * 9.0 + v_var.xy * 13.0) * 0.7 + noise2(v_rest.xz * 31.0) * 0.3;
+			float mud_top = sr2_mud_height * mix(0.75, 1.1, v_var.w);
+			float rise = 1.0 - smoothstep(mud_top * 0.45, mud_top, v_rest.y + (edge_n - 0.5) * 0.14);
+			float mud_blotch = mix(0.55, 1.0, smoothstep(0.25, 0.7, noise2(q * 9.0 + v_var.yz * 31.0)));
+			float mud = rise * mud_blotch * sr_k * mix(0.35, 1.0, fract(v_var.z * 13.7 + v_var.w * 5.3)) * 0.85 * sr_w;
+			vec3 mud_c = mix(vec3(0.16, 0.12, 0.08), vec3(0.30, 0.25, 0.18), smoothstep(0.0, 0.12, v_rest.y))
+				* mix(0.8, 1.1, edge_n);
+			albedo = mix(albedo, mud_c, mud);
+			roughness = mix(roughness, 0.9, mud);
+			metallic = mix(metallic, 0.0, mud);
 		}
 	}
 #endif

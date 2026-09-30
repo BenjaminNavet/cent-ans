@@ -533,7 +533,7 @@ func _build_detail(cell: Dictionary) -> void:
 func _build_blocks() -> void:
 	var blocks: Dictionary = plan["prepared"]["blocks"]
 	if int(blocks["count"]) > 0:
-		_instances_node(block_mesh(), blocks, material(0, true, 0.0, meters_per_unit, 2), "block", 20.0).name = "Blocks"
+		_instances_node(block_mesh(), blocks, material(0, true, 0.0, meters_per_unit, 2, true), "block", 20.0).name = "Blocks"
 
 
 ## Nœud d'un maillage drapé préparé (`prepare`).

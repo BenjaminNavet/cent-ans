@@ -47,7 +47,8 @@ sys.path.insert(0, HERE)
 ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT_DIR = os.path.join(ROOT, "game", "assets", "models", "battle_ga3")
 FINE_DIR = os.path.join(ROOT, "game", "assets", "models", "battle_fine")
-RAW = os.path.expanduser("~/dev/cent-ans-raw/ga3/l3")
+RAW = os.path.expanduser("~/dev/cent-ans-raw/ga3")
+L4_RAW = "l4"  # renders, .blend and the L4 generations, under RAW
 
 # Per unit: fine figure replaced, generated mesh and reference (under RAW), helmet top (m),
 # held equipment (item names of the fine recipe: builder, variant mask and kwargs come from
@@ -57,8 +58,9 @@ RAW = os.path.expanduser("~/dev/cent-ans-raw/ga3/l3")
 UNITS = {
     "longbowman": {
         "figure": "archer_0",
-        "glb": "longbowman/multi_front_back.glb",
-        "reference": "longbowman/sheet.png",
+        "glb": "l3/longbowman/multi_front_back.glb",
+        "reference": "l3/longbowman/sheet.png",
+        "faces": ["l4/longbowman_v2"],
         "top": 1.80,
         "equipment": ["longbow"],
         "metal_z": 1.5,
@@ -67,8 +69,9 @@ UNITS = {
     # L3b. Others sharing the figure type: infantry_7, infantry_8 (harness / sword).
     "man_at_arms": {
         "figure": "infantry_0",
-        "glb": "man_at_arms/multi_front_back.glb",
-        "reference": "man_at_arms/sheet.png",
+        "glb": "l3/man_at_arms/multi_front_back.glb",
+        "reference": "l3/man_at_arms/sheet.png",
+        "faces": ["l4/man_at_arms_v2"],
         "top": 1.86,
         "equipment": ["sword", "heater_shield"],
         "metal_z": 0.0,
@@ -77,8 +80,9 @@ UNITS = {
     # Others: archer_1, archer_4 (crossbow).
     "crossbowman": {
         "figure": "archer_2",
-        "glb": "crossbowman/multi_front_back.glb",
-        "reference": "crossbowman/sheet.png",
+        "glb": "l3/crossbowman/multi_front_back.glb",
+        "reference": "l3/crossbowman/sheet.png",
+        "faces": ["l4/crossbowman_v2"],
         "top": 1.80,
         "equipment": ["crossbow", "quiver", "pavise"],
         "metal_z": 1.5,
@@ -87,8 +91,9 @@ UNITS = {
     # Others: infantry_4 (pike).
     "sergeant": {
         "figure": "infantry_1",
-        "glb": "sergeant/multi_front_back.glb",
-        "reference": "sergeant/sheet.png",
+        "glb": "l3/sergeant/multi_front_back.glb",
+        "reference": "l3/sergeant/sheet.png",
+        "faces": ["l4/sergeant_v2"],
         "top": 1.84,
         "equipment": ["pike"],
         "metal_z": 1.5,
@@ -97,8 +102,9 @@ UNITS = {
     # Others: infantry_2, infantry_3, infantry_6 (staff weapons of the militia).
     "militia": {
         "figure": "infantry_5",
-        "glb": "militia/multi_front_back.glb",
-        "reference": "militia/sheet.png",
+        "glb": "l3/militia/multi_front_back.glb",
+        "reference": "l3/militia/sheet.png",
+        "faces": ["l4/militia_v2"],
         "top": 1.80,
         "equipment": ["goedendag"],
         "metal_z": 1.5,
@@ -110,8 +116,9 @@ UNITS = {
     # (gendarmes, white harness), standard_1 (mounted standard bearer).
     "knight": {
         "figure": "cavalry_0",
-        "glb": "knight/multi_front_back.glb",
-        "reference": "knight/sheet.png",
+        "glb": "l3/knight/multi_front_back.glb",
+        "reference": "l3/knight/sheet.png",
+        "faces": ["l4/knight_v2"],
         "top": 1.84,
         "equipment": ["heater_shield", "lance"],
         "scabbard": True,
@@ -120,6 +127,91 @@ UNITS = {
         "clips": {"idle": "c_idle", "walk": "c_charge", "attack": "c_thrust"},
     },
 }
+
+
+# L4: the remaining recipes, generated as edits of an L3 sheet (``parent``: same pose and
+# scale; the helmet height comes from the ratio of the figure heights on the two sheets).
+def _derived(figure, parent, equipment, clips, metal_z=1.5, **extra):
+    name = extra.pop("name")
+    return {
+        "figure": figure,
+        "parent": parent,
+        "glb": f"l4/{name}/multi_front_back.glb",
+        "reference": f"l4/{name}/sheet.png",
+        "faces": extra.pop("faces", [f"l4/{name}_v2"]),
+        "equipment": equipment,
+        "metal_z": metal_z,
+        "clips": dict(zip(("idle", "walk", "attack"), clips, strict=True)),
+        **extra,
+    }
+
+
+POLE = ("pike_idle", "pike_walk", "pike_thrust")
+XBOW = ("xbow_idle", "walk", "xbow_shoot")
+UNITS.update(
+    {
+        "retinue": _derived(
+            "infantry_7", "man_at_arms", ["pollaxe"], POLE, 0.0, name="retinue"
+        ),
+        "routier": _derived(
+            "infantry_8",
+            "man_at_arms",
+            ["sword", "round_shield"],
+            ("idle", "walk", "slash"),
+            name="routier",
+        ),
+        "urban_militia": _derived(
+            "infantry_2", "militia", ["spear", "bill"], POLE, name="urban_militia"
+        ),
+        "welsh_spearman": _derived(
+            "infantry_3",
+            "militia",
+            ["spear", "round_shield"],
+            POLE,
+            name="welsh_spearman",
+        ),
+        "schiltron": _derived(
+            "infantry_4", "sergeant", ["pike", "round_shield"], POLE, name="schiltron"
+        ),
+        "coutilier": _derived(
+            "infantry_6", "militia", ["coustille"], POLE, name="coutilier"
+        ),
+        "plain_crossbowman": _derived(
+            "archer_1",
+            "crossbowman",
+            ["crossbow", "quiver"],
+            XBOW,
+            name="plain_crossbowman",
+        ),
+        "gascon_crossbowman": _derived(
+            "archer_4",
+            "crossbowman",
+            ["crossbow", "quiver", "pavise"],
+            XBOW,
+            name="gascon_crossbowman",
+        ),
+        "gendarme": _derived(
+            "cavalry_3",
+            "knight",
+            ["lance"],
+            ("c_idle", "c_charge", "c_thrust"),
+            0.0,
+            name="gendarme",
+            mounted=True,
+        ),
+        "standard_bearer": _derived(
+            "standard_1",
+            "knight",
+            ["standard_pole"],
+            ("c_idle", "c_charge", "c_idle"),
+            0.0,
+            name="standard_bearer",
+            mounted=True,
+            # Budget: the one recipe without a face variant (seen from afar, one per army).
+            faces=[],
+        ),
+    }
+)
 KEY_LIVERY = (75.0, 170.0)  # saturated green
 KEY_CLOTH = (190.0, 265.0)  # saturated blue
 KEY_SAT = 0.28
@@ -540,7 +632,7 @@ def closed_low(hi, target, name):
     return low
 
 
-def bake_low(hi, low, albedo, classes):
+def bake_low(hi, low, albedo, classes, size=TEX):
     """Smart-UV `low`, bake `hi`'s albedo and tint classes into two TEX² images."""
     import bpy
 
@@ -583,7 +675,7 @@ def bake_low(hi, low, albedo, classes):
     out = []
     for name, image, data in (("albedo", albedo, False), ("classes", classes, True)):
         s_tex.image = image
-        target = bpy.data.images.new(f"ga3_low_{name}", TEX, TEX, alpha=False)
+        target = bpy.data.images.new(f"ga3_low_{name}", size, size, alpha=False)
         if data:
             target.colorspace_settings.name = "Non-Color"
         d_tex.image = target
@@ -595,7 +687,7 @@ def bake_low(hi, low, albedo, classes):
         bpy.context.view_layer.objects.active = low
         bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"})
         out.append(_pixels(target))
-    print("BAKE albedo + classes", TEX)
+    print("BAKE albedo + classes", size)
     return out
 
 
@@ -724,21 +816,411 @@ def tris(objs):
     return total
 
 
+# --- L4: face variants (grafted heads) and fine hands --------------------------------------
+
+HEAD_TRIS = (
+    1300,
+    110,
+)  # triangles of a grafted head variant at LOD0, LOD1 (LOD2: head A)
+HEAD_OVERLAP = (
+    0.04  # m: a variant head reaches this far below the cut, inside the collar
+)
+FACE_TEX = TEX // 2  # texels of a variant head's square in the strip under the atlas
+GRAFT_MAX_OFFSET = 0.02  # m, horizontal shift of a variant head onto the neck
+HAND_MIN = 0.5  # fine hand: triangles whose vertices all weigh this much on a wrist
+MITTEN_MIN = (
+    0.6  # generated mitten: body triangles whose vertices all weigh this on a wrist
+)
+HAND_RADIUS = (
+    0.16  # m around the mitten's centroid: the fine hand (not a shield or a hilt)
+)
+
+
+def figure_box(path):
+    """(top, feet) rows over the height of the front figure of a cut sheet (alpha)."""
+    import bpy
+
+    img = bpy.data.images.load(path)
+    alpha = _pixels(img)[::-1, :, 3] > 32.0 / 255.0
+    bpy.data.images.remove(img)
+    cols = alpha.sum(axis=0) > 2
+    x0 = x1 = None
+    for x, on in enumerate(list(cols) + [False]):
+        if on and x0 is None:
+            x0 = x
+        elif not on and x0 is not None:
+            if x - x0 > 0.03 * len(cols):
+                x1 = x
+                break
+            x0 = None
+    rows = alpha[:, x0:x1].any(axis=1).nonzero()[0]
+    h = alpha.shape[0]
+    return float(rows[0]) / h, float(rows[-1] + 1) / h
+
+
+def figure_height(raw, rel_dir):
+    """Height of the front figure on the cut sheet of `rel_dir`, over the sheet height."""
+    top, feet = figure_box(os.path.join(raw, rel_dir, "sheet_cut.png"))
+    return feet - top
+
+
+def unit_top(unit_name, raw):
+    """Helmet height (m): given for the L3 units, else scaled from the parent's sheet."""
+    unit = UNITS[unit_name]
+    if "top" in unit:
+        return unit["top"]
+    parent = UNITS[unit["parent"]]
+    ratio = figure_height(raw, os.path.dirname(unit["glb"])) / figure_height(
+        raw, os.path.dirname(parent["glb"])
+    )
+    return parent["top"] * ratio
+
+
+def neck_cut(arm):
+    """Height (m, bind pose) of the cut between the shared body and the variant heads."""
+    head = {b.name: arm.matrix_world @ b.head_local for b in arm.data.bones}
+    return 0.5 * (head["Neck"].z + head["Head"].z)
+
+
+def delete_faces(obj, keep):
+    """Remove the faces of `obj` for which ``keep(world centre, world vertex zs)`` is false."""
+    import bmesh
+
+    mw = obj.matrix_world
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    gone = [
+        f
+        for f in bm.faces
+        if not keep(mw @ f.calc_center_median(), [(mw @ v.co).z for v in f.verts])
+    ]
+    bmesh.ops.delete(bm, geom=gone, context="FACES")
+    loose = [v for v in bm.verts if not v.link_faces]
+    bmesh.ops.delete(bm, geom=loose, context="VERTS")
+    bm.to_mesh(obj.data)
+    bm.free()
+
+
+def cap_hole(obj, z_min):
+    """Close the open neck of the shared body (boundary edges above `z_min`).
+
+    The cap is hidden inside head A; under a narrower variant head it shows as the collar
+    (UV of each corner taken from the vertex's other faces). Returns the faces added.
+    """
+    import bmesh
+
+    mw = obj.matrix_world
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    edges = [
+        e
+        for e in bm.edges
+        if e.is_boundary and min((mw @ v.co).z for v in e.verts) > z_min
+    ]
+    before = set(bm.faces)
+    bmesh.ops.holes_fill(bm, edges=edges, sides=0)
+    new = [f for f in bm.faces if f not in before]
+    uv = bm.loops.layers.uv.active
+    for f in new:
+        near = next((g for e in f.edges for g in e.link_faces if g not in new), None)
+        if near is not None:
+            f.material_index = near.material_index
+        for loop in f.loops:
+            other = next(
+                (lp for lp in loop.vert.link_loops if lp.face not in new), None
+            )
+            if other is not None and uv is not None:
+                loop[uv].uv = other[uv].uv
+    res = bmesh.ops.triangulate(bm, faces=new)
+    bm.to_mesh(obj.data)
+    bm.free()
+    return len(res["faces"])
+
+
+def split_head(obj, z_cut, name):
+    """Split `obj` at `z_cut`: the head above becomes `name`, the body is capped."""
+    import bpy
+
+    head = obj.copy()
+    head.data = obj.data.copy()
+    head.name = name
+    bpy.context.scene.collection.objects.link(head)
+    delete_faces(head, lambda c, _zs: c.z > z_cut)
+    delete_faces(obj, lambda c, _zs: c.z <= z_cut)
+    capped = cap_hole(obj, z_cut - 0.06)
+    print(f"SPLIT {name} head={len(head.data.polygons)} cap={capped}")
+    return head
+
+
+def face_variant(raw, rel, top, arm, z_cut, target, name):
+    """Head of a face variant (A-pose frame): hi-res source, closed low head, maps.
+
+    The sheet is a head-only edit of the unit's sheet: same body, so the same normalisation
+    (helmet height `top`, chest centred) puts the head where head A is.
+    """
+    import ga3_figure_probe as probe
+
+    obj = probe.import_figure(os.path.join(raw, rel, "multi_front_back.glb"))
+    probe.drop_islands(obj)
+    probe.HELMET_TOP = top
+    probe.normalise(obj, arm)
+    base, orm = texture_images(obj)
+    rgb, cls, lum = source_maps(base, orm)
+    floor = z_cut - HEAD_OVERLAP
+    delete_faces(obj, lambda _c, zs: max(zs) > floor - 0.03)
+    low = closed_low(obj, target, name)
+    delete_faces(low, lambda _c, zs: min(zs) >= floor)
+    return obj, low, rgb, cls, lum
+
+
+def match_tint(rgb, cls, lum, lum_ref):
+    """Scale the key-coloured texels of a head so that their mean matches the unit's."""
+    import numpy as np
+
+    out = rgb.copy()
+    for channel, (own, ref) in enumerate(zip(lum, lum_ref, strict=True)):
+        zone = cls[..., channel] > 0.5
+        if zone.any() and own > 1e-4:
+            lin = _srgb_to_linear(out[zone]) * (ref / own)
+            out[zone] = np.where(
+                lin <= 0.0031308,
+                lin * 12.92,
+                1.055 * np.clip(lin, 0.0, 1.0) ** (1 / 2.4) - 0.055,
+            )
+    return out
+
+
+def graft_weights(head, body, z_cut):
+    """Put `head` on the neck of `body` (bind pose) and copy the body's bone weights.
+
+    Horizontal offset: neck band centroids. Weights: nearest face of the body, interpolated.
+    """
+    import bpy
+    from mathutils import Matrix, Vector
+
+    def band(o):
+        pts = [
+            o.matrix_world @ v.co
+            for v in o.data.vertices
+            if z_cut - 0.05 < (o.matrix_world @ v.co).z < z_cut + 0.03
+        ]
+        return sum(pts, Vector()) / max(1, len(pts))
+
+    d = band(body) - band(head)
+    d.z = 0.0
+    # Same normalisation (chest centred): a large offset means a different collar (visor,
+    # bevor), not a misplaced head; it is clamped.
+    if d.length > GRAFT_MAX_OFFSET:
+        d *= GRAFT_MAX_OFFSET / d.length
+    head.data.transform(Matrix.Translation(d))
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    head.select_set(True)
+    body.select_set(True)
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.data_transfer(
+        data_type="VGROUP_WEIGHTS",
+        vert_mapping="POLYINTERP_NEAREST",
+        layers_select_src="ALL",
+        layers_select_dst="NAME",
+        use_create=True,
+    )
+    weighted = sum(1 for v in head.data.vertices if v.groups) / max(
+        1, len(head.data.vertices)
+    )
+    print(f"GRAFT {head.name} offset=({d.x:.3f}, {d.y:.3f}) weighted={weighted:.3f}")
+    return d
+
+
+def compose_atlas(main, heads):
+    """Unit atlas: `main` (TEX²) above a strip of FACE_TEX² head squares (bottom-up rows)."""
+    import numpy as np
+
+    if not heads:
+        return main
+    strip = np.zeros((FACE_TEX, TEX, main.shape[2]), dtype=np.float32)
+    for k, h in enumerate(heads):
+        strip[:, k * FACE_TEX : (k + 1) * FACE_TEX] = h
+    return np.concatenate([strip, main], axis=0)
+
+
+def remap_uv(obj, k, faces):
+    """UVs of `obj` into the composed atlas: k = -1 main (head A, body), else head square k."""
+    uv = obj.data.uv_layers.active
+    height = TEX + FACE_TEX * (1 if faces else 0)
+    for d in uv.data:
+        u, v = d.uv
+        if k < 0:
+            d.uv = (u, (TEX * v + height - TEX) / height)
+        else:
+            d.uv = ((k + u) * FACE_TEX / TEX, v * FACE_TEX / height)
+
+
+def graft_hands(path, fine_path, bones, prefix=""):
+    """LOD0: the generated mittens replaced by the closed hands of the fine figure (CAM level).
+
+    Same rig and bind pose: the fine fists (gloves, gauntlets of the recipe) sit on the rig's
+    wrists and close around the grips of the held items. Mitten = body triangles (u >= 0)
+    all weighted on a wrist; fine hand = its triangles all weighted on that wrist, near the
+    mitten, no variant or held piece. Returns (removed, added) triangles.
+    """
+    import math as m
+
+    wrists = {
+        i: side
+        for i, b in enumerate(bones)
+        for side in ("L", "R")
+        if b == f"{prefix}Wrist.{side}"
+    }
+    ga3 = read_cam(path)
+    fine = read_cam(fine_path)
+
+    def on_wrist(cam, i):
+        acc = {"L": 0.0, "R": 0.0}
+        for b, w in zip(cam["bone"][i], cam["weight"][i], strict=True):
+            side = wrists.get(int(b + 0.5))
+            if side:
+                acc[side] += w
+        return acc
+
+    def hand_tris(cam, threshold, keep):
+        out = {"L": [], "R": []}
+        for t in range(0, len(cam["idx"]), 3):
+            tri = cam["idx"][t : t + 3]
+            if not all(keep(i) for i in tri):
+                continue
+            for side in ("L", "R"):
+                if all(on_wrist(cam, i)[side] >= threshold for i in tri):
+                    out[side].append(t)
+        return out
+
+    mitten = hand_tris(ga3, MITTEN_MIN, lambda i: ga3["uv"][i][0] >= 0.0)
+    fine_hand = hand_tris(
+        fine, HAND_MIN, lambda i: int(fine["mask"][i][0] + 0.5) & 127 == 0
+    )
+    removed, added = set(), []
+    for side in ("L", "R"):
+        pts = [ga3["pos"][i] for t in mitten[side] for i in ga3["idx"][t : t + 3]]
+        if not pts:
+            continue
+        c = [sum(p[k] for p in pts) / len(pts) for k in range(3)]
+        near = [
+            t
+            for t in fine_hand[side]
+            if all(
+                m.dist(fine["pos"][i], c) < HAND_RADIUS for i in fine["idx"][t : t + 3]
+            )
+        ]
+        if not near:
+            print(f"HANDS {side}: no fine hand near the mitten, kept")
+            continue
+        removed.update(mitten[side])
+        added.extend(near)
+    out = {k: [] for k in ga3 if k != "idx"}
+    out["idx"] = []
+    remap = {}
+    for t in range(0, len(ga3["idx"]), 3):
+        if t in removed:
+            continue
+        for i in ga3["idx"][t : t + 3]:
+            if i not in remap:
+                remap[i] = len(out["pos"])
+                for k in out:
+                    if k != "idx" and ga3[k] is not None:
+                        out[k].append(ga3[k][i])
+            out["idx"].append(remap[i])
+    if ga3["atlas"] is None:
+        out["atlas"] = None
+    kept_body = [
+        out["pos"][i] for i in range(len(out["pos"])) if out["uv"][i][0] >= 0.0
+    ]
+    fine_remap = {}
+    hand_pts = []
+    for t in added:
+        for i in fine["idx"][t : t + 3]:
+            if i not in fine_remap:
+                fine_remap[i] = len(out["pos"])
+                if max(on_wrist(fine, i).values()) < 0.8:
+                    hand_pts.append(fine["pos"][i])
+                for k in out:
+                    if k == "idx":
+                        continue
+                    if k == "uv":
+                        out[k].append([EQUIP_UV_SHIFT * 2.0, 0.0])
+                    elif k == "mask":
+                        out[k].append([0.0])
+                    elif k == "atlas":
+                        if out["atlas"] is not None:
+                            out[k].append([0.0])
+                    else:
+                        out[k].append(fine[k][i])
+            out["idx"].append(fine_remap[i])
+    write_cam(path, out)
+    # Seam: the wrist end of the fine hand (vertices partly on the forearm) to the nearest
+    # kept body vertex.
+    gaps = [
+        min(m.dist(p, q) for q in kept_body)
+        for p in hand_pts[:: max(1, len(hand_pts) // 100)]
+    ]
+    print(
+        f"HANDS removed={len(removed)} added={len(added)} "
+        f"gap median={sorted(gaps)[len(gaps) // 2] if gaps else 0:.3f} "
+        f"max={max(gaps) if gaps else 0:.3f}"
+    )
+    return len(removed), len(added)
+
+
+def fine_hand_tris(fig, bones, prefix=""):
+    """Triangles of the fine figure's hands at LOD0 (budget of the graft)."""
+    fine = read_cam(os.path.join(FINE_DIR, f"{fig}_lod0.mesh.bin"))
+    wrist = {
+        i for i, b in enumerate(bones) if b in (f"{prefix}Wrist.L", f"{prefix}Wrist.R")
+    }
+    count = 0
+    for t in range(0, len(fine["idx"]), 3):
+        tri = fine["idx"][t : t + 3]
+        if all(
+            int(fine["mask"][i][0] + 0.5) & 127 == 0
+            and sum(
+                w
+                for b, w in zip(fine["bone"][i], fine["weight"][i], strict=True)
+                if int(b + 0.5) in wrist
+            )
+            >= HAND_MIN
+            for i in tri
+        ):
+            count += 1
+    return count
+
+
 # --- Build --------------------------------------------------------------------------------
 
 
 def build(unit_name, raw, renders, glb=None):
-    """Whole chain for one unit; writes the meshes, the albedo and the manifest entry."""
+    """Whole chain for one unit; writes the meshes, the albedo and the manifest entry.
+
+    L4: the face variants of ``faces`` (head-only edits of the unit's sheet) are grafted on
+    the shared body as heads with variant masks (head A bit 0, variant k bit k), baked in a
+    strip under the atlas; the LOD0 mittens are replaced by the fine figure's hands.
+    """
     import battle_fine as bf
     import battle_fine_proto as fp
     import battle_skinned as bs
     import bpy
     import ga3_figure_probe as probe
+    from mathutils import Vector
 
     unit = UNITS[unit_name]
     fig = unit["figure"]
     mounted = unit.get("mounted", False)
     cap = RIDER_CAP if mounted else TRI_CAP
+    faces = unit.get("faces", [])
+    with open(os.path.join(FINE_DIR, "manifest.json")) as f:
+        fine = json.load(f)
+    if 1 + len(faces) > int(fine["figures"][fig].get("variants", 1)):
+        raise SystemExit(f"GA3: more heads than fine variants for {fig}")
+    if len(faces) > TEX // FACE_TEX:
+        raise SystemExit("GA3: at most two variant heads (atlas strip)")
     os.makedirs(OUT_DIR, exist_ok=True)
     seat = None
     if mounted:
@@ -752,8 +1234,28 @@ def build(unit_name, raw, renders, glb=None):
     if mounted:
         seat = r_rest @ arm.matrix_world.inverted()
     fp.prime_virtuals(arm)
-    probe.HELMET_TOP = unit["top"]
+    top = unit_top(unit_name, raw)
+    z_cut = neck_cut(arm)
+    rig_name = "cavalry" if mounted else "human"
+    bones = fine["rigs"][rig_name]["bones"]
+    prefix = "R:" if mounted else ""
+    hands = fine_hand_tris(fig, bones, prefix)
+    print(f"UNIT {unit_name} top={top:.3f} neck cut={z_cut:.3f} fine hands={hands}")
+    # Variant heads first (their triangles come out of the body budget).
+    heads = []
+    for k, rel in enumerate(faces):
+        own_top = (
+            top
+            * figure_height(raw, rel)
+            / figure_height(raw, os.path.dirname(unit["glb"]))
+        )
+        hi, low, rgb, cls, lum = face_variant(
+            raw, rel, own_top, arm, z_cut, HEAD_TRIS[0], f"{fig}_ga3_head{k + 1}"
+        )
+        heads.append({"hi": hi, "low": low, "rgb": rgb, "cls": cls, "lum": lum})
+        print(f"HEAD {k + 1} {rel} top={own_top:.3f} tris={probe.tris(low)}")
     glb = glb or unit["glb"]
+    probe.HELMET_TOP = top
     obj = probe.import_figure(os.path.join(raw, glb))
     raw_tris = probe.tris(obj)
     islands, dropped = probe.drop_islands(obj)
@@ -763,13 +1265,27 @@ def build(unit_name, raw, renders, glb=None):
     src_rgb, src_cls, lum = source_maps(base, orm)
     src_albedo = image_from(src_rgb, "ga3_src_albedo")
     src_classes = image_from(src_cls, "ga3_src_classes", data=True)
-    # LOD0 budget: the cap minus the level-0 equipment (measured on a throwaway build).
+    for k, h in enumerate(heads):
+        h_rgb = match_tint(h["rgb"], h["cls"], h["lum"], lum)
+        h["baked"], h["classes"] = bake_low(
+            h["hi"],
+            h["low"],
+            image_from(h_rgb, f"ga3_src_albedo_h{k}"),
+            image_from(h["cls"], f"ga3_src_classes_h{k}", data=True),
+            FACE_TEX,
+        )
+        bpy.data.objects.remove(h["hi"])
+    # LOD0 budget: the cap minus the level-0 equipment (measured on a throwaway build), the
+    # fine hands and the variant heads.
     probe_gear = equipment(unit, arm, 0)
     eq_tris = tris(probe_gear)
     for o in probe_gear:
         bpy.data.objects.remove(o)
-    print(f"EQUIP level-0 tris={eq_tris}")
-    low = closed_low(obj, cap[0] - eq_tris - 100, f"{fig}_ga3_body")
+    head_tris = sum(tris([h["low"]]) for h in heads)
+    print(f"EQUIP level-0 tris={eq_tris} heads={head_tris}")
+    low = closed_low(
+        obj, cap[0] - eq_tris - hands // 3 - head_tris - 100, f"{fig}_ga3_body"
+    )
     baked, classes = bake_low(obj, low, src_albedo, src_classes)
     bpy.data.objects.remove(obj)
     obj = low
@@ -778,64 +1294,94 @@ def build(unit_name, raw, renders, glb=None):
     print("HEAT_OK", ok, {k: tuple(round(x, 3) for x in v) for k, v in limbs.items()})
     if not ok:
         raise SystemExit("GA3: bone heat failed")
+    for h in heads:
+        graft_weights(h["low"], obj, z_cut)
+        fp.attach(h["low"], arm)
     tint = (classes[..., 0] > 0.5) | (classes[..., 1] > 0.5)
     rgba = baked.copy()
     rgba[..., 3] = tint.astype("float32")
+    head_rgba = []
+    for h in heads:
+        a = h["baked"].copy()
+        a[..., 3] = (
+            (h["classes"][..., 0] > 0.5) | (h["classes"][..., 1] > 0.5)
+        ).astype("float32")
+        head_rgba.append(a)
+    atlas = compose_atlas(rgba, head_rgba)
+    atlas_classes = compose_atlas(classes, [h["classes"] for h in heads])
     albedo_name = f"{fig}_albedo.png"
-    albedo = save_png(rgba, os.path.join(OUT_DIR, albedo_name), albedo_name)
+    albedo = save_png(atlas, os.path.join(OUT_DIR, albedo_name), albedo_name)
     mats = coded_materials(albedo)
     code_faces(obj, classes[..., :3], mats, unit.get("metal_z", METAL_Z))
     bs.set_face_mask(obj, 0)
     obj.name = f"{fig}_ga3_body"
-    with open(os.path.join(FINE_DIR, "manifest.json")) as f:
-        fine = json.load(f)
-    rig_name = "cavalry" if mounted else "human"
-    rig = bs.rig_stub(rig_name, fine["rigs"][rig_name]["bones"])
+    for k, h in enumerate(heads):
+        code_faces(h["low"], h["classes"][..., :3], mats, unit.get("metal_z", METAL_Z))
+        bs.set_face_mask(h["low"], 1 << (k + 1))
+        remap_uv(h["low"], k, faces)
+    remap_uv(obj, -1, faces)
+    rig = bs.rig_stub(rig_name, bones)
     for pb in arm.pose.bones:
         pb.matrix_basis.identity()
     bpy.context.view_layer.update()
+    # Level bodies (from the whole figure A, before its head is split off), then the heads.
+    levels = {0: obj}
+    for level in (1, 2):
+        equipment_probe = equipment(unit, arm, level)
+        g_tris = tris(equipment_probe)
+        for o in equipment_probe:
+            bpy.data.objects.remove(o)
+        # Level 1: the variant heads and the neck cap (split below).
+        extra = len(heads) * HEAD_TRIS[1] + 40 if level == 1 else 0
+        levels[level] = lod_copy(
+            obj, cap[level] - g_tris - extra, f"{fig}_ga3_lod{level}"
+        )
+    pieces = {0: [], 1: [], 2: []}
+    if heads:
+        for level in (0, 1):
+            head_a = split_head(levels[level], z_cut, f"{fig}_ga3_headA_lod{level}")
+            bs.set_face_mask(head_a, 1)
+            pieces[level].append(head_a)
+            for k, h in enumerate(heads):
+                piece = (
+                    h["low"]
+                    if level == 0
+                    else lod_copy(h["low"], HEAD_TRIS[1], f"{fig}_ga3_head{k + 1}_lod1")
+                )
+                pieces[level].append(piece)
     files, counts = [], []
     kept = {}
     for level in range(3):
         gear_objs = equipment(unit, arm, level)
-        g_tris = tris(gear_objs)
-        if level == 0:
-            body_obj = obj
-        else:
-            body_obj = lod_copy(obj, cap[level] - g_tris, f"{fig}_ga3_lod{level}")
+        body_obj = levels[level]
         name = f"{fig}_lod{level}.mesh.bin"
+        objs = [body_obj, *pieces[level], *gear_objs]
+        path = os.path.join(OUT_DIR, name)
         if mounted:
-            counts.append(
-                export_mounted(
-                    [body_obj, *gear_objs],
-                    seat,
-                    rig,
-                    fine["rigs"][rig_name]["bones"],
-                    level,
-                    os.path.join(OUT_DIR, name),
-                )
-            )
+            counts.append(export_mounted(objs, seat, rig, bones, level, path, fig))
         else:
-            counts.append(
-                bs.export_mesh(
-                    [body_obj, *gear_objs],
-                    rig,
-                    bs.human_bone_alias,
-                    os.path.join(OUT_DIR, name),
-                    influences=bs.INFLUENCES[level],
-                )
+            bs.export_mesh(
+                objs, rig, bs.human_bone_alias, path, influences=bs.INFLUENCES[level]
             )
+            if level == 0:
+                graft_hands(path, os.path.join(FINE_DIR, name), bones)
+            counts.append(len(read_cam(path)["idx"]) // 3)
+            if counts[-1] > cap[level]:
+                raise SystemExit(f"GA3: LOD{level} {counts[-1]} > cap {cap[level]}")
         files.append(name)
-        kept[level] = (body_obj, gear_objs)
+        kept[level] = (body_obj, [*pieces[level], *gear_objs])
+    head_y = (seat @ Vector((0.0, 0.0, z_cut))).z if mounted else z_cut
     entry = {
         "lods": files,
         "tris": counts,
-        "variants": 1,
+        "variants": 1 + len(heads),
+        "head_y": round(head_y, 4),
         "ga3_albedo": albedo_name,
         "ga3_lum": [round(lum[0], 4), round(lum[1], 4)],
         "unit": unit_name,
         **({"fine_horse": True} if mounted else {}),
         "source": f"fal-ai/nano-banana-2/edit + {os.path.basename(glb)} (tools/experiments/ga3_fal_figure.py)",
+        "faces": [os.path.basename(rel) for rel in faces],
     }
     path = os.path.join(OUT_DIR, "manifest.json")
     manifest = {"figures": {}}
@@ -843,15 +1389,26 @@ def build(unit_name, raw, renders, glb=None):
         with open(path) as f:
             manifest = json.load(f)
     manifest["figures"][fig] = entry
-    manifest["source"] = "tools/blender_scripts/ga3_figures.py (GA3-L3, ADR 0140)"
+    manifest["source"] = "tools/blender_scripts/ga3_figures.py (GA3-L3/L4, ADR 0140)"
     with open(path, "w") as f:
         json.dump(manifest, f, indent=1, sort_keys=True)
     print("ENTRY", json.dumps(entry))
+    out_dir = os.path.join(raw, L4_RAW, unit_name)
+    os.makedirs(out_dir, exist_ok=True)
     if renders:
         tag = os.path.splitext(os.path.basename(glb))[0]
-        render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum)
+        render_views(
+            unit_name,
+            tag,
+            os.path.join(raw, L4_RAW),
+            arm,
+            kept,
+            atlas,
+            atlas_classes,
+            lum,
+        )
     bpy.ops.wm.save_as_mainfile(
-        filepath=os.path.join(raw, unit_name, f"ga3_{unit_name}.blend")
+        filepath=os.path.join(out_dir, f"ga3_{unit_name}.blend")
     )
     print("OK")
 
@@ -859,7 +1416,7 @@ def build(unit_name, raw, renders, glb=None):
 # --- Mounted figures (L3c) ----------------------------------------------------------------
 
 
-def export_mounted(objs, seat, rig, bones, level, path):
+def export_mounted(objs, seat, rig, bones, level, path, fig=None):
     """Rider `objs` moved onto the saddle (`seat`), merged with the fine horse; triangles.
 
     The rider pieces are copied into the ``cavalry`` rest frame with their groups renamed
@@ -889,6 +1446,10 @@ def export_mounted(objs, seat, rig, bones, level, path):
     for c in copies:
         bpy.data.objects.remove(c)
     fine = os.path.join(FINE_DIR, os.path.basename(path))
+    if level == 0:
+        # L4: the fine rider's closed hands (same fine figure file, ``R:`` wrists).
+        graft_hands(tmp, fine, bones, "R:")
+        rider = len(read_cam(tmp)["idx"]) // 3
     horse = merge_horse(fine, tmp, path, bones)
     os.remove(tmp)
     print(f"MOUNTED lod{level} rider={rider} horse={horse}")
@@ -1033,7 +1594,7 @@ def cam_uvs(path):
     return [floats[2 * i : 2 * i + 2] for i in range(n)]
 
 
-def game_posed(fig, clip, frac, idle, image, rig_name="human"):
+def game_posed(fig, clip, frac, idle, image, rig_name="human", variant=0):
     """The exported GA3 LOD0 of `fig` skinned on the CPU with the game's bone texture.
 
     Same frames as the current figure beside it (``add_current_archer``): the held items
@@ -1052,7 +1613,7 @@ def game_posed(fig, clip, frac, idle, image, rig_name="human"):
     uvs = cam_uvs(path)
     c = rig["clips"][clip or idle]
     fr = c["start"] + int(round((frac if clip else 0.0) * (c["frames"] - 1)))
-    obj = fc.skinned_object(f"{fig}_ga3_game", mesh, frames[fr], 0)
+    obj = fc.skinned_object(f"{fig}_ga3_game{variant}", mesh, frames[fr], variant)
     me = obj.data
     layer = me.uv_layers.new(name="UVMap")
     colours = mesh[1]
@@ -1143,6 +1704,43 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
             (760, 620) if mounted else (560, 620)
         )
         fp.render(os.path.join(out, f"{label}.png"))
+    # L4: the heads of every variant side by side (rest pose, close-up, LOD0 as in game).
+    for o in [o for o in bpy.data.objects if o.name.startswith(fig)]:
+        if "ga3" not in o.name or "_ga3_game" in o.name:
+            bpy.data.objects.remove(o)
+    count = 1 + len(unit.get("faces", []))
+    neutral = "c_idle" if mounted else "idle"
+
+    def body_points(o):
+        # Generated body faces only (material 0): not the weapon raised above the head.
+        me = o.data
+        return [
+            me.vertices[i].co
+            for p in me.polygons
+            if p.material_index == 0
+            for i in p.vertices
+        ]
+
+    posed = []
+    for v in range(count):
+        o = game_posed(fig, neutral, 0.0, neutral, img, rig_name, v)
+        o.location.x += 0.6 * v
+        posed.append(o)
+    pts = body_points(posed[0])
+    head_z = max(p.z for p in pts) - 0.17
+    xs = [p.x for p in pts if p.z > head_z]
+    x0 = 0.5 * (min(xs) + max(xs))
+    cx = x0 + 0.3 * (count - 1)
+    fp.look_at(cam, (cx + 0.25, -2.4, head_z + 0.12), (cx, 0.0, head_z - 0.08), 50)
+    scene.render.resolution_x, scene.render.resolution_y = (560, 420)
+    fp.render(os.path.join(out, "faces.png"))
+    # Hands of variant 0 (fine fists grafted at LOD0) in the weapon's rest clip.
+    for o in posed:
+        bpy.data.objects.remove(o)
+    game_posed(fig, None, 0.0, clips["idle"], img, rig_name, 0)
+    hand_z = head_z - 0.5
+    fp.look_at(cam, (x0 + 0.35, -1.8, hand_z + 0.2), (x0, 0.0, hand_z), 35)
+    fp.render(os.path.join(out, "hands.png"))
     _ = math
 
 
@@ -1203,37 +1801,48 @@ def sheet(unit_name, jpg, raw, tags):
     print("SHEET", jpg, canvas.size)
 
 
-def board(jpg, raw, names, tag="multi_front_back"):
-    """Planche of several units: one column each, walk above attack (generated | current)."""
+def board(jpg, raw, names, tag="multi_front_back", per_row=8):
+    """Planche of several units (L4): walk (generated | current) above the variant heads.
+
+    `per_row` units per band; renders under ``raw/l4/<unit>/``.
+    """
     from PIL import Image, ImageDraw, ImageFont
 
     try:
-        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 15)
+        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 14)
     except OSError:
         font = ImageFont.load_default()
-    h = 380
-    rows = []
-    for shot, role in (("walk", "walk"), ("shoot", "attack")):
-        row = []
-        for name in names:
-            unit = UNITS[name]
-            path = os.path.join(raw, name, "renders_" + tag, shot + ".png")
-            im = Image.open(path).convert("RGB")
-            label = f"{unit['figure']} {unit['clips'][role]} : GA3 | actuel"
-            row.append((label, im.resize((int(im.width * h / im.height), h))))
-        rows.append(row)
-    width = max(sum(t.width for _, t in r) for r in rows)
-    canvas = Image.new("RGB", (width, len(rows) * (h + 24)), (30, 30, 32))
+    w = 300
+    tiles = []
+    for name in names:
+        unit = UNITS[name]
+        folder = os.path.join(raw, L4_RAW, name, "renders_" + tag)
+        walk = Image.open(os.path.join(folder, "walk.png")).convert("RGB")
+        faces = Image.open(os.path.join(folder, "faces.png")).convert("RGB")
+        hands = Image.open(os.path.join(folder, "hands.png")).convert("RGB")
+        hands = hands.resize((w, int(hands.height * w / hands.width)))
+        walk = walk.resize((w, int(walk.height * w / walk.width)))
+        faces = faces.resize((w, int(faces.height * w / faces.width)))
+        tile = Image.new(
+            "RGB", (w, 22 + walk.height + faces.height + hands.height), (30, 30, 32)
+        )
+        tile.paste(walk, (0, 22))
+        tile.paste(faces, (0, 22 + walk.height))
+        tile.paste(hands, (0, 22 + walk.height + faces.height))
+        ImageDraw.Draw(tile).text(
+            (5, 4), f"{unit['figure']} ({name})", fill=(235, 230, 215), font=font
+        )
+        tiles.append(tile)
+    bands = [tiles[k : k + per_row] for k in range(0, len(tiles), per_row)]
+    band_h = [max(t.height for t in b) for b in bands]
+    canvas = Image.new("RGB", (w * min(per_row, len(tiles)), sum(band_h)), (30, 30, 32))
     y = 0
-    for r in rows:
-        x = 0
-        for label, t in r:
-            canvas.paste(t, (x, y + 24))
-            ImageDraw.Draw(canvas).text(
-                (x + 6, y + 4), label, fill=(235, 230, 215), font=font
-            )
-            x += t.width
-        y += h + 24
+    for b, bh in zip(bands, band_h, strict=True):
+        for k, t in enumerate(b):
+            canvas.paste(t, (k * w, y))
+        y += bh
+    if canvas.width > 1800:
+        canvas = canvas.resize((1800, int(canvas.height * 1800 / canvas.width)))
     os.makedirs(os.path.dirname(jpg), exist_ok=True)
     canvas.save(jpg, quality=84)
     print("BOARD", jpg, canvas.size)
