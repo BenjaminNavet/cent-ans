@@ -147,6 +147,14 @@ uniform float far_boost = 0.35;
 // reflété : sous ~20° de hauteur, où l'acier réel reflète sol, troupe et lisières, le reflet
 // du voile d'horizon (clair) est assombri, et les creux cuits ne reflètent presque rien.
 uniform float steel_occlusion = 1.0;
+// CR4 : lance tenue (os `Prop` de l'index `prop_bone`, -1 : aucune) ; repère de repos de la
+// prise (manifeste `prop_grip`/`prop_axis`/`prop_side`) : longueur ±10 % et angle ±3° par
+// cavalier, flamme ondulante montrée pour `pennon_share` des cavaliers, fût veiné, prise usée.
+uniform int prop_bone = -1;
+uniform vec3 prop_grip = vec3(0.0);
+uniform vec3 prop_axis = vec3(0.0, 0.0, 1.0);
+uniform vec3 prop_side = vec3(1.0, 0.0, 0.0);
+uniform float pennon_share = 0.6;
 
 // Lot AN1a (ADR 0096) : mouvement secondaire (bas des surcots et jaques, caparaçons, crinières,
 // queues), ajouté après le skinning, dans le repère posé de la figurine (+Z = avant). Poids par
@@ -243,6 +251,8 @@ varying vec3 v_rest;
 varying vec3 v_rest_n;
 varying float v_blood;
 varying float v_stump;
+// CR4 : sommet de la lance tenue (1) ; 0 ailleurs.
+varying float v_prop;
 
 float hash1(float n) {
 	return fract(sin(n * 12.9898 + 4.1414) * 43758.5453);
@@ -484,6 +494,7 @@ void vertex() {
 	if (inst_dist < lod_band.x || inst_dist >= lod_band.y) {
 		// FG5 : soldat hors de la bande de ce calque, replié en un point sans skinning.
 		VERTEX = vec3(0.0);
+		v_prop = 0.0;
 	} else {
 		float id = bake_id.x >= 0.0 ? bake_id.x : (id_in_custom ? INSTANCE_CUSTOM.x : float(INSTANCE_ID));
 		vec4 h = vec4(hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53), hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3));
@@ -523,6 +534,31 @@ void vertex() {
 			a = mix(pa, a, s);
 			b = mix(pb, b, s);
 			c = mix(pc, c, s);
+		}
+		v_prop = 0.0;
+		if (prop_bone >= 0 && idx.x == prop_bone && w.x > 0.99) {
+			// CR4 : lance propre au cavalier (repère de repos de la prise, avant le skinning).
+			v_prop = 1.0;
+			vec3 out_dir = normalize(cross(prop_axis, prop_side));
+			vec3 r = VERTEX - prop_grip;
+			float s_ax = dot(r, prop_axis);
+			if (int(COLOR.a * 16.0 + 0.5) == C_LIVERY) {
+				if (fract(h.z * 13.1 + h.x * 3.7) > pennon_share) {
+					r = vec3(0.0); // pas de flamme pour ce cavalier
+				} else {
+					// Flamme : onde qui court vers la pointe libre, amplitude croissante.
+					float d = length(r - prop_axis * s_ax);
+					r += prop_side * (0.07 * d * sin(TIME * 7.0 - d * 11.0 + h.y * 6.283));
+				}
+			}
+			float k_len = mix(0.9, 1.1, fract(h.x * 7.31 + h.z * 3.17));
+			r += prop_axis * (max(s_ax - 0.3, 0.0) * (k_len - 1.0));
+			// Angle : ±3° (baissée ou relevée), ±2° de côté, petits angles.
+			float t1 = radians(3.0) * (fract(h.y * 5.7 + h.w * 1.3) * 2.0 - 1.0);
+			float t2 = radians(2.0) * (fract(h.w * 9.1 + h.x * 2.3) * 2.0 - 1.0);
+			r += t1 * cross(prop_side, r) + t2 * cross(out_dir, r);
+			NORMAL = normalize(NORMAL + t1 * cross(prop_side, NORMAL) + t2 * cross(out_dir, NORMAL));
+			VERTEX = prop_grip + r;
 		}
 		vec4 p = vec4(VERTEX, 1.0);
 		vec3 v = vec3(dot(a, p), dot(b, p), dot(c, p));
@@ -692,6 +728,24 @@ void fragment() {
 	float roughness = 0.85;
 	float specular = 0.4;
 	vec2 q = plane_uv(v_rest, v_rest_n);
+	float lance_s = 0.0;
+	if (v_prop > 0.5) {
+		// CR4 : coordonnées du fût (tour, long de l'axe) : veine du bois le long de la lance.
+		vec3 r = v_rest - prop_grip;
+		lance_s = dot(r, prop_axis);
+		vec3 rr = r - prop_axis * lance_s;
+		q = vec2(atan(dot(rr, prop_side), dot(rr, normalize(cross(prop_axis, prop_side)))) * 0.03, lance_s);
+	}
+#ifdef FG3_BAKED
+	if (code == C_COAT && v_src == 2) {
+		// CR4 : poil couché vers l'arrière et le bas sur le tronc (tuile : poil le long de v),
+		// droit vers le bas sur les jambes.
+		float ang = 1.15 * smoothstep(0.75, 1.0, v_rest.y);
+		float ca = cos(ang);
+		float sa = sin(ang);
+		q = mat2(vec2(ca, sa), vec2(-sa, ca)) * q;
+	}
+#endif
 	float dist = length(VERTEX);
 	float h5 = fract(v_var.x * 7.31 + v_var.z * 3.17);
 	float h6 = fract(v_var.y * 5.13 + v_var.x * 11.7);
@@ -787,6 +841,25 @@ void fragment() {
 		vec3 coat = coat_count > 0 ? coat_colors[min(int(v_var.w * float(coat_count)), coat_count - 1)] : COATS[int(v_var.w * 4.99)];
 		albedo = coat * v_color;
 		roughness = 0.6;
+		// CR4 : crins et extrémités noirs des bais et des isabelles ; bas des jambes plus foncé
+		// pour toutes les robes (paturons), balzane blanche postérieure gauche sur un cheval sur
+		// six. Le crin (hors robe) garde sa teinte de cuisson.
+		bool black_points = (coat.r < 0.2 && coat.r > 0.06 && coat.g < 0.5 * coat.r) || (coat.g > 0.2 && coat.b < 0.55 * coat.g);
+		float lower = 1.0 - smoothstep(0.3, 0.62, v_rest.y);
+		bool is_body = abs(v_color.r - sm_mane_tint) > 0.003; // crins : teinte exacte 0,33
+#ifdef FG3_BAKED
+		if (v_src != 0) {
+			is_body = v_src == 2;
+		}
+#endif
+		if (!is_body && black_points) {
+			albedo = vec3(0.028, 0.022, 0.018) * mix(0.8, 1.2, v_var.z);
+		} else if (is_body) {
+			albedo = mix(albedo, black_points ? vec3(0.03, 0.024, 0.02) : albedo * 0.55, lower * (black_points ? 0.9 : 0.6));
+			if (fract(v_var.w * 37.3) > 0.83 && v_rest.x > 0.0 && v_rest.z < 0.0 && v_rest.y < 0.22) {
+				albedo = mix(albedo, vec3(0.62, 0.6, 0.55), smoothstep(0.22, 0.16, v_rest.y));
+			}
+		}
 	}
 #ifdef FG3_BAKED
 	// Lot FG3 : cartes cuites (LOD0/LOD1 des figurines fines ; LOD2 : v_src = 0, rien de
@@ -874,8 +947,10 @@ void fragment() {
 				albedo = mix(FG3_HAIR[int(h5 * 6.99)] * 1.4, albedo, mix(0.35, 1.0, mask));
 			} else if (code == C_HAIR || code == C_COAT) {
 				tl = FG3_TILE_HAIR;
-				amt = code == C_HAIR ? 0.9 : 0.45;
-				relief = code == C_HAIR ? 0.0 : 0.3;
+				// CR4 : crins du cheval (robe hors carte du cheval) traités comme des cheveux.
+				bool mane = code == C_COAT && v_src != 2;
+				amt = code == C_HAIR || mane ? 0.9 : 0.6;
+				relief = code == C_HAIR ? 0.0 : (mane ? 0.35 : 0.3);
 			}
 			// GA1 : couche générée de la matière et part de l'albédo de détail (uniforme : flux
 			// uniforme, aucune divergence entre figurines).
@@ -911,9 +986,10 @@ void fragment() {
 					gl = GA1_TILE_HAIR;
 					ga_mix = 0.6;
 				} else {
-					// Robes : claires (gris, isabelle) ou foncées (alezan, bai, noir), cf. COATS.
-					gl = int(v_var.w * 4.99) >= 3 ? GA1_TILE_COAT_LIGHT : GA1_TILE_COAT_DARK;
-					ga_mix = 0.5;
+					// CR4 : tuile de poil couché pour toutes les robes (la claire est unie, sans
+					// sens du poil) ; crins : tuile de cheveux.
+					gl = v_src != 2 ? GA1_TILE_HAIR : GA1_TILE_COAT_DARK;
+					ga_mix = v_src != 2 ? 0.7 : 0.45;
 				}
 			}
 			if (tl >= 0) {
@@ -937,6 +1013,9 @@ void fragment() {
 					// CR2 : ×0,55 : l'ombre portée d'un anneau sur l'autre (le soleil, que l'AO ne
 					// touche pas, blanchissait la maille comme un tricot).
 					albedo = v_color * mix(0.85, 1.1, v_var.z) * ga_albedo * mix(1.0, 0.55, steel_occlusion);
+					// CR4 : anneaux lisibles : creux (relief bas du scan) presque noirs, anneaux gris
+					// fer ; la tuile seule, centrée en luminance, donnait un voile gris uniforme.
+					albedo *= mix(1.0, mix(0.12, 1.35, smoothstep(0.38, 0.66, d.b)), steel_occlusion);
 					metallic = 0.6;
 					// CR2 : pas de reflet plus lisse que 0,5 : les anneaux se masquent l'un l'autre
 					// (sinon voile blanc à contre-jour, halo du glow).
@@ -1060,11 +1139,25 @@ void fragment() {
 		metallic = mix(metallic, 0.0, raw);
 	}
 #endif
+	if (v_prop > 0.5 && code == C_WOOD) {
+		// CR4 : prise usée (bois noirci et lustré par les gantelets) de la poignée à la rondelle.
+		float grip = smoothstep(-0.34, -0.22, lance_s) * (1.0 - smoothstep(0.06, 0.14, lance_s));
+		albedo = mix(albedo, albedo * vec3(0.42, 0.36, 0.3), grip);
+		roughness = mix(roughness, 0.42, grip);
+	}
 	float ao = mix(0.6, 1.0, smoothstep(0.0, 1.2, v_rest.y));
 	ALBEDO = albedo * ao * (1.0 + highlight * 0.25);
 	METALLIC = metallic;
 	ROUGHNESS = clamp(roughness, 0.05, 1.0);
 	SPECULAR = specular;
+	if (steel_occlusion > 0.0 && code == C_MAIL) {
+		// CR4 : maille rasante (contre-jour) : les anneaux se masquent, plus de reflet de
+		// Fresnel (f90 de Godot suit f0 quand le métal et la réflectance tombent) : anneaux
+		// sombres au lieu d'un voile blanc « fourrure ».
+		float graz = 1.0 - smoothstep(0.12, 0.55, abs(dot(NORMAL, VIEW)));
+		METALLIC = mix(METALLIC, 0.0, graz * steel_occlusion);
+		SPECULAR = mix(SPECULAR, 0.08, graz * steel_occlusion);
+	}
 	if (steel_occlusion > 0.0 && (code == C_PLATE || code == C_TRIM || code == C_MAIL)) {
 		// CR2 : occlusion spéculaire. RADIANCE (a) mêle le reflet du ciel au noir : le reflet
 		// n'atteint le ciel libre qu'en montant (troupe, sol, lisières et bannières, absents du
