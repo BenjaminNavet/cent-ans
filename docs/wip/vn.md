@@ -53,8 +53,6 @@ rochers) appartient à HB (`feat/hb`) : VN n'y touche pas.
 - Tours de siège énormes (rayon 5+fortif m, cœur `siege_layouts.rs`) : règle du cœur, session
   siège en cours sur main → non touché.
 - `q6_ui_test` (SimFacade introuvable avec --script) et `fe_ui_test` échouent aussi sur main.
-- Écran de résultat : la rangée des régiments est coupée par le bas de la zone défilante en 1080p.
-- Champs de blé procéduraux en ovales (Crécy, Poitiers) plutôt qu'en parcelles.
 
 ## Intégré dans main
 7e68b23e3 (ff-only, 30/09 23:30), dylib reconstruite.
