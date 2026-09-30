@@ -14,5 +14,6 @@ if not defined GITBASH (
 )
 "%GITBASH%" tools/launch.sh %*
 set "RC=%errorlevel%"
-if not "%RC%"=="0" pause
+rem No pause in CI (GitHub Actions sets CI): nobody reads the window there.
+if not "%RC%"=="0" if not defined CI pause
 exit /b %RC%
