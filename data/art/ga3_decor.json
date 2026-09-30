@@ -71,14 +71,17 @@
       "label": "Palissade (segment)",
       "prompt": "straight segment of a medieval field palisade, a single row of about ten sharpened rough wooden stakes of equal height driven close together, slightly leaning, lashed to two horizontal split rails, bark still on some stakes, seen from the side.",
       "model": "multi",
-      "scale_axis": "length",
-      "size_m": 4.0,
+      "scale_axis": "height",
+      "size_m": 1.9,
       "lod0": 3000,
       "tex": 512,
       "kit_kind": "palisade",
       "fit": "real",
       "share": 1.0,
-      "wired": true
+      "wired": true,
+      "raw": "l1p/palisade",
+      "glb": "trellis.glb",
+      "note": "trellis/multi essayé (3 vues) : un peu plus de débris que la vue unique, gardée. Pieux ramenés à 1,9 m (palissade basse du cœur : 1,7 m)."
     },
     {
       "id": "well",
@@ -122,7 +125,10 @@
       "kit_kind": "trebuchet",
       "fit": "real",
       "share": 0.0,
-      "wired": false
+      "wired": false,
+      "raw": "l1p/trebuchet",
+      "glb": "trellis.glb",
+      "note": "Vue unique et trellis/multi équivalentes (un seul îlot) ; non branché : le trébuchet de bataille est animé (SiegeEnginesFx, bras qui pivote), un maillage figé ne le remplace pas."
     },
     {
       "id": "ram",
@@ -136,7 +142,8 @@
       "kit_kind": "ram",
       "fit": "real",
       "share": 0.0,
-      "wired": false
+      "wired": false,
+      "raw": "l1p/ram"
     }
   ]
 }

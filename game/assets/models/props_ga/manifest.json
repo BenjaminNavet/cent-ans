@@ -9,7 +9,7 @@
   "triangles": [
    3000,
    1500,
-   780
+   847
   ],
   "wired": true
  },
@@ -41,6 +41,34 @@
   ],
   "wired": true
  },
+ "ga3_palisade": {
+  "depth": 0.705,
+  "fit": "real",
+  "height": 1.891,
+  "kit_kind": "palisade",
+  "length": 3.128,
+  "share": 1.0,
+  "triangles": [
+   2998,
+   1500,
+   446
+  ],
+  "wired": true
+ },
+ "ga3_ram": {
+  "depth": 3.445,
+  "fit": "real",
+  "height": 4.367,
+  "kit_kind": "ram",
+  "length": 7.004,
+  "share": 0.0,
+  "triangles": [
+   3000,
+   1500,
+   824
+  ],
+  "wired": false
+ },
  "ga3_tent": {
   "depth": 4.404,
   "fit": "real",
@@ -55,6 +83,20 @@
   ],
   "wired": true
  },
+ "ga3_trebuchet": {
+  "depth": 7.116,
+  "fit": "real",
+  "height": 11.045,
+  "kit_kind": "trebuchet",
+  "length": 12.156,
+  "share": 0.0,
+  "triangles": [
+   2999,
+   1499,
+   641
+  ],
+  "wired": false
+ },
  "ga3_well": {
   "depth": 2.474,
   "fit": "real",
@@ -65,7 +107,7 @@
   "triangles": [
    2999,
    1499,
-   1131
+   1100
   ],
   "wired": true
  },

@@ -289,6 +289,14 @@ def decimated_copy(
     return obj
 
 
+def seat(obj: bpy.types.Object) -> None:
+    """Put the lowest vertex back at z = 0 (decimation can lift or sink the foot)."""
+    low = min(v.co.z for v in obj.data.vertices)
+    for vert in obj.data.vertices:
+        vert.co.z -= low
+    obj.data.update()
+
+
 def source_inputs_linked(source: bpy.types.Object, socket: str) -> bool:
     """Whether any material of ``source`` feeds its BSDF ``socket`` from a node (texture)."""
     for slot in source.material_slots:
@@ -465,6 +473,7 @@ def main() -> None:
         target = int(args.lod0 * fraction)
         name = f"{args.name}_lod{level}"
         low = decimated_copy(source if lod0 is None else lod0, name, target)
+        seat(low)
         bake_maps(source, low, max(128, args.tex >> level), args)
         export(low, out_dir / f"{name}.glb")
         dims = low.dimensions

@@ -100,7 +100,7 @@ func _init() -> void:
 		if batch.count() != 200:
 			push_error("ga3_l1: %d instances au lieu de 200" % batch.count())
 			ok = false
-		var expected_some := not no_ga3 and variant == "" and not Ga3Kit.variants_of("cottage").is_empty()
+		var expected_some: bool = not no_ga3 and variant == "" and not Ga3Kit.variants_of("cottage").is_empty()
 		if expected_some and (ga3 < 40 or ga3 > 160):
 			push_error("ga3_l1: part GA3 %d hors de [40, 160] (share 0,5)" % ga3)
 			ok = false

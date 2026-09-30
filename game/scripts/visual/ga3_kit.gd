@@ -198,17 +198,18 @@ class Batch:
 					slots[members[j]] = [tile_key, j, centre]
 			_slots[model_name] = slots
 
+	## Transformation d'une poignée (copie tenue côté CPU : lisible aussi sans serveur de rendu).
 	func get_transform(handle: Array) -> Transform3D:
-		var slot: Variant = _slot(handle)
-		if slot == null:
-			return Transform3D()
-		var lods: Array = _tiles[slot[0]]
-		if lods.is_empty():
-			return Transform3D()
-		var local := (lods[0] as MultiMeshInstance3D).multimesh.get_instance_transform(int(slot[1]))
-		return Transform3D(local.basis, local.origin + (slot[2] as Vector3))
+		var items: Array = _items.get(handle[0], [])
+		var index := int(handle[1])
+		return items[index] if index >= 0 and index < items.size() else Transform3D()
 
 	func set_transform(handle: Array, xform: Transform3D) -> void:
+		var items: Array = _items.get(handle[0], [])
+		var index := int(handle[1])
+		if index < 0 or index >= items.size():
+			return
+		items[index] = xform
 		var slot: Variant = _slot(handle)
 		if slot == null:
 			return
