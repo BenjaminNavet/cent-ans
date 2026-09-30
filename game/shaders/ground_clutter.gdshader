@@ -33,6 +33,8 @@ uniform vec3 winter_color : source_color = vec3(0.36, 0.32, 0.24);
 varying float v_kind;
 varying float v_tint;
 varying float v_seed;
+// Lot L5 : taches de prairie (bruit basse fréquence sur la position), comme le terrain.
+varying float v_patch;
 
 float hash1(float n) {
 	return fract(sin(n * 12.9898) * 43758.5453);
@@ -57,6 +59,8 @@ void vertex() {
 	float prop = pow(max(campaign_prop_scale, 1e-4), prop_scale_power);
 	VERTEX *= prop;
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	vec3 root = MODEL_MATRIX[3].xyz;
+	v_patch = value_noise(root.xz / 7.0) * 0.65 + value_noise(root.xz / 2.3) * 0.35;
 	// Vent : pointe des brins seulement (buisson plus raide).
 	float sway = sin(TIME * wind_speed + INSTANCE_CUSTOM.z * 6.283 + world.x * 0.35 + world.z * 0.21);
 	float bend = up * up * wind_strength * (v_kind > 0.5 ? 0.35 : 1.0) * prop;
@@ -113,7 +117,9 @@ void fragment() {
 		discard;
 	}
 	float up = 1.0 - UV.y;
-	vec3 base = is_bush ? bush_color : mix(grass_color, grass_dry, v_tint * v_tint * 0.5);
+	// Taches plus sèches ou plus drues (bruit de position), petit écart par touffe.
+	float dry = clamp(smoothstep(0.45, 0.8, v_patch) * 0.7 + (v_tint - 0.5) * 0.25, 0.0, 1.0);
+	vec3 base = is_bush ? bush_color : mix(grass_color * mix(0.85, 1.05, v_patch), grass_dry, dry);
 	base *= mix(0.9, 1.12, v_tint) * shade;
 	vec4 w = campaign_season;
 	// Printemps tendre, été sec, automne roux, hiver brun-gris.

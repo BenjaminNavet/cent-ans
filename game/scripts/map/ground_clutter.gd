@@ -30,13 +30,13 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var max_camera_distance: float = 40.0
 @export var fade_band: float = 8.0
 ## Côté (unités monde) d'une cellule de semis.
-@export var cell_size: float = 32.0
+@export var cell_size: float = 24.0  # L5 : 32 → 24 (même coût de pose par cellule, densité × 1,8)
 ## Rayon du disque garni autour du point visé : distance caméra × `radius_factor`, borné.
 @export var radius_factor: float = 1.3
 @export var min_radius: float = 16.0
 @export var max_radius: float = 52.0
 ## Candidats par cellule à la densité 1 (préréglage Haute) sur une couverture pleine.
-@export var base_per_cell: int = 4000
+@export var base_per_cell: int = 4000  # L5 : ≈ 7 candidats/u² (FC5 : 3,9)
 ## Densité maximale d'un préréglage (Ultra) : nombre de candidats semés.
 @export var max_density: float = 1.5
 ## Hauteur (unités monde, taille de carte) d'une touffe d'herbe et d'une broussaille.
@@ -49,6 +49,9 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 ## ×`close_boost` (sans nouveau semis) ; inchangée à d ≥ `close_distance` + 10.
 @export var close_distance: float = 20.0
 @export var close_boost: float = 1.5
+## Lot L5 : part affichée à d ≥ `close_distance` + 10 : ramène la densité par unité² à celle de
+## FC5 (cellules plus petites, même nombre de candidats) : rien ne change au-delà de d = 30.
+@export var far_share: float = 0.56
 ## Échelle des arbres (`campaign_prop_scale`) sous laquelle les touffes disparaissent (trop
 ## petites pour valoir leur coût).
 @export var min_prop_scale: float = 0.025
@@ -336,7 +339,7 @@ func _weight(x: float, y: float, forest: float) -> Vector2:
 		crops = splat.g
 	var edge := clampf(forest * (1.0 - forest) * 4.0, 0.0, 1.0)
 	var p := clampf((grass + heath * 0.6) * (1.0 - forest) + crops * 0.12 + edge * 0.7, 0.0, 1.0)
-	var bush := clampf(0.12 + edge * 0.6 + heath * 0.35, 0.0, 0.9)
+	var bush := clampf(0.04 + edge * 0.4 + heath * 0.25, 0.0, 0.7)  # L5 : moins de broussailles
 	return Vector2(p, bush)
 
 
@@ -578,7 +581,7 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 ## Instances affichées par cellule : part `quality_density / max_density` des candidats, bornée
 ## par `max_visible_instances` sur l'ensemble des cellules visibles.
 func _apply_counts() -> void:
-	var boost := lerpf(close_boost, 1.0, smoothstep(close_distance, close_distance + 10.0, _camera_distance))
+	var boost := lerpf(close_boost, far_share, smoothstep(close_distance, close_distance + 10.0, _camera_distance))
 	var share := clampf(quality_density * boost / maxf(max_density, 0.001), 0.0, 1.0)
 	var total := 0
 	var shown_cells := 0
