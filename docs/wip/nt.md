@@ -31,3 +31,9 @@ Mocap payante (corps à corps, combats appariés), clé fal.ai (GA3), chantier g
 - NT7 fondus entre clips de mêlée + clips porte-étendard / musicien / servants d'engins (pipeline ADR 0096, sans mocap)
 - NT8 château : donjon carré procédural, échelle des tours du type château (capture : tours trop massives)
 - NT9 équilibre NT5 : mesurer batailles FR/EN par décennie, corriger si besoin ; bélier en résolution automatique ; sorties de garnison comptées pour les missions
+
+## Vague 3 — fusionnée (30/09)
+- NT7 fondu 0,2 s entre clips de mêlée (shader, ADR 0129), 10 clips de rôle ; A/B dans le bruit. Ouvert : changements de clip secs pour rôles/servants ; kit grossier non recuit.
+- NT8 château : tours rayon ≤ 6 m, donjon carré 32,5 m (toit en pavillon), basse-cour meublée. Ouvert : porte du donjon sans escalier ; une seule forme de toit.
+- NT9 : une attaque IA par armée ennemie et par tour ; batailles FR/EN ×1,68 (au lieu de ×1,94) vs avant N6/N7, justifié ADR 0128 ; guerre FR–EN 64 % (10/12 graines dans 55-75) ; bélier +20 % en résolution auto ; sorties comptées pour les missions ; cv3_ai_stances rétabli graine 1.
+- Intégration : schéma NT7 sans `$id` corrigé (465 pytest cassés sinon) ; pytest 1287, cargo test, clippy, smoke, tests Godot verts sauf `fe_ui_test` (préexistant, hors NT).

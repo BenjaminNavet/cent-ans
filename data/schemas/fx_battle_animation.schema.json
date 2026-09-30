@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_battle_animation.schema.json",
   "title": "Fondus et clips de rôle des figurines de bataille (NT7)",
   "type": "object",
   "required": ["cycle_blend_s", "role_clips"],
