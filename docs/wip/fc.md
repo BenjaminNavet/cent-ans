@@ -31,8 +31,17 @@ worktree `../game_project-fc`. Mandat : autonomie. Mesures seulement sur machine
   +~10-17 appels de dessin sous d = 40 (objectif FC4 « aucune hausse » mesuré au zoom panoramique).
 
 ## FC2 — arbres imposteurs (agent FC2)
-État : squelette. Générateur `tools/blender_scripts/campaign_tree_impostors.py` (Blender headless,
-arbres sources riches → atlas 8 vues × 3 essences, albédo+alpha et normale),
-shader `game/shaders/campaign_tree_impostor.gdshader`, câblage `vegetation.gd` (tuiles au-delà de
-`detail_distance`), drapeau `--no-fc2`, test `game/tests/fc2_impostors_test.gd`.
-Prochaine étape : script Blender et cuisson des atlas.
+État : atlas cuits et commités (`game/assets/textures/vegetation/campaign_impostors_{albedo,normal}.png`,
+2048×768 = 8 vues × chêne/hêtre/sapin à 256², VRAM BPTC + mipmaps), générateur
+`tools/blender_scripts/campaign_tree_impostors.py` (Cycles CPU ~1 min, arbres sources de 5 400 /
+4 700 / 780 triangles en cartes de feuilles, cuisson à 35° de tangage, émission pure : albédo,
+normale en repère de vue, occlusion en alpha de la normale). Shader
+`game/shaders/campaign_tree_impostor.gdshader` (vue par azimut local + tramage de Bayer entre deux
+vues, découpage alpha, hiver ajouré dans le même shader) ; uniformes et fonctions du feuillage
+extraits dans `foliage_common.gdshaderinc` (inclus par `foliage.gdshaderinc`, comportement
+inchangé). `vegetation.gd` : tuiles au-delà de `detail_distance` → `VegetationMeshes.impostor()`
+(2 triangles) + matériau imposteur pour chêne/hêtre/sapin, haies en maillage bas ;
+`--no-fc2` = maillages bas ; `lod_census()` pour tests/bancs. Contact : `docs/img/fc/fc2_impostors.jpg`.
+Non fait : ForestDetail (garde le maillage bas : changer de maillage y coûte ~1 ms/MultiMesh) ;
+portée 700 → 1000 (pas de clé de préréglage FC1 ; `max_camera_distance` reste 700).
+Prochaine étape : import Godot, `fc2_impostors_test.gd`, tests végétation, smoke.
