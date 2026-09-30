@@ -56,17 +56,35 @@ jamais dans le code.
 
 ## Compiler et lancer
 
-Plateformes prises en charge : **macOS Apple Silicon** et **Windows 10/11 x86_64** (ADR 0087). Linux
-n'est pas encore déclaré, mais un portage suivrait le même schéma et serait le bienvenu.
+Plateformes prises en charge : **macOS Apple Silicon** et **Windows 10/11 x86_64** (ADR 0087), ainsi que
+**Linux** (x86_64, arm64) depuis les sources (ADR 0117 ; pas encore d'export ni de CI).
 
 Prérequis : [Rust](https://rustup.rs) stable, [Godot 4.7](https://godotengine.org),
-[uv](https://docs.astral.sh/uv/) (outils Python, facultatif pour jouer).
+[uv](https://docs.astral.sh/uv/) (outils Python, facultatif pour jouer). Sous Windows, en plus :
+[Git pour Windows](https://git-scm.com/download/win) (Git Bash).
+
+**Lancer depuis les sources** : double-cliquer sur le lanceur de son système, à la racine du dépôt.
+
+| Système | Lanceur |
+|---|---|
+| macOS | `Lancer Cent Ans.command` |
+| Linux | `Lancer Cent Ans.sh` |
+| Windows | `Lancer Cent Ans.bat` |
+
+Le lanceur (`tools/launch.sh`) recompile le cœur Rust si `core/` a changé. Il refait l'import
+headless de Godot si `game/` a changé depuis le dernier import (premier lancement, `git pull`,
+autre version de Godot), puis lance le jeu. Il cherche Godot dans la variable `GODOT`, puis dans
+le PATH, puis aux emplacements d'installation habituels. Si Godot est ailleurs :
+`GODOT=/chemin/vers/godot tools/launch.sh`. Options : `--no-build`, `--import` (import forcé),
+et `-- <arguments Godot>`.
+
+À la main, les mêmes étapes sont :
 
 ```sh
 git clone https://github.com/BenjaminNavet/cent-ans.git
 cd cent-ans
 core/build.sh                               # compile la GDExtension et la copie dans game/bin/
-godot --headless --path game --import       # une fois après le clone
+godot --headless --path game --import       # après chaque changement des ressources
 godot --path game                           # lancer le jeu
 ```
 
@@ -90,11 +108,14 @@ en gardant son journal affiché.
    ```sh
    git clone https://github.com/BenjaminNavet/cent-ans.git
    cd cent-ans
-   core/build-windows.sh                    # compile cent_ans.debug.dll dans game/bin/ (quelques minutes)
+   core/build-windows.sh                    # facultatif : le lanceur le fait (quelques minutes)
    ```
 
-3. Ouvrir Godot, **Importer** → `cent-ans/game/project.godot`, attendre la fin de l'import, puis
-   **Lancer** (F5). En ligne de commande : `Godot_v4.7.2-stable_win64.exe --path game`.
+3. Double-cliquer sur `Lancer Cent Ans.bat` : il compile `cent_ans.debug.dll`, importe les
+   ressources, puis lance le jeu. Si Godot n'est pas trouvé, placer son exécutable
+   (`Godot_v4.7.2-stable_win64.exe`) à côté du dossier `cent-ans`, ou définir la variable
+   `GODOT`. On peut aussi ouvrir Godot, **Importer** → `cent-ans/game/project.godot`, puis
+   **Lancer** (F5).
 
 Le cache du relief fin (`data/map/pyramid/`, ≈ 3 Go) n'est pas dans le dépôt : sans lui, le zoom
 rapproché est limité (avis affiché en jeu). Il se régénère avec les outils Python
