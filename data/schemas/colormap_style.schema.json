@@ -19,6 +19,7 @@
           "propertyNames": {"enum": ["grassland", "grassland_dry", "farmland", "farmland_dry", "forest_broadleaf", "forest_conifer", "heath", "rock", "scrub", "scrub_light"]},
           "additionalProperties": {"$ref": "#/$defs/color"}
         },
+        "dry_max": {"$ref": "#/$defs/share", "description": "Plafond de la sécheresse venue de la latitude."},
         "forest_keep": {"$ref": "#/$defs/share", "description": "Part des forêts conservée (hors vallées)."},
         "conifer_min": {"$ref": "#/$defs/share"},
         "scrub": {"$ref": "#/$defs/share", "description": "Part de garrigue / maquis des terres non cultivées."},
