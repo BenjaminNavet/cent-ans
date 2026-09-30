@@ -22,5 +22,6 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - Prochaine étape : téléchargement + traitement des 8 scans, `scan_m`/`tile_m`, shader, tests.
 
 ## SR3b — en cours (agent)
-- État : lecture des recettes FG2 et de la planche SR3.
-- Prochaine étape : `docs/research/sr3b-ecarts.md` (tableau des écarts), puis 4-6 corrections.
+- État : écarts écrits (`docs/research/sr3b-ecarts.md`) ; retenus 1-6 (camail sous chapel,
+  manchettes de gantelets, gants de cuir, bourse+dague, bocle à la ceinture, chausses).
+- Prochaine étape : `tools/blender_scripts/battle_fine_sr.py` + branchement dans `build_figure`.
