@@ -20,7 +20,26 @@ Branche `fix/q8-recette`, worktree `../gp-q8` (lien `data/map/pyramid` vers main
       travers du ciel aux zooms les plus proches → masqué sous 4 rayons.
 - [x] Routes maritimes : ruban de 1,6 unité monde → large bande rayée rouge/bleu (routes
       superposées) sur la Tamise en vue rapprochée → largeur écran plafonnée à 5 px.
+- [x] Menu pause invisible et inerte (écran assombri seul) : ses panneaux, rangés dans la zone
+      modale, héritaient de la pause du jeu (fondu figé à alpha 0) → `PROCESS_MODE_ALWAYS`
+      (`pause_menu.gd`, test `q8_pause_menu_test.gd`). C'était le « menu Réglages introuvable ».
+- [x] Infobulles brutes aussi sur les lettres (classe interne `Letter`), les jetons d'agent,
+      les lignes de la cour ; `RichTooltip.set_tooltip` pose désormais l'hôte générique sur tout
+      contrôle natif et signale une classe scriptée sans `_make_custom_tooltip`.
+- [x] Discours du général (déploiement) : bandeau translucide sur le panneau « Formations de
+      groupe » → remonté à 48 % de la hauteur.
 - Pilote : bascule du commerce par V (plus X), contrôle de la faction réellement jouée.
+
+## Laissé à une autre session
+- Fenêtre de chronique qui sort de l'écran à droite (620 px dans la zone latérale de ≈ 380 px
+  en 1280×720) : corrigée ici en zone modale puis annulée, la session « VN » refond la fenêtre
+  pour la zone latérale au même moment.
+
+## À signaler au joueur (non corrigé)
+- Bataille pilote : « Défaite presque certaine, 0 % » en résolution auto, victoire écrasante
+  en bataille menée (5 % de pertes contre 36 %) : IA tactique faible ou prévision pessimiste
+  (chantier IA en cours sur feat/ia).
+- Qualité « ultra » : 15 i/s contre 60 en « haute » sur cette machine.
 
 ## Écartés (pas des bugs du jeu)
 - « OVERLAP » du pilote : `gui_get_hovered_control` suit le vrai curseur, pas les événements
@@ -31,7 +50,9 @@ Branche `fix/q8-recette`, worktree `../gp-q8` (lien `data/map/pyramid` vers main
 - « Lever des troupes 0/3 » après 3 recrutements : mission proposée après.
 - Fin de tour « ignorée » avec le rapport de saison : test Q7 vert ; lié à la fenêtre occultée.
 
-## Captures lues : ~17 / 100
+## Captures lues : 25 / 100 (planches de 4 réduites)
 
 ## État
-Partie 2 (Bourgogne) en cours ; ensuite smoke, tests, fusion dans main.
+Parties 1 (Angleterre), 2 (Bourgogne) et de contrôle jouées ; main fusionnée dans la branche
+(conflit `sea_lane.gdshader` : `abs()` de HB + plafond Q8) ; tests ciblés verts ; smoke final
+puis fusion ff dans main.
