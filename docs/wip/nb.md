@@ -48,3 +48,8 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
 - NB1 restreint aux 4 cadres à marges larges (panel_illuminated 38 px, panel 20, top_bar,
   tooltip 12) : barres, curseur, onglets, boutons, encart (1-9 px) restent procéduraux ;
   gain réel limité par la taille 1× du kit (interface 2× = chantier suivant).
+- Carte (question du joueur 09-30) : vue 3D = CC0 photo + DEM + modèles Blender, NB2 peu utile
+  sauf imposteurs d'arbres lointains (à lier au chantier FPS carte, appels de dessin +21 %).
+  Vue parchemin (> 1200) = cible forte : montagnes en pitons, forêts, vignettes de villes par
+  rang, mer, rose des vents, cartouches, style ancre v0 (≈ 60-80 sprites, ~5 $). Chantier
+  « parchemin peint » à spécifier après NB1, plafond propre ~8 $.
