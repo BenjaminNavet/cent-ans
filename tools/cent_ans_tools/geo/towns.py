@@ -547,6 +547,20 @@ def river_reach(
     }
 
 
+def town_bridge_allowed(crossing: dict, rules: dict) -> bool:
+    """Whether a river crossing gets a fixed bridge in the 1:1 town.
+
+    Historical bridges always do; fords and ferries never (Cologne had no bridge over the
+    Rhine before the 19th century); generic road crossings only over narrow rivers.
+    """
+    kind = str(crossing["id"]).split("_", 1)[0]
+    if kind == "bridge":
+        return True
+    if kind == "road":
+        return float(crossing["width_m"]) <= rules["site"]["road_bridge_max_width_m"]
+    return False
+
+
 def parish_count(settlement: dict, population: int, rules: dict) -> int:
     """Parish churches: one per ``parish_inhabitants`` in towns, one in a village or bourg."""
     if settlement["kind"] in ("city", "town"):
@@ -740,7 +754,11 @@ def build(
         rivers = fine_anchors.RiverIndex(map_dir, frame, names, cache=64)
     land = np.asarray(Image.open(map_dir / "land_mask.png"), dtype=np.float32) / 255.0
     roads = load_roads(map_dir)
-    crossings = [c for c in anchors["crossings"] if c.get("snapped")]
+    crossings = [
+        c
+        for c in anchors["crossings"]
+        if c.get("snapped") and town_bridge_allowed(c, rules)
+    ]
     crossing_px = (
         np.array([c["px"] for c in crossings]) if crossings else np.zeros((0, 2))
     )

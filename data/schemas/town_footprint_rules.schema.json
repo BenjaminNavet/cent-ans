@@ -134,9 +134,10 @@
         "irregularity": {"type": "number", "minimum": 0, "maximum": 0.5},
         "spur_share": {"type": "number", "minimum": 0, "maximum": 1},
         "both_banks_population": {"$ref": "#/$defs/positive"},
-        "river_search_factor": {"$ref": "#/$defs/positive"}
+        "river_search_factor": {"$ref": "#/$defs/positive"},
+        "road_bridge_max_width_m": {"$ref": "#/$defs/positive"}
       },
-      "required": ["bearings", "edge_slope", "edge_drop_m", "min_radius_factor", "max_radius_factor", "irregularity", "spur_share", "both_banks_population", "river_search_factor"],
+      "required": ["bearings", "edge_slope", "edge_drop_m", "min_radius_factor", "max_radius_factor", "irregularity", "spur_share", "both_banks_population", "river_search_factor", "road_bridge_max_width_m"],
       "additionalProperties": false
     },
     "faubourgs": {

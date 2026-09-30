@@ -193,6 +193,22 @@ def test_major_river_beats_nearby_brook() -> None:
     assert towns.pick_river_feature({3: (50.0, 60.0), 7: (450.0, 120.0)}) == 3
 
 
+def test_town_bridge_only_where_one_stood() -> None:
+    """No stone bridge for a ferry (Cologne, Rhine) nor a generic road over a wide river."""
+    rules = towns.load_rules()
+    assert towns.town_bridge_allowed(
+        {"id": "bridge_pont_de_blois", "width_m": 440.0}, rules
+    )
+    assert not towns.town_bridge_allowed(
+        {"id": "ford_bac_de_cologne", "width_m": 400.0}, rules
+    )
+    assert towns.town_bridge_allowed({"id": "road_1", "width_m": 30.0}, rules)
+    assert not towns.town_bridge_allowed({"id": "road_2", "width_m": 440.0}, rules)
+    data = json.loads((DATA / "map" / "towns_1340.json").read_text(encoding="utf-8"))
+    assert data["towns"]["set_cologne"]["bridge"] is None
+    assert data["towns"]["set_orleans"]["bridge"] is not None
+
+
 def test_tours_river_corridor() -> None:
     """RS-G: Tours and Orléans keep the Loire (not a brook) as their river corridor."""
     data = json.loads((DATA / "map" / "towns_1340.json").read_text(encoding="utf-8"))

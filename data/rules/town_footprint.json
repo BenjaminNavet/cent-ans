@@ -127,7 +127,8 @@
     "irregularity": 0.08,
     "spur_share": 0.55,
     "both_banks_population": 15000,
-    "river_search_factor": 2.5
+    "river_search_factor": 2.5,
+    "road_bridge_max_width_m": 80.0
   },
   "faubourgs": {
     "description": "Faubourgs le long des routes d'accès (part hors les murs, bourgs ouverts en entier) : longueur par route ∝ racine de la population hors les murs.",
