@@ -11,7 +11,8 @@ Steps (raw files in ``~/dev/cent-ans-raw/hb/rocks/``, run from the repository ro
   seed + 1 (one retry per object at most, kept as ``<id>_s<seed>``).
 * ``cleanup``: ``ga3_cleanup.py`` (Blender) on the retained TRELLIS mesh: longest horizontal
   side 1 m (the layer scales to ``size_m``), LOD0 / 1 / 2 = 100 / 50 / 15 % of
-  ``cleanup.lod0`` triangles, albedo ``cleanup.tex`` px, graded by ``exposure``.
+  ``cleanup.lod0`` triangles, albedo ``cleanup.tex`` px, graded by ``exposure``. Outcrops with
+  ``voxel_divs`` (spiky shapes on which the collapse stalls) go through ``hb_rock_lods.py``.
 
 Outputs ``game/assets/models/rocks/hb/<id>_lod{0,1,2}.glb``, consumed by
 ``game/scripts/map/rock_outcrops.gd``.
@@ -130,13 +131,18 @@ def cleanup_step(only: list[str]) -> None:
             print(name, "missing", source)
             continue
         stats = RAW / f"{name}_stats.json"
+        divs = entry.get("voxel_divs")
+        script = "hb_rock_lods.py" if divs else "ga3_cleanup.py"
         cmd = [
-            blender, "-b", "--factory-startup", "--python", str(REPO / "tools/blender_scripts/ga3_cleanup.py"), "--",
+            blender, "-b", "--factory-startup", "--python", str(REPO / "tools/blender_scripts" / script), "--",
             str(source), str(OUT_MODELS), name, "--length", str(clean["length"]), "--lod0", str(clean["lod0"]),
             "--tex", str(clean["tex"]), "--normal", "off", "--roughness", "off",
             "--strip-base", str(clean.get("strip_base", 0.0)), "--align",
             "--exposure", str(entry.get("exposure", 1.0)), "--stats", str(stats),
+            "--island-min", str(entry.get("island_min", 0.01)),
         ]  # fmt: skip
+        if divs:
+            cmd += ["--divs", ",".join(str(d) for d in divs)]
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         lines = [
             line

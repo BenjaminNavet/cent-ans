@@ -80,7 +80,7 @@ func _test_map() -> void:
 	_check(outcrops.models.size() == 6, "six models loaded (%d)" % outcrops.models.size())
 	for model: Dictionary in outcrops.models:
 		var tris: Array = model["triangles"]
-		_check(int(tris[0]) > int(tris[1]) and int(tris[1]) > int(tris[2]) and int(tris[0]) <= 450, "%s LOD triangles %s" % [model["id"], tris])
+		_check(int(tris[0]) > int(tris[1]) and int(tris[1]) > int(tris[2]) and int(tris[0]) <= 600, "%s LOD triangles %s" % [model["id"], tris])
 	print("hb5: biome source %s" % outcrops.biome_source)
 	var sites := {"Mont-Blanc": MONT_BLANC, "Ecrins": ECRINS, "Sancy": SANCY, "Cantal": CANTAL, "Beauce": BEAUCE, "Biscay": BISCAY}
 	var found := {}

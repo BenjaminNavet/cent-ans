@@ -74,6 +74,8 @@
           "label": {"type": "string"},
           "prompt": {"type": "string", "description": "Sujet de l'image, suivi de `style_suffix`."},
           "seed": {"type": "integer"},
+          "island_min": {"type": "number", "minimum": 0, "maximum": 0.2, "description": "`ga3_cleanup.py --island-min` : éboulis détachés retirés (sinon la décimation cale)."},
+          "voxel_divs": {"type": "array", "items": {"type": "integer", "minimum": 8, "maximum": 256}, "minItems": 3, "maxItems": 3, "description": "LOD par remaillage voxel (taille = plus grande dimension / div, un par LOD, `hb_rock_lods.py`) quand la décimation cale."},
           "exposure": {"type": "number", "exclusiveMinimum": 0, "description": "`ga3_cleanup.py --exposure` (albédo TRELLIS souvent sombre)."},
           "size_m": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 2, "maxItems": 2, "description": "Plus grand côté horizontal réel (m), tiré entre ces bornes."},
           "biomes": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 7}, "minItems": 1, "uniqueItems": true},

@@ -46,6 +46,8 @@
   "outcrops": [
     {
       "id": "limestone_cliff",
+      "voxel_divs": [64, 44, 24],
+      "island_min": 0.04,
       "along_contour": true,
       "label": "Falaise calcaire claire",
       "prompt": "A long pale cream-white limestone cliff escarpment segment, sheer vertical fluted faces with horizontal bedding lines and dark water streaks, flat grassy-free top edge, pale scree fan at its foot, longer than tall",
@@ -77,6 +79,8 @@
     },
     {
       "id": "stratified_ridge",
+      "voxel_divs": [64, 40, 22],
+      "island_min": 0.04,
       "along_contour": true,
       "label": "Barre rocheuse stratifiée",
       "prompt": "A long narrow tilted rock ridge of grey-brown stratified sedimentary layers dipping at 40 degrees, jagged serrated crest, rubble at the base, much longer than wide",
@@ -93,6 +97,8 @@
     },
     {
       "id": "alpine_spire",
+      "voxel_divs": [48, 32, 18],
+      "island_min": 0.04,
       "label": "Piton et aiguille alpine",
       "prompt": "A cluster of sharp dark grey granite alpine needles and spires rising from a steep rocky base, vertical cracks, small snow patches on ledges, taller than wide",
       "seed": 1337,
