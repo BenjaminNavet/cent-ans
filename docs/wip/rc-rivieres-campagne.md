@@ -46,3 +46,10 @@ Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano
 - 2026-09-30 : RC1 (batailles de passage en campagne : pronostic nommé, `setup.crossing`, IA).
 - 2026-09-30 : RC6 (11 rivières de plus infranchissables hors ponts et gués, 40 passages).
 - 2026-09-30 : RC2 (rivière large entre les lignes, un seul passage : pont de pierre, de bois, de bateaux = bois étroit, gué, bac = gué étroit ; flux dérivé `CROSSING_STREAM`, batailles sans passage inchangées ; `tests/rc2_crossing.rs`).
+- 2026-09-30 : vérification finale (conteneur cloud) : `cargo fmt`, `cargo clippy --workspace
+  --all-targets -D warnings` OK (2 lints clippy 1.94 corrigés hors RC) ; tests sim-campaign,
+  data-model, ai, sim-battle OK sauf les 3 `a_replay_recorded_before_cb*_still_reads`, déjà rouges
+  sur main d95f45b9 ; pytest 1251 OK (`test_settlement_graph.py` saturant la mémoire du conteneur,
+  non lancé) ; `smoke.gd` OK ; `rc3_river_labels_test.gd` OK (776 étiquettes).
+  Prochaines étapes sur le Mac : jugement visuel (`rc3_rivers_shot.gd`), génération des matières
+  d'eau (RC5, ≈ 0,31 $), `rivers-render --fine-min-order 5` (RC4).
