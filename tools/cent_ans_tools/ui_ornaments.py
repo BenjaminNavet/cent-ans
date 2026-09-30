@@ -2,7 +2,7 @@
 
 Pipeline (spec ``docs/superpowers/specs/2026-09-30-nb-nano-banana-interface-design.md``):
 each piece of ``game/assets/ui/illumination/kit.json`` is sent to the image model with
-two references, the style anchor (``data/art/style/anchor.png``) and the current
+two references, the style anchor (``data/art/style/anchor.jpg``) and the current
 procedural texture upscaled on a green background (shape guide). The raw answer is
 keyed out, fitted back to the piece geometry, its stretched bands made seamless, and
 written to ``game/assets/ui/illumination/nb/<id>.png`` where ``ui_illumination.build``
@@ -25,7 +25,7 @@ from cent_ans_tools import openrouter
 
 ROOT = Path(__file__).resolve().parents[2]
 ORNAMENTS_PATH = ROOT / "data" / "art" / "ui_ornaments.yaml"
-ANCHOR_PATH = ROOT / "data" / "art" / "style" / "anchor.png"
+ANCHOR_PATH = ROOT / "data" / "art" / "style" / "anchor.jpg"
 KIT_DIR = ROOT / "game" / "assets" / "ui" / "illumination"
 NB_DIR = KIT_DIR / "nb"
 RAW_DIR = ROOT / "tools" / "nb_raw" / "ui"

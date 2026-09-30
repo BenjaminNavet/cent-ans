@@ -58,7 +58,7 @@ transparence native : les pièces à détourer sont générées sur fond vert un
   dorure à la feuille, une frise, un coin, une lettrine sans lettre lisible, une figure en buste,
   un petit paysage ; aucun texte. 4 variantes (seeds consignées).
 - **Jugement** : planche contact des 4 variantes, choix du joueur.
-- **Livrables** : `data/art/style/anchor.png` (variante retenue, 2K) et
+- **Livrables** : `data/art/style/anchor.jpg` (variante retenue, 2K) et
   `data/art/style/anchor.yaml` (modèle, seed, prompt, sources) ; § 13 « Image d'ancrage »
   ajouté à la bible DA : tout nouvel outil de génération NB joint l'ancre en première image
   et dit dans le prompt « Image 1 is the style reference ».

@@ -23,9 +23,9 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
       Tests `test_openrouter.py`. Commit.
 
 ### NB-DA — Planche maîtresse (≤ 1 $, session principale)
-- [ ] 4-6 folios domaine public → `tools/nb_raw/sources/` + `SOURCES.md`.
-- [ ] 4 variantes NB2 2K 3:2 → planche contact → **jugement joueur**.
-- [ ] `data/art/style/anchor.png` + `anchor.yaml` ; bible DA § 13. Commit.
+- [x] 4-6 folios domaine public → `tools/nb_raw/sources/` + `SOURCES.md`.
+- [x] 4 variantes NB2 2K 3:2 → planche contact → **jugement joueur**.
+- [x] `data/art/style/anchor.jpg` (v3, 1536 px JPEG) + `anchor.yaml` ; bible DA § 13. Commit.
 
 ### NB0 — Sonde des modèles (≤ 1,5 $)
 - [ ] 3 sujets × {NB2, Lite, Pro} × {sans, avec ancre}, 1K ; grille `docs/research/nb0_models.png`.
@@ -40,3 +40,4 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
 
 ## Journal
 - 09-30 : spec approuvée, worktree créé.
+- 09-30 : NB-DA fait (0,40 $), v3 retenue par le joueur. Prochaine étape : NB0.
