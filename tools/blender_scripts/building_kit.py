@@ -63,6 +63,9 @@ ROOF_TINTS = {
     ],
 }
 WHITE = (1.0, 1.0, 1.0)
+# Lot TF (ADR 0105 addendum): surface of the panels of half-timbered walls (``style.frame``);
+# the real beams stay ``Timber`` geometry on top. Last layer of the ``Building`` atlas.
+FRAME_PANEL = "TimberFrame"
 
 
 @dataclass
@@ -565,6 +568,9 @@ def floor_walls(
     """Four walls of one storey on rectangle (x0, y0)-(x1, y1) at height ``z``."""
     corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
     stone = wall_mat in ("Rubble", "Ashlar")
+    if framed:
+        # Lot TF: daub panels of a half-timbered wall carry their own atlas layer.
+        wall_mat = FRAME_PANEL
     depth = 0.3 if stone else 0.14
     for i in range(4):
         a, b = corners[i], corners[(i + 1) % 4]
@@ -766,7 +772,7 @@ def house(
                     D,
                     z,
                     style.pitch,
-                    gwall,
+                    FRAME_PANEL if style.frame and gwall == "Plaster" else gwall,
                     sign,
                     color=style.stone_tint
                     if gwall in ("Rubble", "Ashlar")
