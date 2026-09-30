@@ -876,10 +876,11 @@ def export_mounted(objs, seat, rig, bones, level, path):
         me.transform(seat @ o.matrix_world)
         c = bpy.data.objects.new(o.name + "_rider", me)
         bpy.context.scene.collection.objects.link(c)
-        for g in o.vertex_groups:
-            c.vertex_groups.new(
-                name=g.name if g.name.startswith("R:") else "R:" + g.name
-            )
+        # Mesh copies carry the group names (Blender >= 3): add them only if missing.
+        if len(c.vertex_groups) == 0:
+            for g in o.vertex_groups:
+                c.vertex_groups.new(name=g.name)
+        cav._rename_groups(c, "R:")
         copies.append(c)
     tmp = path + ".rider"
     rider = bs.export_mesh(

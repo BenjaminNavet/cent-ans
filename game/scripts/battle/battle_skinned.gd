@@ -134,7 +134,7 @@ static var _corpse_shader: Shader = null
 static func corpse_shader(kind: String = "", variant: int = 0) -> Shader:
 	# GA3-L3 : une figurine générée garde son albédo.
 	if kind != "" and figure(kind, variant).has("ga3_albedo"):
-		return _variant(["BV2_CORPSE", "GA3_TEX"])
+		return _variant(_ga3_defines(figure(kind, variant), true))
 	# FG3 : avec les figurines fines, les cadavres gardent les cartes cuites (même variante,
 	# uniformes `fine_*` à leur valeur neutre pour une figurine sans atlas).
 	if fine_enabled() and fine_maps_ready():
@@ -368,7 +368,11 @@ static func _merge_ga3(figures: Dictionary) -> void:
 		entry["variants"] = int(g.get("variants", 1))
 		entry["ga3_albedo"] = GA3_DIR + str(g["ga3_albedo"])
 		entry["ga3_lum"] = g.get("ga3_lum", [0.2, 0.2])
-		entry.erase("atlas_layer")
+		# L3c : le cavalier généré monte le cheval fin exporté (`fine_horse`) : le cheval, son
+		# harnais et son caparaçon gardent leur atlas FG3 (source 2 robe, 1 caparaçon) ; les
+		# sommets du cavalier n'en lisent aucun (source 0).
+		if not bool(g.get("fine_horse", false)):
+			entry.erase("atlas_layer")
 
 
 ## GA3-L3 : variante `GA3_TEX` (cadavre compris) et albédo d'une figurine générée.
@@ -379,10 +383,20 @@ static func _setup_ga3(mat: ShaderMaterial, kind: String, variant: int) -> void:
 	if mat.shader != SHADER and not _variants.values().has(mat.shader):
 		return
 	var corpse := mat.shader != null and mat.shader.code.contains("#define BV2_CORPSE")
-	mat.shader = _variant(["BV2_CORPSE", "GA3_TEX"] if corpse else ["GA3_TEX"])
+	mat.shader = _variant(_ga3_defines(fig, corpse))
 	mat.set_shader_parameter("ga3_albedo", load(str(fig["ga3_albedo"])))
 	var lum: Array = fig.get("ga3_lum", [0.2, 0.2])
 	mat.set_shader_parameter("ga3_lum", Vector2(float(lum[0]), float(lum[1])))
+
+
+## Définitions du shader d'une figurine générée : `GA3_TEX`, précédée de `FG3_BAKED` quand
+## elle garde un atlas (cheval fin du chevalier, L3c) et de `BV2_CORPSE` pour un cadavre.
+static func _ga3_defines(fig: Dictionary, corpse: bool) -> Array:
+	var defines := ["BV2_CORPSE"] if corpse else []
+	if fig.has("atlas_layer") and fine_maps_ready():
+		defines.append("FG3_BAKED")
+	defines.append("GA3_TEX")
+	return defines
 
 
 ## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
@@ -623,8 +637,9 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 	mat.set_shader_parameter("variant_count", int(figure(kind, variant).get("variants", 1)))
 	mat.set_shader_parameter("size_jitter", 0.0 if kind == "cavalry" else 0.05)
 	mat.set_shader_parameter("sever_bones", sever_table(kind, variant))
-	_setup_ga3(mat, kind, variant)
+	# FG3 puis GA3 : une figurine générée qui garde un atlas (L3c) cumule les deux variantes.
 	_setup_fine_maps(mat, kind, variant)
+	_setup_ga3(mat, kind, variant)
 
 
 ## Configuration d'animation {set: [clips], mode, speed, cycle} d'un régiment dans l'état
