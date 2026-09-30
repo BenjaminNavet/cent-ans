@@ -436,6 +436,36 @@ def geo_sea_lanes() -> None:
         console.print(f"[yellow]{warning}[/yellow]")
 
 
+@geo_app.command("lakes")
+def geo_lakes(
+    min_area_px: int = typer.Option(
+        30, "--min-area-px", help="Surface minimale d'un lac (px carte)"
+    ),
+    simplify_px: float = typer.Option(
+        0.6, "--simplify-px", help="Tolérance de simplification du contour (px)"
+    ),
+    natural_earth: str = typer.Option(
+        "", "--natural-earth", help="ne_10m_lakes.shp (noms), défaut : tools/geo/raw"
+    ),
+) -> None:
+    """Contours et niveaux des lacs : data/map/lakes.json (lot SS3)."""
+    from cent_ans_tools.geo import lakes
+
+    params = lakes.LakesParams(min_area_px=min_area_px, simplify_px=simplify_px)
+    result = lakes.build(
+        params=params,
+        natural_earth=Path(natural_earth)
+        if natural_earth
+        else lakes.NATURAL_EARTH_LAKES,
+    )
+    _print_sizes("Lacs", [result.output])
+    console.print(
+        f"{result.lakes} lacs ({result.named} nommés), {result.vertices} sommets, "
+        f"{result.below_sea} sous le niveau de la mer et {result.not_flat} non plats ignorés, "
+        f"retenues exclues : {', '.join(result.excluded_reservoirs) or 'aucune'}"
+    )
+
+
 @geo_app.command("detail-dem")
 def geo_detail_dem(
     zones: str = typer.Option(
