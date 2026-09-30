@@ -18,8 +18,10 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - 09-30 : spec écrite, worktree créé.
 
 ## SR1 — en cours (agent)
-- État : squelette ; chaîne `source: ambientcg:<Id>` à écrire dans `material_gen.py`.
-- Prochaine étape : téléchargement + traitement des 8 scans, `scan_m`/`tile_m`, shader, tests.
+- État : chaîne `source: ambientcg` faite, 8 scans en cache, tableaux reconstruits
+  (`cent-ans assets materials --out <scratch> --scans --build --layers-sheet docs/img/sr/sr1_layers.jpg`),
+  shader `GA1_TILE_SIZE` + plate ga_mix 0,6, tests pytest verts.
+- Prochaine étape : SOURCE.md/CREDITS.md, tests Godot (build + import + ga1_maps_test, smoke).
 
 ## SR3b — en cours (agent)
 - État : écarts écrits (`docs/research/sr3b-ecarts.md`) ; retenus 1-6 (camail sous chapel,

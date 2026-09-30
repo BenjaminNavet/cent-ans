@@ -193,7 +193,9 @@ const int GA1_TILE_SKIN = 8;
 const int GA1_TILE_HAIR = 9;
 const int GA1_TILE_COAT_LIGHT = 10;
 const int GA1_TILE_COAT_DARK = 11;
-const float GA1_TILE_SIZE[12] = float[](0.1, 0.05, 0.06, 0.16, 0.1, 0.12, 0.16, 0.3, 0.06, 0.05, 0.1, 0.1);
+// SR1 : couches 0-7 = scans ambientCG CC0 à l'échelle physique (mailles ~9 mm, fils de 0,6-2 mm,
+// piqûres de 4 cm, veinage de planche) ; tests tools/tests/test_material_gen.py, test_sr1_scans.py.
+const float GA1_TILE_SIZE[12] = float[](0.15, 0.13, 0.16, 0.32, 0.51, 0.3, 0.3, 0.8, 0.06, 0.05, 0.1, 0.1);
 // Teints (multipliés par la couleur du sommet) : pâle, clair rosé, hâlé, olivâtre, buriné,
 // brun (bible : variation par soldat).
 const vec3 FG3_SKIN[6] = vec3[](
@@ -805,7 +807,8 @@ void fragment() {
 					ga_mix = 1.0;
 				} else if (code == C_PLATE || code == C_TRIM) {
 					gl = GA1_TILE_PLATE;
-					ga_mix = code == C_PLATE ? 0.45 : 0.3;
+					// SR1 : 0,6 (GA1 0,45) pour que les taches et traces de lime du scan se voient.
+					ga_mix = code == C_PLATE ? 0.6 : 0.3;
 				} else if (code == C_LIVERY || code == C_ARMS) {
 					gl = GA1_TILE_FUSTIAN;
 					ga_mix = 0.6;
