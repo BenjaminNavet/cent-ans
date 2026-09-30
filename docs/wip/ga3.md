@@ -199,6 +199,11 @@ avec la texture d'os du jeu). 0,16 $ (une génération `trellis/multi`).
   cavalier sur `R:`, cheval sans UV d'albédo ; témoin `cavalry_1` ; deux modes), pytest
   manifeste (+ cheval identique au fin), smoke, an1a, an1b, fg3_maps, sr2, nt7, nt10, b1,
   pb3c, hud : OK.
+- **Nappe blanche en `c_charge`** (planche) : c'est la flamme de la lance de la figurine
+  **fine** actuelle (placée à +X, lance abaissée vers l'avant-gauche), rendue blanche faute de
+  livrée dans les rendus. Vérifié numériquement : triangles du cheval, de l'écu et de la lance
+  (flamme 0,261 m², code livrée) identiques dans les deux LOD0, aucun triangle du GA3 sous
+  0,6 m hors sabots/jambes, aucun triangle étiré en `c_charge` (0 ; 0,3 ; 0,5). Pas de correctif.
 - **Écarts** : planche regardée une fois, avant le correctif des groupes (rendu d'après non
   regardé, budget de 3 images : le contrôle d'après est numérique) ; verrou Godot
   `/tmp/ga3-godot.lock` non pris pendant les tests ; pas de capture en bataille.
