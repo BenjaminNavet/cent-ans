@@ -58,6 +58,9 @@ func _run() -> void:
 	map = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
 	root.add_child(map)
 	await _wait(10)
+	var tutorial := map.find_child("Tutorial", true, false) as CanvasItem
+	if tutorial != null:
+		tutorial.hide()  # Q7 : le panneau du didacticiel n'est pas l'objet de ce test
 	for config in CONFIGS:
 		root.size = config[0]
 		settings.call("set_value", "interface/ui_size", config[1], false)
@@ -91,33 +94,44 @@ func _check_reachable(button: Control, what: String) -> void:
 
 
 func _test_send_treaty_reachable(label: String) -> void:
-	var controller: DiplomacyController = map.diplomacy
-	controller.open_panel("fac_albret")
+	await _test_send_treaty_for(label, "fac_albret", "Accord commercial")
+	# Q7 : ennemi en guerre, trêve refusée — longue liste de raisons sous la chance d'acceptation.
+	await _test_send_treaty_for(label, "fac_england", "Trêve de deux ans")
+
+
+func _test_send_treaty_for(label: String, target: String, clause: String) -> void:
+	label = "%s %s" % [label, target]
+	var controller: Node = map.diplomacy  # Q7 : non typé (compilé avant les autoloads)
+	controller.open_panel(target)
 	await _wait(10)
-	var panel: DiplomacyPanel = controller.panel
-	if not _check(str(panel.get("_selected")) == "fac_albret", "%s: fac_albret not selected" % label):
+	var panel: Control = controller.panel
+	if not _check(str(panel.get("_selected")) == target, "%s: %s not selected" % [label, target]):
 		return
 	var clause_menu: MenuButton = panel.get("_clause_menu")
 	panel.call("_fill_menu", clause_menu)
 	var popup := clause_menu.get_popup()
 	var picked := false
 	for index in popup.item_count:
-		if popup.get_item_text(index) == "Accord commercial":
+		if popup.get_item_text(index) == clause:
 			popup.id_pressed.emit(popup.get_item_id(index))
 			picked = true
-	_check(picked, "%s: « Accord commercial » clause missing" % label)
+	_check(picked, "%s: « %s » clause missing" % [label, clause])
 	await _wait(5)
 	panel.call("_ask_counter")
 	await _wait(10)
 	var send := panel.find_child("SendTreaty", true, false) as Button
 	if _check(send != null and send.is_visible_in_tree(), "%s: SendTreaty missing or hidden" % label):
 		await _check_reachable(send, "%s: « Proposer le traité »" % label)
+	for text in ["Que faudrait-il ?", "Effacer"]:
+		for button in panel.find_children("*", "Button", true, false):
+			if (button as Button).text == text and (button as Button).is_visible_in_tree():
+				await _check_reachable(button, "%s: « %s »" % [label, text])
 	panel.hide()
 	await _wait(4)
 
 
 func _test_report_above_diplomacy(label: String) -> void:
-	var controller: DiplomacyController = map.diplomacy
+	var controller: Node = map.diplomacy  # Q7 : non typé (compilé avant les autoloads)
 	var report: SeasonReport = map.flow.season_report
 	# Même image, même ordre que `campaign_map` après `end_turn` : diplomatie puis rapport.
 	controller.open_panel()
