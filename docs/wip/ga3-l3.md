@@ -42,9 +42,18 @@ Contexte : `docs/wip/ga3.md` (S2, S3, § L3a), ADR 0140 § figurines.
 - [x] 2. Référence NB2 + 3D (trellis-2 d'abord, puis trellis/multi et trellis sur consigne)
 - [x] 3. `ga3_figures.py` : voxel + cuisson, rig, LOD0/1/2, masque, export CAM1 + albédo + manifeste
 - [x] 4. Jeu : fusion du manifeste, variante `GA3_TEX`, `--no-ga3-fig`
-- [ ] 5. Tests (`ga3_l3_figures_test.gd` OK dans les deux modes ; smoke, fg3/sr/fk/nt en cours),
-      capture Godot en bataille (1)
-- [ ] 6. Docs : `ga3.md` § L3a, ADR 0140 § figurines ; verdict extension
+- [x] 5. Tests : `ga3_l3_figures_test.gd` (deux modes), smoke, fg3_maps et sr2 (adaptés,
+      deux modes), an1a, an1b, fk2, fk_folk, ga1_maps, nt7, nt10, nt12 OK ; capture Godot en
+      bataille (1, `--camera=572,595,13,205 --shot-at=4 --no-hud`, 1280×720)
+- [x] 6. Docs : `ga3.md` § L3a, ADR 0140 § figurines ; verdict extension (go, L3b)
+
+## Suite (L3b)
+- Unités à pied : ajouter une entrée `UNITS` (figure, `top`, `equipment`, et `METAL_Z` par unité
+  pour le harnois) et un prompt `UNITS` dans `ga3_fal_figure.py` ; `ga3_figures.py` exporte une
+  figure par appel (le manifeste est complété, pas écrasé).
+- `equipment()` ne sait construire que des armes de `battle_fine_weapons` sans kwargs : étendre
+  pour arbalète + carreaux, pavois dans le dos (`hide_pavise`), armes d'hast.
+- Cavalier : rig `cavalry` (os `R:`), alias `cavalry_alias`, cheval fin FG4 gardé.
 
 ## Journal
 - 30/09 : planche NB2 A-pose correcte en face et dos (profil : mains sur le carquois). trellis-2 :
@@ -52,3 +61,5 @@ Contexte : `docs/wip/ga3.md` (S2, S3, § L3a), ADR 0140 § figurines.
   (planche) : les trois modèles se valent à distance de jeu ; multi face+dos garde un dos
   cohérent (le plus vu en bataille), visage un peu plus sombre ; trellis seul : visage plus net,
   dos inventé ; trellis-2 : pas meilleur une fois remaillé à 11,5 k. Livré : multi.
+- 30/09 : capture en bataille : archers texturés (jaques de livrée rouge avec crasse, chapels,
+  arcs et cordes, chausses variées) ; cadrage à côté du régiment, jugement sur le bord.

@@ -107,6 +107,28 @@ A-pose mains vides (0,30 $ + ≈ 0,08 $ d'image, ≈ 2,30 $ les 6), liés à not
 pour garder nos clips et nos 40 os de doigts. Le rig/anim Meshy (+0,32 $) n'est utile que si l'on
 abandonne nos clips Quaternius.
 
+## L3a — figurine pilote longbowman (30/09)
+Chaîne et choix : `docs/wip/ga3-l3.md` et ADR 0140 § « Figurines de bataille ». Brutes :
+`~/dev/cent-ans-raw/ga3/l3/longbowman/`. Planche locale `docs/img/ga3/l3a_archer.jpg` (référence
+A-pose | riggée liaison, marche, tir, dos à côté d'`archer_0` fin | marche des trois générateurs).
+- Référence : `nano-banana-2/edit` 2K depuis `sr3/longbowman.png` : face et dos en A-pose
+  propres, mains vides ; le profil tient le carquois (écarté). Jaque vert clé (livrée), chausses
+  bleu clé (étoffe) → segmentation 35 % / 17 % de la texture.
+- 3D : `trellis/multi` face + dos livré (consigne « moins cher ») ; `trellis` vue unique et
+  `trellis-2` (parti avant la consigne) en comparaison. Les trois se valent une fois ramenés à
+  11,5 k : multi garde un dos cohérent ; TRELLIS 2 n'apporte rien au format du jeu.
+- Maillage : feuilles TRELLIS ouvertes et doublées (heat en échec, collapse calé) → solidify 12 mm
+  + voxel 8 mm + collapse + cuisson. LOD 11 800 / 1 350 / 260 tri (arme comprise), heat 100 %.
+- Jeu : rendu texturé en bataille (jaques de livrée rouge avec crasse, chapels, arcs, chausses
+  variées), vu de dos et de trois-quarts ; `--no-ga3-fig` rend `archer_0` fin. Tests
+  `ga3_l3_figures_test.gd` (deux modes), smoke, fg3_maps et sr2 (adaptés : `archer_0` n'a plus
+  d'atlas), an1a, an1b, fk2, fk_folk, ga1_maps, nt7, nt10, nt12 OK.
+- Écarts : capture Godot en bataille cadrée à côté de la troupe (caméra `--camera=572,595,13,205`,
+  régiment décalé à gauche), jugement sur le bord de l'image ; une variante par figurine (plus de
+  visages ni de couvre-chefs alternés) ; pas de FG3/SR2 sur la figurine générée.
+- **Verdict** : go pour étendre aux 4 unités à pied (≈ 0,65 $) ; chevalier : générer le cavalier
+  seul sur le cheval fin.
+
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
 - 30/09 : **S1 fait** (≈ 10 min de bout en bout, 0,05 $). Image `fal-ai/flux/dev` 1024² (0,026 $,
@@ -249,6 +271,10 @@ abandonne nos clips Quaternius.
       `--no-ga3-veg`, `--no-ga3-near`. Voir journal et `docs/wip/ga3-l2.md`.
 - [x] L1b reprise de 3 objets L1 (0,17 $, un essai chacun) : maison (chaume sombre, lisse, épais), puits
       (toit en bardeaux de chêne sombres), bélier (planches + peaux brunes unies, vue unique). Voir journal.
-- [ ] L3 figurines : APRÈS fusion de `feat/sr`. Références A-pose mains vides → trellis-2 → chaîne S2
-      (notre squelette, nos clips, armes procédurales), masque de livrée. ≈ 2,50 $.
+- [x] L3a figurine pilote longbowman (`archer_0`, 0,48 $, ADR 0140 § figurines ; note
+      `docs/wip/ga3-l3.md`) : planche NB2 A-pose à couleurs clés → `trellis/multi` face + dos →
+      `ga3_figures.py` (voxel + cuisson, rig S2, LOD, livrée) → `battle_ga3/`, `GA3_TEX`,
+      `--no-ga3-fig`. Voir « L3a ».
+- [ ] L3b : `man_at_arms`, `crossbowman`, `sergeant`, `militia` (≈ 0,16 $ l'unité), puis cavalier
+      du chevalier sur le cheval fin (voir ADR 0140 § figurines, « Extension »).
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.

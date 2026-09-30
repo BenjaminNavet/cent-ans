@@ -86,3 +86,57 @@ générées pour les arbres (voie A/A'), TRELLIS seulement pour les rochers.
   variante tirée par cellule, niveau de détail commun selon la distance caméra (12 / 24).
 - Outils : `tools/blender_scripts/ga3_vegetation_l2.py` (`fal`, `atlas`, `rocks`), pytest
   `tools/tests/test_ga3_vegetation_l2.py` ; test Godot `ga3_l2_vegetation_test.gd`. 0,47 $.
+
+## Figurines de bataille (GA3-L3a, 30/09)
+
+Suite des sondes S2 (TRELLIS multi-vue : faisable, no-go en l'état) et S3 (comparatif Tripo /
+Meshy / TRELLIS 2). Unité pilote : le longbowman (`archer_0`), de bout en bout jusqu'en bataille.
+
+- **Consigne du joueur : le moins cher.** Modèle livré : `fal-ai/trellis/multi` (0,02 $) sur les
+  vues A-pose **face + dos** ; pas de TRELLIS 2 ni Meshy. Un appel TRELLIS 2 parti avant la
+  consigne a servi de comparaison : une fois ramené au budget de triangles par la même chaîne, il
+  n'apporte rien de visible à distance de jeu ; TRELLIS vue unique donne un visage plus net mais
+  un dos inventé, le multi-vue un dos cohérent (le plus vu en bataille). Coût du lot : 0,48 $
+  (dont 0,30 $ de comparaison TRELLIS 2) ; coût d'une unité avec la chaîne livrée ≈ 0,16 $.
+- **Référence** : `nano-banana-2/edit` (2K, 0,12 $) depuis la planche SR3 de l'unité : même homme,
+  A-pose, mains vides, rien de tenu, trois vues, et **zones teintables peintes en couleurs clés**
+  (vêtement de livrée vert saturé, chausses bleu saturé), segmentées par teinte sur l'albédo
+  généré (fermeture morphologique : les taches de crasse restent dans la zone). Détourage `bria`
+  de la planche, découpe des vues par colonnes d'alpha (`tools/experiments/ga3_fal_figure.py`).
+  Le profil généré tient souvent un objet : il est écarté du multi-vue.
+- **Maillage** (`tools/blender_scripts/ga3_figures.py`) : les surfaces TRELLIS sont des feuilles
+  ouvertes, doublées, non manifold : la chaleur des os échoue sur tous les os et la décimation
+  « collapse » cale. D'où : solidify 12 mm, remaillage voxel 8 mm (coque extérieure gardée),
+  collapse au plafond des fantassins fins, UV intelligente, **albédo et classes cuits** (Cycles,
+  sélection vers active) depuis la source étalonnée (niveaux 0,5 %), poids « heat » sur rig de
+  segments dans la pose du maillage puis retour en pose de liaison (chaîne S2), LOD1/LOD2 par
+  collapse du LOD0 lié (poids et UV gardés, une texture pour les trois). Plafonds : 11 900 /
+  1 350 / 260 triangles, arme comprise ; albédo 1024² (BPTC, ≈ 1,5 Mo PNG).
+- **Armes** : procédurales, celles de la figurine fine remplacée (`battle_fine_weapons.longbow` :
+  branches sur `Wrist.L`, corde sur `Nock`, flèche sur `Arrow`), UV décalées en u < 0 (non
+  texturées), masque « tenu » (lâchées en déroute).
+- **Livrée** : codes de matière par face tirés des classes cuites (`C_LIVERY`, `C_CLOTH`,
+  `C_PLATE` sur le casque au-dessus de 1,5 m, `C_EXACT` ailleurs) ; alpha de l'albédo = zone
+  teintable. Variante `GA3_TEX` du shader skinné : livrée, armoiries de buste et croix du commun
+  du jeu (DA1, part de livrée par soldat) ou couleur naturelle par soldat pour les chausses,
+  multipliées par la luminance de la texture sur sa moyenne (`ga3_lum`) ; ailleurs l'albédo
+  généré. Pas de FG3 (atlas normal/AO) ni d'usure SR2 sur ces figurines : la texture porte sa crasse.
+- **Branchement** : manifeste `game/assets/models/battle_ga3/manifest.json` fusionné par
+  `BattleSkinned._merge_ga3` par-dessus l'entrée fine (même rig, mêmes clips, même `CAM1`, même
+  chargement ; style, noblesse, prises gardés ; `atlas_layer` retiré ; 1 variante). Cadavres,
+  imposteurs lointains, figurines de campagne et passants suivent (même matériau).
+  `--no-ga3-fig` (après `--`) rend la figurine fine. Aucune règle de jeu ne change.
+- **Limites** : une seule variante (plus de visages ni de couvre-chefs alternés : la variété vient
+  de la part de livrée et des couleurs de chausses) ; mains en moufle (pas d'os de doigts dans le
+  rig exporté, la prise de l'arc reste approchée) ; jupe du jaque liée aux cuisses (léger
+  étirement à la marche) ; figurine gonflée de ≈ 6 mm (solidify) ; pas de normal map (le relief
+  voxel à 8 mm lisse les piqûres, la texture les porte) ; éclairage de l'image en partie cuit.
+- **Extension** : go pour les quatre autres unités à pied (`man_at_arms`, `crossbowman`,
+  `sergeant`, `militia`), même chaîne, ≈ 0,16 $ l'unité, une entrée `UNITS` chacune (figure
+  remplacée, hauteur du casque, armes procédurales de la recette fine : épée/lance, arbalète et
+  pavois dans le dos, guisarme, goedendag) ; pour l'homme d'armes, la classe acier doit couvrir
+  tout le harnois (`METAL_Z` par unité). Chevalier monté : ne générer que le **cavalier** (A-pose
+  à pied, lié aux os `R:` du rig `cavalry`, la pose assise étant la pose de liaison, alias
+  `cavalry_alias`) et garder le cheval fin FG4 avec caparaçon et selle procéduraux ; un cheval
+  TRELLIS demanderait un ajustement de squelette quadrupède (pas de repères automatiques) et
+  perdrait la robe teintée par cheval.
