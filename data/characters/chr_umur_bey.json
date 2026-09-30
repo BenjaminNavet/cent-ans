@@ -16,8 +16,10 @@
     "place": "Birgi"
   },
   "death": {
-    "value": "1348-01-17",
-    "place": "Smyrne"
+    "value": "1348",
+    "uncertain": true,
+    "place": "Smyrne",
+    "note": "Tué au printemps 1348 devant la citadelle du port de Smyrne (Lemerle)."
   },
   "historical": true,
   "titles": [
@@ -26,7 +28,14 @@
       "from": {
         "value": "1329"
       },
-      "note": "Maître de la citadelle de Smyrne depuis 1329 ; bey d'Aydın depuis la mort de son père Mehmed (1334), bien que cadet de Hızır, qui tient Ayasoluk."
+      "note": "Maître de la citadelle de Smyrne depuis 1329."
+    },
+    {
+      "title": "Bey d'Aydın",
+      "from": {
+        "value": "1334"
+      },
+      "note": "Chef du beylik à la mort de son père Mehmed (1334), bien que cadet de Hızır, qui tient Ayasoluk (Éphèse)."
     }
   ],
   "skills": {

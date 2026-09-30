@@ -12,6 +12,7 @@
     "primary_color": "#F2C230",
     "secondary_color": "#B0182B"
   },
+  "de_jure_liege": "tit_guyenne",
   "de_jure_provinces": [
     "prov_bearn"
   ],
@@ -50,7 +51,7 @@
       }
     }
   ],
-  "description": "Vicomté relevant en 1337 du duc d'Aquitaine (le roi d'Angleterre) ; Gaston Fébus la déclarera tenue « de Dieu seul » en 1347. Titre sans suzerain de jure dans le jeu, par anticipation de cette souveraineté (rang de comté par convention de schéma).",
+  "description": "Vicomté relevant en 1337 du duc d'Aquitaine (le roi d'Angleterre), d'où son rattachement de jure au duché de Guyenne ; Gaston Fébus la déclarera tenue « de Dieu seul » en 1347 (rang de comté par convention de schéma).",
   "sources": [
     "Vicomté de Béarn",
     "Gaston II de Foix-Béarn"

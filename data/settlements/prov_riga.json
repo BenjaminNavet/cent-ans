@@ -32,7 +32,7 @@
   {
     "id": "set_dunamunde",
     "province": "prov_riga",
-    "kind": "abbey",
+    "kind": "castle",
     "name": {
       "display": "Dünamünde",
       "local": "Dünamünde",
@@ -46,7 +46,7 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_abbey",
+      "bld_castle",
       "bld_port"
     ],
     "port": true,

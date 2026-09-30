@@ -1,0 +1,42 @@
+{
+  "id": "chr_domhnall_mac_domhnaill_mac_murchada",
+  "name": {
+    "display": "Domhnall mac Domhnaill Mac Murchada",
+    "local": "Domhnall mac Domhnaill Mac Murchadha",
+    "local_language": "gaélique irlandais"
+  },
+  "sex": "male",
+  "house": "Mac Murchada",
+  "faction": "fac_leinster",
+  "role": "heir",
+  "birth": {
+    "value": "1315",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1347-07-05",
+    "uncertain": true,
+    "note": "Assassiné, probablement le 5 juillet 1347, selon le Dictionary of Irish Biography."
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_brave",
+    "trait_ambitious"
+  ],
+  "piety": 35,
+  "family": {
+    "father": "chr_donnchadh_mac_murchada"
+  },
+  "starting_location": "prov_leinster",
+  "status": "at_court",
+  "description": "Fils de Domhnall mac Airt, roi de Leinster, à qui il succède vers 1338 ; il reprend la politique paternelle, entre guerre et accommodements avec l'administration de Dublin, jusqu'à son assassinat en 1347.",
+  "sources": [
+    "MacMurrough (Mac Murchadha), Domhnall (DIB)",
+    "Royaume de Leinster"
+  ]
+}
