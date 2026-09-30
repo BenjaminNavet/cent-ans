@@ -116,6 +116,7 @@ GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
 | 2026-09-30 | fal.ai | GA3-S2 : longbowman image→3D (1 × fal-ai/trellis/multi, 3 vues découpées de `sr3/longbowman.png`, 0,02 $) | 0,02 $ | 0,02 $ | 0,66 $ |
 | 2026-09-30 | fal.ai | GA3-S4 : maison v2 (1 × fal-ai/flux-2 1024² 0,012 $ + 1 × fal-ai/bria/background/remove 0,018 $ + 1 × fal-ai/trellis 0,02 $ + 1 × fal-ai/trellis-2 1024 0,30 $) | 0,35 $ | 0,35 $ | 1,01 $ |
 | 2026-09-30 | fal.ai | GA3-S5 : végétation campagne (5 × fal-ai/flux-2 1024² 0,012 $/MP + 5 × fal-ai/bria/background/remove 0,018 $ + 3 × fal-ai/trellis 0,02 $ : chêne, buisson, rocher) | 0,21 $ | 0,21 $ | 1,22 $ |
+| 2026-09-30 | fal.ai | GA3-S3 : comparatif figurine longbowman (1 × tripo3d/h3.1/multiview-to-3d texturé standard + géométrie détaillée 0,50 $ ; 1 × meshy/v7.1/multi-image-to-3d texturé + rig + anim 1,52 $ ; 1 × fal-ai/trellis-2 1024 0,30 $ ; 1 appel Tripo refusé en validation 422, non facturé) — prix catalogue, l'API d'usage refuse la clé | 2,32 $ | 2,32 $ | 3,54 $ |
 
 ## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
 

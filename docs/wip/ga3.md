@@ -15,10 +15,10 @@ Brutes (hors dépôt) : `~/dev/cent-ans-raw/ga3/` ; références figurines : `~/
 - [x] S2 figurine : longbowman (`sr3/longbowman.png`, vues multiples) → TRELLIS → nettoyage →
       rattachement au squelette de bataille existant (poids automatiques) → rendu marche + tir ;
       planche `docs/img/ga3/s2_archer.jpg` ; verdict technique (déformations, triangles, coût).
-- [ ] S3 comparatif générateurs figurine (≤ 3 $) : Tripo H3.1 multivue / Meshy 7.1 multi-image
+- [x] S3 comparatif générateurs figurine (2,32 $) : Tripo H3.1 multivue / Meshy 7.1 multi-image
       (rig + anim) / TRELLIS 2 1024 sur les vues de `sr3/longbowman.png` → planche
       `docs/img/ga3/s3_compare.jpg` (`tools/blender_scripts/ga3_compare_render.py`). Script fal hors
-      dépôt `~/dev/cent-ans-raw/ga3/s3/fal_s3.py`, brutes au même endroit. **En cours** : 3 appels lancés.
+      dépôt `~/dev/cent-ans-raw/ga3/s3/fal_s3.py`, brutes au même endroit. Voir « S3 comparatif ».
 - [x] S4 décor v2 : prompt corrigé (flux-2) → détourage bria → `trellis` et `trellis-2` sur la même
       image → `ga3_cleanup.py` étendu → `props_ga/ga3_house2_t{1,2}_lod*.glb` ; planche
       `docs/img/ga3/s4_house_v2.jpg` (locale, `docs/img/` ignoré sur main). Voir « S4 décor v2 ».
@@ -62,6 +62,50 @@ Brutes (prompt, src, cut, glb, json) : `~/dev/cent-ans-raw/ga3/s4/`.
 - [x] S5 végétation campagne (chêne + herbe/buisson + rocher) : voie A textures vs voie B TRELLIS →
       `tools/blender_scripts/ga3_vegetation.py`, candidats `game/assets/models/vegetation/ga3/` (rien de branché),
       planche `docs/img/ga3/s5_vegetation.jpg` (locale, `docs/img/` ignoré sur main). Verdict ci-dessous.
+
+## S3 comparatif (30/09)
+Entrée : les 3 découpes 848² de S2 (face, 3/4 droit, dos ; fond gris, non détourées). Un appel par
+modèle, prix catalogue (l'API d'usage refuse la clé) : total **2,32 $**. Planche 1600 × 960, deux rangs
+(3/4 face, 3/4 dos), même caméra/soleil EEVEE, chaque modèle mis à 1,80 m ; stats `s3/stats.json`.
+
+| Modèle | Coût | Durée | Triangles | Textures | Arc | Fidélité |
+|---|---|---|---|---|---|---|
+| Tripo H3.1 multivue (tex. standard + géom. détaillée, PBR) | 0,50 $ | 166 s | **1 930 752** (sans `face_limit`) | 2048² albédo + ORM + **normal** | fusionné ; **deux arcs** (3/4 lu comme profil) | tenue, casque, carquois fidèles ; détail fin ; orientation −90° |
+| Meshy 7.1 multi-image (tex. PBR, `a-pose`, rig 1,75 m, anim 224 Archery_Shot) | 1,52 $ | 419 s | 31 148 | modèle statique : 2048² albédo + métal + rugosité + **normal** ; rigué : albédo seul | **arc mis en bandoulière dans le dos** (A-pose), fusionné | propre, couleurs fidèles, mains en moufle, visage correct |
+| TRELLIS 2 1024 (vue de face, `decimation_target` 30 000) | 0,30 $ | 58 s | 29 290 | 2048² albédo + métal + rugosité, pas de normal | tenu en main, fusionné | la plus fidèle de face ; dos lissé/plus pauvre |
+
+Meshy : `model_glb` (statique PBR), `rigged_character_glb`, `animation_glb` (Archery_Shot, 120 images),
+et **gratuits dans le prix** `basic_animations` marche (`walking_man`, 25 images) + course, en glb/fbx.
+Défauts du glb rigué : métallique constant 1,0 et albédo branché aussi en émission (rendu chromé) — le
+script les annule (`--unmetal`) ; les cartes PBR du modèle statique ne sont pas reportées sur le rigué
+(même UV a priori, à recâbler). Squelette : **24 os** `Hips, Spine02 → Spine01 → Spine, neck, Head,
+head_end, headfront, {Left,Right}{Shoulder, Arm, ForeArm, Hand, UpLeg, Leg, Foot, ToeBase}` — pas de
+doigts. Le nôtre (`battle_fine.load_fine_human`, Quaternius ajusté par `battle_fine_rig.py`) : 62 os
+dont 40 de doigts, `Root/Body`, pieds `Foot.*` enfants de `Root` à translations clés (IK) + pôles `PT.*`.
+Correspondance : Hips→Hips, Spine02→Abdomen, Spine01→Torso, Spine→Chest, neck→Neck, Head→Head,
+Shoulder/Arm/ForeArm/Hand→Shoulder/UpperArm/LowerArm/Wrist, UpLeg/Leg→UpperLeg/LowerLeg,
+Foot→Foot (IK chez nous), ToeBase et doigts sans équivalent. **Retargeting faisable** (1:1 sur le
+tronc et les membres) à deux conditions : cuire l'IK des jambes de nos clips en FK avant la copie, et
+compenser la différence de pose de repos (A-pose Meshy / pose de liaison Quaternius) par rotations
+en espace monde puis cuisson. Les doigts sont perdus (prise de l'arc et décoche en moufle).
+Déformation de l'anim Meshy (vue sur 2 images) : bras levés propres, léger étirement de texture au
+haut du torse/épaules, jupe du gambison qui suit les cuisses ; mais le tir se fait **mains vides**
+(l'arc reste dans le dos).
+Constat utile : la sortie `a-pose` de Meshy remplit d'office la condition de go de S2 (« A-pose mains
+vides ») ; son maillage statique peut aussi être lié à *notre* squelette par la chaîne S2
+(`fit_rig_to_mesh` + poids auto) sans retargeting, l'arc du jeu restant procédural.
+Tripo : l'emplacement « gauche » refuse une chaîne vide (422) ; le 3/4 y a été placé tel quel, d'où
+l'arc dédoublé. À refaire avec de vrais profils (face/gauche/dos/droite) si Tripo est retenu ; 1,9 M
+triangles imposent `face_limit` (≈ 20-30 k) ou une décimation.
+
+**Verdict prix/qualité pour 6 unités animées** : TRELLIS 2 (0,30 $) donne la meilleure fidélité mais
+S2 a montré le coût du nettoyage (objets tenus) ; Meshy (1,52 $, ≈ 9 $ les 6) livre directement un
+personnage propre en A-pose, PBR, rigué avec marche/course/1 anim, mais son squelette n'est pas le
+nôtre. Rapport qualité-prix recommandé : **Meshy sans rig ni anim, texturé PBR en `a-pose`** (1,20 $,
+7,20 $ les 6 — au-dessus du reliquat GA3) ou, moins cher, TRELLIS 2 sur une référence regénérée en
+A-pose mains vides (0,30 $ + ≈ 0,08 $ d'image, ≈ 2,30 $ les 6), liés à notre squelette par la chaîne S2
+pour garder nos clips et nos 40 os de doigts. Le rig/anim Meshy (+0,32 $) n'est utile que si l'on
+abandonne nos clips Quaternius.
 
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
@@ -148,4 +192,7 @@ Brutes (prompt, src, cut, glb, json) : `~/dev/cent-ans-raw/ga3/s4/`.
     8 azimuts via nano-banana-2/edit), normal map plate ou dérivée de la luminance, et décider si les
     cartes `_mid` restent en deçà de 37-45 m. Rochers = nouveau genre dans `GroundClutter` (aujourd'hui
     herbe + buisson seulement) ou dans `Vegetation`, avec un MultiMesh dédié.
-
+- 30/09 S3 (comparatif figurine) : 3 appels fal (Tripo 0,50 $, Meshy 1,52 $, TRELLIS 2 0,30 $ = 2,32 $),
+  `fal_client.subscribe` bloqué après la fin des tâches Tripo/Meshy → résultats relus par
+  `queue.fal.run/<app>/requests/<id>` (ids via `api.fal.ai/v1/models/requests/by-endpoint`). Planche
+  `docs/img/ga3/s3_compare.jpg`, analyse dans « S3 comparatif ».

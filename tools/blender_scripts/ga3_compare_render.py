@@ -42,11 +42,19 @@ def parse_args(argv):
             reference, i = (argv[i + 1].split(":"), argv[i + 2]), i + 3
         elif arg == "--panel":
             panels.append(
-                {"path": argv[i + 1], "label": argv[i + 2], "yaw": 0.0, "frame": None}
+                {
+                    "path": argv[i + 1],
+                    "label": argv[i + 2],
+                    "yaw": 0.0,
+                    "frame": None,
+                    "unmetal": False,
+                }
             )
             i += 3
         elif arg == "--yaw":
             panels[-1]["yaw"], i = float(argv[i + 1]), i + 2
+        elif arg == "--unmetal":
+            panels[-1]["unmetal"], i = True, i + 1
         elif arg == "--frame":
             panels[-1]["frame"], i = argv[i + 1], i + 2
         else:
@@ -112,8 +120,13 @@ def import_glb(path):
     for obj in new:
         if obj.parent is None:
             obj.parent = root
-    meshes = [o for o in new if o.type == "MESH"]
     armatures = [o for o in new if o.type == "ARMATURE"]
+    # The glTF importer adds bone display shapes (an Icosphere mesh): not part of the model.
+    shapes = {pb.custom_shape for arm in armatures for pb in arm.pose.bones}
+    for obj in new:
+        if obj in shapes:
+            obj.hide_render = True
+    meshes = [o for o in new if o.type == "MESH" and o not in shapes]
     return root, meshes, armatures
 
 
@@ -145,6 +158,20 @@ def normalise(root, meshes):
     low, high = points.min(axis=0), points.max(axis=0)
     centre = (low + high) / 2
     root.location = (-centre[0], -centre[1], -low[2])
+
+
+def unmetal(meshes):
+    """Undo the Meshy rigged glb material bugs: constant metallic 1, albedo as emission."""
+    for obj in meshes:
+        for slot in obj.material_slots:
+            material = slot.material
+            bsdf = material and material.node_tree.nodes.get("Principled BSDF")
+            metallic = bsdf and bsdf.inputs["Metallic"]
+            if metallic and not metallic.is_linked and metallic.default_value > 0.5:
+                metallic.default_value = 0.0
+            if bsdf:
+                # The same glb also wires the albedo into the emission.
+                bsdf.inputs["Emission Strength"].default_value = 0.0
 
 
 def set_frame(armatures, frame):
@@ -294,6 +321,8 @@ def main():
             set_frame(armatures, panel["frame"])
             if row == 0:
                 all_stats[panel["label"]] = stats_of(meshes, armatures)
+            if panel["unmetal"]:
+                unmetal(meshes)
             normalise(root, meshes)
             # The model is centred on the vertical axis: turn it about the origin.
             pivot = bpy.data.objects.new("pivot", None)
