@@ -318,3 +318,37 @@ fn built_engines_reach_the_siege_battle() {
         Some(false)
     );
 }
+
+/// NT9: in the auto-resolved assault a ready ram (gate broken) raises the
+/// assailant's odds behind standing walls; the bonus is data.
+#[test]
+fn a_ready_ram_helps_the_auto_resolved_assault() {
+    let data = data();
+    let ram = data
+        .siege_engine_rules
+        .engines
+        .iter()
+        .find(|e| e.kind == BuiltEngineKind::Ram)
+        .unwrap();
+    assert!(ram.auto_assault_bonus_percent > 0);
+    let (mut state, army) = besiege_guyenne(&data, 6);
+    let city = guyenne(&state);
+    let ladders = data.siege_engine_rules.engines[0].work;
+    let set_work = |state: &mut CampaignState, work: u32| {
+        state
+            .settlements
+            .get_mut(&city)
+            .unwrap()
+            .siege
+            .as_mut()
+            .unwrap()
+            .engine_work = work;
+    };
+    set_work(&mut state, ladders);
+    let (without, walls) = state.assault_odds(&data, &army).unwrap();
+    assert!(walls);
+    set_work(&mut state, ladders + ram.work);
+    let (with, walls) = state.assault_odds(&data, &army).unwrap();
+    assert!(walls, "the ram does not bring the walls down");
+    assert!(with > without, "{with} > {without}");
+}

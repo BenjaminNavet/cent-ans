@@ -16,7 +16,7 @@ const DIR := "res://assets/models/battle_skinned/"
 const FINE_DIR := "res://assets/models/battle_fine/"
 const FINE_RIG_PREFIX := "fine_"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
-const MAX_CLIPS := 64  # AN1b : 48 -> 64 (clips[] des shaders)
+const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
 const M_LOOP := 0
 const M_CYCLE := 1
@@ -31,6 +31,53 @@ static var _loaded: bool = false
 static var _meshes: Dictionary = {}
 static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
+## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
+const ANIMATION_FILE := "fx/battle_animation.json"
+static var _animation: Dictionary = {}
+
+
+## NT7 : réglages d'animation (fondu de cycle, clips de rôle), lus une fois.
+static func animation_settings() -> Dictionary:
+	if _animation.is_empty():
+		_animation = BattleStandards.read_data(ANIMATION_FILE)
+	return _animation
+
+
+## NT7 : durée (s) du fondu entre deux clips d'un cycle de mêlée ; 0 avec `--no-nt7` après `--`
+## (banc A/B : changement sec comme avant).
+static func cycle_blend_s() -> float:
+	if "--no-nt7" in OS.get_cmdline_user_args():
+		return 0.0
+	return float(animation_settings().get("cycle_blend_s", 0.0))
+
+
+## NT7 : miroir GDScript du tirage du mode CYCLE et du fondu du shader (tests, captures) : clip
+## courant, clip du cycle précédent et poids du courant (1 = pas de fondu) pour le soldat de
+## hachages `h` à l'instant `anim_time`. Même arithmétique que `choose`/`cycle_prev` (le sinus du
+## hachage peut différer du GPU au dernier bit : sert à vérifier le principe, pas le pixel).
+static func cycle_blend_at(config: Dictionary, h: Vector4, anim_time: float, blend: float) -> Dictionary:
+	var ids: Array = config["set"]
+	var n := maxi(ids.size(), 1)
+	var cycle := float(config.get("cycle", 1.5))
+	var local := anim_time * lerpf(0.9, 1.1, h.y) + h.z * cycle
+	var cyc := floorf(local / cycle)
+	var t := fposmod(local, cycle)
+	var clip: int = ids[mini(int(_hash1(h.x * 91.7 + cyc * 13.1) * n), n - 1)]
+	var result := {"clip": clip, "prev": clip, "t": t, "prev_t": 0.0, "weight": 1.0}
+	if blend <= 0.001 or n < 2 or t >= blend:
+		return result
+	var prev: int = ids[mini(int(_hash1(h.x * 91.7 + (cyc - 1.0) * 13.1) * n), n - 1)]
+	if prev == clip:
+		return result
+	result["prev"] = prev
+	result["prev_t"] = cycle + t
+	result["weight"] = smoothstep(0.0, blend, t)
+	return result
+
+
+static func _hash1(n: float) -> float:
+	var x := sin(n * 12.9898 + 4.1414) * 43758.5453
+	return x - floorf(x)
 
 
 ## Lot BV2 : variante « cadavres » du shader (`BV2_CORPSE` : coupe des parties tranchées par
@@ -351,6 +398,7 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 	while table.size() < MAX_CLIPS:
 		table.append(Vector4(0, 1, 1, 0))
 	mat.set_shader_parameter("clips", table)
+	mat.set_shader_parameter("cycle_blend", cycle_blend_s())
 	mat.set_shader_parameter("variant_count", int(figure(kind, variant).get("variants", 1)))
 	mat.set_shader_parameter("size_jitter", 0.0 if kind == "cavalry" else 0.05)
 	mat.set_shader_parameter("sever_bones", sever_table(kind, variant))

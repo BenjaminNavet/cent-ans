@@ -17,6 +17,22 @@
     "impact_marks"
   ],
   "$defs": {
+    "crew_clip": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
     "seconds": {
       "type": "number",
       "minimum": 0
@@ -399,8 +415,19 @@
         },
         "clips": {
           "type": "object",
+          "description": "Clip par rôle ; NT7 : une liste alterne les gestes d'un servant à l'autre.",
           "additionalProperties": {
-            "type": "string"
+            "$ref": "#/$defs/crew_clip"
+          }
+        },
+        "clips_by_engine": {
+          "type": "object",
+          "description": "NT7 : surcharge des clips de rôle par type d'engin (ex. chargeur de trébuchet).",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/$defs/crew_clip"
+            }
           }
         },
         "layouts": {

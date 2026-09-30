@@ -117,6 +117,23 @@ impl CampaignState {
         )
     }
 
+    /// NT9: the attacker's damage bonus (percent) of the engines ready at
+    /// the siege of `settlement` in an auto-resolved assault behind
+    /// standing walls (the ram breaks the gate).
+    pub(crate) fn engine_assault_bonus(&self, data: &GameData, settlement: &SettlementId) -> u32 {
+        let work = self.engine_work(settlement);
+        let mut needed = 0u32;
+        let mut bonus = 0u32;
+        for engine in &data.siege_engine_rules.engines {
+            needed = needed.saturating_add(engine.work);
+            if work < needed {
+                break;
+            }
+            bonus = bonus.saturating_add(engine.auto_assault_bonus_percent);
+        }
+        bonus
+    }
+
     /// Siege towers built at the siege of `settlement`.
     pub(crate) fn built_towers(&self, data: &GameData, settlement: &SettlementId) -> usize {
         ready_kinds(data, self.engine_work(settlement))

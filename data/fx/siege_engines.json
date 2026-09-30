@@ -95,9 +95,20 @@
       "winch": "crank",
       "loader": "load",
       "swab": "swab",
-      "pusher": "push",
+      "pusher": [
+        "push",
+        "push_shoulder"
+      ],
       "pusher_still": "haul",
       "idle": "idle"
+    },
+    "clips_by_engine": {
+      "trebuchet": {
+        "loader": "load_heavy"
+      },
+      "mangonel": {
+        "loader": "load_heavy"
+      }
     },
     "layouts": {
       "trebuchet": [

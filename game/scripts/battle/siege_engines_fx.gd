@@ -250,7 +250,7 @@ func _crew_engine(id: int, i: int, node: Node3D, model: String, c: Dictionary, u
 			# Au repos hors du souffle de la bouche (bombarde) : place de repos.
 			var rest: Array = s["rest"]
 			s = {"x": rest[0], "z": rest[1], "yaw_deg": rest[2], "figure": s.get("figure", 0)}
-		_add_servant("e%d/%d/%d" % [id, i, k], node.global_transform, s, crew.clip_of(act), side)
+		_add_servant("e%d/%d/%d" % [id, i, k], node.global_transform, s, crew.clip_of(act, model, k), side)
 
 
 func _add_servant(key: String, frame: Transform3D, s: Dictionary, clip: String, side: String) -> void:
@@ -632,7 +632,7 @@ func _update_mover(unit: Dictionary, id: int, _dt: float) -> void:
 		var still := "pusher_still" if is_ram else "idle"
 		var layout: Array = crew.cfg.get("layouts", {}).get("ram" if is_ram else "siege_tower", [])
 		for k in layout.size():
-			_add_servant("m%d/%d" % [id, k], machine.global_transform, layout[k], crew.clip_of("pusher" if pushing else still), str(unit.get("side", "")))
+			_add_servant("m%d/%d" % [id, k], machine.global_transform, layout[k], crew.clip_of("pusher" if pushing else still, "ram" if is_ram else "siege_tower", k), str(unit.get("side", "")))
 	var body := machine.find_child("Shed" if is_ram else "Body", true, false) as Node3D
 	if body != null:
 		var target := amp * sin(float(state["sway"])) if moving else 0.0

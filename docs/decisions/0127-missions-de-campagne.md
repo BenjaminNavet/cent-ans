@@ -45,6 +45,6 @@ aléatoire de la campagne (tests d'équilibre graine-dépendants : `ep7_historic
   pilote (ordre de grandeur : quelques centaines de livres toutes les 4 à 10 saisons).
 - Les batailles gagnées en défense pendant le tour de l'IA comptent (auto-résolues contre le
   joueur) ; un assaut de siège gagné (place emportée ou assaut repoussé) compte aussi
-  (`siege::apply_assault_result`) ; les sorties de garnison ne comptent pas.
+  (`siege::apply_assault_result`) ; une sortie de garnison aussi, pour son vainqueur (NT9, `siege::sortie`).
 - Ajouter un genre de mission = une variante de `MissionKind`, ses candidats et son verdict dans
   `missions.rs`, et l'énumération du schéma.

@@ -1586,6 +1586,8 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let largest = armies.first().map(|(id, p)| (id.clone(), *p));
     let mut defended: BTreeSet<SettlementId> = BTreeSet::new();
     let mut targeted: BTreeSet<SettlementId> = BTreeSet::new();
+    // NT9: enemies another of our armies attacks this turn (one attack each).
+    let mut engaged: Vec<[f32; 2]> = Vec::new();
     // CV3-6: a siege of ours or against us in progress (no encounter detours).
     let realm_besieged = state.settlements.values().any(|s| {
         s.siege
@@ -1749,7 +1751,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         }
         let mut attacked = false;
         if !broken && !besieging {
-            if let Some(order) = ctx.grid.attack_order(army_id) {
+            if let Some(order) = ctx.grid.attack_order_sparing(army_id, &mut engaged) {
                 orders.push(order);
                 attacked = true;
             }

@@ -100,6 +100,8 @@ pas des clips). `human.bones.bin` 1,49 → 2,01 Mo (2 101 → 2 843 images, 3,4 
 
 ### Limites
 - Kit grossier Quaternius non recuit : il garde les anciens jeux.
-- Changements de clip d'un cycle de mêlée sans fondu (comme avant) ; `idle_helm` lève aussi le
-  bouclier au bras gauche (tenu à côté du casque).
-- Porte-étendards, musiciens et équipages de siège : pas de nouveaux clips.
+- ~~Changements de clip d'un cycle de mêlée sans fondu~~ : fondu de 0,2 s depuis NT7
+  (ADR 0129). `idle_helm` lève aussi le bouclier au bras gauche (tenu à côté du casque).
+- ~~Porte-étendards, musiciens et équipages de siège : pas de nouveaux clips~~ : clips propres
+  de charge, victoire, attente et gestes de servants depuis NT7 (ADR 0129). La table `clips[]`
+  passe de 64 à 96 (rig humain fin : 70 clips).

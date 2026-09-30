@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_battle_animation.schema.json",
+  "title": "Fondus et clips de rôle des figurines de bataille (NT7)",
+  "type": "object",
+  "required": ["cycle_blend_s", "role_clips"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "cycle_blend_s": {"type": "number", "minimum": 0.0, "maximum": 0.6},
+    "role_clips": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(standard|standard_mounted|drum|horn)$": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "charging": {"type": "string", "minLength": 1},
+            "victory": {"type": "string", "minLength": 1},
+            "idle_alt": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  }
+}

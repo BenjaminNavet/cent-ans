@@ -381,6 +381,17 @@ def human_clip_specs():
         ("scythe", "Idle", True, poses.scythe, False),
         ("carry", "Walk", True, poses.carry, False),
         ("plough", "Walk", True, poses.plough, False),
+        # Lot NT7: own clips of standard bearers (charge, planted rest, victory), musicians
+        # (charge on the run, victory) and siege crews (heavy loading, shoulder push).
+        ("std_charge", "Run", True, poses.std_charge, False),
+        ("std_plant", "Idle", True, poses.std_plant, False),
+        ("std_victory", "Idle", True, poses.std_victory, False),
+        ("drum_run", "Run", True, poses.drum_run, False),
+        ("drum_victory", "Idle", True, poses.drum_victory, False),
+        ("horn_run", "Run", True, poses.horn_run, False),
+        ("horn_victory", "Idle", True, poses.horn_victory, False),
+        ("load_heavy", "Idle", True, poses.load_heavy, False),
+        ("push_shoulder", "Walk", True, poses.push_shoulder, False),
     ]
 
 

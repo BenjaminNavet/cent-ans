@@ -46,7 +46,7 @@ const int M_SPLIT = 4;
 uniform sampler2D bone_tex : filter_nearest, repeat_disable;
 uniform float bone_fps = 24.0;
 // Table des clips du rig : (ligne de départ, images, boucle 0/1, 0).
-uniform vec4 clips[64];
+uniform vec4 clips[96];
 
 uniform float anim_time = 0.0;
 uniform ivec4 clip_set = ivec4(0);
@@ -59,6 +59,11 @@ uniform int prev_mode = 0;
 uniform float prev_speed = 1.0;
 uniform float blend_since = -1000.0;
 uniform float blend_time = 0.35;
+// NT7 : fondu entre deux clips successifs d'un cycle (mode CYCLE : mêlée, charge des lanciers),
+// en secondes (`data/fx/battle_animation.json`, `cycle_blend_s`) ; 0 = changement sec. Le clip
+// précédent continue au-delà de la fin du cycle (tenu sur sa dernière image s'il ne boucle pas)
+// pendant que le suivant monte ; double lecture seulement dans la fenêtre et si le clip change.
+uniform float cycle_blend = 0.0;
 // Mode CYCLE (mêlée) : durée d'une passe ; mode VOLLEY (tir) : instant de la dernière volée,
 // durée du rechargement, instant de la décoche dans le clip (s).
 uniform float cycle_len = 1.5;
@@ -334,6 +339,45 @@ void pose_rows(int clip, float t, ivec4 idx, vec4 w, bool smooth_frames, out vec
 	c = c0;
 }
 
+// NT7 : clip du cycle précédent et poids du fondu (0 au début du cycle, 1 après `cycle_blend`).
+// Retourne 1 (pas de fondu) hors fenêtre ou quand le tirage redonne le même clip.
+float cycle_prev(ivec4 set, int size, vec4 h, int clip, out int pclip, out float pt) {
+	pclip = clip;
+	pt = 0.0;
+	int n = max(size, 1);
+	float local = anim_time * mix(0.9, 1.1, h.y) + h.z * cycle_len;
+	float t = mod(local, cycle_len);
+	if (cycle_blend <= 0.001 || n < 2 || t >= cycle_blend) {
+		return 1.0;
+	}
+	float cyc = floor(local / cycle_len) - 1.0;
+	pclip = pick_clip(set, min(int(hash1(h.x * 91.7 + cyc * 13.1) * float(n)), n - 1));
+	if (pclip == clip) {
+		return 1.0;
+	}
+	pt = cycle_len + t;
+	return smoothstep(0.0, cycle_blend, t);
+}
+
+// Pose (lignes de la matrice de skinning) d'un soldat pour un jeu de clips et un mode, avec le
+// fondu intra-cycle de NT7.
+void anim_pose(int mode, ivec4 set, int size, float speed, vec4 h, vec4 custom, float id, ivec4 idx, vec4 w, bool smooth_frames, out int clip, out float t, out vec4 a, out vec4 b, out vec4 c) {
+	choose(mode, set, size, speed, h, custom, id, clip, t);
+	pose_rows(clip, t, idx, w, smooth_frames, a, b, c);
+	if (mode == M_CYCLE) {
+		int pclip;
+		float pt;
+		float k = cycle_prev(set, size, h, clip, pclip, pt);
+		if (k < 1.0) {
+			vec4 pa; vec4 pb; vec4 pc;
+			pose_rows(pclip, pt, idx, w, smooth_frames, pa, pb, pc);
+			a = mix(pa, a, k);
+			b = mix(pb, b, k);
+			c = mix(pc, c, k);
+		}
+	}
+}
+
 // AN1a : poids (0-1, 1 au bord libre) et pièce souple d'un sommet ; -1 : pièce rigide.
 float sm_weight(int code, ivec4 idx, vec4 w, vec3 rest, float tint, out int part) {
 	part = -1;
@@ -436,18 +480,16 @@ void vertex() {
 		vec4 w = CUSTOM1;
 		int clip;
 		float t;
-		choose(clip_mode, clip_set, clip_set_size, anim_speed, h, custom, id, clip, t);
 		vec4 a; vec4 b; vec4 c;
 		// Au loin, image la plus proche sans interpolation (moitié moins de lectures).
 		bool smooth_frames = inst_dist < interp_distance;
-		pose_rows(clip, t, idx, w, smooth_frames, a, b, c);
+		anim_pose(clip_mode, clip_set, clip_set_size, anim_speed, h, custom, id, idx, w, smooth_frames, clip, t, a, b, c);
 		float blend = clamp((anim_time - blend_since) / max(blend_time, 0.01), 0.0, 1.0);
 		if (blend < 1.0 && clip_mode != M_CUSTOM) {
 			int pclip;
 			float pt;
-			choose(prev_mode, prev_set, prev_set_size, prev_speed, h, custom, id, pclip, pt);
 			vec4 pa; vec4 pb; vec4 pc;
-			pose_rows(pclip, pt, idx, w, smooth_frames, pa, pb, pc);
+			anim_pose(prev_mode, prev_set, prev_set_size, prev_speed, h, custom, id, idx, w, smooth_frames, pclip, pt, pa, pb, pc);
 			float s = smoothstep(0.0, 1.0, blend);
 			a = mix(pa, a, s);
 			b = mix(pb, b, s);

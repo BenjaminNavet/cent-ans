@@ -30,7 +30,7 @@ use crate::siege::{
     WallPiece, GATE_WIDTH, TOWN_CENTER,
 };
 use crate::siege_layout::MAX_PIECE;
-use crate::town::{hash01, Footprint, TownRules};
+use crate::town::{hash01, Footprint, PropKind, TownRules};
 
 /// Kind of besieged place (NT1).
 #[derive(
@@ -83,6 +83,15 @@ pub struct CastleRules {
     pub buildings: [u32; 2],
     pub wall_walk_m: f64,
     pub lane_m: f64,
+    /// NT8: factor on the radius of the castle's towers.
+    pub tower_radius_scale: f64,
+    /// NT8: height of the keep above the curtain walls.
+    pub keep_height_above_wall_m: f64,
+    /// NT8: props in the bailey (besides the well).
+    pub bailey_props: [u32; 2],
+    pub bailey_kinds: Vec<PropKind>,
+    /// NT8: props in front of the lean-to outbuildings.
+    pub lean_to_kinds: Vec<PropKind>,
 }
 
 /// Plan of the fortified borough (`places.borough`).
@@ -226,12 +235,13 @@ fn push_split(pieces: &mut Vec<WallPiece>, a: (f64, f64), b: (f64, f64), hp: f64
 
 /// The works of an enceinte: pieces (gate on side 0, side `split` cut at its
 /// middle for a gatehouse), towers at the corners and between pieces, two
-/// smaller towers flanking the gate. Returns the works (no house yet) and
+/// smaller towers flanking the gate (radii × `tower_scale`). Returns the works (no house yet) and
 /// the gatehouse point, if any.
 fn ring_works(
     shape: &Enceinte,
     fortification: u32,
     height_bonus: f64,
+    tower_scale: f64,
     split: Option<usize>,
 ) -> (SiegeWorks, Option<(f64, f64)>) {
     let fort = f64::from(fortification.min(5));
@@ -270,7 +280,7 @@ fn ring_works(
             push_split(&mut pieces, a, b, wall_hp);
         }
     }
-    let tower_radius = 5.0 + fort;
+    let tower_radius = (5.0 + fort) * tower_scale;
     let mut towers: Vec<Tower> = Vec::new();
     for (i, p) in pieces.iter().enumerate() {
         let next_is_gate = pieces[(i + 1) % pieces.len()].kind == PieceKind::Gate;
@@ -369,7 +379,7 @@ fn borough(fortification: u32, seed: u64, rules: &TownRules) -> SiegeWorks {
     } else {
         n / 2
     };
-    let (mut works, gatehouse) = ring_works(&shape, fortification, 0.0, Some(back));
+    let (mut works, gatehouse) = ring_works(&shape, fortification, 0.0, 1.0, Some(back));
     works.square_radius = b.market_m;
     let center = works.center;
     let far = gatehouse.unwrap_or((center.0, center.1 + 100.0));
@@ -518,7 +528,13 @@ fn castle(fortification: u32, seed: u64, rules: &TownRules) -> SiegeWorks {
         c.rotation_deg,
         c.gate_offset,
     );
-    let (mut works, _) = ring_works(&shape, fortification, c.wall_height_bonus_m, None);
+    let (mut works, _) = ring_works(
+        &shape,
+        fortification,
+        c.wall_height_bonus_m,
+        c.tower_radius_scale,
+        None,
+    );
     works.square_radius = c.courtyard_m;
     let center = works.center;
     let start = before_gate(&works, 8.0);
@@ -556,6 +572,7 @@ fn castle(fortification: u32, seed: u64, rules: &TownRules) -> SiegeWorks {
             let mut house = House::block(x, z, side, side, yaw);
             house.rows = 1;
             house.keep = true;
+            house.height = works.wall_height + c.keep_height_above_wall_m;
             keep = Some(house);
             lanes.push(lane_to_keep(reach - side * 0.5));
             break;
@@ -748,6 +765,50 @@ mod tests {
                 .map(|v| dist(*v, w.center))
                 .fold(0.0, f64::max);
             assert!(r < 110.0, "{province}: tight enceinte ({r})");
+        }
+    }
+
+    #[test]
+    fn castle_looks_like_a_castle() {
+        let c = &TownRules::bundled().places.castle;
+        for province in ["prov_paris", "prov_gascony", "prov_aleppo", "prov_kent"] {
+            let w = works(PlaceKind::Castle, province);
+            let borough = works(PlaceKind::Borough, province);
+            // NT8: slimmer flanking towers than a borough's.
+            let widest = w.towers.iter().map(|t| t.radius).fold(0.0, f64::max);
+            let borough_corner = borough
+                .towers
+                .iter()
+                .map(|t| t.radius)
+                .fold(f64::INFINITY, f64::min)
+                / 0.8;
+            assert!(widest <= borough_corner * c.tower_radius_scale + 1e-9);
+            assert!(widest <= 6.0, "{province}: towers {widest}");
+            // A keep standing well above the towers.
+            let keep = w.houses.iter().find(|h| h.keep).expect("keep");
+            let tallest = w.towers.iter().map(|t| t.height).fold(0.0, f64::max);
+            assert!(
+                keep.height >= tallest + 8.0,
+                "{province}: keep {}",
+                keep.height
+            );
+            // A lived-in bailey: a well, carts, barrels, woodpiles; no stalls.
+            let in_bailey: Vec<_> = w
+                .props
+                .iter()
+                .filter(|p| p.house.is_none() && w.in_square(p.x, p.z))
+                .collect();
+            assert!(in_bailey.iter().any(|p| p.kind == PropKind::Well));
+            assert!(
+                in_bailey.len() >= 4,
+                "{province}: {} props",
+                in_bailey.len()
+            );
+            assert!(w.props.iter().all(|p| p.kind != PropKind::Stall));
+            assert!(
+                w.houses.iter().filter(|h| !h.keep).count() >= 3,
+                "{province}: outbuildings"
+            );
         }
     }
 

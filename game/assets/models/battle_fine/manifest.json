@@ -737,6 +737,11 @@
      "loop": false,
      "start": 781
     },
+    "c_std_charge": {
+     "frames": 30,
+     "loop": true,
+     "start": 984
+    },
     "c_std_death": {
      "frames": 30,
      "loop": false,
@@ -890,6 +895,16 @@
      "loop": true,
      "start": 1121
     },
+    "drum_run": {
+     "frames": 20,
+     "loop": true,
+     "start": 3110
+    },
+    "drum_victory": {
+     "frames": 48,
+     "loop": true,
+     "start": 3130
+    },
     "flee": {
      "frames": 60,
      "loop": true,
@@ -935,6 +950,16 @@
      "loop": true,
      "start": 1178
     },
+    "horn_run": {
+     "frames": 20,
+     "loop": true,
+     "start": 3178
+    },
+    "horn_victory": {
+     "frames": 82,
+     "loop": true,
+     "start": 3198
+    },
     "horn_walk": {
      "frames": 33,
      "loop": true,
@@ -969,6 +994,11 @@
      "frames": 48,
      "loop": true,
      "start": 1404
+    },
+    "load_heavy": {
+     "frames": 60,
+     "loop": true,
+     "start": 3280
     },
     "overhead": {
      "frames": 28,
@@ -1020,6 +1050,11 @@
      "loop": true,
      "start": 1492
     },
+    "push_shoulder": {
+     "frames": 33,
+     "loop": true,
+     "start": 3340
+    },
     "run": {
      "frames": 20,
      "loop": true,
@@ -1035,6 +1070,11 @@
      "loop": false,
      "start": 135
     },
+    "std_charge": {
+     "frames": 20,
+     "loop": true,
+     "start": 2950
+    },
     "std_death": {
      "frames": 26,
      "loop": false,
@@ -1045,10 +1085,20 @@
      "loop": true,
      "start": 895
     },
+    "std_plant": {
+     "frames": 82,
+     "loop": true,
+     "start": 2970
+    },
     "std_run": {
      "frames": 20,
      "loop": true,
      "start": 969
+    },
+    "std_victory": {
+     "frames": 58,
+     "loop": true,
+     "start": 3052
     },
     "std_walk": {
      "frames": 33,
