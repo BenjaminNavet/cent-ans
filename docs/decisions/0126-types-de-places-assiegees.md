@@ -36,8 +36,12 @@ d'Italie se ressemblaient ; seul Paris, Londres et les cinq autres plans histori
   campagne l'utilise, comme avant) : une province garde toujours le même plan. Le côté de la porte
   assaillie fait toujours face à l'assaillant (−z), ce que supposent le déploiement et l'IA.
 - **Donjon** : une `House` marquée `keep` (emprise carrée, obstacle du cheminement et des
-  figurines) qui ne brûle jamais ; le rendu la dessine en tour agrandie (même maquette que les
-  tours de l'enceinte). Les rues du bourg et du château sont exposées (`SiegeWorks.streets`) pour
+  figurines) qui ne brûle jamais. NT8 : le rendu la dessine en donjon carré (talus,
+  mâchicoulis, créneaux, échauguettes, toit en pavillon) à la hauteur donnée par le cœur
+  (`House.height` = courtines + `keep_height_above_wall_m`) ; les tours du château sont
+  amincies (`tower_radius_scale`), la basse-cour reçoit un puits et des accessoires
+  (`bailey_props`, pas d'étals) et les communs adossés sont dessinés en granges, longères et
+  maisons de pierre. Les rues du bourg et du château sont exposées (`SiegeWorks.streets`) pour
   que le marché laisse leurs débouchés libres.
 - **Module** : `siege_layouts.rs` (générateurs), à côté de `siege_layout.rs` (plans
   emblématiques, ADR 0026) ; `siege.rs` n'a reçu que les champs nouveaux.
