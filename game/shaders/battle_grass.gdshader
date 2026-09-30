@@ -83,7 +83,9 @@ void vertex() {
 		vec2 suv = (wp - splat_rect.xy) / splat_rect.zw;
 		vec4 sa = texture(splat_a, suv);
 		vec4 sb = texture(splat_b, suv);
-		density *= 1.0 - smoothstep(0.2, 0.5, max(max(sa.g, sa.b), sa.a));
+		density *= 1.0 - smoothstep(0.2, 0.5, max(sa.g, sa.a));
+		// VN2 : boue en partie herbue, plus encore au bord de l'eau (vue de haut : tache sombre sinon).
+		density *= 1.0 - smoothstep(0.2, 0.6, sa.b) * mix(0.72, 0.45, sb.r);
 		density *= 1.0 - smoothstep(0.3, 0.7, sb.r) * 0.35; // VN2 : berges herbues
 		density *= mix(1.0, 0.45, smoothstep(0.3, 0.8, sa.r)); // sous-bois : clairsemé
 		vec2 calm_d = max(calm_rect.xy - wp, wp - calm_rect.zw);

@@ -374,8 +374,11 @@ void fragment() {
 	albedo *= mix(1.0, 0.62, wet);
 	// VN2 : grève et vase au bord de l'eau : terre sombre, mouillée, un peu verdie (avant :
 	// gravier pâle et sec en bande continue le long de la rivière).
+	// VN2 : boue brun-olive plutôt que lie-de-vin (vue de haut, les zones de boue faisaient des
+	// taches violacées).
+	albedo = mix(albedo, vec3(0.25, 0.21, 0.14) * (0.8 + 0.4 * fine), w_mud * 0.5 * (1.0 - w[int(L_SNOW)]));
 	float bank_wet = smoothstep(0.3, 0.8, sb.r) * max(w_mud, w_pebbles) * (1.0 - w[int(L_SNOW)]);
-	albedo = mix(albedo, albedo * vec3(0.62, 0.66, 0.55), bank_wet * 0.85);
+	albedo = mix(albedo, albedo * vec3(0.66, 0.72, 0.58), bank_wet * 0.6);
 	albedo *= 1.0 - dip * 0.08;
 
 	// GA2 : macro-variation supplémentaire (4 octaves, 50 à 200 m) de teinte et de luminance,

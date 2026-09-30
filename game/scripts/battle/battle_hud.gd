@@ -726,7 +726,9 @@ func _render_log() -> void:
 			text += " (×%d)" % int(entry["count"])
 		var label := _label(text, 13)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.custom_minimum_size = Vector2(330, 0)
+		# VN4 : largeur donnée par la zone (une largeur minimale de 330 px la dépassait en
+		# 1280×720 : « replier » et la fin des lignes coupés au bord droit).
+		label.custom_minimum_size = Vector2(0, 0)
 		if i > 0:
 			label.modulate = Color(1, 1, 1, 0.8)
 		log_box.add_child(label)
