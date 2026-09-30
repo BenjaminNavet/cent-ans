@@ -29,3 +29,7 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - Squelette : uniformes `weathering` (0,6) et `sr2_mud_height` (0,45 ; cavalerie 0,65) dans
   la variante FG3_BAKED, posés par `BattleSkinned._setup_fine_maps`, `--no-sr2` → 0.
 - Prochaine étape : effets dans le fragment (boue, crasse, acier, teintes), test `sr2_weathering_test.gd`.
+
+## SR5 — en cours (agent)
+- Include `game/shaders/building_aging.gdshaderinc` (usure procédurale, sans texture).
+- Prochaine étape : SR5a (atlas + villes), SR5b (`building_pbr.gdshader`, `--no-sr5`), tests.
