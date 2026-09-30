@@ -479,8 +479,8 @@ def _vertex_colour_material():
     return mat
 
 
-def add_current_archer(clip, frac):
-    """The exported ``archer_0`` LOD0 skinned at `clip` / `frac`, shifted along +X.
+def add_current_archer(clip, frac, figure="archer_0", idle="bow_idle"):
+    """The exported fine `figure` LOD0 skinned at `clip` / `frac` (else `idle`), along +X.
 
     Skinned on the CPU like ``battle_fine_check``; vertex colours only (the game adds the
     baked detail atlas and the livery on top).
@@ -494,13 +494,13 @@ def add_current_archer(clip, frac):
     mesh_dir = os.path.join(bs.ROOT, "game", "assets", "models", "battle_fine")
     with open(os.path.join(mesh_dir, "manifest.json")) as f:
         manifest = json.load(f)
-    entry = manifest["figures"]["archer_0"]
+    entry = manifest["figures"][figure]
     rig = manifest["rigs"]["human"]
     frames = fc.load_bones(os.path.join(mesh_dir, rig["texture"]))
     *mesh, atlas = load_cam(os.path.join(mesh_dir, entry["lods"][0]))
-    c = rig["clips"][clip or "bow_idle"]
+    c = rig["clips"][clip or idle]
     fr = c["start"] + int(round((frac if clip else 0.0) * (c["frames"] - 1)))
-    obj = fc.skinned_object("archer_0", mesh, frames[fr], 0)
+    obj = fc.skinned_object(figure, mesh, frames[fr], 0)
     obj.data.transform(Matrix.Translation((CURRENT_OFFSET, 0, 0)))
     me = obj.data
     _ = atlas  # packed UV of the detail/normal atlas: not needed for the look

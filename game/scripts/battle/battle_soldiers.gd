@@ -1218,7 +1218,7 @@ func _add_corpse(side: String, kind: String, variant: int, skinned: bool, pos: V
 		if not _corpse_materials.has(skey):
 			var material := _make_skinned_material(side, kind, variant, true) if skinned else _make_material(side, kind, variant, true)
 			if severed:
-				material.shader = BattleSkinned.corpse_shader()
+				material.shader = BattleSkinned.corpse_shader(kind, variant)
 			if wounded and skinned:
 				material.set_meta("v2_config", {})
 				BattleSkinned.apply_config(material, BattleSkinned.wounded_config(kind, variant), anim_time)

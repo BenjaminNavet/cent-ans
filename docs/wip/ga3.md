@@ -107,6 +107,72 @@ A-pose mains vides (0,30 $ + ≈ 0,08 $ d'image, ≈ 2,30 $ les 6), liés à not
 pour garder nos clips et nos 40 os de doigts. Le rig/anim Meshy (+0,32 $) n'est utile que si l'on
 abandonne nos clips Quaternius.
 
+## L3a — figurine pilote longbowman (30/09)
+Chaîne et choix : `docs/wip/ga3-l3.md` et ADR 0140 § « Figurines de bataille ». Brutes :
+`~/dev/cent-ans-raw/ga3/l3/longbowman/`. Planche locale `docs/img/ga3/l3a_archer.jpg` (référence
+A-pose | riggée liaison, marche, tir, dos à côté d'`archer_0` fin | marche des trois générateurs).
+- Référence : `nano-banana-2/edit` 2K depuis `sr3/longbowman.png` : face et dos en A-pose
+  propres, mains vides ; le profil tient le carquois (écarté). Jaque vert clé (livrée), chausses
+  bleu clé (étoffe) → segmentation 35 % / 17 % de la texture.
+- 3D : `trellis/multi` face + dos livré (consigne « moins cher ») ; `trellis` vue unique et
+  `trellis-2` (parti avant la consigne) en comparaison. Les trois se valent une fois ramenés à
+  11,5 k : multi garde un dos cohérent ; TRELLIS 2 n'apporte rien au format du jeu.
+- Maillage : feuilles TRELLIS ouvertes et doublées (heat en échec, collapse calé) → solidify 12 mm
+  + voxel 8 mm + collapse + cuisson. LOD 11 800 / 1 350 / 260 tri (arme comprise), heat 100 %.
+- Jeu : rendu texturé en bataille (jaques de livrée rouge avec crasse, chapels, arcs, chausses
+  variées), vu de dos et de trois-quarts ; `--no-ga3-fig` rend `archer_0` fin. Tests
+  `ga3_l3_figures_test.gd` (deux modes), smoke, fg3_maps et sr2 (adaptés : `archer_0` n'a plus
+  d'atlas), an1a, an1b, fk2, fk_folk, ga1_maps, nt7, nt10, nt12 OK.
+- Écarts : capture Godot en bataille cadrée à côté de la troupe (caméra `--camera=572,595,13,205`,
+  régiment décalé à gauche), jugement sur le bord de l'image ; une variante par figurine (plus de
+  visages ni de couvre-chefs alternés) ; pas de FG3/SR2 sur la figurine générée.
+- **Verdict** : go pour étendre aux 4 unités à pied (≈ 0,65 $) ; chevalier : générer le cavalier
+  seul sur le cheval fin.
+
+## L3b — quatre unités à pied (30/09)
+Même chaîne que L3a, rendue générique **en données** (`UNITS` de `ga3_figures.py` : figure
+remplacée, hauteur du casque, objets tenus par nom de la recette fine, `metal_z`, clips ; prompts
+dans `ga3_fal_figure.py`). Planche locale `docs/img/ga3/l3b_units.jpg` (5 unités, marche et
+attaque, GA3 | figurine fine actuelle, toutes deux dans les poses du jeu). 0,63 $.
+- **Correspondances** (`data/unit_types` `figure`, sinon `BattleMeshes.VARIANTS`), une recette par
+  type : homme d'armes `infantry_0` (hommes d'armes à pied ; épée + écu), arbalétrier `archer_2`
+  (Génois ; arbalète, carquois, pavois au dos avec le drapeau BV3 `hide_pavise`), sergent
+  `infantry_1` (piquiers flamands ; pique), milicien `infantry_5` (goedendag, Brabançons).
+  Recettes du même type laissées fines : `infantry_7`/`8` (harnois, épée), `archer_1`/`4`
+  (arbalète), `infantry_4` (pique), `infantry_2`/`3`/`6` (armes d'hast de milice).
+- **Références** : 4 planches NB2 propres du premier coup (A-pose, mains vides, livrée verte
+  unie sur jupon / tabard / surcot, chausses bleues ; l'homme d'armes n'a pas de clé d'étoffe :
+  jambes de plates). Seul défaut : l'homme d'armes garde une épée au fourreau à la hanche
+  (fusionnée au maillage, en plus de l'épée tenue).
+- **3D** : `trellis/multi` face + dos, 1 génération par unité (≤ 3 permises, aucune reprise
+  utile). Chaleur des os 100 % partout. Correctif : les jambes sous le tabard de l'arbalétrier
+  sortent du voxel en îlots séparés (≈ 6 % chacune) : seuil de tri des îlots abaissé de 30 % à
+  2 % (`KEEP_ISLAND`).
+- **Équipement** : `equipment()` prend les objets par nom dans la recette fine (masque de
+  variante, kwargs, surcharges SR3b) et les construit comme `build_figure` (registre fin
+  `battle_fine_gear`/`battle_fine_weapons`, sinon V2). Les faces peintes (`C_ARMS` : écu, pavois)
+  gardent leur UV d'armoiries et `GA3_TEX` les épargne (armoiries du jeu sur l'écu).
+- **Acier** : `metal_z` par unité ; homme d'armes 0 : tout ce que la texture dit acier reste en
+  `C_PLATE` ; le reste du harnois est en `C_EXACT` (couleur générée, jamais teinte).
+- **Rendus** : le LOD0 exporté est skinné sur le CPU avec la texture d'os du jeu (comme la
+  figurine actuelle) : l'arme suit les os virtuels (`Prop`) exactement comme en bataille (le
+  rendu Blender posé plaçait l'arbalète et l'épée à l'horizontale).
+- **Poids** : la chaleur des os fuyait des doigts (aliasés en `Wrist`) vers cuisses et tibias
+  (AN1a : chausses du sergent déplacées) ; `strip_arm_leaks` retire les poids de bras sous
+  0,6 m et renormalise ; faces de livrée sous 0,5 m rendues à la couleur générée. `archer_0`
+  reconstruit avec ces correctifs.
+- Tests : `ga3_l3_figures_test.gd` (5 figurines, témoins `archer_1`/`infantry_2`, deux modes),
+  `an1a_motion_test.gd` (étendu aux figurines générées), `sr2_weathering_test.gd` (saute
+  toutes les figurines générées), an1b, fg3_maps, nt7, nt10, nt12, fk2, fk_folk, smoke, pytest
+  `tools/tests/test_ga3_figures_manifest.py` : OK.
+- **Écart** : la seule capture Godot en bataille (gros plan de mêlée par défaut) cadre la
+  cavalerie française : aucun fantassin généré visible ; jugement sur la planche (LOD0 exporté,
+  poses du jeu). Capture ciblée (Crécy) laissée à la session principale.
+- **Points ouverts** : variantes de visages (une figure par recette ; plusieurs générations
+  par recette = variantes), mains en moufle, usure SR2 absente sur les figurines GA3, épée au
+  fourreau fondue de l'homme d'armes, jupon sans armoiries, visages un peu rougis par
+  l'étalonnage.
+
 ## Journal
 - 30/09 : worktree créé, clé validée, joueur OK pour les 2 sondes.
 - 30/09 : **S1 fait** (≈ 10 min de bout en bout, 0,05 $). Image `fal-ai/flux/dev` 1024² (0,026 $,
@@ -249,6 +315,12 @@ abandonne nos clips Quaternius.
       `--no-ga3-veg`, `--no-ga3-near`. Voir journal et `docs/wip/ga3-l2.md`.
 - [x] L1b reprise de 3 objets L1 (0,17 $, un essai chacun) : maison (chaume sombre, lisse, épais), puits
       (toit en bardeaux de chêne sombres), bélier (planches + peaux brunes unies, vue unique). Voir journal.
-- [ ] L3 figurines : APRÈS fusion de `feat/sr`. Références A-pose mains vides → trellis-2 → chaîne S2
-      (notre squelette, nos clips, armes procédurales), masque de livrée. ≈ 2,50 $.
+- [x] L3a figurine pilote longbowman (`archer_0`, 0,48 $, ADR 0140 § figurines ; note
+      `docs/wip/ga3-l3.md`) : planche NB2 A-pose à couleurs clés → `trellis/multi` face + dos →
+      `ga3_figures.py` (voxel + cuisson, rig S2, LOD, livrée) → `battle_ga3/`, `GA3_TEX`,
+      `--no-ga3-fig`. Voir « L3a ».
+- [x] L3b : `man_at_arms` → `infantry_0`, `crossbowman` → `archer_2`, `sergeant` → `infantry_1`,
+      `militia` → `infantry_5` (0,63 $, un essai chacune). Voir « L3b ».
+- [ ] L3c : cavalier du chevalier sur le cheval fin (voir ADR 0140 § figurines, « Extension ») ;
+      autres recettes des mêmes types (infantry_2/3/4/6/7/8, archer_1/4) si le joueur valide.
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.
