@@ -27,11 +27,10 @@ pub struct MapSceneRules {
     pub pool_cap: u32,
     /// Radius (world units) around the camera centre where figurines live.
     pub activity_radius: f64,
-    /// Height of a figurine (world units) at map scale.
-    pub figure_height: f64,
-    /// Minimum figurine height as a fraction of the camera distance (near
-    /// tier readability; FK6).
-    pub figure_min_view_fraction: f64,
+    /// Camera distance (world units) beyond which no figurine is placed:
+    /// figurines are drawn at real (1:1) scale and are sub-pixel further
+    /// away (VT2, ADR 0138).
+    pub figure_max_distance: f64,
     /// Road travellers per world unit at the reference population.
     pub road_folk_per_unit: f64,
     /// Chance a field point is worked.
@@ -98,8 +97,7 @@ impl Default for MapSceneRules {
             devastation_threshold: 25,
             pool_cap: 600,
             activity_radius: 60.0,
-            figure_height: 1.26,
-            figure_min_view_fraction: 0.045,
+            figure_max_distance: 3.0,
             road_folk_per_unit: 0.12,
             field_work_probability: 0.35,
             herd_probability: 0.12,

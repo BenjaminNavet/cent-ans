@@ -10,12 +10,14 @@ extends SceneTree
 ##     l'intensité 0, rien au loin ; colonie inconnue → chef-lieu, province sans colonie → ignorée ;
 ##  7. FK4 : disette → champs de la province sans travailleurs.
 ##  8. FK6 : placement borné (≤ 8 ms hors création des groupes, préchauffés), aucune instance
-##     dans l'emprise d'une ville emblématique (Paris : maquette L1 et ville 1:1), figurines
-##     lisibles au palier proche (hauteur ≥ `figure_min_view_fraction` × distance).
+##     dans l'emprise d'une ville emblématique (Paris : maquette L1 et ville 1:1) ;
+##  9. VT2 : figurines à l'échelle 1:1 à toute distance, rien au-delà de `figure_max_distance`.
 ## FK5 (incidents) ajoutera ses cas.
 ## Usage : godot --headless --path game --script res://tests/fk_folk_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
+## Distance caméra de la vue rapprochée (VT2 : sous `figure_max_distance`, figurines 1:1).
+const NEAR_D := 2.0
 
 var _failures := 0
 
@@ -138,7 +140,7 @@ func _run() -> void:
 
 	# 3. Palier proche sur la route active : charrettes, marchands et routine.
 	var focus: Vector2 = active_edge[2]
-	_view(pool, focus, 45.0, 1.0)
+	_view(pool, focus, NEAR_D, 1.0)
 	var near_ms := float(pool.stats.get("place_ms", 0.0)) - float(pool.stats.get("create_ms", 0.0))
 	_check(near_ms <= 8.0, "routine + caravans placement %.2f ms (> 8 ms)" % near_ms)
 	print("fk_folk_test: near %s, caravans %s, routine %s" % [pool.stats, caravans.stats, routine.stats])
@@ -154,17 +156,17 @@ func _run() -> void:
 		_check(pool.instance_custom("merchant_cart", 0).r > 0.0, "cart travels (custom data)")
 
 	# Route coupée seule dans le rayon : aucune charrette.
-	_view(pool, cut_edge[2], 45.0, 1.0)
+	_view(pool, cut_edge[2], NEAR_D, 1.0)
 	_check(int(caravans.stats.get("carts", -1)) == 0, "no cart on the cut route: %s" % caravans.stats)
 	print("fk_folk_test: second placement %s" % pool.stats)
 
 	# 2. Plafond : petit plafond atteint exactement, moitié en dépassement.
 	pool.cap = 20
 	pool.set_budget_exceeded(false)
-	_view(pool, focus, 45.0, 1.0)
+	_view(pool, focus, NEAR_D, 1.0)
 	_check(pool.figure_count() <= 20, "cap 20: %d" % pool.figure_count())
 	pool.set_budget_exceeded(true)
-	_view(pool, focus, 45.0, 1.0)
+	_view(pool, focus, NEAR_D, 1.0)
 	_check(pool.effective_cap == 10 and pool.figure_count() <= 10, "halved cap: %d/%d" % [pool.figure_count(), pool.effective_cap])
 	pool.cap = 600
 	pool.set_budget_exceeded(false)
@@ -180,14 +182,14 @@ func _run() -> void:
 	# Printemps : attelages de labour (charrue FK2 ou maquette) qui remontent leur sillon.
 	routine.season = "spring"
 	pool.invalidate()
-	_view(pool, focus, 45.0, 1.0)
+	_view(pool, focus, NEAR_D, 1.0)
 	var ploughs := pool.get_node_or_null("Folk_plough") as MultiMeshInstance3D
 	_check(ploughs != null and ploughs.multimesh.instance_count > 0 and pool.instance_custom("plough", 0).r > 0.0, "plough teams in spring: %s" % routine.stats)
 
 	# Saisons : hiver, bûcherons possibles, champs clairsemés ; pas d'erreur.
 	routine.season = "winter"
 	pool.invalidate()
-	_view(pool, focus, 45.0, 1.0)
+	_view(pool, focus, NEAR_D, 1.0)
 	print("fk_folk_test: winter %s" % routine.stats)
 	_check(pool.figure_count() <= 600, "winter capped")
 
@@ -202,9 +204,10 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	for prop in ["dead_cart", "market_stall", "pyre", "scaffold", "stone_cart", "procession_cross", "procession_banner", "sheep", "cow", "flood_water"]:
 		_check(FolkModels.is_prop(prop) and FolkModels.prop_mesh(prop) != null, "scene prop %s" % prop)
 	var settings := FolkPool.load_settings()
-	for key in ["scene_figures_min", "scene_figures_max", "carts_per_trade_value", "figure_height", "guard_value"]:
+	for key in ["scene_figures_min", "scene_figures_max", "carts_per_trade_value", "figure_max_distance", "guard_value"]:
 		_check(settings.has(key), "map_scenes.json has %s" % key)
 	_check(not settings.has("peasants_per_thousand") and not settings.has("carts_per_value"), "old tuning keys gone")
+	_check(not settings.has("figure_height") and not settings.has("figure_min_view_fraction"), "VT2: no map-scale figure keys")
 	_check(FolkScenes.parse_forced("prov_x:plague,prov_y:dragon,bad").size() == 1, "--scene parsing")
 
 	var world := Node3D.new()
@@ -253,7 +256,7 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	for kind in FolkScenes.KINDS:
 		scenes.forced = [{"province": province, "kind": kind, "settlement": "set_paris", "intensity": 1.0}]
 		pool.refresh(null)
-		_view(pool, paris, 45.0, 1.0)
+		_view(pool, paris, NEAR_D, 1.0)
 		var by_kind: Dictionary = scenes.stats.get("by_kind", {})
 		var shown: Dictionary = by_kind.get(kind, {})
 		_check(int(shown.get("figures", 0)) > 0, "%s scene has figures near: %s" % [kind, scenes.stats])
@@ -271,26 +274,31 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 		var nearest := INF
 		for p in pool.instance_origins():
 			nearest = minf(nearest, p.distance_to(paris))
-		# Dispositions en mètres × échelle des figurines : la marge suit `figure_height` (0,5 à l'origine).
-		var margin := 12.0 * maxf(1.0, pool.figure_height / 0.5)
+		# Dispositions en mètres × échelle des figurines (1:1, VT2) : marge d'ancrage fixe.
+		var margin := 12.0
 		_check(nearest < disks[disks.size() - 1].z + margin, "%s: scene next to Paris (%.1f)" % [kind, nearest])
 		print("fk_folk_test: scene %s → %d figures, %d props" % [kind, full, props])
 		if kind in ["plague", "construction", "fair", "celebration", "flood"]:
 			_check(props > 0, "%s scene has props: %d" % [kind, props])
 		scenes.forced = [{"province": province, "kind": kind, "settlement": "set_paris", "intensity": 0.0}]
 		pool.refresh(null)
-		_view(pool, paris, 45.0, 1.0)
+		_view(pool, paris, NEAR_D, 1.0)
 		_check(pool.figure_count() > 0 and pool.figure_count() <= full, "%s: intensity 0 has fewer extras (%d vs %d)" % [kind, pool.figure_count(), full])
 		# Au loin (palier moyen) : rien.
 		_view(pool, paris, 400.0, 0.0)
 		_check(pool.figure_count() == 0 and pool.prop_count() == 0 and not pool.visible, "%s: empty far away" % kind)
 		# Palier proche mais loin de la scène : rien.
-		_view(pool, paris + Vector2(600.0, 600.0), 45.0, 1.0)
+		_view(pool, paris + Vector2(600.0, 600.0), NEAR_D, 1.0)
 		_check(pool.figure_count() == 0, "%s: nothing near another place: %d" % [kind, pool.figure_count()])
 
-	# 8. Lisibilité : au palier proche (d = 12), une figurine mesure ≥ 0,018 × 12 unités.
-	_view(pool, paris, 12.0, 1.0)
-	_check(pool.current_scale() * FolkPool.HUMAN_HEIGHT_M >= pool.figure_min_view_fraction * 12.0 - 1e-4, "readable figures near: %.3f" % (pool.current_scale() * FolkPool.HUMAN_HEIGHT_M))
+	# 9. VT2 : taille réelle (1 m du modèle = 1 / `meters_per_px` unité) à toute distance ; rien
+	# au-delà de `figure_max_distance`, même au palier proche.
+	for near_d in [0.5, NEAR_D]:
+		_view(pool, paris, near_d, 1.0)
+		_check(is_equal_approx(pool.current_scale(), 1.0 / map_data.meters_per_px), "figures 1:1 at d=%.1f: %.6f" % [near_d, pool.current_scale()])
+	_check(pool.figure_count() > 0, "figures within figure_max_distance")
+	_view(pool, paris, pool.figure_max_distance + 1.0, 1.0)
+	_check(pool.figure_count() == 0 and not pool.visible, "no figure beyond figure_max_distance")
 
 	# 7. Disette : champs de la province sans travailleurs (routine en été).
 	var routine := FolkRoutine.new()
@@ -300,12 +308,12 @@ func _scenes(map_data: MapData, data: SettlementData, mask: TerroirMask) -> void
 	pool.register(routine)
 	scenes.forced = []
 	pool.refresh(null)
-	_view(pool, paris, 45.0, 1.0)
+	_view(pool, paris, NEAR_D, 1.0)
 	var fields_before := int(routine.stats.get("fields", 0))
 	scenes.forced = [{"province": province, "kind": "famine", "settlement": "set_paris", "intensity": 1.0}]
 	pool.refresh(null)
 	routine.idle_provinces = scenes.idle_provinces
-	_view(pool, paris, 45.0, 1.0)
+	_view(pool, paris, NEAR_D, 1.0)
 	var fields_after := int(routine.stats.get("fields", 0))
 	print("fk_folk_test: famine fields %d → %d" % [fields_before, fields_after])
 	_check(scenes.idle_provinces.has(province), "famine idles the province")

@@ -17,29 +17,41 @@ extends Resource
 ## arbre, un moulin, un hameau et une maison de village sont donc grossis du même facteur (plus de
 ## moulin rétréci à côté d'un village géant), et chaque famille ne quitte sa taille de carte que
 ## quand E passe sous 1 / ratio.
+##
+## VT / VT2 (ADR 0138) : l'exagération ne s'applique plus qu'aux **arbres** et aux **incendies**.
+## Hameaux, moulins et panaches de cheminée sont à l'échelle 1:1 à toute distance (échelle
+## constante), coupés au-delà d'une portée de visibilité quand ils deviennent sous-pixel.
 
 ## Distance du rig (unités monde, 1 unité ≈ 719 m) au-dessus de laquelle rien ne change.
 @export var shrink_start: float = 28.0
 ## Distance en deçà de laquelle tout est à sa taille réelle (seuil du palier vallée, SZ4b).
 @export var shrink_end: float = 8.0
-## Exagération à `shrink_start` : 1 / plus petit rapport (moulins), toutes les familles y sont
-## encore à leur taille de carte.
+## Exagération à `shrink_start` (arbres et incendies y sont encore à leur taille de carte).
 @export var max_exaggeration: float = 125.0
-## Taille réelle / taille carte, par famille. Arbres : ~1,5 unité de haut sur la carte, 20-30 m en
-## vrai. Moulins : corps de 3,3 unités (2,3 km), ~15 m en vrai. Hameaux : ~2 unités de large,
-## 40-60 m en vrai. Panaches de cheminée : 1 × 3 km sur la carte, ~10 × 40 m en vrai ; fumées
-## d'incendie : 2 × 9 km, ~60 × 400 m en vrai.
+## Taille réelle / taille carte, par famille (1 unité ≈ 719 m). Arbres : ~1,5 unité de haut sur la
+## carte, 20-30 m en vrai. Hameaux : ~2 unités de large, 40-60 m en vrai. Fumées d'incendie :
+## 2 × 9 km sur la carte, ~60 × 400 m en vrai.
 @export var tree_ratio: float = 0.035
-@export var windmill_ratio: float = 0.008
 @export var hamlet_ratio: float = 0.03
-@export var chimney_ratio: float = 0.02
 @export var fire_ratio: float = 0.05
-## Opacité des panaches de cheminée à taille réelle (fondu avec l'échelle) : un filet de fumée de
-## 20 m vu à un kilomètre n'est qu'un voile.
+## VT2 (ADR 0138, addendum) : moulins, panaches de cheminée (et figurants FK, `map_scenes.json`)
+## sont à l'échelle 1:1 à toute distance, comme les villes et les hameaux : échelle constante
+## `*_ratio` × leur taille de modèle, plus d'exagération. Moulin (`WINDMILL_SCALE` 4,6 × modèle) :
+## faîte du corps 0,36 u de modèle → ~11 m, moyeu ~9 m, ailes ~18 m d'envergure (moulin sur pivot
+## médiéval : 10-12 m, ailes 18-24 m). Panache (`CHIMNEY_SIZE` 1,3 × 4, ± 20 %) : ~9 × 28 m.
+@export var windmill_ratio: float = 0.0093
+@export var chimney_ratio: float = 0.0098
+## Opacité des panaches de cheminée (un filet de fumée de 30 m n'est qu'un voile).
 @export var chimney_real_alpha: float = 0.5
+## Portées de visibilité (distance du rig, unités monde) : au-delà, moulins et panaches ne sont
+## plus dessinés (moins d'un à deux pixels en 1080p, fov 55°, on ne paie pas un rendu invisible).
+## Moulin ~18 m hors tout : ≈ 26 / d px ; panache ~28 m de haut : ≈ 40 / d px.
+@export var windmill_max_distance: float = 30.0
+@export var chimney_max_distance: float = 25.0
+## Part de la portée des panaches sur laquelle leur opacité s'éteint (pas d'apparition brusque).
+@export var visibility_fade: float = 0.2
 ## Variation relative d'échelle en deçà de laquelle les instances recalculées sur le processeur
-## (moulins, panaches) ne sont pas réécrites (évite une réécriture par image pendant un
-## zoom).
+## ne sont pas réécrites (évite une réécriture par image pendant un zoom).
 @export var rewrite_step: float = 0.04
 
 static var _default: MapPropScale = null
@@ -70,8 +82,9 @@ func tree_scale(distance: float) -> float:
 	return scale_for(tree_ratio, distance)
 
 
-func windmill_scale(distance: float) -> float:
-	return scale_for(windmill_ratio, distance)
+## VT2 : moulins à l'échelle 1:1 à toute distance (`windmill_ratio` × leur taille de modèle).
+func windmill_scale() -> float:
+	return clampf(windmill_ratio, 1e-4, 1.0)
 
 
 ## VT (ADR 0138) : les hameaux sont à l'échelle 1:1 à toute distance (pas d'exagération) :
@@ -80,13 +93,26 @@ func hamlet_scale(_distance: float) -> float:
 	return clampf(hamlet_ratio, 1e-4, 1.0)
 
 
-func chimney_scale(distance: float) -> float:
-	return scale_for(chimney_ratio, distance)
+## VT2 : panaches de cheminée à l'échelle 1:1 à toute distance.
+func chimney_scale() -> float:
+	return clampf(chimney_ratio, 1e-4, 1.0)
 
 
-## Facteur d'opacité des panaches de cheminée (1 au loin, `chimney_real_alpha` de près).
+## Facteur d'opacité des panaches de cheminée : `chimney_real_alpha`, éteint en approchant de
+## `chimney_max_distance` (0 au-delà).
 func chimney_alpha(distance: float) -> float:
-	return lerpf(1.0, chimney_real_alpha, progress(distance))
+	return chimney_real_alpha * range_weight(distance, chimney_max_distance)
+
+
+## Vrai si les moulins sont dessinés à la distance `distance`.
+func windmills_visible(distance: float) -> bool:
+	return distance < windmill_max_distance
+
+
+## Poids de visibilité (1 en deçà, 0 au-delà de `max_distance`, fondu sur `visibility_fade`).
+func range_weight(distance: float, max_distance: float) -> float:
+	var fade := maxf(max_distance * visibility_fade, 1e-4)
+	return 1.0 - smoothstep(max_distance - fade, max_distance, distance)
 
 
 func fire_scale(distance: float) -> float:

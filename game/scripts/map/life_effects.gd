@@ -5,8 +5,10 @@ extends Node3D
 ## colonies et des hameaux (plus fournies l'hiver), fumées d'incendie des hameaux brûlés et des
 ## villes assiégées, vols d'oiseaux, bateaux. Instanciés par `MultiMesh` (un appel de rendu par
 ## famille), visibles au palier près (fumées d'incendie jusqu'au palier moyen).
-## Lot SZ4 : sous le palier comté, moulins et fumées passent continûment de leur taille de carte à
-## leur taille réelle (`MapPropScale`), et restent affichés jusqu'au palier site.
+## Lot SZ4 : les fumées d'incendie passent continûment de leur taille de carte à leur taille réelle
+## (`MapPropScale`). VT2 (ADR 0138, addendum) : moulins et panaches de cheminée sont à l'échelle
+## 1:1 à toute distance, dessinés en deçà de leur portée (`windmill_max_distance`,
+## `chimney_max_distance`).
 
 const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
 const OVERLAY_SHADER := preload("res://shaders/life_overlay.gdshader")
@@ -19,7 +21,8 @@ const WINDMILL_HUB := Vector3(0.0, 0.3, 0.08)
 const RUIN_MIN_DEVASTATION := 45.0
 ## Panaches de cheminée par type de colonie.
 const CHIMNEYS := {"city": 5, "town": 3, "village": 2, "abbey": 2, "castle": 1}
-## Taille d'un panache de cheminée (largeur, hauteur) et d'incendie (unités monde).
+## Taille d'un panache de cheminée (largeur, hauteur ; × `MapPropScale.chimney_ratio`, VT2) et
+## d'incendie (unités monde à l'échelle de la carte, × `fire_scale`).
 const CHIMNEY_SIZE := Vector2(1.3, 4.0)
 const FIRE_SIZE := Vector2(3.0, 13.0)
 ## VT-G (villes à l'échelle 1:1) : le rayon de colonie est le rayon réel. Cheminées réparties dans
@@ -28,6 +31,9 @@ const FIRE_SIZE := Vector2(3.0, 13.0)
 const CHIMNEY_RADIUS_RATIO := 0.7
 const CHIMNEY_TOP_RATIO := 1.0
 const FIRE_RADIUS_RATIO := 0.9
+## VT2 : levée d'un panache de hameau au-dessus du sol, à l'échelle du modèle de hameau
+## (× `MapPropScale.hamlet_scale`, ≈ 7 m : faîte d'une ferme).
+const HAMLET_CHIMNEY_LIFT := 0.35
 const WINDMILL_RING_MIN := 1.6
 ## Dévastation (%) au-delà de laquelle les hameaux brûlés fument encore.
 const FIRE_MIN_DEVASTATION := 25.0
@@ -65,9 +71,9 @@ var _ruin_overlays: Dictionary = {}
 var _ruin: Dictionary = {}
 var _season_boost := 1.0
 var _snow := 0.0
-## SZ4 : échelles appliquées (moulins : instances réécrites ; fumées : paramètre du matériau).
-var _windmill_scale := 1.0
-var _smoke_scales := Vector2(-1.0, -1.0)
+## SZ4 : échelle appliquée aux fumées d'incendie (paramètre du matériau ; VT2 : les panaches de
+## cheminée ont leur taille réelle dans leurs instances, `prop_scale` 1).
+var _fire_scale := -1.0
 var _camera_distance := 1000.0
 ## FC1 : les moulins ne portent ombre que sous `veg_shadow_distance` (comme les arbres) ; bascule
 ## seulement au franchissement du seuil.
@@ -79,25 +85,13 @@ var _mill_shadows := true
 var _cpu_buffers: Dictionary = {}  # MultiMeshInstance3D → PackedFloat32Array
 ## RS-K : échelles de maquette (courante, réelle) par colonie, mémorisées le temps d'une passe de
 ## réécriture (plusieurs panaches et moulins par colonie : 3 appels `model_scale_at` par point).
-## RS-K : réécritures dues à l'échelle reportées tant que le nœud est masqué (panaches par
-## `MultiMeshInstance3D`, moulins) : faites à l'image où il redevient visible, avant son rendu.
-var _smoke_dirty: Dictionary = {}  # MultiMeshInstance3D → vrai
-var _mills_dirty := false
 var _scale_memo: Dictionary = {}  # colonie → Vector2(échelle courante, échelle réelle)
 var _memo_depth := 0
 ## RS-K2 (ADR 0051) : travaux étalés sur plusieurs images dans une image ouverte par
-## `FrameBudget.begin_frame` (tout d'un coup hors image : tests, outils). Réécriture des panaches
-## après un pas d'échelle : `SMOKE_SLICE` points par image et par famille, reprise au curseur
-## (un nouveau pas relance un tour complet sans revenir au début). Recalage des sols : tuiles
+## `FrameBudget.begin_frame` (tout d'un coup hors image : tests, outils). Recalage des sols : tuiles
 ## en attente traitées par tranches (jusqu'à `REGROUND_SLICE` points), hauteurs lues en un appel.
-## Moulins : `MILL_SLICE` par image, avec leur curseur.
-const SMOKE_SLICE := 1600
+## (VT2 : plus de réécriture d'échelle des moulins ni des panaches, échelles constantes.)
 const REGROUND_SLICE := 400
-const MILL_SLICE := 500
-var _mill_left := 0  # moulins restant à réécrire (tour en cours)
-var _mill_cursor := 0
-var _smoke_left: Dictionary = {}  # MultiMeshInstance3D → points restant à réécrire
-var _smoke_cursor: Dictionary = {}  # MultiMeshInstance3D → prochain point
 var _reground_pending: Dictionary = {}  # index de tuile → vrai (ordre d'arrivée)
 
 
@@ -188,11 +182,11 @@ func rebuild(province_states: Dictionary) -> void:
 			if devastation >= FIRE_MIN_DEVASTATION and hseed % 3 == 0:
 				_fire_points.append(_fixed_point(hpx, 0.1, float(hseed % 1000) / 1000.0))
 		elif hseed % 2 == 0:
-			_chimney_points.append(_fixed_point(hpx, 0.35, float(hseed % 1000) / 1000.0))
+			_chimney_points.append(_fixed_point(hpx, HAMLET_CHIMNEY_LIFT * MapPropScale.shared().hamlet_scale(0.0), float(hseed % 1000) / 1000.0))
 	# FK4 : fumées de bûcher (peste) et d'émeute (révolte) des scènes de province.
 	for k in scene_fires.size():
 		_fire_points.append(_fixed_point(scene_fires[k], 0.1, float(k % 7) / 7.0))
-	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE, 0.0)
+	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE * MapPropScale.shared().chimney_scale(), 0.0)
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
 	_build_windmills(province_states)
 	_apply_ruins(province_states)
@@ -233,8 +227,6 @@ func _rebuild_key(province_states: Dictionary) -> String:
 ## Moulins à vent sur la couronne de champs des colonies ; ailes arrêtées en pays dévasté.
 func _build_windmills(province_states: Dictionary) -> void:
 	_points_version += 1
-	_mill_left = 0  # RS-K2 : positions neuves
-	_mill_cursor = 0
 	_windmill_points.clear()
 	var data := _layer.data
 	for i in data.settlements.size():
@@ -389,8 +381,9 @@ func _end_pass() -> void:
 func _windmill_transforms(point: Array) -> Array:
 	var px: Vector2 = point[0]
 	var y: float = point[4]
-	var basis := Basis(Vector3.UP, float(point[1])).scaled(Vector3.ONE * WINDMILL_SCALE * _windmill_scale)
-	var body := Transform3D(basis, Vector3(px.x, y - 0.05 * _windmill_scale, px.y))
+	var mill_scale := MapPropScale.shared().windmill_scale()  # VT2 : 1:1 à toute distance
+	var basis := Basis(Vector3.UP, float(point[1])).scaled(Vector3.ONE * WINDMILL_SCALE * mill_scale)
+	var body := Transform3D(basis, Vector3(px.x, y - 0.05 * mill_scale, px.y))
 	return [body, Transform3D(basis, body * WINDMILL_HUB)]
 
 
@@ -480,15 +473,14 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 		var point: Array = points[n]
 		var seed_value: float = point[2]
 		var s := 0.8 + 0.4 * seed_value
-		# SZ4 : origine au sol, levée dans la colonne z (lue et mise à l'échelle par le shader).
+		# SZ4 : origine au sol, levée dans la colonne z (lue et mise à l'échelle par le shader,
+		# `prop_scale` : 1 pour les cheminées, VT2).
 		var basis := Basis(Vector3(size.x * s, 0.0, 0.0), Vector3(0.0, size.y * s, 0.0), Vector3(0.0, float(point[1]), 1.0))
 		_write_transform(buffer, n * 16, Transform3D(basis, _origin(point)))
 		_write_custom(buffer, n * 16 + 12, Color(seed_value, darkness, 0.75 + 0.25 * fposmod(seed_value * 7.0, 1.0), fposmod(seed_value * 13.0, 1.0)))
 	multimesh.buffer = buffer
 	mmi.multimesh = multimesh
 	_cpu_buffers[mmi] = buffer
-	_smoke_left.erase(mmi)  # RS-K2 : positions neuves, tour de réécriture en cours caduc
-	_smoke_cursor.erase(mmi)
 
 
 ## Pied d'un panache (au sol ; la levée `point[1]` est portée par la base d'instance, SZ4) ;
@@ -692,131 +684,14 @@ func set_season(weights: Vector4) -> void:
 	_season_boost = 0.55 * weights.y + 0.8 * weights.x + 0.95 * weights.z + 1.15 * weights.w
 
 
-## SZ4 : échelle des panaches (paramètre des matériaux) et des moulins (instances réécrites par
-## pas de `MapPropScale.rewrite_step`).
+## SZ4 : échelle des fumées d'incendie (paramètre du matériau). VT2 : moulins et panaches de
+## cheminée ont une échelle constante, posée à la construction des instances.
 func _apply_prop_scale(camera_distance: float) -> void:
-	var props := MapPropScale.shared()
-	var smoke := Vector2(props.chimney_scale(camera_distance), props.fire_scale(camera_distance))
-	if not smoke.is_equal_approx(_smoke_scales):
-		_smoke_scales = smoke
-		_chimney_material.set_shader_parameter("prop_scale", smoke.x)
-		_fire_material.set_shader_parameter("prop_scale", smoke.y)
+	var fire := MapPropScale.shared().fire_scale(camera_distance)
+	if not is_equal_approx(fire, _fire_scale):
+		_fire_scale = fire
+		_fire_material.set_shader_parameter("prop_scale", fire)
 	_camera_distance = camera_distance
-	var mill := props.windmill_scale(camera_distance)
-	var tp := Time.get_ticks_usec()  # RS-K : sous-sections du banc `--bench-probe`
-	# VT-G : les colonies sont à l'échelle 1:1, leurs moulins et panaches ne suivent plus de maquette.
-	if props.needs_rewrite(_windmill_scale, mill):
-		_windmill_scale = mill
-		_mills_dirty = true
-	_begin_pass()
-	if not _smoke_dirty.is_empty() or not _smoke_left.is_empty():
-		_rewrite_smoke_positions()
-	tp = PerfProbe.lap("life/smoke_rewrite", tp)
-	if _mills_dirty and _windmill_bodies.visible:
-		_mills_dirty = false
-		_mill_left = _windmill_points.size()  # RS-K2 : tour de réécriture étalé
-	if _mill_left > 0:
-		_rewrite_windmills()
-	_end_pass()
-	PerfProbe.lap("life/mill_rewrite", tp)
-
-
-## RS-K2 : tranche du tour de réécriture des moulins (`MILL_SLICE` par image dans une image
-## ouverte, reprise au curseur ; tous sinon).
-func _rewrite_windmills() -> void:
-	var count := _windmill_points.size()
-	if _windmill_bodies.multimesh == null or _windmill_sails.multimesh == null or count == 0:
-		_mill_left = 0
-		return
-	if _windmill_bodies.multimesh.instance_count != count:
-		_mill_left = 0
-		return
-	var todo := mini(_mill_left, MILL_SLICE) if FrameBudget.in_frame() else _mill_left
-	var n := _mill_cursor % count
-	var indices: Array = []
-	for _step in todo:
-		var point: Array = _windmill_points[n]
-		var pose := _mill_pose(point)
-		_settlement_pose(pose)
-		point[0] = pose[0]
-		point[4] = _pose_y(pose)
-		indices.append(n)
-		n += 1
-		if n == count:
-			n = 0
-	_mill_cursor = n
-	_mill_left -= todo
-	indices.sort()
-	_write_windmills(indices)
-
-
-## SZ4b : origines des panaches des colonies à l'échelle courante de leur maquette (tampon complet
-## écrit une fois depuis sa copie processeur, RS-K ; repli point par point sans copie).
-## RS-K2 : un pas d'échelle lance un tour de réécriture, fait par tranches (`_rewrite_smoke_slice`).
-func _rewrite_smoke_positions() -> void:
-	for pair in [[_chimneys, _chimney_points], [_fires, _fire_points]]:
-		var mmi: MultiMeshInstance3D = pair[0]
-		var points: Array = pair[1]
-		if _smoke_dirty.has(mmi) and mmi.visible:
-			_smoke_dirty.erase(mmi)
-			if mmi.multimesh != null and mmi.multimesh.instance_count == points.size() and not points.is_empty():
-				_smoke_left[mmi] = points.size()
-		if _smoke_left.has(mmi):
-			_rewrite_smoke_slice(mmi, points)
-
-
-## RS-K2 : réécrit une tranche de panaches depuis le curseur (tous hors image ouverte) ; échelle,
-## centre et pose de la colonie calculés une fois pour ses points consécutifs.
-func _rewrite_smoke_slice(mmi: MultiMeshInstance3D, points: Array) -> void:
-	var count := points.size()
-	var left: int = _smoke_left[mmi]
-	if mmi.multimesh == null or mmi.multimesh.instance_count != count or count == 0:
-		_smoke_left.erase(mmi)
-		return
-	var buffer: PackedFloat32Array = _cpu_buffers.get(mmi, PackedFloat32Array())
-	var stride := 16
-	var readable := buffer.size() == count * stride
-	var todo := mini(left, SMOKE_SLICE) if readable and FrameBudget.in_frame() else left
-	var n: int = int(_smoke_cursor.get(mmi, 0)) % count
-	var last := -1
-	var center := Vector2.ZERO
-	var s := 1.0
-	var along := 0.0
-	var touched := false
-	for _step in todo:
-		var point: Array = points[n]
-		var i: int = point[3]
-		if i >= 0:
-			if i != last:
-				last = i
-				center = _layer.model_px(i)
-				var scales := _scale_pair(i)
-				s = scales.x
-				along = clampf((s - scales.y) / maxf(1.0 - scales.y, 1e-4), 0.0, 1.0)
-			var px: Vector2 = center + (point[4] as Vector2) * s
-			point[0] = px
-			var y := lerpf(float(point[6]), float(point[5]), along)
-			if readable:
-				var o := n * stride
-				buffer[o + 3] = px.x
-				buffer[o + 7] = y
-				buffer[o + 11] = px.y
-				touched = true
-			else:
-				var xform := mmi.multimesh.get_instance_transform(n)
-				xform.origin = Vector3(px.x, y, px.y)
-				mmi.multimesh.set_instance_transform(n, xform)
-		n += 1
-		if n == count:
-			n = 0
-	_smoke_cursor[mmi] = n
-	if left - todo <= 0:
-		_smoke_left.erase(mmi)
-	else:
-		_smoke_left[mmi] = left - todo
-	if touched:
-		mmi.multimesh.buffer = buffer
-		_cpu_buffers[mmi] = buffer
 
 
 ## FC1 : préréglage de qualité (groupe `RenderQuality.CLIENT_GROUP`).
@@ -844,18 +719,17 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	near_weight = tiers.near_weight(camera_distance) if tiers != null else 1.0
 	# DV : part de la vue normale hors détail proche (feux seuls au-delà de `near_threshold`).
 	var medium := clampf(1.0 - tiers.strategic_weight(camera_distance) - near_weight, 0.0, 1.0) if tiers != null else 0.0
-	var chimney_alpha := near_weight * _season_boost * 0.85 * MapPropScale.shared().chimney_alpha(camera_distance)
+	var props := MapPropScale.shared()
+	var chimney_alpha := near_weight * _season_boost * 0.85 * props.chimney_alpha(camera_distance)
 	_chimneys.visible = chimney_alpha > 0.02
 	_chimney_material.set_shader_parameter("fade", chimney_alpha)
 	var fire_alpha := clampf(near_weight + medium * 0.8, 0.0, 1.0) * 0.9
 	_fires.visible = fire_alpha > 0.02
 	_fire_material.set_shader_parameter("fade", fire_alpha)
-	var show_models := near_weight > 0.35
+	# VT2 : moulins 1:1, dessinés en deçà de leur portée (sous-pixel au-delà).
+	var show_models := near_weight > 0.35 and props.windmills_visible(camera_distance)
 	_windmill_bodies.visible = show_models
 	_windmill_sails.visible = show_models
-	# SZ4 : fumées, feux et moulins à leur taille réelle sous le palier comté (ZG4 les masquait au
-	# palier site, à leur taille de carte : des colonnes de plusieurs kilomètres). RS-K : après la
-	# visibilité (réécritures des nœuds masqués reportées).
 	_apply_prop_scale(camera_distance)
 	if (_snow > 0.01) != _overlay_snowy:
 		_update_overlays()

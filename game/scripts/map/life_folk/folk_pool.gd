@@ -10,10 +10,11 @@ extends Node3D
 ## - Plafond fixe de figurines (`pool_cap` de `data/rules/map_scenes.json`, repli 600), divisé par
 ##   deux tant que le budget d'image (`FrameBudget`) est dépassé ; accessoires : un quart du
 ##   plafond.
-## - Actif au palier proche seulement (`ZoomTiers.near_weight`), dans un rayon autour du point
-##   visé (`activity_radius`, borné par la distance caméra).
-## - Placement recalculé seulement quand le point visé s'éloigne d'une fraction du rayon, que
-##   l'échelle des figurines change nettement (zoom) ou qu'un tour passe (`refresh`), jamais à
+## - Actif au palier proche seulement (`ZoomTiers.near_weight`), en deçà de `figure_max_distance`
+##   (VT2 : figurines à l'échelle 1:1, sous-pixel au-delà), dans un rayon autour du point visé
+##   (`activity_radius`, borné par la distance caméra).
+## - Placement recalculé seulement quand le point visé s'éloigne d'une fraction du rayon ou qu'un
+##   tour passe (`refresh`), jamais à
 ##   chaque image. Animation et déplacement entièrement en shader : chaque instance parcourt en
 ##   boucle un segment droit (phase propre) ; hauteurs aux deux bouts par
 ##   `TerrainBuilder.surface_height_at`.
@@ -26,18 +27,19 @@ extends Node3D
 const DATA_FILE := "rules/map_scenes.json"
 const DEFAULT_CAP := 600
 const DEFAULT_RADIUS := 60.0
-## Hauteur d'une figurine (unités monde) à l'échelle de la carte, au-dessus de `shrink_start` de
-## `MapPropScale` ; elle rejoint la taille réelle (1,8 m) au palier vallée.
-const DEFAULT_FIGURE_HEIGHT := 1.26
+## VT2 (ADR 0138, addendum) : figurines, bêtes et charrettes à l'échelle 1:1 à toute distance
+## (1 m du modèle = 1 / `meters_per_px` unité), placées seulement en deçà de cette distance
+## caméra (repli ; réglage `figure_max_distance` de `map_scenes.json`) : un homme de 1,7 m y fait
+## ≈ 0,8 px en 1080p (fov 55°), une charrette ≈ 2 px ; au-delà, rien n'est posé.
+const DEFAULT_MAX_DISTANCE := 3.0
+const DEFAULT_METERS_PER_UNIT := 719.0
+## Taille d'un homme (m), repli du relevé de taille à l'écran (`view_report`).
 const HUMAN_HEIGHT_M := 1.8
-const DEFAULT_MIN_VIEW_FRACTION := 0.045
 ## Couples rôle:activité préchauffés (vie ordinaire, marchands) ; les autres sont créés à la
 ## première demande.
 const WARM_FIGURES := ["peasant:walk", "peasant_b:walk", "porter:walk", "rider:ride", "pilgrim:walk", "merchant:walk", "guard:guard_walk", "peasant:plough", "peasant_b:plough", "porter:harvest", "reaper:scythe", "peasant:idle", "peasant_b:herd", "peasant:chop"]
 ## Déplacement du point visé (fraction du rayon) qui déclenche un nouveau placement.
 const MOVE_FRACTION := 0.2
-## Variation relative d'échelle qui déclenche un nouveau placement.
-const RESCALE_STEP := 0.12
 ## Poids du palier proche sous lequel le réservoir est vidé.
 const NEAR_MIN := 0.35
 ## Budget : part des images en dépassement (sur `BUDGET_WINDOW`) qui divise le plafond par deux,
@@ -53,7 +55,8 @@ var cap: int = DEFAULT_CAP
 ## Plafond appliqué (moitié de `cap` en cas de dépassement du budget d'image).
 var effective_cap: int = DEFAULT_CAP
 var activity_radius: float = DEFAULT_RADIUS
-var figure_height: float = DEFAULT_FIGURE_HEIGHT
+## Distance caméra au-delà de laquelle aucune figurine n'est posée (VT2).
+var figure_max_distance: float = DEFAULT_MAX_DISTANCE
 ## Réglages lus dans `map_scenes.json` (clés inconnues ignorées), partagés avec les fournisseurs.
 var settings: Dictionary = {}
 var stats: Dictionary = {"figures": 0, "props": 0, "placements": 0, "place_ms": 0.0, "halved": false}
@@ -65,7 +68,6 @@ var _providers: Array = []
 var _groups: Dictionary = {}
 var _anim_time := 0.0
 var _last_focus := Vector2(INF, INF)
-var _last_scale := 0.0
 var _dirty := true
 var _active := false
 var _level := -1
@@ -100,10 +102,6 @@ const WARM_BUDGET_USEC := 4000
 var exclusions: PackedVector3Array = PackedVector3Array()
 ## Couche des colonies dont on tire `exclusions` au premier `refresh` (nulle en test).
 var landmark_layer: Node = null
-## FK6 : hauteur d'une figurine au moins égale à cette fraction de la distance caméra (taille à
-## l'écran à peu près constante au palier proche, lisible), au-dessus de l'échelle des
-## accessoires (`MapPropScale`) qui la ramène sinon à la taille réelle (1 px) près du sol.
-var figure_min_view_fraction: float = DEFAULT_MIN_VIEW_FRACTION
 var _prev_focus := Vector2(INF, INF)
 var _prev_distance := 0.0
 var _since_place := 0.0
@@ -118,8 +116,7 @@ func setup(map_data: MapData, terrain: TerrainBuilder, cap_override: int = -1) -
 		cap = cap_override
 	effective_cap = cap
 	activity_radius = float(settings.get("activity_radius", DEFAULT_RADIUS))
-	figure_height = float(settings.get("figure_height", DEFAULT_FIGURE_HEIGHT))
-	figure_min_view_fraction = float(settings.get("figure_min_view_fraction", DEFAULT_MIN_VIEW_FRACTION))
+	figure_max_distance = float(settings.get("figure_max_distance", DEFAULT_MAX_DISTANCE))
 	# Groupes de figurines de la routine et des marchands (≈ 0,2-1 ms chacun, 9 ms le premier).
 	_warm_queue = []
 	for pair in WARM_FIGURES:
@@ -180,23 +177,23 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 		_warm_step(WARM_BUDGET_USEC)
 		if not _warm_queue.is_empty():
 			return
-	if near_weight < NEAR_MIN or not _refreshed:
+	var out_of_range := near_weight < NEAR_MIN or camera_distance > figure_max_distance
+	if out_of_range or not _refreshed:
 		if _active:
 			clear()
-		_settled = _refreshed or near_weight < NEAR_MIN
+		_settled = _refreshed or out_of_range
 		return
 	_anim_time += delta
-	var scale_now := world_scale(camera_distance)
+	var scale_now := world_scale()
 	var radius := active_radius(camera_distance)
 	var moved := focus.distance_to(_last_focus) > radius * MOVE_FRACTION
-	var rescaled := _last_scale <= 0.0 or absf(scale_now / _last_scale - 1.0) > RESCALE_STEP
 	# Pendant un déplacement ou un zoom continu, placement différé jusqu'à ce que la caméra se
 	# pose (ou au plus tard après `MAX_DEFER_SECONDS`) : pas un placement par image.
 	var steady := focus.distance_to(_prev_focus) < radius * 0.004 and absf(camera_distance / maxf(_prev_distance, 1e-3) - 1.0) < 0.004
 	_prev_focus = focus
 	_prev_distance = camera_distance
 	_since_place += delta
-	var pending := not _active or _dirty or moved or rescaled
+	var pending := not _active or _dirty or moved
 	if not _active or (pending and (steady or _since_place > MAX_DEFER_SECONDS)):
 		place(focus, radius, scale_now)
 		pending = false
@@ -210,15 +207,9 @@ func update_view(focus: Vector2, camera_distance: float, near_weight: float) -> 
 	visible = true
 
 
-## Échelle monde / modèle (1 unité de modèle = 1 m) à la distance `camera_distance`.
-func world_scale(camera_distance: float) -> float:
-	var props := MapPropScale.shared()
-	var real := HUMAN_HEIGHT_M / (_map_data.meters_per_px if _map_data != null else 719.0)
-	var shown := figure_height * props.exaggeration(camera_distance) / maxf(props.max_exaggeration, 1.0)
-	# Borné à `shrink_start` : au-delà, la taille de carte (`figure_height`) prend le relais
-	# (0,018 × 28 ≈ 0,5, raccord continu).
-	var readable := figure_min_view_fraction * minf(camera_distance, props.shrink_start)
-	return maxf(maxf(real, shown), readable) / HUMAN_HEIGHT_M
+## Échelle monde / modèle (1 unité de modèle = 1 m) : taille réelle à toute distance (VT2).
+func world_scale() -> float:
+	return 1.0 / (_map_data.meters_per_px if _map_data != null else DEFAULT_METERS_PER_UNIT)
 
 
 ## Rayon d'activité (unités monde) : `activity_radius`, borné par la distance caméra.
@@ -274,7 +265,6 @@ func place(focus: Vector2, radius: float, world_scale_value: float) -> void:
 			mm.buffer = group["buffer"]
 		mm.custom_aabb = aabb
 	_last_focus = focus
-	_last_scale = world_scale_value
 	_since_place = 0.0
 	_dirty = false
 	_active = true
@@ -488,9 +478,10 @@ func _figure_material(role: String, activity: String, kind: String, variant: int
 	return material
 
 
-## Niveau de détail des figurines selon la distance (toutes petites à l'écran au palier proche).
+## Niveau de détail des figurines selon la distance. VT2 : à l'échelle 1:1 une figurine fait au
+## plus une quinzaine de pixels (rig 0,3) : niveau 1 au plus près, 2 (le plus simple) au-delà.
 func _apply_level(camera_distance: float) -> void:
-	var level := 2 if camera_distance > 35.0 else (1 if camera_distance > 10.0 else 0)
+	var level := 2 if camera_distance > 1.0 else 1
 	if level == _level:
 		return
 	_level = level

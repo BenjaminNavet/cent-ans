@@ -1534,8 +1534,8 @@ d = 60 ; `*_amiens_zoom_*` : Amiens à d = 6 et 3, pleine résolution recadrée)
 ## Maquettes continues et forêts denses (lot SZ4b, suites SZ4)
 
 > Mise à l'échelle des colonies retirée par le chantier VT (ADR 0138) : les villes sont à l'échelle
-> 1:1 à toutes les hauteurs ; l'exagération commune ne s'applique plus qu'aux arbres, moulins,
-> panaches et figurants.
+> 1:1 à toutes les hauteurs ; depuis VT2, moulins, panaches de cheminée et figurants le sont aussi :
+> l'exagération commune ne s'applique plus qu'aux arbres et aux incendies.
 
 **Exagération commune.** `MapPropScale` ne donne plus une courbe par famille mais une seule
 exagération E(d) (taille affichée / taille réelle) : `max_exaggeration` (125 = 1 / rapport des
@@ -1708,8 +1708,8 @@ vue stratégique (poids ≥ 0,99, parchemin au-delà de 1200). Villes v2 : loint
 `sink_factor` (0,95) de la caméra, bande de transition de 10 % (miroir du fondu des blocs).
 
 **Repérage, clic.** Nom et écu (DV2) ; étiquettes, clic (rayon minimal 8 px) et anneau de sélection
-sur l'emprise réelle. Hameaux et cheminées à taille réelle ; incendies exagérés. Végétation exclue
-du finage. Rivières : plus de coupure sous les villes, la ville 1:1 enjambe la vraie rivière.
+sur l'emprise réelle. Hameaux, moulins, panaches de cheminée et figurants FK à taille réelle
+(VT2, ci-dessous) ; incendies et arbres exagérés. Végétation exclue du finage. Rivières : plus de coupure sous les villes, la ville 1:1 enjambe la vraie rivière.
 
 **Options.** `--no-town-far` (lointain coupé), `--no-landmarks-1to1` (villes v2 rendues comme les
 autres). Réglages : `@export` de `town_far_layer.gd` (`f1_tile`, `f2_tile`, `f1_range`,
@@ -1739,6 +1739,33 @@ chauffe. Fil principal : `townfar` ≤ 2,2 ms par image (budget 2 ms + une tuile
 17 ms (une tuile, machine chargée) sur 9 passes. 1,23 M sommets, ≈ 41 Mo de mémoire vidéo.
 
 ![Paris à d = 15 : raccord ville 1:1 / lointain](img/vt/vt_paris_d15_detail.jpg)
+
+### Moulins, fumées et figurants 1:1 (VT2, addendum à l'ADR 0138)
+
+Plus d'exagération pour les moulins, les panaches de cheminée et les figurants FK : échelle
+constante à toute distance, et une **portée** au-delà de laquelle ils ne sont plus dessinés (ils
+seraient sous-pixel ; on ne paie pas leur rendu). Arbres et incendies (événement de jeu) gardent
+l'exagération commune de SZ4b.
+
+| Famille | Avant | Après (taille réelle) | Portée (rig) | Réglage |
+|---|---|---|---|---|
+| Moulins | ×125 au plus (~2 km de loin), 0,008 → corps ~9,5 m de près | `windmill_ratio` 0,0093 : faîte 11 m, ailes 18 m d'envergure (≈ 26 / d px en 1080p) | 30 | `resources/map_prop_scale.tres` |
+| Panaches de cheminée | ×50 au plus, 0,02 → ~19 × 57 m de près ; levée des villes écrasée par l'échelle | `chimney_ratio` 0,0098 : ~9 × 28 m, levée réelle (faîte de la ville, ~7 m sur un hameau) | 25 (fondu `visibility_fade` 20 %) | idem |
+| Figurants FK | plancher de lisibilité (hauteur ≥ 0,045 × d, plus gros que les îlots de Paris à d = 15) | 1 m du modèle = 1 / `meters_per_px` (homme 1,8 m ≈ 0,8 px à d = 3 en 1080p, charrette ≈ 2 px) | `figure_max_distance` 3 | `data/rules/map_scenes.json` |
+
+- `MapPropScale.windmill_scale()` / `chimney_scale()` sans argument ; `windmills_visible(d)`,
+  `chimney_alpha(d)` (`chimney_real_alpha` éteint sur les derniers 20 % de la portée),
+  `range_weight(d, portée)`.
+- `LifeEffects` : taille réelle écrite dans les instances des panaches (matériau `prop_scale` 1 ;
+  les incendies gardent `fire_scale`), moulins à échelle constante ; plus de réécriture d'échelle
+  (moulins, panaches) pendant un zoom ; nœuds des moulins masqués au-delà de leur portée.
+- `FolkPool` : `world_scale()` constant ; `figure_height` et `figure_min_view_fraction` retirés
+  (données, schéma, miroir `MapSceneRules` du cœur) au profit de `figure_max_distance` ; niveau de
+  détail 1 sous d = 1, 2 au-delà ; rayon d'activité `min(activity_radius, max(1,3 d, 6))` = 6 u.
+- Tests : `sz4_prop_scale_test.gd` (échelles, tailles réelles, portées, instances),
+  `fk_folk_test.gd` (vue rapprochée à d = 2, échelle 1:1, rien au-delà de la portée). Captures :
+  `godot --path game --resolution 640x400 --script res://tests/vt2_shots.gd -- --out=<dossier>
+  --hide-armies --map-weather=clear` (Paris d = 15, un moulin de Paris à d = 3 et 1).
 
 ## Interface des colonies (lot C5)
 

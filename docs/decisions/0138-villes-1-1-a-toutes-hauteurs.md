@@ -61,3 +61,28 @@ Banc `--bench-map --bench-pan-only` (M4 Pro, 1280 × 720, qualité Haute, 3 pass
   ≈ 41 Mo (estimation initiale : 30 Mo). Génération 1,4-1,9 s au lieu de 0,3 s estimées, hors du
   chargement bloquant.
 Détail : `docs/godot-map.md`, section « Villes 1:1 à toutes les hauteurs ».
+
+## Addendum VT2 (30/09) : moulins, fumées et figurants à l'échelle 1:1
+
+Contexte : après VT, moulins (jusqu'à ×125 : ~2 km de loin) et panaches de cheminée suivaient
+encore l'exagération commune, et les figurants FK (ADR 0122) gardaient un plancher de lisibilité
+qui les rendait plus gros que les îlots de Paris à d = 15. Le joueur a validé leur passage à
+l'échelle réelle.
+
+Décision :
+- Moulins, panaches de cheminée et figurants FK (gens, bêtes, charrettes) sont à l'échelle 1:1 à
+  toute distance de la vue 3D : moulin ~11 m (ailes ~18 m), panache ~9 × 28 m, homme 1,8 m,
+  charrette ~4 m.
+- Quand ils deviennent sous-pixel, on les **coupe** au-delà d'une portée au lieu de les grossir :
+  moulins 30, panaches 25 (fondu), figurants 3 (distances du rig). Réglages dans
+  `resources/map_prop_scale.tres` et `data/rules/map_scenes.json` (`figure_max_distance`).
+- Arbres et incendies (signal d'un événement de jeu) restent exagérés.
+
+Conséquences :
+- La vie de la carte (figurants) n'apparaît plus qu'en vue très rapprochée (rig ≤ 3, soit une vue
+  de ~2 km) ; au-delà, la campagne est vide de figurants. Les densités FK (réglées pour un rayon de
+  60 u) donnent peu de figurants dans le rayon de 6 u : à rééquilibrer si la partie pilote le
+  demande.
+- Moins de travail pendant un zoom (plus de réécriture d'échelle des moulins et panaches) et
+  moins de rendu (moulins, panaches et figurants masqués au-delà de leur portée).
+- Détail : `docs/godot-map.md`, section « Moulins, fumées et figurants 1:1 (VT2) ».
