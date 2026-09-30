@@ -47,12 +47,21 @@
     {
       "id": "obj_majorca_montpellier",
       "title": "Tenir Montpellier",
-      "description": "Jacques III est seigneur de Montpellier, mais doit tenir la ville elle-même, convoitée par Pierre IV et par le roi de France, qui l'achètera en 1349.",
+      "description": "Jacques III est seigneur de Montpellier en fief du roi de France, qui convoite la ville et l'achètera en 1349.",
       "condition": {
         "kind": "hold_provinces",
         "provinces": [
           "prov_montpellier"
         ]
+      }
+    },
+    {
+      "id": "obj_majorca_achaea",
+      "title": "L'héritage de Morée",
+      "description": "Faire valoir les droits de Jacques III sur la principauté d'Achaïe, reçus de son père Ferdinand de Majorque, mort en la disputant en 1316.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_achaea"
       }
     }
   ],
