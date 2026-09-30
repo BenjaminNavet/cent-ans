@@ -665,8 +665,9 @@ func fit_beside(left_edge: float, view_width: float, view_height: float = 0.0) -
 	offset_right = -SCREEN_MARGIN
 	offset_left = -SCREEN_MARGIN - width
 	if view_height > 0.0 and visible:
-		var height := maxf(get_combined_minimum_size().y, minf(DESIGN_HEIGHT, view_height - TOP_CLEARANCE))
-		size = Vector2(width, height)
+		var height := maxf(get_combined_minimum_size().y, minf(size.y, minf(DESIGN_HEIGHT, view_height - TOP_CLEARANCE)))
+		if not is_equal_approx(size.y, height):
+			size = Vector2(size.x, height)
 
 
 ## Deux colonnes (portrait à gauche, contenu à droite) ou une seule colonne défilante.
