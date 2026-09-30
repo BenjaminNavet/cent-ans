@@ -20,6 +20,11 @@
     "model": {"type": "string", "minLength": 1},
     "size": {"type": "integer", "minimum": 256},
     "layer_size": {"type": "integer", "enum": [256, 512, 1024, 2048]},
+    "normal_size": {
+      "description": "Côté des couches du tableau de normales (défaut : layer_size) ; plus petit pour tenir le budget de 40 Mo.",
+      "type": "integer",
+      "enum": [256, 512, 1024, 2048]
+    },
     "blend_width": {"type": "integer", "minimum": 8},
     "target_luminance": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
     "style_prefix": {"type": "string", "minLength": 20},

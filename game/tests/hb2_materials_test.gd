@@ -18,8 +18,8 @@ func _init() -> void:
 		quit(1)
 		return
 	var count: int = (data["layers"] as Array).size()
-	var size: int = int(data["layer_size"])
 	for key in ["albedo", "normal"]:
+		var size: int = int(data["layer_size"] if key == "albedo" else data.get("normal_size", data["layer_size"]))
 		var arr := arrays[key] as TextureLayered
 		print("HB2 %s : %d couches %dx%d format %d" % [key, arr.get_layers(), arr.get_width(), arr.get_height(), arr.get_format()])
 		if arr.get_layers() != count or arr.get_width() != size or arr.get_height() != size:

@@ -264,14 +264,55 @@ def make_seamless(
     )
 
 
+def low_pass(values: np.ndarray, sigma: float, mode: str) -> np.ndarray:
+    """Wide Gaussian blur of a H x W (x C) image, computed at reduced resolution.
+
+    The image is block-averaged by ``factor`` (sigma / 4, power of two), blurred there and
+    brought back by linear interpolation: a sigma of ~150 px costs milliseconds.
+    """
+    from scipy.ndimage import zoom
+
+    height, width = values.shape[:2]
+    factor = 1
+    while (
+        factor * 2 <= sigma / 4
+        and height % (factor * 2) == 0
+        and width % (factor * 2) == 0
+    ):
+        factor *= 2
+    extra = values.shape[2:]
+    small = values.reshape(
+        height // factor, factor, width // factor, factor, *extra
+    ).mean(axis=(1, 3))
+    sigmas = (sigma / factor, sigma / factor) + (0,) * len(extra)
+    small = gaussian_filter(small, sigmas, mode=mode)
+    if factor == 1:
+        return small
+    zoom_mode = "grid-wrap" if mode == "wrap" else "nearest"
+    factors = (factor, factor) + (1,) * len(extra)
+    return zoom(small, factors, order=1, mode=zoom_mode, grid_mode=True)
+
+
 def flatten_lighting(
     linear: np.ndarray, sigma: float, strength: float = 0.7
 ) -> np.ndarray:
     """Divide out large-scale luminance variation (wrap-around blur), keeping chroma."""
     luminance = linear @ _LUMA
-    low = gaussian_filter(luminance, sigma, mode="wrap")
+    low = low_pass(luminance, sigma, "wrap")
     ratio = (low.mean() / np.maximum(low, 1e-4)) ** strength
     return linear * ratio[..., np.newaxis]
+
+
+def flatten_gradients(linear: np.ndarray, sigma: float) -> np.ndarray:
+    """Remove large-scale colour gradients of a non-tiling image (vignetting, haze).
+
+    Each channel is divided by its own mirrored-edge blur (times its mean), so the regions
+    the seam cuts bring together share the same low-frequency colour and the cuts leave no
+    visible band.
+    """
+    low = low_pass(linear, sigma, "reflect")
+    means = linear.reshape(-1, linear.shape[-1]).mean(axis=0)
+    return linear * (means / np.maximum(low, 1e-4))
 
 
 def equalize_luminance(linear: np.ndarray, target: float) -> np.ndarray:
@@ -337,6 +378,7 @@ def process(
     size = document["layer_size"]
     linear = _srgb_to_linear(np.asarray(source, dtype=np.float64) / 255.0)
     scale = source.width / 1024
+    linear = flatten_gradients(linear, sigma=source.width / 6)
     tiled = make_seamless(linear, int(document["blend_width"] * scale))
     tiled = flatten_lighting(tiled, sigma=source.width / 8)
     tiled = equalize_luminance(tiled, document["target_luminance"])
@@ -418,6 +460,18 @@ slices/vertical={rows}
 """
 
 
+def _resize_normal(normal: Image.Image, size: int) -> Image.Image:
+    """Downsample a normal + roughness tile, renormalising the XY normal."""
+    small = (
+        np.asarray(normal.resize((size, size), Image.Resampling.BOX), dtype=np.float64)
+        / 255.0
+    )
+    xy = small[..., :2] * 2 - 1
+    length = np.sqrt((xy**2).sum(-1) + np.clip(1 - (xy**2).sum(-1), 0, 1))
+    small[..., :2] = xy / np.maximum(length, 1e-6)[..., np.newaxis] * 0.5 + 0.5
+    return Image.fromarray(np.clip(np.rint(small * 255), 0, 255).astype(np.uint8))
+
+
 def pack(
     document: dict[str, Any],
     raw_dir: Path = RAW_DIR,
@@ -427,9 +481,10 @@ def pack(
     """Assemble the tiles into the two grid images, their imports and the manifest."""
     materials = document["materials"]
     size = document["layer_size"]
+    normal_size = document.get("normal_size", size)
     columns, rows = grid_shape(len(materials))
     albedo_grid = Image.new("RGB", (columns * size, rows * size))
-    normal_grid = Image.new("RGB", (columns * size, rows * size))
+    normal_grid = Image.new("RGB", (columns * normal_size, rows * normal_size))
     layers = []
     tiles = raw_dir / "tiles"
     for entry in materials:
@@ -439,9 +494,11 @@ def pack(
             raise ValueError(
                 f"{entry['id']} : tuile de taille {albedo.size}, {size}² attendu"
             )
-        cell = (entry["layer"] % columns * size, entry["layer"] // columns * size)
-        albedo_grid.paste(albedo, cell)
-        normal_grid.paste(normal, cell)
+        column, row = entry["layer"] % columns, entry["layer"] // columns
+        albedo_grid.paste(albedo, (column * size, row * size))
+        if normal_size != size:
+            normal = _resize_normal(normal, normal_size)
+        normal_grid.paste(normal, (column * normal_size, row * normal_size))
         mean = _srgb_to_linear(np.asarray(albedo, dtype=np.float64) / 255.0)
         layers.append(
             {
@@ -467,6 +524,7 @@ def pack(
         raise ValueError(f"tableaux trop lourds : {total / 1e6:.1f} Mo > 40 Mo")
     manifest = {
         "layer_size": size,
+        "normal_size": normal_size,
         "grid": [columns, rows],
         "albedo": RES_DIR + ALBEDO_NAME,
         "normal": RES_DIR + NORMAL_NAME,

@@ -14,6 +14,8 @@
 model: fal-ai/flux-2-pro
 size: 1024
 layer_size: 1024
+# Normal + roughness layers at 512² (repository budget: both arrays <= 40 MB).
+normal_size: 512
 blend_width: 96
 # Mean linear luminance every albedo is brought to (the shader tints with the colour map).
 target_luminance: 0.18
@@ -34,6 +36,11 @@ materials:
     biomes: [1, 2, 3, 4, 7]
     tile_m: 120
     seed: 4301
+    attempt: 1
+    prompt_retry: >-
+      A single field of ripe golden wheat in July seen from directly above, dense even
+      ears forming a fine uniform grainy texture, only very soft irregular tonal variation
+      from the wind, no tractor tram lines, no tracks, no stripes, no circles.
     prompt: >-
       A single field of ripe golden wheat in July, dense even stalks seen from above,
       faint parallel drill lines of the sowing, slight wind ripples, a few pale patches.
@@ -43,6 +50,12 @@ materials:
     biomes: [1, 2, 4, 5]
     tile_m: 120
     seed: 4302
+    attempt: 1
+    prompt_retry: >-
+      High-altitude aerial survey photo taken from 500 metres straight down: a single
+      field of young green barley appearing as a fine even velvet-like green texture,
+      individual plants too small to distinguish, faint soft irregular tonal mottling, no
+      radial pattern, no tram lines, no stripes.
     prompt: >-
       A single field of young green barley in spring, fresh uniform bright green crop
       with faint parallel sowing lines and soft tonal variation.
@@ -70,6 +83,11 @@ materials:
     biomes: [1, 2, 5, 6]
     tile_m: 120
     seed: 4305
+    attempt: 2
+    prompt_retry: >-
+      A lush unmown hay meadow seen from directly above: tall mixed grasses and wild
+      flowers forming an irregular soft green carpet with small scattered white, yellow
+      and purple flower specks, no mowing patterns, no tracks, no circles, no stripes.
     prompt: >-
       A lush hay meadow before mowing, tall mixed grasses and wild flowers, soft
       green with small scattered white and yellow flower specks, gentle wind swirls.
@@ -128,6 +146,11 @@ materials:
     biomes: [2, 5]
     tile_m: 120
     seed: 4311
+    attempt: 2
+    prompt_retry: >-
+      A single field of ripening rye in northern Europe seen from directly above: dense
+      tall straw-coloured and pale green-beige stalks forming a uniform grainy texture,
+      soft irregular wind-bent patches, no tram lines, no tracks, no stripes.
     prompt: >-
       A single field of rye in early summer in northern Europe, tall blue-green to
       silvery beige stalks leaning slightly with the wind, soft waving tonal bands.
@@ -186,6 +209,13 @@ materials:
     biomes: [5]
     tile_m: 150
     seed: 4317
+    attempt: 3
+    prompt_retry: >-
+      High-altitude aerial survey photo taken from 500 metres straight down over boreal
+      taiga: a continuous forest canopy made of hundreds of small distinct tree crowns,
+      dark green conical spruce crowns seen from the top as small star-like dots mixed
+      with rounder yellow-green birch crowns, deep dark shadows between crowns, no radial
+      pattern.
     prompt: >-
       Boreal mixed forest of birch and spruce seen from above: dark narrow spruce crowns
       mixed with lighter yellow-green birch crowns, some mossy ground visible.
@@ -195,6 +225,12 @@ materials:
     biomes: [3]
     tile_m: 100
     seed: 4318
+    attempt: 2
+    prompt_retry: >-
+      Dense Mediterranean maquis seen from high above: a continuous thick cover of rounded
+      evergreen shrub crowns two to four metres wide (holm oak, strawberry tree, mastic,
+      heather) in dark olive and grey-green tones, packed closely, only tiny glimpses of
+      reddish stony soil between them.
     prompt: >-
       Dense Mediterranean maquis shrubland seen from above: a thick irregular carpet of
       evergreen shrubs (holm oak, strawberry tree, mastic) in dark olive and grey-green

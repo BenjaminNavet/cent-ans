@@ -4,10 +4,11 @@
   "title": "Manifeste du tableau de matières de sol (HB2, généré)",
   "description": "Écrit par `cent-ans assets ground-materials pack` : correspondance id → couche des tableaux `hb_ground_albedo_array.jpg` / `hb_ground_normal_array.jpg` et moyenne linéaire de chaque albédo. Lu par `game/scripts/map/ground_materials.gd` (le jeu ne lit pas le YAML).",
   "type": "object",
-  "required": ["layer_size", "grid", "albedo", "normal", "layers"],
+  "required": ["layer_size", "normal_size", "grid", "albedo", "normal", "layers"],
   "additionalProperties": false,
   "properties": {
     "layer_size": {"type": "integer", "minimum": 64},
+    "normal_size": {"type": "integer", "minimum": 64},
     "grid": {
       "type": "array",
       "items": {"type": "integer", "minimum": 1},

@@ -86,7 +86,7 @@ def test_flatten_lighting_removes_blotches() -> None:
 
 def test_normal_rough_is_flat_on_flat_input() -> None:
     """A flat albedo gives an up-facing normal and the base roughness."""
-    packed = gm.derive_normal_rough(np.full((64, 64, 3), 0.2), 2.0, 0.8)
+    packed = gm.derive_normal_rough(np.full((128, 128, 3), 0.2), 2.0, 0.8)
     assert abs(int(packed[..., 0].mean()) - 128) <= 1
     assert abs(int(packed[..., 1].mean()) - 128) <= 1
     assert abs(int(packed[..., 2].mean()) - 204) <= 1
@@ -102,13 +102,14 @@ def test_grid_shape_is_exact() -> None:
 def test_pack_writes_arrays_imports_and_manifest(tmp_path: Path) -> None:
     """Pack of small fake tiles: grid sizes, import slices, manifest schema."""
     document = gm.load_catalog()
-    document["layer_size"] = 64
+    document["layer_size"] = 128
+    document["normal_size"] = 64
     tiles = tmp_path / "raw" / "tiles"
     tiles.mkdir(parents=True)
     rng = np.random.default_rng(0)
     for entry in document["materials"]:
         for kind in ("albedo", "normal"):
-            data = rng.integers(0, 255, (64, 64, 3), dtype=np.uint8)
+            data = rng.integers(0, 255, (128, 128, 3), dtype=np.uint8)
             Image.fromarray(data).save(tiles / f"{entry['id']}_{kind}.png")
     manifest_path = tmp_path / "pack.json"
     report = gm.pack(document, tmp_path / "raw", tmp_path / "tex", manifest_path)
@@ -116,7 +117,9 @@ def test_pack_writes_arrays_imports_and_manifest(tmp_path: Path) -> None:
     count = len(document["materials"])
     assert columns * rows == count == report["layers"]
     with Image.open(tmp_path / "tex" / gm.ALBEDO_NAME) as albedo:
-        assert albedo.size == (columns * 64, rows * 64)
+        assert albedo.size == (columns * 128, rows * 128)
+    with Image.open(tmp_path / "tex" / gm.NORMAL_NAME) as normal:
+        assert normal.size == (columns * 64, rows * 64)
     imported = (tmp_path / "tex" / f"{gm.NORMAL_NAME}.import").read_text()
     assert f"slices/horizontal={columns}" in imported
     assert f"slices/vertical={rows}" in imported
@@ -138,9 +141,9 @@ def test_committed_pack_matches_catalog() -> None:
         m["id"] for m in document["materials"]
     ]
     columns, rows = manifest["grid"]
-    size = manifest["layer_size"]
     total = 0
-    for name in (gm.ALBEDO_NAME, gm.NORMAL_NAME):
+    for name, key in ((gm.ALBEDO_NAME, "layer_size"), (gm.NORMAL_NAME, "normal_size")):
+        size = manifest[key]
         path = gm.TEXTURE_DIR / name
         with Image.open(path) as image:
             assert image.size == (columns * size, rows * size)
