@@ -283,6 +283,9 @@ func _build_field() -> Control:
 	for entry in PLAYER_SIDES:
 		player_option.add_item(entry[1])
 	player_option.item_selected.connect(func(i: int) -> void: _set_key("player_side", PLAYER_SIDES[i][0]))
+	# Fin de la ligne Heure/Joueur, puis ligne du siège : case, vide, fortification, type de place.
+	for i in 2:
+		grid.add_child(Control.new())
 	siege_check = CheckBox.new()
 	siege_check.name = "Siege"
 	siege_check.text = "Siège : le camp 2 défend une place"
@@ -291,6 +294,7 @@ func _build_field() -> Control:
 		config["siege"] = on
 		refresh())
 	grid.add_child(siege_check)
+	grid.add_child(Control.new())
 	var fort_label := Label.new()
 	fort_label.text = "Fortification"
 	RichTooltip.attach_plain(fort_label, "custom_battle_fortification")
