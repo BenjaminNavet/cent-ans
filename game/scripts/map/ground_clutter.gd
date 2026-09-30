@@ -28,13 +28,13 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 @export var max_camera_distance: float = 40.0
 @export var fade_band: float = 8.0
 ## Côté (unités monde) d'une cellule de semis.
-@export var cell_size: float = 16.0
+@export var cell_size: float = 32.0
 ## Rayon du disque garni autour du point visé : distance caméra × `radius_factor`, borné.
 @export var radius_factor: float = 1.3
 @export var min_radius: float = 16.0
 @export var max_radius: float = 52.0
 ## Candidats par cellule à la densité 1 (préréglage Haute) sur une couverture pleine.
-@export var base_per_cell: int = 420
+@export var base_per_cell: int = 1680
 ## Densité maximale d'un préréglage (Ultra) : nombre de candidats semés.
 @export var max_density: float = 1.5
 ## Hauteur (unités monde, taille de carte) d'une touffe d'herbe et d'une broussaille.

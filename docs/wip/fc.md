@@ -19,8 +19,14 @@ worktree `../game_project-fc`. Mandat : autonomie. Mesures seulement sur machine
 - Test `game/tests/fc1_shadows_test.gd` OK (pf1/rl1 OK). Fait.
 
 ## FC3
-- En cours : shader `game/shaders/ground_clutter.gdshader` écrit ; à faire `ground_clutter.gd` + `ground_clutter.gdshader`, clé `clutter_density`
-  (ajoutée aux préréglages : 0 / 0,5 / 1 / 1,5, legacy 0).
+- État : `game/scripts/map/ground_clutter.gd` (`GroundClutter`, créé dans `campaign_map.gd`
+  `_setup_settlements`), `game/shaders/ground_clutter.gdshader`, test `game/tests/fc3_clutter_test.gd` OK.
+- Cellules de 32 u (tuiles de terrain de 256 u trop grandes : écart assumé à « 1 appel par tuile ») ;
+  semis dans le `WorkerThreadPool`, pose ≤ 0,3 ms/cellule ; d = 30, Haute, couverture pleine :
+  15 k touffes en 9 cellules (9 appels, sans ombre) ; plafond 30 k.
+- Masque procédural (brins / feuillage), pas de texture ; teinte saisonnière `campaign_season`.
+- Points ouverts : réglage visuel (taille 0,14/0,26 u, couleurs) à juger en capture (FC4) ;
+  +~10-17 appels de dessin sous d = 40 (objectif FC4 « aucune hausse » mesuré au zoom panoramique).
 
 ## FC2 — arbres imposteurs (agent FC2)
 État : squelette. Générateur `tools/blender_scripts/campaign_tree_impostors.py` (Blender headless,
