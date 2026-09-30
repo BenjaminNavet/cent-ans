@@ -30,6 +30,8 @@ uniform vec3 spring_tint = vec3(1.03, 1.10, 0.9);
 uniform vec3 autumn_oak = vec3(0.19, 0.13, 0.035);
 uniform vec3 autumn_beech = vec3(0.30, 0.10, 0.018);
 uniform vec3 autumn_hedge = vec3(0.20, 0.07, 0.03);
+// Lot HB4 : feuillus d'or (bouleau, érable, peuplier, saule, mélèze : classe 4).
+uniform vec3 autumn_gold = vec3(0.34, 0.22, 0.03);
 uniform vec3 winter_bare = vec3(0.105, 0.090, 0.082);
 // Altitude monde (unités) au-dessus de laquelle les conifères sont poudrés de neige en hiver.
 uniform float winter_snow_y = 4.0;
@@ -90,6 +92,30 @@ float foliage_keep(vec3 origin, float seed) {
 	return smoothstep(0.0, instance_band, seed - t) * (1.0 + 0.5 * t) * inversesqrt(density);
 }
 
+// Lot HB4 (ADR 0143) : essences par biome. INSTANCE_CUSTOM.r = teinte + 4 × (ligne d'atlas + 1),
+// .g = teinte + 4 × (classe de saison + 1) (`TreeSpecies.CUSTOM_STRIDE`) ; ancien format (< 4) :
+// ligne et classe = essence du maillage. Classes : 0 chêne, 1 hêtre, 2 persistant, 3 haie, 4 or.
+const float SPECIES_STRIDE = 4.0;
+
+vec3 species_tint(vec4 custom) {
+	return vec3(mod(custom.r, SPECIES_STRIDE), mod(custom.g, SPECIES_STRIDE), custom.b);
+}
+
+float species_row(vec4 custom, float essence) {
+	float r = floor(custom.r / SPECIES_STRIDE);
+	return r >= 1.0 ? r - 1.0 : essence;
+}
+
+float species_season(vec4 custom, float essence) {
+	float g = floor(custom.g / SPECIES_STRIDE);
+	return g >= 1.0 ? g - 1.0 : essence;
+}
+
+// Feuillage caduc (ramure nue en hiver) : chêne, hêtre, or.
+bool season_deciduous(float essence) {
+	return essence < 1.5 || essence > 3.5;
+}
+
 // PO3 : échelle par arbre et lisières (haies exclues : appeler pour les essences 0-2 seulement) ;
 // `tone` reçoit la teinte du peuplement.
 vec3 foliage_variety(vec3 origin, float seed, out vec3 tone) {
@@ -106,20 +132,20 @@ vec3 foliage_variety(vec3 origin, float seed, out vec3 tone) {
 	return variety;
 }
 
-// Teinte saisonnière d'un houppier (`essence` : 0 chêne, 1 hêtre, 2 conifère, 3 haie) ; `leaves` :
+// Teinte saisonnière d'un houppier (`essence` : 0 chêne, 1 hêtre, 2 persistant, 3 haie, 4 or) ; `leaves` :
 // bruit de feuillage [0, 1] ; `up` : composante verticale de la normale monde ; `world_y` :
 // altitude du pied. Le discard ajouré d'hiver des feuillus reste chez l'appelant.
 vec3 foliage_season(vec3 albedo, float essence, float seed, float leaves, float up, float world_y) {
 	vec4 w = campaign_season;
 	float lum = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
-	bool broadleaf = essence < 1.5;
+	bool broadleaf = season_deciduous(essence);
 	bool conifer = essence > 1.5 && essence < 2.5;
-	bool hedge = essence > 2.5;
+	bool hedge = essence > 2.5 && essence < 3.5;
 	// Printemps : feuillus et haies plus tendres.
 	vec3 spring = conifer ? albedo : albedo * spring_tint;
 	// Automne : chênes roux-olive, hêtres cuivrés, haies rousses ; quelques retardataires verts.
 	float turn = conifer ? 0.0 : smoothstep(0.15, 0.45, fract(seed * 7.13)) * mix(0.7, 1.0, leaves);
-	vec3 target = essence < 0.5 ? autumn_oak : (essence < 1.5 ? autumn_beech : autumn_hedge);
+	vec3 target = essence < 0.5 ? autumn_oak : (essence < 1.5 ? autumn_beech : (essence > 3.5 ? autumn_gold : autumn_hedge));
 	vec3 autumn = mix(albedo, target * (lum / 0.09) * mix(0.8, 1.2, leaves), turn * 0.85);
 	// Hiver : ramure nue gris-brun ; conifères plus sombres, poudrés de neige en altitude et
 	// sur les faces tournées vers le ciel.

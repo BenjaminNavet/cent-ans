@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "colormap_style.schema.json",
   "title": "Style de la carte de couleur du sol de campagne (chantier SS)",
-  "description": "Palette sRGB et paramètres de `cent-ans geo colormap` (`tools/cent_ans_tools/geo/colormap.py`, ADR 0142) : base régionale, mosaïque agricole, routes, lacs, auréoles de villes. Graine fixe : même style et mêmes entrées donnent les mêmes octets.",
+  "description": "Palette sRGB et paramètres de `cent-ans geo colormap` (`tools/cent_ans_tools/geo/colormap.py`, ADR 0142) : base régionale, mosaïque agricole, routes, lacs, auréoles de villes ; section `biomes` (chantier HB, ADR 0143) : palette et mosaïque par biome de `biomes.png`, fondues. Graine fixe : même style et mêmes entrées donnent les mêmes octets.",
   "type": "object",
   "required": ["seed", "scale", "palette", "base", "mosaic", "roads", "lakes", "towns"],
   "additionalProperties": false,
@@ -10,6 +10,28 @@
     "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
     "share": {"type": "number", "minimum": 0, "maximum": 1},
     "positive": {"type": "number", "exclusiveMinimum": 0},
+    "biome_style": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "palette": {
+          "type": "object",
+          "propertyNames": {"enum": ["grassland", "grassland_dry", "farmland", "farmland_dry", "forest_broadleaf", "forest_conifer", "heath", "rock", "scrub", "scrub_light"]},
+          "additionalProperties": {"$ref": "#/$defs/color"}
+        },
+        "dry_max": {"$ref": "#/$defs/share", "description": "Plafond de la sécheresse venue de la latitude."},
+        "forest_keep": {"$ref": "#/$defs/share", "description": "Part des forêts conservée (hors vallées)."},
+        "conifer_min": {"$ref": "#/$defs/share"},
+        "scrub": {"$ref": "#/$defs/share", "description": "Part de garrigue / maquis des terres non cultivées."},
+        "presence": {"type": "number", "minimum": 0, "maximum": 3},
+        "pasture_shift": {"type": "number", "minimum": -1, "maximum": 1},
+        "bocage": {"type": "number", "minimum": 0, "maximum": 4},
+        "openfield": {"type": "number", "minimum": 0, "maximum": 4},
+        "vine": {"type": "number", "minimum": 0, "maximum": 4},
+        "crops": {"$ref": "#/$defs/weighted"},
+        "pastures": {"$ref": "#/$defs/weighted"}
+      }
+    },
     "weighted": {
       "type": "array",
       "minItems": 1,
@@ -30,7 +52,7 @@
     "scale": {"type": "integer", "minimum": 1, "maximum": 4, "description": "Texels par pixel de carte (par côté)."},
     "palette": {
       "type": "object",
-      "required": ["sea_deep", "sea_shallow", "grassland", "grassland_dry", "farmland", "farmland_dry", "forest_broadleaf", "forest_conifer", "heath", "rock", "snow", "coast_sand", "marsh", "ponds", "wet_meadow", "road", "lake_deep", "lake_shallow", "lake_shore", "reeds", "town_ground", "town_gardens", "hedge"],
+      "required": ["sea_deep", "sea_shallow", "grassland", "grassland_dry", "farmland", "farmland_dry", "forest_broadleaf", "forest_conifer", "heath", "rock", "snow", "coast_sand", "marsh", "ponds", "wet_meadow", "road", "lake_deep", "lake_shallow", "lake_shore", "reeds", "town_ground", "town_gardens", "hedge", "scrub", "scrub_light"],
       "additionalProperties": {"$ref": "#/$defs/color"}
     },
     "base": {
@@ -143,6 +165,24 @@
         "ground_opacity": {"$ref": "#/$defs/share"},
         "garden_factor": {"type": "number", "minimum": 1},
         "garden_opacity": {"$ref": "#/$defs/share"}
+      }
+    },
+    "biomes": {
+      "type": "object",
+      "description": "Palettes et mosaïque par biome (HB, ADR 0143) ; clés = noms de data/map/biomes.yaml.",
+      "required": ["transition_km", "weight_step", "scrub_noise_km", "scrub_patchiness", "valley_km", "classes"],
+      "additionalProperties": false,
+      "properties": {
+        "transition_km": {"type": "number", "minimum": 0},
+        "weight_step": {"type": "integer", "minimum": 1, "maximum": 16},
+        "scrub_noise_km": {"$ref": "#/$defs/positive"},
+        "scrub_patchiness": {"$ref": "#/$defs/share"},
+        "valley_km": {"type": "number", "minimum": 0},
+        "classes": {
+          "type": "object",
+          "propertyNames": {"enum": ["oceanic", "continental", "mediterranean", "steppe", "boreal", "mountain", "semi_arid"]},
+          "additionalProperties": {"$ref": "#/$defs/biome_style"}
+        }
       }
     }
   }

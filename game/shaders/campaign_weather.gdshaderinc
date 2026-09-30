@@ -21,7 +21,7 @@ uniform float weather_mist_near_footprint = 0.06;
 // SS2 (ADR 0142) : opacité maximale de la nappe peinte sur le sol (0,8 auparavant) : au-delà, le
 // gris clair recouvrait tout le bassin parisien et effaçait champs et carte de couleur (« relief
 // IGN ») ; la nappe reste un voile léger, teinté par le sol.
-uniform float weather_mist_max = 0.15;
+uniform float weather_mist_max = 0.07;
 // CV3-0 (#3) : en vue large, seules les zones de forte intensité (ou l'orage, toujours couvert)
 // gardent des nuées ; posé par CampaignWeatherView selon la distance caméra (0 de près, jusqu'à
 // ~0.5 de loin — la pluie/neige légère (k proche de 0.45) disparaît, la forte (k proche de 1) reste).

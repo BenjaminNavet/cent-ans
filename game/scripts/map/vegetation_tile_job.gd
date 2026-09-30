@@ -45,6 +45,9 @@ var ground_grid: Dictionary = {}
 ## l'empaquetage sont faits par `VegetationScatter` (Rust, fils natifs) à partir de
 ## `native_params`, puis `apply_native` installe le résultat.
 var coarse_only: bool = false
+## Lot HB4 : essences par biome (`TreeSpecies`, table partagée) ; null : semis V4 (chêne, hêtre,
+## conifère). Le semis natif reçoit la même table (`VegetationScatter.set_species`).
+var species: TreeSpecies = null
 
 ## Résultats : un tampon et un nombre d'instances par emplacement `part * KIND_COUNT + kind`.
 var buffers: Array[PackedFloat32Array] = []
@@ -58,6 +61,8 @@ var _beech := PackedFloat32Array()
 var _hedge := PackedFloat32Array()
 var _grove := PackedFloat32Array()
 var _region := PackedFloat32Array()
+## Lot HB4 : biome par cellule grossière (indice, plus proche).
+var _biome := PackedFloat32Array()
 var _side: int = 0
 
 
@@ -93,7 +98,7 @@ func native_params() -> Dictionary:
 		"relief_squash": MapData.relief_squash(),
 		"side": _side,
 		"coarse": [_forest, _crops, _conifer, _beech, _hedge, _grove, _region],
-		"exclusions": exclusions, "ground_grid": ground_grid,
+		"exclusions": exclusions, "ground_grid": ground_grid, "biome": _biome,
 	}
 
 
@@ -113,7 +118,7 @@ func coarse_params() -> Dictionary:
 	return {
 		"origin_x": float(origin_px.x), "origin_y": float(origin_px.y), "size_px": float(size_px),
 		"coarse_step": float(coarse_step), "side": _side,
-		"coarse": [_forest, _crops, _conifer, _beech, _hedge, _grove, _region],
+		"coarse": [_forest, _crops, _conifer, _beech, _hedge, _grove, _region], "biome": _biome,
 	}
 
 
@@ -127,7 +132,7 @@ func instance_total() -> int:
 func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 	_side = size_px / coarse_step + 2
 	var n := _side * _side
-	for array in [_forest, _crops, _conifer, _beech, _hedge, _grove, _region]:
+	for array in [_forest, _crops, _conifer, _beech, _hedge, _grove, _region, _biome]:
 		array.resize(n)
 	var k := 0
 	for j in _side:
@@ -145,6 +150,7 @@ func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 			# pas de la grille grossière (erreur d'interpolation très inférieure à la zone morte de
 			# 0,02 dans `_hedge_point`) → on évite le coût des 4 sinus par candidat de haie.
 			_region[k] = VegetationFields.region_value(x, y)
+			_biome[k] = float(mask.biome_at(x, y))
 			k += 1
 
 
@@ -184,8 +190,9 @@ func _scatter(raw: Array) -> void:
 	# Exclusions utiles à cette tuile seulement.
 	var local := PackedVector3Array()
 	var rect := Rect2(Vector2(origin_px), Vector2(size_px, size_px))
+	var ring := _max_orchard_ring()
 	for e in exclusions:
-		if rect.grow(e.z).has_point(Vector2(e.x, e.y)):
+		if rect.grow(e.z + ring).has_point(Vector2(e.x, e.y)):
 			local.append(e)
 	exclusions = local
 	for cj in cells:
@@ -200,6 +207,9 @@ func _scatter(raw: Array) -> void:
 			var kind := -1
 			var scale_factor := 1.0
 			var yaw := rng.randf() * TAU
+			if species != null:
+				_species_candidate(raw, rng, rect, x, y, roll, roll_kind, forest, yaw)
+				continue
 			if roll < forest * 0.9:
 				if roll_kind < _lerp_grid(_conifer, gx, gy):
 					kind = Kind.CONIFER
@@ -392,10 +402,118 @@ func _hedge_point(raw: Array, rng: RandomNumberGenerator, rect: Rect2, layout: i
 	var dir := next - pos
 	# Basis(UP, a) envoie X sur (cos a, 0, −sin a) : aligne le buisson sur le bord.
 	var yaw := atan2(-dir.y, dir.x) + rng.randf_range(-0.15, 0.15)
-	if tree < HEDGE_TREE:
-		raw[_slot(Kind.OAK, p.x, p.y)].append(_make_instance(rng, Kind.OAK, p.x, ground, p.y, rng.randf() * TAU, 0.78))
+	var hedge_tree := species.d("hedge_tree", HEDGE_TREE) if species != null else HEDGE_TREE
+	if tree < hedge_tree:
+		var tree_yaw := rng.randf() * TAU
+		if species != null:
+			# Lot HB4 : arbres de haie du biome (rôle « isolé »).
+			var sp := species.pick(TreeSpecies.Role.ISOLE, int(_nearest_grid(_biome, gx, gy)), mask.map_data.height_m_at(p.x, p.y),
+				mask.map_data.river_sd_at(p.x, p.y), _lerp_grid(_conifer, gx, gy), rng.randf())
+			if sp >= 0:
+				_append_species(raw, rng, sp, p.x, ground, p.y, tree_yaw, 0.78)
+			return
+		raw[_slot(Kind.OAK, p.x, p.y)].append(_make_instance(rng, Kind.OAK, p.x, ground, p.y, tree_yaw, 0.78))
 	else:
 		raw[_slot(Kind.HEDGE, p.x, p.y)].append(_make_instance(rng, Kind.HEDGE, p.x, ground, p.y, yaw, 1.0))
+
+
+## Lot HB4 : plus grande largeur d'anneau de vergers (exclusions à garder autour de la tuile).
+func _max_orchard_ring() -> float:
+	return species.max_orchard_ring() if species != null else 0.0
+
+
+## Valeur de la cellule grossière la plus proche (biome).
+func _nearest_grid(grid: PackedFloat32Array, gx: float, gy: float) -> float:
+	var i := clampi(roundi(gx), 0, _side - 1)
+	var j := clampi(roundi(gy), 0, _side - 1)
+	var b := int(grid[j * _side + i])
+	return float(b if b > 0 else int(species.d("default_biome", 2.0)))
+
+
+## Lot HB4 : 1 dans l'anneau des vergers autour d'une clairière de village (largeur `ring` px
+## au-delà du rayon d'exclusion), 0 au-delà (`vegetation::Scatter::village_ring`).
+func _village_ring(x: float, y: float, ring: float) -> float:
+	if ring <= 0.0:
+		return 0.0
+	var best := INF
+	for e in exclusions:
+		best = minf(best, Vector2(x - e.x, y - e.y).length() - e.z)
+	if best <= 0.0:
+		return 0.0
+	return 1.0 - smoothstep(0.5 * ring, ring, best)
+
+
+## Lot HB4 : rôle du candidat (cœur ou lisière de forêt, ripisylve, verger, isolé, garrigue) puis
+## essence ; miroir de `vegetation::Scatter::species_candidate` (Rust).
+func _species_candidate(raw: Array, rng: RandomNumberGenerator, rect: Rect2, x: float, y: float, roll: float, roll_kind: float, forest_raw: float, yaw: float) -> void:
+	var gx := (x - origin_px.x) / coarse_step
+	var gy := (y - origin_px.y) / coarse_step
+	var tree_roll := rng.randf()
+	var b := int(_nearest_grid(_biome, gx, gy))
+	var conifer := clampf(_lerp_grid(_conifer, gx, gy), 0.0, 1.0)
+	var data := mask.map_data
+	var forest := clampf(forest_raw * species.biome_param(b, 0), 0.0, 1.0)
+	var sd := data.river_sd_at(x, y)
+	if sd < RIVER_CLEARANCE:
+		return
+	var core := forest >= species.d("massif_core", 0.6)
+	var fill := species.d("massif_fill", 0.95) if core else species.d("edge_fill", 0.8)
+	var role := -1
+	var scale_factor := 1.0
+	if roll < forest * fill:
+		role = TreeSpecies.Role.MASSIF if core else TreeSpecies.Role.LISIERE
+		scale_factor = 1.0 + CANOPY_SPREAD * smoothstep(0.45, 0.9, forest)
+	elif sd < RIVER_CLEARANCE + species.biome_param(b, 7) and roll < species.biome_param(b, 6) * (1.0 - forest):
+		role = TreeSpecies.Role.RIPISYLVE
+		scale_factor = 0.95
+	else:
+		var crops := _lerp_grid(_crops, gx, gy)
+		var ring := _village_ring(x, y, species.biome_param(b, 4))
+		var p_orchard := species.biome_param(b, 3) * ring + species.biome_param(b, 5) * crops
+		if crops > 0.3 and p_orchard > 0.0 and species.parcel_roll(x, y) < p_orchard:
+			if roll < species.d("orchard_fill", 0.75):
+				role = TreeSpecies.Role.VERGER
+				scale_factor = 0.9
+		elif crops > 0.15:
+			# Bosquets : seul le cœur des taches du bruit, densément planté.
+			var grove := smoothstep(species.d("grove_core", 0.55), 1.0, _lerp_grid(_grove, gx, gy))
+			var hedge := _lerp_grid(_hedge, gx, gy)
+			var p := crops * (grove * species.biome_param(b, 2) + species.biome_param(b, 1) * (1.0 + species.d("hedge_boost", 3.0) * hedge + species.d("village_boost", 4.0) * ring))
+			if roll < p:
+				role = TreeSpecies.Role.ISOLE
+				scale_factor = 0.9
+		if role < 0:
+			var scrub := species.biome_param(b, 8)
+			if scrub > 0.0 and roll < scrub * (1.0 - forest_raw) * clampf(1.2 - crops, 0.0, 1.0):
+				role = TreeSpecies.Role.GARRIGUE
+	if role < 0:
+		return
+	if (not exclusions.is_empty() and _excluded(x, y)) or not rect.has_point(Vector2(x, y)):
+		return
+	var ground := data.height_world_at(x, y)
+	if ground <= 0.0:
+		return
+	var species_roll := species.stand_roll(x, y) if roll_kind < species.d("stand_share", 0.7) else tree_roll
+	var altitude := data.height_m_at(x, y)
+	var sp := species.pick(role, b, altitude, sd, conifer, species_roll)
+	if sp < 0 and role == TreeSpecies.Role.MASSIF:
+		sp = species.pick(TreeSpecies.Role.LISIERE, b, altitude, sd, conifer, species_roll)
+	if sp < 0:
+		return
+	_append_species(raw, rng, sp, x, _display_ground(x, y, ground), y, yaw, scale_factor)
+
+
+## Lot HB4 : un arbre de l'essence `sp` (plage de tailles du catalogue, teinte générique) ; ligne
+## d'atlas et classe de saison encodées dans la teinte (`TreeSpecies.CUSTOM_STRIDE`).
+func _append_species(raw: Array, rng: RandomNumberGenerator, sp: int, x: float, ground: float, y: float, yaw: float, scale_factor: float) -> void:
+	var height := rng.randf_range(species.height[2 * sp], species.height[2 * sp + 1])
+	var width := height * rng.randf_range(species.width[2 * sp], species.width[2 * sp + 1])
+	var b := rng.randf_range(0.85, 1.15)
+	var tint := Color(b * rng.randf_range(0.93, 1.05), b, b * rng.randf_range(0.92, 1.06))
+	tint.r += TreeSpecies.CUSTOM_STRIDE * (sp + 1)
+	tint.g += TreeSpecies.CUSTOM_STRIDE * (species.season[sp] + 1)
+	var kind := clampi(species.kind[sp], Kind.OAK, Kind.CONIFER)
+	raw[_slot(kind, x, y)].append(_instance(rng, kind, x, ground, y, yaw, scale_factor, height, width, tint))
 
 
 ## Hauteur de la surface affichée (grille du maillage) ou, à défaut, `fallback`.
@@ -457,6 +575,11 @@ func _make_instance(rng: RandomNumberGenerator, kind: int, x: float, ground: flo
 				tint = Color(b * 1.12, b * 1.08, b * 0.85)
 			else:
 				tint = Color(b * rng.randf_range(0.9, 1.02), b, b * rng.randf_range(0.9, 1.05))
+	return _instance(rng, kind, x, ground, y, yaw, scale_factor, height, width, tint)
+
+
+## Transformée et graine d'une instance (hauteur, largeur et teinte déjà tirées).
+func _instance(rng: RandomNumberGenerator, kind: int, x: float, ground: float, y: float, yaw: float, scale_factor: float, height: float, width: float, tint: Color) -> Array:
 	# `scale_factor` > 1 (cœur de forêt) élargit surtout le houppier.
 	height *= tree_scale * (scale_factor if scale_factor <= 1.0 else 1.0 + (scale_factor - 1.0) * 0.35)
 	width *= tree_scale * scale_factor

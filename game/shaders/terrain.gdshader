@@ -45,9 +45,12 @@ uniform sampler2D fog_mask : filter_nearest, repeat_disable, hint_default_white;
 uniform bool fog_enabled = false;
 // CV3-0 (#2) : voile éclairci (était 0.80/0.78/0.72, assombrissait trop l'Angleterre en vue large).
 uniform vec3 fog_veil : source_color = vec3(0.90, 0.88, 0.82);
-uniform float fog_desaturation = 0.78;
-uniform float fog_veil_amount = 0.36;
-uniform float fog_cloud_amount = 0.32;
+// HB (ADR 0143) : brouillard de guerre façon Total War, assombri et un peu désaturé, sans le voile
+// clair qui pâlissait tout le territoire non vu en carte « IGN » (0,78 / 0,36 / 0,32, ton 1,15).
+uniform float fog_desaturation = 0.25;
+uniform float fog_veil_amount = 0.1;
+uniform float fog_cloud_amount = 0.22;
+uniform float fog_tone = 0.72;           // luminance du territoire non vu (< 1 : assombri)
 uniform float fog_cloud_scale = 0.045;    // par pixel carte (≈ 22 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
 uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
@@ -103,6 +106,10 @@ uniform vec3 lake_color = vec3(0.035, 0.10, 0.115);
 uniform vec3 lake_bank_color = vec3(0.055, 0.058, 0.030);
 uniform vec3 lake_shallow_color = vec3(0.05, 0.085, 0.06);
 uniform float lake_bank_px = 1.6;
+// HB7 : niveau (m) au-dessus duquel une eau est un lac ; en dessous, c'est la mer (même seuil que
+// water.gdshader). À 0 m, les hauts-fonds de la mer d'Azov (MNT 0-1 m) devenaient des « lacs »
+// sombres à berge de vase, en taches et en escalier contre le plan d'eau de la mer.
+uniform float lake_level_m = 2.0;
 uniform float pond_max_px = 3.0;
 uniform float pond_probe_px = 6.0;
 uniform vec3 seabed_color = vec3(0.03, 0.07, 0.07);
@@ -170,7 +177,7 @@ uniform float political_full = 2.8;
 // que des seuils d'empreinte repoussés : l'empreinte à une distance donnée dépend de la résolution
 // (HiDPI, ADR 0123). Remettre 1.0 pour retrouver l'ancien palier « loin » (A/B).
 uniform float political_amount = 0.0;
-uniform float faction_alpha_near = 0.10;
+uniform float faction_alpha_near = 0.04;  // HB : 0,10 → 0,04, la teinte de faction grisait le sol de près (les frontières suffisent)
 uniform float faction_alpha_far = 0.50;
 uniform float faction_saturation = 0.55;
 uniform float political_flat_gain = 0.45;
@@ -378,6 +385,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 #include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
+#include "res://shaders/hb_ground.gdshaderinc"  // HB3 : habillage par biome (ADR 0143)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -385,6 +393,19 @@ void vertex() {
 	float carve = river_carve(world_pos.xz, map_size);  // lot V4
 	VERTEX.y -= carve;
 	world_pos.y -= carve;
+}
+
+// HB7 : eau raster (coast_dist) dont le MNT dépasse `lake_level_m` : vrai lac seulement si aucune
+// eau sous le niveau de la mer à `lake_sea_probe_px` alentour (8 directions). Sinon c'est un défaut
+// de calage MNT / trait de côte au bord de la mer (delta du Don, flèches d'Azov) : peint comme la mer.
+uniform float lake_sea_probe_px = 4.0;
+float sea_nearby(vec2 uv) {
+	float lowest = 1e6;
+	for (int k = 0; k < 8; k++) {
+		float a = float(k) * 0.785398;
+		lowest = min(lowest, height_m_lod(uv + vec2(cos(a), sin(a)) * lake_sea_probe_px / map_size, 0.0));
+	}
+	return 1.0 - step(0.0, lowest);
 }
 
 void fragment() {
@@ -434,7 +455,7 @@ void fragment() {
 		vec2 probe = uv + to_water * (max(coast, 0.0) + 1.5) / map_size;
 		vec2 far_probe = uv + to_water * (max(coast, 0.0) + pond_probe_px) / map_size;
 		float far_coast = (texture(coast_dist, far_probe).r * 255.0 - 128.0) / coast_dist_scale;
-		lake_shore = max(step(0.5, height_m_lod(probe, 0.0)), step(-pond_max_px, far_coast));
+		lake_shore = max(step(lake_level_m, height_m_lod(probe, 0.0)) * (1.0 - sea_nearby(probe)), step(-pond_max_px, far_coast));
 	}
 
 	// --- Poids des matériaux ---
@@ -629,22 +650,29 @@ void fragment() {
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
 	fp_parcels(p, uv, footprint, grad_m, slope, hc, s, lu, terroir, open_w, w_forest / max(wsum, 1e-3), col, roughness, n);  // ZG5b
 	sg_apply(uv, footprint, snow, land_f, col);  // SS2
+	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
+		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, col);  // HB3
+	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
 	}
 
 	// Fond marin (sous le plan d'eau) et lacs.
-	if (hc <= 0.0) {
+	if (hc <= 0.0 || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
 		col = mix(tint_sand * 0.5, seabed_color, smoothstep(-2.0, -30.0, hc));
 	}
 	// Eau peinte sur le terrain : lacs (au-dessus du niveau de la mer) et mer là où le maillage
 	// LOD dépasse le plan d'eau alors que la côte réelle (raster) est plus loin. Pour la mer, même
 	// rendu que water.gdshader (couleur selon la profondeur composée sur le fond marin).
-	float lake = (1.0 - land_f) * max(step(0.0, hc), step(-0.02, world_pos.y));
+	float lake = (1.0 - land_f) * max(step(lake_level_m, hc), step(-0.02, world_pos.y));
 	vec3 water_col = lake_color;
-	if (hc <= 0.0) {
-		float depth = -hc;
+	float sea_water = hc < lake_level_m ? 1.0 : 0.0;
+	if (sea_water < 0.5 && land_f < 0.99) {
+		sea_water = sea_nearby(uv);
+	}
+	if (sea_water > 0.5) {  // HB7 : mer jusqu'au niveau des lacs (hauts-fonds à 0-2 m compris)
+		float depth = max(-hc, 0.0);
 		vec3 wc = ga_depth_color(depth, sea_shallow_color, sea_mid_color, sea_deep_color, sea_mid_depth_m, sea_depth_falloff_m, ga4_on);  // GA4
 		water_col = mix(col, wc, mix(0.7, 0.97, smoothstep(0.0, 45.0, depth)));
 	}
@@ -658,11 +686,13 @@ void fragment() {
 		water_col = mix(lake_color, lake_shallow_color, 1.0 - smoothstep(-1.6, 0.0, coast));
 	}
 	rl_surface(p, uv, footprint, land_f, col, lake, water_col, roughness);  // lot R1
+	if (hb_debug > 8.5 && hb_debug < 9.5) { hb_dbg = col; }  // HB3 : sonde
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
 
 	// --- Couche politique ---
+	if (hb_debug > 9.5 && hb_debug < 10.5) { hb_dbg = col; }  // HB3 : sonde
 	float political = smoothstep(political_start, political_full, footprint) * political_amount;
 	// Au dézoom maximal : terrain un peu désaturé, façon carte.
 	float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
@@ -777,21 +807,27 @@ void fragment() {
 			cloud = smoothstep(0.38, 0.72, cloud);
 			vec3 mist = pow(fog_veil, vec3(2.2));
 			// CV3-0 (#2) : 0.68 -> 0.86, le voile reste lisible sans virer sombre.
-			vec3 fogged = mix(desat * 1.15 + mist * 0.04, mist * 0.86, fog_veil_amount + cloud * fog_cloud_amount);
+			vec3 fogged = mix(desat * fog_tone + mist * 0.04, mist * 0.86, fog_veil_amount + cloud * fog_cloud_amount);
 			col = mix(col, fogged, fog);
 		}
 	}
 
 	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
+	if (hb_debug > 10.5 && hb_debug < 11.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 wx_emit = vec3(0.0);
 	col = weather_ground(col, p, hc, slope, footprint, roughness, wx_emit);  // CM2 : météo
+	if (hb_debug > 11.5 && hb_debug < 12.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
+	if (hb_debug > 12.5 && hb_debug < 13.5) { hb_dbg = col; }  // HB3 : sonde
 	fr1_borders(p, uv, footprint, col, pm_emit);  // FR1 : frontières de faction lumineuses
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2
 	ROUGHNESS = roughness;
+	if (hb_debug > 0.5) {
+		ALBEDO = hb_dbg;
+	}
 	SPECULAR = mix(0.3, 0.1, lake);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 }
