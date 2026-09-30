@@ -761,14 +761,16 @@ func _update_label_height(i: int) -> void:
 	if label.position != label_at:
 		label.position = label_at
 	_refresh_label_offset(i, _label_lift_px(i))
+	_sync_shield(i)
 
 
-## VT : décalage vertical (px d'étiquette) du nom `i`, écu recalé s'il change d'au moins 0,5 px.
+## VT : décalage vertical (px d'étiquette) du nom `i`, réécrit (écu recalé) seulement s'il change
+## d'au moins 0,5 px (appelé à chaque passe de dé-encombrement).
 func _refresh_label_offset(i: int, lift: float) -> void:
 	var label := _labels[i]
 	if absf(label.offset.y - lift) >= 0.5 or label.offset.x != 0.0:
 		label.offset = Vector2(0.0, lift)
-	_sync_shield(i)
+		_sync_shield(i)
 
 
 ## DV2 : écu recalé sur son nom (ancre du `MultiMesh` et haut du texte), écritures seulement si
