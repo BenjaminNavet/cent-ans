@@ -322,7 +322,37 @@ def classify(inputs: BiomeInputs, legend: dict) -> np.ndarray:
     sigma_px = legend["smoothing"]["sigma_km"] * km_px
     min_px = int(round(legend["smoothing"]["min_area_km2"] * km_px * km_px))
     out = smooth(filled, count, sigma_px, min_px)
-    return np.where(inputs.water, SEA, out).astype(np.uint8)
+    out = np.where(inputs.water, SEA, out).astype(np.uint8)
+    return despeckle(out, count)
+
+
+def despeckle(biome: np.ndarray, count: int) -> np.ndarray:
+    """Land pixels alone in their biome among land neighbours take the local majority.
+
+    The Gaussian blend runs on a grid filled across the sea, so a coastal pixel
+    can end up the only one of its class along the shore; one-pixel islets (no
+    land neighbour) are left alone.
+    """
+    from scipy import ndimage
+
+    kernel = np.ones((3, 3), dtype=np.int32)
+    best = np.zeros(biome.shape, dtype=np.int32)
+    majority = biome.copy()
+    lonely = np.zeros(biome.shape, dtype=bool)
+    others = np.zeros(biome.shape, dtype=np.int32)
+    for index in range(1, count + 1):
+        mask = biome == index
+        if not mask.any():
+            continue
+        near = ndimage.convolve(mask.astype(np.int32), kernel, mode="nearest")
+        lonely |= mask & (near <= 1)
+        others += near
+        neighbours = near - mask
+        better = neighbours > best
+        majority[better] = index
+        best = np.maximum(best, neighbours)
+    lonely &= others > 1
+    return np.where(lonely, majority, biome).astype(np.uint8)
 
 
 def shares(biome: np.ndarray, legend: dict) -> dict[str, float]:
