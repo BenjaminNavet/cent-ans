@@ -24,6 +24,9 @@ func _json(path: String) -> Dictionary:
 
 
 func _init() -> void:
+	# NT14 : les clips de mêlée par défaut (`melee/`) sont écartés, l'essai est comparé à la cuisson.
+	BattleSkinned.melee_forced = 0
+	BattleSkinned.reload_caches()
 	var trial_on := BattleSkinned.mocap_trial_enabled()
 	if not BattleSkinned.fine_enabled():
 		# Kit grossier (`--coarse-figures`) : l'essai ne s'applique pas.

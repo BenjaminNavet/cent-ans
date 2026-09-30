@@ -9,8 +9,8 @@ extends SceneTree
 ## Usage : godot --headless --path game --script res://tests/nt13_video_test.gd [-- --video-trial]
 
 const RIG := "fine_human"
-const EXPECTED := ["guard", "overhead", "slash", "thrust"]
-const UNCHANGED := ["idle", "walk", "parry", "hit", "death", "victory", "pike_thrust"]
+const EXPECTED := ["guard", "overhead", "parry", "slash", "thrust"]  # NT14 : + parry
+const UNCHANGED := ["idle", "walk", "hit", "death", "victory", "pike_thrust"]
 
 var ok := true
 
@@ -27,6 +27,9 @@ func _json(path: String) -> Dictionary:
 
 
 func _init() -> void:
+	# NT14 : les clips de mêlée par défaut (`melee/`) sont écartés, l'essai est comparé à la cuisson.
+	BattleSkinned.melee_forced = 0
+	BattleSkinned.reload_caches()
 	if not BattleSkinned.fine_enabled():
 		_check(not BattleSkinned.video_trial_enabled(), "essai inactif sur le kit grossier")
 		print("NT13 video (coarse): %s" % ("OK" if ok else "FAIL"))
@@ -58,6 +61,7 @@ func _init() -> void:
 	_check(str(both.get("mocap_trial_dir", "")) == BattleSkinned.VIDEO_TRIAL_DIR, "vidéo prioritaire sur CMU")
 	BattleSkinned.video_trial_forced = -1
 	BattleSkinned.mocap_trial_forced = -1
+	BattleSkinned.melee_forced = -1
 	BattleSkinned.reload_caches()
 	print("NT13 video (cmd=%s): %s" % [cmd_on, "OK" if ok else "FAIL"])
 	quit(0 if ok else 1)

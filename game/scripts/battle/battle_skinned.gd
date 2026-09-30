@@ -21,6 +21,8 @@ const MOCAP_TRIAL_DIR := "res://assets/models/battle_fine/mocap_trial/"
 ## NT13 : clips tirés des vidéos du joueur (pose MediaPipe) reciblés sur le rig fin `human` ;
 ## `--video-trial` après `--`, même mécanisme que l'essai NT12 (prioritaire s'il est aussi demandé).
 const VIDEO_TRIAL_DIR := "res://assets/models/battle_fine/video_trial/"
+## NT14 : clips de mêlée par défaut (meilleure source par geste), voir `melee_default_enabled`.
+const MELEE_DIR := "res://assets/models/battle_fine/melee/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
@@ -39,6 +41,7 @@ static var _textures: Dictionary = {}
 static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (chaque image)
 static var mocap_trial_forced: int = -1  # NT12 : voir `mocap_trial_enabled`
 static var video_trial_forced: int = -1  # NT13 : voir `video_trial_enabled`
+static var melee_forced: int = -1  # NT14 : voir `melee_default_enabled`
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation: Dictionary = {}
@@ -327,6 +330,19 @@ static func _merge_fine(base: Dictionary) -> void:
 		_merge_mocap_trial(rigs, VIDEO_TRIAL_DIR)
 	elif mocap_trial_enabled():
 		_merge_mocap_trial(rigs, MOCAP_TRIAL_DIR)
+	elif melee_default_enabled():
+		_merge_mocap_trial(rigs, MELEE_DIR)
+
+
+## NT14 (ADR 0129, complément) : clips de mêlée par défaut du rig fin `human`, choisis geste par
+## geste parmi keyframé / CMU (NT12) / vidéos du joueur (NT13, NT14) et cuits dans `MELEE_DIR`
+## (même mécanisme que les essais). `--keyframed-melee` après `--` rétablit les clips keyframés ;
+## les options d'essai (`--video-trial`, `--mocap-trial`) passent avant. `melee_forced` : -1 =
+## ligne de commande, 0/1 forcé (tests, captures A/B), puis `reload_caches()`.
+static func melee_default_enabled() -> bool:
+	if melee_forced >= 0:
+		return fine_enabled() and melee_forced == 1
+	return fine_enabled() and not OS.get_cmdline_user_args().has("--keyframed-melee")
 
 
 ## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
