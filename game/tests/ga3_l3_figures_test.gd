@@ -127,6 +127,11 @@ func _check_generated(kind: String, variant: int) -> bool:
 	if not mat.shader.code.contains("#define GA3_TEX") or tex == null or tex.get_width() > 1024 or tex.get_height() > 1536 or lum.x <= 0.0:
 		push_error("ga3_l3: %s matériau GA3 incomplet" % name)
 		ok = false
+	# UV en convention Blender (v vers le haut) : le shader lit la ligne 1 - v ; les sommets
+	# texturés du LOD0 doivent y tomber sur l'albédo cuit, pas sur le fond noir de l'atlas.
+	if tex != null and not _uvs_on_albedo(name, tex, lod0) or not mat.shader.code.contains("texture(ga3_albedo, vec2(UV.x, 1.0 - UV.y))"):
+		push_error("ga3_l3: %s UV hors de l'albédo (sens de v)" % name)
+		ok = false
 	var corpse := BattleSkinned.corpse_shader(kind, variant)
 	if not corpse.code.contains("#define GA3_TEX"):
 		push_error("ga3_l3: %s cadavre sans GA3_TEX" % name)
@@ -140,6 +145,31 @@ func _check_generated(kind: String, variant: int) -> bool:
 			push_error("ga3_l3: %s couche d'atlas non posée" % name)
 			ok = false
 	return ok
+
+
+## Part des sommets texturés (corps hors armoiries) lus sur un texel noir de l'albédo en
+## (u, 1 - v) : ≈ 1-4 % à l'endroit, ≈ 45 % si v n'est pas retourné.
+func _uvs_on_albedo(name: String, tex: Texture2D, arrays: Array) -> bool:
+	var img := tex.get_image()
+	if img.is_compressed():
+		img.decompress()
+	var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
+	var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+	var textured := 0
+	var black := 0
+	for i in uvs.size():
+		var uv := uvs[i]
+		if int(colors[i].a * 16.0 + 0.5) == C_ARMS or uv.x < 0.0 or uv.x > 1.0 or uv.y < 0.0 or uv.y > 1.0:
+			continue
+		textured += 1
+		var px := clampi(int(uv.x * img.get_width()), 0, img.get_width() - 1)
+		var py := clampi(int((1.0 - uv.y) * img.get_height()), 0, img.get_height() - 1)
+		var c := img.get_pixel(px, py)
+		if c.r + c.g + c.b < 0.012:
+			black += 1
+	var share := float(black) / maxf(textured, 1.0)
+	print("ga3_l3: %s UV sur texel noir %.1f %%" % [name, share * 100.0])
+	return share < 0.1
 
 
 func _check_fine(kind: String, variant: int) -> bool:

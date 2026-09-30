@@ -880,7 +880,9 @@ void fragment() {
 	// texture sur sa moyenne (plis, piqûres, crasse) ; ailleurs la couleur générée. Les faces
 	// peintes de l'équipement (C_ARMS : écu, pavois) gardent l'UV d'armoiries (L3b).
 	if (UV.x >= 0.0 && code != C_ARMS) {
-		vec4 g3 = texture(ga3_albedo, UV);
+		// UV exportées en convention Blender (v vers le haut, `ga3_figures.cam_uvs`) et PNG
+		// enregistré de haut en bas : Godot lit la ligne 1 - v.
+		vec4 g3 = texture(ga3_albedo, vec2(UV.x, 1.0 - UV.y));
 		float g3_l = dot(g3.rgb, vec3(0.3, 0.59, 0.11));
 		if (code == C_LIVERY) {
 			albedo = mix(g3.rgb, albedo * clamp(g3_l / ga3_lum.x, 0.2, 2.2), g3.a);
