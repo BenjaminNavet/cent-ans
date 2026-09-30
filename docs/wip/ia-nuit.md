@@ -50,5 +50,24 @@ est rapide (tour de campagne < 50 ms par faction, spec M3 ; coût de l'IA par ti
   l'infanterie n'est pas en mêlée. Novice fr. attaque 38 → 51 ; mais passif miroir attaque 50 → 30,
   passif fr. défend 51 → 31 (la cavalerie arrive trop tard). Variantes en cours (`IA_WING`).
 
+- Variantes du poste d'aile (novice + passif, /768) : base 618 ; plafond « jamais devant
+  l'infanterie » partout 666 (mais 1er contact de la démo B6 à 192 s au lieu de ~70 s) ; + levée à
+  80 m de l'ennemi 672 ; **retenu : seulement sous les flèches (pertes par tir < 40 s) + levée à
+  80 m : 670, miroir inchangé, démo toujours ~70 s** (commit 92ec4dc18). EQ7 sonde 64 graines :
+  Français 62/64 (avant 57/64). Empreintes B6 et bornes de rejeu (tick 704) mises à jour.
+- Essai rejeté : tireurs IA visant la cible la plus rentable (armure, couvert) : 637/768 (les arcs
+  anglais délaissaient les chevaliers) ; restreint au contre-tir sur les tireurs ennemis tant
+  qu'aucune mêlée n'est à < 120 m : 673/768 (+3, bruit) → abandonné (KISS).
+- Sièges tactiques non touchés : une autre session modifie `sim/siege_assault.rs` sur main.
+
+## Campagne
+- Sonde `ia_quality_probe` (agent), base 60 tours graines 1-4 : prises manquées 75, pertes sans
+  secours 5,2, % oisives en guerre 22, sièges lancés 47 / pris 21,5 / **abandonnés 22,8**.
+- Fin des sièges abandonnés (graines 1-2, 73) : **bataille contre une armée de secours au 1er tour
+  (31)**, affamée/brisée 14, paix 15, défense/retraite 4, reciblage 2. L'abandon C7a ne joue jamais.
+- Essai c1 (non commité) : défendre d'abord une place assiégée (×3) + pas de siège d'une place
+  qu'une armée ennemie plus forte couvre (`threat_at`) → graines 1-4 : plutôt pire, très bruité ;
+  comparaison sur 8 graines de plus en cours.
+
 ## Prochaine étape
-Choisir la variante du poste d'aile ; puis sonde de campagne (agent) → correctifs campagne.
+Trancher c1 sur 12 graines ; secours : estimer les armées ennemies à portée d'un tour.
