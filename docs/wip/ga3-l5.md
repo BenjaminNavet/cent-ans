@@ -12,13 +12,13 @@ et `ga3_<engin>_lod.glb` (hiérarchie identique au procédural). `SiegeEnginesFx
 choisit la variante GA3 (`data/fx/siege_engines.json`, `ga3`) sauf `--no-ga3`.
 
 ## État
-- [ ] Squelette (note, script Blender, test désactivé)
-- [ ] Script `tools/blender_scripts/ga3_siege_rig.py` : trébuchet
-- [ ] Script : bélier
-- [ ] Branchement Godot (`siege_engines.json` + schéma, `SiegeEnginesFx.instantiate`)
-- [ ] Test `game/tests/ga3_l5_siege_test.gd` + tests de siège + smoke
+- [x] Squelette (note, script Blender, test désactivé)
+- [x] Script `tools/blender_scripts/ga3_siege_rig.py` : trébuchet
+- [x] Script : bélier
+- [x] Branchement Godot (`siege_engines.json` `ga3` + schéma + pytest, `SiegeEnginesFx.ga3_variant/kind_settings/instantiate`, `SiegeAssaultFx` lit `kind_settings`)
+- [ ] Test `game/tests/ga3_l5_siege_test.gd` (écrit, à faire passer) + tests de siège + smoke
 - [ ] Capture unique de contrôle
 - [ ] ADR 0140 § L5, `docs/wip/ga3.md`
 
 ## Prochaine étape
-Squelette.
+Import Godot du worktree (plante parfois : relancer), puis `ga3_l5_siege_test.gd` avec et sans `--no-ga3`.
