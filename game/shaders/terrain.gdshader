@@ -38,26 +38,26 @@ uniform bool hatch_enabled = false;
 uniform float hatch_period_px = 9.0;
 uniform vec3 reachable_color : source_color = vec3(0.98, 0.93, 0.55);
 uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
-// Brouillard de guerre (lot C1, A1-03) : 1 = province vue, 0 = voilée. Le voile ne noircit
-// pas : désaturation + brume claire couleur parchemin, nuages bas qui dérivent lentement, bord
-// fondu sur la frontière entre province vue et province voilée.
+// Brouillard de guerre (lot C1, A1-03 ; refait BR 2026-09-30) : 1 = province vue, 0 = voilée.
+// Le terrain reste lisible sous le voile (couleurs à peine ternies, léger assombrissement) et une
+// vraie brume mouvante le recouvre par bancs : trouées où l'on voit le sol, nappes épaisses
+// ailleurs, plus claire au sommet des bancs. Plus de voile gris uni.
 uniform sampler2D fog_mask : filter_nearest, repeat_disable, hint_default_white;
 uniform bool fog_enabled = false;
-// CV3-0 (#2) : voile éclairci (était 0.80/0.78/0.72, assombrissait trop l'Angleterre en vue large).
-uniform vec3 fog_veil : source_color = vec3(0.90, 0.88, 0.82);
-uniform float fog_desaturation = 0.78;
-uniform float fog_veil_amount = 0.36;
-uniform float fog_cloud_amount = 0.32;
-uniform float fog_cloud_scale = 0.045;    // par pixel carte (≈ 22 px de période)
+uniform float fog_desaturation = 0.25;      // terrain sous la brume : couleurs gardées
+uniform float fog_dim = 0.88;               // et un peu assombri (« pas vu en ce moment »)
+uniform vec3 fog_mist_color : source_color = vec3(0.93, 0.94, 0.96);
+uniform float fog_mist_max = 0.66;          // opacité des nappes les plus épaisses
+uniform float fog_mist_min = 0.06;          // opacité dans les trouées
+uniform float fog_mist_glow = 0.40;         // brume auto-éclairée (ne prend pas l'ombre du relief)
+uniform float fog_cloud_scale = 0.030;      // par pixel carte (≈ 33 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
-uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
+uniform float fog_feather_px = 3.0;         // fondu de bord, pixels carte
 // M5a : brouillard par case (texture de vue R8 de la simulation, filtrage linéaire).
 uniform sampler2D fog_cells : filter_linear, repeat_disable, hint_default_white;
 uniform bool fog_by_cell = false;
 uniform vec2 fog_cells_size = vec2(1.0, 1.0);   // pixels carte couverts par la texture (fournis par le script)
 uniform float fog_edge_jitter_px = 7.0;
-uniform vec3 fog_rim_color = vec3(0.10, 0.065, 0.03);
-uniform float fog_rim_amount = 0.22;
 
 uniform sampler2D splat : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_splat = false;
@@ -748,6 +748,7 @@ void fragment() {
 		col = mix(col, bcol, line * alpha * land_f);
 	}
 
+	float fog_mist = 0.0;  // BR : opacité de la brume, réutilisée pour l'émission et la normale
 	if (fog_enabled && id > 0) {
 		float fog;
 		if (fog_by_cell) {
@@ -756,9 +757,6 @@ void fragment() {
 			vec2 jitter = vec2(fbm(p * 0.035), fbm(p * 0.035 + vec2(31.7, 5.3))) - 0.5;
 			float seen_r = texture(fog_cells, (p + jitter * fog_edge_jitter_px) / fog_cells_size).r;
 			fog = 1.0 - smoothstep(0.32, 0.68, seen_r);
-			// Liseré d'encre sépia sur la lisière, comme un bord de parchemin.
-			float rim = smoothstep(0.18, 0.5, seen_r) * (1.0 - smoothstep(0.5, 0.82, seen_r));
-			col = mix(col, fog_rim_color, rim * fog_rim_amount);
 		} else {
 			fog = 1.0 - step(0.5, fog_seen(id));
 			if (other_id != id && other_id > 0) {
@@ -769,16 +767,23 @@ void fragment() {
 			}
 		}
 		if (fog > 0.0) {
+			// Sol sous la brume : lisible, juste terni et assombri.
 			float lum_f = dot(col, vec3(0.2126, 0.7152, 0.0722));
-			vec3 desat = mix(col, vec3(lum_f) * vec3(1.02, 1.0, 0.96), fog_desaturation);
-			// Nuages bas : deux couches de bruit qui dérivent à des vitesses différentes.
+			vec3 ground = mix(col, vec3(lum_f), fog_desaturation) * fog_dim;
+			// Bancs de brume : bruit à domaine déformé, deux couches qui dérivent à des
+			// vitesses différentes ; la couche fine s'efface au dézoom (pas de scintillement).
 			vec2 q = p * fog_cloud_scale;
-			float cloud = fbm(q + TIME * fog_cloud_wind) * 0.65 + fbm(q * 2.3 - TIME * fog_cloud_wind * 1.7) * 0.35;
-			cloud = smoothstep(0.38, 0.72, cloud);
-			vec3 mist = pow(fog_veil, vec3(2.2));
-			// CV3-0 (#2) : 0.68 -> 0.86, le voile reste lisible sans virer sombre.
-			vec3 fogged = mix(desat * 1.15 + mist * 0.04, mist * 0.86, fog_veil_amount + cloud * fog_cloud_amount);
-			col = mix(col, fogged, fog);
+			vec2 warp = vec2(fbm(q * 0.5 + TIME * fog_cloud_wind * 0.6), fbm(q * 0.5 + vec2(7.3, 2.9) - TIME * fog_cloud_wind * 0.4));
+			float banks = fbm(q + warp * 1.6 + TIME * fog_cloud_wind);
+			float fine_w = 1.0 - smoothstep(0.4, 2.0, footprint * fog_cloud_scale * 12.0);
+			float wisps = fbm(q * 3.1 - TIME * fog_cloud_wind * 2.2);
+			float density = smoothstep(0.26, 0.78, banks + (wisps - 0.5) * 0.35 * fine_w);
+			// À la lisière de la zone vue, la brume s'effiloche au lieu de faire un mur.
+			float edge = smoothstep(0.0, 1.0, fog);
+			fog_mist = mix(fog_mist_min, fog_mist_max, density) * edge;
+			// Sommets des bancs plus clairs, creux légèrement bleutés.
+			vec3 mist = pow(fog_mist_color, vec3(2.2)) * mix(0.90, 1.05, density);
+			col = mix(mix(col, ground, fog), mist, fog_mist);
 		}
 	}
 
@@ -791,7 +796,9 @@ void fragment() {
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2
+	EMISSION += col * fog_mist * fog_mist_glow * (1.0 - pm_weight());  // BR : brume auto-éclairée
 	ROUGHNESS = roughness;
 	SPECULAR = mix(0.3, 0.1, lake);
+	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), fog_mist * 0.7 * (1.0 - pm_weight())));  // BR : la brume nappe le relief
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 }
