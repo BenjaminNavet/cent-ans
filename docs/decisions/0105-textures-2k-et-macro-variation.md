@@ -201,14 +201,19 @@ laissé ouvert en §GA5.3.
    (`building_atlas`, `town_building`) remplacent le seuil `first_plain` par un bloc uni
    `first_plain`..`plain_last` (11..13, calculé par `BuildingMaterials._atlas()` d'après `plain`),
    donc toute couche texturée ajoutée ensuite garde sa texture.
-2. **Surface du kit.** Le kit Blender nomme `TimberFrame` les panneaux des murs à pans de bois
-   (`style.frame`, murs et pignons enduits) ; les poutres réelles restent de la géométrie `Timber`
-   par-dessus. Le lattis peint de la texture double donc l'ossature réelle (façade plus dense,
-   lue comme du colombage serré) ; au niveau de détail `low` (kit des villes ZG6), où seules
-   sablières et poteaux d'angle sont modelés, c'est la texture qui porte le motif. Réexportés :
-   kit de bataille (`game/assets/models/buildings/`, 28 fichiers changés, 10 nouveaux) et kit des
-   villes (`town_kit/`, 12 fichiers). Non réexportés : maquettes de colonies CV1 et monuments
-   (panneaux `Plaster` inchangés, rendu identique).
+2. **Surface du kit, deux couches.** Le kit Blender nomme les panneaux des murs à pans de bois
+   (`style.frame`, murs et pignons enduits) selon le niveau de détail
+   (`building_kit.frame_panel`) : `TimberFrame` (couche 14) au niveau `high` (bataille) =
+   **torchis clair sans poutres peintes** (`timber_daub_diff.jpg` : enduit de chaux réchauffé,
+   taches de terre, brins de paille ; normales/rugosité de `medieval_wall_01`) sous les poutres
+   `Timber` modelées ; `TimberFrameFar` (couche 15) au niveau `low` (kit des villes ZG6, seules
+   sablières et poteaux d'angle modelés) = lattis peint `timber_frame_*`. Un premier essai avec
+   le lattis peint aussi au niveau `high` doublait l'ossature réelle (façade sombre et chargée,
+   rejeté à la relecture). **L'atlas est plein (16 couches)** : une matière de plus demandera de
+   passer à 32 tranches (`layer_tint`/`layer_tile` et l'encodage alpha /16 à changer).
+   Réexportés : kit de bataille (`game/assets/models/buildings/`, 28 fichiers changés, 10
+   nouveaux) et kit des villes (`town_kit/`, 12 fichiers). Non réexportés : maquettes de colonies
+   CV1 et monuments (panneaux `Plaster` inchangés, rendu identique).
 3. **Choix régional par données.** `data/art/building_regions.json` (schéma
    `art_building_regions.schema.json`), clé = `region` des provinces : part de colombage
    (`framed`) et variantes du Midi (`southern` : enduit ou pierre, tuiles canal, pente 26-34°,

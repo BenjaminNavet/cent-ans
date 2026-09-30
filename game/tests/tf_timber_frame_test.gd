@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Lot TF : colombage `TimberFrame` câblé et choix régional des maisons.
-## - données : `wired: true`, couche 14 de l'atlas `Building` ; matériau atlas : couches unies
+## - données : `wired: true`, couches 14 (torchis, `high`) et 15 (lattis, `low`) de l'atlas `Building` ; matériau atlas : couches unies
 ##   11..13 (`first_plain`..`plain_last`), la couche 14 reste texturée ;
 ## - modèles : au moins un modèle de bataille exporté (`manifest.json` : `framed`) porte des faces
 ##   de la couche 14 (alpha de la couleur de sommet) ; variantes du Midi présentes ;
@@ -35,6 +35,9 @@ func _init() -> void:
 	var plain_last := int(atlas.get_shader_parameter("plain_last"))
 	_check(first_plain == 11 and plain_last == 13, "couches unies 11..13 (trouvé %d..%d)" % [first_plain, plain_last])
 	_check(index > plain_last, "TimberFrame après le bloc uni : texturée")
+	var far_index := layers.find("TimberFrameFar")
+	_check(far_index == 15, "TimberFrameFar est la couche 15 (trouvé %d)" % far_index)
+	_check(str(BuildingMaterials.SPECS["TimberFrame"][0]).contains("daub"), "TimberFrame (niveau high) : torchis sans poutres peintes")
 	var albedo := atlas.get_shader_parameter("albedo_array") as TextureLayered
 	_check(albedo != null and albedo.get_layers() == layers.size(), "tableau d'albédos à %d tranches (trouvé %d)" % [layers.size(), albedo.get_layers() if albedo != null else -1])
 
@@ -52,6 +55,8 @@ func _init() -> void:
 	_check(southern >= 3, "%d variantes du Midi" % southern)
 	if not framed.is_empty():
 		_check(_count_layer("res://assets/models/buildings/%s.glb" % framed[0], 14) > 0, "%s : faces TimberFrame (couche 14)" % framed[0])
+		_check(_count_layer("res://assets/models/buildings/%s.glb" % framed[0], 15) == 0, "%s : pas de lattis peint sous les poutres modelées" % framed[0])
+	_check(_count_layer("res://assets/models/town_kit/timber_0.glb", 15) > 0, "kit des villes (low) : lattis peint TimberFrameFar")
 
 	# Choix régional.
 	var north := BuildingRegions.style_for_province("prov_normandie")

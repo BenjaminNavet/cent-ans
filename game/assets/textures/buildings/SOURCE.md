@@ -39,12 +39,12 @@ lattis de poteaux/sablières/entretoises dessiné algorithmiquement (`build_text
 seed déterministe) et mélangé entre `lime_plaster` (remplissage, déjà CC0 Poly Haven) et
 `rough_wood` assombri/désaturé (poutres, déjà CC0 Poly Haven) — aucun nouvel asset externe, 0 $.
 
-`TimberFrame` est **câblée** depuis le lot TF (`"wired": true`) : panneaux des murs à pans de
-bois du kit Blender (`building_kit.FRAME_PANEL`, sous les poutres réelles), dernière couche de
-l'atlas `Building` (indice 14, `building_{albedo,normal}_array.jpg` à 15 tranches) ; le shader
-traite les couches unies comme un bloc `first_plain`..`plain_last` (11..13), la couche 14 reste
-texturée. Tuile 3 m, teinte éclaircie (1,12) : le lattis peint double les poutres réelles, plus
-espacé et plus clair il alourdit moins la façade. Voir ADR 0105 §TF.
+Lot TF : ce lattis peint est la matière `TimberFrameFar` (couche 15 de l'atlas `Building`),
+posée seulement au niveau de détail `low` (kit des villes) où les poteaux ne sont pas modelés.
+Au niveau `high` (bataille), les panneaux sous les poutres modelées prennent `TimberFrame`
+(couche 14) = `timber_daub_diff.jpg` : torchis clair, sans poutres peintes, dérivé de
+`lime_plaster_diff.jpg` (réchauffé vers l'ocre, taches de terre, brins de paille ; seed fixe,
+`build_textures.py::timber_daub()`), normales et rugosité de `medieval_wall_01`. Voir ADR 0105 §TF.
 
 ## Régénérer
 

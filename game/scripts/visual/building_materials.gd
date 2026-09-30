@@ -13,10 +13,11 @@ extends RefCounted
 ## (schéma `art_building_materials.schema.json`), jamais codés en dur ici — même repli que
 ## `BattleTerrain.ground_layers()`.
 ##
-## Lot TF : `TimberFrame` (torchis/colombage) est câblée : panneaux des murs à pans de bois du kit
-## Blender (`building_kit.FRAME_PANEL`), dernière couche de l'atlas `Building` (indice 14, ajoutée
-## en fin de tableau pour ne pas décaler les indices déjà bakés dans les `.glb`), texturée malgré
-## sa place après les couches unies (`first_plain`..`plain_last` du shader).
+## Lot TF : panneaux des murs à pans de bois du kit Blender, deux couches ajoutées en fin d'atlas
+## (indices déjà bakés dans les `.glb` inchangés), texturées malgré leur place après les couches
+## unies (`first_plain`..`plain_last` du shader) : `TimberFrame` (14, torchis clair sous les
+## poutres modelées, niveau `high`) et `TimberFrameFar` (15, lattis peint, niveau `low` sans
+## poteaux modelés). L'atlas est plein (16 couches).
 
 const TEX := "res://assets/textures/"
 const DATA_FILE := "art/building_materials.json"
@@ -40,7 +41,7 @@ const SR5_AGING := 0.5
 const SR5_MOSS := {"RoofTile": 1.0, "Thatch": 0.8, "RoofSlate": 0.5, "RoofFlat": 0.6}
 const SR5_WALL_MOSS := 0.25
 ## Poids des salissures de mur (boue, coulures) ; 0 pour les toits.
-const SR5_GRIME := {"Door": 0.5, "Timber": 0.7, "Planks": 0.8, "TimberFrame": 0.8}
+const SR5_GRIME := {"Door": 0.5, "Timber": 0.7, "Planks": 0.8, "TimberFrame": 0.8, "TimberFrameFar": 0.8}
 ## `--no-sr5` après `--` : StandardMaterial3D d'avant SR5 et usure nulle (comparaison A/B).
 ## Modifiable par les tests (suivi de `clear_cache()`).
 static var sr5_enabled: bool = not OS.get_cmdline_user_args().has("--no-sr5")

@@ -17,10 +17,13 @@ Branche `feat/tf`, worktree `/Users/jean_hubert/dev/game_project-tf`. Décisions
 - [x] Tests : `tf_timber_frame_test.gd` (nouveau), ga5, sr5, zg6, vh4, smoke ; pytest schémas.
 - [x] Captures A/B : `docs/img/tf/tf_ab.jpg` (village normand en bataille, cité + château).
 
+- [x] Relecture (coordinateur) : lattis peint + poutres modelées = façade sombre et chargée.
+      Corrigé : `TimberFrame` (14) = torchis clair sans poutres (`timber_daub_diff.jpg`) au niveau
+      `high` ; lattis peint déplacé en `TimberFrameFar` (15) pour le niveau `low` (kit des villes).
+      Atlas plein (16 couches). A/B mis à jour (`docs/img/tf/tf_ab.jpg`, rangée du milieu = gros plan).
+
 ## Points ouverts
-- Le lattis peint de `TimberFrame` double les poutres réelles au niveau `high` : façade plus
-  dense et plus sombre qu'avant. Si le joueur le trouve trop chargé : texture de remplissage
-  seul (torchis sans poutres) pour le niveau `high`, lattis gardé pour `low` (2 couches).
+- Atlas `Building` plein : une nouvelle matière demandera 32 tranches.
 - Maquettes de colonies CV1 et monuments non réexportés (panneaux `Plaster`).
 - Toits du Midi : seules les variantes `southern` ont des tuiles canal ; longères, granges et
   églises restent communes à toutes les régions.

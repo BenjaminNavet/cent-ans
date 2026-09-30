@@ -40,8 +40,8 @@ func _init() -> void:
 	BuildingMaterials.material("Plaster")
 	names = BuildingMaterials.SPECS.keys()
 	print("GA5 matières texturées : %d" % names.size())
-	if names.size() != 12:
-		print("GA5: 12 matières texturées attendues (11 historiques + TimberFrame), trouvé %d" % names.size())
+	if names.size() != 13:
+		print("GA5: 13 matières texturées attendues (11 historiques + TimberFrame, TimberFrameFar), trouvé %d" % names.size())
 		ok = false
 	if not ("TimberFrame" in names):
 		print("GA5: TimberFrame absente des données")

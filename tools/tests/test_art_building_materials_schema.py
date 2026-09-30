@@ -48,17 +48,19 @@ def test_atlas_layers_are_known_materials() -> None:
         assert layer in names, layer
 
 
-def test_timber_frame_wired_last_layer() -> None:
-    """Lot TF: the half-timber material is wired and appended as the last atlas layer.
+def test_timber_frame_wired_last_layers() -> None:
+    """Lot TF: half-timber panels wired as the last atlas layers (14 daub, 15 far lattice).
 
     Appending keeps the layer indices already baked into exported ``.glb`` vertex colours.
     """
     document = _document()
     by_name = {m["name"]: m for m in document["textured"]}
-    assert "TimberFrame" in by_name
-    assert by_name["TimberFrame"].get("wired", True) is True
-    assert document["atlas_layers"][-1] == "TimberFrame"
+    for name in ("TimberFrame", "TimberFrameFar"):
+        assert by_name[name].get("wired", True) is True, name
     assert document["atlas_layers"].index("TimberFrame") == 14
+    assert document["atlas_layers"].index("TimberFrameFar") == 15
+    # High detail infill carries no painted beams (the modelled beams are on top).
+    assert "daub" in by_name["TimberFrame"]["diffuse"]
 
 
 def test_timber_frame_used_by_exported_models() -> None:

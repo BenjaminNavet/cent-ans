@@ -34,7 +34,8 @@ QUATERNIUS = (
 # name: (texture id or None, texture tile size in metres, fallback linear colour, roughness)
 MATERIALS = {
     "Plaster": ("lime_plaster", 2.2, (0.62, 0.58, 0.5), 0.95),
-    "TimberFrame": ("timber_frame", 3.0, (0.5, 0.46, 0.4), 0.85),
+    "TimberFrame": ("timber_daub", 2.2, (0.62, 0.58, 0.5), 0.95),
+    "TimberFrameFar": ("timber_frame", 3.0, (0.5, 0.46, 0.4), 0.85),
     "Rubble": ("stone_wall", 2.4, (0.36, 0.33, 0.28), 0.95),
     "Ashlar": ("rustic_stone_wall", 2.1, (0.42, 0.39, 0.33), 0.9),
     "Masonry": ("battle/castle_wall_varriation", 3.0, (0.45, 0.43, 0.4), 0.9),
@@ -58,7 +59,8 @@ MATERIAL_TINT = {
     "RoofTile": (0.85, 0.78, 0.76),
     "Plaster": (1.05, 1.02, 0.97),
     "Door": (0.7, 0.62, 0.55),
-    "TimberFrame": (1.12, 1.09, 1.03),
+    "TimberFrame": (1.05, 1.02, 0.97),
+    "TimberFrameFar": (1.12, 1.09, 1.03),
 }
 
 
@@ -80,8 +82,10 @@ ATLAS_LAYERS = [
     "Window",
     "Iron",
     "Canvas",
-    # Lot TF: appended last so the layer indices baked into older GLBs stay valid.
+    # Lot TF: appended last so the layer indices baked into older GLBs stay valid. Daub infill
+    # under modelled beams (high detail), painted lattice where no studs are modelled (low).
     "TimberFrame",
+    "TimberFrameFar",
 ]
 
 
@@ -129,7 +133,11 @@ def _tex_path(tex: str, suffix: str) -> Path:
     """Texture file: ``battle/<id>`` lives in the battle folder, else in the building folder."""
     if tex.startswith("battle/"):
         return TEXTURES.parent / f"{tex}_{suffix}.jpg"
-    name = "medieval_wall_01" if tex == "lime_plaster" and suffix != "diff" else tex
+    name = (
+        "medieval_wall_01"
+        if tex in ("lime_plaster", "timber_daub") and suffix != "diff"
+        else tex
+    )
     return TEXTURES / f"{name}_{suffix}.jpg"
 
 
@@ -342,7 +350,7 @@ def export_battle(out_dir: Path, kinds: list[str] | None = None) -> None:
                 "height": round(info["height"], 2),
                 "triangles": info["triangles"],
                 # Lot TF: regional choice (`data/art/building_regions.json`).
-                "framed": kit.FRAME_PANEL in g.polys,
+                "framed": kit.FRAME_PANEL in g.polys or kit.FRAME_PANEL_FAR in g.polys,
                 "southern": bool(dims.get("southern", False)),
             }
             print("MODEL", name, info["triangles"])
