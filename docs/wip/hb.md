@@ -5,14 +5,15 @@ Demandes du joueur (30/09) : champs, forêts, roches, rivières ; fal.ai ; biome
 
 ## Lots
 Vague 1 (agents, chacun sa branche `feat/hb-*` et son worktree `../gp-hb-*`) :
-- [ ] HB1 biomes : `cent-ans geo biomes` → `data/map/biomes.png` + `biomes.yaml` ; palettes par biome dans `colormap_style.yaml` ; re-cuisson colormap.
+- [x] HB1 biomes (fusionné aef687bc4 ; suite demandée : lisière de steppe rectiligne, Tell maghrébin) : `cent-ans geo biomes` → `data/map/biomes.png` + `biomes.yaml` ; palettes par biome dans `colormap_style.yaml` ; re-cuisson colormap.
 - [ ] HB2 matières de sol fal.ai : textures tuilables → tableau `game/assets/textures/terrain/hb_*` + catalogue `data/art/ground_materials.yaml`.
 - [ ] HB4 essences : ~16 imposteurs (chaîne GA3 L2) + `data/art/tree_species.yaml` ; répartition par biome dans `vegetation.gd` (lit `biomes.png`).
 - [ ] HB5 rochers : affleurements fal.ai + couche de pose.
 Session principale :
-- [ ] HB6 relief : exagération lointaine.
+- [x] HB6 relief : `relief_exaggeration.tres` gain local −0,4 (loin) / −0,1 (près) = collines aplanies au-dessus du fond, écrasement des montagnes dès la vue stratégique (`mountain_squash_far` 1). Caméra inchangée (`exaggeration_far` 4,31 : les échelles cuites en dépendent ; le baisser inverse l'écrasement). Tests ZG8 réécrits selon l'ADR 0143.
+- [x] Brouillard de guerre : assombri (`fog_tone` 0,78, désaturation 0,4, voile 0,1) au lieu du voile clair qui pâlissait tout le territoire non vu.
 - [ ] HB3 shader : parcellaire de vue moyenne texturé, canopée, roche (après HB1+HB2).
-- [ ] HB7 rivières : vérification de lisibilité (RC).
+- [ ] HB7 rivières (agent, `feat/hb-rivers`, captures autorisées ≤ 15) : rivières = traits gris d’un pixel ; `sky_reflect` 0,25 et `major_min_px` 3,2 déjà posés.
 - [ ] HB8 captures, banc, docs.
 
 ## HB1 — biomes (branche `feat/hb-biomes`, worktree `../gp-hb-biomes`)
