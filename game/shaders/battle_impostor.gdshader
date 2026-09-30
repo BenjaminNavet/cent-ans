@@ -20,10 +20,15 @@ uniform float highlight = 0.0;
 // réduit à un point) et les autres sont élargies d'autant : même masse lue, moitié moins de
 // fragments et de mélange alpha.
 uniform float thin_out = 0.0;
+// NT10 : bandes de l'atlas (copies : variante de casque, habit) ; sang du régiment (0-1).
+uniform int copies = 1;
+uniform float blood = 0.0;
 
 varying vec2 v_uv;
 varying float v_shade;
 varying vec3 v_normal_world;
+varying vec2 v_local;
+varying float v_seed;
 
 float hash1(float n) {
 	return fract(sin(n) * 43758.5453123);
@@ -48,10 +53,14 @@ void vertex() {
 	float len = max(set_len[s], 0.1);
 	int f = int(fract(anim_time / len + h) * float(frames)) % frames;
 	int row = s * frames + f;
+	int copy = min(int(hash1(float(INSTANCE_ID) * 3.91 + 2.3) * float(copies)), copies - 1);
+	col += copy * cols;
 	// `world_vertex_coords` : VERTEX arrive déjà en coordonnées monde ; le coin vient des UV.
 	vec2 corner = UV;
 	vec2 local = vec2(UV.x - 0.5, 1.0 - UV.y);
-	v_uv = (vec2(float(col), float(row)) + corner) / vec2(float(cols), float(rows));
+	v_uv = (vec2(float(col), float(row)) + corner) / vec2(float(cols * copies), float(rows));
+	v_local = corner;
+	v_seed = hash1(float(INSTANCE_ID) * 5.17 + 0.9);
 	vec3 right = vec3(tc.y, 0.0, -tc.x);
 	vec3 up = vec3(0.0, 1.0, 0.0);
 	float wide = cell_m.x * scale;
@@ -76,6 +85,15 @@ void fragment() {
 	NORMAL = normalize((VIEW_MATRIX * vec4(v_normal_world, 0.0)).xyz);
 	// Atlas prémultiplié (fond transparent noir) : couleur vraie = rgb / alpha, mipmaps compris.
 	ALBEDO = t.rgb / max(t.a, 0.004) * v_shade + vec3(highlight * 0.25);
+	if (blood > 0.0) {
+		// NT10 : taches de sang en gros grains (le shader skinné en fait autant de près), plus
+		// denses en bas de la silhouette ; la part tachée croît avec le sang du régiment.
+		vec2 cell = floor(v_local * vec2(4.0, 9.0));
+		float spots = hash1(cell.x * 7.13 + cell.y * 3.71 + v_seed * 91.0);
+		float low = smoothstep(0.1, 0.55, v_local.y);
+		float amount = step(1.0 - blood * 0.55 * (0.4 + 0.6 * low), spots) * step(v_seed, blood * 1.6);
+		ALBEDO = mix(ALBEDO, vec3(0.2, 0.015, 0.012), amount * 0.85);
+	}
 	// Couverture conservée au loin : dans les mipmaps, la silhouette se dilue dans le fond et
 	// l'alpha moyen passerait sous le seuil (figurines qui disparaissent) ; on le relève selon
 	// le niveau de mipmap lu.

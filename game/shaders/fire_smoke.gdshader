@@ -19,6 +19,9 @@ uniform float soft_distance = 3.0;
 // Part de la lumière des foyers (lumières ponctuelles) reçue : la fumée, très diffusante, virerait
 // sinon au rose saumon au-dessus des flammes.
 uniform float point_light_share = 0.2;
+// CR1 : fondu des volutes proches de la caméra (m ; 0 = aucun). En gros plan, une volute de 9 m
+// à quelques mètres devenait une grande tache blanche ronde.
+uniform float near_fade = 0.0;
 
 varying vec2 uv_a;
 varying vec2 uv_b;
@@ -58,6 +61,9 @@ void fragment() {
 	vec4 scene = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
 	float scene_distance = -scene.z / scene.w;
 	alpha *= clamp((scene_distance + VERTEX.z) / soft_distance, 0.0, 1.0);
+	if (near_fade > 0.0) {
+		alpha *= smoothstep(near_fade * 0.3, near_fade, -VERTEX.z);
+	}
 	float lighting = texel.g;
 	ALBEDO = smoke_color * (0.45 + 0.75 * lighting);
 	// Lueur du feu sous la fumée jeune (ventre des volutes, côté ombré).

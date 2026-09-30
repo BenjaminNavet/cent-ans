@@ -1,115 +1,92 @@
-# GA1: AI-generated tileable materials of the fine battle figures (ADR 0104).
+# GA1: tileable materials of the fine battle figures (ADR 0104), SR1: 8 of them now
+# CC0 PBR scans from ambientCG (``source: ambientcg:<AssetId>``, 1K-JPG maps Color,
+# NormalGL, Roughness, Displacement; normal taken from the scan, not derived).
 # Order = layer of fine_detail_ga1.png / fine_detail_albedo.png (GA1_TILE_* in
-# battle_soldier_skinned.gdshader); tile_m must equal GA1_TILE_SIZE there.
-# Prompts: flat texture seen straight on, even diffuse light, no cast shadow or
-# perspective, filling the frame (the pipeline makes it tileable afterwards).
-model: openai/gpt-5-image-mini
+# battle_soldier_skinned.gdshader); tile_m must equal GA1_TILE_SIZE there (pytest).
+# Scans: scan_m = physical side given to the whole 1K scan (ambientCG dimensionX when
+# plausible, else estimated from the pattern period measured by autocorrelation/FFT of
+# the Displacement map, 1024 px). tile_m = scan_m everywhere: the whole scan is already
+# seamless, while a crop of a periodic weave or mail would need a phase-mismatched blend
+# (ghosted seams); 1024 -> 512 px keeps >= 4 px per thread and 8 px per ring. A smaller
+# tile_m would crop around crop_centre and blend it tileable (blend_width, output px).
+# Generated prompts (kept layers skin, hair, coat_*): flat texture seen straight on, even
+# diffuse light, no cast shadow or perspective, filling the frame (the pipeline makes it
+# tileable afterwards). Their tiles are NOT regenerated: build_fine_arrays copies their
+# layers from the committed arrays when no tile is supplied.
+model: openai/gpt-5-image-mini  # generated layers only
 size: 1024
 tile_size: 512
 materials:
   - id: wool
-    prompt: >-
-      Seamless flat texture swatch of medieval hand-woven felted wool cloth, undyed
-      natural oatmeal colour, irregular hand-spun yarns of uneven thickness, the weave
-      softened and partly hidden by fulling, slightly fuzzy with loose fibres and
-      small pills, about forty threads across the frame. Photographed straight on,
-      orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
-      no highlights, no perspective, no folds, no vignette, the cloth fills the entire
-      frame edge to edge. No text, no border, no objects.
-    tile_m: 0.1
-    blend_width: 128
-    height_strength: 0.55
-    roughness_bias: 0.1
+    # Fabric045 (no size metadata): knitted/fulled yarn columns, period 13.5 px ->
+    # 76 columns per scan; hand-spun fulled wool yarn ~2 mm -> 0.15 m.
+    source: ambientcg:Fabric045
+    scan_m: 0.15
+    tile_m: 0.15
+    normal_strength: 1.0
+    roughness_bias: 0.3  # scan 0.53 -> ~0.83, wool is matte
     detail_saturation: 0.2
   - id: linen
-    prompt: >-
-      Seamless flat texture swatch of medieval hand-woven linen cloth, pale undyed
-      flax colour, fine plain weave with slightly irregular thin threads and a few
-      slubs, about sixty threads across the frame. Photographed straight on,
-      orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
-      no highlights, no perspective, no folds, no vignette, the cloth fills the entire
-      frame edge to edge. No text, no border, no objects.
-    tile_m: 0.05
-    blend_width: 128
-    height_strength: 0.5
-    roughness_bias: 0.05
+    # Fabric061 (metadata 40 cm = 3 mm threads, upholstery canvas): plain weave repeat
+    # 16 px = 2 threads -> 128 threads per scan; medieval linen thread ~1 mm -> 0.13 m.
+    source: ambientcg:Fabric061
+    scan_m: 0.13
+    tile_m: 0.13
+    normal_strength: 1.5
+    roughness_bias: 0.0  # scan 0.84
     detail_saturation: 0.2
   - id: fustian
-    prompt: >-
-      Seamless flat texture swatch of medieval fustian cloth, a dense twill of linen
-      and cotton with fine diagonal ribs and a slightly brushed nap, plain light
-      beige colour, about fifty ribs across the frame. Photographed straight on,
-      orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
-      no highlights, no perspective, no folds, no vignette, the cloth fills the entire
-      frame edge to edge. No text, no border, no objects.
-    tile_m: 0.06
-    blend_width: 128
-    height_strength: 0.5
-    roughness_bias: 0.05
+    # Fabric066 (metadata 40 cm = 1.6 mm threads): repeat 8 px = 2 threads -> 256
+    # threads per scan; dense fustian twill thread ~0.6 mm -> 0.16 m.
+    source: ambientcg:Fabric066
+    scan_m: 0.16
+    tile_m: 0.16
+    normal_strength: 1.5
+    roughness_bias: 0.0  # scan 0.82
     detail_saturation: 0.15
   - id: gambeson
-    prompt: >-
-      Seamless flat texture swatch of a medieval padded gambeson, off-white linen
-      quilted in parallel vertical channels about four centimetres wide, stitched seams
-      between padded ridges, slightly worn and soiled cloth, four channels across the
-      frame. Photographed straight on, orthographic top-down view, perfectly even
-      diffuse lighting, no cast shadows, no perspective, no vignette, the quilting fills
-      the entire frame edge to edge. No text, no border, no objects.
-    tile_m: 0.16
-    blend_width: 96
-    height_strength: 1.0
-    roughness_bias: 0.1
+    # Fabric048 (metadata 40 cm): quilted grid, period 128 px -> 8 squares of 5 cm;
+    # scaled x0.8 so the quilting reads as 4 cm channels (gambeson 3-4 cm) -> 0.32 m.
+    source: ambientcg:Fabric048
+    scan_m: 0.32
+    tile_m: 0.32
+    normal_strength: 1.5
+    roughness_bias: 0.3  # scan 0.53 -> ~0.83, padded linen is matte
     detail_saturation: 0.2
   - id: mail
-    prompt: >-
-      Seamless flat texture swatch of medieval riveted chain mail, European
-      four-in-one pattern of small interlocking round iron rings with visible rivets,
-      dull grey forged iron with slight patina. Photographed straight on,
-      orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
-      no perspective, no folds, no vignette, uniform ring size, the rings fill the
-      entire frame edge to edge. No text, no border, no background showing.
-    tile_m: 0.1
-    blend_width: 96
-    height_strength: 1.2
-    roughness_bias: -0.35
+    # Chainmail002 (no size metadata): 4-in-1 rows, horizontal ring pitch 16 px (FFT
+    # peak 64 cycles per scan); 9 mm rings overlap to an ~8 mm pitch -> 64 x 8 mm =
+    # 0.51 m (8 px per ring on the 512 px tile).
+    source: ambientcg:Chainmail002
+    scan_m: 0.51
+    tile_m: 0.51
+    normal_strength: 1.0
+    roughness_bias: 0.0  # scan 0.40 (rings ~0.3, gaps rougher)
     detail_saturation: 0.0
   - id: leather
-    prompt: >-
-      Seamless flat texture swatch of medieval vegetable-tanned cowhide leather,
-      natural brown, visible grain pores, fine creases, scuffs and slightly uneven
-      waxed patina. Photographed straight on, orthographic top-down view, perfectly
-      even diffuse lighting, no cast shadows, no highlights, no perspective, no folds,
-      no vignette, the leather fills the entire frame edge to edge. No text, no border,
-      no stitching, no objects.
-    tile_m: 0.12
-    blend_width: 128
-    height_strength: 0.7
-    roughness_bias: -0.05
+    # Leather033A (metadata 30 cm, grain and creases consistent with it) -> 0.3 m.
+    source: ambientcg:Leather033A
+    scan_m: 0.3
+    tile_m: 0.3
+    normal_strength: 3.0  # scan normal very flat (|xy| 0.04)
+    roughness_bias: 0.1  # scan 0.47 -> ~0.57, waxed leather
     detail_saturation: 0.25
   - id: plate
-    prompt: >-
-      Seamless flat texture swatch of a hand-forged medieval steel armour plate
-      surface, shallow irregular hammer dents, faint file marks and light polishing
-      scratches, even grey steel, no rust. Photographed straight on, orthographic
-      top-down view, perfectly even diffuse lighting, no reflections of the
-      surroundings, no cast shadows, no perspective, no vignette, the metal fills the
-      entire frame edge to edge. No text, no border, no rivets, no objects.
-    tile_m: 0.16
-    blend_width: 128
-    height_strength: 0.35
-    roughness_bias: -0.4
+    # Metal055A (no size metadata): streaks and stains 20-80 px wide, read as file
+    # marks and 1-2 cm hammer blotches on a breastplate -> 0.3 m.
+    source: ambientcg:Metal055A
+    scan_m: 0.3
+    tile_m: 0.3
+    normal_strength: 4.0  # scan normal almost flat (|xy| 0.01): faint dents only
+    roughness_bias: 0.1  # scan 0.27 -> ~0.37 (GA1 had 0.38); metallic from shader codes
     detail_saturation: 0.0
   - id: wood
-    prompt: >-
-      Seamless flat texture swatch of weathered medieval ash wood, straight grain
-      running vertically, a few small knots, split-and-shaved surface, natural pale
-      brown. Photographed straight on, orthographic top-down view, perfectly even
-      diffuse lighting, no cast shadows, no perspective, no vignette, the wood fills
-      the entire frame edge to edge. No text, no border, no planks seams, no objects.
-    tile_m: 0.3
-    blend_width: 128
-    height_strength: 0.6
-    roughness_bias: 0.0
+    # Wood049 (metadata 80 cm): plank-scale grain, lines ~3 cm apart -> 0.8 m.
+    source: ambientcg:Wood049
+    scan_m: 0.8
+    tile_m: 0.8
+    normal_strength: 1.5
+    roughness_bias: 0.25  # scan 0.50 -> ~0.75, weathered unfinished wood
     detail_saturation: 0.3
   - id: skin
     prompt: >-

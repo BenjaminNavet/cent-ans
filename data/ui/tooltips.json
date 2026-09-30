@@ -425,6 +425,14 @@
       "title": "Siège",
       "body": "Le camp 2 tient une place fortifiée ; le camp 1 donne l'assaut aux murs."
     },
+    "custom_battle_year": {
+      "title": "Année",
+      "body": "Année de la bataille (1337-1453) : les rosters ne proposent que les unités levées cette année-là (francs-archers après 1448, routiers de 1356 à 1395…). Les technologies ne comptent pas en bataille personnalisée."
+    },
+    "custom_battle_engines": {
+      "title": "Engins de siège",
+      "body": "Engins de l'assiégeant : échelles d'escalade, bélier contre la porte, beffrois. Ils ne coûtent pas de points et ne comptent pas dans le plafond d'unités."
+    },
     "custom_battle_place": {
       "title": "Type de place",
       "body": "Plan de la place assiégée : cité en anneaux de maisons, bourg fortifié le long d'une grand-rue, ou château avec donjon et basse-cour."

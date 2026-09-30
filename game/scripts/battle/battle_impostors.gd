@@ -7,7 +7,8 @@ extends Node
 ## par un atlas cuit au début de la bataille depuis les figurines V2 elles-mêmes :
 ## - un atlas par (camp, famille, variante) présent : même matériau que les figurines (livrée,
 ##   blason), rendu dans un `SubViewport` isolé par une caméra orthographique inclinée ;
-## - colonnes : 8 angles de vue autour de la figurine ; lignes : 4 jeux (arrêt, marche, course
+## - colonnes : 8 angles de vue autour de la figurine (NT10 : × `COPIES` bandes, variantes de
+##   casque et d'habit) ; lignes : 4 jeux (arrêt, marche, course
 ##   ou charge, action : tir ou mêlée) × 4 images du clip (mode CUSTOM du shader skinné) ;
 ## - l'image est copiée une fois rendue (mipmaps), le `SubViewport` libéré.
 ## Le tampon d'instances des figurines (12 flottants, même format) sert tel quel : aucun travail
@@ -27,6 +28,34 @@ const CELL_PX := {false: Vector2i(32, 64), true: Vector2i(64, 64)}
 const CELL_M := {false: Vector2(1.3, 2.6), true: Vector2(3.4, 3.4)}
 ## Marge sous les pieds (fraction de la hauteur de cellule).
 const FOOT := 0.06
+## NT10 : copies de l'atlas (bandes de 8 colonnes) par figurine : variante (casque...) et habit
+## (livrée ou vêtement non teint, teintes) différents ; chaque imposteur en tire une au hasard.
+const COPIES := {false: 3, true: 2}
+const SHADOW_SHADER := preload("res://shaders/battle_impostor_shadow.gdshader")
+
+## NT10 : `--no-nt10` après `--` : imposteurs de BV3 (une copie, sans ombre ni sang), banc A/B.
+static func nt10_enabled() -> bool:
+	return not ("--no-nt10" in OS.get_cmdline_user_args())
+
+
+## NT10 : identifiants de cuisson des `copies` copies : les `round(livery_share × copies)`
+## premières portent la livrée, les autres un habit non teint (même test que le shader skinné,
+## `h5 < livery_share`, avec une marge contre l'écart du dernier bit du sinus GPU).
+static func bake_ids(copies: int, livery_share: float) -> Array:
+	var wearing := clampi(roundi(livery_share * float(copies)), 1, copies)
+	var ids: Array = []
+	var candidate := 1.0
+	while ids.size() < copies and candidate < 4000.0:
+		var hx := BattleSkinned._hash1(candidate * 1.37 + 0.11)
+		var hz := BattleSkinned._hash1(candidate * 0.73 + 1.9)
+		var h5 := fposmod(hx * 7.31 + hz * 3.17, 1.0)
+		var want_livery := ids.size() < wearing
+		if absf(h5 - livery_share) > 0.08 and (h5 < livery_share) == want_livery:
+			ids.append(candidate)
+		candidate += 1.0
+	while ids.size() < copies:
+		ids.append(float(ids.size()) + 1.0)
+	return ids
 
 var baked_count: int = 0
 var _atlases: Dictionary = {}  # key -> {texture, lengths, cell_m, rows}
@@ -72,6 +101,16 @@ func make_material(key: String) -> ShaderMaterial:
 	mat.set_shader_parameter("rows", SETS.size() * FRAMES)
 	mat.set_shader_parameter("frames", FRAMES)
 	mat.set_shader_parameter("set_len", atlas["lengths"])
+	mat.set_shader_parameter("copies", int(atlas.get("copies", 1)))
+	return mat
+
+
+## NT10 : matériau de l'ombre en disque des imposteurs (même MultiMesh, passe multiplicative).
+func make_shadow_material(key: String) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = SHADOW_SHADER
+	mat.set_shader_parameter("cell_m", _atlases[key]["cell_m"])
+	mat.set_shader_parameter("mounted", (_atlases[key]["cell_m"] as Vector2).x > 2.0)
 	return mat
 
 
@@ -94,8 +133,9 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	var cell_px: Vector2i = CELL_PX[mounted]
 	var cell_m: Vector2 = CELL_M[mounted]
 	var rows := SETS.size() * FRAMES
+	var copies: int = COPIES[mounted] if nt10_enabled() else 1
 	var viewport := SubViewport.new()
-	viewport.size = Vector2i(cell_px.x * COLS, cell_px.y * rows)
+	viewport.size = Vector2i(cell_px.x * COLS * copies, cell_px.y * rows)
 	viewport.own_world_3d = true
 	viewport.transparent_bg = true
 	viewport.msaa_3d = Viewport.MSAA_4X
@@ -149,27 +189,38 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	mat.set_shader_parameter("fine_distance", 100000.0)
 	mat.set_shader_parameter("blood", 0.0)
 	mat.set_shader_parameter("hide_pavise", false)
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_custom_data = true
-	mm.mesh = BattleSkinned.mesh(kind, variant, 0)
-	mm.instance_count = COLS * rows
-	var width := cell_m.x * COLS
+	var width := cell_m.x * COLS * copies
 	var height := cell_m.y * rows
-	for r in rows:
-		var s := r / FRAMES
-		var f := r % FRAMES
-		for c in COLS:
-			var x := (float(c) + 0.5) * cell_m.x - width * 0.5
-			var y := height * 0.5 - (float(r) + 1.0) * cell_m.y + FOOT * cell_m.y
-			var basis := Basis(Vector3.UP, float(c) * TAU / float(COLS))
-			var k := r * COLS + c
-			mm.set_instance_transform(k, Transform3D(basis, Vector3(x, 0, 0) + up * y))
-			mm.set_instance_custom_data(k, Color(-float(f) / float(FRAMES) * lengths[s], float(s), 0.0, 0.0))
-	var figures := MultiMeshInstance3D.new()
-	figures.multimesh = mm
-	figures.material_override = mat
-	viewport.add_child(figures)
+	# NT10 : une bande de 8 colonnes par copie, chacune avec son habit et sa variante (matériau
+	# dupliqué, `bake_id` du shader skinné) ; une seule copie sans NT10 (atlas de BV3).
+	var share: Variant = mat.get_shader_parameter("livery_share")
+	var count: Variant = mat.get_shader_parameter("variant_count")
+	var copy_ids: Array = bake_ids(copies, 0.7 if share == null else float(share)) if copies > 1 else []
+	var variants := 1 if count == null else maxi(int(count), 1)
+	for copy in copies:
+		var copy_mat := mat
+		if copies > 1:
+			copy_mat = mat.duplicate()
+			copy_mat.set_shader_parameter("bake_id", Vector2(float(copy_ids[copy]), float(copy % variants)))
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_custom_data = true
+		mm.mesh = BattleSkinned.mesh(kind, variant, 0)
+		mm.instance_count = COLS * rows
+		for r in rows:
+			var s := r / FRAMES
+			var f := r % FRAMES
+			for c in COLS:
+				var x := (float(copy * COLS + c) + 0.5) * cell_m.x - width * 0.5
+				var y := height * 0.5 - (float(r) + 1.0) * cell_m.y + FOOT * cell_m.y
+				var basis := Basis(Vector3.UP, float(c) * TAU / float(COLS))
+				var k := r * COLS + c
+				mm.set_instance_transform(k, Transform3D(basis, Vector3(x, 0, 0) + up * y))
+				mm.set_instance_custom_data(k, Color(-float(f) / float(FRAMES) * lengths[s], float(s), 0.0, 0.0))
+		var figures := MultiMeshInstance3D.new()
+		figures.multimesh = mm
+		figures.material_override = copy_mat
+		viewport.add_child(figures)
 	await RenderingServer.frame_post_draw
 	if _bake_aborted(key, viewport):
 		return
@@ -186,7 +237,7 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 		viewport.queue_free()
 		return
 	image.generate_mipmaps()
-	_atlases[key] = {"texture": ImageTexture.create_from_image(image), "lengths": lengths, "cell_m": cell_m, "image": image}
+	_atlases[key] = {"texture": ImageTexture.create_from_image(image), "lengths": lengths, "cell_m": cell_m, "image": image, "copies": copies}
 	_pending.erase(key)
 	baked_count += 1
 	viewport.queue_free()

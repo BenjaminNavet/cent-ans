@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "materials.schema.json",
-  "title": "Matières générées tuilables (GA)",
-  "description": "Prompts et paramètres des matières générées par IA (`tools/cent_ans_tools/material_gen.py`) : image source `size`², tuile finale `tile_size`², puis cartes dérivées (hauteur, normale OpenGL, rugosité). L'ordre des matières est celui des couches des tableaux de détail des figurines (GA1).",
+  "title": "Matières tuilables des figurines (GA générées, SR scannées)",
+  "description": "Matières des tableaux de détail des figurines (ordre = couches GA1). Une matière est soit générée par IA (`prompt`, `tools/cent_ans_tools/material_gen.py` : image `size`², tuile `tile_size`², cartes dérivées), soit un scan PBR CC0 ambientCG (`source: ambientcg:<Id>`, SR1 : cartes Color, NormalGL, Roughness, Displacement du scan 1K, taille physique `scan_m`).",
   "type": "object",
   "required": [
     "model",
@@ -30,7 +30,6 @@
         "type": "object",
         "required": [
           "id",
-          "prompt",
           "tile_m"
         ],
         "additionalProperties": false,
@@ -54,7 +53,8 @@
           "roughness_bias": {
             "type": "number",
             "minimum": -1,
-            "maximum": 1
+            "maximum": 1,
+            "description": "Décalage de la rugosité (dérivée ou du scan), borné à 0..1."
           },
           "tile_m": {
             "type": "number",
@@ -66,8 +66,47 @@
             "minimum": 0,
             "maximum": 1,
             "description": "Part de la teinte gardée dans l'albédo de détail (0 : luminance seule, la couleur vient des données)."
+          },
+          "source": {
+            "type": "string",
+            "pattern": "^ambientcg:[A-Za-z0-9]+$",
+            "description": "Scan PBR CC0 ambientCG (API v2, archive 1K-JPG) ; absente : matière générée par `prompt`."
+          },
+          "scan_m": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Côté physique (m) donné au scan entier ; tile_m ≤ scan_m (égal : scan entier, déjà tuilable)."
+          },
+          "crop_centre": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Centre (fractions x, y) du recadrage quand tile_m < scan_m."
+          },
+          "normal_strength": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Facteur sur la pente (XY) de la normale du scan, renormalisée."
           }
-        }
+        },
+        "anyOf": [
+          {
+            "required": [
+              "prompt"
+            ]
+          },
+          {
+            "required": [
+              "source",
+              "scan_m"
+            ]
+          }
+        ]
       }
     }
   }

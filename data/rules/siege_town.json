@@ -85,6 +85,7 @@
       "lane_m": 8.0,
       "tower_radius_scale": 0.6,
       "keep_height_above_wall_m": 17.0,
+      "keep_terrace_share": 0.4,
       "bailey_props": [5, 8],
       "bailey_kinds": ["cart", "barrels", "woodpile", "barrels", "woodpile"],
       "lean_to_kinds": ["woodpile", "barrels", "cart", "woodpile"]

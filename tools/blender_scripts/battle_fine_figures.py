@@ -18,6 +18,7 @@ import battle_fine_bake as fb
 import battle_fine_equipment as fe
 import battle_fine_gear as gear
 import battle_fine_proto as fp
+import battle_fine_sr as sr
 import battle_skinned as bs
 import battle_skinned_equipment as eq
 import battle_skinned_figures as figures
@@ -592,7 +593,9 @@ def variant_mask(variants, shown):
 
 
 def hides_hair(name, kwargs):
-    """Headgear that hides the hair."""
+    """Headgear that hides the hair (SR3b: the kettle hat over an aventail too)."""
+    if name == "kettle_hat":
+        return kwargs.get("aventail", False)
     return name in HELMS_HIDING_HAIR
 
 
@@ -600,6 +603,8 @@ def hides_beard(name, kwargs):
     """Headgear that hides the chin (great helm, aventail, visor, bevor)."""
     if name == "great_helm":
         return True
+    if name == "kettle_hat":
+        return kwargs.get("aventail", False)
     if name == "bassinet":
         return kwargs.get("aventail", True) or kwargs.get("visor", False)
     if name == "sallet":
@@ -839,7 +844,7 @@ def build_figure(fig_name, level):
     import battle_skinned_cavalry as cav
     import battle_skinned_poses as poses
 
-    recipe = figures.FIGURES[fig_name]
+    recipe = sr.fine_recipe(fig_name, figures.FIGURES[fig_name])  # SR3b overrides
     mounted = recipe["rig"] == "cavalry"
     horse = []
     if mounted:
@@ -873,6 +878,7 @@ def build_figure(fig_name, level):
     fine = fig_name in FINE_KIT
     if fine:
         gloves = (eq.C_LEATHER, (0.10, 0.06, 0.03))
+    gloves = sr.gloves(fig_name, gloves)  # SR3b: leather gloves of the sergeants
     bvhs = [torso_bvh(o) for o, role in garments if role in ("torso", "coat", "skirt")]
     ctx = eq.Context(arm, level, bs.material, bs.bone_world)
     kit_gear = gear.Gear(ctx, lm, bvhs, fig_name, mounted)
@@ -888,8 +894,8 @@ def build_figure(fig_name, level):
             parent_keep(obj, arm)
             fb.gear_mask("limb_plates", [obj])
             garments.append((obj, "plates"))
-        if era == "late":
-            gloves = (eq.C_PLATE, plate_c)  # plate gauntlets
+        # Plate gauntlets (SR3b: the early harness too, flared cuffs in the plates).
+        gloves = (eq.C_PLATE, plate_c)
     equipment = []
     for item in recipe.get("equipment", []):
         name, mask = item[0], item[1]
@@ -918,6 +924,11 @@ def build_figure(fig_name, level):
         for obj in fe.scabbard(lm):
             gear.unwrap(obj)
             equipment.append((obj, 0, "kit"))
+    # SR3b: purse, dagger and buckler at the belt (rigid on the hips, kept as built).
+    for obj in sr.extras(fig_name, kit_gear, equipment, level, mounted):
+        gear.unwrap(obj)
+        fb.gear_mask(obj.name, [obj])
+        equipment.append((obj, 0, "sr"))
     # Heads: one face per variant at LOD0, the variant-0 face below.
     hair_ok, beard_ok = headgear_visibility(recipe)
     heads = []

@@ -2,7 +2,8 @@
 //!
 //! - `BattleSim.custom_rules()` : budget bounds, unit cap, fortification;
 //! - `BattleSim.custom_factions(data_dir)` : the playable factions;
-//! - `BattleSim.custom_roster(data_dir, faction)` : the units a faction buys;
+//! - `BattleSim.custom_roster(data_dir, faction, year)` : the units a faction buys
+//!   that year (NT11; `0`: the default year);
 //! - `BattleSim.validate_custom(data_dir, config)` : costs and French errors;
 //! - `BattleSim.setup_custom(data_dir, config, seed)` : builds the battle.
 //!
@@ -79,10 +80,11 @@ impl BattleSim {
             .collect()
     }
 
-    /// NT2: units `faction` can buy `[{id, name, category, cost, soldiers,
-    /// mounted, mercenary}]` (cost: recruitment price in livres).
+    /// NT2: units `faction` can buy in `year` (NT11; `0`: the default year)
+    /// `[{id, name, category, cost, soldiers, mounted, mercenary}]` (cost:
+    /// recruitment price in livres).
     #[func]
-    fn custom_roster(&self, data_dir: GString, faction: GString) -> VarArray {
+    fn custom_roster(&self, data_dir: GString, faction: GString, year: i64) -> VarArray {
         let Ok(catalog) = catalog(&PathBuf::from(data_dir.to_string())) else {
             return VarArray::new();
         };
@@ -92,7 +94,12 @@ impl BattleSim {
         else {
             return VarArray::new();
         };
-        roster(&catalog.0, faction)
+        let rules = CustomBattleRules::bundled();
+        let year = match i32::try_from(year) {
+            Ok(y) if y > 0 => y.clamp(rules.min_year, rules.max_year),
+            _ => rules.default_year,
+        };
+        roster(&catalog.0, faction, year)
             .into_iter()
             .map(|u| {
                 let category = serde_json::to_value(u.category)

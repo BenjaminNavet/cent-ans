@@ -150,7 +150,9 @@ void vertex() {
 		float blood_k = 0.0;
 		if (flatten_on > 0.0) {
 			vec2 fuv = (wp - flatten_rect.xy) / flatten_rect.zw;
-			vec2 fl = texture(flatten_map, fuv).rg;
+			// NT10 : rien hors du rectangle couvert (sans cela, le texel du bord s'étire).
+			vec2 inside = step(vec2(0.0), fuv) * step(fuv, vec2(1.0));
+			vec2 fl = texture(flatten_map, fuv).rg * inside.x * inside.y;
 			// Bords irréguliers (bruit à ~1,5 m) et touffes plus ou moins couchées.
 			float ragged = bt_value_noise(wp * 0.7) - 0.5;
 			flat_k = smoothstep(0.08, 0.9, fl.r * (1.0 + ragged * 0.6) + (rnd.x - 0.5) * 0.25 * fl.r);

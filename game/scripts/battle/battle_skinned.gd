@@ -75,6 +75,44 @@ static func cycle_blend_at(config: Dictionary, h: Vector4, anim_time: float, ble
 	return result
 
 
+## NT10 : durée (s) du fondu au changement de clip des figurines en mode CUSTOM (porte-étendards,
+## musiciens, servants d'engins) ; 0 avec `--no-nt10` après `--` (banc A/B, changement sec).
+static func role_blend_s() -> float:
+	if "--no-nt10" in OS.get_cmdline_user_args():
+		return 0.0
+	return float(animation_settings().get("role_blend_s", 0.0))
+
+
+## NT10 : suit le clip (indice global dans `clips[]`) d'une figurine en mode CUSTOM ; `state` est
+## un dictionnaire propre à la figurine (modifié : `cur`, `prev`, `at`). Renvoie le clip précédent
+## encore en fondu, ou −1 (le fondu passé, ou horloge revenue en arrière).
+static func fade_prev(state: Dictionary, clip: int, now: float) -> int:
+	var cur := int(state.get("cur", -1))
+	if cur != clip:
+		if cur >= 0:
+			state["prev"] = cur
+			state["at"] = now
+		state["cur"] = clip
+	var prev := int(state.get("prev", -1))
+	if prev >= 0:
+		var since := now - float(state.get("at", now))
+		if since < 0.0 or since > role_blend_s() + 0.1 or role_blend_s() <= 0.0:
+			state["prev"] = -1
+			prev = -1
+	return prev
+
+
+## NT10 : INSTANCE_CUSTOM.y du mode CUSTOM avec fondu (`custom_fade` du shader) : emplacement du
+## clip dans le jeu (0-31) + 32 × (clip précédent + 1) + 4096 × q, q = instant du changement en
+## 1/32 s modulo 64 s (arrondi par défaut : le fondu ne part jamais en avance). Entier exact en
+## flottant 32 bits (< 2^24).
+static func pack_fade(slot: int, prev_clip: int, changed_at: float) -> float:
+	if prev_clip < 0:
+		return float(slot)
+	var q := int(floorf(fposmod(changed_at, 64.0) * 32.0)) % 2048
+	return float((slot & 31) + 32 * (clampi(prev_clip, 0, 126) + 1) + 4096 * q)
+
+
 static func _hash1(n: float) -> float:
 	var x := sin(n * 12.9898 + 4.1414) * 43758.5453
 	return x - floorf(x)
@@ -167,6 +205,16 @@ static func fine_maps_ready() -> bool:
 	return not fine_maps().is_empty()
 
 
+## Lot SR2 : usure des figurines fines cuites (0-1). `--no-sr2` après `--` : 0 (rendu SR1 exact).
+const SR2_WEATHERING := 0.85
+const SR2_MUD_HEIGHT := 0.45
+const SR2_MUD_HEIGHT_HORSE := 0.65
+
+
+static func sr2_weathering() -> float:
+	return 0.0 if OS.get_cmdline_user_args().has("--no-sr2") else SR2_WEATHERING
+
+
 ## GA1 : albédo de détail généré actif (absent avec `--no-ga1` ou sans les tableaux).
 static func ga1_enabled() -> bool:
 	return fine_maps().has("detail_albedo")
@@ -193,6 +241,10 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 		mat.set_shader_parameter("fine_detail_albedo", maps["detail_albedo"])
 	mat.set_shader_parameter("fine_horse", maps["horse"])
 	mat.set_shader_parameter("fine_layer", int(fig["atlas_layer"]))
+	# SR2 : usure (boue des pieds, crasse des creux, acier vivant, teintes passées) ; les
+	# cavaliers salissent le bas des jambes du cheval et l'ourlet du caparaçon (~0,65 m).
+	mat.set_shader_parameter("weathering", sr2_weathering())
+	mat.set_shader_parameter("sr2_mud_height", SR2_MUD_HEIGHT_HORSE if kind == "cavalry" else SR2_MUD_HEIGHT)
 
 
 static func manifest() -> Dictionary:
@@ -385,6 +437,7 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 		table.append(Vector4(0, 1, 1, 0))
 	mat.set_shader_parameter("clips", table)
 	mat.set_shader_parameter("cycle_blend", cycle_blend_s())
+	mat.set_shader_parameter("role_blend", role_blend_s())
 	mat.set_shader_parameter("variant_count", int(figure(kind, variant).get("variants", 1)))
 	mat.set_shader_parameter("size_jitter", 0.0 if kind == "cavalry" else 0.05)
 	mat.set_shader_parameter("sever_bones", sever_table(kind, variant))

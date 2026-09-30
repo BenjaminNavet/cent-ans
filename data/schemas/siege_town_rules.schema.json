@@ -177,11 +177,12 @@
             "lane_m": { "$ref": "#/$defs/positive", "description": "Largeur du passage porte - basse-cour - donjon." },
             "tower_radius_scale": { "$ref": "#/$defs/factor", "description": "NT8 : facteur du rayon des tours du château (tours de flanquement plus fines que celles d'une ville)." },
             "keep_height_above_wall_m": { "$ref": "#/$defs/positive", "description": "NT8 : hauteur du donjon au-dessus des courtines (m)." },
+            "keep_terrace_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "NT11 : part (0-1) des donjons couverts d'une terrasse crénelée au lieu d'un toit en pavillon (tirage par la graine de la place)." },
             "bailey_props": { "$ref": "#/$defs/counts", "description": "NT8 : nombre [min, max] d'accessoires posés dans la basse-cour (hors puits)." },
             "bailey_kinds": { "$ref": "#/$defs/kinds", "description": "NT8 : accessoires de la basse-cour." },
             "lean_to_kinds": { "$ref": "#/$defs/kinds", "description": "NT8 : accessoires devant les communs et écuries adossés." }
           },
-          "required": ["sides", "radius_m", "radius_jitter", "rotation_deg", "gate_offset", "wall_height_bonus_m", "courtyard_m", "keep_side_m", "keep_distance", "keep_arc_deg", "buildings", "wall_walk_m", "lane_m", "tower_radius_scale", "keep_height_above_wall_m", "bailey_props", "bailey_kinds", "lean_to_kinds"],
+          "required": ["sides", "radius_m", "radius_jitter", "rotation_deg", "gate_offset", "wall_height_bonus_m", "courtyard_m", "keep_side_m", "keep_distance", "keep_arc_deg", "buildings", "wall_walk_m", "lane_m", "tower_radius_scale", "keep_height_above_wall_m", "keep_terrace_share", "bailey_props", "bailey_kinds", "lean_to_kinds"],
           "additionalProperties": false
         },
         "borough": {

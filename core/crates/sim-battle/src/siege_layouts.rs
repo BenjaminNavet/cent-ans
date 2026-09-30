@@ -87,6 +87,9 @@ pub struct CastleRules {
     pub tower_radius_scale: f64,
     /// NT8: height of the keep above the curtain walls.
     pub keep_height_above_wall_m: f64,
+    /// NT11: share (0-1) of keeps roofed with a crenellated terrace
+    /// instead of a pavilion roof (drawn from the place's seed).
+    pub keep_terrace_share: f64,
     /// NT8: props in the bailey (besides the well).
     pub bailey_props: [u32; 2],
     pub bailey_kinds: Vec<PropKind>,
@@ -573,6 +576,7 @@ fn castle(fortification: u32, seed: u64, rules: &TownRules) -> SiegeWorks {
             house.rows = 1;
             house.keep = true;
             house.height = works.wall_height + c.keep_height_above_wall_m;
+            house.terrace = hash01(seed, 23) < c.keep_terrace_share;
             keep = Some(house);
             lanes.push(lane_to_keep(reach - side * 0.5));
             break;
@@ -766,6 +770,33 @@ mod tests {
                 .fold(0.0, f64::max);
             assert!(r < 110.0, "{province}: tight enceinte ({r})");
         }
+    }
+
+    #[test]
+    fn keep_roofs_vary_with_the_place() {
+        // NT11: pavilion or crenellated terrace, drawn from the place's seed
+        // (stable for a province, both seen over a few).
+        let provinces: Vec<String> = (0..24).map(|i| format!("prov_{i}")).collect();
+        let terraces: Vec<bool> = provinces
+            .iter()
+            .map(|p| {
+                let w = works(PlaceKind::Castle, p);
+                let keep = w.houses.iter().find(|h| h.keep).expect("keep");
+                assert_eq!(
+                    works(PlaceKind::Castle, p)
+                        .houses
+                        .iter()
+                        .find(|h| h.keep)
+                        .map(|h| h.terrace),
+                    Some(keep.terrace),
+                    "{p}: stable"
+                );
+                keep.terrace
+            })
+            .collect();
+        assert!(terraces.iter().any(|t| *t) && terraces.iter().any(|t| !*t));
+        let city = works(PlaceKind::City, "prov_paris");
+        assert!(city.houses.iter().all(|h| !h.terrace));
     }
 
     #[test]

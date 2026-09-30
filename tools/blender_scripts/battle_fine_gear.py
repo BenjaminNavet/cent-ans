@@ -395,12 +395,17 @@ def bassinet_shell(g, name="bassinet", open_face=True, point=0.05, low=True):
     return obj, hf
 
 
-def aventail(g, hf):
-    """Mail aventail laced to the bassinet, draped on the shoulders (FG0) with a hem."""
+def aventail(g, hf, top=None):
+    """Mail aventail laced to the bassinet, draped on the shoulders (FG0) with a hem.
+
+    `top`: upper edge per angle (``battle_fine_equipment.aventail``; SR3b kettle hat).
+    """
     frame = (hf.cx, hf.cy, hf.rx + 0.004, hf.ry + 0.004)
     n = g.seg(32, 12, 6)
     rows = g.seg(10, 4, 2)
-    objs = fe.aventail(g.lm, frame, g.bvhs[0], extra=tuple(g.bvhs[1:]), n=n, rows=rows)
+    objs = fe.aventail(
+        g.lm, frame, g.bvhs[0], extra=tuple(g.bvhs[1:]), n=n, rows=rows, top=top
+    )
     for obj in objs:
         obj.data.materials[0] = g.mat(eq.C_MAIL, MAIL)
         if g.level == 0:
@@ -634,10 +639,12 @@ def cerveliere(g):
 
 
 @gear("kettle_hat")
-def kettle_hat(g):
+def kettle_hat(g, aventail=False):
     """Chapel de fer: raised skull with a low comb, wide sloping brim with a rolled edge.
 
-    Skull and brim riveted together (a row of rivets at the crown's base).
+    Skull and brim riveted together (a row of rivets at the crown's base). `aventail`
+    (SR3b): worn over a mail coif whose collar drapes on the shoulders, the edge hidden
+    under the brim, the face left open.
     """
     hf = HeadFrame(g.lm, pad=0.014)
     n = g.seg(28, 12, 6)
@@ -674,7 +681,7 @@ def kettle_hat(g):
             a = 2 * math.pi * i / 16
             p = hf.at(a, 1.02, base + 0.012, out=0.002)
             rivet(bm, p, p - Vector((hf.cx, hf.cy, p.z)), 0.0045, 1)
-    return [
+    out = [
         finish_object(
             "kettle_hat",
             bm,
@@ -682,6 +689,11 @@ def kettle_hat(g):
             bone="Head",
         )
     ]
+    if aventail:
+        # The coif's edge runs just under the brim (sides and back), the face open.
+        coif = HeadFrame(g.lm, pad=0.006)
+        out += globals()["aventail"](g, coif, top=lambda a: base - 0.012)
+    return out
 
 
 @gear("great_helm")
@@ -1018,6 +1030,10 @@ def limb_harness(g, body, era, colour, cuisses=False):
 
         legs = [("greave", greave, 0.02), ("poleyn", poleyn, 0.03)]
         arms = [("couter", couter, 0.034), ("vambrace", vambrace, 0.03)]
+        # SR3b: flared cuff of the gauntlet over the end of the vambrace.
+        cuff = gauntlet_cuff(body, s, elbow, wrist, material)
+        if cuff is not None:
+            pieces.append(cuff)
         if late:
             if cuisses:
                 legs.append(("cuisse", cuisse, 0.022))
@@ -1057,6 +1073,39 @@ def limb_harness(g, body, era, colour, cuisses=False):
     if not pieces:
         return []
     return [fe.join(pieces, "limb_plates")]
+
+
+def gauntlet_cuff(body, s, elbow, wrist, material, length=0.075, flare=0.014):
+    """Hourglass gauntlet's cuff (SR3b), or None when nothing was selected.
+
+    A band of the forearm before the wrist, flared outwards towards the hand, with a
+    rolled thickness.
+    """
+    axis = (wrist - elbow).normalized()
+    lower_arm, hand = f"LowerArm.{s}", f"Wrist.{s}"
+
+    def keep(c, bones):
+        if not bones & {lower_arm} or not bones <= {lower_arm, hand}:
+            return False
+        t = (c - wrist).dot(axis)
+        return -length < t < 0.012
+
+    obj = fe.shell(body, f"cuff_{s}", material, keep, 0.034, relax=4)
+    if not obj.data.polygons:
+        bpy.data.objects.remove(obj)
+        return None
+    mw = obj.matrix_world
+    inv = mw.inverted()
+    for v in obj.data.vertices:
+        p = mw @ v.co
+        t = (p - wrist).dot(axis)
+        on_axis = wrist + axis * t
+        radial = p - on_axis
+        if radial.length > 1e-4:
+            k = eq.smoothstep(-length, 0.012, t)
+            v.co = inv @ (p + radial.normalized() * flare * k)
+    hem(obj, 0.004)
+    return obj
 
 
 def quilt(obj, lm, amp=0.005, spacing=0.05):

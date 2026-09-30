@@ -190,3 +190,15 @@ NB0 ≤ 1,50 $, NB1 ≤ 5 $, réserve 2,50 $.
 | 2026-09-30 | OpenRouter | NB1 : drollery_musician v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 2,96 $ |
 | 2026-09-30 | OpenRouter | NB1 : corner_rinceau v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 3,03 $ |
 | 2026-09-30 | OpenRouter | NB1 : cartouche_title v0 (google/gemini-3.1-flash-image) | 0,07 $ | 0,07 $ | 3,10 $ |
+
+## Figurines semi-réalistes SR (30/09) — plafond propre de 3 $ (NB2, enveloppe NB2 globale ≈ 20 $)
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul SR |
+|---|---|---|---|---|---|
+| 2026-09-30 | — | SR (squelette) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence man_at_arms (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,07 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence longbowman (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,14 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence crossbowman (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,21 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence sergeant (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,28 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence militia (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,35 $ |
+| 2026-09-30 | OpenRouter | SR3 : planche de référence knight_mounted (google/gemini-3.1-flash-image, 1K) | 0,07 $ | 0,07 $ | 0,42 $ |
