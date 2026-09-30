@@ -55,7 +55,9 @@ def main() -> int:
         180: cv2.ROTATE_180,
     }.get(int(round(cap.get(cv2.CAP_PROP_ORIENTATION_META))))
     opts = vision.PoseLandmarkerOptions(
-        base_options=BaseOptions(model_asset_path=args.model, delegate=BaseOptions.Delegate.CPU),
+        base_options=BaseOptions(
+            model_asset_path=args.model, delegate=BaseOptions.Delegate.CPU
+        ),
         running_mode=vision.RunningMode.VIDEO,
         num_poses=1,
         min_pose_detection_confidence=0.5,
@@ -76,7 +78,11 @@ def main() -> int:
             h, w = frame.shape[:2]
             scale = args.long_side / max(h, w)
             if scale < 1.0:
-                frame = cv2.resize(frame, (round(w * scale), round(h * scale)), interpolation=cv2.INTER_AREA)
+                frame = cv2.resize(
+                    frame,
+                    (round(w * scale), round(h * scale)),
+                    interpolation=cv2.INTER_AREA,
+                )
             size = (frame.shape[1], frame.shape[0])
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             res = marker.detect_for_video(
@@ -111,7 +117,9 @@ def main() -> int:
         fps=np.float32(fps),
         size=np.asarray(size, np.int32),
     )
-    print(f"OK {args.out} frames={len(world)} found={sum(found)} size={size} fps={fps:.2f} time={time.time() - t0:.1f}s")
+    print(
+        f"OK {args.out} frames={len(world)} found={sum(found)} size={size} fps={fps:.2f} time={time.time() - t0:.1f}s"
+    )
     return 0
 
 

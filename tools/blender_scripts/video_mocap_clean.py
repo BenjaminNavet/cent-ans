@@ -163,7 +163,9 @@ def clean_runs(mask, min_run=3, max_gap=2):
     return m
 
 
-def foot_contacts(image, rate, scale=None, speed_max=0.35, lift_max=0.04, min_run=3, max_gap=2):
+def foot_contacts(
+    image, rate, scale=None, speed_max=0.35, lift_max=0.04, min_run=3, max_gap=2
+):
     """Planted feet (frames, 2) from normalised image landmarks (frames, 33, >=2).
 
     A foot is planted while its lowest point (heel or toe) is within `lift_max` body heights
@@ -189,7 +191,9 @@ def foot_contacts(image, rate, scale=None, speed_max=0.35, lift_max=0.04, min_ru
             step = np.linalg.norm(np.diff(pos[f], axis=0), axis=-1) * rate
             v[1:] = step
             v[0] = step[0]
-            v[1:-1] = np.minimum(step[:-1], step[1:])  # a planted frame is slow on one side
+            v[1:-1] = np.minimum(
+                step[:-1], step[1:]
+            )  # a planted frame is slow on one side
         lifted = (low[1 - f] - low[f]) / scale > lift_max
         out[:, f] = clean_runs((v / scale < speed_max) & ~lifted, min_run, max_gap)
     return out

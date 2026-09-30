@@ -54,7 +54,9 @@ def test_enforce_lengths_restores_depth():
     out = vc.enforce_lengths(pts, segments=((vc.SHOULDER_R, vc.ELBOW_R),))
     seg = out[:, vc.ELBOW_R] - out[:, vc.SHOULDER_R]
     assert np.allclose(np.linalg.norm(seg, axis=-1), 0.3)
-    assert np.isclose(seg[5, 2], -0.2) and seg[5, 1] < 0.0  # in-image offset and sign kept
+    assert (
+        np.isclose(seg[5, 2], -0.2) and seg[5, 1] < 0.0
+    )  # in-image offset and sign kept
 
 
 def test_enforce_lengths_moves_the_subtree():
@@ -147,7 +149,9 @@ def test_pin_targets_hold_and_ramp():
     assert np.allclose(targets[3], targets[4])
 
 
-@pytest.mark.parametrize("target", [[0.1, 0.05, -0.7], [0.0, 0.3, -0.5], [0.0, 0.0, -2.0]])
+@pytest.mark.parametrize(
+    "target", [[0.1, 0.05, -0.7], [0.0, 0.3, -0.5], [0.0, 0.0, -2.0]]
+)
 def test_two_bone_ik_keeps_lengths(target):
     """Lengths kept, target reached when reachable, bend on the side of the old knee."""
     a = np.array([0.0, 0.0, 0.0])
