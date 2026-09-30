@@ -75,6 +75,10 @@ CLIPS = [
     ),
 ]
 
+# Clips whose left arm keeps the keyframed shield guard (see `shield_arm`).
+SHIELD_CLIPS = {"guard", "slash", "overhead", "parry", "hit"}
+SHIELD_ARM = ("Shoulder.L", "UpperArm.L", "LowerArm.L", "Wrist.L")
+
 # target bone -> (source bone, target child joint giving the limb direction, chain parent)
 MAP = {
     "Body": ("root", None, None),
@@ -136,6 +140,7 @@ class Target:
             self.head["Foot.L"].dot(self.up), self.head["Foot.R"].dot(self.up)
         )
         self.body_height = (self.head["Body"] - feet).dot(self.up)
+        self.shield_rel = shield_arm(arm)
 
     def limb(self, bone):
         """Rest direction from `bone`'s head to its child joint (None for leaves)."""
@@ -182,7 +187,26 @@ def alignments(tgt, src, p):
     return out
 
 
-def solve_frame(tgt, src, pose, q, p, align, origin, scale):
+def shield_arm(arm):
+    """Left arm of the keyframed guard relative to the chest (``SHIELD_ARM`` bones).
+
+    CMU subject 2 fences with both hands on the hilt: on a sword-and-shield figure the left
+    arm would carry the shield across the face. Clips of ``SHIELD_CLIPS`` keep the left arm
+    of the keyframed guard (``Idle_Sword``, first frame) on the mocap chest instead.
+    """
+    import battle_skinned as bs_
+
+    act = bs_.find_action("Idle_Sword", "CharacterArmature")
+    bs_.set_action(arm, act)
+    bpy.context.scene.frame_set(int(round(act.frame_range[0])))
+    bpy.context.view_layer.update()
+    chest = arm.pose.bones["Chest"].matrix.copy()
+    rel = {b: chest.inverted() @ arm.pose.bones[b].matrix for b in SHIELD_ARM}
+    bs_.rest_pose(arm)
+    return rel
+
+
+def solve_frame(tgt, src, pose, q, p, align, origin, scale, shield=False):
     """Armature-space pose matrix of every mapped bone for one source frame."""
     pinv = p.transposed()
     rot = {}
@@ -206,7 +230,11 @@ def solve_frame(tgt, src, pose, q, p, align, origin, scale):
                 tgt.head[bone] - tgt.head[parent]
             )
             pos[bone] = pos[parent] + rot[parent] @ offset
-    return {b: Matrix.Translation(pos[b]) @ rot[b].to_4x4() for b in MAP}
+    out = {b: Matrix.Translation(pos[b]) @ rot[b].to_4x4() for b in MAP}
+    if shield:
+        for b in SHIELD_ARM:
+            out[b] = out["Chest"] @ tgt.shield_rel[b]
+    return out
 
 
 def to_basis(tgt, mats):
@@ -267,7 +295,10 @@ def clip_bases(tgt, clip):
             r, a, _b = pz["root"]
             fixed = a - np.array(drift) * (k / max(len(poses_) - 1, 1))
             pz["root"] = (r, fixed, fixed)
-    solved = [solve_frame(tgt, src, pz, q, p, align, origin, scale) for pz in poses_]
+    shield = name in SHIELD_CLIPS
+    solved = [
+        solve_frame(tgt, src, pz, q, p, align, origin, scale, shield) for pz in poses_
+    ]
     # Ground: the lower foot of the first frame rests where the rest feet are.
     low = min(solved[0][f].to_translation().dot(tgt.up) for f in ("Foot.L", "Foot.R"))
     shift = Matrix.Translation(tgt.up * (tgt.foot_rest - low))
