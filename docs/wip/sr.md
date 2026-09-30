@@ -71,3 +71,12 @@ Mandat : autonomie totale (joueur, 30/09), NB2 ≈ 20 $ au total, sans variantes
 - Câblage `TimberFrame` : réexport Blender du kit, indice de couche d'atlas, choix régional.
 - Toits bleus du château Kenney à remplacer.
 - LOD grossier des maquettes (appels de dessin, chantier FPS carte).
+
+## SR4 (session principale, 30/09)
+- Captures A/B gros plan : `docs/img/sr/sr4_ab_crop.jpg` (gauche main, droite SR). Visible : boue aux
+  jambes, teintes passées, caparaçons plus sourds. **Ouvert** : les plates restent claires malgré
+  acier assombri (0,5), rugosité 0,45-0,75 et crasse d'AO — l'éclat semble venir des reflets du ciel
+  (radiance/SSR), pas de l'albédo ; à analyser par lecture (pas de capture) : `specular`, sonde de
+  réflexion, `metallic` 0,85.
+- Réglage : `weathering` 0,85 (au lieu de 0,6), teintes −25 %.
+- Perf A/B à faire sur machine calme avec FC0/FC4.

@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Lot SR2 : usure des figurines fines cuites. Vérifie que la variante `FG3_BAKED` se compile
-## (liste d'uniformes lue par le compilateur de shaders) et expose `weathering` (défaut 0,6),
+## (liste d'uniformes lue par le compilateur de shaders) et expose `weathering` (défaut 0,85),
 ## que BattleSkinned le pose à 0,6 (0 avec `--no-sr2`), la hauteur de boue des cavaliers, et
 ## qu'avec `--coarse-figures` le shader par défaut reste inchangé (sans uniforme SR2).
 ## Usage : godot --headless --path game --script res://tests/sr2_weathering_test.gd
@@ -22,7 +22,7 @@ func _uniform_default(shader: Shader, uniform_name: String) -> Variant:
 func _init() -> void:
 	var ok := true
 	var args := OS.get_cmdline_user_args()
-	var expected := 0.0 if args.has("--no-sr2") else 0.6
+	var expected := 0.0 if args.has("--no-sr2") else 0.85
 	# Shader par défaut : aucune ligne SR2 compilée (rendu des figurines grossières inchangé).
 	if BattleSkinned.SHADER.get_shader_uniform_list().is_empty():
 		print("SR2 : le shader par défaut ne compile pas")
@@ -50,8 +50,8 @@ func _init() -> void:
 			ok = false
 			continue
 		var default_value = _uniform_default(mat.shader, "weathering")
-		if default_value == null or not is_equal_approx(float(default_value), 0.6):
-			print("SR2 %s : défaut du shader %s (0,6 attendu ; variante non compilée ?)" % [kind, default_value])
+		if default_value == null or not is_equal_approx(float(default_value), 0.85):
+			print("SR2 %s : défaut du shader %s (0,85 attendu ; variante non compilée ?)" % [kind, default_value])
 			ok = false
 		var value = mat.get_shader_parameter("weathering")
 		if value == null or not is_equal_approx(float(value), expected):

@@ -121,7 +121,7 @@ static func fine_maps_ready() -> bool:
 
 
 ## Lot SR2 : usure des figurines fines cuites (0-1). `--no-sr2` après `--` : 0 (rendu SR1 exact).
-const SR2_WEATHERING := 0.6
+const SR2_WEATHERING := 0.85
 const SR2_MUD_HEIGHT := 0.45
 const SR2_MUD_HEIGHT_HORSE := 0.65
 

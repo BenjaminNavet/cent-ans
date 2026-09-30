@@ -210,7 +210,7 @@ const vec3 FG3_HAIR[7] = vec3[](
 );
 // Lot SR2 : usure (0 : rendu SR1 exact) posée par BattleSkinned (`--no-sr2` : 0) ; hauteur de
 // repos (m) jusqu'où monte la boue (piétons ~ genoux, cavaliers : jambes du cheval, caparaçon).
-uniform float weathering = 0.6;
+uniform float weathering = 0.85;
 uniform float sr2_mud_height = 0.45;
 varying vec2 v_atlas;
 varying flat int v_src;
@@ -898,7 +898,7 @@ void fragment() {
 				// la livrée lointaine (`dyed`, far_boost) n'est pas touchée.
 				if (dyed_cloth) {
 					float sr_l = dot(albedo, vec3(0.3, 0.59, 0.11));
-					albedo = mix(albedo, vec3(sr_l) * 1.12, 0.15 * sr_w);
+					albedo = mix(albedo, vec3(sr_l) * 1.08, 0.25 * sr_w);
 				}
 				// 2. Crasse des creux : l'occlusion cuite assombrit et désature étoffe et cuir.
 				if (fabric || code == C_LEATHER) {
@@ -911,8 +911,13 @@ void fragment() {
 				// plus lisse sur les arêtes (courbure : dérivées de la normale / de la position).
 				if (code == C_PLATE) {
 					float lf = noise2(q * 3.0 + v_var.xy * 17.0);
-					float rough = clamp(mix(0.25, 0.6, lf) + (roughness - 0.4) * 0.4, 0.2, 0.65);
+					float rough = clamp(mix(0.45, 0.75, lf) + (roughness - 0.4) * 0.4, 0.4, 0.8);
 					roughness = mix(roughness, rough, sr_w);
+					// Acier forgé : gris sourd (F0 réel ≈ 0,55), pas le blanc chromé du rendu FG.
+					vec3 steel = vec3(0.50, 0.50, 0.52) * mix(0.85, 1.1, lf);
+					albedo = mix(albedo, steel * (0.6 + 0.4 * dot(albedo, vec3(0.33))), 0.7 * sr_w);
+					// Crasse et graisse dans les creux de l'armure.
+					albedo *= mix(1.0, mix(0.55, 1.0, fg_ao), sr_w);
 					float curv = (length(fg_dn1) + length(fg_dn2)) / max(length(fg_dp1) + length(fg_dp2), 1e-5);
 					float wear = smoothstep(0.55, 0.85, noise2(q * 55.0 + 3.1)) * smoothstep(12.0, 50.0, curv);
 					albedo *= 1.0 + 0.25 * wear * sr_w;
