@@ -125,6 +125,12 @@ static func load_wetlands_gpu(map_dir: String) -> Image:
 	return load_gpu_copy(map_dir, _map_meta(map_dir).get("wetlands_gpu"))
 
 
+## Vrai si `map.json` décrit une carte de couleur (sans la lire).
+static func load_colormap_meta(map_dir: String) -> bool:
+	var colormap: Variant = _map_meta(map_dir).get("colormap")
+	return colormap is Dictionary and (colormap as Dictionary).get("bc1") is Dictionary
+
+
 ## SS2 (ADR 0141) : carte de couleur du sol en BC1 avec mipmaps (`map.json.colormap.bc1`) ; null
 ## sans copie (ancien rendu procédural).
 static func load_colormap(map_dir: String) -> Image:

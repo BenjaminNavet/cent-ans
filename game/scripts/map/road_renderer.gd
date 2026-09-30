@@ -11,11 +11,14 @@ extends Node3D
 ##   tuile de terrain au niveau proche ou fin, reconstruit quand la tuile change de niveau.
 
 ## Palier moyen (lot C7b) : cœur et liseré des routes principales, largeur écran selon la distance.
-@export var main_fill: Color = Color(0.95, 0.84, 0.58, 1.0)
-@export var main_casing: Color = Color(0.27, 0.16, 0.07, 1.0)
+## SS2 (ADR 0141) : terre battue claire et liseré discret (plus de trait crème cartographique) ;
+## avec la carte de couleur, les routes y sont peintes de loin : `main_far_alpha_colormap`.
+@export var main_fill: Color = Color(0.66, 0.56, 0.41, 1.0)
+@export var main_casing: Color = Color(0.36, 0.28, 0.18, 0.45)
 @export var main_width: float = 0.5
-@export var main_near_px: float = 4.2
-@export var main_far_px: float = 2.2
+@export var main_near_px: float = 3.4
+@export var main_far_px: float = 1.6
+@export var main_far_alpha_colormap: float = 0.25
 ## Routes secondaires et calculées au palier moyen : discrètes, effacées au-delà de `minor_fade_distance`.
 @export var minor_color: Color = Color(0.36, 0.25, 0.13, 0.55)
 @export var minor_near_px: float = 1.5
@@ -90,6 +93,8 @@ func build(data: MapData, settlement_data: SettlementData, terrain_builder: Terr
 	_minor_lines = _lines_instance("MinorRoads", minor_lines, minor_widths, _minor_material)
 	_main_material = _line_material(main_fill, main_casing, main_near_px, main_far_px, 0.8, 1)
 	_main_lines = _lines_instance("MainRoads", main_lines, main_widths, _main_material)
+	if data != null and ReliefLandcover.load_colormap_meta(data.map_dir):
+		_main_material.set_shader_parameter("far_alpha", main_far_alpha_colormap)
 	_ribbon_material = ShaderMaterial.new()
 	_ribbon_material.shader = preload("res://shaders/road.gdshader")
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
