@@ -14,3 +14,14 @@ Session principale :
 - [ ] HB3 shader : parcellaire de vue moyenne texturé, canopée, roche (après HB1+HB2).
 - [ ] HB7 rivières : vérification de lisibilité (RC).
 - [ ] HB8 captures, banc, docs.
+
+## HB4 — essences et répartition par biome (branche `feat/hb-trees`, worktree `../gp-hb-trees`)
+État :
+- [x] Catalogue `data/art/tree_species.yaml` (23 essences dont 4 arbustes de maquis/garrigue) + schéma
+  `art_tree_species.schema.json` + compilation `data/art/tree_species.json` (`ga3_vegetation_l2.py species`).
+- [x] Script GA3 L2 étendu (`fal` sur tout le catalogue, `atlas` une ligne par essence, `board`).
+- [ ] Génération fal (en cours), atlas commun, planche locale `~/dev/cent-ans-raw/ga3/hb4/species_board.jpg`.
+- [ ] Semis : `TreeSpecies` (GDScript) + miroir Rust (`vegetation` crate, `set_species`), grille grossière biome.
+- [ ] Shader : ligne d'atlas et classe de saison par instance (INSTANCE_CUSTOM r/g + 4 × (n + 1)).
+- [ ] Tests `hb4_species_test.gd`, pytest `test_tree_species.py`, smoke, ga3_l2 ; budget.
+Prochaine étape : Rust + branchement `vegetation.gd`.
