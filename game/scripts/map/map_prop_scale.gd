@@ -48,6 +48,9 @@ extends Resource
 ## `tree_view_fade` × cette portée.
 @export var tree_view_range: float = 30.0
 @export var tree_view_fade: float = 0.35
+## Distance du rig au-delà de laquelle les arbres ne portent plus d'ombre (arbre de 20 m ≈ 3 px
+## au point visé à d = 10 en 1080p).
+@export var tree_shadow_distance: float = 12.0
 ## Touffes d'herbe et broussailles (`GroundClutter`, FC3) : exagération d'avant VT3 conservée
 ## (ancien `tree_ratio`), hors demande.
 @export var clutter_ratio: float = 0.035

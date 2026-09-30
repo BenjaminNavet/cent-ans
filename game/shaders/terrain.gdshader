@@ -127,6 +127,14 @@ uniform float farm_tile_px = 0.6;
 uniform float tile_screen_px = 72.0;
 uniform float detail_strength = 0.85;
 uniform float detail_normal_strength = 0.55;
+// VT3 : canopée des forêts (terrain) : période de la plus fine octave (unités, ~36 m), octaves
+// ×4 ; octave éteinte sous `canopy_min_px` pixels de période ; poids des octaves grossières ;
+// relief (normales) et contraste de teinte (houppiers au soleil / trouées sombres).
+uniform float canopy_period = 0.05;
+uniform float canopy_min_px = 6.0;
+uniform float canopy_octave_gain = 0.8;
+uniform float canopy_bump = 0.45;
+uniform float canopy_contrast = 0.35;
 // Parcellaire : demi-largeur (px carte) du pied de haie et des chemins.
 uniform float hedge_width = 0.16;
 uniform float track_width = 0.10;
@@ -215,6 +223,43 @@ float value_noise(vec2 p) {
 	float c = hash12(i + vec2(0.0, 1.0));
 	float d = hash12(i + vec2(1.0, 1.0));
 	return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// VT3 : bruit de valeur avec dérivées analytiques (x : valeur [0, 1], yz : gradient par unité de p).
+vec3 value_noised(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	vec2 u = f * f * (3.0 - 2.0 * f);
+	vec2 du = 6.0 * f * (1.0 - f);
+	float a = hash12(i);
+	float b = hash12(i + vec2(1.0, 0.0));
+	float c = hash12(i + vec2(0.0, 1.0));
+	float d = hash12(i + vec2(1.0, 1.0));
+	float k = a - b - c + d;
+	return vec3(a + (b - a) * u.x + (c - a) * u.y + k * u.x * u.y,
+		du * vec2(b - a + k * u.y, c - a + k * u.x));
+}
+
+// VT3 : canopée des forêts portée par le terrain (les arbres 1:1 ne sont plus dessinés au-delà de
+// d ≈ 30). Quatre octaves de houppiers (`canopy_period` : bouquets de houppiers, puis ×4 :
+// bouquets, peuplements, massifs), chacune éteinte quand sa période passe sous
+// `canopy_min_px` pixels (pas de scintillement). Rend (relief centré [-1, 1], pente sans dimension).
+vec3 canopy_field(vec2 p, float footprint) {
+	vec3 acc = vec3(0.0);
+	float period = canopy_period;
+	float amp = 1.0;
+	float wsum = 0.0;
+	for (int i = 0; i < 4; i++) {
+		float w = 1.0 - smoothstep(period / (canopy_min_px * 2.0), period / canopy_min_px, footprint);
+		if (w > 0.0) {
+			vec3 nd = value_noised(p / period + vec2(float(i) * 17.3, float(i) * 5.1));
+			acc += w * amp * vec3(nd.x * 2.0 - 1.0, nd.yz * 2.0);  // pente sans dimension (relief ∝ période)
+		}
+		wsum += amp;
+		period *= 4.0;
+		amp *= canopy_octave_gain;
+	}
+	return acc / max(wsum, 1e-3);
 }
 
 float fbm(vec2 p) {
@@ -569,6 +614,13 @@ void fragment() {
 	// Normales de détail combinées au relief (blend « whiteout » dans le repère carte).
 	float dstrength = detail_normal_strength * detail_fade;
 	n = normalize(vec3(n.x + dn.x * dstrength, n.y, n.z - dn.y * dstrength));
+	// VT3 : canopée (houppiers en relief et contraste) sur les forêts, à toute distance.
+	float forest_f = w_forest / max(wsum, 1e-3);
+	if (forest_f > 0.01 && (canopy_bump > 0.0 || canopy_contrast > 0.0)) {
+		vec3 cf = canopy_field(p, footprint);
+		n = normalize(vec3(n.x - cf.y * canopy_bump * forest_f, n.y, n.z - cf.z * canopy_bump * forest_f));
+		col *= 1.0 + canopy_contrast * forest_f * cf.x;
+	}
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
 	fp_parcels(p, uv, footprint, grad_m, slope, hc, s, lu, terroir, open_w, w_forest / max(wsum, 1e-3), col, roughness, n);  // ZG5b
 	sg_apply(uv, footprint, snow, land_f, col);  // SS2

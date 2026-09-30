@@ -222,6 +222,14 @@ static func _make_impostor_material() -> ShaderMaterial:
 ## VT3 (ADR 0138) : arbres à l'échelle 1:1, plus dessinés au-delà de
 ## `MapPropScale.tree_max_distance` (≈ 1 px) ; les portées d'avant (`max_camera_distance`,
 ## `veg_max_distance` du préréglage) ne sont plus que des plafonds.
+## Distance du rig au-delà de laquelle les arbres ne portent plus d'ombre : préréglage
+## (`shadow_camera_distance`), et VT3 `MapPropScale.tree_shadow_distance` (arbres 1:1 de quelques
+## pixels : ombres indiscernables mais payées dans chaque cascade).
+func tree_shadow_limit() -> float:
+	var limit := shadow_camera_distance if quality_shadow_distance < 0.0 else quality_shadow_distance
+	return minf(limit, MapPropScale.shared().tree_shadow_distance)
+
+
 func effective_max_distance() -> float:
 	var legacy := max_camera_distance
 	if quality_max_distance > 0.0 and use_impostors and (_impostor_material != null or map_data == null):
@@ -418,8 +426,7 @@ func _process(_delta: float) -> void:
 	if forest_detail != null:
 		var focus: Variant = _rig.get("focus") if _rig != null else null
 		var at := Vector2(focus.x, focus.z) if focus is Vector3 else Vector2(camera.global_position.x, camera.global_position.z)
-		var shadow_limit := shadow_camera_distance if quality_shadow_distance < 0.0 else quality_shadow_distance
-		forest_detail.update_view(at, distance, cast_shadows and distance < shadow_limit)
+		forest_detail.update_view(at, distance, cast_shadows and distance < tree_shadow_limit())
 	if _frame % 30 == 1:
 		_update_season()
 
@@ -598,8 +605,7 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 	# d'arbres individuelles ne se distinguent déjà plus mais coûtent toujours plein tarif côté
 	# GPU. Réévalué chaque image (pas seulement au changement de LOD) : ne dépend pas de `detailed`
 	# seul, mais aussi du zoom global qui peut varier sans que `detailed` change.
-	var shadow_limit := shadow_camera_distance if quality_shadow_distance < 0.0 else quality_shadow_distance
-	var shadow_on := cast_shadows and detailed and camera_distance < shadow_limit
+	var shadow_on := cast_shadows and detailed and camera_distance < tree_shadow_limit()
 	var shadow_setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow_on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for mmi in mmis:
 		if mmi != null:
