@@ -27,8 +27,13 @@ Budget : section « RC » de `docs/budget.md`, plafond 5 $ (matières d'eau Nano
         (d'abord `--dry-run`) ; juger la planche, supprimer `<id>_raw.png` pour retenter.
   - [ ] brancher `#include "res://shaders/water_detail.gdshaderinc"` + `WaterDetail.apply()` dans les
         shaders mer / fleuve / rivière (session principale) ; régler `scale` à l'œil.
+- [x] RC6 — Rivières infranchissables supplémentaires : Marne, Yonne, Vienne, Charente, Lot, Tarn,
+      Allier, Cher, Moselle (`Mosel`), Severn, Trent dans `navgrid.MAJOR_RIVERS` (Oise et Aisne absentes
+      de `rivers.geojson`) ; 40 ponts, gués et bacs médiévaux ajoutés à `crossings.json` ; `navgrid.png`,
+      aperçu et `crossings_px.json` régénérés (`river_bed.png` laissé tel quel).
 
 ## Journal
 - 2026-09-30 : RC0.
 - 2026-09-30 : RC5 pipeline prêt (génération à faire sur le Mac).
 - 2026-09-30 : RC4 (outil `--fine-min-order` ; données à régénérer sur le Mac).
+- 2026-09-30 : RC6 (11 rivières de plus infranchissables hors ponts et gués, 40 passages).
