@@ -64,6 +64,10 @@ var _smoke_scales := Vector2(-1.0, -1.0)
 ## SZ4b : échelle de référence des maquettes appliquée aux positions (pas de `rewrite_step`).
 var _settlement_ref := 1.0
 var _camera_distance := 1000.0
+## FC1 : les moulins ne portent ombre que sous `veg_shadow_distance` (comme les arbres) ; bascule
+## seulement au franchissement du seuil.
+var quality_shadow_distance: float = 300.0
+var _mill_shadows := true
 ## RS-K : copies processeur des tampons MultiMesh (panaches : 12 + 4 flottants par instance ; corps
 ## de moulin : 12 ; ailes : 12 + 4). Lire `MultiMesh.buffer` relit le tampon du GPU de façon
 ## synchrone (jusqu'à 80 ms par réécriture pendant un zoom) : on écrit depuis ces copies.
@@ -105,6 +109,10 @@ func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
 	sails_material.shader = WINDMILL_SHADER
 	_windmill_sails = _make_instance("WindmillSails", sails_material)
 	_windmill_sails.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	_mill_shadows = true
+	if not is_in_group(RenderQuality.CLIENT_GROUP):
+		add_to_group(RenderQuality.CLIENT_GROUP)
+	apply_render_quality(RenderQuality.preset())
 	_overlay = ShaderMaterial.new()
 	_overlay.shader = OVERLAY_SHADER
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_surface_changed):
@@ -820,7 +828,28 @@ func _rewrite_smoke_slice(mmi: MultiMeshInstance3D, points: Array) -> void:
 		_cpu_buffers[mmi] = buffer
 
 
+## FC1 : préréglage de qualité (groupe `RenderQuality.CLIENT_GROUP`).
+func apply_render_quality(p: Dictionary) -> void:
+	quality_shadow_distance = float(p.get("veg_shadow_distance", 300.0))
+	_update_mill_shadows(_camera_distance, true)
+
+
+func _update_mill_shadows(camera_distance: float, force := false) -> void:
+	var shadows := camera_distance < quality_shadow_distance
+	if (shadows == _mill_shadows and not force) or _windmill_bodies == null:
+		return
+	_mill_shadows = shadows
+	var setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_windmill_bodies.cast_shadow = setting
+	_windmill_sails.cast_shadow = setting
+
+
+func mill_shadows() -> bool:
+	return _mill_shadows
+
+
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
+	_update_mill_shadows(camera_distance)
 	near_weight = tiers.near_weight(camera_distance) if tiers != null else 1.0
 	# DV : part de la vue normale hors détail proche (feux seuls au-delà de `near_threshold`).
 	var medium := clampf(1.0 - tiers.strategic_weight(camera_distance) - near_weight, 0.0, 1.0) if tiers != null else 0.0

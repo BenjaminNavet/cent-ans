@@ -37,10 +37,13 @@ const CLIENT_GROUP := "render_quality_client"
 ##   (0 : jamais d'ombre) ;
 ## - `map_shadow_range`, `map_shadow_splits`, `map_soft_shadows` : ombres de la carte ;
 ## - `battle_lod` : facteur sur les distances de LOD, d'ombre et d'imposteurs des soldats ;
-## - `grass` : facteur sur le rayon de l'herbe de bataille ; `particles` : part des particules.
+## - `grass` : facteur sur le rayon de l'herbe de bataille ; `particles` : part des particules ;
+## - `model_shadow_distance` (FC1) : zoom au-delà duquel les maquettes des colonies ne portent
+##   plus d'ombre (0 : jamais) ; `clutter_density` (FC3) : densité des touffes d'herbe et de
+##   broussailles proches de la carte (0 : aucune).
 const SCENE_KEYS := ["relief_vertex_px", "relief_items", "relief_extra_depth", "relief_pages", "relief_shadow_cascades", "fine_relief", "terrain_near", "veg_density", "veg_detail",
 	"veg_shadow_distance", "map_shadow_range", "map_shadow_splits", "map_soft_shadows", "battle_lod",
-	"grass", "particles"]
+	"grass", "particles", "model_shadow_distance", "clutter_density"]
 
 ## Coûts par niveau. `shadow_distance` : facteur sur la portée d'ombre demandée par la scène.
 ## `volumetric` : "off", "weather" (brouillard, pluie, neige seulement) ou "always".
@@ -80,6 +83,7 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
 		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
+		"model_shadow_distance": 500.0, "clutter_density": 0.0,
 		"upscale_mode": "off", "upscale_scale": 1.0,
 	},
 	"low": {
@@ -92,6 +96,7 @@ const PRESETS := {
 		"veg_shadow_distance": 0.0, "map_shadow_range": 0.6, "map_shadow_splits": 2,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.55, "grass": 0.55, "particles": 0.35,
 		# PB3b (ADR 0080) : MetalFX spatial (FSR 1 hors Metal) ; carte −16 à −27 % par image.
+		"model_shadow_distance": 0.0, "clutter_density": 0.0,
 		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.67,
 	},
 	"medium": {
@@ -103,6 +108,7 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 0.8, "veg_density": 0.75, "veg_detail": 0.8,
 		"veg_shadow_distance": 100.0, "map_shadow_range": 0.8, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.75, "grass": 0.75, "particles": 0.6,
+		"model_shadow_distance": 150.0, "clutter_density": 0.5,
 		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
 	},
 	"high": {
@@ -122,6 +128,7 @@ const PRESETS := {
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
 		# PB3b (ADR 0080) : spatial 0,75, visuellement proche du natif en 1080p ; le temporel
 		# (anticrénelage compris) efface la pluie et traîne sur les ailes des moulins : écarté.
+		"model_shadow_distance": 250.0, "clutter_density": 1.0,
 		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
 	},
 	"ultra": {
@@ -133,6 +140,7 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 1.2, "veg_density": 1.0, "veg_detail": 1.3,
 		"veg_shadow_distance": 400.0, "map_shadow_range": 1.2, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "battle_lod": 1.3, "grass": 1.2, "particles": 1.0,
+		"model_shadow_distance": 500.0, "clutter_density": 1.5,
 		"upscale_mode": "off", "upscale_scale": 1.0,
 	},
 }

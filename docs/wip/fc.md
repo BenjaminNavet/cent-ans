@@ -12,3 +12,12 @@ worktree `../game_project-fc`. Mandat : autonomie. Mesures seulement sur machine
 
 ## Journal
 - 09-30 : spec, worktree.
+
+## FC1
+- État : clé `model_shadow_distance` (préréglages ; legacy 500 = avant FC1) lue par
+  `SettlementLayer.apply_render_quality` ; moulins (`LifeEffects`) ombrés sous `veg_shadow_distance`.
+- Prochaine étape : test `game/tests/fc1_shadows_test.gd`, puis FC3.
+
+## FC3
+- À faire : `ground_clutter.gd` + `ground_clutter.gdshader`, clé `clutter_density`
+  (ajoutée aux préréglages : 0 / 0,5 / 1 / 1,5, legacy 0).
