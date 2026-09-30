@@ -18,7 +18,7 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
       `.gitignore` : `tools/nb_raw/`. Section budget. Commit `wip: NB skeleton`.
 
 ### NB-C — Client OpenRouter
-- [ ] `request_image`/`generate_image` : `image_config`, `seed`, `images` transmis ;
+- [x] `request_image`/`generate_image` : `image_config`, `seed`, `images` transmis ;
       estimation selon `image_size` (747/1120/1680/2520 tokens × `image_output`).
       Tests `test_openrouter.py`. Commit.
 

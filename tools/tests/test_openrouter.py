@@ -199,3 +199,66 @@ def test_generate_image_records_billed_refusal(
     assert ledger.entries[-1].actual == Decimal("0.04")
     assert ledger.total() == Decimal("0.04")
     assert not (tmp_path / "out.png").exists()
+
+
+def test_estimated_price_follows_image_size() -> None:
+    """The Gemini size tier drives the output-token count of the estimate."""
+    model = openrouter.ImageModel(id="g/img", name="g", image_output=Decimal("0.00006"))
+    assert model.estimated_price_per_image("2K") == Decimal("0.00006") * 1680
+    assert model.estimated_price_per_image() == Decimal("0.00006") * 1290
+
+
+def test_generate_image_sends_image_config_seed_and_references(
+    monkeypatch: pytest.MonkeyPatch, budget_file: Path, tmp_path: Path
+) -> None:
+    """NB: image_config, seed and reference images reach the request body."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    data_url = "data:image/png;base64," + base64.b64encode(b"\x89PNGx").decode()
+    bodies: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json=MODELS_PAYLOAD)
+        bodies.append(json.loads(request.read()))
+        message = {"content": "", "images": [{"image_url": {"url": data_url}}]}
+        return httpx.Response(
+            200, json={"choices": [{"message": message}], "usage": {"cost": 0.1}}
+        )
+
+    with _client(handler) as client:
+        openrouter.generate_image(
+            "vendor/imager",
+            "a frame",
+            tmp_path / "frame.png",
+            budget_path=budget_file,
+            client=client,
+            images=[b"\x89PNGref"],
+            image_config={"aspect_ratio": "3:2", "image_size": "2K"},
+            seed=7,
+            cap=Decimal("10.00"),
+        )
+    body = bodies[0]
+    assert body["image_config"] == {"aspect_ratio": "3:2", "image_size": "2K"}
+    assert body["seed"] == 7
+    assert body["messages"][0]["content"][1]["type"] == "image_url"
+
+
+def test_generate_image_respects_custom_cap(
+    monkeypatch: pytest.MonkeyPatch, budget_file: Path, tmp_path: Path
+) -> None:
+    """A per-chantier cap below the default one refuses the call."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    BudgetLedger(budget_file).add_entry("2026-09-30", "OpenRouter", "fill", 10, 10)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=MODELS_PAYLOAD)
+
+    with _client(handler) as client, pytest.raises(BudgetExceeded):
+        openrouter.generate_image(
+            "vendor/imager",
+            "a frame",
+            tmp_path / "frame.png",
+            budget_path=budget_file,
+            client=client,
+            cap=Decimal("10.00"),
+        )

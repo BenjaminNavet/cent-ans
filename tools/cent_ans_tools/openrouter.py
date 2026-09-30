@@ -29,6 +29,9 @@ SERVICE_NAME = "OpenRouter"
 IMAGE_OUTPUT_TOKENS = 1290
 PROMPT_TOKENS_ESTIMATE = 300
 COMPLETION_TOKENS_ESTIMATE = 100
+# Output tokens per Gemini ``image_config.image_size`` tier (Google's published counts;
+# the ledger keeps the billed ``usage.cost``, these only feed the pre-call estimate).
+IMAGE_SIZE_TOKENS = {"512": 747, "1K": 1120, "2K": 1680, "4K": 2520}
 
 
 class ImageModel(BaseModel):
@@ -40,11 +43,14 @@ class ImageModel(BaseModel):
     completion: Decimal | None = None
     image_output: Decimal | None = None
 
-    def estimated_price_per_image(self) -> Decimal | None:
-        """Estimated USD cost of one image (see ``IMAGE_OUTPUT_TOKENS``)."""
+    def estimated_price_per_image(
+        self, image_size: str | None = None
+    ) -> Decimal | None:
+        """Estimated USD cost of one image (``IMAGE_SIZE_TOKENS`` or ``IMAGE_OUTPUT_TOKENS``)."""
         if self.image_output is None:
             return None
-        cost = self.image_output * IMAGE_OUTPUT_TOKENS
+        tokens = IMAGE_SIZE_TOKENS[image_size] if image_size else IMAGE_OUTPUT_TOKENS
+        cost = self.image_output * tokens
         cost += (self.prompt or 0) * PROMPT_TOKENS_ESTIMATE
         cost += (self.completion or 0) * COMPLETION_TOKENS_ESTIMATE
         return cost
@@ -97,11 +103,13 @@ def list_image_models(client: httpx.Client | None = None) -> list[ImageModel]:
             client.close()
 
 
-def estimate_price(model: str, client: httpx.Client | None = None) -> Decimal:
+def estimate_price(
+    model: str, client: httpx.Client | None = None, image_size: str | None = None
+) -> Decimal:
     """Estimated USD price for one image with ``model`` (rounded up to the cent)."""
     for candidate in list_image_models(client):
         if candidate.id == model:
-            price = candidate.estimated_price_per_image()
+            price = candidate.estimated_price_per_image(image_size)
             if price is not None:
                 return price.quantize(Decimal("0.01"), rounding="ROUND_UP")
     raise ValueError(f"Modèle d'image inconnu ou sans tarif : {model}")
@@ -136,13 +144,16 @@ def request_image(
     client: httpx.Client | None = None,
     max_tokens: int | None = None,
     images: list[bytes] | None = None,
+    image_config: dict[str, str] | None = None,
+    seed: int | None = None,
 ) -> tuple[bytes, Decimal | None]:
     """Paid call without budget bookkeeping: return (image bytes, ``usage.cost`` or None).
 
     Callers must check and record the budget themselves (see :func:`generate_image`
     or ``cent_ans_tools.portraits``, which records one row per batch). ``images``
     are optional reference pictures (PNG or JPEG bytes) sent with the prompt, e.g.
-    the existing portrait of a character to age (lot DA2).
+    the existing portrait of a character to age (lot DA2). ``image_config`` (Gemini:
+    ``aspect_ratio``, ``image_size``) and ``seed`` are sent only when given.
     """
     content: str | list[dict[str, Any]] = prompt
     if images:
@@ -165,6 +176,10 @@ def request_image(
     if max_tokens is not None:
         # Caps the credit OpenRouter reserves up front (402 on low key limits).
         body["max_tokens"] = max_tokens
+    if image_config:
+        body["image_config"] = image_config
+    if seed is not None:
+        body["seed"] = seed
     own_client = client is None
     client = client or httpx.Client(timeout=180)
     try:
@@ -193,21 +208,36 @@ def generate_image(
     subject: str | None = None,
     budget_path: Path | str = DEFAULT_BUDGET_PATH,
     client: httpx.Client | None = None,
+    images: list[bytes] | None = None,
+    image_config: dict[str, str] | None = None,
+    seed: int | None = None,
+    cap: Decimal | None = None,
 ) -> Path:
     """Generate one image (paid), guarded by the budget, and save it to ``out_path``.
+
+    ``images``, ``image_config`` and ``seed`` go to :func:`request_image`; ``cap``
+    replaces the ledger's default cap for the current session (e.g. NB: 10 $).
 
     Raises:
         BudgetExceeded: if the estimated price would exceed the cap.
     """
-    estimated = estimate_price(model, client)
-    if not budget.check(estimated, budget_path):
+    image_size = (image_config or {}).get("image_size")
+    estimated = estimate_price(model, client, image_size)
+    ledger = (
+        budget.BudgetLedger(budget_path, cap)
+        if cap
+        else budget.BudgetLedger(budget_path)
+    )
+    if not ledger.check(estimated):
         raise BudgetExceeded(
             f"Estimation {estimated} $ + cumul {budget.total(budget_path)} $ dépasse le plafond"
         )
 
     spent: Decimal | None = None
     try:
-        image, actual_raw = request_image(model, prompt, client)
+        image, actual_raw = request_image(
+            model, prompt, client, images=images, image_config=image_config, seed=seed
+        )
         spent = to_money(actual_raw) if actual_raw is not None else estimated
     except ImageExtractionError as exc:
         if exc.cost is not None:
