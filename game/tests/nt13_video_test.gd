@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Lot NT13 : clips tirés des vidéos du joueur (`video_trial/`). Sans option, le rig fin `human`
 ## est celui de la cuisson (aucune texture ajoutée, clips à leurs images d'origine). Avec
-## `--video-trial` (ici forcé par `video_trial_forced`, puis relu par `reload()`), les clips du
+## `--video-trial` (ici forcé par `video_trial_forced`, puis relu par `reload_caches()`), les clips du
 ## manifeste `video_trial/manifest.json` sont substitués : mêmes noms (mêmes indices de clip),
 ## images placées après celles du rig, texture d'os concaténée. L'essai vidéo passe avant
 ## l'essai CMU (NT12) si les deux sont demandés. Kit grossier : aucun essai.
@@ -47,18 +47,18 @@ func _init() -> void:
 	_check(BattleSkinned.video_trial_enabled() == cmd_on, "option lue sur la ligne de commande")
 	for forced in [0, 1]:
 		BattleSkinned.video_trial_forced = forced
-		BattleSkinned.reload()
+		BattleSkinned.reload_caches()
 		_check(BattleSkinned.video_trial_enabled() == (forced == 1), "forçage %d" % forced)
 		_check_rig(base, trial, base_frames, trial_frames, forced == 1)
 	# Les deux essais demandés : la vidéo l'emporte.
 	BattleSkinned.video_trial_forced = 1
 	BattleSkinned.mocap_trial_forced = 1
-	BattleSkinned.reload()
+	BattleSkinned.reload_caches()
 	var both: Dictionary = BattleSkinned.manifest().get("rigs", {}).get(RIG, {})
 	_check(str(both.get("mocap_trial_dir", "")) == BattleSkinned.VIDEO_TRIAL_DIR, "vidéo prioritaire sur CMU")
 	BattleSkinned.video_trial_forced = -1
 	BattleSkinned.mocap_trial_forced = -1
-	BattleSkinned.reload()
+	BattleSkinned.reload_caches()
 	print("NT13 video (cmd=%s): %s" % [cmd_on, "OK" if ok else "FAIL"])
 	quit(0 if ok else 1)
 

@@ -331,7 +331,7 @@ static func _merge_fine(base: Dictionary) -> void:
 
 ## NT12 : essai de mocap actif (figurines fines seulement, défauts inchangés sans l'option).
 ## `mocap_trial_forced` (captures A/B dans un même processus) : -1 = ligne de commande, 0/1 forcé,
-## puis `reload()`.
+## puis `reload_caches()`.
 static func mocap_trial_enabled() -> bool:
 	if mocap_trial_forced >= 0:
 		return fine_enabled() and mocap_trial_forced == 1
@@ -339,7 +339,7 @@ static func mocap_trial_enabled() -> bool:
 
 
 ## NT13 : essai vidéo actif (figurines fines seulement, défauts inchangés sans l'option).
-## `video_trial_forced` : -1 = ligne de commande, 0/1 forcé (captures A/B), puis `reload()`.
+## `video_trial_forced` : -1 = ligne de commande, 0/1 forcé (captures A/B), puis `reload_caches()`.
 static func video_trial_enabled() -> bool:
 	if video_trial_forced >= 0:
 		return fine_enabled() and video_trial_forced == 1
@@ -347,7 +347,9 @@ static func video_trial_enabled() -> bool:
 
 
 ## NT12 : vide les caches (manifeste, textures d'os, configurations) pour relire le manifeste.
-static func reload() -> void:
+## NT13 : ne pas nommer `reload` : `BattleSkinned.reload()` appelle `Script.reload()` du script
+## lui-même, qui remet les variables statiques (dont `*_trial_forced`) à leur valeur initiale.
+static func reload_caches() -> void:
 	_loaded = false
 	_manifest = {}
 	_textures = {}
