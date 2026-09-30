@@ -18,6 +18,7 @@
       "lod0": 8000,
       "tex": 1024,
       "kit_kind": "cottage",
+      "fit": "footprint",
       "share": 0.5,
       "wired": true,
       "raw": "s4",
@@ -33,6 +34,7 @@
       "lod0": 25000,
       "tex": 2048,
       "kit_kind": "church",
+      "fit": "length",
       "share": 1.0,
       "wired": true
     },
@@ -46,6 +48,7 @@
       "lod0": 8000,
       "tex": 1024,
       "kit_kind": "windmill",
+      "fit": "real",
       "share": 1.0,
       "wired": true
     },
@@ -59,6 +62,7 @@
       "lod0": 3000,
       "tex": 512,
       "kit_kind": "tent",
+      "fit": "real",
       "share": 0.5,
       "wired": true
     },
@@ -72,6 +76,7 @@
       "lod0": 3000,
       "tex": 512,
       "kit_kind": "palisade",
+      "fit": "real",
       "share": 1.0,
       "wired": true
     },
@@ -85,6 +90,7 @@
       "lod0": 3000,
       "tex": 512,
       "kit_kind": "well",
+      "fit": "real",
       "share": 1.0,
       "wired": true
     },
@@ -98,8 +104,11 @@
       "lod0": 3000,
       "tex": 512,
       "kit_kind": "cart",
+      "fit": "real",
       "share": 0.5,
-      "wired": true
+      "wired": true,
+      "glb": "trellis.glb",
+      "note": "trellis/multi essayé (3 vues flux-2 edit) : débris à l'arrière ; la vue unique est plus propre, gardée."
     },
     {
       "id": "trebuchet",
@@ -111,6 +120,7 @@
       "lod0": 3000,
       "tex": 1024,
       "kit_kind": "trebuchet",
+      "fit": "real",
       "share": 0.0,
       "wired": false
     },
@@ -124,6 +134,7 @@
       "lod0": 3000,
       "tex": 1024,
       "kit_kind": "ram",
+      "fit": "real",
       "share": 0.0,
       "wired": false
     }

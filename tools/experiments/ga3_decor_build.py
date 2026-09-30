@@ -76,6 +76,7 @@ def manifest_entry(entry: dict, stats: dict) -> dict:
     size = stats["lods"][0]["size"]
     return {
         "kit_kind": entry["kit_kind"],
+        "fit": entry["fit"],
         "share": entry["share"],
         "wired": entry["wired"],
         "length": size[0],

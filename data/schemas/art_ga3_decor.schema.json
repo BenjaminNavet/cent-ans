@@ -24,7 +24,7 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "label", "prompt", "model", "scale_axis", "size_m", "lod0", "tex", "kit_kind", "share", "wired"],
+        "required": ["id", "label", "prompt", "model", "scale_axis", "size_m", "lod0", "tex", "kit_kind", "fit", "share", "wired"],
         "additionalProperties": false,
         "properties": {
           "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
@@ -44,6 +44,7 @@
           "yaw_deg": {"type": "number", "description": "Rotation (°, autour de la verticale) après l'alignement automatique : faîtage/longueur sur +X, façade vers +Z (repère du kit)."},
           "align": {"type": "boolean", "default": true, "description": "Alignement automatique de l'emprise (rectangle d'aire minimale) sur les axes."},
           "kit_kind": {"type": "string", "description": "Type du kit BR1 (`manifest.json`) que l'objet remplace en partie."},
+          "fit": {"enum": ["footprint", "length", "real"], "description": "Mise à l'emprise visée par le kit : `footprint` (longueur et profondeur, étirement borné), `length` (échelle uniforme sur la longueur, bornée à ±20 %), `real` (taille réelle générée)."},
           "share": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part des modèles de ce type remplacés par la variante GA3 (tirage déterministe)."},
           "wired": {"type": "boolean", "description": "false = généré mais non branché (modèle procédural ou animé gardé)."},
           "note": {"type": "string"}

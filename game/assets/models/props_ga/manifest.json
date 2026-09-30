@@ -1,0 +1,86 @@
+{
+ "ga3_cart": {
+  "depth": 2.954,
+  "fit": "real",
+  "height": 2.149,
+  "kit_kind": "cart",
+  "length": 4.593,
+  "share": 0.5,
+  "triangles": [
+   3000,
+   1500,
+   780
+  ],
+  "wired": true
+ },
+ "ga3_church": {
+  "depth": 15.062,
+  "fit": "length",
+  "height": 17.439,
+  "kit_kind": "church",
+  "length": 22.008,
+  "share": 1.0,
+  "triangles": [
+   24997,
+   12499,
+   3749
+  ],
+  "wired": true
+ },
+ "ga3_house": {
+  "depth": 5.861,
+  "fit": "footprint",
+  "height": 5.607,
+  "kit_kind": "cottage",
+  "length": 7.971,
+  "share": 0.5,
+  "triangles": [
+   7999,
+   3999,
+   1199
+  ],
+  "wired": true
+ },
+ "ga3_tent": {
+  "depth": 4.404,
+  "fit": "real",
+  "height": 3.123,
+  "kit_kind": "tent",
+  "length": 4.995,
+  "share": 0.5,
+  "triangles": [
+   3000,
+   1500,
+   450
+  ],
+  "wired": true
+ },
+ "ga3_well": {
+  "depth": 2.474,
+  "fit": "real",
+  "height": 3.394,
+  "kit_kind": "well",
+  "length": 2.581,
+  "share": 1.0,
+  "triangles": [
+   2999,
+   1499,
+   1131
+  ],
+  "wired": true
+ },
+ "ga3_windmill": {
+  "depth": 7.677,
+  "fit": "real",
+  "height": 14.006,
+  "kit_kind": "windmill",
+  "length": 14.429,
+  "share": 1.0,
+  "triangles": [
+   7999,
+   3999,
+   1199
+  ],
+  "wired": true
+ }
+}

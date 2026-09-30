@@ -79,16 +79,22 @@ static func variant_for(kit_model: String, xform: Transform3D) -> String:
 
 
 ## Transformation de la variante `ga3_model` à la place de `kit_model` posé en `xform` : même
-## orientation et même emprise visée (échelle du kit × emprise du kit), étirement borné ; les
-## accessoires sans échelle (taille réelle) gardent la taille réelle générée.
+## orientation ; mise à l'échelle selon `fit` du manifeste : `footprint` = emprise visée (échelle
+## du kit × emprise du kit), étirement borné ; `length` = uniforme sur la longueur (±20 %) ;
+## `real` = taille réelle générée (accessoires, moulin). Les accessoires posés sans échelle par
+## le kit gardent aussi la taille réelle.
 static func fitted_transform(ga3_model: String, kit_model: String, xform: Transform3D) -> Transform3D:
 	var kit_entry: Dictionary = BuildingKit.manifest().get(kit_model, {})
 	var entry: Dictionary = manifest().get(ga3_model, {})
 	var scale := xform.basis.get_scale()
 	var rot := xform.basis.orthonormalized()
 	var origin := xform.origin
-	if absf(scale.x - 1.0) < 0.01 and absf(scale.z - 1.0) < 0.01:
+	var fit := str(entry.get("fit", "footprint"))
+	if fit == "real" or (absf(scale.x - 1.0) < 0.01 and absf(scale.z - 1.0) < 0.01):
 		return Transform3D(rot, origin)
+	if fit == "length":
+		var s := clampf(scale.x * float(kit_entry["length"]) / float(entry["length"]), 0.8, 1.2)
+		return Transform3D(rot * Basis.from_scale(Vector3.ONE * s), origin - Vector3(0, BUILDING_SINK, 0))
 	var sx := scale.x * float(kit_entry["length"]) / float(entry["length"])
 	var sz := scale.z * float(kit_entry["depth"]) / float(entry["depth"])
 	var mean := sqrt(sx * sz)
