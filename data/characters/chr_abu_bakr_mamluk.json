@@ -1,0 +1,40 @@
+{
+  "id": "chr_abu_bakr_mamluk",
+  "name": {
+    "display": "Abu Bakr (al-Mansur)",
+    "local": "المنصور سيف الدين أبو بكر",
+    "local_language": "arabe"
+  },
+  "sex": "male",
+  "house": "Qalawunides",
+  "faction": "fac_mamluks",
+  "role": "prince",
+  "birth": {
+    "value": "1321",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1341",
+    "note": "Déposé par l'émir Qawsun en août 1341, exilé à Qus et mis à mort à la fin de l'année."
+  },
+  "historical": true,
+  "skills": {
+    "command": 2,
+    "governance": 2,
+    "court": 3
+  },
+  "traits": [
+    "trait_spendthrift"
+  ],
+  "piety": 40,
+  "family": {
+    "father": "chr_al_nasir_muhammad"
+  },
+  "starting_location": "prov_cairo",
+  "status": "at_court",
+  "description": "Fils d'al-Nasir Muhammad, désigné par son père mourant en juin 1341 après la mort d'Anuk ; sultan deux mois seulement, renversé par les émirs. Premier des huit fils d'al-Nasir que les émirs font et défont jusqu'en 1382.",
+  "sources": [
+    "Al-Mansur Abu Bakr",
+    "Al-Nasir Muhammad"
+  ]
+}
