@@ -7,9 +7,9 @@
     "local_language": "vieux norrois"
   },
   "heraldry": {
-    "blazon": "De gueules au lion d'or couronné, armé d'argent.",
-    "description": "Le lion couronné de Norvège, tenant la hache de saint Olaf.",
-    "primary_color": "#B0182B",
+    "blazon": "De gueules au lion d'or couronné d'or, tenant une hache d'armes d'argent emmanchée d'or.",
+    "description": "Lion à la hache de saint Olaf, armes royales de Norvège depuis la fin du XIIIe siècle.",
+    "primary_color": "#C8102E",
     "secondary_color": "#F2C230"
   },
   "de_jure_provinces": [
@@ -51,7 +51,7 @@
       }
     }
   ],
-  "description": "Royaume héréditaire de Norvège, en union personnelle avec la Suède sous Magnus Eriksson (roi depuis 1319, majeur en 1332) ; le conseil du royaume, mené par Erling Vidkunnsson, en assure le gouvernement.",
+  "description": "Royaume héréditaire de Norvège, en union personnelle avec la Suède sous Magnus Eriksson (roi depuis 1319, majeur en 1332) ; le conseil du royaume, que dirigeait Erling Vidkunnsson pendant la minorité (1323-1331), garde une large autonomie.",
   "sources": [
     "Magnus IV de Suède",
     "Royaume de Norvège",

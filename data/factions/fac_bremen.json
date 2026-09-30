@@ -19,11 +19,10 @@
   "primary_title": "tit_bremen",
   "heraldry": {
     "blazon": "D'argent à la clef de gueules posée en pal, le panneton vers le chef.",
-    "description": "Clef, symbole traditionnel des principautés ecclésiastiques allemandes ; couleurs de Brême simplifiées et signalées incertaines.",
+    "description": "Clef de saint Pierre, patron de la cathédrale de Brême.",
     "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6",
-    "uncertain": true,
-    "note": "Armes plausibles, non attestées avec certitude pour 1337."
+    "note": "Armes historiques : de gueules à deux clefs d'argent passées en sautoir ; une seule clef est dessinée pour ne pas reproduire l'écu pontifical."
   },
   "titles": [
     "Archevêque de Brême"
@@ -47,7 +46,7 @@
     "trade": 55,
     "piety": 80
   },
-  "description": "Principauté ecclésiastique tenue par l'archevêque Burchard Grelle (1327-1344, dates à vérifier) ; sa ville capitale de Brême est déjà largement autonome vis-à-vis de son suzerain spirituel et temporel.",
+  "description": "Principauté ecclésiastique tenue par l'archevêque Burchard Grelle (1327-1344) ; sa ville capitale de Brême est déjà largement autonome vis-à-vis de son suzerain spirituel et temporel.",
   "sources": [
     "Burchard Grelle",
     "Archevêché de Brême"

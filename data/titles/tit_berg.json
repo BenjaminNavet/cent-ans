@@ -7,9 +7,9 @@
     "local_language": "moyen bas-allemand"
   },
   "heraldry": {
-    "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or, semé de cœurs de gueules.",
-    "description": "Armes historiques des comtes de Berg : lion de gueules semé de petits cœurs (coeurs de nénuphar) sur champ d'argent.",
-    "primary_color": "#E5E5E5",
+    "blazon": "D'argent au lion de gueules à la queue fourchée, armé, lampassé et couronné d'azur.",
+    "description": "Lion rouge couronné de bleu des comtes de Berg.",
+    "primary_color": "#F5F1E6",
     "secondary_color": "#C8102E"
   },
   "de_jure_liege": "tit_empire",
@@ -43,7 +43,7 @@
       }
     }
   ],
-  "description": "Comté de Berg, rive droite du Rhin face à Cologne, tenu par Adolphe VII (1308-1348).",
+  "description": "Comté de Berg, rive droite du Rhin face à Cologne, tenu par Adolphe VII (Adolphe VI dans l'historiographie allemande, 1308-1348).",
   "sources": [
     "Adolphe VII de Berg",
     "Comté de Berg"

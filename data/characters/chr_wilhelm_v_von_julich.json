@@ -19,7 +19,16 @@
   "historical": true,
   "titles": [
     {
-      "title": "Duc de Juliers"
+      "title": "Comte de Juliers",
+      "from": {
+        "value": "1328"
+      }
+    },
+    {
+      "title": "Margrave de Juliers",
+      "from": {
+        "value": "1336"
+      }
     }
   ],
   "skills": {
@@ -34,7 +43,7 @@
   "piety": 45,
   "starting_location": "prov_julich",
   "status": "at_court",
-  "description": "Comte de Juliers depuis 1328, élevé au rang de duc par Louis IV en 1336. Époux de Jeanne de Hainaut, sœur de la reine d'Angleterre Philippa ; l'un des principaux alliés rhénans d'Édouard III dans sa coalition impériale contre la France en 1337-1338.",
+  "description": "Comte de Juliers depuis 1328, élevé au rang de margrave par Louis IV en 1336 (il ne sera fait duc qu'en 1356 par Charles IV). Époux de Jeanne de Hainaut, sœur de la reine d'Angleterre Philippa ; l'un des principaux alliés rhénans d'Édouard III dans sa coalition impériale contre la France en 1337-1338.",
   "sources": [
     "Guillaume Ier de Juliers",
     "Duché de Juliers",

@@ -46,7 +46,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château lacustre du vieux Trakai, résidence de Kęstutis.",
+    "description": "Château du Vieux Trakai, résidence de Kęstutis ; le château de l'île ne sera élevé qu'à la fin du siècle.",
     "sources": [
       "Trakai"
     ]
@@ -71,7 +71,7 @@
       "bld_market"
     ],
     "port": false,
-    "description": "Ancienne capitale de Mindaugas sur la Neris, cinq collines fortifiées.",
+    "description": "Ancienne capitale des princes lituaniens avant Trakai et Vilnius, sur la Neris, cinq collines fortifiées.",
     "sources": [
       "Kernavė"
     ]

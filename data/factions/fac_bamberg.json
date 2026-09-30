@@ -18,12 +18,11 @@
   "suzerain": "fac_empire",
   "primary_title": "tit_bamberg",
   "heraldry": {
-    "blazon": "D'or à la queue d'hermine renversée de sable, mouvant du chef.",
-    "description": "Armes traditionnelles de l'évêché de Bamberg (« Bamberger Rennfähnlein »).",
+    "blazon": "D'or au lion de sable, armé et lampassé de gueules, à la bande d'argent brochant sur le tout.",
+    "description": "Lion noir à la cotice d'argent, armes du prince-évêché de Bamberg.",
     "primary_color": "#F2C230",
-    "secondary_color": "#1A1A1A",
-    "uncertain": true,
-    "note": "Blason traditionnel de l'évêché, dont l'usage exact au XIVe siècle est incertain."
+    "secondary_color": "#F5F1E6",
+    "note": "Le générateur d'écus ne dessine que la bande d'argent ; le lion (identique à celui de Namur et de Flandre dans le dessin) est omis."
   },
   "titles": [
     "Prince-évêque de Bamberg"
@@ -47,7 +46,7 @@
     "trade": 45,
     "piety": 75
   },
-  "description": "Principauté épiscopale de Bamberg, fondée en 1007 par l'empereur Henri II ; gouvernée en 1337 par l'évêque Léopold d'Egloffstein (titulaire et dates de règne incertains, faute de source précise vérifiée pour cette date exacte).",
+  "description": "Principauté épiscopale de Bamberg, fondée en 1007 par l'empereur Henri II ; gouvernée en 1337 par l'évêque Léopold II d'Egloffstein (1335-1343).",
   "sources": [
     "Léopold d'Egloffstein",
     "Évêché de Bamberg"

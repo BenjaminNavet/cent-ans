@@ -7,10 +7,10 @@
     "local_language": "moyen haut-allemand"
   },
   "heraldry": {
-    "blazon": "Burelé d'azur et d'or, au lion de gueules, armé et couronné d'or, brochant sur le tout.",
-    "description": "Le lion de Hesse, burelé d'azur et d'or, hérité des landgraves de Thuringe par Sophie de Brabant.",
+    "blazon": "D'azur au lion burelé d'argent et de gueules de dix pièces, armé et couronné d'or.",
+    "description": "Lion burelé des Ludowinges de Thuringe, porté par les landgraves de Hesse depuis Sophie de Brabant.",
     "primary_color": "#1F3A93",
-    "secondary_color": "#F2C230"
+    "secondary_color": "#C8102E"
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [

@@ -10,7 +10,8 @@
   "faction": "fac_tirol",
   "role": "ruler",
   "birth": {
-    "value": "1322-10-12"
+    "value": "1322-02-12",
+    "note": "Né à Mělník."
   },
   "death": {
     "value": "1375-11-12"
@@ -45,7 +46,7 @@
   },
   "starting_location": "prov_tirol",
   "status": "minor",
-  "description": "Fils cadet de Jean l'Aveugle de Bohême, frère du futur empereur Charles IV ; marié en 1330, encore enfant, à Marguerite Maultasch, comtesse de Tyrol de dix ans son aînée. Le mariage restera malheureux et sera répudié en 1341 (hors de la portée de ce lot).",
+  "description": "Fils cadet de Jean l'Aveugle de Bohême, frère du futur empereur Charles IV ; marié en 1330, encore enfant, à Marguerite Maultasch, comtesse de Tyrol de quatre ans son aînée. Le mariage restera malheureux et sera chassé du Tyrol par sa femme en novembre 1341.",
   "sources": [
     "Jean-Henri de Luxembourg"
   ]

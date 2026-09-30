@@ -18,12 +18,10 @@
   "suzerain": "fac_empire",
   "primary_title": "tit_trent",
   "heraldry": {
-    "blazon": "D'argent à l'aigle bicéphale de sable, couronnée d'or, tenant en son cœur un écu d'azur à la crosse d'or.",
-    "description": "Armes traditionnelles de la principauté épiscopale de Trente, combinant l'aigle impériale et la crosse épiscopale.",
+    "blazon": "D'argent à l'aigle de sable, becquée, membrée et couronnée d'or, les ailes chargées de flammes de gueules.",
+    "description": "Aigle de saint Venceslas, concédée à l'évêché par Jean de Bohême en 1339 (léger anachronisme en 1337).",
     "primary_color": "#F5F1E6",
-    "secondary_color": "#1A1A1A",
-    "uncertain": true,
-    "note": "Composition héraldique plausible pour une principauté épiscopale impériale ; blason exact du XIVe siècle non vérifié à ce budget."
+    "secondary_color": "#1A1A1A"
   },
   "titles": [
     "Prince-évêque de Trente"
@@ -52,7 +50,7 @@
     "trade": 50,
     "piety": 75
   },
-  "description": "Principauté épiscopale de Trente sur l'Adige, enclavée dans le comté de Tyrol mais politiquement distincte ; évêque en 1337 incertain, Nicolas de Brno (attesté à partir de 1338) retenu ici comme approximation faute de titulaire confirmé exactement pour 1337.",
+  "description": "Principauté épiscopale de Trente sur l'Adige, enclavée dans le comté de Tyrol mais politiquement distincte ; le siège est vacant depuis la mort d'Henri de Metz (octobre 1336) ; Nicolas de Brno, chancelier de Charles de Moravie, confirmé en 1338, est retenu dès 1337.",
   "sources": [
     "Nicolas de Brno",
     "Principauté épiscopale de Trente"
