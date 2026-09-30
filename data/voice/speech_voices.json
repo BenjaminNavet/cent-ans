@@ -20,5 +20,11 @@
       "instructions": "Parle en français. Voix de grand seigneur français du XIVe siècle haranguant son armée : grave et profonde, débit lent, ton épique et solennel, chaque mot porté pour être entendu des rangs. Marque les pauses."
     }
   },
+  "cry_chorus": {
+    "voices": ["Callum", "Daniel", "Liam", "Bill", "George"],
+    "tag": "[shouting]",
+    "default_language": "fr",
+    "language": { "fac_england": "en", "fac_scotland": "en", "fac_castile": "es" }
+  },
   "cry_instructions": "Crie à pleine voix, comme un cri de guerre repris par toute une armée : bref, puissant, exalté."
 }

@@ -5,6 +5,9 @@ Reproducible pipeline, run with::
     uv run --project tools --with soundfile python -m cent_ans_tools.voice_tts --dry-run
     uv run --project tools --with soundfile python -m cent_ans_tools.voice_tts [--only barks] [--limit 5]
 
+Shouted barks and war cries (VX) go to ElevenLabs v3 on fal.ai (``FAL_KEY``) and are
+checked locally: add ``--with faster-whisper --with librosa`` (see ``voice_shout``).
+
 1. **Jobs** are derived from the data files: ``data/voice/barks.json`` (one clip per
    line, voices rotated inside a language), ``data/voice/advisor.json`` (one clip per
    line, light room reverb) and ``data/speeches/battle_speeches.json`` crossed with
@@ -40,7 +43,7 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from cent_ans_tools import budget
+from cent_ans_tools import budget, voice_shout
 from cent_ans_tools.budget import DEFAULT_BUDGET_PATH, to_money
 
 REPO_DIR = Path(__file__).resolve().parents[2]
@@ -78,6 +81,8 @@ DEFAULT_CAP = Decimal("3.00")
 CHARS_PER_SECOND = {"barks": 9.0, "speech": 10.0, "advisor": 12.0}
 MIN_SECONDS = 1.2
 TARGET_LUFS = -16.0
+# Shouts and war cries sit above the spoken lines, as they would on a field.
+SHOUT_LUFS = -13.0
 SPEECH_HASH_LEN = 12
 
 
@@ -91,6 +96,14 @@ class Job:
     voice: str
     instructions: str
     reverb: bool = False
+    # ElevenLabs takes (VX): none = OpenRouter reading, one = shouted bark, several = a
+    # war cry chorus.
+    shouts: tuple[voice_shout.Shout, ...] = ()
+
+    @property
+    def model(self) -> str:
+        """Model that voices the clip (OpenRouter backend for readings)."""
+        return voice_shout.MODEL if self.shouts else OPENROUTER_MODEL
 
     @property
     def output(self) -> Path:
@@ -108,6 +121,8 @@ class Job:
 
     def estimated_cost(self) -> Decimal:
         """Expected price of the API call."""
+        if self.shouts:
+            return sum((shout.cost() for shout in self.shouts), Decimal(0))
         return cost_for(self.estimated_seconds(), self.text, self.instructions)
 
 
@@ -136,20 +151,37 @@ def bark_jobs(barks: dict) -> list[Job]:
     for language, situations in barks["lines"].items():
         spec = barks["languages"][language]
         voices = spec["voices"]
+        shout_voices = spec.get("shout_voices", [])
         for situation, lines in situations.items():
             tone = barks["situations"][situation]["tone"]
+            tag = barks["situations"][situation].get("shout_tag", "")
             instructions = f"{spec['instructions']} Ton : {tone}."
             for index, line in enumerate(lines):
+                voice = voices[index % len(voices)]
+                shouts: tuple[voice_shout.Shout, ...] = ()
+                if tag and shout_voices:
+                    voice = shout_voices[index % len(shout_voices)]
+                    shouts = (shout_for(line["text"], tag, voice, language, spec),)
                 jobs.append(
                     Job(
                         "barks",
                         f"barks/{line['id']}",
                         line["text"],
-                        voices[index % len(voices)],
+                        voice,
                         instructions,
+                        shouts=shouts,
                     )
                 )
     return jobs
+
+
+def shout_for(
+    text: str, tag: str, voice: str, language: str, spec: dict
+) -> voice_shout.Shout:
+    """ElevenLabs request of ``text`` in bark language ``language`` (``spec``)."""
+    code = spec.get("language_code", "")
+    check = code or voice_shout.WHISPER_LANGUAGE.get(language, language)
+    return voice_shout.Shout(text, tag, voice, code, check)
 
 
 def advisor_jobs(advisor: dict) -> list[Job]:
@@ -182,6 +214,18 @@ def speech_sentences(speeches: dict, faction: str) -> list[str]:
     return [s for s in dict.fromkeys(sentences) if "{" not in s]
 
 
+def cry_chorus(text: str, faction: str, casting: dict) -> tuple[voice_shout.Shout, ...]:
+    """ElevenLabs takes of the war cry ``text`` of ``faction`` (empty: no chorus)."""
+    chorus = casting.get("cry_chorus")
+    if not chorus:
+        return ()
+    code = chorus.get("language", {}).get(faction, chorus.get("default_language", "fr"))
+    return tuple(
+        voice_shout.Shout(text, chorus["tag"], voice, code, code)
+        for voice in chorus["voices"]
+    )
+
+
 def speech_jobs(speeches: dict, casting: dict, cries: dict) -> list[Job]:
     """Speech sentences and war cries for every voice of every cast faction.
 
@@ -192,11 +236,12 @@ def speech_jobs(speeches: dict, casting: dict, cries: dict) -> list[Job]:
     cast = casting["casting"]
     for faction, spec in cast.items():
         texts = speech_sentences(speeches, faction)
+        # War cry text -> faction whose language it is in.
         if faction == "default":
-            cry_texts = [speeches["default_cry"]]
-            cry_texts += [c for f, c in cries.items() if f not in cast]
+            cry_texts = {speeches["default_cry"]: "default"}
+            cry_texts.update({c: f for f, c in cries.items() if f not in cast})
         else:
-            cry_texts = [cries.get(faction, speeches["default_cry"])]
+            cry_texts = {cries.get(faction, speeches["default_cry"]): faction}
         for voice in spec["voices"]:
             for text in texts:
                 job = Job(
@@ -207,13 +252,14 @@ def speech_jobs(speeches: dict, casting: dict, cries: dict) -> list[Job]:
                     spec["instructions"],
                 )
                 jobs.setdefault(job.path, job)
-            for text in dict.fromkeys(cry_texts):
+            for text, cry_faction in cry_texts.items():
                 job = Job(
                     "speech",
                     f"speech/{voice}/{speech_file_id(text)}",
                     text,
                     voice,
                     f"{spec['instructions']} {casting['cry_instructions']}",
+                    shouts=cry_chorus(text, cry_faction, casting),
                 )
                 jobs.setdefault(job.path, job)
     return list(jobs.values())
@@ -233,9 +279,16 @@ def all_jobs() -> list[Job]:
     )
 
 
-def pending(jobs: list[Job]) -> list[Job]:
-    """Jobs whose output file does not exist yet (never regenerate)."""
-    return [job for job in jobs if not job.output.exists()]
+def pending(jobs: list[Job], manifest: dict | None = None) -> list[Job]:
+    """Jobs whose output file does not exist yet, or whose clip was voiced by another
+    model than the one the data now asks for (a reading now meant to be shouted)."""
+    manifest = load_manifest() if manifest is None else manifest
+
+    def stale(job: Job) -> bool:
+        entry = manifest.get(f"{job.path}.ogg")
+        return bool(job.shouts) and (entry is None or entry.get("model") != job.model)
+
+    return [job for job in jobs if not job.output.exists() or stale(job)]
 
 
 # --- Synthesis and encoding ---------------------------------------------------------
@@ -422,14 +475,49 @@ def openrouter_checked(
     raise RejectedClip(reason, spent)
 
 
-def filter_chain(reverb: bool) -> str:
-    """Ffmpeg audio filters: trim silences, optional room reverb, loudness."""
+def shouted_clip(job: Job, api_key: str, attempts: int = 3) -> tuple[Path, Decimal, str]:
+    """Checked ElevenLabs take of a shouted bark, or the chorus of a war cry (raw file,
+    money spent, transcript heard). Raises ``RejectedShout`` when a take keeps failing."""
+    spent = Decimal(0)
+    raws, heard = [], ""
+    for shout in job.shouts:
+        try:
+            raw, cost, said = voice_shout.checked(shout, api_key, CACHE_DIR, attempts)
+        except voice_shout.RejectedShout as error:
+            raise voice_shout.RejectedShout(str(error), spent + error.cost) from error
+        spent += cost
+        raws.append(raw)
+        heard = heard or said
+    if len(raws) == 1:
+        return raws[0], spent, heard
+    chorus = voice_shout.chorus_cache_path(list(job.shouts), CACHE_DIR)
+    if not chorus.exists():
+        voice_shout.mix_chorus(raws, chorus, seed=job.text)
+    return chorus, spent, heard
+
+
+def filter_chain(reverb: bool, shout: bool = False, chorus: bool = False) -> str:
+    """Ffmpeg audio filters: trim silences, optional room reverb, loudness.
+
+    Shouts get a battlefield treatment: low rumble cut, firm compression and a presence
+    lift so that they cut through the melee; a chorus gets an open-air echo.
+    """
     trim = "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05"
     filters = [trim, "areverse", trim, "areverse"]
     if reverb:
         # Small vaulted room: two short early reflections, low decay.
         filters.append("aecho=0.9:0.6:37|61:0.22|0.12")
-    filters.append(f"loudnorm=I={TARGET_LUFS}:TP=-1.5:LRA=11")
+    if chorus:
+        # Open field: late, weak reflections from the woods and the far ranks.
+        filters.append("aecho=0.85:0.7:140|260|410:0.22|0.14|0.08")
+    if shout or chorus:
+        filters += [
+            "highpass=f=90",
+            "acompressor=threshold=0.125:ratio=4:attack=4:release=90:makeup=2",
+            "equalizer=f=2600:t=q:w=1.2:g=3",
+        ]
+    lufs = SHOUT_LUFS if shout or chorus else TARGET_LUFS
+    filters.append(f"loudnorm=I={lufs}:TP=-1.5:LRA=11")
     filters.append("aresample=44100")
     return ",".join(filters)
 
@@ -444,7 +532,9 @@ def encode(raw: Path, job: Job) -> float:
             [
                 "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
                 "-i", str(raw),
-                "-af", filter_chain(job.reverb),
+                "-af", filter_chain(
+                    job.reverb, shout=len(job.shouts) == 1, chorus=len(job.shouts) > 1
+                ),
                 "-ac", "1", "-c:a", "pcm_s16le",
                 str(wav),
             ],
@@ -545,6 +635,8 @@ def main(argv: list[str] | None = None) -> int:
         manifest = load_manifest()
         for job in all_jobs():
             entry = manifest.get(f"{job.path}.ogg")
+            if job.shouts:  # ElevenLabs takes are checked by whisper when made
+                continue
             if entry and not transcript_matches(job.text, entry.get("transcript", "")):
                 print(f"recheck: redo {job.path} (said {entry.get('transcript')!r})")
                 if not args.dry_run:
@@ -567,9 +659,14 @@ def main(argv: list[str] | None = None) -> int:
         "OPENROUTER_API_KEY" if args.backend == "openrouter" else "OPENAI_API_KEY"
     )
     api_key = os.environ.get(key_name, "")
-    if not api_key:
-        print(f"{key_name} missing", file=sys.stderr)
-        return 2
+    fal_key = os.environ.get("FAL_KEY", "")
+    for needed, name, value in (
+        (any(not job.shouts for job in jobs), key_name, api_key),
+        (any(job.shouts for job in jobs), "FAL_KEY", fal_key),
+    ):
+        if needed and not value:
+            print(f"{name} missing", file=sys.stderr)
+            return 2
     if spent + forgotten + estimate > args.cap:
         print(
             f"refused: {spent:.3f} + {forgotten:.3f} + {estimate:.3f} $ would exceed "
@@ -580,6 +677,7 @@ def main(argv: list[str] | None = None) -> int:
         print("refused: le plafond global de docs/budget.md serait dépassé")
         return 3
     run_cost = Decimal(0)
+    shout_cost = Decimal(0)  # part of run_cost billed by fal.ai
     result = 0
     try:
         for index, job in enumerate(jobs, 1):
@@ -588,7 +686,11 @@ def main(argv: list[str] | None = None) -> int:
                 break
             model = OPENROUTER_MODEL if args.backend == "openrouter" else MODEL
             try:
-                if args.backend == "openrouter":
+                if job.shouts:
+                    model = job.model
+                    raw, cost, said = shouted_clip(job, fal_key, max(3, args.attempts))
+                    shout_cost += cost
+                elif args.backend == "openrouter":
                     raw, cost, said = openrouter_checked(job, api_key, args.attempts)
                 else:
                     raw = synthesise(job, api_key)
@@ -602,6 +704,11 @@ def main(argv: list[str] | None = None) -> int:
             except RejectedClip as error:  # implausible clip twice: skipped, not saved
                 print(f"skipped: {error}", file=sys.stderr)
                 run_cost += error.cost
+                continue
+            except voice_shout.RejectedShout as error:  # the older clip, if any, stays
+                print(f"skipped: {error}", file=sys.stderr)
+                run_cost += error.cost
+                shout_cost += error.cost
                 continue
             seconds = encode(raw, job)
             run_cost += cost
@@ -617,15 +724,28 @@ def main(argv: list[str] | None = None) -> int:
             print(f"[{index}/{len(jobs)}] {job.path} {seconds:.1f} s  {cost:.4f} $")
         print(f"this run: {run_cost:.3f} $ (estimated beforehand {estimate:.3f} $)")
     finally:
-        total_spent = to_money(forgotten + run_cost)
+        shout_estimate = sum(
+            (job.estimated_cost() for job in jobs if job.shouts), Decimal(0)
+        )
+        total_spent = to_money(forgotten + run_cost - shout_cost)
         if total_spent > 0:
             service = "OpenRouter" if args.backend == "openrouter" else "OpenAI"
             budget.add_entry(
                 date.today().isoformat(),
                 service,
                 f"VO1 : synthèse voix ({len(jobs)} clips en attente)",
-                to_money(estimate),
+                to_money(estimate - shout_estimate),
                 total_spent,
+                path=args.budget_path,
+            )
+        if shout_cost > 0:
+            budget.add_entry(
+                date.today().isoformat(),
+                "fal.ai",
+                "VX : cris de bataille ElevenLabs v3 (répliques criées, chœurs des "
+                "cris de guerre), contrôle whisper, langue et hauteur",
+                to_money(shout_estimate),
+                to_money(shout_cost),
                 path=args.budget_path,
             )
     return result

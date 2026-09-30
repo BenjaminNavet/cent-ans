@@ -21,6 +21,18 @@
         "additionalProperties": false
       }
     },
+    "cry_chorus": {
+      "type": "object",
+      "description": "Cri de guerre en chœur (VX) : le cri de chaque voix ElevenLabs v3, superposé deux fois avec décalage, hauteur et gain aléatoires, puis écho de plein air. Remplace la lecture du cri par la voix du général.",
+      "properties": {
+        "voices": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
+        "tag": { "type": "string", "pattern": "^(\\[[a-z ]+\\] ?)+$" },
+        "default_language": { "type": "string", "pattern": "^[a-z]{2}$" },
+        "language": { "type": "object", "additionalProperties": { "type": "string", "pattern": "^[a-z]{2}$" } }
+      },
+      "required": ["voices", "tag"],
+      "additionalProperties": false
+    },
     "cry_instructions": { "type": "string", "minLength": 1 }
   },
   "required": ["version", "casting", "cry_instructions"],

@@ -33,7 +33,8 @@
           "cooldown_s": { "type": "number", "minimum": 0 },
           "chance": { "type": "number", "minimum": 0, "maximum": 1 },
           "spatial": { "type": "boolean", "description": "Jouée en 3D à la position du régiment (BattleAudio) plutôt qu'en 2D." },
-          "tone": { "type": "string", "description": "Consigne de ton ajoutée aux instructions de synthèse." }
+          "tone": { "type": "string", "description": "Consigne de ton ajoutée aux instructions de synthèse." },
+          "shout_tag": { "type": "string", "pattern": "^(\\[[a-z ]+\\] ?)+$", "description": "Situation criée (VX) : balises d'émotion ElevenLabs v3 placées avant le texte, ex. « [shouting] ». Absente : lecture OpenRouter." }
         },
         "required": ["priority", "cooldown_s", "chance", "spatial", "tone"],
         "additionalProperties": false
@@ -47,6 +48,8 @@
         "properties": {
           "label": { "type": "string" },
           "voices": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "shout_voices": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Voix ElevenLabs v3 (fal.ai) des situations criées." },
+          "language_code": { "type": "string", "pattern": "^[a-z]{2}$", "description": "Langue imposée à ElevenLabs (ISO 639-1) ; absente : détection automatique." },
           "instructions": { "type": "string", "minLength": 1 }
         },
         "required": ["voices", "instructions"],

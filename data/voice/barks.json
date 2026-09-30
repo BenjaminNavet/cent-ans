@@ -4,46 +4,53 @@
   "situations": {
     "select": { "label": "Sélection", "priority": 1, "cooldown_s": 2.5, "chance": 0.85, "spatial": false, "tone": "calme et attentif, prêt à obéir, à mi-voix" },
     "move": { "label": "Ordre de marche", "priority": 2, "cooldown_s": 2.0, "chance": 0.8, "spatial": false, "tone": "bref et obéissant, déjà en mouvement" },
-    "attack": { "label": "Ordre d'attaque", "priority": 3, "cooldown_s": 2.0, "chance": 0.9, "spatial": false, "tone": "résolu et agressif, la mâchoire serrée" },
-    "charge": { "label": "Charge", "priority": 4, "cooldown_s": 4.0, "chance": 0.7, "spatial": true, "tone": "hurlé à pleine gorge, rageur, en courant" },
-    "rout": { "label": "Déroute", "priority": 5, "cooldown_s": 5.0, "chance": 0.8, "spatial": true, "tone": "paniqué, essoufflé, terrifié, en fuyant" },
-    "victory": { "label": "Victoire", "priority": 6, "cooldown_s": 0.0, "chance": 1.0, "spatial": false, "tone": "exultant, triomphant, crié de joie" },
-    "general_down": { "label": "Le général tombe", "priority": 7, "cooldown_s": 0.0, "chance": 1.0, "spatial": true, "tone": "consterné, crié, la voix brisée par l'effroi" }
+    "attack": { "label": "Ordre d'attaque", "priority": 3, "cooldown_s": 2.0, "chance": 0.9, "spatial": false, "tone": "résolu et agressif, la mâchoire serrée", "shout_tag": "[shouting]" },
+    "charge": { "label": "Charge", "priority": 4, "cooldown_s": 4.0, "chance": 0.7, "spatial": true, "tone": "hurlé à pleine gorge, rageur, en courant", "shout_tag": "[shouting]" },
+    "rout": { "label": "Déroute", "priority": 5, "cooldown_s": 5.0, "chance": 0.8, "spatial": true, "tone": "paniqué, essoufflé, terrifié, en fuyant", "shout_tag": "[panicked] [shouting]" },
+    "victory": { "label": "Victoire", "priority": 6, "cooldown_s": 0.0, "chance": 1.0, "spatial": false, "tone": "exultant, triomphant, crié de joie", "shout_tag": "[excited] [shouting]" },
+    "general_down": { "label": "Le général tombe", "priority": 7, "cooldown_s": 0.0, "chance": 1.0, "spatial": true, "tone": "consterné, crié, la voix brisée par l'effroi", "shout_tag": "[horrified] [shouting]" }
   },
   "languages": {
     "fr": {
       "label": "français",
       "voices": ["ash", "echo", "verse"],
+      "shout_voices": ["Callum", "Daniel", "Liam", "Bill"], "language_code": "fr",
       "instructions": "Parle en français. Tu es un homme d'armes français du XIVe siècle sur un champ de bataille, en plein air : voix rude, franche, sans affectation, prononciation française naturelle."
     },
     "en": {
       "label": "anglais",
       "voices": ["ballad", "fable", "onyx"],
+      "shout_voices": ["George", "Daniel", "Callum"], "language_code": "en",
       "instructions": "Speak English with a rough rural English accent. You are a fourteenth-century English archer or soldier on an open battlefield: blunt, earthy voice, no modern intonation."
     },
     "an": {
       "label": "anglo-normand",
       "voices": ["onyx", "ash"],
+      "shout_voices": ["George", "Daniel"], "language_code": "fr",
       "instructions": "Parle en français, avec un léger accent anglais. Tu es un chevalier anglais du XIVe siècle dont la langue de cour est le français : voix noble, assurée, un peu hautaine."
     },
     "oc": {
       "label": "gascon",
       "voices": ["verse"],
+      "shout_voices": ["Liam"],
       "instructions": "Parle en gascon (occitan), avec l'accent chantant du sud-ouest de la France. Tu es un arbalétrier gascon du XIVe siècle : voix vive, méridionale."
     },
     "nl": {
       "label": "flamand",
       "voices": ["echo"],
+      "shout_voices": ["Bill"], "language_code": "nl",
       "instructions": "Spreek Vlaams (Nederlands met een West-Vlaams accent). Je bent een Vlaamse stedelijke militieman uit de veertiende eeuw: stoere, ruwe stem."
     },
     "cy": {
       "label": "gallois",
       "voices": ["ballad"],
+      "shout_voices": ["Callum"],
       "instructions": "Speak Welsh (Cymraeg) with a natural North Wales accent. You are a fourteenth-century Welsh spearman: fierce, lilting voice."
     },
     "sco": {
       "label": "écossais",
       "voices": ["fable"],
+      "shout_voices": ["George"], "language_code": "en",
       "instructions": "Speak with a broad Lowland Scots accent. You are a fourteenth-century Scottish spearman in a schiltron: gruff, defiant voice."
     }
   },
