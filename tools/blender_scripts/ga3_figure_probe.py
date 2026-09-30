@@ -193,41 +193,37 @@ def split_bow(obj):
     return bow
 
 
-def place_bow(bow, arm):
-    """Move the bow onto the rest grip of the game longbow (limbs along the left fist)."""
+def game_longbow(arm):
+    """The fine pipeline's longbow limbs (``battle_fine_weapons.longbow``) on ``Wrist.L``.
+
+    The generated bow is unusable (thin limbs broken into fragments by TRELLIS), so the
+    figure keeps the procedural weapon, as the current archers do. String and arrow ride
+    the virtual ``Nock`` / ``Arrow`` bones of the game shader: left out of this probe.
+    """
+    import battle_fine_gear as gear
+    import battle_fine_proto as fp
+    import battle_fine_weapons as fw
     import battle_skinned as bs
     import battle_skinned_equipment as eq
-    from mathutils import Matrix, Vector
+    import bpy
 
-    pts = [v.co.copy() for v in bow.data.vertices]
-    centre = sum(pts, Vector()) / len(pts)
-    # Principal axis (the limbs): the farthest pair from the centre, approximately.
-    far = max(pts, key=lambda p: (p - centre).length)
-    other = max(pts, key=lambda p: (p - far).length)
-    axis = (other - far).normalized()
-    if axis.z < 0:
-        axis = -axis
-    tips_mid = (far + other) / 2
-    belly = centre - tips_mid
-    belly -= axis * belly.dot(axis)
-    belly = belly.normalized() if belly.length > 1e-4 else Vector((0, -1, 0))
     ctx = eq.Context(arm, 0, bs.material, bs.bone_world)
-    c, along, _up, out = eq.grip(ctx, "L")
-    vert = along.normalized()
-    out = (out - vert * out.dot(vert)).normalized()
-    src = Matrix((axis, belly, axis.cross(belly))).transposed()
-    dst = Matrix((vert, out, vert.cross(out))).transposed()
-    rot = (dst @ src.inverted()).to_4x4()
-    grip = centre  # the bow's mid-height sits in the fist
-    m = Matrix.Translation(c) @ rot @ Matrix.Translation(-grip)
-    bow.data.transform(m)
-    for g in list(bow.vertex_groups):
-        bow.vertex_groups.remove(g)
-    grp = bow.vertex_groups.new(name="Wrist.L")
-    grp.add(range(len(bow.data.vertices)), 1.0, "REPLACE")
-    import battle_fine_proto as fp
-
+    objs = fw.longbow(gear.Gear(ctx, None, [], "ga3_probe", False))
+    bow = objs[0]
+    for o in objs[1:]:
+        bpy.data.objects.remove(o)
+    wood = bpy.data.materials.new("ga3_yew")
+    wood.use_nodes = True
+    wood.node_tree.nodes["Principled BSDF"].inputs[0].default_value = (
+        0.45,
+        0.28,
+        0.12,
+        1,
+    )
+    bow.data.materials.clear()
+    bow.data.materials.append(wood)
     fp.attach(bow, arm)
+    return bow
 
 
 # --- Rig fit ------------------------------------------------------------------------------
@@ -256,57 +252,119 @@ def mesh_limbs(obj):
     return out
 
 
-def _rotate_bone_world(arm, pb, rot):
-    """Rotate pose bone `pb` about its head by world rotation `rot` (3x3)."""
+def _rotate_bone(pb, rot):
+    """Rotate pose bone `pb` about its head by `rot` (3x3, armature space)."""
+    import bpy
     from mathutils import Matrix
 
     head = pb.head.copy()
     pb.matrix = (
         Matrix.Translation(head) @ rot.to_4x4() @ Matrix.Translation(-head) @ pb.matrix
     )
-    import bpy
-
     bpy.context.view_layer.update()
 
 
 def fit_rig_to_mesh(arm, limbs):
-    """Pose `arm` so that its arms and legs lie in the mesh's limbs; returns the rotations."""
-    import bpy
+    """Pose `arm` so that its arms and legs lie in the mesh's limbs (world `limbs`).
 
-    rots = {}
+    Pose matrices live in armature space (the glTF rig is rotated and scaled 1/100):
+    the limbs are brought there first. Returns the rotation angles in degrees.
+    """
+    import bpy
+    from mathutils import Matrix
+
+    inv = arm.matrix_world.inverted()
+    loc = {k: inv @ v for k, v in limbs.items()}
+    world_up = (inv.to_3x3() @ Matrix.Identity(3).col[2]).normalized()
+    angles = {}
     bpy.context.view_layer.update()
     for side in ("L", "R"):
         pb = arm.pose.bones[f"UpperArm.{side}"]
         tip = arm.pose.bones[f"Middle2.{side}"].head
-        want = limbs["hand." + side] - pb.head
-        have = tip - pb.head
-        rot = have.rotation_difference(want).to_matrix()
-        _rotate_bone_world(arm, pb, rot)
-        rots[pb.name] = rot
+        rot = (tip - pb.head).rotation_difference(loc["hand." + side] - pb.head)
+        _rotate_bone(pb, rot.to_matrix())
+        angles[pb.name] = round(math.degrees(rot.angle), 1)
     for side in ("L", "R"):
         pb = arm.pose.bones[f"UpperLeg.{side}"]
         foot = arm.pose.bones[f"Foot.{side}"]
-        want = limbs["ankle." + side] - pb.head
-        have = foot.head - pb.head
-        rot = have.rotation_difference(want).to_matrix()
-        _rotate_bone_world(arm, pb, rot)
-        rots[pb.name] = rot
-        # The IK foot follows (translation keyed on the foot, child of Root).
-        delta = limbs["ankle." + side] - foot.head
-        delta.z = 0.0
-        from mathutils import Matrix
-
-        foot.matrix = Matrix.Translation(delta) @ foot.matrix
+        target = loc["ankle." + side]
+        # Keep the foot's height: only its ground position follows the mesh.
+        target = target - world_up * (target - foot.head).dot(world_up)
+        rot = (foot.head - pb.head).rotation_difference(target - pb.head)
+        _rotate_bone(pb, rot.to_matrix())
+        angles[pb.name] = round(math.degrees(rot.angle), 1)
+        foot.matrix = Matrix.Translation(target - foot.head) @ foot.matrix
         bpy.context.view_layer.update()
-    return rots
+    print("FIT angles", angles)
+    return angles
+
+
+# Tail of each weight bone: the joint it points to (the Quaternius bones are 7 mm stubs, so
+# bone heat on them diffuses from points and gives the feet to ``Body``).
+WEIGHT_TAILS = {
+    "Hips": "Abdomen",
+    "Abdomen": "Torso",
+    "Torso": "Chest",
+    "Chest": "Neck",
+    "Neck": "Head",
+    "Shoulder.{s}": "UpperArm.{s}",
+    "UpperArm.{s}": "LowerArm.{s}",
+    "LowerArm.{s}": "Wrist.{s}",
+    "Wrist.{s}": "Middle2.{s}",
+    "UpperLeg.{s}": "LowerLeg.{s}",
+    "LowerLeg.{s}": "Foot.{s}",
+}
+NO_DEFORM = ("Root", "Body", "PT.")
+
+
+def weight_rig(fit):
+    """Armature with the deform bones of `fit` (at its rest) as joint-to-joint segments."""
+    import bpy
+    from mathutils import Vector
+
+    tails = {}
+    for k, v in WEIGHT_TAILS.items():
+        for side in ("L", "R"):
+            tails[k.format(s=side)] = v.format(s=side)
+    heads = {b.name: b.head_local.copy() for b in fit.data.bones}
+    scale = fit.matrix_world.to_scale().x
+    data = bpy.data.armatures.new("ga3_weights")
+    rig = bpy.data.objects.new("ga3_weights", data)
+    bpy.context.scene.collection.objects.link(rig)
+    rig.matrix_world = fit.matrix_world.copy()
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.object.mode_set(mode="EDIT")
+    for b in fit.data.bones:
+        if b.name.startswith(NO_DEFORM):
+            continue
+        eb = data.edit_bones.new(b.name)
+        eb.head = heads[b.name]
+        if b.name in tails:
+            eb.tail = heads[tails[b.name]]
+        elif b.name == "Head":
+            eb.tail = eb.head + Vector((0, 0, 0.22 / scale))
+        elif b.name.startswith("Foot."):
+            eb.tail = eb.head + Vector((0, -0.14 / scale, -0.05 / scale))
+        elif b.children:
+            eb.tail = heads[b.children[0].name]
+        elif b.parent is not None:
+            d = heads[b.name] - heads[b.parent.name]
+            eb.tail = eb.head + d.normalized() * max(d.length, 0.02 / scale)
+        if (eb.tail - eb.head).length < 1e-3 / scale:
+            eb.tail = eb.head + Vector((0, 0, 0.02 / scale))
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return rig
 
 
 def skin_to_bind(obj, arm):
-    """Auto-weight `obj` on a copy of `arm` posed onto the mesh, then bake it to bind pose.
+    """Auto-weight `obj` on the rig posed onto the mesh, then bake it to the bind pose.
 
-    Returns (armature copy removed, heat ok flag).
+    A copy of `arm` is posed onto the mesh's limbs and the pose applied as its rest; heat
+    weights are computed on a segment rig of the same bones (``weight_rig``); the copy is
+    then posed back onto `arm`'s rest, which carries the mesh to the bind pose of the clips.
+    Returns (heat ok flag, measured limbs).
     """
-    import battle_skinned as bs
+    import battle_fine_proto as fp
     import bpy
 
     fit = arm.copy()
@@ -314,43 +372,47 @@ def skin_to_bind(obj, arm):
     fit.name = "ga3_fit"
     bpy.context.scene.collection.objects.link(fit)
     fit.animation_data_clear()
+    # obj.copy() keeps the IK targets on the original armature: drop them, every bone of
+    # the copy is posed explicitly.
+    for pb in fit.pose.bones:
+        for c in list(pb.constraints):
+            pb.constraints.remove(c)
     limbs = mesh_limbs(obj)
     fit_rig_to_mesh(fit, limbs)
-    # The posed rig becomes the rest of the copy.
-    bpy.context.view_layer.objects.active = fit
     for o in bpy.context.selected_objects:
         o.select_set(False)
+    bpy.context.view_layer.objects.active = fit
     fit.select_set(True)
     bpy.ops.object.mode_set(mode="POSE")
     bpy.ops.pose.armature_apply(selected=False)
     bpy.ops.object.mode_set(mode="OBJECT")
-    # Deform bones only: fingers kept (hand weights), IK helpers not.
-    for b in fit.data.bones:
-        b.use_deform = not b.name.startswith(("PT.", "Root"))
+    fit.select_set(False)
+    wrig = weight_rig(fit)
     obj.select_set(True)
-    fit.select_set(True)
-    bpy.context.view_layer.objects.active = fit
+    wrig.select_set(True)
+    bpy.context.view_layer.objects.active = wrig
     bpy.ops.object.parent_set(type="ARMATURE_AUTO")
     weighted = sum(1 for v in obj.data.vertices if v.groups)
     ok = weighted > 0.95 * len(obj.data.vertices)
     print(f"HEAT weighted={weighted}/{len(obj.data.vertices)}")
-    # Pose the copy back onto the original bind pose, bake the mesh there.
-    for pb in fit.pose.bones:
-        pb.matrix_basis.identity()
-    bpy.context.view_layer.update()
+    for m in [m for m in obj.modifiers if m.type == "ARMATURE"]:
+        obj.modifiers.remove(m)
+    mw = obj.matrix_world.copy()
+    obj.parent = None
+    obj.matrix_world = mw
+    bpy.data.objects.remove(wrig)
+    mod = obj.modifiers.new("fit", "ARMATURE")
+    mod.object = fit
+    # Pose the copy back onto the original rest, bake the mesh there.
     for b in bs_hierarchy(fit):
-        pb = fit.pose.bones[b.name]
-        pb.matrix = arm.data.bones[b.name].matrix_local.copy()
+        fit.pose.bones[b.name].matrix = arm.data.bones[b.name].matrix_local.copy()
         bpy.context.view_layer.update()
-    mod = next(m for m in obj.modifiers if m.type == "ARMATURE")
     with bpy.context.temp_override(object=obj, active_object=obj):
         bpy.ops.object.modifier_apply(modifier=mod.name)
-    obj.parent = None
+    obj.data.transform(obj.matrix_world)
+    obj.matrix_world.identity()
     bpy.data.objects.remove(fit)
-    import battle_fine_proto as fp
-
     fp.attach(obj, arm)
-    _ = bs
     return ok, limbs
 
 
@@ -402,8 +464,8 @@ def load_cam(path):
     )
 
 
-def _atlas_material(layer, image_path, layers):
-    """Vertex colour, replaced by the figure's atlas layer where the vertex has one."""
+def _vertex_colour_material():
+    """Base colour from the ``col`` attribute (alpha holds the shader code, ignored)."""
     import bpy
 
     mat = bpy.data.materials.new("archer_0_look")
@@ -413,29 +475,15 @@ def _atlas_material(layer, image_path, layers):
     bsdf.inputs["Roughness"].default_value = 0.8
     col = nt.nodes.new("ShaderNodeVertexColor")
     col.layer_name = "col"
-    has = nt.nodes.new("ShaderNodeAttribute")
-    has.attribute_name = "has_atlas"
-    uv = nt.nodes.new("ShaderNodeUVMap")
-    uv.uv_map = "atlas"
-    tex = nt.nodes.new("ShaderNodeTexImage")
-    tex.image = bpy.data.images.load(image_path)
-    tex.interpolation = "Closest"
-    nt.links.new(uv.outputs[0], tex.inputs[0])
-    mix = nt.nodes.new("ShaderNodeMix")
-    mix.data_type = "RGBA"
-    nt.links.new(has.outputs["Fac"], mix.inputs["Factor"])
-    nt.links.new(col.outputs[0], mix.inputs["A"])
-    nt.links.new(tex.outputs[0], mix.inputs["B"])
-    nt.links.new(mix.outputs["Result"], bsdf.inputs["Base Color"])
-    _ = layer, layers
+    nt.links.new(col.outputs[0], bsdf.inputs["Base Color"])
     return mat
 
 
 def add_current_archer(clip, frac):
     """The exported ``archer_0`` LOD0 skinned at `clip` / `frac`, shifted along +X.
 
-    Skinned on the CPU like ``battle_fine_check`` (vertex colours), with the figure's layer
-    of the baked LOD0 atlas where the vertex carries one.
+    Skinned on the CPU like ``battle_fine_check``; vertex colours only (the game adds the
+    baked detail atlas and the livery on top).
     """
     import json
 
@@ -454,22 +502,9 @@ def add_current_archer(clip, frac):
     fr = c["start"] + int(round((frac if clip else 0.0) * (c["frames"] - 1)))
     obj = fc.skinned_object("archer_0", mesh, frames[fr], 0)
     obj.data.transform(Matrix.Translation((CURRENT_OFFSET, 0, 0)))
-    image = os.path.join(mesh_dir, "textures", "fine_atlas_lod0.png")
-    layers = 32
-    layer = entry["atlas_layer"]
     me = obj.data
-    if atlas is not None:
-        top = (1 << 11) - 1
-        uvl = me.uv_layers.new(name="atlas")
-        has = me.attributes.new("has_atlas", "FLOAT", "POINT")
-        for i, a in enumerate(atlas):
-            has.data[i].value = 1.0 if int(a) >> 22 else 0.0
-        for loop in me.loops:
-            a = int(atlas[loop.vertex_index])
-            u = (a & top) / top
-            v_down = ((a >> 11) & top) / top
-            uvl.data[loop.index].uv = (u, 1.0 - (layer + v_down) / layers)
-    me.materials.append(_atlas_material(layer, image, layers))
+    _ = atlas  # packed UV of the detail/normal atlas: not needed for the look
+    me.materials.append(_vertex_colour_material())
     return obj
 
 
@@ -528,15 +563,16 @@ def main():
         arm.hide_render = True
         fp.render(os.path.join(out, f"raw_{k}.png"))
     bow = split_bow(obj)
-    body_budget = LOD0_TRIS - (BOW_TRIS if bow else 0)
-    body_tris = bs_decimate(obj, body_budget)
-    bow_tris = bs_decimate(bow, BOW_TRIS) if bow else 0
-    print(f"LOD0 body={body_tris} bow={bow_tris} total={body_tris + bow_tris}")
+    print(f"TRELLIS bow verts={len(bow.data.vertices) if bow else 0} (dropped)")
+    body_tris = bs_decimate(obj, LOD0_TRIS - BOW_TRIS)
+    print(f"LOD0 body={body_tris}")
     ok, limbs = skin_to_bind(obj, arm)
     print("LIMBS", {k: tuple(round(x, 3) for x in v) for k, v in limbs.items()})
     if bow:
-        place_bow(bow, arm)
-    textured_look([obj] + ([bow] if bow else []))
+        bpy.data.objects.remove(bow)
+    game_bow = game_longbow(arm)
+    textured_look([obj])
+    print(f"BOW procedural tris={tris(game_bow)}")
     for label, clip, frac, eye, target in SHOTS:
         for o in [o for o in bpy.data.objects if o.name.startswith("archer_0")]:
             bpy.data.objects.remove(o)
@@ -566,8 +602,12 @@ def bs_decimate(obj, target):
 
 def sheet(out, reference, jpg):
     """Reference | raw mesh (2 views) | rigged poses beside the current archer."""
-    from PIL import Image, ImageDraw
+    from PIL import Image, ImageDraw, ImageFont
 
+    try:
+        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 15)
+    except OSError:
+        font = ImageFont.load_default()
     h = 520
     tiles = []
     ref = Image.open(reference).convert("RGB")
@@ -575,7 +615,7 @@ def sheet(out, reference, jpg):
     for name, label in (
         ("raw_0", "TRELLIS brut (face)"),
         ("raw_1", "TRELLIS brut (3/4)"),
-        ("pose_bind", "Riggée, pose de liaison | archer_0 actuel"),
+        ("pose_bind", "GA3 riggée (liaison) | archer_0 actuel"),
         ("pose_walk", "bow_walk"),
         ("pose_shoot_side", "bow_shoot (profil)"),
         ("pose_shoot_front", "bow_shoot (3/4 face)"),
@@ -591,7 +631,7 @@ def sheet(out, reference, jpg):
         x = 0
         for label, t in r:
             row.paste(t, (x, 26))
-            ImageDraw.Draw(row).text((x + 6, 6), label, fill=(235, 230, 215))
+            ImageDraw.Draw(row).text((x + 6, 5), label, fill=(235, 230, 215), font=font)
             x += t.width
         scale = width / w if w > width else 1.0
         canvas_rows.append(

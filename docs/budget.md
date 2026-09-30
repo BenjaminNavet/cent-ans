@@ -113,6 +113,7 @@ GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
 | 2026-09-28 | OpenRouter | GA1 : rapprochement du solde (appel coat_light coupé en cours de réponse, arrondis) | 0,00 $ | 0,07 $ | 0,59 $ |
 | 2026-09-28 | Poly Haven | GA5 : bâtiments en 2k (10 identifiants existants, téléchargement direct, CC0) + torchis/colombage procédural (composite local, pas d'appel IA) | 0,00 $ | 0,00 $ | 0,59 $ |
 | 2026-09-30 | fal.ai | GA3-S1 : maison à colombages (1 × fal-ai/flux/dev 1024², 0,025 $/MP + 1 × fal-ai/trellis 0,02 $) | 0,05 $ | 0,05 $ | 0,64 $ |
+| 2026-09-30 | fal.ai | GA3-S2 : longbowman image→3D (1 × fal-ai/trellis/multi, 3 vues découpées de `sr3/longbowman.png`, 0,02 $) | 0,02 $ | 0,02 $ | 0,66 $ |
 
 ## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
 
