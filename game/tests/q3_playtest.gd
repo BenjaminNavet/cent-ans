@@ -912,10 +912,23 @@ func phase_settings() -> void:
 
 func end_turn() -> void:
 	var t := Time.get_ticks_msec()
+	var date_before := str(map.sim.call("get_date_label"))
+	var focus := root.gui_get_focus_owner()
 	await key(KEY_ENTER)
 	await wait(3)
 	log_q("end turn: %d ms (date %s, treasury %s)" % [Time.get_ticks_msec() - t, map.sim.call("get_date_label"), _treasury()])
 	await wait(60)
+	# Q7 : calcul du tour (fil) et relecture de l'IA finis avant de juger.
+	var waited := 0
+	while waited < 1200 and (map.end_turn_running or (map.ai_replay != null and map.ai_replay.playing)):
+		await wait(1)
+		waited += 1
+	# Q7 : Entrée sans effet — qui avait le focus, quelles fenêtres étaient ouvertes.
+	if str(map.sim.call("get_date_label")) == date_before:
+		var open: Array = []
+		for panel in map.ui.panels.visible_panels():
+			open.append(str((panel as Node).name))
+		log_q("END TURN IGNORED: date still %s, focus before %s, visible panels %s, blocking alert %s, bell visible %s enabled %s, running %s, subwindows %s, focus after %s" % [date_before, focus.get_path() if focus != null else "none", open, map.ui.end_turn_cluster.blocking_alert(), map.ui.end_turn_cluster.is_visible_in_tree(), map.ui.end_turn_cluster.get("_enabled"), map.end_turn_running, root.get_embedded_subwindows().map(func(w: Window) -> String: return "%s(%s)" % [w.name, w.get_class()]), root.gui_get_focus_owner().get_path() if root.gui_get_focus_owner() != null else "none"])
 	await dismiss_dialogs()
 
 

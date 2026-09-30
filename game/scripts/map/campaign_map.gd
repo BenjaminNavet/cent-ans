@@ -1097,7 +1097,12 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 ## `threaded` (PB3d) : le cœur résout le tour dans un fil et la carte continue de s'animer ; les
 ## appels directs (tests, captures, mode headless) restent synchrones.
 func _on_end_turn(threaded: bool = false) -> void:
-	if sim == null or end_turn_running or ui.is_dialog_open() or (ai_replay != null and ai_replay.playing):
+	# Q7 : Entrée pendant la relecture du tour de l'IA la passe (comme Espace) au lieu de ne rien
+	# faire ; la saison suivante ne se lance pas, son rapport reste à lire.
+	if ai_replay != null and ai_replay.playing:
+		ai_replay.skip()
+		return
+	if sim == null or end_turn_running or ui.is_dialog_open():
 		return
 	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
 		return
