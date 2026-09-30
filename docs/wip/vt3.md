@@ -19,8 +19,25 @@ est portée par le terrain (canopée). Les incendies restent exagérés. Worktre
 - [x] Tests adaptés : sz4_prop_scale, sz4b_colonies_forests, fc2_impostors, settlements_render ;
   fc1, fc3, ga3_l2, cv1, fk_folk, pb3g, sz6, smoke OK.
 - [x] Captures (4, montage) : d = 300/40 lisibles ; d = 5 trop clairsemé → pas fin corrigé.
-- [ ] Banc base/VT3 (script `scratchpad/bench.sh`, sorties `/tmp/claude-501/vt3bench`).
-- [ ] Docs godot-map + addendum ADR 0138.
+- [x] Banc base/VT3 (3 passes, d = 1100/150/30/5) : appels de dessin et primitives ≤ base
+  partout (d = 30 : 426 → 351, 2,82 → 2,22 M) ; i/s dans le bruit du rythme d'affichage.
+- [x] Docs godot-map (« Arbres 1:1 (VT3) ») + addendum VT3 de l'ADR 0138.
+
+## TERMINÉ (30/09), à fusionner par l'orchestrateur (branche feat/vt3)
+
+## Points ouverts
+- Herbe et broussailles FC3 encore grossies (`clutter_scale`, ancienne courbe) : touffes de
+  ~45 m à d ≤ 8, plus hautes que les arbres 1:1. Hors demande ; à passer au 1:1 (ou à couper)
+  si le joueur le demande.
+- Vue d = 5 dans un grand massif : budget de la forêt dense atteint (gain ~0,55, rayon ~10 u) ;
+  au-delà, arbres plus clairsemés sur la canopée du terrain (plus sombre que les houppiers).
+  Jugement à confirmer en partie réelle ; leviers : `instance_budget`, `tree_view_fade`, teinte
+  de la canopée.
+- Premier passage sous d = 30 après un chargement loin : amorçage bloquant des tuiles de
+  végétation (`warm_start_tiles`), comme avant au premier affichage.
+- Imposteurs lointains de la végétation (au-delà de `detail_distance` 170) morts en jeu ; laissés
+  pour les A/B (`fc2_impostors_test`).
+- Worktree `../game_project-vt3-base` supprimé après le banc.
 
 ## Prochaine étape
-Banc 3 passes (d = 1100, 150, 30, 5), puis docs.
+Fusion dans main par la session principale ; jugement du joueur en partie réelle.

@@ -1816,7 +1816,25 @@ laquelle aucun arbre individuel n'est dessiné. Au-delà, la forêt est portée 
   res://tests/vt3_shots.gd -- --out=<dossier> --hide-armies --map-weather=clear` (forêt d'Orléans
   d = 300, 40, 5 ; Paris d = 15).
 
-VT3_BENCH_PLACEHOLDER
+**Mesures** (30/09, M4 Pro, fenêtre 1280 × 720, `--bench-map --bench-probe --bench-pan-only
+--bench-distance=D --bench-seconds=15`, 3 passes alternées base `main` 42050fe98 / VT3, machine
+partagée à une charge de 8-31 ; médianes des passes) :
+
+| d | appels de dessin p50 base → VT3 | primitives p50 | coût CPU du rendu p50 | i/s moyen | pire image |
+|---|---|---|---|---|---|
+| 1100 | 262 → 266 | 1,30 → 1,30 M | 0,37 → 0,37 ms | 74 → 65 | 25 → 23 ms |
+| 150 | 722 → **668** | 2,79 → **2,58 M** | 0,75 → 0,56 ms | 79 → 89 | 43 → 44 ms |
+| 30 | 426 → **351** | 2,82 → **2,22 M** | 0,57 → 0,47 ms | 78 → 66 | 36 → 40 ms |
+| 5 | 582 → 556 | 3,77 → 3,75 M | 0,84 → 0,75 ms | 60 → 66 | 36 → 34 ms |
+
+Les i/s sont dominés par le rythme de l'affichage (p50 à 16,6 ms, plafond 60 i/s, dans une passe
+sur deux des deux côtés) : un A/B de la même version VT3 à d = 30, canopée coupée / active,
+donne 63-66 / 80-83 i/s, écart de même ampleur que base / VT3 dans un sens ou dans l'autre ;
+aucun coût mesurable de la canopée. À d = 1100, aucun arbre ni avant ni après (portée du
+préréglage 700) : écarts de bruit. Fil principal : aucune image > 50 ms en VT3 (base : 33 dans une
+passe à d = 150 sous charge) ; sections les plus chères de la sonde inchangées (`update_lod`,
+`settlements`, `life`), la forêt dense n'y apparaît pas. Chargement de la carte inchangé
+(5,3-6,4 s).
 
 ## Interface des colonies (lot C5)
 
