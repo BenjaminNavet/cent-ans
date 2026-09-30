@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import math
+import shutil
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -632,7 +633,9 @@ def button(rng: np.random.Generator, state: str) -> tuple[Canvas, Piece]:
         "pressed": np.array([0.960, 0.845, 0.560]),
         "disabled": np.array([0.82, 0.79, 0.72]),
     }[state]
-    canvas = Canvas.vellum(size, size, margin, period, rng, base, 0.2 if state == "disabled" else 0.8)
+    canvas = Canvas.vellum(
+        size, size, margin, period, rng, base, 0.2 if state == "disabled" else 0.8
+    )
     if state == "pressed":
         yy, xx = np.mgrid[0:size, 0:size]
         inner = np.clip(1.0 - np.minimum(yy, xx) / 7.0, 0.0, 1.0) ** 2
@@ -650,12 +653,16 @@ def button(rng: np.random.Generator, state: str) -> tuple[Canvas, Piece]:
             for cy in (3.2, size - 3.2):
                 dot = Mask(size, size)
                 lozenge(dot, (cx, cy), 3.0, 3.0)
-                canvas.paint(dot, canvas.flat(AZURE if state == "pressed" else GULES, rng))
+                canvas.paint(
+                    dot, canvas.flat(AZURE if state == "pressed" else GULES, rng)
+                )
     if state == "pressed":
         filet = Mask(size, size)
         filet.frame(5.4, 1.2)
         canvas.paint(filet, canvas.flat(AZURE, rng), 0.9)
-    return canvas, Piece(f"button_{state}", (margin, margin, margin, margin), (12, 5, 12, 5))
+    return canvas, Piece(
+        f"button_{state}", (margin, margin, margin, margin), (12, 5, 12, 5)
+    )
 
 
 def tab(rng: np.random.Generator, selected: bool) -> tuple[Canvas, Piece]:
@@ -793,8 +800,16 @@ def build(output_dir: Path = OUTPUT_DIR, seed: int = 1337) -> list[Path]:
         canvas, piece = maker(rng)
         path = output_dir / f"{piece.name}.png"
         canvas.save(path)
-        written.append(path)
         width, height = canvas.size
+        override = output_dir / "nb" / f"{piece.name}.png"
+        if override.exists():
+            with Image.open(override) as nb_image:
+                if nb_image.size != (width, height):
+                    raise ValueError(
+                        f"{override} : taille {nb_image.size} != {(width, height)}"
+                    )
+            shutil.copyfile(override, path)
+        written.append(path)
         sidecar[piece.name] = {
             "size": [width, height],
             "margins": list(piece.margins),

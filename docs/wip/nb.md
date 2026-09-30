@@ -32,7 +32,7 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
 - [ ] **Jugement joueur** → `docs/research/nb0-sonde-modeles.md`. Commit.
 
 ### NB1 — Kit d'interface (≤ 5 $)
-- [ ] Chaîne locale (`key_out`, `fit_to_piece`, `seam_fix`, `contact_sheet`, repli dans
+- [x] Chaîne locale (`key_out`, `fit_to_piece`, `seam_fix`, `contact_sheet`, repli dans
       `ui_illumination.build`) + tests — agent `cent-ans-mech`. Commit.
 - [ ] Prompts des 16 pièces + ~10 décors dans `ui_ornaments.yaml` ; `--dry-run`.
 - [ ] Génération 3 variantes/pièce → planche avant/après → **jugement joueur** (`selected`).
