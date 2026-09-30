@@ -1,7 +1,83 @@
 # NB1: Nano Banana 2 redraw of the illuminated UI kit (spec 2026-09-30 NB, ADR 0135).
 # Each piece id matches game/assets/ui/illumination/kit.json; `selected` is the variant
-# kept after the player's judgement (absent = procedural fallback).
+# kept after the player's judgement (absent = procedural fallback). Only the frames with
+# margins wide enough to show painted detail are redrawn; bars, slider, tabs, buttons and
+# inset (1-9 px borders) stay procedural.
 model: google/gemini-3.1-flash-image
 guide_scale: 6
-pieces: []
-decor: []
+pieces:
+  - id: panel_illuminated
+    prompt: >-
+      A square illuminated manuscript page border for a game window: a wide frame of
+      burnished raised gold leaf bars edged with azure and vermilion, ivy-leaf rinceaux
+      and tendrils running along all four sides, a gilded boss with a small quatrefoil in
+      each corner, all four sides symmetrical and of equal thickness.
+    aspect_ratio: "1:1"
+    image_size: 1K
+    variants: 3
+  - id: panel
+    prompt: >-
+      A square manuscript frame for a game window: a thin double ruling of brown ink and
+      a narrow gold-leaf filet, with a small ivy leaf at each corner, all four sides
+      identical and symmetrical, restrained and elegant.
+    aspect_ratio: "1:1"
+    image_size: 1K
+    variants: 3
+  - id: top_bar
+    prompt: >-
+      A long horizontal illuminated banner strip for the top of a game screen: vellum band
+      edged below with a gold-leaf bar, an azure and vermilion filet and a row of small
+      ivy leaves hanging from the lower edge, ends finished with small gilded bosses.
+    aspect_ratio: "21:9"
+    image_size: 1K
+    variants: 3
+  - id: tooltip
+    prompt: >-
+      A small square marginal-note frame: a fine brown-ink rule with a thin red rubric
+      filet inside it and a tiny gold dot in each corner, all four sides identical.
+    aspect_ratio: "1:1"
+    image_size: 1K
+    variants: 3
+decor:
+  - id: initial_dragon
+    prompt: >-
+      A decorated initial made only of ornament: a gold-leaf square with azure and rose
+      foliage and a small coiled dragon, with no readable letter.
+    aspect_ratio: "1:1"
+    image_size: 1K
+    variants: 1
+  - id: fleuron_divider
+    prompt: >-
+      A horizontal divider: a thin gold bar with symmetrical ivy tendrils and a central
+      quatrefoil, for separating sections of text.
+    aspect_ratio: "21:9"
+    image_size: 1K
+    variants: 1
+  - id: drollery_hare
+    prompt: >-
+      A marginal drollery: a small hare riding a snail with a lance, painted in the
+      manner of Jean Pucelle's margins, standing on a thin ivy tendril.
+    aspect_ratio: "1:1"
+    image_size: 1K
+    variants: 1
+  - id: drollery_musician
+    prompt: >-
+      A marginal drollery: a grotesque hybrid with a human head playing a vielle, its
+      body ending in an acanthus scroll.
+    aspect_ratio: "1:1"
+    image_size: 1K
+    variants: 1
+  - id: corner_rinceau
+    prompt: >-
+      A single corner ornament: an L-shaped spray of ivy rinceaux with gold-leaf dots and
+      one azure bud, to decorate the corner of a page.
+    aspect_ratio: "1:1"
+    image_size: 1K
+    variants: 1
+  - id: cartouche_title
+    prompt: >-
+      An empty horizontal title cartouche: a vellum scroll band with curled ends outlined
+      in brown ink, a gold filet along its edges, blank inside.
+    aspect_ratio: "21:9"
+    image_size: 1K
+    variants: 1
