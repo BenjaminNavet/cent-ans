@@ -6,7 +6,8 @@ extends Node3D
 ## rechargement exposé par le cœur (`SiegeEnginesFx` choisit le clip de chaque servant : treuil
 ## `crank`, chargement `load`, écouvillon `swab`, poussée `push`, corde `haul`, repos `idle`).
 ## Un MultiMesh par (figurine, clip, camp) en mode CUSTOM du shader skinné : INSTANCE_CUSTOM.x =
-## instant où le servant a commencé son geste (le clip boucle depuis cet instant). Chaque servant
+## instant où le servant a commencé son geste (le clip boucle depuis cet instant) ; NT10 : y =
+## geste précédent en fondu (`BattleSkinned.pack_fade`), z = début de ce geste précédent. Chaque servant
 ## garde le même rang d'instance dans toutes les couches : même variante (tête, bonnet) quel que
 ## soit son geste. Rendu seulement : aucune règle ici.
 
@@ -87,10 +88,20 @@ func finish(camera: Variant) -> void:
 			_slots[key] = _slots.size()
 		var st: Dictionary = _state.get(key, {})
 		if str(st.get("clip", "")) != str(e["clip"]):
-			# Nouveau geste : le clip repart de son début (léger décalage entre servants).
-			st = {"clip": str(e["clip"]), "since": time_now - 0.13 * float(int(_slots[key]) % 5)}
+			# Nouveau geste : le clip repart de son début (léger décalage entre servants). NT10 :
+			# l'ancien geste reste lu (depuis son propre début) le temps du fondu.
+			var fresh := {"clip": str(e["clip"]), "since": time_now - 0.13 * float(int(_slots[key]) % 5)}
+			if not st.is_empty() and BattleSkinned.role_blend_s() > 0.0:
+				fresh["prev"] = BattleSkinned.clip_index(BattleSkinned.rig(kind, int(e["figure"])), str(st["clip"]))
+				fresh["prev_since"] = float(st["since"])
+				fresh["at"] = time_now
+			st = fresh
 			_state[key] = st
+		if st.has("prev") and (time_now - float(st["at"]) > BattleSkinned.role_blend_s() + 0.1 or time_now < float(st["at"])):
+			st.erase("prev")
 		e["since"] = float(st["since"])
+		e["fade_y"] = BattleSkinned.pack_fade(0, int(st.get("prev", -1)), float(st.get("at", 0.0)))
+		e["prev_since"] = float(st.get("prev_since", 0.0))
 		var layer_key := "%d/%s/%s" % [int(e["figure"]), str(e["clip"]), str(e["side"])]
 		if not buckets.has(layer_key):
 			buckets[layer_key] = []
@@ -118,7 +129,7 @@ func finish(camera: Variant) -> void:
 			var o := int(_slots[str(e["key"])]) * FLOATS
 			var t: Transform3D = e["xform"]
 			var b := t.basis
-			var values := [b.x.x, b.y.x, b.z.x, t.origin.x, b.x.y, b.y.y, b.z.y, t.origin.y, b.x.z, b.y.z, b.z.z, t.origin.z, float(e["since"]), 0.0, 0.0, 0.0]
+			var values := [b.x.x, b.y.x, b.z.x, t.origin.x, b.x.y, b.y.y, b.z.y, t.origin.y, b.x.z, b.y.z, b.z.z, t.origin.z, float(e["since"]), float(e["fade_y"]), float(e["prev_since"]), 0.0]
 			for k in FLOATS:
 				buf[o + k] = values[k]
 		if mm.instance_count != _capacity:
@@ -145,6 +156,9 @@ func _layer(layer_key: String, kind: String, figure: int, clip: String, side: St
 	var rig := BattleSkinned.rig(kind, figure)
 	var config := {"key": "%s/%d/%s" % [kind, figure, clip], "set": [BattleSkinned.clip_index(rig, clip)], "mode": BattleSkinned.M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
 	BattleSkinned.apply_config(mat, config, time_now)
+	# NT10 : fondu depuis le geste précédent, lu depuis son propre début (INSTANCE_CUSTOM.z).
+	mat.set_shader_parameter("custom_fade", 2)
+	mat.set_shader_parameter("role_blend", BattleSkinned.role_blend_s())
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_custom_data = true

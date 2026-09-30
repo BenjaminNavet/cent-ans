@@ -1,6 +1,7 @@
 {
-  "description": "Lot NT7 (ADR 0129) : fondus des figurines skinnées. `cycle_blend_s` : fondu entre deux clips successifs d'un cycle de mêlée (mode CYCLE du shader, 0 = changement sec) ; `role_clips` : clips propres des porte-étendards et musiciens par état (charge, victoire, variante d'attente), repli sur le jeu d'origine quand le rig ne les a pas ; les servants d'engins sont dans siege_engines.json (`crew.clips`).",
+  "description": "Lot NT7 (ADR 0129) : fondus des figurines skinnées. `cycle_blend_s` : fondu entre deux clips successifs d'un cycle de mêlée (mode CYCLE du shader, 0 = changement sec) ; `role_clips` : clips propres des porte-étendards et musiciens par état (charge, victoire, variante d'attente), repli sur le jeu d'origine quand le rig ne les a pas ; les servants d'engins sont dans siege_engines.json (`crew.clips`). Lot NT10 : `role_blend_s` : fondu au changement de clip des porte-étendards, musiciens et servants (mode CUSTOM, 0 = sec).",
   "cycle_blend_s": 0.2,
+  "role_blend_s": 0.25,
   "role_clips": {
     "standard": {"charging": "std_charge", "victory": "std_victory", "idle_alt": "std_plant"},
     "standard_mounted": {"charging": "c_std_charge", "victory": "c_std_wave"},
