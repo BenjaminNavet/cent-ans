@@ -26,7 +26,7 @@ Points ouverts :
 
 # CR2 — acier crédible (plates, casques)
 
-État : shader fait (occlusion spéculaire, rugosité, crasse, martelage), casques en cours. Captures brutes `~/dev/cent-ans-raw/cr2/` (`shot.sh`).
+État : CR2 terminé (grille `docs/img/cr/cr2_cr3_ab.jpg`, captures brutes `~/dev/cent-ans-raw/cr2/`, `shot.sh`) ; jugement du joueur attendu.
 
 Causes établies par captures de débogage (`d_mirror`, `d_rad`, `d_ry`) :
 - Le seul environnement reflété est le ciel HDRI : son voile d'horizon, clair, couvre tout ce
@@ -47,7 +47,12 @@ dos rentré vers la nuque (plus de paroi verticale « boîte de conserve ») dan
 constructeurs (`battle_fine_equipment.bassinet` du kit FG0, `battle_fine_gear.bassinet_shell`) ;
 cavalry_0 variante 0 : bassinet à visière en museau de chien + camail au lieu du grand heaume
 (visière omise au LOD2). Recuisson des 14 figurines à bassinet ou caparaçon.
-Prochaine étape : tests, captures finales, grille A/B.
+Triangles LOD0/1/2 : cavalry_0 16 786 / 2 028 / 549 (avant 16 864 / 1 986 / 534), cavalry_3
+17 414 / 2 055 / 508, standard_1 16 910 / 1 998 / 502 ; à pied inchangés (≤ 11 879).
+Tests : smoke, fg3_maps_test, sr2_weathering_test, an1a_motion_test verts. 26 captures sur 30.
+Points ouverts : casque vu de dos encore « obus » (la pointe tirée vers la nuque se lit de
+profil, peu de dos) ; LOD2 de cavalry_0 +15 triangles (camail) ; armoiries à 128 px floues de
+très près sur le caparaçon (atlas `battle_soldiers._build_arms_atlas`).
 
 # CR3 — caparaçons en drap lourd
 
@@ -57,4 +62,5 @@ ondulé à 0,46 m ± 3 cm (jarrets), dents (`dagged`) pour cavalry_3, fentes aux
 avant/arrière porté à 45 % par le haut de la jambe), armoiries sur tout le drap (meubles ~25 cm)
 au lieu d'un écu collé sur chaque flanc ; anneau redistribué (1/3 dos, 1/3 par flanc) : même
 nombre de triangles. Balancement : déjà fait par AN1a (`sm_weight` part 1, vitesse du régiment).
-Prochaine étape : cuisson cavalry_0 d'essai, capture, puis cuisson complète (bassinets partout).
+État : terminé (recuit, échelle 1,5 m par unité d'écu : meubles ~22 cm, bordure = liseré du drap).
+Prochaine étape : jugement du joueur.
