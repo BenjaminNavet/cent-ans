@@ -16,6 +16,9 @@ Session principale :
 - [ ] HB8 captures, banc, docs.
 
 ## HB1 — biomes (branche `feat/hb-biomes`, worktree `../gp-hb-biomes`)
-- État : `geo/biomes.py` implémenté (Köppen Beck 2023 1901-1930 + règles + lissage) ; `biomes.png` cuit (0,3 Mo) ; parts : océanique 4,5 %, continental 32,9, méditerranéen 9,5, steppe 8,5, boréal 17,2, montagnard 5,6, semi-aride 21,8. Source dans `tools/geo/raw/koppen/` (lien `tools/geo/raw` vers le dépôt principal).
-- Palettes par biome : section `biomes` de `colormap_style.yaml` (+ schéma), `colormap.py` fond les palettes (poids gaussiens `transition_km`), garrigue en taches, forêts gardées près des rivières (steppe), cultures par biome tirées par bloc.
-- Prochaine étape : tests `test_biomes.py`, re-cuisson colormap.
+- Fait : `tools/cent_ans_tools/geo/biomes.py` + `cent-ans geo biomes` → `data/map/biomes.png` (L8 7168×6144, 0,3 Mo) ; légende et seuils `data/map/biomes.yaml` (schéma `biomes.schema.json`) ; `map.json.biomes`.
+- Source : Köppen-Geiger 1 km Beck et al. 2023 (CC BY 4.0), période 1901-1930, archive dans `tools/geo/raw/koppen/` (hors dépôt). Règles : océanique ≤ 150 km de l'Atlantique ouvert (Paris, Beauce, Picardie continentaux) ; Dxb ≥ 59,5° N boréal ; BS/BW steppe au nord de 44° N, semi-aride au sud sauf BS côtier méditerranéen (Attique) ; sécheresse `landcover.dryness` + bruit (lisière irrégulière) → steppe pontique / plateau anatolien ; altitude (1150 m à 46° N, −22 m/°, +700 m en climat sec) → montagnard. Lissage gaussien 5 km, îlots < 300 km² fondus, pixels côtiers isolés retirés. Repli par règles sans source (testé).
+- Parts des terres : océanique 4,5 %, continental 32,9, méditerranéen 9,5, steppe 8,5, boréal 17,2, montagnard 5,6, semi-aride 21,8.
+- Carte de couleur : section `biomes` de `colormap_style.yaml` (palettes, garrigue en taches, forêts gardées près des rivières en steppe, cultures/prés par biome tirés par bloc, multiplicateurs bocage/openfield/vigne/présence), poids fondus sur 25 km. Re-cuite (pic mémoire ~11,6 Go).
+- Tests : `tools/tests/test_biomes.py` (38, dont 21 lieux réels : Athènes/Péloponnèse = 3, Rostov/Volgograd = 4…), `test_colormap.py` inchangé et vert.
+- Points ouverts : lisière ouest de la steppe droite vers 26-28° E (héritée de `landcover.dryness`) ; terrasses méditerranéennes non dessinées ; Dobroudja semi-aride (BSk intérieur au sud de 44° N).

@@ -116,7 +116,9 @@ def test_koppen_lut(legend: dict) -> None:
 
 def test_oceanic_only_near_the_atlantic(legend: dict) -> None:
     """Cfb next to the Atlantic is oceanic, Cfb 300 km inland is continental."""
-    raw = _raw(legend, "Cfb", cols=440, lon=_grid(-8.0, cols=440), lat=_grid(47, 40, 440))
+    raw = _raw(
+        legend, "Cfb", cols=440, lon=_grid(-8.0, cols=440), lat=_grid(47, 40, 440)
+    )
     assert raw[20, 5] == OCEANIC
     assert raw[20, 430] == CONTINENTAL
 
