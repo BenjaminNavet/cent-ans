@@ -46,7 +46,7 @@ fn the_ai_forms_armies_within_the_cap() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 5).unwrap();
     let paris = city(&state, "prov_ile_de_france");
-    state.settlements.get_mut(&paris).unwrap().garrison = units(&data, "unit_crossbowmen", 50);
+    state.settlements.get_mut(&paris).unwrap().garrison = units(&data, "unit_crossbowmen", 100);
     let orders = ai::plan_turn(&state, &data, &fac("fac_france"));
     let forming: Vec<usize> = orders
         .iter()
@@ -60,7 +60,7 @@ fn the_ai_forms_armies_within_the_cap() {
         })
         .collect();
     assert!(forming.len() >= 2, "several armies: {forming:?}");
-    assert!(forming.iter().all(|n| *n <= 20), "{forming:?}");
+    assert!(forming.iter().all(|n| *n <= 40), "{forming:?}");
     // Applied in order, every order is accepted.
     for order in orders
         .iter()
@@ -70,7 +70,7 @@ fn the_ai_forms_armies_within_the_cap() {
             .apply_order(&data, &fac("fac_france"), order.clone())
             .unwrap();
     }
-    assert!(state.armies.values().all(|a| a.units.len() <= 20));
+    assert!(state.armies.values().all(|a| a.units.len() <= 40));
 }
 
 #[test]
@@ -80,10 +80,10 @@ fn the_ai_does_not_merge_beyond_the_cap() {
     let armies = french_armies(&state);
     let first = armies[0].clone();
     let place = state.armies[&first].settlement().unwrap().clone();
-    state.armies.get_mut(&first).unwrap().units = units(&data, "unit_crossbowmen", 15);
+    state.armies.get_mut(&first).unwrap().units = units(&data, "unit_crossbowmen", 30);
     let mut second = state.armies[&first].clone();
     second.general = None;
-    second.units = units(&data, "unit_crossbowmen", 12);
+    second.units = units(&data, "unit_crossbowmen", 22);
     let second_id = ArmyId::from_index(9_998);
     state.armies.insert(second_id.clone(), second);
     let orders = ai::plan_turn(&state, &data, &fac("fac_france"));
@@ -98,7 +98,7 @@ fn the_ai_does_not_merge_beyond_the_cap() {
         !merges
             .iter()
             .any(|(s, t)| [s, t].contains(&&first) && [s, t].contains(&&second_id)),
-        "15 + 12 > 20 at {place}: {merges:?}"
+        "30 + 22 > 40 at {place}: {merges:?}"
     );
 }
 

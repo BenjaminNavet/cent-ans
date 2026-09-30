@@ -47,7 +47,7 @@ fn battle(attacker: CustomSide, defender: CustomSide) -> CustomBattle {
 #[test]
 fn rules_match_the_spec() {
     let rules = CustomBattleRules::bundled();
-    assert_eq!(rules.default_budget, 6000);
+    assert_eq!(rules.default_budget, 12000);
     assert!(rules.min_budget <= rules.default_budget && rules.default_budget <= rules.max_budget);
 }
 
@@ -84,7 +84,7 @@ fn budget_cap_and_roster_are_checked() {
     let report = ok.validate(&data, rules);
     assert!(report.ok, "{:?}", report.errors);
     assert_eq!(report.attacker.cost, 900);
-    assert_eq!(report.attacker.budget, 6000);
+    assert_eq!(report.attacker.budget, 12000);
 
     let mut over = ok.clone();
     over.attacker.budget = 1000;

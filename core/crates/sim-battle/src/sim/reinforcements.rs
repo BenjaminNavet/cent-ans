@@ -12,7 +12,7 @@ use crate::unit::{Unit, UnitState};
 
 /// Regiments a side may field at once on the standard field (the general's
 /// always among them); EP1: the battle reads [`BattleSim::max_on_field`].
-pub const MAX_ON_FIELD: usize = 20;
+pub const MAX_ON_FIELD: usize = 40;
 
 fn fighting(unit: &Unit) -> bool {
     unit.present() && !unit.synthetic && unit.state != UnitState::Routing && !unit.withdrawing

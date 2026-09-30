@@ -96,6 +96,6 @@ impl CampaignSim {
     fn army_unit_cap(&self) -> i64 {
         self.data
             .as_ref()
-            .map_or(20, |data| i64::from(data.army_rules.max_units))
+            .map_or(40, |data| i64::from(data.army_rules.max_units))
     }
 }

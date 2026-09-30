@@ -136,11 +136,13 @@ fn flanked_alert_fires_once_on_the_rising_edge() {
 #[test]
 fn reinforcements_alert_fires_when_a_reserve_marches_in() {
     let data = data();
-    let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(12);
+    let many: Vec<&str> = ["unit_men_at_arms_foot", "unit_longbowmen"].repeat(22);
     let battle = setup(units(&data, &many), units(&data, &many[..8]), None);
-    let mut sim = BattleSim::new(battle, 4).unwrap();
+    // The standard field (its 40-regiment cap) whatever the head count.
+    let skirmish = sim_battle::BattleScale::named("skirmish").unwrap();
+    let mut sim = BattleSim::new_scaled(battle, 4, skirmish).unwrap();
     lab(&mut sim);
-    assert!(sim.units()[20].reserve);
+    assert!(sim.units()[40].reserve);
     // A fielded regiment is destroyed: the first waiting one marches in.
     sim.units_mut()[3].hp = 0.0;
     sim.step();
@@ -150,7 +152,7 @@ fn reinforcements_alert_fires_when_a_reserve_marches_in() {
         .filter(|a| a.kind == AlertKind::Reinforcements)
         .collect();
     assert_eq!(reinf.len(), 1, "{alerts:?}");
-    assert_eq!(reinf[0].unit, Some(sim.units()[20].id));
+    assert_eq!(reinf[0].unit, Some(sim.units()[40].id));
     assert_eq!(reinf[0].side, Some(SideId::Attacker));
 }
 

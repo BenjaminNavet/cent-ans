@@ -230,7 +230,7 @@ mod tests {
         let rules = BattleScaleRules::bundled();
         let first = &rules.tiers[0];
         assert_eq!(first.field_size(), FieldSize::STANDARD);
-        assert_eq!(first.max_regiments_per_side, 20);
+        assert_eq!(first.max_regiments_per_side, 40);
         let s = FieldSize::STANDARD;
         assert_eq!(s.attacker_line_z(), 250.0);
         assert_eq!(s.defender_line_z(), 550.0);
@@ -247,7 +247,7 @@ mod tests {
         assert_eq!(rules.tier_for(4001).key, "large");
         assert_eq!(rules.tier_for(30_000).key, "epic");
         let epic = rules.tier_for(30_000);
-        assert!(epic.max_regiments_per_side >= 40);
+        assert!(epic.max_regiments_per_side >= 80);
         assert!(epic.width_m >= 2400.0);
     }
 }
