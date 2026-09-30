@@ -42,7 +42,7 @@ void vertex() {
 	// Taille écran (px) de la longueur de l'affleurement.
 	float size = length(MODEL_MATRIX[0].xyz) * outcrop_scale;
 	float dist = max(distance(CAMERA_POSITION_WORLD, MODEL_MATRIX[3].xyz), 1e-3);
-	float px = size * PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y * 0.5 / dist;
+	float px = size * abs(PROJECTION_MATRIX[1][1]) * VIEWPORT_SIZE.y * 0.5 / dist;
 	if ((px - min_pixels) / max(pixel_fade, 1e-3) < INSTANCE_CUSTOM.y) {
 		VERTEX = vec3(0.0);  // triangle dégénéré : ni fragment, ni remplissage
 	}
