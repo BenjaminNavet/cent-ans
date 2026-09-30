@@ -1,0 +1,12 @@
+{
+  "id": "cdx_andronic_iii",
+  "title": "Andronic III Paléologue",
+  "category": "personnage",
+  "aliases": ["Andronic III", "Andronic III Paléologue", "Andronikos III"],
+  "era": { "from": "1297", "to": "1341" },
+  "summary": "Empereur byzantin de 1328 à 1341, Andronic III reprend la Thessalie et l'Épire mais perd devant Orhan ses dernières villes d'Asie Mineure, Nicée et Nicomédie.",
+  "body": "Petit-fils d'Andronic II, le jeune Andronic se dresse contre son grand-père dans une guerre civile intermittente (1321-1328), soutenu par des aristocrates, dont son ami [[cdx_jean_cantacuzene|Jean Cantacuzène]]. Il entre à Constantinople le 24 mai 1328 et règne seul. Cantacuzène, grand domestique, dirige en fait les affaires.\n\nEn Asie, le règne est un échec : en juin 1329, l'armée impériale est battue par [[cdx_orhan|Orhan]] à Pélékanon, où l'empereur est blessé ; Nicée tombe en 1331, Nicomédie en 1337. Andronic cherche des alliés parmi les émirs turcs de l'Égée, dont [[cdx_umur_d_aydin|Umur d'Aydın]]. En Europe, il est plus heureux : il reprend Chios aux Génois Zaccaria (1329), annexe la Thessalie en 1333 et, après l'assassinat du despote Jean Orsini, l'Épire (1337-1340). Il réforme la justice en instituant quatre « juges généraux des Romains » (1329) et rebâtit une petite flotte.\n\nIl préside encore, le 10 juin 1341, le concile qui donne raison aux moines de l'[[cdx_hesychasme|hésychasme]] contre Barlaam, et meurt cinq jours plus tard, à quarante-quatre ans. Il laisse un fils de huit ans, Jean V, sous la régence de sa veuve Anne de Savoie ; la rivalité entre la régence et Cantacuzène ouvre une guerre civile (1341-1347) qui ruine l'[[cdx_empire_byzantin|Empire]].",
+  "entity": "chr_andronikos_iii",
+  "see_also": ["cdx_empire_byzantin", "cdx_pronoiaires", "cdx_jean_cantacuzene", "cdx_orhan"],
+  "sources": ["Andronic III Paléologue", "Guerre civile byzantine de 1321-1328", "Bataille de Pélékanon", "D. M. Nicol, The Last Centuries of Byzantium, 1993"]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "cdx_via_egnatia",
+  "title": "Via Egnatia",
+  "category": "lieu",
+  "aliases": ["Via Egnatia", "voie Egnatia", "voie Égnatienne"],
+  "era": { "from": "v. 146 av. J.-C.", "to": "1500" },
+  "summary": "Grande route romaine des Balkans, de Durazzo sur l'Adriatique à Thessalonique puis Constantinople : en 1337, Byzantins, Serbes, Angevins et bientôt Ottomans se disputent ses villes.",
+  "body": "Construite à partir de 146 avant notre ère environ par le proconsul Cnaeus Egnatius, qui lui donne son nom, la voie relie Dyrrachium (Durazzo, Durrës) à Thessalonique en franchissant les montagnes d'Albanie et de Macédoine par Ohrid, Héraclée (Bitola) et Édessa, puis se prolonge jusqu'à Constantinople, soit plus de mille cent kilomètres. Elle est pendant des siècles la route des armées, des courriers et des marchands entre l'Italie et l'Orient ; les croisés de 1096 l'empruntent.\n\nAu XIVe siècle, la route n'est plus entretenue comme au temps de Rome, mais elle reste l'axe des Balkans. Ses étapes marquent les fronts de 1337 : Durazzo est angevine, Ohrid vient de passer aux Serbes (1334), Thessalonique, deuxième ville de l'[[cdx_empire_byzantin|Empire]], reste byzantine, et la Thrace est ravagée par les flottes turques. Les conquêtes d'[[cdx_etienne_dusan|Étienne Dušan]] suivent son tracé vers Serrès (1345) ; après 1354, les [[cdx_ottomans|Ottomans]], passés en Europe, la remontent vers l'ouest.\n\nSous le nom de Sol Kol, la route de gauche, elle deviendra l'une des grandes routes militaires de l'Empire ottoman.",
+  "see_also": ["cdx_empire_byzantin", "cdx_etienne_dusan", "cdx_serbie", "cdx_ottomans"],
+  "sources": ["Via Egnatia", "Durrës", "Thessalonique", "D. Obolensky, The Byzantine Commonwealth, 1971"]
+}

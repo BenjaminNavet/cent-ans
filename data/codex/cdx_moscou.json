@@ -2,13 +2,7 @@
   "id": "cdx_moscou",
   "title": "La principauté de Moscou d'Ivan Kalita",
   "category": "lieu",
-  "aliases": [
-    "Moscou",
-    "principauté de Moscou",
-    "Ivan Kalita",
-    "Ivan Ier de Moscou",
-    "Vladimir-Souzdal"
-  ],
+  "aliases": ["Moscou", "principauté de Moscou", "Vladimir-Souzdal"],
   "era": {
     "from": "1276",
     "to": "1533"
@@ -16,10 +10,7 @@
   "summary": "Petite principauté, Moscou grandit sous Ivan Ier Kalita (« la Bourse »), qui obtient de la Horde d'Or le titre de grand-prince de Vladimir et lève pour elle le tribut russe.",
   "body": "Moscou n'est qu'un apanage cadet de la maison de Rurik jusqu'à Ivan Ier, prince de 1325 à 1340. Il obtient en 1328 du khan Özbeg le yarlyk de grand-prince de Vladimir, après avoir aidé les Tatars à écraser la révolte de Tver de 1327. Il collecte le tribut pour la Horde, ce qui lui donne richesse et influence, et achète des villages voisins.\n\nEn 1325, le métropolite de toute la Russie fixe sa résidence à Moscou, qui devient le centre religieux du pays. Ivan y fait bâtir la cathédrale de la Dormition (1326). Moscou n'est encore qu'une principauté parmi d'autres, rivale de Tver, de Souzdal et de Novgorod.",
   "entity": "fac_moscow",
-  "see_also": [
-    "cdx_horde_d_or",
-    "cdx_novgorod"
-  ],
+  "see_also": ["cdx_horde_d_or", "cdx_novgorod", "cdx_ivan_kalita"],
   "sources": [
     "Ivan Ier de Moscou",
     "Grande-principauté de Moscou",

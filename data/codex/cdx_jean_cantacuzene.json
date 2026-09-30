@@ -1,0 +1,12 @@
+{
+  "id": "cdx_jean_cantacuzene",
+  "title": "Jean Cantacuzène",
+  "category": "personnage",
+  "aliases": ["Jean Cantacuzène", "Cantacuzène", "Jean VI Cantacuzène", "Kantakouzenos"],
+  "era": { "from": "v. 1292", "to": "1383" },
+  "summary": "Grand domestique et ami d'Andronic III, Jean Cantacuzène gouverne Byzance en son nom, puis s'en proclame empereur (1341-1354) au prix d'une guerre civile où il appelle les Turcs en Europe.",
+  "body": "Issu d'une des familles les plus riches de l'aristocratie byzantine, Jean Cantacuzène soutient le jeune [[cdx_andronic_iii|Andronic III]] dans la guerre qui l'oppose à son grand-père (1321-1328). Grand domestique, c'est-à-dire chef de l'armée, il dirige en fait l'Empire pendant tout le règne : campagnes contre [[cdx_orhan|Orhan]], reprise de la Thessalie et de l'Épire, alliance avec [[cdx_umur_d_aydin|Umur d'Aydın]].\n\nÀ la mort d'Andronic, en juin 1341, la régence du petit Jean V revient à l'impératrice Anne de Savoie, au patriarche Jean Kalékas et au mégaduc Alexis Apokaukos, qui se défient de lui. Proclamé empereur à Didymotique le 26 octobre 1341, Cantacuzène mène six ans de guerre civile, soutenu par les grands propriétaires et par les moines de l'[[cdx_hesychasme|hésychasme]], combattu par les villes, dont Thessalonique, où les Zélotes prennent le pouvoir. Il appelle les Turcs d'Umur, puis ceux d'Orhan, à qui il donne sa fille Théodora (1346), et entre à Constantinople en février 1347.\n\nEmpereur à côté de Jean V, qui épouse sa fille Hélène, Jean VI règne sur un empire ruiné, que frappe la [[cdx_peste_noire|Peste noire]] en 1347. Les Ottomans, qu'il a fait passer en Europe, s'installent à Gallipoli en 1354 ; Jean V entre alors dans la capitale, et Cantacuzène abdique en décembre. Moine sous le nom de Joasaph, il écrit des Histoires qui sont la grande source de son temps, et meurt à Mistra en 1383.",
+  "entity": "chr_ioannes_kantakouzenos",
+  "see_also": ["cdx_empire_byzantin", "cdx_andronic_iii", "cdx_orhan", "cdx_hesychasme"],
+  "sources": ["Jean VI Cantacuzène", "Guerre civile byzantine de 1341-1347", "D. M. Nicol, The Reluctant Emperor: a Biography of John Cantacuzene, 1996"]
+}

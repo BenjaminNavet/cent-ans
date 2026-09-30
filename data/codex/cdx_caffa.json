@@ -1,0 +1,11 @@
+{
+  "id": "cdx_caffa",
+  "title": "Caffa",
+  "category": "lieu",
+  "aliases": ["Caffa", "Kaffa", "siège de Caffa"],
+  "era": { "from": "v. 1266", "to": "1475" },
+  "summary": "Comptoir génois de Crimée, Caffa est en 1337 le grand marché de la mer Noire : grain, poisson, fourrures et esclaves. Assiégée par la Horde d'Or en 1346, elle passe pour le point de départ de la Peste noire vers l'Occident.",
+  "body": "Les Génois obtiennent des khans mongols, vers 1266, le droit de s'établir à Caffa, l'ancienne Théodosie, sur la côte sud-est de la Crimée. Chassés par le khan Toqta en 1308, ils reviennent sous [[cdx_ozbeg|Özbeg]] ; dès les années 1310, un office de la commune de Gênes, l'Officium Gazariae, administre la ville, gouvernée par un consul. Protégée d'une enceinte, Caffa compte des Génois, des Grecs, des Arméniens, des Tatars et des Juifs.\n\nC'est là que s'embarquent le blé de la steppe, le poisson salé du Don, les fourrures et la cire de Russie, la soie et les épices venues par la route mongole de Tana et d'Asie centrale. Caffa est aussi le premier marché d'esclaves de la mer Noire : jeunes Tatars, Circassiens et Russes partent vers l'Égypte des [[cdx_mamelouks|Mamelouks]], qui en font des soldats, ou vers l'Italie et la Catalogne, comme domestiques.\n\nEn 1343, une rixe à Tana, où un Vénitien tue un Tatar, pousse le khan Djanibeg à chasser les Italiens et à assiéger Caffa. Le siège reprend en 1345-1346. Selon le notaire Gabriele de' Mussi, de Plaisance, la peste frappe alors l'armée tatare et les assiégeants lancent des cadavres par-dessus les murailles ; les galères génoises qui fuient la ville porteraient le mal à Constantinople, puis à Messine en octobre 1347. Les historiens jugent le récit plausible, mais la [[cdx_peste_noire|Peste noire]] a sans doute emprunté plusieurs routes à la fois, par les navires et leurs rats autant que par ce siège.\n\nCaffa reste génoise jusqu'à sa prise par les [[cdx_ottomans|Ottomans]] en 1475.",
+  "see_also": ["cdx_peste_noire", "cdx_horde_d_or", "cdx_ozbeg", "cdx_trebuchet"],
+  "sources": ["Caffa", "Siège de Caffa", "Peste noire", "M. Wheelis, « Biological Warfare at the 1346 Siege of Caffa », Emerging Infectious Diseases, 8, 2002", "M. Balard, La Romanie génoise, 1978"]
+}
