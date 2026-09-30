@@ -104,16 +104,11 @@ func _run() -> void:
 	roads.update_view(0.0, 1.0)
 	roads.flush(1.0)
 	await process_frame
-	_check(int(layer.stats.get("models", 0)) == data.settlements.size(), "expected one model per settlement, got %s" % layer.stats)
-	var floating := 0
-	for i in data.settlements.size():
-		var holder: Node3D = layer._models[i]
-		if holder == null:
-			continue
-		var px: Vector2 = data.settlements[i]["px"]
-		if holder.position.y > terrain.surface_height_at(px.x, px.y) + 0.01:
-			floating += 1
-	_check(floating == 0, "%d settlement models float above the displayed surface" % floating)
+	# VT (ADR 0138) : plus de maquette sur la carte ; emprise réelle par colonie (`towns_1340.json`).
+	_check(layer.get_node_or_null("Models") == null and layer.get_node_or_null("Landmarks") == null, "no settlement model on the campaign map")
+	_check(int(layer.stats.get("footprints", 0)) > 0, "no real footprint read, got %s" % layer.stats)
+	var paris_footprint: int = data.index_by_id["set_paris"]
+	_check(layer.model_radius(paris_footprint) > 0.0 and layer.model_holder(paris_footprint) == null, "Paris footprint without model")
 	_check(layer.hamlet_instance_count() > 0, "no hamlet instances near Paris")
 	_check(roads.ribbon_count() > 0, "no road ribbon near Paris")
 	_check(int(roads.stats.get("main_roads", 0)) > 0, "no main road")
@@ -161,7 +156,6 @@ func _run() -> void:
 	# 6. Lot DV2 : maquettes et couples nom + écu dans toute la vue normale, rien sur le parchemin.
 	layer.refresh(null, Callable())  # écus des détenteurs des données statiques
 	layer.update_view(1100.0)
-	_check(layer._models_root.visible, "models shown at 1100 (normal view)")
 	_check(layer._icons.visible, "shields shown at 1100 (normal view)")
 	var paris_index: int = data.index_by_id["set_paris"]
 	_check(layer.marker_in_tier(paris_index), "Paris name + shield in tier at 1100 (rank 4)")
@@ -173,7 +167,7 @@ func _run() -> void:
 			break
 	_check(village_index < 0 or not layer.marker_in_tier(village_index), "village name hidden at 1100 (rank rule)")
 	layer.update_view(1400.0)
-	_check(not layer._models_root.visible and not layer._icons.visible, "no model nor shield on the parchment (1400)")
+	_check(not layer._icons.visible, "no shield on the parchment (1400)")
 	layer.update_view(55.0)
 	print("settlements_render_test: %s" % JSON.stringify({
 		"settlements": data.settlements.size(), "hamlets": data.hamlets.size(), "roads": data.roads.size(),

@@ -202,3 +202,22 @@ def test_tours_river_corridor() -> None:
             sid,
             river and river["width_m"],
         )
+
+
+def test_ground_grid_layout_and_fallback() -> None:
+    """65 values: centre ~ z_m, rings follow the bearings, gaps fall back on z_m."""
+    rules = towns.load_rules()
+    town = towns.plan_town(_settlement(), rules, spur)
+    ground = town["ground_m"]
+    assert len(ground) == 1 + 2 * len(town["radii"]) == 65
+    assert abs(ground[0] - town["z_m"]) < 0.06
+    assert all(isinstance(v, float) for v in ground)
+
+    def holey(x, y):  # noqa: ANN001, ANN202
+        return np.where(np.asarray(x) > 1.0, np.nan, 42.0)
+
+    filled = towns.ground_grid(holey, np.full(32, 100.0), 7.0)
+    assert len(filled) == 65 and filled[0] == 7.0
+    assert filled[1] == 7.0  # bearing 0 = east, x > 1: missing -> z_m
+    assert filled[1 + 16] == 42.0  # bearing 180 deg = west
+    assert not any(math.isnan(v) for v in filled)
