@@ -22,12 +22,16 @@ Brutes : `~/dev/cent-ans-raw/ga3/l4/`. Contexte : `docs/wip/ga3.md` (L3a-c), `do
 - Coût : 1K partout en L4 (0,08 $ + bria 0,018 + multi 0,02 = 0,118 $ par génération).
 
 ## Étapes
-- [ ] 1. Squelette (note, options fal `--variant`, entrées UNITS) — commit
-- [ ] 2. Shader : usure SR2 + peau dans `GA3_TEX`, `sr2_weathering_test.gd` adapté
-- [ ] 3. Chaîne : têtes variantes (fal + Blender), mains fines greffées, manifeste `variants`
-- [ ] 4. Variantes B des 6 recettes existantes (génération + build)
+- [x] 1. Squelette (note, options fal `--variant`, entrées UNITS) — commit
+- [x] 2. Shader : usure SR2 + peau dans `GA3_TEX`, `sr2_weathering_test.gd` adapté
+- [x] 3. Chaîne : têtes variantes (fal + Blender), mains fines greffées, manifeste `variants`
+- [x] 4. Variantes B des 6 recettes existantes (génération + build)
 - [ ] 5. 10 recettes restantes (A puis B selon budget)
 - [ ] 6. Tests (ga3_l3 deux modes, an1a, an1b, sr2, fg3_maps, nt7, nt10, smoke, pytest), planche
 - [ ] 7. Docs (ga3.md § L4, ADR 0140, budget), merge main
 
 ## Journal
+- 30/09 : 16 générations 1K (6 variantes B + 10 recettes A) = 1,888 $ ; 9 variantes B des
+  nouvelles recettes en cours (standard_1 sans variante : budget). Les 6 figurines L3 et
+  standard_1 reconstruites (têtes greffées, mains fines) ; builds Blender ≈ 10 s chacun.
+  Suite : builds des 9 recettes A+B, `.import` des nouveaux albédos, tests Godot, planche.
