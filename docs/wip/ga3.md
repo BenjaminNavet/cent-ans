@@ -192,20 +192,32 @@ abandonne nos clips Quaternius.
     8 azimuts via nano-banana-2/edit), normal map plate ou dérivée de la luminance, et décider si les
     cartes `_mid` restent en deçà de 37-45 m. Rochers = nouveau genre dans `GroundClutter` (aujourd'hui
     herbe + buisson seulement) ou dans `Vegetation`, avec un MultiMesh dédié.
+- 30/09 **L1 décor de bataille** (1,10 $ ; ADR 0138). 9 objets, tous réussis en TRELLIS vue unique
+  (église en TRELLIS 2) ; triangles LOD0/1/2 : maison 7 999/3 999/1 199 (S4 recalibrée, aligné),
+  église 24 997/12 499/3 749 (22 × 15 × 17,4 m), moulin sur pivot 7 999/3 999/1 199 (14 m),
+  tente 3 000/1 500/450, palissade 2 998/1 500/446 (segment 3,1 m, pieux 1,9 m), puits
+  2 999/1 499/1 100, charrette 3 000/1 500/847, trébuchet 2 999/1 499/641, bélier 3 000/1 500/824.
+  `trellis/multi` (profil + dos regénérés par `flux-2/edit`) essayé sur les 4 pièces fines : pas
+  mieux que la vue unique (débris en plus) → vue unique gardée. Trébuchet et bélier **non
+  branchés** (engins animés `SiegeEnginesFx`). Branchement `Ga3Kit` derrière
+  `BuildingKit.Batch.add` (maisons 50 %, église, moulin, puits 100 %, tente, charrette 50 %),
+  palissade dans `BattleVillage`, tuiles LOD de 120 m ; `--no-ga3` ; rien sous la neige.
+  Tests : `ga3_l1_decor_test.gd` OK (avec et sans `--no-ga3`), smoke OK, bataille headless
+  « 16 GA3 variants » (0 avec `--no-ga3`). Capture Godot unique ratée pour le jugement :
+  `--camera=` n'est pas appliqué avec `--open-shot` (vue par défaut, village trop loin) → jugement
+  d'intégration en jeu à faire par la session principale (église vers (915, 707) sur la bataille
+  par défaut). Défauts : enfoncement fixe 0,35 m (pas de fondations), toit du puits blanchi,
+  peaux du bélier « vache pie ».
 - 30/09 S3 (comparatif figurine) : 3 appels fal (Tripo 0,50 $, Meshy 1,52 $, TRELLIS 2 0,30 $ = 2,32 $),
   `fal_client.subscribe` bloqué après la fin des tâches Tripo/Meshy → résultats relus par
   `queue.fal.run/<app>/requests/<id>` (ids via `api.fal.ai/v1/models/requests/by-endpoint`). Planche
   `docs/img/ga3/s3_compare.jpg`, analyse dans « S3 comparatif ».
 
 ## Lots de production (go joueur 30/09)
-- [ ] L1 décor : 10 objets flux-2 → bria → trellis → `ga3_cleanup.py --normal on --auto-levels 0.5`
-      (maison paysanne, église [trellis-2, LOD0 20-30 k], moulin, tente, palissade, puits, chariot,
-      trébuchet, bélier ; pièces fines : `trellis/multi` ou procédural gardé). Branchement décor de
-      bataille (`battle_decor`) derrière option, ADR (prochain numéro libre). ≈ 1 $.
-      **En cours (agent L1)** : catalogue `data/art/ga3_decor.json` (+ schéma, pytest),
-      `ga3_fal_decor.py --catalog` (brutes `~/dev/cent-ans-raw/ga3/l1/`), ADR 0138 réservé.
-      Suite : appels fal, nettoyage par objet, `Ga3Kit` (game/scripts/visual/ga3_kit.gd), test
-      `ga3_l1_decor_test.gd`, planche `docs/img/ga3/l1_decor.jpg`.
+- [x] L1 décor (1,10 $, ADR 0138) : 9 objets flux-2 → bria → trellis → `ga3_cleanup.py --normal on
+      --auto-levels 0.5` ; catalogue `data/art/ga3_decor.json` (+ schéma, pytest) ; brutes
+      `~/dev/cent-ans-raw/ga3/l1/` et `l1p/` (pièces fines) ; `ga3_fal_decor.py --catalog`,
+      `ga3_decor_build.py`, planche `docs/img/ga3/l1_decor.jpg` (`ga3_decor_sheet.py`). Voir journal.
 - [ ] L2 végétation campagne : imposteurs générés (3 essences, 8 azimuts via nano-banana-2) dans la
       grille `campaign_impostors_albedo`, atlas de feuilles, herbe regénérée dense, rochers TRELLIS dans
       `GroundClutter`, derrière option. ≈ 1,50 $.
