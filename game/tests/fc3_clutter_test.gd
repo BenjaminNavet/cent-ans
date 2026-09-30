@@ -1,6 +1,6 @@
 extends SceneTree
 
-## FC3 : touffes d'herbe et broussailles proches (`GroundClutter`) : préréglages, portée,
+## FC3 : touffes d'herbe et broussailles proches (`GroundClutter`, 1:1 depuis VT3) : préréglages, portée,
 ## disque autour du point visé, budget d'instances, déterminisme.
 ## Usage : godot --headless --path game --script res://tests/fc3_clutter_test.gd
 ## Code de sortie 0 si tout passe, 1 sinon.
@@ -45,7 +45,7 @@ func _test_presets() -> void:
 func _test_low_preset() -> void:
 	var clutter := _make("low")
 	_check(is_zero_approx(clutter.quality_density), "low preset reaches the clutter node")
-	clutter.update_view(Vector2(500, 500), 30.0)
+	clutter.update_view(Vector2(500, 500), 1.5)
 	_check(clutter.visible_instances() == 0 and clutter.cell_count() == 0, "low: no tufts, nothing built")
 	clutter.free()
 
@@ -53,7 +53,7 @@ func _test_low_preset() -> void:
 func _test_in_range() -> void:
 	var clutter := _make("high")
 	var at := Vector2(500, 500)
-	clutter.update_view(at, 30.0)
+	clutter.update_view(at, 1.5)
 	var shown := clutter.visible_instances()
 	_check(shown > 0, "high: tufts near the camera (%d)" % shown)
 	_check(shown <= clutter.max_visible_instances, "high: within the instance budget (%d)" % shown)
@@ -73,16 +73,16 @@ func _test_in_range() -> void:
 	# Ultra : plus de touffes, toujours sous le plafond.
 	RenderQuality.override_level = "ultra"
 	RenderQuality.apply_clients(self)
-	clutter.update_view(at, 30.0)
+	clutter.update_view(at, 1.5)
 	_check(clutter.visible_instances() > shown and clutter.visible_instances() <= clutter.max_visible_instances, "ultra: denser, still within budget (%d)" % clutter.visible_instances())
 	RenderQuality.override_level = "low"
 	RenderQuality.apply_clients(self)
-	clutter.update_view(at, 30.0)
+	clutter.update_view(at, 1.5)
 	_check(clutter.visible_instances() == 0, "switch to low hides every tuft")
 	# Point visé déplacé loin : les anciennes cellules sont masquées.
 	RenderQuality.override_level = "high"
 	RenderQuality.apply_clients(self)
-	clutter.update_view(Vector2(1500, 1500), 30.0)
+	clutter.update_view(Vector2(1500, 1500), 1.5)
 	for cell: Dictionary in clutter.visible_cells():
 		_check((cell["rect"] as Rect2).get_center().distance_to(Vector2(1500, 1500)) < clutter.radius() + clutter.cell_size, "moved: old cells hidden")
 	clutter.free()
@@ -90,17 +90,21 @@ func _test_in_range() -> void:
 
 func _test_far_camera() -> void:
 	var clutter := _make("high")
-	clutter.update_view(Vector2(500, 500), 30.0)
-	clutter.update_view(Vector2(500, 500), 60.0)
+	clutter.update_view(Vector2(500, 500), 1.5)
+	clutter.update_view(Vector2(500, 500), 4.0)
 	_check(not clutter.visible and clutter.visible_instances() == 0, "beyond max_camera_distance: nothing shown")
+	# VT3 : touffes 1:1, portée où une broussaille fait ≈ 1 px (1080p, fov 55°).
+	var bush_px := MapPropScale.pixels_for(clutter.bush_height_m, clutter.max_camera_distance)
+	_check(bush_px > 0.7 and bush_px < 1.4, "real-size bush at the range: %.2f px" % bush_px)
+	_check(clutter.grass_height_m >= 0.3 and clutter.grass_height_m <= 1.0 and clutter.bush_height_m >= 1.0 and clutter.bush_height_m <= 3.0, "real clutter heights")
 	clutter.free()
 
 
 func _test_deterministic() -> void:
 	var a := _make("high")
-	a.update_view(Vector2(300, 300), 25.0)
+	a.update_view(Vector2(300, 300), 1.2)
 	var b := _make("high")
-	b.update_view(Vector2(300, 300), 25.0)
+	b.update_view(Vector2(300, 300), 1.2)
 	var ca := a.visible_cells()
 	var cb := b.visible_cells()
 	var same := ca.size() == cb.size() and ca.size() > 0
@@ -118,16 +122,16 @@ func _test_deterministic() -> void:
 ## Semis dans le `WorkerThreadPool`, pose sur le fil principal : même résultat qu'en direct.
 func _test_threaded() -> void:
 	var direct := _make("high")
-	direct.update_view(Vector2(700, 700), 30.0)
+	direct.update_view(Vector2(700, 700), 1.5)
 	var pooled := _make("high")
 	pooled.threaded = true
 	pooled.max_cells_per_frame = 4
 	var guard := 0
-	pooled.update_view(Vector2(700, 700), 30.0)
+	pooled.update_view(Vector2(700, 700), 1.5)
 	while (pooled.pending_jobs() > 0 or pooled.visible_cells().size() < direct.visible_cells().size()) and guard < 2000:
 		guard += 1
 		OS.delay_msec(1)
-		pooled.update_view(Vector2(700, 700), 30.0)
+		pooled.update_view(Vector2(700, 700), 1.5)
 	_check(pooled.visible_instances() == direct.visible_instances() and pooled.visible_instances() > 0, "threaded seeding matches direct seeding (%d / %d)" % [pooled.visible_instances(), direct.visible_instances()])
 	print("fc3: threaded install max %.2f ms per cell (main thread)" % float(pooled.stats["build_ms_max"]))
 	direct.free()

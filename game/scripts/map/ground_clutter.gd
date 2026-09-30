@@ -13,9 +13,10 @@ extends Node3D
 ## - Densité selon le préréglage (`clutter_density`, 0 en Basse : rien n'est construit). Les
 ##   instances sont semées pour la densité maximale (`max_density`) dans un ordre aléatoire : le
 ##   préréglage ne fait que borner `visible_instance_count`, sans nouveau semis.
-## - Seulement sous `max_camera_distance` ; fondu par rang (shader) sur `fade_band` et au bord du
-##   disque visible ; taille liée à `MapPropScale.clutter_scale` (courbe des arbres d'avant VT3,
-##   paramètre `clutter_scale` des shaders) et fondu quand elle devient trop petite.
+## - VT3 (ADR 0138) : taille réelle (herbe ~0,4-0,8 m, broussailles ~1,3-2,3 m, rochers ~0,5-2,5 m),
+##   plus aucune exagération ; dessinées seulement sous `max_camera_distance` (une broussaille de
+##   1,8 m y fait ≈ 1 px en 1080p, fov 55°) ; fondu par rang (shader) sur `fade_band` et au bord
+##   du disque visible. Au-delà, la texture du terrain suffit.
 ## - Recalage sur la surface affichée : cellules touchées par `chunk_surface_changed` /
 ##   `surface_rect_changed` re-posées (hauteurs seules) par tranches.
 ## - Lot GA3-L2 : touffe d'herbe générée dense (`Ga3Vegetation.GRASS_TUFT`) et rochers TRELLIS
@@ -27,39 +28,35 @@ extends Node3D
 const SHADER := preload("res://shaders/ground_clutter.gdshader")
 ## Lot FC5 : touffe d'herbe texturée (copie mipmappée de `grass_blades.png`, `build_leaf_cards.py`).
 const GRASS_TEXTURE := "res://assets/textures/vegetation/campaign_grass_tuft.png"
-const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalisées
+const FLOATS_PER_INSTANCE := 16
+const METERS_PER_UNIT := 719.0  # transformation 3 × 4 + données personnalisées
 const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Distance caméra au-delà de laquelle plus aucune touffe (fondu sur `fade_band` en deçà).
-@export var max_camera_distance: float = 40.0
-@export var fade_band: float = 8.0
+## VT3 : 2,6 (broussaille de 1,8 m ≈ 1 px en 1080p ; avant : 40, touffes grossies).
+@export var max_camera_distance: float = 2.6
+@export var fade_band: float = 0.8
 ## Côté (unités monde) d'une cellule de semis.
-@export var cell_size: float = 24.0  # L5 : 32 → 24 (même coût de pose par cellule, densité × 1,8)
+@export var cell_size: float = 2.0  # VT3 : 24 → 2 (touffes réelles, semis dense sur un petit disque)
 ## Rayon du disque garni autour du point visé : distance caméra × `radius_factor`, borné.
 @export var radius_factor: float = 1.3
-@export var min_radius: float = 16.0
-@export var max_radius: float = 52.0
+@export var min_radius: float = 1.5
+@export var max_radius: float = 3.2
 ## Candidats par cellule à la densité 1 (préréglage Haute) sur une couverture pleine.
-@export var base_per_cell: int = 3600  # L5 : ≈ 6,3 candidats/u² (FC5 : 3,9), pose ≤ 0,2 ms
+@export var base_per_cell: int = 10000  # VT3 : ≈ 2 500 candidats/u² (une touffe pour ~200 m²)
 ## Densité maximale d'un préréglage (Ultra) : nombre de candidats semés.
 @export var max_density: float = 1.5
-## Hauteur (unités monde, taille de carte) d'une touffe d'herbe et d'une broussaille.
-## Lot FC5 : 0,22 / 0,42 (≈ 6 px à d = 25 en 720p) ; le shader les réduit comme
-## `clutter_scale`^`prop_scale_power` (plus lentement que les arbres : encore visibles à d = 10).
-@export var grass_height: float = 0.18  # L5 : plus fines, plus claires, plus nombreuses
-@export var bush_height: float = 0.42
-@export var prop_scale_power: float = 0.3
+## VT3 : hauteur réelle (mètres, ± 30 % par touffe) d'une touffe d'herbe et d'une broussaille
+## (avant : 0,18 / 0,42 unité de carte réduites par le shader, ~45 / 110 m près du sol).
+@export var grass_height_m: float = 0.6
+@export var bush_height_m: float = 1.8
 ## Lot FC6 : au zoom rapproché (d < `close_distance`), part des candidats semés jusqu'à
-## ×`close_boost` (sans nouveau semis) ; inchangée à d ≥ `close_distance` + 10.
-@export var close_distance: float = 20.0
+## ×`close_boost` (sans nouveau semis) ; `far_share` à d ≥ 2 × `close_distance`.
+@export var close_distance: float = 0.8
 @export var close_boost: float = 1.5
-## Lot L5 : part affichée à d ≥ `close_distance` + 10 : ramène la densité par unité² à celle de
-## FC5 (cellules plus petites, même nombre de candidats) : rien ne change au-delà de d = 30.
+## Lot L5 : part affichée à d ≥ 2 × `close_distance`.
 @export var far_share: float = 0.62
-## Échelle `clutter_scale` sous laquelle les touffes disparaissent (trop
-## petites pour valoir leur coût).
-@export var min_prop_scale: float = 0.025
 ## Cellules posées par image (semis fait dans le `WorkerThreadPool` si `threaded`).
 ## Lot FC6 : une seule cellule posée par image (le semis et les hauteurs sont faits dans le
 ## `WorkerThreadPool` ; le fil principal ne crée que le MultiMesh).
@@ -70,12 +67,13 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 @export var max_cached_cells: int = 96
 ## Plafond des instances visibles (toutes cellules).
 @export var max_visible_instances: int = 60000
-## Lot GA3-L2 : rochers. Candidats par cellule (probabilité `_rock_weight`), longueur (unités,
-## avant `clutter_scale`), distances caméra des niveaux de détail 120 → 60 → 18 triangles.
+## Lot GA3-L2 : rochers. Candidats par cellule (probabilité `_rock_weight`), longueur réelle
+## (VT3, mètres, × 0,45-1,4, un sur huit × 1,8), distances caméra des niveaux de détail
+## 120 → 60 → 18 triangles.
 @export var use_rocks: bool = true
-@export var rock_candidates: int = 120
-@export var rock_size: float = 0.34
-@export var rock_lod_distances: Vector2 = Vector2(12.0, 24.0)
+@export var rock_candidates: int = 40
+@export var rock_size_m: float = 1.0
+@export var rock_lod_distances: Vector2 = Vector2(0.8, 1.6)
 
 ## Lot L5 : `--no-clutter` coupe les touffes (A/B).
 var enabled: bool = true
@@ -218,9 +216,7 @@ func _process(_delta: float) -> void:
 ## visibilité, fondu. Sans coût quand la caméra est au-delà de la portée.
 func update_view(at: Vector2, camera_distance: float) -> void:
 	_frame += 1
-	var prop_scale := MapPropScale.shared().clutter_scale(camera_distance)  # VT3 : `clutter_scale` du shader
 	var fade := clampf((max_camera_distance - camera_distance) / maxf(fade_band, 0.001), 0.0, 1.0)
-	fade *= smoothstep(min_prop_scale, min_prop_scale * 2.0, prop_scale)
 	var active := enabled and fade > 0.001 and quality_density > 0.001 and (mask != null or weight_sampler.is_valid())
 	if not active:
 		if visible:
@@ -236,9 +232,7 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 	_material.set_shader_parameter("fade", fade)
 	_material.set_shader_parameter("focus", at)
 	_material.set_shader_parameter("radius", _radius)
-	_material.set_shader_parameter("clutter_scale", prop_scale)
 	for rock_material in _rock_materials:
-		rock_material.set_shader_parameter("clutter_scale", prop_scale)
 		rock_material.set_shader_parameter("fade", fade)
 		rock_material.set_shader_parameter("focus", at)
 		rock_material.set_shader_parameter("radius", _radius)
@@ -307,7 +301,6 @@ func _ensure_resources() -> void:
 		return
 	_material = ShaderMaterial.new()
 	_material.shader = SHADER
-	_material.set_shader_parameter("prop_scale_power", prop_scale_power)
 	var grass_path := Ga3Vegetation.pick(Ga3Vegetation.GRASS_TUFT, GRASS_TEXTURE)
 	if ResourceLoader.exists(grass_path):
 		_material.set_shader_parameter("grass_texture", load(grass_path))
@@ -318,7 +311,6 @@ func _ensure_resources() -> void:
 	for lods: Array in _rock_meshes:
 		var rock_material := ShaderMaterial.new()
 		rock_material.shader = ROCK_SHADER
-		rock_material.set_shader_parameter("prop_scale_power", prop_scale_power)
 		var source := (lods[0] as Mesh).surface_get_material(0) as BaseMaterial3D
 		if source != null and source.albedo_texture != null:
 			rock_material.set_shader_parameter("albedo_texture", source.albedo_texture)
@@ -446,7 +438,7 @@ func _seed_cell(key: Vector2i) -> Dictionary:
 			continue
 		points.append(p)
 		var bush := 1.0 if kind_roll < w.y else 0.0
-		var s := size * (bush_height if bush > 0.5 else grass_height)
+		var s := size * (bush_height_m if bush > 0.5 else grass_height_m) / METERS_PER_UNIT
 		var c := cos(yaw) * s
 		var si := sin(yaw) * s
 		buffer[o] = c
@@ -506,7 +498,7 @@ func _seed_rocks(key: Vector2i, rect: Rect2, forest: PackedFloat32Array, circles
 		var p := rect.position + Vector2(rng.randf(), rng.randf()) * cell_size
 		var roll := rng.randf()
 		var yaw := rng.randf() * TAU
-		var size := rock_size * rng.randf_range(0.45, 1.4) * (1.0 if rng.randf() > 0.12 else 1.8)
+		var size := rock_size_m / METERS_PER_UNIT * rng.randf_range(0.45, 1.4) * (1.0 if rng.randf() > 0.12 else 1.8)
 		var squash := rng.randf_range(0.65, 1.1)
 		var stretch := rng.randf_range(0.8, 1.2)
 		var tint := rng.randf()
@@ -796,7 +788,7 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 ## Instances affichées par cellule : part `quality_density / max_density` des candidats, bornée
 ## par `max_visible_instances` sur l'ensemble des cellules visibles.
 func _apply_counts() -> void:
-	var boost := lerpf(close_boost, far_share, smoothstep(close_distance, close_distance + 10.0, _camera_distance))
+	var boost := lerpf(close_boost, far_share, smoothstep(close_distance, close_distance * 2.0, _camera_distance))
 	var share := clampf(quality_density * boost / maxf(max_density, 0.001), 0.0, 1.0)
 	var total := 0
 	var shown_cells := 0

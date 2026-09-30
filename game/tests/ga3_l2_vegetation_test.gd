@@ -127,7 +127,7 @@ func _test_rocks() -> void:
 			var tris := _triangles(meshes[v][lod])
 			_check(tris > 8 and tris <= ROCK_TRIANGLES[lod] + 4, "rock %d lod %d: %d triangles (<= %d)" % [v, lod, tris, ROCK_TRIANGLES[lod]])
 	var clutter := _make_clutter()
-	clutter.update_view(Vector2(500, 500), 10.0)
+	clutter.update_view(Vector2(500, 500), 0.5)
 	var near := clutter.rock_stats()
 	print("ga3_l2: rocks at d=10 %s, cells %d" % [near, clutter.visible_cells().size()])
 	_check(clutter.rock_variants() == meshes.size(), "clutter loads the rock variants")
@@ -140,15 +140,15 @@ func _test_rocks() -> void:
 				if p.x <= 500.0:
 					_check(false, "rock outside the rocky half at %s" % p)
 					break
-	clutter.update_view(Vector2(500, 500), 30.0)
+	clutter.update_view(Vector2(500, 500), 2.0)
 	var far := clutter.rock_stats()
-	_check(int(far["lod"]) == 2, "LOD2 at d=30")
+	_check(int(far["lod"]) == 2, "LOD2 at d=2 (VT3 1:1 range)")
 	if int(far["rocks"]) > 0 and int(near["rocks"]) > 0:
 		_check(float(far["triangles"]) / float(far["rocks"]) < float(near["triangles"]) / float(near["rocks"]), "fewer triangles per rock far away")
 	clutter.free()
 	Ga3Vegetation.force(false)
 	var fc := _make_clutter()
-	fc.update_view(Vector2(500, 500), 10.0)
+	fc.update_view(Vector2(500, 500), 0.5)
 	_check(fc.rock_variants() == 0 and int(fc.rock_stats()["rocks"]) == 0, "--no-ga3-veg: no rocks")
 	_check(fc.visible_instances() > 0, "--no-ga3-veg: grass still there")
 	fc.free()

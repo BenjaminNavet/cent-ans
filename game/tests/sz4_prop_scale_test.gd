@@ -39,9 +39,8 @@ func _test_curve() -> void:
 		_check(is_equal_approx(props.fire_scale(d), 1.0), "far fire scale is 1 at d=%.1f" % d)
 		_check(is_equal_approx(props.hamlet_scale(d), props.hamlet_ratio), "hamlets 1:1 at d=%.1f (VT)" % d)
 	_check(is_equal_approx(props.fire_scale(props.shrink_end), props.fire_ratio), "fires at real size at shrink_end")
-	# VT3 : arbres 1:1 à toute distance (échelle constante), herbe FC3 sur l'ancienne courbe.
+	# VT3 : arbres 1:1 à toute distance (échelle constante).
 	_check(is_equal_approx(props.tree_scale(), props.tree_ratio), "trees 1:1 (VT3)")
-	_check(is_equal_approx(props.clutter_scale(60.0), 1.0) and is_equal_approx(props.clutter_scale(props.shrink_end), props.clutter_ratio), "grass clutter keeps the pre-VT3 curve")
 	_check(is_equal_approx(props.hamlet_scale(1.0), props.hamlet_ratio), "real size below shrink_end")
 	# VT2 : moulins et panaches 1:1 à toute distance (échelle constante, sans argument).
 	_check(is_equal_approx(props.windmill_scale(), props.windmill_ratio), "windmills 1:1 (VT2)")
