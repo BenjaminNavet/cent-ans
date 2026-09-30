@@ -1,6 +1,7 @@
 # ADR 0138 — Villes à l'échelle 1:1 à toutes les hauteurs de la vue 3D
 
-Date : 2026-09-30. Chantier VT (« vrai territoire »), suivi `docs/wip/vt.md`.
+Date : 2026-09-30. Statut : acceptée (demande du joueur du 30/09, bancs du lot VT-I). Chantier VT
+(« vrai territoire »), suivi `docs/wip/vt.md`.
 
 ## Contexte
 
@@ -46,3 +47,17 @@ les hauteurs, pour toutes les villes : les 2 134 colonies de `towns_1340.json` e
   ≈ 0,3 s de génération au chargement. En échange, on ne crée plus les ~2 100 maquettes.
 - Les arbres restent grossis (hors demande) ; l'exclusion par le finage évite qu'ils ensevelissent
   les villes. À juger sur capture.
+
+## Mesures (lot VT-I, 30/09)
+
+Banc `--bench-map --bench-pan-only` (M4 Pro, 1280 × 720, qualité Haute, 3 passes alternées avec
+`main` 94cfa8103, machine partagée à une charge de 6-25), base → VT :
+- appels de dessin p50 : d 1100 475 → 201 ; d 150 3 284 → 751 ; d 30 1 088 → 517 ;
+- primitives p50 : 1,40 → 1,30 M ; 5,24 → 3,55 M ; 9,19 → 8,60 M ;
+- i/s : égaux (plafond 60 de l'affichage aux passes 1-2 ; passe 3 : 145/144, 82/83, 55/54) ;
+- chargement de la carte 6,4-7,4 s → 5,3-6,0 s ; lointain généré ensuite en tâche de fond en
+  1,4-1,9 s réelles ; fil principal ≤ 2,2 ms par image (un pic isolé de 17 ms sur 9 passes).
+- Mémoire : 2 141 villes, 757 tuiles F1 (638 k tri) + 122 tuiles F2 (118 k tri), 1,23 M sommets,
+  ≈ 41 Mo (estimation initiale : 30 Mo). Génération 1,4-1,9 s au lieu de 0,3 s estimées, hors du
+  chargement bloquant.
+Détail : `docs/godot-map.md`, section « Villes 1:1 à toutes les hauteurs ».

@@ -31,18 +31,39 @@ Vague 3 : I bancs (d = 1100, 150, 30), captures (≤ 6), docs `godot-map.md`.
   `block_range` × qualité × 0,95. Test `tf_far_layer_test.gd`.
 - [x] F : `max_rig_distance` (16, hystérésis 10 %) sur `TownLayer` et `LandmarkCityLayer`, maquettes/fondu retirés, `built_ids()` sur les deux calques.
 
-## Lot I (en cours)
-- [x] Banc : `--bench-pan-only` (mesure à une seule distance), `startup_total_ms` et `town_far` dans le rapport.
-- [ ] Bancs base (worktree détaché `../game_project-vt-base`, à supprimer) / VT à d = 1100, 150, 30.
-- [ ] Captures `game/tests/vt_shots.gd` → `docs/img/vt/`.
-- [ ] Docs `godot-map.md`, ADR 0138 acceptée.
+## Lot I — TERMINÉ (30/09)
+- [x] Banc : `--bench-pan-only`, `startup_total_ms` et `town_far` dans le rapport (`map_bench.gd`).
+- [x] Bancs base `main` 94cfa8103 / VT à d = 1100, 150, 30, 3 passes alternées (charge 6-25) :
+  appels p50 475 → 201 / 3 284 → 751 / 1 088 → 517 ; primitives 1,40 → 1,30 / 5,24 → 3,55 /
+  9,19 → 8,60 M ; i/s égaux ; chargement 6,4-7,4 → 5,3-6,0 s ; fil principal ≤ 2,2 ms (un pic
+  isolé de 17 ms, une tuile, machine chargée). Tous les critères du plan tenus ; aucun réglage changé.
+  Worktree de base supprimé.
+- [x] Captures `game/tests/vt_shots.gd` → `docs/img/vt/` (locales, `docs/img/` est ignoré par git).
+- [x] Docs : `godot-map.md` (section « Villes 1:1 à toutes les hauteurs », notes sur les anciennes
+  sections maquettes/SZ4b, option de banc), ADR 0138 acceptée avec les mesures.
+- [x] Tests finaux OK : smoke, tf_far_mesh, tf_far_shader, zg6_towns, vh4_landmarks,
+  settlements_render, c5_settlements_ui, sz4_prop_scale. `tf_far_layer_test` instable sous charge
+  (15-20) : seuil « image principale ≤ 8 ms » dépassé 3 fois sur 4 (10-22 ms, parfois avec une tuile
+  ≤ 1,4 ms : fil principal préempté), passe à 2,05 ms quand la machine le laisse. À repasser sur
+  machine calme ; si l'écart persiste, soupçonner la contention du `_mutex` avec les fils.
+
+## Points à juger par le joueur (captures 640 px, `docs/img/vt/`)
+- De haut (d ≥ 150), les villes sont quasi invisibles : Paris ≈ quelques pixels, Amiens caché sous
+  son écu. Voulu par l'ADR (repérage par nom et écu), mais à confirmer en partie réelle.
+- d = 15 au-dessus de Paris (`vt_paris_d15_detail.jpg`) : ville lisible sur le relief, Seine qui la
+  traverse (coupure retirée), finage sans arbres. Toits plats bruns à bords clairs (jupe éclairée ?) :
+  aspect « découpé » à juger ; pas de toit flottant vu.
+- Figurants FK (bêtes, charrettes, gens) gardés lisibles (`figure_min_view_fraction`) : à d = 15 ils
+  sont plus gros que les îlots de Paris. Incohérence d'échelle la plus visible ; relève de FK
+  (ADR 0122), non modifiée.
+- Moulins et panaches de cheminée suivent encore l'exagération commune (jusqu'à ×125) : à côté
+  d'une ville 1:1, un moulin fait ~2 km. L'ADR disait « cheminées réelles » : à trancher.
+- Arbres grossis : le finage les écarte des villes ; au-delà, un houppier vaut un îlot à d = 15.
+- Non jugeables à 640 px : fondu F1/F2 à d ≈ 300 (villes trop petites), teinte F1/F2 à côté des
+  blocs, bande 0,86-1,1 × `block_range` en détail. À regarder en partie réelle.
 
 ## Prochaine étape
-Lot I : bancs (d = 1100, 150, 30), captures (≤ 6), docs `godot-map.md`.
-À juger sur capture (E) : fondu F1/F2 à d ≈ 300 ; bande 0,86-1,1 × `block_range` où blocs et
-lointain partiellement enfoncé coexistent (toits qui percent ?) ; jupe et sol des villes v2
-(sol uniforme échantillonné au centre au chargement, souvent sur la heightmap car pages pas encore
-chargées) ; teinte des toits F1/F2 à côté des blocs.
+Chantier VT terminé sur `feat/vt` : fusion dans main par la session principale, partie pilote.
 
 ## Notes d'intégration
 - Rivières : plus de coupure sous les villes (5484cea26), les villes 1:1 enjambent la vraie rivière.

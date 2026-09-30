@@ -568,6 +568,9 @@ Captures des trois paliers : `docs/img/colonies/{ile-de-france,flandre,guyenne}-
 
 ### Maquettes et hameaux
 
+> Carte de campagne : maquettes remplacées par les villes 1:1 du chantier VT (ADR 0138, section
+> « Villes 1:1 à toutes les hauteurs »). Les `.glb` ci-dessous ne servent plus qu'en repli.
+
 - `blender --background --python tools/blender_scripts/settlements.py -- game/assets/models/settlements`
   produit 13 `.glb` (réutilise les aides de `models.py`, dont le `main()` est désormais protégé) :
   `city_a/b` (enceinte, cathédrale, donjon, faubourg), `town_a` (enceinte irrégulière, église, halle),
@@ -845,7 +848,9 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
   passé dans chaque écouteur de `chunk_surface_changed`.
   Aussi : coût CPU du rendu, primitives et appels de dessin (médianes), `update_ms_avg` du quadtree.
   ZG4 : puis parcours « descente » (`descent` dans le rapport) au-dessus de Rouen, de la Grande Chartreuse
-  et de Paris (150 → 5 → distance minimale, pause, remontée ; `--bench-descent-only` pour lui seul),
+  et de Paris (150 → 5 → distance minimale, pause, remontée ; `--bench-descent-only` pour lui seul ;
+  `--bench-pan-only` s'arrête après le panoramique, mesure à une seule distance ; le rapport donne aussi
+  `startup_total_ms` et `town_far`),
   recalages d'échelle verticale (`vertical_rescales`, `rescale_*`) et cuissons des maquettes
   (`landmark_bake_*`).
 - Pyramide réelle d'essai tirée du cache partagé : dossier contenant un lien `pyramid` vers
@@ -1528,6 +1533,10 @@ d = 60 ; `*_amiens_zoom_*` : Amiens à d = 6 et 3, pleine résolution recadrée)
 
 ## Maquettes continues et forêts denses (lot SZ4b, suites SZ4)
 
+> Mise à l'échelle des colonies retirée par le chantier VT (ADR 0138) : les villes sont à l'échelle
+> 1:1 à toutes les hauteurs ; l'exagération commune ne s'applique plus qu'aux arbres, moulins,
+> panaches et figurants.
+
 **Exagération commune.** `MapPropScale` ne donne plus une courbe par famille mais une seule
 exagération E(d) (taille affichée / taille réelle) : `max_exaggeration` (125 = 1 / rapport des
 moulins) à `shrink_start` (28), 1 à `shrink_end` (**8**, seuil du palier vallée où les villes 1:1
@@ -1667,6 +1676,69 @@ réelle au zoom rapproché ; format, outil et moteur : **`docs/landmarks-v2.md`*
   dans la même session : pas de régression par rapport à une ville ordinaire ; un premier passage,
   plus chargé, donnait 27-28 i/s (Rouen) contre 23-25 (Amiens). 60 i/s à confirmer au repos.
 - Tests : `res://tests/vh4_landmarks_test.gd` (headless), `tools/tests/test_landmarks_v2.py`.
+
+## Villes 1:1 à toutes les hauteurs (chantier VT, ADR 0138)
+
+Plus aucune maquette agrandie sur la carte de campagne : les 2 141 villes (2 134 colonies de
+`data/map/towns_1340.json` et les 8 villes v2 de `data/landmarks_v2/`) sont rendues à l'échelle
+réelle sur tout l'intervalle 3D (0-1250). `LandmarkModel` et `data/landmarks/` ne servent plus
+qu'au décor de bataille. Remplace, pour la carte, la loupe (ADR 0015), les maquettes L1/L2 en vue
+lointaine (ADR 0078) et la mise à l'échelle des colonies de SZ4/SZ4b (sections plus haut).
+
+**Trois niveaux.**
+| Niveau | Quand | Contenu | Code |
+|---|---|---|---|
+| Plan complet | rig < `max_rig_distance` (16, hystérésis 10 %) | ZG6 / VH4 inchangés : maisons du kit jusqu'à `detail_range` (1,6), blocs jusqu'à `block_range` (14) × qualité | `TownLayer`, `LandmarkCityLayer` |
+| F1 | tuile à moins de `f1_range` (300 ; bas 150, moyen 240, ultra 360) | nappe de toits polaire (32 relèvements de `radii`), faubourgs, enceinte, monuments simplifiés ; ≈ 300 tri/ville ; tuiles de 128 u ; ombres sous rig 60 (haute, ultra) | `TownFarLayer`, `TownFarBuilder` |
+| F2 | de `f1_range` à `ZoomTiers.model_range` | polygone à 16 côtés, jupe, une flèche au plus ; ≈ 50 tri/ville ; tuiles de 512 u, sans ombre | idem |
+
+Fondus croisés F1/F2 sur 10 % de `f1_range` (`visibility_range`, `FADE_SELF`) ; calque masqué en
+vue stratégique (poids ≥ 0,99, parchemin au-delà de 1200). Villes v2 : lointain tiré des
+`districts`, `walls` et grands `monuments`.
+
+**Génération.** Au chargement, dans `WorkerThreadPool` (4 fils au plus, une tâche par tuile), depuis
+`towns_1340.json` et `landmarks_v2`, sans `TownPlan`. Le fil principal ne crée que les `ArrayMesh`
+(`build_budget_ms` = 2 ms par image, au moins une tuile). Hauteurs : grille `ground_m` (centre +
+32 × 2 points, mètres) cuite par `cent-ans geo towns` ; le shader `town_far.gdshader` pose le sol
+(`campaign_display_height`, ZG8) ; jupe de 30 m. Teinte des toits partagée avec les blocs
+(`roofscape.gdshaderinc`).
+
+**Passage au plan complet.** Union des `built_ids()` des calques 1:1 → masque `TownFarMask` (R8
+64 × 64) ; le shader enfonce les sommets d'une ville marquée à moins de `block_range` × qualité ×
+`sink_factor` (0,95) de la caméra, bande de transition de 10 % (miroir du fondu des blocs).
+
+**Repérage, clic.** Nom et écu (DV2) ; étiquettes, clic (rayon minimal 8 px) et anneau de sélection
+sur l'emprise réelle. Hameaux et cheminées à taille réelle ; incendies exagérés. Végétation exclue
+du finage. Rivières : plus de coupure sous les villes, la ville 1:1 enjambe la vraie rivière.
+
+**Options.** `--no-town-far` (lointain coupé), `--no-landmarks-1to1` (villes v2 rendues comme les
+autres). Réglages : `@export` de `town_far_layer.gd` (`f1_tile`, `f2_tile`, `f1_range`,
+`fade_fraction`, `shadow_rig_distance`, `sink_factor`, `generation_threads`, `build_budget_ms`,
+`quality`), `game/resources/town_render.tres` (`max_rig_distance`, portées des blocs).
+
+**Tests.** `tf_far_mesh_test.gd` (maillages F1/F2/v2), `tf_far_shader_test.gd` (enfoncement),
+`tf_far_layer_test.gd` (tuiles, masque, budget), `zg6_towns_test.gd`, `vh4_landmarks_test.gd`.
+Captures (fenêtre réelle) : `godot --path game --resolution 640x400 --script res://tests/vt_shots.gd
+-- --out=<dossier> --hide-armies --map-weather=clear` (Paris d = 1100, 300, 60, 15 ; Amiens
+d = 150), copies locales dans `docs/img/vt/`.
+
+**Mesures** (30/09, M4 Pro, fenêtre 1280 × 720, qualité Haute, `--bench-map --bench-probe
+--bench-pan-only --bench-distance=D --bench-seconds=15`, 3 passes alternées base `main` 94cfa8103 /
+VT, machine partagée à une charge de 6-25 ; médianes des passes) :
+
+| d | appels de dessin p50 base → VT | primitives p50 | coût CPU du rendu p50 | i/s (passe 3, sans plafond) |
+|---|---|---|---|---|
+| 1100 | 475 → **201** | 1,40 → 1,30 M | 0,53 → 0,25 ms | 145 → 144 |
+| 150 | 3 284 → **751** | 5,24 → 3,55 M | 1,45 → 0,78 ms | 82 → 83 |
+| 30 | 1 088 → **517** | 9,19 → 8,60 M | 0,87 → 0,62 ms | 55 → 54 |
+
+Les passes 1-2 sont plafonnées à 60 i/s par l'affichage (p50 16,6 ms des deux côtés). Chargement de
+la carte (`startup_total_ms`) : 6,4-7,4 s → 5,3-6,0 s (décor 3,2 → 2,3 s : plus de maquettes) ; le
+lointain se génère ensuite en tâche de fond en 1,4-1,9 s réelles (5,7-7,4 s de CPU), pendant la
+chauffe. Fil principal : `townfar` ≤ 2,2 ms par image (budget 2 ms + une tuile), un pic isolé de
+17 ms (une tuile, machine chargée) sur 9 passes. 1,23 M sommets, ≈ 41 Mo de mémoire vidéo.
+
+![Paris à d = 15 : raccord ville 1:1 / lointain](img/vt/vt_paris_d15_detail.jpg)
 
 ## Interface des colonies (lot C5)
 
