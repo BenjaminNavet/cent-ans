@@ -8,8 +8,9 @@ extends Node3D
 ##   tâches `WorkerThreadPool` (`VegetationTileJob`) ; les tuiles construites restent en cache
 ##   (au plus `max_cached_tiles`, les plus anciennes hors champ sont libérées).
 ## - Distance : deux maillages par essence (détaillé de près, ≈ 20 triangles au loin),
-##   éclaircissement progressif (`foliage.gdshader`) et, au-delà de `max_camera_distance`, plus
-##   aucun arbre (le terrain texturé suffit au dézoom).
+##   éclaircissement progressif (`foliage.gdshader`). VT3 (ADR 0138) : arbres à l'échelle 1:1,
+##   plus aucun arbre au-delà de la portée où ils font ≈ 1 px (`MapPropScale.tree_view_range`,
+##   `tree_max_distance`) : la canopée du terrain (`terrain.gdshader`) porte la forêt au loin.
 ## - Autonome : se branche seul sur la scène parente (`map_data`, `load_ok`, `terrain`) et sur le
 ##   rig de caméra ; `build(map_data)` peut aussi être appelé directement.
 ## - Lot C7b : les arbres sont posés sur la surface du maillage de terrain affiché
@@ -33,24 +34,15 @@ enum Lod { FAR, DETAILED, NEAR }
 ## Pas (px de carte) de la grille de candidats ; plus petit = forêts plus denses.
 @export var spacing: float = 1.35
 @export var tree_scale: float = 1.0
-## Au-delà de cette distance caméra → point visé, plus d'arbres.
+## Au-delà de cette distance caméra → point visé, plus d'arbres (VT3 : plafond, la portée réelle
+## est `MapPropScale.tree_max_distance`, ≈ 30).
 @export var max_camera_distance: float = 700.0
 ## Lot L5 : portée selon le préréglage (`veg_max_distance`, Basse 500 … Ultra 1100), appliquée
-## seulement avec les imposteurs (FC2) ; sans eux, `max_camera_distance`. La densité garde sa
-## courbe jusqu'à `max_camera_distance` (mêmes arbres qu'avant en deçà), puis `density_min`.
+## seulement avec les imposteurs (FC2) ; sans eux, `max_camera_distance` (VT3 : plafonds).
 var quality_max_distance: float = -1.0
-## Portée de l'éclaircissement, en multiples de la distance caméra (bornes absolues en plus).
-@export var fade_start_factor: float = 1.2
-@export var fade_end_factor: float = 2.1
-@export var fade_min_start: float = 110.0
-@export var fade_min_end: float = 200.0
 ## Tuiles (point le plus proche) à moins de cette distance de la caméra : maillage détaillé ;
 ## au-delà, les arbres font moins de ≈ 10 pixels et la variante ≈ 20 triangles suffit.
 @export var detail_distance: float = 170.0
-## Densité globale selon la distance caméra : 1 jusqu'à `density_full_distance`, puis
-## décroissance linéaire jusqu'à `density_min` à `max_camera_distance`.
-@export var density_full_distance: float = 200.0
-@export var density_min: float = 0.3
 @export var max_concurrent_jobs: int = 5
 ## Tuiles semées d'un coup (et attendues) au premier affichage. `WorkerThreadPool` ne sert les
 ## tâches basse priorité que sur ~4 fils quel que soit le nombre de cœurs (mesuré) : demander
@@ -227,10 +219,14 @@ static func _make_impostor_material() -> ShaderMaterial:
 
 
 ## Lot L5 : zoom au-delà duquel plus aucun arbre (préréglage si les imposteurs sont actifs).
+## VT3 (ADR 0138) : arbres à l'échelle 1:1, plus dessinés au-delà de
+## `MapPropScale.tree_max_distance` (≈ 1 px) ; les portées d'avant (`max_camera_distance`,
+## `veg_max_distance` du préréglage) ne sont plus que des plafonds.
 func effective_max_distance() -> float:
+	var legacy := max_camera_distance
 	if quality_max_distance > 0.0 and use_impostors and (_impostor_material != null or map_data == null):
-		return quality_max_distance
-	return max_camera_distance
+		legacy = quality_max_distance
+	return minf(legacy, MapPropScale.shared().tree_max_distance)
 
 
 ## Lot FC2 : imposteurs actifs (matériau prêt).
@@ -503,15 +499,18 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	visible = active
 	if not active or _material == null:
 		return
-	# Au voisinage de la distance maximale, la portée se referme : les arbres s'effacent.
-	var closing := 1.0 - smoothstep(max_distance * 0.7, max_distance, camera_distance)
-	var fade_start := maxf(camera_distance * fade_start_factor, fade_min_start) * closing
-	var fade_end := maxf(camera_distance * fade_end_factor, fade_min_end) * closing
+	# VT3 : arbres 1:1 dessinés jusqu'à la distance caméra où ils font ≈ 1 px
+	# (`MapPropScale.tree_view_range`, éteints par graine sur `tree_view_fade`) ; au voisinage de
+	# la portée du rig, la portée se referme : les arbres s'effacent (la canopée du terrain reste).
+	var props := MapPropScale.shared()
+	var closing := props.range_weight(camera_distance, max_distance)
+	var fade_end := props.tree_view_range * quality_detail * closing
+	var fade_start := fade_end * (1.0 - props.tree_view_fade)
 	_set_foliage_param("view_origin", camera_position)
 	_set_foliage_param("fade_start", fade_start)
 	_set_foliage_param("fade_end", maxf(fade_end, fade_start + 1.0))
-	var density := lerpf(1.0, density_min, clampf((camera_distance - density_full_distance) / maxf(max_camera_distance - density_full_distance, 1.0), 0.0, 1.0))
-	density *= quality_density
+	# VT3 : plus d'éclaircissement au dézoom (arbres coupés à d ≈ 30) : part du préréglage seule.
+	var density := quality_density
 	_set_foliage_param("density", density)
 	if _cards_material != null:
 		# Sans imposteurs (`--no-fc2`), cartes jusqu'au bout des parties proches.

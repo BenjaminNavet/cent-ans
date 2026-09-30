@@ -14,8 +14,8 @@ extends Node3D
 ##   instances sont semées pour la densité maximale (`max_density`) dans un ordre aléatoire : le
 ##   préréglage ne fait que borner `visible_instance_count`, sans nouveau semis.
 ## - Seulement sous `max_camera_distance` ; fondu par rang (shader) sur `fade_band` et au bord du
-##   disque visible ; taille liée à `campaign_prop_scale` (arbres, lot SZ4) et fondu quand elle
-##   devient trop petite.
+##   disque visible ; taille liée à `MapPropScale.clutter_scale` (courbe des arbres d'avant VT3,
+##   paramètre `clutter_scale` des shaders) et fondu quand elle devient trop petite.
 ## - Recalage sur la surface affichée : cellules touchées par `chunk_surface_changed` /
 ##   `surface_rect_changed` re-posées (hauteurs seules) par tranches.
 ## - Lot GA3-L2 : touffe d'herbe générée dense (`Ga3Vegetation.GRASS_TUFT`) et rochers TRELLIS
@@ -46,7 +46,7 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 @export var max_density: float = 1.5
 ## Hauteur (unités monde, taille de carte) d'une touffe d'herbe et d'une broussaille.
 ## Lot FC5 : 0,22 / 0,42 (≈ 6 px à d = 25 en 720p) ; le shader les réduit comme
-## `campaign_prop_scale`^`prop_scale_power` (plus lentement que les arbres : encore visibles à d = 10).
+## `clutter_scale`^`prop_scale_power` (plus lentement que les arbres : encore visibles à d = 10).
 @export var grass_height: float = 0.18  # L5 : plus fines, plus claires, plus nombreuses
 @export var bush_height: float = 0.42
 @export var prop_scale_power: float = 0.3
@@ -57,7 +57,7 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 ## Lot L5 : part affichée à d ≥ `close_distance` + 10 : ramène la densité par unité² à celle de
 ## FC5 (cellules plus petites, même nombre de candidats) : rien ne change au-delà de d = 30.
 @export var far_share: float = 0.62
-## Échelle des arbres (`campaign_prop_scale`) sous laquelle les touffes disparaissent (trop
+## Échelle `clutter_scale` sous laquelle les touffes disparaissent (trop
 ## petites pour valoir leur coût).
 @export var min_prop_scale: float = 0.025
 ## Cellules posées par image (semis fait dans le `WorkerThreadPool` si `threaded`).
@@ -71,7 +71,7 @@ const ROCK_SHADER := preload("res://shaders/ground_rocks.gdshader")
 ## Plafond des instances visibles (toutes cellules).
 @export var max_visible_instances: int = 60000
 ## Lot GA3-L2 : rochers. Candidats par cellule (probabilité `_rock_weight`), longueur (unités,
-## avant `campaign_prop_scale`), distances caméra des niveaux de détail 120 → 60 → 18 triangles.
+## avant `clutter_scale`), distances caméra des niveaux de détail 120 → 60 → 18 triangles.
 @export var use_rocks: bool = true
 @export var rock_candidates: int = 120
 @export var rock_size: float = 0.34
@@ -236,7 +236,9 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 	_material.set_shader_parameter("fade", fade)
 	_material.set_shader_parameter("focus", at)
 	_material.set_shader_parameter("radius", _radius)
+	_material.set_shader_parameter("clutter_scale", prop_scale)
 	for rock_material in _rock_materials:
+		rock_material.set_shader_parameter("clutter_scale", prop_scale)
 		rock_material.set_shader_parameter("fade", fade)
 		rock_material.set_shader_parameter("focus", at)
 		rock_material.set_shader_parameter("radius", _radius)

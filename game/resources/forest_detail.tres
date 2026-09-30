@@ -4,7 +4,9 @@
 
 [resource]
 script = ExtResource("1_forest")
-full_scale = 0.035
+full_scale = 0.022
+dense_full_distance = 8.0
+far_share = 0.35
 min_fraction = 0.003
 cell_size = 16.0
 parts_side = 4
@@ -13,7 +15,7 @@ radius_min = 6.0
 radius_max = 50.0
 fade_from = 0.55
 instance_budget = 220000
-min_gain = 0.35
+min_gain = 0.2
 keep_levels = PackedFloat32Array(0.015625, 0.0625, 0.25, 1)
 keep_margin = 1.25
 detail_factor = 1.2
@@ -23,4 +25,4 @@ max_part_updates = 96
 max_jobs = 3
 max_ground_jobs = 1
 max_cells = 96
-max_stored_instances = 600000
+max_stored_instances = 800000

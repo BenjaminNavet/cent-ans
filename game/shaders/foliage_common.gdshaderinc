@@ -23,7 +23,7 @@ uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
 global uniform vec4 campaign_season;
 // Lot ZG4 : échelle des arbres aux paliers vallée / site (1 au palier comté et au-delà ; les arbres
 // de la carte font ~1 km de haut, lisibles de loin, absurdes vus à 200 m). Lot SZ4 :
-// MapPropScale.tree_scale, taille réelle dès le palier vallée.
+// MapPropScale.tree_scale ; VT3 : constante (arbres 1:1 à toute distance), 1 en bataille.
 global uniform float campaign_prop_scale;
 const float FOLIAGE_GROUND_SINK = 0.08;
 uniform vec3 spring_tint = vec3(1.03, 1.10, 0.9);

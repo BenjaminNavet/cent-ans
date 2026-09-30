@@ -4,22 +4,28 @@ extends Resource
 ## Lot SZ4b : réglages de la couche « forêt dense » (`ForestDetail`, `res://resources/forest_detail.tres`).
 ## Purement visuel.
 ##
-## Les arbres de la carte (`Vegetation`) sont semés au pas `Vegetation.spacing` (1,35 unité) pour des
-## arbres de ~1 km : couvert continu en vue stratégique. Quand `MapPropScale.tree_scale` les réduit à
-## leur taille réelle, ce semis devient clairsemé. La couche dense ajoute, autour du point visé,
-## des arbres semés au pas fin `Vegetation.spacing × full_scale` : la part affichée
-## `full_scale² × (1/s² − 1)` (s = échelle des arbres) garde un couvert constant.
+## Les arbres de la carte (`Vegetation`) sont semés au pas `Vegetation.spacing` (1,35 unité, ~970 m) :
+## à l'échelle 1:1 (VT3, `MapPropScale.tree_scale()`), ce semis n'est qu'un arbre isolé par km². La
+## couche dense ajoute, autour du point visé, des arbres semés au pas fin
+## `Vegetation.spacing × full_scale` qui ferment le couvert des forêts, en deçà de la portée des
+## arbres (`MapPropScale.tree_max_distance`) ; au-delà, la canopée du terrain porte la forêt.
 
-## Échelle des arbres à laquelle la couche dense est entière (pas fin = pas de la carte × ce
-## rapport). Par défaut `MapPropScale.tree_ratio` : couvert de la carte retrouvé à taille réelle.
-@export var full_scale: float = 0.035
+## Pas fin = pas de la carte × ce rapport. VT3 : 0,022 → ~21 m entre deux arbres pour des houppiers
+## de 14-28 m (arbres à `tree_ratio` 0,018) : couvert fermé au cœur des massifs.
+@export var full_scale: float = 0.022
+## VT3 : part affichée selon la distance du rig : 1 jusqu'à `dense_full_distance`, puis
+## `far_share` à la portée des arbres (arbres de 1-2 px sur la canopée du terrain : un semis plus
+## clair suffit à donner le grain, et le passage à la canopée se fait en douceur).
+@export var dense_full_distance: float = 8.0
+@export var far_share: float = 0.35
 ## En deçà de cette part (arbres encore grands), la couche est éteinte.
 @export var min_fraction: float = 0.003
 ## Côté d'une cellule (unités monde, sous-multiple de la tuile de 256) et parties par côté.
 @export var cell_size: float = 16.0
 @export var parts_side: int = 4
-## Rayon autour du point visé = `radius_factor` × distance du rig, borné ; décroissance de la part
-## affichée à partir de `fade_from` × ce rayon.
+## Rayon autour du point visé = `radius_factor` × distance du rig, borné (et par la portée
+## `MapPropScale.tree_view_range`), × le gain du budget ; décroissance de la part affichée à partir
+## de `fade_from` × ce rayon.
 @export var radius_factor: float = 3.5
 @export var radius_min: float = 6.0
 @export var radius_max: float = 50.0
@@ -51,10 +57,12 @@ extends Resource
 static var _default: ForestDetailProfile = null
 
 
-## Part [0, 1] de la couche dense à afficher pour une échelle d'arbres `tree_scale`.
-func fraction_for(tree_scale: float) -> float:
-	var s := maxf(tree_scale, 1e-4)
-	return clampf(full_scale * full_scale * (1.0 / (s * s) - 1.0), 0.0, 1.0)
+## VT3 : part [0, 1] de la couche dense à afficher à la distance du rig `distance` (avant le
+## préréglage), nulle au-delà de la portée des arbres.
+func fraction_at(distance: float) -> float:
+	var props := MapPropScale.shared()
+	var t := smoothstep(dense_full_distance, props.tree_max_distance, distance)
+	return props.trees_weight(distance) * lerpf(1.0, far_share, t)
 
 
 ## Plus petit palier de `keep_levels` qui couvre `need` (avec la marge), 1 au plus.

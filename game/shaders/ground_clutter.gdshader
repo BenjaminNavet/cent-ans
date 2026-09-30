@@ -9,10 +9,12 @@ render_mode cull_disabled, depth_draw_opaque, diffuse_lambert_wrap, specular_dis
 // y = variation de teinte, z = phase du vent, w = rang (coupe du fondu).
 
 global uniform vec4 campaign_season;
-global uniform float campaign_prop_scale;
+// VT3 : échelle propre aux touffes (`MapPropScale.clutter_scale`, posée par `GroundClutter`),
+// découplée des arbres (1:1 depuis VT3, `campaign_prop_scale`).
+uniform float clutter_scale = 1.0;
 
 uniform float fade : hint_range(0.0, 1.0) = 1.0;
-// Lot FC5 : réduction avec `campaign_prop_scale`^puissance (0,3 : plus lente que les arbres).
+// Lot FC5 : réduction avec `clutter_scale`^puissance (0,3 : plus lente que les arbres).
 uniform float prop_scale_power = 0.3;
 uniform vec2 focus = vec2(0.0);
 uniform float radius = 40.0;
@@ -56,7 +58,7 @@ void vertex() {
 	v_tint = INSTANCE_CUSTOM.y;
 	v_seed = INSTANCE_CUSTOM.z;
 	float up = 1.0 - UV.y;
-	float prop = pow(max(campaign_prop_scale, 1e-4), prop_scale_power);
+	float prop = pow(max(clutter_scale, 1e-4), prop_scale_power);
 	VERTEX *= prop;
 	// Lot L5 : touffes d'herbe plus étroites (brins verticaux lisibles de haut, pas des boules).
 	if (INSTANCE_CUSTOM.x < 0.5) {

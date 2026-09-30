@@ -5,12 +5,12 @@ extends Node3D
 ## site. Rendu seulement.
 ##
 ## Les arbres de la carte (`Vegetation`) sont semés pour des arbres de ~1 km ; à leur taille réelle
-## (`MapPropScale.tree_scale`), le semis est clairsemé. Cette couche sème, par cellules de
+## (`MapPropScale.tree_scale()`, 1:1 à toute distance depuis VT3), le semis est clairsemé. Cette couche sème, par cellules de
 ## `cell_size` unités autour du point visé, des arbres au pas fin (`Vegetation.spacing ×
 ## full_scale`) avec les grilles grossières de la tuile (mêmes masques de forêt, d'essences, de
 ## bosquets), sans haies, par le pool natif (`VegetationScatter`, crate `vegetation`).
-## - Part affichée : `ForestDetailProfile.fraction_for(s)` (couvert constant quand les arbres
-##   rétrécissent), décroissante avec la distance au point visé, bornée par un budget d'instances
+## - Part affichée : `ForestDetailProfile.fraction_at(d)` (VT3 : pleine de près, plus claire vers
+##   la portée des arbres, nulle au-delà), décroissante avec la distance au point visé, bornée par un budget d'instances
 ##   (le rayon se resserre).
 ## - Graines triées (rang normalisé) : `visible_instance_count` garde les premières, le paramètre
 ##   d'instance `instance_cut` du shader fait grandir celles qui apparaissent (pas de saut).
@@ -94,8 +94,7 @@ func update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void:
 func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void:
 	_frame += 1
 	var usable := vegetation != null and terrain != null and terrain.quadtree != null and vegetation.has_native()
-	var tree_scale := MapPropScale.shared().tree_scale()
-	var fraction := profile.fraction_for(tree_scale) * vegetation.quality_density if usable else 0.0
+	var fraction := profile.fraction_at(camera_distance) * vegetation.quality_density if usable else 0.0
 	stats["fraction"] = fraction
 	_active = fraction >= profile.min_fraction
 	visible = _active
@@ -103,7 +102,9 @@ func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void
 		stats["visible"] = 0
 		_evict()
 		return
-	var radius := clampf(profile.radius_factor * camera_distance * _gain, profile.radius_min, profile.radius_max)
+	# VT3 : pas au-delà de la portée des arbres ; le gain du budget s'applique après les bornes.
+	var reach := minf(profile.radius_factor * camera_distance, minf(profile.radius_max, MapPropScale.shared().tree_view_range))
+	var radius := maxf(reach * _gain, minf(profile.radius_min, reach))
 	stats["radius"] = radius
 	var size := profile.cell_size
 	var wanted: Array = []
