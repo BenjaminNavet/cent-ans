@@ -196,6 +196,17 @@ un point quelconque de la carte, ou dans une colonie (stationnée, en garnison o
   Simplon, Saint-Gothard, Somport, Roncevaux, le Perthus…), au prix d'une marche de montagne.
 - **Mer** : marchez jusqu'à un port, puis clic droit sur la colonie portuaire d'arrivée ; la traversée
   prend toute la saison et l'armée débarque au port visé.
+- **Routes maritimes** : les grandes lignes de navigation de 1337 sont tracées en tirets bleus sur la mer
+  (route du vin de Gascogne Southampton–Bordeaux, route de la laine Londres–L'Écluse, passage de
+  Bretagne, route de Saint-Jacques, galées de Flandre de Gênes à Southampton…). Une armée qui se tient
+  dans l'un de leurs ports embarque pour l'autre d'un clic droit, en une saison, quelle que soit la
+  distance. Survolez une route pour sa mer, sa longueur, qui tient la mer et le gros temps de la saison.
+  - *Haute mer* (tirets longs) : les escadres ennemies l'interceptent moins souvent que le *cabotage*
+    (tirets courts), mais les tempêtes d'automne et d'hiver coûtent plus d'hommes (jusqu'à 8 % en hiver,
+    le double si l'orage gronde sur le port de départ).
+  - *Commerce* : les routes commerciales suivent les routes maritimes. Une mer tenue par un ennemi
+    (tirets rouges) menace le commerce qui la traverse et le coupe au-delà du seuil de blocus ; l'hiver
+    réduit la valeur du commerce en haute mer.
 - **Tour séquentiel** : vous jouez d'abord toutes vos armées, dans l'ordre que vous voulez ; chaque ordre
   s'exécute tout de suite. À la fin de votre tour, chaque faction IA joue à son tour, dans un ordre fixe :
   ses armées reprennent leurs marches, puis elle donne et exécute ses ordres un par un. Les batailles qu'une

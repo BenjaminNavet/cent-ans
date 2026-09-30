@@ -243,9 +243,55 @@ impl GameData {
                 }
             }
         }
+        // Lot SL1: the sea lanes of `data/naval/sea_lanes.json`.
+        for edge in self.sea_lane_edges() {
+            graph.add(&edge);
+        }
         graph.sort();
         self.movement_graph = graph;
         self.build_trade_paths();
+    }
+
+    /// Length (km) of a sea lane: the routed length of
+    /// `data/map/sea_lanes_px.json`, else the great-circle distance between
+    /// its ports × 1.25 (coasts and capes to round).
+    pub fn sea_lane_length_km(&self, lane: &crate::entities::naval::SeaLane) -> f64 {
+        if let Some(km) = self.naval.lane_lengths_km.get(&lane.id) {
+            return *km;
+        }
+        let lonlat = |id: &SettlementId| self.settlements.get(id).map(|s| s.lonlat);
+        match (lonlat(&lane.from), lonlat(&lane.to)) {
+            (Some(a), Some(b)) => distance_km(a, b) * 1.25,
+            _ => 0.0,
+        }
+    }
+
+    /// Movement cost of a sea lane: length × `cost_per_km`, at least
+    /// `min_cost_steps` steps.
+    pub fn sea_lane_cost(&self, lane: &crate::entities::naval::SeaLane) -> f64 {
+        let rules = &self.naval.sea_lanes.rules;
+        let floor = rules.min_cost_steps * self.movement_rules().points_per_step;
+        let cost = (self.sea_lane_length_km(lane) * rules.cost_per_km).max(floor);
+        (cost * 100.0).round() / 100.0
+    }
+
+    /// Sea edges of the lanes whose two ports exist.
+    fn sea_lane_edges(&self) -> Vec<SettlementEdge> {
+        self.naval
+            .sea_lanes
+            .lanes
+            .iter()
+            .filter(|lane| {
+                self.settlements.contains_key(&lane.from) && self.settlements.contains_key(&lane.to)
+            })
+            .map(|lane| SettlementEdge {
+                from: lane.from.clone(),
+                to: lane.to.clone(),
+                cost: self.sea_lane_cost(lane),
+                road: false,
+                sea: true,
+            })
+            .collect()
     }
 
     fn fallback_edges(&self) -> Vec<SettlementEdge> {

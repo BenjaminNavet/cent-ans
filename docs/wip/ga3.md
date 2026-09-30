@@ -203,7 +203,7 @@ abandonne nos clips Quaternius.
       trébuchet, bélier ; pièces fines : `trellis/multi` ou procédural gardé). Branchement décor de
       bataille (`battle_decor`) derrière option, ADR (prochain numéro libre). ≈ 1 $.
       **En cours (agent L1)** : catalogue `data/art/ga3_decor.json` (+ schéma, pytest),
-      `ga3_fal_decor.py --catalog` (brutes `~/dev/cent-ans-raw/ga3/l1/`), ADR 0138 réservé.
+      `ga3_fal_decor.py --catalog` (brutes `~/dev/cent-ans-raw/ga3/l1/`), ADR 0140 réservé.
       Suite : appels fal, nettoyage par objet, `Ga3Kit` (game/scripts/visual/ga3_kit.gd), test
       `ga3_l1_decor_test.gd`, planche `docs/img/ga3/l1_decor.jpg`.
 - [ ] L2 végétation campagne : imposteurs générés (3 essences, 8 azimuts via nano-banana-2) dans la

@@ -42,6 +42,7 @@ mod campaign_sim_preview;
 mod campaign_sim_provinces;
 mod campaign_sim_replenish;
 mod campaign_sim_retinue;
+mod campaign_sim_sea_lanes;
 mod campaign_sim_settlements;
 mod campaign_sim_siege;
 mod campaign_sim_table;

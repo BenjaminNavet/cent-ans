@@ -1,7 +1,7 @@
 class_name Ga3Kit
 extends RefCounted
 
-## Lot GA3-L1 (ADR 0138) : variantes générées (image → TRELLIS, `data/art/ga3_decor.json`) des
+## Lot GA3-L1 (ADR 0140) : variantes générées (image → TRELLIS, `data/art/ga3_decor.json`) des
 ## modèles du kit BR1 dans le décor de bataille. `BuildingKit.Batch.add` demande ici si un modèle
 ## du kit intact (maison, église, moulin, tente, puits, charrette) est remplacé par sa variante
 ## GA3 (`share` du manifeste, tirage déterministe sur la position) ; la variante reprend l'emprise

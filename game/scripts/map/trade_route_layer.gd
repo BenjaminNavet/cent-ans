@@ -17,6 +17,9 @@ const COLOR_CUT := Color(0.4, 0.4, 0.4, 0.35)
 var map_data: MapData
 var settlement_layer: SettlementLayer
 var settlement_data: SettlementData
+## Lot SL1 : tracé des routes maritimes ; un tronçon port à port relié par une route suit la
+## mer au lieu de couper à travers les terres.
+var sea_lanes: SeaLaneLayer
 var _cut_mesh: MeshInstance3D
 
 ## Routes affichées ce tour : id -> {points: PackedVector2Array (carte), route: Dictionary}.
@@ -60,8 +63,13 @@ func refresh(routes: Array, camera_distance: float, visible_provinces: PackedStr
 			if not visible_provinces.has(from_province) and not visible_provinces.has(to_province):
 				continue
 		var points := PackedVector2Array()
-		for id in path:
-			var world: Vector3 = settlement_layer.world_position_of(str(id))
+		for i in path.size():
+			var id := str(path[i])
+			if i > 0 and sea_lanes != null:
+				var lane := sea_lanes.lane_points(str(path[i - 1]), id)
+				if lane.size() > 2:
+					points.append_array(lane.slice(1, lane.size() - 1))
+			var world: Vector3 = settlement_layer.world_position_of(id)
 			if world == Vector3.ZERO:
 				continue
 			points.append(Vector2(world.x, world.z))
