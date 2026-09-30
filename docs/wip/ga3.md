@@ -15,6 +15,10 @@ Brutes (hors dépôt) : `~/dev/cent-ans-raw/ga3/` ; références figurines : `~/
 - [x] S2 figurine : longbowman (`sr3/longbowman.png`, vues multiples) → TRELLIS → nettoyage →
       rattachement au squelette de bataille existant (poids automatiques) → rendu marche + tir ;
       planche `docs/img/ga3/s2_archer.jpg` ; verdict technique (déformations, triangles, coût).
+- [ ] S3 comparatif générateurs figurine (≤ 3 $) : Tripo H3.1 multivue / Meshy 7.1 multi-image
+      (rig + anim) / TRELLIS 2 1024 sur les vues de `sr3/longbowman.png` → planche
+      `docs/img/ga3/s3_compare.jpg` (`tools/blender_scripts/ga3_compare_render.py`). Script fal hors
+      dépôt `~/dev/cent-ans-raw/ga3/s3/fal_s3.py`, brutes au même endroit. **En cours** : 3 appels lancés.
 - [ ] S4 décor v2 : prompt corrigé (flux-2) → détourage bria → `trellis` et `trellis-2` sur la même
       image → `ga3_cleanup.py` étendu (exposition, normal/rugosité) → `props_ga/ga3_house2_t{1,2}_lod*.glb` ;
       planche `docs/img/ga3/s4_house_v2.jpg`. Script fal : `tools/experiments/ga3_fal_decor.py`
