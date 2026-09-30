@@ -595,7 +595,8 @@ def fine_bassinet(g, aventail=True, visor=False):
         return cerveliere(g)
     helm, hf = bassinet_shell(g, low=aventail or visor)
     out = [helm]
-    if visor:
+    if visor and g.level < 2:
+        # CR2: no snout at LOD2 (a few pixels there; keeps the knights' LOD2 in its cap).
         out.append(globals()["visor"](g, hf))
     if aventail:
         out += globals()["aventail"](g, hf)

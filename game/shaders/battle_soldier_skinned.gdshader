@@ -909,9 +909,13 @@ void fragment() {
 				if (gl >= 0 && code == C_MAIL) {
 					// GA1 : anneaux et creux portés par l'albédo généré ; rugosité de la tuile
 					// (anneaux lisses ~0,35, creux plus rugueux).
-					albedo = v_color * mix(0.85, 1.1, v_var.z) * ga_albedo;
+					// CR2 : ×0,55 : l'ombre portée d'un anneau sur l'autre (le soleil, que l'AO ne
+					// touche pas, blanchissait la maille comme un tricot).
+					albedo = v_color * mix(0.85, 1.1, v_var.z) * ga_albedo * mix(1.0, 0.55, steel_occlusion);
 					metallic = 0.6;
-					roughness = d.a;
+					// CR2 : pas de reflet plus lisse que 0,5 : les anneaux se masquent l'un l'autre
+					// (sinon voile blanc à contre-jour, halo du glow).
+					roughness = max(d.a, mix(0.0, 0.5, steel_occlusion));
 					fg_ao = mix(0.55, 1.0, fg_ao);
 				} else if (code == C_MAIL) {
 					// Mailles lisibles sans être noires : anneaux clairs, creux sombres, moins
