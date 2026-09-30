@@ -10,14 +10,14 @@
   "shallow_color": [0.48, 0.7, 0.8],
   "deep_color": [0.28, 0.52, 0.66],
   "bank_ink_color": [0.1, 0.22, 0.3],
-  "bank_ink_strength": 0.55,
-  "bank_ink_px": 0.8,
+  "bank_ink_strength": 0.35,
+  "bank_ink_px": 0.6,
   "edge_soft_px": 0.5,
   "sky_reflect": 0.45,
   "sky_color": [0.7, 0.82, 0.92],
   "fine": {
-    "min_px": 3.2,
-    "order_px_scale": [0.4, 0.5, 0.6, 0.75, 0.95, 1.15, 1.35, 1.5],
+    "min_px": 4.0,
+    "order_px_scale": [0.45, 0.55, 0.65, 0.8, 1.0, 1.2, 1.5, 1.75],
     "thin_fade": 0.35,
     "sky_reflect": 0.45
   },
