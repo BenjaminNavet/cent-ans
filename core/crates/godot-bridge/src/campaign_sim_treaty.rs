@@ -13,6 +13,7 @@ use godot::prelude::*;
 use serde_json::Value;
 use sim_campaign::negotiation::{
     self, counter_proposal, evaluate_treaty, is_war_goal, ruler_name, Article, TreatyEvaluation,
+    COUNTER_TARGET_CHANCE,
 };
 use sim_campaign::{CampaignState, Season};
 
@@ -50,6 +51,15 @@ impl CampaignSim {
             Err(error) => return error_dict(&error),
         };
         let player = state.player_faction().clone();
+        // Q8 : a draft already acceptable has no counter-proposal; say so instead of
+        // « nothing would suffice ».
+        let current = evaluate_treaty(state, data, &player, &target, &articles);
+        if current.blocked.is_none() && current.chance >= COUNTER_TARGET_CHANCE {
+            return error_dict(&format!(
+                "Rien à ajouter : ils accepteraient déjà en l'état ({} % de chances).",
+                current.chance
+            ));
+        }
         match counter_proposal(state, data, &player, &target, &articles) {
             Some(counter) => {
                 let chance = evaluate_treaty(state, data, &player, &target, &counter).chance;

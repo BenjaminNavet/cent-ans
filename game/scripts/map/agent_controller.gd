@@ -85,6 +85,10 @@ class Token:
 			var dot := center + Vector2(cos(angle), sin(angle)) * (radius - 1.5) * Vector2(-1, 1)
 			draw_circle(dot, 1.8, AgentController.GOLD if i < level else AgentController.INK.lerp(AgentController.PARCHMENT, 0.5))
 
+	## Q8 : infobulle en sections (`attach_plain` ne pose pas son hôte sur une classe scriptée).
+	func _make_custom_tooltip(for_text: String) -> Object:
+		return RichTooltip.panel_for(for_text, self)
+
 
 func setup(campaign_map: Node) -> void:
 	map = campaign_map

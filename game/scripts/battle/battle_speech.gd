@@ -284,7 +284,7 @@ func _input(event: InputEvent) -> void:
 		stop()
 
 
-## Sous-titre : nom de l'orateur et phrase, bandeau sombre au-dessus de la barre du HUD ; cri de
+## Sous-titre : nom de l'orateur et phrase, bandeau sombre au-dessus des panneaux du HUD ; cri de
 ## guerre en grand au centre.
 func _build_subtitle() -> void:
 	_layer = CanvasLayer.new()
@@ -308,8 +308,10 @@ func _build_subtitle() -> void:
 	band.add_theme_stylebox_override("panel", style)
 	band.anchor_left = 0.2
 	band.anchor_right = 0.8
-	band.anchor_top = 0.63
-	band.anchor_bottom = 0.63
+	# Q8 : au-dessus du panneau « Formations de groupe » (57-80 % de la hauteur en 720p), que le
+	# bandeau translucide recouvrait à 63 %.
+	band.anchor_top = 0.48
+	band.anchor_bottom = 0.48
 	band.grow_vertical = Control.GROW_DIRECTION_BOTH
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(band)

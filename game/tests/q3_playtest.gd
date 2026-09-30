@@ -82,6 +82,7 @@ func _run() -> void:
 	log_q("selected faction: %s" % menu.get("selected_faction"))
 	await shot("menu-faction")
 	await click(menu.get("start_button"))
+	log_q("after start click: selected %s, pending %s" % [menu.get("selected_faction"), root.get_node("SimFacade").get("pending_faction")])
 	var t0 := Time.get_ticks_msec()
 	var loading_shot := false
 	while true:
@@ -97,7 +98,9 @@ func _run() -> void:
 			quit(1)
 			return
 	map = current_scene
-	log_q("campaign ready in %d ms" % (Time.get_ticks_msec() - t0))
+	log_q("campaign ready in %d ms, player %s" % [Time.get_ticks_msec() - t0, map.player_faction])
+	if map.player_faction != faction:
+		log_q("WRONG FACTION: asked %s, playing %s" % [faction, map.player_faction])
 	phase_label = "campaign-start"
 	await wait(150)
 	await shot("campaign-start")
@@ -389,11 +392,11 @@ func phase_trade() -> void:
 		await wait(10)
 	else:
 		log_q("trade: no visible trade button")
-	await key(KEY_X)
+	await key(KEY_V)  # `map_toggle_trade` (V depuis la barre des modes de carte)
 	await wait(20)
-	log_q("trade: after X, trade_mode %s, diplomacy mode %s" % [map.trade_mode, map.diplomacy.get("mode") if map.diplomacy != null else "?"])
-	await shot("trade-key-x")
-	await key(KEY_X)
+	log_q("trade: after V, trade_mode %s, diplomacy mode %s" % [map.trade_mode, map.diplomacy.get("mode") if map.diplomacy != null else "?"])
+	await shot("trade-key-v")
+	await key(KEY_V)
 	await wait(10)
 
 

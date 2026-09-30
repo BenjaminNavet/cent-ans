@@ -226,6 +226,12 @@ func modal_open() -> bool:
 func toast(text: String, icon: String = "", seconds: float = TOAST_SECONDS) -> Control:
 	_ensure_host()
 	var box: VBoxContainer = _host["toasts"]
+	# Q8 : un même avis répété (« Carte politique. » à chaque sortie de mode) remplace le
+	# précédent au lieu de s'empiler.
+	for previous in toasts():
+		var previous_label := previous.find_child("Text", true, false) as Label
+		if previous_label != null and previous_label.text == text:
+			_dismiss_toast(previous)
 	var entry := PanelContainer.new()
 	entry.name = "Toast"
 	entry.set_meta(_TOAST_META, true)
