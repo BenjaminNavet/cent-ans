@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
             break
             ;;
         -h | --help)
-            sed -n '2,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0
             ;;
         *)
@@ -92,7 +92,7 @@ find_godot() {
             first_executable \
                 /Applications/Godot.app/Contents/MacOS/Godot \
                 "$HOME"/Applications/Godot.app/Contents/MacOS/Godot \
-                /Applications/Godot_v${GODOT_SERIES}*.app/Contents/MacOS/Godot \
+                /Applications/Godot_v"${GODOT_SERIES}"*.app/Contents/MacOS/Godot \
                 "$HOME"/Downloads/Godot.app/Contents/MacOS/Godot \
                 "$HOME"/Library/Application\ Support/Steam/steamapps/common/Godot\ Engine/Godot.app/Contents/MacOS/Godot &&
                 found=0
@@ -100,10 +100,10 @@ find_godot() {
         linux)
             first_executable \
                 "$HOME"/.local/bin/godot \
-                "$HOME"/Applications/Godot_v${GODOT_SERIES}*_linux.* \
-                "$HOME"/Downloads/Godot_v${GODOT_SERIES}*_linux.* \
-                "$HOME"/Téléchargements/Godot_v${GODOT_SERIES}*_linux.* \
-                "$ROOT"/../Godot_v${GODOT_SERIES}*_linux.* \
+                "$HOME"/Applications/Godot_v"${GODOT_SERIES}"*_linux.* \
+                "$HOME"/Downloads/Godot_v"${GODOT_SERIES}"*_linux.* \
+                "$HOME"/Téléchargements/Godot_v"${GODOT_SERIES}"*_linux.* \
+                "$ROOT"/../Godot_v"${GODOT_SERIES}"*_linux.* \
                 /opt/godot/godot &&
                 found=0
             ;;
@@ -111,12 +111,12 @@ find_godot() {
             # The console build (…_console.exe) is picked separately for the headless import.
             local exe
             for exe in \
-                "$ROOT"/../Godot_v${GODOT_SERIES}*_win64.exe \
-                "$HOME"/Desktop/Godot_v${GODOT_SERIES}*_win64.exe \
-                "$HOME"/Downloads/Godot_v${GODOT_SERIES}*_win64.exe \
-                "$HOME"/Downloads/Godot_v${GODOT_SERIES}*_win64/Godot_v${GODOT_SERIES}*_win64.exe \
-                /c/Godot/Godot_v${GODOT_SERIES}*_win64.exe \
-                /c/Program\ Files/Godot/Godot_v${GODOT_SERIES}*_win64.exe \
+                "$ROOT"/../Godot_v"${GODOT_SERIES}"*_win64.exe \
+                "$HOME"/Desktop/Godot_v"${GODOT_SERIES}"*_win64.exe \
+                "$HOME"/Downloads/Godot_v"${GODOT_SERIES}"*_win64.exe \
+                "$HOME"/Downloads/Godot_v"${GODOT_SERIES}"*_win64/Godot_v"${GODOT_SERIES}"*_win64.exe \
+                /c/Godot/Godot_v"${GODOT_SERIES}"*_win64.exe \
+                /c/Program\ Files/Godot/Godot_v"${GODOT_SERIES}"*_win64.exe \
                 "$HOME"/scoop/apps/godot/current/godot.exe; do
                 if [[ -f "$exe" ]]; then
                     printf '%s\n' "$exe"
@@ -192,7 +192,7 @@ REASON=""
 if [[ $FORCE_IMPORT -eq 1 ]]; then
     NEED_IMPORT=1 REASON="demandé (--import)"
 elif [[ ! -f "$GAME/.godot/extension_list.cfg" || ! -f "$STAMP" ]]; then
-    NEED_IMPORT=1 REASON="premier lancement"
+    NEED_IMPORT=1 REASON="premier lancement, plusieurs minutes"
 elif [[ "$(cat "$STAMP")" != "$(game_fingerprint)" ]]; then
     NEED_IMPORT=1 REASON="fichiers ajoutés ou supprimés, ou autre version de Godot"
 elif game_modified_since_stamp; then
@@ -200,7 +200,7 @@ elif game_modified_since_stamp; then
 fi
 
 if [[ $NEED_IMPORT -eq 1 ]]; then
-    say "Import des ressources Godot ($REASON), plusieurs minutes au premier lancement…"
+    say "Import des ressources Godot ($REASON)…"
     "$GODOT_CLI" --headless --path "$GAME" --import || fail "L'import Godot a échoué (voir ci-dessus)."
     # Fingerprint taken after the import: it writes the .import/.uid files next to the assets.
     game_fingerprint >"$STAMP"
