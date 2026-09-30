@@ -187,7 +187,7 @@ func _plan_tiles(settlement_ids: Array) -> void:
 		if not wanted.has(sid):
 			continue
 		var anchor := LandmarkV2Library.anchor_units(city)
-		var item := {"i": index, "city": city, "anchor": anchor, "ground": _ground_at(anchor, sid, city)}
+		var item := {"i": index, "city": city, "anchor": anchor, "heights": _heights_at(anchor, sid, city)}
 		_index_of[sid] = index
 		_add_item(f1, _key(anchor, f1_tile), item)
 		_add_item(f2, _key(anchor, f2_tile), item)
@@ -221,9 +221,10 @@ static func _add_item(into: Dictionary, key: Vector2i, item: Dictionary) -> void
 	(into[key] as Array).append(item)
 
 
-## Sol (m) au centre d'une ville v2 : pages du relief chargées, sinon heightmap, sinon `z_m` de la
-## colonie dans `towns_1340.json`, sinon celui de la ville v2.
-func _ground_at(anchor: Vector2, sid: String, city: Dictionary) -> float:
+## Relief sous une ville v2 (hauteurs en m, repère local de la ville) : pages du relief chargées
+## sur toute l'emprise, sinon heightmap, sinon `z_m` de la colonie dans `towns_1340.json`, sinon
+## celui de la ville v2. Instantané pris sur le fil principal, lu par les fils de génération.
+func _heights_at(anchor: Vector2, sid: String, city: Dictionary) -> TownPlan.Heights:
 	var fallback := float(city.get("z_m", 0.0))
 	if data.has_town(sid):
 		fallback = float(data.towns[sid].get("z_m", fallback))
@@ -233,13 +234,13 @@ func _ground_at(anchor: Vector2, sid: String, city: Dictionary) -> float:
 	h.map_data = map_data
 	h.fallback_m = fallback
 	if terrain != null and terrain.quadtree != null:
-		var e := 1.0
+		var e := maxf(LandmarkV2Library.extent_units(city), 1.0)
 		var snap := terrain.quadtree.surface_snapshot(Rect2(anchor - Vector2(e, e), Vector2(e, e) * 2.0), anchor)
 		h.pages = snap.get("qt_pages", {})
 		h.top_level = int(snap.get("max_level", 0))
 		h.h_min = float(snap.get("h_min", 0.0))
 		h.h_range = float(snap.get("h_range", 1.0))
-	return h.height_m(0.0, 0.0)
+	return h
 
 
 func _start_generation() -> void:
@@ -259,7 +260,7 @@ func _run_tile(t: int) -> void:
 	for item: Dictionary in spec["items"]:
 		var part: Dictionary
 		if item.has("city"):
-			part = TownFarBuilder.build_v2_far(item["city"], int(item["i"]), _mpu, item["anchor"], float(item["ground"]))
+			part = TownFarBuilder.build_v2_far(item["city"], int(item["i"]), _mpu, item["anchor"], NAN, TownFarBuilder.V2_YEAR, item["heights"])
 		elif f1:
 			part = TownFarBuilder.build_f1(item["town"], int(item["i"]), _mpu, _wall_params)
 		else:

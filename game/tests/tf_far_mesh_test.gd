@@ -234,3 +234,26 @@ func _test_v2(mpu: float) -> void:
 			_check(float(part["y_max"]) >= 140.0, "Londres : flèche de Saint-Paul %.0f m < 140" % float(part["y_max"]))
 	print("tf_far_mesh_test: v2 %d villes, %.0f tri/ville (max %d), %.0f ms" % [cities.size(), float(total) / maxi(cities.size(), 1), worst, (Time.get_ticks_usec() - t0) / 1000.0])
 	_check(worst <= V2_MAX, "v2 max %d > %d" % [worst, V2_MAX])
+	# Relief sous la ville (Paris, 30/09) : chaque sommet des quartiers (nappe et jupe) posé sur le
+	# sol échantillonné à sa position (monuments et murs gardent une base plane, hors test).
+	var paris: Dictionary = {}
+	for city: Dictionary in cities:
+		if str(city["id"]) == "paris":
+			paris = city
+	if not paris.is_empty():
+		var h := TownPlan.Heights.new()
+		h.func_m = func(lx: float, ly: float) -> float: return 30.0 + 0.05 * lx + 40.0 * sin(ly / 300.0)
+		var pa := LandmarkV2Library.anchor_units(paris)
+		var districts_only := paris.duplicate()
+		districts_only["walls"] = []
+		districts_only["monuments"] = []
+		var part := TownFarBuilder.build_v2_far(districts_only, 5000, mpu, pa, NAN, TownFarBuilder.V2_YEAR, h)
+		var verts: PackedVector3Array = part["vertices"]
+		var uv2: PackedVector2Array = part["uv2"]
+		var worst_err := 0.0
+		for k in verts.size():
+			var local := (Vector2(verts[k].x, verts[k].z) - pa) * mpu
+			var err := absf(verts[k].y - uv2[k].y - h.height_m(local.x, local.y))
+			worst_err = maxf(worst_err, err)
+		_check(worst_err < 0.5, "v2 Paris : sommet hors du relief de %.1f m" % worst_err)
+		print("tf_far_mesh_test: v2 Paris sur relief, %d triangles, écart max %.2f m" % [TownFarBuilder.triangle_count(part), worst_err])
