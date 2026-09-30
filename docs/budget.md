@@ -224,3 +224,11 @@ reprises éventuelles comprises : ~0,62 $ prévu. Plafond vérifié par `data/ar
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul RC |
 |---|---|---|---|---|---|
 | 2026-09-30 | — | RC5 : squelette, prompts et essai à blanc (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
+
+## Habillage par biomes HB (30/09) — plafond propre de 8 $ (fal.ai, ADR 0143)
+
+Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Matières de sol (HB2), essences (HB4), rochers (HB5).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul HB |
+|---|---|---|---|---|---|
+| 2026-09-30 | — | HB : plan et ADR 0143 (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
