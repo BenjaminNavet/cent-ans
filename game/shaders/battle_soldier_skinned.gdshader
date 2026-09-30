@@ -74,6 +74,9 @@ uniform float cycle_len = 1.5;
 // anim_time − x (1 : même phase, rôles) ou anim_time − z (2 : début du geste précédent,
 // servants). z et w ne portent alors ni projection ni sang.
 uniform int custom_fade = 0;
+// NT10 : cuisson des imposteurs (`BattleImpostors`) : x ≥ 0 remplace l'identifiant haché (habit,
+// teintes, visage) de toutes les figurines du matériau ; y ≥ 0 force la variante (casque...).
+uniform vec2 bake_id = vec2(-1.0);
 uniform float role_blend = 0.25;
 uniform float volley_time = -1000.0;
 uniform float reload_time = 6.0;
@@ -472,7 +475,7 @@ void vertex() {
 		// FG5 : soldat hors de la bande de ce calque, replié en un point sans skinning.
 		VERTEX = vec3(0.0);
 	} else {
-		float id = id_in_custom ? INSTANCE_CUSTOM.x : float(INSTANCE_ID);
+		float id = bake_id.x >= 0.0 ? bake_id.x : (id_in_custom ? INSTANCE_CUSTOM.x : float(INSTANCE_ID));
 		vec4 h = vec4(hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53), hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3));
 		vec4 custom = id_in_custom ? vec4(0.0) : INSTANCE_CUSTOM;
 		v_rest = VERTEX;
@@ -480,7 +483,7 @@ void vertex() {
 
 		// Variante du soldat : pièces absentes repliées en un point (triangles dégénérés).
 		int mask = int(UV2.x + 0.5);
-		int variant = min(int(h.w * float(variant_count)), variant_count - 1);
+		int variant = bake_id.y >= 0.0 ? int(bake_id.y + 0.5) % max(variant_count, 1) : min(int(h.w * float(variant_count)), variant_count - 1);
 		// Bits 0-5 : variantes ; bit 6 : arme tenue (EP12) ; bit 7 : pavois du dos (BV3).
 		int variant_bits = mask & 63;
 		bool shown = variant_bits == 0 || ((variant_bits >> variant) & 1) == 1;

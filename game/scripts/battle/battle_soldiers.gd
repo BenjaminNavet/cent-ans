@@ -650,7 +650,13 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		_param(imp_mat, imp_sent, &"anim_time", anim_time - float(_lag.get(id, 0.0)))
 		_param(imp_mat, imp_sent, &"imp_set", BattleImpostors.state_set(str(unit.get("state", "")), bool(unit.get("running", false))))
 		_param(imp_mat, imp_sent, &"highlight", 1.0 if is_selected else 0.0)
-		_param(imp_mat, imp_sent, &"thin_out", 1.0 if budget_enabled and distance > THIN_DISTANCE and not is_selected else 0.0)
+		var thin := 1.0 if budget_enabled and distance > THIN_DISTANCE and not is_selected else 0.0
+		_param(imp_mat, imp_sent, &"thin_out", thin)
+		if imp.get_child_count() > 0:
+			# NT10 : sang du régiment (celui des figurines, image précédente) et ombre éclaircie.
+			_param(imp_mat, imp_sent, &"blood", float((_materials[id] as ShaderMaterial).get_meta("bv2_blood", 0.0)))
+			var shadow_mat := (imp.get_child(0) as MultiMeshInstance3D).material_override as ShaderMaterial
+			_param(shadow_mat, _sent_of(shadow_mat), &"thin_out", thin)
 	var mat: ShaderMaterial = _materials[id]
 	var ammo := int(unit.get("ammo", 0))
 	var state := str(unit.get("state", ""))
@@ -976,6 +982,15 @@ func _impostor_layer(id: int, side: String, kind: String, variant: int, count: i
 	imp.material_override = impostors.make_material(key)
 	imp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(imp)
+	if BattleImpostors.nt10_enabled():
+		# NT10 : ombre en disque au sol, même MultiMesh (aucune copie du tampon), enfant de
+		# l'imposteur (visibilité commune).
+		var shadow := MultiMeshInstance3D.new()
+		shadow.name = "Shadow"
+		shadow.multimesh = mm
+		shadow.material_override = impostors.make_shadow_material(key)
+		shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		imp.add_child(shadow)
 	_imp_layers[id] = imp
 	return imp
 
