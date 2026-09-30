@@ -55,3 +55,34 @@ bâtiment-clé (S4), et que les figurines animées ne s'y prêtent pas encore (S
   fal (sortie commerciale autorisée). Aucune image tierce en entrée.
 - Suite possible : variantes (2-3 maisons, grange), versions enneigées (recoloration du toit
   au shader), fondations ajoutées au nettoyage, trébuchet/bélier figés comme décor de camp.
+
+## Végétation de la carte de campagne (GA3-L2)
+
+Suite de l'ADR 0137 (arbres en cartes et imposteurs, herbe proche). Verdict de la sonde S5 : images
+générées pour les arbres (voie A/A'), TRELLIS seulement pour les rochers.
+
+- **Imposteurs générés** : par essence (chêne, hêtre, sapin), une vue de référence `flux-2` puis
+  **une seule** planche `nano-banana-2/edit` de 4 × 2 vues tournées de 45° et un détourage `bria`
+  de la planche entière (≈ 0,11 $ l'essence). Plus sûr et moins cher que sept retouches séparées
+  (0,56 $ l'essence) : les 8 vues d'une même génération partagent éclairage, teinte et échelle.
+  Chaque vue est calée dans la boîte de silhouette de la ligne FC2 correspondante (même cadrage
+  `ortho` / `foot`, mêmes shaders), couleur ramenée à la moyenne linéaire de cette ligne (teintes
+  saisonnières et variété PO3 inchangées), normale approchée (dôme depuis le bord de la silhouette +
+  détail de luminance, biais vers le ciel), occlusion depuis la luminance. Même grille 3 × 8 × 256²
+  → aucun appel de dessin ni matériau de plus.
+- **Les imposteurs remplacent aussi les cartes proches** (`Vegetation.ga3_near_impostors`) : à
+  d = 25, triangles des arbres 2,40 M → 0,05 M (test) ; carte entière au Massif central (fenêtre
+  1920 × 1080, `--fps-probe`) : 17,0 M → 10,3 M primitives, appels de dessin ≈ 1 010 des deux côtés.
+  La caméra proche est rasante (11-30°), favorable à des vues quasi horizontales ; limite connue :
+  pas de parallaxe en plongée forte. `--no-ga3-near` garde les cartes FC5 (avec l'atlas de feuilles
+  GA3), `--no-ga3-veg` rend tout l'état FC.
+- **Herbe** : touffe dense `flux-2` + `bria` (couverture 41 % à 0,5 contre 36 % FC5 et 13 % S5),
+  alpha dilaté d'un pixel horizontalement ; la teinte reste celle du shader (luminance seule lue).
+- **Rochers** : 3 rochers TRELLIS (dont un repris avec une autre graine : effondrement bloqué à
+  1 900 triangles), `ga3_cleanup.py --lod0 120` → 120 / 60 / 18 triangles, albédo 256 relevé
+  (`--exposure`) vers la teinte roche du terrain. Semés par `GroundClutter` (roche/lande de la
+  splatmap, pente, altitude, terrain de province montagnes / collines ; moins sous forêt), un
+  `MultiMesh` enfant par cellule rocheuse (+1 appel de dessin par cellule concernée, sans ombre),
+  variante tirée par cellule, niveau de détail commun selon la distance caméra (12 / 24).
+- Outils : `tools/blender_scripts/ga3_vegetation_l2.py` (`fal`, `atlas`, `rocks`), pytest
+  `tools/tests/test_ga3_vegetation_l2.py` ; test Godot `ga3_l2_vegetation_test.gd`. 0,47 $.

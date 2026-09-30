@@ -208,6 +208,18 @@ abandonne nos clips Quaternius.
   d'intégration en jeu à faire par la session principale (église vers (915, 707) sur la bataille
   par défaut). Défauts : enfoncement fixe 0,35 m (pas de fondations), toit du puits blanchi,
   peaux du bélier « vache pie ».
+- 30/09 **L2 végétation campagne** (0,47 $ ; section « Végétation » de l'ADR 0138 ; note `docs/wip/ga3-l2.md`).
+  `ga3_vegetation_l2.py` (brutes `~/dev/cent-ans-raw/ga3/l2/`) : par essence flux-2 → **une** planche
+  nano-banana-2/edit 4 × 2 (8 azimuts cohérents) → bria ; grille `ga3/ga3_impostors_{albedo,normal}.png`
+  au cadrage FC2 ; les imposteurs remplacent aussi les cartes proches (d = 25 : 2,40 M → 0,05 M
+  triangles d'arbres ; Massif central, fenêtre : 17,0 M → 10,3 M primitives, ≈ 1 010 appels des deux
+  côtés ; FPS non mesurables, machine chargée). Atlas de feuilles GA3 (si `--no-ga3-near`), herbe dense
+  (41 %), rochers a/b/c 120/60/18 dans `GroundClutter` (enfant par cellule, `ground_rocks.gdshader`).
+  `--no-ga3-veg` = état FC. Candidats S5 retirés de `game/assets/models/vegetation/ga3/`. Tests :
+  `ga3_l2_vegetation_test.gd`, smoke, fc2 (forcé en FC), fc3, sz6 OK ; sz4b échoue pareil avec
+  `--no-ga3-veg` (modèles de ville, préexistant). Planche locale `docs/img/ga3/l2_vegetation.jpg` :
+  forêts lues en arbres distincts, plus claires ; rochers trop sombres corrigés après la capture
+  (exposition), non revus en image.
 - 30/09 S3 (comparatif figurine) : 3 appels fal (Tripo 0,50 $, Meshy 1,52 $, TRELLIS 2 0,30 $ = 2,32 $),
   `fal_client.subscribe` bloqué après la fin des tâches Tripo/Meshy → résultats relus par
   `queue.fal.run/<app>/requests/<id>` (ids via `api.fal.ai/v1/models/requests/by-endpoint`). Planche
@@ -218,9 +230,10 @@ abandonne nos clips Quaternius.
       --auto-levels 0.5` ; catalogue `data/art/ga3_decor.json` (+ schéma, pytest) ; brutes
       `~/dev/cent-ans-raw/ga3/l1/` et `l1p/` (pièces fines) ; `ga3_fal_decor.py --catalog`,
       `ga3_decor_build.py`, planche `docs/img/ga3/l1_decor.jpg` (`ga3_decor_sheet.py`). Voir journal.
-- [ ] L2 végétation campagne : imposteurs générés (3 essences, 8 azimuts via nano-banana-2) dans la
-      grille `campaign_impostors_albedo`, atlas de feuilles, herbe regénérée dense, rochers TRELLIS dans
-      `GroundClutter`, derrière option. ≈ 1,50 $.
+- [x] L2 végétation campagne (0,47 $, ADR 0138 § végétation) : imposteurs générés (3 essences, 8 azimuts,
+      une planche nano-banana-2 par essence) dans une grille au format `campaign_impostors_albedo`, aussi
+      pour les arbres proches ; atlas de feuilles, herbe dense, rochers TRELLIS dans `GroundClutter` ;
+      `--no-ga3-veg`, `--no-ga3-near`. Voir journal et `docs/wip/ga3-l2.md`.
 - [ ] L3 figurines : APRÈS fusion de `feat/sr`. Références A-pose mains vides → trellis-2 → chaîne S2
       (notre squelette, nos clips, armes procédurales), masque de livrée. ≈ 2,50 $.
 - Verrou Godot partagé entre agents : `mkdir /tmp/ga3-godot.lock` avant `--import`/tests, `rmdir` après.
