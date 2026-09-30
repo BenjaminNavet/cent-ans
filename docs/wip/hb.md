@@ -12,7 +12,9 @@ Vague 1 (agents, chacun sa branche `feat/hb-*` et son worktree `../gp-hb-*`) :
 Session principale :
 - [x] HB6 relief : `relief_exaggeration.tres` gain local −0,4 (loin) / −0,1 (près) = collines aplanies au-dessus du fond, écrasement des montagnes dès la vue stratégique (`mountain_squash_far` 1). Caméra inchangée (`exaggeration_far` 4,31 : les échelles cuites en dépendent ; le baisser inverse l'écrasement). Tests ZG8 réécrits selon l'ADR 0143.
 - [x] Brouillard de guerre : assombri (`fog_tone` 0,78, désaturation 0,4, voile 0,1) au lieu du voile clair qui pâlissait tout le territoire non vu.
-- [ ] HB3 shader : parcellaire de vue moyenne texturé, canopée, roche (après HB1+HB2).
+- [x] HB3 shader : `hb_ground.gdshaderinc` + `HbGround` (`hb_ground.gd`), mélange par biome `data/art/ground_biome_mix.json` (parcelles, lanières, haies, présence agricole, cultures pondérées, sols sauvages, canopée, roche, teinte). Pièges corrigés : valeurs de table > 1 bornées (table normalisée dans [0, 1]) ; rotation des lanières sur coordonnées absolues = tourbillons (angle constant par région, rotation autour de l'origine de région) ; parcelles réelles (230-900 m) illisibles : `hb_cell_scale` 3. Diagnostic `hb_debug` 1-13 (1 biome, 2 parcelles, 4 couleur brute, 5 couches, 8 grille carte, 9-13 sondes après chaque passe) sortie directe dans ALBEDO.
+- [x] Réglages de lisibilité : teinte de faction de près 0,10 → 0,04, brume météo 0,07, brouillard de guerre désaturation 0,25 / ton 0,72 ; steppe re-teintée vert-doré (colormap re-cuite).
+- [x] Visite des biomes (captures `--param=fog_enabled=false --param=weather_enabled=false`) : Normandie parcelles, Provence verte et en damier, Grèce garrigue, steppe dorée, Finlande boréale, Alpes alpages + roche + neige.
 - [ ] HB7 rivières (agent, `feat/hb-rivers`, captures autorisées ≤ 15) : rivières = traits gris d’un pixel ; `sky_reflect` 0,25 et `major_min_px` 3,2 déjà posés.
 - [ ] HB8 captures, banc, docs.
 

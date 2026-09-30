@@ -1,6 +1,6 @@
 # 0143 — Habillage de la carte de campagne par biomes
 
-Date : 2026-09-30. Chantier HB (suite de SS, ADR 0142).
+Date : 2026-09-30. Chantier HB (suite de SS, ADR 0142). Statut : appliquée.
 
 ## Contexte
 
@@ -24,3 +24,10 @@ Budget fal.ai du chantier : plafond 8 $ (`docs/budget.md`, section HB).
 - Nouvelles données versionnées : biomes (~quelques Mo), tableau de matières (~20–40 Mo), atlas d'imposteurs.
 - Le nombre d'appels de dessin des arbres ne doit pas croître de plus de 30 % (atlas commun des essences).
 - Toute règle de répartition vit dans les données (`biomes.yaml`, `tree_species.yaml`), pas dans le code.
+
+## Constat d'application (2026-09-30)
+
+- Relief : baisser `exaggeration_far` casse l'écrasement des montagnes (les échelles cuites dépendent de ×4,31) ; retenu : gain local négatif (−0,4 loin, −0,1 près) et écrasement des montagnes dès la vue stratégique (`mountain_squash_far` 1).
+- Une part importante du « gris IGN » venait des couches au-dessus du sol : brouillard de guerre (voile clair), teinte de faction de près, brume météo ; toutes adoucies.
+- Coût fal.ai du chantier : 3,82 $ (matières 1,10 $, essences 2,42 $, rochers 0,30 $).
+- Les affleurements 3D se lisent mal (camouflés) ; la roche du sol sur pentes (HB3) porte l'essentiel.
