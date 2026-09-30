@@ -34,7 +34,7 @@
     "kind": "castle",
     "name": {
       "display": "Krujë",
-      "local": "Kruja",
+      "local": "Croia",
       "local_language": "latin"
     },
     "lonlat": [
@@ -76,7 +76,7 @@
       "bld_collegiate_church"
     ],
     "port": true,
-    "description": "Ville portuaire et tombeau des seigneurs albanais.",
+    "description": "Ville portuaire à l'embouchure du Drin.",
     "sources": [
       "Lezhë"
     ]

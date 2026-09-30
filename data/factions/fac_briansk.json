@@ -44,7 +44,7 @@
     {
       "faction": "fac_smolensk",
       "status": "peace",
-      "note": "Frère de Dmitri, Ivan de Smolensk ; querelle de 1334."
+      "note": "Dmitri, parent d'Ivan de Smolensk, l'a attaqué en 1333-1334 avec des Tatars ; paix ensuite."
     }
   ],
   "ai_personality": {
@@ -53,7 +53,7 @@
     "trade": 40,
     "piety": 55
   },
-  "description": "Principauté des forêts de la Desna, dont le prince Dmitri Alexandrovitch a fait assiéger son frère de Smolensk (1334) avec des auxiliaires tatars ; Tchernigov, jadis capitale des Olgovitchi, lui est rattachée (statut incertain).",
+  "description": "Principauté des forêts de la Desna ; en 1333 ou 1334, le prince Dmitri a marché sur Smolensk avec des auxiliaires tatars, avant d'être évincé de Briansk (1334-1340) par Gleb Sviatoslavitch ; Tchernigov, jadis capitale des Olgovitchi, lui est rattachée (statut incertain).",
   "sources": [
     "Principauté de Briansk",
     "Tchernigov"

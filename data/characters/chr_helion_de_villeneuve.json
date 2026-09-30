@@ -1,7 +1,9 @@
 {
   "id": "chr_helion_de_villeneuve",
   "name": {
-    "display": "Hélion de Villeneuve"
+    "display": "Hélion de Villeneuve",
+    "local": "Elion de Vilanova",
+    "local_language": "occitan"
   },
   "sex": "male",
   "house": "Villeneuve",

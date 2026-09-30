@@ -4,7 +4,7 @@
   "name": {
     "display": "Djalayirides (marges occidentales)",
     "local": "جلایریان",
-    "local_language": "arabe"
+    "local_language": "persan"
   },
   "heraldry": {
     "blazon": "De gueules à la bordure d'or.",
@@ -43,7 +43,7 @@
       }
     }
   ],
-  "description": "Prince mongol-turc, gouverneur de l'Ilkhanat déchu ; Hasan Buzurg s'installe à Bagdad (hors carte) et tient Mossoul par ses lieutenants. Capitale replacée à Mossoul pour la carte.",
+  "description": "Prince mongol de la tribu des Djalayir, gouverneur de l'Ilkhanat déchu, faiseur de khans après 1335 ; Hasan Buzurg s'installera à Bagdad (hors carte) vers 1339-1340 et tient Mossoul par ses lieutenants. Capitale replacée à Mossoul pour la carte. Ses rivaux chupanides (Tabriz) sont hors carte.",
   "sources": [
     "Jalayirids",
     "Hasan Buzurg"

@@ -6,7 +6,7 @@
     "name": {
       "display": "Spalato",
       "local": "Spalatum",
-      "local_language": "vénitien"
+      "local_language": "latin"
     },
     "lonlat": [
       16.44,
@@ -35,7 +35,7 @@
     "name": {
       "display": "Trogir",
       "local": "Tragurium",
-      "local_language": "vénitien"
+      "local_language": "latin"
     },
     "lonlat": [
       16.25,
@@ -63,7 +63,7 @@
     "name": {
       "display": "Šibenik",
       "local": "Sibenicum",
-      "local_language": "vénitien"
+      "local_language": "latin"
     },
     "lonlat": [
       15.895,

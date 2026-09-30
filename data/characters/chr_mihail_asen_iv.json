@@ -22,7 +22,8 @@
     {
       "title": "Cotsar",
       "from": {
-        "value": "1337"
+        "value": "1332",
+        "uncertain": true
       }
     }
   ],
@@ -41,7 +42,7 @@
   },
   "starting_location": "prov_tarnovo",
   "status": "minor",
-  "description": "Fils aîné d'Ivan Alexandre, associé au trône en 1337 ; il mourra prématurément en 1355.",
+  "description": "Fils aîné d'Ivan Alexandre, associé au trône dès le début du règne (vers 1332) ; il tombera en 1355 face aux Ottomans près de Sofia.",
   "sources": [
     "Michael Asen IV"
   ]

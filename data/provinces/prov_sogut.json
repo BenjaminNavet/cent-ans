@@ -20,7 +20,9 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Söğüt"
+      "display": "Söğüt",
+      "local": "Söğüt",
+      "local_language": "turc ottoman"
     },
     "lat": 40.02,
     "lon": 30.18

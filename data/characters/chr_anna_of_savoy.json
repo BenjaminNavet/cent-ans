@@ -15,7 +15,8 @@
     "note": "Naissance entre 1306 et 1308 selon les sources."
   },
   "death": {
-    "value": "1365-12-16"
+    "value": "1365",
+    "uncertain": true
   },
   "historical": true,
   "titles": [

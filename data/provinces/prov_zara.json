@@ -3,7 +3,7 @@
   "name": {
     "display": "Zara",
     "local": "Zadar",
-    "local_language": "vénitien"
+    "local_language": "croate (slave)"
   },
   "region": "balkans",
   "terrain": "plains",
@@ -27,7 +27,7 @@
     "name": {
       "display": "Zara",
       "local": "Iadera",
-      "local_language": "vénitien"
+      "local_language": "latin"
     },
     "lat": 44.117,
     "lon": 15.227
@@ -89,7 +89,7 @@
   ],
   "fortification_level": 3,
   "base_supply": 1500,
-  "description": "Zara, vénitienne depuis la reprise de 1311 après sa révolte ; Nin et Biograd ; la Croatie de l'intérieur l'entoure.",
+  "description": "Zara, revenue à Venise en 1313 après sa révolte de 1311 ; Nin et Biograd ; la Croatie de l'intérieur l'entoure.",
   "sources": [
     "Zadar",
     "Nin",

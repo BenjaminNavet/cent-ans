@@ -8,11 +8,11 @@
   },
   "heraldry": {
     "blazon": "Bandé d'or et de gueules.",
-    "description": "Armes de la commune de Raguse : bandes d'or et de gueules (usage ancien, la bande d'azur est postérieure).",
+    "description": "Bandes d'or et de gueules : armes de convention pour la commune de Raguse.",
     "primary_color": "#B0182B",
     "secondary_color": "#F2C230",
     "uncertain": true,
-    "note": "Armoiries anciennes de Raguse, reconstitution."
+    "note": "Reconstitution sans attestation : sous Venise, Raguse use surtout de l'image de saint Blaise ; les bandes de gueules et d'azur n'apparaissent qu'avec la protection hongroise, après 1358."
   },
   "de_jure_liege": "tit_venice",
   "de_jure_provinces": [

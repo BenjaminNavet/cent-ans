@@ -1,7 +1,9 @@
 {
   "id": "chr_eretna",
   "name": {
-    "display": "Eretna"
+    "display": "Eretna",
+    "local": "ارتنا",
+    "local_language": "persan"
   },
   "sex": "male",
   "house": "Eretnides",

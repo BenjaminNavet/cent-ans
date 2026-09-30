@@ -1,7 +1,9 @@
 {
   "id": "chr_saruhan_bey",
   "name": {
-    "display": "Saruhan Bey"
+    "display": "Saruhan Bey",
+    "local": "Saruhan Bey",
+    "local_language": "turc ottoman"
   },
   "sex": "male",
   "house": "Saruhanoğulları",

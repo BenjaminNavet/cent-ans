@@ -20,7 +20,9 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Amasya"
+      "display": "Amasya",
+      "local": "Amasya",
+      "local_language": "turc ottoman"
     },
     "lat": 40.65,
     "lon": 35.83

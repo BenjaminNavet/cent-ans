@@ -1,7 +1,9 @@
 {
   "id": "prov_beysehir",
   "name": {
-    "display": "Beyşehir"
+    "display": "Beyşehir",
+    "local": "Beyşehir",
+    "local_language": "turc ottoman"
   },
   "region": "anatolie",
   "terrain": "hills",
@@ -15,7 +17,9 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Beyşehir"
+      "display": "Beyşehir",
+      "local": "Beyşehir",
+      "local_language": "turc ottoman"
     },
     "lat": 37.68,
     "lon": 31.73

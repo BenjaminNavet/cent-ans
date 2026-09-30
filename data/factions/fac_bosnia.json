@@ -2,7 +2,7 @@
   "id": "fac_bosnia",
   "name": {
     "display": "Banat de Bosnie",
-    "local": "Бансство Босна",
+    "local": "Бановина Босна",
     "local_language": "serbe"
   },
   "short_name": "Bosnie",
@@ -65,7 +65,7 @@
     "trade": 45,
     "piety": 50
   },
-  "description": "Banat de Bosnie d'Étienne II Kotromanić, un jeune ban qui a annexé le Hum en 1326 et se pose en arbitre entre la Hongrie, la Serbie et Venise.",
+  "description": "Banat de Bosnie d'Étienne II Kotromanić, ban depuis 1322, qui a annexé le Hum en 1326 et se pose en arbitre entre la Hongrie, la Serbie et Venise.",
   "sources": [
     "Stephen II, Ban of Bosnia",
     "Banat de Bosnie"

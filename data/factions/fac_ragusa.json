@@ -18,14 +18,14 @@
   "primary_title": "tit_ragusa",
   "heraldry": {
     "blazon": "Bandé d'or et de gueules.",
-    "description": "Armes de la commune de Raguse : bandes d'or et de gueules (usage ancien, la bande d'azur est postérieure).",
+    "description": "Bandes d'or et de gueules : armes de convention pour la commune de Raguse.",
     "primary_color": "#B0182B",
     "secondary_color": "#F2C230",
     "uncertain": true,
-    "note": "Armoiries anciennes de Raguse, reconstitution."
+    "note": "Reconstitution sans attestation : sous Venise, Raguse use surtout de l'image de saint Blaise ; les bandes de gueules et d'azur n'apparaissent qu'avec la protection hongroise, après 1358."
   },
   "titles": [
-    "Recteur de Raguse"
+    "Comte de Raguse (comes vénitien)"
   ],
   "treasury": 12000,
   "prestige": 30,
@@ -40,12 +40,12 @@
     {
       "faction": "fac_venice",
       "status": "vassal",
-      "note": "Suzeraineté vénitienne depuis 1205 : tribut, recteur vénitien, protection de la flotte."
+      "note": "Suzeraineté vénitienne depuis 1205 : tribut, comte vénitien, protection de la flotte."
     },
     {
       "faction": "fac_serbia",
       "status": "peace",
-      "note": "Marchands de Ragusan en Serbie (mines de Novo Brdo)."
+      "note": "Marchands de Raguse en Serbie (mines de Novo Brdo)."
     },
     {
       "faction": "fac_bosnia",
