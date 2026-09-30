@@ -40,7 +40,7 @@ const DUST_DISTANCE := 420.0
 const SPEED := [48.0, 62.0, 110.0, 34.0]
 const ARC := [0.16, 0.06, 0.02, 0.3]
 const STICK := [30.0, 30.0, 0.0, 0.0]
-const DUST_COLOR := Color(0.74, 0.66, 0.52)
+const DUST_COLOR := Color(0.6, 0.52, 0.4)  # CR1 : terre sèche (0.74, 0.66, 0.52 virait au blanc)
 ## BV1 : mottes projetées par les sabots (émetteurs réaffectés comme la poussière).
 const CLOD_EMITTERS := 6
 const CLOD_DISTANCE := 260.0
@@ -667,7 +667,7 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		mat.scale_max = 6.0
 		grow.add_point(Vector2(0, 0.35))
 		grow.add_point(Vector2(1, 1.0))
-		mat.color_ramp = _ramp([0.0, 0.15, 1.0], [0.0, 0.6, 0.0])
+		mat.color_ramp = _ramp([0.0, 0.15, 1.0], [0.0, 0.45, 0.0])  # CR1 : 0.6 → 0.45
 	elif node_name.begins_with("Splash"):
 		# B7 : gerbes plus nombreuses, plus grosses et plus opaques (à peine visibles avant).
 		mat.spread = 28.0
@@ -690,8 +690,8 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		mat.initial_velocity_min = 2.5
 		mat.initial_velocity_max = 6.5
 		mat.gravity = Vector3(0, -9.8, 0)
-		mat.scale_min = 0.12
-		mat.scale_max = 0.24
+		mat.scale_min = 0.05  # CR1 : mottes de 5 à 12 cm (12-24 cm lisaient comme des pavés)
+		mat.scale_max = 0.12
 		mat.angular_velocity_min = -360.0
 		mat.angular_velocity_max = 360.0
 		grow.add_point(Vector2(0, 1.0))
@@ -817,37 +817,92 @@ func _billboard(color: Color, unshaded: bool, additive: bool) -> StandardMateria
 	return mat
 
 
+## CR1 : poussière lisible comme telle en gros plan. Avant : disque radial net (centre opaque),
+## couleur claire, taches blanches rondes devant les murs et collées aux figurines. Désormais
+## nuage bruité (`_dust_texture`), terre plus brune, fondu au contact du décor (particules
+## douces) et près de la caméra (pas de disque plein écran).
 func _dust_material(heavy: bool) -> StandardMaterial3D:
-	return _billboard(DUST_COLOR.darkened(0.1) if heavy else DUST_COLOR, false, false)
+	var mat := _billboard(DUST_COLOR.darkened(0.1) if heavy else DUST_COLOR, false, false)
+	mat.albedo_texture = _dust_texture()
+	mat.proximity_fade_enabled = true
+	mat.proximity_fade_distance = 1.5
+	mat.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
+	mat.distance_fade_min_distance = 2.0
+	mat.distance_fade_max_distance = 9.0
+	return mat
+
+
+static var _dust_texture_cache: ImageTexture = null
+
+
+## CR1 : nuage de poussière (bruit fractal sous une retombée radiale douce), jamais un disque.
+static func _dust_texture() -> ImageTexture:
+	if _dust_texture_cache != null:
+		return _dust_texture_cache
+	const SIZE := 64
+	var noise := FastNoiseLite.new()
+	noise.seed = 11
+	noise.frequency = 0.06
+	noise.fractal_octaves = 4
+	var image := Image.create(SIZE, SIZE, true, Image.FORMAT_RGBA8)
+	for y in SIZE:
+		for x in SIZE:
+			var r := Vector2(x + 0.5 - SIZE * 0.5, y + 0.5 - SIZE * 0.5).length() / (SIZE * 0.5)
+			var fall := 1.0 - smoothstep(0.15, 1.0, r)
+			var n := noise.get_noise_2d(x, y) * 0.5 + 0.5
+			var a := clampf(fall * fall * smoothstep(0.25, 0.8, n) * 1.3, 0.0, 1.0)
+			var shade := lerpf(0.9, 1.05, n)
+			image.set_pixel(x, y, Color(shade, shade, shade, a))
+	image.generate_mipmaps()
+	_dust_texture_cache = ImageTexture.create_from_image(image)
+	return _dust_texture_cache
 
 
 func _splash_material() -> StandardMaterial3D:
 	return _billboard(SPLASH_COLOR, true, false)
 
 
-## Motte : petit éclat opaque, éclairé (terre ou boue), non flou.
+## Motte : petit éclat de terre irrégulier, éclairé (terre ou boue), non flou.
+## CR1 : l'ancienne texture (dégradé carré, 12-24 cm, découpe nette) donnait des cubes noirs à
+## contre-jour dans les gros plans ; désormais silhouette bosselée (`_clod_texture`), 5-12 cm,
+## rétroéclairage (terre fine, jamais noire face au soleil) et fondu tramé en fin de vie.
 func _clod_material() -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = GROUND_CLODS["dry"]
-	var gradient := Gradient.new()
-	gradient.offsets = PackedFloat32Array([0.0, 0.55, 0.7])
-	gradient.colors = PackedColorArray([Color(1, 1, 1, 1), Color(0.8, 0.8, 0.8, 1), Color(1, 1, 1, 0)])
-	var texture := GradientTexture2D.new()
-	texture.gradient = gradient
-	texture.fill = GradientTexture2D.FILL_SQUARE
-	texture.fill_from = Vector2(0.5, 0.5)
-	texture.fill_to = Vector2(1.0, 0.5)
-	texture.width = 16
-	texture.height = 16
-	mat.albedo_texture = texture
+	mat.albedo_texture = _clod_texture()
 	mat.vertex_color_use_as_albedo = true
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	mat.alpha_scissor_threshold = 0.5
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_HASH
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	mat.billboard_keep_scale = true
 	mat.roughness = 1.0
+	mat.backlight_enabled = true
+	mat.backlight = Color(0.55, 0.5, 0.42)
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return mat
+
+
+## CR1 : silhouette de motte bosselée (rayon bruité par l'angle), bord un peu plus sombre.
+static func _clod_texture() -> ImageTexture:
+	const SIZE := 32
+	var image := Image.create(SIZE, SIZE, false, Image.FORMAT_RGBA8)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var lobes: Array[float] = []
+	for k in 7:
+		lobes.append(rng.randf_range(0.7, 1.0))
+	for y in SIZE:
+		for x in SIZE:
+			var d := Vector2(x + 0.5 - SIZE * 0.5, y + 0.5 - SIZE * 0.5) / (SIZE * 0.5)
+			var angle := fposmod(d.angle(), TAU) / TAU * 7.0
+			var i := int(angle)
+			var radius := lerpf(lobes[i % 7], lobes[(i + 1) % 7], angle - i) * 0.95
+			var r := d.length() / radius
+			if r > 1.0:
+				image.set_pixel(x, y, Color(1, 1, 1, 0))
+			else:
+				var shade := lerpf(1.05, 0.7, r * r) * rng.randf_range(0.85, 1.1)
+				image.set_pixel(x, y, Color(shade, shade, shade, 1.0))
+	return ImageTexture.create_from_image(image)
 
 
 ## Fumée de bombarde : planche de fumée animée du lot V3 (A1-13, `fire_smoke.gdshader`), blanche

@@ -35,6 +35,11 @@ var FIELD_D := 800.0
 ## Domaine de la splatmap et de la carte de hauteurs de l'herbe (x0, z0, largeur, profondeur) :
 ## le champ plus 400 m de chaque côté.
 var SPLAT_RECT := Rect2(-400, -400, 2000, 1600)
+## CR1 : couche de rendu des surfaces qui reçoivent les décales d'interface (contour de formation,
+## fantôme d'arrivée) : sol, eau, herbe. Les décales la prennent pour `cull_mask` : sans elle, leur
+## boîte de 30 m projetait le trait sur les figurines, chevaux et murs debout dans la bande
+## (soldats « fantômes » blancs, caparaçons rougis, bande blanche sur les piles de pont).
+const DECAL_LAYER := 1 << 10
 const SPLAT_TEXEL := 4.0
 const HEIGHT_TEXEL := 10.0
 var NEAR_RECT := Rect2(-900, -900, 3000, 2600)
@@ -1158,6 +1163,7 @@ func _add_mesh(node_name: String, mesh: ArrayMesh, shadows: bool) -> MeshInstanc
 	instance.mesh = mesh
 	instance.material_override = ground_material
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	instance.layers |= DECAL_LAYER
 	add_child(instance)
 	return instance
 
@@ -1360,6 +1366,7 @@ func _build_river(river: Dictionary) -> void:
 	instance.name = "River"
 	instance.mesh = mesh
 	instance.material_override = mat
+	instance.layers |= DECAL_LAYER
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(instance)
 
@@ -1434,6 +1441,7 @@ func _build_streams() -> void:
 		instance.name = "Stream"
 		instance.mesh = mesh
 		instance.material_override = mat
+		instance.layers |= DECAL_LAYER
 		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		instance.visibility_range_end = 1400.0
 		add_child(instance)

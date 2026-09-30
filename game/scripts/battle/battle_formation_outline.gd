@@ -165,6 +165,7 @@ func _make_decal(id: int) -> Decal:
 	decal.upper_fade = 0.05
 	decal.lower_fade = 0.05
 	decal.normal_fade = 0.0
+	decal.cull_mask = BattleTerrain.DECAL_LAYER  # CR1 : sol seulement, jamais les figurines
 	add_child(decal)
 	_decals[id] = decal
 	_entries[id] = [State.NONE, Vector3i(-1, -1, -1), 0.0, 0.0, 0.0, 0.0]

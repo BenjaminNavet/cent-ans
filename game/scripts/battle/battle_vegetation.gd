@@ -104,6 +104,7 @@ func build(terrain: BattleTerrain, weather: String, da6_on: int = -1) -> void:
 		instance.material_override = mat
 		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		instance.custom_aabb = AABB(Vector3(-radius, -300, -radius), Vector3(radius * 2.0, 900, radius * 2.0))
+		instance.layers |= BattleTerrain.DECAL_LAYER  # CR1 : le contour de formation passe sur l'herbe
 		add_child(instance)
 		instance.set_meta("spacing", spacing)
 		_layers.append(instance)
