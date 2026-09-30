@@ -572,7 +572,7 @@ func _render_offers() -> void:
 		var offer_id := int(offer["id"])
 		var kind := str(offer.get("kind", ""))
 		var yes := Button.new()
-		yes.text = {"protection": "Intervenir", "arbitration": "Imposer la paix"}.get(kind, "Accepter")
+		yes.text = {"protection": "Intervenir", "arbitration": "Imposer la paix", "summons": "Obéir"}.get(kind, "Accepter")
 		yes.pressed.connect(func() -> void: offer_answered.emit(offer_id, true))
 		row.add_child(yes)
 		if kind == "arbitration" and feudal.has(offer_id):
@@ -585,7 +585,7 @@ func _render_offers() -> void:
 				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
 				row.add_child(take)
 		var no := Button.new()
-		no.text = {"protection": "Se dérober", "arbitration": "Laisser faire"}.get(kind, "Refuser")
+		no.text = {"protection": "Se dérober", "arbitration": "Laisser faire", "summons": "Passer outre"}.get(kind, "Refuser")
 		no.pressed.connect(func() -> void: offer_answered.emit(offer_id, false))
 		row.add_child(no)
 		_offers_box.add_child(row)

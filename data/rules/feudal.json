@@ -57,7 +57,8 @@
       "impose_peace_power_ratio": 1.5,
       "take_side_attitude_gap": 40,
       "imposed_peace_loyalty_drop": 5,
-      "opposed_loyalty_drop": 20
+      "opposed_loyalty_drop": 20,
+      "defied_summons_loyalty_drop": 15
     }
   },
   "host": {

@@ -641,6 +641,11 @@ pub fn war_escalation_preview(
     if let Some(lord) = common_liege(state, data, attacker, target) {
         let (verdict, why) = (policy().arbitration)(state, data, &lord, attacker, target);
         let (likelihood, what) = match &verdict {
+            // ADR 0146: the player is summoned, and may defy the summons.
+            Arbitration::ImposePeace if attacker == &state.player_faction => (
+                Likelihood::Likely,
+                "vous sommera de faire la paix".to_owned(),
+            ),
             Arbitration::ImposePeace => (Likelihood::Likely, "imposera la paix".to_owned()),
             Arbitration::TakeSide { side } if side == target => (
                 Likelihood::Likely,
@@ -716,8 +721,66 @@ pub(crate) fn escalate_war(
         push_feudal_offer(state, data, target, proposal, text);
     } else {
         let (verdict, _) = (policy().arbitration)(state, data, &lord, attacker, target);
-        apply_arbitration(state, data, &lord, attacker, target, &verdict);
+        if verdict == Arbitration::ImposePeace && attacker == &state.player_faction {
+            summon_to_peace(state, data, &lord, target);
+        } else {
+            apply_arbitration(state, data, &lord, attacker, target, &verdict);
+        }
     }
+}
+
+/// ADR 0146: the AI lord of both parties orders the player, who declared a
+/// private war, to make peace. The player chooses: obey (imposed peace) or
+/// defy (the war goes on, loyalty drops). Imposing the peace at once voided
+/// the declaration the player had just confirmed, with no say in it.
+fn summon_to_peace(
+    state: &mut CampaignState,
+    data: &GameData,
+    lord: &FactionId,
+    target: &FactionId,
+) {
+    let rules = &data.feudal_rules.escalation.arbitration;
+    let text = format!(
+        "{} vous somme de faire la paix avec {}, son vassal comme vous. Obéir : paix blanche et \
+         trêve de {} tours (loyauté −{}) ; passer outre : la guerre continue (loyauté −{}).",
+        faction_label(data, lord),
+        faction_label(data, target),
+        rules.truce_turns,
+        rules.imposed_peace_loyalty_drop,
+        rules.defied_summons_loyalty_drop
+    );
+    let proposal = crate::diplomacy::Proposal::PeaceSummons {
+        target: target.clone(),
+    };
+    push_feudal_offer(state, data, lord, proposal, text);
+}
+
+/// ADR 0146: the player refused (or let expire) its lord's summons to make
+/// peace with `target`: the war goes on and its loyalty drops.
+fn defy_summons(
+    state: &mut CampaignState,
+    data: &GameData,
+    lord: &FactionId,
+    player: &FactionId,
+    target: &FactionId,
+) {
+    use crate::events::{EventKind, GameEvent};
+    if !state.is_at_war(player, target) {
+        return; // settled meanwhile
+    }
+    let drop = data
+        .feudal_rules
+        .escalation
+        .arbitration
+        .defied_summons_loyalty_drop;
+    adjust_loyalty(state, player, -i32::from(drop));
+    let text = format!(
+        "{} passe outre la sommation de {} et poursuit sa guerre contre {}.",
+        faction_label(data, player),
+        faction_label(data, lord),
+        faction_label(data, target)
+    );
+    state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(player));
 }
 
 /// The direct suzerain of `vassal` is called to protect it against
@@ -1031,6 +1094,9 @@ pub(crate) fn refuse_feudal_call(
         }
         Proposal::Arbitration { attacker, target } => {
             apply_arbitration(state, data, player, attacker, target, &Arbitration::LetBe);
+        }
+        Proposal::PeaceSummons { target } => {
+            defy_summons(state, data, &offer.from, player, target);
         }
         _ => {}
     }
