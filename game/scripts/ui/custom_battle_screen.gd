@@ -10,6 +10,9 @@ extends PanelContainer
 ## « Lancer la bataille » passe la configuration à `BattleScene.custom_config` puis change de
 ## scène, comme les batailles de démonstration. La dernière composition est gardée dans les
 ## réglages (`custom_battle/last`). Échap ou « Fermer » : signal `closed`.
+## NT11 : année de la bataille (1337-1453, bornes au cœur) qui filtre le roster selon les dates de
+## disponibilité des unités ; engins de l'assiégeant (échelles, bélier, beffrois) choisis dans le
+## menu « Engins » de la ligne du siège.
 
 signal closed
 signal battle_started(config: Dictionary)
@@ -28,7 +31,7 @@ const PLACES := [["city", "Cité"], ["borough", "Bourg fortifié"], ["castle", "
 const CATEGORY_LABELS := {"infantry": "Infanterie", "ranged": "Tireurs", "cavalry": "Cavalerie", "siege": "Siège"}
 const DEFAULT_FACTIONS := {"attacker": "fac_france", "defender": "fac_england"}
 
-## Règles du cœur (`custom_rules`), factions jouables, rosters par faction (id -> [entrées]).
+## Règles du cœur (`custom_rules`), factions jouables, rosters par « faction@année » (-> [entrées]).
 var rules: Dictionary = {}
 var factions: Array = []
 var rosters: Dictionary = {}
@@ -50,6 +53,8 @@ var hour_option: OptionButton
 var siege_check: CheckBox
 var fortification_spin: SpinBox
 var place_option: OptionButton
+var year_spin: SpinBox
+var engines_button: MenuButton
 var player_option: OptionButton
 var errors_label: Label
 var launch_button: Button
@@ -106,12 +111,20 @@ func _initial_config() -> Dictionary:
 		"defender": {"faction": DEFAULT_FACTIONS["defender"], "budget": int(rules.get("default_budget", 6000)), "units": []},
 		"terrain": "plains", "season": "summer", "weather": "", "hour": "",
 		"siege": false, "place": "city", "fortification": int(rules.get("default_fortification", 2)), "player_side": "attacker",
+		"year": int(rules.get("default_year", 1337)), "engines": default_engines(),
 	}
 	var saved := saved_config()
 	for key in out:
 		if not saved.has(key):
 			continue
-		if out[key] is Dictionary and saved[key] is Dictionary:
+		if key == "engines":
+			var engines: Dictionary = saved[key] if saved[key] is Dictionary else {}
+			out[key] = {
+				"ladders": bool(engines.get("ladders", out[key]["ladders"])),
+				"ram": bool(engines.get("ram", out[key]["ram"])),
+				"towers": clampi(int(engines.get("towers", out[key]["towers"])), 0, int(rules.get("max_siege_towers", 2))),
+			}
+		elif out[key] is Dictionary and saved[key] is Dictionary:
 			var side: Dictionary = saved[key]
 			out[key] = {
 				"faction": str(side.get("faction", out[key]["faction"])),
@@ -124,6 +137,7 @@ func _initial_config() -> Dictionary:
 			out[key] = int(saved[key])
 		else:
 			out[key] = str(saved[key])
+	out["year"] = clampi(int(out["year"]), int(rules.get("min_year", 1337)), int(rules.get("max_year", 1453)))
 	for side in SIDES:
 		if not _has_faction(str(out[side]["faction"])):
 			out[side]["faction"] = DEFAULT_FACTIONS[side] if _has_faction(DEFAULT_FACTIONS[side]) else (str(factions[0]["id"]) if not factions.is_empty() else "")
@@ -283,9 +297,20 @@ func _build_field() -> Control:
 	for entry in PLAYER_SIDES:
 		player_option.add_item(entry[1])
 	player_option.item_selected.connect(func(i: int) -> void: _set_key("player_side", PLAYER_SIDES[i][0]))
-	# Fin de la ligne Heure/Joueur, puis ligne du siège : case, vide, fortification, type de place.
-	for i in 2:
-		grid.add_child(Control.new())
+	# Fin de la ligne Heure/Joueur : l'année (NT11), puis ligne du siège : case, engins,
+	# fortification, type de place.
+	var year_label := Label.new()
+	year_label.text = "Année"
+	RichTooltip.attach_plain(year_label, "custom_battle_year")
+	year_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	grid.add_child(year_label)
+	year_spin = SpinBox.new()
+	year_spin.name = "Year"
+	year_spin.min_value = float(rules.get("min_year", 1337))
+	year_spin.max_value = float(rules.get("max_year", 1453))
+	year_spin.step = 1
+	year_spin.value_changed.connect(func(value: float) -> void: set_year(int(value)))
+	grid.add_child(year_spin)
 	siege_check = CheckBox.new()
 	siege_check.name = "Siege"
 	siege_check.text = "Siège : le camp 2 défend une place"
@@ -294,7 +319,18 @@ func _build_field() -> Control:
 		config["siege"] = on
 		refresh())
 	grid.add_child(siege_check)
-	grid.add_child(Control.new())
+	engines_button = MenuButton.new()
+	engines_button.name = "Engines"
+	engines_button.flat = false
+	RichTooltip.attach_plain(engines_button, "custom_battle_engines")
+	var popup := engines_button.get_popup()
+	popup.hide_on_checkable_item_selection = false
+	popup.add_check_item("Échelles", 0)
+	popup.add_check_item("Bélier", 1)
+	for towers in int(rules.get("max_siege_towers", 2)) + 1:
+		popup.add_radio_check_item(_towers_label(towers), 10 + towers)
+	popup.id_pressed.connect(_on_engine_pressed)
+	grid.add_child(engines_button)
 	var fort_label := Label.new()
 	fort_label.text = "Fortification"
 	RichTooltip.attach_plain(fort_label, "custom_battle_fortification")
@@ -345,6 +381,8 @@ func _sync_controls() -> void:
 	siege_check.set_pressed_no_signal(bool(config["siege"]))
 	fortification_spin.set_value_no_signal(float(config["fortification"]))
 	place_option.selected = maxi(_index_of(PLACES, str(config.get("place", "city"))), 0)
+	year_spin.set_value_no_signal(float(config["year"]))
+	_sync_engines()
 	_refreshing = false
 
 
@@ -358,11 +396,84 @@ static func _index_of(pairs: Array, key: String) -> int:
 # --- Composition -------------------------------------------------------------------------------
 
 
-## Roster de `faction` (cache ; `[]` sans extension).
+## Roster de `faction` pour l'année choisie (cache ; `[]` sans extension).
 func roster(faction: String) -> Array:
-	if not rosters.has(faction):
-		rosters[faction] = _sim.call("custom_roster", data_dir(), faction) if _sim != null else []
-	return rosters[faction]
+	var year := int(config.get("year", rules.get("default_year", 1337)))
+	var key := "%s@%d" % [faction, year]
+	if not rosters.has(key):
+		rosters[key] = _sim.call("custom_roster", data_dir(), faction, year) if _sim != null else []
+	return rosters[key]
+
+
+## NT11 : année de la bataille ; les unités qui ne sont plus levées cette année-là quittent les armées.
+func set_year(year: int) -> void:
+	if _refreshing:
+		return
+	year = clampi(year, int(rules.get("min_year", 1337)), int(rules.get("max_year", 1453)))
+	if int(config["year"]) == year:
+		return
+	config["year"] = year
+	for side in SIDES:
+		var faction := str(config[side]["faction"])
+		config[side]["units"] = (config[side]["units"] as Array).filter(func(u: String) -> bool: return not roster_entry(faction, u).is_empty())
+	refresh()
+
+
+## Engins de l'assiégeant par défaut (règles du cœur).
+func default_engines() -> Dictionary:
+	var engines: Dictionary = rules.get("default_engines", {})
+	return {
+		"ladders": bool(engines.get("ladders", true)),
+		"ram": bool(engines.get("ram", true)),
+		"towers": int(engines.get("towers", 0)),
+	}
+
+
+## NT11 : choisit les engins de l'assiégeant (beffrois bornés par `max_siege_towers`).
+func set_engines(ladders: bool, ram: bool, towers: int) -> void:
+	config["engines"] = {"ladders": ladders, "ram": ram, "towers": clampi(towers, 0, int(rules.get("max_siege_towers", 2)))}
+	_sync_engines()
+	refresh()
+
+
+func _on_engine_pressed(id: int) -> void:
+	var engines: Dictionary = config["engines"]
+	match id:
+		0:
+			set_engines(not bool(engines["ladders"]), bool(engines["ram"]), int(engines["towers"]))
+		1:
+			set_engines(bool(engines["ladders"]), not bool(engines["ram"]), int(engines["towers"]))
+		_:
+			set_engines(bool(engines["ladders"]), bool(engines["ram"]), id - 10)
+
+
+static func _towers_label(towers: int) -> String:
+	match towers:
+		0:
+			return "Aucun beffroi"
+		1:
+			return "1 beffroi"
+	return "%d beffrois" % towers
+
+
+## Coches du menu « Engins » et résumé sur le bouton.
+func _sync_engines() -> void:
+	if engines_button == null:
+		return
+	var engines: Dictionary = config["engines"]
+	var popup := engines_button.get_popup()
+	popup.set_item_checked(popup.get_item_index(0), bool(engines["ladders"]))
+	popup.set_item_checked(popup.get_item_index(1), bool(engines["ram"]))
+	for towers in int(rules.get("max_siege_towers", 2)) + 1:
+		popup.set_item_checked(popup.get_item_index(10 + towers), towers == int(engines["towers"]))
+	var parts := PackedStringArray()
+	if bool(engines["ladders"]):
+		parts.append("échelles")
+	if bool(engines["ram"]):
+		parts.append("bélier")
+	if int(engines["towers"]) > 0:
+		parts.append(_towers_label(int(engines["towers"])).to_lower())
+	engines_button.text = "Engins : " + (", ".join(parts) if not parts.is_empty() else "aucun")
 
 
 func roster_entry(faction: String, unit_id: String) -> Dictionary:
@@ -435,6 +546,8 @@ func battle_config() -> Dictionary:
 	for side in SIDES:
 		out[side]["budget"] = int(out[side]["budget"])
 	out["fortification"] = int(out["fortification"])
+	out["year"] = int(out["year"])
+	out["engines"]["towers"] = int(out["engines"]["towers"])
 	return out
 
 
@@ -453,6 +566,7 @@ func refresh() -> void:
 		label.modulate = Color(1.0, 0.6, 0.5) if int(side_report.get("cost", 0)) > int(side_report.get("budget", 0)) else Color(1, 1, 1)
 	fortification_spin.editable = bool(config["siege"])
 	place_option.disabled = not bool(config["siege"])
+	engines_button.disabled = not bool(config["siege"])
 	var errors: Array = report.get("errors", [])
 	errors_label.text = "\n".join(PackedStringArray(errors))
 	errors_label.visible = not errors.is_empty()

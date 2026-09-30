@@ -1462,6 +1462,8 @@ impl BattleSim {
                     "keep" => h.keep,
                     // NT8: the keep's height (0 for other buildings).
                     "height" => h.height,
+                    // NT11: a keep with a crenellated terrace roof.
+                    "terrace" => h.terrace,
                 }
                 .to_variant()
             })
