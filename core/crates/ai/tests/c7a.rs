@@ -136,6 +136,20 @@ fn the_ai_wins_back_a_lost_place() {
     let s = state.settlements.get_mut(&meaux).unwrap();
     s.controller = fac("fac_england");
     s.garrison.clear();
+    // Lot SL1: the English host in London stands one crossing from Calais
+    // (route de l'Étape) and France rightly defends Calais first; keep it
+    // in York so that only the lost place is at stake.
+    let english = state
+        .armies
+        .iter()
+        .filter(|(_, a)| a.faction == fac("fac_england"))
+        .filter(|(_, a)| a.settlement() == Some(&set("set_londres")))
+        .map(|(id, _)| id.clone())
+        .collect::<Vec<_>>();
+    for id in english {
+        state.armies.get_mut(&id).unwrap().position =
+            sim_campaign::ArmyPosition::Settlement(set("set_york"));
+    }
     let orders = ai::plan_turn(&state, &data, &fac("fac_france"));
     let targets: Vec<SettlementId> = state
         .armies

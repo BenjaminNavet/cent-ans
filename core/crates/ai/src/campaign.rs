@@ -39,6 +39,10 @@ pub const SIEGE_SUPERIORITY: f64 = 1.5;
 /// Value kept by a claimed target reached through a sea crossing (landings
 /// are costly); unclaimed provinces are never invaded by sea.
 pub const SEA_INVASION_FACTOR: f64 = 0.6;
+/// Lot SL1 (ADR 0117): weight of a hostile army across the sea from a
+/// settlement in its threat (a landing costs a season and may be
+/// intercepted; with the sea lanes, London stands one crossing from Calais).
+pub const SEA_THREAT_FACTOR: f64 = 0.5;
 /// An army defends a province when it is at least this strong relative to the threat.
 pub const DEFENCE_RATIO: f64 = 0.7;
 /// Share of income spent on armies at war / at peace.
@@ -276,6 +280,7 @@ impl<'a> Context<'a> {
 
     /// Hostile army power anchored on `settlement` or one edge away (lot
     /// M2: an army in the field counts at its nearest settlement).
+    /// Lot SL1: an army across the sea counts for [`SEA_THREAT_FACTOR`].
     fn threat_at(&self, settlement: &SettlementId) -> f64 {
         let mut nodes = vec![settlement.clone()];
         nodes.extend(edges(self.data, settlement).into_iter().map(|(s, _)| s));
@@ -288,7 +293,14 @@ impl<'a> Context<'a> {
                     .get(*id)
                     .is_some_and(|a| self.state.is_at_war(self.faction, &a.faction))
             })
-            .map(|(id, _)| self.state.army_power(self.data, id))
+            .map(|(id, anchor)| {
+                let power = self.state.army_power(self.data, id);
+                if sim_campaign::movement::is_sea_crossing(self.data, anchor, settlement) {
+                    power * SEA_THREAT_FACTOR
+                } else {
+                    power
+                }
+            })
             .sum()
     }
 
