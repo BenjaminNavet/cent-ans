@@ -380,6 +380,42 @@ fn entering_an_enemy_place_lays_siege() {
     }
 }
 
+/// A besieger that marches off leaves the siege stance and the siege is
+/// lifted at once (it kept the camp drawn and looked stuck at the place).
+#[test]
+fn marching_off_a_siege_lifts_it_at_once() {
+    let data = data_with_grid(|_| {});
+    let bordeaux = set("set_bordeaux");
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).unwrap();
+    let french = main_army(&state, "fac_france");
+    state
+        .armies
+        .retain(|id, a| *id == french || a.faction == fac("fac_france"));
+    let point = data.settlement_point(&bordeaux).unwrap();
+    state.armies.get_mut(&french).unwrap().position =
+        ArmyPosition::field(east(&data, point, -12.0));
+    march(
+        &mut state,
+        &data,
+        Order::move_to(french.clone(), bordeaux.clone()),
+    );
+    assert!(state.settlements[&bordeaux].siege.is_some());
+    state.end_turn_with(&data, idle);
+    assert!(state.armies[&french].movement_left > 0);
+    let report = march(
+        &mut state,
+        &data,
+        Order::move_to_point(french.clone(), east(&data, point, -20.0)),
+    );
+    assert_eq!(report.stop, StopReason::Arrived);
+    assert_eq!(state.armies[&french].stance, sim_campaign::Stance::Normal);
+    assert!(state.settlements[&bordeaux].siege.is_none());
+    assert!(state
+        .pending_events
+        .iter()
+        .any(|e| e.kind == EventKind::SiegeLifted));
+}
+
 #[test]
 fn an_ungarrisoned_place_is_taken_and_a_friendly_one_is_a_stop() {
     let data = data_with_grid(|_| {});

@@ -654,9 +654,23 @@ impl CampaignState {
         let path = self
             .find_path(data, army, point)
             .ok_or(OrderError::NoPath)?;
+        let besieged = self.besieged_by(army);
         // CV3: marching off leaves the ambush and the entrenched camp.
         crate::posture::leave_static_stance(self, army);
-        march(self, data, army, &path.waypoints, &target, events).ok_or(OrderError::NoPath)
+        let report =
+            march(self, data, army, &path.waypoints, &target, events).ok_or(OrderError::NoPath)?;
+        if let Some(settlement) = besieged {
+            crate::siege::leave_siege(self, data, army, &settlement, events);
+        }
+        Ok(report)
+    }
+
+    /// Settlement `army` besieges (siege stance, standing in it).
+    fn besieged_by(&self, army: &ArmyId) -> Option<SettlementId> {
+        self.armies
+            .get(army)
+            .filter(|a| a.stance == Stance::Siege)
+            .and_then(|a| a.settlement().cloned())
     }
 
     /// Order `Attack` (lot M2): `army` closes in on `target` (whose own zone
@@ -712,7 +726,11 @@ impl CampaignState {
             x: end[0],
             y: end[1],
         };
+        let besieged = self.besieged_by(army);
         apply_walk(self, data, army, &walk, &path.waypoints, &destination);
+        if let Some(settlement) = besieged {
+            crate::siege::leave_siege(self, data, army, &settlement, events);
+        }
         if let Some(a) = self.armies.get_mut(army) {
             a.movement_left = 0;
             a.clear_plan();
@@ -760,6 +778,7 @@ impl CampaignState {
             a.movement_left = 0;
             a.clear_plan();
         }
+        let besieged = self.besieged_by(army);
         crate::posture::leave_static_stance(self, army);
         // Lot NV1: an enemy squadron may bar the way.
         match crate::naval::intercept(self, data, army, &from, to_port, events) {
@@ -769,6 +788,9 @@ impl CampaignState {
             }
         }
         self.land_crossing(data, army, to_port, events);
+        if let Some(settlement) = besieged {
+            crate::siege::leave_siege(self, data, army, &settlement, events);
+        }
         Ok(())
     }
 
