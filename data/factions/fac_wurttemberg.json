@@ -18,8 +18,8 @@
   "suzerain": "fac_empire",
   "primary_title": "tit_wurttemberg",
   "heraldry": {
-    "blazon": "D'or à trois bois de cerf de sable, rangés en pal.",
-    "description": "Armes historiques des comtes de Wurtemberg (bois de cerf), attestées dès le début du XIVe siècle.",
+    "blazon": "D'or à trois bois de cerf de sable, posés l'un sur l'autre.",
+    "description": "Armes historiques des comtes de Wurtemberg (bois de cerf), attestées dès le XIIIe siècle.",
     "primary_color": "#F2C230",
     "secondary_color": "#1A1A1A"
   },
@@ -37,7 +37,7 @@
     {
       "faction": "fac_empire",
       "status": "vassal",
-      "note": "Ulrich IV soutient Louis IV de Bavière, comme son père Eberhard avant sa réconciliation de 1319."
+      "note": "Ulrich III soutient Louis IV de Bavière, comme son père Eberhard avant sa réconciliation de 1319."
     }
   ],
   "ai_personality": {
@@ -46,7 +46,7 @@
     "trade": 50,
     "piety": 55
   },
-  "description": "Comté de Wurtemberg autour de Stuttgart et du Neckar, tenu par Ulrich IV (1325-1344), rival régional des villes libres et des Habsbourg en Souabe.",
+  "description": "Comté de Wurtemberg autour de Stuttgart et du Neckar, tenu par Ulrich III (1325-1344), rival régional des villes libres et des Habsbourg en Souabe.",
   "sources": [
     "Ulrich IV de Wurtemberg",
     "Comté de Wurtemberg"

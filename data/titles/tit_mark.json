@@ -7,8 +7,8 @@
     "local_language": "moyen bas-allemand"
   },
   "heraldry": {
-    "blazon": "D'or à trois chevrons de gueules.",
-    "description": "Armes historiques des comtes de la Marck : trois chevrons de gueules sur champ d'or.",
+    "blazon": "D'or à la fasce échiquetée d'argent et de gueules de trois tires.",
+    "description": "Fasce échiquetée des comtes de la Marck.",
     "primary_color": "#F2C230",
     "secondary_color": "#C8102E"
   },
@@ -43,7 +43,7 @@
       }
     }
   ],
-  "description": "Comté de la Marck, en Westphalie, tenu par Adolphe II (1328-1347) ; sa maison a déjà donné plusieurs archevêques de Cologne.",
+  "description": "Comté de la Marck, en Westphalie, tenu par Adolphe II (1328-1347) ; son oncle Adolphe est évêque de Liège depuis 1313.",
   "sources": [
     "Adolphe II de la Marck",
     "Comté de la Marck"

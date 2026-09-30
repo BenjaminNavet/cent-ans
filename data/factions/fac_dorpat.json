@@ -17,12 +17,12 @@
   "succession_law": "elective",
   "primary_title": "tit_dorpat",
   "heraldry": {
-    "blazon": "De sable à deux clefs d'argent en sautoir.",
-    "description": "Clefs croisées de l'évêché de Dorpat (armes simplifiées).",
-    "primary_color": "#1A1A1A",
+    "blazon": "De gueules à l'épée et à la clef d'argent passées en sautoir.",
+    "description": "Épée de saint Paul et clef de saint Pierre, patrons de la cathédrale de Dorpat, d'après les sceaux et monnaies épiscopaux.",
+    "primary_color": "#C8102E",
     "secondary_color": "#F5F1E6",
-    "uncertain": true,
-    "note": "Blason non retrouvé pour 1337."
+    "note": "Émaux du XIVe siècle non attestés avec certitude.",
+    "uncertain": true
   },
   "titles": [
     "Évêque de Dorpat",

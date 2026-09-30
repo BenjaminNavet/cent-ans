@@ -24,7 +24,7 @@
     "secondary_color": "#F2C230"
   },
   "titles": [
-    "Duc d'Opole et de Racibórz",
+    "Duc d'Opole",
     "Vassal du roi de Bohême"
   ],
   "treasury": 3500,
@@ -53,7 +53,7 @@
     "trade": 55,
     "piety": 60
   },
-  "description": "Duchés de Haute-Silésie (Opole, Racibórz, Cieszyn, Oświęcim, Opava) tenus par des branches piast vassales de la Bohême ; Boleslas II d'Opole en est le plus puissant.",
+  "description": "Duchés de Haute-Silésie (Opole, Cieszyn, Oświęcim, et Opava-Racibórz du Přemyslide Nicolas II) tenus par des princes vassaux de la Bohême ; Boleslas II d'Opole en est le plus puissant.",
   "sources": [
     "Boleslas II d'Opole",
     "Duché d'Opole",

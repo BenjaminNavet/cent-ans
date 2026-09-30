@@ -7,12 +7,10 @@
     "local_language": "moyen haut-allemand"
   },
   "heraldry": {
-    "blazon": "D'argent à l'aigle de sable, becquée et membrée d'or.",
-    "description": "Aigle noir de Silésie sur argent.",
-    "primary_color": "#F5F1E6",
-    "secondary_color": "#1A1A1A",
-    "uncertain": true,
-    "note": "Armes de Głogów : distinction de jeu."
+    "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules, chargée d'un croissant d'argent, à la bordure de gueules.",
+    "description": "Aigle de Silésie des Piast de Głogów-Żagań ; bordure de gueules de jeu pour la distinguer de Legnica.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1A1A1A"
   },
   "de_jure_liege": "tit_bohemia",
   "de_jure_provinces": [

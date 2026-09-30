@@ -18,10 +18,11 @@
   "suzerain": "fac_empire",
   "primary_title": "tit_meissen",
   "heraldry": {
-    "blazon": "D'or et de sable burelé, au crancelin de sinople brochant en bande.",
-    "description": "Armes de la maison de Wettin, le « crancelin » (couronne de rue) brochant sur les burelles d'or et de sable.",
+    "blazon": "D'or au lion de sable, armé, lampassé et couronné de gueules.",
+    "description": "Lion de Misnie, armes des margraves de la maison de Wettin ; le burelé au crancelin (armes de Saxe) ne sera repris qu'en 1423.",
     "primary_color": "#F2C230",
-    "secondary_color": "#111111"
+    "secondary_color": "#111111",
+    "note": "Couronne de gueules : brisure de jeu pour distinguer l'écu de celui de la Flandre (même lion de sable sur or)."
   },
   "titles": [
     "Margrave de Misnie",
@@ -47,7 +48,7 @@
     "trade": 55,
     "piety": 55
   },
-  "description": "Maison de Wettin, margraves de Misnie et landgraves de Thuringe ; Frédéric II le Sérieux tient les deux provinces (Meissen, Erfurt), mines d'argent de Freiberg, foires de Leipzig.",
+  "description": "Maison de Wettin, margraves de Misnie et landgraves de Thuringe ; Frédéric II le Sérieux tient les deux provinces (Meissen, Gotha et la Wartbourg), mines d'argent de Freiberg, foires de Leipzig.",
   "sources": [
     "Frédéric II de Misnie",
     "Marche de Misnie"

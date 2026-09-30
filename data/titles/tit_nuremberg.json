@@ -7,10 +7,10 @@
     "local_language": "moyen haut-allemand"
   },
   "heraldry": {
-    "blazon": "Parti : au 1 d'or au lion de sable, armé et lampassé de gueules (Zollern) ; au 2 d'argent au burg de sable (burgraviat).",
-    "description": "Armes composites des burgraves de Nuremberg, maison de Hohenzollern, ancêtres des Hohenzollern de Brandebourg puis de Prusse.",
-    "primary_color": "#1A1A1A",
-    "secondary_color": "#F5F1E6"
+    "blazon": "D'or au lion de sable, armé et couronné de gueules, à la bordure componée d'argent et de gueules.",
+    "description": "Armes du burgraviat de Nuremberg portées par les Hohenzollern de Franconie (l'écartelé d'argent et de sable de Zollern n'y est pas joint en 1337).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1A1A1A"
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [

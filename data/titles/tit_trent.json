@@ -7,12 +7,10 @@
     "local_language": "latin"
   },
   "heraldry": {
-    "blazon": "D'argent à l'aigle bicéphale de sable, couronnée d'or, tenant en son cœur un écu d'azur à la crosse d'or.",
-    "description": "Armes traditionnelles de la principauté épiscopale de Trente, combinant l'aigle impériale et la crosse épiscopale.",
+    "blazon": "D'argent à l'aigle de sable, becquée, membrée et couronnée d'or, les ailes chargées de flammes de gueules.",
+    "description": "Aigle de saint Venceslas, concédée à l'évêché par Jean de Bohême en 1339 (léger anachronisme en 1337).",
     "primary_color": "#F5F1E6",
-    "secondary_color": "#1A1A1A",
-    "uncertain": true,
-    "note": "Composition héraldique plausible pour une principauté épiscopale impériale ; blason exact du XIVe siècle non vérifié à ce budget."
+    "secondary_color": "#1A1A1A"
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [

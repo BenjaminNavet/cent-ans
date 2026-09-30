@@ -18,9 +18,9 @@
   "suzerain": "fac_empire",
   "primary_title": "tit_berg",
   "heraldry": {
-    "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or, semé de cœurs de gueules.",
-    "description": "Armes historiques des comtes de Berg : lion de gueules semé de petits cœurs sur champ d'argent.",
-    "primary_color": "#E5E5E5",
+    "blazon": "D'argent au lion de gueules à la queue fourchée, armé, lampassé et couronné d'azur.",
+    "description": "Lion rouge couronné de bleu des comtes de Berg.",
+    "primary_color": "#F5F1E6",
     "secondary_color": "#C8102E"
   },
   "titles": [
@@ -46,7 +46,7 @@
     "trade": 55,
     "piety": 50
   },
-  "description": "Comté de Berg, rive droite du Rhin face à Cologne, tenu par Adolphe VII (1308-1348), qui fait de Düsseldorf sa résidence favorite.",
+  "description": "Comté de Berg, rive droite du Rhin face à Cologne, tenu par Adolphe VII (Adolphe VI dans l'historiographie allemande, 1308-1348) depuis son château de Burg sur la Wupper ; Düsseldorf ne deviendra résidence qu'à la fin du siècle.",
   "sources": [
     "Adolphe VII de Berg",
     "Comté de Berg",
