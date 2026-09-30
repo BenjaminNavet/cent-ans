@@ -125,7 +125,10 @@ fn winter_gales_cost_men_on_the_open_sea_more_than_along_the_coast() {
         .unwrap();
     let after = state.armies[&army].total_strength();
     let lost = f64::from(before - after) / f64::from(before) * 100.0;
-    assert!(lost > open * 0.7 && lost <= open + 0.01, "{lost}% for {open}%");
+    assert!(
+        lost > open * 0.7 && lost <= open + 0.01,
+        "{lost}% for {open}%"
+    );
     assert!(state
         .pending_events
         .iter()
@@ -160,9 +163,10 @@ fn french_squadrons_in_biscay_cut_the_gascon_wine_trade() {
     };
     let free = route(&state);
     assert!(
-        free.path
-            .windows(2)
-            .any(|w| data.movement_graph.edge(&w[0], &w[1]).is_some_and(|e| e.sea)),
+        free.path.windows(2).any(|w| data
+            .movement_graph
+            .edge(&w[0], &w[1])
+            .is_some_and(|e| e.sea)),
         "the wine goes by sea: {:?}",
         free.path
     );
@@ -189,7 +193,12 @@ fn french_squadrons_in_biscay_cut_the_gascon_wine_trade() {
     );
     let harried = route(&state);
     assert!(!harried.cut);
-    assert!(harried.security < free.security, "{} vs {}", harried.security, free.security);
+    assert!(
+        harried.security < free.security,
+        "{} vs {}",
+        harried.security,
+        free.security
+    );
     assert!(harried.total_value() < free.total_value());
 
     state.naval.control.insert(
@@ -202,7 +211,9 @@ fn french_squadrons_in_biscay_cut_the_gascon_wine_trade() {
     let held = route(&state);
     assert!(held.cut);
     assert!(
-        held.cut_reason.as_deref().is_some_and(|r| r.contains("tenue")),
+        held.cut_reason
+            .as_deref()
+            .is_some_and(|r| r.contains("tenue")),
         "{:?}",
         held.cut_reason
     );
@@ -214,13 +225,31 @@ fn winter_lowers_sea_trade_only() {
     let mut state = CampaignState::new_1337(&data, fac("fac_england"), 3).unwrap();
     let path: Vec<SettlementId> = vec![set("set_southampton"), set("set_bordeaux")];
     state.season = Season::Summer;
-    let summer = trade_sea_legs(&state, &data, &path, &fac("fac_england"), &fac("fac_england"));
+    let summer = trade_sea_legs(
+        &state,
+        &data,
+        &path,
+        &fac("fac_england"),
+        &fac("fac_england"),
+    );
     state.season = Season::Winter;
-    let winter = trade_sea_legs(&state, &data, &path, &fac("fac_england"), &fac("fac_england"));
+    let winter = trade_sea_legs(
+        &state,
+        &data,
+        &path,
+        &fac("fac_england"),
+        &fac("fac_england"),
+    );
     assert_eq!(summer.season_factor, 1.0);
     assert!(winter.season_factor < 0.8);
     let land = vec![set("set_bordeaux"), set("set_libourne")];
-    let dry = trade_sea_legs(&state, &data, &land, &fac("fac_england"), &fac("fac_england"));
+    let dry = trade_sea_legs(
+        &state,
+        &data,
+        &land,
+        &fac("fac_england"),
+        &fac("fac_england"),
+    );
     assert_eq!(dry.season_factor, 1.0);
 }
 

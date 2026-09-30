@@ -40,15 +40,17 @@ fn season_index(season: Season) -> usize {
 
 /// Sea crossed by the lane between `from` and `to`, if a lane links them.
 pub fn lane_sea(data: &GameData, from: &SettlementId, to: &SettlementId) -> Option<SeaZoneId> {
-    data.naval.lane_between(from, to).map(|lane| lane.sea.clone())
+    data.naval
+        .lane_between(from, to)
+        .map(|lane| lane.sea.clone())
 }
 
 /// Factor of the interception chance of a crossing between two ports: the
 /// kind of their lane, 1 for the short passages of the graph.
 pub fn intercept_factor(data: &GameData, from: &SettlementId, to: &SettlementId) -> f64 {
-    data.naval
-        .lane_between(from, to)
-        .map_or(1.0, |lane| data.naval.sea_lanes.rules.kind(lane.kind).intercept_factor)
+    data.naval.lane_between(from, to).map_or(1.0, |lane| {
+        data.naval.sea_lanes.rules.kind(lane.kind).intercept_factor
+    })
 }
 
 /// Kind of the sea edge between two ports: its lane's, coastal for the short
@@ -190,9 +192,7 @@ pub fn trade_sea_legs(
             continue;
         }
         let kind = rules.kind(edge_kind(data, from, to));
-        legs.season_factor = legs
-            .season_factor
-            .min(kind.trade_season_factor.at(season));
+        legs.season_factor = legs.season_factor.min(kind.trade_season_factor.at(season));
         // `naval.blockaded` lists the cities of the blockaded provinces.
         let blockaded = |port: &SettlementId| {
             state.naval.blockaded.contains(port)
@@ -289,14 +289,13 @@ fn lane_view(
                 .routes
                 .iter()
                 .filter(|route| {
-                    let (Some(a), Some(b)) = (catalog.hub(&route.from_hub), catalog.hub(&route.to_hub))
+                    let (Some(a), Some(b)) =
+                        (catalog.hub(&route.from_hub), catalog.hub(&route.to_hub))
                     else {
                         return false;
                     };
                     data.trade_path(&a.settlement, &b.settlement)
-                        .is_some_and(|(_, path)| {
-                            path.windows(2).any(|w| lane.links(&w[0], &w[1]))
-                        })
+                        .is_some_and(|(_, path)| path.windows(2).any(|w| lane.links(&w[0], &w[1])))
                 })
                 .map(|route| route.id.clone())
                 .collect()

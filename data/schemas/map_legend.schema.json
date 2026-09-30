@@ -19,7 +19,7 @@
           "enum": [
             "faction_colors", "gradient", "relation", "color", "fog", "settlement",
             "settlement_owners", "army_banner", "army_plate", "agent", "path", "ring",
-            "construction", "trade_route", "minimap_army", "minimap_frame", "occupation"
+            "construction", "trade_route", "sea_lane", "minimap_army", "minimap_frame", "occupation"
           ]
         },
         "pictogram": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Lot DA3 : pictogramme de data/map/settlement_markers.json (sinon celui du type et du rang)."},
