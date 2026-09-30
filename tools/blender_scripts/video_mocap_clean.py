@@ -291,8 +291,14 @@ def two_bone_ik(a, b, c, target, eps=1e-9):
         return b.copy(), c.copy()
     axis = to / dist
     dist = float(np.clip(dist, abs(l1 - l2) + 1e-6, l1 + l2 - 1e-6))
-    # Pole: component of the current middle joint off the a->target line.
-    pole = (b - a) - axis * np.dot(b - a, axis)
+    # Pole: side of the current bend (middle joint off the current a->c line), made
+    # perpendicular to the new a->target line.
+    cur = c - a
+    cur_len = np.linalg.norm(cur)
+    pole = b - a
+    if cur_len > eps:
+        pole = pole - cur / cur_len * np.dot(pole, cur / cur_len)
+    pole = pole - axis * np.dot(pole, axis)
     if np.linalg.norm(pole) < eps:
         pole = np.cross(axis, [1.0, 0.0, 0.0])
         if np.linalg.norm(pole) < eps:
