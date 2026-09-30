@@ -86,3 +86,33 @@ Conséquences :
 - Moins de travail pendant un zoom (plus de réécriture d'échelle des moulins et panaches) et
   moins de rendu (moulins, panaches et figurants masqués au-delà de leur portée).
 - Détail : `docs/godot-map.md`, section « Moulins, fumées et figurants 1:1 (VT2) ».
+
+## Addendum VT3 (30/09) : arbres à l'échelle 1:1
+
+Contexte : après VT2, les arbres de la carte restaient grossis (`tree_ratio` 0,035, exagération
+jusqu'à ×125 entre d = 28 et 8) : à d = 15 un houppier valait un quartier de Paris, seule
+incohérence d'échelle avec les villes, hameaux et moulins 1:1. Le joueur a validé leur passage à
+l'échelle réelle à toute distance de la vue 3D.
+
+Décision :
+- Arbres (tuiles de végétation, forêt dense, haies, vergers, arbres isolés) à l'échelle 1:1
+  constante : `tree_ratio` 0,018 (chêne 14-22 m, hêtre 17-25 m, conifère 17-27 m).
+- Pas de grossissement quand ils deviennent sous-pixel : plus aucun arbre individuel au-delà de
+  la portée où un arbre de 20 m fait ≈ 1 px (1080p, fov 55°) : rig 30, distance caméra 30 par
+  arbre (fondu par graine). Ombres des arbres jusqu'à d = 12.
+- La forêt lointaine est portée par le terrain : canopée procédurale (relief des houppiers,
+  contraste, quatre octaves filtrées par la taille du pixel) sur la part de forêt du splat.
+- Couvert : forêt dense au pas réel (~21 m), part pleine jusqu'à d = 8, 0,35 à la portée ;
+  plancher natif du pas de semis abaissé (0,05 → 0,01 u).
+- Seuls les incendies (événement de jeu) restent exagérés ; les touffes d'herbe FC3 gardent,
+  hors demande, l'ancienne courbe (`clutter_scale`), découplée des arbres.
+
+Conséquences :
+- Au-delà de d = 30, aucun coût d'arbre (appels de dessin, instances, ombres) ; la lecture des
+  massifs dépend de la canopée du terrain.
+- Près du sol, ~3 × plus d'instances par unité² de forêt : le budget de la forêt dense
+  (300 k instances) resserre son rayon dans les grands massifs ; au-delà, arbres plus clairsemés
+  sur la canopée.
+- Les niveaux lointains de la végétation (imposteurs au-delà de `detail_distance`) ne servent
+  plus en jeu.
+- Détail et mesures : `docs/godot-map.md`, section « Arbres 1:1 (VT3) ».
