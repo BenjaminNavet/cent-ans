@@ -62,3 +62,5 @@ Ouvert : jugement visuel (aucune capture faite) ; réglage de densité et du gro
 - Brutes et planche 2×2 : `~/dev/cent-ans-raw/hb/materials/` (`board_2x2.jpg`, mesures `tiles/report.json`).
 Limites : blé et orge gardent des lignes de semis/traces faiblement visibles en 2×2 (orge : la reprise « nadir » donne un motif radial de drone, rejetée) ; seigle légèrement quadrillé ; la teinte d'origine reste dans l'albédo (seule la luminance est égalisée).
 Test headless `hb2_materials_test.gd` OK (27 couches, DXT1). Prochaine étape : jugement de la planche par la session principale.
+- Suite (retours) : lisière forêt-steppe = score (limite historique 35 % + Köppen BSk/Dfa/Dfb flouté 60 km 65 %, à l'est de 24-28° E) + bruit 300/80/25 km → lisière sinueuse, bosquets en îlots (écart à la droite ~1,1° contre 0,36°) ; carte de couleur : `dry_max` par biome (méditerranéen 0,35, semi-aride 0,5, montagnard 0,6), zones arides de `dryness` gardées → Tell olive, hauts plateaux intermédiaires, Sahara sable. Tests 56 verts.
+- Points ouverts : terrasses méditerranéennes non dessinées ; Dobroudja semi-aride (BSk intérieur au sud de 44° N).

@@ -194,8 +194,13 @@ def _apply_dry_and_mountain(
         del noise
     dry = humid & (dryness >= rules["dry_min"])
     del dryness
-    biome = np.where(dry & north, ids["steppe"], biome)
     biome = np.where(dry & ~north, ids["semi_arid"], biome)
+    del dry
+    # Nord : lisière forêt-steppe (Köppen + limite historique + bruit multi-échelle).
+    score = steppe_score(inputs, legend)
+    open_steppe = humid & north & (score >= rules["forest_steppe"]["threshold"])
+    biome = np.where(open_steppe, ids["steppe"], biome)
+    del score, open_steppe
 
     threshold = mountain_threshold_m(inputs.lat, legend)
     arid = (biome == ids["steppe"]) | (biome == ids["semi_arid"])
@@ -204,6 +209,56 @@ def _apply_dry_and_mountain(
     tundra = biome == ids["mountain"]
     biome = np.where(tundra & ~high, ids[rules["mountain"]["tundra_lowland"]], biome)
     return np.where(high, ids["mountain"], biome).astype(np.uint8)
+
+
+def steppe_score(inputs: BiomeInputs, legend: dict) -> np.ndarray:
+    """Openness of the Pontic-Caspian forest-steppe (steppe where >= ``threshold``).
+
+    Blend of the historical steppe line (:func:`landcover.dryness`, normalised by
+    ``line_max``) and of the Köppen classes (``koppen_weights``: BSk open, Dfa
+    half open, Dfb wooded) blurred over ``koppen_sigma_km`` and faded in east of
+    ``lon_from``..``lon_to`` (not the Pannonian plain), plus noise at several
+    scales (``noise``: ``[km, amplitude]``): the forest edge bends over hundreds
+    of kilometres and the transition belt is a mosaic of groves and grassland.
+    """
+    from scipy import ndimage
+
+    from cent_ans_tools.geo import colormap
+
+    rule = legend["rules"]["forest_steppe"]
+    line = np.clip(inputs.dryness / rule["line_max"], 0.0, 1.0)
+    score = rule["line_weight"] * line
+    del line
+    if inputs.koppen is not None:
+        codes = legend["source"]["codes"]
+        table = np.zeros(256, dtype=np.float32)
+        for name, weight in rule["koppen_weights"].items():
+            table[codes.index(name) + 1] = weight
+        step = ATLANTIC_STEP
+        rows, cols = inputs.shape
+        coarse = table[inputs.koppen[::step, ::step]]
+        sigma = rule["koppen_sigma_km"] * 1000.0 / (inputs.meters_per_px * step)
+        coarse = ndimage.gaussian_filter(coarse, sigma, mode="nearest")
+        full = np.repeat(np.repeat(coarse, step, axis=0), step, axis=1)[:rows, :cols]
+        east = smoothstep(rule["lon_from"], rule["lon_to"], inputs.lon)
+        score = score + (1.0 - rule["line_weight"]) * full * east
+        del coarse, full, east
+    for index, (km, amplitude) in enumerate(rule["noise"]):
+        noise = colormap._grid_noise(
+            inputs.shape,
+            inputs.meters_per_px,
+            km * 1000.0,
+            int(rule["seed"]) + 17 * index,
+        )
+        score = score + amplitude * (noise - 0.5) * 2.0
+        del noise
+    return score.astype(np.float32)
+
+
+def smoothstep(edge0: float, edge1: float, x: np.ndarray) -> np.ndarray:
+    """Hermite step from 0 at ``edge0`` to 1 at ``edge1``."""
+    t = np.clip((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+    return (t * t * (3.0 - 2.0 * t)).astype(np.float32)
 
 
 def classify_koppen(inputs: BiomeInputs, legend: dict) -> np.ndarray:

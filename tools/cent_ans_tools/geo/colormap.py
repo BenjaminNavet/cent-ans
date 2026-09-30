@@ -365,15 +365,29 @@ def _settlement_distance_km(inputs: ColormapInputs) -> np.ndarray:
     return (distance * inputs.meters_per_px / 1000.0).astype(np.float32)
 
 
-def _dryness(inputs: ColormapInputs, style: dict, noise: np.ndarray) -> np.ndarray:
+def _dryness(
+    inputs: ColormapInputs,
+    style: dict,
+    noise: np.ndarray,
+    dry_max: np.ndarray | None = None,
+) -> np.ndarray:
+    """Dryness 0-1: latitude + moisture noise, and the arid lands of ``landcover.dryness``.
+
+    With biomes, the latitude part is capped by the biome's ``dry_max`` (the
+    Tell or Andalusia stay olive rather than sand) while the arid belt and
+    steppes of :func:`landcover.dryness` (Sahara, Pontic steppe) keep full weight.
+    """
     from cent_ans_tools.geo import landcover
 
     base = style["base"]
     by_lat = smoothstep(base["dry_lat_start"], base["dry_lat_full"], inputs.lat)
     steppe = landcover.dryness(inputs.lon, inputs.lat, inputs.height_m, None)
-    dry = np.maximum(by_lat, steppe)
-    dry = dry + base["moisture_noise_amp"] * (noise - 0.5) * 2.0
-    return np.clip(dry, 0.0, 1.0).astype(np.float32)
+    moisture = base["moisture_noise_amp"] * (noise - 0.5) * 2.0
+    if dry_max is None:
+        dry = np.maximum(by_lat, steppe) + moisture
+        return np.clip(dry, 0.0, 1.0).astype(np.float32)
+    dry = np.minimum(np.clip(by_lat + moisture, 0.0, 1.0), dry_max)
+    return np.clip(np.maximum(dry, steppe), 0.0, 1.0).astype(np.float32)
 
 
 # ---------------------------------------------------------------------------
@@ -637,10 +651,11 @@ def compute_fields(inputs: ColormapInputs, style: dict) -> _Fields:
     moisture = _grid_noise(
         inputs.shape, mpp, base_style["moisture_noise_km"] * 1000.0, seed + 1
     )
-    dry = _dryness(inputs, style, moisture)
-    del moisture
-    snow = smoothstep(base_style["snow_from_m"], base_style["snow_full_m"], height)
     biome = biome_weights(inputs.biomes, style, mpp)
+    dry_max = _blend_scalar(biome, "dry_max", 1.0, inputs.shape)
+    dry = _dryness(inputs, style, moisture, dry_max if biome[1] is not None else None)
+    del moisture, dry_max
+    snow = smoothstep(base_style["snow_from_m"], base_style["snow_full_m"], height)
     color = _base_color(inputs, style, weights, dry, land, lake, lake_sd, snow, biome)
 
     # Mosaïque : où, avec quelle probabilité, quelle forme.

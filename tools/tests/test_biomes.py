@@ -232,6 +232,12 @@ PLACES = {
     "Aragon": (-0.9, 41.6, SEMI_ARID),
     "Manche (Espagne)": (-1.9, 39.0, SEMI_ARID),
     "Anatolie centrale": (33.0, 39.0, SEMI_ARID),
+    "Alger (Tell)": (3.05, 36.7, MEDITERRANEAN),
+    "Kabylie": (4.05, 36.6, MEDITERRANEAN),
+    "Constantine": (6.6, 36.35, MEDITERRANEAN),
+    "Rif": (-4.5, 35.0, MEDITERRANEAN),
+    "Hauts plateaux (Djelfa)": (3.25, 34.7, SEMI_ARID),
+    "Biskra": (5.7, 34.85, SEMI_ARID),
 }
 
 
@@ -262,6 +268,26 @@ def test_real_map_places(real_map: tuple, place: str) -> None:
     lon, lat, expected = PLACES[place]
     x, y = grid.lonlat_to_pixel(lon, lat)
     assert biome[int(y), int(x)] == expected, place
+
+
+def test_real_map_forest_steppe_edge_is_not_a_line(real_map: tuple) -> None:
+    """The northern steppe edge (30-55° E) bends away from any straight line."""
+    biome, grid = real_map
+    lons, edges = [], []
+    for lon in np.arange(30.0, 55.5, 1.0):
+        lats = np.arange(56.0, 45.0, -0.05)
+        x, y = grid.lonlat_to_pixel(np.full(lats.shape, lon), lats)
+        rows = np.clip(y.astype(int), 0, biome.shape[0] - 1)
+        cols = np.clip(x.astype(int), 0, biome.shape[1] - 1)
+        column = biome[rows, cols]
+        steppe = np.flatnonzero(column == STEPPE)
+        if len(steppe):
+            lons.append(lon)
+            edges.append(lats[steppe[0]])
+    assert len(lons) >= 20
+    fit = np.polyval(np.polyfit(lons, edges, 1), lons)
+    # Ancienne diagonale bruitée : ~0,36° ; lisière forêt-steppe actuelle : ~1,1°.
+    assert float(np.std(np.asarray(edges) - fit)) > 0.6
 
 
 def test_real_map_has_no_isolated_pixels(real_map: tuple) -> None:
@@ -338,6 +364,39 @@ def test_steppe_forests_only_in_valleys(style: dict) -> None:
     forest = spec["forest_broadleaf"]
     assert _dist(valley, forest) < _dist(open_land, forest)
     assert _dist(open_land, spec["grassland"]) < 0.25
+
+
+def test_tell_is_not_desert(style: dict) -> None:
+    """The mediterranean Tell (36.7° N) is greener than the Sahara (30° N, semi-arid)."""
+    tell = (
+        colormap.bake(
+            _cm_inputs(
+                32,
+                32,
+                MEDITERRANEAN,
+                0,
+                lat=_grid(36.7, 32, 32),
+                lon=_grid(3.0, 32, 32),
+            ),
+            style,
+        )
+        .reshape(-1, 3)
+        .astype(np.float32)
+        .mean(0)
+    )
+    sahara = (
+        colormap.bake(
+            _cm_inputs(
+                32, 32, SEMI_ARID, 0, lat=_grid(30.0, 32, 32), lon=_grid(3.0, 32, 32)
+            ),
+            style,
+        )
+        .reshape(-1, 3)
+        .astype(np.float32)
+        .mean(0)
+    )
+    # Vert relatif au rouge : l'olive du Tell contre le sable saharien.
+    assert tell[1] / tell[0] > sahara[1] / sahara[0] + 0.05
 
 
 def test_biome_bake_is_band_independent(style: dict) -> None:

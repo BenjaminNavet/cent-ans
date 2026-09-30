@@ -146,6 +146,8 @@ towns:
 # Chaque classe surcharge une partie de la palette des terres et module la mosaïque ; les
 # poids des biomes sont fondus sur transition_km (pas de frontière nette). Paramètres :
 #   palette        couleurs remplaçant celles de la palette globale (terres seulement)
+#   dry_max        plafond de la sécheresse venue de la latitude (les zones arides et steppes
+#                  de landcover.dryness gardent leur poids : Sahara, steppe pontique)
 #   forest_keep    part des forêts de splat.png conservée (le reste s'ouvre en herbe ou en
 #                  garrigue) ; les forêts restent entières à moins de valley_km d'une rivière
 #   conifer_min    part minimale de résineux dans les forêts
@@ -201,15 +203,16 @@ biomes:
     # hors cultures, pas de futaie dense de feuillus (chênes verts et pins d'Alep épars).
     mediterranean:
       palette:
-        grassland: "#8e8a48"
-        grassland_dry: "#b0985a"
+        grassland: "#7a8a3e"
+        grassland_dry: "#9c9452"
         farmland: "#a8834a"
         farmland_dry: "#b98a55"
         forest_broadleaf: "#3f5230"
         forest_conifer: "#34482a"
         heath: "#8a7a50"
-        scrub: "#667046"
-        scrub_light: "#9c9068"
+        scrub: "#56663a"
+        scrub_light: "#86885a"
+      dry_max: 0.35
       forest_keep: 0.35
       scrub: 0.7
       presence: 0.8
@@ -281,6 +284,7 @@ biomes:
         farmland: "#8a8a44"
         forest_broadleaf: "#294420"
         forest_conifer: "#1c3820"
+      dry_max: 0.6
       conifer_min: 0.65
       presence: 0.5
       pasture_shift: 0.45
@@ -294,8 +298,8 @@ biomes:
     # Terre ocre-rose, maigres cultures, maquis clair.
     semi_arid:
       palette:
-        grassland: "#b39a6a"
-        grassland_dry: "#c4a27a"
+        grassland: "#a89a62"
+        grassland_dry: "#caa87a"
         farmland: "#b88f62"
         farmland_dry: "#c69a6c"
         forest_broadleaf: "#5a6040"
@@ -303,6 +307,7 @@ biomes:
         heath: "#b09070"
         scrub: "#8a8a5c"
         scrub_light: "#b8a47c"
+      dry_max: 0.5
       forest_keep: 0.25
       scrub: 0.45
       presence: 0.5

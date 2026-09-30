@@ -49,14 +49,29 @@ rules:
     - [-40.0, 53.3, 10.5, 80.0]
   # Steppes (BS/BW et continental sec) au nord de cette latitude ; au sud, semi-aride.
   steppe_min_lat: 44.0
-  # Continental ou méditerranéen dont la sécheresse (landcover.dryness : steppe pontique,
-  # plateau anatolien) dépasse ce seuil : steppe au nord de steppe_min_lat, semi-aride au sud.
+  # Au sud de steppe_min_lat, continental ou méditerranéen dont la sécheresse
+  # (landcover.dryness : plateau anatolien) dépasse ce seuil : semi-aride.
   dry_min: 0.45
   # Bruit basse fréquence ajouté à la sécheresse : lisière steppe / forêt irrégulière
   # (la limite de landcover.dryness est une ligne brisée), en km, amplitude, graine.
   dry_noise_km: 70.0
   dry_noise_amp: 0.3
   dry_noise_seed: 1343
+  # Lisière forêt-steppe (nord de steppe_min_lat) : score = line_weight x limite historique
+  # (landcover.dryness / line_max) + (1 - line_weight) x classes Köppen floutées (BSk ouvert,
+  # Dfa mi-ouvert, Dfb boisé ; seulement à l'est de lon_from..lon_to), + bruit à plusieurs
+  # échelles [km, amplitude nominale ; le fbm a un écart-type ~0,12, soit ~1/4 de l'amplitude] : lisière sinueuse, ceinture de transition de ~150-300 km en
+  # mosaïque de bosquets et d'herbe. Steppe si score >= threshold.
+  forest_steppe:
+    threshold: 0.45
+    line_max: 0.9
+    line_weight: 0.35
+    koppen_weights: {BSk: 1.0, BSh: 1.0, BWk: 1.0, Dfa: 0.7, Dfb: 0.25, Dsa: 0.6, Dsb: 0.4}
+    koppen_sigma_km: 60.0
+    lon_from: 24.0
+    lon_to: 28.0
+    noise: [[300.0, 0.45], [80.0, 0.3], [25.0, 0.12]]
+    seed: 1347
   # Semi-aride (BS seulement) près de la Méditerranée (Attique, côtes du Levant) : méditerranéen.
   # Distance à la côte (km, coast_dist.png plafonné à ~46 km) et longitude max (pas la Caspienne).
   coastal_semi_arid_km: 22.0
