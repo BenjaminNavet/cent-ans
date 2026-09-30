@@ -34,8 +34,8 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
 ### NB1 — Kit d'interface (≤ 5 $)
 - [x] Chaîne locale (`key_out`, `fit_to_piece`, `seam_fix`, `contact_sheet`, repli dans
       `ui_illumination.build`) + tests — agent `cent-ans-mech`. Commit.
-- [ ] Prompts des 16 pièces + ~10 décors dans `ui_ornaments.yaml` ; `--dry-run`.
-- [ ] Génération 3 variantes/pièce → planche avant/après → **jugement joueur** (`selected`).
+- [x] Prompts des 4 cadres + 6 décors dans `ui_ornaments.yaml` ; `--dry-run`.
+- [x] Génération 3 variantes/pièce → planche avant/après → **jugement joueur** (`selected`) : panel_illuminated v1, panel v2, top_bar v2, tooltip v2.
 - [ ] Rebuild du kit, `smoke.gd`, une capture en jeu. ADR 0135. Commit, fusion dans `main`.
 
 ## Journal
@@ -56,3 +56,4 @@ Budget : plafond 10 $, section « Nano Banana NB » de `docs/budget.md` (cap pas
   Vue parchemin (> 1200) = cible forte : montagnes en pitons, forêts, vignettes de villes par
   rang, mer, rose des vents, cartouches, style ancre v0 (≈ 60-80 sprites, ~5 $). Chantier
   « parchemin peint » à spécifier après NB1, plafond propre ~8 $.
+- 09-30 : NB1 installé (4 PNG), ADR 0135, 3,10 $ au total. Reste : smoke + capture en jeu dans main.

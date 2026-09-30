@@ -15,6 +15,7 @@ pieces:
     aspect_ratio: "1:1"
     image_size: 1K
     variants: 3
+    selected: 1
   - id: panel
     prompt: >-
       A square manuscript frame for a game window: a thin double ruling of brown ink and
@@ -23,6 +24,7 @@ pieces:
     aspect_ratio: "1:1"
     image_size: 1K
     variants: 3
+    selected: 2
   - id: top_bar
     prompt: >-
       A long horizontal illuminated banner strip for the top of a game screen: vellum band
@@ -31,6 +33,7 @@ pieces:
     aspect_ratio: "21:9"
     image_size: 1K
     variants: 3
+    selected: 2
   - id: tooltip
     prompt: >-
       A small square marginal-note frame: a fine brown-ink rule with a thin red rubric
@@ -38,6 +41,7 @@ pieces:
     aspect_ratio: "1:1"
     image_size: 1K
     variants: 3
+    selected: 2
 decor:
   - id: initial_dragon
     prompt: >-
