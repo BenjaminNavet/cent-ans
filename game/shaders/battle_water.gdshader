@@ -65,11 +65,14 @@ void fragment() {
 	murk *= mix(1.0, 0.45, edge);
 	vec3 water = mix(ground * shallow_color * 2.2, deep_color, murk);
 	// Reflet du ciel (Fresnel de Schlick) : fort en incidence rasante, donc de loin.
+	// CR1 : ciel reflété assombri (le ciel vu sous 20-40° est
+	// plus foncé que la couleur d'horizon `sky_color`) et plafonné à 0,4 : quelques pour cent de
+	// ciel clair suffisent à rendre laiteuse une eau sombre une fois passée en sRGB.
 	vec3 view_n = normalize(mix(up_view, (VIEW_MATRIX * vec4(n.x, n.z, n.y, 0.0)).xyz, 0.25));
 	float cos_v = clamp(dot(view_n, normalize(-VERTEX)), 0.0, 1.0);
 	float fresnel = 0.03 + 0.97 * pow(1.0 - cos_v, 5.0);
-	vec3 sky = sky_color * mix(0.85, 1.1, texture(macro_noise, world_pos.xz * 0.004).r);
-	water = mix(water, sky, clamp(fresnel * 1.1, 0.0, 0.72) * smoothstep(0.02, 0.2, vertical));
+	vec3 sky = sky_color * 0.7 * mix(0.85, 1.1, texture(macro_noise, world_pos.xz * 0.004).r);
+	water = mix(water, sky, clamp(fresnel * 1.1, 0.0, 0.4) * smoothstep(0.02, 0.2, vertical));
 
 	// Écume sur les hauts-fonds et le long des rives, déchiquetée et entraînée par le courant.
 	float foam_noise = texture(macro_noise, flow * vec2(0.3, 0.12) + vec2(0.0, -t * 0.35)).r;
@@ -79,8 +82,11 @@ void fragment() {
 
 	ALBEDO = deep_color * 0.2 + vec3(foam * 0.4);
 	EMISSION = water * (1.0 - foam * 0.3);
-	ROUGHNESS = mix(0.04, 0.35, foam);
-	SPECULAR = 0.45;
+	// CR1 : le reflet du ciel est déjà dans EMISSION (Fresnel ci-dessus) ; le spéculaire du moteur
+	// le comptait une seconde fois (ciel de l'environnement sur des vagues très bosselées :
+	// traînées blanches, eau « glacée » vue de près). Spéculaire réduit, vagues moins miroir.
+	ROUGHNESS = mix(0.1, 0.35, foam);
+	SPECULAR = 0.25;
 	METALLIC = 0.0;
 	// Bord de l'eau fondu dans le sol.
 	ALPHA = smoothstep(0.0, 0.1, vertical);

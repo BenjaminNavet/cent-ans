@@ -1640,7 +1640,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			(banner["flag_mat"] as ShaderMaterial).set_shader_parameter("routing", routing)
 	_update_outlines()
 	if path_preview != null:
-		path_preview.update_orders(units, selected, Time.get_ticks_msec() / 1000.0)
+		path_preview.update_orders(units, selected, Time.get_ticks_msec() / 1000.0, camera_rig.distance)
 	if standards != null:
 		standards.update(units, soldiers, _camera_position())
 	_update_markers(banner_scale)
@@ -1703,7 +1703,7 @@ func _update_outlines() -> void:
 		_hovered_ids.append(card_hover)
 	outlines.update(units, selected, _hovered_ids)
 	if range_arc != null:
-		range_arc.update(units, selected, _hovered_ids)
+		range_arc.update(units, selected, _hovered_ids, camera_rig.distance)
 		compare_panel.refresh(null if replay_mode else battle, units, selected, _hovered_ids, player_side, Time.get_ticks_msec() / 1000.0)
 
 
@@ -2593,6 +2593,11 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 		for control in find_children("*", "Control", true, false):
 			if not (control.get_parent() is Control):
 				(control as Control).visible = false
+		# CR1 : l'interface 3D aussi (contours, trajets, arcs de tir), sinon elle fuit dans les
+		# captures « sans interface ».
+		for overlay: Node3D in [outlines, path_preview, range_arc]:
+			if overlay != null:
+				overlay.visible = false
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()

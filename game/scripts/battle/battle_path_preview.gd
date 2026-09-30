@@ -31,6 +31,11 @@ const RED := Color(0.9, 0.12, 0.08, 0.95)
 const GHOST_ALPHA := 0.45
 ## Trajets des ordres donnés : recalculés au plus toutes les `ORDER_REFRESH_S` secondes.
 const ORDER_REFRESH_S := 0.25
+## CR1 : caméra plus proche que cette distance (m) : trajets et flèches des ordres déjà donnés
+## masqués. Rubans de 1,1 m levés de 0,6 m et dessinés sans test de profondeur : vus au ras des
+## figurines, ils devenaient de grands rectangles saumon flottant à hauteur d'épaule.
+## L'aperçu en direct (clic droit maintenu) reste affiché.
+const ORDERS_NEAR_HIDE_M := 30.0
 
 var battle: Object = null
 var _height_at: Callable
@@ -218,9 +223,10 @@ func clear_live() -> void:
 
 ## Trajets, fantômes et flèches d'attaque des ordres en cours des régiments `selected`.
 ## Masqués pendant l'aperçu en direct : l'ordre préparé remplace l'ordre en cours.
-func update_orders(units: Array, selected: Array, now_s: float) -> void:
-	if live_active:
-		_hide_orders()
+func update_orders(units: Array, selected: Array, now_s: float, camera_distance: float = INF) -> void:
+	if live_active or camera_distance < ORDERS_NEAR_HIDE_M:
+		if _orders_mesh.visible or _orders_key != "":
+			_hide_orders()
 		return
 	var key := str(selected)
 	if key == _orders_key and now_s - _orders_time < ORDER_REFRESH_S:
@@ -502,6 +508,7 @@ func _ghost(pool: Array[Decal], index: int, unit: Dictionary, at: Vector3, facin
 		decal.upper_fade = 0.05
 		decal.lower_fade = 0.05
 		decal.normal_fade = 0.0
+		decal.cull_mask = BattleTerrain.DECAL_LAYER  # CR1 : sol seulement, jamais les figurines
 		add_child(decal)
 		pool.append(decal)
 	var ghost := pool[index]

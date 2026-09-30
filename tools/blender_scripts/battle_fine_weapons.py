@@ -534,8 +534,9 @@ def lance(g, pennon=True):
     for (y0, r0), (y1, r1) in zip(prof, prof[1:], strict=False):
         eq.tube(bm, _at(fr, 0, y0), _at(fr, 0, y1), r0, r1, n, 0)
     if g.level < 2:
-        # Vamplate: a steel cone before the hand.
-        eq.tube(bm, _at(fr, 0, 0.12), _at(fr, 0, 0.26), 0.1, 0.03, g.seg(14, 8, 4), 1)
+        # Vamplate: a steel cone before the hand, 14 cm across (CR1: 20 cm read as a white
+        # plate in close-ups).
+        eq.tube(bm, _at(fr, 0, 0.12), _at(fr, 0, 0.25), 0.07, 0.03, g.seg(14, 8, 4), 1)
     eq.tube(bm, _at(fr, 0, 2.36), _at(fr, 0, 2.46), 0.019, 0.014, g.seg(8, 4, 3), 1)
     blade(
         bm,
