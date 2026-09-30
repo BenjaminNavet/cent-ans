@@ -12,8 +12,8 @@ global uniform vec4 campaign_season;
 global uniform float campaign_prop_scale;
 
 uniform float fade : hint_range(0.0, 1.0) = 1.0;
-// Lot FC5 : réduction avec `campaign_prop_scale`^puissance (0,5 : plus lente que les arbres).
-uniform float prop_scale_power = 0.5;
+// Lot FC5 : réduction avec `campaign_prop_scale`^puissance (0,3 : plus lente que les arbres).
+uniform float prop_scale_power = 0.3;
 uniform vec2 focus = vec2(0.0);
 uniform float radius = 40.0;
 uniform float wind_strength = 0.12;

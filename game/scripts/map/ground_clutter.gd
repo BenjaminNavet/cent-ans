@@ -44,7 +44,11 @@ const FLOATS_PER_INSTANCE := 16  # transformation 3 × 4 + données personnalis�
 ## `campaign_prop_scale`^`prop_scale_power` (plus lentement que les arbres : encore visibles à d = 10).
 @export var grass_height: float = 0.22
 @export var bush_height: float = 0.42
-@export var prop_scale_power: float = 0.5
+@export var prop_scale_power: float = 0.3
+## Lot FC6 : au zoom rapproché (d < `close_distance`), part des candidats semés jusqu'à
+## ×`close_boost` (sans nouveau semis) ; inchangée à d ≥ `close_distance` + 10.
+@export var close_distance: float = 20.0
+@export var close_boost: float = 1.5
 ## Échelle des arbres (`campaign_prop_scale`) sous laquelle les touffes disparaissent (trop
 ## petites pour valoir leur coût).
 @export var min_prop_scale: float = 0.025
@@ -82,6 +86,7 @@ var _jobs: Dictionary = {}  # Vector2i → {"task": int, "result": Dictionary}
 var _ground_jobs: Dictionary = {}  # FC6 : Vector2i → {"task", "mmi", "buffer"[, "stale"]}
 var _frame: int = 0
 var _focus := Vector2.ZERO
+var _camera_distance: float = 1e9
 var _radius: float = 0.0
 
 
@@ -202,6 +207,7 @@ func update_view(at: Vector2, camera_distance: float) -> void:
 		return
 	visible = true
 	_focus = at
+	_camera_distance = camera_distance
 	_radius = clampf(camera_distance * radius_factor, min_radius, max_radius)
 	_ensure_resources()
 	_material.set_shader_parameter("fade", fade)
@@ -572,7 +578,8 @@ func _on_surface_rect_changed(rect: Rect2) -> void:
 ## Instances affichées par cellule : part `quality_density / max_density` des candidats, bornée
 ## par `max_visible_instances` sur l'ensemble des cellules visibles.
 func _apply_counts() -> void:
-	var share := clampf(quality_density / maxf(max_density, 0.001), 0.0, 1.0)
+	var boost := lerpf(close_boost, 1.0, smoothstep(close_distance, close_distance + 10.0, _camera_distance))
+	var share := clampf(quality_density * boost / maxf(max_density, 0.001), 0.0, 1.0)
 	var total := 0
 	var shown_cells := 0
 	for entry: Dictionary in _cells.values():
