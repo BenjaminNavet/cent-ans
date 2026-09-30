@@ -84,3 +84,8 @@ cellules d'herbe à sortir du fil principal ; bord net entre cartes et imposteur
   sous d = 20 (sans nouveau semis) ; rien ne change à d ≥ 30 (échelle 1, part normale).
 - Primitives : d = 25 8,68 M, d = 15 9,08 M (FC5 : 8,65 / 9,03). Captures `fc6_15.png`,
   `fc6_25.png`, `fc6_boundary_25.jpg` dans `~/dev/cent-ans-raw/fc5/`.
+
+## L5 — herbe lisible à d 12-20, portée des arbres par préréglage (agent FC2)
+État : démarré. Plan : touffes plus fines (plus de brins, moins de broussailles), variation de
+teinte calée sur la prairie du terrain, densité ; clé `veg_max_distance` (Basse 500, Moyenne 700,
+Haute 900, Ultra 1100, défaut 700) → `Vegetation.max_camera_distance` si imposteurs.
