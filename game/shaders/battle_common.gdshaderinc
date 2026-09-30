@@ -24,6 +24,15 @@ float bt_value_noise(vec2 p) {
 	return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
+// VN2 : décalage (m) de lecture du canal boue de la splatmap : les zones de boue de la simulation
+// sont des disques ; lus à une position déformée (±20 m à ~50 m, ±5 m à ~12 m), ils deviennent
+// des plaques irrégulières (même formule pour le sol et l'herbe).
+vec2 bt_mud_warp(vec2 p) {
+	vec2 big = vec2(bt_value_noise(p * 0.02 + 3.1), bt_value_noise(p * 0.02 + 17.3)) - 0.5;
+	vec2 small = vec2(bt_value_noise(p * 0.08 + 9.7), bt_value_noise(p * 0.08 + 41.9)) - 0.5;
+	return big * 40.0 + small * 10.0;
+}
+
 // EP6 : parcelle du décor du cœur lue dans `decor_fields` (texel `df`) : x = nature (1 labour,
 // 2 blé, 3 pré, 4 semis, 5 vigne, 6 chaume), y = coordonnée à travers les sillons (qui suivent la
 // longueur de la parcelle), z = distance normalisée au bord.

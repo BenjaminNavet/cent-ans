@@ -82,6 +82,7 @@ void vertex() {
 		// Densité : zones de sol nu et parcelles.
 		vec2 suv = (wp - splat_rect.xy) / splat_rect.zw;
 		vec4 sa = texture(splat_a, suv);
+		sa.b = texture(splat_a, suv + bt_mud_warp(wp) / splat_rect.zw).b; // VN2 : comme le sol
 		vec4 sb = texture(splat_b, suv);
 		density *= 1.0 - smoothstep(0.2, 0.5, max(sa.g, sa.a));
 		// VN2 : boue en partie herbue, plus encore au bord de l'eau (vue de haut : tache sombre sinon).

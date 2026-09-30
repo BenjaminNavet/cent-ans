@@ -142,6 +142,7 @@ void fragment() {
 	// Bords des zones brisés par le bruit (la splatmap est à 4 m le texel).
 	vec2 jitter = (vec2(fine, texture(macro_noise, p * 0.017 + 0.41).r) - 0.5) * 6.0 / splat_rect.zw;
 	vec4 sa = texture(splat_a, suv + jitter);
+	sa.b = texture(splat_a, suv + jitter + bt_mud_warp(p) / splat_rect.zw).b;
 	vec4 sb = texture(splat_b, suv);
 	bool inside = all(greaterThanEqual(suv, vec2(0.0))) && all(lessThanEqual(suv, vec2(1.0)));
 	if (!inside) {
@@ -176,6 +177,7 @@ void fragment() {
 
 	float w_forest = smoothstep(0.15, 0.6, sa.r + (fine - 0.5) * 0.4);
 	float w_dirt = smoothstep(0.2, 0.6, sa.g + (fine - 0.5) * 0.3);
+	// VN2 : canal boue lu à une position déformée (`bt_mud_warp`, sinon cercles parfaits).
 	float w_mud = smoothstep(0.15, 0.55, sa.b + (macro - 0.5) * 0.4);
 	float w_pebbles = smoothstep(0.25, 0.7, sa.a + (fine - 0.5) * 0.3);
 	float slope = 1.0 - clamp(world_normal.y, 0.0, 1.0);
@@ -376,7 +378,8 @@ void fragment() {
 	// gravier pâle et sec en bande continue le long de la rivière).
 	// VN2 : boue brun-olive plutôt que lie-de-vin (vue de haut, les zones de boue faisaient des
 	// taches violacées).
-	albedo = mix(albedo, vec3(0.25, 0.21, 0.14) * (0.8 + 0.4 * fine), w_mud * 0.5 * (1.0 - w[int(L_SNOW)]));
+	float puddle = smoothstep(0.62, 0.8, texture(macro_noise, p * 0.021 + vec2(0.53, 0.29)).r);
+	albedo = mix(albedo, vec3(0.17, 0.14, 0.1) * (0.75 + 0.5 * fine) * mix(1.0, 0.6, puddle), w_mud * 0.7 * (1.0 - w[int(L_SNOW)]));
 	float bank_wet = smoothstep(0.3, 0.8, sb.r) * max(w_mud, w_pebbles) * (1.0 - w[int(L_SNOW)]);
 	albedo = mix(albedo, albedo * vec3(0.66, 0.72, 0.58), bank_wet * 0.6);
 	albedo *= 1.0 - dip * 0.08;
@@ -412,6 +415,9 @@ void fragment() {
 	NORMAL_MAP_DEPTH = 1.0;
 	// Boue tassée : plus luisante que le sol détrempé environnant.
 	float mud_gloss = clamp(wet + mud_trample * 0.7, 0.0, 1.0);
-	ROUGHNESS = mix(0.95, 0.38, mud_gloss * (0.5 + 0.5 * w[int(L_MUD)] + 0.3 * w[int(L_DIRT)]));
+	// VN2 : luisance plafonnée au loin (en vue rasante la boue mouillée renvoyait le ciel : plaques
+	// pâles au lieu de sombres).
+	float gloss_far = mix(0.38, 0.62, smoothstep(80.0, 300.0, view_dist));
+	ROUGHNESS = mix(0.95, gloss_far, mud_gloss * (0.5 + 0.5 * w[int(L_MUD)] + 0.3 * w[int(L_DIRT)]));
 	SPECULAR = 0.35;
 }
