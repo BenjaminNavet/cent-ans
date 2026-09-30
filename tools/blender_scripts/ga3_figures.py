@@ -283,8 +283,10 @@ def face_classes(obj, classes):
 
 
 def coded_materials(image):
-    """One material per class: game code and white base colour (custom properties read by
-    ``export_mesh``), the albedo image on the UV for the renders.
+    """One material per class: game code and white base colour, albedo image on the UV.
+
+    The code and colour are custom properties read by ``export_mesh``; the image serves the
+    renders only.
     """
     import bpy
 
@@ -697,8 +699,10 @@ def render_views(unit_name, tag, raw, arm, kept, rgba, classes, lum):
 
 
 def sheet(unit_name, jpg, raw, tags):
-    """Reference A-pose | rigged figure of ``tags[0]`` (bind, walk, shoot, back) beside the
-    current one; last row: the walk and back renders of every generator in ``tags``.
+    """Planche: reference A-pose | rigged ``tags[0]`` beside the current figure.
+
+    Rows: reference and bind pose; walk, shoot and back; the walk of every generator in
+    ``tags``.
     """
     from PIL import Image, ImageDraw, ImageFont
 
