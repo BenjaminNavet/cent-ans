@@ -1,0 +1,18 @@
+{
+  "description": "Lot FA1 : rameaux feuillus des arbres de bataille (`BattleTrees`) composés de vraies feuilles photographiées. Chaque essence a sa carte `game/assets/textures/battle/leaf_spray_<essence>.png`, construite par `build_fa_leaf_sprays.py` depuis un atlas ambientCG (CC0 1.0, Lennart Demes). Une essence absente garde le rameau dessiné `leaf_spray.png`.",
+  "source_url": "https://ambientcg.com/get?file={asset}_2K-JPG.zip",
+  "size": 1024,
+  "target_rgb": [71, 91, 44],
+  "hue_pull": 0.7,
+  "coverage": 0.42,
+  "species": {
+    "oak": {"asset": "LeafSet016", "axis": "vertical", "leaf_px": 58, "tone": [1.0, 1.0, 1.0], "note": "chêne pédonculé, feuilles lobées"},
+    "beech": {"asset": "LeafSet014", "axis": "vertical", "leaf_px": 50, "tone": [1.0, 1.04, 0.92], "note": "feuilles ovales dentées (hêtre, charme)"},
+    "ash": {"asset": "LeafSet022", "axis": "vertical", "leaf_px": 52, "tone": [0.98, 1.02, 1.0], "note": "folioles lancéolées"},
+    "poplar": {"asset": "LeafSet004", "axis": "vertical", "leaf_px": 46, "tone": [0.98, 1.0, 0.96], "note": "feuilles en cœur (peuplier noir)"},
+    "willow": {"asset": "LeafSet001", "axis": "vertical", "leaf_px": 56, "tone": [1.0, 1.02, 1.12], "note": "feuilles étroites, revers gris"},
+    "fruit": {"asset": "LeafSet024", "axis": "vertical", "leaf_px": 44, "tone": [1.0, 1.0, 0.94], "note": "feuilles rondes dentées (pommier, poirier)"},
+    "bush": {"asset": "LeafSet005", "axis": "vertical", "leaf_px": 44, "tone": [0.96, 1.0, 0.98], "note": "noisetier, aubépine des haies"}
+  },
+  "dead": {"asset": "LeafSet012", "axis": "horizontal", "leaf_px": 46, "count": 420, "target_rgb": [104, 84, 62], "note": "feuilles de chêne sèches (chêne marcescent l'hiver), posées sur `twig_spray.png`"}
+}
