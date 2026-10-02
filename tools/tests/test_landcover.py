@@ -179,3 +179,25 @@ def test_named_forest_in_a_noise_trough_reaches_its_density() -> None:
     assert abs(after - density) < 0.02
     # Outside the footprint the regional score is untouched.
     assert np.array_equal(fixed[mask == 0], score[mask == 0])
+
+
+def test_centred_area_mask_keeps_the_nominal_area() -> None:
+    """Lot HC5: a slow edge noise must not shrink a small named forest as a whole."""
+    grid = default_grid()
+    lon, lat = grid.pixel_to_lonlat(
+        np.array([grid.width_px / 2]), np.array([grid.height_px / 2])
+    )
+    area = {
+        "ellipse": {
+            "center": [float(lon[0]), float(lat[0])],
+            "radii_km": [9.0, 7.0],
+            "angle_deg": 0.0,
+        }
+    }
+    low_noise = np.full(grid.shape, 0.1, dtype=np.float32)
+    dist, _ = landcover.area_signed_distance(area, grid)
+    nominal = float((dist > 0).sum())
+    raw, _ = landcover.area_mask(area, grid, low_noise)
+    centred, _ = landcover.area_mask(area, grid, low_noise, centred=True)
+    assert raw.sum() < 0.6 * nominal
+    assert abs(centred.sum() - nominal) < 0.1 * nominal
