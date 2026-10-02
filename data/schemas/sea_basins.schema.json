@@ -4,7 +4,7 @@
   "title": "Mers de la carte de campagne par bassin (TB5)",
   "description": "Réglages purement visuels des mers de la carte de campagne, lus par game/scripts/map/sea_basins.gd : bassins (polygones en pixels carte), teinte, clarté, houle, écume. Aucune règle de jeu.",
   "type": "object",
-  "required": ["cell_px", "blur_cells", "swell", "default", "basins"],
+  "required": ["cell_px", "blur_cells", "swell", "whitecaps", "default", "basins"],
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
@@ -30,6 +30,23 @@
         "speed": {"type": "number", "minimum": 0, "maximum": 5},
         "contrast": {"type": "number", "minimum": 0, "maximum": 1},
         "normal": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "whitecaps": {
+      "description": "Moutons : cellules par pixel carte en travers du vent, allongement dans le sens du vent, empreinte d'un pixel écran (pixels carte) entre lesquelles les crêtes s'effacent au dézoom, voile de teinte qui les remplace.",
+      "type": "object",
+      "required": ["cells_per_px", "stretch", "fade_footprint", "veil"],
+      "additionalProperties": false,
+      "properties": {
+        "cells_per_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 8},
+        "stretch": {"type": "number", "minimum": 1, "maximum": 8},
+        "fade_footprint": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "number", "exclusiveMinimum": 0, "maximum": 2}
+        },
+        "veil": {"type": "number", "minimum": 0, "maximum": 0.2}
       }
     },
     "default": {"$ref": "#/$defs/look"},

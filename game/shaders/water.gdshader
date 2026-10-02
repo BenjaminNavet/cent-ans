@@ -235,11 +235,11 @@ void fragment() {
 		foam = max(foam * (1.0 - 0.45 * swash_amount), coast_swash(p, coast, cliff_f, footprint).x);
 	}
 	foam = clamp(foam * season_foam * basin_wave_here.z * (1.0 + storm_foam_gain * storm), 0.0, 1.6);  // TB1, TB5
-	// TB1 : moutons au large par tempête (crêtes qui déferlent), estompés au dézoom.
-	float caps = smoothstep(0.70, 0.92, value_noise(p * 2.3 + vec2(TIME * 0.25, TIME * 0.1)))
-		* smoothstep(0.35, 0.6, value_noise(p * 0.31 - vec2(TIME * 0.03, 0.0)));
-	foam = max(foam, caps * max(storm * storm_whitecaps, basin_wave_here.w) * mix(1.0, 0.45, far_t) * step(0.0, off));  // TB5 : moutons du bassin
-	col = mix(col, foam_color, min(foam * 0.55, 0.9));
+	// TB1, TB5 : moutons au large (tempête, bassin houleux) : crêtes rares et irrégulières de
+	// près, simple voile de teinte au dézoom (`sea_whitecaps`).
+	vec2 caps = sea_whitecaps(p, footprint, max(storm * storm_whitecaps, basin_wave_here.w));
+	foam = max(foam, caps.x);
+	col = mix(col, foam_color, min(foam * 0.55, 0.9) + caps.y);
 	alpha = mix(alpha, 0.9, foam * 0.5);
 	// Côte précise (raster) plutôt que l'intersection avec le maillage (LOD grossier) : l'eau
 	// s'efface sur la terre même si la géométrie y passe sous le niveau de la mer.

@@ -119,5 +119,12 @@ static func apply(material: ShaderMaterial, map_size: Vector2i) -> bool:
 	for key: String in ["length_px", "speed", "contrast", "normal"]:
 		if swell.has(key):
 			material.set_shader_parameter("long_swell_" + key, float(swell[key]))
+	var caps: Dictionary = data().get("whitecaps", {})
+	for key: String in ["cells_per_px", "stretch", "veil"]:
+		if caps.has(key):
+			material.set_shader_parameter("whitecap_" + key, float(caps[key]))
+	var fade: Variant = caps.get("fade_footprint")
+	if fade is Array and (fade as Array).size() >= 2:
+		material.set_shader_parameter("whitecap_fade", Vector2(float(fade[0]), float(fade[1])))
 	material.set_shader_parameter("basin_on", true)
 	return true
