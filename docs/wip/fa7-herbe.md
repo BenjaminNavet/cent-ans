@@ -23,7 +23,7 @@ ou de semis).
   carte (hachage de la cellule monde, poids selon le bouquet), carte retournée une fois sur deux,
   hauteur de la case, herbe rase dans les vides (densité 0,62 → 1,0 entre les bouquets, trouées à
   25 m gardées à 0,85), clarté ×1,25 et normale verticale (éclairage du sol), pied à 0,95 au lieu
-  de 0,8, écarts de teinte entre touffes réduits de moitié, herbe couchée à 10 cm (BV3).
+  de 0,8, écarts de teinte entre touffes réduits de moitié, herbe couchée à 16 cm (BV3).
 - `BattleVegetation` : maillage de 2 cartes croisées d'un mètre (au lieu de 4), larges de 0,8 m,
   pied à 80 % ; `--no-fa-grass` après `--` rend l'herbe d'avant ; `--bench-ab=fa-grass,no-fa-grass`
   bascule les deux herbes dans le même processus.
@@ -33,8 +33,9 @@ ou de semis).
 ## Décisions (pour l'ADR du chantier, lot FA4)
 - **Couleur** : carte neutre en moyenne (`neutral_pull` 0,85), luminance linéaire moyenne
   `render.tex_lum` ; le shader multiplie la couleur du sol par l'écart de clarté et de teinte du
-  brin (`hue_mix` 0,35). Essai en couleur réelle écarté : les saisons, la neige, le sang et les
-  parcelles règlent déjà la teinte par le sol. Les épis sortent paille, les brins verts.
+  brin (`hue_mix` 0,35). La couleur réelle n'a pas été essayée : les saisons, la neige, le sang
+  et les parcelles règlent déjà la teinte par le sol, et le premier rendu fondait bien. Les épis
+  sortent paille, les brins verts.
 - **Deux cartes par touffe** : trois cartes coûtaient +8 à +10 % de temps d'image en vue
   rapprochée, deux cartes −5 à −9 % par rapport à l'herbe d'avant (4 cartes, moins de touffes
   vivantes), sans différence visible dans une nappe continue.
@@ -49,7 +50,8 @@ ou de semis).
 - Automne, hiver sans neige : mieux ; neige : identique (herbe presque toute retirée).
 - Blé : champ d'épis serré au lieu de touffes ; chaume : paille rase ; semis : pousses peu
   visibles (moins lisibles qu'avant de loin).
-- Herbe foulée : brins couchés lisibles ; sang inchangé (même teinte par le sol).
+- Herbe foulée : brins couchés lisibles, zone un peu plus nue qu'avant. Sang sur l'herbe : non
+  jugé (la capture `bv3_shot --shot=grass` ne cadre aucun mort) ; le code de teinte est inchangé.
 
 ## Points ouverts
 - Fleurs dessinées par le script (pas d'atlas de fleurs CC0 dans les sources) et peu visibles :
