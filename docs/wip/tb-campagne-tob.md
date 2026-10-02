@@ -21,7 +21,10 @@ références à récupérer en ligne.
       (été 1100 / 400, hiver 400, Midlands hors de vue 300) : saisons reconnaissables, terres hors
       de vue en sépia avec relief lisible, frontières discrètes, écus réduits.
 - [x] `zg8_relief_test` réparé (`rock_outcrops.gdshader` inclut `campaign_relief.gdshaderinc`).
-- [ ] Jugement du joueur sur la vague 1 (en jeu : `tools/launch.sh`) avant TB3.
+- [x] Mandat du joueur (02/10) : autonomie complète, enchaîner les vagues sans le consulter ; le
+      contrôle avant TB3 devient une relecture par la session principale (capture + tests).
+- [ ] Vagues 2 et 3 lancées ensemble le 02/10 : TB3 (`../gp-tb3`), TB4 (`../gp-tb4`), TB5
+      (`../gp-tb5`), TB6 (`../gp-tb6`), branches `feat/tb3` à `feat/tb6`, ADR réservés 0153 à 0156.
 
 ## Points ouverts de la vague 1
 - Ombres de nuages encore sombres et larges en vue moyenne d'été (à juger en jeu).
@@ -33,7 +36,8 @@ références à récupérer en ligne.
 - `fe_ui_test` échoue (cadrage du sélecteur de faction), sans rapport avec TB.
 
 ## Prochaine étape
-Après le jugement du joueur : vague 2, **sans fal.ai** (ADR 0152).
+À la remise de chaque lot : fusion dans `feat/tb` (worktree `../gp-tb`), tests, une capture de
+contrôle commune, puis `--ff-only` dans main. Tout **sans fal.ai** (ADR 0152).
 - TB3 : villes et bâtiments qui grandissent, avec les kits existants (GA3, ADR 0138, villages TF)
   et Blender ; stub `replace_models` (`settlement_layer.gd`), `model_holder()` null. Périmètre à
   recadrer au lancement.
