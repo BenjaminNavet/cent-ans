@@ -3,11 +3,14 @@ extends RefCounted
 
 ## Lot TB1 : réglages visuels des saisons de la carte de campagne, lus dans
 ## `data/ui/campaign_seasons.json` (schéma `data/schemas/campaign_seasons_ui.schema.json`) : mer
-## selon la saison, mer sous la tempête, étalonnage de saison de la carte (ADR 0150). Sans fichier (données de test), valeurs neutres : rendu
+## selon la saison, mer sous la tempête, étalonnage de saison de la carte, neige des toits des villes 1:1 (ADR 0150). Sans fichier (données de test), valeurs neutres : rendu
 ## inchangé. Purement visuel : aucune règle de jeu.
 
 const DATA_PATH := "ui/campaign_seasons.json"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
+## Paramètre de shader global lu par `roofscape.gdshaderinc` (villes 1:1) : x quantité de neige,
+## y / z début et fin du fondu vers le sud (px carte).
+const ROOF_SNOW_PARAM := &"campaign_roof_snow"
 
 static var _data: Dictionary = {}
 static var _loaded: bool = false
@@ -83,3 +86,25 @@ static func storm() -> Dictionary:
 ## {} sans données.
 static func grade(season: String) -> Dictionary:
 	return _season_block(season, "grade")
+
+
+## Limite sud de la neige (début, fin du fondu, en fraction de la hauteur de la carte) ;
+## `Vector2(-1, -1)` sans données.
+static func snow_south_fade() -> Vector2:
+	var fade: Variant = (data().get("snow", {}) as Dictionary).get("south_fade", [])
+	if fade is Array and (fade as Array).size() >= 2:
+		return Vector2(float(fade[0]), float(fade[1]))
+	return Vector2(-1, -1)
+
+
+## Valeur du paramètre global `campaign_roof_snow` pour des poids de saison et une carte haute de
+## `map_height` px : neige des toits mêlée selon les poids, fondu vers le sud.
+static func roof_snow(weights: Vector4, map_height: float) -> Vector4:
+	var amount := 0.0
+	for index in SeasonVisuals.SEASONS.size():
+		var season: Dictionary = (data().get("seasons", {}) as Dictionary).get(SeasonVisuals.SEASONS[index], {})
+		amount += float(season.get("roof_snow", 0.0)) * weights[index]
+	var fade := snow_south_fade()
+	if fade.x < 0.0:
+		return Vector4(clampf(amount, 0.0, 1.0), 0.0, 0.0, 0.0)
+	return Vector4(clampf(amount, 0.0, 1.0), fade.x * map_height, fade.y * map_height, 0.0)

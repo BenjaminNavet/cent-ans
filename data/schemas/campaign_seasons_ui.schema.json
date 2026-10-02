@@ -2,11 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "campaign_seasons_ui.schema.json",
   "title": "Saisons de la carte de campagne (TB1)",
-  "description": "Réglages purement visuels des saisons de la carte de campagne, lus par game/scripts/map/season_look.gd : mer, tempête, étalonnage de carte. Aucune règle de jeu.",
+  "description": "Réglages purement visuels des saisons de la carte de campagne, lus par game/scripts/map/season_look.gd : mer, tempête, étalonnage de carte, neige (toits des villes 1:1, limite sud). Aucune règle de jeu.",
   "type": "object",
   "required": [
     "seasons",
-    "storm"
+    "storm",
+    "snow"
   ],
   "additionalProperties": false,
   "properties": {
@@ -87,6 +88,27 @@
           "maximum": 1
         }
       }
+    },
+    "snow": {
+      "description": "Neige de plaine et des toits.",
+      "type": "object",
+      "required": [
+        "south_fade"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "south_fade": {
+          "description": "Limite sud de la neige de plaine et des toits : début et fin du fondu, en fraction de la hauteur de la carte (0 : bord nord, 1 : bord sud).",
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -104,7 +126,8 @@
       "type": "object",
       "required": [
         "sea",
-        "grade"
+        "grade",
+        "roof_snow"
       ],
       "additionalProperties": false,
       "properties": {
@@ -137,6 +160,12 @@
         },
         "grade": {
           "$ref": "#/$defs/grade"
+        },
+        "roof_snow": {
+          "description": "Neige sur les toits des villes 1:1 (0 : aucune, 1 : toits blancs).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },

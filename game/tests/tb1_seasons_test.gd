@@ -8,6 +8,8 @@ extends SceneTree
 
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
 const WATER_SHADER := preload("res://shaders/water.gdshader")
+const TOWN_SHADER := preload("res://shaders/town_building.gdshader")
+const TOWN_FAR_SHADER := preload("res://shaders/town_far.gdshader")
 
 
 func _init() -> void:
@@ -129,6 +131,31 @@ func _check_grade() -> bool:
 	return ok
 
 
-## Point 4 : neige sur les toits des villes 1:1.
+## Point 4 : neige sur les toits des villes 1:1. Paramètre global `campaign_roof_snow` déclaré,
+## lu par la teinte de toits partagée (`roofscape.gdshaderinc`) des deux shaders de ville, et
+## calculé depuis les données : toits blancs l'hiver, nus l'été, fondu vers le sud.
 func _check_roofs() -> bool:
-	return true
+	var ok := true
+	if not RenderingServer.global_shader_parameter_get_list().has(SeasonLook.ROOF_SNOW_PARAM):
+		push_error("TB1: global %s not declared in project.godot" % SeasonLook.ROOF_SNOW_PARAM)
+		ok = false
+	var include := FileAccess.get_file_as_string("res://shaders/roofscape.gdshaderinc")
+	if not include.contains("global uniform vec4 campaign_roof_snow"):
+		push_error("TB1: roofscape include does not read the roof snow global")
+		ok = false
+	for shader: Shader in [TOWN_SHADER, TOWN_FAR_SHADER]:
+		if not shader.code.contains("roofscape.gdshaderinc") or not _uniforms(shader).has("snow"):
+			push_error("TB1: %s lost its snow wiring" % shader.resource_path)
+			ok = false
+	if not TOWN_SHADER.code.contains("roof_snow(world_m)"):
+		push_error("TB1: town buildings ignore the seasonal roof snow")
+		ok = false
+	var winter := SeasonLook.roof_snow(SeasonVisuals.weights_of("winter"), 6144.0)
+	var summer := SeasonLook.roof_snow(SeasonVisuals.weights_of("summer"), 6144.0)
+	if winter.x < 0.5 or summer.x > 0.0:
+		push_error("TB1: roof snow winter %s / summer %s" % [winter, summer])
+		ok = false
+	if not (winter.y > 0.0 and winter.z > winter.y and winter.z < 6144.0):
+		push_error("TB1: roof snow has no southern limit (%s)" % winter)
+		ok = false
+	return ok
