@@ -16,7 +16,8 @@ règle ni cuisson autre que `geo lakes`.
 - [~] Étangs et mares généralisés par paliers d'empreinte (`relief_landcover.gdshaderinc`,
       uniformes `rl_pond_*`, `rl_pool_*`, `rl_water_ref_height`). Écrit, pas encore compilé
       (import Godot du worktree en cours).
-- [ ] Test headless `hc_water_test.gd` (encore le squelette).
+- [~] Test `hc_water_test.gd` écrit (lacs, uniformes, couleurs ; contrôle d'image de la Dombes à
+      rig 150 / 300 quand il tourne avec une fenêtre), pas encore lancé.
 - [x] Outils : `game/tests/hc_water_view.gd` (carte, cadrage, masque d'eau par passage magenta,
       statistiques), `hc_water_shots.gd` (planche 2×2 + ligne `HC water` chiffrée par vue).
 

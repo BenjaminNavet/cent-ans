@@ -39,7 +39,7 @@ uniform float rl_pond_bank = 0.05;         // largeur de la berge (part de cellu
 uniform float rl_pond_bank_amount = 0.75;  // opacité de la berge (couleur `lake_bank_color`)
 uniform float rl_pond_far_cover = 0.35;    // couverture moyenne au-delà du dernier palier (× densité)
 uniform float rl_pool_min_px = 5.0;        // plus petite mare de marais (px de référence)
-uniform float rl_pool_amount = 0.32;       // part d'eau libre d'un marais dense (roselière dominante)
+uniform float rl_pool_amount = 0.38;       // part d'eau libre d'un marais dense (roselière dominante)
 uniform float rl_pool_opacity = 0.85;      // opacité des mares
 uniform float rl_pool_max_scale = 16.0;    // grossissement maximal des mares
 uniform float rl_pool_lake_tint = 0.6;     // 0 = eau de marais (`rl_marsh_water`), 1 = eau des lacs
@@ -91,15 +91,21 @@ vec4 rl_landcover(vec4 s, vec2 p, float footprint) {
 }
 
 // Étang médiéval dans la cellule de `p` : ellipse orientée coupée par une chaussée droite.
-// `cell_px` : taille de la cellule du palier (px carte) ; la densité de la zone est lue au centre
-// de la cellule (un étang grossi n'est pas rogné par la limite de la zone).
+// `cell_px` : taille de la cellule du palier (px carte) ; la densité de la zone est lue autour du
+// centre de la cellule (un étang grossi n'est pas rogné par la limite de la zone).
 // Renvoie la distance signée (unités de cellule, négative dans l'eau) ou 1 s'il n'y a pas d'étang.
 float rl_pond_sd(vec2 p, float cell_px) {
 	vec2 q = p / cell_px;
 	vec2 cell = floor(q);
 	vec2 local = fract(q) - 0.5;
 	vec2 key = cell + vec2(cell_px * 7.31, cell_px * 3.17);  // semis propre à chaque palier
-	float density = textureLod(wetlands, (cell + 0.5) * cell_px / map_size, 0.0).g;
+	// Plus faible densité aux quatre coins de l'emprise possible de l'étang : pas d'étang à cheval
+	// sur la limite de la zone.
+	vec2 mid = (cell + 0.5) * cell_px / map_size;
+	vec2 reach = vec2(0.25 * cell_px) / map_size;
+	float density = min(
+		min(textureLod(wetlands, mid + reach, 0.0).g, textureLod(wetlands, mid - reach, 0.0).g),
+		min(textureLod(wetlands, mid + vec2(reach.x, -reach.y), 0.0).g, textureLod(wetlands, mid + vec2(-reach.x, reach.y), 0.0).g));
 	float h = hash12(key + vec2(3.7, 11.3));
 	if (h > density * rl_pond_fill) {
 		return 1.0;
@@ -137,7 +143,7 @@ vec3 rl_pond_layer(vec2 p, float cell_px, float footprint) {
 // base. Renvoie (palier bas, part du palier suivant) ; le palier bas est toujours ≥ la taille voulue
 // (fondu vers le suivant sur le dernier tiers).
 vec2 rl_tier(float wanted, float max_tier) {
-	float k = clamp(log2(max(wanted, 1e-4)), -1.0, floor(max_tier) - 1.0);
+	float k = clamp(log2(max(wanted, 1e-4)), -1.0, floor(max_tier + 0.01) - 1.0);
 	return vec2(floor(k) + 1.0, smoothstep(0.67, 1.0, fract(k)));
 }
 
