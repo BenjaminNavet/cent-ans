@@ -28,6 +28,9 @@ var preach_button: Button
 var blocker_label: Label
 var pending_box: VBoxContainer
 var error_label: Label
+## Posé par la carte de campagne : `submit(order) -> Dictionary` (son, toast, rafraîchissement,
+## refus pendant la fin de tour) ; sans lui, l'ordre va droit à la simulation (tests, maquettes).
+var submit: Callable = Callable()
 var _sim: Object = null
 
 static var _rules_cache: Dictionary = {}
@@ -143,7 +146,8 @@ func _show_pending(pending: Array) -> void:
 func request_preach() -> Dictionary:
 	if _sim == null:
 		return {}
-	last_result = _sim.call("submit_order", {"type": "preach_passage"})
+	var order := {"type": "preach_passage"}
+	last_result = submit.call(order) if submit.is_valid() else _sim.call("submit_order", order)
 	var ok := bool(last_result.get("ok", false))
 	show_for(true, _sim)
 	error_label.visible = not ok
@@ -308,7 +312,7 @@ class FervorGauge:
 		name = "FervorGauge"
 		custom_minimum_size = Vector2(CrusadeSection.MIN_WIDTH, BAR_HEIGHT + TICK_OVERSHOOT * 2.0)
 		size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		mouse_filter = Control.MOUSE_FILTER_STOP
+		mouse_filter = Control.MOUSE_FILTER_PASS  # infobulle sans bloquer la molette du panneau
 
 	func set_view(value: int, floor_mark: int, thresholds: Dictionary) -> void:
 		fervor = clampi(value, 0, 100)

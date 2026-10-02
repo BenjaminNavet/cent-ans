@@ -13,14 +13,19 @@ Périmètre : `game/` et cette note.
   `end_turn_cluster.gd`, `news_letters.gd`, filtre du journal (`MapUI.journal_keeps`).
 - Choix de faction : bannière d'une faction sans province dans `faction_map_picker.gd`
   (colonie tenue dans la province de la capitale) ; `_focus_capital` va sur l'ost.
-- Test `game/tests/jr_crusade_test.gd` vert.
+- Test `game/tests/jr_crusade_test.gd` vert ; smoke vert.
+- Capture : `godot --path game --script res://tests/jr_crusade_shot.gd` → `docs/img/jr/jr-ferveur.png`
+  et `jr-ferveur-passage.png` (1280 px, dossier ignoré), à juger par la session principale.
+- Le bouton passe par `CampaignMap._submit` (son, toast, refus pendant la fin de tour).
 
 ## Prochaine étape
-- Script de capture `game/tests/jr_crusade_shot.gd`, smoke complet, relecture.
+- Lot terminé ; jugement visuel de la capture par la session principale (JR5).
 
 ## Points ouverts
 - Seuils (élan, moral, débandade) absents de `get_crusade()` : lus dans
   `data/rules/crusade.json` pour l'affichage ; à exposer par le pont.
 - « Jérusalem délivrée » reconnue à son texte (un seul genre `crusade` dans le cœur).
+- `fe_ui_test` échoue déjà avant JR3 (« map picker framed on the playable lands ») : les
+  factions jouables couvrent toute la carte depuis OM ; non lié à ce lot.
 - Clés d'infobulle : BBCode direct (`RichTooltip.plain`), pas d'entrée dans
   `data/ui/tooltips.json` (hors périmètre).

@@ -401,10 +401,12 @@ func card_text(faction_id: String) -> String:
 	var titles := PackedStringArray()
 	for title in sheet.get("titles", []):
 		titles.append(str(title.get("name", "")))
-	lines.append("Titres : %s" % ", ".join(titles))
+	# JR3 : une faction sans terre n'a ni titre ni royaume.
+	lines.append("Titres : %s" % (", ".join(titles) if not titles.is_empty() else "aucun (ost sans terre)"))
 	var liege := str(sheet.get("liege_name", ""))
 	lines.append("Suzerain : %s" % liege if liege != "" else "Suzerain : aucun (souverain)")
-	lines.append("Royaume : %s" % str(sheet.get("kingdom_name", "")))
+	if str(sheet.get("kingdom_name", "")) != "":
+		lines.append("Royaume : %s" % str(sheet.get("kingdom_name", "")))
 	var entry := FrontEndData.faction(faction_id)
 	if entry.has("difficulty"):
 		lines.append("Difficulté estimée : %s" % FrontEndData.difficulty_label(int(entry["difficulty"])))

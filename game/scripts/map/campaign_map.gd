@@ -404,7 +404,9 @@ func _connect_ui() -> void:
 	ui.cancel_build_requested.connect(_on_cancel_build)
 	ui.tax_rate_changed.connect(_on_tax_rate_changed)
 	ui.faction_panel_requested.connect(_on_faction_panel_requested)
-	ui.faction_panel.crusade_section.passage_preached.connect(_on_passage_preached)  # JR3
+	# JR3 : le passage se prêche par la voie commune des ordres (son, toast, rafraîchissement).
+	ui.faction_panel.crusade_section.submit = func(order: Dictionary) -> Dictionary:
+		return _submit(order, "Le passage est prêché : des volontaires prennent la croix.")
 	ui.court_panel_requested.connect(_on_court_panel_requested)
 	ui.province_court_requested.connect(_on_province_court_requested)
 	ui.character_selected.connect(_on_character_selected)
@@ -943,13 +945,6 @@ func _on_tax_rate_changed(faction_id: String, rate: String) -> void:
 	var result := _submit({"type": "set_tax_rate", "rate": rate}, "Taux d'imposition modifié.")
 	if result.get("ok", false):
 		_show_faction_panel(faction_id)
-
-
-## JR3 : le passage prêché a débité le trésor et levé la ferveur (ordre soumis par la section).
-func _on_passage_preached() -> void:
-	UiSounds.play("order")
-	ui.show_toast("Le passage est prêché : des volontaires prennent la croix.")
-	refresh_all()
 
 
 func _on_faction_panel_requested() -> void:
