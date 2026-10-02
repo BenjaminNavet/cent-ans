@@ -97,6 +97,12 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
   Haarlemmermeer, Whittlesey Mere (+ Fucin, Copaïs, Amouq de HC5).
 
 ## Prochaine étape
+0. GC est dans main (425788334, non poussée) : fusionner main dans `feat/hc` puis dans les trois
+   branches de lot (conflit attendu : `data/ui/campaign_map.json` + schéma, clés `town_scale`,
+   `town_style`, `camera_floor_distance` contre `tree_style`). Maquettes finales : ville 14, bourg 8,
+   château 4,6, abbaye 4,4, village 4, Paris ≈ 28 unités ; plancher de caméra 20 ; `field_scale` 0,3.
+   Reste à GC : GC4 (largeurs des fleuves et routes), fichiers que HC ne touche pas. HC peut
+   désormais entrer dans main sans attendre.
 À la reprise : faire trancher le défaut des massifs vides (HC5), repasser les tests restants de
 HC2 et HC5, banc HC1 sur machine calme, puis HC3
 (fusion de `feat/hc1`, `feat/hc2`, `feat/hc5` dans `feat/hc`, planche commune, réglages).
