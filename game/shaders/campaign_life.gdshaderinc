@@ -25,6 +25,9 @@ uniform float snow_near_opacity = 0.8;
 // TB1 : sol d'hiver hors neige : part de gris et teinte brun-gris (luminance gardée × teinte).
 uniform float winter_ground_desat = 0.55;
 uniform vec3 winter_ground_tint = vec3(1.10, 1.0, 0.86);
+// TB1 : roux d'automne des prés et des forêts posé sur la carte de couleur (vert baissé, pas
+// d'orange vif) ; les cultures en reçoivent la moitié.
+uniform vec3 autumn_russet = vec3(1.03, 0.80, 0.86);
 // TB1 : dorure des cultures en été, appliquée par-dessus la carte de couleur (saison moyenne).
 uniform vec3 summer_gold = vec3(1.12, 1.04, 0.84);
 uniform vec3 life_snow_color = vec3(0.80, 0.82, 0.86);

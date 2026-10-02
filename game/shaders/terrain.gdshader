@@ -654,6 +654,10 @@ void fragment() {
 	vec3 k_farm = season_ratio(farm_base * mix(vec3(1.0), summer_gold, life_season().y * float(life_enabled)), farm_summer);
 	vec3 forest_far = season_forest_mean(tint_forest);
 	vec3 k_forest = season_ratio(mix(season_forest(tint_forest, value_noise(p * 0.45)), forest_far, smoothstep(0.3, 1.0, footprint)), tint_forest);
+	vec3 russet = mix(vec3(1.0), autumn_russet, life_season().z * float(life_enabled));
+	k_grass *= russet;
+	k_forest *= russet;
+	k_farm *= mix(vec3(1.0), russet, 0.5);
 	vec3 k_heath = mix(vec3(1.0), k_grass, 0.6);
 	vec3 season_num = w_grass * grass_summer * k_grass + w_farm * farm_summer * k_farm + w_forest * tint_forest * k_forest
 		+ w_rock * tint_rock + w_heath * tint_heath * k_heath;
