@@ -179,6 +179,7 @@ func _check_plague(block: Dictionary) -> void:
 	_check(_only_meshes(node), "plague shown by 3D props only (no interface sign)")
 	_check(int(scars.stats.get("doors", 0)) == int(doors[1]) and int(scars.stats.get("pits", 0)) == int(pits[1]), "stats: %s" % scars.stats)
 	_check_plague_screen(scars, node, block)
+	_check_door_cross()
 	# Vue lointaine et parchemin : rien.
 	scars.update_view(float(block["max_distance"]) * 2.0, 1.0)
 	_check(not node.visible, "plague hidden beyond max_distance")

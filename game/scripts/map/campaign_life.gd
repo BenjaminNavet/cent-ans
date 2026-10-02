@@ -116,9 +116,8 @@ func _town_plan(id: String) -> Dictionary:
 	if _settlements == null:
 		return {}
 	var cities := _settlements.landmark_cities
-	if cities != null and cities.has_city(id) and cities.is_shown(id):
-		var zone := cities.zone_of(id)
-		return {"plan": cities.plan_of(id), "anchor": Vector2(zone.x, zone.y), "meters_per_unit": LandmarkV2Library.meters_per_unit()}
+	if cities != null and cities.has_city(id):
+		return {"none": true}
 	var towns := _settlements.towns
 	if towns != null and towns.data != null and towns.is_shown(id):
 		return {"plan": towns.plan_of(id), "anchor": towns.data.anchor_of(id), "meters_per_unit": towns.data.meters_per_unit}
