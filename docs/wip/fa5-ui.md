@@ -15,14 +15,20 @@ Branche `feat/fa-ui`, worktree `../gp-fa-ui` (depuis `feat/fa`). Brutes hors dé
 - Jeu : `game/scripts/ui/fa_ui.gd` (`FaUi`) lit le même fichier de données.
 
 ## Points (ordre du brief, chacun jugé sur capture avant/après)
-- [ ] 1. Lettrines réelles (`Lettrine`), titre de la chronique
+- [x] 1. Lettrines réelles : mécanisme en place (`FaUi.initial_for`, `Lettrine`), mais **une
+      seule initiale retenue** (D, Paris v. 1415, titres non ajustés : « Diplomatie »…).
+      Essayées puis écartées sur capture : C Avignon (historiée), C Paris (grille), D Rouen,
+      D Angleterre, E Paris 1460 (visage) → lettre illisible à 45-60 px ; P et E anglais à
+      l'encre → flous ; fond damassé réel sous la lettre d'or → l'or se perd. Titre de la
+      chronique : non traité (aucun gain attendu).
 - [ ] 2. Ornements de bordure (coins / bandeaux en surimpression)
 - [ ] 3. Sceaux de cire
 - [ ] 4. Matières (cuir, laiton, bois, velours)
 - [ ] Crédits `CREDITS.md`, tests, rapport
 
-## Captures lues (budget 30)
-4 / 30 — 2 planches-contact des feuillets, 2 planches de repérage des initiales.
+## Captures lues
+15 (plafond de 30 levé par le coordinateur en cours de lot : « budget illimité de captures »).
+Planches ≤ 1280 px, avant/après assemblés.
 
 ## Journal
 - Squelette : note, données, schéma, outil, test.

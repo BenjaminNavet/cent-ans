@@ -1,8 +1,20 @@
 {
   "description": "Lot FA5 — découpes d'enluminures, de sceaux et de matières du domaine public pour l'interface (outil tools/cent_ans_tools/fa_ui_assets.py, sorties game/assets/ui/fa/).",
-  "sources": {},
-  "initials": [],
+  "sources": {
+    "cma_1953_366_1": {"file": "cleveland/cma_1953.366.1.jpg", "institution": "Cleveland Museum of Art", "object": "Leaf from a Book of Hours: The Visitation (1953.366.1)", "origin": "France, Paris, v. 1415", "url": "https://clevelandart.org/art/1953.366.1", "licence": "CC0 1.0"}
+  },
+  "initials": [
+    {"id": "d_paris_1415", "letter": "D", "set": "french", "source": "cma_1953_366_1", "box": [716, 1931, 1270, 2435], "size": 128, "mode": "framed"}
+  ],
   "ornaments": [],
   "seals": [],
-  "materials": []
+  "materials": [],
+  "display": {
+    "initial_scale": 1.4,
+    "english_cultures": ["cul_english"],
+    "corner_opacity": 0.9,
+    "corner_size_px": 72,
+    "header_opacity": 0.9,
+    "header_height_px": 28
+  }
 }
