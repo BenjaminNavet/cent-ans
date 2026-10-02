@@ -100,3 +100,10 @@ et les agents visuels du chantier. Rester à ≤ 1280 px de large et assembler a
 - 10-02 : FA1 vérifié en bataille (forêt, vue rapprochée et déploiement, avec et sans
   `--no-fa`) : lisières identiques de loin, aucune régression. FA7 lancé (5 agents FA + 4 TB).
 - 10-02 : FA2 jugé et réglé en jeu (Flame03 + WispySmoke03), `feat/fa-fx`.
+- 10-02 : FA2 fusionné dans `feat/fa` (670464d8d). FA6 : rose et sirènes validées, navire réel
+  refusé (agent relancé). FA3 : chaîne validée, agent relancé pour passer `parry`, `death`,
+  `death_back` par défaut via les données. Autres sessions sur la carte : TB (carte 3D), GC
+  (champs, hameaux, moulins), HC (arbres, forêts, lacs, étangs ; ADR 0161 pris) — FA ne touche en
+  campagne que la vue parchemin. Machine saturée (48 processus Godot, charge > 190) : ne plus
+  lancer d'agent tant que les lots en cours n'ont pas rendu. Numéro d'ADR de FA à prendre au
+  moment de la fusion (`ls docs/decisions | tail` dans main, 0153-0156 et 0161 réservés).
