@@ -168,23 +168,58 @@ géographie relative vraie. Origine : champs (HB3 ×3) et camps plus gros que le
 - Captures : `docs/img/gc/gc3_maquettes.jpg` (15 vues, 1080p recadré), `gc5_champs.jpg`,
   `kit_est_sud.jpg`.
 
-## GC6-perf — une surface par maquette (02/10, en cours)
-Constat : 3 181 appels de dessin à d 150 (665 avec les villes 1:1), 1 281 MultiMesh × 8 à 12
-surfaces par modèle + passe d'ombre.
-- [x] Blender : `settlements_east.bake_kit` (teinte de palette × ombrage de pied de mur cuits en
-  `COLOR_0` linéaire, alpha 0 sur les bannières, matériau unique `Kit`), 60 `.glb` réexportés
-  (553 surfaces → 60, triangles et emprises inchangés).
-- [x] Godot : `shaders/maquette_kit.gdshader`, matériau partagé dans `TownMaquetteLayer`.
-- [x] Ombres par type : `shadow_range` de `town_maquettes.json` (château 120, abbaye / village 100).
-- [x] `gc_maquettes_test.gd`, schéma.
-- [ ] Planche Blender de contrôle des teintes, banc (d 150, d 40), smoke.
+## GC6-perf — une surface par maquette (fait le 02/10, teintes à juger en jeu)
+Constat : 3 181 appels de dessin à d 150 (665 avec les villes 1:1) : 1 281 MultiMesh × 8 à 12
+surfaces par modèle (une par teinte, matériaux propres à chaque `.glb`) + passe d'ombre.
+- **Blender** : `settlements_east.bake_kit` (appelé par `settlements.export_model` et par la
+  planche) cuit la teinte de palette de chaque face dans la couleur de coin (`COLOR_0`, linéaire)
+  × l'ombrage de pied de mur que posait `kit_campaign.finish_parts` (0,6 au pied enterré → 1 à
+  1,6 m), alpha 0 sur les faces `Banner` (1 ailleurs), puis ne laisse qu'un matériau `Kit`
+  (rugosité 0,9, nœud « attribut de couleur » → couleur de base : la planche montre les teintes).
+  Plus de passage par l'atlas `Building` ni d'UV pour ces modèles. Les 60 `.glb` des six familles
+  réexportés : 553 surfaces → 60, 78 078 triangles et emprises inchangés (lecture du JSON glTF).
+- **Godot** : `shaders/maquette_kit.gdshader` (albédo = couleur de sommet, sans conversion :
+  linéaire des deux côtés ; alpha < 0,5 → `INSTANCE_CUSTOM.rgb`, convention de
+  `maquette_banner.gdshader`), un seul `ShaderMaterial` pour tous les modèles et toutes les
+  tuiles (`TownMaquetteLayer._kit_material`). Bannière par défaut lue dans la couleur de sommet.
+  Ancien kit (`city_a`…, repli) : chemin d'avant (`BuildingMaterials`, surface `Banner`).
+- **Ombres** : `shadow_range` par type dans `town_maquettes.json` (château 120, abbaye et
+  village 100 ; type absent = sans limite propre), combiné à `model_shadow_distance` (FC1) dans
+  `update_view`, par type.
+- **Banc** (`--bench-map --bench-pan-only`, 10 s, même machine chargée, avant = commit précédent) :
+
+  | distance | appels de dessin | primitives | i/s |
+  |---|---|---|---|
+  | d 150 avant | 3 182 | 3,27 M | 38,5 |
+  | d 150 après | 1 080 (2 passes) | 3,02 M | 38,3 / 37,9 |
+  | d 40 avant | 1 382 | 3,18 M | 20,7 |
+  | d 40 après | 627 / 625 | 3,09 M / 3,07 M | 33,7 / 34,6 |
+
+- **Fidélité des teintes** (vérifiée par le calcul, pas en jeu) : pour 99,8 % des sommets, la
+  nouvelle couleur de sommet = ancien `baseColorFactor` × ancienne couleur de sommet (écart
+  < 0,004) ; le reste = 4 à 8 sommets par modèle sur des faces à la limite mur / toit. Écarts
+  voulus ou connus :
+  - rugosité uniforme 0,9 : les coupoles et ardoises (0,4 à 0,6, `Gilt` métal 0,3) perdent leur
+    reflet de soleil. Piste si ça manque : rugosité dans l'alpha (0,5 à 1), bannière à 0 ;
+  - pièces `Wood` (hampes, couronnes de yourte, charrettes : 7 560 sommets sur 156 000) : couleur
+    unie (0,096 ; 0,058 ; 0,033) = moyenne de la couche `Planks` de l'atlas × sa teinte, sans la
+    texture ni l'usure SR5 ;
+  - premier matériau de chaque ancien `.glb` (sol : `Street`, `Sand`, `Dirt`…) : Godot n'y
+    appliquait pas la couleur de sommet ; ses flancs (enterrés) reçoivent maintenant l'ombrage.
+- **Tests** : `gc_maquettes_test.gd` (une surface, matériau partagé, bannière par défaut, ombres
+  par type), `test_town_maquettes_schema.py`, smoke.
+- **Reste** : 1 281 MultiMesh pour 2 138 instances : c'est désormais le plancher des appels de
+  dessin des maquettes (tuiles plus grandes pour les types à longue portée, ou un seul maillage
+  par tuile, si le banc le demande encore) ; `cull_disabled` gardé comme les matériaux importés
+  (faces arrière à retirer après contrôle visuel des maillages ouverts).
 
 ## Reste à faire
 - GC4 : largeur des fleuves et des routes (pas de multiplicateur unique, voir inventaire) ; raccord
   de la Seine de la maquette de Paris avec le fleuve générique ; ponts.
 - GC6 : retirer ou laisser dormir le parcellaire de près ZG5b, l'herbe et les figurants 1:1, les
   paliers vallée/site ; retirer le prototype `MapScale` et les calques 1:1 si le joueur confirme
-  qu'il ne veut plus du style `real` ; banc d'images par seconde (1 281 MultiMesh).
+  qu'il ne veut plus du style `real`. Banc : fait (GC6-perf) ; teintes des maquettes à une surface
+  à juger en jeu.
 - GC7 : camps, avec SA (ADR 0156).
 - Bannières des 7 villes emblématiques (pas de teinte de contrôleur) ; étiquette de Vincennes dans
   l'emprise de Paris ; Saraï petite (poids faible) ; yourtes à juger en jeu.
