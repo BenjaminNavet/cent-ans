@@ -1883,6 +1883,12 @@ func built_radius(i: int) -> float:
 	return _model_radius[i]
 
 
+## TB3 : plans des villes (`towns_1340.json`) : ceux des villes 1:1 (style `real`), sinon ceux
+## lus pour les maquettes GC (portes, enceinte du plan : croissance des villes).
+func town_data() -> TownData:
+	return towns.data if towns != null else _town_data
+
+
 ## TB3 : vrai si la colonie `i` est une ville emblématique (zone de `data/landmarks/`).
 func is_landmark(i: int) -> bool:
 	return _landmarks.has(i)
@@ -1944,6 +1950,12 @@ func _setup_towns() -> void:
 		add_child(maquettes)
 		maquettes.setup(map_data, terrain, self)
 		_compute_footprints()
+		# TB3 (ADR 0162) : bâtiments hors les murs autour des maquettes GC, suie de leurs pièces.
+		outbuildings = OutbuildingLayer.new()
+		outbuildings.name = "Outbuildings"
+		add_child(outbuildings)
+		outbuildings.setup(self, map_data, terrain, data, 719.0)
+		soot = TownSoot.new(outbuildings.config.get("soot", {}))
 		return
 	towns = TownLayer.new()
 	add_child(towns)

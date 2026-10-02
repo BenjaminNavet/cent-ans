@@ -75,7 +75,11 @@ var _provinces: Dictionary = {}  # province → {population, devastation, besieg
 var _live: Dictionary = {}  # `get_settlements_live` de l'état courant (tableaux alignés)
 var _live_index: Dictionary = {}  # id de colonie → rang dans `_live`
 var _stale := true
+## Distance de mise à l'échelle : celle du rig (style `real`), ou la distance fixe
+## `render.maquette.size_distance` (style `maquette`, ADR 0158 : taille monde constante).
 var _rig_distance := 10.0
+var _view_distance := 10.0
+var _maquette := false
 var _loaded_radius := 0.0
 var _baseline: Dictionary = {}  # province → population de 1337 (données)
 var _soot: Dictionary = {}  # indice de colonie → suie 0-1
@@ -250,6 +254,10 @@ func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: 
 	_data = data
 	_mpu = meters_per_unit
 	config = load_config(data_dir())
+	# Carte généralisée (GC2, ADR 0158) : les villes sont des maquettes à taille monde constante ;
+	# les bâtiments hors les murs suivent la même règle (rien ne « respire » au zoom) et les signes
+	# de colonie du lot sont inutiles (la maquette GC est le signe de la ville).
+	_maquette = TownMaquetteData.enabled() and not (config.get("render", {}) as Dictionary).get("maquette", {}).is_empty()
 	manifest = load_manifest()
 	_family_order = (config.get("families", {}) as Dictionary).keys()
 	_grid.clear()
@@ -481,6 +489,25 @@ func growth_of(id: String) -> Dictionary:
 func _models_of_index(i: int) -> Array:
 	var state := _state_of(i)
 	var models := models_for(config, state["buildings"], _resources_of(str(_data.settlements[i]["province"])))
+	if _maquette:
+		# Carte généralisée : le décor générique (moulins GC5) porte déjà les bâtiments de 1337 ;
+		# ces familles n'ont leur maquette que pour un bâtiment construit en cours de partie.
+		var only_built: Array = (config["render"]["maquette"] as Dictionary).get("built_in_game_only", [])
+		var initial: Array = _data.settlements[i].get("initial_buildings", [])
+		var families: Dictionary = config.get("families", {})
+		var kept: Array = []
+		for model: Dictionary in models:
+			var built_in_game := not only_built.has(str(model["family"]))
+			if not built_in_game:
+				# Bâtiments propres à la famille : premier groupe `require` de chaque niveau.
+				for level: Dictionary in (families[str(model["family"])] as Dictionary)["levels"]:
+					var groups: Array = (level["when"] as Dictionary).get("require", [])
+					for id in (groups[0] as Dictionary).get("of", []) if not groups.is_empty() else []:
+						if (state["buildings"] as Array).has(id) and not initial.has(id):
+							built_in_game = true
+			if built_in_game:
+				kept.append(model)
+		models = kept
 	if bool(state["building"]) and manifest.has(WORKSITE_MODEL):
 		models.append({"family": WORKSITE_FAMILY, "level": 1, "model": WORKSITE_MODEL, "site": "road", "slot": _family_order.size()})
 	return models
@@ -489,31 +516,40 @@ func _models_of_index(i: int) -> Array:
 # --- Mise à jour par image ---------------------------------------------------------------
 
 
+## Réglage de rendu : celui du bloc `render.maquette` dans le style `maquette`, sinon `render`.
+func _render(key: String, fallback: float) -> float:
+	var render: Dictionary = config.get("render", {})
+	if _maquette and (render.get("maquette", {}) as Dictionary).has(key):
+		return float(render["maquette"][key])
+	return float(render.get(key, fallback))
+
+
 func view_range() -> float:
-	return float((config.get("render", {}) as Dictionary).get("view_range_units", 160.0))
+	return _render("view_range_units", 160.0)
 
 
 func update_view(rig_distance: float) -> void:
 	if not enabled or _data == null:
 		visible = false
 		return
-	_rig_distance = rig_distance
+	_view_distance = rig_distance
+	_rig_distance = _render("size_distance", rig_distance) if _maquette else rig_distance
 	var shown := force_active or rig_distance < view_range()
 	if shown != visible:
 		visible = shown
 	if not shown:
 		return
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
-	if camera != null:
+	if camera != null and not _maquette:
 		_fov = camera.fov
-	if _placed_distance < 0.0 or absf(rig_distance - _placed_distance) > 0.04 * _placed_distance:
+	if _placed_distance < 0.0 or absf(_rig_distance - _placed_distance) > 0.04 * _placed_distance:
 		_write_batches()
-	var opacity := 1.0 if force_active else fade(config, rig_distance)
+	var opacity := 1.0 if force_active else clampf(inverse_lerp(view_range(), minf(_render("fade_from_units", view_range()), view_range() - 1e-3), rig_distance), 0.0, 1.0)
 	if absf(opacity - _fade) > 0.02 or (opacity >= 1.0) != (_fade >= 1.0):
 		_fade = opacity
 		for mmi: MultiMeshInstance3D in _batches.values():
 			mmi.transparency = 1.0 - _fade
-	var shadows := rig_distance < float((config.get("render", {}) as Dictionary).get("shadow_range_units", 12.0))
+	var shadows := rig_distance < _render("shadow_range_units", 12.0)
 	if shadows != _shadows:
 		_shadows = shadows
 		for mmi: MultiMeshInstance3D in _batches.values():
@@ -522,7 +558,7 @@ func update_view(rig_distance: float) -> void:
 		_vertical_scale = MapData.vertical_scale()
 		_refresh_aabbs()
 	var here := _camera_ground()
-	if _pending.is_empty() and (_dirty or not is_equal_approx(band_top(config, rig_distance), _built_top) or here.distance_to(_center) > _loaded_radius * 0.3 or load_radius() > _loaded_radius * 1.3):
+	if _pending.is_empty() and (_dirty or not is_equal_approx(band_top(config, _rig_distance), _built_top) or here.distance_to(_center) > _loaded_radius * 0.3 or load_radius() > _loaded_radius * 1.3):
 		_begin_rebuild(here)
 	if not _pending.is_empty():
 		_step(STEP_BUDGET_USEC if FrameBudget.in_frame() else 1 << 30)
@@ -536,8 +572,7 @@ func update_view(rig_distance: float) -> void:
 ## rig, entre `render.load_min_units` et `render.load_max_units` (comme le chargement des villes
 ## 1:1 : de près, on ne pose que les maquettes des colonies proches).
 func load_radius() -> float:
-	var render: Dictionary = config.get("render", {})
-	return clampf(float(render.get("load_factor", 3.0)) * _rig_distance, float(render.get("load_min_units", 6.0)), float(render.get("load_max_units", view_range() * 1.5)))
+	return clampf(_render("load_factor", 3.0) * _view_distance, _render("load_min_units", 6.0), _render("load_max_units", view_range() * 1.5))
 
 
 ## Point du sol visé par la caméra (unités carte) ; position de la caméra en repli.
@@ -626,6 +661,8 @@ func _instances_of(i: int) -> Array:
 	var center := _px_of(i)
 	# De loin, seules les cités et les villes gardent leurs maquettes (la place manque).
 	var minor := _build_top > float(screen_config(config).get("minor_until", INF)) and not KIND_RANK.has(str(_data.settlements[i].get("kind", "")))
+	if _maquette:
+		minor = not ((config["render"]["maquette"] as Dictionary).get("kinds", []) as Array).has(str(_data.settlements[i].get("kind", "")))
 	for model: Dictionary in ([] if minor else _models_of_index(i)):
 		var entry: Dictionary = manifest.get(str(model["model"]), {})
 		if entry.is_empty():
@@ -633,7 +670,15 @@ func _instances_of(i: int) -> Array:
 		var family := str(model["family"])
 		# L'ancrage vaut pour les trois niveaux : il réserve l'emprise du niveau 3.
 		var reserve := float((manifest.get("%s_3" % family, entry) as Dictionary).get("radius", entry["radius"]))
-		var anchor := _anchor(i, family, int(model["slot"]), str(model["site"]), reserve)
+		var anchor := {}
+		if _maquette:
+			# Autour d'une maquette GC, le site réel n'a pas de sens : seule compte la direction,
+			# le secteur de la famille (tiré de l'identifiant de la colonie).
+			var seed_value := absi(str(_data.settlements[i]["id"]).hash())
+			var angle := float(seed_value % 3600) / 3600.0 * TAU + float(int(model["slot"])) * TAU / float(_family_order.size() + 1)
+			anchor = {"px": center + Vector2(cos(angle), sin(angle)) * (_built_radius(i) + 0.1), "yaw": 0.0}
+		else:
+			anchor = _anchor(i, family, int(model["slot"]), str(model["site"]), reserve)
 		var far_only := anchor.is_empty()
 		if far_only:
 			# Port sans grève au pied de la ville : de loin seulement, posé à la côte voisine.
@@ -668,6 +713,14 @@ func _instances_of(i: int) -> Array:
 		if not sign.is_empty():
 			out.append(sign)
 			out.append_array(_quarter_signs(i, center, growth, sign))
+		elif _maquette:
+			# Maquette GC de la ville : les faubourgs ajoutés sont des groupes de maisons à son
+			# bord ; son enceinte est déjà dans la maquette (rien n'est doublé).
+			var built := _built_radius(i)
+			for inst: Dictionary in growth:
+				inst["held_edge"] = built
+				inst["c"] = center
+			out.append_array(_quarter_signs(i, center, growth, {"built": built}))
 	out.append_array(growth)
 	return out
 
@@ -677,6 +730,8 @@ func _instances_of(i: int) -> Array:
 ## enceinte si la ville est murée (plan de 1340, fortification de départ ou construite). Vide si
 ## le genre n'a pas de signe. Les faubourgs ajoutés partent alors du bord du signe.
 func _sign_instance(i: int, center: Vector2, growth: Array) -> Dictionary:
+	if _maquette:
+		return {}
 	var signs: Dictionary = screen_config(config).get("signs", {})
 	var entry: Dictionary = _data.settlements[i]
 	var rule: Dictionary = signs.get(str(entry.get("kind", "")), {})
@@ -764,6 +819,7 @@ func _quarter_signs(i: int, center: Vector2, growth: Array, sign: Dictionary) ->
 			"fraction": float(rule.get("fraction", 0.04)),
 			"sign_share": float(inst.get("sign_share", 0.0)),
 			"sign_built": float(sign["built"]),
+			"held_edge": float(sign["built"]) if _maquette else 0.0,
 			"top": float(shape.get("height", 12.0)),
 			"reach": float(shape.get("radius", 20.0)),
 		})
@@ -784,19 +840,19 @@ func _growth_instances(i: int, state: Dictionary) -> Array:
 	if town.is_empty() or growth.is_empty():
 		return []
 	var entry: Dictionary = _data.settlements[i]
-	var center := _layer.towns.data.anchor_of(str(entry["id"]))
+	var center := _layer.town_data().anchor_of(str(entry["id"]))
 	var out := TownGrowth.suburb_instances(growth, town, i, center, _mpu, TownGrowth.quarter_count(growth, population_ratio(str(entry["province"]))), _base_m)
 	var kind := TownGrowth.enclosure_to_add(growth, state["buildings"], entry.get("initial_buildings", []), str(town.get("walls", "none")))
 	if kind != "":
-		out.append_array(TownGrowth.enclosure_instances(growth, _layer.towns.data.params.get("walls", {}), town, i, center, _mpu, kind, _base_m))
+		out.append_array(TownGrowth.enclosure_instances(growth, _layer.town_data().params.get("walls", {}), town, i, center, _mpu, kind, _base_m))
 	return out
 
 
 ## Entrée de `towns_1340.json` de la colonie `i` (vide : ville emblématique ou colonie absente).
 func _town_of(i: int) -> Dictionary:
-	if _layer == null or _layer.towns == null or _layer.towns.data == null:
+	if _layer == null or _layer.town_data() == null:
 		return {}
-	return _layer.towns.data.towns.get(str(_data.settlements[i]["id"]), {})
+	return _layer.town_data().towns.get(str(_data.settlements[i]["id"]), {})
 
 
 # --- Sites ---------------------------------------------------------------------------------
@@ -1189,6 +1245,11 @@ func _layout(i: int, models: Array, growth: Array, top: float, sign: Dictionary 
 				var reach := float(rule.get("fraction", 0.04)) * view_span(top, _fov) * 0.75
 				_disc_add({"c": center, "dir": quarter[1], "edge": 0.0, "off": sign_top + reach, "r": reach})
 				break
+			elif _maquette:
+				var held: Dictionary = screen_config(config).get("suburb_sign", {})
+				var cluster := float(held.get("fraction", 0.04)) * view_span(top, _fov) * 0.75
+				_disc_add({"c": center, "dir": quarter[1], "edge": edge, "off": cluster, "r": cluster})
+				break
 			else:
 				_disc_add({"c": quarter[0], "dir": quarter[1], "edge": 0.0, "off": along, "r": half})
 			along += half * 1.6
@@ -1263,6 +1324,8 @@ func _place(inst: Dictionary) -> void:
 	var blend := screen_blend(config, d)
 	var screen := screen_config(config)
 	var sign_r := _sign_radius(float(inst.get("sign_share", 0.0)), float(inst.get("sign_built", 0.0)), d) if blend > 0.0 else 0.0
+	if float(inst.get("held_edge", 0.0)) > 0.0:  # style `maquette` : bord de la maquette GC
+		sign_r = float(inst["held_edge"])
 	match str(inst.get("grow", "")):
 		"out":
 			var factor := model_factor(config, float(inst["width_m"]), int(inst["level"]), d, _mpu, _fov)

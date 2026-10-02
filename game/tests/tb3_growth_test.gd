@@ -25,6 +25,8 @@ const SCREEN_DISTANCES: Array[float] = [20.0, 45.0, 90.0]
 var _failures := 0
 var _completed := false
 var _completed_steps := 0
+## Style des lieux : villes 1:1 (`--town-style=real`) ou maquettes de la carte généralisée (défaut).
+var _real := true
 
 
 ## Simulation factice : bâtiments, fortification, chantier et population posés par le test.
@@ -95,6 +97,8 @@ func _run() -> void:
 		return
 	var data := SettlementData.load_from(data_dir, map_dir)
 	var town := data.get_settlement(TOWN)
+	_real = not TownMaquetteData.enabled()
+	print("tb3_growth_test: style %s" % TownMaquetteData.style())
 	if not _check(not town.is_empty(), "%s missing" % TOWN):
 		return
 	var town_px: Vector2 = town["px"]
@@ -165,6 +169,15 @@ func _check_outbuildings(layer: SettlementLayer, data: SettlementData, town_px: 
 	layer.update_view(10.0)
 	out.flush(town_px)
 	await process_frame
+	if not _real:
+		# Carte généralisée : un moulin de 1337 est déjà dans le décor GC, pas de maquette ; il
+		# n'en reçoit une que construit en cours de partie.
+		var entry: Dictionary = data.settlements[data.index_by_id[TOWN]]
+		entry["initial_buildings"] = ["bld_windmill", "bld_water_mill"]
+		_check(not _levels(out.models_of(TOWN)).has("mill"), "no mill model for a mill standing since 1337 (generic decor)")
+		entry["initial_buildings"] = []
+		out.invalidate()
+		out.flush(town_px)
 	var levels := _levels(out.models_of(TOWN))
 	_check(levels == {"farm": 1, "mill": 1, "vineyard": 1, "market": 1}, "level 1 models after the first buildings, got %s" % levels)
 	var placed := out.instances_of(TOWN)
@@ -177,11 +190,11 @@ func _check_outbuildings(layer: SettlementLayer, data: SettlementData, town_px: 
 		var px: Vector2 = inst["px"]
 		spots[str(inst["family"])] = px
 		_check(px.distance_to(layer.model_px(index)) > built, "%s stands outside the built area" % inst["family"])
-		_check(px.distance_to(layer.model_px(index)) < built + 3.0, "%s stays on the town's land" % inst["family"])
+		_check(px.distance_to(layer.model_px(index)) < built + (3.0 if _real else 12.0), "%s stays on the town's land" % inst["family"])
 		_check(str(inst["model"]) == "%s_1" % inst["family"], "level 1 model for %s, got %s" % [inst["family"], inst["model"]])
 	for a: String in spots:
 		for b: String in spots:
-			if a < b:
+			if a < b and _real:
 				_check((spots[a] as Vector2).distance_to(spots[b]) * 719.0 > 60.0, "%s and %s do not overlap" % [a, b])
 	# Construction : moulin à eau, maison des métiers, haras → niveau 2, au même endroit.
 	sim.buildings[TOWN] = ["bld_guild_hall", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_stables"]
@@ -193,7 +206,12 @@ func _check_outbuildings(layer: SettlementLayer, data: SettlementData, town_px: 
 	_check(levels == {"farm": 2, "mill": 2, "vineyard": 2, "market": 2}, "level 2 models after the upgrades, got %s" % levels)
 	for inst: Dictionary in out.instances_of(TOWN):
 		_check(str(inst["model"]) == "%s_2" % inst["family"], "level 2 model for %s, got %s" % [inst["family"], inst["model"]])
-		_check((inst["px"] as Vector2).is_equal_approx(spots[str(inst["family"])]), "%s grows in place" % inst["family"])
+		# Style `real` : même site ; maquettes : même secteur (l'anneau suit la taille de la maquette).
+		var before: Vector2 = spots[str(inst["family"])]
+		if _real:
+			_check((inst["px"] as Vector2).is_equal_approx(before), "%s grows in place" % inst["family"])
+		else:
+			_check((inst["px"] as Vector2).distance_to(before) < 3.0, "%s grows where it stood" % inst["family"])
 	# Niveau 3 et chantier en cours.
 	sim.buildings[TOWN] = ["bld_fair", "bld_water_mill", "bld_vineyard_press", "bld_stables", "bld_weaving_workshop", "bld_abbey", "bld_scriptorium", "bld_counting_house"]
 	sim.constructing[TOWN] = true
@@ -242,6 +260,7 @@ func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapDa
 	var view_height := float(root.size.y)
 	camera.fov = 55.0
 	var town_index: int = data.index_by_id[TOWN]
+	var held_sizes: Array = []
 	for distance in SCREEN_DISTANCES:
 		camera.look_at_from_position(focus + Vector3(0.0, sin(pitch), cos(pitch)) * distance, focus, Vector3.UP)
 		layer.update_view(distance)
@@ -271,7 +290,11 @@ func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapDa
 			var j := int(inst["settlement"])
 			_check(px.distance_to(layer.model_px(j)) >= layer.built_radius(j) + float(inst["radius_m"]) * float(inst["factor"]) / 719.0, "%s of %s clears its town at distance %.0f" % [inst["model"], data.settlements[j]["id"], distance])
 			_check(map_data.is_land_px(int(px.x), int(px.y)) and map_data.river_sd_at(px.x, px.y) > 0.0, "%s of %s stands on land, off the river bed, at distance %.0f" % [inst["model"], data.settlements[j]["id"], distance])
-		_check(narrowest >= 28.0, "every model is at least 28 px wide at distance %.0f, got %.1f" % [distance, narrowest])
+		if _real:
+			_check(narrowest >= 28.0, "every model is at least 28 px wide at distance %.0f, got %.1f" % [distance, narrowest])
+		else:  # taille monde constante : rien ne « respire » au zoom
+			_check(is_equal_approx(float(level_width[3][0]), float(level_width[3][1])) and float(level_width[1][1]) > 1.0, "constant world size at distance %.0f (level 1 %.2f units, level 3 %.2f to %.2f)" % [distance, level_width[1][1], level_width[3][0], level_width[3][1]])
+			held_sizes.append(float(level_width[3][0]))
 		_check(float(level_width[3][0]) >= 1.8 * float(level_width[1][1]), "level 3 at least 1.8 times level 1 at distance %.0f (%.2f against %.2f units)" % [distance, level_width[3][0], level_width[1][1]])
 		var overlaps := 0
 		for a in models.size():
@@ -287,7 +310,9 @@ func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapDa
 		_check(own.size() >= 3, "at least 3 models stay around %s at distance %.0f, got %d" % [TOWN, distance, own.size()])
 		# Signe de la ville : le plus gros ensemble, les maquettes hors de son emprise.
 		var signs := out.instances_of(TOWN, "sign")
-		if _check(signs.size() == 1, "one settlement sign for %s at distance %.0f" % [TOWN, distance]):
+		if not _real:
+			_check(signs.is_empty(), "no TB3 settlement sign over the GC maquette")
+		elif _check(signs.size() == 1, "one settlement sign for %s at distance %.0f" % [TOWN, distance]):
 			var sign_width := float(signs[0]["width_m"]) * float(signs[0]["factor"]) / 719.0
 			var sign_reach := float(signs[0]["radius_m"]) * float(signs[0]["factor"]) / 719.0
 			_check(sign_width > float(level_width[3][1]) * 1.3, "the town sign is the largest piece at distance %.0f (%.2f against %.2f units)" % [distance, sign_width, level_width[3][1]])
@@ -305,7 +330,7 @@ func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapDa
 	for inst: Dictionary in out.instances_of(TOWN):
 		if str(inst.get("family", "")) != "sign":
 			fogged += 1
-	_check(out.is_hidden(TOWN) and fogged == 0 and out.instances_of(TOWN, "sign").size() == 1, "under the fog of war a town keeps its sign and nothing else")
+	_check(out.is_hidden(TOWN) and fogged == 0 and out.instances_of(TOWN, "sign").size() == (1 if _real else 0), "under the fog of war a town keeps its sign and nothing else")
 	_check(not out.instances().is_empty(), "provinces in sight keep their models")
 	fog.hidden_provinces.clear()
 	layer.refresh(sim, Callable())
@@ -316,7 +341,9 @@ func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapDa
 	layer.update_view(8.0)
 	out.flush(town_px)
 	_check(out.instances_of(TOWN, "sign").is_empty(), "no settlement sign up close: the 1:1 town is the town")
-	for inst: Dictionary in out.instances_of(TOWN):
+	if not _real:
+		_check(held_sizes.size() == SCREEN_DISTANCES.size() and is_equal_approx(held_sizes.min(), held_sizes.max()), "same world size at every distance, got %s" % [held_sizes])
+	for inst: Dictionary in (out.instances_of(TOWN) if _real else []):
 		_check(is_equal_approx(float(inst["factor"]), 1.0) and (inst["px"] as Vector2).is_equal_approx(inst["real_px"]), "%s back at real scale and on its site up close" % inst["model"])
 	layer.update_view(10.0)
 	_completed_steps += 1
@@ -336,7 +363,7 @@ func _check_growth(layer: SettlementLayer, data: SettlementData) -> void:
 	_check(TownGrowth.enclosure_to_add(growth, ["bld_castle"], [], "stone") == "", "a town walled in its 1340 plan gets no second wall")
 	# Ville ouverte du plan de 1340, sans fortification de départ.
 	var open_id := ""
-	var towns: Dictionary = layer.towns.data.towns
+	var towns: Dictionary = layer.town_data().towns
 	for entry in data.settlements:
 		var id := str(entry["id"])
 		if str(entry["kind"]) == "town" and towns.has(id) and str(towns[id]["walls"]) == "none" and (towns[id]["gates"] as Array).size() >= 2 and TownGrowth.enclosure_rank(growth, entry["initial_buildings"]) == 0:
@@ -366,12 +393,14 @@ func _check_growth(layer: SettlementLayer, data: SettlementData) -> void:
 	var per_quarter := int(growth["suburbs"]["houses_per_quarter"])
 	_check(houses.size() == 2 * per_quarter, "two suburb quarters (%d houses) after the population grew, got %d" % [2 * per_quarter, houses.size()])
 	var radii := PackedFloat32Array(towns[open_id]["radii"])
-	var anchor := layer.towns.data.anchor_of(open_id)
+	var anchor := layer.town_data().anchor_of(open_id)
 	for inst: Dictionary in houses:
 		var local := ((inst["px"] as Vector2) - anchor) * 719.0
 		if not _check(not TownPlan.inside(radii, local), "suburb houses stand outside the 1340 town"):
 			break
 	_check(out.get_node_or_null("Batches/kit_" + str(houses[0]["model"])) != null if not houses.is_empty() else false, "suburb houses drawn with the town kit")
+	if not _real:
+		_check(out.instances_of(open_id, "suburb_sign").size() == 2, "one house cluster per added quarter at the edge of the GC maquette, got %d" % out.instances_of(open_id, "suburb_sign").size())
 	# Palissade, puis murs de pierre : enceinte, tours, portes.
 	sim.buildings[open_id] = ["bld_market", "bld_palisade"]
 	sim.revision += 1
@@ -464,7 +493,7 @@ func _check_soot(layer: SettlementLayer, data: SettlementData) -> void:
 	var agen_px: Vector2 = data.settlements[agen]["px"]
 	var other := ""
 	for entry in data.settlements:
-		if str(entry["province"]) != PROVINCE and layer.towns.data.has_town(str(entry["id"])) and (entry["px"] as Vector2).distance_to(agen_px) < 40.0:
+		if str(entry["province"]) != PROVINCE and layer.town_data().has_town(str(entry["id"])) and (entry["px"] as Vector2).distance_to(agen_px) < 40.0:
 			other = str(entry["id"])
 			break
 	var sim := FakeSim.new()
@@ -476,16 +505,10 @@ func _check_soot(layer: SettlementLayer, data: SettlementData) -> void:
 	layer.flush()
 	out.flush(agen_px)
 	layer.set_town_soot(TOWN, 0.8)
-	_check(is_equal_approx(layer.towns.soot_of(TOWN), 0.8), "soot stored for the 1:1 town")
-	_check(other != "" and layer.towns.soot_of(other) == 0.0, "the neighbouring town keeps clean roofs")
-	_check(absf(layer.town_far.soot_of(TOWN) - 0.8) < 0.01 and layer.town_far.soot_of(other) == 0.0, "soot written per town in the far mesh mask, got %.2f" % layer.town_far.soot_of(TOWN))
-	if _check(layer.towns.is_shown(TOWN), "the 1:1 town of %s is built near the camera" % TOWN):
-		var counts := _soot_nodes(layer.towns.builder_of(TOWN), 0.8)
-		_check(counts.x > 0 and counts.y == counts.x, "every node of the sooted town carries its soot (%d of %d)" % [counts.y, counts.x])
-		for id: String in layer.towns.built_ids():
-			if id != TOWN:
-				var clean := _soot_nodes(layer.towns.builder_of(id), 0.0)
-				_check(clean.x > 0 and clean.y == clean.x, "no soot on the nodes of %s (%d of %d clean)" % [id, clean.y, clean.x])
+	if not _real:  # maquettes GC : la suie ne porte que sur les pièces du lot (reste consigné)
+		_check(is_equal_approx(layer.town_soot(TOWN), 0.8) and layer.town_soot(other) == 0.0, "soot kept per town in the maquette style")
+	else:
+		_check_town_soot_nodes(layer, other)
 	_check(out.instances_of(TOWN, "mill").size() == 1 and is_equal_approx(out.soot_of(TOWN), 0.8) and out.soot_of(other) == 0.0, "the outbuildings of the sooted town carry its soot")
 	var packed := TownBuilder.pack_instances([Transform3D(), Transform3D()], [12.0, 30.0], [0.5, 0.5])
 	var buffer := OutbuildingLayer.with_soot(packed["buffer"], [0.0, 0.8])
@@ -506,6 +529,20 @@ func _check_soot(layer: SettlementLayer, data: SettlementData) -> void:
 
 
 ## (nœuds de géométrie d'une ville, nœuds dont la suie d'instance vaut `amount`).
+## Suie des villes 1:1 (style `real`) : nœuds de la ville, masque du maillage lointain.
+func _check_town_soot_nodes(layer: SettlementLayer, other: String) -> void:
+	_check(is_equal_approx(layer.towns.soot_of(TOWN), 0.8), "soot stored for the 1:1 town")
+	_check(other != "" and layer.towns.soot_of(other) == 0.0, "the neighbouring town keeps clean roofs")
+	_check(absf(layer.town_far.soot_of(TOWN) - 0.8) < 0.01 and layer.town_far.soot_of(other) == 0.0, "soot written per town in the far mesh mask, got %.2f" % layer.town_far.soot_of(TOWN))
+	if _check(layer.towns.is_shown(TOWN), "the 1:1 town of %s is built near the camera" % TOWN):
+		var counts := _soot_nodes(layer.towns.builder_of(TOWN), 0.8)
+		_check(counts.x > 0 and counts.y == counts.x, "every node of the sooted town carries its soot (%d of %d)" % [counts.y, counts.x])
+		for id: String in layer.towns.built_ids():
+			if id != TOWN:
+				var clean := _soot_nodes(layer.towns.builder_of(id), 0.0)
+				_check(clean.x > 0 and clean.y == clean.x, "no soot on the nodes of %s (%d of %d clean)" % [id, clean.y, clean.x])
+
+
 func _soot_nodes(builder: TownBuilder, amount: float) -> Vector2i:
 	var total := 0
 	var matching := 0

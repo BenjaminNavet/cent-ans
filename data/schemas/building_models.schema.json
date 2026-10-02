@@ -35,7 +35,8 @@
         "shore_reach_m",
         "load_factor",
         "load_min_units",
-        "load_max_units"
+        "load_max_units",
+        "maquette"
       ],
       "properties": {
         "view_range_units": {
@@ -273,6 +274,74 @@
           "description": "Rayon maximal (unités) du voisinage chargé.",
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "maquette": {
+          "description": "Style `maquette` (carte généralisée, ADR 0158) : taille monde constante et portées propres.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "size_distance",
+            "view_range_units",
+            "fade_from_units",
+            "shadow_range_units",
+            "load_factor",
+            "load_min_units",
+            "load_max_units",
+            "kinds",
+            "built_in_game_only"
+          ],
+          "properties": {
+            "size_distance": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Distance du rig dont les tailles tenues à l'écran deviennent les tailles monde constantes."
+            },
+            "view_range_units": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "fade_from_units": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "shadow_range_units": {
+              "type": "number",
+              "minimum": 0
+            },
+            "load_factor": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "load_min_units": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "load_max_units": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "kinds": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "city",
+                  "town",
+                  "castle",
+                  "abbey",
+                  "village"
+                ]
+              },
+              "uniqueItems": true
+            },
+            "built_in_game_only": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z]+$"
+              },
+              "uniqueItems": true
+            }
+          }
         }
       }
     },

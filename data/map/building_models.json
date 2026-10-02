@@ -1,5 +1,5 @@
 {
-  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. `render.screen` (ADR 0162) : échelle réelle sous `real_below` unités de distance du rig, puis taille tenue à l'écran à partir de `full_from` (`fractions` de la hauteur d'écran par niveau 1 à 3, maisons de faubourg et épaisseur d'enceinte de même), fondu de sortie entre `fade_from_units` et `view_range_units` ; mise en place sans recouvrement par palier géométrique `band_ratio`. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille. `growth` : croissance des villes 1:1 (point 4) : un quartier de faubourg par tranche `population_step` de population de la province au-dessus de celle de 1337 ; enceinte ajoutée quand un bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan de 1340 et les bâtiments de départ. `soot` : suie par ville (point 5), d'après la dévastation de la province, le siège et la prise de la place.",
+  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. `render.screen` (ADR 0162) : échelle réelle sous `real_below` unités de distance du rig, puis taille tenue à l'écran à partir de `full_from` (`fractions` de la hauteur d'écran par niveau 1 à 3, maisons de faubourg et épaisseur d'enceinte de même), fondu de sortie entre `fade_from_units` et `view_range_units` ; mise en place sans recouvrement par palier géométrique `band_ratio`. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille. `growth` : croissance des villes 1:1 (point 4) : un quartier de faubourg par tranche `population_step` de population de la province au-dessus de celle de 1337 ; enceinte ajoutée quand un bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan de 1340 et les bâtiments de départ. `soot` : suie par ville (point 5), d'après la dévastation de la province, le siège et la prise de la place. `render.maquette` (style `maquette` de la carte généralisée, ADR 0158) : taille monde constante, celle que les maquettes tiendraient à la distance `size_distance` ; portées propres ; `kinds` : genres de colonie qui reçoivent des maquettes ; `built_in_game_only` : familles montrées seulement pour un bâtiment construit en cours de partie (le décor GC porte déjà ceux de 1337).",
   "version": 1,
   "render": {
     "view_range_units": 160.0,
@@ -63,6 +63,22 @@
         "model": "sign_suburb",
         "fraction": 0.04
       }
+    },
+    "maquette": {
+      "size_distance": 40.0,
+      "view_range_units": 330.0,
+      "fade_from_units": 260.0,
+      "shadow_range_units": 330.0,
+      "load_factor": 1.8,
+      "load_min_units": 60.0,
+      "load_max_units": 380.0,
+      "kinds": [
+        "city",
+        "town"
+      ],
+      "built_in_game_only": [
+        "mill"
+      ]
     }
   },
   "families": {
