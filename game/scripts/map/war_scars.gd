@@ -61,8 +61,6 @@ var _time := 0.0
 var _ground_dirty := false
 var _reground_timer := 0.0
 var _door_timer := 0.0
-var _field_scale := -1.0
-var _camera_distance := 0.0
 
 
 # --- Réglages --------------------------------------------------------------------------
@@ -386,7 +384,7 @@ func _age_fields() -> void:
 				(field["node"] as Node).free()
 			field["stage"] = stage
 			field["node"] = _build_field(str(key), field, block, crows, debris)
-			_field_scale = -1.0  # nouvelle mise en place
+			field.erase("scale")  # nouvelle mise en place à la prochaine vue
 
 
 func _build_field(key: String, field: Dictionary, block: Dictionary, crows: bool, debris: bool) -> Node3D:
@@ -628,11 +626,18 @@ func update_view(camera_distance: float, normal_weight: float) -> void:
 	_time += delta
 	_reground_timer -= delta
 	_door_timer -= delta
-	_camera_distance = camera_distance
 	var normal := normal_weight > 0.02
 	var plague_block := _block("plague")
 	var plague_on := normal and camera_distance <= float(plague_block.get("max_distance", 0.0))
-	var reground := _ground_dirty and _reground_timer <= 0.0
+	if _ground_dirty and _reground_timer <= 0.0:
+		# Sol changé (exagération du relief, pages plus fines) : chaque élément est recalé à sa
+		# prochaine vue, pas seulement ceux visibles à cet instant.
+		for id in _plague:
+			_plague[id]["stale"] = true
+		for key in _fields:
+			_fields[key].erase("scale")
+		_ground_dirty = false
+		_reground_timer = REGROUND_INTERVAL
 	for id in _plague:
 		var entry: Dictionary = _plague[id]
 		var root: Node3D = entry["node"]
@@ -641,7 +646,8 @@ func update_view(camera_distance: float, normal_weight: float) -> void:
 			continue
 		if not bool(entry["doors_done"]) and _door_timer <= 0.0:
 			_try_doors(str(id))
-		if reground:
+		if bool(entry.get("stale", false)):
+			entry["stale"] = false
 			for child in root.get_children():
 				var node := child as Node3D
 				var xz: Vector2 = node.get_meta("xz")
@@ -651,7 +657,6 @@ func update_view(camera_distance: float, normal_weight: float) -> void:
 	var field_block := _block("battlefield")
 	var fields_on := normal and camera_distance <= float(field_block.get("max_distance", 0.0))
 	var scale_now := ArmyMarkers.scale_for_distance(camera_distance) * maxf(normal_weight, 0.02)
-	var rescale := _field_scale < 0.0 or absf(scale_now - _field_scale) > _field_scale * 0.02 or reground
 	var hidden: Variant = _armies.get("hidden_provinces") if _armies != null else null
 	for key in _fields:
 		var field: Dictionary = _fields[key]
@@ -661,19 +666,18 @@ func update_view(camera_distance: float, normal_weight: float) -> void:
 		root.visible = fields_on and not (hidden is Dictionary and (hidden as Dictionary).has(field["province"]))
 		if not root.visible:
 			continue
-		if rescale or not field.has("ground"):
+		# Mise en place par champ : à la première vue, quand l'échelle des armées change de plus
+		# de 2 %, ou après un recalage du sol (aussi pour un champ resté caché entre-temps).
+		var laid := float(field.get("scale", -1.0))
+		if laid < 0.0 or absf(scale_now - laid) > laid * 0.02:
 			_layout_field(field, scale_now)
-		_fly_crows(field, scale_now)
-	if rescale and fields_on:
-		_field_scale = scale_now
+			field["scale"] = scale_now
+		_fly_crows(field, float(field["scale"]))
 	var siege_on := camera_distance <= float(_block("siege").get("max_distance", 0.0))
 	for id in _engines:
 		var node: Variant = _engines[id]["node"]
 		if node != null and is_instance_valid(node):
 			(node as Node3D).visible = siege_on
-	if reground:
-		_ground_dirty = false
-		_reground_timer = REGROUND_INTERVAL
 
 
 # --- Lecture (tests, captures) ---------------------------------------------------------
