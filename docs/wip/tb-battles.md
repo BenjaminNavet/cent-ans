@@ -34,13 +34,19 @@ rechargement. Décision : ADR 0157, section « Révision ».
 - [x] ADR 0157 (révision), `docs/wip/tb4.md`.
 
 ## Vérifications (02/10)
-- `cargo test -p sim-campaign --test tb_battle_history` : 9 OK.
-- `tb4_scars_test.gd` : OK (bataille au tour 0 en Île-de-France, marque partie au tour 4, à sa
-  propre échéance) ; `smoke.gd` : OK ; pytest `test_war_scars_ui_schema` : 6 OK.
-- `cargo test` complet : voir « Points ouverts » tant que la ligne n'est pas remplacée.
+- `cargo fmt --all`, `cargo test` complet (espace de travail) : 1350 réussis, 58 ignorés, aucun échec ; dont
+  `tb_battle_history` : 9 OK.
+- `cargo clippy --all-targets -- -D warnings` : un seul défaut, antérieur et hors lot (voir
+  « Points ouverts ») ; propre avec ce lint autorisé.
+- Godot : `smoke.gd` OK ; `tb4_scars_test.gd` OK (bataille au tour 0 en Île-de-France, marque
+  retrouvée après rechargement à l'âge 1, partie au tour 4, à sa propre échéance) ;
+  `cv1_campaign_life_test`, `fk5_incidents_test`, `tb2_declutter_test` OK.
+- pytest `test_war_scars_ui_schema` : 6 OK. Suite complète : 4 échecs sans rapport avec le lot
+  (`test_entity_icons` : image de `docs/img/` absente du worktree et une entrée d'icône ;
+  `test_ink_icons`, `test_relief_update`, `test_water_detail` : causes non examinées, aucun
+  fichier du lot en jeu).
 
 ## Points ouverts
-- `cargo test` complet : en cours au moment de ce commit.
 - `cargo clippy -- -D warnings` échoue sur la base avec rustc 1.99 :
   `crates/godot-bridge/src/historical_battles.rs:57` (`godot_warn!` en position d'expression,
   lint `semicolon_in_expressions_from_non_local_macros`). Fichier hors lot, non touché ; le reste
@@ -55,5 +61,5 @@ rechargement. Décision : ADR 0157, section « Révision ».
   au premier lancement) ; `godot --headless --path game --import` le répare.
 
 ## Prochaine étape
-Attendre la fin de `cargo test`, corriger s'il y a lieu, puis commit final. Ensuite : fusion et
-jugement à l'œil par la session principale.
+Lot livré. Reste à la session principale : fusion, jugement à l'œil des marques (une par
+province ou une par bataille, place de la marque d'un assaut).
