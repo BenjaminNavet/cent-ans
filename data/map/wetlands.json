@@ -1,5 +1,5 @@
 {
-  "description": "Zones humides historiques vers 1340 (lot R1) : marais littoraux et de fond de vallée, pays d'étangs médiévaux (piscicultures seigneuriales et monastiques), prés humides et tourbières. Ellipses approximatives (lon/lat WGS84, demi-axes en km). Les grands lacs restent ceux de Natural Earth (masque de terre). Sources générales : J.-M. Derex, La gestion de l'eau et des zones humides en Brie et dans le Bassin parisien (2001) ; R. Abad, La conjuration contre les carpes (Fayard, 2006) pour les étangs ; H. C. Darby, The Medieval Fenland (Cambridge, 1940) ; notices Wikipédia citées par zone.",
+  "description": "Zones humides historiques vers 1340 (lot R1) : marais littoraux et de fond de vallée, pays d'étangs médiévaux (piscicultures seigneuriales et monastiques), prés humides et tourbières. Ellipses approximatives (lon/lat WGS84, demi-axes en km). Les grands lacs restent ceux de Natural Earth (masque de terre). Sources générales : J.-M. Derex, La gestion de l'eau et des zones humides en Brie et dans le Bassin parisien (2001) ; R. Abad, La conjuration contre les carpes (Fayard, 2006) pour les étangs ; H. C. Darby, The Medieval Fenland (Cambridge, 1940) ; notices Wikipédia citées par zone. Lot HC5 (ADR 0161) : marais, lagunes et plaines inondables du reste de la carte, dans leur état d'avant les assèchements modernes ; notices citées par entrée (langue de la notice indiquée).",
   "areas": [
     {
       "id": "dombes",
@@ -274,6 +274,404 @@
       "ellipse": { "center": [11.95, 44.85], "radii_km": [20, 16], "angle_deg": 0 },
       "max_height_m": 5,
       "source": "Wikipédia (fr), « Delta du Pô »"
+    },
+    {
+      "id": "etangs_languedoc",
+      "name": "Étangs et palus du Languedoc",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [3.83, 43.47], "radii_km": [34, 4], "angle_deg": 27 },
+      "max_height_m": 5,
+      "source": "Wikipédia (fr), « Étang de Thau » ; « Étang de l'Or »"
+    },
+    {
+      "id": "landes_humides",
+      "name": "Landes humides de Gascogne",
+      "kind": "wet_meadow",
+      "density": 0.5,
+      "ellipse": { "center": [-0.80, 44.25], "radii_km": [68, 38], "angle_deg": 85 },
+      "source": "Wikipédia (fr), « Landes de Gascogne »",
+      "note": "Lande mal drainée, inondée l'hiver, avant les boisements du XIXe siècle."
+    },
+    {
+      "id": "marais_breton",
+      "name": "Marais breton (baie de Bourgneuf)",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [-1.95, 46.95], "radii_km": [16, 10], "angle_deg": 0 },
+      "max_height_m": 6,
+      "source": "Wikipédia (fr), « Marais breton »",
+      "note": "Marais salants de la « Baie »."
+    },
+    {
+      "id": "palus_medoc",
+      "name": "Palus du Médoc et du Blayais",
+      "kind": "marsh",
+      "density": 0.6,
+      "ellipse": { "center": [-0.85, 45.30], "radii_km": [32, 5], "angle_deg": -62 },
+      "max_height_m": 5,
+      "source": "Wikipédia (fr), « Médoc »",
+      "note": "Avant les dessèchements hollandais du XVIIe siècle."
+    },
+    {
+      "id": "scarpe",
+      "name": "Marais de la Scarpe et de la Sensée",
+      "kind": "marsh",
+      "density": 0.6,
+      "ellipse": { "center": [3.30, 50.40], "radii_km": [22, 5], "angle_deg": 10 },
+      "source": "Wikipédia (fr), « Plaine de la Scarpe »"
+    },
+    {
+      "id": "etangs_forez",
+      "name": "Étangs du Forez",
+      "kind": "ponds",
+      "density": 0.5,
+      "ellipse": { "center": [4.15, 45.70], "radii_km": [12, 7], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Forez »",
+      "note": "Étangs comtaux du XIIIe siècle."
+    },
+    {
+      "id": "thames_marshes",
+      "name": "Marais de l'estuaire de la Tamise",
+      "kind": "wet_meadow",
+      "density": 0.6,
+      "ellipse": { "center": [0.55, 51.48], "radii_km": [22, 5], "angle_deg": 0 },
+      "max_height_m": 5,
+      "source": "Wikipédia (en), « North Kent Marshes »"
+    },
+    {
+      "id": "flanders_moss",
+      "name": "Flanders Moss",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [-4.20, 56.15], "radii_km": [9, 4], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Flanders Moss »",
+      "note": "Tourbière qui barre la vallée du Forth en amont de Stirling."
+    },
+    {
+      "id": "marismas_guadalquivir",
+      "name": "Marismas du Guadalquivir",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [-6.25, 37.00], "radii_km": [28, 20], "angle_deg": 0 },
+      "max_height_m": 6,
+      "source": "Wikipédia (es), « Marismas del Guadalquivir »"
+    },
+    {
+      "id": "albufera",
+      "name": "Albufera de Valence",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [-0.35, 39.33], "radii_km": [14, 6], "angle_deg": 100 },
+      "max_height_m": 4,
+      "source": "Wikipédia (fr), « Parc naturel de l'Albufera »",
+      "note": "Bien plus étendue qu'aujourd'hui."
+    },
+    {
+      "id": "emporda",
+      "name": "Étangs et marais de l'Empordà",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [3.08, 42.22], "radii_km": [10, 6], "angle_deg": 90 },
+      "max_height_m": 5,
+      "source": "Wikipédia (en), « Aiguamolls de l'Empordà »"
+    },
+    {
+      "id": "janda",
+      "name": "Lagune de la Janda",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [-5.85, 36.25], "radii_km": [9, 5], "angle_deg": 0 },
+      "source": "Wikipédia (es), « Laguna de La Janda »",
+      "note": "Asséchée au XXe siècle."
+    },
+    {
+      "id": "daimiel",
+      "name": "Tablas de Daimiel et Ojos du Guadiana",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [-3.70, 39.13], "radii_km": [12, 5], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Tablas de Daimiel National Park » ; Libro de la montería d'Alphonse XI (v. 1340-1350), cf. Wikipédia (es), « Libro de la montería »"
+    },
+    {
+      "id": "lagune_venise",
+      "name": "Lagunes de Venise, de Caorle et de Grado",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [12.80, 45.50], "radii_km": [58, 7], "angle_deg": 31 },
+      "max_height_m": 3,
+      "source": "Wikipédia (fr), « Lagune de Venise »"
+    },
+    {
+      "id": "valli_comacchio",
+      "name": "Valli de Comacchio",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [12.10, 44.60], "radii_km": [14, 10], "angle_deg": 0 },
+      "max_height_m": 3,
+      "source": "Wikipédia (it), « Valli di Comacchio »"
+    },
+    {
+      "id": "valli_veronesi",
+      "name": "Valli Grandi Veronesi",
+      "kind": "marsh",
+      "density": 0.65,
+      "ellipse": { "center": [11.25, 45.10], "radii_km": [22, 6], "angle_deg": 0 },
+      "max_height_m": 20,
+      "source": "Wikipédia (it), « Valli Grandi Veronesi »",
+      "note": "Marais du Tartaro, asséchés au XIXe siècle."
+    },
+    {
+      "id": "fucecchio_bientina",
+      "name": "Marais de Fucecchio et lac de Bientina",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [10.72, 43.79], "radii_km": [10, 5], "angle_deg": 0 },
+      "source": "Wikipédia (it), « Padule di Fucecchio » ; « Lago di Bientina »"
+    },
+    {
+      "id": "valdichiana",
+      "name": "Marais du Val di Chiana",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [11.87, 43.20], "radii_km": [26, 4], "angle_deg": 100 },
+      "source": "Wikipédia (en), « Valdichiana »",
+      "note": "Vallée empaludée jusqu'aux bonifications des XVIIIe-XIXe siècles."
+    },
+    {
+      "id": "maremme",
+      "name": "Maremme de Grosseto (lac Prile)",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [10.97, 42.80], "radii_km": [10, 7], "angle_deg": 0 },
+      "max_height_m": 8,
+      "source": "Wikipédia (it), « Lago Prile »"
+    },
+    {
+      "id": "marais_pontins",
+      "name": "Marais pontins",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [13.00, 41.45], "radii_km": [22, 7], "angle_deg": -35 },
+      "max_height_m": 10,
+      "source": "Wikipédia (it), « Agro Pontino »"
+    },
+    {
+      "id": "frise_orientale",
+      "name": "Marais et tourbières de Frise",
+      "kind": "wet_meadow",
+      "density": 0.6,
+      "ellipse": { "center": [7.30, 53.45], "radii_km": [75, 11], "angle_deg": 5 },
+      "max_height_m": 3,
+      "source": "Wikipédia (fr), « Frise orientale »"
+    },
+    {
+      "id": "uthlande",
+      "name": "Marais des Uthlande (Frise du Nord)",
+      "kind": "marsh",
+      "density": 0.6,
+      "ellipse": { "center": [8.80, 54.50], "radii_km": [40, 9], "angle_deg": 90 },
+      "max_height_m": 3,
+      "source": "Wikipédia (en), « Uthlande » ; « Rungholt »",
+      "note": "État d'avant la grande submersion de 1362."
+    },
+    {
+      "id": "dromling",
+      "name": "Drömling",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [11.10, 52.48], "radii_km": [12, 6], "angle_deg": 0 },
+      "source": "Wikipédia (de), « Drömling »"
+    },
+    {
+      "id": "havelland_luch",
+      "name": "Luch du Havelland et du Rhin",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [12.70, 52.70], "radii_km": [30, 8], "angle_deg": 0 },
+      "max_height_m": 35,
+      "source": "Wikipédia (de), « Havelländisches Luch »"
+    },
+    {
+      "id": "spreewald",
+      "name": "Spreewald",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [14.05, 51.90], "radii_km": [14, 8], "angle_deg": 30 },
+      "source": "Wikipédia (de), « Spreewald »"
+    },
+    {
+      "id": "oderbruch",
+      "name": "Oderbruch",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [14.28, 52.67], "radii_km": [28, 7], "angle_deg": 123 },
+      "max_height_m": 12,
+      "source": "Wikipédia (en), « Oderbruch »",
+      "note": "Avant l'assèchement du XVIIIe siècle."
+    },
+    {
+      "id": "donaumoos",
+      "name": "Donaumoos",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [11.25, 48.67], "radii_km": [14, 7], "angle_deg": 0 },
+      "source": "Wikipédia (de), « Donaumoos »",
+      "note": "Asséché à partir de 1790."
+    },
+    {
+      "id": "etangs_milicz",
+      "name": "Étangs de Milicz",
+      "kind": "ponds",
+      "density": 0.5,
+      "ellipse": { "center": [17.30, 51.53], "radii_km": [20, 6], "angle_deg": 0 },
+      "source": "Wikipédia (pl), « Stawy Milickie »",
+      "note": "Étangs cisterciens du XIIIe siècle dans la vallée de la Barycz."
+    },
+    {
+      "id": "hansag",
+      "name": "Hanság",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [17.15, 47.70], "radii_km": [25, 8], "angle_deg": 0 },
+      "source": "Wikipédia (de), « Hanság »"
+    },
+    {
+      "id": "zulawy",
+      "name": "Żuławy de la Vistule",
+      "kind": "marsh",
+      "density": 0.6,
+      "ellipse": { "center": [19.10, 54.15], "radii_km": [25, 17], "angle_deg": 0 },
+      "max_height_m": 5,
+      "source": "Wikipédia (en), « Vistula Fens »",
+      "note": "Delta en cours d'endiguement par l'ordre Teutonique."
+    },
+    {
+      "id": "biebrza",
+      "name": "Marais de la Biebrza",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [22.70, 53.50], "radii_km": [45, 9], "angle_deg": 55 },
+      "source": "Wikipédia (en), « Biebrza Marshes »"
+    },
+    {
+      "id": "pripet",
+      "name": "Marais du Pripiat (Polésie)",
+      "kind": "marsh",
+      "density": 0.6,
+      "ellipse": { "center": [27.30, 52.00], "radii_km": [160, 40], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Pripet Marshes »"
+    },
+    {
+      "id": "polesie_pres",
+      "name": "Prés et bois humides de Polésie",
+      "kind": "wet_meadow",
+      "density": 0.5,
+      "ellipse": { "center": [27.50, 51.80], "radii_km": [200, 80], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Pripet Marshes »"
+    },
+    {
+      "id": "ilmen_lovat",
+      "name": "Marais du Polist et de la Lovat",
+      "kind": "marsh",
+      "density": 0.55,
+      "ellipse": { "center": [30.80, 57.50], "radii_km": [75, 38], "angle_deg": 80 },
+      "source": "Wikipédia (en), « Polistovsky Nature Reserve » ; Première chronique de Novgorod, an 6746 (1238)",
+      "note": "Les marais du dégel qui arrêtent l'armée mongole avant Novgorod."
+    },
+    {
+      "id": "mechtchera_humide",
+      "name": "Tourbières de la Mechtchera",
+      "kind": "wet_meadow",
+      "density": 0.6,
+      "ellipse": { "center": [40.30, 55.30], "radii_km": [60, 25], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Meshchera Lowlands »"
+    },
+    {
+      "id": "hortobagy",
+      "name": "Plaine inondable de la Tisza (Hortobágy)",
+      "kind": "wet_meadow",
+      "density": 0.55,
+      "ellipse": { "center": [21.00, 47.55], "radii_km": [60, 25], "angle_deg": 80 },
+      "source": "Wikipédia (hu), « Hortobágy »",
+      "note": "Avant la régulation de la Tisza au XIXe siècle."
+    },
+    {
+      "id": "sarret",
+      "name": "Sárrét (grand marais du Berettyó)",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [21.20, 47.15], "radii_km": [28, 14], "angle_deg": 0 },
+      "source": "Wikipédia (hu), « Nagy-Sárrét »"
+    },
+    {
+      "id": "ecsed",
+      "name": "Marais d'Ecsed",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [22.45, 47.85], "radii_km": [14, 8], "angle_deg": 30 },
+      "source": "Wikipédia (hu), « Ecsedi-láp »"
+    },
+    {
+      "id": "balta_danube",
+      "name": "Baltas du Danube (Ialomița, Brăila)",
+      "kind": "marsh",
+      "density": 0.75,
+      "ellipse": { "center": [27.75, 44.75], "radii_km": [65, 7], "angle_deg": 75 },
+      "max_height_m": 15,
+      "source": "Wikipédia (en), « Balta Ialomiței » ; « Great Brăila Island »"
+    },
+    {
+      "id": "delta_danube",
+      "name": "Delta du Danube",
+      "kind": "marsh",
+      "density": 0.9,
+      "ellipse": { "center": [29.30, 45.20], "radii_km": [42, 26], "angle_deg": 0 },
+      "max_height_m": 6,
+      "source": "Wikipédia (fr), « Delta du Danube »"
+    },
+    {
+      "id": "copais",
+      "name": "Marais du lac Copaïs",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [23.05, 38.45], "radii_km": [11, 6], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Lake Copais » ; Ramon Muntaner, Chronique (bataille du Céphise ou d'Halmyros, 1311)",
+      "note": "Marais où s'enlise la chevalerie franque en 1311 ; asséché au XIXe siècle."
+    },
+    {
+      "id": "amouq",
+      "name": "Lac et marais de l'Amouq",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [36.35, 36.33], "radii_km": [14, 10], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Lake Amik »",
+      "note": "Asséché au XXe siècle."
+    },
+    {
+      "id": "ghab",
+      "name": "Marais du Ghab (Oronte)",
+      "kind": "marsh",
+      "density": 0.8,
+      "ellipse": { "center": [36.35, 35.55], "radii_km": [28, 5], "angle_deg": 90 },
+      "source": "Wikipédia (en), « Ghab Plain »"
+    },
+    {
+      "id": "houla",
+      "name": "Marais de Houla",
+      "kind": "marsh",
+      "density": 0.85,
+      "ellipse": { "center": [35.60, 33.10], "radii_km": [10, 4], "angle_deg": 90 },
+      "source": "Wikipédia (en), « Hula Valley »"
+    },
+    {
+      "id": "menzaleh",
+      "name": "Lacs et marais du nord du Delta (Menzaleh, Bourlos)",
+      "kind": "marsh",
+      "density": 0.7,
+      "ellipse": { "center": [31.30, 31.40], "radii_km": [90, 13], "angle_deg": 0 },
+      "max_height_m": 3,
+      "source": "Wikipédia (en), « Lake Manzala »"
     }
   ]
 }

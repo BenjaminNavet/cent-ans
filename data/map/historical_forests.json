@@ -1,5 +1,5 @@
 {
-  "description": "Grandes forêts et landes nommées vers 1340 (lot R1), en ellipses approximatives (lon/lat WGS84, demi-axes en km). Emprises médiévales approchées, souvent plus vastes que les massifs actuels ; elles s'ajoutent au défrichement KK10 (Kaplan et al. 2011) pour donner des massifs nets dans splat.png. Sources générales : R. Bechmann, Des arbres et des hommes. La forêt au Moyen Âge (Flammarion, 1984) ; O. Rackham, The History of the Countryside (Dent, 1986) ; M. L. Bazeley, « The Extent of the English Forest in the Thirteenth Century », Transactions of the Royal Historical Society 4 (1921) ; notices Wikipédia citées par massif.",
+  "description": "Grandes forêts et landes nommées vers 1340 (lot R1), en ellipses approximatives (lon/lat WGS84, demi-axes en km). Emprises médiévales approchées, souvent plus vastes que les massifs actuels ; elles s'ajoutent au défrichement KK10 (Kaplan et al. 2011) pour donner des massifs nets dans splat.png. Sources générales : R. Bechmann, Des arbres et des hommes. La forêt au Moyen Âge (Flammarion, 1984) ; O. Rackham, The History of the Countryside (Dent, 1986) ; M. L. Bazeley, « The Extent of the English Forest in the Thirteenth Century », Transactions of the Royal Historical Society 4 (1921) ; notices Wikipédia citées par massif. Lot HC5 (ADR 0161) : massifs, landes et parcours du reste de la carte (Irlande, Galles, Ibérie, Italie, Empire, Pologne-Lituanie, Carpates, Balkans, Rus', Maghreb, Anatolie, Levant), avec en plus E. McCracken, The Irish Woods since Tudor Times (David & Charles, 1971), le Libro de la montería d'Alphonse XI (v. 1340-1350) pour les monts de Castille, et les notices citées par entrée (langue de la notice indiquée).",
   "areas": [
     {
       "id": "orleans",
@@ -442,6 +442,791 @@
       "density": 0.6,
       "ellipse": { "center": [10.00, 53.10], "radii_km": [55, 32], "angle_deg": 0 },
       "source": "Wikipédia (fr), « Lande de Lunebourg »"
+    },
+    {
+      "id": "chize_argenson",
+      "name": "Forêt de Chizé et sylve d'Argenson",
+      "kind": "broadleaf",
+      "density": 0.75,
+      "ellipse": { "center": [-0.55, 46.13], "radii_km": [26, 6], "angle_deg": -12 },
+      "source": "Wikipédia (fr), « Forêt de Chizé » ; Bechmann 1984",
+      "note": "Reste de la sylve d'Argenson entre Poitou, Aunis et Saintonge (Benon, Chizé, Aulnay), déjà morcelée par les défrichements."
+    },
+    {
+      "id": "gresigne",
+      "name": "Forêt de Grésigne",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [1.75, 44.03], "radii_km": [7, 5], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt domaniale de Grésigne »",
+      "note": "Chênaie des comtes de Toulouse puis du roi (1281)."
+    },
+    {
+      "id": "iraty",
+      "name": "Forêt d'Iraty",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [-1.05, 43.03], "radii_km": [12, 7], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt d'Iraty »",
+      "note": "Hêtraie-sapinière à cheval sur la Soule et la Navarre."
+    },
+    {
+      "id": "chartreuse",
+      "name": "Massif de la Chartreuse",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [5.80, 45.37], "radii_km": [20, 9], "angle_deg": 70 },
+      "source": "Wikipédia (fr), « Massif de la Chartreuse »",
+      "note": "« Désert » forestier des chartreux (1084)."
+    },
+    {
+      "id": "ecouves",
+      "name": "Forêt d'Écouves",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [0.07, 48.55], "radii_km": [12, 6], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt d'Écouves »"
+    },
+    {
+      "id": "crecy",
+      "name": "Forêt de Crécy",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [1.88, 50.25], "radii_km": [6, 4], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Crécy »",
+      "note": "Forêt des comtes de Ponthieu, au bord du champ de bataille de 1346."
+    },
+    {
+      "id": "orient",
+      "name": "Forêt d'Orient",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [4.38, 48.30], "radii_km": [12, 7], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Parc naturel régional de la Forêt d'Orient »",
+      "note": "Forêt de la Champagne humide, domaines du Temple puis de l'Hôpital."
+    },
+    {
+      "id": "chatillonnais",
+      "name": "Forêts du Châtillonnais",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [4.75, 47.80], "radii_km": [18, 11], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Parc national de forêts »",
+      "note": "Hêtraies-chênaies du plateau de Langres, domaines ducaux et monastiques ; emprise approchée."
+    },
+    {
+      "id": "haguenau",
+      "name": "Forêt de Haguenau (Forêt sainte)",
+      "kind": "mixed",
+      "density": 0.9,
+      "ellipse": { "center": [7.85, 48.85], "radii_km": [16, 8], "angle_deg": 15 },
+      "source": "Wikipédia (fr), « Forêt de Haguenau »"
+    },
+    {
+      "id": "millevaches",
+      "name": "Landes du plateau de Millevaches",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [2.05, 45.70], "radii_km": [22, 16], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Plateau de Millevaches »",
+      "note": "Landes à bruyère pâturées ; les boisements actuels datent du XXe siècle."
+    },
+    {
+      "id": "grands_causses",
+      "name": "Grands Causses",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [3.25, 44.15], "radii_km": [32, 20], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Grands Causses »",
+      "note": "Parcours à moutons (Larzac, Méjean, Sauveterre)."
+    },
+    {
+      "id": "cevennes",
+      "name": "Châtaigneraies et hêtraies des Cévennes",
+      "kind": "mixed",
+      "density": 0.7,
+      "ellipse": { "center": [3.80, 44.20], "radii_km": [30, 11], "angle_deg": 45 },
+      "source": "Wikipédia (fr), « Cévennes » ; E. Le Roy Ladurie, Les Paysans de Languedoc (SEVPEN, 1966)"
+    },
+    {
+      "id": "maures",
+      "name": "Massif des Maures",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [6.35, 43.28], "radii_km": [25, 9], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Massif des Maures »",
+      "note": "Chênes-lièges, pins et châtaigniers."
+    },
+    {
+      "id": "glenconkeyne",
+      "name": "Bois de Glenconkeyne et de Killetra",
+      "kind": "broadleaf",
+      "density": 0.75,
+      "ellipse": { "center": [-6.65, 54.75], "radii_km": [18, 10], "angle_deg": 80 },
+      "source": "Wikipédia (en), « Glenconkeyne » ; E. McCracken, The Irish Woods since Tudor Times (David & Charles, 1971)",
+      "note": "Grande chênaie d'Ulster à l'ouest du Lough Neagh, décrite vers 1600 ; état de 1340 supposé au moins aussi boisé."
+    },
+    {
+      "id": "wicklow_shillelagh",
+      "name": "Bois de Shillelagh et du Wicklow",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [-6.45, 52.85], "radii_km": [26, 9], "angle_deg": 80 },
+      "source": "Wikipédia (en), « Shillelagh, County Wicklow » ; E. McCracken, The Irish Woods since Tudor Times (David & Charles, 1971)"
+    },
+    {
+      "id": "killarney_desmond",
+      "name": "Chênaies du Desmond (Killarney)",
+      "kind": "broadleaf",
+      "density": 0.6,
+      "ellipse": { "center": [-9.50, 51.95], "radii_km": [25, 10], "angle_deg": 10 },
+      "source": "Wikipédia (fr), « Parc national de Killarney » ; E. McCracken, The Irish Woods since Tudor Times (David & Charles, 1971)"
+    },
+    {
+      "id": "connemara_mayo",
+      "name": "Tourbières de couverture du Connemara et du Mayo",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [-9.60, 53.80], "radii_km": [48, 26], "angle_deg": 90 },
+      "source": "Wikipédia (fr), « Connemara »"
+    },
+    {
+      "id": "cambrian",
+      "name": "Landes des monts Cambriens",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [-3.70, 52.30], "radii_km": [50, 18], "angle_deg": 90 },
+      "source": "Wikipédia (fr), « Monts Cambriens » ; O. Rackham, The History of the Countryside (Dent, 1986)"
+    },
+    {
+      "id": "cantref_mawr",
+      "name": "Bois du Cantref Mawr (Glyn Cothi)",
+      "kind": "broadleaf",
+      "density": 0.65,
+      "ellipse": { "center": [-4.00, 51.98], "radii_km": [16, 9], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Cantref Mawr »",
+      "note": "Hautes terres boisées au nord de la Tywi, refuge des princes de Deheubarth."
+    },
+    {
+      "id": "chilterns",
+      "name": "Hêtraies des Chilterns",
+      "kind": "broadleaf",
+      "density": 0.6,
+      "ellipse": { "center": [-0.80, 51.70], "radii_km": [30, 7], "angle_deg": 45 },
+      "source": "Wikipédia (en), « Chiltern Hills » ; O. Rackham, The History of the Countryside (Dent, 1986)"
+    },
+    {
+      "id": "breckland",
+      "name": "Breckland",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [0.70, 52.45], "radii_km": [18, 14], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Breckland » ; O. Rackham, The History of the Countryside (Dent, 1986)",
+      "note": "Landes sableuses et garennes."
+    },
+    {
+      "id": "cantabrique",
+      "name": "Forêts de la cordillère Cantabrique",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [-5.60, 43.05], "radii_km": [120, 20], "angle_deg": 3 },
+      "source": "Wikipédia (fr), « Cordillère Cantabrique » ; Libro de la montería d'Alphonse XI (v. 1340-1350), cf. Wikipédia (es), « Libro de la montería »",
+      "note": "Hêtraies et chênaies à ours des Asturies et de León."
+    },
+    {
+      "id": "demanda_urbion",
+      "name": "Pinèdes de la Demanda et de l'Urbión",
+      "kind": "conifer",
+      "density": 0.75,
+      "ellipse": { "center": [-2.95, 42.03], "radii_km": [35, 14], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Massif de la Demanda » ; Libro de la montería d'Alphonse XI (v. 1340-1350), cf. Wikipédia (es), « Libro de la montería »"
+    },
+    {
+      "id": "systeme_central",
+      "name": "Pinèdes et chênaies du Système central",
+      "kind": "mixed",
+      "density": 0.65,
+      "ellipse": { "center": [-4.45, 40.60], "radii_km": [105, 14], "angle_deg": 27 },
+      "source": "Wikipédia (fr), « Système central » ; Libro de la montería d'Alphonse XI (v. 1340-1350), cf. Wikipédia (es), « Libro de la montería »",
+      "note": "Guadarrama (Valsaín) et Gredos."
+    },
+    {
+      "id": "monts_tolede",
+      "name": "Monts de Tolède",
+      "kind": "broadleaf",
+      "density": 0.6,
+      "ellipse": { "center": [-4.50, 39.50], "radii_km": [65, 16], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Monts de Tolède » ; Libro de la montería d'Alphonse XI (v. 1340-1350), cf. Wikipédia (es), « Libro de la montería »",
+      "note": "Chênaies vertes et maquis giboyeux."
+    },
+    {
+      "id": "sierra_morena",
+      "name": "Sierra Morena",
+      "kind": "broadleaf",
+      "density": 0.55,
+      "ellipse": { "center": [-4.90, 38.15], "radii_km": [185, 20], "angle_deg": 8 },
+      "source": "Wikipédia (fr), « Sierra Morena » ; Libro de la montería d'Alphonse XI (v. 1340-1350), cf. Wikipédia (es), « Libro de la montería »",
+      "note": "Chênes verts, chênes-lièges et cistaies ; marche peu peuplée."
+    },
+    {
+      "id": "serrania_cuenca",
+      "name": "Pinèdes de la Serranía de Cuenca",
+      "kind": "conifer",
+      "density": 0.75,
+      "ellipse": { "center": [-1.90, 40.30], "radii_km": [40, 22], "angle_deg": 100 },
+      "source": "Wikipédia (fr), « Serranía de Cuenca »"
+    },
+    {
+      "id": "cazorla_segura",
+      "name": "Sierras de Cazorla et de Segura",
+      "kind": "conifer",
+      "density": 0.75,
+      "ellipse": { "center": [-2.75, 38.10], "radii_km": [45, 14], "angle_deg": 55 },
+      "source": "Wikipédia (fr), « Sierra de Segura »"
+    },
+    {
+      "id": "montseny",
+      "name": "Montseny et Guilleries",
+      "kind": "broadleaf",
+      "density": 0.75,
+      "ellipse": { "center": [2.40, 41.78], "radii_km": [16, 10], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Massif du Montseny »"
+    },
+    {
+      "id": "pinhal_leiria",
+      "name": "Pinhal de Leiria",
+      "kind": "conifer",
+      "density": 0.85,
+      "ellipse": { "center": [-8.97, 39.80], "radii_km": [10, 4], "angle_deg": 85 },
+      "source": "Wikipédia (pt), « Pinhal de Leiria »",
+      "note": "Pinède royale semée sur les dunes sous Alphonse III et Denis Ier (XIIIe-XIVe s.)."
+    },
+    {
+      "id": "pineta_classe",
+      "name": "Pinède de Classe et de Ravenne",
+      "kind": "conifer",
+      "density": 0.85,
+      "ellipse": { "center": [12.28, 44.40], "radii_km": [18, 3], "angle_deg": 90 },
+      "source": "Wikipédia (it), « Pineta di Classe » ; Dante, Purgatoire XXVIII, 20",
+      "note": "« La pineta in su 'l lito di Chiassi » ; cordon littoral."
+    },
+    {
+      "id": "casentino",
+      "name": "Forêts du Casentin (Camaldoli, La Verna, Vallombreuse)",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [11.80, 43.82], "radii_km": [22, 9], "angle_deg": -45 },
+      "source": "Wikipédia (it), « Parco nazionale delle Foreste Casentinesi, Monte Falterona e Campigna »",
+      "note": "Sapinières monastiques, bois d'œuvre de Florence."
+    },
+    {
+      "id": "fiemme",
+      "name": "Forêts de Fiemme et du Cadore",
+      "kind": "conifer",
+      "density": 0.8,
+      "ellipse": { "center": [11.60, 46.30], "radii_km": [30, 15], "angle_deg": 20 },
+      "source": "Wikipédia (it), « Magnifica Comunità di Fiemme »",
+      "note": "Pessières gérées par la communauté de vallée depuis 1111."
+    },
+    {
+      "id": "abruzzes",
+      "name": "Hêtraies des Abruzzes",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [13.90, 41.90], "radii_km": [40, 15], "angle_deg": -45 },
+      "source": "Wikipédia (fr), « Parc national des Abruzzes, Latium et Molise »"
+    },
+    {
+      "id": "gargano",
+      "name": "Forêt Umbra (Gargano)",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [15.98, 41.82], "radii_km": [20, 9], "angle_deg": 0 },
+      "source": "Wikipédia (it), « Riserva naturale Foresta Umbra »"
+    },
+    {
+      "id": "pollino",
+      "name": "Forêts du Pollino et de Lucanie",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [16.15, 39.95], "radii_km": [35, 15], "angle_deg": -20 },
+      "source": "Wikipédia (fr), « Massif du Pollino »"
+    },
+    {
+      "id": "sila",
+      "name": "Sila",
+      "kind": "conifer",
+      "density": 0.85,
+      "ellipse": { "center": [16.50, 39.30], "radii_km": [32, 22], "angle_deg": 90 },
+      "source": "Wikipédia (fr), « Sila »",
+      "note": "Pins laricio ; poix et bois de marine depuis l'Antiquité."
+    },
+    {
+      "id": "serre_aspromonte",
+      "name": "Serre et Aspromonte",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [16.10, 38.35], "radii_km": [40, 11], "angle_deg": 55 },
+      "source": "Wikipédia (it), « Serre calabresi » ; Wikipédia (fr), « Aspromonte »"
+    },
+    {
+      "id": "nebrodes",
+      "name": "Bois des Nébrodes et des Madonies",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [14.40, 37.92], "radii_km": [50, 9], "angle_deg": 5 },
+      "source": "Wikipédia (fr), « Nébrodes »"
+    },
+    {
+      "id": "gennargentu",
+      "name": "Chênaies du Gennargentu et de la Barbagia",
+      "kind": "broadleaf",
+      "density": 0.65,
+      "ellipse": { "center": [9.30, 40.05], "radii_km": [30, 20], "angle_deg": 90 },
+      "source": "Wikipédia (fr), « Gennargentu »"
+    },
+    {
+      "id": "thuringe",
+      "name": "Forêt de Thuringe",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [10.80, 50.65], "radii_km": [55, 10], "angle_deg": -38 },
+      "source": "Wikipédia (fr), « Forêt de Thuringe »"
+    },
+    {
+      "id": "harz",
+      "name": "Harz",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [10.75, 51.75], "radii_km": [45, 15], "angle_deg": -15 },
+      "source": "Wikipédia (fr), « Harz »",
+      "note": "Forêt impériale et mines."
+    },
+    {
+      "id": "spessart",
+      "name": "Spessart",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [9.40, 50.00], "radii_km": [22, 16], "angle_deg": 60 },
+      "source": "Wikipédia (fr), « Spessart »",
+      "note": "Forêt de chasse des archevêques de Mayence."
+    },
+    {
+      "id": "odenwald",
+      "name": "Odenwald",
+      "kind": "mixed",
+      "density": 0.8,
+      "ellipse": { "center": [8.95, 49.60], "radii_km": [28, 17], "angle_deg": 80 },
+      "source": "Wikipédia (fr), « Odenwald »"
+    },
+    {
+      "id": "solling_reinhardswald",
+      "name": "Solling et Reinhardswald",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [9.55, 51.62], "radii_km": [26, 11], "angle_deg": 85 },
+      "source": "Wikipédia (fr), « Forêt de Reinhard » ; Wikipédia (de), « Solling »"
+    },
+    {
+      "id": "reichswald_cleves",
+      "name": "Reichswald de Clèves (Ketelwald)",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [6.05, 51.75], "radii_km": [12, 6], "angle_deg": 20 },
+      "source": "Wikipédia (de), « Klever Reichswald »"
+    },
+    {
+      "id": "reichswald_nuremberg",
+      "name": "Reichswald de Nuremberg",
+      "kind": "conifer",
+      "density": 0.9,
+      "ellipse": { "center": [11.25, 49.42], "radii_km": [16, 10], "angle_deg": 90 },
+      "source": "Wikipédia (de), « Nürnberger Reichswald »",
+      "note": "Forêts impériales de Saint-Sébald et de Saint-Laurent ; premiers semis de pins par Peter Stromer en 1368."
+    },
+    {
+      "id": "foret_boheme",
+      "name": "Forêt de Bohême et forêt Bavaroise",
+      "kind": "conifer",
+      "density": 0.9,
+      "ellipse": { "center": [13.25, 49.10], "radii_km": [95, 20], "angle_deg": -41 },
+      "source": "Wikipédia (fr), « Forêt de Bohême »",
+      "note": "La Silva Bohemica, marche forestière entre Bavière et Bohême."
+    },
+    {
+      "id": "monts_metalliferes",
+      "name": "Monts Métallifères (Miriquidi)",
+      "kind": "conifer",
+      "density": 0.75,
+      "ellipse": { "center": [13.10, 50.57], "radii_km": [65, 14], "angle_deg": 17 },
+      "source": "Wikipédia (fr), « Monts Métallifères » ; Wikipédia (de), « Miriquidi »",
+      "note": "Forêt frontière entamée par la colonisation minière des XIIe-XIIIe siècles."
+    },
+    {
+      "id": "sudetes",
+      "name": "Forêts des Sudètes",
+      "kind": "conifer",
+      "density": 0.8,
+      "ellipse": { "center": [16.20, 50.45], "radii_km": [85, 14], "angle_deg": -29 },
+      "source": "Wikipédia (fr), « Sudètes »"
+    },
+    {
+      "id": "wienerwald",
+      "name": "Wienerwald",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [16.05, 48.15], "radii_km": [25, 11], "angle_deg": 60 },
+      "source": "Wikipédia (fr), « Wienerwald »"
+    },
+    {
+      "id": "jutland",
+      "name": "Landes du Jutland",
+      "kind": "heath",
+      "density": 0.6,
+      "ellipse": { "center": [9.00, 56.20], "radii_km": [60, 28], "angle_deg": 90 },
+      "source": "Wikipédia (fr), « Jutland » (landes de l'intérieur, jyske heder)",
+      "note": "Landes à bruyère de l'intérieur, à leur plus grande extension à la fin du Moyen Âge."
+    },
+    {
+      "id": "bialowieza",
+      "name": "Forêt de Białowieża",
+      "kind": "mixed",
+      "density": 0.95,
+      "ellipse": { "center": [23.90, 52.75], "radii_km": [35, 25], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Białowieża »"
+    },
+    {
+      "id": "grande_wildnis",
+      "name": "Grande Solitude (Große Wildnis)",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [22.40, 54.00], "radii_km": [100, 36], "angle_deg": 15 },
+      "source": "Wikipédia (en), « Great Wilderness »",
+      "note": "Marche forestière dépeuplée entre la Prusse teutonique et la Lituanie."
+    },
+    {
+      "id": "kampinos",
+      "name": "Forêt de Kampinos",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [20.55, 52.32], "radii_km": [22, 7], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Forêt de Kampinos »"
+    },
+    {
+      "id": "niepolomice",
+      "name": "Forêt de Niepołomice",
+      "kind": "broadleaf",
+      "density": 0.9,
+      "ellipse": { "center": [20.35, 50.03], "radii_km": [10, 6], "angle_deg": 0 },
+      "source": "Wikipédia (pl), « Puszcza Niepołomicka »",
+      "note": "Chasse royale de Casimir le Grand."
+    },
+    {
+      "id": "tuchola",
+      "name": "Forêt de Tuchola",
+      "kind": "conifer",
+      "density": 0.8,
+      "ellipse": { "center": [17.90, 53.65], "radii_km": [40, 22], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Forêt de Tuchola »"
+    },
+    {
+      "id": "rudninkai",
+      "name": "Forêt de Rūdninkai",
+      "kind": "conifer",
+      "density": 0.9,
+      "ellipse": { "center": [25.05, 54.40], "radii_km": [22, 15], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Rūdninkai Forest »",
+      "note": "Chasse des grands-ducs de Lituanie."
+    },
+    {
+      "id": "samogitie",
+      "name": "Forêts de Samogitie",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [22.30, 55.70], "radii_km": [55, 28], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Samogitie » ; S. C. Rowell, Lithuania Ascending (Cambridge University Press, 1994)",
+      "note": "Forêts et marais opposés aux « reysen » de l'ordre Teutonique."
+    },
+    {
+      "id": "beskides",
+      "name": "Forêts des Beskides et des Tatras",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [20.60, 49.45], "radii_km": [150, 16], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Beskides »"
+    },
+    {
+      "id": "carpates_orientales",
+      "name": "Forêts des Carpates orientales",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [24.40, 47.40], "radii_km": [200, 32], "angle_deg": -54 },
+      "source": "Wikipédia (fr), « Carpates orientales »"
+    },
+    {
+      "id": "carpates_meridionales",
+      "name": "Forêts des Carpates méridionales",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [24.40, 45.45], "radii_km": [150, 20], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Alpes de Transylvanie »"
+    },
+    {
+      "id": "apuseni",
+      "name": "Monts Apuseni",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [22.80, 46.50], "radii_km": [45, 35], "angle_deg": 90 },
+      "source": "Wikipédia (fr), « Monts Apucènes »",
+      "note": "La forêt qui donne son nom à la Transylvanie (« au-delà de la forêt »)."
+    },
+    {
+      "id": "bakony",
+      "name": "Bakony",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [17.75, 47.15], "radii_km": [45, 14], "angle_deg": 35 },
+      "source": "Wikipédia (fr), « Bakony »",
+      "note": "Comitat forestier royal."
+    },
+    {
+      "id": "pilis_borzsony",
+      "name": "Pilis et Börzsöny",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [18.90, 47.80], "radii_km": [16, 13], "angle_deg": 0 },
+      "source": "Wikipédia (hu), « Pilis (hegység) »",
+      "note": "Chasses royales autour de Visegrád."
+    },
+    {
+      "id": "codrii_vlasiei",
+      "name": "Codrii Vlăsiei",
+      "kind": "broadleaf",
+      "density": 0.75,
+      "ellipse": { "center": [26.10, 44.70], "radii_km": [40, 24], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Codrii Vlăsiei »",
+      "note": "Grande forêt de la plaine valaque."
+    },
+    {
+      "id": "silva_bulgarica",
+      "name": "Forêt bulgare (Silva Bulgarica) et Šumadija",
+      "kind": "broadleaf",
+      "density": 0.65,
+      "ellipse": { "center": [21.10, 44.05], "radii_km": [75, 26], "angle_deg": -56 },
+      "source": "Wikipédia (fr), « Šumadija » ; K. Jireček, Die Heerstrasse von Belgrad nach Constantinopel (Prague, 1877)",
+      "note": "Forêt de la route militaire Belgrade-Niš, redoutée des croisés."
+    },
+    {
+      "id": "dinariques",
+      "name": "Forêts des Alpes dinariques",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [18.20, 44.00], "radii_km": [150, 38], "angle_deg": -40 },
+      "source": "Wikipédia (fr), « Alpes dinariques »"
+    },
+    {
+      "id": "grand_balkan",
+      "name": "Hêtraies du Grand Balkan (Hémus)",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [25.00, 42.90], "radii_km": [200, 13], "angle_deg": -10 },
+      "source": "Wikipédia (fr), « Grand Balkan »"
+    },
+    {
+      "id": "rhodopes",
+      "name": "Forêts du Rila et des Rhodopes",
+      "kind": "conifer",
+      "density": 0.8,
+      "ellipse": { "center": [24.50, 41.75], "radii_km": [110, 30], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Rhodopes »"
+    },
+    {
+      "id": "strandja",
+      "name": "Strandja",
+      "kind": "broadleaf",
+      "density": 0.85,
+      "ellipse": { "center": [27.60, 42.00], "radii_km": [45, 20], "angle_deg": -20 },
+      "source": "Wikipédia (fr), « Strandja »"
+    },
+    {
+      "id": "pinde",
+      "name": "Forêts du Pinde",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [21.30, 39.70], "radii_km": [95, 20], "angle_deg": -60 },
+      "source": "Wikipédia (fr), « Pinde »"
+    },
+    {
+      "id": "briansk",
+      "name": "Forêts de Briansk",
+      "kind": "mixed",
+      "density": 0.9,
+      "ellipse": { "center": [34.00, 52.90], "radii_km": [130, 55], "angle_deg": 90 },
+      "source": "Wikipédia (ru), « Брянский лес »",
+      "note": "Les « Debri » qui donnent son nom à Debriansk."
+    },
+    {
+      "id": "okovsky",
+      "name": "Forêt d'Okov (Valdaï)",
+      "kind": "mixed",
+      "density": 0.9,
+      "ellipse": { "center": [32.80, 56.60], "radii_km": [90, 60], "angle_deg": 0 },
+      "source": "Chronique des temps passés (début XIIe s.), prologue ; Wikipédia (ru), « Оковский лес »",
+      "note": "Forêt d'où sortent le Dniepr, la Dvina et la Volga selon la chronique."
+    },
+    {
+      "id": "mechtchera",
+      "name": "Forêts de la Mechtchera",
+      "kind": "conifer",
+      "density": 0.8,
+      "ellipse": { "center": [40.30, 55.30], "radii_km": [85, 40], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Meshchera Lowlands »"
+    },
+    {
+      "id": "crimee",
+      "name": "Forêts des monts de Crimée",
+      "kind": "broadleaf",
+      "density": 0.75,
+      "ellipse": { "center": [34.20, 44.65], "radii_km": [65, 10], "angle_deg": 20 },
+      "source": "Wikipédia (fr), « Monts de Crimée »"
+    },
+    {
+      "id": "caucase_ouest",
+      "name": "Forêts du Caucase occidental",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [40.30, 44.00], "radii_km": [150, 22], "angle_deg": -22 },
+      "source": "Wikipédia (fr), « Caucase de l'Ouest »"
+    },
+    {
+      "id": "kolmarden_tiveden",
+      "name": "Kolmården, Tylöskog et Tiveden",
+      "kind": "conifer",
+      "density": 0.9,
+      "ellipse": { "center": [15.20, 58.75], "radii_km": [75, 13], "angle_deg": 10 },
+      "source": "Wikipédia (en), « Kolmården » ; « Tiveden »",
+      "note": "Forêts frontières entre Svealand et Götaland."
+    },
+    {
+      "id": "mamora",
+      "name": "Forêt de la Maâmora",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [-6.40, 34.10], "radii_km": [35, 16], "angle_deg": 0 },
+      "source": "Wikipédia (en), « Maamora » ; Léon l'Africain, Description de l'Afrique (1526)",
+      "note": "Subéraie de l'arrière-pays de Salé."
+    },
+    {
+      "id": "rif",
+      "name": "Forêts du Rif",
+      "kind": "mixed",
+      "density": 0.65,
+      "ellipse": { "center": [-4.50, 35.00], "radii_km": [100, 20], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Rif »",
+      "note": "Cèdres, sapins et chênes."
+    },
+    {
+      "id": "moyen_atlas",
+      "name": "Cédraies du Moyen Atlas",
+      "kind": "conifer",
+      "density": 0.75,
+      "ellipse": { "center": [-5.00, 33.30], "radii_km": [80, 24], "angle_deg": 40 },
+      "source": "Wikipédia (fr), « Moyen Atlas »"
+    },
+    {
+      "id": "haut_atlas",
+      "name": "Forêts claires du Haut Atlas",
+      "kind": "mixed",
+      "density": 0.5,
+      "ellipse": { "center": [-7.30, 31.30], "radii_km": [170, 20], "angle_deg": 22 },
+      "source": "Wikipédia (fr), « Haut Atlas »",
+      "note": "Thuyas, genévriers et chênes verts ; versant nord."
+    },
+    {
+      "id": "kabylie",
+      "name": "Forêts de Kabylie (Djurdjura, Akfadou)",
+      "kind": "broadleaf",
+      "density": 0.7,
+      "ellipse": { "center": [4.50, 36.60], "radii_km": [70, 17], "angle_deg": 5 },
+      "source": "Wikipédia (fr), « Kabylie » ; al-Idrîsî, Nuzhat al-mushtâq (v. 1154)",
+      "note": "Bois de marine de Béjaïa."
+    },
+    {
+      "id": "aures",
+      "name": "Cédraies de l'Aurès",
+      "kind": "conifer",
+      "density": 0.6,
+      "ellipse": { "center": [6.60, 35.30], "radii_km": [50, 17], "angle_deg": 30 },
+      "source": "Wikipédia (fr), « Aurès »"
+    },
+    {
+      "id": "kroumirie",
+      "name": "Kroumirie",
+      "kind": "broadleaf",
+      "density": 0.8,
+      "ellipse": { "center": [8.60, 36.70], "radii_km": [55, 14], "angle_deg": 10 },
+      "source": "Wikipédia (en), « Kroumirie »",
+      "note": "Chênes-lièges et chênes zéens."
+    },
+    {
+      "id": "pontique_ouest",
+      "name": "Forêts pontiques occidentales",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [33.00, 41.40], "radii_km": [200, 26], "angle_deg": 3 },
+      "source": "Wikipédia (fr), « Chaîne pontique »",
+      "note": "De la Bithynie (« mer d'arbres ») à la Paphlagonie."
+    },
+    {
+      "id": "pontique_est",
+      "name": "Forêts pontiques orientales",
+      "kind": "mixed",
+      "density": 0.85,
+      "ellipse": { "center": [39.00, 40.78], "radii_km": [200, 24], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Chaîne pontique »"
+    },
+    {
+      "id": "taurus",
+      "name": "Forêts du Taurus",
+      "kind": "conifer",
+      "density": 0.7,
+      "ellipse": { "center": [32.60, 37.00], "radii_km": [200, 24], "angle_deg": -3 },
+      "source": "Wikipédia (fr), « Monts Taurus » ; Ibn Battûta, Voyages (v. 1333), Alanya",
+      "note": "Bois exporté d'Alanya vers Alexandrie et Damiette selon Ibn Battûta."
+    },
+    {
+      "id": "amanus",
+      "name": "Amanus",
+      "kind": "mixed",
+      "density": 0.75,
+      "ellipse": { "center": [36.35, 36.70], "radii_km": [70, 11], "angle_deg": 78 },
+      "source": "Wikipédia (fr), « Monts Nur »"
+    },
+    {
+      "id": "liban",
+      "name": "Cédraies du mont Liban",
+      "kind": "conifer",
+      "density": 0.5,
+      "ellipse": { "center": [35.95, 34.15], "radii_km": [65, 9], "angle_deg": 68 },
+      "source": "Wikipédia (fr), « Cèdre du Liban »",
+      "note": "Déjà très entamées en 1340."
+    },
+    {
+      "id": "troodos",
+      "name": "Forêts du Troodos",
+      "kind": "conifer",
+      "density": 0.75,
+      "ellipse": { "center": [32.87, 34.93], "radii_km": [38, 13], "angle_deg": 0 },
+      "source": "Wikipédia (fr), « Massif de Tróodos »"
+    },
+    {
+      "id": "arsouf",
+      "name": "Forêt d'Arsouf (chênaie du Sharon)",
+      "kind": "broadleaf",
+      "density": 0.6,
+      "ellipse": { "center": [34.90, 32.30], "radii_km": [22, 6], "angle_deg": 82 },
+      "source": "Itinerarium Peregrinorum et Gesta Regis Ricardi (1191), cf. Wikipédia (en), « Battle of Arsuf »",
+      "note": "Traversée par l'armée de Richard Cœur de Lion en 1191."
     }
   ]
 }
