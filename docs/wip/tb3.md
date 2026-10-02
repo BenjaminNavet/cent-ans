@@ -17,6 +17,15 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix de
 - [x] Tests : `game/tests/tb3_growth_test.gd` (5 étapes), `game/tests/tb3_shot.gd` (captures, banc)
 - [x] ADR `docs/decisions/0153-batiments-hors-les-murs-assembles-du-kit.md`
 
+## Mesures (02/10, machine chargée à 30-50)
+- `tb3_growth_test` OK (5 étapes) ; `smoke`, `settlements_render_test`, `sz4b_colonies_forests_test`,
+  `tf_far_shader_test`, `tb2_declutter_test`, `tb1_seasons_test` OK ; pytest
+  `test_building_models_schema.py` 9 tests OK.
+- Appels de dessin (`tb3_shot.gd --bench`) : d = 8 : 696 → 714 ; d = 90 : 478 → 478 ; d = 400 :
+  398 → 398. Temps par image : bruit de charge (détail dans `docs/godot-map.md`).
+- `ss_shot.gd --bench` avant / après : 20,6 → 22,2 ms à 90 ; 23,7 → 23,7 ms à 400 (bruit).
+- pytest complet : `test_entity_icons.py` échoue déjà sans ce lot (miniature de la collégiale).
+
 ## Points ouverts
 - Échelle réelle : rien de visible à d = 90 ni 400 (ADR 0138). `render.exaggeration.max` dans les
   données si le joueur veut voir les domaines de plus loin.

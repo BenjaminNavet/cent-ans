@@ -1868,8 +1868,8 @@ Rendu seulement ; les règles restent dans `core/`. Données : `data/map/buildin
   `coast` (grève la plus proche, sinon champ), `shore` (grève obligatoire : pas de port sans eau
   à moins de `shore_reach_m`). La maquette grandit sur place ; sa façade regarde la ville, ou
   l'eau.
-- **Rendu** : un `MultiMesh` par maillage pour le voisinage de la caméra (rayon 1,5 × la portée),
-  reconstruit par tranches de 1,5 ms quand la caméra s'éloigne de son centre ou que l'état de la
+- **Rendu** : un `MultiMesh` par maillage pour le voisinage de la caméra (rayon `load_factor` ×
+  distance du rig, borné par `load_min_units` et 1,5 × la portée), reconstruit par tranches de 1,5 ms quand la caméra s'éloigne de son centre ou que l'état de la
   simulation change (`get_state_revision`) ; hauteurs recalées quand des pages de relief plus
   fines arrivent. Échelle réelle, visible sous `render.view_range_units` (45), ombres sous
   `shadow_range_units` (12). `--no-tb3` après `--` coupe la couche.
@@ -1885,10 +1885,16 @@ Rendu seulement ; les règles restent dans `core/`. Données : `data/map/buildin
 - **Chantier** : `ConstructionMarkers` pose la maquette `worksite_1` (taille constante à l'écran,
   couche « Signes ») ; la cité en chantier reçoit aussi un chantier à l'échelle réelle.
 
-Mesures (`game/tests/tb3_shot.gd --bench`, M4 Pro, 1600 × 900, machine chargée à 20-27, Agen,
-états imposés : 147 instances, 22 nœuds) : d = 8 : 696 → 727 appels de dessin, 21,3 → 22,0 ms et
-43,8 → 44,7 ms par image selon la passe ; d = 90 : 478 → 478 ; d = 400 : 398 → 398 (couche
-masquée au-delà de 45, aucun coût). Les écarts de temps sont dans le bruit de la machine.
+Mesures (`game/tests/tb3_shot.gd --bench`, M4 Pro, 1600 × 900, Agen, états imposés, machine
+partagée à une charge de 30 à 50 : les temps par image ne sont pas exploitables, les appels de
+dessin si) : d = 8 : 696 → 714 appels de dessin (9 instances, 8 nœuds, ombres comprises) ;
+d = 90 : 478 → 478 ; d = 400 : 398 → 398 (couche masquée au-delà de 45 : aucun coût). Temps par
+image avec / sans la couche, deux passes : d = 8 : 25,9 / 42,6 et 37,4 / 56,4 ms ; d = 90 :
+18,1 / 20,5 et 20,4 / 26,6 ms ; d = 400 : 16,7 / 19,6 et 16,8 / 17,5 ms (bruit de charge).
+`ss_shot.gd --bench` avant / après le lot : 20,6 → 22,2 ms à 90, 23,7 → 23,7 ms à 400. À
+refaire sur machine calme. Hors image : lecture groupée de l'état 6 ms (une fois par changement
+d'état, seulement quand la couche est à l'écran) ; voisinage reconstruit en 20 à 50 ms réelles,
+par tranches de 1,5 ms.
 Captures de contrôle : `godot --path game --resolution 1600x900 --script res://tests/tb3_shot.gd
 -- --out=<dossier>`.
 
