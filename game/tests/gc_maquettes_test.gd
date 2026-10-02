@@ -38,8 +38,9 @@ func _run() -> void:
 	if not _check(not doc.is_empty(), "town_maquettes.json missing"):
 		return
 	_check(TownMaquetteData.style() == TownMaquetteData.STYLE_MAQUETTE, "default style should be maquette, got %s" % TownMaquetteData.style())
-	_check(is_equal_approx(TownMaquetteData.width("city"), 11.0) and is_equal_approx(TownMaquetteData.width("village"), 3.2), "sizes from data")
-	_check(is_equal_approx(TownMaquetteData.model_scale("town"), 6.5 / 2.0), "town model scale %.3f" % TownMaquetteData.model_scale("town"))
+	_check(TownMaquetteData.width("city") > TownMaquetteData.width("town") and TownMaquetteData.width("town") > TownMaquetteData.width("village"), "sizes from data, ordered by kind")
+	_check(is_equal_approx(TownMaquetteData.model_scale("town"), TownMaquetteData.width("town") / 2.0), "town model scale %.3f" % TownMaquetteData.model_scale("town"))
+	_check(TownMaquetteData.weight_gain("city", 6.0) < 1.0 and TownMaquetteData.weight_gain("city", 60.0) > 1.3 and TownMaquetteData.weight_gain("city", 20.0) < TownMaquetteData.weight_gain("city", 40.0), "weight gain grows with weight")
 	var expected := {
 		"prov_ile_de_france": "west", "prov_firenze": "med", "prov_constantinople": "byz",
 		"prov_novgorod": "rus", "prov_tunis": "isl", "prov_saray": "steppe",
@@ -53,13 +54,13 @@ func _run() -> void:
 	_check(TownMaquetteData.family_for("cul_unknown", "nowhere", "rel_orthodox") == "byz", "then religion")
 	_check(TownMaquetteData.family_for("cul_unknown", "nowhere", "rel_unknown") == "west", "west by default")
 	_check(TownMaquetteData.family_of_province("prov_nowhere") == "west", "unknown province is west")
-	_check(TownMaquetteData.model_name_raw("city", "west", "a") == "city_a", "west model name")
+	_check(TownMaquetteData.model_name_raw("city", "west", "a") == "city_west_a", "west model name")
 	_check(TownMaquetteData.model_name_raw("city", "byz", "b") == "city_byz_b", "family model name")
 	# Repli : une famille sans fichier retombe sur l'Ouest ; un fichier présent est pris.
-	_check(TownMaquetteData.model_name("castle", "nofamily", "a") == "castle_a", "missing family model falls back to west")
+	_check(TownMaquetteData.model_name("castle", "nofamily", "a") in ["castle_west_a", "castle_a"], "missing family model falls back to west")
 	var byz := TownMaquetteData.model_name("city", "byz", "a")
 	var byz_present := ResourceLoader.exists(TownMaquetteData.MODELS_DIR + "city_byz_a.glb")
-	_check(byz == ("city_byz_a" if byz_present else "city_a"), "byz city model %s (file present: %s)" % [byz, byz_present])
+	_check(byz == "city_byz_a" if byz_present else byz in ["city_west_a", "city_a"], "byz city model %s (file present: %s)" % [byz, byz_present])
 	_check(TownMaquetteData.variant_of("set_amiens") == TownMaquetteData.variant_of("set_amiens") and TownMaquetteData.variant_of("set_amiens") in ["a", "b"], "deterministic variant")
 	_check(TownMaquetteData.yaw_of("set_amiens") == TownMaquetteData.yaw_of("set_amiens"), "deterministic yaw")
 
@@ -119,7 +120,7 @@ func _run() -> void:
 	var families := {}
 	for i in count:
 		var kind := TownMaquetteData.kind_of(data.settlements[i])
-		var base := TownMaquetteData.width(kind) * 0.5
+		var base := TownMaquetteData.width(kind) * 0.5 * maquettes.gain_of(i)
 		families[maquettes.family_of(i)] = true
 		if maquettes.is_landmark(i):
 			continue
@@ -131,11 +132,11 @@ func _run() -> void:
 			break
 		var xf := maquettes.instance_transform(i)
 		var px := layer.model_px(i)
-		if absf(xf.basis.get_scale().x - TownMaquetteData.model_scale(kind) * factor) > 0.01:
+		if absf(xf.basis.get_scale().x - TownMaquetteData.model_scale(kind) * maquettes.gain_of(i) * factor) > 0.01:
 			_check(false, "%s: instance scale %.3f" % [data.settlements[i]["id"], xf.basis.get_scale().x])
 			break
 		# Le sol du modèle (origine du nœud) ne dépasse pas le relief au centre.
-		var ground := xf.origin
+		var ground := (xf * maquettes.model_local(i).affine_inverse()).origin
 		if absf(ground.x - px.x) > 0.01 or absf(ground.z - px.y) > 0.01:
 			_check(false, "%s: instance off its place (%s vs %s)" % [data.settlements[i]["id"], ground, px])
 			break

@@ -32,8 +32,16 @@ uniform vec3 autumn_russet = vec3(1.03, 0.80, 0.86);
 uniform vec3 summer_gold = vec3(1.12, 1.04, 0.84);
 uniform vec3 life_snow_color = vec3(0.80, 0.82, 0.86);
 // Brûlis (dévastation) : cendres et chaume noirci.
-uniform vec3 burnt_color = vec3(0.035, 0.030, 0.026);
-uniform vec3 ash_color = vec3(0.16, 0.15, 0.14);
+uniform vec3 burnt_color = vec3(0.022, 0.014, 0.009);  // TB4 : brun-noir chaud (linéaire ; ≈ 40 31 24 à l'écran, plus de gris neutre)
+uniform vec3 ash_color = vec3(0.060, 0.050, 0.040);
+// TB4 : brûlis par parcelles. À 100 % de dévastation, part des parcelles carbonisées et part des
+// parcelles roussies (le reste est intact) ; teinte des champs roussis ; part du sol d'origine
+// gardée sous le noir (relief, chemins et sillons restent lisibles).
+uniform bool burn_active = false;  // posé par CampaignLife : une province au moins est dévastée
+uniform float burn_charred_share = 0.36;
+uniform float burn_singed_share = 0.33;
+uniform vec3 burn_singe_tint = vec3(0.92, 0.50, 0.20);  // × luminance du sol : roux sombre
+uniform float burn_ground_keep = 0.22;
 // Ombres de nuages : force, échelle (par pixel carte), vent.
 uniform float cloud_shadow_amount = 0.18;
 uniform float cloud_shadow_scale = 0.010;
@@ -236,15 +244,41 @@ vec3 terroir_landuse(vec3 lu, vec4 tr) {
 	return lu;
 }
 
-// Brûlis : plaques de terre calcinée et de cendres, chaumes noircis (dévastation).
-vec3 terroir_burn(vec3 col, float burn, vec2 p, float footprint) {
-	if (burn <= 0.004) {
+// Brûlis (TB4) : dévastation par parcelles. `burn` : masque au pixel ; `keep` : atténuation (neige) ;
+// `parcel` : parcelle de l'habillage HB (`hb_apply` : centre, tirage, poids) ; `mask_scale` :
+// 1 / plus grand côté de la carte (échelle du masque de terroir).
+vec3 terroir_burn(vec3 col, float burn, float keep, vec2 p, float footprint, vec4 parcel, float mask_scale) {
+	if (!burn_active || !life_enabled || !has_terroir) {
 		return col;
 	}
+	const vec3 lum_w = vec3(0.2126, 0.7152, 0.0722);
+	// Découpe large : la zone ravagée n'est pas un disque net (bruit éteint quand il passe sous le pixel).
+	float coarse = 1.0 - smoothstep(1.5, 5.0, footprint);
+	float patch_px = mix(0.5, value_noise(p * 0.13 + 5.0) * 0.65 + value_noise(p * 0.41 + 9.0) * 0.35, coarse);
+	float burn_px = clamp(burn * (0.45 + 1.1 * patch_px), 0.0, 1.0) * keep;
+	float lum = dot(col, lum_w);
+	// Lointain : moyenne des trois états, sans dessin de parcelle.
+	vec3 char_far = mix(mix(burnt_color, ash_color, 0.15), col, burn_ground_keep);
+	vec3 singe_far = mix(col, lum * burn_singe_tint, 0.7);
+	float c_far = burn_charred_share * burn_px;
+	float s_far = burn_singed_share * burn_px;
+	vec3 far = col * (1.0 - c_far - s_far) + char_far * c_far + singe_far * s_far;
+	if (parcel.w <= 0.001) {
+		return far;
+	}
+	// Près : la parcelle entière prend un état, tiré contre la dévastation lue en son centre (le
+	// bord de la zone s'effrange parcelle par parcelle).
+	float patch_c = value_noise(parcel.xy * 0.13 + 5.0) * 0.65 + value_noise(parcel.xy * 0.41 + 9.0) * 0.35;
+	float burn_c = clamp(texture(terroir_mask, parcel.xy * mask_scale).b * (0.45 + 1.1 * patch_c), 0.0, 1.0) * keep;
+	float h = parcel.z;
+	float charred = step(h, burn_charred_share * burn_c);
+	float singed = step(h, (burn_charred_share + burn_singed_share) * burn_c) - charred;
 	float fine = 1.0 - smoothstep(0.8, 2.5, footprint);
-	float n = value_noise(p * 0.35) * mix(1.0, 0.6, fine) + value_noise(p * 1.7) * 0.4 * fine;
-	float amount = smoothstep(1.0 - burn * 0.85 - 0.12, 1.0 - burn * 0.85 + 0.12, n);
 	float ash = value_noise(p * 1.1 + 11.0);
-	vec3 scorched = mix(burnt_color, ash_color, ash * ash * 0.6);
-	return mix(col, scorched, amount * 0.92);
+	float stubble = value_noise(p * 6.3 + 3.0);
+	vec3 scorched = mix(burnt_color, ash_color, ash * ash * 0.6 * fine + 0.1);
+	vec3 char_col = mix(scorched, col, burn_ground_keep * mix(1.0, 0.6 + 0.8 * stubble, fine));
+	vec3 singe_col = mix(col, lum * burn_singe_tint, 0.55 + 0.3 * fract(h * 7.31));
+	vec3 near = mix(mix(col, char_col, charred), singe_col, singed);
+	return mix(far, near, parcel.w);
 }

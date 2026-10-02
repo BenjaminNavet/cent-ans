@@ -19,6 +19,9 @@ extends Node3D
 
 ## Lot C6 : vue « comté » (≈ 40 km, ~55 unités à l'écran) au zoom maximal.
 @export var min_distance: float = 22.0
+## GC (ADR 0158) : plancher dur de la carte généralisée (maquettes stylisées) : aucune zone proche
+## ni étage de relief ne laisse descendre en dessous (0 : pas de plancher). `--camera-min` le lève.
+var floor_distance: float = 0.0
 ## CV3-0 (#1) : 1500 -> 2600 (était trop court pour cadrer la France entière depuis Paris,
 ## le Midi restait hors champ ; 1 unité ≈ 719 m, Paris-Marseille ≈ 918 unités).
 @export var max_distance: float = 2600.0
@@ -137,7 +140,7 @@ func min_distance_at(point: Vector3) -> float:
 		# ZG4b : plancher provisoire au-dessus des villes emblématiques (levé par VH4).
 		var zones := floor_zones if floor_zones_set else close_zones
 		result = maxf(result, minf(profile.landmark_floor(Vector2(point.x, point.z), zones), min_distance))
-	return result
+	return maxf(result, floor_distance)
 
 
 ## Distance minimale par étage, mémorisée tant que le point ne bouge pas de plus de 2 % de la

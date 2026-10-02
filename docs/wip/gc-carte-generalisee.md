@@ -11,18 +11,20 @@ géographie relative vraie. Origine : champs (HB3 ×3) et camps plus gros que le
 - [x] GC0 : diagnostic, ADR 0158, worktree, inventaire des points d'échelle.
 - [x] GC1 : prototypes et planches. Réel grossi ×8 / ×14 **rejeté** (tache brune à moyenne
       distance) ; maquettes stylisées **retenues** (planche `gc1_reel_x8_vs_stylise.jpg`).
-- [ ] GC2 (agent, `../gp-gc`) : système de maquettes — données `data/art/town_maquettes.json`
+- [x] GC2 (agent, `../gp-gc`) : système de maquettes — données `data/art/town_maquettes.json`
       (tailles par type, familles d'architecture par culture/région, portées), `TownMaquetteLayer`
       en MultiMesh par tuile, activé par défaut, calques 1:1 éteints, emprises (clic, anneau,
       étiquettes, exclusions) sur la maquette, voisins trop proches réduits, `LandmarkModel` grossi.
-- [ ] GC3 (agent, `../gp-gc-kit`, branche `feat/gc-kit`) : kits de l'Est et du Sud générés par
+- [x] GC3 (agent, `../gp-gc-kit`, branche `feat/gc-kit`) : kits de l'Est et du Sud générés par
       Blender (`tools/blender_scripts/settlements.py`) : `med`, `byz`, `rus`, `isl`, `steppe`,
       5 types × 2 variantes, noms `settlements/<type>_<famille>_<a|b>.glb`.
-- [ ] GC3b (agent de recherche) : modèles libres sur internet (CC0 / CC-BY seulement, dépôt
+- [x] GC3b (agent de recherche) : modèles libres sur internet (CC0 / CC-BY seulement, dépôt
       public), rapport + téléchargements hors dépôt (`~/.cache/cent_ans/gc_assets/`).
-- [ ] GC4 : fleuves et routes élargis près des maquettes, ponts.
-- [ ] GC5 : champs (HB3) réglés par rapport aux maquettes ; hameaux, moulins, arbres.
-- [ ] GC6 : plancher de caméra, retrait des paliers vallée/site, ménage du 1:1 et du prototype
+- [~] GC4 : zone de retrait du fleuve générique grossie avec les villes emblématiques (fait) ;
+      fleuves et routes élargis, ponts : **à faire** (raccord visible Seine de la maquette / fleuve fin).
+- [x] GC5 : champs réduits (`docs/wip/gc-champs.md`), hameaux, moulins et fumées grossis
+      (`props` de `town_maquettes.json`). Arbres : session HC (ADR 0161).
+- [~] GC6 : plancher de caméra fait (`map.camera_floor_distance` 20) ; reste : plancher de caméra, retrait des paliers vallée/site, ménage du 1:1 et du prototype
       `MapScale`, banc.
 - [ ] GC7 : camps (avec SA, ADR 0156).
 - [ ] GC8 : tests, `godot-map.md`, ADR, mémoire, fusion dans main.
@@ -103,20 +105,78 @@ géographie relative vraie. Origine : champs (HB3 ×3) et camps plus gros que le
   invisibles : la maquette doit aussi grossir (Paris ×2-3, kit ×3-4) et le `LandmarkModel` n'est
   pas encore mis à l'échelle par le prototype (drapé sur le relief à revoir).
 
-## GC2 — système de maquettes (en cours)
-- Données `data/art/town_maquettes.json` + schéma `town_maquettes.schema.json` (test
-  `tools/tests/test_town_maquettes_schema.py`) ; `map.town_style` (`maquette` par défaut,
-  `--town-style=real|maquette`).
-- `TownMaquetteData` (familles culture > région > religion > Ouest, modèle avec repli, collisions),
-  `TownMaquetteLayer` (MultiMesh par modèle et tuile de 256, bannières par donnée d'instance,
-  `shaders/maquette_banner.gdshader`, pose au sol, fondu par type sur la distance du rig),
-  `LandmarkModel` grossi (`drape_scale` dans `landmark.gdshader`).
-- `SettlementLayer` : style `maquette` → pas de `towns` / `landmark_cities` / `town_far` ; emprises
-  = maquette ; exclusions de végétation ≥ maquette ; clic limité à la portée du type.
-- Test `game/tests/gc_maquettes_test.gd` : OK. Mesure : 2 140 instances, 7 emblématiques,
-  1 245 MultiMesh (10 modèles de l'Ouest), 51 lieux réduits, pose ≈ 0,8 s.
-- Reste : smoke, tests existants (1:1) à passer en `--town-style=real` ou adapter,
-  `game/tests/gc_shots.gd`, revue des usages nuls.
+## GC2 — système de maquettes (fait le 02/10, à juger sur captures)
+- **Données** `data/art/town_maquettes.json` + schéma `town_maquettes.schema.json` (test
+  `tools/tests/test_town_maquettes_schema.py` : chaque culture, région et religion de province est
+  dans une famille et une seule). `map.town_style` de `data/ui/campaign_map.json` : `maquette`
+  par défaut, `--town-style=real|maquette` le remplace.
+- **`TownMaquetteData`** : familles (culture > région > religion > Ouest), nom de modèle avec
+  repli silencieux sur l'Ouest (`ResourceLoader.exists`), variante et lacet par id, collisions
+  (`solve_collisions`, ordre de `SettlementData.settlements` = type, poids, id).
+- **`TownMaquetteLayer`** : un MultiMesh par (modèle, tuile de `tile_size` = 256) ; bannières par
+  donnée d'instance (`shaders/maquette_banner.gdshader`, `INSTANCE_CUSTOM`, la couleur de sommet
+  des bâtiments n'est pas touchée) mises à jour par `SettlementLayer.refresh` ; pose au sol en
+  mètres lus une fois (centre, abaissé à la moyenne de l'emprise) puis `display_height` par
+  morceau recalé et par tranches de 400 quand l'échelle verticale change ; portée par type =
+  fondu sur la distance du rig (`transparency` des tuiles du type) + `visibility_range_end` par
+  tuile pour le culling ; ombres jusqu'à `model_shadow_distance` (FC1).
+- **`LandmarkModel`** : `create(plan, terrain, échelle, cuisson différée)` ; zone, cœur et étendue
+  cuite × `landmark_scale`, drapé ramené à l'échelle (`drape_scale` de `landmark.gdshader`) ;
+  première cuisson différée (fil de travail) : la pose des 7 villes coûtait 0,6 à 2 s.
+- **`SettlementLayer`** : style `maquette` → `towns`, `landmark_cities`, `town_far` nuls,
+  `maquettes` créé ; `_model_radius` / `_model_top` = maquette (clic, anneau, étiquette, hameaux),
+  exclusions de végétation ≥ 1,15 × la maquette, finage et `real_radius` réels ; zones des villes
+  emblématiques × `landmark_scale` ; clic par l'emprise limité à la portée du type.
+- **Mesures** (headless) : 2 147 lieux = 2 140 instances + 7 emblématiques, 1 245 MultiMesh pour
+  les 10 modèles de l'Ouest, 51 lieux réduits, 1 091 lieux d'une famille sans kit (repli Ouest),
+  pose ≈ 0,26 s.
+- **Tests** : `game/tests/gc_maquettes_test.gd`, smoke. Adaptés : `sz4_prop_scale_test.gd`
+  (force le style `real`), `settlements_render_test.gd` (contrôle du style) ; scripts de capture
+  1:1 (`vt_`, `vh4_`, `vh6_`, `vh7_`, `sz4_`, `sz4b_shots.gd`) : à lancer avec `--town-style=real`.
+  `tb2_declutter_test`, `da7d_overlap_test`, `tf_far_layer_test` échouent aussi en `real`
+  (machine chargée : temps par image, noms coupés), sans lien avec GC2.
+- **Captures** : `game/tests/gc_shots.gd` (`--out`, `--only`, `--full`), non exécuté par GC2.
+- **Points ouverts** :
+  - fleuve des villes emblématiques : la zone de `river_styles.json` (retrait du fleuve générique)
+    n'est pas grossie, la maquette ×1,7 la dépasse (Seine de la maquette + Seine de la carte entre
+    6,8 et 11,5 unités) → GC4 ;
+  - maquettes du kit pas centrées sur leur origine (faubourg de `city_a` : jusqu'à 7 unités du
+    centre pour un disque de 5,5) ; l'emprise est la demi-largeur des données ;
+  - 1 245 MultiMesh pour 2 140 instances (≈ 1,7 par tuile) : les tuiles servent le culling, pas le
+    regroupement ; +10 modèles par famille livrée. Si le nombre de nœuds pèse, tuiles plus grandes
+    pour les types à longue portée ;
+  - moulins, cheminées, hameaux, scènes FK restent à 1:1 autour de maquettes grossies → GC5 ;
+    rues pavées du réseau fin dans 1,3 × la maquette ; finage du parcellaire proche (`TownLayer`)
+    absent en style `maquette` ;
+  - anneau de sélection masqué sous `4,4 ×` le rayon (Q8) : invisible à d < 24 pour une cité,
+    d < 45 pour Paris → à revoir avec le plancher de caméra (GC6) ;
+  - plancher de caméra `landmark_min_distance` de nouveau actif sur les 7 villes (GC6).
+
+## Vague 2 (orchestrateur, 02/10) — réglages sur captures
+- Tailles relevées après lecture en 1080p : ville 14, bourg 8, château 4,6, abbaye 4,4, village 4
+  unités ; `landmark_scale` 2,2 (Paris ≈ 28 unités) ; `weight_gain` 0,85-1,45 selon le poids du
+  lieu (racine carrée) : Constantinople ou Paris dominent, un petit évêché reste modeste.
+  96 lieux réduits par collision.
+- Kit occidental refait (GC3c, `settlements_west.py`, `<type>_west_<a|b>.glb`) : l'ancien kit BR1
+  (24 k triangles, gris) faisait une tache à côté des familles claires. Rus' éclaircie, yourtes
+  retravaillées, tous les modèles recentrés (décalage porté par le nœud du glTF : le test de pose
+  compare `instance_transform × model_local⁻¹`). Ancien kit gardé en repli (`<type>_<a|b>`).
+- Plancher de caméra : `CampaignCamera.floor_distance` (`map.camera_floor_distance`, 20), levé
+  par `--camera-min`.
+- Hameaux ×0,7 du modèle (≈ 1,3 unité), moulins ×0,5, fumées ×0,3, portées 220 : clés `props`,
+  lues par `TownMaquetteData.prop` à la place des rapports 1:1 de `MapPropScale` (fichier de HC).
+- Captures : `docs/img/gc/gc3_maquettes.jpg` (15 vues, 1080p recadré), `gc5_champs.jpg`,
+  `kit_est_sud.jpg`.
+
+## Reste à faire
+- GC4 : largeur des fleuves et des routes (pas de multiplicateur unique, voir inventaire) ; raccord
+  de la Seine de la maquette de Paris avec le fleuve générique ; ponts.
+- GC6 : retirer ou laisser dormir le parcellaire de près ZG5b, l'herbe et les figurants 1:1, les
+  paliers vallée/site ; retirer le prototype `MapScale` et les calques 1:1 si le joueur confirme
+  qu'il ne veut plus du style `real` ; banc d'images par seconde (1 281 MultiMesh).
+- GC7 : camps, avec SA (ADR 0156).
+- Bannières des 7 villes emblématiques (pas de teinte de contrôleur) ; étiquette de Vincennes dans
+  l'emprise de Paris ; Saraï petite (poids faible) ; yourtes à juger en jeu.
 
 ## Prochaine étape
-Vague 1 lancée (GC2, GC3, GC3b en parallèle) ; à leur retour : captures `gc_shots.gd`, revue, puis GC4-GC6.
+Fusion dans main après la passe de tests carte ; puis jugement du joueur en partie réelle.

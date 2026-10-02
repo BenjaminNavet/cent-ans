@@ -107,6 +107,25 @@ static func model_scale(kind: String) -> float:
 	return width(kind) / native if native > 0.0 else 0.0
 
 
+## Gain de taille d'un lieu selon son poids (`weight_gain` : de `min` au poids bas de son type à
+## `max` au poids haut, en racine carrée) ; 1 si le bloc est absent.
+static func weight_gain(kind: String, weight: float) -> float:
+	var block: Dictionary = document().get("weight_gain", {})
+	var bounds: Array = block.get(kind, [])
+	if bounds.size() < 2 or float(bounds[1]) <= float(bounds[0]):
+		return 1.0
+	var t := clampf((weight - float(bounds[0])) / (float(bounds[1]) - float(bounds[0])), 0.0, 1.0)
+	return lerpf(float(block.get("min", 1.0)), float(block.get("max", 1.0)), sqrt(t))
+
+
+## Réglage d'accessoire de la carte généralisée (`props` : hameaux, moulins, fumées grossis avec
+## les maquettes) ; `fallback` (valeur 1:1 de `MapPropScale`) en style `real` ou si la clé manque.
+static func prop(key: String, fallback: float) -> float:
+	if not enabled():
+		return fallback
+	return float((document().get("props", {}) as Dictionary).get(key, fallback))
+
+
 static func landmark_scale() -> float:
 	return float(document().get("landmark_scale", 1.0))
 
@@ -165,22 +184,21 @@ static func yaw_of(id: String) -> float:
 
 
 ## Nom de modèle (sans dossier ni extension) pour un type, une famille et une variante :
-## `<type>_<famille>_<variante>`, `<type>_<variante>` pour la famille par défaut. Sans test de
-## présence (voir `model_name`).
+## `<type>_<famille>_<variante>`. Sans test de présence (voir `model_name`).
 static func model_name_raw(kind: String, family: String, variant: String) -> String:
-	if family == default_family() or family == "":
-		return "%s_%s" % [kind, variant]
-	return "%s_%s_%s" % [kind, family, variant]
+	return "%s_%s_%s" % [kind, family if family != "" else default_family(), variant]
 
 
 ## Nom du modèle à charger : celui de la famille s'il est importé, sinon celui de la famille par
-## défaut (repli silencieux : les kits de l'Est et du Sud arrivent par un autre lot).
+## défaut, sinon l'ancien kit occidental `<type>_<variante>` (lot C6).
 static func model_name(kind: String, family: String, variant: String) -> String:
 	var key := "%s|%s|%s" % [kind, family, variant]
 	if not _model_names.has(key):
 		var name := model_name_raw(kind, family, variant)
 		if not ResourceLoader.exists(MODELS_DIR + name + ".glb"):
 			name = model_name_raw(kind, default_family(), variant)
+		if not ResourceLoader.exists(MODELS_DIR + name + ".glb"):
+			name = "%s_%s" % [kind, variant]
 		_model_names[key] = name
 	return _model_names[key]
 

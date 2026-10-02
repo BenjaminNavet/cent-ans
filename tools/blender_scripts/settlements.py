@@ -13,8 +13,13 @@ Five settlement kinds, two variants each, plus three hamlet house groups (semi-r
 * ``village_a`` / ``village_b``: open village of cottages and barns around a parish church;
 * ``hamlet_a`` / ``hamlet_b`` / ``hamlet_c``: 2 to 5 farm buildings (instanced by Godot).
 
-Each model is one joined mesh (< 5 000 triangles) whose ``Banner`` material is tinted by Godot
-with the controller's colour. Buildings extend below ``z = 0`` so that they sit on slopes.
+Lot GC3 (ADR 0158) adds the flat-coloured maquette families, named ``<kind>_<family>_<a|b>``:
+``med``, ``byz``, ``rus``, ``isl``, ``steppe`` (``settlements_east.py``) and ``west``
+(``settlements_west.py``, the light counterpart of the models above, which stay in use in
+battles). Their ground footprint is centred on the origin.
+
+Each model is one joined mesh (< 5 000 triangles, cities of the maquette families < 12 000)
+whose ``Banner`` material is tinted by Godot with the controller's colour. Buildings extend below ``z = 0`` so that they sit on slopes.
 A line ``MODEL <name> <triangles>`` is printed per model and ``OK`` at the end.
 """
 
@@ -27,6 +32,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import bpy  # noqa: E402
 import models as m  # noqa: E402
+import settlements_east  # noqa: E402
+import settlements_west  # noqa: E402, F401  (registers the ``west`` family)
 
 m.PALETTE.setdefault("Garden", ((0.12, 0.16, 0.05), 0.95, 0.0))
 m.PALETTE.setdefault("Field", ((0.26, 0.22, 0.10), 1.0, 0.0))
@@ -461,6 +468,7 @@ MODELS = {
     "hamlet_a": lambda: build_hamlet(11, 3),
     "hamlet_b": lambda: build_hamlet(23, 4),
     "hamlet_c": lambda: build_hamlet(37, 5),
+    **settlements_east.MODELS,
 }
 
 
@@ -468,6 +476,8 @@ def export_model(name: str, out_dir: Path) -> int:
     """Build one model, join it into a single mesh, export ``<name>.glb``; return triangles."""
     m.reset_scene()
     parts = MODELS[name]()
+    if name in settlements_east.MODELS and len(parts) != len(bpy.context.scene.objects):
+        raise RuntimeError(f"{name}: parts left out of the joined mesh")
     if m.KIT:
         import kit_campaign
 
@@ -480,14 +490,17 @@ def export_model(name: str, out_dir: Path) -> int:
     bpy.ops.object.join()
     obj = bpy.context.active_object
     obj.name = name
+    if name in settlements_east.MODELS:
+        settlements_east.centre_footprint(obj)
     if m.KIT:
         import kit_campaign
 
         kit_campaign.atlas(obj)
     bpy.ops.object.shade_flat()
     triangles = m.triangle_count(obj)
-    if triangles >= MAX_TRIANGLES:
-        raise RuntimeError(f"{name}: {triangles} triangles >= {MAX_TRIANGLES}")
+    budget = settlements_east.triangle_budget(name, MAX_TRIANGLES)
+    if triangles >= budget:
+        raise RuntimeError(f"{name}: {triangles} triangles >= {budget}")
     out_dir.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(
         filepath=str(out_dir / f"{name}.glb"),

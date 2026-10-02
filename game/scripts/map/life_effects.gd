@@ -184,11 +184,11 @@ func rebuild(province_states: Dictionary) -> void:
 			if devastation >= FIRE_MIN_DEVASTATION and hseed % 3 == 0:
 				_fire_points.append(_fixed_point(hpx, 0.1, float(hseed % 1000) / 1000.0))
 		elif hseed % 2 == 0:
-			_chimney_points.append(_fixed_point(hpx, HAMLET_CHIMNEY_LIFT * MapPropScale.shared().hamlet_scale(0.0), float(hseed % 1000) / 1000.0))
+			_chimney_points.append(_fixed_point(hpx, HAMLET_CHIMNEY_LIFT * TownMaquetteData.prop("hamlet_ratio", MapPropScale.shared().hamlet_scale(0.0)), float(hseed % 1000) / 1000.0))
 	# FK4 : fumées de bûcher (peste) et d'émeute (révolte) des scènes de province.
 	for k in scene_fires.size():
 		_fire_points.append(_fixed_point(scene_fires[k], 0.1, float(k % 7) / 7.0))
-	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE * MapPropScale.shared().chimney_scale(), 0.0)
+	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE * TownMaquetteData.prop("chimney_ratio", MapPropScale.shared().chimney_scale()), 0.0)
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
 	_build_windmills(province_states)
 	_apply_ruins(province_states)
@@ -396,7 +396,8 @@ func _end_pass() -> void:
 func _windmill_transforms(point: Array) -> Array:
 	var px: Vector2 = point[0]
 	var y: float = point[4]
-	var mill_scale := MapPropScale.shared().windmill_scale()  # VT2 : 1:1 à toute distance
+	# VT2 : 1:1 à toute distance ; GC (ADR 0158) : grossi avec les maquettes.
+	var mill_scale := TownMaquetteData.prop("windmill_ratio", MapPropScale.shared().windmill_scale())
 	var basis := Basis(Vector3.UP, float(point[1])).scaled(Vector3.ONE * WINDMILL_SCALE * mill_scale)
 	var body := Transform3D(basis, Vector3(px.x, y - 0.05 * mill_scale, px.y))
 	return [body, Transform3D(basis, body * WINDMILL_HUB)]
@@ -735,14 +736,17 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	# DV : part de la vue normale hors détail proche (feux seuls au-delà de `near_threshold`).
 	var medium := clampf(1.0 - tiers.strategic_weight(camera_distance) - near_weight, 0.0, 1.0) if tiers != null else 0.0
 	var props := MapPropScale.shared()
-	var chimney_alpha := near_weight * _season_boost * 0.85 * props.chimney_alpha(camera_distance)
+	var chimney_range := TownMaquetteData.prop("chimney_range", -1.0)  # GC : portée des fumées grossies
+	var chimney_real := props.chimney_alpha(camera_distance) if chimney_range < 0.0 else props.chimney_real_alpha * props.range_weight(camera_distance, chimney_range)
+	var chimney_alpha := near_weight * _season_boost * 0.85 * chimney_real
 	_chimneys.visible = chimney_alpha > 0.02
 	_chimney_material.set_shader_parameter("fade", chimney_alpha)
 	var fire_alpha := clampf(near_weight + medium * 0.8, 0.0, 1.0) * 0.9
 	_fires.visible = fire_alpha > 0.02
 	_fire_material.set_shader_parameter("fade", fire_alpha)
 	# VT2 : moulins 1:1, dessinés en deçà de leur portée (sous-pixel au-delà).
-	var show_models := near_weight > 0.35 and props.windmills_visible(camera_distance)
+	var mill_range := TownMaquetteData.prop("windmill_range", -1.0)  # GC : portée des moulins grossis
+	var show_models := near_weight > 0.35 and (props.windmills_visible(camera_distance) if mill_range < 0.0 else camera_distance < mill_range)
 	_windmill_bodies.visible = show_models
 	_windmill_sails.visible = show_models
 	_apply_prop_scale(camera_distance)

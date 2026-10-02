@@ -15,6 +15,10 @@ var _failures := 0
 
 func _init() -> void:
 	await process_frame
+	# GC2 (ADR 0158) : ce test porte sur les accessoires et les villes à l'échelle 1:1 (masse de
+	# toits de `TownLayer`) : style `real`, le style `maquette` par défaut a son test
+	# (`gc_maquettes_test.gd`).
+	TownMaquetteData.set_style(TownMaquetteData.STYLE_REAL)
 	_test_curve()
 	await _test_map()
 	if _failures > 0:
