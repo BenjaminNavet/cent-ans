@@ -52,6 +52,11 @@ FA n'y touche pas.
       (cartoon), navire OGA-BY, eau Keith333 (CC BY, non carrée). Lacunes confirmées : pas de
       cogue ni de feuillus 3D CC0 téléchargeables sans compte (piste : Polyy.AI sur itch.io,
       Quaternius Ships, à récupérer par navigateur).
+- [ ] FA7 — Herbe des batailles : agent visuel dans `../gp-fa-grass` (`feat/fa-grass`), note
+      `docs/wip/fa7-herbe.md`. Constat sur capture rapprochée (`--closeup --terrain=forest`) :
+      touffes identiques, raides, sombres, espacées (« plants d'aloès ») = défaut le plus net des
+      batailles. Vrais brins ambientCG Foliage001-008 (CC0), atlas de plusieurs touffes,
+      `--no-fa-grass` pour l'A/B.
 - [ ] FA4 — ADR, captures avant/après, fusion `--ff-only`.
 
 ## Sources retenues (licence vérifiée)
@@ -73,3 +78,5 @@ et les agents visuels du chantier. Rester à ≤ 1280 px de large et assembler a
   agents FA + 4 agents TB = 8 sur 10). pytest sur `feat/fa` : 1476 OK, 4 échecs hors FA
   (`test_water_detail`, `test_entity_icons` aussi sur main ; `test_ink_icons`,
   `test_relief_update` propres au worktree).
+- 10-02 : FA1 vérifié en bataille (forêt, vue rapprochée et déploiement, avec et sans
+  `--no-fa`) : lisières identiques de loin, aucune régression. FA7 lancé (5 agents FA + 4 TB).
