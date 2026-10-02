@@ -5,17 +5,26 @@ Worktree `../gp-hc1`, branche `feat/hc1` (issue de `feat/hc`). ADR 0161. Aucun c
 ## État
 - [x] Squelette : `map.tree_style` (JSON + schéma), `MapPropScale.tree_style()` /
       `--tree-style=`, champs `generalised_*` du `.tres`, test, cette note.
-- [x] Rendu généralisé dans `vegetation.gd` (écrit, à valider par les tests) : échelle
-      `campaign_prop_scale` = `generalised_tree_height / generalised_reference_height`, pas
-      `generalised_spacing`, portée `generalised_max_distance`, disque de dessin centré en avant
-      du point visé, paliers et ombres par distance à la caméra, forêt dense et cartes éteintes.
+- [x] Rendu généralisé dans `vegetation.gd` : échelle `campaign_prop_scale` =
+      `generalised_tree_height / generalised_reference_height`, pas `generalised_spacing`, portée
+      `generalised_max_distance`, disque de dessin centré en avant du point visé, paliers et ombres
+      par distance à la caméra, forêt dense et cartes proches éteintes.
 - [x] Dégagements `tree_clearance.gd` : houppiers hors fleuves, lacs, mer, routes principales
-      (filtre des tampons après le semis natif, en tâche de fond).
-- [x] Test `game/tests/hc_forest_test.gd`, planche `game/tests/hc_shots.gd` (écrits).
-- [ ] Faire passer import, test, smoke, gc_maquettes_test.
-- [ ] Planches (3 lectures au plus) et réglage des gains hors forêt.
-- [ ] Mesures Paris rig 90 / 300 / 700 (`hc_shots.gd --bench`).
-- [ ] Tests existants qui supposent le style 1:1 par défaut (vt3, sz4b, settlements_render…).
+      (filtre des tampons après le semis natif, en tâche de fond), houppiers élargis.
+- [x] `hc_forest_test.gd` OK, `gc_maquettes_test.gd` OK ; planche `hc_shots.gd` (2 lues sur 3) ;
+      sonde `hc_density_probe.gd` (densités par milieu sans image).
+- [x] Tests 1:1 existants épinglés sur le style `real` (vt3, sz4b, settlements_render, fc2,
+      ga3_l2, sz6) : à relancer.
+- [ ] smoke, mesures Paris rig 90 / 300 / 700 (`hc_shots.gd --bench`, machine chargée le 02/10 :
+      charge moyenne 40-136, mesures bruitées), dernière planche.
+
+## Réglages (map_prop_scale.tres)
+Hauteur 0,8 (échelle 0,571 ; hauteurs monde p10 0,44 / médiane 0,86 / p90 1,12), pas 0,9 px,
+houppiers × 1,25, variation ± 25 %, portée 900 (fondu sur le dernier quart), rayon de dessin
+120 + 1,6 × d (plafond 900) centré 0,5 d en avant du point visé, ombres sous d = 70, part gardée
+150 / d bornée à 0,35 (arbres grossis de 1/√part au-delà de d = 150), gains hors forêt : isolés
+× 8, vergers × 1,3, ripisylves × 1,3, bosquets (seuils 0,2 / 0,36, cœur 0,45), bocage × 6.
+Sonde à Paris (rayon 120 px) : 0,98 arbre/px² en forêt, ≈ 0,14 hors forêt.
 
 ## Choix
 - **Haies** (consigne GC, 02/10) : en style généralisé, pas de buissons alignés sur la trame du
@@ -33,7 +42,12 @@ Worktree `../gp-hc1`, branche `feat/hc1` (issue de `feat/hc`). ADR 0161. Aucun c
   hors forêt sont multipliées par les gains `generalised_*_gain` du `.tres`.
 
 ## Prochaine étape
-Attendre l'import, lancer `hc_forest_test.gd`, corriger, puis première planche.
+Smoke, banc, dernière planche, rapport.
 
 ## Points ouverts
-- Éclaircissement au dézoom (`generalised_far_density`) : à décider après mesure.
+- Éclaircissement au dézoom : au-delà de d = 150 la taille n'est plus strictement constante
+  (× 1,41 à 300, × 1,69 à partir de 430) ; `generalised_far_density = 1` la rend constante, au
+  prix du nombre d'instances.
+- Grille grossière des masques (`VegetationTileJob._sample_coarse`, GDScript) : 300-600 ms par
+  tuile en tâche de fond ; une vue à d = 300 sème 25 tuiles (3-4 s pour remplir après un saut).
+- Préréglages de qualité : `veg_max_distance` (500-1100) plafonne la portée généralisée.
