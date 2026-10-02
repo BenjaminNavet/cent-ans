@@ -8,8 +8,8 @@ Branche `feat/fa`, worktree `../gp-fa`. Brutes hors dépôt : `~/dev/cent-ans-ra
 Périmètre : batailles et effets. La carte de campagne appartient à la session TB (`feat/tb`) :
 FA n'y touche pas.
 
-## Consigne de reprise
-> Lis ce fichier et `git log --oneline -10`, puis continue au premier lot non coché.
+## État
+**Terminé et fusionné dans `main` le 2026-10-02.** Décision : ADR 0164. Voir « Restes ».
 
 ## État des lieux (ce qui reste procédural et qu'un asset libre bat)
 - Arbres de bataille : rameaux `leaf_spray.png` dessinés (ovales), identiques pour toutes les
@@ -53,30 +53,39 @@ FA n'y touche pas.
       effet des planches). **Défaut restant** : fumée brun-rouge près des foyers (lueur et
       lumières ponctuelles du shader, antérieur à FA2) ; jeune fumée encore très sombre et dense
       juste au-dessus des flammes.
-- [ ] FA3 — Animations : agent dans `../gp-fa-anim` (`feat/fa-anim`), reciblage Mesh2Motion +
-      KayKit (CC0) sur le rig fin, drapeau `--fa-anim`, note `docs/wip/fa3-anim.md`. Brutes
-      `~/dev/cent-ans-raw/fa/anim/`. La session principale juge les planches Blender puis décide
-      des clips par défaut.
-- [ ] FA5 — Interface : agent visuel dans `../gp-fa-ui` (`feat/fa-ui`), note
-      `docs/wip/fa5-ui.md`. Lettrines et bordures réelles (Cleveland Museum of Art, CC0), sceaux
-      de cire (Met Open Access), matières ambientCG / Poly Haven. Brutes
-      `~/dev/cent-ans-raw/fa/ui/`. Pas de vrai parchemin tuilable CC0 trouvé.
-- [ ] FA6 — Campagne, vue parchemin seulement (TB refond la carte 3D : TB3 villes, TB4 traces,
-      TB5 mer et côtes, TB6 lumière) : agent visuel dans `../gp-fa-map` (`feat/fa-map`), note
-      `docs/wip/fa6-parchemin.md`. Rose des vents, navires, monstres marins réels (Atlas catalan
-      1375, Dürer ; domaine public) à la place des ornements dessinés de CM2. Brutes
-      `~/dev/cent-ans-raw/fa/campaign/`.
-      Non retenus pour l'instant : rochers photogrammétrés Poly Haven (rock_07/09,
-      rock_face_01, mountainside ; à proposer à TB pour `rock_outcrops.yaml`), kits Kenney
-      (cartoon), navire OGA-BY, eau Keith333 (CC BY, non carrée). Lacunes confirmées : pas de
-      cogue ni de feuillus 3D CC0 téléchargeables sans compte (piste : Polyy.AI sur itch.io,
-      Quaternius Ships, à récupérer par navigateur).
-- [ ] FA7 — Herbe des batailles : agent visuel dans `../gp-fa-grass` (`feat/fa-grass`), note
-      `docs/wip/fa7-herbe.md`. Constat sur capture rapprochée (`--closeup --terrain=forest`) :
-      touffes identiques, raides, sombres, espacées (« plants d'aloès ») = défaut le plus net des
-      batailles. Vrais brins ambientCG Foliage001-008 (CC0), atlas de plusieurs touffes,
-      `--no-fa-grass` pour l'A/B.
-- [ ] FA4 — ADR, captures avant/après, fusion `--ff-only`.
+- [x] FA3 — Animations : reciblage Mesh2Motion + KayKit (CC0) sur le rig fin
+      (`tools/blender_scripts/fa3_anim_retarget.py`, `data/fx/fa3_anim_sources.json`). Jugé sur
+      planche Blender et en mêlée : `parry`, `death`, `death_back` par défaut (champ `default`) ;
+      les dix autres clips, équivalents ou moins bons que les clips maison, derrière `--fa-anim`
+      (`--no-fa-anim` = aucun). Note `docs/wip/fa3-anim.md`.
+- [x] FA5 — Interface : sceaux de cire (Met Open Access 466080, 466082) et boutons cuir et laiton
+      de l'accueil (ambientCG Leather030, Metal007), `game/scripts/ui/fa_ui.gd`,
+      `data/ui/fa_ui_assets.json`. Lettrine et rinceau réels (Cleveland) écartés : flous à 50 px,
+      moins bons que les dessinés. Note `docs/wip/fa5-ui.md`.
+- [x] FA6 — Campagne, vue parchemin seulement : rose des vents et sirènes de l'Atlas catalan de
+      1375 (`data/map/parchment_ornaments.json`, `use` par genre). Navires : restent dessinés (le
+      navire de l'Atlas et la nef de Ferrer sont illisibles à l'échelle de la carte).
+      `--no-fa-parchment` pour l'A/B. Note `docs/wip/fa6-parchemin.md`.
+- [x] FA7 — Herbe des batailles : atlas de douze touffes de vrais brins (ambientCG Foliage, CC0),
+      `data/art/battle_grass.json`, `--no-fa-grass` pour l'A/B. Gain le plus net du chantier,
+      5 à 9 % moins cher à l'image. Note `docs/wip/fa7-herbe.md`.
+- [x] FA4 — ADR 0164, captures avant/après (`~/dev/cent-ans-raw/fa/*-shots/`), fusion `--ff-only`
+      dans `main`.
+
+## Restes
+- FA2 : feu naval et fumée de camp en campagne non vérifiés à l'image ; fumée brun-rouge près
+  des foyers (antérieur à FA2).
+- FA5 : sceau du traité signé non vu sur capture ; débordement du panneau des techniques en
+  1280×720 (antérieur à FA).
+- FA7 : semis moins lisibles de loin, plaques de sous-bois en forêt, fleurs presque invisibles,
+  sang sur l'herbe non jugé, blé un peu uniforme.
+- Rochers photogrammétrés Poly Haven (rock_07/09, rock_face_01, mountainside) : à proposer aux
+  sessions de la carte 3D (TB, HC) pour `rock_outcrops.yaml`.
+- Lacunes sans source libre téléchargeable sans compte : cogue médiévale, feuillus européens 3D
+  (pistes itch.io par navigateur : Polyy.AI, Quaternius Ships), parchemin et nuages tuilables.
+- Tests en échec avant FA et sans rapport : pytest `test_entity_icons`, `test_ink_icons`,
+  `test_relief_update`, `test_water_detail` ; Godot `nv2_naval_test`, `po_ui_test` C3,
+  `q6_ui_test`, `fe_ui_test`.
 
 ## Sources retenues (licence vérifiée)
 - ambientCG (Lennart Demes), CC0 1.0 : `https://ambientcg.com/get?file=<id>_2K-JPG.zip`.
@@ -118,3 +127,9 @@ et les agents visuels du chantier. Rester à ≤ 1280 px de large et assembler a
   `fa7_grass_test`, `s2_fire_fx_test`, `fa3_anim_test` et pytest complet sur `feat/fa` (la
   passe Godot post-fusion a été interrompue, non faite) ; 3) revérifier le numéro d'ADR, fusion
   de `main` dans un worktree puis `--ff-only` ; 4) supprimer les worktrees `gp-fa*`.
+- 10-02 : reprise. FA3 jugé (parade et deux morts par défaut) et fusionné ; `main` fusionné dans
+  `feat/fa` sans conflit ; passe de tests verte (smoke, `cm2_parchment_weather_test`,
+  `dv_two_views_test`, `dv_markers_test`, `fa5_ui_test`, `fa7_grass_test`, `s2_fire_fx_test`,
+  `fa3_anim_test`, `nt14_melee_test`, `ui1_lettrine_test`, `vn_ui_720_test`, `bv3_check`,
+  `zg8_relief_test`, 37 tests pytest FA) ; fusion `--ff-only` dans `main`, worktrees `gp-fa*`
+  supprimés.
