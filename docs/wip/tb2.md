@@ -17,7 +17,8 @@ Rendu/UI Godot seulement, `core/` intact.
 - [x] 3. Pictogrammes (ADR 0151) : écu seul signe d'une ville, réservé aux lieux de rang 3-4 au-delà
       de 330 (rang 1 : 220) ; marteaux, sceaux d'incident et sites de rencontre réservés au calque
       « Signes » du menu des filtres, à certains modes de carte et aux cas pressants. Mesure à Paris,
-      écran 1280×720 : écus 25 / 20 / 38 aux distances 1100 / 400 / 90 (45 à 400 avant), 0 autre signe.
+      écran 1280×720, après la règle de bord du point 4 : écus 20 / 10 / 22 aux distances 1100 / 400 / 90
+      (24 / 45 / 39 avant TB2), 0 autre signe.
 - [x] 4. Étiquettes : capitales (rang 4) en petites capitales EB Garamond (`smcp`), grandes cités en
       romain gras, autres en romain ≤ 600 ; un nom ou un écu qui sortirait de l'écran (marge 16 px,
       bandeau du haut exclu) n'est pas affiché ; noms de région en vue moyenne
@@ -27,7 +28,7 @@ Rendu/UI Godot seulement, `core/` intact.
 - [x] 5. Nuées et brumes (bloc `clouds`) : plan de nuées déjà limité à la météo du cœur ; ombres de
       nuages du terrain (`cloud_shadow_amount`) désormais nulles par temps clair, 0,12 sous pluie,
       neige ou orage au point visé ; opacité des nuées 0 / 0,11 / 0,45 aux distances 90 / 400 / 1100
-      (0,29 à 400 avant) ; province sélectionnée dégagée (`weather_clear_id` : nuées, ombres de
+      (0,25 à 400 avant) ; province sélectionnée dégagée (`weather_clear_id` : nuées, ombres de
       nuées, nappe de brume ; sol mouillé et neige fraîche restent).
 
 ## Prochaine étape
@@ -37,5 +38,16 @@ lisent pas d'image) : `godot --path game --resolution 1600x900 --script res://te
 --distances=300` ; nuées : ajouter `--map-weather=rain`. Vérification : `game/tests/tb2_declutter_test.gd`.
 
 ## Points ouverts
-- `da7d_overlap_test.gd` échoue sur son seuil de temps (4 ms) quand la machine est chargée : 5,4 ms avant TB2, 4,4 ms après, charge moyenne > 10. À relancer machine calme.
+- `da7d_overlap_test.gd` : seuil de temps (4 ms) dépassé quand la machine est chargée (5,4 ms avant TB2, 4,4 ms après, charge moyenne > 10) ; passe machine plus calme (vérification finale).
 - `fe_ui_test.gd` échoue sur « map picker framed on the playable lands » (sélecteur de faction, sans rapport avec TB2).
+- `ss_shot.gd` masque tous les `CanvasLayer` : les noms de région (calque 2D) n'y figurent pas ; pour
+  les juger, capture du jeu lancé (`--screenshot`) ou script de capture qui garde le calque `Parchment`.
+- Sceaux d'incident à plusieurs tours d'échéance invisibles sans le calque « Signes » (ADR 0151) : à
+  juger en partie pilote ; repli par données (`signs.incident.modes`, `keep_urgent`).
+- Frontières à pleine intensité conservées en vue parchemin (`rest.parchment_focus` = 1) ; mettre 0
+  pour le style au repos partout.
+- Hors périmètre laissé tel quel : `path_color` / `reachable_color` de `terrain.gdshader` (masque
+  d'atteignabilité, seul le bloc du brouillard pouvait changer) ; brouillard de la minicarte.
+- `uv run --project tools pytest tools/tests` : 1465 réussis, 4 échecs sans rapport avec TB2
+  (`test_entity_icons` × 2 et `test_ink_icons` : images sources absentes du worktree ;
+  `test_water_detail::test_repo_ledger_ends_with_rc_section` : la section TB du budget suit la section RC).
