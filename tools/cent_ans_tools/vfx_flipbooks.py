@@ -87,7 +87,7 @@ def flame_sheet_frames(frames: list[np.ndarray], settings: dict) -> list[np.ndar
     lit = np.concatenate(
         [lum[frame[..., 3] > 0.1] for lum, frame in zip(luminance, frames, strict=True)]
     )
-    white = float(np.percentile(lit, 99.0))
+    white = float(np.percentile(lit, float(settings["white_percentile"])))
     fade = int(settings["base_fade_px"])
     out = []
     for lum, frame in zip(luminance, frames, strict=True):
@@ -96,7 +96,9 @@ def flame_sheet_frames(frames: list[np.ndarray], settings: dict) -> list[np.ndar
         if fade > 0:
             alpha[-fade:] *= np.linspace(1.0, 0.0, fade, dtype=np.float32)[:, None]
         tall = np.stack([heat, heat, heat, alpha], axis=-1)
-        width = round(size * frame.shape[1] / frame.shape[0])
+        width = round(
+            size * frame.shape[1] / frame.shape[0] * float(settings["width_scale"])
+        )
         tall = _resized(tall, width, size)
         square = np.zeros((size, size, 4), dtype=np.float32)
         left = (size - width) // 2

@@ -3,20 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bijqao5gfwcq4"
-path="res://.godot/imported/flame_flipbook.png-067baaeb63d47757d13726469513af26.ctex"
+path.bptc="res://.godot/imported/flame_flipbook.png-067baaeb63d47757d13726469513af26.bptc.ctex"
+path.astc="res://.godot/imported/flame_flipbook.png-067baaeb63d47757d13726469513af26.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/fx/flame_flipbook.png"
-dest_files=["res://.godot/imported/flame_flipbook.png-067baaeb63d47757d13726469513af26.ctex"]
+dest_files=["res://.godot/imported/flame_flipbook.png-067baaeb63d47757d13726469513af26.bptc.ctex", "res://.godot/imported/flame_flipbook.png-067baaeb63d47757d13726469513af26.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

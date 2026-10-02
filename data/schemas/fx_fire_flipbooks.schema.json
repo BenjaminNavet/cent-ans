@@ -12,7 +12,7 @@
     "source_url": {"type": "string", "pattern": "^https://.*\\{name\\}", "description": "Adresse du zip d'une séquence, `{name}` = nom de la séquence."},
     "flame": {
       "type": "object",
-      "required": ["name", "columns", "rows", "frame_px", "heat_gamma", "base_fade_px"],
+      "required": ["name", "columns", "rows", "frame_px", "heat_gamma", "white_percentile", "width_scale", "base_fade_px"],
       "additionalProperties": false,
       "properties": {
         "name": {"$ref": "#/$defs/name"},
@@ -20,6 +20,8 @@
         "rows": {"$ref": "#/$defs/count"},
         "frame_px": {"$ref": "#/$defs/frame_px"},
         "heat_gamma": {"type": "number", "exclusiveMinimum": 0, "maximum": 4, "description": "Exposant de la chaleur tirée de la luminance (> 1 : cœur plus resserré)."},
+        "white_percentile": {"type": "number", "minimum": 50, "maximum": 100, "description": "Centile de luminance de la séquence pris pour chaleur 1 (cœur blanc)."},
+        "width_scale": {"type": "number", "minimum": 0.5, "maximum": 2, "description": "Élargissement de la flamme (la séquence source est deux fois plus haute que large ; 2 = toute la largeur de l'image)."},
         "base_fade_px": {"type": "integer", "minimum": 0, "description": "Fondu du pied de la flamme vers le bord bas de l'image (px source)."}
       }
     },

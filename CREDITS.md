@@ -207,6 +207,15 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   brindilles dessinées par `game/assets/textures/battle/build_fa_leaf_sprays.py` (catalogue
   `data/art/battle_tree_leaves.json`) : `leaf_spray_<essence>.png`, `dead_leaves_oak.png`.
 
+### Flammes et fumée — CC0 1.0 (FA2)
+
+- **Unity Labs Paris** — « Free VFX image sequences & flipbooks »
+  ([billet](https://blog.unity.com/technology/free-vfx-image-sequences-flipbooks) : « we release
+  some of these sequences under CC0 license ») : séquences simulées Flame02 et Cloud02, recodées
+  (chaleur / couverture ; densité / éclairage) par `tools/cent_ans_tools/vfx_flipbooks.py`
+  (réglages `data/fx/fire_flipbooks.json`) en `game/assets/textures/fx/flame_flipbook.png` et
+  `smoke_flipbook.png`.
+
 ### Détail proche du sol de bataille — CC0 1.0
 
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Grass Path 2 (Rob Tuytel), 2k,

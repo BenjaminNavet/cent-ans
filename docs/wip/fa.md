@@ -22,25 +22,39 @@ FA n'y touche pas.
   polices, sons (voir `CREDITS.md`). Audit de départ : `docs/audit/a4-assets-libres.md`.
 
 ## Lots
-- [ ] FA1 — Feuillages des arbres de bataille : vraies feuilles photographiées (ambientCG
-      LeafSet, CC0), un rameau par essence. Données `data/art/battle_tree_leaves.json`, script
-      `game/assets/textures/battle/build_fa_leaf_sprays.py`, `BattleTrees`.
-- [ ] FA2 — Feu et fumée : séquences Unity Labs « VFX image sequences & flipbooks » (CC0) à la
-      place des planches synthétiques. Brutes : scratchpad de session puis
-      `~/dev/cent-ans-raw/fa/vfx/`.
-- [ ] FA3 — Animations : sources redistribuables (recherche en cours : KayKit, Mesh2Motion,
-      Quaternius UAL par navigateur), puis reciblage sur le rig fin (chaîne NT12).
-- [ ] FA4 — Crédits, ADR, captures avant/après, fusion `--ff-only`.
+- [x] FA1 — Feuillages des arbres de bataille : vraies feuilles photographiées (ambientCG
+      LeafSet, CC0), un rameau par essence (`leaf_spray_<essence>.png`, 1024², mipmaps, BC7),
+      `dead_leaves_oak.png`. Données `data/art/battle_tree_leaves.json`, script
+      `game/assets/textures/battle/build_fa_leaf_sprays.py`, `BattleTrees.leaf_texture`,
+      `--no-fa` pour l'A/B. Jugé sur captures : gain net de près (feuilles lisibles, houppiers
+      plus fournis), neutre de loin. Piège : compression S3TC = reflets vert fluo sur les
+      imposteurs → compression haute qualité.
+- [ ] FA2 — Feu et fumée : `tools/cent_ans_tools/vfx_flipbooks.py` recode Flame02 et Cloud02
+      (Unity Labs, CC0) au format des planches du lot V3 (aucun shader modifié), réglages
+      `data/fx/fire_flipbooks.json`. Planches cuites et commitées, tests pytest verts.
+      **Reste** : jugement en jeu. `s2_fire_shot.gd` ne cadre plus de ville en feu (mise en
+      scène obsolète) → agent visuel dédié, worktree `../gp-fa-fx`, branche `feat/fa-fx`.
+- [ ] FA3 — Animations : agent dans `../gp-fa-anim` (`feat/fa-anim`), reciblage Mesh2Motion +
+      KayKit (CC0) sur le rig fin, drapeau `--fa-anim`, note `docs/wip/fa3-anim.md`. Brutes
+      `~/dev/cent-ans-raw/fa/anim/`. La session principale juge les planches Blender puis décide
+      des clips par défaut.
+- [ ] FA5 — Interface : recherche en cours (brutes `~/dev/cent-ans-raw/fa/ui/`).
+- [ ] FA6 — Campagne : recherche en cours (brutes `~/dev/cent-ans-raw/fa/campaign/`) ;
+      intégration sans toucher aux fichiers que TB modifie (`git diff --stat main...feat/tb`).
+- [ ] FA4 — ADR, captures avant/après, fusion `--ff-only`.
 
 ## Sources retenues (licence vérifiée)
 - ambientCG (Lennart Demes), CC0 1.0 : `https://ambientcg.com/get?file=<id>_2K-JPG.zip`.
 - Unity Labs Paris, flipbooks VFX, CC0 (billet
   `https://blog.unity.com/technology/free-vfx-image-sequences-flipbooks`, pas de fichier de
   licence dans les zips) : `https://unity3d.com/files/labs/downloads/vfx/assets01/<Nom>/<Nom>-flipbooks.zip`.
+- Mesh2Motion (CC0, dépôt officiel GitHub) et KayKit Character Animations 1.1 (Kay Lousberg,
+  CC0 ; récupéré d'un miroir GitHub tiers, licence citée depuis kaylousberg.com).
 - Kenney Particle Pack / Smoke Particles, CC0 (sprites stylisés : secours seulement).
 
 ## Captures lues (budget 6)
-1 / 6 (planche avant : essences + deux vues de bataille).
+6 / 6 — budget atteint (planche avant, essences été/hiver, A/B d'essences ×3, incendie raté).
+Toute nouvelle vérification visuelle passe par un agent visuel dédié.
 
 ## Journal
 - 10-02 : worktree, état des lieux, recherche effets terminée, recherche animations lancée.

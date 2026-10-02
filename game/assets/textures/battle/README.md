@@ -71,7 +71,7 @@ dépôt ; `uv run --with pillow --with numpy --with scipy python build_fa_leaf_s
 - `leaf_spray_<essence>.png` (1024², mipmaps, compression haute qualité) : rameau feuillu par
   essence de `BattleTrees` ; `leaf_spray.png` ne sert plus que de repli (`--no-fa` après `--`) ;
 - `dead_leaves_oak.png` : feuilles de chêne sèches sur `twig_spray.png` (remplace
-  `dead_leaves.png`, gardé pour les autres usages).
+  `dead_leaves.png`, qui n'est plus chargé).
 
 Régénérer : télécharger, pour chaque couche du sol de `data/fx/battle_ground_layers.json`, les
 fichiers `<id>_diff_2k.jpg` et `<id>_nor_gl_1k.jpg`, et pour les textures uniques ci-dessus
