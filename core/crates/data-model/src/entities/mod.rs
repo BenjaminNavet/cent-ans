@@ -10,6 +10,7 @@ pub mod army_rules;
 pub mod army_traditions;
 pub mod auto_resolve;
 pub mod battle_ability;
+pub mod battle_history;
 pub mod battle_order;
 pub mod battle_outcome;
 pub mod battle_standards;

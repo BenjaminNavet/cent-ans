@@ -49,6 +49,10 @@
           "type": "number",
           "minimum": 0,
           "maximum": 200
+        },
+        "tree_style": {
+          "description": "HC1 (ADR 0161) : rendu des arbres de la carte de campagne. generalised : arbres à taille monde constante grossie, visibles jusqu'à la vue stratégique (réglages generalised_* de game/resources/map_prop_scale.tres) ; real : arbres 1:1 coupés au-delà de la distance de rig 30 (VT3). `--tree-style=real|generalised` le remplace.",
+          "enum": ["generalised", "real"]
         }
       }
     },

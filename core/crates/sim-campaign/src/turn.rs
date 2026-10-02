@@ -181,6 +181,8 @@ impl CampaignState {
         // 11. New season (step 4 of § 3.4): movement points are refilled,
         // then the player plays.
         self.advance_date();
+        // TB: battles too old leave the history.
+        crate::battle_history::on_new_turn(self, data);
         // CV3: forced marches end before the movement points are refilled.
         crate::posture::start_of_turn(self);
         let allowances: Vec<(crate::state::ArmyId, u32)> = self

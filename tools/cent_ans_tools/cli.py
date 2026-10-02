@@ -486,7 +486,7 @@ def geo_sea_lanes() -> None:
 @geo_app.command("lakes")
 def geo_lakes(
     min_area_px: int = typer.Option(
-        30, "--min-area-px", help="Surface minimale d'un lac (px carte)"
+        8, "--min-area-px", help="Surface minimale d'un lac (px carte)"
     ),
     simplify_px: float = typer.Option(
         0.6, "--simplify-px", help="Tolérance de simplification du contour (px)"

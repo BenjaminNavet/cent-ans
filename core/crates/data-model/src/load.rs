@@ -133,6 +133,8 @@ pub mod folders {
     pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
     /// Living map scenes and figurines (lot FK1), inside `rules/`; optional.
     pub const MAP_SCENE_RULES: &str = "map_scenes.json";
+    /// Bounds of the battle history (chantier TB), inside `rules/`; optional.
+    pub const BATTLE_HISTORY_RULES: &str = "battle_history.json";
     /// River crossing battles (chantier RC), inside `rules/`; optional.
     pub const RIVER_CROSSING_RULES: &str = "river_crossings.json";
     /// Trade hubs and routes (lot C5); optional folder.
@@ -389,6 +391,9 @@ pub struct GameData {
     /// `data/rules/map_scenes.json` (lot FK1, living map);
     /// [`crate::MapSceneRules::default`] when absent.
     pub map_scene_rules: crate::entities::map_scenes::MapSceneRules,
+    /// `data/rules/battle_history.json` (chantier TB, battle history bounds);
+    /// [`crate::BattleHistoryRules::default`] when absent.
+    pub battle_history_rules: crate::entities::battle_history::BattleHistoryRules,
     /// `data/rules/river_crossings.json` (chantier RC, ADR 0141); the
     /// bundled file when absent.
     pub river_crossing_rules: crate::entities::river_crossing::RiverCrossingRules,
@@ -499,6 +504,7 @@ impl GameData {
             army_tradition_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             map_scene_rules: Default::default(),
+            battle_history_rules: Default::default(),
             river_crossing_rules: Default::default(),
             crossings: Vec::new(),
             river_names: BTreeMap::new(),
@@ -668,6 +674,12 @@ impl GameData {
         let map_scenes_path = root.join(folders::RULES).join(folders::MAP_SCENE_RULES);
         if map_scenes_path.is_file() {
             data.map_scene_rules = read_json(&map_scenes_path)?;
+        }
+        let battle_history_path = root
+            .join(folders::RULES)
+            .join(folders::BATTLE_HISTORY_RULES);
+        if battle_history_path.is_file() {
+            data.battle_history_rules = read_json(&battle_history_path)?;
         }
         let crossing_rules_path = root
             .join(folders::RULES)

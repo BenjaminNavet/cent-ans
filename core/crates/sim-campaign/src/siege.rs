@@ -737,6 +737,22 @@ pub(crate) fn apply_assault_result(
         .settlements
         .get(settlement)
         .map_or(0, |s| s.garrison.iter().map(|u| u.strength).sum::<u32>());
+    // TB: the assault enters the battle history (place: the besiegers' camp).
+    if let Some(camp) = attackers.first().and_then(|id| state.armies.get(id)) {
+        let camp = state.army_point(data, camp);
+        crate::battle_history::record(
+            state,
+            data,
+            crate::battle_history::BattleKind::Assault,
+            &province,
+            camp,
+            (
+                (&faction, strength_before.values().sum()),
+                (&defender_faction, garrison_strength),
+            ),
+            result,
+        );
+    }
     for (id, outcome) in crate::movement::split_outcome(state, attackers, &result.attacker) {
         crate::movement::apply_outcome(state, data, &id, &outcome, events);
     }
@@ -866,6 +882,20 @@ fn sortie(
     );
     apply_garrison_losses(state, settlement, &result.attacker);
     let strength_before = crate::traditions::strengths(state, &targets);
+    // TB: the sortie enters the battle history (place: the besiegers' camp).
+    let camp = state.army_point(data, &state.armies[lead]);
+    crate::battle_history::record(
+        state,
+        data,
+        crate::battle_history::BattleKind::Sortie,
+        &province_of(state, settlement),
+        camp,
+        (
+            (&garrison.faction, garrison.total_strength()),
+            (&besieger_faction, strength_before.values().sum()),
+        ),
+        &result,
+    );
     for (id, outcome) in crate::movement::split_outcome(state, &targets, &result.defender) {
         crate::movement::apply_outcome(state, data, &id, &outcome, events);
     }

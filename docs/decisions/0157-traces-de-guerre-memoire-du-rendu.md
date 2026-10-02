@@ -61,3 +61,48 @@ points demandaient un arbitrage.
   `hb_debug=9`, voir `docs/wip/tb4.md`).
 - Portes marquées seulement dans une ville 1:1 ordinaire chargée (vue rapprochée) ; ni villes
   emblématiques ni villages sans plan.
+
+## Révision (2026-10-02, lot « historique des batailles ») : la mémoire passe au cœur
+
+Le point 1 de la décision et la première conséquence sont remplacés.
+
+**Décision.** Le cœur garde un historique borné des batailles terrestres récentes dans l'état de
+campagne (`sim_campaign::battle_history`, champ `CampaignState::battle_history`) : tour, province,
+position sur la carte, nature (`field`, `assault`, `sortie`), factions des deux camps, vainqueur,
+effectifs engagés, pertes. Il est alimenté là où une bataille se résout :
+`movement::apply_battle_result` (bataille rangée, auto-résolue ou jouée en 3D : position du
+défenseur au moment du combat), `siege::apply_assault_result` et la sortie de garnison (position
+du camp des assiégeants). Les batailles navales n'y entrent pas.
+
+- **Bornes dans les données** : `data/rules/battle_history.json` (schéma
+  `battle_history_rules`) : `max_age_turns` (une bataille du tour t est gardée tant que
+  `tour − t < max_age_turns`) et `max_records` (les plus anciennes partent d'abord). Purge à
+  chaque enregistrement et à chaque nouveau tour.
+- **Sauvegardes** : l'historique est sérialisé avec l'état, sans changer `STATE_VERSION`. La clé
+  est absente d'une sauvegarde plus ancienne (historique vide au chargement) et d'une partie sans
+  bataille récente (sa sauvegarde reste celle qu'écrivait l'ancienne version).
+- **Pont** : `CampaignSim.get_battle_history()` rend `[{turn, age, province, position, kind,
+  attacker, defender, winner, attacker_strength, defender_strength, attacker_losses,
+  defender_losses}]`, du plus ancien au plus récent.
+- **Rendu** : `WarScars.refresh` lit cet historique quand le pont l'expose ; l'âge d'une marque
+  est `get_turn() − turn`. Une marque par province, à l'endroit de sa dernière bataille ; une
+  bataille sans mort (bataille refusée) ne marque rien. La durée d'affichage reste
+  `battlefield.turns` (`data/ui/war_scars.json`), qui doit rester ≤ `max_age_turns` (vérifié par
+  pytest et par `tb4_scars_test`). Sans la méthode (pont plus ancien, simulation factice des
+  tests), l'ancienne déduction depuis les événements `battle` sert de repli.
+- Aucune règle de jeu ne lit l'historique : pas de changement d'équilibrage, pas de tirage
+  aléatoire ajouté.
+
+**Conséquences.**
+
+- Une partie rechargée retrouve ses champs de bataille, au même endroit et avec leur âge.
+- La marque est au point du combat (position du défenseur à la résolution), plus à la position de
+  l'armée lue en fin de tour ; une armée détruite ne fait plus retomber la marque sur le centre de
+  la province.
+- Les annonces (« Bataille en vue », « se prépare à donner l'assaut », renom, trophées) ne posent
+  plus de marque : seule une bataille résolue en pose une.
+- Une sauvegarde d'avant l'historique chargée dans cette version ne montre aucune marque tant
+  qu'une nouvelle bataille n'a pas eu lieu (les batailles de son dernier tour ne sont pas
+  redéduites des événements).
+- L'historique est disponible pour d'autres usages d'interface (liste des batailles récentes),
+  non réalisés ici.

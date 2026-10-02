@@ -773,6 +773,25 @@ pub(crate) fn apply_battle_result(
             general_lost: outcome.general_captured || outcome.general_killed,
         }
     };
+    // TB: the battle enters the history kept for the map's battlefield marks.
+    crate::battle_history::record(
+        state,
+        data,
+        crate::battle_history::BattleKind::Field,
+        &province_id,
+        battlefield,
+        (
+            (
+                &attacker_faction,
+                tally(attackers, &result.attacker).strength,
+            ),
+            (
+                &defender_faction,
+                tally(defenders, &result.defender).strength,
+            ),
+        ),
+        result,
+    );
     let place = crate::march::nearest_settlement(data, battlefield).map_or_else(
         || province_name.clone(),
         |s| crate::siege::settlement_name(data, &s),

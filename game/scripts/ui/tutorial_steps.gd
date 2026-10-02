@@ -52,7 +52,7 @@ const BASE := {
 	},
 	"build": {
 		"title": "Construire",
-		"text": "Sous « Construire » (panneau de la ville) ou « Constructible » (panneau de province), chaque ligne est un bâtiment avec son coût et sa durée : un clic sur la ligne lance le chantier. Le coût est prélevé tout de suite ; un marteau sur la carte marque le chantier jusqu'à son achèvement. Une seule construction à la fois par ville.",
+		"text": "Sous « Construire » (panneau de la ville) ou « Constructible » (panneau de province), chaque ligne est un bâtiment avec son coût et sa durée : un clic sur la ligne lance le chantier. Le coût est prélevé tout de suite ; un échafaudage sur la carte marque le chantier jusqu'à son achèvement. Une seule construction à la fois par ville.",
 		"objective": "Lancer une construction dans une de vos villes.",
 		"target": "buildable",
 	},

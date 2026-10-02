@@ -135,6 +135,13 @@ static func visibility(kind: String) -> float:
 	return float((document().get("visibility", {}) as Dictionary).get(kind, 0.0))
 
 
+## Distance du rig au-delà de laquelle les maquettes d'un type ne portent plus d'ombre (INF si le
+## type n'a pas de `shadow_range` : ombre gardée, dans la limite du préréglage de qualité).
+static func shadow_range(kind: String) -> float:
+	var ranges: Dictionary = document().get("shadow_range", {})
+	return float(ranges[kind]) if ranges.has(kind) and (ranges[kind] is float or ranges[kind] is int) else INF
+
+
 static func fade_margin() -> float:
 	return float((document().get("visibility", {}) as Dictionary).get("fade_margin", 0.0))
 
@@ -234,6 +241,12 @@ static func solve_collisions(centers: PackedVector2Array, radii: PackedFloat32Ar
 			grid[key] = PackedInt32Array()
 		grid[key].append(i)
 	return scales
+
+
+## Un lieu dont le centre est à moins de `absorb_ratio` × le rayon d'une ville emblématique n'a
+## pas de maquette propre (0 : jamais).
+static func collision_absorb_ratio() -> float:
+	return float((document().get("collision", {}) as Dictionary).get("absorb_ratio", 0.0))
 
 
 static func collision_min_scale() -> float:

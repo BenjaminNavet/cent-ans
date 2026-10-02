@@ -257,9 +257,44 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
 fn attack_within_reach_and_out_of_reach() {
     let data = data_with_grid(|_| {});
     let start = empty_spot(&data, 25.0);
-    // Out of reach this turn: refused, nothing changes.
+    // Out of reach this turn: the army spends its march towards the target,
+    // keeps the rest of the path and does not fight.
     let (mut state, french, english) = duel(&data, start, east(&data, start, 400.0));
-    let before = state.save_json();
+    let target_point = state.army_point(&data, &state.armies[&english]);
+    let gap_before = state.army_distance_km(&data, &state.armies[&french], &state.armies[&english]);
+    let english_before = state.armies[&english].total_strength();
+    state
+        .submit_order(
+            &data,
+            Order::Attack {
+                army: french.clone(),
+                target_army: english.clone(),
+            },
+        )
+        .unwrap();
+    let attacker = &state.armies[&french];
+    assert!(state.army_distance_km(&data, attacker, &state.armies[&english]) < gap_before);
+    assert!(attacker.movement_left < state.army_grid_allowance(&data, attacker));
+    assert!(
+        !attacker.planned_path.is_empty(),
+        "the march goes on next turn"
+    );
+    assert_eq!(
+        attacker.destination,
+        Some(MoveTarget::Point {
+            x: target_point[0],
+            y: target_point[1]
+        })
+    );
+    assert!(!state
+        .pending_events
+        .iter()
+        .any(|e| e.kind == EventKind::Battle));
+    assert_eq!(state.armies[&english].total_strength(), english_before);
+    // No movement left: still refused, nothing changes (the march above may already have
+    // spent the whole allowance, so the state is not required to differ from before).
+    state.armies.get_mut(&french).unwrap().movement_left = 0;
+    let exhausted = state.save_json();
     assert_eq!(
         state.submit_order(
             &data,
@@ -268,9 +303,9 @@ fn attack_within_reach_and_out_of_reach() {
                 target_army: english.clone(),
             }
         ),
-        Err(OrderError::OutOfRange)
+        Err(OrderError::NoMovementLeft)
     );
-    assert_eq!(state.save_json(), before);
+    assert_eq!(state.save_json(), exhausted);
     // Within reach: the attacker closes in (through the target's own zone
     // of control) and fights at once.
     let (mut state, french, english) = duel(&data, start, east(&data, start, 40.0));

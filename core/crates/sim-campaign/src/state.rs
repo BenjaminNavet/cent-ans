@@ -987,6 +987,14 @@ pub struct CampaignState {
     /// for the UI; absent from older saves.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_battle_outcome: Option<crate::battle_outcome::BattleOutcomeReport>,
+    /// Chantier TB: recent land battles (place, sides, losses), bounded by
+    /// `data/rules/battle_history.json`; absent from older saves (no change
+    /// of [`STATE_VERSION`]).
+    #[serde(
+        default,
+        skip_serializing_if = "crate::battle_history::BattleHistory::is_empty"
+    )]
+    pub battle_history: crate::battle_history::BattleHistory,
 }
 
 impl CampaignState {
@@ -1034,6 +1042,7 @@ impl CampaignState {
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
             last_battle_outcome: None,
+            battle_history: crate::battle_history::BattleHistory::default(),
         }
     }
 

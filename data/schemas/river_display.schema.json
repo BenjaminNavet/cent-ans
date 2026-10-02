@@ -43,6 +43,16 @@
       },
       "additionalProperties": false
     },
+    "generalised": {
+      "type": "object",
+      "description": "GC (ADR 0158) : élargissement compressif des cours d'eau quand les lieux sont des maquettes stylisées. Largeur affichée = max(réelle, width_scale × √(réelle × width_ref_m)) ; width_scale 0 = largeur réelle.",
+      "additionalProperties": false,
+      "required": ["width_scale", "width_ref_m"],
+      "properties": {
+        "width_scale": { "type": "number", "minimum": 0, "maximum": 20 },
+        "width_ref_m": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
     "labels": {
       "type": "object",
       "properties": {

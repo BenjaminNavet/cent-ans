@@ -27,9 +27,11 @@ références à récupérer en ligne.
       `docs/wip/tb5.md`), TB6 lumière et atmosphère (ADR 0156, `docs/wip/tb6.md`) : relus sur
       captures, retouchés une fois chacun, fusionnés dans main le 02/10 (f954a2559). Worktrees
       supprimés.
-- [ ] TB3 bâtiments qui grandissent (`../gp-tb3`, `feat/tb3`, ADR 0162) : mécanique faite
-      (données, couche, faubourgs, enceinte, suie, chantier) mais maquettes illisibles sur capture ;
-      3e passe en cours, l'agent lit lui-même ses captures (plafond levé par le joueur).
+- [x] TB3 bâtiments qui grandissent (ADR 0162, `docs/wip/tb3.md`) : dans main le 03/10
+      (aa9fc2288) après 4 passes. Maquettes en « signes de carte » (8 familles × 3 niveaux),
+      posées autour de la maquette de ville GC2 (style par défaut, ADR 0158) ; signes de ville,
+      faubourgs 1:1 et enceinte seulement dans le style `real`. Planches :
+      `~/.cache/cent_ans/tb/tb3/tb3-planche-*.png`.
 - Captures : plafond levé par le joueur le 02/10. Planches hors dépôt dans
   `~/.cache/cent_ans/tb/` (`final1-sheet.jpg` = état de main après TB1, 2, 4, 5, 6).
 
@@ -54,15 +56,17 @@ références à récupérer en ligne.
   (rouge réservé aux ennemis), FA (assets de bataille). TB ne touche pas leurs fichiers.
 
 ## Prochaine étape
-**EN PAUSE depuis le 02/10 (demande du joueur).** Aucun agent ne tourne. TB3 arrêté en pleine
-3e passe : dernier état commité en `wip` sur `feat/tb3` (maquettes redessinées en signes de carte,
-drapage par pièce sur le relief en cours, non vérifié). Reprendre par une planche catalogue et une
-planche Agen/Fleurance, puis finir la passe.
-
-1. Retour de TB3 : relire ses planches, fusionner dans `feat/tb` (`git merge main` d'abord,
-   supprimer les `.uid` non suivis en collision), tests, `--ff-only` dans main.
-2. Historique des batailles dans `core/` pour les marques de TB4 (règle de jeu : Rust + pont).
-3. TB7 (interface) reporté (ADR 0152).
+1. Fait le 03/10 : historique des batailles dans `core/` fusionné dans main (6d11d4b81,
+   `docs/wip/tb-battles.md`, ADR 0157 révisé) ; test `m2_free_movement` d'une autre session
+   corrigé au passage (assertion fausse quand la marche épuise le mouvement). Capture de contrôle
+   de main avec les arbres HC : `~/.cache/cent_ans/tb/final2-sheet.jpg`. **Chantier TB terminé**
+   hors restes ci-dessous.
+2. Restes TB3 : murs bruns du kit contre murs clairs GC ; suie et enceinte construites en jeu
+   invisibles sur la maquette GC (matériau partagé, à voir avec la session GC) ; pas de
+   bâtiments hors les murs pour villages, châteaux, abbayes ; mine jamais vue en situation ;
+   ombres portées jusqu'à 330 (97 appels de dessin à 90).
+3. Reste TB5 : aplats clairs à bords anguleux dans l'eau côtière (vu à La Rochelle).
+4. Bancs à refaire machine calme (TB3, TB5, TB6). TB7 (interface) reporté (ADR 0152).
 
 Repères utiles (inventaire du 02/10) : `campaign_season` (`game/scripts/map/season_visuals.gd:11`),
 teintes de saison (`game/shaders/campaign_life.gdshaderinc:33-150`), stub de croissance
