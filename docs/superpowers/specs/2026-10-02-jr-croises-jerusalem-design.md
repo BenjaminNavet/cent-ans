@@ -51,14 +51,21 @@ elle le recrute, elle le dissout.
 | Cause | Effet |
 |---|---|
 | chaque tour (le vœu s'use) | −1 |
-| bataille gagnée contre une autre foi | +6 |
-| bataille perdue | −8 |
-| colonie prise en Terre sainte | +10 |
-| Jérusalem prise | +40, puis plancher à 50 tant qu'elle est tenue |
-| passage prêché | +10 |
+| chaque tour à ferveur ≥ 70 (l'exaltation retombe) | −2 de plus |
+| bataille gagnée contre une autre foi | +3 |
+| bataille perdue | −6 |
+| colonie prise en Terre sainte | +4 |
+| Jérusalem prise | +25, puis plancher à 50 tant qu'elle est tenue |
+| passage prêché | +8 |
 | guerre déclarée à une faction catholique | −30 |
-| bataille livrée contre des catholiques | −10 |
+| bataille cherchée contre des catholiques (les croisés attaquent ; attaqués, aucun malus) | −10 |
 | paix ou trêve avec le maître de Jérusalem sans tenir la ville | −2 par tour |
+
+Batailles navales comprises (interception en mer). Barème final du lot JR4 (sonde 5 graines ×
+50 tours, `docs/wip/jr4-equilibre.md`). Aumônes 300 + 20 × ferveur ; passage 1 500 livres, recharge
+8 tours, `1 + ferveur / 40` unités (au plus 2) ; armée de départ de 6 unités (solde de départ
+≈ −150 par saison à ferveur 60). L'IA croisée ne traite pas avec le maître de Jérusalem (vœu)
+et garde de quoi prêcher.
 
 ### 4.2 Ce qu'elle donne
 
@@ -66,7 +73,7 @@ elle le recrute, elle le dissout.
   comme une ligne de revenu. C'est l'essentiel du revenu de la faction.
 - **Prêcher le passage** (action du joueur) : coûte de l'or, exige de tenir un port, délai de
   recharge en tours. Deux tours plus tard, un contingent de volontaires débarque dans ce port :
-  `1 + ferveur / 25` unités tirées d'une table pondérée d'unités existantes (piétons, arbalétriers,
+  `1 + ferveur / 40` unités (au plus 2) tirées d'une table pondérée d'unités existantes (piétons, arbalétriers,
   sergents montés, chevaliers). Aucun nouveau type d'unité (pas d'actif à produire).
 - **Élan de la Croix** : ferveur ≥ 70, bonus de moral aux armées de la faction ; ferveur < 30,
   malus.
