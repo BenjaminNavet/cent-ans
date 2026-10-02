@@ -11,6 +11,7 @@ variantes : `game/assets/models/settlements/<type>_<famille>_<a|b>.glb`.
 - `tools/blender_scripts/settlements_east.py` : palette, aides (tour, courtine, coupole, yourte…),
   une fonction par famille et par type (`build_<famille>_<type>(variante)`), table `MODELS`.
 - `tools/blender_scripts/settlements.py` : importe `settlements_east.MODELS`, budget par modèle.
+- `tools/blender_scripts/settlements_west.py` : famille `west` (GC3c, voir plus bas).
 - `tools/blender_scripts/settlements_sheet.py` : planche de contrôle d'une famille
   (`blender --background --python settlements_sheet.py -- <famille>`) →
   `docs/img/gc/kit_<famille>.png` (non suivi), lignes `SIZE <nom> <l> <p> <h> <triangles>`.
@@ -57,6 +58,50 @@ Emprises (plus grande dimension au sol) : villes 3,27 à 3,86 (Ouest 3,18 à 3,6
 - Yourtes : lues comme des pastilles blanches à couronne sombre ; forme de tente peu marquée de
   très haut.
 
+## GC3c (02/10) : famille `west`, Rus' éclaircie, recentrage, yourtes — terminé
+
+Constat en jeu : les `city_a`… d'origine (kit BR1) sont sombres et lourds (24 261 triangles) à
+côté des nouvelles familles ; la Rus' était sombre aussi.
+
+- **Famille `west`** : `tools/blender_scripts/settlements_west.py` (mêmes aides que
+  `settlements_east.py`, enregistrée par `east.register_family`), 10 modèles
+  `<type>_west_<a|b>.glb`. Pierre claire, tours rondes à poivrières d'ardoise bleue, maisons à
+  pignon de tuile rouge-orangé (une sur cinq en ardoise), chaume blond à la campagne. Les anciens
+  `city_a.glb`… ne sont ni modifiés ni supprimés (batailles, autres scripts).
+- **Rus'** : `Log` miel, `Shingle` gris argenté, murs `WhiteStone`, bulbes `Gilt` /
+  `CopperGreen` saturés et `DomeBlue` (bourg b, abbaye a). `Log` éclaircit aussi palissades et
+  enclos de la steppe et les troncs de palmiers.
+- **Recentrage** : `settlements_east.centre_footprint` (appelé à l'export et par la planche)
+  centre l'emprise au sol de tous les modèles des six familles sur l'origine. Faubourgs resserrés
+  (`suburb(step=0.1)`), palmeraie de `city_isl_a` rapprochée : toutes les villes ≤ 3,64.
+- **Yourtes** : mur bas, bandeau rouge sous l'avant-toit débordant, toit conique, couronne
+  sombre, porte colorée (tente du khan : toit doré, bandeau turquoise).
+- **Planche** : `settlements_sheet.py -- west` rend la nouvelle famille ; l'ancien kit BR1
+  s'appelle désormais `legacy`. La ligne `SIZE` donne aussi le décalage du centre retiré.
+
+### Triangles et emprise (largeur × profondeur) après export, centre à 0,000
+| famille | city a / b | town a / b | castle a / b | abbey a / b | village a / b |
+|---|---|---|---|---|---|
+| west (triangles) | 2 494 / 2 196 | 1 108 / 1 278 | 668 / 942 | 604 / 652 | 502 / 526 |
+| west (emprise) | 3,54×3,02 / 3,09×3,31 | 1,99×1,95 / 1,94×1,94 | 1,82×1,39 / 1,79×1,86 | 1,97×1,73 (a, b) | 2,10×2,09 / 2,07×2,05 |
+| rus (triangles) | 2 900 / 2 914 | 1 276 / 1 238 | 766 / 1 034 | 1 302 / 1 282 | 712 / 692 |
+| steppe (triangles) | 3 338 / 2 570 | 1 772 / 1 816 | 1 284 / 1 300 | 756 / 610 | 1 032 / 1 044 |
+
+Villes des autres familles : med 3,63 / 3,36 ; byz 3,40 / 3,39 ; rus 3,19 / 3,36 ; isl 3,64 /
+3,31 ; steppe 3,57 / 3,44. Décalages retirés les plus forts : `city_rus_b` 0,44, `city_west_a`
+0,27 (le noyau muré est donc décalé d'autant par rapport au point de la carte).
+
+### Points ouverts GC3c
+- Câblage : `town_maquette_data.gd` nomme la famille par défaut `<type>_<a|b>` ; pour afficher
+  `west` il faut que la famille par défaut pointe sur `<type>_west_<a|b>` (à l'orchestrateur), et
+  créer les `.import` des 10 nouveaux `.glb`.
+- Planches regardées : west ×3, rus ×1, steppe ×2 (budget de 6 atteint). La planche rus finale
+  (bardeaux un peu assombris après la première vue, 0,45/0,47/0,50) n'a pas été revue.
+- Yourtes : de trois quarts elles se lisent comme des tambours blancs à bandeau rouge et chapeau
+  conique ; lecture en vue zénithale de jeu à juger dans Godot.
+- `west` : 8 à 12 surfaces par modèle (une par teinte), comme les autres familles.
+- Abbaye `west` 1,97 de large pour un contrat de 2,2 (les autres familles : 2,00 à 2,28).
+
 ## Prochaine étape
-Aucune dans ce lot. À l'orchestrateur : import Godot (`.import`), câblage des familles dans
-`data/art/town_maquettes.json` (GC2), jugement en jeu.
+Aucune dans ce lot. À l'orchestrateur : import Godot (`.import`), câblage de la famille `west`
+comme défaut (GC2), jugement en jeu.

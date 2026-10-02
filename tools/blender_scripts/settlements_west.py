@@ -56,7 +56,7 @@ STONE = "PaleStone"
 SLATE = "SlateBlue"
 TILE = "TileRed"
 HOUSE_WALLS = ("Cream", "Cream", STONE, "Whitewash")
-FIELDS = ("Turf", "Straw", "Field")
+FIELDS = ("Turf", "Straw")
 
 
 # --- Buildings -----------------------------------------------------------------------
@@ -218,9 +218,11 @@ def orchard(x, y, rows, columns, step=0.14, radius=0.05):
     ]
 
 
-def flat_patch(x, y, radius, mat, sides=10):
-    """Flat disc slightly above the ground (yard, green, pond)."""
-    return m.cylinder(radius, 0.012 + F * 0.3, (x, y, 0.006 - F * 0.15), mat, sides)
+def flat_patch(x, y, radius, mat, sides=10, z=0.0):
+    """Flat disc slightly above ``z`` (yard, green, pond); stack patches with distinct ``z``,
+    coplanar tops flicker.
+    """  # noqa: D205
+    return m.cylinder(radius, 0.012 + F * 0.3, (x, y, z + 0.006 - F * 0.15), mat, sides)
 
 
 # --- Walls ---------------------------------------------------------------------------
@@ -377,8 +379,7 @@ def build_west_castle(variant):
         return parts
     height = 0.14
     parts = mound(0.0, 0.0, 0.82, height, "Turf", 0.8, 14)
-    parts.append(flat_patch(0.0, 0.0, 0.5, "Street", 12))
-    parts[-1].location.z += height
+    parts.append(flat_patch(0.0, 0.0, 0.5, "Street", 12, height))
     shell = m.ring_points(0.5, 6, rng, 0.05, phase=0.5)
     parts += curtain(
         shell,
@@ -410,7 +411,7 @@ def build_west_abbey(variant):
     flip = 1 if first else -1
     roof = SLATE if first else TILE
     half = 0.84
-    parts = [block(0.0, 0.0, 2 * half, 2 * half, 0.02, "Turf")]
+    parts = [block(0.0, 0.0, 2 * half, 2 * half, 0.006, "Turf")]
     parts += abbey_church(-0.02, 0.34 * flip, 0.0, 1.0, roof, crossing_tower=first)
     parts += cloister(0.0, -0.08 * flip, 0.48, STONE, TILE, "Turf")
     parts += gable_house(0.35, -0.1 * flip, 0.15, 0.5, 0.18, 0.0, STONE, roof, 0.7)
@@ -426,11 +427,11 @@ def build_west_abbey(variant):
         thickness=0.045,
     )
     parts += flag(-0.62, 0.05 * flip, 0.0, 0.42)
-    parts += plots(0.56, -0.64 * flip, 0.0, 3, 0.4, 0.08, ("Field", "Straw", "Field"))
+    parts += plots(0.56, -0.64 * flip, 0.0, 3, 0.4, 0.08, ("Straw", "Turf", "Straw"))
     parts += orchard(-0.56, -0.62 * flip, 2, 3)
     if not first:
         # Cistercian house: mill and fishpond.
-        parts.append(flat_patch(0.6, 0.2, 0.15, "Pond"))
+        parts.append(flat_patch(0.6, 0.2, 0.15, "Pond", z=0.006))
         parts += gable_house(0.6, 0.42, 0.2, 0.14, 0.12, 0.2, "Cream", "Straw", 0.75)
     for k in range(3):
         parts += cottage(
@@ -456,7 +457,7 @@ def build_west_village(variant):
     if not first:
         # Village green and its pond.
         parts.append(flat_patch(-0.12, -0.3, 0.2, "Turf"))
-        parts.append(flat_patch(-0.14, -0.32, 0.09, "Pond", 8))
+        parts.append(flat_patch(-0.14, -0.32, 0.09, "Pond", 8, 0.008))
         keep_out.append((-0.12, -0.3, 0.2))
     barns = ((-0.74, -0.3, 0.3), (0.72, 0.44, 1.9)) if first else ((0.66, -0.5, 1.2),)
     for bx, by, angle in barns:
