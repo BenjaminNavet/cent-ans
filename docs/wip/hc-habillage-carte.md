@@ -46,8 +46,10 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
       Sologne / Dombes / Léman, rig 60 / 150 / 300), réglages, fusion de HC1 + HC2 dans `feat/hc`.
 - [ ] HC4 (après fusion de GC dans main) : variété des champs (vignes, vergers, landes lisibles à
       hauteur de jeu), sans toucher l'échelle de GC5.
-- [ ] HC5 (optionnel, change les règles) : nouveaux massifs nommés et zones humides historiques,
-      recuisson complète, contrôle d'équilibrage. À décider après HC3.
+- [ ] HC5 (agent, `../gp-hc5`, `feat/hc5`, **accepté par le joueur le 02/10**) : nouveaux massifs
+      nommés, landes et zones humides historiques sur toute la carte, sourcés ; recuisson complète,
+      écart de règles mesuré. Note `docs/wip/hc5-massifs-zones-humides.md`. `tools/geo/raw` en lien
+      symbolique vers main (cache KK10 indispensable).
 - [ ] HC6 : tests, `docs/godot-map.md`, mémoire, fusion dans main (après GC).
 
 ## Budget de captures

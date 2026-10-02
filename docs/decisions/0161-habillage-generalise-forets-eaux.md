@@ -38,3 +38,12 @@ Mesures et lecture du code (inventaires du 02/10, `docs/wip/hc-habillage-carte.m
 - Les emprises d'exclusion (maquettes de ville, fleuves, lacs, routes) doivent tenir compte de la
   taille grossie des arbres.
 - Réglages dans `resources/map_prop_scale.tres` et `data/ui/campaign_map.json`, pas en dur.
+
+## Complément (02/10) — extension des données acceptée par le joueur
+Le joueur a dit oui aux nouveaux massifs et zones humides (point 5). Lot HC5 : massifs, landes et
+zones humides historiques ajoutés à `historical_forests.json` et `wetlands.json` sur toute la
+carte (Ibérie, Italie, Empire, Europe centrale et orientale, Balkans, Maghreb, Anatolie compris),
+chacun sourcé ; recuisson `landcover` → `navgrid` → `colormap` → `horizon`. La grille de
+déplacement et le couvert d'embuscade changent en conséquence : écart mesuré avant / après (part
+de forêt, part de marais, cellules franchissables, liaisons entre lieux) et consigné dans
+`docs/wip/hc5-massifs-zones-humides.md`. Les bosquets isolés restent du ressort du rendu (point 2).
