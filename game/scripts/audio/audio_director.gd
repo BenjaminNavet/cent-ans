@@ -15,6 +15,7 @@ extends Node
 ##   guerre, la liste `war` est complétée par celle de la région de la faction jouée ; à défaut de
 ##   tout, `music/<contexte>.ogg` en boucle. `culture_regions` associe la culture de la faction jouée
 ##   (`data/factions/<id>.json`, champ `culture`) à une région musicale.
+##   La bataille tire sa piste de base dans la liste `battle` (ADR 0166), pas dans `war`.
 ## - Effets : clic sur tout bouton (via `SceneTree.node_added`), page tournée à l'ouverture
 ##   des panneaux de la carte, cloche de fin de tour puis l'effet de l'événement le plus
 ##   marquant du tour (bataille, naissance, mort, guerre, paix, religion).

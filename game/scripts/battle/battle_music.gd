@@ -237,10 +237,15 @@ func _make_player(player_name: String, path: String, loop: bool) -> AudioStreamP
 	return player
 
 
-## Piste de base : un morceau de guerre au hasard (différent d'une bataille à l'autre).
+## Piste de base : un morceau de bataille au hasard (différent d'une bataille à l'autre). Liste
+## `battle` (ADR 0166 : la carte en guerre a sa propre liste, plus calme), à défaut `war`.
 func _pick_base_track() -> String:
 	var director: Node = get_node_or_null("/root/AudioDirector")
-	var tracks: Array = director.call("playlist", "war") if director != null and director.has_method("playlist") else []
+	var tracks: Array = []
+	if director != null and director.has_method("playlist"):
+		tracks = director.call("playlist", "battle")
+		if tracks.is_empty():
+			tracks = director.call("playlist", "war")
 	var existing := tracks.filter(func(path: String) -> bool: return ResourceLoader.exists(path))
 	return MUSIC_PATH if existing.is_empty() else str(existing.pick_random())
 

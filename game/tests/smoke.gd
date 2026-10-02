@@ -1694,7 +1694,7 @@ func _run_assets() -> void:
 	_check(str(audio.call("next_track", "court")) != str(heard[-1]), "music rotation should not replay the track just played")
 	_check(not (audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/audio/music/war.ogg"), "synthetic war.ogg should not be a primary track")
 	audio.set("_war_blend", "campaign_france")
-	_check((audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/third_party/music/ars_nova/onques_ne_fut.ogg"), "war playlist should blend the regional campaign tracks")
+	_check((audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/third_party/music/wikimedia/tomsinska_prelude.mp3"), "war playlist should blend the regional campaign tracks")
 	audio.set("_war_blend", "")
 	audio.set("rotation_path", "")
 	audio.call("load_rotation")
