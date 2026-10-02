@@ -17,11 +17,11 @@
       "real_below": 10.0,
       "full_from": 15.0,
       "fractions": [
-        0.042,
-        0.058,
-        0.077
+        0.044,
+        0.06,
+        0.08
       ],
-      "house_fraction": 0.0042,
+      "house_fraction": 0.011,
       "house_width_m": 9.0,
       "wall_fraction": 0.0032,
       "wall_max_share": 0.2,
@@ -29,8 +29,8 @@
       "gap": 0.15,
       "rings": 2,
       "minor_until": 60.0,
-      "vertical": 1.5,
-      "sign_vertical": 1.25,
+      "vertical": 1.3,
+      "sign_vertical": 1.15,
       "signs": {
         "city": {
           "model": "sign_city",
@@ -54,7 +54,11 @@
           "model": "abbey_2",
           "fraction": 0.06
         }
-      }
+      },
+      "far_houses": 6,
+      "brighten": 0.9,
+      "aging": 0.2,
+      "shore_reach_far": 12.0
     }
   },
   "families": {

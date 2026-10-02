@@ -103,6 +103,7 @@ static func suburb_instances(cfg: Dictionary, town: Dictionary, index: int, cent
 				"real_px": px,
 				"origin": origin,
 				"quarter": q,
+				"rank": k,
 				"quarter_dir": dir,
 				"along_m": along - start,
 				"half_m": setback + depth + 4.0,

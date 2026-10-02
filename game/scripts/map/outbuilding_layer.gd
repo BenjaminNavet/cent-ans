@@ -99,6 +99,8 @@ var _layouts: Dictionary = {}  # indice de colonie → {sig, top, spots: {famill
 var _road_cells: Dictionary = {}
 var _roads_ready := false
 var _fog_signature := 0
+var _drape_mat: ShaderMaterial = null
+var _drape_ready := false
 var _vertical_scale := -1.0
 var _shadows := true
 var _meshes: Dictionary = {}
@@ -632,8 +634,12 @@ func _instances_of(i: int) -> Array:
 		# L'ancrage vaut pour les trois niveaux : il réserve l'emprise du niveau 3.
 		var reserve := float((manifest.get("%s_3" % family, entry) as Dictionary).get("radius", entry["radius"]))
 		var anchor := _anchor(i, family, int(model["slot"]), str(model["site"]), reserve)
-		if anchor.is_empty():
-			continue
+		var far_only := anchor.is_empty()
+		if far_only:
+			# Port sans grève au pied de la ville : de loin seulement, posé à la côte voisine.
+			if _build_top <= 0.0 or str(model["site"]) != "shore":
+				continue
+			anchor = {"px": center + Vector2(0.0, 0.01), "yaw": 0.0}
 		var px: Vector2 = anchor["px"]
 		out.append({
 			"key": "out:" + str(model["model"]),
@@ -642,6 +648,7 @@ func _instances_of(i: int) -> Array:
 			"level": int(model["level"]),
 			"model": str(model["model"]),
 			"site": str(model["site"]),
+			"far_only": far_only,
 			"px": px,
 			"real_px": px,
 			"c": center,
@@ -649,6 +656,7 @@ func _instances_of(i: int) -> Array:
 			"base_m": _base_m(px),
 			"scale": Vector3.ONE,
 			"grow": "out",
+			"tint": 0.5 + float(screen_config(config).get("brighten", 0.0)),
 			"width_m": maxf(float(entry.get("length", 30.0)), float(entry.get("depth", 30.0))),
 			"radius_m": float(entry.get("radius", 30.0)),
 			"top": float(entry.get("height", 20.0)),
@@ -698,6 +706,7 @@ func _sign_instance(i: int, center: Vector2, growth: Array) -> Dictionary:
 		"base_m": _base_m(center),
 		"scale": Vector3.ONE,
 		"grow": "sign",
+		"tint": 0.5 + float(screen_config(config).get("brighten", 0.0)),
 		"width_m": width,
 		"radius_m": float(shape.get("radius", 40.0)),
 		"fraction": float(rule.get("fraction", 0.08)),
@@ -1019,6 +1028,31 @@ func _water_direction(p: Vector2, r: float) -> Vector2:
 	return sum.normalized() if sum.length() > 0.5 else Vector2.ZERO
 
 
+## Port de loin : sur la grève la plus proche de la colonie (mer ou fleuve), à `shore_reach_far`
+## unités au plus, façade vers l'eau ; l'emprise reste à la côte quand la distance change (elle
+## recule vers la terre de 0,6 rayon). Vide : pas de grève libre à portée.
+func _coast_spot(i: int, center: Vector2, from: float, r: float, shares: Array[float]) -> Dictionary:
+	var reach := float(screen_config(config).get("shore_reach_far", 0.0))
+	var best := {}
+	var best_d := INF
+	for k in 24:
+		var dir := Vector2(cos(TAU * float(k) / 24.0), sin(TAU * float(k) / 24.0))
+		var d := from + r * 0.5
+		if not _is_land(center + dir * d):
+			continue
+		while d < minf(reach, best_d):
+			d += 0.25
+			var at := center + dir * d
+			if not _is_land(at) or (_map != null and _map.river_sd_at(at.x, at.y) < 0.0):
+				var disc := {"c": center, "dir": dir, "edge": d, "off": -0.6 * r, "r": r, "yaw": atan2(dir.x, dir.y)}
+				var spot := _disc_center(disc, 1.0)
+				if _is_land(spot) and _far_site(i, spot, r * 0.6, "shore") >= 0 and _disc_free(disc, shares):
+					best = disc
+					best_d = d
+				break
+	return best
+
+
 ## Emprise de loin d'une maquette autour de la colonie `i` : au plus près de la direction de son
 ## site réel, sur l'anneau au bord de la ville, puis les anneaux suivants. Vide : aucune place.
 func _far_spot(i: int, center: Vector2, edge: float, start: float, inst: Dictionary, top: float, gates: PackedFloat32Array, shares: Array[float]) -> Dictionary:
@@ -1029,6 +1063,10 @@ func _far_spot(i: int, center: Vector2, edge: float, start: float, inst: Diction
 	var gap := float(screen.get("gap", 0.15)) * r
 	var site := str(inst["site"])
 	var fallback := {}
+	if site == "shore":
+		var coast := _coast_spot(i, center, edge + start, r, shares)
+		if not coast.is_empty():
+			return coast
 	for ring in int(screen.get("rings", 2)):
 		var radius := edge + start + gap + r * (1.0 + RING_STEP * float(ring))
 		var delta := clampf(r / radius, 0.15, 0.7) * 0.75
@@ -1089,7 +1127,8 @@ func _layout(i: int, models: Array, growth: Array, top: float, sign: Dictionary 
 				var q := int(inst["quarter"])
 				if not quarters.has(q):
 					quarters[q] = [inst["origin"], inst["quarter_dir"], 0.0, 0.0]
-				quarters[q][2] = maxf(float(quarters[q][2]), float(inst["along_m"]))
+				if int(inst.get("rank", 0)) < int(screen_config(config).get("far_houses", 99)):
+					quarters[q][2] = maxf(float(quarters[q][2]), float(inst["along_m"]))
 				quarters[q][3] = maxf(float(quarters[q][3]), float(inst["half_m"]))
 	var house := _house_factor_full(top)
 	for q: int in quarters:
@@ -1145,7 +1184,8 @@ func _layout(i: int, models: Array, growth: Array, top: float, sign: Dictionary 
 		inst["dir"] = disc["dir"]
 		inst["edge"] = disc["edge"]
 		inst["off"] = disc["off"]
-		inst["far_yaw"] = float(disc.get("yaw", 0.0))
+		# Façade vers l'eau, sans tourner le dos à la caméra de jeu (vue du sud) : ± 70° au plus.
+		inst["far_yaw"] = clampf(wrapf(float(disc.get("yaw", 0.0)), -PI, PI), -1.22, 1.22)
 		inst["top_d"] = top
 		out.append(inst)
 	return out
@@ -1186,6 +1226,13 @@ func _place(inst: Dictionary) -> void:
 			inst["factor"] = factor
 			# Volumes relevés de loin : les silhouettes se lisent en plongée.
 			inst["draw_scale"] = Vector3(factor, factor * lerpf(1.0, float(screen.get("vertical", 1.0)), blend), factor)
+			if bool(inst.get("far_only", false)):
+				if inst.has("dir") and blend > 0.0:
+					px = (inst["c"] as Vector2) + (inst["dir"] as Vector2) * (float(inst["edge"]) + float(inst["off"]) * d / float(inst["top_d"]))
+					inst["draw_yaw"] = float(inst.get("far_yaw", 0.0))
+					inst["draw_scale"] = (inst["draw_scale"] as Vector3) * blend
+				else:
+					inst["draw_scale"] = Vector3.ONE * 1e-3
 		"sign":
 			var radius := _sign_radius(float(inst["fraction"]) * float(inst["radius_m"]) / float(inst["width_m"]), float(inst["built"]), d)
 			var factor := float(inst["fraction"]) * view_span(d, _fov) * _mpu / float(inst["width_m"]) * blend
@@ -1198,7 +1245,10 @@ func _place(inst: Dictionary) -> void:
 				origin = origin.lerp((inst["c"] as Vector2) + (inst["quarter_dir"] as Vector2) * sign_r, blend)
 			px = origin + (px - (inst["origin"] as Vector2)) * factor
 			inst["factor"] = factor
-			inst["draw_scale"] = (inst["scale"] as Vector3) * factor
+			inst["draw_scale"] = (inst["scale"] as Vector3) * Vector3(factor, factor * lerpf(1.0, float(screen.get("vertical", 1.0)), blend), factor)
+			# De loin, un quartier se résume à ses premières maisons, plus grosses.
+			if blend >= 0.5 and int(inst.get("rank", 0)) >= int(screen.get("far_houses", 99)):
+				inst["draw_scale"] = Vector3.ONE * 1e-3
 		"wall":
 			var shape: Dictionary = inst["shape"]
 			var thick := lerpf(float(shape["thick_m"]), _wall_thickness_full(shape, d), blend)
@@ -1237,7 +1287,8 @@ func _mesh_of(key: String) -> Mesh:
 		return _meshes[key]
 	var mesh: Mesh = null
 	if key.begins_with("out:"):
-		mesh = _load_glb_mesh(MODEL_DIR + key.trim_prefix("out:") + ".glb")
+		var model := key.trim_prefix("out:")
+		mesh = with_pieces(_load_glb_mesh(MODEL_DIR + model + ".glb"), (manifest.get(model, {}) as Dictionary).get("pieces", []))
 	elif key.begins_with("kit:"):
 		mesh = TownBuilder.kit_mesh(key.trim_prefix("kit:"))
 	elif key.begins_with("box:"):
@@ -1263,6 +1314,59 @@ static func _load_glb_mesh(path: String) -> Mesh:
 	return mesh
 
 
+## Copie du maillage d'une maquette avec, par sommet, le centre xz (m, repère de la maquette) de
+## sa pièce rigide dans `CUSTOM0.xy` (`pieces` du manifeste : centre x, z, puis boîte x0, z0, x1,
+## z1) : `town_building.gdshader` (`drape`) pose chaque pièce sur le sol sous son propre centre.
+## Un sommet appartient à la plus petite boîte qui le contient, sinon à la pièce la plus proche.
+static func with_pieces(mesh: Mesh, pieces: Array) -> Mesh:
+	if mesh == null or pieces.is_empty() or mesh.get_surface_count() == 0:
+		return mesh
+	var out := ArrayMesh.new()
+	for surface in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(surface)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var custom := PackedFloat32Array()
+		custom.resize(vertices.size() * 4)
+		for v in vertices.size():
+			var p := vertices[v]
+			var best := -1
+			var best_area := INF
+			var nearest := 0
+			var nearest_d := INF
+			for k in pieces.size():
+				var piece: Array = pieces[k]
+				var d := Vector2(p.x - float(piece[0]), p.z - float(piece[1])).length_squared()
+				if d < nearest_d:
+					nearest_d = d
+					nearest = k
+				if p.x >= float(piece[2]) - 0.05 and p.x <= float(piece[4]) + 0.05 and p.z >= float(piece[3]) - 0.05 and p.z <= float(piece[5]) + 0.05:
+					var area := (float(piece[4]) - float(piece[2])) * (float(piece[5]) - float(piece[3]))
+					if area < best_area:
+						best_area = area
+						best = k
+			var chosen: Array = pieces[best if best >= 0 else nearest]
+			custom[v * 4] = float(chosen[0])
+			custom[v * 4 + 1] = float(chosen[1])
+		arrays[Mesh.ARRAY_CUSTOM0] = custom
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT)
+	return out
+
+
+## Matériau des maquettes tenues à l'écran : celui des villes, avec la pose par pièce sur la
+## heightmap du terrain (`drape`, suivi à chaque image de la part de tenue à l'écran).
+func _drape_material() -> ShaderMaterial:
+	if _drape_mat == null:
+		_drape_mat = TownBuilder.material(0, false, 0.0, _mpu).duplicate() as ShaderMaterial
+		var texture: Texture2D = _terrain.height_texture() if _terrain != null and _terrain.has_method("height_texture") else null
+		if texture != null and _map != null and _terrain.height_texture_mode() == 1:
+			_drape_mat.set_shader_parameter("drape_heightmap", texture)
+			_drape_mat.set_shader_parameter("drape_info", Vector4(float(_map.size.x), float(_map.size.y), _map.height_min_m, _map.height_max_m - _map.height_min_m))
+			_drape_ready = true
+		# Signes de carte : teintes franches, peu d'usure.
+		_drape_mat.set_shader_parameter("aging", float(screen_config(config).get("aging", 0.5)))
+	return _drape_mat
+
+
 ## Tampon d'instances (`TownBuilder.pack_instances`) avec la suie de chaque instance dans la
 ## composante b des données d'instance (`INSTANCE_CUSTOM.b` de `town_building.gdshader`).
 static func with_soot(buffer: PackedFloat32Array, soots: Array) -> PackedFloat32Array:
@@ -1283,6 +1387,8 @@ func _write_batches() -> void:
 	var s := 1.0 / _mpu
 	_root.transform = Transform3D(Basis().scaled(Vector3(s, s, s)), Vector3(_center.x, 0.0, _center.y))
 	_placed_distance = _rig_distance
+	if _drape_mat != null and _drape_ready:
+		_drape_mat.set_shader_parameter("drape", screen_blend(config, _rig_distance))
 	var groups := {}  # clé → [xforms, bases, tints, top, suies]
 	for inst: Dictionary in _instances:
 		_place(inst)
@@ -1319,7 +1425,7 @@ func _write_batches() -> void:
 			mmi.multimesh.transform_format = MultiMesh.TRANSFORM_3D
 			mmi.multimesh.use_custom_data = true
 			mmi.multimesh.mesh = mesh
-			mmi.material_override = TownBuilder.material(0, not (key.begins_with("out:") or key.begins_with("kit:")), 0.0, _mpu)
+			mmi.material_override = _drape_material() if key.begins_with("out:") else TownBuilder.material(0, not key.begins_with("kit:"), 0.0, _mpu)
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if _shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mmi.transparency = 1.0 - _fade
 			_root.add_child(mmi)
@@ -1345,8 +1451,9 @@ func _refresh_aabbs() -> void:
 		if b.size() < 4:
 			continue
 		var rect: Rect2 = b[3]
-		var y0 := float(b[0]) * k * (down if float(b[0]) > 0.0 else 1.0) - 10.0
-		var y1 := float(b[1]) * k * (up if float(b[1]) > 0.0 else 1.0) + float(b[2])
+		# ± 600 m : les pièces d'une maquette tenue à l'écran suivent le sol sous elles.
+		var y0 := (float(b[0]) - 600.0) * k * (down if float(b[0]) > 600.0 else 1.0) - 10.0
+		var y1 := (float(b[1]) + 600.0) * k * (up if float(b[1]) > -600.0 else 1.0) + float(b[2])
 		mmi.custom_aabb = AABB(Vector3(rect.position.x, y0, rect.position.y), Vector3(rect.size.x, y1 - y0, rect.size.y))
 
 

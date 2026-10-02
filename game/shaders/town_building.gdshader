@@ -57,6 +57,16 @@ uniform vec3 soot_color : source_color = vec3(0.11, 0.075, 0.055);
 uniform float soot_roof_max : hint_range(0.0, 1.0) = 0.6;
 uniform float soot_wall_max : hint_range(0.0, 1.0) = 0.15;
 
+// Lot TB3 (ADR 0162) : maquettes tenues à l'écran (`OutbuildingLayer`), larges de plusieurs
+// kilomètres de carte vues de loin. `drape` (0-1) : la hauteur de base de chaque **pièce rigide**
+// de la maquette (centre xz en mètres dans `CUSTOM0.xy`, repère de la maquette) est lue dans la
+// heightmap du terrain sous cette pièce, au lieu de la base de l'instance : aucun bâtiment
+// enterré dans un versant ni suspendu au-dessus d'une vallée. `drape_info` : taille de la carte
+// (unités) en xy, altitude minimale et étendue (m) de la heightmap en zw. 0 : sans effet.
+uniform float drape : hint_range(0.0, 1.0) = 0.0;
+uniform sampler2D drape_heightmap : filter_linear, repeat_disable, hint_default_black;
+uniform vec4 drape_info = vec4(1.0, 1.0, 0.0, 0.0);
+
 #include "res://shaders/building_aging.gdshaderinc"
 
 varying flat int layer;
@@ -77,6 +87,11 @@ void vertex() {
 	vec2 anchor_xz = base_source == 0 ? MODEL_MATRIX[3].xz : VERTEX.xz;
 	if (base_source == 2) {
 		anchor_xz = (MODEL_MATRIX * vec4(CUSTOM0.g, 0.0, CUSTOM0.b, 1.0)).xz;
+	}
+	if (base_source == 0 && drape > 0.0) {
+		vec2 piece_xz = (MODEL_MATRIX * vec4(CUSTOM0.x, 0.0, CUSTOM0.y, 1.0)).xz;
+		float ground = drape_info.z + textureLod(drape_heightmap, piece_xz / drape_info.xy, 0.0).r * drape_info.w;
+		base = mix(base, max(ground, 0.3), drape);
 	}
 	// Maillages drapés (base_source 1) : l'ancrage est le sommet lui-même ; bruit en position monde.
 	vec2 age_origin = base_source == 1 ? vec2(0.0) : anchor_xz;

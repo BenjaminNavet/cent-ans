@@ -71,7 +71,11 @@
             "minor_until",
             "vertical",
             "sign_vertical",
-            "signs"
+            "signs",
+            "far_houses",
+            "brighten",
+            "aging",
+            "shore_reach_far"
           ],
           "properties": {
             "real_below": {
@@ -183,6 +187,28 @@
                   }
                 }
               }
+            },
+            "far_houses": {
+              "description": "Nombre de maisons gardées par quartier de faubourg ajouté, de loin.",
+              "type": "integer",
+              "minimum": 1
+            },
+            "brighten": {
+              "description": "Éclaircissement des maquettes tenues à l'écran (décalage de teinte par instance ; 1 ≈ +35 %).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "aging": {
+              "description": "Usure des matériaux des maquettes tenues à l'écran (0,5 : celle des villes).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "shore_reach_far": {
+              "description": "Distance maximale (unités) de la grève où un port se pose de loin.",
+              "type": "number",
+              "minimum": 0
             }
           }
         },

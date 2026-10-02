@@ -24,11 +24,13 @@ Run headless:
 ``export`` writes ``<family>_<level>.glb``, ``worksite_1.glb`` and ``manifest.json``.
 """
 
+import functools
 import inspect
 import json
 import math
 import random
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -77,7 +79,50 @@ TILE = kit.ROOF_TINTS["RoofTile"][0]
 
 # --- pieces ---------------------------------------------------------------------------------
 
+# Rigid pieces of the model being built: plan bounding boxes (x0, y0, x1, y1) of what each
+# top-level call added. Far away a model is several kilometres wide on the map: Godot stands
+# every piece on the ground under its own centre (``pieces`` of the manifest), so that no
+# building is buried in a slope or floats over a valley.
+_PIECES: list = []
+_STATE = {"root": None, "depth": 0}
 
+
+@contextmanager
+def part(g: Geometry):
+    """Record what the body adds to the root geometry as one rigid piece."""
+    if g is not _STATE["root"] or _STATE["depth"] > 0:
+        yield
+        return
+    _STATE["depth"] += 1
+    before = {mat: len(polys) for mat, polys in g.polys.items()}
+    try:
+        yield
+    finally:
+        _STATE["depth"] -= 1
+        points = [
+            point
+            for mat, polys in g.polys.items()
+            for poly in polys[before.get(mat, 0) :]
+            for point in poly[0]
+        ]
+        if points:
+            xs = [point[0] for point in points]
+            ys = [point[1] for point in points]
+            _PIECES.append((min(xs), min(ys), max(xs), max(ys)))
+
+
+def rigid(fn):
+    """Decorator: the whole call is one rigid piece."""
+
+    @functools.wraps(fn)
+    def wrapper(g, *args, **kwargs):
+        with part(g):
+            return fn(g, *args, **kwargs)
+
+    return wrapper
+
+
+@rigid
 def put(
     g: Geometry,
     kind: str,
@@ -94,6 +139,7 @@ def put(
     return info
 
 
+@rigid
 def piece(g: Geometry, fn, x: float, y: float, yaw: float, s: float, *args) -> None:
     """Merge a procedural piece built at the origin by ``fn(g, 0, 0, *args)``, scaled ``s``."""
     part = Geometry()
@@ -110,14 +156,15 @@ def run(g, points, height, thick, mat, color, depth=0.8, closed=False) -> None:
     for i in range(count if closed else count - 1):
         a, b = points[i], points[(i + 1) % count]
         dx, dy = b[0] - a[0], b[1] - a[1]
-        k.box(
-            g,
-            ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (height - depth) / 2),
-            (math.hypot(dx, dy) + thick, thick, height + depth),
-            mat,
-            math.atan2(dy, dx),
-            color=color,
-        )
+        with part(g):
+            k.box(
+                g,
+                ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (height - depth) / 2),
+                (math.hypot(dx, dy) + thick, thick, height + depth),
+                mat,
+                math.atan2(dy, dx),
+                color=color,
+            )
 
 
 def rect(x0, y0, x1, y1) -> list:
@@ -134,6 +181,7 @@ def extrude(g, points, z0, z1, mat, color) -> None:
     g.poly([(*p, z1) for p in points], mat, color=color, occlude=False)
 
 
+@rigid
 def wing(g, x, y, yaw, length, width, height, wall="Ashlar", roof="RoofTile") -> None:
     """Plain range of a cloister or a storehouse: walls and a gabled roof."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -157,6 +205,7 @@ def wing(g, x, y, yaw, length, width, height, wall="Ashlar", roof="RoofTile") ->
         )
 
 
+@rigid
 def stall(g, x, y, yaw, tint) -> None:
     """Market stall: four posts, a trestle table, a canvas awning."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -174,6 +223,7 @@ def stall(g, x, y, yaw, tint) -> None:
         g.poly(awning[::-1], "Canvas", color=tint, occlude=False)
 
 
+@rigid
 def tent(g, x, y, yaw, length, width, height, tint) -> None:
     """Ridge tent of a fair."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -190,11 +240,13 @@ def tent(g, x, y, yaw, length, width, height, tint) -> None:
         )
 
 
+@rigid
 def barrel(g, x, y) -> None:
     """Standing barrel."""
     k.cylinder(g, (x, y, -0.2), 0.36, 1.1, "Planks", sides=6, color=DARK_WOOD)
 
 
+@rigid
 def heap(g, x, y, radius, height, mat, color, sides=7) -> None:
     """Conical heap (spoil, ore, salt, stone)."""
     k.cone(
@@ -208,6 +260,7 @@ def heap(g, x, y, radius, height, mat, color, sides=7) -> None:
     )
 
 
+@rigid
 def cart(g, x, y, yaw) -> None:
     """Two-wheeled cart, shafts resting on the ground."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -234,6 +287,7 @@ def cart(g, x, y, yaw) -> None:
             )
 
 
+@rigid
 def vines(g, x0, y0, rows, length, spacing=5.6) -> None:
     """Plot of vines: fat dark rows running away from the viewer (along Y) on pale earth.
 
@@ -256,6 +310,7 @@ def vines(g, x0, y0, rows, length, spacing=5.6) -> None:
             )
 
 
+@rigid
 def house(g, x, y, yaw, length, width, height, roof="RoofTile", wall="Plaster") -> None:
     """Plain house of a settlement sign: pale walls under a steep roof."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -279,6 +334,7 @@ def house(g, x, y, yaw, length, width, height, roof="RoofTile", wall="Plaster") 
         )
 
 
+@rigid
 def tower(g, x, y, radius, height, roof="RoofSlate") -> None:
     """Round wall tower under a conical roof."""
     k.cylinder(
@@ -302,6 +358,7 @@ def tower(g, x, y, radius, height, roof="RoofSlate") -> None:
     )
 
 
+@rigid
 def keep(g, x, y, side, height) -> None:
     """Square keep with corner turrets."""
     k.box(
@@ -399,6 +456,7 @@ def pan(g, x, y, width, depth, salted: bool) -> None:
     )
 
 
+@rigid
 def jetty(g, x, y0, y1, width) -> None:
     """Timber jetty along Y from the shore (y0) out to y1, deck 1.1 m above the anchor."""
     span = abs(y1 - y0)
@@ -417,6 +475,7 @@ def jetty(g, x, y0, y1, width) -> None:
             k.box(g, (x + sx, y, -1.6), (0.35, 0.35, 6.2), "Timber", color=DARK_WOOD)
 
 
+@rigid
 def crane(g, x, y, yaw) -> None:
     """Treadwheel crane: wheel house, mast and jib."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -455,6 +514,7 @@ def crane(g, x, y, yaw) -> None:
         )
 
 
+@rigid
 def boat(g, x, y, yaw, length, beam_m, mast=0.0) -> None:
     """Open boat, or a cog with a mast and a square sail, hull resting 0.3 m in the water."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -479,12 +539,14 @@ def boat(g, x, y, yaw, length, beam_m, mast=0.0) -> None:
             g.poly(sail[::-1], "Canvas", color=(1.0, 0.98, 0.92), occlude=False)
 
 
+@rigid
 def dovecote(g, x, y) -> None:
     """Round stone dovecote under a conical tile roof."""
     k.cylinder(g, (x, y, -1.5), 2.7, 8.5, "Rubble", sides=8, top=False, color=STONE)
     k.cone(g, (x, y, 7.0), 3.1, 3.4, "RoofTile", sides=8, color=TILE)
 
 
+@rigid
 def whim(g, x, y) -> None:
     """Horse whim of a mine: winding drum under a thatched round roof."""
     for i in range(6):
@@ -500,13 +562,26 @@ def whim(g, x, y) -> None:
     k.cylinder(g, (x, y, -0.5), 0.8, 3.2, "Timber", sides=6, color=DARK_WOOD)
 
 
+@rigid
 def headframe(g, x, y) -> None:
     """Timber headframe over a shaft: a boarded tower, a great pulley wheel facing the viewer."""
     k.box(g, (x, y, 5.0), (4.2, 4.2, 12.0), "Planks", color=WOOD)
-    k.tube(g, (x, y - 0.5, 13.5), (x, y + 0.5, 13.5), 3.4, "Timber", 10, color=DARK_WOOD)
-    k.beam(g, (x + 1.0, y, 13.0), (x + 9.0, y, 0.0), 0.8, 0.8, "Timber", (0, 1, 0), color=DARK_WOOD)
+    k.tube(
+        g, (x, y - 0.5, 13.5), (x, y + 0.5, 13.5), 3.4, "Timber", 10, color=DARK_WOOD
+    )
+    k.beam(
+        g,
+        (x + 1.0, y, 13.0),
+        (x + 9.0, y, 0.0),
+        0.8,
+        0.8,
+        "Timber",
+        (0, 1, 0),
+        color=DARK_WOOD,
+    )
 
 
+@rigid
 def adit(g, x, y, yaw) -> None:
     """Mine entrance: spoil bank, timber portal, dark mouth."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -523,6 +598,7 @@ def adit(g, x, y, yaw) -> None:
         )
 
 
+@rigid
 def chimney_stack(g, x, y, height) -> None:
     """Tall stone stack of a furnace or a boiling house."""
     k.cylinder(
@@ -537,6 +613,7 @@ def chimney_stack(g, x, y, height) -> None:
     )
 
 
+@rigid
 def market_cross(g, x, y) -> None:
     """Stepped market cross."""
     k.box(g, (x, y, 0.1), (3.0, 3.0, 1.0), "Ashlar", color=STONE)
@@ -545,6 +622,7 @@ def market_cross(g, x, y) -> None:
     k.box(g, (x, y, 4.2), (1.3, 0.3, 0.3), "Ashlar", color=STONE)
 
 
+@rigid
 def scaffold(g, x, y, yaw, length, height) -> None:
     """Pole scaffolding with two plank lifts and a ladder, in front of a wall along X."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
@@ -642,6 +720,7 @@ def mill_3(g) -> None:
     k.box(g, (16.0, -21.0, -0.3), (36.0, 7.0, 1.6), "Canvas", color=BRINE)
 
 
+@rigid
 def cask(g, x, y) -> None:
     """Great cask lying on its side."""
     k.tube(g, (x - 1.6, y, 1.5), (x + 1.6, y, 1.5), 1.5, "Planks", 8, color=DARK_WOOD)
@@ -824,6 +903,7 @@ def market_3(g) -> None:
         tent(g, x, -25, 0, 10.0, 8.0, 6.0, CLOTHS[(n + 1) % len(CLOTHS)])
 
 
+@rigid
 def quay(g, width) -> None:
     """Stone quay along X at y = 0, water in front (-Y)."""
     k.box(g, (0, 1.0, 0.0), (width, 6.0, 4.0), "Masonry", color=STONE)
@@ -978,6 +1058,9 @@ SIGN_TRIANGLE_CAP = 6000
 def build(family: str, level: int) -> tuple[Geometry, dict]:
     """Geometry and manifest entry of one model."""
     g = Geometry()
+    _PIECES.clear()
+    _STATE["root"] = g
+    _STATE["depth"] = 0
     if family == "sign":
         SIGNS[level](g)
     else:
@@ -997,6 +1080,18 @@ def build(family: str, level: int) -> tuple[Geometry, dict]:
         "depth": round(max(ys) - min(ys), 1),
         "height": round(max(zs), 1),
         "triangles": g.triangle_count(),
+        # Rigid pieces in Godot's frame (x, z = -y): centre x, centre z, then the plan box.
+        "pieces": [
+            [
+                round((x0 + x1) / 2, 1),
+                round(-(y0 + y1) / 2, 1),
+                round(x0, 1),
+                round(-y1, 1),
+                round(x1, 1),
+                round(-y0, 1),
+            ]
+            for x0, y0, x1, y1 in _PIECES
+        ],
     }
     return g, info
 
