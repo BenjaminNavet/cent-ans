@@ -2563,6 +2563,17 @@ func _run_tutorial() -> void:
 	if settings != null:
 		_check(bool(settings.call("get_value", "tutorial/done")), "tutorial/done should be persisted")
 	_check(not tutorial.should_autostart(), "a finished tutorial must not restart")
+	# Factions sans texte propre : dirigeant, suzerain et objectifs de titre lus dans la simulation,
+	# conseils génériques, aucun champ laissé brut.
+	var generic_steps: Array[Dictionary] = TutorialSteps.steps("fac_albret", tutorial._context("fac_albret"))
+	_check(generic_steps.size() == TutorialSteps.count(), "generic tutorial should keep every step")
+	_check(str(generic_steps[0]["text"]).contains("Les objectifs de votre titre") and not str(generic_steps[0]["text"]).contains("Survivre et prospérer"), "generic intro should list the title objectives from the simulation")
+	_check(str(generic_steps[0]["title"]).begins_with("Bienvenue, ") and not str(generic_steps[0]["title"]).contains("Sire"), "generic intro should greet the ruler by name")
+	for generic_step in generic_steps:
+		_check(str(generic_step["advice"]) != "", "generic advice missing at %s" % generic_step["id"])
+		for key in ["title", "text", "objective", "advice"]:
+			_check(not str(generic_step[key]).contains("{"), "raw placeholder in generic %s.%s" % [generic_step["id"], key])
+	_check(TutorialSteps.steps("fac_x", {})[0]["title"] == "Bienvenue", "a faction without ruler gets a plain welcome")
 
 	# Encyclopédie.
 	var encyclopedia: Control = tutorial.encyclopedia

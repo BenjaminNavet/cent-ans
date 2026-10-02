@@ -1028,7 +1028,10 @@ func label_safe_rect() -> Rect2:
 	var screen := get_viewport().get_visible_rect()
 	var margin := MapReadability.number("labels", "edge_margin_px", 16.0)
 	var top := float(label_top_inset.call()) if label_top_inset.is_valid() else 0.0
-	return screen.grow_individual(-margin, -margin - top, -margin, -margin)
+	var safe := screen.grow_individual(-margin, -margin - top, -margin, -margin)
+	# Fenêtre plus petite que ses marges (headless) : zone vide, pas un rectangle négatif.
+	safe.size = safe.size.max(Vector2.ZERO)
+	return safe
 
 
 ## RS-K3 : point écran de `p` avec la caméra figée de la passe (`Camera3D.unproject_position`).
