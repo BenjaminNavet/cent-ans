@@ -2474,6 +2474,21 @@
       "vassal_of": [
         "fac_calatrava"
       ]
+    },
+    {
+      "id": "la_palud",
+      "name": "La Palud",
+      "arms_of": "fac_crusaders",
+      "blazon": "D'argent à la croix potencée d'or cantonnée de quatre croisettes du même.",
+      "description": "Patriarche Pierre de la Palud : armes de la croisade par substitution.",
+      "source": "Pierre de la Palud",
+      "certainty": "substitution",
+      "factions": [
+        "fac_crusaders"
+      ],
+      "vassal_of": [
+        "fac_crusaders"
+      ]
     }
   ]
 }
