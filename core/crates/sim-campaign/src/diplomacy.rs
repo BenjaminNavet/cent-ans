@@ -777,6 +777,12 @@ pub fn evaluate(
                 aggression,
                 &mut reasons,
             );
+            // JR4: the vow of an AI-led crusade allows no peace with the
+            // master of its goal.
+            if crate::crusade::ai_vow_forbids_peace(state, data, recipient, proposer) {
+                reasons.push(("Vœu de croisade".to_owned(), -100));
+                hard_no = true;
+            }
             let capital = state.factions.get(recipient).map(|f| f.capital.clone());
             for province in provinces {
                 let Some(owner) = state.province_owner(province) else {
@@ -855,6 +861,12 @@ pub fn evaluate(
                 aggression,
                 &mut reasons,
             );
+            // JR4: the vow of an AI-led crusade allows no peace with the
+            // master of its goal.
+            if crate::crusade::ai_vow_forbids_peace(state, data, recipient, proposer) {
+                reasons.push(("Vœu de croisade".to_owned(), -100));
+                hard_no = true;
+            }
             reasons.push(("Médiation pontificale".to_owned(), 30));
         }
         Proposal::Alliance => {
@@ -2455,6 +2467,10 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     }
     if !treaties && ((turn + slot).is_multiple_of(2) || cornered(state, data, faction)) {
         for enemy in me.at_war_with.iter().filter(|e| !is_rebels(e)) {
+            // JR4: an AI-led crusade never treats with the master of its goal.
+            if crate::crusade::ai_vow_forbids_peace(state, data, faction, enemy) {
+                continue;
+            }
             if let Some(provinces) = peace_terms(state, data, faction, enemy) {
                 orders.push(Order::ProposePeace {
                     target: enemy.clone(),

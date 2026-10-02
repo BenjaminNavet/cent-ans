@@ -7,13 +7,13 @@
   "coastal_holy_land": ["prov_gaza", "prov_safad", "prov_tripoli"],
   "fervor": {
     "start": 60,
-    "decay_per_turn": 1,
-    "battle_won_other_faith": 6,
+    "decay_per_turn": 2,
+    "battle_won_other_faith": 3,
     "battle_lost": -8,
-    "holy_land_settlement_taken": 10,
+    "holy_land_settlement_taken": 4,
     "target_taken": 40,
     "target_floor": 50,
-    "preach": 10,
+    "preach": 8,
     "war_declared_same_faith": -30,
     "battle_same_faith": -10,
     "truce_with_target_holder_per_turn": -2
@@ -24,11 +24,11 @@
   },
   "passage": {
     "cost": 1500,
-    "cooldown_turns": 6,
+    "cooldown_turns": 8,
     "delay_turns": 2,
     "units_base": 1,
-    "fervor_per_extra_unit": 25,
-    "max_units": 5,
+    "fervor_per_extra_unit": 40,
+    "max_units": 3,
     "unit_table": [
       { "unit": "unit_men_at_arms_foot", "weight": 30 },
       { "unit": "unit_crossbowmen", "weight": 25 },

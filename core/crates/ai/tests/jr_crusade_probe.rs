@@ -78,13 +78,23 @@ pub fn run_seed(data: &GameData, seed: u64, turns: u32, trace: bool) -> SeedRepo
         fervor_min: 100,
         ..SeedReport::default()
     };
+    let watch = std::env::var("JR_WATCH")
+        .ok()
+        .and_then(|id| FactionId::new(&id).ok());
     let mut ashore: BTreeSet<sim_campaign::ArmyId> = BTreeSet::new();
     let mut streak = 0;
     for turn in 1..=turns {
         let planner = |s: &CampaignState, d: &GameData, f: &FactionId| -> Vec<Order> {
             let orders = ai::plan_turn(s, d, f);
-            if trace && f == &faction {
-                for (id, army) in s.armies.iter().filter(|(_, a)| a.faction == faction) {
+            let watched = f == &faction || watch.as_ref() == Some(f);
+            if trace && watched {
+                println!(
+                    "  [s{seed} t{turn}] {f} treasury {} income {} upkeep {}",
+                    s.factions[f].treasury,
+                    s.factions[f].income_last_turn,
+                    s.factions[f].upkeep_last_turn
+                );
+                for (id, army) in s.armies.iter().filter(|(_, a)| &a.faction == f) {
                     println!(
                         "  [s{seed} t{turn}] {id} at {:?} units {} power {:.0} stance {:?}",
                         army.position,
@@ -106,6 +116,18 @@ pub fn run_seed(data: &GameData, seed: u64, turns: u32, trace: bool) -> SeedRepo
                     || e.text_fr.contains("crois")
             }) {
                 println!("  [s{seed} t{turn}] {:?}: {}", e.kind, e.text_fr);
+            }
+        }
+        if trace {
+            if let Some(c) = state
+                .crusade
+                .as_ref()
+                .filter(|c| c.changes_turn + 1 >= turn)
+            {
+                println!(
+                    "  [s{seed} t{turn}] fervour {} {:?}",
+                    c.fervor, c.last_changes
+                );
             }
         }
         report.contingents += events
@@ -187,6 +209,26 @@ pub fn run_seed(data: &GameData, seed: u64, turns: u32, trace: bool) -> SeedRepo
                     .count(),
             );
             report.holder_provinces.push(holder_count(&state));
+            if trace {
+                for (id, army) in state.armies.iter().filter(|(_, a)| a.faction == holder) {
+                    println!(
+                        "  [s{seed} t{turn}] holder {id} in {:?} units {} power {:.0}",
+                        state.army_province(data, army),
+                        army.units.len(),
+                        state.army_power(data, id)
+                    );
+                }
+                for (id, s) in &state.settlements {
+                    if holy(&state, &rules.holy_land, id) {
+                        println!(
+                            "  [s{seed} t{turn}] place {id} {} garrison {} defence {:.0}",
+                            s.controller,
+                            s.garrison.len(),
+                            state.settlement_defensive_power(data, id)
+                        );
+                    }
+                }
+            }
         }
     }
     report

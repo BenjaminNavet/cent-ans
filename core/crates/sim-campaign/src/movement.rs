@@ -760,7 +760,7 @@ pub(crate) fn apply_battle_result(
     state.record_battle(winner, loser, loser_losses > 2 * winner_losses.max(1));
     // JR1: the crusade's fervour follows its battles.
     let (winner, loser) = (winner.clone(), loser.clone());
-    crate::crusade::on_battle(state, data, &winner, &loser);
+    crate::crusade::on_battle(state, data, &winner, &loser, &attacker_faction);
 
     // CV3: nuanced outcome (heroic, decisive, Pyrrhic, disaster...).
     let tally = |ids: &[ArmyId], outcome: &crate::battle_auto::SideOutcome| {

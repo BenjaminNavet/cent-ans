@@ -160,6 +160,23 @@ pub fn is_crusader(state: &CampaignState, data: &GameData, faction: &FactionId) 
     active(state, data).is_some_and(|rules| &rules.faction == faction)
 }
 
+/// The vow binds the AI: the crusader faction, when the player does not
+/// lead it, neither offers nor signs a peace with `other` while `other`
+/// holds the target province. (The player stays free to treat, and pays
+/// for it in fervour each turn.)
+pub fn ai_vow_forbids_peace(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    other: &FactionId,
+) -> bool {
+    faction != &state.player_faction
+        && active(state, data).is_some_and(|rules| {
+            &rules.faction == faction
+                && state.province_controller(&rules.target_province) == Some(other)
+        })
+}
+
 /// Level fervour cannot fall below.
 fn floor(rules: &CrusadeRules, crusade: &CrusadeState) -> u8 {
     if crusade.target_taken {
@@ -248,6 +265,18 @@ fn held_ports(state: &CampaignState, data: &GameData, rules: &CrusadeRules) -> V
     ports.into_iter().map(|(_, id)| id).collect()
 }
 
+/// Mark of the crusade news meant for every faction (the deliverance of the
+/// target and its loss): their text carries this word, which the interface
+/// (`CRUSADE_PUBLIC_MARK` in `game/scripts/ui/season_report.gd`) reads to
+/// show them to all players; the other crusade events concern the crusader
+/// faction alone.
+pub const WORLD_NEWS_MARK: &str = "délivrée";
+
+/// `true` for a crusade event every faction reads (see [`WORLD_NEWS_MARK`]).
+pub fn is_world_news(event: &GameEvent) -> bool {
+    event.kind == EventKind::Crusade && event.text_fr.contains(WORLD_NEWS_MARK)
+}
+
 /// Takes or loses the target province according to who holds its city.
 fn sync_target(state: &mut CampaignState, data: &GameData, events: &mut Vec<GameEvent>) {
     let Some(rules) = active(state, data) else {
@@ -291,7 +320,10 @@ fn sync_target(state: &mut CampaignState, data: &GameData, events: &mut Vec<Game
         events.push(
             GameEvent::new(
                 EventKind::Crusade,
-                format!("{name} est perdue : la ferveur de {faction} n'a plus de plancher."),
+                format!(
+                    "{name}, délivrée par {faction}, est perdue : la ferveur de l'ost \
+                     n'a plus de plancher."
+                ),
             )
             .province(&rules.target_province)
             .faction(&rules.faction),
@@ -488,15 +520,19 @@ fn desert(
     }
 }
 
-/// A field battle, assault or sortie between `winner` and `loser` was
-/// decided: a victory over another faith lifts the fervour, a defeat and
-/// any battle against the same faith lower it. Rebels and kindred churches
-/// (schismatics, not infidels) count for neither.
+/// A field battle, assault, sortie or sea fight between `winner` and
+/// `loser` was decided; `attacker` is the one of the two that sought it. A
+/// victory over another faith lifts the fervour and a defeat lowers it; a
+/// battle the crusade itself sought against its own faith lowers it too
+/// (attacked by brothers in faith, it only defends itself: no malus).
+/// Rebels and kindred churches (schismatics, not infidels) count for
+/// neither.
 pub fn on_battle(
     state: &mut CampaignState,
     data: &GameData,
     winner: &FactionId,
     loser: &FactionId,
+    attacker: &FactionId,
 ) {
     let Some(rules) = active(state, data) else {
         return;
@@ -514,12 +550,14 @@ pub fn on_battle(
         Some(religion::faith_relation(state, data, &rules.faction, other))
     };
     match relation {
-        Some(FaithRelation::Same | FaithRelation::RivalObedience) => change(
-            state,
-            rules,
-            "Bataille livrée contre des frères de foi",
-            rules.fervor.battle_same_faith,
-        ),
+        Some(FaithRelation::Same | FaithRelation::RivalObedience) if attacker == &rules.faction => {
+            change(
+                state,
+                rules,
+                "Bataille livrée contre des frères de foi",
+                rules.fervor.battle_same_faith,
+            )
+        }
         Some(FaithRelation::Different) if won => change(
             state,
             rules,
@@ -934,7 +972,13 @@ mod tests {
         end_of_turn(&mut state);
         assert_eq!(fervor(&state), 0);
         set_fervor(&mut state, 98);
-        on_battle(&mut state, data(), &fac(CRUSADERS), &fac(HOLDER));
+        on_battle(
+            &mut state,
+            data(),
+            &fac(CRUSADERS),
+            &fac(HOLDER),
+            &fac(CRUSADERS),
+        );
         assert_eq!(fervor(&state), 100);
         // Only the points really gained are noted, under the turn's causes.
         let changes = &state.crusade.as_ref().unwrap().last_changes;
@@ -955,27 +999,43 @@ mod tests {
     #[test]
     fn battles_and_wars_move_the_gauge() {
         let mut state = campaign();
+        let brothers = fac("fac_hospitallers");
         // Lost to another faith: only the defeat.
-        on_battle(&mut state, data(), &fac(HOLDER), &fac(CRUSADERS));
+        on_battle(
+            &mut state,
+            data(),
+            &fac(HOLDER),
+            &fac(CRUSADERS),
+            &fac(HOLDER),
+        );
         assert_eq!(fervor(&state), 52);
-        // Won against the same faith: the scandal, no gain.
+        // Won against the same faith it attacked: the scandal, no gain.
         on_battle(
             &mut state,
             data(),
             &fac(CRUSADERS),
-            &fac("fac_hospitallers"),
+            &brothers,
+            &fac(CRUSADERS),
         );
         assert_eq!(fervor(&state), 42);
-        // Lost against the same faith: both.
+        // Lost against the same faith it attacked: both.
         on_battle(
             &mut state,
             data(),
-            &fac("fac_hospitallers"),
+            &brothers,
+            &fac(CRUSADERS),
             &fac(CRUSADERS),
         );
         assert_eq!(fervor(&state), 24);
+        // Attacked by brothers in faith, it only defends itself: no
+        // scandal, won or lost (the defeat still counts).
+        on_battle(&mut state, data(), &fac(CRUSADERS), &brothers, &brothers);
+        assert_eq!(fervor(&state), 24);
+        on_battle(&mut state, data(), &brothers, &fac(CRUSADERS), &brothers);
+        assert_eq!(fervor(&state), 16);
+        set_fervor(&mut state, 24);
         // Other factions' battles and wars are none of its business.
-        on_battle(&mut state, data(), &fac(HOLDER), &fac("fac_hospitallers"));
+        on_battle(&mut state, data(), &fac(HOLDER), &brothers, &fac(HOLDER));
         on_war_declared(&mut state, data(), &fac(HOLDER), &fac(CRUSADERS));
         on_war_declared(&mut state, data(), &fac(CRUSADERS), &fac(HOLDER));
         assert_eq!(fervor(&state), 24);
@@ -1033,14 +1093,16 @@ mod tests {
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].kind, EventKind::Crusade);
         assert_eq!(events[0].province, Some(prov(TARGET)));
-        assert!(
-            events[0].text_fr.contains("délivrée"),
-            "{}",
-            events[0].text_fr
-        );
+        assert!(is_world_news(&events[0]), "{}", events[0].text_fr);
         // The floor holds against defeats and wear.
         set_fervor(&mut state, 53);
-        on_battle(&mut state, data(), &fac(HOLDER), &fac(CRUSADERS));
+        on_battle(
+            &mut state,
+            data(),
+            &fac(HOLDER),
+            &fac(CRUSADERS),
+            &fac(HOLDER),
+        );
         assert_eq!(fervor(&state), 50);
         end_of_turn(&mut state);
         assert_eq!(fervor(&state), 50);
@@ -1058,7 +1120,8 @@ mod tests {
         let lost = end_of_turn(&mut state);
         assert!(!state.crusade.as_ref().unwrap().target_taken);
         assert_eq!(fervor(&state), 59);
-        assert!(lost.iter().any(|e| e.kind == EventKind::Crusade));
+        // The loss is news for every faction too.
+        assert!(lost.iter().any(is_world_news), "{lost:?}");
     }
 
     #[test]
@@ -1321,7 +1384,13 @@ mod tests {
         state.factions.get_mut(&fac(CRUSADERS)).unwrap().alive = false;
         let frozen = state.crusade.clone();
         assert!(end_of_turn(&mut state).is_empty());
-        on_battle(&mut state, data(), &fac(HOLDER), &fac(CRUSADERS));
+        on_battle(
+            &mut state,
+            data(),
+            &fac(HOLDER),
+            &fac(CRUSADERS),
+            &fac(HOLDER),
+        );
         assert_eq!(state.crusade, frozen);
     }
 }

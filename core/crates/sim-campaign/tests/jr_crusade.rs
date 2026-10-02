@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use data_model::{CrusadeRules, FactionId, GameData};
 use sim_campaign::crusade::{self, crusade_view};
-use sim_campaign::{CampaignState, EventKind, Order};
+use sim_campaign::{ArmyPosition, CampaignState, EventKind, Order};
 
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
@@ -223,4 +223,230 @@ fn taking_the_target_province_delivers_it() {
         assert!(crusade.fervor >= rules.fervor.target_floor);
         assert!(crusade.target_taken);
     }
+}
+
+/// The largest army of `faction`.
+fn main_army(state: &CampaignState, faction: &FactionId) -> sim_campaign::ArmyId {
+    state
+        .armies
+        .iter()
+        .filter(|(_, a)| &a.faction == faction)
+        .max_by_key(|(id, a)| (a.units.len(), std::cmp::Reverse((*id).clone())))
+        .map(|(id, _)| id.clone())
+        .expect("faction has an army")
+}
+
+/// A campaign played by `player` where its main army stands in the field
+/// next to the main army of `enemy`, at war with it, ready to attack.
+fn facing(
+    data: &GameData,
+    player: &FactionId,
+    enemy: &FactionId,
+    seed: u64,
+) -> (CampaignState, sim_campaign::ArmyId, sim_campaign::ArmyId) {
+    let mut state = CampaignState::new_1337(data, player.clone(), seed).expect("1337 start");
+    state.interactive_battles = false;
+    let (mine, theirs) = (main_army(&state, player), main_army(&state, enemy));
+    state.armies.retain(|id, _| *id == mine || *id == theirs);
+    let point = [2200.0, 3580.0];
+    state.armies.get_mut(&mine).unwrap().position = ArmyPosition::field(point);
+    state.armies.get_mut(&theirs).unwrap().position =
+        ArmyPosition::field([point[0] + 4.0, point[1]]);
+    for id in [&mine, &theirs] {
+        let allowance = state.army_grid_allowance(data, &state.armies[id]);
+        state.armies.get_mut(id).unwrap().movement_left = allowance;
+    }
+    for (a, b) in [(player, enemy), (enemy, player)] {
+        let f = state.factions.get_mut(a).unwrap();
+        f.at_war_with.insert(b.clone());
+        f.allies.remove(b);
+    }
+    (state, mine, theirs)
+}
+
+/// Fervour causes noted this turn.
+fn causes(state: &CampaignState) -> Vec<(String, i32)> {
+    state.crusade.as_ref().unwrap().last_changes.clone()
+}
+
+#[test]
+fn a_real_battle_against_another_faith_moves_the_fervour() {
+    // JR4: through the attack order and `apply_battle_result`, not the hook.
+    let data = data();
+    let rules = rules(&data);
+    let faction = rules.faction.clone();
+    let holder = fac("fac_mamluks");
+    let (mut state, mine, theirs) = facing(&data, &faction, &holder, 3);
+    let before = state.crusade.as_ref().unwrap().fervor;
+    state
+        .submit_order(
+            &data,
+            Order::Attack {
+                army: mine,
+                target_army: theirs,
+            },
+        )
+        .expect("the attack is fought");
+    let report = state.last_battle_outcome.clone().expect("battle resolved");
+    let won = report.attacker.class.is_victory();
+    let expected = if won {
+        rules.fervor.battle_won_other_faith
+    } else {
+        rules.fervor.battle_lost
+    };
+    let after = state.crusade.as_ref().unwrap().fervor;
+    assert_eq!(
+        i32::from(after),
+        (i32::from(before) + expected).clamp(0, 100),
+        "won: {won}, causes: {:?}",
+        causes(&state)
+    );
+    assert!(causes(&state)
+        .iter()
+        .all(|(cause, _)| !cause.contains("frères de foi")));
+}
+
+#[test]
+fn only_the_battles_the_crusade_seeks_against_its_faith_are_a_scandal() {
+    let data = data();
+    let rules = rules(&data);
+    let faction = rules.faction.clone();
+    let brothers = fac("fac_hospitallers");
+    // The crusade attacks brothers in faith: the scandal.
+    let (mut state, mine, theirs) = facing(&data, &faction, &brothers, 3);
+    state
+        .submit_order(
+            &data,
+            Order::Attack {
+                army: mine,
+                target_army: theirs,
+            },
+        )
+        .expect("the attack is fought");
+    assert!(
+        causes(&state)
+            .iter()
+            .any(|(cause, delta)| cause.contains("frères de foi")
+                && *delta == rules.fervor.battle_same_faith),
+        "{:?}",
+        causes(&state)
+    );
+    // Attacked by them, it only defends itself: no malus but a defeat's.
+    let (mut state, theirs, mine) = facing(&data, &brothers, &faction, 3);
+    let before = state.crusade.as_ref().unwrap().fervor;
+    state
+        .submit_order(
+            &data,
+            Order::Attack {
+                army: theirs,
+                target_army: mine,
+            },
+        )
+        .expect("the attack is fought");
+    let report = state.last_battle_outcome.clone().expect("battle resolved");
+    let expected = if report.attacker.class.is_victory() {
+        rules.fervor.battle_lost
+    } else {
+        0
+    };
+    assert_eq!(
+        i32::from(state.crusade.as_ref().unwrap().fervor),
+        (i32::from(before) + expected).clamp(0, 100),
+        "{:?}",
+        causes(&state)
+    );
+    assert!(causes(&state)
+        .iter()
+        .all(|(cause, _)| !cause.contains("frères de foi")));
+}
+
+#[test]
+fn the_deliverance_and_the_loss_of_the_target_are_news_for_every_faction() {
+    // JR4: a game played by another faction reads both in its turn journal
+    // (the bridge hands the whole journal over; the interface keeps the
+    // crusade events that carry `WORLD_NEWS_MARK` for all players).
+    let data = data();
+    let rules = rules(&data);
+    let faction = rules.faction.clone();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).expect("1337 start");
+    state.interactive_battles = false;
+    let city = state
+        .province_city_id(&rules.target_province)
+        .expect("target city")
+        .clone();
+    let holder = state.settlements[&city].controller.clone();
+    state.settlements.get_mut(&city).unwrap().controller = faction.clone();
+    let events = state.end_turn_with(&data, |_, _, _| Vec::new());
+    let news: Vec<_> = events
+        .iter()
+        .filter(|e| crusade::is_world_news(e))
+        .collect();
+    assert_eq!(news.len(), 1, "{news:?}");
+    assert_eq!(news[0].kind, EventKind::Crusade);
+    assert_eq!(news[0].province.as_ref(), Some(&rules.target_province));
+    assert_eq!(news[0].faction.as_ref(), Some(&faction));
+    assert!(state.crusade.as_ref().unwrap().target_taken);
+    // The private crusade events do not carry the mark.
+    assert!(events
+        .iter()
+        .filter(|e| e.kind == EventKind::Crusade && !crusade::is_world_news(e))
+        .all(|e| !e.text_fr.contains(crusade::WORLD_NEWS_MARK)));
+    // Lost again: news for all too.
+    state.settlements.get_mut(&city).unwrap().controller = holder;
+    let events = state.end_turn_with(&data, |_, _, _| Vec::new());
+    let news: Vec<_> = events
+        .iter()
+        .filter(|e| crusade::is_world_news(e))
+        .collect();
+    assert_eq!(news.len(), 1, "{news:?}");
+    assert!(news[0].text_fr.contains("perdue"), "{}", news[0].text_fr);
+    assert!(!state.crusade.as_ref().unwrap().target_taken);
+}
+
+#[test]
+fn the_vow_binds_the_ai_to_no_peace_with_the_master_of_its_goal() {
+    // JR4: led by the AI, the crusade neither sues for peace with the
+    // holder of the target nor signs one (it bought a truce with its whole
+    // treasury on the first turn and its fervour bled away).
+    use sim_campaign::diplomacy::{evaluate, Proposal};
+    use sim_campaign::negotiation::{evaluate_treaty, plan_peace, Article};
+    let data = data();
+    let rules = rules(&data);
+    let faction = rules.faction.clone();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).expect("1337 start");
+    let holder = state
+        .province_controller(&rules.target_province)
+        .expect("target held")
+        .clone();
+    assert!(state.is_at_war(&faction, &holder));
+    // Desperate: no money, beaten.
+    state.factions.get_mut(&faction).unwrap().treasury = -5000;
+    assert!(crusade::ai_vow_forbids_peace(
+        &state, &data, &faction, &holder
+    ));
+    let verdict = evaluate_treaty(&state, &data, &holder, &faction, &[Article::Peace]);
+    assert!(verdict.blocked.is_some(), "{verdict:?}");
+    assert_eq!(verdict.chance, 0);
+    let white = Proposal::Peace {
+        provinces: Vec::new(),
+        tribute: 0,
+    };
+    assert!(!evaluate(&state, &data, &holder, &faction, &white).accept);
+    for turn in 0..4 {
+        state.turn += turn;
+        let offer = plan_peace(&state, &data, &faction);
+        assert!(
+            !matches!(&offer, Some(Order::ProposeTreaty { target, .. }) if *target == holder),
+            "{offer:?}"
+        );
+    }
+    // Others, and a crusade the player leads, keep their freedom.
+    let cyprus = fac("fac_cyprus");
+    assert!(!crusade::ai_vow_forbids_peace(
+        &state, &data, &cyprus, &holder
+    ));
+    let played = CampaignState::new_1337(&data, faction.clone(), 5).expect("1337 start");
+    assert!(!crusade::ai_vow_forbids_peace(
+        &played, &data, &faction, &holder
+    ));
 }

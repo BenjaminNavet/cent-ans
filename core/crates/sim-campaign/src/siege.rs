@@ -787,7 +787,7 @@ pub(crate) fn apply_assault_result(
     );
     if won {
         state.record_battle(&faction, &defender_faction, true);
-        crate::crusade::on_battle(state, data, &faction, &defender_faction);
+        crate::crusade::on_battle(state, data, &faction, &defender_faction, &faction);
         capture(state, data, settlement, &faction, events);
         if let Some(general) = general {
             dynasty::on_siege_won(state, data, &general);
@@ -802,7 +802,7 @@ pub(crate) fn apply_assault_result(
         }
     } else {
         state.record_battle(&defender_faction, &faction, false);
-        crate::crusade::on_battle(state, data, &defender_faction, &faction);
+        crate::crusade::on_battle(state, data, &defender_faction, &faction, &faction);
     }
 }
 
@@ -912,9 +912,21 @@ fn sortie(
     );
     // JR1: a sortie is a battle for the crusade's fervour too.
     if won {
-        crate::crusade::on_battle(state, data, &garrison.faction, &besieger_faction);
+        crate::crusade::on_battle(
+            state,
+            data,
+            &garrison.faction,
+            &besieger_faction,
+            &garrison.faction,
+        );
     } else {
-        crate::crusade::on_battle(state, data, &besieger_faction, &garrison.faction);
+        crate::crusade::on_battle(
+            state,
+            data,
+            &besieger_faction,
+            &garrison.faction,
+            &garrison.faction,
+        );
     }
     if won {
         state.record_battle(&garrison.faction, &besieger_faction, false);
