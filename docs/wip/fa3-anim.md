@@ -88,6 +88,9 @@ de cheville atteinte à 0,0 cm) : les valeurs non nulles sont des pas de la sour
 - `guard` : bouclier haut devant le buste, visage dégagé (centre du bouclier à 22 cm de la ligne
   de regard au plus près, seuil d'alerte 22 cm) ; garde plus fermée que NT14.
 - Poignets : l'arme suit le poignet droit reciblé, aucune correction de prise.
+- `victory_b` (capture en jeu) : l'épée reste à l'horizontale au-dessus des têtes voisines et le
+  bouclier monte à hauteur de tête ; le keyframé (épée pointée au ciel) se lit mieux.
+- `slash` / `overhead` en jeu : lisibles, bouclier tenu devant le buste pendant le coup.
 
 ## Tests
 - pytest `test_fa3_anim_sources_schema.py` : 4 OK. `ruff check` et `ruff format` : propres.
