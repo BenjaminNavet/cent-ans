@@ -1,12 +1,13 @@
 extends SceneTree
 
-## Lot FA3 : clips CC0 (Mesh2Motion, KayKit) reciblés sur le rig fin `human`. Sans option, le
-## manifeste est celui du jeu (défaut NT14 compris, aucune couche FA3). Avec `-- --fa-anim`, les
-## clips de `fa3_anim/manifest.json` se posent par-dessus : mêmes noms (donc mêmes indices de
+## Lot FA3 : clips CC0 (Mesh2Motion, KayKit) reciblés sur le rig fin `human`, posés par-dessus le
+## défaut NT14. Trois modes : sans option, seuls les clips marqués `default` dans le manifeste
+## (champ de la table `data/fx/fa3_anim_sources.json`) sont substitués ; `-- --fa-anim` : tous ;
+## `-- --no-fa-anim` : aucun (manifeste du jeu d'avant FA3). Mêmes noms (donc mêmes indices de
 ## clip), images placées après celles du rig et de la couche NT14, texture d'os concaténée ; un
 ## clip non couvert (`thrust`) garde sa couche. Chaque clip substitué est joué : ses lignes de
-## texture existent et diffèrent du clip remplacé.
-## Usage : godot --headless --path game --script res://tests/fa3_anim_test.gd [-- --fa-anim]
+## texture existent, sont finies et diffèrent du clip remplacé.
+## Usage : godot --headless --path game --script res://tests/fa3_anim_test.gd [-- --fa-anim | --no-fa-anim]
 
 const RIG := "fine_human"
 const MELEE := ["guard", "slash", "overhead", "parry", "hit", "death"]
@@ -39,13 +40,14 @@ func _row(image: Image, row: int) -> PackedFloat32Array:
 
 
 func _init() -> void:
-	var cmd_on := OS.get_cmdline_user_args().has("--fa-anim")
+	var args := OS.get_cmdline_user_args()
+	var cmd_mode := BattleSkinned.FA_NONE if args.has("--no-fa-anim") else BattleSkinned.FA_ALL if args.has("--fa-anim") else BattleSkinned.FA_DEFAULT
 	if not BattleSkinned.fine_enabled():
-		_check(not BattleSkinned.fa_anim_enabled(), "couche inactive sur le kit grossier")
+		_check(BattleSkinned.fa_anim_mode() == BattleSkinned.FA_NONE, "couche inactive sur le kit grossier")
 		print("FA3 anim (coarse): %s" % ("OK" if ok else "FAIL"))
 		quit(0 if ok else 1)
 		return
-	_check(BattleSkinned.fa_anim_enabled() == cmd_on, "couche lue sur la ligne de commande")
+	_check(BattleSkinned.fa_anim_mode() == cmd_mode, "mode lu sur la ligne de commande")
 	# Essais de la ligne de commande écartés : FA3 est comparé au jeu par défaut (NT14).
 	BattleSkinned.video_trial_forced = 0
 	BattleSkinned.mocap_trial_forced = 0
@@ -83,14 +85,35 @@ func _init() -> void:
 	# Le clip d'archer décoche à l'instant attendu par le mode VOLLEY (1,55 s).
 	if fa_clips.has("bow_shoot"):
 		_check(int(fa_clips["bow_shoot"]["frames"]) > int(1.55 * 24.0), "bow_shoot dépasse la décoche")
-	for forced in [0, 1]:
+	# Les clips par défaut viennent du manifeste (donc de la table), pas du code.
+	var defaults: Array = []
+	for c in fa_clips:
+		_check((fa_clips[c] as Dictionary).has("default"), "%s : champ default" % c)
+		if bool(fa_clips[c].get("default", false)):
+			defaults.append(c)
+	_check(not defaults.is_empty() and defaults.size() < fa_clips.size(), "une partie des clips par défaut (%d)" % defaults.size())
+	# Mode de la ligne de commande d'abord (non forcé), puis les trois modes forcés.
+	BattleSkinned.reload_caches()
+	_check_rig(base, melee, fa, base_frames, melee_frames, fa_frames, _covered(cmd_mode, fa_clips, defaults))
+	for forced in [BattleSkinned.FA_NONE, BattleSkinned.FA_DEFAULT, BattleSkinned.FA_ALL]:
 		BattleSkinned.fa_anim_forced = forced
 		BattleSkinned.reload_caches()
-		_check(BattleSkinned.fa_anim_enabled() == (forced == 1), "forçage %d" % forced)
-		_check_rig(base, melee, fa, base_frames, melee_frames, fa_frames, forced == 1)
+		_check(BattleSkinned.fa_anim_mode() == forced, "forçage %d" % forced)
+		_check_rig(base, melee, fa, base_frames, melee_frames, fa_frames, _covered(forced, fa_clips, defaults))
+	# Un essai demandé n'est pas recouvert par les clips par défaut, mais l'est par `--fa-anim`.
+	BattleSkinned.video_trial_forced = 1
+	BattleSkinned.fa_anim_forced = BattleSkinned.FA_DEFAULT
+	BattleSkinned.reload_caches()
+	var trial: Dictionary = BattleSkinned.manifest().get("rigs", {}).get(RIG, {})
+	_check(str(trial.get("mocap_trial_dir", "")) == BattleSkinned.VIDEO_TRIAL_DIR, "essai vidéo non recouvert par défaut")
+	BattleSkinned.fa_anim_forced = BattleSkinned.FA_ALL
+	BattleSkinned.reload_caches()
+	trial = BattleSkinned.manifest().get("rigs", {}).get(RIG, {})
+	_check(str(trial.get("mocap_trial_dir", "")) == BattleSkinned.FA_ANIM_DIR, "--fa-anim par-dessus un essai")
+	BattleSkinned.video_trial_forced = 0
 	# Sans la couche NT14 (`--keyframed-melee`), FA3 suit directement le rig.
 	BattleSkinned.melee_forced = 0
-	BattleSkinned.fa_anim_forced = 1
+	BattleSkinned.fa_anim_forced = BattleSkinned.FA_ALL
 	BattleSkinned.reload_caches()
 	var alone: Dictionary = BattleSkinned.manifest().get("rigs", {}).get(RIG, {})
 	_check(int(alone["clips"]["guard"]["start"]) == base_frames + int(fa_clips["guard"]["start"]), "FA3 seul : après le rig")
@@ -101,11 +124,18 @@ func _init() -> void:
 	BattleSkinned.video_trial_forced = -1
 	BattleSkinned.mocap_trial_forced = -1
 	BattleSkinned.reload_caches()
-	print("FA3 anim (cmd=%s): %s" % [cmd_on, "OK" if ok else "FAIL"])
+	print("FA3 anim (mode=%s): %s" % [["none", "default", "all"][cmd_mode], "OK" if ok else "FAIL"])
 	quit(0 if ok else 1)
 
 
-func _check_rig(base: Dictionary, melee: Dictionary, fa: Dictionary, base_frames: int, melee_frames: int, fa_frames: int, on: bool) -> void:
+## Clips FA3 substitués dans un mode.
+func _covered(mode: int, fa_clips: Dictionary, defaults: Array) -> Array:
+	if mode == BattleSkinned.FA_ALL:
+		return fa_clips.keys()
+	return defaults if mode == BattleSkinned.FA_DEFAULT else []
+
+
+func _check_rig(base: Dictionary, melee: Dictionary, fa: Dictionary, base_frames: int, melee_frames: int, fa_frames: int, covered: Array) -> void:
 	var entry: Dictionary = BattleSkinned.manifest().get("rigs", {}).get(RIG, {})
 	_check(not entry.is_empty(), "rig %s présent" % RIG)
 	var clips: Dictionary = entry.get("clips", {})
@@ -122,23 +152,27 @@ func _check_rig(base: Dictionary, melee: Dictionary, fa: Dictionary, base_frames
 	if tex == null:
 		return
 	var image := tex.get_image()
-	if not on:
-		# Défaut du jeu inchangé : une seule couche (NT14), clips du rig ou de NT14.
-		_check(layers.size() == 1 and str(layers[0]).begins_with(BattleSkinned.MELEE_DIR), "sans l'option : couche NT14 seule")
-		_check(tex.get_height() == base_frames + melee_frames, "sans l'option : texture rig + NT14 (%d)" % tex.get_height())
-		for c in fa_clips:
-			var got: Dictionary = clips.get(c, {})
-			if melee_clips.has(c):
-				_check(int(got["start"]) == base_frames + int(melee_clips[c]["start"]), "%s : clip NT14 sans l'option" % c)
-			else:
-				_check(got == base_clips.get(c, {}), "%s : clip du rig sans l'option" % c)
+	# Clips FA3 non substitués dans ce mode : ceux du jeu d'avant (NT14 ou rig).
+	for c in fa_clips:
+		if covered.has(c):
+			continue
+		var kept: Dictionary = clips.get(c, {})
+		if melee_clips.has(c):
+			_check(int(kept["start"]) == base_frames + int(melee_clips[c]["start"]), "%s : clip NT14 hors couche" % c)
+		else:
+			_check(kept == base_clips.get(c, {}), "%s : clip du rig hors couche" % c)
+	if covered.is_empty():
+		# `--no-fa-anim` : une seule couche (NT14), aucune image FA3.
+		_check(layers.size() == 1 and str(layers[0]).begins_with(BattleSkinned.MELEE_DIR), "sans FA3 : couche NT14 seule")
+		_check(tex.get_height() == base_frames + melee_frames, "sans FA3 : texture rig + NT14 (%d)" % tex.get_height())
 		return
 	_check(layers.size() == 2 and str(layers[1]).begins_with(BattleSkinned.FA_ANIM_DIR), "couche FA3 après la couche NT14")
-	_check((entry.get("mocap_clips", []) as Array).size() == fa_clips.size(), "%d clips substitués" % fa_clips.size())
+	_check((entry.get("mocap_clips", []) as Array).size() == covered.size(), "%d clips substitués" % covered.size())
 	_check(tex.get_height() == base_frames + melee_frames + fa_frames, "texture concaténée (%d)" % tex.get_height())
 	_check(tex.get_height() <= 16384, "hauteur de texture dans la limite")
-	for c in fa_clips:
+	for c in covered:
 		var got: Dictionary = clips.get(c, {})
+		_check(not got.has("default"), "%s : champ default hors de la table de clips" % c)
 		var want: Dictionary = fa_clips[c]
 		var start := base_frames + melee_frames + int(want["start"])
 		_check(int(got.get("start", -1)) == start, "%s repointé après le rig et NT14" % c)

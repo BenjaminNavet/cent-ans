@@ -81,10 +81,11 @@
     },
     "clip": {
       "type": "object",
-      "required": ["clip", "family", "loop", "parts"],
+      "required": ["clip", "default", "family", "loop", "parts"],
       "additionalProperties": false,
       "properties": {
         "clip": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "default": {"type": "boolean"},
         "family": {"enum": ["melee", "polearm", "bow", "cheer"]},
         "loop": {"type": "boolean"},
         "note": {"type": "string"},

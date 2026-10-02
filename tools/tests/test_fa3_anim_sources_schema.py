@@ -55,7 +55,27 @@ def test_fa3_anim_bake_matches_the_table() -> None:
     names = {clip["clip"] for clip in table["clips"]}
     assert set(baked["clips"]) == names
     assert set(baked["clip_sources"]) == names
+    defaults = {clip["clip"]: clip["default"] for clip in table["clips"]}
+    for name, clip in baked["clips"].items():
+        assert clip["default"] is defaults[name], name
     for name, record in baked["clip_sources"].items():
         assert record["license"] == "CC0-1.0", name
         assert "foot_slide_cm" in record["quality"], name
         assert "loop_gap_cm" in record["quality"], name
+
+
+def test_fa3_anim_defaults_are_the_judged_clips() -> None:
+    """The clips played without an option are flagged in the table, never in code."""
+    table = _load(DATA / "fx" / "fa3_anim_sources.json")
+    defaults = {clip["clip"] for clip in table["clips"] if clip["default"]}
+    assert defaults, "at least one default clip"
+    assert defaults < {clip["clip"] for clip in table["clips"]}, (
+        "some clips stay trials"
+    )
+    script = (ROOT / "game" / "scripts" / "battle" / "battle_skinned.gd").read_text(
+        encoding="utf-8"
+    )
+    fa3 = script[script.index("static func fa_anim_mode") :]
+    fa3 = fa3[: fa3.index("\n\n\n")]
+    for name in table["clips"]:
+        assert f'"{name["clip"]}"' not in fa3, name["clip"]

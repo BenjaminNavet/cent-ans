@@ -34,6 +34,7 @@
     "Bow Release"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": false,
    "family": "bow",
    "license": "CC0-1.0",
    "note": "draw (30), hold (7), loose at 1.55 s (12), back to the first pose (11)",
@@ -74,6 +75,7 @@
     "Death_D"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": true,
    "family": "melee",
    "license": "CC0-1.0",
    "note": "staggers and falls on the back",
@@ -114,6 +116,7 @@
     "Death_B"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": true,
    "family": "melee",
    "license": "CC0-1.0",
    "note": "thrown backwards",
@@ -154,6 +157,7 @@
     "Idle_Shield"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": false,
    "family": "melee",
    "license": "CC0-1.0",
    "note": "upright, shield held before the chest, sword low at the side",
@@ -194,6 +198,7 @@
     "Hit_Chest"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": false,
    "family": "melee",
    "license": "CC0-1.0",
    "note": "blow to the chest",
@@ -234,6 +239,7 @@
     "Hit_Head"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": false,
    "family": "melee",
    "license": "CC0-1.0",
    "note": "blow to the head",
@@ -274,6 +280,7 @@
     "Melee_1H_Attack_Chop"
    ],
    "author": "Kay Lousberg (www.kaylousberg.com)",
+   "default": false,
    "family": "melee",
    "license": "CC0-1.0",
    "note": "one-handed chop from above (Mesh2Motion has no in-place overhead cut)",
@@ -314,6 +321,7 @@
     "Shield_OneShot"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": true,
    "family": "melee",
    "license": "CC0-1.0",
    "note": "shield thrown across the chest, then back",
@@ -354,6 +362,7 @@
     "Melee_2H_Idle"
    ],
    "author": "Kay Lousberg (www.kaylousberg.com)",
+   "default": false,
    "family": "polearm",
    "license": "CC0-1.0",
    "note": "two-handed weapon levelled, ready",
@@ -413,6 +422,7 @@
     "Melee_2H_Attack_Stab"
    ],
    "author": "Kay Lousberg (www.kaylousberg.com)",
+   "default": false,
    "family": "polearm",
    "license": "CC0-1.0",
    "note": "two-handed stab",
@@ -472,6 +482,7 @@
     "Melee_1H_Attack_Slice_Diagonal"
    ],
    "author": "Kay Lousberg (www.kaylousberg.com)",
+   "default": false,
    "family": "melee",
    "license": "CC0-1.0",
    "note": "diagonal cut on the spot, shield kept up (Mesh2Motion's Sword_Attack drops to a knee and switches stance, its Sword_Regular clips travel 0.8 m)",
@@ -512,6 +523,7 @@
     "Cheer_One_arm"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": false,
    "family": "cheer",
    "license": "CC0-1.0",
    "note": "right arm (weapon) pumped overhead, motion capture",
@@ -552,6 +564,7 @@
     "Cheering_Two_Hands"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "default": false,
    "family": "cheer",
    "license": "CC0-1.0",
    "note": "both arms raised, motion capture",
@@ -590,66 +603,79 @@
  },
  "clips": {
   "bow_shoot": {
+   "default": false,
    "frames": 60,
    "loop": false,
    "start": 303
   },
   "death": {
+   "default": true,
    "frames": 53,
    "loop": false,
    "start": 151
   },
   "death_back": {
+   "default": true,
    "frames": 45,
    "loop": false,
    "start": 204
   },
   "guard": {
+   "default": false,
    "frames": 60,
    "loop": true,
    "start": 0
   },
   "hit": {
+   "default": false,
    "frames": 14,
    "loop": false,
    "start": 123
   },
   "hit_b": {
+   "default": false,
    "frames": 14,
    "loop": false,
    "start": 137
   },
   "overhead": {
+   "default": false,
    "frames": 18,
    "loop": false,
    "start": 81
   },
   "parry": {
+   "default": true,
    "frames": 24,
    "loop": false,
    "start": 99
   },
   "pike_level": {
+   "default": false,
    "frames": 26,
    "loop": true,
    "start": 249
   },
   "pike_thrust": {
+   "default": false,
    "frames": 28,
    "loop": false,
    "start": 275
   },
   "slash": {
+   "default": false,
    "frames": 21,
    "loop": false,
    "start": 60
   },
   "victory": {
+   "default": false,
    "frames": 52,
    "loop": true,
    "start": 363
   },
   "victory_b": {
+   "default": false,
    "frames": 38,
    "loop": true,
    "start": 415

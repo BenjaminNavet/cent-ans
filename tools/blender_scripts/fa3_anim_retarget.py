@@ -27,8 +27,8 @@ On top of NT12:
 
 Output: ``game/assets/models/battle_fine/fa3_anim/`` — ``human.bones.bin`` and
 ``manifest.json`` (clip table, source and licence of each clip, measures, the same measures
-on the clip it replaces). ``BattleSkinned`` substitutes these clips with ``--fa-anim`` after
-``--`` (defaults unchanged without it).
+on the clip it replaces). ``BattleSkinned`` substitutes the clips flagged ``default`` in the
+table, all of them with ``--fa-anim`` after ``--``, none with ``--no-fa-anim``.
 """
 
 import json
@@ -871,6 +871,15 @@ def bake():
         "tools/blender_scripts/fa3_anim_retarget.py - Mesh2Motion and KayKit animations "
         "(CC0), table data/fx/fa3_anim_sources.json, see docs/wip/fa3-anim.md",
     )
+    # `default`: the clips ``BattleSkinned`` substitutes without an option (from the table).
+    path = os.path.join(OUT_DIR, "manifest.json")
+    with open(path) as f:
+        manifest = json.load(f)
+    for name, clip in clips.items():
+        manifest["clips"][name]["default"] = bool(clip.spec["default"])
+        manifest["clip_sources"][name]["default"] = bool(clip.spec["default"])
+    with open(path, "w") as f:
+        json.dump(manifest, f, indent=1, sort_keys=True)
 
 
 # --- Check renders ------------------------------------------------------------------------
