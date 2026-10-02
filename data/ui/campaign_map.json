@@ -73,6 +73,14 @@
     "mask_shadow_softness": 0.5,
     "mask_shadow_scale": 0.5
   },
+  "forest_masses": {
+    "description": "TB6 : massifs forestiers de la carte de couleur du sol (vue moyenne et large), presque noirs à bord net avant ce réglage. floor : luminance linéaire plancher des masses sombres (0 : carte inchangée) ; knee : au-delà de floor × knee, la carte n'est pas touchée ; feather : flou du masque en niveaux de mip (lisière fondue sur quelques pixels de carte) ; keep : part du contraste d'origine gardée sous le plancher ; canopy : amplitude du modelé de canopée.",
+    "floor": 0.12,
+    "knee": 2.0,
+    "feather": 2.5,
+    "keep": 0.25,
+    "canopy": 0.12
+  },
   "morning_mist": {
     "description": "TB6 (ADR 0156) : brume du matin de la météo « brume » (canal B du masque météo), en nappe basse dans les vallées. Brouillard de hauteur calculé dans le shader du sol : un point est dans la nappe quand il est plus bas que l'altitude moyenne alentour (valley_depth_m : début et plein, mètres ; wide_lod : niveau de la carte des hauteurs qui donne cette moyenne, 4,5 ≈ 16 km). opacity : opacité maximale ; grazing_gain : épaisseur ajoutée en vue rasante ; lifted_share : part qui reste une fois la brume levée (elle se lève au fil du tour) ; near_share : part gardée de près. Jamais sur la province sélectionnée.",
     "opacity": 0.55,

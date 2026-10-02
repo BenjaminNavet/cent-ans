@@ -245,9 +245,9 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 	var env := (map.get_node_or_null("WorldEnvironment") as WorldEnvironment).environment
 	var trees: Array[Node3D] = []
 	for node in map.find_children("*", "Node3D", true, false):
-		var script: Script = node.get_script()
-		if script != null and script.resource_path.ends_with("/vegetation.gd") and (node as Node3D).visible:
+		if node is Vegetation and (node as Node3D).visible:
 			trees.append(node)
+	print("TB6 ab %s tree nodes %d, forest floor %s" % [name, trees.size(), material.get_shader_parameter("sg_dark_floor")])
 	var saved := {
 		"medium": view.cloud_medium_alpha, "max": view.cloud_max_alpha,
 		"weather": material.get_shader_parameter("weather_enabled"),
@@ -256,10 +256,11 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		"mist": material.get_shader_parameter("weather_mist_max"),
 		"valley": material.get_shader_parameter("weather_valley_mist"),
 		"fow": material.get_shader_parameter("fog_enabled"),
+		"floor": material.get_shader_parameter("sg_dark_floor"),
 		"sg": material.get_shader_parameter("sg_strength"), "hb": material.get_shader_parameter("hb_strength"),
 		"ssao": env.ssao_enabled, "ssil": env.ssil_enabled, "fog": env.fog_enabled,
 	}
-	for layer: String in ["clouds", "ground_weather", "cloud_shadows", "sun_shadows", "mist", "valley_mist", "colormap", "biome_ground", "trees", "fog_of_war", "ssao", "ssil", "depth_fog"]:
+	for layer: String in ["clouds", "ground_weather", "cloud_shadows", "sun_shadows", "mist", "valley_mist", "colormap", "forest_floor", "biome_ground", "trees", "fog_of_war", "ssao", "ssil", "depth_fog"]:
 		# Image de référence reprise avant chaque calque : la dérive (vent, figurants) ne compte pas.
 		var with := _block_luminance(_grab())
 		match layer:
@@ -281,6 +282,8 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 				material.set_shader_parameter("fog_enabled", false)
 			"colormap":
 				material.set_shader_parameter("sg_strength", 0.0)
+			"forest_floor":
+				material.set_shader_parameter("sg_dark_floor", 0.0)
 			"biome_ground":
 				material.set_shader_parameter("hb_strength", 0.0)
 			"trees":
@@ -305,6 +308,7 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		material.set_shader_parameter("weather_valley_mist", saved["valley"])
 		sun.shadow_enabled = saved["sun"]
 		material.set_shader_parameter("sg_strength", saved["sg"])
+		material.set_shader_parameter("sg_dark_floor", saved["floor"])
 		material.set_shader_parameter("hb_strength", saved["hb"])
 		for node: Node3D in trees:
 			node.visible = true
@@ -312,6 +316,20 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		env.ssao_enabled = saved["ssao"]
 		env.ssil_enabled = saved["ssil"]
 		env.fog_enabled = saved["fog"]
+		# Part des blocs de sol très sombres (< 40 % de la médiane de la vue complète) sans ce calque.
+		var with_sorted: Array[float] = []
+		for i in with.size():
+			if land[i] >= 1:
+				with_sorted.append(with[i])
+		with_sorted.sort()
+		var threshold := with_sorted[with_sorted.size() / 2] * 0.4
+		var dark_with := 0
+		var dark_without := 0
+		for i in with.size():
+			if land[i] >= 1:
+				dark_with += 1 if with[i] < threshold else 0
+				dark_without += 1 if without[i] < threshold else 0
+		print("TB6 ab %s %s very dark blocks %.1f%% with, %.1f%% without" % [name, layer, 100.0 * dark_with / with_sorted.size(), 100.0 * dark_without / with_sorted.size()])
 		var ratios: Array[float] = []
 		var selected_sum := 0.0
 		var selected_count := 0

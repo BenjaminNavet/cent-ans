@@ -47,6 +47,7 @@ func _run() -> void:
 	await _test_golden_light(map)
 	_test_quality(map)
 	_test_morning_mist(map)
+	_test_forest_masses(map)
 	map.queue_free()
 	await process_frame
 
@@ -210,6 +211,26 @@ func _test_morning_mist(map: Node3D) -> void:
 	view._update_selection_clear()
 	_check(int(material.get_shader_parameter("weather_clear_id")) == 0, "no cleared province once the selection is dropped")
 	print("tb6 mist: opacity %.2f, valley depth %s m, lift %.2f -> %.2f, cleared province %d" % [opacity, depth, early, late, paris])
+
+
+## 5. Massifs forestiers de la carte de couleur : plancher de luminance, lisière fondue, modelé
+## de canopée, réglés par les données et posés sur le matériau du terrain.
+func _test_forest_masses(map: Node3D) -> void:
+	var material: ShaderMaterial = map.terrain.material
+	var block := MapReadability.section("forest_masses")
+	if not _check(not block.is_empty(), "forest_masses block missing in data/ui/campaign_map.json"):
+		return
+	for key: String in ["floor", "knee", "feather", "keep", "canopy"]:
+		var applied: Variant = material.get_shader_parameter("sg_dark_" + key)
+		_check(applied != null and is_equal_approx(float(applied), float(block.get(key, -1.0))), "sg_dark_%s should carry forest_masses.%s (got %s)" % [key, key, applied])
+	var floor_lum := float(block.get("floor", 0.0))
+	_check(floor_lum >= 0.08 and floor_lum <= 0.2, "forest floor should lift dark masses yet keep forests darker than fields (%.2f)" % floor_lum)
+	_check(float(block.get("feather", 0.0)) >= 1.5, "forest edge should be feathered over a few map pixels")
+	_check(float(block.get("canopy", 0.0)) > 0.0 and float(block.get("keep", 0.0)) > 0.0, "canopy modelling should survive the lift")
+	var include := FileAccess.get_file_as_string("res://shaders/satellite_ground.gdshaderinc")
+	_check(include.contains("sg_dark_floor > 0.0"), "colour map hook should leave the map untouched without data")
+	print("tb6 forests: floor %.2f, knee %.1f, feather %.1f mips, keep %.2f, canopy %.2f" % [
+		floor_lum, float(block.get("knee", 0.0)), float(block.get("feather", 0.0)), float(block.get("keep", 0.0)), float(block.get("canopy", 0.0))])
 
 
 func _check(condition: bool, message: String) -> bool:
