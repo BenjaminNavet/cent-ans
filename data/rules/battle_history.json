@@ -1,0 +1,5 @@
+{
+  "description": "Chantier TB, lot « historique des batailles » (ADR 0157, révision) : bornes de l'historique des batailles terrestres gardé dans l'état de campagne et dans les sauvegardes (tour, province, position, camps, vainqueur, effectifs, pertes). Lu par la carte pour marquer les champs de bataille (data/ui/war_scars.json : battlefield.turns doit rester inférieur ou égal à max_age_turns). Aucune règle de jeu ne lit l'historique.",
+  "max_age_turns": 8,
+  "max_records": 256
+}

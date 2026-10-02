@@ -53,6 +53,7 @@ pub use entities::battle_ability::{
     AbilityCondition, AbilityKind, BattleAbility, BattleAbilityAi, BattleAbilityEffects,
     BattleAbilityFilter,
 };
+pub use entities::battle_history::BattleHistoryRules;
 pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
     BattleOrderScope,
