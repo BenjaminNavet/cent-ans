@@ -57,5 +57,5 @@ Objectif : le jeu se lance et s'exporte sous Windows x86_64.
   `tools/launcher-windows/` (2 tests unitaires), build `tools/launcher-windows/build.sh`.
   Même travail que le `.bat`, qui reste en repli.
 - CI `windows.yml` : tests unitaires du lanceur, puis smoke via l'exécutable commité.
-- Branche `windows/launcher-exe` (worktree `../gp-winexe`). Prochaine étape : run CI vert, puis
-  fusion `--ff-only` dans main et suppression du worktree.
+- CI run 37030962872 vert (exe commité : compilation, import, smoke sous Windows). Fusionné dans
+  main et poussé (661ed46a9) ; branche et worktree supprimés. ADR renuméroté 0153 (0150 pris).
