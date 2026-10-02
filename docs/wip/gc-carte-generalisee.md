@@ -7,18 +7,33 @@ copiée de main : aucun changement Rust prévu).
 « Je sacrifie la vue rapprochée, carte lisible à hauteur de jeu. » Paris, la Seine, etc. agrandis,
 géographie relative vraie. Origine : champs (HB3 ×3) et camps plus gros que les villes 1:1.
 
-## Lots
-- [x] GC0 : diagnostic, ADR 0158, worktree, inventaire des points d'échelle (ci-dessous).
-- [ ] GC1 : prototype du grossissement des villes (un facteur réglable) + captures à hauteur de
-      jeu pour choisir facteur, loi compressive et plancher de caméra. **Jugement du joueur.**
-- [ ] GC2 : villes — tous les niveaux (plan, F1, F2), sol, masques, clic, anneau, étiquettes,
-      zones d'armée.
-- [ ] GC3 : collisions — lieux absorbés en faubourgs.
-- [ ] GC4 : fleuves et routes élargis, ponts.
-- [ ] GC5 : champs (HB3 par rapport aux villes), arbres, hameaux, moulins, figurants.
-- [ ] GC6 : plancher de caméra, retrait des paliers vallée/site, ménage (ZG5b, herbe 1:1), banc.
+## Lots (plan révisé le 02/10 : villes **stylisées**, autonomie totale du joueur)
+- [x] GC0 : diagnostic, ADR 0158, worktree, inventaire des points d'échelle.
+- [x] GC1 : prototypes et planches. Réel grossi ×8 / ×14 **rejeté** (tache brune à moyenne
+      distance) ; maquettes stylisées **retenues** (planche `gc1_reel_x8_vs_stylise.jpg`).
+- [ ] GC2 (agent, `../gp-gc`) : système de maquettes — données `data/art/town_maquettes.json`
+      (tailles par type, familles d'architecture par culture/région, portées), `TownMaquetteLayer`
+      en MultiMesh par tuile, activé par défaut, calques 1:1 éteints, emprises (clic, anneau,
+      étiquettes, exclusions) sur la maquette, voisins trop proches réduits, `LandmarkModel` grossi.
+- [ ] GC3 (agent, `../gp-gc-kit`, branche `feat/gc-kit`) : kits de l'Est et du Sud générés par
+      Blender (`tools/blender_scripts/settlements.py`) : `med`, `byz`, `rus`, `isl`, `steppe`,
+      5 types × 2 variantes, noms `settlements/<type>_<famille>_<a|b>.glb`.
+- [ ] GC3b (agent de recherche) : modèles libres sur internet (CC0 / CC-BY seulement, dépôt
+      public), rapport + téléchargements hors dépôt (`~/.cache/cent_ans/gc_assets/`).
+- [ ] GC4 : fleuves et routes élargis près des maquettes, ponts.
+- [ ] GC5 : champs (HB3) réglés par rapport aux maquettes ; hameaux, moulins, arbres.
+- [ ] GC6 : plancher de caméra, retrait des paliers vallée/site, ménage du 1:1 et du prototype
+      `MapScale`, banc.
 - [ ] GC7 : camps (avec SA, ADR 0156).
-- [ ] GC8 : tests, `godot-map.md`, mémoire.
+- [ ] GC8 : tests, `godot-map.md`, ADR, mémoire, fusion dans main.
+
+### Contrat entre GC2 et GC3
+- Modèle : `res://assets/models/settlements/<type>_<famille>_<variante>.glb`, type ∈ city, town,
+  castle, abbey, village ; famille ∈ med, byz, rus, isl, steppe (l'Ouest garde `<type>_<a|b>`).
+- Un maillage joint, < 5 000 triangles (ville < 12 000), matériau `Banner` teinté par Godot,
+  bâtiments prolongés sous z = 0, même emprise au sol que l'équivalent occidental (ville ≈ 3,6,
+  bourg ≈ 2,0, château ≈ 1,9, abbaye ≈ 2,2, village ≈ 2,0 unités Blender).
+- Modèle absent : repli sur la famille Ouest.
 
 ## Coordination
 - SA (`../gp-sa`, ADR 0156) refait l'échelle des pions d'armée : ne pas toucher `army_markers.gd`.
@@ -89,4 +104,4 @@ géographie relative vraie. Origine : champs (HB3 ×3) et camps plus gros que le
   pas encore mis à l'échelle par le prototype (drapé sur le relief à revoir).
 
 ## Prochaine étape
-Jugement du joueur sur la planche réel ×8 / stylisé ; puis maquettes plus grosses à d 150-300.
+Vague 1 lancée (GC2, GC3, GC3b en parallèle) ; à leur retour : captures `gc_shots.gd`, revue, puis GC4-GC6.

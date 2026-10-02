@@ -1,7 +1,6 @@
 # ADR 0158 — Carte généralisée : positions vraies, objets grossis d'un facteur constant
 
-Date : 2026-10-02. Statut : acceptée dans son principe (décision du joueur du 02/10) ; valeurs
-(facteur, loi par taille de ville, plancher de caméra) à fixer sur les captures du lot GC1.
+Date : 2026-10-02. Statut : acceptée (décisions du joueur du 02/10, captures du lot GC1).
 Chantier GC, suivi `docs/wip/gc-carte-generalisee.md`.
 
 ## Contexte
@@ -32,10 +31,15 @@ La carte de campagne devient une **carte généralisée**, à la manière des je
 2. **Est grossi** : l'emprise des villes et des hameaux, la largeur des fleuves et des routes, les
    moulins, les arbres, les camps. Le grossissement est **constant quelle que soit la distance de
    caméra** : rien ne « respire » au zoom (défaut de SZ4/SZ4b, où l'exagération allait de 1 à 125).
-3. **Loi compressive par taille** : une petite ville est plus grossie qu'une grande, sans jamais
-   inverser l'ordre des tailles. Les paramètres vivent dans les données (`data/ui/campaign_map.json`).
-4. **Collisions** : un lieu dont l'emprise grossie tombe dans celle d'un lieu plus important n'a
-   plus de maquette propre ; il devient un faubourg du grand (son nom reste).
+3. **Villes stylisées, pas un plan réel grossi.** Essai du lot GC1 : le plan réel grossi ×8 ou ×14
+   reste une tache brune à moyenne distance (centaines de petites maisons sombres). Le joueur
+   retient des **maquettes stylisées** : peu d'éléments, gros et clairs, silhouette lisible
+   (enceinte, cathédrale, tours). Une maquette par type de lieu (ville, bourg, château, abbaye,
+   village) et par famille d'architecture (Ouest, Méditerranée, Byzance, Rus', Islam, steppe),
+   à **taille monde constante par type** ; les villes emblématiques gardent leur maquette propre
+   (`LandmarkModel`). Tailles, familles et portées vivent dans `data/art/town_maquettes.json`.
+4. **Collisions** : un lieu dont la maquette toucherait celle d'un lieu plus important est réduit,
+   jusqu'à un plancher ; son nom reste.
 5. **Ville et fleuve** : la ville grossie est une maquette posée sur le vrai terrain ; son fleuve
    intérieur est le fleuve élargi de la carte, pas celui du plan. Pas de déformation locale de
    l'espace autour des villes.
@@ -49,7 +53,8 @@ La carte de campagne devient une **carte généralisée**, à la manière des je
 ## Conséquences
 
 - Remplace l'ADR 0138 (villes 1:1 à toutes les hauteurs) et l'ADR 0144 pour la carte de campagne.
-  Les maillages lointains F1/F2 et les plans de ville de VT/VH restent la source des maquettes.
+  Les villes 1:1 (plans ZG6/VH, lointain F1/F2) quittent la carte de campagne ; les maquettes du
+  kit (lot C6) et les `LandmarkModel` (L1), retirés par VT, y reviennent à taille constante.
 - Le relief fin autour des villes (E4, chantier RF, ADR 0157) perd l'essentiel de son intérêt ; le
   relief E3 partout reste utile, puisque le relief reste vrai.
 - Le parcellaire de près à l'échelle réelle (ZG5b), l'herbe et les figurants à 1:1 ne sont plus
