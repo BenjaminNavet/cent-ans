@@ -23,7 +23,7 @@ revendications `prov_jerusalem`, `prov_gaza`, `prov_safad`.
 
 ## État
 - Spec, ADR, note écrits ; exploration faite (spec § 5.1). JR1 et JR2 lancés.
-- JR1 : règle complète (barème, crochets, aumônes dans le revenu, passage, élan, débandade, vue, pont `get_crusade()`, IA), `feat/jr-data` fusionnée, audit de la capitale fait (récompense de mission, sites de recrutement et levée de l'IA pour une faction sans cité), tests unitaires (13), d'intégration (`sim-campaign/tests/jr_crusade.rs`, 6) et IA (`ai/tests/jr_crusade_ai.rs`, 2) verts. Prochaine étape : suite `cargo test` complète, puis rapport.
+- JR1 : TERMINÉ sur `feat/jr` (dernière fusion de `feat/jr-data` : a0c93dd82). Règle complète, pont `get_crusade()`, ordre `preach_passage`, IA ; `cargo test --workspace` 1362 verts, clippy et fmt propres, schéma Python vert. Restes pour JR4 : équilibrage (aumônes 300 + 20 × ferveur, coût du passage 1 500, usure), Églises sœurs (orthodoxes) sans bonus ni malus, pas de crochet sur les batailles navales.
 
 ## Prochaine étape
 - À la fin de JR1 et JR2 : vérifier les tests, lancer JR3 et JR4.
