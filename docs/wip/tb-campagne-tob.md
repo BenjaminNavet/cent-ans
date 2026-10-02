@@ -16,29 +16,28 @@ références à récupérer en ligne.
       `steam-05/06/07`, `yt-a-*`) et nos captures « avant » dans `~/.cache/cent_ans/tb/ours/`
       (`game/tests/ss_shot.gd`, Paris, distances 1100 / 400 / 90 / 35). Le joueur juge la
       direction sur le résultat de la vague 1 avant TB3.
-- [ ] Vague 1 : TB1 saisons visibles (`../gp-tb1`, `feat/tb1`), TB2 désencombrement
-      (`../gp-tb2`, `feat/tb2`) — lancés le 02/10. TB1 livré sur `feat/tb1` (retouches neige / mer / automne en
-      cours) ; TB2 en cours. Échec `zg8_relief_test` déjà présent sur main (`rock_outcrops.gdshader`
-      redéclare `campaign_vertical_scale`) : à corriger à la fusion.
+- [x] Vague 1 (02/10) : TB1 saisons visibles (ADR 0150, `docs/wip/tb1.md`) et TB2 désencombrement
+      (ADR 0151, `docs/wip/tb2.md`) fusionnés dans `feat/tb` puis main. Capture de contrôle
+      (été 1100 / 400, hiver 400, Midlands hors de vue 300) : saisons reconnaissables, terres hors
+      de vue en sépia avec relief lisible, frontières discrètes, écus réduits.
+- [x] `zg8_relief_test` réparé (`rock_outcrops.gdshader` inclut `campaign_relief.gdshaderinc`).
+- [ ] Jugement du joueur sur la vague 1 (en jeu : `tools/launch.sh`) avant TB3.
 
-## Prochaine étape (reprise en session locale)
-Le travail reprend sur la machine du joueur, avec Godot, Blender, fal.ai et un accès web complet :
-`git fetch origin && git checkout claude/dazzling-maxwell-bk09hi`.
+## Points ouverts de la vague 1
+- Ombres de nuages encore sombres et larges en vue moyenne d'été (à juger en jeu).
+- Suie par ville non faite (demande un état par ville) ; écume de tempête non vérifiée ; brûlis
+  (`terroir_burn`) toujours recouvert par la carte de couleur.
+- Sceaux d'incident et sites de rencontre masqués par défaut (case « Signes » des filtres, ADR
+  0151) : un incident à plusieurs tours d'échéance est invisible, à juger en partie pilote.
+- Noms de région en vue moyenne : non vus sur capture (`ss_shot.gd` masque les `CanvasLayer`).
+- `fe_ui_test` échoue (cadrage du sélecteur de faction), sans rapport avec TB.
 
-1. **TB0** : rapatrier 10 à 15 captures ToB (non versionnées, droits tiers) : campagne large,
-   moyenne et proche, hiver, colonie mineure, capitale, brouillard, vue stratégique. Prendre 3
-   captures de notre carte (large, moyenne, proche, scripts `game/tests/*_shot.gd`). Les repeindre
-   avec `fal-ai/nano-banana-2/edit` vers le rendu visé. Consigner chaque appel dans
-   `docs/budget.md` (section TB). Faire valider la planche par le joueur.
-2. **Vague 1, en parallèle** (zones distinctes) :
-   - TB1 : commencer par le masquage de la teinte saisonnière par la carte de couleur
-     (`game/shaders/satellite_ground.gdshaderinc:22-28`, même logique dans hb_ground, ADR 0143) ;
-     puis mer et étalonnage par saison (`game/scripts/map/turn_light.gd`, `water.gdshader`),
-     neige et suie sur les toits 1:1 (uniform `snow` sans setter ; `model_holder()` null dans
-     `game/scripts/map/settlement_layer.gd:1614`).
-   - TB2 : nuages, brouillard de guerre (`terrain.gdshader:45-57`), pictogrammes, étiquettes et
-     noms de région (`settlement_markers.gd`, `marker_declutter.gd`, `label_placer.gd`).
-3. Puis vague 2 (TB3, TB4), selon le plan § 4.
+## Prochaine étape
+Après le jugement du joueur : vague 2, **sans fal.ai** (ADR 0152).
+- TB3 : villes et bâtiments qui grandissent, avec les kits existants (GA3, ADR 0138, villages TF)
+  et Blender ; stub `replace_models` (`settlement_layer.gd`), `model_holder()` null. Périmètre à
+  recadrer au lancement.
+- TB4 : traces de la guerre et de la peste (plan § 3), dont la suie par ville et le brûlis.
 
 Repères utiles (inventaire du 02/10) : `campaign_season` (`game/scripts/map/season_visuals.gd:11`),
 teintes de saison (`game/shaders/campaign_life.gdshaderinc:33-150`), stub de croissance
