@@ -22,6 +22,7 @@ export/
 tools/.cache/
 # Relief pyramid cache (ADR 0036, rebuilt by cent-ans geo pyramid / detail-dem)
 data/map/pyramid/
+data/map/.pyramid.download-*/
 tools/nb_raw/
 
 # Screenshots / captures (outputs of game/tests/*_shot.gd, kept local only)
@@ -32,3 +33,7 @@ docs/img/*
 docs/audit/captures/
 docs/audit/**/*.png
 docs/audit/**/*.jpg
+
+# Relief package: parts before upload, interrupted downloads (ADR 0149)
+dist/relief/
+data/map/.pyramid.*

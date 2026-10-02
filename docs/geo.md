@@ -525,30 +525,37 @@ uv run --project tools cent-ans geo relief-fetch                    # téléchar
   (le paquet s'installe alors directement dans `data/map/pyramid`, comme si `geo relief-all`
   l'avait cuit). Termine par `geo relief-all --check` quand la destination contient les
   manifestes versionnés (dépôt de développement).
+  `--if-needed` ne fait rien quand le cache installé vaut déjà le paquet publié (ADR 0149).
 - `ReliefCacheStatus.FETCH_COMMAND` (jeu, `game/scripts/map/relief_cache_status.gd`) : l'avis
   « relief rapproché limité/incomplet » propose `relief-fetch` en premier (plus rapide), avec
   `relief-all` en repli si aucun hébergement n'existe encore.
 
-### Publier le paquet (geste du joueur)
-
-Aucune commande de ce lot n'envoie quoi que ce soit sur le réseau. Publier le paquet préparé par
-`relief-pack` est un choix du joueur, sous son propre compte GitHub :
+### Mettre le paquet à jour (automatique, ADR 0149)
 
 ```sh
-# une seule fois : créer le dépôt de données public (séparé du dépôt du jeu, qui reste privé)
-gh repo create BenjaminNavet/cent-ans-relief --public --description "Cache de relief fin du jeu Cent Ans (ADR 0077)"
-
-# à chaque nouvelle version (après uv run --project tools cent-ans geo relief-pack --out dist/relief)
-gh release create v<N> dist/relief/*.part*.tar dist/relief/manifest.json \
-  --repo BenjaminNavet/cent-ans-relief \
-  --title "Cent Ans relief vN" \
-  --notes "Cache de relief fin (pyramide + fleuves et routes fins). Installer avec : uv run --project tools cent-ans geo relief-fetch"
+uv run --project tools cent-ans geo relief-update               # recuit, empaquette, publie
+uv run --project tools cent-ans geo relief-update --no-publish  # s'arrête après l'empaquetage
 ```
 
-`<N>` est la `version` écrite dans `data/map/relief_hosting.json` (et dans `manifest.json` du
-paquet) après le dernier `relief-pack`. `base_url` de `relief_hosting.json` pointe déjà vers
-`https://github.com/BenjaminNavet/cent-ans-relief/releases/download/v{version}/` : aucune autre
-donnée à changer une fois le dépôt créé et la Release publiée.
+`relief-update` (`cent_ans_tools.geo.relief_update`) enchaîne, en sautant ce qui est déjà fait :
+
+1. aligne `bake_versions` de `relief_pyramid.json` sur les versions de cuisson du code
+   (`pyramid.TIER_VERSIONS`, `detail_dem.BAKE_VERSION`) — un test échoue si elles divergent ;
+2. recuit les étapes périmées ou manquantes (comme `geo relief-all`), puis relance `geo towns`
+   et `geo landmarks`, qui lisent les fleuves fins ;
+3. si l'empreinte de cuisson diffère du paquet publié, empaquette dans `dist/relief` (`--out`),
+   crée la Release `v<N>` du dépôt de données (`gh`, lu dans `base_url`), envoie les parts puis
+   le manifeste, vérifie le manifeste en ligne et supprime les parts (`--keep-parts` pour les
+   garder).
+
+Reste à commiter et pousser les fichiers suivis de `data/` (`relief_hosting.json` annonce la
+nouvelle version aux autres postes). Le dépôt de données a été créé une fois pour toutes :
+`gh repo create BenjaminNavet/cent-ans-relief --public`.
+
+Côté joueur, `tools/launch.sh` compare à chaque lancement la version de `relief_hosting.json` à
+celle du cache installé (`pyramid/package.json`) et lance `relief-fetch --if-needed` si elles
+diffèrent (`--no-relief` pour passer). Un cache recuit localement, en avance sur le paquet, n'est
+jamais écrasé.
 
 ## Relief palier 3 : zones de détail E5-E7 (lot ZG3, ADR 0036)
 

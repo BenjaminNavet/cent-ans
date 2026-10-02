@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.error import HTTPError
 
-from cent_ans_tools.geo import relief_pack
+from cent_ans_tools.geo import bake_stamp, relief_pack
 
 REPO_DIR = relief_pack.REPO_DIR
 MAP_DIR = relief_pack.MAP_DIR
@@ -49,6 +49,58 @@ def default_dest(hosting_file: Path = HOSTING_FILE) -> Path:
     if from_env:
         return Path(from_env)
     return MAP_DIR
+
+
+def needs_fetch(
+    dest: Path | None = None, hosting_file: Path = HOSTING_FILE
+) -> tuple[bool, str]:
+    """Whether the installed cache is older than the hosted package (ADR 0149).
+
+    The cache carries the package version it holds (``pyramid/package.json``,
+    :func:`relief_pack.write_installed_marker`). A cache without marker (installed
+    or baked before ADR 0149) is judged on its bake stamps: behind when a tier is
+    missing or older than the package's; otherwise it is adopted (marker written),
+    so that a cache rebaked locally ahead of the package is never overwritten.
+
+    Returns:
+        ``(needed, reason)``, the reason in French for the CLI.
+    """
+    dest_dir = Path(dest) if dest is not None else default_dest(hosting_file)
+    hosting = relief_pack.load_hosting(hosting_file)
+    version = int(hosting.get("version", 1))
+    pyramid_dir = dest_dir / "pyramid"
+    if not pyramid_dir.is_dir():
+        return True, "cache de relief absent"
+    marker = relief_pack.read_installed_marker(pyramid_dir)
+    if "version" in marker:
+        installed = int(marker["version"])
+        if installed < version:
+            return True, f"paquet v{installed} installé, v{version} publié"
+        return False, f"paquet v{installed} installé"
+    stamps = bake_stamp.read(pyramid_dir)
+    expected = (hosting.get("bake") or {}).get("pyramid_bake_versions") or {}
+    behind = [
+        tier
+        for tier, wanted in sorted(expected.items())
+        if tier not in stamps or stamps[tier].version < int(wanted)
+    ]
+    if behind:
+        return True, f"cuisson antérieure au paquet v{version} ({', '.join(behind)})"
+    relief_pack.write_installed_marker(pyramid_dir, hosting)
+    return False, f"cache sans marque, au moins aussi récent que le paquet v{version}"
+
+
+def discard_partial_download(
+    dest: Path | None = None, hosting_file: Path = HOSTING_FILE
+) -> bool:
+    """Remove the leftover parts of an interrupted download (cache already current)."""
+    dest_dir = Path(dest) if dest is not None else default_dest(hosting_file)
+    hosting = relief_pack.load_hosting(hosting_file)
+    staging = dest_dir / f".pyramid.download-{hosting['package_name']}"
+    if not staging.is_dir():
+        return False
+    shutil.rmtree(staging, ignore_errors=True)
+    return True
 
 
 def _read_json(path: Path) -> dict:
@@ -224,6 +276,7 @@ def fetch(
         parts = [staging / entry["name"] for entry in manifest["parts"]]
 
     pyramid_dir = extract_atomic(parts, dest_dir, log)
+    relief_pack.write_installed_marker(pyramid_dir, manifest)
     if from_dir is None:
         shutil.rmtree(parts[0].parent, ignore_errors=True)
     return FetchResult(

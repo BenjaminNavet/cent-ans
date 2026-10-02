@@ -4,7 +4,7 @@
 git) is archived as an uncompressed ``.tar`` stream, split into parts under
 :data:`MAX_PART_BYTES`, alongside a JSON manifest (version, parts, SHA-256 per
 part and global, source credits). Nothing is uploaded here: publishing the
-result is a separate, player-approved step (see ``docs/geo.md``).
+result is the job of :mod:`cent_ans_tools.geo.relief_update` (ADR 0149).
 
 No compression: a spot check (``docs/wip/sz7-hebergement-relief.md``) found zstd
 -19 saves ~0% on the already-DEFLATE-compressed PNG tiles and on the packed
@@ -38,6 +38,8 @@ MANIFEST_NAME = "manifest.json"
 PYRAMID_MANIFEST = "relief_pyramid.json"
 RIVERS_MANIFEST = "rivers_fine.json"
 ANCHORS_MANIFEST = "fine_anchors.json"
+#: ``pyramid/package.json``: which package version the cache on disk holds (ADR 0149).
+INSTALLED_MARKER = "package.json"
 
 
 @dataclass
@@ -85,6 +87,31 @@ def bake_signature(map_dir: Path = MAP_DIR) -> dict:
         else None
     )
     return {**payload, "signature": signature}
+
+
+def read_installed_marker(pyramid_dir: Path) -> dict:
+    """``pyramid/package.json`` (empty when absent or unreadable)."""
+    try:
+        return _read_json(pyramid_dir / INSTALLED_MARKER)
+    except (OSError, ValueError):
+        return {}
+
+
+def write_installed_marker(pyramid_dir: Path, hosting: dict) -> None:
+    """Record in the cache the package version it holds (ADR 0149).
+
+    Written by ``pack`` before archiving (so every package carries it), by
+    ``fetch`` after installing, and when a cache without marker is adopted.
+    ``tools/launch.sh`` reads its ``version`` line: keep one key per line.
+    """
+    marker = {
+        "package_name": hosting.get("package_name"),
+        "version": int(hosting.get("version", 1)),
+        "signature": (hosting.get("bake") or {}).get("signature"),
+    }
+    partial = pyramid_dir / f".{INSTALLED_MARKER}.part"
+    partial.write_text(json.dumps(marker, indent=2) + "\n", encoding="utf-8")
+    partial.replace(pyramid_dir / INSTALLED_MARKER)
 
 
 def load_hosting(hosting_file: Path = HOSTING_FILE) -> dict:
@@ -249,6 +276,7 @@ def pack(
     hosting = bump_version_if_rebaked(map_dir, hosting_file)
     version = int(hosting["version"])
     package = str(hosting["package_name"])
+    write_installed_marker(pyramid_dir, hosting)
 
     writer = _SplitWriter(out_dir, package, version, max_part_bytes)
     with tarfile.open(fileobj=writer, mode="w|") as tar:
