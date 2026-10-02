@@ -608,8 +608,15 @@ func _find_anchor(i: int, slot: int, site: String, radius_m: float) -> Dictionar
 					score += slope * 4.0
 			if score < best_score:
 				best_score = score
-				# Façade (+Z de la maquette) tournée vers la colonie.
-				best = {"px": p, "yaw": atan2(-dir.x, -dir.y)}
+				# Façade (+Z de la maquette) tournée vers la colonie ; vers le fleuve s'il est
+				# proche, pour un site de rive (roue du moulin côté eau).
+				var facing := -dir
+				if site == "water" and _map != null and _map.river_sd_at(p.x, p.y) < 3.0:
+					var e := 0.25
+					var slope_to_river := Vector2(_map.river_sd_at(p.x + e, p.y) - _map.river_sd_at(p.x - e, p.y), _map.river_sd_at(p.x, p.y + e) - _map.river_sd_at(p.x, p.y - e))
+					if slope_to_river.length() > 0.05:
+						facing = -slope_to_river.normalized()
+				best = {"px": p, "yaw": atan2(facing.x, facing.y)}
 		if not best.is_empty() and absi(step) >= 2:
 			break
 	return best
