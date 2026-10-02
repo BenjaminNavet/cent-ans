@@ -144,6 +144,36 @@
         }
       }
     },
+    "shadow_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Distance du rig (unités) au-delà de laquelle les maquettes d'un type ne portent plus d'ombre ; type absent : ombre gardée (limite du préréglage de qualité, `model_shadow_distance`).",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "city": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "town": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "castle": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "abbey": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "village": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
     "collision": {
       "type": "object",
       "required": [
@@ -162,6 +192,12 @@
           "type": "number",
           "minimum": 0,
           "description": "Écart (unités) gardé entre deux maquettes."
+        },
+        "absorb_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Un lieu dont le centre est à moins de ce rapport × le rayon d'une ville emblématique n'a pas de maquette propre (0 : jamais)."
         }
       }
     },

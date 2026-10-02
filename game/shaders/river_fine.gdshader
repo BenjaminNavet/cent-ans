@@ -95,6 +95,17 @@ float vnoise(vec2 p) {
 	return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), u.x), mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), u.x), u.y);
 }
 
+// GC (ADR 0158) : largeur généralisée. Les cours d'eau sont élargis avec les maquettes des lieux,
+// de façon compressive : largeur affichée = max(réelle, `gen_width_scale` × √(réelle × `gen_width_ref`))
+// (unités monde) ; un ruisseau grossit beaucoup, un fleuve modérément, un estuaire pas du tout.
+// 0 : largeur réelle.
+uniform float gen_width_scale = 0.0;
+uniform float gen_width_ref = 0.14;
+
+float gen_width(float w) {
+	return gen_width_scale > 0.0 ? max(w, gen_width_scale * sqrt(max(w, 0.0) * gen_width_ref)) : w;
+}
+
 float zone_mask(vec2 p) {
 	if (fine_zone.z <= 0.0) {
 		return 0.0;
@@ -114,14 +125,15 @@ void vertex() {
 	float px_min = min_px * order_px_scale(order);
 	// HB7 : l'élargissement écran est de l'EAU (pas une bande de berge grise d'un pixel) ; les
 	// bandes de berge s'ajoutent au-delà, à leur largeur réelle.
-	float water_half = max(0.5 * UV.x, px_min * world_per_px * 0.5);
+	float gw = gen_width(UV.x);
+	float water_half = max(0.5 * gw, px_min * world_per_px * 0.5);
 	float band_m = max(COLOR.g * tidal_band, max(COLOR.b * wetland_band, COLOR.r * divagating_band));
 	float band = band_m > 0.0 ? max(0.5 * UV.x * band_m, band_min_m / meters_per_unit) : 0.0;
 	float half_w = water_half + band;
 	world += NORMAL * half_w;
 	world += to_cam / dist * min(depth_bias * dist, 0.5);
 	VERTEX = world;
-	float true_px = UV.x / world_per_px;
+	float true_px = gw / world_per_px;
 	v_open = mark < 0.5 ? 1.0 : (mark < 1.5 ? cover_open : zone_open);
 	float reach = order_distance * exp2(order - 3.0);
 	v_alpha = mix(1.0, clamp(true_px / px_min, 0.25, 1.0), thin_fade) * (1.0 - smoothstep(reach * 0.75, reach, dist));
@@ -129,7 +141,7 @@ void vertex() {
 	v_band = half_w / max(water_half, 1e-5);
 	v_flow = vec2(UV2.x, UV.y * half_w);
 	v_flags = COLOR;
-	v_width = UV.x;
+	v_width = gw;
 	v_world = world;
 	NORMAL = vec3(0.0, 1.0, 0.0);
 }

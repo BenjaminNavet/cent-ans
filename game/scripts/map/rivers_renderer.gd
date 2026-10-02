@@ -53,6 +53,10 @@ var stats: Dictionary = {}
 
 ## RC : contenu de `river_display.json` ({} sans fichier : réglages exportés ci-dessus).
 var display: Dictionary = {}
+## GC (ADR 0158) : élargissement compressif des cours d'eau avec les maquettes (bloc `generalised`
+## de `river_display.json`) ; 0 : largeur réelle. `width_ref` en unités monde.
+var width_scale: float = 0.0
+var width_ref: float = 0.14
 ## RC : noms des cours d'eau (`RiverLabels`, null si désactivés).
 var labels: RiverLabels
 ## Plus grande dimension de la carte (unités monde) : les distances de `display` en sont des fractions.
@@ -206,6 +210,10 @@ func _load_display() -> void:
 		if parsed is Dictionary:
 			display = parsed
 	major_min_px = float(display.get("major_min_px", major_min_px))
+	var generalised: Dictionary = display.get("generalised", {})
+	if TownMaquetteData.enabled() and not generalised.is_empty():
+		width_scale = maxf(float(generalised.get("width_scale", 0.0)), 0.0)
+		width_ref = float(generalised.get("width_ref_m", 100.0)) / maxf(map_data.meters_per_px, 1.0)
 	minor_min_px = float(display.get("minor_min_px", minor_min_px))
 	if display.has("minor_max_distance"):
 		minor_max_distance = float(display["minor_max_distance"]) * _extent
@@ -531,8 +539,20 @@ func _water_material(min_px: float) -> ShaderMaterial:
 	return material
 
 
+## GC : largeur affichée d'un cours d'eau de largeur réelle `w` (unités monde), comme `gen_width`
+## des shaders d'eau (ponts, gués).
+func generalised_width(w: float) -> float:
+	return maxf(w, width_scale * sqrt(maxf(w, 0.0) * width_ref)) if width_scale > 0.0 else w
+
+
+func _apply_generalised(material: ShaderMaterial) -> void:
+	material.set_shader_parameter("gen_width_scale", width_scale)
+	material.set_shader_parameter("gen_width_ref", width_ref)
+
+
 ## RC : couleurs, liseré et facteurs de largeur de `river_display.json`.
 func _apply_display(material: ShaderMaterial) -> void:
+	_apply_generalised(material)
 	for key in ["shallow_color", "deep_color", "bank_ink_color", "sky_color"]:
 		var rgb: Array = display.get(key, [])
 		if rgb.size() == 3:
@@ -549,6 +569,7 @@ func _apply_display(material: ShaderMaterial) -> void:
 ## HB7 : rubans fins de près (`river_fine.gdshader`) accordés aux rubans moyens : mêmes couleurs,
 ## reflet et fondu ; largeur écran minimale `fine_min_px` × facteur par ordre de Strahler (3-10).
 func apply_fine_display(material: ShaderMaterial) -> void:
+	_apply_generalised(material)
 	var fine_cfg: Dictionary = display.get("fine", {})
 	for key in ["shallow_color", "deep_color", "sky_color"]:
 		var rgb: Array = fine_cfg.get(key, display.get(key, []))

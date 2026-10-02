@@ -7,8 +7,9 @@ Run headless:
 (``west``, ``med``, ``byz``, ``rus``, ``isl``, ``steppe``). The ten
 models are laid on a grid (one column per kind, variant ``a`` behind variant ``b``), seen from
 three quarters above under a plain sun, on a neutral ground, with their names. The models are
-built straight from the generators with their palette colours (no kit atlas), which is how
-the flat-coloured families look in Godot. Default output: ``docs/img/gc/kit_<family>.png``
+built straight from the generators; the maquette families get the export finish (palette
+colours baked into the corner colours of one ``Kit`` material, lot GC6-perf), which is what
+Godot draws. Default output: ``docs/img/gc/kit_<family>.png``
 (untracked). A line ``SIZE <name> <width> <depth> <height> <triangles> <dx> <dy>`` is printed per
 model (``dx``, ``dy``: offset of the footprint centre removed from the maquette families).
 """
@@ -138,7 +139,11 @@ def main() -> None:
         column, row = divmod(index, rows)
         obj = build_joined(name)
         triangles = m.triangle_count(obj)
-        dx, dy = east.centre_footprint(obj) if name in east.MODELS else (0.0, 0.0)
+        dx, dy = 0.0, 0.0
+        if name in east.MODELS:
+            # Same finish as the export: the sheet shows the baked corner colours.
+            dx, dy = east.centre_footprint(obj)
+            east.bake_kit(obj)
         bpy.context.view_layer.update()
         size = obj.dimensions
         print(

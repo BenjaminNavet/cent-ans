@@ -97,6 +97,17 @@ float vnoise(vec2 p) {
 	return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), u.x), mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), u.x), u.y);
 }
 
+// GC (ADR 0158) : largeur généralisée. Les cours d'eau sont élargis avec les maquettes des lieux,
+// de façon compressive : largeur affichée = max(réelle, `gen_width_scale` × √(réelle × `gen_width_ref`))
+// (unités monde) ; un ruisseau grossit beaucoup, un fleuve modérément, un estuaire pas du tout.
+// 0 : largeur réelle.
+uniform float gen_width_scale = 0.0;
+uniform float gen_width_ref = 0.14;
+
+float gen_width(float w) {
+	return gen_width_scale > 0.0 ? max(w, gen_width_scale * sqrt(max(w, 0.0) * gen_width_ref)) : w;
+}
+
 void vertex() {
 	vec2 axis_xz = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
 	VERTEX.y = campaign_display_height(VERTEX.y / baked_vertical_scale, axis_xz);
@@ -117,9 +128,10 @@ void vertex() {
 		// HB7 : abs() : sous Metal/Vulkan la projection porte un retournement de Y ([1][1] < 0), ce qui
 		// rendait la largeur écran minimale inopérante (rubans sous-pixel, traits gris).
 		float world_per_px = dist * 2.0 / (abs(PROJECTION_MATRIX[1][1]) * VIEWPORT_SIZE.y);
-		float true_px = UV.x / world_per_px;
+		float gw = gen_width(UV.x);
+		float true_px = gw / world_per_px;
 		float carved = has_river_bed ? carve_weight(world.xz) : 0.0;
-		float width = UV.x * mix(1.0, carved_overlap, carved);
+		float width = gw * mix(1.0, carved_overlap, carved);
 		float imp_px = min_px * importance_px_scale(UV2.y);
 		float half_w = 0.5 * max(width, imp_px * world_per_px);
 		VERTEX += NORMAL * half_w;
@@ -129,10 +141,10 @@ void vertex() {
 		// HB7 : hors du lit creusé, |v_side| = 1 au bord du ruban AFFICHÉ (élargi à `min_px`) : l'eau
 		// remplit toute la largeur écran au lieu de n'occuper que le cœur sous-pixel (trait gris).
 		// Dans le lit creusé, 1 = berge réelle (le ruban déborde sur la pente).
-		v_side = UV.y * mix(1.0, half_w / max(0.5 * UV.x, 1e-4), carved);
-		v_flow = vec2(UV2.x, UV.y * 0.5 * UV.x);
+		v_side = UV.y * mix(1.0, half_w / max(0.5 * gw, 1e-4), carved);
+		v_flow = vec2(UV2.x, UV.y * 0.5 * gw);
 		v_carved = carved;
-		v_width = UV.x;
+		v_width = gw;
 		v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 		NORMAL = vec3(0.0, 1.0, 0.0);
 	}

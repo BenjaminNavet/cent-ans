@@ -155,7 +155,7 @@ func _add_gate_bridges(settlements: SettlementLayer, in_cover: Dictionary) -> vo
 				structure = "wood"
 			var name := str(historic.get("name", "")) if not historic.is_empty() else "Pont de %s" % str(entry.get("name", ""))
 			_add({"id": "gate_%d_%d" % [index, items.size()], "name": name, "structure": structure,
-				"px": hit, "dir": (b - a).normalized(), "width": widths[i]})
+				"px": hit, "dir": (b - a).normalized(), "width": renderer.generalised_width(widths[i])})
 
 
 ## Ponts-portes au bord des zones personnalisées (bouts de tronçons coupés sur le cercle).
@@ -175,7 +175,7 @@ func _add_zone_bridges() -> void:
 					continue
 				var other := points[1] if end == 0 else points[n - 2]
 				_add({"id": "zone_%s_%d" % [zone["id"], items.size()], "name": str(zone["name"]), "structure": "gate",
-					"px": p, "dir": (other - p).normalized() if end == 0 else (p - other).normalized(), "width": widths[end]})
+					"px": p, "dir": (other - p).normalized() if end == 0 else (p - other).normalized(), "width": renderer.generalised_width(widths[end])})
 
 
 static func _circle_point(a: Vector2, b: Vector2, center: Vector2, radius: float) -> Vector2:
@@ -340,7 +340,7 @@ func _fine_anchor_width(item: Dictionary) -> float:
 	var anchor: Dictionary = _fine_anchors[index]
 	if not bool(anchor.get("snapped", false)) or str(anchor.get("id", "")) != str(item["id"]):
 		return 0.0
-	return maxf(float(anchor.get("width_m", 0.0)) / renderer.map_data.meters_per_px, 0.01)
+	return maxf(renderer.generalised_width(float(anchor.get("width_m", 0.0)) / renderer.map_data.meters_per_px), 0.01)
 
 
 func _prepare_fine(todo: Array) -> void:
@@ -374,7 +374,7 @@ func _fine_of(item: Dictionary) -> Dictionary:
 	if not bool(anchor.get("snapped", false)) or str(anchor.get("id", "")) != str(item["id"]):
 		return {}
 	var width_m := float(anchor.get("width_m", 0.0))
-	return {"px": anchor["px"], "dir": anchor["dir"], "width": maxf(width_m / renderer.map_data.meters_per_px, 0.01), "z_water": anchor["z_water"], "z_deck": anchor["z_deck"]}
+	return {"px": anchor["px"], "dir": anchor["dir"], "width": maxf(renderer.generalised_width(width_m / renderer.map_data.meters_per_px), 0.01), "z_water": anchor["z_water"], "z_deck": anchor["z_deck"]}
 
 
 ## Ancrage fin (mode fin actif ou non) de l'ouvrage `id`, pour les tests : {} si aucun.
