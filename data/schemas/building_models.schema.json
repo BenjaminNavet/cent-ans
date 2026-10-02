@@ -1,0 +1,611 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "building_models.schema.json",
+  "title": "Bâtiments hors les murs de la carte de campagne (TB3)",
+  "description": "Correspondance purement visuelle bâtiment construit → famille → niveau → maquette, lue par game/scripts/map/outbuilding_layer.gd. Aucune règle de jeu.",
+  "type": "object",
+  "required": [
+    "version",
+    "render",
+    "families",
+    "growth",
+    "soot"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "render": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "view_range_units",
+        "fade_from_units",
+        "shadow_range_units",
+        "screen",
+        "ring_min_m",
+        "ring_max_m",
+        "max_slope",
+        "max_per_settlement",
+        "shore_reach_m",
+        "load_factor",
+        "load_min_units",
+        "load_max_units"
+      ],
+      "properties": {
+        "view_range_units": {
+          "description": "Distance du rig (unités monde, 1 u ≈ 719 m) au-delà de laquelle rien n'est dessiné.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fade_from_units": {
+          "description": "Distance du rig à partir de laquelle les maquettes s'effacent, jusqu'à `view_range_units`.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shadow_range_units": {
+          "description": "Distance du rig au-delà de laquelle les maquettes ne portent plus d'ombre.",
+          "type": "number",
+          "minimum": 0
+        },
+        "screen": {
+          "description": "Taille tenue à l'écran (ADR 0162) : échelle réelle sous `real_below`, pleine tenue à partir de `full_from`, grossissement proportionnel à la distance du rig au-delà.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "real_below",
+            "full_from",
+            "fractions",
+            "house_fraction",
+            "house_width_m",
+            "wall_fraction",
+            "wall_max_share",
+            "band_ratio",
+            "gap",
+            "rings",
+            "minor_until",
+            "vertical",
+            "sign_vertical",
+            "signs",
+            "far_houses",
+            "brighten",
+            "aging",
+            "shore_reach_far",
+            "suburb_sign"
+          ],
+          "properties": {
+            "real_below": {
+              "description": "Distance du rig sous laquelle tout est à l'échelle réelle (ADR 0138).",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "full_from": {
+              "description": "Distance du rig à partir de laquelle la taille à l'écran est tenue.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "fractions": {
+              "description": "Largeur à l'écran d'une maquette de niveau 1, 2, 3, en part de la hauteur de l'écran (0,0311 = 28 px en 900 px).",
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0.0311,
+                "maximum": 0.15
+              }
+            },
+            "house_fraction": {
+              "description": "Largeur à l'écran d'une maison de faubourg ajoutée, en part de la hauteur de l'écran.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.05
+            },
+            "house_width_m": {
+              "description": "Largeur réelle (m) d'une maison de faubourg.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "wall_fraction": {
+              "description": "Épaisseur à l'écran de l'enceinte ajoutée, en part de la hauteur de l'écran.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.05
+            },
+            "wall_max_share": {
+              "description": "Épaisseur maximale de l'enceinte grossie, en part du rayon de la ville.",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 0.5
+            },
+            "band_ratio": {
+              "description": "Rapport des paliers géométriques de mise en place (borne haute / borne basse).",
+              "type": "number",
+              "minimum": 1.05,
+              "maximum": 3
+            },
+            "gap": {
+              "description": "Écart entre le bord de la ville et une maquette, en part du rayon de la maquette.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "rings": {
+              "description": "Nombre d'anneaux essayés autour de la ville.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6
+            },
+            "minor_until": {
+              "description": "Distance du rig au-delà de laquelle seules les cités et les villes gardent leurs maquettes (villages, châteaux et abbayes : la place manque).",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "vertical": {
+              "description": "Exagération verticale des maquettes hors les murs à pleine tenue (silhouettes lues en plongée).",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "sign_vertical": {
+              "description": "Exagération verticale des signes de colonie.",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "signs": {
+              "description": "Signe de colonie par genre (`kind`) : maquette tenue à l'écran qui recouvre la ville 1:1 de loin. `walled_model` : variante murée (plan de 1340 muré, fortification ≥ `walled_from`, enceinte construite).",
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "model",
+                  "fraction"
+                ],
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "pattern": "^[a-z]+_[a-z0-9]+$"
+                  },
+                  "walled_model": {
+                    "type": "string",
+                    "pattern": "^[a-z]+_[a-z0-9]+$"
+                  },
+                  "walled_from": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "fraction": {
+                    "type": "number",
+                    "minimum": 0.03,
+                    "maximum": 0.3
+                  }
+                }
+              }
+            },
+            "far_houses": {
+              "description": "Nombre de maisons gardées par quartier de faubourg ajouté, de loin.",
+              "type": "integer",
+              "minimum": 1
+            },
+            "brighten": {
+              "description": "Éclaircissement des maquettes tenues à l'écran (décalage de teinte par instance ; 1 ≈ +35 %).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "aging": {
+              "description": "Usure des matériaux des maquettes tenues à l'écran (0,5 : celle des villes).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "shore_reach_far": {
+              "description": "Distance maximale (unités) de la grève où un port se pose de loin.",
+              "type": "number",
+              "minimum": 0
+            },
+            "suburb_sign": {
+              "description": "Signe d'un quartier de faubourg ajouté, de loin : maquette et largeur à l'écran (part de la hauteur d'écran).",
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "model",
+                "fraction"
+              ],
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "pattern": "^[a-z]+_[a-z0-9]+$"
+                },
+                "fraction": {
+                  "type": "number",
+                  "minimum": 0.02,
+                  "maximum": 0.2
+                }
+              }
+            }
+          }
+        },
+        "ring_min_m": {
+          "description": "Distance minimale (m) entre le bord bâti de la colonie et une maquette.",
+          "type": "number",
+          "minimum": 0
+        },
+        "ring_max_m": {
+          "description": "Distance maximale (m) au bord bâti.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_slope": {
+          "description": "Pente maximale (m/m) d'un site.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_per_settlement": {
+          "description": "Nombre maximal de maquettes autour d'une colonie.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "shore_reach_m": {
+          "description": "Distance maximale (m) au bord bâti où chercher une grève (mer ou fleuve).",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "load_factor": {
+          "description": "Rayon du voisinage chargé, en multiples de la distance du rig.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "load_min_units": {
+          "description": "Rayon minimal (unités monde) du voisinage chargé.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "load_max_units": {
+          "description": "Rayon maximal (unités) du voisinage chargé.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "families": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "farm",
+        "mill",
+        "vineyard",
+        "mine",
+        "saltworks",
+        "abbey",
+        "market",
+        "port"
+      ],
+      "properties": {
+        "farm": {
+          "$ref": "#/$defs/family"
+        },
+        "mill": {
+          "$ref": "#/$defs/family"
+        },
+        "vineyard": {
+          "$ref": "#/$defs/family"
+        },
+        "mine": {
+          "$ref": "#/$defs/family"
+        },
+        "saltworks": {
+          "$ref": "#/$defs/family"
+        },
+        "abbey": {
+          "$ref": "#/$defs/family"
+        },
+        "market": {
+          "$ref": "#/$defs/family"
+        },
+        "port": {
+          "$ref": "#/$defs/family"
+        }
+      }
+    },
+    "growth": {
+      "description": "Croissance visible des villes 1:1 (faubourgs, enceinte).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "suburbs",
+        "enclosure"
+      ],
+      "properties": {
+        "suburbs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "population_step",
+            "max_quarters",
+            "houses_per_quarter",
+            "frontage_m",
+            "setback_m",
+            "gap_m",
+            "house_models"
+          ],
+          "properties": {
+            "population_step": {
+              "description": "Part de population de la province au-dessus de celle de 1337 qui ajoute un quartier.",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            },
+            "max_quarters": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "houses_per_quarter": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 40
+            },
+            "frontage_m": {
+              "description": "Largeur de parcelle le long de la route (m).",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "setback_m": {
+              "description": "Recul des maisons par rapport à l'axe de la route (m).",
+              "type": "number",
+              "minimum": 0
+            },
+            "gap_m": {
+              "description": "Intervalle (m) entre le bâti de 1340 et le premier quartier, puis entre quartiers.",
+              "type": "number",
+              "minimum": 0
+            },
+            "house_models": {
+              "description": "Maisons du kit des villes (game/assets/models/town_kit/manifest.json).",
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z]+_[0-9]+$"
+              }
+            }
+          }
+        },
+        "enclosure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "margin_m",
+            "sink_m",
+            "gate_height_m",
+            "kinds"
+          ],
+          "properties": {
+            "margin_m": {
+              "description": "Distance (m) de l'enceinte au bâti de 1340.",
+              "type": "number",
+              "minimum": 0
+            },
+            "sink_m": {
+              "description": "Enfoncement (m) des pans dans le sol (pentes).",
+              "type": "number",
+              "minimum": 0
+            },
+            "gate_height_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "kinds": {
+              "description": "Du plus faible au plus fort ; dimensions dans towns_1340.json (`walls`).",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "buildings"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "palisade",
+                      "stone"
+                    ]
+                  },
+                  "buildings": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^bld_[a-z0-9_]+$"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "soot": {
+      "description": "Suie par ville (0-1) sur les toits des villes 1:1 et de leur maillage lointain.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "devastation_start",
+        "devastation_full",
+        "devastation_max",
+        "siege",
+        "storm",
+        "sack",
+        "sack_devastation_rise",
+        "decay_per_turn"
+      ],
+      "properties": {
+        "devastation_start": {
+          "description": "Dévastation de la province (0-100) où la suie commence.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "devastation_full": {
+          "description": "Dévastation où elle atteint `devastation_max`.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "devastation_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "siege": {
+          "description": "Suie de la cité d'une province assiégée.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "storm": {
+          "description": "Suie d'une place prise d'assaut (contrôleur changé pendant un siège).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "sack": {
+          "description": "Suie d'une place saccagée ou rasée (contrôleur changé et dévastation en hausse).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "sack_devastation_rise": {
+          "description": "Hausse de dévastation de la province qui signale un saccage (data/rules/capture.json).",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "decay_per_turn": {
+          "description": "Baisse par tour de la suie d'une prise.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "site",
+        "levels"
+      ],
+      "properties": {
+        "name": {
+          "description": "Nom français de la famille.",
+          "type": "string",
+          "minLength": 1
+        },
+        "site": {
+          "description": "Site recherché : champ (le plus plat), rive d'un fleuve, côte (grève la plus proche, sinon champ), grève obligatoire (sinon rien), coteau, bord de la colonie.",
+          "enum": [
+            "field",
+            "water",
+            "coast",
+            "shore",
+            "slope",
+            "road"
+          ]
+        },
+        "levels": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/level"
+          }
+        }
+      }
+    },
+    "level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "model",
+        "when"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "model": {
+          "description": "Nom de la maquette (clé de game/assets/models/outbuildings/manifest.json).",
+          "type": "string",
+          "pattern": "^[a-z]+_[1-3]$"
+        },
+        "when": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "require"
+          ],
+          "properties": {
+            "require": {
+              "description": "Groupes tous exigés.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "of",
+                  "min"
+                ],
+                "properties": {
+                  "of": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^bld_[a-z0-9_]+$"
+                    }
+                  },
+                  "min": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            },
+            "resources": {
+              "description": "La province doit produire au moins une de ces ressources.",
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^res_[a-z0-9_]+$"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

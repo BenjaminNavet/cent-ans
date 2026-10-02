@@ -34,11 +34,18 @@ uniform float sink_band = 0.1;
 uniform float sink_depth_m = 30.0;
 // Caméra principale (monde), la même pour la passe d'ombre ; y ≥ 1e5 : caméra du rendu courant.
 uniform vec3 sink_camera = vec3(0.0, 1e6, 0.0);
+// Lot TB3 (ADR 0162) : suie par ville, même index que `built_mask` (R8 64 × 64, 0-1).
+uniform sampler2D soot_mask : filter_nearest, repeat_disable;
+uniform vec3 soot_color : source_color = vec3(0.11, 0.075, 0.055);
+// Comme `town_building.gdshader` : toits brun-noir à 60 % au plus, murs peu touchés.
+uniform float soot_roof_max : hint_range(0.0, 1.0) = 0.6;
+uniform float soot_wall_max : hint_range(0.0, 1.0) = 0.15;
 
 const int MASK_SIDE = 64;
 
 varying vec3 world_m;
 varying vec3 world_n;
+varying float v_soot;
 
 // Enfoncement 0-1 d'un sommet de la ville `index` à la position monde `pos`.
 float town_far_sink(int index, vec3 pos, vec3 camera) {
@@ -57,7 +64,9 @@ void vertex() {
 	float above_m = UV2.y;
 	float ground_y = campaign_display_height(VERTEX.y - above_m, xz);
 	vec3 camera = sink_camera.y >= 1e5 ? CAMERA_POSITION_WORLD : sink_camera;
-	float sink = town_far_sink(int(UV2.x + 0.5), vec3(xz.x, ground_y, xz.y), camera);
+	int town = int(UV2.x + 0.5);
+	float sink = town_far_sink(town, vec3(xz.x, ground_y, xz.y), camera);
+	v_soot = town >= 0 && town < MASK_SIDE * MASK_SIDE ? texelFetch(soot_mask, ivec2(town % MASK_SIDE, town / MASK_SIDE), 0).r : 0.0;
 	float h_m = mix(above_m, -sink_depth_m, sink);
 	VERTEX.y = ground_y + h_m / meters_per_unit;
 	world_m = VERTEX * meters_per_unit;
@@ -76,6 +85,12 @@ void fragment() {
 		float r_avg;
 		vec3 roof = mix(roofscape_average(world_m, r_avg), roofscape_color(world_m, r_cell), detail);
 		albedo = mix(albedo, roof, up);
+	}
+	if (v_soot > 0.0) {
+		float n = roof_hash(floor(world_m.xz / 16.0)) * 0.65 + roof_hash(floor(world_m.xz / 3.0)) * 0.35;
+		// Vue de loin : plaques sous-pixel ramenées à leur moyenne (pas de scintillement).
+		float patch = mix(smoothstep(1.0 - v_soot - 0.12, 1.0 - v_soot + 0.12, n), v_soot, smoothstep(8.0, 32.0, length(fwidth(world_m.xz))));
+		albedo = mix(albedo, soot_color, patch * mix(soot_wall_max, soot_roof_max, up));
 	}
 	ALBEDO = albedo;
 	ROUGHNESS = roughness;
