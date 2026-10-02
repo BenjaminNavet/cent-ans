@@ -37,9 +37,9 @@ survol éclaire le personnage et sa bannière ; le personnage prime sur la ville
 3. **L'ost se tient à côté de la ville** : écart = rayon de la ville + demi-emprise de l'ost à
    l'échelle courante, côté sud-est. L'écart suit l'échelle, donc l'ost ne recouvre la ville à
    aucun zoom. Pendant une marche animée, l'écart est nul (le trajet réel est montré).
-4. **Échelle sous-linéaire** : `échelle = MIN_SCALE × (d / d₀)^p` avec `p = 0,6` (réglage
+4. **Échelle sous-linéaire** : `échelle = MIN_SCALE × (d / d₀)^p` avec `p = 0,65` (réglage
    `map.army_scale_exponent` de `data/ui/campaign_map.json`) au lieu de `p = 1`. L'ost rétrécit
-   à l'écran en dézoomant (comme un objet posé), sans devenir illisible : à 400 il fait 30 % de
+   à l'écran en dézoomant (comme un objet posé), sans devenir illisible : à 400 il fait 35 % de
    sa taille écran d'avant. La plaque d'effectif garde sa taille écran : c'est elle le repère au
    loin, comme la bannière de Total War. Sur le parchemin (poids stratégique), l'étendard
    retrouve l'ancienne loi linéaire (pion lisible, figurines fondues).

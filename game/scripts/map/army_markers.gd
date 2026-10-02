@@ -20,7 +20,7 @@ const PICK_NEAR_PX := 10.0
 const SCALE_PER_DISTANCE := 0.014
 ## SA (ADR 0160) : exposant par défaut de la loi d'échelle en vue normale (1 = taille écran
 ## constante, 0 = taille monde fixe) ; réglage `map.army_scale_exponent`.
-const DEFAULT_SCALE_EXPONENT := 0.6
+const DEFAULT_SCALE_EXPONENT := 0.65
 ## SA : écart à la ville d'une armée en garnison, côté sud-est (vers la caméra par défaut), et
 ## marge au-delà du rayon de la ville (unités monde).
 const STANDOFF_DIRECTION := Vector2(0.86, 0.51)
@@ -39,8 +39,6 @@ const CLOSE_PLATE_RANGE_FACTOR := 40.0
 
 ## Distance minimale (pixels de carte) entre une armée et le modèle de ville de la province.
 const CITY_CLEARANCE_PX := 26.0
-## Q2 : marge hors de la zone d'une grande ville L1-L3 pour une armée qui y stationne.
-const LANDMARK_MARGIN_PX := 1.5
 
 ## Couche des plaques : au-dessus du monde 3D, sous l'interface (`CanvasLayer` 1).
 const PLATE_LAYER := 0
@@ -267,7 +265,7 @@ func _standoff_base(settlement_id: String, point: Vector2) -> float:
 	var radius := float(settlement_radius.call(settlement_id)) if settlement_radius.is_valid() else 0.0
 	for zone in landmark_zones:
 		if point.distance_to(Vector2(zone.x, zone.y)) < zone.z:
-			radius = maxf(radius, zone.z + LANDMARK_MARGIN_PX)
+			radius = maxf(radius, zone.z)
 	return radius + STANDOFF_MARGIN
 
 

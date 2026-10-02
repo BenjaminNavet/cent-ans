@@ -25,9 +25,11 @@ const FOOTPRINT_RADIUS := 4.6
 ## SA : demi-taille écran minimale de la silhouette de visée, et marge autour d'elle.
 const PICK_MIN_HALF_PX := 16.0
 const PICK_MARGIN_PX := 5.0
-## SA : éclaircissement des figurines (`highlight` du shader) au survol et à la sélection.
-const HIGHLIGHT_HOVERED := 1.8
-const HIGHLIGHT_SELECTED := 0.7
+## SA : éclaircissement des figurines (`highlight` du shader, +25 % par unité) : au repos (la
+## monture sombre se détache du terrain), à la sélection et au survol.
+const HIGHLIGHT_IDLE := 0.6
+const HIGHLIGHT_SELECTED := 1.2
+const HIGHLIGHT_HOVERED := 2.2
 ## SA : durée du glissement entre la place à côté de la ville et le trajet animé.
 const STANDOFF_SLIDE := 0.3
 
@@ -236,7 +238,7 @@ func _update_ring() -> void:
 		selection.modulate = ring
 		selection.emission_energy = 0.1
 	if figures != null:
-		figures.set_highlight(HIGHLIGHT_HOVERED if _hovered else (HIGHLIGHT_SELECTED if _selected else 0.0))
+		figures.set_highlight(HIGHLIGHT_HOVERED if _hovered else (HIGHLIGHT_SELECTED if _selected else HIGHLIGHT_IDLE))
 
 
 ## Oriente les figurines (en marche : vers la province suivante), `direction` en coordonnées carte.
@@ -309,17 +311,15 @@ func screen_rect(camera: Camera3D) -> Rect2:
 	return Rect2(center - half, half * 2.0).grow(PICK_MARGIN_PX)
 
 
-## Ancre de la plaque d'effectif : sous une bannière verticale (`plate_below()`), sinon
-## au-dessus du drapeau.
+## Ancre de la plaque d'effectif : au-dessus de l'étendard. SA (ADR 0160) : y compris pour une
+## bannière verticale — l'ost rétrécit à l'écran en dézoomant, une plaque sous le tissu
+## recouvrirait les figurines.
 func plate_anchor() -> Vector3:
-	if standard_mode == 2:
-		# Le tissu occupe les 352 px du haut (sur 512) : plaque sous le bord ondulé.
-		return flag.global_position + Vector3(0.0, -4.3, 0.0) * marker_scale
-	return flag.global_position + Vector3(0.0, 0.9, 0.0) * marker_scale
+	return flag.global_position + Vector3(0.0, 0.9 if standard_mode != 2 else 0.5, 0.0) * marker_scale
 
 
 func plate_below() -> bool:
-	return standard_mode == 2
+	return false
 
 
 ## SA (ADR 0160) : active ou suspend l'écart à la ville (suspendu pendant une marche animée),
