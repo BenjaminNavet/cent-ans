@@ -841,11 +841,13 @@ void fragment() {
 	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
 	if (hb_debug > 10.5 && hb_debug < 11.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 wx_emit = vec3(0.0);
-	// TB6 : brume du matin dans les vallées (altitude moyenne alentour, rasance du regard).
-	float wx_h_wide = (weather_enabled && weather_valley_mist > 0.0) ? height_m_lod(uv, weather_valley_lod) : hc;
+	// TB6 : brume du matin (relief lissé à grande échelle, moyenne régionale, rasance du regard).
+	bool wx_valley = weather_enabled && weather_valley_mist > 0.0;
+	float wx_h_mid = wx_valley ? height_m_lod(uv, weather_valley_lods.x) : hc;
+	float wx_h_wide = wx_valley ? height_m_lod(uv, weather_valley_lods.y) : hc;
 	float wx_grazing = 1.0 - abs(normalize(CAMERA_POSITION_WORLD - world_pos).y);
 	float wx_mist = 0.0;
-	col = weather_ground(col, p, hc, slope, footprint, wx_h_wide, wx_grazing, roughness, wx_emit, wx_mist);  // CM2 : météo
+	col = weather_ground(col, p, hc, slope, footprint, wx_h_mid, wx_h_wide, wx_grazing, roughness, wx_emit, wx_mist);  // CM2 : météo
 	if (hb_debug > 11.5 && hb_debug < 12.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2

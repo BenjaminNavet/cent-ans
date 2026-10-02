@@ -23,6 +23,9 @@ const SETTLE_FRAMES := 150
 const AB_FRAMES := 12
 const BLOCK := 16
 
+var _grid := Vector2i.ZERO
+var _image_size := Vector2i.ZERO
+
 
 func _init() -> void:
 	var out_dir := "user://tb6"
@@ -144,6 +147,8 @@ func _report(map: Node3D, name: String, at: Vector2) -> void:
 func _block_luminance(image: Image) -> PackedFloat32Array:
 	var bw := image.get_width() / BLOCK
 	var bh := image.get_height() / BLOCK
+	_grid = Vector2i(bw, bh)
+	_image_size = image.get_size()
 	var out := PackedFloat32Array()
 	out.resize(bw * bh)
 	for by in bh:
@@ -355,6 +360,8 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		print("TB6 ab %s %s ratio p1 %.2f p10 %.2f p50 %.2f p90 %.2f p99 %.2f darker_15pct %.1f%% lighter_10pct %.1f%%" % [
 			name, layer, ratios[ratios.size() / 100], ratios[ratios.size() / 10], ratios[ratios.size() / 2],
 			ratios[ratios.size() * 9 / 10], ratios[ratios.size() * 99 / 100], 100.0 * darker / ratios.size(), 100.0 * lighter / ratios.size()])
+		if layer == "valley_mist":
+			_mist_width(map, name, with, without, land)
 		if selected_count > 0:
 			print("TB6 ab %s %s selected province: %d blocks, mean ratio %.3f, changed_10pct %.1f%%" % [
 				name, layer, selected_count, selected_sum / selected_count, 100.0 * selected_changed / selected_count])
@@ -428,3 +435,49 @@ func _fmt(values: Array) -> String:
 	for v in values:
 		parts.append("%.2f" % v)
 	return "/".join(parts)
+
+
+## Largeur typique des nappes de brume : longueur des suites horizontales de blocs éclaircis
+## (> 4 %), convertie en pixels de carte au centre de l'image ; part du sol couverte.
+func _mist_width(map: Node3D, name: String, with: PackedFloat32Array, without: PackedFloat32Array, land: PackedByteArray) -> void:
+	var size := Vector2(_image_size)
+	var bw := _grid.x
+	var bh := _grid.y
+	var camera := map.get_viewport().get_camera_3d()
+	var view_size := Vector2(map.get_viewport().get_visible_rect().size)
+	var hits: Array[Vector3] = []
+	for offset in [0.0, 1.0]:
+		var screen := Vector2(view_size.x * 0.5 + offset * BLOCK * view_size.x / size.x, view_size.y * 0.5)
+		var origin := camera.project_ray_origin(screen)
+		var dir := camera.project_ray_normal(screen)
+		hits.append(origin + dir * (-(origin.y - 1.0) / dir.y))
+	var px_per_block := hits[0].distance_to(hits[1])
+	var runs: Array[int] = []
+	var covered := 0
+	var land_count := 0
+	for by in bh:
+		var run := 0
+		for bx in bw:
+			var i := by * bw + bx
+			var misty := land[i] >= 1 and without[i] > 0.02 and with[i] / without[i] > 1.04
+			land_count += 1 if land[i] >= 1 else 0
+			if misty:
+				run += 1
+				covered += 1
+			elif run > 0:
+				runs.append(run)
+				run = 0
+		if run > 0:
+			runs.append(run)
+	if runs.is_empty():
+		print("TB6 mist %s no sheet found" % name)
+		return
+	runs.sort()
+	var total := 0
+	var weighted := 0.0
+	for r in runs:
+		total += r
+		weighted += r * r
+	print("TB6 mist %s cover %.1f%% of land, sheets: median run %.0f map px, area-weighted width %.0f map px, widest %.0f map px (%.1f map px per block)" % [
+		name, 100.0 * covered / maxi(land_count, 1), runs[runs.size() / 2] * px_per_block, weighted / total * px_per_block,
+		runs[-1] * px_per_block, px_per_block])

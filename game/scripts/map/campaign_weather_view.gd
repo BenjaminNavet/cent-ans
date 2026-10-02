@@ -187,13 +187,16 @@ func _apply_ground_tuning() -> void:
 	material.set_shader_parameter("weather_valley_mist", valley_mist_opacity())
 	if valley_mist.is_empty():
 		return
-	var depth: Variant = valley_mist.get("valley_depth_m", [20.0, 90.0])
-	if depth is Array and (depth as Array).size() == 2:
-		material.set_shader_parameter("weather_valley_depth_m", Vector2(float(depth[0]), float(depth[1])))
-	material.set_shader_parameter("weather_valley_lod", float(valley_mist.get("wide_lod", 4.5)))
-	material.set_shader_parameter("weather_valley_grazing", float(valley_mist.get("grazing_gain", 1.2)))
-	material.set_shader_parameter("weather_valley_lift", float(valley_mist.get("lifted_share", 0.35)))
-	material.set_shader_parameter("weather_valley_near", float(valley_mist.get("near_share", 0.5)))
+	for pair: Array in [["valley_depth_m", "weather_valley_depth_m"], ["plain_altitude_m", "weather_valley_plain_m"],
+			["crest_height_m", "weather_valley_crest_m"], ["height_lods", "weather_valley_lods"]]:
+		var values: Variant = valley_mist.get(pair[0], null)
+		if values is Array and (values as Array).size() == 2:
+			material.set_shader_parameter(pair[1], Vector2(float(values[0]), float(values[1])))
+	for pair: Array in [["plain_share", "weather_valley_plain"], ["bank_scale", "weather_valley_bank_scale"],
+			["drift", "weather_valley_drift"], ["grazing_gain", "weather_valley_grazing"],
+			["lifted_share", "weather_valley_lift"], ["near_share", "weather_valley_near"]]:
+		if valley_mist.has(pair[0]):
+			material.set_shader_parameter(pair[1], float(valley_mist[pair[0]]))
 	var tint := Color(str(valley_mist.get("color", "#d9d6cc")))
 	material.set_shader_parameter("weather_valley_color", Vector3(tint.r, tint.g, tint.b))
 

@@ -324,14 +324,19 @@
       "additionalProperties": false,
       "required": [
         "opacity",
+        "height_lods",
         "valley_depth_m",
-        "wide_lod",
+        "plain_altitude_m",
+        "plain_share",
+        "crest_height_m",
+        "bank_scale",
+        "drift",
         "grazing_gain",
         "lifted_share",
         "near_share",
         "color"
       ],
-      "description": "TB6 : brume du matin en nappe basse dans les vallées (météo « brume »).",
+      "description": "TB6 : brume du matin en nappes larges dans les grandes vallées et les plaines basses (météo « brume »).",
       "properties": {
         "description": {
           "type": "string"
@@ -339,8 +344,18 @@
         "opacity": {
           "type": "number",
           "minimum": 0,
-          "maximum": 1,
+          "maximum": 0.35,
           "description": "Opacité maximale de la nappe (0 : coupée)."
+        },
+        "height_lods": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Niveaux de la carte des hauteurs : relief lissé local, moyenne régionale."
         },
         "valley_depth_m": {
           "type": "array",
@@ -350,13 +365,45 @@
           },
           "minItems": 2,
           "maxItems": 2,
-          "description": "Profondeur sous l'altitude moyenne alentour où la nappe commence et où elle est pleine (m)."
+          "description": "Écart sous la moyenne régionale où la nappe commence et où elle est pleine (m)."
         },
-        "wide_lod": {
+        "plain_altitude_m": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Altitude où la nappe de plaine est pleine, puis nulle (m)."
+        },
+        "plain_share": {
           "type": "number",
-          "minimum": 1,
-          "maximum": 8,
-          "description": "Niveau de la carte des hauteurs qui donne l'altitude moyenne alentour."
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de la nappe dans les plaines basses."
+        },
+        "crest_height_m": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Hauteur au-dessus du relief lissé où la nappe commence à s'effacer, puis disparaît (m)."
+        },
+        "bank_scale": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 0.02,
+          "description": "Fréquence des bancs (1 / px carte) : plus petit = bancs plus larges."
+        },
+        "drift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Dérive des bancs, en part du vent."
         },
         "grazing_gain": {
           "type": "number",

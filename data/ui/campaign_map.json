@@ -82,14 +82,28 @@
     "canopy": 0.12
   },
   "morning_mist": {
-    "description": "TB6 (ADR 0156) : brume du matin de la météo « brume » (canal B du masque météo), en nappe basse dans les vallées. Brouillard de hauteur calculé dans le shader du sol : un point est dans la nappe quand il est plus bas que l'altitude moyenne alentour (valley_depth_m : début et plein, mètres ; wide_lod : niveau de la carte des hauteurs qui donne cette moyenne, 4,5 ≈ 16 km). opacity : opacité maximale ; grazing_gain : épaisseur ajoutée en vue rasante ; lifted_share : part qui reste une fois la brume levée (elle se lève au fil du tour) ; near_share : part gardée de près. Jamais sur la province sélectionnée.",
-    "opacity": 0.55,
-    "valley_depth_m": [
-      20,
-      90
+    "description": "TB6 (ADR 0156) : brume du matin de la météo « brume » (canal B du masque météo), en nappes larges et douces dans les grandes vallées et les plaines basses. Brouillard de hauteur calculé dans le shader du sol sur le relief lissé à grande échelle, pas sur le relief fin. height_lods : niveaux de la carte des hauteurs (relief lissé local ≈ 11 km, moyenne régionale ≈ 90 km) ; valley_depth_m : écart sous la moyenne régionale où la nappe commence et où elle est pleine ; plain_altitude_m : altitude où la nappe de plaine est pleine puis nulle, plain_share : sa part ; crest_height_m : hauteur au-dessus du relief lissé où la nappe s'efface (crêtes). opacity : opacité maximale ; bank_scale : fréquence des bancs (1 / px carte ; 0,006 ≈ bancs de 80 px) ; drift : dérive, en part du vent ; grazing_gain : épaisseur ajoutée en vue rasante ; lifted_share : part qui reste une fois la brume levée ; near_share : part gardée de près. Jamais sur la province sélectionnée.",
+    "opacity": 0.32,
+    "height_lods": [
+      4.0,
+      7.0
     ],
-    "wide_lod": 4.5,
-    "grazing_gain": 1.2,
+    "valley_depth_m": [
+      10,
+      140
+    ],
+    "plain_altitude_m": [
+      40,
+      220
+    ],
+    "plain_share": 0.6,
+    "crest_height_m": [
+      30,
+      150
+    ],
+    "bank_scale": 0.006,
+    "drift": 0.5,
+    "grazing_gain": 0.6,
     "lifted_share": 0.35,
     "near_share": 0.5,
     "color": "#d9d6cc"

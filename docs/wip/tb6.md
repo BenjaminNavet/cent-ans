@@ -15,6 +15,7 @@ Spec : `docs/design/2026-10-02-campagne-tob.md` § 3 « TB6 ». Branche `feat/tb
 - [x] 2. Lumière dorée : `data/fx/atmosphere.json`, bloc `campaign` (soleil 20° / 21° / 18° / 18°,
       plus chaud et plus fort sauf l'hiver, diffusion vers le soleil relevée).
 - [x] 3. SSIL gardé (déjà actif en Haute et Ultra), SDFGI écarté : ADR 0156.
+- [x] 5. Retouches : automne, massifs forestiers, brume en nappes larges (voir plus bas).
 - [x] 4. Brume du matin : nappe de vallée dans le shader du sol (`weather_valley_*`, bloc
       `morning_mist`), jamais sur la province sélectionnée.
 - [x] `game/tests/tb6_light_test.gd`, `game/tests/tb6_shot.gd`.
@@ -39,20 +40,44 @@ Spec : `docs/design/2026-10-02-campagne-tob.md` § 3 « TB6 ». Branche `feat/tb
   27,84 / 30,33 (charge 37 à 81). Non comparables : la charge a doublé entre les deux séries.
   L'écart mesuré dans le même processus est dans le bruit pour la brume.
 
+## Retouches après capture de contrôle (02/10)
+Mesures par `tb6_shot.gd` (rendu forcé avant chaque lecture d'image : une fenêtre occultée ne
+fige plus la mesure), Paris, `--map-weather=clear` sauf pour la brume.
+- Automne orange vif : soleil d'automne moins chaud (`sun_color` 1,0 / 0,89 / 0,74, énergie 1,3,
+  diffusion 0,34) et étalonnage de carte d'automne qui retient le rouge (`gain` 0,95 / 1,03 / 1,0,
+  saturation 0,7), dans `data/fx/atmosphere.json`. À 400 : automne teinte 28° → 32°, saturation
+  0,572 → 0,526 (été : 44°, 0,549) ; à 90 : 27° → 31°, 0,514 → 0,481 (été : 38°, 0,508).
+- Massifs forestiers : la source est la carte de couleur (blocs sous 40 % de la médiane à 400 :
+  8,0 % avec, 2,1 % sans). Surcouche dans `sg_apply` (`satellite_ground.gdshaderinc`, uniformes
+  `sg_dark_*`, bloc `forest_masses`, posé par `MapReadability.apply_forest_masses`). Blocs sous
+  40 % de la médiane, été : 1100 : 2,9 % → 0,3 % ; 400 : 8,0 % → 0,6 % ; 250 : 0,3 % après.
+  Hiver : 1,6 % → 0,3 % et 1,9 % → 0,2 %. 5e centile rapporté à la médiane (été) : 0,45 → 0,64
+  (1100), 0,34 → 0,56 (400).
+- Brume en veines : la nappe suit désormais le relief lissé (niveau 4 contre niveau 7 de la carte
+  des hauteurs), plus les plaines basses, hors crêtes, en bancs qui dérivent ; opacité max 0,32.
+  `--season=autumn --map-weather=fog --ab` : largeur des nappes pondérée par la surface 182 px
+  carte à 1100, 93 à 400, 62 à 90 (plus large : 712 / 258 / 157) ; sol éclairci de plus de 10 % :
+  35 % / 17 % / 17 % ; rapport de luminance au 99e centile 1,52 / 1,34 / 1,16 ; province
+  sélectionnée : 1,000 à 1,004.
+
 ## Prochaine étape
 Capture de contrôle par la session principale (les agents ne lisent pas d'image) :
 `godot --path game --resolution 1600x900 --script res://tests/tb6_shot.gd -- --out=<dossier>
 --season=summer --distances=1100,400,90` (Paris `2213.2,3203.9`, météo du cœur) ; brume :
 `--season=autumn --map-weather=fog --prefix=brume-` puis avec `--select` ; hiver :
 `--season=winter`. Pour une vallée plus marquée que la Seine, passer `--at=<x>,<z>` (px carte).
-Réglage à l'œil : `morning_mist.opacity` (0,55), `valley_depth_m` ([20, 90]), couleurs et énergie
-du soleil.
+Réglage à l'œil : `morning_mist` (`opacity` 0,32, `plain_share`, `bank_scale`), `forest_masses.floor`
+(0,12 ; 0,10 plus sombre, 0,16 plus clair), couleurs et énergie du soleil.
 
 ## Points ouverts
 - Banc à refaire sur une machine calme (`tb6_shot.gd --bench --disable-vsync --map-weather=fog`) :
   le seuil de 1 ms du SSIL est sous le bruit de mesure d'aujourd'hui.
-- Fenêtre occultée par une autre : l'image ne se redessine plus, `--ab` rend 1,00 partout.
-  Relancer avec la fenêtre visible.
+- Les mesures `--ab` d'avant la retouche (sans rendu forcé) portaient un bruit de ± 10 % et
+  parfois des images figées ; celles des retouches sont fiables à ± 1 %.
+- La teinte de sol procédurale des forêts (`tint_forest`, assombrissement vers
+  `terrain.gdshader:633`) n'est pas touchée : de près (rig < 250), les blocs très sombres sont
+  déjà sous 0,3 %. À revoir avec HC quand les arbres grossis seront posés.
+- `campaign_map.gd` touché d'une ligne (`apply_forest_masses`) : conflit possible à la fusion.
 - Brouillard de guerre (TB2) : provinces hors de vue jusqu'à −35 % à bord net ; autre source
   possible de « taches sombres » sur la capture, hors de ce lot.
 - La nappe de brume est peinte sur le sol : arbres et villes n'en sont pas voilés. Avec la carte

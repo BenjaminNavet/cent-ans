@@ -38,12 +38,16 @@ seuil de 1 ms : ces chiffres sont indicatifs.
   bougent : le SDFGI n'aurait presque rien de statique à éclairer. `RenderQuality` le réserve à la
   bataille (inchangé).
 - **Brume du matin : brouillard de hauteur calculé dans le shader du sol**, pas de brouillard
-  volumétrique. La nappe apparaît là où le sol est plus bas que l'altitude moyenne alentour
-  (niveau grossier de la carte des hauteurs, une lecture de texture), s'épaissit en vue rasante,
-  se lève au fil du tour et s'efface sur la province sélectionnée (règle TB2). Coût dans le bruit
-  de mesure. Le brouillard volumétrique de l'environnement est écarté pour sa fonction plus que
-  pour son coût : global, il ne suit ni le masque météo par province ni le dégagement de la
-  province sélectionnée, et sa grille est trop grossière aux distances de la carte (90 à 1100).
+  volumétrique. La nappe se forme là où le relief lissé à grande échelle (niveau 4 de la carte des
+  hauteurs, ≈ 11 km) passe sous la moyenne régionale (niveau 7, ≈ 90 km) et dans les plaines
+  basses ; elle s'efface sur les crêtes, se découpe en bancs larges qui dérivent, s'épaissit un peu
+  en vue rasante, se lève au fil du tour et disparaît sur la province sélectionnée (règle TB2).
+  Opacité plafonnée à 0,35 (0,32 posé). Une première version comparait le relief fin à son
+  voisinage : elle dessinait un réseau de veines pâles dans chaque vallon, d'où le relief lissé.
+  Coût dans le bruit de mesure (deux lectures de texture). Le brouillard volumétrique de
+  l'environnement est écarté pour sa fonction plus que pour son coût : global, il ne suit ni le
+  masque météo par province ni le dégagement de la province sélectionnée, et sa grille est trop
+  grossière aux distances de la carte (90 à 1100).
 - **Ombres de nuages bornées.** Cause des taches : le masque météo du sol multipliait le sol
   mouillé (−28 %) par l'ombre des nuées (−35 %, bord de 0,22), par paliers d'un tiers au bord des
   provinces, alors que le plan de nuées est presque transparent en vue moyenne (opacité 0,11).
@@ -51,11 +55,19 @@ seuil de 1 ms : ces chiffres sont indicatifs.
   −5 % : au plus −14,3 % cumulés. Rien par temps clair (règle TB2 conservée).
 - **Lumière dorée par défaut** dans `data/fx/atmosphere.json` (bloc `campaign`) : soleil à 20° /
   21° / 18° au printemps, en été, en automne (26 / 28 / 22 avant), plus chaud et plus fort pour
-  garder la clarté du sol plat ; hiver inchangé (18°, soleil pâle, étalonnage froid de TB1). La
+  garder la clarté du sol plat (l'automne garde un soleil moins chaud que l'été, et son
+  étalonnage de carte retient le rouge : cumulé à l'étalonnage roux de TB1, le sol virait à
+  l'orange vif) ; hiver inchangé (18°, soleil pâle, étalonnage froid de TB1). La
   bande 18-28° de PO3 est respectée.
 
+- **Massifs forestiers éclaircis par surcouche.** En vue moyenne et large, la carte de couleur
+  précalculée domine le sol et ses forêts étaient presque noires à bord net. Le crochet
+  `sg_apply` relève leur luminance vers un plancher (0,12 linéaire), fond la lisière par une
+  lecture floutée de la carte et garde un modelé de canopée à trois octaves ; la pyramide n'est
+  pas régénérée. Bloc `forest_masses` de `data/ui/campaign_map.json`.
+
 ## Conséquences
-- Valeurs dans `data/ui/campaign_map.json` (blocs `clouds` et `morning_mist`) et
+- Valeurs dans `data/ui/campaign_map.json` (blocs `clouds`, `morning_mist` et `forest_masses`) et
   `data/fx/atmosphere.json` ; aucune règle de jeu, batailles inchangées (le bloc `campaign` et le
   shader du terrain de carte ne servent qu'à la carte).
 - La nappe est peinte sur le sol : arbres, villes et figurines en émergent sans être voilés.

@@ -170,10 +170,19 @@ func _test_morning_mist(map: Node3D) -> void:
 	if not _check(not mist.is_empty(), "morning_mist block missing in data/ui/campaign_map.json"):
 		return
 	var opacity := float(mist.get("opacity", 0.0))
-	_check(opacity > 0.2 and opacity <= 0.7, "valley mist should be visible but never opaque (%.2f)" % opacity)
+	_check(opacity > 0.15 and opacity <= 0.35, "mist should be visible but stay under 35 %% (%.2f)" % opacity)
+	# Nappes larges : relief lissé à grande échelle (pas le relief fin), bancs de plusieurs dizaines
+	# de pixels de carte, dérive lente, rien sur les crêtes.
+	var lods: Vector2 = material.get_shader_parameter("weather_valley_lods")
+	_check(lods.x >= 3.0 and lods.y >= lods.x + 2.0, "mist should follow large-scale smoothed height, not fine relief (lods %s)" % lods)
+	var bank_scale := float(material.get_shader_parameter("weather_valley_bank_scale"))
+	_check(bank_scale > 0.0 and bank_scale <= 0.01, "mist banks should be broad (scale %.4f)" % bank_scale)
+	_check(float(material.get_shader_parameter("weather_valley_drift")) > 0.0, "mist banks should drift slowly")
+	var crest: Vector2 = material.get_shader_parameter("weather_valley_crest_m")
+	_check(crest.y > crest.x and crest.x > 0.0, "mist should fade out on crests (%s)" % crest)
 	_check(is_equal_approx(float(material.get_shader_parameter("weather_valley_mist")), opacity), "weather_valley_mist should carry morning_mist.opacity")
 	var depth: Vector2 = material.get_shader_parameter("weather_valley_depth_m")
-	_check(depth.x >= 10.0 and depth.y > depth.x, "mist should pool in valleys only, not on open plains (%s)" % depth)
+	_check(depth.x >= 5.0 and depth.y >= depth.x + 60.0, "mist edges should be very soft (depth band %s)" % depth)
 	_check(float(material.get_shader_parameter("weather_valley_lift")) < 1.0, "mist should thin out once lifted")
 	# Par météo : seul le brouillard remplit le canal B.
 	var paris: int = map.map_data.index_of_id("prov_ile_de_france")
