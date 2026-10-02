@@ -121,8 +121,8 @@
         "radius": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "maximum": 10,
-          "description": "Rayon du champ marqué, en unités du repère des figurines d'armée."
+          "maximum": 20,
+          "description": "Rayon du champ marqué, en unités du repère des figurines d'armée (un homme ≈ 4,3 ; camp de siège ≈ 13 de large)."
         },
         "max_distance": {
           "type": "number",
@@ -173,8 +173,8 @@
               "size": {
                 "type": "number",
                 "exclusiveMinimum": 0,
-                "maximum": 8,
-                "description": "Plus grande dimension de l'engin, en unités du repère des figurines d'armée (camp de siège ≈ 5)."
+                "maximum": 16,
+                "description": "Plus grande dimension de l'engin, en unités du repère des figurines d'armée (un homme ≈ 4,3 ; camp de siège ≈ 13 de large, tentes ≈ 3-4)."
               },
               "slot": {
                 "type": "array",
@@ -183,7 +183,7 @@
                 "items": {
                   "type": "number"
                 },
-                "description": "Place (x devant, z à droite) dans le repère des figurines d'armée."
+                "description": "Place (x devant, z à droite) dans le repère des figurines d'armée ; le camp de siège couvre x de -2 à 11, z de -2,5 à 10,5."
               }
             }
           }

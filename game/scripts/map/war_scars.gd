@@ -28,8 +28,9 @@ const REGROUND_INTERVAL := 0.25
 const DOOR_RETRY_INTERVAL := 0.5
 ## Écart (unités monde) entre l'armée et le tertre (pas sous les figurines du vainqueur).
 const FIELD_OFFSET := 0.7
-## Hauteur d'un homme dans le repère des figurines d'armée (taille des débris).
-const FIGURE_UNIT := 1.0
+## Hauteur d'un homme dans le repère des figurines d'armée (`ArmyFigures.FIGURE_SCALE` 2,3 ×
+## 1,88 m de maillage) : taille des débris et des corbeaux.
+const FIGURE_UNIT := 4.3
 const ENGINES_NODE := "SiegeEngines"
 
 static var _settings: Dictionary = {}
@@ -39,6 +40,9 @@ var stats: Dictionary = {}
 ## Plan de la ville 1:1 d'une colonie : `func(id) -> {plan, anchor: Vector2, meters_per_unit}`
 ## (`{}` tant qu'elle n'est pas chargée). Sans lui, pas de portes marquées.
 var plan_provider: Callable = Callable()
+## Captures (`tb4_shot.gd`) : engins imposés par armée (`[{kind, ready, turns_left}]`), à la place
+## de ceux du pont.
+var forced_engines: Dictionary = {}
 
 var _map_data: MapData = null
 var _terrain: TerrainBuilder = null
@@ -502,8 +506,8 @@ func _refresh_sieges(sim: Object, new_turn: bool) -> void:
 		var attached: bool = entry != null and entry["marker"] == marker and entry["node"] != null and is_instance_valid(entry["node"])
 		if attached and not stale:
 			continue
-		var odds: Dictionary = sim.call("get_assault_odds", id)
-		var stages := engine_stages(odds.get("engines", []), int(block.get("almost_ready_turns", 0)))
+		var engines: Variant = forced_engines[id] if forced_engines.has(id) else (sim.call("get_assault_odds", id) as Dictionary).get("engines", [])
+		var stages := engine_stages(engines, int(block.get("almost_ready_turns", 0)))
 		var signature := str(stages)
 		if attached and str(entry["signature"]) == signature:
 			continue

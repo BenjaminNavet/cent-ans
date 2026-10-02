@@ -21,7 +21,7 @@
     "debris_turns": 3,
     "crows": 5,
     "debris": 9,
-    "radius": 2.4,
+    "radius": 8.0,
     "max_distance": 420.0
   },
   "siege": {
@@ -29,26 +29,26 @@
     "max_distance": 420.0,
     "engines": {
       "ladders": {
-        "size": 1.5,
+        "size": 4.0,
         "slot": [
-          6.6,
-          2.4
+          12.6,
+          0.4
         ]
       },
       "ram": {
         "model": "res://assets/models/siege/ram_lod.glb",
-        "size": 1.9,
+        "size": 5.0,
         "slot": [
-          7.2,
+          13.2,
           4.6
         ]
       },
       "tower": {
         "model": "res://assets/models/siege/siege_tower_lod.glb",
-        "size": 3.0,
+        "size": 7.5,
         "slot": [
-          6.4,
-          6.8
+          12.9,
+          9.0
         ]
       }
     }
