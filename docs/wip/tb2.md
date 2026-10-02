@@ -24,10 +24,17 @@ Rendu/UI Godot seulement, `core/` intact.
       (`game/scripts/map/region_labels.gd`, source `ParchmentOverlay.province_names`, distances
       180-1250). Mesure : 340 noms et écus sur 9 vues (3 paliers × 3 cadrages), 0 coupé ; 7 noms de
       région à 400, 14 à 1100, 0 à 90.
-- [ ] 5. Nuages et brumes : météo réelle seulement, plus fins, jamais sur la province sélectionnée
+- [x] 5. Nuées et brumes (bloc `clouds`) : plan de nuées déjà limité à la météo du cœur ; ombres de
+      nuages du terrain (`cloud_shadow_amount`) désormais nulles par temps clair, 0,12 sous pluie,
+      neige ou orage au point visé ; opacité des nuées 0 / 0,11 / 0,45 aux distances 90 / 400 / 1100
+      (0,29 à 400 avant) ; province sélectionnée dégagée (`weather_clear_id` : nuées, ombres de
+      nuées, nappe de brume ; sol mouillé et neige fraîche restent).
 
 ## Prochaine étape
-Point 5 : nuées (météo réelle seulement, fines en vue moyenne, province sélectionnée dégagée).
+Lot livré. Reste la capture de contrôle par la session principale (les agents d'implémentation ne
+lisent pas d'image) : `godot --path game --resolution 1600x900 --script res://tests/ss_shot.gd --
+--out=<dossier> --distances=1100,400,90` (Paris, fac_france) ; brouillard : `--at=1930,2560
+--distances=300` ; nuées : ajouter `--map-weather=rain`. Vérification : `game/tests/tb2_declutter_test.gd`.
 
 ## Points ouverts
 - `da7d_overlap_test.gd` échoue sur son seuil de temps (4 ms) quand la machine est chargée : 5,4 ms avant TB2, 4,4 ms après, charge moyenne > 10. À relancer machine calme.

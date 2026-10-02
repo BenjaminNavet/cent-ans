@@ -14,6 +14,8 @@ uniform vec3 rain_color : source_color = vec3(0.50, 0.52, 0.56);
 uniform vec3 storm_color : source_color = vec3(0.24, 0.25, 0.30);
 uniform vec3 snow_color : source_color = vec3(0.86, 0.88, 0.92);
 uniform vec3 sun_color : source_color = vec3(1.0, 0.97, 0.9);
+// TB2 : altitude moyenne du sol (unités monde) pour retrouver la province vue sous une nuée.
+uniform float cloud_clear_ground_y = 2.0;
 
 int province_at(vec2 p) {
 	ivec2 sz = textureSize(province_ids, 0);
@@ -36,6 +38,14 @@ void fragment() {
 	float a = cloud_alpha * (1.0 - pm_weight());
 	vec4 w = (a > 0.001) ? wx_sample(p) : vec4(0.0);
 	float density = wx_cloud(p, w);
+	if (density > 0.001 && weather_clear_id > 0) {
+		// TB2 : jamais de nuée devant la province sélectionnée. Le point du sol vu à travers ce
+		// fragment (rayon caméra → plan de nuées prolongé jusqu'au sol) décide, pas l'aplomb.
+		vec3 cam = CAMERA_POSITION_WORLD;
+		float t = (cam.y - cloud_clear_ground_y) / max(cam.y - world_pos.y, 1e-3);
+		vec2 ground = cam.xz + (world_pos.xz - cam.xz) * t;
+		density *= wx_selection_clear(cam.y > world_pos.y ? ground : p);
+	}
 	if (density <= 0.001) {
 		discard;
 	}

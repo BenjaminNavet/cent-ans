@@ -48,6 +48,7 @@ func _run() -> void:
 	_test_borders(map)
 	await _test_signs(map)
 	await _test_labels(map)
+	await _test_clouds(map)
 	map.queue_free()
 	await process_frame
 
@@ -243,7 +244,10 @@ func _test_labels(map: Node3D) -> void:
 	for distance: float in TIERS:
 		for spot in spots:
 			await _look(map, spot, distance)
-			var safe: Rect2 = layer.label_safe_rect()
+			# Zone visible : l'écran moins le bandeau du haut. La passe de dé-encombrement exige
+			# en plus la marge `labels.edge_margin_px`, qui absorbe le glissement des noms entre
+			# deux passes (échelle du relief, décalage au-dessus de l'emprise).
+			var safe: Rect2 = layer.label_safe_rect().grow(MapReadability.number("labels", "edge_margin_px", 16.0) - 1.0)
 			var occupancy: Dictionary = layer.screen_occupancy(map.camera)
 			var rects: Array = occupancy["rects"]
 			var owners: PackedInt32Array = occupancy["owners"]
@@ -274,7 +278,43 @@ func _test_labels(map: Node3D) -> void:
 						_check(regions.placed_rects.is_empty(), "no region name in the close view")
 	_failures += cut_total
 	_check(names_total > 50, "label sample too small (%d)" % names_total)
-	print("tb2 labels: %d names and shields checked over %d views, %d cut by the screen edge (safe rect %s)" % [names_total, TIERS.size() * spots.size(), cut_total, layer.label_safe_rect()])
+	print("tb2 labels: %d names and shields checked over %d views, %d cut by the screen edge (placement rect %s)" % [names_total, TIERS.size() * spots.size(), cut_total, layer.label_safe_rect()])
+
+
+## 5. Nuées et brumes : seulement sous une météo réelle, fines en vue moyenne, jamais sur la
+## province sélectionnée.
+func _test_clouds(map: Node3D) -> void:
+	var view: CampaignWeatherView = map.weather_view
+	if not _check(view != null and view.enabled, "campaign weather view missing"):
+		return
+	var terrain_material: ShaderMaterial = map.terrain.material
+	var cloud_material: ShaderMaterial = view._cloud_material
+	# Opacité par palier : rien de près, fin en vue moyenne, plein en vue large.
+	var close := view.cloud_alpha_at(90.0)
+	var medium := view.cloud_alpha_at(400.0)
+	var wide := view.cloud_alpha_at(1100.0)
+	_check(is_zero_approx(close), "no cloud plane in the close view")
+	_check(medium <= 0.2 and medium < wide * 0.6, "clouds should be thinner in the medium view (%.2f vs %.2f wide)" % [medium, wide])
+	# Météo réelle seulement : pas d'ombre de nuage par temps clair, nuées coupées sans météo.
+	_check(is_zero_approx(view.shadow_amount_for("clear")) and is_zero_approx(view.shadow_amount_for("fog")), "no cloud shadow without real clouds")
+	_check(view.shadow_amount_for("rain") > 0.0 and view.shadow_amount_for("rain") <= 0.15, "light cloud shadow under real rain")
+	var saved: Dictionary = view.weather.duplicate(true)
+	view.weather = {}
+	view._upload_mask()
+	_check(not bool(cloud_material.get_shader_parameter("weather_enabled")), "clear weather everywhere: cloud plane disabled")
+	view.weather = saved
+	view._upload_mask()
+	# Province sélectionnée dégagée (nuées, ombres de nuées et nappes de brume).
+	var paris: int = map.map_data.index_of_id("prov_ile_de_france")
+	map.selected_index = paris
+	await _look(map, PARIS, 400.0)
+	_check(int(cloud_material.get_shader_parameter("weather_clear_id")) == paris, "clouds should clear the selected province")
+	_check(int(terrain_material.get_shader_parameter("weather_clear_id")) == paris, "ground mist should clear the selected province")
+	map.selected_index = 0
+	await process_frame
+	await process_frame
+	_check(int(cloud_material.get_shader_parameter("weather_clear_id")) == 0, "no cleared province once the selection is dropped")
+	print("tb2 clouds: alpha close %.2f, medium %.2f, wide %.2f ; cloud shadow clear %.2f, rain %.2f" % [close, medium, wide, view.shadow_amount_for("clear"), view.shadow_amount_for("rain")])
 
 
 func _check(condition: bool, message: String) -> bool:

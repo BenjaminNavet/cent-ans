@@ -26,6 +26,15 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 ## densité en vue large (au-delà de `cloud_wide.y`, cf. `weather_wide_intensity_cut`) qui rendait
 ## presque chaque province couverte.
 @export var cloud_max_alpha: float = 0.45
+## TB2 : nuées plus fines en vue moyenne. Opacité plafonnée à `cloud_medium_alpha` jusqu'à
+## `cloud_medium.x` (distance caméra), puis montée vers `cloud_max_alpha` à `cloud_medium.y`.
+## Valeurs du bloc `clouds` de `data/ui/campaign_map.json` (repli : ces exports).
+@export var cloud_medium_alpha: float = 0.2
+@export var cloud_medium: Vector2 = Vector2(600.0, 1000.0)
+## TB2 : ombres de nuages du terrain (`cloud_shadow_amount`, lot CV1) : seulement quand il y a de
+## vraies nuées (pluie, neige, orage) sous le point visé ; nulles par temps clair.
+@export var weather_shadow_amount: float = 0.12
+@export var fair_shadow_amount: float = 0.0
 ## CV3-0 (#3) : bande (distance caméra) sur laquelle la coupure d'intensité passe de 0 à
 ## `cloud_wide_cut_max` — au-delà, seules les zones de forte pluie/neige (ou l'orage) gardent
 ## des nuées.
@@ -70,6 +79,7 @@ func setup(map: Node) -> void:
 			forced = arg.trim_prefix("--map-weather=")
 	if not enabled or _map_data == null:
 		return
+	_load_tuning()  # TB2
 	_build_clouds()
 	_rain = _make_particles(false)
 	_snow = _make_particles(true)
@@ -112,16 +122,78 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 	if _terrain != null and _terrain.material != null:
 		var morning := 1.0 - smoothstep(fog_lift_seconds * 0.15, fog_lift_seconds, _fog_clock)
 		_terrain.material.set_shader_parameter("weather_fog_morning", morning)
-	var cloud_alpha := smoothstep(cloud_near.x, cloud_near.y, distance) * cloud_max_alpha * (1.0 - parchment)
+	var cloud_alpha := cloud_alpha_at(distance) * (1.0 - parchment)
 	_cloud_material.set_shader_parameter("cloud_alpha", cloud_alpha)
+	_update_selection_clear()
 	_clouds.visible = cloud_alpha > 0.01
 	var wide_cut := smoothstep(cloud_wide.x, cloud_wide.y, distance) * cloud_wide_cut_max
 	_cloud_material.set_shader_parameter("weather_wide_intensity_cut", wide_cut)
 	if _terrain != null and _terrain.material != null:
 		_terrain.material.set_shader_parameter("weather_wide_intensity_cut", wide_cut)
 	_focus_kind = weather_at(Vector2(focus.x, focus.z))
+	_update_cloud_shadows(delta)
 	_update_particles(focus, distance)
 	_update_lightning(delta, distance)
+
+
+# --- TB2 : nuées sobres -----------------------------------------------------------------
+
+
+## Réglages du bloc `clouds` de `data/ui/campaign_map.json`.
+func _load_tuning() -> void:
+	var clouds := MapReadability.section("clouds")
+	cloud_medium_alpha = float(clouds.get("medium_alpha", cloud_medium_alpha))
+	var band: Variant = clouds.get("medium_distance", null)
+	if band is Array and (band as Array).size() == 2:
+		cloud_medium = Vector2(float(band[0]), float(band[1]))
+	cloud_max_alpha = float(clouds.get("max_alpha", cloud_max_alpha))
+	weather_shadow_amount = float(clouds.get("weather_shadow", weather_shadow_amount))
+	fair_shadow_amount = float(clouds.get("fair_shadow", fair_shadow_amount))
+
+
+## Opacité des nuées à la distance caméra `distance` (hors fondu du parchemin) : nulles de près,
+## fines en vue moyenne, pleines en vue large.
+func cloud_alpha_at(distance: float) -> float:
+	var ceiling := lerpf(cloud_medium_alpha, cloud_max_alpha, smoothstep(cloud_medium.x, cloud_medium.y, distance))
+	return smoothstep(cloud_near.x, cloud_near.y, distance) * ceiling
+
+
+## Vrai si la météo `kind` porte des nuées (pluie, neige, orage) ; le brouillard est une nappe au sol.
+static func has_clouds(kind: String) -> bool:
+	return kind in ["rain", "snow", "storm"]
+
+
+## Ombres de nuages attendues sur le terrain pour la météo `kind` sous le point visé.
+func shadow_amount_for(kind: String) -> float:
+	return weather_shadow_amount if has_clouds(kind) else fair_shadow_amount
+
+
+var _shadow_amount := -1.0
+var _clear_id := -1
+
+
+func _update_cloud_shadows(delta: float) -> void:
+	if _terrain == null or _terrain.material == null:
+		return
+	var target := shadow_amount_for(_focus_kind)
+	var amount := target if _shadow_amount < 0.0 else move_toward(_shadow_amount, target, delta * 0.15)
+	if not is_equal_approx(amount, _shadow_amount):
+		_shadow_amount = amount
+		_terrain.material.set_shader_parameter("cloud_shadow_amount", amount)
+
+
+## Jamais de nuée ni de brume sur la province sélectionnée (`weather_clear_id` des deux matériaux).
+func _update_selection_clear() -> void:
+	var selected: Variant = _map.get("selected_index") if _map != null else null
+	var id := int(selected) if selected != null else 0
+	if id == _clear_id:
+		return
+	_clear_id = id
+	var feather := MapReadability.number("clouds", "clear_feather_px", 8.0)
+	for material: ShaderMaterial in [_terrain.material if _terrain != null else null, _cloud_material]:
+		if material != null:
+			material.set_shader_parameter("weather_clear_id", id)
+			material.set_shader_parameter("weather_clear_feather_px", feather)
 
 
 # --- Masque par province ----------------------------------------------------------------
