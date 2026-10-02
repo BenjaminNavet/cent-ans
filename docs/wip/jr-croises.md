@@ -22,11 +22,15 @@ Ordre : (JR1 ∥ JR2) → (JR3 ∥ JR4) → JR5.
 revendications `prov_jerusalem`, `prov_gaza`, `prov_safad`.
 
 ## État
-- Spec, ADR, note écrits ; exploration faite (spec § 5.1). JR1 et JR2 lancés.
-- JR1 : TERMINÉ sur `feat/jr` (dernière fusion de `feat/jr-data` : a0c93dd82). Règle complète, pont `get_crusade()`, ordre `preach_passage`, IA ; `cargo test --workspace` 1362 verts, clippy et fmt propres, schéma Python vert. Restes pour JR4 : équilibrage (aumônes 300 + 20 × ferveur, coût du passage 1 500, usure), Églises sœurs (orthodoxes) sans bonus ni malus, pas de crochet sur les batailles navales.
+- JR1 fait (règle, pont, IA de prêche ; cargo 1362 ok). JR2 + JR2b faits (données, arêtes forcées).
+- JR3 fait (section Ferveur, repère HUD, sélecteur « Sans terre », évènements ; smoke ok).
+  Capture jugée : lisible ; défauts renvoyés : déficit de départ −1 076/saison, « tour(s) »,
+  armes illisibles (JR3b en cours).
+- JR4 en cours (IA outre-mer, équilibrage, seuils dans la vue).
 
 ## Prochaine étape
-- À la fin de JR1 et JR2 : vérifier les tests, lancer JR3 et JR4.
+- JR5 : relecture du diff, tests complets, nouvelle capture, fusion dans main (worktree dédié, ff-only).
 
 ## Points ouverts
 - Usages de la capitale pour une faction sans cité (liste dans le rapport d'exploration, spec § 5.1).
+- `fe_ui_test` « map picker framed on the playable lands » échoue selon JR3 depuis OM (pas JR) : à vérifier sur main.
