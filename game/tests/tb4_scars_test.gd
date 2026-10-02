@@ -379,8 +379,8 @@ func _check_plague_screen(scars: WarScars, node: Node3D, block: Dictionary) -> v
 		if distance > float(block["max_distance"]):
 			continue
 		scars.update_view(distance, 1.0)
-		# Caméra de la carte : visée sur la colonie, tangage de 35° (vue rapprochée).
-		var pitch := deg_to_rad(35.0)
+		# Caméra de la carte : visée sur la colonie, tangage de 30° (`pitch_near_deg`).
+		var pitch := deg_to_rad(30.0)
 		camera.global_position = site_center + Vector3(0.0, sin(pitch), cos(pitch)) * distance
 		camera.look_at(site_center, Vector3.UP)
 		var smallest := INF
@@ -388,9 +388,12 @@ func _check_plague_screen(scars: WarScars, node: Node3D, block: Dictionary) -> v
 			var prop := child as MeshInstance3D
 			if str(prop.name).begins_with("Door_"):
 				continue
-			var size := prop.mesh.get_aabb().size
-			var world_length := maxf(size.x, size.z) * prop.scale.x
-			var px := world_length / (2.0 * camera.global_position.distance_to(prop.global_position) * tan(deg_to_rad(CAMERA_FOV * 0.5))) * VIEW_HEIGHT
+			# Longueur projetée du grand axe au sol (raccourci compris : les fosses du test sont
+			# en enfilade, le pire cas).
+			var box := prop.mesh.get_aabb()
+			var axis := Vector3.RIGHT if box.size.x >= box.size.z else Vector3.BACK
+			var half := maxf(box.size.x, box.size.z) * 0.5
+			var px := _screen(camera, prop.global_transform * (box.get_center() - axis * half)).distance_to(_screen(camera, prop.global_transform * (box.get_center() + axis * half)))
 			smallest = minf(smallest, px)
 			_check(px >= MIN_PX, "%s is %.1f px at distance %.0f (≥ %.0f wanted)" % [prop.name, px, distance, MIN_PX])
 			_check(camera.is_position_in_frustum(prop.global_position), "%s in view at distance %.0f" % [prop.name, distance])
@@ -405,6 +408,13 @@ func _check_plague_screen(scars: WarScars, node: Node3D, block: Dictionary) -> v
 	_check(is_equal_approx((node.get_node("Pit_0") as Node3D).scale.x, 1.0 / 719.0), "pits at real scale up close")
 	camera.free()
 	scars.update_view(float(block["max_distance"]) * 0.5, 1.0)
+
+
+## Point monde → pixels d'un écran de `VIEW_HEIGHT` de haut (projection de la caméra, sans
+## dépendre de la fenêtre du test).
+func _screen(camera: Camera3D, point: Vector3) -> Vector2:
+	var local := camera.global_transform.affine_inverse() * point
+	return Vector2(local.x, local.y) / maxf(-local.z, 1e-6) / tan(deg_to_rad(CAMERA_FOV * 0.5)) * VIEW_HEIGHT * 0.5
 
 
 ## Croix des portes marquées : au moins 6 px à la distance minimale de la caméra de jeu (dernier

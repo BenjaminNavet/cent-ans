@@ -75,7 +75,7 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 20,
-          "description": "Grossissement des fosses et de la charrette par unité de distance de caméra (taille à l'écran constante ; jamais sous l'échelle réelle). 2,5 : une fosse de 6,5 m fait ≈ 19 px en 900p."
+          "description": "Grossissement des fosses et de la charrette par unité de distance de caméra (taille à l'écran constante ; jamais sous l'échelle réelle). 4,2 : une fosse de 6,6 × 3,3 m fait ≈ 33 × 16 px en 900p vue de travers, 15 px vue en enfilade (tangage 30°)."
         },
         "max_scale": {
           "type": "number",

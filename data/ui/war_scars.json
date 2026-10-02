@@ -13,9 +13,9 @@
     ],
     "door_search_m": 260.0,
     "cart": true,
-    "scale_per_distance": 2.5,
-    "max_scale": 150.0,
-    "cart_scale": 1.8
+    "scale_per_distance": 4.2,
+    "max_scale": 260.0,
+    "cart_scale": 1.9
   },
   "battlefield": {
     "turns": 4,

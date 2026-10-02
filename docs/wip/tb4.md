@@ -6,7 +6,7 @@ Spec : `docs/design/2026-10-02-campagne-tob.md` § 3 « TB4 ». Branche `feat/tb
 ## État
 - [x] Squelette du test `game/tests/tb4_scars_test.gd`.
 - [x] 1. Brûlis (`terroir_burn`) par-dessus la carte de couleur (SS2) et les matières (HB3) : appel déplacé après `sg_apply` / `hb_apply` dans `terrain.gdshader` ; couverture moyenne au loin (`campaign_life.gdshaderinc`) ; masque de terroir relu à son échelle (voir « Écarts »).
-- [x] 2. Peste : `WarScars.set_plague_sites` (scènes `plague` résolues par `FolkScenes.edge_frame`) : fosses (rectangle de terre sombre, grande croix de bois) groupées au bord de la colonie, charrette des morts sur la route qui en sort (`CampaignLife._road_from`). Grossissement = `plague.scale_per_distance` (2,5) × distance de caméra, borné par `max_scale`, jamais sous 1:1 : taille à l'écran tenue jusqu'à `plague.max_distance` (60). Test : à 15 / 20 / 40, plus petit élément 15,7 / 15,8 / 16,0 px en 900p (charrette ; fosse ≈ 19,5 px), tous dans le champ.
+- [x] 2. Peste : `WarScars.set_plague_sites` (scènes `plague` résolues par `FolkScenes.edge_frame`) : fosses (rectangle de terre sombre, grande croix de bois) groupées au bord de la colonie, charrette des morts sur la route qui en sort (`CampaignLife._road_from`). Grossissement = `plague.scale_per_distance` (4,2) × distance de caméra (charrette × `cart_scale` 1,9 en plus), borné par `max_scale`, jamais sous 1:1 : taille à l'écran tenue jusqu'à `plague.max_distance` (60). Test (900p, tangage 30°, fosses en enfilade = pire cas, longueur projetée) : plus petit élément 12,3 / 12,5 / 12,9 px à 15 / 20 / 40, tous dans le champ. Caméra réelle à 20 sur Paris (`tb4_shot --only=peste`) : fosses 13 à 16 px, charrette 53 px (de travers, au premier plan), tous dans le champ.
 - [x] 2 bis. Portes marquées : gardées dans les villes 1:1 ordinaires, croix sur toute la hauteur du vantail (2,2 m, 8,8 px au plancher de caméra 0,30 en 900p) ; **supprimées dans les villes emblématiques** (plancher 2,6 : ≈ 1 px).
 - [x] 3. Champ de bataille : `WarScars.refresh` lit les événements `battle` (`get_events`, `get_pending_events`), marque à la position de l'armée (repli : centre de la province) ; tertre `battlefield.turns` tours, corbeaux `crow_turns`, débris `debris_turns` (`data/ui/war_scars.json`) ; taille des figurines d'armée, caché sous le brouillard de guerre et sur le parchemin.
 - [x] 4. Siège : engins de `get_assault_odds(armée).engines` posés au bord du camp (enfants des figurines) : charpente et tas de bois, maquette sous échafaudage (`siege.almost_ready_turns`), engin prêt ; maquettes `assets/models/siege/*_lod.glb` (lecture seule), échelles procédurales.
@@ -93,8 +93,9 @@ mêlées à cette bascule de luminance. Le correctif du masque reste établi par
 ## Points ouverts
 - Retouches du 02/10 (brûlis par parcelles, peste lisible à 15-40, portes) non jugées à l'œil :
   captures écrites, non lues.
-- Fosses grossies : à 40 de caméra, une fosse fait ≈ 650 m de long sur la carte et le groupe ≈ 3 km ;
-  il peut recouvrir un hameau ou un bois voisin.
+- Fosses grossies : à 40 de caméra, une fosse fait ≈ 1,1 km de long sur la carte et le groupe
+  ≈ 6 km ; il peut recouvrir un hameau ou un bois voisin. La charrette de travers fait 53 px
+  contre 13-16 pour une fosse en enfilade : baisser `cart_scale` si elle domine trop.
 - Portes marquées seulement dans une ville 1:1 ordinaire chargée ; ni villes emblématiques ni
   villages sans plan. Le vantail est posé à 15 cm de la façade, en son milieu : peut mordre un
   encorbellement.
