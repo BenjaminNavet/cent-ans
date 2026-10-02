@@ -25,7 +25,10 @@ fn structural(state: &CampaignState, data: &GameData, faction: &FactionId) -> (i
         .max(0)
         * rules.opulence_percent
         / 100;
-    (e.net_income() + opulence, e.projected_income + e.trade_income)
+    (
+        e.net_income() + opulence,
+        e.projected_income + e.trade_income,
+    )
 }
 
 #[test]
