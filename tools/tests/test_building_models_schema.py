@@ -85,3 +85,30 @@ def test_exaggeration_defaults_to_real_scale() -> None:
         render["exaggeration"]["full_size_below"] < render["exaggeration"]["max_above"]
     )
     assert render["ring_min_m"] < render["ring_max_m"]
+
+
+def _manifest() -> dict:
+    return json.loads((MODELS / "manifest.json").read_text("utf-8"))
+
+
+def test_every_model_is_exported_under_its_triangle_cap() -> None:
+    """Each mapped model has a GLB and stays within a modest triangle budget per level."""
+    manifest = _manifest()
+    caps = {1: 800, 2: 1800, 3: 3500}
+    for family, level in _levels():
+        name = level["model"]
+        assert (MODELS / f"{name}.glb").is_file(), name
+        entry = manifest[name]
+        assert entry["family"] == family and entry["level"] == level["level"]
+        assert entry["triangles"] <= caps[entry["level"]], name
+    assert manifest["worksite_1"]["triangles"] <= caps[1]
+
+
+def test_models_grow_with_their_level() -> None:
+    """Level 1 is one building, level 3 a small estate: footprint and triangles grow."""
+    manifest = _manifest()
+    for family in FAMILIES:
+        radii = [manifest[f"{family}_{n}"]["radius"] for n in (1, 2, 3)]
+        triangles = [manifest[f"{family}_{n}"]["triangles"] for n in (1, 2, 3)]
+        assert radii == sorted(radii) and radii[2] > 1.5 * radii[0], family
+        assert triangles == sorted(triangles), family
