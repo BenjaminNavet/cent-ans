@@ -1,0 +1,554 @@
+{
+  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille.",
+  "version": 1,
+  "render": {
+    "view_range_units": 45.0,
+    "shadow_range_units": 12.0,
+    "exaggeration": {
+      "max": 1.0,
+      "full_size_below": 12.0,
+      "max_above": 60.0
+    },
+    "ring_min_m": 90.0,
+    "ring_max_m": 650.0,
+    "max_slope": 0.22,
+    "max_per_settlement": 4
+  },
+  "families": {
+    "farm": {
+      "name": "Ferme",
+      "site": "field",
+      "levels": [
+        {
+          "level": 1,
+          "model": "farm_1",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_market",
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_herb_garden",
+                  "bld_stables",
+                  "bld_weaving_workshop"
+                ],
+                "min": 1
+              }
+            ],
+            "resources": [
+              "res_wheat",
+              "res_wool"
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "model": "farm_2",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_market",
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_herb_garden",
+                  "bld_stables",
+                  "bld_weaving_workshop"
+                ],
+                "min": 2
+              }
+            ],
+            "resources": [
+              "res_wheat",
+              "res_wool"
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "model": "farm_3",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_market",
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_herb_garden",
+                  "bld_stables",
+                  "bld_weaving_workshop"
+                ],
+                "min": 3
+              }
+            ],
+            "resources": [
+              "res_wheat",
+              "res_wool"
+            ]
+          }
+        }
+      ]
+    },
+    "mill": {
+      "name": "Moulin",
+      "site": "water",
+      "levels": [
+        {
+          "level": 1,
+          "model": "mill_1",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_windmill"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "model": "mill_2",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_water_mill"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "model": "mill_3",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_water_mill"
+                ],
+                "min": 1
+              },
+              {
+                "of": [
+                  "bld_weaving_workshop",
+                  "bld_forge",
+                  "bld_tin_blowing_house",
+                  "bld_fair"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "vineyard": {
+      "name": "Vignoble",
+      "site": "slope",
+      "levels": [
+        {
+          "level": 1,
+          "model": "vineyard_1",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_vineyard_press"
+                ],
+                "min": 1
+              }
+            ],
+            "resources": [
+              "res_wine"
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "model": "vineyard_2",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_vineyard_press"
+                ],
+                "min": 1
+              },
+              {
+                "of": [
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_port",
+                  "bld_counting_house",
+                  "bld_water_mill"
+                ],
+                "min": 1
+              }
+            ],
+            "resources": [
+              "res_wine"
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "model": "vineyard_3",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_vineyard_press"
+                ],
+                "min": 1
+              },
+              {
+                "of": [
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_port",
+                  "bld_counting_house",
+                  "bld_water_mill"
+                ],
+                "min": 2
+              }
+            ],
+            "resources": [
+              "res_wine"
+            ]
+          }
+        }
+      ]
+    },
+    "mine": {
+      "name": "Mine",
+      "site": "slope",
+      "levels": [
+        {
+          "level": 1,
+          "model": "mine_1",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_forge",
+                  "bld_tin_blowing_house"
+                ],
+                "min": 1
+              }
+            ],
+            "resources": [
+              "res_iron",
+              "res_tin"
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "model": "mine_2",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_forge",
+                  "bld_tin_blowing_house"
+                ],
+                "min": 1
+              },
+              {
+                "of": [
+                  "bld_armoury",
+                  "bld_siege_workshop",
+                  "bld_water_mill",
+                  "bld_artillery_bastion"
+                ],
+                "min": 1
+              }
+            ],
+            "resources": [
+              "res_iron",
+              "res_tin"
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "model": "mine_3",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_forge",
+                  "bld_tin_blowing_house"
+                ],
+                "min": 1
+              },
+              {
+                "of": [
+                  "bld_armoury",
+                  "bld_siege_workshop",
+                  "bld_water_mill",
+                  "bld_artillery_bastion"
+                ],
+                "min": 2
+              }
+            ],
+            "resources": [
+              "res_iron",
+              "res_tin"
+            ]
+          }
+        }
+      ]
+    },
+    "saltworks": {
+      "name": "Saline",
+      "site": "coast",
+      "levels": [
+        {
+          "level": 1,
+          "model": "saltworks_1",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_market",
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_port",
+                  "bld_counting_house"
+                ],
+                "min": 1
+              }
+            ],
+            "resources": [
+              "res_salt"
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "model": "saltworks_2",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_market",
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_port",
+                  "bld_counting_house"
+                ],
+                "min": 2
+              }
+            ],
+            "resources": [
+              "res_salt"
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "model": "saltworks_3",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_market",
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_port",
+                  "bld_counting_house"
+                ],
+                "min": 3
+              }
+            ],
+            "resources": [
+              "res_salt"
+            ]
+          }
+        }
+      ]
+    },
+    "abbey": {
+      "name": "Abbaye",
+      "site": "field",
+      "levels": [
+        {
+          "level": 1,
+          "model": "abbey_1",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_scriptorium",
+                  "bld_hotel_dieu",
+                  "bld_collegiate_church",
+                  "bld_abbey"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "model": "abbey_2",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_abbey"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "model": "abbey_3",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_abbey"
+                ],
+                "min": 1
+              },
+              {
+                "of": [
+                  "bld_scriptorium",
+                  "bld_hotel_dieu",
+                  "bld_university",
+                  "bld_herb_garden"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "market": {
+      "name": "Marché",
+      "site": "road",
+      "levels": [
+        {
+          "level": 1,
+          "model": "market_1",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_market",
+                  "bld_guild_hall",
+                  "bld_fair"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "model": "market_2",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_guild_hall",
+                  "bld_fair"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "model": "market_3",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_fair"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "port": {
+      "name": "Port",
+      "site": "coast",
+      "levels": [
+        {
+          "level": 1,
+          "model": "port_1",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_port"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "model": "port_2",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_port"
+                ],
+                "min": 1
+              },
+              {
+                "of": [
+                  "bld_guild_hall",
+                  "bld_fair",
+                  "bld_counting_house",
+                  "bld_weaving_workshop"
+                ],
+                "min": 1
+              }
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "model": "port_3",
+          "when": {
+            "require": [
+              {
+                "of": [
+                  "bld_port"
+                ],
+                "min": 1
+              },
+              {
+                "of": [
+                  "bld_fair",
+                  "bld_counting_house",
+                  "bld_weaving_workshop"
+                ],
+                "min": 2
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
