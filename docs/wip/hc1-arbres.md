@@ -15,8 +15,16 @@ Worktree `../gp-hc1`, branche `feat/hc1` (issue de `feat/hc`). ADR 0161. Aucun c
       sonde `hc_density_probe.gd` (densités par milieu sans image).
 - [x] Tests 1:1 existants épinglés sur le style `real` (vt3, sz4b, settlements_render, fc2,
       ga3_l2, sz6) : à relancer.
-- [ ] smoke, mesures Paris rig 90 / 300 / 700 (`hc_shots.gd --bench`, machine chargée le 02/10 :
-      charge moyenne 40-136, mesures bruitées), dernière planche.
+- [x] smoke OK ; 7 tests de végétation existants OK (vt3, sz4b, settlements_render, fc2, ga3_l2,
+      sz6, hb4).
+- [x] Mesures (`hc_shots.gd --bench`, 1280 × 800, machine très chargée le 02/10 : charge moyenne
+      28-136, autres fenêtres Godot sur le GPU, image de base 17-25 ms au lieu de ≈ 7) :
+      Paris d = 90 : 96 173 instances soumises, +7,9 ms ; d = 300 : 199 986, +5,0 ms ; d = 700 :
+      236 367, +8,2 ms. Maillages bas à la place des imposteurs (`--no-fc2`) : +11,4 / +9,4 /
+      +15,7 ms (les imposteurs restent le palier le moins cher). Premier banc (plafonné à 145
+      images/s, avant réglages) : image complète ≤ 6,9 ms à d = 300 avec 323 610 instances.
+      **À refaire sur machine calme** pour juger la cible (< 2 ms à d = 300).
+- [x] Dernière planche lue : 3 sur 3 (`hc_board_3.jpg`, hors dépôt).
 
 ## Réglages (map_prop_scale.tres)
 Hauteur 0,8 (échelle 0,571 ; hauteurs monde p10 0,44 / médiane 0,86 / p90 1,12), pas 0,9 px,
@@ -42,7 +50,7 @@ Sonde à Paris (rayon 120 px) : 0,98 arbre/px² en forêt, ≈ 0,14 hors forêt.
   hors forêt sont multipliées par les gains `generalised_*_gain` du `.tres`.
 
 ## Prochaine étape
-Smoke, banc, dernière planche, rapport.
+HC3 (session principale) : relecture visuelle, banc sur machine calme, fusion dans `feat/hc`.
 
 ## Points ouverts
 - Éclaircissement au dézoom : au-delà de d = 150 la taille n'est plus strictement constante
