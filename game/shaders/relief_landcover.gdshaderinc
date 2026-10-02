@@ -32,14 +32,14 @@ uniform float rl_pond_cell_px = 2.8;       // taille d'une cellule d'étang (pix
 // Tailles en pixels d'un écran de `rl_water_ref_height` de haut (même cadrage à toute résolution ;
 // 0 = pixels écran bruts).
 uniform float rl_water_ref_height = 1080.0;
-uniform float rl_pond_min_px = 7.0;        // plus petit diamètre d'un étang (px de référence, moyenne des deux axes écran)
+uniform float rl_pond_min_px = 5.0;        // plus petit diamètre d'un étang (px de référence, moyenne des deux axes écran)
 uniform float rl_pond_max_cell_px = 22.4;  // cellule du dernier palier (px carte, cellule × 2^n) ; au-delà, couverture moyenne
-uniform float rl_pond_fill = 0.9;          // part des cellules portant un étang, × densité de la zone
+uniform float rl_pond_fill = 0.8;          // part des cellules portant un étang, × densité de la zone
 uniform float rl_pond_bank = 0.05;         // largeur de la berge (part de cellule ; au moins 1 px écran)
 uniform float rl_pond_bank_amount = 0.75;  // opacité de la berge (couleur `lake_bank_color`)
 uniform float rl_pond_far_cover = 0.35;    // couverture moyenne au-delà du dernier palier (× densité)
-uniform float rl_pool_min_px = 5.0;        // plus petite mare de marais (px de référence)
-uniform float rl_pool_amount = 0.38;       // part d'eau libre d'un marais dense (roselière dominante)
+uniform float rl_pool_min_px = 8.0;        // plus petite mare de marais (px de référence)
+uniform float rl_pool_amount = 0.45;       // part d'eau libre d'un marais dense (roselière dominante)
 uniform float rl_pool_opacity = 0.85;      // opacité des mares
 uniform float rl_pool_max_scale = 16.0;    // grossissement maximal des mares
 uniform float rl_pool_lake_tint = 0.85;    // 0 = eau de marais (`rl_marsh_water`), 1 = eau des lacs
@@ -91,7 +91,7 @@ vec4 rl_landcover(vec4 s, vec2 p, float footprint) {
 }
 
 // Plus petit diamètre d'un étang, en part de cellule (voir `rl_pond_sd`).
-const float RL_POND_MIN_SPAN = 0.31;
+const float RL_POND_MIN_SPAN = 0.22;
 
 // Étang médiéval dans la cellule de `p` : ellipse orientée coupée par une chaussée droite.
 // `cell_px` : taille de la cellule du palier (px carte) ; la densité de la zone est lue autour du
@@ -99,12 +99,15 @@ const float RL_POND_MIN_SPAN = 0.31;
 // Renvoie la distance signée (unités de cellule, négative dans l'eau) ou 1 s'il n'y a pas d'étang.
 float rl_pond_sd(vec2 p, float cell_px) {
 	vec2 q = p / cell_px;
+	// Rangées décalées au hasard : pas de trame carrée d'étangs alignés.
+	float shift = hash12(vec2(floor(q.y) + 0.37, cell_px * 1.91));
+	q.x += shift;
 	vec2 cell = floor(q);
 	vec2 local = fract(q) - 0.5;
 	vec2 key = cell + vec2(cell_px * 7.31, cell_px * 3.17);  // semis propre à chaque palier
 	// Plus faible densité aux quatre coins de l'emprise possible de l'étang : pas d'étang à cheval
 	// sur la limite de la zone.
-	vec2 mid = (cell + 0.5) * cell_px / map_size;
+	vec2 mid = (cell + vec2(0.5 - shift, 0.5)) * cell_px / map_size;
 	vec2 reach = vec2(0.18 * cell_px) / map_size;
 	float density = min(
 		min(textureLod(wetlands, mid + reach, 0.0).g, textureLod(wetlands, mid - reach, 0.0).g),
@@ -113,14 +116,14 @@ float rl_pond_sd(vec2 p, float cell_px) {
 	if (h > density * rl_pond_fill) {
 		return 1.0;
 	}
-	vec2 jitter = (vec2(hash12(key + 1.3), hash12(key + 5.9)) - 0.5) * 0.2;
+	vec2 jitter = (vec2(hash12(key + 1.3), hash12(key + 5.9)) - 0.5) * 0.28;
 	float ang = hash12(key + 9.1) * 6.2832;
 	vec2 dir = vec2(cos(ang), sin(ang));
 	vec2 d = local - jitter;
 	vec2 r = vec2(dot(d, dir), dot(d, vec2(-dir.y, dir.x)));
-	// Petit axe d'au moins 0,31 cellule (`RL_POND_MIN_SPAN`), grand axe d'au plus 0,72.
-	float ra = mix(0.26, 0.36, hash12(key + 2.2));
-	float rb = ra * mix(0.6, 0.9, hash12(key + 4.4));
+	// Petit axe d'au moins 0,22 cellule (`RL_POND_MIN_SPAN`), grand axe d'au plus 0,70.
+	float ra = mix(0.2, 0.35, hash12(key + 2.2));
+	float rb = ra * mix(0.55, 0.9, hash12(key + 4.4));
 	float wob = (value_noise(q * 14.0) - 0.5) * 0.07 + (value_noise(q * 36.0) - 0.5) * 0.025;
 	float e = length(r / vec2(ra, rb)) - 1.0;
 	float sd = e * rb + wob;

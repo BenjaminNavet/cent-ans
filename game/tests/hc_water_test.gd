@@ -103,7 +103,7 @@ func _check_shader() -> void:
 		_check(lake_v.z > lake_v.y and lake_v.y > lake_v.x, "lake %s is not blue-grey" % lake_v)
 		print("hc_water_test: lake_color %s (luminance %.3f), tint_forest %s (luminance %.3f)" % [lake_v, lake_v.dot(weights), forest_v, forest_v.dot(weights)])
 	var min_px := _default_of(FileAccess.get_file_as_string(LANDCOVER_INCLUDE), "rl_pond_min_px")
-	_check(min_px.size() == 1 and min_px[0] >= 6.0, "rl_pond_min_px default %s under 6 px" % [min_px])
+	_check(min_px.size() == 1 and min_px[0] >= 5.0, "rl_pond_min_px default %s under 5 px" % [min_px])
 
 
 ## Valeur par défaut d'un uniforme `float` ou `vec3` dans un source de shader (tableau vide sinon).
