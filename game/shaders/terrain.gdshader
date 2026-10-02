@@ -101,10 +101,14 @@ uniform vec3 hedge_color = vec3(0.035, 0.05, 0.02);
 // Occupation du sol (VegetationFields.landuse) : R vigne, G sécheresse, B bocage.
 uniform sampler2D landuse : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_landuse = false;
-uniform vec3 lake_color = vec3(0.035, 0.10, 0.115);
-// A1-04 : berge de lac (vase, roseaux) à la place du sable et de l'écume marins.
-uniform vec3 lake_bank_color = vec3(0.055, 0.058, 0.030);
-uniform vec3 lake_shallow_color = vec3(0.05, 0.085, 0.06);
+// HC2 (ADR 0161 §3) : eau intérieure éclaircie, bleu-gris, distincte des forêts à hauteur de jeu
+// (avant : 0.035, 0.10, 0.115, confondue avec les massifs) ; reflet du ciel `lake_sky_reflect`.
+uniform vec3 lake_color = vec3(0.075, 0.17, 0.21);
+uniform vec3 lake_sky_color = vec3(0.39, 0.48, 0.54);
+uniform float lake_sky_reflect = 0.25;
+// A1-04 : berge de lac (vase, roseaux) à la place du sable et de l'écume marins. HC2 : berge claire.
+uniform vec3 lake_bank_color = vec3(0.15, 0.14, 0.085);
+uniform vec3 lake_shallow_color = vec3(0.12, 0.20, 0.18);
 uniform float lake_bank_px = 1.6;
 // HB7 : niveau (m) au-dessus duquel une eau est un lac ; en dessous, c'est la mer (même seuil que
 // water.gdshader). À 0 m, les hauts-fonds de la mer d'Azov (MNT 0-1 m) devenaient des « lacs »
@@ -704,7 +708,13 @@ void fragment() {
 		lake = 1.0 - smoothstep(-0.7, 0.3 + 0.3 * (reeds - 0.5), coast);
 		water_col = mix(lake_color, lake_shallow_color, 1.0 - smoothstep(-1.6, 0.0, coast));
 	}
-	rl_surface(p, uv, footprint, land_f, col, lake, water_col, roughness);  // lot R1
+	rl_surface(p, uv, footprint, VIEWPORT_SIZE.y, land_f, col, lake, water_col, roughness);  // lot R1
+	if (lake_shore > 0.5 || sea_water < 0.5) {
+		// HC2 : reflet du ciel sur l'eau intérieure (lacs, étangs, mares ; pas la mer peinte), plus
+		// marqué en vue rasante.
+		float graze = pow(1.0 - clamp(dot(normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz), VIEW), 0.0, 1.0), 4.0);
+		water_col = mix(water_col, lake_sky_color, clamp(lake_sky_reflect + 0.5 * graze, 0.0, 0.8));
+	}
 	if (hb_debug > 8.5 && hb_debug < 9.5) { hb_dbg = col; }  // HB3 : sonde
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
