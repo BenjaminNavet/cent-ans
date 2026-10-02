@@ -83,8 +83,20 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
   forêt de seulement +0,5 point. Avis : le corriger (un massif nommé doit être boisé à sa
   densité), en remesurant l'écart de règles ; `anchors-fine` non relancé (fichier d'une autre
   session) ; lacs historiques (Fucin, Copaïs, Amouq) pour un lot `lakes.json`.
-- HC2 : arrêt demandé à l'agent ; voir `docs/wip/hc2-eaux.md` (`../gp-hc2`).
+- **HC2 en pause, tout commité** sur `feat/hc2` (8272840ad) : lacs 762 → 1231 (`min_area_px` 8),
+  `lake_color` (0.07, 0.23, 0.38) + reflet de ciel, berge claire ; étangs et mares en cellules
+  doublées par paliers d'empreinte (`rl_pond_*` / `rl_pool_*`, Dombes : 25 nappes à rig 150, 6 à
+  rig 300). Passés sur l'état final : `hc_water_test.gd` (fenêtre), `test_lakes.py`, ruff.
+  **À repasser** : `smoke.gd`, `ss_lakes_test.gd`, `hc_water_test.gd` headless,
+  `tb1_seasons_test.gd` (jamais lancé). Planches non lues :
+  `~/.cache/cent_ans/hc/hc2_water.jpg` et `hc2_water_winter.jpg` (hiver : part d'eau moitié
+  moindre, cause non confirmée). Ouverts : cadrage de `hc_water_view.gd` (balayage `--views`
+  incohérent une fois), mares des Fens discrètes, taille des étangs en px d'un écran de 1080
+  (`rl_water_ref_height`). Lacs historiques absents pour un lot `lakes.json` : Grand-Lieu, Loch
+  Ness, Berre, Windermere, Paladru, Aiguebelette, Joux, Nantua, Saint-Point, Léon/Soustons,
+  Haarlemmermeer, Whittlesey Mere (+ Fucin, Copaïs, Amouq de HC5).
 
 ## Prochaine étape
-À la reprise : lire les notes HC2 et HC5, relancer leurs agents s'ils ne sont pas finis, puis HC3
+À la reprise : faire trancher le défaut des massifs vides (HC5), repasser les tests restants de
+HC2 et HC5, banc HC1 sur machine calme, puis HC3
 (fusion de `feat/hc1`, `feat/hc2`, `feat/hc5` dans `feat/hc`, planche commune, réglages).
