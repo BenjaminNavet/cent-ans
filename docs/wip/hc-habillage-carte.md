@@ -27,6 +27,10 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
   `terrain.gdshader`), hameaux et moulins. HC prend **arbres, forêts, lacs, étangs** (message
   envoyé aux sessions voisines le 02/10). HC ne touche pas au bloc parcellaire de
   `terrain.gdshader` (`field_at`, lignes ≈ 492-570).
+- GC (session game-project-e9, 02/10) : `field_scale` 0,3 (enclos ≈ 1 km, `feat/gc-fields`
+  89e181771), `hb_cell_scale` 1,2 ; maquettes : ville 11, bourg 6,5, château/abbaye 3,6, village
+  3,2, Paris ≈ 22 unités. Décision HC : en style `generalised` les arbres de haie ne suivent plus
+  la trame (enclos ≈ 1,4 px < un arbre) : arbres épars dont la densité suit le bocage. Transmis à HC1.
 - SA (`../gp-sa`) : ne pas toucher `army_markers.gd`.
 - TB (`../gp-tb`, session game-project-ef) : garde la **teinte de sol des forêts** (taches presque
   noires à rig 400-1100, corrigées par TB6 côté sol), brouillard, météo, côtes, brûlis dans
