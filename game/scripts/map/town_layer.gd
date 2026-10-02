@@ -295,7 +295,7 @@ func _push_finage(here: Vector2) -> void:
 			built += float(r)
 		built /= maxf(float((town["radii"] as Array).size()), 1.0)
 		var a: Vector2 = _anchor[id]
-		slots.append(Vector4(a.x, a.y, float(town["finage_radius_m"]) / data.meters_per_unit, built / data.meters_per_unit))
+		slots.append(Vector4(a.x, a.y, float(town["finage_radius_m"]) / data.real_meters_per_unit, built / data.meters_per_unit))
 	if key == _finage_key:
 		return
 	_finage_key = key

@@ -36,10 +36,13 @@ var _dated: Dictionary = {}  # nom de nœud → {from, until}
 var _extent := 1.0
 var _origin := Vector2.ZERO
 var _fade := 1.0
+## GC2 (ADR 0158) : grossissement constant de la maquette (1 : taille du plan).
+var _model_scale := 1.0
 
 
-## Construit la maquette ; null si le modèle n'est pas importé.
-static func create(data: Dictionary, terrain: TerrainBuilder) -> LandmarkModel:
+## Construit la maquette ; null si le modèle n'est pas importé. `model_scale` (GC2, ADR 0158) :
+## grossissement constant autour de l'ancrage (zone, cœur et drapé suivent).
+static func create(data: Dictionary, terrain: TerrainBuilder, model_scale: float = 1.0) -> LandmarkModel:
 	var path := MODELS_DIR + str(data.get("id", "")) + ".glb"
 	if not ResourceLoader.exists(path):
 		push_warning("LandmarkModel: %s absent (lancer tools/blender_scripts/landmark_city.py)" % path)
@@ -49,6 +52,7 @@ static func create(data: Dictionary, terrain: TerrainBuilder) -> LandmarkModel:
 		return null
 	var node := LandmarkModel.new()
 	node.name = "Landmark_" + str(data.get("id", ""))
+	node._model_scale = maxf(model_scale, 0.01)
 	node._setup(data, scene.instantiate() as Node3D, terrain)
 	return node
 
@@ -59,8 +63,9 @@ func _setup(data: Dictionary, model: Node3D, terrain: TerrainBuilder) -> void:
 	var anchor: Dictionary = data.get("anchor", {})
 	var px: Array = anchor.get("px", [0.0, 0.0])
 	var scale_block: Dictionary = data.get("scale", {})
-	zone_radius = float(scale_block.get("zone_radius_px", 6.0))
-	core_radius = float(scale_block.get("core_radius_px", 5.0))
+	zone_radius = float(scale_block.get("zone_radius_px", 6.0)) * _model_scale
+	core_radius = float(scale_block.get("core_radius_px", 5.0)) * _model_scale
+	scale = Vector3.ONE * _model_scale
 	position = Vector3(float(px[0]), 0.0, float(px[1]))
 	rotation.y = -deg_to_rad(float(anchor.get("north_bearing_deg", 0.0)))
 	model.name = "Model"
@@ -76,7 +81,7 @@ func _setup(data: Dictionary, model: Node3D, terrain: TerrainBuilder) -> void:
 		if mesh_instance.mesh != null:
 			for surface in mesh_instance.mesh.get_surface_count():
 				triangles += mesh_instance.mesh.surface_get_array_len(surface) / 3
-	stats = {"triangles": triangles, "layers": model.find_children("*", "MeshInstance3D", true, false).size()}
+	stats = {"triangles": triangles, "layers": model.find_children("*", "MeshInstance3D", true, false).size(), "scale": _model_scale}
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 
@@ -153,6 +158,8 @@ func _apply_height_params(material: ShaderMaterial) -> void:
 	material.set_shader_parameter("map_origin", _origin)
 	material.set_shader_parameter("map_extent", _extent)
 	material.set_shader_parameter("height_in_meters", true)
+	# GC2 : le drapé est une hauteur monde ; ajouté en repère local, il est ramené à l'échelle.
+	material.set_shader_parameter("drape_scale", 1.0 / _model_scale)
 
 
 ## Hauteurs de la surface affichée sur une grille couvrant la zone réservée, en mètres (lot ZG4 :
@@ -347,6 +354,25 @@ func set_fade(alpha: float) -> void:
 ## Hauteur de la surface au centre (pose des étiquettes et du picking).
 func ground_height() -> float:
 	return _terrain.surface_height_at(position.x, position.z) if _terrain != null else 0.0
+
+
+## GC2 : hauteur (unités monde) du plus haut élément de la maquette au-dessus de son sol.
+func top_height() -> float:
+	var top := 0.0
+	var model := get_node_or_null("Model") as Node3D
+	if model == null:
+		return top
+	for child in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := child as MeshInstance3D
+		if mesh_instance.mesh == null:
+			continue
+		var local := Transform3D.IDENTITY
+		var node: Node3D = mesh_instance
+		while node != null and node != self:
+			local = node.transform * local
+			node = node.get_parent() as Node3D
+		top = maxf(top, (local * mesh_instance.mesh.get_aabb()).end.y)
+	return top * _model_scale
 
 
 ## Vrai si le point carte (px) est dans la zone réservée.

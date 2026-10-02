@@ -124,6 +124,12 @@ static func present(item: Dictionary, year: int) -> bool:
 	return true
 
 
+## GC (ADR 0158) : mètres du plan par unité carte, grossissement des villes compris. Les ancrages
+## (`anchor_units`, `projected_to_units`) restent en mètres réels.
+static func town_meters_per_unit() -> float:
+	return meters_per_unit() / MapScale.town_scale()
+
+
 ## Rayon (unités carte) couvert par la ville.
 static func extent_units(city: Dictionary) -> float:
-	return float(city.get("extent_m", 1500.0)) / meters_per_unit()
+	return float(city.get("extent_m", 1500.0)) / town_meters_per_unit()

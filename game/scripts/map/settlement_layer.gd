@@ -8,6 +8,9 @@ extends Node3D
 ## sont dessinées à l'échelle 1:1 à toutes les hauteurs (`TownLayer`, `LandmarkCityLayer`, tuiles
 ## lointaines). Ce calque garde l'emprise réelle de chaque colonie (`radii` de `towns_1340.json`) :
 ## clic, anneau de sélection, étiquettes, exclusions (hameaux, végétation par le finage).
+## GC2 (ADR 0158) : par défaut (style `maquette`), les lieux sont des maquettes stylisées à taille
+## monde constante (`TownMaquetteLayer`) à la place des villes 1:1 ; l'emprise est alors celle de
+## la maquette. `--town-style=real` garde le rendu VT.
 ## - nom de chaque lieu au-dessus de son emprise, surmonté d'un petit écu du détenteur
 ##   (`settlement_icon.gdshader`, un `MultiMesh`, atlas `HeraldryAtlas`) ; taille selon le rang et
 ##   densité par rang et distance caméra (`SettlementMarkers`, données) ; estompés par `normal` ;
@@ -44,6 +47,9 @@ const PICK_MIN_PX := 8.0
 ## du sol (`model_top`).
 const DEFAULT_FOOTPRINT_M := 150.0
 const TOWN_TOP_M := 12.0
+const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
+## GC2 : clairière autour d'une maquette (× sa demi-largeur) dans les exclusions de végétation.
+const MAQUETTE_CLEARING := 1.15
 ## Proportion de hameaux brûlés = dévastation (%) × ce facteur (au-delà d'un seuil).
 const BURN_THRESHOLD := 10.0
 ## Distance de retrait du marqueur de la colonie sélectionnée (toujours affiché, DA7d).
@@ -148,6 +154,11 @@ var towns: TownLayer
 var landmark_cities: LandmarkCityLayer
 ## VT-E (ADR 0138) : lointain des villes à l'échelle 1:1 (tuiles F1/F2), voir `TownFarLayer`.
 var town_far: TownFarLayer
+## GC2 (ADR 0158) : maquettes stylisées à taille monde constante (style `maquette`, par défaut) ;
+## `towns`, `landmark_cities` et `town_far` sont alors nuls. Voir `TownMaquetteLayer`.
+var maquettes: TownMaquetteLayer
+## GC2 : emprises réelles (`towns_1340.json`) lues sans `TownLayer` (finage, rayon réel).
+var _town_data: TownData
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
@@ -209,6 +220,10 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	_ground_y.resize(count)
 	_real_radius.resize(count)
 	_real_radius.fill(-1.0)
+	towns = null
+	landmark_cities = null
+	town_far = null
+	maquettes = null
 	_load_landmark_zones()
 	for i in count:
 		var entry: Dictionary = data.settlements[i]
@@ -260,15 +275,21 @@ func _load_landmark_zones() -> void:
 		if anchor.size() < 2:
 			continue
 		var zone := float((plan.get("scale", {}) as Dictionary).get("zone_radius_px", 6.0))
+		if TownMaquetteData.enabled():  # GC2 : la maquette emblématique est grossie
+			zone *= TownMaquetteData.landmark_scale()
 		_landmarks[i] = Vector3(float(anchor[0]), float(anchor[1]), zone)
 
 
 ## VT : emprise réelle de chaque colonie (unités monde) : plus grand des 32 `radii` de
 ## `towns_1340.json` (sans gain), finage (`finage_radius_m`) et hauteur des toits ; colonie
 ## absente : `DEFAULT_FOOTPRINT_M`, sans finage.
+## GC2 (ADR 0158), style `maquette` : l'emprise (clic, anneau, hauteur d'étiquette, exclusions) est
+## celle de la maquette (demi-largeur après réduction des voisins, hauteur du modèle) ; le rayon
+## réel et le finage restent ceux de `towns_1340.json`.
 func _compute_footprints() -> void:
-	var town_data: TownData = towns.data if towns != null else null
-	var mpu := town_data.meters_per_unit if town_data != null else 719.0
+	var town_data: TownData = towns.data if towns != null else _town_data
+	var mpu := town_data.meters_per_unit if town_data != null else 719.0 / MapScale.town_scale()
+	var real_mpu := town_data.real_meters_per_unit if town_data != null else 719.0
 	for i in data.settlements.size():
 		var id := str(data.settlements[i]["id"])
 		var radius_m := -1.0
@@ -280,8 +301,11 @@ func _compute_footprints() -> void:
 			finage_m = float(town.get("finage_radius_m", -1.0))
 		_real_radius[i] = radius_m / mpu if radius_m > 0.0 else -1.0
 		_model_radius[i] = (radius_m if radius_m > 0.0 else DEFAULT_FOOTPRINT_M) / mpu
-		_finage_radius[i] = finage_m / mpu if finage_m > 0.0 else -1.0
+		_finage_radius[i] = finage_m / real_mpu if finage_m > 0.0 else -1.0
 		_model_top[i] = TOWN_TOP_M / mpu
+		if maquettes != null and maquettes.radius_of(i) > 0.0:
+			_model_radius[i] = maquettes.radius_of(i)
+			_model_top[i] = maquettes.top_of(i)
 		_ground_footprint(i)
 	_forget_hamlet_exclusions()
 
@@ -621,12 +645,14 @@ func _build_selection_ring() -> void:
 # --- État de la simulation ---------------------------------------------------------
 
 
-## Écus des détenteurs et dévastation des provinces. `color_of` (faction → Color) n'est plus lu
-## depuis le retrait des bannières de maquettes (VT) ; signature gardée pour les appelants.
-func refresh(sim: Object, _color_of: Callable) -> void:
+## Écus des détenteurs et dévastation des provinces. `color_of` (faction → Color) teinte les
+## bannières des maquettes (GC2) ; il n'est pas lu avec les villes 1:1 (VT).
+func refresh(sim: Object, color_of: Callable) -> void:
 	if data == null:
 		return
 	data.apply_live(sim)
+	if maquettes != null:
+		maquettes.refresh(sim, color_of)
 	if landmark_cities != null and sim != null and sim.has_method("get_date_label"):
 		var year := LandmarkModel.year_of(str(sim.call("get_date_label")))
 		if year > 0:
@@ -738,6 +764,9 @@ func update_view(camera_distance: float) -> void:
 	if town_far != null:  # VT-E : après les calques 1:1 (masque d'enfoncement à jour)
 		town_far.update_view(camera_distance)
 	tp = PerfProbe.lap("settle/townfar", tp)
+	if maquettes != null:  # GC2
+		maquettes.update_view(camera_distance)
+		tp = PerfProbe.lap("settle/maquettes", tp)
 	_update_hamlet_scale(camera_distance)
 	var th := PerfProbe.lap("settle/hamlets/scale", tp)  # RS-K2
 	_update_hamlets()
@@ -759,6 +788,8 @@ func update_view(camera_distance: float) -> void:
 func _on_chunk_surface_changed(index: int) -> void:
 	for i in _settlements_by_chunk.get(index, PackedInt32Array()):
 		_ground_footprint(i)
+	if maquettes != null:  # GC2 : maquettes reposées sur le morceau recalé
+		maquettes.reground(_settlements_by_chunk.get(index, PackedInt32Array()))
 	if _hamlet_nodes.has(index):
 		_hamlet_dirty[index] = true
 	# ZG4 : hauteurs des étiquettes une fois par image (et non à chaque morceau recalé).
@@ -1407,6 +1438,8 @@ func flush() -> void:
 	if town_far != null:  # VT-E : lointain des villes
 		town_far.flush()
 		town_far.update_view(_camera_distance)
+	if maquettes != null:  # GC2
+		maquettes.flush()
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -1558,7 +1591,8 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	var focal := _focal_px(camera)
 	for i in data.settlements.size():
 		var score := INF
-		if near:
+		# GC2 : une maquette hors de portée (type masqué à cette hauteur) ne se clique pas.
+		if near and (maquettes == null or _camera_distance <= maquettes.range_of(i)):
 			score = _model_pick_score(i, camera, right, eye, model_range_sq, screen_position, focal)
 		if icons and marker_visible(i):  # DA7d : pas les couples cédés
 			# DV2 : l'écu et le nom se cliquent comme l'emprise (vue normale entière).
@@ -1682,6 +1716,8 @@ func apply_fine_anchors(store: FineGeoStore) -> void:
 		_anchor_px[i] = store.settlements[id]["px"]
 		_ground_footprint(i)
 	_hamlet_anchors = store.hamlets if store.hamlets.size() == data.hamlets.size() else PackedVector4Array()
+	if maquettes != null:  # GC2 : maquettes posées aux ancrages fins
+		maquettes.reposition_all()
 	_forget_hamlet_exclusions()
 	for index in _hamlet_nodes:
 		_hamlet_dirty[index] = true
@@ -1698,6 +1734,11 @@ func vegetation_exclusions() -> PackedVector3Array:
 		var radius := _finage_radius[i]
 		if radius <= 0.0:
 			radius = _model_radius[i] * 2.0
+			if _landmarks.has(i):
+				radius = maxf(radius, (_landmarks[i] as Vector3).z)
+		if maquettes != null:
+			# GC2 : pas d'arbre dans la maquette, même quand elle dépasse le finage réel.
+			radius = maxf(radius, _model_radius[i] * MAQUETTE_CLEARING)
 			if _landmarks.has(i):
 				radius = maxf(radius, (_landmarks[i] as Vector3).z)
 		result.append(Vector3(px.x, px.y, radius))
@@ -1766,7 +1807,17 @@ func override_devastation(values: Dictionary) -> void:
 # --- Lot ZG6 : villes ordinaires à l'échelle réelle ------------------------------------------
 
 
+## GC2 (ADR 0158) : style `maquette` (défaut, `TownMaquetteData.style`) : maquettes stylisées à
+## taille monde constante, sans calque 1:1 (`towns`, `landmark_cities`, `town_far` nuls) ; style
+## `real` (`--town-style=real`) : villes 1:1 d'avant GC.
 func _setup_towns() -> void:
+	if TownMaquetteData.enabled():
+		_town_data = TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
+		maquettes = TownMaquetteLayer.new()
+		add_child(maquettes)
+		maquettes.setup(map_data, terrain, self)
+		_compute_footprints()
+		return
 	towns = TownLayer.new()
 	add_child(towns)
 	var ids: Array = []

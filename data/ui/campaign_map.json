@@ -1,7 +1,9 @@
 {
   "description": "Lot CV3-5 — réglages de rendu de la carte de campagne. map.army_figure_scale : agrandissement du général (figurine fine FG) qui porte l'étendard de l'ost, à la manière d'un « lord » de grande stratégie, aux paliers près et régional ; au palier lointain, retour à l'étendard et à la plaque d'effectif. Aucune règle de jeu. Lot TB2 : blocs de lisibilité (voile du brouillard de guerre, signes de ville, étiquettes, noms de région, nuées), lus par game/scripts/map/map_readability.gd.",
   "map": {
-    "army_figure_scale": 1.8
+    "army_figure_scale": 1.8,
+    "town_scale": 1.0,
+    "town_style": "maquette"
   },
   "fog_of_war": {
     "description": "TB2 : brouillard de guerre en voile de parchemin (uniformes fog_* de terrain.gdshader). Le sol hors de vue passe en camaïeu sépia assombri sous un lavis léger ; le relief reste lisible.",
