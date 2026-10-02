@@ -107,3 +107,14 @@ et les agents visuels du chantier. Rester à ≤ 1280 px de large et assembler a
   campagne que la vue parchemin. Machine saturée (48 processus Godot, charge > 190) : ne plus
   lancer d'agent tant que les lots en cours n'ont pas rendu. Numéro d'ADR de FA à prendre au
   moment de la fusion (`ls docs/decisions | tail` dans main, 0153-0156 et 0161 réservés).
+- 10-02 : **PAUSE demandée par le joueur.** Dans `feat/fa` (604d4f7ce) : FA1, FA2, FA5 (sceaux
+  et boutons seulement), FA6 (rose et sirènes ; navires dessinés, nef de Ferrer retirée), FA7,
+  ADR 0164. Agent FA3 arrêté en cours de route (`../gp-fa-anim`, `feat/fa-anim`) : il passait
+  `parry`, `death`, `death_back` par défaut via un champ `default` de
+  `data/fx/fa3_anim_sources.json` (`--fa-anim` = les 13, `--no-fa-anim` = aucun) et vérifiait en
+  mêlée ; voir `git status` et `docs/wip/fa3-anim.md` dans ce worktree avant de reprendre.
+  **Reprise** : 1) finir FA3 puis le fusionner ici ; 2) `godot --headless --path game --import`
+  puis `smoke`, `cm2_parchment_weather_test`, `dv_two_views_test`, `fa5_ui_test`,
+  `fa7_grass_test`, `s2_fire_fx_test`, `fa3_anim_test` et pytest complet sur `feat/fa` (la
+  passe Godot post-fusion a été interrompue, non faite) ; 3) revérifier le numéro d'ADR, fusion
+  de `main` dans un worktree puis `--ff-only` ; 4) supprimer les worktrees `gp-fa*`.
