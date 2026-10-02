@@ -210,7 +210,9 @@ func refresh(sim: Object) -> bool:
 	_revision = revision
 	_states.clear()
 	_provinces.clear()
+	var t0 := Time.get_ticks_usec()
 	_read_states()
+	stats["read_ms"] = float(Time.get_ticks_usec() - t0) / 1000.0
 	_dirty = true
 	return true
 

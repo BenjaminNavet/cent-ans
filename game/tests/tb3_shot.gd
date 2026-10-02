@@ -125,7 +125,7 @@ func _summary(out: OutbuildingLayer, id: String) -> String:
 			parts.append("%s %d" % [family, int(inst["level"])])
 	for family: String in growth:
 		parts.append("%s ×%d" % [family, growth[family]])
-	return "%s (%d instances, %d nœuds de rendu)" % [", ".join(parts), out.instance_count(), out.node_count()]
+	return "%s (%d instances, %d nœuds de rendu ; lecture de l'état %.1f ms, voisinage %.1f ms)" % [", ".join(parts), out.instance_count(), out.node_count(), float(out.stats.get("read_ms", 0.0)), float(out.stats.get("build_ms", 0.0))]
 
 
 ## Appels de dessin et temps par image, couche TB3 affichée puis masquée, à 90 et 400 (distances

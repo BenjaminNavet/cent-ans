@@ -112,3 +112,26 @@ def test_models_grow_with_their_level() -> None:
         triangles = [manifest[f"{family}_{n}"]["triangles"] for n in (1, 2, 3)]
         assert radii == sorted(radii) and radii[2] > 1.5 * radii[0], family
         assert triangles == sorted(triangles), family
+
+
+def test_growth_uses_existing_kit_houses_and_fortifications() -> None:
+    """Suburb houses come from the town kit; enclosure kinds name real fortification buildings."""
+    growth = _document()["growth"]
+    kit = json.loads((MODELS.parent / "town_kit" / "manifest.json").read_text("utf-8"))
+    assert set(growth["suburbs"]["house_models"]) <= set(kit)
+    buildings = {path.stem for path in (DATA / "buildings").glob("bld_*.json")}
+    kinds = [entry["kind"] for entry in growth["enclosure"]["kinds"]]
+    assert kinds == ["palisade", "stone"]
+    walls = json.loads((DATA / "map" / "towns_1340.json").read_text("utf-8"))["walls"]
+    for entry in growth["enclosure"]["kinds"]:
+        assert set(entry["buildings"]) <= buildings
+        assert entry["kind"] in walls
+
+
+def test_soot_of_a_sack_is_stronger_than_a_storm_or_a_siege() -> None:
+    """A sacked town is blacker than a stormed one, itself blacker than a besieged one."""
+    soot = _document()["soot"]
+    assert soot["sack"] > soot["storm"] > soot["siege"] > 0
+    assert soot["devastation_start"] < soot["devastation_full"]
+    capture = json.loads((DATA / "rules" / "capture.json").read_text("utf-8"))
+    assert soot["sack_devastation_rise"] <= capture["sack"]["devastation"]

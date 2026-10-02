@@ -312,10 +312,15 @@ func _check_soot(layer: SettlementLayer, data: SettlementData) -> void:
 	_check(is_equal_approx(rule.amount_of("a"), snappedf(float(cfg["sack"]), 0.02)) and changed.has("a"), "a sacked town is black with soot, got %.2f" % rule.amount_of("a"))
 	_check(rule.amount_of("b") < 0.1, "the town next to it, not taken, stays clean, got %.2f" % rule.amount_of("b"))
 	_check(is_equal_approx(rule.amount_of("c"), snappedf(float(cfg["storm"]), 0.02)), "a stormed town is sooted, got %.2f" % rule.amount_of("c"))
-	rule.update(places, {"p": {"devastation": 25.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 14)
-	_check(rule.amount_of("a") < float(cfg["sack"]) - 0.2 and rule.amount_of("a") > 0.0, "soot fades turn after turn, got %.2f" % rule.amount_of("a"))
-	rule.update(places, {"p": {"devastation": 0.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 40)
-	_check(rule.amount_of("a") == 0.0 and rule.amount_of("c") == 0.0, "soot gone after the repairs")
+	rule.update(places, {"p": {"devastation": 25.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 12)
+	rule.update(places, {"p": {"devastation": 25.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 13)
+	_check(rule.amount_of("a") < float(cfg["sack"]) - 0.15 and rule.amount_of("a") > 0.0, "soot fades turn after turn, got %.2f" % rule.amount_of("a"))
+	# Partie rechargée (le tour saute) : des contrôleurs différents ne sont pas des prises.
+	places[1]["controller"] = "fac_england"
+	rule.update(places, {"p": {"devastation": 60.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 40)
+	_check(rule.amount_of("b") < float(cfg["devastation_max"]) + 0.01 and rule.amount_of("c") == 0.0, "a loaded game does not read as a sack, got %.2f" % rule.amount_of("b"))
+	rule.update(places, {"p": {"devastation": 0.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 41)
+	_check(rule.amount_of("a") == 0.0 and rule.amount_of("b") == 0.0, "soot gone after the repairs")
 	# État par ville dans le rendu : ville 1:1, maillage lointain, faubourgs.
 	var shader := load("res://shaders/town_building.gdshader") as Shader
 	_check(shader != null and shader.code.contains("instance uniform float town_soot"), "town_building.gdshader has a per-town soot instance parameter")

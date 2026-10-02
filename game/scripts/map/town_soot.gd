@@ -19,6 +19,7 @@ var _besieged: Dictionary = {}  # province → assiégée à la dernière relect
 var _events: Dictionary = {}  # id → [suie de la prise, tour]
 var _amounts: Dictionary = {}  # id → suie affichée
 var _seen := false
+var _turn := -1
 
 
 func _init(p_config: Dictionary = {}) -> void:
@@ -38,6 +39,12 @@ static func from_devastation(cfg: Dictionary, devastation: float) -> float:
 func update(settlements: Array, provinces: Dictionary, turn: int) -> Dictionary:
 	var changed := {}
 	var decay := float(config.get("decay_per_turn", 0.1))
+	# Partie chargée ou nouvelle campagne (le tour saute ou recule) : les contrôleurs relus ne
+	# sont pas des prises, on repart de cet état.
+	if _turn >= 0 and (turn < _turn or turn > _turn + 1):
+		_seen = false
+		_events.clear()
+	_turn = turn
 	for entry: Dictionary in settlements:
 		var id := str(entry["id"])
 		var province := str(entry["province"])
@@ -84,5 +91,6 @@ func amount_of(id: String) -> float:
 
 
 ## Suie forcée d'une ville (captures, tests) : traitée comme une prise au tour `turn`.
-func force(id: String, amount: float, turn: int = 0) -> void:
-	_events[id] = [amount, turn]
+func force(id: String, amount: float, turn: int = -1) -> void:
+	_events[id] = [amount, turn if turn >= 0 else maxi(_turn, 0)]
+	_amounts[id] = amount

@@ -141,6 +141,13 @@ bourgeois, clergé, noblesse), avec leurs quatre jauges — mécontentement, san
 attachées à la province, pas à chaque colonie. Construire coûte des livres, parfois des matériaux, et
 plusieurs saisons ; une seule construction à la fois par colonie.
 
+Ce que vous bâtissez se voit sur la carte, de près : fermes, moulins, vignobles, mines, salines, abbayes,
+marchés et ports se posent hors les murs et grandissent en trois étapes avec vos améliorations (un marché
+devient halle, puis champ de foire). Une ville dont la province se peuple gagne des faubourgs le long de
+ses routes ; une palissade ou des murs de pierre l'entourent quand vous la fortifiez ; un échafaudage
+marque le chantier en cours. Une ville prise d'assaut, pillée ou dévastée garde ses toits noircis
+quelques saisons.
+
 - **Panneau de faction** (clic sur l'écu de la barre) : revenus et dépenses, entretien de l'armée et des
   bâtiments, frais de cour, biens, **impôt** Bas / Normal / Haut (plus d'argent contre plus de colère).
 - **Gouverneurs** : un personnage nommé à la tête d'une province y applique ses compétences (impôts,

@@ -1739,7 +1739,7 @@ func town_soot(id: String) -> float:
 
 ## TB3 : force la suie de la ville `id` (captures de contrôle, tests), comme une prise au tour
 ## courant ; elle décroît ensuite comme une vraie.
-func set_town_soot(id: String, amount: float, turn: int = 0) -> void:
+func set_town_soot(id: String, amount: float, turn: int = -1) -> void:
 	if soot == null:
 		return
 	soot.force(id, amount, turn)

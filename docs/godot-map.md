@@ -1850,6 +1850,48 @@ passe à d = 150 sous charge) ; sections les plus chères de la sonde inchangée
 (5,3-6,4 s). Après le passage de l'herbe au 1:1, de la teinte de canopée et du fondu : une passe
 VT3 à d = 5 donne 559 appels de dessin, 3,71 M primitives, 74 i/s, pire image 28 ms.
 
+## Bâtiments hors les murs et croissance des villes (lot TB3, ADR 0153)
+
+Rendu seulement ; les règles restent dans `core/`. Données : `data/map/building_models.json`
+(schéma `building_models.schema.json`).
+
+- **Bâtiments hors les murs** (`OutbuildingLayer`, enfant `Outbuildings` de `SettlementLayer`) :
+  ferme, moulin, vignoble, mine, saline, abbaye, marché, port. Pour chaque colonie, le plus haut
+  niveau (1 à 3) de chaque famille dont les groupes `require` comptent assez de bâtiments
+  construits (`get_settlements_live`, sinon `settlement_detail`) et dont la province produit une
+  des `resources` ; au plus `render.max_per_settlement` maquettes par colonie. Maquettes de
+  `game/assets/models/outbuildings/` (`tools/blender_scripts/tb3_outbuildings.py`).
+- **Site** : calculé une fois par famille et par colonie, entre `ring_min_m` et `ring_max_m` du
+  bâti, dans le secteur de la famille (tiré de l'identifiant de la colonie), hors des emprises
+  voisines, des lits de fleuve, de la mer et des routes des portes, pente ≤ `max_slope`. `site` :
+  `field` (le plus plat), `slope` (coteau), `water` (près d'un fleuve), `road` (au plus près),
+  `coast` (grève la plus proche, sinon champ), `shore` (grève obligatoire : pas de port sans eau
+  à moins de `shore_reach_m`). La maquette grandit sur place ; sa façade regarde la ville, ou
+  l'eau.
+- **Rendu** : un `MultiMesh` par maillage pour le voisinage de la caméra (rayon 1,5 × la portée),
+  reconstruit par tranches de 1,5 ms quand la caméra s'éloigne de son centre ou que l'état de la
+  simulation change (`get_state_revision`) ; hauteurs recalées quand des pages de relief plus
+  fines arrivent. Échelle réelle, visible sous `render.view_range_units` (45), ombres sous
+  `shadow_range_units` (12). `--no-tb3` après `--` coupe la couche.
+- **Croissance de la ville 1:1** (`TownGrowth`, mêmes `MultiMesh`) : quartiers de faubourg (maisons
+  de `town_kit/`) le long des routes des portes selon la population de la province rapportée à
+  celle de 1337 ; enceinte (pans, tours, portes aux dimensions de `towns_1340.json`) quand un
+  bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan et les
+  bâtiments de départ. `SettlementLayer.growth_of(id)` résume la croissance d'une colonie.
+- **Suie par ville** (`TownSoot`, `SettlementLayer.town_soot` / `set_town_soot`) : dévastation de
+  la province, siège, prise de la place. Portée par le paramètre d'instance `town_soot` des nœuds
+  de la ville (`TownBuilder.set_soot`), le masque `soot_mask` du maillage lointain et
+  `INSTANCE_CUSTOM.b` des instances partagées.
+- **Chantier** : `ConstructionMarkers` pose la maquette `worksite_1` (taille constante à l'écran,
+  couche « Signes ») ; la cité en chantier reçoit aussi un chantier à l'échelle réelle.
+
+Mesures (`game/tests/tb3_shot.gd --bench`, M4 Pro, 1600 × 900, machine chargée à 20-27, Agen,
+états imposés : 147 instances, 22 nœuds) : d = 8 : 696 → 727 appels de dessin, 21,3 → 22,0 ms et
+43,8 → 44,7 ms par image selon la passe ; d = 90 : 478 → 478 ; d = 400 : 398 → 398 (couche
+masquée au-delà de 45, aucun coût). Les écarts de temps sont dans le bruit de la machine.
+Captures de contrôle : `godot --path game --resolution 1600x900 --script res://tests/tb3_shot.gd
+-- --out=<dossier>`.
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
