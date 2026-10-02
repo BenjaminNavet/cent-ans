@@ -10,12 +10,13 @@ extends Node3D
 ##   selon la distance de la caméra pour rester lisibles aux distances de jeu
 ##   (`plague.scale_per_distance`, sous `plague.max_distance`) ; portes marquées d'une croix sur
 ##   les maisons de la ville 1:1 ordinaire (`plan_provider`), à l'échelle réelle.
-## - **Champ de bataille** (`refresh`, événements `battle` de `get_events` et
-##   `get_pending_events`) : tertre, débris, corbeaux à l'endroit de la bataille (position de
-##   l'armée de l'événement, à défaut centre de la province) pendant `battlefield.turns` tours ;
-##   corbeaux puis débris partent plus tôt. Taille des figurines d'armée (même loi d'échelle).
-##   Mémoire du rendu : le cœur ne garde pas l'historique des batailles, une partie rechargée ne
-##   retrouve que celles du dernier tour.
+## - **Champ de bataille** (`refresh`) : tertre, débris, corbeaux à l'endroit de la bataille
+##   pendant `battlefield.turns` tours ; corbeaux puis débris partent plus tôt. Taille des
+##   figurines d'armée (même loi d'échelle). Lieu et tour viennent de l'historique du cœur
+##   (`get_battle_history`, ADR 0157 « révision ») : les marques survivent au rechargement, avec
+##   leur âge. Sans cette méthode (pont plus ancien, simulation factice) : ancienne déduction
+##   depuis les événements `battle` de `get_events` et `get_pending_events` (position de l'armée
+##   de l'événement, à défaut centre de la province), vieillie en mémoire du rendu.
 ## - **Siège** (`refresh`, `get_assault_odds(armée).engines`) : les engins bâtis sur place (N7,
 ##   ADR 0128) près du camp des assiégeants : charpente et tas de bois, puis maquette sous
 ##   échafaudage, puis engin prêt. Enfants des figurines de l'armée (échelle et visibilité suivies).
@@ -52,7 +53,8 @@ var _terrain: TerrainBuilder = null
 var _armies: Object = null
 ## colonie → {key, node, site, intensity, seed, doors_done, factor, stale}
 var _plague: Dictionary = {}
-## clé (province ou « army:<id> ») → {at, province, turn, texts, node, stage, seed}
+## clé (province ou « army:<id> ») → {at, province, turn, texts, node, stage, seed} ; avec
+## l'historique du cœur : en plus `history` (vrai) et `source` (point de la bataille).
 var _fields: Dictionary = {}
 ## armée → {marker, signature, node}
 var _engines: Dictionary = {}
@@ -129,7 +131,8 @@ func setup(map_data: MapData, terrain: TerrainBuilder, armies: Object) -> void:
 		_terrain.chunk_surface_changed.connect(func(_index: int) -> void: _ground_dirty = true)
 
 
-## Partie chargée : champs de bataille de l'ancienne partie oubliés, tout est relu.
+## Partie chargée : champs de bataille de l'ancienne partie oubliés, tout est relu (avec
+## l'historique du cœur, ceux de la partie chargée reviennent au prochain `refresh`).
 func reset() -> void:
 	for key in _fields.keys():
 		_drop_field(key)
@@ -149,8 +152,8 @@ func _ground(xz: Vector2) -> float:
 	return 0.0
 
 
-## Après tout changement d'état : batailles du tour (et de la main du joueur), âge des champs
-## marqués, engins des sièges en cours.
+## Après tout changement d'état : batailles récentes (historique du cœur ; à défaut événements
+## du tour et de la main du joueur), âge des champs marqués, engins des sièges en cours.
 func refresh(sim: Object) -> void:
 	if sim == null:
 		return
@@ -159,10 +162,13 @@ func refresh(sim: Object) -> void:
 		reset()
 	var new_turn := turn != _turn
 	_turn = turn
-	if new_turn and sim.has_method("get_events"):
-		_read_battles(sim, sim.call("get_events"))
-	if sim.has_method("get_pending_events"):
-		_read_battles(sim, sim.call("get_pending_events"))
+	if sim.has_method("get_battle_history"):
+		_read_history(sim.call("get_battle_history"))
+	else:
+		if new_turn and sim.has_method("get_events"):
+			_read_battles(sim, sim.call("get_events"))
+		if sim.has_method("get_pending_events"):
+			_read_battles(sim, sim.call("get_pending_events"))
 	_age_fields()
 	_refresh_sieges(sim, new_turn)
 	_update_stats()
@@ -363,6 +369,46 @@ func _try_doors(id: String) -> bool:
 # --- Champs de bataille ----------------------------------------------------------------
 
 
+## Historique du cœur (`get_battle_history` : `[{turn, province, position, attacker_losses,
+## defender_losses, …}]`, du plus ancien au plus récent) : une marque par province, à l'endroit
+## et au tour de sa dernière bataille. Une bataille sans mort (bataille refusée) ne marque rien.
+## Les marques nées de l'historique et qui n'y sont plus sont retirées.
+func _read_history(history: Variant) -> void:
+	var turns := battlefield_turns()
+	if turns <= 0 or not (history is Array):
+		return
+	var latest := {}
+	for entry in history:
+		if not (entry is Dictionary):
+			continue
+		var record: Dictionary = entry
+		var province := str(record.get("province", ""))
+		var age := _turn - int(record.get("turn", -1))
+		if province == "" or age < 0 or age >= turns or not (record.get("position") is Vector2):
+			continue
+		if int(record.get("attacker_losses", 0)) + int(record.get("defender_losses", 0)) <= 0:
+			continue
+		if not latest.has(province) or int(record["turn"]) >= int(latest[province]["turn"]):
+			latest[province] = record
+	for key in _fields.keys():
+		if bool(_fields[key].get("history", false)) and not latest.has(key):
+			_drop_field(key)
+	for province in latest:
+		var record: Dictionary = latest[province]
+		var source: Vector2 = record["position"]
+		var turn := int(record["turn"])
+		var existing: Variant = _fields.get(province)
+		if existing != null and int(existing["turn"]) == turn and existing.get("source") == source:
+			continue
+		if existing != null:
+			_drop_field(province)
+		# Même décalage à chaque lecture (rechargement compris) : la marque ne bouge pas.
+		var at := source + Vector2.from_angle(_h(hash(str(province) + str(turn)), 7) * TAU) * FIELD_OFFSET
+		_fields[province] = {"at": at, "province": province, "turn": turn, "texts": {}, "node": null, "stage": "", "seed": absi(str(province).hash()),
+			"history": true, "source": source}
+
+
+## Ancienne déduction (pont sans historique) : événements `battle` du tour.
 func _read_battles(sim: Object, events: Variant) -> void:
 	if battlefield_turns() <= 0 or not (events is Array):
 		return

@@ -8,7 +8,7 @@ Spec : `docs/design/2026-10-02-campagne-tob.md` § 3 « TB4 ». Branche `feat/tb
 - [x] 1. Brûlis (`terroir_burn`) par-dessus la carte de couleur (SS2) et les matières (HB3) : appel déplacé après `sg_apply` / `hb_apply` dans `terrain.gdshader` ; couverture moyenne au loin (`campaign_life.gdshaderinc`) ; masque de terroir relu à son échelle (voir « Écarts »).
 - [x] 2. Peste : `WarScars.set_plague_sites` (scènes `plague` résolues par `FolkScenes.edge_frame`) : fosses (rectangle de terre sombre, grande croix de bois) groupées au bord de la colonie, charrette des morts sur la route qui en sort (`CampaignLife._road_from`). Grossissement = `plague.scale_per_distance` (4,2) × distance de caméra (charrette × `cart_scale` 1,9 en plus), borné par `max_scale`, jamais sous 1:1 : taille à l'écran tenue jusqu'à `plague.max_distance` (60). Test (900p, tangage 30°, fosses en enfilade = pire cas, longueur projetée) : plus petit élément 12,3 / 12,5 / 12,9 px à 15 / 20 / 40, tous dans le champ. Caméra réelle à 20 sur Paris (`tb4_shot --only=peste`) : fosses 13 à 16 px, charrette 53 px (de travers, au premier plan), tous dans le champ.
 - [x] 2 bis. Portes marquées : gardées dans les villes 1:1 ordinaires, croix sur toute la hauteur du vantail (2,2 m, 8,8 px au plancher de caméra 0,30 en 900p) ; **supprimées dans les villes emblématiques** (plancher 2,6 : ≈ 1 px).
-- [x] 3. Champ de bataille : `WarScars.refresh` lit les événements `battle` (`get_events`, `get_pending_events`), marque à la position de l'armée (repli : centre de la province) ; tertre `battlefield.turns` tours, corbeaux `crow_turns`, débris `debris_turns` (`data/ui/war_scars.json`) ; taille des figurines d'armée, caché sous le brouillard de guerre et sur le parchemin.
+- [x] 3. Champ de bataille : `WarScars.refresh` lit l'historique du cœur (`get_battle_history` : lieu et tour de la bataille ; lot « historique des batailles ») ; repli sans cette méthode : événements `battle` (`get_events`, `get_pending_events`), marque à la position de l'armée (repli : centre de la province) ; tertre `battlefield.turns` tours, corbeaux `crow_turns`, débris `debris_turns` (`data/ui/war_scars.json`) ; taille des figurines d'armée, caché sous le brouillard de guerre et sur le parchemin.
 - [x] 4. Siège : engins de `get_assault_odds(armée).engines` posés au bord du camp (enfants des figurines) : charpente et tas de bois, maquette sous échafaudage (`siege.almost_ready_turns`), engin prêt ; maquettes `assets/models/siege/*_lod.glb` (lecture seule), échelles procédurales.
 - [x] Réglages `data/ui/war_scars.json`, schéma `data/schemas/war_scars_ui.schema.json`, pytest `tools/tests/test_war_scars_ui_schema.py`.
 - [x] `game/tests/tb4_scars_test.gd` (4 points), `game/tests/tb4_shot.gd` (captures écrites, non lues), ADR 0157.
@@ -78,11 +78,11 @@ mêlées à cette bascule de luminance. Le correctif du masque reste établi par
   Conséquence visible sur toute la carte : les finages (champs autour des colonies) reviennent
   autour de leur colonie (effet sur les chiffres de TB1 non mesuré proprement, voir ci-dessus).
 
-- **Mémoire des champs de bataille dans le rendu** (ADR 0157) : le pont ne donne ni position ni
-  historique des batailles. La marque est posée à la position de l'armée de l'événement à la fin du
-  tour (pas au point exact du combat) et vieillie par le rendu ; une partie rechargée ne retrouve
-  que les batailles du dernier tour. Pour mieux : exposer dans `core/` un historique (tour,
-  position).
+- **Mémoire des champs de bataille** : levé par le lot « historique des batailles »
+  (`docs/wip/tb-battles.md`, ADR 0157 « révision »). Le cœur garde un historique borné
+  (`data/rules/battle_history.json`), sauvegardé, rendu par `get_battle_history` ; `WarScars` le
+  lit (lieu et tour de la bataille), l'ancienne déduction depuis les événements ne sert plus que
+  de repli sans cette méthode. Une partie rechargée retrouve ses marques avec leur âge.
 - Un commit par point, mais les points 2 à 4 partagent `war_scars.gd` : le module entier est entré
   avec le commit de la peste, les commits 3 et 4 branchent le champ de bataille (`refresh`, `reset`)
   puis le siège (`ArmyMarkers.marker_ids` / `marker_of`).

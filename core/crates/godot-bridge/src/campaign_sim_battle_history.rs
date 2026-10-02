@@ -17,6 +17,31 @@ impl CampaignSim {
     /// before a campaign starts and for a save older than the history.
     #[func]
     fn get_battle_history(&self) -> VarArray {
-        VarArray::new()
+        let Some(state) = &self.state else {
+            return VarArray::new();
+        };
+        let turn = state.turn();
+        state
+            .battle_history
+            .records()
+            .iter()
+            .map(|record| {
+                vdict! {
+                    "turn" => i64::from(record.turn),
+                    "age" => i64::from(record.age(turn)),
+                    "province" => record.province.as_str(),
+                    "position" => Vector2::new(record.position[0], record.position[1]),
+                    "kind" => record.kind.as_str(),
+                    "attacker" => record.attacker.faction.as_str(),
+                    "defender" => record.defender.faction.as_str(),
+                    "winner" => record.winner().as_str(),
+                    "attacker_strength" => i64::from(record.attacker.strength),
+                    "defender_strength" => i64::from(record.defender.strength),
+                    "attacker_losses" => i64::from(record.attacker.losses),
+                    "defender_losses" => i64::from(record.defender.losses),
+                }
+                .to_variant()
+            })
+            .collect()
     }
 }
