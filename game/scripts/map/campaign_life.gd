@@ -13,7 +13,7 @@ extends Node3D
 ##   --season=spring|summer|autumn|winter   force la saison affichée (captures) ;
 ##   --devastate=<province>:<0-100>[,...]   force une dévastation affichée (captures) ;
 ##   --no-life                               désactive la couche (mesures A/B) ;
-##   --life-off=terrain,smoke,mills,ambient  désactive une partie (mesures de coût).
+##   --life-off=terrain,smoke,mills,ambient,scars  désactive une partie (mesures de coût).
 ## Chantier FK (carte vivante, `docs/design/2026-09-29-carte-vivante-folk.md`) : figurines de la
 ## vue rapprochée (`life_folk/`), mêmes crochets `refresh` / `update_view` :
 ##   --no-folk                                        désactive les figurines (mesures A/B) ;
@@ -34,6 +34,8 @@ var folk_caravans: FolkCaravans = null
 var folk_scenes: FolkScenes = null
 ## FK5 : sceaux des incidents (nul : `--no-life`, `--no-folk`, `--folk-off=incidents`).
 var incidents: IncidentMarkers = null
+## TB4 : traces de la guerre et des fléaux (nul : `--no-life`, `--life-off=scars`).
+var scars: WarScars = null
 var folk_enabled: bool = true
 var folk_off: Dictionary = {}
 ## FK4 : scènes forcées par `--scene=` ({province, kind, settlement, intensity}).
@@ -94,6 +96,44 @@ func setup(map: Node) -> void:
 	stats.merge(ambient.stats, true)
 	_setup_folk()
 	_setup_incidents()
+	_setup_scars()
+
+
+## TB4 : fosses et portes marquées de la peste, champs de bataille, engins des camps de siège.
+func _setup_scars() -> void:
+	if _off.has("scars"):
+		return
+	scars = WarScars.new()
+	add_child(scars)
+	scars.setup(_map_data, _terrain, _map.get("armies") if _map != null else null)
+	scars.plan_provider = _town_plan
+
+
+## Plan de la ville 1:1 affichée d'une colonie (emblématique ou ordinaire) ; `{}` sinon.
+func _town_plan(id: String) -> Dictionary:
+	if _settlements == null:
+		return {}
+	var cities := _settlements.landmark_cities
+	if cities != null and cities.has_city(id) and cities.is_shown(id):
+		var zone := cities.zone_of(id)
+		return {"plan": cities.plan_of(id), "anchor": Vector2(zone.x, zone.y), "meters_per_unit": LandmarkV2Library.meters_per_unit()}
+	var towns := _settlements.towns
+	if towns != null and towns.data != null and towns.is_shown(id):
+		return {"plan": towns.plan_of(id), "anchor": towns.data.anchor_of(id), "meters_per_unit": towns.data.meters_per_unit}
+	return {}
+
+
+## TB4 : colonies pestiférées du tour (scènes `plague` résolues par `FolkScenes`).
+func _refresh_scars() -> void:
+	if scars == null:
+		return
+	var sites: Array = []
+	if folk_scenes != null:
+		for scene in folk_scenes.staged:
+			if str(scene["kind"]) == "plague":
+				sites.append(folk_scenes.edge_frame(scene))
+	scars.set_plague_sites(sites)
+	stats["scars"] = scars.stats
 
 
 ## FK3 : réservoir et fournisseurs, servis dans l'ordre d'enregistrement quand le plafond est
@@ -196,6 +236,7 @@ func refresh(sim: Object) -> void:
 			vegetation.set("extra_exclusions", _settlements.vegetation_exclusions())
 	_refresh_terroir()
 	_refresh_folk(sim)
+	_refresh_scars()
 
 
 ## FK3 : état lu par la routine (population, dévastation, saison, cités, terroirs), puis
@@ -375,4 +416,7 @@ func update_view(camera_distance: float) -> void:
 		var folk_rig := _map.get("camera_rig") as Node3D if _map != null else null
 		var folk_focus: Vector3 = folk_rig.get("focus") if folk_rig != null else Vector3.ZERO
 		folk.update_view(Vector2(folk_focus.x, folk_focus.z), _camera_distance, _tiers.near_weight(_camera_distance))
-	PerfProbe.lap("life/folk", tp)
+	tp = PerfProbe.lap("life/folk", tp)
+	if scars != null:
+		scars.update_view(_camera_distance, 1.0 - _tiers.strategic_weight(_camera_distance) if _tiers != null else 1.0)
+	PerfProbe.lap("life/scars", tp)

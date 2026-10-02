@@ -203,6 +203,16 @@ func _side_point(scene: Dictionary, factor: float) -> Vector2:
 	return (scene["center"] as Vector2) + _side(scene) * (_footprint(int(scene["index"])) * factor + SIDE_MARGIN)
 
 
+## TB4 : bord de la colonie d'une scène résolue (`staged`), pour les éléments posés hors
+## réservoir (`WarScars` : fosses de la peste) : centre et emprise en unités monde, `out` unitaire
+## vers l'extérieur, du côté où se tient la scène.
+func edge_frame(scene: Dictionary) -> Dictionary:
+	return {
+		"settlement": scene["settlement"], "center": scene["center"], "out": _side(scene),
+		"footprint": _footprint(int(scene["index"])), "intensity": scene["intensity"], "seed": scene["seed"],
+	}
+
+
 func _figures_for(intensity: float) -> int:
 	var lo := int(_pool.settings.get("scene_figures_min", FIGURES_MIN))
 	var hi := int(_pool.settings.get("scene_figures_max", FIGURES_MAX))
