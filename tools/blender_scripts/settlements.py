@@ -13,7 +13,10 @@ Five settlement kinds, two variants each, plus three hamlet house groups (semi-r
 * ``village_a`` / ``village_b``: open village of cottages and barns around a parish church;
 * ``hamlet_a`` / ``hamlet_b`` / ``hamlet_c``: 2 to 5 farm buildings (instanced by Godot).
 
-Each model is one joined mesh (< 5 000 triangles) whose ``Banner`` material is tinted by Godot
+Lot GC3 (ADR 0158) adds the eastern and southern families of ``settlements_east.py``, named
+``<kind>_<family>_<a|b>`` with family in ``med``, ``byz``, ``rus``, ``isl``, ``steppe``.
+
+Each model is one joined mesh (< 5 000 triangles, cities of the new families < 12 000) whose ``Banner`` material is tinted by Godot
 with the controller's colour. Buildings extend below ``z = 0`` so that they sit on slopes.
 A line ``MODEL <name> <triangles>`` is printed per model and ``OK`` at the end.
 """
@@ -27,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import bpy  # noqa: E402
 import models as m  # noqa: E402
+import settlements_east  # noqa: E402
 
 m.PALETTE.setdefault("Garden", ((0.12, 0.16, 0.05), 0.95, 0.0))
 m.PALETTE.setdefault("Field", ((0.26, 0.22, 0.10), 1.0, 0.0))
@@ -461,6 +465,7 @@ MODELS = {
     "hamlet_a": lambda: build_hamlet(11, 3),
     "hamlet_b": lambda: build_hamlet(23, 4),
     "hamlet_c": lambda: build_hamlet(37, 5),
+    **settlements_east.MODELS,
 }
 
 
@@ -486,8 +491,9 @@ def export_model(name: str, out_dir: Path) -> int:
         kit_campaign.atlas(obj)
     bpy.ops.object.shade_flat()
     triangles = m.triangle_count(obj)
-    if triangles >= MAX_TRIANGLES:
-        raise RuntimeError(f"{name}: {triangles} triangles >= {MAX_TRIANGLES}")
+    budget = settlements_east.triangle_budget(name, MAX_TRIANGLES)
+    if triangles >= budget:
+        raise RuntimeError(f"{name}: {triangles} triangles >= {budget}")
     out_dir.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(
         filepath=str(out_dir / f"{name}.glb"),
