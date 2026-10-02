@@ -114,6 +114,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 			plate.queue_free()
 		return
 	var per_province: Dictionary = {}
+	var stances := StanceCues.stances(sim, player_faction)  # EN : relation de chaque faction
 	for army_id in sim.call("get_army_ids"):
 		var army: Dictionary = sim.call("get_army", army_id)
 		if army.is_empty():
@@ -160,6 +161,10 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 			add_child(marker)
 			marker.setup(army_id, army, color, faction == player_faction)
 			marker.set_meta("pb1_signature", signature)
+		# EN : hors signature, une déclaration de guerre ne reconstruit pas les figurines.
+		var cue := StanceCues.category_of(faction, player_faction, stances)
+		var cue_changed := marker.cue != cue
+		marker.set_cue(cue)
 		marker.base_position = Vector3(centroid.x, _ground(centroid), centroid.y)
 		var stack: int = per_province.get(stack_key, 0)
 		per_province[stack_key] = stack + 1
@@ -174,7 +179,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		if _plate_layer != null:
 			var plate: PanelContainer = previous_plates.get(army_id)
 			previous_plates.erase(army_id)
-			if reused and plate != null and is_instance_valid(plate):
+			if reused and not cue_changed and plate != null and is_instance_valid(plate):
 				_style_plate(plate, marker, marker.army_id == selected_army)
 			else:
 				if plate != null and is_instance_valid(plate):
@@ -419,6 +424,15 @@ static func build_plate(marker: ArmyMarker, selected: bool = false) -> PanelCont
 		swatch.custom_minimum_size = Vector2(12, 16)
 		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(swatch)
+	var glyph_text := StanceCues.plate_glyph(marker.cue)
+	if glyph_text != "":  # EN : marque des armées ennemies, lisible sans la couleur
+		var glyph := Label.new()
+		glyph.name = "EnemyGlyph"
+		glyph.text = glyph_text
+		glyph.add_theme_font_size_override("font_size", PLATE_FONT_SIZE - 2)
+		glyph.add_theme_color_override("font_color", StanceCues.plate_border(marker.cue, OTHER_BORDER, 1)["color"])
+		glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(glyph)
 	var count := Label.new()
 	count.text = format_men(marker.men)
 	count.tooltip_text = FrText.count(marker.unit_count, "unité")
@@ -441,9 +455,10 @@ static func build_plate(marker: ArmyMarker, selected: bool = false) -> PanelCont
 static func _style_plate(plate: PanelContainer, marker: ArmyMarker, selected: bool) -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = PARCHMENT if not selected else PARCHMENT.lightened(0.35)
-	var border := PLAYER_BORDER if marker.is_player else OTHER_BORDER
-	style.border_color = border if not selected else Color(1.0, 0.82, 0.3)
-	style.set_border_width_all(2 if selected or marker.is_player else 1)
+	# EN : bordure selon la relation avec le joueur (rouge réservé aux ennemis).
+	var border := StanceCues.plate_border(marker.cue, PLAYER_BORDER if marker.is_player else OTHER_BORDER, 2 if marker.is_player else 1)
+	style.border_color = border["color"] if not selected else Color(1.0, 0.82, 0.3)
+	style.set_border_width_all(2 if selected else int(border["width"]))
 	style.set_corner_radius_all(3)
 	style.content_margin_left = 6
 	style.content_margin_right = 6

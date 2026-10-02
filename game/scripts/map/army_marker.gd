@@ -30,6 +30,8 @@ var unit_count: int = 0
 ## "siege", "moving", "embarked" ou "".
 var status: String = ""
 var faction_color: Color = Color.WHITE
+## Lot EN : catégorie de relation avec le joueur (`StanceCues` : self, enemy, friend, other).
+var cue: String = StanceCues.OTHER
 ## Position de base (centroïde de la province) et décalage unitaire (armées empilées).
 var base_position: Vector3 = Vector3.ZERO
 var offset_dir: Vector2 = Vector2.ZERO
@@ -180,12 +182,24 @@ func set_selected(selected: bool) -> void:
 	_update_ring()
 
 
+## Lot EN : catégorie de relation avec le joueur ; l'anneau au sol des ennemis passe au rouge.
+func set_cue(value: String) -> void:
+	if value == cue:
+		return
+	cue = value
+	_update_ring()
+
+
 func _update_ring() -> void:
 	if selection == null:
 		return
+	var stance_ring := StanceCues.army_ring(cue)
 	if _selected:
 		selection.modulate = RING_SELECTED
 		selection.emission_energy = 1.1
+	elif not stance_ring.is_empty():  # EN
+		selection.modulate = stance_ring["color"]
+		selection.emission_energy = float(stance_ring["emission"])
 	else:
 		var ring := faction_color
 		ring.a = 0.5

@@ -43,6 +43,9 @@ var _band_saved: Variant = null
 var _last_distance: float = -1.0
 var _last_mode: String = ""
 var _cli_disabled: bool = false
+## Lot EN (ADR 0153) : position du joueur envers chaque faction ({id: clé}) ; hors mode Diplomatie
+## le trait dit la relation (ennemis en rouge, héraldique assourdie en paix). Vide : héraldique.
+var _stances: Dictionary = {}
 ## Lot DZ : couleurs imposées par faction (mode Diplomatie : position envers la faction observée)
 ## et faction mise en valeur (halo du joueur) ; vides : couleurs héraldiques, joueur.
 var _color_override: Dictionary = {}
@@ -180,7 +183,9 @@ func refresh() -> bool:
 				controller = owner
 		owners[index - 1] = owner
 		controllers[index - 1] = controller
-	return set_ownership(owners, controllers, str(map.get("player_faction")))
+	var player := str(map.get("player_faction"))
+	var changed := set_ownership(owners, controllers, player)
+	return set_stances(StanceCues.stances(sim, player)) or changed  # EN
 
 
 ## Pose directement propriétaires et contrôleurs (par index raster - 1) : `refresh` et tests.
@@ -199,6 +204,17 @@ func set_ownership(owners: PackedStringArray, controllers: PackedStringArray, pl
 	if palette_dirty:
 		_build_palette()
 	_build_info()
+	return true
+
+
+## Lot EN : positions du joueur envers chaque faction (`StanceCues.stances`) ; la palette passe
+## aux couleurs de relation. Renvoie vrai si elle a changé.
+func set_stances(stances: Dictionary) -> bool:
+	if stances == _stances:
+		return false
+	_stances = stances.duplicate()
+	if _palette_texture != null:
+		_build_palette()
 	return true
 
 
@@ -247,10 +263,18 @@ func _build_palette() -> void:
 	_set_param("fr1_palette", _palette_texture)
 
 
-## Couleur héraldique (SimFacade), palette de repli du terrain sans store.
+## Couleur du trait d'une faction : imposée (DZ), de relation (EN) ou héraldique.
 func faction_color(faction: String) -> Color:
 	if not _color_override.is_empty():  # DZ
 		return _color_override.get(faction, NEUTRAL_OVERRIDE)
+	var heraldic := heraldic_color(faction)
+	if _stances.is_empty():
+		return heraldic
+	return StanceCues.border_color(heraldic, StanceCues.category_of(faction, _player, _stances))  # EN
+
+
+## Couleur héraldique (SimFacade), palette de repli du terrain sans store.
+func heraldic_color(faction: String) -> Color:
 	var facade: Node = get_node_or_null("/root/SimFacade") if is_inside_tree() else null
 	if facade != null and bool(facade.call("store_loaded")):
 		var color: Color = facade.call("faction_color", faction)
