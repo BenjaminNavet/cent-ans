@@ -35,6 +35,25 @@ func set_built(index: int, built: bool) -> void:
 	_dirty = true
 
 
+## TB3 : valeur 0-1 de la ville `index` (masque de suie : un second `TownFarMask`).
+func set_value(index: int, value: float) -> void:
+	if index < 0 or index >= CAPACITY:
+		return
+	var x := index % SIDE
+	var y := index / SIDE
+	var stored := roundf(clampf(value, 0.0, 1.0) * 255.0) / 255.0
+	if is_equal_approx(_image.get_pixel(x, y).r, stored):
+		return
+	_image.set_pixel(x, y, Color(stored, 0, 0))
+	_dirty = true
+
+
+func value_of(index: int) -> float:
+	if index < 0 or index >= CAPACITY:
+		return 0.0
+	return _image.get_pixel(index % SIDE, index / SIDE).r
+
+
 func is_built(index: int) -> bool:
 	if index < 0 or index >= CAPACITY:
 		return false

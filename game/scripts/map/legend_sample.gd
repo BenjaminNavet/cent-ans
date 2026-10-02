@@ -27,6 +27,25 @@ const FOG_MIST := Color(0.43, 0.42, 0.39)
 
 var sample: Dictionary = {}
 var context: Dictionary = {}
+
+
+## TB3 : petit chantier dessiné (mur qui monte, échafaudage, tas de pierres), comme la maquette
+## de `ConstructionMarkers`.
+class Worksite:
+	extends Control
+
+	func _draw() -> void:
+		var stone := Color(0.72, 0.68, 0.6)
+		var w := size.x
+		var h := size.y
+		draw_rect(Rect2(w * 0.12, h * 0.3, w * 0.5, h * 0.62), stone)
+		draw_rect(Rect2(w * 0.62, h * 0.58, w * 0.2, h * 0.34), stone)
+		for k in 4:
+			var x := w * (0.1 + 0.18 * k)
+			draw_line(Vector2(x, h * 0.08), Vector2(x, h * 0.94), HAMMER, 1.5)
+		for y: float in [0.3, 0.6]:
+			draw_line(Vector2(w * 0.06, h * y), Vector2(w * 0.68, h * y), HAMMER, 2.0)
+		draw_colored_polygon(PackedVector2Array([Vector2(w * 0.78, h * 0.94), Vector2(w * 0.9, h * 0.7), Vector2(w, h * 0.94)]), stone.darkened(0.15))
 ## Catalogue des marqueurs (lot DA3), chargé une fois.
 static var _markers: SettlementMarkers
 
@@ -52,13 +71,9 @@ static func build(sample_data: Dictionary, legend_context: Dictionary) -> Contro
 		"army_banner":
 			child = _banner(legend_context)
 		"construction":
-			var label := Label.new()
-			label.text = "⚒"
-			label.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
-			label.add_theme_color_override("font_color", HAMMER)
-			label.add_theme_color_override("font_outline_color", Color(0.97, 0.92, 0.80))
-			label.add_theme_constant_override("outline_size", 6)
-			child = label
+			# TB3 : le chantier de la carte est un échafaudage devant un mur (plus de « ⚒ »).
+			child = Worksite.new()
+			child.custom_minimum_size = Vector2(34, 26)
 		"faction_colors":
 			child = _swatch_row(legend_context)
 		_:

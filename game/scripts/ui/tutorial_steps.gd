@@ -4,10 +4,11 @@ extends RefCounted
 ## F8 — textes du tutoriel des premiers tours (interface, pas des données de jeu) : 14 étapes,
 ## chacune avec un objectif vérifié par `TutorialController` (identifiant `id`), une cible
 ## (`target`, résolue par le contrôleur en contrôle d'interface ou point de la carte) et un
-## conseil historique propre à la faction jouée (France, Angleterre, Bourgogne ; générique
-## sinon). Les noms (dirigeant, capitale, objectifs) viennent de `data/factions` et
-## `data/characters` via le contexte passé à `steps` : `{army}`, `{capital}`, `{ruler}`,
-## `{faction}`, `{objectives}`, `{end_year}`.
+## conseil historique propre à la faction jouée (France, Angleterre, Bourgogne ; `GENERIC_ADVICE`
+## sinon, avec la description de la faction en introduction). Les noms (dirigeant, capitale,
+## suzerain, objectifs) viennent de `data/factions`, `data/characters` et de la simulation via
+## le contexte passé à `steps` : `{army}`, `{capital}`, `{welcome}`, `{faction}`,
+## `{objectives_title}`, `{objectives}`, `{liege}`.
 ##
 ## `manual` : étape validée par le bouton « Continuer » (introduction, conclusion).
 
@@ -19,8 +20,8 @@ const STEP_IDS := [
 ## Texte commun de chaque étape : titre, consigne, objectif affiché, cible.
 const BASE := {
 	"intro": {
-		"title": "Bienvenue, {ruler}",
-		"text": "Nous sommes au printemps 1337. Vous gouvernez {faction}. Ce guide vous accompagne pendant les premiers tours : chaque étape donne un objectif, une flèche montre où agir, l'étape suivante s'ouvre dès que l'objectif est rempli.\n\n[b]Vos objectifs historiques[/b] (avant {end_year}) :\n{objectives}",
+		"title": "{welcome}",
+		"text": "Nous sommes au printemps 1337. Votre faction : {faction}. Ce guide vous accompagne pendant les premiers tours : chaque étape donne un objectif, une flèche montre où agir, l'étape suivante s'ouvre dès que l'objectif est rempli.\n\n[b]{objectives_title}[/b] :\n{objectives}",
 		"objective": "Cliquez sur « Continuer ».",
 		"target": "",
 		"manual": true,
@@ -51,8 +52,8 @@ const BASE := {
 	},
 	"build": {
 		"title": "Construire",
-		"text": "Dans la liste « Constructible », choisissez un bâtiment et cliquez sur « Construire ». Le coût est prélevé tout de suite ; un marteau sur la carte marque le chantier jusqu'à son achèvement. Une seule construction à la fois par province.",
-		"objective": "Lancer une construction dans une de vos provinces.",
+		"text": "Sous « Construire » (panneau de la ville) ou « Constructible » (panneau de province), chaque ligne est un bâtiment avec son coût et sa durée : un clic sur la ligne lance le chantier. Le coût est prélevé tout de suite ; un échafaudage sur la carte marque le chantier jusqu'à son achèvement. Une seule construction à la fois par ville.",
+		"objective": "Lancer une construction dans une de vos villes.",
 		"target": "buildable",
 	},
 	"research": {
@@ -70,7 +71,7 @@ const BASE := {
 	},
 	"end_turn": {
 		"title": "Finir le tour",
-		"text": "Un tour est une saison. Quand vos armées ont marché, cliquez sur « Fin du tour » (ou Entrée) : les autres puissances jouent l'une après l'autre, les sièges avancent, les villes produisent, et les marches trop longues pour une saison reprennent d'elles-mêmes au tour suivant.",
+		"text": "Un tour est une saison. Quand vos armées ont marché, cliquez sur la cloche « Fin de tour », en bas à droite (ou Entrée) : les autres puissances jouent l'une après l'autre, les sièges avancent, les villes produisent, et les marches trop longues pour une saison reprennent d'elles-mêmes au tour suivant.",
 		"objective": "Terminer le tour.",
 		"target": "end_turn",
 	},
@@ -160,21 +161,50 @@ const ADVICE := {
 	},
 }
 
+## Conseils des factions sans texte propre (étape → texte) : généralités du XIVᵉ siècle.
+## L'introduction reprend la description de la faction (`data/factions`) ; `diplomacy_vassal`
+## remplace `diplomacy` quand la faction a un suzerain.
+const GENERIC_ADVICE := {
+	"select_army": "Au XIVᵉ siècle, une armée se lève pour une campagne et coûte cher à tenir : ménagez la vôtre, elle ne se remplace pas en une saison.",
+	"move_army": "Fleuves, ponts et places fortes commandent les routes : qui les tient choisit où l'on se bat.",
+	"open_province": "{capital} est le cœur de votre domaine : la perdre, c'est souvent tout perdre.",
+	"city_tab": "Paysans, bourgeois, clergé, noblesse : quatre ordres dont les intérêts s'accordent rarement.",
+	"build": "Moulins, marchés et halles paient les guerres de demain ; les murailles donnent le temps d'être secouru.",
+	"research": "Le siècle change la guerre : l'arc long et l'arbalète, puis la poudre, entament la suprématie du chevalier.",
+	"diplomacy": "Sans suzerain au-dessus de vous, vos alliances et vos mariages sont votre meilleure garantie.",
+	"diplomacy_vassal": "Votre suzerain : {liege}. L'hommage oblige, mais un vassal habile choisit ses querelles.",
+	"end_turn": "Quatre saisons font une année : les grands princes comptent en décennies, pas en campagnes.",
+	"season_report": "Lisez aussi les nouvelles du monde : les malheurs des voisins sont des occasions.",
+	"chronicle": "La Peste noire (1347-1352) frappera presque toute l'Europe : peu de décisions pèseront autant que celles de ces années-là.",
+	"tax": "Partout l'impôt nouveau fait gronder : villes et campagnes se soulèvent quand le fardeau paraît injuste.",
+	"governor": "Un prince ne peut être partout : baillis, sénéchaux et capitaines tiennent le pays en son nom.",
+	"outro": "Les objectifs de votre titre se lisent sur votre écu, en haut à gauche : section « Féodalité » du panneau de faction.",
+}
+
 ## Nom de l'armée principale selon la faction (texte d'interface).
 const ARMY_NAMES := {"fac_france": "l'ost royal", "fac_england": "l'armée royale", "fac_burgundy": "l'armée ducale"}
 
 
-## Étapes pour `faction_id` ; `context` : `{faction, ruler, capital, objectives, end_year}`.
+## Étapes pour `faction_id` ; `context` : `{faction, ruler, capital, objectives, end_year,
+## objectives_title, liege, description}` (tout est facultatif).
 static func steps(faction_id: String, context: Dictionary = {}) -> Array[Dictionary]:
+	var ruler := str(context.get("ruler", ""))
+	var liege := str(context.get("liege", ""))
 	var values := {
 		"army": str(ARMY_NAMES.get(faction_id, "votre armée principale")),
 		"faction": str(context.get("faction", "votre royaume")),
-		"ruler": str(context.get("ruler", "Sire")),
+		"welcome": "Bienvenue, %s" % ruler if ruler != "" else "Bienvenue",
 		"capital": str(context.get("capital", "votre capitale")),
 		"objectives": str(context.get("objectives", "• Survivre et prospérer.")),
-		"end_year": str(context.get("end_year", "1453")),
+		"objectives_title": str(context.get("objectives_title", "Vos objectifs historiques (avant %s)" % str(context.get("end_year", "1453")))),
+		"liege": liege,
 	}
 	var advice: Dictionary = ADVICE.get(faction_id, {})
+	if advice.is_empty():
+		advice = GENERIC_ADVICE.duplicate()
+		advice["intro"] = str(context.get("description", ""))
+		if liege != "":
+			advice["diplomacy"] = advice["diplomacy_vassal"]
 	var result: Array[Dictionary] = []
 	for step_id in STEP_IDS:
 		var base: Dictionary = BASE[step_id]
@@ -183,7 +213,7 @@ static func steps(faction_id: String, context: Dictionary = {}) -> Array[Diction
 			"title": str(base["title"]).format(values),
 			"text": str(base["text"]).format(values),
 			"objective": str(base["objective"]).format(values),
-			"advice": str(advice.get(step_id, "")),
+			"advice": str(advice.get(step_id, "")).format(values),
 			"target": str(base.get("target", "")),
 			"manual": bool(base.get("manual", false)),
 			"modal_ok": bool(base.get("modal_ok", false)),

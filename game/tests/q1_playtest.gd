@@ -36,6 +36,11 @@ func _run() -> void:
 	await wait(5)
 	if phase == "q2tutorial":
 		var settings: Node = root.get_node_or_null("/root/Settings")
+		# Réglages et sauvegardes dédiés : la progression du guide du joueur n'est pas touchée.
+		var test_root := "user://q2tutorial_%d" % OS.get_process_id()
+		settings.call("use_test_file", test_root.path_join("settings.cfg"))
+		root.get_node("/root/SimFacade").call("use_test_saves_dir", test_root.path_join("saves"))
+		settings.call("set_value", "battle_prologue/never_ask", true)  # réglages neufs : pas d'invitation au prologue
 		settings.call("set_value", "tutorial/enabled", true)
 		settings.call("set_value", "tutorial/done", false)
 		settings.call("set_value", "tutorial/step", 0)

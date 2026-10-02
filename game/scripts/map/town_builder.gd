@@ -47,6 +47,8 @@ var block_range := 14.0
 var detail_shadows := true
 var block_shadows := false
 var done := false
+## TB3 : suie de cette ville (0-1), paramètre d'instance `town_soot` de `town_building.gdshader`.
+var soot := 0.0
 ## Nœuds géométriques avec leurs bornes de base (m) : recalage des AABB à l'échelle verticale.
 var geometry: Array = []  # [GeometryInstance3D, base_min, base_max, top_m, Rect2 xz (m)]
 var _tasks: Array[Callable] = []
@@ -399,8 +401,19 @@ func refresh_aabbs(vertical_scale: float) -> void:
 		g.custom_aabb = AABB(Vector3(rect.position.x, y0, rect.position.y), Vector3(rect.size.x, y1 - y0, rect.size.y))
 
 
+## TB3 : suie des toits et des murs de cette ville seulement (nœuds déjà construits et à venir).
+func set_soot(amount: float) -> void:
+	soot = clampf(amount, 0.0, 1.0)
+	for entry in geometry:
+		var g: GeometryInstance3D = entry[0]
+		if is_instance_valid(g):
+			g.set_instance_shader_parameter(&"town_soot", soot)
+
+
 func _register(g: GeometryInstance3D, lod: String, base_min: float, base_max: float, top: float, rect: Rect2) -> void:
 	g.set_meta("lod", lod)
+	if soot > 0.0:
+		g.set_instance_shader_parameter(&"town_soot", soot)
 	g.set_meta("radius_units", rect.size.length() * 0.5 / meters_per_unit)
 	_apply_range(g, lod)
 	geometry.append([g, base_min, base_max, top, rect])

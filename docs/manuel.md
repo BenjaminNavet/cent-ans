@@ -58,7 +58,7 @@ Survolez n'importe quelle icône : les infobulles donnent coûts, effets, prére
   prioritaire sur sa province). **Clic droit** (armée sélectionnée) : l'armée marche aussitôt vers le point
   visé du sol, attaque l'armée ennemie visée, ou marche sur la colonie visée (voir § 5, « Mouvement libre
   des armées »). La **bulle** dorée au sol montre jusqu'où elle peut aller cette saison.
-- **Entrée** ou bouton **Fin du tour** : votre tour est clos ; chaque faction IA joue ensuite le sien, l'une
+- **Entrée** ou cloche **Fin de tour** (en bas à droite) : votre tour est clos ; chaque faction IA joue ensuite le sien, l'une
   après l'autre, puis la saison s'écoule (économie, sièges, population, événements).
 - **Échap** : désélectionner, puis menu pause (sauvegarder, charger, réglages, aide, menu principal).
 - **Modes de carte** : M mécontentement, N diplomatie, R religion ; F12 capture d'écran.
@@ -140,6 +140,15 @@ la cité (droit de murage, châtellenie, temporel du monastère) : cité 100 %, 
 bourgeois, clergé, noblesse), avec leurs quatre jauges — mécontentement, santé, richesse, biens — restent
 attachées à la province, pas à chaque colonie. Construire coûte des livres, parfois des matériaux, et
 plusieurs saisons ; une seule construction à la fois par colonie.
+
+Ce que vous bâtissez se voit sur la carte, aux distances où l'on joue comme de près : fermes, moulins, vignobles, mines, salines, abbayes,
+marchés et ports se posent hors les murs et grandissent en trois étapes avec vos améliorations (un marché
+devient halle, puis champ de foire). Une ville dont la province se peuple gagne des faubourgs le long de
+ses routes ; une palissade ou des murs de pierre l'entourent quand vous la fortifiez ; un échafaudage
+marque le chantier en cours. Ces maquettes sont grossies quand la caméra s'éloigne, pour rester lisibles ;
+de très près elles reprennent leur vraie taille. Vous ne voyez pas celles des provinces que le brouillard
+de guerre vous cache. Une ville prise d'assaut, pillée ou dévastée garde ses toits noircis quelques
+saisons.
 
 - **Panneau de faction** (clic sur l'écu de la barre) : revenus et dépenses, entretien de l'armée et des
   bâtiments, frais de cour, biens, **impôt** Bas / Normal / Haut (plus d'argent contre plus de colère).
