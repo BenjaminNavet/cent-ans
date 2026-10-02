@@ -52,6 +52,7 @@ var _states: Dictionary = {}  # id de colonie → {buildings, fortification, bui
 var _resources: Dictionary = {}  # province → Array d'ids de ressource
 var _provinces: Dictionary = {}  # province → {population, devastation, besieged, constructing}
 var _baseline: Dictionary = {}  # province → population de 1337 (données)
+var _soot: Dictionary = {}  # indice de colonie → suie 0-1
 var _anchors: Dictionary = {}  # "i|famille" → {px, yaw} ou {} (aucun site)
 var _root: Node3D
 var _batches: Dictionary = {}  # clé de maillage → MultiMeshInstance3D
@@ -191,8 +192,8 @@ func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: 
 
 
 ## Relit l'état de la simulation s'il a changé (`get_state_revision`) : la prochaine mise à jour
-## de la vue reconstruit le voisinage.
-func refresh(sim: Object) -> void:
+## de la vue reconstruit le voisinage. Rend vrai si l'état a été relu.
+func refresh(sim: Object) -> bool:
 	_sim = sim
 	var revision := -1
 	if sim != null and sim.has_method("get_state_revision"):
@@ -200,12 +201,35 @@ func refresh(sim: Object) -> void:
 	elif sim != null and sim.has_method("get_turn"):
 		revision = int(sim.call("get_turn"))
 	if revision == _revision and revision >= 0:
-		return
+		return false
 	_revision = revision
 	_states.clear()
 	_provinces.clear()
 	_read_states()
 	_dirty = true
+	return true
+
+
+## État des provinces à la dernière relecture : province → `{population, devastation, besieged,
+## constructing}`.
+func provinces_live() -> Dictionary:
+	return _provinces
+
+
+## TB3, point 5 : suie (0-1) des faubourgs, de l'enceinte et des bâtiments hors les murs de la
+## colonie `id` (par instance de `MultiMesh`, `INSTANCE_CUSTOM.b`).
+func set_soot(id: String, amount: float) -> void:
+	var i: int = _data.index_by_id.get(id, -1) if _data != null else -1
+	if i < 0 or is_equal_approx(float(_soot.get(i, 0.0)), amount):
+		return
+	if amount > 0.0:
+		_soot[i] = amount
+	else:
+		_soot.erase(i)
+	for inst: Dictionary in _instances:
+		if int(inst["settlement"]) == i:
+			_write_batches()
+			return
 
 
 ## État des provinces (population, dévastation, siège, chantier de la cité : `ProvinceSnapshot`)
@@ -678,17 +702,30 @@ static func _load_glb_mesh(path: String) -> Mesh:
 	return mesh
 
 
+## Tampon d'instances (`TownBuilder.pack_instances`) avec la suie de chaque instance dans la
+## composante b des données d'instance (`INSTANCE_CUSTOM.b` de `town_building.gdshader`).
+static func with_soot(buffer: PackedFloat32Array, soots: Array) -> PackedFloat32Array:
+	for k in soots.size():
+		buffer[k * 16 + 14] = float(soots[k])
+	return buffer
+
+
+## Suie (0-1) portée par les instances de la colonie `id`.
+func soot_of(id: String) -> float:
+	return float(_soot.get(int(_data.index_by_id.get(id, -1)), 0.0)) if _data != null else 0.0
+
+
 ## Réécrit les `MultiMesh` depuis `_instances` (repère en mètres centré sur `_center`).
 func _write_batches() -> void:
 	if _root == null or _center.x == INF:
 		return
 	var s := 1.0 / _mpu
 	_root.transform = Transform3D(Basis().scaled(Vector3(s, s, s)), Vector3(_center.x, 0.0, _center.y))
-	var groups := {}  # clé → [xforms, bases, tints, top]
+	var groups := {}  # clé → [xforms, bases, tints, top, suies]
 	for inst: Dictionary in _instances:
 		var key := str(inst["key"])
 		if not groups.has(key):
-			groups[key] = [[], [], [], 0.0]
+			groups[key] = [[], [], [], 0.0, []]
 		var g: Array = groups[key]
 		var px: Vector2 = inst["px"]
 		var grow := _scale if bool(inst.get("grow", false)) else 1.0
@@ -697,6 +734,7 @@ func _write_batches() -> void:
 		(g[1] as Array).append(float(inst["base_m"]))
 		(g[2] as Array).append(float(inst.get("tint", 0.5)))
 		g[3] = maxf(float(g[3]), (float(inst.get("top", 20.0)) + float(inst.get("reach", 30.0))) * grow)
+		(g[4] as Array).append(float(_soot.get(int(inst["settlement"]), 0.0)))
 	for key: String in _batches.keys():
 		if not groups.has(key):
 			(_batches[key] as Node).free()
@@ -708,6 +746,7 @@ func _write_batches() -> void:
 			continue
 		var g: Array = groups[key]
 		var packed := TownBuilder.pack_instances(g[0], g[1], g[2])
+		var buffer := with_soot(packed["buffer"], g[4])
 		var mmi: MultiMeshInstance3D = _batches.get(key)
 		if mmi == null:
 			mmi = MultiMeshInstance3D.new()
@@ -721,7 +760,7 @@ func _write_batches() -> void:
 			_root.add_child(mmi)
 			_batches[key] = mmi
 		mmi.multimesh.instance_count = int(packed["count"])
-		mmi.multimesh.buffer = packed["buffer"]
+		mmi.multimesh.buffer = buffer
 		mmi.set_meta("bounds", [float(packed["lo"]), float(packed["hi"]), float(g[3]), (packed["rect"] as Rect2).grow(float(g[3]))])
 		total += int(packed["count"])
 	_refresh_aabbs()

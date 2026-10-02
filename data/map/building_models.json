@@ -1,5 +1,5 @@
 {
-  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille. `growth` : croissance des villes 1:1 (point 4) : un quartier de faubourg par tranche `population_step` de population de la province au-dessus de celle de 1337 ; enceinte ajoutée quand un bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan de 1340 et les bâtiments de départ.",
+  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille. `growth` : croissance des villes 1:1 (point 4) : un quartier de faubourg par tranche `population_step` de population de la province au-dessus de celle de 1337 ; enceinte ajoutée quand un bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan de 1340 et les bâtiments de départ. `soot` : suie par ville (point 5), d'après la dévastation de la province, le siège et la prise de la place.",
   "version": 1,
   "render": {
     "view_range_units": 45.0,
@@ -591,5 +591,15 @@
         }
       ]
     }
+  },
+  "soot": {
+    "devastation_start": 20.0,
+    "devastation_full": 90.0,
+    "devastation_max": 0.6,
+    "siege": 0.25,
+    "storm": 0.45,
+    "sack": 0.9,
+    "sack_devastation_rise": 15.0,
+    "decay_per_turn": 0.1
   }
 }

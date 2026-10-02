@@ -16,7 +16,7 @@ const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TOWN := "set_agen"
 const PROVINCE := "prov_agenais"
 ## Étapes qui doivent aller à leur terme (une erreur de script interrompt la fonction en cours).
-const EXPECTED_STEPS := 3
+const EXPECTED_STEPS := 4
 
 var _failures := 0
 var _completed := false
@@ -109,6 +109,7 @@ func _run() -> void:
 	_check(out.manifest.size() >= 25, "expected 24 models and a worksite, got %d" % out.manifest.size())
 	await _check_outbuildings(layer, data, town_px)
 	_check_growth(layer, data)
+	_check_soot(layer, data)
 	_completed = _completed_steps == EXPECTED_STEPS
 	world.queue_free()
 	await process_frame
@@ -288,3 +289,91 @@ func _parts(instances: Array, part: String) -> int:
 		if str(inst.get("part", "")) == part:
 			count += 1
 	return count
+
+
+## 5. Suie par ville : règle (dévastation, siège, prise), puis état porté par chaque ville.
+func _check_soot(layer: SettlementLayer, data: SettlementData) -> void:
+	var out := layer.outbuildings
+	var cfg: Dictionary = out.config["soot"]
+	_check(TownSoot.from_devastation(cfg, 0.0) == 0.0 and is_equal_approx(TownSoot.from_devastation(cfg, 100.0), float(cfg["devastation_max"])), "soot follows the devastation of the province")
+	var rule := TownSoot.new(cfg)
+	var places: Array = [
+		{"id": "a", "province": "p", "controller": "fac_france", "kind": "city"},
+		{"id": "b", "province": "p", "controller": "fac_france", "kind": "town"},
+		{"id": "c", "province": "q", "controller": "fac_france", "kind": "city"},
+	]
+	rule.update(places, {"p": {"devastation": 0.0, "besieged": true}, "q": {"devastation": 0.0, "besieged": true}}, 10)
+	_check(is_equal_approx(rule.amount_of("a"), snappedf(float(cfg["siege"]), 0.02)) and rule.amount_of("b") == 0.0, "a besieged city is lightly sooted, not the other places")
+	# « a » saccagée (contrôleur changé, dévastation +25), « c » prise d'assaut (sans saccage).
+	places[0]["controller"] = "fac_england"
+	places[2]["controller"] = "fac_england"
+	var changed := rule.update(places, {"p": {"devastation": 25.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 11)
+	_check(is_equal_approx(rule.amount_of("a"), snappedf(float(cfg["sack"]), 0.02)) and changed.has("a"), "a sacked town is black with soot, got %.2f" % rule.amount_of("a"))
+	_check(rule.amount_of("b") < 0.1, "the town next to it, not taken, stays clean, got %.2f" % rule.amount_of("b"))
+	_check(is_equal_approx(rule.amount_of("c"), snappedf(float(cfg["storm"]), 0.02)), "a stormed town is sooted, got %.2f" % rule.amount_of("c"))
+	rule.update(places, {"p": {"devastation": 25.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 14)
+	_check(rule.amount_of("a") < float(cfg["sack"]) - 0.2 and rule.amount_of("a") > 0.0, "soot fades turn after turn, got %.2f" % rule.amount_of("a"))
+	rule.update(places, {"p": {"devastation": 0.0, "besieged": false}, "q": {"devastation": 0.0, "besieged": false}}, 40)
+	_check(rule.amount_of("a") == 0.0 and rule.amount_of("c") == 0.0, "soot gone after the repairs")
+	# État par ville dans le rendu : ville 1:1, maillage lointain, faubourgs.
+	var shader := load("res://shaders/town_building.gdshader") as Shader
+	_check(shader != null and shader.code.contains("instance uniform float town_soot"), "town_building.gdshader has a per-town soot instance parameter")
+	var agen: int = data.index_by_id[TOWN]
+	var agen_px: Vector2 = data.settlements[agen]["px"]
+	var other := ""
+	for entry in data.settlements:
+		if str(entry["province"]) != PROVINCE and layer.towns.data.has_town(str(entry["id"])) and (entry["px"] as Vector2).distance_to(agen_px) < 40.0:
+			other = str(entry["id"])
+			break
+	var sim := FakeSim.new()
+	sim.resources[PROVINCE] = ["res_wheat", "res_wine"]
+	sim.buildings[TOWN] = ["bld_market", "bld_windmill"]
+	sim.population[PROVINCE] = out.baseline_population(PROVINCE)
+	layer.refresh(sim, Callable())
+	layer.update_view(10.0)
+	layer.flush()
+	out.flush(agen_px)
+	layer.set_town_soot(TOWN, 0.8)
+	_check(is_equal_approx(layer.towns.soot_of(TOWN), 0.8), "soot stored for the 1:1 town")
+	_check(other != "" and layer.towns.soot_of(other) == 0.0, "the neighbouring town keeps clean roofs")
+	_check(absf(layer.town_far.soot_of(TOWN) - 0.8) < 0.01 and layer.town_far.soot_of(other) == 0.0, "soot written per town in the far mesh mask, got %.2f" % layer.town_far.soot_of(TOWN))
+	if _check(layer.towns.is_shown(TOWN), "the 1:1 town of %s is built near the camera" % TOWN):
+		var counts := _soot_nodes(layer.towns.builder_of(TOWN), 0.8)
+		_check(counts.x > 0 and counts.y == counts.x, "every node of the sooted town carries its soot (%d of %d)" % [counts.y, counts.x])
+		for id: String in layer.towns.built_ids():
+			if id != TOWN:
+				var clean := _soot_nodes(layer.towns.builder_of(id), 0.0)
+				_check(clean.x > 0 and clean.y == clean.x, "no soot on the nodes of %s (%d of %d clean)" % [id, clean.y, clean.x])
+	_check(out.instances_of(TOWN, "mill").size() == 1 and is_equal_approx(out.soot_of(TOWN), 0.8) and out.soot_of(other) == 0.0, "the outbuildings of the sooted town carry its soot")
+	var packed := TownBuilder.pack_instances([Transform3D(), Transform3D()], [12.0, 30.0], [0.5, 0.5])
+	var buffer := OutbuildingLayer.with_soot(packed["buffer"], [0.0, 0.8])
+	_check(buffer[14] == 0.0 and is_equal_approx(buffer[30], 0.8) and buffer[12] == 12.0 and buffer[28] == 30.0, "soot written per MultiMesh instance (INSTANCE_CUSTOM.b)")
+	# Dévastation de la province lue dans la simulation : suie de toutes ses villes, pas des autres.
+	sim.devastation[PROVINCE] = 100
+	sim.revision += 1
+	layer.refresh(sim, Callable())
+	var second := ""
+	for entry in data.settlements:
+		if str(entry["province"]) == PROVINCE and str(entry["id"]) != TOWN:
+			second = str(entry["id"])
+			break
+	_check(second != "" and is_equal_approx(layer.town_soot(second), float(cfg["devastation_max"])), "towns of a devastated province are sooted, got %.2f" % layer.town_soot(second))
+	_check(layer.town_soot(other) == 0.0, "towns of the next province are not")
+	_completed_steps += 1
+
+
+## (nœuds de géométrie d'une ville, nœuds dont la suie d'instance vaut `amount`).
+func _soot_nodes(builder: TownBuilder, amount: float) -> Vector2i:
+	var total := 0
+	var matching := 0
+	if builder == null:
+		return Vector2i.ZERO
+	for entry in builder.geometry:
+		var node: GeometryInstance3D = entry[0]
+		if not is_instance_valid(node):
+			continue
+		total += 1
+		var value: Variant = node.get_instance_shader_parameter(&"town_soot")
+		if is_equal_approx(float(value) if value != null else 0.0, amount):
+			matching += 1
+	return Vector2i(total, matching)

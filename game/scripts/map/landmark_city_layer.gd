@@ -29,6 +29,7 @@ var stats: Dictionary = {}
 var _cities: Dictionary = {}  # settlement id → ville v2
 var _anchor: Dictionary = {}  # id → Vector2 (unités)
 var _extent: Dictionary = {}  # id → rayon (unités)
+var _soot: Dictionary = {}  # id → suie 0-1 (TB3)
 var _ids_by_chunk: Dictionary = {}
 var _entries: Dictionary = {}  # id → {plan, builder, pending, dirty_ms}
 var _jobs: Dictionary = {}  # id → [task, kind]
@@ -291,10 +292,31 @@ func _start_build(id: String) -> void:
 	if old != null:
 		old.free_nodes()
 	var b := TownBuilder.new(entry["plan"], _anchor[id], LandmarkV2Library.meters_per_unit(), self)
+	b.set_soot(soot_of(id))
 	b.root.name = "City_" + id
 	_configure(b)
 	b.root.visible = false
 	entry["pending"] = b
+
+
+## TB3 : suie de la ville `id` (0-1), gardée pour les constructions à venir.
+func set_soot(id: String, amount: float) -> void:
+	amount = clampf(amount, 0.0, 1.0)
+	if is_equal_approx(float(_soot.get(id, 0.0)), amount):
+		return
+	if amount > 0.0:
+		_soot[id] = amount
+	else:
+		_soot.erase(id)
+	var entry: Dictionary = _entries.get(id, {})
+	for key in ["builder", "pending"]:
+		var b: TownBuilder = entry.get(key)
+		if b != null:
+			b.set_soot(amount)
+
+
+func soot_of(id: String) -> float:
+	return float(_soot.get(id, 0.0))
 
 
 func _step_builders(budget_usec: int) -> void:

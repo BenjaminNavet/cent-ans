@@ -8,7 +8,8 @@
     "version",
     "render",
     "families",
-    "growth"
+    "growth",
+    "soot"
   ],
   "additionalProperties": false,
   "properties": {
@@ -256,6 +257,69 @@
               }
             }
           }
+        }
+      }
+    },
+    "soot": {
+      "description": "Suie par ville (0-1) sur les toits des villes 1:1 et de leur maillage lointain.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "devastation_start",
+        "devastation_full",
+        "devastation_max",
+        "siege",
+        "storm",
+        "sack",
+        "sack_devastation_rise",
+        "decay_per_turn"
+      ],
+      "properties": {
+        "devastation_start": {
+          "description": "Dévastation de la province (0-100) où la suie commence.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "devastation_full": {
+          "description": "Dévastation où elle atteint `devastation_max`.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "devastation_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "siege": {
+          "description": "Suie de la cité d'une province assiégée.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "storm": {
+          "description": "Suie d'une place prise d'assaut (contrôleur changé pendant un siège).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "sack": {
+          "description": "Suie d'une place saccagée ou rasée (contrôleur changé et dévastation en hausse).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "sack_devastation_rise": {
+          "description": "Hausse de dévastation de la province qui signale un saccage (data/rules/capture.json).",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "decay_per_turn": {
+          "description": "Baisse par tour de la suie d'une prise.",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
         }
       }
     }

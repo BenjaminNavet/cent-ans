@@ -148,6 +148,8 @@ var landmark_cities: LandmarkCityLayer
 var town_far: TownFarLayer
 ## Lot TB3 (ADR 0153) : bâtiments hors les murs, chantiers et croissance des villes 1:1.
 var outbuildings: OutbuildingLayer
+## TB3 : suie par ville (dévastation, siège, prise de la place).
+var soot: TownSoot
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
@@ -632,8 +634,8 @@ func refresh(sim: Object, _color_of: Callable) -> void:
 			landmark_cities.set_year(year)
 	_refresh_shields()
 	_refresh_capital(sim)
-	if outbuildings != null:
-		outbuildings.refresh(sim)
+	if outbuildings != null and outbuildings.refresh(sim):
+		_refresh_soot(sim)
 	var devastation := {}
 	if sim != null and (sim.has_method("get_provinces_snapshot") or sim.has_method("get_province_state")):
 		var provinces := {}
@@ -1708,6 +1710,42 @@ func model_radius(i: int) -> float:
 	return _model_radius[i] if i >= 0 and i < _model_radius.size() else DEFAULT_FOOTPRINT_M / 719.0
 
 
+## TB3 : suie de chaque ville relue sur l'état de la simulation (`TownSoot`), poussée aux villes
+## 1:1, à leur maillage lointain et aux faubourgs.
+func _refresh_soot(sim: Object) -> void:
+	if soot == null or outbuildings == null:
+		return
+	var turn := int(sim.call("get_turn")) if sim != null and sim.has_method("get_turn") else 0
+	var changed := soot.update(data.settlements, outbuildings.provinces_live(), turn)
+	for id: String in changed:
+		_apply_town_soot(id, float(changed[id]))
+
+
+func _apply_town_soot(id: String, amount: float) -> void:
+	if towns != null:
+		towns.set_soot(id, amount)
+	if landmark_cities != null:
+		landmark_cities.set_soot(id, amount)
+	if town_far != null:
+		town_far.set_soot(id, amount)
+	if outbuildings != null:
+		outbuildings.set_soot(id, amount)
+
+
+## TB3 : suie affichée (0-1) de la ville `id`.
+func town_soot(id: String) -> float:
+	return soot.amount_of(id) if soot != null else 0.0
+
+
+## TB3 : force la suie de la ville `id` (captures de contrôle, tests), comme une prise au tour
+## courant ; elle décroît ensuite comme une vraie.
+func set_town_soot(id: String, amount: float, turn: int = 0) -> void:
+	if soot == null:
+		return
+	soot.force(id, amount, turn)
+	_apply_town_soot(id, amount)
+
+
 ## TB3 : rayon bâti (unités monde) de la colonie `i` : emprise réelle de la ville 1:1, ou étendue
 ## de la ville emblématique v2.
 func built_radius(i: int) -> float:
@@ -1789,6 +1827,7 @@ func _setup_towns() -> void:
 	outbuildings.name = "Outbuildings"
 	add_child(outbuildings)
 	outbuildings.setup(self, map_data, terrain, data, towns.data.meters_per_unit if towns.data != null else 719.0)
+	soot = TownSoot.new(outbuildings.config.get("soot", {}))
 
 
 ## VH4 : villes emblématiques 1:1.

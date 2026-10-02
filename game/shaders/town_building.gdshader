@@ -46,6 +46,12 @@ uniform float lod_range = 1.6;
 // Hauteur au-dessus du pied = y du sommet relatif à l'origine de l'instance (avant pose sur le
 // relief), en mètres ; position locale (m) relative à l'ancrage pour le bruit.
 uniform float aging : hint_range(0.0, 2.0) = 0.5;
+// Lot TB3 (ADR 0153) : suie d'une ville saccagée, prise d'assaut, assiégée ou dévastée, **par
+// ville** : paramètre d'instance posé sur les nœuds de la ville (`TownBuilder.set_soot`), ou par
+// instance de MultiMesh dans `INSTANCE_CUSTOM.b` (faubourgs et bâtiments hors les murs partagés
+// entre villes, `OutbuildingLayer`). 0 : aucune.
+instance uniform float town_soot : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 soot_color : source_color = vec3(0.035, 0.03, 0.028);
 
 #include "res://shaders/building_aging.gdshaderinc"
 
@@ -56,6 +62,7 @@ varying vec3 world_n;
 varying float v_built;
 varying vec3 v_age_pos;
 varying flat float v_seed;
+varying float v_soot;
 
 void vertex() {
 	layer = clamp(int(COLOR.a * 16.0), 0, 15);
@@ -88,6 +95,7 @@ void vertex() {
 	world_m = VERTEX * meters_per_unit;
 	world_n = NORMAL;
 	v_built = UV2.y;
+	v_soot = max(town_soot, base_source == 0 ? INSTANCE_CUSTOM.b : 0.0);
 }
 
 void fragment() {
@@ -139,6 +147,16 @@ void fragment() {
 			albedo = mix(albedo, mean, far_w);
 			roughness = mix(roughness, mix(r_avg, r_cell, detail), far_w);
 		}
+	}
+	if (v_soot > 0.0) {
+		// Plaques de suie (≈ 16 m, bord déchiqueté à ≈ 3 m) : la part couverte suit `v_soot` ;
+		// toits presque noirs, murs et sol noircis à moitié.
+		float n = ba_noise(world_m.xz * 0.06) * 0.65 + ba_noise(world_m.xz * 0.33) * 0.35;
+		float patch = smoothstep(1.0 - v_soot - 0.12, 1.0 - v_soot + 0.12, n);
+		bool roof = layer >= roof_first && layer <= roof_last;
+		float k = patch * (roof || v_built > 0.0 ? 0.9 : 0.5);
+		albedo = mix(albedo, soot_color, k);
+		roughness = mix(roughness, 1.0, k);
 	}
 	ALBEDO = albedo;
 	ROUGHNESS = roughness;

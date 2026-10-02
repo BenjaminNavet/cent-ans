@@ -61,6 +61,7 @@ var _finage_key := ""
 ## `--no-towns` (rendu d'avant ZG6).
 var _detail_override := 1.0
 var _disabled := false
+var _soot: Dictionary = {}  # id → suie 0-1 (TB3)
 
 
 func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settlement_ids: Array, p_data: TownData = null) -> void:
@@ -378,9 +379,35 @@ func _start_build(id: String) -> void:
 	if old != null:
 		old.free_nodes()
 	var b := TownBuilder.new(entry["plan"], _anchor[id], data.meters_per_unit, self)
+	b.set_soot(soot_of(id))
 	_configure(b)
 	b.root.visible = false
 	entry["pending"] = b
+
+
+## TB3 : suie de la ville `id` (0-1), gardée pour les constructions à venir.
+func set_soot(id: String, amount: float) -> void:
+	amount = clampf(amount, 0.0, 1.0)
+	if is_equal_approx(float(_soot.get(id, 0.0)), amount):
+		return
+	if amount > 0.0:
+		_soot[id] = amount
+	else:
+		_soot.erase(id)
+	var entry: Dictionary = _entries.get(id, {})
+	for key in ["builder", "pending"]:
+		var b: TownBuilder = entry.get(key)
+		if b != null:
+			b.set_soot(amount)
+
+
+func soot_of(id: String) -> float:
+	return float(_soot.get(id, 0.0))
+
+
+## Constructeur de la ville 1:1 affichée de `id` (null si elle n'est pas construite) : tests.
+func builder_of(id: String) -> TownBuilder:
+	return (_entries.get(id, {}) as Dictionary).get("builder")
 
 
 func _step_builders(budget_usec: int) -> void:
