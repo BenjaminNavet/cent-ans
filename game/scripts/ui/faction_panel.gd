@@ -43,6 +43,8 @@ var recoinage_value: Label
 var coinage_section: CoinageSection
 var chivalry_section: ChivalrySection
 var feudal_section: FeudalSection  # FE6 : obligations et objectifs féodaux
+## JR3 : section « Ferveur » (faction croisée seulement), posée sous le trésor.
+var crusade_section: CrusadeSection
 var ransom_button: Button
 var ransom_panel: RansomPanel
 ## Audit A3 E1 : « Solde prévu » (le chiffre de la barre du haut, calculé par `core/`).
@@ -68,6 +70,7 @@ func _ready() -> void:
 	_add_h11_sections()
 	_arrange_budget()
 	_build_budget_view()
+	_add_crusade_section()
 	_wrap_in_scroll()
 	visibility_changed.connect(func() -> void:
 		if not visible and ransom_panel != null:
@@ -286,6 +289,19 @@ func _build_budget_view() -> void:
 const PANEL_WIDTH := 500.0
 
 
+## JR3 : la Ferveur tient lieu d'assise à la faction croisée ; sa section vient juste sous le
+## trésor, avant le budget (masquée pour toute autre faction).
+func _add_crusade_section() -> void:
+	var grid: Control = income_value.get_parent()
+	crusade_section = CrusadeSection.new()
+	grid.add_sibling(crusade_section)
+	var rule := HSeparator.new()
+	rule.name = "CrusadeRule"
+	crusade_section.add_sibling(rule)
+	rule.visible = false
+	crusade_section.visibility_changed.connect(func() -> void: rule.visible = crusade_section.visible)
+
+
 func _section_title(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
@@ -354,6 +370,7 @@ func _show_h11(economy: Dictionary = {}) -> void:
 		RichTooltip.attach_plain(recoinage_value, "recoinage_detail", {"body": "Coût de la monnaie forte prévu cette saison (inclus dans l'administration).\nSaison passée : %s" % Money.amount(int(economy.get("recoinage_last_turn", 0)))})
 	coinage_section.show_for(faction_id, is_player)
 	chivalry_section.show_for(is_player)
+	crusade_section.show_for(is_player)
 	var sim := _sim()
 	ransom_button.visible = is_player and sim != null and sim.has_method("get_ransoms")
 	if ransom_button.visible:

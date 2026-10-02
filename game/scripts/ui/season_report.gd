@@ -27,7 +27,7 @@ const SECTION_KINDS := {
 	"lands": ["province_captured", "siege_started", "siege_lifted", "raid", "revolt", "plague", "famine",
 		"death", "succession", "no_heir", "birth", "marriage", "regency", "table", "medicine", "chivalry",
 		"agent", "excommunication", "heresy", "vassal_rebellion", "victory", "defeat", "campaign_ended",
-		"edict", "mission"],  # C4 : édits régionaux ; NT3 : missions
+		"edict", "mission", "crusade"],  # C4 : édits régionaux ; NT3 : missions ; JR3 : croisade
 	# « income » (revenus bruts) : redondant avec la ligne de synthèse du trésor, laissé au journal.
 	"treasury": ["bankruptcy", "coinage", "ransom", "trade"],  # C5 : accords et routes coupées
 	"armies": ["battle", "army_destroyed", "general_captured", "recruited", "attrition"],
@@ -54,7 +54,13 @@ const KIND_STYLES := {
 	"trade": {"glyph": "⚓", "label": "Commerce", "color": "#1a5a6a"},
 	# NT3 : missions obtenues, réussies, échouées.
 	"mission": {"glyph": "✠", "label": "Mission", "color": "#5a3a10"},
+	# JR3 : ferveur, passage prêché, contingents, débandade, cité du vœu prise ou perdue.
+	"crusade": {"glyph": "✠", "label": "Croisade", "color": RichTooltip.RED},
 }
+## JR3 : seule nouvelle de croisade publique (toutes les factions la lisent) ; les autres ne
+## regardent que le joueur croisé. Le cœur n'a qu'un genre `crusade` : la délivrance se reconnaît
+## à son texte (« … délivrée ! »), comme dans les tests du cœur.
+const CRUSADE_PUBLIC_MARK := "délivrée"
 ## Ton d'une ligne (`_tone`) : perte (rouge, en tête), prise (vert, juste après), neutre.
 const TONE_LOSS := "loss"
 const TONE_GAIN := "gain"
@@ -152,6 +158,19 @@ static func section_of(kind: String) -> String:
 	return "world"
 
 
+## JR3 : vrai pour « Jérusalem délivrée », nouvelle du monde montrée à tous les joueurs.
+static func is_public_crusade(event: Dictionary) -> bool:
+	return str(event.get("kind", "")) == "crusade" and str(event.get("text_fr", "")).contains(CRUSADE_PUBLIC_MARK)
+
+
+## JR3 : vrai pour une nouvelle de croisade qui ne regarde que la faction croisée (passage,
+## contingents, débandade) et que `player` n'a donc pas à lire.
+static func is_private_crusade(event: Dictionary, player: String) -> bool:
+	if str(event.get("kind", "")) != "crusade" or is_public_crusade(event):
+		return false
+	return player != "" and str(event.get("faction", "")) != player
+
+
 ## Ton d'un événement pour le joueur `player` : perte d'une place, prise, ou neutre.
 ## `province_owner(province_id) -> String` (facultatif) désigne le propriétaire actuel.
 static func tone_of(event: Dictionary, player: String, province_owner: Callable = Callable()) -> String:
@@ -170,6 +189,8 @@ static func tone_of(event: Dictionary, player: String, province_owner: Callable 
 			return TONE_LOSS
 		"siege_lifted", "victory":
 			return TONE_GAIN if faction == player or kind == "victory" else ""
+		"crusade":  # JR3 : la cité du vœu délivrée par le joueur
+			return TONE_GAIN if faction == player and is_public_crusade(event) else ""
 	return ""
 
 
@@ -184,12 +205,14 @@ static func build_groups(events: Array, is_relevant: Callable, keeps_world: Call
 			continue
 		var kind := str(event.get("kind", ""))
 		var section := ""
-		if kind == "income":
+		if kind == "income" or is_private_crusade(event, player):
 			continue
 		if is_relevant.call(event):
 			section = section_of(kind)
 			if section == "world" and not (kind in WORLD_NEWS_KINDS or kind in WORLD_KINDS or kind.begins_with("diplom") or kind == "embargo"):
 				continue
+		elif is_public_crusade(event):  # JR3 : lue par tous, quel que soit le filtre d'intérêt
+			section = "world"
 		elif keeps_world.is_valid():
 			if kind in WORLD_NEWS_KINDS and keeps_world.call(event):
 				section = "world"

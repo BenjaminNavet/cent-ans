@@ -7,6 +7,8 @@ extends Control
 ## `faction_chosen`. Filtres par royaume et par rang (les autres factions sont voilées).
 ## Géométrie : `data/map/provinces.geojson` ; fiches : `GameDataStore.get_feudal_start_sheets`
 ## (déductions du cœur). Aucune règle ici.
+## JR3 : une faction jouable sans province (les croisés, qui ne tiennent que Limassol) est posée
+## sur la carte par une bannière à l'emplacement de sa colonie, cliquable comme une terre.
 
 signal faction_chosen(faction_id: String)
 signal faction_hovered(faction_id: String)
@@ -25,6 +27,8 @@ var kingdom_filter: String = ""
 var rank_filter: String = ""
 ## Provinces : `[{id, owner, polygons: [PackedVector2Array]}]` en coordonnées carte.
 var provinces: Array = []
+## JR3 : factions jouables sans province → position (coordonnées carte) de leur bannière.
+var landless: Dictionary = {}
 var _bounds := Rect2()
 var _card: PanelContainer
 var _card_text: RichTextLabel
@@ -76,6 +80,12 @@ func load_data(geojson_path: String = "") -> bool:
 				for province in provinces:
 					if province["id"] == province_id:
 						province["owner"] = id
+	landless.clear()
+	for id in sheet_order:
+		if (sheets[id].get("provinces", PackedStringArray()) as PackedStringArray).is_empty():
+			var home := home_position(id, store)
+			if home != NO_POSITION:
+				landless[id] = home
 	_bounds = playable_bounds()
 	queue_redraw()
 	return not provinces.is_empty() and not sheets.is_empty()
@@ -104,6 +114,9 @@ func playable_bounds() -> Rect2:
 						bounds = bounds.expand(point)
 		if not first:
 			break
+	for id in landless:
+		bounds = bounds.expand(landless[id]) if not first else Rect2(landless[id], Vector2.ZERO)
+		first = false
 	return bounds.grow_individual(bounds.size.x * FRAME_MARGIN, bounds.size.y * FRAME_MARGIN,
 		bounds.size.x * FRAME_MARGIN, bounds.size.y * FRAME_MARGIN)
 
@@ -128,8 +141,44 @@ static func read_provinces(path: String) -> Array:
 				ring.append(Vector2(float(point[0]), float(point[1])))
 			if ring.size() >= 3:
 				polygons.append(ring)
-		result.append({"id": str(props.get("id", "")), "owner": str(props.get("owner", "")), "polygons": polygons})
+		var entry := {"id": str(props.get("id", "")), "owner": str(props.get("owner", "")), "polygons": polygons}
+		var seat: Variant = props.get("capital_px", props.get("centroid", null))
+		if seat is Array and (seat as Array).size() >= 2:
+			entry["seat"] = Vector2(float(seat[0]), float(seat[1]))
+		result.append(entry)
 	return result
+
+
+const NO_POSITION := Vector2(-1, -1)
+const SETTLEMENT_POSITIONS_FILE := "map/settlements_px.json"
+
+
+## JR3 : où poser la bannière d'une faction sans province : la colonie qu'elle tient dans la
+## province de sa capitale (`data/settlements/<capitale>.json`, position de
+## `map/settlements_px.json`), à défaut le siège de cette province ; `NO_POSITION` sinon.
+func home_position(faction_id: String, store: Object) -> Vector2:
+	var info: Dictionary = store.call("get_faction", faction_id) if store != null and store.has_method("get_faction") else {}
+	var capital := str(info.get("capital", ""))
+	if capital == "":
+		return NO_POSITION
+	var data_dir := FrontEndData._data_dir()
+	var listed: Variant = _read_json(data_dir.path_join("settlements/%s.json" % capital))
+	if listed is Array:
+		var positions: Variant = _read_json(data_dir.path_join(SETTLEMENT_POSITIONS_FILE))
+		for settlement in listed:
+			if not (settlement is Dictionary) or str(settlement.get("owner", "")) != faction_id:
+				continue
+			var px: Variant = (positions as Dictionary).get(str(settlement.get("id", "")), null) if positions is Dictionary else null
+			if px is Array and (px as Array).size() >= 2:
+				return Vector2(float(px[0]), float(px[1]))
+	for province in provinces:
+		if province["id"] == capital and province.has("seat"):
+			return province["seat"]
+	return NO_POSITION
+
+
+static func _read_json(path: String) -> Variant:
+	return JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
 
 
 # --- Filtres ---------------------------------------------------------------------------------
@@ -203,7 +252,11 @@ func _transform() -> Transform2D:
 
 ## Faction propriétaire de la province sous `local` ("" hors des terres jouables).
 func faction_at(local: Vector2) -> String:
-	var map_point := _transform().affine_inverse() * local
+	var xform := _transform()
+	for id in landless:  # JR3 : la bannière passe avant la terre qu'elle recouvre
+		if local.distance_to(xform * (landless[id] as Vector2)) <= BANNER_RADIUS + BANNER_PICK_MARGIN:
+			return id
+	var map_point := xform.affine_inverse() * local
 	for province in provinces:
 		for polygon in province["polygons"]:
 			if Geometry2D.is_point_in_polygon(map_point, polygon):
@@ -215,6 +268,8 @@ func faction_at(local: Vector2) -> String:
 ## Point (coordonnées locales) à l'intérieur d'une terre de `faction_id` : centre du plus grand
 ## triangle de sa plus grande province (tests, captures) ; (-1, -1) si elle n'en a aucune.
 func faction_center(faction_id: String) -> Vector2:
+	if landless.has(faction_id):
+		return _transform() * (landless[faction_id] as Vector2)
 	var best := Vector2(-1, -1)
 	var best_area := 0.0
 	for province in provinces:
@@ -266,6 +321,35 @@ func _draw() -> void:
 			closed.append(screen[0])
 			var outline := SELECTED_OUTLINE if owner == selected and owner != "" else OUTLINE
 			draw_polyline(closed, outline, 2.0 if owner == selected else 1.0, true)
+	for id in landless:
+		_draw_banner(str(id), xform * (landless[id] as Vector2))
+
+
+## Rayon (px écran) du disque de la bannière d'une faction sans province, et marge de clic.
+const BANNER_RADIUS := 7.0
+const BANNER_PICK_MARGIN := 4.0
+
+
+## JR3 : bannière d'une faction sans province : hampe et pennon aux couleurs de la faction sur
+## un disque cerné, pour qu'elle se lise par-dessus la terre d'autrui où elle campe.
+func _draw_banner(faction_id: String, at: Vector2) -> void:
+	var color := _faction_color(faction_id)
+	if not matches(faction_id):
+		color = color.lerp(VEIL, 0.6)
+	if faction_id == hovered:
+		color = color.lightened(0.25)
+	var chosen := faction_id == selected
+	var ring := SELECTED_OUTLINE if chosen else FrontEndStyle.GOLD
+	var dark := Color(OUTLINE, 1.0)
+	draw_circle(at, BANNER_RADIUS + (2.5 if chosen else 1.5), dark)
+	draw_circle(at, BANNER_RADIUS, color)
+	draw_arc(at, BANNER_RADIUS, 0.0, TAU, 24, ring, 2.0 if chosen else 1.2, true)
+	var foot := at + Vector2(0, -BANNER_RADIUS)
+	var top := foot + Vector2(0, -BANNER_RADIUS * 1.9)
+	draw_line(foot, top, dark, 1.5, true)
+	var pennon := PackedVector2Array([top, top + Vector2(BANNER_RADIUS * 1.6, BANNER_RADIUS * 0.45), top + Vector2(0, BANNER_RADIUS * 0.9)])
+	draw_colored_polygon(pennon, color)
+	draw_polyline(pennon + PackedVector2Array([top]), ring, 1.0, true)
 
 
 func _gui_input(event: InputEvent) -> void:

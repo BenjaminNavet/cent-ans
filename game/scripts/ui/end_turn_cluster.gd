@@ -40,6 +40,7 @@ const SHORT_LABELS := {
 	"herbarium": "Herbier",
 	"coinage": "Monnaie",
 	"chivalry": "Chevalerie",
+	"crusade": "Croisade",  # JR3
 	"agent": "Agents",
 	"diplomacy_offer": "Proposition",
 }
@@ -56,6 +57,7 @@ const KIND_LABELS := {
 	"herbarium": "Herbier",
 	"research_idle": "Aucune recherche en cours",
 	"ransom": "Captifs et rançons",
+	"crusade": "Croisade et ferveur",  # JR3
 	"diplomacy_offer": "Proposition diplomatique",
 }
 ## Icône d'un type sans icône propre (`hud_<alias>`).

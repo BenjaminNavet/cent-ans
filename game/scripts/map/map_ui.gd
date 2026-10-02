@@ -202,6 +202,7 @@ func _decorate_top_bar() -> void:
 	research_box.set_script(RichBox)  # B1 : recherche en infobulle riche (technologie liée au Codex)
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
 	income_label.tooltip_text = RichTooltip.hud("hud_income")
+	_add_fervor_indicator()  # JR3
 	# UX2 (C9) : chaque bouton porte un libellé court quand la barre a la place, sinon son
 	# icône seule (nom et touche dans l'infobulle) ; voir `fit_top_bar`.
 	# U7 : chaque bouton porte la lettre de son raccourci (lue dans l'InputMap).
@@ -235,6 +236,39 @@ func _decorate_top_bar() -> void:
 				refresh_keycaps())
 	# Boutons ajoutés par les contrôleurs (Diplomatie, Chronique) après ce _ready.
 	bar.child_entered_tree.connect(func(node: Node) -> void: _decorate_late_button.call_deferred(node))
+
+
+## JR3 : repère permanent de la Ferveur après le solde, pour la seule faction croisée (masqué
+## sinon) ; un clic ouvre le panneau de faction, où vit la section « Ferveur ».
+var fervor_label: Label
+
+
+func _add_fervor_indicator() -> void:
+	fervor_label = RichLabel.new()
+	fervor_label.name = "FervorLabel"
+	fervor_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	fervor_label.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	fervor_label.gui_input.connect(_on_faction_swatch_input)
+	fervor_label.hide()
+	income_label.add_sibling(fervor_label)
+
+
+## `view` : `CampaignSim.get_crusade` (vide = le joueur n'est pas la faction croisée).
+func set_crusade(view: Dictionary) -> void:
+	var shown := not view.is_empty()
+	if not shown:
+		_top_texts.erase(fervor_label)
+	else:
+		var fervor := int(view.get("fervor", 0))
+		_set_top_text(fervor_label, "%s Ferveur %d" % [CrusadeSection.GLYPH, fervor], "%s %d" % [CrusadeSection.GLYPH, fervor])
+		var morale := int(view.get("zeal_morale", 0))
+		var failing := int(view.get("desertion_percent", 0)) > 0 or morale < 0
+		fervor_label.add_theme_color_override("font_color",
+			Money.LOSS_COLOR if failing else (Money.GAIN_COLOR if morale > 0 else Money.INK_COLOR))
+		fervor_label.tooltip_text = "%s\n\n[color=%s](Clic : panneau de faction)[/color]" % [CrusadeSection.tooltip(view), RichTooltip.MUTED]
+	if fervor_label.visible != shown:
+		fervor_label.visible = shown
+		queue_fit_top_bar()
 
 
 func _insert_icon_before(control: Control, icon_id: String) -> TextureRect:
@@ -468,6 +502,8 @@ var news_interest: NewsInterest = null
 
 ## Vrai si la nouvelle mérite une lettre ou le bandeau du haut (le journal garde tout).
 func keeps_news(event: Dictionary) -> bool:
+	if SeasonReport.is_public_crusade(event):  # JR3 : « Jérusalem délivrée » est lue par tous
+		return true
 	return news_interest == null or news_interest.keeps(event)
 
 
@@ -476,6 +512,8 @@ func journal_keeps(event: Dictionary) -> bool:
 	var faction := str(event.get("faction", ""))
 	if faction == "" or journal_player_faction == "" or faction == journal_player_faction:
 		return true
+	if SeasonReport.is_private_crusade(event, journal_player_faction):  # JR3
+		return false
 	return not FOREIGN_MINOR_KINDS.has(str(event.get("kind", "")))
 
 
