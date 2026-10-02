@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Lot TB5 (mer et côtes) : captures et mesures des côtes et des mers de la carte de campagne.
 ## Usage : godot --path game --resolution 1600x900 --script res://tests/tb5_shot.gd --
-##   [--out=<dossier>] [--only=<nom>,…] [--season=<saison>] [--stats] [--bench] [--distances=90,40]
+##   [--out=<dossier>] [--only=<nom>,…] [--season=<saison>] [--stats] [--foam] [--bench] [--distances=90,40]
 ## Sans `--stats` : écrit `tb5-<nom>-<distance>.png` (960 px de large) par lieu et par distance.
 ## Avec `--stats` : aucune image écrite ; pour chaque lieu, rend la vue sans puis avec le lot
 ## (`coast_strength`, `basin_on`, `swash_amount` à 0 puis aux valeurs des données) et affiche la
@@ -10,6 +10,12 @@ extends SceneTree
 ## couleur avant → après, puis part et couleur des pixels très changés) : la falaise de craie doit sortir claire, la Méditerranée plus claire
 ## que la Manche, sans lire d'image. Affiche aussi la part de l'image qui bouge en
 ## `MOTION_SECONDS` secondes, sans puis avec le lot (le ressac doit faire bouger le rivage).
+## Avec `--foam` : aucune image écrite ; pour chaque lieu (mers ouvertes surtout), densité d'écume
+## (part des pixels nettement plus clairs que la médiane de l'image) et régularité du motif (plus
+## haut pic secondaire de l'autocorrélation du masque clair le long des lignes : proche de 0 pour
+## des crêtes irrégulières, élevé pour une grille), plus l'empreinte d'un pixel
+## écran en pixels carte.
+## `--stats` affiche aussi la largeur moyenne (pixels écran) de la bande côtière du terrain seule.
 ## Avec `--bench` (lancer avec `--disable-vsync`) : coût du lot en ms par image, mesuré dans le
 ## même processus en alternant sans / avec (`BENCH_ROUNDS` passes de `BENCH_FRAMES` images,
 ## médiane) : insensible à la charge de la machine entre deux lancements.
@@ -22,6 +28,11 @@ const CHANGE_THRESHOLD := 10.0 / 255.0
 const STRONG_THRESHOLD := 45.0 / 255.0
 ## Durée entre les deux images de la mesure du mouvement (une demi-période du ressac environ).
 const MOTION_SECONDS := 3.0
+## Écume : pixel « clair » si sa luminance dépasse `FOAM_RATIO` × médiane + `FOAM_OFFSET`.
+const FOAM_RATIO := 1.5
+const FOAM_OFFSET := 10.0 / 255.0
+const AUTOCORRELATION_LAGS := 80
+const AUTOCORRELATION_ROWS := 64
 ## Lieux (pixels carte) : côtes puis mers ouvertes.
 const PLACES := {
 	"douvres": Vector2(2153.0, 2840.0),
@@ -50,6 +61,7 @@ func _init() -> void:
 	var distances: Array[float] = [90.0, 40.0]
 	var stats := false
 	var bench := false
+	var foam := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -63,6 +75,8 @@ func _init() -> void:
 			stats = true
 		elif arg == "--bench":
 			bench = true
+		elif arg == "--foam":
+			foam = true
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var settings: Node = root.get_node_or_null("/root/Settings")
@@ -118,6 +132,10 @@ func _init() -> void:
 				on_ms.sort()
 				print("TB5 bench %s: %.2f ms/frame without the lot, %.2f with it (median of %d rounds of %d frames)" % [label, off_ms[BENCH_ROUNDS / 2], on_ms[BENCH_ROUNDS / 2], BENCH_ROUNDS, BENCH_FRAMES])
 				continue
+			if foam:
+				await _settle(map, SETTLE_FRAMES)
+				_foam_stats(label, root.get_viewport().get_texture().get_image(), _footprint(ground.y))
+				continue
 			if not stats:
 				await _settle(map, SETTLE_FRAMES)
 				_shot(out_dir, label)
@@ -128,6 +146,8 @@ func _init() -> void:
 			var before := root.get_viewport().get_texture().get_image()
 			var motion_off := await _motion(map)
 			_apply(terrain_material, terrain_on)
+			await _settle(map, 8)
+			_band_width(label, before, root.get_viewport().get_texture().get_image(), _footprint(ground.y))
 			_apply(sea_material, sea_on)
 			await _settle(map, 8)
 			_stats(label, before, root.get_viewport().get_texture().get_image())
@@ -157,6 +177,128 @@ func _settle(map: Node3D, frames: int) -> void:
 		if clouds != null:
 			clouds.visible = false
 		await process_frame
+
+
+## Empreinte d'un pixel écran au centre de la vue, en pixels carte (plan horizontal à `ground_y`).
+func _footprint(ground_y: float) -> float:
+	var camera := root.get_viewport().get_camera_3d()
+	if camera == null:
+		return 0.0
+	var center := Vector2(root.get_viewport().get_visible_rect().size) * 0.5
+	var plane := Plane(Vector3.UP, ground_y)
+	var a: Variant = plane.intersects_ray(camera.project_ray_origin(center), camera.project_ray_normal(center))
+	var b: Variant = plane.intersects_ray(camera.project_ray_origin(center + Vector2(1, 0)), camera.project_ray_normal(center + Vector2(1, 0)))
+	if a == null or b == null:
+		return 0.0
+	return (a as Vector3).distance_to(b as Vector3)
+
+
+## Largeur moyenne (pixels écran) de la bande côtière : pixels très changés par le terrain seul,
+## divisés par la longueur du rivage à l'écran (nombre de lignes ou de colonnes touchées).
+func _band_width(label: String, before: Image, after: Image, footprint: float) -> void:
+	var rows := {}
+	var cols := {}
+	var strong := 0
+	var light := Vector3.ZERO
+	for y in after.get_height():
+		for x in after.get_width():
+			var a := before.get_pixel(x, y)
+			var b := after.get_pixel(x, y)
+			if absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b) > STRONG_THRESHOLD * 3.0:
+				strong += 1
+				rows[y] = true
+				cols[x] = true
+				light += Vector3(b.r, b.g, b.b)
+	var length := maxi(rows.size(), cols.size())
+	if length == 0:
+		print("TB5 band %s: no coast band in view (footprint %.4f map px per screen px)" % [label, footprint])
+		return
+	var mean := light / strong * 255.0
+	var width := float(strong) / length
+	print("TB5 band %s: %.1f screen px wide (%.2f map px) over %d px of shore, mean %.0f %.0f %.0f, footprint %.4f" % [label, width, width * footprint, length, mean.x, mean.y, mean.z, footprint])
+
+
+## Densité et régularité de l'écume sur les deux tiers bas de l'image.
+func _foam_stats(label: String, image: Image, footprint: float) -> void:
+	var width := image.get_width()
+	var top := image.get_height() / 3
+	var height := image.get_height() - top
+	var lum := PackedFloat32Array()
+	lum.resize(width * height)
+	var histogram := PackedInt32Array()
+	histogram.resize(256)
+	var sum := Vector3.ZERO
+	for y in height:
+		for x in width:
+			var c := image.get_pixel(x, y + top)
+			var l := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
+			lum[y * width + x] = l
+			histogram[clampi(int(l * 255.0), 0, 255)] += 1
+			sum += Vector3(c.r, c.g, c.b)
+	var half := width * height / 2
+	var median := 0
+	var seen := 0
+	for bin in 256:
+		seen += histogram[bin]
+		if seen >= half:
+			median = bin
+			break
+	var limit := median / 255.0 * FOAM_RATIO + FOAM_OFFSET
+	var mask := PackedByteArray()
+	mask.resize(width * height)
+	var bright := 0
+	for index in width * height:
+		if lum[index] > limit:
+			mask[index] = 1
+			bright += 1
+	var density := float(bright) / (width * height)
+	var mean := sum / (width * height) * 255.0
+	var line := "TB5 foam %s: density %.2f %% (pixels above %.0f, median %d), image mean %.0f %.0f %.0f, footprint %.4f" % [label, density * 100.0, limit * 255.0, median, mean.x, mean.y, mean.z, footprint]
+	if density > 0.0005 and density < 0.5:
+		var peak := _autocorrelation_peak(mask, width, height)
+		line += " ; regularity peak %.2f at %d px, oscillation %.3f (rows band)" % [peak.x, int(peak.y), peak.z]
+	print(line)
+
+
+## Régularité du motif clair le long des lignes, sur une bande de `AUTOCORRELATION_ROWS` lignes au
+## milieu du masque (échelle à peu près constante dans la bande) : autocorrélation normalisée par
+## décalage ; x = plus haut pic après la première retombée sous 0,05 (0 = aucun retour, motif
+## irrégulier ; une grille revient à chaque pas), y = son décalage (px), z = écart-type de
+## l'autocorrélation après la retombée (une grille oscille, un semis au hasard reste à plat).
+func _autocorrelation_peak(mask: PackedByteArray, width: int, height: int) -> Vector3:
+	var first_row := maxi((height - AUTOCORRELATION_ROWS) / 2, 0)
+	var last_row := mini(first_row + AUTOCORRELATION_ROWS, height)
+	var bright := 0
+	for row in range(first_row, last_row):
+		for x in width:
+			bright += mask[row * width + x]
+	var density := float(bright) / ((last_row - first_row) * width)
+	if density <= 0.0 or density >= 1.0:
+		return Vector3.ZERO
+	var variance := density - density * density
+	var best := Vector2.ZERO
+	var dipped := false
+	var tail_sum := 0.0
+	var tail_sq := 0.0
+	var tail := 0
+	for lag in range(1, AUTOCORRELATION_LAGS + 1):
+		var hits := 0
+		for row in range(first_row, last_row):
+			var base := row * width
+			for x in width - lag:
+				if mask[base + x] == 1 and mask[base + x + lag] == 1:
+					hits += 1
+		var r := (float(hits) / ((last_row - first_row) * (width - lag)) - density * density) / variance
+		if r < 0.05:
+			dipped = true
+		if dipped:
+			tail_sum += r
+			tail_sq += r * r
+			tail += 1
+			if r > best.x:
+				best = Vector2(r, lag)
+	var spread := sqrt(maxf(tail_sq / tail - (tail_sum / tail) * (tail_sum / tail), 0.0)) if tail > 0 else 0.0
+	return Vector3(best.x, best.y, spread)
 
 
 ## Durée moyenne d'une image (ms) sur `BENCH_FRAMES` images, après quelques images d'élan.
