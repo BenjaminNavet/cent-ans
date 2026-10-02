@@ -60,5 +60,21 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
 6 lectures d'image pour la session principale (travail visuel), en planches 2×2 de 640 px ;
 3 lectures au plus par agent. Constat : 2 lues (captures existantes de TB).
 
+## État à la pause (02/10, demandée par le joueur)
+- **HC1 livré** sur `feat/hc1` (4be0a2587, 7 commits), pas encore fusionné dans `feat/hc` ni relu
+  par la session principale. Réglages `generalised_*` dans `map_prop_scale.tres` : hauteur 0,8
+  unité, pas 0,9 px, portée rig 900, ombres < rig 70, imposteurs à toutes distances, haies hors
+  trame. Tests verts (`hc_forest_test`, `gc_maquettes_test`, smoke, 6 anciens tests épinglés sur
+  `real`). Planche : scratchpad de la session `shots/hc_board_3.jpg` (non lue par la session
+  principale).
+  Points ouverts HC1 : surcoût mesuré sur machine chargée (+5 ms à rig 300, cible < 2 ms non
+  établie) → banc sur machine calme ; taille non strictement constante au-delà de rig 150
+  (éclaircie 150/d, restants grossis jusqu'à × 1,69 : `generalised_far_density` = 1 pour la rendre
+  constante) ; semis d'une tuile 300-800 ms en fond (remplissage progressif) ; premier plan de
+  Paris peu arboré ; validation pytest du schéma `campaign_map_ui` non confirmée.
+- HC2 et HC5 : arrêt demandé aux agents (commit `wip:` + note) ; voir `docs/wip/hc2-eaux.md`
+  (`../gp-hc2`) et `docs/wip/hc5-massifs-zones-humides.md` (`../gp-hc5`).
+
 ## Prochaine étape
-Attendre HC1 et HC2, puis HC3.
+À la reprise : lire les notes HC2 et HC5, relancer leurs agents s'ils ne sont pas finis, puis HC3
+(fusion de `feat/hc1`, `feat/hc2`, `feat/hc5` dans `feat/hc`, planche commune, réglages).
