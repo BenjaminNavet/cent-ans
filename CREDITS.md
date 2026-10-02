@@ -221,9 +221,7 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
 - **Atlas catalan** (attribué à Abraham Cresques, Majorque, 1375 ; Bibliothèque nationale de
   France, Espagnol 30), numérisations de Wikimedia Commons marquées « Public domain » :
   [1375 Atlas Catalan, Europe 01](https://commons.wikimedia.org/wiki/File:1375_Atlas_Catalan,_Europe_01.jpg)
-  (rose des vents),
-  [Catalan Atlas BNF, sheet 10](https://commons.wikimedia.org/wiki/File:Catalan_Atlas_BNF,_sheet_10.jpg)
-  (nef de la mer des Indes),
+  (rose des vents ; uxer de Jaume Ferrer, livré mais non affiché par défaut),
   [Taprobane in the Catalan Atlas (1375)](https://commons.wikimedia.org/wiki/File:Taprobane_in_the_Catalan_Atlas_(1375).jpg)
   (sirène). Ornements détourés (vélin retiré) par `tools/cent_ans_tools/parchment_ornaments.py`
   (découpes `data/map/parchment_ornaments.json`) : `game/assets/textures/parchment/` (détail

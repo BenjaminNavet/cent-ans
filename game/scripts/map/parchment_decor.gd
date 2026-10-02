@@ -31,6 +31,8 @@ const PAINTED_SHIP_CENTER_BIAS := 0.25
 ## Écart aux autres ornements au-delà duquel un emplacement n'est plus mieux noté (px carte).
 const PAINTED_SHIP_SPACING := 700.0
 const PAINTED_MONSTER_CLEARANCE := 120.0
+## Écart minimal entre un monstre peint et un navire dessiné (px carte).
+const PAINTED_MONSTER_SHIP_SPACING := 480.0
 const COAST_MARGIN_PX := 8.0
 
 var roses: Array[Vector3] = []  # x, y, rayon (px carte)
@@ -89,11 +91,12 @@ static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 			decor.roses.append(Vector3(p.x, p.y, 62.0))
 			if decor.roses.size() >= 4:
 				break
-	# Monstres marins : au large, loin des roses.
+	# Monstres marins : au large, loin des roses. Avec des navires dessinés, les monstres sont
+	# d'abord placés comme à l'origine (les navires gardent ainsi leurs emplacements d'origine).
 	var monster_taken: Array[Vector2] = taken.duplicate()
 	for entry in open_sea:
 		var p: Vector2 = entry[1]
-		if painted_monsters and not _clear_water(sea_at, p, PAINTED_MONSTER_CLEARANCE):
+		if painted_monsters and painted_ships and not _clear_water(sea_at, p, PAINTED_MONSTER_CLEARANCE):
 			continue
 		if _far_from(p, monster_taken, 520.0):
 			monster_taken.append(p)
@@ -132,6 +135,22 @@ static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 			decor.ships.append(Vector3(p.x, p.y, (1.0 if _hash(int(p.x), int(p.y) + 7) > 0.5 else -1.0)))
 			if decor.ships.size() >= 9:
 				break
+	if painted_monsters:
+		# Monstres peints, plus grands : eau libre autour d'eux, à l'écart des navires dessinés.
+		decor.monsters.clear()
+		var ship_points: Array[Vector2] = []
+		for ship in decor.ships:
+			ship_points.append(Vector2(ship.x, ship.y))
+		var painted_taken: Array[Vector2] = taken.duplicate()
+		for entry in open_sea:
+			var p: Vector2 = entry[1]
+			if not _clear_water(sea_at, p, PAINTED_MONSTER_CLEARANCE):
+				continue
+			if _far_from(p, painted_taken, 520.0) and _far_from(p, ship_points, PAINTED_MONSTER_SHIP_SPACING):
+				painted_taken.append(p)
+				decor.monsters.append(Vector3(p.x, p.y, float(decor.monsters.size() % 2)))
+				if decor.monsters.size() >= 4:
+					break
 	return decor
 
 
