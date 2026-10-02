@@ -134,7 +134,7 @@ func _init() -> void:
 				continue
 			if foam:
 				await _settle(map, SETTLE_FRAMES)
-				_foam_stats(label, root.get_viewport().get_texture().get_image(), _footprint(ground.y))
+				_foam_stats(label, _grab(), _footprint(ground.y))
 				continue
 			if not stats:
 				await _settle(map, SETTLE_FRAMES)
@@ -143,16 +143,25 @@ func _init() -> void:
 			_apply(terrain_material, TERRAIN_OFF)
 			_apply(sea_material, SEA_OFF)
 			await _settle(map, SETTLE_FRAMES)
-			var before := root.get_viewport().get_texture().get_image()
+			var before := _grab()
 			var motion_off := await _motion(map)
+			if motion_off <= 0.0:
+				push_warning("TB5 shot: %s did not move in %.1f s, the window is probably occluded or throttled: the motion figures are not reliable" % [label, MOTION_SECONDS])
 			_apply(terrain_material, terrain_on)
 			await _settle(map, 8)
-			_band_width(label, before, root.get_viewport().get_texture().get_image(), _footprint(ground.y))
+			_band_width(label, before, _grab(), _footprint(ground.y))
 			_apply(sea_material, sea_on)
 			await _settle(map, 8)
-			_stats(label, before, root.get_viewport().get_texture().get_image())
+			_stats(label, before, _grab())
 			print("TB5 motion %s over %.1f s: %.2f %% of the image without the lot, %.2f %% with it" % [label, MOTION_SECONDS, motion_off, await _motion(map)])
 	quit(0)
+
+
+## Image de la vue. Une fenêtre recouverte n'est plus dessinée sous macOS (l'image lue serait
+## figée) : le dessin est forcé avant la lecture.
+func _grab() -> Image:
+	RenderingServer.force_draw(false)
+	return root.get_viewport().get_texture().get_image()
 
 
 ## Valeurs actuelles (celles des données) des réglages de `off` sur `material`.
@@ -311,11 +320,11 @@ func _frame_ms(map: Node3D) -> float:
 
 ## Part de l'image (%) qui change en `MOTION_SECONDS` secondes (vagues, écume, ressac).
 func _motion(map: Node3D) -> float:
-	var first := root.get_viewport().get_texture().get_image()
+	var first := _grab()
 	var until := Time.get_ticks_msec() + int(MOTION_SECONDS * 1000.0)
 	while Time.get_ticks_msec() < until:
 		await _settle(map, 1)
-	var second := root.get_viewport().get_texture().get_image()
+	var second := _grab()
 	var count := 0
 	var moved := 0
 	for y in range(0, second.get_height(), 3):
@@ -329,7 +338,7 @@ func _motion(map: Node3D) -> float:
 
 
 func _shot(out_dir: String, label: String) -> void:
-	var image := root.get_viewport().get_texture().get_image()
+	var image := _grab()
 	if image.get_width() > WIDTH:
 		image.resize(WIDTH, roundi(image.get_height() * float(WIDTH) / image.get_width()), Image.INTERPOLATE_LANCZOS)
 	var path := out_dir.path_join("%s.png" % label)

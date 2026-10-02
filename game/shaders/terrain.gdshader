@@ -677,7 +677,6 @@ void fragment() {
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
 	}
-	coast_band(p, uv, footprint, coast, lake_shore, snow, col, roughness, n);  // TB5
 
 	// Fond marin (sous le plan d'eau) et lacs.
 	if (hc <= 0.0 || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
@@ -711,6 +710,7 @@ void fragment() {
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
+	coast_band(p, uv, footprint, coast, hc, world_pos.y, lake_shore, snow, col, roughness, n);  // TB5 : après l'eau peinte
 
 	// --- Couche politique ---
 	if (hb_debug > 9.5 && hb_debug < 10.5) { hb_dbg = col; }  // HB3 : sonde

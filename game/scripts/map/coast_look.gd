@@ -198,7 +198,7 @@ static func apply(material: ShaderMaterial, map_size: Vector2i, band: bool = tru
 	if not band:
 		return true
 	var settings: Dictionary = data().get("band", {})
-	for key: String in ["cliff_px", "beach_px", "wet_px", "strength", "relief", "far_keep"]:
+	for key: String in ["cliff_px", "cliff_widen", "sea_reach_px", "beach_px", "wet_px", "strength", "relief", "far_keep"]:
 		if settings.has(key):
 			material.set_shader_parameter("coast_" + key, float(settings[key]))
 	var colors := PackedVector3Array()

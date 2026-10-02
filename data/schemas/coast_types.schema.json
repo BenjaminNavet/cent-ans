@@ -28,10 +28,16 @@
     "band": {
       "description": "Bande côtière : largeur de la falaise et de la plage (pixels carte), estran mouillé, force, relief feint de la falaise, part gardée au dézoom.",
       "type": "object",
-      "required": ["cliff_px", "beach_px", "wet_px", "strength", "relief", "far_keep"],
+      "required": ["cliff_px", "sea_reach_px", "beach_px", "wet_px", "strength", "relief", "far_keep"],
       "additionalProperties": false,
       "properties": {
         "cliff_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 4},
+        "sea_reach_px": {
+          "description": "Distance côté mer de la côte raster jusqu'où le relief émergé (pied de falaise, écueil, banc) est peint en roche ou en sable.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 8
+        },
         "beach_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 4},
         "wet_px": {"type": "number", "minimum": 0, "maximum": 2},
         "strength": {"type": "number", "minimum": 0, "maximum": 1},

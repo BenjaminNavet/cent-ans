@@ -1,11 +1,14 @@
 // Lot TB5 (mer et côtes) : bande côtière du terrain. Un seul crochet dans `terrain.gdshader`
-// (`coast_band`, après l'habillage du sol). Falaise (craie, granite, roche) là où le relief
+// (`coast_band`, après l'eau peinte sur le terrain : la bande n'est plus voilée par elle, et le
+// relief qui émerge côté mer de la côte raster — pied de falaise, écueil, banc de sable — est
+// peint en roche ou en sable au lieu de rester une tache d'eau pâle). Falaise (craie, granite, roche) là où le relief
 // domine le rivage, plage (sable, galets) ailleurs ; la roche et la plage viennent de la région
 // (`coast_common.gdshaderinc`). Matières procédurales : aucun échantillonneur de plus que
 // `coast_types`. Réglages : `data/map/coast_types.json`, posés par `CoastLook.apply`.
 #include "res://shaders/coast_common.gdshaderinc"
 
 uniform float coast_cliff_px = 0.85;   // largeur de la falaise vue de dessus (px carte)
+uniform float coast_sea_reach_px = 3.0; // relief émergé peint jusqu'à cette distance côté mer
 uniform float coast_beach_px = 0.55;   // largeur de la plage
 uniform float coast_wet_px = 0.16;     // estran mouillé
 uniform float coast_strength = 1.0;
@@ -16,19 +19,24 @@ uniform vec3 coast_color[5];
 uniform vec3 coast_shade[5];
 uniform float coast_streak[5];
 
-void coast_band(vec2 p, vec2 uv, float footprint, float coast, float lake_shore, float snow,
+void coast_band(vec2 p, vec2 uv, float footprint, float coast, float hc, float world_y, float lake_shore, float snow,
 		inout vec3 col, inout float roughness, inout vec3 n) {
 	float reach = max(coast_cliff_px * 1.2, coast_beach_px * 3.2);
-	if (!coast_enabled || !has_coast_dist || lake_shore > 0.5 || coast < -0.3 || coast > reach) {
+	if (!coast_enabled || !has_coast_dist || lake_shore > 0.5 || coast > reach) {
+		return;
+	}
+	// Relief émergé côté mer de la côte raster (la carte d'altitude y dépasse le niveau de la mer).
+	float emerged = coast > -coast_sea_reach_px && world_y >= 0.0 ? smoothstep(0.0, 2.0, hc) : 0.0;
+	if (coast < -0.3 && emerged <= 0.0) {
 		return;
 	}
 	vec2 to_land = coast_to_land(uv);
 	float h = height_m_lod(coast_probe_uv(uv, coast, to_land), 0.0);
-	float cliff_f = coast_cliff_factor(h);
+	float cliff_f = max(coast_cliff_factor(h), emerged * smoothstep(6.0, 15.0, hc));
 	vec4 geo = coast_geology(p);
 	float w_rock = max(1.0 - geo.r - geo.g, 0.0);
 	float fine = 1.0 - smoothstep(0.15, 0.7, footprint);  // grain visible de près seulement
-	float shore = smoothstep(-0.25, 0.05, coast);
+	float shore = max(smoothstep(-0.25, 0.05, coast), emerged);
 	float k = coast_strength * mix(1.0, coast_far_keep, smoothstep(1.5, 5.0, footprint));
 
 	// Plage : largeur irrégulière, grain, estran mouillé au ras de l'eau.
@@ -54,13 +62,13 @@ void coast_band(vec2 p, vec2 uv, float footprint, float coast, float lake_shore,
 	vec3 rock_s = coast_shade[0] * w_rock + coast_shade[1] * geo.r + coast_shade[2] * geo.g;
 	float rock_k = coast_streak[0] * w_rock + coast_streak[1] * geo.r + coast_streak[2] * geo.g;
 	float cw = coast_cliff_px * (0.65 + 0.5 * value_noise(p * 1.7)) * mix(0.7, 1.0, smoothstep(coast_cliff_m.y, coast_cliff_m.y * 3.0, h));
-	float t = clamp(coast / max(cw, 1e-3), 0.0, 1.0);  // 0 pied, 1 crête
+	float t = max(clamp(coast / max(cw, 1e-3), 0.0, 1.0), emerged * smoothstep(5.0, 40.0, hc));  // 0 pied, 1 crête
 	float grain = value_noise(p * 5.0) * 0.6 + value_noise(p * 11.0) * 0.4;
 	float strata = value_noise(vec2(t * 6.0, value_noise(p * 0.9) * 3.0));
 	float mottle = mix(0.5, grain * 0.65 + strata * 0.35, fine);
 	float light = clamp((1.0 - rock_k + rock_k * mottle * 1.7) * (0.55 + 0.45 * smoothstep(0.0, 0.45, t)), 0.0, 1.0);
 	vec3 cliff_col = mix(rock_s, rock_c, light);
-	float foot = (1.0 - smoothstep(0.05, 0.22, coast)) * 0.7;  // estran de galets ou de blocs au pied
+	float foot = (1.0 - smoothstep(0.05, 0.22, coast)) * 0.7 * (1.0 - emerged);  // estran de galets ou de blocs au pied
 	cliff_col = mix(cliff_col, mix(beach_col, rock_s, 0.5), foot);
 	cliff_col = mix(cliff_col, swash_foam_color, swash.x * 0.8);  // la lame bat le pied de la falaise
 	float face = shore * (1.0 - smoothstep(cw * 0.7, cw, coast)) * cliff_f;

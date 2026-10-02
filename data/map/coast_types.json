@@ -8,6 +8,7 @@
   },
   "band": {
     "cliff_px": 1.0,
+    "sea_reach_px": 3.0,
     "beach_px": 0.6,
     "wet_px": 0.16,
     "strength": 1.0,
