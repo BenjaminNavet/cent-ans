@@ -67,6 +67,11 @@ static func border_color(heraldic: Color, cue: String) -> Color:
 	return Color.from_hsv(heraldic.h, saturation, value)
 
 
+## Poids de pleine intensité des frontières ennemies face au style « au repos » (TB2).
+static func enemy_border_focus() -> float:
+	return float(tuning().get("border", {}).get("enemy_focus", 0.0))
+
+
 ## Bordure de la plaque d'effectif d'une armée : {color: Color, width: int}.
 static func plate_border(cue: String, fallback: Color, fallback_width: int) -> Dictionary:
 	var plates: Dictionary = tuning().get("army", {}).get("plate", {})

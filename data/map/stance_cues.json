@@ -10,9 +10,10 @@
     "self": "#d9a833",
     "enemy": "#d21f17",
     "friend": "#3a9a42",
+    "enemy_focus": 1.0,
     "other": {
-      "saturation_scale": 0.5,
-      "saturation_max": 0.38,
+      "saturation_scale": 0.75,
+      "saturation_max": 0.5,
       "value_min": 0.45,
       "value_max": 0.8
     }

@@ -267,7 +267,11 @@ func _build_palette() -> void:
 	var image := Image.create(PALETTE_SIZE, 1, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0, 0, 0, 0))
 	for faction: String in _faction_index:
-		image.set_pixel(int(_faction_index[faction]), 0, faction_color(faction))
+		var color := faction_color(faction)
+		if is_enemy(faction):  # EN : alpha < 1 = royaume ennemi, gardé à pleine intensité
+			color.a = 0.5
+		image.set_pixel(int(_faction_index[faction]), 0, color)
+	_set_param("fr1_enemy_focus", StanceCues.enemy_border_focus() if _color_override.is_empty() else 0.0)
 	_palette_texture = ImageTexture.create_from_image(image)
 	_set_param("fr1_palette", _palette_texture)
 
@@ -280,6 +284,11 @@ func faction_color(faction: String) -> Color:
 	if _stances.is_empty():
 		return heraldic
 	return StanceCues.border_color(heraldic, StanceCues.category_of(faction, _player, _stances))  # EN
+
+
+## Lot EN : vrai si `faction` est un ennemi du joueur signalé par les frontières (hors DZ).
+func is_enemy(faction: String) -> bool:
+	return _color_override.is_empty() and not _stances.is_empty() and StanceCues.category_of(faction, _player, _stances) == StanceCues.ENEMY
 
 
 ## Couleur héraldique (SimFacade), palette de repli du terrain sans store.

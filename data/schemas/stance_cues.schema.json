@@ -41,12 +41,13 @@
     "border": {
       "type": "object",
       "description": "Couleur du trait de frontière par catégorie ; « other » garde la couleur héraldique, assourdie.",
-      "required": ["self", "enemy", "friend", "other"],
+      "required": ["self", "enemy", "friend", "enemy_focus", "other"],
       "additionalProperties": false,
       "properties": {
         "self": {"$ref": "#/$defs/color"},
         "enemy": {"$ref": "#/$defs/color"},
         "friend": {"$ref": "#/$defs/color"},
+        "enemy_focus": {"$ref": "#/$defs/unit", "description": "Poids de pleine intensité des frontières ennemies quand la carte est au repos (TB2) : 1 = toujours pleines."},
         "other": {
           "type": "object",
           "required": ["saturation_scale", "saturation_max", "value_min", "value_max"],

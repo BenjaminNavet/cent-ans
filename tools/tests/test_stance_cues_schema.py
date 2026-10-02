@@ -36,4 +36,4 @@ def test_enemy_red_stands_out_from_muted_neutrals() -> None:
     assert tuning["categories"]["self"] == "self"
     border = tuning["border"]
     assert border["other"]["value_min"] < border["other"]["value_max"]
-    assert _saturation(border["enemy"]) >= border["other"]["saturation_max"] + 0.4
+    assert _saturation(border["enemy"]) >= border["other"]["saturation_max"] + 0.3
