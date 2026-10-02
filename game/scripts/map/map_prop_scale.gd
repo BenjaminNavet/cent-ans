@@ -41,6 +41,36 @@ extends Resource
 ## Distance du rig au-delà de laquelle les arbres ne portent plus d'ombre (arbre de 20 m ≈ 3 px
 ## au point visé à d = 10 en 1080p).
 @export var tree_shadow_distance: float = 12.0
+## HC1 (ADR 0161) : arbres généralisés (`map.tree_style = generalised`). Taille monde constante
+## et grossie, indépendante de la distance de caméra : un arbre représente un bois. Hauteur monde
+## (unités, 1 unité = 1 px carte ≈ 0,72 km) d'un feuillu adulte, c'est-à-dire d'un arbre de
+## `generalised_reference_height` unités de modèle (chêne 1,1-1,7) ; maquettes GC : village 2,4,
+## bourg 4,5, ville 8 unités.
+@export var generalised_tree_height: float = 0.7
+@export var generalised_reference_height: float = 1.4
+## Variation relative de taille autour de la hauteur de l'essence (± cette part).
+@export var generalised_size_variation: float = 0.25
+## Pas (px carte) du semis généralisé : la canopée se referme quand il est proche de la largeur
+## d'un houppier.
+@export var generalised_spacing: float = 1.0
+## Portée (distance du rig) des arbres généralisés, fondu sur `generalised_fade` (part finale).
+@export var generalised_max_distance: float = 800.0
+@export var generalised_fade: float = 0.25
+## Distance caméra → tuile en deçà de laquelle les arbres sont en maillage (imposteur au-delà).
+@export var generalised_mesh_distance: float = 60.0
+## Distance du rig au-delà de laquelle les arbres généralisés ne portent plus d'ombre.
+@export var generalised_shadow_distance: float = 120.0
+## Part du rayon de houppier ajoutée aux exclusions (lieux, fleuves, lacs, mer, routes).
+@export var generalised_crown_clearance: float = 1.0
+## Demi-largeur (px carte) dégagée de part et d'autre des routes principales (0 : pas de test).
+@export var generalised_road_clearance: float = 0.35
+## Gains appliqués aux probabilités hors forêt de `tree_species.json` (réglées pour le pas 1:1) :
+## bosquets, arbres isolés et de haie, vergers, ripisylves, garrigue.
+@export var generalised_grove_gain: float = 1.0
+@export var generalised_isolated_gain: float = 1.0
+@export var generalised_orchard_gain: float = 1.0
+@export var generalised_riparian_gain: float = 1.0
+@export var generalised_scrub_gain: float = 1.0
 ## VT2 (ADR 0138, addendum) : moulins, panaches de cheminée (et figurants FK, `map_scenes.json`)
 ## sont à l'échelle 1:1 à toute distance, comme les villes et les hameaux : échelle constante
 ## `*_ratio` × leur taille de modèle, plus d'exagération. Moulin (`WINDMILL_SCALE` 4,6 × modèle) :
@@ -62,6 +92,11 @@ extends Resource
 @export var rewrite_step: float = 0.04
 
 static var _default: MapPropScale = null
+
+## HC1 : style des arbres de la carte (`map.tree_style`, `--tree-style=real|generalised`).
+const TREE_STYLE_REAL := "real"
+const TREE_STYLE_GENERALISED := "generalised"
+static var _tree_style: String = ""
 
 
 ## VT3 : arbres à l'échelle 1:1 à toute distance (`tree_ratio` × leur taille de modèle).
@@ -148,3 +183,25 @@ static func shared() -> MapPropScale:
 		if _default == null:
 			_default = MapPropScale.new()
 	return _default
+
+
+## HC1 (ADR 0161) : style des arbres, `generalised` (défaut des données) ou `real` (arbres 1:1 de
+## VT3) ; `map.tree_style` de `data/ui/campaign_map.json`, remplacé par `--tree-style=` après `--`.
+static func tree_style() -> String:
+	if _tree_style == "":
+		_tree_style = str(ArmyFigures.map_settings().get("tree_style", TREE_STYLE_REAL))
+		for argument in OS.get_cmdline_user_args():
+			if argument.begins_with("--tree-style="):
+				_tree_style = argument.get_slice("=", 1)
+		if _tree_style != TREE_STYLE_GENERALISED:
+			_tree_style = TREE_STYLE_REAL
+	return _tree_style
+
+
+static func trees_generalised() -> bool:
+	return tree_style() == TREE_STYLE_GENERALISED
+
+
+## Tests : force le style ("" : relu des données au prochain appel).
+static func set_tree_style(value: String) -> void:
+	_tree_style = value

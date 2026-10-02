@@ -34,6 +34,10 @@
         "town_style": {
           "description": "GC2 (ADR 0158) : rendu des lieux de la carte de campagne. maquette : maquettes stylisées à taille monde constante (data/art/town_maquettes.json) ; real : villes 1:1 (TownLayer, LandmarkCityLayer, TownFarLayer). `--town-style=real|maquette` le remplace.",
           "enum": ["maquette", "real"]
+        },
+        "tree_style": {
+          "description": "HC1 (ADR 0161) : rendu des arbres de la carte de campagne. generalised : arbres à taille monde constante grossie, visibles jusqu'à la vue stratégique (réglages generalised_* de game/resources/map_prop_scale.tres) ; real : arbres 1:1 coupés au-delà de la distance de rig 30 (VT3). `--tree-style=real|generalised` le remplace.",
+          "enum": ["generalised", "real"]
         }
       }
     },
