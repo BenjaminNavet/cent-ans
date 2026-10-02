@@ -197,7 +197,6 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 	var material: ShaderMaterial = terrain.material
 	var sun := map.get_node_or_null("Sun") as DirectionalLight3D
 	var env := (map.get_node_or_null("WorldEnvironment") as WorldEnvironment).environment
-	var with := _block_luminance(root.get_viewport().get_texture().get_image())
 	var saved := {
 		"medium": view.cloud_medium_alpha, "max": view.cloud_max_alpha,
 		"weather": material.get_shader_parameter("weather_enabled"),
@@ -208,6 +207,8 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		"ssao": env.ssao_enabled, "ssil": env.ssil_enabled, "fog": env.fog_enabled,
 	}
 	for layer: String in ["clouds", "ground_weather", "cloud_shadows", "sun_shadows", "mist", "fog_of_war", "ssao", "ssil", "depth_fog"]:
+		# Image de référence reprise avant chaque calque : la dérive (vent, figurants) ne compte pas.
+		var with := _block_luminance(root.get_viewport().get_texture().get_image())
 		match layer:
 			"clouds":
 				view.cloud_medium_alpha = 0.0
@@ -239,7 +240,7 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		material.set_shader_parameter("cloud_shadow_amount", saved["shadow"])
 		material.set_shader_parameter("weather_mist_max", saved["mist"])
 		sun.shadow_enabled = saved["sun"]
-		material.set_shader_parameter("fog_enabled", saved["fow"])
+		material.set_shader_parameter("fog_enabled", saved["fow"] if saved["fow"] != null else true)
 		env.ssao_enabled = saved["ssao"]
 		env.ssil_enabled = saved["ssil"]
 		env.fog_enabled = saved["fog"]
