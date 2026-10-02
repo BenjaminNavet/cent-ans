@@ -71,13 +71,27 @@ Prérequis : [Rust](https://rustup.rs) stable, [Godot 4.7](https://godotengine.o
 | Linux | `Lancer Cent Ans.sh` |
 | Windows | `Lancer Cent Ans.exe` (ou `Lancer Cent Ans.bat`) |
 
-Le lanceur (`tools/launch.sh`) recompile le cœur Rust si `core/` a changé. Il refait l'import
+Le lanceur (`tools/launch.sh`) se met d'abord à jour si le clone suit la branche `stable`
+(voir « Mises à jour » ci-dessous), puis recompile le cœur Rust si `core/` a changé. Il refait l'import
 headless de Godot si `game/` a changé depuis le dernier import (premier lancement, `git pull`,
 autre version de Godot), télécharge le relief fin s'il manque ou s'il est ancien, puis lance le
 jeu. Il cherche Godot dans la variable `GODOT`, puis dans
 le PATH, puis aux emplacements d'installation habituels. Si Godot est ailleurs :
-`GODOT=/chemin/vers/godot tools/launch.sh`. Options : `--no-build`, `--import` (import forcé),
-`--no-relief` (pas de vérification du relief) et `-- <arguments Godot>`.
+`GODOT=/chemin/vers/godot tools/launch.sh`. Options : `--no-update` (pas de mise à jour),
+`--no-build`, `--import` (import forcé), `--no-relief` (pas de vérification du relief) et
+`-- <arguments Godot>`.
+
+**Mises à jour** (ADR 0159) : la branche `stable` avance toute seule sur chaque commit de `main`
+qui passe le test de démarrage en CI. Un clone placé sur `stable` se met à jour à chaque
+lancement, puis recompile et réimporte ce qui a changé :
+
+```sh
+git clone -b stable https://github.com/BenjaminNavet/cent-ans.git   # nouvelle installation
+git fetch && git switch stable                                      # clone existant, une fois
+```
+
+Sans réseau, ou si un fichier du dépôt a été modifié sur place, le lanceur le signale et lance
+la version installée. Sur une autre branche (`main`, développement), rien n'est mis à jour.
 
 À la main, les mêmes étapes sont :
 
@@ -108,7 +122,7 @@ en gardant son journal affiché.
 2. Dans Git Bash :
 
    ```sh
-   git clone https://github.com/BenjaminNavet/cent-ans.git
+   git clone -b stable https://github.com/BenjaminNavet/cent-ans.git   # se met à jour seul
    cd cent-ans
    core/build-windows.sh                    # facultatif : le lanceur le fait (quelques minutes)
    ```
