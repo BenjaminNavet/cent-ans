@@ -611,8 +611,8 @@
       "id": "chilterns",
       "name": "Hêtraies des Chilterns",
       "kind": "broadleaf",
-      "density": 0.45,
-      "ellipse": { "center": [-0.80, 51.70], "radii_km": [28, 6], "angle_deg": 45 },
+      "density": 0.4,
+      "ellipse": { "center": [-0.75, 51.74], "radii_km": [24, 5], "angle_deg": 45 },
       "source": "Wikipédia (en), « Chiltern Hills » ; O. Rackham, The History of the Countryside (Dent, 1986)"
     },
     {
@@ -1218,15 +1218,6 @@
       "density": 0.75,
       "ellipse": { "center": [32.87, 34.93], "radii_km": [38, 13], "angle_deg": 0 },
       "source": "Wikipédia (fr), « Massif de Tróodos »"
-    },
-    {
-      "id": "arsouf",
-      "name": "Forêt d'Arsouf (chênaie du Sharon)",
-      "kind": "broadleaf",
-      "density": 0.6,
-      "ellipse": { "center": [34.90, 32.30], "radii_km": [22, 6], "angle_deg": 82 },
-      "source": "Itinerarium Peregrinorum et Gesta Regis Ricardi (1191), cf. Wikipédia (en), « Battle of Arsuf »",
-      "note": "Traversée par l'armée de Richard Cœur de Lion en 1191."
     }
   ]
 }

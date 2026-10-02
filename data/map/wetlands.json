@@ -315,10 +315,10 @@
     },
     {
       "id": "scarpe",
-      "name": "Marais de la Scarpe et de la Sensée",
+      "name": "Marais de la Scarpe (Marchiennes, Saint-Amand)",
       "kind": "marsh",
       "density": 0.6,
-      "ellipse": { "center": [3.20, 50.41], "radii_km": [14, 3.5], "angle_deg": 10 },
+      "ellipse": { "center": [3.36, 50.43], "radii_km": [8, 3], "angle_deg": 10 },
       "source": "Wikipédia (fr), « Plaine de la Scarpe »"
     },
     {
