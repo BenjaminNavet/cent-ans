@@ -347,6 +347,17 @@ func _setup_settlements() -> void:
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
+		# HC1 : dégagements des arbres généralisés (lacs, routes principales).
+		var main_roads: Array = []
+		for road: Dictionary in settlement_data.roads:
+			if road["main"]:
+				main_roads.append(road["points"])
+		vegetation.set("clearance_roads", main_roads)
+		if lakes != null:
+			var lake_polygons: Array = []
+			for lake: Dictionary in lakes.lakes:
+				lake_polygons.append(lake["polygon"])
+			vegetation.set("clearance_lakes", lake_polygons)
 		# FC3 : touffes d'herbe et broussailles proches (masque de la végétation, mêmes clairières).
 		var clutter := GroundClutter.new()
 		clutter.name = "GroundClutter"
@@ -1492,7 +1503,8 @@ func _exit_tree() -> void:
 
 
 func _apply_close_tiers(distance: float) -> void:
-	var props := MapPropScale.shared().tree_scale()  # VT3 : arbres 1:1 à toute distance
+	# VT3 : arbres 1:1 à toute distance ; HC1 : taille constante grossie en style généralisé.
+	var props := MapPropScale.shared().map_tree_scale()
 	if absf(props - _prop_scale) > props * 0.01:
 		_prop_scale = props
 		RenderingServer.global_shader_parameter_set("campaign_prop_scale", props)

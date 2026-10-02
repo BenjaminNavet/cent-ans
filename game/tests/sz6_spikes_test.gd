@@ -19,6 +19,8 @@ var _failures := 0
 
 func _init() -> void:
 	await process_frame
+	# HC1 (ADR 0161) : ce test porte sur les arbres 1:1 (style `real`, défaut d'avant HC1).
+	MapPropScale.set_tree_style(MapPropScale.TREE_STYLE_REAL)
 	await _run()
 	ModelLibrary.clear_cache()
 	print("sz6_spikes_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))

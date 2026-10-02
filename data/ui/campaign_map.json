@@ -5,7 +5,8 @@
     "army_scale_exponent": 0.65,
     "town_scale": 1.0,
     "town_style": "maquette",
-    "camera_floor_distance": 20.0
+    "camera_floor_distance": 20.0,
+    "tree_style": "generalised"
   },
   "fog_of_war": {
     "description": "TB2 : brouillard de guerre en voile de parchemin (uniformes fog_* de terrain.gdshader). Le sol hors de vue passe en camaïeu sépia assombri sous un lavis léger ; le relief reste lisible.",
