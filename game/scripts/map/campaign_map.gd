@@ -322,6 +322,8 @@ func _setup_settlements() -> void:
 	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
 	camera_rig.floor_zones = settlement_layer.landmark_floor_zones()  # VH4 : plancher levé (v2)
 	camera_rig.floor_zones_set = true
+	if TownMaquetteData.enabled():  # GC : plus de vue rapprochée sur des maquettes stylisées
+		camera_rig.floor_distance = float(ArmyFigures.map_settings().get("camera_floor_distance", 0.0))
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
 		return settlement_layer.screen_label_rects(view_camera)
@@ -1513,6 +1515,7 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--camera-min="):  # ZG2 : essais et captures seulement (ZG4 : caméra)
 			camera_rig.min_distance = float(arg.trim_prefix("--camera-min="))
 			camera_rig.close_min_distance = camera_rig.min_distance
+			camera_rig.floor_distance = 0.0
 		elif arg == "--static-exaggeration":  # ZG4 : relief ×4,3 à tous les zooms (comparaisons)
 			dynamic_exaggeration = false
 		elif arg.begins_with("--rescale-settle-ms="):  # ZG4 : mesures (délai avant recalage des calques)

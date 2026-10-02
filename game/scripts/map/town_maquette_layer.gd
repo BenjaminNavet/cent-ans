@@ -28,6 +28,7 @@ var _layer: SettlementLayer
 ## Par lieu (index de `SettlementData.settlements`).
 var _factor: PackedFloat32Array = PackedFloat32Array()  # réduction de collision (1 = taille de base)
 var _radius: PackedFloat32Array = PackedFloat32Array()  # demi-largeur (unités monde)
+var _gain: PackedFloat32Array = PackedFloat32Array()  # gain de taille selon le poids du lieu
 var _top: PackedFloat32Array = PackedFloat32Array()  # hauteur au-dessus du sol (unités monde)
 var _range: PackedFloat32Array = PackedFloat32Array()  # portée (distance du rig)
 var _kind: PackedByteArray = PackedByteArray()  # index dans `TownMaquetteData.KINDS`
@@ -69,6 +70,7 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 	var entries: Array[Dictionary] = layer.data.settlements
 	var count := entries.size()
 	_radius.resize(count)
+	_gain.resize(count)
 	_top.resize(count)
 	_range.resize(count)
 	_yaw.resize(count)
@@ -100,7 +102,8 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		var kind := TownMaquetteData.kind_of(entry)
 		_kind[i] = TownMaquetteData.KINDS.find(kind)
 		_range[i] = TownMaquetteData.visibility(kind)
-		_radius[i] = TownMaquetteData.width(kind) * 0.5
+		_gain[i] = TownMaquetteData.weight_gain(kind, float(entry.get("weight", 0)))
+		_radius[i] = TownMaquetteData.width(kind) * 0.5 * _gain[i]
 		_yaw[i] = TownMaquetteData.yaw_of(id)
 		_family[i] = TownMaquetteData.family_of_province(str(entry.get("province", "")))
 		centers[i] = layer.model_px(i)
@@ -136,7 +139,7 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		if _factor[i] < 0.999:
 			reduced += 1
 		_model_of[i] = m
-		_model_scale[i] = TownMaquetteData.model_scale(kind) * _factor[i]
+		_model_scale[i] = TownMaquetteData.model_scale(kind) * _gain[i] * _factor[i]
 		_radius[i] *= _factor[i]
 		_top[i] = float(_model_list[m]["top"]) * _model_scale[i]
 		_color[i] = _model_list[m]["banner"]
@@ -400,6 +403,11 @@ func top_of(i: int) -> float:
 
 
 ## Réduction de collision du lieu `i` (1 = taille de base).
+## Gain de taille du lieu `i` selon son poids (`TownMaquetteData.weight_gain`).
+func gain_of(i: int) -> float:
+	return _gain[i] if i >= 0 and i < _gain.size() else 1.0
+
+
 func factor_of(i: int) -> float:
 	return _factor[i] if i >= 0 and i < _factor.size() else 1.0
 

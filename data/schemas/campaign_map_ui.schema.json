@@ -33,7 +33,16 @@
         },
         "town_style": {
           "description": "GC2 (ADR 0158) : rendu des lieux de la carte de campagne. maquette : maquettes stylisées à taille monde constante (data/art/town_maquettes.json) ; real : villes 1:1 (TownLayer, LandmarkCityLayer, TownFarLayer). `--town-style=real|maquette` le remplace.",
-          "enum": ["maquette", "real"]
+          "enum": [
+            "maquette",
+            "real"
+          ]
+        },
+        "camera_floor_distance": {
+          "description": "GC (ADR 0158) : distance minimale du rig de caméra quand les lieux sont des maquettes stylisées (unités monde) ; 0 = pas de plancher. `--camera-min=<d>` le lève.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200
         }
       }
     },

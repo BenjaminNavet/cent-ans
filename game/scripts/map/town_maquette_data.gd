@@ -107,6 +107,25 @@ static func model_scale(kind: String) -> float:
 	return width(kind) / native if native > 0.0 else 0.0
 
 
+## Gain de taille d'un lieu selon son poids (`weight_gain` : de `min` au poids bas de son type à
+## `max` au poids haut, en racine carrée) ; 1 si le bloc est absent.
+static func weight_gain(kind: String, weight: float) -> float:
+	var block: Dictionary = document().get("weight_gain", {})
+	var bounds: Array = block.get(kind, [])
+	if bounds.size() < 2 or float(bounds[1]) <= float(bounds[0]):
+		return 1.0
+	var t := clampf((weight - float(bounds[0])) / (float(bounds[1]) - float(bounds[0])), 0.0, 1.0)
+	return lerpf(float(block.get("min", 1.0)), float(block.get("max", 1.0)), sqrt(t))
+
+
+## Réglage d'accessoire de la carte généralisée (`props` : hameaux, moulins, fumées grossis avec
+## les maquettes) ; `fallback` (valeur 1:1 de `MapPropScale`) en style `real` ou si la clé manque.
+static func prop(key: String, fallback: float) -> float:
+	if not enabled():
+		return fallback
+	return float((document().get("props", {}) as Dictionary).get(key, fallback))
+
+
 static func landmark_scale() -> float:
 	return float(document().get("landmark_scale", 1.0))
 
