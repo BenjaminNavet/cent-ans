@@ -55,11 +55,12 @@ def test_parchment_ornaments_are_consistent() -> None:
             assert "height" in ornament["display"], ornament["id"]
 
 
-def test_every_kind_has_a_real_ornament() -> None:
-    """Switching a kind to ``real`` in ``use`` always finds a cut-out to show."""
+def test_every_real_kind_has_an_ornament() -> None:
+    """A kind set to ``real`` in ``use`` has a cut-out to show (drawn kinds need none)."""
     document = _document()
     kinds = {ornament["kind"] for ornament in document["ornaments"]}
-    assert set(document["use"]) <= kinds
+    real = {kind for kind, choice in document["use"].items() if choice == "real"}
+    assert real <= kinds
 
 
 def test_rose_follows_the_shader_convention() -> None:

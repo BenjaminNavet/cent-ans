@@ -42,24 +42,6 @@
       "display": {"anchor": [0.5, 0.5]}
     },
     {
-      "id": "ship_ferrer",
-      "kind": "ship",
-      "note": "l'uxer de Jaume Ferrer (parti de Majorque en 1346 vers le « fleuve de l'Or »), voile latine et bannière d'Aragon ; trait renforcé, lavis posés sous l'encre (voile, coque)",
-      "source": "catalan_europe",
-      "file": "ship_ferrer.png",
-      "crop": [460, 3420, 940, 3730],
-      "size": 384,
-      "mask": {"shape": "polygon", "feather": 2, "points": [[494, 3432], [508, 3432], [512, 3444], [600, 3444], [602, 3496], [512, 3496], [512, 3642], [556, 3650], [588, 3600], [566, 3500], [738, 3498], [742, 3455], [764, 3455], [766, 3492], [840, 3486], [900, 3516], [928, 3580], [918, 3632], [906, 3655], [912, 3662], [884, 3690], [850, 3704], [640, 3712], [510, 3722], [476, 3706], [474, 3668], [494, 3648]]},
-      "key": {"low": 0.08, "high": 0.2, "paper_radius": 60, "percentile": 80, "reject_blue": [0.01, 0.05], "ink_gain": 1.8},
-      "tone": [0.72, 0.64, 0.58],
-      "contrast": 1.2,
-      "fills": [
-        {"shape": "polygon", "feather": 2, "colour": [240, 228, 196], "points": [[575, 3503], [640, 3508], [700, 3505], [760, 3495], [830, 3492], [880, 3510], [912, 3545], [920, 3585], [905, 3620], [880, 3632], [850, 3615], [840, 3600], [790, 3590], [730, 3568], [660, 3540], [600, 3515]]},
-        {"shape": "polygon", "feather": 2, "colour": [150, 104, 62], "points": [[480, 3665], [500, 3652], [560, 3662], [640, 3682], [760, 3680], [860, 3668], [905, 3658], [880, 3685], [850, 3698], [640, 3703], [520, 3712], [485, 3700]]}
-      ],
-      "display": {"anchor": [0.5, 0.88], "height": 3.6, "faces": "left"}
-    },
-    {
       "id": "siren_catalan",
       "kind": "monster",
       "note": "sirène à deux queues de la mer des Indes",
