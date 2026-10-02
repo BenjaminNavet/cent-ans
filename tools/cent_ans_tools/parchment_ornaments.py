@@ -7,8 +7,9 @@ ones out of scans of period charts (Catalan Atlas, 1375) and writes them as tran
 - the vellum is removed (`key`): the local paper colour is estimated, a pixel's opacity is its
   colour distance to that paper, and its colour is un-mixed from the paper so that only the ink
   and the paint remain;
-- painted figures keep an opaque body (`core`, or a `mask` without `key`);
-- the blue wave pattern of the Atlas seas can be rejected (`reject_blue`).
+- painted figures keep their opaque body (a `mask` without `key`: polygon with holes);
+- the blue wave pattern of the Atlas seas can be rejected (`reject_blue`), except where blue is
+  painted on purpose (`reject_except`).
 
 Every crop, mask and threshold lives in `data/map/parchment_ornaments.json` (no coordinate in this
 file). Raw scans stay outside the repository; missing ones are downloaded from Wikimedia Commons.
@@ -64,12 +65,11 @@ def smoothstep(low: float, high: float, value: np.ndarray) -> np.ndarray:
 def shape_mask(
     shape: dict, origin: tuple[int, int], size: tuple[int, int]
 ) -> np.ndarray:
-    """Coverage in [0, 1] of a `disk`, `ring` or `polygon` given in source pixels."""
+    """Coverage in [0, 1] of a `disk` or a `polygon` (with holes) given in source pixels."""
     width, height = size
     canvas = Image.new("L", (width, height), 0)
     draw = ImageDraw.Draw(canvas)
-    kind = shape["shape"]
-    if kind == "polygon":
+    if shape["shape"] == "polygon":
         points = [(x - origin[0], y - origin[1]) for x, y in shape["points"]]
         draw.polygon(points, fill=255)
         for hole in shape.get("holes", []):
@@ -78,9 +78,6 @@ def shape_mask(
         cx, cy = shape["center"][0] - origin[0], shape["center"][1] - origin[1]
         radius = shape["radius"]
         draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=255)
-        if kind == "ring":
-            inner = shape["inner_radius"]
-            draw.ellipse((cx - inner, cy - inner, cx + inner, cy + inner), fill=0)
     feather = float(shape.get("feather", 0.0))
     if feather > 0.0:
         # Erode by the feather first so that the soft edge stays inside the shape.
@@ -143,10 +140,6 @@ def cut_out(image: Image.Image, ornament: dict) -> Image.Image:
     colour = rgb
     if "key" in ornament:
         alpha, colour = ink_key(rgb, ornament["key"], (x0, y0))
-        if "core" in ornament:
-            core = shape_mask(ornament["core"], (x0, y0), size)
-            alpha = np.maximum(alpha, core)
-            colour = colour * (1.0 - core[..., None]) + rgb * core[..., None]
     if "mask" in ornament:
         alpha = alpha * shape_mask(ornament["mask"], (x0, y0), size)
     tone = np.asarray(ornament.get("tone", [1.0, 1.0, 1.0]), dtype=np.float32)
@@ -178,23 +171,6 @@ def cut_out(image: Image.Image, ornament: dict) -> Image.Image:
     return Image.fromarray((resized * 255.0 + 0.5).astype(np.uint8), "RGBA")
 
 
-def tileable(image: Image.Image, texture: dict) -> Image.Image:
-    """A seamless grain tile: the crop minus its low frequencies, cross-faded over its edges."""
-    x0, y0, x1, y1 = texture["crop"]
-    grey = np.asarray(image.crop((x0, y0, x1, y1)).convert("L"), dtype=np.float32)
-    grey = grey - ndimage.gaussian_filter(grey, float(texture["flatten_sigma"]))
-    blend = int(texture["blend"])
-    ramp = np.linspace(0.0, 1.0, blend, dtype=np.float32)
-    # Fold each trailing band onto the leading one, then drop it: opposite edges now match.
-    grey[:, :blend] = grey[:, :blend] * ramp + grey[:, -blend:] * (1.0 - ramp)
-    grey = grey[:, :-blend]
-    grey[:blend] = grey[:blend] * ramp[:, None] + grey[-blend:] * (1.0 - ramp[:, None])
-    grey = grey[:-blend]
-    grey = grey / max(float(grey.std()), 1e-6) * float(texture["contrast"])
-    out = Image.fromarray(np.clip(128.0 + grey, 0.0, 255.0).astype(np.uint8), "L")
-    return out.resize((int(texture["size"]),) * 2, Image.LANCZOS)
-
-
 def source_notes(settings: dict) -> str:
     """`SOURCE.md` of the output folder: one entry per produced file."""
     lines = [
@@ -206,9 +182,6 @@ def source_notes(settings: dict) -> str:
         "",
     ]
     entries = [(o["file"], o["source"], o["note"]) for o in settings["ornaments"]]
-    entries += [
-        (t["file"], t["source"], t["note"]) for t in settings.get("textures", [])
-    ]
     for file, source_id, note in entries:
         source = settings["sources"][source_id]
         lines += [
@@ -265,7 +238,7 @@ def commons_licence(title: str) -> dict:
 
 
 def build(raw_dir: Path, out_dir: Path, preview_path: Path | None = None) -> None:
-    """Cuts every ornament and texture of the catalogue and writes `SOURCE.md`."""
+    """Cuts every ornament of the catalogue and writes `SOURCE.md`."""
     settings = load_settings()
     out_dir.mkdir(parents=True, exist_ok=True)
     scans: dict[str, Image.Image] = {}
@@ -281,10 +254,6 @@ def build(raw_dir: Path, out_dir: Path, preview_path: Path | None = None) -> Non
         image.save(out_dir / ornament["file"], optimize=True)
         produced[ornament["file"]] = image
         print(f"wrote {ornament['file']} {image.size}")
-    for texture in settings.get("textures", []):
-        image = tileable(scan(texture["source"]), texture)
-        image.save(out_dir / texture["file"], optimize=True)
-        print(f"wrote {texture['file']} {image.size}")
     (out_dir / "SOURCE.md").write_text(source_notes(settings), encoding="utf-8")
     if preview_path is not None:
         preview(produced, settings["preview_colours"]).save(preview_path)

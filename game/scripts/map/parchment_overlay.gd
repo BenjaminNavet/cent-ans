@@ -256,7 +256,8 @@ func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
 			_blit(_sea_glyphs[0], p, 16.0 * s, a, ship.z < 0.0)
 		else:
 			_sea_layer.add(decor.ship_ornaments[i % decor.ship_ornaments.size()], p, 16.0 * s, a, ship.z > 0.0)
-	for monster in decor.monsters:
+	for i in decor.monsters.size():
+		var monster := decor.monsters[i]
 		var p := _screen_w(Vector3(monster.x, 0.0, monster.y))
 		if not view.has_point(p):
 			continue
@@ -264,7 +265,7 @@ func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
 		if decor.monster_ornaments.is_empty():
 			_blit(_sea_glyphs[1 if monster.z < 0.5 else 2], p, 20.0 * s, a, false)
 		else:
-			_sea_layer.add(decor.monster_ornaments[int(monster.z) % decor.monster_ornaments.size()], p, 20.0 * s, a, false)
+			_sea_layer.add(decor.monster_ornaments[int(monster.z) % decor.monster_ornaments.size()], p, 20.0 * s, a, i % 2 == 1)
 	_sea_layer.queue_redraw()
 
 

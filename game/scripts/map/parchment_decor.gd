@@ -20,11 +20,16 @@ const ORNAMENTS_DIR := "res://assets/textures/parchment/"
 const SEA_SHADER_PATH := "res://shaders/water.gdshader"
 const ROSE_UNIFORM := "pm_rose_tex"
 
-## Navires peints : bande de distance à la côte (px carte) et eau libre exigée autour (px carte).
-const PAINTED_SHIP_COAST := Vector2(30.0, 62.0)
-const PAINTED_SHIP_CLEARANCE := 75.0
-## Distance au centre de la carte qui coûte autant qu'un tirage entier (navires peints).
-const PAINTED_SHIP_FOCUS_PX := 3000.0
+## Navires peints : distance minimale à la côte et eau libre exigée autour (px carte).
+const PAINTED_SHIP_COAST := 30.0
+const PAINTED_SHIP_CLEARANCE := 60.0
+## Pas de la grille des emplacements candidats des navires peints (multiple de `GRID`).
+const PAINTED_SHIP_GRID := GRID * 4
+## Navires peints : poids de l'éloignement du centre de la carte face à l'écart aux autres
+## ornements (0 = répartition uniforme, bords de carte compris).
+const PAINTED_SHIP_CENTER_BIAS := 0.25
+## Écart aux autres ornements au-delà duquel un emplacement n'est plus mieux noté (px carte).
+const PAINTED_SHIP_SPACING := 700.0
 const PAINTED_MONSTER_CLEARANCE := 120.0
 const COAST_MARGIN_PX := 8.0
 
@@ -64,9 +69,8 @@ static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 			var jitter := _hash(x, y)
 			if c <= -OPEN_SEA_PX:
 				open_sea.append([-c + jitter * 8.0, Vector2(x, y)])
-			elif painted_ships and c < -PAINTED_SHIP_COAST.x and c > -PAINTED_SHIP_COAST.y:
-				# Peu nombreux et grands : d'abord les mers du cœur de la carte.
-				near_sea.append([jitter * 0.3 - Vector2(x, y).distance_to(Vector2(map.size) * 0.5) / PAINTED_SHIP_FOCUS_PX, Vector2(x, y)])
+			if painted_ships and c < -PAINTED_SHIP_COAST and x % PAINTED_SHIP_GRID == 0 and y % PAINTED_SHIP_GRID == 0:
+				near_sea.append([jitter, Vector2(x, y)])
 			elif not painted_ships and c < -10.0 and c > -30.0:
 				near_sea.append([jitter, Vector2(x, y)])
 	open_sea.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
@@ -97,10 +101,31 @@ static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 				break
 	# Navires : près des côtes, espacés, cap tiré au sort.
 	var ship_taken: Array[Vector2] = monster_taken.duplicate()
+	if painted_ships:
+		# Peu nombreux et grands : répartis au plus loin les uns des autres (et des roses et des
+		# monstres), le cœur de la carte d'abord.
+		var spots: Array[Vector2] = []
+		for entry in near_sea:
+			if _clear_water(sea_at, entry[1], PAINTED_SHIP_CLEARANCE):
+				spots.append(entry[1])
+		while decor.ships.size() < 9 and not spots.is_empty():
+			var best := -1
+			var best_score := -INF
+			for i in spots.size():
+				var nearest := INF
+				for q in ship_taken:
+					nearest = minf(nearest, spots[i].distance_squared_to(q))
+				var score := minf(sqrt(nearest), PAINTED_SHIP_SPACING) - spots[i].distance_to(center) * PAINTED_SHIP_CENTER_BIAS
+				if score > best_score:
+					best_score = score
+					best = i
+			var p := spots[best]
+			spots.remove_at(best)
+			ship_taken.append(p)
+			decor.ships.append(Vector3(p.x, p.y, (1.0 if _hash(int(p.x), int(p.y) + 7) > 0.5 else -1.0)))
+		return decor
 	for entry in near_sea:
 		var p: Vector2 = entry[1]
-		if painted_ships and not _clear_water(sea_at, p, PAINTED_SHIP_CLEARANCE):
-			continue
 		if _far_from(p, ship_taken, 330.0):
 			ship_taken.append(p)
 			decor.ships.append(Vector3(p.x, p.y, (1.0 if _hash(int(p.x), int(p.y) + 7) > 0.5 else -1.0)))

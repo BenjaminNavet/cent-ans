@@ -216,6 +216,19 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   (réglages `data/fx/fire_flipbooks.json`) en `game/assets/textures/fx/flame_flipbook.png` et
   `smoke_flipbook.png`.
 
+### Ornements de portulan de la vue parchemin — domaine public (FA6)
+
+- **Atlas catalan** (attribué à Abraham Cresques, Majorque, 1375 ; Bibliothèque nationale de
+  France, Espagnol 30), numérisations de Wikimedia Commons marquées « Public domain » :
+  [1375 Atlas Catalan, Europe 01](https://commons.wikimedia.org/wiki/File:1375_Atlas_Catalan,_Europe_01.jpg)
+  (rose des vents),
+  [Catalan Atlas BNF, sheet 10](https://commons.wikimedia.org/wiki/File:Catalan_Atlas_BNF,_sheet_10.jpg)
+  (nef de la mer des Indes),
+  [Taprobane in the Catalan Atlas (1375)](https://commons.wikimedia.org/wiki/File:Taprobane_in_the_Catalan_Atlas_(1375).jpg)
+  (sirène). Ornements détourés (vélin retiré) par `tools/cent_ans_tools/parchment_ornaments.py`
+  (découpes `data/map/parchment_ornaments.json`) : `game/assets/textures/parchment/` (détail
+  dans son `SOURCE.md`).
+
 ### Détail proche du sol de bataille — CC0 1.0
 
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Grass Path 2 (Rob Tuytel), 2k,
