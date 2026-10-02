@@ -75,7 +75,8 @@
             "far_houses",
             "brighten",
             "aging",
-            "shore_reach_far"
+            "shore_reach_far",
+            "suburb_sign"
           ],
           "properties": {
             "real_below": {
@@ -209,6 +210,26 @@
               "description": "Distance maximale (unités) de la grève où un port se pose de loin.",
               "type": "number",
               "minimum": 0
+            },
+            "suburb_sign": {
+              "description": "Signe d'un quartier de faubourg ajouté, de loin : maquette et largeur à l'écran (part de la hauteur d'écran).",
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "model",
+                "fraction"
+              ],
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "pattern": "^[a-z]+_[a-z0-9]+$"
+                },
+                "fraction": {
+                  "type": "number",
+                  "minimum": 0.02,
+                  "maximum": 0.2
+                }
+              }
             }
           }
         },

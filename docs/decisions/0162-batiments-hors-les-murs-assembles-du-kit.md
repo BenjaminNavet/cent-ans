@@ -19,8 +19,8 @@ moteur n'ayant pas de niveau par bâtiment.
   recettes `low` du kit (chaumière, longère, grange, maison de pierre, église, manoir, halle,
   moulins, meule, puits) et de pièces procédurales écrites avec les mêmes primitives (rangs de
   vigne, œillets, jetée, grue, manège et chevalement, cloître, étals, tentes, barques,
-  échafaudage). Niveau 1 : un bâtiment ; niveau 3 : un petit domaine. 154 à 2 438 triangles
-  (plafonds 800 / 1 800 / 3 500). Une seule surface `Building` par maquette : même matériau atlas
+  échafaudage). Niveau 1 : la pièce signature ; niveau 3 : un ensemble riche. 104 à 1 555
+  triangles (plafonds 800 / 1 800 / 3 500 ; signes de colonie ≤ 6 000). Une seule surface `Building` par maquette : même matériau atlas
   et même usure (ADR 0136) que les villes, donc « une seule main ».
 - **GA3 écarté** : albédo cuit par modèle, pas de pose par le shader de relief
   (`campaign_display_height`), un matériau par modèle. **Modèles CC0 tiers écartés** : le kit
@@ -34,8 +34,8 @@ moteur n'ayant pas de niveau par bâtiment.
 - **Taille tenue à l'écran** (amendement, `render.screen`) : l'échelle réelle de l'ADR 0138 ne
   vaut plus que de près (distance du rig ≤ `real_below` = 10). À partir de `full_from` = 15, chaque
   maquette hors les murs garde une largeur d'écran selon son niveau (`fractions` de la hauteur de
-  l'écran : 4,2 %, 5,8 %, 7,7 %, soit 38, 52 et 69 px au centre d'un écran de 900 px ; ≥ 28 px
-  autour du point visé une fois la perspective comptée ; niveau 3 = 1,83 × niveau 1) : son
+  l'écran : 4,4 %, 6 %, 8 %, soit 40, 54 et 72 px au centre d'un écran de 900 px ; ≥ 28 px
+  autour du point visé une fois la perspective comptée ; niveau 3 = 1,82 × niveau 1) : son
   grossissement est proportionnel à la distance du rig, comme les figurines FK et les fosses de
   TB4. Fondu de sortie entre `fade_from_units` = 120 et `view_range_units` = 160. Les faubourgs
   ajoutés grossissent de même (quartier entier, depuis son départ sur la route) ; l'enceinte
@@ -61,8 +61,31 @@ moteur n'ayant pas de niveau par bâtiment.
   maquette qui ne tient pas est retirée à ce palier, et au-delà de `minor_until` = 60 seules les
   cités et les villes gardent les leurs. Mise en place gardée par colonie tant que ses maquettes
   ne changent pas.
+- **Maquettes redessinées en signes en volume** (troisième passe, après lecture des captures) :
+  les premiers domaines « réalistes » (petits bâtiments sur une grande emprise) ne se lisaient
+  pas à 40-70 px. Chaque maquette est maintenant faite de quelques pièces grosses et hautes avec
+  une silhouette propre (ailes du moulin, roue, clocher, halle et étals de couleur, grue et nef
+  à voile, chevalement et terril, bassins blancs, rangs de vigne), bâtiments du kit agrandis
+  (× 1,3 à 2), pièces hautes au fond, basses devant ; volumes relevés de 30 % de loin
+  (`screen.vertical`), teintes éclaircies (`brighten`), usure réduite (`aging`), façade tournée
+  vers la caméra de jeu (vue du sud), ou vers l'eau pour un port (± 70° au plus).
+- **Signe de colonie** (`screen.signs`, maquettes `sign_village`, `sign_town`, `sign_walled`,
+  `sign_city`, `sign_castle`) : de loin la ville 1:1 n'est qu'une empreinte ; une maquette tenue
+  à l'écran la recouvre (toits serrés, église, enceinte et tours si la ville est murée), plus
+  grosse que toute maquette hors les murs (cité 11,5 % de la hauteur d'écran). Elle n'apparaît
+  que si elle dépasse la ville réelle (jamais sur une cité emblématique vue de près) et s'efface
+  sous 15. C'est un **second écart à l'ADR 0138**, de même nature que le premier : la ville 1:1
+  reste la ville de près, le signe la relaie aux distances de jeu. `signs: {}` le retire.
+- **Pose par pièce sur le relief** : une maquette tenue à l'écran couvre plusieurs kilomètres ;
+  posée à l'altitude de son centre, elle était enterrée dans les versants. Le manifeste liste
+  les pièces rigides de chaque maquette (`pieces`, écrites par le script Blender) ; Godot écrit
+  le centre de sa pièce dans `CUSTOM0` de chaque sommet et `town_building.gdshader` (`drape`) lit
+  la heightmap du terrain sous ce centre. `drape` suit la part de tenue à l'écran (0 de près).
+- **Port à la côte** : de loin, le port se pose sur la grève la plus proche (`shore_reach_far`
+  = 12 unités), même si la ville n'est pas au bord de l'eau ; sinon dans l'anneau.
 - **Brouillard de guerre** : rien n'est posé (maquettes, faubourgs, enceinte ajoutée) dans une
-  province hors de vue (`ArmyMarkers.hidden_provinces`, rempli par `MinimapController`).
+  province hors de vue (`ArmyMarkers.hidden_provinces`, rempli par `MinimapController`) ; la
+  ville garde son signe (elle reste connue du joueur).
 - **Rendu** : `OutbuildingLayer`, un `MultiMesh` par maillage pour tout le voisinage de la caméra
   (au plus un appel de dessin par maquette distincte), hauteurs de base en mètres posées par
   `town_building.gdshader`. Site calculé une fois par famille et par colonie (secteur propre à la

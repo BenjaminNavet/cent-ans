@@ -972,6 +972,23 @@ def sign_village(g) -> None:
     houses(g, 1312, 7, 30.0, [(0, 6, 13.0)], roofs=("Thatch", "Thatch", "RoofTile"))
 
 
+def sign_suburb(g) -> None:
+    """Suburb quarter added by a growing town: two short rows of houses along a road (+Y)."""
+    for n, (x, y, length) in enumerate(
+        [
+            (-8, -12, 12),
+            (8, -11, 11),
+            (-8, 2, 11),
+            (8, 3, 13),
+            (-8, 15, 12),
+            (8, 16, 10),
+        ]
+    ):
+        house(
+            g, x, y, 90, length, 7.0, 6.0 + (n % 3), "RoofTile" if n % 3 else "Thatch"
+        )
+
+
 def sign_town(g) -> None:
     """Open town: church and tight tiled roofs."""
     put(g, "church", 1321, 2, 8, s=1.05)
@@ -1047,6 +1064,7 @@ MODELS = {
 # Settlement signs (ADR 0162): one model per kind, named ``sign_<kind>``.
 SIGNS = {
     "village": sign_village,
+    "suburb": sign_suburb,
     "town": sign_town,
     "walled": sign_walled,
     "city": sign_city,

@@ -27,28 +27,45 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0162-…` (choix de
 - [x] 4. `tb3_shot.gd` : distances 20, 45, 90 ; paire `-avant` / `-apres` par cadrage.
 - [x] `tb3_growth_test` : 6 étapes (largeurs projetées, recouvrements, brouillard, suie bornée).
 
-## Mesures (02/10, machine chargée à 140)
-- `tb3_growth_test` OK (6 étapes). Largeurs autour du point visé, en 900 px de haut : 28,8 à
-  60,1 px à 20 ; 32,4 à 67,1 px à 45 ; 33,1 à 65,8 px à 90 ; niveau 3 = 1,83 × niveau 1 ; aucune
-  paire en recouvrement (30, 60 et 27 maquettes posées) ; 6 maquettes sur 6 autour d'Agen.
-- Appels de dessin (`tb3_shot.gd --bench`), couche masquée → affichée : d = 20 : 643 → 679 ;
-  d = 45 : 449 → 490 ; d = 90 : 478 → 499 ; d = 400 : 398 → 398. Temps par image : dans le bruit.
-- Mise en place d'un voisinage : 0,2 à 0,6 s réelles par tranches de 1,5 ms (9 à 64 colonies).
-- pytest complet (avant les retouches) : 1489 réussis, 5 échecs étrangers au lot
-  (`test_entity_icons` ×2, `test_ink_icons`, `test_relief_update`, `test_water_detail`).
+## Troisième passe : jugement visuel sur captures (02/10, nuit ; 16 lectures sur 30)
+- [x] Maquettes redessinées en signes en volume (`tb3_outbuildings.py`) : pièces grosses et
+      hautes, une silhouette par famille ; 24 maquettes + chantier, 104 à 1 555 triangles.
+- [x] Signes de colonie (`sign_village`, `sign_town`, `sign_walled`, `sign_city`, `sign_castle`,
+      `sign_suburb`) tenus à l'écran par-dessus la ville 1:1 (`screen.signs`, `suburb_sign`).
+- [x] Pose par pièce sur le relief (`pieces` du manifeste, `with_pieces`, `drape` du shader).
+- [x] Volumes relevés (× 1,3), teintes éclaircies, façade vers la caméra ; port à la côte.
+- [x] `game/tests/tb3_catalogue_shot.gd` (planche catalogue) ; `tb3_shot.gd` pleine résolution,
+      planche par ville, troisième ville côtière (La Rochelle : port et saline de niveau 3).
+- Planches finales (hors dépôt) : `~/.cache/cent_ans/tb/tb3/tb3-catalogue.png`,
+  `tb3-catalogue-z2.png`, `tb3-planche-set_agen.png`, `tb3-planche-set_fleurance.png`,
+  `tb3-planche-set_la_rochelle.png` (+ captures entières `tb3-<id>-<d>-avant|apres.png`).
 
-## Points ouverts
-- Largeur tenue d'après la distance du rig : le fond de l'image est plus petit (perspective) ;
-  28 px garantis autour du point visé seulement.
-- « Échelle réelle sous 15 » de la demande : réelle sous 10, fondu de 10 à 15 (sinon saut de
-  taille à 15). Réglable (`real_below`, `full_from`).
-- Régions denses : les maquettes sans place manquent au palier ; villages, châteaux et abbayes
-  n'en ont plus au-delà de 60 (`minor_until`).
-- D'un palier de distance à l'autre, une maquette peut changer d'angle autour de sa ville.
-- Maquettes grossies posées à l'altitude de leur centre : sur relief marqué, un bord peut
-  flotter ou s'enfoncer. À juger sur capture.
-- Suie d'une prise (saccage, assaut) : en mémoire de session seulement (pas d'état dans `core/`).
-- Règles de niveau (fermes, salines, mines sans bâtiment propre) : à juger en partie pilote.
+## Mesures (02/10, nuit)
+- `tb3_growth_test` OK (6 étapes) : largeurs autour du point visé, en 900 px de haut : 34,5 à
+  62,1 px à 20 ; 29,7 à 62,2 px à 45 ; 29,6 à 64,2 px à 90 ; aucune paire en recouvrement ;
+  6 maquettes sur 6 autour d'Agen ; sous brouillard, la ville ne garde que son signe.
+- `smoke`, `settlements_render_test`, `tb1_seasons_test`, `sz4b_colonies_forests_test`,
+  `tf_far_shader_test` OK ; pytest du schéma 11/11. `tb2_declutter_test` échoue (étiquettes
+  coupées au bord) avec et sans `--no-tb3` : pas ce lot.
+- Appels de dessin (`tb3_shot.gd --bench`, Agen), couche masquée → affichée : d = 20 : 642 → 692 ;
+  d = 45 : 449 → 528 ; d = 90 : 478 → 506 ; d = 400 : 398 → 398. Temps par image inchangé
+  (16,7 ms, synchro verticale). Mise en place d'un voisinage : 0,4 à 0,9 s étalées.
+
+## Points ouverts (jugement après lecture des planches)
+- Mine : la moins lisible des huit familles (terril gris, bouche noire, tour à roue) ; se
+  confond de loin avec un four. Vue seulement en catalogue, pas en situation.
+- Murs des bâtiments du kit bruns plutôt que clairs (textures de l'atlas) : les toits rouges et
+  les étals portent la lecture, pas les murs.
+- Signe de cité dominé par l'ardoise grise ; ville saccagée (suie) très sombre.
+- Grands volumes : un clocher peut masquer la maquette derrière lui (pas de recouvrement au sol,
+  mais à l'écran en plongée).
+- Port tourné vers l'eau à ± 70° de la caméra au plus : jetées pas toujours dans l'axe de l'eau.
+- Largeur tenue d'après la distance du rig : fond de l'image plus petit (perspective).
+- « Échelle réelle sous 15 » : réelle sous 10, fondu de 10 à 15.
+- Régions denses : maquettes sans place retirées au palier ; villages, châteaux et abbayes n'ont
+  plus que leur signe au-delà de 60 (`minor_until`).
+- Signe de colonie = second écart à l'ADR 0138 (ADR 0162) ; `signs: {}` le retire.
+- Suie d'une prise : mémoire de session seulement. Règles de niveau : à juger en partie pilote.
 - Coût CPU de la mise en place à mesurer sur machine calme.
 
 ## Relevé de départ

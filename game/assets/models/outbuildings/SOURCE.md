@@ -12,4 +12,7 @@
   pour moulins, salines et ports, route pour les marchés). Une seule surface `Building` par
   modèle (couche de l'atlas dans l'alpha de la couleur de sommet, comme `town_kit/`).
 - `manifest.json` : famille, niveau, rayon d'emprise, longueur, profondeur, hauteur (m),
-  triangles. `worksite_1` : chantier (lot TB3, point 6).
+  triangles, pièces rigides (`pieces` : centre x, z puis boîte en plan, pour la pose par pièce
+  sur le relief). `worksite_1` : chantier (lot TB3, point 6). `sign_*` : signes de colonie
+  (village, ville, ville murée, cité, château, quartier de faubourg), tenus à l'écran de loin.
+- Ce sont des **signes en volume** (ADR 0162) : pièces grosses et hautes, lues à 40-70 px.

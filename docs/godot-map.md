@@ -1876,7 +1876,7 @@ Rendu seulement ; les règles restent dans `core/`. Données : `data/map/buildin
   couche.
 - **Taille tenue à l'écran** (`render.screen`, ADR 0162) : échelle réelle sous `real_below` (10) ;
   à partir de `full_from` (15) chaque maquette garde une largeur d'écran selon son niveau
-  (`fractions` : 4,2 %, 5,8 %, 7,7 % de la hauteur d'écran, soit 38 / 52 / 69 px au centre en
+  (`fractions` : 4,4 %, 6 %, 8 % de la hauteur d'écran, soit 40 / 54 / 72 px au centre en
   900 px), son grossissement suivant la distance du rig (`model_factor`) ; fondu de sortie de
   `fade_from_units` (120) à `view_range_units` (160). De loin, les maquettes s'écartent de la
   ville dans la même proportion (`_layout`, `_far_spot`) : anneau au bord de la ville dans la
@@ -1889,6 +1889,18 @@ Rendu seulement ; les règles restent dans `core/`. Données : `data/map/buildin
   depuis son départ sur la route (`house_fraction`) ; enceinte ajoutée : tracé inchangé,
   épaisseur tenue à l'écran (`wall_fraction`, au plus `wall_max_share` du rayon), tours
   éclaircies.
+- **Signes en volume** : maquettes faites de quelques pièces grosses et hautes, une silhouette
+  par famille ; de loin, volumes relevés (`screen.vertical`), teintes éclaircies (`brighten`),
+  usure réduite (`aging`), façade vers la caméra de jeu (ou vers l'eau pour un port, posé sur la
+  grève la plus proche à `shore_reach_far` unités au plus).
+- **Signe de colonie** (`screen.signs` par genre : `sign_village`, `sign_town` / `sign_walled`,
+  `sign_city`, `sign_castle`, abbaye) : maquette tenue à l'écran qui recouvre la ville 1:1 dès
+  que celle-ci est plus petite qu'elle ; l'anneau des maquettes et les faubourgs ajoutés partent
+  de son bord ; l'enceinte ajoutée passe par la variante murée. Gardé sous le brouillard.
+- **Pose par pièce** : `manifest.json` liste les pièces rigides de chaque maquette (`pieces`) ;
+  `OutbuildingLayer.with_pieces` écrit le centre de sa pièce dans `CUSTOM0` de chaque sommet et
+  `town_building.gdshader` (`drape`, `drape_heightmap` = heightmap du terrain) pose chaque pièce
+  sur le sol sous son centre : rien d'enterré dans un versant.
 - **Brouillard de guerre** : rien n'est posé dans une province hors de vue
   (`ArmyMarkers.hidden_provinces` ; `OutbuildingLayer.fog_source`, `is_hidden(id)`).
 - **Croissance de la ville 1:1** (`TownGrowth`, mêmes `MultiMesh`) : quartiers de faubourg (maisons
@@ -1904,19 +1916,20 @@ Rendu seulement ; les règles restent dans `core/`. Données : `data/map/buildin
 - **Chantier** : `ConstructionMarkers` pose la maquette `worksite_1` (taille constante à l'écran,
   couche « Signes ») ; la cité en chantier reçoit aussi un chantier parmi ses maquettes.
 
-Mesures (`game/tests/tb3_shot.gd --bench`, M4 Pro, 1600 × 900, Agen, états imposés, machine
-partagée à une charge de 140 : seuls les appels de dessin sont exploitables), couche masquée →
-affichée : d = 20 : 643 → 679 appels de dessin (14 instances, 11 nœuds, ombres comprises) ;
-d = 45 : 449 → 490 (177 instances, 22 nœuds) ; d = 90 : 478 → 499 (218 instances, 25 nœuds) ;
-d = 400 : 398 → 398 (hors de portée). Temps par image avec / sans la couche : 32,9 / 33,0 ms à
-20, 25,1 / 25,0 à 45, 25,3 / 25,1 à 90 (dans le bruit). Mise en place d'un voisinage (hors
-image, par tranches de 1,5 ms, temps réel sous cette charge) : 0,2 à 0,6 s pour 9 à 64 colonies ;
-lecture groupée de l'état 8 ms par changement d'état. Largeurs à l'écran (`tb3_growth_test`,
-autour du point visé, en 900 px de haut) : 28,8 à 60,1 px à 20 ; 32,4 à 67,1 px à 45 ; 33,1 à
-65,8 px à 90 ; aucune paire en recouvrement. À refaire sur machine calme.
+Mesures (`game/tests/tb3_shot.gd --bench`, M4 Pro, 1600 × 900, Agen, états imposés), couche
+masquée → affichée : d = 20 : 642 → 692 appels de dessin (23 instances, 15 nœuds, ombres
+comprises) ; d = 45 : 449 → 528 (196 instances, 26 nœuds) ; d = 90 : 478 → 506 (282 instances,
+31 nœuds) ; d = 400 : 398 → 398 (hors de portée). Temps par image inchangé (16,7 ms, synchro
+verticale). Mise en place d'un voisinage (hors image, par tranches de 1,5 ms) : 0,4 à 0,9 s
+pour 9 à 64 colonies ; lecture groupée de l'état 6 à 10 ms par changement d'état. Largeurs à
+l'écran (`tb3_growth_test`, autour du point visé, en 900 px de haut) : 34,5 à 62,1 px à 20 ;
+29,7 à 62,2 px à 45 ; 29,6 à 64,2 px à 90 ; aucune paire en recouvrement.
 Captures de contrôle : `godot --path game --resolution 1600x900 --script res://tests/tb3_shot.gd
--- --out=<dossier>` : Agen et Fleurance aux distances 20, 45 et 90, chaque cadrage en
-`-avant.png` (sans le lot) et `-apres.png`.
+-- --out=<dossier>` : Agen, Fleurance et La Rochelle (port, saline) aux distances 20, 45 et 90,
+chaque cadrage en `-avant.png` (sans le lot) et `-apres.png`, plus une planche par ville
+(`tb3-planche-<id>.png`). Planche catalogue des maquettes sur sol neutre, à leur taille d'écran :
+`godot --path game --resolution 1600x900 --script res://tests/tb3_catalogue_shot.gd --
+--out=<dossier> [--zoom=2]`.
 
 ## Interface des colonies (lot C5)
 

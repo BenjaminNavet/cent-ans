@@ -667,6 +667,7 @@ func _instances_of(i: int) -> Array:
 		out = _layout(i, out, growth, _build_top, sign)
 		if not sign.is_empty():
 			out.append(sign)
+			out.append_array(_quarter_signs(i, center, growth, sign))
 	out.append_array(growth)
 	return out
 
@@ -721,6 +722,52 @@ func _sign_instance(i: int, center: Vector2, growth: Array) -> Dictionary:
 		inst["sign_built"] = float(sign["built"])
 		inst["c"] = center
 	return sign
+
+
+## Quartiers de faubourg ajoutés, de loin : un petit groupe de maisons (`screen.suburb_sign`) par
+## quartier, au bord du signe de la ville, sur la route de sa porte ; les maisons du quartier
+## elles-mêmes (trop petites, même grossies) sont alors masquées.
+func _quarter_signs(i: int, center: Vector2, growth: Array, sign: Dictionary) -> Array:
+	var rule: Dictionary = screen_config(config).get("suburb_sign", {})
+	var shape: Dictionary = manifest.get(str(rule.get("model", "")), {})
+	var out: Array = []
+	if shape.is_empty():
+		return out
+	var seen := {}
+	for inst: Dictionary in growth:
+		if str(inst.get("grow", "")) != "house":
+			continue
+		inst["quarter_sign"] = true
+		var q := int(inst["quarter"])
+		if seen.has(q):
+			continue
+		seen[q] = true
+		var dir: Vector2 = inst["quarter_dir"]
+		var width := maxf(float(shape.get("length", 30.0)), float(shape.get("depth", 30.0)))
+		out.append({
+			"key": "out:" + str(rule["model"]),
+			"settlement": i,
+			"family": "suburb_sign",
+			"level": q + 1,
+			"model": str(rule["model"]),
+			"px": center,
+			"real_px": center,
+			"c": center,
+			"dir": dir,
+			"yaw": atan2(dir.x, dir.y),
+			"base_m": _base_m(center),
+			"scale": Vector3.ONE,
+			"grow": "quarter",
+			"tint": 0.5 + float(screen_config(config).get("brighten", 0.0)),
+			"width_m": width,
+			"radius_m": float(shape.get("radius", 20.0)),
+			"fraction": float(rule.get("fraction", 0.04)),
+			"sign_share": float(inst.get("sign_share", 0.0)),
+			"sign_built": float(sign["built"]),
+			"top": float(shape.get("height", 12.0)),
+			"reach": float(shape.get("radius", 20.0)),
+		})
+	return out
 
 
 ## Rayon (unités) du signe d'une colonie à la distance `rig_distance` ; 0 s'il n'est pas affiché
@@ -1138,7 +1185,10 @@ func _layout(i: int, models: Array, growth: Array, top: float, sign: Dictionary 
 		var along := half
 		while along < length + half:
 			if sign_top > 0.0:
-				_disc_add({"c": center, "dir": quarter[1], "edge": 0.0, "off": sign_top + along, "r": half})
+				var rule: Dictionary = screen_config(config).get("suburb_sign", {})
+				var reach := float(rule.get("fraction", 0.04)) * view_span(top, _fov) * 0.75
+				_disc_add({"c": center, "dir": quarter[1], "edge": 0.0, "off": sign_top + reach, "r": reach})
+				break
 			else:
 				_disc_add({"c": quarter[0], "dir": quarter[1], "edge": 0.0, "off": along, "r": half})
 			along += half * 1.6
@@ -1238,6 +1288,13 @@ func _place(inst: Dictionary) -> void:
 			var factor := float(inst["fraction"]) * view_span(d, _fov) * _mpu / float(inst["width_m"]) * blend
 			inst["factor"] = factor
 			inst["draw_scale"] = Vector3(factor, factor * float(screen.get("sign_vertical", 1.0)), factor) if radius > 0.0 and blend > 0.0 else Vector3.ONE * 1e-3
+		"quarter":
+			var width := float(inst["fraction"]) * view_span(d, _fov)
+			var factor := width * _mpu / float(inst["width_m"]) * blend
+			px = (inst["c"] as Vector2) + (inst["dir"] as Vector2) * (sign_r + float(inst["radius_m"]) * factor / _mpu)
+			inst["factor"] = factor
+			inst["draw_yaw"] = float(inst["yaw"])
+			inst["draw_scale"] = Vector3(factor, factor * float(screen.get("vertical", 1.0)), factor) if sign_r > 0.0 and blend > 0.0 else Vector3.ONE * 1e-3
 		"house":
 			var factor := lerpf(1.0, _house_factor_full(d), blend)
 			var origin: Vector2 = inst["origin"]
@@ -1247,7 +1304,7 @@ func _place(inst: Dictionary) -> void:
 			inst["factor"] = factor
 			inst["draw_scale"] = (inst["scale"] as Vector3) * Vector3(factor, factor * lerpf(1.0, float(screen.get("vertical", 1.0)), blend), factor)
 			# De loin, un quartier se résume à ses premières maisons, plus grosses.
-			if blend >= 0.5 and int(inst.get("rank", 0)) >= int(screen.get("far_houses", 99)):
+			if blend >= 0.5 and (int(inst.get("rank", 0)) >= int(screen.get("far_houses", 99)) or (sign_r > 0.0 and bool(inst.get("quarter_sign", false)))):
 				inst["draw_scale"] = Vector3.ONE * 1e-3
 		"wall":
 			var shape: Dictionary = inst["shape"]

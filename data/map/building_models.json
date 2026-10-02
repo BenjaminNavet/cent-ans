@@ -58,7 +58,11 @@
       "far_houses": 6,
       "brighten": 1.4,
       "aging": 0.2,
-      "shore_reach_far": 12.0
+      "shore_reach_far": 12.0,
+      "suburb_sign": {
+        "model": "sign_suburb",
+        "fraction": 0.04
+      }
     }
   },
   "families": {
