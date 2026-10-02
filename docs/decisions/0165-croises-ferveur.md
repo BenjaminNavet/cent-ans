@@ -29,3 +29,18 @@ Mamelouks. Trois voies : (a) une faction sans terre du tout, (b) découper une n
   seule croisade à la fois (un seul état).
 - Faction uchronique : données marquées `uncertain` avec note, à l'écart de l'audit historique.
 - 0 $ : armes et portrait par les moyens existants sans génération payante.
+
+## Ajouts d'équilibrage (JR4, JR4b)
+
+- **Vœu de l'IA** : menée par l'IA, la faction des règles ne fait pas la paix avec le maître de la
+  province cible (le joueur reste libre, au prix de la ferveur).
+- **Levée de secours** (`crusade.json` § `relief`) : la place de Terre sainte assiégée par la
+  croisade reçoit une fois par siège quelques unités de son maître. Sans elle, Jérusalem tombait
+  sur 4 graines sur 5.
+- **Budget de départ** (`data/settlements/rules.json` § `starting_budget`, règle commune) : au
+  setup, une faction d'au moins 5 provinces dont le solde dépasse −15 % de ses recettes renvoie
+  ses garnisons les plus chères (jamais la dernière unité d'une colonie ni la capitale). Cause :
+  coûts de garnison fixes par colonie contre recettes proportionnelles à la population, d'où une
+  faillite structurelle des grandes factions de l'extension OM (Mamelouks −21 %, Byzance −42 %,
+  Horde −80 %). Factions saines inchangées. Restent en déficit : Mérinides, Hafsides, Lituanie,
+  Serbie (populations OM ou coût des colonies à revoir, hors JR).

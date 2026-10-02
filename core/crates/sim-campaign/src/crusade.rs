@@ -598,8 +598,7 @@ fn relieve_sieges(
     let mut event = GameEvent::new(
         EventKind::Crusade,
         format!(
-            "{} appelle à défendre {name} contre {} : {} de secours {} dans la place.",
-            crate::events::capitalize(&faction_name(data, &master)),
+            "Appel à défendre {name} contre {} : {} de secours {} dans la place.",
             faction_name(data, &rules.faction),
             count_noun(landed, "unité", "unités"),
             if landed > 1 { "entrent" } else { "entre" },
@@ -1193,7 +1192,7 @@ mod tests {
         assert_eq!(after, before + 3, "{events:?}");
         let call: Vec<_> = events
             .iter()
-            .filter(|e| e.text_fr.contains("appelle à défendre"))
+            .filter(|e| e.text_fr.contains("Appel à défendre"))
             .collect();
         assert_eq!(call.len(), 1, "{events:?}");
         assert_eq!(call[0].faction, Some(fac(HOLDER)));
