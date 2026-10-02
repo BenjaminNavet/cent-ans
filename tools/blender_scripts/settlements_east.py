@@ -41,7 +41,7 @@ PALETTE = {
     "TileOrange": ((0.62, 0.21, 0.07), 0.8, 0.0),
     "Lead": ((0.36, 0.39, 0.43), 0.5, 0.0),
     "Log": ((0.28, 0.18, 0.10), 0.9, 0.0),
-    "Shingle": ((0.42, 0.41, 0.38), 0.85, 0.0),
+    "Shingle": ((0.33, 0.32, 0.30), 0.85, 0.0),
     "CopperGreen": ((0.10, 0.40, 0.27), 0.5, 0.0),
     "Gilt": ((0.85, 0.58, 0.12), 0.4, 0.3),
     "Turquoise": ((0.05, 0.42, 0.48), 0.4, 0.0),
@@ -475,6 +475,27 @@ def scatter(
     return parts
 
 
+def suburb(points, gate, rng, builder, count=8):
+    """Houses along the road outside the gate of side ``gate`` of a wall polygon."""
+    x0, y0 = points[gate]
+    x1, y1 = points[(gate + 1) % len(points)]
+    gx, gy = (x0 + x1) / 2, (y0 + y1) / 2
+    base, reach = math.atan2(gy, gx), math.hypot(gx, gy)
+    parts = []
+    for k in range(count):
+        ang = base + (0.14 if k % 2 else -0.14) + rng.uniform(-0.04, 0.04)
+        t = (1.22 + 0.13 * (k // 2)) * reach
+        parts += builder(
+            t * math.cos(ang),
+            t * math.sin(ang),
+            0.22,
+            0.15,
+            base + rng.uniform(-0.2, 0.2),
+            rng,
+        )
+    return parts
+
+
 def shrink(points, factor):
     """Polygon scaled about the origin (inner side of a wall)."""
     return [(x * factor, y * factor) for x, y in points]
@@ -708,24 +729,7 @@ def build_med_city(variant):
     parts += scatter(
         rng, 60, radius * 0.95, med_house, keep_out, shrink(points, 0.9), (0.2, 0.3)
     )
-    # Borgo outside the first gate.
-    gx, gy = (
-        (points[gates[0]][0] + points[gates[0] + 1][0]) / 2,
-        (points[gates[0]][1] + points[gates[0] + 1][1]) / 2,
-    )
-    base = math.atan2(gy, gx)
-    for k in range(6):
-        ang = base + (0.14 if k % 2 else -0.14) + rng.uniform(-0.04, 0.04)
-        t = (1.22 + 0.13 * (k // 2)) * math.hypot(gx, gy)
-        parts += med_house(
-            t * math.cos(ang),
-            t * math.sin(ang),
-            0.22,
-            0.15,
-            base + rng.uniform(-0.2, 0.2),
-            rng,
-        )
-    return parts
+    return parts + suburb(points, gates[0], rng, med_house)
 
 
 def build_med_town(variant):
@@ -1077,23 +1081,7 @@ def build_byz_city(variant):
     parts += scatter(
         rng, 60, radius * 0.95, byz_house, keep_out, shrink(points, 0.9), (0.2, 0.29)
     )
-    gx, gy = (
-        (points[gates[0]][0] + points[gates[0] + 1][0]) / 2,
-        (points[gates[0]][1] + points[gates[0] + 1][1]) / 2,
-    )
-    base_angle = math.atan2(gy, gx)
-    for k in range(6):
-        ang = base_angle + (0.14 if k % 2 else -0.14) + rng.uniform(-0.04, 0.04)
-        t = (1.22 + 0.13 * (k // 2)) * math.hypot(gx, gy)
-        parts += byz_house(
-            t * math.cos(ang),
-            t * math.sin(ang),
-            0.22,
-            0.15,
-            base_angle + rng.uniform(-0.2, 0.2),
-            rng,
-        )
-    return parts
+    return parts + suburb(points, gates[0], rng, byz_house)
 
 
 def build_byz_town(variant):
@@ -1381,23 +1369,7 @@ def build_rus_city(variant):
     parts += scatter(
         rng, 70, radius * 0.95, izba, keep_out, shrink(points, 0.9), (0.19, 0.26)
     )
-    gx, gy = (
-        (points[gates[0]][0] + points[gates[0] + 1][0]) / 2,
-        (points[gates[0]][1] + points[gates[0] + 1][1]) / 2,
-    )
-    base = math.atan2(gy, gx)
-    for k in range(6):
-        ang = base + (0.14 if k % 2 else -0.14) + rng.uniform(-0.04, 0.04)
-        t = (1.22 + 0.13 * (k // 2)) * math.hypot(gx, gy)
-        parts += izba(
-            t * math.cos(ang),
-            t * math.sin(ang),
-            0.22,
-            0.15,
-            base + rng.uniform(-0.2, 0.2),
-            rng,
-        )
-    return parts
+    return parts + suburb(points, gates[0], rng, izba)
 
 
 def build_rus_town(variant):
@@ -1533,30 +1505,334 @@ def build_rus_village(variant):
 
 # --- isl: Maghreb, Arabs, Turks, Berbers, al-Andalus ---------------------------------
 
+ISL_WALLS = ("Whitewash", "Whitewash", "Ochre", "Limestone")
+
+
+def koubba(x, y, s=1.0, dome="Whitewash", z=0.0):
+    """Domed cube: saint's tomb, bath or fountain house."""
+    parts = [block(x, y, 0.2 * s, 0.2 * s, 0.15 * s, "Whitewash", 0.0, z)]
+    return parts + cupola(x, y, z + 0.15 * s, 0.095 * s, dome, "round", 8)
+
+
+def isl_house(x, y, w, d, angle, rng, z=0.0):
+    """Flat-roofed cubic house, sometimes with a roof room or a small dome."""
+    if rng.random() < 0.07:
+        return koubba(x, y, w / 0.2 * 0.8, z=z)
+    wall = rng.choice(ISL_WALLS)
+    upper = rng.choice(ISL_WALLS) if rng.random() < 0.45 else None
+    return flat_house(x, y, w, d, rng.uniform(0.1, 0.17), angle, wall, z, upper)
+
+
+def minaret(x, y, height, square=True, s=1.0, z=0.0):
+    """Minaret: square Maghrebi tower with a lantern, or slender round shaft with a balcony."""
+    if square:
+        parts = tower(x, y, 0.17 * s, height, "Ochre", "crenel", z=z)
+        top = z + height + 0.045
+        parts += tower(x, y, 0.085 * s, 0.17 * s, "Ochre", "flat", z=top)
+        return parts + cupola(
+            x, y, top + 0.17 * s, 0.05 * s, "Whitewash", "round", 6, "Gilt"
+        )
+    parts = [block(x, y, 0.15 * s, 0.15 * s, 0.16 * s, "Limestone", 0.0, z)]
+    shaft = height * 0.72
+    parts.append(
+        m.cylinder(0.05 * s, shaft, (x, y, z + 0.16 * s + shaft / 2), "Whitewash", 8)
+    )
+    balcony = z + 0.16 * s + shaft
+    parts.append(m.cylinder(0.085 * s, 0.035, (x, y, balcony), "Limestone", 8))
+    upper = height * 0.24
+    parts.append(
+        m.cylinder(0.036 * s, upper, (x, y, balcony + upper / 2), "Whitewash", 8)
+    )
+    return parts + cupola(
+        x, y, balcony + upper, 0.05 * s, "Turquoise", "pointed", 6, "Gilt"
+    )
+
+
+def mosque(x, y, angle, s=1.0, square=True, court=True):
+    """Courtyard mosque: prayer hall towards local +X, arcaded court, minaret.
+
+    ``square``: Maghrebi type (parallel green tile roofs, square minaret on the court axis);
+    otherwise eastern type (domed hall, round minaret at a corner).
+    """
+    at = local_frame(x, y, angle, s)
+    hx, hy = at(0.26, 0.0)
+    parts = [block(hx, hy, 0.4 * s, 0.72 * s, 0.2 * s, "Whitewash", angle)]
+    if square:
+        for k in range(4):
+            rx, ry = at(0.26, (k - 1.5) * 0.18)
+            parts.append(
+                m.gable_roof(
+                    0.4 * s,
+                    0.17 * s,
+                    0.07 * s,
+                    (rx, ry, 0.2 * s),
+                    "CopperGreen",
+                    angle,
+                    0.005,
+                )
+            )
+    else:
+        parts += drum_dome(
+            hx,
+            hy,
+            0.2 * s,
+            0.15 * s,
+            0.07 * s,
+            "Whitewash",
+            "Turquoise",
+            "pointed",
+            8,
+            "Gilt",
+        )
+        for side in (-1, 1):
+            dx, dy = at(0.26, side * 0.25)
+            parts += cupola(dx, dy, 0.2 * s, 0.07 * s, "Turquoise", "round", 6)
+    if court:
+        for dx, dy, w, d in (
+            (-0.42, 0.0, 0.08, 0.72),
+            (-0.16, 0.32, 0.48, 0.08),
+            (-0.16, -0.32, 0.48, 0.08),
+        ):
+            gx, gy = at(dx, dy)
+            parts.append(block(gx, gy, w * s, d * s, 0.13 * s, "Whitewash", angle))
+        fx, fy = at(-0.17, 0.0)
+        parts.append(m.cylinder(0.04 * s, 0.04, (fx, fy, 0.03), "Turquoise", 6))
+    mx, my = at(-0.42, 0.0) if square and court else at(0.0, 0.42)
+    return parts + minaret(mx, my, (0.75 if square else 0.8) * s, square, s)
+
+
+def isl_walls(points, height, gates, mat="Ochre", z=0.0):
+    """Crenellated enceinte with square towers and gate blocks."""
+    return curtain(
+        points,
+        height,
+        mat,
+        tower_at=lambda x, y: tower(
+            x, y, 0.15, height * 1.4, mat, "cap", taper=0.86, z=z
+        ),
+        gates=gates,
+        gate_at=lambda x, y, a: gatehouse(x, y, a, height * 1.6, mat, width=0.26, z=z),
+        top="merlons",
+        z=z,
+    )
+
+
+def kasbah(x, y, angle, s=1.0, mat="Ochre", z=0.0):
+    """Square citadel of rammed earth: battered corner towers, governor's house, banner."""
+    at = local_frame(x, y, angle, s)
+    half = 0.3
+    corners = [at(-half, -half), at(half, -half), at(half, half), at(-half, half)]
+    parts = curtain(
+        corners,
+        0.3 * s,
+        mat,
+        tower_at=lambda tx, ty: tower(
+            tx, ty, 0.2 * s, 0.48 * s, mat, "crenel", angle=angle, z=z, taper=0.78
+        ),
+        gates=(0,),
+        gate_at=lambda gx, gy, a: gatehouse(
+            gx, gy, a, 0.38 * s, mat, width=0.18 * s, z=z
+        ),
+        top="merlons",
+        z=z,
+    )
+    dx, dy = at(0.04, 0.05)
+    parts += flat_house(
+        dx, dy, 0.3 * s, 0.26 * s, 0.4 * s, angle, "Whitewash", z, "Whitewash"
+    )
+    fx, fy = corners[2]
+    return parts + flag(fx, fy, z + 0.48 * s + 0.09)
+
+
+def palm_grove(rng, x, y, count, spread=0.25):
+    """Loose clump of date palms around (x, y)."""
+    parts = []
+    for _ in range(count):
+        ang, r = rng.uniform(0.0, TAU), spread * math.sqrt(rng.random())
+        parts += palm(
+            x + r * math.cos(ang), y + r * math.sin(ang), rng.uniform(0.24, 0.34)
+        )
+    return parts
+
 
 def build_isl_city(variant):
     """Medina: flat roofs, great mosque with its court and minaret, kasbah."""
-    return placeholder(1.4)
+    first = variant == "a"
+    rng = random.Random(1147 if first else 1258)
+    radius = 1.38 if first else 1.32
+    points = m.ring_points(radius, 11 if first else 9, rng, 0.07, phase=0.1)
+    gates = (0, 4, 7) if first else (1, 5)
+    wall = "Ochre" if first else "Limestone"
+    parts = m.ground_patch(radius * 0.97, "Sand")
+    parts += isl_walls(points, 0.2, gates, wall)
+    parts += mosque(0.0, 0.1, 0.5 if first else -0.3, 1.15, first)
+    corner = 5 if first else 3
+    kx, ky = points[corner][0] * 0.72, points[corner][1] * 0.72
+    parts += kasbah(kx, ky, math.atan2(ky, kx), 0.95, wall)
+    keep_out = [(0.0, 0.1, 0.66), (kx, ky, 0.44)]
+    for ang, r in ((1.9, 0.85), (4.4, 0.9)):
+        cx, cy = r * math.cos(ang), r * math.sin(ang)
+        if any(math.hypot(cx - px, cy - py) < pr + 0.2 for px, py, pr in keep_out):
+            continue
+        parts += mosque(cx, cy, ang, 0.5, first, court=False)
+        keep_out.append((cx, cy, 0.3))
+    parts += scatter(
+        rng,
+        85,
+        radius * 0.95,
+        isl_house,
+        keep_out,
+        shrink(points, 0.9),
+        (0.19, 0.3),
+        0.96,
+    )
+    parts += suburb(points, gates[0], rng, isl_house)
+    gx, gy = points[gates[1]]
+    return parts + palm_grove(rng, gx * 1.22, gy * 1.22, 9, 0.24)
 
 
 def build_isl_town(variant):
     """Small walled medina around its mosque."""
-    return placeholder(0.95)
+    first = variant == "a"
+    rng = random.Random(1062 if first else 1299)
+    points = m.ring_points(0.9, 8 if first else 7, rng, 0.08, phase=0.6)
+    wall = "Ochre" if first else "Limestone"
+    parts = m.ground_patch(0.9, "Sand")
+    parts += isl_walls(points, 0.17, (1, 5) if first else (0, 3), wall)
+    parts += mosque(0.05, 0.05, 0.9 if first else 0.2, 0.78, first)
+    tx, ty = points[3][0] * 0.74, points[3][1] * 0.74
+    parts += tower(tx, ty, 0.22, 0.46, wall, "crenel", taper=0.82)
+    parts += flag(tx, ty, 0.46 + 0.09)
+    keep_out = [(0.05, 0.05, 0.47), (tx, ty, 0.17)]
+    parts += scatter(
+        rng, 30, 0.82, isl_house, keep_out, shrink(points, 0.88), (0.18, 0.27), 0.96
+    )
+    return parts + palm_grove(rng, points[6][0] * 1.12, points[6][1] * 1.12, 4, 0.12)
 
 
 def build_isl_castle(variant):
     """Kasbah of rammed earth (a) or citadel on a mound (b)."""
-    return placeholder(0.95)
+    rng = random.Random(1195 if variant == "a" else 1260)
+    parts = m.ground_patch(0.95, "Sand")
+    if variant == "a":
+        parts += kasbah(0.05, 0.08, 0.3, 1.55)
+        parts += palm_grove(rng, -0.62, 0.5, 6, 0.2)
+        arc = range(8)
+    else:
+        height = 0.28
+        parts += mound(0.0, 0.0, 0.72, height, "Sand", 0.72, 14)
+        shell = m.ring_points(0.46, 8, rng, 0.05)
+        parts += isl_walls(shell, 0.16, (), "Limestone", height)
+        # Gate tower on the rim, bridge ramp down to an outer gate.
+        parts += tower(0.0, -0.5, 0.24, 0.36, "Limestone", "crenel", z=height)
+        parts += tower(0.0, -0.9, 0.16, 0.24, "Limestone", "cap")
+        parts.append(
+            m.box(
+                (0.1, 0.44, 0.035),
+                (0.0, -0.7, height * 0.72),
+                "Limestone",
+                rotation=(0.4, 0, 0),
+            )
+        )
+        parts += flat_house(
+            0.1, 0.12, 0.34, 0.26, 0.2, 0.2, "Whitewash", height, "Whitewash"
+        )
+        parts += cupola(0.02, 0.12, height + 0.2, 0.09, "Turquoise", "round", 8)
+        parts += minaret(-0.2, -0.1, 0.5, False, 0.9, height)
+        parts += flag(0.0, -0.5, height + 0.36 + 0.09)
+        arc = range(2, 8)
+    for k in arc:
+        ang = 2.9 + k * 0.33 + rng.uniform(-0.06, 0.06)
+        r = 0.86 + rng.uniform(-0.03, 0.05)
+        parts += isl_house(
+            r * math.cos(ang), r * math.sin(ang), 0.2, 0.15, ang + math.pi / 2, rng
+        )
+    return parts
 
 
 def build_isl_abbey(variant):
     """Ribat (a) or caravanserai (b) with the domed tomb of a zawiya."""
-    return placeholder(1.0)
+    first = variant == "a"
+    rng = random.Random(796 if first else 1229)
+    parts = m.ground_patch(1.0, "Sand")
+    half = 0.42 if first else 0.5
+    mat = "Ochre" if first else "Limestone"
+    height = 0.3 if first else 0.24
+    square = [(-half, -half), (half, -half), (half, half), (-half, half)]
+
+    def corner_tower(x, y):
+        """Round corner tower; the north-east one of the ribat is the tall watchtower."""
+        tall = first and x > 0 and y > 0
+        radius, rise = (0.1, 0.78) if tall else (0.09, height * 1.25)
+        return [
+            m.cylinder(radius, rise + F, (x, y, (rise - F) / 2), mat, 8),
+            m.cylinder(radius * 1.2, 0.04, (x, y, rise + 0.02), mat, 8),
+        ]
+
+    parts += curtain(
+        square,
+        height,
+        mat,
+        tower_at=corner_tower,
+        gates=(0,),
+        gate_at=lambda x, y, a: gatehouse(
+            x, y, a, height * (1.3 if first else 1.9), mat, width=0.2 if first else 0.32
+        ),
+        top="merlons",
+    )
+    # Cells and stores against the walls, around the court.
+    depth = 0.15
+    for k in range(1, 4):
+        a = k * math.pi / 2 - math.pi / 2
+        off = half - 0.035 - depth / 2
+        parts.append(
+            block(
+                math.cos(a) * off,
+                math.sin(a) * off,
+                depth,
+                (half - 0.035) * 2,
+                height * 0.62,
+                "Whitewash",
+                a,
+            )
+        )
+    if first:
+        parts += flag(half, half, 0.78 + 0.04)
+        parts += koubba(-0.05, 0.0, 0.8)
+    else:
+        parts += koubba(0.0, 0.0, 0.9, "Turquoise")
+        parts += flag(0.0, -half, height * 1.9 + 0.04)
+    # Zawiya outside the walls: tomb, low enclosure, palms.
+    parts += koubba(-0.72, 0.5, 1.1, "Whitewash" if first else "Turquoise")
+    parts += curtain(
+        [(-0.92, 0.3), (-0.52, 0.3), (-0.52, 0.72), (-0.92, 0.72)],
+        0.06,
+        "Whitewash",
+        thickness=0.03,
+    )
+    parts += palm_grove(rng, 0.72, 0.62, 5, 0.16)
+    parts += palm_grove(rng, -0.75, -0.55, 3, 0.12)
+    parts.append(
+        m.cylinder(0.04, 0.05 + F * 0.3, (0.3, -0.75, 0.025 - F * 0.15), "Limestone", 6)
+    )
+    for k in range(3):
+        parts += isl_house(0.82 + 0.04 * k, -0.5 + 0.27 * k, 0.2, 0.15, 1.5, rng)
+    return parts
 
 
 def build_isl_village(variant):
     """Village of cubic houses with palms and a small mosque."""
-    return placeholder(0.95)
+    first = variant == "a"
+    rng = random.Random(644 if first else 870)
+    parts = m.ground_patch(0.95, "Sand", 14)
+    parts += mosque(0.0, 0.08, 0.6 if first else -0.5, 0.52, first, court=False)
+    parts += flag(0.2, 0.42, 0.0, 0.34)
+    parts += koubba(-0.72, -0.2, 0.9)
+    keep_out = [(0.0, 0.08, 0.34), (-0.72, -0.2, 0.14), (0.55, -0.6, 0.36)]
+    parts += scatter(rng, 15, 0.78, isl_house, keep_out, None, (0.19, 0.27), 0.98)
+    parts += plots(0.55, -0.62, 0.3, 4, 0.42, 0.08, ("Garden", "Field", "Garden"))
+    parts += palm_grove(rng, 0.55, -0.6, 8, 0.3)
+    return parts + palm_grove(rng, -0.4, 0.75, 3, 0.1)
 
 
 # --- steppe: Kipchaks and the Horde --------------------------------------------------
