@@ -34,5 +34,9 @@ modèles d'armée médiocres et changement de taille bizarre au zoom ; s'inspire
   sur main, sans rapport.
 - Partie pilote : juger le survol et la taille en jeu réel.
 
-## Prochaine étape
-Tests de non-régression, fusion dans main.
+## État
+Terminé, fusionné dans main (2026-10-02). main fusionné dans la branche avant : le liseré de
+relation du lot EN (rouge = ennemi) est gardé, le survol l'éclaircit.
+Tests : `sa_pick_test`, `smoke`, `c5_settlements_ui_test`, `m4_free_movement_ui_test`, `cv3_4`,
+`nv1`, `p2d`, `rs_n_raze`, `unit_roster` verts. `at1_attack_order_test`, `m5a_vision_ui_test`
+et `da7d_overlap_test` (chrono) échouent à l'identique sur main.

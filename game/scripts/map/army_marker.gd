@@ -43,6 +43,8 @@ var unit_count: int = 0
 ## "siege", "moving", "embarked" ou "".
 var status: String = ""
 var faction_color: Color = Color.WHITE
+## Lot EN : catégorie de relation avec le joueur (`StanceCues` : self, enemy, friend, other).
+var cue: String = StanceCues.OTHER
 ## Position de base (centroïde de la province) et décalage unitaire (armées empilées).
 var base_position: Vector3 = Vector3.ZERO
 var offset_dir: Vector2 = Vector2.ZERO
@@ -219,24 +221,36 @@ func is_hovered() -> bool:
 	return _hovered
 
 
-## Socle : doré et vif pour la sélection, couleur de la faction éclaircie au survol, sinon
-## couleur de la faction. Les figurines s'éclaircissent de même.
+## Lot EN : catégorie de relation avec le joueur ; l'anneau au sol des ennemis passe au rouge.
+func set_cue(value: String) -> void:
+	if value == cue:
+		return
+	cue = value
+	_update_ring()
+
+
+## Socle : doré et vif pour la sélection ; sinon couleur de la relation (EN : rouge pour un
+## ennemi) ou de la faction, éclaircie au survol (SA). Les figurines s'éclaircissent de même.
 func _update_ring() -> void:
 	if selection == null:
 		return
+	var stance_ring := StanceCues.army_ring(cue)
 	if _selected:
 		selection.modulate = RING_SELECTED
 		selection.emission_energy = 1.4 if _hovered else 1.1
-	elif _hovered:
-		var lit := faction_color.lerp(Color.WHITE, 0.55)
-		lit.a = 1.0
-		selection.modulate = lit
-		selection.emission_energy = 0.9
 	else:
 		var ring := faction_color
 		ring.a = 0.8
+		var emission := 0.1
+		if not stance_ring.is_empty():  # EN
+			ring = stance_ring["color"]
+			emission = float(stance_ring["emission"])
+		if _hovered:
+			ring = ring.lerp(Color.WHITE, 0.55)
+			ring.a = 1.0
+			emission = maxf(emission, 0.9)
 		selection.modulate = ring
-		selection.emission_energy = 0.1
+		selection.emission_energy = emission
 	if figures != null:
 		figures.set_highlight(HIGHLIGHT_HOVERED if _hovered else (HIGHLIGHT_SELECTED if _selected else HIGHLIGHT_IDLE))
 

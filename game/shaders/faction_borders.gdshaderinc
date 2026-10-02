@@ -63,6 +63,9 @@ uniform float fr1_rest_glow_scale = 0.25;
 uniform float fr1_rest_saturation = 0.45;
 uniform float fr1_rest_brightness = 0.8;
 uniform float fr1_rest_parchment_focus = 1.0;
+// Lot EN (ADR 0155) : poids de pleine intensité des royaumes ennemis du joueur (alpha de palette
+// < 1), pour que leur rouge reste vif quand le reste de la carte est au repos.
+uniform float fr1_enemy_focus = 0.0;
 
 vec3 fr1_info_of(int id) {
 	if (id <= 0) {
@@ -70,6 +73,10 @@ vec3 fr1_info_of(int id) {
 	}
 	vec4 c = texelFetch(fr1_info, ivec2(clamp(id, 0, textureSize(fr1_info, 0).x - 1), 0), 0);
 	return vec3(round(c.r * 255.0), round(c.g * 255.0), c.b);
+}
+
+bool fr1_faction_enemy(float index) {
+	return texelFetch(fr1_palette, ivec2(clamp(int(index), 0, textureSize(fr1_palette, 0).x - 1), 0), 0).a < 0.75;
 }
 
 vec3 fr1_faction_rgb(float index) {
@@ -161,6 +168,9 @@ void fr1_borders(vec2 p, vec2 uv, float footprint, inout vec3 albedo, inout vec3
 	float focus = max(fr1_focus, pw * fr1_rest_parchment_focus);
 	if (me.x > 0.0 && (int(me.x) == fr1_focus_a || int(me.x) == fr1_focus_b)) {
 		focus = 1.0;
+	}
+	if (fr1_enemy_focus > focus && me.x > 0.0 && fr1_faction_enemy(me.x)) {  // EN
+		focus = fr1_enemy_focus;
 	}
 	wscale *= mix(fr1_rest_width_scale, 1.0, focus);
 	gscale *= mix(fr1_rest_width_scale, 1.0, focus);

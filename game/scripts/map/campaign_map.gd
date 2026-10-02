@@ -38,6 +38,8 @@ const SCREENSHOT_DELAY_FRAMES := 40
 const SCREENSHOT_LIFE_WAIT := 240
 var _screenshot_life_wait := 0
 const START_MENU_SCENE := "res://scenes/start_menu.tscn"
+## SA (ADR 0160) : période minimale du recalcul de l'objet survolé pendant un mouvement continu.
+const HOVER_INTERVAL_MS := 40
 ## Q2 : un second clic à moins de tant de pixels du précédent alterne armée / ville.
 const REPEAT_CLICK_PX := 12.0
 
@@ -70,6 +72,7 @@ var hover_target: Dictionary = {}
 var _hover_mouse := Vector2(-1.0e6, -1.0e6)
 var _hover_camera := Transform3D()
 var _hover_dirty := true
+var _hover_tick := 0
 ## Provinces atteignables ce tour par l'armée sélectionnée : id → coût.
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
@@ -653,6 +656,12 @@ func _update_object_hover() -> void:
 	var view := camera.global_transform
 	if not _hover_dirty and mouse == _hover_mouse and view.is_equal_approx(_hover_camera):
 		return
+	# La visée parcourt toutes les colonies : au plus une fois par `HOVER_INTERVAL_MS` pendant
+	# un mouvement continu de la souris ou de la caméra.
+	var now := Time.get_ticks_msec()
+	if not _hover_dirty and now - _hover_tick < HOVER_INTERVAL_MS:
+		return
+	_hover_tick = now
 	_hover_dirty = false
 	_hover_mouse = mouse
 	_hover_camera = view
