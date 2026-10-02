@@ -104,8 +104,11 @@ func _run() -> void:
 	roads.update_view(0.0, 1.0)
 	roads.flush(1.0)
 	await process_frame
-	# VT (ADR 0138) : plus de maquette sur la carte ; emprise réelle par colonie (`towns_1340.json`).
-	_check(layer.get_node_or_null("Models") == null and layer.get_node_or_null("Landmarks") == null, "no settlement model on the campaign map")
+	# VT (ADR 0138) : plus de maquette par nœud ; emprise réelle par colonie lue dans
+	# `towns_1340.json`. GC2 (ADR 0158) : maquettes stylisées en MultiMesh par défaut, l'emprise
+	# affichée est alors celle de la maquette (`gc_maquettes_test.gd`).
+	_check(layer.get_node_or_null("Models") == null and layer.get_node_or_null("Landmarks") == null, "no per-settlement model node on the campaign map")
+	_check((layer.maquettes != null) == TownMaquetteData.enabled() and (layer.towns == null) == TownMaquetteData.enabled(), "town layers follow the town style")
 	_check(int(layer.stats.get("footprints", 0)) > 0, "no real footprint read, got %s" % layer.stats)
 	var paris_footprint: int = data.index_by_id["set_paris"]
 	_check(layer.model_radius(paris_footprint) > 0.0 and layer.model_holder(paris_footprint) == null, "Paris footprint without model")

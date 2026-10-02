@@ -2,8 +2,10 @@
   "description": "Lot CV3-5 — réglages de rendu de la carte de campagne. map.army_figure_scale : agrandissement du général (figurine fine FG) qui porte l'étendard de l'ost, à la manière d'un « lord » de grande stratégie, aux paliers près et régional ; au palier lointain, retour à l'étendard et à la plaque d'effectif. Aucune règle de jeu. Lot TB2 : blocs de lisibilité (voile du brouillard de guerre, signes de ville, étiquettes, noms de région, nuées), lus par game/scripts/map/map_readability.gd.",
   "map": {
     "army_figure_scale": 1.8,
+    "army_scale_exponent": 0.65,
     "town_scale": 1.0,
-    "town_style": "maquette"
+    "town_style": "maquette",
+    "camera_floor_distance": 20.0
   },
   "fog_of_war": {
     "description": "TB2 : brouillard de guerre en voile de parchemin (uniformes fog_* de terrain.gdshader). Le sol hors de vue passe en camaïeu sépia assombri sous un lavis léger ; le relief reste lisible.",
@@ -60,15 +62,54 @@
     "minor_max_weight": 600
   },
   "clouds": {
-    "description": "TB2 : nuées et brumes sobres. Les nuées n'existent que là où le cœur donne pluie, neige ou orage ; elles sont plus fines en vue moyenne (medium_alpha jusqu'à medium_distance[0], max_alpha à partir de medium_distance[1], distances caméra) et ne couvrent jamais la province sélectionnée (bord fondu sur clear_feather_px). Ombres de nuages du terrain : weather_shadow sous de vraies nuées, fair_shadow par temps clair.",
+    "description": "TB2 : nuées et brumes sobres. Les nuées n'existent que là où le cœur donne pluie, neige ou orage ; elles sont plus fines en vue moyenne (medium_alpha jusqu'à medium_distance[0], max_alpha à partir de medium_distance[1], distances caméra) et ne couvrent jamais la province sélectionnée (bord fondu sur clear_feather_px). Ombres de nuages du terrain : weather_shadow sous de vraies nuées, fair_shadow par temps clair. TB6 (ADR 0156) : le masque météo n'assombrit plus le sol que légèrement — wet_dim (sol mouillé), mask_shadow (ombre des nuées, large et fondue : mask_shadow_scale = fréquence du bruit en part de celle des nuées, mask_shadow_softness = largeur du seuil) ; cumulés avec weather_shadow, la baisse de luminance reste sous 15 % au cœur d'une ombre.",
     "medium_alpha": 0.2,
     "max_alpha": 0.45,
     "medium_distance": [
       600,
       1000
     ],
-    "weather_shadow": 0.12,
+    "weather_shadow": 0.05,
     "fair_shadow": 0.0,
-    "clear_feather_px": 8
+    "clear_feather_px": 8,
+    "wet_dim": 0.04,
+    "mask_shadow": 0.06,
+    "mask_shadow_softness": 0.5,
+    "mask_shadow_scale": 0.5
+  },
+  "forest_masses": {
+    "description": "TB6 : massifs forestiers de la carte de couleur du sol (vue moyenne et large), presque noirs à bord net avant ce réglage. floor : luminance linéaire plancher des masses sombres (0 : carte inchangée) ; knee : au-delà de floor × knee, la carte n'est pas touchée ; feather : flou du masque en niveaux de mip (lisière fondue sur quelques pixels de carte) ; keep : part du contraste d'origine gardée sous le plancher ; canopy : amplitude du modelé de canopée.",
+    "floor": 0.12,
+    "knee": 2.0,
+    "feather": 2.5,
+    "keep": 0.25,
+    "canopy": 0.12
+  },
+  "morning_mist": {
+    "description": "TB6 (ADR 0156) : brume du matin de la météo « brume » (canal B du masque météo), en nappes larges et douces dans les grandes vallées et les plaines basses. Brouillard de hauteur calculé dans le shader du sol sur le relief lissé à grande échelle, pas sur le relief fin. height_lods : niveaux de la carte des hauteurs (relief lissé local ≈ 11 km, moyenne régionale ≈ 90 km) ; valley_depth_m : écart sous la moyenne régionale où la nappe commence et où elle est pleine ; plain_altitude_m : altitude où la nappe de plaine est pleine puis nulle, plain_share : sa part ; crest_height_m : hauteur au-dessus du relief lissé où la nappe s'efface (crêtes). opacity : opacité maximale ; bank_scale : fréquence des bancs (1 / px carte ; 0,006 ≈ bancs de 80 px) ; drift : dérive, en part du vent ; grazing_gain : épaisseur ajoutée en vue rasante ; lifted_share : part qui reste une fois la brume levée ; near_share : part gardée de près. Jamais sur la province sélectionnée.",
+    "opacity": 0.32,
+    "height_lods": [
+      4.0,
+      7.0
+    ],
+    "valley_depth_m": [
+      10,
+      140
+    ],
+    "plain_altitude_m": [
+      40,
+      220
+    ],
+    "plain_share": 0.6,
+    "crest_height_m": [
+      30,
+      150
+    ],
+    "bank_scale": 0.006,
+    "drift": 0.5,
+    "grazing_gain": 0.6,
+    "lifted_share": 0.35,
+    "near_share": 0.5,
+    "color": "#d9d6cc"
   }
 }

@@ -4,80 +4,302 @@
   "title": "Maquettes stylisées des lieux de la carte de campagne (GC2, ADR 0158)",
   "description": "Lu par `TownMaquetteData` (`game/scripts/map/town_maquette_data.gd`) et `TownMaquetteLayer`. Tailles monde constantes par type de lieu, portées, réduction des voisins trop proches, familles d'architecture par culture, région et religion de la province (`data/provinces/*.json`). Purement visuel, aucune règle de jeu.",
   "type": "object",
-  "required": ["sizes", "native_width", "landmark_scale", "visibility", "collision", "tile_size", "variants", "default_family", "families"],
+  "required": [
+    "sizes",
+    "native_width",
+    "landmark_scale",
+    "visibility",
+    "collision",
+    "tile_size",
+    "variants",
+    "default_family",
+    "families",
+    "weight_gain",
+    "props"
+  ],
   "additionalProperties": false,
   "$defs": {
     "per_kind": {
       "type": "object",
-      "required": ["city", "town", "castle", "abbey", "village"],
+      "required": [
+        "city",
+        "town",
+        "castle",
+        "abbey",
+        "village"
+      ],
       "additionalProperties": false,
       "properties": {
-        "city": {"type": "number", "exclusiveMinimum": 0},
-        "town": {"type": "number", "exclusiveMinimum": 0},
-        "castle": {"type": "number", "exclusiveMinimum": 0},
-        "abbey": {"type": "number", "exclusiveMinimum": 0},
-        "village": {"type": "number", "exclusiveMinimum": 0}
+        "city": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "town": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "castle": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "abbey": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "village": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     },
     "id_list": {
       "type": "array",
       "uniqueItems": true,
-      "items": {"type": "string", "pattern": "^[a-z][a-z_]*$"}
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z_]*$"
+      }
     },
     "family": {
       "type": "object",
-      "required": ["cultures", "regions", "religions"],
+      "required": [
+        "cultures",
+        "regions",
+        "religions"
+      ],
       "additionalProperties": false,
       "properties": {
-        "note": {"type": "string"},
-        "cultures": {"$ref": "#/$defs/id_list", "description": "Champ `culture` des provinces (`cul_*`)."},
-        "regions": {"$ref": "#/$defs/id_list", "description": "Champ `region` des provinces."},
-        "religions": {"$ref": "#/$defs/id_list", "description": "Champ `religion` des provinces (`rel_*`)."}
+        "note": {
+          "type": "string"
+        },
+        "cultures": {
+          "$ref": "#/$defs/id_list",
+          "description": "Champ `culture` des provinces (`cul_*`)."
+        },
+        "regions": {
+          "$ref": "#/$defs/id_list",
+          "description": "Champ `region` des provinces."
+        },
+        "religions": {
+          "$ref": "#/$defs/id_list",
+          "description": "Champ `religion` des provinces (`rel_*`)."
+        }
       }
     }
   },
   "properties": {
-    "description": {"type": "string"},
-    "sizes": {"$ref": "#/$defs/per_kind", "description": "Largeur monde (unités, 1 unité ≈ 719 m) de la maquette, par type de lieu."},
-    "native_width": {"$ref": "#/$defs/per_kind", "description": "Largeur du modèle à l'échelle 1 (unités Blender), par type de lieu."},
-    "landmark_scale": {"type": "number", "minimum": 1, "maximum": 6, "description": "Grossissement des villes emblématiques (`LandmarkModel`, `data/landmarks/`)."},
+    "description": {
+      "type": "string"
+    },
+    "sizes": {
+      "$ref": "#/$defs/per_kind",
+      "description": "Largeur monde (unités, 1 unité ≈ 719 m) de la maquette, par type de lieu."
+    },
+    "native_width": {
+      "$ref": "#/$defs/per_kind",
+      "description": "Largeur du modèle à l'échelle 1 (unités Blender), par type de lieu."
+    },
+    "landmark_scale": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 6,
+      "description": "Grossissement des villes emblématiques (`LandmarkModel`, `data/landmarks/`)."
+    },
     "visibility": {
       "type": "object",
-      "required": ["city", "town", "castle", "abbey", "village", "fade_margin"],
+      "required": [
+        "city",
+        "town",
+        "castle",
+        "abbey",
+        "village",
+        "fade_margin"
+      ],
       "additionalProperties": false,
       "description": "Distance (unités) au-delà de laquelle la maquette d'un type n'est plus dessinée ; `fade_margin` : largeur du fondu.",
       "properties": {
-        "city": {"type": "number", "exclusiveMinimum": 0},
-        "town": {"type": "number", "exclusiveMinimum": 0},
-        "castle": {"type": "number", "exclusiveMinimum": 0},
-        "abbey": {"type": "number", "exclusiveMinimum": 0},
-        "village": {"type": "number", "exclusiveMinimum": 0},
-        "fade_margin": {"type": "number", "minimum": 0}
+        "city": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "town": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "castle": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "abbey": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "village": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fade_margin": {
+          "type": "number",
+          "minimum": 0
+        }
       }
     },
     "collision": {
       "type": "object",
-      "required": ["min_scale", "margin"],
+      "required": [
+        "min_scale",
+        "margin"
+      ],
       "additionalProperties": false,
       "properties": {
-        "min_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Plancher de la réduction d'un lieu trop proche d'un lieu plus important."},
-        "margin": {"type": "number", "minimum": 0, "description": "Écart (unités) gardé entre deux maquettes."}
+        "min_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Plancher de la réduction d'un lieu trop proche d'un lieu plus important."
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Écart (unités) gardé entre deux maquettes."
+        }
       }
     },
-    "tile_size": {"type": "number", "minimum": 32, "description": "Côté (unités) des tuiles de regroupement en MultiMesh (culling et portée)."},
+    "tile_size": {
+      "type": "number",
+      "minimum": 32,
+      "description": "Côté (unités) des tuiles de regroupement en MultiMesh (culling et portée)."
+    },
     "variants": {
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": {"type": "string", "pattern": "^[a-z]$"},
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z]$"
+      },
       "description": "Suffixes des variantes de modèle, tirées par id de lieu."
     },
-    "default_family": {"type": "string", "pattern": "^[a-z]+$", "description": "Famille sans suffixe dans le nom des modèles, repli de toutes les autres."},
+    "default_family": {
+      "type": "string",
+      "pattern": "^[a-z]+$",
+      "description": "Famille sans suffixe dans le nom des modèles, repli de toutes les autres."
+    },
     "families": {
       "type": "object",
       "minProperties": 1,
-      "propertyNames": {"pattern": "^[a-z]+$"},
-      "additionalProperties": {"$ref": "#/$defs/family"}
+      "propertyNames": {
+        "pattern": "^[a-z]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/family"
+      }
+    },
+    "weight_gain": {
+      "type": "object",
+      "required": [
+        "min",
+        "max",
+        "city",
+        "town",
+        "castle",
+        "abbey",
+        "village"
+      ],
+      "additionalProperties": false,
+      "description": "Gain de taille selon le poids du lieu : de `min` (poids bas du type) à `max` (poids haut), en racine carrée.",
+      "properties": {
+        "min": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "city": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "town": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "castle": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "abbey": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "village": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "props": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hamlet_ratio",
+        "windmill_ratio",
+        "windmill_range",
+        "chimney_ratio",
+        "chimney_range"
+      ],
+      "description": "Accessoires grossis avec les maquettes : rapports taille affichée / taille de modèle et portées (distance du rig).",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "hamlet_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "windmill_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "windmill_range": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "chimney_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "chimney_range": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
     }
   }
 }

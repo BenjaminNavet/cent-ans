@@ -1677,6 +1677,29 @@ réelle au zoom rapproché ; format, outil et moteur : **`docs/landmarks-v2.md`*
   plus chargé, donnait 27-28 i/s (Rouen) contre 23-25 (Amiens). 60 i/s à confirmer au repos.
 - Tests : `res://tests/vh4_landmarks_test.gd` (headless), `tools/tests/test_landmarks_v2.py`.
 
+## Carte généralisée : maquettes stylisées (chantier GC, ADR 0158)
+
+Depuis le 02/10, les lieux de la carte de campagne sont des **maquettes stylisées à taille monde
+constante** (`map.town_style` = `maquette` dans `data/ui/campaign_map.json`) ; les villes 1:1 de
+la section suivante ne sont plus créées, sauf avec `--town-style=real`.
+
+- Données : `data/art/town_maquettes.json` (schéma `town_maquettes.schema.json`) — largeur par
+  type (`sizes`), gain selon le poids du lieu (`weight_gain`), familles d'architecture par culture
+  / région / religion (`families` : west, med, byz, rus, isl, steppe), portées (`visibility`),
+  réduction des voisins (`collision`), accessoires (`props` : hameaux, moulins, fumées),
+  grossissement des 7 villes emblématiques (`landmark_scale`).
+- Modèles : `assets/models/settlements/<type>_<famille>_<a|b>.glb`, générés par
+  `tools/blender_scripts/settlements.py` (`settlements_west.py`, `settlements_east.py`, planche
+  `settlements_sheet.py -- <famille>`).
+- Code : `TownMaquetteData` (lecture, familles, collisions), `TownMaquetteLayer` (MultiMesh par
+  modèle et par tuile de 256 unités, bannière teintée par `INSTANCE_CUSTOM`, `LandmarkModel`
+  grossi), emprises dans `SettlementLayer._compute_footprints` (clic, anneau, étiquettes,
+  exclusions).
+- Caméra : plancher `map.camera_floor_distance` (20) ; `--camera-min=<d>` le lève.
+- Champs : `field_scale` (`terrain.gdshader`, 0,3) et `hb_cell_scale` (`hb_ground.gdshaderinc`,
+  1,2).
+- Captures : `tests/gc_shots.gd` (15 vues) ; test : `tests/gc_maquettes_test.gd`.
+
 ## Villes 1:1 à toutes les hauteurs (chantier VT, ADR 0138)
 
 Plus aucune maquette agrandie sur la carte de campagne : les 2 141 villes (2 134 colonies de

@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "war_scars_ui.schema.json",
+  "title": "Traces de la guerre et des fléaux sur la carte de campagne (TB4)",
+  "description": "Réglages purement visuels des traces de guerre et de peste de la carte de campagne, lus par game/scripts/map/war_scars.gd : seuils d'affichage, nombre d'éléments, durée (en tours) des champs de bataille marqués, engins de siège du camp. Aucune règle de jeu.",
+  "type": "object",
+  "required": [
+    "plague",
+    "battlefield",
+    "siege"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "plague": {
+      "type": "object",
+      "required": [
+        "max_distance",
+        "scale_per_distance",
+        "max_scale",
+        "cart_scale",
+        "min_intensity",
+        "pits",
+        "doors",
+        "door_search_m",
+        "cart"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "max_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Distance du rig de caméra (unités monde) au-delà de laquelle rien n'est dessiné."
+        },
+        "min_intensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Intensité de la scène de peste sous laquelle rien n'est posé."
+        },
+        "pits": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 40
+          },
+          "description": "[à l'intensité 0, à l'intensité 1]"
+        },
+        "doors": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 40
+          },
+          "description": "[à l'intensité 0, à l'intensité 1]"
+        },
+        "door_search_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Rayon (m) autour du centre de la ville où l'on marque des portes."
+        },
+        "cart": {
+          "type": "boolean",
+          "description": "Charrette des morts arrêtée près des fosses."
+        },
+        "scale_per_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 20,
+          "description": "Grossissement des fosses et de la charrette par unité de distance de caméra (taille à l'écran constante ; jamais sous l'échelle réelle). 4,2 : une fosse de 6,6 × 3,3 m fait ≈ 33 × 16 px en 900p vue de travers, 15 px vue en enfilade (tangage 30°)."
+        },
+        "max_scale": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 400,
+          "description": "Grossissement maximal (atteint à max_scale / scale_per_distance)."
+        },
+        "cart_scale": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Grossissement propre à la charrette des morts (3 m de long), en plus du précédent."
+        }
+      }
+    },
+    "battlefield": {
+      "type": "object",
+      "required": [
+        "turns",
+        "crow_turns",
+        "debris_turns",
+        "crows",
+        "debris",
+        "radius",
+        "max_distance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "turns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40,
+          "description": "Tours pendant lesquels le champ de bataille reste marqué (tertre)."
+        },
+        "crow_turns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 40,
+          "description": "Tours pendant lesquels les corbeaux tournent."
+        },
+        "debris_turns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 40,
+          "description": "Tours pendant lesquels les débris restent."
+        },
+        "crows": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 24
+        },
+        "debris": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 40
+        },
+        "radius": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 20,
+          "description": "Rayon du champ marqué, en unités du repère des figurines d'armée (un homme ≈ 4,3 ; camp de siège ≈ 13 de large)."
+        },
+        "max_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "siege": {
+      "type": "object",
+      "required": [
+        "almost_ready_turns",
+        "max_distance",
+        "engines"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "almost_ready_turns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Tours restants en deçà desquels l'engin en chantier est montré presque achevé (maquette sous échafaudage) ; au-delà : charpente et tas de bois."
+        },
+        "max_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "engines": {
+          "type": "object",
+          "description": "Par type d'engin (`kind` de get_assault_odds : ladders, ram, tower).",
+          "required": [
+            "ladders",
+            "ram",
+            "tower"
+          ],
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "size",
+              "slot"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "model": {
+                "type": "string",
+                "pattern": "^res://assets/models/.+\\.glb$",
+                "description": "Maquette (kit existant) ; sans elle, engin procédural."
+              },
+              "size": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 16,
+                "description": "Plus grande dimension de l'engin, en unités du repère des figurines d'armée (un homme ≈ 4,3 ; camp de siège ≈ 13 de large, tentes ≈ 3-4)."
+              },
+              "slot": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number"
+                },
+                "description": "Place (x devant, z à droite) dans le repère des figurines d'armée ; le camp de siège couvre x de -2 à 11, z de -2,5 à 10,5."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

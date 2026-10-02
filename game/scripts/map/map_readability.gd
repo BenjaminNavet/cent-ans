@@ -32,6 +32,20 @@ static func section(name: String) -> Dictionary:
 	return block if block is Dictionary else {}
 
 
+## TB6 : massifs forestiers de la carte de couleur éclaircis (uniformes `sg_dark_*` du matériau du
+## terrain, bloc `forest_masses`). Rend les valeurs posées ; rien sans données (carte inchangée).
+static func apply_forest_masses(material: ShaderMaterial) -> Dictionary:
+	var block := section("forest_masses")
+	var applied := {}
+	for key: String in ["floor", "knee", "feather", "keep", "canopy"]:
+		if block.has(key):
+			applied["sg_dark_" + key] = float(block[key])
+	if material != null:
+		for param: String in applied:
+			material.set_shader_parameter(param, applied[param])
+	return applied
+
+
 static func number(name: String, key: String, fallback: float) -> float:
 	return float(section(name).get(key, fallback))
 

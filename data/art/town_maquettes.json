@@ -1,11 +1,35 @@
 {
-  "description": "GC2 (ADR 0158) : maquettes stylisées des lieux de la carte de campagne. sizes : largeur monde (unités, 1 unité ≈ 719 m) par type ; native_width : largeur du modèle à l'échelle 1 (unités Blender) ; landmark_scale : grossissement des villes emblématiques (LandmarkModel) ; visibility : distance maximale par type, fondu sur fade_margin ; collision : un lieu dont le disque touche celui d'un lieu plus important est réduit jusqu'à min_scale ; families : famille d'architecture d'une province (culture, puis région, puis religion, sinon default_family). Modèles : assets/models/settlements/<type>_<famille>_<a|b>.glb (famille par défaut : <type>_<a|b>.glb), repli sur la famille par défaut si le fichier manque. Purement visuel, aucune règle de jeu.",
+  "description": "GC2 (ADR 0158) : maquettes stylisées des lieux de la carte de campagne. sizes : largeur monde (unités, 1 unité ≈ 719 m) par type ; native_width : largeur du modèle à l'échelle 1 (unités Blender) ; landmark_scale : grossissement des villes emblématiques (LandmarkModel) ; visibility : distance maximale par type, fondu sur fade_margin ; collision : un lieu dont le disque touche celui d'un lieu plus important est réduit jusqu'à min_scale ; families : famille d'architecture d'une province (culture, puis région, puis religion, sinon default_family). Modèles : assets/models/settlements/<type>_<famille>_<a|b>.glb (famille par défaut : <type>_<a|b>.glb), repli sur la famille par défaut si le fichier manque. Purement visuel, aucune règle de jeu. weight_gain : la largeur d'un lieu est multipliée par un gain de min à max selon son poids (champ weight de data/settlements), entre les bornes [poids bas, poids haut] de son type (racine carrée : les très gros lieux ne dominent pas).",
   "sizes": {
-    "city": 11.0,
-    "town": 6.5,
-    "castle": 3.6,
-    "abbey": 3.6,
-    "village": 3.2
+    "city": 14.0,
+    "town": 8.0,
+    "castle": 4.6,
+    "abbey": 4.4,
+    "village": 4.0
+  },
+  "weight_gain": {
+    "min": 0.85,
+    "max": 1.45,
+    "city": [
+      6,
+      60
+    ],
+    "town": [
+      4,
+      40
+    ],
+    "castle": [
+      3,
+      35
+    ],
+    "abbey": [
+      3,
+      30
+    ],
+    "village": [
+      2,
+      15
+    ]
   },
   "native_width": {
     "city": 3.6,
@@ -14,7 +38,15 @@
     "abbey": 2.2,
     "village": 2.0
   },
-  "landmark_scale": 1.7,
+  "landmark_scale": 2.2,
+  "props": {
+    "description": "Accessoires grossis avec les maquettes (à la place des rapports 1:1 de MapPropScale) : rapport taille affichée / taille de modèle des hameaux, moulins et panaches de cheminée, et portées (distance du rig).",
+    "hamlet_ratio": 0.7,
+    "windmill_ratio": 0.5,
+    "windmill_range": 220.0,
+    "chimney_ratio": 0.3,
+    "chimney_range": 220.0
+  },
   "visibility": {
     "city": 1250.0,
     "town": 900.0,
@@ -28,44 +60,187 @@
     "margin": 0.3
   },
   "tile_size": 256.0,
-  "variants": ["a", "b"],
+  "variants": [
+    "a",
+    "b"
+  ],
   "default_family": "west",
   "families": {
     "west": {
       "note": "Défaut : France, Angleterre, Empire, Pays-Bas, Scandinavie, Pologne, Hongrie, Croatie, pays baltes catholiques.",
-      "cultures": ["cul_breton", "cul_croatian", "cul_czech", "cul_danish", "cul_dutch", "cul_english", "cul_estonian", "cul_finnish", "cul_flemish", "cul_french", "cul_german", "cul_hungarian", "cul_irish", "cul_latvian", "cul_norwegian", "cul_polish", "cul_savoyard", "cul_scottish", "cul_slovak", "cul_slovene", "cul_swedish", "cul_welsh"],
-      "regions": ["angleterre_centre", "angleterre_est", "angleterre_nord", "angleterre_sud", "aquitaine", "croatie", "ecosse", "empire_est", "empire_nord", "empire_rhin", "empire_sud", "finlande", "france_centre", "france_est", "france_nord", "france_ouest", "galles", "hongrie", "irlande", "livonie", "mazovie", "norvege", "pays_bas", "pologne", "pomeranie", "prusse", "scandinavie", "silesie", "transylvanie"],
-      "religions": ["rel_catholic"]
+      "cultures": [
+        "cul_breton",
+        "cul_croatian",
+        "cul_czech",
+        "cul_danish",
+        "cul_dutch",
+        "cul_english",
+        "cul_estonian",
+        "cul_finnish",
+        "cul_flemish",
+        "cul_french",
+        "cul_german",
+        "cul_hungarian",
+        "cul_irish",
+        "cul_latvian",
+        "cul_norwegian",
+        "cul_polish",
+        "cul_savoyard",
+        "cul_scottish",
+        "cul_slovak",
+        "cul_slovene",
+        "cul_swedish",
+        "cul_welsh"
+      ],
+      "regions": [
+        "angleterre_centre",
+        "angleterre_est",
+        "angleterre_nord",
+        "angleterre_sud",
+        "aquitaine",
+        "croatie",
+        "ecosse",
+        "empire_est",
+        "empire_nord",
+        "empire_rhin",
+        "empire_sud",
+        "finlande",
+        "france_centre",
+        "france_est",
+        "france_nord",
+        "france_ouest",
+        "galles",
+        "hongrie",
+        "irlande",
+        "livonie",
+        "mazovie",
+        "norvege",
+        "pays_bas",
+        "pologne",
+        "pomeranie",
+        "prusse",
+        "scandinavie",
+        "silesie",
+        "transylvanie"
+      ],
+      "religions": [
+        "rel_catholic"
+      ]
     },
     "med": {
       "note": "Italie, Ibérie chrétienne, Occitanie, Provence, Catalogne, Dalmatie : pierre claire, tuiles canal, campaniles.",
-      "cultures": ["cul_basque", "cul_castilian", "cul_catalan", "cul_dalmatian", "cul_galician", "cul_ligurian", "cul_lombard", "cul_navarrese", "cul_neapolitan", "cul_occitan", "cul_portuguese", "cul_sardinian", "cul_sicilian", "cul_tuscan", "cul_venetian"],
-      "regions": ["aragon", "iberie_centre", "iberie_nord", "iberie_sud", "italie_centre", "italie_nord", "italie_sud", "languedoc", "portugal", "provence_alpes"],
+      "cultures": [
+        "cul_basque",
+        "cul_castilian",
+        "cul_catalan",
+        "cul_dalmatian",
+        "cul_galician",
+        "cul_ligurian",
+        "cul_lombard",
+        "cul_navarrese",
+        "cul_neapolitan",
+        "cul_occitan",
+        "cul_portuguese",
+        "cul_sardinian",
+        "cul_sicilian",
+        "cul_tuscan",
+        "cul_venetian"
+      ],
+      "regions": [
+        "aragon",
+        "iberie_centre",
+        "iberie_nord",
+        "iberie_sud",
+        "italie_centre",
+        "italie_nord",
+        "italie_sud",
+        "languedoc",
+        "portugal",
+        "provence_alpes"
+      ],
       "religions": []
     },
     "byz": {
       "note": "Monde byzantin et chrétientés d'Orient : Grecs, Bulgares, Serbes, Valaques, Géorgiens, Arméniens ; coupoles, brique et pierre alternées.",
-      "cultures": ["cul_alan", "cul_albanian", "cul_armenian", "cul_bosnian", "cul_bulgarian", "cul_georgian", "cul_greek", "cul_romanian", "cul_serbian"],
-      "regions": ["balkans", "caucase", "chypre", "egee", "grece", "valachie"],
-      "religions": ["rel_armenian", "rel_orthodox"]
+      "cultures": [
+        "cul_alan",
+        "cul_albanian",
+        "cul_armenian",
+        "cul_bosnian",
+        "cul_bulgarian",
+        "cul_georgian",
+        "cul_greek",
+        "cul_romanian",
+        "cul_serbian"
+      ],
+      "regions": [
+        "balkans",
+        "caucase",
+        "chypre",
+        "egee",
+        "grece",
+        "valachie"
+      ],
+      "religions": [
+        "rel_armenian",
+        "rel_orthodox"
+      ]
     },
     "rus": {
       "note": "Rus', Novgorod, Ruthénie, Lituanie et peuples de la forêt : kremlins de bois, bulbes.",
-      "cultures": ["cul_karelian", "cul_lithuanian", "cul_mordvin", "cul_novgorodian", "cul_permian", "cul_russian", "cul_ruthenian"],
-      "regions": ["lituanie", "rus_centre", "rus_nord", "rus_ouest", "rus_sud"],
+      "cultures": [
+        "cul_karelian",
+        "cul_lithuanian",
+        "cul_mordvin",
+        "cul_novgorodian",
+        "cul_permian",
+        "cul_russian",
+        "cul_ruthenian"
+      ],
+      "regions": [
+        "lituanie",
+        "rus_centre",
+        "rus_nord",
+        "rus_ouest",
+        "rus_sud"
+      ],
       "religions": []
     },
     "isl": {
       "note": "Maghreb, al-Andalus, Égypte, Levant, Mésopotamie, Anatolie turque : médinas, minarets, toits plats.",
-      "cultures": ["cul_andalusi", "cul_arabic", "cul_berber", "cul_maghrebi", "cul_turkish"],
-      "regions": ["anatolie", "egypte", "levant", "maghreb", "mesopotamie"],
-      "religions": ["rel_islam"]
+      "cultures": [
+        "cul_andalusi",
+        "cul_arabic",
+        "cul_berber",
+        "cul_maghrebi",
+        "cul_turkish"
+      ],
+      "regions": [
+        "anatolie",
+        "egypte",
+        "levant",
+        "maghreb",
+        "mesopotamie"
+      ],
+      "religions": [
+        "rel_islam"
+      ]
     },
     "steppe": {
       "note": "Horde d'Or et steppe pontique : Kiptchaks, Bachkirs, Bulgares de la Volga, Circassiens ; yourtes, enceintes de terre.",
-      "cultures": ["cul_bashkir", "cul_circassian", "cul_kipchak", "cul_volga_bulgar"],
-      "regions": ["crimee", "horde"],
-      "religions": ["rel_pagan"]
+      "cultures": [
+        "cul_bashkir",
+        "cul_circassian",
+        "cul_kipchak",
+        "cul_volga_bulgar"
+      ],
+      "regions": [
+        "crimee",
+        "horde"
+      ],
+      "religions": [
+        "rel_pagan"
+      ]
     }
   }
 }

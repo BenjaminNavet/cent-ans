@@ -1,5 +1,7 @@
 extends SceneTree
 
+## GC2 (ADR 0158) : captures des villes 1:1 ; ajouter `--town-style=real` après `--` (le style par
+## défaut est `maquette`, voir `gc_shots.gd`).
 ## Captures de contrôle du lot VT-I (villes 1:1 à toutes les hauteurs, ADR 0138) : Paris à
 ## d = 1100 (F2), 300 (fondu F1/F2), 60 (F1), 15 (raccord ville 1:1 / lointain, bande
 ## 0,86-1,1 × `block_range`) et Amiens (ville ordinaire) à d = 150.

@@ -38,11 +38,16 @@ var _origin := Vector2.ZERO
 var _fade := 1.0
 ## GC2 (ADR 0158) : grossissement constant de la maquette (1 : taille du plan).
 var _model_scale := 1.0
+## GC2 : première cuisson différée en attente (maquette cachée).
+var _deferred := false
 
 
 ## Construit la maquette ; null si le modèle n'est pas importé. `model_scale` (GC2, ADR 0158) :
-## grossissement constant autour de l'ancrage (zone, cœur et drapé suivent).
-static func create(data: Dictionary, terrain: TerrainBuilder, model_scale: float = 1.0) -> LandmarkModel:
+## grossissement constant autour de l'ancrage (zone, cœur et drapé suivent). `deferred_bake` : la
+## première cuisson des hauteurs n'est pas faite ici (≈ 90 ms par maquette au chargement de la
+## carte) mais par le chemin des recuissons (fil de travail ou tranches) ; la maquette reste
+## cachée jusque-là (`flush_bake` la termine tout de suite).
+static func create(data: Dictionary, terrain: TerrainBuilder, model_scale: float = 1.0, deferred_bake: bool = false) -> LandmarkModel:
 	var path := MODELS_DIR + str(data.get("id", "")) + ".glb"
 	if not ResourceLoader.exists(path):
 		push_warning("LandmarkModel: %s absent (lancer tools/blender_scripts/landmark_city.py)" % path)
@@ -53,6 +58,7 @@ static func create(data: Dictionary, terrain: TerrainBuilder, model_scale: float
 	var node := LandmarkModel.new()
 	node.name = "Landmark_" + str(data.get("id", ""))
 	node._model_scale = maxf(model_scale, 0.01)
+	node._deferred = deferred_bake
 	node._setup(data, scene.instantiate() as Node3D, terrain)
 	return node
 
@@ -73,7 +79,11 @@ func _setup(data: Dictionary, model: Node3D, terrain: TerrainBuilder) -> void:
 	_index_dated()
 	_extent = zone_radius * 2.2
 	_origin = Vector2(position.x, position.z) - Vector2(_extent, _extent) * 0.5
-	_bake_heights()
+	if _deferred:
+		_bake_pending = true
+		visible = false
+	else:
+		_bake_heights()
 	var triangles := 0
 	for child in model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := child as MeshInstance3D
@@ -81,7 +91,7 @@ func _setup(data: Dictionary, model: Node3D, terrain: TerrainBuilder) -> void:
 		if mesh_instance.mesh != null:
 			for surface in mesh_instance.mesh.get_surface_count():
 				triangles += mesh_instance.mesh.surface_get_array_len(surface) / 3
-	stats = {"triangles": triangles, "layers": model.find_children("*", "MeshInstance3D", true, false).size(), "scale": _model_scale}
+	stats = {"triangles": triangles, "layers": model.find_children("*", "MeshInstance3D", true, false).size(), "scale": _model_scale, "bake_ms": _bake_active_us / 1000.0}
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 
@@ -252,6 +262,9 @@ func _finish_bake() -> void:
 	_bake_image = null
 	for material in _materials:
 		_apply_height_params(material)
+	if _deferred:  # première cuisson différée : la maquette peut se montrer
+		_deferred = false
+		visible = _fade > 0.01
 	stats["bakes"] = int(stats.get("bakes", 0)) + 1
 	stats["bake_ms"] = _bake_active_us / 1000.0
 	stats["bake_ms_total"] = float(stats.get("bake_ms_total", 0.0)) + _bake_active_us / 1000.0

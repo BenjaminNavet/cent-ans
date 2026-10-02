@@ -150,6 +150,11 @@ uniform vec3 canopy_lift = vec3(1.8, 1.65, 1.25);
 // Parcellaire : demi-largeur (px carte) du pied de haie et des chemins.
 uniform float hedge_width = 0.16;
 uniform float track_width = 0.10;
+// GC (ADR 0158) : taille des enclos du parcellaire lointain par rapport à la trame d'origine
+// (1 = enclos de ≈ 4,4 px carte, soit ≈ 3 km) ; haies et chemins suivent. 0,3 : enclos de ≈ 1 km,
+// lanières de 250 m à 1 km, nettement plus petits qu'une maquette de village (≈ 3 unités). Le semis
+// des haies (`VegetationFields.LAYOUTS`, `core/crates/vegetation`) garde la trame d'origine.
+uniform float field_scale = 0.3;
 // Neige : altitude de base (m) ; roche au-dessus de rock_line.
 uniform float snow_line_m = 2750.0;
 uniform float rock_line_m = 1700.0;
@@ -386,6 +391,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 #include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
 #include "res://shaders/hb_ground.gdshaderinc"  // HB3 : habillage par biome (ADR 0143)
+#include "res://shaders/coast_band.gdshaderinc"  // TB5 : falaises et plages (crochet coast_band)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -463,7 +469,10 @@ void fragment() {
 	s = fp_splat(s, p, footprint);  // ZG5b : bords des texels de splat cassés de près
 	s /= max(s.r + s.g + s.b + s.a, 1e-3);
 	s = rl_landcover(s, p, footprint);  // lot R1 : lisières
-	vec4 terroir = terroir_at(uv);  // CV1 : finage des colonies, vigne, brûlis, pâtures
+	// TB4 : le masque de terroir est carré, à la même échelle sur les deux axes (`TerroirMask` :
+	// 1024 / plus grand côté de la carte) ; avec `uv` (carte 7168 × 6144 depuis OM), finages et
+	// brûlis étaient décalés vers le nord d'un sixième de l'ordonnée.
+	vec4 terroir = terroir_at(p / max(map_size.x, map_size.y));  // CV1 : finage des colonies, vigne, brûlis, pâtures
 	s = terroir_splat(s, terroir);
 	float macro = fbm(p * 0.035);
 	float rock_frac = max(smoothstep(rock_line_m - 700.0, rock_line_m, hc), smoothstep(0.35, 0.6, slope));
@@ -509,13 +518,15 @@ void fragment() {
 	float balk = 0.0;
 	float vine_rows = 0.0;
 	vec2 furrow_dir = vec2(1.0, 0.0);
-	float cell_px = 4.4 / max(footprint, 1e-4);  // taille d'un enclos à l'écran
+	float field_s = max(field_scale, 0.05);
+	float field_fp = footprint / field_s;  // empreinte du pixel dans le repère du parcellaire
+	float cell_px = 4.4 / max(field_fp, 1e-4);  // taille d'un enclos à l'écran
 	float field_vis = smoothstep(5.0, 14.0, cell_px);
 	if (field_vis > 0.0 && (s.g + s.r) > 0.05) {
 		float rv = region_value(p);
 		int lay = rv > 0.0 ? 1 : 0;
 		float cell_h; float strip_h; float du; float dv; float roll_u; float roll_v; float strip_d; float rows;
-		field_at(p, lay, cell_h, strip_h, du, dv, roll_u, roll_v, strip_d, furrow_dir, rows);
+		field_at(p / field_s, lay, cell_h, strip_h, du, dv, roll_u, roll_v, strip_d, furrow_dir, rows);
 		// Lanières visibles de plus près que les enclos : sinon, couleur de l'enclos.
 		float strip_vis = smoothstep(3.0, 8.0, cell_px * 0.4);
 		float h = strip_vis > 0.5 ? strip_h : cell_h;
@@ -551,16 +562,16 @@ void fragment() {
 		}
 		// Bords : haie (tirage < probabilité), chemin de terre (autre tirage), sinon talus herbeux.
 		float p_hedge = open_land * mix(0.1, 0.75, lu.b);
-		float aa = footprint * 0.75;
+		float aa = field_fp * 0.75;
 		float hedge_u = step(roll_u, p_hedge) * (1.0 - smoothstep(hedge_width - aa, hedge_width + aa, du));
 		float hedge_v = step(roll_v, p_hedge) * (1.0 - smoothstep(hedge_width - aa, hedge_width + aa, dv));
 		// Au-delà d'un pixel, la ligne s'estompe (couverture) au lieu de disparaître.
-		float cover = clamp(2.0 * hedge_width / max(footprint, 1e-4), 0.0, 1.0);
+		float cover = clamp(2.0 * hedge_width / max(field_fp, 1e-4), 0.0, 1.0);
 		hedge = max(hedge_u, hedge_v) * mix(cover, 1.0, cover) * field_vis;
 		float tr_u = step(fract(roll_u * 7.31), 0.07) * (1.0 - smoothstep(track_width - aa, track_width + aa, du));
 		float tr_v = step(fract(roll_v * 7.31), 0.07) * (1.0 - smoothstep(track_width - aa, track_width + aa, dv));
 		// Limite entre les deux trames : chemin continu.
-		float tcover = clamp(2.0 * track_width / max(footprint, 1e-4), 0.0, 1.0);
+		float tcover = clamp(2.0 * track_width / max(field_fp, 1e-4), 0.0, 1.0);
 		float tr_r = 0.0;
 		if (tcover > 0.15 && abs(rv) < 0.05) {
 			float rgrad = length(vec2(region_value(p + vec2(1.0, 0.0)) - rv, region_value(p + vec2(0.0, 1.0)) - rv));
@@ -637,8 +648,6 @@ void fragment() {
 	col = mix(col, track_color * (0.9 + 0.2 * macro), track * open_w * 0.85);
 	col = mix(col, hedge_color, hedge * open_w * 0.55);
 
-	col = terroir_burn(col, terroir.b * (1.0 - snow * 0.7), p, footprint);  // CV1
-
 	// Normales de détail combinées au relief (blend « whiteout » dans le repère carte).
 	float dstrength = detail_normal_strength * detail_fade;
 	n = normalize(vec3(n.x + dn.x * dstrength, n.y, n.z - dn.y * dstrength));
@@ -667,11 +676,17 @@ void fragment() {
 	vec3 season_den = w_grass * grass_summer + w_farm * farm_summer + w_forest * tint_forest + w_rock * tint_rock + w_heath * tint_heath;
 	vec3 season_k = dot(season_den, vec3(1.0)) > 1e-4 ? season_ratio(season_num, season_den) : vec3(1.0);
 	sg_apply(uv, footprint, snow, land_f, season_k, col);  // SS2
+	vec4 burn_parcel;  // TB4 : parcelle HB du pixel (brûlis par parcelles)
 	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
 		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, k_grass, k_forest,
-		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col);  // HB3
+		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col, burn_parcel);  // HB3
 	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
+	// TB4 : brûlis (CV1) posé par-dessus la carte de couleur (SS2) et les matières (HB3), qui le
+	// recouvraient. Par parcelles (celles de l'habillage HB) : une part carbonisée, une part
+	// roussie, le reste intact, selon la dévastation lue au centre de la parcelle ; au loin, la
+	// moyenne des trois, découpée par un bruit large.
+	col = terroir_burn(col, terroir.b, 1.0 - snow * 0.7, p, footprint, burn_parcel, 1.0 / max(map_size.x, map_size.y));
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
@@ -709,6 +724,7 @@ void fragment() {
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
+	coast_band(p, uv, footprint, coast, hc, world_pos.y, lake_shore, snow, col, roughness, n);  // TB5 : après l'eau peinte
 
 	// --- Couche politique ---
 	if (hb_debug > 9.5 && hb_debug < 10.5) { hb_dbg = col; }  // HB3 : sonde
@@ -841,7 +857,13 @@ void fragment() {
 	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
 	if (hb_debug > 10.5 && hb_debug < 11.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 wx_emit = vec3(0.0);
-	col = weather_ground(col, p, hc, slope, footprint, roughness, wx_emit);  // CM2 : météo
+	// TB6 : brume du matin (relief lissé à grande échelle, moyenne régionale, rasance du regard).
+	bool wx_valley = weather_enabled && weather_valley_mist > 0.0;
+	float wx_h_mid = wx_valley ? height_m_lod(uv, weather_valley_lods.x) : hc;
+	float wx_h_wide = wx_valley ? height_m_lod(uv, weather_valley_lods.y) : hc;
+	float wx_grazing = 1.0 - abs(normalize(CAMERA_POSITION_WORLD - world_pos).y);
+	float wx_mist = 0.0;
+	col = weather_ground(col, p, hc, slope, footprint, wx_h_mid, wx_h_wide, wx_grazing, roughness, wx_emit, wx_mist);  // CM2 : météo
 	if (hb_debug > 11.5 && hb_debug < 12.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
@@ -856,6 +878,6 @@ void fragment() {
 		ALBEDO = hb_dbg;
 	}
 	SPECULAR = mix(0.3, 0.1, lake);
-	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), fog_mist * 0.7 * (1.0 - pm_weight())));  // BR : la brume nappe le relief
+	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), max(fog_mist * 0.7, wx_mist) * (1.0 - pm_weight())));  // BR, TB6 : la brume nappe le relief
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 }

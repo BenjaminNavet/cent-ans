@@ -229,13 +229,16 @@ func _load_rivers() -> void:
 		parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if parsed is Dictionary:
 		bank_px = float(parsed.get("bank_px", 1.1))
+		# GC (ADR 0158) : la maquette d'une ville emblématique est grossie (`landmark_scale`) ; le
+		# rendu générique du fleuve se retire sur toute son emprise (pas de second fleuve autour).
+		var zone_scale := TownMaquetteData.landmark_scale() if TownMaquetteData.enabled() else 1.0
 		for zone: Dictionary in parsed.get("custom_zones", []):
 			var center: Array = zone.get("px", [0, 0])
 			zones.append({
 				"id": str(zone.get("id", "")),
 				"name": str(zone.get("name", "")),
 				"px": Vector2(float(center[0]), float(center[1])),
-				"radius_px": float(zone.get("radius_px", 0.0)),
+				"radius_px": float(zone.get("radius_px", 0.0)) * zone_scale,
 				"boundary_bridges": bool(zone.get("boundary_bridges", true)),
 			})
 		for entry: Dictionary in parsed.get("rivers", []):

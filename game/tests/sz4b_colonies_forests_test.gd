@@ -62,6 +62,8 @@ func _settle(rig: CampaignCamera, focus: Vector3, distance: float, layer: Settle
 
 
 func _test_map() -> void:
+	# GC (ADR 0158) : ce test contrôle les emprises réelles ; il force les villes 1:1.
+	TownMaquetteData.set_style(TownMaquetteData.STYLE_REAL)
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
 	root.add_child(map)
 	for i in 5:

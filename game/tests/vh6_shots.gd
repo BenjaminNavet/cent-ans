@@ -1,5 +1,7 @@
 extends SceneTree
 
+## GC2 (ADR 0158) : captures des villes 1:1 ; ajouter `--town-style=real` après `--` (le style par
+## défaut est `maquette`, voir `gc_shots.gd`).
 ## Captures et mesure du lot VH6 (Londres vers 1340 à l'échelle 1:1, ADR 0078) : vue
 ## stratégique (maquette sous loupe), fondu, paliers vallée et site (Tour, London Bridge, Old
 ## St Paul's, Westminster), puis mesure d'images par seconde au-dessus de Londres et de Rouen

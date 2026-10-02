@@ -126,6 +126,9 @@ func _look(map: Node3D, px: Vector2, distance: float) -> void:
 		await process_frame
 	map.settlement_layer.declutter()
 	await process_frame
+	# La passe tranchée relancée par l'image peut placer un nom avec une projection en retard
+	# d'une image (échec intermittent sous charge) : on mesure sur une passe entière et à jour.
+	map.settlement_layer.declutter()
 
 
 ## Positions écran des signes visibles autres que l'écu : marteaux, sceaux, sites de rencontre.
