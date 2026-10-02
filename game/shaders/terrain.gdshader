@@ -150,6 +150,11 @@ uniform vec3 canopy_lift = vec3(1.8, 1.65, 1.25);
 // Parcellaire : demi-largeur (px carte) du pied de haie et des chemins.
 uniform float hedge_width = 0.16;
 uniform float track_width = 0.10;
+// GC (ADR 0158) : taille des enclos du parcellaire lointain par rapport à la trame d'origine
+// (1 = enclos de ≈ 4,4 px carte, soit ≈ 3 km) ; haies et chemins suivent. 0,3 : enclos de ≈ 1 km,
+// lanières de 250 m à 1 km, nettement plus petits qu'une maquette de village (≈ 3 unités). Le semis
+// des haies (`VegetationFields.LAYOUTS`, `core/crates/vegetation`) garde la trame d'origine.
+uniform float field_scale = 0.3;
 // Neige : altitude de base (m) ; roche au-dessus de rock_line.
 uniform float snow_line_m = 2750.0;
 uniform float rock_line_m = 1700.0;
@@ -509,13 +514,15 @@ void fragment() {
 	float balk = 0.0;
 	float vine_rows = 0.0;
 	vec2 furrow_dir = vec2(1.0, 0.0);
-	float cell_px = 4.4 / max(footprint, 1e-4);  // taille d'un enclos à l'écran
+	float field_s = max(field_scale, 0.05);
+	float field_fp = footprint / field_s;  // empreinte du pixel dans le repère du parcellaire
+	float cell_px = 4.4 / max(field_fp, 1e-4);  // taille d'un enclos à l'écran
 	float field_vis = smoothstep(5.0, 14.0, cell_px);
 	if (field_vis > 0.0 && (s.g + s.r) > 0.05) {
 		float rv = region_value(p);
 		int lay = rv > 0.0 ? 1 : 0;
 		float cell_h; float strip_h; float du; float dv; float roll_u; float roll_v; float strip_d; float rows;
-		field_at(p, lay, cell_h, strip_h, du, dv, roll_u, roll_v, strip_d, furrow_dir, rows);
+		field_at(p / field_s, lay, cell_h, strip_h, du, dv, roll_u, roll_v, strip_d, furrow_dir, rows);
 		// Lanières visibles de plus près que les enclos : sinon, couleur de l'enclos.
 		float strip_vis = smoothstep(3.0, 8.0, cell_px * 0.4);
 		float h = strip_vis > 0.5 ? strip_h : cell_h;
@@ -551,16 +558,16 @@ void fragment() {
 		}
 		// Bords : haie (tirage < probabilité), chemin de terre (autre tirage), sinon talus herbeux.
 		float p_hedge = open_land * mix(0.1, 0.75, lu.b);
-		float aa = footprint * 0.75;
+		float aa = field_fp * 0.75;
 		float hedge_u = step(roll_u, p_hedge) * (1.0 - smoothstep(hedge_width - aa, hedge_width + aa, du));
 		float hedge_v = step(roll_v, p_hedge) * (1.0 - smoothstep(hedge_width - aa, hedge_width + aa, dv));
 		// Au-delà d'un pixel, la ligne s'estompe (couverture) au lieu de disparaître.
-		float cover = clamp(2.0 * hedge_width / max(footprint, 1e-4), 0.0, 1.0);
+		float cover = clamp(2.0 * hedge_width / max(field_fp, 1e-4), 0.0, 1.0);
 		hedge = max(hedge_u, hedge_v) * mix(cover, 1.0, cover) * field_vis;
 		float tr_u = step(fract(roll_u * 7.31), 0.07) * (1.0 - smoothstep(track_width - aa, track_width + aa, du));
 		float tr_v = step(fract(roll_v * 7.31), 0.07) * (1.0 - smoothstep(track_width - aa, track_width + aa, dv));
 		// Limite entre les deux trames : chemin continu.
-		float tcover = clamp(2.0 * track_width / max(footprint, 1e-4), 0.0, 1.0);
+		float tcover = clamp(2.0 * track_width / max(field_fp, 1e-4), 0.0, 1.0);
 		float tr_r = 0.0;
 		if (tcover > 0.15 && abs(rv) < 0.05) {
 			float rgrad = length(vec2(region_value(p + vec2(1.0, 0.0)) - rv, region_value(p + vec2(0.0, 1.0)) - rv));
