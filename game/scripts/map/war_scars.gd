@@ -6,9 +6,10 @@ extends Node3D
 ## durées de `data/ui/war_scars.json` (schéma `war_scars_ui`). Aucun pictogramme d'interface.
 ##
 ## - **Peste** (`set_plague_sites`, scènes `plague` de `get_map_scenes` résolues par `FolkScenes`) :
-##   fosses communes et charrette des morts au bord de la colonie, portes marquées d'une croix
-##   sur les maisons de la ville 1:1 (`plan_provider`, dès que son plan est chargé). Échelle 1:1,
-##   palier proche (`plague.max_distance`).
+##   fosses communes groupées au bord de la colonie et charrette des morts sur la route, grossies
+##   selon la distance de la caméra pour rester lisibles aux distances de jeu
+##   (`plague.scale_per_distance`, sous `plague.max_distance`) ; portes marquées d'une croix sur
+##   les maisons de la ville 1:1 ordinaire (`plan_provider`), à l'échelle réelle.
 ## - **Champ de bataille** (`refresh`, événements `battle` de `get_events` et
 ##   `get_pending_events`) : tertre, débris, corbeaux à l'endroit de la bataille (position de
 ##   l'armée de l'événement, à défaut centre de la province) pendant `battlefield.turns` tours ;
@@ -49,7 +50,7 @@ var _terrain: TerrainBuilder = null
 ## `ArmyMarkers` (ou objet de test) : `marker_ids()`, `marker_of(id)`, `world_position_of(id)`,
 ## `hidden_provinces`.
 var _armies: Object = null
-## colonie → {key, node, site, doors_done, unit}
+## colonie → {key, node, site, intensity, seed, doors_done, factor, stale}
 var _plague: Dictionary = {}
 ## clé (province ou « army:<id> ») → {at, province, turn, texts, node, stage, seed}
 var _fields: Dictionary = {}
@@ -184,8 +185,9 @@ func _update_stats() -> void:
 # --- Peste -----------------------------------------------------------------------------
 
 
-## Colonies pestiférées du tour : `[{settlement, center, out, footprint, intensity, seed}]`
-## (`FolkScenes.edge_frame`), `center` et `footprint` en unités monde, `out` unitaire.
+## Colonies pestiférées du tour : `[{settlement, center, out, footprint, intensity, seed, road}]`
+## (`FolkScenes.edge_frame`), `center` et `footprint` en unités monde, `out` unitaire, `road` :
+## tracé d'une route qui sort de la colonie (facultatif).
 func set_plague_sites(sites: Array) -> void:
 	var block := _block("plague")
 	var seen := {}
@@ -217,24 +219,80 @@ func _build_plague(id: String, site: Dictionary, intensity: float, block: Dictio
 	root.name = "Plague_%s" % id
 	root.visible = false
 	add_child(root)
-	var unit := maxf(float(block.get("scale", 1.0)), 1.0) / _meters_per_unit()
-	var center: Vector2 = site.get("center", Vector2.ZERO)
-	var out: Vector2 = site.get("out", Vector2.RIGHT)
-	var along := Vector2(-out.y, out.x)
-	var edge := center + out * float(site.get("footprint", 0.0))
 	var seed_value := int(site.get("seed", id.hash()))
 	var pits := _count_for(block.get("pits", []), intensity)
 	for k in pits:
-		# Deux rangs en quinconce, au-delà du convoi et de la procession FK (0 à 9 m du bord).
-		var out_m := 24.0 + 9.5 * float(k % 2)
-		var along_m := (float(k) - float(pits - 1) * 0.5) * 8.5
-		var at := edge + (out * out_m + along * along_m) * unit
-		var dir := along.rotated((_h(seed_value, 40 + k) - 0.5) * 0.5)
-		_place(root, "Pit_%d" % k, WarScarMeshes.plague_pit(), at, atan2(-dir.y, dir.x), unit, 0.0)
+		# Deux rangs en quinconce, groupés au bord de la colonie (mètres avant grossissement).
+		var pit := _add_prop(root, "Pit_%d" % k, WarScarMeshes.plague_pit())
+		pit.set_meta("offset", Vector2(10.0 + 7.5 * float(k % 2), (float(k) - float(pits - 1) * 0.5) * 8.5))
+		pit.set_meta("turn", (_h(seed_value, 40 + k) - 0.5) * 0.5)
 	if bool(block.get("cart", false)) and pits > 0:
-		var cart_at := edge + (out * 15.0 - along * (float(pits) * 4.3 + 5.0)) * unit
-		_place(root, "DeadCart", FolkModels.prop_mesh("dead_cart"), cart_at, atan2(along.x, along.y), unit, 0.0)
-	return {"key": key, "node": root, "site": site, "intensity": intensity, "seed": seed_value, "doors_done": false}
+		var cart := _add_prop(root, "DeadCart", FolkModels.prop_mesh("dead_cart"))
+		cart.set_meta("cart", float(pits))
+	return {"key": key, "node": root, "site": site, "intensity": intensity, "seed": seed_value, "doors_done": false, "factor": -1.0}
+
+
+func _add_prop(parent: Node3D, node_name: String, mesh: Mesh) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
+	return instance
+
+
+## Grossissement des fosses et de la charrette par rapport à l'échelle réelle : proportionnel à
+## la distance de la caméra (taille à l'écran constante, comme les armées), jamais sous 1.
+static func plague_factor(camera_distance: float) -> float:
+	var block := _block("plague")
+	return clampf(float(block.get("scale_per_distance", 0.0)) * camera_distance, 1.0, maxf(float(block.get("max_scale", 1.0)), 1.0))
+
+
+## Place fosses et charrette d'une colonie au grossissement `factor` : fosses groupées au bord,
+## charrette sur la route qui sort de la colonie (`site.road`), à défaut près des fosses.
+func _layout_plague(entry: Dictionary, factor: float) -> void:
+	var site: Dictionary = entry["site"]
+	var unit := factor / _meters_per_unit()
+	var center: Vector2 = site.get("center", Vector2.ZERO)
+	var out: Vector2 = site.get("out", Vector2.RIGHT)
+	var along := Vector2(-out.y, out.x)
+	var footprint := float(site.get("footprint", 0.0))
+	var edge := center + out * footprint
+	for child in (entry["node"] as Node3D).get_children():
+		var node := child as Node3D
+		if node.has_meta("offset"):
+			var offset: Vector2 = node.get_meta("offset")
+			var at := edge + (out * offset.x + along * offset.y) * unit
+			var dir := along.rotated(float(node.get_meta("turn", 0.0)))
+			node.transform = Transform3D(Basis(Vector3.UP, atan2(-dir.y, dir.x)).scaled(Vector3.ONE * unit), Vector3(at.x, _ground(at), at.y))
+		elif node.has_meta("cart"):
+			var cart_unit := unit * maxf(float(_block("plague").get("cart_scale", 1.0)), 1.0)
+			var at := edge + (out * 2.0 - along * (float(node.get_meta("cart")) * 4.3 + 6.0)) * unit
+			var dir := along
+			var road: Variant = site.get("road")
+			if road is PackedVector2Array and (road as PackedVector2Array).size() >= 2:
+				var spot := road_spot(road, center, footprint + 6.0 * cart_unit)
+				at = spot[0]
+				dir = spot[1]
+			node.transform = Transform3D(Basis(Vector3.UP, atan2(dir.x, dir.y)).scaled(Vector3.ONE * cart_unit), Vector3(at.x, _ground(at), at.y))
+		elif node.has_meta("xz"):  # portes : échelle réelle, seul le sol change
+			var xz: Vector2 = node.get_meta("xz")
+			node.position.y = _ground(xz) + float(node.get_meta("lift", 0.0))
+
+
+## Point d'un tracé (orienté depuis la colonie) à `distance` du centre, et direction du tracé en
+## ce point : `[Vector2, Vector2]` ; fin du tracé s'il est plus court.
+static func road_spot(road: PackedVector2Array, center: Vector2, distance: float) -> Array:
+	for i in road.size() - 1:
+		var a := road[i]
+		var b := road[i + 1]
+		var da := a.distance_to(center)
+		var db := b.distance_to(center)
+		if db >= distance and b != a:
+			var t := clampf((distance - da) / maxf(db - da, 1e-6), 0.0, 1.0)
+			return [a.lerp(b, t), (b - a).normalized()]
+	var last := road.size() - 1
+	var dir := road[last] - road[last - 1]
+	return [road[last], dir.normalized() if dir.length() > 0.0 else Vector2.RIGHT]
 
 
 ## Pose un maillage au sol : méta `xz` (point carte) et `lift` pour les recalages.
@@ -261,6 +319,9 @@ func _try_doors(id: String) -> bool:
 	if not plan_provider.is_valid():
 		return false
 	var info: Variant = plan_provider.call(id)
+	if info is Dictionary and bool((info as Dictionary).get("none", false)):
+		entry["doors_done"] = true  # ville sans portes marquées (croix illisibles : voir `CampaignLife`)
+		return true
 	if not (info is Dictionary) or not ((info as Dictionary).get("plan") is Dictionary):
 		return false
 	var houses: Variant = ((info as Dictionary)["plan"] as Dictionary).get("houses")
@@ -630,6 +691,7 @@ func update_view(camera_distance: float, normal_weight: float) -> void:
 	var normal := normal_weight > 0.02
 	var plague_block := _block("plague")
 	var plague_on := normal and camera_distance <= float(plague_block.get("max_distance", 0.0))
+	var plague_scale := plague_factor(camera_distance)
 	if _ground_dirty and _reground_timer <= 0.0:
 		# Sol changé (exagération du relief, pages plus fines) : chaque élément est recalé à sa
 		# prochaine vue, pas seulement ceux visibles à cet instant.
@@ -647,12 +709,13 @@ func update_view(camera_distance: float, normal_weight: float) -> void:
 			continue
 		if not bool(entry["doors_done"]) and _door_timer <= 0.0:
 			_try_doors(str(id))
-		if bool(entry.get("stale", false)):
+		# Fosses et charrette : taille à l'écran tenue (grossissement selon la distance) ; mise en
+		# place à la première vue, quand il change de plus de 2 %, ou après un recalage du sol.
+		var laid := float(entry.get("factor", -1.0))
+		if laid < 0.0 or bool(entry.get("stale", false)) or absf(plague_scale - laid) > laid * 0.02:
 			entry["stale"] = false
-			for child in root.get_children():
-				var node := child as Node3D
-				var xz: Vector2 = node.get_meta("xz")
-				node.position.y = _ground(xz) + float(node.get_meta("lift", 0.0))
+			entry["factor"] = plague_scale
+			_layout_plague(entry, plague_scale)
 	if _door_timer <= 0.0:
 		_door_timer = DOOR_RETRY_INTERVAL
 	var field_block := _block("battlefield")

@@ -1,8 +1,7 @@
 {
-  "description": "Lot TB4 : conséquences visibles de la guerre et des fléaux sur la carte de campagne (rendu seulement, lu par game/scripts/map/war_scars.gd). plague : fosses, portes marquées d'une croix et charrette des morts des colonies pestiférées (scènes `plague` du pont), à l'échelle 1:1, au palier proche. battlefield : tertre, corbeaux et débris à l'endroit d'une bataille, pendant `turns` tours (corbeaux et débris partent plus tôt). siege : engins bâtis sur place (N7, ADR 0128) posés près du camp des assiégeants selon leur avancement. Aucune règle de jeu.",
+  "description": "Lot TB4 : conséquences visibles de la guerre et des fléaux sur la carte de campagne (rendu seulement, lu par game/scripts/map/war_scars.gd). plague : fosses, portes marquées d'une croix et charrette des morts des colonies pestiférées (scènes `plague` du pont), grossies selon la distance de la caméra (taille à l'écran tenue aux distances de jeu ; portes à l'échelle réelle, villes ordinaires seulement). battlefield : tertre, corbeaux et débris à l'endroit d'une bataille, pendant `turns` tours (corbeaux et débris partent plus tôt). siege : engins bâtis sur place (N7, ADR 0128) posés près du camp des assiégeants selon leur avancement. Aucune règle de jeu.",
   "plague": {
-    "max_distance": 6.0,
-    "scale": 1.0,
+    "max_distance": 60.0,
     "min_intensity": 0.0,
     "pits": [
       2,
@@ -13,7 +12,10 @@
       14
     ],
     "door_search_m": 260.0,
-    "cart": true
+    "cart": true,
+    "scale_per_distance": 2.5,
+    "max_scale": 150.0,
+    "cart_scale": 1.8
   },
   "battlefield": {
     "turns": 4,

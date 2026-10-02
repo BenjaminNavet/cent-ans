@@ -148,7 +148,8 @@ func _check_plague(block: Dictionary) -> void:
 	var plan_ready := [false]
 	scars.plan_provider = func(_id: String) -> Dictionary:
 		return {"plan": {"houses": houses}, "anchor": anchor, "meters_per_unit": 719.0} if plan_ready[0] else {}
-	var site := {"settlement": "set_test", "center": anchor, "out": Vector2.RIGHT, "footprint": 0.5, "intensity": 1.0, "seed": 42}
+	var road := PackedVector2Array([anchor, anchor + Vector2(0.0, -2.0), anchor + Vector2(1.0, -12.0)])
+	var site := {"settlement": "set_test", "center": anchor, "out": Vector2.RIGHT, "footprint": 0.5, "intensity": 1.0, "seed": 42, "road": road}
 	scars.set_plague_sites([site])
 	var node := scars.plague_node("set_test")
 	if not _check(node != null, "plague site built"):
@@ -177,7 +178,8 @@ func _check_plague(block: Dictionary) -> void:
 	_check(pit.position.x > anchor.x + 0.5, "pits beyond the settlement edge")
 	_check(_only_meshes(node), "plague shown by 3D props only (no interface sign)")
 	_check(int(scars.stats.get("doors", 0)) == int(doors[1]) and int(scars.stats.get("pits", 0)) == int(pits[1]), "stats: %s" % scars.stats)
-	# Vue moyenne et parchemin : rien.
+	_check_plague_screen(scars, node, block)
+	# Vue lointaine et parchemin : rien.
 	scars.update_view(float(block["max_distance"]) * 2.0, 1.0)
 	_check(not node.visible, "plague hidden beyond max_distance")
 	scars.update_view(float(block["max_distance"]) * 0.5, 0.0)
@@ -356,3 +358,60 @@ func _check_siege(block: Dictionary) -> void:
 	_check(scars.engine_names("army_1").is_empty() and rebuilt.figures.get_node_or_null(WarScars.ENGINES_NODE) == null, "engines removed when the siege ends")
 	scars.free()
 	armies.free()
+
+
+## Retouche du 02/10 : aux distances de jeu du palier proche (15 à 40), fosses et charrette sont
+## dans le champ d'une caméra posée sur la colonie et font au moins `MIN_PX` à l'écran (900p,
+## champ de 55° de la carte de campagne) ; la charrette est sur la route.
+const MIN_PX := 12.0
+const VIEW_HEIGHT := 900.0
+const CAMERA_FOV := 55.0
+
+
+func _check_plague_screen(scars: WarScars, node: Node3D, block: Dictionary) -> void:
+	var site_center := Vector3(100.0, 0.0, 200.0)
+	var camera := Camera3D.new()
+	camera.fov = CAMERA_FOV
+	root.add_child(camera)
+	for distance in [15.0, 20.0, 40.0]:
+		if distance > float(block["max_distance"]):
+			continue
+		scars.update_view(distance, 1.0)
+		# Caméra de la carte : visée sur la colonie, tangage de 35° (vue rapprochée).
+		var pitch := deg_to_rad(35.0)
+		camera.global_position = site_center + Vector3(0.0, sin(pitch), cos(pitch)) * distance
+		camera.look_at(site_center, Vector3.UP)
+		var smallest := INF
+		for child in node.get_children():
+			var prop := child as MeshInstance3D
+			if str(prop.name).begins_with("Door_"):
+				continue
+			var size := prop.mesh.get_aabb().size
+			var world_length := maxf(size.x, size.z) * prop.scale.x
+			var px := world_length / (2.0 * camera.global_position.distance_to(prop.global_position) * tan(deg_to_rad(CAMERA_FOV * 0.5))) * VIEW_HEIGHT
+			smallest = minf(smallest, px)
+			_check(px >= MIN_PX, "%s is %.1f px at distance %.0f (≥ %.0f wanted)" % [prop.name, px, distance, MIN_PX])
+			_check(camera.is_position_in_frustum(prop.global_position), "%s in view at distance %.0f" % [prop.name, distance])
+			_check(Vector2(prop.position.x - site_center.x, prop.position.z - site_center.z).length() < distance * 0.45, "%s stays close to the town at distance %.0f" % [prop.name, distance])
+		print("tb4_scars_test: plague props at distance %.0f: smallest %.1f px, factor %.0f" % [distance, smallest, WarScars.plague_factor(distance)])
+	# Charrette sur la route (tracé qui part vers -Z), pas dans les fosses.
+	var cart := node.get_node_or_null("DeadCart") as Node3D
+	if cart != null:
+		_check(absf(cart.position.x - site_center.x) < 0.5 and cart.position.z < site_center.z - 0.5, "dead cart on the road out of town: %s" % cart.position)
+	# De très près : échelle réelle (pas de fosse géante dans la ville 1:1).
+	scars.update_view(0.2, 1.0)
+	_check(is_equal_approx((node.get_node("Pit_0") as Node3D).scale.x, 1.0 / 719.0), "pits at real scale up close")
+	camera.free()
+	scars.update_view(float(block["max_distance"]) * 0.5, 1.0)
+
+
+## Croix des portes marquées : au moins 6 px à la distance minimale de la caméra de jeu (dernier
+## étage de `CloseCameraProfile.level_min_distance`), à l'échelle réelle.
+func _check_door_cross() -> void:
+	var profile := CloseCameraProfile.load_default()
+	var floor_distance: float = profile.level_min_distance[profile.level_min_distance.size() - 1]
+	var px := WarScarMeshes.DOOR_CROSS_M / 719.0 / (2.0 * floor_distance * tan(deg_to_rad(CAMERA_FOV * 0.5))) * VIEW_HEIGHT
+	print("tb4_scars_test: door cross %.1f px at the camera floor %.2f (ordinary towns)" % [px, floor_distance])
+	_check(px >= 6.0, "door cross is %.1f px at the closest camera distance (≥ 6 wanted)" % px)
+	var landmark_px := WarScarMeshes.DOOR_CROSS_M / 719.0 / (2.0 * profile.landmark_min_distance * tan(deg_to_rad(CAMERA_FOV * 0.5))) * VIEW_HEIGHT
+	_check(landmark_px < 6.0, "landmark cities: crosses unreadable (%.1f px), hence no marked door there" % landmark_px)

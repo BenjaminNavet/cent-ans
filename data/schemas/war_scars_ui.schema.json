@@ -18,7 +18,9 @@
       "type": "object",
       "required": [
         "max_distance",
-        "scale",
+        "scale_per_distance",
+        "max_scale",
+        "cart_scale",
         "min_intensity",
         "pits",
         "doors",
@@ -31,12 +33,6 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "Distance du rig de caméra (unités monde) au-delà de laquelle rien n'est dessiné."
-        },
-        "scale": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 20,
-          "description": "Grossissement par rapport à l'échelle réelle (1 : 1:1 comme les figurants FK)."
         },
         "min_intensity": {
           "type": "number",
@@ -74,6 +70,24 @@
         "cart": {
           "type": "boolean",
           "description": "Charrette des morts arrêtée près des fosses."
+        },
+        "scale_per_distance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 20,
+          "description": "Grossissement des fosses et de la charrette par unité de distance de caméra (taille à l'écran constante ; jamais sous l'échelle réelle). 2,5 : une fosse de 6,5 m fait ≈ 19 px en 900p."
+        },
+        "max_scale": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 400,
+          "description": "Grossissement maximal (atteint à max_scale / scale_per_distance)."
+        },
+        "cart_scale": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Grossissement propre à la charrette des morts (3 m de long), en plus du précédent."
         }
       }
     },

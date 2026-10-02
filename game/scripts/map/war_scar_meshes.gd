@@ -15,6 +15,8 @@ const WOOD_DARK := Color(0.2, 0.14, 0.09)
 const WOOD_FRESH := Color(0.62, 0.48, 0.3)
 const IRON := Color(0.3, 0.3, 0.32)
 const CROW := Color(0.03, 0.03, 0.035)
+## Hauteur (m) de la croix peinte sur une porte marquée (taille écran contrôlée par le test TB4).
+const DOOR_CROSS_M := 2.2
 const SHIELD_COLORS := [Color(0.55, 0.1, 0.08), Color(0.12, 0.2, 0.5), Color(0.8, 0.76, 0.66), Color(0.7, 0.55, 0.15)]
 
 static var _cache: Dictionary = {}
@@ -128,23 +130,22 @@ static func _h(a: int, b: int) -> float:
 # --- Peste (mètres) --------------------------------------------------------------------
 
 
-## Fosse commune : terre remuée en bourrelets, fond sombre, corps en linceul, chaux, croix au
-## chevet. Longueur le long de +X (≈ 6,5 m), origine au centre, au sol.
+## Fosse commune : rectangle de terre sombre fraîchement remuée (bombé, bourrelet clair autour),
+## corps en linceul et chaux dans la partie encore ouverte, grande croix de bois au chevet.
+## Longueur le long de +X (≈ 6,5 m), origine au centre, au sol.
 static func plague_pit() -> ArrayMesh:
 	if _cache.has("plague_pit"):
 		return _cache["plague_pit"]
 	var st := _begin()
-	box(st, Vector3(0.0, 0.06, 0.0), Vector3(5.6, 0.12, 2.4), EARTH_DARK)
-	dome(st, Vector3(0.0, 0.0, 1.9), 1.5, 0.75, EARTH, 11)
-	dome(st, Vector3(-1.9, 0.0, 1.8), 1.3, 0.6, EARTH, 12)
-	dome(st, Vector3(1.9, 0.0, 1.8), 1.3, 0.6, EARTH, 13)
-	dome(st, Vector3(0.6, 0.0, -1.9), 1.4, 0.5, EARTH, 14)
-	for k in 4:
-		var x := -2.0 + 1.3 * k
+	box(st, Vector3(0.0, 0.1, 0.0), Vector3(6.6, 0.2, 3.3), EARTH)
+	box(st, Vector3(-1.1, 0.26, 0.0), Vector3(3.6, 0.32, 2.5), EARTH_DARK)
+	box(st, Vector3(-1.1, 0.46, 0.0), Vector3(2.9, 0.16, 1.7), EARTH_DARK.lightened(0.06))
+	box(st, Vector3(1.9, 0.22, 0.0), Vector3(2.2, 0.06, 2.3), Color(0.05, 0.04, 0.035))
+	for k in 3:
 		var skew := Basis(Vector3.UP, 0.25 * (_h(21, k) - 0.5))
-		box(st, Vector3(x, 0.2, -0.15 + 0.5 * (_h(22, k) - 0.5)), Vector3(0.5, 0.26, 1.75), SHROUD, skew)
-	box(st, Vector3(1.1, 0.135, 0.5), Vector3(2.2, 0.03, 0.9), LIME)
-	cross(st, Vector3(-3.4, 0.0, 0.0), 1.7, WOOD, PI * 0.5)
+		box(st, Vector3(1.25 + 0.65 * k, 0.36, 0.25 * (_h(22, k) - 0.5)), Vector3(0.5, 0.26, 1.75), SHROUD, skew)
+	box(st, Vector3(2.75, 0.27, -0.75), Vector3(0.6, 0.04, 0.6), LIME)
+	cross(st, Vector3(-3.5, 0.0, 0.0), 3.2, WOOD_FRESH, PI * 0.5)
 	_cache["plague_pit"] = _commit(st)
 	return _cache["plague_pit"]
 
@@ -156,8 +157,9 @@ static func marked_door() -> ArrayMesh:
 		return _cache["marked_door"]
 	var st := _begin()
 	box(st, Vector3(0.0, 0.85, 0.0), Vector3(1.15, 2.7, 0.08), WOOD_DARK)
-	box(st, Vector3(0.0, 1.05, 0.06), Vector3(0.2, 1.5, 0.04), LIME)
-	box(st, Vector3(0.0, 1.3, 0.06), Vector3(0.8, 0.2, 0.04), LIME)
+	# Croix à la chaux sur toute la hauteur du vantail (`DOOR_CROSS_M`).
+	box(st, Vector3(0.0, 1.1, 0.06), Vector3(0.26, DOOR_CROSS_M, 0.04), LIME)
+	box(st, Vector3(0.0, 1.45, 0.06), Vector3(1.05, 0.26, 0.04), LIME)
 	box(st, Vector3(0.0, 0.35, 0.07), Vector3(1.35, 0.12, 0.05), WOOD_FRESH, Basis(Vector3.BACK, 0.12))
 	_cache["marked_door"] = _commit(st)
 	return _cache["marked_door"]

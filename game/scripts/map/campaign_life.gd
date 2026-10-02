@@ -109,7 +109,9 @@ func _setup_scars() -> void:
 	scars.plan_provider = _town_plan
 
 
-## Plan de la ville 1:1 affichée d'une colonie (emblématique ou ordinaire) ; `{}` sinon.
+## Plan de la ville 1:1 ordinaire affichée d'une colonie ; `{}` tant qu'elle n'est pas chargée.
+## Villes emblématiques : `{none: true}`, pas de portes marquées (la caméra n'y descend pas sous
+## `CloseCameraProfile.landmark_min_distance` : une croix de 2,2 m y ferait ≈ 1 px).
 func _town_plan(id: String) -> Dictionary:
 	if _settlements == null:
 		return {}
@@ -123,6 +125,24 @@ func _town_plan(id: String) -> Dictionary:
 	return {}
 
 
+## Tracé d'une route qui part de la colonie `id` (orienté vers l'extérieur) ; vide sans route.
+func _road_from(id: String, center: Vector2) -> PackedVector2Array:
+	if _settlements == null or _settlements.data == null:
+		return PackedVector2Array()
+	for key in _settlements.data.edge_paths:
+		var edge := str(key)
+		if not (edge.begins_with(id + "|") or edge.ends_with("|" + id)):
+			continue
+		var path: PackedVector2Array = _settlements.data.edge_paths[key]
+		if path.size() < 2:
+			continue
+		if path[0].distance_to(center) > path[path.size() - 1].distance_to(center):
+			path = path.duplicate()
+			path.reverse()
+		return path
+	return PackedVector2Array()
+
+
 ## TB4 : colonies pestiférées du tour (scènes `plague` résolues par `FolkScenes`).
 func _refresh_scars() -> void:
 	if scars == null:
@@ -131,7 +151,9 @@ func _refresh_scars() -> void:
 	if folk_scenes != null:
 		for scene in folk_scenes.staged:
 			if str(scene["kind"]) == "plague":
-				sites.append(folk_scenes.edge_frame(scene))
+				var site := folk_scenes.edge_frame(scene)
+				site["road"] = _road_from(str(site["settlement"]), site["center"])
+				sites.append(site)
 	scars.set_plague_sites(sites)
 	stats["scars"] = scars.stats
 
