@@ -58,7 +58,7 @@ Survolez n'importe quelle icône : les infobulles donnent coûts, effets, prére
   prioritaire sur sa province). **Clic droit** (armée sélectionnée) : l'armée marche aussitôt vers le point
   visé du sol, attaque l'armée ennemie visée, ou marche sur la colonie visée (voir § 5, « Mouvement libre
   des armées »). La **bulle** dorée au sol montre jusqu'où elle peut aller cette saison.
-- **Entrée** ou bouton **Fin du tour** : votre tour est clos ; chaque faction IA joue ensuite le sien, l'une
+- **Entrée** ou cloche **Fin de tour** (en bas à droite) : votre tour est clos ; chaque faction IA joue ensuite le sien, l'une
   après l'autre, puis la saison s'écoule (économie, sièges, population, événements).
 - **Échap** : désélectionner, puis menu pause (sauvegarder, charger, réglages, aide, menu principal).
 - **Modes de carte** : M mécontentement, N diplomatie, R religion ; F12 capture d'écran.

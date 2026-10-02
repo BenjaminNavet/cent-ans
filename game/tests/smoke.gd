@@ -117,6 +117,12 @@ func _init() -> void:
 		await _run_ui_layout()
 		quit(1 if _failures > 0 else 0)
 		return
+	# Tutoriel et encyclopédie seuls (F8) : CENT_ANS_SMOKE_ONLY=tutorial.
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "tutorial":
+		await _run_tutorial()
+		_cleanup_test_dir()
+		quit(1 if _failures > 0 else 0)
+		return
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
@@ -2506,8 +2512,13 @@ func _run_tutorial() -> void:
 	_check(tutorial.current_step_id() == "end_turn" and not tutorial.check_now(), "end_turn: not met before ending the turn")
 	_check(tutorial.resolve_target("end_turn").has("rect"), "end turn button target expected")
 	map._on_end_turn()
+	# Rapport de saison ouvert hors de son étape : le guide se range (il couvrait « Continuer »).
+	var report_shown: bool = map.flow.season_report.visible
+	_check(not report_shown or tutorial.modal_open(), "the guide should hide under a season report opened outside its step")
 	_check(tutorial.check_now(), "end_turn should complete after end_turn")
+	_check(not tutorial.modal_open(), "the guide should show beside the season report during its own step")
 	visited.append("end_turn")
+	_check(tutorial.process_mode == Node.PROCESS_MODE_ALWAYS, "tutorial controller must keep running under the pause menu to hide the guide")
 	_check(tutorial.current_step_id() == "season_report", "season_report step expected")
 	var report: Control = map.flow.season_report
 	if report.visible:
@@ -2557,6 +2568,17 @@ func _run_tutorial() -> void:
 	if settings != null:
 		_check(bool(settings.call("get_value", "tutorial/done")), "tutorial/done should be persisted")
 	_check(not tutorial.should_autostart(), "a finished tutorial must not restart")
+	# Factions sans texte propre : dirigeant, suzerain et objectifs de titre lus dans la simulation,
+	# conseils génériques, aucun champ laissé brut.
+	var generic_steps: Array[Dictionary] = TutorialSteps.steps("fac_albret", tutorial._context("fac_albret"))
+	_check(generic_steps.size() == TutorialSteps.count(), "generic tutorial should keep every step")
+	_check(str(generic_steps[0]["text"]).contains("Les objectifs de votre titre") and not str(generic_steps[0]["text"]).contains("Survivre et prospérer"), "generic intro should list the title objectives from the simulation")
+	_check(str(generic_steps[0]["title"]).begins_with("Bienvenue, ") and not str(generic_steps[0]["title"]).contains("Sire"), "generic intro should greet the ruler by name")
+	for generic_step in generic_steps:
+		_check(str(generic_step["advice"]) != "", "generic advice missing at %s" % generic_step["id"])
+		for key in ["title", "text", "objective", "advice"]:
+			_check(not str(generic_step[key]).contains("{"), "raw placeholder in generic %s.%s" % [generic_step["id"], key])
+	_check(TutorialSteps.steps("fac_x", {})[0]["title"] == "Bienvenue", "a faction without ruler gets a plain welcome")
 
 	# Encyclopédie.
 	var encyclopedia: Control = tutorial.encyclopedia

@@ -471,6 +471,25 @@ fn apply_walk(
     }
 }
 
+/// CV3: a march stopped by the zone of control of an army in ambush springs it.
+fn spring_ambush_on_stop(
+    state: &mut CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    stop: &StopReason,
+    events: &mut Vec<GameEvent>,
+) {
+    if let StopReason::EnemyZoneOfControl { army: enemy } = stop {
+        if state
+            .armies
+            .get(enemy)
+            .is_some_and(|a| a.stance == Stance::Ambush)
+        {
+            crate::posture::spring_ambush(state, data, enemy, army_id, events);
+        }
+    }
+}
+
 /// Walks `army_id` along `waypoints` towards `destination` and resolves the
 /// arrival (settlement entered, exact point reached).
 fn march(
@@ -487,16 +506,7 @@ fn march(
     };
     let walk = simulate(state, data, army_id, waypoints, goal, None, None)?;
     apply_walk(state, data, army_id, &walk, waypoints, destination);
-    // CV3: the zone of control of an army in ambush springs it.
-    if let StopReason::EnemyZoneOfControl { army: enemy } = &walk.stop {
-        if state
-            .armies
-            .get(enemy)
-            .is_some_and(|a| a.stance == Stance::Ambush)
-        {
-            crate::posture::spring_ambush(state, data, enemy, army_id, events);
-        }
-    }
+    spring_ambush_on_stop(state, data, army_id, &walk.stop, events);
     let grid = data.navgrid();
     let mut walked: Vec<[f32; 2]> = walk.cells.iter().map(|c| c.center(grid)).collect();
     let mut stop = walk.stop.clone();
@@ -675,7 +685,9 @@ impl CampaignState {
 
     /// Order `Attack` (lot M2): `army` closes in on `target` (whose own zone
     /// of control does not stop it) until within `engage_radius_km`, then
-    /// fights at once. Refused when the target cannot be reached this turn.
+    /// fights at once. A target beyond this turn's reach is marched on: the
+    /// army spends its movement towards it and keeps the rest of the path
+    /// (`approach_out_of_reach`); refused only when it cannot take a step.
     pub(crate) fn order_attack(
         &mut self,
         data: &GameData,
@@ -720,7 +732,24 @@ impl CampaignState {
             |c| c.center(grid),
         );
         if distance(end, approach.point) > approach.radius {
-            return Err(OrderError::OutOfRange);
+            if walk.cells.is_empty() {
+                return Err(OrderError::OutOfRange);
+            }
+            let destination = goal.map_or(
+                MoveTarget::Point {
+                    x: approach.point[0],
+                    y: approach.point[1],
+                },
+                MoveTarget::Settlement,
+            );
+            return Ok(self.approach_out_of_reach(
+                data,
+                army,
+                &walk,
+                &path.waypoints,
+                &destination,
+                events,
+            ));
         }
         let destination = MoveTarget::Point {
             x: end[0],
@@ -747,6 +776,41 @@ impl CampaignState {
             },
             planned_path: Vec::new(),
         })
+    }
+
+    /// An attack whose target is beyond this turn's reach: the simulated
+    /// approach is walked as a plain march (no fight), and the rest of the
+    /// path is kept towards `destination` (where the target stood) for the
+    /// following turns.
+    fn approach_out_of_reach(
+        &mut self,
+        data: &GameData,
+        army: &ArmyId,
+        walk: &Walk,
+        waypoints: &[Cell],
+        destination: &MoveTarget,
+        events: &mut Vec<GameEvent>,
+    ) -> MoveReport {
+        let besieged = self.besieged_by(army);
+        crate::posture::leave_static_stance(self, army);
+        apply_walk(self, data, army, walk, waypoints, destination);
+        if let Some(settlement) = besieged {
+            crate::siege::leave_siege(self, data, army, &settlement, events);
+        }
+        spring_ambush_on_stop(self, data, army, &walk.stop, events);
+        crate::encounter::on_march_end(self, data, army, events);
+        let grid = data.navgrid();
+        MoveReport {
+            army: army.clone(),
+            walked: walk.cells.iter().map(|c| c.center(grid)).collect(),
+            cost: walk.cost,
+            stop: walk.stop.clone(),
+            planned_path: self
+                .armies
+                .get(army)
+                .map(|a| a.planned_path.clone())
+                .unwrap_or_default(),
+        }
     }
 
     /// Order `Embark` (lot M2): a port-to-port crossing along a `sea` edge
