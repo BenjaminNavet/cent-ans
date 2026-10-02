@@ -1,0 +1,728 @@
+{
+  "description": "Lot FA7 : herbe des batailles (`BattleVegetation`, `battle_grass.gdshader`) faite de vrais brins photographiés. `build_fa_grass.py` compose l'atlas `game/assets/textures/battle/grass_tufts.png` (une touffe par case) depuis des atlas ambientCG (CC0 1.0, Lennart Demes). La carte est neutre en moyenne : la couleur vient du sol sous la touffe. `render` règle le maillage et le shader ; `--no-fa-grass` rend l'herbe d'avant.",
+  "source_url": "https://ambientcg.com/get?file={asset}_2K-JPG.zip",
+  "atlas": {
+    "columns": 4,
+    "rows": 2,
+    "cell_width": 512,
+    "cell_height": 256,
+    "padding": 8,
+    "pixels_per_metre": 1280,
+    "work_grey": 128,
+    "neutral_pull": 0.85
+  },
+  "sources": {
+    "long_blade": {
+      "asset": "Foliage001",
+      "axis": "vertical",
+      "note": "longs brins verts"
+    },
+    "lawn_blade": {
+      "asset": "Foliage006",
+      "axis": "vertical",
+      "max_aspect": 0.2,
+      "note": "brins de pelouse"
+    },
+    "broad_blade": {
+      "asset": "Foliage008",
+      "axis": "horizontal",
+      "note": "brins larges arqués"
+    },
+    "dry_blade": {
+      "asset": "Foliage005",
+      "axis": "horizontal",
+      "gain": 1.1,
+      "note": "feuilles de graminée, dont une sèche"
+    },
+    "panicle": {
+      "asset": "Foliage002",
+      "axis": "vertical",
+      "min_pixels": 20000,
+      "gain": 1.15,
+      "note": "graminées à épis (panicules)"
+    },
+    "ear": {
+      "asset": "Foliage004",
+      "axis": "vertical",
+      "gain": 1.15,
+      "note": "épis barbus"
+    },
+    "wild_grass": {
+      "asset": "Foliage003",
+      "axis": "vertical",
+      "gain": 1.05,
+      "note": "herbes folles entières"
+    },
+    "sprig": {
+      "asset": "Foliage007",
+      "axis": "vertical",
+      "note": "brins fourchus"
+    },
+    "dandelion_leaf": {
+      "asset": "LeafSet020",
+      "axis": "vertical",
+      "gain": 0.95,
+      "note": "feuilles de pissenlit"
+    }
+  },
+  "flowers": {
+    "dandelion": {
+      "radius_m": 0.016,
+      "height_m": [
+        0.1,
+        0.2
+      ],
+      "petals": 14,
+      "heart": 0.45,
+      "petal_rgb": [
+        250,
+        205,
+        60
+      ],
+      "heart_rgb": [
+        235,
+        170,
+        40
+      ],
+      "stem_rgb": [
+        120,
+        135,
+        90
+      ],
+      "luma_ref": 128,
+      "note": "capitule dessiné (quelques pixels) : aucun atlas de fleurs CC0 dans les sources"
+    },
+    "daisy": {
+      "radius_m": 0.012,
+      "height_m": [
+        0.08,
+        0.16
+      ],
+      "petals": 12,
+      "heart": 0.35,
+      "petal_rgb": [
+        250,
+        250,
+        245
+      ],
+      "heart_rgb": [
+        240,
+        200,
+        60
+      ],
+      "stem_rgb": [
+        120,
+        135,
+        90
+      ],
+      "luma_ref": 128,
+      "note": "pâquerette dessinée"
+    }
+  },
+  "variants": [
+    {
+      "name": "short_a",
+      "height_m": 0.22,
+      "feet": 7,
+      "foot_span": 0.9,
+      "back_shade": 0.82,
+      "weight_open": 0.34,
+      "weight_clump": 0.1,
+      "layers": [
+        {
+          "source": "lawn_blade",
+          "count": 120,
+          "length_m": [
+            0.07,
+            0.2
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.03,
+          "fan": 0.7,
+          "lean": 0.3,
+          "curve": 0.35,
+          "tone": [
+            0.85,
+            1.15
+          ]
+        },
+        {
+          "source": "broad_blade",
+          "count": 30,
+          "length_m": [
+            0.08,
+            0.18
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.03,
+          "fan": 0.7,
+          "lean": 0.4,
+          "curve": 0.45,
+          "tone": [
+            0.85,
+            1.1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "short_b",
+      "height_m": 0.22,
+      "feet": 6,
+      "foot_span": 0.9,
+      "back_shade": 0.82,
+      "weight_open": 0.3,
+      "weight_clump": 0.1,
+      "layers": [
+        {
+          "source": "lawn_blade",
+          "count": 90,
+          "length_m": [
+            0.06,
+            0.19
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.035,
+          "fan": 0.7,
+          "lean": 0.35,
+          "curve": 0.4,
+          "tone": [
+            0.85,
+            1.15
+          ]
+        },
+        {
+          "source": "sprig",
+          "count": 14,
+          "length_m": [
+            0.1,
+            0.2
+          ],
+          "width_scale": 1.0,
+          "foot_sigma_m": 0.03,
+          "fan": 0.4,
+          "lean": 0.2,
+          "curve": 0.2,
+          "tone": [
+            0.9,
+            1.15
+          ]
+        },
+        {
+          "source": "dry_blade",
+          "count": 14,
+          "length_m": [
+            0.08,
+            0.17
+          ],
+          "width_scale": 0.5,
+          "foot_sigma_m": 0.03,
+          "fan": 0.7,
+          "lean": 0.4,
+          "curve": 0.5,
+          "tone": [
+            0.9,
+            1.15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tall_a",
+      "height_m": 0.5,
+      "feet": 3,
+      "foot_span": 0.55,
+      "back_shade": 0.78,
+      "weight_open": 0.1,
+      "weight_clump": 0.24,
+      "layers": [
+        {
+          "source": "long_blade",
+          "count": 60,
+          "length_m": [
+            0.2,
+            0.48
+          ],
+          "width_scale": 0.42,
+          "foot_sigma_m": 0.035,
+          "fan": 0.6,
+          "lean": 0.22,
+          "curve": 0.4,
+          "tone": [
+            0.85,
+            1.15
+          ]
+        },
+        {
+          "source": "lawn_blade",
+          "count": 60,
+          "length_m": [
+            0.08,
+            0.26
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.06,
+          "fan": 0.6,
+          "lean": 0.3,
+          "curve": 0.35,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tall_b",
+      "height_m": 0.5,
+      "feet": 4,
+      "foot_span": 0.7,
+      "back_shade": 0.78,
+      "weight_open": 0.08,
+      "weight_clump": 0.2,
+      "layers": [
+        {
+          "source": "broad_blade",
+          "count": 46,
+          "length_m": [
+            0.18,
+            0.46
+          ],
+          "width_scale": 0.55,
+          "foot_sigma_m": 0.035,
+          "fan": 0.6,
+          "lean": 0.22,
+          "curve": 0.3,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        },
+        {
+          "source": "long_blade",
+          "count": 26,
+          "length_m": [
+            0.2,
+            0.45
+          ],
+          "width_scale": 0.4,
+          "foot_sigma_m": 0.04,
+          "fan": 0.6,
+          "lean": 0.25,
+          "curve": 0.45,
+          "tone": [
+            0.85,
+            1.15
+          ]
+        },
+        {
+          "source": "lawn_blade",
+          "count": 50,
+          "length_m": [
+            0.08,
+            0.22
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.06,
+          "fan": 0.6,
+          "lean": 0.3,
+          "curve": 0.35,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        }
+      ]
+    },
+    {
+      "name": "seed_a",
+      "height_m": 0.72,
+      "feet": 3,
+      "foot_span": 0.5,
+      "back_shade": 0.8,
+      "weight_open": 0.05,
+      "weight_clump": 0.12,
+      "layers": [
+        {
+          "source": "panicle",
+          "count": 9,
+          "length_m": [
+            0.45,
+            0.7
+          ],
+          "width_scale": 1.0,
+          "foot_sigma_m": 0.04,
+          "fan": 0.4,
+          "lean": 0.1,
+          "curve": 0.12,
+          "tone": [
+            0.95,
+            1.15
+          ]
+        },
+        {
+          "source": "long_blade",
+          "count": 40,
+          "length_m": [
+            0.15,
+            0.4
+          ],
+          "width_scale": 0.42,
+          "foot_sigma_m": 0.04,
+          "fan": 0.6,
+          "lean": 0.25,
+          "curve": 0.4,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        },
+        {
+          "source": "lawn_blade",
+          "count": 40,
+          "length_m": [
+            0.08,
+            0.22
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.06,
+          "fan": 0.6,
+          "lean": 0.3,
+          "curve": 0.35,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        }
+      ]
+    },
+    {
+      "name": "seed_b",
+      "height_m": 0.62,
+      "feet": 4,
+      "foot_span": 0.7,
+      "back_shade": 0.8,
+      "weight_open": 0.05,
+      "weight_clump": 0.1,
+      "layers": [
+        {
+          "source": "ear",
+          "count": 16,
+          "length_m": [
+            0.3,
+            0.6
+          ],
+          "width_scale": 1.0,
+          "foot_sigma_m": 0.05,
+          "fan": 0.4,
+          "lean": 0.12,
+          "curve": 0.15,
+          "tone": [
+            0.95,
+            1.15
+          ]
+        },
+        {
+          "source": "sprig",
+          "count": 10,
+          "length_m": [
+            0.18,
+            0.32
+          ],
+          "width_scale": 1.0,
+          "foot_sigma_m": 0.05,
+          "fan": 0.4,
+          "lean": 0.15,
+          "curve": 0.15,
+          "tone": [
+            0.9,
+            1.12
+          ]
+        },
+        {
+          "source": "lawn_blade",
+          "count": 70,
+          "length_m": [
+            0.08,
+            0.24
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.05,
+          "fan": 0.6,
+          "lean": 0.3,
+          "curve": 0.35,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wild_a",
+      "height_m": 0.6,
+      "feet": 3,
+      "foot_span": 0.6,
+      "back_shade": 0.8,
+      "weight_open": 0.04,
+      "weight_clump": 0.08,
+      "layers": [
+        {
+          "source": "wild_grass",
+          "count": 6,
+          "length_m": [
+            0.35,
+            0.58
+          ],
+          "width_scale": 0.8,
+          "foot_sigma_m": 0.05,
+          "fan": 0.3,
+          "lean": 0.08,
+          "curve": 0.08,
+          "tone": [
+            0.95,
+            1.12
+          ]
+        },
+        {
+          "source": "dandelion_leaf",
+          "count": 7,
+          "length_m": [
+            0.1,
+            0.19
+          ],
+          "width_scale": 0.8,
+          "foot_sigma_m": 0.02,
+          "fan": 0.5,
+          "lean": 0.8,
+          "curve": 0.5,
+          "tone": [
+            0.85,
+            1.05
+          ]
+        },
+        {
+          "source": "long_blade",
+          "count": 26,
+          "length_m": [
+            0.15,
+            0.36
+          ],
+          "width_scale": 0.42,
+          "foot_sigma_m": 0.04,
+          "fan": 0.6,
+          "lean": 0.25,
+          "curve": 0.4,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        },
+        {
+          "source": "lawn_blade",
+          "count": 50,
+          "length_m": [
+            0.07,
+            0.2
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.06,
+          "fan": 0.6,
+          "lean": 0.3,
+          "curve": 0.35,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        }
+      ],
+      "flowers": [
+        {
+          "kind": "dandelion",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "name": "wild_b",
+      "height_m": 0.5,
+      "feet": 4,
+      "foot_span": 0.75,
+      "back_shade": 0.8,
+      "weight_open": 0.04,
+      "weight_clump": 0.06,
+      "layers": [
+        {
+          "source": "wild_grass",
+          "count": 3,
+          "length_m": [
+            0.3,
+            0.48
+          ],
+          "width_scale": 0.8,
+          "foot_sigma_m": 0.05,
+          "fan": 0.3,
+          "lean": 0.08,
+          "curve": 0.08,
+          "tone": [
+            0.95,
+            1.12
+          ]
+        },
+        {
+          "source": "sprig",
+          "count": 12,
+          "length_m": [
+            0.15,
+            0.3
+          ],
+          "width_scale": 1.0,
+          "foot_sigma_m": 0.05,
+          "fan": 0.4,
+          "lean": 0.15,
+          "curve": 0.15,
+          "tone": [
+            0.9,
+            1.12
+          ]
+        },
+        {
+          "source": "broad_blade",
+          "count": 28,
+          "length_m": [
+            0.12,
+            0.3
+          ],
+          "width_scale": 0.55,
+          "foot_sigma_m": 0.04,
+          "fan": 0.6,
+          "lean": 0.3,
+          "curve": 0.4,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        },
+        {
+          "source": "dry_blade",
+          "count": 8,
+          "length_m": [
+            0.12,
+            0.26
+          ],
+          "width_scale": 0.5,
+          "foot_sigma_m": 0.04,
+          "fan": 0.6,
+          "lean": 0.35,
+          "curve": 0.5,
+          "tone": [
+            0.9,
+            1.12
+          ]
+        },
+        {
+          "source": "dandelion_leaf",
+          "count": 4,
+          "length_m": [
+            0.09,
+            0.16
+          ],
+          "width_scale": 0.8,
+          "foot_sigma_m": 0.02,
+          "fan": 0.5,
+          "lean": 0.8,
+          "curve": 0.5,
+          "tone": [
+            0.85,
+            1.05
+          ]
+        },
+        {
+          "source": "lawn_blade",
+          "count": 40,
+          "length_m": [
+            0.07,
+            0.2
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.06,
+          "fan": 0.6,
+          "lean": 0.3,
+          "curve": 0.35,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        }
+      ],
+      "flowers": [
+        {
+          "kind": "daisy",
+          "count": 3
+        }
+      ]
+    }
+  ],
+  "render": {
+    "tex_lum": 0.2,
+    "card": {
+      "width_m": 0.8,
+      "foot_ratio": 0.8,
+      "count": 3,
+      "bend_m": 0.05
+    },
+    "layers": [
+      [
+        0.5,
+        40.0,
+        1.0,
+        0.0
+      ],
+      [
+        1.1,
+        95.0,
+        1.35,
+        34.0
+      ]
+    ],
+    "size": [
+      0.8,
+      1.25
+    ],
+    "height_var": 0.5,
+    "gap_fill": 0.9,
+    "patch_fill": 0.5,
+    "tint_gain": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "tint_var": 0.5,
+    "hue_mix": 0.6,
+    "contrast": 0.8,
+    "luma_clamp": [
+      0.55,
+      2.0
+    ],
+    "foot_shade": 0.85,
+    "foot_height": 0.4,
+    "up_normal": 0.6,
+    "far_luma": 1.0,
+    "mip_boost": 0.25,
+    "backlight": 1.0,
+    "fields": {
+      "wheat_variants": [
+        "seed_b",
+        "seed_a"
+      ],
+      "wheat_height": 1.3,
+      "fallow_height": 1.2,
+      "stubble_variants": [
+        "short_a",
+        "short_b"
+      ],
+      "stubble_height": 1.0,
+      "seedling_height": 0.6
+    }
+  }
+}
