@@ -54,13 +54,13 @@ func _run() -> void:
 	_check(TownMaquetteData.family_for("cul_unknown", "nowhere", "rel_orthodox") == "byz", "then religion")
 	_check(TownMaquetteData.family_for("cul_unknown", "nowhere", "rel_unknown") == "west", "west by default")
 	_check(TownMaquetteData.family_of_province("prov_nowhere") == "west", "unknown province is west")
-	_check(TownMaquetteData.model_name_raw("city", "west", "a") == "city_a", "west model name")
+	_check(TownMaquetteData.model_name_raw("city", "west", "a") == "city_west_a", "west model name")
 	_check(TownMaquetteData.model_name_raw("city", "byz", "b") == "city_byz_b", "family model name")
 	# Repli : une famille sans fichier retombe sur l'Ouest ; un fichier présent est pris.
-	_check(TownMaquetteData.model_name("castle", "nofamily", "a") == "castle_a", "missing family model falls back to west")
+	_check(TownMaquetteData.model_name("castle", "nofamily", "a") in ["castle_west_a", "castle_a"], "missing family model falls back to west")
 	var byz := TownMaquetteData.model_name("city", "byz", "a")
 	var byz_present := ResourceLoader.exists(TownMaquetteData.MODELS_DIR + "city_byz_a.glb")
-	_check(byz == ("city_byz_a" if byz_present else "city_a"), "byz city model %s (file present: %s)" % [byz, byz_present])
+	_check(byz == "city_byz_a" if byz_present else byz in ["city_west_a", "city_a"], "byz city model %s (file present: %s)" % [byz, byz_present])
 	_check(TownMaquetteData.variant_of("set_amiens") == TownMaquetteData.variant_of("set_amiens") and TownMaquetteData.variant_of("set_amiens") in ["a", "b"], "deterministic variant")
 	_check(TownMaquetteData.yaw_of("set_amiens") == TownMaquetteData.yaw_of("set_amiens"), "deterministic yaw")
 
@@ -136,7 +136,7 @@ func _run() -> void:
 			_check(false, "%s: instance scale %.3f" % [data.settlements[i]["id"], xf.basis.get_scale().x])
 			break
 		# Le sol du modèle (origine du nœud) ne dépasse pas le relief au centre.
-		var ground := xf.origin
+		var ground := (xf * maquettes.model_local(i).affine_inverse()).origin
 		if absf(ground.x - px.x) > 0.01 or absf(ground.z - px.y) > 0.01:
 			_check(false, "%s: instance off its place (%s vs %s)" % [data.settlements[i]["id"], ground, px])
 			break

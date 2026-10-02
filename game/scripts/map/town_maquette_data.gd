@@ -184,22 +184,21 @@ static func yaw_of(id: String) -> float:
 
 
 ## Nom de modèle (sans dossier ni extension) pour un type, une famille et une variante :
-## `<type>_<famille>_<variante>`, `<type>_<variante>` pour la famille par défaut. Sans test de
-## présence (voir `model_name`).
+## `<type>_<famille>_<variante>`. Sans test de présence (voir `model_name`).
 static func model_name_raw(kind: String, family: String, variant: String) -> String:
-	if family == default_family() or family == "":
-		return "%s_%s" % [kind, variant]
-	return "%s_%s_%s" % [kind, family, variant]
+	return "%s_%s_%s" % [kind, family if family != "" else default_family(), variant]
 
 
 ## Nom du modèle à charger : celui de la famille s'il est importé, sinon celui de la famille par
-## défaut (repli silencieux : les kits de l'Est et du Sud arrivent par un autre lot).
+## défaut, sinon l'ancien kit occidental `<type>_<variante>` (lot C6).
 static func model_name(kind: String, family: String, variant: String) -> String:
 	var key := "%s|%s|%s" % [kind, family, variant]
 	if not _model_names.has(key):
 		var name := model_name_raw(kind, family, variant)
 		if not ResourceLoader.exists(MODELS_DIR + name + ".glb"):
 			name = model_name_raw(kind, default_family(), variant)
+		if not ResourceLoader.exists(MODELS_DIR + name + ".glb"):
+			name = "%s_%s" % [kind, variant]
 		_model_names[key] = name
 	return _model_names[key]
 

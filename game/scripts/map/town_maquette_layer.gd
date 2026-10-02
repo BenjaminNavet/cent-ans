@@ -449,6 +449,14 @@ func instance_count() -> int:
 
 ## Transformation monde de l'instance du lieu `i` (tests ; recalculée : le rendu factice de
 ## `--headless` ne relit pas un MultiMesh) ; identité pour une ville emblématique.
+## Transformation locale du maillage dans son modèle (les kits recentrés portent un décalage de
+## nœud) ; identité pour une ville emblématique ou un lieu sans modèle.
+func model_local(i: int) -> Transform3D:
+	if i < 0 or i >= _model_of.size() or _landmarks.has(i) or _model_of[i] < 0:
+		return Transform3D.IDENTITY
+	return _model_list[_model_of[i]]["local"]
+
+
 func instance_transform(i: int) -> Transform3D:
 	if i < 0 or i >= _tile_of.size() or _tile_of[i] < 0:
 		return Transform3D.IDENTITY
