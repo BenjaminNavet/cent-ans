@@ -24,6 +24,12 @@
           "type": "number",
           "minimum": 1,
           "maximum": 4
+        },
+        "town_scale": {
+          "description": "GC (ADR 0158) : grossissement constant des villes autour de leur centre sur la carte de campagne ; 1 = échelle réelle.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 20
         }
       }
     },

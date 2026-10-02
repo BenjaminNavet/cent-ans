@@ -268,7 +268,8 @@ func _load_landmark_zones() -> void:
 ## absente : `DEFAULT_FOOTPRINT_M`, sans finage.
 func _compute_footprints() -> void:
 	var town_data: TownData = towns.data if towns != null else null
-	var mpu := town_data.meters_per_unit if town_data != null else 719.0
+	var mpu := town_data.meters_per_unit if town_data != null else 719.0 / MapScale.town_scale()
+	var real_mpu := town_data.real_meters_per_unit if town_data != null else 719.0
 	for i in data.settlements.size():
 		var id := str(data.settlements[i]["id"])
 		var radius_m := -1.0
@@ -280,7 +281,7 @@ func _compute_footprints() -> void:
 			finage_m = float(town.get("finage_radius_m", -1.0))
 		_real_radius[i] = radius_m / mpu if radius_m > 0.0 else -1.0
 		_model_radius[i] = (radius_m if radius_m > 0.0 else DEFAULT_FOOTPRINT_M) / mpu
-		_finage_radius[i] = finage_m / mpu if finage_m > 0.0 else -1.0
+		_finage_radius[i] = finage_m / real_mpu if finage_m > 0.0 else -1.0
 		_model_top[i] = TOWN_TOP_M / mpu
 		_ground_footprint(i)
 	_forget_hamlet_exclusions()

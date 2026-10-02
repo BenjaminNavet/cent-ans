@@ -224,7 +224,7 @@ func _stream(rig_distance: float, center: Variant = null) -> int:
 func _heights_for(id: String) -> TownPlan.Heights:
 	var h := TownPlan.Heights.new()
 	h.anchor = _anchor[id]
-	h.meters_per_unit = LandmarkV2Library.meters_per_unit()
+	h.meters_per_unit = LandmarkV2Library.town_meters_per_unit()
 	h.map_data = map_data
 	if terrain != null and terrain.quadtree != null:
 		var e: float = _extent[id]
@@ -290,7 +290,7 @@ func _start_build(id: String) -> void:
 	var old: TownBuilder = entry.get("pending")
 	if old != null:
 		old.free_nodes()
-	var b := TownBuilder.new(entry["plan"], _anchor[id], LandmarkV2Library.meters_per_unit(), self)
+	var b := TownBuilder.new(entry["plan"], _anchor[id], LandmarkV2Library.town_meters_per_unit(), self)
 	b.root.name = "City_" + id
 	_configure(b)
 	b.root.visible = false
