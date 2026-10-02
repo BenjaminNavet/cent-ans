@@ -24,6 +24,12 @@
           "type": "number",
           "minimum": 1,
           "maximum": 4
+        },
+        "army_scale_exponent": {
+          "description": "ADR 0160 : exposant de la loi d'échelle des armées en vue normale (échelle ∝ distance caméra ^ exposant). 1 = taille écran constante (l'ost gonfle avec le dézoom), 0 = taille monde fixe ; 0,6 : l'ost rétrécit à l'écran en dézoomant, comme un objet posé. La plaque d'effectif garde sa taille écran.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },
