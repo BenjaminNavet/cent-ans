@@ -371,17 +371,21 @@ def flat_house(x, y, w, d, h, angle, wall, z=0.0, upper=None):
     return parts
 
 
-def yurt(x, y, radius, mat="Felt", door=0.0):
-    """Felt tent: round wall, conical roof with a smoke ring, door facing ``door``."""
+def yurt(x, y, radius, mat="Felt", door=-math.pi / 2, roof=None):
+    """Felt tent: round wall, conical roof (of material ``roof``), door facing ``door``."""
     wall_h = radius * 0.75
-    profile = [
-        (radius, -F * 0.5),
+    wall = [(radius, -F * 0.5), (radius, wall_h)]
+    cone = [
         (radius, wall_h),
         (radius * 0.28, wall_h + radius * 0.55),
         (0.0, wall_h + radius * 0.6),
     ]
-    return [
-        lathe(profile, mat, (x, y, 0.0), 8),
+    parts = (
+        [lathe(wall, mat, (x, y, 0.0), 8), lathe(cone, roof, (x, y, 0.0), 8)]
+        if roof
+        else [lathe(wall + cone[1:], mat, (x, y, 0.0), 8)]
+    )
+    parts.append(
         m.box(
             (radius * 0.2, radius * 0.5, wall_h * 0.85),
             (
@@ -391,8 +395,9 @@ def yurt(x, y, radius, mat="Felt", door=0.0):
             ),
             "Wood",
             rotation=(0, 0, door),
-        ),
-    ]
+        )
+    )
+    return parts
 
 
 def cypress(x, y, height=0.3, z=0.0):
@@ -509,11 +514,6 @@ def local_frame(x, y, angle, s=1.0):
         return x + (dx * ca - dy * sa) * s, y + (dx * sa + dy * ca) * s
 
     return at
-
-
-def placeholder(radius):
-    """Skeleton stand-in: ground disc and banner."""
-    return m.ground_patch(radius) + flag(0.0, 0.0, 0.0)
 
 
 # --- med: Italy, Christian Iberia, Midi, Dalmatia ------------------------------------
@@ -1548,7 +1548,7 @@ def minaret(x, y, height, square=True, s=1.0, z=0.0):
     )
 
 
-def mosque(x, y, angle, s=1.0, square=True, court=True):
+def mosque(x, y, angle, s=1.0, square=True, court=True, wall="Whitewash"):
     """Courtyard mosque: prayer hall towards local +X, arcaded court, minaret.
 
     ``square``: Maghrebi type (parallel green tile roofs, square minaret on the court axis);
@@ -1556,7 +1556,7 @@ def mosque(x, y, angle, s=1.0, square=True, court=True):
     """
     at = local_frame(x, y, angle, s)
     hx, hy = at(0.26, 0.0)
-    parts = [block(hx, hy, 0.4 * s, 0.72 * s, 0.2 * s, "Whitewash", angle)]
+    parts = [block(hx, hy, 0.4 * s, 0.72 * s, 0.2 * s, wall, angle)]
     if square:
         for k in range(4):
             rx, ry = at(0.26, (k - 1.5) * 0.18)
@@ -1578,7 +1578,7 @@ def mosque(x, y, angle, s=1.0, square=True, court=True):
             0.2 * s,
             0.15 * s,
             0.07 * s,
-            "Whitewash",
+            wall,
             "Turquoise",
             "pointed",
             8,
@@ -1594,7 +1594,9 @@ def mosque(x, y, angle, s=1.0, square=True, court=True):
             (-0.16, -0.32, 0.48, 0.08),
         ):
             gx, gy = at(dx, dy)
-            parts.append(block(gx, gy, w * s, d * s, 0.13 * s, "Whitewash", angle))
+            parts.append(
+                block(gx, gy, w * s, d * s, (0.11 + d * 0.04) * s, wall, angle)
+            )
         fx, fy = at(-0.17, 0.0)
         parts.append(m.cylinder(0.04 * s, 0.04, (fx, fy, 0.03), "Turquoise", 6))
     mx, my = at(-0.42, 0.0) if square and court else at(0.0, 0.42)
@@ -1790,8 +1792,8 @@ def build_isl_abbey(variant):
                 math.cos(a) * off,
                 math.sin(a) * off,
                 depth,
-                (half - 0.035) * 2,
-                height * 0.62,
+                (half - 0.035) * 2 - (0.0 if k == 2 else 2 * depth),
+                height * (0.66 if k == 2 else 0.58),
                 "Whitewash",
                 a,
             )
@@ -1838,29 +1840,338 @@ def build_isl_village(variant):
 # --- steppe: Kipchaks and the Horde --------------------------------------------------
 
 
+def steppe_house(x, y, w, d, angle, rng, z=0.0):
+    """Flat-roofed mud-brick house."""
+    wall = rng.choice(("MudBrick", "MudBrick", "Ochre"))
+    upper = "MudBrick" if rng.random() < 0.2 else None
+    return flat_house(x, y, w, d, rng.uniform(0.09, 0.14), angle, wall, z, upper)
+
+
+def camp_yurt(x, y, w, d, angle, rng):
+    """Yurt for :func:`scatter` (door to the south)."""
+    return yurt(x, y, w * 0.5)
+
+
+def khan_tent(x, y, radius=0.2):
+    """Great tent of the khan: gilded roof and the banner standard."""
+    return yurt(x, y, radius, "Felt", roof="Gilt") + flag(
+        x + radius * 1.3, y, 0.0, 0.42
+    )
+
+
+def corral(x, y, radius, rng, horses=4):
+    """Round paddock of rails with a few horses."""
+    ring = [(x + px, y + py) for px, py in m.ring_points(radius, 8, rng, 0.05)]
+    parts = curtain(ring, 0.05, "Log", thickness=0.014)
+    for _ in range(horses):
+        ang, r = rng.uniform(0.0, TAU), radius * 0.6 * math.sqrt(rng.random())
+        parts.append(
+            m.box(
+                (0.075, 0.028, 0.04),
+                (x + r * math.cos(ang), y + r * math.sin(ang), 0.04),
+                "Log",
+                rotation=(0, 0, rng.uniform(0.0, TAU)),
+            )
+        )
+    return parts
+
+
+def cart(x, y, angle):
+    """Two-wheeled cart."""
+    at = local_frame(x, y, angle)
+    parts = [m.box((0.16, 0.08, 0.04), (x, y, 0.07), "Log", rotation=(0, 0, angle))]
+    for side in (-1, 1):
+        wx, wy = at(0.0, side * 0.05)
+        parts.append(
+            m.cylinder(
+                0.045,
+                0.012,
+                (wx, wy, 0.045),
+                "Wood",
+                8,
+                rotation=(math.pi / 2, 0, angle),
+            )
+        )
+    return parts
+
+
+def pishtaq(x, y, angle, s=1.0, z=0.0):
+    """Tall portal screen with a glazed recess (faces local -Y)."""
+    at = local_frame(x, y, angle, s)
+    parts = [block(x, y, 0.28 * s, 0.08 * s, 0.42 * s, "MudBrick", angle, z)]
+    fx, fy = at(0.0, -0.035)
+    parts.append(
+        m.box(
+            (0.14 * s, 0.03 * s, 0.28 * s),
+            (fx, fy, z + 0.16 * s),
+            "Turquoise",
+            rotation=(0, 0, angle),
+        )
+    )
+    return parts
+
+
+def mausoleum(x, y, angle, s=1.0, z=0.0):
+    """Domed tomb: brick cube, portal, drum and a pointed turquoise dome."""
+    at = local_frame(x, y, angle, s)
+    parts = [block(x, y, 0.36 * s, 0.36 * s, 0.28 * s, "MudBrick", angle, z)]
+    parts += pishtaq(*at(0.0, -0.2), angle, s, z)
+    return parts + drum_dome(
+        x,
+        y,
+        z + 0.28 * s,
+        0.14 * s,
+        0.1 * s,
+        "MudBrick",
+        "Turquoise",
+        "pointed",
+        8,
+        "Gilt",
+    )
+
+
+def palace(x, y, angle, s=1.0):
+    """Brick palace: main block, upper hall, portal and two small glazed domes."""
+    at = local_frame(x, y, angle, s)
+    parts = flat_house(
+        x, y, 0.62 * s, 0.4 * s, 0.2 * s, angle, "MudBrick", 0.0, "MudBrick"
+    )
+    parts += pishtaq(*at(0.0, -0.23), angle, s)
+    for dx in (-0.22, 0.22):
+        cx, cy = at(dx, -0.1)
+        parts += cupola(cx, cy, 0.2 * s, 0.065 * s, "Turquoise", "round", 6)
+    return parts
+
+
+def rampart(x0, y0, x1, y1, height, base, top, mat="Earth"):
+    """Earth bank between two points: trapezoid section, sunk below the ground."""
+    length = math.hypot(x1 - x0, y1 - y0) + top
+    angle = math.atan2(y1 - y0, x1 - x0)
+    spread = base / 2 + (base - top) / 2 * F / height
+    section = ((-spread, -F), (-top / 2, height), (top / 2, height), (spread, -F))
+    verts = [(sx * length / 2, y, z) for sx in (-1, 1) for y, z in section]
+    faces = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 2, 1, 0), (4, 5, 6, 7)]
+    return m.mesh_object(
+        "rampart", verts, faces, mat, ((x0 + x1) / 2, (y0 + y1) / 2, 0.0), angle
+    )
+
+
 def build_steppe_city(variant):
     """Sarai: mud-brick city without walls, palaces, mosque, yurts around."""
-    return placeholder(1.6)
+    first = variant == "a"
+    rng = random.Random(1261 if first else 1332)
+    core = 1.15
+    parts = m.ground_patch(core, "Sand", 18)
+    parts += palace(0.0, 0.15, 0.2, 1.35 if first else 1.6)
+    parts += mosque(-0.62, -0.4, 2.2, 0.85, False, wall="MudBrick")
+    parts += mausoleum(0.6, -0.5, 0.5, 1.0)
+    keep_out = [(0.0, 0.15, 0.58), (-0.62, -0.4, 0.5), (0.6, -0.5, 0.3)]
+    if first:
+        parts += khan_tent(0.72, 0.3, 0.22)
+        keep_out.append((0.78, 0.3, 0.34))
+    else:
+        parts += flag(0.0, 0.15, 0.2 * 1.6 * 1.55, 0.36)
+        parts += mausoleum(-0.55, 0.62, -0.4, 0.85)
+        parts += palace(0.68, 0.45, -0.6, 0.85)
+        keep_out += [(-0.55, 0.62, 0.26), (0.68, 0.45, 0.38)]
+    parts += scatter(
+        rng,
+        48 if first else 58,
+        core * 0.97,
+        steppe_house,
+        keep_out,
+        None,
+        (0.18, 0.28),
+        1.0,
+    )
+    pens = ((1.42, 2.3), (1.45, 5.4)) if first else ((1.45, 0.7),)
+    ring_keep = []
+    for r, ang in pens:
+        px, py = r * math.cos(ang), r * math.sin(ang)
+        parts += corral(px, py, 0.2, rng)
+        ring_keep.append((px, py, 0.22))
+    parts += scatter(
+        rng,
+        24 if first else 15,
+        1.72,
+        camp_yurt,
+        ring_keep,
+        None,
+        (0.2, 0.28),
+        1.25,
+        core + 0.14,
+    )
+    return parts
 
 
 def build_steppe_town(variant):
     """Large encampment of yurts around the khan's tent, with corrals."""
-    return placeholder(0.95)
+    first = variant == "a"
+    rng = random.Random(1223 if first else 1380)
+    parts = m.ground_patch(0.5, "Sand", 12)
+    parts += khan_tent(0.0, 0.0, 0.2)
+    if first:
+        for radius, count, phase in ((0.5, 9, 0.2), (0.82, 9, 0.5)):
+            for k in range(count):
+                if radius > 0.6 and k in (2, 6):
+                    continue
+                ang = phase + TAU * k / count + rng.uniform(-0.06, 0.06)
+                parts += yurt(
+                    radius * math.cos(ang),
+                    radius * math.sin(ang),
+                    rng.uniform(0.1, 0.13),
+                )
+        pens = [
+            (0.84 * math.cos(a), 0.84 * math.sin(a))
+            for a in (0.5 + TAU * 2 / 9, 0.5 + TAU * 6 / 9)
+        ]
+    else:
+        pens = [(0.72, 0.5), (-0.7, -0.52)]
+        keep_out = [(0.0, 0.0, 0.36)] + [(px, py, 0.22) for px, py in pens]
+        parts += scatter(rng, 17, 0.9, camp_yurt, keep_out, None, (0.2, 0.27), 1.2)
+        for cx, cy, ca in ((0.3, -0.75, 0.3), (0.5, -0.82, 0.5), (-0.35, 0.85, 2.8)):
+            parts += cart(cx, cy, ca)
+    for px, py in pens:
+        parts += corral(px, py, 0.18, rng)
+    return parts
 
 
 def build_steppe_castle(variant):
     """Earth fort with a palisade."""
-    return placeholder(0.95)
+    first = variant == "a"
+    rng = random.Random(1237 if first else 1299)
+    parts = m.ground_patch(0.6, "Sand", 12)
+    height = 0.14
+    ring = (
+        [(-0.55, -0.5), (0.55, -0.5), (0.55, 0.5), (-0.55, 0.5)]
+        if first
+        else m.ring_points(0.6, 10, rng, 0.03)
+    )
+    gate = 0
+    for index, (x0, y0) in enumerate(ring):
+        x1, y1 = ring[(index + 1) % len(ring)]
+        parts.append(rampart(x0, y0, x1, y1, height, 0.26, 0.1))
+    if first:
+        parts += curtain(
+            ring,
+            0.1,
+            "Log",
+            tower_at=lambda x, y: tower(x, y, 0.15, 0.3, "Log", "cap", z=height),
+            gates=(gate,),
+            gate_at=lambda x, y, a: gatehouse(x, y, a, 0.3, "Log", z=height * 0.3),
+            thickness=0.04,
+            top="stakes",
+            z=height,
+        )
+    else:
+        parts += curtain(
+            ring,
+            0.12,
+            "MudBrick",
+            gates=(gate,),
+            gate_at=lambda x, y, a: gatehouse(
+                x, y, a, 0.36, "MudBrick", width=0.26, z=height * 0.3
+            ),
+            thickness=0.05,
+            top="merlons",
+            z=height,
+        )
+        for x, y in ring[1::3]:
+            parts += tower(x, y, 0.16, 0.34, "MudBrick", "cap", z=height * 0.5)
+    parts += khan_tent(0.05, 0.12, 0.15)
+    parts += flat_house(-0.22, -0.12, 0.3, 0.16, 0.12, 0.1, "MudBrick", 0.0, "MudBrick")
+    for yx, yy in (
+        ((0.25, -0.2), (-0.2, 0.25), (0.3, 0.3))
+        if first
+        else ((0.28, -0.2), (-0.25, 0.22))
+    ):
+        parts += yurt(yx, yy, 0.1)
+    for k in range(5):
+        ang = 3.5 + k * 0.42 + rng.uniform(-0.05, 0.05)
+        parts += yurt(
+            0.88 * math.cos(ang), 0.88 * math.sin(ang), rng.uniform(0.09, 0.11)
+        )
+    return parts
 
 
 def build_steppe_abbey(variant):
     """Domed mausoleum (a) or kurgan with stone statues (b)."""
-    return placeholder(1.0)
+    rng = random.Random(1313 if variant == "a" else 1050)
+    if variant == "a":
+        parts = m.ground_patch(0.9, "Sand", 14)
+        parts.append(block(0.0, 0.1, 0.8, 0.8, 0.05, "MudBrick"))
+        parts += mausoleum(0.0, 0.1, 0.0, 1.6, 0.05)
+        parts += mausoleum(0.55, -0.42, 0.3, 0.75)
+        half = 0.68
+        precinct = [
+            (-half, -half),
+            (half, -half),
+            (half, half + 0.1),
+            (-half, half + 0.1),
+        ]
+        parts += curtain(precinct, 0.08, "MudBrick", thickness=0.04)
+        parts += pishtaq(-0.1, -half, 0.0, 0.9)
+        parts += flag(-0.3, -half, 0.0, 0.42)
+        parts += steppe_house(-0.48, -0.4, 0.24, 0.16, 0.0, rng)
+        spots = ((0.98, 0.2), (1.0, -0.15), (0.92, 0.55), (-0.98, 0.1))
+    else:
+        radius = 0.62
+        profile = [(radius, -F * 0.5)] + [
+            (r * radius, h * radius) for r, h in DOME_PROFILES["shallow"]
+        ]
+        parts = [lathe(profile, "Steppe", (0.0, 0.0, 0.0), 14)]
+        top = radius * 0.6
+        parts.append(block(0.0, 0.0, 0.07, 0.05, 0.2, "Limestone", 0.2, top - 0.02))
+        parts.append(m.cylinder(0.035, 0.05, (0.0, 0.0, top + 0.2), "Limestone", 6))
+        for k in range(12):
+            ang = TAU * k / 12
+            parts.append(
+                block(
+                    0.68 * math.cos(ang),
+                    0.68 * math.sin(ang),
+                    0.06,
+                    0.05,
+                    0.05,
+                    "Limestone",
+                    ang,
+                )
+            )
+        for k in range(6):
+            parts.append(
+                block(
+                    0.8 + 0.07 * k,
+                    -0.02 * k,
+                    0.035,
+                    0.035,
+                    0.13 - 0.01 * k,
+                    "Limestone",
+                )
+            )
+        parts += flag(0.12, -0.05, top - 0.03, 0.42)
+        spots = ((-0.85, -0.55), (-1.0, -0.25), (-0.7, -0.8))
+    for x, y in spots:
+        parts += yurt(x, y, 0.11)
+    return parts
 
 
 def build_steppe_village(variant):
     """Small camp of yurts with a corral."""
-    return placeholder(0.95)
+    first = variant == "a"
+    rng = random.Random(605 if first else 842)
+    parts = m.ground_patch(0.42, "Sand", 10)
+    pens = [(0.6, -0.5)] if first else [(0.62, 0.45), (-0.6, -0.55)]
+    keep_out = [(px, py, 0.24) for px, py in pens] + [(0.0, 0.0, 0.12)]
+    parts += yurt(0.0, 0.0, 0.15)
+    parts += flag(0.22, 0.05, 0.0, 0.4)
+    parts += scatter(
+        rng, 8 if first else 6, 0.88, camp_yurt, keep_out, None, (0.2, 0.26), 1.35, 0.3
+    )
+    for px, py in pens:
+        parts += corral(px, py, 0.2, rng)
+    parts += cart(-0.45, 0.6, 0.4)
+    # Kipchak stone statue watching the camp.
+    parts.append(block(-0.82, 0.1, 0.05, 0.04, 0.16, "Limestone", 0.3))
+    return parts
 
 
 BUILDERS = {

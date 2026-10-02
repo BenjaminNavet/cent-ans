@@ -27,9 +27,9 @@ variantes : `game/assets/models/settlements/<type>_<famille>_<a|b>.glb`.
 - [x] `med` (10 modèles, 612 à 1 612 triangles, planche regardée)
 - [x] `byz` (10 modèles, 594 à 2 552 triangles, planche regardée ; coupoles de plomb et contreforts abaissés après coup)
 - [x] `rus` (10 modèles, 692 à 2 900 triangles, planche regardée ; bardeaux assombris après coup)
-- [ ] `isl`
+- [x] `isl` (10 modèles, 864 à 2 950 triangles, planche regardée ; dessus coplanaires des galeries corrigés après coup)
 - [ ] `steppe`
 - [ ] Export des 50 `.glb`, budgets vérifiés, planches regardées.
 
 ## Prochaine étape
-Famille `isl` (code écrit, planche à regarder), puis `steppe` ; à la fin, réexporter `med` et `byz` (faubourg factorisé, 8 maisons).
+Famille `steppe` (code écrit, planche à regarder) ; à la fin, réexporter `med` et `byz` (faubourg factorisé, 8 maisons).
