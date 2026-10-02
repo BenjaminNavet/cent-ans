@@ -54,6 +54,11 @@ références à récupérer en ligne.
   (rouge réservé aux ennemis), FA (assets de bataille). TB ne touche pas leurs fichiers.
 
 ## Prochaine étape
+**EN PAUSE depuis le 02/10 (demande du joueur).** Aucun agent ne tourne. TB3 arrêté en pleine
+3e passe : dernier état commité en `wip` sur `feat/tb3` (maquettes redessinées en signes de carte,
+drapage par pièce sur le relief en cours, non vérifié). Reprendre par une planche catalogue et une
+planche Agen/Fleurance, puis finir la passe.
+
 1. Retour de TB3 : relire ses planches, fusionner dans `feat/tb` (`git merge main` d'abord,
    supprimer les `.uid` non suivis en collision), tests, `--ff-only` dans main.
 2. Historique des batailles dans `core/` pour les marques de TB4 (règle de jeu : Rust + pont).
