@@ -56,6 +56,11 @@ var _revision := -2
 var _states: Dictionary = {}  # id de colonie → {buildings, fortification, building}
 var _resources: Dictionary = {}  # province → Array d'ids de ressource
 var _provinces: Dictionary = {}  # province → {population, devastation, besieged, constructing}
+var _live: Dictionary = {}  # `get_settlements_live` de l'état courant (tableaux alignés)
+var _live_index: Dictionary = {}  # id de colonie → rang dans `_live`
+var _stale := true
+var _rig_distance := 10.0
+var _loaded_radius := 0.0
 var _baseline: Dictionary = {}  # province → population de 1337 (données)
 var _soot: Dictionary = {}  # indice de colonie → suie 0-1
 var _anchors: Dictionary = {}  # "i|famille" → {px, yaw} ou {} (aucun site)
@@ -196,8 +201,9 @@ func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: 
 	stats = {"instances": 0, "nodes": 0, "settlements": 0, "build_ms": 0.0}
 
 
-## Relit l'état de la simulation s'il a changé (`get_state_revision`) : la prochaine mise à jour
-## de la vue reconstruit le voisinage. Rend vrai si l'état a été relu.
+## Note que l'état de la simulation a changé (`get_state_revision`) : il sera relu à la demande
+## (voisinage à reconstruire, `models_of`…), pas tant que la couche est hors de portée. Rend
+## vrai si l'état a changé.
 func refresh(sim: Object) -> bool:
 	_sim = sim
 	var revision := -1
@@ -210,9 +216,8 @@ func refresh(sim: Object) -> bool:
 	_revision = revision
 	_states.clear()
 	_provinces.clear()
-	var t0 := Time.get_ticks_usec()
-	_read_states()
-	stats["read_ms"] = float(Time.get_ticks_usec() - t0) / 1000.0
+	_live = {}
+	_stale = true
 	_dirty = true
 	return true
 
@@ -222,10 +227,25 @@ func invalidate() -> void:
 	_dirty = true
 
 
-## État des provinces à la dernière relecture : province → `{population, devastation, besieged,
-## constructing}`.
-func provinces_live() -> Dictionary:
-	return _provinces
+## État d'une province : `{population, devastation, besieged, constructing}` (vide si la
+## simulation ne la connaît pas), lu dans `ProvinceSnapshot` et gardé jusqu'au prochain
+## changement d'état.
+func province_live(province: String) -> Dictionary:
+	if _provinces.has(province):
+		return _provinces[province]
+	var out := {}
+	if _sim != null and _map != null and (_sim.has_method("get_provinces_snapshot") or _sim.has_method("get_province_state")):
+		var snapshot := ProvinceSnapshot.of(_sim, _map)
+		var p := snapshot.index_of(province)
+		if snapshot.has(p):
+			out = {
+				"population": float(snapshot.population_total[p]),
+				"devastation": float(snapshot.devastation[p]),
+				"besieged": snapshot.besieged[p] != 0,
+				"constructing": snapshot.constructing.size() == snapshot.ids.size() and snapshot.constructing[p] != 0,
+			}
+	_provinces[province] = out
+	return out
 
 
 ## TB3, point 5 : suie (0-1) des faubourgs, de l'enceinte et des bâtiments hors les murs de la
@@ -244,44 +264,26 @@ func set_soot(id: String, amount: float) -> void:
 			return
 
 
-## État des provinces (population, dévastation, siège, chantier de la cité : `ProvinceSnapshot`)
-## et de toutes les colonies en un appel groupé (`get_settlements_live`) ; sans ce dernier,
-## lecture paresseuse par `settlement_detail` (`_state_of`).
-func _read_states() -> void:
-	if _sim == null or _data == null:
+## État de toutes les colonies en un appel groupé (`get_settlements_live`), relu une fois par
+## changement d'état et seulement à la demande ; sans cet appel, lecture par `settlement_detail`.
+func _ensure_states() -> void:
+	if not _stale:
 		return
-	if _map != null and (_sim.has_method("get_provinces_snapshot") or _sim.has_method("get_province_state")):
-		var snapshot := ProvinceSnapshot.of(_sim, _map)
-		var has_sites := snapshot.constructing.size() == snapshot.ids.size()
-		for p in snapshot.ids.size():
-			if not snapshot.has(p):
-				continue
-			_provinces[snapshot.ids[p]] = {
-				"population": float(snapshot.population_total[p]),
-				"devastation": float(snapshot.devastation[p]),
-				"besieged": snapshot.besieged[p] != 0,
-				"constructing": has_sites and snapshot.constructing[p] != 0,
-			}
-	if not _sim.has_method("get_settlements_live"):
+	_stale = false
+	if _sim == null or not _sim.has_method("get_settlements_live"):
 		return
-	var live: Dictionary = _sim.call("get_settlements_live")
-	var ids: PackedStringArray = live.get("id", PackedStringArray())
-	var forts: PackedInt32Array = live.get("fortification_level", PackedInt32Array())
-	var cities: PackedByteArray = live.get("is_city", PackedByteArray())
-	var buildings: Array = live.get("buildings", [])
-	for k in ids.size():
-		var i: int = _data.index_by_id.get(ids[k], -1)
-		var is_city := k < cities.size() and cities[k] != 0
-		var province: Dictionary = _provinces.get(str(_data.settlements[i]["province"]), {}) if i >= 0 else {}
-		_states[ids[k]] = {
-			"buildings": Array(buildings[k]) if k < buildings.size() else [],
-			"fortification": forts[k] if k < forts.size() else 0,
-			"is_city": is_city,
-			"building": is_city and bool(province.get("constructing", false)),
-		}
+	var t0 := Time.get_ticks_usec()
+	_live = _sim.call("get_settlements_live")
+	var ids: PackedStringArray = _live.get("id", PackedStringArray())
+	if ids.size() != _live_index.size():
+		_live_index.clear()
+		for k in ids.size():
+			_live_index[ids[k]] = k
+	stats["read_ms"] = float(Time.get_ticks_usec() - t0) / 1000.0
 
 
-## État d'une colonie : `{buildings: Array, fortification: int, building: bool}`.
+## État d'une colonie : `{buildings: Array, fortification: int, is_city: bool, building: bool}`
+## (`building` : chantier en cours ; pour la cité, celui de `ProvinceSnapshot.constructing`).
 func _state_of(i: int) -> Dictionary:
 	var id := str(_data.settlements[i]["id"])
 	if forced_states.has(id):
@@ -289,8 +291,25 @@ func _state_of(i: int) -> Dictionary:
 		return {"buildings": forced.get("buildings", []), "fortification": 0, "is_city": true, "building": bool(forced.get("building", false))}
 	if _states.has(id):
 		return _states[id]
+	_ensure_states()
 	var state := {"buildings": [], "fortification": int(_data.settlements[i].get("fortification_level", 0)), "is_city": false, "building": false}
-	if _sim != null and _sim.has_method("settlement_detail"):
+	var ids: PackedStringArray = _live.get("id", PackedStringArray())
+	var k: int = _live_index.get(id, -1)
+	if k >= 0 and k < ids.size() and ids[k] != id:
+		# L'ordre des colonies a changé : index refait.
+		_live_index.clear()
+		for n in ids.size():
+			_live_index[ids[n]] = n
+		k = _live_index.get(id, -1)
+	if k >= 0 and k < ids.size():
+		var buildings: Array = _live.get("buildings", [])
+		var forts: PackedInt32Array = _live.get("fortification_level", PackedInt32Array())
+		var cities: PackedByteArray = _live.get("is_city", PackedByteArray())
+		state["buildings"] = Array(buildings[k]) if k < buildings.size() else []
+		state["fortification"] = forts[k] if k < forts.size() else 0
+		state["is_city"] = k < cities.size() and cities[k] != 0
+		state["building"] = bool(state["is_city"]) and bool(province_live(str(_data.settlements[i]["province"])).get("constructing", false))
+	elif _sim != null and _sim.has_method("settlement_detail"):
 		var detail: Dictionary = _sim.call("settlement_detail", id)
 		state["buildings"] = Array(detail.get("buildings", []))
 		state["fortification"] = int(detail.get("fortification_level", state["fortification"]))
@@ -338,7 +357,7 @@ func baseline_population(province: String) -> float:
 func population_ratio(province: String) -> float:
 	if forced_population_ratio.has(province):
 		return float(forced_population_ratio[province])
-	var now := float((_provinces.get(province, {}) as Dictionary).get("population", 0.0))
+	var now := float(province_live(province).get("population", 0.0))
 	var then := baseline_population(province)
 	return now / then if now > 0.0 and then > 0.0 else 1.0
 
@@ -385,6 +404,7 @@ func update_view(rig_distance: float) -> void:
 	if not enabled or _data == null:
 		visible = false
 		return
+	_rig_distance = rig_distance
 	var shown := force_active or rig_distance < view_range()
 	if shown != visible:
 		visible = shown
@@ -403,7 +423,7 @@ func update_view(rig_distance: float) -> void:
 		_vertical_scale = MapData.vertical_scale()
 		_refresh_aabbs()
 	var here := _camera_ground()
-	if _pending.is_empty() and (_dirty or here.distance_to(_center) > load_radius() * 0.3):
+	if _pending.is_empty() and (_dirty or here.distance_to(_center) > _loaded_radius * 0.3 or load_radius() > _loaded_radius * 1.3):
 		_begin_rebuild(here)
 	if not _pending.is_empty():
 		_step(STEP_BUDGET_USEC if FrameBudget.in_frame() else 1 << 30)
@@ -413,9 +433,12 @@ func update_view(rig_distance: float) -> void:
 			_reground()
 
 
-## Rayon (unités) du voisinage chargé autour du point visé.
+## Rayon (unités) du voisinage chargé autour du point visé : `render.load_factor` × distance du
+## rig, entre `render.load_min_units` et 1,5 × la portée (comme le chargement des villes 1:1 :
+## de près, on ne pose que les maquettes des colonies proches).
 func load_radius() -> float:
-	return view_range() * 1.5
+	var render: Dictionary = config.get("render", {})
+	return clampf(float(render.get("load_factor", 3.0)) * _rig_distance, float(render.get("load_min_units", 6.0)), view_range() * 1.5)
 
 
 ## Point du sol visé par la caméra (unités carte) ; position de la caméra en repli.
@@ -449,10 +472,15 @@ func _begin_rebuild(center: Vector2) -> void:
 	_building = []
 	_pending = []
 	var radius := load_radius()
+	_loaded_radius = radius
+	var near: Array = []
 	for i in _data.settlements.size():
 		var px: Vector2 = _data.settlements[i]["px"]
 		if absf(px.x - center.x) <= radius and absf(px.y - center.y) <= radius and px.distance_to(center) <= radius:
-			_pending.append(i)
+			near.append([px.distance_to(center), i])
+	near.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
+	for entry: Array in near:  # `pop_back` : les plus proches d'abord
+		_pending.append(entry[1])
 	stats["settlements"] = _pending.size()
 	stats["build_start_usec"] = Time.get_ticks_usec()
 	if _pending.is_empty():

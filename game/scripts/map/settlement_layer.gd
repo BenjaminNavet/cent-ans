@@ -150,6 +150,7 @@ var town_far: TownFarLayer
 var outbuildings: OutbuildingLayer
 ## TB3 : suie par ville (dévastation, siège, prise de la place).
 var soot: TownSoot
+var _soot_turn := -1
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
@@ -627,7 +628,7 @@ func _build_selection_ring() -> void:
 func refresh(sim: Object, _color_of: Callable) -> void:
 	if data == null:
 		return
-	data.apply_live(sim)
+	var controllers_changed := data.apply_live(sim)
 	if landmark_cities != null and sim != null and sim.has_method("get_date_label"):
 		var year := LandmarkModel.year_of(str(sim.call("get_date_label")))
 		if year > 0:
@@ -635,7 +636,11 @@ func refresh(sim: Object, _color_of: Callable) -> void:
 	_refresh_shields()
 	_refresh_capital(sim)
 	if outbuildings != null and outbuildings.refresh(sim):
-		_refresh_soot(sim)
+		# TB3 : la suie ne change qu'avec le tour (dévastation, sièges) ou une prise de place.
+		var turn := int(sim.call("get_turn")) if sim != null and sim.has_method("get_turn") else 0
+		if controllers_changed or turn != _soot_turn:
+			_soot_turn = turn
+			_refresh_soot(turn)
 	var devastation := {}
 	if sim != null and (sim.has_method("get_provinces_snapshot") or sim.has_method("get_province_state")):
 		var provinces := {}
@@ -1712,11 +1717,10 @@ func model_radius(i: int) -> float:
 
 ## TB3 : suie de chaque ville relue sur l'état de la simulation (`TownSoot`), poussée aux villes
 ## 1:1, à leur maillage lointain et aux faubourgs.
-func _refresh_soot(sim: Object) -> void:
+func _refresh_soot(turn: int) -> void:
 	if soot == null or outbuildings == null:
 		return
-	var turn := int(sim.call("get_turn")) if sim != null and sim.has_method("get_turn") else 0
-	var changed := soot.update(data.settlements, outbuildings.provinces_live(), turn)
+	var changed := soot.update(data.settlements, outbuildings.province_live, turn)
 	for id: String in changed:
 		_apply_town_soot(id, float(changed[id]))
 

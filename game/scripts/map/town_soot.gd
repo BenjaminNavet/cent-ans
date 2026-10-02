@@ -34,9 +34,9 @@ static func from_devastation(cfg: Dictionary, devastation: float) -> float:
 
 
 ## Relit l'état : `settlements` (dictionnaires `id`, `province`, `controller`, `kind`),
-## `provinces` (province → `{devastation, besieged}`), `turn`. Rend les suies qui ont changé
-## (id → suie).
-func update(settlements: Array, provinces: Dictionary, turn: int) -> Dictionary:
+## `provinces` (province → `{devastation, besieged}` : un dictionnaire, ou un Callable qui rend
+## l'état d'une province), `turn`. Rend les suies qui ont changé (id → suie).
+func update(settlements: Array, provinces: Variant, turn: int) -> Dictionary:
 	var changed := {}
 	var decay := float(config.get("decay_per_turn", 0.1))
 	# Partie chargée ou nouvelle campagne (le tour saute ou recule) : les contrôleurs relus ne
@@ -45,10 +45,13 @@ func update(settlements: Array, provinces: Dictionary, turn: int) -> Dictionary:
 		_seen = false
 		_events.clear()
 	_turn = turn
+	var seen := {}  # province → état lu
 	for entry: Dictionary in settlements:
 		var id := str(entry["id"])
 		var province := str(entry["province"])
-		var live: Dictionary = provinces.get(province, {})
+		if not seen.has(province):
+			seen[province] = (provinces as Callable).call(province) if provinces is Callable else (provinces as Dictionary).get(province, {})
+		var live: Dictionary = seen[province]
 		var devastation := float(live.get("devastation", 0.0))
 		var controller := str(entry.get("controller", ""))
 		if _seen and _controller.has(id) and str(_controller[id]) != controller:
@@ -78,8 +81,8 @@ func update(settlements: Array, provinces: Dictionary, turn: int) -> Dictionary:
 			else:
 				_amounts.erase(id)
 			changed[id] = amount
-	for province: String in provinces:
-		var live: Dictionary = provinces[province]
+	for province: String in seen:
+		var live: Dictionary = seen[province]
 		_devastation[province] = float(live.get("devastation", 0.0))
 		_besieged[province] = bool(live.get("besieged", false))
 	_seen = true

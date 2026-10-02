@@ -31,7 +31,9 @@
         "ring_max_m",
         "max_slope",
         "max_per_settlement",
-        "shore_reach_m"
+        "shore_reach_m",
+        "load_factor",
+        "load_min_units"
       ],
       "properties": {
         "view_range_units": {
@@ -92,6 +94,16 @@
         },
         "shore_reach_m": {
           "description": "Distance maximale (m) au bord bâti où chercher une grève (mer ou fleuve).",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "load_factor": {
+          "description": "Rayon du voisinage chargé, en multiples de la distance du rig.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "load_min_units": {
+          "description": "Rayon minimal (unités monde) du voisinage chargé.",
           "type": "number",
           "exclusiveMinimum": 0
         }

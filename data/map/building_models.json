@@ -13,7 +13,9 @@
     "ring_max_m": 650.0,
     "max_slope": 0.22,
     "max_per_settlement": 5,
-    "shore_reach_m": 2500.0
+    "shore_reach_m": 2500.0,
+    "load_factor": 3.0,
+    "load_min_units": 6.0
   },
   "families": {
     "farm": {

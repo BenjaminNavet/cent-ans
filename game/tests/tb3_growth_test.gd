@@ -28,6 +28,7 @@ class FakeSim:
 	extends RefCounted
 
 	var revision := 1
+	var turn := 0
 	var buildings: Dictionary = {}  # colonie → Array
 	var fortification: Dictionary = {}
 	var constructing: Dictionary = {}
@@ -38,6 +39,9 @@ class FakeSim:
 
 	func get_state_revision() -> int:
 		return revision
+
+	func get_turn() -> int:
+		return turn
 
 	func settlement_detail(id: String) -> Dictionary:
 		details += 1
@@ -357,6 +361,7 @@ func _check_soot(layer: SettlementLayer, data: SettlementData) -> void:
 	# Dévastation de la province lue dans la simulation : suie de toutes ses villes, pas des autres.
 	sim.devastation[PROVINCE] = 100
 	sim.revision += 1
+	sim.turn += 1
 	layer.refresh(sim, Callable())
 	var second := ""
 	for entry in data.settlements:
