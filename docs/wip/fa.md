@@ -29,11 +29,24 @@ FA n'y touche pas.
       `--no-fa` pour l'A/B. Jugé sur captures : gain net de près (feuilles lisibles, houppiers
       plus fournis), neutre de loin. Piège : compression S3TC = reflets vert fluo sur les
       imposteurs → compression haute qualité.
-- [ ] FA2 — Feu et fumée : `tools/cent_ans_tools/vfx_flipbooks.py` recode Flame02 et Cloud02
-      (Unity Labs, CC0) au format des planches du lot V3 (aucun shader modifié), réglages
-      `data/fx/fire_flipbooks.json`. Planches cuites et commitées, tests pytest verts.
-      **Reste** : jugement en jeu. `s2_fire_shot.gd` ne cadre plus de ville en feu (mise en
-      scène obsolète) → agent visuel dédié, worktree `../gp-fa-fx`, branche `feat/fa-fx`.
+- [x] FA2 — Feu et fumée : `tools/cent_ans_tools/vfx_flipbooks.py` recode **Flame03** et
+      **WispySmoke03** (Unity Labs, CC0) au format des planches du lot V3 (aucun shader modifié),
+      réglages `data/fx/fire_flipbooks.json`. Jugé en jeu (branche `feat/fa-fx`, 18 planches lues) :
+      flammes nettement meilleures (brasier aux langues déchiquetées au lieu de trois larmes
+      lisses), fumée meilleure (volutes irrégulières au lieu de boules), bombarde non dégradée.
+      Flame02 (pied blanc carré, haut éteint) et Cloud02 (disque plein = boules opaques) écartés.
+      Réglages ajoutés à l'outil : `heat_max`, `coverage_gamma` (flammes), `density_gamma`,
+      `edge_fade` (fumée). `data/fx/siege_fire.json` : flammes 3,5-7 m → 4,5-8,5 m.
+      `s2_fire_shot.gd` réparé (caméra propre par-dessus les toits, interface écartée,
+      `--flipbooks=<dossier>` pour l'A/B, aussi sur `sg3_siege_shot.gd` ; aide
+      `game/tests/fx_flipbook_override.gd`). Planche avant/après :
+      `~/dev/cent-ans-raw/fa/fx-shots/fa2-avant-apres.png`.
+      **Non vérifié à l'image** : feu naval (`naval_fire.gd`), fumée de camp en campagne
+      (`army_figures.gd`, périmètre TB) et feux de camp de bataille (source posée dans un siège
+      invisible avec l'ancienne planche comme avec la nouvelle : mise en scène à revoir, pas un
+      effet des planches). **Défaut restant** : fumée brun-rouge près des foyers (lueur et
+      lumières ponctuelles du shader, antérieur à FA2) ; jeune fumée encore très sombre et dense
+      juste au-dessus des flammes.
 - [ ] FA3 — Animations : agent dans `../gp-fa-anim` (`feat/fa-anim`), reciblage Mesh2Motion +
       KayKit (CC0) sur le rig fin, drapeau `--fa-anim`, note `docs/wip/fa3-anim.md`. Brutes
       `~/dev/cent-ans-raw/fa/anim/`. La session principale juge les planches Blender puis décide
@@ -58,3 +71,4 @@ Toute nouvelle vérification visuelle passe par un agent visuel dédié.
 
 ## Journal
 - 10-02 : worktree, état des lieux, recherche effets terminée, recherche animations lancée.
+- 10-02 : FA2 jugé et réglé en jeu (Flame03 + WispySmoke03), `feat/fa-fx`.
