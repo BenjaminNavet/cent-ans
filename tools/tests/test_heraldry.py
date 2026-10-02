@@ -88,3 +88,25 @@ def test_new_charges_render_distinct_from_plain_field() -> None:
         plain = heraldry.Blazon(field=blazon.field, charge=blazon.charge, text="")
         bare = heraldry.render_shield(plain)
         assert _digest_image(charged) != _digest_image(bare), faction_id
+
+
+def test_jerusalem_cross_has_gold_in_four_cantons() -> None:
+    """The crusader shield shows a potent cross and a crosslet in each canton."""
+    faction = {
+        "heraldry": {
+            "blazon": "D'argent à la croix potencée d'or cantonnée de quatre croisettes du même.",
+            "primary_color": "#F5F1E6",
+            "secondary_color": "#C9A227",
+        }
+    }
+    image = heraldry.shield_for_faction(faction).convert("RGB")
+    size = image.width
+
+    def is_gold(fx: float, fy: float) -> bool:
+        red, green, blue = image.getpixel((int(fx * size), int(fy * size)))
+        return red > 150 and blue < 90 and green > 110
+
+    for canton in ((0.31, 0.29), (0.69, 0.29), (0.31, 0.61), (0.69, 0.61)):
+        assert is_gold(*canton)
+    assert is_gold(0.5, 0.45)
+    assert not is_gold(0.2, 0.2)

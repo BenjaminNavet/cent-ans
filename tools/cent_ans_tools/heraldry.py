@@ -363,6 +363,38 @@ def _draw_cross(draw: ImageDraw.ImageDraw, color: Color, arm: float = 0.16) -> N
     draw.rectangle(_px([(0.0, 0.42 - arm / 2), (1.0, 0.42 + arm / 2)]), fill=color)
 
 
+def _draw_jerusalem_cross(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """Cross potent (arms ~1/6 of the shield, T-bar on each end) + four crosslets."""
+    cx, cy, half_arm = 0.5, 0.45, 0.075
+    reach_v, reach_h = 0.31, 0.30  # arm length from the centre
+    bar_len, bar_thick = 0.12, 0.065  # T-bar half-length and thickness
+    draw.rectangle(
+        _px([(cx - half_arm, cy - reach_v), (cx + half_arm, cy + reach_v)]), fill=color
+    )
+    draw.rectangle(
+        _px([(cx - reach_h, cy - half_arm), (cx + reach_h, cy + half_arm)]), fill=color
+    )
+    half_thick = bar_thick / 2
+    for ex, ey, vertical in (
+        (cx, cy - reach_v, False),
+        (cx, cy + reach_v, False),
+        (cx - reach_h, cy, True),
+        (cx + reach_h, cy, True),
+    ):
+        half_w, half_h = (half_thick, bar_len) if vertical else (bar_len, half_thick)
+        draw.rectangle(
+            _px([(ex - half_w, ey - half_h), (ex + half_w, ey + half_h)]), fill=color
+        )
+    arm, length = 0.026, 0.07  # crosslet half-thickness, half-length
+    for qx, qy in ((0.31, 0.29), (0.69, 0.29), (0.31, 0.61), (0.69, 0.61)):
+        draw.rectangle(
+            _px([(qx - arm, qy - length), (qx + arm, qy + length)]), fill=color
+        )
+        draw.rectangle(
+            _px([(qx - length, qy - arm), (qx + length, qy + arm)]), fill=color
+        )
+
+
 def _draw_saltire(draw: ImageDraw.ImageDraw, color: Color, arm: float = 0.16) -> None:
     """Diagonal cross (X), the saltire of the FitzGerald arms (FE4c)."""
     width = int(arm * CANVAS)
@@ -1073,23 +1105,8 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
                     _px([(x - 0.05, y - 0.05), (x + 0.05, y + 0.05)]), fill=charge
                 )
     elif blazon.has("croix potencee"):
-        # Jerusalem cross: potent (T-ended) main cross, a crosslet in each quarter.
-        draw.rectangle(_px([(0.45, 0.2), (0.55, 0.68)]), fill=charge)
-        draw.rectangle(_px([(0.27, 0.39), (0.73, 0.49)]), fill=charge)
-        for x0, y0, x1, y1 in (
-            (0.38, 0.2, 0.62, 0.26),
-            (0.38, 0.62, 0.62, 0.68),
-            (0.27, 0.34, 0.33, 0.54),
-            (0.67, 0.34, 0.73, 0.54),
-        ):
-            draw.rectangle(_px([(x0, y0), (x1, y1)]), fill=charge)
-        for cx, cy in ((0.34, 0.3), (0.66, 0.3), (0.34, 0.6), (0.66, 0.6)):
-            draw.rectangle(
-                _px([(cx - 0.035, cy - 0.07), (cx + 0.035, cy + 0.07)]), fill=charge
-            )
-            draw.rectangle(
-                _px([(cx - 0.07, cy - 0.035), (cx + 0.07, cy + 0.035)]), fill=charge
-            )
+        # Jerusalem cross: potent (T-ended) main cross, a crosslet in each canton.
+        _draw_jerusalem_cross(draw, charge)
     elif blazon.has("croix alesee"):
         draw.rectangle(_px([(0.42, 0.18), (0.58, 0.7)]), fill=charge)
         draw.rectangle(_px([(0.24, 0.36), (0.76, 0.52)]), fill=charge)
