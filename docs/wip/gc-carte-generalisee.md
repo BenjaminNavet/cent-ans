@@ -224,5 +224,29 @@ surfaces par modèle (une par teinte, matériaux propres à chaque `.glb`) + pas
 - Bannières des 7 villes emblématiques (pas de teinte de contrôleur) ; étiquette de Vincennes dans
   l'emprise de Paris ; Saraï petite (poids faible) ; yourtes à juger en jeu.
 
+## Vague 3 (03/10) — fleuves, lieux noyés, coût, fusion
+- GC4 : élargissement compressif des cours d'eau (`generalised` de `river_display.json` :
+  largeur affichée = max(réelle, 5 × √(réelle × 100 m))), dans `river_fine.gdshader` et
+  `river_water.gdshader` (`gen_width`) ; les ponts suivent (`RiversRenderer.generalised_width`).
+  Le lit creusé garde sa largeur réelle (l'eau déborde grâce au biais de profondeur existant).
+  Routes laissées telles quelles (traits fins à plancher en pixels).
+- Lieux noyés dans une ville emblématique (`collision.absorb_ratio` 0,9) : pas de maquette propre
+  (2 lieux, dont Vincennes).
+- GC6-perf : kit en une surface à couleurs de sommet + shader partagé `maquette_kit.gdshader`,
+  `shadow_range` par type. Appels de dessin 3 182 → 1 080 (d 150), 1 382 → 626 (d 40).
+- Contrôle : `docs/img/gc/gc6_maquettes.jpg` (15 vues, teintes inchangées). Fusion dans main
+  (cb8932a69).
+- Constat hors lot : ≈ 620 erreurs « Rect2 size is negative » par passe de `smoke.gd`
+  (`settlement_layer.gd`, `_declutter_step`, `shield_rect.grow(-marge)`, code TB2), identiques en
+  style `real` ; à signaler à la session TB.
+
+## Reste à faire
+- GC6 : ménage du 1:1 (calques, prototype `MapScale`, ZG5b de près, paliers vallée/site) une fois
+  le style `maquette` confirmé par le joueur ; banc d'i/s sur machine calme.
+- GC7 : camps, avec SA (ADR 0156).
+- À juger en jeu : reflets perdus (coupoles, dorures : rugosité uniforme), bois uni, seuil des
+  ombres des petits lieux, yourtes, Saraï et Novgorod petites (poids faibles dans les données de
+  l'Est), pas de bannière sur les 7 villes emblématiques (l'écu porte le contrôleur).
+
 ## Prochaine étape
-Fusion dans main après la passe de tests carte ; puis jugement du joueur en partie réelle.
+Jugement du joueur en partie réelle.
