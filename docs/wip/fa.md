@@ -35,8 +35,14 @@ FA n'y touche pas.
       flammes nettement meilleures (brasier aux langues déchiquetées au lieu de trois larmes
       lisses), fumée meilleure (volutes irrégulières au lieu de boules), bombarde non dégradée.
       Flame02 (pied blanc carré, haut éteint) et Cloud02 (disque plein = boules opaques) écartés.
-      Réglages ajoutés à l'outil : `heat_max`, `coverage_gamma` (flammes), `density_gamma`,
-      `edge_fade` (fumée). `data/fx/siege_fire.json` : flammes 3,5-7 m → 4,5-8,5 m.
+      Réglages ajoutés à l'outil : `heat_max`, `coverage_gamma` (flammes), `density_floor`,
+      `density_gamma`, `edge_fade` (fumée). `density_floor` 0,04 retire le voile diffus que le
+      gamma relevait en halo (alpha nul sur l'anneau à 90 % du rayon, test pytest).
+      Bombarde : `game/tests/fa2_bombard_shot.gd` (âges de fumée fixes, graines fixées, gros
+      plan et vue moyenne) ; planche `~/dev/cent-ans-raw/fa/fx-shots/fa2-bombarde-avant-apres.png`.
+      Le grand disque pâle vu sur les captures de bombarde n'est pas la planche : c'est la
+      traînée du boulet (`siege_assault_fx.gd`, `_trail_mat`, disque flou) qui s'empile à la
+      bouche quand la simulation est en pause ; présent à l'identique avec l'ancienne planche. `data/fx/siege_fire.json` : flammes 3,5-7 m → 4,5-8,5 m.
       `s2_fire_shot.gd` réparé (caméra propre par-dessus les toits, interface écartée,
       `--flipbooks=<dossier>` pour l'A/B, aussi sur `sg3_siege_shot.gd` ; aide
       `game/tests/fx_flipbook_override.gd`). Planche avant/après :
