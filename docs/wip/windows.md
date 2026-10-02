@@ -50,3 +50,12 @@ Objectif : le jeu se lance et s'exporte sous Windows x86_64.
 - CI Windows run 36664599846 vert sur `main` d95f45b9 (≈ 575 commits après le portage) : DLL
   11 min, import 3 min, smoke 14 min. Lancé en poussant `windows/check-2026-09-30` (le
   `workflow_dispatch` est refusé à l'agent, 403).
+
+## Lanceur `.exe` 2026-10-02 (ADR 0150)
+- Demande du joueur : un `.exe` pour démarrer sous Windows après un clone (pas un export).
+- `Lancer Cent Ans.exe` commité à la racine (309 Ko, n'importe que des DLL système), source
+  `tools/launcher-windows/` (2 tests unitaires), build `tools/launcher-windows/build.sh`.
+  Même travail que le `.bat`, qui reste en repli.
+- CI `windows.yml` : tests unitaires du lanceur, puis smoke via l'exécutable commité.
+- Branche `windows/launcher-exe` (worktree `../gp-winexe`). Prochaine étape : run CI vert, puis
+  fusion `--ff-only` dans main et suppression du worktree.
