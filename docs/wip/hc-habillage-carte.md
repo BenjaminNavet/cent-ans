@@ -96,7 +96,25 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
   Ness, Berre, Windermere, Paladru, Aiguebelette, Joux, Nantua, Saint-Point, Léon/Soustons,
   Haarlemmermeer, Whittlesey Mere (+ Fucin, Copaïs, Amouq de HC5).
 
+## HC3 — reprise du 02/10 au soir (en cours)
+- main (GC comprise, 425788334) + `feat/hc1` + `feat/hc2` fusionnés dans `feat/hc` (71aa197f1) ;
+  conflit `campaign_map.json` + schéma résolu (clés GC et `tree_style` gardées).
+- Tests sur la branche fusionnée, tous verts : import, smoke, `hc_forest_test`, `hc_water_test`,
+  `gc_maquettes_test`, `ss_lakes_test`, `tb1_seasons_test`, pytest schémas / lacs (19).
+- Planches `~/.cache/cent_ans/hc/hc3/trees_a.jpg` et `water_a.jpg` (lues : 4 lectures sur 10) :
+  forêts en volume à rig 25-300 (bien) ; abords de Paris nus à rig 60-150 (massifs nommés vides :
+  HC5) ; bosquets et arbres épars trop rares à mi-distance (à régler : `generalised_grove_*`,
+  `generalised_isolated_gain`) ; Léman et étangs de Dombes / Sologne lisibles ; Fens = masse gris
+  sombre → `rl_reed_color` et `rl_marsh_water` éclaircis (à recontrôler).
+- HC5 relancé (joueur : « oui corrige les massifs nommés vides ») : correction de l'allocation dans
+  `landcover.py`, recuisson, mesures, tests restants.
+- Banc HC1 : machine encore chargée (charge 37) ; à refaire.
+
 ## Prochaine étape
+Au retour de HC5 : fusion de `feat/hc5`, réglage des bosquets, planche de contrôle (Paris 60 / 150,
+bocage, Fens), banc, puis HC6 (docs, fusion dans main).
+
+## (ancienne) Prochaine étape — pause
 0. GC est dans main (425788334, non poussée) : fusionner main dans `feat/hc` puis dans les trois
    branches de lot (conflit attendu : `data/ui/campaign_map.json` + schéma, clés `town_scale`,
    `town_style`, `camera_floor_distance` contre `tree_style`). Maquettes finales : ville 14, bourg 8,

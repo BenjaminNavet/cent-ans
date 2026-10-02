@@ -22,9 +22,9 @@ uniform float rl_valley_green = 0.25;      // fonds de vallée plus verts (prés
 
 uniform sampler2D wetlands : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_wetlands = false;
-uniform vec3 rl_reed_color = vec3(0.105, 0.115, 0.042);
+uniform vec3 rl_reed_color = vec3(0.19, 0.22, 0.085);
 uniform vec3 rl_wet_meadow = vec3(0.06, 0.12, 0.05);
-uniform vec3 rl_marsh_water = vec3(0.04, 0.075, 0.07);
+uniform vec3 rl_marsh_water = vec3(0.07, 0.14, 0.16);
 uniform float rl_pond_cell_px = 2.8;       // taille d'une cellule d'étang (pixels carte ≈ 2 km), palier 0
 // HC2 (ADR 0161 §3) : étangs et mares généralisés. Au dézoom, les cellules d'étangs doublent par
 // paliers d'empreinte (comme les octaves de canopée du terrain) : une zone d'étangs montre toujours
