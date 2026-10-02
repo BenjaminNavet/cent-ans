@@ -748,6 +748,20 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         .collect();
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
     sites.extend(borders.into_iter().map(|(id, _)| id));
+    // JR1: a host that holds no city at all (based in a town of another
+    // realm's province) recruits in, and musters from, the places it holds.
+    let cityless = !state
+        .settlements
+        .iter()
+        .any(|(id, s)| ctx.holds(s) && ctx.is_city(id));
+    if cityless {
+        sites = state
+            .settlements
+            .iter()
+            .filter(|(_, s)| ctx.holds(s) && s.kind != SettlementKind::Village)
+            .map(|(id, _)| id.clone())
+            .collect();
+    }
     let mut recruits = 0;
     // G2: a hoard buys troops at its own pace (a crushed realm sitting on
     // ransoms and loot raises companies, it does not bank them).
@@ -832,15 +846,28 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // turn); the need grows with the threat around the city (lot C4). The
     // small garrisons of the other settlements stay where they are.
     for (id, settlement) in &state.settlements {
-        if !ctx.holds(settlement) || settlement.siege.is_some() || !ctx.is_city(id) {
+        if !ctx.holds(settlement) || settlement.siege.is_some() {
+            continue;
+        }
+        let city = ctx.is_city(id);
+        if !city && !cityless {
             continue;
         }
         // P1: one unit less than the garrison of the same role at the 1337
         // start, so the starting garrisons stay put; one more under threat.
-        let mut keep = state
-            .garrison_role(data, ctx.faction, &settlement.province)
-            .garrison_size()
-            - 1;
+        // JR1: a cityless host keeps the starting garrison of the place's
+        // kind (recruits and landed contingents march out).
+        let mut keep = if city {
+            state
+                .garrison_role(data, ctx.faction, &settlement.province)
+                .garrison_size()
+                - 1
+        } else {
+            data.settlement_rules
+                .as_ref()
+                .and_then(|r| r.starting_garrison.get(&settlement.kind))
+                .map_or(1, |units| units.len().max(1))
+        };
         if ctx.threat_at(id) > 0.0 {
             keep += 1;
         }

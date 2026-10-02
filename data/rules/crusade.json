@@ -19,8 +19,8 @@
     "truce_with_target_holder_per_turn": -2
   },
   "alms": {
-    "base": 200,
-    "per_fervor": 12
+    "base": 300,
+    "per_fervor": 20
   },
   "passage": {
     "cost": 1500,

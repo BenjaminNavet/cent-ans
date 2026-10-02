@@ -288,7 +288,9 @@ fn apply_reward(state: &mut CampaignState, data: &GameData, player: &FactionId, 
     }
 }
 
-/// The capital's city when the player controls it, else his first city.
+/// The capital's city when the player controls it, else his first city,
+/// else the first place he holds (JR1: a host based in a town holds no
+/// city, its reward lands in its base).
 fn reward_city(state: &CampaignState, player: &FactionId) -> Option<SettlementId> {
     let capital = state.factions.get(player)?.capital.clone();
     if state.controls_province(player, &capital) {
@@ -299,6 +301,13 @@ fn reward_city(state: &CampaignState, player: &FactionId) -> Option<SettlementId
         .keys()
         .find(|p| state.controls_province(player, p))
         .and_then(|p| state.province_city_id(p).cloned())
+        .or_else(|| {
+            state
+                .settlements
+                .iter()
+                .find(|(_, s)| &s.owner == player && &s.controller == player)
+                .map(|(id, _)| id.clone())
+        })
 }
 
 /// The dearest unit raised in `city` (available first, else any listed).

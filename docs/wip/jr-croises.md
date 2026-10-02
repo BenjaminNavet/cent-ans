@@ -23,7 +23,7 @@ revendications `prov_jerusalem`, `prov_gaza`, `prov_safad`.
 
 ## État
 - Spec, ADR, note écrits ; exploration faite (spec § 5.1). JR1 et JR2 lancés.
-- JR1 : barème, crochets (bataille, capture, guerre), aumônes dans le revenu, passage, élan, débandade, vue, pont `get_crusade()`, IA et 12 tests unitaires faits. Prochaine étape : audit des usages de la capitale, puis fusion de `feat/jr-data` et tests d'intégration `tests/jr_crusade.rs`.
+- JR1 : règle complète (barème, crochets, aumônes dans le revenu, passage, élan, débandade, vue, pont `get_crusade()`, IA), `feat/jr-data` fusionnée, audit de la capitale fait (récompense de mission, sites de recrutement et levée de l'IA pour une faction sans cité), tests unitaires (13), d'intégration (`sim-campaign/tests/jr_crusade.rs`, 6) et IA (`ai/tests/jr_crusade_ai.rs`, 2) verts. Prochaine étape : suite `cargo test` complète, puis rapport.
 
 ## Prochaine étape
 - À la fin de JR1 et JR2 : vérifier les tests, lancer JR3 et JR4.

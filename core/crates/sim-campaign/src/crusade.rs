@@ -1062,6 +1062,22 @@ mod tests {
     }
 
     #[test]
+    fn the_capture_of_the_target_city_goes_through_the_hook() {
+        let mut state = campaign();
+        let city = target_city(&state);
+        let mut events = Vec::new();
+        crate::siege::capture(&mut state, data(), &city, &fac(CRUSADERS), &mut events);
+        assert!(state.crusade.as_ref().unwrap().target_taken);
+        assert_eq!(fervor(&state), 100);
+        assert!(events
+            .iter()
+            .any(|e| e.kind == EventKind::Crusade && e.text_fr.contains("délivrée")));
+        // Retaken by its former master: the floor goes at once.
+        crate::siege::capture(&mut state, data(), &city, &fac(HOLDER), &mut events);
+        assert!(!state.crusade.as_ref().unwrap().target_taken);
+    }
+
+    #[test]
     fn alms_follow_fervor_and_are_income() {
         let mut state = campaign();
         assert_eq!(alms(&state, data(), &fac(CRUSADERS)), 100 + 10 * 60);
