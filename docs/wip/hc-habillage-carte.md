@@ -110,9 +110,28 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
   `landcover.py`, recuisson, mesures, tests restants.
 - Banc HC1 : machine encore chargée (charge 37) ; à refaire.
 
-## Prochaine étape
-Au retour de HC5 : fusion de `feat/hc5`, réglage des bosquets, planche de contrôle (Paris 60 / 150,
-bocage, Fens), banc, puis HC6 (docs, fusion dans main).
+- HC5 fusionné (3fe939d17) ; planches `trees_b.jpg` / `water_b.jpg` (6 lectures sur 10) :
+  massifs autour de Paris présents (Yveline, Bière près de Melun), bocage breton en arbres épars ;
+  Fens gris-olive avec mares (bien), Dombes nette. Bosquets densifiés dans le .tres (arbres épars
+  ×12, ripisylves ×1,8, bocage ×9, bosquets 0,14 / 0,30).
+- Tests finaux verts (main d86c94c07 fusionnée) : import, smoke, hc_forest, hc_water,
+  gc_maquettes, ss_lakes, tb1_seasons, pytest schémas / lacs (19) et landcover / navgrid /
+  colormap (49). Banc : 16,68 ms avec et sans arbres à rig 30-300 = plafond de 60 i/s
+  (vsync non levée par `--disable-vsync`) : 60 i/s tenues avec 68 000-239 000 instances ; surcoût
+  réel sous ce plafond non mesuré.
+- **Fusionné dans main** (ff) le 03/10.
+
+## Points ouverts
+- Banc sans plafond d'images (vsync) sur machine calme.
+- `geo anchors-fine` à relancer (chaussées sur les nouveaux marais) quand la session qui modifie
+  `fine_anchors.json` dans le checkout principal aura commité.
+- HC4 : variété des champs (vignes, vergers, landes) à hauteur de jeu.
+- Lacs historiques absents de `lakes.json` (Grand-Lieu, Loch Ness, Berre, Windermere, Paladru,
+  Fucin, Copaïs, Amouq, Haarlemmermeer, Whittlesey Mere…) : nouveau jeu de données + rendu.
+- 11 massifs sous 70 % de leur densité (essarts, landes, limite des arbres, steppe), Pripiat à
+  0,45 sans effet de déplacement : choix d'équilibrage ; sources fragiles listées dans
+  `docs/wip/hc5-massifs-zones-humides.md`.
+- Semis 300-800 ms par tuile en fond (remplissage progressif après un saut de caméra).
 
 ## (ancienne) Prochaine étape — pause
 0. GC est dans main (425788334, non poussée) : fusionner main dans `feat/hc` puis dans les trois
