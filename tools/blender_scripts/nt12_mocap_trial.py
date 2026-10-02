@@ -360,11 +360,45 @@ def quality(tgt, solved):
     }
 
 
+def bake_clip(arm, rig, name, bases, loop, prepare=None, mirror=False):
+    """Append the frames `bases` (basis dictionaries) of one clip to `rig`.
+
+    `prepare(i)` runs on the posed armature of frame `i` before it is captured (virtual
+    bones, hand on a prop: lot FA3); `mirror` bakes the left/right mirror of every frame.
+    """
+    import battle_skinned_poses as poses
+
+    start = rig.begin_clip()
+    for i, basis in enumerate(bases):
+        for pb in arm.pose.bones:
+            pb.matrix_basis = basis.get(pb.name, Matrix.Identity(4))
+        poses.reset_state()
+        bpy.context.view_layer.update()
+        if prepare is not None:
+            prepare(i)
+            bpy.context.view_layer.update()
+        mats = rig.frame_matrices()
+        rig.add_frame(rig.mirrored(mats) if mirror else mats)
+    rig.end_clip(name, start, loop)
+
+
+def write_bake(rig, out_dir, report, source):
+    """Write the ``CAB1`` texture of `rig` and its manifest (clip table, sources) to `out_dir`."""
+    os.makedirs(out_dir, exist_ok=True)
+    bs.OUT_DIR = out_dir
+    rig.write()
+    manifest = rig.manifest()
+    manifest["rig"] = "human"
+    manifest["clip_sources"] = report
+    manifest["source"] = source
+    with open(os.path.join(out_dir, "manifest.json"), "w") as f:
+        json.dump(manifest, f, indent=1, sort_keys=True)
+    print("OK", out_dir)
+
+
 def bake():
     """Bake the substituted clips into ``OUT_DIR`` and write its manifest."""
     arm, _meshes = bf.load_fine_human()
-    import battle_skinned_poses as poses
-
     tgt = Target(arm)
     rig = bs.Rig("human")
     for b in bs.HUMAN_BONES:
@@ -373,16 +407,9 @@ def bake():
     rig.capture_rest()
     report = {}
     for clip in CLIPS:
-        name, subject, take, first, last, loop, note = clip
+        name, _subject, take, first, last, loop, note = clip
         bases, solved = clip_bases(tgt, clip)
-        start = rig.begin_clip()
-        for basis in bases:
-            for pb in arm.pose.bones:
-                pb.matrix_basis = basis.get(pb.name, Matrix.Identity(4))
-            poses.reset_state()
-            bpy.context.view_layer.update()
-            rig.add_frame(rig.frame_matrices())
-        rig.end_clip(name, start, loop)
+        bake_clip(arm, rig, name, bases, loop)
         q = quality(tgt, solved)
         report[name] = {
             "source": f"CMU {take}.amc frames {first}-{last} @120fps",
@@ -390,19 +417,13 @@ def bake():
             "quality": q,
         }
         print("QUALITY", name, json.dumps(q))
-    os.makedirs(OUT_DIR, exist_ok=True)
-    bs.OUT_DIR = OUT_DIR
-    rig.write()
-    manifest = rig.manifest()
-    manifest["rig"] = "human"
-    manifest["clip_sources"] = report
-    manifest["source"] = (
+    write_bake(
+        rig,
+        OUT_DIR,
+        report,
         "tools/blender_scripts/nt12_mocap_trial.py - CMU Graphics Lab Motion Capture "
-        "Database (mocap.cs.cmu.edu, NSF EIA-0196217), see docs/research/mocap-gratuite.md"
+        "Database (mocap.cs.cmu.edu, NSF EIA-0196217), see docs/research/mocap-gratuite.md",
     )
-    with open(os.path.join(OUT_DIR, "manifest.json"), "w") as f:
-        json.dump(manifest, f, indent=1, sort_keys=True)
-    print("OK", OUT_DIR)
 
 
 RENDER_FRACS = (0.0, 0.35, 0.7, 1.0)
