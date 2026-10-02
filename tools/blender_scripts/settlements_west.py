@@ -47,7 +47,7 @@ PALETTE = {
     "Turf": ((0.24, 0.36, 0.12), 1.0, 0.0),
     "Street": ((0.48, 0.42, 0.30), 1.0, 0.0),
     "Orchard": ((0.12, 0.30, 0.08), 0.95, 0.0),
-    "Pond": ((0.10, 0.28, 0.42), 0.3, 0.0),
+    "Pond": ((0.16, 0.38, 0.55), 0.7, 0.0),
 }
 for _name, _spec in PALETTE.items():
     m.PALETTE.setdefault(_name, _spec)
@@ -263,7 +263,7 @@ def build_west_city(variant):
     """Episcopal city: stone enceinte, gothic cathedral, belfry or hall, gabled houses."""
     first = variant == "a"
     rng = random.Random(1163 if first else 1220)
-    radius = 1.3 if first else 1.26
+    radius = 1.42 if first else 1.38
     points = m.ring_points(radius, 11 if first else 10, rng, 0.08)
     gates = (0, 4, 8) if first else (1, 6)
     parts = m.ground_patch(radius * 0.97, "Street")
@@ -287,15 +287,15 @@ def build_west_city(variant):
     keep_out.append((bx, by, 0.18))
     parts += scatter(
         rng,
-        85,
+        120,
         radius * 0.95,
         town_house,
         keep_out,
         shrink(points, 0.9),
-        (0.18, 0.27),
+        (0.17, 0.25),
         0.98,
     )
-    return parts + suburb(points, gates[0], rng, town_house, step=0.1)
+    return parts + suburb(points, gates[0], rng, cottage)
 
 
 def build_west_town(variant):

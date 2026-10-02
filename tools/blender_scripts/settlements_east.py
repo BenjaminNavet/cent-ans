@@ -43,7 +43,7 @@ PALETTE = {
     "Lead": ((0.36, 0.39, 0.43), 0.5, 0.0),
     "WhiteStone": ((0.90, 0.89, 0.84), 0.9, 0.0),
     "Log": ((0.50, 0.32, 0.15), 0.9, 0.0),
-    "Shingle": ((0.50, 0.53, 0.56), 0.8, 0.0),
+    "Shingle": ((0.45, 0.47, 0.50), 0.8, 0.0),
     "CopperGreen": ((0.08, 0.52, 0.30), 0.5, 0.0),
     "DomeBlue": ((0.08, 0.24, 0.66), 0.5, 0.0),
     "Gilt": ((0.92, 0.62, 0.10), 0.4, 0.3),
@@ -393,11 +393,11 @@ def yurt(x, y, radius, mat="Felt", door=-math.pi / 2, roof=None, band="FeltBand"
     """Felt tent: low round wall, coloured ``band`` under the eaves, low conical roof (of
     material ``roof``) jutting over the wall, dark smoke ring at the crown, door facing ``door``.
     """  # noqa: D205
-    wall_h = radius * 0.5
+    wall_h = radius * 0.42
     eaves = radius * 1.1
-    skirt = (radius * 0.84, wall_h + radius * 0.14)
+    skirt = (radius * 0.86, wall_h + radius * 0.14)
     ring = radius * 0.26
-    crown = wall_h + radius * 0.62
+    crown = wall_h + radius * 0.8
     here = (x, y, 0.0)
     parts = [
         lathe([(radius, -F * 0.5), (radius, wall_h)], mat, here, 8),
@@ -498,7 +498,7 @@ def scatter(
     return parts
 
 
-def suburb(points, gate, rng, builder, count=8, step=0.13):
+def suburb(points, gate, rng, builder, count=8, step=0.1):
     """Houses along the road outside the gate of side ``gate`` of a wall polygon.
 
     Two rows, ``step`` (fraction of the gate distance) apart along the road.
@@ -1711,7 +1711,7 @@ def build_isl_city(variant):
     )
     parts += suburb(points, gates[0], rng, isl_house)
     gx, gy = points[gates[1]]
-    return parts + palm_grove(rng, gx * 1.22, gy * 1.22, 9, 0.24)
+    return parts + palm_grove(rng, gx * 1.15, gy * 1.15, 9, 0.2)
 
 
 def build_isl_town(variant):
