@@ -79,8 +79,10 @@ NATURAL_REGULATED_LAKES = frozenset(
 class LakesParams:
     """Extraction settings (all distances in map pixels)."""
 
-    #: Smallest lake kept (30 px ≈ 15 km²).
-    min_area_px: int = 30
+    #: Smallest lake kept (8 px ≈ 4 km²; 30 px until lot HC2, ADR 0161). A basin
+    #: also needs a solid core (see :func:`flat_basins`), so lower values add
+    #: nothing: 4 yields the same lakes as 8.
+    min_area_px: int = 8
     #: Douglas-Peucker tolerance of the outline.
     simplify_px: float = 0.6
     #: Lakes at or below this level are left to the sea plane.
@@ -190,8 +192,7 @@ def flat_basins(
             index
             for index in range(1, count + 1)
             if sizes[index] * 2 >= params.min_area_px
-            and ndimage.binary_erosion(cores == index).sum() * 8
-            >= params.min_area_px
+            and ndimage.binary_erosion(cores == index).sum() * 8 >= params.min_area_px
         ]
         if not big and core.sum() * 2 < params.min_area_px:
             break
