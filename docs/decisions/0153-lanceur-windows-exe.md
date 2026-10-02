@@ -1,4 +1,4 @@
-# 0150 — Lanceur Windows en `.exe`, commité à la racine
+# 0153 — Lanceur Windows en `.exe`, commité à la racine
 
 Date : 2026-10-02. Statut : accepté. Complète l'ADR 0117 (lanceur depuis les sources).
 

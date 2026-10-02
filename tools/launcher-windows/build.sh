@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds the Windows double-click launcher and writes it at the root of the repository as
-# "Lancer Cent Ans.exe" (ADR 0150). The executable is committed: a player who has just cloned
+# "Lancer Cent Ans.exe" (ADR 0153). The executable is committed: a player who has just cloned
 # the repository has no compiler yet. Rebuild and commit it whenever src/main.rs changes.
 # Cross-compiles from macOS/Linux with cargo-xwin (same one-time setup as
 # core/build-windows.sh); plain cargo on Windows (Git Bash).

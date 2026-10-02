@@ -1,6 +1,6 @@
 # WIN (ADR 0087): proves the game runs on Windows x86_64 — native MSVC build of the
 # GDExtension, Godot import, then the headless smoke test (dummy renderer, no GPU), all through
-# the double-click launcher "Lancer Cent Ans.exe" committed at the root (ADR 0117, ADR 0150).
+# the double-click launcher "Lancer Cent Ans.exe" committed at the root (ADR 0117, ADR 0153).
 # Manual or on the windows/* branches only: Windows minutes count double on a private repo.
 name: windows
 
@@ -42,7 +42,7 @@ jobs:
       # Bash, builds cent_ans.dll, runs the headless import, then starts Godot. Here Godot runs
       # the smoke test, which exits 1 on any failure, including "CampaignSim class not
       # registered" (cent_ans.dll not loaded). The console build prints the log.
-      # The executable is the one committed in the repository (cross-compiled, ADR 0150): this
+      # The executable is the one committed in the repository (cross-compiled, ADR 0153): this
       # step is its only run on a real Windows. "Lancer Cent Ans.bat" does the same job.
       - name: Launcher, build, import and smoke test
         shell: cmd

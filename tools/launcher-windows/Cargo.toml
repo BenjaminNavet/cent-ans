@@ -1,4 +1,4 @@
-# Double-click launcher "Lancer Cent Ans.exe" for Windows (ADR 0150). Standalone crate, outside
+# Double-click launcher "Lancer Cent Ans.exe" for Windows (ADR 0153). Standalone crate, outside
 # the core/ workspace: no dependency, built by tools/launcher-windows/build.sh.
 [package]
 name = "cent-ans-launcher"
