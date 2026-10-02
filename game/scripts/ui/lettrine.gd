@@ -7,7 +7,11 @@ extends Control
 ## Posée en surimpression sur un `Label` existant (`Lettrine.attach(label)`) : le label garde
 ## son texte, sa couleur et sa place dans la mise en page (les scripts et les tests continuent
 ## de lire `label.text`) ; il est seulement rendu transparent et la lettrine redessine le titre.
-## Suit les changements de texte et de couleur du label. Rendu seulement, aucune image.
+## Suit les changements de texte et de couleur du label. Rendu seulement.
+##
+## Lot FA5 : quand une initiale enluminée réelle existe pour la première lettre du titre
+## (`FaUi.initial_for`, feuillets du domaine public), elle remplace l'initiale dessinée, un peu
+## plus grande (`display.initial_scale`) pour rester lisible ; sinon rien ne change.
 
 ## Q5 : 5 px faisaient lire « D iplomatie » (recettes Q3 et Q5) ; l'initiale colle au mot.
 const GAP := 1.0
@@ -26,6 +30,10 @@ var _font_size := 22
 ## Q6 : titre d'un panneau à largeur imposée (zone `SIDE_PANEL`) : le label ne réclame que
 ## `FIT_MIN_WIDTH` et la suite du titre est rapetissée (jusqu'à `FIT_MIN_FONT`) pour tenir.
 var _fit := false
+## FA5 : initiale réelle du titre courant (null : lettrine dessinée) et côté du champ dessiné.
+var _initial: Texture2D
+var _initial_framed := false
+var _field := 0.0
 const FIT_MIN_WIDTH := 120.0
 const FIT_MIN_FONT := 12
 
@@ -48,6 +56,7 @@ static func attach(label: Label, box: float = 0.0, fit: bool = false) -> Lettrin
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_label.self_modulate = Color(1, 1, 1, 0)
 	# CV3-0 (#10) : l'ancienne marge posée sur le style "normal" du label (invisible, donc sans
@@ -69,11 +78,16 @@ func _sync() -> void:
 		return
 	_text = _label.text
 	_color = color
+	# Pas dans les en-têtes ajustés (`fit`, panneau latéral) : trop petits pour une vraie initiale.
+	var real: Dictionary = FaUi.initial_for(_text) if _has_initial() and not _fit else {}
+	_initial = real.get("texture") as Texture2D
+	_initial_framed = bool(real.get("framed", false))
+	_field = roundf(_box * FaUi.display("initial_scale", 1.0)) if _initial != null else _box
 	var rest := _text.substr(1) if _has_initial() else _text
 	var width := FrontEndStyle.title_font().get_string_size(rest, HORIZONTAL_ALIGNMENT_LEFT, -1, _font_size).x
 	if _fit:
 		width = minf(width, FIT_MIN_WIDTH)
-	_label.custom_minimum_size = Vector2(_box + GAP + width + 2.0, _box + 2.0)
+	_label.custom_minimum_size = Vector2(_field + GAP + width + 2.0, _field + 2.0)
 	queue_redraw()
 
 
@@ -86,22 +100,49 @@ func _has_initial() -> bool:
 
 func _draw() -> void:
 	var font := FrontEndStyle.title_font()
-	var box := Rect2(Vector2(0.0, (size.y - _box) * 0.5), Vector2(_box, _box))
+	var box := Rect2(Vector2(0.0, (size.y - _field) * 0.5), Vector2(_field, _field))
 	var rest := _text
 	if _has_initial():
 		rest = _text.substr(1)
 		var initial := _text.substr(0, 1).to_upper()
-		_draw_initial(font, box, str(UNACCENTED.get(initial, initial)))
+		if _initial != null:
+			_draw_real_initial(box)
+		else:
+			_draw_initial(font, box, str(UNACCENTED.get(initial, initial)))
 	# Suite du titre : même couleur que le label (couleur de faction éventuelle), centrée
 	# verticalement sur le champ.
 	var font_size := _font_size
 	if _fit:
-		var room := size.x - _box - GAP - 2.0
+		var room := size.x - _field - GAP - 2.0
 		var width := font.get_string_size(rest, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 		if width > room and width > 0.0:
 			font_size = maxi(FIT_MIN_FONT, int(floorf(float(font_size) * room / width)))
 	var baseline := box.get_center().y + font.get_ascent(font_size) - font.get_height(font_size) * 0.5
-	draw_string(font, Vector2(_box + GAP, baseline), rest, HORIZONTAL_ALIGNMENT_LEFT, maxf(size.x - _box - GAP, 1.0), font_size, _color)
+	draw_string(font, Vector2(_field + GAP, baseline), rest, HORIZONTAL_ALIGNMENT_LEFT, maxf(size.x - _field - GAP, 1.0), font_size, _color)
+	_draw_spray(_field + GAP + font.get_string_size(rest, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x, box)
+
+
+## FA5 : rinceau réel à la suite du titre (comme l'initiale d'un manuscrit se prolonge dans la
+## marge), seulement si le label a de la largeur libre ; jamais dans un en-tête ajusté.
+func _draw_spray(text_end: float, box: Rect2) -> void:
+	if _fit or not _has_initial():
+		return
+	FaUi.draw_spray(self, text_end, box.get_center().y, _field * FaUi.display("title_spray_height", 0.8))
+
+
+## FA5 : initiale réelle, à ses proportions, centrée dans le champ ; une initiale à champ peint
+## reçoit une ombre portée discrète et un filet d'encre.
+func _draw_real_initial(box: Rect2) -> void:
+	var texture_size := _initial.get_size()
+	var scale := box.size.x / maxf(texture_size.x, texture_size.y)
+	var draw_size := texture_size * scale
+	var rect := Rect2(box.position + (box.size - draw_size) * 0.5, draw_size)
+	if not _initial_framed:
+		draw_texture_rect(_initial, rect, false)
+		return
+	draw_rect(Rect2(rect.position + Vector2(1.5, 1.5), rect.size), Color(0, 0, 0, 0.28))
+	draw_texture_rect(_initial, rect, false)
+	draw_rect(rect, Color(0.16, 0.10, 0.05, 0.85), false, 1.0)
 
 
 func _draw_initial(font: Font, box: Rect2, letter: String) -> void:

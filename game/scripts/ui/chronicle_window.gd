@@ -20,6 +20,9 @@ const ART_SIZE := Vector2(580, 240)
 ## (427 px en vue 1280×720) ; marges du parchemin en plus.
 const CONTENT_WIDTH := 580.0
 const FRAME_WIDTH := 100.0
+## FA5 : hauteur du sceau de l'en-tête (ne dépasse pas le bouton de fermeture).
+const SEAL_HEIGHT := 34.0
+
 var _content_width := CONTENT_WIDTH
 ## P2d : part de la hauteur de l'écran (ou de la zone `UiLayout`) laissée au corps défilant
 ## (image, texte, choix) — une décision à plusieurs choix chiffrés (sort d'une place prise) peut
@@ -29,6 +32,7 @@ const BODY_MAX_RATIO := 0.5
 const BODY_MIN_HEIGHT := 160.0
 
 var _kind_label: Label
+var _seal: TextureRect
 var _art: TextureRect
 var _title_label: Label
 var _meta_label: Label
@@ -53,6 +57,11 @@ func _ready() -> void:
 	add_child(root)
 
 	var header := HBoxContainer.new()
+	# FA5 : sceau de cire réel devant la rubrique des décisions historiques.
+	_seal = FaUi.seal_rect("chronicle", SEAL_HEIGHT)
+	if _seal != null:
+		_seal.hide()
+		header.add_child(_seal)
 	_kind_label = Label.new()
 	UiType.apply(_kind_label, UiType.CAPTION)
 	_kind_label.add_theme_color_override("font_color", RUBRIC)
@@ -141,6 +150,10 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 	_kind_label.text = "✠ Chronique du temps" if decision.get("historical", false) else "✠ Nouvelles du royaume"
 	if decision.has("kind_label"):  # TW2-T1 : sort de la place prise, même fenêtre
 		_kind_label.text = str(decision["kind_label"])
+	if _seal != null:
+		_seal.visible = bool(decision.get("historical", false)) and not decision.has("kind_label")
+		if _seal.visible:  # le sceau tient lieu de croix de rubrique
+			_kind_label.text = _kind_label.text.trim_prefix("✠ ")
 	_title_label.text = str(decision.get("title", ""))
 	_art.texture = PortraitLoader.load_texture(EVENT_ART_DIR + str(decision.get("event", "")) + ".jpg")
 	if _art.texture == null:  # AR1 : décision sans miniature propre, vignette de son genre
