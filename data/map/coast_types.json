@@ -3,8 +3,8 @@
   "cell_px": 16,
   "cliff": {
     "probe_px": 1.6,
-    "min_m": 28.0,
-    "max_m": 50.0
+    "min_m": 36.0,
+    "max_m": 52.0
   },
   "band": {
     "cliff_px": 0.85,

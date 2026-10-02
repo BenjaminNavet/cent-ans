@@ -386,6 +386,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 #include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
 #include "res://shaders/hb_ground.gdshaderinc"  // HB3 : habillage par biome (ADR 0143)
+#include "res://shaders/coast_band.gdshaderinc"  // TB5 : falaises et plages (crochet coast_band)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -676,6 +677,7 @@ void fragment() {
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
 	}
+	coast_band(p, uv, footprint, coast, lake_shore, snow, col, roughness, n);  // TB5
 
 	// Fond marin (sous le plan d'eau) et lacs.
 	if (hc <= 0.0 || (land_f < 0.5 && lake_shore < 0.5 && (hc < lake_level_m || sea_nearby(uv) > 0.5))) {  // HB7 : hauts-fonds marins
