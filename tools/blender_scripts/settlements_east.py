@@ -137,7 +137,8 @@ def drum_dome(x, y, z, radius, drum, wall, mat, shape="round", segments=8, finia
             m.cone(radius * 1.12, height, (x, y, z + drum + height / 2), mat, segments)
         )
         return parts
-    return parts + cupola(x, y, z + drum, radius * 1.04, mat, shape, segments, finial)
+    swell = 1.3 if shape == "onion" else 1.04
+    return parts + cupola(x, y, z + drum, radius * swell, mat, shape, segments, finial)
 
 
 def flag(x, y, z, height=0.32):
@@ -959,11 +960,10 @@ def byz_walls(points, height, gates, z=0.0, tower_side=0.15):
 def byz_church(x, y, angle, s=1.0, domes=1, conical=False, z=0.0):
     """Cross-in-square church: tiled cross arms, apse, dome(s) on drums.
 
-    Greek type: brick walls, tiled domes. ``conical``: Caucasian type, pale stone, tall drum
+    Greek type: brick walls, lead domes. ``conical``: Caucasian type, pale stone, tall drum
     under a conical roof.
     """
     wall = "Limestone" if conical else "Brick"
-    roof = "Lead" if conical else "TileOrange"
     at = local_frame(x, y, angle, s)
     parts = [block(x, y, 0.5 * s, 0.5 * s, 0.24 * s, wall, angle, z)]
     parts.append(
@@ -996,7 +996,7 @@ def byz_church(x, y, angle, s=1.0, domes=1, conical=False, z=0.0):
         0.13 * s,
         drum,
         wall if conical else "Limestone",
-        roof,
+        "Lead",
         "cone" if conical else "round",
         8,
         None if conical else "Gilt",
@@ -1005,7 +1005,7 @@ def byz_church(x, y, angle, s=1.0, domes=1, conical=False, z=0.0):
         for dx, dy in ((-0.19, -0.19), (0.19, -0.19), (0.19, 0.19), (-0.19, 0.19)):
             cx, cy = at(dx, dy)
             parts += drum_dome(
-                cx, cy, z + 0.26 * s, 0.07 * s, 0.1 * s, "Limestone", roof, "round", 6
+                cx, cy, z + 0.26 * s, 0.07 * s, 0.1 * s, "Limestone", "Lead", "round", 6
             )
     return parts
 
@@ -1025,7 +1025,9 @@ def great_church(x, y, angle, s=1.0):
     for dx in (-0.44, 0.44):
         for dy in (-0.42, 0.42):
             bx, by = at(dx, dy)
-            parts.append(block(bx, by, 0.13 * s, 0.13 * s, 0.5 * s, "Limestone", angle))
+            parts.append(
+                block(bx, by, 0.13 * s, 0.13 * s, 0.42 * s, "Limestone", angle)
+            )
     nx, ny = at(-0.54, 0.0)
     parts += gable_house(
         nx, ny, 0.7 * s, 0.14 * s, 0.2 * s, angle + math.pi / 2, "Ochre", "TileOrange"
@@ -1210,29 +1212,323 @@ def build_byz_village(variant):
 # --- rus: Rus', Novgorod, Ruthenia, Lithuania ----------------------------------------
 
 
+def izba(x, y, w, d, angle, rng, z=0.0):
+    """Log house under a steep shingle roof."""
+    return gable_house(
+        x, y, w, d, rng.uniform(0.09, 0.13), angle, "Log", "Shingle", 0.62, z
+    )
+
+
+def rus_tower(x, y, side, height, mat="Log", z=0.0):
+    """Wall tower with an overhanging fighting gallery and a tall tent roof."""
+    parts = tower(x, y, side, height, mat, "cap", z=z)
+    rise = side * 1.5
+    parts.append(
+        m.cone(
+            side * 0.9,
+            rise,
+            (x, y, z + height + 0.045 + rise / 2),
+            "Shingle",
+            4,
+            rotation=(0, 0, math.pi / 4),
+        )
+    )
+    return parts
+
+
+def round_tower(x, y, radius, height, mat, roof, z=0.0):
+    """Round tower of material ``mat`` under a conical ``roof``."""
+    return [
+        m.cylinder(radius, height + F, (x, y, z + (height - F) / 2), mat, 8),
+        m.cone(radius * 1.2, radius * 2.2, (x, y, z + height + radius * 1.1), roof, 8),
+    ]
+
+
+def rus_walls(points, height, gates, stone=False, z=0.0, tower_side=0.15, every=1):
+    """Log palisade (or white stone wall) with tent-roofed towers and gate towers."""
+    mat = "Whitewash" if stone else "Log"
+    corners = set(points[::every])
+    return curtain(
+        points,
+        height,
+        mat,
+        tower_at=lambda x, y: (
+            rus_tower(x, y, tower_side, height * 1.5, mat, z)
+            if (x, y) in corners
+            else []
+        ),
+        gates=gates,
+        gate_at=lambda x, y, a: gatehouse(x, y, a, height * 1.6, mat, "Shingle", z=z),
+        top="merlons" if stone else "stakes",
+        z=z,
+    )
+
+
+def rus_church(
+    x, y, angle, s=1.0, domes=5, shape="onion", dome_mat="CopperGreen", z=0.0
+):
+    """White stone church: cubic body, apse, porch, drums under onion or helmet domes."""
+    at = local_frame(x, y, angle, s)
+    parts = [block(x, y, 0.44 * s, 0.44 * s, 0.4 * s, "Whitewash", angle, z)]
+    parts.append(
+        m.cone(
+            0.34 * s,
+            0.07 * s,
+            (x, y, z + 0.435 * s),
+            "Lead",
+            4,
+            rotation=(0, 0, angle + math.pi / 4),
+        )
+    )
+    ax, ay = at(0.24, 0.0)
+    parts.append(
+        m.cylinder(
+            0.12 * s, 0.3 * s + F, (ax, ay, z + (0.3 * s - F) / 2), "Whitewash", 8
+        )
+    )
+    parts.append(m.cone(0.135 * s, 0.08 * s, (ax, ay, z + 0.34 * s), "Lead", 8))
+    px, py = at(-0.3, 0.0)
+    parts += gable_house(
+        px, py, 0.18 * s, 0.26 * s, 0.2 * s, angle, "Whitewash", "Shingle", 0.4, z
+    )
+    main = "Gilt" if domes > 1 and dome_mat != "Gilt" else dome_mat
+    parts += drum_dome(
+        x, y, z + 0.42 * s, 0.085 * s, 0.2 * s, "Whitewash", main, shape, 8, "Gilt"
+    )
+    if domes >= 5:
+        spots = ((-0.14, -0.14), (0.14, -0.14), (0.14, 0.14), (-0.14, 0.14))
+    elif domes == 3:
+        spots = ((0.0, -0.15), (0.0, 0.15))
+    else:
+        spots = ()
+    for dx, dy in spots:
+        cx, cy = at(dx, dy)
+        parts += drum_dome(
+            cx, cy, z + 0.41 * s, 0.055 * s, 0.11 * s, "Whitewash", dome_mat, shape, 6
+        )
+    return parts
+
+
+def tent_church(x, y, angle, s=1.0, z=0.0):
+    """Wooden church: log nave, octagonal tower under a tall tent roof and a small bulb."""
+    at = local_frame(x, y, angle, s)
+    nx, ny = at(-0.2, 0.0)
+    parts = gable_house(
+        nx, ny, 0.3 * s, 0.2 * s, 0.16 * s, angle, "Log", "Shingle", 0.7, z
+    )
+    parts.append(
+        m.cylinder(0.13 * s, 0.34 * s + F, (x, y, z + (0.34 * s - F) / 2), "Log", 8)
+    )
+    parts.append(m.cone(0.16 * s, 0.4 * s, (x, y, z + 0.54 * s), "Shingle", 8))
+    parts += drum_dome(
+        x, y, z + 0.72 * s, 0.03 * s, 0.05 * s, "Log", "CopperGreen", "onion", 6, "Gilt"
+    )
+    ex, ey = at(0.17, 0.0)
+    parts += gable_house(
+        ex, ey, 0.12 * s, 0.14 * s, 0.12 * s, angle, "Log", "Shingle", 0.7, z
+    )
+    return parts
+
+
+def bell_tower(x, y, s=1.0, mat="Whitewash", z=0.0):
+    """Bell tower: square shaft, tent roof and a small gilded bulb."""
+    parts = rus_tower(x, y, 0.15 * s, 0.5 * s, mat, z)
+    top = z + 0.5 * s + 0.045 + 0.225 * s
+    return parts + cupola(x, y, top - 0.02 * s, 0.035 * s, "Gilt", "onion", 6)
+
+
+def terem(x, y, angle, s=1.0, z=0.0):
+    """Prince's hall: long log hall, porch tower, banner."""
+    at = local_frame(x, y, angle, s)
+    parts = gable_house(
+        x, y, 0.44 * s, 0.2 * s, 0.2 * s, angle, "Log", "Shingle", 0.75, z
+    )
+    tx, ty = at(0.2, 0.14)
+    parts += rus_tower(tx, ty, 0.14 * s, 0.36 * s, "Log", z)
+    return parts + flag(tx, ty, z + 0.36 * s + 0.045 + 0.2 * s, 0.26)
+
+
 def build_rus_city(variant):
     """Detinets and posad: log (a) or white stone (b) kremlin, cathedral, log houses."""
-    return placeholder(1.4)
+    first = variant == "a"
+    rng = random.Random(1136 if first else 1326)
+    radius = 1.36 if first else 1.3
+    points = m.ring_points(radius, 12 if first else 10, rng, 0.07)
+    gates = (1, 7) if first else (0, 5)
+    parts = m.ground_patch(radius * 0.97)
+    parts += rus_walls(points, 0.16, gates, every=2)
+    kx, ky = (0.2, 0.15) if first else (-0.15, -0.2)
+    kremlin = [
+        (kx + px, ky + py) for px, py in m.ring_points(0.56, 7, rng, 0.06, phase=0.4)
+    ]
+    parts += rus_walls(kremlin, 0.22, (2,), stone=not first, tower_side=0.16)
+    parts += rus_church(
+        kx - 0.08,
+        ky + 0.06,
+        0.2,
+        1.25,
+        5,
+        "helmet" if first else "onion",
+        "Gilt" if first else "CopperGreen",
+    )
+    parts += bell_tower(kx + 0.32, ky + 0.2, 1.0, "Log" if first else "Whitewash")
+    parts += terem(kx + 0.12, ky - 0.32, 0.1, 1.0)
+    keep_out = [(kx, ky, 0.66)]
+    for ang, r in ((2.4, 0.95), (5.2, 0.9)) if first else ((0.9, 0.9), (3.3, 0.85)):
+        cx, cy = r * math.cos(ang), r * math.sin(ang)
+        parts += tent_church(cx, cy, ang, 1.0)
+        keep_out.append((cx, cy, 0.3))
+    parts += scatter(
+        rng, 70, radius * 0.95, izba, keep_out, shrink(points, 0.9), (0.19, 0.26)
+    )
+    gx, gy = (
+        (points[gates[0]][0] + points[gates[0] + 1][0]) / 2,
+        (points[gates[0]][1] + points[gates[0] + 1][1]) / 2,
+    )
+    base = math.atan2(gy, gx)
+    for k in range(6):
+        ang = base + (0.14 if k % 2 else -0.14) + rng.uniform(-0.04, 0.04)
+        t = (1.22 + 0.13 * (k // 2)) * math.hypot(gx, gy)
+        parts += izba(
+            t * math.cos(ang),
+            t * math.sin(ang),
+            0.22,
+            0.15,
+            base + rng.uniform(-0.2, 0.2),
+            rng,
+        )
+    return parts
 
 
 def build_rus_town(variant):
     """Palisaded gorod with a wooden church and the prince's hall."""
-    return placeholder(0.95)
+    first = variant == "a"
+    rng = random.Random(1147 if first else 1253)
+    points = m.ring_points(0.9, 9 if first else 8, rng, 0.08, phase=0.3)
+    parts = m.ground_patch(0.88)
+    parts += rus_walls(points, 0.17, (0, 4), tower_side=0.14)
+    if first:
+        parts += tent_church(0.05, 0.12, 0.3, 1.15)
+    else:
+        parts += rus_church(0.05, 0.12, 0.3, 0.95, 1, "onion", "CopperGreen")
+    parts += terem(-0.36, -0.3, 0.5, 0.95)
+    keep_out = [(0.05, 0.12, 0.36), (-0.36, -0.3, 0.3)]
+    parts += scatter(rng, 26, 0.82, izba, keep_out, shrink(points, 0.88), (0.18, 0.25))
+    return parts
 
 
 def build_rus_castle(variant):
     """Wooden fort on a mound (a) or white stone fortress (b)."""
-    return placeholder(0.95)
+    first = variant == "a"
+    rng = random.Random(1240 if first else 1330)
+    radius, height, top = (0.72, 0.18, 0.76) if first else (0.72, 0.12, 0.8)
+    parts = m.ground_patch(0.95, "Earth")
+    parts += mound(0.0, 0.0, radius, height, "Earth" if first else "Rock", top)
+    shell = m.ring_points(radius * top * 0.86, 6, rng, 0.06, phase=0.2)
+    if first:
+        parts += rus_walls(shell, 0.2, (3,), z=height)
+        parts += terem(0.0, 0.02, 0.3, 1.0, z=height)
+        parts += izba(-0.15, -0.24, 0.2, 0.14, 0.2, rng, height)
+    else:
+        parts += curtain(
+            shell,
+            0.26,
+            "Whitewash",
+            tower_at=lambda x, y: round_tower(
+                x, y, 0.09, 0.4, "Whitewash", "Shingle", height
+            ),
+            gates=(3,),
+            gate_at=lambda x, y, a: gatehouse(
+                x, y, a, 0.4, "Whitewash", "Shingle", z=height
+            ),
+            top="merlons",
+            z=height,
+        )
+        parts += tower(0.14, 0.1, 0.22, 0.7, "Whitewash", "tent", "Shingle", z=height)
+        parts += flag(0.14, 0.1, height + 0.7 + 0.3, 0.24)
+        parts += rus_church(-0.14, -0.1, 0.3, 0.5, 1, "helmet", "Gilt", z=height)
+    for k in range(7):
+        ang = 3.3 + k * 0.33 + rng.uniform(-0.06, 0.06)
+        r = 0.84 + rng.uniform(-0.04, 0.06)
+        parts += izba(
+            r * math.cos(ang), r * math.sin(ang), 0.2, 0.14, ang + math.pi / 2, rng
+        )
+    return parts
 
 
 def build_rus_abbey(variant):
     """Monastery inside a wooden enclosure."""
-    return placeholder(1.0)
+    first = variant == "a"
+    rng = random.Random(1337 if first else 1397)
+    parts = m.ground_patch(1.0, "Dirt")
+    fence = m.ring_points(0.86, 8, rng, 0.05, phase=0.4)
+    gate = 5
+    parts += curtain(fence, 0.13, "Log", thickness=0.045, top="stakes")
+    gx, gy = (
+        (fence[gate][0] + fence[gate + 1][0]) / 2,
+        (fence[gate][1] + fence[gate + 1][1]) / 2,
+    )
+    gate_angle = math.atan2(
+        fence[gate + 1][1] - fence[gate][1], fence[gate + 1][0] - fence[gate][0]
+    )
+    parts += gatehouse(gx, gy, gate_angle, 0.3, "Whitewash", "Shingle")
+    parts += cupola(gx, gy, 0.36, 0.045, "CopperGreen", "onion", 6, "Gilt")
+    if first:
+        parts += rus_church(0.0, 0.1, 0.0, 1.15, 5, "onion", "CopperGreen")
+    else:
+        parts += rus_church(-0.1, 0.12, 0.0, 1.0, 3, "helmet", "Gilt")
+        parts += tent_church(0.45, -0.2, 0.0, 0.85)
+    parts += bell_tower(-0.5, 0.35, 1.0)
+    parts += gable_house(0.1, -0.5, 0.5, 0.18, 0.15, 0.1, "Log", "Shingle", 0.6)
+    parts += flag(-0.3, -0.42, 0.0, 0.4)
+    # Cells along the fence.
+    for index in (0, 1, 2):
+        x0, y0 = fence[index]
+        x1, y1 = fence[index + 1]
+        mx, my = (x0 + x1) * 0.42, (y0 + y1) * 0.42
+        parts += izba(mx, my, 0.3, 0.13, math.atan2(y1 - y0, x1 - x0), rng)
+    parts += plots(0.0, -1.02, 0.0, 2, 0.5, 0.07, ("Garden", "Field"))
+    for k in range(3):
+        parts += izba(1.02 + 0.03 * k, -0.3 + 0.28 * k, 0.2, 0.14, 1.5, rng)
+    return parts
 
 
 def build_rus_village(variant):
     """Street village of log houses with a wooden chapel."""
-    return placeholder(0.95)
+    first = variant == "a"
+    rng = random.Random(988 if first else 1071)
+    road = 0.2 if first else -0.3
+    at = local_frame(0.0, 0.0, road)
+    parts = [
+        m.box(
+            (1.95, 0.1, 0.01 + F), (0, 0, 0.005 - F / 2), "Dirt", rotation=(0, 0, road)
+        )
+    ]
+    per_side = 6 if first else 5
+    span = 1.5
+    chapel = (per_side - 1, 1) if first else (2, -1)
+    for side in (-1, 1):
+        for k in range(per_side):
+            along = -span / 2 + span * k / (per_side - 1) + rng.uniform(-0.03, 0.03)
+            if (k, side) == chapel:
+                cx, cy = at(along, side * 0.3)
+                parts += tent_church(cx, cy, road + math.pi / 2 * side, 0.85)
+                parts += flag(*at(along - 0.2, side * 0.22), 0.0, 0.34)
+                continue
+            hx, hy = at(along, side * (0.19 + rng.uniform(0.0, 0.03)))
+            parts += izba(hx, hy, rng.uniform(0.2, 0.25), 0.15, road + math.pi / 2, rng)
+            if k % 2 == 0:
+                bx, by = at(along + 0.04, side * 0.42)
+                parts += izba(bx, by, 0.13, 0.1, road, rng)
+        px, py = at(-0.1 * side, side * 0.72)
+        parts += plots(
+            px, py, road + math.pi / 2, 7, 0.4, 0.09, ("Field", "Garden", "Earth")
+        )
+    if not first:
+        for k in range(4):
+            hx, hy = at(0.75 + 0.12 * (k % 2), -0.5 - 0.13 * (k // 2))
+            parts.append(m.cone(0.06, 0.14, (hx, hy, 0.06), "Ochre", 6))
+    return parts
 
 
 # --- isl: Maghreb, Arabs, Turks, Berbers, al-Andalus ---------------------------------
