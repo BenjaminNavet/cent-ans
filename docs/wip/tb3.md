@@ -24,7 +24,10 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix de
 - Appels de dessin (`tb3_shot.gd --bench`) : d = 8 : 696 → 714 ; d = 90 : 478 → 478 ; d = 400 :
   398 → 398. Temps par image : bruit de charge (détail dans `docs/godot-map.md`).
 - `ss_shot.gd --bench` avant / après : 20,6 → 22,2 ms à 90 ; 23,7 → 23,7 ms à 400 (bruit).
-- pytest complet : `test_entity_icons.py` échoue déjà sans ce lot (miniature de la collégiale).
+- pytest complet : 1489 réussis, 5 échecs étrangers au lot (`test_entity_icons` ×2 : miniature de
+  la collégiale ; `test_ink_icons` : images de référence `docs/img/da5*` absentes du worktree ;
+  `test_relief_update` : manifeste du relief ; `test_water_detail` : dernière section de
+  `docs/budget.md`).
 
 ## Points ouverts
 - Échelle réelle : rien de visible à d = 90 ni 400 (ADR 0138). `render.exaggeration.max` dans les
