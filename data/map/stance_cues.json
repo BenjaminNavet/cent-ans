@@ -1,5 +1,5 @@
 {
-  "description": "Lot EN (ADR 0153) : signes de relation sur la carte de campagne, hors mode Diplomatie. Le rouge est réservé aux ennemis du joueur : frontières, plaques et anneaux d'armée, noms de ville. Les factions en paix gardent leur couleur héraldique, assourdie pour ne jamais se lire comme un rouge d'alerte. Rendu seulement : la position de chaque faction vient du cœur (get_faction_stances_for).",
+  "description": "Lot EN (ADR 0155) : signes de relation sur la carte de campagne, hors mode Diplomatie. Le rouge est réservé aux ennemis du joueur : frontières, plaques et anneaux d'armée, noms de ville. Les factions en paix gardent leur couleur héraldique, assourdie pour ne jamais se lire comme un rouge d'alerte. Rendu seulement : la position de chaque faction vient du cœur (get_faction_stances_for).",
   "categories": {
     "self": "self",
     "war": "enemy",

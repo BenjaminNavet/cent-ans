@@ -1,7 +1,7 @@
 class_name StanceCues
 extends RefCounted
 
-## Lot EN (ADR 0153) : signes de relation de la carte de campagne hors mode Diplomatie. Le rouge
+## Lot EN (ADR 0155) : signes de relation de la carte de campagne hors mode Diplomatie. Le rouge
 ## est réservé aux ennemis du joueur (frontières, plaques et anneaux d'armée, noms de ville) ; les
 ## factions en paix gardent leur couleur héraldique, assourdie. Rendu seulement : la position de
 ## chaque faction vient de `CampaignSim.get_faction_stances_for` (règle dans `sim_campaign::stance`).

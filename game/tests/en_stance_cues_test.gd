@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Test headless du lot EN (ADR 0153, ennemis lisibles hors mode Diplomatie) sur la vraie
+## Test headless du lot EN (ADR 0155, ennemis lisibles hors mode Diplomatie) sur la vraie
 ## simulation, France jouée :
 ##  1. frontières : un ennemi a le rouge d'alerte, nous l'or ; une faction en paix garde une
 ##     couleur héraldique assourdie (jamais plus saturée que le plafond) ;

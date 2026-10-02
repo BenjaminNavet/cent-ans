@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "stance_cues.schema.json",
   "title": "Signes de relation de la carte de campagne (EN)",
-  "description": "Couleurs et marques qui distinguent ennemis, amis et neutres sur la carte de campagne hors mode Diplomatie (ADR 0153) : frontières, plaques et anneaux d'armée, noms de ville. Rendu seulement.",
+  "description": "Couleurs et marques qui distinguent ennemis, amis et neutres sur la carte de campagne hors mode Diplomatie (ADR 0155) : frontières, plaques et anneaux d'armée, noms de ville. Rendu seulement.",
   "type": "object",
   "required": ["categories", "border", "army", "town"],
   "additionalProperties": false,

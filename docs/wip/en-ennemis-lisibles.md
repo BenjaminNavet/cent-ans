@@ -8,21 +8,22 @@ Cause : hors mode Diplomatie, frontières (ADR 0074), plaques d'armée et villes
 couleur héraldique ; un voisin aux armes rouges se lit « ennemi ». La relation n'apparaissait
 qu'en mode Diplomatie (DZ).
 
-Décision (ADR 0153) : le rouge est réservé aux ennemis du joueur, partout sur la carte.
+Décision (ADR 0155) : le rouge est réservé aux ennemis du joueur, partout sur la carte.
 
 Branche `feat/en`, worktree `../gp-en` (la session TB retouche `faction_borders.gd`,
 `settlement_layer.gd`, `map_mode_controller.gd` : modifications gardées petites et localisées).
 
-## Lots
-- [x] EN0 squelette : `data/map/stance_cues.json` + schéma + test pytest, `StanceCues`
-      (`game/scripts/map/stance_cues.gd`).
-- [ ] EN1 frontières : `FactionBorders` lit les positions du joueur ; nous or, ennemis rouge,
-      amis vert, autres héraldique assourdie. Le mode Diplomatie (DZ) garde sa palette.
-- [ ] EN2 armées : bordure de plaque par catégorie, ⚔ sur les plaques ennemies, anneau au sol
-      rouge.
-- [ ] EN3 villes : nom des villes ennemies à l'encre rouge.
-- [ ] EN4 test `game/tests/en_stance_cues_test.gd`, capture de contrôle, ADR 0153, fusion.
+## TERMINÉ (2026-10-02)
+- EN0 données + schéma + `StanceCues` ; EN1 frontières (nous or, ennemis rouge, amis vert, autres
+  héraldique assourdie ; ennemis à pleine intensité malgré le repos TB2) ; EN2 plaques (bordure,
+  ⚔) et anneaux d'armée ; EN3 noms des villes ennemies à l'encre rouge ; EN4 test, captures, ADR 0155.
+- Tests verts : `en_stance_cues_test`, `dz_diplo_borders_test`, `fr1_borders_test`,
+  `tb2_declutter_test`, smoke, pytest des schémas.
+- Captures jugées (Guyenne, 2 vues) : frontière anglaise rouge vif, voisins en paix ternes,
+  anneaux verts des vassaux.
 
-## Points ouverts
-- Après fusion de TB2 (style « au repos », saturation × 0,45) : les frontières ennemies doivent
-  rester à pleine intensité (sinon le rouge s'éteint). À régler à la fusion de la seconde branche.
+## Reste
+- Jugement du joueur en partie. Réglages dans `data/map/stance_cues.json` (encre des noms
+  ennemis `town.label.enemy` assez discrète : l'éclaircir si elle ne suffit pas).
+- Minicarte et teinte des provinces restent héraldiques (hors lot).
+- Aucune armée ennemie visible au tour 1 (brouillard) : plaque ennemie vérifiée par test seulement.

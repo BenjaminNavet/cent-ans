@@ -46,7 +46,7 @@ var _band_saved: Variant = null
 var _last_distance: float = -1.0
 var _last_mode: String = ""
 var _cli_disabled: bool = false
-## Lot EN (ADR 0153) : position du joueur envers chaque faction ({id: clé}) ; hors mode Diplomatie
+## Lot EN (ADR 0155) : position du joueur envers chaque faction ({id: clé}) ; hors mode Diplomatie
 ## le trait dit la relation (ennemis en rouge, héraldique assourdie en paix). Vide : héraldique.
 var _stances: Dictionary = {}
 ## Lot DZ : couleurs imposées par faction (mode Diplomatie : position envers la faction observée)

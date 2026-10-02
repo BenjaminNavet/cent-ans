@@ -1064,7 +1064,7 @@ func _show_label(i: int, shown: bool, alpha: float) -> void:
 	label.outline_modulate = _halo(alpha)
 
 
-## Lot EN (ADR 0153) : encre du nom de la colonie `i` (sans opacité).
+## Lot EN (ADR 0155) : encre du nom de la colonie `i` (sans opacité).
 func label_ink(i: int) -> Color:
 	return _label_ink[i] if i < _label_ink.size() else label_color
 
