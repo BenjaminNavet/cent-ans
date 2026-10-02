@@ -318,14 +318,14 @@
       "name": "Marais de la Scarpe et de la Sensée",
       "kind": "marsh",
       "density": 0.6,
-      "ellipse": { "center": [3.30, 50.40], "radii_km": [22, 5], "angle_deg": 10 },
+      "ellipse": { "center": [3.20, 50.41], "radii_km": [14, 3.5], "angle_deg": 10 },
       "source": "Wikipédia (fr), « Plaine de la Scarpe »"
     },
     {
       "id": "etangs_forez",
       "name": "Étangs du Forez",
       "kind": "ponds",
-      "density": 0.5,
+      "density": 0.4,
       "ellipse": { "center": [4.15, 45.70], "radii_km": [12, 7], "angle_deg": 80 },
       "source": "Wikipédia (fr), « Forez »",
       "note": "Étangs comtaux du XIIIe siècle."
@@ -372,7 +372,7 @@
       "name": "Étangs et marais de l'Empordà",
       "kind": "marsh",
       "density": 0.7,
-      "ellipse": { "center": [3.08, 42.22], "radii_km": [10, 6], "angle_deg": 90 },
+      "ellipse": { "center": [3.10, 42.17], "radii_km": [7, 4], "angle_deg": 90 },
       "max_height_m": 5,
       "source": "Wikipédia (en), « Aiguamolls de l'Empordà »"
     },
@@ -398,7 +398,7 @@
       "name": "Lagunes de Venise, de Caorle et de Grado",
       "kind": "marsh",
       "density": 0.7,
-      "ellipse": { "center": [12.80, 45.50], "radii_km": [58, 7], "angle_deg": 31 },
+      "polygon": [[12.15, 45.20], [12.10, 45.42], [12.20, 45.55], [12.55, 45.62], [12.90, 45.72], [13.20, 45.80], [13.45, 45.75], [13.40, 45.65], [12.95, 45.55], [12.60, 45.45], [12.45, 45.30], [12.35, 45.15]],
       "max_height_m": 3,
       "source": "Wikipédia (fr), « Lagune de Venise »"
     },
@@ -416,18 +416,19 @@
       "name": "Valli Grandi Veronesi",
       "kind": "marsh",
       "density": 0.65,
-      "ellipse": { "center": [11.25, 45.10], "radii_km": [22, 6], "angle_deg": 0 },
+      "ellipse": { "center": [11.20, 45.10], "radii_km": [16, 5], "angle_deg": 0 },
       "max_height_m": 20,
       "source": "Wikipédia (it), « Valli Grandi Veronesi »",
       "note": "Marais du Tartaro, asséchés au XIXe siècle."
     },
     {
-      "id": "fucecchio_bientina",
-      "name": "Marais de Fucecchio et lac de Bientina",
+      "id": "fucecchio",
+      "name": "Marais de Fucecchio",
       "kind": "marsh",
       "density": 0.75,
-      "ellipse": { "center": [10.72, 43.79], "radii_km": [10, 5], "angle_deg": 0 },
-      "source": "Wikipédia (it), « Padule di Fucecchio » ; « Lago di Bientina »"
+      "ellipse": { "center": [10.80, 43.80], "radii_km": [6, 4], "angle_deg": 0 },
+      "source": "Wikipédia (it), « Padule di Fucecchio »",
+      "note": "Le lac de Bientina voisin, sur la liaison Montecarlo-Vicopisano, n'est pas représenté."
     },
     {
       "id": "valdichiana",
@@ -558,9 +559,10 @@
       "id": "pripet",
       "name": "Marais du Pripiat (Polésie)",
       "kind": "marsh",
-      "density": 0.6,
+      "density": 0.45,
       "ellipse": { "center": [27.30, 52.00], "radii_km": [160, 40], "angle_deg": 0 },
-      "source": "Wikipédia (en), « Pripet Marshes »"
+      "source": "Wikipédia (en), « Pripet Marshes »",
+      "note": "Densité tenue sous le seuil de ralentissement (0,5) : à 0,6 les liaisons Pinsk-Tourov-Davyd-Haradok coûtaient plus du double."
     },
     {
       "id": "polesie_pres",
@@ -575,7 +577,7 @@
       "name": "Marais du Polist et de la Lovat",
       "kind": "marsh",
       "density": 0.55,
-      "ellipse": { "center": [30.80, 57.50], "radii_km": [75, 38], "angle_deg": 80 },
+      "ellipse": { "center": [30.80, 57.45], "radii_km": [65, 30], "angle_deg": 80 },
       "source": "Wikipédia (en), « Polistovsky Nature Reserve » ; Première chronique de Novgorod, an 6746 (1238)",
       "note": "Les marais du dégel qui arrêtent l'armée mongole avant Novgorod."
     },
@@ -617,7 +619,7 @@
       "name": "Baltas du Danube (Ialomița, Brăila)",
       "kind": "marsh",
       "density": 0.75,
-      "ellipse": { "center": [27.75, 44.75], "radii_km": [65, 7], "angle_deg": 75 },
+      "ellipse": { "center": [27.95, 44.85], "radii_km": [55, 5], "angle_deg": 78 },
       "max_height_m": 15,
       "source": "Wikipédia (en), « Balta Ialomiței » ; « Great Brăila Island »"
     },
@@ -626,7 +628,7 @@
       "name": "Delta du Danube",
       "kind": "marsh",
       "density": 0.9,
-      "ellipse": { "center": [29.30, 45.20], "radii_km": [42, 26], "angle_deg": 0 },
+      "ellipse": { "center": [29.40, 45.10], "radii_km": [38, 22], "angle_deg": 0 },
       "max_height_m": 6,
       "source": "Wikipédia (fr), « Delta du Danube »"
     },
@@ -666,10 +668,10 @@
     },
     {
       "id": "menzaleh",
-      "name": "Lacs et marais du nord du Delta (Menzaleh, Bourlos)",
+      "name": "Marais du lac Menzaleh",
       "kind": "marsh",
       "density": 0.7,
-      "ellipse": { "center": [31.30, 31.40], "radii_km": [90, 13], "angle_deg": 0 },
+      "ellipse": { "center": [32.10, 31.27], "radii_km": [24, 12], "angle_deg": -20 },
       "max_height_m": 3,
       "source": "Wikipédia (en), « Lake Manzala »"
     }
