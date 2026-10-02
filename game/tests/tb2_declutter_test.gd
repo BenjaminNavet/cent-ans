@@ -47,6 +47,7 @@ func _run() -> void:
 	_test_fog(map)
 	_test_borders(map)
 	await _test_signs(map)
+	await _test_labels(map)
 	map.queue_free()
 	await process_frame
 
@@ -214,6 +215,66 @@ func _test_signs(map: Node3D) -> void:
 	_check(MapReadability.sign_shown("encounter", "political", false, true), "encounter sites shown while an army is selected")
 	_check(MapReadability.sign_shown("encounter", "political", true), "a claimed or expiring encounter stays visible")
 	_check(not map.construction_markers.visible, "construction markers node hidden on the political map")
+
+
+## 4. Étiquettes : hiérarchie typographique, aucun nom coupé en bord d'écran, noms de région en
+## vue moyenne.
+func _test_labels(map: Node3D) -> void:
+	var layer: SettlementLayer = map.settlement_layer
+	var data: SettlementData = layer.data
+	var paris := int(data.index_by_id.get("set_paris", -1))
+	if _check(paris >= 0, "set_paris missing"):
+		_check(layer._marker_rank[paris] == 4 and layer.label_is_small_caps(paris), "capital names should be set in small caps")
+		_check(SettlementLayer.has_small_caps(layer._labels[paris].font), "EB Garamond should provide true small caps (smcp)")
+	var roman := 0
+	var minor := 0
+	for i in data.settlements.size():
+		if layer._marker_rank[i] < 4:
+			minor += 1
+			if not layer.label_is_small_caps(i):
+				roman += 1
+	_check(minor > 0 and roman >= minor - 3, "towns below capital rank should be set in roman (%d of %d)" % [roman, minor])
+	var regions: RegionLabels = map.strategic.region_labels
+	_check(regions != null, "StrategicView.region_labels missing")
+	# Centres de vue : Paris, puis des points où des villes tombent près des bords (Manche, Loire).
+	var spots: Array[Vector2] = [PARIS, PARIS + Vector2(-140.0, -90.0), PARIS + Vector2(60.0, 170.0)]
+	var cut_total := 0
+	var names_total := 0
+	for distance: float in TIERS:
+		for spot in spots:
+			await _look(map, spot, distance)
+			var safe: Rect2 = layer.label_safe_rect()
+			var occupancy: Dictionary = layer.screen_occupancy(map.camera)
+			var rects: Array = occupancy["rects"]
+			var owners: PackedInt32Array = occupancy["owners"]
+			var pinned: PackedInt32Array = layer._pinned_indices()
+			for n in rects.size():
+				if pinned.has(owners[n]):
+					continue  # sélection, survol, capitale du joueur : toujours affichées
+				names_total += 1
+				if not safe.grow(1.0).encloses(rects[n]):
+					cut_total += 1
+					push_error("tb2_declutter: %s cut by the screen edge at distance %.0f: %s" % [data.settlements[owners[n]]["id"], distance, rects[n]])
+			if regions != null:
+				regions.queue_redraw()
+				await process_frame
+				await process_frame
+				var screen: Rect2 = map.get_viewport().get_visible_rect()
+				var town_rects: Array[Rect2] = layer.screen_label_rects(map.camera)
+				for rect in regions.placed_rects:
+					_check(screen.encloses(rect), "region name cut by the screen edge at distance %.0f" % distance)
+					for other in town_rects:
+						_check(not other.intersects(rect), "region name over a town name at distance %.0f" % distance)
+				if spot == PARIS:
+					print("tb2 labels: distance %.0f -> %d region names (%s), weight %.2f" % [distance, regions.placed_rects.size(), ", ".join(regions.placed_names.slice(0, 4)), regions.weight])
+					if distance == 400.0:
+						_check(regions.visible and regions.placed_rects.size() >= 2, "region names expected in the medium view, got %d" % regions.placed_rects.size())
+						_check(MapReadability.number("region_labels", "alpha", 1.0) <= 0.6, "region names should stay discreet")
+					elif distance == 90.0:
+						_check(regions.placed_rects.is_empty(), "no region name in the close view")
+	_failures += cut_total
+	_check(names_total > 50, "label sample too small (%d)" % names_total)
+	print("tb2 labels: %d names and shields checked over %d views, %d cut by the screen edge (safe rect %s)" % [names_total, TIERS.size() * spots.size(), cut_total, layer.label_safe_rect()])
 
 
 func _check(condition: bool, message: String) -> bool:

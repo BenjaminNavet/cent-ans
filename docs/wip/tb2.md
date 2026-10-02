@@ -18,11 +18,17 @@ Rendu/UI Godot seulement, `core/` intact.
       de 330 (rang 1 : 220) ; marteaux, sceaux d'incident et sites de rencontre réservés au calque
       « Signes » du menu des filtres, à certains modes de carte et aux cas pressants. Mesure à Paris,
       écran 1280×720 : écus 25 / 20 / 38 aux distances 1100 / 400 / 90 (45 à 400 avant), 0 autre signe.
-- [ ] 4. Étiquettes : hiérarchie, pas de nom coupé, noms de région en vue moyenne
+- [x] 4. Étiquettes : capitales (rang 4) en petites capitales EB Garamond (`smcp`), grandes cités en
+      romain gras, autres en romain ≤ 600 ; un nom ou un écu qui sortirait de l'écran (marge 16 px,
+      bandeau du haut exclu) n'est pas affiché ; noms de région en vue moyenne
+      (`game/scripts/map/region_labels.gd`, source `ParchmentOverlay.province_names`, distances
+      180-1250). Mesure : 340 noms et écus sur 9 vues (3 paliers × 3 cadrages), 0 coupé ; 7 noms de
+      région à 400, 14 à 1100, 0 à 90.
 - [ ] 5. Nuages et brumes : météo réelle seulement, plus fins, jamais sur la province sélectionnée
 
 ## Prochaine étape
-Point 4 : étiquettes (petites capitales pour les capitales, pas de nom coupé, noms de région en vue moyenne).
+Point 5 : nuées (météo réelle seulement, fines en vue moyenne, province sélectionnée dégagée).
 
 ## Points ouverts
 - `da7d_overlap_test.gd` échoue sur son seuil de temps (4 ms) quand la machine est chargée : 5,4 ms avant TB2, 4,4 ms après, charge moyenne > 10. À relancer machine calme.
+- `fe_ui_test.gd` échoue sur « map picker framed on the playable lands » (sélecteur de faction, sans rapport avec TB2).

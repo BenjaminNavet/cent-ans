@@ -118,6 +118,182 @@
           "$ref": "#/$defs/sign_rule"
         }
       }
+    },
+    "region_labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min_distance",
+        "max_distance",
+        "fade",
+        "font_size_px",
+        "letter_spacing_px",
+        "color",
+        "alpha",
+        "halo_color",
+        "halo_alpha",
+        "edge_margin_px",
+        "max_on_screen"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "min_distance": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance caméra (unités carte) sous laquelle les noms de région s'effacent."
+        },
+        "max_distance": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance au-delà de laquelle ils s'effacent (le parchemin a ses propres noms)."
+        },
+        "fade": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "font_size_px": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 40
+        },
+        "letter_spacing_px": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacité de l'encre : discrète, sous celle des noms de ville."
+        },
+        "halo_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "halo_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "edge_margin_px": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "max_on_screen": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge_margin_px",
+        "capital_weight",
+        "capital_letter_spacing_px",
+        "major_weight",
+        "minor_max_weight"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "edge_margin_px": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "capital_weight": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 800,
+          "description": "Graisse (axe wght d'EB Garamond) des capitales en petites capitales."
+        },
+        "capital_letter_spacing_px": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "major_weight": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 800,
+          "description": "Graisse des grandes cités (rang 3), en romain."
+        },
+        "minor_max_weight": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 800,
+          "description": "Graisse maximale des lieux de rang 1 et 2 (romain)."
+        }
+      }
+    },
+    "clouds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "medium_alpha",
+        "max_alpha",
+        "medium_distance",
+        "weather_shadow",
+        "fair_shadow",
+        "clear_feather_px"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "medium_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacité maximale des nuées en vue moyenne."
+        },
+        "max_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacité maximale des nuées en vue large."
+        },
+        "medium_distance": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Distances caméra entre lesquelles l'opacité passe de medium_alpha à max_alpha."
+        },
+        "weather_shadow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Ombres de nuages du terrain sous de vraies nuées."
+        },
+        "fair_shadow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Ombres de nuages par temps clair (0 : aucune)."
+        },
+        "clear_feather_px": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64,
+          "description": "Fondu (px carte) du dégagement de la province sélectionnée."
+        }
+      }
     }
   },
   "$defs": {
