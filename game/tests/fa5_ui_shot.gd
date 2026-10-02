@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Lot FA5 : captures de contrôle des fenêtres enluminées à 1280×720 (province, cour, faction,
-## techniques, diplomatie, chronique), écrites dans `<out>/<vue>.png`. `--no-fa` rend l'habillage
+## techniques, diplomatie, chronique) et d'une planche de titres à lettrine, écrites dans `<out>/<vue>.png`. `--no-fa` rend l'habillage
 ## d'avant FA5 (comparaison avant/après). Carte de campagne réelle (France, graine 1337).
 ## Usage (avec affichage, pas en headless) :
 ##   godot --path game --resolution 1280x720 --script res://tests/fa5_ui_shot.gd -- --out=<dossier> [--no-fa] [--only=court,tech]
@@ -12,6 +12,9 @@ const LETTRINE_TITLES := [
 	"Diplomatie", "Cour — France", "Techniques", "Île-de-France", "Paris", "Essex",
 	"Dauphiné", "Chronique", "Angleterre", "Évreux", "Bourgogne", "Poitou",
 ]
+
+## Vues sans carte de campagne.
+const STANDALONE := ["lettrines"]
 
 var _out := ""
 var _only := PackedStringArray()
@@ -44,9 +47,9 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(_out)
 	if _wants("lettrines"):
 		await _lettrine_sheet()
-		if _only.size() == 1:
-			quit(0)
-			return
+	if not _only.is_empty() and Array(_only).all(func(view: String) -> bool: return STANDALONE.has(view)):
+		quit(0)
+		return
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	if settings != null:
 		settings.call("use_test_file")

@@ -21,13 +21,19 @@ Branche `feat/fa-ui`, worktree `../gp-fa-ui` (depuis `feat/fa`). Brutes hors dé
       D Angleterre, E Paris 1460 (visage) → lettre illisible à 45-60 px ; P et E anglais à
       l'encre → flous ; fond damassé réel sous la lettre d'or → l'or se perd. Titre de la
       chronique : non traité (aucun gain attendu).
-- [ ] 2. Ornements de bordure (coins / bandeaux en surimpression)
+- [x] 2. Ornements : **rinceau réel à la suite des titres à lettrine** (`FaUi.draw_spray`,
+      heures anglaises v. 1400) quand le label a de la largeur libre : cour, faction, techniques,
+      diplomatie, fiche. Essayés puis écartés sur capture : baguette de lierre (Paris 1415) sous
+      le titre du menu (tache confuse sur fond sombre) et sous le titre de la chronique (+22 px
+      dans un corps déjà trop court en 720) ; rinceau dans l'en-tête de la chronique (pas la
+      place) ; rosettes de coin et acanthe (les fenêtres enluminées ont déjà leur bordure de
+      lierre : surcharge) ; initiale réelle C au menu (« ent Ans »).
 - [ ] 3. Sceaux de cire
 - [ ] 4. Matières (cuir, laiton, bois, velours)
 - [ ] Crédits `CREDITS.md`, tests, rapport
 
 ## Captures lues
-15 (plafond de 30 levé par le coordinateur en cours de lot : « budget illimité de captures »).
+27 (plafond de 30 levé par le coordinateur en cours de lot : « budget illimité de captures »).
 Planches ≤ 1280 px, avant/après assemblés.
 
 ## Journal

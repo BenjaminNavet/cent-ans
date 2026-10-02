@@ -7,3 +7,4 @@ d'origine ne sont pas dans le dépôt.
 | Fichier | Objet | Institution | Lieu, date | Licence | URL |
 | --- | --- | --- | --- | --- | --- |
 | `initials/d_paris_1415.png` | Leaf from a Book of Hours: The Visitation (1953.366.1) | Cleveland Museum of Art | France, Paris, v. 1415 | CC0 1.0 | https://clevelandart.org/art/1953.366.1 |
+| `ornaments/spray_england_1400.png` | Leaf from a Book of Hours: Initial D (2006.10) | Cleveland Museum of Art | Angleterre, v. 1400 | CC0 1.0 | https://clevelandart.org/art/2006.10 |

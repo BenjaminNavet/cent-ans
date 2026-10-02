@@ -1,20 +1,23 @@
 {
   "description": "Lot FA5 — découpes d'enluminures, de sceaux et de matières du domaine public pour l'interface (outil tools/cent_ans_tools/fa_ui_assets.py, sorties game/assets/ui/fa/).",
   "sources": {
-    "cma_1953_366_1": {"file": "cleveland/cma_1953.366.1.jpg", "institution": "Cleveland Museum of Art", "object": "Leaf from a Book of Hours: The Visitation (1953.366.1)", "origin": "France, Paris, v. 1415", "url": "https://clevelandart.org/art/1953.366.1", "licence": "CC0 1.0"}
+    "cma_1953_366_1": {"file": "cleveland/cma_1953.366.1.jpg", "institution": "Cleveland Museum of Art", "object": "Leaf from a Book of Hours: The Visitation (1953.366.1)", "origin": "France, Paris, v. 1415", "url": "https://clevelandart.org/art/1953.366.1", "licence": "CC0 1.0"},
+    "cma_2006_10": {"file": "cleveland/cma_2006.10.jpg", "institution": "Cleveland Museum of Art", "object": "Leaf from a Book of Hours: Initial D (2006.10)", "origin": "Angleterre, v. 1400", "url": "https://clevelandart.org/art/2006.10", "licence": "CC0 1.0"}
   },
   "initials": [
     {"id": "d_paris_1415", "letter": "D", "set": "french", "source": "cma_1953_366_1", "box": [716, 1931, 1270, 2435], "size": 128, "mode": "framed"}
   ],
-  "ornaments": [],
+  "ornaments": [
+    {"id": "spray_england_1400", "source": "cma_2006_10", "box": [691, 86, 1626, 395], "size": 384, "matte": {"low": 0.13, "high": 0.3, "background_blur_px": 30, "fill_holes_px": 400, "min_blob_px": 60, "join_px": 1, "feather_px": 0.7}}
+  ],
   "seals": [],
   "materials": [],
   "display": {
     "initial_scale": 1.4,
     "english_cultures": ["cul_english"],
-    "corner_opacity": 0.9,
-    "corner_size_px": 72,
-    "header_opacity": 0.9,
-    "header_height_px": 28
+    "title_spray": "spray_england_1400",
+    "title_spray_opacity": 0.9,
+    "title_spray_height": 0.9,
+    "title_spray_min_width_px": 110
   }
 }

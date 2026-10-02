@@ -243,9 +243,21 @@ def cut_initial(region: np.ndarray, cut: dict) -> np.ndarray:
     return soften_edges(fit(opaque, int(cut["size"])), float(cut.get("edge_px", 1.0)))
 
 
+def fade_ends(rgba: np.ndarray, width: int) -> np.ndarray:
+    """Fades the left and right ends of a band cut straight through over `width` pixels."""
+    if width <= 0:
+        return rgba
+    columns = np.arange(rgba.shape[1], dtype=np.float32)
+    ramp = smoothstep(0.0, 1.0, np.minimum(columns, columns[::-1]) / float(width))
+    faded = rgba.copy()
+    faded[..., 3] *= ramp[None, :]
+    return faded
+
+
 def cut_ornament(region: np.ndarray, cut: dict) -> np.ndarray:
     """A border ornament lifted off the parchment."""
-    return fit(trim(lift(region, cut["matte"])), int(cut["size"]))
+    ornament = fit(trim(lift(region, cut["matte"])), int(cut["size"]))
+    return fade_ends(ornament, int(cut.get("fade_ends_px", 0)))
 
 
 def cut_seal(region: np.ndarray, cut: dict) -> np.ndarray:

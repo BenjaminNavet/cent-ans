@@ -119,6 +119,15 @@ func _draw() -> void:
 			font_size = maxi(FIT_MIN_FONT, int(floorf(float(font_size) * room / width)))
 	var baseline := box.get_center().y + font.get_ascent(font_size) - font.get_height(font_size) * 0.5
 	draw_string(font, Vector2(_field + GAP, baseline), rest, HORIZONTAL_ALIGNMENT_LEFT, maxf(size.x - _field - GAP, 1.0), font_size, _color)
+	_draw_spray(_field + GAP + font.get_string_size(rest, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x, box)
+
+
+## FA5 : rinceau réel à la suite du titre (comme l'initiale d'un manuscrit se prolonge dans la
+## marge), seulement si le label a de la largeur libre ; jamais dans un en-tête ajusté.
+func _draw_spray(text_end: float, box: Rect2) -> void:
+	if _fit or not _has_initial():
+		return
+	FaUi.draw_spray(self, text_end, box.get_center().y, _field * FaUi.display("title_spray_height", 0.8))
 
 
 ## FA5 : initiale réelle, à ses proportions, centrée dans le champ ; une initiale à champ peint

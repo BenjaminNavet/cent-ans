@@ -12,6 +12,9 @@ const DATA_PATH := "ui/fa_ui_assets.json"
 const ASSET_DIR := "res://assets/ui/fa/"
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 
+## Écart entre un titre et le rinceau qui le suit.
+const SPRAY_GAP := 12.0
+
 static var enabled := true
 static var _data: Dictionary = {}
 static var _loaded := false
@@ -87,3 +90,26 @@ static func preferred_set() -> String:
 	var culture := str((facade.call("faction_info", faction) as Dictionary).get("culture", ""))
 	var english: Array = (data().get("display", {}) as Dictionary).get("english_cultures", [])
 	return "english" if english.has(culture) else "french"
+
+
+## Ornement détouré (`ornaments/<id>.png`), ou null.
+static func ornament(id: String) -> Texture2D:
+	return texture("ornaments", id)
+
+
+
+
+## Dessine le rinceau sur `canvas` à partir de l'abscisse `text_end`, centré sur `centre_y`,
+## réduit à la largeur libre ; rien sous `display.title_spray_min_width_px`.
+static func draw_spray(canvas: Control, text_end: float, centre_y: float, height: float) -> void:
+	var spray := ornament(str((data().get("display", {}) as Dictionary).get("title_spray", "")))
+	if spray == null:
+		return
+	var room := canvas.size.x - text_end - SPRAY_GAP * 2.0
+	if room < display("title_spray_min_width_px", 96.0):
+		return
+	var texture_size := spray.get_size()
+	var width := minf(height * texture_size.x / texture_size.y, room)
+	var drawn_height := width * texture_size.y / texture_size.x
+	var rect := Rect2(Vector2(text_end + SPRAY_GAP, centre_y - drawn_height * 0.5), Vector2(width, drawn_height))
+	canvas.draw_texture_rect(spray, rect, false, Color(1, 1, 1, display("title_spray_opacity", 0.85)))
