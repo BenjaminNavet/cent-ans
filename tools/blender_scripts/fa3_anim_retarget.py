@@ -53,7 +53,9 @@ import video_mocap_clean as vc  # noqa: E402
 RAW_DIR = os.environ.get(
     "CENT_ANS_FA_ANIM_SRC", os.path.expanduser("~/dev/cent-ans-raw/fa/anim")
 )
-TABLE = os.path.join(bs.ROOT, "data", "fx", "fa3_anim_sources.json")
+TABLE = os.environ.get(  # another table: trials of candidate clips (renders only)
+    "CENT_ANS_FA3_TABLE", os.path.join(bs.ROOT, "data", "fx", "fa3_anim_sources.json")
+)
 OUT_DIR = os.path.join(bf.FINE_DIR, "fa3_anim")
 MELEE_DIR = os.path.join(bf.FINE_DIR, "melee")  # NT14 default melee clips
 ORDER = list(nt12.MAP.keys())
@@ -223,16 +225,59 @@ def target(arm):
     return tgt
 
 
+def flat(tgt, v):
+    """Horizontal part of an armature-space vector."""
+    return v - tgt.up * v.dot(tgt.up)
+
+
+def two_axes(a, b):
+    """Orthonormal frame whose first axis is `a`, the second as close to `b` as possible."""
+    a = a.normalized()
+    b = (b - a * b.dot(a)).normalized()
+    return Matrix((a, b, a.cross(b))).transposed()
+
+
+def squaring(tgt, line):
+    """Rotation about the vertical taking the horizontal `line` onto the figure's left."""
+    return flat(tgt, line).normalized().rotation_difference(tgt.left).to_matrix()
+
+
 def alignments(tgt, src, p):
-    """``A`` of every mapped bone (NT12, with the source limbs of the table)."""
+    """``A`` of every mapped bone: the figure's rest pose brought onto the source's.
+
+    NT12 aligns each limb by the smallest rotation. The fine rest pose is a contrapposto
+    (hips turned by 27 degrees, one foot back and turned out, knees bent), so twists matter
+    here: the hips and the chest are squared on the hip and shoulder lines, each leg bone is
+    aligned with its knee hinge across the body, each foot is turned to point forwards.
+    """
     out = {}
+    left = tgt.left
+    hips = squaring(tgt, tgt.head["UpperLeg.L"] - tgt.head["UpperLeg.R"])
+    chest = squaring(tgt, tgt.head["UpperArm.L"] - tgt.head["UpperArm.R"])
     for bone in ORDER:
         limb = tgt.limb(bone)
         want = src.direction(bone)
-        if limb is None or want is None:
+        want = None if want is None else (p @ want).normalized()
+        base = bone.split(".")[0]
+        if bone in ("Body", "Hips"):
+            out[bone] = hips
+        elif base == "Foot":
+            out[bone] = squaring(tgt, tgt.rest[bone].to_3x3().col[0])
+        elif base in ("UpperLeg", "LowerLeg") and want is not None:
+            side = bone[-1]
+            thigh = tgt.limb(f"UpperLeg.{side}")
+            shin = tgt.limb(f"LowerLeg.{side}")
+            hinge = thigh.cross(shin)
+            if hinge.length > math.sin(math.radians(8.0)):
+                out[bone] = two_axes(want, left) @ two_axes(limb, hinge).transposed()
+            else:
+                out[bone] = limb.rotation_difference(want).to_matrix()
+        elif limb is None or want is None:
             out[bone] = out.get(PARENT[bone], Matrix.Identity(3))
-            continue
-        out[bone] = limb.rotation_difference((p @ want).normalized()).to_matrix()
+        elif bone == "Chest":
+            out[bone] = (chest @ limb).rotation_difference(want).to_matrix() @ chest
+        else:
+            out[bone] = limb.rotation_difference(want).to_matrix()
     return out
 
 
@@ -253,6 +298,18 @@ def pin_foot(tgt, rot, pos, side, target):
     pos[foot] = c2
 
 
+def place(tgt, src, sbone, at, p, scale, bone):
+    """Armature-space position of target `bone` for its source joint at `at` (source space).
+
+    Both figures stand on their origin: the ground position is the source's, scaled; the
+    height is the target joint's rest height plus the scaled rise of the source joint. (The
+    rest pose of the figure is a staggered stance: displacements from rest would carry it.)
+    """
+    ground = Vector((at.x, at.y, 0.0))
+    height = tgt.head[bone].dot(tgt.up) + (at.z - src.head[sbone].z) * scale
+    return (p @ ground) * scale + tgt.up * height
+
+
 def solve_frame(tgt, src, frame, p, align, scale, shift):
     """Armature-space pose matrix of every mapped bone for one source frame.
 
@@ -271,8 +328,9 @@ def solve_frame(tgt, src, frame, p, align, scale, shift):
         rot[bone] = p @ s @ pinv @ align[bone] @ tgt.rest[bone].to_3x3()
         parent = PARENT[bone]
         if parent is None:
-            moved = frame[sbone].to_translation() - src.head[sbone] - shift
-            pos[bone] = tgt.head[bone] + (p @ moved) * scale
+            pos[bone] = place(
+                tgt, src, sbone, frame[sbone].to_translation() - shift, p, scale, bone
+            )
         else:
             offset = tgt.rest[parent].to_3x3().transposed() @ (
                 tgt.head[bone] - tgt.head[parent]
@@ -282,8 +340,8 @@ def solve_frame(tgt, src, frame, p, align, scale, shift):
     for side in ("L", "R"):
         foot = f"Foot.{side}"
         sfoot = src.bones[foot][0]
-        moved = frame[sfoot].to_translation() - src.head[sfoot] - shift
-        target = tgt.head[foot] + (p @ moved) * scale
+        at = frame[sfoot].to_translation() - shift
+        target = place(tgt, src, sfoot, at, p, scale, foot)
         pin_foot(tgt, rot, pos, side, target)
         miss = max(miss, (pos[foot] - target).length)
     return {b: Matrix.Translation(pos[b]) @ rot[b].to_4x4() for b in ORDER}, miss
@@ -426,8 +484,9 @@ class Clip:
         if bow and bow.get("elevation_deg"):
             self._raise_aim(tgt, solved, bow)
         self.yaw = 0.0
-        if spec.get("prop", {}).get("aim_forward"):
-            self._aim_forward(tgt, solved)
+        aim = spec.get("prop", {}).get("aim")
+        if aim:
+            self._aim_forward(tgt, solved, aim)
         if spec.get("ground"):
             self._keep_above_ground(tgt, solved)
         self.source_gap = None
@@ -473,9 +532,17 @@ class Clip:
                 rot = Matrix.Rotation(-angle * share * w, 3, left)
                 rotate_about(s, bones, s[pivot].to_translation(), rot)
 
-    def _aim_forward(self, tgt, solved):
-        """Turn the figure about the vertical so that its weapon points forwards at first."""
-        axis = prop_axis(tgt, solved[0])
+    def _aim_forward(self, tgt, solved, aim):
+        """Turn the figure about the vertical so that its weapon points forwards at first.
+
+        `aim`: ``weapon`` (the prop carried by the right wrist) or ``hands`` (the line from
+        the right fist to the left one: a shaft held across the body by both hands).
+        """
+        if aim == "hands":
+            first = solved[0]
+            axis = first["Wrist.L"].to_translation() - first["Wrist.R"].to_translation()
+        else:
+            axis = prop_axis(tgt, solved[0])
         up, fwd, left = tgt.up, tgt.frame.col[1], tgt.frame.col[0]
         self.yaw = math.atan2(axis.dot(left), axis.dot(fwd))
         rot = Matrix.Rotation(self.yaw, 3, up)
@@ -790,6 +857,23 @@ def bake():
 
 RENDER_FRACS = (0.08, 0.36, 0.64, 0.92)
 RENDER_EYE = ((2.4, -4.2, 1.5), (0.0, -0.2, 0.85))
+RENDER_LENS = 68  # standing clips; falls are framed wider
+RENDER_LENS_GROUND = 40
+
+
+def render_fractions(spec, count):
+    """Fractions of the clip shown on the board (a bow clip: nocked, drawn, loosed, after)."""
+    bow = spec.get("bow")
+    if not bow:
+        return RENDER_FRACS
+    last = max(count - 1, 1)
+    frames = (
+        bow["draw_from"] - 6,
+        (bow["draw_from"] + bow["release"]) // 2,
+        bow["release"] - 1,
+        bow["release"] + 5,
+    )
+    return tuple(min(max(f / last, 0.0), 1.0) for f in frames)
 
 
 def render(out, only=None):
@@ -821,7 +905,6 @@ def render(out, only=None):
         fp.PROBE["rig"] = fp.probe_rig(arm)
         fp.setup_workbench((300, 400))
         cam = fp.camera()
-        fp.look_at(cam, RENDER_EYE[0], RENDER_EYE[1], 40)
         tgt = target(arm)
         clips = retarget_all(tgt, sources, table, names)
 
@@ -840,7 +923,9 @@ def render(out, only=None):
             hook = clip.prepare(arm)
             default = baked_frames(arm, MELEE_DIR, name)
             default = default and [nt12.to_basis(tgt, s) for s in default]
-            for i, frac in enumerate(RENDER_FRACS):
+            lens = RENDER_LENS_GROUND if clip.spec.get("ground") else RENDER_LENS
+            fp.look_at(cam, RENDER_EYE[0], RENDER_EYE[1], lens)
+            for i, frac in enumerate(render_fractions(clip.spec, len(clip.bases))):
                 stem = os.path.join(out, f"{family}__{name}__")
                 fp.pose_clip(arm, name, frac)
                 fp.follow_prop(objs)

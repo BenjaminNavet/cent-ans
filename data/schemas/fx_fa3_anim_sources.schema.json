@@ -98,7 +98,7 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "aim_forward": {"type": "boolean"},
+            "aim": {"enum": ["weapon", "hands"]},
             "axis": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}},
             "left_hand": {"type": "boolean"}
           }

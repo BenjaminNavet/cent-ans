@@ -26,6 +26,7 @@ func _json(path: String) -> Dictionary:
 func _init() -> void:
 	# NT14 : les clips de mêlée par défaut (`melee/`) sont écartés, l'essai est comparé à la cuisson.
 	BattleSkinned.melee_forced = 0
+	BattleSkinned.fa_anim_forced = 0  # FA3 : la couche `--fa-anim` se poserait par-dessus
 	BattleSkinned.video_trial_forced = 0  # l'essai vidéo passerait avant l'essai CMU
 	BattleSkinned.reload_caches()
 	var trial_on := BattleSkinned.mocap_trial_enabled()

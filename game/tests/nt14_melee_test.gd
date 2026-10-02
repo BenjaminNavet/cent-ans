@@ -46,6 +46,7 @@ func _init() -> void:
 	_check(base_frames > 0 and melee_frames > 0, "en-têtes CAB1 lisibles")
 	# Options d'essai de la ligne de commande écartées : on compare le défaut à la cuisson.
 	BattleSkinned.video_trial_forced = 0
+	BattleSkinned.fa_anim_forced = 0  # FA3 : la couche `--fa-anim` se poserait par-dessus
 	BattleSkinned.mocap_trial_forced = 0
 	for forced in [0, 1]:
 		BattleSkinned.melee_forced = forced

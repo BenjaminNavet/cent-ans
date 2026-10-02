@@ -23,6 +23,9 @@ const MOCAP_TRIAL_DIR := "res://assets/models/battle_fine/mocap_trial/"
 const VIDEO_TRIAL_DIR := "res://assets/models/battle_fine/video_trial/"
 ## NT14 : clips de mêlée par défaut (meilleure source par geste), voir `melee_default_enabled`.
 const MELEE_DIR := "res://assets/models/battle_fine/melee/"
+## FA3 : clips CC0 (Mesh2Motion, KayKit) reciblés sur le rig fin `human` ; `--fa-anim` après `--`
+## les pose par-dessus les clips en place (défaut NT14 ou essai), voir `fa_anim_enabled`.
+const FA_ANIM_DIR := "res://assets/models/battle_fine/fa3_anim/"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 96  # AN1b : 48 -> 64 ; NT7 : 96 (clips[] des shaders)
 ## Modes du shader.
@@ -42,6 +45,7 @@ static var _configs: Dictionary = {}  # "kind/variant/state" -> configuration (c
 static var mocap_trial_forced: int = -1  # NT12 : voir `mocap_trial_enabled`
 static var video_trial_forced: int = -1  # NT13 : voir `video_trial_enabled`
 static var melee_forced: int = -1  # NT14 : voir `melee_default_enabled`
+static var fa_anim_forced: int = -1  # FA3 : voir `fa_anim_enabled`
 ## NT7 : réglages d'animation (`data/fx/battle_animation.json`).
 const ANIMATION_FILE := "fx/battle_animation.json"
 static var _animation: Dictionary = {}
@@ -335,6 +339,8 @@ static func _merge_fine(base: Dictionary) -> void:
 		_merge_mocap_trial(rigs, MOCAP_TRIAL_DIR)
 	elif melee_default_enabled():
 		_merge_mocap_trial(rigs, MELEE_DIR)
+	if fa_anim_enabled():
+		_merge_mocap_trial(rigs, FA_ANIM_DIR)
 	if ga3_figures_enabled():
 		_merge_ga3(figures)
 
@@ -430,6 +436,16 @@ static func mocap_trial_enabled() -> bool:
 	return fine_enabled() and OS.get_cmdline_user_args().has("--mocap-trial")
 
 
+## FA3 : clips libres reciblés actifs (figurines fines seulement, défauts inchangés sans l'option).
+## Ils se posent par-dessus la couche déjà fusionnée (défaut NT14, `--video-trial` ou
+## `--mocap-trial`) : un clip que FA3 ne couvre pas reste celui de cette couche.
+## `fa_anim_forced` : -1 = ligne de commande, 0/1 forcé (tests, captures A/B), puis `reload_caches()`.
+static func fa_anim_enabled() -> bool:
+	if fa_anim_forced >= 0:
+		return fine_enabled() and fa_anim_forced == 1
+	return fine_enabled() and OS.get_cmdline_user_args().has("--fa-anim")
+
+
 ## NT13 : essai vidéo actif (figurines fines seulement, défauts inchangés sans l'option).
 ## `video_trial_forced` : -1 = ligne de commande, 0/1 forcé (captures A/B), puis `reload_caches()`.
 static func video_trial_enabled() -> bool:
@@ -468,6 +484,10 @@ static func _merge_mocap_trial(rigs: Dictionary, dir: String = MOCAP_TRIAL_DIR) 
 	var base_frames := _texture_frames(_path(str(entry.get("texture", ""))))
 	if base_frames <= 0:
 		return
+	# FA3 : plusieurs couches possibles, chacune après les images des précédentes.
+	var layers: Array = entry.get("mocap_textures", [])
+	for layer in layers:
+		base_frames += _texture_frames(str(layer))
 	var clips: Dictionary = entry.get("clips", {})
 	var substituted: Array = []
 	for clip_name in trial.get("clips", {}):
@@ -479,6 +499,8 @@ static func _merge_mocap_trial(rigs: Dictionary, dir: String = MOCAP_TRIAL_DIR) 
 		substituted.append(clip_name)
 	entry["clips"] = clips
 	entry["mocap_texture"] = dir + str(trial.get("texture", ""))
+	layers.append(entry["mocap_texture"])
+	entry["mocap_textures"] = layers
 	entry["mocap_clips"] = substituted
 	entry["mocap_trial_dir"] = dir
 
@@ -618,13 +640,14 @@ static func bone_texture(rig_name: String) -> ImageTexture:
 		var frames: int = cab[1]
 		var raw: PackedByteArray = cab[2]
 		# NT12 : images mocap à la suite de celles du rig (`--mocap-trial`).
-		if entry.has("mocap_texture"):
-			var extra := _read_cab(str(entry["mocap_texture"]))
+		# FA3 : une ou plusieurs couches (`mocap_textures`, dans l'ordre de fusion).
+		for layer in entry.get("mocap_textures", []):
+			var extra := _read_cab(str(layer))
 			if not extra.is_empty() and int(extra[0]) == bones:
 				raw.append_array(extra[2])
 				frames += int(extra[1])
 			else:
-				push_warning("BattleSkinned: texture mocap illisible %s" % entry["mocap_texture"])
+				push_warning("BattleSkinned: texture mocap illisible %s" % layer)
 		var image := Image.create_from_data(bones * 3, frames, false, Image.FORMAT_RGBAF, raw)
 		tex = ImageTexture.create_from_image(image)
 	else:

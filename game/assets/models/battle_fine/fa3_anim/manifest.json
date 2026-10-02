@@ -39,7 +39,7 @@
    "note": "draw (30), hold (7), loose at 1.55 s (12), back to the first pose (11)",
    "quality": {
     "end_to_start_cm": 0.0,
-    "foot_below_rest_cm": 0.0,
+    "foot_below_rest_cm": -0.0,
     "foot_slide_cm": 0.0,
     "foot_slide_source_cm": 0.0,
     "foot_target_miss_cm": 0.0,
@@ -82,9 +82,9 @@
     "foot_below_rest_cm": -0.0,
     "foot_slide_cm": 2.2,
     "foot_slide_source_cm": 12.5,
-    "foot_target_miss_cm": 14.6,
+    "foot_target_miss_cm": 0.0,
     "frames": 53,
-    "jitter_deg_per_frame2": 15.97,
+    "jitter_deg_per_frame2": 12.24,
     "largest_step_cm": 20.5,
     "loop_blended": false,
     "loop_gap_cm": null,
@@ -118,19 +118,19 @@
    "license": "CC0-1.0",
    "note": "thrown backwards",
    "quality": {
-    "end_to_start_cm": 160.9,
+    "end_to_start_cm": 166.4,
     "foot_below_rest_cm": 0.0,
     "foot_slide_cm": 9.4,
     "foot_slide_source_cm": 16.5,
-    "foot_target_miss_cm": 7.9,
+    "foot_target_miss_cm": 0.0,
     "frames": 45,
-    "jitter_deg_per_frame2": 13.6,
-    "largest_step_cm": 16.4,
+    "jitter_deg_per_frame2": 12.05,
+    "largest_step_cm": 17.9,
     "loop_blended": false,
     "loop_gap_cm": null,
     "loop_gap_source_cm": null,
     "shield_face_frames": 34,
-    "shield_nearest_to_sight_cm": 4.9,
+    "shield_nearest_to_sight_cm": 4.8,
     "wrist_r_max_deg_per_frame": 30.0
    },
    "replaced_quality": {
@@ -151,27 +151,27 @@
   },
   "guard": {
    "actions": [
-    "Idle_Sword"
+    "Idle_Shield"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
    "family": "melee",
    "license": "CC0-1.0",
-   "note": "combat stance, sword cocked back, shield arm forward and low",
+   "note": "upright, shield held before the chest, sword low at the side",
    "quality": {
     "end_to_start_cm": 0.3,
     "foot_below_rest_cm": -0.1,
-    "foot_slide_cm": 0.2,
-    "foot_slide_source_cm": 0.2,
+    "foot_slide_cm": 0.3,
+    "foot_slide_source_cm": 0.3,
     "foot_target_miss_cm": 0.0,
-    "frames": 50,
-    "jitter_deg_per_frame2": 0.05,
-    "largest_step_cm": 0.8,
+    "frames": 60,
+    "jitter_deg_per_frame2": 0.04,
+    "largest_step_cm": 0.4,
     "loop_blended": false,
     "loop_gap_cm": 0.3,
     "loop_gap_source_cm": 0.0,
     "shield_face_frames": 0,
-    "shield_nearest_to_sight_cm": 64.1,
-    "wrist_r_max_deg_per_frame": 1.0
+    "shield_nearest_to_sight_cm": 22.2,
+    "wrist_r_max_deg_per_frame": 0.5
    },
    "replaced_quality": {
     "end_to_start_cm": 0.5,
@@ -204,13 +204,13 @@
     "foot_slide_source_cm": 0.6,
     "foot_target_miss_cm": 0.0,
     "frames": 14,
-    "jitter_deg_per_frame2": 26.08,
+    "jitter_deg_per_frame2": 30.23,
     "largest_step_cm": 11.7,
     "loop_blended": false,
     "loop_gap_cm": null,
     "loop_gap_source_cm": null,
     "shield_face_frames": 0,
-    "shield_nearest_to_sight_cm": 65.0,
+    "shield_nearest_to_sight_cm": 33.3,
     "wrist_r_max_deg_per_frame": 11.5
    },
    "replaced_quality": {
@@ -250,7 +250,7 @@
     "loop_gap_cm": null,
     "loop_gap_source_cm": null,
     "shield_face_frames": 0,
-    "shield_nearest_to_sight_cm": 65.0,
+    "shield_nearest_to_sight_cm": 33.1,
     "wrist_r_max_deg_per_frame": 3.2
    },
    "replaced_quality": {
@@ -278,19 +278,19 @@
    "license": "CC0-1.0",
    "note": "one-handed chop from above (Mesh2Motion has no in-place overhead cut)",
    "quality": {
-    "end_to_start_cm": 0.0,
+    "end_to_start_cm": 21.1,
     "foot_below_rest_cm": -0.0,
     "foot_slide_cm": 0.2,
     "foot_slide_source_cm": 0.2,
     "foot_target_miss_cm": 0.0,
-    "frames": 27,
-    "jitter_deg_per_frame2": 20.32,
-    "largest_step_cm": 20.8,
+    "frames": 18,
+    "jitter_deg_per_frame2": 33.18,
+    "largest_step_cm": 21.1,
     "loop_blended": false,
     "loop_gap_cm": null,
     "loop_gap_source_cm": null,
     "shield_face_frames": 0,
-    "shield_nearest_to_sight_cm": 66.0,
+    "shield_nearest_to_sight_cm": 45.0,
     "wrist_r_max_deg_per_frame": 44.7
    },
    "replaced_quality": {
@@ -373,7 +373,7 @@
      3.4,
      3.4
     ],
-    "prop_thrust_cm": 1.8,
+    "prop_thrust_cm": 2.6,
     "prop_yaw_deg": [
      4.6,
      4.6
@@ -381,7 +381,7 @@
     "shield_face_frames": null,
     "shield_nearest_to_sight_cm": null,
     "wrist_r_max_deg_per_frame": 0.0,
-    "yaw_applied_deg": 22.7
+    "yaw_applied_deg": 78.4
    },
    "replaced_quality": {
     "end_to_start_cm": 0.0,
@@ -423,8 +423,8 @@
     "foot_slide_source_cm": 36.0,
     "foot_target_miss_cm": 0.0,
     "frames": 28,
-    "jitter_deg_per_frame2": 12.52,
-    "largest_step_cm": 47.5,
+    "jitter_deg_per_frame2": 16.01,
+    "largest_step_cm": 47.6,
     "loop_blended": false,
     "loop_gap_cm": null,
     "loop_gap_source_cm": null,
@@ -432,7 +432,7 @@
      3.4,
      3.4
     ],
-    "prop_thrust_cm": 75.6,
+    "prop_thrust_cm": 20.9,
     "prop_yaw_deg": [
      4.6,
      4.6
@@ -440,7 +440,7 @@
     "shield_face_frames": null,
     "shield_nearest_to_sight_cm": null,
     "wrist_r_max_deg_per_frame": 0.0,
-    "yaw_applied_deg": 22.7
+    "yaw_applied_deg": 78.4
    },
    "replaced_quality": {
     "end_to_start_cm": 1.2,
@@ -469,27 +469,27 @@
   },
   "slash": {
    "actions": [
-    "Sword_Attack"
+    "Melee_1H_Attack_Slice_Diagonal"
    ],
-   "author": "Mesh2Motion (Scott Petrovic and contributors)",
+   "author": "Kay Lousberg (www.kaylousberg.com)",
    "family": "melee",
    "license": "CC0-1.0",
-   "note": "wind-up behind, wide diagonal cut with the hips and a change of stance (played x1.2 to fit the melee cycle)",
+   "note": "diagonal cut on the spot, shield kept up (Mesh2Motion's Sword_Attack drops to a knee and switches stance, its Sword_Regular clips travel 0.8 m)",
    "quality": {
-    "end_to_start_cm": 11.8,
-    "foot_below_rest_cm": -0.7,
-    "foot_slide_cm": 53.4,
-    "foot_slide_source_cm": 53.4,
+    "end_to_start_cm": 19.5,
+    "foot_below_rest_cm": -0.1,
+    "foot_slide_cm": 27.5,
+    "foot_slide_source_cm": 27.5,
     "foot_target_miss_cm": 0.0,
-    "frames": 31,
-    "jitter_deg_per_frame2": 18.17,
-    "largest_step_cm": 103.9,
+    "frames": 21,
+    "jitter_deg_per_frame2": 14.22,
+    "largest_step_cm": 52.7,
     "loop_blended": false,
     "loop_gap_cm": null,
     "loop_gap_source_cm": null,
     "shield_face_frames": 0,
-    "shield_nearest_to_sight_cm": 58.2,
-    "wrist_r_max_deg_per_frame": 134.2
+    "shield_nearest_to_sight_cm": 47.9,
+    "wrist_r_max_deg_per_frame": 78.1
    },
    "replaced_quality": {
     "end_to_start_cm": 0.7,
@@ -504,8 +504,8 @@
     "wrist_r_max_deg_per_frame": 44.1
    },
    "replaces": "keyframed",
-   "source": "Mesh2Motion human base animations",
-   "url": "https://github.com/Mesh2Motion/mesh2motion-app"
+   "source": "KayKit Character Animations 1.1, Rig_Medium combat melee",
+   "url": "https://kaylousberg.com/game-assets/character-animations"
   },
   "victory": {
    "actions": [
@@ -517,7 +517,7 @@
    "note": "right arm (weapon) pumped overhead, motion capture",
    "quality": {
     "end_to_start_cm": 1.9,
-    "foot_below_rest_cm": -0.0,
+    "foot_below_rest_cm": 0.0,
     "foot_slide_cm": 0.9,
     "foot_slide_source_cm": 0.9,
     "foot_target_miss_cm": 0.0,
@@ -557,7 +557,7 @@
    "note": "both arms raised, motion capture",
    "quality": {
     "end_to_start_cm": 1.6,
-    "foot_below_rest_cm": 0.0,
+    "foot_below_rest_cm": -0.0,
     "foot_slide_cm": 1.7,
     "foot_slide_source_cm": 1.7,
     "foot_target_miss_cm": 0.0,
@@ -592,67 +592,67 @@
   "bow_shoot": {
    "frames": 60,
    "loop": false,
-   "start": 312
+   "start": 303
   },
   "death": {
    "frames": 53,
    "loop": false,
-   "start": 160
+   "start": 151
   },
   "death_back": {
    "frames": 45,
    "loop": false,
-   "start": 213
+   "start": 204
   },
   "guard": {
-   "frames": 50,
+   "frames": 60,
    "loop": true,
    "start": 0
   },
   "hit": {
    "frames": 14,
    "loop": false,
-   "start": 132
+   "start": 123
   },
   "hit_b": {
    "frames": 14,
    "loop": false,
-   "start": 146
+   "start": 137
   },
   "overhead": {
-   "frames": 27,
+   "frames": 18,
    "loop": false,
    "start": 81
   },
   "parry": {
    "frames": 24,
    "loop": false,
-   "start": 108
+   "start": 99
   },
   "pike_level": {
    "frames": 26,
    "loop": true,
-   "start": 258
+   "start": 249
   },
   "pike_thrust": {
    "frames": 28,
    "loop": false,
-   "start": 284
+   "start": 275
   },
   "slash": {
-   "frames": 31,
+   "frames": 21,
    "loop": false,
-   "start": 50
+   "start": 60
   },
   "victory": {
    "frames": 52,
    "loop": true,
-   "start": 372
+   "start": 363
   },
   "victory_b": {
    "frames": 38,
    "loop": true,
-   "start": 424
+   "start": 415
   }
  },
  "fps": 24,
