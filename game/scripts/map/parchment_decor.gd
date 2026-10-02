@@ -10,17 +10,49 @@ const GRID := 24
 ## Distance à la côte au-delà de laquelle la mer compte comme « large » (px carte).
 const OPEN_SEA_PX := 45.0
 
+## Lot FA6 : ornements réels (Atlas catalan de 1375, domaine public) découpés par
+## `tools/cent_ans_tools/parchment_ornaments.py` ; catalogue `data/map/parchment_ornaments.json`.
+const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
+const ORNAMENTS_FILE := "map/parchment_ornaments.json"
+const ORNAMENTS_DIR := "res://assets/textures/parchment/"
+## Shader de la mer : la rose peinte y est posée comme texture par défaut de `pm_rose_tex`
+## (`parchment_sea.gdshaderinc`), sans toucher au matériau de `Sea`.
+const SEA_SHADER_PATH := "res://shaders/water.gdshader"
+const ROSE_UNIFORM := "pm_rose_tex"
+
+## Navires peints : bande de distance à la côte (px carte) et eau libre exigée autour (px carte).
+const PAINTED_SHIP_COAST := Vector2(30.0, 62.0)
+const PAINTED_SHIP_CLEARANCE := 75.0
+## Distance au centre de la carte qui coûte autant qu'un tirage entier (navires peints).
+const PAINTED_SHIP_FOCUS_PX := 3000.0
+const PAINTED_MONSTER_CLEARANCE := 120.0
+const COAST_MARGIN_PX := 8.0
+
 var roses: Array[Vector3] = []  # x, y, rayon (px carte)
 var ships: Array[Vector3] = []  # x, y, cap (radians, 0 = vers l'est)
 var monsters: Array[Vector3] = []  # x, y, variante
+## FA6 : ornements peints par genre, {texture, anchor (0-1), height (unités du dessin), faces_left}.
+## Vide = ancien dessin par code (`--no-fa-parchment`, catalogue ou textures absents).
+var ship_ornaments: Array[Dictionary] = []
+var monster_ornaments: Array[Dictionary] = []
+var rose_texture: Texture2D
 
 
 ## `coast_dist` : raster L8 signé (valeur × 255 − 128) / `scale` px, < 0 en mer.
 static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 	var decor := ParchmentDecor.new()
+	decor._load_ornaments()
 	var img := map.coast_dist_image
 	if img == null or img.is_empty():
 		return decor
+	# FA6 : les ornements peints sont plus grands à l'écran que les dessins : ils demandent de
+	# l'eau libre autour d'eux (sinon ils chevauchent la côte et les noms).
+	var painted_ships := not decor.ship_ornaments.is_empty()
+	var painted_monsters := not decor.monster_ornaments.is_empty()
+	var sea_at := func(q: Vector2) -> float:
+		if q.x < 0.0 or q.y < 0.0 or q.x >= map.size.x or q.y >= map.size.y:
+			return 0.0
+		return (img.get_pixel(int(q.x * sx_of(img, map)), int(q.y * sy_of(img, map))).r * 255.0 - 128.0) / coast_scale
 	var sx := float(img.get_width()) / float(map.size.x)
 	var sy := float(img.get_height()) / float(map.size.y)
 	var open_sea: Array = []  # [score, Vector2]
@@ -32,7 +64,10 @@ static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 			var jitter := _hash(x, y)
 			if c <= -OPEN_SEA_PX:
 				open_sea.append([-c + jitter * 8.0, Vector2(x, y)])
-			elif c < -10.0 and c > -30.0:
+			elif painted_ships and c < -PAINTED_SHIP_COAST.x and c > -PAINTED_SHIP_COAST.y:
+				# Peu nombreux et grands : d'abord les mers du cœur de la carte.
+				near_sea.append([jitter * 0.3 - Vector2(x, y).distance_to(Vector2(map.size) * 0.5) / PAINTED_SHIP_FOCUS_PX, Vector2(x, y)])
+			elif not painted_ships and c < -10.0 and c > -30.0:
 				near_sea.append([jitter, Vector2(x, y)])
 	open_sea.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
 	near_sea.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
@@ -53,6 +88,8 @@ static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 	var monster_taken: Array[Vector2] = taken.duplicate()
 	for entry in open_sea:
 		var p: Vector2 = entry[1]
+		if painted_monsters and not _clear_water(sea_at, p, PAINTED_MONSTER_CLEARANCE):
+			continue
 		if _far_from(p, monster_taken, 520.0):
 			monster_taken.append(p)
 			decor.monsters.append(Vector3(p.x, p.y, float(decor.monsters.size() % 2)))
@@ -62,12 +99,75 @@ static func build(map: MapData, coast_scale: float = 2.0) -> ParchmentDecor:
 	var ship_taken: Array[Vector2] = monster_taken.duplicate()
 	for entry in near_sea:
 		var p: Vector2 = entry[1]
+		if painted_ships and not _clear_water(sea_at, p, PAINTED_SHIP_CLEARANCE):
+			continue
 		if _far_from(p, ship_taken, 330.0):
 			ship_taken.append(p)
 			decor.ships.append(Vector3(p.x, p.y, (1.0 if _hash(int(p.x), int(p.y) + 7) > 0.5 else -1.0)))
 			if decor.ships.size() >= 9:
 				break
 	return decor
+
+
+static func sx_of(img: Image, map: MapData) -> float:
+	return float(img.get_width()) / float(map.size.x)
+
+
+static func sy_of(img: Image, map: MapData) -> float:
+	return float(img.get_height()) / float(map.size.y)
+
+
+## Vrai si la mer est libre (à plus de `COAST_MARGIN_PX` de la côte) sur un cercle de rayon
+## `radius` autour de `p` et à mi-rayon.
+static func _clear_water(sea_at: Callable, p: Vector2, radius: float) -> bool:
+	for k in 8:
+		var dir := Vector2.from_angle(TAU * k / 8.0)
+		if sea_at.call(p + dir * radius) > -COAST_MARGIN_PX or sea_at.call(p + dir * radius * 0.5) > -COAST_MARGIN_PX:
+			return false
+	return true
+
+
+## `--no-fa-parchment` après `--` : ornements dessinés par code d'avant FA6 (captures A/B).
+static func painted_enabled() -> bool:
+	return not OS.get_cmdline_user_args().has("--no-fa-parchment")
+
+
+## Lit le catalogue des ornements peints et pose la rose sur le shader de la mer.
+func _load_ornaments() -> void:
+	var sea_shader := load(SEA_SHADER_PATH) as Shader if ResourceLoader.exists(SEA_SHADER_PATH) else null
+	if sea_shader != null:
+		sea_shader.set_default_texture_parameter(ROSE_UNIFORM, null)
+	if not painted_enabled():
+		return
+	var path := str(MAP_PATHS.default_data_dir()).path_join(ORNAMENTS_FILE)
+	if not FileAccess.file_exists(path):
+		return
+	var catalogue: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not catalogue is Dictionary:
+		push_warning("ParchmentDecor: unreadable %s" % path)
+		return
+	for entry: Dictionary in (catalogue as Dictionary).get("ornaments", []):
+		var texture_path := ORNAMENTS_DIR + str(entry.get("file", ""))
+		if not ResourceLoader.exists(texture_path):
+			continue
+		var texture := load(texture_path) as Texture2D
+		var display: Dictionary = entry.get("display", {})
+		var anchor: Array = display.get("anchor", [0.5, 0.5])
+		var ornament := {
+			"texture": texture,
+			"anchor": Vector2(float(anchor[0]), float(anchor[1])),
+			"height": float(display.get("height", 3.0)),
+			"faces_left": str(display.get("faces", "right")) == "left",
+		}
+		match str(entry.get("kind", "")):
+			"rose":
+				rose_texture = texture
+			"ship":
+				ship_ornaments.append(ornament)
+			"monster":
+				monster_ornaments.append(ornament)
+	if sea_shader != null and rose_texture != null:
+		sea_shader.set_default_texture_parameter(ROSE_UNIFORM, rose_texture)
 
 
 static func _far_from(p: Vector2, points: Array[Vector2], spacing: float) -> bool:

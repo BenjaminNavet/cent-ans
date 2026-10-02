@@ -245,14 +245,56 @@ func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
 	if decor == null or _sea_glyphs.is_empty():
 		return
 	var t := Time.get_ticks_msec() / 1000.0
-	for ship in decor.ships:
+	_sea_layer.blits.clear()
+	for i in decor.ships.size():
+		var ship := decor.ships[i]
 		var p := _screen_w(Vector3(ship.x, 0.0, ship.y))
-		if view.has_point(p):
-			_blit(_sea_glyphs[0], p + Vector2(0.0, sin(t * 1.3 + ship.x) * 1.2), 16.0 * s, a, ship.z < 0.0)
+		if not view.has_point(p):
+			continue
+		p += Vector2(0.0, sin(t * 1.3 + ship.x) * 1.2)
+		if decor.ship_ornaments.is_empty():
+			_blit(_sea_glyphs[0], p, 16.0 * s, a, ship.z < 0.0)
+		else:
+			_sea_layer.add(decor.ship_ornaments[i % decor.ship_ornaments.size()], p, 16.0 * s, a, ship.z > 0.0)
 	for monster in decor.monsters:
 		var p := _screen_w(Vector3(monster.x, 0.0, monster.y))
-		if view.has_point(p):
-			_blit(_sea_glyphs[1 if monster.z < 0.5 else 2], p + Vector2(0.0, sin(t * 0.8 + monster.y) * 1.5), 20.0 * s, a, false)
+		if not view.has_point(p):
+			continue
+		p += Vector2(0.0, sin(t * 0.8 + monster.y) * 1.5)
+		if decor.monster_ornaments.is_empty():
+			_blit(_sea_glyphs[1 if monster.z < 0.5 else 2], p, 20.0 * s, a, false)
+		else:
+			_sea_layer.add(decor.monster_ornaments[int(monster.z) % decor.monster_ornaments.size()], p, 20.0 * s, a, false)
+	_sea_layer.queue_redraw()
+
+
+## Lot FA6 : navires et monstres peints (Atlas catalan), dessinés sous la couche (villes, noms et
+## jetons restent au-dessus) avec filtrage trilinéaire : les découpes sont bien plus grandes que
+## leur taille à l'écran. Un appel de dessin par texture visible.
+var _sea_layer: SeaLayer
+
+
+class SeaLayer:
+	extends Control
+	var blits: Array = []  # [texture, rect, miroir, alpha]
+
+	## `u` : unité du dessin (px écran) ; `heading_right` : cap vers l'est.
+	func add(ornament: Dictionary, p: Vector2, u: float, a: float, heading_right: bool) -> void:
+		var texture: Texture2D = ornament["texture"]
+		var height: float = float(ornament["height"]) * u
+		var size := Vector2(height * texture.get_width() / float(texture.get_height()), height)
+		var mirrored: bool = heading_right == bool(ornament["faces_left"])
+		var anchor: Vector2 = ornament["anchor"]
+		if mirrored:
+			anchor.x = 1.0 - anchor.x
+		blits.append([texture, Rect2(p - anchor * size, size), mirrored, a])
+
+	func _draw() -> void:
+		for blit in blits:
+			var rect: Rect2 = blit[1]
+			if blit[2]:  # largeur négative = miroir horizontal
+				rect = Rect2(rect.position + Vector2(rect.size.x, 0.0), Vector2(-rect.size.x, rect.size.y))
+			draw_texture_rect(blit[0], rect, false, Color(1, 1, 1, blit[3]))
 
 
 ## Navire, serpent de mer, baleine : dessinés une fois (même méthode que les villes).
@@ -263,6 +305,13 @@ var _ci: CanvasItem = self
 
 
 func _make_sea_glyphs() -> void:
+	_sea_layer = SeaLayer.new()
+	_sea_layer.name = "SeaOrnaments"
+	_sea_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_sea_layer.show_behind_parent = true
+	_sea_layer.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	_sea_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(_sea_layer)
 	var specs := [
 		[Vector2i(72, 72), Vector2(36.0, 42.0), 24.0, func(ci: CanvasItem) -> void: _paint_with(ci, func() -> void: _draw_ship(Vector2(36.0, 42.0), 24.0, 1.0, 1.0))],
 		[Vector2i(100, 48), Vector2(52.0, 26.0), 20.0, func(ci: CanvasItem) -> void: _paint_with(ci, func() -> void: _draw_serpent(Vector2(52.0, 26.0), 20.0, 1.0, 0.0))],
