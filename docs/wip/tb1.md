@@ -5,14 +5,18 @@ Spec : `docs/design/2026-10-02-campagne-tob.md` § 3 « TB1 ». Branche `feat/tb
 
 ## État
 - [x] Squelette du test `game/tests/tb1_seasons_test.gd`.
-- [ ] 1. Delta saisonnier par-dessus la carte de couleur (`satellite_ground`, `hb_ground`), neige de plaine lisible en vue large.
+- [x] 1. Delta saisonnier par-dessus la carte de couleur (`satellite_ground` : `season_k`, `hb_ground` : couleur de saison par parcelle + `k_wild`/`k_forest`), neige de plaine en plaques régionales (`season_snow`, `winter_south`).
 - [ ] 2. Mer selon la saison (hiver sombre et gris, écume de tempête).
 - [ ] 3. Étalonnage par saison (`data/ui/` + schéma).
 - [ ] 4. Neige sur les toits des villes 1:1 (uniform `snow`).
 
 ## Prochaine étape
-Point 1 : calculer la couleur procédurale « été » et la couleur de saison, appliquer leur écart
-après `sg_apply` / `hb_apply`.
+Point 2 : mer selon la saison dans `water.gdshader` (teinte d'hiver, écume de tempête via
+`weather_mask` + `province_ids`), valeurs lues dans `data/ui/campaign_seasons.json` (point 3).
+
+Mesure : `godot --path game --resolution 1600x900 --script res://tests/ss_shot.gd -- --stats
+--season=<saison> --distances=1100,400,90 --hide=Clouds --param=weather_enabled=false
+--param=cloud_shadow_amount=0` (sans ces trois réglages, les nuées font varier la moyenne à 1100).
 
 ## Points ouverts
 (aucun pour l'instant)

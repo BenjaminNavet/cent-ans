@@ -14,6 +14,10 @@ uniform bool life_enabled = true;
 uniform vec4 season_snow_line = vec4(1500.0, 2750.0, 1900.0, 520.0);
 // Couverture neigeuse de plaine en hiver : base, nord, est (0-1).
 uniform vec3 winter_cover = vec3(0.10, 0.42, 0.22);
+// TB1 : limite sud de la neige de plaine (v de carte : début, fin du fondu) et retrait au sud.
+uniform vec3 winter_south = vec3(0.58, 0.72, 0.35);
+// TB1 : dorure des cultures en été, appliquée par-dessus la carte de couleur (saison moyenne).
+uniform vec3 summer_gold = vec3(1.12, 1.04, 0.84);
 uniform vec3 life_snow_color = vec3(0.80, 0.82, 0.86);
 // Brûlis (dévastation) : cendres et chaume noirci.
 uniform vec3 burnt_color = vec3(0.035, 0.030, 0.026);
@@ -121,6 +125,21 @@ vec3 season_forest(vec3 summer, float grove) {
 	return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
 }
 
+// TB1 : moyenne de `season_forest` sur les bosquets (vue large : un pixel couvre plusieurs bosquets).
+vec3 season_forest_mean(vec3 summer) {
+	vec4 w = life_season();
+	vec3 spring = summer * vec3(1.05, 1.3, 0.9);
+	vec3 autumn = 0.35 * vec3(0.115, 0.042, 0.010) + 0.35 * vec3(0.12, 0.08, 0.015) + 0.30 * summer;
+	vec3 winter = 0.72 * vec3(0.050, 0.043, 0.036) + 0.28 * summer * 0.85;
+	return spring * w.x + summer * w.y + autumn * w.z + winter * w.w;
+}
+
+// TB1 : écart saisonnier multiplicatif (saison / été), borné, à appliquer sur une couleur de
+// saison moyenne (carte de couleur SS2, matières HB3) qui ne connaît pas la saison.
+vec3 season_ratio(vec3 season_col, vec3 summer_col) {
+	return clamp(season_col / max(summer_col, vec3(1e-3)), vec3(0.35), vec3(2.6));
+}
+
 // Neige selon la saison : limite d'altitude qui descend en hiver (plus bas au nord et à l'est),
 // et couverture de plaine en plaques l'hiver. `base` : neige d'altitude d'origine.
 float season_snow(float base, float hc, vec2 uv, vec2 p, float slope, float macro, float footprint) {
@@ -135,13 +154,20 @@ float season_snow(float base, float hc, vec2 uv, vec2 p, float slope, float macr
 	float mountain = smoothstep(line - 150.0, line + 250.0, hc + (macro - 0.5) * 500.0);
 	float low = 0.0;
 	if (w.w > 0.01) {
-		float cover = w.w * clamp(winter_cover.x + winter_cover.y * north + winter_cover.z * east + hc / 900.0, 0.0, 1.0);
-		// Plaques : grandes nappes (échelle régionale) + détail des champs, bords fondus d'autant
-		// plus larges que le pixel couvre de terrain (pas de camouflage au zoom moyen).
-		float fine = 1.0 - smoothstep(0.6, 2.0, footprint);
-		float patches = fbm(p * 0.018) * 0.7 + value_noise(p * 0.23) * 0.3 * fine + 0.15 * (1.0 - fine);
-		float soft = mix(0.30, 0.10, fine);
-		low = smoothstep(1.0 - cover - soft, 1.0 - cover + soft, patches);
+		// TB1 : pas de neige de plaine au sud (Méditerranée), sauf en altitude.
+		float south = smoothstep(winter_south.x, winter_south.y, uv.y);
+		float cover = w.w * clamp(winter_cover.x * (1.0 - south) + winter_cover.y * north + winter_cover.z * east
+			+ hc / 900.0 * (1.0 - 0.5 * south) - winter_south.z * south, 0.0, 1.0);
+		// TB1 : plaques régionales (nappes de ~40 km, contour à ~12 km) lisibles en vue large, au
+		// bord net à tous les zooms ; le détail des champs n'apparaît que de près (il faisait des
+		// taches au zoom moyen). Le bruit est étalé pour que `cover` soit la part couverte.
+		float fine = 1.0 - smoothstep(0.05, 0.22, footprint);
+		float mid = 1.0 - smoothstep(0.8, 2.5, footprint);
+		float patches = fbm(p * 0.018) * 0.78 + value_noise(p * 0.071 + 5.3) * 0.22 * mid + 0.11 * (1.0 - mid);
+		patches = smoothstep(0.24, 0.76, patches);
+		patches += (value_noise(p * 0.9) - 0.5) * 0.10 * fine;
+		float soft = 0.07;
+		low = smoothstep(1.0 - cover - soft, 1.0 - cover + soft, patches) * step(0.02, cover);
 		// Poudrage : la neige mince laisse deviner sillons et chaumes.
 		low *= mix(0.72, 0.95, smoothstep(0.3, 0.9, cover));
 		low *= step(1.0, hc);
