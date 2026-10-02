@@ -281,8 +281,11 @@ pub(crate) fn side_setup(
                 );
                 setup.max_soldiers = unit.max_strength.max(unit.strength);
                 // CV3: morale modifiers of the army (battle outcomes).
-                setup.morale =
-                    (i32::from(setup.morale) + army.morale_modifier()).clamp(0, 100) as u8;
+                // JR1: plus the crusade's zeal (0 for every other faction).
+                setup.morale = (i32::from(setup.morale)
+                    + army.morale_modifier()
+                    + crate::crusade::zeal_morale(state, data, &army.faction))
+                .clamp(0, 100) as u8;
                 // G1: technology bonuses of the army's faction, per category
                 // (same source as the auto-resolver's `side_from_army`), plus
                 // the levying province's buildings (armoury, butts).

@@ -498,13 +498,21 @@ impl CampaignState {
                     faction.capital
                 )));
             };
-            let units = units_from(data, &main_army_composition(faction))?;
+            // JR1: a faction the crusade rules base in a settlement starts
+            // there with the army they list (it holds no city).
+            let (station, units) = match crate::crusade::starting_army(&state, data, id) {
+                Some(start) => start,
+                None => (
+                    capital_city,
+                    units_from(data, &main_army_composition(faction))?,
+                ),
+            };
             let army_id = state.allocate_army_id();
             state.armies.insert(
                 army_id.clone(),
                 Army::new(
                     id.clone(),
-                    crate::state::ArmyPosition::Settlement(capital_city),
+                    crate::state::ArmyPosition::Settlement(station),
                     units,
                 ),
             );
@@ -519,6 +527,8 @@ impl CampaignState {
                 .movement_left = allowance;
         }
         crate::economy::resolve_goods(&mut state, data);
+        // JR1: the crusade opens when its rules and its faction exist.
+        crate::crusade::init_crusade(&mut state, data);
         // Vassal loyalty starts at its equilibrium (M5).
         let vassals: Vec<(FactionId, FactionId)> = state
             .factions

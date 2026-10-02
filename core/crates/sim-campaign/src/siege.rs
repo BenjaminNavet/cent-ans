@@ -787,6 +787,7 @@ pub(crate) fn apply_assault_result(
     );
     if won {
         state.record_battle(&faction, &defender_faction, true);
+        crate::crusade::on_battle(state, data, &faction, &defender_faction);
         capture(state, data, settlement, &faction, events);
         if let Some(general) = general {
             dynasty::on_siege_won(state, data, &general);
@@ -801,6 +802,7 @@ pub(crate) fn apply_assault_result(
         }
     } else {
         state.record_battle(&defender_faction, &faction, false);
+        crate::crusade::on_battle(state, data, &defender_faction, &faction);
     }
 }
 
@@ -908,6 +910,12 @@ fn sortie(
             &besieger_faction
         },
     );
+    // JR1: a sortie is a battle for the crusade's fervour too.
+    if won {
+        crate::crusade::on_battle(state, data, &garrison.faction, &besieger_faction);
+    } else {
+        crate::crusade::on_battle(state, data, &besieger_faction, &garrison.faction);
+    }
     if won {
         state.record_battle(&garrison.faction, &besieger_faction, false);
         for id in &targets {
@@ -1002,6 +1010,8 @@ pub(crate) fn capture(
         .province(&province_id)
         .faction(new_controller),
     );
+    // JR1: a place of the Holy Land, or the city of the vow.
+    crate::crusade::on_settlement_taken(state, data, new_controller, settlement_id, events);
     // TW2-T1: the fate of the place (player's choice, or the AI's at once).
     crate::capture::on_captured(
         state,

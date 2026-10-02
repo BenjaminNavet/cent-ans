@@ -1142,6 +1142,8 @@ impl CampaignState {
         if excommunicate {
             religion::excommunicate(self, data, attacker);
         }
+        // JR1: a crusade that turns on its own faith loses its fervour.
+        crate::crusade::on_war_declared(self, data, attacker, target);
         crate::feudal::escalate_war(self, data, attacker, target);
         self.call_to_arms(data, target, attacker, feudal_liege.as_ref());
         // The attacker summons its own host too (loyal direct vassals follow),

@@ -351,8 +351,10 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
         general_command,
         supply: army.supply,
         // CV3: plus the army's morale modifiers (battle outcomes).
+        // JR1: and the crusade's zeal (0 for every other faction).
         general_morale_bonus: general_effects.army_morale.apply(0.0)
-            + f64::from(army.morale_modifier()),
+            + f64::from(army.morale_modifier())
+            + f64::from(crate::crusade::zeal_morale(state, data, &army.faction)),
         general_charge_percent: general_effects.battle_charge.apply(0.0),
         general_ranged_percent: general_effects.battle_ranged.apply(0.0),
         general_defense_percent: general_effects.battle_defense.apply(0.0),
@@ -756,6 +758,9 @@ pub(crate) fn apply_battle_result(
         ),
     };
     state.record_battle(winner, loser, loser_losses > 2 * winner_losses.max(1));
+    // JR1: the crusade's fervour follows its battles.
+    let (winner, loser) = (winner.clone(), loser.clone());
+    crate::crusade::on_battle(state, data, &winner, &loser);
 
     // CV3: nuanced outcome (heroic, decisive, Pyrrhic, disaster...).
     let tally = |ids: &[ArmyId], outcome: &crate::battle_auto::SideOutcome| {

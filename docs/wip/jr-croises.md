@@ -23,7 +23,7 @@ revendications `prov_jerusalem`, `prov_gaza`, `prov_safad`.
 
 ## État
 - Spec, ADR, note écrits ; exploration faite (spec § 5.1). JR1 et JR2 lancés.
-- JR1 : squelette commité (règles `crusade.json` + schéma, `CrusadeRules`, `CrusadeState`, API vide de `sim-campaign/src/crusade.rs`, `Order::PreachPassage`, `EventKind::Crusade`). Prochaine étape : implémenter le barème et les crochets.
+- JR1 : barème, crochets (bataille, capture, guerre), aumônes dans le revenu, passage, élan, débandade, vue, pont `get_crusade()`, IA et 12 tests unitaires faits. Prochaine étape : audit des usages de la capitale, puis fusion de `feat/jr-data` et tests d'intégration `tests/jr_crusade.rs`.
 
 ## Prochaine étape
 - À la fin de JR1 et JR2 : vérifier les tests, lancer JR3 et JR4.

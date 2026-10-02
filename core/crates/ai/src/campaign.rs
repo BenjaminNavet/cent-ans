@@ -444,7 +444,15 @@ fn state_plans(
                         (
                             sim_campaign::coinage::ai_choose_coinage(state, data, faction),
                             sim_campaign::ransom::ai_ransom_orders(state, data, faction),
-                            sim_campaign::chivalry::ai_found_order(state, data, faction),
+                            {
+                                // JR1: the crusader faction preaches the
+                                // passage as soon as it can.
+                                let mut orders =
+                                    sim_campaign::chivalry::ai_found_order(state, data, faction);
+                                orders
+                                    .extend(sim_campaign::crusade::ai_preach(state, data, faction));
+                                orders
+                            },
                             // C6: spies, heralds and preachers (recruitment
                             // keeps a reserve).
                             sim_campaign::agents::plan_agents(state, data, faction),

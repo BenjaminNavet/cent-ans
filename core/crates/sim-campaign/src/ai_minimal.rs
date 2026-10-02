@@ -65,6 +65,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     orders.extend(crate::ransom::ai_ransom_orders(state, data, faction));
     // Chivalric order (H6).
     orders.extend(crate::chivalry::ai_found_order(state, data, faction));
+    // The crusade's passage (JR1).
+    orders.extend(crate::crusade::ai_preach(state, data, faction));
 
     // In debt and still losing money: dismiss the most expensive field unit.
     if faction_state.treasury < 0 && faction_state.income_last_turn < faction_state.upkeep_last_turn
