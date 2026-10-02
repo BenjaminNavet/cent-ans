@@ -50,6 +50,19 @@ uniform float fr1_parchment_width_scale = 1.7;
 uniform float fr1_parchment_alpha_scale = 1.15;
 uniform float fr1_parchment_glow_scale = 0.6;
 uniform float fr1_parchment_ink_mix = 0.35;
+// TB2 : style « au repos ». Hors sélection, survol et mode Diplomatie, les frontières sont plus
+// fines, moins saturées et presque sans halo ; la pleine intensité (poids `focus` = 1) est
+// réservée aux royaumes des provinces sélectionnée et survolée (`fr1_focus_a/b`, index de
+// palette), aux modes de carte « pleins » (`fr1_focus`) et à la vue parchemin.
+uniform float fr1_focus = 0.0;
+uniform int fr1_focus_a = 0;
+uniform int fr1_focus_b = 0;
+uniform float fr1_rest_width_scale = 0.6;
+uniform float fr1_rest_alpha_scale = 0.6;
+uniform float fr1_rest_glow_scale = 0.25;
+uniform float fr1_rest_saturation = 0.45;
+uniform float fr1_rest_brightness = 0.8;
+uniform float fr1_rest_parchment_focus = 1.0;
 
 vec3 fr1_info_of(int id) {
 	if (id <= 0) {
@@ -144,6 +157,16 @@ void fr1_borders(vec2 p, vec2 uv, float footprint, inout vec3 albedo, inout vec3
 	bool occupied = me.y > 0.0 && me.y != me.x;
 	bool player = me.z > 0.5;
 	float ds = d / px;  // distance au trait, pixels écran
+	// TB2 : poids de pleine intensité de ce côté du trait, puis style au repos.
+	float focus = max(fr1_focus, pw * fr1_rest_parchment_focus);
+	if (me.x > 0.0 && (int(me.x) == fr1_focus_a || int(me.x) == fr1_focus_b)) {
+		focus = 1.0;
+	}
+	wscale *= mix(fr1_rest_width_scale, 1.0, focus);
+	gscale *= mix(fr1_rest_width_scale, 1.0, focus);
+	float rest_glow = mix(fr1_rest_glow_scale, 1.0, focus);
+	float rest_sat = mix(fr1_rest_saturation, 1.0, focus);
+	float rest_bright = mix(fr1_rest_brightness, 1.0, focus);
 
 	vec3 ink = fr1_neutral_color;
 	vec3 own = me.x > 0.0 ? fr1_faction_rgb(me.x) : ink;
@@ -154,6 +177,9 @@ void fr1_borders(vec2 p, vec2 uv, float footprint, inout vec3 albedo, inout vec3
 	}
 	own = mix(own, ink, fr1_parchment_ink_mix * pw);
 	occupier = mix(occupier, ink, fr1_parchment_ink_mix * pw);
+	const vec3 fr1_lum = vec3(0.2126, 0.7152, 0.0722);
+	own = mix(vec3(dot(own, fr1_lum)), own, rest_sat) * rest_bright;
+	occupier = mix(vec3(dot(occupier, fr1_lum)), occupier, rest_sat) * rest_bright;
 
 	vec4 acc = vec4(0.0);
 	float glow_emit = 0.0;
@@ -163,7 +189,7 @@ void fr1_borders(vec2 p, vec2 uv, float footprint, inout vec3 albedo, inout vec3
 		float bright = fr1_realm_core_brightness * (player ? fr1_player_brightness : 1.0);
 		if (fr1_glow && me.x > 0.0 && !fr1_neutral) {
 			float g = pow(clamp(1.0 - ds / max(fr1_realm_glow_px * gs, 0.5), 0.0, 1.0), fr1_realm_glow_exponent);
-			float ga = g * fr1_realm_glow_alpha * (player ? fr1_pulse : 1.0) * (1.0 - 0.5 * pw);
+			float ga = g * fr1_realm_glow_alpha * (player ? mix(1.0, fr1_pulse, focus) : 1.0) * (1.0 - 0.5 * pw) * rest_glow;
 			fr1_over(acc, own * bright, ga);
 			glow_emit = ga;
 		}
@@ -186,13 +212,13 @@ void fr1_borders(vec2 p, vec2 uv, float footprint, inout vec3 albedo, inout vec3
 			fr1_over(acc, occupier, band * h * fr1_hatch_alpha);
 		}
 	}
-	float a = clamp(acc.a * fr1_alpha * mix(1.0, fr1_parchment_alpha_scale, pw), 0.0, 1.0);
+	float a = clamp(acc.a * fr1_alpha * mix(1.0, fr1_parchment_alpha_scale, pw) * mix(fr1_rest_alpha_scale, 1.0, focus), 0.0, 1.0);
 	if (a < 0.004) {
 		return;
 	}
 	// Albédo et émission : partage du parchemin (pm_output) au poids pw, part émissive propre en 3D.
 	float k = pm_emission * pw;
 	albedo = mix(albedo, acc.rgb * (1.0 - k), a);
-	vec3 emit3d = acc.rgb * fr1_emission * clamp(glow_emit / max(acc.a, 1e-3), 0.0, 1.0);
+	vec3 emit3d = acc.rgb * fr1_emission * rest_glow * clamp(glow_emit / max(acc.a, 1e-3), 0.0, 1.0);
 	emission = mix(emission, mix(emit3d, acc.rgb * k * pm_emission_gain, pw), a);
 }

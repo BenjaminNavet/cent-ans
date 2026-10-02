@@ -38,6 +38,7 @@ func _run() -> void:
 		map.queue_free()
 		return
 	_test_fog(map)
+	_test_borders(map)
 	map.queue_free()
 	await process_frame
 
@@ -58,6 +59,50 @@ func _test_fog(map: Node3D) -> void:
 	_check(float(material.get_shader_parameter("fog_mist_max")) <= 0.15, "residual mist must stay thin")
 	_check(float(material.get_shader_parameter("fog_mist_glow")) <= 0.05, "mist must not glow (it washed the ground white)")
 	print("tb2 fog: veil %s dim %.2f desaturation %.2f mist_max %.2f" % [veil.to_html(false), dim, float(material.get_shader_parameter("fog_desaturation")), float(material.get_shader_parameter("fog_mist_max"))])
+
+
+## 2. Frontières : style au repos hors sélection, survol et mode Diplomatie.
+func _test_borders(map: Node3D) -> void:
+	var borders: FactionBorders = map.faction_borders
+	var modes: Object = map.map_modes
+	var material: ShaderMaterial = map.terrain.material
+	var data: MapData = map.map_data
+	var paris: int = data.index_of_id("prov_ile_de_france")
+	var guyenne: int = data.index_of_id("prov_guyenne")
+	map.refresh_all()
+	map.hovered_index = 0
+	map.selected_index = 0
+	borders.update_view(300.0)
+	_check(float(material.get_shader_parameter("fr1_rest_width_scale")) <= 0.7, "rest borders should be thinner")
+	_check(float(material.get_shader_parameter("fr1_rest_saturation")) <= 0.6, "rest borders should be less saturated")
+	_check(float(material.get_shader_parameter("fr1_rest_glow_scale")) <= 0.4, "rest borders should barely glow")
+	_check(is_zero_approx(float(material.get_shader_parameter("fr1_focus"))), "political map: no global full intensity")
+	_check(borders.focus_factions() == Vector2i.ZERO, "nothing hovered or selected: no realm in focus")
+	var rest := borders.intensity_of(paris)
+	_check(rest <= 0.5, "border intensity out of selection should be at most half, got %.2f" % rest)
+	# Sélection : le royaume de la province passe à pleine intensité, les autres restent au repos.
+	map.selected_index = paris
+	borders.update_view(301.0)
+	var france := borders.faction_index("fac_france")
+	_check(france > 0 and int(material.get_shader_parameter("fr1_focus_b")) == france, "selecting Paris should put France in focus")
+	_check(is_equal_approx(borders.intensity_of(paris), 1.0), "selected realm at full intensity")
+	_check(borders.intensity_of(guyenne) <= 0.5, "other realms stay at rest while France is selected")
+	# Survol.
+	map.selected_index = 0
+	map.hovered_index = guyenne
+	borders.update_view(302.0)
+	_check(int(material.get_shader_parameter("fr1_focus_a")) == borders.faction_index("fac_england"), "hovering Guyenne should put England in focus")
+	_check(is_equal_approx(borders.intensity_of(guyenne), 1.0) and borders.intensity_of(paris) <= 0.5, "hovered realm only at full intensity")
+	map.hovered_index = 0
+	# Mode Diplomatie : tout à pleine intensité.
+	modes.set_mode("diplomacy")
+	borders.update_view(303.0)
+	_check(is_equal_approx(float(material.get_shader_parameter("fr1_focus")), 1.0), "diplomacy map shows every border in full")
+	_check(is_equal_approx(borders.intensity_of(paris), 1.0), "diplomacy map: full intensity")
+	modes.set_mode("political")
+	borders.update_view(304.0)
+	_check(borders.intensity_of(paris) <= 0.5, "back to political: borders at rest again")
+	print("tb2 borders: rest intensity %.2f (width %.2f x alpha %.2f), saturation %.2f, glow %.2f ; full on selection, hover, diplomacy" % [rest, borders.rest_value("width_scale"), borders.rest_value("alpha_scale"), borders.rest_value("saturation"), borders.rest_value("glow_scale")])
 
 
 func _check(condition: bool, message: String) -> bool:

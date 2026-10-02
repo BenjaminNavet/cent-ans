@@ -16,8 +16,8 @@ const AGENT_SCRIPT := "res://scripts/map/agent_controller.gd"
 const NEUTRAL := Color(0.62, 0.6, 0.55)  # colonie sans contrôleur (`SettlementLayer.refresh`)
 ## Couleurs des couches (reprises de leurs scripts : `ArmyMovementPath`, `TradeRouteLayer`,
 ## `ConstructionMarkers`, `CampaignMinimap`).
-const PATH_NOW := Color(0.40, 0.88, 0.32, 1.0)
-const PATH_LATER := Color(0.92, 0.36, 0.20, 0.95)
+const PATH_NOW := Color(0.47, 0.74, 0.38, 1.0)
+const PATH_LATER := Color(0.76, 0.41, 0.28, 0.95)
 const PATH_MARK := Color(1.0, 0.90, 0.60, 1.0)
 const TRADE := Color(0.45, 0.18, 0.08, 0.9)
 const TRADE_CUT := Color(0.4, 0.4, 0.4, 0.6)
