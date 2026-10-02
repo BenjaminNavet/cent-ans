@@ -7,8 +7,8 @@
     "max_m": 52.0
   },
   "band": {
-    "cliff_px": 0.85,
-    "beach_px": 0.55,
+    "cliff_px": 1.0,
+    "beach_px": 0.6,
     "wet_px": 0.16,
     "strength": 1.0,
     "relief": 0.9,
