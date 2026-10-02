@@ -106,6 +106,8 @@ var _marker_screen: PackedVector2Array = PackedVector2Array()
 var last_declutter_ms := 0.0
 var _icon_distance := -1.0
 var _labels: Array[Label3D] = []
+## Lot EN : encre du nom de chaque colonie (rouge : détenue par un ennemi du joueur).
+var _label_ink: PackedColorArray = PackedColorArray()
 ## DC4 : taille du texte de chaque étiquette (police, contour compris), mesurée à la demande.
 var _label_size: PackedVector2Array = PackedVector2Array()
 var _label_kind: PackedStringArray = PackedStringArray()
@@ -183,6 +185,7 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	data = settlement_data
 	tiers = zoom_tiers if zoom_tiers != null else ZoomTiers.new()
 	_labels.clear()
+	_label_ink.clear()
 	_label_size.clear()
 	_label_kind.clear()
 	_settlements_by_chunk.clear()
@@ -629,6 +632,7 @@ func refresh(sim: Object, _color_of: Callable) -> void:
 		if year > 0:
 			landmark_cities.set_year(year)
 	_refresh_shields()
+	_refresh_label_inks(sim)
 	_refresh_capital(sim)
 	var devastation := {}
 	if sim != null and (sim.has_method("get_provinces_snapshot") or sim.has_method("get_province_state")):
@@ -1054,10 +1058,34 @@ func _show_label(i: int, shown: bool, alpha: float) -> void:
 		label.visible = shown
 	if not shown or is_equal_approx(label.modulate.a, alpha):
 		return
-	var modulate := label_color
+	var modulate := label_ink(i)
 	modulate.a = alpha
 	label.modulate = modulate
 	label.outline_modulate = _halo(alpha)
+
+
+## Lot EN (ADR 0155) : encre du nom de la colonie `i` (sans opacité).
+func label_ink(i: int) -> Color:
+	return _label_ink[i] if i < _label_ink.size() else label_color
+
+
+## Lot EN : noms des villes tenues par un ennemi du joueur à l'encre rouge (`StanceCues`).
+func _refresh_label_inks(sim: Object) -> void:
+	if sim == null or not sim.has_method("get_player_faction"):
+		return
+	var player := str(sim.call("get_player_faction"))
+	var stances := StanceCues.stances(sim, player)
+	if _label_ink.size() != _labels.size():
+		_label_ink.resize(_labels.size())
+		_label_ink.fill(label_color)
+	for i in mini(_labels.size(), data.settlements.size()):
+		var cue := StanceCues.category_of(str(data.settlements[i]["controller"]), player, stances)
+		var ink := StanceCues.town_label_color(cue, label_color)
+		if ink == _label_ink[i]:
+			continue
+		_label_ink[i] = ink
+		ink.a = _labels[i].modulate.a
+		_labels[i].modulate = ink
 
 
 ## PO3 : couleur du halo de parchemin pour une opacité d'étiquette `alpha`.

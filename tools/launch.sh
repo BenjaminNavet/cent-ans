@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Starts Cent Ans from the sources on macOS, Linux and Windows (Git Bash) (ADR 0117):
+#   0. fast-forwards the clone when it follows the `stable` branch (ADR 0159; never fatal),
 #   1. rebuilds the Rust GDExtension when core/ changed (cargo decides; core/build.sh only
 #      replaces the library in game/bin/ when it changed),
 #   2. runs the headless Godot import when game/ changed since the last import (files added,
@@ -8,7 +9,8 @@
 #      (ADR 0149; never fatal: without it the close zoom is only limited),
 #   4. launches the game.
 # Called by the double-click launchers at the root of the repository ("Lancer Cent Ans.*").
-# Usage: tools/launch.sh [--no-build] [--import] [--no-relief] [-- <extra Godot arguments>]
+# Usage: tools/launch.sh [--no-update] [--no-build] [--import] [--no-relief] [-- <extra Godot arguments>]
+#   --no-update  skip the update check (also: CENT_ANS_NO_UPDATE=1)
 #   --no-build   skip the Rust build (the library already in game/bin/ is used)
 #   --import     force the headless import
 #   --no-relief  skip the fine relief check (no download)
@@ -20,12 +22,22 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GAME="game"
 STAMP="$GAME/.godot/cent_ans_import.stamp"
 GODOT_SERIES="4.7"
+# Branch followed by the players' clones; the CI moves it (.github/workflows/windows.yml).
+UPDATE_BRANCH="stable"
+WINDOWS_LAUNCHER="Lancer Cent Ans.exe"
 
+# Kept for the restart after an update (bash 3.2: an empty array is unset under `set -u`).
+ORIGINAL_ARGS=(${1+"$@"})
+
+# No update in CI: the workflow tests the commit it checked out.
+UPDATE=1
+[[ -n "${CENT_ANS_NO_UPDATE:-}" || -n "${CI:-}" ]] && UPDATE=0
 BUILD=1
 FORCE_IMPORT=0
 RELIEF=1
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --no-update) UPDATE=0 ;;
         --no-build) BUILD=0 ;;
         --import) FORCE_IMPORT=1 ;;
         --no-relief) RELIEF=0 ;;
@@ -34,7 +46,7 @@ while [[ $# -gt 0 ]]; do
             break
             ;;
         -h | --help)
-            sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0
             ;;
         *)
@@ -59,6 +71,76 @@ case "$(uname -s)" in
     MINGW* | MSYS* | CYGWIN*) PLATFORM="windows" ;;
     *) fail "Système non pris en charge : $(uname -s)" ;;
 esac
+
+# --- 0. Update -------------------------------------------------------------------------------
+
+# Windows refuses to overwrite a running executable but lets it be renamed: the running
+# launcher becomes *.old (removed at the next launch) and an identical, unlocked copy takes its
+# place for git to replace.
+release_running_launcher() {
+    cp -p "$WINDOWS_LAUNCHER" "$WINDOWS_LAUNCHER.new" &&
+        mv -f "$WINDOWS_LAUNCHER" "$WINDOWS_LAUNCHER.old" &&
+        mv "$WINDOWS_LAUNCHER.new" "$WINDOWS_LAUNCHER"
+    # Never leave the clone without its launcher.
+    if [[ ! -f "$WINDOWS_LAUNCHER" && -f "$WINDOWS_LAUNCHER.old" ]]; then
+        mv "$WINDOWS_LAUNCHER.old" "$WINDOWS_LAUNCHER"
+    fi
+    rm -f "$WINDOWS_LAUNCHER.new"
+}
+
+# Players follow `stable`, which the CI fast-forwards to every commit of main that passes the
+# smoke test (ADR 0159). Only a clone sitting on that branch updates itself: a development
+# checkout (main, feature branches, worktrees) is never touched. Fast-forward only, and git
+# keeps local changes or refuses: nothing is ever discarded. Never fatal: offline, diverged or
+# refused, the installed version starts.
+# The whole function is parsed before it runs and it ends with a restart, so bash never reads
+# on in a launch.sh that git has just replaced.
+self_update() {
+    command -v git >/dev/null || return 0
+    local branch remote before target count
+    branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" || return 0
+    if [[ "$branch" != "$UPDATE_BRANCH" ]]; then
+        say "Mises à jour automatiques inactives sur la branche $branch (pour les activer : git fetch && git switch $UPDATE_BRANCH)."
+        return 0
+    fi
+    remote="$(git config "branch.$UPDATE_BRANCH.remote" || true)"
+    [[ -n "$remote" && "$remote" != "." ]] || return 0
+
+    say "Recherche d'une mise à jour…"
+    if ! GIT_TERMINAL_PROMPT=0 git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=15 \
+        fetch --quiet "$remote" "$UPDATE_BRANCH" 2>/dev/null; then
+        say "Mise à jour non vérifiée (hors ligne ?) : la version installée est lancée."
+        return 0
+    fi
+    before="$(git rev-parse HEAD)"
+    target="$(git rev-parse FETCH_HEAD)"
+    if [[ "$before" == "$target" ]]; then
+        say "Le jeu est à jour."
+        return 0
+    fi
+    if ! git merge-base --is-ancestor "$before" "$target" 2>/dev/null; then
+        say "Mise à jour impossible : ce clone a des commits absents de $remote/$UPDATE_BRANCH. La version installée est lancée."
+        return 0
+    fi
+
+    count="$(git rev-list --count "$before..$target")"
+    say "Mise à jour : $count commit(s) à installer…"
+    if [[ "$PLATFORM" == "windows" && -f "$WINDOWS_LAUNCHER" ]] &&
+        ! git diff --quiet "$before" "$target" -- "$WINDOWS_LAUNCHER"; then
+        release_running_launcher || true
+    fi
+    if ! git merge --ff-only --quiet "$target"; then
+        say "Mise à jour non installée (fichiers modifiés sur place, voir ci-dessus) : la version installée est lancée."
+        return 0
+    fi
+    say "Mise à jour installée : version $(git log -1 --format='%h du %cd' --date=format:'%d/%m/%Y')."
+    exec bash "$ROOT/tools/launch.sh" --no-update ${ORIGINAL_ARGS[@]+"${ORIGINAL_ARGS[@]}"}
+}
+
+rm -f "$WINDOWS_LAUNCHER.old" 2>/dev/null || true
+if [[ $UPDATE -eq 1 ]]; then
+    self_update
+fi
 
 # --- Godot -----------------------------------------------------------------------------------
 
