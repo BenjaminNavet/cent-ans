@@ -88,6 +88,63 @@
           "maximum": 1
         }
       }
+    },
+    "signs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_per_town",
+        "incident",
+        "encounter",
+        "construction"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "max_per_town": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2,
+          "description": "Nombre de signes par ville et par palier en mode politique (vérifié par game/tests/tb2_declutter_test.gd)."
+        },
+        "incident": {
+          "$ref": "#/$defs/sign_rule"
+        },
+        "encounter": {
+          "$ref": "#/$defs/sign_rule"
+        },
+        "construction": {
+          "$ref": "#/$defs/sign_rule"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sign_rule": {
+      "type": "object",
+      "required": [
+        "modes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "modes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "description": "Modes de carte (MapModeController.MODES) qui affichent ce signe."
+        },
+        "keep_urgent": {
+          "type": "boolean",
+          "description": "Reste visible quand il expire ou attend une réponse ce tour."
+        },
+        "with_selected_army": {
+          "type": "boolean",
+          "description": "Visible quand une armée est sélectionnée."
+        }
+      }
     }
   }
 }

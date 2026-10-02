@@ -7,6 +7,10 @@ extends SceneTree
 ## Usage : godot --headless --path game --script res://tests/tb2_declutter_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
+const PARIS := Vector2(2213.2, 3203.9)
+## Paliers de zoom vérifiés : vue large, moyenne, proche (distance caméra, unités carte).
+const SCREEN := Vector2i(1600, 900)
+const TIERS: Array[float] = [1100.0, 400.0, 90.0]
 
 var _failures := 0
 
@@ -20,6 +24,9 @@ func _init() -> void:
 
 
 func _run() -> void:
+	# Fenêtre factice du mode headless (64 px) : taille d'écran réaliste pour les mesures.
+	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
+	root.size = SCREEN
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	if settings != null:
 		settings.call("use_test_file")
@@ -39,6 +46,7 @@ func _run() -> void:
 		return
 	_test_fog(map)
 	_test_borders(map)
+	await _test_signs(map)
 	map.queue_free()
 	await process_frame
 
@@ -103,6 +111,109 @@ func _test_borders(map: Node3D) -> void:
 	borders.update_view(304.0)
 	_check(borders.intensity_of(paris) <= 0.5, "back to political: borders at rest again")
 	print("tb2 borders: rest intensity %.2f (width %.2f x alpha %.2f), saturation %.2f, glow %.2f ; full on selection, hover, diplomacy" % [rest, borders.rest_value("width_scale"), borders.rest_value("alpha_scale"), borders.rest_value("saturation"), borders.rest_value("glow_scale")])
+
+
+## Place la caméra au-dessus de `px` (carte) à la distance `distance`, puis refait le
+## dé-encombrement des noms.
+func _look(map: Node3D, px: Vector2, distance: float) -> void:
+	var data: MapData = map.map_data
+	var ground := Vector3(px.x, data.surface_world_at(px.x, px.y), px.y)
+	map.camera_rig.look_at_point(ground, distance)
+	map.camera_rig.snap()
+	for i in 4:
+		await process_frame
+	map.settlement_layer.declutter()
+	await process_frame
+
+
+## Positions écran des signes visibles autres que l'écu : marteaux, sceaux, sites de rencontre.
+func _extra_signs(map: Node3D) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	var camera: Camera3D = map.camera
+	if map.construction_markers.visible:
+		for label in map.construction_markers.get_children():
+			if (label as Node3D).visible and not camera.is_position_behind((label as Node3D).global_position):
+				points.append(camera.unproject_position((label as Node3D).global_position))
+	var layers: Array = []
+	if map.life != null and map.life.incidents != null:
+		layers.append(map.life.incidents.get_node("IncidentSeals"))
+	if map.encounters != null:
+		layers.append_array(map.encounters.find_children("*", "CanvasLayer", false, false))
+	for layer: Node in layers:
+		for control in layer.get_children():
+			if control is Control and (control as Control).visible:
+				points.append((control as Control).position + (control as Control).size * 0.5)
+	return points
+
+
+## 3. Pictogrammes : un seul signe par ville et par palier ; sceaux, sites et marteaux réservés à
+## la couche « Signes » et aux modes de carte.
+func _test_signs(map: Node3D) -> void:
+	var sim: Object = map.sim
+	var layer: SettlementLayer = map.settlement_layer
+	var limit := int(MapReadability.section("signs").get("max_per_town", 0))
+	_check(limit == 1, "signs.max_per_town should be 1")
+	MapReadability.signs_layer_on = false
+	var seal_id := -1
+	if sim.has_method("debug_offer_decision"):
+		sim.call("set_chronicle_enabled", false)
+		seal_id = int(sim.call("debug_offer_decision", "evt_crue", "prov_touraine"))
+		map.refresh_all()
+	for distance: float in TIERS:
+		await _look(map, PARIS, distance)
+		var extras := _extra_signs(map)
+		# Lieux nommés dans l'écran (`screen_occupancy` : noms et écus affichés, sans marge).
+		var occupancy: Dictionary = layer.screen_occupancy(map.camera)
+		var kinds: Array = occupancy["kinds"]
+		var owners: PackedInt32Array = occupancy["owners"]
+		var signs_of := {}  # index de colonie → nombre de signes
+		for n in owners.size():
+			if not signs_of.has(owners[n]):
+				signs_of[owners[n]] = 0
+			if kinds[n] == "marker":
+				signs_of[owners[n]] += 1
+		var worst := 0
+		for i: int in signs_of:
+			var anchor: Vector2 = map.camera.unproject_position(layer._labels[i].global_position)
+			for point in extras:
+				if point.distance_to(anchor) < 48.0:
+					signs_of[i] += 1
+			worst = maxi(worst, int(signs_of[i]))
+		var towns := signs_of.size()
+		var shields := int(occupancy["markers"])
+		_check(towns > 0, "some town names expected at distance %.0f" % distance)
+		_check(worst <= limit, "at most %d sign per town at distance %.0f, got %d" % [limit, distance, worst])
+		_check(extras.is_empty(), "no hammer, seal or encounter sign on the political map at distance %.0f" % distance)
+		if distance >= 400.0:
+			# Vue moyenne et large : l'écu est réservé aux lieux majeurs (rang 3 et 4).
+			for i: int in signs_of:
+				_check(int(signs_of[i]) == 0 or layer._marker_rank[i] >= 3, "minor place %s should lose its shield at distance %.0f" % [layer.data.settlements[i]["id"], distance])
+		print("tb2 signs: distance %.0f -> %d places named on screen, %d shields, %d other signs, max %d per place" % [distance, towns, shields, extras.size(), worst])
+	# Sceau d'incident : caché en mode politique (sauf dernier tour), montré par la couche et par
+	# le mode Mécontentement.
+	var incidents: IncidentMarkers = map.life.incidents if map.life != null else null
+	var seal: Control = incidents.marker(seal_id) if incidents != null and seal_id > 0 else null
+	if seal != null:
+		await _look(map, Vector2(seal.get("world").x, seal.get("world").z), 400.0)
+		var urgent := int(seal.call("turns_left")) <= 1
+		_check(seal.visible == urgent, "incident seal hidden on the political map unless it expires this turn")
+		map.map_modes.set_mode("unrest")
+		await process_frame
+		_check(seal.visible, "incident seal shown on the unrest map")
+		map.map_modes.set_mode("political")
+		MapReadability.signs_layer_on = true
+		await process_frame
+		_check(seal.visible, "incident seal shown by the signs layer")
+		MapReadability.signs_layer_on = false
+		await process_frame
+	else:
+		print("tb2 signs: incident staging unavailable (seal checks skipped)")
+	_check(not MapReadability.sign_shown("construction", "political"), "construction hammers hidden on the political map")
+	_check(MapReadability.sign_shown("construction", "wealth"), "construction hammers shown on the wealth map")
+	_check(not MapReadability.sign_shown("encounter", "political"), "encounter sites hidden by default")
+	_check(MapReadability.sign_shown("encounter", "political", false, true), "encounter sites shown while an army is selected")
+	_check(MapReadability.sign_shown("encounter", "political", true), "a claimed or expiring encounter stays visible")
+	_check(not map.construction_markers.visible, "construction markers node hidden on the political map")
 
 
 func _check(condition: bool, message: String) -> bool:

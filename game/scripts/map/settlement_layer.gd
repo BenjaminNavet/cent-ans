@@ -83,6 +83,8 @@ var _marker_world: PackedVector3Array = PackedVector3Array()
 ## Écu affiché par colonie (faction), pour ne réécrire que ce qui change ; 1 si armorié (DV2).
 var _marker_holder: PackedStringArray = PackedStringArray()
 var _shielded: PackedByteArray = PackedByteArray()
+## TB2 : distance caméra jusqu'à laquelle l'écu accompagne le nom (rang mineur : nom seul de loin).
+var _shield_until: PackedFloat32Array = PackedFloat32Array()
 ## Lot DA7d : état de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
 ## ordre de priorité fixe (rang puis poids), épinglés et dernier état de caméra calculé.
 var _marker_shown: PackedByteArray = PackedByteArray()
@@ -404,6 +406,7 @@ func _build_icons() -> void:
 	_marker_holder.resize(count)
 	_shielded.resize(count)
 	_shielded.fill(0)
+	_shield_until.resize(count)
 	_marker_shown.resize(count)
 	_marker_shown.fill(1)
 	_marker_screen.resize(count)
@@ -424,6 +427,7 @@ func _build_icons() -> void:
 		_marker_rank[i] = rank
 		_marker_size[i] = markers.size_px(kind, rank) * markers.shield_size_factor()
 		_marker_until[i] = markers.visible_until(kind, rank)
+		_shield_until[i] = minf(_marker_until[i], markers.shield_until(rank))  # TB2
 		_marker_holder[i] = ""
 		var k := _icon_instance(i)
 		# DV2 : ancre = position du nom (recalée par `_sync_shield` quand le nom bouge).
@@ -433,7 +437,7 @@ func _build_icons() -> void:
 		# du dernier changement (fondu).
 		multimesh.set_instance_color(k, Color(-1.0, 0.0, 1.0, -1.0e4))
 		# r = haut du nom au-dessus de l'ancre (px d'étiquette), b = côté de l'écu (px écran).
-		multimesh.set_instance_custom_data(k, Color(_shield_lift(i), 0.0, _marker_size[i], _marker_until[i] / 100.0))
+		multimesh.set_instance_custom_data(k, Color(_shield_lift(i), 0.0, _marker_size[i], _shield_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
 	_icon_material.shader = preload("res://shaders/settlement_icon.gdshader")
 	_fade_distance = markers.fade_distance()
@@ -505,9 +509,10 @@ func marker_in_tier(i: int) -> bool:
 	return i >= 0 and i < _marker_until.size() and _camera_distance < _marker_until_of(i) and _weights.y > 0.01
 
 
-## Vrai si la colonie `i` a un écu (détenteur armorié).
+## Vrai si la colonie `i` montre un écu à la distance caméra courante : détenteur armorié et,
+## lot TB2, rang assez élevé pour cette distance (la colonie sélectionnée garde le sien).
 func has_shield(i: int) -> bool:
-	return i >= 0 and i < _shielded.size() and _shielded[i] == 1
+	return i >= 0 and i < _shielded.size() and _shielded[i] == 1 and (_is_selected(i) or _camera_distance < _shield_until[i])
 
 
 ## DV2, VT : emprises cliquables et anneau de sélection (vue normale).
@@ -959,7 +964,7 @@ func _declutter_step(sliced: bool) -> void:
 		var text := _label_text_size(i) * _dc_scale
 		var label_center := anchor - label.offset * Vector2(-1.0, 1.0) * _dc_scale
 		var rect := Rect2(label_center - text * 0.5, text).grow(_dc_label_margin)
-		var shielded := _shielded[i] == 1
+		var shielded := _shielded[i] == 1 and (i == _selected_index or _camera_distance < _shield_until[i])  # = has_shield(i), sans appel
 		var shield_rect := _shield_rect(i, anchor, _dc_scale, _dc_marker_margin) if shielded else Rect2()
 		var shown := false
 		if _dc_label_screen.intersects(rect) or (shielded and _dc_label_screen.intersects(shield_rect)):
@@ -1512,7 +1517,7 @@ func select(id: String) -> void:
 		var old := _icon_instance(data.index_by_id[selected_id])
 		var custom := _icons.multimesh.get_instance_custom_data(old)
 		custom.g = 0.0
-		custom.a = _marker_until[data.index_by_id[selected_id]] / 100.0
+		custom.a = _shield_until[data.index_by_id[selected_id]] / 100.0
 		_icons.multimesh.set_instance_custom_data(old, custom)
 	selected_id = id if data.index_by_id.has(id) else ""
 	_selected_index = int(data.index_by_id.get(selected_id, -1))

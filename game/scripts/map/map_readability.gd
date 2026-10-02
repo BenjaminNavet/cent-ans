@@ -12,6 +12,8 @@ const FILE := "ui/campaign_map.json"
 
 static var _catalog: Dictionary = {}
 static var _loaded: bool = false
+## Couche « Signes » de la barre de filtres (chantiers, incidents, rencontres), éteinte par défaut.
+static var signs_layer_on: bool = false
 
 
 ## Bloc `name` du fichier (dictionnaire vide si absent : chaque appelant garde ses replis).
@@ -37,6 +39,32 @@ static func number(name: String, key: String, fallback: float) -> float:
 static func clear_cache() -> void:
 	_catalog = {}
 	_loaded = false
+	signs_layer_on = false
+
+
+## Mode de carte courant d'une `CampaignMap` (« political » sans contrôleur de filtres).
+static func map_mode_of(map: Node) -> String:
+	var modes: Variant = map.get("map_modes") if map != null else null
+	return str((modes as Object).get("mode")) if modes is Object else "political"
+
+
+## Vrai si un signe d'évènement de la sorte `kind` (« incident » : sceau de cire, « encounter » :
+## site de rencontre, « construction » : marteau de chantier) s'affiche. Par défaut la carte ne
+## montre qu'un signe par ville (l'écu) : ces signes-là sont réservés à la couche « Signes » de la
+## barre de filtres et aux modes de carte du bloc `signs` ; restent visibles quoi qu'il arrive ceux
+## qui demandent une réponse ce tour (`urgent`) et, pour les rencontres, les sites quand une armée
+## est sélectionnée (ce sont ses destinations). ADR 0151.
+static func sign_shown(kind: String, mode: String, urgent: bool = false, army_selected: bool = false) -> bool:
+	if signs_layer_on:
+		return true
+	var rule: Variant = section("signs").get(kind, null)
+	if not (rule is Dictionary):
+		return true  # pas de règle : comme avant TB2
+	if (rule.get("modes", []) as Array).has(mode):
+		return true
+	if urgent and bool(rule.get("keep_urgent", false)):
+		return true
+	return army_selected and bool(rule.get("with_selected_army", false))
 
 
 ## Couleur « #rrggbb » d'un bloc (repli si absente).
