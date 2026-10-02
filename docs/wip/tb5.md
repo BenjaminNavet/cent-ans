@@ -25,7 +25,7 @@ Arbitrages : ADR 0155 (`docs/decisions/0155-cotes-et-mers-par-region.md`).
 
 ## Prochaine étape
 Lot livré. Reste à la session principale : capture de contrôle, puis réglage à l'œil dans
-`data/map/coast_types.json` (`band`, `types`, `swash`) et `data/map/sea_basins.json` (`look`).
+`data/map/coast_types.json` (`band`, `types`, `swash`) et `data/map/sea_basins.json` (`look`). Voir « Retouches » plus bas pour l'état après la première lecture.
 
 Capture : `godot --path game --resolution 1600x900 --script res://tests/tb5_shot.gd --
 --out=<dossier> --season=summer [--only=douvres,etretat,raz,landes,manche,mer-du-nord,atlantique,mediterranee,mediterranee-large] [--distances=90,40]`.
@@ -70,7 +70,48 @@ Douvres 400 : 22,3 / 17,2 ; Douvres 90 : 34,4 / 37,0 ; Landes 400 : 29,2 / 30,3 
 21,4 / 24,5 ; Atlantique 400 : 20,6 / 20,2 ; Atlantique 90 : 23,9 / 23,2. L'écart (−5 à +3 ms) est
 dans le bruit ; à refaire sur machine calme.
 
+## Retouches après lecture des captures par la session principale (02/10)
+
+Mesures : `tb5_shot.gd --foam` (densité d'écume = part des pixels au-dessus de 1,5 × médiane + 10 ;
+régularité = pic secondaire de l'autocorrélation du masque clair le long des lignes ; empreinte) et
+`--stats` (ligne `TB5 band` : largeur de la bande côtière en pixels écran). Empreinte d'un pixel
+écran : 0,058 px carte à 40, 0,087 à 60, 0,130 à 90. Les lectures d'image forcent le dessin
+(`RenderingServer.force_draw`) : une fenêtre recouverte par celles des autres sessions n'était
+plus dessinée et donnait des chiffres figés.
+
+1. Moutons (`sea_whitecaps`, `sea_basins.gdshaderinc`) : l'ancien motif seuillait un bruit de
+   valeur (pics sur les nœuds de sa grille, d'où les tirets alignés). Remplacé par des cellules de
+   Voronoï à gigue pleine dans un domaine tourné selon le vent, étiré et déformé, crêtes
+   elliptiques à bord lissé sur un pixel écran, par rafales, qui renaissent ailleurs à chaque
+   cycle ; au-delà de l'empreinte 0,062-0,084 (distance ≈ 45-60), plus de crête, un voile de teinte
+   (`whitecaps.veil`). Sert aussi aux moutons de tempête TB1. Densité Atlantique : 4,05 → 0,73 % à
+   40, 4,28 → 0,00 % à 90 ; Manche : 1,30 → 0,19 % à 40, 1,50 → 0,02 % à 90. Régularité à 40
+   (Atlantique) : pic 0,08 à 24 px avant, 0,11 à 61 px après : avec ≈ 25 crêtes dans la bande
+   mesurée, le bruit de l'estimateur est de cet ordre ; la mesure ne départage pas, c'est la
+   construction (pas de grille) et la capture qui tranchent.
+2. Méditerranée : au large (15-45 m et plus), la couleur suit une profondeur lissée (mip 5 de la
+   carte d'altitude, ≈ 23 km) : le talus du plateau du golfe du Lion (−120 → −200 m, fond borné à
+   −200 m) dessinait le bord net ; limites de bassin fondues deux fois plus large (`blur_cells`
+   8) ; relief fin des vagues dans la couleur sur toutes les mers (`swell.ripple_contrast`) ;
+   clapot 0,9, clarté 1,2 ; teinte entière au large, sa racine sur les petits fonds.
+3. Manche 11 20 21 → 18 33 35 à 90, mer du Nord 19 35 36 ; Atlantique 18 36 44, Méditerranée
+   20 45 60 (relevées pour que la Manche et la mer du Nord restent les plus sombres). Eau trouble :
+   une épaisseur d'eau s'ajoute (`depth.murk_m`) au lieu de diviser la profondeur.
+4. Falaises : paroi × 1 à × 2,6 selon la hauteur (`band.cliff_widen`), craie éclaircie, granite
+   sombre rosé. Bande à Douvres à 90 : 5,9 → 11,0 px écran (1,42 px carte), moyenne
+   107 96 76 → 165 141 112 (sous le voile du brouillard de guerre) ; au Raz à 90 : 3,5 → 8,1 px,
+   132 105 85.
+5. Taches pâles en mer : pixels où la carte d'altitude dépasse le niveau de la mer côté eau de la
+   côte raster (pied de falaise à Douvres : 71 et 120 m ; écueils du Raz : 31 m). Le plan d'eau
+   s'y efface (règle des lacs) et le terrain y peignait une eau de haut-fond claire (code HB7,
+   antérieur au lot) ; l'assombrissement de la Manche les a fait ressortir. Le crochet
+   `coast_band` passe après l'eau peinte et peint ce relief émergé en roche (ou en sable s'il est
+   bas) jusqu'à `band.sea_reach_px` de la côte. Non vérifié sur capture.
+
 ## Points ouverts
+- Retouches non jugées à l'œil ; le point 5 en particulier repose sur la lecture des données.
+- L'écume du rivage (`lines`, `broken` dans `water.gdshader`, antérieure au lot) seuille encore
+  un bruit de valeur : même défaut de grille possible près des côtes.
 - Bench à refaire sur machine calme (`tb5_shot.gd --bench` avec `--disable-vsync`).
 - Rendu non jugé à l'œil (aucune capture lue) : largeur de bande (`band.cliff_px` 1,0,
   `beach_px` 0,6), blancheur de la craie, teinte de la Méditerranée (peut-être trop verte sur le
