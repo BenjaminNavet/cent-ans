@@ -391,6 +391,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 #include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
 #include "res://shaders/hb_ground.gdshaderinc"  // HB3 : habillage par biome (ADR 0143)
+#include "res://shaders/coast_band.gdshaderinc"  // TB5 : falaises et plages (crochet coast_band)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -468,7 +469,10 @@ void fragment() {
 	s = fp_splat(s, p, footprint);  // ZG5b : bords des texels de splat cassés de près
 	s /= max(s.r + s.g + s.b + s.a, 1e-3);
 	s = rl_landcover(s, p, footprint);  // lot R1 : lisières
-	vec4 terroir = terroir_at(uv);  // CV1 : finage des colonies, vigne, brûlis, pâtures
+	// TB4 : le masque de terroir est carré, à la même échelle sur les deux axes (`TerroirMask` :
+	// 1024 / plus grand côté de la carte) ; avec `uv` (carte 7168 × 6144 depuis OM), finages et
+	// brûlis étaient décalés vers le nord d'un sixième de l'ordonnée.
+	vec4 terroir = terroir_at(p / max(map_size.x, map_size.y));  // CV1 : finage des colonies, vigne, brûlis, pâtures
 	s = terroir_splat(s, terroir);
 	float macro = fbm(p * 0.035);
 	float rock_frac = max(smoothstep(rock_line_m - 700.0, rock_line_m, hc), smoothstep(0.35, 0.6, slope));
@@ -644,8 +648,6 @@ void fragment() {
 	col = mix(col, track_color * (0.9 + 0.2 * macro), track * open_w * 0.85);
 	col = mix(col, hedge_color, hedge * open_w * 0.55);
 
-	col = terroir_burn(col, terroir.b * (1.0 - snow * 0.7), p, footprint);  // CV1
-
 	// Normales de détail combinées au relief (blend « whiteout » dans le repère carte).
 	float dstrength = detail_normal_strength * detail_fade;
 	n = normalize(vec3(n.x + dn.x * dstrength, n.y, n.z - dn.y * dstrength));
@@ -674,11 +676,17 @@ void fragment() {
 	vec3 season_den = w_grass * grass_summer + w_farm * farm_summer + w_forest * tint_forest + w_rock * tint_rock + w_heath * tint_heath;
 	vec3 season_k = dot(season_den, vec3(1.0)) > 1e-4 ? season_ratio(season_num, season_den) : vec3(1.0);
 	sg_apply(uv, footprint, snow, land_f, season_k, col);  // SS2
+	vec4 burn_parcel;  // TB4 : parcelle HB du pixel (brûlis par parcelles)
 	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
 		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, k_grass, k_forest,
-		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col);  // HB3
+		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col, burn_parcel);  // HB3
 	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
+	// TB4 : brûlis (CV1) posé par-dessus la carte de couleur (SS2) et les matières (HB3), qui le
+	// recouvraient. Par parcelles (celles de l'habillage HB) : une part carbonisée, une part
+	// roussie, le reste intact, selon la dévastation lue au centre de la parcelle ; au loin, la
+	// moyenne des trois, découpée par un bruit large.
+	col = terroir_burn(col, terroir.b, 1.0 - snow * 0.7, p, footprint, burn_parcel, 1.0 / max(map_size.x, map_size.y));
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
@@ -716,6 +724,7 @@ void fragment() {
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
+	coast_band(p, uv, footprint, coast, hc, world_pos.y, lake_shore, snow, col, roughness, n);  // TB5 : après l'eau peinte
 
 	// --- Couche politique ---
 	if (hb_debug > 9.5 && hb_debug < 10.5) { hb_dbg = col; }  // HB3 : sonde
@@ -848,7 +857,13 @@ void fragment() {
 	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
 	if (hb_debug > 10.5 && hb_debug < 11.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 wx_emit = vec3(0.0);
-	col = weather_ground(col, p, hc, slope, footprint, roughness, wx_emit);  // CM2 : météo
+	// TB6 : brume du matin (relief lissé à grande échelle, moyenne régionale, rasance du regard).
+	bool wx_valley = weather_enabled && weather_valley_mist > 0.0;
+	float wx_h_mid = wx_valley ? height_m_lod(uv, weather_valley_lods.x) : hc;
+	float wx_h_wide = wx_valley ? height_m_lod(uv, weather_valley_lods.y) : hc;
+	float wx_grazing = 1.0 - abs(normalize(CAMERA_POSITION_WORLD - world_pos).y);
+	float wx_mist = 0.0;
+	col = weather_ground(col, p, hc, slope, footprint, wx_h_mid, wx_h_wide, wx_grazing, roughness, wx_emit, wx_mist);  // CM2 : météo
 	if (hb_debug > 11.5 && hb_debug < 12.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
@@ -863,6 +878,6 @@ void fragment() {
 		ALBEDO = hb_dbg;
 	}
 	SPECULAR = mix(0.3, 0.1, lake);
-	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), fog_mist * 0.7 * (1.0 - pm_weight())));  // BR : la brume nappe le relief
+	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), max(fog_mist * 0.7, wx_mist) * (1.0 - pm_weight())));  // BR, TB6 : la brume nappe le relief
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 }

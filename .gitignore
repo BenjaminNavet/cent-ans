@@ -37,3 +37,8 @@ docs/audit/**/*.jpg
 # Relief package: parts before upload, interrupted downloads (ADR 0149)
 dist/relief/
 data/map/.pyramid.*
+
+
+# Running Windows launcher set aside during a self-update (ADR 0159)
+*.exe.old
+*.exe.new

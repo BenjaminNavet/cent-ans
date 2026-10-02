@@ -81,6 +81,8 @@ func layout() -> Array[Dictionary]:
 	var size := int(MapReadability.number("region_labels", "font_size_px", 17.0))
 	var limit := int(MapReadability.number("region_labels", "max_on_screen", 14.0))
 	var safe := safe_rect()
+	if safe.size.x <= 0.0 or safe.size.y <= 0.0:  # fenêtre plus petite que les marges (tests sans affichage)
+		return result
 	var taken: Array[Rect2] = []
 	if obstacles.is_valid():
 		for rect: Rect2 in obstacles.call(camera):

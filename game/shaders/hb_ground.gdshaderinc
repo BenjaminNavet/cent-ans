@@ -53,7 +53,10 @@ vec3 hb_sample(float layer_n, float tile_n, vec2 p, vec2 dpx, vec2 dpy, float an
 // saisonniers (saison / été, TB1) des prés et des forêts ; `crop_*` : couleurs d'été de référence
 // des cultures (l'écart d'une parcelle cultivée est tiré par parcelle : blé doré, chaume, labour).
 void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, float open_w, float forest_w,
-		float rock_w, float farm_share, float slope, vec3 k_wild, vec3 k_forest, mat4 crop_refs, inout vec3 col) {
+		float rock_w, float farm_share, float slope, vec3 k_wild, vec3 k_forest, mat4 crop_refs, inout vec3 col, out vec4 parcel) {
+	// TB4 : parcelle du pixel pour le brûlis (xy : centre en px carte, z : tirage de la parcelle,
+	// w : poids du parcellaire, 0 au loin ou sans habillage).
+	parcel = vec4(p, 0.0, 0.0);
 	vec2 dpx = dFdx(p);
 	vec2 dpy = dFdy(p);
 	if (!has_hb) {
@@ -87,6 +90,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	vec2 pc = (floor(pr / cell) + 0.5) * cell;
 	pc.x *= strip;
 	pc = transpose(hb_rot(ang_r)) * pc + origin;
+	parcel = vec4(pc, hb_hash(cid + 88.8), clamp(w_bare, 0.0, 1.0));
 	int b = int(texture(hb_biomes, pc / map_sz).r * 255.0 + 0.5);
 	b = b >= 1 && b <= 7 ? b : b0;
 	vec4 canopy = texelFetch(hb_table, ivec2(12, b), 0);

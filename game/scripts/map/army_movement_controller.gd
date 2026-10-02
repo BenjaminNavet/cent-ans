@@ -172,16 +172,18 @@ func show_current_path(army: Dictionary) -> void:
 
 ## Cible sous un point écran : armée (autre que la sélection), colonie, ou sol.
 func pick_target(screen_position: Vector2) -> Dictionary:
-	var army_id: String = map.armies.pick_screen(screen_position)
-	if army_id != "" and army_id != map.selected_army:
+	# SA (ADR 0160) : même visée que le survol et le clic gauche (`CampaignMap.pick_target`),
+	# l'armée sélectionnée exclue : la cible éclairée est celle de l'ordre.
+	var target: Dictionary = map.pick_target(screen_position, map.selected_army)
+	if str(target.get("kind", "")) == "army":
+		var army_id := str(target["id"])
 		var army: Dictionary = map.sim.call("get_army", army_id)
 		if not army.is_empty():
 			return {"kind": "army", "id": army_id, "point": army.get("position", Vector2.ZERO), "faction": str(army.get("faction", ""))}
-	if map.settlement_layer != null:
-		var settlement_id: String = map.settlement_layer.pick_screen(screen_position)
-		if settlement_id != "":
-			var world: Vector3 = map.settlement_layer.world_position_of(settlement_id)
-			return {"kind": "settlement", "id": settlement_id, "point": Vector2(world.x, world.z)}
+	var settlement_id := str(target.get("settlement", ""))
+	if settlement_id != "":
+		var world: Vector3 = map.settlement_layer.world_position_of(settlement_id)
+		return {"kind": "settlement", "id": settlement_id, "point": Vector2(world.x, world.z)}
 	var hit: Dictionary = map.picker.pick_ray_screen(screen_position)
 	if hit.is_empty():
 		return {}

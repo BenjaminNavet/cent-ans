@@ -30,6 +30,41 @@ uniform float weather_wide_intensity_cut = 0.0;
 // brume par-dessus ; bord fondu sur `weather_clear_feather_px` (px carte).
 uniform int weather_clear_id = 0;
 uniform float weather_clear_feather_px = 8.0;
+// TB6 (ADR 0156) : assombrissement du sol par la météo, borné. Le sol mouillé (`weather_wet_dim`,
+// 0,28 auparavant) et l'ombre des nuées du masque (`weather_cloud_shade`, 0,35 auparavant, bord de
+// 0,22) se multipliaient en taches à -53 % aux bords nets, visibles en vue moyenne où le plan de
+// nuées est presque transparent : le temps paraissait clair. L'ombre est désormais large
+// (`weather_cloud_shade_scale` : fréquence du bruit, en part de celle des nuées) et fondue
+// (`weather_cloud_shade_soft` : largeur du seuil). Valeurs du bloc `clouds` de
+// `data/ui/campaign_map.json`, posées par CampaignWeatherView.
+uniform float weather_wet_dim = 0.04;
+uniform float weather_cloud_shade = 0.06;
+uniform float weather_cloud_shade_soft = 0.5;
+uniform float weather_cloud_shade_scale = 0.5;
+// TB6 (ADR 0156) : brume du matin en nappes larges dans les grandes vallées et les plaines basses
+// (météo « brume », canal B). Brouillard de hauteur calculé dans le sol, sur le relief lissé à
+// grande échelle et non sur le relief fin (qui dessinait un réseau de veines pâles dans chaque
+// vallon) : `weather_valley_lods` = niveaux de la carte des hauteurs (x : relief lissé local,
+// ≈ 11 km ; y : moyenne régionale, ≈ 90 km). La nappe se forme là où le relief lissé passe sous
+// la moyenne régionale (`weather_valley_depth_m` : début et plein, mètres) et dans les plaines
+// basses (`weather_valley_plain_m` : altitude pleine et nulle ; `weather_valley_plain` : part),
+// jamais sur les crêtes (`weather_valley_crest_m` : hauteur du point au-dessus du relief lissé où
+// elle s'efface). Bancs larges à bord fondu qui dérivent (`weather_valley_bank_scale`,
+// `weather_valley_drift`), un peu plus denses en vue rasante, levés au fil du tour, allégés de
+// près. `weather_valley_mist` : opacité maximale, 0 = coupée (défaut : rien sans données). Jamais
+// sur la province sélectionnée. Bloc `morning_mist` de `data/ui/campaign_map.json`.
+uniform float weather_valley_mist = 0.0;
+uniform vec2 weather_valley_lods = vec2(4.0, 7.0);
+uniform vec2 weather_valley_depth_m = vec2(10.0, 140.0);
+uniform vec2 weather_valley_plain_m = vec2(40.0, 220.0);
+uniform float weather_valley_plain = 0.6;
+uniform vec2 weather_valley_crest_m = vec2(30.0, 150.0);
+uniform float weather_valley_bank_scale = 0.006;
+uniform float weather_valley_drift = 0.5;
+uniform float weather_valley_grazing = 0.6;
+uniform float weather_valley_lift = 0.35;
+uniform float weather_valley_near = 0.5;
+uniform vec3 weather_valley_color : source_color = vec3(0.85, 0.84, 0.80);
 
 float wx_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -84,8 +119,9 @@ float wx_selection_clear(vec2 p) {
 }
 
 // Densité des nuées [0, 1] : masses qui défilent avec le vent dans les zones de pluie, d'orage
-// et de neige ; `w` = wx_sample(p).
-float wx_cloud(vec2 p, vec4 w) {
+// et de neige ; `w` = wx_sample(p). `freq` : fréquence du bruit par rapport aux nuées (1 = plan de
+// nuées) ; `soft` : largeur du seuil (0,22 = bord des nuées).
+float wx_cloud_shape(vec2 p, vec4 w, float freq, float soft) {
 	// CV3-0 (#3) : l'orage (w.a) reste toujours couvert ; pluie/neige (w.r, w.g) sont réduites de
 	// `weather_wide_intensity_cut` en vue large, si bien que seule une forte intensité y survit.
 	float rainsnow = max(0.0, max(w.r, w.g) - weather_wide_intensity_cut);
@@ -93,10 +129,14 @@ float wx_cloud(vec2 p, vec4 w) {
 	if (wet <= 0.0) {
 		return 0.0;
 	}
-	vec2 q = (p - TIME * weather_wind) * 0.012;
+	vec2 q = (p - TIME * weather_wind) * 0.012 * freq;
 	float c = wx_fbm(q) * 0.7 + wx_fbm(q * 2.3 + vec2(TIME * 0.01, 0.0)) * 0.3;
 	float cover = mix(0.62, 0.35, wet);  // plus il pleut, plus le ciel est couvert
-	return smoothstep(cover, cover + 0.22, c) * (0.55 + 0.45 * wet);
+	return smoothstep(cover, cover + soft, c) * (0.55 + 0.45 * wet);
+}
+
+float wx_cloud(vec2 p, vec4 w) {
+	return wx_cloud_shape(p, w, 1.0, 0.22);
 }
 
 // Éclair [0, 1] dans une zone d'orage : cellules qui s'illuminent brièvement.
@@ -114,8 +154,11 @@ float wx_lightning(vec2 p, vec4 w) {
 }
 
 // Sol : mouillé sous la pluie, neige fraîche, brouillard matinal (vallées), ombre des nuées,
-// lueur des éclairs. `hc` : altitude (m), `emission` reçoit la lueur des éclairs.
-vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, inout float roughness, inout vec3 emission) {
+// lueur des éclairs. `hc` : altitude (m), `emission` reçoit la lueur des éclairs. TB6 : `h_mid`
+// relief lissé local et `h_wide` moyenne régionale (m), `grazing` rasance du regard (0 à la verticale, 1 à l'horizontale),
+// `valley_mist` reçoit l'opacité de la nappe de vallée (le terrain y aplanit sa normale).
+vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, float h_mid, float h_wide, float grazing, inout float roughness, inout vec3 emission, out float valley_mist) {
+	valley_mist = 0.0;
 	if (!weather_enabled) {
 		return col;
 	}
@@ -125,8 +168,8 @@ vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, in
 	}
 	float clear = wx_selection_clear(p);  // TB2 : rien ne voile la province sélectionnée
 	float rain = max(w.r, w.a);
-	// Sol mouillé : plus sombre, plus lisse (flaques).
-	col *= 1.0 - 0.28 * rain;
+	// Sol mouillé : à peine plus sombre (TB6), plus lisse (flaques).
+	col *= 1.0 - weather_wet_dim * rain;
 	roughness = mix(roughness, 0.45, rain * 0.6);
 	// Neige fraîche : sur le plat surtout, en plaques au bord.
 	if (w.g > 0.0) {
@@ -142,9 +185,23 @@ vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, in
 		mist *= mix(weather_mist_near, 1.0, smoothstep(weather_mist_near_footprint * 0.5, weather_mist_near_footprint * 2.0, footprint));
 		vec3 veil = mix(vec3(0.62, 0.64, 0.66), col * 1.6, 0.35);
 		col = mix(col, veil, clamp(mist, 0.0, weather_mist_max) * clear);
+		// TB6 : nappes larges dans les grandes vallées et les plaines basses.
+		if (weather_valley_mist > 0.0) {
+			float basin = smoothstep(weather_valley_depth_m.x, weather_valley_depth_m.y, h_wide - h_mid);
+			float plain = (1.0 - smoothstep(weather_valley_plain_m.x, weather_valley_plain_m.y, h_mid)) * weather_valley_plain;
+			float crest = 1.0 - smoothstep(weather_valley_crest_m.x, weather_valley_crest_m.y, hc - h_mid);
+			vec2 bq = (p - TIME * weather_wind * weather_valley_drift) * weather_valley_bank_scale;
+			float banks = smoothstep(0.2, 0.8, wx_fbm(bq) * 0.75 + wx_noise(bq * 0.37 + 4.1) * 0.25);
+			float optical = max(basin, plain) * crest * banks * (1.0 + weather_valley_grazing * grazing) * step(1.0, hc);
+			float lifted = mix(weather_valley_lift, 1.0, weather_fog_morning);
+			float near = mix(weather_valley_near, 1.0, smoothstep(weather_mist_near_footprint * 0.5, weather_mist_near_footprint * 2.0, footprint));
+			valley_mist = clamp(w.b * optical * lifted, 0.0, 1.0) * weather_valley_mist * near * clear;
+			col = mix(col, weather_valley_color, valley_mist);
+		}
 	}
-	// Ombre des nuées qui passent.
-	col *= 1.0 - 0.35 * wx_cloud(p + weather_wind * 6.0, w) * clear;
+	// Ombre des nuées qui passent : large, fondue, peu contrastée (TB6).
+	float shade = wx_cloud_shape(p + weather_wind * 6.0, w, weather_cloud_shade_scale, weather_cloud_shade_soft);
+	col *= 1.0 - weather_cloud_shade * shade * clear;
 	emission += vec3(0.55, 0.6, 0.8) * wx_lightning(p, w) * 0.6;
 	return col;
 }

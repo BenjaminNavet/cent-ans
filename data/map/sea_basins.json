@@ -1,0 +1,162 @@
+{
+  "description": "TB5 : mers de la carte de campagne par bassin (rendu seulement, aucune règle de jeu). `basins` : quatre bassins au plus (polygones en pixels carte, grille de map.json, terres comprises ; le dernier qui contient un point l'emporte) ; hors bassin : `default` (mer Noire, Caspienne…). `look` : `tint` teinte multipliée à l'eau (entière au large, sa racine sur les petits fonds), `clarity` clarté (> 1 : la profondeur vue est divisée, les hauts-fonds clairs se voient plus profond ; < 1 : eau trouble, `depth.murk_m` × (1 / clarté - 1) mètres d'eau s'ajoutent). `depth` : au large (au-delà de `soft_from_m`), la couleur suit une profondeur lissée (mip `soft_lod` de la carte d'altitude) pour que le talus du plateau ne dessine pas de bord net, `swell` force du clapot, `long_swell` longue houle, `foam` écume du rivage, `whitecaps` moutons permanents, `grey_scale` part du gris de saison (TB1). Les limites sont fondues sur `blur_cells` cellules de `cell_px` px. `swell` : longue houle (longueur d'onde en px carte, vitesse, contraste, relief). `whitecaps` : moutons (cellules par pixel carte en travers du vent, allongement dans le sens du vent, empreinte d'un pixel écran en pixels carte entre lesquelles les crêtes s'effacent au dézoom, voile de teinte qui les remplace) ; `look.whitecaps` est la part des cellules qui portent une crête. Lu par game/scripts/map/sea_basins.gd et game/shaders/sea_basins.gdshaderinc.",
+  "cell_px": 32,
+  "blur_cells": 8,
+  "depth": {
+    "soft_lod": 5,
+    "soft_from_m": [15, 45],
+    "murk_m": 20
+  },
+  "swell": {
+    "length_px": 3.5,
+    "speed": 0.5,
+    "contrast": 0.12,
+    "ripple_contrast": 0.6,
+    "normal": 0.12
+  },
+  "whitecaps": {
+    "cells_per_px": 1.6,
+    "stretch": 2.5,
+    "fade_footprint": [0.062, 0.084],
+    "veil": 0.03
+  },
+  "default": {
+    "tint": [1.0, 1.0, 1.0],
+    "clarity": 1.0,
+    "swell": 1.0,
+    "long_swell": 0.0,
+    "foam": 1.0,
+    "whitecaps": 0.0,
+    "grey_scale": 1.0
+  },
+  "basins": [
+    {
+      "id": "atlantic",
+      "label": "Atlantique : bleu profond, longue houle, moutons au large",
+      "look": {
+        "tint": [1.35, 1.57, 1.9],
+        "clarity": 1.0,
+        "swell": 1.6,
+        "long_swell": 1.0,
+        "foam": 1.4,
+        "whitecaps": 0.22,
+        "grey_scale": 1.0
+      },
+      "polygon_px": [
+        [-379, 6228],
+        [97, 2462],
+        [1296, -90],
+        [2699, 277],
+        [2627, 1198],
+        [2155, 1143],
+        [1906, 1634],
+        [1871, 2037],
+        [1970, 2526],
+        [1887, 2748],
+        [1575, 2834],
+        [1443, 2890],
+        [1451, 3149],
+        [1811, 3238],
+        [1917, 3613],
+        [1746, 4057],
+        [1332, 4457],
+        [1033, 5024],
+        [1027, 5054],
+        [1159, 5516],
+        [1004, 6565]
+      ]
+    },
+    {
+      "id": "north_sea_channel",
+      "label": "Mer du Nord et Manche : eau sombre, gris-vert, clapot court",
+      "look": {
+        "tint": [0.76, 0.78, 0.84],
+        "clarity": 0.8,
+        "swell": 1.15,
+        "long_swell": 0.2,
+        "foam": 1.1,
+        "whitecaps": 0.08,
+        "grey_scale": 1.15
+      },
+      "polygon_px": [
+        [1443, 2890],
+        [1451, 3149],
+        [1811, 3238],
+        [2188, 3101],
+        [2456, 2893],
+        [2946, 2603],
+        [2908, 1984],
+        [2828, 1827],
+        [2627, 1198],
+        [2155, 1143],
+        [1906, 1634],
+        [1871, 2037],
+        [1970, 2526],
+        [1887, 2748],
+        [1575, 2834]
+      ]
+    },
+    {
+      "id": "mediterranean",
+      "label": "Méditerranée : eau claire et bleue, mer calme",
+      "look": {
+        "tint": [1.75, 2.5, 3.6],
+        "clarity": 1.2,
+        "swell": 0.9,
+        "long_swell": 0.08,
+        "foam": 0.6,
+        "whitecaps": 0.0,
+        "grey_scale": 0.45
+      },
+      "polygon_px": [
+        [1038, 4994],
+        [1534, 4725],
+        [1773, 4295],
+        [2153, 3983],
+        [2663, 3834],
+        [3315, 3649],
+        [3541, 3822],
+        [4145, 4226],
+        [4392, 4314],
+        [4892, 4314],
+        [5140, 4747],
+        [5450, 4716],
+        [6218, 4473],
+        [6496, 5384],
+        [6068, 5606],
+        [5017, 5867],
+        [2992, 6136],
+        [1171, 5440],
+        [1024, 5069]
+      ]
+    },
+    {
+      "id": "baltic",
+      "label": "Baltique : eau sombre et terne, mer calme",
+      "look": {
+        "tint": [0.75, 0.8, 0.68],
+        "clarity": 0.4,
+        "swell": 0.7,
+        "long_swell": 0.0,
+        "foam": 0.7,
+        "whitecaps": 0.0,
+        "grey_scale": 1.2
+      },
+      "polygon_px": [
+        [2992, 2526],
+        [2992, 2062],
+        [3042, 1876],
+        [3196, 1749],
+        [3226, 1515],
+        [3520, 1340],
+        [3434, 542],
+        [3992, 448],
+        [4575, 1206],
+        [4570, 1451],
+        [4184, 1945],
+        [3991, 2373],
+        [3361, 2516]
+      ]
+    }
+  ]
+}

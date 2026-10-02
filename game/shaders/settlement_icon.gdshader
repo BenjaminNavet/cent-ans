@@ -9,7 +9,7 @@ render_mode unshaded, blend_mix, cull_disabled, depth_draw_never, depth_test_dis
 //   INSTANCE_CUSTOM.r = haut du texte au-dessus de l'ancre, en px du `Label3D` (× `label_scale`
 //     = px écran) ; le bas de l'écu est `gap_px` plus haut ;
 //   INSTANCE_CUSTOM.b = côté de l'écu en px écran (taille par rang) ;
-//   INSTANCE_CUSTOM.g = surbrillance (sélection).
+//   INSTANCE_CUSTOM.g = surbrillance (> 0,5 sélection ; entre 0,2 et 0,5 survol, ADR 0160).
 // Dé-encombrement sans CPU par image : INSTANCE_CUSTOM.a = distance caméra (÷ 100) jusqu'à
 // laquelle le lieu reste affiché ; fondu sur `fade_distance`, quad replié au-delà.
 // Lot DA7d : dé-encombrement écran (calculé côté CPU seulement quand la caméra bouge nettement) :
@@ -25,6 +25,7 @@ uniform float alpha = 1.0;
 uniform float camera_distance = 0.0;
 uniform float fade_distance = 60.0;
 uniform vec3 highlight_color : source_color = vec3(0.949, 0.761, 0.188);
+uniform vec3 hover_color : source_color = vec3(1.0, 0.96, 0.82);
 uniform float declutter_now = 0.0;
 uniform float declutter_fade = 0.25;
 uniform float hidden_alpha = 0.0;
@@ -42,7 +43,7 @@ void vertex() {
 	float switched = clamp((declutter_now - COLOR.a) / max(declutter_fade, 1e-3), 0.0, 1.0);
 	float shown = mix(1.0 - COLOR.b, COLOR.b, switched);
 	v_alpha *= mix(hidden_alpha, 1.0, shown);
-	float size = INSTANCE_CUSTOM.b * size_scale * (v_highlight > 0.5 ? 1.18 : 1.0);
+	float size = INSTANCE_CUSTOM.b * size_scale * (v_highlight > 0.5 ? 1.18 : (v_highlight > 0.2 ? 1.12 : 1.0));
 	vec4 center_view = MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0);
 	float dist = max(-center_view.z, 0.01);
 	// abs : la projection peut être retournée en Y (cible de rendu), ce qui retournerait le quad.
@@ -72,6 +73,11 @@ void fragment() {
 		// Halo doré de la sélection derrière l'écu.
 		float r = length(uv - vec2(0.5));
 		col = over(col, vec4(highlight_color, 0.8 * (1.0 - smoothstep(0.36, 0.5, r))));
+	}
+	else if (v_highlight > 0.2) {
+		// Halo clair du survol (ce que le clic prendrait).
+		float r = length(uv - vec2(0.5));
+		col = over(col, vec4(hover_color, 0.75 * (1.0 - smoothstep(0.36, 0.5, r))));
 	}
 	if (col.a < 0.01) {
 		discard;
