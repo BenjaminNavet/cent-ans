@@ -1,0 +1,56 @@
+{
+  "description": "Lot TB4 : conséquences visibles de la guerre et des fléaux sur la carte de campagne (rendu seulement, lu par game/scripts/map/war_scars.gd). plague : fosses, portes marquées d'une croix et charrette des morts des colonies pestiférées (scènes `plague` du pont), à l'échelle 1:1, au palier proche. battlefield : tertre, corbeaux et débris à l'endroit d'une bataille, pendant `turns` tours (corbeaux et débris partent plus tôt). siege : engins bâtis sur place (N7, ADR 0128) posés près du camp des assiégeants selon leur avancement. Aucune règle de jeu.",
+  "plague": {
+    "max_distance": 6.0,
+    "scale": 1.0,
+    "min_intensity": 0.0,
+    "pits": [
+      2,
+      5
+    ],
+    "doors": [
+      4,
+      14
+    ],
+    "door_search_m": 260.0,
+    "cart": true
+  },
+  "battlefield": {
+    "turns": 4,
+    "crow_turns": 2,
+    "debris_turns": 3,
+    "crows": 5,
+    "debris": 9,
+    "radius": 2.4,
+    "max_distance": 420.0
+  },
+  "siege": {
+    "almost_ready_turns": 1,
+    "max_distance": 420.0,
+    "engines": {
+      "ladders": {
+        "size": 1.5,
+        "slot": [
+          6.6,
+          2.4
+        ]
+      },
+      "ram": {
+        "model": "res://assets/models/siege/ram_lod.glb",
+        "size": 1.9,
+        "slot": [
+          7.2,
+          4.6
+        ]
+      },
+      "tower": {
+        "model": "res://assets/models/siege/siege_tower_lod.glb",
+        "size": 3.0,
+        "slot": [
+          6.4,
+          6.8
+        ]
+      }
+    }
+  }
+}
