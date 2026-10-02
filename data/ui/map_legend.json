@@ -121,7 +121,7 @@
         {"sample": {"type": "path"}, "label": "Chemin prévu", "text": "Vert : la marche de ce tour ; rouge : les tours suivants ; un jalon clair à la fin de chaque tour."},
         {"sample": {"type": "ring", "color": "#4df24d"}, "label": "Anneau vert", "text": "Place que l'armée sélectionnée peut atteindre ce tour ; orange : la destination choisie."},
         {"sample": {"type": "ring", "color": "#f2c740"}, "label": "Anneau doré", "text": "Place sélectionnée, ou place qu'un agent sélectionné peut atteindre."},
-        {"sample": {"type": "construction"}, "label": "Marteaux", "text": "Chantier en cours dans la province."},
+        {"sample": {"type": "construction"}, "label": "Chantier", "text": "Échafaudage et tas de pierres : chantier en cours dans la province. De près, le chantier est au pied de la ville."},
         {"sample": {"type": "trade_route"}, "label": "Route commerciale", "text": "Couche « Commerce » : trait sépia, plus épais pour une route plus riche ; grisé, route coupée."},
         {"sample": {"type": "sea_lane"}, "label": "Route maritime", "text": "Tirets bleus sur la mer : longs en haute mer, courts en cabotage ; rouges quand un ennemi tient la mer. Une armée dans l'un des ports embarque pour l'autre (une saison) ; survoler la route pour la mer, la maîtrise et le gros temps."}
       ]

@@ -16,7 +16,7 @@ const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TOWN := "set_agen"
 const PROVINCE := "prov_agenais"
 ## Étapes qui doivent aller à leur terme (une erreur de script interrompt la fonction en cours).
-const EXPECTED_STEPS := 4
+const EXPECTED_STEPS := 5
 
 var _failures := 0
 var _completed := false
@@ -110,6 +110,7 @@ func _run() -> void:
 	await _check_outbuildings(layer, data, town_px)
 	_check_growth(layer, data)
 	_check_soot(layer, data)
+	await _check_worksite_sign(world, camera)
 	_completed = _completed_steps == EXPECTED_STEPS
 	world.queue_free()
 	await process_frame
@@ -377,3 +378,28 @@ func _soot_nodes(builder: TownBuilder, amount: float) -> Vector2i:
 		if is_equal_approx(float(value) if value != null else 0.0, amount):
 			matching += 1
 	return Vector2i(total, matching)
+
+
+## 6. Signe de chantier : la maquette (échafaudage, tas de pierres) à la place du « ⚒ ».
+func _check_worksite_sign(world: Node3D, camera: Camera3D) -> void:
+	var markers := ConstructionMarkers.new()
+	world.add_child(markers)
+	var at := camera.global_position + Vector3(0.0, -8.0, -8.0)
+	markers.refresh(PackedStringArray(["prov_a", "prov_b", "prov_c"]), func(id: String) -> bool: return id != "prov_b", func(id: String) -> Vector3: return at + (Vector3(4.0, 0.0, 0.0) if id == "prov_c" else Vector3.ZERO))
+	await process_frame
+	_check(markers.marker_count() == 2, "one worksite per province under construction, got %d" % markers.marker_count())
+	var labels := markers.find_children("*", "Label3D", true, false)
+	_check(labels.is_empty(), "no hammer glyph left")
+	var meshes := 0
+	for child in markers.get_children():
+		var marker := child as MeshInstance3D
+		if marker == null or marker.is_queued_for_deletion():
+			continue
+		meshes += 1
+		_check(marker.mesh != null and marker.mesh.get_faces().size() / 3 >= 100, "the worksite is a real model (scaffold, wall, stone heaps)")
+		var distance := camera.global_position.distance_to(marker.global_position)
+		_check(is_equal_approx(marker.scale.x, markers.marker_scale(distance)) and marker.scale.x > 0.0, "the sign keeps a constant size on screen")
+	_check(meshes == 2, "two worksite models, got %d" % meshes)
+	_check(markers.marker_scale(200.0) > markers.marker_scale(20.0) * 9.0, "the sign grows with the camera distance")
+	markers.queue_free()
+	_completed_steps += 1
