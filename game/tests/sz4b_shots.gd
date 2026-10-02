@@ -1,5 +1,7 @@
 extends SceneTree
 
+## GC2 (ADR 0158) : captures des villes 1:1 ; ajouter `--town-style=real` après `--` (le style par
+## défaut est `maquette`, voir `gc_shots.gd`).
 ## Captures du lot SZ4b (maquettes de colonies continues, forêts denses au palier vallée), dérivé de
 ## `sz4_shots.gd`. Fenêtre réelle (pas headless) :
 ##   godot --path game --script res://tests/sz4b_shots.gd -- --out=<dossier> [--prefix=avant_]
