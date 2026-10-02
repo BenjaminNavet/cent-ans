@@ -168,6 +168,17 @@ géographie relative vraie. Origine : champs (HB3 ×3) et camps plus gros que le
 - Captures : `docs/img/gc/gc3_maquettes.jpg` (15 vues, 1080p recadré), `gc5_champs.jpg`,
   `kit_est_sud.jpg`.
 
+## GC6-perf — une surface par maquette (02/10, en cours)
+Constat : 3 181 appels de dessin à d 150 (665 avec les villes 1:1), 1 281 MultiMesh × 8 à 12
+surfaces par modèle + passe d'ombre.
+- [x] Blender : `settlements_east.bake_kit` (teinte de palette × ombrage de pied de mur cuits en
+  `COLOR_0` linéaire, alpha 0 sur les bannières, matériau unique `Kit`), 60 `.glb` réexportés
+  (553 surfaces → 60, triangles et emprises inchangés).
+- [x] Godot : `shaders/maquette_kit.gdshader`, matériau partagé dans `TownMaquetteLayer`.
+- [x] Ombres par type : `shadow_range` de `town_maquettes.json` (château 120, abbaye / village 100).
+- [x] `gc_maquettes_test.gd`, schéma.
+- [ ] Planche Blender de contrôle des teintes, banc (d 150, d 40), smoke.
+
 ## Reste à faire
 - GC4 : largeur des fleuves et des routes (pas de multiplicateur unique, voir inventaire) ; raccord
   de la Seine de la maquette de Paris avec le fleuve générique ; ponts.

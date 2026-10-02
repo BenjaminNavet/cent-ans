@@ -55,6 +55,12 @@
     "village": 400.0,
     "fade_margin": 60.0
   },
+  "shadow_range": {
+    "description": "Distance du rig au-delà de laquelle les maquettes d'un type ne portent plus d'ombre (GC6-perf : une passe d'ombre en moins par tuile). Type absent : ombre gardée jusqu'à model_shadow_distance du préréglage de qualité.",
+    "castle": 120.0,
+    "abbey": 100.0,
+    "village": 100.0
+  },
   "collision": {
     "min_scale": 0.6,
     "margin": 0.3,

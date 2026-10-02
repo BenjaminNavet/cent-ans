@@ -6,10 +6,15 @@ extends Node3D
 ## taille monde constante par type (`data/art/town_maquettes.json`, voir `TownMaquetteData`) :
 ## - un `MultiMesh` par (modèle, tuile de carte de `tile_size` unités) : culling par tuile, portée
 ##   par type (fondu sur `fade_margin` selon la distance du rig) ;
+## - une seule surface par modèle des six familles (matériau `Kit`, teintes cuites en couleur de
+##   sommet, lot GC6-perf) et un seul `ShaderMaterial` (`maquette_kit.gdshader`) pour tous : un
+##   appel de dessin par MultiMesh ; l'ancien kit (repli) garde ses surfaces par matière ;
 ## - famille d'architecture par province (culture, région, religion), repli sur l'Ouest tant que
 ##   le modèle de la famille manque ; variante et lacet tirés par id de lieu ;
 ## - un lieu dont le disque touche celui d'un lieu plus important est réduit (`collision`) ;
-## - bannières (matériau `Banner`) à la couleur du contrôleur, par donnée d'instance ;
+## - bannières (alpha nul de la couleur de sommet, ou matériau `Banner` de l'ancien kit) à la
+##   couleur du contrôleur, par donnée d'instance ;
+## - ombres portées coupées par type au-delà de `shadow_range` (petits lieux) ;
 ## - posé au sol affiché (hauteur en mètres lue une fois, remise à l'échelle verticale courante
 ##   par morceau recalé puis par tranches) ;
 ## - les villes emblématiques (`data/landmarks/`) gardent leur `LandmarkModel`, grossi de
@@ -17,6 +22,9 @@ extends Node3D
 ## Style par défaut (`map.town_style`), `--town-style=real` rend les villes 1:1. Purement visuel.
 
 const BANNER_SHADER := preload("res://shaders/maquette_banner.gdshader")
+const KIT_SHADER := preload("res://shaders/maquette_kit.gdshader")
+## Nom du matériau de la surface unique des modèles des six familles (`settlements_east.bake_kit`).
+const KIT_MATERIAL := "Kit"
 ## Lieux reposés par image pendant un tour complet (changement d'échelle verticale).
 const POSE_SLICE := 400
 
@@ -48,12 +56,13 @@ var _model_list: Array[Dictionary] = []
 var _tiles: Array[MultiMeshInstance3D] = []
 var _tiles_by_kind: Array = []
 var _kind_alpha: PackedFloat32Array = PackedFloat32Array()
+var _kind_shadows: PackedByteArray = PackedByteArray()  # 1 : les tuiles du type portent une ombre
+var _kind_shadow_range: PackedFloat32Array = PackedFloat32Array()  # `shadow_range` du type (INF : sans limite)
 var _landmarks: Dictionary = {}  # index de lieu → LandmarkModel
 var _dirty: Dictionary = {}  # index de lieu → true (à reposer)
 var _pose_scale := -1.0
 var _pose_left := 0
 var _pose_cursor := 0
-var _shadows := true
 var _shadow_distance := INF
 var _year := -1
 
@@ -91,6 +100,11 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		_tiles_by_kind.append([])
 	_kind_alpha.resize(TownMaquetteData.KINDS.size())
 	_kind_alpha.fill(1.0)
+	_kind_shadows.resize(TownMaquetteData.KINDS.size())
+	_kind_shadows.fill(1)
+	_kind_shadow_range.resize(TownMaquetteData.KINDS.size())
+	for k in TownMaquetteData.KINDS.size():
+		_kind_shadow_range[k] = TownMaquetteData.shadow_range(TownMaquetteData.KINDS[k])
 	# 1. Tailles de base, villes emblématiques, réduction des voisins trop proches.
 	var centers := PackedVector2Array()
 	var fixed := PackedByteArray()
@@ -205,8 +219,9 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 	print("TownMaquetteLayer: %s" % JSON.stringify(stats))
 
 
-## Modèle préparé pour le MultiMesh (maillage aux matériaux partagés du kit, bannière teintée par
-## instance), -1 s'il n'est pas importé.
+## Modèle préparé pour le MultiMesh, -1 s'il n'est pas importé. Surface `Kit` (six familles) :
+## le matériau unique des maquettes, bannière teintée par instance dans le shader. Ancien kit :
+## matériaux partagés de `BuildingMaterials`, surface `Banner` à part.
 func _model_index(model_name: String) -> int:
 	if _models.has(model_name):
 		return _models[model_name]
@@ -234,6 +249,10 @@ func _model_index(model_name: String) -> int:
 				if original == null:
 					continue
 				var material_name := BuildingMaterials._base_name(original.resource_name)
+				if material_name == KIT_MATERIAL:
+					banner = _kit_banner_color(mesh, surface, banner)
+					mesh.surface_set_material(surface, _kit_material())
+					continue
 				if material_name == "Banner":
 					if original is BaseMaterial3D:
 						banner = (original as BaseMaterial3D).albedo_color
@@ -251,6 +270,27 @@ func _model_index(model_name: String) -> int:
 
 
 var _banner: ShaderMaterial
+var _kit: ShaderMaterial
+
+
+## Matériau unique des surfaces `Kit`, partagé par tous les modèles et toutes les tuiles.
+func _kit_material() -> ShaderMaterial:
+	if _kit == null:
+		_kit = ShaderMaterial.new()
+		_kit.shader = KIT_SHADER
+		_kit.resource_name = KIT_MATERIAL
+	return _kit
+
+
+## Couleur de bannière par défaut d'une surface `Kit` : celle cuite par Blender sur les faces
+## marquées (alpha nul), linéaire dans le maillage, rendue en sRGB comme les couleurs de faction.
+func _kit_banner_color(mesh: Mesh, surface: int, fallback: Color) -> Color:
+	var colors: Variant = mesh.surface_get_arrays(surface)[Mesh.ARRAY_COLOR]
+	if colors is PackedColorArray:
+		for color: Color in colors:
+			if color.a < 0.5:
+				return Color(color.r, color.g, color.b).linear_to_srgb()
+	return fallback
 
 
 func _banner_material() -> ShaderMaterial:
@@ -359,12 +399,15 @@ func update_view(camera_distance: float) -> void:
 			for mmi: MultiMeshInstance3D in _tiles_by_kind[k]:
 				mmi.visible = alpha > 0.0
 				mmi.transparency = 1.0 - alpha
-	var shadows := camera_distance < _shadow_distance
-	if shadows != _shadows:
-		_shadows = shadows
-		var mode := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		for mmi in _tiles:
-			mmi.cast_shadow = mode
+	# Ombres portées, par type : jusqu'à `model_shadow_distance` (FC1) et, pour les petits lieux,
+	# jusqu'à leur `shadow_range` (une passe d'ombre en moins par tuile au-delà).
+	for k in _tiles_by_kind.size():
+		var shadows := camera_distance < minf(_shadow_distance, _kind_shadow_range[k])
+		if shadows != (_kind_shadows[k] == 1):
+			_kind_shadows[k] = 1 if shadows else 0
+			var mode := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			for mmi: MultiMeshInstance3D in _tiles_by_kind[k]:
+				mmi.cast_shadow = mode
 	# Sol : morceaux recalés, puis tour complet par tranches quand l'échelle verticale change.
 	if not _dirty.is_empty():
 		for i: int in _dirty:
@@ -459,6 +502,26 @@ func pose_height(i: int) -> float:
 		return 0.0
 	var px := _layer.model_px(i)
 	return maxf(MapData.display_height(_pose_m(i), px.x, px.y), 0.0)
+
+
+## Vrai si les tuiles du type `kind` portent une ombre (tests).
+func kind_casts_shadow(kind: String) -> bool:
+	var k := TownMaquetteData.KINDS.find(kind)
+	return k >= 0 and k < _kind_shadows.size() and _kind_shadows[k] == 1
+
+
+## Nombre de surfaces du modèle du lieu `i` et matériau de la première (tests) ; 0 et null pour
+## une ville emblématique ou un lieu sans modèle.
+func model_surface_count(i: int) -> int:
+	if i < 0 or i >= _model_of.size() or _model_of[i] < 0:
+		return 0
+	return (_model_list[_model_of[i]]["mesh"] as Mesh).get_surface_count()
+
+
+func model_material(i: int) -> Material:
+	if i < 0 or i >= _model_of.size() or _model_of[i] < 0:
+		return null
+	return (_model_list[_model_of[i]]["mesh"] as Mesh).surface_get_material(0)
 
 
 ## Nombre d'instances de MultiMesh (lieux du kit).

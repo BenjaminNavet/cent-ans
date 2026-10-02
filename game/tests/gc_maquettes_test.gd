@@ -6,7 +6,7 @@ extends SceneTree
 ##  2. collisions : réduction déterministe, plancher `min_scale`, lieu emblématique jamais réduit ;
 ##  3. `SettlementLayer` en style `maquette` : pas de calque 1:1, une instance de MultiMesh par
 ##     lieu du kit + un `LandmarkModel` grossi par ville emblématique, pose au sol, bannières à
-##     la couleur du contrôleur ;
+##     la couleur du contrôleur, surface et matériau uniques du kit, ombres par type (GC6-perf) ;
 ##  4. emprises : rayon de clic et anneau = demi-largeur de la maquette, picking écran d'Amiens ;
 ##  5. style `real` : calques 1:1 présents, pas de maquette.
 ## Usage : godot --headless --path game --script res://tests/gc_maquettes_test.gd
@@ -177,6 +177,43 @@ func _run() -> void:
 	maquettes.refresh(null, color_of)
 	_check(maquettes.banner_color(amiens) == palette["fac_b"], "Amiens banner follows a new controller")
 	data.settlements[amiens]["controller"] = controller
+	# GC6-perf : une surface `Kit` par modèle, un seul matériau pour tous les modèles ; la bannière
+	# est dans la couleur de sommet (alpha nul), teintée par la donnée d'instance.
+	var kit_material := maquettes.model_material(amiens) as ShaderMaterial
+	_check(maquettes.model_surface_count(amiens) == 1, "Amiens model has %d surfaces, expected 1" % maquettes.model_surface_count(amiens))
+	if _check(kit_material != null and kit_material.shader == TownMaquetteLayer.KIT_SHADER, "Amiens model is drawn by maquette_kit.gdshader"):
+		var shared := 0
+		var single := 0
+		var kit_places := 0
+		for i in count:
+			if maquettes.model_surface_count(i) == 0:
+				continue
+			kit_places += 1
+			single += 1 if maquettes.model_surface_count(i) == 1 else 0
+			shared += 1 if maquettes.model_material(i) == kit_material else 0
+		_check(single == kit_places and shared == kit_places, "every kit model has one surface and the shared material (%d single, %d shared of %d)" % [single, shared, kit_places])
+		var shader_code := kit_material.shader.code
+		_check(shader_code.contains("INSTANCE_CUSTOM") and shader_code.contains("COLOR.a"), "kit shader tints the banner faces from the instance data")
+	# Bannière par défaut lue dans la couleur de sommet du modèle (rouge du kit), pas le gris de repli.
+	var free_color := func(_faction: String) -> Variant:
+		return null
+	maquettes.refresh(null, free_color)
+	var default_banner := maquettes.banner_color(amiens)
+	_check(default_banner.r > 0.6 and default_banner.g < 0.5 and default_banner.b < 0.5, "default banner colour read from the model (%s)" % default_banner)
+	maquettes.refresh(null, color_of)
+	# Ombres par type : un village n'en porte plus au-delà de `shadow_range`, une cité si.
+	var village_shadow := TownMaquetteData.shadow_range("village")
+	_check(village_shadow > 0.0 and village_shadow < INF and TownMaquetteData.shadow_range("city") == INF, "shadow_range from data (village %.0f)" % village_shadow)
+	maquettes.apply_render_quality({"model_shadow_distance": INF})
+	maquettes.update_view(village_shadow - 1.0)
+	_check(maquettes.kind_casts_shadow("village") and maquettes.kind_casts_shadow("city"), "village and city cast shadows below the village range")
+	maquettes.update_view(village_shadow + 1.0)
+	_check(not maquettes.kind_casts_shadow("village") and maquettes.kind_casts_shadow("city"), "village shadow off beyond its range, city kept")
+	maquettes.apply_render_quality({"model_shadow_distance": 50.0})
+	maquettes.update_view(60.0)
+	_check(not maquettes.kind_casts_shadow("city"), "quality preset still cuts every shadow")
+	maquettes.apply_render_quality(RenderQuality.preset())
+	maquettes.update_view(rig_distance)
 
 	# 4. Emprises : la maquette (clic, anneau, étiquette).
 	_check(is_equal_approx(layer.model_radius(amiens), maquettes.radius_of(amiens)), "footprint radius = maquette half-width")
