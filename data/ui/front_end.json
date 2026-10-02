@@ -2613,6 +2613,22 @@
         "Génois Doria au nord"
       ],
       "difficulty": 3
+    },
+    {
+      "id": "fac_crusaders",
+      "tagline": "Le vœu de Jérusalem",
+      "intro": "En 1336, le pape a renoncé au passage général ; vous, Pierre de la Palud, patriarche latin de Jérusalem, avez gardé le vœu et conduit les croisés restés fidèles à Limassol. Vous n'avez pas de terres : la Ferveur de votre ost fait vos aumônes, vos recrues et votre moral. Jérusalem est à portée de voile, mais le vœu s'use chaque tour. (Uchronie de jeu.)",
+      "strengths": [
+        "Les aumônes de la Chrétienté et des volontaires prêchés à chaque passage",
+        "L'élan de la Croix : bonus de moral tant que la Ferveur est haute",
+        "Chypre alliée et une petite flotte de transport"
+      ],
+      "weaknesses": [
+        "Pas de terres : tout dépend de la Ferveur, qui s'use chaque tour",
+        "Débandade si la Ferveur tombe trop bas",
+        "Face aux Mamelouks, l'une des plus grandes puissances du Levant"
+      ],
+      "difficulty": 3
     }
   ],
   "difficulty_labels": [

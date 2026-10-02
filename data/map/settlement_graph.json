@@ -653,6 +653,13 @@
   },
   {
    "from": "set_acre",
+   "to": "set_limassol",
+   "cost": 364.63,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_acre",
    "to": "set_ramla",
    "cost": 56.83,
    "road": true,
@@ -19609,6 +19616,13 @@
   },
   {
    "from": "set_gaza",
+   "to": "set_limassol",
+   "cost": 469.03,
+   "road": false,
+   "sea": true
+  },
+  {
+   "from": "set_gaza",
    "to": "set_mansura",
    "cost": 304.43,
    "road": false,
@@ -26648,6 +26662,13 @@
    "cost": 32.02,
    "road": true,
    "sea": false
+  },
+  {
+   "from": "set_limassol",
+   "to": "set_tripoli_levant",
+   "cost": 359.35,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_limerick",

@@ -1,0 +1,29 @@
+{
+  "id": "cdx_croisade_saint_sepulcre",
+  "title": "La Croisade du Saint-Sépulcre",
+  "category": "institution",
+  "aliases": [
+    "Croisade du Saint-Sépulcre",
+    "Croisés",
+    "Passage général de 1336",
+    "Pierre de la Palud",
+    "Patriarche latin de Jérusalem"
+  ],
+  "era": {
+    "from": "1333",
+    "to": "1342"
+  },
+  "summary": "Faction d'uchronie : les croisés du passage général de 1336, restés fidèles à leur vœu malgré l'annulation pontificale, suivent le patriarche Pierre de la Palud à Limassol.",
+  "body": "En 1333, Jean XXII prêche le passage général et Philippe VI de Valois s'en fait nommer capitaine général. En mars 1336, Benoît XII annule l'expédition et la flotte rassemblée en Provence est dispersée. Pierre de la Palud, dominicain, patriarche latin de Jérusalem de 1329 à 1342, avait été envoyé auprès du sultan et prêchait la croisade à son retour ; les patriarches titulaires administraient alors l'évêché de Limassol, à Chypre.\n\nUchronie de jeu : dans ce monde, les croisés qui refusent d'être relevés de leur vœu suivent le patriarche à Limassol, avec l'appui des Lusignan. Rien de cela n'est attesté ; seuls l'annulation de 1336 et la personne du patriarche le sont.\n\nMécanique : la faction n'a presque pas de terres. Sa Ferveur (de 0 à 100) paie des aumônes chaque tour et gouverne l'élan de l'ost ; elle monte avec les victoires contre les infidèles et les places prises en Terre sainte, descend avec les défaites et l'usure du vœu, et sous un seuil l'armée se débande. Le joueur peut prêcher le passage pour faire débarquer des volontaires dans un port tenu.",
+  "entity": "fac_crusaders",
+  "see_also": [
+    "cdx_hospitaliers_rhodes",
+    "cdx_mamelouks",
+    "cdx_chypre_lusignan"
+  ],
+  "sources": [
+    "Pierre de la Palud",
+    "Passagium generale",
+    "Patriarcat latin de Jérusalem"
+  ]
+}
