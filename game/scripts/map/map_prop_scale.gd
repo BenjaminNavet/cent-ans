@@ -56,10 +56,31 @@ extends Resource
 ## Portée (distance du rig) des arbres généralisés, fondu sur `generalised_fade` (part finale).
 @export var generalised_max_distance: float = 800.0
 @export var generalised_fade: float = 0.25
-## Distance caméra → tuile en deçà de laquelle les arbres sont en maillage (imposteur au-delà).
+## Portée de dessin autour de la caméra (même métrique que le shader de feuillage : distance
+## horizontale + moitié de la hauteur de la caméra) : `generalised_view_base` +
+## `generalised_view_factor` × distance du rig. Les tuiles au-delà ne sont ni semées ni dessinées.
+@export var generalised_view_base: float = 150.0
+@export var generalised_view_factor: float = 1.8
+## Avance du centre de dessin au-delà du point visé (part de la distance du rig) et part finale
+## du rayon sur laquelle les arbres s'éclaircissent.
+@export var generalised_view_lead: float = 0.5
+@export var generalised_view_fade: float = 0.3
+## Plafond du rayon de dessin (mémoire : tuiles semées).
+@export var generalised_view_max: float = 900.0
+## Éclaircissement au dézoom (coût) : part des arbres gardée, de 1 à `generalised_thin_start`
+## jusqu'à `generalised_far_density` à la portée ; le shader grossit les arbres restants de
+## 1/√part (même couvert). 1 : taille strictement constante.
+@export var generalised_thin_start: float = 300.0
+@export var generalised_far_density: float = 1.0
+## Distance caméra → partie de tuile en deçà de laquelle les arbres sont en maillage détaillé
+## (sans imposteurs générés GA3) ; imposteur ou maillage bas au-delà.
 @export var generalised_mesh_distance: float = 60.0
 ## Distance du rig au-delà de laquelle les arbres généralisés ne portent plus d'ombre.
 @export var generalised_shadow_distance: float = 120.0
+## Tuiles gardées en cache (une vue stratégique en montre plus que les 64 de VT3).
+@export var generalised_max_cached_tiles: int = 96
+## Rayon nominal d'un houppier / hauteur d'un feuillu adulte (clairières des lieux, lacs).
+@export var generalised_crown_ratio: float = 0.6
 ## Part du rayon de houppier ajoutée aux exclusions (lieux, fleuves, lacs, mer, routes).
 @export var generalised_crown_clearance: float = 1.0
 ## Demi-largeur (px carte) dégagée de part et d'autre des routes principales (0 : pas de test).
@@ -71,6 +92,10 @@ extends Resource
 @export var generalised_orchard_gain: float = 1.0
 @export var generalised_riparian_gain: float = 1.0
 @export var generalised_scrub_gain: float = 1.0
+## Poids du bocage (canal de haies du masque) sur les arbres épars (`hedge_boost` de
+## `tree_species.json`, 3 en 1:1) : dans ce style, pas de haies alignées sur la trame du
+## parcellaire, le bocage se lit par des arbres épars plus nombreux.
+@export var generalised_hedge_boost: float = 6.0
 ## VT2 (ADR 0138, addendum) : moulins, panaches de cheminée (et figurants FK, `map_scenes.json`)
 ## sont à l'échelle 1:1 à toute distance, comme les villes et les hameaux : échelle constante
 ## `*_ratio` × leur taille de modèle, plus d'exagération. Moulin (`WINDMILL_SCALE` 4,6 × modèle) :
@@ -196,6 +221,31 @@ static func tree_style() -> String:
 		if _tree_style != TREE_STYLE_GENERALISED:
 			_tree_style = TREE_STYLE_REAL
 	return _tree_style
+
+
+## Facteur monde / modèle des arbres généralisés (`campaign_prop_scale`).
+func generalised_scale() -> float:
+	return clampf(generalised_tree_height / maxf(generalised_reference_height, 1e-3), 1e-4, 4.0)
+
+
+## Rayon nominal d'un houppier généralisé (unités monde).
+func generalised_crown_radius() -> float:
+	return generalised_tree_height * generalised_crown_ratio * generalised_crown_clearance
+
+
+## Échelle des arbres de la carte selon le style (`campaign_prop_scale`).
+func map_tree_scale() -> float:
+	return generalised_scale() if trees_generalised() else tree_scale()
+
+
+## Portée de dessin autour de la caméra à la distance du rig `distance` (style généralisé).
+func generalised_view_range(distance: float) -> float:
+	return minf(generalised_view_base + generalised_view_factor * distance, generalised_view_max)
+
+
+## Part des arbres gardée à la distance du rig `distance` (style généralisé).
+func generalised_density(distance: float) -> float:
+	return lerpf(1.0, clampf(generalised_far_density, 0.05, 1.0), smoothstep(generalised_thin_start, maxf(generalised_max_distance, generalised_thin_start + 1.0), distance))
 
 
 static func trees_generalised() -> bool:
