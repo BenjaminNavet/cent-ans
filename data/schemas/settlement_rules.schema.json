@@ -46,6 +46,16 @@
     "description": {
       "type": "string"
     },
+    "starting_budget": {
+      "type": "object",
+      "description": "Lot JR4b : une faction d'au moins min_provinces provinces dont les garnisons, armées, bâtiments et cour de départ coûtent plus que ses recettes plus max_deficit_percent % commence avec des garnisons allégées (les unités les plus chères rentrent chez elles ; jamais la dernière d'une colonie ni celles de la capitale). La part de la cour due au trésor qui dort ne compte pas : elle fond avec le trésor.",
+      "additionalProperties": false,
+      "required": ["min_provinces", "max_deficit_percent"],
+      "properties": {
+        "min_provinces": { "type": "integer", "minimum": 1 },
+        "max_deficit_percent": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
     "capital_guard": {
       "type": "object",
       "description": "Garde du seigneur (lot OMR R3, ADR 0117) : les unités les moins chères de la garnison de la cité capitale d'une faction, entretenues par son domaine ; le trésor n'en paie que upkeep_percent %.",

@@ -52,6 +52,13 @@ pub struct CrusadeState {
     /// Alms paid at the last end of turn.
     #[serde(default)]
     pub alms_last_turn: i64,
+    /// JR4b: turns before the master of a besieged place of the Holy Land
+    /// can call its defence again.
+    #[serde(default)]
+    pub relief_cooldown: u32,
+    /// JR4b: places whose current siege by the crusade was already relieved.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub relieved: Vec<SettlementId>,
 }
 
 /// Why `preach_passage` was refused.
@@ -63,12 +70,12 @@ pub enum CrusadeError {
     NoPort,
     #[error("Trésor insuffisant : {needed} livres nécessaires, {available} disponibles.")]
     InsufficientFunds { needed: i64, available: i64 },
-    #[error("Passage déjà prêché : nouvel appel dans {}.", count(*.0, "tour", "tours"))]
+    #[error("Passage déjà prêché : nouvel appel dans {}.", count_noun(*.0, "tour", "tours"))]
     Cooldown(u32),
 }
 
 /// `n` and the noun agreed with it (« 1 tour », « 8 tours »).
-fn count(n: u32, singular: &str, plural: &str) -> String {
+fn count_noun(n: u32, singular: &str, plural: &str) -> String {
     format!("{n} {}", if n > 1 { plural } else { singular })
 }
 
@@ -402,8 +409,10 @@ pub(crate) fn resolve_crusade(
     }
     land_contingents(state, data, rules, events);
     desert(state, data, rules, events);
+    relieve_sieges(state, data, rules, events);
     if let Some(crusade) = state.crusade.as_mut() {
         crusade.preach_cooldown = crusade.preach_cooldown.saturating_sub(1);
+        crusade.relief_cooldown = crusade.relief_cooldown.saturating_sub(1);
     }
 }
 
@@ -421,13 +430,11 @@ fn passage_rng(seed: u64, turn: u32, index: usize) -> CampaignRng {
 /// data are left out of the draw).
 fn draw_units(
     data: &GameData,
-    rules: &CrusadeRules,
+    unit_table: &[data_model::CrusadePassageUnit],
     rng: &mut CampaignRng,
     count: u32,
 ) -> Vec<UnitTypeId> {
-    let table: Vec<(&UnitTypeId, u32)> = rules
-        .passage
-        .unit_table
+    let table: Vec<(&UnitTypeId, u32)> = unit_table
         .iter()
         .filter(|e| e.weight > 0 && data.unit_types.contains_key(&e.unit))
         .map(|e| (&e.unit, e.weight))
@@ -484,7 +491,7 @@ fn land_contingents(
                     format!(
                         "Les volontaires du passage ne trouvent aucun port où débarquer : \
                          le contingent ({}) se disperse.",
-                        count(passage.units, "unité", "unités")
+                        count_noun(passage.units, "unité", "unités")
                     ),
                 )
                 .faction(&rules.faction),
@@ -492,7 +499,7 @@ fn land_contingents(
             continue;
         };
         let mut rng = passage_rng(state.seed, state.turn, index);
-        let units = draw_units(data, rules, &mut rng, passage.units);
+        let units = draw_units(data, &rules.passage.unit_table, &mut rng, passage.units);
         let landed = spawn_units_at_settlement(state, data, &port, &units);
         let mut event = GameEvent::new(
             EventKind::Crusade,
@@ -512,6 +519,97 @@ fn land_contingents(
         }
         events.push(event);
     }
+}
+
+/// JR4b « appel à défendre »: the master of a place of the Holy Land the
+/// crusade besieges throws a relief levy into it, once per siege, at most
+/// once every `cooldown_turns` turns, within the place's garrison cap. The
+/// levy goes into the besieged garrison rather than the field: a besieged
+/// place keeps its men when its master is in debt, a field levy would be
+/// dismissed the next season by an indebted planner.
+fn relieve_sieges(
+    state: &mut CampaignState,
+    data: &GameData,
+    rules: &CrusadeRules,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(relief) = &rules.relief else {
+        return;
+    };
+    let besieged: Vec<SettlementId> = state
+        .settlements
+        .iter()
+        .filter(|(_, s)| {
+            rules.holy_land.contains(&s.province)
+                && s.siege
+                    .as_ref()
+                    .is_some_and(|g| g.attacker == rules.faction)
+        })
+        .map(|(id, _)| id.clone())
+        .collect();
+    let Some(crusade) = state.crusade.as_mut() else {
+        return;
+    };
+    // A siege lifted or ended: the next one may be relieved again.
+    crusade.relieved.retain(|id| besieged.contains(id));
+    if crusade.relief_cooldown > 0 {
+        return;
+    }
+    let Some(place) = besieged
+        .iter()
+        .find(|id| !crusade.relieved.contains(id))
+        .cloned()
+    else {
+        return;
+    };
+    let Some(settlement) = state.settlements.get(&place) else {
+        return;
+    };
+    let master = settlement.controller.clone();
+    if is_rebels(&master) || master == rules.faction {
+        return;
+    }
+    let cap = data
+        .settlement_rules
+        .as_ref()
+        .and_then(|r| r.garrison_cap.get(&settlement.kind).copied())
+        .unwrap_or(usize::MAX);
+    let room = cap.saturating_sub(settlement.garrison.len()) as u32;
+    let count = relief.units.min(room);
+    if let Some(crusade) = state.crusade.as_mut() {
+        crusade.relieved.push(place.clone());
+        crusade.relief_cooldown = relief.cooldown_turns;
+    }
+    if count == 0 {
+        return;
+    }
+    let index = state
+        .settlements
+        .keys()
+        .position(|id| *id == place)
+        .unwrap_or(0);
+    let mut rng = passage_rng(state.seed ^ 0x5245_4C49_4546, state.turn, index);
+    let units = draw_units(data, &relief.unit_table, &mut rng, count);
+    let landed = spawn_units_at_settlement(state, data, &place, &units);
+    if landed == 0 {
+        return;
+    }
+    let name = crate::siege::settlement_name(data, &place);
+    let mut event = GameEvent::new(
+        EventKind::Crusade,
+        format!(
+            "{} appelle à défendre {name} contre {} : {} de secours {} dans la place.",
+            crate::events::capitalize(&faction_name(data, &master)),
+            faction_name(data, &rules.faction),
+            count_noun(landed, "unité", "unités"),
+            if landed > 1 { "entrent" } else { "entre" },
+        ),
+    )
+    .faction(&master);
+    if let Some(province) = state.settlement_province(&place) {
+        event = event.province(province);
+    }
+    events.push(event);
 }
 
 /// « Débandade »: below the threshold a share of each unit's men goes home.
@@ -755,14 +853,14 @@ pub fn preach_passage(
         format!(
             "{} prêche le passage : {} de volontaires {} à {} dans {}.",
             crate::events::capitalize(&faction_name(data, faction)),
-            count(units, "unité", "unités"),
+            count_noun(units, "unité", "unités"),
             if units > 1 {
                 "sont attendues"
             } else {
                 "est attendue"
             },
             crate::siege::settlement_name(data, &port),
-            count(rules.passage.delay_turns, "tour", "tours")
+            count_noun(rules.passage.delay_turns, "tour", "tours")
         ),
     )
     .faction(faction);
@@ -953,7 +1051,12 @@ mod tests {
             },
             "desertion": { "threshold": 20, "men_percent_per_turn": 5, "zero_multiplier": 2 },
             "starting_army": ["unit_knights", "unit_crossbowmen", "unit_crossbowmen"],
-            "target_taken_prestige": 40
+            "target_taken_prestige": 40,
+            "relief": {
+                "units": 3,
+                "cooldown_turns": 5,
+                "unit_table": [{ "unit": "unit_urban_militia", "weight": 1 }]
+            }
         }))
         .expect("synthetic rules are well formed")
     }
@@ -1068,6 +1171,60 @@ mod tests {
         set_fervor(&mut state, 69);
         end_of_turn(&mut state);
         assert_eq!(fervor(&state), 68);
+    }
+
+    #[test]
+    fn the_master_of_a_besieged_holy_place_calls_its_defence_once() {
+        let mut state = campaign();
+        let city = target_city(&state);
+        let besiege = |state: &mut CampaignState| {
+            state.settlements.get_mut(&city).unwrap().siege = Some(
+                serde_json::from_value(serde_json::json!({
+                    "attacker": CRUSADERS,
+                    "turns_left": 9
+                }))
+                .unwrap(),
+            );
+        };
+        besiege(&mut state);
+        let before = state.settlements[&city].garrison.len();
+        let events = end_of_turn(&mut state);
+        let after = state.settlements[&city].garrison.len();
+        assert_eq!(after, before + 3, "{events:?}");
+        let call: Vec<_> = events
+            .iter()
+            .filter(|e| e.text_fr.contains("appelle à défendre"))
+            .collect();
+        assert_eq!(call.len(), 1, "{events:?}");
+        assert_eq!(call[0].faction, Some(fac(HOLDER)));
+        assert_eq!(call[0].province, Some(prov(TARGET)));
+        // Once per siege.
+        end_of_turn(&mut state);
+        assert_eq!(state.settlements[&city].garrison.len(), after);
+        // A new siege waits for the cooldown.
+        state.settlements.get_mut(&city).unwrap().siege = None;
+        end_of_turn(&mut state);
+        besiege(&mut state);
+        end_of_turn(&mut state);
+        assert_eq!(state.settlements[&city].garrison.len(), after);
+        for _ in 0..3 {
+            end_of_turn(&mut state);
+        }
+        assert!(state.settlements[&city].garrison.len() > after);
+        // A place outside the Holy Land is never relieved.
+        let elsewhere = set("set_limassol");
+        let mut other = campaign();
+        other.settlements.get_mut(&elsewhere).unwrap().controller = fac(HOLDER);
+        other.settlements.get_mut(&elsewhere).unwrap().siege = Some(
+            serde_json::from_value(serde_json::json!({
+                "attacker": CRUSADERS,
+                "turns_left": 9
+            }))
+            .unwrap(),
+        );
+        let size = other.settlements[&elsewhere].garrison.len();
+        end_of_turn(&mut other);
+        assert_eq!(other.settlements[&elsewhere].garrison.len(), size);
     }
 
     #[test]

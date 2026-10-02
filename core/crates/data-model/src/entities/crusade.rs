@@ -36,6 +36,23 @@ pub struct CrusadeRules {
     pub starting_army: Vec<UnitTypeId>,
     /// Prestige the ruler gains when the target province is taken.
     pub target_taken_prestige: i32,
+    /// Lot JR4b: the master of a besieged place of the Holy Land calls its
+    /// defence (absent: no relief).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub relief: Option<CrusadeRelief>,
+}
+
+/// « Appel à défendre »: when the crusade besieges a place of the Holy
+/// Land, its master throws a relief levy into it, once per siege and at
+/// most once every `cooldown_turns` turns.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CrusadeRelief {
+    /// Units of the levy (the place's garrison cap still applies).
+    pub units: u32,
+    pub cooldown_turns: u32,
+    /// Weighted table the units are drawn from.
+    pub unit_table: Vec<CrusadePassageUnit>,
 }
 
 /// What moves the 0-100 gauge: signed points, except `start`, `target_floor`

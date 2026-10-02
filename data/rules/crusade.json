@@ -57,5 +57,14 @@
     "unit_crossbowmen",
     "unit_urban_militia"
   ],
-  "target_taken_prestige": 40
+  "target_taken_prestige": 40,
+  "relief": {
+    "units": 2,
+    "cooldown_turns": 12,
+    "unit_table": [
+      { "unit": "unit_mamluk_cavalry", "weight": 40 },
+      { "unit": "unit_crossbowmen", "weight": 30 },
+      { "unit": "unit_urban_militia", "weight": 30 }
+    ]
+  }
 }

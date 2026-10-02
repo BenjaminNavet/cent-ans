@@ -94,6 +94,81 @@ fn garrison_composition(role: GarrisonRole) -> Vec<&'static str> {
     }
 }
 
+/// Balance of the season `faction` would pay from the start, without the
+/// idle hoard's share of the court (it melts with the treasury), and its
+/// receipts.
+fn structural_balance(state: &CampaignState, data: &GameData, faction: &FactionId) -> (i64, i64) {
+    let Some(economy) = state.faction_economy(data, faction) else {
+        return (0, 0);
+    };
+    let rules = &data.economy_rules;
+    let income = state.faction_income_effective(data, faction);
+    let treasury = state.factions.get(faction).map_or(0, |f| f.treasury);
+    let opulence =
+        (treasury - rules.opulence_seasons * income.max(0)).max(0) * rules.opulence_percent / 100;
+    (
+        economy.net_income() + opulence,
+        economy.projected_income + economy.trade_income,
+    )
+}
+
+/// Lot JR4b (`settlement_rules.starting_budget`): a great realm whose
+/// starting forces outrun its receipts sends home its costliest garrison
+/// units, one at a time, until the deficit is within the allowed share —
+/// never a settlement's last unit nor the capital's garrison. (The Mamluks
+/// paid 4 000 livres of upkeep on 4 000 of receipts and their AI dismissed
+/// its whole field army by the eighth season.)
+fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
+    let Some(rule) = data
+        .settlement_rules
+        .as_ref()
+        .and_then(|r| r.starting_budget.clone())
+    else {
+        return;
+    };
+    let factions: Vec<FactionId> = state.factions.keys().cloned().collect();
+    for faction in factions {
+        if state.controlled_provinces(&faction).len() < rule.min_provinces {
+            continue;
+        }
+        let capital = state.faction_capital_city(&faction).cloned();
+        loop {
+            let (net, receipts) = structural_balance(state, data, &faction);
+            if net * 100 >= -rule.max_deficit_percent * receipts.max(0) {
+                break;
+            }
+            let costliest = state
+                .settlements
+                .iter()
+                .filter(|(id, s)| {
+                    s.controller == faction && s.garrison.len() > 1 && Some(*id) != capital.as_ref()
+                })
+                .flat_map(|(id, s)| {
+                    let percent = crate::economy::garrison_upkeep_percent(data, s.kind);
+                    s.garrison.iter().enumerate().map(move |(index, unit)| {
+                        (
+                            crate::economy::unit_upkeep(data, unit) * percent,
+                            id.clone(),
+                            index,
+                        )
+                    })
+                })
+                .filter(|(paid, _, _)| *paid > 0)
+                .max_by(|a, b| {
+                    a.0.cmp(&b.0)
+                        .then_with(|| b.1.cmp(&a.1))
+                        .then_with(|| b.2.cmp(&a.2))
+                });
+            let Some((_, settlement, index)) = costliest else {
+                break;
+            };
+            if let Some(place) = state.settlements.get_mut(&settlement) {
+                place.garrison.remove(index);
+            }
+        }
+    }
+}
+
 fn units_from(data: &GameData, ids: &[&str]) -> Result<Vec<Unit>, CampaignError> {
     ids.iter()
         .map(|raw| {
@@ -527,6 +602,8 @@ impl CampaignState {
                 .movement_left = allowance;
         }
         crate::economy::resolve_goods(&mut state, data);
+        // JR4b: the great realms start with garrisons they can pay.
+        fit_starting_garrisons(&mut state, data);
         // JR1: the crusade opens when its rules and its faction exist.
         crate::crusade::init_crusade(&mut state, data);
         // Vassal loyalty starts at its equilibrium (M5).

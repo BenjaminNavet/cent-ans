@@ -186,6 +186,10 @@ pub struct SettlementRules {
     /// treasury. Absent: every garrison unit pays its kind's share.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub capital_guard: Option<CapitalGuard>,
+    /// Lot JR4b: starting garrisons of the great realms sized to their
+    /// means. Absent: every settlement keeps its full starting garrison.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub starting_budget: Option<StartingBudget>,
     /// Share of the upkeep of a settlement's buildings paid by its
     /// controller, in per cent, by settlement kind (lot C7a); kinds left out
     /// pay in full.
@@ -209,6 +213,19 @@ pub struct SettlementRules {
     pub retreat: RetreatRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// Lot JR4b: a realm of at least `min_provinces` provinces whose starting
+/// garrisons, armies, buildings and court cost more than its receipts plus
+/// `max_deficit_percent` % of them starts with lighter garrisons: the
+/// costliest garrison units are sent home, never a settlement's last one nor
+/// the capital's (the idle hoard's share of the court is not counted: it
+/// melts with the treasury).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct StartingBudget {
+    pub min_provinces: usize,
+    pub max_deficit_percent: i64,
 }
 
 /// Household guard of a faction's capital city (lot OMR R3, ADR 0117,

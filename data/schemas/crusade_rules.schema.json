@@ -132,7 +132,30 @@
       "items": { "$ref": "common.schema.json#/$defs/unit_type_id" },
       "description": "Types d'unités de l'armée de départ, placée dans `base_settlement`."
     },
-    "target_taken_prestige": { "type": "integer", "minimum": 0, "maximum": 200 }
+    "target_taken_prestige": { "type": "integer", "minimum": 0, "maximum": 200 },
+    "relief": {
+      "type": "object",
+      "description": "Lot JR4b, « appel à défendre » : quand les croisés assiègent une place de Terre sainte, son maître y jette une levée de secours tirée de la table (une fois par siège, au plus une fois tous les cooldown_turns tours ; plafond de garnison de la place).",
+      "properties": {
+        "units": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "cooldown_turns": { "type": "integer", "minimum": 0, "maximum": 40 },
+        "unit_table": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "unit": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+              "weight": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["unit", "weight"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["units", "cooldown_turns", "unit_table"],
+      "additionalProperties": false
+    }
   },
   "required": [
     "faction", "base_settlement", "target_province", "holy_land", "coastal_holy_land",
