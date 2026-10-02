@@ -137,7 +137,9 @@ def smoke_sheet_frames(frames: list[np.ndarray], settings: dict) -> list[np.ndar
             1.0 - float(settings["old_density"])
         ) * (1.0 - age) ** float(settings["fade_power"])
         density = frame[..., 3] ** float(settings.get("density_gamma", 1.0)) * thinning
-        density = density * _edge_mask(density.shape[0], float(settings.get("edge_fade", 0.0)))
+        density = density * _edge_mask(
+            density.shape[0], float(settings.get("edge_fade", 0.0))
+        )
         puff = np.stack([lighting, lighting, lighting, density], axis=-1)
         side = max(8, round(size * (young + (1.0 - young) * np.sqrt(age))))
         puff = _resized(puff, side, side)

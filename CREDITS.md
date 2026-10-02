@@ -211,7 +211,7 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
 
 - **Unity Labs Paris** — « Free VFX image sequences & flipbooks »
   ([billet](https://blog.unity.com/technology/free-vfx-image-sequences-flipbooks) : « we release
-  some of these sequences under CC0 license ») : séquences simulées Flame02 et Cloud02, recodées
+  some of these sequences under CC0 license ») : séquences simulées Flame03 et WispySmoke03, recodées
   (chaleur / couverture ; densité / éclairage) par `tools/cent_ans_tools/vfx_flipbooks.py`
   (réglages `data/fx/fire_flipbooks.json`) en `game/assets/textures/fx/flame_flipbook.png` et
   `smoke_flipbook.png`.

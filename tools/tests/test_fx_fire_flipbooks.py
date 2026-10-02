@@ -61,3 +61,39 @@ def test_smoke_puff_grows_and_thins() -> None:
     young, old = frames[0][..., 3], frames[-1][..., 3]
     assert (young > 0.1).sum() < (old > 0.1).sum()
     assert young.max() > old.max()
+
+
+def test_flame_heat_ceiling_and_coverage_gamma() -> None:
+    """`heat_max` caps the core heat and `coverage_gamma` < 1 thickens thin tongues."""
+    base = {**_settings()["flame"], "base_fade_px": 0}
+    source = np.zeros((32, 16, 4), dtype=np.float32)
+    source[4:28, 4:12] = [1.0, 1.0, 1.0, 0.25]
+    size = base["frame_px"]
+    plain = vfx_flipbooks.flame_sheet_frames(
+        [source], {**base, "heat_max": 1.0, "coverage_gamma": 1.0}
+    )[0]
+    tuned = vfx_flipbooks.flame_sheet_frames(
+        [source], {**base, "heat_max": 0.5, "coverage_gamma": 0.5}
+    )[0]
+    centre = (size // 2, size // 2)
+    assert abs(plain[centre][0] - 1.0) < 0.02
+    assert abs(tuned[centre][0] - 0.5) < 0.02
+    assert abs(plain[centre][3] - 0.25) < 0.02
+    assert abs(tuned[centre][3] - 0.5) < 0.02
+
+
+def test_smoke_edge_fade_clears_the_frame_border() -> None:
+    """With `edge_fade`, a source filling its frame never reaches the border of the puff."""
+    base = _settings()["smoke"]
+    source = np.full((32, 32, 4), 0.5, dtype=np.float32)
+    source[..., 3] = 1.0
+    sources = [source] * vfx_flipbooks.FRAMES
+    square = vfx_flipbooks.smoke_sheet_frames(sources, {**base, "edge_fade": 0.0})[-1]
+    faded = vfx_flipbooks.smoke_sheet_frames(sources, {**base, "edge_fade": 0.3})[-1]
+    border = np.concatenate(
+        [faded[0, :, 3], faded[-1, :, 3], faded[:, 0, 3], faded[:, -1, 3]]
+    )
+    assert square[0, :, 3].max() > 0.1
+    assert border.max() < 0.02
+    middle = faded.shape[0] // 2
+    assert faded[middle, middle, 3] > 0.9 * square[middle, middle, 3]
