@@ -8,6 +8,10 @@ uniform bool basin_on = false;
 uniform vec3 basin_tint[5];    // teinte multipliée à l'eau
 uniform vec4 basin_wave[5];    // x clapot, y longue houle, z écume du rivage, w moutons permanents
 uniform vec2 basin_water[5];   // x clarté, y part du gris de saison
+uniform float basin_depth_lod = 5.0;                   // mip de la profondeur lissée du large
+uniform vec2 basin_soft_depth_m = vec2(15.0, 45.0);    // passage de la profondeur exacte à la lissée
+uniform float basin_murk_m = 20.0;                     // épaisseur d'eau ajoutée par unité de (1 / clarté - 1)
+uniform float sea_ripple_contrast = 0.6;
 uniform float long_swell_length_px = 3.5;
 uniform float long_swell_speed = 0.5;
 uniform float long_swell_contrast = 0.12;

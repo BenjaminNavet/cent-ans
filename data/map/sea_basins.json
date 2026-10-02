@@ -1,11 +1,17 @@
 {
-  "description": "TB5 : mers de la carte de campagne par bassin (rendu seulement, aucune règle de jeu). `basins` : quatre bassins au plus (polygones en pixels carte, grille de map.json, terres comprises ; le dernier qui contient un point l'emporte) ; hors bassin : `default` (mer Noire, Caspienne…). `look` : `tint` teinte multipliée à l'eau, `clarity` clarté (> 1 : les hauts-fonds clairs se voient plus profond ; < 1 : eau sombre dès la côte), `swell` force du clapot, `long_swell` longue houle, `foam` écume du rivage, `whitecaps` moutons permanents, `grey_scale` part du gris de saison (TB1). Les limites sont fondues sur `blur_cells` cellules de `cell_px` px. `swell` : longue houle (longueur d'onde en px carte, vitesse, contraste, relief). `whitecaps` : moutons (cellules par pixel carte en travers du vent, allongement dans le sens du vent, empreinte d'un pixel écran en pixels carte entre lesquelles les crêtes s'effacent au dézoom, voile de teinte qui les remplace) ; `look.whitecaps` est la part des cellules qui portent une crête. Lu par game/scripts/map/sea_basins.gd et game/shaders/sea_basins.gdshaderinc.",
+  "description": "TB5 : mers de la carte de campagne par bassin (rendu seulement, aucune règle de jeu). `basins` : quatre bassins au plus (polygones en pixels carte, grille de map.json, terres comprises ; le dernier qui contient un point l'emporte) ; hors bassin : `default` (mer Noire, Caspienne…). `look` : `tint` teinte multipliée à l'eau (entière au large, sa racine sur les petits fonds), `clarity` clarté (> 1 : la profondeur vue est divisée, les hauts-fonds clairs se voient plus profond ; < 1 : eau trouble, `depth.murk_m` × (1 / clarté - 1) mètres d'eau s'ajoutent). `depth` : au large (au-delà de `soft_from_m`), la couleur suit une profondeur lissée (mip `soft_lod` de la carte d'altitude) pour que le talus du plateau ne dessine pas de bord net, `swell` force du clapot, `long_swell` longue houle, `foam` écume du rivage, `whitecaps` moutons permanents, `grey_scale` part du gris de saison (TB1). Les limites sont fondues sur `blur_cells` cellules de `cell_px` px. `swell` : longue houle (longueur d'onde en px carte, vitesse, contraste, relief). `whitecaps` : moutons (cellules par pixel carte en travers du vent, allongement dans le sens du vent, empreinte d'un pixel écran en pixels carte entre lesquelles les crêtes s'effacent au dézoom, voile de teinte qui les remplace) ; `look.whitecaps` est la part des cellules qui portent une crête. Lu par game/scripts/map/sea_basins.gd et game/shaders/sea_basins.gdshaderinc.",
   "cell_px": 32,
-  "blur_cells": 4,
+  "blur_cells": 8,
+  "depth": {
+    "soft_lod": 5,
+    "soft_from_m": [15, 45],
+    "murk_m": 20
+  },
   "swell": {
     "length_px": 3.5,
     "speed": 0.5,
     "contrast": 0.12,
+    "ripple_contrast": 0.6,
     "normal": 0.12
   },
   "whitecaps": {
@@ -94,10 +100,10 @@
       "id": "mediterranean",
       "label": "Méditerranée : eau claire et bleue, mer calme",
       "look": {
-        "tint": [1.4, 1.75, 2.6],
-        "clarity": 1.6,
-        "swell": 0.6,
-        "long_swell": 0.0,
+        "tint": [1.75, 2.5, 3.6],
+        "clarity": 1.2,
+        "swell": 0.9,
+        "long_swell": 0.08,
         "foam": 0.6,
         "whitecaps": 0.0,
         "grey_scale": 0.45

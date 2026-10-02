@@ -165,7 +165,15 @@ void fragment() {
 	vec4 basin_wave_here;
 	vec2 basin_water_here;
 	basin_look(uv, basin_tint_here, basin_wave_here, basin_water_here);
-	float seen_depth = depth / max(basin_water_here.x, 0.1);
+	// Retouche TB5 : profondeur exacte sur les petits fonds, lissée au large (mip de la carte
+	// d'altitude) : le talus du plateau ne dessine plus de bord net. Eau claire (> 1) : la
+	// profondeur vue est divisée ; eau trouble (< 1) : une épaisseur d'eau s'ajoute (la diviser
+	// durcissait chaque marche du fond en tache claire).
+	float depth_soft = has_heightmap && inside && height_bpp == 1
+		? max(-mix(height_min_m, height_max_m, textureLod(heightmap, uv, basin_depth_lod).r), 0.0) : depth;
+	float depth_col = mix(depth, depth_soft, smoothstep(basin_soft_depth_m.x, basin_soft_depth_m.y, depth));
+	float clarity = max(basin_water_here.x, 0.1);
+	float seen_depth = clarity >= 1.0 ? depth_col / clarity : depth_col + (1.0 / clarity - 1.0) * basin_murk_m;
 	vec3 col = ga_depth_color(seen_depth, shallow_color, mid_color, deep_color, mid_depth_m, depth_falloff_m, ga4_on);  // GA4
 	float alpha = mix(alpha_shallow, alpha_deep, smoothstep(0.0, 45.0, seen_depth));
 
@@ -210,13 +218,18 @@ void fragment() {
 	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
 	col *= 1.0 + h0 * 0.06 * basin_wave_here.x * (1.0 - smoothstep(0.25, 1.2, footprint));
+	// Retouche TB5 : relief fin des vagues lisible dans la couleur sur toutes les mers (la
+	// Méditerranée claire sortait en aplat), plus ou moins marqué selon le clapot du bassin.
+	col *= 1.0 + (n.x * 0.6 + n.z * 0.8) * sea_ripple_contrast * (1.0 - smoothstep(0.25, 1.2, footprint));
 	// TB5 : longue houle du large (Atlantique), lisible dans la couleur et dans le reflet.
 	vec3 ls = long_swell(p, footprint, basin_wave_here.y);
 	col *= 1.0 + ls.z * long_swell_contrast;
 	n = normalize(n - vec3(ls.x, 0.0, ls.y) * long_swell_normal);
 	// TB1 : mer de la saison (gris acier l'hiver), assombrie sous la tempête.
 	float storm = sea_storm(p);
-	col = mix(col * basin_tint_here, season_grey, clamp(season_grey_amount * basin_water_here.y, 0.0, 1.0)) * season_tint;  // TB5 : bassin
+	// Retouche TB5 : teinte entière au large, adoucie (racine) sur les petits fonds déjà clairs.
+	vec3 basin_tint_seen = mix(sqrt(basin_tint_here), basin_tint_here, smoothstep(0.0, 40.0, depth_col));
+	col = mix(col * basin_tint_seen, season_grey, clamp(season_grey_amount * basin_water_here.y, 0.0, 1.0)) * season_tint;  // TB5 : bassin
 	col *= 1.0 - storm_darken * storm;
 
 	// Écume : bande près du rivage, lignes qui avancent vers la côte, cassées par le bruit.

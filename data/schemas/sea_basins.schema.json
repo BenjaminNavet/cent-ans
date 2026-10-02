@@ -4,7 +4,7 @@
   "title": "Mers de la carte de campagne par bassin (TB5)",
   "description": "Réglages purement visuels des mers de la carte de campagne, lus par game/scripts/map/sea_basins.gd : bassins (polygones en pixels carte), teinte, clarté, houle, écume. Aucune règle de jeu.",
   "type": "object",
-  "required": ["cell_px", "blur_cells", "swell", "whitecaps", "default", "basins"],
+  "required": ["cell_px", "blur_cells", "depth", "swell", "whitecaps", "default", "basins"],
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
@@ -23,13 +23,35 @@
     "swell": {
       "description": "Longue houle : longueur d'onde (pixels carte), vitesse, contraste de couleur, relief.",
       "type": "object",
-      "required": ["length_px", "speed", "contrast", "normal"],
+      "required": ["length_px", "speed", "contrast", "ripple_contrast", "normal"],
       "additionalProperties": false,
       "properties": {
         "length_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 40},
         "speed": {"type": "number", "minimum": 0, "maximum": 5},
         "contrast": {"type": "number", "minimum": 0, "maximum": 1},
+        "ripple_contrast": {
+          "description": "Relief fin des vagues dans la couleur, sur toutes les mers.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
         "normal": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "depth": {
+      "description": "Profondeur vue : exacte sous `soft_from_m[0]`, lissée (mip `soft_lod` de la carte d'altitude) au-delà de `soft_from_m[1]` ; `murk_m` : mètres d'eau ajoutés par unité de (1 / clarté - 1) dans une eau trouble.",
+      "type": "object",
+      "required": ["soft_lod", "soft_from_m", "murk_m"],
+      "additionalProperties": false,
+      "properties": {
+        "soft_lod": {"type": "number", "minimum": 0, "maximum": 8},
+        "soft_from_m": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "number", "minimum": 0}
+        },
+        "murk_m": {"type": "number", "minimum": 0, "maximum": 200}
       }
     },
     "whitecaps": {

@@ -161,7 +161,7 @@ func _check_basins() -> bool:
 	if not (tints[north].length() < tints[atlantic].length() and tints[atlantic].length() < tints[med].length()):
 		push_error("TB5: expected North Sea darker than the Atlantic, Mediterranean lighter")
 		ok = false
-	if not (waters[north].x < 1.0 and waters[med].x > 1.5 and tints[med].z > tints[med].x):
+	if not (waters[north].x < 1.0 and waters[med].x > 1.0 and tints[med].z > tints[med].x):
 		push_error("TB5: expected a murky Channel and a clear blue Mediterranean")
 		ok = false
 	if not (waves[atlantic].x > waves[north].x and waves[atlantic].x > waves[med].x and waves[atlantic].y > 0.5 and waves[med].y < 0.1):

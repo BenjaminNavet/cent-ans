@@ -119,6 +119,16 @@ static func apply(material: ShaderMaterial, map_size: Vector2i) -> bool:
 	for key: String in ["length_px", "speed", "contrast", "normal"]:
 		if swell.has(key):
 			material.set_shader_parameter("long_swell_" + key, float(swell[key]))
+	var depth: Dictionary = data().get("depth", {})
+	if depth.has("soft_lod"):
+		material.set_shader_parameter("basin_depth_lod", float(depth["soft_lod"]))
+	if depth.has("murk_m"):
+		material.set_shader_parameter("basin_murk_m", float(depth["murk_m"]))
+	var soft: Variant = depth.get("soft_from_m")
+	if soft is Array and (soft as Array).size() >= 2:
+		material.set_shader_parameter("basin_soft_depth_m", Vector2(float(soft[0]), float(soft[1])))
+	if swell.has("ripple_contrast"):
+		material.set_shader_parameter("sea_ripple_contrast", float(swell["ripple_contrast"]))
 	var caps: Dictionary = data().get("whitecaps", {})
 	for key: String in ["cells_per_px", "stretch", "veil"]:
 		if caps.has(key):
