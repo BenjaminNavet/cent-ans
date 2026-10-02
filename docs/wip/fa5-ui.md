@@ -28,12 +28,22 @@ Branche `feat/fa-ui`, worktree `../gp-fa-ui` (depuis `feat/fa`). Brutes hors dé
       dans un corps déjà trop court en 720) ; rinceau dans l'en-tête de la chronique (pas la
       place) ; rosettes de coin et acanthe (les fenêtres enluminées ont déjà leur bordure de
       lierre : surcharge) ; initiale réelle C au menu (« ent Ans »).
-- [ ] 3. Sceaux de cire
-- [ ] 4. Matières (cuir, laiton, bois, velours)
-- [ ] Crédits `CREDITS.md`, tests, rapport
+- [x] 3. Sceaux de cire réels (Met) : sceau rouge en navette devant « Chronique du temps »
+      (décisions historiques, à la place de la croix ✠), sceau rond reteinté en cire rouge sur
+      le bouton « Proposer le traité » et devant chaque traité signé de l'onglet Traités
+      (ce dernier non vu sur capture : aucun traité signé dans la mise en scène). Bouton de fin
+      de tour : non touché (médaillon à cloche déjà en place).
+- [x] 4. Matières : plaques 9 tranches cuir brun / cuir cramoisi bordées de laiton
+      (`FaUi.plate_box`) pour les boutons d'action des écrans d'accueil
+      (`FrontEndStyle.style_action_button` : choix de faction, cartes d'introduction).
+      Écarté : cuir rouge gaufré (losanges trop présents sous le texte). Non tenté : barre du
+      haut de campagne et boutons du thème (parchemin peint NB, texte à l'encre : un cuir sombre
+      imposerait de recolorer tous les textes).
+- [x] Crédits `CREDITS.md`
+- [ ] Tests Godot, planches avant/après, rapport
 
 ## Captures lues
-27 (plafond de 30 levé par le coordinateur en cours de lot : « budget illimité de captures »).
+36 (plafond de 30 levé par le coordinateur en cours de lot : « budget illimité de captures »).
 Planches ≤ 1280 px, avant/après assemblés.
 
 ## Journal

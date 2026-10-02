@@ -46,6 +46,9 @@ def test_cuts_reference_known_sources_and_unique_ids() -> None:
     for kind, cut in _cuts(catalogue):
         assert cut["source"] in catalogue["sources"], (kind, cut["id"])
         used.add(cut["source"])
+        if "rim" in cut:
+            assert cut["rim"]["source"] in catalogue["sources"], (kind, cut["id"])
+            used.add(cut["rim"]["source"])
         if "box" in cut:
             left, top, right, bottom = cut["box"]
             assert right > left and bottom > top, (kind, cut["id"])
@@ -134,3 +137,29 @@ def test_tint_recolours_by_luminance() -> None:
     graded = fa_ui_assets.grade(rgb, {"tint": [150, 30, 20]})
     assert graded[0, 1, 0] > graded[0, 0, 0]
     assert graded[0, 0, 0] > graded[0, 0, 1] > graded[0, 0, 2] - 0.05
+
+
+def test_display_names_existing_cuts() -> None:
+    """The ornaments and seals the game is told to use exist in the catalogue."""
+    catalogue = _catalogue()
+    display = catalogue["display"]
+    assert display["title_spray"] in {cut["id"] for cut in catalogue["ornaments"]}
+    seals = {cut["id"] for cut in catalogue["seals"]}
+    assert set(display["seals"].values()) <= seals
+
+
+def test_rimmed_plate_is_a_seamless_nine_slice() -> None:
+    """A rimmed plate keeps one whole period of the material inside a darker-edged rim."""
+    columns = np.linspace(0.0, 1.0, 64, dtype=np.float32)
+    material = np.dstack([np.tile(columns, (64, 1))] * 3)
+    metal = np.full((64, 64, 3), 0.8, dtype=np.float32)
+    rim = {"source": "metal", "width_px": 4, "outline": 0.5, "groove": 0.5}
+    plate = fa_ui_assets.cut_material(material, {"size": 40, "rim": rim}, metal)
+    assert plate.shape == (40, 40, 4)
+    assert np.allclose(plate[20, 1, :3], 0.8, atol=0.02)
+    assert np.allclose(plate[20, 0, :3], 0.4, atol=0.02)
+    assert np.allclose(plate[20, 3, :3], 0.4, atol=0.02)
+    centre = plate[20, 4:36, 0]
+    assert centre[0] < 0.1 and centre[-1] > 0.9
+    plain = fa_ui_assets.cut_material(material, {"size": 32})
+    assert plain.shape == (32, 32, 4) and plain[..., 3].min() == 1.0

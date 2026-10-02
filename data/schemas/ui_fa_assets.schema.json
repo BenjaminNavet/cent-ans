@@ -30,12 +30,11 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "letter", "set", "source", "box", "size", "mode"],
+        "required": ["id", "letter", "source", "box", "size", "mode"],
         "additionalProperties": false,
         "properties": {
           "id": {"$ref": "#/$defs/id"},
           "letter": {"type": "string", "pattern": "^[A-Z]$", "description": "Lettre lue par le joueur (capitale sans accent)."},
-          "set": {"type": "string", "enum": ["french", "english"], "description": "Jeu d'origine du feuillet."},
           "source": {"$ref": "#/$defs/id"},
           "box": {"$ref": "#/$defs/box"},
           "size": {"$ref": "#/$defs/size"},
@@ -107,22 +106,49 @@
           "tint": {"$ref": "#/$defs/colour"},
           "tint_strength": {"$ref": "#/$defs/unit"},
           "saturation": {"type": "number", "minimum": 0, "maximum": 3},
-          "gain": {"type": "number", "exclusiveMinimum": 0, "maximum": 3}
+          "gain": {"type": "number", "exclusiveMinimum": 0, "maximum": 3},
+          "rim": {
+            "type": "object",
+            "description": "Bord de métal : la tuile devient une plaque en 9 tranches (bord = `width_px`, centre = une période de la matière).",
+            "required": ["source", "width_px"],
+            "additionalProperties": false,
+            "properties": {
+              "source": {"$ref": "#/$defs/id"},
+              "width_px": {"type": "integer", "minimum": 1, "maximum": 32},
+              "tint": {"$ref": "#/$defs/colour"},
+              "tint_strength": {"$ref": "#/$defs/unit"},
+              "saturation": {"type": "number", "minimum": 0, "maximum": 3},
+              "gain": {"type": "number", "exclusiveMinimum": 0, "maximum": 3},
+              "outline": {"$ref": "#/$defs/unit", "description": "Assombrissement du filet extérieur du bord."},
+              "groove": {"$ref": "#/$defs/unit", "description": "Assombrissement du filet intérieur du bord."},
+              "inner_shadow": {"$ref": "#/$defs/unit", "description": "Ombre du bord sur la matière (au contact)."},
+              "inner_shadow_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 32}
+            }
+          }
         }
       }
     },
     "display": {
       "type": "object",
       "description": "Réglages de pose lus par le jeu (`FaUi`).",
-      "required": ["initial_scale", "english_cultures", "title_spray", "title_spray_opacity", "title_spray_height", "title_spray_min_width_px"],
+      "required": ["initial_scale", "title_spray", "title_spray_opacity", "title_spray_height", "title_spray_min_width_px", "seals"],
       "additionalProperties": false,
       "properties": {
         "initial_scale": {"type": "number", "minimum": 1, "maximum": 2, "description": "Agrandissement d'une initiale réelle par rapport au champ de la lettrine dessinée."},
-        "english_cultures": {"type": "array", "items": {"type": "string", "pattern": "^cul_[a-z_]+$"}, "uniqueItems": true, "description": "Cultures du joueur qui préfèrent le jeu d'initiales `english` (les autres : `french`)."},
         "title_spray": {"type": "string", "pattern": "^([a-z][a-z0-9_]*)?$", "description": "Rinceau posé à la suite des titres à lettrine quand la place le permet (id d'`ornaments`), vide : aucun."},
         "title_spray_opacity": {"$ref": "#/$defs/unit"},
         "title_spray_height": {"type": "number", "exclusiveMinimum": 0, "maximum": 2, "description": "Hauteur du rinceau, en part du champ de la lettrine."},
-        "title_spray_min_width_px": {"type": "integer", "minimum": 16, "maximum": 512, "description": "Largeur libre minimale après le titre pour poser le rinceau."}
+        "title_spray_min_width_px": {"type": "integer", "minimum": 16, "maximum": 512, "description": "Largeur libre minimale après le titre pour poser le rinceau."},
+        "seals": {
+          "type": "object",
+          "description": "Sceau réel de chaque moment solennel (id de `seals`) : `treaty` (traité proposé ou signé), `chronicle` (décision historique de la chronique).",
+          "required": ["treaty", "chronicle"],
+          "additionalProperties": false,
+          "properties": {
+            "treaty": {"$ref": "#/$defs/id"},
+            "chronicle": {"$ref": "#/$defs/id"}
+          }
+        }
       }
     }
   },

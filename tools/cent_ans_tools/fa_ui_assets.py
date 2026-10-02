@@ -268,14 +268,56 @@ def cut_seal(region: np.ndarray, cut: dict) -> np.ndarray:
     return drop_shadow(seal, cut["shadow"]) if "shadow" in cut else seal
 
 
-def cut_material(region: np.ndarray, cut: dict) -> np.ndarray:
-    """A seamless material tile (the sources tile already), toned."""
-    size = int(cut["size"])
+def resized_tile(region: np.ndarray, width: int, height: int, cut: dict) -> np.ndarray:
+    """A seamless source resized to `width` x `height` and toned (still seamless)."""
     image = Image.fromarray((region * 255.0 + 0.5).astype(np.uint8)).resize(
-        (size, size), Image.LANCZOS
+        (width, height), Image.LANCZOS
     )
-    rgb = grade(np.asarray(image, dtype=np.float32) / 255.0, cut)
-    return np.dstack([rgb, np.ones((size, size), dtype=np.float32)])
+    return grade(np.asarray(image, dtype=np.float32) / 255.0, cut)
+
+
+def cut_material(
+    region: np.ndarray, cut: dict, rim_region: np.ndarray | None = None
+) -> np.ndarray:
+    """A seamless material tile, toned; with a `rim`, a nine-slice plate edged with metal.
+
+    The plate's centre is exactly one period of the material, so the nine-slice centre tiles
+    without a seam; a dark groove and a soft inner shadow set the material below its rim.
+    """
+    size = int(cut["size"])
+    rim = cut.get("rim")
+    if rim is None or rim_region is None:
+        rgb = resized_tile(region, size, size, cut)
+        return np.dstack([rgb, np.ones((size, size), dtype=np.float32)])
+    width = int(rim["width_px"])
+    inner = size - 2 * width
+    plate = resized_tile(rim_region, size, size, rim)
+    fill = resized_tile(region, inner, inner, cut)
+    depth = np.minimum.reduce(
+        np.indices((inner, inner)).tolist()
+        + [
+            np.indices((inner, inner))[0][::-1],
+            np.indices((inner, inner))[1][:, ::-1],
+        ]
+    ).astype(np.float32)
+    shadow = float(rim.get("inner_shadow", 0.0)) * np.exp(
+        -depth / float(rim.get("inner_shadow_px", 3.0))
+    )
+    plate[width : size - width, width : size - width] = fill * (1.0 - shadow)[..., None]
+    # Bevel: the rim's outer line catches the light, its inner line falls into shade.
+    edge = np.minimum.reduce(
+        [
+            np.indices((size, size))[0],
+            np.indices((size, size))[1],
+            np.indices((size, size))[0][::-1],
+            np.indices((size, size))[1][:, ::-1],
+        ]
+    )
+    plate[edge == 0] *= 1.0 - float(rim.get("outline", 0.0))
+    plate[edge == width - 1] *= 1.0 - float(rim.get("groove", 0.0))
+    return np.dstack(
+        [np.clip(plate, 0.0, 1.0), np.ones((size, size), dtype=np.float32)]
+    )
 
 
 CUTTERS = {
@@ -294,6 +336,18 @@ def to_image(rgba: np.ndarray, opaque: bool = False) -> Image.Image:
     return image.convert("RGB") if opaque else image
 
 
+def treatment(kind: str, cut: dict) -> str:
+    """What was done to the source, for `SOURCE.md`."""
+    steps = ["réduite"] if kind == "materials" else ["découpée, réduite"]
+    if "matte" in cut:
+        steps.append("détourée")
+    if "tint" in cut:
+        steps.append("reteintée")
+    if "shadow" in cut:
+        steps.append("ombre portée ajoutée")
+    return ", ".join(steps)
+
+
 def sources_markdown(catalogue: dict) -> str:
     """`SOURCE.md`: provenance and licence of every generated file."""
     lines = [
@@ -303,16 +357,20 @@ def sources_markdown(catalogue: dict) -> str:
         "`data/ui/fa_ui_assets.json`. Ce sont des dérivés découpés et réduits ; les photographies",
         "d'origine ne sont pas dans le dépôt.",
         "",
-        "| Fichier | Objet | Institution | Lieu, date | Licence | URL |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| Fichier | Objet | Institution | Lieu, date | Licence | URL | Traitement |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for kind in KINDS:
         for cut in catalogue.get(kind, []):
-            source = catalogue["sources"][cut["source"]]
-            lines.append(
-                f"| `{kind}/{cut['id']}.png` | {source['object']} | {source['institution']} "
-                f"| {source['origin']} | {source['licence']} | {source['url']} |"
-            )
+            parts = [(cut, treatment(kind, cut))]
+            if "rim" in cut:
+                parts.append((cut["rim"], "bord de la plaque"))
+            for part, note in parts:
+                source = catalogue["sources"][part["source"]]
+                lines.append(
+                    f"| `{kind}/{cut['id']}.png` | {source['object']} | {source['institution']} "
+                    f"| {source['origin']} | {source['licence']} | {source['url']} | {note} |"
+                )
     return "\n".join(lines) + "\n"
 
 
@@ -322,7 +380,13 @@ def build(raw_dir: Path = DEFAULT_RAW, out_dir: Path = DEFAULT_OUT) -> list[Path
     written: list[Path] = []
     for kind in KINDS:
         for cut in catalogue.get(kind, []):
-            rgba = CUTTERS[kind](crop_source(raw_dir, catalogue, cut), cut)
+            region = crop_source(raw_dir, catalogue, cut)
+            if kind == "materials" and "rim" in cut:
+                rgba = cut_material(
+                    region, cut, crop_source(raw_dir, catalogue, cut["rim"])
+                )
+            else:
+                rgba = CUTTERS[kind](region, cut)
             path = out_dir / kind / f"{cut['id']}.png"
             path.parent.mkdir(parents=True, exist_ok=True)
             to_image(rgba, opaque=kind == "materials").save(path, optimize=True)

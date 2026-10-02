@@ -242,6 +242,24 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
 - **Fantasy UI Borders** — Kenney ([kenney.nl](https://kenney.nl)).
 - **Parchment GUI** — zwonky ([OpenGameArt](https://opengameart.org/content/parchment-gui)).
 
+### Ornements d'interface — domaine public et CC0 1.0 (FA5)
+
+Dérivés découpés et réduits (`game/assets/ui/fa/`) par `tools/cent_ans_tools/fa_ui_assets.py`
+depuis le catalogue `data/ui/fa_ui_assets.json` ; détail fichier par fichier dans
+`game/assets/ui/fa/SOURCE.md`.
+
+- **Initiale D enluminée** — feuillet d'un livre d'heures, *La Visitation*, Paris, v. 1415,
+  [Cleveland Museum of Art 1953.366.1](https://clevelandart.org/art/1953.366.1), CC0 1.0
+  ([Open Access](https://www.clevelandart.org/open-access)).
+- **Rinceau des titres** — feuillet d'un livre d'heures, *Initial D*, Angleterre, v. 1400,
+  [Cleveland Museum of Art 2006.10](https://clevelandart.org/art/2006.10), CC0 1.0.
+- **Sceaux de cire** — empreintes de sceau *Saint Giles* (Angleterre, fin du XIIIe siècle,
+  [466080](https://www.metmuseum.org/art/collection/search/466080)) et *Bishop* (Pays-Bas,
+  XIVe siècle, [466082](https://www.metmuseum.org/art/collection/search/466082), reteintée en
+  cire rouge), The Metropolitan Museum of Art, domaine public (Open Access, CC0 1.0).
+- **Cuir et laiton des boutons d'accueil** — Leather030 et Metal007,
+  [ambientCG](https://ambientcg.com) (Lennart Demes), CC0 1.0.
+
 ### Sons de bataille et ambiances — Freesound, CC0 1.0
 
 Banque AU1 (`game/assets/audio/battle/`, `game/assets/audio/ambience/`) : enregistrements

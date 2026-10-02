@@ -52,25 +52,17 @@ static func display(key: String, fallback: float) -> float:
 
 ## Initiale enluminée réelle pour la première lettre de `title` (sans accent) :
 ## `{"texture": Texture2D, "framed": bool}` (`framed` : champ peint opaque), ou `{}` — le titre
-## garde alors la lettrine dessinée. Le jeu de la culture du joueur passe d'abord (feuillets
-## anglais pour une faction anglaise, français sinon) ; entre plusieurs initiales de la même
-## lettre, le choix est stable pour un titre donné.
+## garde alors la lettrine dessinée. Entre plusieurs initiales de la même lettre, le choix est
+## stable pour un titre donné.
 static func initial_for(title: String) -> Dictionary:
 	if not enabled or title.is_empty():
 		return {}
 	var letter := title.substr(0, 1).to_upper()
 	letter = str(Lettrine.UNACCENTED.get(letter, letter))
-	var preferred := preferred_set()
-	var own: Array[Dictionary] = []
-	var other: Array[Dictionary] = []
+	var pool: Array[Dictionary] = []
 	for entry: Dictionary in data().get("initials", []):
-		if str(entry.get("letter", "")) != letter:
-			continue
-		if str(entry.get("set", "")) == preferred:
-			own.append(entry)
-		else:
-			other.append(entry)
-	var pool := own if not own.is_empty() else other
+		if str(entry.get("letter", "")) == letter:
+			pool.append(entry)
 	if pool.is_empty():
 		return {}
 	var chosen := pool[absi(hash(title)) % pool.size()]
@@ -78,18 +70,6 @@ static func initial_for(title: String) -> Dictionary:
 	if image == null:
 		return {}
 	return {"texture": image, "framed": str(chosen.get("mode", "")) == "framed"}
-
-
-## Jeu d'initiales de la culture du joueur : `english` ou `french` (`display.english_cultures`).
-static func preferred_set() -> String:
-	var tree := Engine.get_main_loop() as SceneTree
-	var facade: Node = tree.root.get_node_or_null("SimFacade") if tree != null and tree.root != null else null
-	if facade == null:
-		return "french"
-	var faction := str(facade.get("pending_faction"))
-	var culture := str((facade.call("faction_info", faction) as Dictionary).get("culture", ""))
-	var english: Array = (data().get("display", {}) as Dictionary).get("english_cultures", [])
-	return "english" if english.has(culture) else "french"
 
 
 ## Ornement détouré (`ornaments/<id>.png`), ou null.
@@ -113,3 +93,46 @@ static func draw_spray(canvas: Control, text_end: float, centre_y: float, height
 	var drawn_height := width * texture_size.y / texture_size.x
 	var rect := Rect2(Vector2(text_end + SPRAY_GAP, centre_y - drawn_height * 0.5), Vector2(width, drawn_height))
 	canvas.draw_texture_rect(spray, rect, false, Color(1, 1, 1, display("title_spray_opacity", 0.85)))
+
+
+## Sceau de cire réel d'un moment solennel : `role` est une clé de `display.seals`
+## (`treaty`, `chronicle`…) ; null si le catalogue n'en désigne pas ou si FA est désactivé.
+static func seal(role: String) -> Texture2D:
+	var roles: Dictionary = (data().get("display", {}) as Dictionary).get("seals", {})
+	return texture("seals", str(roles.get(role, "")))
+
+
+## Sceau posé dans une mise en page : image haute de `height` px, à ses proportions, sans
+## capter la souris ; null si le sceau manque.
+static func seal_rect(role: String, height: float) -> TextureRect:
+	var wax := seal(role)
+	if wax == null:
+		return null
+	var rect := TextureRect.new()
+	rect.name = "FaSeal"
+	rect.texture = wax
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	rect.custom_minimum_size = Vector2(roundf(height * wax.get_width() / wax.get_height()), height)
+	rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rect
+
+
+## Plaque de matière bordée de métal (`materials/<id>.png`, 9 tranches : bord = `rim.width_px`
+## du catalogue, centre répété), ou null si elle manque ou si FA est désactivé.
+static func plate_box(id: String) -> StyleBoxTexture:
+	var plate := texture("materials", id)
+	if plate == null:
+		return null
+	var rim := 1.0
+	for entry: Dictionary in data().get("materials", []):
+		if str(entry.get("id", "")) == id:
+			rim = float((entry.get("rim", {}) as Dictionary).get("width_px", 1))
+	var box := StyleBoxTexture.new()
+	box.texture = plate
+	box.set_texture_margin_all(rim)
+	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
+	box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
+	return box

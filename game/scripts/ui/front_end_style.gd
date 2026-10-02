@@ -19,6 +19,8 @@ const VELLUM := Color(0.95, 0.90, 0.78)
 const INK := Color(0.20, 0.13, 0.07)
 const FADED_INK := Color(0.40, 0.30, 0.18)
 const NIGHT := Color(0.05, 0.04, 0.035)
+## FA5 : éclaircissement d'une plaque de cuir survolée.
+const PLATE_HOVER := Color(1.3, 1.26, 1.2)
 
 static var _fonts: Dictionary = {}
 
@@ -135,9 +137,18 @@ static func style_action_button(button: Button, primary: bool, size: int = 22) -
 	hover.bg_color = normal.bg_color.lightened(0.15)
 	hover.shadow_color = Color(GOLD, 0.35)
 	hover.shadow_size = 8
-	button.add_theme_stylebox_override("normal", normal)
-	button.add_theme_stylebox_override("hover", hover)
-	button.add_theme_stylebox_override("focus", hover)
-	button.add_theme_stylebox_override("pressed", hover)
+	var boxes: Array[StyleBox] = [normal, hover]
+	# FA5 : cuir réel bordé de laiton (cramoisi pour l'action principale) à la place de l'aplat.
+	var plate := FaUi.plate_box("plate_crimson_brass" if primary else "plate_leather_brass")
+	if plate != null:
+		for margin in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+			plate.set_content_margin(margin, normal.get_content_margin(margin))
+		var lit := plate.duplicate() as StyleBoxTexture
+		lit.modulate_color = PLATE_HOVER
+		boxes = [plate, lit]
+	button.add_theme_stylebox_override("normal", boxes[0])
+	button.add_theme_stylebox_override("hover", boxes[1])
+	button.add_theme_stylebox_override("focus", boxes[1])
+	button.add_theme_stylebox_override("pressed", boxes[1])
 	for key in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color"]:
 		button.add_theme_color_override(key, Color(1.0, 0.95, 0.82) if key == "font_color" else GOLD)
