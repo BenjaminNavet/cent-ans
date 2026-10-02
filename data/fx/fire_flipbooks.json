@@ -22,7 +22,8 @@
     "young_scale": 0.62,
     "fade_power": 1.3,
     "old_density": 0.38,
-    "density_gamma": 0.45,
+    "density_floor": 0.04,
+    "density_gamma": 0.42,
     "edge_fade": 0.25,
     "lighting_floor": 0.25
   }

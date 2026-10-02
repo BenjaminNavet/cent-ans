@@ -39,6 +39,7 @@
         "young_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Taille de la bouffée naissante (part de sa taille finale)."},
         "fade_power": {"type": "number", "exclusiveMinimum": 0, "description": "Exposant de la dissipation avec l'âge."},
         "old_density": {"type": "number", "minimum": 0, "maximum": 1, "description": "Densité restante en fin de vie (part de la densité de départ)."},
+        "density_floor": {"type": "number", "minimum": 0, "exclusiveMaximum": 1, "description": "Densité source retirée avant l'exposant (défaut 0) : densité = max(0, d − plancher) / (1 − plancher). Fait tomber à zéro le voile diffus qu'un `density_gamma` < 1 relèverait en halo autour de la bouffée."},
         "density_gamma": {"type": "number", "exclusiveMinimum": 0, "maximum": 4, "description": "Exposant de la densité (défaut 1 ; < 1 : voiles plus fournis)."},
         "edge_fade": {"type": "number", "minimum": 0, "maximum": 1, "description": "Fondu radial de la densité sur cette part extérieure du rayon (défaut 0 : aucun) ; évite un bord carré quand la séquence touche le cadre."},
         "lighting_floor": {"type": "number", "minimum": 0, "maximum": 1, "description": "Éclairage du creux le plus sombre des volutes."}

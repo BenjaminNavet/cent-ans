@@ -136,7 +136,11 @@ def smoke_sheet_frames(frames: list[np.ndarray], settings: dict) -> list[np.ndar
         thinning = float(settings["old_density"]) + (
             1.0 - float(settings["old_density"])
         ) * (1.0 - age) ** float(settings["fade_power"])
-        density = frame[..., 3] ** float(settings.get("density_gamma", 1.0)) * thinning
+        density_floor = float(settings.get("density_floor", 0.0))
+        density = np.clip(frame[..., 3] - density_floor, 0.0, None) / (
+            1.0 - density_floor
+        )
+        density = density ** float(settings.get("density_gamma", 1.0)) * thinning
         density = density * _edge_mask(
             density.shape[0], float(settings.get("edge_fade", 0.0))
         )
