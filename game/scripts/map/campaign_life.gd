@@ -213,6 +213,8 @@ func refresh(sim: Object) -> void:
 		return
 	if incidents != null:  # FK5 : une décision prise dans le tour retire son sceau
 		incidents.refresh(sim)
+	if scars != null:  # TB4 : batailles de la main du joueur, sièges posés ou levés dans le tour
+		scars.refresh(sim)
 	if forced_season == "" and sim.has_method("get_date_label"):
 		var season := SeasonVisuals.season_from_label(str(sim.call("get_date_label")))
 		# Premier affichage (nouvelle partie, chargement) : sans transition.
@@ -377,6 +379,8 @@ func _exit_tree() -> void:
 ## Force une relecture complète au prochain `refresh` (chargement d'une partie).
 func invalidate() -> void:
 	_turn_key = ""
+	if scars != null:  # TB4 : champs de bataille de l'ancienne partie oubliés
+		scars.reset()
 
 
 func update_view(camera_distance: float) -> void:

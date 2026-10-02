@@ -77,6 +77,7 @@ func _init() -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MAP_PATHS.default_data_dir().path_join(WarScars.DATA_PATH)))
 	_check(not WarScars.settings().is_empty(), "war_scars.json read")
 	_check_plague(data["plague"])
+	_check_battlefield(data["battlefield"])
 	WarScarMeshes.clear_cache()
 	FolkModels.clear_cache()
 	print("TB4 scars test %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
