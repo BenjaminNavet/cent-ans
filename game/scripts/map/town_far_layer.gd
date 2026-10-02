@@ -57,6 +57,8 @@ var tiers: ZoomTiers
 ## tout objet qui a ces deux membres).
 var sources: Array = []
 var mask := TownFarMask.new()
+## TB3 : suie par ville (même index que `mask`).
+var soot_mask := TownFarMask.new()
 var material: ShaderMaterial
 var stats: Dictionary = {}
 
@@ -154,6 +156,7 @@ func _make_material() -> ShaderMaterial:
 	mat.set_shader_parameter("roofscape_cell_m", profile.roofscape_cell_m)
 	mat.set_shader_parameter("roofscape_gain", profile.roofscape_gain)
 	mat.set_shader_parameter("built_mask", mask.texture())
+	mat.set_shader_parameter("soot_mask", soot_mask.texture())
 	mat.set_shader_parameter("sink_distance", 0.0)
 	return mat
 
@@ -398,6 +401,20 @@ func _apply_range(node: MeshInstance3D, f1: bool) -> void:
 		node.visibility_range_begin_margin = r * fade_fraction
 		node.visibility_range_end = tiers.model_range
 		node.visibility_range_end_margin = tiers.model_range * 0.05
+
+
+## TB3 : suie (0-1) du maillage lointain de la ville `id`.
+func set_soot(id: String, amount: float) -> void:
+	var index := index_of(id)
+	if index < 0:
+		return
+	soot_mask.set_value(index, amount)
+	if material != null:
+		material.set_shader_parameter("soot_mask", soot_mask.texture())
+
+
+func soot_of(id: String) -> float:
+	return soot_mask.value_of(index_of(id))
 
 
 ## Masque des villes 1:1 construites, recalculé quand un calque source change (`version`).

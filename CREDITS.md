@@ -108,6 +108,27 @@ page par page (domaine public, CC0, CC BY ou CC BY-SA — jamais NC ni ND).
 Sources détaillées (URL, licence exacte, traitement) :
 `game/assets/third_party/music/wikimedia/SOURCE.md`.
 
+### Luth, vihuela et instruments anciens — Wikimedia Commons (MU, ADR 0166)
+
+Musique calme de la carte de campagne et de la cour : enregistrements réels sur instruments
+anciens, sans voix ni synthétiseur. Licence vérifiée page par page via l'API Commons.
+
+- Anonyme, Prélude et « C'est mon amy » ; Adrian Le Roy, Bransles et « Je n'ay point plus
+  d'affection » — Magdalena Tomsińska, luth (Collegium Vocale Bydgoszcz), CC BY 3.0.
+- J. S. Bach, Sarabande et Allemande BWV 996, Sarabande BWV 997, Prélude BWV 998 — Martha
+  Goldstein, luth-clavecin (Lautenwerk), CC BY-SA 2.0.
+- Tobias Hume, « Captaine Hume's Pavan » et « Love's Farewell » (1605) — Phillip W. Serna, viole
+  de gambe, CC BY-SA 3.0. Étienne Moulinié, Fantaisie à 4 (1639) — Phillip W. Serna, violes,
+  CC BY-SA 4.0.
+- Orlando Gibbons, Pavane MB 16 — David Joseph Stith, clavecin, CC0.
+- « Greensleeves » — Emilio Villalba et Sara Marina (*La Pequeña Juglaresa*, 2020), CC BY 3.0.
+- Alonso Mudarra, pièces pour vihuela (1546) — José Miguel Moreno (Jornadas de Guitarra de
+  Valencia), CC BY 3.0 ; « Tiento para harpa » — Metzner, CC BY-SA 3.0.
+- Antonio de Cabezón, « Duviensela » — Joan Benson, clavicorde, CC BY-SA 2.0.
+- G. G. Kapsberger, « Capona » (1640) — Y. Nagai (théorbe) et K. Mieno (orgue), CC BY-SA 3.0.
+
+Sources détaillées : `game/assets/third_party/music/wikimedia/SOURCE.md`.
+
 ### Musique orthodoxe et orientale — Wikimedia Commons (OMR-R6)
 
 Playlists de campagne `campaign_orthodox` et `campaign_islamic` (cultures de l'Est et du Sud).

@@ -166,6 +166,11 @@ var town_far: TownFarLayer
 var maquettes: TownMaquetteLayer
 ## GC2 : emprises réelles (`towns_1340.json`) lues sans `TownLayer` (finage, rayon réel).
 var _town_data: TownData
+## Lot TB3 (ADR 0162) : bâtiments hors les murs, chantiers et croissance des villes 1:1.
+var outbuildings: OutbuildingLayer
+## TB3 : suie par ville (dévastation, siège, prise de la place).
+var soot: TownSoot
+var _soot_turn := -1
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
@@ -668,7 +673,7 @@ func _build_selection_ring() -> void:
 func refresh(sim: Object, color_of: Callable) -> void:
 	if data == null:
 		return
-	data.apply_live(sim)
+	var controllers_changed := data.apply_live(sim)
 	if maquettes != null:
 		maquettes.refresh(sim, color_of)
 	if landmark_cities != null and sim != null and sim.has_method("get_date_label"):
@@ -678,6 +683,12 @@ func refresh(sim: Object, color_of: Callable) -> void:
 	_refresh_shields()
 	_refresh_label_inks(sim)
 	_refresh_capital(sim)
+	if outbuildings != null and outbuildings.refresh(sim):
+		# TB3 : la suie ne change qu'avec le tour (dévastation, sièges) ou une prise de place.
+		var turn := int(sim.call("get_turn")) if sim != null and sim.has_method("get_turn") else 0
+		if controllers_changed or turn != _soot_turn:
+			_soot_turn = turn
+			_refresh_soot(turn)
 	var devastation := {}
 	if sim != null and (sim.has_method("get_provinces_snapshot") or sim.has_method("get_province_state")):
 		var provinces := {}
@@ -785,6 +796,9 @@ func update_view(camera_distance: float) -> void:
 	if maquettes != null:  # GC2
 		maquettes.update_view(camera_distance)
 		tp = PerfProbe.lap("settle/maquettes", tp)
+	if outbuildings != null:  # TB3 : bâtiments hors les murs
+		outbuildings.update_view(camera_distance)
+	tp = PerfProbe.lap("settle/outbuildings", tp)
 	_update_hamlet_scale(camera_distance)
 	var th := PerfProbe.lap("settle/hamlets/scale", tp)  # RS-K2
 	_update_hamlets()
@@ -1461,6 +1475,9 @@ func flush() -> void:
 		town_far.update_view(_camera_distance)
 	if maquettes != null:  # GC2
 		maquettes.flush()
+	if outbuildings != null:  # TB3
+		outbuildings.update_view(_camera_distance)
+		outbuildings.flush()
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -1802,10 +1819,14 @@ func vegetation_exclusions() -> PackedVector3Array:
 
 # --- Accès pour les effets de vie (fumées, foule, rivières) ---------------------------------
 # VT (ADR 0138) : plus de maquette ; signatures gardées pour les consommateurs (`LifeEffects`,
-# `CampaignLife`, `FineGeoLayer`, `FolkScenes`), recâblés au lot G.
+# `CampaignLife`, `FineGeoLayer`, `FolkScenes`), recâblés au lot G. TB3 (ADR 0162) : la
+# croissance passe par `outbuildings` (`OutbuildingLayer`, `TownGrowth`).
 
 
-## Plus de maquette sur la carte (VT) : toujours null.
+## Pas de nœud par colonie : la ville 1:1 est dans `towns` / `landmark_cities`, et sa croissance
+## (faubourgs, enceinte, bâtiments hors les murs, lot TB3) dans les `MultiMesh` partagés de
+## `outbuildings`. Toujours null ; signature gardée pour `LifeEffects` (surcouche par maquette,
+## remplacée par la suie par ville de `set_town_soot`).
 func model_holder(_i: int) -> Node3D:
 	return null
 
@@ -1813,6 +1834,64 @@ func model_holder(_i: int) -> Node3D:
 ## Emprise réelle au sol (unités monde) de la colonie `i` (`DEFAULT_FOOTPRINT_M` si inconnue).
 func model_radius(i: int) -> float:
 	return _model_radius[i] if i >= 0 and i < _model_radius.size() else DEFAULT_FOOTPRINT_M / 719.0
+
+
+## TB3 : suie de chaque ville relue sur l'état de la simulation (`TownSoot`), poussée aux villes
+## 1:1, à leur maillage lointain et aux faubourgs.
+func _refresh_soot(turn: int) -> void:
+	if soot == null or outbuildings == null:
+		return
+	var changed := soot.update(data.settlements, outbuildings.province_live, turn)
+	for id: String in changed:
+		_apply_town_soot(id, float(changed[id]))
+
+
+func _apply_town_soot(id: String, amount: float) -> void:
+	if towns != null:
+		towns.set_soot(id, amount)
+	if landmark_cities != null:
+		landmark_cities.set_soot(id, amount)
+	if town_far != null:
+		town_far.set_soot(id, amount)
+	if outbuildings != null:
+		outbuildings.set_soot(id, amount)
+
+
+## TB3 : suie affichée (0-1) de la ville `id`.
+func town_soot(id: String) -> float:
+	return soot.amount_of(id) if soot != null else 0.0
+
+
+## TB3 : force la suie de la ville `id` (captures de contrôle, tests), comme une prise au tour
+## courant ; elle décroît ensuite comme une vraie.
+func set_town_soot(id: String, amount: float, turn: int = -1) -> void:
+	if soot == null:
+		return
+	soot.force(id, amount, turn)
+	_apply_town_soot(id, amount)
+
+
+## TB3 : rayon bâti (unités monde) de la colonie `i` : emprise réelle de la ville 1:1, ou étendue
+## de la ville emblématique v2.
+func built_radius(i: int) -> float:
+	if i < 0 or i >= _model_radius.size():
+		return DEFAULT_FOOTPRINT_M / 719.0
+	if landmark_cities != null:
+		var id := str(data.settlements[i]["id"])
+		if landmark_cities.has_city(id):
+			return maxf(_model_radius[i], landmark_cities.zone_of(id).z)
+	return _model_radius[i]
+
+
+## TB3 : plans des villes (`towns_1340.json`) : ceux des villes 1:1 (style `real`), sinon ceux
+## lus pour les maquettes GC (portes, enceinte du plan : croissance des villes).
+func town_data() -> TownData:
+	return towns.data if towns != null else _town_data
+
+
+## TB3 : vrai si la colonie `i` est une ville emblématique (zone de `data/landmarks/`).
+func is_landmark(i: int) -> bool:
+	return _landmarks.has(i)
 
 
 ## Hauteur des toits (≈ `TOWN_TOP_M`) au-dessus du sol, en unités monde.
@@ -1834,9 +1913,11 @@ func real_radius(i: int) -> float:
 	return _real_radius[i] if i >= 0 and i < _real_radius.size() else -1.0
 
 
-## Lot CV1 (croissance des maquettes) abandonné (VT) : sans effet, gardé pour `CampaignLife`.
-func replace_models(_replacements: Array) -> void:
-	pass
+## TB3 : croissance affichée de la colonie `id` (remplace `replace_models` du lot CV1) :
+## `{outbuildings: [{family, level, model}], suburb_houses, enclosure}` pour l'état courant de la
+## simulation, que la colonie soit ou non dans le voisinage dessiné.
+func growth_of(id: String) -> Dictionary:
+	return outbuildings.growth_of(id) if outbuildings != null else {}
 
 
 ## Hameau brûlé (même tirage que `_build_hamlets`), pour les fumées d'incendie.
@@ -1869,6 +1950,12 @@ func _setup_towns() -> void:
 		add_child(maquettes)
 		maquettes.setup(map_data, terrain, self)
 		_compute_footprints()
+		# TB3 (ADR 0162) : bâtiments hors les murs autour des maquettes GC, suie de leurs pièces.
+		outbuildings = OutbuildingLayer.new()
+		outbuildings.name = "Outbuildings"
+		add_child(outbuildings)
+		outbuildings.setup(self, map_data, terrain, data, 719.0)
+		soot = TownSoot.new(outbuildings.config.get("soot", {}))
 		return
 	towns = TownLayer.new()
 	add_child(towns)
@@ -1883,6 +1970,11 @@ func _setup_towns() -> void:
 	town_far = TownFarLayer.new()
 	add_child(town_far)
 	town_far.setup(map_data, terrain, tiers, ids, [towns, landmark_cities], towns.data)
+	outbuildings = OutbuildingLayer.new()
+	outbuildings.name = "Outbuildings"
+	add_child(outbuildings)
+	outbuildings.setup(self, map_data, terrain, data, towns.data.meters_per_unit if towns.data != null else 719.0)
+	soot = TownSoot.new(outbuildings.config.get("soot", {}))
 
 
 ## VH4 : villes emblématiques 1:1.
