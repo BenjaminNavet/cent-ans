@@ -7,9 +7,11 @@ extends SceneTree
 ##   [--out=<dossier>] [--town=<id>] (défaut set_agen : ferme, vignoble et marché de niveau 3,
 ##   moulin de niveau 1, abbaye de niveau 1, chantier) [--growth=<id>] (ville ouverte : deux
 ##   quartiers de faubourg, enceinte de pierre, suie ; défaut : la plus proche de `--town`)
-##   [--distances=3,8] [--bench] (appels de dessin et ms par image à 90 et 400, couche affichée
-##   puis masquée ; sans vsync avec `--disable-vsync`)
-## Écrit `tb3-<id>-<distance>.png` (960 px de large), HUD masqué. Les images ne sont pas lues ici.
+##   [--distances=20,45,90] [--no-before] [--bench] (appels de dessin et ms par image à 20, 45,
+##   90 et 400, couche affichée puis masquée ; sans vsync avec `--disable-vsync`)
+## Écrit, par ville et par distance, `tb3-<id>-<distance>-avant.png` (même cadrage sans le lot :
+## couche masquée, suie retirée, comme `--no-tb3`) puis `tb3-<id>-<distance>-apres.png` (960 px de
+## large), HUD masqué. Les images ne sont pas lues ici.
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const WIDTH := 960
@@ -22,7 +24,8 @@ func _init() -> void:
 	var out_dir := "user://tb3"
 	var town_id := "set_agen"
 	var growth_id := ""
-	var distances: Array[float] = [3.0, 8.0]
+	var distances: Array[float] = [20.0, 45.0, 90.0]
+	var before := true
 	var bench := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
@@ -37,6 +40,8 @@ func _init() -> void:
 				distances.append(float(d))
 		elif arg == "--bench":
 			bench = true
+		elif arg == "--no-before":
+			before = false
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var settings: Node = root.get_node_or_null("/root/Settings")
@@ -91,10 +96,20 @@ func _init() -> void:
 		for distance in distances:
 			rig.look_at_point(ground, maxf(distance, rig.min_distance_at(ground)))
 			rig.snap()
+			if before:  # même cadrage sans le lot
+				out.enabled = false
+				if growth_id != "":
+					settlements.set_town_soot(growth_id, 0.0)
+				for i in SETTLE_FRAMES:
+					await process_frame
+				_shot(out_dir, "tb3-%s-%d-avant" % [shot[0], int(distance)])
+				out.enabled = true
+				if growth_id != "":
+					settlements.set_town_soot(growth_id, 0.8)
 			for i in SETTLE_FRAMES:
 				await process_frame
 			print("TB3 %s d=%.0f : %s" % [shot[0], distance, _summary(out, str(shot[0]))])
-			_shot(out_dir, "tb3-%s-%d" % [shot[0], int(distance)])
+			_shot(out_dir, "tb3-%s-%d-apres" % [shot[0], int(distance)])
 	quit(0)
 
 
@@ -128,11 +143,11 @@ func _summary(out: OutbuildingLayer, id: String) -> String:
 	return "%s (%d instances, %d nœuds de rendu ; lecture de l'état %.1f ms, voisinage %.1f ms)" % [", ".join(parts), out.instance_count(), out.node_count(), float(out.stats.get("read_ms", 0.0)), float(out.stats.get("build_ms", 0.0))]
 
 
-## Appels de dessin et temps par image, couche TB3 affichée puis masquée, à 90 et 400 (distances
-## des captures TB) et à 8 (où les maquettes sont à l'écran).
+## Appels de dessin et temps par image, couche TB3 affichée puis masquée, aux distances de jeu
+## (20, 45, 90) et à 400 (hors de portée).
 func _bench(rig: CampaignCamera, data: MapData, out: OutbuildingLayer, px: Vector2) -> void:
 	var ground := Vector3(px.x, data.surface_world_at(px.x, px.y), px.y)
-	for distance: float in [8.0, 90.0, 400.0]:
+	for distance: float in [20.0, 45.0, 90.0, 400.0]:
 		rig.look_at_point(ground, maxf(distance, rig.min_distance_at(ground)))
 		rig.snap()
 		for enabled: bool in [true, false, true, false]:
@@ -144,7 +159,7 @@ func _bench(rig: CampaignCamera, data: MapData, out: OutbuildingLayer, px: Vecto
 			for i in BENCH_FRAMES:
 				await process_frame
 				draws += Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
-			print("TB3 bench d=%d couche %s : %.0f appels de dessin, %.2f ms/image (%d instances, %d nœuds)" % [int(distance), "oui" if enabled else "non", draws / BENCH_FRAMES, (Time.get_ticks_usec() - t0) / float(BENCH_FRAMES) / 1000.0, out.instance_count() if out.visible else 0, out.node_count() if out.visible else 0])
+			print("TB3 bench d=%d couche %s : %.0f appels de dessin, %.2f ms/image (%d instances, %d nœuds ; mise en place %.0f ms pour %d colonies)" % [int(distance), "oui" if enabled else "non", draws / BENCH_FRAMES, (Time.get_ticks_usec() - t0) / float(BENCH_FRAMES) / 1000.0, out.instance_count() if out.visible else 0, out.node_count() if out.visible else 0, float(out.stats.get("build_ms", 0.0)), int(out.stats.get("settlements", 0))])
 	out.enabled = true
 
 
