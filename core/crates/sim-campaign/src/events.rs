@@ -75,6 +75,8 @@ pub enum EventKind {
     Trade,
     /// NT3: campaign missions offered, fulfilled, failed.
     Mission,
+    /// JR1: the crusade (passage preached, contingents, the target taken).
+    Crusade,
 }
 
 /// One entry of the turn journal, with a French summary for the UI.

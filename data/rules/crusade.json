@@ -1,0 +1,62 @@
+{
+  "description": "Lot JR1 (ADR 0165) : la Ferveur de la faction croisée. Uchronie de jeu : les croisés du passage annulé de 1336 ont suivi le patriarche latin à Limassol. Tout le barème est ici ; le Rust ne nomme ni la faction ni Jérusalem.",
+  "faction": "fac_crusaders",
+  "base_settlement": "set_limassol",
+  "target_province": "prov_jerusalem",
+  "holy_land": ["prov_jerusalem", "prov_gaza", "prov_safad", "prov_tripoli"],
+  "coastal_holy_land": ["prov_gaza", "prov_safad", "prov_tripoli"],
+  "fervor": {
+    "start": 60,
+    "decay_per_turn": 1,
+    "battle_won_other_faith": 6,
+    "battle_lost": -8,
+    "holy_land_settlement_taken": 10,
+    "target_taken": 40,
+    "target_floor": 50,
+    "preach": 10,
+    "war_declared_same_faith": -30,
+    "battle_same_faith": -10,
+    "truce_with_target_holder_per_turn": -2
+  },
+  "alms": {
+    "base": 200,
+    "per_fervor": 12
+  },
+  "passage": {
+    "cost": 1500,
+    "cooldown_turns": 6,
+    "delay_turns": 2,
+    "units_base": 1,
+    "fervor_per_extra_unit": 25,
+    "max_units": 5,
+    "unit_table": [
+      { "unit": "unit_men_at_arms_foot", "weight": 30 },
+      { "unit": "unit_crossbowmen", "weight": 25 },
+      { "unit": "unit_urban_militia", "weight": 20 },
+      { "unit": "unit_mounted_sergeants", "weight": 15 },
+      { "unit": "unit_knights", "weight": 10 }
+    ]
+  },
+  "zeal": {
+    "high_threshold": 70,
+    "high_morale": 10,
+    "low_threshold": 30,
+    "low_morale": -10
+  },
+  "desertion": {
+    "threshold": 20,
+    "men_percent_per_turn": 5,
+    "zero_multiplier": 2
+  },
+  "starting_army": [
+    "unit_knights",
+    "unit_knights",
+    "unit_mounted_sergeants",
+    "unit_men_at_arms_foot",
+    "unit_men_at_arms_foot",
+    "unit_crossbowmen",
+    "unit_crossbowmen",
+    "unit_urban_militia"
+  ],
+  "target_taken_prestige": 40
+}

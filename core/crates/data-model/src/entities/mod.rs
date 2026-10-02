@@ -18,6 +18,7 @@ pub mod campaign_weather;
 pub mod capture;
 pub mod character;
 pub mod chivalric_order;
+pub mod crusade;
 pub mod diet;
 pub mod difficulty;
 pub mod diplomacy_rules;

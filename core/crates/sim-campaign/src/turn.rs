@@ -151,6 +151,8 @@ impl CampaignState {
         crate::passage::resolve_trespass(self, data, events);
         diplomacy::resolve_diplomacy(self, data, events);
         religion::resolve_religion(self, data, events);
+        // JR1: the crusade's fervour (wear, alms, contingents, desertion).
+        crate::crusade::resolve_crusade(self, data, events);
         // 8b'. Agents: upkeep, counter-espionage, stale intelligence (C6).
         crate::agents::resolve_agents(self, data, events);
 

@@ -970,6 +970,11 @@ pub struct CampaignState {
     /// no change of [`STATE_VERSION`]).
     #[serde(default)]
     pub missions: crate::missions::MissionsState,
+    /// Lot JR1: the crusader faction's fervour (`None` without
+    /// `data/rules/crusade.json` or its faction, and in older saves; no
+    /// change of [`STATE_VERSION`]).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crusade: Option<crate::crusade::CrusadeState>,
     /// Lot M3: the AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -1025,6 +1030,7 @@ impl CampaignState {
             mercenaries: crate::mercenaries::MercenaryState::default(),
             feudal: crate::feudal::FeudalState::default(),
             missions: crate::missions::MissionsState::default(),
+            crusade: None,
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
             last_battle_outcome: None,
