@@ -62,7 +62,8 @@ func apply_season(weights: Vector4) -> void:
 		return
 	var look := SeasonLook.sea(weights)
 	material.set_shader_parameter("season_tint", look["tint"])
-	material.set_shader_parameter("season_desaturate", look["desaturate"])
+	material.set_shader_parameter("season_grey", look["grey"])
+	material.set_shader_parameter("season_grey_amount", look["grey_amount"])
 	material.set_shader_parameter("season_foam", look["foam"])
 
 

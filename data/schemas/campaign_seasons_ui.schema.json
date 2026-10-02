@@ -135,7 +135,8 @@
           "type": "object",
           "required": [
             "tint",
-            "desaturate",
+            "grey",
+            "grey_amount",
             "foam"
           ],
           "additionalProperties": false,
@@ -144,17 +145,21 @@
               "description": "Teinte multiplicative de l'eau (1, 1, 1 : inchangée).",
               "$ref": "#/$defs/rgb"
             },
-            "desaturate": {
-              "description": "Part de gris (0 : couleur d'origine, 1 : gris).",
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
-            },
             "foam": {
               "description": "Force de l'écume du rivage (1 : inchangée).",
               "type": "number",
               "minimum": 0,
               "maximum": 3
+            },
+            "grey": {
+              "description": "Gris visé par la mer de la saison (albédo linéaire ; gris acier l'hiver).",
+              "$ref": "#/$defs/rgb"
+            },
+            "grey_amount": {
+              "description": "Part de ce gris dans la couleur de l'eau (0 : couleur d'origine, 1 : gris seul).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
             }
           }
         },

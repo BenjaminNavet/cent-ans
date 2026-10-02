@@ -23,7 +23,7 @@ Date : 2026-10-02. Lot TB1 (`docs/design/2026-10-02-campagne-tob.md` § 3).
    précalculées » de la spec n'est pas retenue : 4 × 60 Mo de BC1 et un outil à relancer pour un
    écart que le shader sait calculer ; elle reste possible si le rendu ne suffit pas.
 2. **Un seul fichier de réglages de saison pour la carte : `data/ui/campaign_seasons.json`**
-   (schéma `campaign_seasons_ui.schema.json`, lu par `SeasonLook`) : mer (`sea`), tempête
+   (schéma `campaign_seasons_ui.schema.json`, lu par `SeasonLook`) : mer (`sea` : teinte et gris visé), tempête
    (`storm`), étalonnage (`grade`), neige des toits (`roof_snow`, `snow`).
 3. **L'étalonnage TB1 est une surcouche, pas un remplacement.** `CampaignAtmosphere.resolve_preset`
    compose : saison commune (`atmosphere.json` `seasons`) → saison de carte (`SeasonLook.grade`) →

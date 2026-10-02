@@ -61,9 +61,11 @@ uniform float ocean_detail_scale = 1.0;
 uniform vec2 ocean_detail_depth = vec2(30.0, 120.0);
 uniform float mid_depth_m = 25.0;
 // Lot TB1 : mer selon la saison (valeurs de `data/ui/campaign_seasons.json`, mêlées par
-// `SeasonLook.sea` et posées par `Sea.apply_season`) : teinte multiplicative, part de gris, écume.
+// `SeasonLook.sea` et posées par `Sea.apply_season`) : teinte multiplicative, gris visé (acier
+// l'hiver : une mer profonde seulement assombrie devenait noire) et sa part, écume.
 uniform vec3 season_tint = vec3(1.0);
-uniform float season_desaturate = 0.0;
+uniform vec3 season_grey = vec3(0.0);
+uniform float season_grey_amount = 0.0;
 uniform float season_foam = 1.0;
 // Lot TB1 : mer sous la tempête. Masque météo par province du lot CM2 (R pluie, A orage), repris
 // du terrain par `Sea.sync_weather` ; la tempête d'une province côtière porte à `storm_reach_px`.
@@ -198,9 +200,9 @@ void fragment() {
 	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
 	col *= 1.0 + h0 * 0.06 * (1.0 - smoothstep(0.25, 1.2, footprint));
-	// TB1 : mer de la saison (grise et sombre l'hiver), assombrie sous la tempête.
+	// TB1 : mer de la saison (gris acier l'hiver), assombrie sous la tempête.
 	float storm = sea_storm(p);
-	col = mix(col, vec3(dot(col, vec3(0.2126, 0.7152, 0.0722))), season_desaturate) * season_tint;
+	col = mix(col, season_grey, season_grey_amount) * season_tint;
 	col *= 1.0 - storm_darken * storm;
 
 	// Écume : bande près du rivage, lignes qui avancent vers la côte, cassées par le bruit.

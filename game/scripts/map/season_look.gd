@@ -48,10 +48,11 @@ static func _season_block(season: String, key: String) -> Dictionary:
 
 
 ## Mer pour des poids de saison (x printemps, y été, z automne, w hiver) :
-## {tint: Vector3, desaturate: float, foam: float}, mêlés selon les poids.
+## {tint: Vector3, grey: Vector3, grey_amount: float, foam: float}, mêlés selon les poids.
 static func sea(weights: Vector4) -> Dictionary:
 	var tint := Vector3.ZERO
-	var desaturate := 0.0
+	var grey := Vector3.ZERO
+	var grey_amount := 0.0
 	var foam := 0.0
 	var total := 0.0
 	for index in SeasonVisuals.SEASONS.size():
@@ -59,17 +60,20 @@ static func sea(weights: Vector4) -> Dictionary:
 		if weight <= 0.0:
 			continue
 		var block := _season_block(SeasonVisuals.SEASONS[index], "sea")
-		var rgb: Variant = block.get("tint", [1.0, 1.0, 1.0])
-		var season_tint := Vector3.ONE
-		if rgb is Array and (rgb as Array).size() >= 3:
-			season_tint = Vector3(float(rgb[0]), float(rgb[1]), float(rgb[2]))
-		tint += season_tint * weight
-		desaturate += float(block.get("desaturate", 0.0)) * weight
+		tint += _vec3(block.get("tint"), Vector3.ONE) * weight
+		grey += _vec3(block.get("grey"), Vector3.ZERO) * weight
+		grey_amount += float(block.get("grey_amount", 0.0)) * weight
 		foam += float(block.get("foam", 1.0)) * weight
 		total += weight
 	if total <= 0.0:
-		return {"tint": Vector3.ONE, "desaturate": 0.0, "foam": 1.0}
-	return {"tint": tint / total, "desaturate": desaturate / total, "foam": foam / total}
+		return {"tint": Vector3.ONE, "grey": Vector3.ZERO, "grey_amount": 0.0, "foam": 1.0}
+	return {"tint": tint / total, "grey": grey / total, "grey_amount": grey_amount / total, "foam": foam / total}
+
+
+static func _vec3(values: Variant, fallback: Vector3) -> Vector3:
+	if values is Array and (values as Array).size() >= 3:
+		return Vector3(float(values[0]), float(values[1]), float(values[2]))
+	return fallback
 
 
 ## Mer sous la tempête : {foam_gain, foam_width, whitecaps, darken, reach_px, rain_share}

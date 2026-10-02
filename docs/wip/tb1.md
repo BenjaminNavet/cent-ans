@@ -34,6 +34,17 @@ Mer (Atlantique, 400 / 90) : été 8 15 20 / 12 22 25 ; automne 7 12 16 / 15 22 
 
 Mer : `--at=1000,2800` (Atlantique, mer franche à 400 et 90), `--at=2030,2950` (Manche, 90 seulement).
 
+## Retouches après capture de contrôle (02/10)
+- Neige en vue moyenne : bord fondu (`snow_edge_soft`), découpé par deux octaves fines
+  (`snow_edge_noise`), moins de neige sous les bois (`snow_forest_shed`), voile de près
+  (`snow_near_opacity`), haies visibles sous la neige (`hb_snow_hedge`), sol d'hiver hors neige
+  brun-gris (`winter_ground_desat`, `winter_ground_tint`). Hiver 1100 : 103 106 115 (σ 48 49 52,
+  avant 106 108 115) ; hiver 400 : 80 81 84, σ 32 31 32 (avant 88 89 89, σ 38 38 43).
+- Automne : `autumn_russet` (vert baissé sur prés et forêts, moitié sur cultures). À 400 : automne
+  111 80 52 contre été 99 89 53 (vert 9 points sous l'été) ; à 1100 : 110 80 57 contre 96 86 59.
+- Mer : `desaturate` remplacé par un gris visé (`grey`, `grey_amount`) : hiver gris acier
+  21 31 40 (400) / 22 33 42 (90) ; été 8 15 20 / 11 22 25. L'automne (part 0,3) non remesuré.
+
 ## Points ouverts
 - `terroir_burn` (brûlis) est posé avant `sg_apply` / `hb_apply` : la carte de couleur et les
   matières le recouvrent encore (hors lot TB1, même correctif possible).

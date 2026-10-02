@@ -23,12 +23,13 @@ def test_campaign_seasons_match_schema() -> None:
     assert not errors, [error.message for error in errors]
 
 
-def test_winter_sea_is_darker_and_greyer() -> None:
-    """The winter sea is darker and greyer than the summer sea."""
+def test_winter_sea_is_steel_grey() -> None:
+    """The winter sea is much greyer than the summer sea, towards a readable steel grey."""
     seasons = _load("ui/campaign_seasons.json")["seasons"]
     winter, summer = seasons["winter"]["sea"], seasons["summer"]["sea"]
-    assert sum(winter["tint"]) < sum(summer["tint"]) - 0.5
-    assert winter["desaturate"] > summer["desaturate"] + 0.3
+    assert winter["grey_amount"] > summer["grey_amount"] + 0.3
+    red, green, blue = winter["grey"]
+    assert red < green < blue and 0.03 < green < 0.3
 
 
 def test_season_grades_follow_the_art_bible() -> None:
