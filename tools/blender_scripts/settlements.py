@@ -473,6 +473,8 @@ def export_model(name: str, out_dir: Path) -> int:
     """Build one model, join it into a single mesh, export ``<name>.glb``; return triangles."""
     m.reset_scene()
     parts = MODELS[name]()
+    if name in settlements_east.MODELS and len(parts) != len(bpy.context.scene.objects):
+        raise RuntimeError(f"{name}: parts left out of the joined mesh")
     if m.KIT:
         import kit_campaign
 

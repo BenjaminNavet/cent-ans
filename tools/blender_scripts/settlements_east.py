@@ -172,12 +172,26 @@ def mound_height(distance, radius, height, top=0.62):
     return height * (radius - distance) / (radius * (1.0 - top))
 
 
-def tower(x, y, side, height, mat, top="cap", roof=None, angle=0.0, z=0.0, taper=1.0):
+def tower(
+    x,
+    y,
+    side,
+    height,
+    mat,
+    top="cap",
+    roof=None,
+    angle=0.0,
+    z=0.0,
+    taper=1.0,
+    shaft=True,
+):
     """Square tower. ``top``: ``cap`` (jutting parapet), ``crenel`` (parapet and corner merlons),
     ``pyramid`` (low tiled roof), ``tent`` (tall wooden roof) or ``flat``; ``taper`` < 1 batters
-    the walls (pisé towers).
+    the walls (pisé towers); ``shaft=False`` builds the top only, on a shaft made elsewhere.
     """  # noqa: D205
-    if taper < 1.0:
+    if not shaft:
+        parts = []
+    elif taper < 1.0:
         half = side * math.sqrt(0.5)
         parts = [
             m.cone(
@@ -372,19 +386,19 @@ def flat_house(x, y, w, d, h, angle, wall, z=0.0, upper=None):
 
 
 def yurt(x, y, radius, mat="Felt", door=-math.pi / 2, roof=None):
-    """Felt tent: round wall, conical roof (of material ``roof``), door facing ``door``."""
-    wall_h = radius * 0.75
+    """Felt tent: low round wall, conical roof (of material ``roof``) with its dark smoke
+    ring, door facing ``door``.
+    """  # noqa: D205
+    wall_h = radius * 0.55
+    crown = wall_h + radius * 0.45
     wall = [(radius, -F * 0.5), (radius, wall_h)]
-    cone = [
-        (radius, wall_h),
-        (radius * 0.28, wall_h + radius * 0.55),
-        (0.0, wall_h + radius * 0.6),
-    ]
+    cone = [(radius, wall_h), (radius * 0.3, crown)]
     parts = (
         [lathe(wall, mat, (x, y, 0.0), 8), lathe(cone, roof, (x, y, 0.0), 8)]
         if roof
         else [lathe(wall + cone[1:], mat, (x, y, 0.0), 8)]
     )
+    parts.append(m.cylinder(radius * 0.33, 0.02, (x, y, crown), "Wood", 6))
     parts.append(
         m.box(
             (radius * 0.2, radius * 0.5, wall_h * 0.85),
@@ -417,7 +431,7 @@ def palm(x, y, height=0.3, z=0.0):
     ]
 
 
-def plots(x, y, angle, count, length, width, mats=("Field", "Garden", "Earth")):
+def plots(x, y, angle, count, length, width, mats=("Field", "Garden")):
     """Flat cultivated strips slightly above the ground (gardens, vineyards, fields)."""
     parts = []
     ca, sa = math.cos(angle), math.sin(angle)
@@ -868,7 +882,7 @@ def build_med_abbey(variant):
     parts += plots(
         0.58, -0.56 * flip, 0.0, 4, 0.36, 0.07, ("Garden", "Field", "Garden")
     )
-    parts += plots(-0.58, -0.6 * flip, 0.0, 3, 0.3, 0.07, ("Garden", "Earth", "Garden"))
+    parts += plots(-0.58, -0.6 * flip, 0.0, 3, 0.3, 0.07, ("Garden", "Field", "Garden"))
     for k in range(6):
         parts += cypress(0.66 + rng.uniform(-0.02, 0.02), (-0.2 + k * 0.17) * flip, 0.3)
     for k in range(3):
@@ -944,7 +958,7 @@ def byz_house(x, y, w, d, angle, rng, z=0.0):
 def byz_tower(x, y, side, height, top="cap", z=0.0):
     """Square tower of banded stone and brick with a jutting parapet."""
     parts = banded(x, y, side, side, height, BYZ_BANDS, z=z)
-    return parts + tower(x, y, side, 0.0, "Limestone", top, z=z + height)[1:]
+    return parts + tower(x, y, side, 0.0, "Limestone", top, z=z + height, shaft=False)
 
 
 def byz_walls(points, height, gates, z=0.0, tower_side=0.15):
@@ -1003,7 +1017,7 @@ def byz_church(x, y, angle, s=1.0, domes=1, conical=False, z=0.0):
         "Lead",
         "cone" if conical else "round",
         8,
-        None if conical else "Gilt",
+        None,
     )
     if domes > 1:
         for dx, dy in ((-0.19, -0.19), (0.19, -0.19), (0.19, 0.19), (-0.19, 0.19)):
@@ -1190,7 +1204,7 @@ def build_byz_village(variant):
         keep_out.append((-0.5, -0.3, 0.14))
     parts += scatter(rng, 13, 0.85, byz_house, keep_out, None, (0.2, 0.27), 1.25)
     parts.append(
-        m.cylinder(0.13, 0.012 + F * 0.3, (0.55, -0.6, 0.006 - F * 0.15), "Sand", 10)
+        m.cylinder(0.13, 0.012 + F * 0.3, (0.55, -0.6, 0.006 - F * 0.15), "Dirt", 10)
     )
     parts += plots(-0.25, -0.95, -0.1, 4, 0.55, 0.07, ("Garden", "Field", "Garden"))
     parts += plots(0.92, 0.25, 1.4, 4, 0.5, 0.07)
@@ -1494,7 +1508,7 @@ def build_rus_village(variant):
                 parts += izba(bx, by, 0.13, 0.1, road, rng)
         px, py = at(-0.1 * side, side * 0.72)
         parts += plots(
-            px, py, road + math.pi / 2, 7, 0.4, 0.09, ("Field", "Garden", "Earth")
+            px, py, road + math.pi / 2, 7, 0.4, 0.09, ("Field", "Garden", "Field")
         )
     if not first:
         for k in range(4):
@@ -1862,7 +1876,10 @@ def khan_tent(x, y, radius=0.2):
 def corral(x, y, radius, rng, horses=4):
     """Round paddock of rails with a few horses."""
     ring = [(x + px, y + py) for px, py in m.ring_points(radius, 8, rng, 0.05)]
-    parts = curtain(ring, 0.05, "Log", thickness=0.014)
+    parts = curtain(ring, 0.035, "Log", thickness=0.014)
+    parts.append(
+        m.cylinder(radius * 0.95, 0.012 + F * 0.3, (x, y, 0.006 - F * 0.15), "Sand", 8)
+    )
     for _ in range(horses):
         ang, r = rng.uniform(0.0, TAU), radius * 0.6 * math.sqrt(rng.random())
         parts.append(
@@ -1943,8 +1960,8 @@ def palace(x, y, angle, s=1.0):
     return parts
 
 
-def rampart(x0, y0, x1, y1, height, base, top, mat="Earth"):
-    """Earth bank between two points: trapezoid section, sunk below the ground."""
+def rampart(x0, y0, x1, y1, height, base, top, mat="Steppe"):
+    """Grassed earth bank between two points: trapezoid section, sunk below the ground."""
     length = math.hypot(x1 - x0, y1 - y0) + top
     angle = math.atan2(y1 - y0, x1 - x0)
     spread = base / 2 + (base - top) / 2 * F / height
