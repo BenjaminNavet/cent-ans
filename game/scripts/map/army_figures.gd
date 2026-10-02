@@ -292,6 +292,12 @@ func _state_config(figure_kind: String, variant: int) -> Dictionary:
 	return BattleSkinned.state_config(figure_kind, variant, "marching" if walking else "idle", false)
 
 
+## SA (ADR 0160) : éclaircissement des figurines (survol, sélection), 0 = aucun.
+func set_highlight(value: float) -> void:
+	for key in _groups:
+		(_groups[key]["material"] as ShaderMaterial).set_shader_parameter("highlight", value)
+
+
 ## Marche (animation M4 en cours) ou repos.
 func set_walking(value: bool) -> void:
 	if value == walking:

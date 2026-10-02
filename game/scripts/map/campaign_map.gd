@@ -64,6 +64,12 @@ var selected_army: String = ""
 ## Q2 : dernier clic gauche résolu (position écran, "army:<id>" ou "settlement:<id>").
 var _last_pick_position := Vector2(-1.0e6, -1.0e6)
 var _last_pick_target := ""
+## SA (ADR 0160) : objet sous le curseur, celui que le clic prendrait ({} ou {kind, id}), et
+## l'état (souris, caméra) du dernier calcul.
+var hover_target: Dictionary = {}
+var _hover_mouse := Vector2(-1.0e6, -1.0e6)
+var _hover_camera := Transform3D()
+var _hover_dirty := true
 ## Provinces atteignables ce tour par l'armée sélectionnée : id → coût.
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
@@ -323,6 +329,7 @@ func _setup_settlements() -> void:
 	camera_rig.floor_zones = settlement_layer.landmark_floor_zones()  # VH4 : plancher levé (v2)
 	camera_rig.floor_zones_set = true
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
+	armies.settlement_radius = settlement_layer.model_radius_of  # SA : l'ost à côté de la ville
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
 		return settlement_layer.screen_label_rects(view_camera)
 	settlement_layer.label_top_inset = func() -> float:  # TB2 : pas de nom sous le bandeau du haut
@@ -585,25 +592,38 @@ func player_army_ids() -> PackedStringArray:
 # --- Sélection ---------------------------------------------------------------------
 
 
-## Intercepteur de clic gauche du picker : vrai si une armée ou une colonie a été cliquée.
-## Q2 : quand une armée stationne dans une ville, le clic va à ce qui est sous le curseur
-## (jeton ou figurines : l'armée ; ville 1:1 ou icône de la ville : la colonie, dont le panneau
-## ouvre recrutement, chantiers et province) ; un second clic au même endroit alterne.
-func _try_select_army(screen_position: Vector2) -> bool:
-	var army_hit: Dictionary = armies.pick_screen_scored(screen_position)
+## SA (ADR 0160) : objet visé à un point écran — la même fonction sert au survol et au clic, si
+## bien que ce qui est éclairé est ce que le clic prend. Renvoie {} ou {kind: "army" |
+## "settlement", id, army, settlement} (`army` / `settlement` : les deux candidats, pour
+## l'alternance du second clic). Une armée visée en plein (silhouette ou plaque) prime sur la
+## colonie ; une armée seulement frôlée ne gagne que s'il n'y a pas de colonie dessous.
+## `exclude_army` : armée ignorée (la sélection, quand on vise une cible pour elle).
+func pick_target(screen_position: Vector2, exclude_army: String = "") -> Dictionary:
+	var army_hit: Dictionary = armies.pick_screen_scored(screen_position, exclude_army) if armies != null else {}
 	var settlement_hit: Dictionary = settlement_layer.pick_screen_scored(screen_position) if settlement_layer != null else {}
 	var army_id := str(army_hit.get("id", ""))
 	var settlement_id := str(settlement_hit.get("id", ""))
-	var choose_army := army_id != ""
-	if army_id != "" and settlement_id != "":
-		var repeat := screen_position.distance_to(_last_pick_position) <= REPEAT_CLICK_PX
-		if repeat and _last_pick_target == "army:" + army_id:
+	if army_id == "" and settlement_id == "":
+		return {}
+	var choose_army := army_id != "" and (settlement_id == "" or bool(army_hit.get("direct", false)))
+	return {"kind": "army" if choose_army else "settlement", "id": army_id if choose_army else settlement_id, "army": army_id, "settlement": settlement_id}
+
+
+## Intercepteur de clic gauche du picker : vrai si une armée ou une colonie a été cliquée.
+## Q2 : quand une armée et une ville sont sous le même point, un second clic au même endroit
+## alterne (le panneau de la ville ouvre recrutement, chantiers et province).
+func _try_select_army(screen_position: Vector2) -> bool:
+	var target := pick_target(screen_position)
+	var army_id := str(target.get("army", ""))
+	var settlement_id := str(target.get("settlement", ""))
+	var choose_army := str(target.get("kind", "")) == "army"
+	if army_id != "" and settlement_id != "" and screen_position.distance_to(_last_pick_position) <= REPEAT_CLICK_PX:
+		if _last_pick_target == "army:" + army_id:
 			choose_army = false
-		elif repeat and _last_pick_target == "settlement:" + settlement_id:
+		elif _last_pick_target == "settlement:" + settlement_id:
 			choose_army = true
-		else:
-			choose_army = float(army_hit["score"]) <= float(settlement_hit["score"])
 	_last_pick_position = screen_position
+	_hover_dirty = true
 	if choose_army:
 		_last_pick_target = "army:" + army_id
 		if settlements_ctl != null and settlements_ctl.panel != null and settlements_ctl.panel.visible:
@@ -620,6 +640,63 @@ func _try_select_army(screen_position: Vector2) -> bool:
 		deselect_army()
 	settlement_layer.select(settlement_id)
 	return true
+
+
+## SA (ADR 0160) : éclaire l'objet sous le curseur (armée : socle, figurines, plaque ; ville :
+## écu, anneau d'emprise) et éteint la province survolée tant qu'un objet est visé. Recalculé
+## quand la souris ou la caméra bouge. Avec une armée du joueur sélectionnée, la visée ignore
+## cette armée (on vise une cible pour elle) et le curseur reste celui du déplacement.
+func _update_object_hover() -> void:
+	if armies == null or camera == null:
+		return
+	var mouse := get_viewport().get_mouse_position()
+	var view := camera.global_transform
+	if not _hover_dirty and mouse == _hover_mouse and view.is_equal_approx(_hover_camera):
+		return
+	_hover_dirty = false
+	_hover_mouse = mouse
+	_hover_camera = view
+	var on_map := get_viewport().gui_get_hovered_control() == null and get_viewport().get_visible_rect().has_point(mouse)
+	hover_at(mouse, on_map)
+
+
+## SA : applique le survol pour un point écran (`on_map` faux : curseur sur l'interface ou hors
+## de la fenêtre, rien n'est visé).
+func hover_at(screen_position: Vector2, on_map: bool = true) -> void:
+	var ordering := movement_ctl != null and movement_ctl.active()
+	var target: Dictionary = pick_target(screen_position, selected_army if ordering else "") if on_map else {}
+	var kind := str(target.get("kind", ""))
+	var id := str(target.get("id", ""))
+	if kind == str(hover_target.get("kind", "")) and id == str(hover_target.get("id", "")):
+		return
+	var had_object := not hover_target.is_empty()
+	hover_target = {"kind": kind, "id": id} if kind != "" else {}
+	armies.set_hovered(id if kind == "army" else "")
+	if settlement_layer != null:
+		settlement_layer.set_hovered(id if kind == "settlement" else "")
+	if had_object != (kind != ""):
+		terrain.set_highlight(_hover_highlight_index(), selected_index)
+	if DisplayServer.get_name() != "headless":
+		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if kind != "" and not ordering else Input.CURSOR_ARROW)
+
+
+## SA : plus rien de visé (carte quittée ou mise en veille pour une bataille) ; le curseur
+## redevient la flèche.
+func _clear_object_hover() -> void:
+	hover_target = {}
+	_hover_dirty = true
+	if armies != null:
+		armies.set_hovered("")
+	if settlement_layer != null:
+		settlement_layer.set_hovered("")
+	if DisplayServer.get_name() != "headless":
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+
+## SA : province à éclairer au survol — aucune quand une armée ou une ville est visée (une seule
+## cible éclairée à la fois).
+func _hover_highlight_index() -> int:
+	return 0 if not hover_target.is_empty() else hovered_index
 
 
 func select_army(army_id: String) -> void:
@@ -651,7 +728,8 @@ func select_army(army_id: String) -> void:
 		sieges.on_army_shown(army_id, is_player)
 	ui.hide_province()
 	selected_index = 0
-	terrain.set_highlight(hovered_index, 0)
+	terrain.set_highlight(_hover_highlight_index(), 0)
+	_hover_dirty = true
 	if next_hint != null:  # RS-E : la sélection change la couverture du conseil (panneaux ouverts)
 		next_hint.refresh()
 	# Le chemin en cours (ordre déjà donné) est prévisualisé.
@@ -674,6 +752,7 @@ func deselect_army() -> void:
 	selected_army = ""
 	reachable = {}
 	armies.set_selected("")
+	_hover_dirty = true
 	terrain.set_reachable(PackedInt32Array(), PackedInt32Array())
 	if settlements_ctl != null:  # C5
 		settlements_ctl.on_army_deselected()
@@ -737,7 +816,7 @@ func _with_mode_value(province: Dictionary) -> Dictionary:
 
 func _on_province_hovered(index: int) -> void:
 	hovered_index = index
-	terrain.set_highlight(hovered_index, selected_index)
+	terrain.set_highlight(_hover_highlight_index(), selected_index)
 	var province := province_info(index)
 	if movement_ctl != null and movement_ctl.active():
 		return  # M4 : l'aperçu suit le curseur (ArmyMovementController)
@@ -775,7 +854,7 @@ func _on_province_selected(index: int) -> void:
 	if selected_army != "":
 		deselect_army()
 	selected_index = index
-	terrain.set_highlight(hovered_index, selected_index)
+	terrain.set_highlight(_hover_highlight_index(), selected_index)
 	if index == 0:
 		ui.hide_province()
 	else:
@@ -1358,6 +1437,7 @@ func _process(_delta: float) -> void:
 	tp = PerfProbe.lap("map.rivers", tp)
 	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
 	armies.update_scale(camera_rig.distance)
+	_update_object_hover()  # SA
 	_update_trade_hover()  # C5
 	_update_sea_lane_hover()  # SL1
 	tp = PerfProbe.lap("map.misc", tp)
@@ -1391,6 +1471,7 @@ var _prop_scale: float = 1.0
 ## ZG4 : paramètres globaux remis à leurs valeurs par défaut en quittant la carte (les arbres des
 ## batailles partagent `foliage.gdshaderinc`).
 func _exit_tree() -> void:
+	_clear_object_hover()
 	RenderingServer.global_shader_parameter_set("campaign_prop_scale", 1.0)
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
 	if _parked_environment != null and not _parked_environment.is_inside_tree():
@@ -1980,6 +2061,8 @@ func _set_campaign_active(active: bool) -> void:
 			layer.set_meta(&"visible_before_battle", layer.visible)
 			layer.visible = false
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	if not active:
+		_clear_object_hover()  # SA : pas de curseur « main » pendant la bataille
 	_set_world_environment_active(active)
 	if active:
 		camera.make_current()

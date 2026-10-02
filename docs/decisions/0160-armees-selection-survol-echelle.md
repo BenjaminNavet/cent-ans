@@ -1,4 +1,4 @@
-# 0156 — Armées sur la carte : cible survolée, ost hors de la ville, échelle sous-linéaire
+# 0160 — Armées sur la carte : cible survolée, ost hors de la ville, échelle sous-linéaire
 
 Date : 2026-10-02 · Lot SA (`docs/wip/sa-selection-armees.md`)
 

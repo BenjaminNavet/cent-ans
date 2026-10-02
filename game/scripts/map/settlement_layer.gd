@@ -40,6 +40,10 @@ const LABEL_GAP_PX := 2.0
 const LABEL_FOOTPRINT_MAX_PX := 160.0
 ## VT : rayon de clic minimal (px écran) d'une emprise.
 const PICK_MIN_PX := 8.0
+## SA (ADR 0160) : survol — niveau de surbrillance de l'écu (`settlement_icon.gdshader` : entre
+## 0,2 et 0,5 = survol, au-delà = sélection) et couleur de l'anneau d'emprise.
+const HOVER_HIGHLIGHT := 0.4
+const HOVER_RING_COLOR := Color(1.0, 0.96, 0.82)
 ## VT : emprise (m) d'une colonie absente de `towns_1340.json` ; hauteur (m) des toits au-dessus
 ## du sol (`model_top`).
 const DEFAULT_FOOTPRINT_M := 150.0
@@ -123,6 +127,9 @@ var _labels_dirty: bool = false
 var _labels_root: Node3D
 var _hamlets_root: Node3D
 var _selection_ring: MeshInstance3D
+## SA (ADR 0160) : colonie sous le curseur ("" = aucune) et son anneau clair.
+var hovered_id: String = ""
+var _hover_ring: MeshInstance3D
 ## Q8 : l'anneau de sélection disparaît quand la caméra est à moins de N rayons de la ville.
 const RING_HIDE_DISTANCE_FACTOR := 4.0
 var _settlements_by_chunk: Dictionary = {}
@@ -613,6 +620,17 @@ func _build_selection_ring() -> void:
 	_selection_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_selection_ring.visible = false
 	add_child(_selection_ring)
+	# SA : même anneau, clair, pour la colonie survolée.
+	var hover_material := material.duplicate() as StandardMaterial3D
+	hover_material.albedo_color = HOVER_RING_COLOR
+	hover_material.render_priority = 1
+	_hover_ring = MeshInstance3D.new()
+	_hover_ring.name = "HoverRing"
+	_hover_ring.mesh = torus
+	_hover_ring.material_override = hover_material
+	_hover_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_hover_ring.visible = false
+	add_child(_hover_ring)
 
 
 # --- État de la simulation ---------------------------------------------------------
@@ -1582,42 +1600,73 @@ func _pair_pick_score(i: int, camera: Camera3D, scale: float, screen_position: V
 
 ## Sélectionne une colonie ("" = aucune) : surbrillance de l'écu, anneau au sol, signal.
 func select(id: String) -> void:
-	if _icons != null and selected_id != "" and data.index_by_id.has(selected_id):
-		var old := _icon_instance(data.index_by_id[selected_id])
-		var custom := _icons.multimesh.get_instance_custom_data(old)
-		custom.g = 0.0
-		custom.a = _shield_until[data.index_by_id[selected_id]] / 100.0
-		_icons.multimesh.set_instance_custom_data(old, custom)
+	var old_index: int = data.index_by_id.get(selected_id, -1)
 	selected_id = id if data.index_by_id.has(id) else ""
 	_selected_index = int(data.index_by_id.get(selected_id, -1))
+	_apply_icon_highlight(old_index)
 	_declutter_force = true  # DA7d : la sélection est épinglée
 	if selected_id != "":
 		var index: int = data.index_by_id[selected_id]
-		var custom_new := _icons.multimesh.get_instance_custom_data(_icon_instance(index))
-		custom_new.g = 1.0
-		custom_new.a = SELECTED_UNTIL / 100.0  # DA7d : la sélection reste affichée à toute distance
-		_icons.multimesh.set_instance_custom_data(_icon_instance(index), custom_new)
+		_apply_icon_highlight(index)
 		var entry: Dictionary = data.settlements[index]
 		print("SettlementLayer: selected %s (%s, %s, controller %s)" % [selected_id, entry["name"], entry["kind"], entry["controller"]])
 		settlement_selected.emit(selected_id)
 	_update_selection_ring()
 
 
-func _update_selection_ring() -> void:
-	if _selection_ring == null:
+## SA (ADR 0160) : colonie sous le curseur ("" = aucune) — écu agrandi à halo clair et anneau
+## clair autour de l'emprise : ce que le clic prendrait.
+func set_hovered(id: String) -> void:
+	if data == null or not data.index_by_id.has(id):
+		id = ""
+	if id == hovered_id:
 		return
-	var index: int = data.index_by_id.get(selected_id, -1) if data != null else -1
+	var old_index: int = data.index_by_id.get(hovered_id, -1) if data != null else -1
+	hovered_id = id
+	_apply_icon_highlight(old_index)
+	_apply_icon_highlight(int(data.index_by_id.get(id, -1)) if data != null else -1)
+	_update_selection_ring()
+
+
+## Surbrillance (sélection > survol > rien) et portée d'affichage de l'écu de la colonie `i`.
+func _apply_icon_highlight(i: int) -> void:
+	if _icons == null or i < 0 or i >= data.settlements.size():
+		return
+	var custom := _icons.multimesh.get_instance_custom_data(_icon_instance(i))
+	var selected := _is_selected(i)
+	custom.g = 1.0 if selected else (HOVER_HIGHLIGHT if str(data.settlements[i]["id"]) == hovered_id else 0.0)
+	# DA7d : la sélection reste affichée à toute distance.
+	custom.a = (SELECTED_UNTIL if selected else _shield_until[i]) / 100.0
+	_icons.multimesh.set_instance_custom_data(_icon_instance(i), custom)
+
+
+func _update_selection_ring() -> void:
+	_place_ring(_selection_ring, data.index_by_id.get(selected_id, -1) if data != null else -1)
+	var hover_index: int = data.index_by_id.get(hovered_id, -1) if data != null else -1
+	_place_ring(_hover_ring, -1 if hover_index == _selected_index else hover_index)
+
+
+func _place_ring(ring: MeshInstance3D, index: int) -> void:
+	if ring == null:
+		return
 	var show := index >= 0 and _footprints_on()
 	# Q8 : dessiné sans test de profondeur, l'anneau vu de plus près que sa taille devenait un
 	# disque jaune plein, puis un arc en travers du ciel au zoom minimal : masqué au sol.
 	var radius := _model_radius[index] * 1.1 if index >= 0 else 0.0
 	show = show and _camera_distance > radius * RING_HIDE_DISTANCE_FACTOR
-	_selection_ring.visible = show
+	ring.visible = show
 	if show:
 		# VT : anneau autour de l'emprise réelle.
 		var px := model_px(index)
-		_selection_ring.position = Vector3(px.x, _ground_y[index] + 0.15, px.y)
-		_selection_ring.scale = Vector3(radius, 1.0, radius)
+		ring.position = Vector3(px.x, _ground_y[index] + 0.15, px.y)
+		ring.scale = Vector3(radius, 1.0, radius)
+
+
+## SA (ADR 0160) : rayon de l'emprise d'une colonie (unités monde), 0 si inconnue.
+func model_radius_of(id: String) -> float:
+	if data == null or not data.index_by_id.has(id):
+		return 0.0
+	return _model_radius[data.index_by_id[id]]
 
 
 ## Position monde d'une colonie (maquette posée, sinon relief), Vector3.ZERO si inconnue.

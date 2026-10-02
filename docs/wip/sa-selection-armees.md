@@ -1,6 +1,6 @@
 # Lot SA — sélection, survol et échelle des armées (carte de campagne)
 
-Branche `feat/sa`, worktree `../gp-sa`. ADR 0156. Rendu et entrées seulement (`core/` intact).
+Branche `feat/sa`, worktree `../gp-sa`. ADR 0160. Rendu et entrées seulement (`core/` intact).
 
 Demande (2026-10-02) : cliquer l'ost sélectionne Paris ; pas de surbrillance de ce qu'on vise ;
 modèles d'armée médiocres et changement de taille bizarre au zoom ; s'inspirer de Total War.

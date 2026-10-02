@@ -38,7 +38,7 @@ extends Resource
 @export var min_gain: float = 0.35
 ## Paliers de la part semée (graines gardées) : une cellule est resemée au palier supérieur
 ## quand la part voulue dépasse la part semée ; marge `keep_margin`.
-@export var keep_levels: PackedFloat32Array = PackedFloat32Array([0.015625, 0.0625, 0.25, 1.0])
+@export var keep_levels: PackedFloat32Array = PackedFloat32Array([0.016025, 0.0625, 0.25, 1.0])
 @export var keep_margin: float = 1.25
 ## Ombres des parties à moins de `detail_factor` × la distance du rig (maillage bas partout).
 @export var detail_factor: float = 1.2
