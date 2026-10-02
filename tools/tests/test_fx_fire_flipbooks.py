@@ -1,0 +1,63 @@
+"""Validates data/fx/fire_flipbooks.json and the baking of the FA2 flipbook frames."""
+
+import json
+from pathlib import Path
+
+import numpy as np
+from jsonschema import Draft202012Validator
+from PIL import Image
+
+from cent_ans_tools import vfx_flipbooks
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA = ROOT / "data"
+SHEETS = ROOT / "game/assets/textures/fx"
+
+
+def _settings() -> dict:
+    return json.loads((DATA / "fx" / "fire_flipbooks.json").read_text(encoding="utf-8"))
+
+
+def test_fire_flipbooks_match_schema() -> None:
+    """The flipbook settings match their schema."""
+    schema = json.loads(
+        (DATA / "schemas" / "fx_fire_flipbooks.schema.json").read_text(encoding="utf-8")
+    )
+    Draft202012Validator.check_schema(schema)
+    errors = sorted(
+        Draft202012Validator(schema).iter_errors(_settings()), key=lambda e: e.path
+    )
+    assert not errors, [error.message for error in errors]
+
+
+def test_sheets_are_eight_by_eight() -> None:
+    """Both versioned sheets hold 8x8 square frames of the configured size."""
+    settings = _settings()
+    for name, key in (("flame_flipbook.png", "flame"), ("smoke_flipbook.png", "smoke")):
+        side = settings[key]["frame_px"] * vfx_flipbooks.GRID
+        assert Image.open(SHEETS / name).size == (side, side), name
+
+
+def test_flame_frames_are_centred_squares() -> None:
+    """A tall source frame lands centred in a square frame, heat in RGB, coverage in A."""
+    settings = _settings()["flame"]
+    source = np.zeros((32, 16, 4), dtype=np.float32)
+    source[8:24, 4:12] = [1.0, 0.6, 0.2, 1.0]
+    frames = vfx_flipbooks.flame_sheet_frames([source], settings)
+    size = settings["frame_px"]
+    assert frames[0].shape == (size, size, 4)
+    alpha = frames[0][..., 3]
+    assert alpha[size // 2, size // 2] > 0.9
+    assert alpha[:, : size // 4].max() < 0.05
+    assert alpha[:, -size // 4 :].max() < 0.05
+
+
+def test_smoke_puff_grows_and_thins() -> None:
+    """The puff is smaller and denser when young than when old."""
+    settings = _settings()["smoke"]
+    source = np.zeros((32, 32, 4), dtype=np.float32)
+    source[2:30, 2:30] = [0.5, 0.5, 0.5, 1.0]
+    frames = vfx_flipbooks.smoke_sheet_frames([source] * vfx_flipbooks.FRAMES, settings)
+    young, old = frames[0][..., 3], frames[-1][..., 3]
+    assert (young > 0.1).sum() < (old > 0.1).sum()
+    assert young.max() > old.max()

@@ -1,0 +1,23 @@
+{
+  "description": "Lot FA2 : planches de flammes et de fumée cuites depuis les séquences simulées d'Unity Labs Paris (« Free VFX image sequences & flipbooks », CC0 d'après le billet `licence_url`), par `tools/cent_ans_tools/vfx_flipbooks.py`. Même codage que les planches synthétiques du lot V3 (`fire_flipbooks.py`) : 8×8 images ; flammes RVB = chaleur, A = couverture ; fumée R/A = densité, V = éclairage auto-ombré, image = âge.",
+  "licence_url": "https://blog.unity.com/technology/free-vfx-image-sequences-flipbooks",
+  "source_url": "https://unity3d.com/files/labs/downloads/vfx/assets01/{name}/{name}-flipbooks.zip",
+  "flame": {
+    "name": "Flame02",
+    "columns": 16,
+    "rows": 4,
+    "frame_px": 256,
+    "heat_gamma": 1.25,
+    "base_fade_px": 12
+  },
+  "smoke": {
+    "name": "Cloud02",
+    "columns": 8,
+    "rows": 8,
+    "frame_px": 128,
+    "young_scale": 0.62,
+    "fade_power": 1.3,
+    "old_density": 0.3,
+    "lighting_floor": 0.25
+  }
+}

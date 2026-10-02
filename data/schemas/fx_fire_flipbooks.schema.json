@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_fire_flipbooks.schema.json",
+  "title": "Planches de flammes et de fumée (lot FA2)",
+  "description": "Sources et réglages de `tools/cent_ans_tools/vfx_flipbooks.py`, qui cuit `game/assets/textures/fx/flame_flipbook.png` et `smoke_flipbook.png` (8×8 images) depuis des séquences libres.",
+  "type": "object",
+  "required": ["licence_url", "source_url", "flame", "smoke"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "licence_url": {"type": "string", "pattern": "^https://", "description": "Page où la licence des séquences est énoncée."},
+    "source_url": {"type": "string", "pattern": "^https://.*\\{name\\}", "description": "Adresse du zip d'une séquence, `{name}` = nom de la séquence."},
+    "flame": {
+      "type": "object",
+      "required": ["name", "columns", "rows", "frame_px", "heat_gamma", "base_fade_px"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"$ref": "#/$defs/name"},
+        "columns": {"$ref": "#/$defs/count"},
+        "rows": {"$ref": "#/$defs/count"},
+        "frame_px": {"$ref": "#/$defs/frame_px"},
+        "heat_gamma": {"type": "number", "exclusiveMinimum": 0, "maximum": 4, "description": "Exposant de la chaleur tirée de la luminance (> 1 : cœur plus resserré)."},
+        "base_fade_px": {"type": "integer", "minimum": 0, "description": "Fondu du pied de la flamme vers le bord bas de l'image (px source)."}
+      }
+    },
+    "smoke": {
+      "type": "object",
+      "required": ["name", "columns", "rows", "frame_px", "young_scale", "fade_power", "old_density", "lighting_floor"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"$ref": "#/$defs/name"},
+        "columns": {"$ref": "#/$defs/count"},
+        "rows": {"$ref": "#/$defs/count"},
+        "frame_px": {"$ref": "#/$defs/frame_px"},
+        "young_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Taille de la bouffée naissante (part de sa taille finale)."},
+        "fade_power": {"type": "number", "exclusiveMinimum": 0, "description": "Exposant de la dissipation avec l'âge."},
+        "old_density": {"type": "number", "minimum": 0, "maximum": 1, "description": "Densité restante en fin de vie (part de la densité de départ)."},
+        "lighting_floor": {"type": "number", "minimum": 0, "maximum": 1, "description": "Éclairage du creux le plus sombre des volutes."}
+      }
+    }
+  },
+  "$defs": {
+    "name": {"type": "string", "pattern": "^[A-Za-z0-9]+$"},
+    "count": {"type": "integer", "minimum": 1, "maximum": 64},
+    "frame_px": {"type": "integer", "enum": [128, 256], "description": "Côté d'une image de la planche produite (8×8 images)."}
+  }
+}
