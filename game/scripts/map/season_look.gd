@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Lot TB1 : réglages visuels des saisons de la carte de campagne, lus dans
 ## `data/ui/campaign_seasons.json` (schéma `data/schemas/campaign_seasons_ui.schema.json`) : mer
-## selon la saison, mer sous la tempête. Sans fichier (données de test), valeurs neutres : rendu
+## selon la saison, mer sous la tempête, étalonnage de saison de la carte (ADR 0150). Sans fichier (données de test), valeurs neutres : rendu
 ## inchangé. Purement visuel : aucune règle de jeu.
 
 const DATA_PATH := "ui/campaign_seasons.json"
@@ -77,3 +77,9 @@ static func storm() -> Dictionary:
 	for key: String in ["foam_gain", "foam_width", "whitecaps", "darken", "reach_px", "rain_share"]:
 		result[key] = float(block.get(key, 0.0))
 	return result
+
+
+## Étalonnage de saison de la carte (bloc `grade`, format de `AtmosphereLibrary.grade_lut`) ;
+## {} sans données.
+static func grade(season: String) -> Dictionary:
+	return _season_block(season, "grade")

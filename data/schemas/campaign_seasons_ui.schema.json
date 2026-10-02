@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "campaign_seasons_ui.schema.json",
   "title": "Saisons de la carte de campagne (TB1)",
-  "description": "Réglages purement visuels des saisons de la carte de campagne, lus par game/scripts/map/season_look.gd : mer, tempête, étalonnage de carte, neige des toits. Aucune règle de jeu.",
+  "description": "Réglages purement visuels des saisons de la carte de campagne, lus par game/scripts/map/season_look.gd : mer, tempête, étalonnage de carte. Aucune règle de jeu.",
   "type": "object",
   "required": [
     "seasons",
@@ -103,7 +103,8 @@
     "season": {
       "type": "object",
       "required": [
-        "sea"
+        "sea",
+        "grade"
       ],
       "additionalProperties": false,
       "properties": {
@@ -133,6 +134,65 @@
               "maximum": 3
             }
           }
+        },
+        "grade": {
+          "$ref": "#/$defs/grade"
+        }
+      }
+    },
+    "grade": {
+      "description": "Étalonnage de saison de la carte (bible DA § 12.6), au format des blocs `grade` de data/fx/atmosphere.json ; composé après l'étalonnage de saison commun et avant l'étalonnage de carte (ADR 0150).",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "temperature": {
+          "description": "Balance chaud (+) / froid (−).",
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "tint": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "contrast": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.5
+        },
+        "saturation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.5
+        },
+        "shadow_saturation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.5
+        },
+        "lift": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number",
+            "minimum": -0.2,
+            "maximum": 0.2
+          }
+        },
+        "gamma": {
+          "$ref": "#/$defs/rgb"
+        },
+        "gain": {
+          "$ref": "#/$defs/rgb"
+        },
+        "shadows": {
+          "$ref": "#/$defs/rgb"
+        },
+        "highlights": {
+          "$ref": "#/$defs/rgb"
         }
       }
     }

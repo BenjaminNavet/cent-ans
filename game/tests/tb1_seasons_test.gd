@@ -95,9 +95,38 @@ func _check_sea() -> bool:
 	return ok
 
 
-## Point 3 : étalonnage par saison (`data/ui/`).
+## Point 3 : étalonnage par saison lu dans `data/ui/campaign_seasons.json` et composé dans le
+## préréglage de la carte. Un gris moyen sort plus chaud en automne qu'en été, froid au printemps,
+## bleuté en hiver ; une couleur vive sort désaturée en hiver.
 func _check_grade() -> bool:
-	return true
+	var ok := true
+	var warmth := {}
+	var chroma := {}
+	for season in AtmosphereLibrary.SEASONS:
+		var grade := SeasonLook.grade(season)
+		var preset := CampaignAtmosphere.resolve_preset(season)
+		if grade.is_empty() or preset.is_empty() or not (preset["grades"] as Array).has(grade):
+			push_error("TB1: %s season grade missing from the campaign preset" % season)
+			ok = false
+			continue
+		var prepared := AtmosphereLibrary._prepare(grade)
+		var grey := AtmosphereLibrary._grade(Vector3(0.5, 0.5, 0.5), prepared)
+		warmth[season] = grey.x - grey.z
+		var vivid := AtmosphereLibrary._grade(Vector3(0.3, 0.6, 0.2), prepared)
+		chroma[season] = maxf(vivid.x, maxf(vivid.y, vivid.z)) - minf(vivid.x, minf(vivid.y, vivid.z))
+	if not ok:
+		return false
+	print("TB1 grade: warmth %s, chroma %s" % [warmth, chroma])
+	if not (float(warmth["autumn"]) > float(warmth["summer"]) and float(warmth["summer"]) > 0.01):
+		push_error("TB1: summer should be golden and autumn warmer (%s)" % warmth)
+		ok = false
+	if not (float(warmth["spring"]) < 0.0 and float(warmth["winter"]) < float(warmth["spring"])):
+		push_error("TB1: spring should be cool and winter bluer (%s)" % warmth)
+		ok = false
+	if float(chroma["winter"]) > float(chroma["summer"]) * 0.85:
+		push_error("TB1: winter should be desaturated (%s)" % chroma)
+		ok = false
+	return ok
 
 
 ## Point 4 : neige sur les toits des villes 1:1.

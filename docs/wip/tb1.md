@@ -7,12 +7,12 @@ Spec : `docs/design/2026-10-02-campagne-tob.md` § 3 « TB1 ». Branche `feat/tb
 - [x] Squelette du test `game/tests/tb1_seasons_test.gd`.
 - [x] 1. Delta saisonnier par-dessus la carte de couleur (`satellite_ground` : `season_k`, `hb_ground` : couleur de saison par parcelle + `k_wild`/`k_forest`), neige de plaine en plaques régionales (`season_snow`, `winter_south`).
 - [x] 2. Mer selon la saison (`water.gdshader` : `season_*`, `storm_*` ; `Sea.apply_season` / `sync_weather` appelés par `CampaignLife._sync_sea` ; valeurs dans `data/ui/campaign_seasons.json`, lues par `SeasonLook`).
-- [ ] 3. Étalonnage par saison (`data/ui/` + schéma).
+- [x] 3. Étalonnage par saison : bloc `grade` de `data/ui/campaign_seasons.json`, composé par `CampaignAtmosphere.resolve_preset` (ADR 0150).
 - [ ] 4. Neige sur les toits des villes 1:1 (uniform `snow`).
 
 ## Prochaine étape
-Point 3 : bloc `grade` par saison dans `data/ui/campaign_seasons.json`, inséré par
-`CampaignAtmosphere.resolve_preset` entre l'étalonnage de saison et celui de carte (ADR 0150).
+Point 4 : neige des toits des villes 1:1 par paramètre global `campaign_roof_snow`
+(`project.godot`, `town_building.gdshader`, `town_far.gdshader`), publié par `CampaignLife`.
 
 Mesure : `godot --path game --resolution 1600x900 --script res://tests/ss_shot.gd -- --stats
 --season=<saison> --distances=1100,400,90 --hide=Clouds --param=weather_enabled=false

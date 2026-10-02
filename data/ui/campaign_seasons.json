@@ -1,5 +1,5 @@
 {
-  "description": "TB1 : saisons de la carte de campagne (rendu seulement). `sea` : mer selon la saison ; `storm` : mer sous la tempête.",
+  "description": "TB1 : saisons de la carte de campagne (rendu seulement). `sea` : mer selon la saison ; `grade` : étalonnage de saison de la carte (printemps frais, été doré, automne chaud, hiver bleuté et désaturé ; bible DA § 12.6, ADR 0150) ; `storm` : mer sous la tempête.",
   "seasons": {
     "spring": {
       "sea": {
@@ -10,6 +10,14 @@
         ],
         "desaturate": 0.05,
         "foam": 1.0
+      },
+      "grade": {
+        "temperature": -0.12,
+        "gain": [
+          0.98,
+          1.02,
+          1.0
+        ]
       }
     },
     "summer": {
@@ -21,6 +29,14 @@
         ],
         "desaturate": 0.0,
         "foam": 0.9
+      },
+      "grade": {
+        "temperature": 0.14,
+        "highlights": [
+          1.05,
+          1.0,
+          0.9
+        ]
       }
     },
     "autumn": {
@@ -32,6 +48,19 @@
         ],
         "desaturate": 0.3,
         "foam": 1.2
+      },
+      "grade": {
+        "temperature": 0.22,
+        "gain": [
+          1.04,
+          0.98,
+          0.9
+        ],
+        "shadows": [
+          1.03,
+          0.98,
+          0.92
+        ]
       }
     },
     "winter": {
@@ -43,6 +72,20 @@
         ],
         "desaturate": 0.6,
         "foam": 1.4
+      },
+      "grade": {
+        "temperature": -0.32,
+        "saturation": 0.72,
+        "shadows": [
+          0.94,
+          0.99,
+          1.08
+        ],
+        "highlights": [
+          0.97,
+          1.0,
+          1.05
+        ]
       }
     }
   },

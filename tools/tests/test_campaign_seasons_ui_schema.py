@@ -29,3 +29,13 @@ def test_winter_sea_is_darker_and_greyer() -> None:
     winter, summer = seasons["winter"]["sea"], seasons["summer"]["sea"]
     assert sum(winter["tint"]) < sum(summer["tint"]) - 0.5
     assert winter["desaturate"] > summer["desaturate"] + 0.3
+
+
+def test_season_grades_follow_the_art_bible() -> None:
+    """Spring is cool, summer and autumn warm, winter blue and desaturated (bible § 12.6)."""
+    seasons = _load("ui/campaign_seasons.json")["seasons"]
+    grades = {name: season["grade"] for name, season in seasons.items()}
+    assert grades["spring"]["temperature"] < 0
+    assert grades["autumn"]["temperature"] > grades["summer"]["temperature"] > 0
+    assert grades["winter"]["temperature"] < grades["spring"]["temperature"]
+    assert grades["winter"]["saturation"] < 0.9
