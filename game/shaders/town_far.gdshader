@@ -36,7 +36,10 @@ uniform float sink_depth_m = 30.0;
 uniform vec3 sink_camera = vec3(0.0, 1e6, 0.0);
 // Lot TB3 (ADR 0162) : suie par ville, même index que `built_mask` (R8 64 × 64, 0-1).
 uniform sampler2D soot_mask : filter_nearest, repeat_disable;
-uniform vec3 soot_color : source_color = vec3(0.035, 0.03, 0.028);
+uniform vec3 soot_color : source_color = vec3(0.11, 0.075, 0.055);
+// Comme `town_building.gdshader` : toits brun-noir à 60 % au plus, murs peu touchés.
+uniform float soot_roof_max : hint_range(0.0, 1.0) = 0.6;
+uniform float soot_wall_max : hint_range(0.0, 1.0) = 0.15;
 
 const int MASK_SIDE = 64;
 
@@ -87,7 +90,7 @@ void fragment() {
 		float n = roof_hash(floor(world_m.xz / 16.0)) * 0.65 + roof_hash(floor(world_m.xz / 3.0)) * 0.35;
 		// Vue de loin : plaques sous-pixel ramenées à leur moyenne (pas de scintillement).
 		float patch = mix(smoothstep(1.0 - v_soot - 0.12, 1.0 - v_soot + 0.12, n), v_soot, smoothstep(8.0, 32.0, length(fwidth(world_m.xz))));
-		albedo = mix(albedo, soot_color, patch * 0.9);
+		albedo = mix(albedo, soot_color, patch * mix(soot_wall_max, soot_roof_max, up));
 	}
 	ALBEDO = albedo;
 	ROUGHNESS = roughness;

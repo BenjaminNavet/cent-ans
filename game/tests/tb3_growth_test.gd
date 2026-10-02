@@ -388,6 +388,14 @@ func _check_growth(layer: SettlementLayer, data: SettlementData) -> void:
 	_completed_steps += 1
 
 
+## Valeur par défaut d'un uniforme flottant dans le code d'un shader (-1 si absente).
+func _uniform_default(code: String, uniform_name: String) -> float:
+	var regex := RegEx.new()
+	regex.compile("uniform float %s[^=;]*=\\s*([0-9.]+)" % uniform_name)
+	var found := regex.search(code)
+	return float(found.get_string(1)) if found != null else -1.0
+
+
 func _parts(instances: Array, part: String) -> int:
 	var count := 0
 	for inst: Dictionary in instances:
@@ -428,6 +436,14 @@ func _check_soot(layer: SettlementLayer, data: SettlementData) -> void:
 	# État par ville dans le rendu : ville 1:1, maillage lointain, faubourgs.
 	var shader := load("res://shaders/town_building.gdshader") as Shader
 	_check(shader != null and shader.code.contains("instance uniform float town_soot"), "town_building.gdshader has a per-town soot instance parameter")
+	# Effet borné : toits brun-noir à 60 % au plus, murs peu touchés (la ville reste lisible).
+	for path: String in ["res://shaders/town_building.gdshader", "res://shaders/town_far.gdshader"]:
+		var bounded := load(path) as Shader
+		# Valeurs par défaut lues dans le code (le rendu headless ne les expose pas).
+		var roof_max := _uniform_default(bounded.code, "soot_roof_max")
+		var wall_max := _uniform_default(bounded.code, "soot_wall_max")
+		_check(roof_max > 0.3 and roof_max <= 0.6 and wall_max <= 0.2, "%s: soot bounded (roofs %.2f, walls %.2f)" % [path.get_file(), roof_max, wall_max])
+		_check(bounded.code.contains("mix(albedo, soot_color, patch * mix(soot_wall_max, soot_roof_max, up))") or bounded.code.contains("patch * (roof ? soot_roof_max : soot_wall_max)"), "%s: roofs and walls sooted by their own bound" % path.get_file())
 	var agen: int = data.index_by_id[TOWN]
 	var agen_px: Vector2 = data.settlements[agen]["px"]
 	var other := ""

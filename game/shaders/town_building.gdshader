@@ -51,7 +51,11 @@ uniform float aging : hint_range(0.0, 2.0) = 0.5;
 // instance de MultiMesh dans `INSTANCE_CUSTOM.b` (faubourgs et bâtiments hors les murs partagés
 // entre villes, `OutbuildingLayer`). 0 : aucune.
 instance uniform float town_soot : hint_range(0.0, 1.0) = 0.0;
-uniform vec3 soot_color : source_color = vec3(0.035, 0.03, 0.028);
+uniform vec3 soot_color : source_color = vec3(0.11, 0.075, 0.055);
+// Part maximale de la teinte de suie : toits brun-noir à 60 % au plus, murs et sol peu touchés
+// (la ville saccagée reste lisible).
+uniform float soot_roof_max : hint_range(0.0, 1.0) = 0.6;
+uniform float soot_wall_max : hint_range(0.0, 1.0) = 0.15;
 
 #include "res://shaders/building_aging.gdshaderinc"
 
@@ -150,11 +154,11 @@ void fragment() {
 	}
 	if (v_soot > 0.0) {
 		// Plaques de suie (≈ 16 m, bord déchiqueté à ≈ 3 m) : la part couverte suit `v_soot` ;
-		// toits presque noirs, murs et sol noircis à moitié.
+		// toits brun-noir (`soot_roof_max`), murs et sol à peine salis (`soot_wall_max`).
 		float n = ba_noise(world_m.xz * 0.06) * 0.65 + ba_noise(world_m.xz * 0.33) * 0.35;
 		float patch = smoothstep(1.0 - v_soot - 0.12, 1.0 - v_soot + 0.12, n);
 		bool roof = layer >= roof_first && layer <= roof_last;
-		float k = patch * (roof || v_built > 0.0 ? 0.9 : 0.5);
+		float k = patch * (roof ? soot_roof_max : soot_wall_max);
 		albedo = mix(albedo, soot_color, k);
 		roughness = mix(roughness, 1.0, k);
 	}
