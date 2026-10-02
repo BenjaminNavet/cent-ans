@@ -1869,34 +1869,54 @@ Rendu seulement ; les règles restent dans `core/`. Données : `data/map/buildin
   à moins de `shore_reach_m`). La maquette grandit sur place ; sa façade regarde la ville, ou
   l'eau.
 - **Rendu** : un `MultiMesh` par maillage pour le voisinage de la caméra (rayon `load_factor` ×
-  distance du rig, borné par `load_min_units` et 1,5 × la portée), reconstruit par tranches de 1,5 ms quand la caméra s'éloigne de son centre ou que l'état de la
-  simulation change (`get_state_revision`) ; hauteurs recalées quand des pages de relief plus
-  fines arrivent. Échelle réelle, visible sous `render.view_range_units` (45), ombres sous
-  `shadow_range_units` (12). `--no-tb3` après `--` coupe la couche.
+  distance du rig, entre `load_min_units` et `load_max_units`), reconstruit par tranches de
+  1,5 ms quand la caméra s'éloigne de son centre, que le palier de distance change ou que l'état
+  de la simulation change (`get_state_revision`) ; hauteurs recalées quand des pages de relief
+  plus fines arrivent. Ombres sous `shadow_range_units` (90). `--no-tb3` après `--` coupe la
+  couche.
+- **Taille tenue à l'écran** (`render.screen`, ADR 0162) : échelle réelle sous `real_below` (10) ;
+  à partir de `full_from` (15) chaque maquette garde une largeur d'écran selon son niveau
+  (`fractions` : 4,2 %, 5,8 %, 7,7 % de la hauteur d'écran, soit 38 / 52 / 69 px au centre en
+  900 px), son grossissement suivant la distance du rig (`model_factor`) ; fondu de sortie de
+  `fade_from_units` (120) à `view_range_units` (160). De loin, les maquettes s'écartent de la
+  ville dans la même proportion (`_layout`, `_far_spot`) : anneau au bord de la ville dans la
+  direction du site réel, sans recouvrement entre elles ni avec les colonies voisines, hors mer
+  et lits de fleuve, routes principales et routes des portes évitées tant qu'il reste de la
+  place. La mise en place est calculée par palier géométrique de distance (`band_top`,
+  `band_ratio` 1,5) et gardée par colonie ; les cités passent avant les villes, les niveaux hauts
+  avant les bas ; une maquette sans place est retirée à ce palier ; au-delà de `minor_until`
+  (60), seules les cités et les villes gardent les leurs. Faubourgs ajoutés : quartier grossi
+  depuis son départ sur la route (`house_fraction`) ; enceinte ajoutée : tracé inchangé,
+  épaisseur tenue à l'écran (`wall_fraction`, au plus `wall_max_share` du rayon), tours
+  éclaircies.
+- **Brouillard de guerre** : rien n'est posé dans une province hors de vue
+  (`ArmyMarkers.hidden_provinces` ; `OutbuildingLayer.fog_source`, `is_hidden(id)`).
 - **Croissance de la ville 1:1** (`TownGrowth`, mêmes `MultiMesh`) : quartiers de faubourg (maisons
   de `town_kit/`) le long des routes des portes selon la population de la province rapportée à
   celle de 1337 ; enceinte (pans, tours, portes aux dimensions de `towns_1340.json`) quand un
   bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan et les
   bâtiments de départ. `SettlementLayer.growth_of(id)` résume la croissance d'une colonie.
 - **Suie par ville** (`TownSoot`, `SettlementLayer.town_soot` / `set_town_soot`) : dévastation de
-  la province, siège, prise de la place. Portée par le paramètre d'instance `town_soot` des nœuds
-  de la ville (`TownBuilder.set_soot`), le masque `soot_mask` du maillage lointain et
-  `INSTANCE_CUSTOM.b` des instances partagées.
+  la province, siège, prise de la place (mémoire de session). Portée par le paramètre d'instance
+  `town_soot` des nœuds de la ville (`TownBuilder.set_soot`), le masque `soot_mask` du maillage
+  lointain et `INSTANCE_CUSTOM.b` des instances partagées. Effet borné dans les shaders : toits
+  brun-noir à 60 % au plus (`soot_roof_max`), murs et sol à 15 % (`soot_wall_max`).
 - **Chantier** : `ConstructionMarkers` pose la maquette `worksite_1` (taille constante à l'écran,
-  couche « Signes ») ; la cité en chantier reçoit aussi un chantier à l'échelle réelle.
+  couche « Signes ») ; la cité en chantier reçoit aussi un chantier parmi ses maquettes.
 
 Mesures (`game/tests/tb3_shot.gd --bench`, M4 Pro, 1600 × 900, Agen, états imposés, machine
-partagée à une charge de 30 à 50 : les temps par image ne sont pas exploitables, les appels de
-dessin si) : d = 8 : 696 → 714 appels de dessin (9 instances, 8 nœuds, ombres comprises) ;
-d = 90 : 478 → 478 ; d = 400 : 398 → 398 (couche masquée au-delà de 45 : aucun coût). Temps par
-image avec / sans la couche, deux passes : d = 8 : 25,9 / 42,6 et 37,4 / 56,4 ms ; d = 90 :
-18,1 / 20,5 et 20,4 / 26,6 ms ; d = 400 : 16,7 / 19,6 et 16,8 / 17,5 ms (bruit de charge).
-`ss_shot.gd --bench` avant / après le lot : 20,6 → 22,2 ms à 90, 23,7 → 23,7 ms à 400. À
-refaire sur machine calme. Hors image : lecture groupée de l'état 6 ms (une fois par changement
-d'état, seulement quand la couche est à l'écran) ; voisinage reconstruit en 20 à 50 ms réelles,
-par tranches de 1,5 ms.
+partagée à une charge de 140 : seuls les appels de dessin sont exploitables), couche masquée →
+affichée : d = 20 : 643 → 679 appels de dessin (14 instances, 11 nœuds, ombres comprises) ;
+d = 45 : 449 → 490 (177 instances, 22 nœuds) ; d = 90 : 478 → 499 (218 instances, 25 nœuds) ;
+d = 400 : 398 → 398 (hors de portée). Temps par image avec / sans la couche : 32,9 / 33,0 ms à
+20, 25,1 / 25,0 à 45, 25,3 / 25,1 à 90 (dans le bruit). Mise en place d'un voisinage (hors
+image, par tranches de 1,5 ms, temps réel sous cette charge) : 0,2 à 0,6 s pour 9 à 64 colonies ;
+lecture groupée de l'état 8 ms par changement d'état. Largeurs à l'écran (`tb3_growth_test`,
+autour du point visé, en 900 px de haut) : 28,8 à 60,1 px à 20 ; 32,4 à 67,1 px à 45 ; 33,1 à
+65,8 px à 90 ; aucune paire en recouvrement. À refaire sur machine calme.
 Captures de contrôle : `godot --path game --resolution 1600x900 --script res://tests/tb3_shot.gd
--- --out=<dossier>`.
+-- --out=<dossier>` : Agen et Fleurance aux distances 20, 45 et 90, chaque cadrage en
+`-avant.png` (sans le lot) et `-apres.png`.
 
 ## Interface des colonies (lot C5)
 
