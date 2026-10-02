@@ -9,14 +9,18 @@ extends SceneTree
 ##  4. croissance de la ville 1:1 : faubourgs selon la population, enceinte selon la
 ##     fortification ;
 ##  5. suie par ville ;
-##  6. chantier des signes de carte : maquette à la place du « ⚒ ».
+##  6. chantier des signes de carte : maquette à la place du « ⚒ » ;
+##  7. taille tenue à l'écran (ADR 0162) : largeur projetée de chaque maquette aux distances 20,
+##     45 et 90 (≥ 28 px en 1600 × 900, niveau 3 ≥ 1,8 × le niveau 1), aucune paire en
+##     recouvrement, fondu de sortie, rien sous le brouillard de guerre.
 ## Usage : godot --headless --path game --script res://tests/tb3_growth_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TOWN := "set_agen"
 const PROVINCE := "prov_agenais"
 ## Étapes qui doivent aller à leur terme (une erreur de script interrompt la fonction en cours).
-const EXPECTED_STEPS := 5
+const EXPECTED_STEPS := 6
+const SCREEN_DISTANCES: Array[float] = [20.0, 45.0, 90.0]
 
 var _failures := 0
 var _completed := false
@@ -112,6 +116,8 @@ func _run() -> void:
 		return
 	_check(out.manifest.size() >= 25, "expected 24 models and a worksite, got %d" % out.manifest.size())
 	await _check_outbuildings(layer, data, town_px)
+	_check_screen(layer, data, map_data, camera, town_px)
+	camera.look_at_from_position(focus + Vector3(0.0, 8.0, 8.0), focus, Vector3.UP)
 	_check_growth(layer, data)
 	_check_soot(layer, data)
 	await _check_worksite_sign(world, camera)
@@ -142,8 +148,10 @@ func _check_mapping(config: Dictionary) -> void:
 	_check(capped.size() == cap, "models capped at %d per settlement, got %d" % [cap, capped.size()])
 	for model: Dictionary in capped:
 		_check(int(model["level"]) >= 2, "the cap keeps the highest levels (%s level %d)" % [model["family"], model["level"]])
-	_check(is_equal_approx(OutbuildingLayer.exaggeration(config, 200.0), float(config["render"]["exaggeration"]["max"])), "exaggeration reaches its maximum far away")
-	_check(is_equal_approx(OutbuildingLayer.exaggeration(config, 5.0), 1.0), "real scale up close")
+	_check(is_equal_approx(OutbuildingLayer.model_factor(config, 25.0, 1, 5.0, 719.0, 55.0), 1.0), "real scale up close")
+	_check(OutbuildingLayer.model_factor(config, 25.0, 1, 90.0, 719.0, 55.0) > 6.0 * OutbuildingLayer.model_factor(config, 25.0, 1, 15.0, 719.0, 55.0) * 0.99, "the factor grows like the rig distance")
+	_check(is_zero_approx(OutbuildingLayer.band_top(config, 8.0)) and OutbuildingLayer.band_top(config, 20.0) >= 20.0 and OutbuildingLayer.band_top(config, 90.0) >= 90.0, "layout bands cover their distances")
+	_check(is_equal_approx(OutbuildingLayer.fade(config, 100.0), 1.0) and is_equal_approx(OutbuildingLayer.fade(config, 140.0), 0.5) and is_zero_approx(OutbuildingLayer.fade(config, 160.0)), "fade out between 120 and 160")
 	_completed_steps += 1
 
 
@@ -202,6 +210,98 @@ func _check_outbuildings(layer: SettlementLayer, data: SettlementData, town_px: 
 	# Hors de portée : rien n'est dessiné.
 	layer.update_view(out.view_range() * 2.0)
 	_check(not out.visible, "outbuildings hidden beyond their view range")
+	layer.update_view(10.0)
+	_completed_steps += 1
+
+
+## Brouillard de guerre factice (`ArmyMarkers.hidden_provinces`).
+class FogSource:
+	extends RefCounted
+
+	var hidden_provinces: Dictionary = {}
+
+
+## 7. Taille tenue à l'écran aux distances de jeu, sans recouvrement ; brouillard de guerre.
+func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapData, camera: Camera3D, town_px: Vector2) -> void:
+	var out := layer.outbuildings
+	var screen: Dictionary = out.config["render"]["screen"]
+	var sim := FakeSim.new()
+	sim.resources[PROVINCE] = ["res_wheat", "res_wine", "res_wood"]
+	sim.buildings[TOWN] = ["bld_fair", "bld_water_mill", "bld_vineyard_press", "bld_stables", "bld_weaving_workshop", "bld_abbey", "bld_scriptorium", "bld_counting_house"]
+	sim.constructing[TOWN] = true
+	# Colonies voisines bâties elles aussi : les emprises de villes voisines ne se recouvrent pas.
+	for entry in data.settlements:
+		if str(entry["id"]) != TOWN and (entry["px"] as Vector2).distance_to(town_px) < 80.0:
+			sim.buildings[str(entry["id"])] = ["bld_market", "bld_windmill"]
+			sim.resources[str(entry["province"])] = ["res_wheat"]
+	var fog := FogSource.new()
+	out.fog_source = fog
+	layer.refresh(sim, Callable())
+	var focus := Vector3(town_px.x, map_data.surface_world_at(town_px.x, town_px.y), town_px.y)
+	var pitch := deg_to_rad(30.0)
+	var view_height := float(root.size.y)
+	camera.fov = 55.0
+	var town_index: int = data.index_by_id[TOWN]
+	for distance in SCREEN_DISTANCES:
+		camera.look_at_from_position(focus + Vector3(0.0, sin(pitch), cos(pitch)) * distance, focus, Vector3.UP)
+		layer.update_view(distance)
+		out.flush(town_px)
+		var models: Array = []
+		for inst: Dictionary in out.instances():
+			if str(inst.get("grow", "")) == "out":
+				models.append(inst)
+		var narrowest := INF
+		var widest := 0.0
+		var level_width := {1: [INF, 0.0], 2: [INF, 0.0], 3: [INF, 0.0]}
+		var measured := 0
+		for inst: Dictionary in models:
+			var px: Vector2 = inst["px"]
+			var width := float(inst["width_m"]) * float(inst["factor"]) / 719.0
+			var at := Vector3(px.x, map_data.surface_world_at(px.x, px.y), px.y)
+			var right := camera.global_transform.basis.x * width * 0.5
+			var pixels := camera.unproject_position(at - right).distance_to(camera.unproject_position(at + right)) * 900.0 / view_height
+			# Largeur mesurée autour du point visé (la perspective réduit le fond de l'image).
+			if px.distance_to(town_px) < distance * 0.2:
+				measured += 1
+				narrowest = minf(narrowest, pixels)
+				widest = maxf(widest, pixels)
+			var range: Array = level_width[int(inst["level"])]
+			range[0] = minf(float(range[0]), width)
+			range[1] = maxf(float(range[1]), width)
+			var j := int(inst["settlement"])
+			_check(px.distance_to(layer.model_px(j)) >= layer.built_radius(j) + float(inst["radius_m"]) * float(inst["factor"]) / 719.0, "%s of %s clears its town at distance %.0f" % [inst["model"], data.settlements[j]["id"], distance])
+			_check(map_data.is_land_px(int(px.x), int(px.y)) and map_data.river_sd_at(px.x, px.y) > 0.0, "%s of %s stands on land, off the river bed, at distance %.0f" % [inst["model"], data.settlements[j]["id"], distance])
+		_check(narrowest >= 28.0, "every model is at least 28 px wide at distance %.0f, got %.1f" % [distance, narrowest])
+		_check(float(level_width[3][0]) >= 1.8 * float(level_width[1][1]), "level 3 at least 1.8 times level 1 at distance %.0f (%.2f against %.2f units)" % [distance, level_width[3][0], level_width[1][1]])
+		var overlaps := 0
+		for a in models.size():
+			for b in range(a + 1, models.size()):
+				var reach := (float(models[a]["radius_m"]) * float(models[a]["factor"]) + float(models[b]["radius_m"]) * float(models[b]["factor"])) / 719.0
+				if (models[a]["px"] as Vector2).distance_to(models[b]["px"]) < reach:
+					overlaps += 1
+		_check(overlaps == 0, "no two models overlap at distance %.0f, got %d pair(s) among %d" % [distance, overlaps, models.size()])
+		var own := out.instances_of(TOWN)
+		_check(own.size() >= 3, "at least 3 models stay around %s at distance %.0f, got %d" % [TOWN, distance, own.size()])
+		_check(float(own[0]["factor"]) > 1.0 if not own.is_empty() else false, "models are enlarged at distance %.0f" % distance)
+		print("tb3_growth_test: distance %.0f : %d maquettes (%d autour de %s), largeur de %d d'entre elles %.1f à %.1f px en 900 px de haut, niveau 1 %.2f u, niveau 3 %.2f u, mise en place %.1f ms" % [distance, models.size(), own.size(), TOWN, measured, narrowest, widest, level_width[1][1], level_width[3][0], float(out.stats.get("build_ms", 0.0))])
+	_check(float(screen["real_below"]) < float(screen["full_from"]), "real scale below the held sizes")
+	# Brouillard de guerre : rien n'est posé dans une province hors de vue.
+	fog.hidden_provinces[PROVINCE] = true
+	layer.refresh(sim, Callable())
+	layer.update_view(45.0)
+	out.flush(town_px)
+	_check(out.is_hidden(TOWN) and out.instances_of(TOWN).is_empty(), "nothing stands around a town under the fog of war")
+	_check(not out.instances().is_empty(), "provinces in sight keep their models")
+	fog.hidden_provinces.clear()
+	layer.refresh(sim, Callable())
+	layer.update_view(45.0)
+	out.flush(town_px)
+	_check(not out.instances_of(TOWN).is_empty(), "models come back once the province is in sight")
+	# Retour à l'échelle réelle de près.
+	layer.update_view(8.0)
+	out.flush(town_px)
+	for inst: Dictionary in out.instances_of(TOWN):
+		_check(is_equal_approx(float(inst["factor"]), 1.0) and (inst["px"] as Vector2).is_equal_approx(inst["real_px"]), "%s back at real scale and on its site up close" % inst["model"])
 	layer.update_view(10.0)
 	_completed_steps += 1
 

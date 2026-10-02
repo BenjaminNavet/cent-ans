@@ -1,7 +1,7 @@
 class_name OutbuildingLayer
 extends Node3D
 
-## Lot TB3 (ADR 0153) : bâtiments hors les murs de la carte de campagne (ferme, moulin, vignoble,
+## Lot TB3 (ADR 0162) : bâtiments hors les murs de la carte de campagne (ferme, moulin, vignoble,
 ## mine, saline, abbaye, marché, port), posés sur le terroir autour des colonies selon les
 ## bâtiments construits que le moteur expose (`CampaignSim.get_settlements_live`, sinon
 ## `settlement_detail`), au niveau 1 à 3 donné par `data/map/building_models.json`. Rendu
@@ -12,7 +12,13 @@ extends Node3D
 ##   dessin par maquette distincte), reconstruit par petites étapes quand la caméra s'éloigne du
 ##   centre du voisinage ou que l'état de la simulation change. Hauteurs de base en mètres, posées
 ##   par le shader (`campaign_display_height`).
-## - Échelle réelle (ADR 0138) ; `render.exaggeration` des données permet de grossir de loin.
+## - **Taille tenue à l'écran** (ADR 0162, `render.screen`) : échelle réelle de près (ADR 0138),
+##   puis chaque maquette garde une largeur d'écran selon son niveau (grossissement proportionnel
+##   à la distance du rig), jusqu'au fondu de sortie. Les maquettes s'écartent alors de la ville
+##   et les unes des autres dans la même proportion : mise en place par palier de distance
+##   (`band_top`), sans recouvrement, hors mer, fleuves, routes principales et autres colonies ;
+##   celles qui ne tiennent pas sont retirées à ce palier.
+## - Brouillard de guerre : rien n'est posé dans une province hors de vue.
 ## - Les autres pièces de la croissance (faubourgs, enceinte, lot TB3 point 4) passent par le même
 ##   rendu : `TownGrowth` fournit ses instances par colonie.
 
@@ -33,6 +39,13 @@ const REGROUND_DELAY := 20
 const GRID_UNITS := 8.0
 ## Demi-angle (rad) laissé libre autour de la route de chaque porte.
 const GATE_CORRIDOR := 0.2
+## Côté (unités) des cases de la grille des emprises tenues à l'écran, et des routes principales.
+const DISC_CELL := 18.0
+const ROAD_CELL := 2.0
+## Écart entre anneaux successifs de la mise en place de loin, en rayons de la maquette.
+const RING_STEP := 2.15
+## Ordre de mise en place par genre de colonie (les cités d'abord).
+const KIND_RANK := {"city": 0, "town": 1}
 
 var config: Dictionary = {}
 var manifest: Dictionary = {}
@@ -45,6 +58,9 @@ var force_active := false
 ## rapport de population imposé. Appeler `invalidate()` après un changement.
 var forced_states: Dictionary = {}
 var forced_population_ratio: Dictionary = {}
+## Brouillard de guerre : objet portant `hidden_provinces` (id → true), par défaut les marqueurs
+## d'armée de la carte (`MinimapController.refresh_fog`). Null : rien n'est caché.
+var fog_source: Object = null
 
 var _layer: SettlementLayer
 var _map: MapData
@@ -73,7 +89,16 @@ var _pending: Array = []  # indices de colonies à traiter (reconstruction en co
 var _building: Array = []  # instances de la reconstruction en cours
 var _build_center := Vector2.ZERO
 var _reground_in := -1
-var _scale := 1.0
+var _fov := 55.0
+var _placed_distance := -1.0
+var _fade := 1.0
+var _build_top := 0.0  # palier de la reconstruction en cours (0 : échelle réelle)
+var _built_top := -1.0
+var _discs: Dictionary = {}  # Vector2i → Array d'emprises {c, dir, edge, off, r} au palier
+var _layouts: Dictionary = {}  # indice de colonie → {sig, top, spots: {famille → emprise}}
+var _road_cells: Dictionary = {}
+var _roads_ready := false
+var _fog_signature := 0
 var _vertical_scale := -1.0
 var _shadows := true
 var _meshes: Dictionary = {}
@@ -162,17 +187,58 @@ static func models_for(cfg: Dictionary, buildings: Array, resources: Array) -> A
 	return out
 
 
-## Grossissement à la distance du rig `rig_distance` : 1 sous `full_size_below`, `max` au-delà de
-## `max_above`, fondu sur le logarithme de la distance entre les deux.
-static func exaggeration(cfg: Dictionary, rig_distance: float) -> float:
-	var e: Dictionary = (cfg.get("render", {}) as Dictionary).get("exaggeration", {})
-	var top := float(e.get("max", 1.0))
-	if top <= 1.0:
-		return 1.0
-	var lo := maxf(float(e.get("full_size_below", 12.0)), 1e-3)
-	var hi := maxf(float(e.get("max_above", 60.0)), lo * 1.01)
-	var t := smoothstep(log(lo), log(hi), log(maxf(rig_distance, 1e-3)))
-	return pow(top, t)
+static func screen_config(cfg: Dictionary) -> Dictionary:
+	return (cfg.get("render", {}) as Dictionary).get("screen", {})
+
+
+## Part (0-1) de la taille tenue à l'écran : 0 sous `real_below` (échelle réelle), 1 au-delà de
+## `full_from`.
+static func screen_blend(cfg: Dictionary, rig_distance: float) -> float:
+	var screen := screen_config(cfg)
+	var lo := float(screen.get("real_below", 10.0))
+	return smoothstep(lo, maxf(float(screen.get("full_from", 15.0)), lo + 1e-3), rig_distance)
+
+
+## Hauteur de terrain (unités) couverte par l'écran à la distance `rig_distance`.
+static func view_span(rig_distance: float, fov_deg: float) -> float:
+	return 2.0 * tan(deg_to_rad(fov_deg) * 0.5) * maxf(rig_distance, 0.0)
+
+
+## Largeur (unités) qu'une maquette de niveau `level` tient à l'écran à pleine tenue :
+## `fractions[level - 1]` de la hauteur de l'écran.
+static func held_width(cfg: Dictionary, level: int, rig_distance: float, fov_deg: float) -> float:
+	var fractions: Array = screen_config(cfg).get("fractions", [])
+	if fractions.is_empty():
+		return 0.0
+	return float(fractions[clampi(level - 1, 0, fractions.size() - 1)]) * view_span(rig_distance, fov_deg)
+
+
+## Grossissement d'une maquette large de `width_m` : 1 à l'échelle réelle, jamais moins.
+static func model_factor(cfg: Dictionary, width_m: float, level: int, rig_distance: float, mpu: float, fov_deg: float) -> float:
+	var full := maxf(1.0, held_width(cfg, level, rig_distance, fov_deg) * mpu / maxf(width_m, 0.1))
+	return lerpf(1.0, full, screen_blend(cfg, rig_distance))
+
+
+## Opacité (0-1) du fondu de sortie entre `fade_from_units` et `view_range_units`.
+static func fade(cfg: Dictionary, rig_distance: float) -> float:
+	var render: Dictionary = cfg.get("render", {})
+	var hi := float(render.get("view_range_units", 160.0))
+	var lo := minf(float(render.get("fade_from_units", hi)), hi - 1e-3)
+	return clampf(inverse_lerp(hi, lo, rig_distance), 0.0, 1.0)
+
+
+## Palier de mise en place de la distance `rig_distance` : 0 à l'échelle réelle, sinon la borne
+## haute du palier géométrique (`full_from` × `band_ratio`^n) qui la contient. Les écarts sont
+## calculés à cette borne puis réduits en proportion de la distance à l'intérieur du palier.
+static func band_top(cfg: Dictionary, rig_distance: float) -> float:
+	var screen := screen_config(cfg)
+	if screen.is_empty() or rig_distance <= float(screen.get("real_below", 10.0)):
+		return 0.0
+	var from := maxf(float(screen.get("full_from", 15.0)), 1e-3)
+	if rig_distance <= from:
+		return from
+	var ratio := maxf(float(screen.get("band_ratio", 1.5)), 1.05)
+	return from * pow(ratio, ceilf(log(rig_distance / from) / log(ratio) - 1e-6))
 
 
 func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: SettlementData, meters_per_unit: float = 719.0) -> void:
@@ -212,8 +278,12 @@ func refresh(sim: Object) -> bool:
 	elif sim != null and sim.has_method("get_turn"):
 		revision = int(sim.call("get_turn"))
 	if revision == _revision and revision >= 0:
+		if _fog_hash() != _fog_signature:  # réglage du brouillard changé sans changement d'état
+			_fog_signature = _fog_hash()
+			_dirty = true
 		return false
 	_revision = revision
+	_fog_signature = _fog_hash()
 	_states.clear()
 	_provinces.clear()
 	_live = {}
@@ -225,6 +295,27 @@ func refresh(sim: Object) -> bool:
 ## Reconstruit le voisinage à la prochaine mise à jour (états imposés changés).
 func invalidate() -> void:
 	_dirty = true
+	_layouts.clear()
+
+
+## Provinces hors de vue (id → true) : `fog_source.hidden_provinces`, par défaut celles des
+## marqueurs d'armée de la carte (nœud `Armies` voisin de la couche des colonies).
+func _hidden_provinces() -> Dictionary:
+	if fog_source == null and _layer != null and _layer.get_parent() != null:
+		fog_source = _layer.get_parent().get_node_or_null("Armies")
+	var hidden: Variant = fog_source.get("hidden_provinces") if fog_source != null else null
+	return hidden if hidden is Dictionary else {}
+
+
+func _fog_hash() -> int:
+	var hidden := _hidden_provinces()
+	return hidden.size() * 31 + (hash(hidden.keys()) if hidden.size() < 64 else 0)
+
+
+## Vrai si la colonie `id` est sous le brouillard de guerre (rien n'y est posé).
+func is_hidden(id: String) -> bool:
+	var i: int = _data.index_by_id.get(id, -1) if _data != null else -1
+	return i >= 0 and _hidden_provinces().has(str(_data.settlements[i]["province"]))
 
 
 ## État d'une province : `{population, devastation, besieged, constructing}` (vide si la
@@ -397,7 +488,7 @@ func _models_of_index(i: int) -> Array:
 
 
 func view_range() -> float:
-	return float((config.get("render", {}) as Dictionary).get("view_range_units", 45.0))
+	return float((config.get("render", {}) as Dictionary).get("view_range_units", 160.0))
 
 
 func update_view(rig_distance: float) -> void:
@@ -410,10 +501,16 @@ func update_view(rig_distance: float) -> void:
 		visible = shown
 	if not shown:
 		return
-	var scale := exaggeration(config, rig_distance)
-	if absf(scale - _scale) > 0.04 * _scale:
-		_scale = scale
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if camera != null:
+		_fov = camera.fov
+	if _placed_distance < 0.0 or absf(rig_distance - _placed_distance) > 0.04 * _placed_distance:
 		_write_batches()
+	var opacity := 1.0 if force_active else fade(config, rig_distance)
+	if absf(opacity - _fade) > 0.02 or (opacity >= 1.0) != (_fade >= 1.0):
+		_fade = opacity
+		for mmi: MultiMeshInstance3D in _batches.values():
+			mmi.transparency = 1.0 - _fade
 	var shadows := rig_distance < float((config.get("render", {}) as Dictionary).get("shadow_range_units", 12.0))
 	if shadows != _shadows:
 		_shadows = shadows
@@ -423,7 +520,7 @@ func update_view(rig_distance: float) -> void:
 		_vertical_scale = MapData.vertical_scale()
 		_refresh_aabbs()
 	var here := _camera_ground()
-	if _pending.is_empty() and (_dirty or here.distance_to(_center) > _loaded_radius * 0.3 or load_radius() > _loaded_radius * 1.3):
+	if _pending.is_empty() and (_dirty or not is_equal_approx(band_top(config, rig_distance), _built_top) or here.distance_to(_center) > _loaded_radius * 0.3 or load_radius() > _loaded_radius * 1.3):
 		_begin_rebuild(here)
 	if not _pending.is_empty():
 		_step(STEP_BUDGET_USEC if FrameBudget.in_frame() else 1 << 30)
@@ -434,11 +531,11 @@ func update_view(rig_distance: float) -> void:
 
 
 ## Rayon (unités) du voisinage chargé autour du point visé : `render.load_factor` × distance du
-## rig, entre `render.load_min_units` et 1,5 × la portée (comme le chargement des villes 1:1 :
-## de près, on ne pose que les maquettes des colonies proches).
+## rig, entre `render.load_min_units` et `render.load_max_units` (comme le chargement des villes
+## 1:1 : de près, on ne pose que les maquettes des colonies proches).
 func load_radius() -> float:
 	var render: Dictionary = config.get("render", {})
-	return clampf(float(render.get("load_factor", 3.0)) * _rig_distance, float(render.get("load_min_units", 6.0)), view_range() * 1.5)
+	return clampf(float(render.get("load_factor", 3.0)) * _rig_distance, float(render.get("load_min_units", 6.0)), float(render.get("load_max_units", view_range() * 1.5)))
 
 
 ## Point du sol visé par la caméra (unités carte) ; position de la caméra en repli.
@@ -457,7 +554,7 @@ func _camera_ground() -> Vector2:
 func flush(center: Variant = null) -> void:
 	if not enabled or _data == null:
 		return
-	if center is Vector2 or _dirty or _center.x == INF:
+	if center is Vector2 or _dirty or _center.x == INF or not is_equal_approx(band_top(config, _rig_distance), _built_top):
 		_begin_rebuild(center if center is Vector2 else _camera_ground())
 	if not _pending.is_empty():
 		_step(1 << 30)
@@ -471,13 +568,17 @@ func _begin_rebuild(center: Vector2) -> void:
 	_build_center = center
 	_building = []
 	_pending = []
+	_build_top = band_top(config, _rig_distance)
+	_discs = {}
 	var radius := load_radius()
 	_loaded_radius = radius
 	var near: Array = []
 	for i in _data.settlements.size():
 		var px: Vector2 = _data.settlements[i]["px"]
 		if absf(px.x - center.x) <= radius and absf(px.y - center.y) <= radius and px.distance_to(center) <= radius:
-			near.append([px.distance_to(center), i])
+			# De loin, l'ordre fixe la priorité de la mise en place : les cités, puis les villes.
+			var rank := int(KIND_RANK.get(str(_data.settlements[i].get("kind", "")), 2)) if _build_top > 0.0 else 0
+			near.append([float(rank) * 1e6 + px.distance_to(center), i])
 	near.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
 	for entry: Array in near:  # `pop_back` : les plus proches d'abord
 		_pending.append(entry[1])
@@ -500,6 +601,7 @@ func _step(budget_usec: int) -> void:
 func _finish_rebuild() -> void:
 	_instances = _building
 	_building = []
+	_built_top = _build_top
 	_center = _build_center
 	_reground_in = -1
 	_write_batches()
@@ -507,10 +609,17 @@ func _finish_rebuild() -> void:
 
 
 ## Instances d'une colonie : maquettes hors les murs, chantier, puis croissance de la ville.
+## Rien sous le brouillard de guerre.
 func _instances_of(i: int) -> Array:
 	var out: Array = []
+	if _hidden_provinces().has(str(_data.settlements[i]["province"])):
+		return out
 	var state := _state_of(i)
-	for model: Dictionary in _models_of_index(i):
+	var growth := _growth_instances(i, state)
+	var center := _px_of(i)
+	# De loin, seules les cités et les villes gardent leurs maquettes (la place manque).
+	var minor := _build_top > float(screen_config(config).get("minor_until", INF)) and not KIND_RANK.has(str(_data.settlements[i].get("kind", "")))
+	for model: Dictionary in ([] if minor else _models_of_index(i)):
 		var entry: Dictionary = manifest.get(str(model["model"]), {})
 		if entry.is_empty():
 			continue
@@ -527,15 +636,22 @@ func _instances_of(i: int) -> Array:
 			"family": family,
 			"level": int(model["level"]),
 			"model": str(model["model"]),
+			"site": str(model["site"]),
 			"px": px,
+			"real_px": px,
+			"c": center,
 			"yaw": float(anchor["yaw"]),
 			"base_m": _base_m(px),
 			"scale": Vector3.ONE,
-			"grow": true,
+			"grow": "out",
+			"width_m": maxf(float(entry.get("length", 30.0)), float(entry.get("depth", 30.0))),
+			"radius_m": float(entry.get("radius", 30.0)),
 			"top": float(entry.get("height", 20.0)),
 			"reach": float(entry.get("radius", 30.0)),
 		})
-	out.append_array(_growth_instances(i, state))
+	if _build_top > 0.0:
+		out = _layout(i, out, growth, _build_top)
+	out.append_array(growth)
 	return out
 
 
@@ -720,6 +836,283 @@ func _shore_anchor(i: int, center: Vector2, from: float, to: float, theta0: floa
 	return best
 
 
+# --- Mise en place tenue à l'écran -----------------------------------------------------------
+#
+# De loin, chaque maquette garde une largeur d'écran : son emprise (unités) grandit comme la
+# distance du rig. Une emprise est un disque {c, dir, edge, off, r} : centre `c + dir × (edge +
+# off × q)` et rayon `r × q`, où q = distance / borne haute du palier (1 à la borne). `edge` est
+# le bord de la ville (taille réelle, fixe) ; l'écart au bord et le rayon suivent la distance, si
+# bien que deux emprises disjointes à la borne le restent dans tout le palier autour d'une même
+# ville ; entre villes voisines, l'essai est refait au milieu et au bas du palier.
+
+
+func _disc_center(disc: Dictionary, q: float) -> Vector2:
+	return (disc["c"] as Vector2) + (disc["dir"] as Vector2) * (float(disc["edge"]) + float(disc["off"]) * q)
+
+
+func _disc_cell(p: Vector2) -> Vector2i:
+	return Vector2i(floori(p.x / DISC_CELL), floori(p.y / DISC_CELL))
+
+
+func _disc_add(disc: Dictionary) -> void:
+	var cell := _disc_cell(_disc_center(disc, 1.0))
+	if not _discs.has(cell):
+		_discs[cell] = []
+	(_discs[cell] as Array).append(disc)
+
+
+## Parts de la borne haute où une emprise est essayée : la borne, puis vers le bas du palier.
+func _band_shares() -> Array[float]:
+	var low := 1.0 / maxf(float(screen_config(config).get("band_ratio", 1.5)), 1.05)
+	return [1.0, lerpf(1.0, low, 0.34), lerpf(1.0, low, 0.67), low]
+
+
+## Vrai si l'emprise ne recouvre aucune emprise déjà posée : à la borne pour celles de la même
+## colonie, et aussi plus bas dans le palier pour celles des colonies voisines.
+func _disc_free(disc: Dictionary, shares: Array[float]) -> bool:
+	var at := _disc_center(disc, 1.0)
+	var cell := _disc_cell(at)
+	var r := float(disc["r"])
+	for dy in [-1, 0, 1]:
+		for dx in [-1, 0, 1]:
+			for other: Dictionary in _discs.get(cell + Vector2i(dx, dy), []):
+				var reach := (r + float(other["r"])) * 1.04
+				if at.distance_to(_disc_center(other, 1.0)) < reach:
+					return false
+				if (other["c"] as Vector2) == (disc["c"] as Vector2):
+					continue
+				for q in shares:
+					if q < 1.0 and _disc_center(disc, q).distance_to(_disc_center(other, q)) < reach * q:
+						return false
+	return true
+
+
+func _is_land(p: Vector2) -> bool:
+	if _map == null:
+		return true
+	return _map.is_land_px(int(p.x), int(p.y)) and _map.height_m_at(p.x, p.y) > 0.5
+
+
+## Routes principales : cases de `ROAD_CELL` traversées (lues une fois).
+func _road_near(p: Vector2, reach: float) -> bool:
+	if not _roads_ready:
+		_roads_ready = true
+		for road: Dictionary in _data.roads:
+			if not bool(road.get("main", false)):
+				continue
+			var points: PackedVector2Array = road["points"]
+			for k in range(1, points.size()):
+				var steps := maxi(1, ceili(points[k - 1].distance_to(points[k]) / (ROAD_CELL * 0.5)))
+				for n in steps + 1:
+					var at := points[k - 1].lerp(points[k], float(n) / float(steps))
+					_road_cells[Vector2i(floori(at.x / ROAD_CELL), floori(at.y / ROAD_CELL))] = true
+	var span := ceili(reach / ROAD_CELL)
+	var cell := Vector2i(floori(p.x / ROAD_CELL), floori(p.y / ROAD_CELL))
+	for dy in range(-span, span + 1):
+		for dx in range(-span, span + 1):
+			if dx * dx + dy * dy <= span * span and _road_cells.has(cell + Vector2i(dx, dy)):
+				return true
+	return false
+
+
+## Site de loin : 0 s'il convient, 1 s'il convient faute de mieux (route principale ou fleuve
+## sous l'emprise), -1 s'il ne convient pas (mer, lit de fleuve, emprise d'une autre colonie).
+func _far_site(i: int, p: Vector2, r: float, site: String) -> int:
+	if _map != null and (p.x < 1.0 or p.y < 1.0 or p.x > _map.size.x - 1.0 or p.y > _map.size.y - 1.0):
+		return -1
+	if not _is_land(p):
+		return -1
+	var river := _map.river_sd_at(p.x, p.y) if _map != null else 8.0
+	if river < minf(r * 0.25, 1.5):
+		return -1
+	if site != "shore" and site != "coast":
+		for offset: Vector2 in [Vector2(r, 0.0), Vector2(-r, 0.0), Vector2(0.0, r), Vector2(0.0, -r)]:
+			if not _is_land(p + offset * 0.7):
+				return -1
+	var cell := Vector2i(floori(p.x / GRID_UNITS), floori(p.y / GRID_UNITS))
+	var span := ceili((r + 4.0) / GRID_UNITS)
+	for dy in range(-span, span + 1):
+		for dx in range(-span, span + 1):
+			for j: int in _grid.get(cell + Vector2i(dx, dy), PackedInt32Array()):
+				if j != i and p.distance_to(_px_of(j)) < _built_radius(j) + r * 1.05:
+					return -1
+	if river < minf(r * (0.45 if site == "water" else 0.65), 5.0) or _road_near(p, r * 0.5):
+		return 1
+	return 0
+
+
+## Emprise de loin d'une maquette autour de la colonie `i` : au plus près de la direction de son
+## site réel, sur l'anneau au bord de la ville, puis les anneaux suivants. Vide : aucune place.
+func _far_spot(i: int, center: Vector2, edge: float, inst: Dictionary, top: float, gates: PackedFloat32Array, shares: Array[float]) -> Dictionary:
+	var screen := screen_config(config)
+	var factor := maxf(1.0, held_width(config, int(inst["level"]), top, _fov) * _mpu / float(inst["width_m"]))
+	var r := float(inst["radius_m"]) * factor / _mpu
+	var preferred := ((inst["real_px"] as Vector2) - center).angle()
+	var gap := float(screen.get("gap", 0.15)) * r
+	var site := str(inst["site"])
+	var fallback := {}
+	for ring in int(screen.get("rings", 2)):
+		var radius := edge + gap + r * (1.0 + RING_STEP * float(ring))
+		var delta := clampf(r / radius, 0.15, 0.7) * 0.75
+		for m in int(PI / delta) + 1:
+			for side: float in ([1.0] if m == 0 else [1.0, -1.0]):
+				var angle := preferred + side * float(m) * delta
+				var dir := Vector2(cos(angle), sin(angle))
+				var disc := {"c": center, "dir": dir, "edge": edge, "off": radius - edge, "r": r}
+				if not _disc_free(disc, shares):
+					continue
+				var fit := _far_site(i, center + dir * radius, r, site)
+				if fit < 0:
+					continue
+				# Plus bas dans le palier, la maquette se rapproche de la ville : ni mer ni lit.
+				for q in shares:
+					var at := _disc_center(disc, q)
+					if q < 1.0 and (not _is_land(at) or (_map != null and _map.river_sd_at(at.x, at.y) < minf(r * q * 0.25, 1.5))):
+						fit = -1
+				if fit < 0:
+					continue
+				for gate_angle in gates:  # routes des portes
+					if absf(angle_difference(angle, gate_angle)) * radius < r * 0.6:
+						fit = 1
+				if fit == 0:
+					return disc
+				if fallback.is_empty():
+					fallback = disc
+		if not fallback.is_empty():
+			return fallback
+	return fallback
+
+
+## Mise en place de loin de la colonie `i` au palier `top` : pose les emprises de sa croissance
+## (quartiers de faubourg), puis celles de ses maquettes par niveau décroissant. Rend les
+## maquettes placées (`dir`, `edge`, `off`, `top_d`) ; celles qui ne tiennent pas sont retirées.
+func _layout(i: int, models: Array, growth: Array, top: float) -> Array:
+	var center := _px_of(i)
+	var edge := _built_radius(i)
+	var quarters := {}  # quartier → [origine, direction, longueur (m), demi-largeur (m)]
+	for inst: Dictionary in growth:
+		match str(inst.get("grow", "")):
+			"wall":
+				edge = maxf(edge, (float((inst["shape"] as Dictionary)["ring_m"]) + _wall_thickness_full(inst["shape"], top) * 1.6) / _mpu)
+			"house":
+				var q := int(inst["quarter"])
+				if not quarters.has(q):
+					quarters[q] = [inst["origin"], inst["quarter_dir"], 0.0, 0.0]
+				quarters[q][2] = maxf(float(quarters[q][2]), float(inst["along_m"]))
+				quarters[q][3] = maxf(float(quarters[q][3]), float(inst["half_m"]))
+	var house := _house_factor_full(top)
+	for q: int in quarters:
+		var quarter: Array = quarters[q]
+		var half := float(quarter[3]) * house / _mpu
+		var length := float(quarter[2]) * house / _mpu
+		var along := half
+		while along < length + half:
+			_disc_add({"c": quarter[0], "dir": quarter[1], "edge": 0.0, "off": along, "r": half})
+			along += half * 1.6
+	var names := PackedStringArray()
+	for inst: Dictionary in models:
+		names.append(str(inst["model"]))
+	var sig := "%.2f|%.3f|%d|%s" % [top, edge, quarters.size(), ",".join(names)]
+	var cached: Dictionary = _layouts.get(i, {})
+	var shares := _band_shares()
+	var spots: Dictionary = {}
+	# Mise en place gardée tant que les maquettes ne changent pas, si elle ne recouvre pas celles
+	# des colonies déjà posées.
+	var reuse := str(cached.get("sig", "")) == sig
+	if reuse:
+		for family: String in cached["spots"]:
+			if not _disc_free(cached["spots"][family], shares):
+				reuse = false
+				break
+	if reuse:
+		spots = cached["spots"]
+		for family: String in spots:
+			_disc_add(spots[family])
+	else:
+		var gates := PackedFloat32Array()
+		for gate: Dictionary in _town_of(i).get("gates", []):
+			gates.append(deg_to_rad(float(gate["bearing"])))
+		var order := models.duplicate()
+		order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			if int(a["level"]) != int(b["level"]):
+				return int(a["level"]) > int(b["level"])
+			return str(a["family"]) < str(b["family"]))
+		for inst: Dictionary in order:
+			var disc := _far_spot(i, center, edge, inst, top, gates, shares)
+			if not disc.is_empty():
+				spots[str(inst["family"])] = disc
+				_disc_add(disc)
+		_layouts[i] = {"sig": sig, "spots": spots}
+	var out: Array = []
+	for inst: Dictionary in models:
+		var disc: Dictionary = spots.get(str(inst["family"]), {})
+		if disc.is_empty():
+			continue
+		inst["dir"] = disc["dir"]
+		inst["edge"] = disc["edge"]
+		inst["off"] = disc["off"]
+		inst["top_d"] = top
+		out.append(inst)
+	return out
+
+
+## Épaisseur (m) tenue à l'écran de l'enceinte ajoutée : `wall_fraction` de la hauteur d'écran,
+## au plus `wall_max_share` du rayon de la ville, jamais moins que la vraie.
+func _wall_thickness_full(shape: Dictionary, rig_distance: float) -> float:
+	var screen := screen_config(config)
+	var real := float(shape.get("thick_m", 2.0))
+	var held := float(screen.get("wall_fraction", 0.0)) * view_span(rig_distance, _fov) * _mpu
+	return clampf(held, real, maxf(real, float(screen.get("wall_max_share", 0.2)) * float(shape.get("ring_m", 100.0))))
+
+
+## Grossissement tenu à l'écran des maisons de faubourg (`house_fraction` de la hauteur d'écran).
+func _house_factor_full(rig_distance: float) -> float:
+	var screen := screen_config(config)
+	return maxf(1.0, float(screen.get("house_fraction", 0.0)) * view_span(rig_distance, _fov) * _mpu / maxf(float(screen.get("house_width_m", 9.0)), 0.1))
+
+
+## Position, échelle et hauteur de base d'une instance à la distance courante du rig.
+func _place(inst: Dictionary) -> void:
+	var d := _rig_distance
+	var px: Vector2 = inst.get("real_px", inst["px"])
+	var blend := screen_blend(config, d)
+	match str(inst.get("grow", "")):
+		"out":
+			var factor := model_factor(config, float(inst["width_m"]), int(inst["level"]), d, _mpu, _fov)
+			if inst.has("dir") and blend > 0.0:
+				var far := (inst["c"] as Vector2) + (inst["dir"] as Vector2) * (float(inst["edge"]) + float(inst["off"]) * d / float(inst["top_d"]))
+				px = px.lerp(far, blend)
+			inst["factor"] = factor
+			inst["draw_scale"] = Vector3.ONE * factor
+		"house":
+			var factor := lerpf(1.0, _house_factor_full(d), blend)
+			px = (inst["origin"] as Vector2) + (px - (inst["origin"] as Vector2)) * factor
+			inst["factor"] = factor
+			inst["draw_scale"] = (inst["scale"] as Vector3) * factor
+		"wall":
+			var shape: Dictionary = inst["shape"]
+			var thick := lerpf(float(shape["thick_m"]), _wall_thickness_full(shape, d), blend)
+			inst["draw_scale"] = Vector3(float(inst["length_m"]) + thick, maxf(float(inst["height_m"]), thick * 1.5) + float(shape["sink_m"]), thick)
+		"tower":
+			var shape: Dictionary = inst["shape"]
+			var thick := lerpf(float(shape["thick_m"]), _wall_thickness_full(shape, d), blend)
+			var radius := maxf(float(inst["radius_m"]), thick * 0.9)
+			# Tours trop serrées une fois grossies : une sur `stride` reste.
+			var stride := maxi(1, ceili(radius * 3.2 / maxf(float(inst["spacing_m"]), 1.0)))
+			var height := maxf(float(inst["height_m"]), thick * 2.2) + float(shape["sink_m"])
+			inst["draw_scale"] = Vector3(radius, height, radius) if int(inst["order"]) % stride == 0 else Vector3.ONE * 1e-3
+		"gate":
+			var shape: Dictionary = inst["shape"]
+			var thick := lerpf(float(shape["thick_m"]), _wall_thickness_full(shape, d), blend)
+			var real: Vector3 = inst["scale"]
+			inst["draw_scale"] = Vector3(maxf(real.x, thick * 1.6), maxf(float(inst["height_m"]), thick * 1.95) + float(shape["sink_m"]), maxf(real.z, thick * 1.6))
+		_:
+			return
+	if not px.is_equal_approx(inst["px"]):
+		inst["px"] = px
+		inst["base_m"] = _base_m(px)
+
+
 # --- Rendu ---------------------------------------------------------------------------------
 
 
@@ -773,19 +1166,22 @@ func _write_batches() -> void:
 		return
 	var s := 1.0 / _mpu
 	_root.transform = Transform3D(Basis().scaled(Vector3(s, s, s)), Vector3(_center.x, 0.0, _center.y))
+	_placed_distance = _rig_distance
 	var groups := {}  # clé → [xforms, bases, tints, top, suies]
 	for inst: Dictionary in _instances:
+		_place(inst)
 		var key := str(inst["key"])
 		if not groups.has(key):
 			groups[key] = [[], [], [], 0.0, []]
 		var g: Array = groups[key]
 		var px: Vector2 = inst["px"]
-		var grow := _scale if bool(inst.get("grow", false)) else 1.0
-		var basis := Basis(Vector3.UP, float(inst["yaw"])) * Basis.from_scale((inst["scale"] as Vector3) * grow)
+		var draw: Vector3 = inst.get("draw_scale", inst["scale"])
+		var grow := float(inst.get("factor", 1.0))
+		var basis := Basis(Vector3.UP, float(inst["yaw"])) * Basis.from_scale(draw)
 		(g[0] as Array).append(Transform3D(basis, Vector3((px.x - _center.x) * _mpu, float(inst.get("lift", 0.0)), (px.y - _center.y) * _mpu)))
 		(g[1] as Array).append(float(inst["base_m"]))
 		(g[2] as Array).append(float(inst.get("tint", 0.5)))
-		g[3] = maxf(float(g[3]), (float(inst.get("top", 20.0)) + float(inst.get("reach", 30.0))) * grow)
+		g[3] = maxf(float(g[3]), maxf((float(inst.get("top", 20.0)) + float(inst.get("reach", 30.0))) * grow, draw.y * 1.5 + maxf(draw.x, draw.z)))
 		(g[4] as Array).append(float(_soot.get(int(inst["settlement"]), 0.0)))
 	for key: String in _batches.keys():
 		if not groups.has(key):
@@ -809,6 +1205,7 @@ func _write_batches() -> void:
 			mmi.multimesh.mesh = mesh
 			mmi.material_override = TownBuilder.material(0, not (key.begins_with("out:") or key.begins_with("kit:")), 0.0, _mpu)
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if _shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mmi.transparency = 1.0 - _fade
 			_root.add_child(mmi)
 			_batches[key] = mmi
 		mmi.multimesh.instance_count = int(packed["count"])

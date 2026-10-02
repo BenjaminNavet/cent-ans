@@ -146,7 +146,7 @@ var towns: TownLayer
 var landmark_cities: LandmarkCityLayer
 ## VT-E (ADR 0138) : lointain des villes à l'échelle 1:1 (tuiles F1/F2), voir `TownFarLayer`.
 var town_far: TownFarLayer
-## Lot TB3 (ADR 0153) : bâtiments hors les murs, chantiers et croissance des villes 1:1.
+## Lot TB3 (ADR 0162) : bâtiments hors les murs, chantiers et croissance des villes 1:1.
 var outbuildings: OutbuildingLayer
 ## TB3 : suie par ville (dévastation, siège, prise de la place).
 var soot: TownSoot
@@ -1698,7 +1698,7 @@ func vegetation_exclusions() -> PackedVector3Array:
 
 # --- Accès pour les effets de vie (fumées, foule, rivières) ---------------------------------
 # VT (ADR 0138) : plus de maquette ; signatures gardées pour les consommateurs (`LifeEffects`,
-# `CampaignLife`, `FineGeoLayer`, `FolkScenes`), recâblés au lot G. TB3 (ADR 0153) : la
+# `CampaignLife`, `FineGeoLayer`, `FolkScenes`), recâblés au lot G. TB3 (ADR 0162) : la
 # croissance passe par `outbuildings` (`OutbuildingLayer`, `TownGrowth`).
 
 

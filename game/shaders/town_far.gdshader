@@ -34,7 +34,7 @@ uniform float sink_band = 0.1;
 uniform float sink_depth_m = 30.0;
 // Caméra principale (monde), la même pour la passe d'ombre ; y ≥ 1e5 : caméra du rendu courant.
 uniform vec3 sink_camera = vec3(0.0, 1e6, 0.0);
-// Lot TB3 (ADR 0153) : suie par ville, même index que `built_mask` (R8 64 × 64, 0-1).
+// Lot TB3 (ADR 0162) : suie par ville, même index que `built_mask` (R8 64 × 64, 0-1).
 uniform sampler2D soot_mask : filter_nearest, repeat_disable;
 uniform vec3 soot_color : source_color = vec3(0.035, 0.03, 0.028);
 

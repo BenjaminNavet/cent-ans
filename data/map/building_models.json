@@ -1,21 +1,35 @@
 {
-  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille. `growth` : croissance des villes 1:1 (point 4) : un quartier de faubourg par tranche `population_step` de population de la province au-dessus de celle de 1337 ; enceinte ajoutée quand un bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan de 1340 et les bâtiments de départ. `soot` : suie par ville (point 5), d'après la dévastation de la province, le siège et la prise de la place.",
+  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. `render.screen` (ADR 0162) : échelle réelle sous `real_below` unités de distance du rig, puis taille tenue à l'écran à partir de `full_from` (`fractions` de la hauteur d'écran par niveau 1 à 3, maisons de faubourg et épaisseur d'enceinte de même), fondu de sortie entre `fade_from_units` et `view_range_units` ; mise en place sans recouvrement par palier géométrique `band_ratio`. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille. `growth` : croissance des villes 1:1 (point 4) : un quartier de faubourg par tranche `population_step` de population de la province au-dessus de celle de 1337 ; enceinte ajoutée quand un bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan de 1340 et les bâtiments de départ. `soot` : suie par ville (point 5), d'après la dévastation de la province, le siège et la prise de la place.",
   "version": 1,
   "render": {
-    "view_range_units": 45.0,
-    "shadow_range_units": 12.0,
-    "exaggeration": {
-      "max": 1.0,
-      "full_size_below": 12.0,
-      "max_above": 60.0
-    },
+    "view_range_units": 160.0,
+    "shadow_range_units": 90.0,
     "ring_min_m": 90.0,
     "ring_max_m": 650.0,
     "max_slope": 0.22,
     "max_per_settlement": 5,
     "shore_reach_m": 2500.0,
-    "load_factor": 3.0,
-    "load_min_units": 6.0
+    "load_factor": 1.8,
+    "load_min_units": 6.0,
+    "fade_from_units": 120.0,
+    "load_max_units": 220.0,
+    "screen": {
+      "real_below": 10.0,
+      "full_from": 15.0,
+      "fractions": [
+        0.042,
+        0.058,
+        0.077
+      ],
+      "house_fraction": 0.0042,
+      "house_width_m": 9.0,
+      "wall_fraction": 0.0032,
+      "wall_max_share": 0.2,
+      "band_ratio": 1.5,
+      "gap": 0.15,
+      "rings": 2,
+      "minor_until": 60.0
+    }
   },
   "families": {
     "farm": {

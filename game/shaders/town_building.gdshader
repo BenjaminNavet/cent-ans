@@ -46,7 +46,7 @@ uniform float lod_range = 1.6;
 // Hauteur au-dessus du pied = y du sommet relatif à l'origine de l'instance (avant pose sur le
 // relief), en mètres ; position locale (m) relative à l'ancrage pour le bruit.
 uniform float aging : hint_range(0.0, 2.0) = 0.5;
-// Lot TB3 (ADR 0153) : suie d'une ville saccagée, prise d'assaut, assiégée ou dévastée, **par
+// Lot TB3 (ADR 0162) : suie d'une ville saccagée, prise d'assaut, assiégée ou dévastée, **par
 // ville** : paramètre d'instance posé sur les nœuds de la ville (`TownBuilder.set_soot`), ou par
 // instance de MultiMesh dans `INSTANCE_CUSTOM.b` (faubourgs et bâtiments hors les murs partagés
 // entre villes, `OutbuildingLayer`). 0 : aucune.

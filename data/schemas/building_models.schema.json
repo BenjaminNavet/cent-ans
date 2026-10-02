@@ -25,19 +25,26 @@
       "additionalProperties": false,
       "required": [
         "view_range_units",
+        "fade_from_units",
         "shadow_range_units",
-        "exaggeration",
+        "screen",
         "ring_min_m",
         "ring_max_m",
         "max_slope",
         "max_per_settlement",
         "shore_reach_m",
         "load_factor",
-        "load_min_units"
+        "load_min_units",
+        "load_max_units"
       ],
       "properties": {
         "view_range_units": {
           "description": "Distance du rig (unités monde, 1 u ≈ 719 m) au-delà de laquelle rien n'est dessiné.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fade_from_units": {
+          "description": "Distance du rig à partir de laquelle les maquettes s'effacent, jusqu'à `view_range_units`.",
           "type": "number",
           "exclusiveMinimum": 0
         },
@@ -46,26 +53,88 @@
           "type": "number",
           "minimum": 0
         },
-        "exaggeration": {
-          "description": "Grossissement selon la distance du rig : 1 sous `full_size_below`, `max` au-delà de `max_above` (1 = échelle réelle partout, ADR 0138).",
+        "screen": {
+          "description": "Taille tenue à l'écran (ADR 0162) : échelle réelle sous `real_below`, pleine tenue à partir de `full_from`, grossissement proportionnel à la distance du rig au-delà.",
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "max",
-            "full_size_below",
-            "max_above"
+            "real_below",
+            "full_from",
+            "fractions",
+            "house_fraction",
+            "house_width_m",
+            "wall_fraction",
+            "wall_max_share",
+            "band_ratio",
+            "gap",
+            "rings",
+            "minor_until"
           ],
           "properties": {
-            "max": {
-              "type": "number",
-              "minimum": 1,
-              "maximum": 40
-            },
-            "full_size_below": {
+            "real_below": {
+              "description": "Distance du rig sous laquelle tout est à l'échelle réelle (ADR 0138).",
               "type": "number",
               "exclusiveMinimum": 0
             },
-            "max_above": {
+            "full_from": {
+              "description": "Distance du rig à partir de laquelle la taille à l'écran est tenue.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "fractions": {
+              "description": "Largeur à l'écran d'une maquette de niveau 1, 2, 3, en part de la hauteur de l'écran (0,0311 = 28 px en 900 px).",
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0.0311,
+                "maximum": 0.15
+              }
+            },
+            "house_fraction": {
+              "description": "Largeur à l'écran d'une maison de faubourg ajoutée, en part de la hauteur de l'écran.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.05
+            },
+            "house_width_m": {
+              "description": "Largeur réelle (m) d'une maison de faubourg.",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "wall_fraction": {
+              "description": "Épaisseur à l'écran de l'enceinte ajoutée, en part de la hauteur de l'écran.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.05
+            },
+            "wall_max_share": {
+              "description": "Épaisseur maximale de l'enceinte grossie, en part du rayon de la ville.",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 0.5
+            },
+            "band_ratio": {
+              "description": "Rapport des paliers géométriques de mise en place (borne haute / borne basse).",
+              "type": "number",
+              "minimum": 1.05,
+              "maximum": 3
+            },
+            "gap": {
+              "description": "Écart entre le bord de la ville et une maquette, en part du rayon de la maquette.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "rings": {
+              "description": "Nombre d'anneaux essayés autour de la ville.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6
+            },
+            "minor_until": {
+              "description": "Distance du rig au-delà de laquelle seules les cités et les villes gardent leurs maquettes (villages, châteaux et abbayes : la place manque).",
               "type": "number",
               "exclusiveMinimum": 0
             }
@@ -104,6 +173,11 @@
         },
         "load_min_units": {
           "description": "Rayon minimal (unités monde) du voisinage chargé.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "load_max_units": {
+          "description": "Rayon maximal (unités) du voisinage chargé.",
           "type": "number",
           "exclusiveMinimum": 0
         }

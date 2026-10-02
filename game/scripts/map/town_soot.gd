@@ -1,7 +1,7 @@
 class_name TownSoot
 extends RefCounted
 
-## Lot TB3 (ADR 0153), point 5 : suie **par ville** sur la carte de campagne (0-1), déduite de ce
+## Lot TB3 (ADR 0162), point 5 : suie **par ville** sur la carte de campagne (0-1), déduite de ce
 ## que le moteur expose déjà — aucune règle nouvelle :
 ## - dévastation de la province (`soot.devastation_*`) ;
 ## - siège en cours de la cité de la province (`soot.siege`) ;

@@ -2,7 +2,7 @@ class_name ConstructionMarkers
 extends Node3D
 
 ## Chantier visible sur les provinces en construction (`get_province_city().construction`) :
-## lot TB3 (ADR 0153), un échafaudage et son tas de pierres (`outbuildings/worksite_1.glb`) à la
+## lot TB3 (ADR 0162), un échafaudage et son tas de pierres (`outbuildings/worksite_1.glb`) à la
 ## place du marteau « ⚒ » en `Label3D`. C'est un **signe** de carte (TB2, ADR 0151) : il garde une
 ## taille constante à l'écran, comme l'ancien marteau, et ne s'affiche que dans la couche
 ## « Signes » et les modes de carte du bloc `signs.construction`. Le chantier à l'échelle réelle,

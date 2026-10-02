@@ -1,4 +1,4 @@
-"""Buildings outside the walls of the campaign map, three levels each (lot TB3, ADR 0153).
+"""Buildings outside the walls of the campaign map, three levels each (lot TB3, ADR 0162).
 
 No paid generation (ADR 0152): every model is an assembly of the ``low`` detail recipes of the
 building kit (``building_kit.py``: cottage, longère, barn, stone house, church, manor, market

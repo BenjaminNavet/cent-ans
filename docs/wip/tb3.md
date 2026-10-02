@@ -1,7 +1,7 @@
 # TB3 — colonies et bâtiments qui poussent
 
 Branche `feat/tb3`, worktree `../gp-tb3`. Plan : `docs/design/2026-10-02-campagne-tob.md` § 3.
-Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix des maquettes).
+Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0162-…` (choix des maquettes).
 
 ## État
 - [x] 1. `data/map/building_models.json` + schéma + `tools/tests/test_building_models_schema.py`
@@ -15,7 +15,7 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix de
       (`town_building.gdshader`), masque `soot_mask` (`town_far.gdshader`)
 - [x] 6. Chantier : `construction_markers.gd` (maquette à taille d'écran constante) + chantier 1:1
 - [x] Tests : `game/tests/tb3_growth_test.gd` (5 étapes), `game/tests/tb3_shot.gd` (captures, banc)
-- [x] ADR `docs/decisions/0153-batiments-hors-les-murs-assembles-du-kit.md`
+- [x] ADR `docs/decisions/0162-batiments-hors-les-murs-assembles-du-kit.md`
 
 ## Mesures (02/10, machine chargée à 30-50)
 - `tb3_growth_test` OK (5 étapes) ; `smoke`, `settlements_render_test`, `sz4b_colonies_forests_test`,
@@ -35,7 +35,7 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix de
 - Suie d'une prise (saccage, assaut) : en mémoire de session seulement (pas d'état dans `core/`).
 - Règles de niveau (fermes, salines, mines sans bâtiment propre) : à juger en partie pilote.
 - Brouillard de guerre : les bâtiments des provinces non vues sont dessinés comme les villes 1:1.
-- Numéro d'ADR 0153 déjà pris sur main par le lanceur Windows.
+- Numéro d'ADR 0162 déjà pris sur main par le lanceur Windows.
 
 ## Relevé de départ
 - Pont : `get_province_city(id)` donne `buildings[{id, name, category, upkeep}]`,

@@ -77,13 +77,17 @@ def test_a_higher_level_is_never_easier_to_reach() -> None:
         assert needed[2] > needed[0] or name in ("market", "mill"), name
 
 
-def test_exaggeration_defaults_to_real_scale() -> None:
-    """Models are at real scale by default, like the towns (ADR 0138)."""
+def test_screen_held_sizes() -> None:
+    """Level 1 holds at least 28 px of a 900 px screen, level 3 at least 1.8 times level 1."""
     render = _document()["render"]
-    assert render["exaggeration"]["max"] >= 1.0
-    assert (
-        render["exaggeration"]["full_size_below"] < render["exaggeration"]["max_above"]
-    )
+    screen = render["screen"]
+    fractions = screen["fractions"]
+    assert fractions[0] * 900 >= 28
+    assert fractions == sorted(fractions)
+    assert fractions[2] >= 1.8 * fractions[0]
+    assert screen["real_below"] < screen["full_from"] <= 15
+    assert render["fade_from_units"] < render["view_range_units"]
+    assert render["fade_from_units"] >= 120 and render["view_range_units"] <= 160
     assert render["ring_min_m"] < render["ring_max_m"]
 
 

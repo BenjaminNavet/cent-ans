@@ -1850,7 +1850,7 @@ passe à d = 150 sous charge) ; sections les plus chères de la sonde inchangée
 (5,3-6,4 s). Après le passage de l'herbe au 1:1, de la teinte de canopée et du fondu : une passe
 VT3 à d = 5 donne 559 appels de dessin, 3,71 M primitives, 74 i/s, pire image 28 ms.
 
-## Bâtiments hors les murs et croissance des villes (lot TB3, ADR 0153)
+## Bâtiments hors les murs et croissance des villes (lot TB3, ADR 0162)
 
 Rendu seulement ; les règles restent dans `core/`. Données : `data/map/building_models.json`
 (schéma `building_models.schema.json`).

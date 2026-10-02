@@ -1,7 +1,7 @@
 class_name TownGrowth
 extends RefCounted
 
-## Lot TB3 (ADR 0153), point 4 : croissance visible des villes 1:1 de `towns_1340.json`. Le plan
+## Lot TB3 (ADR 0162), point 4 : croissance visible des villes 1:1 de `towns_1340.json`. Le plan
 ## de 1340 reste figé (ADR 0138) ; cette couche lui ajoute, par-dessus :
 ## - des **quartiers de faubourg** le long des routes des portes, au-delà des faubourgs de 1340,
 ##   quand la population simulée de la province dépasse celle de 1337 (`growth.suburbs`) ;
@@ -76,6 +76,7 @@ static func suburb_instances(cfg: Dictionary, town: Dictionary, index: int, cent
 				start = maxf(start, float(fb["start_m"]) + float(fb["length_m"]))
 		var length := ceilf(houses / 2.0) * frontage
 		start += gap + float(ring) * (length + gap)
+		var origin := center + dir * start / mpu
 		for k in houses:
 			var h := hash(Vector3i(seed_value, q, k))
 			var model := str(models[h % models.size()])
@@ -96,6 +97,15 @@ static func suburb_instances(cfg: Dictionary, town: Dictionary, index: int, cent
 				"yaw": atan2(facing.x, facing.y) + (float((h >> 4) % 100) / 100.0 - 0.5) * 0.25,
 				"base_m": float(height.call(px)),
 				"scale": Vector3.ONE,
+				# Tenue à l'écran de loin (`OutbuildingLayer._place`) : le quartier grossit depuis
+				# son départ sur la route (`origin`), maisons et écarts ensemble.
+				"grow": "house",
+				"real_px": px,
+				"origin": origin,
+				"quarter": q,
+				"quarter_dir": dir,
+				"along_m": along - start,
+				"half_m": setback + depth + 4.0,
 				"tint": 0.35 + float((h >> 12) % 100) / 100.0 * 0.3,
 				"top": 15.0,
 				"reach": 12.0,
@@ -126,8 +136,13 @@ static func enclosure_instances(cfg: Dictionary, walls: Dictionary, town: Dictio
 		var a := TAU * float(k) / float(n)
 		points.append(Vector2(cos(a), sin(a)) * (radii[k] + margin))
 	var perimeter := 0.0
+	var ring_m := 0.0
 	for k in n:
 		perimeter += points[k].distance_to(points[(k + 1) % n])
+		ring_m += points[k].length() / float(n)
+	# Tenue à l'écran de loin (`OutbuildingLayer._place`) : l'épaisseur, la hauteur, les tours et
+	# les portes grossissent, le tracé reste sur la ville.
+	var grow := {"thick_m": thick, "ring_m": ring_m, "sink_m": sink}
 	for k in n:
 		var a := points[k]
 		var b := points[(k + 1) % n]
@@ -144,6 +159,10 @@ static func enclosure_instances(cfg: Dictionary, walls: Dictionary, town: Dictio
 			"base_m": float(height.call(px)),
 			"lift": -sink,
 			"scale": Vector3(d.length() + thick, wall_h + sink, thick),
+			"grow": "wall",
+			"shape": grow,
+			"length_m": d.length(),
+			"height_m": wall_h,
 			"top": wall_h + 6.0,
 			"reach": d.length(),
 		})
@@ -152,6 +171,10 @@ static func enclosure_instances(cfg: Dictionary, walls: Dictionary, town: Dictio
 		var every := maxi(1, int(round(spacing / maxf(perimeter / float(n), 1.0))))
 		var tower_r := float(dims.get("tower_radius_m", 4.5))
 		var tower_h := float(dims.get("tower_height_m", 14.0))
+		var towers := 0
+		for k in range(0, n, every):
+			towers += 1
+		var order := 0
 		for k in range(0, n, every):
 			var px := center + points[k] / mpu
 			out.append({
@@ -165,9 +188,16 @@ static func enclosure_instances(cfg: Dictionary, walls: Dictionary, town: Dictio
 				"base_m": float(height.call(px)),
 				"lift": -sink,
 				"scale": Vector3(tower_r, tower_h + sink, tower_r),
+				"grow": "tower",
+				"shape": grow,
+				"radius_m": tower_r,
+				"height_m": tower_h,
+				"order": order,
+				"spacing_m": perimeter / float(towers),
 				"top": (tower_h + sink) * 1.5,
 				"reach": tower_r,
 			})
+			order += 1
 	for gate: Dictionary in town.get("gates", []):
 		var angle := deg_to_rad(float(gate["bearing"]))
 		var dir := Vector2(cos(angle), sin(angle))
@@ -184,6 +214,9 @@ static func enclosure_instances(cfg: Dictionary, walls: Dictionary, town: Dictio
 			"base_m": float(height.call(px)),
 			"lift": -sink,
 			"scale": Vector3(float(walls.get("gate_depth_m", 12.0)), gate_h + sink, 11.0),
+			"grow": "gate",
+			"shape": grow,
+			"height_m": gate_h,
 			"top": gate_h + 6.0,
 			"reach": 12.0,
 		})
