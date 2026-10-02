@@ -35,6 +35,15 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 ## vraies nuées (pluie, neige, orage) sous le point visé ; nulles par temps clair.
 @export var weather_shadow_amount: float = 0.12
 @export var fair_shadow_amount: float = 0.0
+## TB6 (ADR 0156) : assombrissement du sol par le masque météo (uniformes `weather_wet_dim`,
+## `weather_cloud_shade*` de `campaign_weather.gdshaderinc`) : sol mouillé, ombre des nuées du
+## masque (force, largeur du seuil, fréquence du bruit en part de celle des nuées). Avec
+## `weather_shadow_amount`, la baisse de luminance au cœur d'une ombre reste sous 15 %
+## (`max_ground_dim`).
+@export var wet_dim: float = 0.04
+@export var mask_shadow: float = 0.06
+@export var mask_shadow_softness: float = 0.5
+@export var mask_shadow_scale: float = 0.5
 ## CV3-0 (#3) : bande (distance caméra) sur laquelle la coupure d'intensité passe de 0 à
 ## `cloud_wide_cut_max` — au-delà, seules les zones de forte pluie/neige (ou l'orage) gardent
 ## des nuées.
@@ -149,6 +158,27 @@ func _load_tuning() -> void:
 	cloud_max_alpha = float(clouds.get("max_alpha", cloud_max_alpha))
 	weather_shadow_amount = float(clouds.get("weather_shadow", weather_shadow_amount))
 	fair_shadow_amount = float(clouds.get("fair_shadow", fair_shadow_amount))
+	wet_dim = float(clouds.get("wet_dim", wet_dim))
+	mask_shadow = float(clouds.get("mask_shadow", mask_shadow))
+	mask_shadow_softness = float(clouds.get("mask_shadow_softness", mask_shadow_softness))
+	mask_shadow_scale = float(clouds.get("mask_shadow_scale", mask_shadow_scale))
+
+
+## TB6 : plus forte baisse de luminance (0..1) que la météo peut poser sur le sol : sol mouillé,
+## ombre des nuées du masque et ombres de nuages du terrain cumulés, au cœur d'un orage.
+func max_ground_dim() -> float:
+	return 1.0 - (1.0 - wet_dim) * (1.0 - mask_shadow) * (1.0 - maxf(weather_shadow_amount, fair_shadow_amount))
+
+
+## TB6 : pose les réglages du sol sur le matériau du terrain.
+func _apply_ground_tuning() -> void:
+	if _terrain == null or _terrain.material == null:
+		return
+	var material: ShaderMaterial = _terrain.material
+	material.set_shader_parameter("weather_wet_dim", wet_dim)
+	material.set_shader_parameter("weather_cloud_shade", mask_shadow)
+	material.set_shader_parameter("weather_cloud_shade_soft", mask_shadow_softness)
+	material.set_shader_parameter("weather_cloud_shade_scale", mask_shadow_scale)
 
 
 ## Opacité des nuées à la distance caméra `distance` (hors fondu du parchemin) : nulles de près,
@@ -227,6 +257,7 @@ func _upload_mask() -> void:
 		_mask = ImageTexture.create_from_image(image)
 	else:
 		_mask.update(image)
+	_apply_ground_tuning()  # TB6
 	for material: ShaderMaterial in [_terrain.material if _terrain != null else null, _cloud_material]:
 		if material == null:
 			continue

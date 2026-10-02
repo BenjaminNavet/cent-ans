@@ -58,15 +58,19 @@
     "minor_max_weight": 600
   },
   "clouds": {
-    "description": "TB2 : nuées et brumes sobres. Les nuées n'existent que là où le cœur donne pluie, neige ou orage ; elles sont plus fines en vue moyenne (medium_alpha jusqu'à medium_distance[0], max_alpha à partir de medium_distance[1], distances caméra) et ne couvrent jamais la province sélectionnée (bord fondu sur clear_feather_px). Ombres de nuages du terrain : weather_shadow sous de vraies nuées, fair_shadow par temps clair.",
+    "description": "TB2 : nuées et brumes sobres. Les nuées n'existent que là où le cœur donne pluie, neige ou orage ; elles sont plus fines en vue moyenne (medium_alpha jusqu'à medium_distance[0], max_alpha à partir de medium_distance[1], distances caméra) et ne couvrent jamais la province sélectionnée (bord fondu sur clear_feather_px). Ombres de nuages du terrain : weather_shadow sous de vraies nuées, fair_shadow par temps clair. TB6 (ADR 0156) : le masque météo n'assombrit plus le sol que légèrement — wet_dim (sol mouillé), mask_shadow (ombre des nuées, large et fondue : mask_shadow_scale = fréquence du bruit en part de celle des nuées, mask_shadow_softness = largeur du seuil) ; cumulés avec weather_shadow, la baisse de luminance reste sous 15 % au cœur d'une ombre.",
     "medium_alpha": 0.2,
     "max_alpha": 0.45,
     "medium_distance": [
       600,
       1000
     ],
-    "weather_shadow": 0.12,
+    "weather_shadow": 0.05,
     "fair_shadow": 0.0,
-    "clear_feather_px": 8
+    "clear_feather_px": 8,
+    "wet_dim": 0.04,
+    "mask_shadow": 0.06,
+    "mask_shadow_softness": 0.5,
+    "mask_shadow_scale": 0.5
   }
 }

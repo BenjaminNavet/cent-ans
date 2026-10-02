@@ -292,6 +292,30 @@
           "minimum": 0,
           "maximum": 64,
           "description": "Fondu (px carte) du dégagement de la province sélectionnée."
+        },
+        "wet_dim": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.15,
+          "description": "TB6 : assombrissement du sol mouillé (pluie, orage)."
+        },
+        "mask_shadow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.15,
+          "description": "TB6 : ombre des nuées du masque météo au cœur d'une nuée."
+        },
+        "mask_shadow_softness": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 1,
+          "description": "TB6 : largeur du seuil de l'ombre des nuées (0,22 = bord des nuées ; plus grand = plus fondu)."
+        },
+        "mask_shadow_scale": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 2,
+          "description": "TB6 : fréquence du bruit de l'ombre en part de celle des nuées (plus petit = taches plus larges)."
         }
       }
     }
