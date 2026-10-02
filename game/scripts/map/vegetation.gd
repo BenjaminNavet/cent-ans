@@ -938,6 +938,7 @@ func _poll_native() -> void:
 			continue
 		var job: VegetationTileJob = item["job"]
 		job.apply_native(result)
+		stats["native_ms_max"] = maxf(float(stats.get("native_ms_max", 0.0)), float(result["ms"]))
 		if job.clearance != null or job.drop_hedges:
 			# HC1 : houppiers hors de l'eau et des routes, filtrés hors du fil principal.
 			item["filter"] = WorkerThreadPool.add_task(job.apply_clearance, false, "vegetation clearance %d" % index)

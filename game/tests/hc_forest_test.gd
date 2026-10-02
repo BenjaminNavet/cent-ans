@@ -169,6 +169,7 @@ func _make_vegetation(world: Node3D, terrain: TerrainBuilder, map_data: MapData,
 	vegetation.camera_rig_path = NodePath("")
 	world.add_child(vegetation)
 	vegetation.set_process(false)
+	vegetation.quality_max_distance = -1.0  # portée des réglages, pas celle du préréglage de qualité
 	vegetation.extra_exclusions = exclusions
 	vegetation.clearance_roads = roads
 	vegetation.bind_terrain(terrain)

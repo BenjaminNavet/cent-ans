@@ -19,6 +19,8 @@ const LAKES_FILE := "lakes.json"
 const ROAD_CELL := 4.0
 ## Niveaux 8 bits par px carte de `coast_dist.png` (`coast_dist_scale` de `terrain.gdshader`).
 const COAST_DIST_SCALE := 2.0
+## Majorant du rayon d'un houppier généralisé (unités monde) pour la table des cellules humides.
+const MAX_CROWN_RADIUS := 1.2
 
 var map_data: MapData
 ## Rayon nominal d'un houppier (unités monde) : élargissement des contours de lac.
@@ -50,7 +52,7 @@ func setup(data: MapData, lake_polygons: Array, road_lines: Array) -> void:
 			var best := 0.0
 			for piece: PackedVector2Array in Geometry2D.offset_polygon(polygon, crown_radius, Geometry2D.JOIN_MITER):
 				var area := _bounds(piece).get_area()
-				if area > best and not Geometry2D.is_polygon_clockwise(piece):
+				if area > best:
 					best = area
 					grown = piece
 		_lakes.append([_bounds(grown), grown])
@@ -136,71 +138,94 @@ class TileFilter:
 	var filter_ms: float = 0.0
 	var _road_cells: Dictionary = {}
 	var _cells_x: int = 0
+	## 1 par cellule de `ROAD_CELL` px où un fleuve ou une côte est assez proche pour toucher un
+	## houppier ; les autres cellules ne lisent pas les rasters.
+	var _wet := PackedByteArray()
 
 	## Retire des tampons MultiMesh (`VegetationTileJob._pack`, 16 flottants par instance) les
 	## arbres dont le houppier déborde ; `counts` est mis à jour. L'ordre (graines décroissantes)
 	## est gardé.
 	func apply(buffers: Array[PackedFloat32Array], counts: PackedInt32Array) -> void:
 		var t0 := Time.get_ticks_usec()
-		_index_roads()
+		var cell := TreeClearance.ROAD_CELL
+		_cells_x = ceili(rect.size.x / cell)
+		var cells_y := ceili(rect.size.y / cell)
+		_index_roads(cells_y)
+		_index_water(cells_y)
 		var data := owner.map_data
 		var scale := owner.tree_scale * 0.5 * owner.crown_clearance
 		var road_sq := owner.road_clearance * owner.road_clearance
 		var stride := VegetationTileJob.FLOATS_PER_INSTANCE
+		var has_lakes := not lakes.is_empty()
+		var has_roads := not _road_cells.is_empty()
+		var origin := rect.position
+		var last_cell := _cells_x * cells_y - 1
 		for slot in buffers.size():
 			var buffer := buffers[slot]
 			var count := buffer.size() / stride
 			if count == 0:
 				continue
-			var kept := 0
+			# Tampon de sortie construit par plages gardées, seulement si une instance est retirée.
+			var out := PackedFloat32Array()
+			var run_start := 0
+			var dropped := 0
 			for i in count:
 				var k := i * stride
 				var x := buffer[k + 3]
 				var y := buffer[k + 11]
-				# Rayon du houppier : demi-largeur de l'instance (colonne X de la base) à l'échelle.
-				var radius := Vector3(buffer[k], buffer[k + 4], buffer[k + 8]).length() * scale
-				if _blocked(data, x, y, radius, road_sq):
-					continue
-				if kept != i:
-					var to := kept * stride
-					for f in stride:
-						buffer[to + f] = buffer[k + f]
-				kept += 1
-			if kept != count:
-				removed += count - kept
-				buffer.resize(kept * stride)
-				buffers[slot] = buffer
-				counts[slot] = kept
+				var key := clampi(int((y - origin.y) / cell) * _cells_x + int((x - origin.x) / cell), 0, last_cell)
+				var blocked := false
+				if _wet[key] != 0:
+					# Rayon du houppier : demi-largeur de l'instance (colonne X de la base) à l'échelle.
+					var radius := Vector3(buffer[k], buffer[k + 4], buffer[k + 8]).length() * scale
+					blocked = data.river_sd_at(x, y) < radius or owner.coast_distance(x, y) < radius
+				if not blocked and has_lakes:
+					var p := Vector2(x, y)
+					for lake: Array in lakes:
+						if (lake[0] as Rect2).has_point(p) and Geometry2D.is_point_in_polygon(p, lake[1]):
+							blocked = true
+							break
+				if not blocked and has_roads:
+					var segments: Variant = _road_cells.get(key)
+					if segments != null:
+						var p := Vector2(x, y)
+						var points: PackedVector2Array = segments
+						for s in range(0, points.size(), 2):
+							if Geometry2D.get_closest_point_to_segment(p, points[s], points[s + 1]).distance_squared_to(p) < road_sq:
+								blocked = true
+								break
+				if blocked:
+					if i > run_start:
+						out.append_array(buffer.slice(run_start * stride, k))
+					run_start = i + 1
+					dropped += 1
+			if dropped > 0:
+				if run_start < count:
+					out.append_array(buffer.slice(run_start * stride))
+				removed += dropped
+				buffers[slot] = out
+				counts[slot] = count - dropped
 		filter_ms = (Time.get_ticks_usec() - t0) / 1000.0
 
-	func _blocked(data: MapData, x: float, y: float, radius: float, road_sq: float) -> bool:
-		if data.river_sd_at(x, y) < radius:
-			return true
-		if owner.coast_distance(x, y) < radius:
-			return true
-		if not lakes.is_empty():
-			var p := Vector2(x, y)
-			for lake: Array in lakes:
-				if (lake[0] as Rect2).has_point(p) and Geometry2D.is_point_in_polygon(p, lake[1]):
-					return true
-		if _cells_x > 0:
-			var key := int((y - rect.position.y) / TreeClearance.ROAD_CELL) * _cells_x + int((x - rect.position.x) / TreeClearance.ROAD_CELL)
-			var segments: Variant = _road_cells.get(key)
-			if segments != null:
-				var p := Vector2(x, y)
-				var points: PackedVector2Array = segments
-				for s in range(0, points.size(), 2):
-					if Geometry2D.get_closest_point_to_segment(p, points[s], points[s + 1]).distance_squared_to(p) < road_sq:
-						return true
-		return false
+	## Cellules proches d'un fleuve ou d'une côte (distance au centre < demi-diagonale + houppier).
+	func _index_water(cells_y: int) -> void:
+		var cell := TreeClearance.ROAD_CELL
+		var reach := cell * 0.7072 + TreeClearance.MAX_CROWN_RADIUS
+		var data := owner.map_data
+		_wet.resize(_cells_x * cells_y)
+		var k := 0
+		for cy in cells_y:
+			var y := rect.position.y + (cy + 0.5) * cell
+			for cx in _cells_x:
+				var x := rect.position.x + (cx + 0.5) * cell
+				_wet[k] = 1 if data.river_sd_at(x, y) < reach or owner.coast_distance(x, y) < reach else 0
+				k += 1
 
 	## Table cellule → segments de route proches (extrémités par paires).
-	func _index_roads() -> void:
+	func _index_roads(cells_y: int) -> void:
 		if roads.is_empty():
 			return
 		var cell := TreeClearance.ROAD_CELL
-		_cells_x = ceili(rect.size.x / cell)
-		var cells_y := ceili(rect.size.y / cell)
 		var reach := owner.road_clearance
 		for line: PackedVector2Array in roads:
 			for s in line.size() - 1:

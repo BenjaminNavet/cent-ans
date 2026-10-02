@@ -54,7 +54,7 @@ extends Resource
 ## d'un houppier.
 @export var generalised_spacing: float = 1.0
 ## Portée (distance du rig) des arbres généralisés, fondu sur `generalised_fade` (part finale).
-@export var generalised_max_distance: float = 800.0
+@export var generalised_max_distance: float = 900.0
 @export var generalised_fade: float = 0.25
 ## Portée de dessin autour de la caméra (même métrique que le shader de feuillage : distance
 ## horizontale + moitié de la hauteur de la caméra) : `generalised_view_base` +
