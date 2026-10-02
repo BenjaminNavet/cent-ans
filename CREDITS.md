@@ -198,6 +198,15 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   détail ; couches 0-7 des tableaux `game/assets/models/battle_fine/textures/fine_detail_*.png`
   (détail dans son `SOURCE.md`).
 
+### Feuillages des arbres de bataille — CC0 1.0 (FA1)
+
+- **ambientCG** ([ambientcg.com](https://ambientcg.com), Lennart Demes) : atlas de feuilles
+  photographiées LeafSet016 (chêne), LeafSet014 (hêtre), LeafSet022 (frêne), LeafSet004
+  (peuplier), LeafSet001 (saule), LeafSet024 (fruitiers), LeafSet005 (haies), LeafSet012 (feuilles
+  de chêne sèches), 2K-JPG. Feuilles détourées, ramenées à la teinte du décor et posées sur des
+  brindilles dessinées par `game/assets/textures/battle/build_fa_leaf_sprays.py` (catalogue
+  `data/art/battle_tree_leaves.json`) : `leaf_spray_<essence>.png`, `dead_leaves_oak.png`.
+
 ### Détail proche du sol de bataille — CC0 1.0
 
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Grass Path 2 (Rob Tuytel), 2k,

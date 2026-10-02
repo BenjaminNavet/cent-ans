@@ -4,7 +4,7 @@
   "size": 1024,
   "target_rgb": [71, 91, 44],
   "hue_pull": 0.7,
-  "coverage": 0.42,
+  "coverage": 0.38,
   "species": {
     "oak": {"asset": "LeafSet016", "axis": "vertical", "leaf_px": 58, "tone": [1.0, 1.0, 1.0], "note": "chêne pédonculé, feuilles lobées"},
     "beech": {"asset": "LeafSet014", "axis": "vertical", "leaf_px": 50, "tone": [1.0, 1.04, 0.92], "note": "feuilles ovales dentées (hêtre, charme)"},

@@ -65,6 +65,14 @@ tierce ; `uv run --with pillow --with numpy python build_da6_textures.py`) :
 - `twig_spray.png` : ramilles nues (feuillus en hiver) ;
 - `dead_leaves.png` : feuilles sèches (chêne marcescent en hiver).
 
+Rameaux de **vraies feuilles** du lot FA1 (`build_fa_leaf_sprays.py`, catalogue
+`data/art/battle_tree_leaves.json` ; atlas ambientCG LeafSet, CC0, téléchargés par le script hors
+dépôt ; `uv run --with pillow --with numpy --with scipy python build_fa_leaf_sprays.py`) :
+- `leaf_spray_<essence>.png` (1024², mipmaps, compression haute qualité) : rameau feuillu par
+  essence de `BattleTrees` ; `leaf_spray.png` ne sert plus que de repli (`--no-fa` après `--`) ;
+- `dead_leaves_oak.png` : feuilles de chêne sèches sur `twig_spray.png` (remplace
+  `dead_leaves.png`, gardé pour les autres usages).
+
 Régénérer : télécharger, pour chaque couche du sol de `data/fx/battle_ground_layers.json`, les
 fichiers `<id>_diff_2k.jpg` et `<id>_nor_gl_1k.jpg`, et pour les textures uniques ci-dessus
 `<id>_diff_1k.jpg` et `<id>_nor_gl_1k.jpg`, tous dans un même dossier, puis
