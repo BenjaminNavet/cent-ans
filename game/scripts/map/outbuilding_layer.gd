@@ -1402,7 +1402,10 @@ func _write_batches() -> void:
 		var basis := Basis(Vector3.UP, float(inst.get("draw_yaw", inst["yaw"]))) * Basis.from_scale(draw)
 		(g[0] as Array).append(Transform3D(basis, Vector3((px.x - _center.x) * _mpu, float(inst.get("lift", 0.0)), (px.y - _center.y) * _mpu)))
 		(g[1] as Array).append(float(inst["base_m"]))
-		(g[2] as Array).append(float(inst.get("tint", 0.5)))
+		var tint := float(inst.get("tint", 0.5))
+		if str(inst.get("grow", "")) == "house":  # faubourgs éclaircis de loin, comme les maquettes
+			tint += float(screen_config(config).get("brighten", 0.0)) * screen_blend(config, _rig_distance)
+		(g[2] as Array).append(tint)
 		g[3] = maxf(float(g[3]), maxf((float(inst.get("top", 20.0)) + float(inst.get("reach", 30.0))) * grow, draw.y * 1.5 + maxf(draw.x, draw.z)))
 		(g[4] as Array).append(float(_soot.get(int(inst["settlement"]), 0.0)))
 	for key: String in _batches.keys():

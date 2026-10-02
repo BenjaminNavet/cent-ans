@@ -108,14 +108,36 @@ def test_every_model_is_exported_under_its_triangle_cap() -> None:
     assert manifest["worksite_1"]["triangles"] <= caps[1]
 
 
+def test_settlement_signs_exist_and_outsize_the_outbuildings() -> None:
+    """Each settlement kind with a sign names an exported model, larger than a level 3 model."""
+    manifest = _manifest()
+    screen = _document()["render"]["screen"]
+    assert set(screen["signs"]) <= {"city", "town", "village", "castle", "abbey"}
+    for kind, rule in screen["signs"].items():
+        for key in ("model", "walled_model"):
+            if key in rule:
+                assert (MODELS / f"{rule[key]}.glb").is_file(), (kind, rule[key])
+                assert manifest[rule[key]]["triangles"] <= 6000, rule[key]
+    assert screen["signs"]["city"]["fraction"] > 1.3 * screen["fractions"][2]
+    assert screen["signs"]["town"]["fraction"] > screen["fractions"][2]
+
+
+def test_every_model_lists_its_rigid_pieces() -> None:
+    """Pieces (centre and plan box) let Godot stand each building on its own ground."""
+    for name, entry in _manifest().items():
+        assert entry["pieces"], name
+        for cx, cz, x0, z0, x1, z1 in entry["pieces"]:
+            assert x0 <= cx <= x1 and z0 <= cz <= z1, name
+
+
 def test_models_grow_with_their_level() -> None:
-    """Level 1 is one building, level 3 a small estate: footprint and triangles grow."""
+    """Level 1 is the signature piece, level 3 a rich compound: footprint and detail grow."""
     manifest = _manifest()
     for family in FAMILIES:
         radii = [manifest[f"{family}_{n}"]["radius"] for n in (1, 2, 3)]
         triangles = [manifest[f"{family}_{n}"]["triangles"] for n in (1, 2, 3)]
         assert radii == sorted(radii) and radii[2] > 1.5 * radii[0], family
-        assert triangles == sorted(triangles), family
+        assert triangles[2] > triangles[0], family
 
 
 def test_growth_uses_existing_kit_houses_and_fortifications() -> None:

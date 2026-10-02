@@ -56,7 +56,7 @@
         }
       },
       "far_houses": 6,
-      "brighten": 0.9,
+      "brighten": 1.4,
       "aging": 0.2,
       "shore_reach_far": 12.0
     }
