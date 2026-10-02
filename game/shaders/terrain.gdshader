@@ -38,18 +38,21 @@ uniform bool hatch_enabled = false;
 uniform float hatch_period_px = 9.0;
 uniform vec3 reachable_color : source_color = vec3(0.98, 0.93, 0.55);
 uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
-// Brouillard de guerre (lot C1, A1-03 ; refait BR 2026-09-30) : 1 = province vue, 0 = voilée.
-// Le terrain reste lisible sous le voile (couleurs à peine ternies, léger assombrissement) et une
-// vraie brume mouvante le recouvre par bancs : trouées où l'on voit le sol, nappes épaisses
-// ailleurs, plus claire au sommet des bancs. Plus de voile gris uni.
+// Brouillard de guerre (lot C1, A1-03 ; BR 2026-09-30 ; refait TB2 2026-10-02) : 1 = province vue,
+// 0 = voilée. Voile de parchemin : le sol hors de vue est tiré vers un camaïeu sépia, un peu
+// assombri, sous un lavis léger ; l'ombrage du relief reste entier (plus de nappe blanche qui
+// l'efface). Un reste de brume très fin dérive par-dessus. Réglages : bloc `fog_of_war` de
+// `data/ui/campaign_map.json` (posés par `MapReadability`), mêmes valeurs par défaut ici.
 uniform sampler2D fog_mask : filter_nearest, repeat_disable, hint_default_white;
 uniform bool fog_enabled = false;
-uniform float fog_desaturation = 0.25;      // terrain sous la brume : couleurs gardées
-uniform float fog_dim = 0.88;               // et un peu assombri (« pas vu en ce moment »)
-uniform vec3 fog_mist_color : source_color = vec3(0.93, 0.94, 0.96);
-uniform float fog_mist_max = 0.66;          // opacité des nappes les plus épaisses
-uniform float fog_mist_min = 0.06;          // opacité dans les trouées
-uniform float fog_mist_glow = 0.40;         // brume auto-éclairée (ne prend pas l'ombre du relief)
+uniform float fog_desaturation = 0.62;      // part de camaïeu sépia du sol hors de vue
+uniform float fog_dim = 0.72;               // assombrissement (« pas vu en ce moment »)
+uniform vec3 fog_veil_color : source_color = vec3(0.74, 0.65, 0.48);  // ton parchemin
+uniform float fog_veil_strength = 0.10;     // lavis uni par-dessus (0 = aucun)
+uniform vec3 fog_mist_color : source_color = vec3(0.80, 0.74, 0.62);
+uniform float fog_mist_max = 0.10;          // opacité du reste de brume le plus épais
+uniform float fog_mist_min = 0.0;           // opacité dans les trouées
+uniform float fog_mist_glow = 0.0;          // plus de brume auto-éclairée (elle blanchissait le sol)
 uniform float fog_cloud_scale = 0.030;      // par pixel carte (≈ 33 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
 uniform float fog_feather_px = 3.0;         // fondu de bord, pixels carte
@@ -794,23 +797,25 @@ void fragment() {
 			}
 		}
 		if (fog > 0.0) {
-			// Sol sous la brume : lisible, juste terni et assombri.
-			float lum_f = dot(col, vec3(0.2126, 0.7152, 0.0722));
-			vec3 ground = mix(col, vec3(lum_f), fog_desaturation) * fog_dim;
-			// Bancs de brume : bruit à domaine déformé, deux couches qui dérivent à des
-			// vitesses différentes ; la couche fine s'efface au dézoom (pas de scintillement).
+			// TB2 : voile de parchemin. Camaïeu sépia à luminance conservée (le modelé du sol reste
+			// lisible), assombri, puis un lavis uni très léger du ton du papier.
+			const vec3 lum_w = vec3(0.2126, 0.7152, 0.0722);
+			float lum_f = dot(col, lum_w);
+			vec3 sepia = fog_veil_color / max(dot(fog_veil_color, lum_w), 1e-3);
+			vec3 ground = mix(col, lum_f * sepia, fog_desaturation) * fog_dim;
+			ground = mix(ground, fog_veil_color * fog_dim, fog_veil_strength);
+			// Reste de brume : bruit à domaine déformé, deux couches qui dérivent à des vitesses
+			// différentes ; la couche fine s'efface au dézoom (pas de scintillement).
 			vec2 q = p * fog_cloud_scale;
 			vec2 warp = vec2(fbm(q * 0.5 + TIME * fog_cloud_wind * 0.6), fbm(q * 0.5 + vec2(7.3, 2.9) - TIME * fog_cloud_wind * 0.4));
 			float banks = fbm(q + warp * 1.6 + TIME * fog_cloud_wind);
 			float fine_w = 1.0 - smoothstep(0.4, 2.0, footprint * fog_cloud_scale * 12.0);
 			float wisps = fbm(q * 3.1 - TIME * fog_cloud_wind * 2.2);
 			float density = smoothstep(0.26, 0.78, banks + (wisps - 0.5) * 0.35 * fine_w);
-			// À la lisière de la zone vue, la brume s'effiloche au lieu de faire un mur.
+			// À la lisière de la zone vue, le voile s'effiloche au lieu de faire un mur.
 			float edge = smoothstep(0.0, 1.0, fog);
 			fog_mist = mix(fog_mist_min, fog_mist_max, density) * edge;
-			// Sommets des bancs plus clairs, creux légèrement bleutés.
-			vec3 mist = pow(fog_mist_color, vec3(2.2)) * mix(0.90, 1.05, density);
-			col = mix(mix(col, ground, fog), mist, fog_mist);
+			col = mix(mix(col, ground, fog), fog_mist_color * fog_dim, fog_mist);
 		}
 	}
 

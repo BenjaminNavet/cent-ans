@@ -143,6 +143,7 @@ func _ready() -> void:
 	var t1 := Time.get_ticks_msec()
 	_configure_lod()
 	terrain.build(map_data)
+	MapReadability.apply_fog(terrain.material)  # TB2 : voile de parchemin du brouillard de guerre
 	var t2 := Time.get_ticks_msec()
 	sea.setup(map_data.size)
 	var map_extent := maxf(map_data.size.x, map_data.size.y)
