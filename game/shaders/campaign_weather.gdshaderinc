@@ -41,6 +41,21 @@ uniform float weather_wet_dim = 0.04;
 uniform float weather_cloud_shade = 0.06;
 uniform float weather_cloud_shade_soft = 0.5;
 uniform float weather_cloud_shade_scale = 0.5;
+// TB6 (ADR 0156) : brume du matin en nappe basse dans les vallées (météo « brume », canal B).
+// Brouillard de hauteur calculé dans le sol : épaisseur selon la profondeur du point sous l'altitude
+// moyenne alentour (`weather_valley_depth_m` : début et plein, en mètres ; la moyenne est lue sur
+// un niveau grossier de la carte des hauteurs, `weather_valley_lod`), plus dense en vue rasante
+// (`weather_valley_grazing`), qui se lève au fil du tour (`weather_valley_lift` : part qui reste)
+// et s'allège de près (`weather_valley_near`). `weather_valley_mist` : opacité maximale, 0 = coupée
+// (défaut : rien sans données). Jamais sur la province sélectionnée. Bloc `morning_mist` de
+// `data/ui/campaign_map.json`.
+uniform float weather_valley_mist = 0.0;
+uniform vec2 weather_valley_depth_m = vec2(20.0, 90.0);
+uniform float weather_valley_lod = 4.5;
+uniform float weather_valley_grazing = 1.2;
+uniform float weather_valley_lift = 0.35;
+uniform float weather_valley_near = 0.5;
+uniform vec3 weather_valley_color : source_color = vec3(0.85, 0.84, 0.80);
 
 float wx_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -130,8 +145,11 @@ float wx_lightning(vec2 p, vec4 w) {
 }
 
 // Sol : mouillé sous la pluie, neige fraîche, brouillard matinal (vallées), ombre des nuées,
-// lueur des éclairs. `hc` : altitude (m), `emission` reçoit la lueur des éclairs.
-vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, inout float roughness, inout vec3 emission) {
+// lueur des éclairs. `hc` : altitude (m), `emission` reçoit la lueur des éclairs. TB6 : `h_wide`
+// altitude moyenne alentour (m), `grazing` rasance du regard (0 à la verticale, 1 à l'horizontale),
+// `valley_mist` reçoit l'opacité de la nappe de vallée (le terrain y aplanit sa normale).
+vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, float h_wide, float grazing, inout float roughness, inout vec3 emission, out float valley_mist) {
+	valley_mist = 0.0;
 	if (!weather_enabled) {
 		return col;
 	}
@@ -158,6 +176,15 @@ vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, in
 		mist *= mix(weather_mist_near, 1.0, smoothstep(weather_mist_near_footprint * 0.5, weather_mist_near_footprint * 2.0, footprint));
 		vec3 veil = mix(vec3(0.62, 0.64, 0.66), col * 1.6, 0.35);
 		col = mix(col, veil, clamp(mist, 0.0, weather_mist_max) * clear);
+		// TB6 : nappe basse qui remplit les vallées.
+		if (weather_valley_mist > 0.0) {
+			float pool = smoothstep(weather_valley_depth_m.x, weather_valley_depth_m.y, h_wide - hc) * step(1.0, hc);
+			float optical = pool * (0.55 + 0.45 * patches) * (1.0 + weather_valley_grazing * grazing);
+			float lifted = mix(weather_valley_lift, 1.0, weather_fog_morning);
+			float near = mix(weather_valley_near, 1.0, smoothstep(weather_mist_near_footprint * 0.5, weather_mist_near_footprint * 2.0, footprint));
+			valley_mist = clamp(w.b * optical * lifted, 0.0, 1.0) * weather_valley_mist * near * clear;
+			col = mix(col, weather_valley_color, valley_mist);
+		}
 	}
 	// Ombre des nuées qui passent : large, fondue, peu contrastée (TB6).
 	float shade = wx_cloud_shape(p + weather_wind * 6.0, w, weather_cloud_shade_scale, weather_cloud_shade_soft);

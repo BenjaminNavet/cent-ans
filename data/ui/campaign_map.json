@@ -72,5 +72,18 @@
     "mask_shadow": 0.06,
     "mask_shadow_softness": 0.5,
     "mask_shadow_scale": 0.5
+  },
+  "morning_mist": {
+    "description": "TB6 (ADR 0156) : brume du matin de la météo « brume » (canal B du masque météo), en nappe basse dans les vallées. Brouillard de hauteur calculé dans le shader du sol : un point est dans la nappe quand il est plus bas que l'altitude moyenne alentour (valley_depth_m : début et plein, mètres ; wide_lod : niveau de la carte des hauteurs qui donne cette moyenne, 4,5 ≈ 16 km). opacity : opacité maximale ; grazing_gain : épaisseur ajoutée en vue rasante ; lifted_share : part qui reste une fois la brume levée (elle se lève au fil du tour) ; near_share : part gardée de près. Jamais sur la province sélectionnée.",
+    "opacity": 0.55,
+    "valley_depth_m": [
+      20,
+      90
+    ],
+    "wide_lod": 4.5,
+    "grazing_gain": 1.2,
+    "lifted_share": 0.35,
+    "near_share": 0.5,
+    "color": "#d9d6cc"
   }
 }

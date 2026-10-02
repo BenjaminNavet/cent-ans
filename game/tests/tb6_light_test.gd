@@ -45,6 +45,8 @@ func _run() -> void:
 		return
 	_test_cloud_shadows(map)
 	await _test_golden_light(map)
+	_test_quality(map)
+	_test_morning_mist(map)
 	map.queue_free()
 	await process_frame
 
@@ -127,6 +129,78 @@ func _test_golden_light(map: Node3D) -> void:
 		print("tb6 light %s: elevation %.0f (was %.0f), shadows %.2f x height, sun %s x %.2f, scatter %.2f" % [
 			season, elevation, float(former[season]), shadow_length, color.to_html(false), float(preset["sun_energy"]), float(preset["fog_sun_scatter"])])
 	atmosphere.apply_season(initial)
+
+
+## 3. SSIL derrière le réglage de qualité (Haute et Ultra) ; ni SDFGI ni brouillard volumétrique
+## sur la carte, à aucun niveau (ADR 0156).
+func _test_quality(map: Node3D) -> void:
+	var world_env := map.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	if not _check(world_env != null and world_env.environment != null, "campaign environment missing"):
+		return
+	var expected := {"low": false, "medium": false, "high": true, "ultra": true}
+	var saved := RenderQuality.override_level
+	for level: String in expected:
+		RenderQuality.override_level = level
+		RenderQuality.apply_environment(world_env)
+		var env := world_env.environment
+		_check(env.ssil_enabled == bool(expected[level]), "%s: SSIL should be %s on the map" % [level, expected[level]])
+		_check(not env.sdfgi_enabled, "%s: SDFGI must stay off on the campaign map" % level)
+		_check(not env.volumetric_fog_enabled, "%s: no volumetric fog on the campaign map (height mist in the ground shader)" % level)
+	RenderQuality.override_level = saved
+	RenderQuality.apply_environment(world_env)
+	print("tb6 quality: SSIL on for high and ultra, SDFGI and volumetric fog off on the map at every level")
+
+
+## 4. Brume du matin : nappe de vallée réglée par les données, portée par la seule météo « brume »
+## (canal B du masque), qui se lève au fil du tour et épargne la province sélectionnée.
+func _test_morning_mist(map: Node3D) -> void:
+	var view: CampaignWeatherView = map.weather_view
+	var material: ShaderMaterial = map.terrain.material
+	var mist := MapReadability.section("morning_mist")
+	if not _check(not mist.is_empty(), "morning_mist block missing in data/ui/campaign_map.json"):
+		return
+	var opacity := float(mist.get("opacity", 0.0))
+	_check(opacity > 0.2 and opacity <= 0.7, "valley mist should be visible but never opaque (%.2f)" % opacity)
+	_check(is_equal_approx(float(material.get_shader_parameter("weather_valley_mist")), opacity), "weather_valley_mist should carry morning_mist.opacity")
+	var depth: Vector2 = material.get_shader_parameter("weather_valley_depth_m")
+	_check(depth.x >= 10.0 and depth.y > depth.x, "mist should pool in valleys only, not on open plains (%s)" % depth)
+	_check(float(material.get_shader_parameter("weather_valley_lift")) < 1.0, "mist should thin out once lifted")
+	# Par météo : seul le brouillard remplit le canal B.
+	var paris: int = map.map_data.index_of_id("prov_ile_de_france")
+	var id := str(map.map_data.get_province(paris).get("id", ""))
+	var saved: Dictionary = view.weather.duplicate(true)
+	for kind: String in CampaignWeatherView.KINDS:
+		view.weather = {id: {"kind": kind, "intensity": 0.8, "label": kind}}
+		view._upload_mask()
+		var texel: Color = view._mask.get_image().get_pixel(paris, 0)
+		_check((texel.b > 0.0) == (kind == "fog"), "%s: mist channel %.2f" % [kind, texel.b])
+		_check(bool(material.get_shader_parameter("weather_enabled")) == (kind != "clear"), "%s: weather mask enabled flag" % kind)
+		_check(is_equal_approx(float(material.get_shader_parameter("weather_valley_mist")), opacity), "%s: valley mist opacity kept" % kind)
+	view.weather = saved
+	view._upload_mask()
+	# La brume se lève au fil du tour.
+	var focus := Vector3(PARIS.x, 0.0, PARIS.y)
+	view._fog_clock = 0.0
+	view.update_view(focus, 400.0, 0.0)
+	var early := float(material.get_shader_parameter("weather_fog_morning"))
+	view._fog_clock = view.fog_lift_seconds + 1.0
+	view.update_view(focus, 400.0, 0.0)
+	var late := float(material.get_shader_parameter("weather_fog_morning"))
+	_check(early > 0.9 and late < 0.05, "morning mist should lift during the turn (%.2f -> %.2f)" % [early, late])
+	# Jamais sur la province sélectionnée : le shader multiplie la nappe par le dégagement.
+	var include := FileAccess.get_file_as_string("res://shaders/campaign_weather.gdshaderinc")
+	var line := ""
+	for candidate in include.split("\n"):
+		if candidate.strip_edges().begins_with("valley_mist = clamp("):
+			line = candidate
+	_check(line.contains("* clear"), "valley mist must be cut on the selected province (wx_selection_clear)")
+	map.selected_index = paris
+	view._update_selection_clear()
+	_check(int(material.get_shader_parameter("weather_clear_id")) == paris, "selected province should be cleared of mist")
+	map.selected_index = 0
+	view._update_selection_clear()
+	_check(int(material.get_shader_parameter("weather_clear_id")) == 0, "no cleared province once the selection is dropped")
+	print("tb6 mist: opacity %.2f, valley depth %s m, lift %.2f -> %.2f, cleared province %d" % [opacity, depth, early, late, paris])
 
 
 func _check(condition: bool, message: String) -> bool:

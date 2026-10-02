@@ -44,6 +44,10 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 @export var mask_shadow: float = 0.06
 @export var mask_shadow_softness: float = 0.5
 @export var mask_shadow_scale: float = 0.5
+## TB6 (ADR 0156) : brume du matin en nappe basse dans les vallées (météo « brume », canal B du
+## masque), bloc `morning_mist` de `data/ui/campaign_map.json` ; uniformes `weather_valley_*`.
+## Opacité nulle sans données : pas de nappe.
+var valley_mist: Dictionary = {}
 ## CV3-0 (#3) : bande (distance caméra) sur laquelle la coupure d'intensité passe de 0 à
 ## `cloud_wide_cut_max` — au-delà, seules les zones de forte pluie/neige (ou l'orage) gardent
 ## des nuées.
@@ -162,6 +166,7 @@ func _load_tuning() -> void:
 	mask_shadow = float(clouds.get("mask_shadow", mask_shadow))
 	mask_shadow_softness = float(clouds.get("mask_shadow_softness", mask_shadow_softness))
 	mask_shadow_scale = float(clouds.get("mask_shadow_scale", mask_shadow_scale))
+	valley_mist = MapReadability.section("morning_mist")
 
 
 ## TB6 : plus forte baisse de luminance (0..1) que la météo peut poser sur le sol : sol mouillé,
@@ -179,6 +184,23 @@ func _apply_ground_tuning() -> void:
 	material.set_shader_parameter("weather_cloud_shade", mask_shadow)
 	material.set_shader_parameter("weather_cloud_shade_soft", mask_shadow_softness)
 	material.set_shader_parameter("weather_cloud_shade_scale", mask_shadow_scale)
+	material.set_shader_parameter("weather_valley_mist", valley_mist_opacity())
+	if valley_mist.is_empty():
+		return
+	var depth: Variant = valley_mist.get("valley_depth_m", [20.0, 90.0])
+	if depth is Array and (depth as Array).size() == 2:
+		material.set_shader_parameter("weather_valley_depth_m", Vector2(float(depth[0]), float(depth[1])))
+	material.set_shader_parameter("weather_valley_lod", float(valley_mist.get("wide_lod", 4.5)))
+	material.set_shader_parameter("weather_valley_grazing", float(valley_mist.get("grazing_gain", 1.2)))
+	material.set_shader_parameter("weather_valley_lift", float(valley_mist.get("lifted_share", 0.35)))
+	material.set_shader_parameter("weather_valley_near", float(valley_mist.get("near_share", 0.5)))
+	var tint := Color(str(valley_mist.get("color", "#d9d6cc")))
+	material.set_shader_parameter("weather_valley_color", Vector3(tint.r, tint.g, tint.b))
+
+
+## TB6 : opacité maximale de la nappe de vallée (0 : pas de nappe).
+func valley_mist_opacity() -> float:
+	return clampf(float(valley_mist.get("opacity", 0.0)), 0.0, 1.0)
 
 
 ## Opacité des nuées à la distance caméra `distance` (hors fondu du parchemin) : nulles de près,

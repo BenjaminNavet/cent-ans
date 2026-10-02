@@ -318,6 +318,69 @@
           "description": "TB6 : fréquence du bruit de l'ombre en part de celle des nuées (plus petit = taches plus larges)."
         }
       }
+    },
+    "morning_mist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "opacity",
+        "valley_depth_m",
+        "wide_lod",
+        "grazing_gain",
+        "lifted_share",
+        "near_share",
+        "color"
+      ],
+      "description": "TB6 : brume du matin en nappe basse dans les vallées (météo « brume »).",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacité maximale de la nappe (0 : coupée)."
+        },
+        "valley_depth_m": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Profondeur sous l'altitude moyenne alentour où la nappe commence et où elle est pleine (m)."
+        },
+        "wide_lod": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Niveau de la carte des hauteurs qui donne l'altitude moyenne alentour."
+        },
+        "grazing_gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Épaisseur ajoutée en vue rasante."
+        },
+        "lifted_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de la nappe qui reste une fois la brume levée."
+        },
+        "near_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de la nappe gardée de près."
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      }
     }
   },
   "$defs": {

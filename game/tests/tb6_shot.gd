@@ -9,6 +9,9 @@ extends SceneTree
 ##   [--no-shots] (mesures seulement)
 ##   [--ab] (pour chaque vue, écart de luminance du sol avec / sans chaque calque : nuées, météo
 ##   du sol, ombres de nuages, ombres du soleil, brume ; même image, même instant)
+##   [--bench] (coût GPU mesuré par le moteur, insensible au plafond du compositeur : SSIL coupé /
+##   actif, SDFGI, brume du matin ; configurations alternées sur trois tours pour lisser la charge
+##   de la machine ; lancer avec `--disable-vsync`)
 ## Par vue : `TB6 view …` (météo au point visé, opacité des nuées, soleil, brouillard) et
 ## `TB6 stats …` (luminance du sol émergé : moyenne, écart-type, part des blocs très sombres).
 
@@ -28,6 +31,7 @@ func _init() -> void:
 	var shots := true
 	var ab := false
 	var select := false
+	var bench := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -46,6 +50,8 @@ func _init() -> void:
 			ab = true
 		elif arg == "--select":
 			select = true
+		elif arg == "--bench":
+			bench = true
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var settings: Node = root.get_node_or_null("/root/Settings")
@@ -82,6 +88,9 @@ func _init() -> void:
 		for i in SETTLE_FRAMES:
 			await process_frame
 		var name := "%stb6-%d" % [prefix, int(distance)]
+		if bench:
+			await _bench(map, name)
+			continue
 		_report(map, name, at)
 		var image := root.get_viewport().get_texture().get_image()
 		var land := _land_blocks(map, data, image)
@@ -113,9 +122,9 @@ func _report(map: Node3D, name: String, at: Vector2) -> void:
 	var sun := map.get_node_or_null("Sun") as DirectionalLight3D
 	var env := (map.get_node_or_null("WorldEnvironment") as WorldEnvironment).environment
 	var elevation := rad_to_deg(asin(clampf(sun.global_basis.z.y, -1.0, 1.0)))
-	print("TB6 view %s weather_at_focus %s provinces %s cloud_alpha %.2f cloud_shadow %.2f mist_height %s" % [
+	print("TB6 view %s weather_at_focus %s provinces %s cloud_alpha %.2f cloud_shadow %.2f valley_mist %s" % [
 		name, view.weather_at(at), counts, view.cloud_alpha_at(map.camera_rig.distance),
-		float(material.get_shader_parameter("cloud_shadow_amount")), material.get_shader_parameter("weather_mist_height")])
+		float(material.get_shader_parameter("cloud_shadow_amount")), material.get_shader_parameter("weather_valley_mist")])
 	print("TB6 light %s sun_elevation %.1f sun_color %s sun_energy %.2f shadows %s shadow_range %.0f fog %s density %.4f ssil %s sdfgi %s volumetric %s" % [
 		name, elevation, sun.light_color.to_html(false), sun.light_energy, sun.shadow_enabled,
 		sun.directional_shadow_max_distance, env.fog_enabled, env.fog_density, env.ssil_enabled,
@@ -148,6 +157,7 @@ func _land_blocks(map: Node3D, data: MapData, image: Image) -> PackedByteArray:
 	var scale := view_size / Vector2(image.get_width(), image.get_height())
 	var out := PackedByteArray()
 	out.resize(bw * bh)
+	var selected := int(map.get("selected_index"))
 	for by in bh:
 		for bx in bw:
 			var screen := Vector2((bx + 0.5) * BLOCK, (by + 0.5) * BLOCK) * scale
@@ -158,7 +168,9 @@ func _land_blocks(map: Node3D, data: MapData, image: Image) -> PackedByteArray:
 			var hit := origin + dir * (-(origin.y - 1.0) / dir.y)
 			if hit.x < 0.0 or hit.z < 0.0 or hit.x >= data.size.x or hit.z >= data.size.y:
 				continue
-			out[by * bw + bx] = 1 if data.is_land_px(int(hit.x), int(hit.z)) else 0
+			if data.is_land_px(int(hit.x), int(hit.z)):
+				# 2 : sol de la province sélectionnée (la brume doit l'épargner).
+				out[by * bw + bx] = 2 if selected > 0 and data.province_index_at(hit.x, hit.z) == selected else 1
 	return out
 
 
@@ -167,7 +179,7 @@ func _land_blocks(map: Node3D, data: MapData, image: Image) -> PackedByteArray:
 func _stats(name: String, lum: PackedFloat32Array, land: PackedByteArray) -> void:
 	var values: Array[float] = []
 	for i in lum.size():
-		if land[i] == 1:
+		if land[i] >= 1:
 			values.append(lum[i])
 	if values.is_empty():
 		print("TB6 stats %s no land" % name)
@@ -203,10 +215,11 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		"shadow": material.get_shader_parameter("cloud_shadow_amount"),
 		"sun": sun.shadow_enabled,
 		"mist": material.get_shader_parameter("weather_mist_max"),
+		"valley": material.get_shader_parameter("weather_valley_mist"),
 		"fow": material.get_shader_parameter("fog_enabled"),
 		"ssao": env.ssao_enabled, "ssil": env.ssil_enabled, "fog": env.fog_enabled,
 	}
-	for layer: String in ["clouds", "ground_weather", "cloud_shadows", "sun_shadows", "mist", "fog_of_war", "ssao", "ssil", "depth_fog"]:
+	for layer: String in ["clouds", "ground_weather", "cloud_shadows", "sun_shadows", "mist", "valley_mist", "fog_of_war", "ssao", "ssil", "depth_fog"]:
 		# Image de référence reprise avant chaque calque : la dérive (vent, figurants) ne compte pas.
 		var with := _block_luminance(root.get_viewport().get_texture().get_image())
 		match layer:
@@ -221,6 +234,9 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 				sun.shadow_enabled = false
 			"mist":
 				material.set_shader_parameter("weather_mist_max", 0.0)
+				material.set_shader_parameter("weather_valley_mist", 0.0)
+			"valley_mist":
+				material.set_shader_parameter("weather_valley_mist", 0.0)
 			"fog_of_war":
 				material.set_shader_parameter("fog_enabled", false)
 			"ssao":
@@ -239,24 +255,104 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		material.set_shader_parameter("weather_enabled", saved["weather"])
 		material.set_shader_parameter("cloud_shadow_amount", saved["shadow"])
 		material.set_shader_parameter("weather_mist_max", saved["mist"])
+		material.set_shader_parameter("weather_valley_mist", saved["valley"])
 		sun.shadow_enabled = saved["sun"]
 		material.set_shader_parameter("fog_enabled", saved["fow"] if saved["fow"] != null else true)
 		env.ssao_enabled = saved["ssao"]
 		env.ssil_enabled = saved["ssil"]
 		env.fog_enabled = saved["fog"]
 		var ratios: Array[float] = []
+		var selected_sum := 0.0
+		var selected_count := 0
+		var selected_changed := 0
 		for i in with.size():
-			if land[i] == 1 and without[i] > 0.02:
+			if land[i] >= 1 and without[i] > 0.02:
 				ratios.append(with[i] / without[i])
+				if land[i] == 2:
+					selected_sum += with[i] / without[i]
+					selected_count += 1
+					if absf(with[i] / without[i] - 1.0) > 0.1:
+						selected_changed += 1
 		if ratios.is_empty():
 			continue
 		ratios.sort()
 		var darker := 0
+		var lighter := 0
 		for r in ratios:
 			if r < 0.85:
 				darker += 1
-		print("TB6 ab %s %s ratio p1 %.2f p10 %.2f p50 %.2f p99 %.2f darker_15pct %.1f%%" % [
+			elif r > 1.1:
+				lighter += 1
+		print("TB6 ab %s %s ratio p1 %.2f p10 %.2f p50 %.2f p90 %.2f p99 %.2f darker_15pct %.1f%% lighter_10pct %.1f%%" % [
 			name, layer, ratios[ratios.size() / 100], ratios[ratios.size() / 10], ratios[ratios.size() / 2],
-			ratios[ratios.size() * 99 / 100], 100.0 * darker / ratios.size()])
+			ratios[ratios.size() * 9 / 10], ratios[ratios.size() * 99 / 100], 100.0 * darker / ratios.size(), 100.0 * lighter / ratios.size()])
+		if selected_count > 0:
+			print("TB6 ab %s %s selected province: %d blocks, mean ratio %.3f, changed_10pct %.1f%%" % [
+				name, layer, selected_count, selected_sum / selected_count, 100.0 * selected_changed / selected_count])
 		for i in AB_FRAMES:
 			await process_frame
+
+
+## Coût par configuration : durée d'une image rendue en boucle serrée (`force_draw`, sans vsync ni
+## plafond d'images : le compositeur ne borne pas la mesure comme il borne `process_frame`).
+## Configurations alternées sur `BENCH_ROUNDS` tours ; médiane des tours (la machine est chargée).
+const BENCH_ROUNDS := 7
+const BENCH_DRAWS := 90
+
+
+func _bench(map: Node3D, name: String) -> void:
+	var env := (map.get_node_or_null("WorldEnvironment") as WorldEnvironment).environment
+	var terrain: TerrainBuilder = map.get("terrain")
+	var material: ShaderMaterial = terrain.material
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = 0
+	var saved := {"ssil": env.ssil_enabled, "sdfgi": env.sdfgi_enabled, "mist": material.get_shader_parameter("weather_valley_mist")}
+	var configs := ["ssil_off", "ssil_on", "ssil_sdfgi", "mist_off"]
+	var wall := {}
+	for config: String in configs:
+		wall[config] = []
+	for round in BENCH_ROUNDS:
+		for config: String in configs:
+			env.ssil_enabled = config != "ssil_off"
+			env.sdfgi_enabled = config == "ssil_sdfgi"
+			if config == "mist_off":
+				material.set_shader_parameter("weather_valley_mist", 0.0)
+			for i in 20:
+				await process_frame
+			for i in 10:
+				RenderingServer.force_draw(false)
+			var t0 := Time.get_ticks_usec()
+			for i in BENCH_DRAWS:
+				RenderingServer.force_draw(false)
+			(wall[config] as Array).append((Time.get_ticks_usec() - t0) / (1000.0 * BENCH_DRAWS))
+			material.set_shader_parameter("weather_valley_mist", saved["mist"])
+	env.ssil_enabled = saved["ssil"]
+	env.sdfgi_enabled = saved["sdfgi"]
+	var best := {}
+	for config: String in configs:
+		var series: Array = (wall[config] as Array).duplicate()
+		series.sort()
+		best[config] = series[0]
+		print("TB6 bench %s %s median %.2f ms/frame, best %.2f (rounds %s)" % [name, config, series[series.size() / 2], series[0], _fmt(wall[config])])
+	# Coût d'un effet : écart apparié dans chaque tour (médiane des tours) et écart des meilleurs
+	# tours ; sur une machine chargée, le second est le plus fiable.
+	print("TB6 bench %s cost ssil %.2f / %.2f ms, sdfgi %.2f / %.2f ms, mist %.2f / %.2f ms (paired median / best rounds, %d rounds) ; preset %s, 3D %s" % [
+		name, _paired(wall["ssil_on"], wall["ssil_off"]), best["ssil_on"] - best["ssil_off"],
+		_paired(wall["ssil_sdfgi"], wall["ssil_on"]), best["ssil_sdfgi"] - best["ssil_on"],
+		_paired(wall["ssil_on"], wall["mist_off"]), best["ssil_on"] - best["mist_off"],
+		BENCH_ROUNDS, RenderQuality.current(), Vector2(root.size) * root.scaling_3d_scale])
+
+
+func _paired(with: Array, without: Array) -> float:
+	var deltas: Array[float] = []
+	for i in with.size():
+		deltas.append(float(with[i]) - float(without[i]))
+	deltas.sort()
+	return deltas[deltas.size() / 2]
+
+
+func _fmt(values: Array) -> String:
+	var parts := PackedStringArray()
+	for v in values:
+		parts.append("%.2f" % v)
+	return "/".join(parts)
