@@ -1,19 +1,13 @@
 {
   "description": "Lot FA5 — découpes d'enluminures, de sceaux et de matières du domaine public pour l'interface (outil tools/cent_ans_tools/fa_ui_assets.py, sorties game/assets/ui/fa/).",
   "sources": {
-    "cma_1953_366_1": {"file": "cleveland/cma_1953.366.1.jpg", "institution": "Cleveland Museum of Art", "object": "Leaf from a Book of Hours: The Visitation (1953.366.1)", "origin": "France, Paris, v. 1415", "url": "https://clevelandart.org/art/1953.366.1", "licence": "CC0 1.0"},
-    "cma_2006_10": {"file": "cleveland/cma_2006.10.jpg", "institution": "Cleveland Museum of Art", "object": "Leaf from a Book of Hours: Initial D (2006.10)", "origin": "Angleterre, v. 1400", "url": "https://clevelandart.org/art/2006.10", "licence": "CC0 1.0"},
     "met_466080": {"file": "met/met_466080.jpg", "institution": "The Metropolitan Museum of Art", "object": "Seal Impression, Saint Giles (inv. 466080)", "origin": "Angleterre, fin du XIIIe siècle, cire rouge", "url": "https://www.metmuseum.org/art/collection/search/466080", "licence": "Domaine public (Met Open Access, CC0 1.0)"},
     "met_466082": {"file": "met/met_466082.jpg", "institution": "The Metropolitan Museum of Art", "object": "Seal Impression, Bishop (inv. 466082)", "origin": "Pays-Bas, XIVe siècle, cire brune", "url": "https://www.metmuseum.org/art/collection/search/466082", "licence": "Domaine public (Met Open Access, CC0 1.0)"},
     "acg_leather030": {"file": "ambientcg/Leather030/Leather030_1K-JPG_Color.jpg", "institution": "ambientCG", "object": "Leather030 (cuir brun)", "origin": "Lennart Demes", "url": "https://ambientcg.com/view?id=Leather030", "licence": "CC0 1.0"},
     "acg_metal007": {"file": "ambientcg/Metal007/Metal007_1K-JPG_Color.jpg", "institution": "ambientCG", "object": "Metal007 (laiton vieilli)", "origin": "Lennart Demes", "url": "https://ambientcg.com/view?id=Metal007", "licence": "CC0 1.0"}
   },
-  "initials": [
-    {"id": "d_paris_1415", "letter": "D", "source": "cma_1953_366_1", "box": [716, 1931, 1270, 2435], "size": 128, "mode": "framed"}
-  ],
-  "ornaments": [
-    {"id": "spray_england_1400", "source": "cma_2006_10", "box": [691, 86, 1626, 395], "size": 384, "matte": {"low": 0.13, "high": 0.3, "background_blur_px": 30, "fill_holes_px": 400, "min_blob_px": 60, "join_px": 1, "feather_px": 0.7}}
-  ],
+  "initials": [],
+  "ornaments": [],
   "seals": [
     {"id": "seal_red_england_1290", "source": "met_466080", "box": [140, 900, 980, 2220], "size": 160, "matte": {"low": 0.2, "high": 0.36, "background_percentile": 50, "background_blur_px": 40, "fill_holes_px": 20000, "keep_largest": true, "join_px": 2, "feather_px": 1.2, "ellipse": [415, 660, 410, 655]}, "shadow": {"offset_px": [3, 4], "blur_px": 4.0, "opacity": 0.45}},
     {"id": "seal_red_round", "source": "met_466082", "box": [120, 480, 1840, 2110], "size": 160, "matte": {"low": 0.2, "high": 0.36, "background_percentile": 50, "background_blur_px": 40, "fill_holes_px": 20000, "keep_largest": true, "join_px": 2, "feather_px": 1.2, "ellipse": [860, 815, 832, 792]}, "tint": [150, 36, 26], "tint_strength": 0.85, "gain": 0.95, "shadow": {"offset_px": [3, 4], "blur_px": 4.0, "opacity": 0.45}}
@@ -24,7 +18,7 @@
   ],
   "display": {
     "initial_scale": 1.4,
-    "title_spray": "spray_england_1400",
+    "title_spray": "",
     "title_spray_opacity": 0.9,
     "title_spray_height": 0.9,
     "title_spray_min_width_px": 110,

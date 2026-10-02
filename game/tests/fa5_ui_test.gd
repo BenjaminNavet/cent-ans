@@ -1,8 +1,9 @@
 extends SceneTree
 
 ## Lot FA5 — ornements réels de l'interface : le catalogue désigne des fichiers présents, la
-## lettrine prend l'initiale réelle quand elle existe (et seulement hors en-tête ajusté), les
-## sceaux et les plaques de cuir se posent, et `FaUi.enabled = false` rend l'ancien habillage.
+## lettrine ne prend une initiale réelle que si le catalogue en liste une (aucune aujourd'hui :
+## titres à lettrine dessinée, sans rinceau), les sceaux et les plaques de cuir se posent, et
+## `FaUi.enabled = false` rend l'ancien habillage.
 ##   godot --headless --path game --script res://tests/fa5_ui_test.gd
 
 var _failures := 0
@@ -20,17 +21,22 @@ func _run() -> void:
 		for entry: Dictionary in catalogue.get(kind, []):
 			_check(FaUi.texture(kind, str(entry["id"])) != null, "texture %s/%s importée" % [kind, entry["id"]])
 
-	_check(not FaUi.initial_for("Diplomatie").is_empty(), "initiale réelle pour un titre en D")
-	_check(not FaUi.initial_for("dauphiné").is_empty(), "initiale réelle trouvée en minuscule")
-	_check(FaUi.initial_for("Zélande").is_empty(), "pas d'initiale réelle pour une lettre absente")
-
-	var drawn := await _titled("Zélande", false)
-	var real := await _titled("Diplomatie", false)
+	# Revue du lot : initiale réelle et rinceau refusés, désactivés par le catalogue (`initials`
+	# vide, `display.title_spray` vide) ; le code reste, les titres gardent la lettrine dessinée.
+	var has_initials := not (catalogue.get("initials", []) as Array).is_empty()
+	for entry: Dictionary in catalogue.get("initials", []):
+		_check(not FaUi.initial_for(str(entry["letter"]) + "x").is_empty(), "initiale réelle pour %s" % entry["letter"])
+	_check(FaUi.initial_for("Zélande").is_empty() or has_initials, "catalogue sans initiale : aucune initiale réelle")
+	if not has_initials:
+		for title in ["Diplomatie", "Cour — France", "France"]:
+			_check(FaUi.initial_for(title).is_empty(), "pas d'initiale réelle pour « %s »" % title)
+			var lettrine := await _titled(title, false)
+			_check(lettrine.get("_initial") == null, "lettrine dessinée pour « %s »" % title)
+			_check(float(lettrine.get("_field")) == float(lettrine.get("_box")), "champ de la lettrine inchangé pour « %s »" % title)
+	var spray_id := str((catalogue.get("display", {}) as Dictionary).get("title_spray", ""))
+	_check(spray_id.is_empty() == (FaUi.ornament(spray_id) == null), "rinceau des titres : présent si et seulement si le catalogue le désigne")
 	var fitted := await _titled("Diplomatie", true)
-	_check(real.get("_initial") != null, "la lettrine prend l'initiale réelle")
-	_check(drawn.get("_initial") == null, "la lettrine reste dessinée sans initiale réelle")
 	_check(fitted.get("_initial") == null, "pas d'initiale réelle dans un en-tête ajusté")
-	_check(float(real.get("_field")) > float(drawn.get("_field")), "l'initiale réelle est agrandie")
 
 	var seal := FaUi.seal_rect("chronicle", 34.0)
 	_check(seal != null and seal.custom_minimum_size.y == 34.0, "sceau de la chronique posé à la hauteur demandée")
@@ -46,7 +52,6 @@ func _run() -> void:
 	button.free()
 
 	FaUi.enabled = false
-	_check(FaUi.initial_for("Diplomatie").is_empty(), "désactivé : pas d'initiale réelle")
 	_check(FaUi.seal_rect("chronicle", 34.0) == null, "désactivé : pas de sceau")
 	var flat := Button.new()
 	FrontEndStyle.style_action_button(flat, true)

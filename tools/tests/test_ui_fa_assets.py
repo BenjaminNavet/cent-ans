@@ -140,12 +140,64 @@ def test_tint_recolours_by_luminance() -> None:
 
 
 def test_display_names_existing_cuts() -> None:
-    """The ornaments and seals the game is told to use exist in the catalogue."""
+    """The ornaments and seals the game is told to use exist; an empty spray means none."""
     catalogue = _catalogue()
     display = catalogue["display"]
-    assert display["title_spray"] in {cut["id"] for cut in catalogue["ornaments"]}
+    if display["title_spray"]:
+        assert display["title_spray"] in {cut["id"] for cut in catalogue["ornaments"]}
     seals = {cut["id"] for cut in catalogue["seals"]}
     assert set(display["seals"].values()) <= seals
+
+
+def test_catalogue_without_initials_or_spray_is_valid(tmp_path: Path) -> None:
+    """Initials and the title spray are optional: an empty catalogue of them validates and builds."""
+    catalogue = _catalogue()
+    catalogue["initials"] = []
+    catalogue["ornaments"] = []
+    catalogue["display"]["title_spray"] = ""
+    schema = json.loads(
+        (DATA / "schemas" / "ui_fa_assets.schema.json").read_text(encoding="utf-8")
+    )
+    assert not list(Draft202012Validator(schema).iter_errors(catalogue))
+    text = fa_ui_assets.sources_markdown(catalogue)
+    assert "initials/" not in text and "ornaments/" not in text
+    assert "seals/" in text
+
+
+def test_initial_and_ornament_entries_still_validate() -> None:
+    """The shelved kinds stay usable: a framed initial and a matte ornament match the schema."""
+    catalogue = _catalogue()
+    source = next(iter(catalogue["sources"]))
+    catalogue["initials"] = [
+        {
+            "id": "d_example",
+            "letter": "D",
+            "source": source,
+            "box": [0, 0, 64, 64],
+            "size": 128,
+            "mode": "framed",
+        }
+    ]
+    catalogue["ornaments"] = [
+        {
+            "id": "spray_example",
+            "source": source,
+            "box": [0, 0, 64, 32],
+            "size": 384,
+            "matte": MATTE,
+        }
+    ]
+    catalogue["display"]["title_spray"] = "spray_example"
+    schema = json.loads(
+        (DATA / "schemas" / "ui_fa_assets.schema.json").read_text(encoding="utf-8")
+    )
+    assert not list(Draft202012Validator(schema).iter_errors(catalogue))
+    region = np.full((64, 64, 3), 0.5, dtype=np.float32)
+    assert fa_ui_assets.cut_initial(region, catalogue["initials"][0]).shape == (
+        64,
+        64,
+        4,
+    )
 
 
 def test_rimmed_plate_is_a_seamless_nine_slice() -> None:
