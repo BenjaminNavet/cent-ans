@@ -8,17 +8,18 @@ extends SceneTree
 ## dossier (A/B ancien / nouveau dans la même scène, voir `fx_flipbook_override.gd`).
 ## Usage (avec affichage, pas en headless) :
 ##   godot --path game --resolution 1600x900 --script res://tests/s2_fire_shot.gd -- --out=<dossier>
-##     [--flipbooks=<dossier>] [--prefix=s2] [--only=proche,large,ruines] [--close=45] [--wide=170]
+##     [--flipbooks=<dossier>] [--prefix=s2] [--only=proche,large,ruines] [--close=30] [--wide=190]
 
 const FLIPBOOKS := preload("res://tests/fx_flipbook_override.gd")
 
 var _out := ""
 var _prefix := "s2"
 var _only := PackedStringArray()
-var _close := 45.0
-var _wide := 170.0
+var _close := 30.0
+var _wide := 190.0
 var _textures := {}
 var _scene: Node = null
+var _camera: Camera3D = null
 
 
 func _init() -> void:
@@ -86,24 +87,24 @@ func _init() -> void:
 	# La scène tourne (non figée) : le rendu du feu suit l'état du cœur image après image.
 	await _advance(40.0)
 	var ground: float = _scene.terrain.height_at(hearth.x, hearth.y)
-	# Visée à hauteur des toits : les flammes au milieu de l'image, le panache au-dessus.
-	var focus := Vector3(hearth.x, ground + 8.0, hearth.y)
+	var focus := Vector3(hearth.x, ground, hearth.y)
 	siege = battle.call("get_siege")
 	var wind: Vector2 = siege.get("wind", Vector2.ZERO)
 	# Vent de travers : le panache part sur le côté de l'image, pas vers la caméra.
 	var yaw := atan2(wind.x, wind.y) + PI * 0.5 if wind.length() > 0.0001 else 0.6 + PI
 	print("s2_fire_shot: %d burning (%d drawn), wind %s, status « %s »" % [int(siege.get("houses_burning", 0)), _drawn_fires(), wind, BattleScene.siege_status(siege)])
 	if _wants("proche"):
-		_scene.camera_rig.look_at_point(focus, _close, yaw)
+		_frame(focus, _close, yaw, 10.0, 0.42)
 		await _wait(3.0)
 		await _shot("feu-proche")
 	if _wants("large"):
-		_scene.camera_rig.look_at_point(Vector3(center.x, ground, center.y), _wide, yaw)
+		_frame(Vector3(center.x, ground, center.y), _wide, yaw, 0.0, 0.45)
 		await _wait(2.0)
 		await _shot("feu-large")
 	if _wants("ruines"):
 		await _advance(150.0)
-		_scene.camera_rig.look_at_point(focus, _close * 1.5, yaw)
+		# Trois quarts au vent : le panache s'éloigne de la caméra au lieu de la noyer.
+		_frame(focus, _close * 1.8, yaw + 1.0, 4.0, 0.55)
 		await _wait(3.0)
 		siege = battle.call("get_siege")
 		print("s2_fire_shot: later %d burning, %d burnt" % [int(siege.get("houses_burning", 0)), int(siege.get("houses_burnt", 0))])
@@ -139,13 +140,33 @@ func _wait(seconds: float) -> void:
 	var end := Time.get_ticks_msec() + int(seconds * 1000.0)
 	while Time.get_ticks_msec() < end:
 		FLIPBOOKS.apply(_scene, _textures)
+		_hide_ui(_scene)
 		await process_frame
 
 
-## Interface cachée : toutes les couches 2D de la bataille (HUD, ordres du chef, alertes).
+## Caméra propre au script, par-dessus les toits : à `distance` de `point` (visée `lift` mètres
+## au-dessus du sol), plongée de `pitch` radians. La caméra du jeu suit (niveaux de détail).
+func _frame(point: Vector3, distance: float, yaw: float, lift: float, pitch: float) -> void:
+	var rig: Node3D = _scene.camera_rig
+	rig.look_at_point(point, distance, yaw)
+	if _camera == null:
+		_camera = Camera3D.new()
+		_camera.fov = rig.camera.fov
+		_camera.near = rig.camera.near
+		_camera.far = rig.camera.far
+		_camera.attributes = rig.camera.attributes
+		_scene.add_child(_camera)
+	var aim := point + Vector3.UP * lift
+	_camera.global_position = aim + Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)) * distance
+	_camera.look_at(aim, Vector3.UP)
+	_camera.make_current()
+
+
+## Interface écartée de l'image : toutes les couches 2D de la bataille (HUD, ordres du chef,
+## alertes). Par décalage et non par `visible`, que plusieurs panneaux rétablissent à chaque image.
 func _hide_ui(node: Node) -> void:
 	if node is CanvasLayer:
-		(node as CanvasLayer).visible = false
+		(node as CanvasLayer).offset = Vector2(100000.0, 0.0)
 	for child in node.get_children():
 		_hide_ui(child)
 
