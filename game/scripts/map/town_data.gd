@@ -9,7 +9,10 @@ extends RefCounted
 var towns: Dictionary = {}
 ## Paramètres communs : `{"plan": ..., "walls": ...}` (entrée de `TownPlan.generate`).
 var params: Dictionary = {}
+## GC (ADR 0158) : mètres du plan par unité monde, grossissement compris (`MapScale.town_scale`).
 var meters_per_unit: float = 719.0
+## Mètres réels par unité monde (finage, tout ce qui n'est pas l'emprise bâtie).
+var real_meters_per_unit: float = 719.0
 
 
 static func load_from(map_dir: String) -> TownData:
@@ -22,7 +25,8 @@ static func load_from(map_dir: String) -> TownData:
 		return result
 	result.towns = parsed.get("towns", {})
 	result.params = {"plan": parsed.get("plan", {}), "walls": parsed.get("walls", {})}
-	result.meters_per_unit = float(parsed.get("meters_per_unit", 719.0))
+	result.real_meters_per_unit = float(parsed.get("meters_per_unit", 719.0))
+	result.meters_per_unit = result.real_meters_per_unit / MapScale.town_scale()
 	return result
 
 
@@ -55,5 +59,5 @@ func finage_zones() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for id in towns:
 		var a := anchor_of(id)
-		out.append(Vector3(a.x, a.y, float(towns[id]["finage_radius_m"]) / meters_per_unit))
+		out.append(Vector3(a.x, a.y, float(towns[id]["finage_radius_m"]) / real_meters_per_unit))
 	return out

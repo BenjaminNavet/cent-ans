@@ -22,6 +22,9 @@ uniform float map_extent = 1.0;
 // ZG4 : hauteurs cuites en mètres, mises à l'échelle verticale courante de la carte (pas de
 // nouvelle cuisson quand l'exagération change) ; faux : hauteurs déjà en unités monde.
 uniform bool height_in_meters = false;
+// GC2 (ADR 0158) : inverse de l'échelle du nœud ; le drapé (hauteur monde) est ajouté en repère
+// local, donc ramené à l'échelle de la maquette grossie.
+uniform float drape_scale = 1.0;
 // ZG8 : hauteur affichée (relief local exagéré) au point d'ancrage, source unique.
 #include "res://shaders/campaign_relief.gdshaderinc"
 // Eau : léger reflet spéculaire et teinte.
@@ -64,7 +67,7 @@ void vertex() {
 	vec3 anchor_world = (MODEL_MATRIX * vec4(UV.x, 0.0, UV.y, 1.0)).xyz;
 	vec2 uvh = (anchor_world.xz - map_origin) / map_extent;
 	float h = textureLod(height_map, clamp(uvh, vec2(0.0), vec2(1.0)), 0.0).r;
-	VERTEX.y += height_in_meters ? campaign_display_height(h, anchor_world.xz) : h;
+	VERTEX.y += (height_in_meters ? campaign_display_height(h, anchor_world.xz) : h) * drape_scale;
 }
 
 // Échantillon triplanaire d'une couche ; `n` normale locale, `w` poids des trois plans.

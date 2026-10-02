@@ -10,8 +10,10 @@ extends Node
 ##   deux lecteurs. Chaque contexte a deux listes de lecture (`data/audio/music.json`) : `primary`
 ##   (musique d'époque libre de droits, tirée en priorité) et `fallback` (repli, notamment les
 ##   pistes Kevin MacLeod, utilisées seulement si `primary` ne fournit aucun fichier présent),
-##   jouées en ordre aléatoire sans répéter le morceau précédent ; à défaut de tout,
-##   `music/<contexte>.ogg` en boucle. `culture_regions` associe la culture de la faction jouée
+##   jouées en rotation mélangée (ADR 0154) : chaque morceau passe une fois avant toute
+##   répétition, la rotation survit d'une session à l'autre (`user://music_rotation.cfg`) et, en
+##   guerre, la liste `war` est complétée par celle de la région de la faction jouée ; à défaut de
+##   tout, `music/<contexte>.ogg` en boucle. `culture_regions` associe la culture de la faction jouée
 ##   (`data/factions/<id>.json`, champ `culture`) à une région musicale.
 ## - Effets : clic sur tout bouton (via `SceneTree.node_added`), page tournée à l'ouverture
 ##   des panneaux de la carte, cloche de fin de tour puis l'effet de l'événement le plus
@@ -22,6 +24,8 @@ extends Node
 ## chargés par le smoke test sont compilés avant l'enregistrement des autoloads).
 
 const SETTINGS_PATH := "user://settings.cfg"
+const ROTATION_PATH := "user://music_rotation.cfg"
+const TIERS := ["primary", "fallback"]
 const MUSIC_BUS := "Musique"
 ## AU1 : les effets d'interface (clic, page, cloche de tour) passent par le bus « Interface ».
 const SFX_BUS := "Interface"
@@ -80,7 +84,14 @@ var _playlists: Dictionary = {}
 ## (`campaign_<région>`), lue dans `data/audio/music.json` (clé `culture_regions`).
 var _culture_regions: Dictionary = {}
 var _faction_cultures: Dictionary = {}  # cache faction_id -> culture id
-var _last_track: Dictionary = {}
+## Rotation mélangée (ADR 0154) : `{"<contexte>/<liste>": [morceaux restant à jouer]}`. Une liste
+## n'est rebattue qu'une fois épuisée ; l'état est écrit dans `rotation_path` à chaque tirage pour
+## que deux sessions successives n'ouvrent pas sur le même morceau ("" = pas de persistance).
+var rotation_path := ROTATION_PATH
+var _rotation: Dictionary = {}
+var _current_track := ""  # dernier morceau tiré, jamais rejoué aussitôt (même dans un autre contexte)
+## Liste de campagne régionale mêlée à `war` tant que le joueur est en guerre ("" = aucune).
+var _war_blend := ""
 var _music_rng := RandomNumberGenerator.new()
 
 
@@ -103,6 +114,9 @@ func _ready() -> void:
 		_sfx_players.append(voice)
 	load_settings()
 	load_playlists(SoundBank.data_path(PLAYLISTS_PATH))
+	if silent:
+		rotation_path = ""  # tests sans affichage : ne pas toucher à la rotation du joueur
+	load_rotation()
 	get_tree().node_added.connect(_on_node_added)
 
 
@@ -280,24 +294,87 @@ func playlist(context: String) -> Array:
 	return combined
 
 
-## Choisit un morceau du contexte au hasard parmi `primary`, différent du précédent si possible ;
-## repli sur `fallback` si `primary` ne fournit aucun fichier présent, puis sur
-## `music/<contexte>.ogg` en boucle. `remember` : note le choix pour éviter la répétition.
-func _pick_track(context: String, remember: bool = true) -> AudioStream:
-	var entry: Dictionary = _playlists.get(context, {})
-	for tier in [entry.get("primary", []), entry.get("fallback", [])]:
-		var candidates: Array = (tier as Array).duplicate()
-		if candidates.size() > 1:
-			candidates.erase(_last_track.get(context, ""))
-		while not candidates.is_empty():
-			var index := _music_rng.randi_range(0, candidates.size() - 1)
-			var path: String = candidates[index]
-			var stream := _load_music(path)
-			if stream != null:
-				if remember:
-					_last_track[context] = path
-				return stream
-			candidates.remove_at(index)
+## Morceaux d'une liste (`primary` ou `fallback`) du contexte. En guerre, `war` est complétée par
+## la même liste de la région de la faction jouée (`_war_blend`), sans doublon.
+func tier_tracks(context: String, tier: String) -> Array:
+	var tracks: Array = ((_playlists.get(context, {}) as Dictionary).get(tier, []) as Array).duplicate()
+	if context == "war" and _war_blend != "":
+		for path in (_playlists.get(_war_blend, {}) as Dictionary).get(tier, []):
+			if not tracks.has(path):
+				tracks.append(path)
+	return tracks
+
+
+## Tire le prochain morceau du contexte dans sa rotation mélangée et l'en retire : `primary`
+## d'abord, `fallback` si `primary` ne fournit aucun fichier présent. "" si rien n'est jouable.
+func next_track(context: String) -> String:
+	for tier in TIERS:
+		var tracks := tier_tracks(context, tier)
+		var key := "%s/%s" % [context, tier]
+		var bag: Array = []
+		for path in _rotation.get(key, []):
+			if tracks.has(path) and not bag.has(path):
+				bag.append(path)
+		# Sac épuisé (ou réduit au morceau en cours) : on rebat toute la liste.
+		if bag.is_empty() or (tracks.size() > 1 and bag == [_current_track]):
+			bag = tracks.duplicate()
+			_shuffle(bag)
+		for path in bag.duplicate():
+			if path == _current_track and bag.size() > 1:
+				continue
+			bag.erase(path)
+			if _load_music(path) != null:
+				_rotation[key] = bag
+				_current_track = path
+				save_rotation()
+				return path
+		_rotation[key] = bag
+	return ""
+
+
+## Mélange de Fisher-Yates sur le générateur de la musique (graine aléatoire à chaque session).
+func _shuffle(tracks: Array) -> void:
+	for index in range(tracks.size() - 1, 0, -1):
+		var other := _music_rng.randi_range(0, index)
+		var swapped: Variant = tracks[index]
+		tracks[index] = tracks[other]
+		tracks[other] = swapped
+
+
+func load_rotation() -> void:
+	_rotation.clear()
+	var config := ConfigFile.new()
+	if rotation_path == "" or config.load(rotation_path) != OK:
+		return
+	for key in config.get_section_keys("rotation") if config.has_section("rotation") else PackedStringArray():
+		var bag: Variant = config.get_value("rotation", key, [])
+		if bag is Array:
+			_rotation[key] = bag
+	_current_track = str(config.get_value("state", "last_track", ""))
+
+
+func save_rotation() -> void:
+	if rotation_path == "":
+		return
+	var config := ConfigFile.new()
+	for key in _rotation:
+		config.set_value("rotation", key, _rotation[key])
+	config.set_value("state", "last_track", _current_track)
+	config.save(rotation_path)
+
+
+## Flux du prochain morceau du contexte (`next_track`), à défaut `music/<contexte>.ogg` en boucle.
+## `advance = false` : simple test de présence, la rotation n'avance pas.
+func _pick_track(context: String, advance: bool = true) -> AudioStream:
+	if advance:
+		var path := next_track(context)
+		if path != "":
+			return _load_music(path)
+	else:
+		for tier in TIERS:
+			for path in tier_tracks(context, tier):
+				if _load_music(path) != null:
+					return _load_music(path)
 	return _load_stream(MUSIC_DIR, context, true)
 
 
@@ -450,11 +527,11 @@ func player_at_war() -> bool:
 
 
 func refresh_context() -> void:
-	if player_at_war():
-		_base_context = "war"
-	else:
-		var faction := str(_campaign.get("player_faction")) if _campaign != null else ""
-		_base_context = campaign_context(faction)
+	var faction := str(_campaign.get("player_faction")) if _campaign != null else ""
+	var peace_context := campaign_context(faction)
+	# ADR 0154 : la guerre dure presque toute la partie, sa liste s'enrichit des airs de la région.
+	_war_blend = peace_context
+	_base_context = "war" if player_at_war() else peace_context
 	_update_music()
 
 

@@ -4,3 +4,5 @@
 # Launchers (ADR 0117): the macOS .command runs in bash (LF), the Windows .bat in cmd (CRLF).
 *.command text eol=lf
 *.bat text eol=crlf
+# Committed Windows launcher (ADR 0153), built by tools/launcher-windows/build.sh.
+*.exe binary

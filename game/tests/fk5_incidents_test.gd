@@ -96,6 +96,8 @@ func _test_incidents(map: Node, sim: Object) -> void:
 	var centroid := map_data.centroid_of_id(PROVINCE)
 	_check(seal.get("world").distance_to(Vector3(centroid.x, seal.get("world").y, centroid.y)) < 0.01, "the seal should hang over the province")
 	# Visible à tous les zooms : contrôle d'écran, placé au loin comme au plus près.
+	# TB2 : le sceau n'apparaît plus que dans la couche « Signes » (ou au dernier tour).
+	MapReadability.signs_layer_on = true
 	for distance in [map.camera_rig.max_distance, 45.0]:
 		map.camera_rig.look_at_point(seal.get("world"), distance)
 		map.camera_rig.snap()

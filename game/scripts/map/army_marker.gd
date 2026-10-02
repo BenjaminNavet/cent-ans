@@ -19,6 +19,19 @@ const ROYAL_STANDARDS := {"fac_france": "oriflamme", "fac_england": "st_george"}
 ## Hauteur de la hampe de la scène, et hauteur portée pour une bannière verticale.
 const POLE_HEIGHT := 8.4
 const POLE_TALL := 11.0
+## SA (ADR 0160) : demi-emprise au sol de l'ost (unités locales, avant échelle) : rayon du socle,
+## de la silhouette de visée et de l'écart à la ville.
+const FOOTPRINT_RADIUS := 4.6
+## SA : demi-taille écran minimale de la silhouette de visée, et marge autour d'elle.
+const PICK_MIN_HALF_PX := 16.0
+const PICK_MARGIN_PX := 5.0
+## SA : éclaircissement des figurines (`highlight` du shader, +25 % par unité) : au repos (la
+## monture sombre se détache du terrain), à la sélection et au survol.
+const HIGHLIGHT_IDLE := 0.6
+const HIGHLIGHT_SELECTED := 1.2
+const HIGHLIGHT_HOVERED := 2.2
+## SA : durée du glissement entre la place à côté de la ville et le trajet animé.
+const STANDOFF_SLIDE := 0.3
 
 var army_id: String = ""
 var province_id: String = ""
@@ -30,10 +43,22 @@ var unit_count: int = 0
 ## "siege", "moving", "embarked" ou "".
 var status: String = ""
 var faction_color: Color = Color.WHITE
+## Lot EN : catégorie de relation avec le joueur (`StanceCues` : self, enemy, friend, other).
+var cue: String = StanceCues.OTHER
 ## Position de base (centroïde de la province) et décalage unitaire (armées empilées).
 var base_position: Vector3 = Vector3.ZERO
 var offset_dir: Vector2 = Vector2.ZERO
 var marker_scale: float = 1.0
+## SA (ADR 0160) : une armée en garnison se tient à côté de sa ville. `standoff_dir` (unitaire,
+## coordonnées carte ; nul = pas d'écart), `standoff_base` = rayon de la ville (unités monde) ;
+## s'y ajoute la demi-emprise de l'ost à l'échelle courante. `standoff_weight` passe à 0 pendant
+## une marche animée (le trajet réel est montré).
+var standoff_dir: Vector2 = Vector2.ZERO
+var standoff_base: float = 0.0
+var standoff_weight: float = 1.0:
+	set(value):
+		standoff_weight = value
+		_apply_position()
 ## Mode de l'étendard (0 drapeau armorié, 1 flamme, 2 bannière verticale).
 var standard_mode: int = 0
 
@@ -48,6 +73,9 @@ var figures: ArmyFigures
 ## Hauteurs de repos de la hampe, du fleuron et du drapeau (avant décalage vers le porteur).
 var _rest_y: Array = []
 var _selected := false
+var _hovered := false
+var _standoff_on := true
+var _standoff_tween: Tween
 var _shadows_on := true
 
 static var _ring_textures: Dictionary = {}  # prémultipliée ? → ImageTexture
@@ -61,6 +89,7 @@ func _ready() -> void:
 	selection.albedo_mix = 1.0
 	selection.upper_fade = 0.3
 	selection.lower_fade = 0.3
+	selection.size = Vector3(FOOTPRINT_RADIUS * 2.0, selection.size.y, FOOTPRINT_RADIUS * 2.0)
 	_update_ring()
 
 
@@ -180,17 +209,50 @@ func set_selected(selected: bool) -> void:
 	_update_ring()
 
 
+## SA (ADR 0160) : l'armée est sous le curseur (le clic la prendrait).
+func set_hovered(hovered: bool) -> void:
+	if hovered == _hovered:
+		return
+	_hovered = hovered
+	_update_ring()
+
+
+func is_hovered() -> bool:
+	return _hovered
+
+
+## Lot EN : catégorie de relation avec le joueur ; l'anneau au sol des ennemis passe au rouge.
+func set_cue(value: String) -> void:
+	if value == cue:
+		return
+	cue = value
+	_update_ring()
+
+
+## Socle : doré et vif pour la sélection ; sinon couleur de la relation (EN : rouge pour un
+## ennemi) ou de la faction, éclaircie au survol (SA). Les figurines s'éclaircissent de même.
 func _update_ring() -> void:
 	if selection == null:
 		return
+	var stance_ring := StanceCues.army_ring(cue)
 	if _selected:
 		selection.modulate = RING_SELECTED
-		selection.emission_energy = 1.1
+		selection.emission_energy = 1.4 if _hovered else 1.1
 	else:
 		var ring := faction_color
-		ring.a = 0.5
+		ring.a = 0.8
+		var emission := 0.1
+		if not stance_ring.is_empty():  # EN
+			ring = stance_ring["color"]
+			emission = float(stance_ring["emission"])
+		if _hovered:
+			ring = ring.lerp(Color.WHITE, 0.55)
+			ring.a = 1.0
+			emission = maxf(emission, 0.9)
 		selection.modulate = ring
-		selection.emission_energy = 0.08
+		selection.emission_energy = emission
+	if figures != null:
+		figures.set_highlight(HIGHLIGHT_HOVERED if _hovered else (HIGHLIGHT_SELECTED if _selected else HIGHLIGHT_IDLE))
 
 
 ## Oriente les figurines (en marche : vers la province suivante), `direction` en coordonnées carte.
@@ -238,23 +300,73 @@ func pick_positions() -> PackedVector3Array:
 	return PackedVector3Array([pick_position(), global_position + Vector3(0.0, 1.5, 0.0) * marker_scale])
 
 
-## Ancre de la plaque d'effectif : sous une bannière verticale (`plate_below()`), sinon
-## au-dessus du drapeau.
+## SA (ADR 0160) : silhouette de visée à l'écran — boîte du socle (large de l'emprise) au haut de
+## l'étendard, d'au moins `PICK_MIN_HALF_PX` de demi-côté, élargie de `PICK_MARGIN_PX`. Rectangle
+## vide si le marqueur est derrière la caméra.
+func screen_rect(camera: Camera3D) -> Rect2:
+	var base := global_position
+	if camera.is_position_behind(base):
+		return Rect2()
+	var right := camera.global_transform.basis.x * (FOOTPRINT_RADIUS * marker_scale)
+	var foot := camera.unproject_position(base)
+	var rect := Rect2(foot, Vector2.ZERO)
+	rect = rect.expand(camera.unproject_position(base - right))
+	rect = rect.expand(camera.unproject_position(base + right))
+	# Bord du socle vers la caméra (le sol est vu de biais).
+	var toward := camera.global_transform.basis.z
+	toward.y = 0.0
+	if toward.length() > 0.01:
+		rect = rect.expand(camera.unproject_position(base + toward.normalized() * (FOOTPRINT_RADIUS * 0.6 * marker_scale)))
+	var top := flag.global_position + Vector3(0.0, 0.6, 0.0) * marker_scale
+	if flag.visible and not camera.is_position_behind(top):
+		rect = rect.expand(camera.unproject_position(top))
+	var center := rect.get_center()
+	var half := (rect.size * 0.5).max(Vector2(PICK_MIN_HALF_PX, PICK_MIN_HALF_PX))
+	return Rect2(center - half, half * 2.0).grow(PICK_MARGIN_PX)
+
+
+## Ancre de la plaque d'effectif : au-dessus de l'étendard. SA (ADR 0160) : y compris pour une
+## bannière verticale — l'ost rétrécit à l'écran en dézoomant, une plaque sous le tissu
+## recouvrirait les figurines.
 func plate_anchor() -> Vector3:
-	if standard_mode == 2:
-		# Le tissu occupe les 352 px du haut (sur 512) : plaque sous le bord ondulé.
-		return flag.global_position + Vector3(0.0, -4.3, 0.0) * marker_scale
-	return flag.global_position + Vector3(0.0, 0.9, 0.0) * marker_scale
+	return flag.global_position + Vector3(0.0, 0.9 if standard_mode != 2 else 0.5, 0.0) * marker_scale
 
 
 func plate_below() -> bool:
-	return standard_mode == 2
+	return false
+
+
+## SA (ADR 0160) : active ou suspend l'écart à la ville (suspendu pendant une marche animée),
+## en glissant sur `STANDOFF_SLIDE` secondes.
+func set_standoff_enabled(enabled: bool) -> void:
+	if enabled == _standoff_on:
+		return
+	_standoff_on = enabled
+	if _standoff_tween != null:
+		_standoff_tween.kill()
+	if standoff_dir == Vector2.ZERO or not is_inside_tree():
+		standoff_weight = 1.0 if enabled else 0.0
+		return
+	_standoff_tween = create_tween()
+	_standoff_tween.tween_property(self, "standoff_weight", 1.0 if enabled else 0.0, STANDOFF_SLIDE)
+
+
+## SA : écart courant à la ville (unités monde) : rayon de la ville + demi-emprise de l'ost.
+func standoff_distance() -> float:
+	if standoff_dir == Vector2.ZERO:
+		return 0.0
+	return (standoff_base + FOOTPRINT_RADIUS * marker_scale) * standoff_weight
+
+
+func _apply_position() -> void:
+	var away := standoff_dir * standoff_distance() + offset_dir * (6.0 * marker_scale)
+	position = base_position + Vector3(away.x, 0.0, away.y)
 
 
 func apply_scale(new_scale: float) -> void:
 	marker_scale = new_scale
 	scale = Vector3.ONE * new_scale
-	position = base_position + Vector3(offset_dir.x, 0.0, offset_dir.y) * (6.0 * new_scale)
+	_apply_position()
 	var shadows := new_scale <= SHADOW_MAX_SCALE
 	if shadows != _shadows_on:
 		_shadows_on = shadows
@@ -265,7 +377,8 @@ func apply_scale(new_scale: float) -> void:
 				(child as GeometryInstance3D).cast_shadow = setting
 
 
-## Anneau (texture partagée) : couronne douce, bord extérieur plus marqué.
+## Socle (texture partagée, SA / ADR 0160) : disque teinté translucide cerclé d'un liseré net,
+## à la manière d'un socle de pion ; l'émission ne porte que le liseré.
 static func ring_texture(premultiplied: bool) -> ImageTexture:
 	if _ring_textures.has(premultiplied):
 		return _ring_textures[premultiplied]
@@ -275,12 +388,15 @@ static func ring_texture(premultiplied: bool) -> ImageTexture:
 	for y in size:
 		for x in size:
 			var r := Vector2(x, y).distance_to(center) / (size * 0.5)
-			var band := smoothstep(0.66, 0.78, r) * (1.0 - smoothstep(0.9, 0.98, r))
-			var inner := smoothstep(0.3, 0.8, r) * 0.1 * (1.0 - smoothstep(0.9, 0.98, r))
-			var a := clampf(band + inner, 0.0, 1.0)
-			# Émission (additive) prémultipliée : rien hors de l’anneau ; albédo blanc (alpha seul).
-			var c := a if premultiplied else 1.0
-			image.set_pixel(x, y, Color(c, c, c, a))
+			var edge := 1.0 - smoothstep(0.92, 0.98, r)
+			var band := smoothstep(0.74, 0.82, r) * edge
+			var fill := 0.34 * edge
+			if premultiplied:
+				# Émission (additive) prémultipliée : rien hors du liseré.
+				image.set_pixel(x, y, Color(band, band, band, band))
+			else:
+				# Albédo blanc (alpha seul) : disque + liseré.
+				image.set_pixel(x, y, Color(1.0, 1.0, 1.0, clampf(maxf(band, fill), 0.0, 1.0)))
 	image.generate_mipmaps()
 	_ring_textures[premultiplied] = ImageTexture.create_from_image(image)
 	return _ring_textures[premultiplied]

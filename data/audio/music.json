@@ -4,7 +4,6 @@
       "primary": [
         "assets/third_party/music/ars_nova/souvent_souspire.ogg",
         "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
-        "assets/audio/music/campaign.ogg",
         "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
         "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3"
@@ -18,7 +17,8 @@
         "assets/third_party/music/kevin_macleod/thatched_villagers.mp3",
         "assets/third_party/music/kevin_macleod/the_britons.mp3",
         "assets/third_party/music/kevin_macleod/folk_round.mp3",
-        "assets/third_party/music/kevin_macleod/pippin_the_hunchback.mp3"
+        "assets/third_party/music/kevin_macleod/pippin_the_hunchback.mp3",
+        "assets/audio/music/campaign.ogg"
       ]
     },
     "campaign_france": {
@@ -27,7 +27,6 @@
         "assets/third_party/music/ars_nova/souvent_souspire.ogg",
         "assets/third_party/music/ars_nova/pierrekin_chancon_fas.ogg",
         "assets/third_party/music/ars_nova/he_robinet.ogg",
-        "assets/audio/music/campaign.ogg",
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
         "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3"
       ],
@@ -36,7 +35,8 @@
         "assets/third_party/music/wikimedia/machaut_riches_damour.mp3",
         "assets/third_party/music/wikimedia/solage_fumeux_fume.mp3",
         "assets/third_party/music/kevin_macleod/the_britons.mp3",
-        "assets/third_party/music/kevin_macleod/folk_round.mp3"
+        "assets/third_party/music/kevin_macleod/folk_round.mp3",
+        "assets/audio/music/campaign.ogg"
       ]
     },
     "campaign_england": {
@@ -90,7 +90,6 @@
     },
     "war": {
       "primary": [
-        "assets/audio/music/war.ogg",
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
         "assets/third_party/music/wikimedia/agincourt_carol_deo_gracias.mp3"
       ],
@@ -99,7 +98,8 @@
         "assets/third_party/music/kevin_macleod/celtic_impulse.mp3",
         "assets/third_party/music/kevin_macleod/achaidh_cheide.mp3",
         "assets/third_party/music/kevin_macleod/angevin_b.mp3",
-        "assets/third_party/music/kevin_macleod/procession_of_the_king.mp3"
+        "assets/third_party/music/kevin_macleod/procession_of_the_king.mp3",
+        "assets/audio/music/war.ogg"
       ]
     },
     "court": {
@@ -107,7 +107,6 @@
         "assets/third_party/music/ars_nova/binchois_adieu_mamour.ogg",
         "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
         "assets/third_party/music/ars_nova/he_robinet.ogg",
-        "assets/audio/music/court.ogg",
         "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3",
         "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3"
       ],
@@ -119,7 +118,8 @@
         "assets/third_party/music/kevin_macleod/minstrel_guild.mp3",
         "assets/third_party/music/kevin_macleod/moonlight_hall.mp3",
         "assets/third_party/music/kevin_macleod/village_consort.mp3",
-        "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3"
+        "assets/third_party/music/kevin_macleod/suonatore_di_liuto.mp3",
+        "assets/audio/music/court.ogg"
       ]
     },
     "menu": {

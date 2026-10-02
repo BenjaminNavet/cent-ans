@@ -60,6 +60,24 @@ uniform float ocean_detail_scale = 1.0;
 // Profondeurs (m) du passage de la mer côtière au large.
 uniform vec2 ocean_detail_depth = vec2(30.0, 120.0);
 uniform float mid_depth_m = 25.0;
+// Lot TB1 : mer selon la saison (valeurs de `data/ui/campaign_seasons.json`, mêlées par
+// `SeasonLook.sea` et posées par `Sea.apply_season`) : teinte multiplicative, gris visé (acier
+// l'hiver : une mer profonde seulement assombrie devenait noire) et sa part, écume.
+uniform vec3 season_tint = vec3(1.0);
+uniform vec3 season_grey = vec3(0.0);
+uniform float season_grey_amount = 0.0;
+uniform float season_foam = 1.0;
+// Lot TB1 : mer sous la tempête. Masque météo par province du lot CM2 (R pluie, A orage), repris
+// du terrain par `Sea.sync_weather` ; la tempête d'une province côtière porte à `storm_reach_px`.
+uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
+uniform sampler2D weather_mask : filter_nearest, repeat_disable, hint_default_black;
+uniform bool weather_enabled = false;
+uniform float storm_foam_gain = 0.0;
+uniform float storm_foam_width = 0.0;
+uniform float storm_whitecaps = 0.0;
+uniform float storm_darken = 0.0;
+uniform float storm_reach_px = 12.0;
+uniform float storm_rain_share = 0.4;
 // Lot CM2 : mer des portulans (vue stratégique parchemin).
 #include "res://shaders/parchment_sea.gdshaderinc"
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : couleur de profondeur
@@ -91,6 +109,32 @@ float value_noise(vec2 p) {
 		mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), u.x), u.y);
 }
 
+#include "res://shaders/sea_basins.gdshaderinc"  // TB5 : mers par bassin
+#include "res://shaders/coast_common.gdshaderinc"  // TB5 : géologie de la côte, ressac
+
+// TB1 : force de la tempête [0, 1] au point p (px carte) : province lue ici et à `storm_reach_px`
+// autour (frange déformée par le bruit : pas de bord de province net sur l'eau).
+float sea_storm(vec2 p) {
+	if (!weather_enabled) {
+		return 0.0;
+	}
+	ivec2 sz = textureSize(province_ids, 0);
+	int width = textureSize(weather_mask, 0).x - 1;
+	float warp = value_noise(p * 0.05) * 6.2832;
+	float sum = 0.0;
+	for (int i = 0; i < 5; i++) {
+		float ang = warp + float(i) * 1.5708;
+		vec2 q = p + (i == 0 ? vec2(0.0) : vec2(cos(ang), sin(ang)) * storm_reach_px * (0.5 + value_noise(p * 0.11 + float(i) * 3.7)));
+		vec4 c = texelFetch(province_ids, clamp(ivec2(floor(q)), ivec2(0), sz - ivec2(1)), 0);
+		int id = int(round(c.r * 255.0)) | (int(round(c.g * 255.0)) << 8);
+		if (id > 0) {
+			vec4 w = texelFetch(weather_mask, ivec2(clamp(id, 0, width), 0), 0);
+			sum += max(w.a, w.r * storm_rain_share);
+		}
+	}
+	return clamp(sum * 0.4, 0.0, 1.0);
+}
+
 // Hauteur de houle (somme de trains d'ondes orientés + bruit), en unités arbitraires.
 float swell(vec2 p, float t) {
 	float h = 0.0;
@@ -115,8 +159,23 @@ void fragment() {
 	bool inside = all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
 	float h_here = (has_heightmap && inside) ? height_m(uv) : -200.0;
 	float depth = max(-h_here, 0.0);
-	vec3 col = ga_depth_color(depth, shallow_color, mid_color, deep_color, mid_depth_m, depth_falloff_m, ga4_on);  // GA4
-	float alpha = mix(alpha_shallow, alpha_deep, smoothstep(0.0, 45.0, depth));
+	// TB5 : mer du bassin (teinte, clarté, houle, écume) ; la clarté étire ou resserre la
+	// profondeur vue (Méditerranée : hauts-fonds clairs visibles plus loin ; Manche : sombre).
+	vec3 basin_tint_here;
+	vec4 basin_wave_here;
+	vec2 basin_water_here;
+	basin_look(uv, basin_tint_here, basin_wave_here, basin_water_here);
+	// Retouche TB5 : profondeur exacte sur les petits fonds, lissée au large (mip de la carte
+	// d'altitude) : le talus du plateau ne dessine plus de bord net. Eau claire (> 1) : la
+	// profondeur vue est divisée ; eau trouble (< 1) : une épaisseur d'eau s'ajoute (la diviser
+	// durcissait chaque marche du fond en tache claire).
+	float depth_soft = has_heightmap && inside && height_bpp == 1
+		? max(-mix(height_min_m, height_max_m, textureLod(heightmap, uv, basin_depth_lod).r), 0.0) : depth;
+	float depth_col = mix(depth, depth_soft, smoothstep(basin_soft_depth_m.x, basin_soft_depth_m.y, depth));
+	float clarity = max(basin_water_here.x, 0.1);
+	float seen_depth = clarity >= 1.0 ? depth_col / clarity : depth_col + (1.0 / clarity - 1.0) * basin_murk_m;
+	vec3 col = ga_depth_color(seen_depth, shallow_color, mid_color, deep_color, mid_depth_m, depth_falloff_m, ga4_on);  // GA4
+	float alpha = mix(alpha_shallow, alpha_deep, smoothstep(0.0, 45.0, seen_depth));
 
 	// Vagues : normale par différences finies de la houle, estompée au dézoom.
 	float t = TIME * wave_speed;
@@ -130,14 +189,14 @@ void fragment() {
 		vec2 ub = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * (p + TIME * ga4_velocity_b) / ga4_scale_b;
 		vec2 na = texture(water_normal, ua).rg * 2.0 - 1.0;
 		vec2 nb = texture(water_normal, ub).rg * 2.0 - 1.0;
-		float gs = ga4_normal_strength * (1.0 - smoothstep(0.6, 2.5, footprint) * 0.7);
+		float gs = ga4_normal_strength * basin_wave_here.x * (1.0 - smoothstep(0.6, 2.5, footprint) * 0.7);
 		vec2 nxy = (na + nb) * gs;
 		n = normalize(vec3(nxy.x, 1.0, nxy.y));
 	} else {
 		float e = 0.15;
 		float hx = swell(q + vec2(e, 0.0), t) - h0;
 		float hz = swell(q + vec2(0.0, e), t) - h0;
-		float ws = wave_strength * (1.0 - smoothstep(0.15, 0.8, footprint));
+		float ws = wave_strength * basin_wave_here.x * (1.0 - smoothstep(0.15, 0.8, footprint));
 		n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
 	}
 	// RC5 : détail côtier puis large (normale ajoutée, teinte relative), estompé au dézoom.
@@ -158,17 +217,42 @@ void fragment() {
 	col = mix(col, mix(rc_sea_col, rc_ocean_col, rc_ocean), rc_near);
 	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
-	col *= 1.0 + h0 * 0.06 * (1.0 - smoothstep(0.25, 1.2, footprint));
+	col *= 1.0 + h0 * 0.06 * basin_wave_here.x * (1.0 - smoothstep(0.25, 1.2, footprint));
+	// Retouche TB5 : relief fin des vagues lisible dans la couleur sur toutes les mers (la
+	// Méditerranée claire sortait en aplat), plus ou moins marqué selon le clapot du bassin.
+	col *= 1.0 + (n.x * 0.6 + n.z * 0.8) * sea_ripple_contrast * (1.0 - smoothstep(0.25, 1.2, footprint));
+	// TB5 : longue houle du large (Atlantique), lisible dans la couleur et dans le reflet.
+	vec3 ls = long_swell(p, footprint, basin_wave_here.y);
+	col *= 1.0 + ls.z * long_swell_contrast;
+	n = normalize(n - vec3(ls.x, 0.0, ls.y) * long_swell_normal);
+	// TB1 : mer de la saison (gris acier l'hiver), assombrie sous la tempête.
+	float storm = sea_storm(p);
+	// Retouche TB5 : teinte entière au large, adoucie (racine) sur les petits fonds déjà clairs.
+	vec3 basin_tint_seen = mix(sqrt(basin_tint_here), basin_tint_here, smoothstep(0.0, 40.0, depth_col));
+	col = mix(col * basin_tint_seen, season_grey, clamp(season_grey_amount * basin_water_here.y, 0.0, 1.0)) * season_tint;  // TB5 : bassin
+	col *= 1.0 - storm_darken * storm;
 
 	// Écume : bande près du rivage, lignes qui avancent vers la côte, cassées par le bruit.
 	float coast = has_coast_dist && inside ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : -50.0;
 	float off = max(-coast, 0.0);
-	float band = 1.0 - smoothstep(0.0, foam_px, off);
+	float foam_w = foam_px * (1.0 + storm_foam_width * storm);  // TB1 : bande plus large par tempête
+	float band = 1.0 - smoothstep(0.0, foam_w, off);
 	float lines = smoothstep(0.55, 0.95, sin(off * 5.5 + TIME * 1.6 + value_noise(p * 0.8) * 4.0) * 0.5 + 0.5);
 	float broken = smoothstep(0.35, 0.75, value_noise(p * 1.6 + vec2(TIME * 0.05, 0.0)));
 	float foam = band * mix(0.35 + 0.65 * lines * broken, 0.6, far_t);
-	foam *= 1.0 - smoothstep(foam_px * 0.2, foam_px, off) * 0.5;
-	col = mix(col, foam_color, foam * 0.55);
+	foam *= 1.0 - smoothstep(foam_w * 0.2, foam_w, off) * 0.5;
+	// TB5 : ressac au trait de côte. La lame va et vient (elle monte peu au pied des falaises) ;
+	// la bande d'écume d'origine s'efface d'autant pour rester sobre.
+	if (swash_amount > 0.0 && has_coast_dist && inside && coast > -(swash_out_px + swash_film_px + 0.3)) {
+		float cliff_f = coast_enabled && has_heightmap ? coast_cliff_factor(height_m(coast_probe_uv(uv, coast, coast_to_land(uv)))) : 0.0;
+		foam = max(foam * (1.0 - 0.45 * swash_amount), coast_swash(p, coast, cliff_f, footprint).x);
+	}
+	foam = clamp(foam * season_foam * basin_wave_here.z * (1.0 + storm_foam_gain * storm), 0.0, 1.6);  // TB1, TB5
+	// TB1, TB5 : moutons au large (tempête, bassin houleux) : crêtes rares et irrégulières de
+	// près, simple voile de teinte au dézoom (`sea_whitecaps`).
+	vec2 caps = sea_whitecaps(p, footprint, max(storm * storm_whitecaps, basin_wave_here.w));
+	foam = max(foam, caps.x);
+	col = mix(col, foam_color, min(foam * 0.55, 0.9) + caps.y);
 	alpha = mix(alpha, 0.9, foam * 0.5);
 	// Côte précise (raster) plutôt que l'intersection avec le maillage (LOD grossier) : l'eau
 	// s'efface sur la terre même si la géométrie y passe sous le niveau de la mer.

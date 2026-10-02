@@ -495,6 +495,7 @@
     "close_legend": {"title": "Fermer la légende"},
     "map_mode_filters": {"title": "Filtres de la carte", "body": "Diplomatie, religion, ordre public, richesse…", "hint": "F"},
     "map_mode_trade_overlay": {"title": "Calque des routes commerciales, combinable avec tout filtre"},
+    "map_mode_signs_overlay": {"title": "Calque des signes : marteaux de chantier, sceaux d'incident et sites de rencontre. Sans lui, la carte ne montre que les signes qui pressent."},
     "research_none": {"title": "Recherche"},
     "research_progress": {"title": "Recherche"},
     "income_gross_last_turn": {"title": "Revenu brut du dernier tour."},

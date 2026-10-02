@@ -36,5 +36,5 @@
     "pin_selected": true,
     "pin_hovered": true
   },
-  "shield": {"description": "Lot DV2 : écu du détenteur posé au-dessus du nom ; côté = size_px × size_factor, écart au texte en px.", "size_factor": 0.45, "gap_px": 1}
+  "shield": {"description": "Lot DV2 : écu du détenteur posé au-dessus du nom ; côté = size_px × size_factor, écart au texte en px. Lot TB2 : max_distance_by_rank = distance caméra jusqu'à laquelle un lieu de ce rang porte son écu (au-delà, nom seul ; rang absent = toujours) : en vue moyenne et large, seuls les lieux majeurs gardent un écu.", "size_factor": 0.45, "gap_px": 1, "max_distance_by_rank": {"1": 220, "2": 330}}
 }

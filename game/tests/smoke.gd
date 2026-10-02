@@ -117,6 +117,12 @@ func _init() -> void:
 		await _run_ui_layout()
 		quit(1 if _failures > 0 else 0)
 		return
+	# Tutoriel et encyclopédie seuls (F8) : CENT_ANS_SMOKE_ONLY=tutorial.
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "tutorial":
+		await _run_tutorial()
+		_cleanup_test_dir()
+		quit(1 if _failures > 0 else 0)
+		return
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
@@ -1669,6 +1675,30 @@ func _run_assets() -> void:
 	_check(not audio.call("play_sfx", "does_not_exist"), "unknown sfx should be ignored")
 	audio.call("play_music", "war")
 	_check(str(audio.get("current_context")) == "war", "music context should be war")
+	# ADR 0154 : rotation mélangée — chaque morceau passe une fois avant toute répétition, et la
+	# rotation survit à un rechargement (deux sessions n'ouvrent pas sur le même morceau).
+	var rotation_path := "user://music_rotation_smoke_%d.cfg" % OS.get_process_id()
+	audio.set("rotation_path", rotation_path)
+	audio.call("load_rotation")
+	var court_tracks: Array = audio.call("tier_tracks", "court", "primary")
+	var heard: Array = []
+	for index in 2:
+		heard.append(audio.call("next_track", "court"))
+	audio.call("load_rotation")  # « nouvelle session »
+	for index in court_tracks.size() - 2:
+		heard.append(audio.call("next_track", "court"))
+	var distinct := {}
+	for path in heard:
+		distinct[path] = true
+	_check(court_tracks.size() >= 3 and distinct.size() == court_tracks.size(), "music rotation should play every court track once before repeating: %s" % [heard])
+	_check(str(audio.call("next_track", "court")) != str(heard[-1]), "music rotation should not replay the track just played")
+	_check(not (audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/audio/music/war.ogg"), "synthetic war.ogg should not be a primary track")
+	audio.set("_war_blend", "campaign_france")
+	_check((audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/third_party/music/ars_nova/onques_ne_fut.ogg"), "war playlist should blend the regional campaign tracks")
+	audio.set("_war_blend", "")
+	audio.set("rotation_path", "")
+	audio.call("load_rotation")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(rotation_path))
 	_check(str(audio.call("event_sfx", [{"kind": "birth"}, {"kind": "battle"}])) == "sword_clash", "battle should win event sfx priority")
 
 	# Persistance des volumes (valeurs d'origine restaurées ensuite).
@@ -2533,6 +2563,17 @@ func _run_tutorial() -> void:
 	if settings != null:
 		_check(bool(settings.call("get_value", "tutorial/done")), "tutorial/done should be persisted")
 	_check(not tutorial.should_autostart(), "a finished tutorial must not restart")
+	# Factions sans texte propre : dirigeant, suzerain et objectifs de titre lus dans la simulation,
+	# conseils génériques, aucun champ laissé brut.
+	var generic_steps: Array[Dictionary] = TutorialSteps.steps("fac_albret", tutorial._context("fac_albret"))
+	_check(generic_steps.size() == TutorialSteps.count(), "generic tutorial should keep every step")
+	_check(str(generic_steps[0]["text"]).contains("Les objectifs de votre titre") and not str(generic_steps[0]["text"]).contains("Survivre et prospérer"), "generic intro should list the title objectives from the simulation")
+	_check(str(generic_steps[0]["title"]).begins_with("Bienvenue, ") and not str(generic_steps[0]["title"]).contains("Sire"), "generic intro should greet the ruler by name")
+	for generic_step in generic_steps:
+		_check(str(generic_step["advice"]) != "", "generic advice missing at %s" % generic_step["id"])
+		for key in ["title", "text", "objective", "advice"]:
+			_check(not str(generic_step[key]).contains("{"), "raw placeholder in generic %s.%s" % [generic_step["id"], key])
+	_check(TutorialSteps.steps("fac_x", {})[0]["title"] == "Bienvenue", "a faction without ruler gets a plain welcome")
 
 	# Encyclopédie.
 	var encyclopedia: Control = tutorial.encyclopedia

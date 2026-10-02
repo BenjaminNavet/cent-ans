@@ -8,6 +8,9 @@ extends Node3D
 ## sont dessinées à l'échelle 1:1 à toutes les hauteurs (`TownLayer`, `LandmarkCityLayer`, tuiles
 ## lointaines). Ce calque garde l'emprise réelle de chaque colonie (`radii` de `towns_1340.json`) :
 ## clic, anneau de sélection, étiquettes, exclusions (hameaux, végétation par le finage).
+## GC2 (ADR 0158) : par défaut (style `maquette`), les lieux sont des maquettes stylisées à taille
+## monde constante (`TownMaquetteLayer`) à la place des villes 1:1 ; l'emprise est alors celle de
+## la maquette. `--town-style=real` garde le rendu VT.
 ## - nom de chaque lieu au-dessus de son emprise, surmonté d'un petit écu du détenteur
 ##   (`settlement_icon.gdshader`, un `MultiMesh`, atlas `HeraldryAtlas`) ; taille selon le rang et
 ##   densité par rang et distance caméra (`SettlementMarkers`, données) ; estompés par `normal` ;
@@ -40,10 +43,17 @@ const LABEL_GAP_PX := 2.0
 const LABEL_FOOTPRINT_MAX_PX := 160.0
 ## VT : rayon de clic minimal (px écran) d'une emprise.
 const PICK_MIN_PX := 8.0
+## SA (ADR 0160) : survol — niveau de surbrillance de l'écu (`settlement_icon.gdshader` : entre
+## 0,2 et 0,5 = survol, au-delà = sélection) et couleur de l'anneau d'emprise.
+const HOVER_HIGHLIGHT := 0.4
+const HOVER_RING_COLOR := Color(1.0, 0.96, 0.82)
 ## VT : emprise (m) d'une colonie absente de `towns_1340.json` ; hauteur (m) des toits au-dessus
 ## du sol (`model_top`).
 const DEFAULT_FOOTPRINT_M := 150.0
 const TOWN_TOP_M := 12.0
+const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
+## GC2 : clairière autour d'une maquette (× sa demi-largeur) dans les exclusions de végétation.
+const MAQUETTE_CLEARING := 1.15
 ## Proportion de hameaux brûlés = dévastation (%) × ce facteur (au-delà d'un seuil).
 const BURN_THRESHOLD := 10.0
 ## Distance de retrait du marqueur de la colonie sélectionnée (toujours affiché, DA7d).
@@ -66,6 +76,9 @@ var stats: Dictionary = {}
 ## CV3-0 (#7) : rectangles écran réservés (plaques/étendards d'armée) que le déclutter des
 ## colonies doit éviter ; posé par `CampaignMap` (`ArmyMarkers.screen_label_rects`).
 var label_obstacles: Callable = Callable()
+## TB2 : bord haut de l'écran occupé par le HUD (px), `func() -> float` posé par la carte ; un nom
+## qui passerait dessous est coupé, donc masqué.
+var label_top_inset: Callable = Callable()
 
 var _icons: MultiMeshInstance3D
 var _icon_material: ShaderMaterial
@@ -83,6 +96,8 @@ var _marker_world: PackedVector3Array = PackedVector3Array()
 ## Écu affiché par colonie (faction), pour ne réécrire que ce qui change ; 1 si armorié (DV2).
 var _marker_holder: PackedStringArray = PackedStringArray()
 var _shielded: PackedByteArray = PackedByteArray()
+## TB2 : distance caméra jusqu'à laquelle l'écu accompagne le nom (rang mineur : nom seul de loin).
+var _shield_until: PackedFloat32Array = PackedFloat32Array()
 ## Lot DA7d : état de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
 ## ordre de priorité fixe (rang puis poids), épinglés et dernier état de caméra calculé.
 var _marker_shown: PackedByteArray = PackedByteArray()
@@ -101,6 +116,8 @@ var _marker_screen: PackedVector2Array = PackedVector2Array()
 var last_declutter_ms := 0.0
 var _icon_distance := -1.0
 var _labels: Array[Label3D] = []
+## Lot EN : encre du nom de chaque colonie (rouge : détenue par un ennemi du joueur).
+var _label_ink: PackedColorArray = PackedColorArray()
 ## DC4 : taille du texte de chaque étiquette (police, contour compris), mesurée à la demande.
 var _label_size: PackedVector2Array = PackedVector2Array()
 var _label_kind: PackedStringArray = PackedStringArray()
@@ -118,6 +135,9 @@ var _labels_dirty: bool = false
 var _labels_root: Node3D
 var _hamlets_root: Node3D
 var _selection_ring: MeshInstance3D
+## SA (ADR 0160) : colonie sous le curseur ("" = aucune) et son anneau clair.
+var hovered_id: String = ""
+var _hover_ring: MeshInstance3D
 ## Q8 : l'anneau de sélection disparaît quand la caméra est à moins de N rayons de la ville.
 const RING_HIDE_DISTANCE_FACTOR := 4.0
 var _settlements_by_chunk: Dictionary = {}
@@ -141,6 +161,11 @@ var towns: TownLayer
 var landmark_cities: LandmarkCityLayer
 ## VT-E (ADR 0138) : lointain des villes à l'échelle 1:1 (tuiles F1/F2), voir `TownFarLayer`.
 var town_far: TownFarLayer
+## GC2 (ADR 0158) : maquettes stylisées à taille monde constante (style `maquette`, par défaut) ;
+## `towns`, `landmark_cities` et `town_far` sont alors nuls. Voir `TownMaquetteLayer`.
+var maquettes: TownMaquetteLayer
+## GC2 : emprises réelles (`towns_1340.json`) lues sans `TownLayer` (finage, rayon réel).
+var _town_data: TownData
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
@@ -178,6 +203,7 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	data = settlement_data
 	tiers = zoom_tiers if zoom_tiers != null else ZoomTiers.new()
 	_labels.clear()
+	_label_ink.clear()
 	_label_size.clear()
 	_label_kind.clear()
 	_settlements_by_chunk.clear()
@@ -201,6 +227,10 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	_ground_y.resize(count)
 	_real_radius.resize(count)
 	_real_radius.fill(-1.0)
+	towns = null
+	landmark_cities = null
+	town_far = null
+	maquettes = null
 	_load_landmark_zones()
 	for i in count:
 		var entry: Dictionary = data.settlements[i]
@@ -252,15 +282,21 @@ func _load_landmark_zones() -> void:
 		if anchor.size() < 2:
 			continue
 		var zone := float((plan.get("scale", {}) as Dictionary).get("zone_radius_px", 6.0))
+		if TownMaquetteData.enabled():  # GC2 : la maquette emblématique est grossie
+			zone *= TownMaquetteData.landmark_scale()
 		_landmarks[i] = Vector3(float(anchor[0]), float(anchor[1]), zone)
 
 
 ## VT : emprise réelle de chaque colonie (unités monde) : plus grand des 32 `radii` de
 ## `towns_1340.json` (sans gain), finage (`finage_radius_m`) et hauteur des toits ; colonie
 ## absente : `DEFAULT_FOOTPRINT_M`, sans finage.
+## GC2 (ADR 0158), style `maquette` : l'emprise (clic, anneau, hauteur d'étiquette, exclusions) est
+## celle de la maquette (demi-largeur après réduction des voisins, hauteur du modèle) ; le rayon
+## réel et le finage restent ceux de `towns_1340.json`.
 func _compute_footprints() -> void:
-	var town_data: TownData = towns.data if towns != null else null
-	var mpu := town_data.meters_per_unit if town_data != null else 719.0
+	var town_data: TownData = towns.data if towns != null else _town_data
+	var mpu := town_data.meters_per_unit if town_data != null else 719.0 / MapScale.town_scale()
+	var real_mpu := town_data.real_meters_per_unit if town_data != null else 719.0
 	for i in data.settlements.size():
 		var id := str(data.settlements[i]["id"])
 		var radius_m := -1.0
@@ -272,8 +308,11 @@ func _compute_footprints() -> void:
 			finage_m = float(town.get("finage_radius_m", -1.0))
 		_real_radius[i] = radius_m / mpu if radius_m > 0.0 else -1.0
 		_model_radius[i] = (radius_m if radius_m > 0.0 else DEFAULT_FOOTPRINT_M) / mpu
-		_finage_radius[i] = finage_m / mpu if finage_m > 0.0 else -1.0
+		_finage_radius[i] = finage_m / real_mpu if finage_m > 0.0 else -1.0
 		_model_top[i] = TOWN_TOP_M / mpu
+		if maquettes != null and maquettes.radius_of(i) > 0.0:
+			_model_radius[i] = maquettes.radius_of(i)
+			_model_top[i] = maquettes.top_of(i)
 		_ground_footprint(i)
 	_forget_hamlet_exclusions()
 
@@ -388,6 +427,50 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	_label_kind.append(kind)
 
 
+## TB2 : hiérarchie typographique des noms. Capitales (rang 4) en petites capitales espacées,
+## grandes cités (rang 3) en romain gras, autres lieux en romain plus léger (graisse plafonnée).
+func _style_label(i: int, rank: int) -> void:
+	if i >= _labels.size():
+		return
+	var label := _labels[i]
+	var style := MapReadability.section("labels")
+	if rank < 3:
+		var kind_weight := int(LABEL_WEIGHT.get(_label_kind[i], 500))
+		var capped := mini(kind_weight, int(style.get("minor_max_weight", kind_weight)))
+		if capped != kind_weight:
+			label.font = _label_font(capped)
+			_label_size[i] = Vector2.ZERO
+		return
+	if rank >= 4:
+		var weight := int(style.get("capital_weight", 700))
+		var spacing := int(style.get("capital_letter_spacing_px", 1))
+		var font := _label_font(weight, true, spacing)
+		if font == null:
+			return
+		label.font = font
+		label.font_size = UiType.size(UiType.HEADING)
+		if not has_small_caps(font):
+			label.text = label.text.to_upper()  # repli : capitales, un cran plus petites
+			label.font_size = roundi(label.font_size * 0.82)
+	else:
+		label.font = _label_font(int(style.get("major_weight", 700)))
+	_label_size[i] = Vector2.ZERO  # texte à remesurer
+
+
+## TB2 : vrai si la police porte de vraies petites capitales (fonction OpenType `smcp`).
+static func has_small_caps(font: Font) -> bool:
+	return font != null and font.get_supported_feature_list().has(TextServerManager.get_primary_interface().name_to_tag("smcp"))
+
+
+## TB2 : vrai si le nom de la colonie `i` est composé en petites capitales (ou en capitales, repli).
+func label_is_small_caps(i: int) -> bool:
+	if i < 0 or i >= _labels.size():
+		return false
+	var variation := _labels[i].font as FontVariation
+	var tag := TextServerManager.get_primary_interface().name_to_tag("smcp")
+	return (variation != null and int(variation.opentype_features.get(tag, 0)) == 1) or _labels[i].text == _labels[i].text.to_upper()
+
+
 ## Instance du `MultiMesh` d'une colonie : ordre inverse de la priorité, pour que les lieux de
 ## rang élevé (cités, triées en tête) soient dessinés par-dessus les petits.
 func _icon_instance(i: int) -> int:
@@ -404,6 +487,7 @@ func _build_icons() -> void:
 	_marker_holder.resize(count)
 	_shielded.resize(count)
 	_shielded.fill(0)
+	_shield_until.resize(count)
 	_marker_shown.resize(count)
 	_marker_shown.fill(1)
 	_marker_screen.resize(count)
@@ -424,6 +508,8 @@ func _build_icons() -> void:
 		_marker_rank[i] = rank
 		_marker_size[i] = markers.size_px(kind, rank) * markers.shield_size_factor()
 		_marker_until[i] = markers.visible_until(kind, rank)
+		_shield_until[i] = minf(_marker_until[i], markers.shield_until(rank))  # TB2
+		_style_label(i, rank)
 		_marker_holder[i] = ""
 		var k := _icon_instance(i)
 		# DV2 : ancre = position du nom (recalée par `_sync_shield` quand le nom bouge).
@@ -433,7 +519,7 @@ func _build_icons() -> void:
 		# du dernier changement (fondu).
 		multimesh.set_instance_color(k, Color(-1.0, 0.0, 1.0, -1.0e4))
 		# r = haut du nom au-dessus de l'ancre (px d'étiquette), b = côté de l'écu (px écran).
-		multimesh.set_instance_custom_data(k, Color(_shield_lift(i), 0.0, _marker_size[i], _marker_until[i] / 100.0))
+		multimesh.set_instance_custom_data(k, Color(_shield_lift(i), 0.0, _marker_size[i], _shield_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
 	_icon_material.shader = preload("res://shaders/settlement_icon.gdshader")
 	_fade_distance = markers.fade_distance()
@@ -505,9 +591,10 @@ func marker_in_tier(i: int) -> bool:
 	return i >= 0 and i < _marker_until.size() and _camera_distance < _marker_until_of(i) and _weights.y > 0.01
 
 
-## Vrai si la colonie `i` a un écu (détenteur armorié).
+## Vrai si la colonie `i` montre un écu à la distance caméra courante : détenteur armorié et,
+## lot TB2, rang assez élevé pour cette distance (la colonie sélectionnée garde le sien).
 func has_shield(i: int) -> bool:
-	return i >= 0 and i < _shielded.size() and _shielded[i] == 1
+	return i >= 0 and i < _shielded.size() and _shielded[i] == 1 and (_is_selected(i) or _camera_distance < _shield_until[i])
 
 
 ## DV2, VT : emprises cliquables et anneau de sélection (vue normale).
@@ -560,22 +647,36 @@ func _build_selection_ring() -> void:
 	_selection_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_selection_ring.visible = false
 	add_child(_selection_ring)
+	# SA : même anneau, clair, pour la colonie survolée.
+	var hover_material := material.duplicate() as StandardMaterial3D
+	hover_material.albedo_color = HOVER_RING_COLOR
+	hover_material.render_priority = 1
+	_hover_ring = MeshInstance3D.new()
+	_hover_ring.name = "HoverRing"
+	_hover_ring.mesh = torus
+	_hover_ring.material_override = hover_material
+	_hover_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_hover_ring.visible = false
+	add_child(_hover_ring)
 
 
 # --- État de la simulation ---------------------------------------------------------
 
 
-## Écus des détenteurs et dévastation des provinces. `color_of` (faction → Color) n'est plus lu
-## depuis le retrait des bannières de maquettes (VT) ; signature gardée pour les appelants.
-func refresh(sim: Object, _color_of: Callable) -> void:
+## Écus des détenteurs et dévastation des provinces. `color_of` (faction → Color) teinte les
+## bannières des maquettes (GC2) ; il n'est pas lu avec les villes 1:1 (VT).
+func refresh(sim: Object, color_of: Callable) -> void:
 	if data == null:
 		return
 	data.apply_live(sim)
+	if maquettes != null:
+		maquettes.refresh(sim, color_of)
 	if landmark_cities != null and sim != null and sim.has_method("get_date_label"):
 		var year := LandmarkModel.year_of(str(sim.call("get_date_label")))
 		if year > 0:
 			landmark_cities.set_year(year)
 	_refresh_shields()
+	_refresh_label_inks(sim)
 	_refresh_capital(sim)
 	var devastation := {}
 	if sim != null and (sim.has_method("get_provinces_snapshot") or sim.has_method("get_province_state")):
@@ -681,6 +782,9 @@ func update_view(camera_distance: float) -> void:
 	if town_far != null:  # VT-E : après les calques 1:1 (masque d'enfoncement à jour)
 		town_far.update_view(camera_distance)
 	tp = PerfProbe.lap("settle/townfar", tp)
+	if maquettes != null:  # GC2
+		maquettes.update_view(camera_distance)
+		tp = PerfProbe.lap("settle/maquettes", tp)
 	_update_hamlet_scale(camera_distance)
 	var th := PerfProbe.lap("settle/hamlets/scale", tp)  # RS-K2
 	_update_hamlets()
@@ -702,6 +806,8 @@ func update_view(camera_distance: float) -> void:
 func _on_chunk_surface_changed(index: int) -> void:
 	for i in _settlements_by_chunk.get(index, PackedInt32Array()):
 		_ground_footprint(i)
+	if maquettes != null:  # GC2 : maquettes reposées sur le morceau recalé
+		maquettes.reground(_settlements_by_chunk.get(index, PackedInt32Array()))
 	if _hamlet_nodes.has(index):
 		_hamlet_dirty[index] = true
 	# ZG4 : hauteurs des étiquettes une fois par image (et non à chaque morceau recalé).
@@ -858,6 +964,7 @@ var _dc_origin := Vector3.ZERO
 var _dc_eye := Vector3.FORWARD
 var _dc_near := 0.05
 var _dc_label_screen := Rect2()
+var _dc_safe := Rect2()  # TB2 : zone où un nom s'écrit en entier
 var _dc_marker_margin := 2.0
 var _dc_label_margin := 4.0
 var _dc_icons_on := false
@@ -886,6 +993,7 @@ func _declutter_begin() -> bool:
 	_dc_near = camera.near
 	var spill := float(markers.declutter_value("label_screen_margin", 0.2))
 	_dc_label_screen = screen.grow_individual(screen.size.x * spill, screen.size.y * spill, screen.size.x * spill, screen.size.y * spill)
+	_dc_safe = label_safe_rect()
 	_dc_marker_margin = float(markers.declutter_value("marker_margin_px", 2.0))
 	_dc_label_margin = float(markers.declutter_value("label_margin_px", declutter_margin))
 	_dc_icons_on = _icons != null and _icons.visible
@@ -911,6 +1019,19 @@ func _declutter_begin() -> bool:
 	PerfProbe.lap("settle/declutter/prep", tp)
 	_dc_usec = Time.get_ticks_usec() - t0
 	return true
+
+
+## TB2 : rectangle de l'écran où un nom (et son écu) doit tenir en entier pour s'afficher : écran
+## moins la marge `labels.edge_margin_px` et le bandeau du HUD (`label_top_inset`). La marge couvre
+## aussi le déplacement de caméra toléré entre deux passes de dé-encombrement.
+func label_safe_rect() -> Rect2:
+	var screen := get_viewport().get_visible_rect()
+	var margin := MapReadability.number("labels", "edge_margin_px", 16.0)
+	var top := float(label_top_inset.call()) if label_top_inset.is_valid() else 0.0
+	var safe := screen.grow_individual(-margin, -margin - top, -margin, -margin)
+	# Fenêtre plus petite que ses marges (headless) : zone vide, pas un rectangle négatif.
+	safe.size = safe.size.max(Vector2.ZERO)
+	return safe
 
 
 ## RS-K3 : point écran de `p` avec la caméra figée de la passe (`Camera3D.unproject_position`).
@@ -958,12 +1079,15 @@ func _declutter_step(sliced: bool) -> void:
 		# Rectangle du nom (cf. `_label_screen_rect`) et de l'écu (cf. `_shield_rect`).
 		var text := _label_text_size(i) * _dc_scale
 		var label_center := anchor - label.offset * Vector2(-1.0, 1.0) * _dc_scale
-		var rect := Rect2(label_center - text * 0.5, text).grow(_dc_label_margin)
-		var shielded := _shielded[i] == 1
+		var bare := Rect2(label_center - text * 0.5, text)
+		var rect := bare.grow(_dc_label_margin)
+		var shielded := _shielded[i] == 1 and (i == _selected_index or _camera_distance < _shield_until[i])  # = has_shield(i), sans appel
 		var shield_rect := _shield_rect(i, anchor, _dc_scale, _dc_marker_margin) if shielded else Rect2()
 		var shown := false
 		if _dc_label_screen.intersects(rect) or (shielded and _dc_label_screen.intersects(shield_rect)):
-			shown = pinned or not (_placer.overlaps(rect, i) or (shielded and _placer.overlaps(shield_rect, i)))
+			# TB2 : un nom (ou son écu) qui dépasse de l'écran serait coupé : il cède la place.
+			var cut := not _dc_safe.encloses(bare) or (shielded and not _dc_safe.encloses(shield_rect.grow(-_dc_marker_margin)))
+			shown = pinned or not (cut or _placer.overlaps(rect, i) or (shielded and _placer.overlaps(shield_rect, i)))
 			if shown:
 				_placer.try_place(rect, i, true)
 				if shielded:
@@ -986,10 +1110,34 @@ func _show_label(i: int, shown: bool, alpha: float) -> void:
 		label.visible = shown
 	if not shown or is_equal_approx(label.modulate.a, alpha):
 		return
-	var modulate := label_color
+	var modulate := label_ink(i)
 	modulate.a = alpha
 	label.modulate = modulate
 	label.outline_modulate = _halo(alpha)
+
+
+## Lot EN (ADR 0155) : encre du nom de la colonie `i` (sans opacité).
+func label_ink(i: int) -> Color:
+	return _label_ink[i] if i < _label_ink.size() else label_color
+
+
+## Lot EN : noms des villes tenues par un ennemi du joueur à l'encre rouge (`StanceCues`).
+func _refresh_label_inks(sim: Object) -> void:
+	if sim == null or not sim.has_method("get_player_faction"):
+		return
+	var player := str(sim.call("get_player_faction"))
+	var stances := StanceCues.stances(sim, player)
+	if _label_ink.size() != _labels.size():
+		_label_ink.resize(_labels.size())
+		_label_ink.fill(label_color)
+	for i in mini(_labels.size(), data.settlements.size()):
+		var cue := StanceCues.category_of(str(data.settlements[i]["controller"]), player, stances)
+		var ink := StanceCues.town_label_color(cue, label_color)
+		if ink == _label_ink[i]:
+			continue
+		_label_ink[i] = ink
+		ink.a = _labels[i].modulate.a
+		_labels[i].modulate = ink
 
 
 ## PO3 : couleur du halo de parchemin pour une opacité d'étiquette `alpha`.
@@ -1003,16 +1151,22 @@ static var _label_fonts: Dictionary = {}
 
 
 ## PO3 : EB Garamond à la graisse `weight` (axe variable `wght`), partagée ; null si la police manque.
-static func _label_font(weight: int) -> Font:
-	if _label_fonts.has(weight):
-		return _label_fonts[weight]
+## TB2 : `small_caps` active les petites capitales (`smcp`) avec `spacing` px entre les lettres.
+static func _label_font(weight: int, small_caps: bool = false, spacing: int = 0) -> Font:
+	var key := weight + (100000 + spacing * 1000 if small_caps else 0)
+	if _label_fonts.has(key):
+		return _label_fonts[key]
 	var font: Font = null
 	if ResourceLoader.exists(LABEL_FONT_PATH):
+		var server := TextServerManager.get_primary_interface()
 		var variation := FontVariation.new()
 		variation.base_font = load(LABEL_FONT_PATH) as Font
-		variation.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): weight}
+		variation.variation_opentype = {server.name_to_tag("wght"): weight}
+		if small_caps:
+			variation.opentype_features = {server.name_to_tag("smcp"): 1}
+			variation.spacing_glyph = spacing
 		font = variation
-	_label_fonts[weight] = font
+	_label_fonts[key] = font
 	return font
 
 
@@ -1226,7 +1380,7 @@ func visible_label_count() -> int:
 ## construites réécrites depuis les données gardées à la construction (sans relire le relief).
 func _update_hamlet_scale(camera_distance: float) -> void:
 	var props := MapPropScale.shared()
-	var wanted := props.hamlet_scale(camera_distance)
+	var wanted := TownMaquetteData.prop("hamlet_ratio", props.hamlet_scale(camera_distance))  # GC : hameaux grossis
 	if not props.needs_rewrite(_hamlet_scale, wanted):
 		return
 	_hamlet_scale = wanted
@@ -1305,6 +1459,8 @@ func flush() -> void:
 	if town_far != null:  # VT-E : lointain des villes
 		town_far.flush()
 		town_far.update_view(_camera_distance)
+	if maquettes != null:  # GC2
+		maquettes.flush()
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -1456,7 +1612,8 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	var focal := _focal_px(camera)
 	for i in data.settlements.size():
 		var score := INF
-		if near:
+		# GC2 : une maquette hors de portée (type masqué à cette hauteur) ne se clique pas.
+		if near and (maquettes == null or _camera_distance <= maquettes.range_of(i)):
 			score = _model_pick_score(i, camera, right, eye, model_range_sq, screen_position, focal)
 		if icons and marker_visible(i):  # DA7d : pas les couples cédés
 			# DV2 : l'écu et le nom se cliquent comme l'emprise (vue normale entière).
@@ -1508,42 +1665,73 @@ func _pair_pick_score(i: int, camera: Camera3D, scale: float, screen_position: V
 
 ## Sélectionne une colonie ("" = aucune) : surbrillance de l'écu, anneau au sol, signal.
 func select(id: String) -> void:
-	if _icons != null and selected_id != "" and data.index_by_id.has(selected_id):
-		var old := _icon_instance(data.index_by_id[selected_id])
-		var custom := _icons.multimesh.get_instance_custom_data(old)
-		custom.g = 0.0
-		custom.a = _marker_until[data.index_by_id[selected_id]] / 100.0
-		_icons.multimesh.set_instance_custom_data(old, custom)
+	var old_index: int = data.index_by_id.get(selected_id, -1)
 	selected_id = id if data.index_by_id.has(id) else ""
 	_selected_index = int(data.index_by_id.get(selected_id, -1))
+	_apply_icon_highlight(old_index)
 	_declutter_force = true  # DA7d : la sélection est épinglée
 	if selected_id != "":
 		var index: int = data.index_by_id[selected_id]
-		var custom_new := _icons.multimesh.get_instance_custom_data(_icon_instance(index))
-		custom_new.g = 1.0
-		custom_new.a = SELECTED_UNTIL / 100.0  # DA7d : la sélection reste affichée à toute distance
-		_icons.multimesh.set_instance_custom_data(_icon_instance(index), custom_new)
+		_apply_icon_highlight(index)
 		var entry: Dictionary = data.settlements[index]
 		print("SettlementLayer: selected %s (%s, %s, controller %s)" % [selected_id, entry["name"], entry["kind"], entry["controller"]])
 		settlement_selected.emit(selected_id)
 	_update_selection_ring()
 
 
-func _update_selection_ring() -> void:
-	if _selection_ring == null:
+## SA (ADR 0160) : colonie sous le curseur ("" = aucune) — écu agrandi à halo clair et anneau
+## clair autour de l'emprise : ce que le clic prendrait.
+func set_hovered(id: String) -> void:
+	if data == null or not data.index_by_id.has(id):
+		id = ""
+	if id == hovered_id:
 		return
-	var index: int = data.index_by_id.get(selected_id, -1) if data != null else -1
+	var old_index: int = data.index_by_id.get(hovered_id, -1) if data != null else -1
+	hovered_id = id
+	_apply_icon_highlight(old_index)
+	_apply_icon_highlight(int(data.index_by_id.get(id, -1)) if data != null else -1)
+	_update_selection_ring()
+
+
+## Surbrillance (sélection > survol > rien) et portée d'affichage de l'écu de la colonie `i`.
+func _apply_icon_highlight(i: int) -> void:
+	if _icons == null or i < 0 or i >= data.settlements.size():
+		return
+	var custom := _icons.multimesh.get_instance_custom_data(_icon_instance(i))
+	var selected := _is_selected(i)
+	custom.g = 1.0 if selected else (HOVER_HIGHLIGHT if str(data.settlements[i]["id"]) == hovered_id else 0.0)
+	# DA7d : la sélection reste affichée à toute distance.
+	custom.a = (SELECTED_UNTIL if selected else _shield_until[i]) / 100.0
+	_icons.multimesh.set_instance_custom_data(_icon_instance(i), custom)
+
+
+func _update_selection_ring() -> void:
+	_place_ring(_selection_ring, data.index_by_id.get(selected_id, -1) if data != null else -1)
+	var hover_index: int = data.index_by_id.get(hovered_id, -1) if data != null else -1
+	_place_ring(_hover_ring, -1 if hover_index == _selected_index else hover_index)
+
+
+func _place_ring(ring: MeshInstance3D, index: int) -> void:
+	if ring == null:
+		return
 	var show := index >= 0 and _footprints_on()
 	# Q8 : dessiné sans test de profondeur, l'anneau vu de plus près que sa taille devenait un
 	# disque jaune plein, puis un arc en travers du ciel au zoom minimal : masqué au sol.
 	var radius := _model_radius[index] * 1.1 if index >= 0 else 0.0
 	show = show and _camera_distance > radius * RING_HIDE_DISTANCE_FACTOR
-	_selection_ring.visible = show
+	ring.visible = show
 	if show:
 		# VT : anneau autour de l'emprise réelle.
 		var px := model_px(index)
-		_selection_ring.position = Vector3(px.x, _ground_y[index] + 0.15, px.y)
-		_selection_ring.scale = Vector3(radius, 1.0, radius)
+		ring.position = Vector3(px.x, _ground_y[index] + 0.15, px.y)
+		ring.scale = Vector3(radius, 1.0, radius)
+
+
+## SA (ADR 0160) : rayon de l'emprise d'une colonie (unités monde), 0 si inconnue.
+func model_radius_of(id: String) -> float:
+	if data == null or not data.index_by_id.has(id):
+		return 0.0
+	return _model_radius[data.index_by_id[id]]
 
 
 ## Position monde d'une colonie (maquette posée, sinon relief), Vector3.ZERO si inconnue.
@@ -1580,6 +1768,8 @@ func apply_fine_anchors(store: FineGeoStore) -> void:
 		_anchor_px[i] = store.settlements[id]["px"]
 		_ground_footprint(i)
 	_hamlet_anchors = store.hamlets if store.hamlets.size() == data.hamlets.size() else PackedVector4Array()
+	if maquettes != null:  # GC2 : maquettes posées aux ancrages fins
+		maquettes.reposition_all()
 	_forget_hamlet_exclusions()
 	for index in _hamlet_nodes:
 		_hamlet_dirty[index] = true
@@ -1596,6 +1786,11 @@ func vegetation_exclusions() -> PackedVector3Array:
 		var radius := _finage_radius[i]
 		if radius <= 0.0:
 			radius = _model_radius[i] * 2.0
+			if _landmarks.has(i):
+				radius = maxf(radius, (_landmarks[i] as Vector3).z)
+		if maquettes != null:
+			# GC2 : pas d'arbre dans la maquette, même quand elle dépasse le finage réel.
+			radius = maxf(radius, _model_radius[i] * MAQUETTE_CLEARING)
 			if _landmarks.has(i):
 				radius = maxf(radius, (_landmarks[i] as Vector3).z)
 		result.append(Vector3(px.x, px.y, radius))
@@ -1664,7 +1859,17 @@ func override_devastation(values: Dictionary) -> void:
 # --- Lot ZG6 : villes ordinaires à l'échelle réelle ------------------------------------------
 
 
+## GC2 (ADR 0158) : style `maquette` (défaut, `TownMaquetteData.style`) : maquettes stylisées à
+## taille monde constante, sans calque 1:1 (`towns`, `landmark_cities`, `town_far` nuls) ; style
+## `real` (`--town-style=real`) : villes 1:1 d'avant GC.
 func _setup_towns() -> void:
+	if TownMaquetteData.enabled():
+		_town_data = TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
+		maquettes = TownMaquetteLayer.new()
+		add_child(maquettes)
+		maquettes.setup(map_data, terrain, self)
+		_compute_footprints()
+		return
 	towns = TownLayer.new()
 	add_child(towns)
 	var ids: Array = []

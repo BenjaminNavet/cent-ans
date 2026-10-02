@@ -12,9 +12,19 @@ extends Node3D
 
 const MARKER_SCENE := preload("res://scenes/map/army_marker.tscn")
 const PICK_RADIUS_PX := 26.0
-## Échelle du marqueur = distance caméra × facteur, bornée : taille constante à l'écran aux
-## paliers moyen et loin (lisible comme un pion), taille monde fixe au plus près.
+## SA (ADR 0160) : tolérance autour de la silhouette de visée (clic juste à côté, sans rien
+## d'autre dessous).
+const PICK_NEAR_PX := 10.0
+## Échelle du pion sur le parchemin = distance caméra × facteur, bornée (taille constante à
+## l'écran) ; en vue normale la loi est sous-linéaire (`scale_for_distance`).
 const SCALE_PER_DISTANCE := 0.014
+## SA (ADR 0160) : exposant par défaut de la loi d'échelle en vue normale (1 = taille écran
+## constante, 0 = taille monde fixe) ; réglage `map.army_scale_exponent`.
+const DEFAULT_SCALE_EXPONENT := 0.65
+## SA : écart à la ville d'une armée en garnison, côté sud-est (vers la caméra par défaut), et
+## marge au-delà du rayon de la ville (unités monde).
+const STANDOFF_DIRECTION := Vector2(0.86, 0.51)
+const STANDOFF_MARGIN := 0.4
 ## Q2 : plafond de taille monde au palier « près » (la ville doit dominer l'armée).
 ## À cette échelle l'étendard royal fait ~3 unités et l'escorte ~2,5 de large, soit environ un
 ## quart du diamètre de Paris (L1, `core_radius_px` 6) et moins qu'une ville L2/L3 (4,5-7) ;
@@ -29,8 +39,6 @@ const CLOSE_PLATE_RANGE_FACTOR := 40.0
 
 ## Distance minimale (pixels de carte) entre une armée et le modèle de ville de la province.
 const CITY_CLEARANCE_PX := 26.0
-## Q2 : marge hors de la zone d'une grande ville L1-L3 pour une armée qui y stationne.
-const LANDMARK_MARGIN_PX := 1.5
 
 ## Couche des plaques : au-dessus du monde 3D, sous l'interface (`CanvasLayer` 1).
 const PLATE_LAYER := 0
@@ -62,6 +70,11 @@ var landmark_zones: PackedVector3Array = PackedVector3Array()
 ## C4/C6 : position monde d'une colonie (`SettlementLayer.world_position_of`), posée par
 ## la carte ; à défaut, `MapData.settlement_px`.
 var settlement_position: Callable = Callable()
+## SA (ADR 0160) : rayon de l'emprise d'une colonie (`SettlementLayer.model_radius_of`), posé
+## par la carte ; sert à tenir l'armée en garnison à côté de la ville.
+var settlement_radius: Callable = Callable()
+## SA : armée sous le curseur ("" = aucune).
+var hovered_army: String = ""
 ## Lot UX1 (A3 C8) : noms de ville à éviter, `func(camera: Camera3D) -> Array[Rect2]` (rectangles
 ## écran), posé par la carte ; les plaques s'en écartent (`LabelPlacer`).
 var label_obstacles: Callable = Callable()
@@ -114,6 +127,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 			plate.queue_free()
 		return
 	var per_province: Dictionary = {}
+	var stances := StanceCues.stances(sim, player_faction)  # EN : relation de chaque faction
 	for army_id in sim.call("get_army_ids"):
 		var army: Dictionary = sim.call("get_army", army_id)
 		if army.is_empty():
@@ -132,6 +146,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var in_field := army.has("position") and str(army.get("settlement", "")) == ""
 		var centroid := Vector2(-1.0, -1.0)
 		var stack_key := location
+		var standoff := -1.0  # SA : < 0 = en campagne, pas d'écart à une ville
 		if in_field:
 			centroid = army["position"]
 			stack_key = "field:%d:%d" % [int(centroid.x), int(centroid.y)]
@@ -143,8 +158,8 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 				continue
 			if not army.has("position"):
 				centroid = _clear_of_city(location, centroid)
-			centroid = _clear_of_landmark(centroid)
 			stack_key = "settlement:" + str(army.get("settlement", army.get("location", "")))
+			standoff = _standoff_base(str(army.get("settlement", army.get("location", ""))), centroid)
 		var faction: String = str(army.get("faction", ""))
 		var color: Color = color_of.call(faction)
 		var signature := _signature(army, color, faction == player_faction)
@@ -160,12 +175,20 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 			add_child(marker)
 			marker.setup(army_id, army, color, faction == player_faction)
 			marker.set_meta("pb1_signature", signature)
+		# EN : hors signature, une déclaration de guerre ne reconstruit pas les figurines.
+		var cue := StanceCues.category_of(faction, player_faction, stances)
+		var cue_changed := marker.cue != cue
+		marker.set_cue(cue)
 		marker.base_position = Vector3(centroid.x, _ground(centroid), centroid.y)
+		# SA (ADR 0160) : en garnison, l'ost se tient à côté de la ville, à tout zoom.
+		marker.standoff_dir = STANDOFF_DIRECTION.normalized() if standoff >= 0.0 else Vector2.ZERO
+		marker.standoff_base = maxf(standoff, 0.0)
 		var stack: int = per_province.get(stack_key, 0)
 		per_province[stack_key] = stack + 1
 		marker.offset_dir = Vector2.ZERO if stack == 0 else Vector2.RIGHT.rotated(stack * TAU / 6.0)
 		marker.face(_heading(army, centroid))
 		marker.set_selected(army_id == selected_army)
+		marker.set_hovered(army_id == hovered_army)
 		marker.apply_scale(_current_scale)
 		if _camera_distance >= 0.0:
 			marker.set_view(_camera_distance, figure_weight(_camera_distance))
@@ -174,8 +197,8 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		if _plate_layer != null:
 			var plate: PanelContainer = previous_plates.get(army_id)
 			previous_plates.erase(army_id)
-			if reused and plate != null and is_instance_valid(plate):
-				_style_plate(plate, marker, marker.army_id == selected_army)
+			if reused and not cue_changed and plate != null and is_instance_valid(plate):
+				_style_plate(plate, marker, marker.army_id == selected_army, marker.army_id == hovered_army)
 			else:
 				if plate != null and is_instance_valid(plate):
 					plate.queue_free()
@@ -188,6 +211,8 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		plate.queue_free()
 	if not _markers.has(selected_army):
 		selected_army = ""
+	if not _markers.has(hovered_army):
+		hovered_army = ""
 	_placement_dirty = true
 	_update_plates()
 
@@ -238,16 +263,15 @@ func _clear_of_city(location: String, centroid: Vector2) -> Vector2:
 	return capital + direction * CITY_CLEARANCE_PX
 
 
-## Q2 : pousse le point hors de la zone d'une grande ville détaillée (L1-L3), côté sud-est.
-func _clear_of_landmark(point: Vector2) -> Vector2:
+## SA (ADR 0160) : part fixe de l'écart entre une armée en garnison et le centre de sa ville
+## (unités monde) : rayon de la zone L1-L3 qui contient le point (Q2), sinon rayon de l'emprise
+## de la colonie, plus une marge. La demi-emprise de l'ost s'y ajoute (`ArmyMarker`).
+func _standoff_base(settlement_id: String, point: Vector2) -> float:
+	var radius := float(settlement_radius.call(settlement_id)) if settlement_radius.is_valid() else 0.0
 	for zone in landmark_zones:
-		var center := Vector2(zone.x, zone.y)
-		var away := point - center
-		if away.length() >= zone.z + LANDMARK_MARGIN_PX:
-			continue
-		var direction := away.normalized() if away.length() > 0.5 else Vector2(1.0, 0.6).normalized()
-		return center + direction * (zone.z + LANDMARK_MARGIN_PX)
-	return point
+		if point.distance_to(Vector2(zone.x, zone.y)) < zone.z:
+			radius = maxf(radius, zone.z)
+	return radius + STANDOFF_MARGIN
 
 
 func set_selected(army_id: String) -> void:
@@ -255,8 +279,26 @@ func set_selected(army_id: String) -> void:
 	for id in _markers:
 		_markers[id].set_selected(id == army_id)
 	for id in _plates:
-		_style_plate(_plates[id], _markers[id], id == army_id)
+		_style_plate(_plates[id], _markers[id], id == army_id, id == hovered_army)
 	_placement_dirty = true
+
+
+## SA (ADR 0160) : armée sous le curseur ("" = aucune) : socle, figurines et plaque éclaircis.
+func set_hovered(army_id: String) -> void:
+	if not _markers.has(army_id):
+		army_id = ""
+	if army_id == hovered_army:
+		return
+	var previous := hovered_army
+	hovered_army = army_id
+	for id in [previous, army_id]:
+		var marker: ArmyMarker = _markers.get(id)
+		if marker == null:
+			continue
+		marker.set_hovered(id == army_id)
+		var plate: PanelContainer = _plates.get(id)
+		if plate != null and is_instance_valid(plate):
+			_style_plate(plate, marker, id == selected_army, id == army_id)
 
 
 func has_army(army_id: String) -> bool:
@@ -288,26 +330,40 @@ func pick_screen(screen_position: Vector2) -> String:
 	return str(pick_screen_scored(screen_position).get("id", ""))
 
 
-## Q2 : comme `pick_screen`, avec `score` (distance / `PICK_RADIUS_PX` ; 0 sur la plaque) pour
-## départager une armée et une colonie sous le même clic ; {} si rien.
-func pick_screen_scored(screen_position: Vector2) -> Dictionary:
+## Q2 / SA (ADR 0160) : comme `pick_screen`, avec `score` et `direct` pour départager une armée
+## et une colonie sous le même point. `direct` : le point est dans la silhouette projetée de
+## l'armée (`ArmyMarker.screen_rect`) ou sur sa plaque ; `score` vaut alors 0 sur la plaque,
+## sinon la distance normalisée au centre de la silhouette (0 à 1). À moins de `PICK_NEAR_PX`
+## de la silhouette : `direct` faux, `score` entre 1 et 2. {} si rien.
+## `exclude` : armée ignorée (la sélection, quand on vise une cible pour elle).
+func pick_screen_scored(screen_position: Vector2, exclude: String = "") -> Dictionary:
 	if camera == null:
 		return {}
 	var best := ""
-	var best_distance := PICK_RADIUS_PX
+	var best_score := INF
 	for id in _markers:
 		var marker: ArmyMarker = _markers[id]
-		for world in marker.pick_positions():
-			if camera.is_position_behind(world):
-				continue
-			var distance := camera.unproject_position(world).distance_to(screen_position)
-			if distance < best_distance:
-				best_distance = distance
-				best = id
+		if id == exclude or not marker.is_visible_in_tree():
+			continue
 		var plate: PanelContainer = _plates.get(id)
 		if plate != null and plate.visible and plate.get_global_rect().has_point(screen_position):
-			return {"id": id, "score": 0.0}
-	return {"id": best, "score": best_distance / PICK_RADIUS_PX} if best != "" else {}
+			return {"id": id, "score": 0.0, "direct": true}
+		var rect := marker.screen_rect(camera)
+		if rect.size == Vector2.ZERO:
+			continue
+		var score := INF
+		if rect.has_point(screen_position):
+			var offset := (screen_position - rect.get_center()).abs() / (rect.size * 0.5)
+			score = maxf(offset.x, offset.y)
+		else:
+			var outside := (screen_position - rect.get_center()).abs() - rect.size * 0.5
+			var gap := Vector2(maxf(outside.x, 0.0), maxf(outside.y, 0.0)).length()
+			if gap < PICK_NEAR_PX:
+				score = 1.0 + gap / PICK_NEAR_PX
+		if score < best_score:
+			best_score = score
+			best = id
+	return {"id": best, "score": best_score, "direct": best_score <= 1.0} if best != "" else {}
 
 
 ## Lot M4 (animation) : pose le marqueur de `army_id` au point carte `point`, tourné vers
@@ -318,6 +374,8 @@ func place_marker(army_id: String, point: Vector2, heading: Vector2 = Vector2.ZE
 		return
 	# Lot CV2 : les figurines marchent pendant l'animation du déplacement.
 	marker.set_walking(point.x >= 0.0)
+	# SA : l'écart à la ville est suspendu pendant la marche (trajet réel), repris à l'arrivée.
+	marker.set_standoff_enabled(point.x < 0.0)
 	if point.x < 0.0:
 		marker.base_position = _homes.get(army_id, marker.base_position)
 	else:
@@ -351,6 +409,15 @@ func reground() -> void:
 		marker.apply_scale(_current_scale)
 
 
+## TB4 : armées affichées et leur marqueur (`WarScars` y pose les engins de siège du camp).
+func marker_ids() -> Array:
+	return _markers.keys()
+
+
+func marker_of(army_id: String) -> ArmyMarker:
+	return _markers.get(army_id)
+
+
 ## Position monde d'une armée (pour cadrer la caméra), Vector3.ZERO si absente.
 func world_position_of(army_id: String) -> Vector3:
 	var marker: ArmyMarker = _markers.get(army_id)
@@ -363,7 +430,7 @@ func update_scale(camera_distance: float) -> void:
 		var weight := figure_weight(camera_distance)
 		for marker in _markers.values():
 			marker.set_view(camera_distance, weight)
-	var new_scale := scale_for_distance(camera_distance)
+	var new_scale := scale_for_distance(camera_distance, 1.0 - figure_weight(camera_distance), scale_exponent())
 	if absf(new_scale - _current_scale) < minf(0.005, new_scale * 0.02):
 		return
 	_current_scale = new_scale
@@ -371,13 +438,28 @@ func update_scale(camera_distance: float) -> void:
 		marker.apply_scale(_current_scale)
 
 
-## Échelle des marqueurs d'armée pour une distance caméra (voir `MIN_SCALE`). Lot ZG4 : sous
-## `CLOSE_KNEE_DISTANCE` (vues vallée et site), l'échelle redevient proportionnelle à la distance
-## (taille à l'écran bornée) : pas d'étendard de 2 km au-dessus d'un site vu à 200 m.
-static func scale_for_distance(camera_distance: float) -> float:
+## SA (ADR 0160) : exposant de la loi d'échelle (`map.army_scale_exponent` de
+## `data/ui/campaign_map.json`, borné à [0 ; 1]).
+static func scale_exponent() -> float:
+	return clampf(float(ArmyFigures.map_settings().get("army_scale_exponent", DEFAULT_SCALE_EXPONENT)), 0.0, 1.0)
+
+
+## Échelle des marqueurs d'armée pour une distance caméra.
+## - Sous `CLOSE_KNEE_DISTANCE` (lot ZG4, vues vallée et site) : proportionnelle à la distance
+##   (pas d'étendard de 2 km au-dessus d'un site vu à 200 m).
+## - Jusqu'à `MIN_SCALE / SCALE_PER_DISTANCE` (≈ 19) : taille monde fixe `MIN_SCALE` (Q2).
+## - Au-delà, vue normale (SA, ADR 0160) : `MIN_SCALE × (d / 19)^exponent`. Avec un exposant
+##   inférieur à 1, l'ost rétrécit à l'écran en dézoomant, comme un objet posé sur la carte,
+##   au lieu de gonfler avec la distance ; `exponent` = 1 redonne la taille écran constante.
+## - Sur le parchemin (`strategic_weight` → 1) : retour à la loi linéaire bornée, l'étendard
+##   devient un pion de taille écran constante.
+static func scale_for_distance(camera_distance: float, strategic_weight: float = 0.0, exponent: float = DEFAULT_SCALE_EXPONENT) -> float:
 	if camera_distance < CLOSE_KNEE_DISTANCE:
 		return MIN_SCALE * maxf(camera_distance, 0.02) / CLOSE_KNEE_DISTANCE
-	return clampf(camera_distance * SCALE_PER_DISTANCE, MIN_SCALE, MAX_SCALE)
+	var token := clampf(camera_distance * SCALE_PER_DISTANCE, MIN_SCALE, MAX_SCALE)
+	var knee := MIN_SCALE / SCALE_PER_DISTANCE
+	var posed := minf(MIN_SCALE * pow(maxf(camera_distance / knee, 1.0), exponent), token)
+	return lerpf(posed, token, clampf(strategic_weight, 0.0, 1.0))
 
 
 ## Lot CV2 / DV : présence des figurines (1 en vue normale, 0 sur le parchemin, fondu sur la
@@ -419,6 +501,15 @@ static func build_plate(marker: ArmyMarker, selected: bool = false) -> PanelCont
 		swatch.custom_minimum_size = Vector2(12, 16)
 		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(swatch)
+	var glyph_text := StanceCues.plate_glyph(marker.cue)
+	if glyph_text != "":  # EN : marque des armées ennemies, lisible sans la couleur
+		var glyph := Label.new()
+		glyph.name = "EnemyGlyph"
+		glyph.text = glyph_text
+		glyph.add_theme_font_size_override("font_size", PLATE_FONT_SIZE - 2)
+		glyph.add_theme_color_override("font_color", StanceCues.plate_border(marker.cue, OTHER_BORDER, 1)["color"])
+		glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(glyph)
 	var count := Label.new()
 	count.text = format_men(marker.men)
 	count.tooltip_text = FrText.count(marker.unit_count, "unité")
@@ -438,12 +529,15 @@ static func build_plate(marker: ArmyMarker, selected: bool = false) -> PanelCont
 	return plate
 
 
-static func _style_plate(plate: PanelContainer, marker: ArmyMarker, selected: bool) -> void:
+## `hovered` (SA, ADR 0160) : plaque de l'armée sous le curseur, fond clair et liseré doré épais.
+static func _style_plate(plate: PanelContainer, marker: ArmyMarker, selected: bool, hovered: bool = false) -> void:
 	var style := StyleBoxFlat.new()
-	style.bg_color = PARCHMENT if not selected else PARCHMENT.lightened(0.35)
-	var border := PLAYER_BORDER if marker.is_player else OTHER_BORDER
-	style.border_color = border if not selected else Color(1.0, 0.82, 0.3)
-	style.set_border_width_all(2 if selected or marker.is_player else 1)
+	style.bg_color = PARCHMENT if not (selected or hovered) else PARCHMENT.lightened(0.5 if hovered else 0.35)
+	# EN : bordure selon la relation avec le joueur (rouge réservé aux ennemis) ; au survol
+	# (SA) elle garde sa couleur de relation et s'épaissit, le doré reste à la sélection.
+	var border := StanceCues.plate_border(marker.cue, PLAYER_BORDER if marker.is_player else OTHER_BORDER, 2 if marker.is_player else 1)
+	style.border_color = border["color"] if not selected else Color(1.0, 0.82, 0.3)
+	style.set_border_width_all(3 if hovered else (2 if selected else int(border["width"])))
 	style.set_corner_radius_all(3)
 	style.content_margin_left = 6
 	style.content_margin_right = 6
@@ -453,7 +547,7 @@ static func _style_plate(plate: PanelContainer, marker: ArmyMarker, selected: bo
 	style.shadow_size = 3
 	style.shadow_offset = Vector2(1, 2)
 	plate.add_theme_stylebox_override("panel", style)
-	plate.z_index = 1 if selected else 0
+	plate.z_index = 2 if hovered else (1 if selected else 0)
 
 
 static func format_men(men: int) -> String:

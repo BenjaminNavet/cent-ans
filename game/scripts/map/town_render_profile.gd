@@ -46,13 +46,31 @@ extends Resource
 }
 
 
+static var _scaled: TownRenderProfile
+
+
+## GC (ADR 0158) : les distances du profil sont données pour des villes à l'échelle réelle ; elles
+## suivent le grossissement des villes (`MapScale.town_range_scale`) : une ville grossie k fois se
+## voit à la distance d comme la ville réelle à d / k.
 static func load_default() -> TownRenderProfile:
+	if _scaled != null:
+		return _scaled
 	var path := "res://resources/town_render.tres"
+	var base: TownRenderProfile = null
 	if ResourceLoader.exists(path):
-		var loaded := load(path) as TownRenderProfile
-		if loaded != null:
-			return loaded
-	return TownRenderProfile.new()
+		base = load(path) as TownRenderProfile
+	if base == null:
+		base = TownRenderProfile.new()
+	_scaled = base.duplicate() as TownRenderProfile
+	var k := MapScale.town_range_scale()
+	_scaled.detail_range *= k
+	_scaled.block_range *= k
+	_scaled.stream_min *= k
+	_scaled.stream_max *= k
+	_scaled.max_rig_distance *= k
+	_scaled.roofscape_near *= k
+	_scaled.roofscape_far *= k
+	return _scaled
 
 
 ## Facteurs du niveau de qualité `level` (repli « high »).

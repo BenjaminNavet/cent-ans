@@ -1,0 +1,53 @@
+# TB2 — désencombrement et lecture « à la ToB »
+
+Worktree `../gp-tb2`, branche `feat/tb2`. Plan : `docs/design/2026-10-02-campagne-tob.md` § 3.
+Rendu/UI Godot seulement, `core/` intact.
+
+## État
+- [x] Squelette du test `game/tests/tb2_declutter_test.gd`
+- [x] 1. Brouillard de guerre : voile de parchemin (bloc brouillard de `terrain.gdshader`, réglages
+      `fog_of_war` de `data/ui/campaign_map.json`, lus par `game/scripts/map/map_readability.gd`).
+      Mesure `ss_shot.gd --stats --at=1930,2560 --distances=300` (Midlands vus de fac_france),
+      moyenne RVB / écart-type : sans brouillard 82 83 39 / 41 33 24 ; avant 126 124 108 /
+      40 37 38 (nappe blanche) ; après 88 76 49 / 31 27 21 (sépia, à peine plus sombre que le sol vu).
+- [x] 2. Frontières FR1 au repos (bloc `rest` de `data/map/faction_borders.json` : largeur × 0,6,
+      opacité × 0,6, halo × 0,25, saturation 0,45) ; pleine intensité pour les royaumes des provinces
+      sélectionnée et survolée (`fr1_focus_a/b`), en mode Diplomatie (`modes.diplomacy.full`) et sur
+      le parchemin (`rest.parchment_focus`). Chemins d'armée adoucis (déjà réservés à la sélection).
+- [x] 3. Pictogrammes (ADR 0151) : écu seul signe d'une ville, réservé aux lieux de rang 3-4 au-delà
+      de 330 (rang 1 : 220) ; marteaux, sceaux d'incident et sites de rencontre réservés au calque
+      « Signes » du menu des filtres, à certains modes de carte et aux cas pressants. Mesure à Paris,
+      écran 1280×720, après la règle de bord du point 4 : écus 20 / 10 / 22 aux distances 1100 / 400 / 90
+      (24 / 45 / 39 avant TB2), 0 autre signe.
+- [x] 4. Étiquettes : capitales (rang 4) en petites capitales EB Garamond (`smcp`), grandes cités en
+      romain gras, autres en romain ≤ 600 ; un nom ou un écu qui sortirait de l'écran (marge 16 px,
+      bandeau du haut exclu) n'est pas affiché ; noms de région en vue moyenne
+      (`game/scripts/map/region_labels.gd`, source `ParchmentOverlay.province_names`, distances
+      180-1250). Mesure : 340 noms et écus sur 9 vues (3 paliers × 3 cadrages), 0 coupé ; 7 noms de
+      région à 400, 14 à 1100, 0 à 90.
+- [x] 5. Nuées et brumes (bloc `clouds`) : plan de nuées déjà limité à la météo du cœur ; ombres de
+      nuages du terrain (`cloud_shadow_amount`) désormais nulles par temps clair, 0,12 sous pluie,
+      neige ou orage au point visé ; opacité des nuées 0 / 0,11 / 0,45 aux distances 90 / 400 / 1100
+      (0,25 à 400 avant) ; province sélectionnée dégagée (`weather_clear_id` : nuées, ombres de
+      nuées, nappe de brume ; sol mouillé et neige fraîche restent).
+
+## Prochaine étape
+Lot livré. Reste la capture de contrôle par la session principale (les agents d'implémentation ne
+lisent pas d'image) : `godot --path game --resolution 1600x900 --script res://tests/ss_shot.gd --
+--out=<dossier> --distances=1100,400,90` (Paris, fac_france) ; brouillard : `--at=1930,2560
+--distances=300` ; nuées : ajouter `--map-weather=rain`. Vérification : `game/tests/tb2_declutter_test.gd`.
+
+## Points ouverts
+- `da7d_overlap_test.gd` : seuil de temps (4 ms) dépassé quand la machine est chargée (5,4 ms avant TB2, 4,4 ms après, charge moyenne > 10) ; passe machine plus calme (vérification finale).
+- `fe_ui_test.gd` échoue sur « map picker framed on the playable lands » (sélecteur de faction, sans rapport avec TB2).
+- `ss_shot.gd` masque tous les `CanvasLayer` : les noms de région (calque 2D) n'y figurent pas ; pour
+  les juger, capture du jeu lancé (`--screenshot`) ou script de capture qui garde le calque `Parchment`.
+- Sceaux d'incident à plusieurs tours d'échéance invisibles sans le calque « Signes » (ADR 0151) : à
+  juger en partie pilote ; repli par données (`signs.incident.modes`, `keep_urgent`).
+- Frontières à pleine intensité conservées en vue parchemin (`rest.parchment_focus` = 1) ; mettre 0
+  pour le style au repos partout.
+- Hors périmètre laissé tel quel : `path_color` / `reachable_color` de `terrain.gdshader` (masque
+  d'atteignabilité, seul le bloc du brouillard pouvait changer) ; brouillard de la minicarte.
+- `uv run --project tools pytest tools/tests` : 1465 réussis, 4 échecs sans rapport avec TB2
+  (`test_entity_icons` × 2 et `test_ink_icons` : images sources absentes du worktree ;
+  `test_water_detail::test_repo_ledger_ends_with_rc_section` : la section TB du budget suit la section RC).

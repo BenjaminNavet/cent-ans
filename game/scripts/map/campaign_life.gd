@@ -13,7 +13,7 @@ extends Node3D
 ##   --season=spring|summer|autumn|winter   force la saison affichée (captures) ;
 ##   --devastate=<province>:<0-100>[,...]   force une dévastation affichée (captures) ;
 ##   --no-life                               désactive la couche (mesures A/B) ;
-##   --life-off=terrain,smoke,mills,ambient  désactive une partie (mesures de coût).
+##   --life-off=terrain,smoke,mills,ambient,scars  désactive une partie (mesures de coût).
 ## Chantier FK (carte vivante, `docs/design/2026-09-29-carte-vivante-folk.md`) : figurines de la
 ## vue rapprochée (`life_folk/`), mêmes crochets `refresh` / `update_view` :
 ##   --no-folk                                        désactive les figurines (mesures A/B) ;
@@ -34,6 +34,8 @@ var folk_caravans: FolkCaravans = null
 var folk_scenes: FolkScenes = null
 ## FK5 : sceaux des incidents (nul : `--no-life`, `--no-folk`, `--folk-off=incidents`).
 var incidents: IncidentMarkers = null
+## TB4 : traces de la guerre et des fléaux (nul : `--no-life`, `--life-off=scars`).
+var scars: WarScars = null
 var folk_enabled: bool = true
 var folk_off: Dictionary = {}
 ## FK4 : scènes forcées par `--scene=` ({province, kind, settlement, intensity}).
@@ -49,6 +51,9 @@ var _map: Node = null
 var _terrain: TerrainBuilder = null
 var _map_data: MapData = null
 var _settlements: SettlementLayer = null
+## TB1 : mer de la saison (poids déjà appliqués à la mer).
+var _sea: Sea = null
+var _sea_weights := Vector4(-1, -1, -1, -1)
 var _tiers: ZoomTiers = null
 var _camera_distance := 0.0
 var _refreshed_once := false
@@ -63,14 +68,22 @@ func setup(map: Node) -> void:
 	_terrain = map.get("terrain") as TerrainBuilder
 	_map_data = map.get("map_data") as MapData
 	_settlements = map.get("settlement_layer") as SettlementLayer
+	_sea = map.get("sea") as Sea
 	_parse_cmdline()
 	if _terrain != null and _terrain.material != null:
 		_terrain.material.set_shader_parameter("life_enabled", enabled and not _off.has("terrain"))
+		var south := SeasonLook.snow_south_fade()  # TB1 : limite sud de la neige de plaine (données)
+		if south.x >= 0.0:
+			var winter_south: Variant = _terrain.material.get_shader_parameter("winter_south")
+			var retreat: float = (winter_south as Vector3).z if winter_south is Vector3 else 0.35
+			_terrain.material.set_shader_parameter("winter_south", Vector3(south.x, south.y, retreat))
 	if not enabled:
 		seasons.set_season("summer", true)
+		_sync_sea()
 		return
 	if forced_season != "":
 		seasons.set_season(forced_season, true)
+	_sync_sea()
 	_tiers = map.get("zoom_tiers") as ZoomTiers
 	effects = LifeEffects.new()
 	effects.name = "Effects"
@@ -83,6 +96,65 @@ func setup(map: Node) -> void:
 	stats.merge(ambient.stats, true)
 	_setup_folk()
 	_setup_incidents()
+	_setup_scars()
+
+
+## TB4 : fosses et portes marquées de la peste, champs de bataille, engins des camps de siège.
+func _setup_scars() -> void:
+	if _off.has("scars"):
+		return
+	scars = WarScars.new()
+	add_child(scars)
+	scars.setup(_map_data, _terrain, _map.get("armies") if _map != null else null)
+	scars.plan_provider = _town_plan
+
+
+## Plan de la ville 1:1 ordinaire affichée d'une colonie ; `{}` tant qu'elle n'est pas chargée.
+## Villes emblématiques : `{none: true}`, pas de portes marquées (la caméra n'y descend pas sous
+## `CloseCameraProfile.landmark_min_distance` : une croix de 2,2 m y ferait ≈ 1 px).
+func _town_plan(id: String) -> Dictionary:
+	if _settlements == null:
+		return {}
+	var cities := _settlements.landmark_cities
+	if cities != null and cities.has_city(id):
+		return {"none": true}
+	var towns := _settlements.towns
+	if towns != null and towns.data != null and towns.is_shown(id):
+		return {"plan": towns.plan_of(id), "anchor": towns.data.anchor_of(id), "meters_per_unit": towns.data.meters_per_unit}
+	return {}
+
+
+## Tracé d'une route qui part de la colonie `id` (orienté vers l'extérieur) ; vide sans route.
+func _road_from(id: String, center: Vector2) -> PackedVector2Array:
+	if _settlements == null or _settlements.data == null:
+		return PackedVector2Array()
+	for key in _settlements.data.edge_paths:
+		var edge := str(key)
+		if not (edge.begins_with(id + "|") or edge.ends_with("|" + id)):
+			continue
+		var path: PackedVector2Array = _settlements.data.edge_paths[key]
+		if path.size() < 2:
+			continue
+		if path[0].distance_to(center) > path[path.size() - 1].distance_to(center):
+			path = path.duplicate()
+			path.reverse()
+		return path
+	return PackedVector2Array()
+
+
+## TB4 : colonies pestiférées du tour (scènes `plague` résolues par `FolkScenes`).
+func _refresh_scars() -> void:
+	if scars == null:
+		return
+	var sites: Array = []
+	if folk_scenes != null:
+		for scene in folk_scenes.staged:
+			if str(scene["kind"]) == "plague":
+				var site := folk_scenes.edge_frame(scene)
+				site["road"] = _road_from(str(site["settlement"]), site["center"])
+				sites.append(site)
+	scars.set_plague_sites(sites)
+	stats["scars"] = scars.stats
 
 
 ## FK3 : réservoir et fournisseurs, servis dans l'ordre d'enregistrement quand le plafond est
@@ -143,12 +215,27 @@ func _parse_cmdline() -> void:
 					forced_devastation[parts[0]] = float(parts[1])
 
 
+## TB1 : mer de la saison (teinte, écume) et neige des toits des villes 1:1 quand les poids
+## changent ; masque météo du terrain repris par la mer (écume de tempête).
+func _sync_sea() -> void:
+	if seasons.weights != _sea_weights:
+		_sea_weights = seasons.weights
+		var map_height := float(_map_data.size.y) if _map_data != null else 0.0
+		RenderingServer.global_shader_parameter_set(SeasonLook.ROOF_SNOW_PARAM, SeasonLook.roof_snow(_sea_weights, map_height))
+		if _sea != null:
+			_sea.apply_season(_sea_weights)
+	if _sea != null and _terrain != null:
+		_sea.sync_weather(_terrain.material)
+
+
 ## Relit la saison, la dévastation et la population depuis la simulation.
 func refresh(sim: Object) -> void:
 	if not enabled or sim == null:
 		return
 	if incidents != null:  # FK5 : une décision prise dans le tour retire son sceau
 		incidents.refresh(sim)
+	if scars != null:  # TB4 : batailles de la main du joueur, sièges posés ou levés dans le tour
+		scars.refresh(sim)
 	if forced_season == "" and sim.has_method("get_date_label"):
 		var season := SeasonVisuals.season_from_label(str(sim.call("get_date_label")))
 		# Premier affichage (nouvelle partie, chargement) : sans transition.
@@ -172,6 +259,7 @@ func refresh(sim: Object) -> void:
 			vegetation.set("extra_exclusions", _settlements.vegetation_exclusions())
 	_refresh_terroir()
 	_refresh_folk(sim)
+	_refresh_scars()
 
 
 ## FK3 : état lu par la routine (population, dévastation, saison, cités, terroirs), puis
@@ -278,9 +366,13 @@ func _refresh_terroir() -> void:
 		return
 	# Clé : dévastation par paliers de 5 %, population par paliers de 10 %.
 	var parts := PackedStringArray()
+	var burnt := false
 	for province_id in province_states:
 		var state: Dictionary = province_states[province_id]
+		burnt = burnt or float(state["devastation"]) >= TerroirMask.BURN_THRESHOLD
 		parts.append("%s:%d:%d:%d" % [province_id, int(state["devastation"] / 5.0), int(log(maxf(state["population"], 1.0)) * 10.0), int(state["siege"])])
+	# TB4 : le brûlis par parcelles n'est calculé que si une province au moins est dévastée.
+	_terrain.material.set_shader_parameter("burn_active", burnt)
 	var key := ",".join(parts)
 	if key == _terroir_key:
 		return
@@ -303,6 +395,8 @@ func _refresh_terroir() -> void:
 
 
 func _exit_tree() -> void:
+	# TB1 : plus de neige de saison sur les toits hors de la carte de campagne.
+	RenderingServer.global_shader_parameter_set(SeasonLook.ROOF_SNOW_PARAM, Vector4.ZERO)
 	if terroir != null:
 		terroir.wait()
 
@@ -310,6 +404,8 @@ func _exit_tree() -> void:
 ## Force une relecture complète au prochain `refresh` (chargement d'une partie).
 func invalidate() -> void:
 	_turn_key = ""
+	if scars != null:  # TB4 : champs de bataille de l'ancienne partie oubliés
+		scars.reset()
 
 
 func update_view(camera_distance: float) -> void:
@@ -321,6 +417,7 @@ func update_view(camera_distance: float) -> void:
 		_terrain.material.set_shader_parameter("terroir_mask", terroir.texture)
 	tp = PerfProbe.lap("life/terroir", tp)
 	seasons.update(get_process_delta_time())
+	_sync_sea()
 	tp = PerfProbe.lap("life/seasons", tp)
 	if effects != null:
 		effects.set_season(seasons.weights)
@@ -348,4 +445,7 @@ func update_view(camera_distance: float) -> void:
 		var folk_rig := _map.get("camera_rig") as Node3D if _map != null else null
 		var folk_focus: Vector3 = folk_rig.get("focus") if folk_rig != null else Vector3.ZERO
 		folk.update_view(Vector2(folk_focus.x, folk_focus.z), _camera_distance, _tiers.near_weight(_camera_distance))
-	PerfProbe.lap("life/folk", tp)
+	tp = PerfProbe.lap("life/folk", tp)
+	if scars != null:
+		scars.update_view(_camera_distance, 1.0 - _tiers.strategic_weight(_camera_distance) if _tiers != null else 1.0)
+	PerfProbe.lap("life/scars", tp)

@@ -84,7 +84,13 @@
       "properties": {
         "description": {"type": "string"},
         "size_factor": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Côté de l'écu en fraction de `size_px`."},
-        "gap_px": {"type": "number", "minimum": 0, "maximum": 16, "description": "Écart (px) entre le haut du nom et le bas de l'écu."}
+        "gap_px": {"type": "number", "minimum": 0, "maximum": 16, "description": "Écart (px) entre le haut du nom et le bas de l'écu."},
+        "max_distance_by_rank": {
+          "type": "object",
+          "description": "Lot TB2 : distance caméra (unités carte) jusqu'à laquelle un lieu de ce rang porte son écu ; rang absent = à toute distance.",
+          "propertyNames": {"enum": ["1", "2", "3", "4"]},
+          "additionalProperties": {"type": "number", "exclusiveMinimum": 0}
+        }
       },
       "required": ["size_factor", "gap_px"],
       "additionalProperties": false

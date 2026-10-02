@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "stance_cues.schema.json",
+  "title": "Signes de relation de la carte de campagne (EN)",
+  "description": "Couleurs et marques qui distinguent ennemis, amis et neutres sur la carte de campagne hors mode Diplomatie (ADR 0155) : frontières, plaques et anneaux d'armée, noms de ville. Rendu seulement.",
+  "type": "object",
+  "required": ["categories", "border", "army", "town"],
+  "additionalProperties": false,
+  "$defs": {
+    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "unit": {"type": "number", "minimum": 0, "maximum": 1},
+    "category": {"enum": ["self", "enemy", "friend", "other"]},
+    "plate": {
+      "type": "object",
+      "required": ["color", "width_px"],
+      "additionalProperties": false,
+      "properties": {
+        "color": {"$ref": "#/$defs/color"},
+        "width_px": {"type": "integer", "minimum": 1, "maximum": 4}
+      }
+    },
+    "ring": {
+      "type": "object",
+      "required": ["color", "alpha", "emission"],
+      "additionalProperties": false,
+      "properties": {
+        "color": {"$ref": "#/$defs/color"},
+        "alpha": {"$ref": "#/$defs/unit"},
+        "emission": {"type": "number", "minimum": 0, "maximum": 2}
+      }
+    }
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "categories": {
+      "type": "object",
+      "description": "Position diplomatique du cœur (self, ally, agreement, neutral, tension, war, vassal) → catégorie de signe ; les positions absentes sont « other ».",
+      "required": ["self", "war"],
+      "additionalProperties": {"$ref": "#/$defs/category"}
+    },
+    "border": {
+      "type": "object",
+      "description": "Couleur du trait de frontière par catégorie ; « other » garde la couleur héraldique, assourdie.",
+      "required": ["self", "enemy", "friend", "enemy_focus", "other"],
+      "additionalProperties": false,
+      "properties": {
+        "self": {"$ref": "#/$defs/color"},
+        "enemy": {"$ref": "#/$defs/color"},
+        "friend": {"$ref": "#/$defs/color"},
+        "enemy_focus": {"$ref": "#/$defs/unit", "description": "Poids de pleine intensité des frontières ennemies quand la carte est au repos (TB2) : 1 = toujours pleines."},
+        "other": {
+          "type": "object",
+          "required": ["saturation_scale", "saturation_max", "value_min", "value_max"],
+          "additionalProperties": false,
+          "properties": {
+            "saturation_scale": {"$ref": "#/$defs/unit", "description": "Facteur appliqué à la saturation héraldique."},
+            "saturation_max": {"$ref": "#/$defs/unit", "description": "Plafond de saturation : un rouge héraldique en paix ne doit pas se lire comme un ennemi."},
+            "value_min": {"$ref": "#/$defs/unit"},
+            "value_max": {"$ref": "#/$defs/unit"}
+          }
+        }
+      }
+    },
+    "army": {
+      "type": "object",
+      "required": ["enemy_glyph", "plate", "ring"],
+      "additionalProperties": false,
+      "properties": {
+        "enemy_glyph": {"type": "string", "maxLength": 2, "description": "Marque non colorée des armées ennemies sur la plaque d'effectif (daltonisme)."},
+        "plate": {
+          "type": "object",
+          "description": "Bordure de la plaque d'effectif par catégorie.",
+          "required": ["self", "enemy", "friend", "other"],
+          "additionalProperties": false,
+          "properties": {
+            "self": {"$ref": "#/$defs/plate"},
+            "enemy": {"$ref": "#/$defs/plate"},
+            "friend": {"$ref": "#/$defs/plate"},
+            "other": {"$ref": "#/$defs/plate"}
+          }
+        },
+        "ring": {
+          "type": "object",
+          "description": "Anneau au sol des armées non sélectionnées ; catégories absentes : couleur héraldique.",
+          "additionalProperties": false,
+          "properties": {
+            "enemy": {"$ref": "#/$defs/ring"},
+            "friend": {"$ref": "#/$defs/ring"}
+          }
+        }
+      }
+    },
+    "town": {
+      "type": "object",
+      "required": ["label"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "object",
+          "description": "Encre du nom des villes par catégorie du détenteur ; catégories absentes : encre ordinaire.",
+          "additionalProperties": false,
+          "properties": {
+            "enemy": {"$ref": "#/$defs/color"},
+            "friend": {"$ref": "#/$defs/color"}
+          }
+        }
+      }
+    }
+  }
+}

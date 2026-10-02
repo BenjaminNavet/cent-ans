@@ -1,0 +1,4 @@
+# Static C runtime: the launcher must start on a Windows without the Visual C++
+# Redistributable (same choice as cent_ans.dll, ADR 0087).
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static", "-C", "link-arg=/ignore:4099"]

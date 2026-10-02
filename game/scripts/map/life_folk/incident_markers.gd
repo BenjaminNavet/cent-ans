@@ -180,8 +180,10 @@ func _place_markers() -> void:
 	var camera: Camera3D = map.get("camera") if map != null else null
 	if camera == null:
 		return
+	var mode := MapReadability.map_mode_of(map)
 	for node: IncidentSeal in _markers.values():
-		if camera.is_position_behind(node.world):
+		# TB2 : sceau réservé à la couche « Signes » et aux modes de carte, sauf dernier tour.
+		if camera.is_position_behind(node.world) or not MapReadability.sign_shown("incident", mode, node.turns_left() <= 1):
 			node.visible = false
 			continue
 		node.visible = true

@@ -1,13 +1,24 @@
 # WIN (ADR 0087): proves the game runs on Windows x86_64 — native MSVC build of the
 # GDExtension, Godot import, then the headless smoke test (dummy renderer, no GPU), all through
-# the double-click launcher "Lancer Cent Ans.bat" (ADR 0117).
-# Manual or on the windows/* branches only: Windows minutes count double on a private repo.
+# the double-click launcher "Lancer Cent Ans.exe" committed at the root (ADR 0117, ADR 0153).
+# On main, a green run then fast-forwards `stable`, the branch the players' launchers follow
+# (ADR 0159): a commit that fails here never reaches them. Also manual, and on the windows/*
+# branches to try a change without touching `stable`.
 name: windows
 
 on:
   workflow_dispatch:
   push:
-    branches: ["windows/**"]
+    branches: ["main", "windows/**"]
+    # Nothing to prove for the players in a documentation-only push; `stable` catches up with
+    # the next one.
+    paths-ignore: ["docs/**"]
+
+# One run at a time per branch, and only the latest waiting one is kept: `stable` keeps moving
+# under a burst of pushes without a run per commit.
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   smoke:
@@ -34,16 +45,22 @@ jobs:
           unzip -q godot.zip -d godot
           ls godot
 
+      - name: Launcher unit tests
+        working-directory: tools/launcher-windows
+        run: cargo test
+
       # The double-click launcher (ADR 0117) does the whole chain as a player would: finds Git
       # Bash, builds cent_ans.dll, runs the headless import, then starts Godot. Here Godot runs
       # the smoke test, which exits 1 on any failure, including "CampaignSim class not
       # registered" (cent_ans.dll not loaded). The console build prints the log.
+      # The executable is the one committed in the repository (cross-compiled, ADR 0153): this
+      # step is its only run on a real Windows. "Lancer Cent Ans.bat" does the same job.
       - name: Launcher, build, import and smoke test
         shell: cmd
         env:
           GODOT: ${{ github.workspace }}\godot\Godot_v${{ env.GODOT_VERSION }}_win64_console.exe
         run: |
-          call "Lancer Cent Ans.bat" -- --headless --script res://tests/smoke.gd > smoke.log 2>&1
+          "Lancer Cent Ans.exe" -- --headless --script res://tests/smoke.gd > smoke.log 2>&1
           set RC=%errorlevel%
           type smoke.log
           exit /b %RC%
@@ -53,3 +70,26 @@ jobs:
         with:
           name: smoke-log
           path: smoke.log
+
+
+  # Fast-forward only (force=false): a rewritten main fails here instead of breaking the
+  # players' clones, and a re-run of an old commit cannot move `stable` backwards. The first
+  # green run creates the branch.
+  promote:
+    needs: smoke
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Fast-forward stable to this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/stable" >/dev/null 2>&1; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/stable" \
+              -f sha="$GITHUB_SHA" -F force=false
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref=refs/heads/stable -f sha="$GITHUB_SHA"
+          fi

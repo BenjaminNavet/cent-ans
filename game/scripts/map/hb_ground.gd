@@ -30,7 +30,8 @@ static func apply(material: ShaderMaterial, data_dir: String) -> bool:
 	if arrays.is_empty():
 		return false
 	var biomes := _load_biomes(data_dir.path_join(BIOMES_FILE))
-	var mix: Variant = JSON.parse_string(FileAccess.get_file_as_string(data_dir.path_join(MIX_FILE)))
+	var mix_text := FileAccess.get_file_as_string(data_dir.path_join(MIX_FILE))
+	var mix: Variant = JSON.parse_string(mix_text) if not mix_text.is_empty() else null
 	if biomes == null or not mix is Dictionary:
 		push_warning("HbGround: biomes.png ou ground_biome_mix.json absent, habillage désactivé")
 		return false

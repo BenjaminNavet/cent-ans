@@ -92,6 +92,12 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 	queue_redraw()
 
 
+## Lot TB2 : noms courts et centroïdes des provinces ([{id, name, px, world, area}], les plus vastes
+## d'abord), source partagée avec les noms de région de la vue moyenne (`RegionLabels`).
+func province_names() -> Array[Dictionary]:
+	return _provinces
+
+
 ## Regroupe les provinces de chaque faction par voisinage ; nomme le plus grand bloc.
 func _build_realms(owner_of: Dictionary) -> void:
 	var seen: Dictionary = {}

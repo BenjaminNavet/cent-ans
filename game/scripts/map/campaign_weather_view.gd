@@ -26,6 +26,28 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 ## densité en vue large (au-delà de `cloud_wide.y`, cf. `weather_wide_intensity_cut`) qui rendait
 ## presque chaque province couverte.
 @export var cloud_max_alpha: float = 0.45
+## TB2 : nuées plus fines en vue moyenne. Opacité plafonnée à `cloud_medium_alpha` jusqu'à
+## `cloud_medium.x` (distance caméra), puis montée vers `cloud_max_alpha` à `cloud_medium.y`.
+## Valeurs du bloc `clouds` de `data/ui/campaign_map.json` (repli : ces exports).
+@export var cloud_medium_alpha: float = 0.2
+@export var cloud_medium: Vector2 = Vector2(600.0, 1000.0)
+## TB2 : ombres de nuages du terrain (`cloud_shadow_amount`, lot CV1) : seulement quand il y a de
+## vraies nuées (pluie, neige, orage) sous le point visé ; nulles par temps clair.
+@export var weather_shadow_amount: float = 0.12
+@export var fair_shadow_amount: float = 0.0
+## TB6 (ADR 0156) : assombrissement du sol par le masque météo (uniformes `weather_wet_dim`,
+## `weather_cloud_shade*` de `campaign_weather.gdshaderinc`) : sol mouillé, ombre des nuées du
+## masque (force, largeur du seuil, fréquence du bruit en part de celle des nuées). Avec
+## `weather_shadow_amount`, la baisse de luminance au cœur d'une ombre reste sous 15 %
+## (`max_ground_dim`).
+@export var wet_dim: float = 0.04
+@export var mask_shadow: float = 0.06
+@export var mask_shadow_softness: float = 0.5
+@export var mask_shadow_scale: float = 0.5
+## TB6 (ADR 0156) : brume du matin en nappe basse dans les vallées (météo « brume », canal B du
+## masque), bloc `morning_mist` de `data/ui/campaign_map.json` ; uniformes `weather_valley_*`.
+## Opacité nulle sans données : pas de nappe.
+var valley_mist: Dictionary = {}
 ## CV3-0 (#3) : bande (distance caméra) sur laquelle la coupure d'intensité passe de 0 à
 ## `cloud_wide_cut_max` — au-delà, seules les zones de forte pluie/neige (ou l'orage) gardent
 ## des nuées.
@@ -70,6 +92,7 @@ func setup(map: Node) -> void:
 			forced = arg.trim_prefix("--map-weather=")
 	if not enabled or _map_data == null:
 		return
+	_load_tuning()  # TB2
 	_build_clouds()
 	_rain = _make_particles(false)
 	_snow = _make_particles(true)
@@ -112,22 +135,145 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 	if _terrain != null and _terrain.material != null:
 		var morning := 1.0 - smoothstep(fog_lift_seconds * 0.15, fog_lift_seconds, _fog_clock)
 		_terrain.material.set_shader_parameter("weather_fog_morning", morning)
-	var cloud_alpha := smoothstep(cloud_near.x, cloud_near.y, distance) * cloud_max_alpha * (1.0 - parchment)
+	var cloud_alpha := cloud_alpha_at(distance) * (1.0 - parchment)
 	_cloud_material.set_shader_parameter("cloud_alpha", cloud_alpha)
+	_update_selection_clear()
 	_clouds.visible = cloud_alpha > 0.01
 	var wide_cut := smoothstep(cloud_wide.x, cloud_wide.y, distance) * cloud_wide_cut_max
 	_cloud_material.set_shader_parameter("weather_wide_intensity_cut", wide_cut)
 	if _terrain != null and _terrain.material != null:
 		_terrain.material.set_shader_parameter("weather_wide_intensity_cut", wide_cut)
 	_focus_kind = weather_at(Vector2(focus.x, focus.z))
+	_update_cloud_shadows(delta)
 	_update_particles(focus, distance)
 	_update_lightning(delta, distance)
+
+
+# --- TB2 : nuées sobres -----------------------------------------------------------------
+
+
+## Réglages du bloc `clouds` de `data/ui/campaign_map.json`.
+func _load_tuning() -> void:
+	var clouds := MapReadability.section("clouds")
+	cloud_medium_alpha = float(clouds.get("medium_alpha", cloud_medium_alpha))
+	var band: Variant = clouds.get("medium_distance", null)
+	if band is Array and (band as Array).size() == 2:
+		cloud_medium = Vector2(float(band[0]), float(band[1]))
+	cloud_max_alpha = float(clouds.get("max_alpha", cloud_max_alpha))
+	weather_shadow_amount = float(clouds.get("weather_shadow", weather_shadow_amount))
+	fair_shadow_amount = float(clouds.get("fair_shadow", fair_shadow_amount))
+	wet_dim = float(clouds.get("wet_dim", wet_dim))
+	mask_shadow = float(clouds.get("mask_shadow", mask_shadow))
+	mask_shadow_softness = float(clouds.get("mask_shadow_softness", mask_shadow_softness))
+	mask_shadow_scale = float(clouds.get("mask_shadow_scale", mask_shadow_scale))
+	valley_mist = MapReadability.section("morning_mist")
+
+
+## TB6 : plus forte baisse de luminance (0..1) que la météo peut poser sur le sol : sol mouillé,
+## ombre des nuées du masque et ombres de nuages du terrain cumulés, au cœur d'un orage.
+func max_ground_dim() -> float:
+	return 1.0 - (1.0 - wet_dim) * (1.0 - mask_shadow) * (1.0 - maxf(weather_shadow_amount, fair_shadow_amount))
+
+
+## TB6 : pose les réglages du sol sur le matériau du terrain.
+func _apply_ground_tuning() -> void:
+	if _terrain == null or _terrain.material == null:
+		return
+	var material: ShaderMaterial = _terrain.material
+	material.set_shader_parameter("weather_wet_dim", wet_dim)
+	material.set_shader_parameter("weather_cloud_shade", mask_shadow)
+	material.set_shader_parameter("weather_cloud_shade_soft", mask_shadow_softness)
+	material.set_shader_parameter("weather_cloud_shade_scale", mask_shadow_scale)
+	material.set_shader_parameter("weather_valley_mist", valley_mist_opacity())
+	if valley_mist.is_empty():
+		return
+	for pair: Array in [["valley_depth_m", "weather_valley_depth_m"], ["plain_altitude_m", "weather_valley_plain_m"],
+			["crest_height_m", "weather_valley_crest_m"], ["height_lods", "weather_valley_lods"]]:
+		var values: Variant = valley_mist.get(pair[0], null)
+		if values is Array and (values as Array).size() == 2:
+			material.set_shader_parameter(pair[1], Vector2(float(values[0]), float(values[1])))
+	for pair: Array in [["plain_share", "weather_valley_plain"], ["bank_scale", "weather_valley_bank_scale"],
+			["drift", "weather_valley_drift"], ["grazing_gain", "weather_valley_grazing"],
+			["lifted_share", "weather_valley_lift"], ["near_share", "weather_valley_near"]]:
+		if valley_mist.has(pair[0]):
+			material.set_shader_parameter(pair[1], float(valley_mist[pair[0]]))
+	var tint := Color(str(valley_mist.get("color", "#d9d6cc")))
+	material.set_shader_parameter("weather_valley_color", Vector3(tint.r, tint.g, tint.b))
+
+
+## TB6 : opacité maximale de la nappe de vallée (0 : pas de nappe).
+func valley_mist_opacity() -> float:
+	return clampf(float(valley_mist.get("opacity", 0.0)), 0.0, 1.0)
+
+
+## Opacité des nuées à la distance caméra `distance` (hors fondu du parchemin) : nulles de près,
+## fines en vue moyenne, pleines en vue large.
+func cloud_alpha_at(distance: float) -> float:
+	var ceiling := lerpf(cloud_medium_alpha, cloud_max_alpha, smoothstep(cloud_medium.x, cloud_medium.y, distance))
+	return smoothstep(cloud_near.x, cloud_near.y, distance) * ceiling
+
+
+## Vrai si la météo `kind` porte des nuées (pluie, neige, orage) ; le brouillard est une nappe au sol.
+static func has_clouds(kind: String) -> bool:
+	return kind in ["rain", "snow", "storm"]
+
+
+## Ombres de nuages attendues sur le terrain pour la météo `kind` sous le point visé.
+func shadow_amount_for(kind: String) -> float:
+	return weather_shadow_amount if has_clouds(kind) else fair_shadow_amount
+
+
+var _shadow_amount := -1.0
+var _clear_id := -1
+
+
+func _update_cloud_shadows(delta: float) -> void:
+	if _terrain == null or _terrain.material == null:
+		return
+	var target := shadow_amount_for(_focus_kind)
+	var amount := target if _shadow_amount < 0.0 else move_toward(_shadow_amount, target, delta * 0.15)
+	if not is_equal_approx(amount, _shadow_amount):
+		_shadow_amount = amount
+		_terrain.material.set_shader_parameter("cloud_shadow_amount", amount)
+
+
+## Jamais de nuée ni de brume sur la province sélectionnée (`weather_clear_id` des deux matériaux).
+func _update_selection_clear() -> void:
+	var selected: Variant = _map.get("selected_index") if _map != null else null
+	var id := int(selected) if selected != null else 0
+	if id == _clear_id:
+		return
+	_clear_id = id
+	var feather := MapReadability.number("clouds", "clear_feather_px", 8.0)
+	for material: ShaderMaterial in [_terrain.material if _terrain != null else null, _cloud_material]:
+		if material != null:
+			material.set_shader_parameter("weather_clear_id", id)
+			material.set_shader_parameter("weather_clear_feather_px", feather)
 
 
 # --- Masque par province ----------------------------------------------------------------
 
 
 func _upload_mask() -> void:
+	var image := mask_image()
+	var any := _mask_any
+	if _mask == null:
+		_mask = ImageTexture.create_from_image(image)
+	else:
+		_mask.update(image)
+	_apply_ground_tuning()  # TB6
+	for material: ShaderMaterial in [_terrain.material if _terrain != null else null, _cloud_material]:
+		if material == null:
+			continue
+		material.set_shader_parameter("weather_mask", _mask)
+		material.set_shader_parameter("weather_enabled", any)
+
+
+var _mask_any := false
+
+
+## Masque météo du tour (un texel par province : R pluie, G neige, B brouillard, A orage).
+func mask_image() -> Image:
 	var width := maxi(_map_data.province_count + 1, 1)
 	var image := Image.create(width, 1, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0, 0, 0, 0))
@@ -151,15 +297,8 @@ func _upload_mask() -> void:
 		if kind != "clear":
 			any = true
 		image.set_pixel(index, 0, c)
-	if _mask == null:
-		_mask = ImageTexture.create_from_image(image)
-	else:
-		_mask.update(image)
-	for material: ShaderMaterial in [_terrain.material if _terrain != null else null, _cloud_material]:
-		if material == null:
-			continue
-		material.set_shader_parameter("weather_mask", _mask)
-		material.set_shader_parameter("weather_enabled", any)
+	_mask_any = any
+	return image
 
 
 # --- Nuées ---------------------------------------------------------------------------------
