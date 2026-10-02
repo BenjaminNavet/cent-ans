@@ -33,9 +33,15 @@ points demandaient un arbitrage.
    est appliqué après `sg_apply` et `hb_apply`. La correction du masque touche toute la carte : les
    finages reviennent autour de leur colonie.
 3. **Fosses, charrette arrêtée et portes marquées sont posées hors réservoir** par `WarScars`, à
-   l'échelle 1:1, à partir des scènes `plague` déjà résolues par `FolkScenes` (`edge_frame`). Les
-   portes s'appuient sur les façades du plan de la ville 1:1 (`TownLayer` / `LandmarkCityLayer`
-   `plan_of`), dès qu'il est chargé. Aucun pictogramme.
+   partir des scènes `plague` déjà résolues par `FolkScenes` (`edge_frame`). Fosses et charrette
+   sont grossies en proportion de la distance de la caméra (`plague.scale_per_distance`), comme les
+   armées : à l'échelle 1:1 des figurants FK elles font moins d'un pixel aux distances de jeu.
+   Les portes restent à l'échelle réelle, sur les façades du plan de la ville 1:1 ordinaire
+   (`TownLayer.plan_of`) ; pas de portes dans les villes emblématiques, où la caméra ne descend
+   pas assez bas pour lire une croix. Aucun pictogramme.
+5. **Brûlis par parcelles** : `hb_apply` rend la parcelle du pixel et `terroir_burn` donne à la
+   parcelle entière un état (carbonisée, roussie, intacte) tiré contre la dévastation lue en son
+   centre ; au loin, la moyenne des trois.
 4. **Engins de siège** : enfants des figurines de l'armée assiégeante (même repère, même échelle,
    même visibilité que le camp), lus dans `get_assault_odds(armée).engines`. Trois stades :
    charpente et tas de bois, maquette sous échafaudage (`siege.almost_ready_turns`), engin prêt.
@@ -50,7 +56,8 @@ points demandaient un arbitrage.
   exact du combat ; une armée détruite retombe sur le centre de sa province.
 - Les batailles d'une province sous le brouillard de guerre sont mémorisées mais cachées tant que
   la province n'est pas vue.
-- Les mesures `--stats` de TB1 près des colonies changent (finages revenus) : à 40 de Paris,
-  112 93 59 → 94 79 48 en été.
-- Portes marquées seulement quand la ville 1:1 est chargée (vue rapprochée) ; les villages sans
-  plan n'en ont pas.
+- Les finages reviennent autour de leur colonie sur toute la carte ; l'effet sur les mesures
+  `--stats` de TB1 n'est pas chiffré (ces mesures ne sont répétables qu'avec la sonde
+  `hb_debug=9`, voir `docs/wip/tb4.md`).
+- Portes marquées seulement dans une ville 1:1 ordinaire chargée (vue rapprochée) ; ni villes
+  emblématiques ni villages sans plan.
