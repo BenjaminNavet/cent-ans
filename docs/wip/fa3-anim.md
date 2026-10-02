@@ -3,8 +3,12 @@
 Branche `feat/fa-anim` (worktree `../gp-fa-anim`, issue de `feat/fa`). Chantier : `docs/wip/fa.md`.
 Prédécesseurs : NT12 (`docs/wip/nt12-mocap.md`), NT13/NT14 (`docs/wip/nt13-video-mocap.md`).
 
-## État : TERMINÉ (10-02), prêt à juger par la session principale
-Les clips par défaut ne changent pas ; tout passe par `--fa-anim` après `--`.
+## État : TERMINÉ (10-02) ; défauts décidés par la session principale
+Trois modes (`BattleSkinned.fa_anim_mode`) : sans option, les clips marqués `default: true` dans
+la table (`parry`, `death`, `death_back`) ; `--fa-anim` : les 13 ; `--no-fa-anim` : aucun (A/B).
+Le champ `default` vit dans `data/fx/fa3_anim_sources.json`, la cuisson le recopie dans
+`fa3_anim/manifest.json`, le GDScript ne nomme aucun clip. Un essai demandé (`--video-trial`,
+`--mocap-trial`) n'est pas recouvert par les clips par défaut, seulement par `--fa-anim`.
 
 ## Fait
 - Table `data/fx/fa3_anim_sources.json` (sources, squelettes, clips du jeu <- clips source,
@@ -16,7 +20,7 @@ Les clips par défaut ne changent pas ; tout passe par `--fa-anim` après `--`.
   NT12 identique octet pour octet), hanches et chevilles placées d'après la source mise à
   l'échelle, IK à deux os des deux jambes sur toutes les images, boucles sans dérive, clé de
   bouclage répétée ôtée, options par clip (bras du bouclier, sol, arme d'hast, arc).
-- Cuisson `game/assets/models/battle_fine/fa3_anim/` (13 clips, 472 images, 0,4 Mo) +
+- Cuisson `game/assets/models/battle_fine/fa3_anim/` (13 clips, 437 images, 0,4 Mo) +
   `manifest.json` (source, licence, mesures FA3 et mesures du clip remplacé) + `SOURCE.md`.
 - `BattleSkinned` : `--fa-anim`, `fa_anim_forced`, couche posée **par-dessus** la couche en
   place (défaut NT14 ou essai) : `mocap_textures` est une liste, `thrust` garde NT14.
@@ -64,8 +68,8 @@ CENT_ANS_FA3_TABLE=autre.json blender … -- render DIR   # essai de clips candi
 | parry | M2M Shield_OneShot | 24 / 38 (NT14) | 0,0 / 1,3 | — | 0 image (23 cm) / 0 |
 | hit | M2M Hit_Chest | 14 / 14 | 0,6 / 0,0 | — | 0 / 0 |
 | hit_b | M2M Hit_Head | 14 / 14 | 0,0 / 0,0 | — | 0 / 0 |
-| death | M2M Death_D | 53 / 26 | 2,2 / 31,5 | — | 0 / 0 |
-| death_back | M2M Death_B | 45 / 26 | 9,4 / 13,9 (et 20 cm sous le sol) | — | bras sur le visage au sol |
+| death | M2M Death_D | 41 / 26 | 2,2 / 31,5 | — | 0 / 0 |
+| death_back | M2M Death_B | 41 / 26 | 9,9 / 13,9 (et 20 cm sous le sol) | — | bras sur le visage au sol |
 | pike_level | KayKit 2H_Idle | 26 / 41 | 0,0 / 0,0 | 0,0 / 0,0 | — |
 | pike_thrust | KayKit 2H_Stab | 28 / 28 | 36,0 (= source) / 0,0 | — | — |
 | bow_shoot | M2M Bow Pull/Hold/Release | 60 / 60 | 0,0 / 0,0 | — | — |
@@ -74,6 +78,23 @@ CENT_ANS_FA3_TABLE=autre.json blender … -- render DIR   # essai de clips candi
 
 Le reciblage n'ajoute aucun glissement (`foot_slide_cm` = `foot_slide_source_cm` partout, cible
 de cheville atteinte à 0,0 cm) : les valeurs non nulles sont des pas de la source près du sol.
+
+## Vérification en jeu des clips par défaut (captures `--no-fa-anim` | défaut)
+`game/tests/fa3_anim_shot.gd` (scènes `deaths`, `charge`, `melee` ; 8 instants ; herbe masquée
+pour les morts), planche `~/dev/cent-ans-raw/fa/anim/boards/fa3_default_avant_apres.jpg`.
+- **Corrigé** : `Death_D` titube 0,8 s avant de tomber et `Death_B` s'élève 0,5 s ; or le jeu
+  projette le cadavre dès l'instant de la mort (vol balistique du shader) : le mort glissait
+  debout puis tombait, 0,6 s après le keyframé. Début des deux clips accéléré (x2,5 et x1,6,
+  41 images chacun) : la chute coïncide avec la projection, au sol vers 0,9-1,3 s.
+- Vu, rien à corriger : corps posés au sol (ni enfoncés ni flottants), pose finale stable (clip
+  non bouclé tenu sur sa dernière image), pas d'épée dressée comme dans le keyframé ; projetés
+  d'une charge : corps à l'horizontale en vol puis à plat. `death_back` finit face contre terre,
+  retourné, bassin à 29 cm (corps ramassé sur les genoux).
+- `parry` : bouclier devant le buste sans le traverser (planche Blender) ; en jeu la parade se
+  fond dans la presse. Enchaînement avec les voisins NT14 mesuré : appui gauche devant, hanches à
+  -13° (garde NT14 : -7° ; parade NT14 remplacée : +44°), bassin à 0,77 m (0,72) : plus proche
+  de la garde NT14 que la parade qu'il remplace ; le fondu `cycle_blend_s` (0,2 s) fait le reste.
+- Piège de capture : fenêtre Godot masquée = rendu figé (10 min sans image) ; `--always-on-top`.
 
 ## Défauts constatés (planches lues)
 - `pike_level` / `pike_thrust` : genoux rentrés (jambes KayKit), buste de profil, poussée de
@@ -94,12 +115,13 @@ de cheville atteinte à 0,0 cm) : les valeurs non nulles sont des pas de la sour
 
 ## Tests
 - pytest `test_fa3_anim_sources_schema.py` : 4 OK. `ruff check` et `ruff format` : propres.
-- Godot : `fa3_anim_test` (défaut, `--fa-anim`, `--coarse-figures`), `nt7_anim_test`,
-  `an1b_clips_test`, `nt12_mocap_test` (aussi `--mocap-trial`), `nt13_video_test`,
-  `nt14_melee_test`, `smoke` : OK avec et sans `--fa-anim`.
+- pytest : 5 tests (dont `default` requis, recopié dans le manifeste, aucun nom de clip dans
+  `fa_anim_mode`).
+- Godot, dans les trois modes (défaut, `--fa-anim`, `--no-fa-anim`) : `fa3_anim_test` (plus
+  `--coarse-figures`), `nt7_anim_test`, `an1b_clips_test`, `nt12_mocap_test` (aussi
+  `--mocap-trial`), `nt13_video_test`, `nt14_melee_test`, `smoke` : OK.
 
 ## Prochaine étape (session principale)
-Juger les planches puis en jeu (`godot --path game -- --fa-anim`), choisir clip par clip ce
-qui devient défaut (même mécanique que `melee/` de NT14 : une table de choix et une cuisson).
-Pistes : `thrust` (KayKit Melee_1H_Attack_Stab), `hit_c`, `death_knees` (Death_A), fantassins
-du kit grossier non reciblés, crédits dans `CREDITS.md` au lot FA4.
+Partie pilote avec les trois clips par défaut ; passer un autre clip par défaut = `default: true`
+dans la table puis recuisson. Pistes : `thrust` (KayKit Melee_1H_Attack_Stab), `hit_c`, `death_knees` (Death_A), fantassins
+du kit grossier non reciblés. Crédits : `CREDITS.md` (section animations).

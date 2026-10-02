@@ -72,21 +72,22 @@
   },
   "death": {
    "actions": [
+    "Death_D",
     "Death_D"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
    "default": true,
    "family": "melee",
    "license": "CC0-1.0",
-   "note": "staggers and falls on the back",
+   "note": "staggers (played x2.5: a corpse is thrown back at once by the game), falls on the back, settles",
    "quality": {
-    "end_to_start_cm": 179.7,
+    "end_to_start_cm": 179.8,
     "foot_below_rest_cm": -0.0,
     "foot_slide_cm": 2.2,
     "foot_slide_source_cm": 12.5,
     "foot_target_miss_cm": 0.0,
-    "frames": 53,
-    "jitter_deg_per_frame2": 12.24,
+    "frames": 41,
+    "jitter_deg_per_frame2": 14.44,
     "largest_step_cm": 20.5,
     "loop_blended": false,
     "loop_gap_cm": null,
@@ -113,28 +114,29 @@
   },
   "death_back": {
    "actions": [
+    "Death_B",
     "Death_B"
    ],
    "author": "Mesh2Motion (Scott Petrovic and contributors)",
    "default": true,
    "family": "melee",
    "license": "CC0-1.0",
-   "note": "thrown backwards",
+   "note": "lifted off the feet (played x1.6) and thrown backwards",
    "quality": {
     "end_to_start_cm": 166.4,
     "foot_below_rest_cm": 0.0,
-    "foot_slide_cm": 9.4,
+    "foot_slide_cm": 9.9,
     "foot_slide_source_cm": 16.5,
     "foot_target_miss_cm": 0.0,
-    "frames": 45,
-    "jitter_deg_per_frame2": 12.05,
-    "largest_step_cm": 17.9,
+    "frames": 41,
+    "jitter_deg_per_frame2": 13.47,
+    "largest_step_cm": 23.7,
     "loop_blended": false,
     "loop_gap_cm": null,
     "loop_gap_source_cm": null,
     "shield_face_frames": 34,
     "shield_nearest_to_sight_cm": 4.8,
-    "wrist_r_max_deg_per_frame": 30.0
+    "wrist_r_max_deg_per_frame": 44.1
    },
    "replaced_quality": {
     "end_to_start_cm": 366.6,
@@ -606,19 +608,19 @@
    "default": false,
    "frames": 60,
    "loop": false,
-   "start": 303
+   "start": 287
   },
   "death": {
    "default": true,
-   "frames": 53,
+   "frames": 41,
    "loop": false,
    "start": 151
   },
   "death_back": {
    "default": true,
-   "frames": 45,
+   "frames": 41,
    "loop": false,
-   "start": 204
+   "start": 192
   },
   "guard": {
    "default": false,
@@ -654,13 +656,13 @@
    "default": false,
    "frames": 26,
    "loop": true,
-   "start": 249
+   "start": 233
   },
   "pike_thrust": {
    "default": false,
    "frames": 28,
    "loop": false,
-   "start": 275
+   "start": 259
   },
   "slash": {
    "default": false,
@@ -672,13 +674,13 @@
    "default": false,
    "frames": 52,
    "loop": true,
-   "start": 363
+   "start": 347
   },
   "victory_b": {
    "default": false,
    "frames": 38,
    "loop": true,
-   "start": 415
+   "start": 399
   }
  },
  "fps": 24,

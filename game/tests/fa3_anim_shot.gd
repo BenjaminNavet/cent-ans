@@ -1,13 +1,17 @@
 extends SceneTree
 
-## Lot FA3 : captures côte à côte des mêmes scènes, clips du jeu (gauche) et clips CC0 reciblés
-## (droite, `--fa-anim`). Hors simulation, sur une prairie plate, comme `nt12_mocap_shot.gd`.
+## Lot FA3 : captures côte à côte des mêmes scènes, jeu sans FA3 (gauche, `--no-fa-anim`) et jeu
+## avec la couche FA3 (droite : clips par défaut, ou tous avec `--right=all`). Hors simulation,
+## sur une prairie plate, comme `nt12_mocap_shot.gd`.
 ## Usage (avec affichage, pas en headless) :
-##   godot --path game --resolution 1280x720 --script res://tests/fa3_anim_shot.gd -- [--out-dir=<dossier>]
-## Écrit dans `docs/audit/captures/fa/` (défaut, ignoré par git) :
-## - `fa3_<scène>_0..3.png` : 4 instants à 0,25 s d'écart, gauche jeu / droite FA3 (1280 px) ;
-##   scènes `melee` (épée et bouclier), `pike` (piquiers contre fantassins), `bow` (archers qui
-##   tirent : volée déclenchée, instants autour de la décoche), `victory` (acclamation).
+##   godot --path game --resolution 1280x720 --script res://tests/fa3_anim_shot.gd -- \
+##     [--out-dir=<dossier>] [--right=default|all] [--scenes=melee,deaths,charge,pike,bow,victory]
+## Écrit `fa3_<droite>_<scène>_<k>.png` (1280 px) dans `docs/audit/captures/fa/` (défaut, ignoré
+## par git) :
+## - `melee` : mêlée épée et bouclier avec pertes (parades, morts, cadavres), 8 instants ;
+## - `deaths` : un rang immobile perd des hommes (cause mêlée), vue rasante de profil : chute
+##   puis pose finale ; `charge` : mêmes morts projetées par une charge (impulsion forte) ;
+## - `pike`, `bow`, `victory` : clips d'essai (utiles avec `--right=all`).
 
 const SKY_SHADER := preload("res://shaders/battle_sky.gdshader")
 const STEPS := 4
@@ -41,23 +45,30 @@ var _out_dir := "../docs/audit/captures/fa"
 
 
 func _init() -> void:
+	var right_mode := BattleSkinned.FA_DEFAULT
+	var scenes := ["melee", "deaths", "charge"]
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out-dir="):
 			_out_dir = arg.trim_prefix("--out-dir=")
+		elif arg == "--right=all":
+			right_mode = BattleSkinned.FA_ALL
+		elif arg.begins_with("--scenes="):
+			scenes = Array(arg.trim_prefix("--scenes=").split(","))
 	_out_dir = ProjectSettings.globalize_path("res://").path_join(_out_dir).simplify_path() if _out_dir.is_relative_path() else _out_dir
 	DirAccess.make_dir_recursive_absolute(_out_dir)
 	await process_frame
 	var failures := 0
-	for scene in ["melee", "pike", "bow", "victory"]:
+	var tag := "all" if right_mode == BattleSkinned.FA_ALL else "default"
+	for scene in scenes:
 		var images := {}
-		for layer in [0, 1]:
+		for layer in [BattleSkinned.FA_NONE, right_mode]:
 			BattleSkinned.fa_anim_forced = layer
 			BattleSkinned.reload_caches()
-			images[layer] = await _run(scene)
-		var left: Array = images[0]
-		var right: Array = images[1]
+			images[layer] = await _run(str(scene))
+		var left: Array = images[BattleSkinned.FA_NONE]
+		var right: Array = images[right_mode]
 		for k in left.size():
-			failures += _save_pair(left[k], right[k], "fa3_%s_%d.png" % [scene, k])
+			failures += _save_pair(left[k], right[k], "fa3_%s_%s_%d.png" % [tag, scene, k])
 	BattleSkinned.fa_anim_forced = -1
 	BattleSkinned.reload_caches()
 	print("fa3_anim_shot: %s (%s)" % ["OK" if failures == 0 else "FAIL", _out_dir])
@@ -82,10 +93,10 @@ func _run(scene: String) -> Array:
 	world.add_child(soldiers)
 	var fake := FakeBattle.new()
 	var c := _center
-	var foe_type := "unit_men_at_arms_foot"
 	var own_type := "unit_men_at_arms_foot"
 	var own_render := "infantry"
 	var state := "melee"
+	var facing_foe := scene == "melee" or scene == "pike"
 	match scene:
 		"pike":
 			own_type = "unit_flemish_pikemen"
@@ -93,11 +104,12 @@ func _run(scene: String) -> Array:
 			own_type = "unit_longbowmen"
 			own_render = "archer"
 			state = "shooting"
-		"victory":
+		"victory", "deaths", "charge":
 			state = "idle"
-	fake.units = [_stage_unit(1, "attacker", own_type, own_render, Vector3(c.x, 0, c.z - 3.2), 0.0, 48, false)]
-	if scene == "melee" or scene == "pike":
-		fake.units.append(_stage_unit(2, "defender", foe_type, "infantry", Vector3(c.x, 0, c.z + 3.2), PI, 48, false))
+	var count := 12 if scene == "deaths" or scene == "charge" else 48
+	fake.units = [_stage_unit(1, "attacker", own_type, own_render, Vector3(c.x, 0, c.z - 3.2), 0.0, count, false)]
+	if facing_foe:
+		fake.units.append(_stage_unit(2, "defender", "unit_men_at_arms_foot", "infantry", Vector3(c.x, 0, c.z + 3.2), PI, 48, false))
 		fake.units[0]["target"] = 2
 		fake.units[1]["target"] = 1
 	for unit in fake.units:
@@ -108,11 +120,21 @@ func _run(scene: String) -> Array:
 	soldiers.setup(fake.units, _colors(), _factions())
 	if scene == "victory":
 		soldiers.victor_side = "attacker"
-	camera.look_at_from_position(c + Vector3(6.5, 2.2, -4.0 if scene != "melee" and scene != "pike" else -1.0), c + Vector3(0, 1.0, -3.2 if scene != "melee" and scene != "pike" else 0.0))
+	if scene == "deaths" or scene == "charge":
+		# Un rang de 12 hommes vu de profil, au ras du sol.
+		camera.look_at_from_position(c + Vector3(-17.0, 1.0, -5.0), c + Vector3(-8.0, 0.3, -3.6))
+	elif facing_foe:
+		camera.look_at_from_position(c + Vector3(6.5, 2.2, -1.0), c + Vector3(0, 1.0, 0))
+	else:
+		camera.look_at_from_position(c + Vector3(6.5, 2.2, -4.0), c + Vector3(0, 1.0, -3.2))
 	var dt := 1.0 / 30.0
 	for i in 45:
 		soldiers.update(fake, fake.units, dt, [])
 		await process_frame
+	if scene == "deaths" or scene == "charge":
+		# Herbes hautes masquées : on juge le contact des corps avec le sol.
+		terrain.vegetation.visible = false
+	var out: Array = []
 	if scene == "bow":
 		# Une volée part (instant du clip = 1,55 s), le clip reprend à 0 au rechargement (6 s) :
 		# 5,4 s plus tard l'archer bande (0,95 s), les 4 vues encadrent la décoche suivante.
@@ -120,15 +142,39 @@ func _run(scene: String) -> Array:
 		for i in 54:
 			soldiers.update(fake, fake.units, 0.1, [])
 			await process_frame
-	var out: Array = []
-	for k in STEPS:
-		out.append(await _grab())
-		for j in 5:
-			soldiers.update(fake, fake.units, 0.05, [])
-			await process_frame
+	if scene == "deaths" or scene == "charge":
+		# Six hommes tombent d'un coup ; vues pendant la chute puis au repos.
+		_lose(fake.units[0], 6, "melee" if scene == "deaths" else "charge")
+		for wait in [0.3, 0.3, 0.3, 0.4, 0.5, 0.7, 1.5, 3.0]:
+			for j in int(round(wait / 0.05)):
+				soldiers.update(fake, fake.units, 0.05, [])
+				await process_frame
+			out.append(await _grab())
+	elif scene == "melee":
+		# Pertes régulières des deux camps : parades, morts et cadavres dans la presse.
+		for k in 8:
+			_lose(fake.units[k % 2], 3, "melee")
+			for j in 9:
+				soldiers.update(fake, fake.units, 0.05, [])
+				await process_frame
+			out.append(await _grab())
+	else:
+		for k in STEPS:
+			out.append(await _grab())
+			for j in 5:
+				soldiers.update(fake, fake.units, 0.05, [])
+				await process_frame
 	world.queue_free()
 	await process_frame
 	return out
+
+
+## Retire `count` figurines au régiment (elles tombent : cadavres de `BattleSoldiers`).
+func _lose(unit: Dictionary, count: int, cause: String) -> void:
+	unit["figures"] = int(unit["figures"]) - count
+	unit["soldiers"] = int(unit["soldiers"]) - count
+	unit["loss_cause"] = cause
+	unit["loss_by"] = int(unit.get("target", -1))
 
 
 func _grab() -> Image:

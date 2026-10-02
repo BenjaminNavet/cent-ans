@@ -406,6 +406,22 @@ mention « Public domain » ou CC0). Recadrées et réduites par `tools/cent_ans
 Images générées pour combler les manques (`ld_avignon`, `vg_famine`, `vg_treasury`, `vg_trade`) : OpenRouter
 (`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md` (session 7).
 
+## Animations de combat (`game/assets/models/battle_fine/fa3_anim/`, lot FA3)
+
+Clips reciblés sur le squelette des figurines fines et cuits en matrices d'os par
+`tools/blender_scripts/fa3_anim_retarget.py` (table `data/fx/fa3_anim_sources.json`) ; seuls ces
+dérivés sont versionnés, les fichiers d'origine restent hors dépôt. Les deux sources sont en
+CC0 1.0 (aucune attribution requise, créditées par courtoisie). Par défaut : parade (`parry`) et
+deux morts (`death`, `death_back`), tirées de Mesh2Motion ; les autres clips ne sont lus qu'avec
+`--fa-anim`.
+
+- **Mesh2Motion**, animations humaines (Scott Petrovic et contributeurs) —
+  https://github.com/Mesh2Motion/mesh2motion-app. CC0 ; README du dépôt : « The art assets (3d
+  models, rigs, animations) are all licensed under CC0 ».
+- **KayKit Character Animations 1.1** (Kay Lousberg, www.kaylousberg.com) — CC0 ; source de la
+  licence : fichier `KayKit-CC0-License.txt` du pack (« License: (Creative Commons Zero, CC0) »).
+  Clips d'essai seulement (`slash`, `overhead`, `pike_level`, `pike_thrust`).
+
 ## Assets produits par le projet
 
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons
