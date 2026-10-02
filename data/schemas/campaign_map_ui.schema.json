@@ -30,6 +30,10 @@
           "type": "number",
           "minimum": 1,
           "maximum": 20
+        },
+        "town_style": {
+          "description": "GC2 (ADR 0158) : rendu des lieux de la carte de campagne. maquette : maquettes stylisées à taille monde constante (data/art/town_maquettes.json) ; real : villes 1:1 (TownLayer, LandmarkCityLayer, TownFarLayer). `--town-style=real|maquette` le remplace.",
+          "enum": ["maquette", "real"]
         }
       }
     },

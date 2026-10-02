@@ -103,5 +103,20 @@ géographie relative vraie. Origine : champs (HB3 ×3) et camps plus gros que le
   invisibles : la maquette doit aussi grossir (Paris ×2-3, kit ×3-4) et le `LandmarkModel` n'est
   pas encore mis à l'échelle par le prototype (drapé sur le relief à revoir).
 
+## GC2 — système de maquettes (en cours)
+- Données `data/art/town_maquettes.json` + schéma `town_maquettes.schema.json` (test
+  `tools/tests/test_town_maquettes_schema.py`) ; `map.town_style` (`maquette` par défaut,
+  `--town-style=real|maquette`).
+- `TownMaquetteData` (familles culture > région > religion > Ouest, modèle avec repli, collisions),
+  `TownMaquetteLayer` (MultiMesh par modèle et tuile de 256, bannières par donnée d'instance,
+  `shaders/maquette_banner.gdshader`, pose au sol, fondu par type sur la distance du rig),
+  `LandmarkModel` grossi (`drape_scale` dans `landmark.gdshader`).
+- `SettlementLayer` : style `maquette` → pas de `towns` / `landmark_cities` / `town_far` ; emprises
+  = maquette ; exclusions de végétation ≥ maquette ; clic limité à la portée du type.
+- Test `game/tests/gc_maquettes_test.gd` : OK. Mesure : 2 140 instances, 7 emblématiques,
+  1 245 MultiMesh (10 modèles de l'Ouest), 51 lieux réduits, pose ≈ 0,8 s.
+- Reste : smoke, tests existants (1:1) à passer en `--town-style=real` ou adapter,
+  `game/tests/gc_shots.gd`, revue des usages nuls.
+
 ## Prochaine étape
 Vague 1 lancée (GC2, GC3, GC3b en parallèle) ; à leur retour : captures `gc_shots.gd`, revue, puis GC4-GC6.
