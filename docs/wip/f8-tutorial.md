@@ -22,12 +22,21 @@ Tout est dans `main` (F8, puis UX2 « Plus tard »/sommaire, Q2, NT4 prologue de
   non par province ; « Votre faction : … » (l'ancien « Vous gouvernez Royaume de France »
   n'avait pas d'article).
 
+## Points ouverts traités le 2026-10-02 (02f2f1509, 06b0597f2)
+- Dirigeant, suzerain et objectifs lus dans la simulation (`get_feudal_sheet`) : les factions sans
+  bloc `victory` affichent « Les objectifs de votre titre », celles sans `ruler` dans les données
+  le dirigeant tiré par la simulation ; « Bienvenue » seul s'il n'y en a aucun.
+- `TutorialSteps.GENERIC_ADVICE` : conseils d'époque pour les factions sans texte propre ;
+  l'introduction reprend la `description` de la faction, la diplomatie nomme le suzerain.
+- Le guide se range sous le menu pause (le contrôleur tourne arbre en pause, régression depuis
+  Q8) et sous le rapport de saison hors de son étape (il couvrait « Continuer »).
+- `label_safe_rect()` borné à une taille nulle : plus de « Rect2 size is negative » en headless.
+- Parcours aux vrais clics `q1_playtest.gd --phase=q2tutorial` vert pour France et Albret
+  (introduction → construction, pause, 3 fins de tour) ; il utilise désormais ses propres
+  réglages et sauvegardes et écarte l'invitation au prologue de bataille. La fenêtre doit rester
+  au premier plan (`osascript … set frontmost`).
+
 ## Points ouverts
-- 146 factions jouables sur 149 n'ont pas de `victory` : l'introduction affiche « Vos objectifs
-  historiques : • Survivre et prospérer. ». 22 n'ont pas de `ruler` : titre « Bienvenue, Sire »
-  (faux pour les républiques). Conseils historiques seulement pour France/Angleterre/Bourgogne.
-- Le smoke ne joue le guide que par appels directs (France) ; le parcours aux vrais clics est
-  `q1_playtest.gd --phase=q2tutorial` (fenêtré, non relancé le 2026-10-02).
-- Hors tutoriel, vu dans les logs headless : `settlement_layer.gd:1086` (`_declutter_step`)
-  émet « Rect2 size is negative » à chaque passe quand la fenêtre est minuscule (51 px en
-  headless) : `label_safe_rect()` devient négatif.
+- Le parcours aux vrais clics s'arrête à l'étape « recherche » : les étapes suivantes ne sont
+  jouées que par appels directs dans le smoke (France).
+- Conseils propres à une faction : toujours France, Angleterre, Bourgogne seulement.
