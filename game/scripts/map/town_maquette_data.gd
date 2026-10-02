@@ -236,6 +236,12 @@ static func solve_collisions(centers: PackedVector2Array, radii: PackedFloat32Ar
 	return scales
 
 
+## Un lieu dont le centre est à moins de `absorb_ratio` × le rayon d'une ville emblématique n'a
+## pas de maquette propre (0 : jamais).
+static func collision_absorb_ratio() -> float:
+	return float((document().get("collision", {}) as Dictionary).get("absorb_ratio", 0.0))
+
+
 static func collision_min_scale() -> float:
 	return float((document().get("collision", {}) as Dictionary).get("min_scale", 1.0))
 

@@ -111,7 +111,9 @@ func _run() -> void:
 	var count := data.settlements.size()
 	var landmarks := int(maquettes.stats.get("landmarks", 0))
 	_check(landmarks == 7, "expected the 7 landmark cities, got %d" % landmarks)
-	_check(maquettes.instance_count() + landmarks == count, "instances %d + landmarks %d != places %d" % [maquettes.instance_count(), landmarks, count])
+	var absorbed := int(maquettes.stats.get("absorbed", 0))
+	_check(maquettes.instance_count() + landmarks + absorbed == count, "instances %d + landmarks %d + absorbed %d != places %d" % [maquettes.instance_count(), landmarks, absorbed, count])
+	_check(absorbed > 0 and absorbed < 40, "a few places are swallowed by landmark cities (%d)" % absorbed)
 	_check(int(maquettes.stats.get("multimeshes", 0)) < maquettes.instance_count(), "places are not grouped by tile: %s" % maquettes.stats)
 	print("gc_maquettes_test: %s" % JSON.stringify(maquettes.stats))
 	# Taille, pose et réductions.
@@ -122,7 +124,7 @@ func _run() -> void:
 		var kind := TownMaquetteData.kind_of(data.settlements[i])
 		var base := TownMaquetteData.width(kind) * 0.5 * maquettes.gain_of(i)
 		families[maquettes.family_of(i)] = true
-		if maquettes.is_landmark(i):
+		if maquettes.is_landmark(i) or maquettes.is_absorbed(i):
 			continue
 		var factor := maquettes.factor_of(i)
 		if factor < 0.999:

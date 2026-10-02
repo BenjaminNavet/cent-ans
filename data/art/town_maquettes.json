@@ -57,7 +57,8 @@
   },
   "collision": {
     "min_scale": 0.6,
-    "margin": 0.3
+    "margin": 0.3,
+    "absorb_ratio": 0.9
   },
   "tile_size": 256.0,
   "variants": [

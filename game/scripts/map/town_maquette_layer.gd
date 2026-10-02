@@ -29,6 +29,7 @@ var _layer: SettlementLayer
 var _factor: PackedFloat32Array = PackedFloat32Array()  # réduction de collision (1 = taille de base)
 var _radius: PackedFloat32Array = PackedFloat32Array()  # demi-largeur (unités monde)
 var _gain: PackedFloat32Array = PackedFloat32Array()  # gain de taille selon le poids du lieu
+var _absorbed: PackedByteArray = PackedByteArray()  # 1 : noyé dans une ville emblématique, sans maquette
 var _top: PackedFloat32Array = PackedFloat32Array()  # hauteur au-dessus du sol (unités monde)
 var _range: PackedFloat32Array = PackedFloat32Array()  # portée (distance du rig)
 var _kind: PackedByteArray = PackedByteArray()  # index dans `TownMaquetteData.KINDS`
@@ -124,8 +125,24 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 	var groups := {}  # "modèle|tuile" → indices de lieux
 	var fallbacks := 0
 	var reduced := 0
+	var absorbed := 0
+	var absorb_ratio := TownMaquetteData.collision_absorb_ratio()
+	_absorbed.resize(count)
+	_absorbed.fill(0)
 	for i in count:
 		if _landmarks.has(i):
+			continue
+		# Lieu noyé dans la maquette d'une ville emblématique (Vincennes dans Paris) : pas de maquette
+		# propre, son nom et son écu restent.
+		var swallowed := false
+		for j: int in _landmarks:
+			if centers[i].distance_to(centers[j]) < _radius[j] * absorb_ratio:
+				swallowed = true
+				break
+		if swallowed:
+			_absorbed[i] = 1
+			absorbed += 1
+			_radius[i] *= _factor[i]
 			continue
 		var kind: String = TownMaquetteData.KINDS[_kind[i]]
 		var variant := TownMaquetteData.variant_of(str(entries[i]["id"]))
@@ -182,7 +199,7 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 	apply_render_quality(RenderQuality.preset())
 	stats = {
 		"places": count, "landmarks": _landmarks.size(), "instances": instances, "multimeshes": _tiles.size(),
-		"models": _model_list.size(), "reduced": reduced, "family_fallbacks": fallbacks,
+		"models": _model_list.size(), "reduced": reduced, "absorbed": absorbed, "family_fallbacks": fallbacks,
 		"setup_ms": Time.get_ticks_msec() - t0, "prepare_ms": t1 - t0,
 	}
 	print("TownMaquetteLayer: %s" % JSON.stringify(stats))
@@ -403,6 +420,11 @@ func top_of(i: int) -> float:
 
 
 ## Réduction de collision du lieu `i` (1 = taille de base).
+## Vrai si le lieu `i` est noyé dans la maquette d'une ville emblématique (pas de maquette propre).
+func is_absorbed(i: int) -> bool:
+	return i >= 0 and i < _absorbed.size() and _absorbed[i] == 1
+
+
 ## Gain de taille du lieu `i` selon son poids (`TownMaquetteData.weight_gain`).
 func gain_of(i: int) -> float:
 	return _gain[i] if i >= 0 and i < _gain.size() else 1.0

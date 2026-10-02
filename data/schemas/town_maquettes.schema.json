@@ -162,6 +162,12 @@
           "type": "number",
           "minimum": 0,
           "description": "Écart (unités) gardé entre deux maquettes."
+        },
+        "absorb_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Un lieu dont le centre est à moins de ce rapport × le rayon d'une ville emblématique n'a pas de maquette propre (0 : jamais)."
         }
       }
     },
