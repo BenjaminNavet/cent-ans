@@ -73,15 +73,16 @@
       34.68
     ],
     "weight": 10,
-    "owner": null,
+    "owner": "fac_crusaders",
     "fortification_level": 2,
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_collegiate_church"
+      "bld_collegiate_church",
+      "bld_muster_field"
     ],
     "port": true,
-    "description": "Port du sud, siège des Hospitaliers avant 1310.",
+    "description": "Port du sud, siège des Hospitaliers avant 1310 ; en 1337 le patriarche Pierre de la Palud y rassemble les croisés.",
     "sources": [
       "Limassol"
     ]
