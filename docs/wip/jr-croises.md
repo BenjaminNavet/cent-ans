@@ -5,22 +5,27 @@ Worktree d'intégration `../gp-jr` (`feat/jr`). Lancé le 2026-10-02, autonomie 
 (enchaîner les lots, relire, fusionner dans main sans jalon de validation). Budget 0 $.
 
 ## Lots
-- JR0 squelette : spec, ADR, note, `crusade.json` + schéma, modules vides, tests désactivés.
-- JR1 règle (cent-ans-dev) : `sim-campaign/src/crusade.rs`, crochets, fin de tour, sauvegarde, tests.
-- JR2 données (cent-ans-mech) : faction, chef, Limassol, armée et flotte de départ, relations
-  réciproques, objectifs, codex, armes, tests de comptage.
-- JR3 pont + encart Godot (cent-ans-dev) : vue, commande, encart « Ferveur », toasts, test headless.
-- JR4 IA + équilibre (cent-ans-dev) : prêche automatique, débarquement, sonde 5 graines × 50 tours.
+- JR1 règle (cent-ans-dev, `../gp-jr`, `feat/jr`) : tout le Rust + `data/rules/crusade.json` et son
+  schéma. Squelette commité d'abord ; fusionne `feat/jr-data` pour les tests d'intégration.
+- JR2 données (cent-ans-mech, `../gp-jr-data`, `feat/jr-data`) : tout `data/` hors `crusade.json` —
+  faction, chef, Limassol, flotte, revendications, relations réciproques, objectifs, arêtes
+  maritimes, codex, armes et bannières, carte de sélection. Pas de build cargo.
+- JR3 pont + section Godot (cent-ans-dev) : section « Ferveur », `EventKind::Crusade` côté Godot,
+  sélecteur de faction sur carte, test headless.
+- JR4 IA + équilibre (cent-ans-dev) : sonde 5 graines × 50 tours, débarquement de l'IA.
 - JR5 relecture, capture de contrôle, fusion dans main.
 
-Ordre : JR0 → (JR1 ∥ JR2) → (JR3 ∥ JR4) → JR5.
+Ordre : (JR1 ∥ JR2) → (JR3 ∥ JR4) → JR5.
+
+## Contrat d'identifiants
+`fac_crusaders`, `chr_pierre_de_la_palud`, base `set_limassol`, capitale `prov_cyprus`,
+revendications `prov_jerusalem`, `prov_gaza`, `prov_safad`.
 
 ## État
-- Spec, ADR, note écrits. Exploration des points d'intégration en cours.
+- Spec, ADR, note écrits ; exploration faite (spec § 5.1). JR1 et JR2 lancés.
 
 ## Prochaine étape
-- JR0 : squelette, puis lancer JR1 et JR2.
+- À la fin de JR1 et JR2 : vérifier les tests, lancer JR3 et JR4.
 
 ## Points ouverts
-- L'IA commune sait-elle débarquer ? (sinon objectif outre-mer explicite en JR4)
-- Capitale dans une province dont la cité est à un autre : acceptée par les validateurs ?
+- Usages de la capitale pour une faction sans cité (liste dans le rapport d'exploration, spec § 5.1).

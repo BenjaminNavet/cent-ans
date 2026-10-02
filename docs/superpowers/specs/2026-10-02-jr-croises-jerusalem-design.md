@@ -98,9 +98,27 @@ plus proche, puis Jérusalem).
   appelés par bataille, capture et diplomatie ; commande `preach_passage` ; vue `crusade_view`.
 - **Pont** : une vue (jauge, détail des causes du dernier tour, aumônes, état du passage) et une
   commande, sur le modèle des missions.
-- **Godot** : un encart « Ferveur » dans le HUD de campagne, visible seulement pour la faction
+- **Godot** : une section « Ferveur » dans le panneau de faction, visible seulement pour la faction
   croisée : jauge, aumônes, bouton « Prêcher le passage », infobulle détaillée. Évènements en
   toasts et chronique.
+
+### 5.1 Points d'intégration relevés (exploration du 2026-10-02)
+
+- Propriété par colonie déjà gérée (28 enclaves existantes) ; `capital` = `prov_cyprus` accepté,
+  mais beaucoup de code lit « la cité de la capitale » : `crusade.json` porte `base_settlement`,
+  l'armée de départ y est placée, et chaque usage de la capitale est vérifié pour une faction sans
+  cité (récompenses de mission, recrutement, IA, chronique).
+- Limassol n'a aucune arête maritime : ajouter des arêtes `sea` Limassol ↔ Acre, Gaza, Tripoli
+  dans le graphe des colonies, et une flotte dans `data/naval/fleets.json`.
+- L'IA ne débarque que sur des provinces revendiquées : `claims` de la faction sur
+  `prov_jerusalem`, `prov_gaza`, `prov_safad`.
+- Commande = variante `Order::PreachPassage` (sérialisation générique, pas de code de pont) ; IA par
+  `crusade::ai_preach` dans `state_plans` du planificateur.
+- Interface : section « Ferveur » du panneau de faction (modèle `chivalry_section.gd`), pas un
+  encart de HUD ; nouveau `EventKind::Crusade` avec ses trois correspondances Godot.
+- Sélection de faction : carte dans `data/ui/front_end.json` ; le sélecteur sur carte, fondé sur
+  les provinces, doit accepter une faction qui n'a qu'une colonie.
+- Sauvegarde : sous-état `#[serde(default)]`, `STATE_VERSION` inchangé.
 
 Chaque unité se teste seule : le barème (tests Rust purs sur `CrusadeState`), les crochets (tests
 d'intégration bataille/capture), la vue (test du pont), l'encart (test Godot headless).
