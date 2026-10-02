@@ -244,6 +244,8 @@ vec3 terroir_burn(vec3 col, float burn, vec2 p, float footprint) {
 	float fine = 1.0 - smoothstep(0.8, 2.5, footprint);
 	float n = value_noise(p * 0.35) * mix(1.0, 0.6, fine) + value_noise(p * 1.7) * 0.4 * fine;
 	float amount = smoothstep(1.0 - burn * 0.85 - 0.12, 1.0 - burn * 0.85 + 0.12, n);
+	// TB4 : au loin (plaques plus fines qu'un pixel), la couverture moyenne remplace le bruit.
+	amount = mix(amount, clamp(burn * 0.85, 0.0, 1.0), smoothstep(1.5, 5.0, footprint));
 	float ash = value_noise(p * 1.1 + 11.0);
 	vec3 scorched = mix(burnt_color, ash_color, ash * ash * 0.6);
 	return mix(col, scorched, amount * 0.92);

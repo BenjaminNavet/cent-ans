@@ -463,7 +463,10 @@ void fragment() {
 	s = fp_splat(s, p, footprint);  // ZG5b : bords des texels de splat cassés de près
 	s /= max(s.r + s.g + s.b + s.a, 1e-3);
 	s = rl_landcover(s, p, footprint);  // lot R1 : lisières
-	vec4 terroir = terroir_at(uv);  // CV1 : finage des colonies, vigne, brûlis, pâtures
+	// TB4 : le masque de terroir est carré, à la même échelle sur les deux axes (`TerroirMask` :
+	// 1024 / plus grand côté de la carte) ; avec `uv` (carte 7168 × 6144 depuis OM), finages et
+	// brûlis étaient décalés vers le nord d'un sixième de l'ordonnée.
+	vec4 terroir = terroir_at(p / max(map_size.x, map_size.y));  // CV1 : finage des colonies, vigne, brûlis, pâtures
 	s = terroir_splat(s, terroir);
 	float macro = fbm(p * 0.035);
 	float rock_frac = max(smoothstep(rock_line_m - 700.0, rock_line_m, hc), smoothstep(0.35, 0.6, slope));
@@ -637,8 +640,6 @@ void fragment() {
 	col = mix(col, track_color * (0.9 + 0.2 * macro), track * open_w * 0.85);
 	col = mix(col, hedge_color, hedge * open_w * 0.55);
 
-	col = terroir_burn(col, terroir.b * (1.0 - snow * 0.7), p, footprint);  // CV1
-
 	// Normales de détail combinées au relief (blend « whiteout » dans le repère carte).
 	float dstrength = detail_normal_strength * detail_fade;
 	n = normalize(vec3(n.x + dn.x * dstrength, n.y, n.z - dn.y * dstrength));
@@ -672,6 +673,9 @@ void fragment() {
 		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col);  // HB3
 	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
+	// TB4 : brûlis (CV1) posé par-dessus la carte de couleur (SS2) et les matières (HB3), qui le
+	// recouvraient ; visible à tous les zooms (plaques larges au loin, cendres et chaumes de près).
+	col = terroir_burn(col, terroir.b * (1.0 - snow * 0.7), p, footprint);
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
