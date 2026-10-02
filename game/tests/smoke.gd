@@ -117,6 +117,12 @@ func _init() -> void:
 		await _run_ui_layout()
 		quit(1 if _failures > 0 else 0)
 		return
+	# Tutoriel et encyclopédie seuls (F8) : CENT_ANS_SMOKE_ONLY=tutorial.
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "tutorial":
+		await _run_tutorial()
+		_cleanup_test_dir()
+		quit(1 if _failures > 0 else 0)
+		return
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()

@@ -20,7 +20,7 @@ const STEP_IDS := [
 const BASE := {
 	"intro": {
 		"title": "Bienvenue, {ruler}",
-		"text": "Nous sommes au printemps 1337. Vous gouvernez {faction}. Ce guide vous accompagne pendant les premiers tours : chaque étape donne un objectif, une flèche montre où agir, l'étape suivante s'ouvre dès que l'objectif est rempli.\n\n[b]Vos objectifs historiques[/b] (avant {end_year}) :\n{objectives}",
+		"text": "Nous sommes au printemps 1337. Votre faction : {faction}. Ce guide vous accompagne pendant les premiers tours : chaque étape donne un objectif, une flèche montre où agir, l'étape suivante s'ouvre dès que l'objectif est rempli.\n\n[b]Vos objectifs historiques[/b] (avant {end_year}) :\n{objectives}",
 		"objective": "Cliquez sur « Continuer ».",
 		"target": "",
 		"manual": true,
@@ -51,8 +51,8 @@ const BASE := {
 	},
 	"build": {
 		"title": "Construire",
-		"text": "Dans la liste « Constructible », choisissez un bâtiment et cliquez sur « Construire ». Le coût est prélevé tout de suite ; un marteau sur la carte marque le chantier jusqu'à son achèvement. Une seule construction à la fois par province.",
-		"objective": "Lancer une construction dans une de vos provinces.",
+		"text": "Sous « Construire » (panneau de la ville) ou « Constructible » (panneau de province), chaque ligne est un bâtiment avec son coût et sa durée : un clic sur la ligne lance le chantier. Le coût est prélevé tout de suite ; un marteau sur la carte marque le chantier jusqu'à son achèvement. Une seule construction à la fois par ville.",
+		"objective": "Lancer une construction dans une de vos villes.",
 		"target": "buildable",
 	},
 	"research": {
@@ -70,7 +70,7 @@ const BASE := {
 	},
 	"end_turn": {
 		"title": "Finir le tour",
-		"text": "Un tour est une saison. Quand vos armées ont marché, cliquez sur « Fin du tour » (ou Entrée) : les autres puissances jouent l'une après l'autre, les sièges avancent, les villes produisent, et les marches trop longues pour une saison reprennent d'elles-mêmes au tour suivant.",
+		"text": "Un tour est une saison. Quand vos armées ont marché, cliquez sur la cloche « Fin de tour », en bas à droite (ou Entrée) : les autres puissances jouent l'une après l'autre, les sièges avancent, les villes produisent, et les marches trop longues pour une saison reprennent d'elles-mêmes au tour suivant.",
 		"objective": "Terminer le tour.",
 		"target": "end_turn",
 	},
