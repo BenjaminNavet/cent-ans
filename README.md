@@ -73,10 +73,11 @@ Prérequis : [Rust](https://rustup.rs) stable, [Godot 4.7](https://godotengine.o
 
 Le lanceur (`tools/launch.sh`) recompile le cœur Rust si `core/` a changé. Il refait l'import
 headless de Godot si `game/` a changé depuis le dernier import (premier lancement, `git pull`,
-autre version de Godot), puis lance le jeu. Il cherche Godot dans la variable `GODOT`, puis dans
+autre version de Godot), télécharge le relief fin s'il manque ou s'il est ancien, puis lance le
+jeu. Il cherche Godot dans la variable `GODOT`, puis dans
 le PATH, puis aux emplacements d'installation habituels. Si Godot est ailleurs :
 `GODOT=/chemin/vers/godot tools/launch.sh`. Options : `--no-build`, `--import` (import forcé),
-et `-- <arguments Godot>`.
+`--no-relief` (pas de vérification du relief) et `-- <arguments Godot>`.
 
 À la main, les mêmes étapes sont :
 
@@ -85,6 +86,7 @@ git clone https://github.com/BenjaminNavet/cent-ans.git
 cd cent-ans
 core/build.sh                               # compile la GDExtension et la copie dans game/bin/
 godot --headless --path game --import       # après chaque changement des ressources
+uv run --project tools cent-ans geo relief-fetch --if-needed   # relief fin (≈ 5 Go, facultatif)
 godot --path game                           # lancer le jeu
 ```
 
