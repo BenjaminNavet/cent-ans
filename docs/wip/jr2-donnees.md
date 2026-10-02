@@ -11,3 +11,6 @@ Branche `feat/jr-data`, worktree `../gp-jr-data`. Pas de Rust, pas de build carg
 - Le test de relief/ledger/icônes échouent déjà sur main (fichiers `docs/img` ignorés, version de bake, ledger).
 - Les `.png.import` des nouveaux visuels seront créés par Godot à l'import.
 - Pas d'illustration de carte de sélection (champ optionnel).
+
+## JR2b
+- Arêtes maritimes durables : `data/map/forced_sea_edges.json`, appliquées par `settlements.apply_forced_sea_edges` dans `prepare` (donc `geo settlements` et `geo roads`). Test : `tools/tests/test_forced_sea_edges.py`. Le point ouvert « arêtes à la main » ci-dessus est résolu ; `settlement_graph.json` est inchangé.

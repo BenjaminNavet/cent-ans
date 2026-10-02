@@ -12,6 +12,8 @@ Outputs:
     * ``data/map/settlement_graph.json``: ``{"edges": [{from, to, cost, road,
       sea}]}``, undirected (one entry per pair, ``from < to``), exactly the
       format read by ``core/crates/data-model/src/settlement_load.rs``.
+      Edges listed in ``data/map/forced_sea_edges.json`` are added as ``sea``
+      edges after the normal generation (:func:`apply_forced_sea_edges`).
     * ``data/map/settlement_edge_paths.json``: road polyline of every ``road``
       edge, for display (see :mod:`cent_ans_tools.geo.edge_paths`, lot C7b).
     * ``docs/img/settlements-preview.png``.
@@ -58,6 +60,7 @@ PREVIEW_PATH = REPO_DIR / "docs" / "img" / "settlements-preview.png"
 RULES_FILE = "rules.json"
 GRAPH_FILE = "settlement_graph.json"
 POSITIONS_FILE = "settlements_px.json"
+FORCED_SEA_EDGES_FILE = "forced_sea_edges.json"
 ROADS_FILE = "roads.geojson"
 
 SETTLEMENT_PREFIX = "set_"
@@ -699,6 +702,57 @@ def render_preview(
 # ----------------------------------------------------------------------------
 
 
+def load_forced_sea_edges(map_dir: Path = MAP_DIR) -> list[dict]:
+    """Entries of ``forced_sea_edges.json`` (empty when the file is absent)."""
+    path = map_dir / FORCED_SEA_EDGES_FILE
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8")).get("edges", [])
+
+
+def apply_forced_sea_edges(
+    edges: list[Edge],
+    settlements: list[Settlement],
+    forced: list[dict],
+    km_per_px: float,
+) -> list[Edge]:
+    """Add each forced pair missing from ``edges`` as a sea edge (idempotent, sorted).
+
+    Raises ``ValueError`` when a settlement is unknown or not a port, or when the
+    pair already has a land edge.
+    """
+    by_id = {s.id: s for s in settlements}
+    existing = {(e.a, e.b): e for e in edges}
+    result = list(edges)
+    for entry in forced:
+        for key in ("a", "b"):
+            settlement = by_id.get(entry[key])
+            if settlement is None:
+                raise ValueError(
+                    f"arête maritime forcée : colonie inconnue {entry[key]}"
+                )
+            if not settlement.port:
+                raise ValueError(
+                    f"arête maritime forcée : {settlement.id} n'est pas un port"
+                )
+        first, second = by_id[entry["a"]], by_id[entry["b"]]
+        a, b = sorted((first.id, second.id))
+        if a == b:
+            raise ValueError(f"arête maritime forcée : {a} reliée à elle-même")
+        old = existing.get((a, b))
+        if old is not None:
+            if not old.sea:
+                raise ValueError(
+                    f"arête maritime forcée {a} – {b} : une arête terrestre existe déjà"
+                )
+            continue
+        km = float(np.hypot(first.px[0] - second.px[0], first.px[1] - second.px[1]))
+        edge = Edge(a, b, km * km_per_px, 1.0, sea=True)
+        existing[(a, b)] = edge
+        result.append(edge)
+    return sorted(result, key=lambda e: (e.a, e.b))
+
+
 def prepare(
     map_dir: Path = MAP_DIR,
     provinces_dir: Path = PROVINCES_DIR,
@@ -721,6 +775,12 @@ def prepare(
         grid.meters_per_px / 1000.0,
         warnings,
         labels,
+    )
+    edges = apply_forced_sea_edges(
+        edges,
+        settlements,
+        load_forced_sea_edges(map_dir),
+        grid.meters_per_px / 1000.0,
     )
     return settlements, edges, grid, labels, provinces
 
