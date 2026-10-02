@@ -133,6 +133,7 @@ func _run() -> void:
 		if Vector2(e.x, e.y).distance_to(paris_px) < 0.01 and is_equal_approx(e.z, exclusions[paris].z + crown):
 			found = true
 	_check(found, "Paris clearing = layer exclusion + one crown radius")
+	print("hc_forest_test: Paris exclusion radius %.1f px (layer) + crown %.2f" % [exclusions[paris].z, crown])
 	await _view(vegetation, focus, 700.0)
 	_check(vegetation.visible and int(vegetation.visible_census()["instances"]) > 1000, "trees still drawn at rig 700")
 	print("hc_forest_test: rig 700 %s" % JSON.stringify(vegetation.visible_census()))

@@ -228,6 +228,10 @@ func build(data: MapData) -> void:
 	_bind_forest_cover(data)
 	if generalised:  # HC1 : variation de taille par arbre (`scale_jitter` du feuillage)
 		_set_foliage_param("scale_jitter", props.generalised_size_variation)
+		# Lisières : la rampe de la couverture réduite (≈ 7 px par texel) est large devant un bois
+		# généralisé ; arbres à peine plus bas et peu éclaircis, sinon la canopée s'ouvre.
+		_set_foliage_param("edge_height", props.generalised_edge_height)
+		_set_foliage_param("edge_thin", props.generalised_edge_thin)
 	_season = -1
 	_exclusions.clear()
 	# Sans colonies (C6), clairière autour de chaque capitale de province.

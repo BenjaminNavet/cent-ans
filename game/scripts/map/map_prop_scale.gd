@@ -50,6 +50,10 @@ extends Resource
 @export var generalised_reference_height: float = 1.4
 ## Variation relative de taille autour de la hauteur de l'essence (± cette part).
 @export var generalised_size_variation: float = 0.25
+## Lisières des massifs (uniformes `edge_height` / `edge_thin` du feuillage, 0,62 / 0,45 en 1:1) :
+## hauteur relative et part des arbres retirés sur la rampe de la couverture forestière.
+@export var generalised_edge_height: float = 0.85
+@export var generalised_edge_thin: float = 0.1
 ## Élargissement des houppiers (largeur des instances après le semis) : des houppiers plus ronds
 ## referment la canopée sans resserrer le semis.
 @export var generalised_crown_widen: float = 1.25
