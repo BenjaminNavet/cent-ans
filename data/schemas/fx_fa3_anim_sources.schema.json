@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_fa3_anim_sources.schema.json",
+  "title": "Animations libres reciblées sur les figurines fines (FA3)",
+  "type": "object",
+  "required": ["fps", "skeletons", "sources", "clips"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "fps": {"type": "integer", "const": 24},
+    "loop_blend_frames": {"type": "integer", "minimum": 0, "maximum": 12},
+    "skeletons": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/skeleton"}
+    },
+    "sources": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/source"}
+    },
+    "clips": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/clip"}
+    }
+  },
+  "$defs": {
+    "bone_pair": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {"type": "string", "minLength": 1},
+        {"type": ["string", "null"]}
+      ]
+    },
+    "skeleton": {
+      "type": "object",
+      "required": ["bones"],
+      "additionalProperties": false,
+      "properties": {
+        "note": {"type": "string"},
+        "root": {"type": "string", "minLength": 1},
+        "bones": {
+          "type": "object",
+          "minProperties": 21,
+          "additionalProperties": false,
+          "patternProperties": {
+            "^(Body|Hips|Abdomen|Torso|Chest|Neck|Head|(Shoulder|UpperArm|LowerArm|Wrist|UpperLeg|LowerLeg|Foot)\\.[LR])$": {"$ref": "#/$defs/bone_pair"}
+          }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["title", "author", "license", "url", "file", "skeleton"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "author": {"type": "string", "minLength": 1},
+        "license": {"type": "string", "const": "CC0-1.0"},
+        "license_proof": {"type": "string"},
+        "url": {"type": "string", "pattern": "^https://"},
+        "file": {"type": "string", "pattern": "\\.glb$"},
+        "skeleton": {"type": "string", "minLength": 1}
+      }
+    },
+    "part": {
+      "type": "object",
+      "required": ["source", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {"type": "string", "minLength": 1},
+        "action": {"type": "string", "minLength": 1},
+        "first": {"type": "integer", "minimum": 0},
+        "last": {"type": "integer"},
+        "frames": {"type": "integer", "minimum": 2, "maximum": 200}
+      }
+    },
+    "clip": {
+      "type": "object",
+      "required": ["clip", "family", "loop", "parts"],
+      "additionalProperties": false,
+      "properties": {
+        "clip": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "family": {"enum": ["melee", "polearm", "bow", "cheer"]},
+        "loop": {"type": "boolean"},
+        "note": {"type": "string"},
+        "parts": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/part"}},
+        "return_frames": {"type": "integer", "minimum": 0, "maximum": 24},
+        "root_motion": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "left_arm": {"enum": ["source", "keyframed_guard", "clip_guard"]},
+        "ground": {"type": "boolean"},
+        "mirror": {"type": "boolean"},
+        "prop": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "aim_forward": {"type": "boolean"},
+            "left_hand": {"type": "boolean"}
+          }
+        },
+        "bow": {
+          "type": "object",
+          "required": ["draw_from", "release"],
+          "additionalProperties": false,
+          "properties": {
+            "draw_from": {"type": "integer", "minimum": 0},
+            "release": {"type": "integer", "minimum": 1},
+            "elevation_deg": {"type": "number", "minimum": 0.0, "maximum": 45.0}
+          }
+        }
+      }
+    }
+  }
+}
