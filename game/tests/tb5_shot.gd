@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Lot TB5 (mer et côtes) : captures et mesures des côtes et des mers de la carte de campagne.
 ## Usage : godot --path game --resolution 1600x900 --script res://tests/tb5_shot.gd --
-##   [--out=<dossier>] [--only=<nom>,…] [--season=<saison>] [--stats] [--distances=90,40]
+##   [--out=<dossier>] [--only=<nom>,…] [--season=<saison>] [--stats] [--bench] [--distances=90,40]
 ## Sans `--stats` : écrit `tb5-<nom>-<distance>.png` (960 px de large) par lieu et par distance.
 ## Avec `--stats` : aucune image écrite ; pour chaque lieu, rend la vue sans puis avec le lot
 ## (`coast_strength`, `basin_on`, `swash_amount` à 0 puis aux valeurs des données) et affiche la
@@ -10,6 +10,9 @@ extends SceneTree
 ## couleur avant → après, puis part et couleur des pixels très changés) : la falaise de craie doit sortir claire, la Méditerranée plus claire
 ## que la Manche, sans lire d'image. Affiche aussi la part de l'image qui bouge en
 ## `MOTION_SECONDS` secondes, sans puis avec le lot (le ressac doit faire bouger le rivage).
+## Avec `--bench` (lancer avec `--disable-vsync`) : coût du lot en ms par image, mesuré dans le
+## même processus en alternant sans / avec (`BENCH_ROUNDS` passes de `BENCH_FRAMES` images,
+## médiane) : insensible à la charge de la machine entre deux lancements.
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const WIDTH := 960
@@ -34,6 +37,11 @@ const PLACES := {
 ## Réglages coupés pour la vue « sans le lot » (matériau du terrain, matériau de la mer).
 const TERRAIN_OFF := {"coast_strength": 0.0, "swash_amount": 0.0}
 const SEA_OFF := {"basin_on": false, "swash_amount": 0.0}
+## Réglages coupés pour le bench : le lot entier est sauté dans les deux shaders.
+const TERRAIN_BENCH_OFF := {"coast_enabled": false, "swash_amount": 0.0}
+const SEA_BENCH_OFF := {"basin_on": false, "swash_amount": 0.0, "coast_enabled": false}
+const BENCH_ROUNDS := 5
+const BENCH_FRAMES := 120
 
 
 func _init() -> void:
@@ -41,6 +49,7 @@ func _init() -> void:
 	var only := PackedStringArray()
 	var distances: Array[float] = [90.0, 40.0]
 	var stats := false
+	var bench := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -52,6 +61,8 @@ func _init() -> void:
 				distances.append(float(d))
 		elif arg == "--stats":
 			stats = true
+		elif arg == "--bench":
+			bench = true
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var settings: Node = root.get_node_or_null("/root/Settings")
@@ -81,6 +92,8 @@ func _init() -> void:
 	var sea_material: ShaderMaterial = sea.material_override as ShaderMaterial if sea != null else null
 	var terrain_on := _values(terrain_material, TERRAIN_OFF)
 	var sea_on := _values(sea_material, SEA_OFF)
+	var terrain_bench_on := _values(terrain_material, TERRAIN_BENCH_OFF)
+	var sea_bench_on := _values(sea_material, SEA_BENCH_OFF)
 	for place: String in PLACES:
 		if not only.is_empty() and not only.has(place):
 			continue
@@ -90,6 +103,21 @@ func _init() -> void:
 			rig.look_at_point(ground, maxf(distance, rig.min_distance_at(ground)))
 			rig.snap()
 			var label := "tb5-%s-%d" % [place, int(distance)]
+			if bench:
+				await _settle(map, SETTLE_FRAMES)
+				var off_ms: Array[float] = []
+				var on_ms: Array[float] = []
+				for round_index in BENCH_ROUNDS:
+					_apply(terrain_material, TERRAIN_BENCH_OFF)
+					_apply(sea_material, SEA_BENCH_OFF)
+					off_ms.append(await _frame_ms(map))
+					_apply(terrain_material, terrain_bench_on)
+					_apply(sea_material, sea_bench_on)
+					on_ms.append(await _frame_ms(map))
+				off_ms.sort()
+				on_ms.sort()
+				print("TB5 bench %s: %.2f ms/frame without the lot, %.2f with it (median of %d rounds of %d frames)" % [label, off_ms[BENCH_ROUNDS / 2], on_ms[BENCH_ROUNDS / 2], BENCH_ROUNDS, BENCH_FRAMES])
+				continue
 			if not stats:
 				await _settle(map, SETTLE_FRAMES)
 				_shot(out_dir, label)
@@ -129,6 +157,14 @@ func _settle(map: Node3D, frames: int) -> void:
 		if clouds != null:
 			clouds.visible = false
 		await process_frame
+
+
+## Durée moyenne d'une image (ms) sur `BENCH_FRAMES` images, après quelques images d'élan.
+func _frame_ms(map: Node3D) -> float:
+	await _settle(map, 10)
+	var t0 := Time.get_ticks_usec()
+	await _settle(map, BENCH_FRAMES)
+	return (Time.get_ticks_usec() - t0) / (1000.0 * BENCH_FRAMES)
 
 
 ## Part de l'image (%) qui change en `MOTION_SECONDS` secondes (vagues, écume, ressac).
