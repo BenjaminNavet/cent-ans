@@ -40,10 +40,27 @@ Branche `feat/fa-ui`, worktree `../gp-fa-ui` (depuis `feat/fa`). Brutes hors dé
       haut de campagne et boutons du thème (parchemin peint NB, texte à l'encre : un cuir sombre
       imposerait de recolorer tous les textes).
 - [x] Crédits `CREDITS.md`
-- [ ] Tests Godot, planches avant/après, rapport
+- [x] Tests : `fa5_ui_test` (nouveau), `smoke`, `ui1_lettrine_test`, `vn_ui_720_test` (+ `_b`,
+      `_c`), `p2a/p2b/p2d/p2g_ui_test`, `q7_faction_fit_test`, `q8_start_faction_test`,
+      `ui3_test`, `dz_diplo_borders_test`, `tw2_t1_capture_test` verts ; pytest
+      `test_ui_fa_assets.py` 10 verts. Échecs antérieurs à FA5 (mêmes résultats avec les scripts
+      de `feat/fa`) : `po_ui_test` C3 (5 tailles de police, 18 px vue 12 fois), `q6_ui_test`,
+      `fe_ui_test` (cadrage du sélecteur de carte) ; `ui1_lettrine_test` saute en silence son
+      contrôle du panneau de diplomatie (erreur de compilation `SimFacade` en mode `--script`).
+- [x] Planches avant/après (hors dépôt) : `~/dev/cent-ans-raw/fa/ui-shots/`
+      `planche_1_diplomatie_avant_apres.jpg`, `planche_2_details_avant_apres.jpg`.
+
+## Reste / pistes
+- Le rinceau des titres est discret sur les fenêtres à bordure de lierre (cour, faction) : à
+  juger par le joueur ; `display.title_spray` vide dans le catalogue le retire.
+- Sceau des traités signés (onglet Traités) : non vu sur capture.
+- Autres initiales : il faudrait des feuillets à lettres simples sur champ uni (peu de détail
+  intérieur) pour qu'elles se lisent à 45-60 px ; le mécanisme est prêt (ajouter une entrée
+  `initials` au catalogue suffit).
+- Fusion dans `feat/fa` : à faire par la session principale (`--ff-only` après rebase).
 
 ## Captures lues
-36 (plafond de 30 levé par le coordinateur en cours de lot : « budget illimité de captures »).
+38 (plafond de 30 levé par le coordinateur en cours de lot : « budget illimité de captures »).
 Planches ≤ 1280 px, avant/après assemblés.
 
 ## Journal
