@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sea_basins.schema.json",
+  "title": "Mers de la carte de campagne par bassin (TB5)",
+  "description": "Réglages purement visuels des mers de la carte de campagne, lus par game/scripts/map/sea_basins.gd : bassins (polygones en pixels carte), teinte, clarté, houle, écume. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["cell_px", "blur_cells", "swell", "default", "basins"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "cell_px": {
+      "description": "Taille d'une cellule de la texture des bassins, en pixels carte.",
+      "type": "integer",
+      "minimum": 8,
+      "maximum": 128
+    },
+    "blur_cells": {
+      "description": "Fondu des limites de bassin, en cellules.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16
+    },
+    "swell": {
+      "description": "Longue houle : longueur d'onde (pixels carte), vitesse, contraste de couleur, relief.",
+      "type": "object",
+      "required": ["length_px", "speed", "contrast", "normal"],
+      "additionalProperties": false,
+      "properties": {
+        "length_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 40},
+        "speed": {"type": "number", "minimum": 0, "maximum": 5},
+        "contrast": {"type": "number", "minimum": 0, "maximum": 1},
+        "normal": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "default": {"$ref": "#/$defs/look"},
+    "basins": {
+      "description": "Quatre bassins au plus (un canal de la texture chacun).",
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "look", "polygon_px"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "label": {"type": "string", "minLength": 1},
+          "look": {"$ref": "#/$defs/look"},
+          "polygon_px": {
+            "description": "Polygone en pixels carte (grille de map.json), terres comprises.",
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {"type": "number"}
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "look": {
+      "type": "object",
+      "required": ["tint", "clarity", "swell", "long_swell", "foam", "whitecaps", "grey_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "tint": {
+          "description": "Teinte multipliée à la couleur de l'eau (RVB linéaire).",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"type": "number", "minimum": 0, "maximum": 4}
+        },
+        "clarity": {"type": "number", "minimum": 0.1, "maximum": 5},
+        "swell": {"type": "number", "minimum": 0, "maximum": 3},
+        "long_swell": {"type": "number", "minimum": 0, "maximum": 1},
+        "foam": {"type": "number", "minimum": 0, "maximum": 3},
+        "whitecaps": {"type": "number", "minimum": 0, "maximum": 1},
+        "grey_scale": {"type": "number", "minimum": 0, "maximum": 2}
+      }
+    }
+  }
+}

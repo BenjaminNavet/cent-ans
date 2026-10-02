@@ -109,6 +109,8 @@ float value_noise(vec2 p) {
 		mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), u.x), u.y);
 }
 
+#include "res://shaders/sea_basins.gdshaderinc"  // TB5 : mers par bassin
+
 // TB1 : force de la tempête [0, 1] au point p (px carte) : province lue ici et à `storm_reach_px`
 // autour (frange déformée par le bruit : pas de bord de province net sur l'eau).
 float sea_storm(vec2 p) {
@@ -156,8 +158,15 @@ void fragment() {
 	bool inside = all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
 	float h_here = (has_heightmap && inside) ? height_m(uv) : -200.0;
 	float depth = max(-h_here, 0.0);
-	vec3 col = ga_depth_color(depth, shallow_color, mid_color, deep_color, mid_depth_m, depth_falloff_m, ga4_on);  // GA4
-	float alpha = mix(alpha_shallow, alpha_deep, smoothstep(0.0, 45.0, depth));
+	// TB5 : mer du bassin (teinte, clarté, houle, écume) ; la clarté étire ou resserre la
+	// profondeur vue (Méditerranée : hauts-fonds clairs visibles plus loin ; Manche : sombre).
+	vec3 basin_tint_here;
+	vec4 basin_wave_here;
+	vec2 basin_water_here;
+	basin_look(uv, basin_tint_here, basin_wave_here, basin_water_here);
+	float seen_depth = depth / max(basin_water_here.x, 0.1);
+	vec3 col = ga_depth_color(seen_depth, shallow_color, mid_color, deep_color, mid_depth_m, depth_falloff_m, ga4_on);  // GA4
+	float alpha = mix(alpha_shallow, alpha_deep, smoothstep(0.0, 45.0, seen_depth));
 
 	// Vagues : normale par différences finies de la houle, estompée au dézoom.
 	float t = TIME * wave_speed;
@@ -171,14 +180,14 @@ void fragment() {
 		vec2 ub = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * (p + TIME * ga4_velocity_b) / ga4_scale_b;
 		vec2 na = texture(water_normal, ua).rg * 2.0 - 1.0;
 		vec2 nb = texture(water_normal, ub).rg * 2.0 - 1.0;
-		float gs = ga4_normal_strength * (1.0 - smoothstep(0.6, 2.5, footprint) * 0.7);
+		float gs = ga4_normal_strength * basin_wave_here.x * (1.0 - smoothstep(0.6, 2.5, footprint) * 0.7);
 		vec2 nxy = (na + nb) * gs;
 		n = normalize(vec3(nxy.x, 1.0, nxy.y));
 	} else {
 		float e = 0.15;
 		float hx = swell(q + vec2(e, 0.0), t) - h0;
 		float hz = swell(q + vec2(0.0, e), t) - h0;
-		float ws = wave_strength * (1.0 - smoothstep(0.15, 0.8, footprint));
+		float ws = wave_strength * basin_wave_here.x * (1.0 - smoothstep(0.15, 0.8, footprint));
 		n = normalize(vec3(-hx / e * ws, 1.0, -hz / e * ws));
 	}
 	// RC5 : détail côtier puis large (normale ajoutée, teinte relative), estompé au dézoom.
@@ -199,10 +208,14 @@ void fragment() {
 	col = mix(col, mix(rc_sea_col, rc_ocean_col, rc_ocean), rc_near);
 	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
-	col *= 1.0 + h0 * 0.06 * (1.0 - smoothstep(0.25, 1.2, footprint));
+	col *= 1.0 + h0 * 0.06 * basin_wave_here.x * (1.0 - smoothstep(0.25, 1.2, footprint));
+	// TB5 : longue houle du large (Atlantique), lisible dans la couleur et dans le reflet.
+	vec3 ls = long_swell(p, footprint, basin_wave_here.y);
+	col *= 1.0 + ls.z * long_swell_contrast;
+	n = normalize(n - vec3(ls.x, 0.0, ls.y) * long_swell_normal);
 	// TB1 : mer de la saison (gris acier l'hiver), assombrie sous la tempête.
 	float storm = sea_storm(p);
-	col = mix(col, season_grey, season_grey_amount) * season_tint;
+	col = mix(col * basin_tint_here, season_grey, clamp(season_grey_amount * basin_water_here.y, 0.0, 1.0)) * season_tint;  // TB5 : bassin
 	col *= 1.0 - storm_darken * storm;
 
 	// Écume : bande près du rivage, lignes qui avancent vers la côte, cassées par le bruit.
@@ -214,11 +227,11 @@ void fragment() {
 	float broken = smoothstep(0.35, 0.75, value_noise(p * 1.6 + vec2(TIME * 0.05, 0.0)));
 	float foam = band * mix(0.35 + 0.65 * lines * broken, 0.6, far_t);
 	foam *= 1.0 - smoothstep(foam_w * 0.2, foam_w, off) * 0.5;
-	foam = clamp(foam * season_foam * (1.0 + storm_foam_gain * storm), 0.0, 1.6);  // TB1
+	foam = clamp(foam * season_foam * basin_wave_here.z * (1.0 + storm_foam_gain * storm), 0.0, 1.6);  // TB1, TB5
 	// TB1 : moutons au large par tempête (crêtes qui déferlent), estompés au dézoom.
 	float caps = smoothstep(0.70, 0.92, value_noise(p * 2.3 + vec2(TIME * 0.25, TIME * 0.1)))
 		* smoothstep(0.35, 0.6, value_noise(p * 0.31 - vec2(TIME * 0.03, 0.0)));
-	foam = max(foam, caps * storm * storm_whitecaps * mix(1.0, 0.45, far_t) * step(0.0, off));
+	foam = max(foam, caps * max(storm * storm_whitecaps, basin_wave_here.w) * mix(1.0, 0.45, far_t) * step(0.0, off));  // TB5 : moutons du bassin
 	col = mix(col, foam_color, min(foam * 0.55, 0.9));
 	alpha = mix(alpha, 0.9, foam * 0.5);
 	// Côte précise (raster) plutôt que l'intersection avec le maillage (LOD grossier) : l'eau

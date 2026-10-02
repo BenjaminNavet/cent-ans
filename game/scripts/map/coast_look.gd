@@ -53,7 +53,7 @@ static func region_at(px: Vector2) -> Dictionary:
 	var found: Dictionary = data().get("default", {})
 	var id := ""
 	for region: Dictionary in data().get("regions", []):
-		if Geometry2D.is_point_in_polygon(px, _polygon(region)):
+		if Geometry2D.is_point_in_polygon(px, polygon_of(region)):
 			found = region
 			id = str(region.get("id", ""))
 	return {
@@ -64,7 +64,8 @@ static func region_at(px: Vector2) -> Dictionary:
 	}
 
 
-static func _polygon(region: Dictionary) -> PackedVector2Array:
+## Polygone `polygon_px` (pixels carte) d'une région de côte ou d'un bassin.
+static func polygon_of(region: Dictionary) -> PackedVector2Array:
 	var polygon := PackedVector2Array()
 	for point: Array in region.get("polygon_px", []):
 		polygon.append(Vector2(float(point[0]), float(point[1])))
@@ -137,7 +138,7 @@ static func texture(map_size: Vector2i) -> ImageTexture:
 	var image := Image.create(width, height, false, Image.FORMAT_RGBA8)
 	image.fill(_geology_color(data().get("default", {})))
 	for region: Dictionary in data().get("regions", []):
-		fill_polygon(image, _polygon(region), cell, _geology_color(region))
+		fill_polygon(image, polygon_of(region), cell, _geology_color(region))
 	_texture = ImageTexture.create_from_image(image)
 	_texture_size = map_size
 	return _texture

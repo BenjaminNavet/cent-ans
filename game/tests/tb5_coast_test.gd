@@ -3,7 +3,9 @@ extends SceneTree
 ## Lot TB5 (campagne façon Thrones of Britannia) : mer et côtes.
 ## Point 1 : type de côte par région et par pente (falaise de craie à Douvres et Étretat, de
 ## granite à la pointe du Raz, plage de sable dans les Landes), bande côtière du terrain.
-## Les points 2 (mers par bassin) et 3 (ressac) ajoutent leurs contrôles.
+## Point 2 : mers par bassin (mer du Nord et Manche sombres, Atlantique houleux, Méditerranée
+## claire), valeurs de `data/map/sea_basins.json`.
+## Le point 3 (ressac) ajoute ses contrôles.
 ## Usage : godot --headless --path game --script res://tests/tb5_coast_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -18,12 +20,22 @@ const PLACES := {
 	"Mimizan (Landes)": [Vector2(1739.1, 3867.2), "sand_beach"],
 	"Calais": [Vector2(2197.8, 2874.5), "sand_beach"],
 }
+## Points en mer (pixels carte) et bassin attendu ("" : mer par défaut).
+const SEAS := {
+	"Manche": [Vector2(1905.0, 2955.0), "north_sea_channel"],
+	"Mer du Nord": [Vector2(2386.0, 2110.0), "north_sea_channel"],
+	"Golfe de Gascogne": [Vector2(1479.0, 3620.0), "atlantic"],
+	"Golfe du Lion": [Vector2(2362.0, 4203.0), "mediterranean"],
+	"Baltique": [Vector2(3752.0, 1937.0), "baltic"],
+	"Mer Noire": [Vector2(5670.0, 3715.0), ""],
+}
 
 
 func _init() -> void:
 	var ok := true
 	ok = _check_coast_types() and ok
 	ok = _check_band() and ok
+	ok = _check_basins() and ok
 	if ok:
 		print("TB5 coast test OK")
 	quit(0 if ok else 1)
@@ -96,4 +108,68 @@ func _check_band() -> bool:
 	if not (chalk.x > 0.6 and chalk.x > granite.x * 2.0):
 		push_error("TB5: chalk %s should be much lighter than granite %s" % [chalk, granite])
 		ok = false
+	return ok
+
+
+## Point 2 : chaque mer a son bassin ; la texture de poids et les réglages arrivent au matériau de
+## la mer ; la Méditerranée est plus claire que la Manche, l'Atlantique a la plus forte houle.
+func _check_basins() -> bool:
+	var ok := true
+	if SeaBasins.data().is_empty():
+		push_error("TB5: data/map/sea_basins.json missing")
+		return false
+	var uniforms := _uniforms(WATER_SHADER)
+	for uniform_name in ["sea_basins", "basin_on", "basin_tint", "basin_wave", "basin_water", "long_swell_length_px"]:
+		if not uniforms.has(uniform_name):
+			push_error("TB5: water shader lacks uniform %s" % uniform_name)
+			ok = false
+	var map_size := Vector2i(7168, 6144)
+	var ids: Array = [""]
+	for basin: Dictionary in SeaBasins.basins():
+		ids.append(basin["id"])
+	var image := SeaBasins.texture(map_size).get_image()
+	var cell := int(SeaBasins.data()["cell_px"])
+	for sea: String in SEAS:
+		var at: Vector2 = SEAS[sea][0]
+		var expected: String = SEAS[sea][1]
+		var basin := SeaBasins.basin_at(at)
+		var weights := image.get_pixelv(Vector2i(at / cell))
+		var look := SeaBasins.look(basin)
+		print("TB5 sea %s: basin '%s', weights %s, tint %s, clarity %s, swell %s, long swell %s" % [sea, basin, weights, look["tint"], look["clarity"], look["swell"], look["long_swell"]])
+		if basin != expected:
+			push_error("TB5: %s should be in basin '%s', got '%s'" % [sea, expected, basin])
+			ok = false
+		var slot := ids.find(expected)
+		var own: float = 1.0 - (weights.r + weights.g + weights.b + weights.a) if slot == 0 else weights[slot - 1]
+		if own < 0.8:
+			push_error("TB5: basin texture at %s gives %.2f to '%s' (%s)" % [sea, own, expected, weights])
+			ok = false
+	var sea_node := Sea.new()
+	sea_node.setup(map_size)
+	var material := sea_node.material_override as ShaderMaterial
+	var tints: PackedVector3Array = material.get_shader_parameter("basin_tint") if material.get_shader_parameter("basin_on") == true else PackedVector3Array()
+	var waves: PackedVector4Array = material.get_shader_parameter("basin_wave") if tints.size() > 0 else PackedVector4Array()
+	var waters: PackedVector2Array = material.get_shader_parameter("basin_water") if tints.size() > 0 else PackedVector2Array()
+	if tints.size() != SeaBasins.MAX_BASINS + 1 or waves.size() != tints.size() or waters.size() != tints.size():
+		push_error("TB5: sea material did not receive the basin settings")
+		sea_node.free()
+		return false
+	var north := ids.find("north_sea_channel")
+	var atlantic := ids.find("atlantic")
+	var med := ids.find("mediterranean")
+	if not (tints[north].length() < tints[atlantic].length() and tints[atlantic].length() < tints[med].length()):
+		push_error("TB5: expected North Sea darker than the Atlantic, Mediterranean lighter")
+		ok = false
+	if not (waters[north].x < 1.0 and waters[med].x > 1.5 and tints[med].z > tints[med].x):
+		push_error("TB5: expected a murky Channel and a clear blue Mediterranean")
+		ok = false
+	if not (waves[atlantic].x > waves[north].x and waves[atlantic].x > waves[med].x and waves[atlantic].y > 0.5 and waves[med].y < 0.1):
+		push_error("TB5: expected the Atlantic to carry the heaviest swell")
+		ok = false
+	# TB1 conservé : la saison s'applique toujours par-dessus le bassin.
+	sea_node.apply_season(SeasonVisuals.weights_of("winter"))
+	if float(material.get_shader_parameter("season_grey_amount")) <= 0.3:
+		push_error("TB5: the winter sea look is no longer applied")
+		ok = false
+	sea_node.free()
 	return ok

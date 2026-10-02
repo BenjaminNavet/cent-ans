@@ -39,6 +39,7 @@ func setup(map_size: Vector2i) -> void:
 	material_override = material
 	for key: String in SeasonLook.storm():  # TB1 : mer sous la tempête
 		material.set_shader_parameter("storm_" + key, SeasonLook.storm()[key])
+	SeaBasins.apply(material, map_size)  # TB5 : mers par bassin
 	# Fond opaque sous l'eau transparente : masque le bord de la carte et l'arrière-plan.
 	var floor_instance := MeshInstance3D.new()
 	floor_instance.name = "Abyss"
