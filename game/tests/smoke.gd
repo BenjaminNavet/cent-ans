@@ -1669,6 +1669,30 @@ func _run_assets() -> void:
 	_check(not audio.call("play_sfx", "does_not_exist"), "unknown sfx should be ignored")
 	audio.call("play_music", "war")
 	_check(str(audio.get("current_context")) == "war", "music context should be war")
+	# ADR 0154 : rotation mélangée — chaque morceau passe une fois avant toute répétition, et la
+	# rotation survit à un rechargement (deux sessions n'ouvrent pas sur le même morceau).
+	var rotation_path := "user://music_rotation_smoke_%d.cfg" % OS.get_process_id()
+	audio.set("rotation_path", rotation_path)
+	audio.call("load_rotation")
+	var court_tracks: Array = audio.call("tier_tracks", "court", "primary")
+	var heard: Array = []
+	for index in 2:
+		heard.append(audio.call("next_track", "court"))
+	audio.call("load_rotation")  # « nouvelle session »
+	for index in court_tracks.size() - 2:
+		heard.append(audio.call("next_track", "court"))
+	var distinct := {}
+	for path in heard:
+		distinct[path] = true
+	_check(court_tracks.size() >= 3 and distinct.size() == court_tracks.size(), "music rotation should play every court track once before repeating: %s" % [heard])
+	_check(str(audio.call("next_track", "court")) != str(heard[-1]), "music rotation should not replay the track just played")
+	_check(not (audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/audio/music/war.ogg"), "synthetic war.ogg should not be a primary track")
+	audio.set("_war_blend", "campaign_france")
+	_check((audio.call("tier_tracks", "war", "primary") as Array).has("res://assets/third_party/music/ars_nova/onques_ne_fut.ogg"), "war playlist should blend the regional campaign tracks")
+	audio.set("_war_blend", "")
+	audio.set("rotation_path", "")
+	audio.call("load_rotation")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(rotation_path))
 	_check(str(audio.call("event_sfx", [{"kind": "birth"}, {"kind": "battle"}])) == "sword_clash", "battle should win event sfx priority")
 
 	# Persistance des volumes (valeurs d'origine restaurées ensuite).
