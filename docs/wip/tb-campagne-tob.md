@@ -11,8 +11,20 @@ références à récupérer en ligne.
 - [x] Plan `docs/design/2026-10-02-campagne-tob.md` (lots TB0-TB7)
 - [x] ADR 0149 (fal.ai hors plafond, enveloppe 25 $) + section dans `docs/budget.md`
 - [x] Plan validé par le joueur (02/10) ; la suite se fait en session locale
-- [ ] TB0 planche cible (session locale : Godot + fal.ai)
-- [ ] Vague 1 : TB1 saisons visibles, TB2 désencombrement
+- [ ] TB0 planche cible — **bloqué par le solde fal.ai** (02/10, session locale, worktree
+      `../gp-tb`, branche `feat/tb`) :
+  - [x] 13 références ToB dans `~/.cache/cent_ans/tb/refs/` (hors dépôt) : 3 captures Steam de
+        campagne (`steam-05/06/07`) et 10 images d'une vidéo de jeu (`yt-a-*`).
+  - [x] 4 captures de notre carte (`game/tests/ss_shot.gd`, Paris, distances 1100 / 400 / 90 / 35)
+        dans `~/.cache/cent_ans/tb/ours/`.
+  - [x] Script `tools/experiments/tb0_target_board.py` (4 repeints : large, moyen, moyen hiver,
+        proche ; ≈ 0,32 $ ; sorties `docs/img/tb/cible-*.jpg`, versionnées).
+  - [ ] Repeints : fal.ai répond 403 « User is locked. Reason: Exhausted balance ». Le joueur
+        doit recharger le compte, puis relancer la commande en tête du script et consigner les
+        appels dans `docs/budget.md`. Aucun appel facturé à ce jour.
+- [ ] Vague 1 : TB1 saisons visibles (`../gp-tb1`, `feat/tb1`), TB2 désencombrement
+      (`../gp-tb2`, `feat/tb2`) — lancés le 02/10 sans attendre la planche (0 $, validation de la
+      planche exigée avant TB3 seulement, plan § 3).
 
 ## Prochaine étape (reprise en session locale)
 Le travail reprend sur la machine du joueur, avec Godot, Blender, fal.ai et un accès web complet :
