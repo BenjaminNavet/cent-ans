@@ -72,8 +72,18 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
   (éclaircie 150/d, restants grossis jusqu'à × 1,69 : `generalised_far_density` = 1 pour la rendre
   constante) ; semis d'une tuile 300-800 ms en fond (remplissage progressif) ; premier plan de
   Paris peu arboré ; validation pytest du schéma `campaign_map_ui` non confirmée.
-- HC2 et HC5 : arrêt demandé aux agents (commit `wip:` + note) ; voir `docs/wip/hc2-eaux.md`
-  (`../gp-hc2`) et `docs/wip/hc5-massifs-zones-humides.md` (`../gp-hc5`).
+- **HC5 en pause, état propre** sur `feat/hc5` (79f517bfa) : +91 massifs/landes (55 → 146),
+  +45 zones humides (32 → 77), cuissons faites et cohérentes (landcover, navgrid, colormap,
+  horizon). Écart de règles : forêt 39,8 → 40,3 % des terres, marais + étangs 0,08 → 0,24 %,
+  franchissable 92,3 % inchangé, aucun lieu isolé, liaison max +28 % (Buda–Visegrád).
+  Reste : pytest `test_colormap.py` / `test_horizon.py`, import + smoke Godot,
+  `cargo test -p sim-campaign -p ai`, supprimer `core/target-hc5`.
+  **Défaut à arbitrer** : `landcover.py` laisse vides des massifs nommés tombés dans un creux du
+  bruit (Fontainebleau 0 %, Sherwood 0 %, Yveline 5 %, Clèves 5 %, Maures 17 %) : d'où un gain de
+  forêt de seulement +0,5 point. Avis : le corriger (un massif nommé doit être boisé à sa
+  densité), en remesurant l'écart de règles ; `anchors-fine` non relancé (fichier d'une autre
+  session) ; lacs historiques (Fucin, Copaïs, Amouq) pour un lot `lakes.json`.
+- HC2 : arrêt demandé à l'agent ; voir `docs/wip/hc2-eaux.md` (`../gp-hc2`).
 
 ## Prochaine étape
 À la reprise : lire les notes HC2 et HC5, relancer leurs agents s'ils ne sont pas finis, puis HC3
