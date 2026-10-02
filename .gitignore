@@ -33,3 +33,7 @@ docs/img/*
 docs/audit/captures/
 docs/audit/**/*.png
 docs/audit/**/*.jpg
+
+# Relief package: parts before upload, interrupted downloads (ADR 0149)
+dist/relief/
+data/map/.pyramid.*

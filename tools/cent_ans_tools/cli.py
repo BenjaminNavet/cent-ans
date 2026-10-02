@@ -721,6 +721,57 @@ def geo_relief_pack(
     console.print(f"Manifeste : {result.manifest_path}")
 
 
+@geo_app.command("relief-update")
+def geo_relief_update(
+    publish: bool = typer.Option(
+        True,
+        "--publish/--no-publish",
+        help="Publier la Release GitHub du paquet (sinon s'arrêter après l'empaquetage)",
+    ),
+    out: str = typer.Option(
+        "dist/relief", "--out", help="Dossier des parts avant l'envoi"
+    ),
+    keep_parts: bool = typer.Option(
+        False, "--keep-parts", help="Garder les parts après une publication réussie"
+    ),
+    workers: int = typer.Option(
+        0, "--workers", help="Processus (0 = défaut de l'étape)"
+    ),
+) -> None:
+    """Met le paquet de relief à jour avec le code (ADR 0149) : recuit, empaquette, publie.
+
+    Aligne les versions de cuisson du manifeste sur le code, recuit ce qui est
+    périmé (puis `geo towns` et `geo landmarks`), et, si la cuisson a changé,
+    empaquette et publie la Release `v<N>` (`gh`). Chaque étape est sautée quand
+    elle n'a rien à faire ; relançable après une interruption. Reste à commiter
+    les fichiers suivis de data/ modifiés. Voir docs/geo.md.
+    """
+    from pathlib import Path
+
+    from cent_ans_tools.geo import relief_update
+
+    try:
+        result = relief_update.update(
+            out_dir=Path(out),
+            do_publish=publish,
+            keep_parts=keep_parts,
+            workers=workers or None,
+            log=console.print,
+        )
+    except (RuntimeError, OSError, ValueError) as error:
+        console.print(f"[red]{error}[/red]")
+        raise typer.Exit(1) from error
+    if result.packed and not result.published:
+        console.print(
+            f"[yellow]Paquet v{result.version} prêt dans {out}, non publié "
+            "(--no-publish).[/yellow]"
+        )
+    if result.changed:
+        console.print(
+            "[yellow]Fichiers suivis modifiés à commiter : git status data/[/yellow]"
+        )
+
+
 @geo_app.command("relief-fetch")
 def geo_relief_fetch(
     dest: str = typer.Option(
@@ -738,6 +789,11 @@ def geo_relief_fetch(
         "--from-dir",
         help="Installer depuis des parts locales (clé USB, tests) plutôt que par HTTP",
     ),
+    if_needed: bool = typer.Option(
+        False,
+        "--if-needed",
+        help="Ne rien faire si le cache installé vaut déjà le paquet publié (ADR 0149)",
+    ),
 ) -> None:
     """Télécharge, vérifie et installe le cache de relief fin (ADR 0077, lot SZ7).
 
@@ -749,6 +805,14 @@ def geo_relief_fetch(
 
     from cent_ans_tools.geo import relief_cache, relief_fetch
 
+    if if_needed:
+        needed, reason = relief_fetch.needs_fetch(Path(dest) if dest else None)
+        if not needed:
+            console.print(f"[green]Relief fin à jour ({reason}).[/green]")
+            if relief_fetch.discard_partial_download(Path(dest) if dest else None):
+                console.print("Restes d'un téléchargement interrompu supprimés.")
+            return
+        console.print(f"Relief fin à télécharger : {reason}.")
     result = relief_fetch.fetch(
         dest=Path(dest) if dest else None,
         base_url=base_url or None,

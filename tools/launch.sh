@@ -4,11 +4,14 @@
 #      replaces the library in game/bin/ when it changed),
 #   2. runs the headless Godot import when game/ changed since the last import (files added,
 #      removed or modified, other Godot version, first launch after a clone),
-#   3. launches the game.
+#   3. downloads the fine relief cache when it is absent or older than the published package
+#      (ADR 0149; never fatal: without it the close zoom is only limited),
+#   4. launches the game.
 # Called by the double-click launchers at the root of the repository ("Lancer Cent Ans.*").
-# Usage: tools/launch.sh [--no-build] [--import] [-- <extra Godot arguments>]
-#   --no-build  skip the Rust build (the library already in game/bin/ is used)
-#   --import    force the headless import
+# Usage: tools/launch.sh [--no-build] [--import] [--no-relief] [-- <extra Godot arguments>]
+#   --no-build   skip the Rust build (the library already in game/bin/ is used)
+#   --import     force the headless import
+#   --no-relief  skip the fine relief check (no download)
 # Godot: $GODOT if set, else `godot`/`godot4` on the PATH, else the usual install places.
 # Must stay compatible with the bash 3.2 shipped with macOS.
 set -euo pipefail
@@ -20,16 +23,18 @@ GODOT_SERIES="4.7"
 
 BUILD=1
 FORCE_IMPORT=0
+RELIEF=1
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --no-build) BUILD=0 ;;
         --import) FORCE_IMPORT=1 ;;
+        --no-relief) RELIEF=0 ;;
         --)
             shift
             break
             ;;
         -h | --help)
-            sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0
             ;;
         *)
@@ -208,7 +213,31 @@ else
     say "Ressources déjà importées."
 fi
 
-# --- 3. Game ---------------------------------------------------------------------------------
+# --- 3. Fine relief --------------------------------------------------------------------------
+
+# First top-level "version" of a JSON file written one key per line (empty if absent).
+json_version() {
+    [[ -f "$1" ]] || return 0
+    sed -n 's/^ *"version": *\([0-9][0-9]*\).*/\1/p' "$1" | head -n 1
+}
+
+# The installed cache says which package it holds (pyramid/package.json). Only when it differs
+# from the published version does the Python tool decide (and download).
+if [[ $RELIEF -eq 1 ]]; then
+    RELIEF_WANTED="$(json_version data/map/relief_hosting.json)"
+    RELIEF_HAVE="$(json_version "${CENT_ANS_RELIEF_DIR:-data/map}/pyramid/package.json")"
+    if [[ -n "$RELIEF_WANTED" && "$RELIEF_HAVE" != "$RELIEF_WANTED" ]]; then
+        if command -v uv >/dev/null; then
+            say "Relief fin : vérification du paquet v$RELIEF_WANTED (téléchargement ≈ 5 Go s'il manque ; --no-relief pour passer)…"
+            uv run --project tools cent-ans geo relief-fetch --if-needed ||
+                say "Relief fin non mis à jour (zoom rapproché limité) ; nouvel essai au prochain lancement."
+        else
+            say "Relief fin absent ou ancien, et uv introuvable (https://docs.astral.sh/uv/) : zoom rapproché limité."
+        fi
+    fi
+fi
+
+# --- 4. Game ---------------------------------------------------------------------------------
 
 say "Lancement du jeu…"
 exec "$GODOT_BIN" --path "$GAME" ${1+"$@"}
