@@ -2512,8 +2512,13 @@ func _run_tutorial() -> void:
 	_check(tutorial.current_step_id() == "end_turn" and not tutorial.check_now(), "end_turn: not met before ending the turn")
 	_check(tutorial.resolve_target("end_turn").has("rect"), "end turn button target expected")
 	map._on_end_turn()
+	# Rapport de saison ouvert hors de son étape : le guide se range (il couvrait « Continuer »).
+	var report_shown: bool = map.flow.season_report.visible
+	_check(not report_shown or tutorial.modal_open(), "the guide should hide under a season report opened outside its step")
 	_check(tutorial.check_now(), "end_turn should complete after end_turn")
+	_check(not tutorial.modal_open(), "the guide should show beside the season report during its own step")
 	visited.append("end_turn")
+	_check(tutorial.process_mode == Node.PROCESS_MODE_ALWAYS, "tutorial controller must keep running under the pause menu to hide the guide")
 	_check(tutorial.current_step_id() == "season_report", "season_report step expected")
 	var report: Control = map.flow.season_report
 	if report.visible:
