@@ -2,7 +2,7 @@
 
 Spec : `docs/design/2026-10-02-campagne-tob.md` § 3 « TB5 ». Branche `feat/tb5`, worktree
 `/Users/jean_hubert/dev/gp-tb5`. Rendu Godot seulement (`core/` intact). Pas de fal.ai (ADR 0152).
-Arbitrages : ADR 0155 (`docs/decisions/0155-cotes-et-mers-par-region.md`).
+Arbitrages : ADR 0163 (`docs/decisions/0163-cotes-et-mers-par-region.md`).
 
 ## État
 - [x] Squelette : cette note, `game/tests/tb5_coast_test.gd`.

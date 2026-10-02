@@ -1,4 +1,4 @@
-# ADR 0155 — Côtes et mers par région : polygones dans `data/map/`, matières procédurales
+# ADR 0163 — Côtes et mers par région : polygones dans `data/map/`, matières procédurales
 
 Date : 2026-10-02. Lot TB5 (`docs/design/2026-10-02-campagne-tob.md` § 3).
 
