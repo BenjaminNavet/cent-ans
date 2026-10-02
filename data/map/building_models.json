@@ -28,7 +28,33 @@
       "band_ratio": 1.5,
       "gap": 0.15,
       "rings": 2,
-      "minor_until": 60.0
+      "minor_until": 60.0,
+      "vertical": 1.5,
+      "sign_vertical": 1.25,
+      "signs": {
+        "city": {
+          "model": "sign_city",
+          "fraction": 0.115
+        },
+        "town": {
+          "model": "sign_town",
+          "walled_model": "sign_walled",
+          "walled_from": 2,
+          "fraction": 0.09
+        },
+        "village": {
+          "model": "sign_village",
+          "fraction": 0.06
+        },
+        "castle": {
+          "model": "sign_castle",
+          "fraction": 0.06
+        },
+        "abbey": {
+          "model": "abbey_2",
+          "fraction": 0.06
+        }
+      }
     }
   },
   "families": {

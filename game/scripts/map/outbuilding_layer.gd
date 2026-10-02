@@ -613,6 +613,11 @@ func _finish_rebuild() -> void:
 func _instances_of(i: int) -> Array:
 	var out: Array = []
 	if _hidden_provinces().has(str(_data.settlements[i]["province"])):
+		# Sous le brouillard, la ville garde son signe (elle reste connue), rien d'autre.
+		if _build_top > 0.0:
+			var hidden_sign := _sign_instance(i, _px_of(i), [])
+			if not hidden_sign.is_empty():
+				out.append(hidden_sign)
 		return out
 	var state := _state_of(i)
 	var growth := _growth_instances(i, state)
@@ -650,9 +655,70 @@ func _instances_of(i: int) -> Array:
 			"reach": float(entry.get("radius", 30.0)),
 		})
 	if _build_top > 0.0:
-		out = _layout(i, out, growth, _build_top)
+		var sign := _sign_instance(i, center, growth)
+		out = _layout(i, out, growth, _build_top, sign)
+		if not sign.is_empty():
+			out.append(sign)
 	out.append_array(growth)
 	return out
+
+
+## Signe de la colonie (ADR 0162) : de loin, la ville 1:1 ne se lit plus ; une maquette tenue à
+## l'écran (`render.screen.signs`, par genre de colonie) la recouvre : toits serrés, église,
+## enceinte si la ville est murée (plan de 1340, fortification de départ ou construite). Vide si
+## le genre n'a pas de signe. Les faubourgs ajoutés partent alors du bord du signe.
+func _sign_instance(i: int, center: Vector2, growth: Array) -> Dictionary:
+	var signs: Dictionary = screen_config(config).get("signs", {})
+	var entry: Dictionary = _data.settlements[i]
+	var rule: Dictionary = signs.get(str(entry.get("kind", "")), {})
+	if rule.is_empty():
+		return {}
+	var model := str(rule.get("model", ""))
+	if rule.has("walled_model"):
+		var walled := int(entry.get("fortification_level", 0)) >= int(rule.get("walled_from", 1)) or str(_town_of(i).get("walls", "none")) != "none"
+		for inst: Dictionary in growth:
+			if str(inst.get("grow", "")) == "wall":
+				walled = true
+		if walled:
+			model = str(rule["walled_model"])
+	var shape: Dictionary = manifest.get(model, {})
+	if shape.is_empty():
+		return {}
+	var width := maxf(float(shape.get("length", 60.0)), float(shape.get("depth", 60.0)))
+	var sign := {
+		"key": "out:" + model,
+		"settlement": i,
+		"family": "sign",
+		"level": 0,
+		"model": model,
+		"px": center,
+		"real_px": center,
+		"c": center,
+		"yaw": 0.0,
+		"base_m": _base_m(center),
+		"scale": Vector3.ONE,
+		"grow": "sign",
+		"width_m": width,
+		"radius_m": float(shape.get("radius", 40.0)),
+		"fraction": float(rule.get("fraction", 0.08)),
+		"built": _built_radius(i),
+		"top": float(shape.get("height", 30.0)),
+		"reach": float(shape.get("radius", 40.0)),
+	}
+	# Part du rayon du signe dans la hauteur de terrain vue : rayon (unités) = part × `view_span`.
+	var share := float(sign["fraction"]) * float(sign["radius_m"]) / width
+	for inst: Dictionary in growth:
+		inst["sign_share"] = share
+		inst["sign_built"] = float(sign["built"])
+		inst["c"] = center
+	return sign
+
+
+## Rayon (unités) du signe d'une colonie à la distance `rig_distance` ; 0 s'il n'est pas affiché
+## (ville réelle plus grande que lui : cités emblématiques vues d'assez près).
+func _sign_radius(share: float, built: float, rig_distance: float) -> float:
+	var radius := share * view_span(rig_distance, _fov)
+	return radius if radius >= built * 1.25 else 0.0
 
 
 ## TB3, point 4 : faubourgs (population) et enceinte (fortification) de la ville 1:1.
@@ -941,9 +1007,21 @@ func _far_site(i: int, p: Vector2, r: float, site: String) -> int:
 	return 0
 
 
+## Direction de l'eau (mer ou fleuve) au bord de l'emprise de rayon `r` posée en `p` ; nulle s'il
+## n'y en a pas.
+func _water_direction(p: Vector2, r: float) -> Vector2:
+	var sum := Vector2.ZERO
+	for k in 12:
+		var dir := Vector2(cos(TAU * float(k) / 12.0), sin(TAU * float(k) / 12.0))
+		var at := p + dir * r * 1.1
+		if not _is_land(at) or (_map != null and _map.river_sd_at(at.x, at.y) < 0.0):
+			sum += dir
+	return sum.normalized() if sum.length() > 0.5 else Vector2.ZERO
+
+
 ## Emprise de loin d'une maquette autour de la colonie `i` : au plus près de la direction de son
 ## site réel, sur l'anneau au bord de la ville, puis les anneaux suivants. Vide : aucune place.
-func _far_spot(i: int, center: Vector2, edge: float, inst: Dictionary, top: float, gates: PackedFloat32Array, shares: Array[float]) -> Dictionary:
+func _far_spot(i: int, center: Vector2, edge: float, start: float, inst: Dictionary, top: float, gates: PackedFloat32Array, shares: Array[float]) -> Dictionary:
 	var screen := screen_config(config)
 	var factor := maxf(1.0, held_width(config, int(inst["level"]), top, _fov) * _mpu / float(inst["width_m"]))
 	var r := float(inst["radius_m"]) * factor / _mpu
@@ -952,7 +1030,7 @@ func _far_spot(i: int, center: Vector2, edge: float, inst: Dictionary, top: floa
 	var site := str(inst["site"])
 	var fallback := {}
 	for ring in int(screen.get("rings", 2)):
-		var radius := edge + gap + r * (1.0 + RING_STEP * float(ring))
+		var radius := edge + start + gap + r * (1.0 + RING_STEP * float(ring))
 		var delta := clampf(r / radius, 0.15, 0.7) * 0.75
 		for m in int(PI / delta) + 1:
 			for side: float in ([1.0] if m == 0 else [1.0, -1.0]):
@@ -974,6 +1052,13 @@ func _far_spot(i: int, center: Vector2, edge: float, inst: Dictionary, top: floa
 				for gate_angle in gates:  # routes des portes
 					if absf(angle_difference(angle, gate_angle)) * radius < r * 0.6:
 						fit = 1
+				if site == "shore" or site == "coast":
+					# Port et saline : au bord de l'eau, façade vers elle ; sinon faute de mieux.
+					var water := _water_direction(center + dir * radius, r)
+					if water == Vector2.ZERO:
+						fit = 1
+					else:
+						disc["yaw"] = atan2(water.x, water.y)
 				if fit == 0:
 					return disc
 				if fallback.is_empty():
@@ -986,9 +1071,15 @@ func _far_spot(i: int, center: Vector2, edge: float, inst: Dictionary, top: floa
 ## Mise en place de loin de la colonie `i` au palier `top` : pose les emprises de sa croissance
 ## (quartiers de faubourg), puis celles de ses maquettes par niveau décroissant. Rend les
 ## maquettes placées (`dir`, `edge`, `off`, `top_d`) ; celles qui ne tiennent pas sont retirées.
-func _layout(i: int, models: Array, growth: Array, top: float) -> Array:
+func _layout(i: int, models: Array, growth: Array, top: float, sign: Dictionary = {}) -> Array:
 	var center := _px_of(i)
 	var edge := _built_radius(i)
+	# Signe affiché jusqu'au bas du palier : l'anneau part de son bord, qui suit la distance.
+	var low := top / maxf(float(screen_config(config).get("band_ratio", 1.5)), 1.05)
+	var sign_top := 0.0
+	if not sign.is_empty() and _sign_radius(float(sign["fraction"]) * float(sign["radius_m"]) / float(sign["width_m"]), edge, low) > 0.0:
+		sign_top = float(sign["fraction"]) * float(sign["radius_m"]) / float(sign["width_m"]) * view_span(top, _fov)
+		edge = 0.0
 	var quarters := {}  # quartier → [origine, direction, longueur (m), demi-largeur (m)]
 	for inst: Dictionary in growth:
 		match str(inst.get("grow", "")):
@@ -1007,12 +1098,15 @@ func _layout(i: int, models: Array, growth: Array, top: float) -> Array:
 		var length := float(quarter[2]) * house / _mpu
 		var along := half
 		while along < length + half:
-			_disc_add({"c": quarter[0], "dir": quarter[1], "edge": 0.0, "off": along, "r": half})
+			if sign_top > 0.0:
+				_disc_add({"c": center, "dir": quarter[1], "edge": 0.0, "off": sign_top + along, "r": half})
+			else:
+				_disc_add({"c": quarter[0], "dir": quarter[1], "edge": 0.0, "off": along, "r": half})
 			along += half * 1.6
 	var names := PackedStringArray()
 	for inst: Dictionary in models:
 		names.append(str(inst["model"]))
-	var sig := "%.2f|%.3f|%d|%s" % [top, edge, quarters.size(), ",".join(names)]
+	var sig := "%.2f|%.3f|%.3f|%d|%s" % [top, edge, sign_top, quarters.size(), ",".join(names)]
 	var cached: Dictionary = _layouts.get(i, {})
 	var shares := _band_shares()
 	var spots: Dictionary = {}
@@ -1038,7 +1132,7 @@ func _layout(i: int, models: Array, growth: Array, top: float) -> Array:
 				return int(a["level"]) > int(b["level"])
 			return str(a["family"]) < str(b["family"]))
 		for inst: Dictionary in order:
-			var disc := _far_spot(i, center, edge, inst, top, gates, shares)
+			var disc := _far_spot(i, center, edge, sign_top, inst, top, gates, shares)
 			if not disc.is_empty():
 				spots[str(inst["family"])] = disc
 				_disc_add(disc)
@@ -1051,6 +1145,7 @@ func _layout(i: int, models: Array, growth: Array, top: float) -> Array:
 		inst["dir"] = disc["dir"]
 		inst["edge"] = disc["edge"]
 		inst["off"] = disc["off"]
+		inst["far_yaw"] = float(disc.get("yaw", 0.0))
 		inst["top_d"] = top
 		out.append(inst)
 	return out
@@ -1076,23 +1171,40 @@ func _place(inst: Dictionary) -> void:
 	var d := _rig_distance
 	var px: Vector2 = inst.get("real_px", inst["px"])
 	var blend := screen_blend(config, d)
+	var screen := screen_config(config)
+	var sign_r := _sign_radius(float(inst.get("sign_share", 0.0)), float(inst.get("sign_built", 0.0)), d) if blend > 0.0 else 0.0
 	match str(inst.get("grow", "")):
 		"out":
 			var factor := model_factor(config, float(inst["width_m"]), int(inst["level"]), d, _mpu, _fov)
 			if inst.has("dir") and blend > 0.0:
 				var far := (inst["c"] as Vector2) + (inst["dir"] as Vector2) * (float(inst["edge"]) + float(inst["off"]) * d / float(inst["top_d"]))
 				px = px.lerp(far, blend)
+				# De loin, la façade regarde la caméra de jeu (vue du sud), ou l'eau pour un port.
+				inst["draw_yaw"] = lerp_angle(float(inst["yaw"]), float(inst.get("far_yaw", 0.0)), blend)
+			else:
+				inst["draw_yaw"] = float(inst["yaw"])
 			inst["factor"] = factor
-			inst["draw_scale"] = Vector3.ONE * factor
+			# Volumes relevés de loin : les silhouettes se lisent en plongée.
+			inst["draw_scale"] = Vector3(factor, factor * lerpf(1.0, float(screen.get("vertical", 1.0)), blend), factor)
+		"sign":
+			var radius := _sign_radius(float(inst["fraction"]) * float(inst["radius_m"]) / float(inst["width_m"]), float(inst["built"]), d)
+			var factor := float(inst["fraction"]) * view_span(d, _fov) * _mpu / float(inst["width_m"]) * blend
+			inst["factor"] = factor
+			inst["draw_scale"] = Vector3(factor, factor * float(screen.get("sign_vertical", 1.0)), factor) if radius > 0.0 and blend > 0.0 else Vector3.ONE * 1e-3
 		"house":
 			var factor := lerpf(1.0, _house_factor_full(d), blend)
-			px = (inst["origin"] as Vector2) + (px - (inst["origin"] as Vector2)) * factor
+			var origin: Vector2 = inst["origin"]
+			if sign_r > 0.0:  # le quartier part du bord du signe de la ville
+				origin = origin.lerp((inst["c"] as Vector2) + (inst["quarter_dir"] as Vector2) * sign_r, blend)
+			px = origin + (px - (inst["origin"] as Vector2)) * factor
 			inst["factor"] = factor
 			inst["draw_scale"] = (inst["scale"] as Vector3) * factor
 		"wall":
 			var shape: Dictionary = inst["shape"]
 			var thick := lerpf(float(shape["thick_m"]), _wall_thickness_full(shape, d), blend)
 			inst["draw_scale"] = Vector3(float(inst["length_m"]) + thick, maxf(float(inst["height_m"]), thick * 1.5) + float(shape["sink_m"]), thick)
+			if sign_r > 0.0 and blend >= 0.5:  # l'enceinte est portée par le signe muré
+				inst["draw_scale"] = Vector3.ONE * 1e-3
 		"tower":
 			var shape: Dictionary = inst["shape"]
 			var thick := lerpf(float(shape["thick_m"]), _wall_thickness_full(shape, d), blend)
@@ -1101,11 +1213,15 @@ func _place(inst: Dictionary) -> void:
 			var stride := maxi(1, ceili(radius * 3.2 / maxf(float(inst["spacing_m"]), 1.0)))
 			var height := maxf(float(inst["height_m"]), thick * 2.2) + float(shape["sink_m"])
 			inst["draw_scale"] = Vector3(radius, height, radius) if int(inst["order"]) % stride == 0 else Vector3.ONE * 1e-3
+			if sign_r > 0.0 and blend >= 0.5:
+				inst["draw_scale"] = Vector3.ONE * 1e-3
 		"gate":
 			var shape: Dictionary = inst["shape"]
 			var thick := lerpf(float(shape["thick_m"]), _wall_thickness_full(shape, d), blend)
 			var real: Vector3 = inst["scale"]
 			inst["draw_scale"] = Vector3(maxf(real.x, thick * 1.6), maxf(float(inst["height_m"]), thick * 1.95) + float(shape["sink_m"]), maxf(real.z, thick * 1.6))
+			if sign_r > 0.0 and blend >= 0.5:
+				inst["draw_scale"] = Vector3.ONE * 1e-3
 		_:
 			return
 	if not px.is_equal_approx(inst["px"]):
@@ -1177,7 +1293,7 @@ func _write_batches() -> void:
 		var px: Vector2 = inst["px"]
 		var draw: Vector3 = inst.get("draw_scale", inst["scale"])
 		var grow := float(inst.get("factor", 1.0))
-		var basis := Basis(Vector3.UP, float(inst["yaw"])) * Basis.from_scale(draw)
+		var basis := Basis(Vector3.UP, float(inst.get("draw_yaw", inst["yaw"]))) * Basis.from_scale(draw)
 		(g[0] as Array).append(Transform3D(basis, Vector3((px.x - _center.x) * _mpu, float(inst.get("lift", 0.0)), (px.y - _center.y) * _mpu)))
 		(g[1] as Array).append(float(inst["base_m"]))
 		(g[2] as Array).append(float(inst.get("tint", 0.5)))

@@ -1,219 +1,264 @@
 {
  "abbey_1": {
-  "depth": 28.6,
+  "depth": 20.9,
   "family": "abbey",
-  "height": 25.4,
-  "length": 24.1,
+  "height": 29.6,
+  "length": 27.8,
   "level": 1,
-  "radius": 24.8,
-  "triangles": 319
+  "radius": 16.9,
+  "triangles": 237
  },
  "abbey_2": {
-  "depth": 64.7,
+  "depth": 45.0,
   "family": "abbey",
-  "height": 32.7,
-  "length": 79.9,
+  "height": 35.9,
+  "length": 49.0,
   "level": 2,
-  "radius": 56.1,
-  "triangles": 495
+  "radius": 33.3,
+  "triangles": 319
  },
  "abbey_3": {
-  "depth": 102.8,
+  "depth": 63.2,
   "family": "abbey",
-  "height": 44.8,
-  "length": 123.9,
+  "height": 51.7,
+  "length": 75.2,
   "level": 3,
-  "radius": 84.1,
-  "triangles": 1263
+  "radius": 50.5,
+  "triangles": 622
  },
  "farm_1": {
-  "depth": 15.5,
+  "depth": 18.0,
   "family": "farm",
-  "height": 8.4,
-  "length": 25.1,
+  "height": 11.3,
+  "length": 28.9,
   "level": 1,
-  "radius": 15.4,
-  "triangles": 154
+  "radius": 17.1,
+  "triangles": 144
  },
  "farm_2": {
-  "depth": 26.8,
+  "depth": 32.2,
   "family": "farm",
-  "height": 10.3,
-  "length": 43.2,
-  "level": 2,
-  "radius": 26.2,
-  "triangles": 498
- },
- "farm_3": {
-  "depth": 55.6,
-  "family": "farm",
-  "height": 12.2,
-  "length": 76.3,
-  "level": 3,
-  "radius": 46.1,
-  "triangles": 1009
- },
- "market_1": {
-  "depth": 19.8,
-  "family": "market",
-  "height": 4.7,
-  "length": 17.6,
-  "level": 1,
-  "radius": 13.5,
-  "triangles": 352
- },
- "market_2": {
-  "depth": 42.4,
-  "family": "market",
-  "height": 10.6,
+  "height": 14.9,
   "length": 42.7,
   "level": 2,
-  "radius": 27.8,
-  "triangles": 1314
+  "radius": 26.6,
+  "triangles": 320
+ },
+ "farm_3": {
+  "depth": 55.0,
+  "family": "farm",
+  "height": 19.2,
+  "length": 67.0,
+  "level": 3,
+  "radius": 44.7,
+  "triangles": 531
+ },
+ "market_1": {
+  "depth": 20.3,
+  "family": "market",
+  "height": 8.8,
+  "length": 19.8,
+  "level": 1,
+  "radius": 14.1,
+  "triangles": 602
+ },
+ "market_2": {
+  "depth": 32.1,
+  "family": "market",
+  "height": 13.8,
+  "length": 41.4,
+  "level": 2,
+  "radius": 24.7,
+  "triangles": 754
  },
  "market_3": {
-  "depth": 75.8,
+  "depth": 55.9,
   "family": "market",
-  "height": 12.7,
-  "length": 85.9,
+  "height": 18.5,
+  "length": 61.6,
   "level": 3,
-  "radius": 52.6,
-  "triangles": 2438
+  "radius": 39.8,
+  "triangles": 1091
  },
  "mill_1": {
-  "depth": 16.6,
+  "depth": 24.2,
   "family": "mill",
-  "height": 15.8,
-  "length": 24.4,
+  "height": 25.3,
+  "length": 25.2,
   "level": 1,
-  "radius": 19.9,
-  "triangles": 458
+  "radius": 14.0,
+  "triangles": 209
  },
  "mill_2": {
-  "depth": 30.4,
+  "depth": 38.1,
   "family": "mill",
-  "height": 9.7,
-  "length": 39.7,
+  "height": 24.6,
+  "length": 43.0,
   "level": 2,
-  "radius": 24.5,
-  "triangles": 1002
+  "radius": 25.2,
+  "triangles": 765
  },
  "mill_3": {
-  "depth": 39.7,
+  "depth": 50.7,
   "family": "mill",
-  "height": 17.0,
-  "length": 69.6,
+  "height": 34.0,
+  "length": 72.1,
   "level": 3,
-  "radius": 42.6,
-  "triangles": 2290
+  "radius": 41.9,
+  "triangles": 1555
  },
  "mine_1": {
-  "depth": 26.3,
+  "depth": 36.4,
   "family": "mine",
-  "height": 8.3,
-  "length": 32.3,
+  "height": 25.1,
+  "length": 41.8,
   "level": 1,
-  "radius": 20.0,
-  "triangles": 278
+  "radius": 25.4,
+  "triangles": 104
  },
  "mine_2": {
-  "depth": 42.5,
+  "depth": 48.8,
   "family": "mine",
-  "height": 12.0,
-  "length": 59.6,
+  "height": 36.8,
+  "length": 58.0,
   "level": 2,
-  "radius": 35.0,
-  "triangles": 492
+  "radius": 35.8,
+  "triangles": 195
  },
  "mine_3": {
-  "depth": 74.6,
+  "depth": 63.4,
   "family": "mine",
-  "height": 13.0,
-  "length": 93.9,
+  "height": 43.5,
+  "length": 89.3,
   "level": 3,
-  "radius": 48.4,
-  "triangles": 1393
+  "radius": 50.1,
+  "triangles": 341
  },
  "port_1": {
-  "depth": 38.1,
+  "depth": 32.4,
   "family": "port",
-  "height": 10.6,
-  "length": 27.4,
+  "height": 18.9,
+  "length": 28.0,
   "level": 1,
-  "radius": 22.4,
-  "triangles": 220
+  "radius": 22.9,
+  "triangles": 163
  },
  "port_2": {
-  "depth": 52.6,
+  "depth": 40.3,
   "family": "port",
-  "height": 13.0,
-  "length": 55.8,
+  "height": 20.9,
+  "length": 49.0,
   "level": 2,
-  "radius": 34.6,
-  "triangles": 909
+  "radius": 32.8,
+  "triangles": 412
  },
  "port_3": {
-  "depth": 86.2,
+  "depth": 50.9,
   "family": "port",
-  "height": 14.0,
-  "length": 91.5,
+  "height": 21.9,
+  "length": 69.0,
   "level": 3,
-  "radius": 62.4,
-  "triangles": 2265
+  "radius": 42.3,
+  "triangles": 976
  },
  "saltworks_1": {
-  "depth": 27.5,
+  "depth": 31.4,
   "family": "saltworks",
-  "height": 7.2,
-  "length": 35.7,
+  "height": 10.1,
+  "length": 24.6,
   "level": 1,
-  "radius": 21.7,
-  "triangles": 413
+  "radius": 21.1,
+  "triangles": 293
  },
  "saltworks_2": {
-  "depth": 55.7,
+  "depth": 35.6,
   "family": "saltworks",
-  "height": 11.0,
-  "length": 59.7,
+  "height": 16.2,
+  "length": 44.3,
   "level": 2,
-  "radius": 41.9,
-  "triangles": 785
+  "radius": 27.6,
+  "triangles": 194
  },
  "saltworks_3": {
-  "depth": 96.6,
+  "depth": 55.4,
   "family": "saltworks",
-  "height": 11.7,
-  "length": 102.2,
+  "height": 20.0,
+  "length": 70.5,
   "level": 3,
-  "radius": 66.8,
-  "triangles": 2091
+  "radius": 40.8,
+  "triangles": 374
+ },
+ "sign_castle": {
+  "depth": 57.2,
+  "family": "sign",
+  "height": 30.5,
+  "length": 57.2,
+  "level": 0,
+  "radius": 37.7,
+  "triangles": 214
+ },
+ "sign_city": {
+  "depth": 130.1,
+  "family": "sign",
+  "height": 45.1,
+  "length": 128.2,
+  "level": 0,
+  "radius": 68.1,
+  "triangles": 987
+ },
+ "sign_town": {
+  "depth": 93.5,
+  "family": "sign",
+  "height": 37.1,
+  "length": 90.0,
+  "level": 0,
+  "radius": 50.7,
+  "triangles": 541
+ },
+ "sign_village": {
+  "depth": 66.8,
+  "family": "sign",
+  "height": 18.7,
+  "length": 57.7,
+  "level": 0,
+  "radius": 34.7,
+  "triangles": 333
+ },
+ "sign_walled": {
+  "depth": 101.1,
+  "family": "sign",
+  "height": 35.5,
+  "length": 106.8,
+  "level": 0,
+  "radius": 53.4,
+  "triangles": 793
  },
  "vineyard_1": {
-  "depth": 25.5,
+  "depth": 24.0,
   "family": "vineyard",
-  "height": 11.1,
-  "length": 28.5,
+  "height": 16.4,
+  "length": 32.6,
   "level": 1,
-  "radius": 18.7,
-  "triangles": 244
+  "radius": 20.8,
+  "triangles": 193
  },
  "vineyard_2": {
-  "depth": 46.0,
+  "depth": 34.0,
   "family": "vineyard",
-  "height": 12.0,
-  "length": 52.5,
+  "height": 18.0,
+  "length": 42.7,
   "level": 2,
-  "radius": 34.3,
-  "triangles": 762
+  "radius": 27.1,
+  "triangles": 302
  },
  "vineyard_3": {
-  "depth": 86.6,
+  "depth": 64.0,
   "family": "vineyard",
-  "height": 27.7,
-  "length": 92.6,
+  "height": 41.5,
+  "length": 67.0,
   "level": 3,
-  "radius": 64.1,
-  "triangles": 1848
+  "radius": 46.7,
+  "triangles": 459
  },
  "worksite_1": {
   "depth": 25.5,

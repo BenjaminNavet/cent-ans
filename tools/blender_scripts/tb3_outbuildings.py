@@ -6,7 +6,12 @@ hall, windmill, water mill, haystack, well, lychgate, wall run) plus a few proce
 written here with the same primitives (vine rows, salt pans, jetty, treadwheel crane, mine whim
 and headframe, cloister wings, stalls, tents, boats, scaffolding).
 
-Level 1 is one building, level 2 a small yard, level 3 a small estate. Conventions of the kit:
+The models are **map signs in the round** (ADR 0162): they are drawn at a held screen size
+(40 to 70 px), seen from the south at about 30 degrees, so each one is a few big, tall pieces
+with one signature silhouette (sails, wheel, bell tower, hall, crane, headframe, white pans,
+vine rows), kit buildings enlarged, tall pieces at the back (+Y), low ones in front (-Y).
+Level 1 is the signature piece, level 2 adds a yard, level 3 is a rich compound. The settlement
+signs (``sign_*``: village, town, walled town, city, castle) follow the same rule. Conventions of the kit:
 metres, Z up, ground at z = 0, foundations below (models sit on gentle slopes), front towards -Y
 (Godot: +Z). The front is the *site side*: the water for mills, saltworks and ports, the road for
 markets. Every material is a layer of the ``Building`` atlas, so a model is one surface and one
@@ -19,8 +24,10 @@ Run headless:
 ``export`` writes ``<family>_<level>.glb``, ``worksite_1.glb`` and ``manifest.json``.
 """
 
+import inspect
 import json
 import math
+import random
 import sys
 from pathlib import Path
 
@@ -56,12 +63,14 @@ WOOD = (0.5, 0.4, 0.33)
 DARK_WOOD = (0.34, 0.27, 0.22)
 STONE = (0.95, 0.92, 0.86)
 CLAY = (0.78, 0.68, 0.52)
-SPOIL = (0.52, 0.47, 0.42)
-ORE = (0.45, 0.33, 0.28)
+SPOIL = (0.3, 0.28, 0.27)
+ORE = (0.42, 0.2, 0.14)
 SALT = (1.0, 1.0, 1.0)
 BRINE = (0.42, 0.52, 0.6)
-VINE = (0.42, 0.8, 0.26)
+VINE = (0.16, 0.42, 0.12)
 HAY = (0.86, 0.72, 0.32)
+EARTH = (0.78, 0.62, 0.42)
+PALE = (1.0, 0.97, 0.9)
 CLOTHS = [(0.86, 0.3, 0.24), (0.3, 0.42, 0.7), (0.9, 0.8, 0.5), (0.4, 0.6, 0.36)]
 TILE = kit.ROOF_TINTS["RoofTile"][0]
 
@@ -70,12 +79,29 @@ TILE = kit.ROOF_TINTS["RoofTile"][0]
 
 
 def put(
-    g: Geometry, kind: str, seed: int, x: float, y: float, yaw: float = 0.0, **dims
+    g: Geometry,
+    kind: str,
+    seed: int,
+    x: float,
+    y: float,
+    yaw: float = 0.0,
+    s: float = 1.0,
+    **dims,
 ):
-    """Merge one ``low`` detail kit building at (x, y), turned by ``yaw`` degrees."""
+    """Merge one ``low`` detail kit building at (x, y), turned by ``yaw`` degrees, scaled ``s``."""
     part, info = kit.build(kind, seed, "low", False, **dims)
-    g.merge(part.transformed((1.0, 1.0, 1.0), (x, y, 0.0), math.radians(yaw)))
+    g.merge(part.transformed((s, s, s), (x, y, 0.0), math.radians(yaw)))
     return info
+
+
+def piece(g: Geometry, fn, x: float, y: float, yaw: float, s: float, *args) -> None:
+    """Merge a procedural piece built at the origin by ``fn(g, 0, 0, *args)``, scaled ``s``."""
+    part = Geometry()
+    if "yaw" in inspect.signature(fn).parameters:
+        fn(part, 0.0, 0.0, 0.0, *args)
+    else:
+        fn(part, 0.0, 0.0, *args)
+    g.merge(part.transformed((s, s, s), (x, y, 0.0), math.radians(yaw)))
 
 
 def run(g, points, height, thick, mat, color, depth=0.8, closed=False) -> None:
@@ -208,13 +234,154 @@ def cart(g, x, y, yaw) -> None:
             )
 
 
-def vines(g, x0, y0, rows, length, spacing=2.2) -> None:
-    """Rows of vines along X: a leafy hedge on stakes."""
+def vines(g, x0, y0, rows, length, spacing=5.6) -> None:
+    """Plot of vines: fat dark rows running away from the viewer (along Y) on pale earth.
+
+    ``x0, y0`` is the front left corner, ``rows`` the number of rows side by side along X,
+    ``length`` their length along Y. Seen from the south the rows are vertical stripes.
+    """
+    width = (rows - 1) * spacing + 4.0
+    k.box(
+        g,
+        (x0 + width / 2 - 2.0, y0 + length / 2, 0.0),
+        (width, length + 2.0, 1.0),
+        "Plaster",
+        color=EARTH,
+    )
     for i in range(rows):
-        y = y0 + i * spacing
-        k.prism_x(g, x0, x0 + length, y, 0.35, 0.42, 1.15, "Canvas", color=VINE)
-        for x in (x0 - 0.2, x0 + length + 0.2):
-            k.box(g, (x, y, 0.5), (0.1, 0.1, 2.0), "Timber", color=DARK_WOOD)
+        x = x0 + i * spacing
+        with kit.frame(g, (x, y0 + length / 2, 0.5), math.radians(90)):
+            k.prism_x(
+                g, -length / 2, length / 2, 0.0, 0.0, 1.5, 3.4, "Canvas", color=VINE
+            )
+
+
+def house(g, x, y, yaw, length, width, height, roof="RoofTile", wall="Plaster") -> None:
+    """Plain house of a settlement sign: pale walls under a steep roof."""
+    with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
+        k.box(
+            g,
+            (0, 0, (height - 1.5) / 2),
+            (length, width, height + 1.5),
+            wall,
+            color=PALE,
+        )
+        k.prism_x(
+            g,
+            -length / 2 - 0.4,
+            length / 2 + 0.4,
+            0.0,
+            height,
+            width / 2 + 0.5,
+            width * 0.75,
+            roof,
+            color=kit.ROOF_TINTS[roof][0],
+        )
+
+
+def tower(g, x, y, radius, height, roof="RoofSlate") -> None:
+    """Round wall tower under a conical roof."""
+    k.cylinder(
+        g,
+        (x, y, -1.5),
+        radius,
+        height + 1.5,
+        "Masonry",
+        sides=8,
+        top=False,
+        color=STONE,
+    )
+    k.cone(
+        g,
+        (x, y, height),
+        radius * 1.2,
+        radius * 1.5,
+        roof,
+        sides=8,
+        color=kit.ROOF_TINTS[roof][0],
+    )
+
+
+def keep(g, x, y, side, height) -> None:
+    """Square keep with corner turrets."""
+    k.box(
+        g,
+        (x, y, (height - 1.5) / 2),
+        (side, side, height + 1.5),
+        "Masonry",
+        color=STONE,
+    )
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            k.box(
+                g,
+                (x + sx * side * 0.45, y + sy * side * 0.45, height + 1.2),
+                (side * 0.22, side * 0.22, 2.6),
+                "Masonry",
+                color=STONE,
+            )
+
+
+def ring_wall(
+    g, radius, height, thick, towers, tower_r, tower_h, mat="Masonry"
+) -> None:
+    """Town wall: a ring of runs, round towers, a gate house on the front (-Y)."""
+    sides = 16
+    points = [
+        (
+            radius * math.cos(math.tau * i / sides),
+            radius * math.sin(math.tau * i / sides),
+        )
+        for i in range(sides)
+    ]
+    run(g, points, height, thick, mat, STONE, depth=1.5, closed=True)
+    for i in range(towers):
+        a = math.tau * (i + 0.5) / towers - math.pi / 2
+        tower(g, radius * math.cos(a), radius * math.sin(a), tower_r, tower_h)
+    k.box(
+        g,
+        (0, -radius, height * 0.7),
+        (tower_r * 3.2, thick * 2.2, height * 1.4 + 1.5),
+        mat,
+        color=STONE,
+    )
+    g.quad(
+        (-tower_r * 0.8, -radius - thick * 1.12, 0.0),
+        (tower_r * 0.8, -radius - thick * 1.12, 0.0),
+        (tower_r * 0.8, -radius - thick * 1.12, height * 0.75),
+        (-tower_r * 0.8, -radius - thick * 1.12, height * 0.75),
+        "Window",
+    )
+
+
+def houses(g, seed, count, radius, keep_out, roofs=("RoofTile",), size=1.0) -> None:
+    """Tight cluster of houses inside ``radius``, clear of the ``keep_out`` discs (x, y, r)."""
+    rng = random.Random(seed)
+    placed = []
+    tries = 0
+    while len(placed) < count and tries < count * 60:
+        tries += 1
+        a = rng.uniform(0.0, math.tau)
+        d = radius * math.sqrt(rng.uniform(0.0, 1.0))
+        x, y = d * math.cos(a), d * math.sin(a)
+        length = rng.uniform(10.0, 15.0) * size
+        if any(math.hypot(x - ox, y - oy) < r + length * 0.5 for ox, oy, r in keep_out):
+            continue
+        if any(
+            math.hypot(x - ox, y - oy) < (length + ol) * 0.52 for ox, oy, ol in placed
+        ):
+            continue
+        placed.append((x, y, length))
+        house(
+            g,
+            x,
+            y,
+            rng.choice((0, 0, 90, 20, -25)),
+            length,
+            rng.uniform(6.5, 8.0) * size,
+            rng.uniform(5.5, 8.5) * size,
+            rng.choice(roofs),
+        )
 
 
 def pan(g, x, y, width, depth, salted: bool) -> None:
@@ -289,7 +456,7 @@ def crane(g, x, y, yaw) -> None:
 
 
 def boat(g, x, y, yaw, length, beam_m, mast=0.0) -> None:
-    """Open boat (or a cog with a mast), hull resting 0.3 m in the water or the sand."""
+    """Open boat, or a cog with a mast and a square sail, hull resting 0.3 m in the water."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
         half, w = length / 2, beam_m / 2
         outline = [
@@ -299,18 +466,17 @@ def boat(g, x, y, yaw, length, beam_m, mast=0.0) -> None:
             (-half, -w * 0.8),
             (half * 0.45, -w),
         ]
-        extrude(g, outline, -0.4, 0.25 * beam_m + 0.4, "Planks", DARK_WOOD)
+        extrude(g, outline, -0.4, 0.3 * beam_m + 0.6, "Planks", DARK_WOOD)
         if mast > 0.0:
-            k.box(g, (0, 0, mast / 2), (0.3, 0.3, mast), "Timber", color=WOOD)
-            k.tube(
-                g,
-                (0, -beam_m * 1.3, mast * 0.82),
-                (0, beam_m * 1.3, mast * 0.82),
-                0.25,
-                "Canvas",
-                5,
-                color=(1.0, 0.98, 0.92),
-            )
+            k.box(g, (0, 0, mast / 2), (0.5, 0.5, mast), "Timber", color=WOOD)
+            sail = [
+                (-length * 0.3, 0.3, mast * 0.3),
+                (length * 0.3, 0.3, mast * 0.3),
+                (length * 0.3, 0.3, mast * 0.95),
+                (-length * 0.3, 0.3, mast * 0.95),
+            ]
+            g.poly(sail, "Canvas", color=(1.0, 0.98, 0.92), occlude=False)
+            g.poly(sail[::-1], "Canvas", color=(1.0, 0.98, 0.92), occlude=False)
 
 
 def dovecote(g, x, y) -> None:
@@ -335,20 +501,10 @@ def whim(g, x, y) -> None:
 
 
 def headframe(g, x, y) -> None:
-    """Timber headframe over a shaft, with its pulley."""
-    for sx in (-1, 1):
-        for sy in (-1, 1):
-            k.tube(
-                g,
-                (x + sx * 2.2, y + sy * 2.2, -1.0),
-                (x + sx * 0.5, y + sy * 0.5, 9.0),
-                0.16,
-                "Timber",
-                4,
-                color=DARK_WOOD,
-            )
-    k.tube(g, (x - 0.15, y, 9.3), (x + 0.15, y, 9.3), 1.0, "Timber", 8, color=WOOD)
-    k.box(g, (x, y, 0.9), (3.6, 3.6, 2.6), "Planks", color=WOOD)
+    """Timber headframe over a shaft: a boarded tower, a great pulley wheel facing the viewer."""
+    k.box(g, (x, y, 5.0), (4.2, 4.2, 12.0), "Planks", color=WOOD)
+    k.tube(g, (x, y - 0.5, 13.5), (x, y + 0.5, 13.5), 3.4, "Timber", 10, color=DARK_WOOD)
+    k.beam(g, (x + 1.0, y, 13.0), (x + 9.0, y, 0.0), 0.8, 0.8, "Timber", (0, 1, 0), color=DARK_WOOD)
 
 
 def adit(g, x, y, yaw) -> None:
@@ -428,369 +584,283 @@ def scaffold(g, x, y, yaw, length, height) -> None:
 
 
 def farm_1(g) -> None:
-    """A longère and its rick."""
-    put(g, "longere", 511, 0, 0)
-    put(g, "haystack", 512, 12, 5)
-    run(g, [(-11, -9), (9, -9), (9, -4)], 1.1, 0.12, "Planks", WOOD)
+    """A longère, its rick and a fenced yard."""
+    put(g, "longere", 511, -2, 3, s=1.35)
+    put(g, "haystack", 512, 10, -6, s=2.2)
+    run(g, [(-13, -10), (4, -10)], 2.0, 0.5, "Planks", WOOD)
 
 
 def farm_2(g) -> None:
-    """House, barn, well and ricks around a yard."""
-    put(g, "longere", 521, 0, 9)
-    put(g, "barn", 522, -16, -4, 90)
-    put(g, "well", 523, 2, -3)
-    put(g, "haystack", 524, 14, -6)
-    put(g, "haystack", 525, 19, 1)
-    cart(g, -6, -9, 20)
-    run(g, [(-22, -14), (10, -14), (10, -9)], 1.1, 0.12, "Planks", WOOD)
+    """House, barn and ricks around a fenced yard."""
+    put(g, "longere", 521, -9, 9, s=1.45)
+    put(g, "barn", 522, 13, 4, 90, s=1.45)
+    put(g, "haystack", 524, -12, -9, s=2.4)
+    put(g, "haystack", 525, -3, -11, s=2.4)
+    run(g, [(-20, -4), (-20, -16), (20, -16), (20, -8)], 2.2, 0.5, "Planks", WOOD)
 
 
 def farm_3(g) -> None:
-    """Courtyard farm: stone house, two barns, byre, dovecote, walled yard."""
-    put(g, "stonehouse", 531, 0, 22, length=14.0, depth=8.0)
-    put(g, "barn", 532, -24, 4, 90, length=20.0, depth=9.0)
-    put(g, "barn", 533, 24, 4, 90, length=18.0, depth=9.0)
-    put(g, "longere", 534, 0, -20, 180)
-    put(g, "cottage", 535, 34, -22, 30)
-    put(g, "well", 536, 4, 4)
-    dovecote(g, -9, 3)
-    for n, (x, y) in enumerate([(38, 10), (44, 3), (40, -6)]):
-        put(g, "haystack", 537 + n, x, y)
-    cart(g, 12, -6, -30)
-    cart(g, -14, -10, 70)
+    """Courtyard farm: stone house, two great barns, dovecote, ricks, walled yard."""
+    put(g, "stonehouse", 531, -15, 14, s=1.7)
+    put(g, "barn", 532, 13, 15, s=1.8)
+    put(g, "barn", 533, 24, -8, 90, s=1.5)
+    piece(g, dovecote, -24, -8, 0, 1.7)
+    for n, (x, y) in enumerate([(-10, -14), (0, -17), (9, -13)]):
+        put(g, "haystack", 537 + n, x, y, s=2.6)
     run(
         g,
-        [(-30, -26), (-30, 28), (30, 28), (30, -26), (12, -26)],
-        1.6,
-        0.6,
+        [(-6, -26), (-32, -26), (-32, 28), (34, 28), (34, -26), (8, -26)],
+        3.0,
+        1.0,
         "Rubble",
         STONE,
     )
 
 
 def mill_1(g) -> None:
-    """Post windmill and the miller's cottage."""
-    put(g, "windmill", 611, 0, 0)
-    put(g, "cottage", 612, 13, 5, -20)
-    for x, y in [(4.5, -3), (5.3, -2.2)]:
-        barrel(g, x, y)
+    """Post windmill on its mound."""
+    heap(g, 0, 0, 9.0, 2.2, "Plaster", EARTH, sides=9)
+    put(g, "windmill", 611, 0, 0, s=1.6)
 
 
 def mill_2(g) -> None:
-    """Water mill on its race, house and store."""
-    put(g, "watermill", 621, 0, 0, length=11.0, depth=6.8)
-    put(g, "cottage", 622, 15, 6, -15)
-    put(g, "barn", 623, -15, 9, 90, length=12.0, depth=7.5)
-    k.box(g, (-2.2, -9.0, -0.3), (1.4, 12.0, 0.9), "Planks", color=DARK_WOOD)
-    cart(g, 8, 10, 10)
-    for x, y in [(5, 4.5), (5.8, 5.2), (4.3, 5.4)]:
-        barrel(g, x, y)
+    """Windmill and a water mill with its wheel."""
+    heap(g, -11, 7, 9.0, 2.2, "Plaster", EARTH, sides=9)
+    put(g, "windmill", 621, -11, 7, s=1.6)
+    put(g, "watermill", 622, 11, -1, s=1.7)
+    k.box(g, (11.0, -15.0, -0.3), (5.0, 8.0, 1.6), "Canvas", color=BRINE)
 
 
 def mill_3(g) -> None:
-    """Mill hamlet: two wheels (grain, fulling or hammer), windmill, houses, store."""
-    put(g, "watermill", 631, -9, 0, length=12.0, depth=7.0)
-    put(g, "watermill", 632, 11, 0, length=11.0, depth=6.8)
-    chimney_stack(g, 17, 2.5, 10.0)
-    put(g, "windmill", 633, 30, 22)
-    put(g, "barn", 634, -26, 14, 90, length=16.0, depth=9.0)
-    put(g, "stonehouse", 635, 2, 20)
-    put(g, "cottage", 636, -12, 24, 10)
-    put(g, "cottage", 637, 18, 26, -12)
-    k.box(g, (1.0, -8.5, -0.3), (34.0, 1.6, 0.9), "Planks", color=DARK_WOOD)
-    cart(g, -4, 11, 15)
-    cart(g, 22, 10, -40)
-    for x, y in [(-17, 6), (-16.2, 6.8), (5, 9), (5.8, 9.5), (6, 8.6)]:
-        barrel(g, x, y)
+    """Mill hamlet: great windmill, two wheels, miller's house and store."""
+    heap(g, -18, 12, 11.0, 2.6, "Plaster", EARTH, sides=9)
+    put(g, "windmill", 631, -18, 12, s=2.0)
+    put(g, "watermill", 632, 8, -6, s=1.9)
+    put(g, "watermill", 633, 27, -6, s=1.6)
+    put(g, "stonehouse", 634, 14, 16, s=1.5)
+    put(g, "barn", 635, -20, -12, s=1.3)
+    k.box(g, (16.0, -21.0, -0.3), (36.0, 7.0, 1.6), "Canvas", color=BRINE)
+
+
+def cask(g, x, y) -> None:
+    """Great cask lying on its side."""
+    k.tube(g, (x - 1.6, y, 1.5), (x + 1.6, y, 1.5), 1.5, "Planks", 8, color=DARK_WOOD)
 
 
 def vineyard_1(g) -> None:
-    """Press shed and a few rows."""
-    put(g, "barn", 711, 0, 9, length=10.0, depth=7.0)
-    vines(g, -14, -12, 6, 28)
-    barrel(g, 6.5, 6)
-    barrel(g, 7.4, 6.4)
+    """Press house and a plot of vines."""
+    put(g, "stonehouse", 711, -9, 5, s=1.3)
+    vines(g, 3, -12, 3, 22)
+    cask(g, -9, -8)
 
 
 def vineyard_2(g) -> None:
-    """Press house, cellar and a plot of vines."""
-    put(g, "stonehouse", 721, -8, 18)
-    put(g, "longere", 722, 12, 20)
-    vines(g, -26, -22, 13, 52)
-    cart(g, 2, 10, 0)
-    for x, y in [(-1, 14), (-0.2, 14.7), (0.6, 14), (20, 14)]:
-        barrel(g, x, y)
+    """Press house, cellar and a larger plot."""
+    put(g, "stonehouse", 721, -13, 9, s=1.5)
+    put(g, "barn", 722, -13, -9, s=1.1)
+    vines(g, 2, -16, 4, 32)
+    cask(g, -1.5, -13)
 
 
 def vineyard_3(g) -> None:
-    """Walled clos: house, press house, cellar, two plots."""
-    put(g, "manor", 731, 0, 34, length=20.0, depth=7.5)
-    put(g, "stonehouse", 732, -24, 30)
-    put(g, "longere", 733, 26, 30)
-    put(g, "barn", 734, 40, 14, 90, length=13.0, depth=8.0)
-    vines(g, -42, -40, 14, 38)
-    vines(g, 4, -40, 14, 38)
-    vines(g, -42, -4, 9, 30)
-    cart(g, 8, 18, 0)
-    cart(g, -10, 20, 40)
-    for x, y in [(-16, 24), (-15.2, 24.6), (-14.4, 24), (18, 24), (18.8, 24.6)]:
-        barrel(g, x, y)
+    """Walled clos: manor, press house, two plots."""
+    put(g, "manor", 731, 3, 20, s=1.5)
+    put(g, "barn", 733, 0, -14, 90, s=1.3)
+    vines(g, -27, -26, 4, 30)
+    vines(g, 11, -26, 4, 30)
+    cask(g, -5, 2)
+    cask(g, 1, 2)
     run(
         g,
-        [(-4, -44), (-46, -44), (-46, 42), (46, 42), (46, -44), (4, -44)],
-        1.7,
-        0.6,
+        [(-6, -31), (-33, -31), (-33, 32), (33, 32), (33, -31), (6, -31)],
+        2.8,
+        1.0,
         "Rubble",
         STONE,
     )
 
 
 def mine_1(g) -> None:
-    """Adit, spoil heap and a miner's hut."""
-    adit(g, 0, 4, 0)
-    put(g, "cottage", 811, 14, -4, -25)
-    heap(g, -9, -5, 2.6, 1.6, "Rubble", ORE)
+    """Spoil bank with its adit and a headframe."""
+    piece(g, adit, -3, 4, 0, 1.6)
+    piece(g, headframe, 11, -4, 0, 1.5)
+    heap(g, -12, -7, 3.6, 2.6, "Rubble", ORE)
 
 
 def mine_2(g) -> None:
-    """Adit, horse whim, washing trough, smithy and huts."""
-    adit(g, -10, 10, 0)
-    whim(g, 8, 6)
-    put(g, "stonehouse", 821, 22, -10, -20, length=10.0, depth=7.0)
-    chimney_stack(g, 27, -7, 9.0)
-    put(g, "cottage", 822, -20, -12, 15)
-    k.box(g, (0, -10, 0.1), (14.0, 1.2, 0.9), "Planks", color=DARK_WOOD)
-    for x, y, r in [(-4, -3, 3.0), (2, -16, 2.2), (30, 4, 3.4)]:
-        heap(g, x, y, r, r * 0.6, "Rubble", ORE)
-    cart(g, 12, -16, 30)
+    """Adit, tall headframe, horse whim and ore heaps."""
+    piece(g, adit, -12, 8, 0, 1.8)
+    piece(g, headframe, 10, 6, 0, 2.2)
+    piece(g, whim, 14, -11, 0, 1.3)
+    for x, y, r in [(-8, -10, 4.4), (-16, -6, 3.4)]:
+        heap(g, x, y, r, r * 0.75, "Rubble", ORE)
 
 
 def mine_3(g) -> None:
-    """Mining works: two adits, headframe, whim, furnace hall, stores, miners' row."""
-    adit(g, -24, 22, 10)
-    adit(g, 4, 28, -8)
-    headframe(g, 22, 14)
-    whim(g, -6, 4)
-    put(g, "barn", 831, 30, -12, 0, length=18.0, depth=9.0)
-    chimney_stack(g, 24, -5, 13.0)
-    chimney_stack(g, 36, -5, 11.0)
-    put(g, "stonehouse", 832, -30, -8, 10)
-    for n, x in enumerate((-34, -22, -10)):
-        put(g, "cottage", 833 + n, x, -26, 4 * n)
-    put(g, "longere", 836, 8, -30)
-    k.box(g, (6, -12, 0.1), (20.0, 1.2, 0.9), "Planks", color=DARK_WOOD)
-    for x, y, r in [
-        (-14, -8, 3.4),
-        (12, -2, 2.6),
-        (40, 8, 4.2),
-        (44, -2, 3.0),
-        (-40, 8, 4.8),
-    ]:
-        heap(g, x, y, r, r * 0.6, "Rubble", ORE if r < 4.0 else SPOIL)
-    cart(g, 16, -20, 20)
-    cart(g, -2, -18, -35)
+    """Mining works: two adits, great headframe, whim, furnace hall with its stacks."""
+    piece(g, adit, -22, 14, 8, 2.0)
+    piece(g, adit, 4, 20, -6, 1.6)
+    piece(g, headframe, 24, 12, 0, 2.6)
+    piece(g, whim, -6, -8, 0, 1.5)
+    put(g, "barn", 831, 22, -14, s=1.5)
+    piece(g, chimney_stack, 12, -8, 0, 2.0, 12.0)
+    piece(g, chimney_stack, 33, -8, 0, 2.0, 10.0)
+    for x, y, r in [(-26, -12, 5.4), (-18, -18, 4.0), (-32, -4, 3.6)]:
+        heap(g, x, y, r, r * 0.75, "Rubble", ORE if r < 5.0 else SPOIL)
+
+
+def pans(g, x0, y0, columns, rows, side) -> None:
+    """Chequer of evaporation pans (white salt, pale brine) inside thick clay bunds."""
+    for row in range(rows):
+        for i in range(columns):
+            x = x0 + (i + 0.5) * side
+            y = y0 + (row + 0.5) * side
+            k.box(g, (x, y, 0.1), (side, side, 1.8), "Rubble", color=CLAY)
+            inner = side * 0.4
+            salted = (i + row) % 2 == 0
+            g.quad(
+                (x - inner, y - inner, 1.05),
+                (x + inner, y - inner, 1.05),
+                (x + inner, y + inner, 1.05),
+                (x - inner, y + inner, 1.05),
+                "Plaster" if salted else "Canvas",
+                color=SALT if salted else BRINE,
+                occlude=False,
+            )
 
 
 def saltworks_1(g) -> None:
-    """Boiling hut and four pans."""
-    put(g, "cottage", 911, 0, 12)
-    for i in range(4):
-        pan(g, -13.5 + 9 * i, -6, 8, 12, i % 2 == 0)
-    heap(g, 9, 9, 1.8, 1.3, "Plaster", SALT)
+    """Four pans, a boiling hut and a heap of salt."""
+    pans(g, -11, -13, 2, 2, 11)
+    put(g, "cottage", 911, -4, 14, s=1.4)
+    heap(g, 9, 13, 4.0, 5.0, "Plaster", SALT)
 
 
 def saltworks_2(g) -> None:
-    """Boiling house with its stack, store, a dozen pans."""
-    put(g, "longere", 921, -8, 22)
-    chimney_stack(g, -2, 25, 9.0)
-    put(g, "barn", 922, 18, 22, 0, length=12.0, depth=8.0)
-    for row in range(2):
-        for i in range(6):
-            pan(g, -25 + 10 * i, -22 + 15 * row, 9, 14, (i + row) % 3 != 0)
-    for x, y in [(4, 15), (8, 16.5), (-20, 16)]:
-        heap(g, x, y, 2.0, 1.5, "Plaster", SALT)
-    cart(g, 14, 13, 10)
+    """Six pans, boiling house with its stack, heaps of salt."""
+    pans(g, -18, -17, 3, 2, 12)
+    put(g, "longere", 921, -6, 14, s=1.4)
+    piece(g, chimney_stack, 4, 17, 0, 1.8, 9.0)
+    heap(g, 15, 13, 4.6, 5.6, "Plaster", SALT)
+    heap(g, 22, 9, 3.4, 4.2, "Plaster", SALT)
 
 
 def saltworks_3(g) -> None:
-    """Great saltworks: two boiling houses, salt store, a field of pans, carts."""
-    put(g, "longere", 931, -22, 40)
-    put(g, "longere", 932, 4, 42, 4)
-    chimney_stack(g, -15, 43, 11.0)
-    chimney_stack(g, 11, 45, 10.0)
-    put(g, "barn", 933, 34, 38, 0, length=20.0, depth=9.5)
-    put(g, "stonehouse", 934, -46, 36, 10)
-    for row in range(4):
-        for i in range(8):
-            pan(g, -38.5 + 11 * i, -42 + 17 * row, 10, 16, (i * 3 + row * 5) % 4 != 0)
-    for x, y, r in [
-        (18, 30, 2.8),
-        (24, 31, 2.2),
-        (-8, 31, 2.4),
-        (-34, 30, 2.0),
-        (46, 28, 2.6),
-    ]:
-        heap(g, x, y, r, r * 0.75, "Plaster", SALT)
-    cart(g, 12, 29, 0)
-    cart(g, -26, 29, 20)
+    """Great saltworks: a dozen pans, two boiling houses, salt store, heaps."""
+    pans(g, -26, -27, 4, 3, 13)
+    put(g, "longere", 931, -18, 20, s=1.5)
+    piece(g, chimney_stack, -6, 23, 0, 2.0, 10.0)
+    put(g, "barn", 933, 12, 21, s=1.5)
+    for x, y, r in [(28, 18, 5.2), (31, 8, 4.0), (-31, 16, 3.6)]:
+        heap(g, x, y, r, r * 1.2, "Plaster", SALT)
+
+
+def _cloister(g, x, y, side, height=6.5) -> None:
+    """Three ranges around a garth, south of the church."""
+    wing(g, x - side / 2, y, 90, side, 7.5, height)
+    wing(g, x + side / 2, y, 90, side, 7.5, height)
+    wing(g, x, y - side / 2, 0, side + 7.5, 7.5, height)
 
 
 def abbey_1(g) -> None:
-    """Priory: chapel and one range of cells."""
-    put(g, "church", 1011, 0, 0, length=19.0, depth=8.0)
-    put(g, "longere", 1012, 2, -14)
-    run(g, [(-14, -20), (-14, 8)], 1.6, 0.6, "Rubble", STONE)
-
-
-def _cloister(g, x, y, side) -> None:
-    """Three ranges around a garth, south of the church."""
-    wing(g, x - side / 2, y, 90, side, 7.0, 5.5)
-    wing(g, x + side / 2, y, 90, side, 7.0, 5.5)
-    wing(g, x, y - side / 2, 0, side + 7.0, 7.5, 5.5)
+    """Priory: a chapel with its bell tower and one range of cells."""
+    put(g, "church", 1011, 0, 4, s=0.95)
+    wing(g, 3, -8, 0, 18, 6.5, 5.0)
 
 
 def abbey_2(g) -> None:
-    """Abbey: church, cloister, barn, precinct wall and gate."""
-    put(g, "church", 1021, 0, 14, length=28.0, depth=10.0)
-    _cloister(g, 0, -6, 22.0)
-    put(g, "barn", 1022, 32, -14, 90, length=18.0, depth=9.0)
-    put(g, "lychgate", 1023, -34, -10, 90)
+    """Abbey: church, cloister and a precinct wall."""
+    put(g, "church", 1021, 0, 12, s=1.25)
+    _cloister(g, 2, -4, 20.0)
     run(
         g,
-        [(-34, -8), (-34, 30), (44, 30), (44, -34), (-34, -34), (-34, -12)],
-        2.4,
-        0.7,
+        [(-4, -22), (-24, -22), (-24, 22), (24, 22), (24, -22), (8, -22)],
+        3.0,
+        1.0,
         "Rubble",
         STONE,
     )
 
 
 def abbey_3(g) -> None:
-    """Great abbey: large church, cloister, guest house, infirmary, tithe barn, farm court."""
-    put(g, "church", 1031, 0, 24, length=40.0, depth=13.0)
-    _cloister(g, -4, -2, 28.0)
-    put(g, "manor", 1032, -44, 10, 90, length=20.0, depth=7.5)
-    put(g, "longere", 1033, 34, -4, 90)
-    put(g, "stonehouse", 1034, 34, 22, 90)
-    put(g, "barn", 1035, 30, -40, 0, length=26.0, depth=10.0)
-    put(g, "barn", 1036, -6, -44, 0, length=16.0, depth=9.0)
-    put(g, "longere", 1037, -40, -38, 10)
-    dovecote(g, 52, -24)
-    put(g, "well", 1038, -4, -2)
-    put(g, "lychgate", 1039, -60, -14, 90)
+    """Great abbey: large church, cloister, guest house, tithe barn, precinct wall."""
+    put(g, "church", 1031, 0, 16, s=1.65)
+    _cloister(g, 4, -6, 24.0, 7.5)
+    put(g, "manor", 1032, -24, -14, 90, s=1.0)
+    put(g, "barn", 1035, 28, -14, 90, s=1.4)
     run(
         g,
-        [(-60, -12), (-60, 46), (62, 46), (62, -56), (-60, -56), (-60, -16)],
-        2.6,
-        0.8,
+        [(-6, -32), (-36, -32), (-36, 30), (38, 30), (38, -32), (10, -32)],
+        3.4,
+        1.2,
         "Rubble",
         STONE,
     )
 
 
 def market_1(g) -> None:
-    """Market cross and a few stalls."""
-    market_cross(g, 0, 0)
-    for n, (x, y, yaw) in enumerate(
-        [(-7, 3, 10), (-6, -5, -15), (6, 5, 170), (7, -4, 195)]
-    ):
-        stall(g, x, y, yaw, CLOTHS[n % len(CLOTHS)])
-    cart(g, 0, -10, 80)
+    """Market hall and two stalls."""
+    put(g, "hall", 1111, 0, 4, s=0.9)
+    for n, x in enumerate((-6, 6)):
+        piece(g, stall, x, -8, 0, 2.2, CLOTHS[n])
 
 
 def market_2(g) -> None:
-    """Market hall, cross and two rows of stalls."""
-    put(g, "hall", 1121, 0, 12)
-    market_cross(g, 0, -6)
-    for i in range(5):
-        stall(g, -14 + 7 * i, -14, 0, CLOTHS[i % len(CLOTHS)])
-        stall(g, -14 + 7 * i, -22, 180, CLOTHS[(i + 2) % len(CLOTHS)])
-    cart(g, 20, -4, 60)
-    cart(g, -20, 0, 120)
-    for x, y in [(-12, 4), (-11.2, 4.6), (13, 4)]:
-        barrel(g, x, y)
+    """Market hall, cross and a row of stalls."""
+    put(g, "hall", 1121, 0, 9, s=1.3)
+    piece(g, market_cross, 0, -6, 0, 1.8)
+    for n, x in enumerate((-17, -9, 9, 17)):
+        piece(g, stall, x, -11, 0, 2.3, CLOTHS[n % len(CLOTHS)])
 
 
 def market_3(g) -> None:
-    """Fair ground: hall, guild house, rows of stalls and tents, carts."""
-    put(g, "hall", 1131, -14, 30)
-    put(g, "stonehouse", 1132, 18, 32, length=14.0, depth=8.5)
-    market_cross(g, 0, 12)
-    for row in range(3):
-        for i in range(7):
-            stall(
-                g,
-                -24 + 8 * i,
-                -2 - 10 * row,
-                180 * (row % 2),
-                CLOTHS[(i + row) % len(CLOTHS)],
-            )
-    for n, (x, y, yaw) in enumerate(
-        [
-            (-38, -30, 15),
-            (-28, -36, -10),
-            (30, -34, 20),
-            (40, -26, 80),
-            (40, 6, 95),
-            (-40, 8, 85),
-        ]
-    ):
-        tent(g, x, y, yaw, 7.0, 5.0, 3.2, CLOTHS[n % len(CLOTHS)])
-    for x, y, yaw in [(-34, 18, 30), (36, 18, 150), (0, -36, 5), (12, -38, -20)]:
-        cart(g, x, y, yaw)
-    for x, y in [(-6, 20), (-5.2, 20.6), (6, 20), (26, 22), (26.8, 22.5)]:
-        barrel(g, x, y)
+    """Fair ground: great hall, guild house, rows of stalls and tents."""
+    put(g, "hall", 1131, -9, 16, s=1.7)
+    put(g, "stonehouse", 1132, 23, 17, s=1.6)
+    piece(g, market_cross, 0, -4, 0, 2.2)
+    for n, x in enumerate((-26, -17, -8, 8, 17, 26)):
+        piece(g, stall, x, -13, 0, 2.4, CLOTHS[n % len(CLOTHS)])
+    for n, x in enumerate((-22, -8, 8, 22)):
+        tent(g, x, -25, 0, 10.0, 8.0, 6.0, CLOTHS[(n + 1) % len(CLOTHS)])
+
+
+def quay(g, width) -> None:
+    """Stone quay along X at y = 0, water in front (-Y)."""
+    k.box(g, (0, 1.0, 0.0), (width, 6.0, 4.0), "Masonry", color=STONE)
+    k.box(g, (0, -8.0, -0.6), (width, 12.0, 1.6), "Canvas", color=BRINE)
 
 
 def port_1(g) -> None:
-    """Jetty, a store and two boats."""
-    jetty(g, 0, 0, -22, 3.5)
-    put(g, "barn", 1211, -10, 12, length=11.0, depth=7.0)
-    boat(g, 5, -12, 80, 6.0, 1.8)
-    boat(g, 9, 2, 20, 5.5, 1.7)
-    barrel(g, 3, 3)
-    barrel(g, 3.8, 3.6)
+    """Quay, crane, store and a cog."""
+    quay(g, 28.0)
+    piece(g, crane, -8, 2, 0, 1.9)
+    put(g, "barn", 1211, 5, 12, s=1.2)
+    boat(g, 3, -8, 0, 16.0, 5.0, mast=14.0)
 
 
 def port_2(g) -> None:
-    """Two jetties, crane, warehouses, a cog."""
-    jetty(g, -10, 0, -30, 4.0)
-    jetty(g, 16, 0, -24, 3.5)
-    k.box(g, (3, 1.0, 0.2), (44.0, 4.0, 2.0), "Rubble", color=STONE)
-    crane(g, -4, 2, 0)
-    put(g, "barn", 1221, -18, 16, length=14.0, depth=8.0)
-    put(g, "stonehouse", 1222, 6, 18)
-    put(g, "cottage", 1223, 24, 16, -10)
-    boat(g, -2, -18, 90, 17.0, 5.0, mast=13.0)
-    boat(g, 22, -12, 85, 6.0, 1.8)
-    boat(g, 28, -3, 30, 5.5, 1.7)
-    for x, y in [(-12, 5), (-11.2, 5.6), (10, 5), (10.8, 5.4)]:
-        barrel(g, x, y)
+    """Quay, jetty, crane, warehouses, a cog and boats."""
+    quay(g, 42.0)
+    jetty(g, 15, 0, -18, 5.0)
+    piece(g, crane, -4, 2, 0, 2.1)
+    put(g, "barn", 1221, -12, 15, s=1.5)
+    put(g, "stonehouse", 1222, 12, 14, s=1.4)
+    boat(g, -6, -9, 0, 19.0, 5.6, mast=17.0)
+    boat(g, 23, -6, 80, 9.0, 3.0)
 
 
 def port_3(g) -> None:
-    """Harbour: stone quay, three jetties, crane, hall, warehouses, two cogs and boats."""
-    k.box(g, (0, 1.5, 0.2), (86.0, 5.0, 2.0), "Rubble", color=STONE)
-    jetty(g, -28, -1, -34, 4.5)
-    jetty(g, 0, -1, -40, 4.5)
-    jetty(g, 28, -1, -30, 4.0)
-    crane(g, -12, 2.5, 0)
-    crane(g, 16, 2.5, 0)
-    put(g, "hall", 1231, 0, 24)
-    put(g, "barn", 1232, -30, 20, length=18.0, depth=9.0)
-    put(g, "barn", 1233, 30, 20, length=16.0, depth=9.0)
-    put(g, "stonehouse", 1234, -22, 40)
-    put(g, "stonehouse", 1235, 20, 42)
-    put(g, "cottage", 1236, 40, 40, -15)
-    put(g, "cottage", 1237, -40, 38, 12)
-    boat(g, -14, -20, 90, 18.0, 5.2, mast=14.0)
-    boat(g, 14, -24, 92, 17.0, 5.0, mast=13.0)
-    for x, y, yaw in [(36, -14, 85), (40, -2, 20), (-38, -10, 100), (-42, -1, 160)]:
-        boat(g, x, y, yaw, 6.0, 1.8)
-    cart(g, -4, 10, 0)
-    cart(g, 24, 10, 180)
-    for x, y in [(-20, 6), (-19.2, 6.6), (-18.4, 6), (6, 6), (6.8, 6.6), (30, 6)]:
-        barrel(g, x, y)
+    """Harbour: long quay, two jetties, two cranes, hall, warehouses, two cogs."""
+    quay(g, 60.0)
+    jetty(g, -8, 0, -20, 5.0)
+    jetty(g, 22, 0, -20, 5.0)
+    piece(g, crane, -22, 2, 0, 2.2)
+    piece(g, crane, 8, 2, 0, 2.2)
+    put(g, "hall", 1231, 0, 20, s=1.5)
+    put(g, "barn", 1232, -24, 17, s=1.5)
+    put(g, "barn", 1233, 25, 17, s=1.4)
+    boat(g, -20, -10, 0, 20.0, 6.0, mast=18.0)
+    boat(g, 7, -11, 0, 19.0, 5.6, mast=17.0)
 
 
 def worksite_1(g) -> None:
@@ -813,6 +883,76 @@ def worksite_1(g) -> None:
     cart(g, -2, -14, 15)
 
 
+# --- settlement signs -----------------------------------------------------------------------
+
+
+def sign_village(g) -> None:
+    """Village: a chapel and a handful of thatched houses."""
+    put(g, "church", 1311, 0, 6, s=0.7)
+    houses(g, 1312, 7, 30.0, [(0, 6, 13.0)], roofs=("Thatch", "Thatch", "RoofTile"))
+
+
+def sign_town(g) -> None:
+    """Open town: church and tight tiled roofs."""
+    put(g, "church", 1321, 2, 8, s=1.05)
+    houses(
+        g, 1322, 20, 44.0, [(2, 8, 17.0)], roofs=("RoofTile", "RoofTile", "RoofFlat")
+    )
+
+
+def sign_walled(g) -> None:
+    """Walled town: stone wall, towers, gate, church and tiled roofs."""
+    put(g, "church", 1331, 2, 8, s=1.05)
+    houses(
+        g, 1332, 18, 38.0, [(2, 8, 17.0)], roofs=("RoofTile", "RoofTile", "RoofFlat")
+    )
+    ring_wall(g, 48.0, 8.0, 3.0, 6, 4.5, 13.0)
+
+
+def sign_city(g) -> None:
+    """City: wall, towers and gate, great church, keep, tight tiled and slated roofs."""
+    put(g, "church", 1341, 6, 14, s=1.5)
+    keep(g, -30, 22, 15.0, 26.0)
+    houses(
+        g,
+        1342,
+        30,
+        50.0,
+        [(6, 14, 25.0), (-30, 22, 13.0)],
+        roofs=("RoofTile", "RoofTile", "RoofSlate"),
+        size=1.1,
+    )
+    ring_wall(g, 62.0, 10.0, 3.6, 8, 5.5, 16.0)
+
+
+def sign_castle(g) -> None:
+    """Castle: square curtain, corner towers, gate and a tall keep."""
+    half = 22.0
+    run(
+        g,
+        rect(-half, -half, half, half),
+        11.0,
+        3.0,
+        "Masonry",
+        STONE,
+        depth=1.5,
+        closed=True,
+    )
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            tower(g, sx * half, sy * half, 5.5, 17.0)
+    k.box(g, (0, -half, 7.5), (11.0, 6.0, 16.5), "Masonry", color=STONE)
+    g.quad(
+        (-2.5, -half - 3.1, 0.0),
+        (2.5, -half - 3.1, 0.0),
+        (2.5, -half - 3.1, 7.0),
+        (-2.5, -half - 3.1, 7.0),
+        "Window",
+    )
+    keep(g, 2, 6, 15.0, 28.0)
+    house(g, -9, -8, 0, 13.0, 7.0, 6.0, "RoofSlate", "Ashlar")
+
+
 MODELS = {
     "farm": [farm_1, farm_2, farm_3],
     "mill": [mill_1, mill_2, mill_3],
@@ -824,15 +964,29 @@ MODELS = {
     "port": [port_1, port_2, port_3],
     "worksite": [worksite_1],
 }
+# Settlement signs (ADR 0162): one model per kind, named ``sign_<kind>``.
+SIGNS = {
+    "village": sign_village,
+    "town": sign_town,
+    "walled": sign_walled,
+    "city": sign_city,
+    "castle": sign_castle,
+}
+SIGN_TRIANGLE_CAP = 6000
 
 
 def build(family: str, level: int) -> tuple[Geometry, dict]:
     """Geometry and manifest entry of one model."""
     g = Geometry()
-    MODELS[family][level - 1](g)
+    if family == "sign":
+        SIGNS[level](g)
+    else:
+        MODELS[family][level - 1](g)
     unknown = sorted(set(g.polys) - set(ATLAS_LAYERS))
     if unknown:
         raise SystemExit(f"{family}_{level}: materials outside the atlas: {unknown}")
+    if family == "sign":
+        level = 0
     points = [p for polys in g.polys.values() for pts, _, _ in polys for p in pts]
     xs, ys, zs = ([p[i] for p in points] for i in range(3))
     info = {
@@ -849,11 +1003,14 @@ def build(family: str, level: int) -> tuple[Geometry, dict]:
 
 def manifest() -> dict:
     """Manifest entries of every model (no Blender needed)."""
-    return {
+    entries = {
         f"{family}_{level}": build(family, level)[1]
         for family, recipes in MODELS.items()
         for level in range(1, len(recipes) + 1)
     }
+    for kind in SIGNS:
+        entries[f"sign_{kind}"] = build("sign", kind)[1]
+    return entries
 
 
 def export(out_dir: Path) -> None:
@@ -872,6 +1029,15 @@ def export(out_dir: Path) -> None:
             kit_export.export_glb(obj, out_dir / f"{name}.glb")
             entries[name] = info
             print("MODEL", name, info["triangles"])
+    for kind in SIGNS:
+        name = f"sign_{kind}"
+        kit_export.reset_scene()
+        g, info = build("sign", kind)
+        obj = kit_export.to_object(g, name)
+        kit_export.atlas(obj)
+        kit_export.export_glb(obj, out_dir / f"{name}.glb")
+        entries[name] = info
+        print("MODEL", name, info["triangles"])
     (out_dir / "manifest.json").write_text(
         json.dumps(entries, indent=1, sort_keys=True) + "\n"
     )
@@ -885,7 +1051,7 @@ def main() -> None:
         export(Path(argv[1]))
     elif argv[:1] == ["stats"]:
         for name, info in manifest().items():
-            cap = TRIANGLE_CAPS[info["level"]]
+            cap = TRIANGLE_CAPS.get(info["level"], SIGN_TRIANGLE_CAP)
             flag = "" if info["triangles"] <= cap else "  OVER"
             print(
                 f"{name:14} {info['triangles']:5} tri  r {info['radius']:5} m  h {info['height']:5} m{flag}"

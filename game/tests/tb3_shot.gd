@@ -9,12 +9,16 @@ extends SceneTree
 ##   quartiers de faubourg, enceinte de pierre, suie ; défaut : la plus proche de `--town`)
 ##   [--distances=20,45,90] [--no-before] [--bench] (appels de dessin et ms par image à 20, 45,
 ##   90 et 400, couche affichée puis masquée ; sans vsync avec `--disable-vsync`)
+##   [--coast=<id>] (ville côtière : port et saline de niveau 3 ; défaut set_la_rochelle)
 ## Écrit, par ville et par distance, `tb3-<id>-<distance>-avant.png` (même cadrage sans le lot :
-## couche masquée, suie retirée, comme `--no-tb3`) puis `tb3-<id>-<distance>-apres.png` (960 px de
-## large), HUD masqué. Les images ne sont pas lues ici.
+## couche masquée, suie retirée, comme `--no-tb3`) puis `tb3-<id>-<distance>-apres.png`, à la
+## résolution de la fenêtre, HUD masqué ; puis une planche par ville `tb3-planche-<id>.png`
+## (800 px de large : une ligne par distance, avant à gauche, après à droite, recadrage central
+## de 400 × 300 px sans réduction).
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
-const WIDTH := 960
+const TILE := Vector2i(400, 300)
+const COAST_BUILDINGS := ["bld_port", "bld_fair", "bld_counting_house", "bld_weaving_workshop"]
 const SETTLE_FRAMES := 150
 const BENCH_FRAMES := 240
 const LEVEL_3 := ["bld_fair", "bld_herb_garden", "bld_stables", "bld_weaving_workshop", "bld_windmill", "bld_vineyard_press", "bld_counting_house", "bld_scriptorium"]
@@ -24,6 +28,7 @@ func _init() -> void:
 	var out_dir := "user://tb3"
 	var town_id := "set_agen"
 	var growth_id := ""
+	var coast_id := "set_la_rochelle"
 	var distances: Array[float] = [20.0, 45.0, 90.0]
 	var before := true
 	var bench := false
@@ -34,6 +39,8 @@ func _init() -> void:
 			town_id = arg.trim_prefix("--town=")
 		elif arg.begins_with("--growth="):
 			growth_id = arg.trim_prefix("--growth=")
+		elif arg.begins_with("--coast="):
+			coast_id = arg.trim_prefix("--coast=")
 		elif arg.begins_with("--distances="):
 			distances.clear()
 			for d in arg.trim_prefix("--distances=").split(","):
@@ -82,6 +89,9 @@ func _init() -> void:
 		out.forced_states[growth_id] = {"buildings": ["bld_market", "bld_windmill", "bld_stone_walls"], "building": false}
 		out.forced_population_ratio[str(growth["province"])] = 1.2
 		settlements.set_town_soot(growth_id, 0.8)
+	var coast := settlements.data.get_settlement(coast_id)
+	if not coast.is_empty():
+		out.forced_states[coast_id] = {"buildings": COAST_BUILDINGS, "building": false}
 	out.invalidate()
 	if bench:
 		await _bench(rig, data, out, town_px)
@@ -90,7 +100,11 @@ func _init() -> void:
 	var shots := [[town_id, town_px]]
 	if growth_id != "":
 		shots.append([growth_id, settlements.data.get_settlement(growth_id)["px"]])
+	if not coast.is_empty():
+		shots.append([coast_id, coast["px"]])
 	for shot: Array in shots:
+		var sheet := Image.create(TILE.x * 2, TILE.y * distances.size(), false, Image.FORMAT_RGB8)
+		var row := 0
 		var px: Vector2 = shot[1]
 		var ground := Vector3(px.x, data.surface_world_at(px.x, px.y), px.y)
 		for distance in distances:
@@ -102,14 +116,17 @@ func _init() -> void:
 					settlements.set_town_soot(growth_id, 0.0)
 				for i in SETTLE_FRAMES:
 					await process_frame
-				_shot(out_dir, "tb3-%s-%d-avant" % [shot[0], int(distance)])
+				_tile(sheet, _shot(out_dir, "tb3-%s-%d-avant" % [shot[0], int(distance)]), Vector2i(0, row))
 				out.enabled = true
 				if growth_id != "":
 					settlements.set_town_soot(growth_id, 0.8)
 			for i in SETTLE_FRAMES:
 				await process_frame
 			print("TB3 %s d=%.0f : %s" % [shot[0], distance, _summary(out, str(shot[0]))])
-			_shot(out_dir, "tb3-%s-%d-apres" % [shot[0], int(distance)])
+			_tile(sheet, _shot(out_dir, "tb3-%s-%d-apres" % [shot[0], int(distance)]), Vector2i(1, row))
+			row += 1
+		sheet.save_png(out_dir.path_join("tb3-planche-%s.png" % shot[0]))
+		print("TB3 planche %s" % out_dir.path_join("tb3-planche-%s.png" % shot[0]))
 	quit(0)
 
 
@@ -163,10 +180,17 @@ func _bench(rig: CampaignCamera, data: MapData, out: OutbuildingLayer, px: Vecto
 	out.enabled = true
 
 
-func _shot(out_dir: String, name: String) -> void:
+func _shot(out_dir: String, name: String) -> Image:
 	var image := root.get_viewport().get_texture().get_image()
-	if image.get_width() > WIDTH:
-		image.resize(WIDTH, roundi(image.get_height() * float(WIDTH) / image.get_width()), Image.INTERPOLATE_LANCZOS)
 	var path := out_dir.path_join("%s.png" % name)
 	image.save_png(path)
 	print("TB3 shot %s" % path)
+	return image
+
+
+## Recadrage central de `TILE` px, sans réduction, posé dans la case `cell` de la planche.
+func _tile(sheet: Image, image: Image, cell: Vector2i) -> void:
+	var size := Vector2i(mini(TILE.x, image.get_width()), mini(TILE.y, image.get_height()))
+	var region := image.get_region(Rect2i((image.get_size() - size) / 2, size))
+	region.convert(Image.FORMAT_RGB8)
+	sheet.blit_rect(region, Rect2i(Vector2i.ZERO, size), cell * TILE)

@@ -68,7 +68,10 @@
             "band_ratio",
             "gap",
             "rings",
-            "minor_until"
+            "minor_until",
+            "vertical",
+            "sign_vertical",
+            "signs"
           ],
           "properties": {
             "real_below": {
@@ -137,6 +140,49 @@
               "description": "Distance du rig au-delà de laquelle seules les cités et les villes gardent leurs maquettes (villages, châteaux et abbayes : la place manque).",
               "type": "number",
               "exclusiveMinimum": 0
+            },
+            "vertical": {
+              "description": "Exagération verticale des maquettes hors les murs à pleine tenue (silhouettes lues en plongée).",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "sign_vertical": {
+              "description": "Exagération verticale des signes de colonie.",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "signs": {
+              "description": "Signe de colonie par genre (`kind`) : maquette tenue à l'écran qui recouvre la ville 1:1 de loin. `walled_model` : variante murée (plan de 1340 muré, fortification ≥ `walled_from`, enceinte construite).",
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "model",
+                  "fraction"
+                ],
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "pattern": "^[a-z]+_[a-z0-9]+$"
+                  },
+                  "walled_model": {
+                    "type": "string",
+                    "pattern": "^[a-z]+_[a-z0-9]+$"
+                  },
+                  "walled_from": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "fraction": {
+                    "type": "number",
+                    "minimum": 0.03,
+                    "maximum": 0.3
+                  }
+                }
+              }
             }
           }
         },

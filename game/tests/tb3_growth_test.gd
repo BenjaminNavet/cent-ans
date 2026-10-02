@@ -280,8 +280,19 @@ func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapDa
 				if (models[a]["px"] as Vector2).distance_to(models[b]["px"]) < reach:
 					overlaps += 1
 		_check(overlaps == 0, "no two models overlap at distance %.0f, got %d pair(s) among %d" % [distance, overlaps, models.size()])
-		var own := out.instances_of(TOWN)
+		var own: Array = []
+		for inst: Dictionary in out.instances_of(TOWN):
+			if str(inst.get("grow", "")) == "out":
+				own.append(inst)
 		_check(own.size() >= 3, "at least 3 models stay around %s at distance %.0f, got %d" % [TOWN, distance, own.size()])
+		# Signe de la ville : le plus gros ensemble, les maquettes hors de son emprise.
+		var signs := out.instances_of(TOWN, "sign")
+		if _check(signs.size() == 1, "one settlement sign for %s at distance %.0f" % [TOWN, distance]):
+			var sign_width := float(signs[0]["width_m"]) * float(signs[0]["factor"]) / 719.0
+			var sign_reach := float(signs[0]["radius_m"]) * float(signs[0]["factor"]) / 719.0
+			_check(sign_width > float(level_width[3][1]) * 1.3, "the town sign is the largest piece at distance %.0f (%.2f against %.2f units)" % [distance, sign_width, level_width[3][1]])
+			for inst: Dictionary in own:
+				_check((inst["px"] as Vector2).distance_to(town_px) >= sign_reach + float(inst["radius_m"]) * float(inst["factor"]) / 719.0, "%s clears the town sign at distance %.0f" % [inst["model"], distance])
 		_check(float(own[0]["factor"]) > 1.0 if not own.is_empty() else false, "models are enlarged at distance %.0f" % distance)
 		print("tb3_growth_test: distance %.0f : %d maquettes (%d autour de %s), largeur de %d d'entre elles %.1f à %.1f px en 900 px de haut, niveau 1 %.2f u, niveau 3 %.2f u, mise en place %.1f ms" % [distance, models.size(), own.size(), TOWN, measured, narrowest, widest, level_width[1][1], level_width[3][0], float(out.stats.get("build_ms", 0.0))])
 	_check(float(screen["real_below"]) < float(screen["full_from"]), "real scale below the held sizes")
@@ -290,16 +301,21 @@ func _check_screen(layer: SettlementLayer, data: SettlementData, map_data: MapDa
 	layer.refresh(sim, Callable())
 	layer.update_view(45.0)
 	out.flush(town_px)
-	_check(out.is_hidden(TOWN) and out.instances_of(TOWN).is_empty(), "nothing stands around a town under the fog of war")
+	var fogged := 0
+	for inst: Dictionary in out.instances_of(TOWN):
+		if str(inst.get("family", "")) != "sign":
+			fogged += 1
+	_check(out.is_hidden(TOWN) and fogged == 0 and out.instances_of(TOWN, "sign").size() == 1, "under the fog of war a town keeps its sign and nothing else")
 	_check(not out.instances().is_empty(), "provinces in sight keep their models")
 	fog.hidden_provinces.clear()
 	layer.refresh(sim, Callable())
 	layer.update_view(45.0)
 	out.flush(town_px)
-	_check(not out.instances_of(TOWN).is_empty(), "models come back once the province is in sight")
+	_check(out.instances_of(TOWN).size() > 1, "models come back once the province is in sight")
 	# Retour à l'échelle réelle de près.
 	layer.update_view(8.0)
 	out.flush(town_px)
+	_check(out.instances_of(TOWN, "sign").is_empty(), "no settlement sign up close: the 1:1 town is the town")
 	for inst: Dictionary in out.instances_of(TOWN):
 		_check(is_equal_approx(float(inst["factor"]), 1.0) and (inst["px"] as Vector2).is_equal_approx(inst["real_px"]), "%s back at real scale and on its site up close" % inst["model"])
 	layer.update_view(10.0)
