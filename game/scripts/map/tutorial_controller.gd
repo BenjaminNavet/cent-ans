@@ -108,21 +108,34 @@ func should_autostart() -> bool:
 # --- Déroulé --------------------------------------------------------------------------
 
 
-func _context() -> Dictionary:
-	var faction_id := str(map.get("player_faction"))
+## Contexte des textes pour `faction_id` (faction du joueur par défaut).
+func _context(faction_id: String = _player()) -> Dictionary:
 	var faction: Dictionary = GameCatalog.definitions("factions").get(faction_id, {})
 	var context := {}
 	var name: Variant = faction.get("name", {})
 	if name is Dictionary:
 		context["faction"] = str(name.get("display", faction_id))
+	# Fiche féodale de la simulation : dirigeant des factions sans `ruler` dans les données,
+	# suzerain, et objectifs de titre des factions sans bloc `victory`.
+	var sim := _sim()
+	var sheet: Dictionary = sim.call("get_feudal_sheet", faction_id) if sim != null and sim.has_method("get_feudal_sheet") else {}
 	if str(faction.get("ruler", "")) != "":
 		context["ruler"] = Encyclopedia._character_name(str(faction["ruler"]))
+	elif str(sheet.get("ruler", "")) != "":
+		context["ruler"] = str(sheet["ruler"])
+	context["liege"] = str(sheet.get("liege_name", ""))
+	context["description"] = str(faction.get("description", ""))
 	if str(faction.get("capital_city", "")) != "":
 		context["capital"] = str(faction["capital_city"])
 	var victory: Dictionary = faction.get("victory", {})
 	var lines := PackedStringArray()
 	for objective in victory.get("objectives", []):
 		lines.append("• %s" % str(objective.get("title", "")))
+	if lines.is_empty():
+		for objective in sheet.get("objectives", []):
+			lines.append("• %s" % str(objective.get("title", "")))
+		if not lines.is_empty():
+			context["objectives_title"] = "Les objectifs de votre titre"
 	if not lines.is_empty():
 		context["objectives"] = "\n".join(lines)
 	if victory.has("end_year"):

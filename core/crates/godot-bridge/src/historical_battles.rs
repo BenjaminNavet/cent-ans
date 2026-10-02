@@ -54,7 +54,9 @@ pub(crate) fn maps_in(data_dir: &Path) -> Arc<[MapEntry]> {
             };
             match HistoricalMap::from_json(&text) {
                 Ok(map) => maps.push((map, text)),
-                Err(error) => godot_warn!("battle map {}: {error}", path.display()),
+                Err(error) => {
+                    godot_warn!("battle map {}: {error}", path.display());
+                }
             }
         }
     }

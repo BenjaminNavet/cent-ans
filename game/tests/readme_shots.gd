@@ -80,13 +80,18 @@ func _init() -> void:
 			await process_frame
 		for i in 120:
 			await process_frame
-		for layer in root.find_children("*", "CanvasLayer", true, false):
-			(layer as CanvasLayer).visible = keep_ui
+		# Masquée juste avant chaque rendu : l'interface de campagne se réaffiche seule selon le zoom.
+		var hide_ui := func() -> void:
+			for layer in root.find_children("*", "CanvasLayer", true, false):
+				(layer as CanvasLayer).visible = keep_ui
+		RenderingServer.frame_pre_draw.connect(hide_ui)
 		if terrain != null and terrain.material != null:
 			terrain.material.set_shader_parameter("fog_enabled", false)
 		for i in 3:
 			await process_frame
+		await RenderingServer.frame_post_draw
 		var image := root.get_viewport().get_texture().get_image()
+		RenderingServer.frame_pre_draw.disconnect(hide_ui)
 		if image.get_width() > width:
 			image.resize(width, roundi(image.get_height() * float(width) / image.get_width()), Image.INTERPOLATE_LANCZOS)
 		var path := out_dir.path_join("%s.jpg" % shot[0])
