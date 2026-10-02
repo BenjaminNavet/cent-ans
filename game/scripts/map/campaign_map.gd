@@ -143,6 +143,8 @@ func _ready() -> void:
 	var t1 := Time.get_ticks_msec()
 	_configure_lod()
 	terrain.build(map_data)
+	MapReadability.signs_layer_on = false  # TB2 : couche « Signes » éteinte à chaque partie
+	MapReadability.apply_fog(terrain.material)  # TB2 : voile de parchemin du brouillard de guerre
 	var t2 := Time.get_ticks_msec()
 	sea.setup(map_data.size)
 	var map_extent := maxf(map_data.size.x, map_data.size.y)
@@ -323,6 +325,9 @@ func _setup_settlements() -> void:
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
 		return settlement_layer.screen_label_rects(view_camera)
+	settlement_layer.label_top_inset = func() -> float:  # TB2 : pas de nom sous le bandeau du haut
+		var bar := ui.get_node_or_null("TopBar") as Control
+		return bar.get_global_rect().end.y if bar != null and bar.visible else 0.0
 	# CV3-0 (#7) : réciproque — les colonies évitent à leur tour les plaques/étendards d'armée.
 	settlement_layer.label_obstacles = func(view_camera: Camera3D) -> Array:
 		return armies.screen_label_rects(view_camera)

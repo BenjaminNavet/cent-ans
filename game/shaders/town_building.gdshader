@@ -105,14 +105,15 @@ void fragment() {
 	}
 	vec3 albedo = base * tint.rgb * COLOR.rgb * (1.0 + tint_shift * 0.35);
 	float far = ba_far(v_age_pos);
+	float snow_k = roof_snow(world_m);  // TB1 : neige du matériau ou de la saison (paramètre global)
 	if (aging > 0.0 && textured) {
 		bool roof = layer >= roof_first && layer <= roof_last;
 		float age = aging * (0.6 + 0.8 * v_seed);
 		vec3 n = normalize(world_n);
-		albedo = ba_age(albedo, v_age_pos, n, v_age_pos.y, v_seed, roof ? 0.0 : 1.0, roof ? 1.0 - snow : 0.25, age, far);
+		albedo = ba_age(albedo, v_age_pos, n, v_age_pos.y, v_seed, roof ? 0.0 : 1.0, roof ? 1.0 - snow_k : 0.25, age, far);
 	}
-	if (snow > 0.0 && layer >= roof_first && layer <= roof_last) {
-		albedo = mix(albedo, vec3(0.9, 0.92, 0.97) * (0.85 + 0.15 * base.r), snow);
+	if (snow_k > 0.0 && layer >= roof_first && layer <= roof_last) {
+		albedo = mix(albedo, vec3(0.9, 0.92, 0.97) * (0.85 + 0.15 * base.r), snow_k);
 	}
 	float roughness = tint.a;
 	if (roofscape > 0.0 && v_built > 0.0) {
@@ -134,7 +135,7 @@ void fragment() {
 			float detail = 1.0 - smoothstep(roofscape_cell_m * 0.5, roofscape_cell_m * 2.0, footprint);
 			float r_cell;
 			float r_avg;
-			vec3 mean = mix(roofscape_average(r_avg), roofscape_color(world_m, r_cell), detail);
+			vec3 mean = mix(roofscape_average(world_m, r_avg), roofscape_color(world_m, r_cell), detail);
 			albedo = mix(albedo, mean, far_w);
 			roughness = mix(roughness, mix(r_avg, r_cell, detail), far_w);
 		}

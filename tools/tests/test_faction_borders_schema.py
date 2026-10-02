@@ -31,3 +31,15 @@ def test_faction_borders_consistency() -> None:
     assert tuning["realm"]["core_alpha"] > tuning["province"]["core_alpha"]
     assert tuning["modes"]["political"]["alpha"] == 1.0
     assert not tuning["modes"]["political"]["neutral"]
+
+
+def test_faction_borders_rest_style_is_quieter() -> None:
+    """TB2: at rest borders are thinner, fainter and less saturated; diplomacy shows them in full."""
+    tuning = _load("map/faction_borders.json")
+    rest = tuning["rest"]
+    assert rest["width_scale"] < 1.0
+    assert rest["alpha_scale"] < 1.0
+    assert rest["saturation"] < 1.0
+    assert rest["glow_scale"] <= 0.5
+    assert tuning["modes"]["diplomacy"].get("full") is True
+    assert not tuning["modes"]["political"].get("full", False)

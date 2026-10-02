@@ -1,0 +1,130 @@
+{
+  "description": "TB1 : saisons de la carte de campagne (rendu seulement). `sea` : mer selon la saison ; `grade` : étalonnage de saison de la carte (printemps frais, été doré, automne chaud, hiver bleuté et désaturé ; bible DA § 12.6, ADR 0150) ; `roof_snow` : neige des toits des villes 1:1 ; `storm` : mer sous la tempête ; `snow.south_fade` : limite sud de la neige de plaine et des toits.",
+  "seasons": {
+    "spring": {
+      "sea": {
+        "tint": [
+          0.98,
+          1.02,
+          1.0
+        ],
+        "grey": [
+          0.021,
+          0.047,
+          0.075
+        ],
+        "grey_amount": 0.05,
+        "foam": 1.0
+      },
+      "grade": {
+        "temperature": -0.12,
+        "gain": [
+          0.98,
+          1.02,
+          1.0
+        ]
+      },
+      "roof_snow": 0.0
+    },
+    "summer": {
+      "sea": {
+        "tint": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "grey": [
+          0.021,
+          0.047,
+          0.075
+        ],
+        "grey_amount": 0.0,
+        "foam": 0.9
+      },
+      "grade": {
+        "temperature": 0.14,
+        "highlights": [
+          1.05,
+          1.0,
+          0.9
+        ]
+      },
+      "roof_snow": 0.0
+    },
+    "autumn": {
+      "sea": {
+        "tint": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "grey": [
+          0.021,
+          0.047,
+          0.075
+        ],
+        "grey_amount": 0.3,
+        "foam": 1.2
+      },
+      "grade": {
+        "temperature": 0.22,
+        "gain": [
+          1.04,
+          0.98,
+          0.9
+        ],
+        "shadows": [
+          1.03,
+          0.98,
+          0.92
+        ]
+      },
+      "roof_snow": 0.0
+    },
+    "winter": {
+      "sea": {
+        "tint": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "grey": [
+          0.021,
+          0.047,
+          0.075
+        ],
+        "grey_amount": 0.75,
+        "foam": 1.4
+      },
+      "grade": {
+        "temperature": -0.32,
+        "saturation": 0.72,
+        "shadows": [
+          0.94,
+          0.99,
+          1.08
+        ],
+        "highlights": [
+          0.97,
+          1.0,
+          1.05
+        ]
+      },
+      "roof_snow": 0.8
+    }
+  },
+  "storm": {
+    "foam_gain": 1.2,
+    "foam_width": 1.5,
+    "whitecaps": 0.35,
+    "darken": 0.25,
+    "reach_px": 12,
+    "rain_share": 0.4
+  },
+  "snow": {
+    "south_fade": [
+      0.58,
+      0.72
+    ]
+  }
+}

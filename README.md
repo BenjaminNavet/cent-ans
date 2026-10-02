@@ -69,7 +69,7 @@ Prérequis : [Rust](https://rustup.rs) stable, [Godot 4.7](https://godotengine.o
 |---|---|
 | macOS | `Lancer Cent Ans.command` |
 | Linux | `Lancer Cent Ans.sh` |
-| Windows | `Lancer Cent Ans.bat` |
+| Windows | `Lancer Cent Ans.exe` (ou `Lancer Cent Ans.bat`) |
 
 Le lanceur (`tools/launch.sh`) recompile le cœur Rust si `core/` a changé. Il refait l'import
 headless de Godot si `game/` a changé depuis le dernier import (premier lancement, `git pull`,
@@ -113,7 +113,8 @@ en gardant son journal affiché.
    core/build-windows.sh                    # facultatif : le lanceur le fait (quelques minutes)
    ```
 
-3. Double-cliquer sur `Lancer Cent Ans.bat` : il compile `cent_ans.debug.dll`, importe les
+3. Double-cliquer sur `Lancer Cent Ans.exe` (ou sur `Lancer Cent Ans.bat`, identique, si Windows
+   ou l'antivirus bloque l'exécutable non signé) : il compile `cent_ans.debug.dll`, importe les
    ressources, puis lance le jeu. Si Godot n'est pas trouvé, placer son exécutable
    (`Godot_v4.7.2-stable_win64.exe`) à côté du dossier `cent-ans`, ou définir la variable
    `GODOT`. On peut aussi ouvrir Godot, **Importer** → `cent-ans/game/project.godot`, puis

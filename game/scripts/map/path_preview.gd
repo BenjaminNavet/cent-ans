@@ -26,7 +26,7 @@ const MIN_STEP := 0.04
 const MAX_POINTS := 2000
 const REBUILD_RATIO := 1.3
 
-@export var color: Color = Color(1.0, 0.55, 0.15, 0.95)
+@export var color: Color = Color(0.88, 0.57, 0.26, 0.9)  # TB2 : orange adouci
 @export var lift: float = 0.6
 
 var map_data: MapData

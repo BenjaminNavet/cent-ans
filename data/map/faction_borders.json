@@ -40,6 +40,15 @@
     "glow_scale": 0.6,
     "ink_mix": 0.35
   },
+  "rest": {
+    "description": "TB2 : style au repos (hors sélection, survol et modes « pleins »). Facteurs appliqués à la largeur, à l'opacité, au halo, à la saturation et à la luminosité des frontières ; 1 = pleine intensité. parchment_focus : part de pleine intensité gardée en vue stratégique (parchemin).",
+    "width_scale": 0.6,
+    "alpha_scale": 0.6,
+    "glow_scale": 0.25,
+    "saturation": 0.45,
+    "brightness": 0.8,
+    "parchment_focus": 1.0
+  },
   "modes": {
     "political": {
       "alpha": 1.0,
@@ -47,7 +56,8 @@
     },
     "diplomacy": {
       "alpha": 1.0,
-      "neutral": false
+      "neutral": false,
+      "full": true
     },
     "claims": {
       "alpha": 0.75,

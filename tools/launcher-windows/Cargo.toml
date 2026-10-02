@@ -1,0 +1,21 @@
+# Double-click launcher "Lancer Cent Ans.exe" for Windows (ADR 0153). Standalone crate, outside
+# the core/ workspace: no dependency, built by tools/launcher-windows/build.sh.
+[package]
+name = "cent-ans-launcher"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[[bin]]
+name = "lancer-cent-ans"
+path = "src/main.rs"
+
+[workspace]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

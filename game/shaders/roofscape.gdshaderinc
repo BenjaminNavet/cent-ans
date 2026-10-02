@@ -3,13 +3,25 @@
 // (`town_far.gdshader`). Couleur moyenne (dernier niveau de mip) d'une couche de toit de l'atlas,
 // tirée par cellule de `roofscape_cell_m`, bord sombre de chaque cellule (ruelles et cours).
 // Le shader qui inclut ce fichier déclare avant l'inclusion : `albedo_array` (sampler2DArray),
-// `layer_tint[16]`, `roof_first`, `roof_last`, `snow`.
+// `layer_tint[16]`, `roof_first`, `roof_last`, `snow`, `meters_per_unit`.
 
 uniform float roofscape = 0.0;
 uniform float roofscape_near = 1.2;
 uniform float roofscape_far = 3.5;
 uniform float roofscape_cell_m = 9.0;
 uniform float roofscape_gain = 1.0;
+
+// Lot TB1 (ADR 0150) : neige d'hiver sur les toits des villes 1:1, paramètre global publié par
+// `CampaignLife` (x : quantité 0-1 ; y, z : début et fin du fondu vers le sud, en px carte ; 0 hors
+// de la carte de campagne). Le `snow` local du matériau garde la main s'il est plus fort.
+global uniform vec4 campaign_roof_snow;
+
+// Neige des toits au point `world_m` (mètres monde).
+float roof_snow(vec3 world_m) {
+	float z_px = world_m.z / meters_per_unit;
+	float north = campaign_roof_snow.z > campaign_roof_snow.y ? 1.0 - smoothstep(campaign_roof_snow.y, campaign_roof_snow.z, z_px) : 1.0;
+	return max(snow, campaign_roof_snow.x * north);
+}
 
 float roof_hash(vec2 p) {
 	p = fract(p * vec2(127.1, 311.7));
@@ -27,16 +39,14 @@ vec3 roofscape_color(vec3 world_m, out float roof_roughness) {
 	vec2 f = abs(fract(world_m.xz / roofscape_cell_m) - 0.5) * 2.0;
 	float gap = smoothstep(0.72, 0.95, max(f.x, f.y));
 	mean *= roofscape_gain * mix(0.8, 1.15, fract(h * 7.31)) * mix(1.0, 0.55, gap);
-	if (snow > 0.0) {
-		mean = mix(mean, vec3(0.9, 0.92, 0.97), snow);
-	}
+	mean = mix(mean, vec3(0.9, 0.92, 0.97), roof_snow(world_m));
 	roof_roughness = layer_tint[roof].a;
 	return mean;
 }
 
 // Teinte moyenne de toutes les couches de toit (sans variation par cellule) : repli quand une
 // cellule devient plus petite qu'un pixel (le tirage par cellule scintillerait).
-vec3 roofscape_average(out float roof_roughness) {
+vec3 roofscape_average(vec3 world_m, out float roof_roughness) {
 	vec3 sum = vec3(0.0);
 	float rough = 0.0;
 	int n = 0;
@@ -47,9 +57,7 @@ vec3 roofscape_average(out float roof_roughness) {
 	}
 	float k = 1.0 / float(max(n, 1));
 	vec3 mean = sum * k * roofscape_gain * 0.95;
-	if (snow > 0.0) {
-		mean = mix(mean, vec3(0.9, 0.92, 0.97), snow);
-	}
+	mean = mix(mean, vec3(0.9, 0.92, 0.97), roof_snow(world_m));
 	roof_roughness = rough * k;
 	return mean;
 }

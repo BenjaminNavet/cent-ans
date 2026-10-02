@@ -38,18 +38,21 @@ uniform bool hatch_enabled = false;
 uniform float hatch_period_px = 9.0;
 uniform vec3 reachable_color : source_color = vec3(0.98, 0.93, 0.55);
 uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
-// Brouillard de guerre (lot C1, A1-03 ; refait BR 2026-09-30) : 1 = province vue, 0 = voilée.
-// Le terrain reste lisible sous le voile (couleurs à peine ternies, léger assombrissement) et une
-// vraie brume mouvante le recouvre par bancs : trouées où l'on voit le sol, nappes épaisses
-// ailleurs, plus claire au sommet des bancs. Plus de voile gris uni.
+// Brouillard de guerre (lot C1, A1-03 ; BR 2026-09-30 ; refait TB2 2026-10-02) : 1 = province vue,
+// 0 = voilée. Voile de parchemin : le sol hors de vue est tiré vers un camaïeu sépia, un peu
+// assombri, sous un lavis léger ; l'ombrage du relief reste entier (plus de nappe blanche qui
+// l'efface). Un reste de brume très fin dérive par-dessus. Réglages : bloc `fog_of_war` de
+// `data/ui/campaign_map.json` (posés par `MapReadability`), mêmes valeurs par défaut ici.
 uniform sampler2D fog_mask : filter_nearest, repeat_disable, hint_default_white;
 uniform bool fog_enabled = false;
-uniform float fog_desaturation = 0.25;      // terrain sous la brume : couleurs gardées
-uniform float fog_dim = 0.88;               // et un peu assombri (« pas vu en ce moment »)
-uniform vec3 fog_mist_color : source_color = vec3(0.93, 0.94, 0.96);
-uniform float fog_mist_max = 0.66;          // opacité des nappes les plus épaisses
-uniform float fog_mist_min = 0.06;          // opacité dans les trouées
-uniform float fog_mist_glow = 0.40;         // brume auto-éclairée (ne prend pas l'ombre du relief)
+uniform float fog_desaturation = 0.62;      // part de camaïeu sépia du sol hors de vue
+uniform float fog_dim = 0.72;               // assombrissement (« pas vu en ce moment »)
+uniform vec3 fog_veil_color : source_color = vec3(0.74, 0.65, 0.48);  // ton parchemin
+uniform float fog_veil_strength = 0.10;     // lavis uni par-dessus (0 = aucun)
+uniform vec3 fog_mist_color : source_color = vec3(0.80, 0.74, 0.62);
+uniform float fog_mist_max = 0.10;          // opacité du reste de brume le plus épais
+uniform float fog_mist_min = 0.0;           // opacité dans les trouées
+uniform float fog_mist_glow = 0.0;          // plus de brume auto-éclairée (elle blanchissait le sol)
 uniform float fog_cloud_scale = 0.030;      // par pixel carte (≈ 33 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
 uniform float fog_feather_px = 3.0;         // fondu de bord, pixels carte
@@ -478,7 +481,7 @@ void fragment() {
 	w_rock += before_cliff - (w_grass + w_farm + w_forest + w_heath);
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
-	snow = season_snow(snow, hc, uv, p, slope, macro, footprint);  // CV1
+	snow = season_snow(snow, hc, uv, p, slope, macro, footprint, w_forest / max(w_grass + w_farm + w_forest + w_rock + w_heath, 1e-3));  // CV1, TB1
 	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f * (1.0 - lake_shore);
 	float keep = (1.0 - snow) * (1.0 - sand);
 	w_grass *= keep; w_farm *= keep; w_forest *= keep; w_rock *= keep; w_heath *= keep;
@@ -495,6 +498,8 @@ void fragment() {
 	// Teintes de base (lointain) : même moyenne que les parcelles, sèches au sud.
 	vec3 grass_base = mix(tint_grass, dry_grass, dry * 0.75);
 	vec3 farm_base = mix(tint_farmland, mix(tint_farmland, crop_wheat, 0.35) * vec3(1.05, 0.98, 0.9), dry * 0.6);
+	vec3 grass_summer = grass_base;  // TB1 : références d'été de l'écart saisonnier
+	vec3 farm_summer = farm_base;
 	grass_base = season_grass(grass_base);  // CV1
 	farm_base = season_farm(farm_base);
 	vec3 grass_tint = grass_base;
@@ -646,9 +651,26 @@ void fragment() {
 	}
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
 	fp_parcels(p, uv, footprint, grad_m, slope, hc, s, lu, terroir, open_w, w_forest / max(wsum, 1e-3), col, roughness, n);  // ZG5b
-	sg_apply(uv, footprint, snow, land_f, col);  // SS2
+	// TB1 : écart saisonnier (saison / été) de l'occupation du sol, posé par-dessus la carte de
+	// couleur et les matières (qui sont d'une saison moyenne) au lieu d'être effacé par elles.
+	vec3 k_grass = season_ratio(grass_base, grass_summer);
+	vec3 k_farm = season_ratio(farm_base * mix(vec3(1.0), summer_gold, life_season().y * float(life_enabled)), farm_summer);
+	vec3 forest_far = season_forest_mean(tint_forest);
+	vec3 k_forest = season_ratio(mix(season_forest(tint_forest, value_noise(p * 0.45)), forest_far, smoothstep(0.3, 1.0, footprint)), tint_forest);
+	vec3 russet = mix(vec3(1.0), autumn_russet, life_season().z * float(life_enabled));
+	k_grass *= russet;
+	k_forest *= russet;
+	k_farm *= mix(vec3(1.0), russet, 0.5);
+	vec3 k_heath = mix(vec3(1.0), k_grass, 0.6);
+	vec3 season_num = w_grass * grass_summer * k_grass + w_farm * farm_summer * k_farm + w_forest * tint_forest * k_forest
+		+ w_rock * tint_rock + w_heath * tint_heath * k_heath;
+	vec3 season_den = w_grass * grass_summer + w_farm * farm_summer + w_forest * tint_forest + w_rock * tint_rock + w_heath * tint_heath;
+	vec3 season_k = dot(season_den, vec3(1.0)) > 1e-4 ? season_ratio(season_num, season_den) : vec3(1.0);
+	sg_apply(uv, footprint, snow, land_f, season_k, col);  // SS2
 	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
-		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, col);  // HB3
+		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, k_grass, k_forest,
+		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col);  // HB3
+	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
 
 	if (hc > 0.0) {
@@ -794,23 +816,25 @@ void fragment() {
 			}
 		}
 		if (fog > 0.0) {
-			// Sol sous la brume : lisible, juste terni et assombri.
-			float lum_f = dot(col, vec3(0.2126, 0.7152, 0.0722));
-			vec3 ground = mix(col, vec3(lum_f), fog_desaturation) * fog_dim;
-			// Bancs de brume : bruit à domaine déformé, deux couches qui dérivent à des
-			// vitesses différentes ; la couche fine s'efface au dézoom (pas de scintillement).
+			// TB2 : voile de parchemin. Camaïeu sépia à luminance conservée (le modelé du sol reste
+			// lisible), assombri, puis un lavis uni très léger du ton du papier.
+			const vec3 lum_w = vec3(0.2126, 0.7152, 0.0722);
+			float lum_f = dot(col, lum_w);
+			vec3 sepia = fog_veil_color / max(dot(fog_veil_color, lum_w), 1e-3);
+			vec3 ground = mix(col, lum_f * sepia, fog_desaturation) * fog_dim;
+			ground = mix(ground, fog_veil_color * fog_dim, fog_veil_strength);
+			// Reste de brume : bruit à domaine déformé, deux couches qui dérivent à des vitesses
+			// différentes ; la couche fine s'efface au dézoom (pas de scintillement).
 			vec2 q = p * fog_cloud_scale;
 			vec2 warp = vec2(fbm(q * 0.5 + TIME * fog_cloud_wind * 0.6), fbm(q * 0.5 + vec2(7.3, 2.9) - TIME * fog_cloud_wind * 0.4));
 			float banks = fbm(q + warp * 1.6 + TIME * fog_cloud_wind);
 			float fine_w = 1.0 - smoothstep(0.4, 2.0, footprint * fog_cloud_scale * 12.0);
 			float wisps = fbm(q * 3.1 - TIME * fog_cloud_wind * 2.2);
 			float density = smoothstep(0.26, 0.78, banks + (wisps - 0.5) * 0.35 * fine_w);
-			// À la lisière de la zone vue, la brume s'effiloche au lieu de faire un mur.
+			// À la lisière de la zone vue, le voile s'effiloche au lieu de faire un mur.
 			float edge = smoothstep(0.0, 1.0, fog);
 			fog_mist = mix(fog_mist_min, fog_mist_max, density) * edge;
-			// Sommets des bancs plus clairs, creux légèrement bleutés.
-			vec3 mist = pow(fog_mist_color, vec3(2.2)) * mix(0.90, 1.05, density);
-			col = mix(mix(col, ground, fog), mist, fog_mist);
+			col = mix(mix(col, ground, fog), fog_mist_color * fog_dim, fog_mist);
 		}
 	}
 

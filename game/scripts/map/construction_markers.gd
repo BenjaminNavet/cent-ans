@@ -35,5 +35,11 @@ func refresh(province_ids: PackedStringArray, is_building: Callable, world_posit
 		_labels.append(label)
 
 
+## TB2 : le marteau doublait l'écu de la ville ; il ne s'affiche plus que dans la couche « Signes »
+## et les modes de carte du bloc `signs.construction` (`MapReadability.sign_shown`).
+func _process(_delta: float) -> void:
+	visible = MapReadability.sign_shown("construction", MapReadability.map_mode_of(get_parent()))
+
+
 func marker_count() -> int:
 	return _labels.size()

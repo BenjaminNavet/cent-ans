@@ -10,8 +10,10 @@ extends Node3D
 const SUBDIVISION_PX := 6.0
 const LIFT := 0.5
 
-@export var now_color: Color = Color(0.40, 0.88, 0.32, 1.0)
-@export var later_color: Color = Color(0.92, 0.36, 0.20, 0.95)
+## TB2 : teintes adoucies (vert et ocre rouge moins saturés), le tracé n'existe que pour l'armée
+## sélectionnée.
+@export var now_color: Color = Color(0.47, 0.74, 0.38, 1.0)
+@export var later_color: Color = Color(0.76, 0.41, 0.28, 0.95)
 @export var marker_color: Color = Color(1.0, 0.90, 0.60, 1.0)
 ## Lot DP2 : chemin sans droit de passage (incident diplomatique), en rouge franc.
 @export var trespass_color: Color = Color(0.93, 0.08, 0.06, 1.0)

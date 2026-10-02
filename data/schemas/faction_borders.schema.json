@@ -16,7 +16,8 @@
       "additionalProperties": false,
       "properties": {
         "alpha": {"$ref": "#/$defs/unit", "description": "Opacité des frontières dans ce mode (0 = masquées)."},
-        "neutral": {"type": "boolean", "description": "Vrai : trait à l'encre neutre (les couleurs de faction entreraient en conflit avec celles du mode)."}
+        "neutral": {"type": "boolean", "description": "Vrai : trait à l'encre neutre (les couleurs de faction entreraient en conflit avec celles du mode)."},
+        "full": {"type": "boolean", "description": "TB2 : vrai = toutes les frontières à pleine intensité dans ce mode (sinon style au repos hors sélection et survol)."}
       }
     },
     "quality": {
@@ -105,6 +106,21 @@
         "alpha_scale": {"$ref": "#/$defs/scale"},
         "glow_scale": {"$ref": "#/$defs/scale"},
         "ink_mix": {"$ref": "#/$defs/unit"}
+      }
+    },
+    "rest": {
+      "type": "object",
+      "description": "TB2 : style au repos des frontières (hors sélection, survol et modes de carte « pleins ») ; facteurs appliqués à la pleine intensité (1 = inchangé).",
+      "required": ["width_scale", "alpha_scale", "glow_scale", "saturation", "brightness", "parchment_focus"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {"type": "string"},
+        "width_scale": {"$ref": "#/$defs/unit", "description": "Largeur du trait et du halo."},
+        "alpha_scale": {"$ref": "#/$defs/unit", "description": "Opacité d'ensemble."},
+        "glow_scale": {"$ref": "#/$defs/unit", "description": "Opacité et part émissive du halo."},
+        "saturation": {"$ref": "#/$defs/unit", "description": "Saturation de la couleur de faction (0 = gris)."},
+        "brightness": {"$ref": "#/$defs/unit", "description": "Luminosité de la couleur de faction."},
+        "parchment_focus": {"$ref": "#/$defs/unit", "description": "Part de pleine intensité gardée en vue stratégique parchemin (1 = le parchemin ignore le style au repos)."}
       }
     },
     "modes": {

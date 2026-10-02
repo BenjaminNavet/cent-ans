@@ -66,6 +66,9 @@ var stats: Dictionary = {}
 ## CV3-0 (#7) : rectangles écran réservés (plaques/étendards d'armée) que le déclutter des
 ## colonies doit éviter ; posé par `CampaignMap` (`ArmyMarkers.screen_label_rects`).
 var label_obstacles: Callable = Callable()
+## TB2 : bord haut de l'écran occupé par le HUD (px), `func() -> float` posé par la carte ; un nom
+## qui passerait dessous est coupé, donc masqué.
+var label_top_inset: Callable = Callable()
 
 var _icons: MultiMeshInstance3D
 var _icon_material: ShaderMaterial
@@ -83,6 +86,8 @@ var _marker_world: PackedVector3Array = PackedVector3Array()
 ## Écu affiché par colonie (faction), pour ne réécrire que ce qui change ; 1 si armorié (DV2).
 var _marker_holder: PackedStringArray = PackedStringArray()
 var _shielded: PackedByteArray = PackedByteArray()
+## TB2 : distance caméra jusqu'à laquelle l'écu accompagne le nom (rang mineur : nom seul de loin).
+var _shield_until: PackedFloat32Array = PackedFloat32Array()
 ## Lot DA7d : état de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
 ## ordre de priorité fixe (rang puis poids), épinglés et dernier état de caméra calculé.
 var _marker_shown: PackedByteArray = PackedByteArray()
@@ -391,6 +396,50 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	_label_kind.append(kind)
 
 
+## TB2 : hiérarchie typographique des noms. Capitales (rang 4) en petites capitales espacées,
+## grandes cités (rang 3) en romain gras, autres lieux en romain plus léger (graisse plafonnée).
+func _style_label(i: int, rank: int) -> void:
+	if i >= _labels.size():
+		return
+	var label := _labels[i]
+	var style := MapReadability.section("labels")
+	if rank < 3:
+		var kind_weight := int(LABEL_WEIGHT.get(_label_kind[i], 500))
+		var capped := mini(kind_weight, int(style.get("minor_max_weight", kind_weight)))
+		if capped != kind_weight:
+			label.font = _label_font(capped)
+			_label_size[i] = Vector2.ZERO
+		return
+	if rank >= 4:
+		var weight := int(style.get("capital_weight", 700))
+		var spacing := int(style.get("capital_letter_spacing_px", 1))
+		var font := _label_font(weight, true, spacing)
+		if font == null:
+			return
+		label.font = font
+		label.font_size = UiType.size(UiType.HEADING)
+		if not has_small_caps(font):
+			label.text = label.text.to_upper()  # repli : capitales, un cran plus petites
+			label.font_size = roundi(label.font_size * 0.82)
+	else:
+		label.font = _label_font(int(style.get("major_weight", 700)))
+	_label_size[i] = Vector2.ZERO  # texte à remesurer
+
+
+## TB2 : vrai si la police porte de vraies petites capitales (fonction OpenType `smcp`).
+static func has_small_caps(font: Font) -> bool:
+	return font != null and font.get_supported_feature_list().has(TextServerManager.get_primary_interface().name_to_tag("smcp"))
+
+
+## TB2 : vrai si le nom de la colonie `i` est composé en petites capitales (ou en capitales, repli).
+func label_is_small_caps(i: int) -> bool:
+	if i < 0 or i >= _labels.size():
+		return false
+	var variation := _labels[i].font as FontVariation
+	var tag := TextServerManager.get_primary_interface().name_to_tag("smcp")
+	return (variation != null and int(variation.opentype_features.get(tag, 0)) == 1) or _labels[i].text == _labels[i].text.to_upper()
+
+
 ## Instance du `MultiMesh` d'une colonie : ordre inverse de la priorité, pour que les lieux de
 ## rang élevé (cités, triées en tête) soient dessinés par-dessus les petits.
 func _icon_instance(i: int) -> int:
@@ -407,6 +456,7 @@ func _build_icons() -> void:
 	_marker_holder.resize(count)
 	_shielded.resize(count)
 	_shielded.fill(0)
+	_shield_until.resize(count)
 	_marker_shown.resize(count)
 	_marker_shown.fill(1)
 	_marker_screen.resize(count)
@@ -427,6 +477,8 @@ func _build_icons() -> void:
 		_marker_rank[i] = rank
 		_marker_size[i] = markers.size_px(kind, rank) * markers.shield_size_factor()
 		_marker_until[i] = markers.visible_until(kind, rank)
+		_shield_until[i] = minf(_marker_until[i], markers.shield_until(rank))  # TB2
+		_style_label(i, rank)
 		_marker_holder[i] = ""
 		var k := _icon_instance(i)
 		# DV2 : ancre = position du nom (recalée par `_sync_shield` quand le nom bouge).
@@ -436,7 +488,7 @@ func _build_icons() -> void:
 		# du dernier changement (fondu).
 		multimesh.set_instance_color(k, Color(-1.0, 0.0, 1.0, -1.0e4))
 		# r = haut du nom au-dessus de l'ancre (px d'étiquette), b = côté de l'écu (px écran).
-		multimesh.set_instance_custom_data(k, Color(_shield_lift(i), 0.0, _marker_size[i], _marker_until[i] / 100.0))
+		multimesh.set_instance_custom_data(k, Color(_shield_lift(i), 0.0, _marker_size[i], _shield_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
 	_icon_material.shader = preload("res://shaders/settlement_icon.gdshader")
 	_fade_distance = markers.fade_distance()
@@ -508,9 +560,10 @@ func marker_in_tier(i: int) -> bool:
 	return i >= 0 and i < _marker_until.size() and _camera_distance < _marker_until_of(i) and _weights.y > 0.01
 
 
-## Vrai si la colonie `i` a un écu (détenteur armorié).
+## Vrai si la colonie `i` montre un écu à la distance caméra courante : détenteur armorié et,
+## lot TB2, rang assez élevé pour cette distance (la colonie sélectionnée garde le sien).
 func has_shield(i: int) -> bool:
-	return i >= 0 and i < _shielded.size() and _shielded[i] == 1
+	return i >= 0 and i < _shielded.size() and _shielded[i] == 1 and (_is_selected(i) or _camera_distance < _shield_until[i])
 
 
 ## DV2, VT : emprises cliquables et anneau de sélection (vue normale).
@@ -862,6 +915,7 @@ var _dc_origin := Vector3.ZERO
 var _dc_eye := Vector3.FORWARD
 var _dc_near := 0.05
 var _dc_label_screen := Rect2()
+var _dc_safe := Rect2()  # TB2 : zone où un nom s'écrit en entier
 var _dc_marker_margin := 2.0
 var _dc_label_margin := 4.0
 var _dc_icons_on := false
@@ -890,6 +944,7 @@ func _declutter_begin() -> bool:
 	_dc_near = camera.near
 	var spill := float(markers.declutter_value("label_screen_margin", 0.2))
 	_dc_label_screen = screen.grow_individual(screen.size.x * spill, screen.size.y * spill, screen.size.x * spill, screen.size.y * spill)
+	_dc_safe = label_safe_rect()
 	_dc_marker_margin = float(markers.declutter_value("marker_margin_px", 2.0))
 	_dc_label_margin = float(markers.declutter_value("label_margin_px", declutter_margin))
 	_dc_icons_on = _icons != null and _icons.visible
@@ -915,6 +970,16 @@ func _declutter_begin() -> bool:
 	PerfProbe.lap("settle/declutter/prep", tp)
 	_dc_usec = Time.get_ticks_usec() - t0
 	return true
+
+
+## TB2 : rectangle de l'écran où un nom (et son écu) doit tenir en entier pour s'afficher : écran
+## moins la marge `labels.edge_margin_px` et le bandeau du HUD (`label_top_inset`). La marge couvre
+## aussi le déplacement de caméra toléré entre deux passes de dé-encombrement.
+func label_safe_rect() -> Rect2:
+	var screen := get_viewport().get_visible_rect()
+	var margin := MapReadability.number("labels", "edge_margin_px", 16.0)
+	var top := float(label_top_inset.call()) if label_top_inset.is_valid() else 0.0
+	return screen.grow_individual(-margin, -margin - top, -margin, -margin)
 
 
 ## RS-K3 : point écran de `p` avec la caméra figée de la passe (`Camera3D.unproject_position`).
@@ -962,12 +1027,15 @@ func _declutter_step(sliced: bool) -> void:
 		# Rectangle du nom (cf. `_label_screen_rect`) et de l'écu (cf. `_shield_rect`).
 		var text := _label_text_size(i) * _dc_scale
 		var label_center := anchor - label.offset * Vector2(-1.0, 1.0) * _dc_scale
-		var rect := Rect2(label_center - text * 0.5, text).grow(_dc_label_margin)
-		var shielded := _shielded[i] == 1
+		var bare := Rect2(label_center - text * 0.5, text)
+		var rect := bare.grow(_dc_label_margin)
+		var shielded := _shielded[i] == 1 and (i == _selected_index or _camera_distance < _shield_until[i])  # = has_shield(i), sans appel
 		var shield_rect := _shield_rect(i, anchor, _dc_scale, _dc_marker_margin) if shielded else Rect2()
 		var shown := false
 		if _dc_label_screen.intersects(rect) or (shielded and _dc_label_screen.intersects(shield_rect)):
-			shown = pinned or not (_placer.overlaps(rect, i) or (shielded and _placer.overlaps(shield_rect, i)))
+			# TB2 : un nom (ou son écu) qui dépasse de l'écran serait coupé : il cède la place.
+			var cut := not _dc_safe.encloses(bare) or (shielded and not _dc_safe.encloses(shield_rect.grow(-_dc_marker_margin)))
+			shown = pinned or not (cut or _placer.overlaps(rect, i) or (shielded and _placer.overlaps(shield_rect, i)))
 			if shown:
 				_placer.try_place(rect, i, true)
 				if shielded:
@@ -1031,16 +1099,22 @@ static var _label_fonts: Dictionary = {}
 
 
 ## PO3 : EB Garamond à la graisse `weight` (axe variable `wght`), partagée ; null si la police manque.
-static func _label_font(weight: int) -> Font:
-	if _label_fonts.has(weight):
-		return _label_fonts[weight]
+## TB2 : `small_caps` active les petites capitales (`smcp`) avec `spacing` px entre les lettres.
+static func _label_font(weight: int, small_caps: bool = false, spacing: int = 0) -> Font:
+	var key := weight + (100000 + spacing * 1000 if small_caps else 0)
+	if _label_fonts.has(key):
+		return _label_fonts[key]
 	var font: Font = null
 	if ResourceLoader.exists(LABEL_FONT_PATH):
+		var server := TextServerManager.get_primary_interface()
 		var variation := FontVariation.new()
 		variation.base_font = load(LABEL_FONT_PATH) as Font
-		variation.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): weight}
+		variation.variation_opentype = {server.name_to_tag("wght"): weight}
+		if small_caps:
+			variation.opentype_features = {server.name_to_tag("smcp"): 1}
+			variation.spacing_glyph = spacing
 		font = variation
-	_label_fonts[weight] = font
+	_label_fonts[key] = font
 	return font
 
 
@@ -1540,7 +1614,7 @@ func select(id: String) -> void:
 		var old := _icon_instance(data.index_by_id[selected_id])
 		var custom := _icons.multimesh.get_instance_custom_data(old)
 		custom.g = 0.0
-		custom.a = _marker_until[data.index_by_id[selected_id]] / 100.0
+		custom.a = _shield_until[data.index_by_id[selected_id]] / 100.0
 		_icons.multimesh.set_instance_custom_data(old, custom)
 	selected_id = id if data.index_by_id.has(id) else ""
 	_selected_index = int(data.index_by_id.get(selected_id, -1))
