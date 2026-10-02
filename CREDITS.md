@@ -207,6 +207,16 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   brindilles dessinées par `game/assets/textures/battle/build_fa_leaf_sprays.py` (catalogue
   `data/art/battle_tree_leaves.json`) : `leaf_spray_<essence>.png`, `dead_leaves_oak.png`.
 
+### Herbe des batailles — CC0 1.0 (FA7)
+
+- **ambientCG** ([ambientcg.com](https://ambientcg.com), Lennart Demes) : atlas de brins et
+  d'herbes photographiés Foliage001 (longs brins), Foliage006 et Foliage008 (brins de pelouse),
+  Foliage005 (feuilles de graminée), Foliage002 et Foliage004 (panicules, épis barbus), Foliage003
+  et Foliage007 (herbes folles), LeafSet020 (feuilles de pissenlit), 2K-JPG. Brins détourés,
+  ramenés à une couleur moyenne neutre (la teinte vient du sol) et composés en touffes par
+  `game/assets/textures/battle/build_fa_grass.py` (catalogue `data/art/battle_grass.json`) :
+  `grass_tufts.png`. Les capitules de pissenlit et de pâquerette sont dessinés par le script.
+
 ### Flammes et fumée — CC0 1.0 (FA2)
 
 - **Unity Labs Paris** — « Free VFX image sequences & flipbooks »

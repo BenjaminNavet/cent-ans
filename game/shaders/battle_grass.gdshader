@@ -55,7 +55,9 @@ uniform float fa_cum_clump[FA_MAX_VARIANTS]; // poids cumulés au cœur des bouq
 uniform ivec2 fa_wheat = ivec2(0); // cases des parcelles de blé
 uniform ivec2 fa_stubble = ivec2(0); // cases du chaume et des semis
 uniform vec4 fa_field_height = vec4(1.3, 1.2, 1.0, 0.6); // blé, jachère, chaume, semis
-uniform float fa_wheat_gain = 1.0; // clarté du blé
+uniform vec3 fa_wheat_gain = vec3(1.0); // teinte du blé
+uniform float fa_wheat_foot = 0.6; // pied des tiges de blé (ombre entre les tiges)
+uniform vec3 fa_sown_gain = vec3(1.0); // teinte des semis (jeunes pousses sur la terre)
 uniform float fa_flat_height = 0.1; // hauteur (m) d'une touffe couchée par les troupes
 uniform vec2 fa_size = vec2(0.8, 1.25); // taille d'une touffe (tirage)
 uniform float fa_height_var = 0.5; // part gardée des variations de hauteur par plaques
@@ -78,6 +80,7 @@ varying vec3 v_tint;
 varying vec3 v_normal;
 varying float v_facing;
 varying flat vec2 v_cell;
+varying flat float v_foot;
 
 float terrain_h(vec2 p) {
 	vec2 uv = (p - height_rect.xy) / height_rect.zw;
@@ -123,6 +126,7 @@ void vertex() {
 	v_normal = vec3(0.0, 1.0, 0.0);
 	v_facing = 1.0;
 	v_cell = vec2(0.0);
+	v_foot = fa_foot_shade;
 	bool fa = fa_on > 0.5;
 	if (fade <= 0.0 || r3 >= density) {
 		// Touffe absente : triangle dégénéré sous le sol (aucun pixel).
@@ -143,7 +147,7 @@ void vertex() {
 		bool soft = da6_on > 0.5;
 		vec3 field = soft ? bt_field_info_soft(wp) : bt_field_info(wp);
 		float height_mul = 1.0;
-		int fa_kind = 0; // 1 : blé, 2 : chaume et semis
+		int fa_kind = 0; // 1 : blé, 2 : chaume, 3 : semis
 		// Couleur de base : celle du sol dessous (couches herbe et prairie, très floues), pour que
 		// l'herbe se fonde dans la texture du terrain.
 		float macro2 = texture(macro_noise, wp * 0.00043 + vec2(0.3, 0.7)).r;
@@ -169,7 +173,7 @@ void vertex() {
 					// Semis : herbe courte et claire en rangs.
 					density *= 0.55;
 					height_mul *= fa ? fa_field_height.w : 0.45;
-					fa_kind = 2;
+					fa_kind = 3;
 					field.x = 0.0;
 				} else if (field.x == 5.0) {
 					// Vigne : herbe rase entre les rangs.
@@ -248,7 +252,8 @@ void vertex() {
 			}
 			if (fa_kind == 1) {
 				idx = flip < 0.5 ? fa_wheat.x : fa_wheat.y;
-			} else if (fa_kind == 2) {
+				v_foot = fa_wheat_foot;
+			} else if (fa_kind >= 2) {
 				idx = flip < 0.5 ? fa_stubble.x : fa_stubble.y;
 			}
 			v_cell = vec2(float(idx % int(fa_grid.x)), float(idx / int(fa_grid.x)));
@@ -259,7 +264,7 @@ void vertex() {
 			h_units = fa_height[idx] / 0.44;
 			// Herbe couchée : la touffe tombe à une hauteur donnée, quelle que soit sa case.
 			height_mul *= mix(1.0, min(fa_flat_height / fa_height[idx], 1.0), flat_k);
-			v_tint *= fa_tint_gain * (fa_kind == 1 ? fa_wheat_gain : 1.0);
+			v_tint *= fa_tint_gain * (fa_kind == 1 ? fa_wheat_gain : vec3(1.0)) * (fa_kind == 3 ? fa_sown_gain : vec3(1.0));
 		}
 
 		float angle = rnd.y * 6.2832;
@@ -335,7 +340,7 @@ void fragment() {
 	ALPHA = clamp(tex.a * (1.0 + mip * (fa ? fa_mip_boost : 0.25)), 0.0, 1.0);
 	if (fa) {
 		float top = 1.0 - UV.y;
-		ALBEDO *= mix(mix(fa_foot_shade, 1.0, far_k), 1.0, smoothstep(0.0, fa_foot_height, top));
+		ALBEDO *= mix(mix(v_foot, 1.0, far_k * 0.6), 1.0, smoothstep(0.0, fa_foot_height, top));
 		ALPHA *= mix(0.45, 1.0, smoothstep(0.12, 0.5, v_facing));
 		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, min(decor_saturation * 1.25, 1.0));
 	} else if (da6_on > 0.5) {

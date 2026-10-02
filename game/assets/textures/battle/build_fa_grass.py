@@ -91,7 +91,8 @@ def cut_pieces(raw: Path, source: dict, source_url: str) -> list[np.ndarray]:
     gain = float(source.get("gain", 1.0)) / mean_luma
     tone = np.array(source.get("tone", [1.0, 1.0, 1.0]), dtype=np.float32)
     return [
-        np.dstack([rgb * gain * tone * alpha[..., None], alpha]) for rgb, alpha in pieces
+        np.dstack([rgb * gain * tone * alpha[..., None], alpha])
+        for rgb, alpha in pieces
     ]
 
 
@@ -169,13 +170,17 @@ def _flower(rng: random.Random, flower: dict, ppm: float) -> np.ndarray:
             fill=(*(int(v * shade) for v in petal), 255),
         )
     r = radius * float(flower["heart"])
-    draw.ellipse((cx - r, size / 2 - r * 0.75, cx + r, size / 2 + r * 0.75), fill=(*heart, 255))
+    draw.ellipse(
+        (cx - r, size / 2 - r * 0.75, cx + r, size / 2 + r * 0.75), fill=(*heart, 255)
+    )
     arr = np.array(image).astype(np.float32)
     alpha = arr[..., 3:4] / 255.0
     return np.dstack([arr[..., :3] / float(flower["luma_ref"]) * alpha, alpha])
 
 
-def tuft(variant: dict, pieces: dict[str, list[np.ndarray]], catalogue: dict, seed: str):
+def tuft(
+    variant: dict, pieces: dict[str, list[np.ndarray]], catalogue: dict, seed: str
+):
     """Compose une touffe : RGBA prémultiplié à l'échelle de travail (`pixels_per_metre`)."""
     atlas = catalogue["atlas"]
     ppm = float(atlas["pixels_per_metre"])
@@ -214,7 +219,9 @@ def tuft(variant: dict, pieces: dict[str, list[np.ndarray]], catalogue: dict, se
     stamps.sort(key=lambda s: -s[0])
     for rank, (length, layer, base_x, lean, curve, tone) in enumerate(stamps):
         depth = rank / max(len(stamps) - 1, 1)
-        shade = tone * (float(variant["back_shade"]) + (1.0 - float(variant["back_shade"])) * depth)
+        shade = tone * (
+            float(variant["back_shade"]) + (1.0 - float(variant["back_shade"])) * depth
+        )
         piece = rng.choice(pieces[layer["source"]])
         if rng.random() < 0.5:
             piece = piece[:, ::-1]
@@ -227,7 +234,9 @@ def tuft(variant: dict, pieces: dict[str, list[np.ndarray]], catalogue: dict, se
         for _ in range(int(flower["count"])):
             stamp = _flower(rng, kind, ppm)
             x = rng.uniform(0.2, 0.8) * width
-            _paste(canvas, stamp, round(x - stamp.shape[1] / 2), height - stamp.shape[0])
+            _paste(
+                canvas, stamp, round(x - stamp.shape[1] / 2), height - stamp.shape[0]
+            )
     return canvas
 
 
@@ -235,7 +244,11 @@ def build(catalogue: dict, raw: Path) -> Image.Image:
     """Atlas complet, neutre en moyenne, de luminance linéaire moyenne `render.tex_lum`."""
     atlas = catalogue["atlas"]
     columns, rows = int(atlas["columns"]), int(atlas["rows"])
-    cell_w, cell_h, pad = int(atlas["cell_width"]), int(atlas["cell_height"]), int(atlas["padding"])
+    cell_w, cell_h, pad = (
+        int(atlas["cell_width"]),
+        int(atlas["cell_height"]),
+        int(atlas["padding"]),
+    )
     pieces = {
         name: cut_pieces(raw, source, catalogue["source_url"])
         for name, source in catalogue["sources"].items()
@@ -246,7 +259,11 @@ def build(catalogue: dict, raw: Path) -> Image.Image:
         inner = (cell_w - 2 * pad, cell_h - 2 * pad)
         small = np.dstack(
             [
-                np.array(Image.fromarray(canvas[..., k]).resize(inner, Image.Resampling.LANCZOS))
+                np.array(
+                    Image.fromarray(canvas[..., k]).resize(
+                        inner, Image.Resampling.LANCZOS
+                    )
+                )
                 for k in range(4)
             ]
         ).clip(0.0, None)
@@ -256,7 +273,9 @@ def build(catalogue: dict, raw: Path) -> Image.Image:
         # Marge du bas : le pied est prolongé (les mipmaps ne creusent pas la base de la touffe).
         sheet[y + inner[1] : y + inner[1] + pad, x : x + inner[0]] = small[-1:]
         coverage = float((small[..., 3] > 0.5).mean())
-        print(f"{variant['name']} : {len(variant['layers'])} couches, couverture {coverage:.2f}")
+        print(
+            f"{variant['name']} : {len(variant['layers'])} couches, couverture {coverage:.2f}"
+        )
     alpha = sheet[..., 3].clip(0.0, 1.0)
     rgb = sheet[..., :3] / np.maximum(alpha, 1e-4)[..., None]
     # Luminance relative (1 = brin moyen) vers linéaire, puis moyenne neutre de luminance cible.
@@ -267,7 +286,12 @@ def build(catalogue: dict, raw: Path) -> Image.Image:
     gain = (target / mean) ** pull * (target / float(mean @ LUMA)) ** (1.0 - pull)
     linear *= gain
     linear *= target / float(((linear @ LUMA) * alpha).sum() / alpha.sum())
-    out = np.dstack([_to_srgb(linear), alpha * 255.0]).round().clip(0, 255).astype(np.uint8)
+    out = (
+        np.dstack([_to_srgb(linear), alpha * 255.0])
+        .round()
+        .clip(0, 255)
+        .astype(np.uint8)
+    )
     # Couleur des brins étendue sous les pixels transparents (pas de franges aux mipmaps).
     nearest = ndimage.distance_transform_edt(
         out[..., 3] == 0, return_distances=False, return_indices=True

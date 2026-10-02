@@ -509,7 +509,9 @@
             "stubble_variants",
             "stubble_height",
             "seedling_height",
-            "wheat_gain"
+            "wheat_gain",
+            "wheat_foot_shade",
+            "seedling_gain"
           ],
           "additionalProperties": false,
           "properties": {
@@ -558,10 +560,32 @@
               "description": "Hauteur relative dans les semis."
             },
             "wheat_gain": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0.3,
+                "maximum": 2.0
+              },
+              "description": "Teinte du blé par rapport à celle de DA6 (par canal)."
+            },
+            "wheat_foot_shade": {
               "type": "number",
-              "minimum": 0.5,
-              "maximum": 2.0,
-              "description": "Clarté du blé par rapport à la teinte de DA6."
+              "minimum": 0.2,
+              "maximum": 1.0,
+              "description": "Clarté du pied des tiges de blé (ombre entre les tiges)."
+            },
+            "seedling_gain": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0.3,
+                "maximum": 2.0
+              },
+              "description": "Teinte des jeunes pousses des semis par rapport au sol (par canal)."
             }
           }
         },

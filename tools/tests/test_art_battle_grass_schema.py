@@ -70,7 +70,7 @@ def test_battle_grass_atlas_matches_catalogue() -> None:
         pad = atlas["padding"]
         if pad > 1:
             assert cell[: pad - 1].max() < 0.05, variant["name"]
-            assert cell[: -pad, : pad - 1].max() < 0.05, variant["name"]
+            assert cell[:-pad, : pad - 1].max() < 0.05, variant["name"]
     srgb = pixels[..., :3]
     linear = np.where(srgb <= 0.04045, srgb / 12.92, ((srgb + 0.055) / 1.055) ** 2.4)
     luma = (linear @ np.array([0.3, 0.59, 0.11]) * alpha).sum() / alpha.sum()

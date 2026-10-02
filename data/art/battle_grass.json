@@ -3,7 +3,7 @@
   "source_url": "https://ambientcg.com/get?file={asset}_2K-JPG.zip",
   "atlas": {
     "columns": 4,
-    "rows": 2,
+    "rows": 3,
     "cell_width": 512,
     "cell_height": 256,
     "padding": 8,
@@ -676,6 +676,305 @@
           "count": 3
         }
       ]
+    },
+    {
+      "name": "short_c",
+      "height_m": 0.26,
+      "feet": 5,
+      "foot_span": 0.85,
+      "back_shade": 0.82,
+      "weight_open": 0.2,
+      "weight_clump": 0.08,
+      "layers": [
+        {
+          "source": "lawn_blade",
+          "count": 80,
+          "length_m": [
+            0.07,
+            0.22
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.04,
+          "fan": 0.7,
+          "lean": 0.35,
+          "curve": 0.4,
+          "tone": [
+            0.85,
+            1.15
+          ]
+        },
+        {
+          "source": "broad_blade",
+          "count": 30,
+          "length_m": [
+            0.1,
+            0.24
+          ],
+          "width_scale": 0.55,
+          "foot_sigma_m": 0.035,
+          "fan": 0.7,
+          "lean": 0.4,
+          "curve": 0.5,
+          "tone": [
+            0.85,
+            1.1
+          ]
+        },
+        {
+          "source": "dandelion_leaf",
+          "count": 5,
+          "length_m": [
+            0.08,
+            0.14
+          ],
+          "width_scale": 0.8,
+          "foot_sigma_m": 0.02,
+          "fan": 0.5,
+          "lean": 0.8,
+          "curve": 0.5,
+          "tone": [
+            0.85,
+            1.05
+          ]
+        },
+        {
+          "source": "sprig",
+          "count": 8,
+          "length_m": [
+            0.12,
+            0.24
+          ],
+          "width_scale": 1.0,
+          "foot_sigma_m": 0.04,
+          "fan": 0.4,
+          "lean": 0.2,
+          "curve": 0.2,
+          "tone": [
+            0.9,
+            1.12
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tall_c",
+      "height_m": 0.42,
+      "feet": 5,
+      "foot_span": 0.8,
+      "back_shade": 0.78,
+      "weight_open": 0.1,
+      "weight_clump": 0.18,
+      "layers": [
+        {
+          "source": "long_blade",
+          "count": 44,
+          "length_m": [
+            0.16,
+            0.4
+          ],
+          "width_scale": 0.4,
+          "foot_sigma_m": 0.035,
+          "fan": 0.6,
+          "lean": 0.28,
+          "curve": 0.5,
+          "tone": [
+            0.85,
+            1.15
+          ]
+        },
+        {
+          "source": "dry_blade",
+          "count": 12,
+          "length_m": [
+            0.14,
+            0.32
+          ],
+          "width_scale": 0.5,
+          "foot_sigma_m": 0.04,
+          "fan": 0.6,
+          "lean": 0.35,
+          "curve": 0.5,
+          "tone": [
+            0.9,
+            1.12
+          ]
+        },
+        {
+          "source": "ear",
+          "count": 5,
+          "length_m": [
+            0.25,
+            0.4
+          ],
+          "width_scale": 1.0,
+          "foot_sigma_m": 0.05,
+          "fan": 0.4,
+          "lean": 0.12,
+          "curve": 0.15,
+          "tone": [
+            0.95,
+            1.12
+          ]
+        },
+        {
+          "source": "lawn_blade",
+          "count": 60,
+          "length_m": [
+            0.08,
+            0.24
+          ],
+          "width_scale": 0.6,
+          "foot_sigma_m": 0.06,
+          "fan": 0.6,
+          "lean": 0.3,
+          "curve": 0.35,
+          "tone": [
+            0.85,
+            1.12
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wheat_a",
+      "height_m": 0.95,
+      "feet": 8,
+      "foot_span": 0.95,
+      "back_shade": 0.8,
+      "weight_open": 0.0,
+      "weight_clump": 0.0,
+      "layers": [
+        {
+          "source": "ear",
+          "count": 46,
+          "length_m": [
+            0.62,
+            0.93
+          ],
+          "width_scale": 1.1,
+          "foot_sigma_m": 0.03,
+          "fan": 0.15,
+          "lean": 0.06,
+          "curve": 0.08,
+          "tone": [
+            0.9,
+            1.15
+          ]
+        },
+        {
+          "source": "long_blade",
+          "count": 36,
+          "length_m": [
+            0.3,
+            0.62
+          ],
+          "width_scale": 0.4,
+          "foot_sigma_m": 0.03,
+          "fan": 0.3,
+          "lean": 0.2,
+          "curve": 0.45,
+          "tone": [
+            0.85,
+            1.1
+          ]
+        },
+        {
+          "source": "dry_blade",
+          "count": 16,
+          "length_m": [
+            0.25,
+            0.5
+          ],
+          "width_scale": 0.5,
+          "foot_sigma_m": 0.03,
+          "fan": 0.3,
+          "lean": 0.25,
+          "curve": 0.5,
+          "tone": [
+            0.9,
+            1.1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wheat_b",
+      "height_m": 0.95,
+      "feet": 7,
+      "foot_span": 0.95,
+      "back_shade": 0.8,
+      "weight_open": 0.0,
+      "weight_clump": 0.0,
+      "layers": [
+        {
+          "source": "ear",
+          "count": 38,
+          "length_m": [
+            0.58,
+            0.9
+          ],
+          "width_scale": 1.1,
+          "foot_sigma_m": 0.035,
+          "fan": 0.15,
+          "lean": 0.08,
+          "curve": 0.1,
+          "tone": [
+            0.9,
+            1.15
+          ]
+        },
+        {
+          "source": "panicle",
+          "count": 4,
+          "length_m": [
+            0.6,
+            0.88
+          ],
+          "width_scale": 0.9,
+          "foot_sigma_m": 0.04,
+          "fan": 0.15,
+          "lean": 0.06,
+          "curve": 0.08,
+          "tone": [
+            0.95,
+            1.12
+          ]
+        },
+        {
+          "source": "long_blade",
+          "count": 40,
+          "length_m": [
+            0.3,
+            0.6
+          ],
+          "width_scale": 0.4,
+          "foot_sigma_m": 0.03,
+          "fan": 0.3,
+          "lean": 0.2,
+          "curve": 0.45,
+          "tone": [
+            0.85,
+            1.1
+          ]
+        },
+        {
+          "source": "dry_blade",
+          "count": 14,
+          "length_m": [
+            0.25,
+            0.5
+          ],
+          "width_scale": 0.5,
+          "foot_sigma_m": 0.03,
+          "fan": 0.3,
+          "lean": 0.25,
+          "curve": 0.5,
+          "tone": [
+            0.9,
+            1.1
+          ]
+        }
+      ]
     }
   ],
   "render": {
@@ -727,10 +1026,10 @@
     "backlight": 1.0,
     "fields": {
       "wheat_variants": [
-        "seed_b",
-        "seed_a"
+        "wheat_a",
+        "wheat_b"
       ],
-      "wheat_height": 1.3,
+      "wheat_height": 1.0,
       "fallow_height": 1.2,
       "stubble_variants": [
         "short_a",
@@ -738,7 +1037,17 @@
       ],
       "stubble_height": 1.0,
       "seedling_height": 0.6,
-      "wheat_gain": 1.25
+      "wheat_gain": [
+        0.86,
+        0.8,
+        0.56
+      ],
+      "wheat_foot_shade": 0.5,
+      "seedling_gain": [
+        0.72,
+        0.95,
+        0.66
+      ]
     },
     "flat_height": 0.1
   }

@@ -262,7 +262,11 @@ static func _apply_fa(mat: ShaderMaterial, fa: Dictionary) -> void:
 	mat.set_shader_parameter("fa_luma_clamp", Vector2(float(render["luma_clamp"][0]), float(render["luma_clamp"][1])))
 	var gain: Array = render["tint_gain"]
 	mat.set_shader_parameter("fa_tint_gain", Vector3(float(gain[0]), float(gain[1]), float(gain[2])))
-	mat.set_shader_parameter("fa_wheat_gain", float(fields["wheat_gain"]))
+	var wheat: Array = fields["wheat_gain"]
+	mat.set_shader_parameter("fa_wheat_gain", Vector3(float(wheat[0]), float(wheat[1]), float(wheat[2])))
+	mat.set_shader_parameter("fa_wheat_foot", float(fields["wheat_foot_shade"]))
+	var sown: Array = fields["seedling_gain"]
+	mat.set_shader_parameter("fa_sown_gain", Vector3(float(sown[0]), float(sown[1]), float(sown[2])))
 	for key in ["flat_height", "height_var", "gap_fill", "patch_fill", "tint_var", "hue_mix", "contrast", "foot_shade", "foot_height", "up_normal", "far_luma", "mip_boost", "backlight"]:
 		mat.set_shader_parameter("fa_" + key, float(render[key]))
 
