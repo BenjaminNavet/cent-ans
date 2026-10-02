@@ -21,6 +21,7 @@
     "thin_fade": 0.35,
     "sky_reflect": 0.45
   },
+  "generalised": { "width_scale": 5.0, "width_ref_m": 100.0 },
   "labels": {
     "enabled": true,
     "font_size": 13,
