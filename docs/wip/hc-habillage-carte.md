@@ -28,6 +28,10 @@ symbolique vers main, dylib copiée de main (aucun changement Rust). ADR 0161.
   envoyé aux sessions voisines le 02/10). HC ne touche pas au bloc parcellaire de
   `terrain.gdshader` (`field_at`, lignes ≈ 492-570).
 - SA (`../gp-sa`) : ne pas toucher `army_markers.gd`.
+- TB (`../gp-tb`, session game-project-ef) : garde la **teinte de sol des forêts** (taches presque
+  noires à rig 400-1100, corrigées par TB6 côté sol), brouillard, météo, côtes, brûlis dans
+  `terrain.gdshader` ; TB ne touche ni arbres, ni lacs, ni étangs. Au-delà de la portée des arbres
+  HC (≈ 700-900), seul le sol de TB compte.
 - Checkout principal : fichiers `data/map/*` modifiés non commités par une autre session ; aucune
   recuisson de données depuis main.
 
