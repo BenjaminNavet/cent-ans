@@ -102,7 +102,8 @@ func _update_season() -> void:
 
 
 ## PO3 : préréglage complet de la carte pour `season` : `campaign_look` (ciel, étalonnage de
-## saison) augmenté de l'étalonnage de carte (`grade`, appliqué après), du soleil (`sun_elevation`,
+## saison) augmenté de l'étalonnage de saison de la carte (TB1, `SeasonLook.grade`) puis de
+## l'étalonnage de carte (`grade`, appliqué après), du soleil (`sun_elevation`,
 ## `sun_azimuth`, `sun_color`, `sun_energy`) et de la brume (`fog_color`, `fog_sun_scatter`).
 ## {} si la saison n'a pas de soleil dans les données.
 static func resolve_preset(season: String) -> Dictionary:
@@ -114,6 +115,11 @@ static func resolve_preset(season: String) -> Dictionary:
 		if not look.has(key):
 			return {}
 	var grades: Array = (resolved["grades"] as Array).duplicate()
+	# TB1 (ADR 0150) : étalonnage de saison propre à la carte (`data/ui/campaign_seasons.json`),
+	# entre l'étalonnage de saison commun aux batailles et l'étalonnage de carte.
+	var season_grade := SeasonLook.grade(AtmosphereLibrary.normalize_season(season))
+	if not season_grade.is_empty():
+		grades.append(season_grade)
 	if look.has("grade"):
 		grades.append(look["grade"])
 	resolved["grades"] = grades

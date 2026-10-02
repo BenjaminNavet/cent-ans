@@ -26,6 +26,9 @@ uniform float hb_region_period = 60.0;  // période (px carte) de l'orientation 
 uniform float hb_cell_scale = 3.0;      // grossissement des parcelles (lisibilité, comme Total War)
 uniform float hb_cell_jitter = 0.16;    // variation de luminance d'une parcelle à l'autre (±)
 uniform float hb_cell_hue = 0.1;        // variation de teinte (jaune ↔ vert) d'une parcelle à l'autre
+uniform float hb_season_strength = 0.8; // TB1 : part de la saison sur les matières (0 : matières d'une seule saison)
+uniform float hb_season_gain = 1.0;     // TB1 : luminance des couleurs de saison des parcelles
+uniform float hb_snow_hedge = 0.6;       // TB1 : part des haies visible à travers la neige
 uniform float hb_debug = 0.0;           // diagnostic : 1 biome, 2 parcelles (R hasard, G culture), 3 part agricole
 
 float hb_hash(vec2 q) {
@@ -46,18 +49,23 @@ vec3 hb_sample(float layer_n, float tile_n, vec2 p, vec2 dpx, vec2 dpy, float an
 }
 
 // `open_w`, `forest_w`, `rock_w` : parts normalisées des matériaux au pixel ; `farm_share` : part
-// des cultures dans les terres ouvertes (splat) ; `slope` en m/m.
+// des cultures dans les terres ouvertes (splat) ; `slope` en m/m ; `k_wild`, `k_forest` : écarts
+// saisonniers (saison / été, TB1) des prés et des forêts ; `crop_*` : couleurs d'été de référence
+// des cultures (l'écart d'une parcelle cultivée est tiré par parcelle : blé doré, chaume, labour).
 void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, float open_w, float forest_w,
-		float rock_w, float farm_share, float slope, inout vec3 col) {
+		float rock_w, float farm_share, float slope, vec3 k_wild, vec3 k_forest, mat4 crop_refs, inout vec3 col) {
 	vec2 dpx = dFdx(p);
 	vec2 dpy = dFdy(p);
 	if (!has_hb) {
 		return;
 	}
-	float w = hb_strength * (1.0 - smoothstep(hb_fade_start, hb_fade_end, footprint)) * (1.0 - snow) * land_f;
-	if (w <= 0.001) {
+	// TB1 : poids hors neige gardé à part (les haies percent la neige mince).
+	float w_bare = hb_strength * (1.0 - smoothstep(hb_fade_start, hb_fade_end, footprint)) * land_f;
+	float w = w_bare * (1.0 - snow);
+	if (w_bare <= 0.001) {
 		return;
 	}
+	float hedge_mask = 0.0;
 	// Orientation régionale des lanières (champs parallèles par terroir) : constante par région et
 	// rotation autour de l'origine de la région (tourner les coordonnées absolues avec un angle
 	// variable cisaillait tout en tourbillons).
@@ -96,7 +104,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	float wild_mix = smoothstep(0.35, 0.65, value_noise(p * 0.35 + 3.7));
 	vec3 wild = mix(hb_sample(wild_a.r, wild_a.b, p, dpx, dpy, ang_r * 0.3),
 		hb_sample(wild_b.r, wild_b.b, p, dpx, dpy, 1.1), wild_mix);
-	vec3 open_col = wild;
+	vec3 open_col = wild * pow(k_wild, vec3(hb_season_strength));  // TB1
 	bool farmed = h_farm < farm_share * presence;
 	if (farmed) {
 		float layer = -1.0;
@@ -119,6 +127,23 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 			float j1 = hb_hash(cid + 3.3) - 0.5;
 			float j2 = hb_hash(cid + 9.1) - 0.5;
 			open_col *= (1.0 + 2.0 * hb_cell_jitter * j1) * vec3(1.0 + hb_cell_hue * j2, 1.0, 1.0 - hb_cell_hue * j2);
+			// TB1 : saison de la parcelle. La matière est d'une saison moyenne : hors été, elle prend
+			// la couleur de saison de sa culture (blé en herbe, chaume ou labour d'automne, terre nue
+			// l'hiver) et ne garde que son grain (luminance rapportée à sa moyenne) ; l'été dore les blés.
+			vec4 sw = life_season();
+			float h_cls = hb_hash(cid + 27.7);
+			int cls = h_cls < 0.36 ? 0 : (h_cls < 0.6 ? 1 : (h_cls < 0.76 ? 2 : 3));
+			if (cls == 0) {
+				open_col *= mix(vec3(1.0), summer_gold, sw.y * hb_season_strength);
+			}
+			if (sw.y < 0.999) {
+				vec3 ref = crop_refs[cls].rgb;
+				vec3 mean_col = textureLod(hb_albedo, vec3(0.5, 0.5, floor(layer * 255.0 + 0.5)), 16.0).rgb;
+				float lum_mean = max(dot(mean_col, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
+				float grain = clamp(dot(open_col, vec3(0.2126, 0.7152, 0.0722)) / lum_mean, 0.6, 1.5);
+				vec3 season_col = season_field(ref, cls, hb_hash(cid + 61.3)) * hb_season_gain;
+				open_col = mix(open_col, season_col * grain, hb_season_strength * (1.0 - sw.y));
+			}
 			// Haies et talus sur les bords des parcelles cultivées.
 			float edge_m = min(min(f.x, 1.0 - f.x) * strip, min(f.y, 1.0 - f.y)) * cell * hb_meters_px / hb_cell_scale;
 			float px_m = footprint * hb_meters_px;
@@ -129,6 +154,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 			float balk = 1.0 - smoothstep(1.5, 1.5 + px_m, edge_m);
 			open_col = mix(open_col, open_col * 0.82, balk * 0.6);
 			open_col = mix(open_col, hb_hedge_color, hedge * 0.8);
+			hedge_mask = hedge;
 		}
 	}
 	if (hb_debug > 7.5 && hb_debug < 8.5) {
@@ -156,7 +182,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 			: (hb_debug < 2.5 ? vec3(h, farmed ? 1.0 : 0.0, 0.0) : vec3(farm_share, presence, open_w));
 		return;
 	}
-	vec3 canopy_col = hb_sample(canopy.r, canopy.b, p, dpx, dpy, 0.4);
+	vec3 canopy_col = hb_sample(canopy.r, canopy.b, p, dpx, dpy, 0.4) * pow(k_forest, vec3(hb_season_strength));  // TB1
 	// Roche : part de roche du splat, renforcée sur les pentes fortes.
 	float rock_share = clamp(rock_w + smoothstep(0.35, 0.8, slope) * (1.0 - forest_w), 0.0, 1.0);
 	vec3 rock_col = hb_sample(rock.r, rock.b, p, dpx, dpy, 0.0);
@@ -168,4 +194,5 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	float lum_c = max(dot(col, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
 	hb_col = mix(hb_col, col * (lum_hb / lum_c), hb_hue_keep);
 	col = mix(col, hb_col, w);
+	col = mix(col, hb_hedge_color, hedge_mask * snow * hb_snow_hedge * w_bare);  // TB1 : haies sous la neige
 }

@@ -74,7 +74,7 @@ void fragment() {
 		float detail = 1.0 - smoothstep(roofscape_cell_m * 0.5, roofscape_cell_m * 2.0, footprint);
 		float r_cell;
 		float r_avg;
-		vec3 roof = mix(roofscape_average(r_avg), roofscape_color(world_m, r_cell), detail);
+		vec3 roof = mix(roofscape_average(world_m, r_avg), roofscape_color(world_m, r_cell), detail);
 		albedo = mix(albedo, roof, up);
 	}
 	ALBEDO = albedo;

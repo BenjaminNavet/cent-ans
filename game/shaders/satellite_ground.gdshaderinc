@@ -12,14 +12,17 @@ uniform float sg_near_keep = 0.45;     // part de la carte au plus près (le pro
 uniform float sg_near_footprint = 0.05;  // empreinte (px carte / px écran) du palier « près »
 uniform float sg_far_footprint = 0.5;  // au-delà : carte seule (un texel ≥ un pixel écran)
 uniform float sg_detail_lum = 0.55;    // part de la luminance procédurale gardée par-dessus la carte
+uniform float sg_season_strength = 1.3;  // TB1 : force de l'écart saisonnier posé sur la carte (0 : carte d'une seule saison)
 
 float sg_luma(vec3 c) {
 	return dot(c, vec3(0.2126, 0.7152, 0.0722));
 }
 
 // `col` : couleur procédurale (albédo linéaire) ; `snow` : poids de neige (la carte est une saison
-// moyenne, la neige saisonnière reste au-dessus) ; `land_f` : 1 à terre.
-void sg_apply(vec2 uv, float footprint, float snow, float land_f, inout vec3 col) {
+// moyenne, la neige saisonnière reste au-dessus) ; `land_f` : 1 à terre ; `season_k` : écart
+// saisonnier multiplicatif (saison / été) de l'occupation du sol au pixel (TB1) : la carte donne
+// la couleur moyenne, la saison la déplace au lieu d'être effacée par elle.
+void sg_apply(vec2 uv, float footprint, float snow, float land_f, vec3 season_k, inout vec3 col) {
 	if (!has_colormap || sg_strength <= 0.0) {
 		return;
 	}
@@ -30,5 +33,6 @@ void sg_apply(vec2 uv, float footprint, float snow, float land_f, inout vec3 col
 	// sur la teinte de la carte, d'autant plus qu'on est près.
 	float ratio = clamp(sg_luma(col) / max(sg_luma(cm), 1e-3), 0.55, 1.6);
 	vec3 tinted = cm * mix(1.0, ratio, sg_detail_lum * (1.0 - far_w));
+	tinted *= pow(season_k, vec3(sg_season_strength));
 	col = mix(col, tinted, w);
 }

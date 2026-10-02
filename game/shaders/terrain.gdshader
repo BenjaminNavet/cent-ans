@@ -478,7 +478,7 @@ void fragment() {
 	w_rock += before_cliff - (w_grass + w_farm + w_forest + w_heath);
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
-	snow = season_snow(snow, hc, uv, p, slope, macro, footprint);  // CV1
+	snow = season_snow(snow, hc, uv, p, slope, macro, footprint, w_forest / max(w_grass + w_farm + w_forest + w_rock + w_heath, 1e-3));  // CV1, TB1
 	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f * (1.0 - lake_shore);
 	float keep = (1.0 - snow) * (1.0 - sand);
 	w_grass *= keep; w_farm *= keep; w_forest *= keep; w_rock *= keep; w_heath *= keep;
@@ -495,6 +495,8 @@ void fragment() {
 	// Teintes de base (lointain) : même moyenne que les parcelles, sèches au sud.
 	vec3 grass_base = mix(tint_grass, dry_grass, dry * 0.75);
 	vec3 farm_base = mix(tint_farmland, mix(tint_farmland, crop_wheat, 0.35) * vec3(1.05, 0.98, 0.9), dry * 0.6);
+	vec3 grass_summer = grass_base;  // TB1 : références d'été de l'écart saisonnier
+	vec3 farm_summer = farm_base;
 	grass_base = season_grass(grass_base);  // CV1
 	farm_base = season_farm(farm_base);
 	vec3 grass_tint = grass_base;
@@ -646,9 +648,26 @@ void fragment() {
 	}
 	float roughness = has_textures && detail_fade > 0.0 ? clamp(dn.z, 0.55, 1.0) : 0.9;
 	fp_parcels(p, uv, footprint, grad_m, slope, hc, s, lu, terroir, open_w, w_forest / max(wsum, 1e-3), col, roughness, n);  // ZG5b
-	sg_apply(uv, footprint, snow, land_f, col);  // SS2
+	// TB1 : écart saisonnier (saison / été) de l'occupation du sol, posé par-dessus la carte de
+	// couleur et les matières (qui sont d'une saison moyenne) au lieu d'être effacé par elles.
+	vec3 k_grass = season_ratio(grass_base, grass_summer);
+	vec3 k_farm = season_ratio(farm_base * mix(vec3(1.0), summer_gold, life_season().y * float(life_enabled)), farm_summer);
+	vec3 forest_far = season_forest_mean(tint_forest);
+	vec3 k_forest = season_ratio(mix(season_forest(tint_forest, value_noise(p * 0.45)), forest_far, smoothstep(0.3, 1.0, footprint)), tint_forest);
+	vec3 russet = mix(vec3(1.0), autumn_russet, life_season().z * float(life_enabled));
+	k_grass *= russet;
+	k_forest *= russet;
+	k_farm *= mix(vec3(1.0), russet, 0.5);
+	vec3 k_heath = mix(vec3(1.0), k_grass, 0.6);
+	vec3 season_num = w_grass * grass_summer * k_grass + w_farm * farm_summer * k_farm + w_forest * tint_forest * k_forest
+		+ w_rock * tint_rock + w_heath * tint_heath * k_heath;
+	vec3 season_den = w_grass * grass_summer + w_farm * farm_summer + w_forest * tint_forest + w_rock * tint_rock + w_heath * tint_heath;
+	vec3 season_k = dot(season_den, vec3(1.0)) > 1e-4 ? season_ratio(season_num, season_den) : vec3(1.0);
+	sg_apply(uv, footprint, snow, land_f, season_k, col);  // SS2
 	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
-		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, col);  // HB3
+		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, k_grass, k_forest,
+		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col);  // HB3
+	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
 
 	if (hc > 0.0) {
