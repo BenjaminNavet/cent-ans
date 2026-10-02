@@ -1072,6 +1072,24 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
                 draw.ellipse(
                     _px([(x - 0.05, y - 0.05), (x + 0.05, y + 0.05)]), fill=charge
                 )
+    elif blazon.has("croix potencee"):
+        # Jerusalem cross: potent (T-ended) main cross, a crosslet in each quarter.
+        draw.rectangle(_px([(0.45, 0.2), (0.55, 0.68)]), fill=charge)
+        draw.rectangle(_px([(0.27, 0.39), (0.73, 0.49)]), fill=charge)
+        for x0, y0, x1, y1 in (
+            (0.38, 0.2, 0.62, 0.26),
+            (0.38, 0.62, 0.62, 0.68),
+            (0.27, 0.34, 0.33, 0.54),
+            (0.67, 0.34, 0.73, 0.54),
+        ):
+            draw.rectangle(_px([(x0, y0), (x1, y1)]), fill=charge)
+        for cx, cy in ((0.34, 0.3), (0.66, 0.3), (0.34, 0.6), (0.66, 0.6)):
+            draw.rectangle(
+                _px([(cx - 0.035, cy - 0.07), (cx + 0.035, cy + 0.07)]), fill=charge
+            )
+            draw.rectangle(
+                _px([(cx - 0.07, cy - 0.035), (cx + 0.07, cy + 0.035)]), fill=charge
+            )
     elif blazon.has("croix alesee"):
         draw.rectangle(_px([(0.42, 0.18), (0.58, 0.7)]), fill=charge)
         draw.rectangle(_px([(0.24, 0.36), (0.76, 0.52)]), fill=charge)
