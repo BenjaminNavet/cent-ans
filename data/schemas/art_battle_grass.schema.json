@@ -333,7 +333,8 @@
         "far_luma",
         "mip_boost",
         "backlight",
-        "fields"
+        "fields",
+        "flat_height"
       ],
       "additionalProperties": false,
       "properties": {
@@ -507,7 +508,8 @@
             "fallow_height",
             "stubble_variants",
             "stubble_height",
-            "seedling_height"
+            "seedling_height",
+            "wheat_gain"
           ],
           "additionalProperties": false,
           "properties": {
@@ -554,8 +556,20 @@
               "minimum": 0.2,
               "maximum": 4,
               "description": "Hauteur relative dans les semis."
+            },
+            "wheat_gain": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 2.0,
+              "description": "Clarté du blé par rapport à la teinte de DA6."
             }
           }
+        },
+        "flat_height": {
+          "type": "number",
+          "minimum": 0.02,
+          "maximum": 0.5,
+          "description": "Hauteur (m) d'une touffe couchée par les troupes (BV3)."
         }
       }
     }

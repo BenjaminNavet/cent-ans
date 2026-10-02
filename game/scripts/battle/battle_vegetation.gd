@@ -29,15 +29,34 @@ const LAYERS := [[0.5, 40.0, 1.0, 0.0], [1.1, 95.0, 1.35, 34.0]]
 var _layers: Array[MultiMeshInstance3D] = []
 var _materials: Array[ShaderMaterial] = []
 var _ground_y: float = 0.0
+var _fa_ab: bool = false  # banc A/B : les deux herbes sont construites
+var _fa_view: bool = true
 
 
 ## `da6_on` : −1 = selon le terrain (`BattleTerrain.da6`), 0/1 forcé (banc A/B DA6).
 func build(terrain: BattleTerrain, weather: String, da6_on: int = -1) -> void:
 	_ground_y = terrain.height_at(terrain.FIELD_W * 0.5, terrain.FIELD_D * 0.5)
 	var da6 := terrain.da6 if da6_on < 0 else da6_on == 1
-	var mesh := _clump_mesh_da6() if da6 else _clump_mesh()
 	# FA7 : touffes de vrais brins (au-dessus de DA6). `--no-fa-grass` après `--` : herbe d'avant.
-	var fa: Dictionary = fa_catalogue() if da6 and fa_grass_enabled() else {}
+	var use_fa := da6 and fa_grass_enabled()
+	_build_set(terrain, weather, da6, use_fa)
+	for arg in OS.get_cmdline_user_args():
+		if use_fa and arg.begins_with("--bench-ab=") and arg.contains("fa-grass"):
+			# Banc A/B (`--bench-ab=fa-grass,no-fa-grass`) : l'herbe d'avant, masquée.
+			_build_set(terrain, weather, da6, false)
+			_fa_ab = true
+			set_fa_view(true)
+
+
+## FA7 : bascule du banc A/B entre l'herbe en vrais brins et celle d'avant.
+func set_fa_view(on: bool) -> void:
+	if _fa_ab:
+		_fa_view = on
+
+
+func _build_set(terrain: BattleTerrain, weather: String, da6: bool, use_fa: bool) -> void:
+	var mesh := _clump_mesh_da6() if da6 else _clump_mesh()
+	var fa: Dictionary = fa_catalogue() if use_fa else {}
 	var render: Dictionary = fa.get("render", {})
 	var layers: Array = LAYERS
 	if not fa.is_empty():
@@ -125,6 +144,7 @@ func build(terrain: BattleTerrain, weather: String, da6_on: int = -1) -> void:
 		instance.layers |= BattleTerrain.DECAL_LAYER  # CR1 : le contour de formation passe sur l'herbe
 		add_child(instance)
 		instance.set_meta("spacing", spacing)
+		instance.set_meta("fa", not fa.is_empty())
 		_layers.append(instance)
 		_materials.append(mat)
 
@@ -152,8 +172,8 @@ func _process(_delta: float) -> void:
 	var high := camera.global_position.y - focus.y > MAX_CAMERA_HEIGHT
 	for k in _layers.size():
 		var instance := _layers[k]
-		instance.visible = not high
-		if high:
+		instance.visible = not high and (not _fa_ab or bool(instance.get_meta("fa")) == _fa_view)
+		if not instance.visible:
 			continue
 		var spacing: float = instance.get_meta("spacing")
 		instance.global_position = Vector3(snappedf(focus.x, spacing), 0.0, snappedf(focus.z, spacing))
@@ -242,7 +262,8 @@ static func _apply_fa(mat: ShaderMaterial, fa: Dictionary) -> void:
 	mat.set_shader_parameter("fa_luma_clamp", Vector2(float(render["luma_clamp"][0]), float(render["luma_clamp"][1])))
 	var gain: Array = render["tint_gain"]
 	mat.set_shader_parameter("fa_tint_gain", Vector3(float(gain[0]), float(gain[1]), float(gain[2])))
-	for key in ["height_var", "gap_fill", "patch_fill", "tint_var", "hue_mix", "contrast", "foot_shade", "foot_height", "up_normal", "far_luma", "mip_boost", "backlight"]:
+	mat.set_shader_parameter("fa_wheat_gain", float(fields["wheat_gain"]))
+	for key in ["flat_height", "height_var", "gap_fill", "patch_fill", "tint_var", "hue_mix", "contrast", "foot_shade", "foot_height", "up_normal", "far_luma", "mip_boost", "backlight"]:
 		mat.set_shader_parameter("fa_" + key, float(render[key]))
 
 

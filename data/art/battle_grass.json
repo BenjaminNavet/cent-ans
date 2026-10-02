@@ -39,19 +39,34 @@
       "axis": "vertical",
       "min_pixels": 20000,
       "gain": 1.15,
-      "note": "graminées à épis (panicules)"
+      "note": "graminées à épis (panicules)",
+      "tone": [
+        0.95,
+        1.0,
+        0.82
+      ]
     },
     "ear": {
       "asset": "Foliage004",
       "axis": "vertical",
       "gain": 1.15,
-      "note": "épis barbus"
+      "note": "épis barbus",
+      "tone": [
+        0.95,
+        1.0,
+        0.82
+      ]
     },
     "wild_grass": {
       "asset": "Foliage003",
       "axis": "vertical",
       "gain": 1.05,
-      "note": "herbes folles entières"
+      "note": "herbes folles entières",
+      "tone": [
+        0.97,
+        1.0,
+        0.9
+      ]
     },
     "sprig": {
       "asset": "Foliage007",
@@ -668,7 +683,7 @@
     "card": {
       "width_m": 0.8,
       "foot_ratio": 0.8,
-      "count": 3,
+      "count": 2,
       "bend_m": 0.05
     },
     "layers": [
@@ -690,23 +705,23 @@
       1.25
     ],
     "height_var": 0.5,
-    "gap_fill": 0.9,
-    "patch_fill": 0.5,
+    "gap_fill": 1.0,
+    "patch_fill": 0.85,
     "tint_gain": [
-      1.0,
-      1.0,
-      1.0
+      1.25,
+      1.25,
+      1.25
     ],
     "tint_var": 0.5,
-    "hue_mix": 0.6,
+    "hue_mix": 0.35,
     "contrast": 0.8,
     "luma_clamp": [
       0.55,
       2.0
     ],
-    "foot_shade": 0.85,
+    "foot_shade": 0.95,
     "foot_height": 0.4,
-    "up_normal": 0.6,
+    "up_normal": 1.0,
     "far_luma": 1.0,
     "mip_boost": 0.25,
     "backlight": 1.0,
@@ -722,7 +737,9 @@
         "short_b"
       ],
       "stubble_height": 1.0,
-      "seedling_height": 0.6
-    }
+      "seedling_height": 0.6,
+      "wheat_gain": 1.25
+    },
+    "flat_height": 0.1
   }
 }

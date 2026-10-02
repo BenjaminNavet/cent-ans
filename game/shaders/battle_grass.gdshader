@@ -55,6 +55,8 @@ uniform float fa_cum_clump[FA_MAX_VARIANTS]; // poids cumulés au cœur des bouq
 uniform ivec2 fa_wheat = ivec2(0); // cases des parcelles de blé
 uniform ivec2 fa_stubble = ivec2(0); // cases du chaume et des semis
 uniform vec4 fa_field_height = vec4(1.3, 1.2, 1.0, 0.6); // blé, jachère, chaume, semis
+uniform float fa_wheat_gain = 1.0; // clarté du blé
+uniform float fa_flat_height = 0.1; // hauteur (m) d'une touffe couchée par les troupes
 uniform vec2 fa_size = vec2(0.8, 1.25); // taille d'une touffe (tirage)
 uniform float fa_height_var = 0.5; // part gardée des variations de hauteur par plaques
 uniform float fa_gap_fill = 0.9; // densité gardée entre les bouquets
@@ -213,7 +215,7 @@ void vertex() {
 			flat_k = smoothstep(0.08, 0.9, fl.r * (1.0 + ragged * 0.6) + (rnd.x - 0.5) * 0.25 * fl.r);
 			blood_k = smoothstep(0.05, 0.6, fl.g) * smoothstep(-0.45, 0.1, ragged + fl.g * 0.5);
 			density *= 1.0 - flat_k * 0.3;
-			height_mul *= mix(1.0, 0.22, flat_k);
+			height_mul *= fa ? 1.0 : mix(1.0, 0.22, flat_k); // FA7 : hauteur couchée fixée plus bas
 			v_tint = mix(v_tint, v_tint * vec3(1.08, 1.0, 0.62), flat_k * 0.6);
 			v_tint = mix(v_tint, grass_blood_color, blood_k * mix(0.55, 0.9, r3));
 		}
@@ -255,7 +257,9 @@ void vertex() {
 			}
 			s = mix(fa_size.x, fa_size.y, rnd.x) * blade_scale * fade * keep;
 			h_units = fa_height[idx] / 0.44;
-			v_tint *= fa_tint_gain;
+			// Herbe couchée : la touffe tombe à une hauteur donnée, quelle que soit sa case.
+			height_mul *= mix(1.0, min(fa_flat_height / fa_height[idx], 1.0), flat_k);
+			v_tint *= fa_tint_gain * (fa_kind == 1 ? fa_wheat_gain : 1.0);
 		}
 
 		float angle = rnd.y * 6.2832;
@@ -267,7 +271,7 @@ void vertex() {
 		float top = 1.0 - UV.y;
 		float gust = sin(dot(wp, wind_dir) * 0.08 - TIME * 1.7) * 0.5 + 0.5;
 		float sway = sin(TIME * 2.3 + rnd.x * 6.2832 + wp.x * 0.3) * 0.12 + gust * 0.28;
-		v.xz += wind_dir * sway * top * top * wind_strength * s * height_mul * min(h_units, 1.6) * (1.0 - flat_k * 0.8);
+		v.xz += wind_dir * sway * top * top * wind_strength * s * height_mul * min(h_units, 1.15) * (1.0 - flat_k * 0.8);
 		// Brins couchés : le haut de la touffe s'étale au ras du sol (sens propre à la touffe).
 		v.xz += vec2(cos(angle * 1.7), sin(angle * 1.7)) * top * 0.42 * s * flat_k;
 		vec3 world = vec3(wp.x, terrain_h(wp) - 0.05, wp.y) + v;

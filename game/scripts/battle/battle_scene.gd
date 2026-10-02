@@ -1565,6 +1565,8 @@ func _bench_ab_step(gpu_ms: float) -> void:
 	if phase == 0:
 		if level in ["da6", "no-da6"]:
 			terrain.set_da6_view(level == "da6")  # DA6 : végétation de bataille A/B
+		elif level in ["fa-grass", "no-fa-grass"]:
+			terrain.vegetation.set_fa_view(level == "fa-grass")  # FA7 : herbe en vrais brins A/B
 		elif level == "off" or level.contains(":"):
 			# PB3b : mise à l'échelle 3D (`off`, `metalfx_s:0.75`, `metalfx_t:0.67`, `bilinear:0.75`).
 			RenderQuality.upscale_override = level
