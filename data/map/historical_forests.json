@@ -280,8 +280,9 @@
       "name": "New Forest",
       "kind": "mixed",
       "density": 0.6,
-      "ellipse": { "center": [-1.60, 50.87], "radii_km": [15, 11], "angle_deg": 0 },
-      "source": "Wikipedia (en), « New Forest » ; Rackham 1986 (bois, landes et pâtures)"
+      "ellipse": { "center": [-1.66, 50.87], "radii_km": [14, 10], "angle_deg": 0 },
+      "source": "Wikipedia (en), « New Forest » ; Rackham 1986 (bois, landes et pâtures)",
+      "note": "Emprise retirée de la rive de Southampton Water (lot HC5) : la liaison Beaulieu-Southampton coûtait +33 %."
     },
     {
       "id": "dean",
@@ -303,9 +304,10 @@
       "id": "arden",
       "name": "Forest of Arden",
       "kind": "broadleaf",
-      "density": 0.65,
+      "density": 0.6,
       "ellipse": { "center": [-1.75, 52.33], "radii_km": [19, 12], "angle_deg": 20 },
-      "source": "Wikipedia (en), « Forest of Arden »"
+      "source": "Wikipedia (en), « Forest of Arden »",
+      "note": "Densité 0,65 → 0,6 (lot HC5) : la liaison Henley-in-Arden-Maxstoke atteignait +30 %."
     },
     {
       "id": "epping_waltham",
