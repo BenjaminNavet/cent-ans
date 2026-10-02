@@ -154,6 +154,7 @@ func _ready() -> void:
 	terrain.build(map_data)
 	MapReadability.signs_layer_on = false  # TB2 : couche « Signes » éteinte à chaque partie
 	MapReadability.apply_fog(terrain.material)  # TB2 : voile de parchemin du brouillard de guerre
+	MapReadability.apply_forest_masses(terrain.material)  # TB6 : massifs forestiers éclaircis
 	var t2 := Time.get_ticks_msec()
 	sea.setup(map_data.size)
 	var map_extent := maxf(map_data.size.x, map_data.size.y)

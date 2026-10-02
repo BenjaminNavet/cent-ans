@@ -298,6 +298,187 @@
           "minimum": 0,
           "maximum": 64,
           "description": "Fondu (px carte) du dégagement de la province sélectionnée."
+        },
+        "wet_dim": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.15,
+          "description": "TB6 : assombrissement du sol mouillé (pluie, orage)."
+        },
+        "mask_shadow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.15,
+          "description": "TB6 : ombre des nuées du masque météo au cœur d'une nuée."
+        },
+        "mask_shadow_softness": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 1,
+          "description": "TB6 : largeur du seuil de l'ombre des nuées (0,22 = bord des nuées ; plus grand = plus fondu)."
+        },
+        "mask_shadow_scale": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 2,
+          "description": "TB6 : fréquence du bruit de l'ombre en part de celle des nuées (plus petit = taches plus larges)."
+        }
+      }
+    },
+    "morning_mist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "opacity",
+        "height_lods",
+        "valley_depth_m",
+        "plain_altitude_m",
+        "plain_share",
+        "crest_height_m",
+        "bank_scale",
+        "drift",
+        "grazing_gain",
+        "lifted_share",
+        "near_share",
+        "color"
+      ],
+      "description": "TB6 : brume du matin en nappes larges dans les grandes vallées et les plaines basses (météo « brume »).",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.35,
+          "description": "Opacité maximale de la nappe (0 : coupée)."
+        },
+        "height_lods": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Niveaux de la carte des hauteurs : relief lissé local, moyenne régionale."
+        },
+        "valley_depth_m": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Écart sous la moyenne régionale où la nappe commence et où elle est pleine (m)."
+        },
+        "plain_altitude_m": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Altitude où la nappe de plaine est pleine, puis nulle (m)."
+        },
+        "plain_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de la nappe dans les plaines basses."
+        },
+        "crest_height_m": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Hauteur au-dessus du relief lissé où la nappe commence à s'effacer, puis disparaît (m)."
+        },
+        "bank_scale": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 0.02,
+          "description": "Fréquence des bancs (1 / px carte) : plus petit = bancs plus larges."
+        },
+        "drift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Dérive des bancs, en part du vent."
+        },
+        "grazing_gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Épaisseur ajoutée en vue rasante."
+        },
+        "lifted_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de la nappe qui reste une fois la brume levée."
+        },
+        "near_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de la nappe gardée de près."
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      }
+    },
+    "forest_masses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "floor",
+        "knee",
+        "feather",
+        "keep",
+        "canopy"
+      ],
+      "description": "TB6 : massifs forestiers de la carte de couleur éclaircis (vue moyenne et large).",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "floor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3,
+          "description": "Luminance linéaire plancher des masses sombres (0 : carte inchangée)."
+        },
+        "knee": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Au-delà de floor × knee, la carte n'est pas touchée."
+        },
+        "feather": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Flou du masque, en niveaux de mip (lisière fondue)."
+        },
+        "keep": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part du contraste d'origine gardée sous le plancher."
+        },
+        "canopy": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Amplitude du modelé de canopée."
         }
       }
     }
