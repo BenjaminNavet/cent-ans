@@ -38,9 +38,20 @@ FA n'y touche pas.
       KayKit (CC0) sur le rig fin, drapeau `--fa-anim`, note `docs/wip/fa3-anim.md`. Brutes
       `~/dev/cent-ans-raw/fa/anim/`. La session principale juge les planches Blender puis décide
       des clips par défaut.
-- [ ] FA5 — Interface : recherche en cours (brutes `~/dev/cent-ans-raw/fa/ui/`).
-- [ ] FA6 — Campagne : recherche en cours (brutes `~/dev/cent-ans-raw/fa/campaign/`) ;
-      intégration sans toucher aux fichiers que TB modifie (`git diff --stat main...feat/tb`).
+- [ ] FA5 — Interface : agent visuel dans `../gp-fa-ui` (`feat/fa-ui`), note
+      `docs/wip/fa5-ui.md`. Lettrines et bordures réelles (Cleveland Museum of Art, CC0), sceaux
+      de cire (Met Open Access), matières ambientCG / Poly Haven. Brutes
+      `~/dev/cent-ans-raw/fa/ui/`. Pas de vrai parchemin tuilable CC0 trouvé.
+- [ ] FA6 — Campagne, vue parchemin seulement (TB refond la carte 3D : TB3 villes, TB4 traces,
+      TB5 mer et côtes, TB6 lumière) : agent visuel dans `../gp-fa-map` (`feat/fa-map`), note
+      `docs/wip/fa6-parchemin.md`. Rose des vents, navires, monstres marins réels (Atlas catalan
+      1375, Dürer ; domaine public) à la place des ornements dessinés de CM2. Brutes
+      `~/dev/cent-ans-raw/fa/campaign/`.
+      Non retenus pour l'instant : rochers photogrammétrés Poly Haven (rock_07/09,
+      rock_face_01, mountainside ; à proposer à TB pour `rock_outcrops.yaml`), kits Kenney
+      (cartoon), navire OGA-BY, eau Keith333 (CC BY, non carrée). Lacunes confirmées : pas de
+      cogue ni de feuillus 3D CC0 téléchargeables sans compte (piste : Polyy.AI sur itch.io,
+      Quaternius Ships, à récupérer par navigateur).
 - [ ] FA4 — ADR, captures avant/après, fusion `--ff-only`.
 
 ## Sources retenues (licence vérifiée)
@@ -58,3 +69,7 @@ Toute nouvelle vérification visuelle passe par un agent visuel dédié.
 
 ## Journal
 - 10-02 : worktree, état des lieux, recherche effets terminée, recherche animations lancée.
+- 10-02 : FA1 commité ; FA2 cuit, agent visuel lancé ; FA3, FA5, FA6 lancés en parallèle (4
+  agents FA + 4 agents TB = 8 sur 10). pytest sur `feat/fa` : 1476 OK, 4 échecs hors FA
+  (`test_water_detail`, `test_entity_icons` aussi sur main ; `test_ink_icons`,
+  `test_relief_update` propres au worktree).
