@@ -21,6 +21,8 @@ Les clips par défaut ne changent pas ; tout passe par `--fa-anim` après `--`.
 - `BattleSkinned` : `--fa-anim`, `fa_anim_forced`, couche posée **par-dessus** la couche en
   place (défaut NT14 ou essai) : `mocap_textures` est une liste, `thrust` garde NT14.
 - `game/tests/fa3_anim_test.gd` ; les tests NT12/NT13/NT14 forcent `fa_anim_forced = 0`.
+- Captures en jeu côte à côte (jeu | FA3) : `game/tests/fa3_anim_shot.gd` (avec affichage),
+  écrites hors dépôt dans `~/dev/cent-ans-raw/fa/anim/boards/godot/` (mêlée, piques, arc, victoire).
 - Planches (hors dépôt) : `~/dev/cent-ans-raw/fa/anim/boards/fa3_{melee,polearm,bow,cheer}.jpg`
   par `fa3_anim_retarget.py -- render DIR` puis `fa3_anim_board.py DIR BOARD_DIR`.
 
@@ -50,7 +52,8 @@ CENT_ANS_FA3_TABLE=autre.json blender … -- render DIR   # essai de clips candi
   poings pointe devant (`prop.aim: hands`), la pique garde l'axe du clip keyframé
   (`prop.axis`), portée par le poing droit, main gauche posée dessus par IK.
 - Arc : arc tenu vertical (`bow_upright`), corde tirée par le poing droit des images 12 à 37,
-  décoche à l'image 37 (1,55 s, mode VOLLEY), buste incliné de 32° (élévation des flèches).
+  décoche à l'image 37 (1,55 s, mode VOLLEY), buste incliné de 32° et bras relevés du
+  complément (la source vise 12° sous l'horizontale) : le bras d'arc vise à 32° à pleine allonge.
 
 ## Mesures (manifeste ; FA3 / clip remplacé)
 | clip | source | images | glissement pieds cm | écart boucle cm | bouclier devant le visage |

@@ -44,7 +44,7 @@
     "foot_slide_source_cm": 0.0,
     "foot_target_miss_cm": 0.0,
     "frames": 60,
-    "jitter_deg_per_frame2": 9.84,
+    "jitter_deg_per_frame2": 11.03,
     "largest_step_cm": 26.2,
     "loop_blended": false,
     "loop_gap_cm": null,

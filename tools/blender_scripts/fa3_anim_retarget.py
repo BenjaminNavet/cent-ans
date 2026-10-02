@@ -517,12 +517,21 @@ class Clip:
         self.bases = bases
 
     def _raise_aim(self, tgt, solved, bow):
-        """Lean the upper body back so that the arrow leaves at the game's elevation."""
+        """Raise the aim so that the arrow leaves at the game's elevation.
+
+        The upper body leans back by the elevation (60 % at the waist, 40 % at the chest);
+        what the bow arm still lacks at full draw (a source aiming below the horizontal) is
+        made up by turning both arms about their shoulders.
+        """
         angle = math.radians(float(bow["elevation_deg"]))
         left = tgt.frame.col[0]
         a, b = bow["draw_from"], bow["release"]
+
+        def weight(i):
+            return smoothstep(a - 8, a + 8, i) * (1.0 - smoothstep(b + 4, b + 12, i))
+
         for i, s in enumerate(solved):
-            w = smoothstep(a - 8, a + 8, i) * (1.0 - smoothstep(b + 4, b + 12, i))
+            w = weight(i)
             if w <= 0.0:
                 continue
             for bones, pivot, share in (
@@ -531,6 +540,17 @@ class Clip:
             ):
                 rot = Matrix.Rotation(-angle * share * w, 3, left)
                 rotate_about(s, bones, s[pivot].to_translation(), rot)
+        full = solved[min(b - 1, len(solved) - 1)]
+        aim = full["Wrist.L"].to_translation() - full["UpperArm.L"].to_translation()
+        lacking = angle - math.asin(aim.normalized().dot(tgt.up))
+        for i, s in enumerate(solved):
+            w = weight(i)
+            if w <= 0.0:
+                continue
+            rot = Matrix.Rotation(-lacking * w, 3, left)
+            for side in ("L", "R"):
+                arm = [f"{b}.{side}" for b in ("UpperArm", "LowerArm", "Wrist")]
+                rotate_about(s, arm, s[arm[0]].to_translation(), rot)
 
     def _aim_forward(self, tgt, solved, aim):
         """Turn the figure about the vertical so that its weapon points forwards at first.
