@@ -55,6 +55,13 @@ def test_parchment_ornaments_are_consistent() -> None:
             assert "height" in ornament["display"], ornament["id"]
 
 
+def test_every_kind_has_a_real_ornament() -> None:
+    """Switching a kind to ``real`` in ``use`` always finds a cut-out to show."""
+    document = _document()
+    kinds = {ornament["kind"] for ornament in document["ornaments"]}
+    assert set(document["use"]) <= kinds
+
+
 def test_rose_follows_the_shader_convention() -> None:
     """A rose is a centred square crop whose circle takes 0.9 of the half side."""
     for ornament in _document()["ornaments"]:

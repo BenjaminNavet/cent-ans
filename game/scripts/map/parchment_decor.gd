@@ -37,7 +37,8 @@ var roses: Array[Vector3] = []  # x, y, rayon (px carte)
 var ships: Array[Vector3] = []  # x, y, cap (radians, 0 = vers l'est)
 var monsters: Array[Vector3] = []  # x, y, variante
 ## FA6 : ornements peints par genre, {texture, anchor (0-1), height (unités du dessin), faces_left}.
-## Vide = ancien dessin par code (`--no-fa-parchment`, catalogue ou textures absents).
+## Vide = dessin par code d'origine (`use` du catalogue à `drawn`, `--no-fa-parchment`, catalogue
+## ou textures absents).
 var ship_ornaments: Array[Dictionary] = []
 var monster_ornaments: Array[Dictionary] = []
 var rose_texture: Texture2D
@@ -171,7 +172,11 @@ func _load_ornaments() -> void:
 	if not catalogue is Dictionary:
 		push_warning("ParchmentDecor: unreadable %s" % path)
 		return
+	# `use` : par genre, `real` (découpes du catalogue) ou `drawn` (dessin par code d'origine).
+	var use: Dictionary = (catalogue as Dictionary).get("use", {})
 	for entry: Dictionary in (catalogue as Dictionary).get("ornaments", []):
+		if str(use.get(str(entry.get("kind", "")), "real")) != "real":
+			continue
 		var texture_path := ORNAMENTS_DIR + str(entry.get("file", ""))
 		if not ResourceLoader.exists(texture_path):
 			continue

@@ -13,13 +13,13 @@ Les numérisations brutes ne sont pas versionnées.
 - Fichier source : [File:1375 Atlas Catalan, Europe 01.jpg](https://commons.wikimedia.org/wiki/File:1375_Atlas_Catalan,_Europe_01.jpg)
 - Licence : Domaine public (Wikimedia Commons : « Public domain », Copyrighted = False ; œuvre de 1375, reproduction fidèle d'une œuvre en deux dimensions)
 
-## `ship_indies.png`
+## `ship_ferrer.png`
 
-- Sujet : nef de la mer des Indes (coque noire bordée à clin, voiles de nattes, marins coiffés de chaperons)
-- Œuvre : Atlas catalan, feuillet 10 (golfe Persique, pêcheurs de perles)
+- Sujet : l'uxer de Jaume Ferrer (parti de Majorque en 1346 vers le « fleuve de l'Or »), voile latine et bannière d'Aragon ; trait renforcé, lavis posés sous l'encre (voile, coque)
+- Œuvre : Atlas catalan, feuillets de l'Europe et de la Méditerranée (BnF, Espagnol 30)
 - Auteur : Abraham Cresques (attribué) ; date : 1375
 - Institution : Bibliothèque nationale de France
-- Fichier source : [File:Catalan Atlas BNF, sheet 10.jpg](https://commons.wikimedia.org/wiki/File:Catalan_Atlas_BNF,_sheet_10.jpg)
+- Fichier source : [File:1375 Atlas Catalan, Europe 01.jpg](https://commons.wikimedia.org/wiki/File:1375_Atlas_Catalan,_Europe_01.jpg)
 - Licence : Domaine public (Wikimedia Commons : « Public domain », Copyrighted = False ; œuvre de 1375, reproduction fidèle d'une œuvre en deux dimensions)
 
 ## `siren_catalan.png`

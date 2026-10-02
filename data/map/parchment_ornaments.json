@@ -2,6 +2,7 @@
   "description": "Lot FA6 : ornements de portulan de la vue parchemin (carte de campagne, caméra > 1200), découpés dans des numérisations d'œuvres du domaine public par `tools/cent_ans_tools/parchment_ornaments.py`. Coordonnées en pixels du fichier source. `display` : indications lues par le jeu (`ParchmentDecor`).",
   "output_dir": "game/assets/textures/parchment",
   "preview_colours": [[214, 196, 150], [150, 165, 155]],
+  "use": {"rose": "real", "ship": "drawn", "monster": "real"},
   "sources": {
     "catalan_europe": {
       "file": "commons/1375_Atlas_Catalan,_Europe_01.jpg",
@@ -24,17 +25,6 @@
       "date": "1375",
       "institution": "Bibliothèque nationale de France",
       "licence": "Domaine public (Wikimedia Commons : « Public domain », Copyrighted = False ; œuvre de 1375, reproduction fidèle d'une œuvre en deux dimensions)"
-    },
-    "catalan_sheet_10": {
-      "file": "commons/Catalan_Atlas_BNF,_sheet_10.jpg",
-      "title": "File:Catalan Atlas BNF, sheet 10.jpg",
-      "page_url": "https://commons.wikimedia.org/wiki/File:Catalan_Atlas_BNF,_sheet_10.jpg",
-      "download_url": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Catalan_Atlas_BNF%2C_sheet_10.jpg",
-      "work": "Atlas catalan, feuillet 10 (golfe Persique, pêcheurs de perles)",
-      "author": "Abraham Cresques (attribué)",
-      "date": "1375",
-      "institution": "Bibliothèque nationale de France",
-      "licence": "Domaine public (Wikimedia Commons : « Public domain », Copyrighted = False ; œuvre de 1375, reproduction fidèle d'une œuvre en deux dimensions)"
     }
   },
   "ornaments": [
@@ -52,16 +42,22 @@
       "display": {"anchor": [0.5, 0.5]}
     },
     {
-      "id": "ship_indies",
+      "id": "ship_ferrer",
       "kind": "ship",
-      "note": "nef de la mer des Indes (coque noire bordée à clin, voiles de nattes, marins coiffés de chaperons)",
-      "source": "catalan_sheet_10",
-      "file": "ship_indies.png",
-      "crop": [940, 12440, 2220, 13820],
+      "note": "l'uxer de Jaume Ferrer (parti de Majorque en 1346 vers le « fleuve de l'Or »), voile latine et bannière d'Aragon ; trait renforcé, lavis posés sous l'encre (voile, coque)",
+      "source": "catalan_europe",
+      "file": "ship_ferrer.png",
+      "crop": [460, 3420, 940, 3730],
       "size": 384,
-      "mask": {"shape": "polygon", "feather": 4, "points": [[1110, 12770], [1240, 12750], [1250, 12600], [1280, 12590], [1290, 12730], [1380, 12710], [1384, 12556], [1416, 12556], [1420, 12700], [1520, 12690], [1520, 12480], [1554, 12480], [1560, 12690], [1670, 12690], [1674, 12484], [1706, 12484], [1712, 12700], [1796, 12710], [1800, 12580], [1834, 12580], [1836, 12716], [2000, 12710], [2024, 12830], [1980, 12860], [1920, 12870], [1920, 12980], [2000, 12944], [2116, 12986], [2124, 13150], [2184, 13164], [2130, 13420], [2010, 13620], [1880, 13756], [1600, 13784], [1300, 13764], [1140, 13684], [1026, 13544], [1006, 13380], [976, 13300], [1006, 13190], [1100, 13156], [1150, 13190], [1124, 13100]]},
-      "contrast": 1.25,
-      "display": {"anchor": [0.5, 0.9], "height": 4.2, "faces": "right"}
+      "mask": {"shape": "polygon", "feather": 2, "points": [[494, 3432], [508, 3432], [512, 3444], [600, 3444], [602, 3496], [512, 3496], [512, 3642], [556, 3650], [588, 3600], [566, 3500], [738, 3498], [742, 3455], [764, 3455], [766, 3492], [840, 3486], [900, 3516], [928, 3580], [918, 3632], [906, 3655], [912, 3662], [884, 3690], [850, 3704], [640, 3712], [510, 3722], [476, 3706], [474, 3668], [494, 3648]]},
+      "key": {"low": 0.08, "high": 0.2, "paper_radius": 60, "percentile": 80, "reject_blue": [0.01, 0.05], "ink_gain": 1.8},
+      "tone": [0.72, 0.64, 0.58],
+      "contrast": 1.2,
+      "fills": [
+        {"shape": "polygon", "feather": 2, "colour": [240, 228, 196], "points": [[575, 3503], [640, 3508], [700, 3505], [760, 3495], [830, 3492], [880, 3510], [912, 3545], [920, 3585], [905, 3620], [880, 3632], [850, 3615], [840, 3600], [790, 3590], [730, 3568], [660, 3540], [600, 3515]]},
+        {"shape": "polygon", "feather": 2, "colour": [150, 104, 62], "points": [[480, 3665], [500, 3652], [560, 3662], [640, 3682], [760, 3680], [860, 3668], [905, 3658], [880, 3685], [850, 3698], [640, 3703], [520, 3712], [485, 3700]]}
+      ],
+      "display": {"anchor": [0.5, 0.88], "height": 3.6, "faces": "left"}
     },
     {
       "id": "siren_catalan",

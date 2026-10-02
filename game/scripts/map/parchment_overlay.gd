@@ -173,6 +173,7 @@ var _last_draw_ms := -ANIMATION_INTERVAL_MS
 func _process(_delta: float) -> void:
 	if not visible:
 		return
+	_ensure_sea_glyphs()
 	var view := _view_signature()
 	var now := Time.get_ticks_msec()
 	var pulsing := armies != null and armies.selected_army != "" and weight > 0.4
@@ -242,7 +243,7 @@ func _draw() -> void:
 
 
 func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
-	if decor == null or _sea_glyphs.is_empty():
+	if decor == null or _sea_layer == null:
 		return
 	var t := Time.get_ticks_msec() / 1000.0
 	_sea_layer.blits.clear()
@@ -253,7 +254,8 @@ func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
 			continue
 		p += Vector2(0.0, sin(t * 1.3 + ship.x) * 1.2)
 		if decor.ship_ornaments.is_empty():
-			_blit(_sea_glyphs[0], p, 16.0 * s, a, ship.z < 0.0)
+			if _sea_glyphs.has(SHIP_GLYPH):
+				_blit(_sea_glyphs[SHIP_GLYPH], p, 16.0 * s, a, ship.z < 0.0)
 		else:
 			_sea_layer.add(decor.ship_ornaments[i % decor.ship_ornaments.size()], p, 16.0 * s, a, ship.z > 0.0)
 	for i in decor.monsters.size():
@@ -263,7 +265,9 @@ func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
 			continue
 		p += Vector2(0.0, sin(t * 0.8 + monster.y) * 1.5)
 		if decor.monster_ornaments.is_empty():
-			_blit(_sea_glyphs[1 if monster.z < 0.5 else 2], p, 20.0 * s, a, false)
+			var glyph := SERPENT_GLYPH if monster.z < 0.5 else WHALE_GLYPH
+			if _sea_glyphs.has(glyph):
+				_blit(_sea_glyphs[glyph], p, 20.0 * s, a, false)
 		else:
 			_sea_layer.add(decor.monster_ornaments[int(monster.z) % decor.monster_ornaments.size()], p, 20.0 * s, a, i % 2 == 1)
 	_sea_layer.queue_redraw()
@@ -298,14 +302,20 @@ class SeaLayer:
 			draw_texture_rect(blit[0], rect, false, Color(1, 1, 1, blit[3]))
 
 
-## Navire, serpent de mer, baleine : dessinés une fois (même méthode que les villes).
-## [texture, taille, ancre, unité]
-var _sea_glyphs: Array = []
+## Navire, serpent de mer, baleine : dessinés une fois (même méthode que les villes), et
+## seulement ceux que le catalogue des ornements ne remplace pas (FA6).
+## nom → [texture, taille, ancre, unité]
+const SHIP_GLYPH := "ship"
+const SERPENT_GLYPH := "serpent"
+const WHALE_GLYPH := "whale"
+
+var _sea_glyphs: Dictionary = {}
+var _sea_glyphs_for: ParchmentDecor
 ## Cible des fonctions de dessin des ornements (soi-même, ou la toile d'une vignette).
 var _ci: CanvasItem = self
 
 
-func _make_sea_glyphs() -> void:
+func _make_sea_layer() -> void:
 	_sea_layer = SeaLayer.new()
 	_sea_layer.name = "SeaOrnaments"
 	_sea_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -313,13 +323,22 @@ func _make_sea_glyphs() -> void:
 	_sea_layer.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	_sea_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_sea_layer)
-	var specs := [
-		[Vector2i(72, 72), Vector2(36.0, 42.0), 24.0, func(ci: CanvasItem) -> void: _paint_with(ci, func() -> void: _draw_ship(Vector2(36.0, 42.0), 24.0, 1.0, 1.0))],
-		[Vector2i(100, 48), Vector2(52.0, 26.0), 20.0, func(ci: CanvasItem) -> void: _paint_with(ci, func() -> void: _draw_serpent(Vector2(52.0, 26.0), 20.0, 1.0, 0.0))],
-		[Vector2i(90, 52), Vector2(40.0, 30.0), 20.0, func(ci: CanvasItem) -> void: _paint_with(ci, func() -> void: _draw_whale(Vector2(40.0, 30.0), 20.0, 1.0, 0.0))],
-	]
-	for spec in specs:
-		_sea_glyphs.append([_make_glyph(spec[0], spec[3]), spec[0], spec[1], spec[2]])
+
+
+## Crée les vignettes dessinées dont `decor` a besoin (hors du dessin : ajoute des nœuds).
+func _ensure_sea_glyphs() -> void:
+	if decor == null or decor == _sea_glyphs_for:
+		return
+	_sea_glyphs_for = decor
+	if decor.ship_ornaments.is_empty() and not _sea_glyphs.has(SHIP_GLYPH):
+		_add_sea_glyph(SHIP_GLYPH, Vector2i(72, 72), Vector2(36.0, 42.0), 24.0, func() -> void: _draw_ship(Vector2(36.0, 42.0), 24.0, 1.0, 1.0))
+	if decor.monster_ornaments.is_empty() and not _sea_glyphs.has(SERPENT_GLYPH):
+		_add_sea_glyph(SERPENT_GLYPH, Vector2i(100, 48), Vector2(52.0, 26.0), 20.0, func() -> void: _draw_serpent(Vector2(52.0, 26.0), 20.0, 1.0, 0.0))
+		_add_sea_glyph(WHALE_GLYPH, Vector2i(90, 52), Vector2(40.0, 30.0), 20.0, func() -> void: _draw_whale(Vector2(40.0, 30.0), 20.0, 1.0, 0.0))
+
+
+func _add_sea_glyph(glyph: String, size: Vector2i, anchor: Vector2, unit: float, body: Callable) -> void:
+	_sea_glyphs[glyph] = [_make_glyph(size, func(ci: CanvasItem) -> void: _paint_with(ci, body)), size, anchor, unit]
 
 
 ## Remplit un polygone (ignoré si la triangulation échoue : contour seul).
@@ -450,7 +469,8 @@ var _town_glyph: Texture2D
 
 func _make_glyphs() -> void:
 	_town_glyph = _make_glyph(GLYPH_SIZE, func(ci: CanvasItem) -> void: paint_town(ci, GLYPH_ANCHOR, GLYPH_UNIT))
-	_make_sea_glyphs()
+	_make_sea_layer()
+	_ensure_sea_glyphs()
 	for kind in WEATHER_GLYPHS:
 		_weather_glyphs[kind] = _make_glyph(WEATHER_GLYPH_SIZE, func(ci: CanvasItem) -> void: paint_weather(ci, WEATHER_ANCHOR, WEATHER_UNIT, kind))
 

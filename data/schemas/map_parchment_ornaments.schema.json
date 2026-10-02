@@ -4,12 +4,23 @@
   "title": "Ornements de portulan de la vue parchemin (lot FA6)",
   "description": "Catalogue `data/map/parchment_ornaments.json` : découpes d'ornements (rose des vents, navires, monstres marins) dans des numérisations d'œuvres du domaine public, lues par `tools/cent_ans_tools/parchment_ornaments.py` (détourage) et par `ParchmentDecor` (affichage). Coordonnées en pixels du fichier source.",
   "type": "object",
-  "required": ["output_dir", "preview_colours", "sources", "ornaments"],
+  "required": ["output_dir", "preview_colours", "use", "sources", "ornaments"],
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
     "output_dir": {"type": "string", "pattern": "^game/assets/textures/", "description": "Dossier des PNG produits, relatif à la racine du dépôt."},
     "preview_colours": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/rgb255"}, "description": "Fonds de la planche de contrôle (`--preview`)."},
+    "use": {
+      "type": "object",
+      "required": ["rose", "ship", "monster"],
+      "additionalProperties": false,
+      "description": "Choix par genre d'ornement, lu par `ParchmentDecor` : `real` = découpes du catalogue, `drawn` = dessin par code d'origine (et ses emplacements).",
+      "properties": {
+        "rose": {"$ref": "#/$defs/use"},
+        "ship": {"$ref": "#/$defs/use"},
+        "monster": {"$ref": "#/$defs/use"}
+      }
+    },
     "sources": {
       "type": "object",
       "minProperties": 1,
@@ -65,6 +76,7 @@
           "saturation": {"type": "number", "minimum": 0, "maximum": 3},
           "contrast": {"type": "number", "exclusiveMinimum": 0, "maximum": 3},
           "opacity": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+          "fills": {"type": "array", "items": {"$ref": "#/$defs/fill"}, "description": "Lavis posés sous l'encre (voile, coque) pour qu'une esquisse pâle se lise à la taille d'un ornement."},
           "display": {
             "type": "object",
             "required": ["anchor"],
@@ -80,6 +92,19 @@
     }
   },
   "$defs": {
+    "use": {"enum": ["real", "drawn"]},
+    "fill": {
+      "type": "object",
+      "required": ["shape", "points", "colour"],
+      "additionalProperties": false,
+      "properties": {
+        "shape": {"const": "polygon"},
+        "points": {"$ref": "#/$defs/polygon"},
+        "feather": {"type": "number", "minimum": 0},
+        "colour": {"$ref": "#/$defs/rgb255"},
+        "opacity": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+      }
+    },
     "rgb255": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 0, "maximum": 255}},
     "point": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
     "polygon": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/point"}},

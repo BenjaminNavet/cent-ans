@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://baiouvgdyyv5o"
-path="res://.godot/imported/ship_indies.png-425e97d0f304a7fda607737fe96cee2b.ctex"
+uid="uid://dl71ijvncyilh"
+path="res://.godot/imported/ship_ferrer.png-87f08f7546f10f9beecbc180d39de6bc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/parchment/ship_indies.png"
-dest_files=["res://.godot/imported/ship_indies.png-425e97d0f304a7fda607737fe96cee2b.ctex"]
+source_file="res://assets/textures/parchment/ship_ferrer.png"
+dest_files=["res://.godot/imported/ship_ferrer.png-87f08f7546f10f9beecbc180d39de6bc.ctex"]
 
 [params]
 

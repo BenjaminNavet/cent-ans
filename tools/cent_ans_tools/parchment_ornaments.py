@@ -9,7 +9,8 @@ ones out of scans of period charts (Catalan Atlas, 1375) and writes them as tran
   and the paint remain;
 - painted figures keep their opaque body (a `mask` without `key`: polygon with holes);
 - the blue wave pattern of the Atlas seas can be rejected (`reject_blue`), except where blue is
-  painted on purpose (`reject_except`).
+  painted on purpose (`reject_except`);
+- a pale ink sketch can receive flat washes under its lines (`fills`).
 
 Every crop, mask and threshold lives in `data/map/parchment_ornaments.json` (no coordinate in this
 file). Raw scans stay outside the repository; missing ones are downloaded from Wikimedia Commons.
@@ -148,6 +149,14 @@ def cut_out(image: Image.Image, ornament: dict) -> Image.Image:
     colour = luma[..., None] + (colour - luma[..., None]) * saturation
     contrast = float(ornament.get("contrast", 1.0))
     colour = np.clip(((colour - 0.5) * contrast + 0.5) * tone, 0.0, 1.0)
+    for fill in ornament.get("fills", []):
+        # Flat wash laid under the ink (sail, hull): a pale sketch reads at ornament size.
+        cover = shape_mask(fill, (x0, y0), size) * float(fill.get("opacity", 1.0))
+        wash = np.asarray(fill["colour"], dtype=np.float32) / 255.0
+        under = cover * (1.0 - alpha)
+        total = np.maximum(alpha + under, 1e-4)[..., None]
+        colour = (colour * alpha[..., None] + wash * under[..., None]) / total
+        alpha = alpha + under
     alpha = np.clip(alpha * float(ornament.get("opacity", 1.0)), 0.0, 1.0)
     rgba = np.concatenate([colour, alpha[..., None]], axis=-1)
     out = Image.fromarray((rgba * 255.0 + 0.5).astype(np.uint8), "RGBA")
