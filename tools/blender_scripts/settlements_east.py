@@ -22,6 +22,7 @@ import random
 from functools import partial
 
 import models as m
+from mathutils import Matrix, Vector
 
 F = m.FOUNDATION
 TAU = 2 * math.pi
@@ -40,12 +41,15 @@ PALETTE = {
     "Brick": ((0.45, 0.17, 0.10), 0.88, 0.0),
     "TileOrange": ((0.62, 0.21, 0.07), 0.8, 0.0),
     "Lead": ((0.36, 0.39, 0.43), 0.5, 0.0),
-    "Log": ((0.28, 0.18, 0.10), 0.9, 0.0),
-    "Shingle": ((0.33, 0.32, 0.30), 0.85, 0.0),
-    "CopperGreen": ((0.10, 0.40, 0.27), 0.5, 0.0),
-    "Gilt": ((0.85, 0.58, 0.12), 0.4, 0.3),
+    "WhiteStone": ((0.90, 0.89, 0.84), 0.9, 0.0),
+    "Log": ((0.50, 0.32, 0.15), 0.9, 0.0),
+    "Shingle": ((0.50, 0.53, 0.56), 0.8, 0.0),
+    "CopperGreen": ((0.08, 0.52, 0.30), 0.5, 0.0),
+    "DomeBlue": ((0.08, 0.24, 0.66), 0.5, 0.0),
+    "Gilt": ((0.92, 0.62, 0.10), 0.4, 0.3),
     "Turquoise": ((0.05, 0.42, 0.48), 0.4, 0.0),
-    "Felt": ((0.74, 0.70, 0.60), 0.95, 0.0),
+    "Felt": ((0.78, 0.74, 0.64), 0.95, 0.0),
+    "FeltBand": ((0.62, 0.13, 0.09), 0.9, 0.0),
     "Sand": ((0.50, 0.40, 0.25), 1.0, 0.0),
     "Rock": ((0.40, 0.36, 0.29), 0.95, 0.0),
     "Steppe": ((0.30, 0.31, 0.13), 1.0, 0.0),
@@ -385,32 +389,32 @@ def flat_house(x, y, w, d, h, angle, wall, z=0.0, upper=None):
     return parts
 
 
-def yurt(x, y, radius, mat="Felt", door=-math.pi / 2, roof=None):
-    """Felt tent: low round wall, conical roof (of material ``roof``) with its dark smoke
-    ring, door facing ``door``.
+def yurt(x, y, radius, mat="Felt", door=-math.pi / 2, roof=None, band="FeltBand"):
+    """Felt tent: low round wall, coloured ``band`` under the eaves, low conical roof (of
+    material ``roof``) jutting over the wall, dark smoke ring at the crown, door facing ``door``.
     """  # noqa: D205
-    wall_h = radius * 0.55
-    crown = wall_h + radius * 0.45
-    wall = [(radius, -F * 0.5), (radius, wall_h)]
-    cone = [(radius, wall_h), (radius * 0.3, crown)]
-    parts = (
-        [lathe(wall, mat, (x, y, 0.0), 8), lathe(cone, roof, (x, y, 0.0), 8)]
-        if roof
-        else [lathe(wall + cone[1:], mat, (x, y, 0.0), 8)]
-    )
-    parts.append(m.cylinder(radius * 0.33, 0.02, (x, y, crown), "Wood", 6))
-    parts.append(
+    wall_h = radius * 0.5
+    eaves = radius * 1.1
+    skirt = (radius * 0.84, wall_h + radius * 0.14)
+    ring = radius * 0.26
+    crown = wall_h + radius * 0.62
+    here = (x, y, 0.0)
+    parts = [
+        lathe([(radius, -F * 0.5), (radius, wall_h)], mat, here, 8),
+        lathe([(eaves, wall_h - radius * 0.04), skirt], band, here, 8),
+        lathe([skirt, (ring, crown)], roof or mat, here, 8),
+        m.cylinder(ring * 1.15, radius * 0.08, (x, y, crown), "Wood", 6),
         m.box(
-            (radius * 0.2, radius * 0.5, wall_h * 0.85),
+            (radius * 0.2, radius * 0.5, wall_h * 0.9),
             (
                 x + math.cos(door) * radius * 0.95,
                 y + math.sin(door) * radius * 0.95,
-                wall_h * 0.42,
+                wall_h * 0.45,
             ),
-            "Wood",
+            band,
             rotation=(0, 0, door),
-        )
-    )
+        ),
+    ]
     return parts
 
 
@@ -494,8 +498,11 @@ def scatter(
     return parts
 
 
-def suburb(points, gate, rng, builder, count=8):
-    """Houses along the road outside the gate of side ``gate`` of a wall polygon."""
+def suburb(points, gate, rng, builder, count=8, step=0.13):
+    """Houses along the road outside the gate of side ``gate`` of a wall polygon.
+
+    Two rows, ``step`` (fraction of the gate distance) apart along the road.
+    """
     x0, y0 = points[gate]
     x1, y1 = points[(gate + 1) % len(points)]
     gx, gy = (x0 + x1) / 2, (y0 + y1) / 2
@@ -503,7 +510,7 @@ def suburb(points, gate, rng, builder, count=8):
     parts = []
     for k in range(count):
         ang = base + (0.14 if k % 2 else -0.14) + rng.uniform(-0.04, 0.04)
-        t = (1.22 + 0.13 * (k // 2)) * reach
+        t = (1.22 + step * (k // 2)) * reach
         parts += builder(
             t * math.cos(ang),
             t * math.sin(ang),
@@ -1248,7 +1255,7 @@ def round_tower(x, y, radius, height, mat, roof, z=0.0):
 
 def rus_walls(points, height, gates, stone=False, z=0.0, tower_side=0.15, every=1):
     """Log palisade (or white stone wall) with tent-roofed towers and gate towers."""
-    mat = "Whitewash" if stone else "Log"
+    mat = "WhiteStone" if stone else "Log"
     corners = set(points[::every])
     return curtain(
         points,
@@ -1271,7 +1278,7 @@ def rus_church(
 ):
     """White stone church: cubic body, apse, porch, drums under onion or helmet domes."""
     at = local_frame(x, y, angle, s)
-    parts = [block(x, y, 0.44 * s, 0.44 * s, 0.4 * s, "Whitewash", angle, z)]
+    parts = [block(x, y, 0.44 * s, 0.44 * s, 0.4 * s, "WhiteStone", angle, z)]
     parts.append(
         m.cone(
             0.34 * s,
@@ -1285,17 +1292,17 @@ def rus_church(
     ax, ay = at(0.24, 0.0)
     parts.append(
         m.cylinder(
-            0.12 * s, 0.3 * s + F, (ax, ay, z + (0.3 * s - F) / 2), "Whitewash", 8
+            0.12 * s, 0.3 * s + F, (ax, ay, z + (0.3 * s - F) / 2), "WhiteStone", 8
         )
     )
     parts.append(m.cone(0.135 * s, 0.08 * s, (ax, ay, z + 0.34 * s), "Lead", 8))
     px, py = at(-0.3, 0.0)
     parts += gable_house(
-        px, py, 0.18 * s, 0.26 * s, 0.2 * s, angle, "Whitewash", "Shingle", 0.4, z
+        px, py, 0.18 * s, 0.26 * s, 0.2 * s, angle, "WhiteStone", "Shingle", 0.4, z
     )
     main = "Gilt" if domes > 1 and dome_mat != "Gilt" else dome_mat
     parts += drum_dome(
-        x, y, z + 0.42 * s, 0.085 * s, 0.2 * s, "Whitewash", main, shape, 8, "Gilt"
+        x, y, z + 0.42 * s, 0.085 * s, 0.2 * s, "WhiteStone", main, shape, 8, "Gilt"
     )
     if domes >= 5:
         spots = ((-0.14, -0.14), (0.14, -0.14), (0.14, 0.14), (-0.14, 0.14))
@@ -1306,7 +1313,7 @@ def rus_church(
     for dx, dy in spots:
         cx, cy = at(dx, dy)
         parts += drum_dome(
-            cx, cy, z + 0.41 * s, 0.055 * s, 0.11 * s, "Whitewash", dome_mat, shape, 6
+            cx, cy, z + 0.41 * s, 0.055 * s, 0.11 * s, "WhiteStone", dome_mat, shape, 6
         )
     return parts
 
@@ -1332,7 +1339,7 @@ def tent_church(x, y, angle, s=1.0, z=0.0):
     return parts
 
 
-def bell_tower(x, y, s=1.0, mat="Whitewash", z=0.0):
+def bell_tower(x, y, s=1.0, mat="WhiteStone", z=0.0):
     """Bell tower: square shaft, tent roof and a small gilded bulb."""
     parts = rus_tower(x, y, 0.15 * s, 0.5 * s, mat, z)
     top = z + 0.5 * s + 0.045 + 0.225 * s
@@ -1373,7 +1380,7 @@ def build_rus_city(variant):
         "helmet" if first else "onion",
         "Gilt" if first else "CopperGreen",
     )
-    parts += bell_tower(kx + 0.32, ky + 0.2, 1.0, "Log" if first else "Whitewash")
+    parts += bell_tower(kx + 0.32, ky + 0.2, 1.0, "Log" if first else "WhiteStone")
     parts += terem(kx + 0.12, ky - 0.32, 0.1, 1.0)
     keep_out = [(kx, ky, 0.66)]
     for ang, r in ((2.4, 0.95), (5.2, 0.9)) if first else ((0.9, 0.9), (3.3, 0.85)):
@@ -1396,7 +1403,7 @@ def build_rus_town(variant):
     if first:
         parts += tent_church(0.05, 0.12, 0.3, 1.15)
     else:
-        parts += rus_church(0.05, 0.12, 0.3, 0.95, 1, "onion", "CopperGreen")
+        parts += rus_church(0.05, 0.12, 0.3, 0.95, 1, "onion", "DomeBlue")
     parts += terem(-0.36, -0.3, 0.5, 0.95)
     keep_out = [(0.05, 0.12, 0.36), (-0.36, -0.3, 0.3)]
     parts += scatter(rng, 26, 0.82, izba, keep_out, shrink(points, 0.88), (0.18, 0.25))
@@ -1419,18 +1426,18 @@ def build_rus_castle(variant):
         parts += curtain(
             shell,
             0.26,
-            "Whitewash",
+            "WhiteStone",
             tower_at=lambda x, y: round_tower(
-                x, y, 0.09, 0.4, "Whitewash", "Shingle", height
+                x, y, 0.09, 0.4, "WhiteStone", "Shingle", height
             ),
             gates=(3,),
             gate_at=lambda x, y, a: gatehouse(
-                x, y, a, 0.4, "Whitewash", "Shingle", z=height
+                x, y, a, 0.4, "WhiteStone", "Shingle", z=height
             ),
             top="merlons",
             z=height,
         )
-        parts += tower(0.14, 0.1, 0.22, 0.7, "Whitewash", "tent", "Shingle", z=height)
+        parts += tower(0.14, 0.1, 0.22, 0.7, "WhiteStone", "tent", "Shingle", z=height)
         parts += flag(0.14, 0.1, height + 0.7 + 0.3, 0.24)
         parts += rus_church(-0.14, -0.1, 0.3, 0.5, 1, "helmet", "Gilt", z=height)
     for k in range(7):
@@ -1457,10 +1464,10 @@ def build_rus_abbey(variant):
     gate_angle = math.atan2(
         fence[gate + 1][1] - fence[gate][1], fence[gate + 1][0] - fence[gate][0]
     )
-    parts += gatehouse(gx, gy, gate_angle, 0.3, "Whitewash", "Shingle")
+    parts += gatehouse(gx, gy, gate_angle, 0.3, "WhiteStone", "Shingle")
     parts += cupola(gx, gy, 0.36, 0.045, "CopperGreen", "onion", 6, "Gilt")
     if first:
-        parts += rus_church(0.0, 0.1, 0.0, 1.15, 5, "onion", "CopperGreen")
+        parts += rus_church(0.0, 0.1, 0.0, 1.15, 5, "onion", "DomeBlue")
     else:
         parts += rus_church(-0.1, 0.12, 0.0, 1.0, 3, "helmet", "Gilt")
         parts += tent_church(0.45, -0.2, 0.0, 0.85)
@@ -1868,7 +1875,7 @@ def camp_yurt(x, y, w, d, angle, rng):
 
 def khan_tent(x, y, radius=0.2):
     """Great tent of the khan: gilded roof and the banner standard."""
-    return yurt(x, y, radius, "Felt", roof="Gilt") + flag(
+    return yurt(x, y, radius, "Felt", roof="Gilt", band="Turquoise") + flag(
         x + radius * 1.3, y, 0.0, 0.42
     )
 
@@ -2236,12 +2243,19 @@ def model_names(family):
 
 
 # ``<kind>_<family>_<variant>`` -> parts builder, merged into ``settlements.MODELS``.
-MODELS = {
-    f"{kind}_{family}_{variant}": partial(build, variant)
-    for family in FAMILIES
-    for kind, build in zip(KINDS, BUILDERS[family], strict=True)
-    for variant in VARIANTS
-}
+MODELS = {}
+
+
+def register_family(family, builders):
+    """Add the models of ``family`` (one ``build(variant)`` per kind of :data:`KINDS`)."""
+    BUILDERS[family] = tuple(builders)
+    for kind, build in zip(KINDS, BUILDERS[family], strict=True):
+        for variant in VARIANTS:
+            MODELS[f"{kind}_{family}_{variant}"] = partial(build, variant)
+
+
+for _family in FAMILIES:
+    register_family(_family, BUILDERS[_family])
 
 
 def triangle_budget(name, default):
@@ -2249,3 +2263,17 @@ def triangle_budget(name, default):
     if name not in MODELS:
         return default
     return 12000 if name.startswith("city_") else 5000
+
+
+def centre_footprint(obj):
+    """Centre the ground footprint of a joined model on the origin (suburbs and outlying
+    houses must not shift the model on its map spot); return the ``(x, y)`` shift removed.
+    """  # noqa: D205
+    world = obj.matrix_world
+    xs, ys = zip(
+        *((p.x, p.y) for p in (world @ v.co for v in obj.data.vertices)), strict=True
+    )
+    cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+    shift = world.to_3x3().inverted() @ Vector((cx, cy, 0.0))
+    obj.data.transform(Matrix.Translation(-shift))
+    return cx, cy

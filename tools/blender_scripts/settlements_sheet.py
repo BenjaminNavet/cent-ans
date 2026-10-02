@@ -3,12 +3,14 @@
 Run headless:
     blender --background --python settlements_sheet.py -- <family> [out.png]
 
-``family`` is ``west`` (the original kit) or one of ``settlements_east.FAMILIES``. The ten
+``family`` is ``legacy`` (the original BR1 kit models, ``city_a``...) or a maquette family
+(``west``, ``med``, ``byz``, ``rus``, ``isl``, ``steppe``). The ten
 models are laid on a grid (one column per kind, variant ``a`` behind variant ``b``), seen from
 three quarters above under a plain sun, on a neutral ground, with their names. The models are
 built straight from the generators with their palette colours (no kit atlas), which is how
 the flat-coloured families look in Godot. Default output: ``docs/img/gc/kit_<family>.png``
-(untracked). A line ``SIZE <name> <width> <depth> <height> <triangles>`` is printed per model.
+(untracked). A line ``SIZE <name> <width> <depth> <height> <triangles> <dx> <dy>`` is printed per
+model (``dx``, ``dy``: offset of the footprint centre removed from the maquette families).
 """
 
 import math
@@ -28,11 +30,12 @@ IMAGE_WIDTH = 1600
 ELEVATION = math.radians(40.0)  # camera height above the horizon
 YAW = math.radians(-28.0)  # each model is turned by this angle (three-quarter view)
 REPO = Path(__file__).resolve().parents[2]
+LEGACY = "legacy"
 
 
 def family_names(family: str) -> list[str]:
     """Model names of a family, kind by kind then variant."""
-    if family == "west":
+    if family == LEGACY:
         return [f"{kind}_{variant}" for kind in east.KINDS for variant in east.VARIANTS]
     return east.model_names(family)
 
@@ -125,7 +128,7 @@ def main() -> None:
         else REPO / "docs" / "img" / "gc" / f"kit_{family}.png"
     )
     out.parent.mkdir(parents=True, exist_ok=True)
-    m.KIT = family == "west"
+    m.KIT = family == LEGACY
     m.reset_scene()
     names = family_names(family)
     columns, rows = len(east.KINDS), len(east.VARIANTS)
@@ -135,8 +138,13 @@ def main() -> None:
         column, row = divmod(index, rows)
         obj = build_joined(name)
         triangles = m.triangle_count(obj)
+        dx, dy = east.centre_footprint(obj) if name in east.MODELS else (0.0, 0.0)
+        bpy.context.view_layer.update()
         size = obj.dimensions
-        print(f"SIZE {name} {size.x:.2f} {size.y:.2f} {size.z:.2f} {triangles}")
+        print(
+            f"SIZE {name} {size.x:.2f} {size.y:.2f} {size.z:.2f} {triangles}"
+            f" {dx:+.2f} {dy:+.2f}"
+        )
         obj.rotation_euler = (0.0, 0.0, YAW)
         obj.location = (column * CELL, -row * CELL, 0.0)
         add_label(
