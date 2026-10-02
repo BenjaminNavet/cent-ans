@@ -106,7 +106,7 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 		centers[i] = layer.model_px(i)
 		var plan := LandmarkLibrary.for_settlement(id)
 		if not plan.is_empty():
-			var landmark := LandmarkModel.create(plan, terrain, landmark_scale)
+			var landmark := LandmarkModel.create(plan, terrain, landmark_scale, true)
 			if landmark != null:
 				add_child(landmark)
 				_landmarks[i] = landmark
@@ -180,7 +180,7 @@ func setup(map_data: MapData, terrain: TerrainBuilder, layer: SettlementLayer) -
 	stats = {
 		"places": count, "landmarks": _landmarks.size(), "instances": instances, "multimeshes": _tiles.size(),
 		"models": _model_list.size(), "reduced": reduced, "family_fallbacks": fallbacks,
-		"setup_ms": Time.get_ticks_msec() - t0, "landmark_ms": t1 - t0,
+		"setup_ms": Time.get_ticks_msec() - t0, "prepare_ms": t1 - t0,
 	}
 	print("TownMaquetteLayer: %s" % JSON.stringify(stats))
 
