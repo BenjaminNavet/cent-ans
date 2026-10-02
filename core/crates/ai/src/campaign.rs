@@ -203,9 +203,11 @@ impl<'a> Context<'a> {
         self.army_upkeep + self.building_upkeep
     }
 
-    /// Treasury kept aside: two turns of upkeep.
+    /// Treasury kept aside: two turns of upkeep (JR4: and, for the
+    /// crusade, the price of the next passage once it can be preached).
     fn reserve(&self) -> i64 {
         2 * self.upkeep()
+            + sim_campaign::crusade::ai_passage_reserve(self.state, self.data, self.faction)
     }
 
     /// Seasonal surplus (negative: deficit) at the current upkeep.

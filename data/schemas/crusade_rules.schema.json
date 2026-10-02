@@ -37,6 +37,10 @@
       "properties": {
         "start": { "type": "integer", "minimum": 0, "maximum": 100 },
         "decay_per_turn": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "decay_above_high": {
+          "type": "integer", "minimum": 0, "maximum": 20,
+          "description": "Points perdus en plus chaque tour quand la Ferveur atteint le seuil haut de l'Élan (`zeal.high_threshold`) : l'exaltation retombe."
+        },
         "battle_won_other_faith": { "type": "integer", "minimum": 0, "maximum": 100 },
         "battle_lost": { "type": "integer", "minimum": -100, "maximum": 0 },
         "holy_land_settlement_taken": { "type": "integer", "minimum": 0, "maximum": 100 },

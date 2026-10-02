@@ -9,7 +9,9 @@ use crate::campaign_sim::CampaignSim;
 #[godot_api(secondary)]
 impl CampaignSim {
     /// The player's fervour: `{fervor, floor, alms, alms_last_turn,
-    /// changes[{cause, delta}], zeal_morale, desertion_percent, target_taken,
+    /// changes[{cause, delta}], zeal_morale, desertion_percent,
+    /// zeal_high_threshold, zeal_low_threshold, zeal_high_morale,
+    /// zeal_low_morale, desertion_threshold, desertion_men_percent, target_taken,
     /// target_name, passage_cost, passage_cooldown, passage_available,
     /// passage_blocker, passage_units, passage_delay, pending[{turns_left,
     /// port, port_name, units}]}` (French texts; `passage_blocker` is `""`
@@ -56,6 +58,12 @@ impl CampaignSim {
             "changes" => &changes,
             "zeal_morale" => i64::from(view.zeal_morale),
             "desertion_percent" => i64::from(view.desertion_percent),
+            "zeal_high_threshold" => i64::from(view.zeal_high_threshold),
+            "zeal_low_threshold" => i64::from(view.zeal_low_threshold),
+            "zeal_high_morale" => i64::from(view.zeal_high_morale),
+            "zeal_low_morale" => i64::from(view.zeal_low_morale),
+            "desertion_threshold" => i64::from(view.desertion_threshold),
+            "desertion_men_percent" => i64::from(view.desertion_men_percent),
             "target_taken" => view.target_taken,
             "target_name" => view.target_name.as_str(),
             "passage_cost" => view.passage_cost,

@@ -45,6 +45,10 @@ pub struct CrusadeRules {
 pub struct CrusadeFervor {
     pub start: u8,
     pub decay_per_turn: u8,
+    /// Extra points lost each turn at or above the high zeal threshold
+    /// (« l'exaltation retombe »: keeps the gauge off its ceiling).
+    #[serde(default)]
+    pub decay_above_high: u8,
     pub battle_won_other_faith: i32,
     pub battle_lost: i32,
     pub holy_land_settlement_taken: i32,

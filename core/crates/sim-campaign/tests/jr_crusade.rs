@@ -119,7 +119,7 @@ fn preaching_lands_a_contingent_on_time() {
     let refused = state
         .submit_order(&data, Order::PreachPassage)
         .expect_err("on cooldown");
-    assert!(refused.to_string().contains("passage"), "{refused}");
+    assert!(refused.to_string().contains("Passage"), "{refused}");
 
     let garrison = |state: &CampaignState| state.settlements[&rules.base_settlement].garrison.len();
     let before = garrison(&state);
@@ -449,4 +449,46 @@ fn the_vow_binds_the_ai_to_no_peace_with_the_master_of_its_goal() {
     assert!(!crusade::ai_vow_forbids_peace(
         &played, &data, &faction, &holder
     ));
+}
+
+#[test]
+fn the_starting_host_is_about_balanced_at_the_starting_fervour() {
+    // JR4: played from the first turn, the crusade's army and garrisons cost
+    // about what the alms and its few places bring at the starting fervour:
+    // preaching stays a real choice, and no bankruptcy before it.
+    let data = data();
+    let (state, faction) = crusade(&data, 1);
+    assert_eq!(
+        state.crusade.as_ref().unwrap().fervor,
+        rules(&data).fervor.start
+    );
+    let economy = state.faction_economy(&data, &faction).expect("economy");
+    let net = economy.net_income();
+    println!(
+        "receipts {} trade {} armies {} buildings {} administration {} table {} net {net}",
+        economy.projected_income,
+        economy.trade_income,
+        economy.army_upkeep,
+        economy.building_upkeep,
+        economy.administration_upkeep,
+        economy.table_upkeep
+    );
+    assert!((-300..=200).contains(&net), "net balance {net}");
+}
+
+#[test]
+fn the_view_carries_the_thresholds_of_the_rules() {
+    let data = data();
+    let (state, faction) = crusade(&data, 1);
+    let rules = rules(&data);
+    let view = crusade_view(&state, &data, &faction).expect("view");
+    assert_eq!(view.zeal_high_threshold, rules.zeal.high_threshold);
+    assert_eq!(view.zeal_low_threshold, rules.zeal.low_threshold);
+    assert_eq!(view.zeal_high_morale, rules.zeal.high_morale);
+    assert_eq!(view.zeal_low_morale, rules.zeal.low_morale);
+    assert_eq!(view.desertion_threshold, rules.desertion.threshold);
+    assert_eq!(
+        view.desertion_men_percent,
+        rules.desertion.men_percent_per_turn
+    );
 }

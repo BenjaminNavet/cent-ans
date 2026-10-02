@@ -57,14 +57,19 @@ pub struct CrusadeState {
 /// Why `preach_passage` was refused.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum CrusadeError {
-    #[error("seule la faction croisée peut prêcher le passage")]
+    #[error("Seule la faction croisée peut prêcher le passage.")]
     NotCrusaders,
-    #[error("il faut tenir un port pour accueillir les volontaires")]
+    #[error("Aucun port tenu pour accueillir les volontaires.")]
     NoPort,
-    #[error("trésor insuffisant : {needed} livres nécessaires, {available} disponibles")]
+    #[error("Trésor insuffisant : {needed} livres nécessaires, {available} disponibles.")]
     InsufficientFunds { needed: i64, available: i64 },
-    #[error("le passage a déjà été prêché : encore {0} tour(s) avant un nouvel appel")]
+    #[error("Passage déjà prêché : nouvel appel dans {}.", count(*.0, "tour", "tours"))]
     Cooldown(u32),
+}
+
+/// `n` and the noun agreed with it (« 1 tour », « 8 tours »).
+fn count(n: u32, singular: &str, plural: &str) -> String {
+    format!("{n} {}", if n > 1 { plural } else { singular })
 }
 
 /// One line of the fervour tooltip.
@@ -97,6 +102,15 @@ pub struct CrusadeView {
     pub zeal_morale: i32,
     /// Percent of the men who leave each turn at the current fervour.
     pub desertion_percent: u32,
+    /// The thresholds of the rules, for the tooltip: zeal bonus at or above
+    /// `zeal_high_threshold`, malus below `zeal_low_threshold`, desertion
+    /// of `desertion_men_percent` % a turn below `desertion_threshold`.
+    pub zeal_high_threshold: u8,
+    pub zeal_low_threshold: u8,
+    pub zeal_high_morale: i32,
+    pub zeal_low_morale: i32,
+    pub desertion_threshold: u8,
+    pub desertion_men_percent: u32,
     pub target_taken: bool,
     pub target_name: String,
     pub passage_cost: i64,
@@ -357,6 +371,20 @@ pub(crate) fn resolve_crusade(
         "Le vœu s'use",
         -i32::from(rules.fervor.decay_per_turn),
     );
+    // JR4: exaltation does not last; above the high threshold it falls back
+    // faster.
+    let exalted = state
+        .crusade
+        .as_ref()
+        .is_some_and(|c| c.fervor >= rules.zeal.high_threshold);
+    if exalted {
+        change(
+            state,
+            rules,
+            "L'exaltation retombe",
+            -i32::from(rules.fervor.decay_above_high),
+        );
+    }
     // Peace or truce with the master of the target, without holding it.
     let holder = state.province_controller(&rules.target_province).cloned();
     if let Some(holder) = holder {
@@ -455,8 +483,8 @@ fn land_contingents(
                     EventKind::Crusade,
                     format!(
                         "Les volontaires du passage ne trouvent aucun port où débarquer : \
-                         le contingent ({} unités) se disperse.",
-                        passage.units
+                         le contingent ({}) se disperse.",
+                        count(passage.units, "unité", "unités")
                     ),
                 )
                 .faction(&rules.faction),
@@ -469,9 +497,13 @@ fn land_contingents(
         let mut event = GameEvent::new(
             EventKind::Crusade,
             format!(
-                "Un contingent de volontaires débarque à {} : {landed} unité(s) rejoignent \
-                 la garnison.",
-                crate::siege::settlement_name(data, &port)
+                "Un contingent de volontaires débarque à {} : {} la garnison.",
+                crate::siege::settlement_name(data, &port),
+                if landed > 1 {
+                    format!("{landed} unités rejoignent")
+                } else {
+                    format!("{landed} unité rejoint")
+                }
             ),
         )
         .faction(&rules.faction);
@@ -721,11 +753,16 @@ pub fn preach_passage(
     let mut event = GameEvent::new(
         EventKind::Crusade,
         format!(
-            "{} prêche le passage : {units} unité(s) de volontaires sont attendues à {} \
-             dans {} tour(s).",
+            "{} prêche le passage : {} de volontaires {} à {} dans {}.",
             crate::events::capitalize(&faction_name(data, faction)),
+            count(units, "unité", "unités"),
+            if units > 1 {
+                "sont attendues"
+            } else {
+                "est attendue"
+            },
             crate::siege::settlement_name(data, &port),
-            rules.passage.delay_turns
+            count(rules.passage.delay_turns, "tour", "tours")
         ),
     )
     .faction(faction);
@@ -783,6 +820,12 @@ pub fn crusade_view(
             .collect(),
         zeal_morale: zeal_at(rules, crusade.fervor),
         desertion_percent: rules.desertion.percent_at(crusade.fervor),
+        zeal_high_threshold: rules.zeal.high_threshold,
+        zeal_low_threshold: rules.zeal.low_threshold,
+        zeal_high_morale: rules.zeal.high_morale,
+        zeal_low_morale: rules.zeal.low_morale,
+        desertion_threshold: rules.desertion.threshold,
+        desertion_men_percent: rules.desertion.men_percent_per_turn,
         target_taken: crusade.target_taken,
         target_name: target_name(state, data, rules),
         passage_cost: passage_cost(state, data, faction),
@@ -802,6 +845,29 @@ pub fn crusade_view(
             })
             .collect(),
     })
+}
+
+/// AI: gold the crusade keeps aside for the passage (its price once the
+/// cooldown is about to end and a port is held; 0 for every other faction
+/// and for a crusade the player leads). Without it the planner spent the
+/// alms on recruits and buildings, the passage was never affordable again
+/// and the fervour wore down to nothing.
+pub fn ai_passage_reserve(state: &CampaignState, data: &GameData, faction: &FactionId) -> i64 {
+    if faction == &state.player_faction {
+        return 0;
+    }
+    let Some(rules) = active(state, data).filter(|rules| &rules.faction == faction) else {
+        return 0;
+    };
+    let soon = state
+        .crusade
+        .as_ref()
+        .is_some_and(|c| c.preach_cooldown <= 1);
+    if soon && !held_ports(state, data, rules).is_empty() {
+        passage_cost(state, data, faction)
+    } else {
+        0
+    }
 }
 
 /// AI: preaches as soon as the action is available and affordable.
@@ -855,6 +921,7 @@ mod tests {
             "fervor": {
                 "start": 60,
                 "decay_per_turn": 1,
+                "decay_above_high": 2,
                 "battle_won_other_faith": 6,
                 "battle_lost": -8,
                 "holy_land_settlement_taken": 10,
@@ -983,6 +1050,24 @@ mod tests {
         // Only the points really gained are noted, under the turn's causes.
         let changes = &state.crusade.as_ref().unwrap().last_changes;
         assert_eq!(changes, &vec![("Victoire sur une autre foi".to_owned(), 2)]);
+    }
+
+    #[test]
+    fn exaltation_falls_back_faster_above_the_high_threshold() {
+        let mut state = campaign();
+        set_fervor(&mut state, 80);
+        end_of_turn(&mut state);
+        assert_eq!(fervor(&state), 77, "1 of wear + 2 of exaltation");
+        assert!(state
+            .crusade
+            .as_ref()
+            .unwrap()
+            .last_changes
+            .contains(&("L'exaltation retombe".to_owned(), -2)));
+        // Below the threshold, the plain wear only.
+        set_fervor(&mut state, 69);
+        end_of_turn(&mut state);
+        assert_eq!(fervor(&state), 68);
     }
 
     #[test]
@@ -1178,7 +1263,7 @@ mod tests {
         );
         let view = crusade_view(&state, data(), &fac(CRUSADERS)).unwrap();
         assert!(!view.passage_available);
-        assert!(view.passage_blocker.contains("trésor insuffisant"));
+        assert!(view.passage_blocker.contains("Trésor insuffisant"));
         assert!(ai_preach(&state, data(), &fac(CRUSADERS)).is_empty());
         // Through the order, in French.
         match state.submit_order(data(), Order::PreachPassage) {
@@ -1213,7 +1298,14 @@ mod tests {
             preach_blocker(&state, data(), &fac(CRUSADERS)),
             Some(CrusadeError::Cooldown(6))
         );
-        assert!(CrusadeError::Cooldown(6).to_string().contains("6 tour"));
+        assert_eq!(
+            CrusadeError::Cooldown(6).to_string(),
+            "Passage déjà prêché : nouvel appel dans 6 tours."
+        );
+        assert_eq!(
+            CrusadeError::Cooldown(1).to_string(),
+            "Passage déjà prêché : nouvel appel dans 1 tour."
+        );
         for _ in 0..6 {
             end_of_turn(&mut state);
         }
