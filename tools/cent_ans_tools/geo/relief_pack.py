@@ -4,7 +4,7 @@
 git) is archived as an uncompressed ``.tar`` stream, split into parts under
 :data:`MAX_PART_BYTES`, alongside a JSON manifest (version, parts, SHA-256 per
 part and global, source credits). Nothing is uploaded here: publishing the
-result is a separate, player-approved step (see ``docs/geo.md``).
+result is the job of :mod:`cent_ans_tools.geo.relief_update` (ADR 0149).
 
 No compression: a spot check (``docs/wip/sz7-hebergement-relief.md``) found zstd
 -19 saves ~0% on the already-DEFLATE-compressed PNG tiles and on the packed

@@ -117,9 +117,11 @@ en gardant son journal affiché.
    `GODOT`. On peut aussi ouvrir Godot, **Importer** → `cent-ans/game/project.godot`, puis
    **Lancer** (F5).
 
-Le cache du relief fin (`data/map/pyramid/`, ≈ 3 Go) n'est pas dans le dépôt : sans lui, le zoom
-rapproché est limité (avis affiché en jeu). Il se régénère avec les outils Python
-(`uv run --project tools cent-ans geo relief-all`, voir `docs/geo.md`).
+Le cache du relief fin (`data/map/pyramid/`, ≈ 5 Go) n'est pas dans le dépôt : sans lui, le zoom
+rapproché est limité (avis affiché en jeu). Le lanceur le télécharge au premier lancement et à
+chaque nouvelle version (il faut [uv](https://docs.astral.sh/uv/) ; `tools/launch.sh --no-relief`
+pour s'en passer). À la main : `uv run --project tools cent-ans geo relief-fetch` (voir
+`docs/geo.md`).
 
 **Préparer la version Windows depuis un Mac** (compilation croisée avec
 [cargo-xwin](https://github.com/rust-cross/cargo-xwin), détails dans `docs/tools.md`) :

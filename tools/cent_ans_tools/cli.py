@@ -705,9 +705,9 @@ def geo_relief_pack(
 ) -> None:
     """Empaquette le cache de relief fin en parts « Cent Ans relief » (ADR 0077, lot SZ7).
 
-    N'envoie rien : la publication (dépôt public, `gh release create`) est un geste
-    à part, réservé à l'accord du joueur (voir docs/geo.md). Ne pas lancer sur le
-    vrai cache (≈ 2,8 Go) si le disque est presque plein.
+    N'envoie rien : `geo relief-update` enchaîne recuisson, empaquetage et
+    publication (ADR 0149, voir docs/geo.md). Ne pas lancer sur le vrai cache
+    (≈ 5 Go) si le disque est presque plein.
     """
     from pathlib import Path
 
