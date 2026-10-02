@@ -264,7 +264,24 @@ Zones humides : Teufelsmoor, Aischgrund, callows du Shannon, Oristano, Narbonnai
 Gharb (source trop générale).
 
 ## Cuissons et tests
-(à compléter en fin de reprise)
+- Première passe (avant la pause, machine très chargée) : trois cuissons `landcover` + `navgrid`
+  pour caler les emprises, puis `colormap` et `horizon` ; sorties remplacées depuis.
+- Reprise (allocation corrigée) : quatre cuissons `landcover` + `navgrid` (score local ; bouchage
+  des trouées ; lisière recentrée ; New Forest et Arden réduits). Dernière : `geo landcover`
+  2 min 38 (forêt 40,0 %, défriché KK10 31,9 % : cache KK10 lu), `geo navgrid` 9 s (strict,
+  92,1 % de cases franchissables), `geo colormap` 3 min 31, `geo horizon` 35 s (443 tuiles).
+  Sorties commitées : 619313368 (splat, forest_kind, navgrid ; wetlands.png inchangé) et
+  d661b3e6b (colormap, horizon), cohérentes avec les JSON et le code commités.
+- `uv run --project tools pytest tools/tests/test_landcover.py test_splat.py test_navgrid.py
+  test_colormap.py test_horizon.py` : 64 passés. `uvx ruff check --fix` et `ruff format` sur
+  `landcover.py` et `test_landcover.py` : propres.
+- `cargo test -p data-model -p sim-campaign -p ai` (cible privée `core/target-hc5`, supprimée
+  ensuite) : 117 binaires, 851 passés, 0 échec, 9 ignorés (dont `real_data`).
+- `godot --headless --path game --import` : sortie 0, aucune erreur. `smoke.gd` : sortie 0,
+  « smoke OK ». Le journal contient 623 « Rect2 size is negative » (UI, sans rapport avec ce lot,
+  à vérifier sur main) ; dylib de `game/bin` non recompilée dans ce worktree (aucun changement
+  Rust dans HC5).
+- `geo anchors-fine` **non relancé** (voir plus haut).
 
 ## Prochaine étape
 Session principale : relecture visuelle (aucune capture faite ici), `geo anchors-fine` après
