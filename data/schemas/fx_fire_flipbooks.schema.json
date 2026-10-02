@@ -20,6 +20,8 @@
         "rows": {"$ref": "#/$defs/count"},
         "frame_px": {"$ref": "#/$defs/frame_px"},
         "heat_gamma": {"type": "number", "exclusiveMinimum": 0, "maximum": 4, "description": "Exposant de la chaleur tirée de la luminance (> 1 : cœur plus resserré)."},
+        "heat_max": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Chaleur du point le plus chaud (défaut 1 ; < 1 : cœur jaune plutôt que blanc, les séquences simulées saturent sur tout le pied de la flamme)."},
+        "coverage_gamma": {"type": "number", "exclusiveMinimum": 0, "maximum": 4, "description": "Exposant de la couverture (défaut 1 ; < 1 : les langues hautes, peu couvrantes dans la source, gardent du corps)."},
         "white_percentile": {"type": "number", "minimum": 50, "maximum": 100, "description": "Centile de luminance de la séquence pris pour chaleur 1 (cœur blanc)."},
         "width_scale": {"type": "number", "minimum": 0.5, "maximum": 2, "description": "Élargissement de la flamme (la séquence source est deux fois plus haute que large ; 2 = toute la largeur de l'image)."},
         "base_fade_px": {"type": "integer", "minimum": 0, "description": "Fondu du pied de la flamme vers le bord bas de l'image (px source)."}
@@ -37,6 +39,9 @@
         "young_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Taille de la bouffée naissante (part de sa taille finale)."},
         "fade_power": {"type": "number", "exclusiveMinimum": 0, "description": "Exposant de la dissipation avec l'âge."},
         "old_density": {"type": "number", "minimum": 0, "maximum": 1, "description": "Densité restante en fin de vie (part de la densité de départ)."},
+        "density_floor": {"type": "number", "minimum": 0, "exclusiveMaximum": 1, "description": "Densité source retirée avant l'exposant (défaut 0) : densité = max(0, d − plancher) / (1 − plancher). Fait tomber à zéro le voile diffus qu'un `density_gamma` < 1 relèverait en halo autour de la bouffée."},
+        "density_gamma": {"type": "number", "exclusiveMinimum": 0, "maximum": 4, "description": "Exposant de la densité (défaut 1 ; < 1 : voiles plus fournis)."},
+        "edge_fade": {"type": "number", "minimum": 0, "maximum": 1, "description": "Fondu radial de la densité sur cette part extérieure du rayon (défaut 0 : aucun) ; évite un bord carré quand la séquence touche le cadre."},
         "lighting_floor": {"type": "number", "minimum": 0, "maximum": 1, "description": "Éclairage du creux le plus sombre des volutes."}
       }
     }

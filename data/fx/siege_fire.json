@@ -14,7 +14,7 @@
   "flames": {
     "amount": 26,
     "lifetime_s": 1.5,
-    "size_m": [3.5, 7.0],
+    "size_m": [4.5, 8.5],
     "velocity_m_s": [1.2, 2.8],
     "spread_m": 4.5,
     "color_start": [1.0, 0.72, 0.28, 1.0],

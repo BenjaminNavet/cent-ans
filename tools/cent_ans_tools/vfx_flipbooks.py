@@ -92,7 +92,8 @@ def flame_sheet_frames(frames: list[np.ndarray], settings: dict) -> list[np.ndar
     out = []
     for lum, frame in zip(luminance, frames, strict=True):
         heat = np.clip(lum / white, 0.0, 1.0) ** float(settings["heat_gamma"])
-        alpha = frame[..., 3].copy()
+        heat = heat * float(settings.get("heat_max", 1.0))
+        alpha = frame[..., 3] ** float(settings.get("coverage_gamma", 1.0))
         if fade > 0:
             alpha[-fade:] *= np.linspace(1.0, 0.0, fade, dtype=np.float32)[:, None]
         tall = np.stack([heat, heat, heat, alpha], axis=-1)
@@ -105,6 +106,16 @@ def flame_sheet_frames(frames: list[np.ndarray], settings: dict) -> list[np.ndar
         square[:, left : left + width] = tall
         out.append(square)
     return out
+
+
+def _edge_mask(size: int, edge_fade: float) -> np.ndarray:
+    """Radial mask of a square frame: 1 inside, eased to 0 over the outer `edge_fade` of the radius."""
+    if edge_fade <= 0.0:
+        return np.ones((size, size), dtype=np.float32)
+    axis = (np.arange(size, dtype=np.float32) + 0.5) / size * 2.0 - 1.0
+    radius = np.sqrt(axis[None, :] ** 2 + axis[:, None] ** 2)
+    ramp = np.clip((1.0 - radius) / edge_fade, 0.0, 1.0)
+    return (ramp * ramp * (3.0 - 2.0 * ramp)).astype(np.float32)
 
 
 def smoke_sheet_frames(frames: list[np.ndarray], settings: dict) -> list[np.ndarray]:
@@ -125,7 +136,14 @@ def smoke_sheet_frames(frames: list[np.ndarray], settings: dict) -> list[np.ndar
         thinning = float(settings["old_density"]) + (
             1.0 - float(settings["old_density"])
         ) * (1.0 - age) ** float(settings["fade_power"])
-        density = frame[..., 3] * thinning
+        density_floor = float(settings.get("density_floor", 0.0))
+        density = np.clip(frame[..., 3] - density_floor, 0.0, None) / (
+            1.0 - density_floor
+        )
+        density = density ** float(settings.get("density_gamma", 1.0)) * thinning
+        density = density * _edge_mask(
+            density.shape[0], float(settings.get("edge_fade", 0.0))
+        )
         puff = np.stack([lighting, lighting, lighting, density], axis=-1)
         side = max(8, round(size * (young + (1.0 - young) * np.sqrt(age))))
         puff = _resized(puff, side, side)

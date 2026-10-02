@@ -3,23 +3,28 @@
   "licence_url": "https://blog.unity.com/technology/free-vfx-image-sequences-flipbooks",
   "source_url": "https://unity3d.com/files/labs/downloads/vfx/assets01/{name}/{name}-flipbooks.zip",
   "flame": {
-    "name": "Flame02",
+    "name": "Flame03",
     "columns": 16,
     "rows": 4,
     "frame_px": 256,
-    "heat_gamma": 1.7,
-    "white_percentile": 99.8,
-    "width_scale": 1.4,
+    "heat_gamma": 1.0,
+    "heat_max": 0.85,
+    "white_percentile": 99.9,
+    "coverage_gamma": 0.5,
+    "width_scale": 1.15,
     "base_fade_px": 12
   },
   "smoke": {
-    "name": "Cloud02",
+    "name": "WispySmoke03",
     "columns": 8,
     "rows": 8,
     "frame_px": 128,
     "young_scale": 0.62,
     "fade_power": 1.3,
-    "old_density": 0.3,
+    "old_density": 0.38,
+    "density_floor": 0.04,
+    "density_gamma": 0.42,
+    "edge_fade": 0.25,
     "lighting_floor": 0.25
   }
 }
