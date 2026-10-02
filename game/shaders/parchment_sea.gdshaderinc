@@ -7,6 +7,24 @@
 uniform vec4 pm_roses[4];  // x, y (px carte), rayon (px carte), 1 = active
 uniform int pm_rose_count = 0;
 uniform float pm_rhumb_alpha = 0.4;
+// Lot FA6 : rose des vents peinte (Atlas catalan de 1375), texture par défaut du shader posée par
+// `ParchmentDecor` ; absente (`--no-fa-parchment`) = rose dessinée ci-dessous. Convention de
+// `parchment_ornaments.py` : rose centrée, son cercle occupe `PM_ROSE_CIRCLE` du demi-côté de la
+// texture, nord de la carte en haut. La rose de l'Atlas est plus grande que la rose dessinée :
+// `PM_ROSE_EXTENT` = demi-côté de la texture en rayons de rose (`pm_roses[i].z`).
+uniform sampler2D pm_rose_tex : source_color, filter_linear_mipmap_anisotropic, repeat_disable, hint_default_transparent;
+const float PM_ROSE_EXTENT = 2.0;
+const float PM_ROSE_CIRCLE = 0.9;
+
+// Rose peinte : (couleur, couverture). `gx`, `gy` : dérivées écran de `p`.
+vec4 pm_rose_painted(vec2 p, vec4 rose, vec2 gx, vec2 gy) {
+	float half_side = rose.z * PM_ROSE_EXTENT;
+	vec2 q = (p - rose.xy) / half_side;
+	if (max(abs(q.x), abs(q.y)) >= 1.0) {
+		return vec4(0.0);
+	}
+	return textureGrad(pm_rose_tex, q * 0.5 + 0.5, gx * 0.5 / half_side, gy * 0.5 / half_side);
+}
 
 // Rose des vents à 16 pointes, pointe nord rouge ; renvoie (couverture, couleur).
 vec4 pm_rose(vec2 p, vec4 rose, float footprint) {
@@ -46,10 +64,11 @@ vec4 pm_rose(vec2 p, vec4 rose, float footprint) {
 }
 
 // Lignes de rhumbs (32 directions) d'une rose : (intensité, couleur).
-vec4 pm_rhumbs(vec2 p, vec4 rose, float footprint) {
+// `start` : rayon (en rayons de rose) où commencent les lignes (bord du cercle de la rose).
+vec4 pm_rhumbs(vec2 p, vec4 rose, float footprint, float start) {
 	vec2 v = p - rose.xy;
 	float r = length(v);
-	if (r < rose.z * 0.9) {
+	if (r < rose.z * start) {
 		return vec4(0.0);
 	}
 	float a = atan(v.x, -v.y);
@@ -67,6 +86,9 @@ vec4 pm_rhumbs(vec2 p, vec4 rose, float footprint) {
 void parchment_sea(vec2 p, vec2 uv, float footprint, float coast, float lake_f, inout vec3 col,
 		inout float alpha, inout vec3 n, out vec3 emission) {
 	emission = vec3(0.0);
+	vec2 gx = dFdx(p);
+	vec2 gy = dFdy(p);
+	bool painted_rose = textureSize(pm_rose_tex, 0).x > 16;
 	float w = pm_weight();
 	if (w <= 0.001) {
 		return;
@@ -89,14 +111,14 @@ void parchment_sea(vec2 p, vec2 uv, float footprint, float coast, float lake_f, 
 		if (i >= pm_rose_count) {
 			break;
 		}
-		vec4 rh = pm_rhumbs(p, pm_roses[i], footprint);
+		vec4 rh = pm_rhumbs(p, pm_roses[i], footprint, painted_rose ? PM_ROSE_EXTENT * PM_ROSE_CIRCLE : 0.9);
 		parch = mix(parch, rh.rgb, rh.a * pm_rhumb_alpha);
 	}
 	for (int i = 0; i < 4; i++) {
 		if (i >= pm_rose_count) {
 			break;
 		}
-		vec4 ro = pm_rose(p, pm_roses[i], footprint);
+		vec4 ro = painted_rose ? pm_rose_painted(p, pm_roses[i], gx, gy) : pm_rose(p, pm_roses[i], footprint);
 		parch = mix(parch, ro.rgb, ro.a);
 	}
 	parch = mix(parch, pm_ink, pm_line(coast, 1.0, footprint) * 0.9);
