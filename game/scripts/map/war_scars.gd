@@ -177,7 +177,8 @@ func _update_stats() -> void:
 				doors += 1
 			elif str(child.name).begins_with("Pit_"):
 				pits += 1
-	stats = {"plague_sites": _plague.size(), "pits": pits, "doors": doors, "battlefields": _fields.size(), "sieges": _engines.size()}
+	# Même dictionnaire mis à jour (référencé par `CampaignLife.stats`).
+	stats.merge({"plague_sites": _plague.size(), "pits": pits, "doors": doors, "battlefields": _fields.size(), "sieges": _engines.size()}, true)
 
 
 # --- Peste -----------------------------------------------------------------------------

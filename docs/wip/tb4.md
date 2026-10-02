@@ -79,8 +79,8 @@ ressortait plus claire, champs remplacés par la friche). Avant tout correctif, 
 - Portes marquées seulement quand la ville 1:1 est chargée ; villages sans plan : fosses et
   charrette seulement.
 - Fosses posées sans regarder l'occupation du sol (forêt, eau, autre colonie proche).
-- La charrette des morts arrêtée double celle, en marche, de la scène FK4 (voulu : elle reste
-  avec `--folk-off=scenes`... non : sans `FolkScenes`, pas de site de peste du tout).
+- La charrette des morts arrêtée s'ajoute à celle, en marche, de la scène FK4. Les sites de peste
+  viennent de `FolkScenes` : avec `--no-folk` ou `--folk-off=scenes`, ni fosses ni portes.
 - Beaucoup de pestes dès 1337 (3 à 15 colonies) : réglage du cœur (`map_scenes`), hors lot.
 - Erreurs déjà présentes dans `smoke` et sans rapport : `region_labels.gd:95` (Rect2 négatif,
   TB2, des milliers de lignes), `hb_ground.gd:33` (JSON vide).
