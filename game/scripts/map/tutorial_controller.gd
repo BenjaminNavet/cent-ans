@@ -49,6 +49,8 @@ func setup(campaign_map: Node) -> void:
 	map = campaign_map
 	settings = get_node_or_null("/root/Settings")
 	persist_progress = not capture_mode()
+	# Q8 : le menu pause met l'arbre en pause ; le contrôleur doit tourner pour ranger le guide.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	var ui: Node = map.get("ui")
 	encyclopedia = (load(ENCYCLOPEDIA_SCENE) as PackedScene).instantiate()
 	encyclopedia.hide()
@@ -306,13 +308,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo or not map.get("visible"):
 		return
 	var key := event as InputEventKey
+	if get_tree().paused:
+		return
 	if key.is_action_pressed("encyclopedia_open") and not key.ctrl_pressed and not key.meta_pressed:  # U7
 		encyclopedia.toggle()
 		get_viewport().set_input_as_handled()
 
 
 ## Q2 : vrai quand une fenêtre modale couvre la carte (menu pause, réglages, fenêtre de
-## chronique hors de l'étape qui la demande) : le guide ne s'affiche pas par-dessus.
+## chronique ou rapport de saison hors de l'étape qui les demande) : le guide ne s'affiche pas
+## par-dessus.
 func modal_open() -> bool:
 	var flow: Node = map.get("flow")
 	if flow != null:
@@ -320,6 +325,9 @@ func modal_open() -> bool:
 			return true
 		var settings_menu: Variant = flow.get("_settings_menu")
 		if settings_menu != null and is_instance_valid(settings_menu):
+			return true
+		var report := flow.get("season_report") as Control
+		if report != null and report.visible and current_step_id() != "season_report":
 			return true
 	var chronicle: Node = map.get("chronicle")
 	if chronicle != null and current_step_id() != "chronicle":
