@@ -1,4 +1,4 @@
-# ADR 0155 — Traces de guerre : mémoire du rendu, masque de terroir à son échelle
+# ADR 0157 — Traces de guerre : mémoire du rendu, masque de terroir à son échelle
 
 Date : 2026-10-02. Lot TB4 (`docs/design/2026-10-02-campagne-tob.md` § 3). Numéro à revoir à la
 fusion si un autre lot TB a pris 0155 (0154 est la rotation musicale).

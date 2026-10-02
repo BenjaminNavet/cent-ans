@@ -11,7 +11,7 @@ Spec : `docs/design/2026-10-02-campagne-tob.md` § 3 « TB4 ». Branche `feat/tb
 - [x] 3. Champ de bataille : `WarScars.refresh` lit les événements `battle` (`get_events`, `get_pending_events`), marque à la position de l'armée (repli : centre de la province) ; tertre `battlefield.turns` tours, corbeaux `crow_turns`, débris `debris_turns` (`data/ui/war_scars.json`) ; taille des figurines d'armée, caché sous le brouillard de guerre et sur le parchemin.
 - [x] 4. Siège : engins de `get_assault_odds(armée).engines` posés au bord du camp (enfants des figurines) : charpente et tas de bois, maquette sous échafaudage (`siege.almost_ready_turns`), engin prêt ; maquettes `assets/models/siege/*_lod.glb` (lecture seule), échelles procédurales.
 - [x] Réglages `data/ui/war_scars.json`, schéma `data/schemas/war_scars_ui.schema.json`, pytest `tools/tests/test_war_scars_ui_schema.py`.
-- [x] `game/tests/tb4_scars_test.gd` (4 points), `game/tests/tb4_shot.gd` (captures écrites, non lues), ADR 0155.
+- [x] `game/tests/tb4_scars_test.gd` (4 points), `game/tests/tb4_shot.gd` (captures écrites, non lues), ADR 0157.
 
 ## Prochaine étape
 Lot livré (4 points). Reste à la session principale : capture de contrôle, puis réglage à l'œil
@@ -78,7 +78,7 @@ mêlées à cette bascule de luminance. Le correctif du masque reste établi par
   Conséquence visible sur toute la carte : les finages (champs autour des colonies) reviennent
   autour de leur colonie (effet sur les chiffres de TB1 non mesuré proprement, voir ci-dessus).
 
-- **Mémoire des champs de bataille dans le rendu** (ADR 0155) : le pont ne donne ni position ni
+- **Mémoire des champs de bataille dans le rendu** (ADR 0157) : le pont ne donne ni position ni
   historique des batailles. La marque est posée à la position de l'armée de l'événement à la fin du
   tour (pas au point exact du combat) et vieillie par le rendu ; une partie rechargée ne retrouve
   que les batailles du dernier tour. Pour mieux : exposer dans `core/` un historique (tour,
