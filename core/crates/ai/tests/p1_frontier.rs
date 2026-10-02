@@ -19,7 +19,12 @@ fn fac(id: &str) -> FactionId {
 
 #[test]
 fn starting_garrisons_follow_the_shared_classification() {
-    let data = data();
+    let mut data = data();
+    // JR4b: the great realms short of money start with lighter garrisons
+    // (`starting_budget`); the role sizes are checked without that trim.
+    if let Some(rules) = data.settlement_rules.as_mut() {
+        rules.starting_budget = None;
+    }
     let state = CampaignState::new_1337(&data, fac("fac_england"), 1).unwrap();
     for id in state.provinces.keys() {
         // Lot C4: the province garrison is held by its city.

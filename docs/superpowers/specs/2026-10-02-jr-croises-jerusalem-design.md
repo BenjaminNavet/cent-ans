@@ -65,7 +65,9 @@ Batailles navales comprises (interception en mer). Barème final du lot JR4 (son
 50 tours, `docs/wip/jr4-equilibre.md`). Aumônes 300 + 20 × ferveur ; passage 1 500 livres, recharge
 8 tours, `1 + ferveur / 40` unités (au plus 2) ; armée de départ de 6 unités (solde de départ
 ≈ −150 par saison à ferveur 60). L'IA croisée ne traite pas avec le maître de Jérusalem (vœu)
-et garde de quoi prêcher.
+et garde de quoi prêcher. Lot JR4b : quand la croisade assiège une place de Terre sainte, son
+maître appelle à la défendre (2 unités jetées dans la place, une fois par siège, recharge
+12 tours, `crusade.json` § `relief`).
 
 ### 4.2 Ce qu'elle donne
 

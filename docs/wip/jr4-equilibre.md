@@ -51,10 +51,47 @@ Vivante partout, trésor négatif au plus 2 tours d'affilée, débarquement au t
 en Terre sainte partout, Mamelouks à 11-12 provinces au tour 30 (aucun écrasement), jamais
 détruite par eux.
 
+## JR4b — cause côté Mamelouks
+Diagnostic `core/crates/sim-campaign/tests/jr4b_budget_probe.rs` (`#[ignore]`) : recettes,
+armée, garnisons, bâtiments, cour, solde structurel (hors part de la cour due au trésor qui dort)
+de chaque faction au tour 1.
+- Le « −4 000 » mamelouk est surtout la taxe d'opulence (20 % du trésor au-delà de 6 saisons de
+  recettes : ~3 250) ; solde structurel −21 %. Le trésor (40 000) fond en 15 tours (opulence +
+  dépenses de l'IA), puis le déficit fait licencier les armées de campagne en premier.
+- Pas isolé : 152 factions sur 178 sous −15 %. Cause : coûts par colonie fixes (garnison de cité
+  par rôle, garnison de départ par type, bâtiments) contre des recettes par tête ; les provinces
+  OM sont vastes et peu peuplées (Mamelouks 110 000 hab./province contre 340 000 en France), et
+  l'armée de départ codée (3 unités, 1 080/saison) dépasse les recettes des petites seigneuries.
+- Correctif `settlements/rules.json` § `starting_budget` (`min_provinces` 5,
+  `max_deficit_percent` 15) : une grande faction trop chère au départ renvoie ses unités de
+  garnison les plus coûteuses, jamais la dernière d'une colonie ni la capitale. Effets (solde
+  structurel) : Mamelouks −21 % → −14 %, Horde d'Or −80 % → −28 %, Byzance −42 % → −14 %,
+  Mérinides −148 % → −90 %, Lituanie −148 % → −77 % (plancher atteint) ; France, Angleterre,
+  Castille, Hongrie, Venise inchangées ; petites factions (< 5 provinces) inchangées.
+- Insuffisant pour Jérusalem (3/5) : l'IA mamelouke reste sans armée de campagne. Ajout
+  `crusade.json` § `relief` : quand la croisade assiège une place de Terre sainte, son maître y
+  jette 2 unités (table pondérée), une fois par siège, recharge 12 tours, plafond de garnison ;
+  évènement « Mamelouks appelle à défendre … ». Écart à la demande : la levée entre dans la place
+  assiégée et non dans la province voisine, car un maître endetté licencie ses armées de campagne
+  dès la saison suivante alors qu'une place assiégée garde sa garnison.
+
+Sonde finale JR4b (ferveur t10-t50 ; Jérusalem) :
+| graine | ferveur | min-max | trésor t50 | places t50 | Jérusalem | Mamelouks t50 |
+|---|---|---|---|---|---|---|
+| 1 | 60 60 44 42 61 | 35-71 | 1 913 | 9 | t50 | 10 |
+| 2 | 58 58 50 40 38 | 36-67 | −137 | 4 | — | 12 |
+| 3 | 54 54 46 46 36 | 36-67 | 995 | 4 | — | 12 |
+| 4 | 60 64 56 62 52 | 52-69 | 232 | 4 | — | 12 |
+| 5 | 68 50 42 44 30 | 26-73 | 631 | 5 | — | 12 |
+
 ## Points ouverts
-- Jérusalem prise 4 graines sur 5 (tours 28-31), au-dessus de la cible 0-2. Cause : les Mamelouks
+- (Résolu par JR4b.) Jérusalem prise 4 graines sur 5 (tours 28-31) avant JR4b. Cause : les Mamelouks
   n'ont aucune armée de campagne après le tour 8 (déficit structurel : ~4 000 de recettes pour
   ~7 000 d'entretien au tour 1, l'IA licencie) ; Jérusalem (garnison de 2 milices, « intérieure »)
   tombe affamée après ~9 tours de siège sans secours. Essais : garnison de marche pour la cité du
   vœu (pire, 4/5 dès le tour 22, retiré), contingents plafonnés. Le levier est l'économie et la
   défense des Mamelouks (hors lot : données `fac_mamluks`, IA de secours), pas `crusade.json`.
+- Grandes factions OM encore en déficit structurel après le correctif (Mérinides, Hafsides,
+  Lituanie, Serbie) : leurs recettes ne couvrent pas même bâtiments + armée de départ ; à revoir
+  avec les populations OM (lot historien) ou un coût de colonie proportionnel aux recettes.
+- La ferveur tend à baisser après le tour 30 sans conquête (graine 5 : 26 au plus bas).
