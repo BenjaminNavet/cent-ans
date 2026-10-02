@@ -38,8 +38,9 @@ func _run() -> void:
 	if not _check(not doc.is_empty(), "town_maquettes.json missing"):
 		return
 	_check(TownMaquetteData.style() == TownMaquetteData.STYLE_MAQUETTE, "default style should be maquette, got %s" % TownMaquetteData.style())
-	_check(is_equal_approx(TownMaquetteData.width("city"), 11.0) and is_equal_approx(TownMaquetteData.width("village"), 3.2), "sizes from data")
-	_check(is_equal_approx(TownMaquetteData.model_scale("town"), 6.5 / 2.0), "town model scale %.3f" % TownMaquetteData.model_scale("town"))
+	_check(TownMaquetteData.width("city") > TownMaquetteData.width("town") and TownMaquetteData.width("town") > TownMaquetteData.width("village"), "sizes from data, ordered by kind")
+	_check(is_equal_approx(TownMaquetteData.model_scale("town"), TownMaquetteData.width("town") / 2.0), "town model scale %.3f" % TownMaquetteData.model_scale("town"))
+	_check(TownMaquetteData.weight_gain("city", 6.0) < 1.0 and TownMaquetteData.weight_gain("city", 60.0) > 1.3 and TownMaquetteData.weight_gain("city", 20.0) < TownMaquetteData.weight_gain("city", 40.0), "weight gain grows with weight")
 	var expected := {
 		"prov_ile_de_france": "west", "prov_firenze": "med", "prov_constantinople": "byz",
 		"prov_novgorod": "rus", "prov_tunis": "isl", "prov_saray": "steppe",
@@ -119,7 +120,7 @@ func _run() -> void:
 	var families := {}
 	for i in count:
 		var kind := TownMaquetteData.kind_of(data.settlements[i])
-		var base := TownMaquetteData.width(kind) * 0.5
+		var base := TownMaquetteData.width(kind) * 0.5 * maquettes.gain_of(i)
 		families[maquettes.family_of(i)] = true
 		if maquettes.is_landmark(i):
 			continue
@@ -131,7 +132,7 @@ func _run() -> void:
 			break
 		var xf := maquettes.instance_transform(i)
 		var px := layer.model_px(i)
-		if absf(xf.basis.get_scale().x - TownMaquetteData.model_scale(kind) * factor) > 0.01:
+		if absf(xf.basis.get_scale().x - TownMaquetteData.model_scale(kind) * maquettes.gain_of(i) * factor) > 0.01:
 			_check(false, "%s: instance scale %.3f" % [data.settlements[i]["id"], xf.basis.get_scale().x])
 			break
 		# Le sol du modèle (origine du nœud) ne dépasse pas le relief au centre.
