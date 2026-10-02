@@ -165,8 +165,13 @@ func _place_markers() -> void:
 	var camera: Camera3D = map.camera if map != null else null
 	if camera == null:
 		return
+	var mode := MapReadability.map_mode_of(map)
+	var army_selected := str(map.get("selected_army")) != ""
 	for node: SiteMarker in _markers.values():
-		if camera.is_position_behind(node.world):
+		# TB2 : site réservé à la couche « Signes », sauf décision en attente, dernier tour ou
+		# armée sélectionnée (le site est une destination).
+		var urgent := bool(node.site.get("claimed", false)) or int(node.site.get("expires_in", 0)) <= 1
+		if camera.is_position_behind(node.world) or not MapReadability.sign_shown("encounter", mode, urgent, army_selected):
 			node.visible = false
 			continue
 		node.visible = true

@@ -2,20 +2,323 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "campaign_map_ui.schema.json",
   "title": "Rendu de la carte de campagne (CV3-5)",
-  "description": "Réglages purement visuels de la carte de campagne, lus par game/scripts/map/army_figures.gd. Aucune règle de jeu.",
+  "description": "Réglages purement visuels de la carte de campagne, lus par game/scripts/map/army_figures.gd (map) et game/scripts/map/map_readability.gd (blocs TB2). Aucune règle de jeu.",
   "type": "object",
-  "required": ["map"],
+  "required": [
+    "map"
+  ],
   "additionalProperties": false,
   "properties": {
-    "description": {"type": "string"},
+    "description": {
+      "type": "string"
+    },
     "map": {
       "type": "object",
-      "required": ["army_figure_scale"],
+      "required": [
+        "army_figure_scale"
+      ],
       "additionalProperties": false,
       "properties": {
         "army_figure_scale": {
           "description": "Échelle du général à cheval (porteur de l'étendard de l'ost) par rapport aux autres figurines de l'armée ; 1 = même taille que l'escorte.",
-          "type": "number", "minimum": 1, "maximum": 4
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4
+        }
+      }
+    },
+    "fog_of_war": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "desaturation",
+        "dim",
+        "veil_color",
+        "veil_strength",
+        "mist_color",
+        "mist_max",
+        "mist_min",
+        "mist_glow"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "desaturation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part de camaïeu sépia du sol hors de vue."
+        },
+        "dim": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Facteur de luminosité du sol hors de vue (1 = inchangé)."
+        },
+        "veil_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Ton parchemin du voile."
+        },
+        "veil_strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Lavis uni par-dessus le sol (0 = aucun)."
+        },
+        "mist_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "mist_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3,
+          "description": "Opacité du reste de brume ; bornée pour ne plus effacer le relief."
+        },
+        "mist_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.3
+        },
+        "mist_glow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "signs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_per_town",
+        "incident",
+        "encounter",
+        "construction"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "max_per_town": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2,
+          "description": "Nombre de signes par ville et par palier en mode politique (vérifié par game/tests/tb2_declutter_test.gd)."
+        },
+        "incident": {
+          "$ref": "#/$defs/sign_rule"
+        },
+        "encounter": {
+          "$ref": "#/$defs/sign_rule"
+        },
+        "construction": {
+          "$ref": "#/$defs/sign_rule"
+        }
+      }
+    },
+    "region_labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min_distance",
+        "max_distance",
+        "fade",
+        "font_size_px",
+        "letter_spacing_px",
+        "color",
+        "alpha",
+        "halo_color",
+        "halo_alpha",
+        "edge_margin_px",
+        "max_on_screen"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "min_distance": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance caméra (unités carte) sous laquelle les noms de région s'effacent."
+        },
+        "max_distance": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance au-delà de laquelle ils s'effacent (le parchemin a ses propres noms)."
+        },
+        "fade": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "font_size_px": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 40
+        },
+        "letter_spacing_px": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacité de l'encre : discrète, sous celle des noms de ville."
+        },
+        "halo_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "halo_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "edge_margin_px": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "max_on_screen": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge_margin_px",
+        "capital_weight",
+        "capital_letter_spacing_px",
+        "major_weight",
+        "minor_max_weight"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "edge_margin_px": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "capital_weight": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 800,
+          "description": "Graisse (axe wght d'EB Garamond) des capitales en petites capitales."
+        },
+        "capital_letter_spacing_px": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "major_weight": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 800,
+          "description": "Graisse des grandes cités (rang 3), en romain."
+        },
+        "minor_max_weight": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 800,
+          "description": "Graisse maximale des lieux de rang 1 et 2 (romain)."
+        }
+      }
+    },
+    "clouds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "medium_alpha",
+        "max_alpha",
+        "medium_distance",
+        "weather_shadow",
+        "fair_shadow",
+        "clear_feather_px"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "medium_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacité maximale des nuées en vue moyenne."
+        },
+        "max_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Opacité maximale des nuées en vue large."
+        },
+        "medium_distance": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Distances caméra entre lesquelles l'opacité passe de medium_alpha à max_alpha."
+        },
+        "weather_shadow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Ombres de nuages du terrain sous de vraies nuées."
+        },
+        "fair_shadow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Ombres de nuages par temps clair (0 : aucune)."
+        },
+        "clear_feather_px": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64,
+          "description": "Fondu (px carte) du dégagement de la province sélectionnée."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sign_rule": {
+      "type": "object",
+      "required": [
+        "modes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "modes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "description": "Modes de carte (MapModeController.MODES) qui affichent ce signe."
+        },
+        "keep_urgent": {
+          "type": "boolean",
+          "description": "Reste visible quand il expire ou attend une réponse ce tour."
+        },
+        "with_selected_army": {
+          "type": "boolean",
+          "description": "Visible quand une armée est sélectionnée."
         }
       }
     }

@@ -26,6 +26,10 @@ uniform float weather_mist_max = 0.07;
 // gardent des nuées ; posé par CampaignWeatherView selon la distance caméra (0 de près, jusqu'à
 // ~0.5 de loin — la pluie/neige légère (k proche de 0.45) disparaît, la forte (k proche de 1) reste).
 uniform float weather_wide_intensity_cut = 0.0;
+// TB2 : province sélectionnée (index raster, 0 = aucune) : ni nuée, ni ombre de nuée, ni nappe de
+// brume par-dessus ; bord fondu sur `weather_clear_feather_px` (px carte).
+uniform int weather_clear_id = 0;
+uniform float weather_clear_feather_px = 8.0;
 
 float wx_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -63,6 +67,20 @@ vec4 wx_sample(vec2 p) {
 		}
 	}
 	return sum / 3.0;
+}
+
+// TB2 : 1 hors de la province sélectionnée, 0 dedans (cinq lectures : bord fondu).
+float wx_selection_clear(vec2 p) {
+	if (weather_clear_id <= 0) {
+		return 1.0;
+	}
+	float r = weather_clear_feather_px;
+	float inside = float(province_at(p) == weather_clear_id) * 0.4;
+	inside += float(province_at(p + vec2(r, 0.0)) == weather_clear_id) * 0.15;
+	inside += float(province_at(p - vec2(r, 0.0)) == weather_clear_id) * 0.15;
+	inside += float(province_at(p + vec2(0.0, r)) == weather_clear_id) * 0.15;
+	inside += float(province_at(p - vec2(0.0, r)) == weather_clear_id) * 0.15;
+	return 1.0 - inside;
 }
 
 // Densité des nuées [0, 1] : masses qui défilent avec le vent dans les zones de pluie, d'orage
@@ -105,6 +123,7 @@ vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, in
 	if (dot(w, vec4(1.0)) <= 0.0) {
 		return col;
 	}
+	float clear = wx_selection_clear(p);  // TB2 : rien ne voile la province sélectionnée
 	float rain = max(w.r, w.a);
 	// Sol mouillé : plus sombre, plus lisse (flaques).
 	col *= 1.0 - 0.28 * rain;
@@ -122,10 +141,10 @@ vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, in
 		float mist = w.b * mix(0.3, 0.75, low) * mix(0.35, 1.0, weather_fog_morning) * (0.35 + 0.65 * patches);
 		mist *= mix(weather_mist_near, 1.0, smoothstep(weather_mist_near_footprint * 0.5, weather_mist_near_footprint * 2.0, footprint));
 		vec3 veil = mix(vec3(0.62, 0.64, 0.66), col * 1.6, 0.35);
-		col = mix(col, veil, clamp(mist, 0.0, weather_mist_max));
+		col = mix(col, veil, clamp(mist, 0.0, weather_mist_max) * clear);
 	}
 	// Ombre des nuées qui passent.
-	col *= 1.0 - 0.35 * wx_cloud(p + weather_wind * 6.0, w);
+	col *= 1.0 - 0.35 * wx_cloud(p + weather_wind * 6.0, w) * clear;
 	emission += vec3(0.55, 0.6, 0.8) * wx_lightning(p, w) * 0.6;
 	return col;
 }

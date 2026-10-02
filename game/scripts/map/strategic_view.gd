@@ -19,6 +19,7 @@ var enabled: bool = true
 var forced: float = -1.0
 var decor: ParchmentDecor
 var overlay: ParchmentOverlay
+var region_labels: RegionLabels  # TB2
 
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
 const PARCHMENT_SHADER := preload("res://shaders/terrain_parchment.gdshader")
@@ -66,6 +67,20 @@ func setup(map: Node) -> void:
 	overlay.armies = map.get("armies")
 	overlay.visible = false
 	_layer.add_child(overlay)
+	# TB2 : noms de région de la vue moyenne (même source que les noms du parchemin).
+	region_labels = RegionLabels.new()
+	region_labels.name = "RegionLabels"
+	region_labels.camera = overlay.camera
+	region_labels.source = overlay
+	region_labels.visible = false
+	region_labels.obstacles = func(view_camera: Camera3D) -> Array:
+		var layer: Variant = map.get("settlement_layer")
+		return (layer as SettlementLayer).screen_label_rects(view_camera) if layer is SettlementLayer else []
+	region_labels.top_inset = func() -> float:
+		var ui: Variant = map.get("ui")
+		var bar := (ui as Node).get_node_or_null("TopBar") as Control if ui is Node else null
+		return bar.get_global_rect().end.y if bar != null and bar.visible else 0.0
+	_layer.add_child(region_labels)
 
 
 ## Poids du parchemin [0, 1] pour une distance caméra.
@@ -98,6 +113,8 @@ func update_view(distance: float) -> void:
 		RenderingServer.global_shader_parameter_set("campaign_parchment", w)
 		_swap_terrain_shader(w >= FULL_WEIGHT)
 	overlay.set_weight(w, distance)
+	if region_labels != null:  # TB2
+		region_labels.set_view(distance, w)
 	_fade_armies(w)
 
 

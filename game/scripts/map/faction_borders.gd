@@ -11,7 +11,10 @@ extends Node
 ##   joueur par province ; couleur par faction) à chaque `refresh` (appelé par `refresh_all`) :
 ##   un changement de propriétaire se voit à l'image suivante, sans reconstruction de géométrie ;
 ## - opacité et largeur selon le zoom, le filtre de carte (MF1) et la qualité (PF1) ;
-## - respiration du halo du joueur (un uniforme par image).
+## - respiration du halo du joueur (un uniforme par image) ;
+## - lot TB2 : style « au repos » (bloc `rest` : trait plus fin, désaturé, presque sans halo) ; la
+##   pleine intensité est réservée aux royaumes des provinces sélectionnée et survolée
+##   (`set_focus_provinces`), aux modes de carte marqués `full` (Diplomatie) et au parchemin.
 ## Réglages : `data/map/faction_borders.json` (schéma `faction_borders.schema.json`).
 ## Option (après `--`) : `--no-faction-borders` (A/B de perf). Purement visuel.
 
@@ -47,6 +50,10 @@ var _cli_disabled: bool = false
 ## et faction mise en valeur (halo du joueur) ; vides : couleurs héraldiques, joueur.
 var _color_override: Dictionary = {}
 var _highlight: String = ""
+## Lot TB2 : provinces (index raster) survolée et sélectionnée, dont les royaumes passent à
+## pleine intensité ; index de palette correspondants posés sur le shader (x = survol).
+var _focus_provinces := Vector2i.ZERO
+var _focus_factions := Vector2i(-1, -1)
 
 
 func setup(campaign_map: Node, terrain_builder: TerrainBuilder = null) -> void:
@@ -139,6 +146,7 @@ func _apply_tuning() -> void:
 		"province": ["core_px", "core_alpha", "core_brightness"],
 		"player": ["width_scale", "glow_scale", "brightness"],
 		"parchment": ["width_scale", "alpha_scale", "glow_scale", "ink_mix"],
+		"rest": ["width_scale", "alpha_scale", "glow_scale", "saturation", "brightness", "parchment_focus"],  # TB2
 	}
 	for section: String in sections:
 		var values: Dictionary = tuning.get(section, {})
@@ -236,6 +244,7 @@ func _build_info() -> void:
 	else:
 		_info_texture.update(_info_image)
 	_set_param("fr1_info", _info_texture)
+	_apply_focus()  # TB2 : un changement de propriétaire déplace la mise en avant
 
 
 func _build_palette() -> void:
@@ -276,7 +285,56 @@ func faction_index(faction: String) -> int:
 func mode_style(map_mode: String) -> Dictionary:
 	var modes: Dictionary = tuning.get("modes", {})
 	var style: Dictionary = modes.get(map_mode, modes.get("political", {"alpha": 1.0, "neutral": false}))
-	return {"alpha": float(style.get("alpha", 1.0)), "neutral": bool(style.get("neutral", false))}
+	return {"alpha": float(style.get("alpha", 1.0)), "neutral": bool(style.get("neutral", false)), "full": bool(style.get("full", false))}
+
+
+## Lot TB2 : provinces (index raster, 0 = aucune) survolée et sélectionnée ; les frontières des
+## royaumes qui les possèdent passent à pleine intensité, les autres restent au repos.
+func set_focus_provinces(hovered: int, selected: int) -> void:
+	var provinces := Vector2i(hovered, selected)
+	if provinces == _focus_provinces:
+		return
+	_focus_provinces = provinces
+	_apply_focus()
+
+
+func _apply_focus() -> void:
+	var factions := Vector2i(_owner_index(_focus_provinces.x), _owner_index(_focus_provinces.y))
+	if factions == _focus_factions:
+		return
+	_focus_factions = factions
+	_set_param("fr1_focus_a", factions.x)
+	_set_param("fr1_focus_b", factions.y)
+
+
+func _owner_index(province_index: int) -> int:
+	if province_index <= 0 or province_index > _owners.size():
+		return 0
+	return int(_faction_index.get(_owners[province_index - 1], 0))
+
+
+## TB2 : index de palette des royaumes mis en avant (x = survol, y = sélection ; 0 = aucun).
+func focus_factions() -> Vector2i:
+	return Vector2i(maxi(_focus_factions.x, 0), maxi(_focus_factions.y, 0))
+
+
+## TB2 : vrai si le mode de carte courant montre toutes les frontières à pleine intensité.
+func full_intensity() -> bool:
+	return bool(mode_style(mode)["full"])
+
+
+## TB2 : facteur du style au repos (`width_scale`, `alpha_scale`, `saturation`…), 1 si absent.
+func rest_value(key: String) -> float:
+	return float(tuning.get("rest", {}).get(key, 1.0))
+
+
+## TB2 : intensité relative (largeur × opacité, 1 = pleine) des frontières du royaume qui possède
+## la province `province_index` dans l'état courant (mode, survol, sélection) ; mesures et tests.
+func intensity_of(province_index: int) -> float:
+	var owner := _owner_index(province_index)
+	if full_intensity() or (owner > 0 and (owner == _focus_factions.x or owner == _focus_factions.y)):
+		return 1.0
+	return rest_value("width_scale") * rest_value("alpha_scale")
 
 
 ## Fondu de zoom : 0 sous `fade_out_m` (distance caméra en mètres), 1 au-delà de `fade_in_m`.
@@ -297,6 +355,10 @@ func update_view(distance: float) -> void:
 		_set_param("fr1_pulse", 1.0 + amount * sin(Time.get_ticks_msec() * 0.001 * TAU / period))
 	var modes: Node = map.get("map_modes") if map != null else null
 	var current := str(modes.get("mode")) if modes != null else "political"
+	if map != null:  # TB2 : pleine intensité pour les royaumes survolé et sélectionné
+		var hovered: Variant = map.get("hovered_index")
+		var selected: Variant = map.get("selected_index")
+		set_focus_provinces(int(hovered) if hovered != null else 0, int(selected) if selected != null else 0)
 	if is_equal_approx(distance, _last_distance) and current == _last_mode:
 		return
 	_last_distance = distance
@@ -310,6 +372,7 @@ func update_view(distance: float) -> void:
 func set_mode(map_mode: String) -> void:
 	mode = map_mode
 	_set_param("fr1_neutral", bool(mode_style(mode)["neutral"]))
+	_set_param("fr1_focus", 1.0 if full_intensity() else 0.0)  # TB2
 	_update_alpha()
 
 

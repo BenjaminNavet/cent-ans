@@ -86,5 +86,12 @@ func shield_size_factor() -> float:
 	return float(catalog.get("shield", {}).get("size_factor", 0.45))
 
 
+## Lot TB2 : distance caméra jusqu'à laquelle un lieu de rang `rank` porte son écu
+## (`shield.max_distance_by_rank`) ; au-delà, le nom seul. Rang absent : écu à toute distance.
+func shield_until(rank: int) -> float:
+	var limits: Dictionary = catalog.get("shield", {}).get("max_distance_by_rank", {})
+	return float(limits.get(str(rank), 100000.0))
+
+
 func shield_gap_px() -> float:
 	return float(catalog.get("shield", {}).get("gap_px", 1.0))

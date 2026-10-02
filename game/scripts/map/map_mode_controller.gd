@@ -79,6 +79,7 @@ var button: Button
 var menu: PopupPanel
 var _menu_buttons: Dictionary = {}  # mode → Button
 var _trade_check: CheckBox
+var _signs_check: CheckBox  # TB2
 var _legend: PanelContainer
 var _markers: Node3D
 var _tint_saved: Dictionary = {}
@@ -163,6 +164,15 @@ func _build_menu() -> void:
 	_trade_check.focus_mode = Control.FOCUS_NONE
 	_trade_check.toggled.connect(func(_on: bool) -> void: map.call("_toggle_trade_layer"))
 	box.add_child(_trade_check)
+	# TB2 : couche « Signes » (marteaux de chantier, sceaux d'incident, sites de rencontre),
+	# éteinte par défaut : la carte ne montre qu'un signe par ville.
+	_signs_check = CheckBox.new()
+	_signs_check.name = "SignsLayer"
+	_signs_check.text = "Signes : chantiers, incidents, rencontres"
+	RichTooltip.attach_plain(_signs_check, "map_mode_signs_overlay")
+	_signs_check.focus_mode = Control.FOCUS_NONE
+	_signs_check.toggled.connect(func(on: bool) -> void: MapReadability.signs_layer_on = on)
+	box.add_child(_signs_check)
 	_sync_menu()
 
 
@@ -192,6 +202,8 @@ func _sync_menu() -> void:
 		item.text = ("▸ " if id == mode else "   ") + item.text.trim_prefix("▸ ").trim_prefix("   ")
 	if _trade_check != null and map != null:
 		_trade_check.set_pressed_no_signal(bool(map.get("trade_mode")))
+	if _signs_check != null:
+		_signs_check.set_pressed_no_signal(MapReadability.signs_layer_on)
 
 
 func handle_input(event: InputEvent) -> bool:
