@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_history_rules.schema.json",
+  "title": "Bornes de l'historique des batailles",
+  "description": "Fichier data/rules/battle_history.json (chantier TB, ADR 0157 révision) : combien de temps et combien de batailles terrestres l'état de campagne garde en mémoire (et sauvegarde) pour les marques de champ de bataille de la carte.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "max_age_turns": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 400,
+      "description": "Une bataille du tour t est gardée tant que tour - t < max_age_turns ; 0 ne garde rien."
+    },
+    "max_records": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4096,
+      "description": "Nombre maximal de batailles gardées ; les plus anciennes partent d'abord."
+    }
+  },
+  "required": ["max_age_turns", "max_records"],
+  "additionalProperties": false
+}
