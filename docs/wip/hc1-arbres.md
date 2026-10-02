@@ -49,8 +49,18 @@ Sonde à Paris (rayon 120 px) : 0,98 arbre/px² en forêt, ≈ 0,14 hors forêt.
 - Aucune donnée ni règle touchée ; `tree_species.json` (compilé) non modifié : les probabilités
   hors forêt sont multipliées par les gains `generalised_*_gain` du `.tres`.
 
+## Pause (02/10, demandée par le joueur)
+Lot arrêté proprement : tout est commité, aucune commande Godot ni tâche de fond en cours, rien
+d'incohérent dans le worktree (seul fichier non suivi : `game/tests/gc_maquettes_test.gd.uid`,
+qui appartient à GC). Non terminé : validation pytest du schéma `campaign_map_ui.schema.json`
+(interrompue par la pause, sans résultat) et banc sur machine calme.
+
 ## Prochaine étape
-HC3 (session principale) : relecture visuelle, banc sur machine calme, fusion dans `feat/hc`.
+1. `uv run --project tools pytest` (validation de `data/ui/campaign_map.json` contre le schéma).
+2. Banc sur machine calme : `godot --path game --resolution 1280x800 --disable-vsync --script
+   res://tests/hc_shots.gd -- --out=<dossier> --bench "--views=2213,3204,90;2213,3204,300;2213,3204,700"
+   --hide-armies --map-weather=clear` ; cible : surcoût < 2 ms à d = 300.
+3. HC3 (session principale) : relecture visuelle, réglages, fusion dans `feat/hc`.
 
 ## Points ouverts
 - Éclaircissement au dézoom : au-delà de d = 150 la taille n'est plus strictement constante
