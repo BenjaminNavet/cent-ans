@@ -14,7 +14,8 @@
     "variants",
     "default_family",
     "families",
-    "weight_gain"
+    "weight_gain",
+    "props"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -260,6 +261,43 @@
           },
           "minItems": 2,
           "maxItems": 2
+        }
+      }
+    },
+    "props": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hamlet_ratio",
+        "windmill_ratio",
+        "windmill_range",
+        "chimney_ratio",
+        "chimney_range"
+      ],
+      "description": "Accessoires grossis avec les maquettes : rapports taille affichée / taille de modèle et portées (distance du rig).",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "hamlet_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "windmill_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "windmill_range": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "chimney_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "chimney_range": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     }

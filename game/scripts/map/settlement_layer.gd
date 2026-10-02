@@ -1359,7 +1359,7 @@ func visible_label_count() -> int:
 ## construites réécrites depuis les données gardées à la construction (sans relire le relief).
 func _update_hamlet_scale(camera_distance: float) -> void:
 	var props := MapPropScale.shared()
-	var wanted := props.hamlet_scale(camera_distance)
+	var wanted := TownMaquetteData.prop("hamlet_ratio", props.hamlet_scale(camera_distance))  # GC : hameaux grossis
 	if not props.needs_rewrite(_hamlet_scale, wanted):
 		return
 	_hamlet_scale = wanted
