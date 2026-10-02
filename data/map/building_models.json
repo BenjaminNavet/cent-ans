@@ -65,7 +65,7 @@
       }
     },
     "maquette": {
-      "size_distance": 40.0,
+      "size_distance": 50.0,
       "view_range_units": 330.0,
       "fade_from_units": 260.0,
       "shadow_range_units": 330.0,
@@ -78,7 +78,8 @@
       ],
       "built_in_game_only": [
         "mill"
-      ]
+      ],
+      "brighten": 2.0
     }
   },
   "families": {

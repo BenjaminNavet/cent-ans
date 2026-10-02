@@ -524,6 +524,10 @@ func _render(key: String, fallback: float) -> float:
 	return float(render.get(key, fallback))
 
 
+func _brighten() -> float:
+	return _render("brighten", float(screen_config(config).get("brighten", 0.0)))
+
+
 func view_range() -> float:
 	return _render("view_range_units", 160.0)
 
@@ -701,7 +705,7 @@ func _instances_of(i: int) -> Array:
 			"base_m": _base_m(px),
 			"scale": Vector3.ONE,
 			"grow": "out",
-			"tint": 0.5 + float(screen_config(config).get("brighten", 0.0)),
+			"tint": 0.5 + _brighten(),
 			"width_m": maxf(float(entry.get("length", 30.0)), float(entry.get("depth", 30.0))),
 			"radius_m": float(entry.get("radius", 30.0)),
 			"top": float(entry.get("height", 20.0)),
@@ -762,7 +766,7 @@ func _sign_instance(i: int, center: Vector2, growth: Array) -> Dictionary:
 		"base_m": _base_m(center),
 		"scale": Vector3.ONE,
 		"grow": "sign",
-		"tint": 0.5 + float(screen_config(config).get("brighten", 0.0)),
+		"tint": 0.5 + _brighten(),
 		"width_m": width,
 		"radius_m": float(shape.get("radius", 40.0)),
 		"fraction": float(rule.get("fraction", 0.08)),
@@ -813,7 +817,7 @@ func _quarter_signs(i: int, center: Vector2, growth: Array, sign: Dictionary) ->
 			"base_m": _base_m(center),
 			"scale": Vector3.ONE,
 			"grow": "quarter",
-			"tint": 0.5 + float(screen_config(config).get("brighten", 0.0)),
+			"tint": 0.5 + _brighten(),
 			"width_m": width,
 			"radius_m": float(shape.get("radius", 20.0)),
 			"fraction": float(rule.get("fraction", 0.04)),
@@ -1524,7 +1528,7 @@ func _write_batches() -> void:
 		(g[1] as Array).append(float(inst["base_m"]))
 		var tint := float(inst.get("tint", 0.5))
 		if str(inst.get("grow", "")) == "house":  # faubourgs éclaircis de loin, comme les maquettes
-			tint += float(screen_config(config).get("brighten", 0.0)) * screen_blend(config, _rig_distance)
+			tint += _brighten() * screen_blend(config, _rig_distance)
 		(g[2] as Array).append(tint)
 		g[3] = maxf(float(g[3]), maxf((float(inst.get("top", 20.0)) + float(inst.get("reach", 30.0))) * grow, draw.y * 1.5 + maxf(draw.x, draw.z)))
 		(g[4] as Array).append(float(_soot.get(int(inst["settlement"]), 0.0)))

@@ -288,7 +288,8 @@
             "load_min_units",
             "load_max_units",
             "kinds",
-            "built_in_game_only"
+            "built_in_game_only",
+            "brighten"
           ],
           "properties": {
             "size_distance": {
@@ -340,6 +341,12 @@
                 "pattern": "^[a-z]+$"
               },
               "uniqueItems": true
+            },
+            "brighten": {
+              "description": "Éclaircissement des maquettes dans le style `maquette` (murs clairs et toits vifs des maquettes GC).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4
             }
           }
         }

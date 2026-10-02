@@ -1,6 +1,7 @@
 """Validates data/map/building_models.json (lot TB3: buildings outside the walls)."""
 
 import json
+import math
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -161,3 +162,21 @@ def test_soot_of_a_sack_is_stronger_than_a_storm_or_a_siege() -> None:
     assert soot["devastation_start"] < soot["devastation_full"]
     capture = json.loads((DATA / "rules" / "capture.json").read_text("utf-8"))
     assert soot["sack_devastation_rise"] <= capture["sack"]["devastation"]
+
+
+def test_maquette_style_keeps_outbuildings_smaller_than_the_town_maquette() -> None:
+    """In the maquette town style an outbuilding has a constant world size below a town's."""
+    document = _document()
+    maquette = document["render"]["maquette"]
+    screen = document["render"]["screen"]
+    assert set(maquette["built_in_game_only"]) <= set(FAMILIES)
+    assert set(maquette["kinds"]) <= {"city", "town", "village", "castle", "abbey"}
+    assert maquette["fade_from_units"] < maquette["view_range_units"]
+    view_span = 2.0 * math.tan(math.radians(55.0) / 2.0) * maquette["size_distance"]
+    widths = [fraction * view_span for fraction in screen["fractions"]]
+    town_sizes = json.loads((DATA / "art" / "town_maquettes.json").read_text("utf-8"))[
+        "sizes"
+    ]
+    smallest_host = min(town_sizes[kind] for kind in maquette["kinds"])
+    assert widths == sorted(widths)
+    assert widths[0] >= 1.5 and widths[-1] <= 0.6 * smallest_host

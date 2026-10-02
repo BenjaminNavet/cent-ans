@@ -13,8 +13,10 @@ extends SceneTree
 ## Écrit, par ville et par distance, `tb3-<id>-<distance>-avant.png` (même cadrage sans le lot :
 ## couche masquée, suie retirée, comme `--no-tb3`) puis `tb3-<id>-<distance>-apres.png`, à la
 ## résolution de la fenêtre, HUD masqué ; puis une planche par ville `tb3-planche-<id>.png`
-## (800 px de large : une ligne par distance, avant à gauche, après à droite, recadrage central
-## de 400 × 300 px sans réduction).
+## (800 px de large, une ligne par distance). Style `real` (`--town-style=real`) : avant à gauche,
+## après à droite, recadrage central de 400 × 300 px sans réduction, fichier `…-real.png`. Style
+## `maquette` (défaut, carte généralisée) : image entière réduite de moitié, planche « après » et
+## planche `…-avant.png`.
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TILE := Vector2i(400, 300)
@@ -103,7 +105,12 @@ func _init() -> void:
 	if not coast.is_empty():
 		shots.append([coast_id, coast["px"]])
 	for shot: Array in shots:
-		var sheet := Image.create(TILE.x * 2, TILE.y * distances.size(), false, Image.FORMAT_RGB8)
+		# Style `real` : recadrage central sans réduction, avant | après. Style `maquette` (objets
+		# de plusieurs unités) : image entière réduite de moitié, une planche avant, une après.
+		var wide := TownMaquetteData.enabled()
+		var tile := Vector2i(root.size.x / 2, root.size.y / 2) if wide else TILE
+		var sheet := Image.create(tile.x * (1 if wide else 2), tile.y * distances.size(), false, Image.FORMAT_RGB8)
+		var sheet_before := Image.create(tile.x, tile.y * distances.size(), false, Image.FORMAT_RGB8)
 		var row := 0
 		var px: Vector2 = shot[1]
 		var ground := Vector3(px.x, data.surface_world_at(px.x, px.y), px.y)
@@ -116,17 +123,20 @@ func _init() -> void:
 					settlements.set_town_soot(growth_id, 0.0)
 				for i in SETTLE_FRAMES:
 					await process_frame
-				_tile(sheet, _shot(out_dir, "tb3-%s-%d-avant" % [shot[0], int(distance)]), Vector2i(0, row))
+				_tile(sheet_before if wide else sheet, _shot(out_dir, "tb3-%s-%d-avant" % [shot[0], int(distance)]), Vector2i(0, row), tile, wide)
 				out.enabled = true
 				if growth_id != "":
 					settlements.set_town_soot(growth_id, 0.8)
 			for i in SETTLE_FRAMES:
 				await process_frame
 			print("TB3 %s d=%.0f : %s" % [shot[0], distance, _summary(out, str(shot[0]))])
-			_tile(sheet, _shot(out_dir, "tb3-%s-%d-apres" % [shot[0], int(distance)]), Vector2i(1, row))
+			_tile(sheet, _shot(out_dir, "tb3-%s-%d-apres" % [shot[0], int(distance)]), Vector2i(0 if wide else 1, row), tile, wide)
 			row += 1
-		sheet.save_png(out_dir.path_join("tb3-planche-%s.png" % shot[0]))
-		print("TB3 planche %s" % out_dir.path_join("tb3-planche-%s.png" % shot[0]))
+		var style := "" if wide else "-real"
+		sheet.save_png(out_dir.path_join("tb3-planche-%s%s.png" % [shot[0], style]))
+		print("TB3 planche %s" % out_dir.path_join("tb3-planche-%s%s.png" % [shot[0], style]))
+		if wide and before:
+			sheet_before.save_png(out_dir.path_join("tb3-planche-%s-avant.png" % shot[0]))
 	quit(0)
 
 
@@ -134,7 +144,7 @@ func _init() -> void:
 func _open_town_near(settlements: SettlementLayer, px: Vector2) -> String:
 	var best := ""
 	var best_d := INF
-	var towns: Dictionary = settlements.towns.data.towns
+	var towns: Dictionary = settlements.town_data().towns
 	for entry in settlements.data.settlements:
 		var id := str(entry["id"])
 		if not towns.has(id) or str(towns[id]["walls"]) != "none" or str(entry["kind"]) != "town":
@@ -188,9 +198,15 @@ func _shot(out_dir: String, name: String) -> Image:
 	return image
 
 
-## Recadrage central de `TILE` px, sans réduction, posé dans la case `cell` de la planche.
-func _tile(sheet: Image, image: Image, cell: Vector2i) -> void:
-	var size := Vector2i(mini(TILE.x, image.get_width()), mini(TILE.y, image.get_height()))
-	var region := image.get_region(Rect2i((image.get_size() - size) / 2, size))
+## Pose l'image dans la case `cell` de la planche : recadrage central de `tile` px sans réduction,
+## ou (`whole`) image entière réduite à `tile`.
+func _tile(sheet: Image, image: Image, cell: Vector2i, tile: Vector2i, whole: bool) -> void:
+	var region: Image
+	if whole:
+		region = image.duplicate()
+		region.resize(tile.x, tile.y, Image.INTERPOLATE_LANCZOS)
+	else:
+		var size := Vector2i(mini(tile.x, image.get_width()), mini(tile.y, image.get_height()))
+		region = image.get_region(Rect2i((image.get_size() - size) / 2, size))
 	region.convert(Image.FORMAT_RGB8)
-	sheet.blit_rect(region, Rect2i(Vector2i.ZERO, size), cell * TILE)
+	sheet.blit_rect(region, Rect2i(Vector2i.ZERO, region.get_size()), cell * tile)

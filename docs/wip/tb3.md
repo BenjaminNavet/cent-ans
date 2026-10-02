@@ -40,6 +40,37 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0162-…` (choix de
   `tb3-catalogue-z2.png`, `tb3-planche-set_agen.png`, `tb3-planche-set_fleurance.png`,
   `tb3-planche-set_la_rochelle.png` (+ captures entières `tb3-<id>-<d>-avant|apres.png`).
 
+## Quatrième passe : style de ville `maquette` de GC2 (03/10 ; 6 lectures sur 20)
+- [x] `SettlementLayer._setup_towns()` crée `outbuildings` et `soot` dans le style `maquette`
+      aussi ; `town_data()` donne les plans quand la couche 1:1 n'existe pas.
+- [x] `render.maquette` : taille monde constante (`size_distance` 50 → 2,3 / 3,1 / 4,2 unités),
+      fondu 260 → 330, cités et villes seulement, `brighten` 2,0, moulin seulement s'il est
+      construit en cours de partie (les moulins du décor sont ceux de GC5).
+- [x] Pas de signe de colonie ni d'enceinte ajoutée dans ce style ; faubourgs en groupes
+      `sign_suburb` au bord de la maquette de GC ; anneau au bord de son emprise (`built_radius`).
+- [x] `tb3_growth_test` dans les deux styles (`-- --town-style=real|maquette`) ; `tb3_shot.gd` :
+      planche large par ville dans le style par défaut, planche `-real` dans le style `real`.
+- Aucun fichier de GC modifié (`town_maquette*`, `gc_*`) ; seul `settlement_layer.gd` l'est
+  (création de la couche, `town_data()`).
+- Planches (hors dépôt, `~/.cache/cent_ans/tb/tb3/`) : `tb3-planche-set_agen.png`,
+  `tb3-planche-set_fleurance.png`, `tb3-planche-set_la_rochelle.png` (+ `-avant`), style `real` :
+  `tb3-planche-set_agen-real.png` (+ Fleurance, La Rochelle).
+- Jugement : à 20 et 45 les maquettes se lisent autour de la maquette de GC sans la recouvrir
+  (halle et étals, ferme, vignoble, port à grue sur la grève de La Rochelle, faubourg au pied de
+  Fleurance) ; à 90 elles restent présentes mais petites (2 à 4 unités contre 8 à 14 pour la
+  ville) ; à 200 ce sont des points. Murs bruns du kit plus sombres que les murs clairs de GC :
+  deux familles de style côte à côte. Style `real` : inchangé par rapport à la troisième passe.
+- Mesures, style `maquette`, Agen, couche masquée → affichée : d = 20 : 1 180 → 1 208 appels de
+  dessin ; d = 45 : 1 332 → 1 384 ; d = 90 : 2 071 → 2 168 ; d = 400 : 1 204 → 1 204 ; temps par
+  image inchangé (≈ 25 ms sur machine chargée). `tb3_growth_test` (deux styles), `smoke`,
+  `settlements_render_test`, `tb2_declutter_test` OK ; pytest du schéma 12/12.
+- Restes qui demandent un changement chez GC : suie sur la maquette de la ville (matériau partagé
+  `BuildingMaterials` palier `far`, pas de paramètre par ville) ; niveaux d'enceinte de la
+  maquette (aucun aujourd'hui : l'enceinte ajoutée n'est pas montrée dans ce style).
+- À voir : + 97 appels de dessin à 90 (ombres portées jusqu'à 330) : baisser
+  `render.maquette.shadow_range_units` si le banc sur machine calme le demande ; villages,
+  châteaux et abbayes sans bâtiments hors les murs dans ce style (`kinds`).
+
 ## Mesures (02/10, nuit)
 - `tb3_growth_test` OK (6 étapes) : largeurs autour du point visé, en 900 px de haut : 34,5 à
   62,1 px à 20 ; 29,7 à 62,2 px à 45 ; 29,6 à 64,2 px à 90 ; aucune paire en recouvrement ;
@@ -78,8 +109,5 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0162-…` (choix de
   `upgrades_from`. Le niveau de maquette vient donc de la correspondance.
 
 ## Prochaine étape
-Relecture visuelle par la session principale :
-`godot --path game --resolution 1600x900 --script res://tests/tb3_shot.gd -- --out=<dossier>`
-(Agen : ferme, vignoble, marché de niveau 3, moulin et abbaye de niveau 1, chantier ; Fleurance :
-faubourgs, enceinte de pierre, suie ; distances 20, 45, 90 ; `-avant` / `-apres`). Puis fusion
-dans `feat/tb`.
+Fusion dans `feat/tb` par la session principale, puis jugement du joueur en partie pilote
+(style `maquette` par défaut ; `--town-style=real` pour l'ancien rendu).

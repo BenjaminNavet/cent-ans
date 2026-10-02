@@ -1926,6 +1926,13 @@ Rendu seulement ; les règles restent dans `core/`. Données : `data/map/buildin
   sur le sol sous son centre : rien d'enterré dans un versant.
 - **Brouillard de guerre** : rien n'est posé dans une province hors de vue
   (`ArmyMarkers.hidden_provinces` ; `OutbuildingLayer.fog_source`, `is_hidden(id)`).
+- **Style `maquette`** (défaut, ADR 0158 ; `render.maquette`) : mêmes maquettes autour de la
+  maquette de GC, à taille monde constante (formules de taille évaluées à `size_distance` 50 :
+  2,3 / 3,1 / 4,2 unités), visibles jusqu'à 330 (fondu depuis 260) ; pas de signe de colonie ni
+  d'enceinte ajoutée ; faubourgs en groupes `sign_suburb` au bord de la maquette ; cités et
+  villes seulement (`kinds`) ; moulin seulement s'il est construit en cours de partie
+  (`built_in_game_only`, les moulins du décor sont ceux de GC5) ; suie sur ces pièces seulement.
+  `--town-style=real` rend le comportement décrit ci-dessus (signes, taille tenue à l'écran).
 - **Croissance de la ville 1:1** (`TownGrowth`, mêmes `MultiMesh`) : quartiers de faubourg (maisons
   de `town_kit/`) le long des routes des portes selon la population de la province rapportée à
   celle de 1337 ; enceinte (pans, tours, portes aux dimensions de `towns_1340.json`) quand un

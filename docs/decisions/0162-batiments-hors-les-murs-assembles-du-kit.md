@@ -103,6 +103,28 @@ moteur n'ayant pas de niveau par bâtiment.
 - **Chantier** : la maquette `worksite_1` remplace le « ⚒ » des signes (taille constante à
   l'écran, règles TB2 inchangées) et se pose au pied de la cité en chantier, comme une maquette
   de niveau 1.
+- **Style de ville `maquette`** (défaut depuis GC2, ADR 0158 ; `render.maquette`) : la ville est
+  la maquette stylisée de GC, à taille monde constante. La couche et la suie sont créées dans ce
+  style aussi (`SettlementLayer.town_data()` donne les colonies quand la couche 1:1 n'existe pas),
+  avec ces différences :
+  - taille monde constante, comme les maquettes de GC : les formules de taille tenue à l'écran
+    sont évaluées à une distance fixe (`size_distance` 50, champ de 55°), soit 2,3 / 3,1 / 4,2
+    unités de large pour les niveaux 1 à 3 (village de GC : 4 ; ville : 8 ; cité : 14) ; la
+    distance réelle du rig ne sert plus qu'à la visibilité (fondu 260 → 330), au chargement et
+    aux ombres ;
+  - pas de signe de colonie : la maquette de GC est le signe de la ville ; les `sign_*` ne
+    servent que dans le style `real` ;
+  - anneau au bord de la maquette de GC (`SettlementLayer.built_radius`, qui vaut alors
+    `TownMaquetteLayer.radius_of`), une famille par secteur,
+    sans la recouvrir ; cités et villes seulement (`kinds`) ;
+  - faubourgs : un groupe `sign_suburb` par quartier ajouté, au bord de la maquette ; l'enceinte
+    ajoutée n'est pas dessinée (la maquette de GC est déjà murée et n'a pas de niveaux) ;
+  - moulins : ceux du décor sont ceux de GC5 ; le moulin de ce lot n'apparaît que si un bâtiment
+    de sa famille est construit en cours de partie (`built_in_game_only`) ;
+  - teintes éclaircies davantage (`brighten` 2,0) pour tenir à côté des murs clairs de GC ;
+  - suie : sur les pièces de ce lot seulement. La maquette de GC partage un matériau
+    (`BuildingMaterials`, palier `far`) sans paramètre par ville : la noircir demande un
+    changement dans les fichiers de GC, laissé hors de ce lot.
 
 ## Conséquences
 - 0 $ ; 25 GLB (2 Mo) régénérables par le script.
