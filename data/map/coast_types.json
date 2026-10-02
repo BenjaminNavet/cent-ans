@@ -1,0 +1,163 @@
+{
+  "description": "TB5 : type de côte de la carte de campagne (rendu seulement, aucune règle de jeu). `regions` : géologie de la côte par région (polygones en pixels carte, grille de map.json ; la dernière région qui contient un point l'emporte) ; hors région : `default`. La pente choisit entre falaise et plage : altitude lue à `cliff.probe_px` de la côte vers l'intérieur, plage sous `cliff.min_m`, falaise au-dessus de `cliff.max_m`. `types` : couleurs linéaires des roches et des plages. Lu par game/scripts/map/coast_look.gd et game/shaders/coast_band.gdshaderinc.",
+  "cell_px": 16,
+  "cliff": {
+    "probe_px": 1.6,
+    "min_m": 28.0,
+    "max_m": 50.0
+  },
+  "band": {
+    "cliff_px": 0.85,
+    "beach_px": 0.55,
+    "wet_px": 0.16,
+    "strength": 1.0,
+    "relief": 0.9,
+    "far_keep": 0.55
+  },
+  "default": {
+    "rock": "rock",
+    "beach": "sand",
+    "beach_width": 1.0
+  },
+  "types": {
+    "rock": {
+      "label": "Roche",
+      "color": [0.3, 0.27, 0.22],
+      "shade": [0.15, 0.13, 0.11],
+      "streak": 0.35
+    },
+    "chalk": {
+      "label": "Craie",
+      "color": [0.8, 0.78, 0.7],
+      "shade": [0.46, 0.44, 0.38],
+      "streak": 0.3
+    },
+    "granite": {
+      "label": "Granite",
+      "color": [0.27, 0.22, 0.2],
+      "shade": [0.1, 0.085, 0.08],
+      "streak": 0.55
+    },
+    "sand": {
+      "label": "Sable",
+      "color": [0.56, 0.46, 0.3],
+      "shade": [0.36, 0.29, 0.19],
+      "streak": 0.12
+    },
+    "shingle": {
+      "label": "Galets",
+      "color": [0.36, 0.34, 0.31],
+      "shade": [0.22, 0.21, 0.2],
+      "streak": 0.4
+    }
+  },
+  "regions": [
+    {
+      "id": "chalk_south_england",
+      "label": "Craie du sud de l'Angleterre : Purbeck, île de Wight, Sept Sœurs, Douvres, Thanet",
+      "rock": "chalk",
+      "beach": "shingle",
+      "beach_width": 1.0,
+      "polygon_px": [
+        [1795, 2890],
+        [1804, 2837],
+        [2020, 2846],
+        [2115, 2789],
+        [2182, 2797],
+        [2174, 2866],
+        [2102, 2896],
+        [2011, 2908],
+        [1910, 2917]
+      ]
+    },
+    {
+      "id": "chalk_caux",
+      "label": "Craie du pays de Caux et de la côte picarde : du Havre à Ault (Étretat, Fécamp, Dieppe)",
+      "rock": "chalk",
+      "beach": "shingle",
+      "beach_width": 0.8,
+      "polygon_px": [
+        [1982, 3084],
+        [2005, 3024],
+        [2132, 2978],
+        [2170, 2990],
+        [2155, 3035],
+        [2027, 3090]
+      ]
+    },
+    {
+      "id": "chalk_boulonnais",
+      "label": "Craie du Boulonnais : caps Blanc-Nez et Gris-Nez, plages de sable",
+      "rock": "chalk",
+      "beach": "sand",
+      "beach_width": 1.0,
+      "polygon_px": [
+        [2153, 2926],
+        [2160, 2861],
+        [2204, 2866],
+        [2197, 2931]
+      ]
+    },
+    {
+      "id": "granite_brittany",
+      "label": "Granite du Massif armoricain : Bretagne, Cotentin de l'ouest, îles Anglo-Normandes",
+      "rock": "granite",
+      "beach": "sand",
+      "beach_width": 1.0,
+      "polygon_px": [
+        [1392, 3334],
+        [1445, 3076],
+        [1680, 3090],
+        [1759, 2986],
+        [1877, 3006],
+        [1864, 3090],
+        [1836, 3211],
+        [1733, 3398],
+        [1627, 3396]
+      ]
+    },
+    {
+      "id": "granite_cornwall",
+      "label": "Roches dures de Cornouailles et du Devon",
+      "rock": "granite",
+      "beach": "sand",
+      "beach_width": 1.0,
+      "polygon_px": [
+        [1405, 2925],
+        [1428, 2818],
+        [1587, 2725],
+        [1739, 2755],
+        [1717, 2877],
+        [1667, 2931],
+        [1502, 2946]
+      ]
+    },
+    {
+      "id": "granite_galicia",
+      "label": "Granite de Galice",
+      "rock": "granite",
+      "beach": "sand",
+      "beach_width": 1.0,
+      "polygon_px": [
+        [747, 4039],
+        [828, 3716],
+        [1109, 3787],
+        [1087, 3885],
+        [870, 4071]
+      ]
+    },
+    {
+      "id": "sand_landes",
+      "label": "Côte des Landes : cordon de dunes et grandes plages de sable",
+      "rock": "rock",
+      "beach": "sand",
+      "beach_width": 1.6,
+      "polygon_px": [
+        [1686, 3962],
+        [1732, 3649],
+        [1813, 3661],
+        [1769, 3975]
+      ]
+    }
+  ]
+}
