@@ -172,7 +172,7 @@ func _test_morning_mist(map: Node3D) -> void:
 	for kind: String in CampaignWeatherView.KINDS:
 		view.weather = {id: {"kind": kind, "intensity": 0.8, "label": kind}}
 		view._upload_mask()
-		var texel: Color = view._mask.get_image().get_pixel(paris, 0)
+		var texel: Color = view.mask_image().get_pixel(paris, 0)
 		_check((texel.b > 0.0) == (kind == "fog"), "%s: mist channel %.2f" % [kind, texel.b])
 		_check(bool(material.get_shader_parameter("weather_enabled")) == (kind != "clear"), "%s: weather mask enabled flag" % kind)
 		_check(is_equal_approx(float(material.get_shader_parameter("weather_valley_mist")), opacity), "%s: valley mist opacity kept" % kind)

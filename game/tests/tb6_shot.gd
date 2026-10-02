@@ -9,9 +9,10 @@ extends SceneTree
 ##   [--no-shots] (mesures seulement)
 ##   [--ab] (pour chaque vue, écart de luminance du sol avec / sans chaque calque : nuées, météo
 ##   du sol, ombres de nuages, ombres du soleil, brume ; même image, même instant)
-##   [--bench] (coût GPU mesuré par le moteur, insensible au plafond du compositeur : SSIL coupé /
-##   actif, SDFGI, brume du matin ; configurations alternées sur trois tours pour lisser la charge
-##   de la machine ; lancer avec `--disable-vsync`)
+##   [--bench] (durée d'image en boucle serrée, sans plafond du compositeur : SSIL coupé / actif,
+##   SDFGI, brume du matin, brouillard volumétrique ; configurations alternées sur plusieurs tours
+##   pour lisser la charge de la machine ; lancer avec `--disable-vsync`, et `--map-weather=fog`
+##   pour mesurer la brume)
 ## Par vue : `TB6 view …` (météo au point visé, opacité des nuées, soleil, brouillard) et
 ## `TB6 stats …` (luminance du sol émergé : moyenne, écart-type, part des blocs très sombres).
 
@@ -307,7 +308,7 @@ func _bench(map: Node3D, name: String) -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
 	var saved := {"ssil": env.ssil_enabled, "sdfgi": env.sdfgi_enabled, "mist": material.get_shader_parameter("weather_valley_mist")}
-	var configs := ["ssil_off", "ssil_on", "ssil_sdfgi", "mist_off"]
+	var configs := ["ssil_off", "ssil_on", "ssil_sdfgi", "mist_off", "volumetric"]
 	var wall := {}
 	for config: String in configs:
 		wall[config] = []
@@ -315,6 +316,7 @@ func _bench(map: Node3D, name: String) -> void:
 		for config: String in configs:
 			env.ssil_enabled = config != "ssil_off"
 			env.sdfgi_enabled = config == "ssil_sdfgi"
+			env.volumetric_fog_enabled = config == "volumetric"
 			if config == "mist_off":
 				material.set_shader_parameter("weather_valley_mist", 0.0)
 			for i in 20:
@@ -328,6 +330,7 @@ func _bench(map: Node3D, name: String) -> void:
 			material.set_shader_parameter("weather_valley_mist", saved["mist"])
 	env.ssil_enabled = saved["ssil"]
 	env.sdfgi_enabled = saved["sdfgi"]
+	env.volumetric_fog_enabled = false
 	var best := {}
 	for config: String in configs:
 		var series: Array = (wall[config] as Array).duplicate()
@@ -336,10 +339,11 @@ func _bench(map: Node3D, name: String) -> void:
 		print("TB6 bench %s %s median %.2f ms/frame, best %.2f (rounds %s)" % [name, config, series[series.size() / 2], series[0], _fmt(wall[config])])
 	# Coût d'un effet : écart apparié dans chaque tour (médiane des tours) et écart des meilleurs
 	# tours ; sur une machine chargée, le second est le plus fiable.
-	print("TB6 bench %s cost ssil %.2f / %.2f ms, sdfgi %.2f / %.2f ms, mist %.2f / %.2f ms (paired median / best rounds, %d rounds) ; preset %s, 3D %s" % [
+	print("TB6 bench %s cost ssil %.2f / %.2f ms, sdfgi %.2f / %.2f ms, mist %.2f / %.2f ms, volumetric fog %.2f / %.2f ms (paired median / best rounds, %d rounds) ; preset %s, 3D %s" % [
 		name, _paired(wall["ssil_on"], wall["ssil_off"]), best["ssil_on"] - best["ssil_off"],
 		_paired(wall["ssil_sdfgi"], wall["ssil_on"]), best["ssil_sdfgi"] - best["ssil_on"],
 		_paired(wall["ssil_on"], wall["mist_off"]), best["ssil_on"] - best["mist_off"],
+		_paired(wall["volumetric"], wall["ssil_on"]), best["volumetric"] - best["ssil_on"],
 		BENCH_ROUNDS, RenderQuality.current(), Vector2(root.size) * root.scaling_3d_scale])
 
 

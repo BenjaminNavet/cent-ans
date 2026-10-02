@@ -252,6 +252,25 @@ func _update_selection_clear() -> void:
 
 
 func _upload_mask() -> void:
+	var image := mask_image()
+	var any := _mask_any
+	if _mask == null:
+		_mask = ImageTexture.create_from_image(image)
+	else:
+		_mask.update(image)
+	_apply_ground_tuning()  # TB6
+	for material: ShaderMaterial in [_terrain.material if _terrain != null else null, _cloud_material]:
+		if material == null:
+			continue
+		material.set_shader_parameter("weather_mask", _mask)
+		material.set_shader_parameter("weather_enabled", any)
+
+
+var _mask_any := false
+
+
+## Masque météo du tour (un texel par province : R pluie, G neige, B brouillard, A orage).
+func mask_image() -> Image:
 	var width := maxi(_map_data.province_count + 1, 1)
 	var image := Image.create(width, 1, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0, 0, 0, 0))
@@ -275,16 +294,8 @@ func _upload_mask() -> void:
 		if kind != "clear":
 			any = true
 		image.set_pixel(index, 0, c)
-	if _mask == null:
-		_mask = ImageTexture.create_from_image(image)
-	else:
-		_mask.update(image)
-	_apply_ground_tuning()  # TB6
-	for material: ShaderMaterial in [_terrain.material if _terrain != null else null, _cloud_material]:
-		if material == null:
-			continue
-		material.set_shader_parameter("weather_mask", _mask)
-		material.set_shader_parameter("weather_enabled", any)
+	_mask_any = any
+	return image
 
 
 # --- Nuées ---------------------------------------------------------------------------------
