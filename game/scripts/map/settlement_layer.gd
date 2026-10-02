@@ -1781,6 +1781,10 @@ func _setup_towns() -> void:
 	town_far = TownFarLayer.new()
 	add_child(town_far)
 	town_far.setup(map_data, terrain, tiers, ids, [towns, landmark_cities], towns.data)
+	if TownMaquetteLayer.enabled():  # GC1 : prototype des villes stylisées
+		var maquettes := TownMaquetteLayer.new()
+		add_child(maquettes)
+		maquettes.setup(map_data, terrain, self)
 
 
 ## VH4 : villes emblématiques 1:1.

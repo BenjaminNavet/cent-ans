@@ -77,5 +77,16 @@ géographie relative vraie. Origine : champs (HB3 ×3) et camps plus gros que le
   maillage lointain (toits plus clairs, enceinte marquée) en GC2.
 - Piste de réglage : Paris ×8, ville ordinaire ×12-14, portées ×4 à ×8.
 
+### Piste stylisée (joueur, 02/10 : « styliser Paris et non qu'il soit réaliste »)
+- `TownMaquetteLayer` (prototype, `--town-style=maquette`, `--maquette-scale=<m>`) : maquettes du
+  kit `assets/models/settlements/` à taille monde constante par type (ville 8, bourg 4,5, château /
+  abbaye 2,6, village 2,4 unités) + `LandmarkModel` des 7 villes emblématiques (taille d'origine,
+  ≈ 13 unités pour Paris). À lancer avec `--no-towns --no-landmarks-1to1 --no-town-far`.
+- Planche `gc1_reel_x8_vs_stylise.jpg` : à d 22 la maquette de Paris se lit d'un coup (toits
+  orange, Seine et îles, enceinte) là où le réel ×8 est une nappe brune ; à d 60 elle est claire
+  mais petite (13 unités contre ≈ 28 pour le réel ×8) ; à d 150-300 les deux restent presque
+  invisibles : la maquette doit aussi grossir (Paris ×2-3, kit ×3-4) et le `LandmarkModel` n'est
+  pas encore mis à l'échelle par le prototype (drapé sur le relief à revoir).
+
 ## Prochaine étape
-Jugement du joueur sur les deux planches (facteur, loi par taille, plancher de caméra), puis GC2.
+Jugement du joueur sur la planche réel ×8 / stylisé ; puis maquettes plus grosses à d 150-300.
