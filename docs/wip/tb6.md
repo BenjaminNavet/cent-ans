@@ -44,7 +44,7 @@ Capture de contrôle par la session principale (les agents ne lisent pas d'image
 `godot --path game --resolution 1600x900 --script res://tests/tb6_shot.gd -- --out=<dossier>
 --season=summer --distances=1100,400,90` (Paris `2213.2,3203.9`, météo du cœur) ; brume :
 `--season=autumn --map-weather=fog --prefix=brume-` puis avec `--select` ; hiver :
-`--season=winter`. Vallées marquées : Seine en aval de Paris, Meuse `--at=2560,3020` (à vérifier).
+`--season=winter`. Pour une vallée plus marquée que la Seine, passer `--at=<x>,<z>` (px carte).
 Réglage à l'œil : `morning_mist.opacity` (0,55), `valley_depth_m` ([20, 90]), couleurs et énergie
 du soleil.
 
