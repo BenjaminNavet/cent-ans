@@ -1691,10 +1691,14 @@ func vegetation_exclusions() -> PackedVector3Array:
 
 # --- Accès pour les effets de vie (fumées, foule, rivières) ---------------------------------
 # VT (ADR 0138) : plus de maquette ; signatures gardées pour les consommateurs (`LifeEffects`,
-# `CampaignLife`, `FineGeoLayer`, `FolkScenes`), recâblés au lot G.
+# `CampaignLife`, `FineGeoLayer`, `FolkScenes`), recâblés au lot G. TB3 (ADR 0153) : la
+# croissance passe par `outbuildings` (`OutbuildingLayer`, `TownGrowth`).
 
 
-## Plus de maquette sur la carte (VT) : toujours null.
+## Pas de nœud par colonie : la ville 1:1 est dans `towns` / `landmark_cities`, et sa croissance
+## (faubourgs, enceinte, bâtiments hors les murs, lot TB3) dans les `MultiMesh` partagés de
+## `outbuildings`. Toujours null ; signature gardée pour `LifeEffects` (surcouche par maquette,
+## remplacée par la suie par ville de `set_town_soot`).
 func model_holder(_i: int) -> Node3D:
 	return null
 
@@ -1740,9 +1744,11 @@ func real_radius(i: int) -> float:
 	return _real_radius[i] if i >= 0 and i < _real_radius.size() else -1.0
 
 
-## Lot CV1 (croissance des maquettes) abandonné (VT) : sans effet, gardé pour `CampaignLife`.
-func replace_models(_replacements: Array) -> void:
-	pass
+## TB3 : croissance affichée de la colonie `id` (remplace `replace_models` du lot CV1) :
+## `{outbuildings: [{family, level, model}], suburb_houses, enclosure}` pour l'état courant de la
+## simulation, que la colonie soit ou non dans le voisinage dessiné.
+func growth_of(id: String) -> Dictionary:
+	return outbuildings.growth_of(id) if outbuildings != null else {}
 
 
 ## Hameau brûlé (même tirage que `_build_hamlets`), pour les fumées d'incendie.

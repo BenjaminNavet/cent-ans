@@ -1,5 +1,5 @@
 {
-  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille.",
+  "description": "Lot TB3 : bâtiments hors les murs de la carte de campagne. Correspondance bâtiment construit → famille → niveau → maquette (game/assets/models/outbuildings/, générées par tools/blender_scripts/tb3_outbuildings.py). Purement visuel : aucune règle de jeu. Un niveau est atteint quand tous ses groupes `require` sont satisfaits (au moins `min` bâtiments du groupe construits dans la colonie) et que la province produit une des `resources` ; la couche affiche le plus haut niveau atteint de chaque famille. `growth` : croissance des villes 1:1 (point 4) : un quartier de faubourg par tranche `population_step` de population de la province au-dessus de celle de 1337 ; enceinte ajoutée quand un bâtiment de fortification construit en cours de partie dépasse l'enceinte du plan de 1340 et les bâtiments de départ.",
   "version": 1,
   "render": {
     "view_range_units": 45.0,
@@ -546,6 +546,48 @@
               }
             ]
           }
+        }
+      ]
+    }
+  },
+  "growth": {
+    "suburbs": {
+      "population_step": 0.08,
+      "max_quarters": 6,
+      "houses_per_quarter": 14,
+      "frontage_m": 16.0,
+      "setback_m": 10.0,
+      "gap_m": 40.0,
+      "house_models": [
+        "cottage_0",
+        "cottage_1",
+        "cottage_2",
+        "cottage_3",
+        "longere_0",
+        "longere_1",
+        "longere_2",
+        "timber_1",
+        "barn_0"
+      ]
+    },
+    "enclosure": {
+      "margin_m": 35.0,
+      "sink_m": 3.0,
+      "gate_height_m": 16.0,
+      "kinds": [
+        {
+          "kind": "palisade",
+          "buildings": [
+            "bld_palisade"
+          ]
+        },
+        {
+          "kind": "stone",
+          "buildings": [
+            "bld_stone_walls",
+            "bld_castle",
+            "bld_artillery_bastion"
+          ]
         }
       ]
     }

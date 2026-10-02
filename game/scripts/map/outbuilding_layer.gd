@@ -31,6 +31,8 @@ const STEP_BUDGET_USEC := 1500
 const REGROUND_DELAY := 20
 ## Côté (unités) des cases de la grille de voisinage des colonies (emprises voisines à éviter).
 const GRID_UNITS := 8.0
+## Demi-angle (rad) laissé libre autour de la route de chaque porte.
+const GATE_CORRIDOR := 0.2
 
 var config: Dictionary = {}
 var manifest: Dictionary = {}
@@ -38,8 +40,6 @@ var stats: Dictionary = {}
 var enabled := true
 ## Affiche et construit quelle que soit la distance du rig (tests headless).
 var force_active := false
-## Instances fournies par la croissance des villes (`TownGrowth`) : Callable(i, state) → Array.
-var extra_instances: Callable = Callable()
 
 var _layer: SettlementLayer
 var _map: MapData
@@ -50,6 +50,8 @@ var _sim: Object = null
 var _revision := -2
 var _states: Dictionary = {}  # id de colonie → {buildings, fortification, building}
 var _resources: Dictionary = {}  # province → Array d'ids de ressource
+var _provinces: Dictionary = {}  # province → {population, devastation, besieged, constructing}
+var _baseline: Dictionary = {}  # province → population de 1337 (données)
 var _anchors: Dictionary = {}  # "i|famille" → {px, yaw} ou {} (aucun site)
 var _root: Node3D
 var _batches: Dictionary = {}  # clé de maillage → MultiMeshInstance3D
@@ -201,40 +203,46 @@ func refresh(sim: Object) -> void:
 		return
 	_revision = revision
 	_states.clear()
+	_provinces.clear()
 	_read_states()
 	_dirty = true
 
 
-## État de toutes les colonies en un appel groupé (`get_settlements_live`) ; sans lui, lecture
-## paresseuse par `settlement_detail` (`_state_of`). Chantiers : `ProvinceSnapshot.constructing`
-## (cité de la province).
+## État des provinces (population, dévastation, siège, chantier de la cité : `ProvinceSnapshot`)
+## et de toutes les colonies en un appel groupé (`get_settlements_live`) ; sans ce dernier,
+## lecture paresseuse par `settlement_detail` (`_state_of`).
 func _read_states() -> void:
 	if _sim == null or _data == null:
 		return
-	if _sim.has_method("get_settlements_live"):
-		var live: Dictionary = _sim.call("get_settlements_live")
-		var ids: PackedStringArray = live.get("id", PackedStringArray())
-		var forts: PackedInt32Array = live.get("fortification_level", PackedInt32Array())
-		var cities: PackedByteArray = live.get("is_city", PackedByteArray())
-		var buildings: Array = live.get("buildings", [])
-		for k in ids.size():
-			_states[ids[k]] = {
-				"buildings": Array(buildings[k]) if k < buildings.size() else [],
-				"fortification": forts[k] if k < forts.size() else 0,
-				"is_city": k < cities.size() and cities[k] != 0,
-				"building": false,
+	if _map != null and (_sim.has_method("get_provinces_snapshot") or _sim.has_method("get_province_state")):
+		var snapshot := ProvinceSnapshot.of(_sim, _map)
+		var has_sites := snapshot.constructing.size() == snapshot.ids.size()
+		for p in snapshot.ids.size():
+			if not snapshot.has(p):
+				continue
+			_provinces[snapshot.ids[p]] = {
+				"population": float(snapshot.population_total[p]),
+				"devastation": float(snapshot.devastation[p]),
+				"besieged": snapshot.besieged[p] != 0,
+				"constructing": has_sites and snapshot.constructing[p] != 0,
 			}
-		if _map != null and (_sim.has_method("get_provinces_snapshot") or _sim.has_method("get_province_state")):
-			var snapshot := ProvinceSnapshot.of(_sim, _map)
-			if snapshot.constructing.size() == snapshot.ids.size():
-				var busy := {}
-				for p in snapshot.ids.size():
-					if snapshot.constructing[p] != 0:
-						busy[snapshot.ids[p]] = true
-				for entry in _data.settlements:
-					var state: Dictionary = _states.get(str(entry["id"]), {})
-					if not state.is_empty() and bool(state["is_city"]) and busy.has(str(entry["province"])):
-						state["building"] = true
+	if not _sim.has_method("get_settlements_live"):
+		return
+	var live: Dictionary = _sim.call("get_settlements_live")
+	var ids: PackedStringArray = live.get("id", PackedStringArray())
+	var forts: PackedInt32Array = live.get("fortification_level", PackedInt32Array())
+	var cities: PackedByteArray = live.get("is_city", PackedByteArray())
+	var buildings: Array = live.get("buildings", [])
+	for k in ids.size():
+		var i: int = _data.index_by_id.get(ids[k], -1)
+		var is_city := k < cities.size() and cities[k] != 0
+		var province: Dictionary = _provinces.get(str(_data.settlements[i]["province"]), {}) if i >= 0 else {}
+		_states[ids[k]] = {
+			"buildings": Array(buildings[k]) if k < buildings.size() else [],
+			"fortification": forts[k] if k < forts.size() else 0,
+			"is_city": is_city,
+			"building": is_city and bool(province.get("constructing", false)),
+		}
 
 
 ## État d'une colonie : `{buildings: Array, fortification: int, building: bool}`.
@@ -270,11 +278,51 @@ func _resources_of(province: String) -> Array:
 	return out
 
 
+## Population de la province en 1337 (somme des classes de `data/provinces/<id>.json`), 0 si
+## inconnue.
+func baseline_population(province: String) -> float:
+	if _baseline.has(province):
+		return _baseline[province]
+	var total := 0.0
+	var path := data_dir().path_join("provinces").path_join(province + ".json")
+	if FileAccess.file_exists(path):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if parsed is Dictionary:
+			var classes: Dictionary = ((parsed as Dictionary).get("population", {}) as Dictionary).get("classes", {})
+			for name: String in classes:
+				total += float((classes[name] as Dictionary).get("count", 0.0))
+	_baseline[province] = total
+	return total
+
+
+## Population simulée de la province rapportée à celle de 1337 (1 si l'une des deux manque).
+func population_ratio(province: String) -> float:
+	var now := float((_provinces.get(province, {}) as Dictionary).get("population", 0.0))
+	var then := baseline_population(province)
+	return now / then if now > 0.0 and then > 0.0 else 1.0
+
+
 ## Maquettes hors les murs de la colonie `id` pour l'état courant : `[{family, level, model…}]`,
 ## chantier compris (`family` = `worksite`).
 func models_of(id: String) -> Array:
 	var i: int = _data.index_by_id.get(id, -1) if _data != null else -1
 	return _models_of_index(i) if i >= 0 else []
+
+
+## Croissance affichée de la colonie `id` : maquettes hors les murs, nombre de maisons de
+## faubourg ajoutées et enceinte ajoutée ("" : aucune).
+func growth_of(id: String) -> Dictionary:
+	var i: int = _data.index_by_id.get(id, -1) if _data != null else -1
+	if i < 0:
+		return {}
+	var suburb := 0
+	var enclosure := ""
+	for inst: Dictionary in _growth_instances(i, _state_of(i)):
+		if str(inst["family"]) == "suburb":
+			suburb += 1
+		elif str(inst.get("part", "")) == "wall":
+			enclosure = TownGrowth.KINDS[int(inst["level"])]
+	return {"outbuildings": _models_of_index(i), "suburb_houses": suburb, "enclosure": enclosure}
 
 
 func _models_of_index(i: int) -> Array:
@@ -418,9 +466,30 @@ func _instances_of(i: int) -> Array:
 			"top": float(entry.get("height", 20.0)),
 			"reach": float(entry.get("radius", 30.0)),
 		})
-	if extra_instances.is_valid():
-		out.append_array(extra_instances.call(i, state))
+	out.append_array(_growth_instances(i, state))
 	return out
+
+
+## TB3, point 4 : faubourgs (population) et enceinte (fortification) de la ville 1:1.
+func _growth_instances(i: int, state: Dictionary) -> Array:
+	var town := _town_of(i)
+	var growth: Dictionary = config.get("growth", {})
+	if town.is_empty() or growth.is_empty():
+		return []
+	var entry: Dictionary = _data.settlements[i]
+	var center := _layer.towns.data.anchor_of(str(entry["id"]))
+	var out := TownGrowth.suburb_instances(growth, town, i, center, _mpu, TownGrowth.quarter_count(growth, population_ratio(str(entry["province"]))), _base_m)
+	var kind := TownGrowth.enclosure_to_add(growth, state["buildings"], entry.get("initial_buildings", []), str(town.get("walls", "none")))
+	if kind != "":
+		out.append_array(TownGrowth.enclosure_instances(growth, _layer.towns.data.params.get("walls", {}), town, i, center, _mpu, kind, _base_m))
+	return out
+
+
+## Entrée de `towns_1340.json` de la colonie `i` (vide : ville emblématique ou colonie absente).
+func _town_of(i: int) -> Dictionary:
+	if _layer == null or _layer.towns == null or _layer.towns.data == null:
+		return {}
+	return _layer.towns.data.towns.get(str(_data.settlements[i]["id"]), {})
 
 
 # --- Sites ---------------------------------------------------------------------------------
@@ -466,10 +535,20 @@ func _find_anchor(i: int, slot: int, site: String, radius_m: float) -> Dictionar
 	var slots := float(_family_order.size() + 1)
 	var sector := TAU / slots
 	var max_slope := float(render.get("max_slope", 0.22))
+	var gates := PackedFloat32Array()
+	for gate: Dictionary in _town_of(i).get("gates", []):
+		gates.append(deg_to_rad(float(gate["bearing"])))
 	var best := {}
 	var best_score := INF
 	for step in ANGLE_STEPS:
 		var angle := theta0 + (float(slot) + float(step) / 3.0) * sector
+		# Les routes des portes restent libres (faubourgs à venir).
+		var on_road := false
+		for gate_angle in gates:
+			if absf(angle_difference(angle, gate_angle)) < GATE_CORRIDOR:
+				on_road = true
+		if on_road:
+			continue
 		var dir := Vector2(cos(angle), sin(angle))
 		for t: float in [0.1, 0.45]:
 			var p := center + dir * lerpf(ring_min, ring_max, t)

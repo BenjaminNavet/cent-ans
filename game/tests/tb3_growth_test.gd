@@ -16,7 +16,7 @@ const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const TOWN := "set_agen"
 const PROVINCE := "prov_agenais"
 ## Étapes qui doivent aller à leur terme (une erreur de script interrompt la fonction en cours).
-const EXPECTED_STEPS := 2
+const EXPECTED_STEPS := 3
 
 var _failures := 0
 var _completed := false
@@ -32,6 +32,8 @@ class FakeSim:
 	var fortification: Dictionary = {}
 	var constructing: Dictionary = {}
 	var resources: Dictionary = {}  # province → Array
+	var population: Dictionary = {}  # province → habitants
+	var devastation: Dictionary = {}
 	var details := 0
 
 	func get_state_revision() -> int:
@@ -46,6 +48,11 @@ class FakeSim:
 
 	func get_province_city(province: String) -> Dictionary:
 		return {"resources": resources.get(province, [])}
+
+	func get_province_state(province: String) -> Dictionary:
+		if not population.has(province):
+			return {}
+		return {"owner": "fac_france", "controller": "fac_france", "population_total": int(population[province]), "devastation": int(devastation.get(province, 0))}
 
 
 func _init() -> void:
@@ -101,6 +108,7 @@ func _run() -> void:
 		return
 	_check(out.manifest.size() >= 25, "expected 24 models and a worksite, got %d" % out.manifest.size())
 	await _check_outbuildings(layer, data, town_px)
+	_check_growth(layer, data)
 	_completed = _completed_steps == EXPECTED_STEPS
 	world.queue_free()
 	await process_frame
@@ -190,3 +198,93 @@ func _check_outbuildings(layer: SettlementLayer, data: SettlementData, town_px: 
 	_check(not out.visible, "outbuildings hidden beyond their view range")
 	layer.update_view(10.0)
 	_completed_steps += 1
+
+
+## 4. Croissance de la ville 1:1 : faubourgs selon la population, enceinte selon la fortification.
+func _check_growth(layer: SettlementLayer, data: SettlementData) -> void:
+	var out := layer.outbuildings
+	var growth: Dictionary = out.config["growth"]
+	_check(TownGrowth.quarter_count(growth, 1.0) == 0 and TownGrowth.quarter_count(growth, 0.7) == 0, "no suburb without growth")
+	var step := float(growth["suburbs"]["population_step"])
+	_check(TownGrowth.quarter_count(growth, 1.0 + step * 2.5) == 2, "one quarter per population step")
+	_check(TownGrowth.quarter_count(growth, 9.0) == int(growth["suburbs"]["max_quarters"]), "quarters capped")
+	_check(TownGrowth.enclosure_to_add(growth, ["bld_palisade"], [], "none") == "palisade", "a palisade built in game encloses an open town")
+	_check(TownGrowth.enclosure_to_add(growth, ["bld_stone_walls"], ["bld_palisade"], "palisade") == "stone", "stone walls replace a palisade")
+	_check(TownGrowth.enclosure_to_add(growth, ["bld_stone_walls"], ["bld_stone_walls"], "none") == "", "walls already there in 1337 add nothing")
+	_check(TownGrowth.enclosure_to_add(growth, ["bld_castle"], [], "stone") == "", "a town walled in its 1340 plan gets no second wall")
+	# Ville ouverte du plan de 1340, sans fortification de départ.
+	var open_id := ""
+	var towns: Dictionary = layer.towns.data.towns
+	for entry in data.settlements:
+		var id := str(entry["id"])
+		if str(entry["kind"]) == "town" and towns.has(id) and str(towns[id]["walls"]) == "none" and (towns[id]["gates"] as Array).size() >= 2 and TownGrowth.enclosure_rank(growth, entry["initial_buildings"]) == 0:
+			open_id = id
+			break
+	if not _check(open_id != "", "no open town in towns_1340.json"):
+		return
+	var entry := data.get_settlement(open_id)
+	var province := str(entry["province"])
+	var index: int = data.index_by_id[open_id]
+	var baseline := out.baseline_population(province)
+	_check(baseline > 1000.0, "baseline population of %s read from data, got %.0f" % [province, baseline])
+	var sim := FakeSim.new()
+	sim.population[province] = baseline
+	sim.buildings[open_id] = ["bld_market"]
+	layer.refresh(sim, Callable())
+	layer.update_view(10.0)
+	out.flush(entry["px"])
+	_check(out.instances_of(open_id, "suburb").is_empty() and out.instances_of(open_id, "enclosure").is_empty(), "no growth at the 1337 population without fortification")
+	# Population +20 % : deux quartiers de faubourg hors du bâti de 1340.
+	sim.population[province] = baseline * (1.0 + step * 2.5)
+	sim.revision += 1
+	layer.refresh(sim, Callable())
+	layer.update_view(10.0)
+	out.flush(entry["px"])
+	var houses := out.instances_of(open_id, "suburb")
+	var per_quarter := int(growth["suburbs"]["houses_per_quarter"])
+	_check(houses.size() == 2 * per_quarter, "two suburb quarters (%d houses) after the population grew, got %d" % [2 * per_quarter, houses.size()])
+	var radii := PackedFloat32Array(towns[open_id]["radii"])
+	var anchor := layer.towns.data.anchor_of(open_id)
+	for inst: Dictionary in houses:
+		var local := ((inst["px"] as Vector2) - anchor) * 719.0
+		if not _check(not TownPlan.inside(radii, local), "suburb houses stand outside the 1340 town"):
+			break
+	_check(out.get_node_or_null("Batches/kit_" + str(houses[0]["model"])) != null if not houses.is_empty() else false, "suburb houses drawn with the town kit")
+	# Palissade, puis murs de pierre : enceinte, tours, portes.
+	sim.buildings[open_id] = ["bld_market", "bld_palisade"]
+	sim.revision += 1
+	layer.refresh(sim, Callable())
+	layer.update_view(10.0)
+	out.flush(entry["px"])
+	var ring := out.instances_of(open_id, "enclosure")
+	var gates := (towns[open_id]["gates"] as Array).size()
+	_check(_parts(ring, "wall") == radii.size() and _parts(ring, "tower") == 0 and _parts(ring, "gate") == gates, "palisade: %d wall runs and %d gates, no tower, got %d / %d / %d" % [radii.size(), gates, _parts(ring, "wall"), _parts(ring, "gate"), _parts(ring, "tower")])
+	_check(not ring.is_empty() and str(ring[0]["key"]) == "box:Planks", "palisade made of planks")
+	sim.buildings[open_id] = ["bld_market", "bld_stone_walls"]
+	sim.revision += 1
+	layer.refresh(sim, Callable())
+	layer.update_view(10.0)
+	out.flush(entry["px"])
+	ring = out.instances_of(open_id, "enclosure")
+	_check(_parts(ring, "wall") == radii.size() and _parts(ring, "tower") >= 4 and _parts(ring, "gate") == gates, "stone enclosure: walls, towers and gates, got %d / %d / %d" % [_parts(ring, "wall"), _parts(ring, "tower"), _parts(ring, "gate")])
+	for inst: Dictionary in ring:
+		var local := ((inst["px"] as Vector2) - anchor) * 719.0
+		if not _check(not TownPlan.inside(radii, local), "the enclosure surrounds the 1340 town"):
+			break
+	_check(out.get_node_or_null("Batches/tower") != null and out.get_node_or_null("Batches/box_Masonry") != null, "towers and masonry walls drawn")
+	# La ville déjà murée de son plan (Agen) ne reçoit pas de seconde enceinte.
+	sim.buildings[TOWN] = ["bld_stone_walls", "bld_castle"]
+	sim.revision += 1
+	layer.refresh(sim, Callable())
+	_check(str(towns[TOWN]["walls"]) == "stone" and str(layer.growth_of(TOWN)["enclosure"]) == "", "no second wall around a town walled in 1340")
+	var grown := layer.growth_of(open_id)
+	_check(str(grown["enclosure"]) == "stone" and int(grown["suburb_houses"]) == 2 * per_quarter and layer.model_holder(index) == null, "growth_of sums up the growth of a town, got %s" % grown)
+	_completed_steps += 1
+
+
+func _parts(instances: Array, part: String) -> int:
+	var count := 0
+	for inst: Dictionary in instances:
+		if str(inst.get("part", "")) == part:
+			count += 1
+	return count

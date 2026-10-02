@@ -86,6 +86,8 @@ func _load_settlements(data_dir: String, map_dir: String) -> void:
 				"fortification_level": int(entry.get("fortification_level", 0)),
 				"port": bool(entry.get("port", false)),
 				"weight": int(entry.get("weight", 0)),
+				# TB3 : bâtiments de départ (1337), pour juger si la fortification a monté.
+				"initial_buildings": entry.get("buildings", []),
 			})
 	settlements.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var pa: int = LABEL_PRIORITY.get(a["kind"], 9)

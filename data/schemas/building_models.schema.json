@@ -7,7 +7,8 @@
   "required": [
     "version",
     "render",
-    "families"
+    "families",
+    "growth"
   ],
   "additionalProperties": false,
   "properties": {
@@ -132,6 +133,129 @@
         },
         "port": {
           "$ref": "#/$defs/family"
+        }
+      }
+    },
+    "growth": {
+      "description": "Croissance visible des villes 1:1 (faubourgs, enceinte).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "suburbs",
+        "enclosure"
+      ],
+      "properties": {
+        "suburbs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "population_step",
+            "max_quarters",
+            "houses_per_quarter",
+            "frontage_m",
+            "setback_m",
+            "gap_m",
+            "house_models"
+          ],
+          "properties": {
+            "population_step": {
+              "description": "Part de population de la province au-dessus de celle de 1337 qui ajoute un quartier.",
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            },
+            "max_quarters": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "houses_per_quarter": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 40
+            },
+            "frontage_m": {
+              "description": "Largeur de parcelle le long de la route (m).",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "setback_m": {
+              "description": "Recul des maisons par rapport à l'axe de la route (m).",
+              "type": "number",
+              "minimum": 0
+            },
+            "gap_m": {
+              "description": "Intervalle (m) entre le bâti de 1340 et le premier quartier, puis entre quartiers.",
+              "type": "number",
+              "minimum": 0
+            },
+            "house_models": {
+              "description": "Maisons du kit des villes (game/assets/models/town_kit/manifest.json).",
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z]+_[0-9]+$"
+              }
+            }
+          }
+        },
+        "enclosure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "margin_m",
+            "sink_m",
+            "gate_height_m",
+            "kinds"
+          ],
+          "properties": {
+            "margin_m": {
+              "description": "Distance (m) de l'enceinte au bâti de 1340.",
+              "type": "number",
+              "minimum": 0
+            },
+            "sink_m": {
+              "description": "Enfoncement (m) des pans dans le sol (pentes).",
+              "type": "number",
+              "minimum": 0
+            },
+            "gate_height_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "kinds": {
+              "description": "Du plus faible au plus fort ; dimensions dans towns_1340.json (`walls`).",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "buildings"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "palisade",
+                      "stone"
+                    ]
+                  },
+                  "buildings": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^bld_[a-z0-9_]+$"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
