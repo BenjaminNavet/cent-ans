@@ -411,9 +411,12 @@ Ordre de régénération : `geo relief-shade` (après `geo build`) puis `geo lan
     humides ne ralentissent pas. Après toute retouche : `geo landcover` → `geo navgrid` →
     `geo colormap` → `geo horizon`, puis mesurer l'écart (parts, coût des liaisons entre lieux ;
     méthode et résultats du lot HC5 dans `docs/wip/hc5-massifs-zones-humides.md`).
-  - Limite connue : l'allocation suit un bruit régional ; un massif nommé tombé dans un creux de
-    ce bruit reste peu boisé quelle que soit sa densité (Bière / Fontainebleau, Sherwood, Yveline
-    parmi les massifs du lot R1). La bande aride au sud de 32,5° N annule tout massif de plaine.
+  - Allocation dans un massif nommé (lot HC5) : le score est reclassé parmi les pixels de
+    l'emprise (`named_forest_score`), la lisière bruitée garde l'aire nominale
+    (`area_mask(centred=True)`) : la part boisée vaut `densité × √potentiel` moins les essarts,
+    où que tombe le bruit régional. Restent sous leur densité les massifs en steppe, sur la
+    côte, en province « lande » ou au-dessus de la limite des arbres ; la bande aride au sud de
+    32,5° N annule tout massif de plaine.
 - `cent-ans geo gpu-textures` (`block_compress.py`, lot OMR-R2, ADR 0118) : copies GPU lues par le
   jeu à la place des PNG : `relief_shade_bc5_<i>.bin` (BC5 + mipmaps, `map.json.relief_shade.bc5`)
   et `wetlands_bc1_<i>.bin` (BC1, `map.json.wetlands_gpu`), parts zlib de ≤ 32 Mo bruts. Refaites
