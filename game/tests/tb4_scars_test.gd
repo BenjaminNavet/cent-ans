@@ -78,6 +78,7 @@ func _init() -> void:
 	_check(not WarScars.settings().is_empty(), "war_scars.json read")
 	_check_plague(data["plague"])
 	_check_battlefield(data["battlefield"])
+	_check_siege(data["siege"])
 	WarScarMeshes.clear_cache()
 	FolkModels.clear_cache()
 	print("TB4 scars test %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
