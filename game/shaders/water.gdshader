@@ -110,6 +110,7 @@ float value_noise(vec2 p) {
 }
 
 #include "res://shaders/sea_basins.gdshaderinc"  // TB5 : mers par bassin
+#include "res://shaders/coast_common.gdshaderinc"  // TB5 : géologie de la côte, ressac
 
 // TB1 : force de la tempête [0, 1] au point p (px carte) : province lue ici et à `storm_reach_px`
 // autour (frange déformée par le bruit : pas de bord de province net sur l'eau).
@@ -227,6 +228,12 @@ void fragment() {
 	float broken = smoothstep(0.35, 0.75, value_noise(p * 1.6 + vec2(TIME * 0.05, 0.0)));
 	float foam = band * mix(0.35 + 0.65 * lines * broken, 0.6, far_t);
 	foam *= 1.0 - smoothstep(foam_w * 0.2, foam_w, off) * 0.5;
+	// TB5 : ressac au trait de côte. La lame va et vient (elle monte peu au pied des falaises) ;
+	// la bande d'écume d'origine s'efface d'autant pour rester sobre.
+	if (swash_amount > 0.0 && has_coast_dist && inside && coast > -(swash_out_px + swash_film_px + 0.3)) {
+		float cliff_f = coast_enabled && has_heightmap ? coast_cliff_factor(height_m(coast_probe_uv(uv, coast, coast_to_land(uv)))) : 0.0;
+		foam = max(foam * (1.0 - 0.45 * swash_amount), coast_swash(p, coast, cliff_f, footprint).x);
+	}
 	foam = clamp(foam * season_foam * basin_wave_here.z * (1.0 + storm_foam_gain * storm), 0.0, 1.6);  // TB1, TB5
 	// TB1 : moutons au large par tempête (crêtes qui déferlent), estompés au dézoom.
 	float caps = smoothstep(0.70, 0.92, value_noise(p * 2.3 + vec2(TIME * 0.25, TIME * 0.1)))

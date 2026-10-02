@@ -8,7 +8,8 @@ extends SceneTree
 ## (`coast_strength`, `basin_on`, `swash_amount` à 0 puis aux valeurs des données) et affiche la
 ## moyenne RVB de l'image entière et celle des seuls pixels que le lot change (part de l'image,
 ## couleur avant → après, puis part et couleur des pixels très changés) : la falaise de craie doit sortir claire, la Méditerranée plus claire
-## que la Manche, sans lire d'image.
+## que la Manche, sans lire d'image. Affiche aussi la part de l'image qui bouge en
+## `MOTION_SECONDS` secondes, sans puis avec le lot (le ressac doit faire bouger le rivage).
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const WIDTH := 960
@@ -16,6 +17,8 @@ const SETTLE_FRAMES := 150
 const CHANGE_THRESHOLD := 10.0 / 255.0
 ## Écart moyen par canal au-delà duquel un pixel est « très changé » (cœur de la bande côtière).
 const STRONG_THRESHOLD := 45.0 / 255.0
+## Durée entre les deux images de la mesure du mouvement (une demi-période du ressac environ).
+const MOTION_SECONDS := 3.0
 ## Lieux (pixels carte) : côtes puis mers ouvertes.
 const PLACES := {
 	"douvres": Vector2(2153.0, 2840.0),
@@ -29,7 +32,7 @@ const PLACES := {
 	"mediterranee-large": Vector2(2400.0, 4500.0),
 }
 ## Réglages coupés pour la vue « sans le lot » (matériau du terrain, matériau de la mer).
-const TERRAIN_OFF := {"coast_strength": 0.0}
+const TERRAIN_OFF := {"coast_strength": 0.0, "swash_amount": 0.0}
 const SEA_OFF := {"basin_on": false, "swash_amount": 0.0}
 
 
@@ -95,10 +98,12 @@ func _init() -> void:
 			_apply(sea_material, SEA_OFF)
 			await _settle(map, SETTLE_FRAMES)
 			var before := root.get_viewport().get_texture().get_image()
+			var motion_off := await _motion(map)
 			_apply(terrain_material, terrain_on)
 			_apply(sea_material, sea_on)
 			await _settle(map, 8)
 			_stats(label, before, root.get_viewport().get_texture().get_image())
+			print("TB5 motion %s over %.1f s: %.2f %% of the image without the lot, %.2f %% with it" % [label, MOTION_SECONDS, motion_off, await _motion(map)])
 	quit(0)
 
 
@@ -124,6 +129,25 @@ func _settle(map: Node3D, frames: int) -> void:
 		if clouds != null:
 			clouds.visible = false
 		await process_frame
+
+
+## Part de l'image (%) qui change en `MOTION_SECONDS` secondes (vagues, écume, ressac).
+func _motion(map: Node3D) -> float:
+	var first := root.get_viewport().get_texture().get_image()
+	var until := Time.get_ticks_msec() + int(MOTION_SECONDS * 1000.0)
+	while Time.get_ticks_msec() < until:
+		await _settle(map, 1)
+	var second := root.get_viewport().get_texture().get_image()
+	var count := 0
+	var moved := 0
+	for y in range(0, second.get_height(), 3):
+		for x in range(0, second.get_width(), 3):
+			var a := first.get_pixel(x, y)
+			var b := second.get_pixel(x, y)
+			count += 1
+			if absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b) > CHANGE_THRESHOLD * 3.0:
+				moved += 1
+	return 100.0 * moved / count
 
 
 func _shot(out_dir: String, label: String) -> void:

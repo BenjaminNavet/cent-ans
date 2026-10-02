@@ -181,8 +181,8 @@ static func fill_polygon(image: Image, polygon: PackedVector2Array, cell: int, c
 				image.fill_rect(Rect2i(col_from, row, col_to - col_from, 1), color)
 
 
-## Pose la géologie et la règle de pente sur un matériau (terrain ou mer) ; avec `band`, aussi la
-## bande côtière du terrain (largeurs, couleurs). Sans données : `coast_enabled` reste faux.
+## Pose la géologie, la règle de pente et le ressac sur un matériau (terrain ou mer) ; avec `band`,
+## aussi la bande côtière du terrain (largeurs, couleurs). Sans données : `coast_enabled` reste faux.
 static func apply(material: ShaderMaterial, map_size: Vector2i, band: bool = true) -> bool:
 	if material == null or data().is_empty():
 		return false
@@ -191,6 +191,10 @@ static func apply(material: ShaderMaterial, map_size: Vector2i, band: bool = tru
 	material.set_shader_parameter("coast_enabled", true)
 	material.set_shader_parameter("coast_probe_px", float(cliff.get("probe_px", 1.6)))
 	material.set_shader_parameter("coast_cliff_m", Vector2(float(cliff.get("min_m", 36.0)), float(cliff.get("max_m", 52.0))))
+	var swash: Dictionary = data().get("swash", {})
+	for key: String in ["amount", "period_s", "out_px", "in_px", "edge_px", "film_px", "cliff"]:
+		if swash.has(key):
+			material.set_shader_parameter("swash_" + key, float(swash[key]))
 	if not band:
 		return true
 	var settings: Dictionary = data().get("band", {})

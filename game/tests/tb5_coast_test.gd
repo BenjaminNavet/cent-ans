@@ -5,7 +5,7 @@ extends SceneTree
 ## granite à la pointe du Raz, plage de sable dans les Landes), bande côtière du terrain.
 ## Point 2 : mers par bassin (mer du Nord et Manche sombres, Atlantique houleux, Méditerranée
 ## claire), valeurs de `data/map/sea_basins.json`.
-## Le point 3 (ressac) ajoute ses contrôles.
+## Point 3 : ressac animé au trait de côte (lame partagée par la mer et la plage), sobre.
 ## Usage : godot --headless --path game --script res://tests/tb5_coast_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -36,6 +36,7 @@ func _init() -> void:
 	ok = _check_coast_types() and ok
 	ok = _check_band() and ok
 	ok = _check_basins() and ok
+	ok = _check_swash() and ok
 	if ok:
 		print("TB5 coast test OK")
 	quit(0 if ok else 1)
@@ -170,6 +171,40 @@ func _check_basins() -> bool:
 	sea_node.apply_season(SeasonVisuals.weights_of("winter"))
 	if float(material.get_shader_parameter("season_grey_amount")) <= 0.3:
 		push_error("TB5: the winter sea look is no longer applied")
+		ok = false
+	sea_node.free()
+	return ok
+
+
+## Point 3 : le ressac est la même lame dans la mer et sur la plage (`coast_swash`, include
+## commun) ; ses réglages viennent des données et arrivent aux deux matériaux ; il reste sobre
+## (lent, plus étroit que la plage, moindre au pied des falaises).
+func _check_swash() -> bool:
+	var ok := true
+	for shader: Shader in [WATER_SHADER, TERRAIN_SHADER]:
+		var uniforms := _uniforms(shader)
+		for uniform_name in ["swash_amount", "swash_period_s", "swash_out_px", "swash_in_px", "swash_cliff", "coast_types"]:
+			if not uniforms.has(uniform_name):
+				push_error("TB5: %s lacks uniform %s" % [shader.resource_path, uniform_name])
+				ok = false
+	var common := FileAccess.get_file_as_string("res://shaders/coast_common.gdshaderinc")
+	var band := FileAccess.get_file_as_string("res://shaders/coast_band.gdshaderinc")
+	if not common.contains("vec2 coast_swash(") or not common.contains("TIME") or not band.contains("coast_swash(") or not WATER_SHADER.code.contains("coast_swash("):
+		push_error("TB5: the animated swash is not shared by the sea and the coast band")
+		ok = false
+	var swash: Dictionary = CoastLook.data().get("swash", {})
+	var sea_node := Sea.new()
+	sea_node.setup(Vector2i(7168, 6144))
+	var sea_material := sea_node.material_override as ShaderMaterial
+	var terrain_material := ShaderMaterial.new()
+	terrain_material.shader = TERRAIN_SHADER
+	CoastLook.apply(terrain_material, Vector2i(7168, 6144))
+	for material: ShaderMaterial in [sea_material, terrain_material]:
+		if material.get_shader_parameter("coast_enabled") != true or not is_equal_approx(float(material.get_shader_parameter("swash_amount")), float(swash.get("amount", -1.0))) or not is_equal_approx(float(material.get_shader_parameter("swash_period_s")), float(swash.get("period_s", -1.0))):
+			push_error("TB5: a material did not receive the swash settings")
+			ok = false
+	if float(swash.get("amount", 0.0)) <= 0.0 or float(swash.get("period_s", 0.0)) < 4.0 or float(swash.get("in_px", 9.0)) >= float(CoastLook.data()["band"]["beach_px"]) or float(swash.get("cliff", 1.0)) >= 1.0:
+		push_error("TB5: swash settings are not sober (%s)" % swash)
 		ok = false
 	sea_node.free()
 	return ok

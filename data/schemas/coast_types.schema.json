@@ -4,7 +4,7 @@
   "title": "Types de côte de la carte de campagne (TB5)",
   "description": "Réglages purement visuels des côtes de la carte de campagne, lus par game/scripts/map/coast_look.gd : géologie de la côte par région (craie, granite, roche), plage (sable, galets), règle de pente falaise / plage, couleurs. Aucune règle de jeu.",
   "type": "object",
-  "required": ["cell_px", "cliff", "band", "default", "types", "regions"],
+  "required": ["cell_px", "cliff", "band", "swash", "default", "types", "regions"],
   "additionalProperties": false,
   "properties": {
     "description": {"type": "string"},
@@ -37,6 +37,21 @@
         "strength": {"type": "number", "minimum": 0, "maximum": 1},
         "relief": {"type": "number", "minimum": 0, "maximum": 3},
         "far_keep": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "swash": {
+      "description": "Ressac : lame d'écume qui avance puis se retire au trait de côte. `amount` 0 = aucun ; `period_s` période ; `out_px` recul vers le large, `in_px` montée sur la plage, `edge_px` liseré, `film_px` dentelle derrière le liseré (pixels carte) ; `cliff` part de la montée au pied d'une falaise.",
+      "type": "object",
+      "required": ["amount", "period_s", "out_px", "in_px", "edge_px", "film_px", "cliff"],
+      "additionalProperties": false,
+      "properties": {
+        "amount": {"type": "number", "minimum": 0, "maximum": 1},
+        "period_s": {"type": "number", "minimum": 2, "maximum": 60},
+        "out_px": {"type": "number", "minimum": 0, "maximum": 3},
+        "in_px": {"type": "number", "minimum": 0, "maximum": 1},
+        "edge_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "film_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 2},
+        "cliff": {"type": "number", "minimum": 0, "maximum": 1}
       }
     },
     "default": {

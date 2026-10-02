@@ -89,6 +89,16 @@ def test_reference_places_have_the_expected_geology(place: str) -> None:
     assert _geology(_load("map/coast_types.json"), _to_px(lon, lat)) == expected
 
 
+def test_swash_is_slow_and_narrow() -> None:
+    """The swash stays sober: a slow wave, narrower than the beach, weaker under cliffs."""
+    coast = _load("map/coast_types.json")
+    swash = coast["swash"]
+    assert swash["period_s"] >= 4
+    assert swash["in_px"] < coast["band"]["beach_px"]
+    assert swash["edge_px"] < swash["film_px"] < swash["out_px"] + swash["in_px"]
+    assert swash["cliff"] < 1
+
+
 def test_cliff_rule_and_colours_are_readable() -> None:
     """The slope rule is ordered; chalk is much lighter than granite, sand lighter than shingle."""
     coast = _load("map/coast_types.json")

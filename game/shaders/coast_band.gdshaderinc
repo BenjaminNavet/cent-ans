@@ -40,6 +40,10 @@ void coast_band(vec2 p, vec2 uv, float footprint, float coast, float lake_shore,
 	vec3 beach_col = mix(beach_s, beach_c, clamp(1.0 - beach_k + beach_k * speck * 1.6, 0.0, 1.0));
 	float wet = 1.0 - smoothstep(0.0, coast_wet_px, coast);
 	beach_col *= mix(1.0, 0.7, wet);
+	// TB5 : ressac sur la plage (même lame que la mer) : eau de la lame, puis son écume.
+	vec2 swash = coast_swash(p, coast, cliff_f, footprint) * shore;
+	beach_col = mix(beach_col, beach_col * vec3(0.55, 0.7, 0.72), swash.y * 0.5);
+	beach_col = mix(beach_col, swash_foam_color, swash.x * 0.8);
 	float beach = shore * (1.0 - smoothstep(bw * 0.6, bw, coast)) * (1.0 - cliff_f) * (1.0 - 0.7 * snow);
 	col = mix(col, beach_col, beach * k);
 	roughness = mix(roughness, mix(0.9, 0.5, wet), beach * k);
@@ -58,6 +62,7 @@ void coast_band(vec2 p, vec2 uv, float footprint, float coast, float lake_shore,
 	vec3 cliff_col = mix(rock_s, rock_c, light);
 	float foot = (1.0 - smoothstep(0.05, 0.22, coast)) * 0.7;  // estran de galets ou de blocs au pied
 	cliff_col = mix(cliff_col, mix(beach_col, rock_s, 0.5), foot);
+	cliff_col = mix(cliff_col, swash_foam_color, swash.x * 0.8);  // la lame bat le pied de la falaise
 	float face = shore * (1.0 - smoothstep(cw * 0.7, cw, coast)) * cliff_f;
 	col = mix(col, cliff_col, face * k);
 	roughness = mix(roughness, 0.95, face * k);
