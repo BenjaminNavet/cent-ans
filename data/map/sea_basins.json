@@ -88,8 +88,8 @@
       "id": "mediterranean",
       "label": "Méditerranée : eau claire et bleue, mer calme",
       "look": {
-        "tint": [1.7, 2.4, 2.8],
-        "clarity": 2.5,
+        "tint": [1.4, 1.75, 2.6],
+        "clarity": 1.6,
         "swell": 0.6,
         "long_swell": 0.0,
         "foam": 0.6,

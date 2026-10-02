@@ -26,6 +26,7 @@ const PLACES := {
 	"mer-du-nord": Vector2(2400.0, 2500.0),
 	"atlantique": Vector2(1000.0, 2800.0),
 	"mediterranee": Vector2(2500.0, 4200.0),
+	"mediterranee-large": Vector2(2400.0, 4500.0),
 }
 ## Réglages coupés pour la vue « sans le lot » (matériau du terrain, matériau de la mer).
 const TERRAIN_OFF := {"coast_strength": 0.0}
