@@ -63,9 +63,9 @@ FA n'y touche pas.
   CC0 ; récupéré d'un miroir GitHub tiers, licence citée depuis kaylousberg.com).
 - Kenney Particle Pack / Smoke Particles, CC0 (sprites stylisés : secours seulement).
 
-## Captures lues (budget 6)
-6 / 6 — budget atteint (planche avant, essences été/hiver, A/B d'essences ×3, incendie raté).
-Toute nouvelle vérification visuelle passe par un agent visuel dédié.
+## Captures
+Plafond levé par le joueur le 10-02 (« budget illimité de captures ») pour la session principale
+et les agents visuels du chantier. Rester à ≤ 1280 px de large et assembler avant/après.
 
 ## Journal
 - 10-02 : worktree, état des lieux, recherche effets terminée, recherche animations lancée.
