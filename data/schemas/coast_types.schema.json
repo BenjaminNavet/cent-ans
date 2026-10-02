@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coast_types.schema.json",
+  "title": "Types de côte de la carte de campagne (TB5)",
+  "description": "Réglages purement visuels des côtes de la carte de campagne, lus par game/scripts/map/coast_look.gd : géologie de la côte par région (craie, granite, roche), plage (sable, galets), règle de pente falaise / plage, couleurs. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["cell_px", "cliff", "band", "swash", "default", "types", "regions"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "cell_px": {
+      "description": "Taille d'une cellule de la texture des types de côte, en pixels carte.",
+      "type": "integer",
+      "minimum": 4,
+      "maximum": 64
+    },
+    "cliff": {
+      "description": "Règle de pente : altitude (m) lue à `probe_px` de la côte vers l'intérieur ; plage sous `min_m`, falaise au-dessus de `max_m`.",
+      "type": "object",
+      "required": ["probe_px", "min_m", "max_m"],
+      "additionalProperties": false,
+      "properties": {
+        "probe_px": {"type": "number", "minimum": 0.5, "maximum": 6},
+        "min_m": {"type": "number", "minimum": 0},
+        "max_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "band": {
+      "description": "Bande côtière : largeur de la falaise et de la plage (pixels carte), estran mouillé, force, relief feint de la falaise, part gardée au dézoom.",
+      "type": "object",
+      "required": ["cliff_px", "cliff_widen", "sea_reach_px", "beach_px", "wet_px", "strength", "relief", "far_keep"],
+      "additionalProperties": false,
+      "properties": {
+        "cliff_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 4},
+        "cliff_widen": {
+          "description": "Élargissement de la paroi sur une falaise haute (1 = aucun).",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "sea_reach_px": {
+          "description": "Distance côté mer de la côte raster jusqu'où le relief émergé (pied de falaise, écueil, banc) est peint en roche ou en sable.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "beach_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 4},
+        "wet_px": {"type": "number", "minimum": 0, "maximum": 2},
+        "strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "relief": {"type": "number", "minimum": 0, "maximum": 3},
+        "far_keep": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "swash": {
+      "description": "Ressac : lame d'écume qui avance puis se retire au trait de côte. `amount` 0 = aucun ; `period_s` période ; `out_px` recul vers le large, `in_px` montée sur la plage, `edge_px` liseré, `film_px` dentelle derrière le liseré (pixels carte) ; `cliff` part de la montée au pied d'une falaise.",
+      "type": "object",
+      "required": ["amount", "period_s", "out_px", "in_px", "edge_px", "film_px", "cliff"],
+      "additionalProperties": false,
+      "properties": {
+        "amount": {"type": "number", "minimum": 0, "maximum": 1},
+        "period_s": {"type": "number", "minimum": 2, "maximum": 60},
+        "out_px": {"type": "number", "minimum": 0, "maximum": 3},
+        "in_px": {"type": "number", "minimum": 0, "maximum": 1},
+        "edge_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "film_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 2},
+        "cliff": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "default": {
+      "description": "Côte hors de toute région.",
+      "type": "object",
+      "required": ["rock", "beach", "beach_width"],
+      "additionalProperties": false,
+      "properties": {
+        "rock": {"$ref": "#/$defs/rock"},
+        "beach": {"$ref": "#/$defs/beach"},
+        "beach_width": {"$ref": "#/$defs/beach_width"}
+      }
+    },
+    "types": {
+      "type": "object",
+      "required": ["rock", "chalk", "granite", "sand", "shingle"],
+      "additionalProperties": false,
+      "properties": {
+        "rock": {"$ref": "#/$defs/type"},
+        "chalk": {"$ref": "#/$defs/type"},
+        "granite": {"$ref": "#/$defs/type"},
+        "sand": {"$ref": "#/$defs/type"},
+        "shingle": {"$ref": "#/$defs/type"}
+      }
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "rock", "beach", "polygon_px"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "label": {"type": "string", "minLength": 1},
+          "rock": {"$ref": "#/$defs/rock"},
+          "beach": {"$ref": "#/$defs/beach"},
+          "beach_width": {"$ref": "#/$defs/beach_width"},
+          "polygon_px": {
+            "description": "Polygone en pixels carte (grille de map.json).",
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {"type": "number"}
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "rock": {"enum": ["rock", "chalk", "granite"]},
+    "beach": {"enum": ["sand", "shingle"]},
+    "beach_width": {
+      "description": "Largeur relative de la plage (1 = `band.beach_px`).",
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 2
+    },
+    "color": {
+      "description": "Couleur linéaire RVB.",
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "type": {
+      "type": "object",
+      "required": ["label", "color", "shade", "streak"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {"type": "string", "minLength": 1},
+        "color": {"$ref": "#/$defs/color"},
+        "shade": {"$ref": "#/$defs/color"},
+        "streak": {
+          "description": "Contraste du grain (stries de la falaise, grain de la plage).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

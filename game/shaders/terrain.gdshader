@@ -386,6 +386,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 #include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
 #include "res://shaders/hb_ground.gdshaderinc"  // HB3 : habillage par biome (ADR 0143)
+#include "res://shaders/coast_band.gdshaderinc"  // TB5 : falaises et plages (crochet coast_band)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -716,6 +717,7 @@ void fragment() {
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
+	coast_band(p, uv, footprint, coast, hc, world_pos.y, lake_shore, snow, col, roughness, n);  // TB5 : après l'eau peinte
 
 	// --- Couche politique ---
 	if (hb_debug > 9.5 && hb_debug < 10.5) { hb_dbg = col; }  // HB3 : sonde
