@@ -12,7 +12,8 @@
     "ring_min_m": 90.0,
     "ring_max_m": 650.0,
     "max_slope": 0.22,
-    "max_per_settlement": 4
+    "max_per_settlement": 5,
+    "shore_reach_m": 2500.0
   },
   "families": {
     "farm": {
@@ -184,8 +185,7 @@
                   "bld_guild_hall",
                   "bld_fair",
                   "bld_port",
-                  "bld_counting_house",
-                  "bld_water_mill"
+                  "bld_counting_house"
                 ],
                 "min": 1
               }
@@ -211,8 +211,7 @@
                   "bld_guild_hall",
                   "bld_fair",
                   "bld_port",
-                  "bld_counting_house",
-                  "bld_water_mill"
+                  "bld_counting_house"
                 ],
                 "min": 2
               }
@@ -487,7 +486,7 @@
     },
     "port": {
       "name": "Port",
-      "site": "coast",
+      "site": "shore",
       "levels": [
         {
           "level": 1,

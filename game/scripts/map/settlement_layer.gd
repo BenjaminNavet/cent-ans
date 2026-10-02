@@ -146,6 +146,8 @@ var towns: TownLayer
 var landmark_cities: LandmarkCityLayer
 ## VT-E (ADR 0138) : lointain des villes à l'échelle 1:1 (tuiles F1/F2), voir `TownFarLayer`.
 var town_far: TownFarLayer
+## Lot TB3 (ADR 0153) : bâtiments hors les murs, chantiers et croissance des villes 1:1.
+var outbuildings: OutbuildingLayer
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
@@ -630,6 +632,8 @@ func refresh(sim: Object, _color_of: Callable) -> void:
 			landmark_cities.set_year(year)
 	_refresh_shields()
 	_refresh_capital(sim)
+	if outbuildings != null:
+		outbuildings.refresh(sim)
 	var devastation := {}
 	if sim != null and (sim.has_method("get_provinces_snapshot") or sim.has_method("get_province_state")):
 		var provinces := {}
@@ -734,6 +738,9 @@ func update_view(camera_distance: float) -> void:
 	if town_far != null:  # VT-E : après les calques 1:1 (masque d'enfoncement à jour)
 		town_far.update_view(camera_distance)
 	tp = PerfProbe.lap("settle/townfar", tp)
+	if outbuildings != null:  # TB3 : bâtiments hors les murs
+		outbuildings.update_view(camera_distance)
+	tp = PerfProbe.lap("settle/outbuildings", tp)
 	_update_hamlet_scale(camera_distance)
 	var th := PerfProbe.lap("settle/hamlets/scale", tp)  # RS-K2
 	_update_hamlets()
@@ -1379,6 +1386,9 @@ func flush() -> void:
 	if town_far != null:  # VT-E : lointain des villes
 		town_far.flush()
 		town_far.update_view(_camera_distance)
+	if outbuildings != null:  # TB3
+		outbuildings.update_view(_camera_distance)
+		outbuildings.flush()
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -1694,6 +1704,23 @@ func model_radius(i: int) -> float:
 	return _model_radius[i] if i >= 0 and i < _model_radius.size() else DEFAULT_FOOTPRINT_M / 719.0
 
 
+## TB3 : rayon bâti (unités monde) de la colonie `i` : emprise réelle de la ville 1:1, ou étendue
+## de la ville emblématique v2.
+func built_radius(i: int) -> float:
+	if i < 0 or i >= _model_radius.size():
+		return DEFAULT_FOOTPRINT_M / 719.0
+	if landmark_cities != null:
+		var id := str(data.settlements[i]["id"])
+		if landmark_cities.has_city(id):
+			return maxf(_model_radius[i], landmark_cities.zone_of(id).z)
+	return _model_radius[i]
+
+
+## TB3 : vrai si la colonie `i` est une ville emblématique (zone de `data/landmarks/`).
+func is_landmark(i: int) -> bool:
+	return _landmarks.has(i)
+
+
 ## Hauteur des toits (≈ `TOWN_TOP_M`) au-dessus du sol, en unités monde.
 func model_top(i: int) -> float:
 	return _model_top[i] if i >= 0 and i < _model_top.size() else TOWN_TOP_M / 719.0
@@ -1752,6 +1779,10 @@ func _setup_towns() -> void:
 	town_far = TownFarLayer.new()
 	add_child(town_far)
 	town_far.setup(map_data, terrain, tiers, ids, [towns, landmark_cities], towns.data)
+	outbuildings = OutbuildingLayer.new()
+	outbuildings.name = "Outbuildings"
+	add_child(outbuildings)
+	outbuildings.setup(self, map_data, terrain, data, towns.data.meters_per_unit if towns.data != null else 719.0)
 
 
 ## VH4 : villes emblématiques 1:1.

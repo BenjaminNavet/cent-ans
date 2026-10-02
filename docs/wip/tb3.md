@@ -4,9 +4,11 @@ Branche `feat/tb3`, worktree `../gp-tb3`. Plan : `docs/design/2026-10-02-campagn
 Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix des maquettes).
 
 ## État
-- [ ] 1. `data/map/building_models.json` + schéma + test pytest
-- [ ] 2. Maquettes des 3 niveaux (8 familles) sans génération payante
-- [ ] 3. Couche de rendu des bâtiments hors les murs
+- [x] 1. `data/map/building_models.json` + schéma + test pytest (823aaa747)
+- [x] 2. Maquettes des 3 niveaux (8 familles) + chantier : `tools/blender_scripts/tb3_outbuildings.py`
+      → `game/assets/models/outbuildings/` (154 à 2 438 triangles, une surface `Building`)
+- [~] 3. Couche `game/scripts/map/outbuilding_layer.gd` (un MultiMesh par maquette pour le voisinage
+      de la caméra), branchée dans `SettlementLayer` ; test `tb3_growth_test.gd` vert ; reste : banc
 - [ ] 4. Croissance de la ville 1:1 (faubourgs selon population, enceinte selon fortification)
 - [ ] 5. Suie par ville (saccage, assaut)
 - [ ] 6. Chantier visible (échafaudage + tas de pierres)
@@ -22,4 +24,4 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix de
   `upgrades_from`. Le niveau de maquette vient donc de la correspondance.
 
 ## Prochaine étape
-Point 1 : écrire la correspondance et son schéma.
+Point 4 : `TownGrowth` (faubourgs, enceinte) branché par `OutbuildingLayer.extra_instances`.
