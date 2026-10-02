@@ -356,6 +356,15 @@ func reground() -> void:
 		marker.apply_scale(_current_scale)
 
 
+## TB4 : armées affichées et leur marqueur (`WarScars` y pose les engins de siège du camp).
+func marker_ids() -> Array:
+	return _markers.keys()
+
+
+func marker_of(army_id: String) -> ArmyMarker:
+	return _markers.get(army_id)
+
+
 ## Position monde d'une armée (pour cadrer la caméra), Vector3.ZERO si absente.
 func world_position_of(army_id: String) -> Vector3:
 	var marker: ArmyMarker = _markers.get(army_id)
