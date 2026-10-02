@@ -267,5 +267,7 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Mat
 
 ## Campagne façon Thrones of Britannia TB (02/10) — fal.ai seul, hors plafond v1, enveloppe propre 25 $ (ADR 0149)
 
+**Annulée le 02/10 (ADR 0152)** : compte fal.ai sans crédit, le joueur renonce ; chantier TB à 0 $, aucun appel facturé.
+
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul TB |
 |---|---|---|---|---|---|

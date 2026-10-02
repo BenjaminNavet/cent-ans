@@ -29,7 +29,6 @@ tools/nb_raw/
 docs/img/*
 !docs/img/ga3/
 !docs/img/readme/
-!docs/img/tb/
 docs/audit/captures/
 docs/audit/**/*.png
 docs/audit/**/*.jpg

@@ -1,6 +1,6 @@
 # 0149 — fal.ai hors plafond v1 pour le chantier TB (campagne façon Thrones of Britannia)
 
-Date : 2026-10-02. Statut : acceptée (accord du joueur le 02/10, enveloppe de 25 $ validée avec le plan).
+Date : 2026-10-02. Statut : **remplacée par l'ADR 0152 le 02/10 (chantier sans fal.ai)** ; était acceptée (accord du joueur le 02/10, enveloppe de 25 $ validée avec le plan).
 Plan : `docs/design/2026-10-02-campagne-tob.md`.
 
 ## Contexte

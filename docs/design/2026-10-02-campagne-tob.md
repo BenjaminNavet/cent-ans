@@ -1,7 +1,9 @@
 # TB — Carte de campagne façon Thrones of Britannia
 
 Date : 2026-10-02. Statut : validé par le joueur le 02/10 (plan, ordre des vagues, enveloppe fal.ai de 25 $). Suivi : `docs/wip/tb-campagne-tob.md`.
-Budget : ADR 0149 (fal.ai seul, hors plafond v1).
+Budget : **0 $, sans fal.ai (ADR 0152, décision du joueur le 02/10, remplace l'ADR 0149)**. Les mentions
+de fal.ai et les coûts ci-dessous sont caducs : TB0 sans repeints, TB3 et TB5 avec les kits et textures
+existants et Blender, TB7 reporté.
 
 ## 0. Demande et cadrage
 
