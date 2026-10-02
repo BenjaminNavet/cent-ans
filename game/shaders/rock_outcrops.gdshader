@@ -13,7 +13,7 @@ render_mode depth_draw_opaque, diffuse_lambert_wrap, specular_schlick_ggx;
 // unité, x et z) : la base est cisaillée sur le versant.
 
 global uniform vec4 campaign_season;
-global uniform float campaign_vertical_scale;
+#include "res://shaders/campaign_relief.gdshaderinc"
 
 uniform float outcrop_scale = 1.0;
 uniform float meters_per_unit = 719.0;
