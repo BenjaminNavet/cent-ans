@@ -24,7 +24,7 @@ variantes : `game/assets/models/settlements/<type>_<famille>_<a|b>.glb`.
 
 ## État
 - [x] Squelette : module, table des 50 modèles (bouche-trous), planche.
-- [ ] `med`
+- [x] `med` (10 modèles, 612 à 1 612 triangles, planche regardée)
 - [ ] `byz`
 - [ ] `rus`
 - [ ] `isl`
@@ -32,4 +32,4 @@ variantes : `game/assets/models/settlements/<type>_<famille>_<a|b>.glb`.
 - [ ] Export des 50 `.glb`, budgets vérifiés, planches regardées.
 
 ## Prochaine étape
-Famille `med`.
+Famille `byz` (code écrit, planche à regarder), puis `rus`, `isl`, `steppe`.

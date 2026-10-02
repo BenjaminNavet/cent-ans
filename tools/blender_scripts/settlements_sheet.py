@@ -70,6 +70,7 @@ def add_label(text: str, location, rotation, material) -> None:
     obj.data.size = 0.42
     obj.data.align_x = "CENTER"
     obj.data.materials.append(material)
+    obj.visible_shadow = False
 
 
 def setup_render(columns: int, rows: int, out: Path) -> None:
