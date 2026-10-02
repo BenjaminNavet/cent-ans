@@ -8,6 +8,7 @@
 #include "res://shaders/coast_common.gdshaderinc"
 
 uniform float coast_cliff_px = 0.85;   // largeur de la falaise vue de dessus (px carte)
+uniform float coast_cliff_widen = 2.6; // paroi élargie d'autant sur une falaise haute
 uniform float coast_sea_reach_px = 3.0; // relief émergé peint jusqu'à cette distance côté mer
 uniform float coast_beach_px = 0.55;   // largeur de la plage
 uniform float coast_wet_px = 0.16;     // estran mouillé
@@ -21,7 +22,7 @@ uniform float coast_streak[5];
 
 void coast_band(vec2 p, vec2 uv, float footprint, float coast, float hc, float world_y, float lake_shore, float snow,
 		inout vec3 col, inout float roughness, inout vec3 n) {
-	float reach = max(coast_cliff_px * 1.2, coast_beach_px * 3.2);
+	float reach = max(coast_cliff_px * coast_cliff_widen * 1.2, coast_beach_px * 3.2);
 	if (!coast_enabled || !has_coast_dist || lake_shore > 0.5 || coast > reach) {
 		return;
 	}
@@ -61,12 +62,14 @@ void coast_band(vec2 p, vec2 uv, float footprint, float coast, float hc, float w
 	vec3 rock_c = coast_color[0] * w_rock + coast_color[1] * geo.r + coast_color[2] * geo.g;
 	vec3 rock_s = coast_shade[0] * w_rock + coast_shade[1] * geo.r + coast_shade[2] * geo.g;
 	float rock_k = coast_streak[0] * w_rock + coast_streak[1] * geo.r + coast_streak[2] * geo.g;
-	float cw = coast_cliff_px * (0.65 + 0.5 * value_noise(p * 1.7)) * mix(0.7, 1.0, smoothstep(coast_cliff_m.y, coast_cliff_m.y * 3.0, h));
+	// Paroi d'autant plus large que la falaise est haute (plage : bande inchangée).
+	float steep = smoothstep(coast_cliff_m.y, coast_cliff_m.y * 2.5, h);
+	float cw = coast_cliff_px * (0.75 + 0.4 * value_noise(p * 1.7)) * mix(1.0, coast_cliff_widen, steep);
 	float t = max(clamp(coast / max(cw, 1e-3), 0.0, 1.0), emerged * smoothstep(5.0, 40.0, hc));  // 0 pied, 1 crête
 	float grain = value_noise(p * 5.0) * 0.6 + value_noise(p * 11.0) * 0.4;
 	float strata = value_noise(vec2(t * 6.0, value_noise(p * 0.9) * 3.0));
 	float mottle = mix(0.5, grain * 0.65 + strata * 0.35, fine);
-	float light = clamp((1.0 - rock_k + rock_k * mottle * 1.7) * (0.55 + 0.45 * smoothstep(0.0, 0.45, t)), 0.0, 1.0);
+	float light = clamp((1.0 - rock_k + rock_k * mottle * 1.7) * (0.7 + 0.3 * smoothstep(0.0, 0.3, t)), 0.0, 1.0);
 	vec3 cliff_col = mix(rock_s, rock_c, light);
 	float foot = (1.0 - smoothstep(0.05, 0.22, coast)) * 0.7 * (1.0 - emerged);  // estran de galets ou de blocs au pied
 	cliff_col = mix(cliff_col, mix(beach_col, rock_s, 0.5), foot);
