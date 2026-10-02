@@ -366,9 +366,13 @@ func _refresh_terroir() -> void:
 		return
 	# Clé : dévastation par paliers de 5 %, population par paliers de 10 %.
 	var parts := PackedStringArray()
+	var burnt := false
 	for province_id in province_states:
 		var state: Dictionary = province_states[province_id]
+		burnt = burnt or float(state["devastation"]) >= TerroirMask.BURN_THRESHOLD
 		parts.append("%s:%d:%d:%d" % [province_id, int(state["devastation"] / 5.0), int(log(maxf(state["population"], 1.0)) * 10.0), int(state["siege"])])
+	# TB4 : le brûlis par parcelles n'est calculé que si une province au moins est dévastée.
+	_terrain.material.set_shader_parameter("burn_active", burnt)
 	var key := ",".join(parts)
 	if key == _terroir_key:
 		return

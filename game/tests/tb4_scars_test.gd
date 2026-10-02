@@ -102,7 +102,8 @@ func _check_burn() -> void:
 	_check(code.find("hb_apply(p") >= 0 and code.find("hb_apply(p") < burn, "burn is applied before the HB materials (hb_apply)")
 	_check(code.contains("terroir_at(p / max(map_size.x, map_size.y))"), "terroir mask not sampled at the scale it is painted (non-square map)")
 	var uniforms := TERRAIN_SHADER.get_shader_uniform_list().map(func(u: Dictionary) -> String: return str(u["name"]))
-	for uniform_name in ["burnt_color", "ash_color", "terroir_mask"]:
+	_check(code.contains("col, burn_parcel);") and code.contains("burn_parcel, 1.0 / max(map_size.x, map_size.y))"), "burn does not use the HB parcels")
+	for uniform_name in ["burnt_color", "ash_color", "terroir_mask", "burn_active", "burn_charred_share", "burn_singed_share", "burn_singe_tint", "burn_ground_keep"]:
 		_check(uniforms.has(uniform_name), "terrain shader lacks uniform %s" % uniform_name)
 	# Même convention côté processeur : un point peint se relit au même endroit.
 	var mask := TerroirMask.new()

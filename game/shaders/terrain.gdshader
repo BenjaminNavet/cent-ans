@@ -668,14 +668,17 @@ void fragment() {
 	vec3 season_den = w_grass * grass_summer + w_farm * farm_summer + w_forest * tint_forest + w_rock * tint_rock + w_heath * tint_heath;
 	vec3 season_k = dot(season_den, vec3(1.0)) > 1e-4 ? season_ratio(season_num, season_den) : vec3(1.0);
 	sg_apply(uv, footprint, snow, land_f, season_k, col);  // SS2
+	vec4 burn_parcel;  // TB4 : parcelle HB du pixel (brûlis par parcelles)
 	hb_apply(p, map_size, footprint, snow, land_f, (w_grass + w_farm + w_heath) / max(wsum, 1e-3), w_forest / max(wsum, 1e-3),
 		w_rock / max(wsum, 1e-3), w_farm / max(w_grass + w_farm, 1e-3), slope, k_grass, k_forest,
-		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col);  // HB3
+		mat4(vec4(crop_wheat, 0.0), vec4(crop_green, 0.0), vec4(crop_ploughed, 0.0), vec4(crop_fallow, 0.0)), col, burn_parcel);  // HB3
 	col = mix(season_winter_ground(col, land_f), col, snow);  // TB1 : sol d'hiver hors neige
 	vec3 hb_dbg = col;  // HB3 : diagnostic (`hb_debug` > 0 : sortie directe de l'habillage)
 	// TB4 : brûlis (CV1) posé par-dessus la carte de couleur (SS2) et les matières (HB3), qui le
-	// recouvraient ; visible à tous les zooms (plaques larges au loin, cendres et chaumes de près).
-	col = terroir_burn(col, terroir.b * (1.0 - snow * 0.7), p, footprint);
+	// recouvraient. Par parcelles (celles de l'habillage HB) : une part carbonisée, une part
+	// roussie, le reste intact, selon la dévastation lue au centre de la parcelle ; au loin, la
+	// moyenne des trois, découpée par un bruit large.
+	col = terroir_burn(col, terroir.b, 1.0 - snow * 0.7, p, footprint, burn_parcel, 1.0 / max(map_size.x, map_size.y));
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4
