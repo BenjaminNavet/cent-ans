@@ -23,7 +23,7 @@ liaison renchérie de plus de 30 % sans correction.
 - [x] Trois cuissons `landcover` + `navgrid` avec mesure ; emprises et densités réduites après les
       deux premières (voir « Corrections »). Sorties de la troisième commitées (f336110c6).
 - [x] `colormap` + `horizon` (sorties commitées à part).
-- [x] Tests : voir « Tests ».
+- [ ] Tests : partiels, voir « Cuissons et tests » (pause).
 - [x] `docs/geo.md` (jeux de données, effets sur les règles, limite de l'allocation).
 
 ## Ce qui dépend des données ajoutées
@@ -121,12 +121,32 @@ forêt d'Arsouf (sans effet sous la bande aride).
 Zones humides : Teufelsmoor, Aischgrund, callows du Shannon, Oristano, Narbonnais, Giannitsá ;
 Gharb (source trop générale).
 
-## Cuissons et tests
-(à compléter)
+## Cuissons et tests (état à la PAUSE du 02/10, demandée par le joueur)
+Machine très chargée (charge 80-130) : durées bien au-dessus des valeurs de référence.
+- `geo landcover` : référence sans HC5 13 min 22 ; cuisson 1 10 min 44 ; cuisson 2 ; cuisson 3
+  5 min 26 (forêt 40,2 %, défriché KK10 31,9 %). `geo navgrid` : 29-32 s, mode strict, 92,1 % de
+  cases franchissables. `geo colormap` : 13 min 51. `geo horizon` : 3 min 42 (443 tuiles, 45
+  modifiées).
+- **Toutes les sorties cuites sont commitées et cohérentes avec les JSON commités** :
+  f336110c6 (splat, wetlands, wetlands_bc1, forest_kind, navgrid), 4f9147aaa (colormap, horizon).
+  Rien à refaire côté cuisson.
+- Tests passés : `pytest tools/tests/test_landcover.py test_splat.py test_navgrid.py` (44 passés) ;
+  `cargo test -p data-model --test real_data` (13 passés, cible privée `core/target-hc5`).
+- Tests **non faits ou interrompus** : `pytest tools/tests/test_colormap.py test_horizon.py`
+  (à lancer, les cuissons sont finies) ; `cargo test -p sim-campaign -p ai -p data-model`
+  (arrêté à la pause : 5 binaires passés, aucun échec vu, les tests longs de l'IA en cours) ;
+  `godot --headless --path game --import` puis `smoke.gd` ; `uvx ruff` sans objet (aucun fichier
+  Python du dépôt modifié).
+- `core/target-hc5` (cible cargo privée, ignorée par git) est **encore sur le disque** : à
+  supprimer en fin de lot.
 
-## Prochaine étape
-Relecture visuelle par la session principale (aucune capture faite ici), arbitrage du défaut
-d'allocation, `geo anchors-fine` après fusion, puis fusion de `feat/hc5`.
+## Prochaine étape (reprise)
+1. `uv run --project tools pytest tools/tests/test_colormap.py tools/tests/test_horizon.py`.
+2. `cd core && CARGO_TARGET_DIR=$PWD/target-hc5 cargo test -p sim-campaign -p ai -p data-model`
+   (les tests de campagne et d'IA lisent le vrai `navgrid.png`), puis supprimer `core/target-hc5`.
+3. `godot --headless --path game --import` et `--script res://tests/smoke.gd`.
+4. Session principale : relecture visuelle (aucune capture faite ici), arbitrage du défaut
+   d'allocation, `geo anchors-fine` après fusion, fusion de `feat/hc5`.
 
 ## Points ouverts
 - Lacs historiques absents du raster (lac Fucin, Copaïs en eau, Amouq, Karla, Prile) : rendus ici
