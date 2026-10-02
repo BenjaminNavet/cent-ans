@@ -4,15 +4,26 @@ Branche `feat/tb3`, worktree `../gp-tb3`. Plan : `docs/design/2026-10-02-campagn
 Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix des maquettes).
 
 ## État
-- [x] 1. `data/map/building_models.json` + schéma + test pytest (823aaa747)
-- [x] 2. Maquettes des 3 niveaux (8 familles) + chantier : `tools/blender_scripts/tb3_outbuildings.py`
-      → `game/assets/models/outbuildings/` (154 à 2 438 triangles, une surface `Building`)
-- [~] 3. Couche `game/scripts/map/outbuilding_layer.gd` (un MultiMesh par maquette pour le voisinage
-      de la caméra), branchée dans `SettlementLayer` ; test `tb3_growth_test.gd` vert ; reste : banc
-- [ ] 4. Croissance de la ville 1:1 (faubourgs selon population, enceinte selon fortification)
-- [ ] 5. Suie par ville (saccage, assaut)
-- [ ] 6. Chantier visible (échafaudage + tas de pierres)
-- [ ] Tests `tb3_growth_test.gd`, `tb3_shot.gd`, bench `ss_shot.gd --bench` à 90 et 400
+- [x] 1. `data/map/building_models.json` + schéma + `tools/tests/test_building_models_schema.py`
+- [x] 2. Maquettes : `tools/blender_scripts/tb3_outbuildings.py` → `game/assets/models/outbuildings/`
+      (24 maquettes + `worksite_1`, 154 à 2 438 triangles, une surface `Building`)
+- [x] 3. `game/scripts/map/outbuilding_layer.gd` (un MultiMesh par maillage pour le voisinage de la
+      caméra), branché dans `SettlementLayer` (`outbuildings`)
+- [x] 4. `game/scripts/map/town_growth.gd` : faubourgs (population) et enceinte (fortification) ;
+      `replace_models` retiré, `growth_of(id)` à la place
+- [x] 5. Suie par ville : `town_soot.gd`, paramètre d'instance `town_soot`
+      (`town_building.gdshader`), masque `soot_mask` (`town_far.gdshader`)
+- [x] 6. Chantier : `construction_markers.gd` (maquette à taille d'écran constante) + chantier 1:1
+- [x] Tests : `game/tests/tb3_growth_test.gd` (5 étapes), `game/tests/tb3_shot.gd` (captures, banc)
+- [x] ADR `docs/decisions/0153-batiments-hors-les-murs-assembles-du-kit.md`
+
+## Points ouverts
+- Échelle réelle : rien de visible à d = 90 ni 400 (ADR 0138). `render.exaggeration.max` dans les
+  données si le joueur veut voir les domaines de plus loin.
+- Suie d'une prise (saccage, assaut) : en mémoire de session seulement (pas d'état dans `core/`).
+- Règles de niveau (fermes, salines, mines sans bâtiment propre) : à juger en partie pilote.
+- Brouillard de guerre : les bâtiments des provinces non vues sont dessinés comme les villes 1:1.
+- Numéro d'ADR 0153 déjà pris sur main par le lanceur Windows.
 
 ## Relevé de départ
 - Pont : `get_province_city(id)` donne `buildings[{id, name, category, upkeep}]`,
@@ -24,4 +35,7 @@ Sans service payant (ADR 0152). ADR du lot : `docs/decisions/0153-…` (choix de
   `upgrades_from`. Le niveau de maquette vient donc de la correspondance.
 
 ## Prochaine étape
-Point 4 : `TownGrowth` (faubourgs, enceinte) branché par `OutbuildingLayer.extra_instances`.
+Relecture visuelle par la session principale :
+`godot --path game --resolution 1600x900 --script res://tests/tb3_shot.gd -- --out=<dossier>`
+(Agen : ferme, vignoble, marché de niveau 3, moulin et abbaye de niveau 1, chantier ; Fleurance :
+faubourgs, enceinte de pierre, suie). Puis fusion dans `feat/tb`.

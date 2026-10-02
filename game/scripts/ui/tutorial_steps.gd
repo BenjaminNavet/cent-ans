@@ -51,7 +51,7 @@ const BASE := {
 	},
 	"build": {
 		"title": "Construire",
-		"text": "Dans la liste « Constructible », choisissez un bâtiment et cliquez sur « Construire ». Le coût est prélevé tout de suite ; un marteau sur la carte marque le chantier jusqu'à son achèvement. Une seule construction à la fois par province.",
+		"text": "Dans la liste « Constructible », choisissez un bâtiment et cliquez sur « Construire ». Le coût est prélevé tout de suite ; un échafaudage sur la carte marque le chantier jusqu'à son achèvement. Une seule construction à la fois par province.",
 		"objective": "Lancer une construction dans une de vos provinces.",
 		"target": "buildable",
 	},

@@ -40,6 +40,11 @@ var stats: Dictionary = {}
 var enabled := true
 ## Affiche et construit quelle que soit la distance du rig (tests headless).
 var force_active := false
+## États imposés (captures de contrôle, comme `CampaignLife.forced_devastation`) : id de colonie
+## → `{buildings: Array, building: bool}` à la place de l'état de la simulation ; province →
+## rapport de population imposé. Appeler `invalidate()` après un changement.
+var forced_states: Dictionary = {}
+var forced_population_ratio: Dictionary = {}
 
 var _layer: SettlementLayer
 var _map: MapData
@@ -210,6 +215,11 @@ func refresh(sim: Object) -> bool:
 	return true
 
 
+## Reconstruit le voisinage à la prochaine mise à jour (états imposés changés).
+func invalidate() -> void:
+	_dirty = true
+
+
 ## État des provinces à la dernière relecture : province → `{population, devastation, besieged,
 ## constructing}`.
 func provinces_live() -> Dictionary:
@@ -272,6 +282,9 @@ func _read_states() -> void:
 ## État d'une colonie : `{buildings: Array, fortification: int, building: bool}`.
 func _state_of(i: int) -> Dictionary:
 	var id := str(_data.settlements[i]["id"])
+	if forced_states.has(id):
+		var forced: Dictionary = forced_states[id]
+		return {"buildings": forced.get("buildings", []), "fortification": 0, "is_city": true, "building": bool(forced.get("building", false))}
 	if _states.has(id):
 		return _states[id]
 	var state := {"buildings": [], "fortification": int(_data.settlements[i].get("fortification_level", 0)), "is_city": false, "building": false}
@@ -321,6 +334,8 @@ func baseline_population(province: String) -> float:
 
 ## Population simulée de la province rapportée à celle de 1337 (1 si l'une des deux manque).
 func population_ratio(province: String) -> float:
+	if forced_population_ratio.has(province):
+		return float(forced_population_ratio[province])
 	var now := float((_provinces.get(province, {}) as Dictionary).get("population", 0.0))
 	var then := baseline_population(province)
 	return now / then if now > 0.0 and then > 0.0 else 1.0
