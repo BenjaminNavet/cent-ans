@@ -49,6 +49,9 @@ var _map: Node = null
 var _terrain: TerrainBuilder = null
 var _map_data: MapData = null
 var _settlements: SettlementLayer = null
+## TB1 : mer de la saison (poids déjà appliqués à la mer).
+var _sea: Sea = null
+var _sea_weights := Vector4(-1, -1, -1, -1)
 var _tiers: ZoomTiers = null
 var _camera_distance := 0.0
 var _refreshed_once := false
@@ -63,14 +66,17 @@ func setup(map: Node) -> void:
 	_terrain = map.get("terrain") as TerrainBuilder
 	_map_data = map.get("map_data") as MapData
 	_settlements = map.get("settlement_layer") as SettlementLayer
+	_sea = map.get("sea") as Sea
 	_parse_cmdline()
 	if _terrain != null and _terrain.material != null:
 		_terrain.material.set_shader_parameter("life_enabled", enabled and not _off.has("terrain"))
 	if not enabled:
 		seasons.set_season("summer", true)
+		_sync_sea()
 		return
 	if forced_season != "":
 		seasons.set_season(forced_season, true)
+	_sync_sea()
 	_tiers = map.get("zoom_tiers") as ZoomTiers
 	effects = LifeEffects.new()
 	effects.name = "Effects"
@@ -141,6 +147,18 @@ func _parse_cmdline() -> void:
 				var parts := pair.split(":")
 				if parts.size() == 2:
 					forced_devastation[parts[0]] = float(parts[1])
+
+
+## TB1 : mer de la saison (teinte, écume) quand les poids changent, et masque météo du terrain
+## (écume de tempête).
+func _sync_sea() -> void:
+	if _sea == null or not (_sea.material_override is ShaderMaterial):
+		return
+	if seasons.weights != _sea_weights:
+		_sea_weights = seasons.weights
+		_sea.apply_season(_sea_weights)
+	if _terrain != null:
+		_sea.sync_weather(_terrain.material)
 
 
 ## Relit la saison, la dévastation et la population depuis la simulation.
@@ -321,6 +339,7 @@ func update_view(camera_distance: float) -> void:
 		_terrain.material.set_shader_parameter("terroir_mask", terroir.texture)
 	tp = PerfProbe.lap("life/terroir", tp)
 	seasons.update(get_process_delta_time())
+	_sync_sea()
 	tp = PerfProbe.lap("life/seasons", tp)
 	if effects != null:
 		effects.set_season(seasons.weights)

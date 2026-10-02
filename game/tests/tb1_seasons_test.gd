@@ -7,6 +7,7 @@ extends SceneTree
 ## Usage : godot --headless --path game --script res://tests/tb1_seasons_test.gd
 
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
+const WATER_SHADER := preload("res://shaders/water.gdshader")
 
 
 func _init() -> void:
@@ -47,9 +48,51 @@ func _uniforms(shader: Shader) -> Array:
 	return shader.get_shader_uniform_list().map(func(u: Dictionary) -> String: return str(u["name"]))
 
 
-## Point 2 : mer selon la saison.
+## Point 2 : mer selon la saison (valeurs de `data/ui/campaign_seasons.json`) : plus sombre et
+## plus grise l'hiver que l'été, fondu entre deux saisons, écume de tempête réglée par les données
+## et masque météo repris du terrain.
 func _check_sea() -> bool:
-	return true
+	var ok := true
+	var uniforms := _uniforms(WATER_SHADER)
+	for uniform_name in ["season_tint", "season_desaturate", "season_foam", "weather_mask", "province_ids", "storm_foam_gain", "storm_whitecaps"]:
+		if not uniforms.has(uniform_name):
+			push_error("TB1: water shader lacks uniform %s" % uniform_name)
+			ok = false
+	var summer := SeasonLook.sea(SeasonVisuals.weights_of("summer"))
+	var winter := SeasonLook.sea(SeasonVisuals.weights_of("winter"))
+	var summer_tint: Vector3 = summer["tint"]
+	var winter_tint: Vector3 = winter["tint"]
+	if winter_tint.x + winter_tint.y + winter_tint.z > summer_tint.x + summer_tint.y + summer_tint.z - 0.5:
+		push_error("TB1: winter sea %s not darker than summer %s" % [winter_tint, summer_tint])
+		ok = false
+	if float(winter["desaturate"]) < float(summer["desaturate"]) + 0.3:
+		push_error("TB1: winter sea not greyer than summer")
+		ok = false
+	var half := SeasonLook.sea(Vector4(0, 0.5, 0, 0.5))
+	if not is_equal_approx(float(half["desaturate"]), (float(summer["desaturate"]) + float(winter["desaturate"])) * 0.5):
+		push_error("TB1: sea look not blended between seasons")
+		ok = false
+	var storm := SeasonLook.storm()
+	if float(storm["foam_gain"]) <= 0.0 or float(storm["whitecaps"]) <= 0.0:
+		push_error("TB1: storm foam missing from data/ui/campaign_seasons.json")
+		ok = false
+	# La mer reçoit la saison et le masque météo du terrain.
+	var sea := Sea.new()
+	sea.setup(Vector2i(64, 64))
+	sea.apply_season(SeasonVisuals.weights_of("winter"))
+	var material := sea.material_override as ShaderMaterial
+	if material.get_shader_parameter("season_tint") != winter_tint or float(material.get_shader_parameter("storm_foam_gain")) != float(storm["foam_gain"]):
+		push_error("TB1: sea material did not receive the season or storm settings")
+		ok = false
+	var terrain_material := ShaderMaterial.new()
+	terrain_material.shader = TERRAIN_SHADER
+	terrain_material.set_shader_parameter("weather_enabled", true)
+	sea.sync_weather(terrain_material)
+	if material.get_shader_parameter("weather_enabled") != true:
+		push_error("TB1: sea material did not receive the weather mask state")
+		ok = false
+	sea.free()
+	return ok
 
 
 ## Point 3 : étalonnage par saison (`data/ui/`).

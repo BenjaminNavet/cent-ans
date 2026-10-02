@@ -60,6 +60,22 @@ uniform float ocean_detail_scale = 1.0;
 // Profondeurs (m) du passage de la mer côtière au large.
 uniform vec2 ocean_detail_depth = vec2(30.0, 120.0);
 uniform float mid_depth_m = 25.0;
+// Lot TB1 : mer selon la saison (valeurs de `data/ui/campaign_seasons.json`, mêlées par
+// `SeasonLook.sea` et posées par `Sea.apply_season`) : teinte multiplicative, part de gris, écume.
+uniform vec3 season_tint = vec3(1.0);
+uniform float season_desaturate = 0.0;
+uniform float season_foam = 1.0;
+// Lot TB1 : mer sous la tempête. Masque météo par province du lot CM2 (R pluie, A orage), repris
+// du terrain par `Sea.sync_weather` ; la tempête d'une province côtière porte à `storm_reach_px`.
+uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
+uniform sampler2D weather_mask : filter_nearest, repeat_disable, hint_default_black;
+uniform bool weather_enabled = false;
+uniform float storm_foam_gain = 0.0;
+uniform float storm_foam_width = 0.0;
+uniform float storm_whitecaps = 0.0;
+uniform float storm_darken = 0.0;
+uniform float storm_reach_px = 12.0;
+uniform float storm_rain_share = 0.4;
 // Lot CM2 : mer des portulans (vue stratégique parchemin).
 #include "res://shaders/parchment_sea.gdshaderinc"
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : couleur de profondeur
@@ -89,6 +105,29 @@ float value_noise(vec2 p) {
 	vec2 u = f * f * (3.0 - 2.0 * f);
 	return mix(mix(hash12(i), hash12(i + vec2(1.0, 0.0)), u.x),
 		mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+// TB1 : force de la tempête [0, 1] au point p (px carte) : province lue ici et à `storm_reach_px`
+// autour (frange déformée par le bruit : pas de bord de province net sur l'eau).
+float sea_storm(vec2 p) {
+	if (!weather_enabled) {
+		return 0.0;
+	}
+	ivec2 sz = textureSize(province_ids, 0);
+	int width = textureSize(weather_mask, 0).x - 1;
+	float warp = value_noise(p * 0.05) * 6.2832;
+	float sum = 0.0;
+	for (int i = 0; i < 5; i++) {
+		float ang = warp + float(i) * 1.5708;
+		vec2 q = p + (i == 0 ? vec2(0.0) : vec2(cos(ang), sin(ang)) * storm_reach_px * (0.5 + value_noise(p * 0.11 + float(i) * 3.7)));
+		vec4 c = texelFetch(province_ids, clamp(ivec2(floor(q)), ivec2(0), sz - ivec2(1)), 0);
+		int id = int(round(c.r * 255.0)) | (int(round(c.g * 255.0)) << 8);
+		if (id > 0) {
+			vec4 w = texelFetch(weather_mask, ivec2(clamp(id, 0, width), 0), 0);
+			sum += max(w.a, w.r * storm_rain_share);
+		}
+	}
+	return clamp(sum * 0.4, 0.0, 1.0);
 }
 
 // Hauteur de houle (somme de trains d'ondes orientés + bruit), en unités arbitraires.
@@ -159,16 +198,26 @@ void fragment() {
 	n = normalize(n + mix(rc_sea_n, rc_ocean_n, rc_ocean) * rc_near);
 	// Creux et crêtes légèrement contrastés dans la couleur (lisibles sans reflet du soleil).
 	col *= 1.0 + h0 * 0.06 * (1.0 - smoothstep(0.25, 1.2, footprint));
+	// TB1 : mer de la saison (grise et sombre l'hiver), assombrie sous la tempête.
+	float storm = sea_storm(p);
+	col = mix(col, vec3(dot(col, vec3(0.2126, 0.7152, 0.0722))), season_desaturate) * season_tint;
+	col *= 1.0 - storm_darken * storm;
 
 	// Écume : bande près du rivage, lignes qui avancent vers la côte, cassées par le bruit.
 	float coast = has_coast_dist && inside ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : -50.0;
 	float off = max(-coast, 0.0);
-	float band = 1.0 - smoothstep(0.0, foam_px, off);
+	float foam_w = foam_px * (1.0 + storm_foam_width * storm);  // TB1 : bande plus large par tempête
+	float band = 1.0 - smoothstep(0.0, foam_w, off);
 	float lines = smoothstep(0.55, 0.95, sin(off * 5.5 + TIME * 1.6 + value_noise(p * 0.8) * 4.0) * 0.5 + 0.5);
 	float broken = smoothstep(0.35, 0.75, value_noise(p * 1.6 + vec2(TIME * 0.05, 0.0)));
 	float foam = band * mix(0.35 + 0.65 * lines * broken, 0.6, far_t);
-	foam *= 1.0 - smoothstep(foam_px * 0.2, foam_px, off) * 0.5;
-	col = mix(col, foam_color, foam * 0.55);
+	foam *= 1.0 - smoothstep(foam_w * 0.2, foam_w, off) * 0.5;
+	foam = clamp(foam * season_foam * (1.0 + storm_foam_gain * storm), 0.0, 1.6);  // TB1
+	// TB1 : moutons au large par tempête (crêtes qui déferlent), estompés au dézoom.
+	float caps = smoothstep(0.70, 0.92, value_noise(p * 2.3 + vec2(TIME * 0.25, TIME * 0.1)))
+		* smoothstep(0.35, 0.6, value_noise(p * 0.31 - vec2(TIME * 0.03, 0.0)));
+	foam = max(foam, caps * storm * storm_whitecaps * mix(1.0, 0.45, far_t) * step(0.0, off));
+	col = mix(col, foam_color, min(foam * 0.55, 0.9));
 	alpha = mix(alpha, 0.9, foam * 0.5);
 	// Côte précise (raster) plutôt que l'intersection avec le maillage (LOD grossier) : l'eau
 	// s'efface sur la terre même si la géométrie y passe sous le niveau de la mer.

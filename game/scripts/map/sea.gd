@@ -37,6 +37,8 @@ func setup(map_size: Vector2i) -> void:
 	WaterDetail.apply(material, "sea")  # RC5 : détail Nano Banana 2 (repli : rendu inchangé)
 	WaterDetail.apply(material, "ocean", "ocean_detail")
 	material_override = material
+	for key: String in SeasonLook.storm():  # TB1 : mer sous la tempête
+		material.set_shader_parameter("storm_" + key, SeasonLook.storm()[key])
 	# Fond opaque sous l'eau transparente : masque le bord de la carte et l'arrière-plan.
 	var floor_instance := MeshInstance3D.new()
 	floor_instance.name = "Abyss"
@@ -50,3 +52,27 @@ func setup(map_size: Vector2i) -> void:
 	floor_material.metallic_specular = 0.15
 	floor_instance.material_override = floor_material
 	add_child(floor_instance)
+
+
+## Lot TB1 : mer de la saison (`weights` : poids printemps, été, automne, hiver de `SeasonVisuals`),
+## valeurs de `data/ui/campaign_seasons.json`.
+func apply_season(weights: Vector4) -> void:
+	var material := material_override as ShaderMaterial
+	if material == null:
+		return
+	var look := SeasonLook.sea(weights)
+	material.set_shader_parameter("season_tint", look["tint"])
+	material.set_shader_parameter("season_desaturate", look["desaturate"])
+	material.set_shader_parameter("season_foam", look["foam"])
+
+
+## Lot TB1 : reprend du terrain le masque météo par province (CM2) et la carte des provinces,
+## pour l'écume de tempête.
+func sync_weather(terrain_material: ShaderMaterial) -> void:
+	var material := material_override as ShaderMaterial
+	if material == null or terrain_material == null:
+		return
+	for key in ["province_ids", "weather_mask", "weather_enabled"]:
+		var value: Variant = terrain_material.get_shader_parameter(key)
+		if value != material.get_shader_parameter(key):
+			material.set_shader_parameter(key, value)

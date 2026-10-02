@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "campaign_seasons_ui.schema.json",
+  "title": "Saisons de la carte de campagne (TB1)",
+  "description": "Réglages purement visuels des saisons de la carte de campagne, lus par game/scripts/map/season_look.gd : mer, tempête, étalonnage de carte, neige des toits. Aucune règle de jeu.",
+  "type": "object",
+  "required": [
+    "seasons",
+    "storm"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "seasons": {
+      "type": "object",
+      "required": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "spring": {
+          "$ref": "#/$defs/season"
+        },
+        "summer": {
+          "$ref": "#/$defs/season"
+        },
+        "autumn": {
+          "$ref": "#/$defs/season"
+        },
+        "winter": {
+          "$ref": "#/$defs/season"
+        }
+      }
+    },
+    "storm": {
+      "description": "Mer sous une province en tempête (masque météo CM2 ; la pluie compte pour `rain_share`).",
+      "type": "object",
+      "required": [
+        "foam_gain",
+        "foam_width",
+        "whitecaps",
+        "darken",
+        "reach_px",
+        "rain_share"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "foam_gain": {
+          "description": "Surcroît d'écume du rivage à pleine tempête (0 : aucun).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "foam_width": {
+          "description": "Élargissement de la bande d'écume (multiple de sa largeur).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "whitecaps": {
+          "description": "Part de moutons au large (0-1).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "darken": {
+          "description": "Assombrissement de l'eau (0-1).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.8
+        },
+        "reach_px": {
+          "description": "Portée (px carte) de la tempête d'une province côtière vers le large.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60
+        },
+        "rain_share": {
+          "description": "Part de l'effet sous la simple pluie.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "rgb": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 2
+      }
+    },
+    "season": {
+      "type": "object",
+      "required": [
+        "sea"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sea": {
+          "type": "object",
+          "required": [
+            "tint",
+            "desaturate",
+            "foam"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "tint": {
+              "description": "Teinte multiplicative de l'eau (1, 1, 1 : inchangée).",
+              "$ref": "#/$defs/rgb"
+            },
+            "desaturate": {
+              "description": "Part de gris (0 : couleur d'origine, 1 : gris).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "foam": {
+              "description": "Force de l'écume du rivage (1 : inchangée).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 3
+            }
+          }
+        }
+      }
+    }
+  }
+}
