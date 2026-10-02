@@ -32,9 +32,9 @@ uniform float rl_pond_cell_px = 2.8;       // taille d'une cellule d'étang (pix
 // Tailles en pixels d'un écran de `rl_water_ref_height` de haut (même cadrage à toute résolution ;
 // 0 = pixels écran bruts).
 uniform float rl_water_ref_height = 1080.0;
-uniform float rl_pond_min_px = 8.0;        // plus petit diamètre d'un étang (px de référence)
+uniform float rl_pond_min_px = 7.0;        // plus petit diamètre d'un étang (px de référence, moyenne des deux axes écran)
 uniform float rl_pond_max_cell_px = 22.4;  // cellule du dernier palier (px carte, cellule × 2^n) ; au-delà, couverture moyenne
-uniform float rl_pond_fill = 0.72;         // part des cellules portant un étang, × densité de la zone
+uniform float rl_pond_fill = 0.9;          // part des cellules portant un étang, × densité de la zone
 uniform float rl_pond_bank = 0.05;         // largeur de la berge (part de cellule ; au moins 1 px écran)
 uniform float rl_pond_bank_amount = 0.75;  // opacité de la berge (couleur `lake_bank_color`)
 uniform float rl_pond_far_cover = 0.35;    // couverture moyenne au-delà du dernier palier (× densité)
@@ -42,7 +42,7 @@ uniform float rl_pool_min_px = 5.0;        // plus petite mare de marais (px de 
 uniform float rl_pool_amount = 0.38;       // part d'eau libre d'un marais dense (roselière dominante)
 uniform float rl_pool_opacity = 0.85;      // opacité des mares
 uniform float rl_pool_max_scale = 16.0;    // grossissement maximal des mares
-uniform float rl_pool_lake_tint = 0.6;     // 0 = eau de marais (`rl_marsh_water`), 1 = eau des lacs
+uniform float rl_pool_lake_tint = 0.85;    // 0 = eau de marais (`rl_marsh_water`), 1 = eau des lacs
 uniform float rl_forest_edge = 0.35;       // ondulation des lisières (poids de forêt)
 
 float rl_occ_at(vec2 uv) {
@@ -90,6 +90,9 @@ vec4 rl_landcover(vec4 s, vec2 p, float footprint) {
 	return s;
 }
 
+// Plus petit diamètre d'un étang, en part de cellule (voir `rl_pond_sd`).
+const float RL_POND_MIN_SPAN = 0.31;
+
 // Étang médiéval dans la cellule de `p` : ellipse orientée coupée par une chaussée droite.
 // `cell_px` : taille de la cellule du palier (px carte) ; la densité de la zone est lue autour du
 // centre de la cellule (un étang grossi n'est pas rogné par la limite de la zone).
@@ -102,7 +105,7 @@ float rl_pond_sd(vec2 p, float cell_px) {
 	// Plus faible densité aux quatre coins de l'emprise possible de l'étang : pas d'étang à cheval
 	// sur la limite de la zone.
 	vec2 mid = (cell + 0.5) * cell_px / map_size;
-	vec2 reach = vec2(0.25 * cell_px) / map_size;
+	vec2 reach = vec2(0.18 * cell_px) / map_size;
 	float density = min(
 		min(textureLod(wetlands, mid + reach, 0.0).g, textureLod(wetlands, mid - reach, 0.0).g),
 		min(textureLod(wetlands, mid + vec2(reach.x, -reach.y), 0.0).g, textureLod(wetlands, mid + vec2(-reach.x, reach.y), 0.0).g));
@@ -110,13 +113,14 @@ float rl_pond_sd(vec2 p, float cell_px) {
 	if (h > density * rl_pond_fill) {
 		return 1.0;
 	}
-	vec2 jitter = (vec2(hash12(key + 1.3), hash12(key + 5.9)) - 0.5) * 0.24;
+	vec2 jitter = (vec2(hash12(key + 1.3), hash12(key + 5.9)) - 0.5) * 0.2;
 	float ang = hash12(key + 9.1) * 6.2832;
 	vec2 dir = vec2(cos(ang), sin(ang));
 	vec2 d = local - jitter;
 	vec2 r = vec2(dot(d, dir), dot(d, vec2(-dir.y, dir.x)));
-	float ra = mix(0.22, 0.34, hash12(key + 2.2));
-	float rb = ra * mix(0.55, 0.9, hash12(key + 4.4));
+	// Petit axe d'au moins 0,31 cellule (`RL_POND_MIN_SPAN`), grand axe d'au plus 0,72.
+	float ra = mix(0.26, 0.36, hash12(key + 2.2));
+	float rb = ra * mix(0.6, 0.9, hash12(key + 4.4));
 	float wob = (value_noise(q * 14.0) - 0.5) * 0.07 + (value_noise(q * 36.0) - 0.5) * 0.025;
 	float e = length(r / vec2(ra, rb)) - 1.0;
 	float sd = e * rb + wob;
@@ -141,10 +145,10 @@ vec3 rl_pond_layer(vec2 p, float cell_px, float footprint) {
 
 // HC2 : palier continu d'une échelle doublée : la taille voulue vaut `wanted` fois la taille de
 // base. Renvoie (palier bas, part du palier suivant) ; le palier bas est toujours ≥ la taille voulue
-// (fondu vers le suivant sur le dernier tiers).
+// (fondu vers le suivant sur les derniers 15 % du palier).
 vec2 rl_tier(float wanted, float max_tier) {
 	float k = clamp(log2(max(wanted, 1e-4)), -1.0, floor(max_tier + 0.01) - 1.0);
-	return vec2(floor(k) + 1.0, smoothstep(0.67, 1.0, fract(k)));
+	return vec2(floor(k) + 1.0, smoothstep(0.85, 1.0, fract(k)));
 }
 
 float rl_pool_noise(vec2 p) {
@@ -171,8 +175,10 @@ void rl_surface(vec2 p, vec2 uv, float footprint, float viewport_h, float land_f
 		return;
 	}
 	float aa = max(footprint, 1e-3);
-	// HC2 : empreinte en pixels de référence (écran de `rl_water_ref_height` de haut).
-	float ref_fp = aa * (rl_water_ref_height > 0.0 ? viewport_h / rl_water_ref_height : 1.0);
+	// HC2 : empreinte en pixels de référence (écran de `rl_water_ref_height` de haut), moyenne
+	// géométrique des deux axes écran (la vue inclinée écrase l'axe nord-sud : surface écran égale).
+	float ref_fp = sqrt(max(length(dFdx(p)) * length(dFdy(p)), 1e-6))
+		* (rl_water_ref_height > 0.0 ? viewport_h / rl_water_ref_height : 1.0);
 	// Prés humides et tourbières : herbe plus sombre et plus fraîche, mouchetée.
 	float moss = value_noise(p * 3.7);
 	col = mix(col, rl_wet_meadow * (0.8 + 0.4 * moss), wl.b * 0.55);
@@ -200,9 +206,8 @@ void rl_surface(vec2 p, vec2 uv, float footprint, float viewport_h, float land_f
 	float pond = 0.0;
 	float pond_shallow = 0.0;
 	if (wl.g > 0.01) {
-		// Le plus petit étang fait 0,24 cellule (petit axe).
 		float max_tier = log2(max(rl_pond_max_cell_px / rl_pond_cell_px, 1.0));
-		vec2 tier = rl_tier(ref_fp * rl_pond_min_px / (0.24 * rl_pond_cell_px), max_tier);
+		vec2 tier = rl_tier(ref_fp * rl_pond_min_px / (RL_POND_MIN_SPAN * rl_pond_cell_px), max_tier);
 		float cell0 = rl_pond_cell_px * exp2(tier.x);
 		vec3 layer = rl_pond_layer(p, cell0, aa);
 		if (tier.y > 0.0) {
@@ -210,7 +215,7 @@ void rl_surface(vec2 p, vec2 uv, float footprint, float viewport_h, float land_f
 		}
 		// Au-delà du dernier palier, les étangs rapetissent : couverture moyenne quand le plus petit
 		// passe sous 70 % puis 30 % de `rl_pond_min_px`.
-		float vis = smoothstep(0.3, 0.7, 0.24 * rl_pond_max_cell_px / max(ref_fp * rl_pond_min_px, 1e-4));
+		float vis = smoothstep(0.3, 0.7, RL_POND_MIN_SPAN * rl_pond_max_cell_px / max(ref_fp * rl_pond_min_px, 1e-4));
 		pond = mix(wl.g * rl_pond_far_cover, layer.x, vis);
 		pond_shallow = layer.z * vis;
 		col = mix(col, lake_bank_color, layer.y * vis * rl_pond_bank_amount * land_f);

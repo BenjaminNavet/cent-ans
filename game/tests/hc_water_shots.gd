@@ -72,8 +72,8 @@ func _init() -> void:
 		image.convert(Image.FORMAT_RGB8)
 		var stats: Dictionary = VIEW.water_stats(image, mask)
 		var scale: Vector2 = VIEW.screen_px_per_map_px(self, map, view[1]) * float(CELL.x) / window_width
-		print("HC water %s px/map_px %.2f x %.2f share %.4f water %s land %s blobs %d biggest %d" % [
-			view[0], scale.x, scale.y, stats["share"], stats["water_rgb"], stats["land_rgb"], stats["blobs"], stats["biggest_px"]])
+		print("HC water %s px/map_px %.2f x %.2f share %.4f water %s core %s land %s blobs %d biggest %d" % [
+			view[0], scale.x, scale.y, stats["share"], stats["water_rgb"], stats["core_rgb"], stats["land_rgb"], stats["blobs"], stats["biggest_px"]])
 		board.blit_rect(image, Rect2i(Vector2i.ZERO, CELL), Vector2i((index % 2) * CELL.x, (index / 2) * CELL.y))
 	if board_wanted:
 		var path := out_dir.path_join("%s.jpg" % board_name)

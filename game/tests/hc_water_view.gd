@@ -129,13 +129,15 @@ static func water_mask(tree: SceneTree, map: Node3D) -> Image:
 	return mask
 
 
-## Statistiques d'une vue : part d'eau, couleur moyenne (sRGB 0-255) de l'eau et du reste, plus
+## Statistiques d'une vue : part d'eau, couleur moyenne (sRGB 0-255) de l'eau, du cœur des nappes et du reste, plus
 ## grande nappe (px), nombre de nappes d'au moins `min_blob_px` pixels (composantes 4-connexes).
 static func water_stats(image: Image, mask: Image, min_blob_px: int = 12) -> Dictionary:
 	var w := mask.get_width()
 	var h := mask.get_height()
 	var water := Vector3.ZERO
 	var land := Vector3.ZERO
+	var core := Vector3.ZERO
+	var n_core := 0
 	var n_water := 0
 	var n_land := 0
 	var wet := PackedByteArray()
@@ -148,6 +150,11 @@ static func water_stats(image: Image, mask: Image, min_blob_px: int = 12) -> Dic
 				water += v
 				n_water += 1
 				wet[y * w + x] = 1
+				# Cœur de nappe : les quatre voisins sont aussi de l'eau (couleur sans mélange de bord).
+				if x > 0 and y > 0 and x < w - 1 and y < h - 1 and mask.get_pixel(x - 1, y).r > 0.5 and mask.get_pixel(x + 1, y).r > 0.5 \
+						and mask.get_pixel(x, y - 1).r > 0.5 and mask.get_pixel(x, y + 1).r > 0.5:
+					core += v
+					n_core += 1
 			else:
 				land += v
 				n_land += 1
@@ -175,6 +182,7 @@ static func water_stats(image: Image, mask: Image, min_blob_px: int = 12) -> Dic
 	return {
 		"share": float(n_water) / maxf(float(w * h), 1.0),
 		"water_rgb": (water / maxf(n_water, 1.0)).round(),
+		"core_rgb": (core / maxf(n_core, 1.0)).round(),
 		"land_rgb": (land / maxf(n_land, 1.0)).round(),
 		"blobs": blobs,
 		"biggest_px": biggest,

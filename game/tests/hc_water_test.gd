@@ -6,9 +6,10 @@ extends SceneTree
 ##  2. `terrain.gdshader` compile et expose les réglages de l'eau intérieure (couleurs des lacs,
 ##     étangs et mares généralisés) ; eau des lacs nettement plus claire que la forêt, bleue ;
 ##     nappe des lacs aux couleurs propres aux lacs ;
-##  3. avec une fenêtre réelle seulement (sans `--headless`) : part de pixels d'eau intérieure et
-##     nombre de nappes distinctes dans la Dombes à rig 150 et 300, comptés par passage magenta
-##     (`hc_water_view.gd`) — au dézoom les étangs restent des nappes, pas une teinte moyenne.
+##  3. avec une fenêtre réelle seulement (sans `--headless`) : part de pixels d'eau et nombre de
+##     nappes distinctes dues aux étangs dans la Dombes à rig 150 et 300, comptés par passage
+##     magenta (`hc_water_view.gd`) — au dézoom les étangs restent des nappes, pas une teinte
+##     moyenne — et eau plus bleue que le sol alentour.
 ## Usage : godot --headless --path game --script res://tests/hc_water_test.gd
 ##         godot --path game --resolution 640x400 --script res://tests/hc_water_test.gd --
 ##           --hide-armies --map-weather=clear        (contrôle chiffré sur image en plus)
@@ -16,6 +17,7 @@ extends SceneTree
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const VIEW := preload("res://tests/hc_water_view.gd")
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
+const LANDCOVER_INCLUDE := "res://shaders/relief_landcover.gdshaderinc"
 ## Lacs de `lakes.json` avant HC2 (`min_area_px` 30).
 const LAKES_BEFORE := 762
 ## Plafond de triangles de la nappe des lacs (≈ 15 500 mesurés au seuil 8).
@@ -26,8 +28,11 @@ const POND_UNIFORMS := [
 	"rl_pool_opacity", "rl_pool_max_scale", "rl_pool_lake_tint",
 ]
 const LAKE_UNIFORMS := ["lake_color", "lake_shallow_color", "lake_bank_color", "lake_sky_color", "lake_sky_reflect"]
-## Dombes : part minimale de pixels d'eau et nombre minimal de nappes d'au moins 12 px (640×400).
-const DOMBES_CHECKS := [[150.0, 0.01, 8], [300.0, 0.002, 3]]
+## Dombes, par distance de rig : nappes d'étang d'au moins `POND_BLOB_PX` pixels (image 640×400)
+## et part d'image gagnées par rapport à la même vue sans étangs (`rl_pond_fill` = 0 ; les lacs de
+## l'arrière-plan sont ainsi décomptés). À rig 150 la zone ne couvre que ≈ 100×40 px de l'image.
+const DOMBES_CHECKS := [[150.0, 6, 0.0006], [300.0, 2, 0.0001]]
+const POND_BLOB_PX := 6
 
 var _failures := 0
 
@@ -87,18 +92,30 @@ func _check_shader() -> void:
 		return
 	for uniform_name: String in POND_UNIFORMS + LAKE_UNIFORMS:
 		_check(uniforms.has(uniform_name), "terrain.gdshader lacks uniform %s" % uniform_name)
-	var shader_rid := TERRAIN_SHADER.get_rid()
-	var lake: Variant = RenderingServer.shader_get_parameter_default(shader_rid, "lake_color")
-	var forest: Variant = RenderingServer.shader_get_parameter_default(shader_rid, "tint_forest")
-	if _check(lake is Vector3 and forest is Vector3, "lake_color / tint_forest defaults unreadable: %s %s" % [lake, forest]):
+	# Valeurs par défaut lues dans le source (le serveur de rendu headless ne les rend pas).
+	var lake := _default_of(TERRAIN_SHADER.code, "lake_color")
+	var forest := _default_of(TERRAIN_SHADER.code, "tint_forest")
+	if _check(lake.size() == 3 and forest.size() == 3, "lake_color / tint_forest defaults unreadable: %s %s" % [lake, forest]):
 		var weights := Vector3(0.2126, 0.7152, 0.0722)
-		var lake_v: Vector3 = lake
-		var forest_v: Vector3 = forest
+		var lake_v := Vector3(lake[0], lake[1], lake[2])
+		var forest_v := Vector3(forest[0], forest[1], forest[2])
 		_check(lake_v.dot(weights) > 1.8 * forest_v.dot(weights), "lake %s not clearly lighter than forest %s" % [lake_v, forest_v])
 		_check(lake_v.z > lake_v.y and lake_v.y > lake_v.x, "lake %s is not blue-grey" % lake_v)
 		print("hc_water_test: lake_color %s (luminance %.3f), tint_forest %s (luminance %.3f)" % [lake_v, lake_v.dot(weights), forest_v, forest_v.dot(weights)])
-	var min_px: Variant = RenderingServer.shader_get_parameter_default(shader_rid, "rl_pond_min_px")
-	_check(min_px is float and float(min_px) >= 6.0, "rl_pond_min_px default %s under 6 px" % [min_px])
+	var min_px := _default_of(FileAccess.get_file_as_string(LANDCOVER_INCLUDE), "rl_pond_min_px")
+	_check(min_px.size() == 1 and min_px[0] >= 6.0, "rl_pond_min_px default %s under 6 px" % [min_px])
+
+
+## Valeur par défaut d'un uniforme `float` ou `vec3` dans un source de shader (tableau vide sinon).
+func _default_of(source: String, uniform_name: String) -> Array[float]:
+	var regex := RegEx.new()
+	regex.compile("uniform\\s+\\w+\\s+%s\\s*(?::[^=;]*)?=\\s*(?:vec3\\()?([^;)]*)\\)?\\s*;" % uniform_name)
+	var found := regex.search(source)
+	var values: Array[float] = []
+	if found != null:
+		for part in found.get_string(1).split(",", false):
+			values.append(float(part.strip_edges()))
+	return values
 
 
 ## Fenêtre réelle : la Dombes montre des nappes d'eau distinctes à rig 150 et encore à rig 300.
@@ -108,14 +125,31 @@ func _check_image() -> void:
 		return
 	for entry: Array in DOMBES_CHECKS:
 		await VIEW.frame(self, map, VIEW.DOMBES, entry[0])
-		var image: Image = await VIEW.grab(self)
-		var mask: Image = await VIEW.water_mask(self, map)
-		image.resize(640, 400, Image.INTERPOLATE_LANCZOS)
-		mask.resize(640, 400, Image.INTERPOLATE_NEAREST)
-		var stats: Dictionary = VIEW.water_stats(image, mask)
-		print("hc_water_test: Dombes rig %d share %.4f blobs %d biggest %d water %s land %s" % [
-			int(entry[0]), stats["share"], stats["blobs"], stats["biggest_px"], stats["water_rgb"], stats["land_rgb"]])
-		_check(float(stats["share"]) > float(entry[1]), "Dombes rig %d: water share %.4f under %.4f" % [int(entry[0]), stats["share"], entry[1]])
-		_check(int(stats["blobs"]) >= int(entry[2]), "Dombes rig %d: %d water sheets, %d wanted" % [int(entry[0]), stats["blobs"], entry[2]])
+		var materials: Array[ShaderMaterial] = VIEW.terrain_materials(map)
+		for material in materials:
+			material.set_shader_parameter("rl_pond_fill", 0.0)
+		var bare: Dictionary = await _stats(map)
+		for material in materials:
+			material.set_shader_parameter("rl_pond_fill", null)  # valeur par défaut du shader
+		var stats: Dictionary = await _stats(map)
+		var sheets := int(stats["blobs"]) - int(bare["blobs"])
+		var share := float(stats["share"]) - float(bare["share"])
+		print("hc_water_test: Dombes rig %d ponds: %d sheets, share %.4f (view %.4f, without ponds %.4f), water %s land %s" % [
+			int(entry[0]), sheets, share, stats["share"], bare["share"], stats["core_rgb"], stats["land_rgb"]])
+		_check(sheets >= int(entry[1]), "Dombes rig %d: %d pond sheets, %d wanted" % [int(entry[0]), sheets, entry[1]])
+		_check(share > float(entry[2]), "Dombes rig %d: pond share %.4f under %.4f" % [int(entry[0]), share, entry[2]])
+		var water: Vector3 = stats["core_rgb"]
+		var land: Vector3 = stats["land_rgb"]
+		_check(water.z > land.z * 1.5 and water.z > water.x * 1.2, "Dombes rig %d: water %s does not stand out from the land %s" % [int(entry[0]), water, land])
 	map.queue_free()
 	await process_frame
+
+
+func _stats(map: Node3D) -> Dictionary:
+	for i in 4:
+		await process_frame
+	var image: Image = await VIEW.grab(self)
+	var mask: Image = await VIEW.water_mask(self, map)
+	image.resize(640, 400, Image.INTERPOLATE_LANCZOS)
+	mask.resize(640, 400, Image.INTERPOLATE_NEAREST)
+	return VIEW.water_stats(image, mask, POND_BLOB_PX)

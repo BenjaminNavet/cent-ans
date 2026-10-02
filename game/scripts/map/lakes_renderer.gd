@@ -20,8 +20,8 @@ const LAKES_FILE := "lakes.json"
 @export var sheet_alpha: float = 0.88
 ## HC2 (ADR 0161 §3) : couleurs propres aux lacs, plus claires que celles des fleuves et accordées
 ## à l'eau peinte du terrain (`lake_color`, `lake_shallow_color` de `terrain.gdshader`, en sRGB ici).
-@export var deep_color: Color = Color(0.30, 0.45, 0.50)
-@export var shallow_color: Color = Color(0.38, 0.49, 0.47)
+@export var deep_color: Color = Color(0.29, 0.52, 0.65)
+@export var shallow_color: Color = Color(0.38, 0.57, 0.64)
 ## Part de ciel reflétée en vue rasante (en plus du reflet constant du shader).
 @export var sky_reflect: float = 0.8
 

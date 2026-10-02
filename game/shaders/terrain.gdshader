@@ -103,12 +103,12 @@ uniform sampler2D landuse : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_landuse = false;
 // HC2 (ADR 0161 §3) : eau intérieure éclaircie, bleu-gris, distincte des forêts à hauteur de jeu
 // (avant : 0.035, 0.10, 0.115, confondue avec les massifs) ; reflet du ciel `lake_sky_reflect`.
-uniform vec3 lake_color = vec3(0.075, 0.17, 0.21);
-uniform vec3 lake_sky_color = vec3(0.39, 0.48, 0.54);
-uniform float lake_sky_reflect = 0.25;
+uniform vec3 lake_color = vec3(0.07, 0.23, 0.38);
+uniform vec3 lake_sky_color = vec3(0.38, 0.55, 0.72);
+uniform float lake_sky_reflect = 0.35;
 // A1-04 : berge de lac (vase, roseaux) à la place du sable et de l'écume marins. HC2 : berge claire.
 uniform vec3 lake_bank_color = vec3(0.15, 0.14, 0.085);
-uniform vec3 lake_shallow_color = vec3(0.12, 0.20, 0.18);
+uniform vec3 lake_shallow_color = vec3(0.12, 0.28, 0.36);
 uniform float lake_bank_px = 1.6;
 // HB7 : niveau (m) au-dessus duquel une eau est un lac ; en dessous, c'est la mer (même seuil que
 // water.gdshader). À 0 m, les hauts-fonds de la mer d'Azov (MNT 0-1 m) devenaient des « lacs »
