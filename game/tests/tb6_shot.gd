@@ -93,14 +93,22 @@ func _init() -> void:
 			await _bench(map, name)
 			continue
 		_report(map, name, at)
-		var image := root.get_viewport().get_texture().get_image()
+		var image := _grab()
 		var land := _land_blocks(map, data, image)
 		_stats(name, _block_luminance(image), land)
+		_color_stats(name, image, land)
 		if shots:
 			_shot(out_dir, name, image)
 		if ab:
 			await _ab(map, name, land)
 	quit(0)
+
+
+## Image du viewport après un rendu forcé : une fenêtre occultée par une autre n'est plus
+## redessinée par la boucle principale, et la capture resterait figée.
+func _grab() -> Image:
+	RenderingServer.force_draw(false)
+	return root.get_viewport().get_texture().get_image()
 
 
 func _shot(out_dir: String, name: String, image: Image) -> void:
@@ -195,11 +203,36 @@ func _stats(name: String, lum: PackedFloat32Array, land: PackedByteArray) -> voi
 	values.sort()
 	var median := values[values.size() / 2]
 	var dark := 0
+	var very_dark := 0
 	for v in values:
 		if v < median * 0.6:
 			dark += 1
-	print("TB6 stats %s land_blocks %d mean %.1f sd %.1f median %.1f dark_blocks %.1f%%" % [
-		name, values.size(), mean * 255.0, sd * 255.0, median * 255.0, 100.0 * dark / values.size()])
+		if v < median * 0.4:
+			very_dark += 1
+	print("TB6 stats %s land_blocks %d mean %.1f sd %.1f median %.1f p5 %.1f dark_blocks %.1f%% below_40pct_of_median %.1f%%" % [
+		name, values.size(), mean * 255.0, sd * 255.0, median * 255.0, values[values.size() / 20] * 255.0,
+		100.0 * dark / values.size(), 100.0 * very_dark / values.size()])
+
+
+## Teinte et saturation (HSV, couleurs affichées) du sol émergé : de la couleur moyenne, et
+## saturation moyenne par bloc. Sert à comparer les saisons sans lire l'image.
+func _color_stats(name: String, image: Image, land: PackedByteArray) -> void:
+	var bw := image.get_width() / BLOCK
+	var sum := Vector3.ZERO
+	var saturation := 0.0
+	var count := 0
+	for i in land.size():
+		if land[i] == 0:
+			continue
+		var c := image.get_pixel((i % bw) * BLOCK + BLOCK / 2, (i / bw) * BLOCK + BLOCK / 2)
+		sum += Vector3(c.r, c.g, c.b)
+		saturation += c.s
+		count += 1
+	if count == 0:
+		return
+	var mean := Color(sum.x / count, sum.y / count, sum.z / count)
+	print("TB6 color %s mean_rgb %d %d %d hue %.0f deg saturation_of_mean %.3f mean_block_saturation %.3f" % [
+		name, roundi(mean.r * 255.0), roundi(mean.g * 255.0), roundi(mean.b * 255.0), mean.h * 360.0, mean.s, saturation / count])
 
 
 ## Écart avec / sans chaque calque, sur la même vue : rapport de luminance par bloc de sol
@@ -210,6 +243,11 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 	var material: ShaderMaterial = terrain.material
 	var sun := map.get_node_or_null("Sun") as DirectionalLight3D
 	var env := (map.get_node_or_null("WorldEnvironment") as WorldEnvironment).environment
+	var trees: Array[Node3D] = []
+	for node in map.find_children("*", "Node3D", true, false):
+		var script: Script = node.get_script()
+		if script != null and script.resource_path.ends_with("/vegetation.gd") and (node as Node3D).visible:
+			trees.append(node)
 	var saved := {
 		"medium": view.cloud_medium_alpha, "max": view.cloud_max_alpha,
 		"weather": material.get_shader_parameter("weather_enabled"),
@@ -218,11 +256,12 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		"mist": material.get_shader_parameter("weather_mist_max"),
 		"valley": material.get_shader_parameter("weather_valley_mist"),
 		"fow": material.get_shader_parameter("fog_enabled"),
+		"sg": material.get_shader_parameter("sg_strength"), "hb": material.get_shader_parameter("hb_strength"),
 		"ssao": env.ssao_enabled, "ssil": env.ssil_enabled, "fog": env.fog_enabled,
 	}
-	for layer: String in ["clouds", "ground_weather", "cloud_shadows", "sun_shadows", "mist", "valley_mist", "fog_of_war", "ssao", "ssil", "depth_fog"]:
+	for layer: String in ["clouds", "ground_weather", "cloud_shadows", "sun_shadows", "mist", "valley_mist", "colormap", "biome_ground", "trees", "fog_of_war", "ssao", "ssil", "depth_fog"]:
 		# Image de référence reprise avant chaque calque : la dérive (vent, figurants) ne compte pas.
-		var with := _block_luminance(root.get_viewport().get_texture().get_image())
+		var with := _block_luminance(_grab())
 		match layer:
 			"clouds":
 				view.cloud_medium_alpha = 0.0
@@ -240,6 +279,13 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 				material.set_shader_parameter("weather_valley_mist", 0.0)
 			"fog_of_war":
 				material.set_shader_parameter("fog_enabled", false)
+			"colormap":
+				material.set_shader_parameter("sg_strength", 0.0)
+			"biome_ground":
+				material.set_shader_parameter("hb_strength", 0.0)
+			"trees":
+				for node: Node3D in trees:
+					node.visible = false
 			"ssao":
 				env.ssao_enabled = false
 			"ssil":
@@ -250,7 +296,7 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 			if layer == "cloud_shadows":  # la vue météo repose la valeur quand elle change
 				material.set_shader_parameter("cloud_shadow_amount", 0.0)
 			await process_frame
-		var without := _block_luminance(root.get_viewport().get_texture().get_image())
+		var without := _block_luminance(_grab())
 		view.cloud_medium_alpha = saved["medium"]
 		view.cloud_max_alpha = saved["max"]
 		material.set_shader_parameter("weather_enabled", saved["weather"])
@@ -258,6 +304,10 @@ func _ab(map: Node3D, name: String, land: PackedByteArray) -> void:
 		material.set_shader_parameter("weather_mist_max", saved["mist"])
 		material.set_shader_parameter("weather_valley_mist", saved["valley"])
 		sun.shadow_enabled = saved["sun"]
+		material.set_shader_parameter("sg_strength", saved["sg"])
+		material.set_shader_parameter("hb_strength", saved["hb"])
+		for node: Node3D in trees:
+			node.visible = true
 		material.set_shader_parameter("fog_enabled", saved["fow"] if saved["fow"] != null else true)
 		env.ssao_enabled = saved["ssao"]
 		env.ssil_enabled = saved["ssil"]

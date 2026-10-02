@@ -113,6 +113,15 @@ func _test_golden_light(map: Node3D) -> void:
 			# L'hiver reste bleuté : soleil pâle, étalonnage froid de TB1 intact.
 			_check(color.r - color.b <= 0.25, "winter: sun should stay pale (%s)" % color)
 			_check(float(SeasonLook.grade("winter").get("temperature", 0.0)) < 0.0, "winter: TB1 cold grade lost")
+		elif season == "autumn":
+			# Retouche : la lumière chaude et l'étalonnage roux de TB1 se cumulaient en orange vif.
+			# Soleil d'automne moins chaud que celui d'été, et étalonnage de carte qui retient le rouge.
+			var summer: Color = CampaignAtmosphere.resolve_preset("summer")["sun_color"]
+			_check(color.r - color.b >= 0.2 and color.r - color.b < summer.r - summer.b, "autumn: sun should be warm but cooler than summer (%s)" % color)
+			var map_grade: Dictionary = (preset["grades"] as Array)[-1]
+			var gain: Array = map_grade.get("gain", [1.0, 1.0, 1.0])
+			_check(float(gain[0]) < 1.0 and float(gain[1]) >= 1.0, "autumn: map grade should hold the red back (gain %s)" % [gain])
+			_check(float(map_grade.get("saturation", 1.0)) <= 0.72, "autumn: map grade saturation should stay restrained")
 		else:
 			_check(color.r - color.b >= 0.3 and color.g - color.b >= 0.15, "%s: sun should be golden (%s)" % [season, color])
 			_check(float(preset["fog_sun_scatter"]) >= 0.3, "%s: golden haze towards the sun expected" % season)
