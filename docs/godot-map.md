@@ -1700,6 +1700,40 @@ la section suivante ne sont plus créées, sauf avec `--town-style=real`.
   1,2).
 - Captures : `tests/gc_shots.gd` (15 vues) ; test : `tests/gc_maquettes_test.gd`.
 
+## Habillage généralisé : arbres grossis, eaux lisibles (chantier HC, ADR 0161)
+
+Prolonge la carte généralisée (ADR 0158) : à hauteur de jeu, forêts, bosquets, lacs et étangs se
+lisent en volume au lieu de teintes plates.
+
+- **Arbres** (`map.tree_style` de `data/ui/campaign_map.json`, `generalised` par défaut,
+  `--tree-style=real` pour les arbres 1:1 de VT3). Réglages `generalised_*` de
+  `resources/map_prop_scale.tres` : hauteur monde constante d'un feuillu adulte
+  (`generalised_tree_height`), pas du semis (`generalised_spacing`), portée
+  (`generalised_max_distance`, fondu `generalised_fade`), zone de dessin en avant du point visé
+  (`generalised_view_*`), éclaircie au-delà de `generalised_thin_start` (les arbres restants
+  grossissent de 1/√part ; `generalised_far_density` = 1 pour une taille strictement constante),
+  ombres sous `generalised_shadow_distance`. Imposteurs à toutes les distances ; `forest_detail`
+  et les cartes proches 1:1 sont éteints dans ce style.
+- **Hors forêt** : bosquets (`generalised_grove_*`), arbres épars (`generalised_isolated_gain`,
+  `generalised_hedge_boost` en bocage), vergers, ripisylves, garrigue. Les haies alignées sur la
+  trame du parcellaire ne sont pas dessinées (enclos de GC5 plus petits qu'un arbre).
+- **Dégagements** (`tree_clearance.gd`, en tâche de fond après le semis) : emprises de
+  `SettlementLayer.vegetation_exclusions()` élargies d'un rayon de houppier, fleuves, lacs, mer,
+  routes principales (`generalised_crown_clearance`, `generalised_road_clearance`).
+- **Lacs** : `data/map/lakes.json` régénéré avec `min_area_px` 8 (1231 lacs) ; eau peinte et nappe
+  éclaircies (`lake_color`, `lake_sky_color`, `lake_sky_reflect`, `lake_bank_color` de
+  `terrain.gdshader`).
+- **Étangs et mares** (`relief_landcover.gdshaderinc`) : cellules doublées par paliers d'empreinte
+  (`rl_pond_*`, `rl_pool_*`) pour que les zones d'étangs de `wetlands.png` gardent des nappes
+  distinctes au dézoom ; taille minimale en pixels d'un écran de référence
+  (`rl_water_ref_height`).
+- **Données** (HC5, changent les règles) : `historical_forests.json` (146 massifs et landes) et
+  `wetlands.json` (77 zones) ; `landcover.py` boise chaque massif nommé à sa densité par un rang
+  local. Recuisson : `geo landcover` → `navgrid` → `colormap` → `horizon` (`docs/geo.md`).
+- **Tests et planches** : `tests/hc_forest_test.gd`, `tests/hc_water_test.gd` ;
+  `tests/hc_shots.gd` et `tests/hc_water_shots.gd` (planches 2×2, fenêtre réelle),
+  `tests/hc_density_probe.gd` (densités sans image).
+
 ## Villes 1:1 à toutes les hauteurs (chantier VT, ADR 0138)
 
 Plus aucune maquette agrandie sur la carte de campagne : les 2 141 villes (2 134 colonies de
