@@ -28,6 +28,7 @@ uniform float hb_cell_jitter = 0.16;    // variation de luminance d'une parcelle
 uniform float hb_cell_hue = 0.1;        // variation de teinte (jaune ↔ vert) d'une parcelle à l'autre
 uniform float hb_season_strength = 0.8; // TB1 : part de la saison sur les matières (0 : matières d'une seule saison)
 uniform float hb_season_gain = 1.0;     // TB1 : luminance des couleurs de saison des parcelles
+uniform float hb_snow_hedge = 0.6;       // TB1 : part des haies visible à travers la neige
 uniform float hb_debug = 0.0;           // diagnostic : 1 biome, 2 parcelles (R hasard, G culture), 3 part agricole
 
 float hb_hash(vec2 q) {
@@ -58,10 +59,13 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	if (!has_hb) {
 		return;
 	}
-	float w = hb_strength * (1.0 - smoothstep(hb_fade_start, hb_fade_end, footprint)) * (1.0 - snow) * land_f;
-	if (w <= 0.001) {
+	// TB1 : poids hors neige gardé à part (les haies percent la neige mince).
+	float w_bare = hb_strength * (1.0 - smoothstep(hb_fade_start, hb_fade_end, footprint)) * land_f;
+	float w = w_bare * (1.0 - snow);
+	if (w_bare <= 0.001) {
 		return;
 	}
+	float hedge_mask = 0.0;
 	// Orientation régionale des lanières (champs parallèles par terroir) : constante par région et
 	// rotation autour de l'origine de la région (tourner les coordonnées absolues avec un angle
 	// variable cisaillait tout en tourbillons).
@@ -150,6 +154,7 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 			float balk = 1.0 - smoothstep(1.5, 1.5 + px_m, edge_m);
 			open_col = mix(open_col, open_col * 0.82, balk * 0.6);
 			open_col = mix(open_col, hb_hedge_color, hedge * 0.8);
+			hedge_mask = hedge;
 		}
 	}
 	if (hb_debug > 7.5 && hb_debug < 8.5) {
@@ -189,4 +194,5 @@ void hb_apply(vec2 p, vec2 map_sz, float footprint, float snow, float land_f, fl
 	float lum_c = max(dot(col, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
 	hb_col = mix(hb_col, col * (lum_hb / lum_c), hb_hue_keep);
 	col = mix(col, hb_col, w);
+	col = mix(col, hb_hedge_color, hedge_mask * snow * hb_snow_hedge * w_bare);  // TB1 : haies sous la neige
 }

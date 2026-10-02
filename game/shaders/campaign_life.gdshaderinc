@@ -16,6 +16,15 @@ uniform vec4 season_snow_line = vec4(1500.0, 2750.0, 1900.0, 520.0);
 uniform vec3 winter_cover = vec3(0.10, 0.42, 0.22);
 // TB1 : limite sud de la neige de plaine (v de carte : début, fin du fondu) et retrait au sud.
 uniform vec3 winter_south = vec3(0.58, 0.72, 0.35);
+// TB1 : bord des plaques de neige (demi-largeur du fondu : vue large, vue moyenne et proche),
+// découpe du bord par le bruit fin, part de neige retirée sous les bois, opacité de près.
+uniform vec2 snow_edge_soft = vec2(0.07, 0.24);
+uniform float snow_edge_noise = 0.34;
+uniform float snow_forest_shed = 0.7;
+uniform float snow_near_opacity = 0.8;
+// TB1 : sol d'hiver hors neige : part de gris et teinte brun-gris (luminance gardée × teinte).
+uniform float winter_ground_desat = 0.55;
+uniform vec3 winter_ground_tint = vec3(1.10, 1.0, 0.86);
 // TB1 : dorure des cultures en été, appliquée par-dessus la carte de couleur (saison moyenne).
 uniform vec3 summer_gold = vec3(1.12, 1.04, 0.84);
 uniform vec3 life_snow_color = vec3(0.80, 0.82, 0.86);
@@ -141,8 +150,9 @@ vec3 season_ratio(vec3 season_col, vec3 summer_col) {
 }
 
 // Neige selon la saison : limite d'altitude qui descend en hiver (plus bas au nord et à l'est),
-// et couverture de plaine en plaques l'hiver. `base` : neige d'altitude d'origine.
-float season_snow(float base, float hc, vec2 uv, vec2 p, float slope, float macro, float footprint) {
+// et couverture de plaine en plaques l'hiver. `base` : neige d'altitude d'origine ; `forest_f` :
+// part de forêt au pixel (la neige de plaine tient moins sous les bois).
+float season_snow(float base, float hc, vec2 uv, vec2 p, float slope, float macro, float footprint, float forest_f) {
 	if (!life_enabled) {
 		return base;
 	}
@@ -158,21 +168,35 @@ float season_snow(float base, float hc, vec2 uv, vec2 p, float slope, float macr
 		float south = smoothstep(winter_south.x, winter_south.y, uv.y);
 		float cover = w.w * clamp(winter_cover.x * (1.0 - south) + winter_cover.y * north + winter_cover.z * east
 			+ hc / 900.0 * (1.0 - 0.5 * south) - winter_south.z * south, 0.0, 1.0);
-		// TB1 : plaques régionales (nappes de ~40 km, contour à ~12 km) lisibles en vue large, au
-		// bord net à tous les zooms ; le détail des champs n'apparaît que de près (il faisait des
-		// taches au zoom moyen). Le bruit est étalé pour que `cover` soit la part couverte.
-		float fine = 1.0 - smoothstep(0.05, 0.22, footprint);
+		// TB1 : plaques régionales (nappes de ~40 km, contour à ~12 km) lisibles en vue large ; le
+		// bruit est étalé pour que `cover` soit la part couverte. En vue moyenne et proche, le bord
+		// s'élargit et se découpe sur deux octaves plus fines (chacune s'efface avant de passer sous
+		// le pixel : pas de taches), la neige se pose moins sous les bois et reste un voile.
 		float mid = 1.0 - smoothstep(0.8, 2.5, footprint);
+		float near = 1.0 - smoothstep(0.55, 1.1, footprint);
 		float patches = fbm(p * 0.018) * 0.78 + value_noise(p * 0.071 + 5.3) * 0.22 * mid + 0.11 * (1.0 - mid);
 		patches = smoothstep(0.24, 0.76, patches);
-		patches += (value_noise(p * 0.9) - 0.5) * 0.10 * fine;
-		float soft = 0.07;
+		float oct_a = (value_noise(p * 0.19 + 2.1) - 0.5) * (1.0 - smoothstep(0.45, 1.3, footprint));
+		float oct_b = (value_noise(p * 0.47 + 8.4) - 0.5) * (1.0 - smoothstep(0.18, 0.6, footprint));
+		patches += (oct_a * 0.65 + oct_b * 0.35) * snow_edge_noise;
+		float soft = mix(snow_edge_soft.x, snow_edge_soft.y, near);
 		low = smoothstep(1.0 - cover - soft, 1.0 - cover + soft, patches) * step(0.02, cover);
+		low *= 1.0 - snow_forest_shed * forest_f * mix(0.35, 1.0, near);
+		low *= mix(1.0, snow_near_opacity, near);
 		// Poudrage : la neige mince laisse deviner sillons et chaumes.
 		low *= mix(0.72, 0.95, smoothstep(0.3, 0.9, cover));
 		low *= step(1.0, hc);
 	}
 	return max(max(base * w.y, mountain), low) * (1.0 - smoothstep(0.55, 0.9, slope));
+}
+
+// TB1 : sol d'hiver hors neige, brun-gris et désaturé (la neige ne tranche plus sur un sol vert).
+vec3 season_winter_ground(vec3 col, float land_f) {
+	if (!life_enabled) {
+		return col;
+	}
+	float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
+	return mix(col, lum * winter_ground_tint, winter_ground_desat * campaign_season.w * land_f);
 }
 
 // Ombres de nuages qui passent (facteur multiplicatif de l'albédo, 1 = pas d'ombre).
