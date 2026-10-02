@@ -65,8 +65,8 @@ WOOD = (0.5, 0.4, 0.33)
 DARK_WOOD = (0.34, 0.27, 0.22)
 STONE = (0.95, 0.92, 0.86)
 CLAY = (0.78, 0.68, 0.52)
-SPOIL = (0.3, 0.28, 0.27)
-ORE = (0.42, 0.2, 0.14)
+SPOIL = (0.55, 0.52, 0.5)
+ORE = (0.75, 0.4, 0.3)
 SALT = (1.0, 1.0, 1.0)
 BRINE = (0.42, 0.52, 0.6)
 VINE = (0.16, 0.42, 0.12)
@@ -585,15 +585,15 @@ def headframe(g, x, y) -> None:
 def adit(g, x, y, yaw) -> None:
     """Mine entrance: spoil bank, timber portal, dark mouth."""
     with kit.frame(g, (x, y, 0.0), math.radians(yaw)):
-        heap(g, 0, 4.0, 8.0, 5.5, "Rubble", SPOIL, sides=9)
+        heap(g, 0, 4.0, 8.0, 5.5, "RoofSlate", SPOIL, sides=9)
         for sx in (-1.1, 1.1):
             k.box(g, (sx, -2.6, 0.9), (0.3, 0.3, 2.8), "Timber", color=DARK_WOOD)
         k.box(g, (0, -2.6, 2.45), (2.9, 0.4, 0.3), "Timber", color=DARK_WOOD)
         g.quad(
-            (-1.0, -2.5, 0.0),
-            (1.0, -2.5, 0.0),
-            (1.0, -2.5, 2.3),
-            (-1.0, -2.5, 2.3),
+            (-1.6, -2.7, 0.0),
+            (1.6, -2.7, 0.0),
+            (1.6, -2.7, 3.2),
+            (-1.6, -2.7, 3.2),
             "Window",
         )
 
@@ -763,7 +763,7 @@ def mine_1(g) -> None:
     """Spoil bank with its adit and a headframe."""
     piece(g, adit, -3, 4, 0, 1.6)
     piece(g, headframe, 11, -4, 0, 1.5)
-    heap(g, -12, -7, 3.6, 2.6, "Rubble", ORE)
+    heap(g, -12, -7, 3.6, 2.6, "RoofSlate", ORE)
 
 
 def mine_2(g) -> None:
@@ -772,7 +772,7 @@ def mine_2(g) -> None:
     piece(g, headframe, 10, 6, 0, 2.2)
     piece(g, whim, 14, -11, 0, 1.3)
     for x, y, r in [(-8, -10, 4.4), (-16, -6, 3.4)]:
-        heap(g, x, y, r, r * 0.75, "Rubble", ORE)
+        heap(g, x, y, r, r * 0.75, "RoofSlate", ORE)
 
 
 def mine_3(g) -> None:
@@ -785,7 +785,7 @@ def mine_3(g) -> None:
     piece(g, chimney_stack, 12, -8, 0, 2.0, 12.0)
     piece(g, chimney_stack, 33, -8, 0, 2.0, 10.0)
     for x, y, r in [(-26, -12, 5.4), (-18, -18, 4.0), (-32, -4, 3.6)]:
-        heap(g, x, y, r, r * 0.75, "Rubble", ORE if r < 5.0 else SPOIL)
+        heap(g, x, y, r, r * 0.75, "RoofSlate", ORE if r < 5.0 else SPOIL)
 
 
 def pans(g, x0, y0, columns, rows, side) -> None:
