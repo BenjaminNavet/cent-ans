@@ -44,6 +44,7 @@ func _run() -> void:
 		map.queue_free()
 		return
 	_test_cloud_shadows(map)
+	await _test_golden_light(map)
 	map.queue_free()
 	await process_frame
 
@@ -82,6 +83,50 @@ func _test_cloud_shadows(map: Node3D) -> void:
 	view._upload_mask()
 	print("tb6 cloud shadows: wet %.2f, mask shade %.2f (soft %.2f, scale %.2f), terrain %.2f -> max dim %.3f" % [
 		view.wet_dim, view.mask_shadow, view.mask_shadow_softness, view.mask_shadow_scale, view.weather_shadow_amount, view.max_ground_dim()])
+
+
+## 2. Lumière dorée par défaut : soleil plus bas qu'avant TB6 (ombres plus longues), teinte chaude
+## au printemps, en été et en automne ; l'hiver garde son soleil pâle et son étalonnage bleuté (TB1).
+func _test_golden_light(map: Node3D) -> void:
+	# Hauteurs d'avant TB6 (PO3) : la lumière dorée ne remonte jamais le soleil.
+	var former := {"spring": 26.0, "summer": 28.0, "autumn": 22.0, "winter": 18.0}
+	var atmosphere: CampaignAtmosphere = null
+	for node in map.find_children("*", "", true, false):
+		if node is CampaignAtmosphere:
+			atmosphere = node
+	if not _check(atmosphere != null, "campaign atmosphere node missing"):
+		return
+	var sun := map.get_node_or_null("Sun") as DirectionalLight3D
+	var initial := atmosphere.current_season()
+	for season: String in SEASONS:
+		var preset := CampaignAtmosphere.resolve_preset(season)
+		if not _check(not preset.is_empty(), "%s: no campaign preset" % season):
+			continue
+		var elevation := float(preset["sun_elevation"])
+		var color: Color = preset["sun_color"]
+		var shadow_length := 1.0 / tan(deg_to_rad(elevation))
+		_check(elevation <= float(former[season]) and elevation >= 18.0, "%s: sun should sit lower than before TB6 (%.1f)" % [season, elevation])
+		_check(elevation <= 21.0 and shadow_length >= 2.6, "%s: long golden-hour shadows expected (%.2f x height)" % [season, shadow_length])
+		if season == "winter":
+			# L'hiver reste bleuté : soleil pâle, étalonnage froid de TB1 intact.
+			_check(color.r - color.b <= 0.25, "winter: sun should stay pale (%s)" % color)
+			_check(float(SeasonLook.grade("winter").get("temperature", 0.0)) < 0.0, "winter: TB1 cold grade lost")
+		else:
+			_check(color.r - color.b >= 0.3 and color.g - color.b >= 0.15, "%s: sun should be golden (%s)" % [season, color])
+			_check(float(preset["fog_sun_scatter"]) >= 0.3, "%s: golden haze towards the sun expected" % season)
+		var fog: Color = preset["fog_color"]
+		_check(fog.b > fog.r, "%s: aerial perspective should stay bluish away from the sun" % season)
+		# Les valeurs arrivent sur le soleil de la scène.
+		atmosphere.apply_season(season)
+		await process_frame
+		if sun != null and not atmosphere._sun_dirty:
+			var applied := rad_to_deg(asin(clampf(sun.global_basis.z.y, -1.0, 1.0)))
+			_check(absf(applied - elevation) < 0.5, "%s: sun node elevation %.1f, expected %.1f" % [season, applied, elevation])
+			_check(sun.light_color.is_equal_approx(color), "%s: sun node colour %s" % [season, sun.light_color])
+			_check(is_equal_approx(sun.light_energy, float(preset["sun_energy"])), "%s: sun node energy" % season)
+		print("tb6 light %s: elevation %.0f (was %.0f), shadows %.2f x height, sun %s x %.2f, scatter %.2f" % [
+			season, elevation, float(former[season]), shadow_length, color.to_html(false), float(preset["sun_energy"]), float(preset["fog_sun_scatter"])])
+	atmosphere.apply_season(initial)
 
 
 func _check(condition: bool, message: String) -> bool:
