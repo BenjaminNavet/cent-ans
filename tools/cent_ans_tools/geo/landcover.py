@@ -16,8 +16,11 @@ Outputs in ``data/map/`` (same grid as ``province_ids.png``, 7168 x 6144):
     * allocation: forest where a score (fractal noise with uniform marginal +
       terrain preference: slopes, crests, poor high soils; minus the
       surroundings of towns, villages and hamlets and the river flood plains)
-      is in the top ``F`` share. The result is binary (massifs with clean
-      edges, clearings and assarts around settlements), then anti-aliased.
+      is in the top ``F`` share. Inside a named forest the score is re-ranked
+      among the pixels of its own footprint (lot HC5), so the forest reaches
+      its density wherever the regional noise happens to be low. The result
+      is binary (massifs with clean edges, clearings and assarts around
+      settlements), then anti-aliased.
 
     The other channels keep the mix of :func:`cent_ans_tools.geo.splat.compute_splat`
     (farmland / grassland / rock), scaled to the non-forest share; named heaths
@@ -66,6 +69,9 @@ AREA_NOISE_PX = 2.5
 #: Share of the smaller radius added as edge wobble (named areas must not read as ellipses).
 AREA_NOISE_SHARE = 0.35
 KK10_SMOOTH_PX = 6.0
+#: Inside a named forest, one-pixel gaps are filled only where the target share is at least
+#: this (town clearings, tree line and wetlands stay open).
+NAMED_FILL_MIN_TARGET = 0.3
 
 
 @dataclass(frozen=True)
@@ -187,12 +193,22 @@ def area_signed_distance(
 
 
 def area_mask(
-    area: dict, grid: MapGrid, noise: np.ndarray
+    area: dict, grid: MapGrid, noise: np.ndarray, centred: bool = False
 ) -> tuple[np.ndarray, tuple[slice, slice]]:
-    """Soft 0-1 mask of an area with a noisy, natural edge (on its bounding window)."""
+    """Soft 0-1 mask of an area with a noisy, natural edge (on its bounding window).
+
+    ``centred`` removes the mean of the noise along the edge: the outline still
+    wobbles but the area keeps its nominal size (the noise varies more slowly
+    than a small forest is wide, so the raw wobble shrinks or swells it whole).
+    """
     dist, window = area_signed_distance(area, grid)
     amplitude = max(AREA_NOISE_PX, AREA_NOISE_SHARE * area_min_radius_px(area, grid))
-    wobble = (noise[window] - 0.5) * 2.0 * amplitude
+    local = noise[window]
+    centre = 0.5
+    if centred:
+        band = np.abs(dist) <= amplitude
+        centre = float(local[band].mean()) if band.any() else 0.5
+    wobble = (local - centre) * 2.0 * amplitude
     return smoothstep(-AREA_EDGE_PX, AREA_EDGE_PX, dist + wobble), window
 
 
@@ -433,9 +449,14 @@ def compute_forest(
         conifer, 0.8 * smoothstep(56.2, 56.8, lat) * smoothstep(100.0, 250.0, h)
     )
     conifer = np.maximum(conifer, 0.45 * smoothstep(44.0, 42.5, lat))
+    named: list[tuple[np.ndarray, tuple[slice, slice]]] = []
     for area in forests:
-        mask, window = area_mask(area, grid, edge_noise)
+        mask, window = area_mask(
+            area, grid, edge_noise, centred=area["kind"] != "heath"
+        )
         density = float(area["density"])
+        if area["kind"] != "heath":
+            named.append((mask, window))
         if area["kind"] == "heath":
             heath[window] = np.maximum(heath[window], mask * density)
             target[window] = target[window] * (1.0 - 0.75 * mask * density)
@@ -469,14 +490,42 @@ def compute_forest(
     )
     # Massifs de 5 à 30 km : bruit assez fin (≈ 25 px) ; la tendance régionale vient de KK10.
     noise = uniform_noise(size, rng, base_cells=160, octaves=4)
-    score = rank_uniform(0.62 * noise + 0.38 * np.clip(preference, 0.0, 1.0), land)
+    blend = 0.62 * noise + 0.38 * np.clip(preference, 0.0, 1.0)
+    score = rank_uniform(blend, land)
+    for mask, window in named:
+        score[window] = named_forest_score(
+            score[window], blend[window], mask, land[window]
+        )
     forest = (score > 1.0 - np.clip(target, 0.0, 1.0)) & land
+    # Massifs nommés : le rang local suit la préférence de terrain au pixel près ; sans ce
+    # bouchage préalable des trouées d'un pixel, l'ouverture ci-dessous les grignoterait.
+    for mask, window in named:
+        fill = (mask > 0.5) & land[window] & (target[window] > NAMED_FILL_MIN_TARGET)
+        patch = forest[window]
+        forest[window] = patch | (ndimage.binary_closing(patch, iterations=1) & fill)
     # Bosquets isolés supprimés, petites trouées bouchées : des massifs lisibles.
     forest = ndimage.binary_opening(forest, iterations=1)
     forest = ndimage.binary_closing(forest, iterations=1) & land
     cover = ndimage.gaussian_filter(forest.astype(np.float32), 0.7)
     cover[~land] = 0.0
     return cover, heath, np.clip(conifer, 0.0, 1.0)
+
+
+def named_forest_score(
+    score: np.ndarray, blend: np.ndarray, mask: np.ndarray, land: np.ndarray
+) -> np.ndarray:
+    """Allocation score inside a named forest: rank of ``blend`` among its own pixels.
+
+    The regional score is a rank over the whole map: a named forest lying in a
+    trough of the regional noise would stay empty whatever its density (Bière,
+    Sherwood before lot HC5). Re-ranking ``blend`` among the land pixels of the
+    footprint keeps the same spatial preferences (slopes wooded first, clearings
+    around settlements and along rivers) and makes the wooded share equal to the
+    mean target of the footprint. ``mask`` (soft, noisy edge) blends the local
+    rank with the regional ``score``, which is untouched outside the footprint.
+    """
+    local = rank_uniform(blend, (mask > 0.0) & land)
+    return score + (local - score) * mask
 
 
 def compose_splat(
