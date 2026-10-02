@@ -5,7 +5,8 @@ extends SceneTree
 ## Fenêtre réelle (pas headless), armées masquées, météo claire :
 ##   godot --path game --resolution 1280x800 --script res://tests/hc_shots.gd -- --out=<dossier>
 ##   --hide-armies --map-weather=clear [--name=hc_board] [--views=x,z,d;x,z,d;…]
-##   [--tree-style=real|generalised] [--bench] (avec `--disable-vsync` avant `--`)
+##   [--tree-style=real|generalised] [--prop=<champ de MapPropScale>=<valeur>]…
+##   [--bench] (avec `--disable-vsync` avant `--`)
 ## Vues par défaut : Orléans (2180, 3333) rig 300, Paris (2213, 3204) rig 150, Paris rig 60,
 ## Orléans rig 30. Une ligne `HC view` par vue (tuiles et instances d'arbres soumises au rendu) ;
 ## `--bench` : temps d'image moyen avec puis sans la couche d'arbres (240 images chacun), sans
@@ -31,6 +32,10 @@ func _init() -> void:
 			board_name = arg.trim_prefix("--name=")
 		elif arg == "--bench":
 			bench = true
+		elif arg.begins_with("--prop="):
+			# Réglage de `MapPropScale` remplacé pour cette exécution (essais sans toucher au .tres).
+			var kv := arg.trim_prefix("--prop=").split("=")
+			MapPropScale.shared().set(kv[0], float(kv[1]))
 		elif arg.begins_with("--views="):
 			views.clear()
 			for item in arg.trim_prefix("--views=").split(";", false):
@@ -76,6 +81,7 @@ func _init() -> void:
 		print("HC view %d (%.0f, %.0f) rig %.0f style %s census %s stats %s" % [v, view[0], view[1], rig.distance, MapPropScale.tree_style(),
 			JSON.stringify(census), JSON.stringify(vegetation.stats) if vegetation != null else "-"])
 		if bench:
+			Engine.max_fps = 0
 			var with_trees := await _bench()
 			vegetation.enabled = false
 			for i in 20:

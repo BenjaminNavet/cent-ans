@@ -29,6 +29,8 @@ var crown_radius: float = 0.4
 ## houppier dégagée (`generalised_crown_clearance`).
 var tree_scale: float = 0.5
 var crown_clearance: float = 1.0
+## Élargissement des houppiers appliqué aux instances gardées (`generalised_crown_widen`).
+var crown_widen: float = 1.0
 ## Demi-largeur dégagée des routes principales (0 : routes ignorées).
 var road_clearance: float = 0.0
 var stats: Dictionary = {"lakes": 0, "roads": 0, "removed": 0, "filter_ms_max": 0.0}
@@ -153,6 +155,7 @@ class TileFilter:
 		_index_roads(cells_y)
 		_index_water(cells_y)
 		var data := owner.map_data
+		var widen := owner.crown_widen
 		var scale := owner.tree_scale * 0.5 * owner.crown_clearance
 		var road_sq := owner.road_clearance * owner.road_clearance
 		var stride := VegetationTileJob.FLOATS_PER_INSTANCE
@@ -175,6 +178,10 @@ class TileFilter:
 				var y := buffer[k + 11]
 				var key := clampi(int((y - origin.y) / cell) * _cells_x + int((x - origin.x) / cell), 0, last_cell)
 				var blocked := false
+				if widen != 1.0:
+					# Colonnes X et Z de la base : houppier élargi, hauteur inchangée.
+					for f: int in [0, 2, 4, 6, 8, 10]:
+						buffer[k + f] *= widen
 				if _wet[key] != 0:
 					# Rayon du houppier : demi-largeur de l'instance (colonne X de la base) à l'échelle.
 					var radius := Vector3(buffer[k], buffer[k + 4], buffer[k + 8]).length() * scale
@@ -205,6 +212,8 @@ class TileFilter:
 				removed += dropped
 				buffers[slot] = out
 				counts[slot] = count - dropped
+			elif widen != 1.0:
+				buffers[slot] = buffer
 		filter_ms = (Time.get_ticks_usec() - t0) / 1000.0
 
 	## Cellules proches d'un fleuve ou d'une côte (distance au centre < demi-diagonale + houppier).

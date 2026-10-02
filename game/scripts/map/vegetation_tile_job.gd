@@ -55,6 +55,9 @@ var clearance: TreeClearance.TileFilter = null
 ## arbres grossis ne peuvent pas dessiner des enclos d'un à deux px) : les emplacements `Kind.HEDGE`
 ## sont vidés après le semis ; les arbres épars du bocage viennent du rôle « isolé » (`hedge_boost`).
 var drop_hedges: bool = false
+## Lot HC1 : seuils du bruit des bosquets (grille grossière `_grove`).
+var grove_low: float = 0.28
+var grove_high: float = 0.42
 
 ## Résultats : un tampon et un nombre d'instances par emplacement `part * KIND_COUNT + kind`.
 var buffers: Array[PackedFloat32Array] = []
@@ -168,7 +171,7 @@ func _sample_coarse(noise: FastNoiseLite, grove_noise: FastNoiseLite) -> void:
 			_conifer[k] = s["conifer"]
 			_beech[k] = s["beech"]
 			_hedge[k] = s["hedge"]
-			_grove[k] = smoothstep(0.28, 0.42, grove_noise.get_noise_2d(x, y))
+			_grove[k] = smoothstep(grove_low, grove_high, grove_noise.get_noise_2d(x, y))
 			# Région (frontière des deux trames de parcelles) : variation bien plus lente que le
 			# pas de la grille grossière (erreur d'interpolation très inférieure à la zone morte de
 			# 0,02 dans `_hedge_point`) → on évite le coût des 4 sinus par candidat de haie.

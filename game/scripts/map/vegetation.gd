@@ -226,6 +226,8 @@ func build(data: MapData) -> void:
 			for param in ["albedo_atlas", "normal_atlas", "views", "rows", "species_rows"]:
 				_cards_material.set_shader_parameter(param, _impostor_material.get_shader_parameter(param))
 	_bind_forest_cover(data)
+	if generalised:  # HC1 : variation de taille par arbre (`scale_jitter` du feuillage)
+		_set_foliage_param("scale_jitter", props.generalised_size_variation)
 	_season = -1
 	_exclusions.clear()
 	# Sans colonies (C6), clairière autour de chaque capitale de province.
@@ -245,6 +247,7 @@ func build(data: MapData) -> void:
 		clearance.crown_radius = crown
 		clearance.tree_scale = props.generalised_scale()
 		clearance.crown_clearance = props.generalised_crown_clearance
+		clearance.crown_widen = props.generalised_crown_widen
 		clearance.road_clearance = props.generalised_road_clearance
 		clearance.setup(data, clearance_lakes, clearance_roads)
 	stats["cleared"] = 0
@@ -270,6 +273,7 @@ static func _generalised_species(props: MapPropScale) -> TreeSpecies:
 			table.biome_params[k] = clampf(table.biome_params[k] * float(gains[key]), 0.0, 1.0)
 	table.dist = table.dist.duplicate()
 	table.dist["hedge_boost"] = props.generalised_hedge_boost
+	table.dist["grove_core"] = props.generalised_grove_core
 	return table
 
 
@@ -831,6 +835,8 @@ func _start_job(index: int) -> void:
 	job.spacing = pitch * float(chunk_px) / 256.0 if chunk_px < 256 else pitch
 	if generalised:
 		job.drop_hedges = true
+		job.grove_low = MapPropScale.shared().generalised_grove_low
+		job.grove_high = MapPropScale.shared().generalised_grove_high
 		if clearance != null:
 			job.clearance = clearance.for_tile(Rect2(Vector2(job.origin_px), Vector2(chunk_px, chunk_px)))
 	job.tree_scale = tree_scale
