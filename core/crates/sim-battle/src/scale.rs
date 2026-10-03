@@ -122,6 +122,10 @@ pub struct ScaleTier {
     pub width_m: f64,
     pub depth_m: f64,
     pub line_gap_m: f64,
+    /// Gap of the lines in a field battle (ADR 0180); sieges keep
+    /// `line_gap_m`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_line_gap_m: Option<f64>,
     pub zone_depth_m: f64,
     pub max_regiments_per_side: usize,
 }
@@ -134,6 +138,15 @@ impl ScaleTier {
             line_gap: self.line_gap_m,
             zone_depth: self.zone_depth_m,
         }
+    }
+
+    /// [`Self::scale`] for a field battle: with `field_line_gap_m` when set.
+    pub fn field_scale(&self) -> BattleScale {
+        let mut scale = self.scale();
+        if let Some(gap) = self.field_line_gap_m {
+            scale.field.line_gap = gap;
+        }
+        scale
     }
 
     pub fn scale(&self) -> BattleScale {
@@ -203,12 +216,14 @@ impl BattleScale {
         if setup.siege.is_some() {
             return rules.tiers[0].scale();
         }
-        rules.tier_for(total_soldiers(setup)).scale()
+        rules.tier_for(total_soldiers(setup)).field_scale()
     }
 
     /// The tier named `key`, if any.
     pub fn named(key: &str) -> Option<BattleScale> {
-        BattleScaleRules::bundled().tier(key).map(ScaleTier::scale)
+        BattleScaleRules::bundled()
+            .tier(key)
+            .map(ScaleTier::field_scale)
     }
 }
 

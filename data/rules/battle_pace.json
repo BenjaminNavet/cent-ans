@@ -1,7 +1,7 @@
 {
-  "description": "Cadence des combats (lot A6-L13, ADR 0180) : létalité par coup de mêlée et par volée, perte de moral par mort. Les batailles rangées (« field ») sont réglées pour durer 8 à 12 minutes de temps simulé ; les sièges (« siege ») gardent leurs valeurs d'origine.",
+  "description": "Cadence des combats (lot A6-L13, ADR 0180) : létalité par coup de mêlée et par volée, perte de moral par mort. Les batailles rangées (« field ») ont une mêlée ralentie (×0,3, ADR 0180) ; les sièges (« siege ») gardent leurs valeurs d'origine.",
   "field": {
-    "melee_rate": 0.035,
+    "melee_rate": 0.0105,
     "ranged_rate": 0.3,
     "loss_morale_factor": 60.0,
     "flank_morale_per_s": 1.5,

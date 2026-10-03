@@ -19,6 +19,7 @@
           "width_m": { "type": "number", "minimum": 600, "maximum": 4000, "multipleOf": 10, "description": "Largeur du champ (x), multiple de la grille de 10 m." },
           "depth_m": { "type": "number", "minimum": 600, "maximum": 3000, "multipleOf": 10, "description": "Profondeur du champ (z), multiple de la grille de 10 m." },
           "line_gap_m": { "type": "number", "minimum": 150, "maximum": 1000, "description": "Écart entre les lignes de bataille des deux camps, centrées sur le milieu du champ." },
+          "field_line_gap_m": { "type": "number", "minimum": 150, "maximum": 1000, "description": "Écart des lignes en bataille rangée (ADR 0180) ; absent = line_gap_m. Les sièges gardent line_gap_m (plan de la ville fixe)." },
           "zone_depth_m": { "type": "number", "minimum": 100, "maximum": 1000, "description": "Profondeur d'une zone de déploiement ; la ligne de bataille est à 50 m de son bord avant." },
           "max_regiments_per_side": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Régiments présents à la fois par camp ; le surplus attend en renfort." }
         },

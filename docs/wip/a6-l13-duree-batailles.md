@@ -1,10 +1,8 @@
 # A6-L13 : durée des batailles
 
 ## État
-- Sonde `sim-battle/tests/l13_duration.rs` et `l13_trace.rs` (ignorées) ; surcharges par variables d'environnement.
-- Cadence du combat en données : `data/rules/battle_pace.json` (`PaceRules`), valeurs inchangées.
-- Mesures et analyse : `docs/decisions/0180-duree-des-batailles.md`. Cible ×2-×3 non atteignable par les seules
-  données de combat/moral sans casser les vainqueurs (plafond ×1,3-1,4) ; décision de conception à prendre.
+- Sondes `l13_duration.rs` / `l13_trace.rs`, cadence en données `battle_pace.json`.
+- Retenu (ADR 0180) : `battle_scale.json` line_gap_m ×1,5, melee_rate ×0,3 : durée ×1,27, 23/24 vainqueurs.
 
 ## Prochaine étape
-- Arbitrer parmi les trois pistes de l'ADR (marche d'approche, effectifs, nouvel équilibre historique).
+- Aller au-delà de ×1,3 : armées plus larges (effectifs/régiments) ou nouvel équilibre historique (ADR 0180).

@@ -1,7 +1,7 @@
 # 0180 — Durée des batailles : mesure, cadence en données, et limite des leviers de combat
 
 Date : 2026-10-03 (lot A6-L13, constat B1 de `docs/audit/a6-audit-joueur.md`).
-Statut : **mesure et outillage livrés ; valeurs de jeu inchangées** (voir « Décision à prendre »).
+Statut : **décision retenue (piste 1)** : écart de déploiement ×1,5 et mêlée ralentie (voir « Décision retenue »).
 
 ## Contexte
 
@@ -75,10 +75,10 @@ Résultats :
   conservés** ; à ×0,4 la durée ne progresse plus et 4 vainqueurs basculent (arrondi de la vitesse, tirs plus
   longs pour les archers).
 
-## Décision à prendre (non tranchée ici)
+## Pistes examinées
 
 La cible ×2 à ×3 avec accord ≥ 90 % des vainqueurs **n'est pas atteignable par les seules données de combat et
-de moral**. Les valeurs de jeu restent donc celles d'avant ; trois pistes à arbitrer :
+de moral**. Trois pistes ont été examinées :
 
 1. **Allonger la marche d'approche** (distance de déploiement, vitesse de marche des régiments) : ×1,4 mesuré
    pour 24/24 vainqueurs, cumulable avec un léger adoucissement de la mêlée (létalité ÷2, poussée ÷3 :
@@ -91,6 +91,30 @@ de moral**. Les valeurs de jeu restent donc celles d'avant ; trois pistes à arb
    moral par mort ×0,32, flanc ×0,8, poussée ×0,53, contagion ×1,13, munitions ×1,5) donne ×1,4 avec 21/24
    vainqueurs et Crécy 1 graine française sur 6. Il faudrait alors réétalonner `ep7_historical` et la
    calibration de l'auto-résolution (`balance_probe rt`).
+
+## Décision retenue
+
+Piste 1, par la **distance de déploiement** (et non la vitesse, pour ne pas ralentir la démarche des
+régiments) :
+
+- `data/rules/battle_scale.json` : `line_gap_m` ×1,5 (300 → 450, 340 → 510, 380 → 570), les terrains et les
+  profondeurs de zone ne changent pas (lignes à 175/625 m sur le champ de 800 m, zones bornées par les marges).
+  La valeur était déjà en données. Les cartes historiques gardent leur géométrie.
+- `data/rules/battle_pace.json` : `field.melee_rate` 0,035 → 0,0105 (×0,3) ; tout le reste (tirs, moral,
+  contagion, seuils) inchangé. C'est la meilleure combinaison douce trouvée qui garde 23/24 vainqueurs et
+  Crécy, Azincourt, Poitiers anglais sur 6 graines sur 6.
+
+| Mesure (médiane, 6 graines) | Avant | Écart seul | Écart + mêlée ×0,3 |
+|---|---|---|---|
+| Médiane des médianes (24 cas) | 274 s | 337 s (×1,23) | 349 s (×1,27) |
+| Campagne 600/550 | 277 s | 315 s | 352 s (×1,27) |
+| Vainqueurs conservés | 24/24 | 24/24 | 23/24 (« Crécy » de la fixture : France 3 graines sur 6) |
+| Crécy / Azincourt / Poitiers (anglais) | 6/6 chacun | 6/6 | 6/6 chacun |
+| Accord avec la référence 3D de la fixture | 17/20 | 17/20 | 18/20 |
+
+Le gain total reste ×1,27, sous le ×1,6 visé : l'écart de lignes ne déplace que la marche d'approche (≈ 20 %
+du total mesuré sur la fixture) et les cartes historiques ne la changent pas. Aller plus loin demande des
+armées plus larges (piste 2) ou d'accepter la bascule historique (piste 3).
 
 ## Munitions
 
