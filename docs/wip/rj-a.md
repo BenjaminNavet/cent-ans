@@ -10,8 +10,14 @@ Branche `feat/rj-a`, worktree `../gp-rj-a`. Chantier parent : `docs/wip/rj-retou
 - Pont : `unit_formations()`, `formation_reform_rules()`, champs `get_units` (battle_sim_formation.rs ; une ligne dans battle_sim.rs).
 - UI : menu `battle_formation_menu.gd`, infobulle `ib:formation:<clé>`, boutons Formation/Tir à volonté on/off dorés + libellé + barre de reformation (battle_hud.gd), T = cycle (battle_input.gd), carte d'unité, codex, tutoriel, aide.
 
+## Vérifications
+- `cargo test --workspace` vert, `cargo clippy --all-targets -D warnings` propre, `core/build.sh` fait.
+- `smoke.gd` OK, `cb2_modes_test.gd` OK (nouveaux contrôles RJ-a : états on/off, cycle T, menu, infobulle).
+- `cb0_input_equivalence_test.gd` : 2 échecs **antérieurs** (sélection initiale et double clic : la démo a changé depuis le golden CB, unités [1,5,7,4] au lieu de [0..6]) ; les ordres de formation produits suivent bien le golden (cavaliers → coin, autres → marche).
+- pytest : schéma des formations, codex (alias « archers en herse »), infobulles.
+
 ## Prochaine étape
-Suite cargo complète verte → clippy → build GDExtension → smoke.gd + cb2_modes_test + cb0_input_equivalence_test.
+Vérification visuelle par la session principale (menu, infobulle, bouton doré + barre, marche des hommes en reformation), puis fusion.
 
 ## Points ouverts
 - L'IA n'emploie pas encore les nouvelles formations.
