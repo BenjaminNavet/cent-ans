@@ -650,31 +650,43 @@ pub fn assault_coalition(state: &CampaignState, army: &ArmyId) -> Vec<ArmyId> {
     crate::movement::settlement_coalition(state, army, &controller)
 }
 
-/// Auto-resolved assault of `army` (and its allies, G1) on the settlement
-/// it besieges.
-pub(crate) fn auto_assault(
-    state: &mut CampaignState,
+/// Everything an auto-resolved assault is fought with, built once for the
+/// resolver and for the pre-battle forecast (LR-13).
+pub(crate) struct AssaultSetup {
+    pub settlement: SettlementId,
+    pub attackers: Vec<ArmyId>,
+    pub attacker_side: crate::battle_auto::Side,
+    pub defender_side: crate::battle_auto::Side,
+    pub attacker_profiles: Vec<crate::battle_auto::UnitProfile>,
+    pub defender_profiles: Vec<crate::battle_auto::UnitProfile>,
+    pub context: crate::battle_auto::BattleContext,
+    pub garrison_is_player: bool,
+}
+
+/// Sides and situation of the assault of `army` (and its allies, G1) on the
+/// settlement it besieges; `None` without a garrison.
+pub(crate) fn assault_setup(
+    state: &CampaignState,
     data: &GameData,
     army: &ArmyId,
-    events: &mut Vec<GameEvent>,
-) {
-    let Some(settlement) = state.armies.get(army).and_then(|a| a.settlement().cloned()) else {
-        return;
-    };
+) -> Option<AssaultSetup> {
+    let settlement = state
+        .armies
+        .get(army)
+        .and_then(|a| a.settlement().cloned())?;
     let walls = walls_stand(state, data, army, &settlement);
-    let Some(garrison) = garrison_army(state, &settlement) else {
-        return;
-    };
+    let garrison = garrison_army(state, &settlement)?;
     let attackers = assault_coalition(state, army);
     let mut attacker_side = crate::movement::coalition_side(state, data, &attackers);
     let mut defender_side = crate::movement::side_from_army(state, data, &garrison);
+    let garrison_is_player = garrison.faction == state.player_faction;
     // DF1: the AI's morale against the player follows the difficulty.
     state.apply_difficulty_morale(
         data,
         &mut attacker_side,
         state.coalition_has_player(&attackers),
         &mut defender_side,
-        garrison.faction == state.player_faction,
+        garrison_is_player,
     );
     let context = crate::battle_auto::BattleContext {
         defender_terrain_bonus: false,
@@ -683,19 +695,48 @@ pub(crate) fn auto_assault(
         assault_bonus_percent: state.engine_assault_bonus(data, &settlement),
         crossing: None,
     };
+    Some(AssaultSetup {
+        attacker_profiles: crate::battle_auto::coalition_profiles(state, data, &attackers),
+        defender_profiles: crate::battle_auto::army_profiles(data, &garrison),
+        settlement,
+        attackers,
+        attacker_side,
+        defender_side,
+        context,
+        garrison_is_player,
+    })
+}
+
+/// Auto-resolved assault of `army` (and its allies, G1) on the settlement
+/// it besieges.
+pub(crate) fn auto_assault(
+    state: &mut CampaignState,
+    data: &GameData,
+    army: &ArmyId,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(setup) = assault_setup(state, data, army) else {
+        return;
+    };
     // N1: phased auto-resolve; walls stand for the terrain, the season
     // still brings its weather.
-    let attacker_profiles = crate::battle_auto::coalition_profiles(state, data, &attackers);
-    let defender_profiles = crate::battle_auto::army_profiles(data, &garrison);
     let result = crate::battle_auto::resolve_profiled(
         state,
         data,
-        (&attacker_side, &attacker_profiles),
-        (&defender_side, &defender_profiles),
-        &context,
+        (&setup.attacker_side, &setup.attacker_profiles),
+        (&setup.defender_side, &setup.defender_profiles),
+        &setup.context,
         None,
     );
-    apply_assault_result(state, data, &attackers, &settlement, &result, walls, events);
+    apply_assault_result(
+        state,
+        data,
+        &setup.attackers,
+        &setup.settlement,
+        &result,
+        setup.context.walls,
+        events,
+    );
 }
 
 /// Applies an assault result (auto-resolved or fought in 3D): losses on
