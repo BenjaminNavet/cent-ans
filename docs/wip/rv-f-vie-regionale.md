@@ -13,11 +13,12 @@ d ≈ 150-1200), sans pictogrammes (ADR 0124), sans coût FPS notable, rien qui 
    terrain ; rafales de luminosité qui traversent le couvert ; impostors (partie vent).
 
 ## État
-- [ ] squelette
-- [ ] 1 panaches
-- [ ] 2 reflets
-- [ ] 3 vent
-- [ ] import, smoke, captures (≤ 5)
+- [x] 1 panaches : `life_plume.gdshader`, `LifeEffects._fill_plumes/_update_plumes` (1 appel de rendu)
+- [x] 2 reflets : `water_glint.gdshaderinc` dans `water.gdshader` (fleuves non : pas de light() dans
+  `river_water.gdshader`, rubans trop fins en vue régionale)
+- [x] 3 vent : `campaign_wind.gdshaderinc` partagé ; `forest_wind` (campaign_life) + 1 ligne terrain ;
+  imposteurs (flexion + éclaircissement)
+- [ ] import, smoke, planche `tests/rv_life_shot.gd` (≤ 5 captures), A/B `--bench`
 
 ## Prochaine étape
-Squelette puis panaches.
+Import Godot (long, worktree neuf), smoke, planches été/hiver, réglages, bench.

@@ -73,6 +73,8 @@ var _plume_material: ShaderMaterial
 var _plume_points: Array = []
 ## RV-F : par point de `_plume_points` : noirceur (0 foyer, 1 incendie).
 var _plume_dark: PackedFloat32Array = PackedFloat32Array()
+## RV-F : interrupteur des panaches régionaux (A/B de `tests/rv_life_shot.gd`).
+var regional_plumes_enabled := true
 ## Points des panaches : [Vector2 px (courant), hauteur au-dessus du sol, graine, colonie (-1 :
 ## hameau), décalage au centre à l'échelle de la carte, sol à la pose de carte, sol à la pose réelle]
 ## (lot SZ4b : les points d'une colonie suivent l'échelle de sa maquette, `_settlement_pose`).
@@ -776,7 +778,7 @@ func _update_plumes(camera_distance: float, tiers: ZoomTiers, medium: float) -> 
 	var near_end := tiers.near_threshold if tiers != null else 150.0
 	var far_end := tiers.strategic_threshold if tiers != null else 1200.0
 	var fade := medium * clampf((camera_distance - near_end) / PLUME_FADE_IN, 0.0, 1.0)
-	_plumes.visible = fade > 0.02 and not _plume_points.is_empty()
+	_plumes.visible = regional_plumes_enabled and fade > 0.02 and not _plume_points.is_empty()
 	if not _plumes.visible:
 		return
 	var far := smoothstep(far_end * 0.4, far_end, camera_distance)
