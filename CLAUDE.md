@@ -19,15 +19,14 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Tests : `cd core && cargo test` ; `uv run --project tools pytest`
 
 ## Règles de robustesse pour les agents (quota Claude Code)
-- Commiter tôt et souvent : un commit `wip:` dès qu'un état compile ou qu'un fichier est complet, au plus tard toutes les 15 minutes de travail. Une interruption ne doit jamais perdre plus de 15 minutes.
 - Commencer chaque tâche par le squelette (API publique, fichiers vides, tests désactivés) et le commiter avant d'implémenter.
 - Écrire un fichier `docs/wip/<tâche>.md` (état, prochaine étape) mis à jour à chaque commit `wip:` pour qu'un agent de reprise sache où continuer.
-- Pas plus de 6 agents en parallèle par vague ; les agents d'implémentation bien spécifiés tournent sur un modèle plus léger (Sonnet) quand la tâche est mécanique.
+- Pas plus de 10 agents en parallèle par vague ; les agents d'implémentation bien spécifiés tournent sur un modèle plus léger (Sonnet) quand la tâche est mécanique.
 
 ## Vérification visuelle et MCP d'éditeur (contexte = quota)
 Coûts mesurés (essai godot-ai 2026-09-27, `docs/research/godot-ai-mcp.md`) : capture 640×400 ≈ 340 tokens ; liste d'UI complète d'un écran chargé ≈ 16 000 tokens ; schémas des 47 outils godot-ai ≈ 27 000 tokens (≈ 14 000 avec les seuls domaines utiles). Règles :
 - **Texte ciblé d'abord.** Avant toute capture : tests (`cargo test`, `smoke.gd`), logs, propriétés d'un nœud précis. Une capture ne sert qu'à juger un rendu (UI, 3D, lisibilité), jamais à vérifier ce qu'un test ou un log établit.
-- **Budget : 3 captures par tâche**, 6 au plus si l'utilisateur demande un travail visuel. Au-delà, s'arrêter et dire pourquoi.
+- **Budget : 5 captures par tâche**, 10 au plus si l'utilisateur demande un travail visuel. Au-delà, s'arrêter et dire pourquoi.
 - **Jamais en boucle.** Pas de capture après chaque retouche ni pour « attendre » un état (sonder `editor_state`, pas l'image) : regrouper les corrections, puis une seule capture de contrôle.
 - **Résolution par défaut (640 px).** Ne pas monter au-delà sans besoin précis de lire un petit texte ; recadrer plutôt qu'agrandir.
 - **Listes d'UI / arbre de scène toujours filtrés** (`root_path` + `max_depth` ≤ 3) : une liste complète coûte plus cher que 40 captures. Ne jamais déverser la carte de campagne ou une bataille entière.
