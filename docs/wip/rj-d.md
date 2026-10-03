@@ -16,11 +16,14 @@ Chantier parent : `docs/wip/rj-retours-joueur.md`. Worktree `../gp-rj-d`, branch
 - [x] Tests : `rj_stance_fill_test.gd` OK, pytest schéma OK
 - [x] Captures (3/3) : poids relevés à 0,45/0,42/0,35/0,10, saturation 0,8
 - [x] ADR 0175 section RJ-d
-- [ ] smoke.gd (en cours au dernier commit)
+- [x] smoke.gd vert (32 étapes OK)
+- [x] Perf : `--fps-probe` A/B ×2 (vue d'ouverture, d=860) : 43,0/43,1 fps avec, 43,6/43,2 sans — dans le bruit (machine partagée, gpu_ms non mesuré)
 
 ## Points ouverts
-- Pas de bench FPS chiffré (coût : 1 texelFetch + ~15 ALU par fragment, early-out uniforme) ;
-  A/B possible avec `--no-stance-fill` et la sonde FPS de la carte.
+- Bench sur machine calme à refaire (`godot --path game res://scenes/campaign_map.tscn -- --fps-probe [--no-stance-fill]`).
 - Vue rapprochée et parchemin non capturés (budget 3 captures) : à juger en partie pilote.
 - Fusion : ADR 0175 partagé avec RJ-c (sections distinctes) ; terrain.gdshader touché par RV
   (2 lignes isolées ici).
+
+## Prochaine étape
+Lot terminé ; relecture et fusion par l'orchestrateur (pas de fusion dans main ici).
