@@ -245,6 +245,7 @@ fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), Ca
                 siege: None,
                 buildings,
                 construction: None,
+                build_queue: Vec::new(),
                 recruit_queue: Vec::new(),
                 fortification_level: settlement.fortification_level,
                 recruit_pool: Default::default(),

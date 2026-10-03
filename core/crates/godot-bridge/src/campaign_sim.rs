@@ -935,6 +935,15 @@ pub(crate) fn demolition_preview_array(
         .collect()
 }
 
+/// M8: the queued constructions behind the current one (oldest first), as
+/// `Array[{building, name, turns_left}]`.
+pub(crate) fn build_queue_array(data: &GameData, queue: &[Construction]) -> VarArray {
+    queue
+        .iter()
+        .map(|c| construction_dict(data, c).to_variant())
+        .collect()
+}
+
 pub(crate) fn construction_dict(data: &GameData, construction: &Construction) -> VarDictionary {
     let name = data.buildings.get(&construction.building).map_or_else(
         || construction.building.to_string(),
@@ -1057,6 +1066,7 @@ fn province_city_dict(
     if let Some(construction) = &city.construction {
         dict.set("construction", &construction_dict(data, construction));
     }
+    dict.set("build_queue", &build_queue_array(data, &city.build_queue));
     dict
 }
 

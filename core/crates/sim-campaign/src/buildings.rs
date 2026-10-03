@@ -549,6 +549,8 @@ pub struct ProvinceCity {
     pub classes: data_model::PopulationClasses,
     pub buildings: Vec<BuildingId>,
     pub construction: Option<Construction>,
+    /// M8: buildings queued behind `construction`.
+    pub build_queue: Vec<Construction>,
     pub fortification_level: u32,
     pub capacity: u64,
     pub buildable: Vec<BuildOption>,
@@ -773,6 +775,7 @@ impl CampaignState {
             let reserved = settlement
                 .construction
                 .iter()
+                .chain(settlement.build_queue.iter())
                 .map(|c| &c.drawn)
                 .chain(settlement.recruit_queue.iter().map(|r| &r.drawn));
             for drawn in reserved {
@@ -851,8 +854,18 @@ impl CampaignState {
         if state.owner != state.controller {
             return Some("la colonie doit être possédée et contrôlée".to_owned());
         }
-        if state.construction.is_some() {
-            return Some("une construction est déjà en cours".to_owned());
+        let queued = state
+            .construction
+            .iter()
+            .chain(state.build_queue.iter())
+            .map(|c| &c.building)
+            .any(|b| b == &building.id);
+        if queued {
+            return Some("déjà en chantier ou en file".to_owned());
+        }
+        let size = data.economy_rules.construction_queue_size.max(1) as usize;
+        if state.construction.is_some() && 1 + state.build_queue.len() >= size {
+            return Some(format!("file de construction pleine ({size} chantiers)"));
         }
         if data.has_building(&state.buildings, &building.id) {
             return Some("déjà construit".to_owned());
@@ -925,6 +938,7 @@ impl CampaignState {
             classes: state.population.clone(),
             buildings: city.buildings.clone(),
             construction: city.construction.clone(),
+            build_queue: city.build_queue.clone(),
             fortification_level: self.fortification_level(data, &state.city),
             capacity: self.province_capacity(data, id),
             buildable: self.buildable(data, &state.city),
@@ -982,7 +996,13 @@ pub fn demolition_blocker(
         .buildings
         .iter()
         .filter(|b| *b != building)
-        .chain(place.construction.as_ref().map(|c| &c.building))
+        .chain(
+            place
+                .construction
+                .iter()
+                .chain(place.build_queue.iter())
+                .map(|c| &c.building),
+        )
         .filter_map(|b| data.buildings.get(b))
         .find(|b| {
             b.required_building.as_ref().is_some_and(needs_it)
@@ -1088,6 +1108,8 @@ pub(crate) fn resolve_construction(
         }
         let Construction { building, .. } = settlement.construction.take().expect("checked above");
         complete_building(data, settlement, &building);
+        // M8: the next queued building starts.
+        settlement.promote_queued_build();
         let controller = settlement.controller.clone();
         let province = settlement.province.clone();
         if controller == player {

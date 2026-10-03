@@ -171,6 +171,13 @@ pub enum Order {
         #[serde(alias = "province")]
         settlement: Place,
     },
+    /// M8: cancels the queued (not yet started) construction at `index`
+    /// (0 = next in line), refunding half its cost.
+    CancelQueuedBuild {
+        #[serde(alias = "province")]
+        settlement: Place,
+        index: usize,
+    },
     /// RS-C: razes the completed `building` of `settlement`, refunding
     /// `economy.json` `demolition_refund_percent` of its money cost.
     Demolish {
@@ -798,6 +805,10 @@ impl CampaignState {
                 let settlement = self.resolve_place(&settlement)?;
                 self.order_cancel_build(data, faction, &settlement)
             }
+            Order::CancelQueuedBuild { settlement, index } => {
+                let settlement = self.resolve_place(&settlement)?;
+                self.order_cancel_queued_build(data, faction, &settlement, index)
+            }
             Order::Demolish {
                 settlement,
                 building,
@@ -1067,12 +1078,12 @@ impl CampaignState {
         self.settlements
             .get_mut(settlement)
             .expect("checked above")
-            .construction = Some(Construction {
-            building: building.clone(),
-            turns_left: option.turns,
-            paid: option.cost,
-            drawn: draw.drawn,
-        });
+            .enqueue_build(Construction {
+                building: building.clone(),
+                turns_left: option.turns,
+                paid: option.cost,
+                drawn: draw.drawn,
+            });
         Ok(())
     }
 
@@ -1096,11 +1107,39 @@ impl CampaignState {
                 .get(&construction.building)
                 .map_or(0, |b| b.cost.money)
         };
+        settlement_state.promote_queued_build();
         let refund = paid * CANCEL_REFUND_PERCENT / 100;
         self.factions
             .get_mut(faction)
             .expect("checked above")
             .treasury += i64::from(refund);
+        Ok(())
+    }
+
+    fn order_cancel_queued_build(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        settlement: &SettlementId,
+        index: usize,
+    ) -> Result<(), OrderError> {
+        self.own_settlement(faction, settlement)?;
+        let settlement_state = self.settlements.get_mut(settlement).expect("checked above");
+        if index >= settlement_state.build_queue.len() {
+            return Err(OrderError::NoConstruction);
+        }
+        let work = settlement_state.build_queue.remove(index);
+        let paid = if work.paid > 0 {
+            work.paid
+        } else {
+            data.buildings
+                .get(&work.building)
+                .map_or(0, |b| b.cost.money)
+        };
+        self.factions
+            .get_mut(faction)
+            .expect("checked above")
+            .treasury += i64::from(paid * CANCEL_REFUND_PERCENT / 100);
         Ok(())
     }
 

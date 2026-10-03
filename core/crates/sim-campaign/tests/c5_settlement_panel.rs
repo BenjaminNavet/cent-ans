@@ -107,7 +107,7 @@ fn recruit_and_build_orders_address_a_non_city_settlement() {
         state
             .buildable(&data, &town)
             .iter()
-            .all(|option| !option.available),
-        "one construction at a time per settlement"
+            .all(|option| option.building != build.building || !option.available),
+        "the building under way cannot be ordered again"
     );
 }

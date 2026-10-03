@@ -121,6 +121,10 @@ pub struct EconomyRules {
     /// unit is imported at the resource's `base_price` times this.
     #[serde(default = "default_resource_import_multiplier")]
     pub resource_import_multiplier: u32,
+    /// M8: most buildings a settlement holds at once in its construction
+    /// queue (the one under way included); each is paid when queued.
+    #[serde(default = "default_construction_queue_size")]
+    pub construction_queue_size: u32,
     /// SV4: supply lost per season outside friendly territory (points).
     #[serde(default = "default_supply_loss")]
     pub supply_loss: u8,
@@ -296,6 +300,7 @@ impl Default for EconomyRules {
             supply_devastation_recovery_cut_percent:
                 default_supply_devastation_recovery_cut_percent(),
             resource_import_multiplier: default_resource_import_multiplier(),
+            construction_queue_size: default_construction_queue_size(),
             supply_loss: default_supply_loss(),
             supply_loss_winter: default_supply_loss_winter(),
             supply_recovery: default_supply_recovery(),
@@ -343,6 +348,9 @@ fn default_demolition_refund_percent() -> u32 {
 }
 fn default_resource_import_multiplier() -> u32 {
     100
+}
+fn default_construction_queue_size() -> u32 {
+    3
 }
 fn default_supply_loss() -> u8 {
     20
