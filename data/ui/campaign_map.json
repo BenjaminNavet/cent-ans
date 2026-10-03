@@ -63,7 +63,7 @@
     "minor_max_weight": 600
   },
   "clouds": {
-    "description": "TB2 : nuées et brumes sobres. Les nuées n'existent que là où le cœur donne pluie, neige ou orage ; elles sont plus fines en vue moyenne (medium_alpha jusqu'à medium_distance[0], max_alpha à partir de medium_distance[1], distances caméra) et ne couvrent jamais la province sélectionnée (bord fondu sur clear_feather_px). Ombres de nuages du terrain : weather_shadow sous de vraies nuées, fair_shadow par temps clair. TB6 (ADR 0156) : le masque météo n'assombrit plus le sol que légèrement — wet_dim (sol mouillé), mask_shadow (ombre des nuées, large et fondue : mask_shadow_scale = fréquence du bruit en part de celle des nuées, mask_shadow_softness = largeur du seuil) ; cumulés avec weather_shadow, la baisse de luminance reste sous 15 % au cœur d'une ombre.",
+    "description": "TB2 : nuées et brumes sobres. Les nuées n'existent que là où le cœur donne pluie, neige ou orage ; elles sont plus fines en vue moyenne (medium_alpha jusqu'à medium_distance[0], max_alpha à partir de medium_distance[1], distances caméra) et ne couvrent jamais la province sélectionnée (bord fondu sur clear_feather_px). Ombres de nuages du terrain : weather_shadow sous de vraies nuées, fair_shadow par temps clair. RV-C : ombres de cumulus qui dérivent avec le vent, aussi par beau temps (cumulus_*, voir le schéma) ; plus nombreuses sous un ciel chargé, effacées au dézoom, en vue politique et parchemin. TB6 (ADR 0156) : le masque météo n'assombrit plus le sol que légèrement — wet_dim (sol mouillé), mask_shadow (ombre des nuées, large et fondue : mask_shadow_scale = fréquence du bruit en part de celle des nuées, mask_shadow_softness = largeur du seuil) ; cumulés avec weather_shadow, la baisse de luminance reste sous 15 % au cœur d'une ombre.",
     "medium_alpha": 0.2,
     "max_alpha": 0.45,
     "medium_distance": [
@@ -76,7 +76,15 @@
     "wet_dim": 0.04,
     "mask_shadow": 0.06,
     "mask_shadow_softness": 0.5,
-    "mask_shadow_scale": 0.5
+    "mask_shadow_scale": 0.5,
+    "cumulus_shadow": 0.26,
+    "cumulus_scale": 0.07,
+    "cumulus_cover": [0.12, 0.38],
+    "cumulus_cover_wet": 0.7,
+    "cumulus_edge": 0.12,
+    "cumulus_drift": 0.3,
+    "cumulus_tint": [0.94, 0.97, 1.06],
+    "cumulus_fade_px": [10, 4]
   },
   "forest_masses": {
     "description": "TB6 : massifs forestiers de la carte de couleur du sol (vue moyenne et large), presque noirs à bord net avant ce réglage. floor : luminance linéaire plancher des masses sombres (0 : carte inchangée) ; knee : au-delà de floor × knee, la carte n'est pas touchée ; feather : flou du masque en niveaux de mip (lisière fondue sur quelques pixels de carte) ; keep : part du contraste d'origine gardée sous le plancher ; canopy : amplitude du modelé de canopée.",

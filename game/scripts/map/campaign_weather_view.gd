@@ -48,6 +48,9 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 ## masque), bloc `morning_mist` de `data/ui/campaign_map.json` ; uniformes `weather_valley_*`.
 ## Opacité nulle sans données : pas de nappe.
 var valley_mist: Dictionary = {}
+## RV-C : bloc `clouds` des données (clés `cumulus_*` : ombres de cumulus, aussi par beau temps).
+var cumulus: Dictionary = {}
+var _shadow_sun := Vector3.ZERO
 ## CV3-0 (#3) : bande (distance caméra) sur laquelle la coupure d'intensité passe de 0 à
 ## `cloud_wide_cut_max` — au-delà, seules les zones de forte pluie/neige (ou l'orage) gardent
 ## des nuées.
@@ -145,6 +148,7 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 		_terrain.material.set_shader_parameter("weather_wide_intensity_cut", wide_cut)
 	_focus_kind = weather_at(Vector2(focus.x, focus.z))
 	_update_cloud_shadows(delta)
+	_update_cloud_shadow_sun()  # RV-C
 	_update_particles(focus, distance)
 	_update_lightning(delta, distance)
 
@@ -167,6 +171,36 @@ func _load_tuning() -> void:
 	mask_shadow_softness = float(clouds.get("mask_shadow_softness", mask_shadow_softness))
 	mask_shadow_scale = float(clouds.get("mask_shadow_scale", mask_shadow_scale))
 	valley_mist = MapReadability.section("morning_mist")
+	cumulus = clouds
+
+
+## RV-C : réglages des ombres de cumulus (clés `cumulus_*` du bloc `clouds`) vers les uniformes
+## `cloud_shadow_*` de campaign_cloud_shadow.gdshaderinc ; clé absente : valeur du shader.
+func _apply_cumulus_tuning(material: ShaderMaterial) -> void:
+	for pair: Array in [["cumulus_shadow", "cloud_shadow_cumulus"], ["cumulus_scale", "cloud_shadow_scale"],
+			["cumulus_cover_wet", "cloud_shadow_cover_wet"], ["cumulus_edge", "cloud_shadow_edge"],
+			["cumulus_drift", "cloud_shadow_drift"]]:
+		if cumulus.has(pair[0]):
+			material.set_shader_parameter(pair[1], float(cumulus[pair[0]]))
+	for pair: Array in [["cumulus_cover", "cloud_shadow_cover"], ["cumulus_fade_px", "cloud_shadow_fade_px"]]:
+		var values: Variant = cumulus.get(pair[0], null)
+		if values is Array and (values as Array).size() == 2:
+			material.set_shader_parameter(pair[1], Vector2(float(values[0]), float(values[1])))
+	var tint: Variant = cumulus.get("cumulus_tint", null)
+	if tint is Array and (tint as Array).size() == 3:
+		material.set_shader_parameter("cloud_shadow_tint", Vector3(float(tint[0]), float(tint[1]), float(tint[2])))
+	material.set_shader_parameter("cloud_shadow_height", cloud_height - 2.0)  # sol moyen ≈ 2 (cf. `cloud_clear_ground_y`)
+
+
+## RV-C : direction vers le soleil pour décaler les ombres de nuages (le soleil change de saison
+## en saison et au fil du tour, `turn_light.gd`).
+func _update_cloud_shadow_sun() -> void:
+	if _sun == null or _terrain == null or _terrain.material == null:
+		return
+	var to_sun := _sun.global_transform.basis.z.normalized()
+	if not to_sun.is_equal_approx(_shadow_sun):
+		_shadow_sun = to_sun
+		_terrain.material.set_shader_parameter("cloud_shadow_sun", to_sun)
 
 
 ## TB6 : plus forte baisse de luminance (0..1) que la météo peut poser sur le sol : sol mouillé,
@@ -180,6 +214,7 @@ func _apply_ground_tuning() -> void:
 	if _terrain == null or _terrain.material == null:
 		return
 	var material: ShaderMaterial = _terrain.material
+	_apply_cumulus_tuning(material)  # RV-C
 	material.set_shader_parameter("weather_wet_dim", wet_dim)
 	material.set_shader_parameter("weather_cloud_shade", mask_shadow)
 	material.set_shader_parameter("weather_cloud_shade_soft", mask_shadow_softness)
