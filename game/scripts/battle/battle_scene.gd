@@ -238,6 +238,10 @@ var replay_mode: bool = false
 ## PB3e : pas de simulation calculé sur un fil (`--no-pb3e` : synchrone, mesures A/B).
 var pb3e_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3e")
 var _step_thread_on: bool = false
+## RJ-b : figurines et régiments interpolés entre deux pas de simulation (démarche continue) ;
+## `--no-pose-lerp` après `--` : poses du pas courant (mesures A/B). Coupé en headless (tests).
+var pose_lerp_enabled: bool = not OS.get_cmdline_user_args().has("--no-pose-lerp")
+var _pose_lerp_on: bool = false
 var replay_bar: BattleReplayBar = null
 var replay_error: String = ""
 var replay_saved_path: String = ""  # fichier écrit à la fin de la bataille (vide : non enregistré)
@@ -1308,11 +1312,23 @@ func _process(delta: float) -> void:
 ## montre le pas courant (même bataille, au bit près). Synchrone en headless (tests), pendant un
 ## rejeu et avec `--no-pb3e` après `--` (mesures A/B).
 func _configure_step_thread() -> void:
+	_configure_pose_lerp()
 	var wanted := pb3e_enabled and not replay_mode and DisplayServer.get_name() != "headless"
 	if wanted == _step_thread_on or not battle.has_method("set_step_thread"):
 		return
 	_step_thread_on = wanted
 	battle.call("set_step_thread", wanted)
+
+
+## RJ-b : poses interpolées entre deux pas (fraction du pas en cours, `step_fraction` du cœur).
+## `--pose-lerp` force l'interpolation en headless (test, banc).
+func _configure_pose_lerp() -> void:
+	var forced := OS.get_cmdline_user_args().has("--pose-lerp")
+	var wanted := pose_lerp_enabled and (forced or DisplayServer.get_name() != "headless")
+	if wanted == _pose_lerp_on or not battle.has_method("set_pose_lerp"):
+		return
+	_pose_lerp_on = wanted
+	battle.call("set_pose_lerp", wanted)
 
 
 ## EP7 : la météo d'une carte historique change pendant la bataille (averse de Crécy) : la pluie

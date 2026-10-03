@@ -32,11 +32,11 @@ qui pulse à 10 Hz).
   headless gardent les poses du pas courant (résultats inchangés).
 
 ## État
-- [ ] Squelette
-- [ ] Cœur : step_fraction
-- [ ] Pont : lerp poses + unités + loose
-- [ ] GDScript : branchement, cadence, skip_far
+- [x] Squelette
+- [x] Cœur : step_fraction
+- [x] Pont : lerp poses + unités + loose (`battle_pose_lerp.rs`, `battle_sim_poses.rs`)
+- [x] GDScript : branchement, cadence (skip_far à vérifier)
 - [ ] Mesures perf, smoke
 
 ## Prochaine étape
-Squelette puis implémentation du pont.
+Clippy, build GDExtension, `tests/rj_b_pose_lerp_test.gd`, smoke, banc A/B (`--no-pose-lerp`).
