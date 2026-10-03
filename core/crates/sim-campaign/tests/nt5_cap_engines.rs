@@ -182,7 +182,7 @@ fn engines_take_turns_by_army_size() {
     // A siege-speed general hastens the work.
     assert!(siege_engines::work_per_turn(&data, 2_000, 50.0) > big);
     let tower_turns = |rate: u32| {
-        siege_engines::statuses(&data, 0, rate)
+        siege_engines::statuses(&data, 0, rate, 0)
             .into_iter()
             .find(|s| s.kind == BuiltEngineKind::Tower)
             .unwrap()
@@ -192,10 +192,10 @@ fn engines_take_turns_by_army_size() {
     assert!(tower_turns(small) > tower_turns(big));
     // In list order: ladders first.
     let ladders = data.siege_engine_rules.engines[0].work;
-    let first = siege_engines::statuses(&data, ladders, 1);
+    let first = siege_engines::statuses(&data, ladders, 1, 0);
     assert!(first[0].ready && !first[1].ready && !first[2].ready);
     assert_eq!(
-        siege_engines::ready_kinds(&data, 1_000),
+        siege_engines::ready_kinds(&data, 1_000, 0),
         vec![
             BuiltEngineKind::Ladders,
             BuiltEngineKind::Ram,

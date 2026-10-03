@@ -1,10 +1,11 @@
 {
-  "description": "Lot NT5 (N7, ADR 0128) : engins construits sur place pendant un siège de campagne. Chaque tour de siège, les hommes des armées assiégeantes fournissent hommes / men_per_work_point points de travail (au moins min_work_per_turn), majorés de la vitesse de siège du général et des traditions ; les engins se bâtissent l'un après l'autre dans l'ordre de la liste (échelles, bélier, beffroi), chacun pour son coût work. Derrière des murailles intactes, l'assaut n'est permis qu'avec au moins un engin prêt (ou une tour de siège recrutée, ou une brèche). Les engins prêts passent à la bataille de siège : échelles (escalade), bélier (porte), beffroi (unité tower_unit_type, sans pertes reportées en campagne) ; un beffroi prêt vaut une tour de siège pour la résolution automatique ; en résolution automatique, un bélier prêt (porte enfoncée) majore de auto_assault_bonus_percent les coups de l'assaillant tant que les murailles tiennent (NT9).",
+  "description": "Lot NT5 (N7, ADR 0128) : engins construits sur place pendant un siège de campagne. Chaque tour de siège, les hommes des armées assiégeantes fournissent hommes / men_per_work_point points de travail (au moins min_work_per_turn), majorés de la vitesse de siège du général et des traditions ; les engins se bâtissent l'un après l'autre dans l'ordre de la liste (échelles, bélier, beffroi), chacun pour son coût work. Derrière des murailles intactes, l'assaut n'est permis qu'avec au moins un engin prêt (ou une tour de siège recrutée, ou une brèche). Les engins prêts passent à la bataille de siège : échelles (escalade), bélier (porte), beffroi (unité tower_unit_type, sans pertes reportées en campagne) ; un beffroi prêt vaut une tour de siège pour la résolution automatique ; en résolution automatique, un bélier prêt (porte enfoncée) majore de auto_assault_bonus_percent les coups de l'assaillant tant que les murailles tiennent (NT9). A6-L2 : contre des murailles de niveau >= scaling_min_wall_level, chaque engin coûte work + work_per_wall_level x niveau (niveau 5 : échelles 34, bélier 46, beffroi 100 points ; une armée de 2 000 hommes en fournit 20 par saison).",
   "men_per_work_point": 100,
   "min_work_per_turn": 4,
+  "scaling_min_wall_level": 3,
   "engines": [
-    { "id": "ladders", "kind": "ladders", "name": "Échelles", "work": 4 },
-    { "id": "ram", "kind": "ram", "name": "Bélier", "work": 16, "auto_assault_bonus_percent": 20 },
-    { "id": "siege_tower", "kind": "tower", "name": "Beffroi", "work": 40, "tower_unit_type": "unit_siege_tower" }
+    { "id": "ladders", "kind": "ladders", "name": "Échelles", "work": 4, "work_per_wall_level": 6 },
+    { "id": "ram", "kind": "ram", "name": "Bélier", "work": 16, "work_per_wall_level": 6, "auto_assault_bonus_percent": 20 },
+    { "id": "siege_tower", "kind": "tower", "name": "Beffroi", "work": 40, "work_per_wall_level": 12, "tower_unit_type": "unit_siege_tower" }
   ]
 }

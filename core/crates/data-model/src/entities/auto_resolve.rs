@@ -126,6 +126,14 @@ pub struct AutoResolveRules {
     pub walls_attacker: f64,
     /// Multiplier on the defender's shooting from walls.
     pub walls_defender_ranged: f64,
+    /// A6-L2: extra defence of the garrison per wall level of the place
+    /// (0.35: level 5 intact walls make the storm 2.75 times harder, on top
+    /// of `walls_attacker`). Softened by the breach and the ready engines.
+    #[serde(default = "default_wall_defence_per_level")]
+    pub wall_defence_per_level: f64,
+    /// A6-L2: share of the wall defence removed when every engine is ready.
+    #[serde(default = "default_wall_engine_relief")]
+    pub wall_engine_relief: f64,
     /// Defender bonus of the legacy `defender_terrain_bonus` flag, used when
     /// the terrain is unknown.
     pub legacy_defender_bonus: f64,
@@ -191,6 +199,8 @@ impl Default for AutoResolveRules {
             river_attacker: 0.8,
             walls_attacker: 0.7,
             walls_defender_ranged: 1.3,
+            wall_defence_per_level: default_wall_defence_per_level(),
+            wall_engine_relief: default_wall_engine_relief(),
             legacy_defender_bonus: 1.15,
             weather: AutoResolveWeather {
                 spring: chances(60, 30, 10, 0),
@@ -215,5 +225,32 @@ impl Default for AutoResolveRules {
             .collect(),
             description: None,
         }
+    }
+}
+
+fn default_wall_defence_per_level() -> f64 {
+    0.35
+}
+
+fn default_wall_engine_relief() -> f64 {
+    0.6
+}
+
+impl AutoResolveRules {
+    /// A6-L2: multiplier (≤ 1) on the attacker's blows against standing
+    /// walls of `level`: the wall defence (`wall_defence_per_level` × level)
+    /// fades linearly with the breach (gone at 50 %, where the walls stop
+    /// counting) and by `wall_engine_relief` when every engine is ready
+    /// (`engines_ready_percent`).
+    pub fn wall_attacker_factor(
+        &self,
+        level: u32,
+        breach_percent: u32,
+        engines_ready_percent: u32,
+    ) -> f64 {
+        let breach_left = (1.0 - f64::from(breach_percent) / 50.0).clamp(0.0, 1.0);
+        let ready = (f64::from(engines_ready_percent) / 100.0).clamp(0.0, 1.0);
+        let relief = (1.0 - self.wall_engine_relief * ready).clamp(0.0, 1.0);
+        1.0 / (1.0 + f64::from(level) * self.wall_defence_per_level * breach_left * relief)
     }
 }

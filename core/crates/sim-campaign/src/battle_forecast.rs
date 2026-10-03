@@ -158,6 +158,7 @@ impl CampaignState {
                 river_crossing: false,
                 walls,
                 assault_bonus_percent: self.engine_assault_bonus(data, &request.location),
+                wall: self.wall_stand(data, &request.location),
                 crossing: None,
             };
             (
@@ -191,6 +192,7 @@ impl CampaignState {
                 river_crossing: site.is_none() && province.is_some_and(|p| !p.rivers.is_empty()),
                 walls: false,
                 assault_bonus_percent: 0,
+                wall: Default::default(),
                 crossing: site.as_ref().map(|c| c.effect()),
             };
             (
@@ -237,6 +239,21 @@ impl CampaignState {
         if context.walls {
             attacker_modifier *= 0.7;
             modifiers.push("Murailles intactes (−30 % à l'assaillant)".to_owned());
+            let wall = &context.wall;
+            let rules = &data.auto_resolve;
+            let factor = rules.wall_attacker_factor(
+                wall.level,
+                wall.breach_percent,
+                wall.engines_ready_percent,
+            );
+            if factor < 0.995 {
+                attacker_modifier *= factor;
+                modifiers.push(format!(
+                    "Murailles de niveau {} sans brèche suffisante ({:+.0} % à l'assaillant)",
+                    wall.level,
+                    (factor - 1.0) * 100.0
+                ));
+            }
             if context.assault_bonus_percent > 0 {
                 attacker_modifier *= 1.0 + f64::from(context.assault_bonus_percent) / 100.0;
                 modifiers.push(format!(

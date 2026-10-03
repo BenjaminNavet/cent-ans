@@ -31,6 +31,8 @@
   "river_attacker": 0.8,
   "walls_attacker": 0.7,
   "walls_defender_ranged": 1.3,
+  "wall_defence_per_level": 0.35,
+  "wall_engine_relief": 0.6,
   "legacy_defender_bonus": 1.15,
   "weather": {
     "spring": { "clear": 60, "rain": 30, "fog": 10, "snow": 0 },

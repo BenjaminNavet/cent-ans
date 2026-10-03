@@ -170,6 +170,15 @@ impl Default for Side {
     }
 }
 
+/// A6-L2: what the walls of an assaulted place are worth (the level of the
+/// walls, the breach and the share of ready engines of the siege).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct WallStand {
+    pub level: u32,
+    pub breach_percent: u32,
+    pub engines_ready_percent: u32,
+}
+
 /// Situation modifiers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct BattleContext {
@@ -184,6 +193,9 @@ pub struct BattleContext {
     /// percentage (built engines such as the ram, `siege_engines.json`).
     #[serde(default)]
     pub assault_bonus_percent: u32,
+    /// A6-L2: level, breach and engines behind the walls (`walls` only).
+    #[serde(default)]
+    pub wall: WallStand,
     /// RC (ADR 0141): the attacker forces this river crossing; its
     /// coefficients (`data/rules/river_crossings.json`) replace
     /// `river_crossing`.
@@ -886,7 +898,13 @@ pub fn resolve_with_crossings(
         a.damage *= rules.river_attacker;
     }
     if context.walls {
-        a.damage *= rules.walls_attacker * (1.0 + f64::from(context.assault_bonus_percent) / 100.0);
+        a.damage *= rules.walls_attacker
+            * (1.0 + f64::from(context.assault_bonus_percent) / 100.0)
+            * rules.wall_attacker_factor(
+                context.wall.level,
+                context.wall.breach_percent,
+                context.wall.engines_ready_percent,
+            );
         d.ranged *= rules.walls_defender_ranged;
     }
     d.damage *= match terrain {
@@ -1165,6 +1183,7 @@ mod tests {
                 river_crossing: true,
                 walls: false,
                 assault_bonus_percent: 0,
+                wall: Default::default(),
                 crossing: None,
             },
             &mut CampaignRng::from_seed(1),
