@@ -18,18 +18,18 @@ Disque : `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0` dans les worktrees ; ta
 | 04 | FE : économies faibles (Irlande, Îles, Luna, Urbino), `g4.rs` ignoré, `m3_grid_ai` 50 tours | 1 | lancé |
 | 05 | OMR : Brandebourg sans province, Brabançons/archers écossais hors bande, Bourgogne éliminée | 1 | lancé |
 | 06 | Tests rouges anciens (pytest + Godot), reprise de `fix/ui-tests` | 1 | lancé |
-| 07 | EQ6 : révoltes (poids des garnisons dans l'ordre public), plafond du bonus de mariage | 2 | à lancer |
-| 08 | TW2 : recrutement grisé en ruines, marqueur de ruine, surcoût mercenaire, brèche ADR 0108 | 2 | à lancer |
-| 09 | UI 720 : en-tête du panneau de province, avis trop longs, panneau des techs | 2 | à lancer |
-| 10 | HC lacs historiques + SS 5 réservoirs modernes | 2 | à lancer |
-| 11 | IA : levée de siège au tour 1 par une armée de secours, armées oisives | 2 | à lancer |
-| 12 | VN tours de siège trop grandes, NT4 ordre « tenir » côté IA, NT2 technologies du roster | 2 | à lancer |
-| 13 | Q8 : prévision d'auto-résolution trop pessimiste | 3 | à lancer |
-| 14 | TB : colonnes de fumée, charrette de peste trop grande | 3 | à lancer |
-| 15 | JR : déficit structurel (Marinides, Hafsides, Lituanie, Serbie), capitale sans ville | 3 | à lancer |
-| 16 | CB/NT : cris d'alerte en double, trait des piques plantées, transitions de rôle brusques | 3 | à lancer |
-| 17 | HV : effet d'événement (vente de l'Estonie 1346, Algirdas 1345, Ösel-Wiek) | 3 | à lancer |
-| 18 | FK : crue opaque, réfugiés en ligne droite | 3 | à lancer |
+| 07 | EQ6 : révoltes (poids des garnisons dans l'ordre public), plafond du bonus de mariage | 2 | lancé |
+| 08 | TW2 : recrutement grisé en ruines, marqueur de ruine, surcoût mercenaire, brèche ADR 0108 | 2 | lancé |
+| 09 | UI 720 : en-tête du panneau de province, avis trop longs, panneau des techs | 2 | lancé |
+| 10 | HC lacs historiques + SS 5 réservoirs modernes | 2 | lancé |
+| 11 | IA : levée de siège au tour 1 par une armée de secours, armées oisives | 2 | lancé |
+| 12 | VN tours de siège trop grandes, NT4 ordre « tenir » côté IA, NT2 technologies du roster | 2 | lancé |
+| 13 | Q8 : prévision d'auto-résolution trop pessimiste | 3 | lancé |
+| 14 | TB : colonnes de fumée, charrette de peste trop grande | 3 | lancé |
+| 15 | JR : déficit structurel (Marinides, Hafsides, Lituanie, Serbie), capitale sans ville | 3 | lancé |
+| 16 | CB/NT : cris d'alerte en double, trait des piques plantées, transitions de rôle brusques | 3 | lancé |
+| 17 | HV : effet d'événement (vente de l'Estonie 1346, Algirdas 1345, Ösel-Wiek) | 3 | lancé |
+| 18 | FK : crue opaque, réfugiés en ligne droite | 3 | lancé |
 
 ## Prochaine étape
-Vague 1 en cours ; à son retour, relire, fusionner, puis lancer la vague 2.
+Les 18 lots tournent en parallèle (le joueur autorise 20 agents simultanés, 03/10) ; relire et fusionner au fil des retours.
