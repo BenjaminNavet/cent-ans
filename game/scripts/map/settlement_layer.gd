@@ -99,6 +99,8 @@ var _shielded: PackedByteArray = PackedByteArray()
 ## RJ-c (ADR 0175) : 1 si la place est occupée (écu de l'occupant à côté de celui du propriétaire :
 ## quad élargi, cf. `_shield_rect`).
 var _occupied: PackedByteArray = PackedByteArray()
+## RJ-c : joueur et empreinte des positions des bannières écrites (cf. `_refresh_shields`).
+var _banner_signature: Array = []
 ## RJ-c : indice de position par catégorie `StanceCues` (0 aucun liseré).
 const BANNER_CUES := {"self": 1, "friend": 2, "enemy": 3}
 ## TB2 : distance caméra jusqu'à laquelle l'écu accompagne le nom (rang mineur : nom seul de loin).
@@ -558,26 +560,35 @@ func _build_icons() -> void:
 ## apparaît (rare : révolte, succession), sinon seules les instances changées sont réécrites.
 ## Lot RJ-c (ADR 0175) : bannière du PROPRIÉTAIRE de droit, plus le petit écu de l'OCCUPANT si la
 ## place est occupée ; liserés à la couleur de position du joueur (`StanceCues`, ADR 0155).
-func _refresh_shields(sim: Object = null) -> void:
+func _refresh_shields(sim: Object = null, holders_changed: bool = true, player: String = "", stances: Variant = null) -> void:
 	if _icons == null or markers == null:
 		return
-	var factions: Array = []
-	var missing := heraldry.texture == null
+	var seen := {}
 	for entry in data.settlements:
-		for key in ["owner", "controller"]:
-			var faction := str(entry.get(key, ""))
-			if faction != "" and not factions.has(faction):
-				factions.append(faction)
-				if not heraldry.has(faction):
-					missing = true
+		seen[entry["owner"]] = true
+		seen[entry["controller"]] = true
+	seen.erase("")
+	var factions: Array = seen.keys()
+	var missing := heraldry.texture == null
+	for faction in factions:
+		if not heraldry.has(str(faction)):
+			missing = true
+			break
 	if missing:
 		factions.sort()
 		heraldry.build(factions)
 		_icon_material.set_shader_parameter("shields", heraldry.texture)
 		_icon_material.set_shader_parameter("shield_grid", heraldry.grid())
 		_marker_holder.fill("?")
-	var player := str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
-	var cues := banner_cues(factions, player, StanceCues.stances(sim, player) if player != "" else {})
+	if stances == null:
+		player = str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
+		stances = StanceCues.stances(sim, player) if player != "" else {}
+	# RJ-c : rien à réécrire si ni les détenteurs, ni les positions, ni l'atlas n'ont changé.
+	var signature := [player, stances.hash()]
+	if not missing and not holders_changed and signature == _banner_signature:
+		return
+	_banner_signature = signature
+	var cues := banner_cues(factions, player, stances)
 	var multimesh := _icons.multimesh
 	for i in data.settlements.size():
 		var banner := banner_of(data.settlements[i], cues)
@@ -755,8 +766,11 @@ func refresh(sim: Object, color_of: Callable) -> void:
 		var year := LandmarkModel.year_of(str(sim.call("get_date_label")))
 		if year > 0:
 			landmark_cities.set_year(year)
-	_refresh_shields(sim)
-	_refresh_label_inks(sim)
+	# RJ-c : positions du joueur lues une fois pour les bannières et l'encre des noms.
+	var player := str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
+	var stances := StanceCues.stances(sim, player) if player != "" else {}
+	_refresh_shields(sim, controllers_changed, player, stances)
+	_refresh_label_inks(sim, stances)
 	_refresh_capital(sim)
 	if outbuildings != null and outbuildings.refresh(sim):
 		# TB3 : la suie ne change qu'avec le tour (dévastation, sièges) ou une prise de place.
@@ -1220,11 +1234,11 @@ func label_ink(i: int) -> Color:
 
 
 ## Lot EN : noms des villes tenues par un ennemi du joueur à l'encre rouge (`StanceCues`).
-func _refresh_label_inks(sim: Object) -> void:
+func _refresh_label_inks(sim: Object, known_stances: Variant = null) -> void:
 	if sim == null or not sim.has_method("get_player_faction"):
 		return
 	var player := str(sim.call("get_player_faction"))
-	var stances := StanceCues.stances(sim, player)
+	var stances: Dictionary = known_stances if known_stances is Dictionary else StanceCues.stances(sim, player)
 	if _label_ink.size() != _labels.size():
 		_label_ink.resize(_labels.size())
 		_label_ink.fill(label_color)

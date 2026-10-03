@@ -115,7 +115,7 @@ func _run() -> void:
 	_check(str(map.ui.hover_label.text).contains(line), "hover label shows the status")
 	map.picker.select_index(map.map_data.index_of_id(province))
 	await process_frame
-	var panel: ProvincePanel = map.ui.province_panel
+	var panel: Control = map.ui.province_panel
 	_check(panel.visible and panel.owner_value.text == line, "province panel status (got '%s')" % panel.owner_value.text)
 	_check(panel.possession_held != null and panel.possession_held.visible and panel.possession_held.text.begins_with("Places tenues : "), "province panel held line")
 	_check(panel.possession_help().contains("donne le contrôle de la province"), "province panel help sentence")
@@ -127,33 +127,41 @@ func _run() -> void:
 	_check(str(city_row.get("possession_status", "")) == "occupied_by_viewer", "colony list row carries the status")
 	map.settlements_ctl.open_settlement(city)
 	await process_frame
-	var settlement_panel: SettlementPanel = map.settlements_ctl.panel
+	var settlement_panel: Control = map.settlements_ctl.panel
 	_check(settlement_panel.owner_value.text == line, "settlement panel status (got '%s')" % settlement_panel.owner_value.text)
 	_check(settlement_panel.possession_help.visible and settlement_panel.possession_help.text.contains("qui la tient contrôle la province"), "settlement panel help")
 
 	# 4. Bannières.
-	var layer: SettlementLayer = map.settlement_layer
+	var layer: Node3D = map.settlement_layer
 	var index: int = layer.data.index_by_id.get(city, -1)
 	if _check(index >= 0, "city %s on the settlement layer" % city):
-		var color: Color = layer._icons.multimesh.get_instance_color(layer._icon_instance(index))
+		# Le serveur de rendu factice (headless) ne relit pas les couleurs du MultiMesh : on lit
+		# la clé « case|canal g » écrite avec elles.
+		var holder := str(layer._marker_holder[index]).split("|")
+		var color := Color(float(holder[0]), float(holder[1]), 0.0)
 		var packed := int(round(color.g))
 		_check(int(round(color.r)) == layer.heraldry.shield_of(OWNER), "main shield = the owner's arms")
 		_check(packed / 16 - 1 == layer.heraldry.shield_of(PLAYER), "second shield = the occupant's arms")
-		_check(packed % 4 == SettlementLayer.BANNER_CUES["self"], "occupant edge = self")
+		_check(packed % 4 == layer.BANNER_CUES["self"], "occupant edge = self")
 		var owner_cue := StanceCues.category_of(OWNER, PLAYER, StanceCues.stances(sim, PLAYER))
-		_check((packed / 4) % 4 == int(SettlementLayer.BANNER_CUES.get(owner_cue, 0)), "owner edge follows the stance")
+		_check((packed / 4) % 4 == int(layer.BANNER_CUES.get(owner_cue, 0)), "owner edge follows the stance")
 		_check(layer._occupied[index] == 1 and layer.banner_width(index) > 1.0, "occupied banner is wider")
 	var own_city := str((sim.call("province_possession", _province_of(sim, map, PLAYER), "") as Dictionary).get("city", ""))
 	var own_index: int = layer.data.index_by_id.get(own_city, -1)
 	if own_index >= 0:
-		var own_color: Color = layer._icons.multimesh.get_instance_color(layer._icon_instance(own_index))
-		_check(int(round(own_color.g)) == SettlementLayer.BANNER_CUES["self"] * 4, "own place: no occupant, self edge")
+		var own_packed := int(str(layer._marker_holder[own_index]).split("|")[1])
+		_check(own_packed == layer.BANNER_CUES["self"] * 4, "own place: no occupant, self edge")
 	# Perf : réécriture complète de toutes les bannières.
 	layer._marker_holder.fill("?")
 	var started := Time.get_ticks_usec()
 	layer._refresh_shields(sim)
 	var elapsed_ms := (Time.get_ticks_usec() - started) / 1000.0
 	print("rj_possession_test: full banner rewrite of %d places in %.1f ms" % [layer.data.settlements.size(), elapsed_ms])
+	# `refresh` lit les positions une fois pour les bannières et l'encre des noms.
+	var stances := StanceCues.stances(sim, PLAYER)
+	started = Time.get_ticks_usec()
+	layer._refresh_shields(sim, false, PLAYER, stances)
+	print("rj_possession_test: unchanged banner refresh in %.2f ms" % ((Time.get_ticks_usec() - started) / 1000.0))
 	_check(layer.data.settlements.size() >= 1000, "at least 1000 places carry a banner")
 	map.queue_free()
 	await process_frame
