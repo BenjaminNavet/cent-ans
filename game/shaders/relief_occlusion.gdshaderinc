@@ -10,17 +10,17 @@
 uniform sampler2D rvd_occlusion : filter_linear_mipmap, repeat_disable, hint_default_black;
 uniform bool rvd_has_occlusion = false;
 // Assombrissement des fonds (0 = aucun) et teinte froide vers laquelle ils tirent.
-uniform float rvd_strength : hint_range(0.0, 1.0) = 0.32;
+uniform float rvd_strength : hint_range(0.0, 1.0) = 0.40;
 uniform vec3 rvd_cool_tint : source_color = vec3(0.70, 0.78, 0.92);
 // Éclaircissement des crêtes et plateaux (légèrement chaud).
-uniform float rvd_crest_lift : hint_range(0.0, 0.5) = 0.10;
+uniform float rvd_crest_lift : hint_range(0.0, 0.5) = 0.14;
 uniform vec3 rvd_warm_tint : source_color = vec3(1.0, 0.97, 0.90);
 // Occlusion de la lumière ambiante au fond des vallées (sortie AO, 1 = aucune).
-uniform float rvd_ao_strength : hint_range(0.0, 1.0) = 0.55;
+uniform float rvd_ao_strength : hint_range(0.0, 1.0) = 0.6;
 // Fondu de près : empreinte (px carte / px écran) où l'effet tombe à `rvd_near_strength`
 // (x) et où il est plein (y), seulement si le quadtree fin porte le relief.
-uniform vec2 rvd_near_footprint = vec2(0.08, 0.5);
-uniform float rvd_near_strength : hint_range(0.0, 1.0) = 0.35;
+uniform vec2 rvd_near_footprint = vec2(0.04, 0.3);
+uniform float rvd_near_strength : hint_range(0.0, 1.0) = 0.5;
 
 // Applique l'occlusion à `col` (terre seulement, poids `land`) et rend la valeur AO.
 float rvd_apply(vec2 uv, float footprint, float land, inout vec3 col) {
