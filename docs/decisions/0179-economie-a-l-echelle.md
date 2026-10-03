@@ -20,12 +20,25 @@ Toutes les valeurs sont dans `data/` ; le Rust ne porte que le mécanisme.
 3. **Budget de départ** (`starting_budget`, code `setup_1337::fit_starting_garrisons`) : s'applique dès 1 province (`min_provinces` 5 → 1) ; `max_deficit_percent` accepte une valeur négative et vaut -10 (excédent d'au moins 10 % des recettes). Les garnisons hors capitale sont renvoyées d'abord (comportement JR4b) ; si le solde reste négatif, l'armée de départ perd ses unités les plus chères (elle n'est pas levée si même la dernière dépasse les recettes), puis la garnison de la capitale (sauf une unité), puis les bâtiments à l'entretien le plus lourd. Ces replis ne ramènent qu'à zéro. Garnison de départ de la Bourgogne : une unité de moins dans l'armée (4 → 3, soit -25 %), le reste vient de la règle.
 4. **Rançons** (`economy.json` § `ransom`) : `income_cap_percent` 100 (une rançon ne dépasse jamais une saison de revenu du payeur) ; `sovereign_capture_only_if_routed` vrai (un souverain à la tête d'une armée battue n'est pris que si cette armée est en déroute ; `ransom::capture_allowed`, appelé par `movement::apply_battle_outcome`).
 5. **Révoltes** : `edict_peace_of_god` unrest -8 → -5, recruit_slots -1 → -2, impôt -5 % ; `population.json` `occupation_unrest` 20 → 24 (+20 %) et `revolt_seasons` 2 → 5 (mesuré : 3 saisons 12,5 ; 4 saisons 14,8 ; 5 saisons 6,5 ; 6 saisons 8,7 révoltes par partie, 6 graines).
-6. **Milice** (`ai/doctrines.json`) : poids de `unit_urban_militia` divisé par 2 puis par 0,6 puis par 2 (25 → 3 dans la doctrine par défaut, 1 minimum).
+6. **Milice** (`ai/doctrines.json`) : poids de `unit_urban_militia` réduits (25 → 3 dans la doctrine par défaut). Effet faible : la part de milice suit surtout l'argent disponible (35 % tant que les banqueroutes étaient fréquentes, 41-47 % depuis). Cible < 40 % non atteinte, point ouvert (plafond de part de milice dans le code de l'IA, ou coût de levée).
 7. **Banqueroutes** : la cause n'était ni le trésor de départ ni l'entretien mais `event_treasury_min_scale` (0,25 → 0,03) : un événement de chronique écrit pour un royaume de 4 000 ₶ de revenu coûtait à un comté de 40 ₶ de revenu le quart de son montant (120 ₶), soit trois saisons de recettes. À 0,03 : banqueroutes 2,1 → 0,3-0,4.
 8. **Recherche** : coût des technologies de rang 3 et plus × 1,5 (24 fichiers de `data/technologies/`).
 9. **Coût des bâtiments** : inchangé. Coût moyen 1 366 ₶ ; solde net d'une province de France après la règle : 250 ₶ par saison, soit 5,5 saisons (cible 3-8). Le problème de l'audit était le trésor, pas le prix.
 
-## Mesures (sonde, 200 tours)
+## Mesures (sonde, 6 graines x 200 tours, avant -> après)
+
+| Indicateur | Avant | Après | Cible |
+|---|---|---|---|
+| Révoltes / partie | 14,2 | 6,0 | 4-10 |
+| Banqueroutes / faction / décennie | 1,62 (2,1 sur 4 graines) | 0,28 | < 0,5 |
+| Milice / recrutements IA | 64,9 % | 46,6 % | < 40 % (non atteinte) |
+| Paix de Dieu (provinces) | 91 % | 38 % | — |
+| Édouard III capturé, 12 premiers tours (60 graines) | 1/60 | 1/60 | < 10 % |
+| Souverains capturés / partie | 3,2 | 3,2 | — |
+| Plus forte rançon | 60 000 | 34 661 | <= 1 saison de revenu |
+| Solde net tour 0 France / Angleterre / Bourgogne | +4 346 / +944 / -535 | +6 505 / +2 378 / +342 | >= 10 % du revenu |
+| Trésor de départ France / Angleterre / Bourgogne | 60 000 / 45 000 / 15 000 | 28 000 / 12 000 / 2 000 | 4-6 saisons de solde |
+| Techs France au tour 200 | 40-43 | 35-38 | plus lente |
 
 Voir le tableau du rapport de lot et `docs/wip/a6-l3-economie.md`. La sonde a gagné : `DATA_ROOT` (mesurer d'anciennes données), captures de souverains, plus forte rançon, économie au tour 0 de toutes les factions, banqueroutes par décile, flux hors revenu/entretien.
 
