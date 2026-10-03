@@ -3,6 +3,7 @@
   "tax_unrest_weight": 130.0,
   "garrison_relief_per_100_men": 1.0,
   "garrison_relief_max": 10.0,
+  "garrison_relief_reference_population": 100000,
   "goods_relief_max": 10.0,
   "occupation_unrest": 20.0,
   "foreign_religion_unrest": 10.0,
