@@ -392,6 +392,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/relief_quadtree.gdshaderinc"  // ZG2 : relief streamé en quadtree
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
+#include "res://shaders/stance_fill.gdshaderinc"  // RJ-d : lavis par position (crochet sf_fill)
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 #include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
 #include "res://shaders/hb_ground.gdshaderinc"  // HB3 : habillage par biome (ADR 0143)
@@ -878,6 +879,7 @@ void fragment() {
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
 	if (hb_debug > 12.5 && hb_debug < 13.5) { hb_dbg = col; }  // HB3 : sonde
+	sf_fill(id, col, pm_emit);  // RJ-d : lavis par position, sous les frontières
 	fr1_borders(p, uv, footprint, col, pm_emit);  // FR1 : frontières de faction lumineuses
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
 	ALBEDO = col;

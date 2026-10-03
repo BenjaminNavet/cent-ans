@@ -191,6 +191,7 @@ func _build_map(grid: GridContainer) -> void:
 	_slider(grid, "Vitesse de la caméra", float(settings.call("get_value", "camera/speed")), 0.4, 2.5, 0.1,
 		func(value: float) -> void: settings.call("set_value", "camera/speed", value), "camera/speed")
 	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
+	_check(grid, "map/stance_fill", "Lavis des positions diplomatiques", "En vue 3D, chaque province est teintée selon son détenteur : or vos terres, vert vos alliés et vassaux, rouge vos ennemis en guerre, gris léger les autres. Une province occupée garde les hachures de l'occupant au bord.")
 	_options(grid, "map/ai_moves", "Mouvements de l'IA", Array(AiTurnReplay.MODES), Array(AiTurnReplay.MODE_LABELS),
 		"En fin de tour, les armées des autres factions que vous voyez marchent sur la carte. Suivre : la caméra se porte sur celles qui vous concernent puis revient. Montrer : sans bouger la caméra. Masquer : fin de tour immédiate. Espace passe l'animation.")
 	var replay_speeds: Array = AiTurnReplay.speeds()

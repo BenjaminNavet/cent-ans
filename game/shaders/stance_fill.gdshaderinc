@@ -12,5 +12,25 @@ uniform float sf_alpha = 0.0;            // option × mode de carte × atténuat
 uniform float sf_saturation = 0.6;
 uniform float sf_parchment_scale = 0.55;
 
+// Teinte à luminance conservée (colore sans délaver ni assombrir le relief), comme la teinte de
+// faction du terrain ; même opération sur l'émission (part du papier en vue parchemin).
+vec3 sf_tint(vec3 c, vec3 ratio, float a) {
+	float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+	return mix(c, l * ratio, a);
+}
+
 void sf_fill(int id, inout vec3 albedo, inout vec3 emission) {
+	if (sf_alpha <= 0.0 || id <= 0) {
+		return;
+	}
+	vec4 c = texelFetch(sf_colors, ivec2(clamp(id, 0, textureSize(sf_colors, 0).x - 1), 0), 0);
+	if (c.a <= 0.0) {
+		return;
+	}
+	vec3 lin = pow(c.rgb, vec3(2.2));
+	float lf = max(dot(lin, vec3(0.2126, 0.7152, 0.0722)), 0.02);
+	vec3 ratio = mix(vec3(1.0), lin / lf, sf_saturation);
+	float a = c.a * sf_alpha * mix(1.0, sf_parchment_scale, pm_weight());
+	albedo = sf_tint(albedo, ratio, a);
+	emission = sf_tint(emission, ratio, a);
 }
