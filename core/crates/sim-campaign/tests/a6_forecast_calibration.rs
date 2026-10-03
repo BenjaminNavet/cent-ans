@@ -129,3 +129,69 @@ fn forecast_matches_auto_resolution_frequency() {
     eprintln!("mean gap {:.1} points", mean_gap * 100.0);
     assert!(mean_gap <= 0.10, "mean gap {:.1} points", mean_gap * 100.0);
 }
+
+/// Forecast attacker win chance with the defender's regiments scaled by
+/// `1 / ratio` (same regiments when `mirror`, else another 1337 army).
+fn chance_at_ratio(ratio: f64, mirror: bool) -> f64 {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 7).expect("1337 start");
+    state.chronicle.disabled = true;
+    let (a, b) = (fac("fac_france"), fac("fac_england"));
+    state
+        .factions
+        .get_mut(&a)
+        .unwrap()
+        .at_war_with
+        .insert(b.clone());
+    state
+        .factions
+        .get_mut(&b)
+        .unwrap()
+        .at_war_with
+        .insert(a.clone());
+    let attacker = armies_of(&state, "fac_france")[0].clone();
+    let defender = armies_of(&state, "fac_england")[0].clone();
+    if mirror {
+        let copy = state.armies[&attacker].units.clone();
+        state.armies.get_mut(&defender).unwrap().units = copy;
+    }
+    for unit in &mut state.armies.get_mut(&defender).unwrap().units {
+        unit.strength = ((f64::from(unit.strength) / ratio) as u32).max(1);
+        unit.max_strength = unit.strength;
+    }
+    state
+        .debug_stage_battle(&attacker, &defender)
+        .expect("stage");
+    let chance = state
+        .battle_forecast(&data, 0)
+        .expect("forecast")
+        .attacker_win_chance;
+    eprintln!("ratio {ratio} mirror={mirror}: {:.1} %", chance * 100.0);
+    chance
+}
+
+#[test]
+fn forecast_ratio_1_25_mirror() {
+    let chance = chance_at_ratio(1.25, true);
+    assert!((0.30..=0.75).contains(&chance), "{chance}");
+}
+
+#[test]
+fn forecast_ratio_1_5_mirror() {
+    assert!(chance_at_ratio(1.5, true) >= 0.75);
+}
+
+#[test]
+fn forecast_ratio_2_mirror() {
+    assert!(chance_at_ratio(2.0, true) >= 0.90);
+}
+
+#[test]
+fn forecast_ratio_3_mirror() {
+    assert!(chance_at_ratio(3.0, true) >= 0.98);
+}
+
+#[test]
+fn forecast_ratio_2_mixed_armies() {
+    assert!(chance_at_ratio(2.0, false) >= 0.90);
+}

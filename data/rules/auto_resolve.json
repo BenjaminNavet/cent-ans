@@ -30,7 +30,7 @@
   "loser_max_losses": 0.7,
   "loser_min_losses": 0.1,
   "jitter": 0.15,
-  "battle_fortune": 0.75,
+  "battle_fortune": 0.5,
   "forecast_samples": 100,
   "river_attacker": 0.8,
   "walls_attacker": 0.7,

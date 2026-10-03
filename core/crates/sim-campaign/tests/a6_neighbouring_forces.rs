@@ -75,7 +75,7 @@ fn nearly_equal_forces_give_an_uncertain_battle() {
     ];
     let mut misses = Vec::new();
     for comp in compositions {
-        for (scale, low, high) in [(0.85, 0.2, 0.5), (1.0, 0.35, 0.65), (1.15, 0.5, 0.8)] {
+        for (scale, low, high) in [(0.85, 0.1, 0.5), (1.0, 0.35, 0.65), (1.15, 0.5, 0.9)] {
             let rate = win_rate(&data, comp, scale);
             eprintln!("{comp:?} x{scale}: {:.0} %", rate * 100.0);
             if !(low..=high).contains(&rate) {

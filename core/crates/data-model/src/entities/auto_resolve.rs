@@ -202,7 +202,7 @@ impl Default for AutoResolveRules {
             loser_min_losses: 0.1,
             jitter: 0.15,
             forecast_samples: 100,
-            battle_fortune: 0.75,
+            battle_fortune: 0.5,
             river_attacker: 0.8,
             walls_attacker: 0.7,
             walls_defender_ranged: 1.3,
