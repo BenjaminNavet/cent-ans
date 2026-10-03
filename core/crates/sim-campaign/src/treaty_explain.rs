@@ -203,7 +203,7 @@ pub fn explain_treaty(
     let name = faction_name(data, recipient);
     let mut explanation = TreatyExplanation {
         chance: verdict.chance,
-        accept: verdict.blocked.is_none() && verdict.chance >= ACCEPT_CHANCE,
+        accept: verdict.accept,
         score: verdict.score,
         lines,
         summary: String::new(),
@@ -223,8 +223,11 @@ pub fn explain_treaty(
             .filter(|l| l.value > 0)
             .max_by_key(|l| l.value);
         explanation.summary = match best {
-            Some(line) => format!("{name} accepterait : {} ({:+}).", line.text, line.value),
-            None => format!("{name} accepterait."),
+            Some(line) => format!(
+                "{name} accepterait (score {:+}) : {} ({:+}).",
+                explanation.score, line.text, line.value
+            ),
+            None => format!("{name} accepterait (score {:+}).", explanation.score),
         };
         return explanation;
     }
@@ -312,15 +315,18 @@ pub fn explain_treaty(
     let worst = objections.first();
     explanation.summary = match (&explanation.blocker, &verdict.blocked, worst) {
         (Some(blocker), _, _) => format!(
-            "{name} refuse, sur un seul point : {} ({:+}).",
-            blocker.text, blocker.value
+            "{name} refuserait (score {:+}), sur un seul point : {} ({:+}).",
+            explanation.score, blocker.text, blocker.value
         ),
         (None, Some(blocked), _) => format!("{name} ne peut accepter : {blocked}."),
         (None, None, Some(line)) => format!(
-            "{name} refuse : {} ({:+}), entre autres ; il manque {} points.",
-            line.text, line.value, gap
+            "{name} refuserait (score {:+}) : {} ({:+}), entre autres ; il manque {} points.",
+            explanation.score, line.text, line.value, gap
         ),
-        (None, None, None) => format!("{name} refuse ; il manque {gap} points."),
+        (None, None, None) => format!(
+            "{name} refuserait (score {:+}) ; il manque {gap} points.",
+            explanation.score
+        ),
     };
     explanation
 }

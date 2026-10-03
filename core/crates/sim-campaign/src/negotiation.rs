@@ -321,6 +321,9 @@ fn is_rebels(id: &FactionId) -> bool {
     id.as_str() == diplomacy::REBELS_FACTION
 }
 
+/// Score at or above which a proposal of the player is accepted (ADR 0178).
+pub const ACCEPT_SCORE: i32 = 0;
+
 /// Acceptance chance (percent) of a score.
 pub fn chance_of(data: &GameData, score: i32) -> u8 {
     let scale = rules(data).chance_scale.max(0.1);
@@ -646,7 +649,7 @@ pub fn evaluate_treaty(
     };
     TreatyEvaluation {
         chance,
-        accept: chance >= 50,
+        accept: blocked.is_none() && score >= ACCEPT_SCORE,
         score,
         articles: values,
         context,
@@ -1338,8 +1341,13 @@ pub fn propose_treaty(
 ) -> Result<bool, DiplomacyError> {
     check_treaty(state, data, proposer, recipient, &articles)?;
     let verdict = evaluate_treaty(state, data, proposer, recipient, &articles);
-    let roll = answer_roll(state, proposer, recipient);
-    let accepted = verdict.blocked.is_none() && roll < verdict.chance;
+    // The player's proposals are deterministic (ADR 0178): accepted iff the
+    // score reaches the threshold. Between AIs, a seeded roll remains.
+    let accepted = if proposer == &state.player_faction {
+        verdict.accept
+    } else {
+        verdict.blocked.is_none() && answer_roll(state, proposer, recipient) < verdict.chance
+    };
     if !accepted {
         record(state, data, proposer, recipient, &articles, false);
         let mut reasons = verdict.reasons();
@@ -1350,9 +1358,10 @@ pub fn propose_treaty(
             .map(|(t, v)| format!("{t} ({v:+})"))
             .collect();
         return Err(DiplomacyError::Refused(format!(
-            "{} refuse (il y avait {} % de chances d'accord) : {}",
+            "{} refuse (score {:+}, il en fallait {:+}) : {}",
             faction_name(data, recipient),
-            verdict.chance,
+            verdict.score,
+            ACCEPT_SCORE,
             top.join(", ")
         )));
     }

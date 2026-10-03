@@ -27,6 +27,7 @@ func setup(campaign_map: Node) -> void:
 	panel.order_requested.connect(_on_order_requested)
 	panel.offer_answered.connect(_on_offer_answered)
 	panel.arbitration_requested.connect(_on_arbitration_requested)
+	panel.trade_view_requested.connect(_on_trade_view_requested)  # U16
 	var court_button: Button = map.ui.court_button
 	button = Button.new()
 	button.text = "Diplomatie"
@@ -35,6 +36,13 @@ func setup(campaign_map: Node) -> void:
 	court_button.get_parent().add_child(button)
 	court_button.get_parent().move_child(button, court_button.get_index())
 	button.pressed.connect(toggle_panel)
+
+
+## U16 : bouton « Commerce » du panneau : referme l'écran et montre la couche des routes (comme V).
+func _on_trade_view_requested() -> void:
+	panel.hide()
+	if not map.trade_mode:
+		map.call("_toggle_trade_layer")
 
 
 func available() -> bool:
