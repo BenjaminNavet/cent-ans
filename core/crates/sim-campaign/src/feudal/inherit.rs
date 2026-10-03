@@ -216,6 +216,46 @@ fn kin_abroad(state: &CampaignState, faction: &FactionId, house: &str) -> Vec<Ch
         .collect()
 }
 
+/// A cadet branch of the late ruler's house takes `faction` over when its
+/// direct line dies out without kin in another faction (LR-05): with
+/// `feudal_rules.collateral_line_percent` chance, so that the many realms
+/// whose data names a single ruler do not all escheat within a generation.
+/// Elective realms never call this (they elect). Returns the new ruler.
+pub(crate) fn cadet_branch(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    dead_ruler: Option<&CharacterId>,
+    events: &mut Vec<GameEvent>,
+) -> Option<CharacterId> {
+    let percent = data.feudal_rules.collateral_line_percent;
+    if percent == 0 {
+        return None;
+    }
+    let house = dead_ruler
+        .and_then(|r| state.characters.get(r))
+        .map(|c| c.house.clone())?;
+    if !kin_abroad(state, faction, &house).is_empty() {
+        return None;
+    }
+    if state.rng.below(100) >= percent {
+        return None;
+    }
+    let ruler = crate::dynasty::spawn_cadet(state, data, faction, &house);
+    events.push(
+        GameEvent::new(
+            EventKind::Succession,
+            format!(
+                "La branche aînée de {} s'éteint : {}, d'une branche cadette, relève ses titres.",
+                faction_name(data, faction),
+                state.character_name(data, &ruler)
+            ),
+        )
+        .faction(faction),
+    );
+    Some(ruler)
+}
+
 /// Titles of `faction` when its line dies out (see the module doc).
 /// Returns `true` when the faction, left without title, has vanished.
 pub(crate) fn inherit_titles_on_extinction(

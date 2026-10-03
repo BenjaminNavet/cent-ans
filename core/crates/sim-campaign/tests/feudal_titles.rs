@@ -258,7 +258,9 @@ fn personal_union() {
 
 #[test]
 fn escheat_without_heir() {
-    let data = data();
+    let mut data = data();
+    // LR-05: no cadet branch takes the duchy over.
+    data.feudal_rules.collateral_line_percent = 0;
     let mut s = start(&data);
     let (france, brittany) = (fac("fac_france"), fac("fac_brittany"));
     last_of_line(&mut s, "chr_jean_iii_de_bretagne", "Dreux (test)");

@@ -27,7 +27,9 @@ pub use acts::{revolt, switch_allegiance};
 pub use felony::{
     has_forfeiture, on_host_refused, on_revolt, open_felony_towards, settle_forfeitures,
 };
-pub(crate) use inherit::{contested_succession, heir_comes_home, inherit_titles_on_extinction};
+pub(crate) use inherit::{
+    cadet_branch, contested_succession, heir_comes_home, inherit_titles_on_extinction,
+};
 pub(crate) use objectives::resolve_feudal;
 pub use objectives::{generic_victory, objective_status, GenericVictory};
 pub use policy::{
