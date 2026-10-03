@@ -104,6 +104,13 @@ pub struct EconomyRules {
     /// ... which spends this percentage of the excess every season.
     #[serde(default = "default_opulence_percent")]
     pub opulence_percent: i64,
+    /// LR-04: seasonal revenue (livres) of the lord's own demesne (rents,
+    /// tolls, mills and dues of his domain), collected by every faction that
+    /// holds its capital city, whatever the population taxed. A one-province
+    /// county taxing 50-80 livres could not pay a single garrison unit
+    /// beside its buildings; the sum is negligible for a kingdom. 0: none.
+    #[serde(default = "default_domain_income")]
+    pub domain_income: i64,
     /// B7a: morale lost every season by every unit (armies and garrisons)
     /// while the treasury is negative.
     #[serde(default = "default_bankruptcy_morale_penalty")]
@@ -260,6 +267,9 @@ fn default_opulence_seasons() -> i64 {
 fn default_opulence_percent() -> i64 {
     20
 }
+fn default_domain_income() -> i64 {
+    150
+}
 fn default_bankruptcy_morale_penalty() -> u8 {
     10
 }
@@ -285,12 +295,13 @@ impl Default for EconomyRules {
     fn default() -> Self {
         EconomyRules {
             event_treasury_reference_income: 4000,
-            event_treasury_min_scale: 0.25,
+            event_treasury_min_scale: 0.05,
             administration_base: default_administration_base(),
             administration_per_province: default_administration_per_province(),
             administration_max: default_administration_max(),
             opulence_seasons: default_opulence_seasons(),
             opulence_percent: default_opulence_percent(),
+            domain_income: default_domain_income(),
             bankruptcy_morale_penalty: default_bankruptcy_morale_penalty(),
             supply_devastation_loss_percent: default_supply_devastation_loss_percent(),
             supply_devastation_recovery_cut_percent:

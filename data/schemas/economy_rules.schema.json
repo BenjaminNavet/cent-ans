@@ -42,6 +42,11 @@
       "minimum": 0,
       "description": "Nombre de saisons de revenu au-delà duquel le trésor nourrit une cour opulente."
     },
+    "domain_income": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lot LR-04 : revenu de saison (livres) du domaine propre du seigneur (cens, péages, moulins, droits), perçu par toute faction qui tient la cité de sa capitale, indépendamment de la population imposée. 0 : aucun."
+    },
     "opulence_percent": {
       "type": "integer",
       "minimum": 0,
