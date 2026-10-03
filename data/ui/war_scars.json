@@ -15,7 +15,7 @@
     "cart": true,
     "scale_per_distance": 4.2,
     "max_scale": 260.0,
-    "cart_scale": 1.9
+    "cart_scale": 1.0
   },
   "battlefield": {
     "turns": 4,
