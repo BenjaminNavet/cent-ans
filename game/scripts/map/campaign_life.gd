@@ -190,6 +190,7 @@ func _setup_incidents() -> void:
 	incidents = IncidentMarkers.new()
 	add_child(incidents)
 	incidents.setup(_map)
+	incidents.folk_scenes = folk_scenes
 
 
 func _parse_cmdline() -> void:
