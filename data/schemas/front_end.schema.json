@@ -531,6 +531,15 @@
               },
               "date": {
                 "$ref": "#/$defs/text"
+              },
+              "cultures": {
+                "description": "Cultures (cul_*) des factions auxquelles la citation est montrée ; absent = citation générale, montrée à toutes.",
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^cul_[a-z_]+$"
+                }
               }
             }
           }

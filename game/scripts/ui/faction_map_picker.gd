@@ -55,7 +55,7 @@ func _init() -> void:
 	_card_text.custom_minimum_size = Vector2(300, 0)
 	_card_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_card_text.add_theme_color_override("default_color", FrontEndStyle.INK)
-	UiType.apply(_card_text, UiType.CAPTION)
+	_card_text.add_theme_font_size_override("normal_font_size", 16)  # A6-L11 (U2) : 16 px de base au minimum
 	_card.add_child(_card_text)
 
 

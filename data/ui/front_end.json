@@ -2754,7 +2754,8 @@
         "text": "Quand Adam bêchait et qu'Ève filait, qui donc était gentilhomme ?",
         "author": "John Ball",
         "source": "sermon de Blackheath",
-        "date": "juin 1381"
+        "date": "juin 1381",
+        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
       },
       {
         "text": "Il n'est fileuse en France qui ne filerait pour payer ma rançon.",
@@ -2796,13 +2797,15 @@
         "text": "Avignon, Babylone de l'Occident, où tout n'est que fraude et vanité.",
         "author": "Pétrarque",
         "source": "d'après les Lettres sans titre",
-        "date": "vers 1350"
+        "date": "vers 1350",
+        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch"]
       },
       {
         "text": "Combien d'hommes vaillants, de belles dames, de gracieux jouvenceaux déjeunèrent le matin avec leurs parents et leurs amis, et le soir soupèrent avec leurs ancêtres dans l'autre monde !",
         "author": "Boccace",
         "source": "Décaméron, introduction",
-        "date": "vers 1350"
+        "date": "vers 1350",
+        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian"]
       },
       {
         "text": "Et moi, Agnolo di Tura dit le Gros, j'ai enseveli de mes propres mains mes cinq enfants.",
@@ -2814,37 +2817,43 @@
         "text": "La civilisation, en Orient comme en Occident, fut frappée d'une peste destructrice qui dévasta les nations et fit disparaître les peuples.",
         "author": "Ibn Khaldoun",
         "source": "d'après la Muqaddima",
-        "date": "1377"
+        "date": "1377",
+        "cultures": ["cul_arabic", "cul_maghrebi", "cul_andalusi", "cul_turkish", "cul_castilian", "cul_catalan", "cul_sicilian", "cul_portuguese"]
       },
       {
         "text": "Les chevaux hennissent à Moscou, les tambours battent à Kolomna, les trompettes sonnent à Serpoukhov : la gloire retentit par toute la terre russe.",
         "author": "Zadonchtchina",
         "source": "d'après le chant de Koulikovo",
-        "date": "fin du XIVe siècle"
+        "date": "fin du XIVe siècle",
+        "cultures": ["cul_russian", "cul_ruthenian", "cul_novgorodian", "cul_mordvin", "cul_permian", "cul_bashkir", "cul_kipchak", "cul_lithuanian", "cul_polish"]
       },
       {
         "text": "Va contre les impies, seigneur, et Dieu t'aidera : tu vaincras.",
         "author": "Serge de Radonège, à Dmitri Donskoï",
         "source": "d'après sa Vie",
-        "date": "août 1380"
+        "date": "août 1380",
+        "cultures": ["cul_russian", "cul_ruthenian", "cul_novgorodian", "cul_mordvin", "cul_permian", "cul_bashkir", "cul_kipchak", "cul_lithuanian", "cul_polish"]
       },
       {
         "text": "Je ne fais ni ne défais roi, mais je sers mon seigneur.",
         "author": "Bertrand du Guesclin",
         "source": "selon la tradition",
-        "date": "Montiel, mars 1369"
+        "date": "Montiel, mars 1369",
+        "cultures": ["cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch", "cul_castilian", "cul_catalan", "cul_portuguese", "cul_navarrese", "cul_english"]
       },
       {
         "text": "Tant que cent d'entre nous demeureront en vie, jamais nous ne nous soumettrons à la domination des Anglais.",
         "author": "Barons d'Écosse",
         "source": "Déclaration d'Arbroath",
-        "date": "6 avril 1320"
+        "date": "6 avril 1320",
+        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
       },
       {
         "text": "Je ne reconnaissais plus rien de ce que je voyais : partout la solitude, la tristesse, la désolation, des champs en friche, des maisons en ruine.",
         "author": "Pétrarque",
         "source": "d'après les Familiares, sur la France",
-        "date": "1361"
+        "date": "1361",
+        "cultures": ["cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_french", "cul_breton", "cul_occitan", "cul_flemish", "cul_savoyard", "cul_dutch"]
       },
       {
         "text": "Temps de douleur et de tentation, âge de pleurs, d'envie et de tourment…",
@@ -2856,13 +2865,15 @@
         "text": "Un chevalier y avait, homme de valeur, qui, dès qu'il commença à chevaucher, aima chevalerie, loyauté et honneur, franchise et courtoisie.",
         "author": "Geoffrey Chaucer",
         "source": "Contes de Canterbury, prologue",
-        "date": "vers 1390"
+        "date": "vers 1390",
+        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
       },
       {
         "text": "En une saison d'été, quand doux était le soleil, je me vêtis d'une bure comme un berger…",
         "author": "William Langland",
         "source": "Pierre le Laboureur",
-        "date": "vers 1377"
+        "date": "vers 1377",
+        "cultures": ["cul_english", "cul_scottish", "cul_irish"]
       },
       {
         "text": "Le temps a laissé son manteau de vent, de froidure et de pluie, et s'est vêtu de broderie, de soleil luisant, clair et beau.",
@@ -2904,7 +2915,8 @@
         "text": "Ne savez-vous pas que je vis de la guerre, et que la paix me déferait ?",
         "author": "John Hawkwood, à deux frères qui lui souhaitaient la paix",
         "source": "d'après Franco Sacchetti, Nouvelles",
-        "date": "vers 1390"
+        "date": "vers 1390",
+        "cultures": ["cul_english", "cul_scottish", "cul_irish", "cul_tuscan", "cul_lombard", "cul_venetian", "cul_ligurian", "cul_neapolitan", "cul_sicilian", "cul_sardinian", "cul_savoyard"]
       },
       {
         "text": "Les gentilshommes, par moquerie, appelaient les paysans Jacques Bonhomme.",
@@ -2922,7 +2934,8 @@
         "text": "La cité est prise, et moi je vis encore ?",
         "author": "Constantin XI Paléologue",
         "source": "selon la tradition",
-        "date": "Constantinople, 29 mai 1453"
+        "date": "Constantinople, 29 mai 1453",
+        "cultures": ["cul_greek", "cul_bulgarian", "cul_serbian", "cul_turkish", "cul_albanian", "cul_romanian", "cul_bosnian", "cul_dalmatian", "cul_croatian", "cul_hungarian", "cul_venetian", "cul_georgian", "cul_armenian"]
       },
       {
         "text": "Souvenez-vous que les gens d'Église, les femmes, les enfants et le pauvre peuple ne sont point vos ennemis.",

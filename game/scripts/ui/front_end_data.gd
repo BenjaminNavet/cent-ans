@@ -11,6 +11,7 @@ const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 static var _data: Dictionary = {}
 ## Indices des citations pas encore montrées dans la session (voir `random_quote`).
 static var _quote_bag: Array = []
+static var _quote_bag_key: String = ""
 
 
 static func data() -> Dictionary:
@@ -99,15 +100,44 @@ static func loading() -> Dictionary:
 	return data().get("loading", {})
 
 
-## Tirage d'une citation {text, author, source, date} ({} si aucune). Sans `rng`, tirage « sac
+## Culture (`cul_*`) d'une faction, lue dans `data/factions/<id>.json` ("" si inconnue).
+static func faction_culture(faction_id: String) -> String:
+	if faction_id == "":
+		return ""
+	var path := _data_dir().path_join("factions").path_join(faction_id + ".json")
+	if not FileAccess.file_exists(path):
+		path = MAP_PATHS_SCRIPT.project_root().path_join("data/factions").path_join(faction_id + ".json")
+	if not FileAccess.file_exists(path):
+		return ""
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	return str((parsed as Dictionary).get("culture", "")) if parsed is Dictionary else ""
+
+
+## Citations montrables à une faction (A6-L11, U3) : celles sans `cultures` (générales, guerre de
+## Cent Ans) et celles dont `cultures` contient la culture de la faction. Sans faction, ou sans
+## culture connue : uniquement les générales.
+static func quotes_for(faction_id: String) -> Array:
+	var culture := faction_culture(faction_id)
+	var result: Array = []
+	for quote: Variant in loading().get("quotes", []):
+		var cultures: Array = (quote as Dictionary).get("cultures", [])
+		if cultures.is_empty() or (culture != "" and cultures.has(culture)):
+			result.append(quote)
+	return result
+
+
+## Tirage d'une citation {text, author, source, date} ({} si aucune), filtrée par la culture de
+## `faction_id` (voir `quotes_for` ; repli : citations générales). Sans `rng`, tirage « sac
 ## mélangé » : aucune citation ne revient avant que toutes aient été montrées dans la session.
-static func random_quote(rng: RandomNumberGenerator = null) -> Dictionary:
-	var quotes: Array = loading().get("quotes", [])
+static func random_quote(rng: RandomNumberGenerator = null, faction_id: String = "") -> Dictionary:
+	var quotes: Array = quotes_for(faction_id)
 	if quotes.is_empty():
 		return {}
 	if rng != null:
 		return quotes[_pick(quotes.size(), rng)]
-	if _quote_bag.is_empty():
+	if _quote_bag_key != faction_id or _quote_bag.is_empty():
+		_quote_bag_key = faction_id
+		_quote_bag.clear()
 		for index in quotes.size():
 			_quote_bag.append(index)
 		_quote_bag.shuffle()
