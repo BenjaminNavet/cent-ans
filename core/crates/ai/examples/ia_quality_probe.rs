@@ -885,6 +885,7 @@ fn measure(
 
 /// Why `siege` ended without capture: index in [`SIEGE_END_CAUSES`] and
 /// a detail naming the besieger and what it was told.
+#[allow(clippy::too_many_arguments)]
 fn siege_end_cause(
     state: &CampaignState,
     rec: &Recorder,
