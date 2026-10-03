@@ -1,0 +1,18 @@
+{
+  "noise_scales": {
+    "macro": 0.0021,
+    "macro2": 0.00043,
+    "fine": 0.017,
+    "blend": 0.006,
+    "patch": 0.0013,
+    "patch2": 0.0047,
+    "puddle": 0.021
+  },
+  "macro_variation": {
+    "frequency": 0.0017,
+    "tint_strength": 0.28,
+    "wetness_strength": 0.3,
+    "albedo_strength": 0.12
+  },
+  "fine_contrast": 0.6
+}

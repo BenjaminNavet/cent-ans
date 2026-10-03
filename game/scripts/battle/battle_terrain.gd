@@ -128,6 +128,48 @@ static func ground_role_index(role: String) -> int:
 	return int(_ground_role_index.get(role, -1))
 
 
+## A6-L14 : échelles de bruit et variation macro du sol (`data/fx/battle_ground.json`, schéma
+## `fx_battle_ground.schema.json`) ; sans fichier, les uniforms gardent les anciennes constantes.
+const GROUND_NOISE_FILE := "fx/battle_ground.json"
+static var _ground_noise: Dictionary = {}
+static var _ground_noise_loaded: bool = false
+
+
+static func ground_noise() -> Dictionary:
+	if _ground_noise_loaded:
+		return _ground_noise
+	_ground_noise_loaded = true
+	var candidates: Array[String] = []
+	var tree := Engine.get_main_loop() as SceneTree
+	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
+	if paths != null:
+		candidates.append(str(paths.get("data_dir")))
+	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
+	for dir in candidates:
+		var path := dir.path_join(GROUND_NOISE_FILE)
+		if FileAccess.file_exists(path):
+			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+			if parsed is Dictionary:
+				_ground_noise = parsed
+				return _ground_noise
+	push_warning("BattleTerrain: %s introuvable, échelles de sol historiques" % GROUND_NOISE_FILE)
+	return _ground_noise
+
+
+func _apply_ground_noise() -> void:
+	var data := ground_noise()
+	var scales: Dictionary = data.get("noise_scales", {})
+	for key in scales:
+		ground_material.set_shader_parameter("freq_" + str(key), float(scales[key]))
+	var macro_var: Dictionary = data.get("macro_variation", {})
+	if not macro_var.is_empty():
+		ground_material.set_shader_parameter("freq_macro_var", float(macro_var.get("frequency", 0.0017)))
+		ground_material.set_shader_parameter("macro_tint_strength", float(macro_var.get("tint_strength", 0.0)))
+		ground_material.set_shader_parameter("macro_wet_strength", float(macro_var.get("wetness_strength", 0.0)))
+		ground_material.set_shader_parameter("macro_albedo_strength", float(macro_var.get("albedo_strength", 0.0)))
+	ground_material.set_shader_parameter("fine_contrast", float(data.get("fine_contrast", 1.0)))
+
+
 const GROUND_SHADER := preload("res://shaders/battle_ground.gdshader")
 const WATER_SHADER := preload("res://shaders/battle_water.gdshader")
 const ALBEDO_ARRAY := preload("res://assets/textures/battle/ground_albedo_array.jpg")
@@ -1080,6 +1122,7 @@ func _apply_terrain_tint() -> void:
 func _build_material(weather: String) -> void:
 	ground_material = ShaderMaterial.new()
 	ground_material.shader = GROUND_SHADER
+	_apply_ground_noise()
 	ground_material.set_shader_parameter("albedo_array", ALBEDO_ARRAY)
 	ground_material.set_shader_parameter("normal_array", NORMAL_ARRAY)
 	ground_material.set_shader_parameter("macro_noise", macro_noise)
