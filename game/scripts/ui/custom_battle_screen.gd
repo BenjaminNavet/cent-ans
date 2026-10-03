@@ -55,6 +55,11 @@ var fortification_spin: SpinBox
 var place_option: OptionButton
 var year_spin: SpinBox
 var engines_button: MenuButton
+## LR-12 (NT4) : l'armée adverse au joueur tient sa position (`set_hold` du cœur, appliqué au lancement).
+var hold_check: CheckBox
+## LR-12 : menu « Technologies » par camp (technologies accordées en plus de celles de la faction).
+var tech_buttons: Dictionary = {}
+var tech_catalogs: Dictionary = {}
 var player_option: OptionButton
 var errors_label: Label
 var launch_button: Button
@@ -107,11 +112,11 @@ static func save_config(value: Dictionary) -> void:
 
 func _initial_config() -> Dictionary:
 	var out := {
-		"attacker": {"faction": DEFAULT_FACTIONS["attacker"], "budget": int(rules.get("default_budget", 12000)), "units": []},
-		"defender": {"faction": DEFAULT_FACTIONS["defender"], "budget": int(rules.get("default_budget", 12000)), "units": []},
+		"attacker": {"faction": DEFAULT_FACTIONS["attacker"], "budget": int(rules.get("default_budget", 12000)), "units": [], "technologies": []},
+		"defender": {"faction": DEFAULT_FACTIONS["defender"], "budget": int(rules.get("default_budget", 12000)), "units": [], "technologies": []},
 		"terrain": "plains", "season": "summer", "weather": "", "hour": "",
 		"siege": false, "place": "city", "fortification": int(rules.get("default_fortification", 2)), "player_side": "attacker",
-		"year": int(rules.get("default_year", 1337)), "engines": default_engines(),
+		"year": int(rules.get("default_year", 1337)), "engines": default_engines(), "hold_opponent": false,
 	}
 	var saved := saved_config()
 	for key in out:
@@ -130,6 +135,7 @@ func _initial_config() -> Dictionary:
 				"faction": str(side.get("faction", out[key]["faction"])),
 				"budget": int(side.get("budget", out[key]["budget"])),
 				"units": Array(side.get("units", [])).map(func(u: Variant) -> String: return str(u)),
+				"technologies": Array(side.get("technologies", [])).map(func(t: Variant) -> String: return str(t)),
 			}
 		elif out[key] is bool:
 			out[key] = bool(saved[key])
@@ -183,6 +189,14 @@ func _build() -> void:
 	row.alignment = BoxContainer.ALIGNMENT_END
 	row.add_theme_constant_override("separation", 8)
 	box.add_child(row)
+	hold_check = CheckBox.new()
+	hold_check.name = "HoldOpponent"
+	hold_check.text = "Adversaire : tenir sa position"
+	RichTooltip.attach_plain(hold_check, "custom_battle_hold")
+	hold_check.toggled.connect(func(on: bool) -> void:
+		if not _refreshing:
+			config["hold_opponent"] = on)
+	row.add_child(hold_check)
 	var close_button := Button.new()
 	close_button.name = "CloseButton"
 	close_button.text = "Fermer"
@@ -230,6 +244,16 @@ func _build_side(side: String) -> Control:
 	budget.value_changed.connect(func(value: float) -> void: set_budget(side, int(value)))
 	top.add_child(budget)
 	budget_spins[side] = budget
+	var tech_button := MenuButton.new()
+	tech_button.name = "Technologies"
+	tech_button.flat = false
+	tech_button.text = "Technologies"
+	RichTooltip.attach_plain(tech_button, "custom_battle_technologies")
+	var tech_popup := tech_button.get_popup()
+	tech_popup.hide_on_checkable_item_selection = false
+	tech_popup.index_pressed.connect(func(index: int) -> void: toggle_technology(side, str(tech_popup.get_item_metadata(index))))
+	top.add_child(tech_button)
+	tech_buttons[side] = tech_button
 	var points := Label.new()
 	points.name = "Points"
 	UiType.apply(points, UiType.BODY)
@@ -382,6 +406,7 @@ func _sync_controls() -> void:
 	fortification_spin.set_value_no_signal(float(config["fortification"]))
 	place_option.selected = maxi(_index_of(PLACES, str(config.get("place", "city"))), 0)
 	year_spin.set_value_no_signal(float(config["year"]))
+	hold_check.set_pressed_no_signal(bool(config.get("hold_opponent", false)))
 	_sync_engines()
 	_refreshing = false
 
@@ -397,12 +422,46 @@ static func _index_of(pairs: Array, key: String) -> int:
 
 
 ## Roster de `faction` pour l'année choisie (cache ; `[]` sans extension).
-func roster(faction: String) -> Array:
+func roster(faction: String, techs: Array = []) -> Array:
 	var year := int(config.get("year", rules.get("default_year", 1337)))
-	var key := "%s@%d" % [faction, year]
+	var sorted_techs := techs.duplicate()
+	sorted_techs.sort()
+	var key := "%s@%d@%s" % [faction, year, ",".join(PackedStringArray(sorted_techs))]
 	if not rosters.has(key):
-		rosters[key] = _sim.call("custom_roster", data_dir(), faction, year) if _sim != null else []
+		rosters[key] = _sim.call("custom_roster", data_dir(), faction, year, PackedStringArray(techs)) if _sim != null else []
 	return rosters[key]
+
+
+## LR-12 : roster du camp (sa faction et les technologies qui lui sont accordées).
+func side_roster(side: String) -> Array:
+	return roster(str(config[side]["faction"]), config[side].get("technologies", []))
+
+
+## LR-12 : technologies que la faction du camp peut recevoir cette année (`[{id, name, units}]`).
+func grantable_technologies(side: String) -> Array:
+	var year := int(config.get("year", rules.get("default_year", 1337)))
+	var key := "%s@%d" % [config[side]["faction"], year]
+	if not tech_catalogs.has(key):
+		tech_catalogs[key] = _sim.call("custom_technologies", data_dir(), str(config[side]["faction"]), year) if _sim != null else []
+	return tech_catalogs[key]
+
+
+## LR-12 : accorde ou retire une technologie ; les unités qu'elle débloquait quittent l'armée.
+func toggle_technology(side: String, tech_id: String) -> void:
+	if _refreshing:
+		return
+	var techs: Array = config[side]["technologies"]
+	if techs.has(tech_id):
+		techs.erase(tech_id)
+	else:
+		techs.append(tech_id)
+	_prune_army(side)
+	refresh()
+
+
+## Retire de l'armée les unités hors roster (faction, année, technologies).
+func _prune_army(side: String) -> void:
+	config[side]["units"] = (config[side]["units"] as Array).filter(func(u: String) -> bool: return not roster_entry(str(config[side]["faction"]), u, config[side]["technologies"]).is_empty())
 
 
 ## NT11 : année de la bataille ; les unités qui ne sont plus levées cette année-là quittent les armées.
@@ -414,8 +473,7 @@ func set_year(year: int) -> void:
 		return
 	config["year"] = year
 	for side in SIDES:
-		var faction := str(config[side]["faction"])
-		config[side]["units"] = (config[side]["units"] as Array).filter(func(u: String) -> bool: return not roster_entry(faction, u).is_empty())
+		_prune_army(side)
 	refresh()
 
 
@@ -476,8 +534,8 @@ func _sync_engines() -> void:
 	engines_button.text = "Engins : " + (", ".join(parts) if not parts.is_empty() else "aucun")
 
 
-func roster_entry(faction: String, unit_id: String) -> Dictionary:
-	for entry in roster(faction):
+func roster_entry(faction: String, unit_id: String, techs: Array = []) -> Dictionary:
+	for entry in roster(faction, techs):
 		if str(entry["id"]) == unit_id:
 			return entry
 	return {}
@@ -487,8 +545,9 @@ func set_faction(side: String, faction: String) -> void:
 	if _refreshing or str(config[side]["faction"]) == faction:
 		return
 	config[side]["faction"] = faction
+	config[side]["technologies"] = []
 	# Les unités hors du roster de la nouvelle faction sont retirées.
-	config[side]["units"] = (config[side]["units"] as Array).filter(func(u: String) -> bool: return not roster_entry(faction, u).is_empty())
+	_prune_army(side)
 	refresh()
 
 
@@ -508,7 +567,7 @@ func _set_key(key: String, value: String) -> void:
 
 ## Vrai si `side` peut encore acheter `unit_id` (budget et plafond d'unités du rapport du cœur).
 func can_buy(side: String, unit_id: String) -> bool:
-	var entry := roster_entry(str(config[side]["faction"]), unit_id)
+	var entry := roster_entry(str(config[side]["faction"]), unit_id, config[side]["technologies"])
 	if entry.is_empty():
 		return false
 	var side_report: Dictionary = report.get(side, {})
@@ -558,6 +617,7 @@ func refresh() -> void:
 	else:
 		report = {"ok": false, "errors": ["Extension de simulation absente."]}
 	for side in SIDES:
+		_fill_technologies(side)
 		_fill_roster(side)
 		_fill_army(side)
 		var side_report: Dictionary = report.get(side, {})
@@ -584,11 +644,27 @@ func _decorate(button: Button, unit_id: String) -> void:
 		library.call("decorate_button", button, unit_id, ROSTER_ICON, "unit")
 
 
+## LR-12 : coches du menu « Technologies » du camp et résumé sur le bouton.
+func _fill_technologies(side: String) -> void:
+	var button: MenuButton = tech_buttons[side]
+	var popup := button.get_popup()
+	popup.clear()
+	var granted: Array = config[side]["technologies"]
+	var catalog := grantable_technologies(side)
+	for entry in catalog:
+		var index := popup.item_count
+		popup.add_check_item("%s (%s)" % [entry["name"], ", ".join(PackedStringArray(entry["units"]))])
+		popup.set_item_metadata(index, str(entry["id"]))
+		popup.set_item_checked(index, granted.has(str(entry["id"])))
+	button.disabled = catalog.is_empty()
+	button.text = "Technologies" if granted.is_empty() else "Technologies (%d)" % granted.size()
+
+
 func _fill_roster(side: String) -> void:
 	var items: VBoxContainer = roster_boxes[side]
 	for child in items.get_children():
 		child.queue_free()
-	for entry in roster(str(config[side]["faction"])):
+	for entry in side_roster(side):
 		var unit_id := str(entry["id"])
 		var button := RichButton.new()
 		button.name = "Buy_" + unit_id

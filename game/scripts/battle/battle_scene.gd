@@ -476,6 +476,9 @@ func begin_custom(config: Dictionary) -> bool:
 			battle.call("set_start_phase", _hour_override)
 	if not _build_scene():
 		return false
+	# LR-12 (NT4) : l'adversaire du joueur tient sa position (option du cœur, enregistrée au rejeu).
+	if bool(config.get("hold_opponent", false)) and player_side != "" and battle.has_method("set_hold"):
+		battle.call("set_hold", enemy_side, true)
 	var attacker := str((setup.get("attacker", {}) as Dictionary).get("faction_name", ""))
 	var defender := str((setup.get("defender", {}) as Dictionary).get("faction_name", ""))
 	_title_text = "Bataille personnalisée : %s contre %s" % [attacker, defender]

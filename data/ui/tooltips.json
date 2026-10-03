@@ -427,7 +427,15 @@
     },
     "custom_battle_year": {
       "title": "Année",
-      "body": "Année de la bataille (1337-1453) : les rosters ne proposent que les unités levées cette année-là (francs-archers après 1448, routiers de 1356 à 1395…). Les technologies ne comptent pas en bataille personnalisée."
+      "body": "Année de la bataille (1337-1453) : les rosters ne proposent que les unités levées cette année-là (francs-archers après 1448, routiers de 1356 à 1395…)."
+    },
+    "custom_battle_technologies": {
+      "title": "Technologies",
+      "body": "Chaque faction dispose de ses technologies de départ de la campagne. Les unités qui exigent une autre technologie (arquebusiers, bombardes, francs-archers…) n'apparaissent au roster que si vous la cochez ici."
+    },
+    "custom_battle_hold": {
+      "title": "Adversaire immobile",
+      "body": "L'armée adverse garde sa place : elle ne marche ni ne charge de son propre chef et ne recule pas. Elle se bat si on l'attaque et peut encore se débander sous la pression."
     },
     "custom_battle_engines": {
       "title": "Engins de siège",

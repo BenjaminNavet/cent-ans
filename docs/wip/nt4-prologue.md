@@ -26,7 +26,7 @@ Branche `feat/nt4-battle-prologue` (partie de `integration/nt`). Spec : ligne NT
   `BattlePrologueInvite` Oui / Non / Ne plus demander (réglages `battle_prologue/never_ask`,
   `battle_prologue/done`, ce dernier posé à la fin du guide hors défaite).
 - [x] Défaite : texte d'adieu (`defeat` du JSON), boutons « Recommencer » et « Fermer ».
-- [ ] Ennemi tenu en place : pas d'option au cœur. `issue_command` refuse les régiments du
+- [x] (fait par NT11 `set_hold`, LR-12 : case dans la bataille perso) Ennemi tenu en place : pas d'option au cœur. `issue_command` refuse les régiments du
   camp non joué, et il n'existe ni ordre « tenir » ni mode « sans fuite ». La déroute par le
   moral est une règle de combat, à laquelle je n'ai pas touché. Il faudrait une commande côté
   (`ReplayAction`) pour passer l'ennemi en mode garde : c'est à décider.
