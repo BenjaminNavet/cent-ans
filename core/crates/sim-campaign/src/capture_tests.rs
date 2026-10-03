@@ -291,6 +291,11 @@ fn raze_costs_a_level_or_leaves_a_ruin() {
         .unwrap();
     assert!(crate::capture::is_ruined(&state, &royaumont));
     assert_eq!(state.settlements[&royaumont].fortification_level, 0);
+    let listed = state.recruitable(&data, &royaumont);
+    assert!(!listed.is_empty());
+    assert!(listed
+        .iter()
+        .all(|o| !o.available && o.reason.as_deref() == Some("la colonie est en ruines")));
     let unit_type = data.unit_types.keys().next().unwrap().clone();
     let refused = state.submit_order(
         &data,

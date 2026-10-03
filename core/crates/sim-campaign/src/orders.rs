@@ -1291,6 +1291,10 @@ impl CampaignState {
         let province_state = self.provinces.get(&settlement.province)?;
         let province = data.provinces.get(&settlement.province)?;
         let faction_state = self.factions.get(faction)?;
+        // LR-08: a razed place lies in ruins, the order is refused upfront.
+        if crate::capture::is_ruined(self, settlement_id) {
+            return Some("la colonie est en ruines".to_owned());
+        }
         if &settlement.owner != faction || &settlement.controller != faction {
             return Some("la colonie doit être possédée et contrôlée".to_owned());
         }
