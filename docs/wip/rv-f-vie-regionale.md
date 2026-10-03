@@ -15,7 +15,7 @@ d ≈ 150-1200), sans pictogrammes (ADR 0124), sans coût FPS notable, rien qui 
 ## État (fini, à intégrer dans feat/rv)
 - [x] Panaches régionaux : `life_plume.gdshader` + `LifeEffects._fill_plumes/_update_plumes` ; 2361
   instances (1 appel de rendu), densité saison (`PLUME_DENSITY_PER_BOOST`), incendies sombres
-  (siège, dévastation ≥ 45, hameaux brûlés 1/6), palier moyen seulement, coupés par `--no-life=smoke`.
+  (siège, dévastation ≥ 45, hameaux brûlés 1/6), palier moyen seulement, coupés par `--life-off=smoke`.
   Piège corrigé : `PROJECTION_MATRIX[1][1]` est négatif sous Vulkan (abs).
 - [x] Paillettes de mer : `water_glint.gdshaderinc` (cellules de 4 px, deux grilles fondues selon
   l'empreinte, nappes), dans `water.gdshader` light(). Fleuves non traités (pas de light()).
