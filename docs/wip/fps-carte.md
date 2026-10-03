@@ -39,3 +39,16 @@ Le jeu saccade un peu, surtout sur la carte de campagne pendant les zooms et les
 2. Chercher une régression GPU depuis PB1 (relief ~12 ms de shader à 1440×900) : shader du relief
    (hide:Terrain le plus coûteux), éventuels ajouts OM, GA ou FK ; le cas échéant, bisection à d=30.
 3. Metal System Trace sur 5 s de panoramique pour obtenir le coût par passe.
+
+## Mesure du 03/10 (main 61fbbfd7f, machine chargée, charge 35-64 : ms gonflées, attributions fiables)
+`--bench-map --bench-probe` (d = 30) : image p50 53,6 ms, p99 100 ms, 741 pics > 50 ms ; descente
+process p50 20,7 ms (≈ 5 ms le 29/09) → **les scripts dominent de nouveau les pics**.
+- `map.settlements` en tête de 550 des 741 pics (moyenne 8,4 ms/image, p99 54 ms) :
+  - `settle/outbuildings` (TB3) : pics 40-85 ms. Cause lue : `OutbuildingLayer._write_batches()`
+    réécrit toutes les instances (`_place` par dictionnaire) dès que le zoom change de 4 %, hors
+    budget ; idem `_reground()`.
+  - `settle/declutter` : ≈ 5 ms à chaque image en mouvement (`_declutter_step`).
+- `map.life` / `life/reground` (FK) : pics 15-19 ms. `map.update_lod` : 3,4 ms en moyenne.
+Compteurs (`--map-ab`, temps inexploitables : 6,9 ms partout = cadence) : d = 150 → 4,14 M prim.,
+1 313 appels ; **rivières 1,42 M prim. (34 %)** et 281 appels ; colonies 682 appels (52 %) ;
+relief 0,86 M. d = 40 → 4,71 M, 880 appels ; rivières 0,9 M, vie 0,67 M, colonies 455 appels.
