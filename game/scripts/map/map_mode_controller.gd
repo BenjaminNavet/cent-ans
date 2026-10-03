@@ -698,3 +698,12 @@ func _show_legend() -> void:
 ## Tests et captures : légende affichée du mode de carte courant (null sinon).
 func legend() -> PanelContainer:
 	return _legend if _legend != null and is_instance_valid(_legend) else null
+
+
+## A6-L10 : le menu des filtres n'entre dans l'arbre qu'à la première ouverture ; jamais ouvert, il
+## restait orphelin (ses boutons et cases gardaient le thème, les icônes et les polices vivants à
+## la sortie : « 60 resources still in use at exit »).
+func _exit_tree() -> void:
+	if menu != null and is_instance_valid(menu) and menu.get_parent() == null:
+		menu.free()
+		menu = null
