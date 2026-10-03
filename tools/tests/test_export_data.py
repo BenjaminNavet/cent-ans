@@ -106,3 +106,30 @@ def test_windows_folder_gets_data_and_relief_beside_the_exe(tmp_path: Path) -> N
     assert (folder / "data" / "rules" / "r.json").is_file()
     assert (folder / "Cent Ans relief" / "pyramid" / "E1" / "0_0.png").is_file()
     assert result.relief_dir == folder / "Cent Ans relief" / "pyramid"
+
+
+def test_unused_relief_shade_bands_are_left_out_when_bc5_is_complete(
+    tmp_path: Path,
+) -> None:
+    """The PNG bands are dead weight once the BC5 parts listed in map.json exist."""
+    repo = _fake_repo(tmp_path)
+    map_dir = repo / "data" / "map"
+    shade = {
+        "bc5": {"pattern": "relief_shade_bc5_{part}.bin", "part_bytes": [1, 1]},
+        "bands": {"pattern": "relief_shade_{band}.png", "count": 2},
+    }
+    (map_dir / "map.json").write_text(json.dumps({"relief_shade": shade}))
+    (map_dir / "relief_shade_0.png").write_bytes(b"png")
+    (map_dir / "relief_shade_1.png").write_bytes(b"png")
+    (map_dir / "heightmap_render.png").write_bytes(b"png")
+    (map_dir / "relief_shade_bc5_0.bin").write_bytes(b"bc5")
+    # One BC5 part missing: the fallback bands must stay.
+    export_data.stage(_resources(tmp_path), "none", repo_dir=repo)
+    data_map = _resources(tmp_path) / "data" / "map"
+    assert (data_map / "relief_shade_0.png").exists()
+    (map_dir / "relief_shade_bc5_1.bin").write_bytes(b"bc5")
+    export_data.stage(_resources(tmp_path), "none", repo_dir=repo)
+    assert not (data_map / "relief_shade_0.png").exists()
+    assert not (data_map / "relief_shade_1.png").exists()
+    assert (data_map / "relief_shade_bc5_0.bin").exists()
+    assert (data_map / "heightmap_render.png").exists()

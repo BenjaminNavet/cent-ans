@@ -937,6 +937,13 @@ func _update_shield_label_scale() -> void:
 
 ## DV2 : rectangle écran de l'écu `i`, l'ancre projetée en `anchor` (échelle des étiquettes
 ## `scale`), élargi de `margin` px.
+## Rectangle réduit de `margin` de chaque côté, sans jamais produire une taille négative
+## (Godot : « Rect2 size is negative » à chaque appel sinon, un écu étant parfois plus petit que la marge).
+func _shrink_rect(rect: Rect2, margin: float) -> Rect2:
+	var half := minf(margin, minf(rect.size.x, rect.size.y) * 0.5)
+	return rect.grow(-maxf(half, 0.0))
+
+
 func _shield_rect(i: int, anchor: Vector2, scale: float, margin: float) -> Rect2:
 	var size := marker_size(i)
 	var bottom := anchor.y - _shield_lift(i) * scale - _shield_gap
@@ -1108,7 +1115,7 @@ func _declutter_step(sliced: bool) -> void:
 		var shown := false
 		if _dc_label_screen.intersects(rect) or (shielded and _dc_label_screen.intersects(shield_rect)):
 			# TB2 : un nom (ou son écu) qui dépasse de l'écran serait coupé : il cède la place.
-			var cut := not _dc_safe.encloses(bare) or (shielded and not _dc_safe.encloses(shield_rect.grow(-_dc_marker_margin)))
+			var cut := not _dc_safe.encloses(bare) or (shielded and not _dc_safe.encloses(_shrink_rect(shield_rect, _dc_marker_margin)))
 			shown = pinned or not (cut or _placer.overlaps(rect, i) or (shielded and _placer.overlaps(shield_rect, i)))
 			if shown:
 				_placer.try_place(rect, i, true)
