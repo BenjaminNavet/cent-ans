@@ -29,9 +29,9 @@ revendications `prov_jerusalem`, `prov_gaza`, `prov_safad`.
 ## Reste
 - Partie pilote par le joueur (débarquement, prêche, siège de Jérusalem).
 - Graine 3 : ferveur un tour à 94, trésor négatif 4 tours d'affilée (tolérable).
-- Déficit structurel Mérinides, Hafsides, Lituanie, Serbie (hors JR, ADR 0165 § Ajouts).
+- (Résolu par LR-15, `docs/wip/lr-15.md`.) Déficit structurel Mérinides, Hafsides, Lituanie, Serbie.
 - `test_ars_nova_recordings` échoue depuis 54dd3e0c4 (musique, ADR 0166, autre session).
 
 ## Points ouverts
-- Usages de la capitale pour une faction sans cité (liste dans le rapport d'exploration, spec § 5.1).
+- (Résolu par LR-15 : `CampaignState::faction_seat`.) Usages de la capitale pour une faction sans cité.
 - `fe_ui_test` « map picker framed on the playable lands » échoue selon JR3 depuis OM (pas JR) : à vérifier sur main.

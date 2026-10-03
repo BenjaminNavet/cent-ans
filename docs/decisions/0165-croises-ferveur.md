@@ -44,6 +44,10 @@ Mamelouks. Trois voies : (a) une faction sans terre du tout, (b) découper une n
   faillite structurelle des grandes factions de l'extension OM (Mamelouks −21 %, Byzance −42 %,
   Horde −80 %). Factions saines inchangées. Restent en déficit : Mérinides, Hafsides, Lituanie,
   Serbie (populations OM ou coût des colonies à revoir, hors JR).
+  Ajout LR-15 : deux paliers de plus, dans l'ordre, pour une faction encore au-delà du seuil une
+  fois ses garnisons au plancher : armées de campagne de départ (`min_field_units` 1), puis
+  garnison de la capitale (`min_capital_units` 2). Populations du Maghreb mérinide et hafside
+  relevées ×2,5 (sous-estimées : Fès 15 000 citadins). Les quatre factions passent sous −15 %.
 - **Rassemblement sans cité** (IA, `ai/src/campaign.rs`, règle `cityless`) : une faction qui ne
   tient aucune cité recrute dans ses bourgs et châteaux et en fait sortir le surplus, en gardant
   la garnison de départ du type de chaque place. Voulu pour toute faction réduite à des châteaux,
