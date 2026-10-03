@@ -51,7 +51,19 @@ avec interpolation contre 20/119 sans ; 14 régiments immobiles gardent leur ver
 
 ## État
 - [x] Squelette, cœur (`step_fraction`), pont, GDScript, banc A/B
-- [ ] smoke.gd (normal et `--pose-lerp`)
+- [x] smoke.gd vert (normal et `-- --pose-lerp`). Note : dans ce worktree, le chargement de la
+  carte de campagne en headless crache des millions d'erreurs `geometry_instance is null`
+  (`river_labels.gd:118`, Label3D) : sans lien avec le lot, filtrer la sortie.
+
+## Points ouverts
+- Écart à la spec : quand l'effectif dessiné change (pertes), les rangs communs restent
+  interpolés (garde-fou de téléportation) au lieu d'un retour à la pose courante : sinon chaque
+  perte d'un régiment en marche sous les traits refait un saut.
+- `_previous` (figure_at, cadavres, étendards) tient désormais les places « lâchées » et
+  interpolées (rangs lâches appliqués par le cœur à toute distance, ±0,15 m, ±4°).
+- Coût restant : ~+0,4 ms par image sans pas sur 9 600 figurines en bibliothèque debug
+  (lerp Rust non optimisé + envoi des tampons des régiments en marche).
+- Vérification visuelle en jeu par le joueur (pas de capture dans ce lot).
 
 ## Prochaine étape
-Smoke vert, rapport.
+Relecture et fusion par l'orchestrateur (`../gp-rj-merge`).
