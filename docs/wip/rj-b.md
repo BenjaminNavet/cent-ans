@@ -31,12 +31,27 @@ qui pulse à 10 Hz).
 - Opt-in `set_pose_lerp(true)` (la scène de bataille, hors `--no-pose-lerp`) : tests et
   headless gardent les poses du pas courant (résultats inchangés).
 
+- Budget EP1 (`_skip_far`) : décidé avant l'appel ; un régiment sauté reçoit sa capacité codée
+  `-2 - capacité` et le cœur lui rend son tampon tel quel (pas de lerp inutile). Gardé : au-delà
+  de 450 m, une mise à jour toutes les 2-3 images d'une position déjà interpolée bouge de
+  quelques centimètres (< 1 px), plus de saut de pas entier.
+- `battle_effects.gd` : le cache d'emprise mouillée était indexé sur la position exacte
+  (recalculé à chaque image avec l'interpolation : +0,9 ms) ; tolérance 0,5 m / 0,05 rad.
+
+## Mesures (bibliothèque debug, `tools/bench_ep1.sh`, vsync à 60 i/s, machine partagée)
+| Banc | `proc_plain` médiane | figurines (images sans pas) | `proc_step` médiane |
+|---|---|---|---|
+| 80 régiments, 9 598 fig., `--units=40 --autoplay --bench-at=40`, lerp | 5,38 ms | 2,00 ms | 7,07 ms |
+| idem `--no-pose-lerp` | 4,97 ms | 1,76 ms | 7,27 ms |
+| `--closeup --autoplay`, lerp | 1,67 ms | 0,65 ms | 2,05 ms |
+| idem `--no-pose-lerp` | 1,58 ms | 0,59 ms | 2,13 ms |
+
+Test headless (`tests/rj_b_pose_lerp_test.gd`) : figurine de tête qui bouge sur 114/119 images
+avec interpolation contre 20/119 sans ; 14 régiments immobiles gardent leur version de tampon.
+
 ## État
-- [x] Squelette
-- [x] Cœur : step_fraction
-- [x] Pont : lerp poses + unités + loose (`battle_pose_lerp.rs`, `battle_sim_poses.rs`)
-- [x] GDScript : branchement, cadence (skip_far à vérifier)
-- [ ] Mesures perf, smoke
+- [x] Squelette, cœur (`step_fraction`), pont, GDScript, banc A/B
+- [ ] smoke.gd (normal et `--pose-lerp`)
 
 ## Prochaine étape
-Clippy, build GDExtension, `tests/rj_b_pose_lerp_test.gd`, smoke, banc A/B (`--no-pose-lerp`).
+Smoke vert, rapport.
