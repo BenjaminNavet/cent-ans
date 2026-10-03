@@ -290,7 +290,7 @@ fn dismount_turns_knights_into_heavy_foot_for_good() {
         .apply_command(
             Command::Formation {
                 units: vec![1],
-                kind: sim_battle::Formation::Wedge,
+                kind: sim_battle::Formation::of("wedge"),
             },
             None,
         )

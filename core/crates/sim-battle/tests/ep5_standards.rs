@@ -103,7 +103,7 @@ fn bearers_stand_in_the_front_rank_centre() {
         }
     }
     // Wedge: the tip.
-    sim.units_mut()[2].formation = Formation::Wedge;
+    sim.units_mut()[2].formation = Formation::of("wedge");
     assert_eq!(sim.units()[2].standard_slots(1.0, 1), vec![0]);
 }
 

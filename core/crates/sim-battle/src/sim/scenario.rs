@@ -12,7 +12,7 @@ use crate::command::Command;
 use crate::field::Weather;
 use crate::historical::{MapArmies, WeatherChange};
 use crate::setup::SideId;
-use crate::unit::{Formation, UnitState};
+use crate::unit::UnitState;
 
 /// A regiment's post: where it stands and how far the AI may take it.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -120,8 +120,8 @@ impl BattleSim {
                         unit.dismount(speed, armor);
                     }
                     if let Some(formation) = block.formation {
-                        if formation != Formation::Wedge || unit.mounted {
-                            unit.formation = formation;
+                        if formation.def().allows(unit) {
+                            unit.change_formation(formation, true);
                         }
                     }
                     if let Some(ammo) = block.ammo {

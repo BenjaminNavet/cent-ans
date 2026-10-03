@@ -63,10 +63,10 @@ fn figures_fill_the_simulated_rectangle() {
     let mut sim = BattleSim::new(battle, 1).unwrap();
     lab(&mut sim);
     for formation in [
-        Formation::Line,
-        Formation::Column,
-        Formation::Square,
-        Formation::Wedge,
+        Formation::of("line"),
+        Formation::of("column"),
+        Formation::of("square"),
+        Formation::of("wedge"),
     ] {
         for id in 0..2u32 {
             sim.units_mut()[id as usize].formation = formation;
@@ -99,7 +99,7 @@ fn figures_fill_the_simulated_rectangle() {
     }
     // Ultra line of foot: extra ranks rather than men packed shoulder to
     // shoulder (mean nearest-neighbour distance stays above half a metre).
-    sim.units_mut()[0].formation = Formation::Line;
+    sim.units_mut()[0].formation = Formation::of("line");
     let figures = sim.units()[0].figure_positions(2.5);
     let mean: f64 = figures
         .iter()

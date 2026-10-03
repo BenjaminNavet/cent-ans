@@ -19,7 +19,7 @@
 use data_model::{Ability, UnitCategory};
 use serde::{Deserialize, Serialize};
 
-use crate::unit::{Formation, Unit};
+use crate::unit::Unit;
 
 /// Seconds a knocked-down soldier stays on the ground before fighting again.
 pub const KNOCKDOWN_TIME: f64 = 3.0;
@@ -136,11 +136,7 @@ pub fn charge_mass(attacker: &Unit) -> f64 {
     } else {
         1.0
     };
-    let wedge = if attacker.formation == Formation::Wedge {
-        1.2
-    } else {
-        1.0
-    };
+    let wedge = attacker.formation_charge();
     let horses = if attacker.mounted { 1.0 } else { 0.35 };
     (charge * lance * wedge * horses).clamp(0.0, 2.0)
 }
@@ -151,13 +147,13 @@ pub fn pikes_stop(attacker: &Unit, defender: &Unit, angle: u8) -> bool {
     attacker.is_cavalry()
         && attacker.mounted
         && defender.has(Ability::PikeSquare)
-        && (angle == 0 || defender.formation == Formation::Square)
+        && (angle == 0 || defender.all_round())
 }
 
 /// Share (0-0.6) of the target's men a charge of weight `mass` knocks down,
 /// struck in front (`angle` 0), on the flank (1) or in the rear (2).
 pub fn knocked_share(mass: f64, defender: &Unit, angle: u8) -> f64 {
-    if defender.formation == Formation::Square || (defender.is_cavalry() && defender.mounted) {
+    if defender.braced() || (defender.is_cavalry() && defender.mounted) {
         return 0.0;
     }
     let exposure = match defender.category {

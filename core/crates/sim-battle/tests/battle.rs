@@ -267,8 +267,8 @@ fn schiltron_stops_cavalry() {
         run(&mut sim, 40.0);
         (losses(&sim, 1), losses(&sim, 0))
     };
-    let (line_losses, _) = charge(Formation::Line);
-    let (square_losses, knights_losses) = charge(Formation::Square);
+    let (line_losses, _) = charge(Formation::of("line"));
+    let (square_losses, knights_losses) = charge(Formation::of("square"));
     assert!(
         square_losses < line_losses * 0.5,
         "square {square_losses} vs line {line_losses}"
@@ -282,14 +282,14 @@ fn schiltron_stops_cavalry() {
     assert!(matches!(
         sim.issue_command(Command::Formation {
             units: vec![0],
-            kind: Formation::Square
+            kind: Formation::of("square")
         }),
         Err(CommandError::InvalidFormation { .. })
     ));
     assert!(sim
         .issue_command(Command::Formation {
             units: vec![1],
-            kind: Formation::Wedge
+            kind: Formation::of("wedge")
         })
         .is_err());
 }

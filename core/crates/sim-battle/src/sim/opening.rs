@@ -20,6 +20,7 @@ use data_model::{Ability, UnitCategory};
 use serde::{Deserialize, Serialize};
 
 use super::{angle_to, of_faction, BattleSim, DeploymentZone, STAKES_DELAY};
+use crate::formations::AiRole;
 use crate::opening::{column_path, polyline_length, OpeningRules};
 use crate::setup::SideId;
 use crate::site::{Obstacle, ObstacleKind};
@@ -238,7 +239,9 @@ impl BattleSim {
         let order = self.march_order(&ids);
         for &i in &order {
             let unit = &mut self.units[i];
-            unit.formation = Formation::Column;
+            let march = Formation::for_role(AiRole::March, unit)
+                .unwrap_or_else(Formation::default_formation);
+            unit.change_formation(march, true);
         }
         let gap = rules.column.gap_m;
         let total: f64 = order
