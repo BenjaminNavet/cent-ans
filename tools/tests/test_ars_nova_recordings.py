@@ -64,13 +64,17 @@ def _is_real_recording(track: str) -> bool:
 
 
 def test_france_and_italy_play_a_real_ars_nova_recording() -> None:
-    """DA7a: campaign_france and campaign_italy list at least one real DA7a performance."""
+    """DA7a: campaign_france and campaign_italy still list a real DA7a performance.
+
+    ADR 0166 moved the medieval pieces to `fallback` (calm lute and viol pieces lead the
+    `primary` lists) without dropping them: they must stay listed in either list.
+    """
     playlists = _playlists()
     for context in ("campaign_france", "campaign_italy"):
-        primary = playlists[context]["primary"]
-        ars_nova = [t for t in primary if "third_party/music/ars_nova/" in t]
+        listed = playlists[context]["primary"] + playlists[context].get("fallback", [])
+        ars_nova = [t for t in listed if "third_party/music/ars_nova/" in t]
         assert ars_nova, (
-            f"{context} : aucun enregistrement réel d'Ars nova (DA7a) en primary"
+            f"{context} : aucun enregistrement réel d'Ars nova (DA7a) listé"
         )
         assert all(_is_real_recording(t) for t in ars_nova)
 

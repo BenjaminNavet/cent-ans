@@ -84,9 +84,13 @@ func _test_chronicle_body_visible() -> void:
 		var buttons := window.find_children("*", "Button", true, false)
 		var choices := buttons.filter(func(b: Button) -> bool: return b.text.begins_with("Choix"))
 		_check(choices.size() == 3, "pass %d: 3 choices expected, got %d" % [pass_index, choices.size()])
+		# Q7 : les choix sont sous le corps défilant (plus dedans), dans la fenêtre et dans la vue.
+		var window_rect := window.get_global_rect().grow(0.5)
+		var body_end := scroll.get_global_rect().end.y
 		for button: Button in choices:
 			var rect := button.get_global_rect()
-			_check(view.encloses(rect) and scroll.get_global_rect().intersects(rect), "pass %d: « %s » %s not visible" % [pass_index, button.text, rect])
+			_check(view.encloses(rect) and window_rect.encloses(rect) and rect.position.y >= body_end - 0.5,
+				"pass %d: « %s » %s not visible (window %s, body ends at %.0f)" % [pass_index, button.text, rect, window_rect, body_end])
 	host.queue_free()
 	await process_frame
 
@@ -120,11 +124,26 @@ func _test_top_bar_fits() -> void:
 	await process_frame
 
 
-class DiplomacyProbe extends "res://scripts/map/diplomacy_controller.gd":
-	var opened := 0
+## Sonde du contrôleur de diplomatie, compilée à l'exécution : une classe interne
+## `extends "…/diplomacy_controller.gd"` charge `DiplomacyPanel` à la compilation de ce test, avant
+## l'enregistrement des autoloads en mode `--script` (« Identifier not found: SimFacade »), et
+## laisse le script du panneau en échec pour toute la session.
+const DIPLOMACY_PROBE_SOURCE := """extends "res://scripts/map/diplomacy_controller.gd"
 
-	func open_panel(_faction_id: String = "") -> void:
-		opened += 1
+var opened := 0
+
+
+func open_panel(_faction_id: String = "") -> void:
+	opened += 1
+"""
+
+
+func _diplomacy_probe() -> Node:
+	var script := GDScript.new()
+	script.source_code = DIPLOMACY_PROBE_SOURCE
+	if not _check(script.reload() == OK, "diplomacy probe script failed to compile"):
+		return null
+	return script.new()
 
 
 class SimStub extends RefCounted:
@@ -157,7 +176,9 @@ func _test_diplomacy_auto_open() -> void:
 	var sim := SimStub.new()
 	map.sim = sim
 	map.ui = UiStub.new()
-	var ctl := DiplomacyProbe.new()
+	var ctl := _diplomacy_probe()
+	if ctl == null:
+		return
 	ctl.map = map
 	sim.offers = [{"id": 1, "kind": "treaty"}, {"id": 2, "kind": "treaty"}]
 	ctl.after_end_turn()

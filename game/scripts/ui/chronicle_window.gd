@@ -178,7 +178,9 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 	reset_size()
 	_center_on_screen()
 	call_deferred("_fit")
-	get_viewport().size_changed.connect(_on_view_resized, CONNECT_DEFERRED)
+	var view := get_viewport()  # une seule connexion, la fenêtre sert à toutes les décisions
+	if not view.size_changed.is_connected(_on_view_resized):
+		view.size_changed.connect(_on_view_resized, CONNECT_DEFERRED)
 
 
 ## VN : largeur du contenu qui tient dans la zone `SIDE_PANEL` (580 px au plus).
