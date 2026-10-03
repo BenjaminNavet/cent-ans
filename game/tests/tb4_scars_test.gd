@@ -513,6 +513,8 @@ func _check_siege(block: Dictionary) -> void:
 ## dans le champ d'une caméra posée sur la colonie et font au moins `MIN_PX` à l'écran (900p,
 ## champ de 55° de la carte de campagne) ; la charrette est sur la route.
 const MIN_PX := 12.0
+## LR-14 : la charrette (3 m) est une figurine, plus petite que les fosses : seuil propre.
+const CART_MIN_PX := 6.0
 const VIEW_HEIGHT := 900.0
 const CAMERA_FOV := 55.0
 
@@ -542,7 +544,8 @@ func _check_plague_screen(scars: WarScars, node: Node3D, block: Dictionary) -> v
 			var half := maxf(box.size.x, box.size.z) * 0.5
 			var px := _screen(camera, prop.global_transform * (box.get_center() - axis * half)).distance_to(_screen(camera, prop.global_transform * (box.get_center() + axis * half)))
 			smallest = minf(smallest, px)
-			_check(px >= MIN_PX, "%s is %.1f px at distance %.0f (≥ %.0f wanted)" % [prop.name, px, distance, MIN_PX])
+			var wanted := CART_MIN_PX if prop.name == &"DeadCart" else MIN_PX
+			_check(px >= wanted, "%s is %.1f px at distance %.0f (≥ %.0f wanted)" % [prop.name, px, distance, wanted])
 			_check(camera.is_position_in_frustum(prop.global_position), "%s in view at distance %.0f" % [prop.name, distance])
 			_check(Vector2(prop.position.x - site_center.x, prop.position.z - site_center.z).length() < distance * 0.45, "%s stays close to the town at distance %.0f" % [prop.name, distance])
 		print("tb4_scars_test: plague props at distance %.0f: smallest %.1f px, factor %.0f" % [distance, smallest, WarScars.plague_factor(distance)])
