@@ -1,0 +1,32 @@
+{
+  "id": "cdx_jongleurs_et_menestrels",
+  "title": "Jongleurs et ménestrels",
+  "category": "societe",
+  "aliases": [
+    "jongleurs",
+    "jongleur",
+    "ménestrels",
+    "ménestrel",
+    "montreurs d'ours",
+    "troupes de jongleurs"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Chanteurs, musiciens, acrobates et conteurs, les jongleurs parcourent les routes et animent cours, foires et places. L'Église les juge suspects, mais les seigneurs les protègent et les rémunèrent.",
+  "body": "Le terme de jongleur désigne tout artiste itinérant : joueur de vielle ou de harpe, conteur de chansons de geste, acrobate, montreur d'animaux, diseur de fabliaux, ces récits brefs et gaillards en vers. Le ménestrel, à l'origine serviteur de la cour (ministerialis), est un musicien attaché à un seigneur ; au XIVe siècle, les ménestrels forment des corporations urbaines, comme celle de Saint-Julien-des-Ménétriers, fondée à Paris en 1321.\n\nL'Église condamne ces professions, que les théologiens jugent frivoles, voire immorales, et refuse parfois la communion aux jongleurs. Dans les faits, les clercs eux-mêmes en font venir, et les seigneurs en entretiennent à leur table : on les paye en vêtements, en monnaie, en bonne chère. Les fêtes, mariages, tournois et foires leur sont autant d'occasions.\n\nLes jongleurs servent aussi de messagers et de propagandistes : un prince peut faire chanter ses victoires, et les chansons satiriques circulent plus vite que les ordonnances.",
+  "gameplay": "Événement aléatoire de province, avec une scène de fête sur la carte : inviter les jongleurs au château, les laisser jouer sur la place ou les chasser à l'instigation du curé. Voir [[cdx_fetes_chretiennes]].",
+  "entity": "evt_jongleurs_de_passage",
+  "see_also": [
+    "cdx_fetes_chretiennes",
+    "cdx_foire",
+    "cdx_eglise_paroissiale",
+    "cdx_fabliaux"
+  ],
+  "sources": [
+    "Jongleur",
+    "Ménestrel",
+    "Fabliau"
+  ]
+}
