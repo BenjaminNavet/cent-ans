@@ -1057,7 +1057,7 @@ pub fn retreat_target_after(
 }
 
 /// Applies the retreat rule to a beaten army (see [`retreat_target`]).
-fn retreat_beaten_army(
+pub(crate) fn retreat_beaten_army(
     state: &mut CampaignState,
     data: &GameData,
     army_id: &ArmyId,
