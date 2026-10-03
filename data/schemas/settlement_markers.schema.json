@@ -10,6 +10,19 @@
   },
   "properties": {
     "description": {"type": "string"},
+    "banner": {
+      "type": "object",
+      "description": "Lot RJ-c (ADR 0175) : bannière possesseur / occupant au-dessus du nom.",
+      "properties": {
+        "description": {"type": "string"},
+        "border": {"type": "number", "minimum": 0, "maximum": 0.25, "description": "Marge du liseré de position, en fraction du côté de l'écu."},
+        "occupant_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Côté de l'écu de l'occupant, en fraction de celui du propriétaire."},
+        "occupant_overlap": {"type": "number", "minimum": 0, "maximum": 1, "description": "Part du côté de l'écu de l'occupant posée sur celui du propriétaire."},
+        "parchment_pennant_units": {"type": "number", "exclusiveMinimum": 0, "maximum": 2, "description": "Longueur du fanion sur le parchemin, en unités de vignette."}
+      },
+      "required": ["border", "occupant_scale", "occupant_overlap"],
+      "additionalProperties": false
+    },
     "rank_rules": {
       "type": "array",
       "description": "Règles de rang, la première qui s'applique l'emporte ; sinon `default_rank`.",

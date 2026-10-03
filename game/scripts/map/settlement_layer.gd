@@ -96,6 +96,13 @@ var _marker_world: PackedVector3Array = PackedVector3Array()
 ## Écu affiché par colonie (faction), pour ne réécrire que ce qui change ; 1 si armorié (DV2).
 var _marker_holder: PackedStringArray = PackedStringArray()
 var _shielded: PackedByteArray = PackedByteArray()
+## RJ-c (ADR 0175) : 1 si la place est occupée (écu de l'occupant à côté de celui du propriétaire :
+## quad élargi, cf. `_shield_rect`).
+var _occupied: PackedByteArray = PackedByteArray()
+## RJ-c : joueur et empreinte des positions des bannières écrites (cf. `_refresh_shields`).
+var _banner_signature: Array = []
+## RJ-c : indice de position par catégorie `StanceCues` (0 aucun liseré).
+const BANNER_CUES := {"self": 1, "friend": 2, "enemy": 3}
 ## TB2 : distance caméra jusqu'à laquelle l'écu accompagne le nom (rang mineur : nom seul de loin).
 var _shield_until: PackedFloat32Array = PackedFloat32Array()
 ## Lot DA7d : état de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
@@ -492,6 +499,8 @@ func _build_icons() -> void:
 	_marker_holder.resize(count)
 	_shielded.resize(count)
 	_shielded.fill(0)
+	_occupied.resize(count)
+	_occupied.fill(0)
 	_shield_until.resize(count)
 	_marker_shown.resize(count)
 	_marker_shown.fill(1)
@@ -534,6 +543,7 @@ func _build_icons() -> void:
 	_icon_material.set_shader_parameter("size_scale", icon_size_scale)
 	_icon_material.set_shader_parameter("declutter_fade", float(markers.declutter_value("fade_seconds", 0.25)))
 	_icon_material.set_shader_parameter("hidden_alpha", float(markers.declutter_value("hidden_alpha", 0.0)))
+	_apply_banner_uniforms()  # RJ-c
 	declutter_interval = float(markers.declutter_value("interval_seconds", declutter_interval))
 	_build_priority_order()
 	_icon_material.render_priority = 2
@@ -548,35 +558,111 @@ func _build_icons() -> void:
 
 ## Lot DA3 : écus des détenteurs. L'atlas d'écus est recomposé quand une faction nouvelle
 ## apparaît (rare : révolte, succession), sinon seules les instances changées sont réécrites.
-func _refresh_shields() -> void:
+## Lot RJ-c (ADR 0175) : bannière du PROPRIÉTAIRE de droit, plus le petit écu de l'OCCUPANT si la
+## place est occupée ; liserés à la couleur de position du joueur (`StanceCues`, ADR 0155).
+func _refresh_shields(sim: Object = null, holders_changed: bool = true, player: String = "", stances: Variant = null) -> void:
 	if _icons == null or markers == null:
 		return
-	var factions: Array = []
-	var missing := heraldry.texture == null
+	var seen := {}
 	for entry in data.settlements:
-		var controller := str(entry["controller"])
-		if controller != "" and not factions.has(controller):
-			factions.append(controller)
-			if not heraldry.has(controller):
-				missing = true
+		seen[entry["owner"]] = true
+		seen[entry["controller"]] = true
+	seen.erase("")
+	var factions: Array = seen.keys()
+	var missing := heraldry.texture == null
+	for faction in factions:
+		if not heraldry.has(str(faction)):
+			missing = true
+			break
 	if missing:
 		factions.sort()
 		heraldry.build(factions)
 		_icon_material.set_shader_parameter("shields", heraldry.texture)
 		_icon_material.set_shader_parameter("shield_grid", heraldry.grid())
 		_marker_holder.fill("?")
+	if stances == null:
+		player = str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
+		stances = StanceCues.stances(sim, player) if player != "" else {}
+	# RJ-c : rien à réécrire si ni les détenteurs, ni les positions, ni l'atlas n'ont changé.
+	var signature := [player, stances.hash()]
+	if not missing and not holders_changed and signature == _banner_signature:
+		return
+	_banner_signature = signature
+	var cues := banner_cues(factions, player, stances)
 	var multimesh := _icons.multimesh
 	for i in data.settlements.size():
-		var controller := str(data.settlements[i]["controller"])
-		if controller == _marker_holder[i]:
+		var banner := banner_of(data.settlements[i], cues)
+		var holder := "%d|%d" % [banner["cell"], banner["packed"]]
+		if holder == _marker_holder[i]:
 			continue
-		_marker_holder[i] = controller
+		_marker_holder[i] = holder
 		var k := _icon_instance(i)
 		var color := multimesh.get_instance_color(k)
-		var cell := heraldry.shield_of(controller)
-		_shielded[i] = 1 if cell >= 0 else 0
-		color.r = float(cell)
+		_shielded[i] = 1 if int(banner["cell"]) >= 0 else 0
+		_occupied[i] = 1 if int(banner["occupant_cell"]) >= 0 else 0
+		color.r = float(banner["cell"])
+		color.g = float(banner["packed"])
 		multimesh.set_instance_color(k, color)
+
+
+## RJ-c : indice de position (`BANNER_CUES`, 0 aucun) de chaque faction de `factions` vue par
+## `player` ({} sans joueur).
+static func banner_cues(factions: Array, player: String, stances: Dictionary) -> Dictionary:
+	var cues := {}
+	if player == "":
+		return cues
+	for faction in factions:
+		cues[faction] = int(BANNER_CUES.get(StanceCues.category_of(str(faction), player, stances), 0))
+	return cues
+
+
+## RJ-c : bannière d'une colonie `entry` ({owner, controller}), positions `cues` (`banner_cues`) :
+## {cell (écu du propriétaire, à défaut de l'occupant ; -1 aucun), occupant_cell (-1 : non
+## occupée ou sans armoiries), owner_cue, occupant_cue (0 aucun, 1 soi, 2 ami, 3 ennemi),
+## packed (canal COLOR.g du shader)}.
+func banner_of(entry: Dictionary, cues: Dictionary) -> Dictionary:
+	var controller := str(entry.get("controller", ""))
+	var owner := str(entry.get("owner", controller))
+	if owner == "":
+		owner = controller
+	var cell := heraldry.shield_of(owner)
+	var owner_cue := int(cues.get(owner, 0))
+	var occupant_cell := -1
+	var occupant_cue := 0
+	if controller != owner and controller != "":
+		occupant_cell = heraldry.shield_of(controller)
+		occupant_cue = int(cues.get(controller, 0))
+		if cell < 0:  # propriétaire sans armoiries : l'occupant seul
+			cell = occupant_cell
+			owner_cue = occupant_cue
+			occupant_cell = -1
+			occupant_cue = 0
+	return {
+		"cell": cell,
+		"occupant_cell": occupant_cell,
+		"owner_cue": owner_cue,
+		"occupant_cue": occupant_cue,
+		"packed": (occupant_cell + 1) * 16 + owner_cue * 4 + occupant_cue,
+	}
+
+
+## RJ-c : réglages du shader de bannière (`settlement_markers.json` `banner`, couleurs de
+## position de `stance_cues.json`).
+func _apply_banner_uniforms() -> void:
+	_icon_material.set_shader_parameter("border", float(markers.banner_value("border", 0.09)))
+	_icon_material.set_shader_parameter("occupant_scale", float(markers.banner_value("occupant_scale", 0.62)))
+	_icon_material.set_shader_parameter("occupant_overlap", float(markers.banner_value("occupant_overlap", 0.45)))
+	_icon_material.set_shader_parameter("shield_cell_px", float(HeraldryAtlas.CELL))
+	for cue in BANNER_CUES:
+		_icon_material.set_shader_parameter("cue_" + str(cue), StanceCues.border_color(Color.WHITE, str(cue)))
+
+
+## RJ-c : largeur de la bannière `i` en côtés d'écu (élargie d'une place occupée).
+func banner_width(i: int) -> float:
+	if i < 0 or i >= _occupied.size() or _occupied[i] == 0:
+		return 1.0
+	var scale := float(markers.banner_value("occupant_scale", 0.62))
+	return 1.0 + scale * (1.0 - float(markers.banner_value("occupant_overlap", 0.45)))
 
 
 ## Côté écran (px) de l'écu d'une colonie (dé-encombrement, picking).
@@ -680,8 +766,11 @@ func refresh(sim: Object, color_of: Callable) -> void:
 		var year := LandmarkModel.year_of(str(sim.call("get_date_label")))
 		if year > 0:
 			landmark_cities.set_year(year)
-	_refresh_shields()
-	_refresh_label_inks(sim)
+	# RJ-c : positions du joueur lues une fois pour les bannières et l'encre des noms.
+	var player := str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
+	var stances := StanceCues.stances(sim, player) if player != "" else {}
+	_refresh_shields(sim, controllers_changed, player, stances)
+	_refresh_label_inks(sim, stances)
 	_refresh_capital(sim)
 	if outbuildings != null and outbuildings.refresh(sim):
 		# TB3 : la suie ne change qu'avec le tour (dévastation, sièges) ou une prise de place.
@@ -946,8 +1035,9 @@ func _shrink_rect(rect: Rect2, margin: float) -> Rect2:
 
 func _shield_rect(i: int, anchor: Vector2, scale: float, margin: float) -> Rect2:
 	var size := marker_size(i)
+	var width := size * banner_width(i)  # RJ-c : écu de l'occupant à côté
 	var bottom := anchor.y - _shield_lift(i) * scale - _shield_gap
-	return Rect2(Vector2(anchor.x - size * 0.5, bottom - size), Vector2(size, size)).grow(margin)
+	return Rect2(Vector2(anchor.x - width * 0.5, bottom - size), Vector2(width, size)).grow(margin)
 
 
 ## DV2 : opacité du nom `i` : vue normale, fondu de retrait par rang (comme l'écu, cf. shader).
@@ -1151,11 +1241,11 @@ func label_ink(i: int) -> Color:
 
 
 ## Lot EN : noms des villes tenues par un ennemi du joueur à l'encre rouge (`StanceCues`).
-func _refresh_label_inks(sim: Object) -> void:
+func _refresh_label_inks(sim: Object, known_stances: Variant = null) -> void:
 	if sim == null or not sim.has_method("get_player_faction"):
 		return
 	var player := str(sim.call("get_player_faction"))
-	var stances := StanceCues.stances(sim, player)
+	var stances: Dictionary = known_stances if known_stances is Dictionary else StanceCues.stances(sim, player)
 	if _label_ink.size() != _labels.size():
 		_label_ink.resize(_labels.size())
 		_label_ink.fill(label_color)

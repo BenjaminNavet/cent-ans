@@ -77,6 +77,11 @@ var edict_section: EdictSection  # lot C4
 ## siege, is_city}]` (fourni par `SettlementController`) ; `label_of` nomme les factions.
 var settlements_list: VBoxContainer
 var settlement_rows_provider: Callable = Callable()
+## RJ-c (ADR 0175) : `possession_provider(province_id)` renvoie la possession décrite
+## (`PossessionText.describe` de `province_possession`) ; {} : lignes propriétaire d'origine.
+var possession_provider: Callable = Callable()
+var possession: Dictionary = {}
+var possession_held: Label
 var _label_of: Callable = Callable()
 ## FE6 : fil d'Ariane des titres (« Royaume de France › Duché de Bourgogne › Comté de Charolais »).
 var breadcrumb: HFlowContainer
@@ -203,6 +208,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	var controller: String = str(state.get("controller", owner))
 	var controller_label := _faction_label(controller, "", label_of) if controller != owner else "—"
 	controller_value.text = controller_label
+	_fill_possession()  # RJ-c
 	var capital: String = str(province.get("capital", province.get("capital_name", "")))
 	capital_value.text = capital if capital != "" else "—"
 	var terrain: String = str(province.get("terrain", ""))
@@ -455,6 +461,52 @@ func _build_settlements_tab() -> void:
 	tabs.set_tab_icon(tabs.get_tab_count() - 1, IconLibrary.get_icon("cat_building"))
 
 
+## RJ-c (ADR 0175) : statut clair de la province pour le joueur (« À vous — occupée par X »…),
+## coloré selon la position (ADR 0155), infobulle d'explication et ligne des places tenues.
+func _fill_possession() -> void:
+	possession = possession_provider.call(province_id) if possession_provider.is_valid() else {}
+	var owner_key: Label = get_node_or_null("VBox/Grid/OwnerKey")
+	if possession_held == null:
+		possession_held = Label.new()
+		possession_held.name = "PossessionHeld"
+		possession_held.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		possession_held.add_theme_color_override("font_color", Color(RichTooltip.MUTED))
+		UiType.apply(possession_held, UiType.CAPTION)
+		var grid: Control = get_node_or_null("VBox/Grid")
+		if grid != null:
+			grid.add_sibling(possession_held)
+	if possession.is_empty():
+		if owner_key != null:
+			owner_key.text = "Propriétaire"
+		owner_value.remove_theme_color_override("font_color")
+		possession_held.hide()
+		return
+	if owner_key != null:
+		owner_key.text = "Statut"
+	owner_value.text = str(possession.get("line", owner_value.text))
+	owner_value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	owner_value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	owner_value.add_theme_color_override("font_color", PossessionText.ink(str(possession.get("cue", "")), RichTooltip.INK))
+	owner_value.mouse_filter = Control.MOUSE_FILTER_PASS
+	RichTooltip.attach_plain(owner_value, "province_possession", {"body": possession_help()})
+	possession_held.text = held_text()
+	possession_held.show()
+
+
+## RJ-c : phrase d'aide (la cité donne le contrôle, le traité la possession) et rappel de la
+## restitution à la paix d'une place occupée.
+func possession_help() -> String:
+	var help := PossessionText.province_help(str(possession.get("city_name", "")))
+	if bool(possession.get("occupied", false)):
+		help += " À la paix, une place occupée et non cédée revient à son propriétaire."
+	return help
+
+
+## RJ-c : « Places tenues : 2 sur 5 — … » (bonus de province complète).
+func held_text() -> String:
+	return PossessionText.held_line(int(possession.get("held", 0)), int(possession.get("total", 0)), str(possession.get("whole_holder", "")), str(possession.get("player", "")))
+
+
 func show_settlements_tab() -> void:
 	tabs.current_tab = tabs.get_tab_count() - 1
 
@@ -465,6 +517,14 @@ func _fill_settlements() -> void:
 	if rows.is_empty():
 		PanelWidgets.placeholder(settlements_list, "Colonies indisponibles.")
 		return
+	if not possession.is_empty():  # RJ-c : la cité donne le contrôle, le traité la possession
+		var help := Label.new()
+		help.name = "PossessionHelp"
+		help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		help.text = "%s\n%s" % [possession_help(), held_text()]
+		help.add_theme_color_override("font_color", Color(RichTooltip.MUTED))
+		UiType.apply(help, UiType.CAPTION)
+		settlements_list.add_child(help)
 	for row in rows:
 		settlements_list.add_child(_make_settlement_row(row))
 
@@ -479,6 +539,13 @@ func _make_settlement_row(row: Dictionary) -> Control:
 	var kind := str(row.get("kind", ""))
 	var controller := _faction_label(str(row.get("controller", "")), "", _label_of)
 	var text := "%s — %s, %s" % [str(row.get("name", settlement_id)), str(SettlementPanel.KIND_LABELS.get(kind, kind)), controller]
+	# RJ-c : « occupée par … » (statut du cœur, `province_possession`).
+	var owner_label := _faction_label(str(row.get("owner", "")), "", _label_of)
+	var mention := PossessionText.occupied_mention(str(row.get("possession_status", "")), owner_label, controller)
+	if mention != "":
+		text += " — " + mention
+	if bool(row.get("is_city", false)):
+		text += " (cité : donne la province)"
 	text += "\n    garnison : %s, %s hommes" % [FrText.count(int(row.get("garrison_units", 0)), "unité"), _thousands(int(row.get("garrison_strength", 0)))]
 	var siege: Dictionary = row.get("siege", {}) if row.get("siege") is Dictionary else {}
 	if not siege.is_empty():

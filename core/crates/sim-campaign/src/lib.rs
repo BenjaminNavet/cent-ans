@@ -72,6 +72,7 @@ pub mod passage;
 pub mod path_plan;
 pub mod planning_scope;
 pub mod population;
+pub mod possession;
 pub mod posture;
 pub mod preview;
 pub mod ransom;
