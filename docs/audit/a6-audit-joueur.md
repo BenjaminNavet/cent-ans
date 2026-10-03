@@ -86,4 +86,18 @@ Gravité : **B** bloquant ou faux, **M** majeur (gêne nette), **m** mineur. Lot
 
 ## Mesures d'équilibre longues (sonde A2)
 
-_À compléter quand la sonde rend son rapport._
+`balance_probe` sur `main` (cb3dd3187), 4 graines × 200 tours, plus `balance_probe rt 4` (3D). Une saison = un tour.
+
+| Indicateur | A2 | Maintenant | Cible | Lot |
+|---|---|---|---|---|
+| Milice dans les recrutements IA | 99,8 % | 64,9 % (20-22 types recrutés) | < 40 % | L3 |
+| Auto-résolution contre 3D (accord sur le vainqueur) | — | 17/20 ; reste cavalerie contre archers (Crécy : auto 100 %, 3D 0/4) | ≥ 19/20 | L1 |
+| Changements de propriétaire | 12/partie | 254/partie, 93 factions détruites | — | — |
+| Révoltes | 1/partie | 14,2/partie, 67 % en province occupée ; `peace_of_god` choisi 91 % | 4-10 | L3 |
+| Recherche (France, tour 200) | 45/45 | 40-43/45 | plus lente | L3 |
+| Revenu France / Angleterre | 2-3,7× | 2,8-3,0× (une graine 0,9) | < 2× | L3 |
+| Bourgogne | 3 prov. | trésor ≈ 0, solde structurel −535/saison | solde > 0 | L3 |
+| Banqueroutes | — | 1,62 par faction et par décennie | < 0,5 | L3 |
+| Bâtiments jamais construits | 10/30 | 9/30 (armurerie, forge, écuries, buttes de tir…) | ≤ 3 | L3 |
+
+Économie au tour 0 (revenu brut / solde net par saison) : France 27 686 / +4 254, Angleterre 19 185 / +860, Bourgogne 3 206 / −535. Le trésor de départ de la France (60 000 ₶) vaut 14 saisons de solde net ; un bâtiment moyen (1 366 ₶) coûte 5 % du revenu brut. Rançons : médiane 3 300 ₶, max 51 260 (facteur richesse × prestige). Constat M4 confirmé côté joueur ; l'IA, elle, dépense tout.
