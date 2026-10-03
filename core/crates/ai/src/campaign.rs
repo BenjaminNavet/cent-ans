@@ -709,7 +709,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // Lot C7a: garrisons are a fixed cost of the realm like buildings (a
     // hundred places since the settlements); the share applies to what
     // both leave, and the garrisons are paid on top.
-    let garrisons = garrison_upkeep(ctx).min(ctx.army_upkeep);
+    // LR-04: the capital city's garrison is where recruits muster, not a
+    // fixed cost: counted on top, every recruit kept there raised the target
+    // by as much as it cost, and a county's garrison grew until it ate the
+    // whole net income (no margin left for an event or a war).
+    let garrisons = garrison_upkeep_outside_capital(ctx).min(ctx.army_upkeep);
     let target_upkeep = garrisons
         + ((ctx.income - ctx.building_upkeep - garrisons).max(0) as f64 * share) as i64
         + hoard / HOARD_SPENDING_TURNS;
@@ -983,6 +987,25 @@ fn garrison_upkeep(ctx: &Context) -> i64 {
                 ctx.data,
                 s.kind,
                 capital == Some(id),
+                s.garrison.iter().map(|u| unit_upkeep(ctx.data, u)),
+            )
+        })
+        .sum()
+}
+
+/// [`garrison_upkeep`] without the capital city's garrison (LR-04).
+fn garrison_upkeep_outside_capital(ctx: &Context) -> i64 {
+    use sim_campaign::economy::{garrison_share, unit_upkeep};
+    let capital = ctx.state.faction_capital_city(ctx.faction);
+    ctx.state
+        .settlements
+        .iter()
+        .filter(|(id, s)| &s.controller == ctx.faction && capital != Some(*id))
+        .map(|(_, s)| {
+            garrison_share(
+                ctx.data,
+                s.kind,
+                false,
                 s.garrison.iter().map(|u| unit_upkeep(ctx.data, u)),
             )
         })
