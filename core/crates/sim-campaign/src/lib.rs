@@ -39,6 +39,7 @@ pub mod battle_forecast;
 pub mod battle_history;
 pub mod battle_outcome;
 pub mod battle_request;
+pub mod building_slots;
 pub mod buildings;
 pub mod capture;
 pub mod characters;
@@ -114,6 +115,7 @@ pub use battle_auto::{
     BattleUnit, FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
+pub use building_slots::BuildingSlot;
 pub use buildings::{BuildOption, DemolitionPreview, EffectTotals, EffectValue, ProvinceCity};
 pub use capture::{
     CaptureDecisionView, CaptureEffects, CaptureError, CaptureOptionView, CaptureOutcome,

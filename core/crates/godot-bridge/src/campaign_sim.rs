@@ -845,7 +845,7 @@ fn resource_category_key(category: ResourceCategory) -> &'static str {
     }
 }
 
-fn building_category_key(category: data_model::BuildingCategory) -> &'static str {
+pub(crate) fn building_category_key(category: data_model::BuildingCategory) -> &'static str {
     match category {
         data_model::BuildingCategory::Production => "production",
         data_model::BuildingCategory::Commerce => "commerce",
