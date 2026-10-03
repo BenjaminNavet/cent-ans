@@ -56,8 +56,8 @@ impl CampaignSim {
         let current = evaluate_treaty(state, data, &player, &target, &articles);
         if current.blocked.is_none() && current.chance >= COUNTER_TARGET_CHANCE {
             return error_dict(&format!(
-                "Rien à ajouter : ils accepteraient déjà en l'état ({} % de chances).",
-                current.chance
+                "Rien à ajouter : ils accepteraient déjà en l'état (score {:+}).",
+                current.score
             ));
         }
         match counter_proposal(state, data, &player, &target, &articles) {
