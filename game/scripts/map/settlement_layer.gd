@@ -50,6 +50,9 @@ const HOVER_RING_COLOR := Color(1.0, 0.96, 0.82)
 ## VT : emprise (m) d'une colonie absente de `towns_1340.json` ; hauteur (m) des toits au-dessus
 ## du sol (`model_top`).
 const DEFAULT_FOOTPRINT_M := 150.0
+## U21 : rayon maximal de l'anneau de sélection / survol (mètres), pour que Paris ne soit pas recouverte.
+const RING_MAX_RADIUS_M := 500.0
+var _ring_max_radius := 1.0e9
 const TOWN_TOP_M := 12.0
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 ## GC2 : clairière autour d'une maquette (× sa demi-largeur) dans les exclusions de végétation.
@@ -309,6 +312,7 @@ func _compute_footprints() -> void:
 	var town_data: TownData = towns.data if towns != null else _town_data
 	var mpu := town_data.meters_per_unit if town_data != null else 719.0 / MapScale.town_scale()
 	var real_mpu := town_data.real_meters_per_unit if town_data != null else 719.0
+	_ring_max_radius = RING_MAX_RADIUS_M / mpu
 	for i in data.settlements.size():
 		var id := str(data.settlements[i]["id"])
 		var radius_m := -1.0
@@ -1832,7 +1836,7 @@ func _place_ring(ring: MeshInstance3D, index: int) -> void:
 	var show := index >= 0 and _footprints_on()
 	# Q8 : dessiné sans test de profondeur, l'anneau vu de plus près que sa taille devenait un
 	# disque jaune plein, puis un arc en travers du ciel au zoom minimal : masqué au sol.
-	var radius := _model_radius[index] * 1.1 if index >= 0 else 0.0
+	var radius := minf(_model_radius[index] * 1.1, _ring_max_radius) if index >= 0 else 0.0
 	show = show and _camera_distance > radius * RING_HIDE_DISTANCE_FACTOR
 	ring.visible = show
 	if show:

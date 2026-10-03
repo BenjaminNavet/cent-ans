@@ -645,6 +645,11 @@ func _try_select_army(screen_position: Vector2) -> bool:
 	var army_id := str(target.get("army", ""))
 	var settlement_id := str(target.get("settlement", ""))
 	var choose_army := str(target.get("kind", "")) == "army"
+	if army_id == "" and settlement_id != "":
+		# U19 : clic sur une ville où stationne une armée du joueur (non sélectionnée) = l'armée ;
+		# le second clic au même endroit ouvre la ville (alternance ci-dessous).
+		army_id = _player_army_in(settlement_id)
+		choose_army = army_id != "" and army_id != selected_army
 	if army_id != "" and settlement_id != "" and screen_position.distance_to(_last_pick_position) <= REPEAT_CLICK_PX:
 		if _last_pick_target == "army:" + army_id:
 			choose_army = false
@@ -668,6 +673,30 @@ func _try_select_army(screen_position: Vector2) -> bool:
 		deselect_army()
 	settlement_layer.select(settlement_id)
 	return true
+
+
+## M9 : libellé d'une armée pour l'infobulle — « Armée de X », avec « (vassal de Y) » si la faction
+## a un suzerain (lecture seule de la fiche féodale du cœur).
+func army_hover_text(army_id: String) -> String:
+	if sim == null:
+		return ""
+	var faction := str(sim.call("get_army", army_id).get("faction", ""))
+	if faction == "":
+		return ""
+	var text := "Armée de %s" % SimFacade.faction_short_name(faction)
+	if sim.has_method("get_feudal_sheet"):
+		var lord_name := str(sim.call("get_feudal_sheet", faction).get("liege_name", ""))
+		if lord_name != "":
+			text += " (vassal de %s)" % lord_name
+	return text
+
+
+## U19 : première armée du joueur stationnée dans la colonie `settlement_id` ("" = aucune).
+func _player_army_in(settlement_id: String) -> String:
+	for id in player_army_ids():
+		if str(sim.call("get_army", id).get("settlement", "")) == settlement_id:
+			return id
+	return ""
 
 
 ## SA (ADR 0160) : éclaire l'objet sous le curseur (armée : socle, figurines, plaque ; ville :
@@ -704,7 +733,12 @@ func hover_at(screen_position: Vector2, on_map: bool = true) -> void:
 	if kind == str(hover_target.get("kind", "")) and id == str(hover_target.get("id", "")):
 		return
 	var had_object := not hover_target.is_empty()
+	var had_army_hover := str(hover_target.get("kind", "")) == "army"
 	hover_target = {"kind": kind, "id": id} if kind != "" else {}
+	if kind == "army" and ui != null:  # M9 : infobulle de l'armée visée
+		ui.set_hovered({"display_name": army_hover_text(id)})
+	elif had_army_hover and ui != null:
+		ui.set_hovered({})
 	armies.set_hovered(id if kind == "army" else "")
 	if settlement_layer != null:
 		settlement_layer.set_hovered(id if kind == "settlement" else "")

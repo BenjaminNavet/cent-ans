@@ -102,6 +102,9 @@ func show_army(army_id: String, army: Dictionary, is_player: bool) -> void:
 			title = kept
 	if not is_player and general_name != "":
 		title += " (%s)" % faction_name
+	var vassal_text := str(map.call("army_hover_text", army_id))  # M9 : « (vassal de Y) »
+	if vassal_text.contains("(vassal de "):
+		title += " — " + vassal_text.substr(vassal_text.find("(vassal de "))
 	var garrison := garrison_availability(army, is_player)
 	if is_player and sim.has_method("get_stance_options"):  # CV3-4 : refus des postures (cœur)
 		army = army.duplicate()
