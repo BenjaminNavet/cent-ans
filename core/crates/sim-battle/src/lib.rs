@@ -75,6 +75,7 @@ pub mod preview;
 pub mod props;
 pub mod push;
 pub mod queue;
+pub mod pace;
 pub mod relief;
 pub mod relief_ai;
 pub mod replay;
