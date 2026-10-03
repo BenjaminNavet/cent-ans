@@ -483,6 +483,30 @@ def geo_sea_lanes() -> None:
         console.print(f"[yellow]{warning}[/yellow]")
 
 
+@geo_app.command("land-mask")
+def geo_land_mask() -> None:
+    """Masque terre de 1340 : sans retenues modernes, avec les lacs historiques (LR-10)."""
+    from cent_ans_tools.geo import historical_water
+
+    result = historical_water.build()
+    _print_sizes("Masque terre", [result.land_mask])
+    console.print(
+        f"{result.to_land} px redevenus terre, {result.to_water} px devenus eau, "
+        f"{result.refilled_provinces} px rendus à une province ; retenues retirées : "
+        f"{', '.join(result.dropped_reservoirs) or 'aucune'}"
+    )
+    console.print(
+        "Lacs historiques creusés (px) : "
+        + ", ".join(f"{key} {value}" for key, value in result.punched.items())
+    )
+    if result.settlements_in_water:
+        console.print(
+            f"[yellow]Colonies passées dans l'eau : "
+            f"{', '.join(result.settlements_in_water)}[/yellow]"
+        )
+    console.print("Ensuite : cent-ans geo lakes, puis cent-ans geo navgrid.")
+
+
 @geo_app.command("lakes")
 def geo_lakes(
     min_area_px: int = typer.Option(
