@@ -345,6 +345,57 @@
           "minimum": 0.1,
           "maximum": 2,
           "description": "TB6 : fréquence du bruit de l'ombre en part de celle des nuées (plus petit = taches plus larges)."
+        },
+        "cumulus_shadow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.6,
+          "description": "RV-C : part de lumière retirée au cœur d'une ombre de cumulus."
+        },
+        "cumulus_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 0.5,
+          "description": "RV-C : fréquence des cumulus (1 / px carte ; 0,032 ≈ cellules de 22 km)."
+        },
+        "cumulus_cover": {
+          "type": "array",
+          "items": {"type": "number", "minimum": 0, "maximum": 1},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "RV-C : couverture de beau temps, minimum et maximum selon les régions."
+        },
+        "cumulus_cover_wet": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "RV-C : couverture sous un ciel chargé (pluie, neige, orage)."
+        },
+        "cumulus_edge": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 0.5,
+          "description": "RV-C : largeur du bord des cumulus (part du seuil de bruit ; petit = net)."
+        },
+        "cumulus_drift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "RV-C : vitesse de dérive des cumulus en part du vent météo."
+        },
+        "cumulus_tint": {
+          "type": "array",
+          "items": {"type": "number", "minimum": 0.5, "maximum": 1.5},
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "RV-C : teinte de l'ombre (RVB multiplié, légère dominante froide)."
+        },
+        "cumulus_fade_px": {
+          "type": "array",
+          "items": {"type": "number", "minimum": 0},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "RV-C : taille d'un cumulus à l'écran (px) où l'ombre commence à s'effacer, puis disparaît."
         }
       }
     },

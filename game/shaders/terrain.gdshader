@@ -402,6 +402,8 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 // Lot CM2 : vue stratégique parchemin (fondu au zoom maximal) et météo de campagne.
 #include "res://shaders/parchment_map.gdshaderinc"
 #include "res://shaders/campaign_weather.gdshaderinc"
+#define CS_WITH_WEATHER  // RV-C : ombres de nuages liées à la météo par province
+#include "res://shaders/campaign_cloud_shadow.gdshaderinc"  // RV-C : ombres de nuages
 #include "res://shaders/relief_quadtree.gdshaderinc"  // ZG2 : relief streamé en quadtree
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
@@ -891,7 +893,7 @@ void fragment() {
 		}
 	}
 
-	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
+	col *= cloud_shadow_light(p, footprint, float(life_enabled) * (1.0 - political) * (1.0 - pm_weight()));  // RV-C
 	if (hb_debug > 10.5 && hb_debug < 11.5) { hb_dbg = col; }  // HB3 : sonde
 	vec3 wx_emit = vec3(0.0);
 	// TB6 : brume du matin (relief lissé à grande échelle, moyenne régionale, rasance du regard).

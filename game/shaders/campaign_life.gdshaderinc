@@ -3,7 +3,7 @@
 //   publiés par season_visuals.gd, glissant d'un tour à l'autre. La palette d'origine du
 //   terrain (lot V2b) est celle de l'été ; les autres saisons la transforment.
 // - Terroirs : masque terroir_mask.gd (R cultures, G vigne, B brûlis, A pâtures).
-// - Ombres de nuages qui passent.
+// - Ombres de nuages : campaign_cloud_shadow.gdshaderinc (lot RV-C).
 // Inclus après les fonctions utilitaires de terrain.gdshader (value_noise, fbm).
 
 global uniform vec4 campaign_season;
@@ -42,10 +42,6 @@ uniform float burn_charred_share = 0.36;
 uniform float burn_singed_share = 0.33;
 uniform vec3 burn_singe_tint = vec3(0.92, 0.50, 0.20);  // × luminance du sol : roux sombre
 uniform float burn_ground_keep = 0.22;
-// Ombres de nuages : force, échelle (par pixel carte), vent.
-uniform float cloud_shadow_amount = 0.18;
-uniform float cloud_shadow_scale = 0.010;
-uniform vec2 cloud_shadow_wind = vec2(0.012, 0.005);
 
 vec4 life_season() {
 	return life_enabled ? campaign_season : vec4(0.0, 1.0, 0.0, 0.0);
@@ -208,16 +204,6 @@ vec3 season_winter_ground(vec3 col, float land_f) {
 	}
 	float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
 	return mix(col, lum * winter_ground_tint, winter_ground_desat * campaign_season.w * land_f);
-}
-
-// Ombres de nuages qui passent (facteur multiplicatif de l'albédo, 1 = pas d'ombre).
-float cloud_shadow(vec2 p) {
-	if (!life_enabled || cloud_shadow_amount <= 0.0) {
-		return 1.0;
-	}
-	vec2 q = p * cloud_shadow_scale + TIME * cloud_shadow_wind;
-	float c = value_noise(q) * 0.62 + value_noise(q * 2.7 + vec2(3.1, 7.7)) * 0.38;
-	return 1.0 - cloud_shadow_amount * smoothstep(0.45, 0.78, c);
 }
 
 // --- Terroirs (masque terroir_mask.gd) ---
