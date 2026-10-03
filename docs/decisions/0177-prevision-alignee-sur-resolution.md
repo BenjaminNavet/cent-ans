@@ -33,3 +33,7 @@ Probabilité de victoire annoncée par la prévision (armée 1337 de France cont
 La bande des forces voisines est relâchée à 22-72 % pour des effectifs à ±15 % (test `a6_neighbouring_forces`, bandes 10-50 / 35-65 / 50-90 %).
 - Coût : 100 résolutions par affichage de prévision (quelques millisecondes).
 - Les parties sauvegardées ne sont pas touchées ; les graines des batailles de campagne changent (deux tirages de plus par bataille).
+
+## Addendum (intégration A6 L1+L2)
+
+Les murs pèsent dans le résolveur : `wall_attacker_morale`, `wall_defender_steadiness`, `wall_hold_morale` (départage sans rupture : une impasse sous des murs debout est un assaut manqué). La prévision reste la fréquence du même résolveur. Les engins coûtent `cost(niveau)` aussi dans les sièges mis en scène.

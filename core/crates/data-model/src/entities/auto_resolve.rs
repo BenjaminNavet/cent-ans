@@ -145,6 +145,21 @@ pub struct AutoResolveRules {
     /// A6-L2: share of the wall defence removed when every engine is ready.
     #[serde(default = "default_wall_engine_relief")]
     pub wall_engine_relief: f64,
+    /// A6 integration: behind standing walls the assailant's casualties
+    /// weigh more on his morale, by this much per point of wall stand
+    /// (`wall_stand`), so intact walls make an assault without breach
+    /// break early instead of only hitting softer.
+    #[serde(default = "default_wall_attacker_morale")]
+    pub wall_attacker_morale: f64,
+    /// A6 integration: the garrison's morale loss is divided by
+    /// `1 + wall_defender_steadiness × wall stand`.
+    #[serde(default = "default_wall_defender_steadiness")]
+    pub wall_defender_steadiness: f64,
+    /// A6 integration: morale points per point of wall stand that the
+    /// garrison adds in the tie-break when neither side breaks (a stalemate
+    /// under standing walls is a failed assault).
+    #[serde(default = "default_wall_hold_morale")]
+    pub wall_hold_morale: f64,
     /// Defender bonus of the legacy `defender_terrain_bonus` flag, used when
     /// the terrain is unknown.
     pub legacy_defender_bonus: f64,
@@ -216,6 +231,9 @@ impl Default for AutoResolveRules {
             walls_defender_ranged: 1.3,
             wall_defence_per_level: default_wall_defence_per_level(),
             wall_engine_relief: default_wall_engine_relief(),
+            wall_attacker_morale: default_wall_attacker_morale(),
+            wall_defender_steadiness: default_wall_defender_steadiness(),
+            wall_hold_morale: default_wall_hold_morale(),
             legacy_defender_bonus: 1.15,
             weather: AutoResolveWeather {
                 spring: chances(60, 30, 10, 0),
@@ -251,6 +269,18 @@ fn default_wall_engine_relief() -> f64 {
     0.6
 }
 
+fn default_wall_attacker_morale() -> f64 {
+    0.35
+}
+
+fn default_wall_hold_morale() -> f64 {
+    6.0
+}
+
+fn default_wall_defender_steadiness() -> f64 {
+    0.5
+}
+
 impl AutoResolveRules {
     /// A6-L2: multiplier (≤ 1) on the attacker's blows against standing
     /// walls of `level`: the wall defence (`wall_defence_per_level` × level)
@@ -263,9 +293,17 @@ impl AutoResolveRules {
         breach_percent: u32,
         engines_ready_percent: u32,
     ) -> f64 {
+        1.0 / (1.0
+            + self.wall_defence_per_level
+                * self.wall_stand(level, breach_percent, engines_ready_percent))
+    }
+
+    /// Standing strength of the walls: level × share left by the breach ×
+    /// share left by the ready engines (0 once breached to 50 %).
+    pub fn wall_stand(&self, level: u32, breach_percent: u32, engines_ready_percent: u32) -> f64 {
         let breach_left = (1.0 - f64::from(breach_percent) / 50.0).clamp(0.0, 1.0);
         let ready = (f64::from(engines_ready_percent) / 100.0).clamp(0.0, 1.0);
         let relief = (1.0 - self.wall_engine_relief * ready).clamp(0.0, 1.0);
-        1.0 / (1.0 + f64::from(level) * self.wall_defence_per_level * breach_left * relief)
+        f64::from(level) * breach_left * relief
     }
 }
