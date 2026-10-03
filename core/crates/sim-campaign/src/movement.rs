@@ -553,23 +553,35 @@ pub(crate) fn coalition_side(state: &CampaignState, data: &GameData, ids: &[Army
     side
 }
 
-/// Auto-resolves a field battle between two armies within reach of each
-/// other; the allied armies nearby join either side (F1).
-/// CV3: `opening` (an ambush: the ambusher of a sprung
-/// ambush charges harder); an entrenched side defends better.
-pub(crate) fn auto_fight_with_opening(
-    state: &mut CampaignState,
-    data: &GameData,
+/// Everything an auto-resolved field battle is fought with, built once for
+/// the resolver and for the pre-battle forecast (LR-13: the two used to
+/// drift apart).
+pub(crate) struct FieldBattleSetup<'a> {
+    pub attackers: Vec<ArmyId>,
+    pub defenders: Vec<ArmyId>,
+    pub attacker_side: Side,
+    pub defender_side: Side,
+    pub context: BattleContext,
+    /// The defender's province (terrain of the battle).
+    pub province: Option<&'a data_model::Province>,
+    /// RC: the real river crossing between the two armies, if any.
+    pub crossing: Option<crate::river_crossing::CrossingSite>,
+}
+
+/// Sides and situation of a field battle between two armies within reach
+/// of each other; the allied armies nearby join either side (F1).
+/// CV3: `opening` (an ambush: the ambusher of a sprung ambush charges
+/// harder); an entrenched side defends better. DF1: the AI's morale against
+/// the player follows the difficulty.
+pub(crate) fn field_battle_setup<'a>(
+    state: &CampaignState,
+    data: &'a GameData,
     attacker_id: &ArmyId,
     defender_id: &ArmyId,
     opening: BattleOpening,
-    events: &mut Vec<GameEvent>,
-) {
-    let (Some(attacker), Some(defender)) =
-        (state.armies.get(attacker_id), state.armies.get(defender_id))
-    else {
-        return;
-    };
+) -> Option<FieldBattleSetup<'a>> {
+    let attacker = state.armies.get(attacker_id)?;
+    let defender = state.armies.get(defender_id)?;
     let province = state
         .army_province(data, defender)
         .and_then(|p| data.provinces.get(&p));
@@ -609,18 +621,49 @@ pub(crate) fn auto_fight_with_opening(
         &mut defender_side,
         state.coalition_has_player(&defenders),
     );
+    Some(FieldBattleSetup {
+        attackers,
+        defenders,
+        attacker_side,
+        defender_side,
+        context,
+        province,
+        crossing,
+    })
+}
+
+/// Auto-resolves a field battle between two armies within reach of each
+/// other (see [`field_battle_setup`]).
+pub(crate) fn auto_fight_with_opening(
+    state: &mut CampaignState,
+    data: &GameData,
+    attacker_id: &ArmyId,
+    defender_id: &ArmyId,
+    opening: BattleOpening,
+    events: &mut Vec<GameEvent>,
+) {
+    let Some(setup) = field_battle_setup(state, data, attacker_id, defender_id, opening) else {
+        return;
+    };
     // N1: phased auto-resolve on the province's terrain, season and weather.
     let result = resolve_field(
         state,
         data,
-        &attackers,
-        &defenders,
-        &attacker_side,
-        &defender_side,
-        &context,
-        province,
+        &setup.attackers,
+        &setup.defenders,
+        &setup.attacker_side,
+        &setup.defender_side,
+        &setup.context,
+        setup.province,
     );
-    apply_battle_result(state, data, &attackers, &defenders, &result, events);
+    apply_battle_result(
+        state,
+        data,
+        &setup.attackers,
+        &setup.defenders,
+        &result,
+        events,
+    );
 }
 
 /// Splits a coalition's outcome into one outcome per army (F1): each army
