@@ -41,7 +41,8 @@
           "area_km2": {"type": "number", "minimum": 0},
           "center_px": {"$ref": "#/$defs/point"},
           "islands": {"type": "integer", "minimum": 0, "description": "Contours intérieurs (îles) non découpés."},
-          "polygon_px": {"type": "array", "items": {"$ref": "#/$defs/point"}, "minItems": 3, "description": "Contour extérieur simplifié, non fermé."}
+          "polygon_px": {"type": "array", "items": {"$ref": "#/$defs/point"}, "minItems": 3, "description": "Contour extérieur simplifié, non fermé."},
+          "historical": {"type": "string", "description": "Identifiant dans historical_lakes.json (nappe de lac historique, LR-10) ; absent pour un lac extrait du masque."}
         }
       }
     }

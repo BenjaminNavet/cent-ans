@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "historical_lakes.schema.json",
+  "title": "Lacs historiques de 1340 (LR-10)",
+  "description": "Lacs drainés depuis 1340 ou absents des données modernes : enveloppe lon/lat grossière, seuil de relief pour le masque terre (`cent-ans geo land-mask`), niveau de la nappe (`cent-ans geo lakes`).",
+  "type": "object",
+  "required": ["description", "lakes"],
+  "additionalProperties": false,
+  "$defs": {
+    "lonlat": {
+      "type": "array",
+      "items": {"type": "number"},
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "lakes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "status", "level_m", "max_height_m", "punch_mask", "area_km2_ref", "source"],
+        "additionalProperties": false,
+        "oneOf": [
+          {"required": ["polygon"], "not": {"anyOf": [{"required": ["axis"]}, {"required": ["width_m"]}]}},
+          {"required": ["axis", "width_m"], "not": {"required": ["polygon"]}}
+        ],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "name": {"type": "string", "minLength": 1},
+          "status": {"enum": ["drained", "existing"], "description": "drained : asséché depuis 1340 ; existing : existe encore."},
+          "drained": {"type": "string", "description": "Années de l'assèchement."},
+          "level_m": {"type": ["number", "null"], "exclusiveMinimum": 0, "maximum": 4800, "description": "Niveau de la nappe affichée (m) ; nul : pas de nappe."},
+          "max_height_m": {"type": ["number", "null"], "description": "Seuil de heightmap.png pour creuser le masque ; nul : toute l'enveloppe."},
+          "punch_mask": {"type": "boolean", "description": "Creuse l'enveloppe dans land_mask.png (eau : arbres, navigation)."},
+          "polygon": {"type": "array", "items": {"$ref": "#/$defs/lonlat"}, "minItems": 3, "description": "Enveloppe lon/lat, non fermée."},
+          "axis": {"type": "array", "items": {"$ref": "#/$defs/lonlat"}, "minItems": 2, "description": "Ligne médiane lon/lat d'un lac allongé."},
+          "width_m": {"type": "number", "exclusiveMinimum": 0, "description": "Largeur de l'enveloppe autour de l'axe (m)."},
+          "area_km2_ref": {"type": "number", "exclusiveMinimum": 0, "description": "Surface historique de référence (sources)."},
+          "note": {"type": "string"},
+          "source": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

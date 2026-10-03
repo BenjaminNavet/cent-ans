@@ -15,6 +15,7 @@ from PIL import Image, ImageDraw
 from cent_ans_tools.geo import (
     download,
     hamlets,
+    historical_water,
     navgrid,
     provinces,
     relief,
@@ -185,7 +186,19 @@ def build(
         pd.concat([read("lakes"), read("lakes_europe")], ignore_index=True),
         crs=read("lakes").crs,
     )
-    land_mask = terrain.build_land_mask(grid, read("land"), lakes)
+    # Lot LR-10: modern reservoirs stay land, lakes of 1340 are punched.
+    land_mask, _, _ = historical_water.corrected_land_mask(
+        grid,
+        read("land"),
+        lakes,
+        height_m,
+        historical_water.load_reservoirs(
+            map_dir / historical_water.RESERVOIRS_FILE.name
+        ),
+        historical_water.load_historical(
+            map_dir / historical_water.HISTORICAL_FILE.name
+        ),
+    )
     land_mask_path = map_dir / "land_mask.png"
     terrain.write_png8(land_mask, land_mask_path)
 
