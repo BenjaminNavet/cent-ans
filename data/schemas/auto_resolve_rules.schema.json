@@ -69,6 +69,9 @@
     "walls_defender_ranged": { "$ref": "#/$defs/factor", "description": "Multiplicateur du tir du défenseur depuis ses murailles." },
     "wall_defence_per_level": { "type": "number", "minimum": 0, "description": "A6-L2 : défense supplémentaire de la garnison par niveau de murailles (l'assaut est 1 + niveau × valeur fois plus dur), réduite par la brèche (nulle à 50 %) et les engins prêts." },
     "wall_engine_relief": { "type": "number", "minimum": 0, "maximum": 1, "description": "A6-L2 : part de la défense des murailles ôtée quand tous les engins sont prêts." },
+    "wall_attacker_morale": { "type": "number", "minimum": 0, "description": "A6 : derrière des murailles debout, les pertes de l'assaillant pèsent plus sur son moral (par point de tenue des murs : niveau × brèche restante × engins)." },
+    "wall_defender_steadiness": { "type": "number", "minimum": 0, "description": "A6 : la perte de moral de la garnison est divisée par 1 + valeur × tenue des murs." },
+    "wall_hold_morale": { "type": "number", "minimum": 0, "description": "A6 : points de moral par point de tenue des murs ajoutés à la garnison au départage quand aucun camp ne rompt (une impasse sous des murs debout est un assaut manqué)." },
     "legacy_defender_bonus": { "$ref": "#/$defs/factor", "description": "Bonus du défenseur quand seul l'indicateur de relief est connu (terrain inconnu)." },
     "weather": {
       "type": "object",

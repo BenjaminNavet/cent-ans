@@ -37,6 +37,9 @@
   "walls_defender_ranged": 1.3,
   "wall_defence_per_level": 0.35,
   "wall_engine_relief": 0.6,
+  "wall_attacker_morale": 0.35,
+  "wall_defender_steadiness": 0.5,
+  "wall_hold_morale": 6.0,
   "legacy_defender_bonus": 1.15,
   "weather": {
     "spring": { "clear": 60, "rain": 30, "fog": 10, "snow": 0 },

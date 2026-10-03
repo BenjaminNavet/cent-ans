@@ -137,6 +137,11 @@ fn the_ai_storms_once_an_engine_is_ready() {
     };
     assert!(state.assault_blocker(&data, &army).is_some());
     assert!(!assaults(&state), "no assault without an engine");
+    // A6-L2: the ladders cost more against high walls.
+    let ladders = data.siege_engine_rules.engines[0].cost(
+        data.siege_engine_rules.scaling_min_wall_level,
+        state.fortification_level(&data, &target),
+    );
     state
         .settlements
         .get_mut(&target)
@@ -144,7 +149,7 @@ fn the_ai_storms_once_an_engine_is_ready() {
         .siege
         .as_mut()
         .unwrap()
-        .engine_work = data.siege_engine_rules.engines[0].work;
+        .engine_work = ladders;
     assert!(state.assault_blocker(&data, &army).is_none());
     assert!(assaults(&state), "ladders ready, odds good: assault");
 }
