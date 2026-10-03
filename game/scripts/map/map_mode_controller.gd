@@ -31,19 +31,19 @@ const RELATION_COLORS := {
 	"peace": Color(0.55, 0.55, 0.52), "alliance": Color(0.20, 0.40, 0.78), "vassal": Color(0.50, 0.25, 0.65),
 	"suzerain": Color(0.50, 0.25, 0.65),
 }
-const RELIGION_AVIGNON := Color(0.25, 0.35, 0.70)
+const RELIGION_AVIGNON := Color(0.20, 0.34, 0.80)  # A6-C8 : bleu, seul bleu de la carte des religions
 const RELIGION_ROME := Color(0.80, 0.65, 0.20)
 const RELIGION_OTHER := Color(0.45, 0.45, 0.45)
 ## OM3 (ADR 0116) : grandes fois de l'Est, chacune sa teinte (les autres restent en gris).
 const RELIGION_ORTHODOX := Color(0.62, 0.22, 0.38)
-const RELIGION_ISLAM := Color(0.15, 0.50, 0.50)
+const RELIGION_ISLAM := Color(0.12, 0.52, 0.22)  # A6-C8 : vert (convention), plus de bleu-vert
 const RELIGION_PAGAN := Color(0.55, 0.40, 0.22)
 const RELIGION_ARMENIAN := Color(0.80, 0.42, 0.18)
 const RELIGION_FAITHS := {
 	"rel_orthodox": RELIGION_ORTHODOX, "rel_islam": RELIGION_ISLAM,
 	"rel_pagan": RELIGION_PAGAN, "rel_armenian": RELIGION_ARMENIAN,
 }
-const HERESY := Color(0.20, 0.65, 0.25)
+const HERESY := Color(0.58, 0.26, 0.72)  # A6-C8 : violet (le vert est à l'islam)
 ## Rampes séquentielles (faible → fort), lisibles sur le parchemin.
 const GOOD := Color(0.20, 0.55, 0.20)
 const BAD := Color(0.75, 0.15, 0.10)
