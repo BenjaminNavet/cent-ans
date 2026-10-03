@@ -613,7 +613,7 @@ fn a_replay_recorded_before_cb2_still_reads() {
     // (see `cb1_width.rs`): CB2 must not make it part any earlier.
     // IA night: the attacker's horse under the arrows now waits behind its
     // foot; the sample parts from the rules at tick 704 (1 min 10 s).
-    // A6-L13b (ADR 0180): the approach pace of the field battles parts it from
+    // A6-L13b (ADR 0184): the approach pace of the field battles parts it from
     // the first marches, tick 100 (10 s).
     assert!(
         player.divergence().is_none_or(|d| d.tick >= 100),

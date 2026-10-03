@@ -299,7 +299,7 @@
     },
     "ransom": {
       "type": "object",
-      "description": "Plafond des rançons et capture des souverains (lot A6-L3, ADR 0179).",
+      "description": "Plafond des rançons et capture des souverains (lot A6-L3, ADR 0183).",
       "properties": {
         "income_cap_percent": {
           "type": "integer",

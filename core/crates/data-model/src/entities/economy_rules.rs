@@ -195,7 +195,7 @@ pub struct EconomyRules {
     /// RS-C: when the AI demolishes buildings it can no longer afford.
     #[serde(default)]
     pub ai_demolition: AiDemolition,
-    /// A6-L3 (ADR 0179): ceiling of a ransom and capture of rulers.
+    /// A6-L3 (ADR 0183): ceiling of a ransom and capture of rulers.
     #[serde(default)]
     pub ransom: RansomRules,
     /// OM3 (ADR 0116): forage by province terrain (steppe, desert); a
@@ -268,7 +268,7 @@ impl Default for AiDemolition {
     }
 }
 
-/// A6-L3 (ADR 0179): ransoms are capped and a ruler is not taken on a
+/// A6-L3 (ADR 0183): ransoms are capped and a ruler is not taken on a
 /// plain defeat.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

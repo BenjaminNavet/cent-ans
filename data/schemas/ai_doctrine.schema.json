@@ -43,7 +43,7 @@
     },
     "share_caps": {
       "type": "object",
-      "description": "Plafond de part d'un type d'unité parmi les régiments d'une faction, armées et garnisons ensemble (lot A6-L3b, ADR 0179). Une option qui dépasserait le plafond n'est pas recrutée.",
+      "description": "Plafond de part d'un type d'unité parmi les régiments d'une faction, armées et garnisons ensemble (lot A6-L3b, ADR 0183). Une option qui dépasserait le plafond n'est pas recrutée.",
       "propertyNames": { "pattern": "^unit_[a-z0-9_]+$" },
       "additionalProperties": {
         "type": "object",

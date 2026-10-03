@@ -1,4 +1,4 @@
-# 0177 — Prévision de bataille alignée sur la résolution automatique
+# 0181 — Prévision de bataille alignée sur la résolution automatique
 
 Date : 2026-10-03 · Lot A6-L1 (constats M1, M2 de l'audit joueur).
 

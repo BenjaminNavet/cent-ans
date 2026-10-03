@@ -1,4 +1,4 @@
-//! Starting armies of the 1337 campaign (lot A6-L3b, ADR 0179), mirroring
+//! Starting armies of the 1337 campaign (lot A6-L3b, ADR 0183), mirroring
 //! `data/schemas/starting_armies.schema.json`
 //! (`data/rules/starting_armies.json`): the main army of each faction and
 //! the starting garrison of each province role.

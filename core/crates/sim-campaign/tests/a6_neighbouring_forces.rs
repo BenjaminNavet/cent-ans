@@ -1,5 +1,5 @@
 //! A6-L1: nearly equal forces give an uncertain auto-resolution (35-65 %),
-//! the odds the pre-battle forecast announces (ADR 0177).
+//! the odds the pre-battle forecast announces (ADR 0181).
 
 use std::path::PathBuf;
 

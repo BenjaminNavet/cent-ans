@@ -1,7 +1,7 @@
 class_name SettlementSlotBar
 extends PanelContainer
 
-## A6-L15 (ADR 0181) : barre des emplacements d'une colonie, à la Total War. Bande horizontale
+## A6-L15 (ADR 0185) : barre des emplacements d'une colonie, à la Total War. Bande horizontale
 ## en bas de l'écran : une case par emplacement de bâtiment (icône et niveau du bâtiment, « + »
 ## pour une case vide, case grisée pour une case verrouillée), infobulle IB par case, clic =
 ## `slot_activated`. Aucune règle ici : les cases viennent de `CampaignSim.settlement_slots`

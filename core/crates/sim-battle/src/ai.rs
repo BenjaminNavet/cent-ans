@@ -1340,7 +1340,7 @@ fn plan_field(view: &mut View) {
         && shooters_have_ammo
         && contact < DUEL_RANGE
         && elapsed
-            < if press {
+            < if press && !(winning_duel && view.side == SideId::Attacker) {
                 ATTACKER_DUEL_TIME
             } else if view.side == SideId::Attacker {
                 duel_rules.attacker_limit(winning_duel)
@@ -2182,7 +2182,13 @@ fn plan_horse(
         .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
     if let (Some((j, d)), false) = (exposed, general_only) {
         let e = &units[j];
-        if attack_angle(e, unit.x, unit.z) > 0 || d < 25.0 {
+        // A6 x LR: a charge already launched at `j` is not broken off to ride
+        // round: the target turns to face the charge in the last 30 m (its
+        // angle becomes frontal) and, with the slower A6 pace and the RJ-a
+        // wedge, that happens beyond the 25 m below.
+        let committed =
+            unit.target.is_some_and(|t| t as usize == j) && unit.state == UnitState::Charging;
+        if attack_angle(e, unit.x, unit.z) > 0 || d < 25.0 || committed {
             view.attack(i, j, true);
             return;
         }

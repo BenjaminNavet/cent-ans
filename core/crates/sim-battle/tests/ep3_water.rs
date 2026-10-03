@@ -194,7 +194,7 @@ fn river_lab(seed: u64) -> BattleSim {
         None,
     );
     battle.river = true;
-    // The rivers and bridges are drawn for the standard field (ADR 0180: the
+    // The rivers and bridges are drawn for the standard field (ADR 0184: the
     // field battles' wider gap moves them).
     let mut sim = BattleSim::new_scaled(battle, seed, sim_battle::BattleScale::default()).unwrap();
     lab(&mut sim);

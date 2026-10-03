@@ -1,4 +1,4 @@
-//! A6-L13 (ADR 0180): duration of field battles, AI against AI, without
+//! A6-L13 (ADR 0184): duration of field battles, AI against AI, without
 //! rendering. Ignored survey: prints and writes (`L13_OUT`) one line per
 //! battle `name<TAB>seed<TAB>winner<TAB>seconds<TAB>lost_a<TAB>lost_d`, then
 //! the median duration per scenario.

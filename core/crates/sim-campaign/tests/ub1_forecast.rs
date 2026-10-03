@@ -57,7 +57,7 @@ fn forecast_is_consistent_and_does_not_consume_randomness() {
     let (state, _) = staged(&data, "fac_france", "fac_england");
     let forecast = state.battle_forecast(&data, 0).expect("forecast");
     assert!(forecast.attacker_power > 0.0 && forecast.defender_power > 0.0);
-    // The bar and the verdict share one probability (A6-L1, ADR 0177).
+    // The bar and the verdict share one probability (A6-L1, ADR 0181).
     assert!((forecast.attacker_share - forecast.attacker_win_chance).abs() < 1e-9);
     assert!((0.0..=1.0).contains(&forecast.attacker_win_chance));
     assert!(forecast.attacker_soldiers > 0 && forecast.defender_soldiers > 0);

@@ -1,4 +1,4 @@
-//! A6-L13 (ADR 0180): trace of one battle, every 10 s, per side: soldiers,
+//! A6-L13 (ADR 0184): trace of one battle, every 10 s, per side: soldiers,
 //! regiments routing / in melee, mean morale.
 //! `L13_TRACE=substring-of-scenario-name L13_SEED=0 [L13_PACE=file.json]
 //! cargo test --release -p sim-battle --test l13_trace -- --ignored --nocapture`

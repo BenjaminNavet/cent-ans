@@ -1,4 +1,4 @@
-//! Building slots of a settlement (lot A6-L15, ADR 0181): the grid shown by
+//! Building slots of a settlement (lot A6-L15, ADR 0185): the grid shown by
 //! the slot bar. A slot is one upgrade chain (`upgrades_from`) of the
 //! buildings allowed in the settlement's kind; it holds at most one building
 //! of its chain (upgrading replaces it, see `complete_building`). Read-only:

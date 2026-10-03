@@ -1,4 +1,4 @@
-# 0179 — Économie à l'échelle (lot A6-L3)
+# 0183 — Économie à l'échelle (lot A6-L3)
 
 Date : 2026-10-03. Contexte : audit joueur A6 (constats M4, M5) et mesures longues de la sonde A2 (`docs/audit/a6-audit-joueur.md`).
 

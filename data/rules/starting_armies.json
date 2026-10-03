@@ -1,5 +1,5 @@
 {
-  "description": "Armées de départ de 1337 (lot A6-L3b, ADR 0179) : composition de l'armée principale de chaque faction (types d'unités, répétables) et des garnisons de départ selon le rôle de la province. Une faction absente de `factions` reçoit `default_army`. Le budget de départ (settlements/rules.json § starting_budget) retire ensuite les unités que la faction ne peut pas entretenir.",
+  "description": "Armées de départ de 1337 (lot A6-L3b, ADR 0183) : composition de l'armée principale de chaque faction (types d'unités, répétables) et des garnisons de départ selon le rôle de la province. Une faction absente de `factions` reçoit `default_army`. Le budget de départ (settlements/rules.json § starting_budget) retire ensuite les unités que la faction ne peut pas entretenir.",
   "default_army": ["unit_knights", "unit_men_at_arms_foot", "unit_crossbowmen"],
   "factions": {
     "fac_france": [

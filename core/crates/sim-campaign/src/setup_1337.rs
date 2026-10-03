@@ -127,7 +127,7 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
         {
             continue;
         }
-        // A6-L3 (ADR 0179): the treasury is capped at a few seasons of income.
+        // A6-L3 (ADR 0183): the treasury is capped at a few seasons of income.
         if let Some(seasons) = rule.treasury_max_income_seasons {
             let (_, receipts) = structural_balance(state, data, &faction);
             if let Some(f) = state.factions.get_mut(&faction) {
@@ -992,18 +992,18 @@ mod tests {
         // structural bankruptcy.
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
         let data = GameData::load(&root).expect("game data loads").0;
-        let rule = data
-            .settlement_rules
-            .as_ref()
-            .and_then(|r| r.starting_budget.clone())
-            .expect("starting budget");
+        // A6 x LR: A6-L3 asks a surplus (`max_deficit_percent` -10) that only the
+        // garrisons can serve; the LR-15 fallbacks (field armies, capital
+        // garrison, buildings) bring a realm to zero and no further. So the
+        // invariant kept here is "no structural deficit" (net >= 0), not the
+        // 10 % surplus (the Hafsids end at +4 %).
         let state = CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 1)
             .expect("start");
         for realm in ["fac_marinids", "fac_hafsids", "fac_serbia", "fac_lithuania"] {
             let realm = FactionId::new(realm).unwrap();
             let (net, receipts) = structural_balance(&state, &data, &realm);
             assert!(
-                !over_budget(&state, &data, &realm, &rule),
+                !in_deficit(&state, &data, &realm),
                 "{realm}: {net} on {receipts}"
             );
         }

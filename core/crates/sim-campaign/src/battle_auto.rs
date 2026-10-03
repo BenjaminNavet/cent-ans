@@ -936,7 +936,7 @@ pub fn resolve_with_crossings(
     };
     let attacker_power = estimate(&a, &d, &field);
     let defender_power = estimate(&d, &a, &field);
-    // Fog of war: one draw per side for the whole battle (A6-L1, ADR 0177),
+    // Fog of war: one draw per side for the whole battle (A6-L1, ADR 0181),
     // so that nearly equal forces do not always end the same way.
     if rules.battle_fortune > 0.0 {
         a.damage *= 1.0 + rules.battle_fortune * (2.0 * rng.unit_f64() - 1.0);

@@ -43,7 +43,7 @@ pub struct BattleForecast {
     /// Effective power of the attackers (all modifiers applied).
     pub attacker_power: f64,
     pub defender_power: f64,
-    /// Share of the attackers in the total power, 0-1 (the balance bar).
+    /// Balance bar, 0-1: the attackers' chance of winning (A6-L1, ADR 0181: bar and verdict share one probability).
     pub attacker_share: f64,
     /// Estimated chance that the attackers win an auto-resolved battle, 0-1.
     pub attacker_win_chance: f64,
@@ -124,7 +124,7 @@ pub fn forecast_sides(
     let (mut wins, mut attacker_power, mut defender_power) = (0u64, 0.0, 0.0);
     let samples = u64::from(rules.forecast_samples.max(1));
     for run in 0..samples {
-        let mut rng = CampaignRng::from_seed(seed ^ run.wrapping_mul(0x9E37_79B9_7F4A_7C15));
+        let mut rng = CampaignRng::from_seed(seed.wrapping_add(run));
         let result = battle_auto::resolve_with_crossings(
             attacker.0,
             attacker.1,
@@ -152,7 +152,7 @@ pub fn forecast_sides(
 
 /// Seed of the forecast's private generators: the odds of a given battle do
 /// not flicker from one call to the next.
-const FORECAST_SEED: u64 = 0x1337_0C7A_B4E5;
+const FORECAST_SEED: u64 = 0xF02_ECA57;
 
 /// The resolver's own fallback: guessed profiles when the list does not
 /// match the side (an army vanished between the two lookups).
@@ -340,7 +340,6 @@ impl CampaignState {
             &data.river_crossing_rules,
             FORECAST_SEED,
         );
-        let total = odds.attacker_power + odds.defender_power;
         let player_attacks = attackers.iter().any(|id| {
             self.armies
                 .get(id)
@@ -349,11 +348,8 @@ impl CampaignState {
         Some(BattleForecast {
             attacker_power: odds.attacker_power,
             defender_power: odds.defender_power,
-            attacker_share: if total > f64::EPSILON {
-                odds.attacker_power / total
-            } else {
-                0.5
-            },
+            // A6-L1 (ADR 0181): the balance bar and the verdict share one probability.
+            attacker_share: odds.win_chance,
             attacker_win_chance: odds.win_chance,
             attacker_soldiers: head_count(&attacker_side),
             defender_soldiers: head_count(&defender_side),

@@ -321,7 +321,7 @@ fn is_rebels(id: &FactionId) -> bool {
     id.as_str() == diplomacy::REBELS_FACTION
 }
 
-/// Score at or above which a proposal of the player is accepted (ADR 0178).
+/// Score at or above which a proposal of the player is accepted (ADR 0182).
 pub const ACCEPT_SCORE: i32 = 0;
 
 /// Acceptance chance (percent) of a score.
@@ -1387,7 +1387,7 @@ pub fn propose_treaty(
 ) -> Result<bool, DiplomacyError> {
     check_treaty(state, data, proposer, recipient, &articles)?;
     let verdict = evaluate_treaty(state, data, proposer, recipient, &articles);
-    // The player's proposals are deterministic (ADR 0178): accepted iff the
+    // The player's proposals are deterministic (ADR 0182): accepted iff the
     // score reaches the threshold. Between AIs, a seeded roll remains.
     let accepted = if proposer == &state.player_faction {
         verdict.accept

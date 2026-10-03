@@ -1,4 +1,4 @@
-//! A6-L13b (ADR 0180): behaviour probe of the field pace. Ignored survey: the
+//! A6-L13b (ADR 0184): behaviour probe of the field pace. Ignored survey: the
 //! two behaviours the tuning tests defend, measured under a pace override
 //! (`L13_PACE=file.json`) without recompiling:
 //! - the active AI beats a passive side (`ai_relief.rs`, 32 battles per relief);
@@ -71,7 +71,7 @@ fn crecy(seed: u64) -> BattleSim {
     battle.defender.general.as_mut().unwrap().unit_index = 4;
     let mut sim = BattleSim::new(battle, seed).unwrap();
     // The ridge lies 20 m in front of the English line wherever the field
-    // battle scale puts it (ADR 0180: wider gap).
+    // battle scale puts it (ADR 0184: wider gap).
     let crest = sim
         .units()
         .iter()

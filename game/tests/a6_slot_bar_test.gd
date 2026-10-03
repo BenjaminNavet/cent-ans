@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Test headless A6-L15 (ADR 0181) : barre des emplacements de colonie. Sélectionne Paris
+## Test headless A6-L15 (ADR 0185) : barre des emplacements de colonie. Sélectionne Paris
 ## (vraie simulation) : la barre existe, une case par emplacement du cœur, elle tient dans
 ## 1280×720 sans chevaucher la cloche de fin de tour ni la minicarte, et un clic ouvre l'onglet
 ## des bâtiments du panneau de colonie.

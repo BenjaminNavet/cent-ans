@@ -376,7 +376,7 @@ pub struct GameData {
     /// `data/rules/crusade.json` (lot JR1, ADR 0165: the crusader faction's
     /// fervour); `None` when absent: the mechanic is inert.
     pub crusade_rules: Option<crate::entities::crusade::CrusadeRules>,
-    /// `data/rules/starting_armies.json` (lot A6-L3b, ADR 0179); without
+    /// `data/rules/starting_armies.json` (lot A6-L3b, ADR 0183); without
     /// it the 1337 start raises no army and no city garrison.
     pub starting_armies: Option<crate::entities::starting_armies::StartingArmies>,
     /// `data/rules/armies.json` (lot NT5, N6: army unit cap); the bundled

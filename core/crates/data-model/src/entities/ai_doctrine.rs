@@ -32,7 +32,7 @@ pub struct AiDoctrines {
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub rank_strategies: BTreeMap<String, RankStrategy>,
     /// Cap on the share of a unit type among a faction's regiments, field
-    /// armies and garrisons together (lot A6-L3b, ADR 0179): an option whose
+    /// armies and garrisons together (lot A6-L3b, ADR 0183): an option whose
     /// recruit would push the type above its cap is not taken.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub share_caps: BTreeMap<UnitTypeId, ShareCap>,

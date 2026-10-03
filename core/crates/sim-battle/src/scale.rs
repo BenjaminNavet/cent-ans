@@ -122,7 +122,7 @@ pub struct ScaleTier {
     pub width_m: f64,
     pub depth_m: f64,
     pub line_gap_m: f64,
-    /// Gap of the lines in a field battle (ADR 0180); sieges keep
+    /// Gap of the lines in a field battle (ADR 0184); sieges keep
     /// `line_gap_m`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub field_line_gap_m: Option<f64>,

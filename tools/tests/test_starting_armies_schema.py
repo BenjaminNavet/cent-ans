@@ -1,4 +1,4 @@
-"""Validates data/rules/starting_armies.json against its schema (lot A6-L3b, ADR 0179)."""
+"""Validates data/rules/starting_armies.json against its schema (lot A6-L3b, ADR 0183)."""
 
 import json
 from pathlib import Path

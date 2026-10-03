@@ -1,4 +1,4 @@
-//! A6-L13 (ADR 0180): pace of the fighting. Rules in
+//! A6-L13 (ADR 0184): pace of the fighting. Rules in
 //! `data/rules/battle_pace.json` (schema
 //! `data/schemas/battle_pace_rules.schema.json`): lethality of the melee and
 //! of the missiles, morale lost per man killed. Field battles and sieges have

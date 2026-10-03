@@ -126,10 +126,10 @@ pub struct AutoResolveRules {
     pub loser_min_losses: f64,
     /// Fortune of war: every phase's damage is scaled by `1 ± jitter`.
     pub jitter: f64,
-    /// Auto-resolutions run by the pre-battle forecast (ADR 0177).
+    /// Auto-resolutions run by the pre-battle forecast (ADR 0181).
     pub forecast_samples: u32,
     /// Fog of war: each side's damage is scaled once per battle by
-    /// `1 ± battle_fortune` (ADR 0177).
+    /// `1 ± battle_fortune` (ADR 0181).
     pub battle_fortune: f64,
     /// Multiplier on the attacker crossing a river.
     pub river_attacker: f64,

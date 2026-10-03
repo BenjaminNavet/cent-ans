@@ -1024,7 +1024,7 @@ func _render_chance() -> void:
 	_chance_bar.value = chance
 	fill.bg_color = HudStyle.gauge_color(chance / 100.0)
 	_chance_bar.add_theme_stylebox_override("fill", fill)
-	# M6 (ADR 0178) : acceptation déterministe, score signé (accepté ssi score >= 0).
+	# M6 (ADR 0182) : acceptation déterministe, score signé (accepté ssi score >= 0).
 	var accepts := bool(_verdict.get("accept", false))
 	_chance_label.text = "%s (%+d)" % ["Accepterait" if accepts else "Refuserait", int(_verdict.get("score", 0))]
 	if _render_explanation():

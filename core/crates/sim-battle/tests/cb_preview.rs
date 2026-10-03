@@ -180,7 +180,7 @@ fn bridge_preview_is_the_way_the_knights_ride() {
     assert!(preview.len() >= 3, "by the bridge: {preview:?}");
     assert_eq!(*preview.last().unwrap(), north);
     let from = (sim.units()[0].x, sim.units()[0].z);
-    // L13b (ADR 0180): approach pace x0.45.
+    // L13b (ADR 0184): approach pace x0.45.
     let walk = followed(&mut sim, 0, north, 700.0);
     // Exactly the same waypoints, in the same order (the knights hesitate
     // between the two ends of the bridge a few ticks: first visits).

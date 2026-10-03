@@ -1,4 +1,4 @@
-//! ADR 0178: the player's proposals are accepted iff score >= 0, never by a roll.
+//! ADR 0182: the player's proposals are accepted iff score >= 0, never by a roll.
 
 use std::path::PathBuf;
 

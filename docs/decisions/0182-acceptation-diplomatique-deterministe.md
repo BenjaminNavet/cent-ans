@@ -1,4 +1,4 @@
-# 0178 — Acceptation diplomatique déterministe pour le joueur
+# 0182 — Acceptation diplomatique déterministe pour le joueur
 
 ## Contexte
 

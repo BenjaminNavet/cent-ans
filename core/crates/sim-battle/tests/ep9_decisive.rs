@@ -221,13 +221,13 @@ fn q3_demo_battle_without_orders_ends() {
         let (t, w, last) = play(&mut sim);
         println!("demo seed {seed}: {t:.0} s {w:?} « {last} »");
         assert!(sim.is_finished(), "seed {seed}: still running at {t:.0} s");
-        // L13b (ADR 0180): longer battles (approach x0.45), 20 minutes at most.
+        // L13b (ADR 0184): longer battles (approach x0.45), 20 minutes at most.
         assert!(t <= 1200.0, "seed {seed}: {t:.0} s");
     }
 }
 
 /// Standard tier, no order from the player (or both AIs), four seeds:
-/// every battle ends within 20 minutes (23 with a river to cross, ADR 0180).
+/// every battle ends within 20 minutes (23 with a river to cross, ADR 0184).
 #[test]
 fn battles_without_orders_end_in_time() {
     for (terrain, river, limit) in [
@@ -298,7 +298,7 @@ fn an_unfought_battle_is_refused() {
     let (t, winner, last) = play(&mut sim);
     let rules = sim.decision_rules().clone();
     assert_eq!(sim.end_kind(), Some(BattleEnd::Refused), "« {last} »");
-    // L13b (ADR 0180): the refusal clock runs at the patience factor of the
+    // L13b (ADR 0184): the refusal clock runs at the patience factor of the
     // field pace (x1.5); a regiment of the defender repositioning slowly may
     // restart it once.
     assert!(
@@ -397,7 +397,7 @@ pub fn crecy(seed: u64, legacy: bool) -> BattleSim {
     battle.defender.general.as_mut().unwrap().unit_index = 4;
     let mut sim = BattleSim::new(battle, seed).unwrap();
     // The ridge lies 20 m in front of the English line wherever the field
-    // battle scale puts it (ADR 0180: wider gap).
+    // battle scale puts it (ADR 0184: wider gap).
     let crest = sim
         .units()
         .iter()

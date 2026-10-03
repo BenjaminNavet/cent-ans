@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/battle_pace_rules.schema.json",
   "title": "Cadence des combats",
-  "description": "Fichier data/rules/battle_pace.json (lot A6-L13, ADR 0180) : létalité de la mêlée et des tirs, et moral perdu par mort, pour les batailles rangées (field) et les sièges (siege). Lu par sim-battle (PaceRules).",
+  "description": "Fichier data/rules/battle_pace.json (lot A6-L13, ADR 0184) : létalité de la mêlée et des tirs, et moral perdu par mort, pour les batailles rangées (field) et les sièges (siege). Lu par sim-battle (PaceRules).",
   "type": "object",
   "properties": {
     "description": { "type": "string" },

@@ -191,13 +191,13 @@ pub fn ransom_amount(state: &CampaignState, data: &GameData, character: &Charact
     let base = captive_rank(state, character).base_ransom() as f64;
     let prestige = 1.0 + f64::from(c.prestige.clamp(0, 200)) / 100.0;
     let raw = base * prestige * wealth_factor(state, data, &c.faction);
-    // A6-L3 (ADR 0179): never more than a share of the payer's income.
+    // A6-L3 (ADR 0183): never more than a share of the payer's income.
     let income = state.faction_income_effective(data, &c.faction).max(0);
     let cap = income * data.economy_rules.ransom.income_cap_percent / 100;
     ((raw / 50.0).round() as i64 * 50).min(cap).max(50)
 }
 
-/// A6-L3 (ADR 0179): whether a beaten general may be taken prisoner. A
+/// A6-L3 (ADR 0183): whether a beaten general may be taken prisoner. A
 /// ruler leading a beaten army is taken only when that army routed (rule
 /// `economy_rules.ransom.sovereign_capture_only_if_routed`).
 pub fn capture_allowed(

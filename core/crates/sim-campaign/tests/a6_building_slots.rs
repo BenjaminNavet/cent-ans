@@ -1,4 +1,4 @@
-//! Lot A6-L15 (ADR 0181): the slot grid derived from the building chains.
+//! Lot A6-L15 (ADR 0185): the slot grid derived from the building chains.
 
 use std::path::PathBuf;
 

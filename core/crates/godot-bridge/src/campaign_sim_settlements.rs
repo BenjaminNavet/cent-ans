@@ -156,7 +156,7 @@ impl CampaignSim {
         buildable_array(data, &state.buildable(data, &id), Some((state, &id)))
     }
 
-    /// A6-L15 (ADR 0181): building slots of a settlement for the slot bar:
+    /// A6-L15 (ADR 0185): building slots of a settlement for the slot bar:
     /// `[{root, built, built_name, level, max_level, category, upkeep,
     /// state ("built" | "upgradable" | "empty" | "locked"), locked_reason,
     /// next[]}]` where `next[]` are build-option rows as in

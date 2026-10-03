@@ -84,7 +84,7 @@ fn ai_beats_a_passive_side_on_every_relief() {
 fn ridge_sim(data: &GameData, attacker: &[&str], defender: &[&str], crest_z: f64) -> BattleSim {
     let mut battle = setup(units(data, attacker), units(data, defender), None);
     battle.village = Some(false);
-    // The ridge is laid for the standard 300 m line gap (ADR 0180 widened the
+    // The ridge is laid for the standard 300 m line gap (ADR 0184 widened the
     // field battles' gap).
     let scale = sim_battle::BattleScale::default();
     let mut sim = BattleSim::new_scaled(battle, 7, scale).unwrap();
@@ -153,7 +153,7 @@ fn a_weaker_defender_holds_the_crest_and_hides_its_line_behind_it() {
     let defender = ["unit_men_at_arms_foot", "unit_longbowmen"];
     let mut sim = ridge_sim(&data, &attacker, &defender, 525.0);
     sim.set_ai(SideId::Attacker, false);
-    // L13b (ADR 0180): approach pace x0.45 while the armies are apart.
+    // L13b (ADR 0184): approach pace x0.45 while the armies are apart.
     run(&mut sim, 270.0);
     let field = sim.field();
     let of = |kind: &str| {

@@ -1,4 +1,4 @@
-# 0180 — Durée des batailles : mesure, cadence en données, et limite des leviers de combat
+# 0184 — Durée des batailles : mesure, cadence en données, et limite des leviers de combat
 
 Date : 2026-10-03 (lot A6-L13, constat B1 de `docs/audit/a6-audit-joueur.md`).
 Statut : **appliqué par le lot A6-L13b** (voir la section « L13b » en fin de document ; les sections précédentes restent l'historique du lot L13).

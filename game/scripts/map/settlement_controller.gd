@@ -41,9 +41,9 @@ func setup(campaign_map: Node) -> void:
 	panel.place_like(province_panel)
 	map.ui.dock_right_panel(panel)  # C7b : à gauche de la minicarte
 	panel.hide()
-	# A6-L15 (ADR 0181) : barre des emplacements en bas de l'écran.
+	# A6-L15 (ADR 0185) : barre des emplacements en bas de l'écran.
 	slot_bar = SettlementSlotBar.new()
-	map.ui.attach_slot_bar(slot_bar)
+	map.ui.attach_slot_bar(slot_bar, panel)
 	slot_bar.slot_activated.connect(_on_slot_activated)
 	panel.visibility_changed.connect(func() -> void: slot_bar.visible = panel.visible and slot_bar.slots.size() > 0)
 	panel.recruit_requested.connect(_on_recruit)

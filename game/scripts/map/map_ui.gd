@@ -85,6 +85,9 @@ var docked_panels: Array[Control] = []
 var docked_right_x: float = 0.0
 ## A6-L15 : barre des emplacements de la colonie sélectionnée (posée par `SettlementController`).
 var slot_bar: SettlementSlotBar = null
+## Panneau de colonie : la barre s'arrête à son bord gauche réel (il est calé sur le panneau de
+## province et peut déborder de la zone latérale).
+var slot_bar_beside: Control = null
 @onready var province_panel: ProvincePanel = %ProvincePanel
 @onready var faction_panel: FactionPanel = %FactionPanel
 @onready var court_button: Button = %CourtButton
@@ -1479,8 +1482,9 @@ func layout_hud() -> void:
 
 ## A6-L15 : place la barre des emplacements en bas de la zone de sélection (même repère que le
 ## bandeau d'ost, entre le sceau et la cloche) ; au-dessus du bandeau s'il est visible.
-func attach_slot_bar(bar: SettlementSlotBar) -> void:
+func attach_slot_bar(bar: SettlementSlotBar, beside: Control = null) -> void:
 	slot_bar = bar
+	slot_bar_beside = beside
 	army_strip.get_parent().add_child(bar)
 	bar.visibility_changed.connect(queue_layout)
 
@@ -1488,14 +1492,18 @@ func attach_slot_bar(bar: SettlementSlotBar) -> void:
 func _layout_slot_bar(left: float, gap: float, zone_size: Vector2) -> void:
 	if slot_bar == null or not slot_bar.visible:
 		return
-	slot_bar.fit(gap)
+	var room := gap
+	if slot_bar_beside != null and slot_bar_beside.is_visible_in_tree():
+		var local_left: float = slot_bar_beside.get_global_rect().position.x - slot_bar.get_parent().get_global_rect().position.x
+		room = clampf(minf(left + gap, local_left - 6.0) - left, 0.0, gap)
+	slot_bar.fit(room)
 	slot_bar.size = Vector2.ZERO
-	var width := minf(slot_bar.get_combined_minimum_size().x, gap)
+	var width := minf(slot_bar.get_combined_minimum_size().x, room)
 	var bottom_edge := zone_size.y
 	if army_strip.visible:
 		bottom_edge = army_strip.position.y - 6.0
 	slot_bar.size = Vector2(width, slot_bar.get_combined_minimum_size().y)
-	slot_bar.position = Vector2(left + (gap - width) * 0.5, bottom_edge - slot_bar.size.y)
+	slot_bar.position = Vector2(left + (room - width) * 0.5, bottom_edge - slot_bar.size.y)
 
 
 ## U1 : vrai si un panneau central ou compagnon ouvert recouvre `rect` (coordonnées écran).

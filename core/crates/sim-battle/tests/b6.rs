@@ -191,7 +191,10 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// 245 s); over seeds 0-63 the French win 57/64 instead of 31/64
 /// (`eq7_cavalry::probe_mixed_battle`).
 /// A6-L13b (approach pace x0.45, patience clocks x1.9, melee x0.57): seed 3
-/// French in 388 s, seed 11 French in 523 s (final pace values of ADR 0180).
+/// French in 388 s, seed 11 French in 523 s (final pace values of ADR 0184).
+/// A6 x LR merge: with the L13b pace and the RJ-a formations together, seed 3
+/// French in 353 s and seed 11 French in 508 s (same winners as L13b alone;
+/// `approach_range_m` 375 and the committed charge / won duel of the AI).
 /// IA night (the attacker's horse under the arrows waits behind its foot,
 /// not ahead of it): seed 3 stays French (227 s), seed 11 goes back to the
 /// English (317 s); over seeds 0-63 the French win 62/64 instead of 57/64.
@@ -203,11 +206,11 @@ fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "388 Some(Attacker) [42, 31, 62, 100, 100, 33, 37, 95, 106, 20]",
+            "353 Some(Attacker) [39, 31, 52, 100, 100, 43, 45, 99, 100, 18]",
         ),
         (
             11,
-            "523 Some(Attacker) [50, 67, 72, 87, 69, 22, 56, 86, 95, 30]",
+            "508 Some(Attacker) [50, 63, 71, 85, 69, 16, 55, 90, 78, 39]",
         ),
     ];
     for (seed, digest_before) in expected {
@@ -248,7 +251,7 @@ fn english_on_the_defensive(seed: u64) -> BattleSim {
     ];
     let mut battle = setup(units(&data, &french), units(&data, &english), None);
     battle.village = Some(false);
-    // The hedge and the village are laid for the standard 300 m line gap (ADR 0180
+    // The hedge and the village are laid for the standard 300 m line gap (ADR 0184
     // widened the field battles' gap).
     let mut sim = BattleSim::new_scaled(battle, seed, sim_battle::BattleScale::default()).unwrap();
     sim.set_ai(SideId::Attacker, true);

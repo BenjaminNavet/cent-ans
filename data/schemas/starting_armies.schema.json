@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/starting_armies.schema.json",
   "title": "Armées de départ de 1337",
-  "description": "Fichier data/rules/starting_armies.json (lot A6-L3b, ADR 0179) : armée principale par faction et garnison de départ par rôle de province.",
+  "description": "Fichier data/rules/starting_armies.json (lot A6-L3b, ADR 0183) : armée principale par faction et garnison de départ par rôle de province.",
   "type": "object",
   "$defs": {
     "unit_list": {

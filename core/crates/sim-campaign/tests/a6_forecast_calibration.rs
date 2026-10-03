@@ -1,5 +1,5 @@
 //! A6-L1: the pre-battle forecast agrees with the auto-resolution it
-//! announces (ADR 0177). Armies of the 1337 setup are staged against each
+//! announces (ADR 0181). Armies of the 1337 setup are staged against each
 //! other (with the defender's regiments scaled to vary the odds); the
 //! forecast is compared with the frequency of attacker victories over 200
 //! auto-resolutions on fresh seeds.
