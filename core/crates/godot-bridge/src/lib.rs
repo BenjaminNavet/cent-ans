@@ -11,11 +11,13 @@ use data_model::{GameData, HistoricalDate};
 use godot::classes::RefCounted;
 use godot::prelude::*;
 
+mod battle_pose_lerp;
 mod battle_replay;
 mod battle_sim;
 mod battle_sim_abilities;
 mod battle_sim_formation;
 mod battle_sim_modes;
+mod battle_sim_poses;
 mod battle_sim_preview;
 mod battle_sim_queue;
 mod battle_step_job;
