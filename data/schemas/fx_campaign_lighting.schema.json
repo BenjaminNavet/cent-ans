@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_campaign_lighting.schema.json",
+  "title": "Éclairage de la carte de campagne",
+  "description": "Fichier data/fx/campaign_lighting.json (lot RV-B) lu par game/scripts/visual/campaign_lighting.gd. Aucune règle de jeu.",
+  "type": "object",
+  "properties": { "description": { "type": "string" } }
+}
