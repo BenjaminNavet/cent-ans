@@ -235,8 +235,8 @@ impl CampaignState {
                 wall.breach_percent,
                 wall.engines_ready_percent,
             );
+            // Display only: the resolver sampled below applies the factor.
             if factor < 0.995 {
-                attacker_modifier *= factor;
                 modifiers.push(format!(
                     "Murailles de niveau {} sans brèche suffisante ({:+.0} % à l'assaillant)",
                     wall.level,
