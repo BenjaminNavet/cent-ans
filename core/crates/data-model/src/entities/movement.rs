@@ -99,6 +99,14 @@ pub struct FreeMovementRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub road_crossing_radius_km: Option<f64>,
     pub embark_cost: EmbarkCost,
+    /// Lot EM (ADR 0167): sea edges a voyage may chain in one season, from
+    /// the port of departure to the destination (1 = a single crossing).
+    #[serde(default = "default_max_voyage_legs")]
+    pub max_voyage_legs: u32,
+}
+
+fn default_max_voyage_legs() -> u32 {
+    1
 }
 
 impl Default for FreeMovementRules {
@@ -116,6 +124,7 @@ impl Default for FreeMovementRules {
             slope_impassable_threshold: 0.3,
             road_crossing_radius_km: None,
             embark_cost: EmbarkCost::All,
+            max_voyage_legs: default_max_voyage_legs(),
         }
     }
 }

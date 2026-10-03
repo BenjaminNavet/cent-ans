@@ -1176,8 +1176,28 @@ func _run_sea_lanes() -> void:
 	var tip := SeaLaneLayer.tooltip(wine)
 	_check(tip.contains("Gascogne"), "sea lane tooltip should name the sea: %s" % tip)
 	layer.free()
+	_run_sea_voyage(sim)
 	if _failures == 0:
 		print("smoke OK: sea lanes, %d lanes" % lanes.size())
+
+
+## EM (ADR 0167) : voyage de plusieurs traversées depuis un port, clic sur la mer.
+func _run_sea_voyage(sim: Object) -> void:
+	if not sim.has_method("sea_voyage"):
+		print("smoke sea voyage: skipped, CampaignSim has no sea_voyage (run core/build.sh)")
+		return
+	var army_id := ""
+	for id in sim.call("get_army_ids"):
+		var army: Dictionary = sim.call("get_army", str(id))
+		if str(army.get("faction", "")) == "fac_england":
+			army_id = str(id)
+			break
+	if not _check(army_id != "", "sea voyage: an English army expected"):
+		return
+	_check(bool(sim.call("debug_place_army", army_id, 0.0, 0.0)), "sea voyage: debug_place_army failed")
+	_check((sim.call("sea_voyage", army_id, "set_bordeaux") as PackedStringArray).is_empty(), "an army in the field has no voyage")
+	_check(str(sim.call("sea_port_near", army_id, 0.0, 0.0)) == "", "an army in the field has no port to sail to")
+	print("smoke OK: sea voyage bridge (field army refused)")
 
 
 ## C5 (docs/design/2026-09-24-rapprochement-total-war.md) : routes commerciales et accords.
