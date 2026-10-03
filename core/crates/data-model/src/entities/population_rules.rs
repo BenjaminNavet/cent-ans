@@ -88,7 +88,7 @@ impl Default for PopulationRules {
             garrison_relief_reference_population: 100_000,
             garrison_relief_max_weight: 3.0,
             goods_relief_max: 10.0,
-            occupation_unrest: 20.0,
+            occupation_unrest: 12.0,
             foreign_religion_unrest: 10.0,
             disorder_unrest_weight: default_disorder_weight(),
             disorder_unrest_max: default_disorder_max(),
@@ -157,14 +157,14 @@ mod tests {
         // Without weighting, as before LR-07.
         let flat = PopulationRules {
             garrison_relief_reference_population: 0,
-            ..rules
+            ..rules.clone()
         };
         assert_eq!(flat.garrison_relief(600, 200_000), 6.0);
         // A thinly peopled province: a bonus up to the weight ceiling.
         let bonus = PopulationRules {
             garrison_relief_max_weight: 3.0,
             garrison_relief_max: 15.0,
-            ..rules
+            ..rules.clone()
         };
         assert_eq!(bonus.garrison_relief(300, 50_000), 6.0);
         assert_eq!(bonus.garrison_relief(300, 10_000), 9.0);
