@@ -533,7 +533,8 @@ def geo_lakes(
     console.print(
         f"{result.lakes} lacs ({result.named} nommés), {result.vertices} sommets, "
         f"{result.below_sea} sous le niveau de la mer et {result.not_flat} non plats ignorés, "
-        f"retenues exclues : {', '.join(result.excluded_reservoirs) or 'aucune'}"
+        f"retenues exclues : {', '.join(result.excluded_reservoirs) or 'aucune'}, "
+        f"lacs historiques : {', '.join(result.historical) or 'aucun'}"
     )
 
 

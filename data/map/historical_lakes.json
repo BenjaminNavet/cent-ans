@@ -62,7 +62,7 @@
       "max_height_m": null,
       "punch_mask": true,
       "axis": [[-0.245, 52.505], [-0.205, 52.505]],
-      "width_m": 2500,
+      "width_m": 1800,
       "area_km2_ref": 10,
       "note": "Plus grand lac des Fens (7 à 12 km² selon la saison), drainé en 1851.",
       "source": "en.wikipedia.org/wiki/Whittlesey_Mere"
@@ -112,7 +112,7 @@
       "max_height_m": null,
       "punch_mask": true,
       "axis": [[-2.962, 54.420], [-2.945, 54.395], [-2.928, 54.370], [-2.937, 54.345], [-2.950, 54.315], [-2.960, 54.290], [-2.966, 54.272]],
-      "width_m": 1000,
+      "width_m": 700,
       "area_km2_ref": 14.7,
       "note": "Plus grand lac d'Angleterre, 17 km sur 1 km.",
       "source": "fr.wikipedia.org/wiki/Windermere"
@@ -125,7 +125,7 @@
       "max_height_m": null,
       "punch_mask": true,
       "axis": [[5.514, 45.430], [5.548, 45.470]],
-      "width_m": 900,
+      "width_m": 600,
       "area_km2_ref": 3.9,
       "note": "Lac naturel ; habitats lacustres de l'an mil (Colletière).",
       "source": "fr.wikipedia.org/wiki/Lac_de_Paladru"
@@ -138,7 +138,7 @@
       "max_height_m": null,
       "punch_mask": true,
       "axis": [[5.797, 45.570], [5.803, 45.535]],
-      "width_m": 1800,
+      "width_m": 1400,
       "area_km2_ref": 5.5,
       "note": "Lac naturel d'origine glaciaire.",
       "source": "fr.wikipedia.org/wiki/Lac_d'Aiguebelette"
@@ -151,7 +151,7 @@
       "max_height_m": null,
       "punch_mask": true,
       "axis": [[6.235, 46.613], [6.330, 46.664]],
-      "width_m": 1100,
+      "width_m": 800,
       "area_km2_ref": 8.8,
       "note": "Plus grand lac du Jura ; abbaye du lac de Joux (XIIe siècle).",
       "source": "fr.wikipedia.org/wiki/Lac_de_Joux"
@@ -164,7 +164,7 @@
       "max_height_m": null,
       "punch_mask": true,
       "axis": [[6.282, 46.778], [6.345, 46.840]],
-      "width_m": 800,
+      "width_m": 600,
       "area_km2_ref": 5.4,
       "note": "Traversé par le Doubs.",
       "source": "fr.wikipedia.org/wiki/Lac_de_Saint-Point"
@@ -177,7 +177,7 @@
       "max_height_m": null,
       "punch_mask": true,
       "axis": [[-1.322, 43.893], [-1.305, 43.873]],
-      "width_m": 1200,
+      "width_m": 900,
       "area_km2_ref": 3.5,
       "note": "Étang littoral landais.",
       "source": "fr.wikipedia.org/wiki/Étang_de_Léon"
@@ -190,7 +190,7 @@
       "max_height_m": null,
       "punch_mask": true,
       "axis": [[-1.345, 43.778], [-1.315, 43.770]],
-      "width_m": 1200,
+      "width_m": 900,
       "area_km2_ref": 3.8,
       "note": "Étang littoral landais.",
       "source": "fr.wikipedia.org/wiki/Étang_de_Soustons"
