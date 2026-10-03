@@ -32,8 +32,11 @@ rouge reste réservé aux ennemis (ADR 0155).
   ennemie prise : lavis or, bord rouge hachuré d'or ; province à nous occupée : lavis rouge, bord
   or hachuré de rouge. Les bannières de RJ-c redisent possesseur et occupant sur la ville.
 - **Teinte à luminance conservée** (comme la teinte de faction du terrain) : le relief, les
-  forêts et les champs gardent leur valeur, seule la couleur glisse. Opacités modérées
-  (`alpha` : nous 0,22, ennemi 0,20, ami 0,16, autres 0,06), part de chromaticité 0,6.
+  forêts et les champs gardent leur valeur, seule la couleur glisse. Poids (`alpha`) : nous
+  0,45, ennemi 0,42, ami 0,35, autres 0,10, part de chromaticité 0,8. Réglés sur capture : les
+  valeurs de départ (0,15-0,25) ne déplaçaient le rendu que de 3/255 en moyenne, illisible sur
+  un sol vert ; la teinte ne change que la chromaticité, d'où des poids plus hauts qu'un
+  mélange alpha ordinaire.
 - **Atténuation de près** par la distance caméra (fondu entre 60 et 260, × 0,35 de près) pour
   laisser villes et champs à leur rendu. Distance caméra plutôt qu'empreinte pixel : indépendant
   de la résolution (ADR 0123).
