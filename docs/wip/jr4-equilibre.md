@@ -95,3 +95,18 @@ Sonde finale JR4b (ferveur t10-t50 ; Jérusalem) :
   Lituanie, Serbie) : leurs recettes ne couvrent pas même bâtiments + armée de départ ; à revoir
   avec les populations OM (lot historien) ou un coût de colonie proportionnel aux recettes.
 - La ferveur tend à baisser après le tour 30 sans conquête (graine 5 : 26 au plus bas).
+
+## JR5-fix (relecture)
+Champs `public`/`loss` de `GameEvent` (pont et Godot, plus de marque « délivrée »), appel à
+défendre public, sortie (l'assiégeant attaque), filtre des places rebelles, capitale rétablie,
+contingents dans la limite de garnison, gains de cible et de place une seule fois, budget de départ
+au niveau neutre, test `cityless`. Barème retouché : défaite −6 → −4, place 4 → 6 (chaque place
+ne compte plus qu'une fois).
+
+| graine | ferveur t10-t50 | min-max | trésor t50 | places t50 | Jérusalem | Mamelouks t50 |
+|---|---|---|---|---|---|---|
+| 1 | 58 64 64 54 56 | 49-67 | 372 | 5 | — | 12 |
+| 2 | 73 69 63 64 62 | 58-78 | 1 813 | 5 | — | 12 |
+| 3 | 84 74 79 71 59 | 59-94 | 1 258 | 6 | t25 | 10 |
+| 4 | 72 64 62 52 46 | 44-75 | 2 236 | 5 | — | 12 |
+| 5 | 56 54 48 36 40 | 31-67 | 630 | 5 | — | 12 |

@@ -53,9 +53,9 @@ elle le recrute, elle le dissout.
 | chaque tour (le vœu s'use) | −1 |
 | chaque tour à ferveur ≥ 70 (l'exaltation retombe) | −2 de plus |
 | bataille gagnée contre une autre foi | +3 |
-| bataille perdue | −6 |
-| colonie prise en Terre sainte | +4 |
-| Jérusalem prise | +25, puis plancher à 50 tant qu'elle est tenue |
+| bataille perdue | −4 |
+| colonie prise en Terre sainte (une fois par colonie) | +6 |
+| Jérusalem prise (gain à la première délivrance) | +25, puis plancher à 50 tant qu'elle est tenue |
 | passage prêché | +8 |
 | guerre déclarée à une faction catholique | −30 |
 | bataille cherchée contre des catholiques (les croisés attaquent ; attaqués, aucun malus) | −10 |
