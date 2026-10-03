@@ -356,7 +356,7 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 0.5,
-          "description": "RV-C : fréquence des cumulus (1 / px carte ; 0,07 ≈ cellules de 10 km)."
+          "description": "RV-C : fréquence des cumulus (1 / px carte ; 0,045 ≈ cellules de 16 km)."
         },
         "cumulus_cover": {
           "type": "array",

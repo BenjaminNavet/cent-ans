@@ -17,15 +17,16 @@
 // (`weather_shadow` des données) ; 0 par temps clair.
 uniform float cloud_shadow_amount = 0.05;
 // Force de l'ombre au cœur d'un cumulus (part de lumière retirée, 0-1).
-uniform float cloud_shadow_cumulus = 0.26;
-// Fréquence des cumulus (1 / px carte) : 0,07 ≈ cellules de 14 px, soit ≈ 10 km.
-uniform float cloud_shadow_scale = 0.07;
+uniform float cloud_shadow_cumulus = 0.34;
+// Fréquence des cumulus (1 / px carte) : 0,045 ≈ cellules de 22 px, soit ≈ 16 km (amas de cumulus
+// lisibles en vue régionale ; le détail du bord descend à ≈ 4 km).
+uniform float cloud_shadow_scale = 0.045;
 // Couverture de beau temps (part du ciel couverte, 0-1) : minimum et maximum selon les régions,
 // et couverture sous un ciel chargé (pluie, neige, orage).
-uniform vec2 cloud_shadow_cover = vec2(0.12, 0.38);
+uniform vec2 cloud_shadow_cover = vec2(0.18, 0.45);
 uniform float cloud_shadow_cover_wet = 0.7;
 // Largeur du bord des cumulus (en part du seuil de bruit) : petit = bord net.
-uniform float cloud_shadow_edge = 0.12;
+uniform float cloud_shadow_edge = 0.10;
 // Vent (px carte / s ; = `weather_wind` de campaign_weather.gdshaderinc) et part de ce vent prise
 // par les cumulus.
 uniform vec2 cloud_shadow_wind = vec2(3.0, 0.6);
@@ -37,7 +38,7 @@ uniform vec3 cloud_shadow_sun = vec3(0.35, 0.71, 0.61);
 // Altitude des nuées au-dessus du sol (unités monde = px carte) pour le décalage solaire.
 uniform float cloud_shadow_height = 34.0;
 // Taille apparente (px d'écran) d'un cumulus où l'ombre commence à s'effacer, puis disparaît.
-uniform vec2 cloud_shadow_fade_px = vec2(16.0, 5.0);  // ≈ fondu de la vue politique (footprint 0,9 à 2,8)
+uniform vec2 cloud_shadow_fade_px = vec2(14.0, 5.0);
 
 float cs_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -63,9 +64,10 @@ vec2 cs_source(vec2 p) {
 	return p + sun.xz / max(sun.y, 0.2) * cloud_shadow_height;
 }
 
-// Fondu selon la taille d'un cumulus à l'écran (footprint : px carte par px d'écran).
-float cs_footprint_fade(float footprint) {
-	float cell_px = 1.0 / max(cloud_shadow_scale * footprint, 1e-4);
+// Fondu selon la taille d'un cumulus à l'écran. `area_px` : px carte par px d'écran en moyenne
+// géométrique des deux axes (en vue rasante, l'axe de profondeur seul effacerait trop tôt).
+float cs_footprint_fade(float area_px) {
+	float cell_px = 1.0 / max(cloud_shadow_scale * area_px, 1e-4);
 	return smoothstep(cloud_shadow_fade_px.y, cloud_shadow_fade_px.x, cell_px);
 }
 
@@ -98,7 +100,7 @@ vec3 cs_light_factor(float shade) {
 // Part de lumière retirée par les cumulus seuls (mer, arbres : pas de météo par province).
 // `fade` : 0 en vue politique, parchemin ou désactivé.
 float cloud_shadow_fair(vec2 p, float footprint, float fade) {
-	fade *= cs_footprint_fade(footprint);
+	fade *= cs_footprint_fade(sqrt(length(dFdx(p)) * length(dFdy(p))));
 	if (fade <= 0.001 || cloud_shadow_cumulus <= 0.0) {
 		return 0.0;
 	}
@@ -109,7 +111,7 @@ float cloud_shadow_fair(vec2 p, float footprint, float fade) {
 // Sol : cumulus plus nombreux sous la météo chargée et ombre des nuées visibles. Facteur de
 // lumière au sol (1 = plein soleil).
 vec3 cloud_shadow_light(vec2 p, float footprint, float fade) {
-	fade *= cs_footprint_fade(footprint);
+	fade *= cs_footprint_fade(sqrt(length(dFdx(p)) * length(dFdy(p))));
 	if (fade <= 0.001 || (cloud_shadow_cumulus <= 0.0 && cloud_shadow_amount <= 0.0)) {
 		return vec3(1.0);
 	}
