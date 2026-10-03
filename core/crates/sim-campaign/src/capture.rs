@@ -672,16 +672,25 @@ impl CampaignState {
                         }
                     })
                     .collect();
+                // RJ-c (ADR 0175): taking a place occupies it; possession
+                // changes only by treaty.
+                let is_city = self.province_city_id(&place.province) == Some(&pending.settlement);
+                let owner_name = faction_name(data, &place.owner);
+                let reminder = occupation_reminder(
+                    is_city,
+                    &province_name,
+                    (place.owner != pending.faction).then_some(owner_name.as_str()),
+                );
                 Some(CaptureDecisionView {
                     id: pending.id,
                     settlement: pending.settlement.clone(),
-                    title: format!("{settlement_name} est à vous"),
+                    title: format!("{settlement_name} est prise"),
                     text: format!(
                         "La place de {settlement_name} ({province_name}) est tombée ; ses \
                          défenseurs, qui tenaient pour {previous_name}, attendent votre bon \
                          plaisir. Vos capitaines demandent quel sort lui réserver : l'occuper \
                          telle quelle, en tirer rançon, la livrer au pillage ou la raser. \
-                         Sans ordre avant la fin de la saison, on l'occupera."
+                         Sans ordre avant la fin de la saison, on l'occupera.\n\n{reminder}"
                     ),
                     settlement_name,
                     province: place.province.clone(),
@@ -770,4 +779,23 @@ pub fn debug_capture(
     crate::siege::capture(state, data, settlement, faction, &mut events);
     state.pending_events.extend(events);
     true
+}
+
+/// RJ-c (ADR 0175): one line under a capture decision — occupying is not
+/// possessing. `owner_name` is the de jure owner of the place, `None` when
+/// the taker owns it (a place recovered).
+pub fn occupation_reminder(is_city: bool, province_name: &str, owner_name: Option<&str>) -> String {
+    let control = if is_city {
+        format!("C'est la cité de {province_name} : vous en prenez le contrôle. ")
+    } else {
+        String::new()
+    };
+    let Some(owner_name) = owner_name else {
+        return format!("{control}La place est à vous de droit : vous la recouvrez.");
+    };
+    format!(
+        "{control}Occuper n'est pas posséder : la place reste de droit à {owner_name} ; \
+         elle ne devient vôtre que par cession dans un traité, et vous la rendrez à la paix \
+         si elle n'est pas cédée."
+    )
 }
