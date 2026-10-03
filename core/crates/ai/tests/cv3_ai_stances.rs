@@ -652,8 +652,10 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // trajectory leaves seed 1 with no ambush in 60 turns (checked: not the
     // army cap; ladders ready at once bring it back). NT9 (one attack per
     // enemy army and turn, ram in the auto-resolve): seed 1 lies in wait
-    // again, alone as before NT5.
-    let log: Vec<(u32, String, bool)> = [1]
+    // again, alone as before NT5. LR-07 (garrison per head, occupation 12):
+    // seed 1 no longer lies in wait in 60 turns, seed 2 does (seed 3 shows
+    // refused Verona/Venice ambush orders at turns 5-6: open point).
+    let log: Vec<(u32, String, bool)> = [1, 2]
         .into_iter()
         .flat_map(|seed| campaign_stance_orders(&data, seed, 60))
         .collect();
