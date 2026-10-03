@@ -1,7 +1,7 @@
 # 0180 — Durée des batailles : mesure, cadence en données, et limite des leviers de combat
 
 Date : 2026-10-03 (lot A6-L13, constat B1 de `docs/audit/a6-audit-joueur.md`).
-Statut : **décision retenue (piste 1)** : écart de déploiement ×1,5 et mêlée ralentie (voir « Décision retenue »).
+Statut : **piste 1 mesurée, mécanisme livré, valeurs NON appliquées** (voir « Décision retenue » et « Retombées »).
 
 ## Contexte
 
@@ -115,6 +115,18 @@ régiments) :
 Le gain total reste ×1,27, sous le ×1,6 visé : l'écart de lignes ne déplace que la marche d'approche (≈ 20 %
 du total mesuré sur la fixture) et les cartes historiques ne la changent pas. Aller plus loin demande des
 armées plus larges (piste 2) ou d'accepter la bascule historique (piste 3).
+
+## Retombées : pourquoi les valeurs ne sont pas appliquées
+
+Le mécanisme `field_line_gap_m` (optionnel par palier, absent des données livrées) est en place. Appliquer
+450/510/570 fait échouer 16 tests de sim-battle réglés sur l'ancienne géométrie ou le premier contact à ≈ 70 s :
+`b6` (5 : contact vers 70 s, couvert des haies, empreintes), `cb6_group_formation` (1), `ep3_water` (pont),
+`ep9_decisive` (3 : bataille refusée, Crécy, fin à temps), `ep9b_duel` (2 : duel, bataille symétrique 3-7),
+`r4` (3 : archers sur la crête). `ep7_historical` reste vert avec l'écart seul ; avec la mêlée ×0,3 il échoue
+(Azincourt, Poitiers) et `ep9` / `ep9b` échouent davantage. `auto_resolve_calibration` reste verte.
+Ces tests sont des empreintes de réglage (seuils d'équilibre, instants de contact), pas des invariants : les
+réétalonner est un travail de balance à valider, non mécanique. Reprise : mettre `field_line_gap_m` dans
+`battle_scale.json`, réétalonner ces tests, puis décider de la mêlée douce.
 
 ## Munitions
 

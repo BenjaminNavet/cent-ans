@@ -8,7 +8,6 @@
       "width_m": 1200,
       "depth_m": 800,
       "line_gap_m": 300,
-      "field_line_gap_m": 450,
       "zone_depth_m": 300,
       "max_regiments_per_side": 40
     },
@@ -19,7 +18,6 @@
       "width_m": 1800,
       "depth_m": 1200,
       "line_gap_m": 340,
-      "field_line_gap_m": 510,
       "zone_depth_m": 400,
       "max_regiments_per_side": 80
     },
@@ -29,7 +27,6 @@
       "width_m": 2400,
       "depth_m": 1600,
       "line_gap_m": 380,
-      "field_line_gap_m": 570,
       "zone_depth_m": 500,
       "max_regiments_per_side": 160
     }
