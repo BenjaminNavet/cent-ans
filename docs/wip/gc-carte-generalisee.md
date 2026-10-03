@@ -220,7 +220,9 @@ surfaces par modèle (une par teinte, matériaux propres à chaque `.glb`) + pas
   paliers vallée/site ; retirer le prototype `MapScale` et les calques 1:1 si le joueur confirme
   qu'il ne veut plus du style `real`. Banc : fait (GC6-perf) ; teintes des maquettes à une surface
   à juger en jeu.
-- GC7 : camps, avec SA (ADR 0156).
+- GC7 : fait le 03/10 (SA fusionné, échelle sous-linéaire des pions) : camp de siège 1,3 → 0,8 (≈ un
+  bourg à d 150), bivouac 0,75 → 0,5 (≈ un village), réglables (`map.siege_camp_scale`,
+  `map.bivouac_scale`). Non vérifié sur capture (pas de siège dans `gc_shots.gd`).
 - Bannières des 7 villes emblématiques (pas de teinte de contrôleur) ; étiquette de Vincennes dans
   l'emprise de Paris ; Saraï petite (poids faible) ; yourtes à juger en jeu.
 
@@ -249,4 +251,5 @@ surfaces par modèle (une par teinte, matériaux propres à chaque `.glb`) + pas
   l'Est), pas de bannière sur les 7 villes emblématiques (l'écu porte le contrôleur).
 
 ## Prochaine étape
-Jugement du joueur en partie réelle.
+Chantier clos par le joueur le 03/10 (« c'est bon pour moi »). Restes facultatifs : ménage du code
+1:1 et du prototype `MapScale`, banc d'i/s sur machine calme, retouches à juger en partie.

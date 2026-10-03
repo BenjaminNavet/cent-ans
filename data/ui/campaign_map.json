@@ -6,6 +6,8 @@
     "town_scale": 1.0,
     "town_style": "maquette",
     "camera_floor_distance": 20.0,
+    "siege_camp_scale": 0.8,
+    "bivouac_scale": 0.5,
     "tree_style": "generalised"
   },
   "fog_of_war": {
