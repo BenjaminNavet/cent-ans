@@ -89,6 +89,16 @@
         }
       }
     },
+    "ground": {
+      "description": "A6-C4/C5 : uniformes de teinte de saison du sol du terrain (campaign_life.gdshaderinc).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summer_gold": {"$ref": "#/$defs/rgb2"},
+        "winter_ground_tint": {"$ref": "#/$defs/rgb2"},
+        "winter_ground_desat": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
     "snow": {
       "description": "Neige de plaine et des toits.",
       "type": "object",
@@ -112,6 +122,7 @@
     }
   },
   "$defs": {
+    "rgb2": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 3}, "minItems": 3, "maxItems": 3},
     "rgb": {
       "type": "array",
       "minItems": 3,

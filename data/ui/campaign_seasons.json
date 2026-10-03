@@ -1,5 +1,5 @@
 {
-  "description": "TB1 : saisons de la carte de campagne (rendu seulement). `sea` : mer selon la saison ; `grade` : étalonnage de saison de la carte (printemps frais, été doré, automne chaud, hiver bleuté et désaturé ; bible DA § 12.6, ADR 0150) ; `roof_snow` : neige des toits des villes 1:1 ; `storm` : mer sous la tempête ; `snow.south_fade` : limite sud de la neige de plaine et des toits.",
+  "description": "TB1 : saisons de la carte de campagne (rendu seulement). `sea` : mer selon la saison ; `grade` : étalonnage de saison de la carte (printemps frais, été doré, automne chaud, hiver bleuté et désaturé ; bible DA § 12.6, ADR 0150) ; `roof_snow` : neige des toits des villes 1:1 ; `storm` : mer sous la tempête ; `snow.south_fade` : limite sud de la neige de plaine et des toits. A6-C4/C5 : été plus vert (étalonnage et or des champs), hiver plus clair et plus froid ; bloc `ground` = uniformes du sol du terrain.",
   "seasons": {
     "spring": {
       "sea": {
@@ -42,11 +42,16 @@
         "foam": 0.9
       },
       "grade": {
-        "temperature": 0.14,
+        "temperature": 0.04,
+        "gain": [
+          0.97,
+          1.03,
+          0.96
+        ],
         "highlights": [
-          1.05,
-          1.0,
-          0.9
+          1.02,
+          1.02,
+          0.95
         ]
       },
       "roof_snow": 0.0
@@ -97,17 +102,27 @@
         "foam": 1.4
       },
       "grade": {
-        "temperature": -0.32,
-        "saturation": 0.72,
+        "temperature": -0.4,
+        "saturation": 0.88,
+        "lift": [
+          0.012,
+          0.018,
+          0.03
+        ],
+        "gain": [
+          1.03,
+          1.05,
+          1.08
+        ],
         "shadows": [
-          0.94,
-          0.99,
+          0.97,
+          1.0,
           1.08
         ],
         "highlights": [
-          0.97,
           1.0,
-          1.05
+          1.02,
+          1.06
         ]
       },
       "roof_snow": 0.8
@@ -126,5 +141,18 @@
       0.58,
       0.72
     ]
+  },
+  "ground": {
+    "summer_gold": [
+      1.04,
+      1.05,
+      0.93
+    ],
+    "winter_ground_tint": [
+      1.0,
+      1.06,
+      1.18
+    ],
+    "winter_ground_desat": 0.38
   }
 }
