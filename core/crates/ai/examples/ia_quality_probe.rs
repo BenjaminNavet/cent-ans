@@ -400,6 +400,12 @@ struct Report {
     undefended_examples: Vec<Example>,
     war_army_turns: u32,
     idle_army_turns: u32,
+    /// Idle at war while every non-rebel enemy holds at most
+    /// `ai::campaign::LAST_BASTIONS` provinces (left to the peace table).
+    idle_bastion_turns: u32,
+    /// (faction, enemy) → (idle army-turns, last turn, war score then,
+    /// war start), for the idle armies of metric `idle_bastion_turns`.
+    bastion_wars: BTreeMap<(FactionId, FactionId), (u32, u32, i32, u32)>,
     battles: u32,
     battles_lost: u32,
     suicide: u32,
@@ -456,6 +462,7 @@ const HEADERS: &[&str] = &[
     "tours écoulés à l'abandon",
     "niv. fort. abandonnés",
     "niv. fort. pris",
+    "% oisives, bastions seuls",
 ];
 
 impl Report {
@@ -500,6 +507,7 @@ impl Report {
             Self::per(self.abandoned_elapsed, self.sieges_abandoned),
             Self::per(self.abandoned_levels, self.sieges_abandoned),
             Self::per(self.captured_levels, self.sieges_captured),
+            Self::pct(self.idle_bastion_turns, self.war_army_turns),
         ])
         .collect()
     }
@@ -622,6 +630,22 @@ fn measure(
             .is_some_and(|fs| fs.at_war_with.iter().any(|e| e.as_str() != REBELS))
     };
     let kind = |s: &SettlementId| state.settlements.get(s).map_or(9, |s| kind_rank(s.kind));
+    // Every non-rebel enemy down to its last bastions (F4).
+    let only_bastions = |f: &FactionId| {
+        state.factions.get(f).is_some_and(|fs| {
+            fs.at_war_with
+                .iter()
+                .filter(|e| e.as_str() != REBELS)
+                .all(|e| {
+                    state
+                        .provinces
+                        .keys()
+                        .filter(|p| state.holds_province(e, p))
+                        .count()
+                        <= ai::campaign::LAST_BASTIONS
+                })
+        })
+    };
     // Idle after the turn: did not move since planning, no destination,
     // not besieging, no battle.
     let idle = |id: &ArmyId, snap: &ArmySnap| -> bool {
@@ -675,6 +699,20 @@ fn measure(
                 && !matches!(stance, Stance::Ambush | Stance::Entrenched)
             {
                 report.idle_army_turns += 1;
+                if only_bastions(&snap.faction) {
+                    report.idle_bastion_turns += 1;
+                    let fs = &state.factions[&snap.faction];
+                    for enemy in fs.at_war_with.iter().filter(|e| e.as_str() != REBELS) {
+                        let entry = report
+                            .bastion_wars
+                            .entry((snap.faction.clone(), enemy.clone()))
+                            .or_insert((0, 0, 0, 0));
+                        entry.0 += 1;
+                        entry.1 = turn;
+                        entry.2 = state.war_score(data, &snap.faction, enemy);
+                        entry.3 = fs.war_started.get(enemy).copied().unwrap_or(0);
+                    }
+                }
             }
         }
     }
@@ -820,7 +858,8 @@ fn measure(
         report.sieges_abandoned += 1;
         report.abandoned_elapsed += siege.elapsed;
         report.abandoned_levels += siege.level;
-        let (cause, detail) = siege_end_cause(state, rec, sid, siege, controller, turn, &destroyed);
+        let (cause, detail) =
+            siege_end_cause(state, rec, sid, siege, controller, turn, &destroyed, events);
         report.siege_ends[cause] += 1;
         report.siege_end_examples.push((
             cause,
@@ -854,6 +893,7 @@ fn siege_end_cause(
     controller: &FactionId,
     turn: u32,
     destroyed: &BTreeSet<&ArmyId>,
+    events: &[GameEvent],
 ) -> (usize, String) {
     if !state.is_at_war(&siege.attacker, controller) {
         return (0, format!("paix avec {controller}"));
@@ -874,7 +914,46 @@ fn siege_end_cause(
         } else {
             "détruite"
         };
-        return (1, format!("{id} {fate}"));
+        // Which side the besieger fought on, who won, where it stands now.
+        let province = state.settlements.get(place).map(|s| &s.province);
+        let in_province = |e: &GameEvent| province.is_some() && e.province.as_ref() == province;
+        let battles: Vec<&GameEvent> = events
+            .iter()
+            .filter(|e| e.kind == EventKind::Battle)
+            .collect();
+        let side = if let Some(e) = battles.iter().find(|e| e.army.as_ref() == Some(&id)) {
+            if e.faction.as_ref() == Some(&siege.attacker) {
+                "attaquant vainqueur"
+            } else {
+                "attaquant vaincu"
+            }
+        } else if let Some(e) = battles
+            .iter()
+            .filter(|e| in_province(e))
+            .find(|e| e.text_fr.starts_with("Sortie"))
+        {
+            if e.faction.as_ref() == Some(&siege.attacker) {
+                "sortie repoussée"
+            } else {
+                "sortie réussie"
+            }
+        } else {
+            match battles
+                .iter()
+                .filter(|e| in_province(e))
+                .find(|e| e.army.is_some())
+            {
+                Some(e) if e.faction.as_ref() == Some(&siege.attacker) => "défenseur vainqueur",
+                Some(_) => "défenseur vaincu",
+                None => "bataille ailleurs",
+            }
+        };
+        let place_now = match state.armies.get(&id) {
+            Some(a) if a.is_at(place) => format!("sur place, {:?}", a.stance),
+            Some(_) => "partie".to_owned(),
+            None => "disparue".to_owned(),
+        };
+        return (1, format!("{id} {fate} ({side}, {place_now})"));
     }
     if let Some(id) = first(&|id| rec.plans.get(id).is_some_and(|p| p.assault)) {
         return (2, format!("{id} a donné l'assaut"));
@@ -960,6 +1039,12 @@ fn main() {
             for line in report.suicide_examples.iter().take(EXAMPLES) {
                 println!("- {line}");
             }
+            let mut wars: Vec<_> = report.bastion_wars.iter().collect();
+            wars.sort_by_key(|(_, v)| std::cmp::Reverse(v.0));
+            println!("\nGuerres contre des derniers bastions (armées oisives) :");
+            for ((f, e), (n, last, score, start)) in wars.iter().take(8) {
+                println!("- {f} contre {e} : {n} armée-tours, dernier t{last}, score {score}, guerre depuis t{start}");
+            }
             println!("\nSièges finis sans prise :");
             for (cause, name) in SIEGE_END_CAUSES.iter().enumerate() {
                 let lines: Vec<&String> = report
@@ -972,7 +1057,8 @@ fn main() {
                     continue;
                 }
                 println!("- {name} ({}) :", lines.len());
-                for line in lines.iter().take(3) {
+                let shown = if cause == 1 { lines.len() } else { 3 };
+                for line in lines.iter().take(shown) {
                     println!("  - {line}");
                 }
             }
