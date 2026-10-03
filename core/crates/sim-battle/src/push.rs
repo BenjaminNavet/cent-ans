@@ -27,7 +27,7 @@ use std::sync::OnceLock;
 use data_model::Ability;
 use serde::{Deserialize, Serialize};
 
-use crate::unit::{Formation, Unit};
+use crate::unit::Unit;
 
 /// Contents of `data/rules/battle_push.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -66,8 +66,6 @@ pub struct PressureRules {
     pub fatigue_scale: f64,
     /// While the charge impetus lasts: × (1 + charge/100 × this).
     pub charge_factor: f64,
-    /// Square / schiltron.
-    pub square_factor: f64,
     /// Archers behind their planted stakes.
     pub stakes_factor: f64,
     /// Pikemen (schiltron ability) against riders.
@@ -200,6 +198,8 @@ impl PressureRules {
         let freshness = (1.0 - unit.fatigue / self.fatigue_scale).max(self.min_freshness);
         let morale = 0.5 + unit.morale.clamp(0.0, 100.0) / 200.0;
         let mut pressure = weight * depth * freshness * morale;
+        // RJ-a: the formation's drive (a deep block pushes harder).
+        pressure *= unit.formation.def().modifiers.push_drive;
         if unit.charge_timer > 0.0 {
             let charge = f64::from(unit.stats.charge.unwrap_or(20));
             pressure *= 1.0 + charge / 100.0 * self.charge_factor;
@@ -215,9 +215,8 @@ impl PressureRules {
     /// they do not drive the enemy back).
     pub fn resistance(&self, unit: &Unit, opponent: &Unit) -> f64 {
         let mut pressure = self.drive(unit, opponent);
-        if unit.formation == Formation::Square {
-            pressure *= self.square_factor;
-        }
+        // RJ-a: the formation's hold (a schiltron, a deep block).
+        pressure *= unit.formation.def().modifiers.push_resistance;
         if unit.stakes_planted {
             pressure *= self.stakes_factor;
         }

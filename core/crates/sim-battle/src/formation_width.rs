@@ -122,7 +122,7 @@ impl Unit {
             return None;
         }
         let n = self.soldiers().max(1);
-        let (sx, _) = self.spacing();
+        let (sx, _) = self.spacing_in(self.drag_formation());
         let asked = ((width / sx).round() as u32).max(1);
         let bounds = FormationWidthRules::bundled().bounds(self);
         let (_, files) = line_shape(n, asked, bounds);
@@ -137,14 +137,29 @@ impl Unit {
         };
         let bounds = FormationWidthRules::bundled().bounds(self);
         let (ranks, files) = line_shape(self.soldiers(), files, bounds);
-        let (sx, sz) = self.spacing();
+        let (sx, sz) = self.spacing_in(self.drag_formation());
         (f64::from(files) * sx, f64::from(ranks) * sz)
+    }
+
+    /// RJ-a: the formation a drag leaves the regiment in: its own when
+    /// line-shaped (`width_adjustable`), the default line otherwise.
+    pub fn drag_formation(&self) -> crate::unit::Formation {
+        if self.formation.def().width_adjustable {
+            self.formation
+        } else {
+            crate::unit::Formation::default_formation()
+        }
     }
 
     /// CB1: takes the Line `width` metres wide (no change without width).
     pub fn set_width(&mut self, width: Option<f64>) {
         if let Some(files) = width.and_then(|w| self.files_for_width(w)) {
-            self.formation = crate::unit::Formation::Line;
+            // RJ-a: a line-shaped formation keeps its name under a drag;
+            // any other goes back to the default line.
+            if !self.formation.def().width_adjustable {
+                self.formation = self.drag_formation();
+                self.reform = None;
+            }
             self.line_files = Some(files);
         }
     }

@@ -49,8 +49,8 @@ const SEAL_SIZE := 112.0
 const GROUP_SECONDS := 8.0
 ## Boutons d'ordres : [commande, nom, infobulle] ; le raccourci vient de `BattleHotkeys` (CB2).
 const COMMANDS := [
-	["formation", "Formation", "Changer de formation (ligne, colonne, schiltron, coin)"],
-	["fire_at_will", "Tir à volonté", "Tir à volonté ou tir retenu"],
+	["formation", "Formation", "Choisir une formation dans le menu (noms historiques, effets) ; la touche passe à la suivante. Doré : formation particulière ou reformation en cours."],
+	["fire_at_will", "Tir à volonté", "Tir à volonté ou tir retenu. Doré : tir à volonté pour tous les tireurs choisis."],
 	["halt", "Halte", "Arrêter la sélection sur place"],
 	["withdraw", "Retraite", "Faire quitter le champ aux régiments choisis"],
 ]
@@ -96,6 +96,11 @@ var _leader_arms: Texture2D = null
 var _card_names: Dictionary = {}  # unit id -> nom distinctif (« Chevaliers II »)
 ## CB2 : boutons de mode (mode -> Button) et leur état pour la sélection {on, able}.
 var _mode_buttons: Dictionary = {}
+## RJ-a : boutons d'ordre (« formation », « fire_at_will »…) et leur état on/off pour la sélection.
+var _command_buttons: Dictionary = {}
+var _command_state: Dictionary = {}
+## RJ-a : menu des formations (catalogue posé par la scène, `setup_formations`).
+var formation_menu: BattleFormationMenu = null
 var _mode_state: Dictionary = {}
 
 
@@ -304,6 +309,7 @@ func _build_bottom() -> void:
 		button.draw.connect(_draw_command_icon.bind(button, str(entry[0]), key))
 		button.pressed.connect(func() -> void: command_pressed.emit(str(entry[0])))
 		buttons.add_child(button)
+		_command_buttons[str(entry[0])] = button
 	_build_mode_buttons(buttons)
 	withdraw_all_button = RichButton.new()
 	withdraw_all_button.name = "WithdrawAll"
@@ -348,6 +354,11 @@ func _build_bottom() -> void:
 func _draw_command_icon(button: Button, command: String, key: String) -> void:
 	var c := button.size * 0.5 + Vector2(2, 1)
 	var ink := INK
+	# RJ-a : ordre actif (tir à volonté, formation particulière ou menu ouvert) : fond doré,
+	# comme les modes.
+	var state: Dictionary = _command_state.get(command, {})
+	if bool(state.get("on", false)) and not button.disabled:
+		button.draw_rect(Rect2(Vector2(3, 3), button.size - Vector2(6, 6)), Color(HudStyle.GOLD, 0.45))
 	# DA5 : icône d'ordre à l'encre (or au survol), repli sur le pictogramme vectoriel.
 	var texture := HudStyle.icon("battle_" + command)
 	if texture != null:
@@ -379,6 +390,20 @@ func _draw_command_icon(button: Button, command: String, key: String) -> void:
 			button.draw_arc(c + Vector2(4, -3), 7.0, -PI * 0.5, PI * 0.5, 8, ink, 2.0)
 	if key != "":
 		button.draw_string(get_font_for(button), Vector2(4, 12), key, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, BattleUiKit.INK_FADED)
+	if command == "formation" and not state.is_empty():
+		_draw_formation_status(button, state)
+
+
+## RJ-a : formation courante de la sélection (libellé court) et barre de reformation en cours.
+func _draw_formation_status(button: Button, state: Dictionary) -> void:
+	var label := str(state.get("label", ""))
+	if label != "":
+		button.draw_string(get_font_for(button), Vector2(2, button.size.y - 3), label, HORIZONTAL_ALIGNMENT_CENTER, button.size.x - 4, 9, INK)
+	var progress := float(state.get("progress", 1.0))
+	if progress < 1.0:
+		var bar := Rect2(Vector2(4, button.size.y - 13), Vector2(button.size.x - 8, 3))
+		button.draw_rect(bar, Color(INK, 0.25))
+		button.draw_rect(Rect2(bar.position, Vector2(bar.size.x * clampf(progress, 0.0, 1.0), bar.size.y)), HudStyle.GOLD.darkened(0.2))
 
 
 func get_font_for(control: Control) -> Font:
@@ -764,6 +789,86 @@ func update_cards(units: Array, side: String, selected: Array) -> void:
 				_refresh_leader_tooltip()
 				leader_seal.queue_redraw()
 	update_mode_buttons(units, selected)
+	update_command_buttons(units, selected)
+
+
+## RJ-a : catalogue des formations (`BattleSim.unit_formations()`) et règles de reformation ;
+## construit le menu ouvert par le bouton « Formation ».
+func setup_formations(catalog: Array, reform: Dictionary) -> void:
+	if formation_menu != null or catalog.is_empty():
+		return
+	formation_menu = BattleFormationMenu.new()
+	formation_menu.setup(catalog, reform)
+	formation_menu.chosen.connect(func(key: String) -> void:
+		ui_feedback.emit("card")
+		formation_menu.visible = false
+		_command_state = {}
+		command_pressed.emit("formation:" + key))
+	root.add_child(formation_menu)
+
+
+## RJ-a : ouvre ou ferme le menu des formations au-dessus du bouton « Formation ».
+func toggle_formation_menu() -> void:
+	if formation_menu == null:
+		return
+	formation_menu.toggle_at(_command_buttons.get("formation", null))
+	_command_state = {}
+	var button: Button = _command_buttons.get("formation", null)
+	if button != null:
+		button.queue_redraw()
+
+
+## RJ-a : état des boutons d'ordre pour la sélection, puis du menu des formations.
+func update_command_buttons(units: Array, selected: Array) -> void:
+	var state := command_button_state(units, selected)
+	if formation_menu != null and formation_menu.visible:
+		if bool(state["formation"]["able"]):
+			formation_menu.refresh(units, selected)
+		else:
+			formation_menu.visible = false  # plus de sélection : le menu se referme
+	state["formation"]["on"] = bool(state["formation"]["on"]) or (formation_menu != null and formation_menu.visible)
+	if state == _command_state:
+		return
+	_command_state = state
+	for command in _command_buttons:
+		var button: Button = _command_buttons[command]
+		if state.has(command):
+			button.disabled = not bool(state[command]["able"])
+		button.queue_redraw()
+
+
+## RJ-a : {ordre: {on, able, …}} des boutons « formation » et « fire_at_will » pour les unités
+## `selected` (fonction pure, testée). Tir à volonté : `on` si tous les tireurs choisis l'ont.
+## Formation : `on` si l'une est hors de la formation par défaut (`formations[0]`) ou se
+## reforme ; `label` = libellé court commun (« » si mêlé) ; `progress` = la reformation la moins
+## avancée (1 sans reformation).
+static func command_button_state(units: Array, selected: Array) -> Dictionary:
+	var shooters := 0
+	var firing := 0
+	var present := 0
+	var special := false
+	var labels := {}
+	var progress := 1.0
+	for unit in units:
+		if not selected.has(int(unit["id"])) or not bool(unit.get("present", true)):
+			continue
+		present += 1
+		if bool(unit.get("can_shoot", false)):
+			shooters += 1
+			if bool(unit.get("fire_at_will", false)):
+				firing += 1
+		var allowed: Array = Array(unit.get("formations", []))
+		var default_key := str(allowed[0]) if not allowed.is_empty() else "line"
+		if str(unit.get("formation", default_key)) != default_key:
+			special = true
+		if bool(unit.get("reforming", false)):
+			special = true
+			progress = minf(progress, float(unit.get("reform_progress", 1.0)))
+		labels[str(unit.get("formation_short", unit.get("formation", "")))] = true
+	return {
+		"fire_at_will": {"able": shooters > 0, "on": shooters > 0 and firing == shooters},
+		"formation": {"able": present > 0, "on": special, "label": str(labels.keys()[0]) if labels.size() == 1 else "", "progress": progress},
+	}
 
 
 ## CB2 : un bouton par mode d'unité (après les ordres), glyphe dessiné en code, raccourci de

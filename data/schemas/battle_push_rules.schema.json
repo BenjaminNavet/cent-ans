@@ -78,12 +78,6 @@
           "maximum": 5,
           "description": "Pendant l'élan de charge, pression × (1 + charge/100 × charge_factor)."
         },
-        "square_factor": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 20,
-          "description": "Résistance d'un carré ou schiltron (il tient, il ne pousse pas davantage)."
-        },
         "stakes_factor": {
           "type": "number",
           "minimum": 1,
@@ -121,7 +115,6 @@
         "min_freshness",
         "fatigue_scale",
         "charge_factor",
-        "square_factor",
         "stakes_factor",
         "pikes_against_horse_factor",
         "follow_share",

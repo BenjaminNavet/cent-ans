@@ -12,6 +12,7 @@ use godot::prelude::*;
 use serde_json::Value;
 use sim_battle::{BattleOutcome, BattleSetup, Command, SideId, Unit, UnitState};
 
+use crate::battle_pose_lerp::push_pose;
 use crate::battle_replay::{note, REPLAY_REFUSAL};
 use crate::campaign_sim::{events_array, CampaignSim};
 use crate::convert::variant_to_json;
@@ -248,7 +249,7 @@ pub struct BattleSim {
     pub(crate) sim: Option<sim_battle::BattleSim>,
     /// Visual unit-size multiplier (BV1, ADR 0016): figures drawn per
     /// simulated soldier. Rendering only.
-    figure_scale: f64,
+    pub(crate) figure_scale: f64,
     /// Forced battle scale tier (EP1, `data/rules/battle_scale.json`);
     /// empty: by head count.
     scale_key: String,
@@ -258,63 +259,25 @@ pub struct BattleSim {
     pub(crate) recorder: Option<sim_battle::ReplayRecorder>,
     /// EP13: playback of a replay; the battle then takes no order.
     pub(crate) player: Option<sim_battle::ReplayPlayer>,
-    /// PB3c: figure buffers kept between simulation steps (rendering only).
-    poses: PoseCache,
+    /// PB3c: figure buffers kept between simulation steps (rendering only,
+    /// `battle_sim_poses.rs`).
+    pub(crate) poses: crate::battle_sim_poses::PoseCache,
     /// PB3c: `get_units` of the current step, with its key (see `PoseCache`).
-    units_cache: Option<((u64, u64, u64), VarArray)>,
+    pub(crate) units_cache: Option<((u64, u64, u64), VarArray)>,
+    /// RJ-b: regiment centres of the two latest steps (blended positions).
+    pub(crate) unit_frames: crate::battle_sim_poses::UnitFrames,
+    /// RJ-b: figures and regiments blended between steps (`set_pose_lerp`).
+    pub(crate) pose_lerp: bool,
+    /// RJ-b: PO4 loose ranks drawn by the core (`set_loose_ranks`).
+    pub(crate) loose: Option<crate::battle_pose_lerp::LooseRanks>,
     /// PB3c: bumped by every change of the battle outside a simulation step
     /// (orders, deployment, new battle, replay jump): invalidates `poses`.
-    pose_epoch: u64,
+    pub(crate) pose_epoch: u64,
     /// PB3e (ADR 0090): the next step computed on a worker thread, when
     /// `set_step_thread(true)` (the battle scene; tests stay synchronous).
     step_thread: bool,
     steps: crate::battle_step_job::StepPipeline,
     base: Base<RefCounted>,
-}
-
-/// PB3c: per-regiment `MultiMesh.buffer`s of the latest [`BattleSim::get_soldier_buffers`].
-/// The simulation moves by fixed 0.1 s steps and the poses are not
-/// interpolated between steps, so they are rebuilt only when the step count,
-/// the pose epoch or the figure scale changes; between steps the same packed
-/// arrays are handed out again (copy-on-write: the renderer may alter its copy).
-#[derive(Default)]
-struct PoseCache {
-    /// `(ticks, pose epoch, figure scale bits)` the buffers were built for.
-    key: Option<(u64, u64, u64)>,
-    /// Unit id -> poses (12 floats per figure), `None` when not requested.
-    raw: Vec<Option<Vec<f32>>>,
-    /// Unit id -> the buffer handed out (poses zero-padded to the capacity).
-    padded: Vec<PackedFloat32Array>,
-    /// PB3e: unit id -> serial of `padded[id]` (changes whenever it is
-    /// rebuilt): the renderer skips re-sending an unchanged buffer.
-    versions: Vec<i64>,
-    serial: i64,
-}
-
-/// Appends the `MultiMesh` transform (12 floats, rotation about Y) of a pose.
-fn push_pose(buffer: &mut Vec<f32>, [x, y, z, angle]: [f64; 4]) {
-    let (s, c) = (angle.sin() as f32, angle.cos() as f32);
-    buffer.extend_from_slice(&[
-        c, 0.0, s, x as f32, 0.0, 1.0, 0.0, y as f32, -s, 0.0, c, z as f32,
-    ]);
-}
-
-/// `[a, b]` as a Godot array.
-fn pair(a: &PackedInt32Array, b: &VarArray) -> VarArray {
-    let mut out = VarArray::new();
-    out.push(&a.to_variant());
-    out.push(&b.to_variant());
-    out
-}
-
-/// The poses zero-padded to `capacity` figures (never cut).
-fn padded_buffer(raw: &[f32], capacity: usize) -> PackedFloat32Array {
-    let len = raw.len().max(capacity * 12);
-    let mut out = PackedFloat32Array::from(raw);
-    if len > raw.len() {
-        out.resize(len);
-    }
-    out
 }
 
 #[godot_api]
@@ -327,8 +290,11 @@ impl IRefCounted for BattleSim {
             historical: None,
             recorder: None,
             player: None,
-            poses: PoseCache::default(),
+            poses: Default::default(),
             units_cache: None,
+            unit_frames: Default::default(),
+            pose_lerp: false,
+            loose: None,
             pose_epoch: 0,
             step_thread: false,
             steps: Default::default(),
@@ -912,23 +878,15 @@ impl BattleSim {
     /// (same key as the figure poses); in between the same array comes back —
     /// read-only for the caller.
     #[func]
+    /// RJ-b: `x`, `y`, `z`, `facing` blended between the two latest steps
+    /// with `set_pose_lerp` (the dictionaries change in place each frame),
+    /// `ground_speed` = m/s of the centre over the latest step.
     fn get_units(&mut self) -> VarArray {
-        let Some(sim) = &self.sim else {
-            return VarArray::new();
-        };
-        let key = (sim.ticks(), self.pose_epoch, self.figure_scale.to_bits());
-        if let Some((cached, units)) = &self.units_cache {
-            if *cached == key {
-                return units.clone();
-            }
-        }
-        let units = self.build_units();
-        self.units_cache = Some((key, units.clone()));
-        units
+        self.units_now()
     }
 
     /// The dictionaries of [`Self::get_units`].
-    fn build_units(&self) -> VarArray {
+    pub(crate) fn build_units(&self) -> VarArray {
         let Some(sim) = &self.sim else {
             return VarArray::new();
         };
@@ -1018,6 +976,7 @@ impl BattleSim {
                 dict.set("queue", &crate::battle_sim_queue::queue_array(sim, unit));
                 // CB2: modes on, modes available, states for the badges.
                 crate::battle_sim_modes::add_mode_fields(sim, unit, &mut dict);
+                crate::battle_sim_formation::add_formation_fields(unit, &mut dict);
                 // CB4: the regiment's abilities (buttons of its card).
                 crate::battle_sim_abilities::add_ability_fields(sim, unit, &mut dict);
                 // EP11: push of the lines in melee (m/s, > 0 driving the enemy
@@ -1120,73 +1079,6 @@ impl BattleSim {
             }
         }
         PackedFloat32Array::from(buffer.as_slice())
-    }
-
-    /// PB3c: every regiment's `MultiMesh.buffer` in one call. `capacities[id]`
-    /// is the instance count of regiment `id`'s `MultiMesh` (< 0 or missing:
-    /// not drawn, no buffer). → `[counts: PackedInt32Array, buffers: Array]`
-    /// indexed by unit id: `counts[id]` figures (12 floats each, as
-    /// `get_soldier_buffer`), `buffers[id]` zero-padded to
-    /// `max(counts[id], capacities[id])` figures. Poses are rebuilt only after
-    /// a simulation step or a change of the battle; in between the same
-    /// buffers come back (copy-on-write). PB3e: a third element `versions:
-    /// PackedInt64Array` numbers each buffer; it changes when the buffer does.
-    #[func]
-    fn get_soldier_buffers(&mut self, capacities: PackedInt32Array) -> VarArray {
-        let Some(sim) = &self.sim else {
-            return pair(&PackedInt32Array::new(), &VarArray::new());
-        };
-        let key = (sim.ticks(), self.pose_epoch, self.figure_scale.to_bits());
-        let units = sim.units();
-        let capacities = capacities.as_slice();
-        let wanted = |id: usize| capacities.get(id).is_some_and(|&c| c >= 0);
-        let cache = &mut self.poses;
-        let fresh = cache.key == Some(key) && cache.raw.len() == units.len();
-        if !fresh {
-            cache.key = Some(key);
-            cache.raw.resize(units.len(), None);
-            cache.padded.resize(units.len(), PackedFloat32Array::new());
-            cache.versions.resize(units.len(), -1);
-        }
-        let mut versions = PackedInt64Array::new();
-        versions.resize(units.len());
-        let mut counts = PackedInt32Array::new();
-        counts.resize(units.len());
-        let mut buffers = VarArray::new();
-        for (id, unit) in units.iter().enumerate() {
-            if !wanted(id) {
-                cache.raw[id] = None;
-                cache.padded[id] = PackedFloat32Array::new();
-                buffers.push(&PackedFloat32Array::new().to_variant());
-                continue;
-            }
-            let capacity = capacities[id].max(0) as usize;
-            if !fresh || cache.raw[id].is_none() {
-                // SG1: climbers drawn on their ladders / the tower bridge.
-                let poses = sim.soldier_poses(unit, self.figure_scale);
-                let mut raw = Vec::with_capacity(poses.len() * 12);
-                for pose in poses {
-                    push_pose(&mut raw, pose);
-                }
-                cache.padded[id] = padded_buffer(&raw, capacity);
-                cache.raw[id] = Some(raw);
-                cache.serial += 1;
-                cache.versions[id] = cache.serial;
-            }
-            let raw = cache.raw[id].as_deref().unwrap_or_default();
-            let len = raw.len().max(capacity * 12);
-            if cache.padded[id].len() != len {
-                cache.padded[id] = padded_buffer(raw, capacity);
-                cache.serial += 1;
-                cache.versions[id] = cache.serial;
-            }
-            versions[id] = cache.versions[id];
-            counts[id] = (raw.len() / 12) as i32;
-            buffers.push(&cache.padded[id].to_variant());
-        }
-        let mut out = pair(&counts, &buffers);
-        out.push(&versions.to_variant());
-        out
     }
 
     /// `{width, depth, resolution, nx, nz, heights, forests[{x, z, radius}],

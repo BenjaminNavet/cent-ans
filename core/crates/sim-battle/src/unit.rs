@@ -10,37 +10,8 @@ use crate::queue::QueuedOrder;
 use crate::rng::jitter;
 use crate::setup::{SideId, UnitSetup};
 
-/// Formation of a regiment (spec § 1).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Formation {
-    Line,
-    Column,
-    /// Carré / schiltron: no flank, strong against cavalry, very slow.
-    Square,
-    /// Coin: cavalry only, stronger charge.
-    Wedge,
-}
-
-impl Formation {
-    pub fn key(self) -> &'static str {
-        match self {
-            Formation::Line => "line",
-            Formation::Column => "column",
-            Formation::Square => "square",
-            Formation::Wedge => "wedge",
-        }
-    }
-
-    pub fn label_fr(self) -> &'static str {
-        match self {
-            Formation::Line => "ligne",
-            Formation::Column => "colonne",
-            Formation::Square => "schiltron",
-            Formation::Wedge => "coin",
-        }
-    }
-}
+pub use crate::formations::{Formation, Reform};
+use crate::formations::{FormationRules, FormationShape};
 
 /// What a regiment is doing (spec § 1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -272,6 +243,13 @@ pub struct Unit {
     /// `None` for the default depth of the Line.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub line_files: Option<u32>,
+    /// RJ-a (ADR 0174): change of formation under way, `None` once formed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reform: Option<Reform>,
+    /// RJ-a: seconds since the formation last changed (the AI holds a new
+    /// formation a while before changing again).
+    #[serde(default = "never")]
+    pub formed_for: f64,
     /// CB1: tag of the grouped order the regiment walks under (a locked
     /// group, or one drag); with `match_speed`, the group keeps the pace
     /// of its slowest regiment.
@@ -337,7 +315,7 @@ impl Unit {
             x: 0.0,
             z: 0.0,
             facing: 0.0,
-            formation: Formation::Line,
+            formation: Formation::default_formation(),
             state: UnitState::Idle,
             morale: f64::from(setup.morale),
             morale_cap: f64::from(setup.morale),
@@ -382,6 +360,8 @@ impl Unit {
             push: Default::default(),
             order_queue: VecDeque::new(),
             line_files: None,
+            reform: None,
+            formed_for: never(),
             group_tag: None,
             match_speed: false,
             mode_run: false,
@@ -407,8 +387,10 @@ impl Unit {
         self.stats.armor = self.stats.armor.saturating_add(armor).min(120);
         self.stats.charge = None;
         self.charge_timer = 0.0;
-        if self.formation == Formation::Wedge {
-            self.formation = Formation::Line;
+        if !self.formation.def().allows(self) {
+            self.formation = Formation::default_formation();
+            self.line_files = None;
+            self.reform = None;
         }
         if self.state == UnitState::Charging {
             self.state = UnitState::Marching;
@@ -503,46 +485,66 @@ impl Unit {
         (self.facing.cos(), -self.facing.sin())
     }
 
-    /// Lateral and depth spacing between soldiers, in metres.
+    /// Lateral and depth spacing between soldiers, in metres (current
+    /// formation).
     pub fn spacing(&self) -> (f64, f64) {
-        if self.category == UnitCategory::Siege {
+        self.spacing_in(self.formation)
+    }
+
+    /// Spacing in `formation`: the base spacing of the troops times the
+    /// formation's factors (`unit_formations.json`).
+    pub fn spacing_in(&self, formation: Formation) -> (f64, f64) {
+        let (sx, sz) = if self.category == UnitCategory::Siege {
             (7.0, 7.0)
         } else if self.mounted {
             (2.4, 3.4)
         } else {
             (1.1, 1.5)
-        }
+        };
+        let k = formation.def().spacing;
+        (sx * k.lateral, sz * k.depth)
     }
 
     /// `(ranks, files)` of the current formation for `n` soldiers.
     pub fn ranks_files(&self, n: u32) -> (u32, u32) {
+        self.ranks_files_in(self.formation, self.line_files, n)
+    }
+
+    /// `(ranks, files)` of `formation` (dragged to `line_files` files) for
+    /// `n` soldiers.
+    pub fn ranks_files_in(
+        &self,
+        formation: Formation,
+        line_files: Option<u32>,
+        n: u32,
+    ) -> (u32, u32) {
         let n = n.max(1);
-        match self.formation {
-            Formation::Line if self.line_files.is_some() => {
-                let bounds = crate::formation_width::FormationWidthRules::bundled().bounds(self);
-                crate::formation_width::line_shape(n, self.line_files.unwrap_or(1), bounds)
-            }
-            Formation::Line => {
-                let ranks = if self.category == UnitCategory::Siege {
-                    1
-                } else if self.mounted {
-                    2
-                } else if self.category == UnitCategory::Ranged {
-                    3
-                } else {
-                    4
-                };
+        let def = formation.def();
+        match def.shape {
+            FormationShape::Line | FormationShape::Herse => {
+                if let (true, Some(files)) = (def.width_adjustable, line_files) {
+                    let bounds =
+                        crate::formation_width::FormationWidthRules::bundled().bounds(self);
+                    return crate::formation_width::line_shape(n, files, bounds);
+                }
+                let ranks = def.ranks_for(self);
                 (ranks.min(n), n.div_ceil(ranks))
             }
-            Formation::Column => {
-                let files = if self.mounted { 4 } else { 6 }.min(n);
+            FormationShape::Column => {
+                let files = if self.mounted {
+                    def.files.mounted
+                } else {
+                    def.files.foot
+                }
+                .max(1)
+                .min(n);
                 (n.div_ceil(files), files)
             }
-            Formation::Square => {
+            FormationShape::Square => {
                 let side = (f64::from(n).sqrt().ceil() as u32).max(1);
                 (n.div_ceil(side), side)
             }
-            Formation::Wedge => {
+            FormationShape::Wedge => {
                 let rows = (f64::from(n).sqrt().ceil() as u32).max(1);
                 (rows, 2 * rows - 1)
             }
@@ -551,20 +553,21 @@ impl Unit {
 
     /// Frontage and depth of the formation, in metres.
     pub fn extent(&self) -> (f64, f64) {
-        let (ranks, files) = self.ranks_files(self.soldiers());
-        let (sx, sz) = self.spacing();
+        self.extent_in(self.formation, self.line_files)
+    }
+
+    fn extent_in(&self, formation: Formation, line_files: Option<u32>) -> (f64, f64) {
+        let (ranks, files) = self.ranks_files_in(formation, line_files, self.soldiers());
+        let (sx, sz) = self.spacing_in(formation);
         (f64::from(files) * sx, f64::from(ranks) * sz)
     }
 
     /// Soldiers fighting in the front ranks.
     pub fn fighting_soldiers(&self) -> f64 {
         let (_, files) = self.ranks_files(self.soldiers());
-        let front = match self.formation {
-            Formation::Square => f64::from(files) * 4.0,
-            // The wedge drives in: riders fight along both slanted faces.
-            Formation::Wedge => f64::from(files) * 3.0,
-            _ => f64::from(files) * 2.0,
-        };
+        // A square fights on every face, a wedge along both slanted faces
+        // (`fighting_ranks`).
+        let front = f64::from(files) * self.formation.def().modifiers.fighting_ranks;
         // BV2: men knocked down by a charge do not fight until they get up.
         let down = if self.knocked_timer > 0.0 {
             self.knocked
@@ -572,6 +575,120 @@ impl Unit {
             0.0
         };
         (front - down).max(0.0).min(self.hp.max(0.0))
+    }
+
+    /// RJ-a: the regiment is changing formation.
+    pub fn reforming(&self) -> bool {
+        self.reform.is_some()
+    }
+
+    /// RJ-a: multiplier of the pace (formation, and the change under way;
+    /// riders at the charge close up on the move, at full gallop).
+    pub fn formation_speed(&self) -> f64 {
+        let mut k = self.formation.def().modifiers.speed;
+        if self.reforming() && self.state != UnitState::Charging {
+            k *= FormationRules::bundled().reform.speed;
+        }
+        k
+    }
+
+    /// RJ-a: multiplier of the melee damage the regiment takes.
+    pub fn melee_taken_factor(&self) -> f64 {
+        let mut k = self.formation.def().modifiers.melee_taken;
+        if self.reforming() {
+            k *= FormationRules::bundled().reform.melee_taken;
+        }
+        k
+    }
+
+    /// RJ-a: multiplier of the missile casualties the regiment takes.
+    pub fn missile_taken_factor(&self) -> f64 {
+        let mut k = self.formation.def().modifiers.missile_taken;
+        if self.reforming() {
+            k *= FormationRules::bundled().reform.missile_taken;
+        }
+        k
+    }
+
+    /// RJ-a: multiplier of the morale lost to casualties.
+    pub fn morale_loss_factor(&self) -> f64 {
+        let mut k = self.formation.def().modifiers.morale_loss;
+        if self.reforming() {
+            k *= FormationRules::bundled().reform.morale_loss;
+        }
+        k
+    }
+
+    /// RJ-a: multiplier of the charge bonus and weight.
+    pub fn formation_charge(&self) -> f64 {
+        self.formation.def().modifiers.charge
+    }
+
+    /// RJ-a: multiplier of the casualties the regiment's shots inflict.
+    pub fn formation_shooting(&self) -> f64 {
+        self.formation.def().modifiers.shooting
+    }
+
+    /// RJ-a: no flank nor rear (schiltron).
+    pub fn all_round(&self) -> bool {
+        self.formation.def().all_round
+    }
+
+    /// RJ-a: braced against horse (schiltron).
+    pub fn braced(&self) -> bool {
+        self.formation.def().braced
+    }
+
+    /// RJ-a: orders the change to `to` (no-op when already there). The men
+    /// walk to their new places over [`FormationRules::reform_duration`];
+    /// ordering back the formation being left turns them round where they
+    /// are. `instant` skips the walk (deployment, scenario set-up).
+    pub fn change_formation(&mut self, to: Formation, instant: bool) {
+        let from = self.formation;
+        let from_files = self.line_files;
+        if from != to {
+            self.formed_for = 0.0;
+        }
+        self.formation = to;
+        // CB1: a formation order drops a dragged width.
+        self.line_files = None;
+        if instant {
+            self.reform = None;
+            return;
+        }
+        let rules = FormationRules::bundled();
+        let duration = rules.reform_duration(self, to);
+        self.reform = match self.reform {
+            // Back to the formation being left: the same walk, reversed.
+            Some(r) if r.from == to && from_files.is_none() => {
+                let done = r.progress();
+                (done > 0.0).then_some(Reform {
+                    from,
+                    from_files: None,
+                    elapsed: duration * (1.0 - done),
+                    duration,
+                })
+            }
+            Some(_) if from == to && from_files.is_none() => self.reform,
+            None if from == to && from_files.is_none() => None,
+            _ => (duration > 0.0).then_some(Reform {
+                from,
+                from_files,
+                elapsed: 0.0,
+                duration,
+            }),
+        };
+    }
+
+    /// RJ-a: advances the change of formation by `dt` seconds.
+    pub fn tick_reform(&mut self, dt: f64) {
+        self.formed_for += dt;
+        if let Some(r) = &mut self.reform {
+            r.elapsed += dt;
+            if r.elapsed >= r.duration {
+                self.reform = None;
+            }
+        }
     }
 
     /// Support of the formation rectangle along the unit vector `dir`.
@@ -594,12 +711,13 @@ impl Unit {
         (ox * ox + oz * oz).sqrt()
     }
 
-    /// Local position (lateral, forward) of soldier `i` in the formation.
-    fn slot(&self, i: u32, n: u32) -> (f64, f64) {
-        let (ranks, files) = self.ranks_files(n);
-        let (sx, sz) = self.spacing();
-        match self.formation {
-            Formation::Wedge => {
+    /// Local position (lateral, forward) of soldier `i` of `n` in
+    /// `formation`.
+    fn slot_in(&self, formation: Formation, line_files: Option<u32>, i: u32, n: u32) -> (f64, f64) {
+        let (ranks, files) = self.ranks_files_in(formation, line_files, n);
+        let (sx, sz) = self.spacing_in(formation);
+        match formation.shape() {
+            FormationShape::Wedge => {
                 // Row k (0 = tip) holds 2k + 1 riders.
                 let mut k = 0u32;
                 let mut first = 0u32;
@@ -612,10 +730,16 @@ impl Unit {
                 let lz = (f64::from(ranks) - 1.0) * 0.5 * sz - f64::from(k) * sz;
                 (lx, lz)
             }
-            _ => {
+            shape => {
                 let rank = i / files;
                 let file = i % files;
-                let lx = (f64::from(file) - (f64::from(files) - 1.0) * 0.5) * sx;
+                // Herse: odd ranks stand in the gaps of the rank ahead.
+                let stagger = match (shape, rank % 2) {
+                    (FormationShape::Herse, 0) => -0.25,
+                    (FormationShape::Herse, _) => 0.25,
+                    _ => 0.0,
+                };
+                let lx = (f64::from(file) - (f64::from(files) - 1.0) * 0.5 + stagger) * sx;
                 let lz = ((f64::from(ranks) - 1.0) * 0.5 - f64::from(rank)) * sz;
                 (lx, lz)
             }
@@ -643,50 +767,55 @@ impl Unit {
     /// matches the footprint the rules use for contact and collisions. At
     /// `scale` = 1 this is exactly [`Self::soldier_positions`].
     pub fn figure_positions(&self, scale: f64) -> Vec<(f64, f64, f64)> {
-        if (scale - 1.0).abs() < 1e-9 {
-            return self.soldier_positions();
-        }
         let m = self.figure_count(scale);
         if m == 0 {
             return Vec::new();
         }
-        let (width, depth) = self.extent();
-        let (sx, sz) = self.spacing();
-        let (ranks, files) = self.figure_ranks_files(scale, m);
-        let (fw, fd) = match self.formation {
-            Formation::Line | Formation::Column => (f64::from(files) * sx, f64::from(ranks) * sz),
-            _ => {
-                let (r, f) = self.ranks_files(m);
-                (f64::from(f) * sx, f64::from(r) * sz)
+        let (mut local, squeeze) = self.figure_layout(self.formation, self.line_files, scale, m);
+        // RJ-a: changing formation, each man walks from his old place to
+        // his new one (all arrive when the change ends).
+        if let Some(r) = self.reform {
+            let (old, _) = self.figure_layout(r.from, r.from_files, scale, m);
+            let rules = &FormationRules::bundled().reform;
+            let walk = if self.mounted {
+                rules.walk_mps.mounted
+            } else {
+                rules.walk_mps.foot
+            };
+            let farthest = old
+                .iter()
+                .zip(&local)
+                .map(|(a, b)| (b.0 - a.0).hypot(b.1 - a.1))
+                .fold(0.0, f64::max);
+            let pace = walk.max(farthest / r.duration.max(1e-6));
+            let walked = r.elapsed * pace;
+            for (to, from) in local.iter_mut().zip(&old) {
+                let d = (to.0 - from.0).hypot(to.1 - from.1);
+                let p = if d <= 1e-9 {
+                    1.0
+                } else {
+                    (walked / d).min(1.0)
+                };
+                *to = (from.0 + (to.0 - from.0) * p, from.1 + (to.1 - from.1) * p);
             }
-        };
-        let kx = width / fw.max(1e-6);
-        let kz = depth / fd.max(1e-6);
+        }
         let (fx, fz) = self.forward();
         let (rx, rz) = self.right();
         let spread = match self.state {
             UnitState::Routing => 5.0,
             UnitState::Melee => 1.2,
             _ => 0.35,
-        } * kx.min(kz).min(1.0);
-        (0..m)
-            .map(|i| {
-                let (lx, lz) = match self.formation {
-                    Formation::Line | Formation::Column => {
-                        let rank = i / files;
-                        let file = i % files;
-                        (
-                            (f64::from(file) - (f64::from(files) - 1.0) * 0.5) * sx,
-                            ((f64::from(ranks) - 1.0) * 0.5 - f64::from(rank)) * sz,
-                        )
-                    }
-                    _ => self.slot(i, m),
-                };
-                let jx = jitter(u64::from(self.id), u64::from(i) * 2) * spread;
-                let jz = jitter(u64::from(self.id), u64::from(i) * 2 + 1) * spread;
-                let (lx, lz) = (lx * kx + jx, lz * kz + jz);
+        } * squeeze;
+        local
+            .into_iter()
+            .enumerate()
+            .map(|(i, (lx, lz))| {
+                let i = i as u64;
+                let jx = jitter(u64::from(self.id), i * 2) * spread;
+                let jz = jitter(u64::from(self.id), i * 2 + 1) * spread;
+                let (lx, lz) = (lx + jx, lz + jz);
                 let angle = if self.state == UnitState::Routing {
-                    self.facing + jitter(u64::from(self.id) + 7, u64::from(i)) * 1.5
+                    self.facing + jitter(u64::from(self.id) + 7, i) * 1.5
                 } else {
                     self.facing
                 };
@@ -699,28 +828,93 @@ impl Unit {
             .collect()
     }
 
+    /// Local places (lateral, forward) of the `m` figures drawn at `scale`
+    /// in `formation`, and the factor of the jitter (figures squeezed into
+    /// the simulated rectangle jitter less).
+    fn figure_layout(
+        &self,
+        formation: Formation,
+        line_files: Option<u32>,
+        scale: f64,
+        m: u32,
+    ) -> (Vec<(f64, f64)>, f64) {
+        if (scale - 1.0).abs() < 1e-9 {
+            let slots = (0..m)
+                .map(|i| self.slot_in(formation, line_files, i, m))
+                .collect();
+            return (slots, 1.0);
+        }
+        let (width, depth) = self.extent_in(formation, line_files);
+        let (sx, sz) = self.spacing_in(formation);
+        let (ranks, files) = self.figure_ranks_files_in(formation, line_files, scale, m);
+        let grid = matches!(
+            formation.shape(),
+            FormationShape::Line | FormationShape::Column
+        );
+        let (fw, fd) = if grid {
+            (f64::from(files) * sx, f64::from(ranks) * sz)
+        } else {
+            let (r, f) = self.ranks_files_in(formation, line_files, m);
+            (f64::from(f) * sx, f64::from(r) * sz)
+        };
+        let kx = width / fw.max(1e-6);
+        let kz = depth / fd.max(1e-6);
+        let slots = (0..m)
+            .map(|i| {
+                let (lx, lz) = if grid {
+                    let rank = i / files;
+                    let file = i % files;
+                    (
+                        (f64::from(file) - (f64::from(files) - 1.0) * 0.5) * sx,
+                        ((f64::from(ranks) - 1.0) * 0.5 - f64::from(rank)) * sz,
+                    )
+                } else {
+                    self.slot_in(formation, line_files, i, m)
+                };
+                (lx * kx, lz * kz)
+            })
+            .collect();
+        (slots, kx.min(kz).min(1.0))
+    }
+
     /// `(ranks, files)` of the figure grid for `m` figures drawn at `scale`.
     /// Figure layout: the formation's own shape for m figures, squeezed back
     /// into the simulated rectangle. Lines and columns gain ranks as well as
     /// files (√scale each way) so that a large regiment does not turn into a
     /// single file of shoulder-to-shoulder men; riders keep at least a horse
     /// length between ranks.
-    fn figure_ranks_files(&self, scale: f64, m: u32) -> (u32, u32) {
+    fn figure_ranks_files_in(
+        &self,
+        formation: Formation,
+        line_files: Option<u32>,
+        scale: f64,
+        m: u32,
+    ) -> (u32, u32) {
         if (scale - 1.0).abs() < 1e-9 {
-            return self.ranks_files(m);
+            return self.ranks_files_in(formation, line_files, m);
         }
-        match self.formation {
-            Formation::Line | Formation::Column => {
-                let (r, _) = self.ranks_files(self.soldiers());
-                let (_, depth) = self.extent();
+        match formation.shape() {
+            FormationShape::Line | FormationShape::Column => {
+                let (r, _) = self.ranks_files_in(formation, line_files, self.soldiers());
+                let (_, depth) = self.extent_in(formation, line_files);
                 let min_depth = if self.mounted { 2.7 } else { 0.8 };
                 let most = ((depth / min_depth).floor() as u32).max(1);
                 let r = ((f64::from(r) * scale.sqrt()).round() as u32).clamp(1, most.max(r));
                 let r = r.min(m);
                 (r, m.div_ceil(r))
             }
-            _ => self.ranks_files(m),
+            _ => self.ranks_files_in(formation, line_files, m),
         }
+    }
+
+    /// Shooters stand in a line-like formation (their standard in the
+    /// middle rank so the front rank can see).
+    fn shooters_in_line(&self) -> bool {
+        self.category == UnitCategory::Ranged
+            && matches!(
+                self.formation.shape(),
+                FormationShape::Line | FormationShape::Herse
+            )
     }
 
     /// EP5: indices, in the figure buffer drawn at `scale`, of the figures
@@ -733,7 +927,7 @@ impl Unit {
             return Vec::new();
         }
         let bearers = bearers.min(m);
-        if self.formation == Formation::Wedge {
+        if self.formation.shape() == FormationShape::Wedge {
             // Row k holds 2k + 1 riders from index k²: the tip, then the
             // second row's ends.
             return match bearers {
@@ -741,11 +935,8 @@ impl Unit {
                 _ => vec![1.min(m - 1), 3.min(m - 1)],
             };
         }
-        let (ranks, files) = self.figure_ranks_files(scale, m);
-        let rank = if self.category == UnitCategory::Ranged
-            && self.formation == Formation::Line
-            && ranks > 2
-        {
+        let (ranks, files) = self.figure_ranks_files_in(self.formation, self.line_files, scale, m);
+        let rank = if self.shooters_in_line() && ranks > 2 {
             ranks / 2
         } else {
             0
@@ -763,7 +954,7 @@ impl Unit {
     pub fn standard_point(&self) -> (f64, f64) {
         let (_, depth) = self.extent();
         let (fx, fz) = self.forward();
-        let ahead = if self.category == UnitCategory::Ranged && self.formation == Formation::Line {
+        let ahead = if self.shooters_in_line() {
             0.0
         } else {
             depth * 0.5
@@ -780,34 +971,6 @@ impl Unit {
     /// World (x, z, angle) of every living soldier, with a small stable jitter
     /// (larger when routing or in melee).
     pub fn soldier_positions(&self) -> Vec<(f64, f64, f64)> {
-        if !self.present() {
-            return Vec::new();
-        }
-        let n = self.soldiers();
-        let (fx, fz) = self.forward();
-        let (rx, rz) = self.right();
-        let spread = match self.state {
-            UnitState::Routing => 5.0,
-            UnitState::Melee => 1.2,
-            _ => 0.35,
-        };
-        (0..n)
-            .map(|i| {
-                let (lx, lz) = self.slot(i, n);
-                let jx = jitter(u64::from(self.id), u64::from(i) * 2) * spread;
-                let jz = jitter(u64::from(self.id), u64::from(i) * 2 + 1) * spread;
-                let (lx, lz) = (lx + jx, lz + jz);
-                let angle = if self.state == UnitState::Routing {
-                    self.facing + jitter(u64::from(self.id) + 7, u64::from(i)) * 1.5
-                } else {
-                    self.facing
-                };
-                (
-                    self.x + rx * lx + fx * lz,
-                    self.z + rz * lx + fz * lz,
-                    angle,
-                )
-            })
-            .collect()
+        self.figure_positions(1.0)
     }
 }

@@ -37,6 +37,17 @@ impl BattleSim {
         steps
     }
 
+    /// RJ-b: the part of the next fixed step already elapsed (accumulator /
+    /// [`DT`], in `[0, 1]`): the renderer draws the poses of the two latest
+    /// steps blended by it. 1 when no step can run (deployment, end of the
+    /// battle): the latest poses stand.
+    pub fn step_fraction(&self) -> f64 {
+        if !self.can_step() {
+            return 1.0;
+        }
+        (self.accumulator / DT).clamp(0.0, 1.0)
+    }
+
     /// True when a fixed step would change the battle (not finished, not
     /// deploying): a fork is worth computing.
     pub fn can_step(&self) -> bool {

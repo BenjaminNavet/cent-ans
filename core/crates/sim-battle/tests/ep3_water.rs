@@ -366,7 +366,7 @@ fn marching_in_column_on_the_road_is_faster() {
         sim.apply_command(
             Command::Formation {
                 units: vec![0],
-                kind: Formation::Column,
+                kind: Formation::of("column"),
             },
             None,
         )

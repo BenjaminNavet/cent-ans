@@ -365,6 +365,9 @@ func _path_allowed(point: Vector3, facing: float, queued: bool = false, width: f
 
 
 func _on_command(command: String) -> void:
+	if command.begins_with("formation:"):
+		_order_formation(command.trim_prefix("formation:"))
+		return
 	match command:
 		"pause":
 			pause_toggled.emit()
@@ -395,9 +398,11 @@ func _on_command(command: String) -> void:
 			if not shooters.is_empty():
 				command_requested.emit({"type": "fire_at_will", "units": shooters, "enabled": enable})
 		"formation":
-			for unit in scene.units:
-				if ids.has(int(unit["id"])):
-					command_requested.emit({"type": "formation", "units": [int(unit["id"])], "kind": _next_formation(unit)})
+			# RJ-a : le bouton ouvre le menu des formations (la touche T fait défiler, plus bas).
+			if scene.hud != null and scene.hud.formation_menu != null:
+				scene.hud.toggle_formation_menu()
+			else:
+				_cycle_formation(ids)
 		"run", "guard", "skirmish", "melee", "breach":
 			_toggle_mode(command, ids)
 
@@ -406,6 +411,12 @@ func _on_command(command: String) -> void:
 func handle_action(action: String) -> void:
 	if action == "lock_group":
 		toggle_lock()
+		return
+	if action == "formation":
+		# RJ-a : touche T = formation suivante parmi celles que chaque régiment peut prendre.
+		var ids := _available_selection()
+		if not ids.is_empty():
+			_cycle_formation(ids)
 		return
 	_on_command(action)
 
@@ -490,18 +501,38 @@ func _available_selection() -> Array[int]:
 	return ids
 
 
-## Formation suivante autorisée pour la famille de l'unité.
-func _next_formation(unit: Dictionary) -> String:
-	var cycle: Array = ["line", "column"]
-	match str(unit["category"]):
-		"infantry":
-			cycle = ["line", "column", "square"]
-		"cavalry":
-			cycle = ["line", "wedge", "column"]
-		"siege":
-			cycle = ["line"]
-	var current := cycle.find(str(unit["formation"]))
-	return cycle[(current + 1) % cycle.size()]
+## RJ-a : formation suivante parmi celles que le régiment peut prendre (`formations` de
+## `get_units`, verdict du cœur, ordre des données) ; "" s'il n'en a pas d'autre.
+static func next_formation(unit: Dictionary) -> String:
+	var cycle: Array = Array(unit.get("formations", []))
+	if cycle.size() < 2:
+		return ""
+	var current := cycle.find(str(unit.get("formation", "")))
+	return str(cycle[(current + 1) % cycle.size()])
+
+
+## RJ-a : touche T, un ordre `formation` par régiment (formation suivante de chacun).
+func _cycle_formation(ids: Array[int]) -> void:
+	for unit in scene.units:
+		if ids.has(int(unit["id"])):
+			var kind := next_formation(unit)
+			if kind != "":
+				command_requested.emit({"type": "formation", "units": [int(unit["id"])], "kind": kind})
+
+
+## RJ-a : ordre `formation` choisi dans le menu, pour les régiments choisis qui peuvent la
+## prendre (verdict du cœur) ; message si aucun ne le peut.
+func _order_formation(key: String) -> void:
+	var ids := _available_selection()
+	var able: Array[int] = []
+	for unit in scene.units:
+		if ids.has(int(unit["id"])) and Array(unit.get("formations", [])).has(key):
+			able.append(int(unit["id"]))
+	if able.is_empty():
+		if scene.hud != null and not ids.is_empty():
+			scene.hud.show_toast("Aucun régiment choisi ne peut prendre cette formation.")
+		return
+	command_requested.emit({"type": "formation", "units": able, "kind": key})
 
 
 func _deploy_selection(press: Vector2, release: Vector2) -> void:

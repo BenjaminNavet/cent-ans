@@ -7,7 +7,7 @@
   "required": ["equilibrium_effects", "width_px", "max_height_screen_share", "header_icon_px", "short_max_body_lines", "chain", "kind_colors", "headline"],
   "additionalProperties": false,
   "$defs": {
-    "kind": {"enum": ["unit", "unit_recruit", "building", "technology", "resource", "gauge", "trait", "skill", "class", "rule", "plain"]},
+    "kind": {"enum": ["unit", "unit_recruit", "building", "technology", "resource", "gauge", "trait", "skill", "class", "rule", "plain", "formation"]},
     "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
   },
   "properties": {

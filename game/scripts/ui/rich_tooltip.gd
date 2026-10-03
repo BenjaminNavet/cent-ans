@@ -248,6 +248,8 @@ static func spec_for(key: String, live: Dictionary = {}) -> Dictionary:
 			return technology_spec(node)
 		"plain":
 			return plain_spec(id, live)
+		"formation":  # RJ-a : formations de régiment (catalogue du cœur en `live`)
+			return BattleFormationMenu.tooltip_spec(id, live)
 	return {}
 
 

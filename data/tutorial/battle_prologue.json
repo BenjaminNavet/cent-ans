@@ -66,7 +66,7 @@
     {
       "id": "formation",
       "title": "Former la ligne",
-      "text": "Maintenez le clic droit et glissez : le trait tracé au sol donne le front et l'orientation du régiment. Un front large met plus d'hommes au contact ; un front étroit et profond tient mieux le choc. La touche T change la formation (ligne, colonne, schiltron, coin).",
+      "text": "Maintenez le clic droit et glissez : le trait tracé au sol donne le front et l'orientation du régiment. Un front large met plus d'hommes au contact ; un front étroit et profond tient mieux le choc. Le bouton Formation ouvre le menu des formations historiques (en haie, bataille serrée, schiltron, herse…) ; la touche T passe à la suivante. Les hommes mettent quelques secondes à se reformer.",
       "objective": "Changer le front ou la formation d'un régiment.",
       "condition": {"type": "formation_changed", "min_ratio": 0.15},
       "target": ""
