@@ -274,7 +274,7 @@ fn default_wall_attacker_morale() -> f64 {
 }
 
 fn default_wall_hold_morale() -> f64 {
-    8.0
+    6.0
 }
 
 fn default_wall_defender_steadiness() -> f64 {

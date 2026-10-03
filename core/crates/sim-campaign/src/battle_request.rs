@@ -996,6 +996,7 @@ impl CampaignState {
                 c.location = Some(province.clone());
             }
         }
+        let walls = self.fortification_level(data, &city);
         let p = self.settlements.get_mut(&city).expect("exists");
         if p.garrison.is_empty() {
             if let Some(unit_type) = data
@@ -1035,7 +1036,7 @@ impl CampaignState {
             .engines
             .iter()
             .take_while(|e| e.kind != data_model::BuiltEngineKind::Tower)
-            .map(|e| e.work)
+            .map(|e| e.cost(data.siege_engine_rules.scaling_min_wall_level, walls))
             .sum();
         if let Some(siege) = p.siege.as_mut() {
             siege.engine_work = siege.engine_work.max(staged_work);

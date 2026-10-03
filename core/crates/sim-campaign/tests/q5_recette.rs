@@ -63,14 +63,17 @@ fn besiege_guyenne(data: &GameData, seed: u64) -> (CampaignState, ArmyId) {
 /// NT5 (N7): the besiegers' ladders are built (an assault behind standing
 /// walls needs one ready engine).
 fn ladders_ready(state: &mut CampaignState, data: &GameData, place: &SettlementId) {
+    // A6-L2: the ladders cost more against high walls.
+    let ladders = data.siege_engine_rules.engines[0].cost(
+        data.siege_engine_rules.scaling_min_wall_level,
+        state.fortification_level(data, place),
+    );
     if let Some(siege) = state
         .settlements
         .get_mut(place)
         .and_then(|s| s.siege.as_mut())
     {
-        siege.engine_work = siege
-            .engine_work
-            .max(data.siege_engine_rules.engines[0].work);
+        siege.engine_work = siege.engine_work.max(ladders);
     }
 }
 
