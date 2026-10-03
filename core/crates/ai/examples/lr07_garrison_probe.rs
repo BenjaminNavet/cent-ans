@@ -8,6 +8,9 @@ use std::collections::BTreeMap;
 use data_model::{FactionId, GameData, SocialClass};
 use sim_campaign::CampaignState;
 
+/// Provinces, men, inhabitants, unrest, provinces above 60, garrisons.
+type Bucket = (usize, f64, f64, f64, usize, Vec<u32>);
+
 fn main() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
     let (data, _) = GameData::load(&root).expect("data");
@@ -27,7 +30,7 @@ fn main() {
             .or_default() += 1;
     }
     // bucket -> (count, men, pop, unrest, provinces above 60)
-    let mut buckets: BTreeMap<&str, (usize, f64, f64, f64, usize, Vec<u32>)> = BTreeMap::new();
+    let mut buckets: BTreeMap<&str, Bucket> = BTreeMap::new();
     for (id, p) in &state.provinces {
         let ctrl = &state.settlements[&p.city].controller;
         let n = size.get(ctrl).copied().unwrap_or(0);
