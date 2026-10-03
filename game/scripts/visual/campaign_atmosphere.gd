@@ -64,6 +64,15 @@ var _base_ssao_radius: float = -1.0
 ## soleil pendant la construction du terrain) et au changement de saison, hors soir de fin de tour.
 var _sun_dirty: bool = false
 var _preset: Dictionary = {}
+## RV-B (`CampaignLighting`, `data/fx/campaign_lighting.json`) : soleil, ambiance et brume visés
+## (saison + phase du tour) et courants ; la lumière glisse de l'un à l'autre, sans saut.
+var _turn: int = -1
+var _sun_target: Dictionary = {}
+var _sun_current: Dictionary = {}
+var _ambient_target: Dictionary = {}
+var _fog_target: Color = Color(0, 0, 0, 0)
+var _blend_s: float = 6.0
+var _lighting_settled: bool = true
 
 
 func _ready() -> void:
@@ -78,7 +87,24 @@ func _ready() -> void:
 	apply_render_quality(RenderQuality.preset())
 	if _world_env != null:
 		RenderQuality.register(_world_env, _sun, "campaign")
+	if _environment != null:
+		var exposure: Dictionary = CampaignLighting.data().get("exposure", {})
+		if not exposure.is_empty():
+			_environment.tonemap_exposure = float(exposure.get("tonemap_exposure", _environment.tonemap_exposure))
+			_environment.tonemap_white = float(exposure.get("tonemap_white", _environment.tonemap_white))
 	_update_season()
+
+
+## RV-B : numéro du tour (`--light-turn=N` force la phase pour les captures), -1 sans simulation.
+func current_turn() -> int:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--light-turn="):
+			return int(arg.trim_prefix("--light-turn="))
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	if sim != null and sim.has_method("get_turn"):
+		return int(sim.call("get_turn"))
+	return -1
 
 
 ## Saison de la simulation (libellé de date) ; ciel et étalonnage changent avec elle.
@@ -99,6 +125,10 @@ func _update_season() -> void:
 	var season := current_season()
 	if season != _season:
 		apply_season(season)
+	var turn := current_turn()
+	if turn != _turn:
+		_turn = turn
+		_retarget_light("turn")
 
 
 ## PO3 : préréglage complet de la carte pour `season` : `campaign_look` (ciel, étalonnage de
@@ -138,30 +168,95 @@ func apply_season(season: String) -> void:
 	if _preset.is_empty():
 		push_warning("CampaignAtmosphere: no complete preset for season %s" % season)
 		return
-	sun_elevation_deg = float(_preset["sun_elevation"])
-	sun_azimuth_deg = float(_preset["sun_azimuth"])
-	_sun_dirty = true
-	_apply_sun_if_free()
+	_retarget_light("season")
 	if _environment == null:
 		return
 	var fog: Color = _preset["fog_color"]
-	_environment.fog_light_color = fog
 	_environment.fog_sun_scatter = float(_preset["fog_sun_scatter"])
 	AtmosphereLibrary.apply_to_environment(_environment, _preset, fog, fog.darkened(0.5))
+
+
+## RV-B : nouvelle cible de lumière (saison ou tour) ; la première est posée d'emblée, les
+## suivantes sont rejointes en `transition_s.<reason>` secondes.
+func _retarget_light(reason: String) -> void:
+	if _preset.is_empty():
+		return
+	var cfg := CampaignLighting.data()
+	_sun_target = CampaignLighting.sun_target(_preset, _turn, cfg)
+	_ambient_target = CampaignLighting.ambient(_season, cfg)
+	_fog_target = CampaignLighting.fog_color(_preset["fog_color"], cfg)
+	var durations: Dictionary = cfg.get("transition_s", {})
+	_blend_s = maxf(0.05, float(durations.get(reason, 6.0)))
+	_lighting_settled = false
+	if _sun_current.is_empty() or not _map_loaded:  # avant la carte : posé d'emblée
+		_sun_current = _sun_target.duplicate()
+		_apply_environment_light(1.0)
+	_sun_dirty = true
+	_apply_sun_if_free()
+
+
+## RV-B : soleil visé (saison + tour) : {elevation, azimuth, color, energy}, {} sans préréglage.
+func light_target() -> Dictionary:
+	return _sun_target
+
+
+## RV-B : pose la lumière visée d'emblée (tests, captures), hors soir de fin de tour.
+func settle_light() -> void:
+	if _sun_target.is_empty():
+		return
+	_sun_current = _sun_target.duplicate()
+	_apply_environment_light(1.0)
+	_lighting_settled = true
+	_sun_dirty = true
+	_apply_sun_if_free()
+
+
+## Ambiance et teinte de brume rapprochées de leur cible (fraction `k`).
+func _apply_environment_light(k: float) -> void:
+	if _environment == null:
+		return
+	if not _ambient_target.is_empty():
+		_environment.ambient_light_color = _environment.ambient_light_color.lerp(_ambient_target["color"], k)
+		_environment.ambient_light_energy = lerpf(_environment.ambient_light_energy, float(_ambient_target["energy"]), k)
+		_environment.ambient_light_sky_contribution = lerpf(_environment.ambient_light_sky_contribution, float(_ambient_target["sky_contribution"]), k)
+	if _fog_target.a > 0.0:
+		_environment.fog_light_color = _environment.fog_light_color.lerp(_fog_target, k)
+
+
+## RV-B : un pas d'interpolation de la lumière (soleil, ambiance, brume) vers la cible.
+func _step_light(delta: float) -> void:
+	if _lighting_settled or _sun_target.is_empty() or not _sun_free():
+		return
+	var k := 1.0 - exp(-delta * 3.0 / _blend_s)  # ≈ 95 % de l'écart comblé en `_blend_s`
+	_sun_current = CampaignLighting.blend_sun(_sun_current, _sun_target, k)
+	_apply_environment_light(k)
+	if CampaignLighting.sun_gap(_sun_current, _sun_target) < 0.05:
+		_sun_current = _sun_target.duplicate()
+		_apply_environment_light(1.0)
+		_lighting_settled = true
+	_sun_dirty = true
+	_apply_sun_if_free()
 
 
 ## PO3 : pose le soleil de la saison sauf pendant le soir doré de fin de tour (`TurnLight`, qui
 ## rend ensuite la lumière mémorisée) ; sinon réessayé à la vérification suivante.
 func _apply_sun_if_free() -> void:
-	if not _sun_dirty or _sun == null or _preset.is_empty():
+	if not _sun_dirty or _sun == null or _preset.is_empty() or _sun_current.is_empty():
 		return
-	var turn_light := get_node_or_null(^"../TurnLight")
-	if turn_light != null and (float(turn_light.get("dusk")) > 0.0 or bool(turn_light.get("_active"))):
+	if not _sun_free():
 		return
+	sun_elevation_deg = float(_sun_current["elevation"])
+	sun_azimuth_deg = float(_sun_current["azimuth"])
 	_orient_sun()
-	_sun.light_color = _preset["sun_color"]
-	_sun.light_energy = float(_preset["sun_energy"])
+	_sun.light_color = _sun_current["color"]
+	_sun.light_energy = float(_sun_current["energy"])
 	_sun_dirty = false
+
+
+## Faux pendant le soir doré de fin de tour (`TurnLight` mémorise puis rend la lumière).
+func _sun_free() -> bool:
+	var turn_light := get_node_or_null(^"../TurnLight")
+	return turn_light == null or not (float(turn_light.get("dusk")) > 0.0 or bool(turn_light.get("_active")))
 
 
 func _process(delta: float) -> void:
@@ -171,6 +266,7 @@ func _process(delta: float) -> void:
 	if _season_check_s <= 0.0:
 		_season_check_s = 1.0
 		_update_season()
+	_step_light(delta)
 	if _sun_dirty:
 		_apply_sun_if_free()
 	if _rig == null:
@@ -204,8 +300,18 @@ func apply_render_quality(p: Dictionary) -> void:
 func apply_distance(distance: float) -> void:
 	var close := 1.0 - smoothstep(close_full_distance, close_begin_distance, distance)
 	if _environment != null:
-		_environment.fog_depth_begin = lerpf(distance * fog_begin_factor, maxf(close_fog_begin, distance * fog_begin_factor), close)
-		_environment.fog_depth_end = lerpf(distance * fog_end_factor, maxf(close_fog_end, distance * fog_end_factor), close)
+		# RV-B : perspective aérienne selon l'inclinaison (nette en vue basse, légère de dessus).
+		var begin_factor := fog_begin_factor
+		var end_factor := fog_end_factor
+		var aerial := CampaignLighting.aerial(_rig.pitch_deg() if _rig != null else 50.0)
+		if not aerial.is_empty():
+			begin_factor = float(aerial.get("begin_factor", begin_factor))
+			end_factor = float(aerial.get("end_factor", end_factor))
+			_environment.fog_density = float(aerial.get("density", _environment.fog_density))
+			_environment.fog_aerial_perspective = float(aerial.get("aerial_perspective", _environment.fog_aerial_perspective))
+			_environment.fog_sky_affect = float(aerial["sky_affect"])
+		_environment.fog_depth_begin = lerpf(distance * begin_factor, maxf(close_fog_begin, distance * begin_factor), close)
+		_environment.fog_depth_end = lerpf(distance * end_factor, maxf(close_fog_end, distance * end_factor), close)
 		if _base_ssao_radius < 0.0:
 			_base_ssao_radius = _environment.ssao_radius
 		_environment.ssao_radius = clampf(distance * ssao_radius_factor, ssao_radius_min, _base_ssao_radius)
