@@ -77,43 +77,88 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 ## largeur du panneau (colonne unique) au lieu de la partager avec la note de droite.
 static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Callable, wrap: bool = false) -> void:
 	clear(list)
+	# U13 : disponibles d'abord, puis les refus passagers ; les lignes qui attendent une
+	# technique ou un bâtiment sont repliées sous « Bientôt » ; celles réservées à d'autres
+	# factions ou cultures ne sont pas montrées. Sans `group` (mercenaires) : `available`.
+	var ready: Array = []
+	var blocked: Array = []
+	var soon: Array = []
 	for row in recruitable:
-		var line: Container = VBoxContainer.new() if wrap else HBoxContainer.new()
+		var group := str(row.get("group", "ready" if bool(row.get("available", false)) else "blocked"))
+		match group:
+			"ready":
+				ready.append(row)
+			"soon":
+				soon.append(row)
+			"elsewhere":
+				pass
+			_:
+				blocked.append(row)
+	for row in ready + blocked:
+		_recruit_row(list, row, on_recruit, wrap)
+	if not soon.is_empty():
+		_soon_section(list, soon, on_recruit, wrap)
+
+
+## U13 : intertitre repliable « Bientôt (n) » ; l'état (ouvert ou non) survit au rafraîchissement.
+static func _soon_section(list: Container, rows: Array, on_recruit: Callable, wrap: bool) -> void:
+	var toggle := Button.new()
+	toggle.name = "SoonToggle"
+	toggle.flat = true
+	toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var body := VBoxContainer.new()
+	body.name = "SoonList"
+	for row in rows:
+		_recruit_row(body, row, on_recruit, wrap)
+	var refresh := func() -> void:
+		var open: bool = bool(list.get_meta(&"soon_open", false))
+		toggle.text = "%s Bientôt (%d)" % ["▾" if open else "▸", rows.size()]
+		body.visible = open
+	toggle.pressed.connect(func() -> void:
+		list.set_meta(&"soon_open", not bool(list.get_meta(&"soon_open", false)))
+		refresh.call())
+	refresh.call()
+	list.add_child(toggle)
+	list.add_child(body)
+
+
+static func _recruit_row(list: Container, row: Dictionary, on_recruit: Callable, wrap: bool) -> void:
+	var line: Container = VBoxContainer.new() if wrap else HBoxContainer.new()
+	if wrap:
+		line.add_theme_constant_override("separation", 1)
+	var button := RichButton.new()
+	button.text = "%s — %s / %s" % [str(row.get("name", row.get("unit_type", "?"))), Money.amount(int(row.get("cost", 0))), Money.amount(int(row.get("upkeep", 0)))]
+	# SV2 : le coût comprend l'importation des matériaux manquants (détail dans la bulle).
+	if int(row.get("import_cost", 0)) > 0:
+		button.text += " (dont import %s)" % Money.amount(int(row["import_cost"]))
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	if wrap:
+		button.clip_text = false
+		button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	else:
+		narrow_button(button)
+	var available: bool = bool(row.get("available", false))
+	button.disabled = not available
+	var unit_type: String = str(row.get("unit_type", ""))
+	IconLibrary.decorate_button(button, unit_type, int(ROW_ICON), "unit")
+	RichTooltip.set_tooltip(button, "unit", unit_type, row)  # IB1 : infobulle en sections
+	button.pressed.connect(func() -> void: on_recruit.call(unit_type))
+	line.add_child(button)
+	# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
+	if row.has("pool_label"):
+		line.add_child(_note(pool_label(row), wrap))
+	list.add_child(line)
+	# Q8 : le motif d'indisponibilité passe sous la ligne, pleine largeur ; à droite il
+	# partageait la place avec la réserve et se repliait mot à mot (« à / engager / depuis… »).
+	var reason := str(row.get("reason", "Indisponible"))
+	if not available and not reason.begins_with("réserve"):
+		var reason_note := _note(reason_label(reason), true)
 		if wrap:
-			line.add_theme_constant_override("separation", 1)
-		var button := RichButton.new()
-		button.text = "%s — %s / %s" % [str(row.get("name", row.get("unit_type", "?"))), Money.amount(int(row.get("cost", 0))), Money.amount(int(row.get("upkeep", 0)))]
-		# SV2 : le coût comprend l'importation des matériaux manquants (détail dans la bulle).
-		if int(row.get("import_cost", 0)) > 0:
-			button.text += " (dont import %s)" % Money.amount(int(row["import_cost"]))
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		if wrap:
-			button.clip_text = false
-			button.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
-			button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			line.add_child(reason_note)
 		else:
-			narrow_button(button)
-		var available: bool = bool(row.get("available", false))
-		button.disabled = not available
-		var unit_type: String = str(row.get("unit_type", ""))
-		IconLibrary.decorate_button(button, unit_type, int(ROW_ICON), "unit")
-		RichTooltip.set_tooltip(button, "unit", unit_type, row)  # IB1 : infobulle en sections
-		button.pressed.connect(func() -> void: on_recruit.call(unit_type))
-		line.add_child(button)
-		# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
-		if row.has("pool_label"):
-			line.add_child(_note(pool_label(row), wrap))
-		list.add_child(line)
-		# Q8 : le motif d'indisponibilité passe sous la ligne, pleine largeur ; à droite il
-		# partageait la place avec la réserve et se repliait mot à mot (« à / engager / depuis… »).
-		var reason := str(row.get("reason", "Indisponible"))
-		if not available and not reason.begins_with("réserve"):
-			var reason_note := _note(reason_label(reason), true)
-			if wrap:
-				line.add_child(reason_note)
-			else:
-				list.add_child(reason_note)
+			list.add_child(reason_note)
 
 
 ## Note à droite d'un bouton de ligne (`side_note`), ou pleine largeur sous le bouton si `wrap`.
@@ -227,8 +272,6 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		IconLibrary.decorate_button(button, building_id, int(ROW_ICON), "building")
 		button.pressed.connect(func() -> void: on_build.call(building_id))
 		line.add_child(button)
-		if not available:
-			line.add_child(side_note(reason_label(str(row.get("reason", "Indisponible")))))
 		# SV3 : surcoût d'import (B7c) déjà visible dans la bulle ; rappel court sur la ligne
 		# pour ne pas avoir à ouvrir la bulle pour le repérer.
 		var import_cost := int(row.get("import_cost", 0))
@@ -236,6 +279,10 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 			line.add_child(side_note(import_cost_label(import_cost)))
 		RichTooltip.set_tooltip(button, "building", building_id, row)  # IB1 : infobulle en sections
 		list.add_child(line)
+		# U12 : le motif d'indisponibilité passe sous la ligne, pleine largeur (comme le
+		# recrutement, Q8), et non plus dans une colonne rouge étroite à droite du bouton.
+		if not available:
+			list.add_child(_note(reason_label(str(row.get("reason", "Indisponible"))), true))
 
 
 ## SV3 : « Dont import : X ₶ » en rouge, même couleur que la bulle (`RichTooltip.RED`).

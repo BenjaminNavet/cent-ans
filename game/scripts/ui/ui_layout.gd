@@ -40,7 +40,7 @@ const ZONE_RECTS := {
 	Zone.TOP_BAR: Rect2(0.0, 0.0, 1.0, 0.08),
 	Zone.BOTTOM_SELECTION: Rect2(0.01, 0.80, 0.80, 0.20),
 	Zone.MINIMAP: Rect2(0.82, 0.72, 0.18, 0.28),
-	Zone.SIDE_PANEL: Rect2(0.70, 0.09, 0.30, 0.61),
+	Zone.SIDE_PANEL: Rect2(0.67, 0.09, 0.33, 0.61),  # A6-U11 : 422 px à 1280 (0,70 / 0,30 avant)
 	Zone.TOASTS: Rect2(0.01, 0.09, 0.26, 0.48),
 	Zone.MODAL: Rect2(0.2, 0.12, 0.6, 0.76),
 }

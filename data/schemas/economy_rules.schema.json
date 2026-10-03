@@ -80,6 +80,12 @@
       "minimum": 0,
       "description": "Lot B7c (et SV2 pour les unités) : prix (livres) d'une unité de ressource de construction ou de recrutement manquante = prix de base de la ressource × ce multiplicateur. Les unités disponibles viennent des provinces productrices accessibles à la faction (une par province), réservées pendant le chantier ou la levée."
     },
+    "construction_queue_size": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "Lot M8 : nombre maximal de bâtiments dans la file de construction d'une colonie (celui en cours compris). Chaque entrée est payée à la mise en file et remboursée pour moitié si elle est annulée."
+    },
     "supply_loss": {
       "type": "integer",
       "minimum": 0,
@@ -327,6 +333,7 @@
     "supply_devastation_loss_percent",
     "supply_devastation_recovery_cut_percent",
     "resource_import_multiplier",
+    "construction_queue_size",
     "supply_loss",
     "supply_loss_winter",
     "supply_recovery",

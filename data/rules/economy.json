@@ -13,6 +13,7 @@
   "supply_devastation_loss_percent": 50.0,
   "supply_devastation_recovery_cut_percent": 50.0,
   "resource_import_multiplier": 100,
+  "construction_queue_size": 3,
   "supply_loss": 20,
   "supply_loss_winter": 35,
   "supply_recovery": 40,

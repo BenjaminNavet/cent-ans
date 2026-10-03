@@ -252,7 +252,7 @@ func _fill_city(city: Dictionary, is_player_owner: bool) -> void:
 	_fill_classes(city.get("classes", {}))
 	var buildings: Array = city.get("buildings", [])
 	_fill_buildings(buildings)
-	_fill_construction(city.get("construction", {}), is_player_owner)
+	_fill_construction(city.get("construction", {}), is_player_owner, (city.get("build_queue", []) as Array).size())
 	var built_ids: Array = []
 	for entry in buildings:
 		built_ids.append(str(entry.get("id", "")))
@@ -359,11 +359,13 @@ func _fill_buildings(buildings: Array) -> void:
 	PanelWidgets.fill_buildings(buildings_list, buildings)
 
 
-func _fill_construction(construction: Dictionary, is_player_owner: bool) -> void:
+func _fill_construction(construction: Dictionary, is_player_owner: bool, queued: int = 0) -> void:
 	construction_box.visible = not construction.is_empty()
 	if construction.is_empty():
 		return
 	construction_label.text = "%s — %s restant%s" % [str(construction.get("name", "?")), FrText.count(int(construction.get("turns_left", 0)), "tour"), FrText.s(int(construction.get("turns_left", 0)))]
+	if queued > 0:  # M8 : la file se gère dans le panneau de la colonie
+		construction_label.text += " (+ %d en file)" % queued
 	cancel_build_button.visible = is_player_owner
 
 

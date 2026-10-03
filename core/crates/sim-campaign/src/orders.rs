@@ -171,6 +171,13 @@ pub enum Order {
         #[serde(alias = "province")]
         settlement: Place,
     },
+    /// M8: cancels the queued (not yet started) construction at `index`
+    /// (0 = next in line), refunding half its cost.
+    CancelQueuedBuild {
+        #[serde(alias = "province")]
+        settlement: Place,
+        index: usize,
+    },
     /// RS-C: razes the completed `building` of `settlement`, refunding
     /// `economy.json` `demolition_refund_percent` of its money cost.
     Demolish {
@@ -631,6 +638,50 @@ pub struct RecruitOption {
     pub pool: crate::recruit_pool::PoolView,
 }
 
+/// U13: where a recruitment line belongs in the settlement panel.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RecruitGroup {
+    /// Can be recruited now.
+    Ready,
+    /// Blocked for a passing reason (treasury, full queue, empty reserve...).
+    Blocked,
+    /// Waits for a technology, a building or a date: shown under « Bientôt ».
+    Soon,
+    /// Reserved to other factions or cultures: not shown.
+    Elsewhere,
+}
+
+impl RecruitGroup {
+    /// Stable name for the interface.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ready => "ready",
+            Self::Blocked => "blocked",
+            Self::Soon => "soon",
+            Self::Elsewhere => "elsewhere",
+        }
+    }
+}
+
+impl RecruitOption {
+    /// U13: the panel group of this line, from its blocker.
+    pub fn group(&self) -> RecruitGroup {
+        let Some(reason) = self.reason.as_deref().filter(|_| !self.available) else {
+            return RecruitGroup::Ready;
+        };
+        if reason.starts_with("réservé à") || reason.starts_with("culture locale") {
+            RecruitGroup::Elsewhere
+        } else if reason.starts_with("bâtiment requis")
+            || reason.starts_with("technologie requise")
+            || reason.starts_with("disponible à partir")
+        {
+            RecruitGroup::Soon
+        } else {
+            RecruitGroup::Blocked
+        }
+    }
+}
+
 /// SV2: full price of one recruit — money cost plus the import of the
 /// resource units the faction's free supply lacks.
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -805,6 +856,10 @@ impl CampaignState {
             Order::CancelBuild { settlement } => {
                 let settlement = self.resolve_place(&settlement)?;
                 self.order_cancel_build(data, faction, &settlement)
+            }
+            Order::CancelQueuedBuild { settlement, index } => {
+                let settlement = self.resolve_place(&settlement)?;
+                self.order_cancel_queued_build(data, faction, &settlement, index)
             }
             Order::Demolish {
                 settlement,
@@ -1083,12 +1138,12 @@ impl CampaignState {
         self.settlements
             .get_mut(settlement)
             .expect("checked above")
-            .construction = Some(Construction {
-            building: building.clone(),
-            turns_left: option.turns,
-            paid: option.cost,
-            drawn: draw.drawn,
-        });
+            .enqueue_build(Construction {
+                building: building.clone(),
+                turns_left: option.turns,
+                paid: option.cost,
+                drawn: draw.drawn,
+            });
         Ok(())
     }
 
@@ -1112,11 +1167,39 @@ impl CampaignState {
                 .get(&construction.building)
                 .map_or(0, |b| b.cost.money)
         };
+        settlement_state.promote_queued_build();
         let refund = paid * CANCEL_REFUND_PERCENT / 100;
         self.factions
             .get_mut(faction)
             .expect("checked above")
             .treasury += i64::from(refund);
+        Ok(())
+    }
+
+    fn order_cancel_queued_build(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        settlement: &SettlementId,
+        index: usize,
+    ) -> Result<(), OrderError> {
+        self.own_settlement(faction, settlement)?;
+        let settlement_state = self.settlements.get_mut(settlement).expect("checked above");
+        if index >= settlement_state.build_queue.len() {
+            return Err(OrderError::NoConstruction);
+        }
+        let work = settlement_state.build_queue.remove(index);
+        let paid = if work.paid > 0 {
+            work.paid
+        } else {
+            data.buildings
+                .get(&work.building)
+                .map_or(0, |b| b.cost.money)
+        };
+        self.factions
+            .get_mut(faction)
+            .expect("checked above")
+            .treasury += i64::from(paid * CANCEL_REFUND_PERCENT / 100);
         Ok(())
     }
 

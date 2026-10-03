@@ -11,6 +11,8 @@ signal recruit_requested(settlement_id: String, unit_type: String)
 signal create_army_requested(settlement_id: String, unit_indices: Array)
 signal build_requested(settlement_id: String, building_id: String)
 signal cancel_build_requested(settlement_id: String)
+## M8 : annule l'entrée `index` de la file (0 = la prochaine) ; la moitié du coût est remboursée.
+signal cancel_queued_build_requested(settlement_id: String, index: int)
 ## RS-N : `preview` vient de `settlement_demolition_preview` (cœur) : `{building, name,
 ## can_demolish, reason, refund, upkeep_saved}`.
 signal raze_requested(settlement_id: String, building_id: String, preview: Dictionary)
@@ -52,6 +54,7 @@ var buildings_list: VBoxContainer
 var construction_box: VBoxContainer
 var construction_label: Label
 var cancel_build_button: Button
+var queue_box: VBoxContainer  # M8 : chantiers en attente derrière celui en cours
 var buildable_list: VBoxContainer
 
 var _garrison_checks: Array[CheckBox] = []
@@ -60,6 +63,7 @@ var _garrison_checks: Array[CheckBox] = []
 func _init() -> void:
 	name = "SettlementPanel"
 	clip_contents = true  # Q6 : largeur donnée par la zone `SIDE_PANEL` (pas de minimum fixe)
+	theme_type_variation = &"IlluminatedPanel"  # A6-U14 : même cadre enluminé que le panneau de province
 	if ResourceLoader.exists(THEME_PATH):
 		theme = load(THEME_PATH)
 	_build()
@@ -89,6 +93,7 @@ func _build() -> void:
 	UiType.apply(name_label, UiType.HEADING)
 	name_label.text = "Colonie"
 	header.add_child(name_label)
+	Lettrine.attach(name_label, 0.0, true)  # A6-U14 : titre à lettrine, comme la province
 	var close_button := Button.new()
 	close_button.name = "CloseButton"
 	close_button.text = "×"
@@ -128,8 +133,7 @@ func _build() -> void:
 	box.add_child(HSeparator.new())
 	tabs = TabContainer.new()
 	tabs.name = "Tabs"
-	tabs.custom_minimum_size = Vector2(0, 360)
-	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	tabs.custom_minimum_size = Vector2(0, 240)
 	box.add_child(tabs)
 	_build_garrison_tab()
 	_build_buildings_tab()
@@ -178,14 +182,13 @@ func _show_row(value: Label, shown: bool) -> void:
 
 
 func _tab_box(title: String) -> VBoxContainer:
-	var scroll := ScrollContainer.new()
-	scroll.name = title
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	tabs.add_child(scroll)
+	# A6-U11 : un seul défilement, celui de l'enveloppe de la zone `SIDE_PANEL` (`UiLayout`) ;
+	# les pages d'onglet ne défilent plus (il y avait un défilement dans un défilement).
 	var inner := VBoxContainer.new()
+	inner.name = title
 	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inner.add_theme_constant_override("separation", 4)
-	scroll.add_child(inner)
+	tabs.add_child(inner)
 	return inner
 
 
@@ -253,6 +256,9 @@ func _build_buildings_tab() -> void:
 	cancel_build_button.pressed.connect(func() -> void: cancel_build_requested.emit(settlement_id))
 	IconLibrary.decorate_button(cancel_build_button, "act_cancel_build", int(PanelWidgets.ROW_ICON))
 	row.add_child(cancel_build_button)
+	queue_box = VBoxContainer.new()
+	queue_box.name = "BuildQueue"
+	construction_box.add_child(queue_box)
 	_header(inner, "Construire")
 	buildable_list = VBoxContainer.new()
 	inner.add_child(buildable_list)
@@ -329,6 +335,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	if not construction.is_empty():
 		construction_label.text = "%s — %s restant%s" % [str(construction.get("name", "?")), FrText.count(int(construction.get("turns_left", 0)), "tour"), FrText.s(int(construction.get("turns_left", 0)))]
 	cancel_build_button.visible = player_owner
+	_fill_build_queue(detail.get("build_queue", []) if detail.get("build_queue") is Array else [], player_owner)
 	var built_ids: Array = Array(detail.get("buildings", PackedStringArray()))
 	PanelWidgets.fill_buildable(buildable_list, buildable, player_owner, built_ids,
 		func(building_id: String) -> void: build_requested.emit(settlement_id, building_id))
@@ -338,32 +345,34 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	queue_fit_height()
 
 
-## Q6 : hauteur de conception des onglets ; ils rétrécissent si la zone `SIDE_PANEL` manque.
-const TABS_HEIGHT := 360.0
-var _fit_queued := false
+## M8 : file de construction (chantiers payés et en attente), une ligne par entrée avec « Annuler ».
+func _fill_build_queue(queued: Array, player_owner: bool) -> void:
+	PanelWidgets.clear(queue_box)
+	queue_box.visible = not queued.is_empty()
+	for index in queued.size():
+		var entry: Dictionary = queued[index]
+		var row := HBoxContainer.new()
+		row.name = "Queued%d" % index
+		var label := Label.new()
+		label.text = "%d. %s — %s" % [index + 2, str(entry.get("name", "?")), FrText.count(int(entry.get("turns_left", 0)), "tour")]
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.add_child(label)
+		if player_owner:
+			var cancel := Button.new()
+			cancel.name = "CancelQueuedButton"
+			cancel.text = "Annuler"
+			var queued_index := index
+			cancel.pressed.connect(func() -> void: cancel_queued_build_requested.emit(settlement_id, queued_index))
+			IconLibrary.decorate_button(cancel, "act_cancel_build", int(PanelWidgets.ROW_ICON))
+			row.add_child(cancel)
+		queue_box.add_child(row)
 
 
-func _enter_tree() -> void:
-	if not get_viewport().size_changed.is_connected(queue_fit_height):
-		get_viewport().size_changed.connect(queue_fit_height)
-
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
-		queue_fit_height()
-
-
-## Q6 : le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
+## A6-U11 : le panneau n'ajuste plus la hauteur de ses onglets ; la zone latérale défile seule.
+## Conservé pour les appelants existants.
 func queue_fit_height() -> void:
-	if _fit_queued:
-		return
-	_fit_queued = true
-	_fit_height.call_deferred()
-
-
-func _fit_height() -> void:
-	_fit_queued = false
-	PanelWidgets.fit_tabs_to_side_zone(self, tabs, TABS_HEIGHT)
+	pass
 
 
 func show_recruit() -> void:

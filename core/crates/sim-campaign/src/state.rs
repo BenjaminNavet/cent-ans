@@ -403,7 +403,7 @@ fn full_supplies() -> u8 {
     100
 }
 
-/// A building under construction in a settlement (spec § 1.2); one at a time.
+/// A building under construction (or queued, M8) in a settlement (spec § 1.2).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Construction {
     pub building: BuildingId,
@@ -475,6 +475,10 @@ pub struct SettlementState {
     /// One building under construction at a time.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub construction: Option<Construction>,
+    /// M8: buildings paid for and waiting their turn behind `construction`
+    /// (oldest first); the next one starts when the current one ends.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub build_queue: Vec<Construction>,
     /// Units paid for and still training (B7b): each joins the garrison
     /// at the end of the turn its `turns_left` runs out
     /// (`UnitType::recruit_time_turns`, one turn by default).
@@ -560,6 +564,22 @@ impl SettlementState {
         self.garrison.iter().map(|u| u.strength).sum()
     }
 
+    /// M8: starts `work` at once when the site is free, else queues it.
+    pub(crate) fn enqueue_build(&mut self, work: Construction) {
+        if self.construction.is_none() {
+            self.construction = Some(work);
+        } else {
+            self.build_queue.push(work);
+        }
+    }
+
+    /// M8: starts the oldest queued building when no construction is under way.
+    pub(crate) fn promote_queued_build(&mut self) {
+        if self.construction.is_none() && !self.build_queue.is_empty() {
+            self.construction = Some(self.build_queue.remove(0));
+        }
+    }
+
     /// The settlement passes to `controller` (capture, cession, revolt): the
     /// siege ends, the former holder's recruits in training and building
     /// site are lost (no refund). The garrison is the caller's business.
@@ -568,6 +588,7 @@ impl SettlementState {
         self.siege = None;
         self.recruit_queue.clear();
         self.construction = None;
+        self.build_queue.clear();
         std::mem::replace(&mut self.controller, controller.clone())
     }
 }

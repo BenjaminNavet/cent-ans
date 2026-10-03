@@ -524,6 +524,7 @@ pub(crate) fn apply_outcome(
         .saturating_sub(effects.fortification_loss);
     if effects.becomes_ruin {
         place.construction = None;
+        place.build_queue.clear();
         place.recruit_queue.clear();
         let until = state.turn + effects.ruin_turns;
         state.captures.ruins.insert(settlement.clone(), until);

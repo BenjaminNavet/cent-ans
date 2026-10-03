@@ -124,6 +124,10 @@ impl CampaignSim {
         if let Some(construction) = &live.construction {
             dict.set("construction", &construction_dict(data, construction));
         }
+        dict.set(
+            "build_queue",
+            &crate::campaign_sim::build_queue_array(data, &live.build_queue),
+        );
         if let Some(siege) = &live.siege {
             let siege_dict = vdict! {
                 "attacker" => siege.attacker.as_str(),
