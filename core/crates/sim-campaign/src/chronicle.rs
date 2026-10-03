@@ -617,15 +617,50 @@ impl CampaignState {
                 format!("Fondation de l'ordre « {name} »")
             }
             EventEffect::TransferProvince {
-                province, faction, ..
-            } => match faction {
-                Some(f) => format!(
-                    "{} passe à {}",
-                    province_name(data, province),
-                    faction_name(data, f)
-                ),
-                None => format!("{} rejoint le domaine", province_name(data, province)),
-            },
+                province,
+                faction,
+                price,
+                payer,
+                ..
+            } => {
+                let text = match faction {
+                    Some(f) => format!(
+                        "{} passe à {}",
+                        province_name(data, province),
+                        faction_name(data, f)
+                    ),
+                    None => format!("{} rejoint le domaine", province_name(data, province)),
+                };
+                format!("{text}{}", price_label(data, *price, payer))
+            }
+            EventEffect::TransferTitle {
+                title,
+                faction,
+                price,
+                payer,
+                ..
+            } => {
+                let name = data
+                    .titles
+                    .get(title)
+                    .map_or_else(|| title.to_string(), |t| t.name.display.clone());
+                let text = match faction {
+                    Some(f) => format!("{name} passe à {}", faction_name(data, f)),
+                    None => format!("{name} rejoint le domaine"),
+                };
+                format!("{text}{}", price_label(data, *price, payer))
+            }
+            EventEffect::SetRuler { character, faction } => {
+                let realm = faction
+                    .as_ref()
+                    .or(ctx.faction.as_ref())
+                    .map(|f| format!(" de {}", faction_name(data, f)))
+                    .unwrap_or_default();
+                format!(
+                    "{} prend la tête{realm}",
+                    self.character_name(data, character)
+                )
+            }
             EventEffect::Marry { a, b } => format!(
                 "Mariage de {} et {}",
                 self.character_name(data, a),
@@ -1015,8 +1050,33 @@ pub fn apply_effect(
             let from_ok = from
                 .as_ref()
                 .is_none_or(|f| holder.is_some_and(|(o, c)| o == f || c == f));
+            let seller = state.province_owner(province).cloned();
             if let Some(faction) = target_faction(faction).filter(|_| from_ok) {
-                transfer_province(state, data, province, &faction, events);
+                if transfer_province(state, data, province, &faction, events) {
+                    let payer = payer.clone().unwrap_or_else(|| faction.clone());
+                    pay_sale_price(state, data, &payer, seller.as_ref(), *price, events);
+                }
+            }
+        }
+        EventEffect::TransferTitle {
+            title,
+            faction,
+            from,
+            price,
+            payer,
+        } => {
+            let holder = crate::feudal::holder_of(state, title).cloned();
+            let from_ok = from.as_ref().is_none_or(|f| holder.as_ref() == Some(f));
+            if let Some(faction) = target_faction(faction).filter(|_| from_ok) {
+                if transfer_title(state, data, title, &faction, events) {
+                    let payer = payer.clone().unwrap_or_else(|| faction.clone());
+                    pay_sale_price(state, data, &payer, holder.as_ref(), *price, events);
+                }
+            }
+        }
+        EventEffect::SetRuler { character, faction } => {
+            if let Some(faction) = target_faction(faction) {
+                set_ruler(state, data, &faction, character, events);
             }
         }
         EventEffect::FoundChivalricOrder { order, faction } => {
@@ -1072,6 +1132,117 @@ pub fn transfer_province(
             ),
         )
         .province(province)
+        .faction(faction),
+    );
+    true
+}
+
+/// LR-17 ` (price N livres)` suffix of a sale, naming a payer other than
+/// the recipient.
+fn price_label(data: &GameData, price: i64, payer: &Option<FactionId>) -> String {
+    if price <= 0 {
+        return String::new();
+    }
+    let amount = crate::economy_balance::signed_livres(price);
+    let amount = amount.trim_start_matches('+');
+    match payer {
+        Some(p) => format!(" contre {amount}, payés par {}", faction_name(data, p)),
+        None => format!(" contre {amount}"),
+    }
+}
+
+/// LR-17 `transfer_title`: `title` passes to `faction` through the feudal
+/// transfer (its provinces held by the seller follow, capital included; a
+/// seller left without title is absorbed). Ignored for an unknown title, a
+/// dead recipient or one that already holds it. Returns whether the title
+/// changed hands.
+pub fn transfer_title(
+    state: &mut CampaignState,
+    data: &GameData,
+    title: &data_model::TitleId,
+    faction: &FactionId,
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    if crate::feudal::holder_of(state, title) == Some(faction) {
+        return false;
+    }
+    crate::feudal::transfer_title_into(state, data, title, faction, events).is_ok()
+}
+
+/// LR-17: `payer` pays `price` livres for a sale (even into debt); `seller`
+/// receives them if it still exists, otherwise the money leaves the map (a
+/// crown that is not playable, a seller absorbed by the sale).
+fn pay_sale_price(
+    state: &mut CampaignState,
+    data: &GameData,
+    payer: &FactionId,
+    seller: Option<&FactionId>,
+    price: i64,
+    events: &mut Vec<GameEvent>,
+) {
+    if price <= 0 || seller == Some(payer) {
+        return;
+    }
+    let Some(paying) = state.factions.get_mut(payer).filter(|f| f.alive) else {
+        return;
+    };
+    paying.treasury -= price;
+    let receiver = seller.filter(|s| state.factions.get(*s).is_some_and(|f| f.alive));
+    if let Some(receiver) = receiver {
+        state.factions.get_mut(receiver).expect("alive").treasury += price;
+    }
+    let amount = crate::economy_balance::signed_livres(price);
+    let amount = amount.trim_start_matches('+');
+    let text = match receiver {
+        Some(r) => format!(
+            "{} verse {amount} à {}.",
+            faction_name(data, payer),
+            faction_name(data, r)
+        ),
+        None => format!("{} verse {amount} pour son achat.", faction_name(data, payer)),
+    };
+    events.push(GameEvent::new(EventKind::Chronicle, text).faction(payer));
+}
+
+/// LR-17 `set_ruler`: `character`, alive and of `faction`, takes its throne
+/// (usurpation, election); the former ruler lives on and the heir is picked
+/// again by the succession law. Returns whether the ruler changed.
+pub fn set_ruler(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    character: &CharacterId,
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    let eligible = state
+        .characters
+        .get(character)
+        .is_some_and(|c| c.alive && &c.faction == faction);
+    let Some(realm) = state.factions.get(faction).filter(|f| f.alive) else {
+        return false;
+    };
+    if !eligible || realm.ruler.as_ref() == Some(character) {
+        return false;
+    }
+    let deposed = realm.ruler.clone();
+    let realm = state.factions.get_mut(faction).expect("alive");
+    realm.ruler = Some(character.clone());
+    realm.heir = None;
+    let heir = crate::dynasty::pick_heir_by_law(state, data, faction, character);
+    state.factions.get_mut(faction).expect("alive").heir = heir;
+    let deposed = deposed
+        .filter(|d| state.characters.get(d).is_some_and(|c| c.alive))
+        .map(|d| format!(" ; {} est écarté", state.character_name(data, &d)))
+        .unwrap_or_default();
+    events.push(
+        GameEvent::new(
+            EventKind::Succession,
+            format!(
+                "{} prend la tête de {}{deposed}.",
+                state.character_name(data, character),
+                faction_name(data, faction)
+            ),
+        )
         .faction(faction),
     );
     true
@@ -1321,6 +1492,18 @@ pub fn ai_affordable_choice_among(
                     faction: None,
                     amount,
                 } if *amount < 0 => -event_treasury_amount(state, data, decider, *amount),
+                EventEffect::TransferProvince {
+                    faction: None,
+                    payer: None,
+                    price,
+                    ..
+                }
+                | EventEffect::TransferTitle {
+                    faction: None,
+                    payer: None,
+                    price,
+                    ..
+                } => *price,
                 _ => 0,
             })
             .sum()

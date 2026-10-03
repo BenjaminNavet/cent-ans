@@ -315,10 +315,29 @@ impl EventRefs<'_> {
                 province,
                 faction,
                 from,
+                payer,
+                ..
             } => {
                 self.province("effects.province", Some(province));
                 self.faction("effects.faction", faction.as_ref());
                 self.faction("effects.from", from.as_ref());
+                self.faction("effects.payer", payer.as_ref());
+            }
+            EventEffect::TransferTitle {
+                title,
+                faction,
+                from,
+                payer,
+                ..
+            } => {
+                self.check("effects.title", Some(title), &data.titles);
+                self.faction("effects.faction", faction.as_ref());
+                self.faction("effects.from", from.as_ref());
+                self.faction("effects.payer", payer.as_ref());
+            }
+            EventEffect::SetRuler { character, faction } => {
+                self.character("effects.character", Some(character));
+                self.faction("effects.faction", faction.as_ref());
             }
         }
     }

@@ -446,6 +446,17 @@ pub fn transfer_title(
     Ok(())
 }
 
+/// LR-17: [`transfer_title`] whose events join `events` (chronicle effects).
+pub(crate) fn transfer_title_into(
+    state: &mut CampaignState,
+    data: &GameData,
+    title: &TitleId,
+    to: &FactionId,
+    events: &mut Vec<crate::events::GameEvent>,
+) -> Result<(), FeudalError> {
+    transfer::transfer(state, data, title, to, events)
+}
+
 /// Historical objectives of every living faction whose primary title has
 /// some (§ 4.8), evaluated against the current state.
 pub fn evaluate_objectives(state: &CampaignState, data: &GameData) -> Vec<ObjectiveProgress> {
