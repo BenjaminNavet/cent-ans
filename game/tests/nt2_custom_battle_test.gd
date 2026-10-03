@@ -51,6 +51,9 @@ func _check_screen() -> void:
 	_check(not screen.buy("attacker", "unit_akinci"), "unit outside the roster refused")
 	screen.remove("attacker", 0)
 	_check((screen.config["attacker"]["units"] as Array).size() == 3 and int(screen.report["attacker"]["cost"]) == 1350, "remove refunds")
+	# Un seul arbalétrier gardé pour la suite (contrôles « other units kept », composition mémorisée).
+	screen.remove("attacker", 0)
+	screen.remove("attacker", 0)
 	_check(screen.buy("defender", "unit_crossbowmen"), "defender buys")
 	_check(bool(screen.report.get("ok", false)), "valid composition: %s" % str(screen.report.get("errors")))
 	_check(not screen.launch_button.disabled, "launch enabled")

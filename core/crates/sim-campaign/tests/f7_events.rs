@@ -245,10 +245,11 @@ fn nevilles_cross_captures_david_and_berwick_frees_him() {
 #[test]
 fn montereau_leads_to_the_alliance_then_troyes() {
     let data = data();
-    // Seed 2 (seed 7 before LR-17, 6 before the HV8 data): the chain depends
-    // on the random stream, which any new random event or character shifts
-    // (seeds 4 and 9 missed the alliance within three turns).
-    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 2).unwrap();
+    // Seed 1 (2 before the LR merge, 7 before LR-17, 6 before the HV8 data):
+    // the chain depends on the random stream, which any new random event or
+    // character shifts (after LR, seeds 1 and 3-12 pass, seed 2 misses the
+    // alliance within three turns).
+    let mut state = CampaignState::new_1337(&data, fac("fac_scotland"), 1).unwrap();
     state.year = 1419;
     state.season = Season::Autumn;
     for _ in 0..3 {

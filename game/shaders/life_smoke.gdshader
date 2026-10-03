@@ -77,7 +77,7 @@ vec4 puff_sample(vec2 uv, float frame) {
 	return mix(texture(flipbook, a), texture(flipbook, b), f - first);
 }
 
-void flipbook_plume(float seed, float dark) {
+vec4 flipbook_plume(float seed, float dark) {
 	float speed = mix(0.08, 0.14, v_custom.a);
 	float total = 0.0;
 	float light = 0.0;
@@ -98,23 +98,13 @@ void flipbook_plume(float seed, float dark) {
 		light += texel.g * a;
 	}
 	float alpha = clamp(total * 0.9, 0.0, 1.0) * v_custom.b * fade;
-	if (alpha < 0.01) {
-		discard;
-	}
 	float lit = total > 0.001 ? light / total : 0.5;
 	vec3 col = mix(light_smoke, dark_smoke * 2.2, dark) * sun_tint * (0.6 + 0.6 * lit);
 	col += ember * dark * (1.0 - smoothstep(0.0, 0.12, v_uv.y)) * (0.6 + 0.4 * sin(TIME * 7.0 + seed * 30.0));
-	ALBEDO = col;
-	ALPHA = alpha;
+	return vec4(col, alpha);
 }
 
-void fragment() {
-	if (use_flipbook) {
-		flipbook_plume(v_custom.r, v_custom.g);
-		return;
-	}
-	float seed = v_custom.r;
-	float dark = v_custom.g;
+vec4 procedural_plume(float seed, float dark) {
 	float speed = mix(0.25, 0.45, v_custom.a);
 	vec2 uv = v_uv;
 	float t = uv.y;
@@ -127,12 +117,21 @@ void fragment() {
 	float body = smoothstep(0.0, 0.1, t) * (1.0 - smoothstep(0.4, 1.0, t));
 	float density = clamp((n - 0.25 + 0.3 * (1.0 - t)) * 1.8, 0.0, 1.0) * core * body;
 	float alpha = density * v_custom.b * fade;
-	if (alpha < 0.01) {
-		discard;
-	}
 	vec3 col = mix(light_smoke, dark_smoke, dark) * sun_tint * mix(0.85, 1.05, n);
 	// Lueur de braises au pied des incendies.
 	col += ember * dark * (1.0 - smoothstep(0.0, 0.12, t)) * (0.6 + 0.4 * sin(TIME * 7.0 + seed * 30.0));
-	ALBEDO = col;
-	ALPHA = alpha;
+	return vec4(col, alpha);
+}
+
+void fragment() {
+	// ALBEDO, discard et return ne sont permis que dans fragment() (sans return) :
+	// les deux variantes renvoient couleur et opacité.
+	vec4 plume = use_flipbook
+		? flipbook_plume(v_custom.r, v_custom.g)
+		: procedural_plume(v_custom.r, v_custom.g);
+	if (plume.a < 0.01) {
+		discard;
+	}
+	ALBEDO = plume.rgb;
+	ALPHA = plume.a;
 }
