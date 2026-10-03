@@ -11,10 +11,10 @@
 
 // Force des paillettes (0 : désactivées) et part de la traîne hors du chemin du soleil.
 uniform float glint_amount = 0.55;
-uniform float glint_tail = 0.16;
+uniform float glint_tail = 0.03;  // intégration RV : hors du chemin du soleil, le semis faisait des pois réguliers
 // Taille d'une cellule à l'écran (pixels) et part des cellules qui portent une paillette.
 uniform float glint_cell_px = 4.0;
-uniform float glint_coverage = 0.16;
+uniform float glint_coverage = 0.10;
 // Échelle des nappes de mer agitée qui regroupent les paillettes (1 / unités monde).
 uniform float glint_patch_scale = 0.02;
 // Cadence du clignement (cycles par seconde, moyenne) et dérive de la grille avec la houle

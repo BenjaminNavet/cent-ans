@@ -16,7 +16,7 @@ uniform vec2 wind_dir = vec2(0.98, 0.2);
 uniform float wind_lean = 0.35;
 // Taille à l'écran (part de la hauteur de l'écran) : largeur, hauteur d'un foyer ; facteur des
 // panaches d'incendie (plus larges et plus hauts).
-uniform vec2 screen_size = vec2(0.014, 0.045);
+uniform vec2 screen_size = vec2(0.016, 0.034);  // intégration RV : plus courts, moins « bâtonnets »
 uniform float fire_gain = 1.8;
 // Distance caméra → point visé (unités monde), pilotée par le script.
 uniform float focus_distance = 300.0;
@@ -25,9 +25,9 @@ uniform float fade = 0.0;
 // Part des foyers qui fument (rang < densité) : plus l'hiver, moins au grand dézoom.
 uniform float density = 0.5;
 // Opacité de pointe d'un foyer et d'un incendie.
-uniform float smoke_alpha = 0.5;
+uniform float smoke_alpha = 0.35;
 uniform float fire_alpha = 0.85;
-uniform vec3 light_smoke : source_color = vec3(0.86, 0.85, 0.83);
+uniform vec3 light_smoke : source_color = vec3(0.78, 0.78, 0.77);
 uniform vec3 dark_smoke : source_color = vec3(0.12, 0.11, 0.10);
 // Lumière ambiante approximative (unshaded) : teinte chaude de la carte.
 uniform vec3 sun_tint = vec3(1.0, 0.96, 0.9);
