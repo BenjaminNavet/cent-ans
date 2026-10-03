@@ -31,7 +31,7 @@ const CRIES := {"rout": "rout_cry", "general_down": "general_death"}
 const CRY_FALLBACK := "ui_alert"
 
 ## `{name: value}` par défaut si `RuleValues` n'a pas encore de données (maquette, tests).
-const FALLBACK_DURATION_S := 8.0
+const FALLBACK_DURATION_S := 10.0
 const FALLBACK_MERGE_WINDOW_S := 5.0
 const FALLBACK_MERGE_RADIUS_M := 60.0
 const FALLBACK_MAX_SHOWN := 5
@@ -96,16 +96,23 @@ func _push_one(alert: Dictionary) -> void:
 	var kind := str(alert.get("kind", ""))
 	var x := float(alert.get("x", 0.0))
 	var z := float(alert.get("z", 0.0))
-	var radius := merge_radius_m()
-	var window := merge_window_s()
+	var unit := int(alert.get("unit", -1))
 	var time := float(alert.get("time", 0.0))
+	# U23 : une alerte par unité et par type, rafraîchie (jamais incrémentée). Sans unité
+	# (muraille, porte, général...), même type dans la même zone = la même alerte.
 	for entry in _entries:
 		if str(entry["kind"]) != kind:
 			continue
-		var d := Vector2(x, z).distance_to(Vector2(float(entry["x"]), float(entry["z"])))
-		if d <= radius and time - float(entry["last_time"]) <= window:
+		var same := false
+		if unit >= 0:
+			same = int(entry["unit"]) == unit
+		else:
+			var d := Vector2(x, z).distance_to(Vector2(float(entry["x"]), float(entry["z"])))
+			same = int(entry["unit"]) < 0 and d <= merge_radius_m()
+		if same:
 			entry["last_time"] = time
-			entry["count"] = int(entry["count"]) + 1
+			entry["x"] = x
+			entry["z"] = z
 			entry["remaining"] = duration_s()
 			return
 	_entries.append({
@@ -113,7 +120,7 @@ func _push_one(alert: Dictionary) -> void:
 		"x": x,
 		"z": z,
 		"side": str(alert.get("side", "")),
-		"unit": int(alert.get("unit", -1)),
+		"unit": unit,
 		"last_time": time,
 		"remaining": duration_s(),
 		"count": 1,
@@ -148,7 +155,22 @@ func _process(delta: float) -> void:
 ## Alertes affichées, les plus importantes d'abord (`data/rules/battle_alerts.json`), au plus
 ## `max_shown()`.
 func visible_entries() -> Array[Dictionary]:
-	var sorted := _entries.duplicate()
+	# Une ligne par type : `count` = nombre d'unités concernées, position = la plus récente.
+	var by_kind := {}
+	for entry in _entries:
+		var kind := str(entry["kind"])
+		if not by_kind.has(kind):
+			by_kind[kind] = {"kind": kind, "x": entry["x"], "z": entry["z"], "side": entry["side"],
+				"unit": entry["unit"], "last_time": entry["last_time"], "count": 1}
+		else:
+			var row: Dictionary = by_kind[kind]
+			row["count"] = int(row["count"]) + 1
+			if float(entry["last_time"]) >= float(row["last_time"]):
+				row["x"] = entry["x"]
+				row["z"] = entry["z"]
+				row["unit"] = entry["unit"]
+				row["last_time"] = entry["last_time"]
+	var sorted := by_kind.values()
 	sorted.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var ia := _importance(str(a["kind"]))
 		var ib := _importance(str(b["kind"]))
@@ -161,6 +183,13 @@ func visible_entries() -> Array[Dictionary]:
 		if out.size() >= max_shown():
 			break
 	return out
+
+
+## Compteur affiché : plafonné à « ×9+ ».
+static func count_label(count: int) -> String:
+	if count <= 1:
+		return ""
+	return " (×9+)" if count > 9 else " (×%d)" % count
 
 
 ## Ordre d'affichage : `cb5_alert_importance_<type>` (`RuleValues`, un par `AlertKind::key()`,
@@ -197,8 +226,7 @@ func _row(entry: Dictionary) -> Control:
 	row.custom_minimum_size = Vector2(0, 28)
 	var kind := str(entry["kind"])
 	var text: String = str(LABELS.get(kind, kind))
-	if int(entry["count"]) > 1:
-		text += " (×%d)" % int(entry["count"])
+	text += count_label(int(entry["count"]))
 	row.text = "   " + text
 	RichTooltip.attach_plain(row, "click_camera_focus")
 	var glyph := Control.new()

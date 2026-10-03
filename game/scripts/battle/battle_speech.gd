@@ -23,6 +23,9 @@ const WAR_CRY_FILE := "battle_orders/order_war_cry.json"
 const CAMERA_DISTANCE := 34.0
 const CRY_DISTANCE := 95.0
 
+## U22 : décalage (px) du bandeau sous le haut de l'écran, sous la barre de rapport de forces.
+const SUBTITLE_TOP := 76.0
+
 var active: bool = false
 ## Vrai si le joueur a passé le discours (le discours adverse n'est alors pas joué).
 var skipped: bool = false
@@ -308,11 +311,12 @@ func _build_subtitle() -> void:
 	band.add_theme_stylebox_override("panel", style)
 	band.anchor_left = 0.2
 	band.anchor_right = 0.8
-	# Q8 : au-dessus du panneau « Formations de groupe » (57-80 % de la hauteur en 720p), que le
-	# bandeau translucide recouvrait à 63 %.
-	band.anchor_top = 0.48
-	band.anchor_bottom = 0.48
-	band.grow_vertical = Control.GROW_DIRECTION_BOTH
+	# U22 : en haut au centre, sous la barre de rapport de forces (haute de ~56 px), loin des
+	# panneaux de formations et des cartes d'unités qui occupent le milieu et le bas de l'écran.
+	band.anchor_top = 0.0
+	band.anchor_bottom = 0.0
+	band.offset_top = SUBTITLE_TOP
+	band.grow_vertical = Control.GROW_DIRECTION_END
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(band)
 	_band = band

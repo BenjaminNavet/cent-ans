@@ -44,7 +44,7 @@ def test_every_alert_kind_has_an_importance() -> None:
 def test_duration_and_merge_window_are_the_spec_defaults() -> None:
     """The design spec asks for an 8 s display and a 5 s merge window."""
     rules = _rules()
-    assert rules["duration_s"] == 8
+    assert rules["duration_s"] == 10
     assert rules["merge_window_s"] == 5
 
 

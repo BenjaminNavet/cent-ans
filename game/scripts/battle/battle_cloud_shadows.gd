@@ -114,18 +114,19 @@ func _texture(tiles: Vector2i, px: int, seed_value: int) -> ImageTexture:
 	var noise := FastNoiseLite.new()
 	noise.seed = seed_value
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	noise.frequency = 3.0 / float(px)
+	noise.frequency = float(cfg.get("noise_cycles", 3.0)) / float(px)
 	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
-	noise.fractal_octaves = 4
+	noise.fractal_octaves = int(cfg.get("octaves", 2))
 	var tile_img := noise.get_seamless_image(px, px, false, false, 0.1, true)
 	tile_img.convert(Image.FORMAT_L8)
 	var values := tile_img.get_data()
 	var data := PackedByteArray()
 	data.resize(px * px * 2)
 	var edge := 1.0 - coverage
+	var softness := maxf(float(cfg.get("edge_softness", 0.2)), 0.05)
 	for i in px * px:
 		var n := values[i] / 255.0
-		var t := clampf((n - (edge - 0.08)) / 0.2, 0.0, 1.0)
+		var t := clampf((n - (edge - 0.08)) / softness, 0.0, 1.0)
 		data[i * 2] = 0
 		data[i * 2 + 1] = int(t * t * (3.0 - 2.0 * t) * 255.0)
 	var tile := Image.create_from_data(px, px, false, Image.FORMAT_LA8, data)

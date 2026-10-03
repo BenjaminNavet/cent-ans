@@ -1233,10 +1233,11 @@ func _frame_camera() -> void:
 	if siege_view != null and player_side == "attacker" and n > 0 and _frame_siege_camera(center):
 		return
 	var yaw := PI if player_side == "attacker" else 0.0
-	# Regarder un peu devant sa propre ligne, vers l'ennemi.
-	center.z += 70.0 if player_side == "attacker" else -70.0
-	# A1-06 : vue d'ouverture plus basse et plus proche (on voit des hommes, pas des points).
-	camera_rig.look_at_point(center, 170.0, yaw)
+	# B3 : cadrage sur le centre de l'armée du joueur (léger décalage vers l'ennemi), à ~66 m de
+	# hauteur, regard vers l'ennemi (réglages `battle.opening_*` de `camera_feel.json`).
+	var ahead := CameraFeel.get_value("battle", "opening_ahead_m")
+	center.z += ahead if player_side == "attacker" else -ahead
+	camera_rig.look_at_point(center, CameraFeel.get_value("battle", "opening_distance_m"), yaw)
 
 
 ## Q4 (Q3 : caméra d'assaut cadrant un bélier sur une plaine vide) : l'assaillant ouvre derrière

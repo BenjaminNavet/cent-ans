@@ -29,11 +29,16 @@
     },
     "battle": {
       "type": "object",
-      "required": ["zoom_damping", "focus_glide_s"],
+      "required": ["zoom_damping", "focus_glide_s", "opening_distance_m", "opening_ahead_m", "marker_shrink_start_m", "marker_shrink_end_m", "marker_min_scale"],
       "additionalProperties": false,
       "properties": {
         "zoom_damping": {"$ref": "#/$defs/rate"},
-        "focus_glide_s": {"$ref": "#/$defs/glide"}
+        "focus_glide_s": {"$ref": "#/$defs/glide"},
+        "opening_distance_m": {"description": "B3 : distance de la caméra de déploiement/ouverture au centre de l'armée du joueur (155 m = environ 66 m de hauteur).", "type": "number", "minimum": 20, "maximum": 900},
+        "opening_ahead_m": {"description": "B3 : décalage du point visé vers l'ennemi (m) ; 0 = centre de l'armée.", "type": "number", "minimum": 0, "maximum": 200},
+        "marker_shrink_start_m": {"description": "B4 : distance de caméra (m) au-delà de laquelle les icônes d'unité rapetissent.", "type": "number", "minimum": 0},
+        "marker_shrink_end_m": {"description": "B4 : distance de caméra (m) où l'icône atteint son échelle minimale.", "type": "number", "minimum": 1},
+        "marker_min_scale": {"description": "B4 : échelle minimale des icônes d'unité en vue lointaine.", "type": "number", "minimum": 0.2, "maximum": 1}
       }
     },
     "reduce_motion": {

@@ -13,7 +13,10 @@ const FALLBACK := {
 		"pan_accel": 14.0, "pan_friction": 5.5, "follow_damping": 12.0, "zoom_damping": 9.0,
 		"rotate_damping": 10.0, "focus_glide_s": 0.4, "drag_release_inertia": 0.6,
 	},
-	"battle": {"zoom_damping": 9.0, "focus_glide_s": 0.4},
+	"battle": {
+		"zoom_damping": 9.0, "focus_glide_s": 0.4, "opening_distance_m": 155.0, "opening_ahead_m": 10.0,
+		"marker_shrink_start_m": 260.0, "marker_shrink_end_m": 700.0, "marker_min_scale": 0.5,
+	},
 	"reduce_motion": {},
 }
 

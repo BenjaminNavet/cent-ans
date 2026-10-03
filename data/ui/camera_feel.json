@@ -11,7 +11,12 @@
   },
   "battle": {
     "zoom_damping": 9.0,
-    "focus_glide_s": 0.4
+    "focus_glide_s": 0.4,
+    "opening_distance_m": 155.0,
+    "opening_ahead_m": 10.0,
+    "marker_shrink_start_m": 260.0,
+    "marker_shrink_end_m": 700.0,
+    "marker_min_scale": 0.5
   },
   "reduce_motion": {
     "pan_friction": 40.0,

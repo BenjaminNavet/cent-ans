@@ -57,6 +57,8 @@ const COMMANDS := [
 const CATEGORY_ICON := {"infantry": "⚔", "archer": "➶", "cavalry": "♞", "siege": "⚙", "tower": "♜", "ram": "⚒"}
 
 var root: Control
+var _top_bar_panel: PanelContainer = null
+var _corner_panel: PanelContainer = null
 var title_label: Label
 var clock_label: Label
 var weather_label: Label
@@ -114,6 +116,10 @@ func _ready() -> void:
 	_build_log()
 	_build_bottom()
 	_build_alerts()  # CB5
+	_fit_zones()
+	_top_bar_panel.resized.connect(_fit_zones)
+	_corner_panel.minimum_size_changed.connect(_fit_zones)
+	get_viewport().size_changed.connect(_fit_zones)
 	# UB1 / U13 : sons d'interface (bus Interface d'AU1).
 	ui_feedback.connect(func(kind: String) -> void:
 		if kind == "card" or kind == "alert":
@@ -130,6 +136,7 @@ func _label(text: String, size: int = 16) -> Label:
 
 func _build_top_bar() -> void:
 	var panel := PanelContainer.new()
+	_top_bar_panel = panel
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
 	panel.offset_left = -470
@@ -180,6 +187,34 @@ func _build_top_bar() -> void:
 	siege_label = _label("", 14)
 	siege_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	siege_panel.add_child(siege_label)
+
+
+## U22 : ajuste les zones fixes de `UiLayout` au contenu réel du HUD de bataille, sans que deux
+## panneaux se chevauchent (y compris en 1280x720) :
+## - `TOASTS` (journal, alertes) commence à 9 % de la hauteur alors que la barre de rapport de
+##   forces descend plus bas : on la repousse sous la barre ;
+## - `MINIMAP` s'élargit vers la gauche si son contenu est plus large que la zone (sinon rogné) ;
+##   `BOTTOM_SELECTION` s'arrête avant la minicarte.
+## Rappelé à chaque changement de taille de la barre, de la minicarte ou de la fenêtre.
+func _fit_zones() -> void:
+	var layout := UiZones.layout()
+	if layout == null or _top_bar_panel == null:
+		return
+	var view := get_viewport().get_visible_rect().size
+	var toasts: Control = layout.zone_node(UiZones.Zone.TOASTS)
+	var bar_bottom := _top_bar_panel.offset_top + _top_bar_panel.size.y + 4.0
+	toasts.offset_top = maxf(0.0, bar_bottom - toasts.anchor_top * view.y)
+	if _corner_panel == null:
+		return
+	var minimap: Control = layout.zone_node(UiZones.Zone.MINIMAP)
+	var selection: Control = layout.zone_node(UiZones.Zone.BOTTOM_SELECTION)
+	var zone_left := minimap.anchor_left * view.x
+	var zone_width := (minimap.anchor_right - minimap.anchor_left) * view.x
+	var needed := _corner_panel.get_combined_minimum_size().x + 8.0
+	minimap.offset_left = -maxf(0.0, needed - zone_width)
+	var minimap_left := zone_left + minimap.offset_left
+	var selection_right := selection.anchor_right * view.x
+	selection.offset_right = -maxf(0.0, selection_right - (minimap_left - 6.0))
 
 
 func _draw_balance() -> void:
@@ -325,6 +360,7 @@ func _build_bottom() -> void:
 	# PO1 : minicarte et vitesses dans la zone `MINIMAP` (bas droite), calées dans son coin.
 	var corner_panel := PanelContainer.new()
 	corner_panel.name = "MapCorner"
+	_corner_panel = corner_panel
 	corner_panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(6))
 	corner_panel.add_child(_build_corner())
 	UiZones.put(UiZones.Zone.MINIMAP, corner_panel)
