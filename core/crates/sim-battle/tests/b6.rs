@@ -76,7 +76,7 @@ fn probe() {
     for o in &f.obstacles {
         println!("  {o:?}");
     }
-    println!("contact {:?}", first_contact(&mut sim, 300.0));
+    println!("contact {:?}", first_contact(&mut sim, 420.0));
     for seed in [3, 11] {
         let mut s = no_site_sim(seed);
         assert!(s.field().obstacles.is_empty() && s.field().village.is_none());
@@ -99,9 +99,9 @@ fn bocage_battles_still_engage() {
         let mut sim = BattleSim::new(battle, seed).unwrap();
         sim.set_ai(SideId::Attacker, true);
         covered += usize::from(defensive_cover(sim.field(), SideId::Defender).is_some());
-        let contact = first_contact(&mut sim, 300.0);
+        let contact = first_contact(&mut sim, 420.0);
         assert!(
-            contact.is_some_and(|t| t < 180.0),
+            contact.is_some_and(|t| t < 320.0),
             "seed {seed}: contact at {contact:?}"
         );
     }
@@ -143,9 +143,9 @@ fn the_site_reads_in_one_line() {
 #[test]
 fn demo_contact_stays_near_seventy_seconds() {
     let mut sim = demo_sim();
-    let contact = first_contact(&mut sim, 300.0);
+    let contact = first_contact(&mut sim, 420.0);
     assert!(
-        contact.is_some_and(|t| (55.0..=160.0).contains(&t)),
+        contact.is_some_and(|t| (120.0..=320.0).contains(&t)),
         "contact at {contact:?}"
     );
 }
@@ -198,7 +198,7 @@ fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "227 Some(Attacker) [44, 33, 41, 100, 100, 37, 0, 107, 20, 4]",
+            "484 Some(Attacker) [38, 35, 58, 100, 100, 31, 41, 98, 103, 19]",
         ),
         (
             11,
@@ -243,7 +243,9 @@ fn english_on_the_defensive(seed: u64) -> BattleSim {
     ];
     let mut battle = setup(units(&data, &french), units(&data, &english), None);
     battle.village = Some(false);
-    let mut sim = BattleSim::new(battle, seed).unwrap();
+    // The hedge and the village are laid for the standard 300 m line gap (ADR 0180
+    // widened the field battles' gap).
+    let mut sim = BattleSim::new_scaled(battle, seed, sim_battle::BattleScale::default()).unwrap();
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
     sim.set_weather(Weather::Clear);
@@ -275,7 +277,8 @@ fn defensive_archers_stand_behind_the_hedge() {
     assert!(cover.breaks_charge);
     // March to the hedge before the French close in.
     let mut covered_at = None;
-    while sim.elapsed() < 150.0 && covered_at.is_none() {
+    // L13b: the approach pace is x0.45 while the armies are apart.
+    while sim.elapsed() < 330.0 && covered_at.is_none() {
         sim.step();
         if english_archers(&sim).iter().all(|u| behind_hedge(u)) {
             covered_at = Some(sim.elapsed());
@@ -327,7 +330,7 @@ fn a_village_edge_is_cover_too() {
     let cover = defensive_cover(sim.field(), SideId::Defender).expect("the village is cover");
     assert_eq!(cover.kind, CoverKind::Village);
     assert!(sim.field().in_village(cover.center.0, cover.center.1));
-    run(&mut sim, 120.0);
+    run(&mut sim, 270.0);
     let inside = english_archers(&sim)
         .iter()
         .filter(|u| sim.field().in_village(u.x, u.z))
@@ -374,7 +377,7 @@ fn probe_shots() {
             defensive_cover(sim.field(), SideId::Defender),
             sim.field().site_label_fr()
         );
-        println!("  contact {:?}", first_contact(&mut sim, 300.0));
+        println!("  contact {:?}", first_contact(&mut sim, 420.0));
     }
 }
 
@@ -479,8 +482,8 @@ fn bocage_village_seed_5_engages_near_seventy_seconds() {
     battle.river = false;
     let mut sim = BattleSim::new(battle, 5).unwrap();
     sim.set_ai(SideId::Attacker, true);
-    let contact = first_contact(&mut sim, 300.0);
-    assert!(contact.is_some_and(|t| t < 90.0), "contact at {contact:?}");
+    let contact = first_contact(&mut sim, 420.0);
+    assert!(contact.is_some_and(|t| t < 260.0), "contact at {contact:?}");
 }
 
 /// B8: a horse that has already chased a rout far beyond its own battle
@@ -555,4 +558,15 @@ fn cavalry_waits_rather_than_charge_through_a_ditch() {
     run(&mut sim, 60.0);
     assert!(!has_event(&sim, "se brise sur la haie"));
     assert_ne!(sim.units()[0].state, UnitState::Melee);
+}
+
+#[test]
+#[ignore]
+fn tmp_seed11() {
+    let mut sim = no_site_sim(11);
+    run_to_end(&mut sim);
+    for e in sim.events() {
+        println!("EV {:>4.0}s {}", e.time, e.text_fr);
+    }
+    println!("{:?} {:?}", sim.end_kind(), sim.winner());
 }

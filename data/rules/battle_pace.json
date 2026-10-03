@@ -14,7 +14,7 @@
     "contagion_factor": 0.7,
     "melee_resolve_per_s": 0.4,
     "approach_range_m": 250.0,
-    "ai_patience_factor": 1.9
+    "ai_patience_factor": 1.5
   },
   "siege": {
     "melee_rate": 0.035,

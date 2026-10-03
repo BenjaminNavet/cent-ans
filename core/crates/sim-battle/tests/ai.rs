@@ -133,7 +133,9 @@ fn a_weaker_side_takes_the_high_ground_and_plants_stakes() {
         .iter()
         .map(|u| sim.field().height(u.x, u.z))
         .collect();
-    run(&mut sim, 90.0);
+    // L13b (ADR 0180): the approach pace of the field battles is slower
+    // (x0.45 while the armies are apart): 200 s instead of 90 s.
+    run(&mut sim, 200.0);
     let longbows: Vec<_> = sim
         .units()
         .iter()
