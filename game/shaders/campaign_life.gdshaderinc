@@ -220,6 +220,36 @@ float cloud_shadow(vec2 p) {
 	return 1.0 - cloud_shadow_amount * smoothstep(0.45, 0.78, c);
 }
 
+// --- RV-F : vent dans les forêts (rafales de `campaign_wind.gdshaderinc`) ---
+#include "res://shaders/campaign_wind.gdshaderinc"
+// Éclaircissement du couvert sous la rafale (feuilles retournées), teinte argentée visée, et
+// vagues fines dans la rafale (longueur d'onde en unités monde, force) ; la vague s'éteint avant
+// de passer sous ~6 pixels (pas de moiré au dézoom).
+uniform float forest_wind_amount = 0.11;
+uniform vec3 forest_wind_silver = vec3(1.0, 1.05, 1.08);
+uniform float forest_wind_ripple_len = 5.0;
+uniform float forest_wind_ripple = 0.45;
+
+// Facteur multiplicatif du couvert forestier (1 = calme). `forest_f` : part de forêt au pixel,
+// `snow` : neige au pixel (la rafale ne se voit pas sous la neige ; bois nus l'hiver : moins).
+vec3 forest_wind(vec2 p, float footprint, float forest_f, float snow) {
+	if (!life_enabled || forest_wind_amount <= 0.0 || forest_f < 0.02) {
+		return vec3(1.0);
+	}
+	// Nappes de ~16-34 u : s'effacent quand elles tombent sous ~5 pixels (grand dézoom).
+	float wide = 1.0 - smoothstep(wind_gust_size.y / 8.0, wind_gust_size.y / 3.0, footprint);
+	if (wide <= 0.0) {
+		return vec3(1.0);
+	}
+	float gust = wind_gust(p);
+	float fine = 1.0 - smoothstep(forest_wind_ripple_len / 12.0, forest_wind_ripple_len / 6.0, footprint);
+	float x = wind_frame(p).x;
+	float ripple = (sin(x * 6.2832 / forest_wind_ripple_len - TIME * 1.3) * 0.5 + 0.5) * fine;
+	float amount = forest_wind_amount * gust * mix(1.0 - forest_wind_ripple * 0.5 * fine, 1.0, ripple)
+		* forest_f * wide * (1.0 - snow) * (1.0 - 0.6 * life_season().w);
+	return mix(vec3(1.0), forest_wind_silver, amount) * (1.0 + amount);
+}
+
 // --- Terroirs (masque terroir_mask.gd) ---
 vec4 terroir_at(vec2 uv) {
 	return (life_enabled && has_terroir) ? texture(terroir_mask, uv) : vec4(0.0);

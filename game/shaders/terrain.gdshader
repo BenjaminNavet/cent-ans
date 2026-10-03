@@ -691,6 +691,7 @@ void fragment() {
 	// roussie, le reste intact, selon la dévastation lue au centre de la parcelle ; au loin, la
 	// moyenne des trois, découpée par un bruit large.
 	col = terroir_burn(col, terroir.b, 1.0 - snow * 0.7, p, footprint, burn_parcel, 1.0 / max(map_size.x, map_size.y));
+	col *= forest_wind(p, footprint, w_forest / max(wsum, 1e-3), snow);  // RV-F : rafales sur les forêts (campaign_life)
 
 	if (hc > 0.0) {
 		river_banks(p, map_size, footprint, col, roughness, n);  // lot V4

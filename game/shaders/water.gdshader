@@ -81,8 +81,12 @@ uniform float storm_rain_share = 0.4;
 // Lot CM2 : mer des portulans (vue stratégique parchemin).
 #include "res://shaders/parchment_sea.gdshaderinc"
 #include "res://shaders/ga_macro.gdshaderinc"  // GA4 : couleur de profondeur
+#include "res://shaders/water_glint.gdshaderinc"  // RV-F : paillettes du soleil
 
 varying float v_far;
+// RV-F : masque des paillettes et normale au repos (repère vue), du fragment vers light().
+varying float v_glint;
+varying vec3 v_flat_n;
 
 varying vec3 world_pos;
 
@@ -279,6 +283,10 @@ void fragment() {
 	vec3 pm_emit;
 	parchment_sea(p, uv, footprint, coast, lake_f, col, alpha, n, pm_emit);  // CM2
 
+	// RV-F : paillettes du soleil (vue moyenne et régionale), éteintes sur l'écume, les lacs et
+	// la terre (alpha) ; le parchemin les efface dans light().
+	v_glint = glint_mask(p, footprint, TIME) * (1.0 - clamp(foam, 0.0, 1.0)) * alpha * (1.0 - 0.6 * storm);
+	v_flat_n = normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
 	ALBEDO = col;
 	EMISSION = pm_emit;  // CM2
 	ALPHA = alpha;
@@ -294,4 +302,5 @@ void light() {
 	float power = mix(sun_spec_power, sun_spec_power * 0.25, v_far);
 	float spec = pow(max(dot(NORMAL, h), 0.0), power) * sun_spec_intensity * (1.0 - 0.7 * v_far);
 	SPECULAR_LIGHT += min(spec, sun_spec_max) * ATTENUATION * LIGHT_COLOR / PI * (1.0 - pm_weight());  // CM2
+	SPECULAR_LIGHT += glint_light(v_glint, v_flat_n, VIEW, LIGHT) * glint_color * ATTENUATION * LIGHT_COLOR * (1.0 - pm_weight());  // RV-F
 }
