@@ -72,6 +72,9 @@ var coast_dist_image: Image
 ## Lot V4 : lit des fleuves (`cent-ans geo rivers-render`), L8, distance signée à la berge
 ## ((valeur − 128) / 16 px, négative dans le lit) ; null si absent.
 var river_bed_image: Image
+## Lot RV-D : occlusion de vallée (`cent-ans geo relief-occlusion`), L8 demi-grille, 128 neutre,
+## > 128 vallée, < 128 crête ; null si absente (le terrain s'en passe).
+var relief_occlusion_image: Image
 ## Occupation du sol par province (vigne, sécheresse, bocage), calculée à la demande par
 ## `VegetationFields.landuse` (lot V2b) ; null tant qu'elle n'a pas été demandée.
 var landuse_image: Image
@@ -328,13 +331,15 @@ func _load() -> void:
 	# PB1 : les six masques de la carte sont décodés en parallèle (~100 ms chacun en série).
 	var masks := _load_images_parallel([["land_mask.png", -1], ["splat.png", Image.FORMAT_RGBA8],
 		["province_border_dist.png", Image.FORMAT_RGB8], ["coast_dist.png", Image.FORMAT_L8],
-		["river_bed.png", Image.FORMAT_L8], ["province_ids.png", -1]])
+		["river_bed.png", Image.FORMAT_L8], ["province_ids.png", -1],
+		["relief_occlusion.png", Image.FORMAT_L8]])
 	land_mask = masks[0]
 	splat_image = masks[1]
 	border_dist_image = masks[2]
 	coast_dist_image = masks[3]
 	river_bed_image = masks[4]
 	_preloaded_ids = masks[5]
+	relief_occlusion_image = masks[6]  # RV-D
 	if not _load_province_ids():
 		return
 	var t3 := Time.get_ticks_msec()
