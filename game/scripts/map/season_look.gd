@@ -92,6 +92,20 @@ static func grade(season: String) -> Dictionary:
 	return _season_block(season, "grade")
 
 
+## A6-C4/C5 : uniformes de teinte de saison du sol (bloc `ground`) : nom d'uniforme → float ou Vector3.
+static func ground() -> Dictionary:
+	var out := {}
+	var block: Variant = data().get("ground", {})
+	if block is Dictionary:
+		for key: String in block:
+			var value: Variant = block[key]
+			if value is Array and (value as Array).size() >= 3:
+				out[key] = _vec3(value, Vector3.ONE)
+			elif value is float or value is int:
+				out[key] = float(value)
+	return out
+
+
 ## Limite sud de la neige (début, fin du fondu, en fraction de la hauteur de la carte) ;
 ## `Vector2(-1, -1)` sans données.
 static func snow_south_fade() -> Vector2:

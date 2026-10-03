@@ -61,6 +61,8 @@ func build(renderer: RiversRenderer, cfg: Dictionary, names: Dictionary) -> void
 	var spacing: Array = cfg.get("spacing_px", [])
 	var max_dist: Array = cfg.get("max_distance_by_importance", [])
 	var min_importance := int(cfg.get("min_importance", 0))
+	var major_names: Array = cfg.get("major_names", [])
+	var major_distance := float(cfg.get("major_max_distance", 0.0)) * extent
 	var min_len := float(cfg.get("min_segment_px", 40.0))
 	var clear_px := float(cfg.get("clear_px_from_settlements", 4.0))
 	var max_labels := int(cfg.get("max_labels", 900))
@@ -91,6 +93,8 @@ func build(renderer: RiversRenderer, cfg: Dictionary, names: Dictionary) -> void
 		var n := 1 if step <= 0.0 else maxi(1, int(floor(total / step)))
 		var gap := total / float(n)
 		var visible_to := (float(max_dist[importance]) if importance < max_dist.size() else 0.1) * extent
+		if major_names.has(source) or major_names.has(text):
+			visible_to = maxf(visible_to, major_distance)  # A6-C2 : grands fleuves en vue moyenne
 		var clearance := maxf(step, gap) * SAME_NAME_CLEARANCE
 		for k in n:
 			var at := gap * (float(k) + 0.5)

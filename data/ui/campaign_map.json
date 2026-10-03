@@ -2,7 +2,7 @@
   "description": "Lot CV3-5 — réglages de rendu de la carte de campagne. map.army_figure_scale : agrandissement du général (figurine fine FG) qui porte l'étendard de l'ost, à la manière d'un « lord » de grande stratégie, aux paliers près et régional ; au palier lointain, retour à l'étendard et à la plaque d'effectif. Aucune règle de jeu. Lot TB2 : blocs de lisibilité (voile du brouillard de guerre, signes de ville, étiquettes, noms de région, nuées), lus par game/scripts/map/map_readability.gd.",
   "map": {
     "army_figure_scale": 1.8,
-    "army_scale_exponent": 0.65,
+    "army_scale_exponent": 0.65, "plate_scale": 0.8,
     "town_scale": 1.0,
     "town_style": "maquette",
     "camera_floor_distance": 20.0,
@@ -21,6 +21,7 @@
     "mist_min": 0.0,
     "mist_glow": 0.0
   },
+  "hover_bar": {"font_size": 14, "min_width": 0, "padding_x": 8},
   "signs": {
     "description": "TB2 (ADR 0151) : un seul signe par ville et par palier de zoom (l'écu au-dessus du nom). Les autres signes ne s'affichent que dans la couche « Signes » de la barre de filtres ou dans les modes de carte listés ici. keep_urgent : le signe reste visible quand il demande une réponse ce tour ; with_selected_army : visible quand une armée est sélectionnée (destination possible).",
     "max_per_town": 1,
@@ -79,7 +80,7 @@
     "mask_shadow": 0.06,
     "mask_shadow_softness": 0.5,
     "mask_shadow_scale": 0.5,
-    "cumulus_shadow": 0.40,
+    "cumulus_shadow": 0.40, "cumulus_medium_scale": 0.3, "cumulus_medium_distance": [200, 500], "parchment_icon_cell_px": 300,
     "cumulus_scale": 0.032,
     "cumulus_cover": [0.22, 0.5],
     "cumulus_cover_wet": 0.7,

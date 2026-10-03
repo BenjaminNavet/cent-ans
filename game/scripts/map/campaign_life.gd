@@ -72,6 +72,9 @@ func setup(map: Node) -> void:
 	_parse_cmdline()
 	if _terrain != null and _terrain.material != null:
 		_terrain.material.set_shader_parameter("life_enabled", enabled and not _off.has("terrain"))
+		var ground := SeasonLook.ground()  # A6-C4/C5 : teintes d'été et d'hiver du sol (données)
+		for uniform_name: String in ground:
+			_terrain.material.set_shader_parameter(uniform_name, ground[uniform_name])
 		var south := SeasonLook.snow_south_fade()  # TB1 : limite sud de la neige de plaine (données)
 		if south.x >= 0.0:
 			var winter_south: Variant = _terrain.material.get_shader_parameter("winter_south")

@@ -82,6 +82,10 @@ extends Resource
 @export var amount_ratio_near: float = 1.0
 @export var amount_ratio_far: float = 0.6
 
+## A6-C6 : facteur de densité propre à la pluie (la neige garde `amount_ratio_*`) : sans lui la pluie
+## couvrait tout l'écran de traînées ; 1 = densité d'origine.
+@export var rain_amount_scale: float = 1.0
+
 static var _default: PrecipitationProfile = null
 
 

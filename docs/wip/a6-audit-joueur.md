@@ -21,3 +21,6 @@ Tableau : `docs/audit/a6-audit-joueur.md`. Agents `cent-ans-mech` (Sonnet), un w
 
 ## Prochaine étape
 Attendre les rapports de la vague 1, relire chaque branche, fusionner ; lancer L3, L10, L13.
+
+## L9 (lisibilité de la carte) — fait, branche worktree-agent-aebbedcd06cbb5c34
+C1 stance_fill (alpha self 0,45→0,62, enemy 0,42→0,52, friend 0,35→0,45, saturation 0,8→1,0, flat_mix 0→0,35) ; C2 rivières proches seulement + `major_names` (0,22 de l'étendue) ; régions alpha 0,5→0,85 ; C3 `plate_scale` 0,8 et écus rang 1/2 160/380 ; C4/C5 grade été/hiver + bloc `ground` de campaign_seasons.json ; C6 `rain_amount_scale` 0,45 et amount_ratio_far 0,45 ; C7 `parchment_icon_cell_px` 300 ; C8 couleurs en constantes de map_mode_controller (islam vert, Avignon bleu, hérésie violet) ; C9 `cumulus_medium_scale` 0,3 ; U18 `hover_bar`. Reste : jugement visuel (`a6_map_shots.gd`) par la session principale.

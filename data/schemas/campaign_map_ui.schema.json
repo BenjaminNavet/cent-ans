@@ -31,6 +31,12 @@
           "minimum": 0,
           "maximum": 1
         },
+        "plate_scale": {
+          "description": "A6-C3 : facteur de taille des plaques d'effectif des armées (police, écu, marges) ; 1 = taille d'origine, 0,8 = −20 %.",
+          "type": "number",
+          "minimum": 0.3,
+          "maximum": 1.5
+        },
         "town_scale": {
           "description": "GC (ADR 0158) : grossissement constant des villes autour de leur centre sur la carte de campagne ; 1 = échelle réelle.",
           "type": "number",
@@ -131,6 +137,16 @@
           "minimum": 0,
           "maximum": 1
         }
+      }
+    },
+    "hover_bar": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A6-U18 : barre de survol de province (bas, centre), compacte : police réduite, aucune largeur minimale, marges serrées.",
+      "properties": {
+        "font_size": {"type": "integer", "minimum": 8, "maximum": 32},
+        "min_width": {"type": "number", "minimum": 0},
+        "padding_x": {"type": "number", "minimum": 0}
       }
     },
     "signs": {
@@ -404,6 +420,18 @@
           "minItems": 3,
           "maxItems": 3,
           "description": "RV-C : teinte de l'ombre (RVB multiplié, légère dominante froide)."
+        },
+        "cumulus_medium_scale": {
+          "type": "number", "minimum": 0, "maximum": 1,
+          "description": "A6-C9 : facteur de force des ombres de cumulus au-delà de cumulus_medium_distance[1] (sol tacheté en vue moyenne)."
+        },
+        "cumulus_medium_distance": {
+          "type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2,
+          "description": "A6-C9 : distances caméra (début, fin) du fondu des ombres de cumulus vers cumulus_medium_scale."
+        },
+        "parchment_icon_cell_px": {
+          "type": "number", "minimum": 0,
+          "description": "A6-C7 : une seule icône météo par cellule de cette taille (px écran à l'échelle 1) en vue parchemin ; 0 = icônes masquées."
         },
         "cumulus_fade_px": {
           "type": "array",
