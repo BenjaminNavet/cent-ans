@@ -492,10 +492,32 @@ impl CampaignState {
             .sum();
         // Embargoes (M5) cut trade.
         let net = (gross as f64 * self.embargo_income_factor(faction)).round() as i64;
+        // LR-04: the lord's demesne, wherever his seat is held.
+        let domain = self.faction_domain_income(data, faction);
         // DF1: difficulty (AI or player income).
-        crate::difficulty::scale_i64(net, self.difficulty_income_percent(data, faction))
+        crate::difficulty::scale_i64(
+            net + domain,
+            self.difficulty_income_percent(data, faction),
+        )
             // JR1: the alms of the crusade (0 for every other faction).
             + crate::crusade::alms(self, data, faction)
+    }
+
+    /// Seasonal revenue of the lord's own demesne (`economy.json`
+    /// `domain_income`, lot LR-04): paid while the faction holds its capital
+    /// city, nothing otherwise (a landless or exiled lord has no domain).
+    pub fn faction_domain_income(&self, data: &GameData, faction: &FactionId) -> i64 {
+        let amount = data.economy_rules.domain_income;
+        if amount <= 0 {
+            return 0;
+        }
+        let Some(city) = self.faction_capital_city(faction) else {
+            return 0;
+        };
+        if self.settlements.get(city).is_some_and(|s| s.siege.is_some()) {
+            return 0;
+        }
+        amount
     }
 
     /// Seasonal tax `faction` collects in `province` before embargoes and
