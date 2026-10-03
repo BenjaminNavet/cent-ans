@@ -1,4 +1,4 @@
-# ADR NNNN — Pas de déshérence pour les sièges électifs, branches cadettes des lignées éteintes
+# ADR 0179 — Pas de déshérence pour les sièges électifs, branches cadettes des lignées éteintes
 
 Date : 2026-10-03 (lot LR-05). Numéro à attribuer à la fusion.
 

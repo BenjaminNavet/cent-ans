@@ -1,4 +1,4 @@
-# NNNN — Garnison par habitant, prime d'occupation et plafond d'opinion à la lecture (lot LR-07)
+# ADR 0180 — Garnison par habitant, prime d'occupation et plafond d'opinion à la lecture (lot LR-07)
 
 Date : 2026-10-03. Statut : accepté.
 Suivi : `docs/wip/lr-07.md`. Prolonge l'ADR 0100 (RS-B, ordre public pondéré) et le lot RS-C

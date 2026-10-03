@@ -1,7 +1,7 @@
 """Water of 1340 in the land mask: historical lakes in, modern reservoirs out (lot LR-10).
 
 ``land_mask.png`` is Natural Earth land minus Natural Earth lakes (``geo build``).
-Two corrections bring it back to 1340 (ADR 0168):
+Two corrections bring it back to 1340 (ADR 0177):
 
 - **Modern reservoirs out.** A Natural Earth lake polygon that holds the point
   of a dam reservoir of ``modern_reservoirs.json`` (ADR 0036: Sainte-Croix, Der,

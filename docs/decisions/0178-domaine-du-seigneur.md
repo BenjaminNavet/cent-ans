@@ -1,4 +1,4 @@
-# NNNN — Domaine du seigneur, évènements proportionnels, garnison de la capitale hors coût fixe (lot LR-04)
+# ADR 0178 — Domaine du seigneur, évènements proportionnels, garnison de la capitale hors coût fixe (lot LR-04)
 
 Date : 2026-10-03. Statut : accepté. Mesures : `docs/wip/lr-04.md`. Suite des ADR 0114 (FE8) et
 0117 (garde du seigneur), point ouvert de `docs/wip/fe.md` et `docs/wip/fe8-equilibre.md`.

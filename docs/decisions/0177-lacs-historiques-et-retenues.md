@@ -1,4 +1,4 @@
-# ADR 0168 — Eaux de 1340 dans le masque terre : lacs historiques, retenues modernes
+# ADR 0177 — Eaux de 1340 dans le masque terre : lacs historiques, retenues modernes
 
 Date : 2026-10-03 (lot LR-10). Complète ADR 0036 (retenues de la pyramide), 0142 §4 (lacs SS3)
 et 0161 (HC2).
