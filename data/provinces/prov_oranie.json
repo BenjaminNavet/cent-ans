@@ -45,28 +45,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 45000,
+        "count": 112500,
         "unrest": 35,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 2700,
+        "count": 6750,
         "unrest": 35,
         "health": 52,
         "wealth": 60,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1125,
+        "count": 2812,
         "unrest": 30,
         "health": 60,
         "wealth": 65,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 540,
+        "count": 1350,
         "unrest": 30,
         "health": 60,
         "wealth": 70,
@@ -74,7 +74,7 @@
       }
     },
     "uncertain": true,
-    "note": "Côtes et plaines de l'Oranie, ancien domaine zayyanide. Chiffres estimés (uncertain)."
+    "note": "Côtes et plaines de l'Oranie, ancien domaine zayyanide. Chiffres estimés (uncertain). Effectifs relevés ×2,5 (lot LR-15) : le Maghreb était sous-estimé (Fès, plus de 100 000 habitants vers 1340, n'avait que 15 000 citadins ; Tunis 12 600)."
   },
   "buildings": [
     "bld_market",

@@ -41,7 +41,11 @@ fn starting_budget_breakdown() {
                 let bld = province_building_upkeep(&data, &s.buildings)
                     * building_upkeep_percent(&data, s.kind)
                     / 100;
-                let garr: i64 = s.garrison.iter().map(|u| unit_upkeep(&data, u)).sum::<i64>()
+                let garr: i64 = s
+                    .garrison
+                    .iter()
+                    .map(|u| unit_upkeep(&data, u))
+                    .sum::<i64>()
                     * garrison_upkeep_percent(&data, s.kind)
                     / 100;
                 row[if city { 1 } else { 2 }] += bld;

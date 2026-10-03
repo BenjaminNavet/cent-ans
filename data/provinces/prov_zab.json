@@ -43,28 +43,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 28000,
+        "count": 70000,
         "unrest": 20,
         "health": 55,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 1120,
+        "count": 2800,
         "unrest": 20,
         "health": 52,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 700,
+        "count": 1750,
         "unrest": 15,
         "health": 60,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 336,
+        "count": 840,
         "unrest": 15,
         "health": 60,
         "wealth": 65,
@@ -72,7 +72,7 @@
       }
     },
     "uncertain": true,
-    "note": "Ziban et Hodna : oasis de Biskra, dattes et tribus arabes (Dawawida) en marge du pouvoir hafside. Chiffres estimés (uncertain)."
+    "note": "Ziban et Hodna : oasis de Biskra, dattes et tribus arabes (Dawawida) en marge du pouvoir hafside. Chiffres estimés (uncertain). Effectifs relevés ×2,5 (lot LR-15) : le Maghreb était sous-estimé (Fès, plus de 100 000 habitants vers 1340, n'avait que 15 000 citadins ; Tunis 12 600)."
   },
   "buildings": [
     "bld_market"
