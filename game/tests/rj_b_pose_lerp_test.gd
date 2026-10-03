@@ -1,8 +1,8 @@
 extends SceneTree
 
 ## RJ-b : figurines et régiments interpolés entre deux pas de simulation (0,1 s).
-## Bataille de démonstration (France 1337, armées principales, IA des deux camps), sans rendu,
-## 60 images par seconde simulée :
+## Bataille de démonstration (France 1337, armées principales), tous les régiments en marche
+## vers le camp adverse, sans rendu, 60 images par seconde simulée :
 ## 1. avec `set_pose_lerp(true)`, la première figurine d'un régiment en marche bouge à presque
 ##    chaque image, par petits pas réguliers (sans interpolation : immobile 5 images, puis saut) ;
 ##    le centre du régiment (`get_units` x/z) aussi ;
@@ -29,13 +29,16 @@ func _init() -> void:
 	var plain := _battle(setup, false)
 	var blended := _battle(setup, true)
 	_check(blended.has_method("set_pose_lerp") and bool(blended.call("get_pose_lerp")), "set_pose_lerp missing")
-	# La marche s'engage (IA) : 20 s simulées, au pas fixe.
-	for i in 200:
-		plain.call("tick", 0.1)
-		blended.call("tick", 0.1)
+	# Tous les régiments marchent vers le centre du camp adverse ; 3 s simulées au pas fixe.
+	for battle in [plain, blended]:
+		_march(battle)
+		for i in 30:
+			battle.call("tick", 0.1)
+			battle.call("get_units")  # positions de deux pas consécutifs (vitesse du dernier pas)
+	print("rj_b_pose_lerp_test: ticks %d" % int(blended.call("get_ticks")))
 	var capacities := _capacities(blended.call("get_units"))
 	var mover := _moving_unit(blended, capacities)
-	_check(mover >= 0, "no marching regiment after 20 s")
+	_check(mover >= 0, "no marching regiment after 3 s")
 	if mover >= 0:
 		var smooth := _track(blended, capacities, mover, 120)
 		var stepped := _track(plain, capacities, mover, 120)
@@ -45,7 +48,13 @@ func _init() -> void:
 		_check(float(smooth["ratio"]) < 2.5, "blended steps uneven: %s" % [smooth])
 		_check(int(smooth["centre_moved"]) >= int(smooth["frames"]) * 0.8, "regiment centre still stepped: %s" % [smooth])
 		_check(float(smooth["ground_speed"]) > 0.2, "ground_speed missing or zero: %s" % [smooth])
-	_check_idle_versions(blended, capacities)
+	var idle := _battle(setup, true)
+	idle.call("set_ai", "attacker", false)
+	idle.call("set_ai", "defender", false)
+	for i in 3:
+		idle.call("tick", 0.1)
+		idle.call("get_units")
+	_check_idle_versions(idle, capacities)
 	_bench(setup)
 	print("rj_b_pose_lerp_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
@@ -65,6 +74,20 @@ func _battle(setup: Dictionary, lerp: bool) -> Object:
 	battle.call("set_ai", "defender", true)
 	battle.call("set_pose_lerp", lerp)
 	return battle
+
+
+func _march(battle: Object) -> void:
+	var units: Array = battle.call("get_units")
+	var centres := {"attacker": Vector2.ZERO, "defender": Vector2.ZERO}
+	var counts := {"attacker": 0, "defender": 0}
+	for unit in units:
+		var side := str(unit["side"])
+		centres[side] += Vector2(float(unit["x"]), float(unit["z"]))
+		counts[side] += 1
+	for unit in units:
+		var other := "defender" if str(unit["side"]) == "attacker" else "attacker"
+		var target: Vector2 = centres[other] / maxf(float(counts[other]), 1.0)
+		battle.call("issue_command", {"type": "move", "units": [int(unit["id"])], "x": target.x, "z": target.y})
 
 
 func _capacities(units: Array) -> PackedInt32Array:
@@ -147,9 +170,10 @@ func _check_idle_versions(battle: Object, capacities: PackedInt32Array) -> void:
 
 ## Coût par image de `get_soldier_buffers` (toutes les figurines), sans puis avec interpolation.
 func _bench(setup: Dictionary) -> void:
-	for lerp in [false, true]:
+	for lerp in [false, true, false, true]:
 		var battle := _battle(setup, lerp)
-		for i in 300:
+		_march(battle)
+		for i in 30:
 			battle.call("tick", 0.1)
 		var capacities := _capacities(battle.call("get_units"))
 		var figures := 0

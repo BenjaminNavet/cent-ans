@@ -12,6 +12,7 @@ use godot::prelude::*;
 use serde_json::Value;
 use sim_battle::{BattleOutcome, BattleSetup, Command, SideId, Unit, UnitState};
 
+use crate::battle_pose_lerp::push_pose;
 use crate::battle_replay::{note, REPLAY_REFUSAL};
 use crate::campaign_sim::{events_array, CampaignSim};
 use crate::convert::variant_to_json;
@@ -278,8 +279,6 @@ pub struct BattleSim {
     steps: crate::battle_step_job::StepPipeline,
     base: Base<RefCounted>,
 }
-
-use crate::battle_pose_lerp::push_pose;
 
 #[godot_api]
 impl IRefCounted for BattleSim {
