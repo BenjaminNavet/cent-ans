@@ -1043,6 +1043,8 @@ pub fn apply_effect(
             province,
             faction,
             from,
+            price,
+            payer,
         } => {
             let holder = state
                 .province_owner(province)
@@ -1199,7 +1201,10 @@ fn pay_sale_price(
             faction_name(data, payer),
             faction_name(data, r)
         ),
-        None => format!("{} verse {amount} pour son achat.", faction_name(data, payer)),
+        None => format!(
+            "{} verse {amount} pour son achat.",
+            faction_name(data, payer)
+        ),
     };
     events.push(GameEvent::new(EventKind::Chronicle, text).faction(payer));
 }

@@ -53,7 +53,10 @@ fn a_province_sale_pays_the_former_owner() {
     let mut state = start(&data, 1);
     state.chronicle.disabled = true;
     let dauphine = data_model::ProvinceId::new("prov_dauphine").unwrap();
-    let (france, empire) = (treasury(&state, "fac_france"), treasury(&state, "fac_empire"));
+    let (france, empire) = (
+        treasury(&state, "fac_france"),
+        treasury(&state, "fac_empire"),
+    );
     let sale = EventEffect::TransferProvince {
         province: dauphine.clone(),
         faction: None,
@@ -90,7 +93,10 @@ fn a_title_sale_takes_the_capital_and_absorbs_the_seller() {
             payer: None,
         },
     );
-    assert_eq!(state.province_owner(&reval), Some(&fac("fac_danish_estonia")));
+    assert_eq!(
+        state.province_owner(&reval),
+        Some(&fac("fac_danish_estonia"))
+    );
     let sale = EventEffect::TransferTitle {
         title: TitleId::new("tit_estonia").unwrap(),
         faction: Some(fac("fac_livonian_order")),
@@ -99,7 +105,10 @@ fn a_title_sale_takes_the_capital_and_absorbs_the_seller() {
         payer: Some(fac("fac_teutonic")),
     };
     apply(&mut state, &data, "fac_danish_estonia", sale.clone());
-    assert_eq!(state.province_owner(&reval), Some(&fac("fac_livonian_order")));
+    assert_eq!(
+        state.province_owner(&reval),
+        Some(&fac("fac_livonian_order"))
+    );
     assert!(!state.factions[&fac("fac_danish_estonia")].alive);
     // The seller is gone: the price leaves the map (the Danish crown).
     assert_eq!(treasury(&state, "fac_teutonic"), teutonic - 6000);
@@ -129,10 +138,7 @@ fn set_ruler_deposes_without_killing() {
             faction: None,
         },
     );
-    assert_eq!(
-        state.factions[&lithuania].ruler,
-        Some(chr("chr_gediminas"))
-    );
+    assert_eq!(state.factions[&lithuania].ruler, Some(chr("chr_gediminas")));
     apply(
         &mut state,
         &data,
@@ -159,7 +165,10 @@ fn danish_estonia_is_sold_to_the_order_in_1346() {
         .fired_events
         .contains(&evt("evt_vente_de_l_estonie")));
     let reval = data_model::ProvinceId::new("prov_harrien_wierland").unwrap();
-    assert_eq!(state.province_owner(&reval), Some(&fac("fac_livonian_order")));
+    assert_eq!(
+        state.province_owner(&reval),
+        Some(&fac("fac_livonian_order"))
+    );
     assert!(!state.factions[&fac("fac_danish_estonia")].alive);
 }
 
