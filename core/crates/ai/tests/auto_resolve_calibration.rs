@@ -4,7 +4,7 @@
 //! result of each in `sim-battle` (AI against AI, 6 seeds), produced by
 //! `RT_WRITE=1 cargo run --release -p ai --example balance_probe -- rt`.
 //! The auto-resolve must name the same winner (majority of its draws) in at
-//! least 80 % of them.
+//! least 95 % of them (A6-L1: 19 out of 20).
 
 use std::path::Path;
 
@@ -121,8 +121,8 @@ fn auto_resolve_agrees_with_3d_battles() {
     }
     let agreement = 1.0 - disagreements.len() as f64 / fixture.scenarios.len() as f64;
     assert!(
-        agreement >= 0.8,
-        "agreement {:.0} % < 80 %: {disagreements:#?}",
+        agreement >= 0.95,
+        "agreement {:.0} % < 95 %: {disagreements:#?}",
         agreement * 100.0
     );
 }

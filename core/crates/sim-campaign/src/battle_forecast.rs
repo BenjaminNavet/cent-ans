@@ -23,19 +23,20 @@
 
 use data_model::{GameData, Terrain};
 use serde::{Deserialize, Serialize};
+use sim_battle::SideId;
 
-use crate::battle_auto::{self, BattleContext, Side};
+use crate::battle_auto::{self, BattleContext, FieldConditions, Side, UnitProfile, Winner};
 use crate::battle_request::{is_live, BattleRequestError};
 use crate::events::{EventKind, GameEvent};
 use crate::movement;
+use crate::rng::CampaignRng;
 use crate::state::{BattleRequest, CampaignState};
 
 /// Morale lost by every regiment of an army that calls off its attack.
 pub const WITHDRAW_MORALE_LOSS: u8 = 10;
-/// Half-width of the auto-resolver's fortune of war (±10 %).
-const FORTUNE: f64 = 0.10;
-/// Integration steps of the win chance.
-const STEPS: usize = 400;
+/// First seed of the forecast's auto-resolutions (fixed: the forecast is
+/// pure and never touches the campaign RNG).
+const FORECAST_SEED: u64 = 0xF02_ECA57;
 
 /// Estimated balance of power of a pending battle.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -70,31 +71,6 @@ pub struct Reinforcement {
     pub regiments: u32,
     /// Name of its general, empty if none.
     pub general: String,
-}
-
-/// Probability that `a × u1 ≥ d × u2` with `u1`, `u2` uniform on
-/// `[1 − FORTUNE, 1 + FORTUNE]` (the auto-resolver's rolls).
-pub fn win_chance(attacker_power: f64, defender_power: f64) -> f64 {
-    if defender_power <= f64::EPSILON {
-        return if attacker_power > f64::EPSILON {
-            1.0
-        } else {
-            0.5
-        };
-    }
-    if attacker_power <= f64::EPSILON {
-        return 0.0;
-    }
-    let low = 1.0 - FORTUNE;
-    let width = 2.0 * FORTUNE;
-    let ratio = attacker_power / defender_power;
-    let total: f64 = (0..STEPS)
-        .map(|i| {
-            let u1 = low + width * (i as f64 + 0.5) / STEPS as f64;
-            ((ratio * u1 - low) / width).clamp(0.0, 1.0)
-        })
-        .sum();
-    total / STEPS as f64
 }
 
 fn head_count(side: &Side) -> u32 {
@@ -147,6 +123,8 @@ impl CampaignState {
         let mut modifiers = Vec::new();
         let mut garrison_is_player = false;
         let mut site = None;
+        let mut field_province = None;
+        let mut defender_profiles = None;
         let (mut attacker_side, mut defender_side, context, attackers, defenders) = if request.siege
         {
             let attackers = crate::siege::assault_coalition(self, &request.attacker);
@@ -161,6 +139,7 @@ impl CampaignState {
                 wall: self.wall_stand(data, &request.location),
                 crossing: None,
             };
+            defender_profiles = Some(battle_auto::army_profiles(data, &garrison));
             (
                 movement::coalition_side(self, data, &attackers),
                 movement::side_from_army(self, data, &garrison),
@@ -181,6 +160,7 @@ impl CampaignState {
                 &request.attacker,
                 &request.defender,
             );
+            field_province = province;
             let context = BattleContext {
                 defender_terrain_bonus: province.is_some_and(|p| {
                     matches!(
@@ -203,6 +183,27 @@ impl CampaignState {
                 defenders,
             )
         };
+        // CV3: stances (entrenched camp) and the ambush opening, as in the
+        // auto-resolver (field battles only).
+        if !request.siege {
+            for (side, lead, id) in [
+                (
+                    &mut attacker_side,
+                    self.armies.get(&request.attacker),
+                    SideId::Attacker,
+                ),
+                (
+                    &mut defender_side,
+                    self.armies.get(&request.defender),
+                    SideId::Defender,
+                ),
+            ] {
+                let ambusher = request.opening.ambush_victim() == Some(id.other());
+                let (charge, defense) = crate::posture::auto_resolve_bonus(data, lead, ambusher);
+                side.general_charge_percent += charge;
+                side.general_defense_percent += defense;
+            }
+        }
         // DF1: the AI's morale against the player, as in the auto-resolver.
         let attacker_has_player = self.coalition_has_player(&attackers);
         let defender_has_player = garrison_is_player || self.coalition_has_player(&defenders);
@@ -219,25 +220,13 @@ impl CampaignState {
                 "Niveau de difficulté : moral de l'IA {ai_morale:+}"
             ));
         }
-        let mut attacker_modifier = 1.0;
         if context.river_crossing {
-            attacker_modifier *= 0.8;
             modifiers.push("L'assaillant franchit une rivière (−20 %)".to_owned());
         }
         if let Some(site) = &site {
-            // RC: the attacker's coefficient of the crossing, and the
-            // defender's archers (folded into its ranged bonus, which
-            // `side_power` applies to ranged regiments only).
-            let rules = &data.river_crossing_rules;
-            let effect = site.effect();
-            attacker_modifier *= effect.attacker_factor(rules);
-            let ranged = effect.defender_ranged_factor(rules);
-            defender_side.general_ranged_percent =
-                ((1.0 + defender_side.general_ranged_percent / 100.0) * ranged - 1.0) * 100.0;
             modifiers.push(crate::river_crossing::forecast_line(data, site));
         }
         if context.walls {
-            attacker_modifier *= 0.7;
             modifiers.push("Murailles intactes (−30 % à l'assaillant)".to_owned());
             let wall = &context.wall;
             let rules = &data.auto_resolve;
@@ -255,30 +244,54 @@ impl CampaignState {
                 ));
             }
             if context.assault_bonus_percent > 0 {
-                attacker_modifier *= 1.0 + f64::from(context.assault_bonus_percent) / 100.0;
                 modifiers.push(format!(
                     "Porte enfoncée par le bélier (+{} %)",
                     context.assault_bonus_percent
                 ));
             }
         }
-        let defender_modifier = if context.defender_terrain_bonus {
+        if context.defender_terrain_bonus {
             modifiers.push("Le défenseur tient un terrain favorable (+15 %)".to_owned());
-            1.15
-        } else {
-            1.0
+        }
+        // The chance is the share of auto-resolutions the attackers win:
+        // the very resolver of the campaign, on fixed seeds (ADR 0177).
+        let attacker_profiles = battle_auto::coalition_profiles(self, data, &attackers);
+        let defender_profiles = defender_profiles
+            .unwrap_or_else(|| battle_auto::coalition_profiles(self, data, &defenders));
+        let checked = |side: &Side, profiles: Vec<UnitProfile>| {
+            if profiles.len() == side.units.len() {
+                profiles
+            } else {
+                side.units.iter().map(UnitProfile::infer).collect()
+            }
         };
-        let attacker_power = battle_auto::side_power(
-            &attacker_side,
-            battle_auto::effective_armor(&defender_side),
-            attacker_modifier,
-        );
-        let defender_power = battle_auto::side_power(
-            &defender_side,
-            battle_auto::effective_armor(&attacker_side),
-            defender_modifier,
-        );
-        let total = attacker_power + defender_power;
+        let attacker_profiles = checked(&attacker_side, attacker_profiles);
+        let defender_profiles = checked(&defender_side, defender_profiles);
+        let conditions = FieldConditions {
+            terrain: field_province.map(|p| p.terrain),
+            season: Some(self.season),
+            weather: None,
+        };
+        let samples = data.auto_resolve.forecast_samples.max(1);
+        let mut wins = 0u32;
+        let (mut attacker_power, mut defender_power) = (0.0, 0.0);
+        for seed in 0..samples {
+            let result = battle_auto::resolve_with_crossings(
+                &attacker_side,
+                &attacker_profiles,
+                &defender_side,
+                &defender_profiles,
+                &context,
+                &conditions,
+                &data.auto_resolve,
+                &data.river_crossing_rules,
+                &mut CampaignRng::from_seed(FORECAST_SEED + u64::from(seed)),
+            );
+            wins += u32::from(result.winner == Winner::Attacker);
+            attacker_power += result.attacker.power / f64::from(samples);
+            defender_power += result.defender.power / f64::from(samples);
+        }
+        let win_chance = f64::from(wins) / f64::from(samples);
         let player_attacks = attackers.iter().any(|id| {
             self.armies
                 .get(id)
@@ -287,12 +300,8 @@ impl CampaignState {
         Some(BattleForecast {
             attacker_power,
             defender_power,
-            attacker_share: if total > f64::EPSILON {
-                attacker_power / total
-            } else {
-                0.5
-            },
-            attacker_win_chance: win_chance(attacker_power, defender_power),
+            attacker_share: win_chance,
+            attacker_win_chance: win_chance,
             attacker_soldiers: head_count(&attacker_side),
             defender_soldiers: head_count(&defender_side),
             attacker_reinforcements: self.reinforcements(data, &attackers),
@@ -368,23 +377,5 @@ impl CampaignState {
             .faction(&self.player_faction.clone());
         self.events.push(event.clone());
         Ok(vec![event])
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn win_chance_is_symmetric_and_bounded() {
-        assert!((win_chance(100.0, 100.0) - 0.5).abs() < 1e-3);
-        assert_eq!(win_chance(130.0, 100.0), 1.0);
-        assert_eq!(win_chance(70.0, 100.0), 0.0);
-        let a = win_chance(105.0, 100.0);
-        let b = win_chance(100.0, 105.0);
-        assert!((a + b - 1.0).abs() < 1e-3, "{a} + {b}");
-        assert!(a > 0.5 && a < 1.0);
-        assert_eq!(win_chance(10.0, 0.0), 1.0);
-        assert_eq!(win_chance(0.0, 10.0), 0.0);
     }
 }

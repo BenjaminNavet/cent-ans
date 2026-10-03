@@ -642,48 +642,54 @@ fn armor_reduction(armor: f64, coefficient: f64) -> f64 {
 }
 
 /// Kills dealt by `from`'s shooters on `to` (`share` of a full volley).
+/// War-bow shooters (those who plant stakes) pierce mounted targets
+/// better than the rest (`AutoResolveRules::warbow_mounted_factor`).
 fn fire(field: &Field, from: &Host, to: &Host, share: f64, kills: &mut [f64]) {
     let rules = field.rules;
-    let raw: f64 = from
-        .fighters
-        .iter()
-        .filter(|f| f.profile.is_shooter() && f.ranged > 0.0)
-        .map(|f| f.men / 100.0 * f.ranged * f.quality * field.bow_factor(f.profile))
-        .sum::<f64>()
-        * rules.ranged_lethality
-        * share
-        * from.ranged
-        * from.damage
-        * from.morale_factor();
-    spread(
-        raw,
-        to,
-        |f| {
-            if f.profile.family == UnitFamily::HorseArchers {
-                rules.skirmish_exposure
-            } else {
-                1.0
-            }
-        },
-        |f| {
-            let mounted = matches!(
-                f.profile.family,
-                UnitFamily::Cavalry | UnitFamily::HorseArchers
-            );
-            armor_reduction(f.armor, rules.armor_vs_ranged)
-                * if mounted {
-                    rules.mounted_target_ranged_factor
+    for warbow in [false, true] {
+        let raw: f64 = from
+            .fighters
+            .iter()
+            .filter(|f| f.profile.is_shooter() && f.ranged > 0.0 && f.profile.stakes == warbow)
+            .map(|f| f.men / 100.0 * f.ranged * f.quality * field.bow_factor(f.profile))
+            .sum::<f64>()
+            * rules.ranged_lethality
+            * share
+            * from.ranged
+            * from.damage
+            * from.morale_factor();
+        spread(
+            raw,
+            to,
+            |f| {
+                if f.profile.family == UnitFamily::HorseArchers {
+                    rules.skirmish_exposure
                 } else {
                     1.0
                 }
-                * if f.profile.pavise {
-                    rules.pavise_factor
-                } else {
-                    1.0
-                }
-        },
-        kills,
-    );
+            },
+            |f| {
+                let mounted = matches!(
+                    f.profile.family,
+                    UnitFamily::Cavalry | UnitFamily::HorseArchers
+                );
+                armor_reduction(f.armor, rules.armor_vs_ranged)
+                    * if !mounted {
+                        1.0
+                    } else if warbow {
+                        rules.warbow_mounted_factor
+                    } else {
+                        rules.mounted_target_ranged_factor
+                    }
+                    * if f.profile.pavise {
+                        rules.pavise_factor
+                    } else {
+                        1.0
+                    }
+            },
+            kills,
+        );
+    }
 }
 
 /// Kills dealt by `from`'s cavalry charge on `to`, and the kills pikes
@@ -817,6 +823,11 @@ fn melee(field: &Field, from: &Host, to: &Host, kills: &mut [f64]) {
                 } else {
                     1.0
                 }
+                * if f.profile.stakes && to.defending {
+                    rules.stakes_cavalry_melee_factor
+                } else {
+                    1.0
+                }
         },
         kills,
     );
@@ -914,6 +925,12 @@ pub fn resolve_with_crossings(
     };
     let attacker_power = estimate(&a, &d, &field);
     let defender_power = estimate(&d, &a, &field);
+    // Fog of war: one draw per side for the whole battle (A6-L1, ADR 0177),
+    // so that nearly equal forces do not always end the same way.
+    if rules.battle_fortune > 0.0 {
+        a.damage *= 1.0 + rules.battle_fortune * (2.0 * rng.unit_f64() - 1.0);
+        d.damage *= 1.0 + rules.battle_fortune * (2.0 * rng.unit_f64() - 1.0);
+    }
 
     // Phases: volleys, one charge, melee rounds.
     #[derive(Clone, Copy)]
