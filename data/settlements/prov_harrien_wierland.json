@@ -92,7 +92,7 @@
       58.8856
     ],
     "weight": 8,
-    "owner": null,
+    "owner": "fac_livonian_order",
     "fortification_level": 2,
     "buildings": [
       "bld_castle"

@@ -20,6 +20,12 @@
   },
   "properties": {
     "default": {"$ref": "#/$defs/style"},
+    "provinces": {
+      "type": "object",
+      "description": "Exceptions par province (`prov_*`) : priment sur la région de la province.",
+      "propertyNames": {"pattern": "^prov_[a-z0-9_]+$"},
+      "additionalProperties": {"$ref": "#/$defs/style"}
+    },
     "regions": {
       "type": "object",
       "propertyNames": {"pattern": "^[a-z][a-z_]*$"},
