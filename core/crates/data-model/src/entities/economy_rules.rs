@@ -309,7 +309,7 @@ impl Default for EconomyRules {
     fn default() -> Self {
         EconomyRules {
             event_treasury_reference_income: 4000,
-            event_treasury_min_scale: 0.25,
+            event_treasury_min_scale: 0.03,
             administration_base: default_administration_base(),
             administration_per_province: default_administration_per_province(),
             administration_max: default_administration_max(),

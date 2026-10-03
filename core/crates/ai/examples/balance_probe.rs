@@ -128,6 +128,17 @@ struct CampaignRun {
     revolts: Vec<RevoltSample>,
     /// EQ1: seasons ending with a negative treasury, per faction.
     bankruptcies: BTreeMap<String, u32>,
+    /// A6-L3: bankruptcies per 10-turn bucket.
+    bankruptcies_by_decile: BTreeMap<u32, u32>,
+    /// A6-L3: treasury movements outside income and upkeep (tributes,
+    /// gold articles, costs of orders...), summed over factions and turns:
+    /// (outflows, inflows).
+    other_flows: (i64, i64),
+    /// A6-L3: the largest outflows (amount, turn, faction).
+    top_outflows: Vec<(i64, u32, String)>,
+    /// A6-L3: (turn, income, upkeep, army, buildings, treasury) at the first
+    /// bankruptcy of each faction.
+    first_bankruptcy: BTreeMap<String, (u32, i64, i64, i64, i64, i64)>,
     /// EQ1: seasons of each faction alive.
     alive_turns: u32,
     /// EQ1 (C4): provinces under each edict, sampled every 20 turns.
@@ -143,6 +154,11 @@ struct CampaignRun {
     edward_captured_early: bool,
     /// A6-L3: (gross income, net balance, treasury) of each major at turn 0.
     economy_turn0: BTreeMap<String, (i64, i64, i64)>,
+    /// A6-L3: (army, building, administration) upkeep of each faction at turn 0.
+    upkeep_turn0: BTreeMap<String, (i64, i64, i64)>,
+    /// A6-L3: last-turn (income, upkeep, army, buildings, treasury, provinces)
+    /// of every living faction.
+    final_economy: BTreeMap<String, (i64, i64, i64, i64, i64, usize)>,
     /// A6-L3: largest ransom asked of a captive, in livres.
     max_ransom: i64,
 }
@@ -217,14 +233,31 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
         log(f, &orders);
         orders
     };
-    for major in MAJORS {
-        let id = fid(major);
+    let all_factions: Vec<FactionId> = state.factions.keys().cloned().collect();
+    for id in all_factions {
         if let Some(economy) = state.faction_economy(data, &id) {
+            run.upkeep_turn0.insert(
+                id.as_str().to_owned(),
+                (
+                    economy.army_upkeep,
+                    economy.building_upkeep,
+                    economy.administration_upkeep,
+                ),
+            );
             run.economy_turn0.insert(
-                (*major).to_owned(),
+                id.as_str().to_owned(),
                 (
                     economy.projected_income + economy.trade_income,
-                    economy.net_income(),
+                    // Structural balance: the idle hoard's share of the
+                    // court melts with the treasury, so it is added back.
+                    economy.net_income() + {
+                        let rules = &data.economy_rules;
+                        let income = state.faction_income_effective(data, &id);
+                        let treasury = state.factions.get(&id).map_or(0, |f| f.treasury);
+                        (treasury - rules.opulence_seasons * income.max(0)).max(0)
+                            * rules.opulence_percent
+                            / 100
+                    },
                     state.factions.get(&id).map_or(0, |f| f.treasury),
                 ),
             );
@@ -283,7 +316,35 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
                 },
             );
         }
+        if let Ok(watched) = std::env::var("WATCH_FACTION") {
+            let id = fid(&watched);
+            eprintln!(
+                "plan t{turn} {watched}: {:?}",
+                ai::plan_turn(&state, data, &id)
+            );
+        }
+        let before: BTreeMap<FactionId, i64> = state
+            .factions
+            .iter()
+            .map(|(id, f)| (id.clone(), f.treasury))
+            .collect();
         let events = state.end_turn_with(data, planner);
+        for (id, f) in state
+            .factions
+            .iter()
+            .filter(|(id, f)| f.alive && id.as_str() != "fac_rebels")
+        {
+            let Some(prev) = before.get(id) else { continue };
+            let other = f.treasury - prev - (f.income_last_turn - f.upkeep_last_turn);
+            if other < 0 {
+                run.other_flows.0 += other;
+                run.top_outflows.push((other, turn, id.as_str().to_owned()));
+                run.top_outflows.sort();
+                run.top_outflows.truncate(25);
+            } else {
+                run.other_flows.1 += other;
+            }
+        }
         for event in &events {
             if event.kind == EventKind::Revolt && !event.text_fr.contains("passe aux mains") {
                 if let Some(p) = &event.province {
@@ -326,6 +387,19 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
             if event.kind == EventKind::Bankruptcy {
                 if let Some(f) = &event.faction {
                     *run.bankruptcies.entry(f.as_str().to_owned()).or_default() += 1;
+                    *run.bankruptcies_by_decile.entry(turn / 10).or_default() += 1;
+                    if let Some(state_f) = state.factions.get(f) {
+                        run.first_bankruptcy
+                            .entry(f.as_str().to_owned())
+                            .or_insert((
+                                turn,
+                                state_f.income_last_turn,
+                                state_f.upkeep_last_turn,
+                                state_f.army_upkeep_last_turn,
+                                state_f.building_upkeep_last_turn,
+                                state_f.treasury,
+                            ));
+                    }
                 }
             }
             *run.event_kinds
@@ -348,6 +422,22 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
                 }
             }
         }
+        if let Ok(watched) = std::env::var("WATCH_FACTION") {
+            let id = fid(&watched);
+            if let Some(f) = state.factions.get(&id) {
+                eprintln!(
+                    "watch t{turn} {watched}: treasury {} income {} upkeep {} (army {}, bld {})",
+                    f.treasury,
+                    f.income_last_turn,
+                    f.upkeep_last_turn,
+                    f.army_upkeep_last_turn,
+                    f.building_upkeep_last_turn
+                );
+                for event in events.iter().filter(|e| e.faction.as_ref() == Some(&id)) {
+                    eprintln!("   {:?} {}", event.kind, event.text_fr);
+                }
+            }
+        }
         for (id, faction) in &state.factions {
             let captive = faction
                 .ruler
@@ -356,9 +446,14 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
                 .is_some_and(|c| c.alive && c.captive);
             if captive && !ruler_captive.get(id).copied().unwrap_or(false) {
                 run.sovereign_captures += 1;
+                if std::env::var("CAPTURE_DEBUG").is_ok() {
+                    for event in &events {
+                        eprintln!("capture t{turn} {id}: {:?} {}", event.kind, event.text_fr);
+                    }
+                }
                 if id.as_str() == "fac_england" {
                     run.edward_captured = true;
-                    run.edward_captured_early |= turn < 4;
+                    run.edward_captured_early |= turn < 20;
                 }
             }
             ruler_captive.insert(id.clone(), captive);
@@ -447,6 +542,19 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
                 .sum(),
         );
     }
+    for (id, f) in state.factions.iter().filter(|(_, f)| f.alive) {
+        run.final_economy.insert(
+            id.as_str().to_owned(),
+            (
+                f.income_last_turn,
+                f.upkeep_last_turn,
+                f.army_upkeep_last_turn,
+                f.building_upkeep_last_turn,
+                f.treasury,
+                state.controlled_provinces(id).len(),
+            ),
+        );
+    }
     run.seconds = started.elapsed().as_secs_f64();
     run
 }
@@ -514,11 +622,17 @@ fn run_json(run: &CampaignRun) -> Value {
             "before4": r.before4, "before1": r.before1, "at": r.at, "occupied": r.occupied,
         })).collect::<Vec<_>>(),
         "bankruptcies": run.bankruptcies,
+        "bankruptcies_by_decile": run.bankruptcies_by_decile,
+        "other_flows": [run.other_flows.0, run.other_flows.1],
+        "top_outflows": run.top_outflows,
+        "first_bankruptcy": run.first_bankruptcy,
         "sovereign_captures": run.sovereign_captures,
         "edward_captured": run.edward_captured,
         "edward_captured_early": run.edward_captured_early,
         "max_ransom": run.max_ransom,
         "economy_turn0": run.economy_turn0,
+        "upkeep_turn0": run.upkeep_turn0,
+        "final_economy": run.final_economy,
         "edicts": run.edicts,
         "trade_income": [run.trade_income.0, run.trade_income.1],
     })
@@ -671,7 +785,7 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
     );
     let _ = writeln!(
         md,
-        "| Souverains capturés par partie / Édouard III capturé (parties, dont 4 premiers tours) | {:.1} / {} sur {} ({}) | Édouard < 10 % |",
+        "| Souverains capturés par partie / Édouard III capturé (parties, dont 20 premiers tours) | {:.1} / {} sur {} ({}) | Édouard < 10 % |",
         runs.iter().map(|r| f64::from(r.sovereign_captures)).sum::<f64>() / n,
         runs.iter().filter(|r| r.edward_captured).count(),
         runs.len(),
@@ -683,7 +797,11 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
         runs.iter().map(|r| r.max_ransom).max().unwrap_or(0)
     );
     if let Some(first) = runs.first() {
-        for (major, (gross, net, treasury)) in &first.economy_turn0 {
+        for (major, (gross, net, treasury)) in first
+            .economy_turn0
+            .iter()
+            .filter(|(k, _)| MAJORS.contains(&k.as_str()))
+        {
             let _ = writeln!(
                 md,
                 "| Tour 0 {major} : revenu brut / solde net / trésor | {gross} / {net} / {treasury} | solde >= 10 % du revenu |"

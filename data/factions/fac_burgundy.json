@@ -30,7 +30,7 @@
     "Comte d'Artois",
     "Pair de France"
   ],
-  "treasury": 15000,
+  "treasury": 2000,
   "prestige": 55,
   "starting_technologies": [
     "tech_water_mills",

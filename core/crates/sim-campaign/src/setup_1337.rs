@@ -80,7 +80,8 @@ fn main_army_composition(faction: &Faction) -> Vec<&'static str> {
             LONGBOWMEN,
             MOUNTED_ARCHERS,
         ],
-        "fac_burgundy" => vec![KNIGHTS, KNIGHTS, MEN_AT_ARMS, CROSSBOWMEN],
+        // A6-L3 (ADR 0179): the duchy's host cost 68 % of its receipts.
+        "fac_burgundy" => vec![KNIGHTS, MEN_AT_ARMS, CROSSBOWMEN],
         _ => vec![KNIGHTS, MEN_AT_ARMS, CROSSBOWMEN],
     }
 }
@@ -136,6 +137,13 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
         if state.controlled_provinces(&faction).len() < rule.min_provinces {
             continue;
         }
+        // A6-L3 (ADR 0179): the treasury is capped at a few seasons of income.
+        if let Some(seasons) = rule.treasury_max_income_seasons {
+            let (_, receipts) = structural_balance(state, data, &faction);
+            if let Some(f) = state.factions.get_mut(&faction) {
+                f.treasury = f.treasury.min(seasons * receipts.max(0));
+            }
+        }
         let capital = state.faction_capital_city(&faction).cloned();
         loop {
             let (net, receipts) = structural_balance(state, data, &faction);
@@ -165,7 +173,94 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
                         .then_with(|| b.2.cmp(&a.2))
                 });
             let Some((_, settlement, index)) = costliest else {
-                break;
+                // The fallbacks below only bring a deficit to zero; the
+                // surplus asked of the others stops at their garrisons.
+                if net >= 0 {
+                    break;
+                }
+                // A6-L3 (ADR 0179): no garrison left to trim, the starting
+                // host sends home its costliest unit (and is not raised at all when
+                // even its last unit is beyond the receipts).
+                let costliest_unit = state
+                    .armies
+                    .iter()
+                    .filter(|(_, a)| a.faction == faction && !a.units.is_empty())
+                    .flat_map(|(id, a)| {
+                        a.units.iter().enumerate().map(move |(index, unit)| {
+                            (crate::economy::unit_upkeep(data, unit), id.clone(), index)
+                        })
+                    })
+                    .filter(|(paid, _, _)| *paid > 0)
+                    .max_by(|a, b| {
+                        a.0.cmp(&b.0)
+                            .then_with(|| b.1.cmp(&a.1))
+                            .then_with(|| b.2.cmp(&a.2))
+                    });
+                let Some((_, army, index)) = costliest_unit else {
+                    // Last resort: the capital's garrison keeps one unit.
+                    let costliest_guard = capital.as_ref().and_then(|id| {
+                        let place = state.settlements.get(id)?;
+                        let percent = crate::economy::garrison_upkeep_percent(data, place.kind);
+                        place
+                            .garrison
+                            .iter()
+                            .enumerate()
+                            .filter(|_| place.garrison.len() > 1)
+                            .map(|(index, unit)| {
+                                (crate::economy::unit_upkeep(data, unit) * percent, index)
+                            })
+                            .filter(|(paid, _)| *paid > 0)
+                            .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(&a.1)))
+                            .map(|(_, index)| index)
+                    });
+                    if let (Some(index), Some(id)) = (costliest_guard, capital.as_ref()) {
+                        if let Some(place) = state.settlements.get_mut(id) {
+                            place.garrison.remove(index);
+                        }
+                        continue;
+                    }
+                    // Then the dearest building left unpaid for (a realm
+                    // whose upkeep alone outruns its receipts).
+                    let dearest = state
+                        .settlements
+                        .iter()
+                        .filter(|(_, s)| s.controller == faction)
+                        .flat_map(|(id, s)| {
+                            let percent = crate::economy::building_upkeep_percent(data, s.kind);
+                            s.buildings.iter().enumerate().map(move |(index, b)| {
+                                let upkeep = data
+                                    .buildings
+                                    .get(b)
+                                    .map_or(0, |t| i64::from(t.upkeep.unwrap_or(0)));
+                                (upkeep * percent, id.clone(), index)
+                            })
+                        })
+                        .filter(|(paid, _, _)| *paid > 0)
+                        .max_by(|a, b| {
+                            a.0.cmp(&b.0)
+                                .then_with(|| b.1.cmp(&a.1))
+                                .then_with(|| b.2.cmp(&a.2))
+                        });
+                    let Some((_, id, index)) = dearest else {
+                        break;
+                    };
+                    if let Some(place) = state.settlements.get_mut(&id) {
+                        place.buildings.remove(index);
+                    }
+                    continue;
+                };
+                if let Some(a) = state.armies.get_mut(&army) {
+                    a.units.remove(index);
+                    // A host that cannot pay even its last unit is not raised.
+                    if a.units.is_empty() {
+                        let general = a.general.clone();
+                        if let Some(general) = general {
+                            state.detach_general(&general);
+                        }
+                        state.armies.remove(&army);
+                    }
+                }
+                continue;
             };
             if let Some(place) = state.settlements.get_mut(&settlement) {
                 place.garrison.remove(index);

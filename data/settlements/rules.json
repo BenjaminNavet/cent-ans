@@ -20,7 +20,7 @@
     "abbey": 5,
     "village": 0
   },
-  "starting_budget": { "min_provinces": 5, "max_deficit_percent": 15 },
+  "starting_budget": { "min_provinces": 1, "max_deficit_percent": -10, "treasury_max_income_seasons": 4 },
   "capital_guard": {
     "units": 1,
     "upkeep_percent": 0

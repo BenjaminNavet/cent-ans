@@ -62,7 +62,7 @@ impl Default for PopulationRules {
             garrison_relief_per_100_men: 1.0,
             garrison_relief_max: 10.0,
             goods_relief_max: 10.0,
-            occupation_unrest: 20.0,
+            occupation_unrest: 24.0,
             foreign_religion_unrest: 10.0,
             disorder_unrest_weight: default_disorder_weight(),
             disorder_unrest_max: default_disorder_max(),
@@ -90,7 +90,7 @@ fn default_revolt_threshold() -> f64 {
 
 /// RS-B (ADR 0100): 3 before.
 fn default_revolt_seasons() -> u32 {
-    2
+    4
 }
 
 fn default_revolt_control_threshold() -> f64 {
