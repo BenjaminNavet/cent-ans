@@ -17,13 +17,13 @@
 // (`weather_shadow` des données) ; 0 par temps clair.
 uniform float cloud_shadow_amount = 0.05;
 // Force de l'ombre au cœur d'un cumulus (part de lumière retirée, 0-1).
-uniform float cloud_shadow_cumulus = 0.34;
-// Fréquence des cumulus (1 / px carte) : 0,045 ≈ cellules de 22 px, soit ≈ 16 km (amas de cumulus
-// lisibles en vue régionale ; le détail du bord descend à ≈ 4 km).
-uniform float cloud_shadow_scale = 0.045;
+uniform float cloud_shadow_cumulus = 0.40;
+// Fréquence des cumulus (1 / px carte) : 0,032 ≈ cellules de 30 px, soit ≈ 22 km (amas de cumulus
+// lisibles en vue régionale malgré le sol chargé ; le détail du bord descend à ≈ 5 km).
+uniform float cloud_shadow_scale = 0.032;
 // Couverture de beau temps (part du ciel couverte, 0-1) : minimum et maximum selon les régions,
 // et couverture sous un ciel chargé (pluie, neige, orage).
-uniform vec2 cloud_shadow_cover = vec2(0.18, 0.45);
+uniform vec2 cloud_shadow_cover = vec2(0.22, 0.5);
 uniform float cloud_shadow_cover_wet = 0.7;
 // Largeur du bord des cumulus (en part du seuil de bruit) : petit = bord net.
 uniform float cloud_shadow_edge = 0.10;
@@ -38,7 +38,7 @@ uniform vec3 cloud_shadow_sun = vec3(0.35, 0.71, 0.61);
 // Altitude des nuées au-dessus du sol (unités monde = px carte) pour le décalage solaire.
 uniform float cloud_shadow_height = 34.0;
 // Taille apparente (px d'écran) d'un cumulus où l'ombre commence à s'effacer, puis disparaît.
-uniform vec2 cloud_shadow_fade_px = vec2(14.0, 5.0);
+uniform vec2 cloud_shadow_fade_px = vec2(12.0, 4.0);
 
 float cs_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
