@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "stance_fill.schema.json",
+  "title": "Lavis par position diplomatique de la carte de campagne (RJ-d)",
+  "description": "Remplissage translucide des provinces selon la position du contrôleur envers le joueur (ADR 0175). Couleurs nous / ennemi / ami reprises de stance_cues.json ; réglages d'opacité, d'atténuation de près et de parchemin. Rendu seulement.",
+  "type": "object",
+  "required": ["colors", "alpha", "saturation", "zoom", "parchment_scale", "modes"],
+  "additionalProperties": false,
+  "$defs": {
+    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "unit": {"type": "number", "minimum": 0, "maximum": 1}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "colors": {
+      "type": "object",
+      "description": "Couleur des provinces des autres factions (ni nous, ni amis, ni ennemis) ; nous, ennemis et amis prennent la couleur de frontière de stance_cues.json.",
+      "required": ["other"],
+      "additionalProperties": false,
+      "properties": {"other": {"$ref": "#/$defs/color"}}
+    },
+    "alpha": {
+      "type": "object",
+      "description": "Opacité du lavis par catégorie (vue 3D, de loin). Rester modéré : le relief doit se lire à travers.",
+      "required": ["self", "enemy", "friend", "other"],
+      "additionalProperties": false,
+      "properties": {
+        "self": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "enemy": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "friend": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "other": {"type": "number", "minimum": 0, "maximum": 0.2}
+      }
+    },
+    "saturation": {"$ref": "#/$defs/unit", "description": "Part de la chromaticité de la couleur de position dans la teinte (à luminance du sol conservée)."},
+    "zoom": {
+      "type": "object",
+      "description": "Atténuation de près (distance caméra, unités carte) : opacité × near_scale sous near_distance, pleine au-delà de far_distance.",
+      "required": ["near_distance", "far_distance", "near_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "near_distance": {"type": "number", "minimum": 0},
+        "far_distance": {"type": "number", "minimum": 0},
+        "near_scale": {"$ref": "#/$defs/unit"}
+      }
+    },
+    "parchment_scale": {"$ref": "#/$defs/unit", "description": "Facteur d'opacité sur le parchemin, qui a déjà son lavis héraldique."},
+    "modes": {
+      "type": "object",
+      "description": "Modes de carte où le lavis paraît, avec leur facteur d'opacité ; absent : pas de lavis (les autres modes peignent leurs propres couleurs).",
+      "additionalProperties": {"$ref": "#/$defs/unit"}
+    }
+  }
+}
