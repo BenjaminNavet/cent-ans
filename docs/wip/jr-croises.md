@@ -22,14 +22,15 @@ Ordre : (JR1 ∥ JR2) → (JR3 ∥ JR4) → JR5.
 revendications `prov_jerusalem`, `prov_gaza`, `prov_safad`.
 
 ## État
-- JR1 fait (règle, pont, IA de prêche ; cargo 1362 ok). JR2 + JR2b faits (données, arêtes forcées).
-- JR3 fait (section Ferveur, repère HUD, sélecteur « Sans terre », évènements ; smoke ok).
-  Capture jugée : lisible ; défauts renvoyés : déficit de départ −1 076/saison, « tour(s) »,
-  armes illisibles (JR3b en cours).
-- JR4 en cours (IA outre-mer, équilibrage, seuils dans la vue).
+- TERMINÉ le 2026-10-03, fusionné dans main (ff). JR1-JR4b, JR3b, relecture indépendante et
+  JR5-fix faits ; cargo 1386 ok, smoke + jr_crusade_test ok, sonde finale dans jr4-equilibre.md
+  (Jérusalem prise par l'IA sur 1 graine sur 5, faction vivante partout).
 
-## Prochaine étape
-- JR5 : relecture du diff, tests complets, nouvelle capture, fusion dans main (worktree dédié, ff-only).
+## Reste
+- Partie pilote par le joueur (débarquement, prêche, siège de Jérusalem).
+- Graine 3 : ferveur un tour à 94, trésor négatif 4 tours d'affilée (tolérable).
+- Déficit structurel Mérinides, Hafsides, Lituanie, Serbie (hors JR, ADR 0165 § Ajouts).
+- `test_ars_nova_recordings` échoue depuis 54dd3e0c4 (musique, ADR 0166, autre session).
 
 ## Points ouverts
 - Usages de la capitale pour une faction sans cité (liste dans le rapport d'exploration, spec § 5.1).
