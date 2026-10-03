@@ -752,6 +752,15 @@ impl ReplayPlayer {
         });
     }
 
+    /// RJ-b: the part of the next recorded step already elapsed (see
+    /// [`BattleSim::step_fraction`]); 1 at the end of the recording.
+    pub fn step_fraction(&self, sim: &BattleSim) -> f64 {
+        if self.at_end(sim) || !sim.can_step() {
+            return 1.0;
+        }
+        (self.accumulator / DT).clamp(0.0, 1.0)
+    }
+
     /// Advances playback by `dt` battle seconds; returns the steps run.
     pub fn advance(&mut self, sim: &mut BattleSim, dt: f64) -> u32 {
         if !dt.is_finite() || dt <= 0.0 {
