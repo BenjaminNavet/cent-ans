@@ -32,9 +32,9 @@
       "river": false,
       "reference_3d": {
         "runs": 6,
-        "attacker_wins": 5,
-        "attacker_losses": 573,
-        "defender_losses": 444
+        "attacker_wins": 0,
+        "attacker_losses": 635,
+        "defender_losses": 271
       }
     },
     {
@@ -68,9 +68,9 @@
       "river": false,
       "reference_3d": {
         "runs": 6,
-        "attacker_wins": 5,
-        "attacker_losses": 603,
-        "defender_losses": 428
+        "attacker_wins": 1,
+        "attacker_losses": 466,
+        "defender_losses": 208
       }
     },
     {
@@ -92,9 +92,9 @@
       "river": false,
       "reference_3d": {
         "runs": 6,
-        "attacker_wins": 6,
-        "attacker_losses": 117,
-        "defender_losses": 245
+        "attacker_wins": 0,
+        "attacker_losses": 311,
+        "defender_losses": 54
       }
     },
     {
@@ -116,9 +116,9 @@
       "river": false,
       "reference_3d": {
         "runs": 6,
-        "attacker_wins": 5,
-        "attacker_losses": 16,
-        "defender_losses": 1503
+        "attacker_wins": 6,
+        "attacker_losses": 12,
+        "defender_losses": 1552
       }
     },
     {
@@ -141,7 +141,7 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 1543,
+        "attacker_losses": 1325,
         "defender_losses": 12
       }
     },
@@ -165,8 +165,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 224,
-        "defender_losses": 54
+        "attacker_losses": 226,
+        "defender_losses": 68
       }
     },
     {
@@ -189,7 +189,7 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 763,
+        "attacker_losses": 724,
         "defender_losses": 0
       }
     },
@@ -213,8 +213,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 6,
-        "attacker_losses": 90,
-        "defender_losses": 196
+        "attacker_losses": 40,
+        "defender_losses": 168
       }
     },
     {
@@ -237,8 +237,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 193,
-        "defender_losses": 95
+        "attacker_losses": 157,
+        "defender_losses": 46
       }
     },
     {
@@ -261,8 +261,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 6,
-        "attacker_losses": 65,
-        "defender_losses": 680
+        "attacker_losses": 36,
+        "defender_losses": 723
       }
     },
     {
@@ -285,7 +285,7 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 425,
+        "attacker_losses": 391,
         "defender_losses": 0
       }
     },
@@ -309,8 +309,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 6,
-        "attacker_losses": 40,
-        "defender_losses": 143
+        "attacker_losses": 50,
+        "defender_losses": 131
       }
     },
     {
@@ -333,8 +333,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 6,
-        "attacker_losses": 44,
-        "defender_losses": 216
+        "attacker_losses": 19,
+        "defender_losses": 304
       }
     },
     {
@@ -357,8 +357,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 352,
-        "defender_losses": 283
+        "attacker_losses": 321,
+        "defender_losses": 232
       }
     },
     {
@@ -381,8 +381,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 821,
-        "defender_losses": 530
+        "attacker_losses": 653,
+        "defender_losses": 447
       }
     },
     {
@@ -406,7 +406,7 @@
         "runs": 6,
         "attacker_wins": 6,
         "attacker_losses": 0,
-        "defender_losses": 518
+        "defender_losses": 582
       }
     },
     {
@@ -441,8 +441,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 531,
-        "defender_losses": 51
+        "attacker_losses": 247,
+        "defender_losses": 3
       }
     },
     {
@@ -477,8 +477,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 505,
-        "defender_losses": 67
+        "attacker_losses": 292,
+        "defender_losses": 12
       }
     },
     {
@@ -505,8 +505,8 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 6,
-        "attacker_losses": 1,
-        "defender_losses": 751
+        "attacker_losses": 0,
+        "defender_losses": 851
       }
     },
     {
@@ -533,7 +533,7 @@
       "reference_3d": {
         "runs": 6,
         "attacker_wins": 0,
-        "attacker_losses": 1318,
+        "attacker_losses": 827,
         "defender_losses": 0
       }
     }

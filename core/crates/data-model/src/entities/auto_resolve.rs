@@ -95,11 +95,17 @@ pub struct AutoResolveRules {
     pub pike_reflect: f64,
     /// Multiplier on a charge received by defending archers with `stakes`.
     pub stakes_charge_factor: f64,
+    /// Multiplier on the melee kills of horsemen against defenders behind
+    /// stakes (the horses are held at the palisade).
+    pub stakes_cavalry_melee_factor: f64,
     /// Multiplier on melee blows between pikes and cavalry: pikes strike
     /// riders harder by this factor, riders strike pikes softer by it.
     pub pike_vs_cavalry: f64,
     /// Multiplier on shots received by mounted units (they close fast).
     pub mounted_target_ranged_factor: f64,
+    /// Same for shooters who plant stakes (war bows, whose arrows pierce
+    /// horse and rider).
+    pub warbow_mounted_factor: f64,
     /// Multiplier on shots received by units with a `pavise`.
     pub pavise_factor: f64,
     /// Multiplier on the melee of cavalry after the charge (horsemen
@@ -120,6 +126,11 @@ pub struct AutoResolveRules {
     pub loser_min_losses: f64,
     /// Fortune of war: every phase's damage is scaled by `1 ± jitter`.
     pub jitter: f64,
+    /// Auto-resolutions run by the pre-battle forecast (ADR 0177).
+    pub forecast_samples: u32,
+    /// Fog of war: each side's damage is scaled once per battle by
+    /// `1 ± battle_fortune` (ADR 0177).
+    pub battle_fortune: f64,
     /// Multiplier on the attacker crossing a river.
     pub river_attacker: f64,
     /// Multiplier on the attacker storming walls.
@@ -176,8 +187,10 @@ impl Default for AutoResolveRules {
             pike_charge_factor: 0.25,
             pike_reflect: 1.0,
             stakes_charge_factor: 0.6,
+            stakes_cavalry_melee_factor: 1.0,
             pike_vs_cavalry: 3.0,
             mounted_target_ranged_factor: 0.5,
+            warbow_mounted_factor: 0.5,
             pavise_factor: 0.7,
             cavalry_melee_factor: 1.0,
             morale_per_loss_percent: 1.0,
@@ -188,6 +201,8 @@ impl Default for AutoResolveRules {
             loser_max_losses: 0.7,
             loser_min_losses: 0.1,
             jitter: 0.15,
+            forecast_samples: 100,
+            battle_fortune: 0.75,
             river_attacker: 0.8,
             walls_attacker: 0.7,
             walls_defender_ranged: 1.3,
