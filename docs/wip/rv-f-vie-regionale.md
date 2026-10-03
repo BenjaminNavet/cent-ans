@@ -12,13 +12,22 @@ d ≈ 150-1200), sans pictogrammes (ADR 0124), sans coût FPS notable, rien qui 
 3. Vent dans les forêts : `forest_wind` (campaign_life) appelée par une ligne `// RV-F` du
    terrain ; rafales de luminosité qui traversent le couvert ; impostors (partie vent).
 
-## État
-- [x] 1 panaches : `life_plume.gdshader`, `LifeEffects._fill_plumes/_update_plumes` (1 appel de rendu)
-- [x] 2 reflets : `water_glint.gdshaderinc` dans `water.gdshader` (fleuves non : pas de light() dans
-  `river_water.gdshader`, rubans trop fins en vue régionale)
-- [x] 3 vent : `campaign_wind.gdshaderinc` partagé ; `forest_wind` (campaign_life) + 1 ligne terrain ;
-  imposteurs (flexion + éclaircissement)
-- [ ] import, smoke, planche `tests/rv_life_shot.gd` (≤ 5 captures), A/B `--bench`
+## État (fini, à intégrer dans feat/rv)
+- [x] Panaches régionaux : `life_plume.gdshader` + `LifeEffects._fill_plumes/_update_plumes` ; 2361
+  instances (1 appel de rendu), densité saison (`PLUME_DENSITY_PER_BOOST`), incendies sombres
+  (siège, dévastation ≥ 45, hameaux brûlés 1/6), palier moyen seulement, coupés par `--no-life=smoke`.
+  Piège corrigé : `PROJECTION_MATRIX[1][1]` est négatif sous Vulkan (abs).
+- [x] Paillettes de mer : `water_glint.gdshaderinc` (cellules de 4 px, deux grilles fondues selon
+  l'empreinte, nappes), dans `water.gdshader` light(). Fleuves non traités (pas de light()).
+- [x] Vent : `campaign_wind.gdshaderinc` partagé ; `forest_wind` + 1 ligne `// RV-F` du terrain ;
+  imposteurs (flexion, éclaircissement). Non jugé visuellement (animé).
+- [x] Smoke vert ; planches `docs/audit/captures/rv-f/` (5 captures).
+- Bench (`rv_life_shot.gd --bench`) : bruit ± 2 ms (machine chargée, autres agents) ; pas de coût
+  mesurable à d=300/420.
 
-## Prochaine étape
-Import Godot (long, worktree neuf), smoke, planches été/hiver, réglages, bench.
+## Points ouverts
+- Réglage final des panaches (dernière valeur, entre « trop de traits » et « invisible ») non revu
+  en capture : à juger en jeu (`screen_size`, `smoke_alpha`, `PLUME_DENSITY_PER_BOOST`).
+- Paillettes : semis de points un peu régulier ; soleil derrière la caméra → surtout la traîne.
+- Mouchetures jaunes sur les forêts à d=300 : préexistantes (A/B), pas RV-F.
+- Fumées FA (ADR 0164, flipbooks) non réutilisées : trop fines pour la vue régionale.
