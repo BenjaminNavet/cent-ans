@@ -57,7 +57,8 @@
     "truce_binds_allies": true,
     "long_war_years": 8,
     "long_war_points_per_year": 8,
-    "long_war_max_points": 100
+    "long_war_max_points": 100,
+    "bastion_war_points": 30
   },
   "passage": {
     "enabled": true,

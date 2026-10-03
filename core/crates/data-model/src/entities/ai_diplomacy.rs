@@ -227,6 +227,12 @@ pub struct NegotiationRules {
     /// EQ6: cap of those points.
     #[serde(default)]
     pub long_war_max_points: i32,
+    /// LR-11: treaty points in favour of peace, on both sides, once a war
+    /// against a realm down to its last bastions (never besieged without a
+    /// claim, F4) has lasted `min_war_turns` with no clear winner: nothing is
+    /// left to fight for. 0: off.
+    #[serde(default)]
+    pub bastion_war_points: i32,
 }
 
 impl Default for NegotiationRules {
@@ -264,6 +270,7 @@ impl Default for NegotiationRules {
             long_war_years: 0,
             long_war_points_per_year: 0,
             long_war_max_points: 0,
+            bastion_war_points: 0,
         }
     }
 }

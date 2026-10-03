@@ -968,6 +968,27 @@ fn sortie(
                 army.stance = Stance::Normal;
             }
         }
+        // LR-11: the besiegers put to flight fall back like any beaten army
+        // (they stayed under the walls, out of the siege stance, and the AI
+        // could neither resume the siege nor march off it).
+        let battlefield = data.settlement_point(settlement).unwrap_or(camp);
+        for id in &targets {
+            let before = strength_before.get(id).copied().unwrap_or(0);
+            let after = state.armies.get(id).map_or(0, |a| a.total_strength());
+            let losses_percent = if before == 0 {
+                0
+            } else {
+                (u64::from(before.saturating_sub(after)) * 100 / u64::from(before)) as u32
+            };
+            crate::movement::retreat_beaten_army(
+                state,
+                data,
+                id,
+                battlefield,
+                losses_percent,
+                events,
+            );
+        }
         // The siege is lifted only when no other army still besieges.
         if besiegers_of(state, settlement).is_empty() {
             if let Some(s) = state.settlements.get_mut(settlement) {
