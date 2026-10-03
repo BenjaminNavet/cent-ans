@@ -32,7 +32,7 @@ func _test_windmills() -> void:
 	var bodies := effects.get_node("WindmillBodies") as MultiMeshInstance3D
 	var sails := effects.get_node("WindmillSails") as MultiMeshInstance3D
 	effects._update_mill_shadows(60.0)
-	_check(bodies.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON and sails.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON, "high: windmill shadows at d = 60")
+	_check(bodies.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON and sails.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "high: windmill body shadows at d = 60, never the sails (A6-L10)")
 	effects._update_mill_shadows(200.0)
 	_check(bodies.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF and sails.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "high: no windmill shadows beyond veg_shadow_distance")
 	RenderQuality.override_level = "low"

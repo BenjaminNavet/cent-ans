@@ -136,7 +136,9 @@ func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
 	var sails_material := ShaderMaterial.new()
 	sails_material.shader = WINDMILL_SHADER
 	_windmill_sails = _make_instance("WindmillSails", sails_material)
-	_windmill_sails.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	# A6-L10 : les ailes (treillis fin, instances de toute la carte) ne portent pas d'ombre : elles
+	# coûtaient 439 k primitives en 8 passes d'ombre au zoom max de Paris pour une ombre à peine lisible.
+	_windmill_sails.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_mill_shadows = true
 	if not is_in_group(RenderQuality.CLIENT_GROUP):
 		add_to_group(RenderQuality.CLIENT_GROUP)
@@ -817,7 +819,6 @@ func _update_mill_shadows(camera_distance: float, force := false) -> void:
 	_mill_shadows = shadows
 	var setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_windmill_bodies.cast_shadow = setting
-	_windmill_sails.cast_shadow = setting
 
 
 func mill_shadows() -> bool:

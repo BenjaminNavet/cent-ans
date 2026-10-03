@@ -18,3 +18,5 @@ func build(map_data: MapData) -> void:
 		widths.append(width)
 	mesh = PolylineMesh.build_screen_lines(lines, widths, map_data, lift)
 	material_override = PolylineMesh.line_material(color, min_px)
+	# A6-L10 : liseré translucide, aucune ombre à porter (483 k primitives de passes d'ombre sinon).
+	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
