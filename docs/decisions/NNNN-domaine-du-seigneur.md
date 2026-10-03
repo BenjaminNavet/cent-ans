@@ -36,7 +36,7 @@ Deux autres causes sont apparues à la mesure, dès que ces comtés ont eu de qu
    qui tient la cité de sa capitale, non assiégée, perçoit ce revenu fixe de son domaine propre
    (cens, péages, moulins, droits), hors barème d'impôt et hors embargo, avant le coefficient de
    difficulté (`CampaignState::faction_domain_income`, dans `faction_income_effective_walk`).
-   Absent ou 0 : comportement antérieur. Une faction sans cité (croisés, exilés) n'en a pas.
+   À 0 : comportement antérieur. Une faction sans cité (croisés, exilés) n'en a pas.
    Valeur : la plus petite somme ronde qui laisse aux huit comtés cités, bâtiments et cour payés,
    de quoi entretenir une milice urbaine dans leur cité (test
    `sim-campaign/tests/lr04_domain_income.rs`) ; à 100, les Îles (123 livres de bâtiments)
