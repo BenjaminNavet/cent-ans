@@ -249,7 +249,7 @@ fn ring_works(
 ) -> (SiegeWorks, Option<(f64, f64)>) {
     let fort = f64::from(fortification.min(5));
     let thickness = 2.5 + 0.5 * fort;
-    let wall_height = 6.0 + 1.5 * fort + height_bonus;
+    let wall_height = 6.0 + 1.2 * fort + height_bonus;
     let (wall_hp, gate_hp) = SiegeWorkRules::bundled().hp(fortification);
     let v = &shape.vertices;
     let n = v.len();
@@ -283,7 +283,7 @@ fn ring_works(
             push_split(&mut pieces, a, b, wall_hp);
         }
     }
-    let tower_radius = (5.0 + fort) * tower_scale;
+    let tower_radius = (3.5 + 0.4 * fort) * tower_scale;
     let mut towers: Vec<Tower> = Vec::new();
     for (i, p) in pieces.iter().enumerate() {
         let next_is_gate = pieces[(i + 1) % pieces.len()].kind == PieceKind::Gate;
@@ -295,7 +295,7 @@ fn ring_works(
             x: p.b.0,
             z: p.b.1,
             radius: tower_radius * if at_gatehouse { 1.25 } else { 1.0 },
-            height: wall_height + if at_gatehouse { 7.0 } else { 4.0 },
+            height: wall_height + if at_gatehouse { 5.0 } else { 3.5 },
         });
     }
     for end in [pieces[gate].a, pieces[gate].b] {

@@ -10,12 +10,12 @@
 //! ([`CustomBattle::battle_setup`]). The weather, when forced, is carried by
 //! the replay start (`ReplayStart::weather`), not by the setup.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
 use data_model::{
-    BattleAbility, BattleOrder, BattleStandardRules, Faction, FactionId, Terrain, UnitType,
-    UnitTypeId,
+    BattleAbility, BattleOrder, BattleStandardRules, Faction, FactionId, TechnologyId, Terrain,
+    UnitType, UnitTypeId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -90,6 +90,11 @@ pub struct CustomSide {
     /// Unit type ids bought, one entry per regiment.
     #[serde(default)]
     pub units: Vec<String>,
+    /// LR-12: technologies granted on top of the faction's starting ones
+    /// (the campaign's `starting_technologies`), which unlock the units that
+    /// require one (`UnitType::required_technology`).
+    #[serde(default)]
+    pub technologies: Vec<String>,
 }
 
 /// A custom battle composition (the dictionary of the screen). Field
@@ -166,13 +171,57 @@ pub fn faction_name(faction: &Faction) -> String {
         .unwrap_or_else(|| faction.name.display.clone())
 }
 
+/// LR-12: the technologies a side knows in a custom battle: the faction's
+/// starting technologies (as at the start of the campaign) plus `extra`
+/// chosen on the screen (no research happens in a custom battle).
+pub fn known_technologies(faction: &Faction, extra: &[String]) -> BTreeSet<TechnologyId> {
+    faction
+        .starting_technologies
+        .iter()
+        .cloned()
+        .chain(
+            extra
+                .iter()
+                .filter_map(|t| TechnologyId::new(t.as_str()).ok()),
+        )
+        .collect()
+}
+
 /// Whether `faction` may field `unit_type` in a custom battle: the
-/// campaign's faction and culture restrictions (technology is ignored: no
-/// research in a custom battle). The period is [`in_period`].
-pub fn in_roster(unit_type: &UnitType, faction: &Faction) -> bool {
+/// campaign's faction, culture and technology restrictions (`techs`, see
+/// [`known_technologies`]). The period is [`in_period`].
+pub fn in_roster(unit_type: &UnitType, faction: &Faction, techs: &BTreeSet<TechnologyId>) -> bool {
     (unit_type.required_faction.is_empty() || unit_type.required_faction.contains(&faction.id))
         && (unit_type.required_culture.is_empty()
             || unit_type.required_culture.contains(&faction.culture))
+        && unit_type
+            .required_technology
+            .as_ref()
+            .is_none_or(|t| techs.contains(t))
+}
+
+/// LR-12: the technologies `faction` does not know yet that gate at least one
+/// unit it could otherwise field in `year`, with the units each unlocks:
+/// what the screen offers to grant.
+pub fn grantable_technologies<'a>(
+    unit_types: &'a BTreeMap<UnitTypeId, UnitType>,
+    faction: &Faction,
+    year: i32,
+) -> BTreeMap<TechnologyId, Vec<&'a UnitType>> {
+    let known = known_technologies(faction, &[]);
+    let mut out: BTreeMap<TechnologyId, Vec<&UnitType>> = BTreeMap::new();
+    for unit in unit_types.values() {
+        let Some(tech) = &unit.required_technology else {
+            continue;
+        };
+        if !known.contains(tech)
+            && in_period(unit, year)
+            && in_roster(unit, faction, &BTreeSet::from([tech.clone()]))
+        {
+            out.entry(tech.clone()).or_default().push(unit);
+        }
+    }
+    out
 }
 
 /// NT11: whether `unit_type` is raised in `year` (its `available_from` /
@@ -188,10 +237,11 @@ pub fn roster<'a>(
     unit_types: &'a BTreeMap<UnitTypeId, UnitType>,
     faction: &Faction,
     year: i32,
+    techs: &BTreeSet<TechnologyId>,
 ) -> Vec<&'a UnitType> {
     let mut out: Vec<&UnitType> = unit_types
         .values()
-        .filter(|u| in_roster(u, faction) && in_period(u, year))
+        .filter(|u| in_roster(u, faction, techs) && in_period(u, year))
         .collect();
     out.sort_by_key(|u| (u.category as u8, u.cost.money, u.id.as_str().to_owned()));
     out
@@ -341,15 +391,16 @@ impl CustomBattle {
                     points(rules.max_budget)
                 ));
             }
+            let techs = known_technologies(faction, &composed.technologies);
             for id in &composed.units {
                 let unit_type = UnitTypeId::new(id.as_str())
                     .ok()
                     .and_then(|id| data.unit_types.get(&id));
                 match unit_type {
-                    Some(u) if in_roster(u, faction) && in_period(u, year) => {
+                    Some(u) if in_roster(u, faction, &techs) && in_period(u, year) => {
                         side_report.cost += u.cost.money
                     }
-                    Some(u) if in_roster(u, faction) => report.errors.push(format!(
+                    Some(u) if in_roster(u, faction, &techs) => report.errors.push(format!(
                         "{label} : {} n'est pas levée en {year}",
                         u.name.display
                     )),

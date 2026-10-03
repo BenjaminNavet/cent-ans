@@ -5,7 +5,10 @@ use std::path::PathBuf;
 
 use data_model::load::load_entities;
 use data_model::{Faction, FactionId, UnitType, UnitTypeId};
-use sim_battle::custom::{roster, CustomBattle, CustomBattleRules, CustomData, CustomSide};
+use sim_battle::custom::{
+    grantable_technologies, known_technologies, roster, CustomBattle, CustomBattleRules,
+    CustomData, CustomSide,
+};
 use sim_battle::{ReplayStart, SideId, Weather};
 
 fn data_dir() -> PathBuf {
@@ -24,6 +27,7 @@ fn side(faction: &str, units: &[&str]) -> CustomSide {
         faction: faction.to_owned(),
         budget: 0,
         units: units.iter().map(|u| (*u).to_owned()).collect(),
+        technologies: Vec::new(),
     }
 }
 
@@ -56,11 +60,11 @@ fn roster_follows_faction_and_culture_restrictions() {
     let (units, factions) = load();
     let france = &factions[&FactionId::new("fac_france").unwrap()];
     let ottoman = &factions[&FactionId::new("fac_ottoman").unwrap()];
-    let french: Vec<&str> = roster(&units, france, 1400)
+    let french: Vec<&str> = roster(&units, france, 1400, &known_technologies(france, &[]))
         .iter()
         .map(|u| u.id.as_str())
         .collect();
-    let turkish: Vec<&str> = roster(&units, ottoman, 1400)
+    let turkish: Vec<&str> = roster(&units, ottoman, 1400, &known_technologies(ottoman, &[]))
         .iter()
         .map(|u| u.id.as_str())
         .collect();
@@ -183,8 +187,13 @@ fn a_valid_composition_builds_and_fights() {
 fn nt11_roster_follows_the_year() {
     let (units, factions) = load();
     let france = &factions[&FactionId::new("fac_france").unwrap()];
+    let grant = || -> Vec<String> {
+        ["tech_francs_archers", "tech_compagnies_d_ordonnance"]
+            .map(str::to_owned)
+            .to_vec()
+    };
     let ids = |year: i32| -> Vec<String> {
-        roster(&units, france, year)
+        roster(&units, france, year, &known_technologies(france, &grant()))
             .iter()
             .map(|u| u.id.as_str().to_owned())
             .collect()
@@ -217,6 +226,8 @@ fn nt11_roster_follows_the_year() {
         report.errors
     );
     custom.year = Some(1450);
+    assert!(!custom.validate(&data, rules).ok, "technology missing");
+    custom.attacker.technologies = vec!["tech_francs_archers".to_owned()];
     assert!(custom.validate(&data, rules).ok);
     custom.year = Some(1200);
     assert!(!custom.validate(&data, rules).ok, "year out of bounds");
@@ -256,4 +267,37 @@ fn nt11_siege_engines_are_chosen() {
     // Engines are out of the budget and the unit cap.
     assert_eq!(setup.attacker.units.len(), 1);
     assert!(sim_battle::BattleSim::new(setup, 4).is_ok());
+}
+
+#[test]
+fn lr12_roster_follows_technologies() {
+    let (units, factions) = load();
+    let france = &factions[&FactionId::new("fac_france").unwrap()];
+    let england = &factions[&FactionId::new("fac_england").unwrap()];
+    let ids = |techs: &[String]| -> Vec<String> {
+        roster(&units, england, 1337, &known_technologies(england, techs))
+            .iter()
+            .map(|u| u.id.as_str().to_owned())
+            .collect()
+    };
+    // England starts with the longbow drill; France does not.
+    assert!(ids(&[]).contains(&"unit_longbowmen".to_owned()));
+    let french = |techs: &[String]| -> Vec<String> {
+        roster(&units, france, 1337, &known_technologies(france, techs))
+            .iter()
+            .map(|u| u.id.as_str().to_owned())
+            .collect()
+    };
+    assert!(!french(&[]).contains(&"unit_bombard".to_owned()));
+    assert!(french(&["tech_bombards".to_owned()]).contains(&"unit_bombard".to_owned()));
+    // The grantable list names the missing technology and what it unlocks.
+    let grantable = grantable_technologies(&units, france, 1337);
+    let bombards = grantable
+        .iter()
+        .find(|(t, _)| t.as_str() == "tech_bombards")
+        .expect("tech_bombards offered");
+    assert!(bombards.1.iter().any(|u| u.id.as_str() == "unit_bombard"));
+    assert!(grantable
+        .keys()
+        .all(|t| !known_technologies(france, &[]).contains(t)));
 }
