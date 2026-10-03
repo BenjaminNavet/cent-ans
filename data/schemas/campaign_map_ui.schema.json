@@ -139,6 +139,16 @@
         }
       }
     },
+    "hover_bar": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A6-U18 : barre de survol de province (bas, centre), compacte : police réduite, aucune largeur minimale, marges serrées.",
+      "properties": {
+        "font_size": {"type": "integer", "minimum": 8, "maximum": 32},
+        "min_width": {"type": "number", "minimum": 0},
+        "padding_x": {"type": "number", "minimum": 0}
+      }
+    },
     "signs": {
       "type": "object",
       "additionalProperties": false,

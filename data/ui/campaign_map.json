@@ -21,6 +21,7 @@
     "mist_min": 0.0,
     "mist_glow": 0.0
   },
+  "hover_bar": {"font_size": 14, "min_width": 0, "padding_x": 8},
   "signs": {
     "description": "TB2 (ADR 0151) : un seul signe par ville et par palier de zoom (l'écu au-dessus du nom). Les autres signes ne s'affichent que dans la couche « Signes » de la barre de filtres ou dans les modes de carte listés ici. keep_urgent : le signe reste visible quand il demande une réponse ce tour ; with_selected_army : visible quand une armée est sélectionnée (destination possible).",
     "max_per_town": 1,

@@ -1369,8 +1369,10 @@ func _set_hover_cue(cue: String) -> void:
 
 
 func _fit_hover_label() -> void:
+	# A6-U18 : barre compacte (police, largeur minimale et marges dans `hover_bar` des données).
+	hover_label.add_theme_font_size_override("font_size", int(MapReadability.number("hover_bar", "font_size", 14.0)))
 	hover_label.reset_size()
-	hover_label.size.x = maxf(hover_label.get_combined_minimum_size().x + 24.0, 400.0)
+	hover_label.size.x = maxf(hover_label.get_combined_minimum_size().x + 2.0 * MapReadability.number("hover_bar", "padding_x", 8.0), MapReadability.number("hover_bar", "min_width", 0.0))
 	hover_label.position.x = (get_viewport().get_visible_rect().size.x - hover_label.size.x) * 0.5
 	queue_layout()
 
