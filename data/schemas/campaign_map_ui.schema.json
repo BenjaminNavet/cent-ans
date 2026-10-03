@@ -411,6 +411,18 @@
           "maxItems": 3,
           "description": "RV-C : teinte de l'ombre (RVB multiplié, légère dominante froide)."
         },
+        "cumulus_medium_scale": {
+          "type": "number", "minimum": 0, "maximum": 1,
+          "description": "A6-C9 : facteur de force des ombres de cumulus au-delà de cumulus_medium_distance[1] (sol tacheté en vue moyenne)."
+        },
+        "cumulus_medium_distance": {
+          "type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2,
+          "description": "A6-C9 : distances caméra (début, fin) du fondu des ombres de cumulus vers cumulus_medium_scale."
+        },
+        "parchment_icon_cell_px": {
+          "type": "number", "minimum": 0,
+          "description": "A6-C7 : une seule icône météo par cellule de cette taille (px écran à l'échelle 1) en vue parchemin ; 0 = icônes masquées."
+        },
         "cumulus_fade_px": {
           "type": "array",
           "items": {"type": "number", "minimum": 0},

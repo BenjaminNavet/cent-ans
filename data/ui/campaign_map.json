@@ -79,7 +79,7 @@
     "mask_shadow": 0.06,
     "mask_shadow_softness": 0.5,
     "mask_shadow_scale": 0.5,
-    "cumulus_shadow": 0.40,
+    "cumulus_shadow": 0.40, "cumulus_medium_scale": 0.3, "cumulus_medium_distance": [200, 500], "parchment_icon_cell_px": 300,
     "cumulus_scale": 0.032,
     "cumulus_cover": [0.22, 0.5],
     "cumulus_cover_wet": 0.7,

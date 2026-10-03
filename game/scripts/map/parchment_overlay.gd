@@ -506,7 +506,11 @@ var _weather_glyphs: Dictionary = {}
 func _draw_weather(s: float, a: float, view: Rect2) -> void:
 	if weather_view == null or weather_view.weather.is_empty():
 		return
-	var cell := 64.0 * s
+	# A6-C7 : une icône par grande cellule (`clouds.parchment_icon_cell_px`) ; 0 = aucune.
+	var icon_cell := MapReadability.number("clouds", "parchment_icon_cell_px", 64.0)
+	if icon_cell <= 0.0:
+		return
+	var cell := icon_cell * s
 	var occupied: Dictionary = {}
 	for province in _provinces:
 		var kind := str(weather_view.weather.get(province["id"], {}).get("kind", "clear"))

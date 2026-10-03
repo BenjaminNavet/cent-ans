@@ -27,4 +27,5 @@ snow_speed_far_ratio = Vector2(0.08, 0.12)
 snow_sway_ms_at_near = 0.3
 snow_sway_far_ratio = 0.03
 amount_ratio_near = 1.0
-amount_ratio_far = 0.6
+amount_ratio_far = 0.45
+rain_amount_scale = 0.45

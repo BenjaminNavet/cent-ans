@@ -150,6 +150,7 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 	_focus_kind = weather_at(Vector2(focus.x, focus.z))
 	_update_cloud_shadows(delta)
 	_update_cloud_shadow_sun()  # RV-C
+	_update_cumulus_medium(distance)  # A6-C9
 	_update_particles(focus, distance)
 	_update_lightning(delta, distance)
 
@@ -205,6 +206,25 @@ func _cloud_shadow_materials() -> Array[ShaderMaterial]:
 		if material is ShaderMaterial:
 			out.append(material)
 	return out
+
+
+var _cumulus_scale_set := -1.0
+
+
+## A6-C9 : en vue moyenne et lointaine, les ombres de cumulus (taches de ~30 px carte) donnaient un
+## sol « camouflage » : leur force est ramenée à `cumulus_medium_scale` entre les deux distances de
+## `cumulus_medium_distance` (bloc `clouds` des données).
+func _update_cumulus_medium(distance: float) -> void:
+	var band: Variant = cumulus.get("cumulus_medium_distance", null)
+	if not (band is Array and (band as Array).size() >= 2):
+		return
+	var factor := lerpf(1.0, float(cumulus.get("cumulus_medium_scale", 1.0)), smoothstep(float(band[0]), float(band[1]), distance))
+	if absf(factor - _cumulus_scale_set) < 0.01:
+		return
+	_cumulus_scale_set = factor
+	var strength := float(cumulus.get("cumulus_shadow", 0.4)) * factor
+	for material in _cloud_shadow_materials():
+		material.set_shader_parameter("cloud_shadow_cumulus", strength)
 
 
 ## RV-C : direction vers le soleil pour décaler les ombres de nuages (le soleil change de saison
@@ -449,7 +469,7 @@ func _update_particles(focus: Vector3, distance: float) -> void:
 			process.set_shader_parameter("velocity_min", v.x)
 			process.set_shader_parameter("velocity_max", v.y)
 			process.set_shader_parameter("sway", profile.sway(distance) if is_snow else 0.0)
-			particles.amount_ratio = profile.amount_ratio(distance)
+			particles.amount_ratio = profile.amount_ratio(distance) * (1.0 if is_snow else clampf(profile.rain_amount_scale, 0.0, 1.0))
 			var quad := particles.draw_pass_1 as QuadMesh
 			if is_snow:
 				var side := profile.snow_size(distance)
