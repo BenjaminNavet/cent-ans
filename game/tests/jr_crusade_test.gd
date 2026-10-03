@@ -126,11 +126,16 @@ func _test_texts() -> void:
 
 
 func _test_events() -> void:
-	var freed := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_jerusalem",
+	var freed := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_jerusalem", "public": true,
 		"text_fr": "Jérusalem délivrée ! L'ost tient la cité de son vœu et y établit son siège."}
 	var preached := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_cyprus",
-		"text_fr": "Les croisés prêchent le passage : 3 unité(s) de volontaires sont attendues à Limassol dans 2 tour(s)."}
-	_check(SeasonReport.is_public_crusade(freed) and not SeasonReport.is_public_crusade(preached), "only the deliverance is public")
+		"text_fr": "Les croisés prêchent le passage : 3 unités de volontaires sont attendues à Limassol dans 2 tours."}
+	var lost := {"kind": "crusade", "faction": CRUSADERS, "province": "prov_jerusalem", "public": true, "loss": true,
+		"text_fr": "Jérusalem est perdue : la ferveur des croisés n'a plus de plancher."}
+	# JR5 : le caractère public vient du champ `public`, plus du texte.
+	var marked := {"kind": "crusade", "faction": CRUSADERS, "text_fr": "Jérusalem délivrée !"}
+	_check(SeasonReport.is_public(freed) and not SeasonReport.is_public(preached) and not SeasonReport.is_public(marked),
+		"only the flagged events are public")
 	_check(SeasonReport.section_of("crusade") == "lands" and SeasonReport.KIND_STYLES.has("crusade"), "crusade kind has a section and a style")
 	var mine := func(event: Dictionary) -> bool: return str(event.get("faction", "")) == CRUSADERS
 	var nobody := func(_event: Dictionary) -> bool: return false
@@ -142,6 +147,13 @@ func _test_events() -> void:
 		_check(other.size() == 1 and other[0]["id"] == "world" and (other[0]["entries"] as Array).size() == 1
 			and str(other[0]["entries"][0]["text_fr"]).contains("délivrée"), "France reads the deliverance only: %s" % str(other))
 	_check(SeasonReport.tone_of(freed, CRUSADERS) == SeasonReport.TONE_GAIN, "the deliverance is a gain for the crusader")
+	_check(SeasonReport.tone_of(lost, CRUSADERS) == SeasonReport.TONE_LOSS, "the loss is a loss for the crusader")
+	_check(SeasonReport.tone_of(preached, CRUSADERS) == "", "a private crusade event is neutral")
+	# JR5 : l'appel à défendre (faction du maître de la place) est public : le croisé assiégeant le lit.
+	var call := {"kind": "crusade", "faction": "fac_mamluks", "province": "prov_jerusalem", "public": true,
+		"text_fr": "Appel à défendre Jérusalem contre les croisés : 2 unités de secours entrent dans la place."}
+	var besieger := SeasonReport.build_groups([call], mine, Callable(), CRUSADERS)
+	_check(besieger.size() == 1 and (besieger[0]["entries"] as Array).size() == 1, "the besieging crusader reads the call: %s" % str(besieger))
 	_check(not NewsLetters.news_from_event(preached).is_empty() and NewsLetters.kind_label("crusade") == "Croisade", "crusade letters")
 	_check(EndTurnCluster.short_label("crusade") == "Croisade", "crusade alert pill label")
 

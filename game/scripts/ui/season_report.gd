@@ -57,10 +57,6 @@ const KIND_STYLES := {
 	# JR3 : ferveur, passage prêché, contingents, débandade, cité du vœu prise ou perdue.
 	"crusade": {"glyph": "✠", "label": "Croisade", "color": RichTooltip.RED},
 }
-## JR3 : seule nouvelle de croisade publique (toutes les factions la lisent) ; les autres ne
-## regardent que le joueur croisé. Le cœur n'a qu'un genre `crusade` : la délivrance se reconnaît
-## à son texte (« … délivrée ! »), comme dans les tests du cœur.
-const CRUSADE_PUBLIC_MARK := "délivrée"
 ## Ton d'une ligne (`_tone`) : perte (rouge, en tête), prise (vert, juste après), neutre.
 const TONE_LOSS := "loss"
 const TONE_GAIN := "gain"
@@ -158,15 +154,16 @@ static func section_of(kind: String) -> String:
 	return "world"
 
 
-## JR3 : vrai pour « Jérusalem délivrée », nouvelle du monde montrée à tous les joueurs.
-static func is_public_crusade(event: Dictionary) -> bool:
-	return str(event.get("kind", "")) == "crusade" and str(event.get("text_fr", "")).contains(CRUSADE_PUBLIC_MARK)
+## JR5 : vrai pour une nouvelle publique (champ `public` du cœur : délivrance et perte de la cité
+## du vœu, appel à défendre une place sainte), montrée à tous les joueurs quel que soit le filtre.
+static func is_public(event: Dictionary) -> bool:
+	return bool(event.get("public", false))
 
 
 ## JR3 : vrai pour une nouvelle de croisade qui ne regarde que la faction croisée (passage,
 ## contingents, débandade) et que `player` n'a donc pas à lire.
 static func is_private_crusade(event: Dictionary, player: String) -> bool:
-	if str(event.get("kind", "")) != "crusade" or is_public_crusade(event):
+	if str(event.get("kind", "")) != "crusade" or is_public(event):
 		return false
 	return player != "" and str(event.get("faction", "")) != player
 
@@ -189,8 +186,12 @@ static func tone_of(event: Dictionary, player: String, province_owner: Callable 
 			return TONE_LOSS
 		"siege_lifted", "victory":
 			return TONE_GAIN if faction == player or kind == "victory" else ""
-		"crusade":  # JR3 : la cité du vœu délivrée par le joueur
-			return TONE_GAIN if faction == player and is_public_crusade(event) else ""
+		"crusade":  # JR5 : la cité du vœu délivrée (prise) ou perdue (perte) par le joueur
+			if faction != player:
+				return ""
+			if bool(event.get("loss", false)):
+				return TONE_LOSS
+			return TONE_GAIN if is_public(event) else ""
 	return ""
 
 
@@ -211,7 +212,7 @@ static func build_groups(events: Array, is_relevant: Callable, keeps_world: Call
 			section = section_of(kind)
 			if section == "world" and not (kind in WORLD_NEWS_KINDS or kind in WORLD_KINDS or kind.begins_with("diplom") or kind == "embargo"):
 				continue
-		elif is_public_crusade(event):  # JR3 : lue par tous, quel que soit le filtre d'intérêt
+		elif is_public(event):  # JR5 : lue par tous, quel que soit le filtre d'intérêt
 			section = "world"
 		elif keeps_world.is_valid():
 			if kind in WORLD_NEWS_KINDS and keeps_world.call(event):

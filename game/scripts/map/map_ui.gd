@@ -502,7 +502,7 @@ var news_interest: NewsInterest = null
 
 ## Vrai si la nouvelle mérite une lettre ou le bandeau du haut (le journal garde tout).
 func keeps_news(event: Dictionary) -> bool:
-	if SeasonReport.is_public_crusade(event):  # JR3 : « Jérusalem délivrée » est lue par tous
+	if SeasonReport.is_public(event):  # JR5 : nouvelle publique (champ `public`), lue par tous
 		return true
 	return news_interest == null or news_interest.keeps(event)
 

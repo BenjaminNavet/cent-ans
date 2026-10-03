@@ -90,6 +90,18 @@ pub struct GameEvent {
     pub army: Option<ArmyId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub faction: Option<FactionId>,
+    /// News for every faction, whatever the interest filter (JR5: the
+    /// deliverance and the loss of the crusade's goal, the call to defend a
+    /// besieged holy place).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub public: bool,
+    /// The event is a loss for its `faction` (the interface's tone).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub loss: bool,
+}
+
+fn is_false(value: &bool) -> bool {
+    !value
 }
 
 impl GameEvent {
@@ -100,6 +112,8 @@ impl GameEvent {
             province: None,
             army: None,
             faction: None,
+            public: false,
+            loss: false,
         }
     }
 
@@ -115,6 +129,18 @@ impl GameEvent {
 
     pub fn faction(mut self, faction: &FactionId) -> Self {
         self.faction = Some(faction.clone());
+        self
+    }
+
+    /// News for every faction (see [`GameEvent::public`]).
+    pub fn public(mut self) -> Self {
+        self.public = true;
+        self
+    }
+
+    /// A loss for the event's faction (see [`GameEvent::loss`]).
+    pub fn loss(mut self) -> Self {
+        self.loss = true;
         self
     }
 }

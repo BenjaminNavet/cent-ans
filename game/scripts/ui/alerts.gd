@@ -152,7 +152,8 @@ static func table_medicine_alerts(sim: Object, player: String, last_events: Arra
 		var faction := str(event.get("faction", ""))
 		if kind == "technology_researched" and faction == player:
 			researched = true
-		if not SeasonReport.KIND_STYLES.has(kind) or (faction != "" and faction != player):
+		# JR5 : une nouvelle publique (cité du vœu, appel à défendre) alerte tous les joueurs.
+		if not SeasonReport.KIND_STYLES.has(kind) or (faction != "" and faction != player and not SeasonReport.is_public(event)):
 			continue
 		var style: Dictionary = SeasonReport.KIND_STYLES[kind]
 		result.append({

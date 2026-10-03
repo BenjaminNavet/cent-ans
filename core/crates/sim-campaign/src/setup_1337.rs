@@ -126,6 +126,11 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
     else {
         return;
     };
+    // JR5: the reference balance ignores the difficulty (whatever level the
+    // campaign is or will be set to): measured at the neutral level, where
+    // neither the AI nor the player gets any favour.
+    let level = state.difficulty;
+    state.difficulty = crate::difficulty::Difficulty::Normal;
     let factions: Vec<FactionId> = state.factions.keys().cloned().collect();
     for faction in factions {
         if state.controlled_provinces(&faction).len() < rule.min_provinces {
@@ -167,6 +172,7 @@ fn fit_starting_garrisons(state: &mut CampaignState, data: &GameData) {
             }
         }
     }
+    state.difficulty = level;
 }
 
 fn units_from(data: &GameData, ids: &[&str]) -> Result<Vec<Unit>, CampaignError> {
@@ -718,4 +724,47 @@ fn pick_general(state: &CampaignState, data: &GameData, faction: &Faction) -> Op
         })
         .max_by_key(|(id, c)| (c.skills.command, std::cmp::Reverse((*id).clone())))
         .map(|(id, _)| id.clone())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+    use crate::difficulty::Difficulty;
+
+    #[test]
+    fn the_starting_garrisons_do_not_depend_on_the_difficulty() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+        let data = GameData::load(&root).expect("game data loads").0;
+        let mut raw_data = data.clone();
+        raw_data
+            .settlement_rules
+            .as_mut()
+            .expect("settlement rules")
+            .starting_budget = None;
+        let player = FactionId::new("fac_france").unwrap();
+        let garrisons = |level: Difficulty| {
+            let mut state = CampaignState::new_1337(&raw_data, player.clone(), 1).unwrap();
+            state.difficulty = level;
+            fit_starting_garrisons(&mut state, &data);
+            assert_eq!(state.difficulty, level, "the level is restored");
+            state
+                .settlements
+                .iter()
+                .map(|(id, s)| (id.clone(), s.garrison.len()))
+                .collect::<Vec<_>>()
+        };
+        let normal = garrisons(Difficulty::Normal);
+        assert_eq!(garrisons(Difficulty::Easy), normal);
+        assert_eq!(garrisons(Difficulty::VeryHard), normal);
+        // And it did trim something.
+        let untouched = CampaignState::new_1337(&raw_data, player.clone(), 1).unwrap();
+        let raw: Vec<_> = untouched
+            .settlements
+            .iter()
+            .map(|(id, s)| (id.clone(), s.garrison.len()))
+            .collect();
+        assert_ne!(raw, normal);
+    }
 }

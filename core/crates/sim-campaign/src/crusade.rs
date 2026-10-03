@@ -9,7 +9,7 @@
 //!
 //! Spec `docs/superpowers/specs/2026-10-02-jr-croises-jerusalem-design.md`.
 
-use data_model::{CrusadeRules, FactionId, GameData, SettlementId, UnitTypeId};
+use data_model::{CrusadeRules, FactionId, GameData, ProvinceId, SettlementId, UnitTypeId};
 use serde::{Deserialize, Serialize};
 
 use crate::diplomacy::{faction_name, is_rebels};
@@ -59,6 +59,16 @@ pub struct CrusadeState {
     /// JR4b: places whose current siege by the crusade was already relieved.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub relieved: Vec<SettlementId>,
+    /// JR5: the target was delivered at least once (its fervour and
+    /// prestige are won only the first time).
+    #[serde(default)]
+    pub target_ever_taken: bool,
+    /// JR5: capital before the deliverance, restored when the target is lost.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub former_capital: Option<ProvinceId>,
+    /// JR5: places of the Holy Land whose capture already lifted the fervour.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub counted_places: Vec<SettlementId>,
 }
 
 /// Why `preach_passage` was refused.
@@ -286,18 +296,6 @@ fn held_ports(state: &CampaignState, data: &GameData, rules: &CrusadeRules) -> V
     ports.into_iter().map(|(_, id)| id).collect()
 }
 
-/// Mark of the crusade news meant for every faction (the deliverance of the
-/// target and its loss): their text carries this word, which the interface
-/// (`CRUSADE_PUBLIC_MARK` in `game/scripts/ui/season_report.gd`) reads to
-/// show them to all players; the other crusade events concern the crusader
-/// faction alone.
-pub const WORLD_NEWS_MARK: &str = "délivrée";
-
-/// `true` for a crusade event every faction reads (see [`WORLD_NEWS_MARK`]).
-pub fn is_world_news(event: &GameEvent) -> bool {
-    event.kind == EventKind::Crusade && event.text_fr.contains(WORLD_NEWS_MARK)
-}
-
 /// Takes or loses the target province according to who holds its city.
 fn sync_target(state: &mut CampaignState, data: &GameData, events: &mut Vec<GameEvent>) {
     let Some(rules) = active(state, data) else {
@@ -308,18 +306,28 @@ fn sync_target(state: &mut CampaignState, data: &GameData, events: &mut Vec<Game
     let name = target_name(state, data, rules);
     let faction = faction_name(data, &rules.faction);
     if held && !taken {
+        let capital = state
+            .factions
+            .get(&rules.faction)
+            .map(|f| f.capital.clone());
+        let first = !state.crusade.as_ref().is_some_and(|c| c.target_ever_taken);
         if let Some(crusade) = state.crusade.as_mut() {
             crusade.target_taken = true;
+            crusade.target_ever_taken = true;
+            crusade.former_capital = capital.filter(|c| *c != rules.target_province);
         }
-        change(
-            state,
-            rules,
-            &format!("{name} délivrée"),
-            rules.fervor.target_taken,
-        );
+        // The gain and the prestige come with the first deliverance only.
+        if first {
+            change(
+                state,
+                rules,
+                &format!("{name} délivrée"),
+                rules.fervor.target_taken,
+            );
+            state.change_ruler_prestige(&rules.faction, rules.target_taken_prestige);
+        }
         // The floor also lifts a gauge the gain left below it.
         change(state, rules, &format!("{name} délivrée"), 0);
-        state.change_ruler_prestige(&rules.faction, rules.target_taken_prestige);
         if let Some(f) = state.factions.get_mut(&rules.faction) {
             f.capital = rules.target_province.clone();
         }
@@ -332,22 +340,29 @@ fn sync_target(state: &mut CampaignState, data: &GameData, events: &mut Vec<Game
                 ),
             )
             .province(&rules.target_province)
-            .faction(&rules.faction),
+            .faction(&rules.faction)
+            .public(),
         );
     } else if !held && taken {
-        if let Some(crusade) = state.crusade.as_mut() {
+        let former = state.crusade.as_mut().and_then(|crusade| {
             crusade.target_taken = false;
+            crusade.former_capital.take()
+        });
+        // Back to the former seat.
+        if let (Some(former), Some(f)) = (former, state.factions.get_mut(&rules.faction)) {
+            if f.capital == rules.target_province {
+                f.capital = former;
+            }
         }
         events.push(
             GameEvent::new(
                 EventKind::Crusade,
-                format!(
-                    "{name}, délivrée par {faction}, est perdue : la ferveur de l'ost \
-                     n'a plus de plancher."
-                ),
+                format!("{name} est perdue : la ferveur de {faction} n'a plus de plancher."),
             )
             .province(&rules.target_province)
-            .faction(&rules.faction),
+            .faction(&rules.faction)
+            .public()
+            .loss(),
         );
     }
 }
@@ -500,17 +515,13 @@ fn land_contingents(
         };
         let mut rng = passage_rng(state.seed, state.turn, index);
         let units = draw_units(data, &rules.passage.unit_table, &mut rng, passage.units);
-        let landed = spawn_units_at_settlement(state, data, &port, &units);
+        let landed = disembark(state, data, rules, &port, &units);
         let mut event = GameEvent::new(
             EventKind::Crusade,
             format!(
-                "Un contingent de volontaires débarque à {} : {} la garnison.",
+                "Un contingent de volontaires débarque à {} : {}.",
                 crate::siege::settlement_name(data, &port),
-                if landed > 1 {
-                    format!("{landed} unités rejoignent")
-                } else {
-                    format!("{landed} unité rejoint")
-                }
+                count_noun(landed, "unité", "unités")
             ),
         )
         .faction(&rules.faction);
@@ -519,6 +530,79 @@ fn land_contingents(
         }
         events.push(event);
     }
+}
+
+/// Free places in the garrison of `settlement` (its kind's cap).
+fn garrison_room(state: &CampaignState, data: &GameData, settlement: &SettlementId) -> usize {
+    let Some(place) = state.settlements.get(settlement) else {
+        return 0;
+    };
+    data.settlement_rules
+        .as_ref()
+        .and_then(|r| r.garrison_cap.get(&place.kind).copied())
+        .map_or(usize::MAX, |cap| cap.saturating_sub(place.garrison.len()))
+}
+
+/// JR5: lands `units` at `port` within its garrison cap; the surplus fills
+/// the other held ports, then joins (or forms) a field army of the faction
+/// at `port`. Returns the units landed.
+fn disembark(
+    state: &mut CampaignState,
+    data: &GameData,
+    rules: &CrusadeRules,
+    port: &SettlementId,
+    units: &[UnitTypeId],
+) -> u32 {
+    let mut left: Vec<UnitTypeId> = units
+        .iter()
+        .filter(|id| data.unit_types.contains_key(*id))
+        .cloned()
+        .collect();
+    let total = left.len() as u32;
+    let mut ports = vec![port.clone()];
+    ports.extend(
+        held_ports(state, data, rules)
+            .into_iter()
+            .filter(|p| p != port),
+    );
+    for place in ports {
+        if left.is_empty() {
+            break;
+        }
+        let room = garrison_room(state, data, &place).min(left.len());
+        let batch: Vec<UnitTypeId> = left.drain(..room).collect();
+        spawn_units_at_settlement(state, data, &place, &batch);
+    }
+    if left.is_empty() {
+        return total;
+    }
+    let fresh: Vec<Unit> = left
+        .iter()
+        .filter_map(|id| data.unit_types.get(id))
+        .map(Unit::fresh)
+        .collect();
+    let cap = data.army_rules.cap();
+    let position = crate::state::ArmyPosition::Settlement(port.clone());
+    let existing = state
+        .armies
+        .iter()
+        .find(|(_, a)| a.faction == rules.faction && a.position == position && a.units.len() < cap)
+        .map(|(id, _)| id.clone());
+    let mut fresh = fresh.into_iter();
+    if let Some(id) = existing {
+        if let Some(army) = state.armies.get_mut(&id) {
+            let room = cap.saturating_sub(army.units.len());
+            army.units.extend(fresh.by_ref().take(room));
+        }
+    }
+    let rest: Vec<Unit> = fresh.collect();
+    if !rest.is_empty() {
+        let id = state.allocate_army_id();
+        let mut army = crate::state::Army::new(rules.faction.clone(), position, rest);
+        army.movement_left = state.army_grid_allowance(data, &army);
+        state.armies.insert(id, army);
+    }
+    total
 }
 
 /// JR4b « appel à défendre »: the master of a place of the Holy Land the
@@ -541,6 +625,8 @@ fn relieve_sieges(
         .iter()
         .filter(|(_, s)| {
             rules.holy_land.contains(&s.province)
+                && !is_rebels(&s.controller)
+                && s.controller != rules.faction
                 && s.siege
                     .as_ref()
                     .is_some_and(|g| g.attacker == rules.faction)
@@ -566,9 +652,6 @@ fn relieve_sieges(
         return;
     };
     let master = settlement.controller.clone();
-    if is_rebels(&master) || master == rules.faction {
-        return;
-    }
     let cap = data
         .settlement_rules
         .as_ref()
@@ -604,7 +687,9 @@ fn relieve_sieges(
             if landed > 1 { "entrent" } else { "entre" },
         ),
     )
-    .faction(&master);
+    .faction(&master)
+    // The besieging crusade reads it too, whoever plays.
+    .public();
     if let Some(province) = state.settlement_province(&place) {
         event = event.province(province);
     }
@@ -716,13 +801,22 @@ pub fn on_settlement_taken(
     let taken_before = state.crusade.as_ref().is_some_and(|c| c.target_taken);
     sync_target(state, data, events);
     let delivered = !taken_before && state.crusade.as_ref().is_some_and(|c| c.target_taken);
-    if taker != &rules.faction || delivered {
+    if taker != &rules.faction {
         return;
     }
     let in_holy_land = state
         .settlement_province(settlement)
         .is_some_and(|p| rules.holy_land.contains(p));
-    if in_holy_land {
+    // JR5: each place lifts the fervour once, however often it changes hands.
+    let first = in_holy_land
+        && state.crusade.as_mut().is_some_and(|c| {
+            let new = !c.counted_places.contains(settlement);
+            if new {
+                c.counted_places.push(settlement.clone());
+            }
+            new
+        });
+    if in_holy_land && first && !delivered {
         change(
             state,
             rules,
@@ -1082,6 +1176,23 @@ mod tests {
         state
     }
 
+    /// Units of the crusaders: garrisons of their places and armies.
+    fn crusader_units(state: &CampaignState) -> usize {
+        let garrisons: usize = state
+            .settlements
+            .values()
+            .filter(|s| s.controller == fac(CRUSADERS))
+            .map(|s| s.garrison.len())
+            .sum();
+        let armies: usize = state
+            .armies
+            .values()
+            .filter(|a| a.faction == fac(CRUSADERS))
+            .map(|a| a.units.len())
+            .sum();
+        garrisons + armies
+    }
+
     fn set_fervor(state: &mut CampaignState, fervor: u8) {
         state.crusade.as_mut().unwrap().fervor = fervor;
     }
@@ -1173,6 +1284,96 @@ mod tests {
     }
 
     #[test]
+    fn a_contingent_respects_the_garrison_cap() {
+        let mut state = campaign();
+        let rules = synthetic_rules();
+        let base = set(BASE);
+        let cap = data()
+            .settlement_rules
+            .as_ref()
+            .and_then(|r| r.garrison_cap.get(&state.settlements[&base].kind).copied())
+            .expect("a cap");
+        // Every port full: the volunteers form an army in the booked port.
+        let militia = data()
+            .unit_types
+            .get(&UnitTypeId::new("unit_urban_militia").unwrap())
+            .unwrap();
+        for port in held_ports(&state, data(), &rules) {
+            let place = state.settlements.get_mut(&port).unwrap();
+            let kind_cap = data()
+                .settlement_rules
+                .as_ref()
+                .and_then(|r| r.garrison_cap.get(&place.kind).copied())
+                .unwrap();
+            while place.garrison.len() < kind_cap {
+                place.garrison.push(Unit::fresh(militia));
+            }
+        }
+        state.armies.retain(|_, a| a.faction != fac(CRUSADERS));
+        let before = crusader_units(&state);
+        state.factions.get_mut(&fac(CRUSADERS)).unwrap().treasury = 5000;
+        preach_passage(&mut state, data(), &fac(CRUSADERS)).expect("preached");
+        end_of_turn(&mut state);
+        end_of_turn(&mut state);
+        assert_eq!(state.settlements[&base].garrison.len(), cap);
+        assert_eq!(crusader_units(&state), before + 3);
+        let army: Vec<_> = state
+            .armies
+            .values()
+            .filter(|a| a.faction == fac(CRUSADERS))
+            .collect();
+        assert_eq!(army.len(), 1);
+        assert_eq!(army[0].units.len(), 3);
+        assert_eq!(army[0].settlement(), Some(&base));
+    }
+
+    #[test]
+    fn the_target_and_each_place_lift_the_fervour_once() {
+        let mut state = campaign();
+        let city = target_city(&state);
+        let ruler = state.factions[&fac(CRUSADERS)].ruler.clone().unwrap();
+        let mut events = Vec::new();
+        hand(&mut state, &city, CRUSADERS);
+        on_settlement_taken(&mut state, data(), &fac(CRUSADERS), &city, &mut events);
+        assert_eq!(fervor(&state), 100);
+        let prestige = state.characters[&ruler].prestige;
+        // Lost and delivered again: the floor and the seat, no new gain.
+        hand(&mut state, &city, HOLDER);
+        on_settlement_taken(&mut state, data(), &fac(HOLDER), &city, &mut events);
+        set_fervor(&mut state, 30);
+        hand(&mut state, &city, CRUSADERS);
+        on_settlement_taken(&mut state, data(), &fac(CRUSADERS), &city, &mut events);
+        assert_eq!(fervor(&state), 50, "lifted to the floor only");
+        assert_eq!(state.characters[&ruler].prestige, prestige);
+        assert_eq!(state.factions[&fac(CRUSADERS)].capital, prov(TARGET));
+        // A place of the Holy Land counts once, however often retaken.
+        set_fervor(&mut state, 60);
+        let acre = set("set_acre");
+        for (taker, gain) in [(CRUSADERS, 10), (HOLDER, 0), (CRUSADERS, 0)] {
+            let before = fervor(&state);
+            hand(&mut state, &acre, taker);
+            on_settlement_taken(&mut state, data(), &fac(taker), &acre, &mut events);
+            assert_eq!(i32::from(fervor(&state)) - i32::from(before), gain);
+        }
+    }
+
+    #[test]
+    fn the_capital_goes_back_when_the_target_is_lost() {
+        let mut state = campaign();
+        let seat = state.factions[&fac(CRUSADERS)].capital.clone();
+        let city = target_city(&state);
+        let mut events = Vec::new();
+        hand(&mut state, &city, CRUSADERS);
+        on_settlement_taken(&mut state, data(), &fac(CRUSADERS), &city, &mut events);
+        assert_eq!(state.factions[&fac(CRUSADERS)].capital, prov(TARGET));
+        hand(&mut state, &city, HOLDER);
+        on_settlement_taken(&mut state, data(), &fac(HOLDER), &city, &mut events);
+        assert_eq!(state.factions[&fac(CRUSADERS)].capital, seat);
+        let lost = events.last().unwrap();
+        assert!(lost.public && lost.loss, "{lost:?}");
+    }
+
+    #[test]
     fn the_master_of_a_besieged_holy_place_calls_its_defence_once() {
         let mut state = campaign();
         let city = target_city(&state);
@@ -1185,9 +1386,23 @@ mod tests {
                 .unwrap(),
             );
         };
+        // A rebel place besieged first in the order does not use the call.
+        let acre = set("set_acre");
+        assert!(acre < city);
+        hand(&mut state, &acre, "fac_rebels");
+        state.settlements.get_mut(&acre).unwrap().siege = Some(
+            serde_json::from_value(serde_json::json!({
+                "attacker": CRUSADERS,
+                "turns_left": 9
+            }))
+            .unwrap(),
+        );
+        let rebels = state.settlements[&acre].garrison.len();
         besiege(&mut state);
         let before = state.settlements[&city].garrison.len();
         let events = end_of_turn(&mut state);
+        assert_eq!(state.settlements[&acre].garrison.len(), rebels);
+        state.settlements.get_mut(&acre).unwrap().siege = None;
         let after = state.settlements[&city].garrison.len();
         assert_eq!(after, before + 3, "{events:?}");
         let call: Vec<_> = events
@@ -1196,6 +1411,7 @@ mod tests {
             .collect();
         assert_eq!(call.len(), 1, "{events:?}");
         assert_eq!(call[0].faction, Some(fac(HOLDER)));
+        assert!(call[0].public, "the besieging crusade reads it too");
         assert_eq!(call[0].province, Some(prov(TARGET)));
         // Once per siege.
         end_of_turn(&mut state);
@@ -1334,7 +1550,7 @@ mod tests {
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].kind, EventKind::Crusade);
         assert_eq!(events[0].province, Some(prov(TARGET)));
-        assert!(is_world_news(&events[0]), "{}", events[0].text_fr);
+        assert!(events[0].public && !events[0].loss, "{}", events[0].text_fr);
         // The floor holds against defeats and wear.
         set_fervor(&mut state, 53);
         on_battle(
@@ -1351,18 +1567,22 @@ mod tests {
             crusade_view(&state, data(), &fac(CRUSADERS)).unwrap().floor,
             50
         );
-        // Delivered only once: a later capture there is a place like another.
+        // Delivered only once: a later capture there gives nothing more.
         let mut again = Vec::new();
         on_settlement_taken(&mut state, data(), &fac(CRUSADERS), &city, &mut again);
         assert!(again.is_empty());
-        assert_eq!(fervor(&state), 60);
+        assert_eq!(
+            fervor(&state),
+            50,
+            "the city was counted at its deliverance"
+        );
         // Lost: the floor goes, with an event.
         hand(&mut state, &city, HOLDER);
         let lost = end_of_turn(&mut state);
         assert!(!state.crusade.as_ref().unwrap().target_taken);
-        assert_eq!(fervor(&state), 59);
+        assert_eq!(fervor(&state), 49);
         // The loss is news for every faction too.
-        assert!(lost.iter().any(is_world_news), "{lost:?}");
+        assert!(lost.iter().any(|e| e.public && e.loss), "{lost:?}");
     }
 
     #[test]
@@ -1500,19 +1720,14 @@ mod tests {
         let view = crusade_view(&state, data(), &fac(CRUSADERS)).unwrap();
         assert_eq!(view.pending.len(), 1);
         assert_eq!(view.pending[0].turns_left, 2);
-        let garrison = state.settlements[&set(BASE)].garrison.len();
+        let before = crusader_units(&state);
         // End of the turn of the call: still at sea.
         end_of_turn(&mut state);
-        assert_eq!(state.settlements[&set(BASE)].garrison.len(), garrison);
-        // End of the next one: ashore for the second turn after the call.
+        assert_eq!(crusader_units(&state), before);
+        // End of the next one: ashore for the second turn after the call
+        // (in the port's garrison within its cap, the rest elsewhere).
         let events = end_of_turn(&mut state);
-        let place = &state.settlements[&set(BASE)];
-        assert_eq!(place.garrison.len(), garrison + 3);
-        let allowed = ["unit_crossbowmen", "unit_knights"];
-        for unit in &place.garrison[garrison..] {
-            assert!(allowed.contains(&unit.unit_type.as_str()));
-            assert_eq!(unit.strength, unit.max_strength);
-        }
+        assert_eq!(crusader_units(&state), before + 3);
         assert!(state.crusade.as_ref().unwrap().pending_passages.is_empty());
         assert!(events.iter().any(|e| e.kind == EventKind::Crusade));
     }
@@ -1529,10 +1744,12 @@ mod tests {
             .into_iter()
             .next()
             .expect("another port");
+        let before = crusader_units(&state);
         let garrison = state.settlements[&fallback].garrison.len();
         end_of_turn(&mut state);
         end_of_turn(&mut state);
-        assert_eq!(state.settlements[&fallback].garrison.len(), garrison + 3);
+        assert_eq!(crusader_units(&state), before + 3);
+        assert!(state.settlements[&fallback].garrison.len() > garrison);
 
         // No port at all: lost, with an event.
         let mut state = campaign();

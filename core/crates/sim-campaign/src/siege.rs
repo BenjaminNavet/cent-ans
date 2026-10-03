@@ -940,14 +940,17 @@ fn sortie(
             &besieger_faction
         },
     );
-    // JR1: a sortie is a battle for the crusade's fervour too.
+    // JR1: a sortie is a battle for the crusade's fervour too. JR5: it
+    // answers the siege, so the besiegers are the side that sought the
+    // fight (a besieged crusade sallying against brothers in faith only
+    // defends itself).
     if won {
         crate::crusade::on_battle(
             state,
             data,
             &garrison.faction,
             &besieger_faction,
-            &garrison.faction,
+            &besieger_faction,
         );
     } else {
         crate::crusade::on_battle(
@@ -955,7 +958,7 @@ fn sortie(
             data,
             &besieger_faction,
             &garrison.faction,
-            &garrison.faction,
+            &besieger_faction,
         );
     }
     if won {

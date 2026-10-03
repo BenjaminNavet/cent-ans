@@ -44,3 +44,14 @@ Mamelouks. Trois voies : (a) une faction sans terre du tout, (b) découper une n
   faillite structurelle des grandes factions de l'extension OM (Mamelouks −21 %, Byzance −42 %,
   Horde −80 %). Factions saines inchangées. Restent en déficit : Mérinides, Hafsides, Lituanie,
   Serbie (populations OM ou coût des colonies à revoir, hors JR).
+- **Rassemblement sans cité** (IA, `ai/src/campaign.rs`, règle `cityless`) : une faction qui ne
+  tient aucune cité recrute dans ses bourgs et châteaux et en fait sortir le surplus, en gardant
+  la garnison de départ du type de chaque place. Voulu pour toute faction réduite à des châteaux,
+  pas seulement la croisade ; elle ne vide jamais sa dernière place (test
+  `a_cityless_realm_never_empties_its_last_place`).
+- **Correctifs JR5** : évènements `public` (champ explicite de `GameEvent`, plus de marque dans
+  le texte) et `loss` (ton) ; levée de secours publique ; sortie : l'assiégeant est l'attaquant ;
+  capitale rétablie à la perte de la cible ; gain et prestige de la cible à la première
+  délivrance seulement, chaque place de Terre sainte comptée une fois ; contingents dans la
+  limite de garnison (surplus : autres ports, puis armée au port) ; budget de départ mesuré au
+  niveau de difficulté neutre.

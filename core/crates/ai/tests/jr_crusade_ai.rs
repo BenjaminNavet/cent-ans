@@ -72,3 +72,60 @@ fn forty_turns_of_the_real_ai_keep_the_crusade_alive() {
         assert!(base.garrison.len() <= 6, "garrison {}", base.garrison.len());
     }
 }
+
+#[test]
+fn a_cityless_realm_never_empties_its_last_place() {
+    // JR5 (ADR 0165 § Ajouts): the cityless muster rule applies to any
+    // faction reduced to towns and castles, not only the crusade; it keeps
+    // the starting garrison of each place's kind and marches the rest out.
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, FactionId::new("fac_france").unwrap(), 3)
+        .expect("1337 start");
+    let realm = FactionId::new("fac_brittany").unwrap();
+    let france = FactionId::new("fac_france").unwrap();
+    // Brittany loses every city; its other places stay, heavily garrisoned.
+    let militia = &data.unit_types[&data_model::UnitTypeId::new("unit_urban_militia").unwrap()];
+    let mut kept = Vec::new();
+    let ids: Vec<_> = state.settlements.keys().cloned().collect();
+    for id in ids {
+        let is_city = state
+            .settlement_province(&id)
+            .and_then(|p| state.province_city_id(p))
+            == Some(&id);
+        let place = state.settlements.get_mut(&id).unwrap();
+        if place.controller != realm {
+            continue;
+        }
+        if is_city {
+            place.controller = france.clone();
+            place.owner = france.clone();
+        } else if place.kind != data_model::SettlementKind::Village {
+            while place.garrison.len() < 3 {
+                place.garrison.push(sim_campaign::Unit::fresh(militia));
+            }
+            kept.push(id);
+        }
+    }
+    assert!(!kept.is_empty(), "Brittany keeps towns or castles");
+    state.armies.retain(|_, a| a.faction != realm);
+    let orders = ai::plan_turn(&state, &data, &realm);
+    let musters = orders
+        .iter()
+        .filter(|o| matches!(o, Order::CreateArmy { .. }))
+        .count();
+    assert!(musters > 0, "the surplus marches out: {orders:?}");
+    for order in &orders {
+        if let Order::CreateArmy {
+            settlement: sim_campaign::Place::Settlement(id),
+            units_from_garrison,
+            ..
+        } = order
+        {
+            let garrison = state.settlements[id].garrison.len();
+            assert!(
+                units_from_garrison.len() < garrison,
+                "{id}: {units_from_garrison:?} of {garrison}"
+            );
+        }
+    }
+}

@@ -362,45 +362,49 @@ fn only_the_battles_the_crusade_seeks_against_its_faith_are_a_scandal() {
 
 #[test]
 fn the_deliverance_and_the_loss_of_the_target_are_news_for_every_faction() {
-    // JR4: a game played by another faction reads both in its turn journal
-    // (the bridge hands the whole journal over; the interface keeps the
-    // crusade events that carry `WORLD_NEWS_MARK` for all players).
+    // JR5: a game played by another faction reads both in its turn journal:
+    // the events are `public` (the bridge hands the flag over; the
+    // interface shows public news to every player); the loss is a `loss`.
+    // The capital moves to the target and back.
     let data = data();
     let rules = rules(&data);
     let faction = rules.faction.clone();
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 5).expect("1337 start");
     state.interactive_battles = false;
+    let seat = state.factions[&faction].capital.clone();
     let city = state
         .province_city_id(&rules.target_province)
         .expect("target city")
         .clone();
     let holder = state.settlements[&city].controller.clone();
+    let public = |events: &[sim_campaign::GameEvent]| -> Vec<sim_campaign::GameEvent> {
+        events
+            .iter()
+            .filter(|e| e.kind == EventKind::Crusade && e.public)
+            .cloned()
+            .collect()
+    };
     state.settlements.get_mut(&city).unwrap().controller = faction.clone();
     let events = state.end_turn_with(&data, |_, _, _| Vec::new());
-    let news: Vec<_> = events
-        .iter()
-        .filter(|e| crusade::is_world_news(e))
-        .collect();
+    let news = public(&events);
     assert_eq!(news.len(), 1, "{news:?}");
-    assert_eq!(news[0].kind, EventKind::Crusade);
     assert_eq!(news[0].province.as_ref(), Some(&rules.target_province));
     assert_eq!(news[0].faction.as_ref(), Some(&faction));
+    assert!(!news[0].loss);
     assert!(state.crusade.as_ref().unwrap().target_taken);
-    // The private crusade events do not carry the mark.
-    assert!(events
-        .iter()
-        .filter(|e| e.kind == EventKind::Crusade && !crusade::is_world_news(e))
-        .all(|e| !e.text_fr.contains(crusade::WORLD_NEWS_MARK)));
-    // Lost again: news for all too.
+    assert_eq!(state.factions[&faction].capital, rules.target_province);
+    // Lost again: news for all too, a loss, and the former seat back.
     state.settlements.get_mut(&city).unwrap().controller = holder;
     let events = state.end_turn_with(&data, |_, _, _| Vec::new());
-    let news: Vec<_> = events
-        .iter()
-        .filter(|e| crusade::is_world_news(e))
-        .collect();
+    let news = public(&events);
     assert_eq!(news.len(), 1, "{news:?}");
-    assert!(news[0].text_fr.contains("perdue"), "{}", news[0].text_fr);
+    assert!(news[0].loss, "{news:?}");
     assert!(!state.crusade.as_ref().unwrap().target_taken);
+    assert_eq!(state.factions[&faction].capital, seat);
+    // An old save without the flags still loads them as false.
+    let old: sim_campaign::GameEvent =
+        serde_json::from_str(r#"{"kind":"crusade","text_fr":"x"}"#).expect("old event");
+    assert!(!old.public && !old.loss);
 }
 
 #[test]
@@ -490,5 +494,49 @@ fn the_view_carries_the_thresholds_of_the_rules() {
     assert_eq!(
         view.desertion_men_percent,
         rules.desertion.men_percent_per_turn
+    );
+}
+
+#[test]
+fn a_besieged_crusade_sallying_against_brothers_only_defends_itself() {
+    // JR5: the sortie answers the siege; the besiegers sought the fight.
+    let data = data();
+    let rules = rules(&data);
+    let faction = rules.faction.clone();
+    let france = fac("fac_france");
+    let (mut state, mine, theirs) = facing(&data, &faction, &france, 6);
+    let base = rules.base_settlement.clone();
+    state.armies.remove(&mine);
+    let besieger = state.armies.get_mut(&theirs).unwrap();
+    besieger.position = ArmyPosition::Settlement(base.clone());
+    besieger.stance = sim_campaign::Stance::Siege;
+    besieger.clear_plan();
+    let idle = |_: &CampaignState, _: &GameData, _: &FactionId| Vec::<Order>::new();
+    state.end_turn_with(&data, idle);
+    assert!(state.settlements[&base].siege.is_some(), "the siege begins");
+    let knight = sim_campaign::Unit {
+        unit_type: data_model::UnitTypeId::new("unit_knights").unwrap(),
+        strength: 100,
+        max_strength: 100,
+        experience: 2,
+        morale: 80,
+        levy_armor: 0,
+        levy_ranged: 0,
+        experience_residue: 0,
+    };
+    let garrison = &mut state.settlements.get_mut(&base).unwrap().garrison;
+    garrison.clear();
+    garrison.extend(std::iter::repeat_n(knight, 8));
+    let events = state.end_turn_with(&data, idle);
+    assert!(
+        events.iter().any(|e| e.text_fr.contains("Sortie")),
+        "{events:?}"
+    );
+    assert!(
+        causes(&state)
+            .iter()
+            .all(|(cause, _)| !cause.contains("frères de foi")),
+        "{:?}",
+        causes(&state)
     );
 }
