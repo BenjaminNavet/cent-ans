@@ -11,10 +11,12 @@
 
 // Force des paillettes (0 : désactivées) et part de la traîne hors du chemin du soleil.
 uniform float glint_amount = 0.55;
-uniform float glint_tail = 0.22;
+uniform float glint_tail = 0.16;
 // Taille d'une cellule à l'écran (pixels) et part des cellules qui portent une paillette.
 uniform float glint_cell_px = 4.0;
 uniform float glint_coverage = 0.16;
+// Échelle des nappes de mer agitée qui regroupent les paillettes (1 / unités monde).
+uniform float glint_patch_scale = 0.02;
 // Cadence du clignement (cycles par seconde, moyenne) et dérive de la grille avec la houle
 // (cellules par seconde : vitesse fixe à l'écran, jamais un défilement rapide de cellules).
 uniform float glint_rate = 0.35;
@@ -38,7 +40,13 @@ float glint_grid(vec2 p, float cell, float time) {
 	vec2 id = floor(q);
 	vec2 f = fract(q) - 0.5;
 	float h = glint_hash(id);
-	if (h > glint_coverage) {
+	// Nappes de mer plus ou moins agitée (bruit large, en monde) : paillettes groupées, pas en semis.
+	vec2 g = p * glint_patch_scale + time * vec2(0.004, 0.002);
+	vec2 gi = floor(g);
+	vec2 gf = fract(g);
+	gf = gf * gf * (3.0 - 2.0 * gf);
+	float patchy = mix(mix(glint_hash(gi), glint_hash(gi + vec2(1.0, 0.0)), gf.x), mix(glint_hash(gi + vec2(0.0, 1.0)), glint_hash(gi + vec2(1.0, 1.0)), gf.x), gf.y);
+	if (h > glint_coverage * mix(0.25, 1.75, patchy)) {
 		return 0.0;
 	}
 	float h2 = glint_hash(id + 17.3);

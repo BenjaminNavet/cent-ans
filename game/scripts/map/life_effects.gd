@@ -785,6 +785,7 @@ func _update_plumes(camera_distance: float, tiers: ZoomTiers, medium: float) -> 
 	var density := clampf(PLUME_DENSITY_PER_BOOST * _season_boost, 0.0, 1.0) * lerpf(1.0, PLUME_FAR_KEEP, far)
 	_plume_material.set_shader_parameter("fade", fade)
 	_plume_material.set_shader_parameter("density", density)
+	_plume_material.set_shader_parameter("focus_distance", camera_distance)
 
 
 ## Plus de feux de cheminée l'hiver et à l'automne (poids de saison x, y, z, w).

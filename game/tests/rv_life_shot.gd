@@ -5,6 +5,7 @@ extends SceneTree
 ##   godot --path game --resolution 1280x800 --script res://tests/rv_life_shot.gd -- --out=<dossier>
 ##   --hide-armies --map-weather=clear [--season=winter] [--name=rv_board] [--views=x,z,d;…]
 ##   [--bench] (avec `--disable-vsync` avant `--`) [--off] (effets RV-F coupés : A/B visuel)
+##   [--crop] (centre de chaque vue à pleine résolution au lieu de la vue réduite)
 ## Une ligne `RV view` par vue (panaches, effets de vie) ; `--bench` : temps d'image moyen avec puis
 ## sans les effets RV-F (panaches régionaux, paillettes, vent des forêts), sans planche.
 
@@ -18,6 +19,7 @@ func _init() -> void:
 	var board_name := "rv_board"
 	var bench := false
 	var off := false
+	var crop := false
 	## [x, z, distance du rig] : côte normande (régional), Caen (moyen), Gironde et Landes, Paris.
 	var views: Array = [[2050.0, 3060.0, 600.0], [1944.0, 3110.0, 300.0], [1831.0, 3782.0, 420.0], [2213.0, 3204.0, 220.0]]
 	for arg in OS.get_cmdline_user_args():
@@ -27,6 +29,8 @@ func _init() -> void:
 			board_name = arg.trim_prefix("--name=")
 		elif arg == "--bench":
 			bench = true
+		elif arg == "--crop":
+			crop = true
 		elif arg == "--off":
 			off = true
 		elif arg.begins_with("--views="):
@@ -75,6 +79,10 @@ func _init() -> void:
 		var plumes := map.find_child("RegionalPlumes", true, false) as MultiMeshInstance3D
 		print("RV view %d (%.0f, %.0f) rig %.0f stats %s plumes visible %s" % [v, view[0], view[1], rig.distance,
 			JSON.stringify(life.effects.stats) if life != null and life.effects != null else "-", plumes.visible if plumes != null else "-"])
+		if plumes != null and plumes.multimesh != null and OS.get_cmdline_user_args().has("--debug"):
+			var pm := plumes.material_override as ShaderMaterial
+			print("RV debug fade %s density %s count %d t0 %s c0 %s cam %s" % [pm.get_shader_parameter("fade"), pm.get_shader_parameter("density"),
+				plumes.multimesh.instance_count, plumes.multimesh.get_instance_transform(0), plumes.multimesh.get_instance_custom_data(0), rig.get_viewport().get_camera_3d().global_position])
 		if bench:
 			Engine.max_fps = 0
 			var with_fx := await _bench()
@@ -89,7 +97,11 @@ func _init() -> void:
 		await RenderingServer.frame_post_draw
 		var image := root.get_viewport().get_texture().get_image()
 		image.convert(Image.FORMAT_RGB8)
-		image.resize(VIEW_SIZE.x, VIEW_SIZE.y, Image.INTERPOLATE_LANCZOS)
+		if crop:
+			# Centre à pleine résolution (juger un détail de quelques pixels).
+			image = image.get_region(Rect2i((image.get_size() - VIEW_SIZE) / 2, VIEW_SIZE))
+		else:
+			image.resize(VIEW_SIZE.x, VIEW_SIZE.y, Image.INTERPOLATE_LANCZOS)
 		board.blit_rect(image, Rect2i(Vector2i.ZERO, VIEW_SIZE), Vector2i((v % 2) * VIEW_SIZE.x, (v / 2) * VIEW_SIZE.y))
 	if not bench:
 		var path := out_dir.path_join("%s.jpg" % board_name)

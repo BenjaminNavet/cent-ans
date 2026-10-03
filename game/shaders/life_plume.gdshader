@@ -2,8 +2,8 @@
 // fine et couchée par le vent au-dessus de chaque colonie (relais des cheminées 1:1, trop petites
 // au-delà du palier près), panache sombre et épais au-dessus des villes assiégées et des provinces
 // ravagées. Instanciés par MultiMesh (`LifeEffects`, un appel de rendu). Taille fixée en part de la
-// hauteur d'écran (par instance, selon sa distance à la caméra) : le panache garde quelques pixels
-// de large à toute distance, jamais sous le pixel (pas de scintillement au dézoom).
+// hauteur d'écran au point visé : le panache garde quelques pixels de large à tout zoom, jamais
+// sous le pixel au centre de la vue (pas de scintillement au dézoom).
 // Quad vertical (x ∈ [-0.5, 0.5], y ∈ [0, 1]).
 // INSTANCE_CUSTOM : r graine, g noirceur (0 foyer, 1 incendie), b rang de densité (0-1 : le
 // panache n'est dessiné que si rang < `density`), a vitesse.
@@ -13,18 +13,20 @@ render_mode blend_mix, depth_draw_never, cull_disabled, unshaded, shadows_disabl
 // Direction du vent (plan de carte x, z), alignée sur le vent météo de `campaign_weather`
 // (`weather_wind`, d'ouest) ; couchage du panache (part de sa hauteur déportée au sommet).
 uniform vec2 wind_dir = vec2(0.98, 0.2);
-uniform float wind_lean = 0.55;
+uniform float wind_lean = 0.45;
 // Taille à l'écran (part de la hauteur de l'écran) : largeur, hauteur d'un foyer ; facteur des
 // panaches d'incendie (plus larges et plus hauts).
-uniform vec2 screen_size = vec2(0.0055, 0.042);
+uniform vec2 screen_size = vec2(0.013, 0.05);
 uniform float fire_gain = 1.8;
+// Distance caméra → point visé (unités monde), pilotée par le script.
+uniform float focus_distance = 300.0;
 // Fondu global (palier moyen, saison, parchemin), piloté par le script.
 uniform float fade = 0.0;
 // Part des foyers qui fument (rang < densité) : plus l'hiver, moins au grand dézoom.
 uniform float density = 0.5;
 // Opacité de pointe d'un foyer et d'un incendie.
-uniform float smoke_alpha = 0.42;
-uniform float fire_alpha = 0.75;
+uniform float smoke_alpha = 0.6;
+uniform float fire_alpha = 0.85;
 uniform vec3 light_smoke : source_color = vec3(0.86, 0.85, 0.83);
 uniform vec3 dark_smoke : source_color = vec3(0.12, 0.11, 0.10);
 // Lumière ambiante approximative (unshaded) : teinte chaude de la carte.
@@ -55,9 +57,12 @@ void vertex() {
 	v_keep = dark > 0.5 ? 1.0 : step(INSTANCE_CUSTOM.b, density);
 	vec3 origin = MODEL_MATRIX[3].xyz;
 	origin.y += MODEL_MATRIX[2].y;  // levée : faîte de la maquette (colonne z de la base)
-	// Taille monde d'une part de la hauteur d'écran à la distance de l'instance.
-	float dist = length(CAMERA_POSITION_WORLD - origin);
-	float px_world = 2.0 * dist / max(PROJECTION_MATRIX[1][1], 1e-3);
+	// Taille monde : part de la hauteur d'écran mesurée à la distance du point visé (même taille
+	// monde pour tous les panaches d'une image : perspective naturelle, l'horizon reste léger),
+	// bornée à la distance propre de l'instance (pas de panache géant au pied de la caméra).
+	float dist = min(focus_distance, length(INV_VIEW_MATRIX[3].xyz - origin) * 1.5);
+	// |P[1][1]| = 1 / tan(fov / 2) (signe selon l'API graphique : retournement de Y).
+	float px_world = 2.0 * dist / max(abs(PROJECTION_MATRIX[1][1]), 1e-3);
 	float gain = mix(1.0, fire_gain, dark) * mix(0.85, 1.15, INSTANCE_CUSTOM.r);
 	float sx = screen_size.x * px_world * gain * v_keep;
 	float sy = screen_size.y * px_world * gain * v_keep;
