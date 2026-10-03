@@ -229,14 +229,16 @@ fn an_assault_is_recorded() {
     let (mut state, army, guyenne) = besiege_guyenne(&data, 4);
     state.interactive_battles = false;
     state.end_turn_with(&data, idle);
+    let ladders = data.siege_engine_rules.engines[0].cost(
+        data.siege_engine_rules.scaling_min_wall_level,
+        state.fortification_level(&data, &guyenne),
+    );
     if let Some(siege) = state
         .settlements
         .get_mut(&guyenne)
         .and_then(|s| s.siege.as_mut())
     {
-        siege.engine_work = siege
-            .engine_work
-            .max(data.siege_engine_rules.engines[0].work);
+        siege.engine_work = siege.engine_work.max(ladders);
     }
     let before = state.battle_history.len();
     let camp = state.army_point(&data, &state.armies[&army]);

@@ -508,6 +508,8 @@ struct Host {
     /// Extra multiplier on melee and charge (general's `BattleCharge`).
     shock: f64,
     defending: bool,
+    /// Multiplier on the morale lost to casualties (walls, A6 integration).
+    morale_loss: f64,
 }
 
 impl Host {
@@ -542,6 +544,7 @@ impl Host {
             ranged: 1.0 + side.general_ranged_percent / 100.0,
             shock: 1.0 + side.general_charge_percent / 100.0,
             defending,
+            morale_loss: 1.0,
         }
     }
 
@@ -843,7 +846,8 @@ fn suffer(host: &mut Host, kills: &[f64], rules: &AutoResolveRules) {
         lost += k;
     }
     if host.start_men > 0.0 {
-        host.morale -= 100.0 * lost / host.start_men * rules.morale_per_loss_percent;
+        host.morale -=
+            100.0 * lost / host.start_men * rules.morale_per_loss_percent * host.morale_loss;
     }
 }
 
@@ -917,6 +921,13 @@ pub fn resolve_with_crossings(
                 context.wall.engines_ready_percent,
             );
         d.ranged *= rules.walls_defender_ranged;
+        let stand = rules.wall_stand(
+            context.wall.level,
+            context.wall.breach_percent,
+            context.wall.engines_ready_percent,
+        );
+        a.morale_loss *= 1.0 + rules.wall_attacker_morale * stand;
+        d.morale_loss /= 1.0 + rules.wall_defender_steadiness * stand;
     }
     d.damage *= match terrain {
         Some(t) => t.defender,
@@ -946,6 +957,18 @@ pub fn resolve_with_crossings(
             rules.melee_rounds as usize,
         ));
     let mut broken = (false, false);
+    // A6 integration: where neither side breaks, standing walls hold the
+    // place for the garrison (an assault must carry them or break it).
+    let wall_hold = if context.walls {
+        rules.wall_hold_morale
+            * rules.wall_stand(
+                context.wall.level,
+                context.wall.breach_percent,
+                context.wall.engines_ready_percent,
+            )
+    } else {
+        0.0
+    };
     for phase in phases {
         let mut on_d = vec![0.0; d.fighters.len()];
         let mut on_a = vec![0.0; a.fighters.len()];
@@ -987,7 +1010,7 @@ pub fn resolve_with_crossings(
         // Both break, or neither: the steadier side holds the field; the
         // attacker must do better than the defender to win.
         _ => {
-            if a.morale > d.morale {
+            if a.morale > d.morale + wall_hold {
                 Winner::Attacker
             } else {
                 Winner::Defender

@@ -381,8 +381,12 @@ fn besiege_guyenne_as(
     assert!(state.settlements[&city].siege.is_some());
     // NT5 (ADR 0128): the ladders are built (an assault behind standing
     // walls needs one ready engine).
+    let ladders = data.siege_engine_rules.engines[0].cost(
+        data.siege_engine_rules.scaling_min_wall_level,
+        state.fortification_level(data, &city),
+    );
     if let Some(siege) = state.settlements.get_mut(&city).unwrap().siege.as_mut() {
-        siege.engine_work = data.siege_engine_rules.engines[0].work;
+        siege.engine_work = ladders;
     }
     let garrison = &mut state.settlements.get_mut(&city).unwrap().garrison;
     garrison.truncate(1);
