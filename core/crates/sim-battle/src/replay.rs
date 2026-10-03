@@ -410,6 +410,14 @@ pub fn state_digest(sim: &BattleSim) -> u64 {
             hash.u64(0x4c46);
             hash.u64(u64::from(files));
         }
+        // RJ-a: a change of formation under way, only when there is one.
+        if let Some(r) = &unit.reform {
+            hash.u64(0x5246);
+            hash.bytes(r.from.key().as_bytes());
+            hash.bytes(unit.formation.key().as_bytes());
+            hash.u64(r.elapsed.to_bits());
+            hash.u64(r.duration.to_bits());
+        }
         if unit.match_speed || unit.group_tag.is_some() {
             hash.u64(0x4754);
             hash.u64(u64::from(unit.match_speed));

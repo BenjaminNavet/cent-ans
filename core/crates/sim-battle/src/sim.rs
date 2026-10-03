@@ -52,7 +52,7 @@ use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
 use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
-use crate::unit::{Formation, Unit, UnitFate, UnitState};
+use crate::unit::{Unit, UnitFate, UnitState};
 use width::move_group_tag;
 
 /// Fixed simulation step, in seconds.
@@ -292,11 +292,11 @@ pub(crate) fn horse_against_foot(attacker: &Unit, defender: &Unit) -> f64 {
     if !attacker.is_cavalry() {
         return 1.0;
     }
-    if defender.formation == Formation::Square {
+    if defender.braced() {
         if defender.has(Ability::PikeSquare) {
             0.25
         } else {
-            0.4
+            defender.formation.def().modifiers.horse_blows
         }
     } else if defender.has(Ability::PikeSquare) {
         0.7
@@ -315,7 +315,7 @@ pub(crate) fn pikes_against_horse(attacker: &Unit, defender: &Unit) -> f64 {
 }
 
 pub(crate) fn attack_angle(defender: &Unit, attacker_x: f64, attacker_z: f64) -> u8 {
-    if defender.formation == Formation::Square {
+    if defender.all_round() {
         return 0;
     }
     let (dx, dz) = (attacker_x - defender.x, attacker_z - defender.z);
@@ -1271,16 +1271,7 @@ impl BattleSim {
             Command::Formation { units, kind } => {
                 for &id in &units {
                     let unit = &self.units[id as usize];
-                    let allowed = match kind {
-                        Formation::Line | Formation::Column => {
-                            unit.category != UnitCategory::Siege || kind == Formation::Line
-                        }
-                        Formation::Square => {
-                            unit.category == UnitCategory::Infantry && !unit.mounted
-                        }
-                        Formation::Wedge => unit.category == UnitCategory::Cavalry,
-                    };
-                    if !allowed {
+                    if !kind.def().allows(unit) {
                         return Err(CommandError::InvalidFormation {
                             unit: id,
                             formation: kind,
@@ -1288,9 +1279,9 @@ impl BattleSim {
                     }
                 }
                 for &id in &units {
+                    // RJ-a (ADR 0174): the men walk to their new places;
                     // CB1: a formation order drops a dragged width.
-                    self.units[id as usize].formation = kind;
-                    self.units[id as usize].line_files = None;
+                    self.units[id as usize].change_formation(kind, self.deploying);
                 }
             }
             Command::FireAtWill { units, enabled } => {
@@ -1507,6 +1498,9 @@ impl BattleSim {
         self.resolve_camps();
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
+        for unit in &mut self.units {
+            unit.tick_reform(DT);
+        }
         self.tick_abilities();
         self.elapsed += DT;
         self.ticks += 1;
@@ -1592,11 +1586,8 @@ impl BattleSim {
             // CB2: a run under the run mode (1 in the bundled data).
             speed *= unit.run_mode_speed();
         }
-        speed *= match unit.formation {
-            Formation::Column => 1.15,
-            Formation::Square => 0.3,
-            Formation::Line | Formation::Wedge => 1.0,
-        };
+        // RJ-a: formation pace, slower while reforming.
+        speed *= unit.formation_speed();
         if self.field.in_forest(unit.x, unit.z) {
             speed *= if unit.mounted { 0.4 } else { 0.65 };
         }
@@ -2282,7 +2273,7 @@ impl BattleSim {
         // Loss of cohesion: the shock of the horses (B-rules, unchanged).
         // CB4: close ranks take the shock better.
         let braced = self.ability_charge_taken(&self.units[p]);
-        let cohesion = if cavalry && self.units[p].formation != Formation::Square {
+        let cohesion = if cavalry && !self.units[p].braced() {
             impact::shock_morale(angle) * braced
         } else {
             0.0
@@ -2525,9 +2516,8 @@ impl BattleSim {
             }
         }
         kills *= self.missile_cover(target, attack_angle(target, shooter.x, shooter.z));
-        if target.formation == Formation::Square {
-            kills *= 1.2;
-        }
+        // RJ-a: formation and reform (a schiltron is a dense target).
+        kills *= target.missile_taken_factor() * shooter.formation_shooting();
         if target.on_wall && !shooter.on_wall {
             kills *= 0.5; // merlons
         }
@@ -2774,11 +2764,7 @@ impl BattleSim {
             } else {
                 1.0
             };
-            let wedge = if attacker.formation == Formation::Wedge {
-                1.2
-            } else {
-                1.0
-            };
+            let wedge = attacker.formation_charge();
             let general = self
                 .general_bonus(attacker.side)
                 .map_or(0.0, |g| g.charge_percent);
@@ -2792,6 +2778,8 @@ impl BattleSim {
         };
         // CB4: close ranks, planted pikes.
         damage *= self.ability_melee_factor(attacker, defender, angle);
+        // RJ-a: the defender's formation, and a change of formation under way.
+        damage *= defender.melee_taken_factor();
         if defender.state == UnitState::Routing {
             damage *= 1.5;
         }
@@ -3027,7 +3015,8 @@ impl BattleSim {
             morale -= unit.tick_losses / f64::from(unit.max_soldiers)
                 * LOSS_MORALE_FACTOR
                 * cover
-                * stand_loss;
+                * stand_loss
+                * unit.morale_loss_factor();
             if unit.flanked & 1 != 0 {
                 morale -= 1.5 * DT;
             }

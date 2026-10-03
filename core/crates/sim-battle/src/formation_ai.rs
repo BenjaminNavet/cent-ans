@@ -6,14 +6,20 @@
 //!   (120 m) and go back to line once it is gone (220 m).
 //! - Lancers (`charge_lance`) form a wedge when charging a target within
 //!   250 m, and a line again once the charge is over.
-//! - Foot and horse on a long march (> 250 m, no enemy within 300 m) move in
-//!   column, and deploy back into line when the enemy is within 220 m.
+//! - Foot and horse on a long march (> 250 m, no enemy within 450 m) move in
+//!   column, and deploy back into line when the enemy is within 350 m (RJ-a: the line takes time to form).
 //! - Two regiments of horse riding round the same enemy regiment take
 //!   opposite flanks (the second one's waypoint is mirrored).
+//!
+//! RJ-a (ADR 0174): the formations are those of `unit_formations.json`
+//! with the matching `ai_role` (default, march, anti_cavalry, charge) that
+//! the regiment may take; a regiment in a formation the AI does not use
+//! (chosen by the player before an AI takeover) is left as it is.
 
 use data_model::{Ability, UnitCategory};
 
 use crate::command::Command;
+use crate::formations::AiRole;
 use crate::setup::SideId;
 use crate::sim::BattleSim;
 use crate::unit::{Formation, Unit, UnitState};
@@ -21,8 +27,17 @@ use crate::unit::{Formation, Unit, UnitState};
 const SCHILTRON_ENTER: f64 = 120.0;
 const SCHILTRON_LEAVE: f64 = 220.0;
 const WEDGE_RANGE: f64 = 250.0;
+/// RJ-a: seconds after a change of formation before the AI puts a regiment
+/// in march or in wedge again (each change costs a reformation).
+const FORMATION_HOLD: f64 = 20.0;
+/// RJ-a: closer than this the wedge would not be formed before the impact
+/// (the change takes a few seconds): the horse charges as it stands.
+const WEDGE_MIN: f64 = 120.0;
+/// RJ-a: no wedge within this distance of a hedge or ditch (metres).
+const OBSTACLE_CLEAR: f64 = 60.0;
 const COLUMN_MARCH: f64 = 250.0;
 const COLUMN_CLEAR: f64 = 300.0;
+/// RJ-a: deploying back into line takes time (reformation), hence 350 m (was 220).
 const COLUMN_DEPLOY: f64 = 220.0;
 
 fn dist(a: &Unit, x: f64, z: f64) -> f64 {
@@ -43,16 +58,19 @@ fn wanted(sim: &BattleSim, u: &Unit) -> Option<Formation> {
             .map(|e| dist(u, e.x, e.z))
             .fold(f64::INFINITY, f64::min)
     };
+    let role = |r: AiRole| Formation::for_role(r, u);
+    let current = u.formation.role();
+    let line = role(AiRole::Default);
     let foot = u.category == UnitCategory::Infantry && !u.mounted;
-    if foot && u.has(Ability::PikeSquare) {
+    if let Some(square) = role(AiRole::AntiCavalry).filter(|_| foot && u.has(Ability::PikeSquare)) {
         let d = nearest(&horse);
         if d < SCHILTRON_ENTER {
-            return Some(Formation::Square);
+            return Some(square);
         }
-        if u.formation == Formation::Square && d > SCHILTRON_LEAVE {
-            return Some(Formation::Line);
+        if current == Some(AiRole::AntiCavalry) && d > SCHILTRON_LEAVE {
+            return line;
         }
-        if u.formation == Formation::Square {
+        if current == Some(AiRole::AntiCavalry) {
             return None;
         }
     }
@@ -66,33 +84,46 @@ fn wanted(sim: &BattleSim, u: &Unit) -> Option<Formation> {
                         (e.stakes_planted || e.has(Ability::PikeSquare))
                             && dist(e, t.x, t.z) < 100.0
                     });
-                    t.present() && dist(u, t.x, t.z) < WEDGE_RANGE && !guarded
+                    // RJ-a: nor a hedge or ditch close by (riding round
+                    // its end, a change of formation would only slow the
+                    // horse).
+                    let hedge =
+                        sim.field().obstacles.iter().any(|o| {
+                            o.kind.breaks_charge() && o.distance(u.x, u.z) < OBSTACLE_CLEAR
+                        });
+                    t.present()
+                        && (WEDGE_MIN..WEDGE_RANGE).contains(&dist(u, t.x, t.z))
+                        && !guarded
+                        && !hedge
                 });
-        if charging {
-            return Some(Formation::Wedge);
+        if let Some(wedge) = role(AiRole::Charge).filter(|_| charging) {
+            return Some(wedge);
         }
         // The wedge is kept through the melee (reforming in contact would
-        // shift the front); back to line once the charge is over.
-        if u.formation == Formation::Wedge && u.state != UnitState::Melee {
-            return Some(Formation::Line);
+        // shift the front) and while riding at an enemy close by (RJ-a: a
+        // detour round an obstacle does not undo it); back to line once the
+        // charge is over.
+        let riding_in = u.running && u.target.is_some() && nearest(&|_| true) < WEDGE_RANGE;
+        if current == Some(AiRole::Charge) && u.state != UnitState::Melee && !riding_in {
+            return line;
         }
     }
     if u.state == UnitState::Melee {
         return None;
     }
     let near = nearest(&|_| true);
-    if u.formation == Formation::Column && near < COLUMN_DEPLOY {
-        return Some(Formation::Line);
+    if current == Some(AiRole::March) && near < COLUMN_DEPLOY {
+        return line;
     }
     let long_march = u
         .destination
         .is_some_and(|(x, z)| dist(u, x, z) > COLUMN_MARCH);
     let marcher = foot || horse(u);
-    if marcher && long_march && near > COLUMN_CLEAR && u.formation == Formation::Line {
-        return Some(Formation::Column);
+    if marcher && long_march && near > COLUMN_CLEAR && current == Some(AiRole::Default) {
+        return role(AiRole::March);
     }
-    if u.formation == Formation::Column && !long_march {
-        return Some(Formation::Line);
+    if current == Some(AiRole::March) && !long_march {
+        return line;
     }
     None
 }
@@ -105,6 +136,16 @@ pub fn plan_formations(sim: &BattleSim, side: SideId) -> Vec<Command> {
         .filter(|u| u.climbing.is_none())
         .filter_map(|u| {
             let kind = wanted(sim, u).filter(|&k| k != u.formation)?;
+            // RJ-a: a regiment changing formation finishes first, unless
+            // horse is upon pikemen.
+            // Back to the line (deploying, after a charge) is never held
+            // back once formed; a march or a wedge is not taken again
+            // within FORMATION_HOLD of the last change.
+            let optional = matches!(kind.role(), Some(AiRole::March | AiRole::Charge));
+            let settling = u.reforming() || (optional && u.formed_for < FORMATION_HOLD);
+            if settling && kind.role() != Some(AiRole::AntiCavalry) {
+                return None;
+            }
             Some(Command::Formation {
                 units: vec![u.id],
                 kind,

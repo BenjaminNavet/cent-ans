@@ -1018,6 +1018,7 @@ impl BattleSim {
                 dict.set("queue", &crate::battle_sim_queue::queue_array(sim, unit));
                 // CB2: modes on, modes available, states for the badges.
                 crate::battle_sim_modes::add_mode_fields(sim, unit, &mut dict);
+                crate::battle_sim_formation::add_formation_fields(unit, &mut dict);
                 // CB4: the regiment's abilities (buttons of its card).
                 crate::battle_sim_abilities::add_ability_fields(sim, unit, &mut dict);
                 // EP11: push of the lines in melee (m/s, > 0 driving the enemy

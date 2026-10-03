@@ -776,6 +776,9 @@ func _build_scene() -> bool:
 	# CB4 : textes des capacités pour les infobulles des boutons de carte.
 	if battle.has_method("get_ability_catalog"):
 		hud.ability_catalog = battle.call("get_ability_catalog")
+	# RJ-a : formations de régiment (menu du bouton « Formation », infobulles).
+	if battle.has_method("unit_formations"):
+		hud.setup_formations(battle.call("unit_formations"), battle.call("formation_reform_rules"))
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0)  # EP1
 	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).

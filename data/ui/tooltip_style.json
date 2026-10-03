@@ -21,7 +21,8 @@
     "skill": "#2e5a4a",
     "class": "#4a3a2a",
     "rule": "#3a3a3a",
-    "plain": "#3a2a1a"
+    "plain": "#3a2a1a",
+    "formation": "#6a3a1e"
   },
   "headline": {
     "unit": [

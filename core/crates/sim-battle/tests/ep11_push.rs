@@ -176,7 +176,7 @@ fn wide_against_narrow(bonus: Option<f64>) -> (BattleSim, u32, u32) {
         id_of(&sim, SideId::Attacker, 0),
         id_of(&sim, SideId::Defender, 0),
     );
-    sim.units_mut()[d as usize].formation = Formation::Column;
+    sim.units_mut()[d as usize].formation = Formation::of("column");
     face_off(&mut sim, a, d, X, 0.3);
     steady(&mut sim);
     if let Some(bonus) = bonus {

@@ -3,7 +3,7 @@
 
 use super::BattleSim;
 use crate::formation_width::{split_widths, FormationWidthRules};
-use crate::unit::{Formation, Unit, UnitState};
+use crate::unit::{Unit, UnitState};
 
 /// Tags given to a `match_speed` order without a `group_tag`: this bit set,
 /// plus the lowest regiment id of the order (a locked group's tags, chosen
@@ -38,11 +38,7 @@ impl Unit {
         if self.running {
             pace *= 2.0;
         }
-        pace *= match self.formation {
-            Formation::Column => 1.15,
-            Formation::Square => 0.3,
-            Formation::Line | Formation::Wedge => 1.0,
-        };
+        pace *= self.formation_speed();
         pace * (1.0 - self.fatigue / 200.0)
     }
 
