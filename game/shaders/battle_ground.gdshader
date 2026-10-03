@@ -63,6 +63,19 @@ uniform sampler2D trample_map : filter_linear, repeat_disable;
 uniform float trample_on = 0.0;
 uniform vec3 grass_tint : source_color = vec3(0.9, 1.0, 0.8);
 uniform float detail_scale = 1.0;
+// A6-L14 : échelles de bruit (cycles par mètre) et variation macro, depuis `data/fx/battle_ground.json`.
+uniform float freq_macro = 0.0021;
+uniform float freq_macro2 = 0.00043;
+uniform float freq_fine = 0.017;
+uniform float freq_blend = 0.006;
+uniform float freq_patch = 0.0013;
+uniform float freq_patch2 = 0.0047;
+uniform float freq_puddle = 0.021;
+uniform float freq_macro_var = 0.0017; // variation de teinte/humidité sur 300-800 m
+uniform float fine_contrast = 1.0; // contraste de la variation fine (1 = historique)
+uniform float macro_tint_strength = 0.0; // amplitude de la teinte macro (herbe et terre)
+uniform float macro_wet_strength = 0.0; // amplitude de l'humidité macro (assombrissement)
+uniform float macro_albedo_strength = 0.0; // amplitude de luminosité macro de tout le sol
 // Lot R2 : r = pente (1 = 50 %), g = creux (> 0,5) / bosse (< 0,5) à 30 m, b = idem à 90 m.
 uniform sampler2D relief_map : filter_linear, repeat_disable;
 uniform vec4 relief_rect = vec4(-405.0, -405.0, 2010.0, 1610.0);
@@ -129,18 +142,19 @@ float detail_height(vec2 p, float rough) {
 
 void fragment() {
 	vec2 p = world_pos.xz;
-	float macro = texture(macro_noise, p * 0.0021).r;
-	float macro2 = texture(macro_noise, p * 0.00043 + vec2(0.3, 0.7)).r;
-	float fine = texture(macro_noise, p * 0.017).r;
-	float blend = smoothstep(0.35, 0.65, texture(macro_noise, p * 0.006 + 0.5).r);
+	float macro = texture(macro_noise, p * freq_macro).r;
+	float macro2 = texture(macro_noise, p * freq_macro2 + vec2(0.3, 0.7)).r;
+	float fine = texture(macro_noise, p * freq_fine).r;
+	fine = 0.5 + (fine - 0.5) * fine_contrast;
+	float blend = smoothstep(0.35, 0.65, texture(macro_noise, p * freq_blend + 0.5).r);
 	// Lot V4b : taches de prairie (herbe sèche, prairie grasse), calculées ici pour servir aussi
 	// au partage prairie fleurie de GA2, ci-dessous.
-	float patch = texture(macro_noise, p * 0.0013 + vec2(0.61, 0.13)).r;
-	float patch2 = texture(macro_noise, p * 0.0047 + vec2(0.27, 0.83)).r;
+	float patch = texture(macro_noise, p * freq_patch + vec2(0.61, 0.13)).r;
+	float patch2 = texture(macro_noise, p * freq_patch2 + vec2(0.27, 0.83)).r;
 
 	vec2 suv = (p - splat_rect.xy) / splat_rect.zw;
 	// Bords des zones brisés par le bruit (la splatmap est à 4 m le texel).
-	vec2 jitter = (vec2(fine, texture(macro_noise, p * 0.017 + 0.41).r) - 0.5) * 6.0 / splat_rect.zw;
+	vec2 jitter = (vec2(fine, texture(macro_noise, p * freq_fine + 0.41).r) - 0.5) * 6.0 / splat_rect.zw;
 	vec4 sa = texture(splat_a, suv + jitter);
 	sa.b = texture(splat_a, suv + jitter + bt_mud_warp(p) / splat_rect.zw).b;
 	vec4 sb = texture(splat_b, suv);
@@ -295,7 +309,15 @@ void fragment() {
 	// Lot R2 : herbe grasse et sombre dans les creux, sèche et blonde sur les crêtes.
 	tint = mix(tint, tint * vec3(0.78, 0.92, 0.72), dip * 0.7);
 	tint = mix(tint, tint * vec3(1.14, 1.06, 0.8), crest * 0.55);
+	// A6-L14 : variation macro (300-800 m) de teinte et d'humidité, sur tout le sol, pour que
+	// le champ vu d'en haut ne soit plus un motif répété ; deux octaves décalées.
+	float mv = texture(macro_noise, p * freq_macro_var + vec2(0.47, 0.19)).r * 0.65
+		+ texture(macro_noise, p * freq_macro_var * 0.43 + vec2(0.81, 0.33)).r * 0.35;
+	float mv_c = (mv - 0.5) * 2.0;
+	tint *= mix(vec3(1.0), vec3(1.0 + 0.5 * mv_c, 1.0 + 0.12 * mv_c, 1.0 - 0.45 * mv_c), macro_tint_strength);
 	albedo = mix(albedo, albedo * tint, grassy);
+	albedo *= 1.0 + mv_c * macro_albedo_strength;
+	albedo = mix(albedo, albedo * vec3(0.78, 0.8, 0.74), clamp(-mv_c, 0.0, 1.0) * macro_wet_strength);
 	// VN : sol des blés et des chaumes couleur de paille : au-delà du disque d'herbe (~95 m autour
 	// du point regardé) le champ n'était que terre sombre, et les épis s'arrêtaient en ovale.
 	if (field.x == 2.0) {
@@ -386,7 +408,7 @@ void fragment() {
 	// gravier pâle et sec en bande continue le long de la rivière).
 	// VN2 : boue brun-olive plutôt que lie-de-vin (vue de haut, les zones de boue faisaient des
 	// taches violacées).
-	float puddle = smoothstep(0.62, 0.8, texture(macro_noise, p * 0.021 + vec2(0.53, 0.29)).r);
+	float puddle = smoothstep(0.62, 0.8, texture(macro_noise, p * freq_puddle + vec2(0.53, 0.29)).r);
 	albedo = mix(albedo, vec3(0.17, 0.14, 0.1) * (0.75 + 0.5 * fine) * mix(1.0, 0.6, puddle), w_mud * 0.7 * (1.0 - w[int(L_SNOW)]));
 	// VN : chemins et terre battue en terre brune (vus de près : bande de sable gris-beige).
 	albedo = mix(albedo, albedo * vec3(0.8, 0.66, 0.48), w_dirt * 0.8 * (1.0 - w[int(L_SNOW)]));

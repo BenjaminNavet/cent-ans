@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fx_battle_ground.schema.json",
+  "title": "Bruit et variation du sol de bataille (lot A6-L14)",
+  "description": "Échelles de bruit (cycles par mètre) du shader `battle_ground.gdshader`, auparavant codées en dur, et variation macro (300-800 m) de teinte et d'humidité qui casse le motif tacheté répété. Valeurs d'origine : macro 0.0021, macro2 0.00043, fine 0.017, blend 0.006, patch 0.0013, patch2 0.0047, puddle 0.021, fine_contrast 1.0.",
+  "type": "object",
+  "required": ["noise_scales", "macro_variation", "fine_contrast"],
+  "additionalProperties": false,
+  "properties": {
+    "noise_scales": {
+      "type": "object",
+      "required": ["macro", "macro2", "fine", "blend", "patch", "patch2", "puddle"],
+      "additionalProperties": false,
+      "properties": {
+        "macro": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "macro2": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "fine": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "blend": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "patch": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "patch2": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "puddle": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+      }
+    },
+    "macro_variation": {
+      "type": "object",
+      "required": ["frequency", "tint_strength", "wetness_strength", "albedo_strength"],
+      "additionalProperties": false,
+      "properties": {
+        "frequency": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.01, "description": "Cycles par mètre ; 0.0017 donne des ondulations de 300 à 800 m."},
+        "tint_strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "wetness_strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "albedo_strength": {"type": "number", "minimum": 0, "maximum": 0.5}
+      }
+    },
+    "fine_contrast": {"type": "number", "minimum": 0, "maximum": 1.5, "description": "Facteur sur l'amplitude du bruit fin (1 = historique)."}
+  }
+}
