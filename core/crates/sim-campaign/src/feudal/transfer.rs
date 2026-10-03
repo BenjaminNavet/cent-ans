@@ -384,6 +384,7 @@ fn create_faction(
         research_progress: 0,
         research_points_last_turn: 0,
         research_banked: Default::default(),
+        research_queue: Vec::new(),
         table_upkeep_last_turn: 0,
         coinage: template.coinage,
         price_level: template.price_level,

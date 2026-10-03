@@ -303,6 +303,14 @@ pub enum Order {
     Research {
         technology: TechnologyId,
     },
+    /// A6-L4: queues `technology` behind the current research.
+    QueueResearch {
+        technology: TechnologyId,
+    },
+    /// A6-L4: removes `technology` from the research queue.
+    DequeueResearch {
+        technology: TechnologyId,
+    },
     /// Answers a pending chronicle decision (M10).
     ChooseEventOption {
         decision: u32,
@@ -932,6 +940,14 @@ impl CampaignState {
             Order::Assault { army } => Ok(self.assault(data, faction, &army)?),
             Order::Research { technology } => {
                 research::start_research(self, data, faction, &technology)?;
+                Ok(())
+            }
+            Order::QueueResearch { technology } => {
+                research::queue_research(self, data, faction, &technology)?;
+                Ok(())
+            }
+            Order::DequeueResearch { technology } => {
+                research::dequeue_research(self, data, faction, &technology);
                 Ok(())
             }
             Order::ChooseEventOption { decision, option } => {

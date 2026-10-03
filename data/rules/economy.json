@@ -7,6 +7,8 @@
   "administration_max": 0.35,
   "opulence_seasons": 6,
   "opulence_percent": 20,
+  "research_reserve_turns": 3,
+  "research_queue_max": 3,
   "bankruptcy_morale_penalty": 10,
   "supply_devastation_loss_percent": 50.0,
   "supply_devastation_recovery_cut_percent": 50.0,

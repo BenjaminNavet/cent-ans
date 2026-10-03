@@ -91,6 +91,10 @@ impl CampaignSim {
                     "historical_uncertain" => tech.historical_year.as_ref().is_some_and(|d| d.uncertain),
                     "state" => tech_status(state, &faction, tech).key(),
                     "progress" => i64::from(tech_progress(state, &faction, &tech.id)),
+                    // A6-L4: 1-based position in the research queue, 0 when not queued.
+                    "queue_position" => state.factions.get(&faction)
+                        .and_then(|f| f.research_queue.iter().position(|q| q == &tech.id))
+                        .map_or(0, |i| i as i64 + 1),
                     "herbs" => &herbs,
                     "historical_note" => tech.historical_year.as_ref().and_then(|d| d.note.as_deref()).unwrap_or(""),
                     // IB5: each prerequisite's state and the "before → after"
@@ -133,6 +137,51 @@ impl CampaignSim {
             "cost" => i64::from(info.cost),
             "points_per_turn" => i64::from(info.points_per_turn),
             "turns_left" => turns_left,
+        }
+    }
+
+    /// A6-L4: research queue of `faction`: `[{id, name, cost}]` in start order
+    /// (the technologies waiting behind the current one).
+    #[func]
+    fn get_research_queue(&self, faction: GString) -> VarArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarArray::new();
+        };
+        let Ok(faction) = FactionId::new(faction.to_string()) else {
+            return VarArray::new();
+        };
+        let Some(f) = state.factions.get(&faction) else {
+            return VarArray::new();
+        };
+        f.research_queue
+            .iter()
+            .filter_map(|id| data.technologies.get(id))
+            .map(|tech| {
+                vdict! {
+                    "id" => tech.id.as_str(),
+                    "name" => tech.name.display.as_str(),
+                    "cost" => i64::from(effective_cost(tech, state.year())),
+                }
+                .to_variant()
+            })
+            .collect()
+    }
+
+    /// A6-L4: `{points, cap, max_queue}`: points piled up while no research
+    /// runs, their ceiling (in points) and the queue length limit.
+    #[func]
+    fn get_research_reserve(&self, faction: GString) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        let Ok(faction) = FactionId::new(faction.to_string()) else {
+            return VarDictionary::new();
+        };
+        let (points, cap) = state.research_reserve(data, &faction);
+        vdict! {
+            "points" => i64::from(points),
+            "cap" => i64::from(cap),
+            "max_queue" => i64::from(data.economy_rules.research_queue_max),
         }
     }
 

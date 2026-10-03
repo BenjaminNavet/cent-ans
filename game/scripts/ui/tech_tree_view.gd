@@ -7,6 +7,8 @@ extends Control
 ## disponible = `research_requested`. Aucune règle ici.
 
 signal research_requested(technology_id: String)
+## A6-L4 : Maj+clic sur une technologie disponible = la mettre en file derrière la recherche.
+signal queue_requested(technology_id: String)
 
 const NODE_SIZE := Vector2(212, 62)
 const COLUMN_STEP := 252.0
@@ -23,6 +25,7 @@ const STATE_LABELS := {
 	"known": "Acquise",
 	"researching": "En cours",
 	"available": "Disponible",
+	"queued": "En file",
 	"locked": "Verrouillée",
 }
 const EFFECT_LABELS := {
@@ -141,6 +144,9 @@ func _make_button(node: Dictionary) -> Button:
 		second_line = "%d / %d pts — %s" % [int(node.get("progress", 0)), cost, STATE_LABELS[state]]
 	else:
 		second_line = "%d pts — %s" % [cost, STATE_LABELS.get(state, state)]
+	var queue_position := int(node.get("queue_position", 0))
+	if queue_position > 0 and state == "available":
+		second_line = "%d pts — En file (n° %d)" % [cost, queue_position]
 	button.text = "%s\n%s" % [str(node.get("name", id)), second_line]
 	RichTooltip.set_tooltip(button, "technology", id, node)  # F2 / IB1 : infobulle en sections (tooltip_for : texte brut)
 	var style := StyleBoxFlat.new()
@@ -159,7 +165,11 @@ func _make_button(node: Dictionary) -> Button:
 	for color_name in ["font_color", "font_disabled_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		button.add_theme_color_override(color_name, font_color)
 	button.disabled = state != "available"
-	button.pressed.connect(func() -> void: research_requested.emit(id))
+	button.pressed.connect(func() -> void:
+		if Input.is_key_pressed(KEY_SHIFT):
+			queue_requested.emit(id)
+		else:
+			research_requested.emit(id))
 	return button
 
 

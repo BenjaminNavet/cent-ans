@@ -433,6 +433,7 @@ func _connect_ui() -> void:
 	ui.stance_changed.connect(_on_stance_changed)
 	ui.tech_panel_requested.connect(_on_tech_panel_requested)  # M6
 	ui.research_requested.connect(_on_research_requested)  # M6
+	ui.research_queue_requested.connect(_on_research_queue_requested)  # A6-L4
 	ui.trade_layer_toggle_requested.connect(_toggle_trade_layer)  # C5
 	ui.province_panel_closed.connect(func() -> void:
 		selected_index = 0
@@ -1103,7 +1104,8 @@ func _refresh_research() -> void:
 		ui.research_box.hide()
 		return
 	ui.research_box.show()
-	ui.set_research_progress(sim.call("get_research", player_faction), int(sim.call("get_research_points", player_faction)))
+	ui.set_research_progress(sim.call("get_research", player_faction), int(sim.call("get_research_points", player_faction)),
+		sim.call("get_research_queue", player_faction), sim.call("get_research_reserve", player_faction))
 
 
 func _on_tech_panel_requested() -> void:
@@ -1117,7 +1119,12 @@ func _on_tech_panel_requested() -> void:
 func _show_tech_panel() -> void:
 	ui.show_tech_tree(sim.call("get_tech_tree", player_faction), sim.call("get_research", player_faction),
 		int(sim.call("get_research_points", player_faction)),
-		SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction))
+		SimFacade.faction_short_name(player_faction), SimFacade.faction_color(player_faction),
+		sim.call("get_research_queue", player_faction), sim.call("get_research_reserve", player_faction))
+
+
+func _on_research_queue_requested(technology_id: String) -> void:
+	_submit({"type": "queue_research", "technology": technology_id}, "Technologie mise en file.")
 
 
 func _on_research_requested(technology_id: String) -> void:

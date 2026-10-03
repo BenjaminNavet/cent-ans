@@ -378,6 +378,7 @@ impl CampaignState {
                 research_progress: 0,
                 research_points_last_turn: 0,
                 research_banked: Default::default(),
+                research_queue: Vec::new(),
             };
             state.factions.insert(id.clone(), faction_state);
         }

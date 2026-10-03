@@ -101,6 +101,15 @@ pub struct EconomyRules {
     /// opulent court...
     #[serde(default = "default_opulence_seasons")]
     pub opulence_seasons: i64,
+    /// A6-L4: while no research runs, the points pile up in a reserve capped
+    /// at this many turns of research points; it is poured into the next
+    /// research.
+    #[serde(default = "default_research_reserve_turns")]
+    pub research_reserve_turns: u32,
+    /// A6-L4: length of the research queue (technologies waiting behind the
+    /// current one).
+    #[serde(default = "default_research_queue_max")]
+    pub research_queue_max: u32,
     /// ... which spends this percentage of the excess every season.
     #[serde(default = "default_opulence_percent")]
     pub opulence_percent: i64,
@@ -257,6 +266,12 @@ fn default_administration_max() -> f64 {
 fn default_opulence_seasons() -> i64 {
     6
 }
+fn default_research_reserve_turns() -> u32 {
+    3
+}
+fn default_research_queue_max() -> u32 {
+    3
+}
 fn default_opulence_percent() -> i64 {
     20
 }
@@ -291,6 +306,8 @@ impl Default for EconomyRules {
             administration_max: default_administration_max(),
             opulence_seasons: default_opulence_seasons(),
             opulence_percent: default_opulence_percent(),
+            research_reserve_turns: default_research_reserve_turns(),
+            research_queue_max: default_research_queue_max(),
             bankruptcy_morale_penalty: default_bankruptcy_morale_penalty(),
             supply_devastation_loss_percent: default_supply_devastation_loss_percent(),
             supply_devastation_recovery_cut_percent:
