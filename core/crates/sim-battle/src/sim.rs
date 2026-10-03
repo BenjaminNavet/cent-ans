@@ -2482,11 +2482,8 @@ impl BattleSim {
         let target = &self.units[t];
         let dist = ((target.x - shooter.x).powi(2) + (target.z - shooter.z).powi(2)).sqrt();
         let range = self.effective_range(shooter, target.x, target.z).max(1.0);
-        let shots = if shooter.category == UnitCategory::Siege {
-            shooter.hp * 3.0
-        } else {
-            shooter.hp
-        };
+        let engine = (shooter.category == UnitCategory::Siege)
+            .then(|| &siege::SiegeWorkRules::bundled().engine);
         let mut accuracy = 0.3 * (1.0 - 0.5 * dist / range);
         if shooter.has(Ability::RainPenalty) {
             accuracy *= self.weather.bow_factor();
@@ -2503,9 +2500,24 @@ impl BattleSim {
         if let Some(e) = shooter_ability {
             accuracy *= e.accuracy_factor;
         }
-        let mut kills = shots * accuracy * f64::from(shooter.stats.ranged) / 100.0
-            * armor_factor(self.defense_points(target))
-            * RANGED_RATE;
+        // An engine's stone ploughs a file of men: a set toll per shot, the
+        // armour barely counting; a volley of arrows scales with the archers.
+        let mut kills = match engine {
+            Some(rules) => {
+                let crew = shooter.hp / f64::from(shooter.initial_soldiers.max(1));
+                f64::from(shooter.stats.siege_attack.unwrap_or(0))
+                    * rules.kills_per_siege_attack
+                    * crew
+                    * accuracy
+                    / 0.3
+                    * armor_factor(self.defense_points(target) * rules.armor_weight)
+            }
+            None => {
+                shooter.hp * accuracy * f64::from(shooter.stats.ranged) / 100.0
+                    * armor_factor(self.defense_points(target))
+                    * RANGED_RATE
+            }
+        };
         if let Some(e) = shooter_ability.filter(|_| target.mounted) {
             kills *= e.vs_mounted_factor;
         }
@@ -2589,6 +2601,9 @@ impl BattleSim {
         }
         // ADR 0052: the arrows wound the horses too, and they panic, unless
         // the riders are already locked in a melee.
+        if kills > 0.0 {
+            self.units[t].morale -= engine.map_or(0.0, |rules| rules.morale_shock);
+        }
         let target = &self.units[t];
         self.units[t].morale -= crate::missile_morale::MissileMoraleRules::bundled().panic(
             target.mounted && target.state != UnitState::Melee,

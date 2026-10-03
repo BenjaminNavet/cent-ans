@@ -1,0 +1,22 @@
+{
+  "description": "Lot RJ-d (ADR 0175) : lavis translucide de chaque province selon la position diplomatique de son contrôleur envers le joueur (or : nous ; vert : alliés et vassaux ; rouge : ennemis en guerre ; gris très léger : les autres). Les couleurs nous / ennemi / ami sont celles des frontières (stance_cues.json, ADR 0155) ; la province occupée garde les hachures de l'occupant (faction_borders.json), peintes par-dessus. Rendu seulement.",
+  "colors": {
+    "other": "#8a8478"
+  },
+  "alpha": {
+    "self": 0.45,
+    "enemy": 0.42,
+    "friend": 0.35,
+    "other": 0.1
+  },
+  "saturation": 0.8,
+  "zoom": {
+    "near_distance": 60.0,
+    "far_distance": 260.0,
+    "near_scale": 0.35
+  },
+  "parchment_scale": 0.55,
+  "modes": {
+    "political": 1.0
+  }
+}
