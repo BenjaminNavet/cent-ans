@@ -346,17 +346,31 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
     let games: Vec<Game> = (1..=8).map(|seed| fifty_turns(&data, seed)).collect();
     let n = games.len() as f64;
     let mean = |f: &dyn Fn(&Game) -> f64| games.iter().map(f).sum::<f64>() / n;
+    // LR-04: every seed is printed, then every failure listed, so that one
+    // run (an hour on a loaded machine) shows the whole picture.
+    let mut failures = Vec::new();
     for (i, g) in games.iter().enumerate() {
         let seed = i + 1;
-        assert!(g.majors_alive, "seed {seed}: France and England survive");
-        assert_eq!(g.bankruptcies, [0, 0], "seed {seed}: no bankruptcy");
-        for (m, delta) in g.provinces_delta.iter().enumerate() {
-            assert!(
-                delta.abs() <= 5,
-                "seed {seed}: major {m} Δ provinces {delta} (no collapse, no blitz)"
-            );
+        println!(
+            "seed {seed}: treasury {:?}, Δ provinces {:?}, bankruptcies {:?}, battles {}, sieges {}, landings {}",
+            g.treasury, g.provinces_delta, g.bankruptcies, g.battles, g.siege_turns, g.english_landings
+        );
+        if !g.majors_alive {
+            failures.push(format!("seed {seed}: France and England survive"));
         }
-        assert!(g.battles > 0, "seed {seed}: armies meet in the field");
+        if g.bankruptcies != [0, 0] {
+            failures.push(format!("seed {seed}: bankruptcies {:?}", g.bankruptcies));
+        }
+        for (m, delta) in g.provinces_delta.iter().enumerate() {
+            if delta.abs() > 5 {
+                failures.push(format!(
+                    "seed {seed}: major {m} Δ provinces {delta} (no collapse, no blitz)"
+                ));
+            }
+        }
+        if g.battles == 0 {
+            failures.push(format!("seed {seed}: armies meet in the field"));
+        }
     }
     let france = mean(&|g| g.treasury[0] as f64);
     let england = mean(&|g| g.treasury[1] as f64);
@@ -368,6 +382,7 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
         "France {france:.0}, England {england:.0}, sieges/turn {sieges:.3}, stuck/turn {stuck:.2}, English landings {landings:.1}, battles {:.1}",
         mean(&|g| f64::from(g.battles))
     );
+    assert!(failures.is_empty(), "{failures:#?}");
     // RS-M (ADR 0113): 40 000 until TW2 (royal ransoms after battles) and FE
     // (the Empire's host at war with France from turn 8); 24 336 on main of
     // 2026-09-28, standard error of the 8-seed mean about 3 400. FE8 (ADR
