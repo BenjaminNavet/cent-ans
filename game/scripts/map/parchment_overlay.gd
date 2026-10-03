@@ -41,6 +41,7 @@ var _refresh_key: Array = []  # PB3d : propriétaires, vignettes et colonies du 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	pennant_units = float(SettlementMarkers.load_default().banner_value("parchment_pennant_units", pennant_units))  # RJ-c
 	_make_glyphs()
 
 
@@ -50,7 +51,10 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 		return
 	# PB3d : propriétaires en un appel groupé ; rien n'est reconstruit s'ils n'ont pas changé.
 	var snapshot: ProvinceSnapshot = ProvinceSnapshot.of(sim, map_data) if sim != null else null
-	var refresh_key := [snapshot.owner if snapshot != null else PackedStringArray(), draw_towns, settlement_data.get_instance_id() if settlement_data != null else 0]
+	# RJ-c : fanions possesseur / occupant et liseré de position → détenteurs et positions aussi.
+	var player := str(sim.call("get_player_faction")) if sim != null and sim.has_method("get_player_faction") else ""
+	var stances := StanceCues.stances(sim, player) if player != "" else {}
+	var refresh_key := [snapshot.owner if snapshot != null else PackedStringArray(), snapshot.controller if snapshot != null else PackedStringArray(), stances.hash(), draw_towns, settlement_data.get_instance_id() if settlement_data != null else 0]
 	if refresh_key == _refresh_key and not _provinces.is_empty():
 		return
 	_refresh_key = refresh_key
@@ -85,9 +89,16 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 				continue
 			var px: Vector2 = entry["px"]
 			var province_id := str(entry.get("province", ""))
-			var owner := str(owner_of.get(province_id, ""))
+			var owner := str(entry.get("owner", owner_of.get(province_id, "")))
+			var controller := str(entry.get("controller", owner))
 			var cap: Vector2 = capitals.get(province_id, Vector2(-1, -1))
-			_towns.append({"px": px, "world": _world(px), "capital": cap.distance_to(px) < 6.0, "color": _faction_info(owner).get("color", INK) if owner != "" else INK})
+			var town := {"px": px, "world": _world(px), "capital": cap.distance_to(px) < 6.0, "color": _faction_info(owner).get("color", INK) if owner != "" else INK}
+			# RJ-c (ADR 0175) : fanion du propriétaire (liseré de position), fanion de l'occupant.
+			town["edge"] = _cue_edge(owner, player, stances)
+			if controller != owner and controller != "":
+				town["occupant_color"] = _faction_info(controller).get("color", INK)
+				town["occupant_edge"] = _cue_edge(controller, player, stances)
+			_towns.append(town)
 	_towns.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["capital"] and not b["capital"])
 	queue_redraw()
 
@@ -578,12 +589,46 @@ func _draw_town(p: Vector2, u: float, town: Dictionary, a: float) -> void:
 		return
 	var k := u / GLYPH_UNIT
 	draw_texture_rect(_town_glyph, Rect2(p - GLYPH_ANCHOR * k, Vector2(GLYPH_SIZE) * k), false, Color(1, 1, 1, a))
-	if town["capital"]:
-		var x := p.x + 0.15 * u
-		draw_line(Vector2(x, p.y - 1.8 * u), Vector2(x, p.y - 2.3 * u), Color(INK, a), 1.2)
-		var flag := PackedVector2Array([Vector2(x, p.y - 2.3 * u), Vector2(x + 0.6 * u, p.y - 2.16 * u), Vector2(x, p.y - 2.02 * u)])
-		var c := Color(town["color"], a)
-		draw_primitive(flag, PackedColorArray([c, c, c]), PackedVector2Array())
+	# RJ-c (ADR 0175) : fanion du propriétaire sur chaque cité (liseré de position) ; place
+	# occupée : fanion de l'occupant sous le premier, sur la même hampe.
+	var length := pennant_units * u
+	var x := p.x + 0.15 * u
+	var top := p.y - 2.3 * u
+	var occupied := town.has("occupant_color")
+	var bottom := top + length * (0.95 if occupied else 0.5)
+	draw_line(Vector2(x, p.y - 1.8 * u), Vector2(x, top), Color(INK, a), 1.2)
+	if occupied:
+		draw_line(Vector2(x, p.y - 1.8 * u), Vector2(x, bottom), Color(INK, a), 1.2)
+	_draw_pennant(Vector2(x, top), length, town["color"], town.get("edge", Color(0, 0, 0, 0)), a)
+	if occupied:
+		_draw_pennant(Vector2(x, top + length * 0.5), length * 0.8, town["occupant_color"], town.get("occupant_edge", Color(0, 0, 0, 0)), a)
+
+
+## RJ-c : longueur du fanion (unités de vignette, `settlement_markers.json` `banner`).
+var pennant_units: float = 0.55
+
+
+## RJ-c : fanion triangulaire accroché à `at` (haut de la hampe), à la couleur `color`, liseré
+## `edge` (alpha 0 : aucun).
+func _draw_pennant(at: Vector2, length: float, color: Color, edge: Color, a: float) -> void:
+	var h := length * 0.46
+	var flag := PackedVector2Array([at, at + Vector2(length, h * 0.5), at + Vector2(0.0, h)])
+	var c := Color(color, a)
+	draw_primitive(flag, PackedColorArray([c, c, c]), PackedVector2Array())
+	if edge.a > 0.0:
+		var outline := flag.duplicate()
+		outline.append(flag[0])
+		draw_polyline(outline, Color(edge, a * edge.a), 1.4, true)
+
+
+## RJ-c : liseré de position d'une faction (`StanceCues`, ADR 0155) ; transparent si neutre.
+static func _cue_edge(faction: String, player: String, stances: Dictionary) -> Color:
+	if player == "":
+		return Color(0, 0, 0, 0)
+	var cue := StanceCues.category_of(faction, player, stances)
+	if cue == StanceCues.OTHER:
+		return Color(0, 0, 0, 0)
+	return StanceCues.border_color(Color.WHITE, cue)
 
 
 ## Vignette : tertre au lavis, clocher, enceinte crénelée, deux tours à toits rouges.

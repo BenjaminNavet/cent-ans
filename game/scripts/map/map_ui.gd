@@ -435,6 +435,11 @@ func is_dialog_open() -> bool:
 
 func set_hovered(province: Dictionary) -> void:
 	hover_label.text = str(province.get("display_name", province.get("name", ""))) if not province.is_empty() else ""
+	# RJ-c (ADR 0175) : statut possédé / occupé, filet latéral à la couleur de position.
+	var possession_line := str(province.get("possession_line", ""))
+	if hover_label.text != "" and possession_line != "":
+		hover_label.text += " — " + possession_line
+	_set_hover_cue(str(province.get("possession_cue", "")) if possession_line != "" else "")
 	if hover_label.text == "" and army_strip.visible:
 		hover_label.text = _army_status  # F10b : position et ordre de l'armée sélectionnée
 	hover_label.visible = hover_label.text != ""
@@ -443,6 +448,7 @@ func set_hovered(province: Dictionary) -> void:
 
 ## Survol d'une destination avec une armée sélectionnée : nom, coût et faisabilité.
 func set_hover_path(province_name: String, steps: int, cost: int, reachable_this_turn: bool) -> void:
+	_set_hover_cue("")  # RJ-c
 	if steps <= 0:
 		hover_label.text = "%s — aucun chemin" % province_name
 	elif reachable_this_turn:
@@ -464,6 +470,7 @@ func set_trade_mode(active: bool) -> void:
 func set_hover_trade(text: String) -> void:
 	if text == "":
 		return
+	_set_hover_cue("")  # RJ-c
 	hover_label.text = text
 	hover_label.visible = true
 	_fit_hover_label()
@@ -1339,6 +1346,26 @@ func dock_right_panel(panel: Control) -> void:
 	panels.register(panel, PanelStack.Kind.DOCKED)
 	panel.visibility_changed.connect(queue_layout)
 	queue_layout()
+
+
+## RJ-c : filets gauche et droit de l'étiquette de survol à la couleur de position (`self`,
+## `friend`, `enemy`, ADR 0155) ; aucun pour une faction neutre ou hors province.
+var _hover_style: StyleBoxFlat = null
+
+
+func _set_hover_cue(cue: String) -> void:
+	if _hover_style == null:
+		var base := hover_label.get_theme_stylebox("normal")
+		if not base is StyleBoxFlat:
+			return
+		_hover_style = (base as StyleBoxFlat).duplicate()
+		hover_label.add_theme_stylebox_override("normal", _hover_style)
+	var colored := cue != "" and cue != StanceCues.OTHER
+	var width := 4 if colored else 0
+	_hover_style.border_width_left = width
+	_hover_style.border_width_right = width
+	if colored:
+		_hover_style.border_color = StanceCues.border_color(Color.WHITE, cue)
 
 
 func _fit_hover_label() -> void:

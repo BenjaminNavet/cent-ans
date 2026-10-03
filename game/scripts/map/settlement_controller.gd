@@ -54,6 +54,7 @@ func setup(campaign_map: Node) -> void:
 		if map.settlement_layer != null:
 			map.settlement_layer.select(""))
 	province_panel.settlement_rows_provider = rows_for_province
+	province_panel.possession_provider = possession_of_province  # RJ-c
 	province_panel.settlement_requested.connect(func(id: String) -> void: open_settlement(id, true))
 	# Un seul des deux panneaux à la fois.
 	province_panel.visibility_changed.connect(func() -> void:
@@ -121,7 +122,12 @@ func _show(detail: Dictionary) -> void:
 	var recruitable: Array = map.sim.call("get_recruitable", id) if player_owner else []
 	var buildable: Array = map.sim.call("settlement_buildable", id) if player_owner and map.sim.has_method("settlement_buildable") else []
 	var demolition: Array = map.sim.call("settlement_demolition_preview", id) if player_owner and map.sim.has_method("settlement_demolition_preview") else []
-	panel.show_settlement(detail, recruitable, buildable, player_owner, SimFacade.faction_short_name, demolition)
+	var shown := detail
+	var possession := possession_of_settlement(id)  # RJ-c : statut possédé / occupé
+	if not possession.is_empty():
+		shown = detail.duplicate()
+		shown["possession"] = possession
+	panel.show_settlement(shown, recruitable, buildable, player_owner, SimFacade.faction_short_name, demolition)
 
 
 ## Rafraîchit le panneau ouvert après un changement d'état (appelé par `refresh_all`).
@@ -140,14 +146,39 @@ func rows_for_province(province_id: String) -> Array:
 	var rows: Array = []
 	if not available() or not map.sim.has_method("province_settlements"):
 		return rows
+	# RJ-c : statut de chaque place (occupée par…) depuis `province_possession`.
+	var statuses: Dictionary = {}
+	for place in possession_of_province(province_id).get("settlements", []):
+		statuses[str(place.get("id", ""))] = place
 	for id in map.sim.call("province_settlements", province_id):
 		var detail: Dictionary = map.sim.call("settlement_detail", id)
 		if detail.is_empty():
 			continue
 		var row := detail.duplicate()
 		row["garrison_units"] = (detail.get("garrison", []) as Array).size()
+		row["possession_status"] = str(statuses.get(str(id), {}).get("status", ""))
 		rows.append(row)
 	return rows
+
+
+## RJ-c (ADR 0175) : possession de la province pour le joueur, décrite (`PossessionText.describe`) ;
+## {} si la simulation ne l'expose pas.
+func possession_of_province(province_id: String) -> Dictionary:
+	if map == null or map.sim == null or not map.sim.has_method("province_possession"):
+		return {}
+	return _described(map.sim.call("province_possession", province_id, ""))
+
+
+## RJ-c : possession d'une place pour le joueur, décrite ; {} si indisponible.
+func possession_of_settlement(settlement_id: String) -> Dictionary:
+	if map == null or map.sim == null or not map.sim.has_method("settlement_possession"):
+		return {}
+	return _described(map.sim.call("settlement_possession", settlement_id, ""))
+
+
+func _described(possession: Dictionary) -> Dictionary:
+	var player: String = map.player_faction
+	return PossessionText.describe(possession, player, StanceCues.stances(map.sim, player), SimFacade.faction_short_name)
 
 
 func _on_province_requested(province_id: String) -> void:
