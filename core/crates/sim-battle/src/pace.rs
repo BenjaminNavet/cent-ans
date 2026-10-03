@@ -28,6 +28,14 @@ pub struct Pace {
     pub ranged_rate: f64,
     /// Morale lost when a regiment loses all its men at once.
     pub loss_morale_factor: f64,
+    /// Morale lost per second by a regiment struck on the flank.
+    pub flank_morale_per_s: f64,
+    /// Morale lost per second by a regiment struck in the rear.
+    pub rear_morale_per_s: f64,
+    /// A regiment whose morale falls under this routs.
+    pub rout_morale: f64,
+    /// A routing regiment out of danger whose morale rises above this rallies.
+    pub rally_morale: f64,
 }
 
 const BUNDLED: &str = include_str!("../../../../data/rules/battle_pace.json");

@@ -51,6 +51,7 @@ use crate::rng::BattleRng;
 use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
 use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
+use crate::pace::Pace;
 use crate::siege::{self, PieceKind, SiegeWorks};
 use crate::unit::{Formation, Unit, UnitFate, UnitState};
 use width::move_group_tag;
@@ -68,10 +69,6 @@ const MAX_STEPS_PER_CALL: u32 = 600;
 pub const CONTACT_GAP: f64 = 2.5;
 /// Radius of the general's morale aura (metres).
 pub const GENERAL_AURA: f64 = 150.0;
-/// Morale below which a regiment routs.
-pub const ROUT_MORALE: f64 = 20.0;
-/// Morale above which a routing regiment may rally.
-pub const RALLY_MORALE: f64 = 40.0;
 /// Enemies closer than this prevent rallying (metres).
 pub const RALLY_SAFE_DISTANCE: f64 = 150.0;
 /// Duration of the charge impact bonus (seconds).
@@ -923,6 +920,11 @@ impl BattleSim {
     /// Replaces the fighting rates (tuning probes; the game uses the data file).
     pub fn set_pace(&mut self, rules: crate::pace::PaceRules) {
         self.pace = rules;
+    }
+
+    /// Replaces the rout rules (tuning probes).
+    pub fn set_rout_rules(&mut self, rules: crate::rout::RoutRules) {
+        self.rout = rules;
     }
 
     /// Enables or disables the end-of-battle checks (lab scenarios where a
@@ -3027,7 +3029,14 @@ impl BattleSim {
         // formatted for the few regiments concerned).
         let mut new_events: Vec<(usize, &'static str)> = Vec::new();
         let siege = self.siege.is_some();
-        let loss_morale_factor = self.pace().loss_morale_factor;
+        let Pace {
+            loss_morale_factor,
+            flank_morale_per_s,
+            rear_morale_per_s,
+            rout_morale,
+            rally_morale,
+            ..
+        } = *self.pace();
         // T4 (ADR 0108): the garrison's last stand on the square.
         let stand = &crate::capture::CaptureRules::bundled().last_stand;
         let last_stand: Vec<bool> = self
@@ -3059,10 +3068,10 @@ impl BattleSim {
                 * cover
                 * stand_loss;
             if unit.flanked & 1 != 0 {
-                morale -= 1.5 * DT;
+                morale -= flank_morale_per_s * DT;
             }
             if unit.flanked & 2 != 0 {
-                morale -= 3.0 * DT;
+                morale -= rear_morale_per_s * DT;
             }
             if unit.fatigue > EXHAUSTED_FATIGUE {
                 morale -= (unit.fatigue - EXHAUSTED_FATIGUE) * 0.02 * DT;
@@ -3153,7 +3162,7 @@ impl BattleSim {
             unit.fatigue = (unit.fatigue + rate * DT).clamp(0.0, 100.0);
 
             // Rout and rally.
-            if unit.state != UnitState::Routing && unit.morale < ROUT_MORALE && !unit.withdrawing {
+            if unit.state != UnitState::Routing && unit.morale < rout_morale && !unit.withdrawing {
                 unit.state = UnitState::Routing;
                 unit.target = None;
                 unit.destination = None;
@@ -3168,7 +3177,7 @@ impl BattleSim {
                 }
                 new_events.push((i, "sont en déroute !"));
             } else if unit.state == UnitState::Routing
-                && unit.morale > RALLY_MORALE
+                && unit.morale > rally_morale
                 && nearest_enemy > RALLY_SAFE_DISTANCE
                 && unit.hp >= f64::from(unit.max_soldiers) * 0.2
             {

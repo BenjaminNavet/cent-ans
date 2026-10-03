@@ -55,7 +55,7 @@ fn mixed(men: u32, archer: &str) -> Vec<(String, usize)> {
     ]
 }
 
-type Row = (String, u64, Option<SideId>, f64, u32, u32);
+type Row = (String, u64, Option<SideId>, f64, u32, u32, f64, f64);
 
 fn field(data: &GameData, s: &Scenario, seed: u64) -> Row {
     let mut setup = setup(comp(data, &s.attacker), comp(data, &s.defender), None);
@@ -73,10 +73,36 @@ fn finish(name: &str, seed: u64, mut sim: BattleSim) -> Row {
         let rules = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
         sim.set_pace(rules);
     }
+    if let Some(factor) = std::env::var("L13_AMMO").ok().and_then(|v| v.parse::<f64>().ok()) {
+        for u in sim.units_mut() {
+            u.ammo = (f64::from(u.ammo) * factor).round() as u32;
+        }
+    }
+    if let Ok(path) = std::env::var("L13_PUSH") {
+        sim.set_push_rules(serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap());
+    }
+    if let Ok(path) = std::env::var("L13_ROUT") {
+        sim.set_rout_rules(serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap());
+    }
+    if let Ok(path) = std::env::var("L13_DECISION") {
+        sim.set_decision_rules(
+            serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap(),
+        );
+    }
     let a0 = sim.strength(SideId::Attacker);
     let d0 = sim.strength(SideId::Defender);
+    let (mut contact, mut first_rout) = (f64::NAN, f64::NAN);
     while !sim.is_finished() && sim.elapsed() < 3600.0 {
         sim.step();
+        if contact.is_nan() && sim.units().iter().any(|u| u.state == sim_battle::UnitState::Melee)
+        {
+            contact = sim.elapsed();
+        }
+        if first_rout.is_nan()
+            && sim.units().iter().any(|u| u.state == sim_battle::UnitState::Routing)
+        {
+            first_rout = sim.elapsed();
+        }
     }
     (
         name.to_owned(),
@@ -85,6 +111,8 @@ fn finish(name: &str, seed: u64, mut sim: BattleSim) -> Row {
         sim.elapsed(),
         a0.saturating_sub(sim.strength(SideId::Attacker)),
         d0.saturating_sub(sim.strength(SideId::Defender)),
+        contact,
+        first_rout,
     )
 }
 
@@ -154,7 +182,11 @@ fn survey() {
             Some(SideId::Defender) => "D",
             None => "-",
         };
-        let _ = writeln!(tsv, "{}\t{}\t{}\t{:.0}\t{}\t{}", r.0, r.1, w, r.3, r.4, r.5);
+        let _ = writeln!(
+            tsv,
+            "{}\t{}\t{}\t{:.0}\t{}\t{}\t{:.0}\t{:.0}",
+            r.0, r.1, w, r.3, r.4, r.5, r.6, r.7
+        );
     }
     if let Ok(out) = std::env::var("L13_OUT") {
         std::fs::write(out, &tsv).unwrap();
@@ -167,7 +199,17 @@ fn survey() {
         t.sort_by(f64::total_cmp);
         let m = t[t.len() / 2];
         medians.push(m);
-        println!("{m:>6.0} s  {n}");
+        let med = |f: fn(&Row) -> f64| {
+            let mut v: Vec<f64> = rows.iter().filter(|r| r.0 == n).map(f).collect();
+            v.retain(|x| !x.is_nan());
+            v.sort_by(f64::total_cmp);
+            v.get(v.len() / 2).copied().unwrap_or(f64::NAN)
+        };
+        println!(
+            "{m:>6.0} s (contact {:.0}, first rout {:.0})  {n}",
+            med(|r| r.6),
+            med(|r| r.7)
+        );
     }
     medians.sort_by(f64::total_cmp);
     println!("MEDIAN OF MEDIANS {:.0} s", medians[medians.len() / 2]);

@@ -3,11 +3,19 @@
   "field": {
     "melee_rate": 0.035,
     "ranged_rate": 0.3,
-    "loss_morale_factor": 60.0
+    "loss_morale_factor": 60.0,
+    "flank_morale_per_s": 1.5,
+    "rear_morale_per_s": 3.0,
+    "rout_morale": 20.0,
+    "rally_morale": 40.0
   },
   "siege": {
     "melee_rate": 0.035,
     "ranged_rate": 0.3,
-    "loss_morale_factor": 60.0
+    "loss_morale_factor": 60.0,
+    "flank_morale_per_s": 1.5,
+    "rear_morale_per_s": 3.0,
+    "rout_morale": 20.0,
+    "rally_morale": 40.0
   }
 }

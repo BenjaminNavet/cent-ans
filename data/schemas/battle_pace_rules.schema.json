@@ -27,6 +27,30 @@
           "maximum": 2,
           "description": "Facteur de létalité d'une volée (et des tirs de tour)."
         },
+        "flank_morale_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Moral perdu par seconde par un régiment pris de flanc."
+        },
+        "rear_morale_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Moral perdu par seconde par un régiment pris à revers."
+        },
+        "rout_morale": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Sous ce moral, un régiment part en déroute."
+        },
+        "rally_morale": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Au-dessus de ce moral, un régiment en déroute hors de danger se rallie."
+        },
         "loss_morale_factor": {
           "type": "number",
           "exclusiveMinimum": 0,
@@ -34,7 +58,7 @@
           "description": "Points de moral perdus pour la perte de tout l'effectif d'un régiment en un instant."
         }
       },
-      "required": ["melee_rate", "ranged_rate", "loss_morale_factor"],
+      "required": ["melee_rate", "ranged_rate", "loss_morale_factor", "flank_morale_per_s", "rear_morale_per_s", "rout_morale", "rally_morale"],
       "additionalProperties": false
     }
   }
