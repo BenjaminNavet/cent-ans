@@ -60,6 +60,8 @@ var disks: PackedVector3Array = PackedVector3Array()
 var _footprints: Dictionary = {}
 ## Points de fleuve proches par indice de colonie (crue), calculés une fois par tour.
 var _river_cache: Dictionary = {}
+## LR-18 : trajets de fuite par (colonie, groupe), calculés une fois par tour.
+var _escape_cache: Dictionary = {}
 
 
 func setup(map_data: MapData, settlement_data: SettlementData, layer: SettlementLayer = null) -> void:
@@ -127,6 +129,7 @@ func resolve(scenes: Array) -> void:
 	staged = by_key.values()
 	_footprints.clear()
 	_river_cache.clear()
+	_escape_cache.clear()
 	quiet_settlements.clear()
 	idle_provinces.clear()
 	fire_points = PackedVector2Array()
@@ -139,7 +142,7 @@ func resolve(scenes: Array) -> void:
 				fire_points.append(_side_point(scene, 1.3))
 			"famine":
 				idle_provinces[scene["province"]] = true
-			"flood":
+			"flood", "devastation":
 				# Parcours des fleuves une fois par tour, pas au placement (≈ 25 ms).
 				var index := int(scene["index"])
 				if not _river_cache.has(index):
@@ -391,16 +394,105 @@ func _devastation(f: Dictionary, n: int) -> void:
 		var angle := _h(seed_value, 5) * TAU + (float(g) + _h(seed_value, 10 + g) * 0.5) * TAU / float(groups)
 		var dir := Vector2(cos(angle), sin(angle))
 		var from := center + dir * inner
-		var to := from + dir * _m(30.0)
+		# LR-18 : trajet courbe (route voisine, sinon arc qui s'écarte de l'eau), un tronçon par groupe.
+		var cache_key := int(f["index"]) * 64 + g
+		if not _escape_cache.has(cache_key):
+			_escape_cache[cache_key] = _escape_path(int(f["index"]), from, dir, seed_value + g)
+		var path: PackedVector2Array = _escape_cache[cache_key]
+		var piece := g % (path.size() - 1)
+		var a := path[piece]
+		var b := path[piece + 1]
 		var phase := _h(seed_value, 30 + g)
 		var size := 2 + int(_h(seed_value, 50 + g) * 2.0)
 		for k in size:
 			if placed >= n:
 				return
 			var role := "porter" if k % 2 == 0 else "peasant_b"
-			if not _pool.add(role, "procession", from, to, phase, 0.6 * float(k % 2), 1.2 * float(k)):
+			if not _pool.add(role, "procession", a, b, phase, 0.6 * float(k % 2), 1.2 * float(k)):
 				return
 			placed += 1
+
+
+## Trajet de fuite (3 tronçons chaînés, 4 points) depuis `from` : la route la plus proche (suivie
+## en s'éloignant de la colonie, sur ≈ 70 m), sinon un arc dont la courbure fuit le fleuve voisin.
+func _escape_path(index: int, from: Vector2, dir: Vector2, salt: int) -> PackedVector2Array:
+	var road := _road_from(from)
+	if road.size() >= 2:
+		return _resample(road, 3)
+	var to := from + dir * _m(70.0)
+	var side := Vector2(-dir.y, dir.x)
+	var mid := (from + to) * 0.5
+	var bend := _m(18.0)
+	var pos := mid + side * bend
+	var neg := mid - side * bend
+	var sign_value := 1.0 if _h(salt, 1) < 0.5 else -1.0
+	var rivers: Array = _river_cache.get(index, [])
+	if not rivers.is_empty():
+		var near_pos := INF
+		var near_neg := INF
+		for entry in rivers:
+			var p: Vector2 = entry[1]
+			near_pos = minf(near_pos, p.distance_squared_to(pos))
+			near_neg = minf(near_neg, p.distance_squared_to(neg))
+		sign_value = 1.0 if near_pos >= near_neg else -1.0
+	var control := mid + side * bend * 2.0 * sign_value
+	var out := PackedVector2Array()
+	for i in 4:
+		var t := float(i) / 3.0
+		out.append(from.lerp(control, t).lerp(control.lerp(to, t), t))
+	return out
+
+
+## Route la plus proche de `from` (à moins de 60 m) : points suivis dans le sens qui s'éloigne de
+## `from`, sur ≈ 70 m. Vide si aucune route.
+func _road_from(from: Vector2) -> PackedVector2Array:
+	if _data == null:
+		return PackedVector2Array()
+	var best := _m(60.0) * _m(60.0)
+	var best_points := PackedVector2Array()
+	var best_i := -1
+	for road in _data.roads:
+		var points: PackedVector2Array = road["points"]
+		for i in points.size():
+			var d2 := points[i].distance_squared_to(from)
+			if d2 < best:
+				best = d2
+				best_points = points
+				best_i = i
+	if best_i < 0 or best_points.size() < 2:
+		return PackedVector2Array()
+	var step := 1
+	if best_i + 1 >= best_points.size() or (best_i > 0 and best_points[best_i - 1].distance_squared_to(from) > best_points[best_i + 1].distance_squared_to(from)):
+		step = -1
+	var out := PackedVector2Array([from])
+	var length := 0.0
+	var i := best_i
+	while i >= 0 and i < best_points.size() and length < _m(70.0):
+		length += out[out.size() - 1].distance_to(best_points[i])
+		out.append(best_points[i])
+		i += step
+	return out
+
+
+## `pieces` tronçons de même longueur le long de la ligne brisée (pieces + 1 points).
+static func _resample(line: PackedVector2Array, pieces: int) -> PackedVector2Array:
+	var total := 0.0
+	for i in line.size() - 1:
+		total += line[i].distance_to(line[i + 1])
+	var out := PackedVector2Array([line[0]])
+	var target := total / float(pieces)
+	var walked := 0.0
+	var next := target
+	for i in line.size() - 1:
+		var seg := line[i].distance_to(line[i + 1])
+		while seg > 0.0 and next <= walked + seg + 1e-6 and out.size() < pieces:
+			out.append(line[i].lerp(line[i + 1], (next - walked) / seg))
+			next += target
+		walked += seg
+	out.append(line[line.size() - 1])
+	while out.size() < pieces + 1:
+		out.append(line[line.size() - 1])
+	return out
 
 
 ## Siège : charrettes de ravitaillement vers le camp (le camp existe déjà, CV2) et fourrageurs
