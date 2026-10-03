@@ -62,6 +62,9 @@ var _footprints: Dictionary = {}
 var _river_cache: Dictionary = {}
 ## LR-18 : trajets de fuite par (colonie, groupe), calculés une fois par tour.
 var _escape_cache: Dictionary = {}
+## LR-18 : index des points de route par case (Vector2i → [route, rang, …] à plat), bâti au `setup`.
+var _road_cells: Dictionary = {}
+const ROAD_CELL := 2.0
 
 
 func setup(map_data: MapData, settlement_data: SettlementData, layer: SettlementLayer = null) -> void:
@@ -69,8 +72,17 @@ func setup(map_data: MapData, settlement_data: SettlementData, layer: Settlement
 	_data = settlement_data
 	_layer = layer
 	_seat.clear()
+	_road_cells.clear()
 	if _data == null:
 		return
+	for r in _data.roads.size():
+		var road_points: PackedVector2Array = _data.roads[r]["points"]
+		for i in road_points.size():
+			var key := Vector2i(int(floorf(road_points[i].x / ROAD_CELL)), int(floorf(road_points[i].y / ROAD_CELL)))
+			var list: PackedInt32Array = _road_cells.get(key, PackedInt32Array())
+			list.append(r)
+			list.append(i)
+			_road_cells[key] = list
 	for i in _data.settlements.size():
 		var province := str(_data.settlements[i]["province"])
 		if not _seat.has(province):
@@ -451,14 +463,18 @@ func _road_from(from: Vector2) -> PackedVector2Array:
 	var best := _m(60.0) * _m(60.0)
 	var best_points := PackedVector2Array()
 	var best_i := -1
-	for road in _data.roads:
-		var points: PackedVector2Array = road["points"]
-		for i in points.size():
-			var d2 := points[i].distance_squared_to(from)
-			if d2 < best:
-				best = d2
-				best_points = points
-				best_i = i
+	var cx := int(floorf(from.x / ROAD_CELL))
+	var cy := int(floorf(from.y / ROAD_CELL))
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var list: PackedInt32Array = _road_cells.get(Vector2i(cx + dx, cy + dy), PackedInt32Array())
+			for k in range(0, list.size(), 2):
+				var points: PackedVector2Array = _data.roads[list[k]]["points"]
+				var d2 := points[list[k + 1]].distance_squared_to(from)
+				if d2 < best:
+					best = d2
+					best_points = points
+					best_i = list[k + 1]
 	if best_i < 0 or best_points.size() < 2:
 		return PackedVector2Array()
 	var step := 1
