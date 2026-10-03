@@ -27,6 +27,7 @@ var _mouse_dirty := false
 var _last_distance := -1.0
 ## RS-N : confirmation avant l'ordre `demolish` ; ordre en attente de sa réponse
 ## ({settlement, building}).
+var slot_bar: SettlementSlotBar = null
 var raze_dialog: RazeConfirmationDialog = null
 var _pending_raze: Dictionary = {}
 
@@ -40,6 +41,11 @@ func setup(campaign_map: Node) -> void:
 	panel.place_like(province_panel)
 	map.ui.dock_right_panel(panel)  # C7b : à gauche de la minicarte
 	panel.hide()
+	# A6-L15 (ADR 0181) : barre des emplacements en bas de l'écran.
+	slot_bar = SettlementSlotBar.new()
+	map.ui.attach_slot_bar(slot_bar)
+	slot_bar.slot_activated.connect(_on_slot_activated)
+	panel.visibility_changed.connect(func() -> void: slot_bar.visible = panel.visible and slot_bar.slots.size() > 0)
 	panel.recruit_requested.connect(_on_recruit)
 	panel.create_army_requested.connect(_on_create_army)
 	panel.build_requested.connect(_on_build)
@@ -128,6 +134,33 @@ func _show(detail: Dictionary) -> void:
 		shown = detail.duplicate()
 		shown["possession"] = possession
 	panel.show_settlement(shown, recruitable, buildable, player_owner, SimFacade.faction_short_name, demolition)
+	_fill_slot_bar(id, str(detail.get("name", id)), player_owner)
+
+
+## A6-L15 : la bande des emplacements suit la colonie affichée (données du cœur, lecture seule).
+func _fill_slot_bar(id: String, place_name: String, player_owner: bool) -> void:
+	if slot_bar == null:
+		return
+	var rows: Array = map.sim.call("settlement_slots", id) if map.sim.has_method("settlement_slots") else []
+	slot_bar.set_slots(id, rows, player_owner, place_name)
+	slot_bar.visible = panel.visible and not rows.is_empty()
+
+
+## Clic sur une case : l'onglet des bâtiments du panneau s'ouvre, la ligne de construction de la
+## case (premier palier proposé) prend le focus. L'ordre se donne dans le panneau, pas ici.
+func _on_slot_activated(settlement_id: String, slot: Dictionary) -> void:
+	if panel == null or not panel.visible or panel.settlement_id != settlement_id:
+		return
+	panel.show_buildings_tab()
+	var next: Array = slot.get("next", [])
+	if next.is_empty() or panel.buildable_list == null:
+		return
+	var wanted := str((next[0] as Dictionary).get("name", ""))
+	for line in panel.buildable_list.get_children():
+		for child in line.get_children():
+			if child is Button and not (child as Button).disabled and (child as Button).text.begins_with(wanted):
+				(child as Button).grab_focus()
+				return
 
 
 ## Rafraîchit le panneau ouvert après un changement d'état (appelé par `refresh_all`).

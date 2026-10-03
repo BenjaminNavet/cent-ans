@@ -82,6 +82,8 @@ var minimap: Control = null
 var docked_panels: Array[Control] = []
 ## Abscisse écran du bord droit de ces panneaux (dernier `layout_hud`).
 var docked_right_x: float = 0.0
+## A6-L15 : barre des emplacements de la colonie sélectionnée (posée par `SettlementController`).
+var slot_bar: SettlementSlotBar = null
 @onready var province_panel: ProvincePanel = %ProvincePanel
 @onready var faction_panel: FactionPanel = %FactionPanel
 @onready var court_button: Button = %CourtButton
@@ -1266,6 +1268,7 @@ func layout_hud() -> void:
 	army_strip.max_width = gap
 	army_strip.size = Vector2.ZERO
 	army_strip.position = Vector2(left + (gap - army_strip.size.x) * 0.5, zone_size.y - army_strip.size.y)
+	_layout_slot_bar(left, gap, zone_size)
 	# Étiquette de chemin (enfant direct) : au-dessus du bandeau, sinon au-dessus de la zone.
 	var strip_top := bottom.position.y + (army_strip.position.y if army_strip.visible else 0.0)
 	hover_label.position.y = strip_top - 6.0 - hover_label.size.y
@@ -1304,6 +1307,27 @@ func layout_hud() -> void:
 	var letters_visible := not (side_busy or wide_panel_open)
 	if news_letters.visible != letters_visible:
 		news_letters.visible = letters_visible
+
+
+## A6-L15 : place la barre des emplacements en bas de la zone de sélection (même repère que le
+## bandeau d'ost, entre le sceau et la cloche) ; au-dessus du bandeau s'il est visible.
+func attach_slot_bar(bar: SettlementSlotBar) -> void:
+	slot_bar = bar
+	army_strip.get_parent().add_child(bar)
+	bar.visibility_changed.connect(queue_layout)
+
+
+func _layout_slot_bar(left: float, gap: float, zone_size: Vector2) -> void:
+	if slot_bar == null or not slot_bar.visible:
+		return
+	slot_bar.fit(gap)
+	slot_bar.size = Vector2.ZERO
+	var width := minf(slot_bar.get_combined_minimum_size().x, gap)
+	var bottom_edge := zone_size.y
+	if army_strip.visible:
+		bottom_edge = army_strip.position.y - 6.0
+	slot_bar.size = Vector2(width, slot_bar.get_combined_minimum_size().y)
+	slot_bar.position = Vector2(left + (gap - width) * 0.5, bottom_edge - slot_bar.size.y)
 
 
 ## U1 : vrai si un panneau central ou compagnon ouvert recouvre `rect` (coordonnées écran).
