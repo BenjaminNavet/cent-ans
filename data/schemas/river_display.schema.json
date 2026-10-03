@@ -69,6 +69,8 @@
         "min_segment_px": { "type": "number", "minimum": 0 },
         "spacing_px": { "$ref": "#/$defs/by_importance" },
         "max_distance_by_importance": { "$ref": "#/$defs/by_importance" },
+        "major_max_distance": { "type": "number", "exclusiveMinimum": 0, "description": "A6-C2 : portée (part de l'étendue) des étiquettes des grands fleuves de major_names, visibles en vue moyenne." },
+        "major_names": { "type": "array", "items": { "type": "string" } },
         "min_importance": { "type": "integer", "minimum": 0, "maximum": 6 },
         "clear_px_from_settlements": { "type": "number", "minimum": 0 },
         "max_labels": { "type": "integer", "minimum": 0 }

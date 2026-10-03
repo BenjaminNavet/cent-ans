@@ -31,6 +31,12 @@
           "minimum": 0,
           "maximum": 1
         },
+        "plate_scale": {
+          "description": "A6-C3 : facteur de taille des plaques d'effectif des armées (police, écu, marges) ; 1 = taille d'origine, 0,8 = −20 %.",
+          "type": "number",
+          "minimum": 0.3,
+          "maximum": 1.5
+        },
         "town_scale": {
           "description": "GC (ADR 0158) : grossissement constant des villes autour de leur centre sur la carte de campagne ; 1 = échelle réelle.",
           "type": "number",
