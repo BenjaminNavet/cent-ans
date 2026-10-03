@@ -83,10 +83,10 @@ impl Default for PopulationRules {
     fn default() -> Self {
         PopulationRules {
             tax_unrest_weight: 130.0,
-            garrison_relief_per_100_men: 1.0,
-            garrison_relief_max: 10.0,
+            garrison_relief_per_100_men: 1.5,
+            garrison_relief_max: 15.0,
             garrison_relief_reference_population: 100_000,
-            garrison_relief_max_weight: default_garrison_relief_max_weight(),
+            garrison_relief_max_weight: 3.0,
             goods_relief_max: 10.0,
             occupation_unrest: 20.0,
             foreign_religion_unrest: 10.0,
@@ -140,10 +140,12 @@ mod tests {
     use super::PopulationRules;
 
     #[test]
-    fn a_garrison_soothes_per_head_beyond_the_reference_population() {
+    fn a_garrison_soothes_per_head() {
         let rules = PopulationRules {
+            garrison_relief_per_100_men: 1.0,
+            garrison_relief_max: 10.0,
             garrison_relief_reference_population: 100_000,
-            garrison_relief_max_weight: default_garrison_relief_max_weight(),
+            garrison_relief_max_weight: 1.0,
             ..PopulationRules::default()
         };
         // A small or average province: 1 point per 100 men, capped.
@@ -158,5 +160,14 @@ mod tests {
             ..rules
         };
         assert_eq!(flat.garrison_relief(600, 200_000), 6.0);
+        // A thinly peopled province: a bonus up to the weight ceiling.
+        let bonus = PopulationRules {
+            garrison_relief_max_weight: 3.0,
+            garrison_relief_max: 15.0,
+            ..rules
+        };
+        assert_eq!(bonus.garrison_relief(300, 50_000), 6.0);
+        assert_eq!(bonus.garrison_relief(300, 10_000), 9.0);
+        assert_eq!(bonus.garrison_relief(5_000, 10_000), 15.0);
     }
 }
