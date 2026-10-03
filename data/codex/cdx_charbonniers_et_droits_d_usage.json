@@ -1,0 +1,31 @@
+{
+  "id": "cdx_charbonniers_et_droits_d_usage",
+  "title": "Les charbonniers et les droits d'usage en forêt",
+  "category": "societe",
+  "aliases": [
+    "charbonniers",
+    "charbonnier",
+    "charbonnière",
+    "droits d'usage",
+    "affouage",
+    "maîtres de forges"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "La forêt fournit bois de chauffe, charbon, glands et gibier. Paysans, charbonniers, maîtres de forges et seigneurs s'y disputent des droits d'usage que les ordonnances royales tentent d'encadrer.",
+  "body": "Le charbon de bois, obtenu par la combustion lente d'un tas de bûches recouvert de terre, alimente les forges, les verreries et les fours de potiers. Les charbonniers vivent dans la forêt par équipes, loin des villages, et ont mauvaise réputation. Chaque fourneau consomme des hectares de taillis, ce qui rend les forêts proches des centres métallurgiques de plus en plus rares.\n\nLes habitants des paroisses voisines possèdent des droits d'usage, concédés ou coutumiers : ramasser le bois mort, couper du bois de chauffe, mener les porcs à la glandée, faire paître le bétail. Le seigneur, de son côté, se réserve la chasse et les bois de haute futaie, et tire des revenus de la vente des coupes. L'ordonnance de Brunoy (1346) de Philippe VI, qui règle l'administration des eaux et forêts, marque la volonté du roi de contrôler ces ressources.\n\nLes litiges se règlent par des procès, des transactions et parfois des émeutes. Beaucoup de seigneurs finissent par vendre les droits d'usage contre une redevance, ce qui satisfait leur trésorerie et rassure les forges.",
+  "gameplay": "Événement aléatoire de province : confirmer les droits des charbonniers, faire respecter la réserve seigneuriale ou accorder la coupe contre redevance. Voir [[cdx_bois]] et [[cdx_forge]].",
+  "entity": "evt_charbonniers_en_conflit",
+  "see_also": [
+    "cdx_bois",
+    "cdx_forge",
+    "cdx_seigneurie"
+  ],
+  "sources": [
+    "Charbonnier",
+    "Charbon de bois",
+    "Ordonnance de Brunoy"
+  ]
+}

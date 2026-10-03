@@ -157,6 +157,11 @@ pub enum Condition {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         province: Option<ProvinceId>,
     },
+    /// The province (default: scope) is crossed by at least one river.
+    ProvinceOnRiver {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        province: Option<ProvinceId>,
+    },
     TreasuryAbove {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         faction: Option<FactionId>,

@@ -1,0 +1,32 @@
+{
+  "id": "cdx_faux_monnayage",
+  "title": "Faux-monnayeurs et rognage des monnaies",
+  "category": "economie",
+  "aliases": [
+    "faux-monnayeur",
+    "faux-monnayeurs",
+    "fausse monnaie",
+    "faux monnayage",
+    "rognage",
+    "rogneurs",
+    "pièces rognées"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Altérer ou contrefaire la monnaie est un crime contre le prince, qui détient le droit de battre monnaie. Les peines vont de l'amende à l'ébouillantement, mais la monnaie fautive circule largement quand les espèces manquent.",
+  "body": "Le monnayage est une prérogative du prince : y toucher est un crime de lèse-majesté. Les faux-monnayeurs coulent des pièces dans des alliages de moindre valeur (étain, plomb, cuivre argenté) ou rognent les bords des pièces d'or et d'argent pour en récupérer le métal. Les orfèvres, qui possèdent le matériel et le savoir-faire, sont les suspects habituels.\n\nLes sanctions sont terribles : en France, les ordonnances royales prévoient la pendaison, l'ébouillantement ou la confiscation des biens. Les changeurs sont tenus de signaler les pièces douteuses et de les peser. Pourtant, le crime prospère quand le roi lui-même modifie le titre et le poids des espèces : sous Philippe VI et Jean le Bon, les mutations monétaires fréquentes rendent la fraude difficile à distinguer de la politique du prince, comme le dénonce Nicole Oresme dans son traité vers 1360.\n\nLa fausse monnaie ruine la confiance des marchands et peut gêner un marché entier. Aux foires, on vérifie les pièces à la balance et à la pierre de touche.",
+  "gameplay": "Événement aléatoire de province : livrer le coupable à la justice du prince, saisir faux deniers et fonte, ou fermer les yeux contre une part du gain. Voir [[cdx_mutations_monetaires]].",
+  "entity": "evt_faux_monnayeur",
+  "see_also": [
+    "cdx_mutations_monetaires",
+    "cdx_marche",
+    "cdx_foire"
+  ],
+  "sources": [
+    "Faux-monnayage",
+    "Traité des monnaies",
+    "Rognage (numismatique)"
+  ]
+}

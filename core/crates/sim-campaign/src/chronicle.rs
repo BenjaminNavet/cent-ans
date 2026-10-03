@@ -263,6 +263,9 @@ impl CampaignState {
             Condition::ProvinceCoastal { province } => scope_province(province)
                 .and_then(|p| data.provinces.get(&p))
                 .is_some_and(|p| p.coastal),
+            Condition::ProvinceOnRiver { province } => scope_province(province)
+                .and_then(|p| data.provinces.get(&p))
+                .is_some_and(|p| !p.rivers.is_empty()),
             Condition::TreasuryAbove { faction, amount } => scope_faction(faction)
                 .and_then(|f| self.factions.get(&f))
                 .is_some_and(|f| f.treasury > *amount),

@@ -87,6 +87,7 @@
         { "properties": { "type": { "const": "province_unrest_above" }, "province": { "$ref": "#/$defs/province_id" }, "amount": { "type": "integer", "minimum": 0, "maximum": 100 } }, "required": ["amount"], "additionalProperties": false },
         { "properties": { "type": { "const": "province_besieged" }, "province": { "$ref": "#/$defs/province_id" }, "by": { "$ref": "#/$defs/faction_id" } }, "additionalProperties": false },
         { "properties": { "type": { "const": "province_coastal" }, "province": { "$ref": "#/$defs/province_id" } }, "additionalProperties": false },
+        { "properties": { "type": { "const": "province_on_river" }, "province": { "$ref": "#/$defs/province_id" } }, "additionalProperties": false },
         { "properties": { "type": { "const": "treasury_above" }, "faction": { "$ref": "#/$defs/faction_id" }, "amount": { "type": "integer" } }, "required": ["amount"], "additionalProperties": false },
         { "properties": { "type": { "const": "provinces_below" }, "faction": { "$ref": "#/$defs/faction_id" }, "count": { "type": "integer", "minimum": 0 } }, "required": ["count"], "additionalProperties": false },
         { "properties": { "type": { "const": "religion_is" }, "faction": { "$ref": "#/$defs/faction_id" }, "religion": { "$ref": "common.schema.json#/$defs/religion_id" } }, "required": ["religion"], "additionalProperties": false },

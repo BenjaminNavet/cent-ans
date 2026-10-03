@@ -1,0 +1,32 @@
+{
+  "id": "cdx_bateliers_et_peages",
+  "title": "Les bateliers et les péages de rivière",
+  "category": "vie_quotidienne",
+  "aliases": [
+    "bateliers",
+    "batelier",
+    "nautes",
+    "péage fluvial",
+    "péages fluviaux",
+    "halage"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Les bateliers font vivre le transport par eau, moins coûteux que la route. Leurs tarifs, leurs corporations et les péages que les seigneurs lèvent à chaque pont ou chaque écluse sont une source constante de litiges.",
+  "body": "Un chaland chargé de grain ou de vin transporte ce que vingt charrettes porteraient sur la route : fleuves et rivières sont donc les grands axes du commerce. Le Rhône, la Seine, la Loire, la Garonne ou l'Escaut portent des convois de bateaux que l'on remonte à la voile, à la perche ou par halage, à l'aide d'hommes et de chevaux. Les bateliers sont organisés en confréries ; à Paris, la hanse des marchands de l'eau règle la navigation sur la Seine et préfigure l'administration municipale.\n\nChaque seigneur riverain prélève un péage : ponts, passages, tours de guet, pertuis et moulins servent de barrières. Les péages se superposent (on en a compté plus de soixante entre Roanne et Nantes sur la Loire) et les marchands se plaignent qu'ils renchérissent les denrées. Les rois tentent périodiquement de les réduire, sans grand succès, car ils rémunèrent l'entretien des ouvrages et des chemins de halage. Quand les tarifs sont gelés alors que les prix montent, les bateliers refusent le service : leurs arrêts de travail sont attestés dans plusieurs ports fluviaux.\n\nLa guerre aggrave la situation. Les compagnies tiennent des ponts et des passages qu'elles font payer, réquisitionnent des bateaux et coupent la navigation.",
+  "gameplay": "Événement aléatoire de province, réservé aux provinces traversées par un cours d'eau. Le joueur choisit entre accorder la hausse, rogner le péage ou réquisitionner les bateaux, avec leurs effets sur le trésor, la richesse et le mécontentement. Voir [[cdx_ponts_gues]] pour les passages.",
+  "entity": "evt_bateliers_en_greve",
+  "see_also": [
+    "cdx_ponts_gues",
+    "cdx_marche",
+    "cdx_seigneurie",
+    "cdx_foire"
+  ],
+  "sources": [
+    "Batellerie",
+    "Péage",
+    "Hanse parisienne de la marchandise de l'eau"
+  ]
+}

@@ -117,6 +117,26 @@ func _test_incidents(map: Node, sim: Object) -> void:
 		"clicking the seal should open the decision window on it (%d)" % chronicle.window.current_decision())
 	chronicle.window.hide()
 
+	# 2b. LR-02 : clic sur la scène de l'incident (pas seulement le sceau).
+	var staged_here := false
+	if map.life.folk_scenes != null:
+		for scene: Dictionary in map.life.folk_scenes.staged:
+			staged_here = staged_here or str(scene.get("province", "")) == PROVINCE
+	var hit := incidents.scene_hit(map_id)
+	_check(staged_here == (hit != null), "a scene in the province should give a clickable area (scene %s, area %s)" % [staged_here, hit])
+	if hit != null:
+		map.camera_rig.look_at_point(seal.get("world"), 45.0)
+		map.camera_rig.snap()
+		await process_frame
+		await process_frame
+		_check(hit.visible and hit.size.x >= 2.0 * IncidentMarkers.SCENE_HIT_MIN - 0.01, "the scene area should be shown and sized (%s)" % hit.size)
+		_check(hit.tooltip_text.contains(str(by_id[map_id].get("title", "?"))), "the scene area should carry the incident tooltip")
+		hit.call("_gui_input", click)
+		await process_frame
+		_check(chronicle.window.visible and chronicle.window.current_decision() == map_id,
+			"clicking the scene should open the decision window on it (%d)" % chronicle.window.current_decision())
+		chronicle.window.hide()
+
 	# 3. Pas de fenêtre de début de tour pour l'incident ; repli quand les sceaux sont coupés.
 	_check(_pending_ids(chronicle, true) == [dialog_id], "only the dialog should open by itself: %s" % [_pending_ids(chronicle, true)])
 	map.life.incidents = null

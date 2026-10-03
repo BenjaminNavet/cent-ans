@@ -1,0 +1,32 @@
+{
+  "id": "cdx_securite_des_routes",
+  "title": "La sécurité des routes et le brigandage",
+  "category": "institution",
+  "aliases": [
+    "sécurité des routes",
+    "brigandage",
+    "détrousseurs",
+    "coupeurs de routes",
+    "sauvegarde des routes",
+    "grand chemin"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Le prince doit à ses sujets la sécurité des routes : c'est le fondement de son droit de péage. Marchands détroussés, indemnisation, sergents de route et guet des chemins forment le décor ordinaire du commerce médiéval.",
+  "body": "Les marchands voyagent en convois ou sous escorte, mais les brigands, les soldats licenciés et les seigneurs pillards dépouillent régulièrement les voyageurs. Le droit féodal fait peser la responsabilité sur le seigneur dont le territoire a été traversé : en vertu de la sauvegarde ou du conduit, qui garantit le chemin contre un paiement, le marchand volé peut exiger réparation. Ce principe est affirmé dans les privilèges des foires et dans nombre de chartes.\n\nLa guerre de Cent Ans aggrave le désordre. Les trêves laissent sans solde des hommes d'armes qui se constituent en compagnies et rançonnent les campagnes (voir [[cdx_grandes_compagnies]] et [[cdx_routiers_des_compagnies]]). Les villes organisent leurs propres milices et paient des sergents pour garder les routes d'accès, tandis que les rois créent la maréchaussée.\n\nLes marchands disposent de recours : plainte devant le prévôt, saisie des biens d'un pays tenu pour responsable, lettres de marque pour les étrangers. Ces règles de responsabilité collective alimentent bien des litiges entre villes.",
+  "gameplay": "Événement aléatoire de province : indemniser le marchand et poursuivre les voleurs, faire garder la route par des sergents ou rejeter la plainte, avec les conséquences sur le trésor, la richesse et le mécontentement.",
+  "entity": "evt_marchand_detrousse",
+  "see_also": [
+    "cdx_grandes_compagnies",
+    "cdx_routiers_des_compagnies",
+    "cdx_foire",
+    "cdx_marche"
+  ],
+  "sources": [
+    "Brigandage",
+    "Sauf-conduit",
+    "Marchand"
+  ]
+}

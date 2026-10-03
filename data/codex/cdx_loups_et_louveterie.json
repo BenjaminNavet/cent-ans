@@ -1,0 +1,30 @@
+{
+  "id": "cdx_loups_et_louveterie",
+  "title": "Les loups et la louveterie",
+  "category": "vie_quotidienne",
+  "aliases": [
+    "loups",
+    "louveterie",
+    "louvetiers",
+    "louvetier",
+    "louveteau",
+    "attaques de loups"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Les loups sont nombreux dans les campagnes et les forêts d'Europe, et les guerres, la peste et les friches les favorisent. Des officiers spécialisés, les louvetiers, organisent leur chasse, parfois payée à la prime.",
+  "body": "Au Moyen Âge, les loups attaquent le bétail, surtout les moutons, et rôdent autour des villages en hiver. Les épidémies et la guerre, qui vident les campagnes et laissent des champs en friche, font reculer l'homme et progresser la forêt : à la fin de la guerre de Cent Ans, le Journal d'un bourgeois de Paris note des loups jusque dans la ville en 1438. Ces années-là, plusieurs chroniqueurs rapportent des attaques mortelles.\n\nLe pouvoir seigneurial et royal organise la lutte. La charge de louvetier, attestée dès le XIIIe siècle et fixée par Charles VI, confie à un officier la conduite des battues, avec ses chiens et ses pièges. Les communautés paient souvent une prime par bête tuée, présentée à titre de preuve, patte ou tête. Les paysans posent des fosses, des collets et des appâts empoisonnés.\n\nLe loup est aussi une figure de la peur et du récit : bête du diable, d'où la légende du loup-garou, mais aussi animal sur lequel on reporte la faute d'une négligence.",
+  "gameplay": "Événement aléatoire de province : dépêcher les louvetiers, promettre une prime par bête abattue ou dédommager le berger seul.",
+  "entity": "evt_loup_dans_la_bergerie",
+  "see_also": [
+    "cdx_bois",
+    "cdx_seigneurie"
+  ],
+  "sources": [
+    "Louveterie",
+    "Loup gris",
+    "Loup-garou"
+  ]
+}

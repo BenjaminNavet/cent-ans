@@ -4,7 +4,12 @@
   "text": "Les bateliers du fleuve refusent de haler les bateaux : ils réclament une hausse du prix du passage, que les péagers ont gelé. Les denrées s'amoncellent sur les quais.",
   "kind": "random",
   "trigger": {
-    "mean_time_to_happen": 65
+    "mean_time_to_happen": 65,
+    "conditions": [
+      {
+        "type": "province_on_river"
+      }
+    ]
   },
   "scope": {
     "type": "province"

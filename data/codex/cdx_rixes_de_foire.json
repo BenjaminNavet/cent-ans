@@ -1,0 +1,31 @@
+{
+  "id": "cdx_rixes_de_foire",
+  "title": "Rixes et justice de foire",
+  "category": "institution",
+  "aliases": [
+    "rixe de foire",
+    "rixes de foire",
+    "aunage",
+    "querelle d'aunage",
+    "prévôt de foire",
+    "justice des foires"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1500"
+  },
+  "summary": "Les foires concentrent marchands, argent et marchandises en un lieu et un temps courts. Les querelles de mesure et de qualité y dégénèrent facilement : une juridiction spéciale, rapide, tranche les litiges.",
+  "body": "L'aunage, mesure des étoffes à l'aune, est un sujet constant de querelles, comme le poids, la qualité des draps ou la fausse monnaie. Les foires disposent donc de tribunaux propres, tenus par des gardes ou des prévôts, qui jugent vite pour ne pas retarder les affaires ; à Champagne, les gardes des foires font exécuter les sentences jusque dans les pays lointains, et une dette non payée peut entraîner l'exclusion des foires.\n\nLes foires sont placées sous la paix du prince : le conduit garantit la sécurité des marchands, et les violences y sont punies plus sévèrement qu'ailleurs. Mais les affluences, l'alcool et les rivalités entre nations marchandes (Italiens, Flamands, Allemands) provoquent des rixes. Le guet intervient, on saisit les armes, on emprisonne les meneurs, parfois on ferme la foire.\n\nUn seigneur qui laisse les troubles s'installer perd sa réputation auprès des marchands et risque de voir la foire s'éteindre au profit d'une rivale.",
+  "gameplay": "Événement aléatoire de province, avec une scène de foire : faire juger l'affaire par le prévôt, faire emprisonner les meneurs ou laisser les marchands s'arranger. Voir [[cdx_foire]].",
+  "entity": "evt_rixe_de_foire",
+  "see_also": [
+    "cdx_foire",
+    "cdx_marche",
+    "cdx_seigneurie"
+  ],
+  "sources": [
+    "Foires de Champagne",
+    "Foire (commerce)",
+    "Aunage"
+  ]
+}
