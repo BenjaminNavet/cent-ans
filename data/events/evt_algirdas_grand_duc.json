@@ -1,0 +1,87 @@
+{
+  "id": "evt_algirdas_grand_duc",
+  "title": "Algirdas grand-duc",
+  "text": "Pendant l'hiver, Kęstutis surprend Vilnius et s'empare de Jaunutis, qui s'enfuit ensuite à Moscou. Il appelle son frère aîné Algirdas, prince de Vitebsk, au trône grand-ducal ; les deux frères se partagent la Lituanie, Algirdas à l'est, Kęstutis à l'ouest face aux Ordres.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1345,
+      "season": "spring"
+    },
+    "until_year": 1346,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_lithuania"
+      },
+      {
+        "type": "ruler_is",
+        "faction": "fac_lithuania",
+        "character": "chr_jaunutis"
+      },
+      {
+        "type": "character_alive",
+        "id": "chr_algirdas"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_lithuania"
+  },
+  "options": [
+    {
+      "text": "Algirdas et Kęstutis prennent Vilnius",
+      "effects": [
+        {
+          "type": "set_ruler",
+          "character": "chr_algirdas"
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_vilnius",
+          "amount": 5
+        },
+        {
+          "type": "loyalty",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Jaunutis garde Vilnius",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": -10
+        },
+        {
+          "type": "loyalty",
+          "amount": -10
+        },
+        {
+          "type": "unrest",
+          "province": "prov_vilnius",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1345",
+    "uncertain": true,
+    "note": "Coup de l'hiver 1344-1345, date exacte discutée."
+  },
+  "sources": [
+    "Algirdas",
+    "Jaunutis",
+    "Kęstutis",
+    "S. C. Rowell, Lithuania Ascending, 1994"
+  ]
+}

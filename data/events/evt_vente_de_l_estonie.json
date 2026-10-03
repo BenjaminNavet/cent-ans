@@ -1,0 +1,92 @@
+{
+  "id": "evt_vente_de_l_estonie",
+  "title": "La vente de l'Estonie",
+  "text": "Trois ans après la nuit de la Saint-Georges, Valdemar IV de Danemark, à court d'argent pour racheter son royaume, vend le duché d'Estonie à l'ordre Teutonique pour 19 000 marcs d'argent. Le grand maître remet aussitôt Harrie et Wierland au maître de Livonie ; Reval passe à l'Ordre.",
+  "kind": "historical",
+  "trigger": {
+    "date": {
+      "year": 1346,
+      "season": "summer"
+    },
+    "until_year": 1347,
+    "conditions": [
+      {
+        "type": "faction_exists",
+        "faction": "fac_danish_estonia"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_livonian_order"
+      },
+      {
+        "type": "faction_exists",
+        "faction": "fac_teutonic"
+      },
+      {
+        "type": "controls",
+        "faction": "fac_danish_estonia",
+        "province": "prov_harrien_wierland"
+      }
+    ]
+  },
+  "scope": {
+    "type": "faction",
+    "faction": "fac_danish_estonia"
+  },
+  "options": [
+    {
+      "text": "S'incliner devant la vente : le duché passe à l'Ordre (fin de l'Estonie danoise)",
+      "effects": [
+        {
+          "type": "transfer_title",
+          "title": "tit_estonia",
+          "faction": "fac_livonian_order",
+          "from": "fac_danish_estonia",
+          "price": 6000,
+          "payer": "fac_teutonic"
+        },
+        {
+          "type": "prestige",
+          "faction": "fac_teutonic",
+          "amount": 10
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "text": "Refuser la vente et tenir Reval pour la couronne",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 5
+        },
+        {
+          "type": "unrest",
+          "province": "prov_harrien_wierland",
+          "amount": 10
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_livonian_order",
+          "amount": -20,
+          "reason": "Vente de l'Estonie refusée"
+        },
+        {
+          "type": "opinion",
+          "faction": "fac_teutonic",
+          "amount": -15,
+          "reason": "Vente de l'Estonie refusée"
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "historical_date": {
+    "value": "1346-08-29"
+  },
+  "sources": [
+    "Estonie danoise",
+    "Traité de Marienbourg (1346)",
+    "Valdemar IV de Danemark"
+  ]
+}
