@@ -253,6 +253,7 @@ impl BattleSim {
     /// The loser of a broken army routs; the loser of a refused battle or
     /// a lull withdraws in good order.
     pub(super) fn apply_decision(&mut self, loser: SideId, end: BattleEnd) {
+        let rout_morale = self.pace().rout_morale;
         for unit in self
             .units
             .iter_mut()
@@ -261,7 +262,7 @@ impl BattleSim {
             match end {
                 BattleEnd::Broken => {
                     unit.state = UnitState::Routing;
-                    unit.morale = unit.morale.min(super::ROUT_MORALE - 1.0);
+                    unit.morale = unit.morale.min(rout_morale - 1.0);
                     unit.target = None;
                     unit.order_queue.clear();
                     unit.destination = None;

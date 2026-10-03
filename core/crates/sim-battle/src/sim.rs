@@ -46,6 +46,7 @@ use crate::field::{Battlefield, Weather};
 use crate::impact::{self, ImpactEvent, ImpactKind, LossCause, MAX_PENDING_IMPACTS};
 use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
+use crate::pace::Pace;
 use crate::queue::QueuedOrder;
 use crate::rng::BattleRng;
 use crate::scale::BattleScale;
@@ -68,10 +69,6 @@ const MAX_STEPS_PER_CALL: u32 = 600;
 pub const CONTACT_GAP: f64 = 2.5;
 /// Radius of the general's morale aura (metres).
 pub const GENERAL_AURA: f64 = 150.0;
-/// Morale below which a regiment routs.
-pub const ROUT_MORALE: f64 = 20.0;
-/// Morale above which a routing regiment may rally.
-pub const RALLY_MORALE: f64 = 40.0;
 /// Enemies closer than this prevent rallying (metres).
 pub const RALLY_SAFE_DISTANCE: f64 = 150.0;
 /// Duration of the charge impact bonus (seconds).
@@ -84,9 +81,6 @@ pub const RALLY_PAUSE: f64 = 5.0;
 /// catalogue has no `dismount` order.
 const ASSAULT_DISMOUNT_SPEED: u8 = 35;
 
-const MELEE_RATE: f64 = 0.035;
-const RANGED_RATE: f64 = 0.3;
-const LOSS_MORALE_FACTOR: f64 = 60.0;
 /// Fatigue above which a unit loses morale over time (SV4: named so the
 /// battle markers show "exhausted" from the same threshold).
 pub const EXHAUSTED_FATIGUE: f64 = 60.0;
@@ -200,6 +194,8 @@ pub struct BattleSim {
     duel: crate::duel::DuelRules,
     /// EP10: direction of the rout and contagion of morale.
     rout: crate::rout::RoutRules,
+    /// A6-L13: lethality of the melee and of the missiles.
+    pace: crate::pace::PaceRules,
     clock: crate::decision::EngagementClock,
     end: Option<crate::decision::BattleEnd>,
     /// EP7: scenario of a historical battle (waves, posts, weather).
@@ -539,6 +535,7 @@ impl BattleSim {
             decision: crate::decision::DecisionRules::bundled().clone(),
             duel: crate::duel::DuelRules::bundled().clone(),
             rout: crate::rout::RoutRules::bundled().clone(),
+            pace: crate::pace::PaceRules::bundled().clone(),
             clock: Default::default(),
             end: None,
             scenario: None,
@@ -918,6 +915,16 @@ impl BattleSim {
     /// Forces the weather (scripted scenarios and tests).
     pub fn set_weather(&mut self, weather: Weather) {
         self.weather = weather;
+    }
+
+    /// Replaces the fighting rates (tuning probes; the game uses the data file).
+    pub fn set_pace(&mut self, rules: crate::pace::PaceRules) {
+        self.pace = rules;
+    }
+
+    /// Replaces the rout rules (tuning probes).
+    pub fn set_rout_rules(&mut self, rules: crate::rout::RoutRules) {
+        self.rout = rules;
     }
 
     /// Enables or disables the end-of-battle checks (lab scenarios where a
@@ -2515,7 +2522,7 @@ impl BattleSim {
             None => {
                 shooter.hp * accuracy * f64::from(shooter.stats.ranged) / 100.0
                     * armor_factor(self.defense_points(target))
-                    * RANGED_RATE
+                    * self.pace().ranged_rate
             }
         };
         if let Some(e) = shooter_ability.filter(|_| target.mounted) {
@@ -2775,10 +2782,19 @@ impl BattleSim {
         self.incendiary_volley(i, p.midpoint());
     }
 
+    /// Fighting rates of this battle: sieges keep their own pace.
+    pub(crate) fn pace(&self) -> &crate::pace::Pace {
+        if self.siege.is_some() {
+            &self.pace.siege
+        } else {
+            &self.pace.field
+        }
+    }
+
     fn melee_damage(&self, attacker: &Unit, defender: &Unit) -> f64 {
         let mut damage = attacker.fighting_soldiers() * f64::from(attacker.stats.melee) / 100.0
             * armor_factor(self.defense_points(defender))
-            * MELEE_RATE
+            * self.pace().melee_rate
             * DT
             // EP6: walls, hedges and houses of the decor shelter the defender.
             / self.field.decor_defense(defender.x, defender.z);
@@ -3013,6 +3029,14 @@ impl BattleSim {
         // formatted for the few regiments concerned).
         let mut new_events: Vec<(usize, &'static str)> = Vec::new();
         let siege = self.siege.is_some();
+        let Pace {
+            loss_morale_factor,
+            flank_morale_per_s,
+            rear_morale_per_s,
+            rout_morale,
+            rally_morale,
+            ..
+        } = *self.pace();
         // T4 (ADR 0108): the garrison's last stand on the square.
         let stand = &crate::capture::CaptureRules::bundled().last_stand;
         let last_stand: Vec<bool> = self
@@ -3040,14 +3064,14 @@ impl BattleSim {
                 1.0
             };
             morale -= unit.tick_losses / f64::from(unit.max_soldiers)
-                * LOSS_MORALE_FACTOR
+                * loss_morale_factor
                 * cover
                 * stand_loss;
             if unit.flanked & 1 != 0 {
-                morale -= 1.5 * DT;
+                morale -= flank_morale_per_s * DT;
             }
             if unit.flanked & 2 != 0 {
-                morale -= 3.0 * DT;
+                morale -= rear_morale_per_s * DT;
             }
             if unit.fatigue > EXHAUSTED_FATIGUE {
                 morale -= (unit.fatigue - EXHAUSTED_FATIGUE) * 0.02 * DT;
@@ -3138,7 +3162,7 @@ impl BattleSim {
             unit.fatigue = (unit.fatigue + rate * DT).clamp(0.0, 100.0);
 
             // Rout and rally.
-            if unit.state != UnitState::Routing && unit.morale < ROUT_MORALE && !unit.withdrawing {
+            if unit.state != UnitState::Routing && unit.morale < rout_morale && !unit.withdrawing {
                 unit.state = UnitState::Routing;
                 unit.target = None;
                 unit.destination = None;
@@ -3153,7 +3177,7 @@ impl BattleSim {
                 }
                 new_events.push((i, "sont en déroute !"));
             } else if unit.state == UnitState::Routing
-                && unit.morale > RALLY_MORALE
+                && unit.morale > rally_morale
                 && nearest_enemy > RALLY_SAFE_DISTANCE
                 && unit.hp >= f64::from(unit.max_soldiers) * 0.2
             {

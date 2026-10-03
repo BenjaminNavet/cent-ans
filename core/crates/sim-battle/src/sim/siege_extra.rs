@@ -9,7 +9,7 @@
 //!   [`SORTIE_RATIO`] × the garrison's, after [`SORTIE_DELAY`] seconds) an
 //!   AI garrison opens its gate and sallies out (`SiegeWorks::sortie`).
 
-use super::{armor_factor, BattleSim, DT, RANGED_RATE};
+use super::{armor_factor, BattleSim, DT};
 use crate::setup::SideId;
 
 /// Reach of the tower crossbows (metres).
@@ -86,7 +86,7 @@ impl BattleSim {
                 * accuracy
                 * 0.6
                 * armor_factor(self.defense_points(target))
-                * RANGED_RATE;
+                * self.pace().ranged_rate;
             let kills = kills.min(self.units[j].hp);
             self.units[j].hp -= kills;
             self.units[j].tick_losses += kills;

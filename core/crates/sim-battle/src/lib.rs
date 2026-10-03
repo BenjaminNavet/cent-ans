@@ -70,6 +70,7 @@ pub mod naval;
 pub mod opening;
 pub mod orders;
 pub mod outcome;
+pub mod pace;
 pub mod position;
 pub mod preview;
 pub mod props;

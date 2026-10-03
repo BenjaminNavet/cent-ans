@@ -1,0 +1,21 @@
+{
+  "description": "Cadence des combats (lot A6-L13, ADR 0180) : létalité par coup de mêlée et par volée, perte de moral par mort. Les batailles rangées (« field ») ont une mêlée ralentie (×0,3, ADR 0180) ; les sièges (« siege ») gardent leurs valeurs d'origine.",
+  "field": {
+    "melee_rate": 0.035,
+    "ranged_rate": 0.3,
+    "loss_morale_factor": 60.0,
+    "flank_morale_per_s": 1.5,
+    "rear_morale_per_s": 3.0,
+    "rout_morale": 20.0,
+    "rally_morale": 40.0
+  },
+  "siege": {
+    "melee_rate": 0.035,
+    "ranged_rate": 0.3,
+    "loss_morale_factor": 60.0,
+    "flank_morale_per_s": 1.5,
+    "rear_morale_per_s": 3.0,
+    "rout_morale": 20.0,
+    "rally_morale": 40.0
+  }
+}

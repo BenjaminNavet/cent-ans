@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_pace_rules.schema.json",
+  "title": "Cadence des combats",
+  "description": "Fichier data/rules/battle_pace.json (lot A6-L13, ADR 0180) : létalité de la mêlée et des tirs, et moral perdu par mort, pour les batailles rangées (field) et les sièges (siege). Lu par sim-battle (PaceRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "field": { "$ref": "#/$defs/pace" },
+    "siege": { "$ref": "#/$defs/pace" }
+  },
+  "required": ["field", "siege"],
+  "additionalProperties": false,
+  "$defs": {
+    "pace": {
+      "type": "object",
+      "properties": {
+        "melee_rate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Morts par seconde et par combattant de mêlée, avant armure, valeur d'attaque et couvert."
+        },
+        "ranged_rate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2,
+          "description": "Facteur de létalité d'une volée (et des tirs de tour)."
+        },
+        "flank_morale_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Moral perdu par seconde par un régiment pris de flanc."
+        },
+        "rear_morale_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Moral perdu par seconde par un régiment pris à revers."
+        },
+        "rout_morale": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Sous ce moral, un régiment part en déroute."
+        },
+        "rally_morale": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Au-dessus de ce moral, un régiment en déroute hors de danger se rallie."
+        },
+        "loss_morale_factor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 300,
+          "description": "Points de moral perdus pour la perte de tout l'effectif d'un régiment en un instant."
+        }
+      },
+      "required": ["melee_rate", "ranged_rate", "loss_morale_factor", "flank_morale_per_s", "rear_morale_per_s", "rout_morale", "rally_morale"],
+      "additionalProperties": false
+    }
+  }
+}
