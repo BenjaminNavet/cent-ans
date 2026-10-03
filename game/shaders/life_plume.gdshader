@@ -13,10 +13,10 @@ render_mode blend_mix, depth_draw_never, cull_disabled, unshaded, shadows_disabl
 // Direction du vent (plan de carte x, z), alignée sur le vent météo de `campaign_weather`
 // (`weather_wind`, d'ouest) ; couchage du panache (part de sa hauteur déportée au sommet).
 uniform vec2 wind_dir = vec2(0.98, 0.2);
-uniform float wind_lean = 0.45;
+uniform float wind_lean = 0.35;
 // Taille à l'écran (part de la hauteur de l'écran) : largeur, hauteur d'un foyer ; facteur des
 // panaches d'incendie (plus larges et plus hauts).
-uniform vec2 screen_size = vec2(0.013, 0.05);
+uniform vec2 screen_size = vec2(0.014, 0.045);
 uniform float fire_gain = 1.8;
 // Distance caméra → point visé (unités monde), pilotée par le script.
 uniform float focus_distance = 300.0;
@@ -25,7 +25,7 @@ uniform float fade = 0.0;
 // Part des foyers qui fument (rang < densité) : plus l'hiver, moins au grand dézoom.
 uniform float density = 0.5;
 // Opacité de pointe d'un foyer et d'un incendie.
-uniform float smoke_alpha = 0.6;
+uniform float smoke_alpha = 0.5;
 uniform float fire_alpha = 0.85;
 uniform vec3 light_smoke : source_color = vec3(0.86, 0.85, 0.83);
 uniform vec3 dark_smoke : source_color = vec3(0.12, 0.11, 0.10);
@@ -93,9 +93,10 @@ void fragment() {
 	vec2 q = vec2(uv.x * 1.1, t * 1.8 - TIME * speed) + seed * 17.0;
 	float n = noise2(q * 1.5) * 0.65 + noise2(q * 3.1 + 5.0) * 0.35;
 	float dx = abs(uv.x - 0.5) * 2.0;
-	float core = 1.0 - smoothstep(0.15, 1.0, dx + (n - 0.5) * 0.5);
-	float body = smoothstep(0.0, 0.08, t) * (1.0 - smoothstep(0.35, 1.0, t));
-	float density_px = clamp((n - 0.15 + 0.35 * (1.0 - t)) * 1.6, 0.0, 1.0) * core * body;
+	// Filet serré au pied, bouffée qui s'ouvre et se déchire en montant.
+	float core = 1.0 - smoothstep(mix(0.1, 0.35, t), 1.0, dx + (n - 0.5) * mix(0.3, 0.9, t));
+	float body = smoothstep(0.0, 0.06, t) * (1.0 - smoothstep(0.25, 0.95, t));
+	float density_px = clamp((n - 0.25 + 0.45 * (1.0 - t)) * 1.7, 0.0, 1.0) * core * body;
 	float alpha = density_px * mix(smoke_alpha, fire_alpha, dark) * mix(0.75, 1.0, v_custom.a) * fade;
 	if (alpha < 0.01) {
 		discard;

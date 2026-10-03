@@ -19,11 +19,11 @@ const PLUME_SHADER := preload("res://shaders/life_plume.gdshader")
 ## `PLUME_HAMLET_ONE_IN` ; incendie régional au-dessus des hameaux brûlés, un sur
 ## `PLUME_HAMLET_FIRE_ONE_IN`.
 const PLUME_KINDS := {"city": 1, "town": 1, "village": 1, "abbey": 1}
-const PLUME_HAMLET_ONE_IN := 3
+const PLUME_HAMLET_ONE_IN := 6
 const PLUME_HAMLET_FIRE_ONE_IN := 6
 ## RV-F : part des foyers qui fument par point de `_season_boost` (0,55 l'été → 1,15 l'hiver), et
 ## repli au grand dézoom (part gardée à `strategic_threshold`).
-const PLUME_DENSITY_PER_BOOST := 0.55
+const PLUME_DENSITY_PER_BOOST := 0.42
 const PLUME_FAR_KEEP := 0.55
 ## RV-F : entrée en fondu des panaches régionaux au-delà du palier près (unités de distance).
 const PLUME_FADE_IN := 120.0
