@@ -45,28 +45,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 38000,
+        "count": 95000,
         "unrest": 15,
         "health": 55,
         "wealth": 40,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 1520,
+        "count": 3800,
         "unrest": 15,
         "health": 52,
         "wealth": 55,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 950,
+        "count": 2375,
         "unrest": 10,
         "health": 60,
         "wealth": 60,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 456,
+        "count": 1140,
         "unrest": 10,
         "health": 60,
         "wealth": 65,
@@ -74,7 +74,7 @@
       }
     },
     "uncertain": true,
-    "note": "Piémont du Moyen Atlas, tribus berbères sanhaja et zénètes. Chiffres estimés (uncertain)."
+    "note": "Piémont du Moyen Atlas, tribus berbères sanhaja et zénètes. Chiffres estimés (uncertain). Effectifs relevés ×2,5 (lot LR-15) : le Maghreb était sous-estimé (Fès, plus de 100 000 habitants vers 1340, n'avait que 15 000 citadins ; Tunis 12 600)."
   },
   "buildings": [
     "bld_castle",

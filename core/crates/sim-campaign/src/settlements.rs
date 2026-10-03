@@ -71,6 +71,32 @@ impl CampaignState {
             .is_some_and(|s| &s.owner == faction && &s.controller == faction)
     }
 
+    /// Lot LR-15: the place that stands for the faction's capital when it
+    /// musters, recruits or receives a reward — the city of its capital
+    /// province when it controls it, else the city of its first controlled
+    /// province (id order), else its first controlled place other than a
+    /// village, else any place it controls; `None` when it controls
+    /// nothing. Never another realm's city: the capital province of a
+    /// cityless faction (ADR 0165) belongs to someone else.
+    pub fn faction_seat(&self, faction: &FactionId) -> Option<SettlementId> {
+        let capital = &self.factions.get(faction)?.capital;
+        if self.controls_province(faction, capital) {
+            return self.province_city_id(capital).cloned();
+        }
+        let controlled = |s: &SettlementState| &s.controller == faction;
+        self.provinces
+            .values()
+            .find(|p| self.settlements.get(&p.city).is_some_and(controlled))
+            .map(|p| p.city.clone())
+            .or_else(|| {
+                self.settlements
+                    .iter()
+                    .find(|(_, s)| controlled(s) && s.kind != SettlementKind::Village)
+                    .or_else(|| self.settlements.iter().find(|(_, s)| controlled(s)))
+                    .map(|(id, _)| id.clone())
+            })
+    }
+
     /// Province of `settlement`.
     pub fn settlement_province(&self, settlement: &SettlementId) -> Option<&ProvinceId> {
         self.settlements.get(settlement).map(|s| &s.province)

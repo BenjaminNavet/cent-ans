@@ -44,28 +44,28 @@
   "population": {
     "classes": {
       "peasants": {
-        "count": 55000,
+        "count": 137500,
         "unrest": 18,
         "health": 55,
         "wealth": 50,
         "goods_satisfaction": 55
       },
       "burghers": {
-        "count": 5500,
+        "count": 13750,
         "unrest": 18,
         "health": 52,
         "wealth": 65,
         "goods_satisfaction": 60
       },
       "clergy": {
-        "count": 1375,
+        "count": 3438,
         "unrest": 13,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 70
       },
       "nobility": {
-        "count": 660,
+        "count": 1650,
         "unrest": 13,
         "health": 60,
         "wealth": 75,
@@ -73,7 +73,7 @@
       }
     },
     "uncertain": true,
-    "note": "Hauts plateaux constantinois : forteresse du Rhumel, grenier des Hafsides. Chiffres estimés (uncertain)."
+    "note": "Hauts plateaux constantinois : forteresse du Rhumel, grenier des Hafsides. Chiffres estimés (uncertain). Effectifs relevés ×2,5 (lot LR-15) : le Maghreb était sous-estimé (Fès, plus de 100 000 habitants vers 1340, n'avait que 15 000 citadins ; Tunis 12 600)."
   },
   "buildings": [
     "bld_market",

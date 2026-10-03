@@ -48,12 +48,22 @@
     },
     "starting_budget": {
       "type": "object",
-      "description": "Lot JR4b : une faction d'au moins min_provinces provinces dont les garnisons, armées, bâtiments et cour de départ coûtent plus que ses recettes plus max_deficit_percent % commence avec des garnisons allégées (les unités les plus chères rentrent chez elles ; jamais la dernière d'une colonie ni celles de la capitale). La part de la cour due au trésor qui dort ne compte pas : elle fond avec le trésor.",
+      "description": "Lot JR4b : une faction d'au moins min_provinces provinces dont les garnisons, armées, bâtiments et cour de départ coûtent plus que ses recettes plus max_deficit_percent % commence avec des garnisons allégées (les unités les plus chères rentrent chez elles ; jamais la dernière d'une colonie ni celles de la capitale), puis (lot LR-15) des armées de campagne allégées (min_field_units) et en dernier recours une garnison de capitale allégée (min_capital_units). La part de la cour due au trésor qui dort ne compte pas : elle fond avec le trésor.",
       "additionalProperties": false,
       "required": ["min_provinces", "max_deficit_percent"],
       "properties": {
         "min_provinces": { "type": "integer", "minimum": 1 },
-        "max_deficit_percent": { "type": "integer", "minimum": 0, "maximum": 100 }
+        "max_deficit_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "min_field_units": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Lot LR-15 : garnisons au plancher et déficit encore au-delà de max_deficit_percent, les unités les plus chères des armées de campagne de départ rentrent aussi chez elles, jusqu'à ce seuil (absent : armées laissées entières)."
+        },
+        "min_capital_units": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Lot LR-15 : en dernier recours, les unités les plus chères de la garnison de la cité capitale rentrent chez elles, jusqu'à ce seuil (absent : garnison de la capitale laissée entière)."
+        }
       }
     },
     "capital_guard": {
