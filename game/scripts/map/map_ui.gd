@@ -227,6 +227,8 @@ func _decorate_top_bar() -> void:
 	_register_top_label(holdings, "Colonies", "" if _apply_top_medallion(holdings, "hud_settlement") else "⛫")
 	if _apply_top_medallion(menu_button, "hud_menu"):
 		UiType.apply(menu_button, UiType.CAPTION)
+	# U4 : le menu a aussi son infobulle (nom, contenu, raccourci).
+	menu_button.tooltip_text = "Menu\nSauvegarder, charger, retour au menu principal, quitter.\nRaccourci : Échap"
 	get_viewport().size_changed.connect(queue_fit_top_bar)
 	($TopBar as Control).resized.connect(queue_fit_top_bar)
 	var settings := get_node_or_null("/root/Settings")
