@@ -45,5 +45,11 @@ ADR numérotés à la fusion : 0177 lacs historiques (LR-10), 0178 domaine du se
 - `test_relief_update` : publication v3 du relief interrompue (part002 + manifest manquants) ; relancer `geo relief-update` après RV.
 - Partie séculaire 464 tours × 10 graines sur la branche fusionnée (LR-04/05/07/15 changent tous économie et survie).
 
+## État (03/10, fin)
+Fusionné dans main (07545c8a0) après vérification complète : fmt, clippy, cargo test, smoke et 11 tests Godot verts ; pytest vert sauf `test_relief_update` (paquet relief v3 incomplet, déjà rouge avant LR).
+Corrections d'intégration : shader de fumée (ALBEDO/discard/return hors de `fragment()`), graine Montereau 1, test nt2 sur le budget 2000, intitulé du panneau à 14 px (plancher PO2), statut de possession RJ-c après la ligne compacte LR-09 (places tenues en infobulle).
+Garde-fou headless ajouté à part (a9f672207) après 206 Go de journaux Godot écrits par un test bloqué.
+Branches `feat/lr-*`, `integ/lr` et worktrees supprimés ; `fix/ui-tests` gardée (un commit q6 remplacé par LR-06).
+
 ## Prochaine étape
-Vérification complète de `integ/lr` (cargo, pytest, Godot), captures de contrôle (crue, fumée, panneau 720p), puis ff dans main.
+Captures de contrôle non faites (crue, fumée, panneau 720p) : à juger en partie pilote. Restes ci-dessus à arbitrer.
