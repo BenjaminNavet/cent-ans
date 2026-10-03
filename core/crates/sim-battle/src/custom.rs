@@ -404,6 +404,18 @@ impl CustomBattle {
                         "{label} : {} n'est pas levée en {year}",
                         u.name.display
                     )),
+                    Some(u)
+                        if u.required_technology.as_ref().is_some_and(|t| {
+                            let mut with = techs.clone();
+                            with.insert(t.clone());
+                            in_roster(u, faction, &with)
+                        }) =>
+                    {
+                        report.errors.push(format!(
+                            "{label} : {} exige une technologie que {name} ne possède pas",
+                            u.name.display
+                        ))
+                    }
                     Some(u) => report.errors.push(format!(
                         "{label} : {} n'est pas levée par {name}",
                         u.name.display

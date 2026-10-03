@@ -860,10 +860,16 @@ mod tests {
                 .count();
             assert!(along >= 5, "{province}: {along} houses on the main street");
             // A gatehouse on the far side.
+            // (a stouter tower than the gate flankers, which are 0.8 of a corner).
+            let flanker = w
+                .towers
+                .iter()
+                .map(|t| t.radius)
+                .fold(f64::INFINITY, f64::min);
             assert!(w
                 .towers
                 .iter()
-                .any(|t| t.z > w.center.1 + 60.0 && t.radius > 8.0));
+                .any(|t| t.z > w.center.1 + 60.0 && t.radius > flanker * 1.4));
         }
     }
 

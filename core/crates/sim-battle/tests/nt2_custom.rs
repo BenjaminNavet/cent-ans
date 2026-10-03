@@ -219,6 +219,7 @@ fn nt11_roster_follows_the_year() {
         side("fac_france", &["unit_francs_archers"]),
         side("fac_england", &["unit_crossbowmen"]),
     );
+    custom.attacker.technologies = vec!["tech_francs_archers".to_owned()];
     let report = custom.validate(&data, rules);
     assert!(
         report.errors.iter().any(|e| e.contains("en 1337")),
@@ -226,9 +227,18 @@ fn nt11_roster_follows_the_year() {
         report.errors
     );
     custom.year = Some(1450);
-    assert!(!custom.validate(&data, rules).ok, "technology missing");
-    custom.attacker.technologies = vec!["tech_francs_archers".to_owned()];
     assert!(custom.validate(&data, rules).ok);
+    custom.attacker.technologies.clear();
+    let report = custom.validate(&data, rules);
+    assert!(!report.ok, "technology missing");
+    assert!(
+        report
+            .errors
+            .iter()
+            .any(|e| e.contains("exige une technologie")),
+        "{:?}",
+        report.errors
+    );
     custom.year = Some(1200);
     assert!(!custom.validate(&data, rules).ok, "year out of bounds");
 }
