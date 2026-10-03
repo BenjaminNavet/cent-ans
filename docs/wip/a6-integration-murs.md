@@ -9,3 +9,5 @@ Correctif (dans le résolveur, données `auto_resolve.json` + schéma) :
 - nt5 : le test fournit le travail des échelles au coût du niveau des murs (règle L2 voulue).
 
 État : tests a6_l2 et nt5 verts ; suite complète à lancer (fmt, clippy, workspace).
+
+Résultat : suite workspace verte (197 binaires), fmt et clippy -D warnings propres. `stage_siege_at` utilise le coût des engins au niveau des murs.
