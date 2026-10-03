@@ -9,6 +9,7 @@ Jeu de grande stratégie (guerre de Cent Ans). Lire `docs/design/2026-09-23-cent
 - Rust : `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test` avant commit.
 - Python (`tools/`) : `uv`, `uvx ruff check --fix`, `uvx ruff format`.
 - Godot : `godot --headless --path game --import` une fois après un clone, puis `godot --headless --path game --script res://tests/smoke.gd` doit passer.
+- Garde-fou headless (`game/scripts/debug/headless_watchdog.gd`) : un processus Godot headless s'arrête (code 124) au-delà de 20 000 erreurs, un script `res://tests/` au-delà de 45 min. Variables `CENT_ANS_MAX_ERRORS` / `CENT_ANS_TEST_TIMEOUT_S` (0 = sans limite) ; ne les lever que pour un outil long connu. Origine : un test bloqué a écrit 206 Go de journaux (03/10).
 - Toute dépense cloud est consignée dans `docs/budget.md` (plafond 50 $ v1).
 - Décisions d'architecture : un fichier ADR dans `docs/decisions/NNNN-titre.md`.
 - Pas de ligne Co-Authored-By dans les commits.
