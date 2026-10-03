@@ -17,6 +17,9 @@ use sim_campaign::diplomacy::{
 use sim_campaign::negotiation::plan_peace;
 use sim_campaign::{CampaignState, Order};
 
+/// An uncapped goodwill (LR-07: herald embassies are capped when read).
+const GOODWILL_REASON: &str = "Bonne volonté";
+
 fn data() -> GameData {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../data");
     let (data, _warnings) = GameData::load(&root).expect("game data loads");
@@ -135,7 +138,7 @@ fn easy_level_goodwill_does_not_stop_the_claim_war() {
         .push(OpinionModifier {
             with: france.clone(),
             value: 25 - now,
-            reason_fr: "Ambassade d'un héraut".to_owned(),
+            reason_fr: GOODWILL_REASON.to_owned(),
             expires_turn: turn + 40,
         });
     assert_eq!(state.attitude(&data, &england, &france).0, 25);
@@ -170,7 +173,7 @@ fn fresh_war(data: &GameData, score: i32) -> CampaignState {
     me.modifiers.push(OpinionModifier {
         with: england.clone(),
         value: 40,
-        reason_fr: "Ambassade d'un héraut".to_owned(),
+        reason_fr: GOODWILL_REASON.to_owned(),
         expires_turn: 80,
     });
     assert_eq!(state.war_score(data, &france, &england), score);
@@ -201,6 +204,8 @@ fn marriages_do_not_stop_the_claim_war() {
     let base = data();
     let mut data = switches(&base, true);
     data.ai_diplomacy.war.claim_war_ignores_kinship = true;
+    // Marriages uncapped (LR-07 reads them at most at the cap): a large goodwill.
+    data.diplomacy_rules.opinion_caps.clear();
     let mut old = data.clone();
     old.ai_diplomacy.war.claim_war_ignores_kinship = false;
     let mut state = campaign(&data, Difficulty::Normal);
@@ -242,7 +247,7 @@ fn an_exhausted_realm_stays_out_of_its_allys_war() {
     me.modifiers.push(OpinionModifier {
         with: portugal.clone(),
         value: 60,
-        reason_fr: "Ambassade d'un héraut".to_owned(),
+        reason_fr: GOODWILL_REASON.to_owned(),
         expires_turn: turn + 40,
     });
     assert!(answers_call_to_arms(

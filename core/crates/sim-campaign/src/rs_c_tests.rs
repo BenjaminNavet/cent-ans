@@ -248,3 +248,72 @@ fn deficit_seasons_count_the_seasons_in_the_red() {
     crate::economy::resolve_economy(&mut state, &data, &mut events);
     assert_eq!(state.factions[&france].deficit_seasons, 0);
 }
+
+/// LR-07: modifiers written past the cap (a save from before RS-C, an event,
+/// a direct push) weigh at most the cap in the attitude, on one line.
+#[test]
+fn the_attitude_reads_a_capped_motive_at_most_at_its_cap() {
+    let data = data();
+    let cap = data
+        .diplomacy_rules
+        .opinion_cap(OpinionMotive::Marriage)
+        .expect("marriage is capped");
+    let mut state = campaign(&data);
+    let (england, france) = (fac("fac_england"), fac("fac_france"));
+    let turn = state.turn;
+    for _ in 0..10 {
+        state.factions.get_mut(&england).unwrap().modifiers.push(
+            crate::diplomacy::OpinionModifier {
+                with: france.clone(),
+                value: 15,
+                reason_fr: MARRIAGE_REASON.to_owned(),
+                expires_turn: turn + 80,
+            },
+        );
+    }
+    let (_, reasons) = state.attitude(&data, &england, &france);
+    let marriage: Vec<i32> = reasons
+        .iter()
+        .filter(|(reason, _)| reason == MARRIAGE_REASON)
+        .map(|(_, value)| *value)
+        .collect();
+    assert_eq!(marriage, vec![cap]);
+    // Uncapped, the ten marriages would still stack.
+    let mut uncapped = data.clone();
+    uncapped.diplomacy_rules.opinion_caps.clear();
+    let (_, reasons) = state.attitude(&uncapped, &england, &france);
+    let total: i32 = reasons
+        .iter()
+        .filter(|(reason, _)| reason == MARRIAGE_REASON)
+        .map(|(_, value)| *value)
+        .sum();
+    assert_eq!(total, 150);
+}
+
+/// LR-07: an event's opinion effect with a capped motive is capped too.
+#[test]
+fn an_event_opinion_of_a_capped_motive_is_capped() {
+    let data = data();
+    let cap = data
+        .diplomacy_rules
+        .opinion_cap(OpinionMotive::Marriage)
+        .expect("marriage is capped");
+    let mut state = campaign(&data);
+    let (england, france) = (fac("fac_england"), fac("fac_france"));
+    let effect = data_model::EventEffect::Opinion {
+        faction: england.clone(),
+        towards: Some(france.clone()),
+        amount: 25,
+        reason: MARRIAGE_REASON.to_owned(),
+        duration: Some(40),
+    };
+    let ctx = crate::chronicle::EventContext::default();
+    let mut events = Vec::new();
+    for _ in 0..4 {
+        crate::chronicle::apply_effect(&mut state, &data, &effect, &ctx, &mut events);
+    }
+    assert_eq!(
+        running(&state, "fac_england", "fac_france", MARRIAGE_REASON).0,
+        cap
+    );
+}

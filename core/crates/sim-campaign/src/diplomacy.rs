@@ -602,12 +602,30 @@ impl CampaignState {
                 add("Embargo contre nous", -20);
             }
         }
+        // LR-07: a capped motive (`opinion_caps`) also weighs at most its
+        // cap when read, whatever path wrote its modifiers (events, saves
+        // from before RS-C): one line per capped motive.
+        let mut capped: Vec<(&str, i32, i32)> = Vec::new();
         for modifier in fa
             .modifiers
             .iter()
             .filter(|m| &m.with == b && m.expires_turn > self.turn)
         {
-            add(&modifier.reason_fr, modifier.value);
+            let cap = opinion_motive(&modifier.reason_fr)
+                .and_then(|m| data.diplomacy_rules.opinion_cap(m));
+            match cap {
+                Some(cap) => match capped
+                    .iter_mut()
+                    .find(|(reason, _, _)| *reason == modifier.reason_fr)
+                {
+                    Some(entry) => entry.1 += modifier.value,
+                    None => capped.push((&modifier.reason_fr, modifier.value, cap)),
+                },
+                None => add(&modifier.reason_fr, modifier.value),
+            }
+        }
+        for (reason, sum, cap) in capped {
+            add(reason, sum.clamp(-cap.abs(), cap.abs()));
         }
         let total: i32 = reasons.iter().map(|(_, v)| v).sum();
         (total.clamp(-100, 100), reasons)

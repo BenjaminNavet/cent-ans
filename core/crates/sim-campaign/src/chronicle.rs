@@ -818,7 +818,9 @@ pub fn apply_effect(
                 && state.faction_alive(faction)
                 && state.factions.contains_key(&towards)
             {
-                state.add_modifier(
+                // LR-07: an event may give a capped motive too.
+                state.add_capped_modifier(
+                    data,
                     faction,
                     &towards,
                     *amount,
