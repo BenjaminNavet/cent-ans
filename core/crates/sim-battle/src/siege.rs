@@ -66,6 +66,14 @@ pub struct RamRules {
 pub struct EngineRules {
     /// Wall damage per engine shot, per point of `siege_attack`.
     pub wall_damage_per_siege_attack: f64,
+    /// Men struck down by one engine shot at a regiment, per point of
+    /// `siege_attack`, full crew, point-blank, unarmoured.
+    pub kills_per_siege_attack: f64,
+    /// Share of the target's armour that still counts against a stone
+    /// ball (0: ignored, 1: as against an arrow).
+    pub armor_weight: f64,
+    /// Morale a regiment loses to each engine shot that lands on it.
+    pub morale_shock: f64,
 }
 
 /// Contents of `data/rules/siege_works.json` (schema
