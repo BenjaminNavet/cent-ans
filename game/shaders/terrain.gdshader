@@ -165,12 +165,25 @@ uniform float rock_line_m = 1700.0;
 // Exagération de l'ombrage par rapport à la géométrie (lisibilité du relief).
 // CV3-0 (#5) : 1.8 -> 2.1, la plaine entre Paris et Orléans restait peu lisible en vue régionale
 // (l'écrasement des montagnes, indépendant, reste inchangé).
-uniform float shading_relief = 2.1;
+// RV-A (ADR 0167) : 2.1 -> 1.15. Des normales deux fois plus pentues que le maillage donnaient un
+// estompage « carte IGN » sans volume ; le relief se lit désormais surtout par le maillage (gain
+// local des collines remis à 0 dans `relief_exaggeration.tres`) et la lumière.
+uniform float shading_relief = 1.15;
 // SS2 (ADR 0142) : de près (empreinte < `shading_relief_near_footprint`), l'exagération retombe à
 // `shading_relief_near` : la carte de couleur porte la lecture du paysage, le relief ne doit plus
-// dominer (effet « carte IGN »).
-uniform float shading_relief_near = 1.3;
+// dominer (effet « carte IGN »). RV-A : 1.3 -> 1.0 (ombrage = géométrie affichée).
+uniform float shading_relief_near = 1.0;
 uniform float shading_relief_near_footprint = 0.25;
+// RV-A : micro-relief filtré. La normale d'ombrage mélange un gradient basse fréquence (heightmap
+// lue à `relief_coarse_mult` × le pas fin, soit ≈ 3-8 km en vue régionale) et le gradient fin
+// (empreinte du pixel + détail `rl_relief` ou page du quadtree). Part du fin : 1 sous l'empreinte
+// `relief_fine_near_footprint` (de près : quadtree fin intact), `relief_fine_far` au-delà de
+// `relief_fine_far_footprint` (vue régionale : les collines de 1-3 px ne font plus grain de papier).
+// La pente des matériaux (roche, falaises) garde le gradient fin.
+uniform float relief_coarse_mult = 4.0;
+uniform float relief_fine_far = 0.35;
+uniform float relief_fine_near_footprint = 0.3;
+uniform float relief_fine_far_footprint = 1.2;
 // ZG8 : roche sur les pentes raides du relief EXAGÉRÉ localement (pente affichée ramenée à l'échelle
 // ×1 : pente vraie × (1 + gain local)), m/m ; 0 / 0 : désactivé (posés par TerrainBuilder).
 uniform float cliff_slope_start = 0.0;
@@ -444,9 +457,22 @@ void fragment() {
 	}
 	qt_relief(p, footprint, hc, grad_m);  // ZG2 : relief de la page du quadtree
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
-	vec2 grad_disp = campaign_display_gradient(hc, grad_m, p);  // ZG8 : pente de la surface affichée
+	// RV-A : gradient d'ombrage filtré (basse fréquence + part atténuée du fin en vue régionale).
+	vec2 grad_shade = grad_m;
+	float fine_w = mix(1.0, relief_fine_far, smoothstep(relief_fine_near_footprint, relief_fine_far_footprint, footprint));
+	if (fine_w < 0.999) {
+		float kc = k * max(relief_coarse_mult, 1.0);
+		float lc = log2(kc);
+		vec2 cu = vec2(kc / map_size.x, 0.0);
+		vec2 cv = vec2(0.0, kc / map_size.y);
+		vec2 grad_c = vec2(height_m_lod(uv + cu, lc) - height_m_lod(uv - cu, lc),
+			height_m_lod(uv + cv, lc) - height_m_lod(uv - cv, lc)) / (2.0 * kc);
+		grad_shade = mix(grad_c, grad_m, fine_w);
+	}
+	vec2 grad_disp_shade;
+	vec2 grad_disp = campaign_display_gradient_pair(hc, grad_m, grad_shade, p, grad_disp_shade);  // ZG8 : pente de la surface affichée
 	float cliff = cliff_slope_full > cliff_slope_start ? smoothstep(cliff_slope_start, cliff_slope_full, length(grad_disp) / (height_scale * meters_per_px)) : 0.0;
-	vec2 g = grad_disp * mix(shading_relief_near, shading_relief, smoothstep(0.0, shading_relief_near_footprint, footprint));
+	vec2 g = grad_disp_shade * mix(shading_relief_near, shading_relief, smoothstep(0.0, shading_relief_near_footprint, footprint));
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
 
 	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
