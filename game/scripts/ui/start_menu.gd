@@ -50,9 +50,12 @@ var selected_faction: String:
 var _continue_detail: Label
 var _column: VBoxContainer
 var _menu_buttons: Array[Button] = []
-## Paliers de compaction de la colonne (taille de police, marge verticale des boutons, écart) :
+## Paliers de compaction de la colonne (style de texte, marge verticale des boutons, écart) :
 ## le premier qui tient dans la hauteur de l'écran est retenu (1920×1080 : toujours le premier).
-const FIT_LEVELS := [[0, 4, 4], [-2, 3, 3], [-4, 2, 2], [-6, 1, 1], [-8, 0, 0]]
+## Les polices restent sur l'échelle typographique (Title puis Heading, bible DA § 12.2 : quatre
+## tailles au plus), seules marges et écarts varient entre deux paliers.
+const FIT_LEVELS := [[UiType.TITLE, 4, 4], [UiType.TITLE, 2, 2], [UiType.HEADING, 3, 3],
+	[UiType.HEADING, 1, 1], [UiType.HEADING, 0, 0]]
 var _caption: Label
 var _leaving := false
 var _overlay: Control = null  # réglages, crédits ou prologue ouverts
@@ -276,7 +279,7 @@ func _fit_column() -> void:
 func _apply_fit_level(level: Array) -> void:
 	_column.add_theme_constant_override("separation", int(level[2]))
 	for button in _menu_buttons:
-		FrontEndStyle.style_menu_button(button, UiType.size(UiType.TITLE) + int(level[0]), int(level[1]))
+		FrontEndStyle.style_menu_button(button, UiType.size(str(level[0])), int(level[1]))
 
 
 func _menu_button(parent: Control, text: String, action: Callable) -> Button:
