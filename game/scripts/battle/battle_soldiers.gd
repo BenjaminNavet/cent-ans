@@ -463,10 +463,20 @@ func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 	var capacities := PackedInt32Array()
 	capacities.resize(units.size())
 	capacities.fill(-1)
+	# RJ-b : les régiments lointains sautés cette image (budget EP1) sont décidés avant l'appel :
+	# le cœur leur rend leur tampon tel quel (`-2 - capacité`) au lieu d'en interpoler un nouveau.
+	var skip := PackedByteArray()
+	skip.resize(units.size())
 	for i in units.size():
-		var id := int(units[i]["id"])
+		var unit: Dictionary = units[i]
+		var id := int(unit["id"])
 		if layers.has(id):
-			capacities[i] = (layers[id] as MultiMeshInstance3D).multimesh.instance_count
+			var capacity := (layers[id] as MultiMeshInstance3D).multimesh.instance_count
+			capacities[i] = capacity
+			var n := int(unit.get("figures", unit["soldiers"])) if bool(unit["present"]) else 0
+			if budget_enabled and _skip_far(unit, id, n):
+				skip[i] = 1
+				capacities[i] = -2 - capacity
 	var result: Array = battle.call("get_soldier_buffers", capacities)
 	var counts: PackedInt32Array = result[0]
 	var buffers: Array = result[1]
@@ -491,7 +501,7 @@ func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 						push_warning("BattleSoldiers: soldier buffer shorter than expected (%s/%s)" % [side, kind])
 						_warned = true
 					n = counts[i]
-				if budget_enabled and _skip_far(unit, id, n):
+				if skip[i] == 1:
 					skipped_updates += 1
 					continue
 				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0

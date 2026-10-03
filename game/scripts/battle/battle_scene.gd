@@ -176,6 +176,7 @@ var _bench_process_ms: Array = []
 ## PB3e : durée de `_process` (scripts + pont) des images avec un pas de simulation et des autres.
 var _bench_step_frame_ms: Array = []
 var _bench_plain_frame_ms: Array = []
+var _bench_plain_soldiers_ms: Array = []  # RJ-b : figurines, images sans pas de simulation
 var _bench_proc_start_us: int = 0
 var _bench_ticks_before: int = -1
 var _bench_soldiers_ms: Array = []
@@ -1306,6 +1307,7 @@ func _process(delta: float) -> void:
 				_bench_step_frame_ms.append(proc_ms)
 			else:
 				_bench_plain_frame_ms.append(proc_ms)
+				_bench_plain_soldiers_ms.append(_bench_soldiers_last_ms)
 
 
 ## PB3e (ADR 0090) : le pas de simulation suivant se calcule sur un fil pendant que l'image
@@ -1456,6 +1458,8 @@ func _bench_finish() -> void:
 		"proc_step_ms_median": _median(_bench_step_frame_ms),
 		"proc_step_ms_p99": _percentile(_sorted(_bench_step_frame_ms), 0.99),
 		"proc_plain_ms_median": _median(_bench_plain_frame_ms),
+		"soldiers_plain_ms_median": _median(_bench_plain_soldiers_ms),
+		"pose_lerp": _pose_lerp_on,
 		"proc_plain_ms_p99": _percentile(_sorted(_bench_plain_frame_ms), 0.99),
 		"step_stats": battle.call("get_step_stats") if battle.has_method("get_step_stats") else {},
 		"quality": RenderQuality.current(),

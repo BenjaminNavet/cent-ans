@@ -13,6 +13,11 @@ use sim_battle::DT;
 use crate::battle_pose_lerp::{self as lerp, LooseRanks, Pose, TELEPORT_M_PER_STEP};
 use crate::battle_sim::BattleSim;
 
+/// RJ-b: `capacities[id] = HOLD - capacity` asks [`BattleSim::get_soldier_buffers`]
+/// to keep regiment `id`'s buffer as it is (EP1 budget: far regiment not
+/// redrawn this frame); its poses are still computed at a new step.
+const HOLD: i32 = -2;
+
 /// `(ticks, pose epoch, figure scale bits)` of the poses built.
 type PoseKey = (u64, u64, u64);
 
@@ -283,8 +288,9 @@ impl BattleSim {
     }
 
     /// PB3c: every regiment's `MultiMesh.buffer` in one call. `capacities[id]`
-    /// is the instance count of regiment `id`'s `MultiMesh` (< 0 or missing:
-    /// not drawn, no buffer). → `[counts: PackedInt32Array, buffers: Array]`
+    /// is the instance count of regiment `id`'s `MultiMesh` (-1 or missing:
+    /// not drawn, no buffer; `-2 - capacity`: skipped this frame, the
+    /// previous buffer comes back unchanged). → `[counts: PackedInt32Array, buffers: Array]`
     /// indexed by unit id: `counts[id]` figures (12 floats each, as
     /// `get_soldier_buffer`), `buffers[id]` zero-padded to
     /// `max(counts[id], capacities[id])` figures. Poses are computed once per
@@ -306,7 +312,7 @@ impl BattleSim {
         let t = self.frame_blend(self.poses.prev_ticks, self.poses.cur_ticks);
         let (scale, loose) = (self.figure_scale, self.loose);
         let capacities = capacities.as_slice();
-        let wanted = |id: usize| capacities.get(id).is_some_and(|&c| c >= 0);
+        let wanted = |id: usize| capacities.get(id).is_some_and(|&c| c >= 0 || c <= HOLD);
         let cache = &mut self.poses;
         let teleport =
             TELEPORT_M_PER_STEP * cache.cur_ticks.saturating_sub(cache.prev_ticks).max(1) as f64;
@@ -324,13 +330,25 @@ impl BattleSim {
                 buffers.push(&PackedFloat32Array::new().to_variant());
                 continue;
             }
-            let capacity = capacities[id].max(0) as usize;
+            // EP1 budget: a far regiment skipped this frame keeps its buffer.
+            let hold = capacities[id] <= HOLD;
+            let capacity = if hold {
+                (HOLD - capacities[id]) as usize
+            } else {
+                capacities[id] as usize
+            };
             if cache.cur[id].is_none() {
                 // SG1: climbers drawn on their ladders / the tower bridge.
                 let poses = sim.soldier_poses(unit, scale);
                 cache.moving[id] = cache.prev[id].as_ref().is_some_and(|p| *p != poses);
                 cache.cur[id] = Some(poses);
                 cache.built[id] = None;
+            }
+            if hold {
+                versions[id] = cache.versions[id];
+                counts[id] = cache.cur[id].as_ref().map_or(0, Vec::len) as i32;
+                buffers.push(&cache.padded[id].to_variant());
+                continue;
             }
             let shown = if cache.moving[id] { t } else { 1.0 };
             if cache.built[id] != Some(shown.to_bits()) {
