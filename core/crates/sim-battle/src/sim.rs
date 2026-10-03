@@ -1586,11 +1586,18 @@ impl BattleSim {
     /// Movement speed of `unit` heading along `dir`, in m/s.
     fn speed(&self, unit: &Unit, dir: (f64, f64)) -> f64 {
         let mut speed = f64::from(unit.stats.speed) * 0.04;
+        if unit.state != UnitState::Routing {
+            speed *= self.pace().move_speed_factor;
+        }
         if unit.siege_tower() {
             // Pushed along by the assault troops.
             speed = speed.max(0.55);
         }
-        if unit.running || unit.state == UnitState::Routing {
+        let routing = unit.state == UnitState::Routing;
+        if unit.running || routing {
+            if !routing {
+                speed *= self.pace().run_speed_factor;
+            }
             speed *= if unit.is_cavalry() && unit.state == UnitState::Charging {
                 2.5
             } else {
@@ -2786,6 +2793,9 @@ impl BattleSim {
     pub(crate) fn pace(&self) -> &crate::pace::Pace {
         if self.siege.is_some() {
             &self.pace.siege
+        } else if self.scenario.is_some() {
+            // Historical maps keep the pace their order of battle was tuned for.
+            &self.pace.historical
         } else {
             &self.pace.field
         }
@@ -3035,6 +3045,7 @@ impl BattleSim {
             rear_morale_per_s,
             rout_morale,
             rally_morale,
+            melee_fatigue_per_s,
             ..
         } = *self.pace();
         // T4 (ADR 0108): the garrison's last stand on the square.
@@ -3146,7 +3157,7 @@ impl BattleSim {
                 UnitState::Marching if unit.running || unit.withdrawing => 0.25,
                 UnitState::Marching => 0.05,
                 UnitState::Charging => 0.4,
-                UnitState::Melee | UnitState::Climbing => 0.3,
+                UnitState::Melee | UnitState::Climbing => melee_fatigue_per_s,
                 UnitState::Routing => 0.3,
             };
             if rate > 0.0 {

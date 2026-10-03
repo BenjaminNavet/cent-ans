@@ -7,9 +7,10 @@
   "properties": {
     "description": { "type": "string" },
     "field": { "$ref": "#/$defs/pace" },
+    "historical": { "$ref": "#/$defs/pace" },
     "siege": { "$ref": "#/$defs/pace" }
   },
-  "required": ["field", "siege"],
+  "required": ["field", "historical", "siege"],
   "additionalProperties": false,
   "$defs": {
     "pace": {
@@ -51,6 +52,24 @@
           "maximum": 100,
           "description": "Au-dessus de ce moral, un régiment en déroute hors de danger se rallie."
         },
+        "move_speed_factor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2,
+          "description": "Facteur sur la vitesse de marche de tous les régiments (hors course, charge et déroute) ; 1 = vitesses des types d'unité (A6-L13b)."
+        },
+        "run_speed_factor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2,
+          "description": "Facteur sur la vitesse d'une course ou d'une charge (pas d'une déroute) (A6-L13b)."
+        },
+        "melee_fatigue_per_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Fatigue gagnée par seconde par un régiment en mêlée (A6-L13b)."
+        },
         "loss_morale_factor": {
           "type": "number",
           "exclusiveMinimum": 0,
@@ -58,7 +77,7 @@
           "description": "Points de moral perdus pour la perte de tout l'effectif d'un régiment en un instant."
         }
       },
-      "required": ["melee_rate", "ranged_rate", "loss_morale_factor", "flank_morale_per_s", "rear_morale_per_s", "rout_morale", "rally_morale"],
+      "required": ["melee_rate", "ranged_rate", "loss_morale_factor", "flank_morale_per_s", "rear_morale_per_s", "rout_morale", "rally_morale", "move_speed_factor", "run_speed_factor", "melee_fatigue_per_s"],
       "additionalProperties": false
     }
   }

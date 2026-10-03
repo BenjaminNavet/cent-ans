@@ -15,6 +15,8 @@ pub struct PaceRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub field: Pace,
+    /// Historical maps (EP7), tuned with the original pace.
+    pub historical: Pace,
     pub siege: Pace,
 }
 
@@ -36,6 +38,13 @@ pub struct Pace {
     pub rout_morale: f64,
     /// A routing regiment out of danger whose morale rises above this rallies.
     pub rally_morale: f64,
+    /// A6-L13b: factor on the walking speed of every regiment that is not
+    /// running or routing (1 = the stats of the unit types).
+    pub move_speed_factor: f64,
+    /// A6-L13b: factor on the speed of a run or a charge (not of a rout).
+    pub run_speed_factor: f64,
+    /// A6-L13b: fatigue gained per second by a regiment in melee.
+    pub melee_fatigue_per_s: f64,
 }
 
 const BUNDLED: &str = include_str!("../../../../data/rules/battle_pace.json");
