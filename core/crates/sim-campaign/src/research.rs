@@ -50,6 +50,8 @@ pub enum ResearchError {
     AlreadyKnown,
     #[error("prérequis manquant : {0}")]
     MissingPrerequisite(String),
+    #[error("la file de recherche est pleine")]
+    QueueFull,
 }
 
 /// State of a technology for one faction (`get_tech_tree`).
@@ -386,6 +388,7 @@ pub fn start_research(
     if f.research.as_ref() == Some(technology) {
         return Ok(());
     }
+    f.research_queue.retain(|queued| queued != technology);
     // F1: with no research running, `research_progress` holds the surplus
     // of the last completed technology; it carries over to the new one.
     let surplus = if f.research.is_none() {
@@ -422,7 +425,15 @@ pub(crate) fn resolve_research(
         let points = state.research_points_per_turn(data, &faction_id);
         let f = state.factions.get_mut(&faction_id).expect("listed above");
         f.research_points_last_turn = points;
+        if f.research.is_none() {
+            promote_queued_research(state, data, &faction_id);
+        }
+        let f = state.factions.get_mut(&faction_id).expect("listed above");
         let Some(technology) = f.research.clone() else {
+            // A6-L4: idle, the points pile up in a capped reserve instead
+            // of being lost; the next research starts with them.
+            let cap = points.saturating_mul(data.economy_rules.research_reserve_turns);
+            f.research_progress = f.research_progress.saturating_add(points).min(cap);
             continue;
         };
         let Some(tech) = data.technologies.get(&technology) else {
@@ -439,6 +450,7 @@ pub(crate) fn resolve_research(
         // F1: the surplus is kept for the next research (see
         // `start_research`, which carries it over).
         f.research_progress -= effective_cost(tech, year);
+        promote_queued_research(state, data, &faction_id);
         let faction_name = data
             .factions
             .get(&faction_id)
@@ -453,6 +465,115 @@ pub(crate) fn resolve_research(
             )
             .faction(&faction_id),
         );
+    }
+}
+
+/// A6-L4: starts the first queued technology that can still be researched
+/// (the surplus / reserve carries over as in [`start_research`]); queued
+/// entries that became known or whose prerequisites are missing are dropped.
+fn promote_queued_research(state: &mut CampaignState, data: &GameData, faction: &FactionId) {
+    loop {
+        let Some(next) = state
+            .factions
+            .get(faction)
+            .and_then(|f| f.research_queue.first().cloned())
+        else {
+            return;
+        };
+        if let Some(f) = state.factions.get_mut(faction) {
+            f.research_queue.remove(0);
+        }
+        if start_research(state, data, faction, &next).is_ok() {
+            return;
+        }
+    }
+}
+
+/// A6-L4: puts `technology` at the end of `faction`'s research queue. With no
+/// research running it simply starts. Prerequisites may be known, being
+/// researched or queued ahead.
+pub fn queue_research(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    technology: &TechnologyId,
+) -> Result<(), ResearchError> {
+    let tech = data
+        .technologies
+        .get(technology)
+        .ok_or_else(|| ResearchError::UnknownTechnology(technology.clone()))?;
+    let Some(f) = state.factions.get(faction) else {
+        return Err(ResearchError::UnknownTechnology(technology.clone()));
+    };
+    if f.research.is_none() && f.research_queue.is_empty() {
+        return start_research(state, data, faction, technology);
+    }
+    if f.technologies.contains(technology) {
+        return Err(ResearchError::AlreadyKnown);
+    }
+    if f.research.as_ref() == Some(technology) || f.research_queue.contains(technology) {
+        return Ok(());
+    }
+    if let Some(missing) = tech.prerequisites.iter().find(|p| {
+        !f.technologies.contains(*p)
+            && f.research.as_ref() != Some(*p)
+            && !f.research_queue.contains(p)
+    }) {
+        let name = data
+            .technologies
+            .get(missing)
+            .map_or_else(|| missing.to_string(), |t| t.name.display.clone());
+        return Err(ResearchError::MissingPrerequisite(name));
+    }
+    if f.research_queue.len() >= data.economy_rules.research_queue_max as usize {
+        return Err(ResearchError::QueueFull);
+    }
+    let f = state.factions.get_mut(faction).expect("checked above");
+    f.research_queue.push(technology.clone());
+    Ok(())
+}
+
+/// A6-L4: removes `technology` from the queue (and what depends on it).
+pub fn dequeue_research(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    technology: &TechnologyId,
+) {
+    let Some(f) = state.factions.get_mut(faction) else {
+        return;
+    };
+    let Some(index) = f.research_queue.iter().position(|t| t == technology) else {
+        return;
+    };
+    let removed: Vec<TechnologyId> = f.research_queue.drain(index..).collect();
+    // Entries after it stay when they do not depend on the removed one.
+    for later in removed.into_iter().skip(1) {
+        let depends = data
+            .technologies
+            .get(&later)
+            .is_some_and(|t| t.prerequisites.contains(technology));
+        if !depends {
+            f.research_queue.push(later);
+        }
+    }
+}
+
+impl CampaignState {
+    /// A6-L4: `(reserve, cap)` of `faction`: points piled up while idle and
+    /// their ceiling. Zero while a research runs.
+    pub fn research_reserve(&self, data: &GameData, faction: &FactionId) -> (u32, u32) {
+        let Some(f) = self.factions.get(faction) else {
+            return (0, 0);
+        };
+        let cap = self
+            .research_points_per_turn(data, faction)
+            .saturating_mul(data.economy_rules.research_reserve_turns);
+        if f.research.is_some() {
+            (0, cap)
+        } else {
+            (f.research_progress, cap)
+        }
     }
 }
 

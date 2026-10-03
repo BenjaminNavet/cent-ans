@@ -44,6 +44,7 @@ signal learn_skill_requested(character_id: String, skill_id: String)
 # M6 : technologies.
 signal tech_panel_requested
 signal research_requested(technology_id: String)
+signal research_queue_requested(technology_id: String)  # A6-L4
 # C5 : couche des routes commerciales.
 signal trade_layer_toggle_requested
 
@@ -158,6 +159,7 @@ func _ready() -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			tech_panel_requested.emit())
 	tech_panel.research_requested.connect(func(id: String) -> void: research_requested.emit(id))
+	tech_panel.queue_requested.connect(func(id: String) -> void: research_queue_requested.emit(id))
 	tech_panel.closed.connect(func() -> void: tech_panel.hide())
 	# Le panneau recouvre le journal : masqué tant que les technologies sont ouvertes.
 	hide_log_while(tech_panel)
@@ -966,8 +968,9 @@ func hide_character() -> void:
 # --- Technologies (M6) --------------------------------------------------------------
 
 
-func show_tech_tree(tree: Array, research: Dictionary, points_per_turn: int, faction_label: String, faction_color: Color) -> void:
-	tech_panel.show_tree(tree, research, points_per_turn, faction_label, faction_color)
+func show_tech_tree(tree: Array, research: Dictionary, points_per_turn: int, faction_label: String, faction_color: Color,
+		queue: Array = [], reserve: Dictionary = {}) -> void:
+	tech_panel.show_tree(tree, research, points_per_turn, faction_label, faction_color, queue, reserve)
 
 
 func hide_tech() -> void:
@@ -978,23 +981,43 @@ func tech_panel_visible() -> bool:
 	return tech_panel.visible
 
 
-## Barre supérieure : recherche en cours (`get_research`, vide si aucune).
-func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
+## Libellé court de la barre (A6-L4) : « Recherche : — » ou « Recherche : <nom court> (n tours) » ;
+## version compacte sans préfixe. Le détail (réserve, file) est dans l'infobulle.
+static func research_bar_text(research_name: String, turns: int, compact: bool) -> String:
+	var short := research_name if research_name.length() <= 14 else research_name.left(13) + "…"
+	var when := "%d t." % turns if compact else "(%s)" % FrText.count(turns, "tour")
+	if research_name.is_empty():
+		return "Rech. : —" if compact else "Recherche : —"
+	if compact:
+		return "%s %s" % [short, when] if turns >= 0 else short
+	return "Recherche : %s %s" % [short, when] if turns >= 0 else "Recherche : %s" % short
+
+
+## Barre supérieure : recherche en cours (`get_research`, vide si aucune) ; `queue` :
+## `get_research_queue`, `reserve` : `get_research_reserve` (A6-L4, détail en infobulle).
+func set_research_progress(research: Dictionary, points_per_turn: int, queue: Array = [], reserve: Dictionary = {}) -> void:
+	var queue_text := ""
+	if not queue.is_empty():
+		var names := PackedStringArray()
+		for entry in queue:
+			names.append(str(entry.get("name", "")))
+		queue_text = "\nEn file : %s" % ", ".join(names)
 	if research.is_empty():
-		research_label.text = "Aucune recherche"
-		research_bar.max_value = 1
-		research_bar.value = 0
-		RichTooltip.attach_plain(research_box, "research_none", {"body": "Aucune recherche en cours : %d points par tour perdus (clic : technologies)." % points_per_turn})
+		research_label.text = research_bar_text("", -1, _top_compact)
+		research_bar.max_value = maxi(1, int(reserve.get("cap", 1)))
+		research_bar.value = int(reserve.get("points", 0))
+		RichTooltip.attach_plain(research_box, "research_none", {"body": "Aucune recherche en cours : %d points par tour s'accumulent en réserve (%d / %d), versés dans la prochaine recherche (clic : technologies).%s" % [
+			points_per_turn, int(reserve.get("points", 0)), int(reserve.get("cap", 0)), queue_text]})
 		return
 	var turns := int(research.get("turns_left", -1))
-	research_label.text = str(research.get("name", ""))
+	research_label.text = research_bar_text(str(research.get("name", "")), turns, _top_compact)
 	research_bar.max_value = maxi(1, int(research.get("cost", 1)))
 	research_bar.value = int(research.get("progress", 0))
-	RichTooltip.attach_plain(research_box, "research_progress", {"body": "[b]%s[/b]\n%d / %d points, +%d par tour%s" % [
+	RichTooltip.attach_plain(research_box, "research_progress", {"body": "[b]%s[/b]\n%d / %d points, +%d par tour%s%s" % [
 		RichTooltip.entity_name(str(research.get("technology", "")), str(research.get("name", ""))),
 		int(research.get("progress", 0)), int(research.get("cost", 0)),
 		int(research.get("points_per_turn", points_per_turn)),
-		", %s restant%s" % [FrText.count(turns, "tour"), FrText.s(turns)] if turns >= 0 else ""]})
+		", %s restant%s" % [FrText.count(turns, "tour"), FrText.s(turns)] if turns >= 0 else "", queue_text]})
 
 
 # --- HUD de campagne (F10b) ----------------------------------------------------------
@@ -1643,8 +1666,8 @@ var _fit_queued := false
 ## solde et de la date (le détail reste en infobulle), nom de faction masqué, recherche étroite.
 var _top_compact := false
 var _top_texts: Dictionary = {}  # Label → [texte complet, texte compact]
-const RESEARCH_WIDTH := 160.0
-const RESEARCH_WIDTH_COMPACT := 90.0
+const RESEARCH_WIDTH := 190.0
+const RESEARCH_WIDTH_COMPACT := 100.0
 
 
 ## Inscrit `button` dans la barre adaptative : `label` quand la place le permet, sinon l'icône

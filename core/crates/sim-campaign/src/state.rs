@@ -664,6 +664,10 @@ pub struct FactionState {
     /// Progress kept for abandoned research (switching back resumes it).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub research_banked: BTreeMap<TechnologyId, u32>,
+    /// A6-L4: technologies waiting behind `research` (started in order as
+    /// each research completes).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub research_queue: Vec<TechnologyId>,
     // ----- H3: La Table -------------------------------------------------------
     /// Diets paid during the last resolved turn (budget line « Table »).
     #[serde(default)]

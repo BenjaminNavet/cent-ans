@@ -42,6 +42,16 @@
       "minimum": 0,
       "description": "Nombre de saisons de revenu au-delà duquel le trésor nourrit une cour opulente."
     },
+    "research_reserve_turns": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Tours de points de recherche que la réserve peut contenir quand aucune recherche n'est en cours."
+    },
+    "research_queue_max": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Nombre de technologies que la file de recherche peut contenir derrière la recherche en cours."
+    },
     "opulence_percent": {
       "type": "integer",
       "minimum": 0,
