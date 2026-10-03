@@ -36,6 +36,8 @@ func _test_presets() -> void:
 	_check(int(low["relief_pages"]) < int(high["relief_pages"]) and int(high["relief_pages"]) <= 256, "relief pages within the ADR 0036 VRAM cap")
 	_check(not bool(low["fine_relief"]) and bool(high["fine_relief"]), "fine relief off in low only")
 	_check(int(low["msaa"]) == Viewport.MSAA_DISABLED and int(high["msaa"]) == Viewport.MSAA_2X, "MSAA off in low, kept in high")
+	# PF (ADR 0169) : pas de MSAA sur la carte en Haute (shader du terrain), gardé en bataille.
+	_check(RenderQuality.msaa_for(high, "campaign") == Viewport.MSAA_DISABLED and RenderQuality.msaa_for(high, "battle") == Viewport.MSAA_2X, "map MSAA off in high, battle MSAA kept")
 	_check(not bool(low["ssao"]) and bool(medium["ssao"]), "SSAO off in low")
 	_check(float(low["veg_shadow_distance"]) == 0.0, "no tree shadows in low")
 	_check(int(low["map_shadow_splits"]) == 2 and int(high["map_shadow_splits"]) == 4, "map shadow cascades")

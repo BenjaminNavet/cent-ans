@@ -52,3 +52,24 @@ process p50 20,7 ms (≈ 5 ms le 29/09) → **les scripts dominent de nouveau le
 Compteurs (`--map-ab`, temps inexploitables : 6,9 ms partout = cadence) : d = 150 → 4,14 M prim.,
 1 313 appels ; **rivières 1,42 M prim. (34 %)** et 281 appels ; colonies 682 appels (52 %) ;
 relief 0,86 M. d = 40 → 4,71 M, 880 appels ; rivières 0,9 M, vie 0,67 M, colonies 455 appels.
+
+## Chantier PF (03/10, autonomie, worktree `../gp-pf`, branche `feat/pf`, ADR 0169)
+**Méthode** : `--bench-ab=a;b;…` (map_bench) alterne les configurations toutes les 12 images dans
+le même processus ; seule mesure fiable sur la machine partagée (bancs séparés : ×2 de bruit).
+Réglages : `scale:`, `noshadow`, `msaa_off`, `hide:<nœud>`, `qt:<prop>=`, `terrain:<prop>=`,
+`tparam:<uniforme>=`. Scripts de lancement : `ab.sh` (scratchpad, à recopier au besoin) =
+`godot --path game res://scenes/campaign_map.tscn -- --bench-map --bench-pan-only --bench-seconds=50 "--bench-ab=…"`.
+
+Fait (A/B d = 30, Haute auto 50 %, machine chargée) :
+- [x] Quadtree en pixels rendus : 61,7 → 40,5 ms.
+- [x] MSAA coupé sur la carte (`map_msaa`) : −11 ms (39 → 28).
+- [x] Maillages TB3 préparés sur un fil de travail : pic max 80 → 42 ms (reste `out/step` →
+      `_finish_rebuild` → `_write_batches` complet, non budgété).
+- [x] Dé-encombrement : colonies loin hors écran ignorées (gain CPU non mesuré isolément).
+
+Restes / pistes :
+- Shader du terrain : coût diffus (20 blocs ≤ 3 ms chacun, 27 ms à eux tous avant correctifs).
+  Piste : variantes sans les blocs de près au-delà de leur portée (shader de loin), ou passe
+  de couleur différée en demi-résolution. Conflit avec RV (terrain.gdshader) : après RV.
+- `OutbuildingLayer._write_batches` en fin de reconstruction : étaler ou porter en Rust.
+- `life/reground` (FK) 12-19 ms en pointe : déjà tranché ; RV-F touche le fichier.

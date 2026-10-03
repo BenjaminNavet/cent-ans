@@ -1087,11 +1087,19 @@ func _declutter_step(sliced: bool) -> void:
 			_set_marker_shown(i, false)
 			_show_label(i, false, alpha)
 			continue
+		var anchor := _dc_project(at)
+		var text := _label_text_size(i) * _dc_scale
+		# PF : ancre loin hors de l'écran élargi (au-delà du plus grand décalage possible du nom
+		# et de son écu) : cédé sans recaler le décalage du nom (réécriture du `Label3D` évitée
+		# pour la grande majorité des colonies, hors champ ; recalé quand il y revient).
+		var reach := text + Vector2.ONE * (LABEL_GAP_PX + LABEL_FOOTPRINT_MAX_PX + _max_marker_px * icon_size_scale + _dc_label_margin + _dc_marker_margin + _shield_gap)
+		if not _dc_label_screen.grow_individual(reach.x, reach.y * 2.0, reach.x, reach.y).has_point(anchor) and not pinned:
+			_set_marker_shown(i, false)
+			_show_label(i, false, alpha)
+			continue
 		# VT : nom décalé au-dessus de l'emprise projetée (suit le zoom à chaque passe).
 		_refresh_label_offset(i, _label_lift_with(i, _dc_origin, _dc_focal, _dc_scale))
-		var anchor := _dc_project(at)
 		# Rectangle du nom (cf. `_label_screen_rect`) et de l'écu (cf. `_shield_rect`).
-		var text := _label_text_size(i) * _dc_scale
 		var label_center := anchor - label.offset * Vector2(-1.0, 1.0) * _dc_scale
 		var bare := Rect2(label_center - text * 0.5, text)
 		var rect := bare.grow(_dc_label_margin)

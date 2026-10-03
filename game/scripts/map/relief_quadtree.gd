@@ -303,7 +303,10 @@ func _prepare_camera(camera: Camera3D) -> void:
 	var viewport_h := 720.0
 	var viewport := camera.get_viewport()
 	if viewport != null:
-		viewport_h = maxf(viewport.get_visible_rect().size.y, 64.0)
+		# PF (ADR 0169) : pixels rendus (échelle 3D comprise, MetalFX / FSR) et non affichés :
+		# sous l'échelle 50 % de l'ADR 0123, un seuil en pixels affichés donnait des triangles
+		# de ~2 px rendus, ombrés plusieurs fois (quads 2 × 2) par le shader du terrain.
+		viewport_h = maxf(viewport.get_visible_rect().size.y * clampf(viewport.scaling_3d_scale, 0.25, 2.0), 64.0)
 	var k := viewport_h * 0.5 / tan(deg_to_rad(camera.fov) * 0.5)
 	_last_k = k
 	var threshold := max_vertex_px * _px_scale

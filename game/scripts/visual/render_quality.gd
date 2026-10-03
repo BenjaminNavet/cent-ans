@@ -36,6 +36,7 @@ const CLIENT_GROUP := "render_quality_client"
 ##   détaillés ; `veg_shadow_distance` : zoom au-delà duquel les arbres ne portent plus d'ombre
 ##   (0 : jamais d'ombre) ;
 ## - `map_shadow_range`, `map_shadow_splits`, `map_soft_shadows` : ombres de la carte ;
+## - `map_msaa` (PF, ADR 0169) : MSAA sur la carte (`msaa` : en bataille) ;
 ## - `battle_lod` : facteur sur les distances de LOD, d'ombre et d'imposteurs des soldats ;
 ## - `grass` : facteur sur le rayon de l'herbe de bataille ; `particles` : part des particules ;
 ## - `model_shadow_distance` (FC1) : zoom au-delà duquel les maquettes des colonies ne portent
@@ -76,7 +77,7 @@ const UPSCALE_PLAYER := {
 const PRESETS := {
 	# Réglages d'avant le lot V3 (project.godot) : référence des mesures (`--bench-ab=`), hors menu.
 	"legacy": {
-		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA,
+		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "map_msaa": Viewport.MSAA_2X,
 		"shadow_splits": 4, "shadow_distance": 1.0, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
 		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
 		"glow": true, "fog_grid": [64, 32],
@@ -88,7 +89,7 @@ const PRESETS := {
 		"upscale_mode": "off", "upscale_scale": 1.0,
 	},
 	"low": {
-		"msaa": Viewport.MSAA_DISABLED, "shadow_atlas": 2048, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW,
+		"msaa": Viewport.MSAA_DISABLED, "shadow_atlas": 2048, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "map_msaa": Viewport.MSAA_DISABLED,
 		"shadow_splits": 2, "shadow_distance": 0.6, "ssao": false, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_LOW,
 		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
 		"glow": false, "fog_grid": [64, 32],
@@ -101,7 +102,7 @@ const PRESETS := {
 		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.67,
 	},
 	"medium": {
-		"msaa": Viewport.MSAA_2X, "shadow_atlas": 4096, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM,
+		"msaa": Viewport.MSAA_2X, "shadow_atlas": 4096, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "map_msaa": Viewport.MSAA_DISABLED,
 		"shadow_splits": 4, "shadow_distance": 0.8, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_MEDIUM,
 		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
 		"glow": true, "fog_grid": [64, 32],
@@ -113,7 +114,7 @@ const PRESETS := {
 		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
 	},
 	"high": {
-		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH,
+		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "map_msaa": Viewport.MSAA_DISABLED,
 		"shadow_splits": 4, "shadow_distance": 1.0, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_HIGH,
 		"ssil": true, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "weather", "sdfgi": false,
 		"glow": true, "fog_grid": [64, 48],
@@ -133,7 +134,7 @@ const PRESETS := {
 		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
 	},
 	"ultra": {
-		"msaa": Viewport.MSAA_4X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA,
+		"msaa": Viewport.MSAA_4X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "map_msaa": Viewport.MSAA_2X,
 		"shadow_splits": 4, "shadow_distance": 1.35, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
 		"ssil": true, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_HIGH, "volumetric": "always", "sdfgi": true,
 		"glow": true, "fog_grid": [128, 64],
@@ -330,9 +331,16 @@ static func apply_upscale(viewport: Viewport, p: Dictionary) -> void:
 	# Le temporel accumule les images précédentes : il remplace MSAA et FXAA (sinon coût double
 	# et flou). Hors temporel, FXAA suit project.godot.
 	var temporal := is_temporal(scaling_mode)
-	viewport.msaa_3d = Viewport.MSAA_DISABLED if temporal else p["msaa"]
+	viewport.msaa_3d = Viewport.MSAA_DISABLED if temporal else msaa_for(p, active_context)
 	var fxaa := int(ProjectSettings.get_setting("rendering/anti_aliasing/quality/screen_space_aa", 0))
 	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if temporal else fxaa as Viewport.ScreenSpaceAA
+
+
+## PF (ADR 0169) : MSAA du contexte : `map_msaa` sur la carte de campagne (shader du terrain trop
+## lourd pour être ombré deux fois aux bords des triangles : −11 ms à 50 % d'échelle, FXAA garde
+## les bords lisses), `msaa` en bataille.
+static func msaa_for(p: Dictionary, context: String) -> Viewport.MSAA:
+	return (p.get("map_msaa", p["msaa"]) if context == "campaign" else p["msaa"]) as Viewport.MSAA
 
 
 ## PF1 : particules réduites selon le niveau dès leur entrée dans l'arbre (`amount` d'origine

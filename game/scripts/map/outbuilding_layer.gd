@@ -110,6 +110,10 @@ var _shadows := true
 var _meshes: Dictionary = {}
 var _family_order: Array = []
 var _grid: Dictionary = {}  # Vector2i → PackedInt32Array (indices de colonies)
+## Maillages `out:` préparés hors du fil principal dès `setup` (chargement du `.glb` et pièces
+## sommet par sommet : jusqu'à 80 ms par maquette sinon, à sa première apparition).
+var _warm_task := -1
+var _warmed: Dictionary = {}
 
 
 ## Dossier `data/` du jeu : celui de l'autoload `MapPaths`, sinon le dossier par défaut (scripts
@@ -275,6 +279,30 @@ func setup(layer: SettlementLayer, map: MapData, terrain: TerrainBuilder, data: 
 	if terrain != null and not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 	stats = {"instances": 0, "nodes": 0, "settlements": 0, "build_ms": 0.0}
+	if enabled and _warm_task < 0:
+		_warm_task = WorkerThreadPool.add_task(_warm_meshes.bind(manifest.duplicate(true)), false, "outbuilding meshes")
+
+
+## Fil de travail : maillages `out:` de toutes les maquettes du manifeste, dans `_warmed` (lu par
+## le fil principal seulement après la fin de la tâche).
+func _warm_meshes(models: Dictionary) -> void:
+	for model: String in models:
+		_warmed["out:" + model] = with_pieces(_load_glb_mesh(MODEL_DIR + model + ".glb"), (models[model] as Dictionary).get("pieces", []))
+
+
+func _finish_warm() -> void:
+	if _warm_task < 0:
+		return
+	WorkerThreadPool.wait_for_task_completion(_warm_task)
+	_warm_task = -1
+	for key: String in _warmed:
+		if not _meshes.has(key):
+			_meshes[key] = _warmed[key]
+	_warmed = {}
+
+
+func _exit_tree() -> void:
+	_finish_warm()
 
 
 ## Note que l'état de la simulation a changé (`get_state_revision`) : il sera relu à la demande
@@ -547,7 +575,9 @@ func update_view(rig_distance: float) -> void:
 	if camera != null and not _maquette:
 		_fov = camera.fov
 	if _placed_distance < 0.0 or absf(_rig_distance - _placed_distance) > 0.04 * _placed_distance:
+		var tw := Time.get_ticks_usec()
 		_write_batches()
+		PerfProbe.lap("out/rescale", tw)
 	var opacity := 1.0 if force_active else clampf(inverse_lerp(view_range(), minf(_render("fade_from_units", view_range()), view_range() - 1e-3), rig_distance), 0.0, 1.0)
 	if absf(opacity - _fade) > 0.02 or (opacity >= 1.0) != (_fade >= 1.0):
 		_fade = opacity
@@ -564,12 +594,15 @@ func update_view(rig_distance: float) -> void:
 	var here := _camera_ground()
 	if _pending.is_empty() and (_dirty or not is_equal_approx(band_top(config, _rig_distance), _built_top) or here.distance_to(_center) > _loaded_radius * 0.3 or load_radius() > _loaded_radius * 1.3):
 		_begin_rebuild(here)
+	var ts := Time.get_ticks_usec()
 	if not _pending.is_empty():
 		_step(STEP_BUDGET_USEC if FrameBudget.in_frame() else 1 << 30)
+		PerfProbe.lap("out/step", ts)
 	elif _reground_in >= 0:
 		_reground_in -= 1
 		if _reground_in < 0:
 			_reground()
+			PerfProbe.lap("out/reground", ts)
 
 
 ## Rayon (unités) du voisinage chargé autour du point visé : `render.load_factor` × distance du
@@ -1409,6 +1442,10 @@ func _place(inst: Dictionary) -> void:
 func _mesh_of(key: String) -> Mesh:
 	if _meshes.has(key):
 		return _meshes[key]
+	if _warm_task >= 0:
+		_finish_warm()
+		if _meshes.has(key):
+			return _meshes[key]
 	var mesh: Mesh = null
 	if key.begins_with("out:"):
 		var model := key.trim_prefix("out:")
