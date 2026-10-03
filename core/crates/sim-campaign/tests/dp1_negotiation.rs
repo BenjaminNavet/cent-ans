@@ -228,7 +228,7 @@ fn a_winning_peace_cedes_provinces_and_pays_gold() {
 }
 
 #[test]
-fn a_refusal_is_reported_with_its_chance() {
+fn a_refusal_is_reported_with_its_score() {
     let data = data();
     let mut state = start(&data, "fac_france", 7);
     let error = state
@@ -246,7 +246,7 @@ fn a_refusal_is_reported_with_its_chance() {
         )
         .unwrap_err()
         .to_string();
-    assert!(error.contains("%"), "{error}");
+    assert!(error.contains("score"), "{error}");
     assert!(state.is_at_war(&fac("fac_france"), &fac("fac_england")));
     // The player keeps a trace of the refused treaty.
     assert!(!state.factions[&fac("fac_france")].ledger.history[0].accepted);
