@@ -4,8 +4,8 @@ use data_model::{ProvinceId, SettlementId};
 use godot::prelude::*;
 
 use crate::campaign_sim::{
-    buildable_array, buildings_array, construction_dict, demolition_preview_array, ids,
-    units_array, CampaignSim,
+    buildable_array, building_category_key, buildings_array, construction_dict,
+    demolition_preview_array, ids, units_array, CampaignSim,
 };
 
 #[godot_api(secondary)]
@@ -150,6 +150,49 @@ impl CampaignSim {
             return VarArray::new();
         };
         buildable_array(data, &state.buildable(data, &id), Some((state, &id)))
+    }
+
+    /// A6-L15 (ADR 0181): building slots of a settlement for the slot bar:
+    /// `[{root, built, built_name, level, max_level, category, upkeep,
+    /// state ("built" | "upgradable" | "empty" | "locked"), locked_reason,
+    /// next[]}]` where `next[]` are build-option rows as in
+    /// `settlement_buildable` (with `requirements` and `before_after`).
+    /// Empty for an unknown id.
+    #[func]
+    fn settlement_slots(&self, id: GString) -> VarArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarArray::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarArray::new();
+        };
+        state
+            .building_slots(data, &id)
+            .iter()
+            .map(|slot| {
+                let shown = slot.built.as_ref().unwrap_or(&slot.root);
+                let building = data.buildings.get(shown);
+                let slot_state = match (&slot.built, slot.locked) {
+                    (_, true) => "locked",
+                    (None, false) => "empty",
+                    (Some(_), false) if slot.next.is_empty() => "built",
+                    (Some(_), false) => "upgradable",
+                };
+                vdict! {
+                    "root" => slot.root.as_str(),
+                    "built" => slot.built.as_ref().map_or("", |b| b.as_str()),
+                    "built_name" => building.map_or("", |b| b.name.display.as_str()),
+                    "level" => i64::from(slot.level),
+                    "max_level" => i64::from(slot.max_level),
+                    "category" => building.map_or("", |b| building_category_key(b.category)),
+                    "upkeep" => building.map_or(0, |b| i64::from(b.upkeep.unwrap_or(0))),
+                    "state" => slot_state,
+                    "locked_reason" => slot.locked_reason.as_deref().unwrap_or(""),
+                    "next" => &buildable_array(data, &slot.next, Some((state, &id))),
+                }
+                .to_variant()
+            })
+            .collect()
     }
 
     /// RS-N: demolition preview of every built building of a settlement, for
