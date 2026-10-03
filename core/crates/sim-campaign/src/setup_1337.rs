@@ -573,20 +573,24 @@ impl CampaignState {
             if id.as_str() == REBELS_FACTION {
                 continue;
             }
-            let Some(capital_city) = state.province_city_id(&faction.capital).cloned() else {
-                return Err(CampaignError::MissingData(format!(
-                    "capital {} of {id}",
-                    faction.capital
-                )));
-            };
             // JR1: a faction the crusade rules base in a settlement starts
             // there with the army they list (it holds no city).
             let (station, units) = match crate::crusade::starting_army(&state, data, id) {
                 Some(start) => start,
-                None => (
-                    capital_city,
-                    units_from(data, &main_army_composition(faction))?,
-                ),
+                None => {
+                    // LR-15: its seat (never another realm's city), else,
+                    // when it holds no place at all, its capital's city.
+                    let Some(station) = state
+                        .faction_seat(id)
+                        .or_else(|| state.province_city_id(&faction.capital).cloned())
+                    else {
+                        return Err(CampaignError::MissingData(format!(
+                            "capital {} of {id}",
+                            faction.capital
+                        )));
+                    };
+                    (station, units_from(data, &main_army_composition(faction))?)
+                }
             };
             let army_id = state.allocate_army_id();
             state.armies.insert(

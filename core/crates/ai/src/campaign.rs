@@ -728,11 +728,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
 
     // Recruitment: the capital's city first, then the cities (and castles)
     // of threatened border provinces.
-    let mut sites: Vec<SettlementId> = state
-        .province_city_id(&me.capital)
-        .cloned()
-        .into_iter()
-        .collect();
+    // LR-15: the seat, never another realm's city (cityless faction).
+    let mut sites: Vec<SettlementId> = state.faction_seat(ctx.faction).into_iter().collect();
     let mut borders: Vec<(SettlementId, i64)> = state
         .provinces
         .keys()
@@ -749,7 +746,13 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         })
         .collect();
     borders.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
-    sites.extend(borders.into_iter().map(|(id, _)| id));
+    let seat = sites.first().cloned();
+    sites.extend(
+        borders
+            .into_iter()
+            .map(|(id, _)| id)
+            .filter(|id| Some(id) != seat.as_ref()),
+    );
     // JR1: a host that holds no city at all (based in a town of another
     // realm's province) recruits in, and musters from, the places it holds.
     let cityless = !state
@@ -1153,7 +1156,8 @@ fn disband_for_debt(ctx: &Context, savings: i64) -> Vec<Order> {
         Garrison(SettlementId),
     }
     let state = ctx.state;
-    let capital = state.province_city_id(&state.factions[ctx.faction].capital);
+    let seat = state.faction_seat(ctx.faction);
+    let capital = seat.as_ref();
     // (upkeep, is_garrison, holder index, unit index)
     let mut holders: Vec<Holder> = Vec::new();
     let mut candidates: Vec<(i64, bool, usize, usize)> = Vec::new();
@@ -1624,14 +1628,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let enemy_capitals: BTreeSet<SettlementId> = ctx
         .enemies
         .iter()
-        .filter_map(|e| state.factions.get(e))
-        .filter_map(|f| state.province_city_id(&f.capital).cloned())
+        .filter_map(|e| state.faction_capital_city(e).cloned())
         .collect();
-    let my_capital = state
-        .factions
-        .get(ctx.faction)
-        .and_then(|f| state.province_city_id(&f.capital))
-        .cloned();
+    let my_capital = state.faction_seat(ctx.faction);
     let largest = armies.first().map(|(id, p)| (id.clone(), *p));
     let mut defended: BTreeSet<SettlementId> = BTreeSet::new();
     let mut targeted: BTreeSet<SettlementId> = BTreeSet::new();
