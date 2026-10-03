@@ -22,7 +22,6 @@
 
 use data_model::{AutoResolveRules, GameData, RiverCrossingRules};
 use serde::{Deserialize, Serialize};
-use sim_battle::SideId;
 
 use crate::battle_auto::{self, BattleContext, FieldConditions, Side, UnitProfile, Winner};
 use crate::battle_request::{is_live, BattleRequestError};
@@ -33,9 +32,10 @@ use crate::state::{BattleRequest, CampaignState};
 
 /// Morale lost by every regiment of an army that calls off its attack.
 pub const WITHDRAW_MORALE_LOSS: u8 = 10;
-/// First seed of the forecast's auto-resolutions (fixed: the forecast is
-/// pure and never touches the campaign RNG).
-const FORECAST_SEED: u64 = 0xF02_ECA57;
+/// Half-width of the auto-resolver's fortune of war (±10 %).
+const FORTUNE: f64 = 0.10;
+/// Integration steps of the win chance.
+const STEPS: usize = 400;
 
 /// Estimated balance of power of a pending battle.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
