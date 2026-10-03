@@ -144,7 +144,7 @@ var _siege_key_visible := false
 func _compact_header() -> void:
 	var box: VBoxContainer = get_node("VBox")
 	var grid: GridContainer = box.get_node("Grid")
-	for hidden in ["ControllerKey", "ControllerValue", "TerrainKey", "TerrainValue", "IdKey", "IdValue"]:
+	for hidden in ["ControllerKey", "ControllerValue", "CapitalKey", "CapitalValue", "TerrainKey", "TerrainValue", "IdKey", "IdValue"]:
 		(grid.get_node(hidden) as Control).hide()
 	for separator in ["Separator", "Separator2"]:
 		(box.get_node(separator) as Control).hide()
@@ -152,7 +152,7 @@ func _compact_header() -> void:
 	grid.add_theme_constant_override("v_separation", 1)
 	gauges_row = HFlowContainer.new()
 	gauges_row.name = "GaugesRow"
-	gauges_row.add_theme_constant_override("h_separation", 12)
+	gauges_row.add_theme_constant_override("h_separation", 4)  # LR-09 : tient sur une ligne en vue étroite
 	gauges_row.add_theme_constant_override("v_separation", 0)
 	grid.add_sibling(gauges_row)
 	var chips := [["PopulationKey", population_value, "Pop."], ["UnrestKey", unrest_value, "Mécont."], ["DevastationKey", devastation_value, "Dévast."]]
@@ -163,13 +163,22 @@ func _compact_header() -> void:
 		grid.remove_child(key)
 		grid.remove_child(value)
 		var holder := HBoxContainer.new()
-		holder.add_theme_constant_override("separation", 4)
+		holder.add_theme_constant_override("separation", 2)
 		key.text = chip[2]
 		key.tooltip_text = full_name
+		key.add_theme_font_size_override("font_size", 13)  # LR-09 : intitulé abrégé, plus petit que la valeur
 		holder.add_child(key)
 		holder.add_child(value)
 		gauges_row.add_child(holder)
 	siege_key = grid.get_node("SiegeKey")
+	# LR-09 : propriétaire et capitale sur une seule ligne (tronquée avec points de suspension) ;
+	# le détail (occupant, capitale, terrain) est dans l'infobulle.
+	owner_value.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	owner_value.clip_text = true
+	owner_value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	owner_value.custom_minimum_size.x = 0.0
+	owner_value.mouse_filter = Control.MOUSE_FILTER_STOP
+	(grid.get_node("OwnerKey") as Label).text = "Seigneur"
 	# Gouverneur : en tête de l'onglet Ville.
 	var governor_row: Control = box.get_node("GovernorRow")
 	box.remove_child(governor_row)
@@ -190,17 +199,28 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	province_id = str(province.get("id", ""))
 	name_label.text = str(province.get("display_name", province.get("name", "?")))
 	var owner: String = str(state.get("owner", province.get("owner", "")))
-	owner_value.text = _faction_label(owner, province.get("owner_display_name", ""), label_of)
+	var owner_label := _faction_label(owner, province.get("owner_display_name", ""), label_of)
 	var controller: String = str(state.get("controller", owner))
-	controller_value.text = _faction_label(controller, "", label_of) if controller != owner else "—"
-	if controller != owner:
-		owner_value.text += " (aux mains de %s)" % controller_value.text
+	var controller_label := _faction_label(controller, "", label_of) if controller != owner else "—"
+	controller_value.text = controller_label
 	var capital: String = str(province.get("capital", province.get("capital_name", "")))
 	capital_value.text = capital if capital != "" else "—"
 	var terrain: String = str(province.get("terrain", ""))
 	terrain_value.text = TERRAIN_LABELS.get(terrain, terrain if terrain != "" else "—")
+	# LR-09 : une ligne « Seigneur · cap. Ville · terrain », détail en infobulle.
+	var short_line := owner_label
+	var detail := "Propriétaire : %s" % owner_label
+	if controller != owner:
+		short_line += " (occ. %s)" % controller_label
+		detail += "\nAux mains de : %s" % controller_label
+	if capital != "":
+		short_line += " · cap. %s" % capital
+		detail += "\nCapitale : %s" % capital
 	if terrain != "":
-		capital_value.text += " · %s" % str(terrain_value.text).to_lower()
+		short_line += " · %s" % str(terrain_value.text).to_lower()
+		detail += "\nTerrain : %s" % terrain_value.text
+	owner_value.text = short_line
+	owner_value.tooltip_text = detail
 	var population := int(state.get("population_total", province.get("population_total", 0)))
 	population_value.text = _thousands(population) if population > 0 else "—"
 	unrest_value.text = ("%d %%" % int(state["unrest"])) if state.has("unrest") else "—"
