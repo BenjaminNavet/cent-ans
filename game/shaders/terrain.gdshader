@@ -396,6 +396,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/satellite_ground.gdshaderinc"  // SS2 : carte de couleur (ADR 0142)
 #include "res://shaders/hb_ground.gdshaderinc"  // HB3 : habillage par biome (ADR 0143)
 #include "res://shaders/coast_band.gdshaderinc"  // TB5 : falaises et plages (crochet coast_band)
+#include "res://shaders/relief_occlusion.gdshaderinc"  // RV-D : occlusion de vallée
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -880,6 +881,7 @@ void fragment() {
 	if (hb_debug > 12.5 && hb_debug < 13.5) { hb_dbg = col; }  // HB3 : sonde
 	fr1_borders(p, uv, footprint, col, pm_emit);  // FR1 : frontières de faction lumineuses
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
+	AO = rvd_apply(uv, footprint, land_f, col);  // RV-D : occlusion de vallée (teinte + AO)
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2
 	EMISSION += col * fog_mist * fog_mist_glow * (1.0 - pm_weight());  // BR : brume auto-éclairée

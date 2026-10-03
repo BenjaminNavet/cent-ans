@@ -128,6 +128,7 @@ var _height_texture: ImageTexture
 var _splat_texture: ImageTexture
 var _border_texture: ImageTexture
 var _coast_texture: ImageTexture
+var _occlusion_texture: ImageTexture  # RV-D : occlusion de vallée (null si absente)
 var _river_bed_texture: ImageTexture
 var _landuse_texture: ImageTexture
 var _albedo_array: TextureLayered  # GA4 : CompressedTexture2DArray importé ou Texture2DArray (1k)
@@ -1061,6 +1062,7 @@ func _build_textures() -> void:
 	_border_texture = _optional_texture(map_data.border_dist_image)
 	_coast_texture = _optional_texture(map_data.coast_dist_image)
 	_river_bed_texture = _optional_texture(map_data.river_bed_image)
+	_occlusion_texture = _mipmapped_texture(map_data.relief_occlusion_image)  # RV-D
 	_build_material_arrays()
 	_build_faction_texture()
 
@@ -1124,6 +1126,16 @@ static func _optional_texture(image: Image) -> ImageTexture:
 	if image == null:
 		return null
 	return ImageTexture.create_from_image(image)
+
+
+## RV-D : texture basse fréquence lue au dézoom, mipmaps générées sur une copie (l'image de
+## MapData reste intacte).
+static func _mipmapped_texture(image: Image) -> ImageTexture:
+	if image == null or image.is_empty():
+		return null
+	var copy := image.duplicate() as Image
+	copy.generate_mipmaps()
+	return ImageTexture.create_from_image(copy)
 
 
 ## Deux Texture2DArray (albédo ; normale XY + rugosité) depuis les JPEG Poly Haven importés.
@@ -1227,6 +1239,8 @@ func _build_material() -> void:
 	material.set_shader_parameter("has_border_dist", _border_texture != null)
 	material.set_shader_parameter("coast_dist", _coast_texture)
 	material.set_shader_parameter("has_coast_dist", _coast_texture != null)
+	material.set_shader_parameter("rvd_occlusion", _occlusion_texture)  # RV-D
+	material.set_shader_parameter("rvd_has_occlusion", _occlusion_texture != null)
 	# Lot V4 : lit des fleuves (les tuiles creusées sont réglées par RiversRenderer).
 	material.set_shader_parameter("river_bed", _river_bed_texture)
 	material.set_shader_parameter("has_river_bed", _river_bed_texture != null)
