@@ -81,7 +81,12 @@ fn main() {
     } else {
         args.remove(0)
     };
-    let (data, _) = GameData::load(&data_root()).expect("data");
+    let (mut data, _) = GameData::load(&data_root()).expect("data");
+    // LR-07: `POPULATION_RULES=file.json` tries other public order rules.
+    if let Ok(path) = std::env::var("POPULATION_RULES") {
+        let text = std::fs::read_to_string(&path).expect("population rules file");
+        data.population_rules = serde_json::from_str(&text).expect("population rules");
+    }
     match mode.as_str() {
         "campaign" => campaign_mode(&data, &args),
         "matrix" => matrix_mode(&data),
@@ -148,6 +153,10 @@ struct RevoltSample {
     before1: f64,
     at: f64,
     occupied: bool,
+    /// LR-07: inhabitants of the province and provinces held by its
+    /// controller at the revolt.
+    population: u64,
+    controller_provinces: usize,
 }
 
 fn campaign_mode(data: &GameData, args: &[String]) {
@@ -293,6 +302,22 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
                         before1: get(unrest_history.back()),
                         at: sim_campaign::population::weighted_unrest(&province.population),
                         occupied,
+                        population: province.population.total(),
+                        controller_provinces: state.settlements.get(&province.city).map_or(
+                            0,
+                            |c| {
+                                state
+                                    .provinces
+                                    .values()
+                                    .filter(|q| {
+                                        state
+                                            .settlements
+                                            .get(&q.city)
+                                            .is_some_and(|s| s.controller == c.controller)
+                                    })
+                                    .count()
+                            },
+                        ),
                     });
                 }
             }
@@ -601,6 +626,36 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
         md,
         "| Révoltes en province occupée | {:.0} % | — |",
         100.0 * all_revolts.iter().filter(|r| r.occupied).count() as f64 / count
+    );
+    // LR-07: who revolts, by size of the province's controller.
+    let buckets = [
+        (0, 2, "1-2"),
+        (3, 6, "3-6"),
+        (7, 15, "7-15"),
+        (16, usize::MAX, "16+"),
+    ];
+    let by_size: Vec<String> = buckets
+        .iter()
+        .map(|(lo, hi, label)| {
+            let set: Vec<&RevoltSample> = all_revolts
+                .iter()
+                .filter(|r| (*lo..=*hi).contains(&r.controller_provinces))
+                .collect();
+            let pop =
+                set.iter().map(|r| r.population as f64).sum::<f64>() / set.len().max(1) as f64;
+            let garrison =
+                set.iter().map(|r| f64::from(r.garrison)).sum::<f64>() / set.len().max(1) as f64;
+            format!(
+                "{label} prov. {:.1} (pop. {:.0} k, garn. {garrison:.0})",
+                set.len() as f64 / n,
+                pop / 1000.0
+            )
+        })
+        .collect();
+    let _ = writeln!(
+        md,
+        "| Révoltes par partie selon la taille du tenant (LR-07) | {} | — |",
+        by_size.join(" ; ")
     );
     let decades = f64::from(turns) / 40.0;
     let alive: f64 =

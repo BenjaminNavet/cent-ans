@@ -14,12 +14,15 @@ pub struct PopulationRules {
     pub garrison_relief_per_100_men: f64,
     /// ... up to this much.
     pub garrison_relief_max: f64,
-    /// LR-07: inhabitants a garrison is sized for. In a more populous
-    /// province the relief shrinks in proportion (a hundred men keep a
-    /// village in order, not Paris); a smaller one gets no bonus. 0: no
-    /// weighting.
+    /// LR-07: inhabitants a garrison is sized for. The relief is weighed by
+    /// this over the province's population (a hundred men keep a village
+    /// in order, not Paris). 0: no weighting.
     #[serde(default)]
     pub garrison_relief_reference_population: u64,
+    /// LR-07: ceiling of that weight in a thinly peopled province (1: no
+    /// bonus below the reference population).
+    #[serde(default = "default_garrison_relief_max_weight")]
+    pub garrison_relief_max_weight: f64,
     /// Ceiling of the relief brought by well-supplied goods (the term
     /// `(50 - goods satisfaction) / 3` never goes below minus this).
     pub goods_relief_max: f64,
@@ -65,8 +68,8 @@ impl PopulationRules {
     pub fn garrison_relief(&self, garrison_men: u32, population: u64) -> f64 {
         let relief = f64::from(garrison_men / 100) * self.garrison_relief_per_100_men;
         let reference = self.garrison_relief_reference_population;
-        let weight = if reference > 0 && population > reference {
-            reference as f64 / population as f64
+        let weight = if reference > 0 {
+            (reference as f64 / population.max(1) as f64).min(self.garrison_relief_max_weight)
         } else {
             1.0
         };
@@ -83,6 +86,7 @@ impl Default for PopulationRules {
             garrison_relief_per_100_men: 1.0,
             garrison_relief_max: 10.0,
             garrison_relief_reference_population: 100_000,
+            garrison_relief_max_weight: default_garrison_relief_max_weight(),
             goods_relief_max: 10.0,
             occupation_unrest: 20.0,
             foreign_religion_unrest: 10.0,
@@ -96,6 +100,10 @@ impl Default for PopulationRules {
             description: None,
         }
     }
+}
+
+fn default_garrison_relief_max_weight() -> f64 {
+    1.0
 }
 
 fn default_disorder_weight() -> f64 {
@@ -135,6 +143,7 @@ mod tests {
     fn a_garrison_soothes_per_head_beyond_the_reference_population() {
         let rules = PopulationRules {
             garrison_relief_reference_population: 100_000,
+            garrison_relief_max_weight: default_garrison_relief_max_weight(),
             ..PopulationRules::default()
         };
         // A small or average province: 1 point per 100 men, capped.
