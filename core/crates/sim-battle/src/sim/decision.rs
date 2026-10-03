@@ -121,7 +121,7 @@ impl BattleSim {
     }
 
     /// Nearest distance between two able regiments of opposite sides.
-    fn army_gap(&self) -> Option<f64> {
+    pub(super) fn army_gap(&self) -> Option<f64> {
         let mut best: Option<f64> = None;
         let able: Vec<_> = self
             .units

@@ -38,13 +38,28 @@ pub struct Pace {
     pub rout_morale: f64,
     /// A routing regiment out of danger whose morale rises above this rallies.
     pub rally_morale: f64,
-    /// A6-L13b: factor on the walking speed of every regiment that is not
-    /// running or routing (1 = the stats of the unit types).
+    /// A6-L13b: factor on the walking speed of a regiment that is not running
+    /// or routing and while the two armies are still farther apart than
+    /// `approach_range_m` (the deliberate march of the approach; 1 = the stats
+    /// of the unit types).
     pub move_speed_factor: f64,
+    /// A6-L13b: gap between the two armies (nearest regiments) under which
+    /// everyone moves at full speed, so the volleys of the approach keep their
+    /// original exposure and the army arrives together.
+    pub approach_range_m: f64,
     /// A6-L13b: factor on the speed of a run or a charge (not of a rout).
     pub run_speed_factor: f64,
     /// A6-L13b: fatigue gained per second by a regiment in melee.
     pub melee_fatigue_per_s: f64,
+    /// A6-L13b: factor on the morale a routing neighbour costs (rout cascade).
+    pub contagion_factor: f64,
+    /// A6-L13b: morale regained per second by a regiment holding its ground in
+    /// melee (not flanked, over half its men), up to its morale cap.
+    pub melee_resolve_per_s: f64,
+    /// A6-L13b: the patience clocks of the battle AI (wait, duel, assault and
+    /// hold times of `ai.rs`) run this many times slower, so a longer approach
+    /// does not make the AI leave its ground before the armies meet.
+    pub ai_patience_factor: f64,
 }
 
 const BUNDLED: &str = include_str!("../../../../data/rules/battle_pace.json");

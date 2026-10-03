@@ -1224,7 +1224,8 @@ fn charge_or_detour(view: &mut View, i: usize, j: usize, run: bool) -> bool {
 
 fn plan_field(view: &mut View) {
     let roles = roles(view);
-    let elapsed = view.sim.elapsed();
+    // A6-L13b: the patience clocks run at the pace of the battle.
+    let elapsed = view.sim.elapsed() / view.sim.ai_patience_factor();
     let own_power = view.power(true);
     let enemy_power = view.power(false).max(1.0);
     let ratio = own_power / enemy_power;
