@@ -13,7 +13,7 @@ Demande joueur 2026-10-03 : on voit encore l'estompage IGN (petites ombres de re
 ## Lots (branche feat/rv, worktrees gp-rv-<lot>)
 | Lot | Contenu | Branche | État |
 |---|---|---|---|
-| RV-A | Volume : normales moins exagérées, micro-relief filtré, exagération du maillage | feat/rv-a | en cours |
+| RV-A | Volume : normales moins exagérées, micro-relief filtré, exagération du maillage | feat/rv-a | fusionné (2aae70a36) |
 | RV-B | Soleil de jeu (25-35°, chaud/froid, varie saison/tour) + perspective atmosphérique | feat/rv-b | en cours |
 | RV-C | Ombres de nuages crédibles, dérivant, liées aux nuages visibles | feat/rv-c | en cours |
 | RV-D | Occlusion de vallée précalculée (outil tools/geo + échantillonnage shader) | feat/rv-d | en cours |
