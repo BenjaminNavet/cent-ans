@@ -38,20 +38,32 @@ func _check_column_pure() -> void:
 	root.add_child(col)
 	await process_frame
 
-	# Fusion : même type, même zone, dans la fenêtre -> une seule entrée, compte 2.
+	# U23 : même unité et même type -> rafraîchi, jamais incrémenté.
 	col.push_alerts([_alert("rout", 0.0, 100.0, 200.0)])
 	col.push_alerts([_alert("rout", 1.0, 105.0, 202.0)])
-	_check(col._entries.size() == 1, "same kind/zone/window merges into one entry")
+	_check(col._entries.size() == 1, "same unit/kind refreshes one entry")
 	if col._entries.size() == 1:
-		_check(int(col._entries[0]["count"]) == 2, "merged entry counts 2")
+		_check(int(col._entries[0]["count"]) == 1, "a refreshed entry is not incremented")
 
-	# Zone différente : pas de fusion.
+	# Autre unité, même type : deux entrées, une seule ligne affichée avec ×2.
 	col.push_alerts([_alert("rout", 1.5, 900.0, 900.0, "defender", 9)])
-	_check(col._entries.size() == 2, "a different zone does not merge: %d" % col._entries.size())
+	_check(col._entries.size() == 2, "another unit is another entry: %d" % col._entries.size())
+	var rows: Array = col.visible_entries()
+	_check(rows.size() == 1 and int(rows[0]["count"]) == 2, "one row per kind, counting units")
 
-	# Hors fenêtre de fusion (le premier avait duré > merge_window_s depuis) : nouvelle entrée.
-	col.push_alerts([_alert("rout", 1.5 + col.merge_window_s() + 1.0, 101.0, 201.0)])
-	_check(col._entries.size() == 3, "past the merge window: a new entry")
+	# Plafond d'affichage « ×9+ ».
+	_check(BattleAlertsColumn.count_label(1) == "", "no counter for one")
+	_check(BattleAlertsColumn.count_label(5) == " (×5)", "counter for five")
+	_check(BattleAlertsColumn.count_label(101) == " (×9+)", "counter capped at 9+")
+	for k in 120:
+		col.push_alerts([_alert("flanked", 2.0, 0.0, 0.0, "attacker", 1000 + k)])
+	for entry in col.visible_entries():
+		if str(entry["kind"]) == "flanked":
+			_check(int(entry["count"]) == 120, "flanked counts distinct units")
+	# Oubli : l'alerte non rafraîchie s'efface après sa durée (10 s).
+	# (la durée vient de data/rules/battle_alerts.json, 10 s ; la valeur lue peut venir d'un
+	# cœur compilé avant ce réglage).
+	_check(col.duration_s() >= 8.0 and col.duration_s() <= 10.0, "alerts are forgotten after ~10 s")
 
 	# Borne à 5 (data/rules/battle_alerts.json) : 7 types distincts, zones éloignées.
 	col._entries.clear()

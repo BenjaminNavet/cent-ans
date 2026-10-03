@@ -45,6 +45,8 @@ var player_side: String = "attacker"
 var _placed: Dictionary = {}
 var _key_of: Dictionary = {}  # id de régiment -> clé de son repère dans `_placed`
 var clustered: bool = false  # B7 : vue lointaine, repères regroupés
+## B4 : échelle courante des repères (1 de près, `marker_min_scale` à fort dézoom).
+var marker_scale: float = 1.0
 var _order: Array[int] = []
 var _selected: Array = []
 var hovered: int = -1  # repère sous la souris
@@ -75,6 +77,11 @@ func update(units: Array, anchors: Dictionary, selected: Array, camera_distance:
 	_order.clear()
 	if not visible:
 		return
+	marker_scale = scale_for_distance(
+		camera_distance,
+		CameraFeel.get_value("battle", "marker_shrink_start_m"),
+		CameraFeel.get_value("battle", "marker_shrink_end_m"),
+		CameraFeel.get_value("battle", "marker_min_scale"))
 	clustered = true if force_clustered else camera_distance > (CLUSTER_OFF if clustered else CLUSTER_ON)
 	var entries: Array = []
 	for unit in units:
@@ -89,12 +96,12 @@ func update(units: Array, anchors: Dictionary, selected: Array, camera_distance:
 	var rects: Array[Rect2] = []
 	for entry in entries:
 		var anchor: Vector2 = entry[1]
-		var base := Rect2(anchor.x - WIDTH * 0.5, anchor.y - HEIGHT, WIDTH, HEIGHT)
+		var base := Rect2(anchor.x - WIDTH * 0.5 * marker_scale, anchor.y - HEIGHT * marker_scale, WIDTH * marker_scale, HEIGHT * marker_scale)
 		var rect := base
 		if _overlaps(base, rects):
 			var placed := false
 			for nudge in NUDGES:
-				var candidate := Rect2(base.position + Vector2(nudge.x * (WIDTH + 14.0 + GAP), nudge.y * (HEIGHT + GAP)), base.size)
+				var candidate := Rect2(base.position + Vector2(nudge.x * (WIDTH + 14.0 + GAP), nudge.y * (HEIGHT + GAP)) * marker_scale, base.size)
 				if not _overlaps(candidate, rects):
 					rect = candidate
 					placed = true
@@ -102,7 +109,7 @@ func update(units: Array, anchors: Dictionary, selected: Array, camera_distance:
 			# Foule (vue très éloignée) : on empile au-dessus jusqu'à une place libre.
 			var level := 3
 			while not placed and level < MAX_STACK:
-				rect = Rect2(base.position - Vector2(0, level * (HEIGHT + GAP)), base.size)
+				rect = Rect2(base.position - Vector2(0, level * (HEIGHT + GAP) * marker_scale), base.size)
 				placed = not _overlaps(rect, rects)
 				level += 1
 		rects.append(rect)
@@ -113,6 +120,14 @@ func update(units: Array, anchors: Dictionary, selected: Array, camera_distance:
 	var mouse := get_local_mouse_position()
 	hovered = marker_at(mouse)
 	queue_redraw()
+
+
+## B4 : échelle des repères selon la distance de la caméra : 1 jusqu'à `start`, puis décroît
+## linéairement jusqu'à `min_scale` à `end` (au-delà, `min_scale`).
+static func scale_for_distance(distance: float, start: float, end: float, min_scale: float) -> float:
+	if distance <= start or end <= start:
+		return 1.0
+	return lerpf(1.0, min_scale, clampf((distance - start) / (end - start), 0.0, 1.0))
 
 
 ## B7 : regroupe les entrées [id, ancre, unité, unités] d'un même camp dont les ancres écran sont
@@ -230,10 +245,22 @@ func _draw() -> void:
 			draw_line(tip_point, anchor, Color(INK, 0.7), 1.0)
 			draw_circle(anchor, 2.0, Color(INK, 0.7))
 	for id in _order:
-		if (_placed[id]["units"] as Array).size() > 1:
-			_draw_cluster(_placed[id], blink)
+		var entry: Dictionary = _placed[id]
+		var shrunk := marker_scale < 0.999
+		if shrunk:
+			# B4 : on dessine le repère à taille normale, réduit autour de sa pointe (le
+			# rectangle de `entry` est déjà la version réduite, utilisée pour la pose et le clic).
+			var rect: Rect2 = entry["rect"]
+			var pivot := Vector2(rect.get_center().x, rect.end.y)
+			entry = entry.duplicate()
+			entry["rect"] = Rect2(pivot.x - WIDTH * 0.5, pivot.y - HEIGHT, WIDTH, HEIGHT)
+			draw_set_transform(pivot * (1.0 - marker_scale), 0.0, Vector2(marker_scale, marker_scale))
+		if (entry["units"] as Array).size() > 1:
+			_draw_cluster(entry, blink)
 		else:
-			_draw_marker(id, _placed[id], blink)
+			_draw_marker(id, entry, blink)
+		if shrunk:
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var focus := hovered if hovered >= 0 else int(_key_of.get(world_hover, -1))
 	if _placed.has(focus):
 		_draw_name(_placed[focus])

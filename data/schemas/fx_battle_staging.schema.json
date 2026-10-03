@@ -72,6 +72,9 @@
       "properties": {
         "texture_px": { "type": "integer", "minimum": 64, "maximum": 1024, "description": "Deux fois la résolution d'une tuile de bruit (px)." },
         "tile_m": { "type": "number", "minimum": 200, "description": "Côté d'une tuile du bruit périodique (m) : le décal glisse d'au plus une tuile." },
+        "noise_cycles": { "type": "number", "minimum": 0.5, "maximum": 8, "description": "Nombre de périodes du bruit par tuile : plus petit = nuages plus larges." },
+        "octaves": { "type": "integer", "minimum": 1, "maximum": 5, "description": "Octaves du bruit : moins = contours plus lisses." },
+        "edge_softness": { "type": "number", "minimum": 0.05, "maximum": 1, "description": "Largeur de la transition du bord des ombres (0..1 de densité) : plus grand = plus doux." },
         "wind_speed_m_s": { "type": "number", "minimum": 0, "description": "Vitesse des ombres pour un vent de force 1." },
         "by_weather": {
           "type": "object",

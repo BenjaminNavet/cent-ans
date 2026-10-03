@@ -18,13 +18,16 @@
   },
   "cloud_shadows": {
     "texture_px": 256,
-    "tile_m": 1200,
+    "tile_m": 2400,
+    "noise_cycles": 1.6,
+    "octaves": 2,
+    "edge_softness": 0.45,
     "wind_speed_m_s": 7.0,
     "by_weather": {
-      "clear": { "strength": 0.32, "coverage": 0.45 },
+      "clear": { "strength": 0.2, "coverage": 0.3 },
       "fog": { "strength": 0.0, "coverage": 0.0 },
-      "rain": { "strength": 0.14, "coverage": 0.7 },
-      "snow": { "strength": 0.1, "coverage": 0.65 }
+      "rain": { "strength": 0.1, "coverage": 0.5 },
+      "snow": { "strength": 0.08, "coverage": 0.5 }
     },
     "night_strength_mul": 0.0,
     "quality": { "low": false, "medium": true, "high": true, "ultra": true }
