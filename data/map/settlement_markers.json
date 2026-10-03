@@ -36,5 +36,6 @@
     "pin_selected": true,
     "pin_hovered": true
   },
-  "shield": {"description": "Lot DV2 : écu du détenteur posé au-dessus du nom ; côté = size_px × size_factor, écart au texte en px. Lot TB2 : max_distance_by_rank = distance caméra jusqu'à laquelle un lieu de ce rang porte son écu (au-delà, nom seul ; rang absent = toujours) : en vue moyenne et large, seuls les lieux majeurs gardent un écu.", "size_factor": 0.45, "gap_px": 1, "max_distance_by_rank": {"1": 220, "2": 330}}
+  "shield": {"description": "Lot DV2 : écu du détenteur posé au-dessus du nom ; côté = size_px × size_factor, écart au texte en px. Lot TB2 : max_distance_by_rank = distance caméra jusqu'à laquelle un lieu de ce rang porte son écu (au-delà, nom seul ; rang absent = toujours) : en vue moyenne et large, seuls les lieux majeurs gardent un écu.", "size_factor": 0.45, "gap_px": 1, "max_distance_by_rank": {"1": 220, "2": 700}},
+  "banner": {"description": "Lot RJ-c (ADR 0175) : l'écu au-dessus du nom est celui du propriétaire de droit ; une place occupée y ajoute, en bas à droite, le petit écu de l'occupant. Liseré de chaque écu à la couleur de position du joueur (stance_cues.json, ADR 0155 ; aucun pour une faction neutre). Parchemin : fanion du propriétaire sur chaque cité, fanion de l'occupant en dessous si elle est occupée. Rang 2 (cités) porté à 700 dans shield.max_distance_by_rank : l'écu suit le nom.", "border": 0.09, "occupant_scale": 0.62, "occupant_overlap": 0.45, "parchment_pennant_units": 0.55}
 }

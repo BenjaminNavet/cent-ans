@@ -42,7 +42,10 @@ fn status_covers_the_five_cases() {
     assert!(PossessionStatus::OwnOccupied.is_occupied());
     assert!(PossessionStatus::OccupiedByViewer.is_occupied());
     assert!(PossessionStatus::ForeignOccupied.is_occupied());
-    assert_eq!(PossessionStatus::OccupiedByViewer.key(), "occupied_by_viewer");
+    assert_eq!(
+        PossessionStatus::OccupiedByViewer.key(),
+        "occupied_by_viewer"
+    );
 }
 
 #[test]

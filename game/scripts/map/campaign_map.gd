@@ -831,6 +831,7 @@ func province_info(index: int) -> Dictionary:
 
 ## MF1 : nom de la province survolée suivi de sa valeur dans le filtre de carte actif.
 func _with_mode_value(province: Dictionary) -> Dictionary:
+	province = _with_possession(province)  # RJ-c
 	if map_modes == null or not map_modes.active() or province.is_empty():
 		return province
 	var value := map_modes.hover_text(str(province.get("id", "")))
@@ -839,6 +840,20 @@ func _with_mode_value(province: Dictionary) -> Dictionary:
 	var named := province.duplicate()
 	named["display_name"] = "%s — %s" % [province.get("display_name", province.get("name", "")), value]
 	return named
+
+
+## RJ-c (ADR 0175) : statut de possession de la province survolée pour le joueur (« À vous —
+## occupée par X »…) et sa catégorie de position, lus par `MapUi.set_hovered`.
+func _with_possession(province: Dictionary) -> Dictionary:
+	if province.is_empty() or settlements_ctl == null:
+		return province
+	var possession := settlements_ctl.possession_of_province(str(province.get("id", "")))
+	if possession.is_empty():
+		return province
+	var described := province.duplicate()
+	described["possession_line"] = possession.get("line", "")
+	described["possession_cue"] = possession.get("cue", "")
+	return described
 
 
 func _on_province_hovered(index: int) -> void:

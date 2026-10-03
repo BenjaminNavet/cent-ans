@@ -506,6 +506,7 @@
     },
     "recruit_pool": {"title": "Réserve de recrutement"},
     "colony_focus_open": {"title": "Ouvrir le panneau de la colonie et centrer la carte"},
+    "province_possession": {"title": "Possession et occupation", "body": "La cité de la province donne son contrôle ; la possession ne change que par traité (cession). À la paix, les places occupées et non cédées reviennent à leur propriétaire.", "hint": "Codex : Conquête et possession"},
     "relief_notice_hide": {"title": "Masquer cet avis jusqu'au prochain lancement du jeu"},
     "relief_command": {"title": "À lancer à la racine du dépôt"},
     "relief_copy_command": {"title": "Copier la commande dans le presse-papiers"},

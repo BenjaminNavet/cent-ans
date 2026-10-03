@@ -87,3 +87,24 @@ static func settlement_help(is_city: bool, province_name: String, city_name: Str
 	if is_city:
 		return "Cité de %s : qui la tient contrôle la province. La possession ne change que par traité (cession)." % province_name
 	return "Place de %s : la tenir ne donne pas la province (c'est la cité de %s qui la donne) ; elle compte pour le bonus de province complète." % [province_name, city_name]
+
+
+## `possession` (dictionnaire du cœur, `province_possession` ou `settlement_possession`) complété
+## pour l'affichage : `line` (statut en une ligne), `cue` (catégorie de position), `owner_label`,
+## `controller_label`. `label_of(faction_id) -> String` nomme une faction ; `player`, `stances` :
+## faction du joueur et ses positions (`StanceCues.stances`). {} si `possession` est vide.
+static func describe(possession: Dictionary, player: String, stances: Dictionary, label_of: Callable) -> Dictionary:
+	if possession.is_empty():
+		return {}
+	var out := possession.duplicate()
+	var status := str(possession.get("status", ""))
+	var owner := str(possession.get("owner", ""))
+	var controller := str(possession.get("controller", owner))
+	var owner_label := str(label_of.call(owner)) if label_of.is_valid() else owner
+	var controller_label := str(label_of.call(controller)) if label_of.is_valid() else controller
+	out["owner_label"] = owner_label
+	out["controller_label"] = controller_label
+	out["line"] = status_line(status, owner_label, controller_label)
+	out["cue"] = cue_of(status, owner, controller, player, stances)
+	out["player"] = player
+	return out

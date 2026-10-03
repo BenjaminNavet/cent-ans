@@ -95,3 +95,8 @@ func shield_until(rank: int) -> float:
 
 func shield_gap_px() -> float:
 	return float(catalog.get("shield", {}).get("gap_px", 1.0))
+
+
+## Lot RJ-c (ADR 0175) : réglage `key` de la bannière possesseur / occupant (`banner`).
+func banner_value(key: String, default: Variant) -> Variant:
+	return catalog.get("banner", {}).get(key, default)

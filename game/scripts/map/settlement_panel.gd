@@ -36,6 +36,8 @@ var controller_value: Label
 var fortification_value: Label
 var siege_value: Label
 var income_value: Label
+## RJ-c (ADR 0175) : aide sous la grille (cité ou place, possession par traité).
+var possession_help: Label
 var tabs: TabContainer
 var garrison_header: Label
 var garrison_list: VBoxContainer
@@ -116,6 +118,13 @@ func _build() -> void:
 	fortification_value = _grid_row(grid, "Fortification")
 	siege_value = _grid_row(grid, "Siège")
 	income_value = _grid_row(grid, "Revenu")
+	possession_help = Label.new()
+	possession_help.name = "PossessionHelp"
+	possession_help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	possession_help.add_theme_color_override("font_color", Color(RichTooltip.MUTED))
+	UiType.apply(possession_help, UiType.CAPTION)
+	possession_help.hide()
+	box.add_child(possession_help)
 	box.add_child(HSeparator.new())
 	tabs = TabContainer.new()
 	tabs.name = "Tabs"
@@ -140,6 +149,26 @@ func _grid_row(grid: GridContainer, key: String) -> Label:
 	value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_child(value)
 	return value
+
+
+## RJ-c (ADR 0175) : statut de la place pour le joueur (« À vous — occupée par X »…), coloré
+## selon la position, et phrase d'aide ; sans `possession` (simulation ancienne), lignes d'origine.
+func _fill_possession(possession: Dictionary) -> void:
+	var owner_key: Label = owner_value.get_meta(&"row_key")
+	if possession.is_empty():
+		owner_key.text = "Propriétaire"
+		owner_value.remove_theme_color_override("font_color")
+		possession_help.hide()
+		return
+	owner_key.text = "Statut"
+	owner_value.text = str(possession.get("line", owner_value.text))
+	owner_value.add_theme_color_override("font_color", PossessionText.ink(str(possession.get("cue", "")), RichTooltip.INK))
+	_show_row(controller_value, false)
+	var help := PossessionText.settlement_help(bool(possession.get("is_city", false)), str(possession.get("province_name", "")), str(possession.get("city_name", "")))
+	if bool(possession.get("occupied", false)):
+		help += " Occupée : elle revient à son propriétaire à la paix si le traité ne la cède pas."
+	possession_help.text = help
+	possession_help.show()
 
 
 ## VN : affiche ou masque une ligne (clé et valeur) de la grille d'informations.
@@ -249,6 +278,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	owner_value.text = _faction(owner, label_of)
 	controller_value.text = _faction(controller, label_of) if controller != owner else "— (le propriétaire)"
 	_show_row(controller_value, controller != owner)  # VN : lignes sans information masquées (place à la garnison)
+	_fill_possession(detail.get("possession", {}) if detail.get("possession") is Dictionary else {})  # RJ-c
 	fortification_value.text = "Niveau %d" % int(detail.get("fortification_level", 0))
 	var siege: Dictionary = detail.get("siege", {}) if detail.get("siege") is Dictionary else {}
 	if siege.is_empty():
